@@ -50,12 +50,14 @@ const
   SR_DELETE_GAME_OK                       = 043;
   SR_EDIT_GAME_OK                         = 044;
   SR_SECONDARY_LOGIN_DETECTED             = 045;
+  SR_DECKREPLY                            = 46;
 
   CMD_LOGIN                               = 501;
   CMD_STATUS                              = 502;
   CMD_REGISTER                            = 503;
   CMD_FORGOT_PASSWORD                     = 504;
   CMD_LOGOUT                              = 505;
+  CMD_GETDECK                             = 506;
 
 
 implementation
