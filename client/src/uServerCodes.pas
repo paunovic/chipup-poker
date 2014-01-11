@@ -57,7 +57,7 @@ const
   CMD_REGISTER                            = 503;
   CMD_FORGOT_PASSWORD                     = 504;
   CMD_LOGOUT                              = 505;
-  CMD_GETDECK                             = 506;
+  CMD_LIST_PUBLIC_CLUBS                   = 506;
 
 
 implementation

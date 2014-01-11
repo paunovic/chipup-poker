@@ -69,7 +69,7 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSettings, uCommon,
   uPB_OldMessage, uPB_LoginParams, uPB_StatusReply, uPB_HelloArguments, uPB_RegisterParams,
-  uPB_ForgotPasswordParams, uPB_Game, pbOutput,
+  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, pbOutput,
   uMessageContainer,
   pbInput;
 
@@ -234,7 +234,7 @@ begin
     SR_REGISTER_DUPLICATE_MAIL: ;
     SR_REGISTER_DUPLICATE_USERNAME: ;
     SR_REGISTER_INVALID_MAIL: ;
-    SR_LIST_CLUBS: ;
+    SR_LIST_CLUBS: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     SR_STATUS: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
     SR_CREATECLUB_OK: ;
     SR_CREATECLUB_NAME_EXISTS: ;
@@ -419,7 +419,7 @@ end;
 
 procedure TSocketClient.ListPublicClubs;
 begin
-  SendCommand('list_clubs');
+  SendProtobuf(CMD_LIST_PUBLIC_CLUBS, nil);
 end;
 
 procedure TSocketClient.SendCommand(const ACommand: String);

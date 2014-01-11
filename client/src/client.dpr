@@ -23,7 +23,7 @@ uses
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableForm in 'forms\uTableForm.pas' {frmTable},
   uCreateGameForm in 'forms\uCreateGameForm.pas' {frmCreateGame},
-  {$IFDEF DEBUG} uDebugForm in 'forms\uDebugForm.pas' {frmDebug}, {$ENDIF}
+  uDebugForm in 'forms\uDebugForm.pas' {frmDebug},
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',
@@ -57,8 +57,8 @@ uses
   uPB_Game in 'modules\protobuf\objects\uPB_Game.pas',
   uMessageContainer in 'modules\message_container\uMessageContainer.pas',
   uMessageItem in 'modules\message_container\uMessageItem.pas',
-  uServerMessageCallback in 'modules\message_container\uServerMessageCallback.pas';
-
+  uServerMessageCallback in 'modules\message_container\uServerMessageCallback.pas',
+  uPB_ListClubsReply in 'modules\protobuf\objects\uPB_ListClubsReply.pas';
 
 procedure FocusPokerApp;
 var

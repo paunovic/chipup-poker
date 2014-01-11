@@ -437,6 +437,9 @@ const
 var
   ms: TMemoryStream;
 begin
+  if AStream.Size < 3 then
+    Exit(FALSE);
+
   ms := TMemoryStream.Create;
   try
     ms.CopyFrom(AStream, 3);

@@ -70,7 +70,7 @@
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-			<Debugger_RunParams>C:\proto_objects.proto</Debugger_RunParams>
+			<Debugger_RunParams>D:\dropbox\poker\protobuf\message.proto</Debugger_RunParams>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">

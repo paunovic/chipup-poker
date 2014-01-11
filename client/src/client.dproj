@@ -179,6 +179,7 @@
 			<DCCReference Include="modules\message_container\uMessageContainer.pas"/>
 			<DCCReference Include="modules\message_container\uMessageItem.pas"/>
 			<DCCReference Include="modules\message_container\uServerMessageCallback.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_ListClubsReply.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>

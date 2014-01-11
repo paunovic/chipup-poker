@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
   dxSkinDevExpressStyle, dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxSpinEdit, cxTextEdit,
-  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid;
+  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid,
+  uMessageItem;
 
 type
   TfrmPublicClubsList = class(TForm)
@@ -32,7 +33,7 @@ type
   private
     FSelectedClubId: Int64;
 
-    procedure TCListClubs(const AData: TObject);
+    procedure TCListClubs(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -48,7 +49,8 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uCommon, uServerCodes, superobject, uMainDataModule, uJoinClubForm, uMessageContainer;
+  uSocketClient, uCommon, uServerCodes, superobject, uMainDataModule, uJoinClubForm, uMessageContainer, uServerMessageCallback,
+  uPB_ListClubsReply, uPB_Club;
 
 procedure TfrmPublicClubsList.FormCreate(Sender: TObject);
 begin
@@ -87,15 +89,25 @@ begin
 end;
 
 procedure TfrmPublicClubsList.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_LIST_CLUBS, TCListClubs)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_LIST_CLUBS, TCListClubs)
+                          ]
+                        );
+
+      mtSocketChangeState: ;
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmPublicClubsList.acJoinClubExecute(Sender: TObject);
@@ -116,28 +128,27 @@ begin
   SocketClient.ListPublicClubs;
 end;
 
-procedure TfrmPublicClubsList.TCListClubs(const AData: TObject);
+procedure TfrmPublicClubsList.TCListClubs(const AMessage: TMessageItem);
 var
-  json, sub_json: ISuperObject;
-  rcount        : Integer;
+  rcount: Integer;
+  club  : TPB_Club;
+  clubs : TPB_ListClubsReply;
 begin
-  json := TSuperObject.ParseString(PChar(AData), FALSE);
+  clubs := AMessage.Object_ as TPB_ListClubsReply;
 
   gridClubsTable.DataController.BeginFullUpdate;
   try
     rcount := 0;
     gridClubsTable.DataController.SetRecordCount(0);
-    if not Assigned(json) then
-      Exit;
 
-    for sub_json in json do
+    for club in clubs.Clubs do
     begin
       Inc(rcount);
       gridClubsTable.DataController.SetRecordCount(rcount);
-      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsId.Index, sub_json.I['seq']);
-      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsName.Index, sub_json.S['name']);
-      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsInvitationCode.Index, sub_json.S['invcode']);
-      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsPlayers.Index, sub_json.I['member_count']);
+      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsId.Index, club.Id);
+      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsName.Index, club.Name);
+      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsInvitationCode.Index, club.Password);
+      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsPlayers.Index, club.Members.Count);
     end;
   finally
     gridClubsTable.DataController.EndFullUpdate;

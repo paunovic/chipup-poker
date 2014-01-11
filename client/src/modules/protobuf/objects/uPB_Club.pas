@@ -17,6 +17,9 @@ type
       FN_PRIVATE = 7;
       FN_ID = 8;
       FN_MEMBERS = 9;
+      FN_HAS_PASSWORD = 10;
+      FN_MEMBER_COUNT = 11;
+
     function GetMongoId: AnsiString;
     function GetOwnerMongoId: AnsiString;
 
@@ -29,6 +32,8 @@ type
       FPrivate: Boolean;
       FId: Integer;
       FMembers: TStringList;
+      FHasPassword: Boolean;
+      FMemberCount: Integer;
 
   public
     constructor Create(const AMongoId: AnsiString; const AChips: Integer; const AName: AnsiString; const AOwnerMongoId: AnsiString; const APassword: AnsiString; const APrivate: Boolean; const AId: Integer); overload;
@@ -45,6 +50,8 @@ type
     property Private: Boolean read FPrivate;
     property Id: Integer read FId;
     property Members: TStringList read FMembers;
+    property HasPassword: Boolean read FHasPassword;
+    property MemberCount: Integer read FMemberCount;
   end;
 
   TPB_Clubs = TObjectList<TPB_Club>;
@@ -64,6 +71,8 @@ begin
   FPassword := APassword;
   FPrivate := APrivate;
   FId := AId;
+  FHasPassword := APassword <> '';
+  FMemberCount := 0;
   FMembers := TStringList.Create;
   FMembers.Sorted := TRUE;
   FMembers.Duplicates := dupIgnore;
@@ -110,7 +119,10 @@ begin
       FN_MEMBERS: begin
                     AProtobufReader.readMongoId(member);
                     FMembers.Add(String(BytesToHex(member)));
+                    FMemberCount := FMembers.Count;
                   end;
+      FN_HAS_PASSWORD: AProtobufReader.readBoolean;
+      FN_MEMBER_COUNT: AProtobufReader.readInt32;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -128,6 +140,8 @@ begin
   if FPrivate <> FALSE then
     pboutput.writeBoolean(FN_PRIVATE, FPrivate);
   pboutput.writeInt32(FN_ID, FId);
+  pboutput.writeBoolean(FN_HAS_PASSWORD, FHasPassword);
+  pboutput.writeInt32(FN_MEMBER_COUNT, FMemberCount);
   result := pboutput;
 end;
 

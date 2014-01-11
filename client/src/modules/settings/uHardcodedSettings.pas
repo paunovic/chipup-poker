@@ -3,7 +3,7 @@ unit uHardcodedSettings;
 interface
 
 const
-  URL_DOMAIN = 'http://ww.chipuppoker.com';
+  URL_DOMAIN = 'http://chipuppoker.com';
 
 type
   THardcodedSettings = class
@@ -29,7 +29,7 @@ type
                                            VERSION: '0.01a';
 
                                            // instance mutex name
-                                           INSTANCE_MUTEX_NAME: 'CUPINSTANCEMUTEX';
+                                           INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
 
                                            // settings filename
                                            SETTINGS_FILENAME: 'settings.dat';
@@ -43,7 +43,7 @@ type
                                              TOS       : URL_DOMAIN + '/tos.html';
                                              BUY_TOKENS: URL_DOMAIN + '/buy-tokens.html';
                                              BUY_CHIPS : URL_DOMAIN + '/buy-chips.html';
-                                             GET_AVATAR: 'http://poker.angeldsis.com/getavatar?id=%s';
+                                             GET_AVATAR: URL_DOMAIN + '/getavatar?id=%s';
                                            )
                                          );
   end;
