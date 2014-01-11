@@ -23,7 +23,7 @@ uses
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableForm in 'forms\uTableForm.pas' {frmTable},
   uCreateGameForm in 'forms\uCreateGameForm.pas' {frmCreateGame},
-  uDebugForm in 'forms\uDebugForm.pas' {frmDebug},
+  {$IFDEF DEBUG} uDebugForm in 'forms\uDebugForm.pas' {frmDebug}, {$ENDIF}
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',

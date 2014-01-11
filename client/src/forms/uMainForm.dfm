@@ -72,8 +72,8 @@ object frmMain: TfrmMain
     end
   end
   object btLeaveClub: TcxButton
-    Left = 28
-    Top = 65
+    Left = 60
+    Top = 97
     Width = 105
     Height = 32
     Caption = 'Leave Club'
@@ -87,8 +87,8 @@ object frmMain: TfrmMain
     Transparent = True
   end
   object btOpenTable: TButton
-    Left = 740
-    Top = 21
+    Left = 460
+    Top = 81
     Width = 75
     Height = 25
     Caption = 'Open Table'
@@ -96,8 +96,8 @@ object frmMain: TfrmMain
     OnClick = btOpenTableClick
   end
   object cxButton1: TcxButton
-    Left = 184
-    Top = 25
+    Left = 216
+    Top = 57
     Width = 105
     Height = 32
     Caption = 'Create Club'
@@ -106,8 +106,8 @@ object frmMain: TfrmMain
     OnClick = btLeaveClubClick
   end
   object cxButton2: TcxButton
-    Left = 28
-    Top = 25
+    Left = 60
+    Top = 57
     Width = 105
     Height = 32
     Caption = 'Join Club'
@@ -116,8 +116,8 @@ object frmMain: TfrmMain
     OnClick = btLeaveClubClick
   end
   object cxButton3: TcxButton
-    Left = 184
-    Top = 65
+    Left = 216
+    Top = 97
     Width = 105
     Height = 32
     Caption = 'Manage Club'
