@@ -1,0 +1,254 @@
+unit uChangeAvatarForm;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
+  dxSkinDevExpressStyle, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ExtCtrls, cxLabel, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg,
+  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar;
+
+type
+  TfrmChangeAvatar = class(TForm)
+    lbsInfo: TcxLabel;
+    btChange: TcxButton;
+    btCancel: TcxButton;
+    alChangeAvatar: TActionList;
+    acChange: TAction;
+    acClose: TAction;
+    imgAvatar: TcxImage;
+    OpenDialog: TOpenDialog;
+    pbUpload: TcxProgressBar;
+    procedure acCloseExecute(Sender: TObject);
+    procedure acChangeExecute(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
+    procedure HTTPSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
+  private
+    FAvatarId : String;
+    FAvatarJPG: TJPEGImage;
+
+    procedure TCChangeAvatarOk(const AData: TObject);
+    procedure TCChangeAvatarInvalidId(const AData: TObject);
+
+    procedure UploadAvatar(const AAvatarFile: String);
+
+  protected
+    procedure WndProc(var AMessage: TMessage); override;
+
+  public
+  end;
+
+implementation
+
+{$R *.dfm}
+
+uses
+  superobject, PNGImage, uAvatar, uMessageContainer,
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
+  uServerCodes, uSocketClient, uCommon, uSettings, uMainDataModule;
+
+
+procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
+var
+  avatar: TAvatar;
+begin
+  FAvatarJPG := TJPEGImage.Create;
+
+  avatar := dmMain.Avatars.Add(dmMain.SelfInfo.AvatarId);
+  imgAvatar.Picture.Assign(avatar.Image);
+end;
+
+procedure TfrmChangeAvatar.FormDestroy(Sender: TObject);
+begin
+  MessageContainer.RemoveMessageHandler(Handle);
+
+  FAvatarJPG.Free;
+end;
+
+procedure TfrmChangeAvatar.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    VK_ESCAPE: acClose.Execute;
+  end;
+end;
+
+procedure TfrmChangeAvatar.FormShow(Sender: TObject);
+begin
+  MessageContainer.AddMessageHandler(Handle);
+end;
+
+procedure TfrmChangeAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
+var
+  json : ISuperObject;
+  error: String;
+  http : THTTPcli;
+begin
+  http := Sender as THttpCli;
+
+  error := '';
+
+  if Assigned(http.SendStream) then
+    (http.SendStream as TMemoryStream).Free;
+
+  if Assigned(http.RcvdStream) then
+  begin
+    http.RcvdStream.Position := 0;
+    json := TSuperObject.ParseStream(http.RcvdStream as TMemoryStream, FALSE);
+    (http.RcvdStream as TMemoryStream).Free;
+    if Assigned(json) then
+    begin
+      {$IFDEF DEBUG} DebugLn(Format('Change avatar response: %s', [json.AsJson]), ditNetInc); {$ENDIF}
+      FAvatarId := json.S['id'];
+      SocketClient.SetAvatar(FAvatarId);
+    end
+    else
+      error := 'Invalid response from server';
+  end
+  else
+    error := 'Invalid response from server';
+
+  if error <> '' then
+    MessageDlg(error, mtError, [mbOK], 0);
+
+  http.Free;
+end;
+
+procedure TfrmChangeAvatar.HTTPSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
+var
+  http : THTTPcli;
+begin
+  http := Sender as THttpCli;
+  pbUpload.Position := Round((http.SentCount / http.SendStream.Size) * 100)
+end;
+
+procedure TfrmChangeAvatar.acCloseExecute(Sender: TObject);
+begin
+  ModalResult := mrClose;
+end;
+
+procedure TfrmChangeAvatar.WndProc(var AMessage: TMessage);
+begin
+  inherited;
+                  {
+  if SocketClient.IsServerResponseMessage(AMessage) then
+    SocketClient.ParseWndMessage(AMessage,
+      [
+        TWndCallback.Create(SR_CHANGE_AVATAR_OK, TCChangeAvatarOk),
+        TWndCallback.Create(SR_CHANGE_AVATAR_INVALID_ID, TCChangeAvatarInvalidId)
+      ]
+    );             }
+end;
+
+procedure TfrmChangeAvatar.UploadAvatar(const AAvatarFile: String);
+var
+  send_stream: TMemoryStream;
+  http       : THTTPCli;
+  boundary   : AnsiString;
+  buf        : AnsiString;
+begin
+  send_stream := TMemoryStream.Create;
+
+  boundary := AnsiString(FormatDateTime('mmddyyhhnnsszzz', Now));
+  buf := '--' + boundary + sLineBreak + 'Content-Disposition: form-data; name="avatar" filename="avatar.jpg"' + sLineBreak + 'Content-Type: image/jpeg' + sLineBreak + sLineBreak;
+  send_stream.Write(buf[1], Length(buf));
+  FAvatarJPG.SaveToStream(send_stream);
+  buf := sLineBreak + '--' + boundary + '--' + sLineBreak;
+  send_stream.Write(buf[1], Length(buf));
+
+  {$IFDEF DEBUG}  DebugLn(Format('Uploading avatar to server [size: %d]', [send_stream.Size]), ditNetOut);  {$ENDIF}
+
+  send_stream.Position := 0;
+  http := THTTPCli.Create(nil);
+  http.Connection := 'Keep-Alive';
+  http.BandwidthLimit := 0;
+  http.RequestVer := '1.1';
+  http.URL := 'http://poker.angeldsis.com/image_upload';
+  http.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
+  http.SendStream := send_stream;
+  http.RcvdStream := TMemoryStream.Create;
+  http.OnRequestDone := HTTPRequestDone;
+  http.OnSendData := HTTPSendData;
+  http.PostASync;
+end;
+
+procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);
+var
+  fname  : String;
+  picture: TPicture;
+  bmp    : TBitmap;
+  error  : String;
+begin
+  if not OpenDialog.Execute(Handle) then
+    Exit;
+
+  error := '';
+  fname := OpenDialog.FileName;
+  if not FileExists(fname) then
+    error := 'File doesn''t exist';
+
+  if GetFileSize(fname) > 100 * 1024 then
+    error := 'File size is too big';
+
+  if error = '' then
+  begin
+    picture := TPicture.Create;
+    try
+      picture.LoadFromFile(fname);
+      if (picture.Width > 150) or (picture.Height > 150) then
+        error := 'Avatar has dimensions larger than 150x150px'
+      else
+      begin
+        bmp := TBitmap.Create;
+        try
+          bmp.SetSize(picture.Width, picture.Height);
+          bmp.Canvas.Draw(0, 0, picture.Graphic);
+          FAvatarJPG.Assign(bmp);
+        finally
+          bmp.Free;
+        end;
+      end;
+    finally
+      picture.Free;
+    end;
+  end;
+
+  if error = '' then
+  begin
+    acChange.Enabled := FALSE;
+    pbUpload.Position := 0;
+    pbUpload.Visible := TRUE;
+    UploadAvatar(fname);
+  end
+  else
+    MessageDlg(error, mtError, [mbOK], 0);
+end;
+
+procedure TfrmChangeAvatar.TCChangeAvatarInvalidId(const AData: TObject);
+begin
+  MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
+
+  acChange.Enabled := TRUE;
+  pbUpload.Visible := FALSE;
+end;
+
+procedure TfrmChangeAvatar.TCChangeAvatarOk(const AData: TObject);
+var
+  avatar: TAvatar;
+begin
+  dmMain.SelfInfo.AvatarId := FAvatarId;
+  avatar := dmMain.Avatars.Add(dmMain.SelfInfo.AvatarId, FAvatarJPG);
+  imgAvatar.Picture.Assign(avatar.Image);
+
+  acChange.Enabled := TRUE;
+  pbUpload.Visible := FALSE;
+end;
+
+
+
+end.
+
+

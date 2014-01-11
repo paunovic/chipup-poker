@@ -1,0 +1,136 @@
+unit uChangePasswordForm;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
+  dxSkinDevExpressStyle, cxTextEdit, cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList;
+
+type
+  TfrmChangePassword = class(TForm)
+    lbsCurrentPassword: TcxLabel;
+    lbsNewPassword: TcxLabel;
+    edNewPassword: TcxTextEdit;
+    edCurrentPassword: TcxTextEdit;
+    lbsConfirmPassword: TcxLabel;
+    edConfirmPassword: TcxTextEdit;
+    btOK: TcxButton;
+    btCancel: TcxButton;
+    alChangePassword: TActionList;
+    acOK: TAction;
+    acCancel: TAction;
+    procedure FormCreate(Sender: TObject);
+    procedure acOKExecute(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure acCancelExecute(Sender: TObject);
+  private
+    procedure TCChangePasswordOk(const AData: TObject);
+    procedure TCChangePasswordInvalid(const AData: TObject);
+  protected
+    procedure WndProc(var AMessage: TMessage); override;
+  public
+  end;
+
+implementation
+
+{$R *.dfm}
+
+uses
+  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer;
+
+
+procedure TfrmChangePassword.FormCreate(Sender: TObject);
+begin
+  edNewPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
+  edCurrentPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
+  edConfirmPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
+end;
+
+procedure TfrmChangePassword.FormDestroy(Sender: TObject);
+begin
+  MessageContainer.RemoveMessageHandler(Handle);
+end;
+
+procedure TfrmChangePassword.FormShow(Sender: TObject);
+begin
+  MessageContainer.AddMessageHandler(Handle);
+end;
+
+procedure TfrmChangePassword.WndProc(var AMessage: TMessage);
+begin
+  inherited;
+                  {
+  if SocketClient.IsServerResponseMessage(AMessage) then
+    SocketClient.ParseWndMessage(AMessage,
+      [
+        TWndCallback.Create(SR_CHANGE_PASSWORD_OK, TCChangePasswordOk),
+        TWndCallback.Create(SR_CHANGE_PASSWORD_INVALID_PASSWORD, TCChangePasswordInvalid)
+      ]
+    );             }
+end;
+
+procedure TfrmChangePassword.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    VK_ESCAPE: acCancel.Execute;
+    VK_RETURN: if edConfirmPassword.Focused then
+                 acOK.Execute
+               else
+                 SelectNext(ActiveControl, TRUE, TRUE);
+  end;
+end;
+
+procedure TfrmChangePassword.acOKExecute(Sender: TObject);
+var
+  error: String;
+begin
+  if edCurrentPassword.Text <> dmMain.SelfInfo.Password then
+  begin
+    error := 'Invalid current password';
+    edCurrentPassword.SetFocus;
+  end
+  else
+    if not ValidatePassword(edNewPassword.Text, error) then
+      edNewPassword.SetFocus
+    else
+      if edNewPassword.Text <> edConfirmPassword.Text then
+      begin
+        error := 'Passwords mismatch';
+        edNewPassword.SetFocus;
+      end;
+
+  if error <> '' then
+  begin
+    MessageDlg(error, mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  acOK.Enabled := FALSE;
+  SocketClient.ChangePassword(edNewPassword.Text);
+end;
+
+procedure TfrmChangePassword.TCChangePasswordInvalid(const AData: TObject);
+begin
+  MessageDlg('Invalid password', mtError, [mbOK], 0);
+  edNewPassword.SetFocus;
+  acOK.Enabled := TRUE;
+end;
+
+procedure TfrmChangePassword.TCChangePasswordOk(const AData: TObject);
+begin
+  MessageDlg('Password successfully changed', mtInformation, [mbOK], 0);
+  dmMain.SelfInfo.Password := edNewPassword.Text;
+  ModalResult := mrOk;
+end;
+
+procedure TfrmChangePassword.acCancelExecute(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+
+
+end.

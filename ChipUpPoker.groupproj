@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{DE38688C-0643-4FFF-866E-240DAAECE07F}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="client\src\client.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="ProtobufObjectGenerator\src\ProtobufObjectGenerator.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="client">
+			<MSBuild Projects="client\src\client.dproj"/>
+		</Target>
+		<Target Name="client:Clean">
+			<MSBuild Targets="Clean" Projects="client\src\client.dproj"/>
+		</Target>
+		<Target Name="client:Make">
+			<MSBuild Targets="Make" Projects="client\src\client.dproj"/>
+		</Target>
+		<Target Name="ProtobufObjectGenerator">
+			<MSBuild Projects="ProtobufObjectGenerator\src\ProtobufObjectGenerator.dproj"/>
+		</Target>
+		<Target Name="ProtobufObjectGenerator:Clean">
+			<MSBuild Targets="Clean" Projects="ProtobufObjectGenerator\src\ProtobufObjectGenerator.dproj"/>
+		</Target>
+		<Target Name="ProtobufObjectGenerator:Make">
+			<MSBuild Targets="Make" Projects="ProtobufObjectGenerator\src\ProtobufObjectGenerator.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="client;ProtobufObjectGenerator"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="client:Clean;ProtobufObjectGenerator:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="client:Make;ProtobufObjectGenerator:Make"/>
+		</Target>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
+	</Project>

@@ -1,0 +1,108 @@
+unit uCreateGameForm;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
+  dxSkinDevExpressStyle, Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  Vcl.Samples.Spin, cxSpinEdit, uIFormParams, uClubInfo;
+
+type
+  TfrmCreateGame = class(TForm, IFormParams)
+    edGameName: TcxTextEdit;
+    lbsGameName: TcxLabel;
+    lbsGameType: TcxLabel;
+    btOK: TcxButton;
+    btCancel: TcxButton;
+    alCreateGame: TActionList;
+    acOK: TAction;
+    acCancel: TAction;
+    cbGameType: TcxComboBox;
+    lbsBlinds: TcxLabel;
+    lbsSeats: TcxLabel;
+    cbSeats: TcxComboBox;
+    cbLimit: TcxComboBox;
+    lbsLimit: TcxLabel;
+    cbBlinds: TcxComboBox;
+    procedure acOKExecute(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure acCancelExecute(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    FClub: TClubInfo;
+
+    procedure TCCreateGameOk(const AData: TObject);
+
+  protected
+    procedure WndProc(var AMessage: TMessage); override;
+  public
+    procedure SetParams(const AParams: array of pointer);
+  end;
+
+implementation
+
+{$R *.dfm}
+
+uses
+  uSocketClient, uServerCodes, uCommon, uMessageContainer;
+
+
+procedure TfrmCreateGame.FormDestroy(Sender: TObject);
+begin
+  MessageContainer.RemoveMessageHandler(Handle);
+end;
+
+procedure TfrmCreateGame.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    VK_ESCAPE: acCancel.Execute;
+  end;
+end;
+
+procedure TfrmCreateGame.FormShow(Sender: TObject);
+begin
+  MessageContainer.AddMessageHandler(Handle);
+end;
+
+procedure TfrmCreateGame.SetParams(const AParams: array of pointer);
+begin
+  FClub := AParams[0];
+end;
+
+procedure TfrmCreateGame.WndProc(var AMessage: TMessage);
+begin
+  inherited;
+                  {
+  if SocketClient.IsServerResponseMessage(AMessage) then
+    SocketClient.ParseWndMessage(AMessage,
+      [
+        TWndCallback.Create(SR_CREATE_GAME_OK, TCCreateGameOk)
+      ]
+    );             }
+end;
+
+procedure TfrmCreateGame.acCancelExecute(Sender: TObject);
+begin
+  ModalResult := mrCancel;
+end;
+
+procedure TfrmCreateGame.acOKExecute(Sender: TObject);
+var
+  sb, bb: Integer;
+begin
+  if not GetBlinds(cbBlinds.Text, sb, bb) then
+    Exit;
+
+  acOK.Enabled := FALSE;
+  SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+end;
+
+procedure TfrmCreateGame.TCCreateGameOk(const AData: TObject);
+begin
+  ModalResult := mrOk;
+end;
+
+
+end.

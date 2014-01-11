@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2014/01/08 19:21:33.000.902,D:\projects\Poker\ChipUpPoker.groupproj=D:\projects\Poker\BadassPoker.groupproj</Transaction>
+  </Transactions>
+	<Default.Personality>
+		<Projects ActiveProject="D:\projects\ChipUpPoker\ProtobufObjectGenerator\src\ProtobufObjectGenerator.dproj"/>
+	</Default.Personality>
+</BorlandProject>

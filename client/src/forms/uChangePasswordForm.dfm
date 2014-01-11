@@ -1,0 +1,146 @@
+object frmChangePassword: TfrmChangePassword
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Change Password'
+  ClientHeight = 137
+  ClientWidth = 301
+  Color = clWindow
+  Ctl3D = False
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poOwnerFormCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  DesignSize = (
+    301
+    137)
+  PixelsPerInch = 96
+  TextHeight = 13
+  object lbsCurrentPassword: TcxLabel
+    Left = 7
+    Top = 15
+    Caption = 'Current password:'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object lbsNewPassword: TcxLabel
+    Left = 7
+    Top = 45
+    Caption = 'New password:'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object edNewPassword: TcxTextEdit
+    Left = 106
+    Top = 44
+    Anchors = [akLeft, akTop, akRight]
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.EchoMode = eemPassword
+    Properties.MaxLength = 32
+    Properties.PasswordChar = '*'
+    TabOrder = 1
+    Width = 187
+  end
+  object edCurrentPassword: TcxTextEdit
+    Left = 106
+    Top = 14
+    Anchors = [akLeft, akTop, akRight]
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.EchoMode = eemPassword
+    Properties.MaxLength = 32
+    Properties.PasswordChar = '*'
+    TabOrder = 0
+    Width = 187
+  end
+  object lbsConfirmPassword: TcxLabel
+    Left = 7
+    Top = 69
+    Caption = 'Confirm password:'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object edConfirmPassword: TcxTextEdit
+    Left = 106
+    Top = 68
+    Anchors = [akLeft, akTop, akRight]
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.EchoMode = eemPassword
+    Properties.MaxLength = 32
+    Properties.PasswordChar = '*'
+    TabOrder = 2
+    Width = 187
+  end
+  object btOK: TcxButton
+    Left = 101
+    Top = 101
+    Width = 93
+    Height = 27
+    Action = acOK
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 3
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object btCancel: TcxButton
+    Left = 200
+    Top = 101
+    Width = 93
+    Height = 27
+    Action = acCancel
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 4
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+  end
+  object alChangePassword: TActionList
+    Left = 36
+    Top = 82
+    object acOK: TAction
+      Caption = 'OK'
+      OnExecute = acOKExecute
+    end
+    object acCancel: TAction
+      Caption = 'Cancel'
+      OnExecute = acCancelExecute
+    end
+  end
+end
