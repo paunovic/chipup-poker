@@ -1,5 +1,5 @@
-#define ApplicationName "BadassPoker"
-#define ApplicationExe "badasspoker.exe"
+#define ApplicationName "ChipUP Poker"
+#define ApplicationExe "chipuppoker.exe"
 
 [Setup]
 AppName={#ApplicationName}
@@ -15,8 +15,8 @@ OutputBaseFilename=setup
 UninstallDisplayIcon={app}\{#ApplicationExe}
 DisableProgramGroupPage=yes
 AppMutex=FileSyncerClientInstanceMutex
-WizardImageFile=setup_images\big.bmp
-WizardSmallImageFile=setup_images\small.bmp
+WizardImageFile=installer_images\installer-1.bmp
+WizardSmallImageFile=installer_images\installer-2.bmp
 ArchitecturesInstallIn64BitMode=x64
 
 [Files]
@@ -28,4 +28,4 @@ Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Working
 Name: "{group}\Uninstall"; Filename: "{uninstallexe}"
 
 [Run]
-Filename: "{app}\{#ApplicationExe}"; Description: "Launch BadassPoker"; Flags: postinstall nowait skipifsilent runascurrentuser
+Filename: "{app}\{#ApplicationExe}"; Description: "Launch ChipUP Poker"; Flags: postinstall nowait skipifsilent runascurrentuser
