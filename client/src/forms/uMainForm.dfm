@@ -87,8 +87,8 @@ object frmMain: TfrmMain
     Transparent = True
   end
   object btOpenTable: TButton
-    Left = 460
-    Top = 81
+    Left = 360
+    Top = 101
     Width = 75
     Height = 25
     Caption = 'Open Table'

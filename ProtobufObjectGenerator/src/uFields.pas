@@ -6,16 +6,17 @@ uses
   System.Generics.Collections;
 
 type
-  TFieldVarType = (fvtUnknown, fvtInt32, fvtString, fvtBoolean, fvtBytes);
+  TFieldVarType = (fvtUnknown, fvtInt32, fvtString, fvtBoolean, fvtBytes, fvtClass);
   TFieldType    = (ftUnknown, ftRequired, ftOptional, ftRepeated);
 
   TField = class
   private
-    FValid  : Boolean;
-    FType   : TFieldType;
-    FVarType: TFieldVarType;
-    FName   : String;
-    FTag    : Integer;
+    FValid     : Boolean;
+    FType      : TFieldType;
+    FVarTypeStr: String;
+    FVarType   : TFieldVarType;
+    FName      : String;
+    FTag       : Integer;
 
     function StringToFieldType(const AString: String): TFieldType;
     function StringToFieldVarType(const AString: String): TFieldVarType;
@@ -81,10 +82,11 @@ begin
   wpos := Pos(' ', line);
   if wpos = 0 then
     Exit;
-  tmp := LowerCase(Copy(line, 1, wpos - 1));
+  tmp := Copy(line, 1, wpos - 1);
   Delete(line, 1, Length(tmp) + 1);
 
-  FVarType := StringToFieldVarType(tmp);
+  FVarTypeStr := tmp;
+  FVarType := StringToFieldVarType(LowerCase(FVarTypeStr));
 
   wpos := Pos(' ', line);
   if wpos = 0 then
@@ -138,7 +140,7 @@ begin
   if AString = 'bytes' then
     Exit(fvtBytes);
 
-  Exit(fvtUnknown);
+  Exit(fvtClass);
 end;
 
 function TField.GetConst: String;
@@ -171,6 +173,7 @@ function TField.GetVarTypeAsString: String;
 begin
   case FVarType of
     fvtUnknown: result := 'Unknown';
+    fvtClass: result := 'TPB_' + FVarTypeStr;
     fvtInt32: result := 'Integer';
     fvtString: result := 'AnsiString';
     fvtBoolean: result := 'Boolean';
@@ -186,6 +189,7 @@ function TField.GetProtobufReadFunction: String;
 begin
   case FVarType of
     fvtUnknown: result := 'readUnknown';
+    fvtClass: result := 'readClass';
     fvtInt32: result := 'readInt32';
     fvtString: result := 'readString';
     fvtBoolean: result := 'readBoolean';
@@ -200,6 +204,7 @@ begin
     fvtInt32: result := 'writeInt32';
     fvtString: result := 'writeString';
     fvtBoolean: result := 'writeBoolean';
+    fvtClass: result := 'writeClass';
     fvtBytes: result := Format('writeRawData(@%s[0], Length(%s))', [AsPrivateProperty, AsPrivateProperty]);
   end;
 end;
@@ -219,6 +224,7 @@ function TField.GetWireTypeConstant: String;
 begin
   case FVarType of
     fvtUnknown: result := 'WIRETYPE_UNKNOWN';
+    fvtClass: result := 'WIRETYPE_LENGTH_DELIMITED';
     fvtInt32: result := 'WIRETYPE_VARINT';
     fvtString: result := 'WIRETYPE_LENGTH_DELIMITED';
     fvtBoolean: result := 'WIRETYPE_VARINT';

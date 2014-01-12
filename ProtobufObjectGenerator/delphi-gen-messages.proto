@@ -1,0 +1,93 @@
+package Poker;
+
+option optimize_for = LITE_RUNTIME;
+
+message RpcMessage {
+	required int32 method_id = 1;
+	optional int32 data_size = 2 [ default = 0];
+	optional int32 token = 3 [ default = 0];
+}
+message TokenPrices {
+	required int32 club_change_details = 1;
+	required int32 club_creation = 2;
+}
+message StringSizes {
+	required int32 email = 1;
+	required int32 password = 2;
+	required int32 club_name = 3;
+	required int32 inv_code = 4;
+	required int32 username = 5;
+	required int32 game_name = 6;
+}
+message HelloArguments {
+	required TokenPrices token_prices = 1;
+	required StringSizes string_sizes = 2;
+	required int32 change_expire_time = 3;
+	required int32 forgot_expire_time = 4;
+}
+message LoginParams {
+	required string username = 1;
+	required string password = 2;
+}
+message RegisterParams {
+	required string email = 1;
+	required string password = 2;
+	required string display_name = 3;
+}
+message ForgotPasswordParams {
+	required string email = 1;
+}
+
+message Club {
+	required bytes mongo_id = 1;
+	required int32 chips = 2;
+	required string name = 4;
+	required bytes owner_mongo_id = 5;
+	optional string password = 6;
+	optional bool private = 7;
+	required int32 seq = 8;
+	repeated bytes members = 9;
+	optional bool has_password = 10;
+	optional int32 member_count = 11;
+}
+message User {
+	required bytes mongo_id = 1;
+	required bytes avatar_mongo_id = 2;
+	required string display_name = 3;
+	optional int32 tokens = 4;
+	optional string email = 5;
+	optional bool authed = 6;
+	optional int32 chips = 7;
+}
+message Game {
+	required bytes mongo_id = 1;
+	required bytes creator_mongo_id = 2;
+	required string name = 3;
+	required int32 club_seq = 4;
+	required int32 game_type = 5;
+	required int32 game_limit = 6;
+	required int32 small_blind = 7;
+	required int32 big_blind = 8;
+	required int32 seats = 9;
+}
+message StatusReply {
+	repeated Club clubs = 1;
+	repeated User users = 2;
+	required User self = 3;
+	repeated Game games = 4;
+}
+message OldMessage {
+	optional int32 code = 1;
+	optional string msg = 2;
+	optional string command = 3;
+}
+
+message ListClubsReply {
+	repeated Club clubs = 1;
+}
+
+message CreateClubParams {
+	required string name = 1;
+	required bool private = 2;
+	optional string inv_code = 3;
+}
