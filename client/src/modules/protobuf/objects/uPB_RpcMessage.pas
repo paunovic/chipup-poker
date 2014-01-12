@@ -3,20 +3,20 @@ unit uPB_RpcMessage;
 interface
 
 uses
-  Winapi.Windows, System.Classes, uProtobufBaseObject, uProtobufReader,
-  pbOutput;
+  Winapi.Windows,
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_RpcMessage = class(TProtobufBaseObject)
-  private
     const
-      FN_METHOD_ID = 1;
-      FN_DATA_SIZE = 2;
+      FN_METHODID = 1;
+      FN_DATASIZE = 2;
+      FN_TOKEN = 3;
 
     var
       FMethodId: Integer;
       FDataSize: Integer;
-      FValid   : Boolean;
+      FToken: Integer;
 
   public
     constructor Create(const AMethodId, ADataSize: Integer); overload;
@@ -26,7 +26,7 @@ type
 
     property MethodId: Integer read FMethodId;
     property DataSize: Integer read FDataSize;
-    property IsValid : Boolean read FValid;
+    property Token: Integer read FToken;
   end;
 
 implementation
@@ -39,48 +39,45 @@ constructor TPB_RpcMessage.Create(const AMethodId, ADataSize: Integer);
 begin
   FMethodId := AMethodId;
   FDataSize := ADataSize;
-  FValid := TRUE;
 end;
 
 procedure TPB_RpcMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag, field_number, wire_type: Integer;
-  validity, endpos            : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
-  validity := 0;
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
-  begin
     case field_number of
-      FN_METHOD_ID: begin
+      FN_METHODID: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FmethodId := AProtobufReader.readInt32;
-        Inc(validity);
+        FMethodId := AProtobufReader.readInt32;
       end;
-      FN_DATA_SIZE: begin
+      FN_DATASIZE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FdataSize := AProtobufReader.readInt32;
-        Inc(validity);
+        FDataSize := AProtobufReader.readInt32;
+      end;
+      FN_TOKEN: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FToken := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
-  end;
-  FValid := validity = 2;
 end;
 
 function TPB_RpcMessage.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  pboutput.writeInt32(FN_METHOD_ID, FMethodId);
-  if FDataSize > 0 then
-    pboutput.writeInt32(FN_DATA_SIZE, FDataSize);
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+  pbout.writeInt32(FN_METHODID, FMethodId);
+  if FDataSize <> 0 then
+    pbout.writeInt32(FN_DATASIZE, FDataSize);
+  if FToken <> 0 then
+    pbout.writeInt32(FN_TOKEN, FToken);
+  result := pbout;
 end;
 
-
-
 end.
+

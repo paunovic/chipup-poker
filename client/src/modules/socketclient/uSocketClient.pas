@@ -163,12 +163,6 @@ begin
 
   rpc_message := TPB_RpcMessage.Create(pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size)), rpc_size);
   try
-    if not rpc_message.IsValid then
-    begin
-      {$IFDEF DEBUG} DebugLn('Invalid RPC message', ditException); {$ENDIF}
-      Exit;
-    end;
-
     if (rpc_size + SizeOf(rpc_size) + rpc_message.DataSize > FReceiveBufferSize) then
       Exit;
 

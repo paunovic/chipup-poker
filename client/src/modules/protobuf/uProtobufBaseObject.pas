@@ -7,7 +7,6 @@ uses
 
 type
   TProtobufBaseObject = class
-  private
   public
     constructor Create(const APointer: pointer; const ASize: Integer); overload;
     constructor Create(const AProtobufReader: TProtobufReader; const ASize: Integer); overload;

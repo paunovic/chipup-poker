@@ -3,31 +3,31 @@ unit uPB_User;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader,
-  System.SysUtils;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections,
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_User = class(TProtobufBaseObject)
-  private
     const
       FN_MONGOID = 1;
-      FN_AVATAR = 2;
+      FN_AVATARMONGOID = 2;
       FN_DISPLAYNAME = 3;
       FN_TOKENS = 4;
       FN_EMAIL = 5;
       FN_AUTHED = 6;
       FN_CHIPS = 7;
-    function GetAvatar: AnsiString;
-    function GetMongoId: AnsiString;
 
     var
       FMongoId: TBytes;
       FAvatarMongoId: TBytes;
       FDisplayName: AnsiString;
-      FEMail: AnsiString;
       FTokens: Integer;
+      FEmail: AnsiString;
       FAuthed: Boolean;
       FChips: Integer;
+
+    function GetAvatar: AnsiString;
+    function GetMongoId: AnsiString;
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -36,8 +36,8 @@ type
     property MongoId: AnsiString read GetMongoId;
     property AvatarMongoId: AnsiString read GetAvatar;
     property DisplayName: AnsiString read FDisplayName;
-    property EMail: AnsiString read FEMail;
     property Tokens: Integer read FTokens;
+    property Email: AnsiString read FEmail;
     property Authed: Boolean read FAuthed;
     property Chips: Integer read FChips;
   end;
@@ -47,27 +47,45 @@ type
 implementation
 
 uses
-  pbPublic, EncdDecd, uCommon;
+  pbPublic, uCommon, Soap.EncdDecd;
 
 
 procedure TPB_User.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag         : Integer;
-  wire_type   : Integer;
-  field_number: Integer;
-  endpos      : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_MONGOID: AProtobufReader.readMongoId(FMongoId);
-      FN_AVATAR: AProtobufReader.readMongoId(FAvatarMongoId);
-      FN_DISPLAYNAME: FDisplayName := AProtobufReader.readString;
-      FN_TOKENS: FTokens := AProtobufReader.readInt32;
-      FN_EMAIL: FEMail := AProtobufReader.readString;
-      FN_AUTHED: FAuthed := AProtobufReader.readBoolean;
-      FN_CHIPS: FChips := AProtobufReader.readInt32;
+      FN_MONGOID: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AProtobufReader.readBytes(FMongoId);
+      end;
+      FN_AVATARMONGOID: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AProtobufReader.readBytes(FAvatarMongoId);
+      end;
+      FN_DISPLAYNAME: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FDisplayName := AProtobufReader.readString;
+      end;
+      FN_TOKENS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FTokens := AProtobufReader.readInt32;
+      end;
+      FN_EMAIL: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FEmail := AProtobufReader.readString;
+      end;
+      FN_AUTHED: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FAuthed := AProtobufReader.readBoolean;
+      end;
+      FN_CHIPS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FChips := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -75,10 +93,21 @@ end;
 
 function TPB_User.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+//  pbout.writeRawData(@FMongoId[0], Length(FMongoId))(FN_MONGOID, FMongoId);
+//  pbout.writeRawData(@FAvatarMongoId[0], Length(FAvatarMongoId))(FN_AVATARMONGOID, FAvatarMongoId);
+  pbout.writeString(FN_DISPLAYNAME, FDisplayName);
+  if FTokens <> 0 then
+    pbout.writeInt32(FN_TOKENS, FTokens);
+  if FEmail <> '' then
+    pbout.writeString(FN_EMAIL, FEmail);
+  if FAuthed <> FALSE then
+    pbout.writeBoolean(FN_AUTHED, FAuthed);
+  if FChips <> 0 then
+    pbout.writeInt32(FN_CHIPS, FChips);
+  result := pbout;
 end;
 
 
@@ -93,3 +122,4 @@ begin
 end;
 
 end.
+

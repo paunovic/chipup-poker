@@ -3,11 +3,11 @@ unit uPB_ListClubsReply;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club;
+  Winapi.Windows,
+  pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club;
 
 type
   TPB_ListClubsReply = class(TProtobufBaseObject)
-  private
     const
       FN_CLUBS = 1;
 
@@ -26,7 +26,7 @@ type
 implementation
 
 uses
-  pbInput, pbPublic;
+  pbPublic;
 
 
 destructor TPB_ListClubsReply.Destroy;
@@ -39,17 +39,19 @@ end;
 
 procedure TPB_ListClubsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag, field_number, wire_type, endpos: Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
+  if not Assigned(FClubs) then
+    FClubs := TPB_Clubs.Create;
+  FClubs.Clear;
+
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_clubs: begin
+      FN_CLUBS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(Fclubs) then
-          Fclubs := TPB_Clubs.Create;
-        Fclubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
+        FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -58,10 +60,11 @@ end;
 
 function TPB_ListClubsReply.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+  result := pbout;
 end;
 
 end.
+

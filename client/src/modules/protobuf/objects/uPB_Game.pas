@@ -3,11 +3,11 @@ unit uPB_Game;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections,
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_Game = class(TProtobufBaseObject)
-  private
     const
       FN_MONGOID = 1;
       FN_CREATOR = 2;
@@ -18,8 +18,6 @@ type
       FN_SMALLBLIND = 7;
       FN_BIGBLIND = 8;
       FN_SEATS = 9;
-    function GetCreatorMongoId: AnsiString;
-    function GetMongoId: AnsiString;
 
     var
       FMongoId: TBytes;
@@ -31,10 +29,11 @@ type
       FSmallBlind: Integer;
       FBigBlind: Integer;
       FSeats: Integer;
+  private
+    function GetCreatorMongoId: AnsiString;
+    function GetMongoId: AnsiString;
 
   public
-    constructor Create(const AMongoId: AnsiString; const ACreatorMongoId: AnsiString; const AName: AnsiString; const AClubSeq: Integer; const AGameType: Integer; const AGameLimit: Integer; const ASmallBlind: Integer; const ABigBlind: Integer; const ASeats: Integer); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
@@ -57,45 +56,50 @@ uses
   pbPublic, uCommon;
 
 
-constructor TPB_Game.Create(const AMongoId: AnsiString; const ACreatorMongoId: AnsiString; const AName: AnsiString; const AClubSeq: Integer; const AGameType: Integer; const AGameLimit: Integer; const ASmallBlind: Integer; const ABigBlind: Integer; const ASeats: Integer);
-begin
-  HexToBytes(AMongoId, FMongoId);
-  HexToBytes(ACreatorMongoId, FCreatorMongoId);
-  FName := AName;
-  FClubSeq := AClubSeq;
-  FGameType := AGameType;
-  FGameLimit := AGameLimit;
-  FSmallBlind := ASmallBlind;
-  FBigBlind := ABigBlind;
-  FSeats := ASeats;
-end;
-
 procedure TPB_Game.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag         : Integer;
-  wire_type   : Integer;
-  field_number: Integer;
-  endpos      : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
-  FClubSeq := -1;
-  FGameType := -1;
-  FGameLimit := -1;
-  FSmallBlind := -1;
-  FBigBlind := -1;
-  FSeats := -1;
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_MONGOID: AProtobufReader.readMongoId(FMongoId);
-      FN_CREATOR: AProtobufReader.readMongoId(FCreatorMongoId);
-      FN_NAME: FName := AProtobufReader.readString;
-      FN_CLUBSEQ: FClubSeq := AProtobufReader.readInt32;
-      FN_GAMETYPE: FGameType := AProtobufReader.readInt32;
-      FN_GAMELIMIT: FGameLimit := AProtobufReader.readInt32;
-      FN_SMALLBLIND: FSmallBlind := AProtobufReader.readInt32;
-      FN_BIGBLIND: FBigBlind := AProtobufReader.readInt32;
-      FN_SEATS: FSeats := AProtobufReader.readInt32;
+      FN_MONGOID: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AProtobufReader.readBytes(FMongoId);
+      end;
+      FN_CREATOR: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AProtobufReader.readBytes(FCreatorMongoId);
+      end;
+      FN_NAME: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FName := AProtobufReader.readString;
+      end;
+      FN_CLUBSEQ: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FClubSeq := AProtobufReader.readInt32;
+      end;
+      FN_GAMETYPE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FGameType := AProtobufReader.readInt32;
+      end;
+      FN_GAMELIMIT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FGameLimit := AProtobufReader.readInt32;
+      end;
+      FN_SMALLBLIND: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSmallBlind := AProtobufReader.readInt32;
+      end;
+      FN_BIGBLIND: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBigBlind := AProtobufReader.readInt32;
+      end;
+      FN_SEATS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSeats := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -103,10 +107,10 @@ end;
 
 function TPB_Game.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+  result := pbout;
 end;
 
 function TPB_Game.GetCreatorMongoId: AnsiString;
@@ -120,3 +124,4 @@ begin
 end;
 
 end.
+

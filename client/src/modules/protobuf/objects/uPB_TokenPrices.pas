@@ -3,11 +3,11 @@ unit uPB_TokenPrices;
 interface
 
 uses
-  Winapi.Windows, System.Classes, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows,
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_TokenPrices = class(TProtobufBaseObject)
-  private
     const
       FN_CLUBCHANGEDETAILS = 1;
       FN_CLUBCREATION = 2;
@@ -27,24 +27,25 @@ type
 implementation
 
 uses
-  System.SysUtils, pbPublic;
+  pbPublic;
 
 
 procedure TPB_TokenPrices.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag         : Integer;
-  wire_type   : Integer;
-  field_number: Integer;
-  endpos      : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
-  FClubChangeDetails := -1;
-  FClubCreation := -1;
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_CLUBCHANGEDETAILS: FClubChangeDetails := AProtobufReader.readInt32;
-      FN_CLUBCREATION: FClubCreation := AProtobufReader.readInt32;
+      FN_CLUBCHANGEDETAILS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FClubChangeDetails := AProtobufReader.readInt32;
+      end;
+      FN_CLUBCREATION: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FClubCreation := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -52,12 +53,13 @@ end;
 
 function TPB_TokenPrices.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  pboutput.writeInt32(FN_CLUBCHANGEDETAILS, FClubChangeDetails);
-  pboutput.writeInt32(FN_CLUBCREATION, FClubCreation);
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+  pbout.writeInt32(FN_CLUBCHANGEDETAILS, FClubChangeDetails);
+  pbout.writeInt32(FN_CLUBCREATION, FClubCreation);
+  result := pbout;
 end;
 
 end.
+

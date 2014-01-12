@@ -3,16 +3,16 @@ unit uPB_ForgotPasswordParams;
 interface
 
 uses
-  Winapi.Windows, System.Classes, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows,
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_ForgotPasswordParams = class(TProtobufBaseObject)
-  private
     const
       FN_EMAIL = 1;
 
     var
-      FEMail: AnsiString;
+      FEmail: AnsiString;
 
   public
     constructor Create(const AEMail: AnsiString); overload;
@@ -20,14 +20,14 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property EMail: AnsiString read FEMail;
+    property Email: AnsiString read FEmail;
   end;
+
 
 implementation
 
 uses
-  System.SysUtils, pbPublic;
-
+  pbPublic;
 
 constructor TPB_ForgotPasswordParams.Create(const AEMail: AnsiString);
 begin
@@ -36,16 +36,16 @@ end;
 
 procedure TPB_ForgotPasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag         : Integer;
-  wire_type   : Integer;
-  field_number: Integer;
-  endpos      : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_EMAIL: FEMail := AProtobufReader.readString;
+      FN_EMAIL: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FEmail := AProtobufReader.readString;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -53,11 +53,12 @@ end;
 
 function TPB_ForgotPasswordParams.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  pboutput.writeString(FN_EMAIL, FEMail);
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+  pbout.writeString(FN_EMAIL, FEmail);
+  result := pbout;
 end;
 
 end.
+

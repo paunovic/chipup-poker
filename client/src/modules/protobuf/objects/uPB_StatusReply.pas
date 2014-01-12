@@ -3,12 +3,11 @@ unit uPB_StatusReply;
 interface
 
 uses
-  Winapi.Windows, System.Classes, pbOutput, uProtobufBaseObject, uProtobufReader,
-  uPB_Club, uPB_User, uPB_Game;
+  Winapi.Windows,
+  pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club, uPB_User, uPB_Game;
 
 type
   TPB_StatusReply = class(TProtobufBaseObject)
-  private
     const
       FN_CLUBS = 1;
       FN_USERS = 2;
@@ -22,39 +21,40 @@ type
       FGames: TPB_Games;
 
   public
+    destructor Destroy; override;
+
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    destructor Destroy; override;
-
     property Clubs: TPB_Clubs read FClubs;
-    property Users: TPB_Users read Fusers;
-    property Self: TPB_User read Fself;
+    property Users: TPB_Users read FUsers;
+    property Self: TPB_User read FSelf;
     property Games: TPB_Games read FGames;
   end;
 
 implementation
 
 uses
-  System.SysUtils, pbPublic;
+  pbPublic;
 
 
 destructor TPB_StatusReply.Destroy;
 begin
-  FClubs.Free;
-  FUsers.Free;
-  FSelf.Free;
-  FGames.Free;
+  if Assigned(FClubs) then
+    FClubs.Free;
+  if Assigned(FUsers) then
+    FUsers.Free;
+  if Assigned(FSelf) then
+    FSelf.Free;
+  if Assigned(FGames) then
+    FGames.Free;
 
   inherited;
 end;
 
 procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag         : Integer;
-  wire_type   : Integer;
-  field_number: Integer;
-  endpos      : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
   if not Assigned(FClubs) then
     FClubs := TPB_Clubs.Create;
@@ -72,10 +72,22 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_CLUBS: FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
-      FN_USERS: FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32));
-      FN_SELF: FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
-      FN_GAMES: FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32));
+      FN_CLUBS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
+      end;
+      FN_USERS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32));
+      end;
+      FN_SELF: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+      end;
+      FN_GAMES: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32));
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -83,10 +95,11 @@ end;
 
 function TPB_StatusReply.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+  result := pbout;
 end;
 
 end.
+

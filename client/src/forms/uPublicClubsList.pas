@@ -145,7 +145,7 @@ begin
     begin
       Inc(rcount);
       gridClubsTable.DataController.SetRecordCount(rcount);
-      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsId.Index, club.Id);
+      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsId.Index, club.Seq);
       gridClubsTable.DataController.SetValue(rcount - 1, gridClubsName.Index, club.Name);
       gridClubsTable.DataController.SetValue(rcount - 1, gridClubsInvitationCode.Index, club.HasPassword);
       gridClubsTable.DataController.SetValue(rcount - 1, gridClubsPlayers.Index, club.MemberCount);

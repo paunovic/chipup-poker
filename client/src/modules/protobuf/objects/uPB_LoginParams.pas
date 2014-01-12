@@ -3,11 +3,11 @@ unit uPB_LoginParams;
 interface
 
 uses
-  Winapi.Windows, System.Classes, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows,
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_LoginParams = class(TProtobufBaseObject)
-  private
     const
       FN_USERNAME = 1;
       FN_PASSWORD = 2;
@@ -29,7 +29,7 @@ type
 implementation
 
 uses
-  System.SysUtils, pbPublic;
+  pbPublic;
 
 
 constructor TPB_LoginParams.Create(const AUsername: AnsiString; const APassword: AnsiString);
@@ -40,17 +40,20 @@ end;
 
 procedure TPB_LoginParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag         : Integer;
-  wire_type   : Integer;
-  field_number: Integer;
-  endpos      : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_USERNAME: FUsername := AProtobufReader.readString;
-      FN_PASSWORD: FPassword := AProtobufReader.readString;
+      FN_USERNAME: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FUsername := AProtobufReader.readString;
+      end;
+      FN_PASSWORD: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPassword := AProtobufReader.readString;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -58,12 +61,13 @@ end;
 
 function TPB_LoginParams.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  pboutput.writeString(FN_USERNAME, FUsername);
-  pboutput.writeString(FN_PASSWORD, FPassword);
-  result := pboutput;
+  pbout := TProtoBufOutput.Create;
+  pbout.writeString(FN_USERNAME, FUsername);
+  pbout.writeString(FN_PASSWORD, FPassword);
+  result := pbout;
 end;
 
 end.
+

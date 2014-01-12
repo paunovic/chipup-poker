@@ -3,11 +3,11 @@ unit uPB_OldMessage;
 interface
 
 uses
-  Winapi.Windows, System.Classes, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows,
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_OldMessage = class(TProtobufBaseObject)
-  private
     const
       FN_CODE = 1;
       FN_MSG = 2;
@@ -32,8 +32,7 @@ type
 implementation
 
 uses
-  System.SysUtils, pbPublic;
-
+  pbPublic;
 
 constructor TPB_OldMessage.Create(const ACode: Integer; const AMsg: AnsiString; const ACommand: AnsiString);
 begin
@@ -44,19 +43,24 @@ end;
 
 procedure TPB_OldMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
-  tag         : Integer;
-  wire_type   : Integer;
-  field_number: Integer;
-  endpos      : Integer;
+  tag, wire_type, field_number, endpos: Integer;
 begin
-  FCode := -1;
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_CODE: FCode := AProtobufReader.readInt32;
-      FN_MSG: FMsg := AProtobufReader.readString;
-      FN_COMMAND: FCommand := AProtobufReader.readString;
+      FN_CODE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCode := AProtobufReader.readInt32;
+      end;
+      FN_MSG: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FMsg := AProtobufReader.readString;
+      end;
+      FN_COMMAND: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FCommand := AProtobufReader.readString;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -64,16 +68,16 @@ end;
 
 function TPB_OldMessage.GetProtobuf: TProtoBufOutput;
 var
-  pboutput: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
-  pboutput := TProtoBufOutput.Create;
-  if FCode <> -1 then
-    pboutput.writeInt32(FN_CODE, FCode);
+  pbout := TProtoBufOutput.Create;
+  if FCode <> 0 then
+    pbout.writeInt32(FN_CODE, FCode);
   if FMsg <> '' then
-    pboutput.writeString(FN_MSG, FMsg);
+    pbout.writeString(FN_MSG, FMsg);
   if FCommand <> '' then
-    pboutput.writeString(FN_COMMAND, FCommand);
-  result := pboutput;
+    pbout.writeString(FN_COMMAND, FCommand);
+  result := pbout;
 end;
 
 end.

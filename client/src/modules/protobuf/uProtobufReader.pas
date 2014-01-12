@@ -13,7 +13,7 @@ type
   public
     constructor Create(const APointer: pointer; const ASize: DWORD);
     function GetNext(out ATag, AWireType, AFieldNumber: Integer): Boolean;
-    procedure readMongoId(var ABytes: TBytes);
+    procedure readBytes(var ABytes: TBytes);
 
     property Size: Integer read FSize;
   end;
@@ -51,7 +51,7 @@ begin
   Exit(TRUE);
 end;
 
-procedure TProtobufReader.readMongoId(var ABytes: TBytes);
+procedure TProtobufReader.readBytes(var ABytes: TBytes);
 var
   bsize: Integer;
 begin

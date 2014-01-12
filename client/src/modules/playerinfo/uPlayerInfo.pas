@@ -69,7 +69,7 @@ procedure TPlayerInfo.Flush;
 begin
   FId := '';
   FNick := '';
-  FClubs.CLear;
+  FClubs.Clear;
 end;
 
 function TPlayerInfo.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
@@ -103,7 +103,7 @@ begin
     pbclub := AStatusReply.Clubs[C1];
 
     club_mongoid := String(pbclub.MongoId);
-    club_id := pbclub.Id;
+    club_id := pbclub.Seq;
     club_name := String(pbclub.Name);
     club_balance := pbclub.Chips;
     club_ownerid := String(pbclub.OwnerMongoId);
