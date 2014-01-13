@@ -8,7 +8,7 @@ uses
   uGenerator in 'uGenerator.pas';
 
 var
-  input_file: String;
+  input_file, output_path: String;
 
 procedure Work;
 var
@@ -58,7 +58,7 @@ begin
               WriteLn(Format('Invalid field [%s]', [line]));
           end;
 
-          TGenerator.Generate(msg_name, fields, Format('u%s.pas', [msg_name]));
+          TGenerator.Generate(msg_name, fields, Format('%su%s.pas', [IncludeTrailingPathDelimiter(output_path), msg_name]));
         finally
           fields.Free;
         end;
@@ -70,8 +70,7 @@ begin
 end;
 
 begin
-  input_file := ParamStr(1);
+  input_file := ExpandFileName(ParamStr(1));
+  output_path := ExpandFileName(ParamStr(2));
   Work;
-  Write('Done!');
-  ReadLn;
 end.

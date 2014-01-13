@@ -22,7 +22,9 @@ var
   C1     : Integer;
   cc     : String;
 begin
-  fwriter := TStreamWriter.Create(Format('uPB_%s.pas', [AMessageName]));
+  ForceDirectories(ExtractFilePath(AOutputFile));
+
+  fwriter := TStreamWriter.Create(AOutputFile);
   try
     fwriter.WriteLine(Format('unit uPB_%s;', [AMessageName]));
     fwriter.WriteLine();

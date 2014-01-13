@@ -70,7 +70,7 @@
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-			<Debugger_RunParams>D:\dropbox\poker\protobuf\delphi-gen-messages.proto</Debugger_RunParams>
+			<Debugger_RunParams>d:\projects\ChipUpPoker\message.proto D:\output_dir_test</Debugger_RunParams>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
