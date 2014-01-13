@@ -189,6 +189,6 @@ message SetAvatarParams {
 	required string avatar_mongo_id = 1;
 }
 message DeleteGameParams {
-	required string game_mongo_id = 1;
+	required bytes game_mongo_id = 1;
 }
 
