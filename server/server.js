@@ -537,13 +537,13 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.CMD_CREATE_CLUB:
-			var params = pb.Parse(args,'Poker.CreateClubParams');
+			var params = pb.Parse(args,'Poker.Club');
 			//if (parts.length < 3) {
 			//	this.reply(codes.SR_JOINCLUB_OK,"missing arguments");
 			//	return;
 			//}
 			var priv = params.private;
-			var pass = params.inv_code
+			var pass = params.password;
 			var clubname = params.name;
 			if (clubname.length > sharedconfig.stringSizes.clubname) {
 				this.send(codes.SR_CREATECLUB_INVALID_NAME);
