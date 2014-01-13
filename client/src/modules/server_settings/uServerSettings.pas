@@ -37,9 +37,6 @@ type
 
 implementation
 
-uses
-  superobject;
-
 
 procedure TServerSettings.ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 begin

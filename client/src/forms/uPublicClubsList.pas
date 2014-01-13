@@ -49,7 +49,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uCommon, uServerCodes, superobject, uMainDataModule, uJoinClubForm, uMessageContainer, uServerMessageCallback,
+  uSocketClient, uCommon, uServerCodes, uMainDataModule, uJoinClubForm, uMessageContainer, uServerMessageCallback,
   uPB_ListClubsReply, uPB_Club;
 
 procedure TfrmPublicClubsList.FormCreate(Sender: TObject);
