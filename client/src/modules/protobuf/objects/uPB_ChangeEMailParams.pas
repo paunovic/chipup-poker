@@ -1,71 +1,65 @@
-unit uPB_ListClubsReply;
+unit uPB_ChangeEMailParams;
 
 interface
 
 uses
   Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club;
+  pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TPB_ListClubsReply = class(TProtobufBaseObject)
+  TPB_ChangeEMailParams = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBS = 1;
+      FN_NEWMAIL = 1;
 
     var
-      FClubs: TPB_Clubs;
+      FNewMail: AnsiString;
 
   public
-    destructor Destroy; override;
+    constructor Create(const ANewMail: AnsiString); overload;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Clubs: TPB_Clubs read FClubs;
+    property NewMail: AnsiString read FNewMail;
   end;
+
+//  TPB_ChangeEMailParamss = TObjectList<TPB_ChangeEMailParams>;
 
 implementation
 
 uses
   pbPublic;
 
-
-destructor TPB_ListClubsReply.Destroy;
+constructor TPB_ChangeEMailParams.Create(const ANewMail: AnsiString);
 begin
-  if Assigned(FClubs) then
-    FClubs.Free;
-
-  inherited;
+  FNewMail := ANewMail;
 end;
 
-procedure TPB_ListClubsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
+procedure TPB_ChangeEMailParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
-  if not Assigned(FClubs) then
-    FClubs := TPB_Clubs.Create;
-  FClubs.Clear;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_CLUBS: begin
+      FN_NEWMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
+        FNewMail := AProtobufReader.readString;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-function TPB_ListClubsReply.GetProtobuf: TProtoBufOutput;
+function TPB_ChangeEMailParams.GetProtobuf: TProtoBufOutput;
 var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
+  pbout.writeString(FN_NEWMAIL, FNewMail);
   result := pbout;
 end;
 
 end.
-

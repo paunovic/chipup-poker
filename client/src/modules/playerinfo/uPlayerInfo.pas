@@ -125,7 +125,7 @@ begin
       game_type := TGameType(pbgame.GameType);
       game_limit := TGameLimit(pbgame.GameLimit);
 
-      club.Games.AddGame(String(pbgame.MongoId), String(pbgame.CreatorMongoId), game_clubid, String(pbgame.Name),
+      club.Games.AddGame(String(pbgame.MongoId), String(pbgame.CreatorMongoId), game_clubid, String(pbgame.Gamename),
                          game_type, game_limit, pbgame.SmallBlind, pbgame.BigBlind, pbgame.Seats);
     end;
 

@@ -30,7 +30,6 @@ type
     procedure Disconnect;
     function IsConnected: Boolean;
 
-    procedure SendCommand(const ACommand: String);
     procedure SendProtobuf(const AMethodId: DWORD; const AProtobuf: TProtobufBaseObject);
 
     procedure Login(const ALogin, APass: String);
@@ -43,7 +42,6 @@ type
     procedure LeaveClub(const AId: Int64);
     procedure KickPlayer(const AClubId: Int64; const APlayerId: String);
     procedure GiveOwnership(const AClubId: Int64; const APlayerId: String);
-    procedure ChangeClubDetails(const AClubId: Int64; const AJSON: ISuperObject); overload;
     procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean); overload;
     procedure DisbandClub(const AClubId: Int64);
     procedure TransferChips(const AClubId: Int64; const APlayerId: String; const AChipAmount: Integer);
@@ -55,8 +53,8 @@ type
     procedure EditGame(const AGameId: String; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
     procedure ListPublicClubs;
 
-    property Socket                  : TSslWSocket read FSocket;
-    property ConnectCode             : Integer read FConnectCode;
+    property Socket     : TSslWSocket read FSocket;
+    property ConnectCode: Integer read FConnectCode;
 
   end;
 
@@ -68,10 +66,11 @@ implementation
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSettings, uCommon,
-  uPB_OldMessage, uPB_LoginParams, uPB_StatusReply, uPB_HelloArguments, uPB_RegisterParams,
-  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, pbOutput,
-  uMessageContainer,
-  pbInput;
+  uPB_LoginParams, uPB_StatusReply, uPB_HelloArguments, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
+  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_CreateClubParams, uPB_JoinClubParams, uPB_TransferChipsParams,
+  uPB_KickPlayerParams, uPB_LeaveClubParams, uPB_GiveClubOwnershipParams, uPB_DeleteClubParams, uPB_ChangePasswordParams,
+  uPB_SetAvatarParams, uPB_DeleteGameParams,
+  pbOutput, pbInput, uMessageContainer;
 
 
 constructor TSocketClient.Create(const AServer: String; const APort: Integer);
@@ -98,7 +97,7 @@ begin
   FSocket.Port := IntToStr(FPort);
   FSocket.TimeoutConnect := 10000;
   FSocket.ComponentOptions := [wsoSIO_RCVALL];
-  FSocket.SslEnable := FALSE;
+  FSocket.SslEnable := TRUE;
   FSocket.SslContext := TSslContext.Create(nil);
   FSocket.SslContext.InitContext;
   FSocket.OnChangeState := SocketChangeState;
@@ -207,6 +206,8 @@ begin
 end;
 
 function TSocketClient.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
+var
+  err: String;
 begin
   if FConnectCode = -1 then
     FConnectCode := ARpcMessage.MethodId;
@@ -214,12 +215,10 @@ begin
   ADataObject := nil;
   result := TRUE;
   case ARpcMessage.MethodId of
-    SR_OLD_MESSAGE: begin
-      ADataObject := TPB_OldMessage.Create(ADataPointer, ARpcMessage.DataSize);
-      if FConnectCode = SR_OLD_MESSAGE then
-        FConnectCode := (ADataObject as TPB_OldMessage).Code;
+    SR_NOT_IMPLEMENTED: begin
+      SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
+      {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED code: %s', [err]), ditException); {$ENDIF}
     end;
-    SR_NOT_IMPLEMENTED: ;
     SR_HELLO: ADataObject := TPB_HelloArguments.Create(ADataPointer, ARpcMessage.DataSize);
     SR_LOGIN_OK: ;
     SR_INVALID_LOGIN: ;
@@ -252,8 +251,8 @@ begin
     SR_CLUB_DISBAND_OK: ;
     SR_CLUB_TRANFER_CHIPS_OK: ;
     SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT: ;
-    SR_CREATECLUB_NO_GOLD: ;
-    SR_CLUB_DETAILS_CHANGE_NO_GOLD: ;
+    SR_CREATECLUB_NO_TOKENS: ;
+    SR_CLUB_DETAILS_CHANGE_NO_TOKENS: ;
     SR_CHANGE_MAIL_OK: ;
     SR_CHANGE_MAIL_INVALID_MAIL: ;
     SR_CHANGE_MAIL_DUPLICATE_MAIL: ;
@@ -318,128 +317,176 @@ end;
 
 procedure TSocketClient.CreateClub(const AName, AInvCode: String; const APrivate: Boolean);
 var
-  priv: Integer;
+  protobuf: TPB_CreateClubParams;
 begin
-  if APrivate then
-    priv := 1
-  else
-    priv := 0;
-
-  SendCommand(Format('create_club %d %s %s', [priv, AInvCode, AName]))
+  protobuf := TPB_CreateClubParams.Create(AnsiString(AName), APrivate, AnsiString(AInvCode));
+  try
+    SendProtobuf(CMD_CREATE_CLUB, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.JoinClub(const AId: Int64; const ACode: String);
+var
+  protobuf: TPB_JoinClubParams;
 begin
-  SendCommand(Format('join_club %d %s', [AId, ACode]));
+  protobuf := TPB_JoinClubParams.Create(AId, AnsiString(ACode));
+  try
+    SendProtobuf(CMD_JOIN_CLUB, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.KickPlayer(const AClubId: Int64; const APlayerId: String);
+var
+  protobuf: TPB_KickPlayerParams;
 begin
-  SendCommand(Format('kick %d %s', [AClubId, APlayerId]));
+  protobuf := TPB_KickPlayerParams.Create(AClubId, AnsiString(APlayerId));
+  try
+    SendProtobuf(CMD_KICK_PLAYER, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.LeaveClub(const AId: Int64);
+var
+  protobuf: TPB_LeaveClubParams;
 begin
-  SendCommand(Format('leave_club %d', [AId]));
+  protobuf := TPB_LeaveClubParams.Create(AId);
+  try
+    SendProtobuf(CMD_LEAVE_CLUB, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.GiveOwnership(const AClubId: Int64; const APlayerId: String);
+var
+  protobuf: TPB_GiveClubOwnershipParams;
 begin
-  SendCommand(Format('give_owner %d %s', [AClubId, APlayerId]));
-end;
-
-procedure TSocketClient.ChangeClubDetails(const AClubId: Int64; const AJSON: ISuperObject);
-begin
-  SendCommand(Format('club_change_details %d %s', [AClubId, AJSON.AsJSon]));
+  protobuf := TPB_GiveClubOwnershipParams.Create(AClubId, AnsiString(APlayerId));
+  try
+    SendProtobuf(CMD_GIVE_CLUB_OWNERSHIP, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean);
 var
-  json: ISuperObject;
-  priv: Integer;
+  protobuf: TPB_Club;
 begin
-  json := SO;
-  json.S['name'] := AClubName;
-  json.S['invcode'] := AClubCode;
-
-  if APrivate then
-    priv := 1
-  else
-    priv := 0;
-  json.I['private'] := priv;
-
-  ChangeClubDetails(AClubId, json);
+  protobuf := TPB_Club.Create(AClubId, AnsiString(AClubName), AnsiString(AClubCode), APrivate);
+  try
+    SendProtobuf(CMD_CHANGE_CLUB_DETAILS, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.DisbandClub(const AClubId: Int64);
+var
+  protobuf: TPB_DeleteClubParams;
 begin
-  SendCommand(Format('delete_club %d', [AClubId]));
+  protobuf := TPB_DeleteClubParams.Create(AClubId);
+  try
+    SendProtobuf(CMD_DELETE_CLUB, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.TransferChips(const AClubId: Int64; const APlayerId: String; const AChipAmount: Integer);
+var
+  protobuf: TPB_TransferChipsParams;
 begin
-  SendCommand(Format('transfer_chips %d %s %d', [AClubId, APlayerId, AChipAmount]));
+  protobuf := TPB_TransferChipsParams.Create(AClubId, AnsiString(APlayerId), AChipAmount);
+  try
+    SendProtobuf(CMD_TRANSFER_CHIPS, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.ChangeEMail(const ANewMail: String);
+var
+  protobuf: TPB_ChangeEMailParams;
 begin
-  SendCommand(Format('change_email %s', [ANewMail]));
+  protobuf := TPB_ChangeEMailParams.Create(AnsiString(ANewMail));
+  try
+    SendProtobuf(CMD_CHANGE_EMAIL, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.ChangePassword(const APassword: String);
+var
+  protobuf: TPB_ChangePasswordParams;
 begin
-  SendCommand(Format('change_password %s', [APassword]));
+  protobuf := TPB_ChangePasswordParams.Create(AnsiString(APassword));
+  try
+    SendProtobuf(CMD_CHANGE_PASSWORD, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.SetAvatar(const AAvatarId: String);
+var
+  protobuf: TPB_SetAvatarParams;
 begin
-  SendCommand(Format('set_avatar %s', [AAvatarId]));
+  protobuf := TPB_SetAvatarParams.Create(AnsiString(AAvatarId));
+  try
+    SendProtobuf(CMD_SET_AVATAR, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+var
+  protobuf: TPB_Game;
 begin
-  SendCommand(Format('create_game %d %d %d %d %d %d %s', [AClubId, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats, AGameName]));
+  protobuf := TPB_Game.Create(AnsiString(AGameName), AClubId, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats);
+  try
+    SendProtobuf(CMD_CREATE_GAME, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.DeleteGame(const AGameId: String);
+var
+  protobuf: TPB_DeleteGameParams;
 begin
-  SendCommand(Format('delete_game %s', [AGameId]));
+  protobuf := TPB_DeleteGameParams.Create(AnsiString(AGameId));
+  try
+    SendProtobuf(CMD_DELETE_GAME, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.EditGame(const AGameId, AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+var
+  protobuf: TPB_Game;
 begin
-  SendCommand(Format('edit_game %s %d %d %d %d %d %s', [AGameId, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats, AGameName]));
+  protobuf := TPB_Game.Create(AnsiString(AGameName), 0, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats);
+  try
+    protobuf.MongoId := AnsiString(AGameId);
+    SendProtobuf(CMD_EDIT_GAME, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.ListPublicClubs;
 begin
   SendProtobuf(CMD_LIST_PUBLIC_CLUBS, nil);
-end;
-
-procedure TSocketClient.SendCommand(const ACommand: String);
-var
-  old_message: TPB_OldMessage;
-  cmd: String;
-  params: String;
-begin
-  if Pos(' ', ACommand) > 0 then
-  begin
-    cmd := Copy(ACommand, 1, Pos(' ', ACommand) - 1);
-    params := ACommand;
-    Delete(params, 1, Length(cmd) + 1);
-  end
-  else
-  begin
-    cmd := ACommand;
-    params := '';
-  end;
-
-  old_message := TPB_OldMessage.Create(-1, AnsiString(params), AnsiString(cmd));
-  try
-    SendProtobuf(SR_OLD_MESSAGE,old_message);
-  finally
-    old_message.Free;
-  end;
 end;
 
 procedure TSocketClient.SendProtobuf(const AMethodId: DWORD; const AProtobuf: TProtobufBaseObject);

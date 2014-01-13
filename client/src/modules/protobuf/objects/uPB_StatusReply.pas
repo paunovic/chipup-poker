@@ -8,6 +8,7 @@ uses
 
 type
   TPB_StatusReply = class(TProtobufBaseObject)
+  private
     const
       FN_CLUBS = 1;
       FN_USERS = 2;

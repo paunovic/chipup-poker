@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   dxSkinDevExpressStyle, Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  Vcl.Samples.Spin, cxSpinEdit, uGameInfo, uIFormParams;
+  Vcl.Samples.Spin, cxSpinEdit, uGameInfo, uIFormParams, uMessageItem;
 
 type
   TfrmEditGame = class(TForm, IFormParams)
@@ -33,7 +33,7 @@ type
   private
     FGame: TGameInfo;
 
-    procedure TCEditGameOk(const AData: TObject);
+    procedure TCEditGameOk(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -47,7 +47,8 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uCommon, uMessageContainer;
+  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
+
 
 procedure TfrmEditGame.FormDestroy(Sender: TObject);
 begin
@@ -96,15 +97,23 @@ begin
 end;
 
 procedure TfrmEditGame.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_EDIT_GAME_OK, TCEditGameOk)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_EDIT_GAME_OK, TCEditGameOk)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 
@@ -124,7 +133,7 @@ begin
   SocketClient.EditGame(FGame.MongoId, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
 end;
 
-procedure TfrmEditGame.TCEditGameOk(const AData: TObject);
+procedure TfrmEditGame.TCEditGameOk(const AMessage: TMessageItem);
 begin
   ModalResult := mrOk;
 end;

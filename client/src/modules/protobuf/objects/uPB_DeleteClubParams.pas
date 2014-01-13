@@ -1,4 +1,4 @@
-unit uPB_ForgotPasswordParams;
+unit uPB_DeleteClubParams;
 
 interface
 
@@ -7,35 +7,36 @@ uses
   pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TPB_ForgotPasswordParams = class(TProtobufBaseObject)
+  TPB_DeleteClubParams = class(TProtobufBaseObject)
   private
     const
-      FN_EMAIL = 1;
+      FN_CLUBSEQ = 1;
 
     var
-      FEmail: AnsiString;
+      FClubSeq: Integer;
 
   public
-    constructor Create(const AEMail: AnsiString); overload;
+    constructor Create(const AClubSeq: Integer); overload;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: AnsiString read FEmail;
+    property ClubSeq: Integer read FClubSeq;
   end;
 
+//  TPB_DeleteClubParamss = TObjectList<TPB_DeleteClubParams>;
 
 implementation
 
 uses
   pbPublic;
 
-constructor TPB_ForgotPasswordParams.Create(const AEMail: AnsiString);
+constructor TPB_DeleteClubParams.Create(const AClubSeq: Integer);
 begin
-  FEMail := AEMail;
+  FClubSeq := AClubSeq;
 end;
 
-procedure TPB_ForgotPasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
+procedure TPB_DeleteClubParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
@@ -43,23 +44,22 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_EMAIL: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FEmail := AProtobufReader.readString;
+      FN_CLUBSEQ: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FClubSeq := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-function TPB_ForgotPasswordParams.GetProtobuf: TProtoBufOutput;
+function TPB_DeleteClubParams.GetProtobuf: TProtoBufOutput;
 var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_EMAIL, FEmail);
+  pbout.writeInt32(FN_CLUBSEQ, FClubSeq);
   result := pbout;
 end;
 
 end.
-

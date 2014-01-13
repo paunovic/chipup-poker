@@ -8,6 +8,7 @@ uses
 
 type
   TPB_RpcMessage = class(TProtobufBaseObject)
+  private
     const
       FN_METHODID = 1;
       FN_DATASIZE = 2;

@@ -8,6 +8,7 @@ uses
 
 type
   TPB_User = class(TProtobufBaseObject)
+  private
     const
       FN_MONGOID = 1;
       FN_AVATARMONGOID = 2;

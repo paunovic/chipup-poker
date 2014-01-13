@@ -8,6 +8,7 @@ uses
 
 type
   TPB_StringSizes = class(TProtobufBaseObject)
+  private
     const
       FN_EMAIL = 1;
       FN_PASSWORD = 2;

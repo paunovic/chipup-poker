@@ -25,7 +25,6 @@ type
     lbsPassword: TcxLabel;
     StatusBar: TdxStatusBar;
     SkinController: TdxSkinController;
-    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acLoginExecute(Sender: TObject);
@@ -33,7 +32,6 @@ type
     procedure acShowForgotPasswordFormExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   private
     FLoginSuccess: Boolean;
 
@@ -105,11 +103,6 @@ begin
 
   if Settings.RememberPassword then
     edPassword.Text := Settings.Password;
-end;
-
-procedure TfrmLogin.Button1Click(Sender: TObject);
-begin
-  SocketClient.SendCommand('crash');
 end;
 
 procedure TfrmLogin.SaveSettings;

@@ -8,10 +8,11 @@ uses
 
 type
   TPB_Game = class(TProtobufBaseObject)
+  private
     const
       FN_MONGOID = 1;
       FN_CREATOR = 2;
-      FN_NAME = 3;
+      FN_GAMENAME = 3;
       FN_CLUBSEQ = 4;
       FN_GAMETYPE = 5;
       FN_GAMELIMIT = 6;
@@ -21,26 +22,29 @@ type
 
     var
       FMongoId: TBytes;
-      FCreatorMongoId: TBytes;
-      FName: AnsiString;
-      FClubSeq: Integer;
+      FCreator: TBytes;
+      FGamename: AnsiString;
+      FClubseq: Integer;
       FGameType: Integer;
       FGameLimit: Integer;
       FSmallBlind: Integer;
       FBigBlind: Integer;
       FSeats: Integer;
-  private
+
     function GetCreatorMongoId: AnsiString;
     function GetMongoId: AnsiString;
+    procedure SetMongoId(const AValue: AnsiString);
 
   public
+    constructor Create(const AGamename: AnsiString; const AClubseq: Integer; const AGameType: Integer; const AGameLimit: Integer; const ASmallBlind: Integer; const ABigBlind: Integer; const ASeats: Integer); overload;
+
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property MongoId: AnsiString read GetMongoId;
+    property MongoId: AnsiString read GetMongoId write SetMongoId;
     property CreatorMongoId: AnsiString read GetCreatorMongoId;
-    property Name: AnsiString read FName;
-    property ClubSeq: Integer read FClubSeq;
+    property Gamename: AnsiString read FGamename;
+    property Clubseq: Integer read FClubseq;
     property GameType: Integer read FGameType;
     property GameLimit: Integer read FGameLimit;
     property SmallBlind: Integer read FSmallBlind;
@@ -56,6 +60,17 @@ uses
   pbPublic, uCommon;
 
 
+constructor TPB_Game.Create(const AGamename: AnsiString; const AClubseq: Integer; const AGameType: Integer; const AGameLimit: Integer; const ASmallBlind: Integer; const ABigBlind: Integer; const ASeats: Integer);
+begin
+  FGamename := AGamename;
+  FClubseq := AClubseq;
+  FGameType := AGameType;
+  FGameLimit := AGameLimit;
+  FSmallBlind := ASmallBlind;
+  FBigBlind := ABigBlind;
+  FSeats := ASeats;
+end;
+
 procedure TPB_Game.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
@@ -70,15 +85,15 @@ begin
       end;
       FN_CREATOR: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FCreatorMongoId);
+        AProtobufReader.readBytes(FCreator);
       end;
-      FN_NAME: begin
+      FN_GAMENAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FName := AProtobufReader.readString;
+        FGamename := AProtobufReader.readString;
       end;
       FN_CLUBSEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClubSeq := AProtobufReader.readInt32;
+        FClubseq := AProtobufReader.readInt32;
       end;
       FN_GAMETYPE: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -105,17 +120,32 @@ begin
     end;
 end;
 
+
 function TPB_Game.GetProtobuf: TProtoBufOutput;
 var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
+
+  if Length(FMongoId) > 0 then
+    pbout.writeBytes(FN_MONGOID, FMongoId);
+
+  if Length(FCreator) > 0 then
+    pbout.writeBytes(FN_CREATOR, FCreator);
+
+  pbout.writeString(FN_GAMENAME, FGamename);
+  pbout.writeInt32(FN_CLUBSEQ, FClubseq);
+  pbout.writeInt32(FN_GAMETYPE, FGameType);
+  pbout.writeInt32(FN_GAMELIMIT, FGameLimit);
+  pbout.writeInt32(FN_SMALLBLIND, FSmallBlind);
+  pbout.writeInt32(FN_BIGBLIND, FBigBlind);
+  pbout.writeInt32(FN_SEATS, FSeats);
   result := pbout;
 end;
 
 function TPB_Game.GetCreatorMongoId: AnsiString;
 begin
-  result := BytesToHex(FCreatorMongoId);
+  result := BytesToHex(FCreator);
 end;
 
 function TPB_Game.GetMongoId: AnsiString;
@@ -123,5 +153,10 @@ begin
   result := BytesToHex(FMongoId);
 end;
 
-end.
+procedure TPB_Game.SetMongoId(const AValue: AnsiString);
+begin
+  HexToBytes(AValue, FMongoId);
+end;
 
+
+end.

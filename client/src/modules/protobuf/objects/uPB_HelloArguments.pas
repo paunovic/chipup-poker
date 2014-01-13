@@ -8,6 +8,7 @@ uses
 
 type
   TPB_HelloArguments = class(TProtobufBaseObject)
+  private
     const
       FN_TOKENPRICES = 1;
       FN_STRINGSIZES = 2;

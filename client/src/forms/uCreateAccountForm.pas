@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
   cxContainer, cxEdit, dxSkinsCore, dxSkinDevExpressStyle, Vcl.Menus, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList, Vcl.ExtCtrls,
-  dxSkinsForm;
+  dxSkinsForm, uMessageItem;
 
 type
   TfrmCreateAccount = class(TForm)
@@ -33,10 +33,10 @@ type
   private
     function ValidateForm: Boolean;
 
-    procedure TCRegisterOk(const AData: TObject);
-    procedure TCRegisterDuplicateMail(const AData: TObject);
-    procedure TCRegisterDuplicateUser(const AData: TObject);
-    procedure TCRegisterInvalidMail(const AData: TObject);
+    procedure TCRegisterOk(const AMessage: TMessageItem);
+    procedure TCRegisterDuplicateMail(const AMessage: TMessageItem);
+    procedure TCRegisterDuplicateUser(const AMessage: TMessageItem);
+    procedure TCRegisterInvalidMail(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -47,7 +47,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSettings, uCommon, uSocketClient, uValidators, uServerCodes, uMainDataModule, uMessageContainer;
+  uSettings, uCommon, uSocketClient, uValidators, uServerCodes, uMainDataModule, uMessageContainer, uServerMessageCallback;
 
 
 procedure TfrmCreateAccount.FormCreate(Sender: TObject);
@@ -81,18 +81,26 @@ begin
 end;
 
 procedure TfrmCreateAccount.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_REGISTER_OK, TCRegisterOk),
-        TWndCallback.Create(SR_REGISTER_DUPLICATE_MAIL, TCRegisterDuplicateMail),
-        TWndCallback.Create(SR_REGISTER_DUPLICATE_USERNAME, TCRegisterDuplicateUser),
-        TWndCallback.Create(SR_REGISTER_INVALID_MAIL, TCRegisterInvalidMail)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_REGISTER_OK, TCRegisterOk),
+                            TServerMessageCallback.Create(SR_REGISTER_DUPLICATE_MAIL, TCRegisterDuplicateMail),
+                            TServerMessageCallback.Create(SR_REGISTER_DUPLICATE_USERNAME, TCRegisterDuplicateUser),
+                            TServerMessageCallback.Create(SR_REGISTER_INVALID_MAIL, TCRegisterInvalidMail)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 function TfrmCreateAccount.ValidateForm: Boolean;
@@ -135,27 +143,27 @@ begin
   SocketClient.CreateAccount(edUsername.Text, edPassword.Text, edEmail.Text);
 end;
 
-procedure TfrmCreateAccount.TCRegisterOk(const AData: TObject);
+procedure TfrmCreateAccount.TCRegisterOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Account successfully created. Please check your inbox for confirmation e-mail', mtInformation, [mbOK], 0);
   ModalResult := mrOk;
 end;
 
-procedure TfrmCreateAccount.TCRegisterDuplicateMail(const AData: TObject);
+procedure TfrmCreateAccount.TCRegisterDuplicateMail(const AMessage: TMessageItem);
 begin
   MessageDlg('E-mail address already exists', mtError, [mbOK], 0);
   edEmail.SetFocus;
   acSignUp.Enabled := TRUE;
 end;
 
-procedure TfrmCreateAccount.TCRegisterDuplicateUser(const AData: TObject);
+procedure TfrmCreateAccount.TCRegisterDuplicateUser(const AMessage: TMessageItem);
 begin
   MessageDlg('Username already exists', mtError, [mbOK], 0);
   edUsername.SetFocus;
   acSignUp.Enabled := TRUE;
 end;
 
-procedure TfrmCreateAccount.TCRegisterInvalidMail(const AData: TObject);
+procedure TfrmCreateAccount.TCRegisterInvalidMail(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid E-mail address', mtError, [mbOK], 0);
   edEmail.SetFocus;

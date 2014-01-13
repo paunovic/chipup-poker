@@ -43,7 +43,6 @@ uses
   uSocketClient in 'modules\socketclient\uSocketClient.pas',
   uProtobufReader in 'modules\protobuf\uProtobufReader.pas',
   uPB_RpcMessage in 'modules\protobuf\objects\uPB_RpcMessage.pas',
-  uPB_OldMessage in 'modules\protobuf\objects\uPB_OldMessage.pas',
   uPB_LoginParams in 'modules\protobuf\objects\uPB_LoginParams.pas',
   uPB_Club in 'modules\protobuf\objects\uPB_Club.pas',
   uPB_StatusReply in 'modules\protobuf\objects\uPB_StatusReply.pas',
@@ -54,11 +53,22 @@ uses
   uPB_RegisterParams in 'modules\protobuf\objects\uPB_RegisterParams.pas',
   uPB_ForgotPasswordParams in 'modules\protobuf\objects\uPB_ForgotPasswordParams.pas',
   uPB_User in 'modules\protobuf\objects\uPB_User.pas',
-  uPB_Game in 'modules\protobuf\objects\uPB_Game.pas',
   uMessageContainer in 'modules\message_container\uMessageContainer.pas',
   uMessageItem in 'modules\message_container\uMessageItem.pas',
   uServerMessageCallback in 'modules\message_container\uServerMessageCallback.pas',
-  uPB_ListClubsReply in 'modules\protobuf\objects\uPB_ListClubsReply.pas';
+  uPB_ListClubsReply in 'modules\protobuf\objects\uPB_ListClubsReply.pas',
+  uPB_CreateClubParams in 'modules\protobuf\objects\uPB_CreateClubParams.pas',
+  uPB_GiveClubOwnershipParams in 'modules\protobuf\objects\uPB_GiveClubOwnershipParams.pas',
+  uPB_JoinClubParams in 'modules\protobuf\objects\uPB_JoinClubParams.pas',
+  uPB_KickPlayerParams in 'modules\protobuf\objects\uPB_KickPlayerParams.pas',
+  uPB_LeaveClubParams in 'modules\protobuf\objects\uPB_LeaveClubParams.pas',
+  uPB_ChangeEMailParams in 'modules\protobuf\objects\uPB_ChangeEMailParams.pas',
+  uPB_ChangePasswordParams in 'modules\protobuf\objects\uPB_ChangePasswordParams.pas',
+  uPB_DeleteClubParams in 'modules\protobuf\objects\uPB_DeleteClubParams.pas',
+  uPB_DeleteGameParams in 'modules\protobuf\objects\uPB_DeleteGameParams.pas',
+  uPB_Game in 'modules\protobuf\objects\uPB_Game.pas',
+  uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
+  uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas';
 
 procedure FocusPokerApp;
 var

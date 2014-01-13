@@ -3,7 +3,6 @@ unit uServerCodes;
 interface
 
 const
-  SR_OLD_MESSAGE                          = 100;
   SR_NOT_IMPLEMENTED                      = 000;
   SR_HELLO                                = 001;
   SR_LOGIN_OK                             = 002;
@@ -37,8 +36,8 @@ const
   SR_CLUB_DISBAND_OK                      = 030;
   SR_CLUB_TRANFER_CHIPS_OK                = 031;
   SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT    = 032;
-  SR_CREATECLUB_NO_GOLD                   = 033;
-  SR_CLUB_DETAILS_CHANGE_NO_GOLD          = 034;
+  SR_CREATECLUB_NO_TOKENS                 = 033;
+  SR_CLUB_DETAILS_CHANGE_NO_TOKENS        = 034;
   SR_CHANGE_MAIL_OK                       = 035;
   SR_CHANGE_MAIL_INVALID_MAIL             = 036;
   SR_CHANGE_MAIL_DUPLICATE_MAIL           = 037;
@@ -50,7 +49,7 @@ const
   SR_DELETE_GAME_OK                       = 043;
   SR_EDIT_GAME_OK                         = 044;
   SR_SECONDARY_LOGIN_DETECTED             = 045;
-  SR_DECKREPLY                            = 46;
+  SR_DECKREPLY                            = 046;
 
   CMD_LOGIN                               = 501;
   CMD_STATUS                              = 502;
@@ -58,7 +57,20 @@ const
   CMD_FORGOT_PASSWORD                     = 504;
   CMD_LOGOUT                              = 505;
   CMD_LIST_PUBLIC_CLUBS                   = 506;
-
+  CMD_CREATE_CLUB                         = 507;
+  CMD_JOIN_CLUB                           = 508;
+  CMD_KICK_PLAYER                         = 509;
+  CMD_LEAVE_CLUB                          = 510;
+  CMD_GIVE_CLUB_OWNERSHIP                 = 511;
+  CMD_CHANGE_CLUB_DETAILS                 = 512;
+  CMD_DELETE_CLUB                         = 513;
+  CMD_TRANSFER_CHIPS                      = 514;
+  CMD_CHANGE_EMAIL                        = 515;
+  CMD_CHANGE_PASSWORD                     = 516;
+  CMD_SET_AVATAR                          = 517;
+  CMD_CREATE_GAME                         = 518;
+  CMD_DELETE_GAME                         = 519;
+  CMD_EDIT_GAME                           = 520;
 
 implementation
 

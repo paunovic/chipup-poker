@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  dxSkinDevExpressStyle, cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, Vcl.ActnList;
+  dxSkinDevExpressStyle, cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, Vcl.ActnList, uMessageItem;
 
 type
   TfrmChangeEMail = class(TForm)
@@ -27,9 +27,9 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    procedure TCChangeMailOk(const AData: TObject);
-    procedure TCChangeMailInvalidMail(const AData: TObject);
-    procedure TCChangeMailDuplicateMail(const AData: TObject);
+    procedure TCChangeMailOk(const AMessage: TMessageItem);
+    procedure TCChangeMailInvalidMail(const AMessage: TMessageItem);
+    procedure TCChangeMailDuplicateMail(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -40,7 +40,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer;
+  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
 
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
@@ -66,17 +66,25 @@ begin
 end;
 
 procedure TfrmChangeEMail.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_CHANGE_MAIL_OK, TCChangeMailOk),
-        TWndCallback.Create(SR_CHANGE_MAIL_INVALID_MAIL, TCChangeMailInvalidMail),
-        TWndCallback.Create(SR_CHANGE_MAIL_DUPLICATE_MAIL, TCChangeMailDuplicateMail)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_CHANGE_MAIL_OK, TCChangeMailOk),
+                            TServerMessageCallback.Create(SR_CHANGE_MAIL_INVALID_MAIL, TCChangeMailInvalidMail),
+                            TServerMessageCallback.Create(SR_CHANGE_MAIL_DUPLICATE_MAIL, TCChangeMailDuplicateMail)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 
@@ -106,21 +114,21 @@ begin
   acOK.Enabled := FALSE;
 end;
 
-procedure TfrmChangeEMail.TCChangeMailDuplicateMail(const AData: TObject);
+procedure TfrmChangeEMail.TCChangeMailDuplicateMail(const AMessage: TMessageItem);
 begin
   MessageDlg('E-mail address is already in use', mtError, [mbOK], 0);
   edNewMail.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmChangeEMail.TCChangeMailInvalidMail(const AData: TObject);
+procedure TfrmChangeEMail.TCChangeMailInvalidMail(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid E-mail address', mtError, [mbOK], 0);
   edNewMail.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmChangeEMail.TCChangeMailOk(const AData: TObject);
+procedure TfrmChangeEMail.TCChangeMailOk(const AMessage: TMessageItem);
 begin
   MessageDlg('E-mail address successfully changed. Please check your inbox for confirmation link.', mtInformation, [mbOK], 0);
   ModalResult := mrOk;

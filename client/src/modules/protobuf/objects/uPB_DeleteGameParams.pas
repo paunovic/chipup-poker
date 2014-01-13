@@ -1,4 +1,4 @@
-unit uPB_ForgotPasswordParams;
+unit uPB_DeleteGameParams;
 
 interface
 
@@ -7,35 +7,36 @@ uses
   pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TPB_ForgotPasswordParams = class(TProtobufBaseObject)
+  TPB_DeleteGameParams = class(TProtobufBaseObject)
   private
     const
-      FN_EMAIL = 1;
+      FN_GAMEMONGOID = 1;
 
     var
-      FEmail: AnsiString;
+      FGameMongoId: AnsiString;
 
   public
-    constructor Create(const AEMail: AnsiString); overload;
+    constructor Create(const AGameMongoId: AnsiString); overload;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: AnsiString read FEmail;
+    property GameMongoId: AnsiString read FGameMongoId;
   end;
 
+//  TPB_DeleteGameParamss = TObjectList<TPB_DeleteGameParams>;
 
 implementation
 
 uses
   pbPublic;
 
-constructor TPB_ForgotPasswordParams.Create(const AEMail: AnsiString);
+constructor TPB_DeleteGameParams.Create(const AGameMongoId: AnsiString);
 begin
-  FEMail := AEMail;
+  FGameMongoId := AGameMongoId;
 end;
 
-procedure TPB_ForgotPasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
+procedure TPB_DeleteGameParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
@@ -43,23 +44,22 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_EMAIL: begin
+      FN_GAMEMONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FEmail := AProtobufReader.readString;
+        FGameMongoId := AProtobufReader.readString;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-function TPB_ForgotPasswordParams.GetProtobuf: TProtoBufOutput;
+function TPB_DeleteGameParams.GetProtobuf: TProtoBufOutput;
 var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_EMAIL, FEmail);
+  pbout.writeString(FN_GAMEMONGOID, FGameMongoId);
   result := pbout;
 end;
 
 end.
-

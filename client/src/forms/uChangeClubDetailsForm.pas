@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  dxSkinDevExpressStyle, Vcl.StdCtrls, cxRadioGroup, cxLabel, cxTextEdit, Vcl.Menus, cxButtons, uClubInfo, Vcl.ActnList, uIFormParams;
+  dxSkinDevExpressStyle, Vcl.StdCtrls, cxRadioGroup, cxLabel, cxTextEdit, Vcl.Menus, cxButtons, uClubInfo, Vcl.ActnList, uIFormParams,
+  uMessageItem;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams)
@@ -31,9 +32,9 @@ type
   private
     FClub: TClubInfo;
 
-    procedure TCClubDetailsChangeOk(const AData: TObject);
-    procedure TCClubDetailsChangeClubnameExists(const AData: TObject);
-    procedure TCClubDetailsChangeNoGold(const AData: TObject);
+    procedure TCClubDetailsChangeOk(const AMessage: TMessageItem);
+    procedure TCClubDetailsChangeClubnameExists(const AMessage: TMessageItem);
+    procedure TCClubDetailsChangeNoGold(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -46,7 +47,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uMessageContainer;
+  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uMessageContainer, uServerMessageCallback;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
@@ -84,17 +85,25 @@ begin
 end;
 
 procedure TfrmChangeClubDetails.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_CLUB_DETAILS_CHANGE_OK, TCClubDetailsChangeOk),
-        TWndCallback.Create(SR_CLUB_DETAILS_CLUBNAME_EXISTS, TCClubDetailsChangeClubnameExists),
-        TWndCallback.Create(SR_CLUB_DETAILS_CHANGE_NO_GOLD, TCClubDetailsChangeNoGold)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_CLUB_DETAILS_CHANGE_OK, TCClubDetailsChangeOk),
+                            TServerMessageCallback.Create(SR_CLUB_DETAILS_CLUBNAME_EXISTS, TCClubDetailsChangeClubnameExists),
+                            TServerMessageCallback.Create(SR_CLUB_DETAILS_CHANGE_NO_TOKENS, TCClubDetailsChangeNoGold)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmChangeClubDetails.acCancelExecute(Sender: TObject);
@@ -125,21 +134,21 @@ begin
   SocketClient.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rbPrivate.Checked);
 end;
 
-procedure TfrmChangeClubDetails.TCClubDetailsChangeClubnameExists(const AData: TObject);
+procedure TfrmChangeClubDetails.TCClubDetailsChangeClubnameExists(const AMessage: TMessageItem);
 begin
   MessageDlg('Club name already exists', mtError, [mbOk], 0);
   edClubName.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmChangeClubDetails.TCClubDetailsChangeNoGold(const AData: TObject);
+procedure TfrmChangeClubDetails.TCClubDetailsChangeNoGold(const AMessage: TMessageItem);
 begin
   MessageDlg('You don''t have enough tokens to change club details. You can get some at our site!', mtWarning, [mbYes], 0);
   edClubName.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmChangeClubDetails.TCClubDetailsChangeOk(const AData: TObject);
+procedure TfrmChangeClubDetails.TCClubDetailsChangeOk(const AMessage: TMessageItem);
 begin
   ModalResult := mrOk;
 end;

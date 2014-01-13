@@ -1,4 +1,4 @@
-unit uPB_ForgotPasswordParams;
+unit uPB_SetAvatarParams;
 
 interface
 
@@ -7,35 +7,36 @@ uses
   pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TPB_ForgotPasswordParams = class(TProtobufBaseObject)
+  TPB_SetAvatarParams = class(TProtobufBaseObject)
   private
     const
-      FN_EMAIL = 1;
+      FN_AVATARMONGOID = 1;
 
     var
-      FEmail: AnsiString;
+      FAvatarMongoId: AnsiString;
 
   public
-    constructor Create(const AEMail: AnsiString); overload;
+    constructor Create(const AAvatarMongoId: AnsiString); overload;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: AnsiString read FEmail;
+    property AvatarMongoId: AnsiString read FAvatarMongoId;
   end;
 
+//  TPB_SetAvatarParamss = TObjectList<TPB_SetAvatarParams>;
 
 implementation
 
 uses
   pbPublic;
 
-constructor TPB_ForgotPasswordParams.Create(const AEMail: AnsiString);
+constructor TPB_SetAvatarParams.Create(const AAvatarMongoId: AnsiString);
 begin
-  FEMail := AEMail;
+  FAvatarMongoId := AAvatarMongoId;
 end;
 
-procedure TPB_ForgotPasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
+procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
@@ -43,23 +44,22 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_EMAIL: begin
+      FN_AVATARMONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FEmail := AProtobufReader.readString;
+        FAvatarMongoId := AProtobufReader.readString;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-function TPB_ForgotPasswordParams.GetProtobuf: TProtoBufOutput;
+function TPB_SetAvatarParams.GetProtobuf: TProtoBufOutput;
 var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_EMAIL, FEmail);
+  pbout.writeString(FN_AVATARMONGOID, FAvatarMongoId);
   result := pbout;
 end;
 
 end.
-

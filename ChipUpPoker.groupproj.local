@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2014/01/08 19:21:33.000.902,D:\projects\Poker\ChipUpPoker.groupproj=D:\projects\Poker\BadassPoker.groupproj</Transaction>
+    <Transaction>2014/01/08 19:21:33.000.902,D:\projects\Poker\BadassPoker.groupproj=D:\projects\Poker\ChipUpPoker.groupproj</Transaction>
   </Transactions>
 	<Default.Personality>
-		<Projects ActiveProject="D:\projects\ChipUpPoker\client\src\client.dproj"/>
+		<Projects ActiveProject="D:\projects\ChipUpPoker\delphi-protobuf-generator\src\delphi_protobuf_object_generator.dproj"/>
 	</Default.Personality>
 </BorlandProject>

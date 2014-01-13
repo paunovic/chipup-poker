@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   dxSkinDevExpressStyle, Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  Vcl.Samples.Spin, cxSpinEdit, uIFormParams, uClubInfo;
+  Vcl.Samples.Spin, cxSpinEdit, uIFormParams, uClubInfo, uMessageItem;
 
 type
   TfrmCreateGame = class(TForm, IFormParams)
@@ -33,7 +33,7 @@ type
   private
     FClub: TClubInfo;
 
-    procedure TCCreateGameOk(const AData: TObject);
+    procedure TCCreateGameOk(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -46,7 +46,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uCommon, uMessageContainer;
+  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
 
 
 procedure TfrmCreateGame.FormDestroy(Sender: TObject);
@@ -72,15 +72,23 @@ begin
 end;
 
 procedure TfrmCreateGame.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_CREATE_GAME_OK, TCCreateGameOk)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_CREATE_GAME_OK, TCCreateGameOk)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmCreateGame.acCancelExecute(Sender: TObject);
@@ -99,7 +107,7 @@ begin
   SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
 end;
 
-procedure TfrmCreateGame.TCCreateGameOk(const AData: TObject);
+procedure TfrmCreateGame.TCCreateGameOk(const AMessage: TMessageItem);
 begin
   ModalResult := mrOk;
 end;

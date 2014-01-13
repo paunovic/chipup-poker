@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
   dxSkinDevExpressStyle, dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxTextEdit, cxSpinEdit,
   cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxContainer,
-  cxLabel, cxRadioGroup, cxGroupBox, dxSkinsForm, uClubInfo, Vcl.ActnList, cxMaskEdit, uPlayerInfo, uGameInfo;
+  cxLabel, cxRadioGroup, cxGroupBox, dxSkinsForm, uClubInfo, Vcl.ActnList, cxMaskEdit, uPlayerInfo, uGameInfo, uMessageItem;
 
 type
   TfrmManageClubs = class(TForm)
@@ -79,16 +79,16 @@ type
     procedure UpdateClubGamesList;
     procedure ShowClubInfo;
 
-    procedure TCStatusReply(const AData: TObject);
-    procedure TCKickPlayerOk(const AData: TObject);
-    procedure TCKickPlayerInvalidClubId(const AData: TObject);
-    procedure TCKickPlayerInvalidPlayerId(const AData: TObject);
-    procedure TCOwnerGiveawayOk(const AData: TObject);
-    procedure TCOwnerGiveawayNotOwner(const AData: TObject);
-    procedure TCOwnerGiveawayInvalidPlayerId(const AData: TObject);
-    procedure TCOwnerGiveawayInvalidClubId(const AData: TObject);
-    procedure TCClubDisbandOk(const AData: TObject);
-    procedure TCDeleteGameOk(const AData: TObject);
+    procedure TCStatusReply(const AMessage: TMessageItem);
+    procedure TCKickPlayerOk(const AMessage: TMessageItem);
+    procedure TCKickPlayerInvalidClubId(const AMessage: TMessageItem);
+    procedure TCKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
+    procedure TCOwnerGiveawayOk(const AMessage: TMessageItem);
+    procedure TCOwnerGiveawayNotOwner(const AMessage: TMessageItem);
+    procedure TCOwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
+    procedure TCOwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
+    procedure TCClubDisbandOk(const AMessage: TMessageItem);
+    procedure TCDeleteGameOk(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -101,7 +101,7 @@ implementation
 
 uses
   uMainDataModule, uSocketClient, uCommon, uServerCodes, uChangeClubDetailsForm, uGiveChipsForm, uCreateGameForm, uEditGameForm,
-  uPB_StatusReply, uMessageContainer;
+  uPB_StatusReply, uMessageContainer, uServerMessageCallback;
 
 procedure TfrmManageClubs.FormCreate(Sender: TObject);
 begin
@@ -123,24 +123,32 @@ begin
 end;
 
 procedure TfrmManageClubs.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_STATUS, TCStatusReply),
-        TWndCallback.Create(SR_KICKPLAYER_OK, TCKickPlayerOk),
-        TWndCallback.Create(SR_KICKPLAYER_INVALID_CLUB_ID, TCKickPlayerInvalidClubId),
-        TWndCallback.Create(SR_KICKPLAYER_INVALID_PLAYER_ID, TCKickPlayerInvalidPlayerId),
-        TWndCallback.Create(SR_OWNERSHIP_GIVEAWAY_NOT_OWNER, TCOwnerGiveawayNotOwner),
-        TWndCallback.Create(SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID, TCOwnerGiveawayInvalidPlayerId),
-        TWndCallback.Create(SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID, TCOwnerGiveawayInvalidClubId),
-        TWndCallback.Create(SR_OWNERSHIP_GIVEAWAY_OK, TCOwnerGiveawayOk),
-        TWndCallback.Create(SR_CLUB_DISBAND_OK, TCClubDisbandOk),
-        TWndCallback.Create(SR_DELETE_GAME_OK, TCDeleteGameOk)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_STATUS, TCStatusReply),
+                            TServerMessageCallback.Create(SR_KICKPLAYER_OK, TCKickPlayerOk),
+                            TServerMessageCallback.Create(SR_KICKPLAYER_INVALID_CLUB_ID, TCKickPlayerInvalidClubId),
+                            TServerMessageCallback.Create(SR_KICKPLAYER_INVALID_PLAYER_ID, TCKickPlayerInvalidPlayerId),
+                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_NOT_OWNER, TCOwnerGiveawayNotOwner),
+                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID, TCOwnerGiveawayInvalidPlayerId),
+                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID, TCOwnerGiveawayInvalidClubId),
+                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_OK, TCOwnerGiveawayOk),
+                            TServerMessageCallback.Create(SR_CLUB_DISBAND_OK, TCClubDisbandOk),
+                            TServerMessageCallback.Create(SR_DELETE_GAME_OK, TCDeleteGameOk)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmManageClubs.UpdateClublist;
@@ -375,11 +383,11 @@ begin
     SocketClient.Status;
 end;
 
-procedure TfrmManageClubs.TCStatusReply(const AData: TObject);
+procedure TfrmManageClubs.TCStatusReply(const AMessage: TMessageItem);
 var
   pbstatus: TPB_StatusReply;
 begin
-  pbstatus := AData as TPB_StatusReply;
+  pbstatus := AMessage.Object_ as TPB_StatusReply;
 
   dmMain.SelfInfo.ParseStatus(pbstatus);
   dmMain.Players.ParseStatus(pbstatus);
@@ -388,47 +396,47 @@ begin
   UpdateClubGamesList;
 end;
 
-procedure TfrmManageClubs.TCKickPlayerInvalidClubId(const AData: TObject);
+procedure TfrmManageClubs.TCKickPlayerInvalidClubId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmManageClubs.TCKickPlayerInvalidPlayerId(const AData: TObject);
+procedure TfrmManageClubs.TCKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmManageClubs.TCKickPlayerOk(const AData: TObject);
+procedure TfrmManageClubs.TCKickPlayerOk(const AMessage: TMessageItem);
 begin
   SocketClient.Status;
 end;
 
-procedure TfrmManageClubs.TCOwnerGiveawayInvalidClubId(const AData: TObject);
+procedure TfrmManageClubs.TCOwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmManageClubs.TCOwnerGiveawayInvalidPlayerId(const AData: TObject);
+procedure TfrmManageClubs.TCOwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmManageClubs.TCOwnerGiveawayNotOwner(const AData: TObject);
+procedure TfrmManageClubs.TCOwnerGiveawayNotOwner(const AMessage: TMessageItem);
 begin
   MessageDlg('You are not owner of this club', mtError, [mbOk], 0);
 end;
 
-procedure TfrmManageClubs.TCOwnerGiveawayOk(const AData: TObject);
+procedure TfrmManageClubs.TCOwnerGiveawayOk(const AMessage: TMessageItem);
 begin
   SocketClient.Status;
 end;
 
-procedure TfrmManageClubs.TCClubDisbandOk(const AData: TObject);
+procedure TfrmManageClubs.TCClubDisbandOk(const AMessage: TMessageItem);
 begin
   SocketClient.Status;
 end;
 
-procedure TfrmManageClubs.TCDeleteGameOk(const AData: TObject);
+procedure TfrmManageClubs.TCDeleteGameOk(const AMessage: TMessageItem);
 begin
   SocketClient.Status;
 end;

@@ -8,6 +8,7 @@ uses
 
 type
   TPB_LoginParams = class(TProtobufBaseObject)
+  private
     const
       FN_USERNAME = 1;
       FN_PASSWORD = 2;

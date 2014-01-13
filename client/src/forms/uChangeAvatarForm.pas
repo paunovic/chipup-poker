@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   dxSkinDevExpressStyle, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ExtCtrls, cxLabel, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg,
-  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar;
+  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar, uMessageItem;
 
 type
   TfrmChangeAvatar = class(TForm)
@@ -31,8 +31,8 @@ type
     FAvatarId : String;
     FAvatarJPG: TJPEGImage;
 
-    procedure TCChangeAvatarOk(const AData: TObject);
-    procedure TCChangeAvatarInvalidId(const AData: TObject);
+    procedure TCChangeAvatarOk(const AMessage: TMessageItem);
+    procedure TCChangeAvatarInvalidId(const AMessage: TMessageItem);
 
     procedure UploadAvatar(const AAvatarFile: String);
 
@@ -47,7 +47,7 @@ implementation
 {$R *.dfm}
 
 uses
-  superobject, PNGImage, uAvatar, uMessageContainer,
+  superobject, PNGImage, uAvatar, uMessageContainer, uServerMessageCallback,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSocketClient, uCommon, uSettings, uMainDataModule;
 
@@ -131,16 +131,24 @@ begin
 end;
 
 procedure TfrmChangeAvatar.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_CHANGE_AVATAR_OK, TCChangeAvatarOk),
-        TWndCallback.Create(SR_CHANGE_AVATAR_INVALID_ID, TCChangeAvatarInvalidId)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_CHANGE_AVATAR_OK, TCChangeAvatarOk),
+                            TServerMessageCallback.Create(SR_CHANGE_AVATAR_INVALID_ID, TCChangeAvatarInvalidId)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmChangeAvatar.UploadAvatar(const AAvatarFile: String);
@@ -227,7 +235,7 @@ begin
     MessageDlg(error, mtError, [mbOK], 0);
 end;
 
-procedure TfrmChangeAvatar.TCChangeAvatarInvalidId(const AData: TObject);
+procedure TfrmChangeAvatar.TCChangeAvatarInvalidId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
 
@@ -235,7 +243,7 @@ begin
   pbUpload.Visible := FALSE;
 end;
 
-procedure TfrmChangeAvatar.TCChangeAvatarOk(const AData: TObject);
+procedure TfrmChangeAvatar.TCChangeAvatarOk(const AMessage: TMessageItem);
 var
   avatar: TAvatar;
 begin

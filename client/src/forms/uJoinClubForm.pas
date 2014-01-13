@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   dxSkinDevExpressStyle, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxLabel, cxTextEdit, Vcl.ActnList, dxSkinsForm, cxMaskEdit, cxSpinEdit,
-  uIFormParams;
+  uIFormParams, uMessageItem;
 
 type
   TfrmJoinClub = class(TForm, IFormParams)
@@ -27,10 +27,10 @@ type
     procedure acCancelExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    procedure TCJoinClubOk(const AData: TObject);
-    procedure TCJoinClubInvalidId(const AData: TObject);
-    procedure TCJoinClubInvalidCode(const AData: TObject);
-    procedure TCJoinClubAlreadyMember(const AData: TObject);
+    procedure TCJoinClubOk(const AMessage: TMessageItem);
+    procedure TCJoinClubInvalidId(const AMessage: TMessageItem);
+    procedure TCJoinClubInvalidCode(const AMessage: TMessageItem);
+    procedure TCJoinClubAlreadyMember(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -42,7 +42,8 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uCommon, uServerCodes, uMainDataModule, uMessageContainer;
+  uSocketClient, uCommon, uServerCodes, uMainDataModule, uMessageContainer, uServerMessageCallback;
+
 
 procedure TfrmJoinClub.edClubIDPropertiesChange(Sender: TObject);
 begin
@@ -82,18 +83,26 @@ begin
 end;
 
 procedure TfrmJoinClub.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_JOINCLUB_OK , TCJoinClubOk),
-        TWndCallback.Create(SR_JOINCLUB_INVALID_ID, TCJoinClubInvalidId),
-        TWndCallback.Create(SR_JOINCLUB_INVALID_CODE, TCJoinClubInvalidCode),
-        TWndCallback.Create(SR_JOINCLUB_ALREADY_MEMBER, TCJoinClubAlreadyMember)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                           [
+                             TServerMessageCallback.Create(SR_JOINCLUB_OK , TCJoinClubOk),
+                             TServerMessageCallback.Create(SR_JOINCLUB_INVALID_ID, TCJoinClubInvalidId),
+                             TServerMessageCallback.Create(SR_JOINCLUB_INVALID_CODE, TCJoinClubInvalidCode),
+                             TServerMessageCallback.Create(SR_JOINCLUB_ALREADY_MEMBER, TCJoinClubAlreadyMember)
+                           ]
+                         );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmJoinClub.acCancelExecute(Sender: TObject);
@@ -107,28 +116,28 @@ begin
   SocketClient.JoinClub(edClubID.Value, edClubCode.Text);
 end;
 
-procedure TfrmJoinClub.TCJoinClubAlreadyMember(const AData: TObject);
+procedure TfrmJoinClub.TCJoinClubAlreadyMember(const AMessage: TMessageItem);
 begin
   MessageDlg('You are already member of this club', mtInformation, [mbOK], 0);
   edClubID.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmJoinClub.TCJoinClubInvalidCode(const AData: TObject);
+procedure TfrmJoinClub.TCJoinClubInvalidCode(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club code', mtError, [mbOK], 0);
   edClubCode.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmJoinClub.TCJoinClubInvalidId(const AData: TObject);
+procedure TfrmJoinClub.TCJoinClubInvalidId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOK], 0);
   edClubID.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmJoinClub.TCJoinClubOk(const AData: TObject);
+procedure TfrmJoinClub.TCJoinClubOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Successfully joined', mtInformation, [mbOK], 0);
   ModalResult := mrOk;

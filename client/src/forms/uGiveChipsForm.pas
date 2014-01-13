@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   dxSkinDevExpressStyle, cxTextEdit, cxLabel, cxMaskEdit, cxSpinEdit, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList, uClubInfo,
-  uPlayerInfo, uIFormParams;
+  uPlayerInfo, uIFormParams, uMessageItem;
 
 type
   TfrmGiveChips = class(TForm, IFormParams)
@@ -30,8 +30,8 @@ type
     FClub  : TClubInfo;
     FPlayer: TPlayerInfo;
 
-    procedure TCClubTransferChipsOk(const AData: TObject);
-    procedure TCClubTransferChipsInvalidAmount(const AData: TObject);
+    procedure TCClubTransferChipsOk(const AMessage: TMessageItem);
+    procedure TCClubTransferChipsInvalidAmount(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -46,7 +46,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uMainDataModule, uCommon, uMessageContainer;
+  uSocketClient, uServerCodes, uMainDataModule, uCommon, uMessageContainer, uServerMessageCallback;
 
 
 procedure TfrmGiveChips.FormDestroy(Sender: TObject);
@@ -60,16 +60,24 @@ begin
 end;
 
 procedure TfrmGiveChips.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_CLUB_TRANFER_CHIPS_OK, TCClubTransferChipsOk),
-        TWndCallback.Create(SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT, TCClubTransferChipsInvalidAmount)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_CLUB_TRANFER_CHIPS_OK, TCClubTransferChipsOk),
+                            TServerMessageCallback.Create(SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT, TCClubTransferChipsInvalidAmount)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmGiveChips.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -99,13 +107,13 @@ begin
   SocketClient.TransferChips(FClub.Id, FPlayer.Id, seChipAmount.Value);
 end;
 
-procedure TfrmGiveChips.TCClubTransferChipsInvalidAmount(const AData: TObject);
+procedure TfrmGiveChips.TCClubTransferChipsInvalidAmount(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid chip amount to transfer', mtError, [mbOK], 0);
   seChipAmount.SetFocus;
 end;
 
-procedure TfrmGiveChips.TCClubTransferChipsOk(const AData: TObject);
+procedure TfrmGiveChips.TCClubTransferChipsOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Chips successfully transferred', mtInformation, [mbOK], 0);
   ModalResult := mrOk;

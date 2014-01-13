@@ -36,7 +36,7 @@ type
 
                                            // socket server
                                            TCP_SERVER_ADDRESS: 'ext.earthtools.ca';
-                                           TCP_SERVER_PORT: 12345;
+                                           TCP_SERVER_PORT: 12346;
 
                                            // urls
                                            URL : (

@@ -8,6 +8,7 @@ uses
 
 type
   TPB_TokenPrices = class(TProtobufBaseObject)
+  private
     const
       FN_CLUBCHANGEDETAILS = 1;
       FN_CLUBCREATION = 2;

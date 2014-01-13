@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  dxSkinDevExpressStyle, cxTextEdit, cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList;
+  dxSkinDevExpressStyle, cxTextEdit, cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList, uMessageItem;
 
 type
   TfrmChangePassword = class(TForm)
@@ -27,8 +27,8 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acCancelExecute(Sender: TObject);
   private
-    procedure TCChangePasswordOk(const AData: TObject);
-    procedure TCChangePasswordInvalid(const AData: TObject);
+    procedure TCChangePasswordOk(const AMessage: TMessageItem);
+    procedure TCChangePasswordInvalid(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -39,7 +39,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer;
+  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
 
 
 procedure TfrmChangePassword.FormCreate(Sender: TObject);
@@ -60,16 +60,24 @@ begin
 end;
 
 procedure TfrmChangePassword.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_CHANGE_PASSWORD_OK, TCChangePasswordOk),
-        TWndCallback.Create(SR_CHANGE_PASSWORD_INVALID_PASSWORD, TCChangePasswordInvalid)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                          [
+                            TServerMessageCallback.Create(SR_CHANGE_PASSWORD_OK, TCChangePasswordOk),
+                            TServerMessageCallback.Create(SR_CHANGE_PASSWORD_INVALID_PASSWORD, TCChangePasswordInvalid)
+                          ]
+                        );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
 procedure TfrmChangePassword.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -112,14 +120,14 @@ begin
   SocketClient.ChangePassword(edNewPassword.Text);
 end;
 
-procedure TfrmChangePassword.TCChangePasswordInvalid(const AData: TObject);
+procedure TfrmChangePassword.TCChangePasswordInvalid(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid password', mtError, [mbOK], 0);
   edNewPassword.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmChangePassword.TCChangePasswordOk(const AData: TObject);
+procedure TfrmChangePassword.TCChangePasswordOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Password successfully changed', mtInformation, [mbOK], 0);
   dmMain.SelfInfo.Password := edNewPassword.Text;

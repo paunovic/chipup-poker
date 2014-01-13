@@ -3,7 +3,7 @@ unit uProtobufBaseObject;
 interface
 
 uses
-  Winapi.Windows, System.Classes, pbOutput, uProtobufReader;
+  Winapi.Windows, System.Classes, System.SysUtils, pbOutput, uProtobufReader;
 
 type
   TProtobufBaseObject = class
@@ -18,7 +18,15 @@ type
     procedure WriteToStream(const AStream: TStream);
   end;
 
+  TProtobufOutputHelper = class helper for TProtobufOutput
+  public
+    procedure writeBytes(const AFieldNumber: Integer; const ABytes: TBytes);
+  end;
+
 implementation
+
+uses
+  pbPublic;
 
 
 constructor TProtobufBaseObject.Create(const APointer: pointer; const ASize: Integer);
@@ -60,6 +68,15 @@ begin
   finally
     pboutput.Free;
   end;
+end;
+
+{ TProtobufOutputHelper }
+
+procedure TProtobufOutputHelper.writeBytes(const AFieldNumber: Integer; const ABytes: TBytes);
+begin
+  writeTag(AFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+  writeRawVarint32(Length(ABytes));
+  writeRawData(@ABytes[0], Length(ABytes));
 end;
 
 end.

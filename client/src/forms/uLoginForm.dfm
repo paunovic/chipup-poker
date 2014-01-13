@@ -130,15 +130,6 @@ object frmLogin: TfrmLogin
     Font.Name = 'Tahoma'
     Font.Style = []
   end
-  object Button1: TButton
-    Left = 8
-    Top = 8
-    Width = 75
-    Height = 25
-    Caption = 'CRASH'
-    TabOrder = 10
-    OnClick = Button1Click
-  end
   object alLogin: TActionList
     Left = 36
     Top = 44

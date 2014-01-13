@@ -5,7 +5,13 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, dxSkinsCore, dxSkinDevExpressStyle, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
-  cxLookAndFeelPainters, cxContainer, cxEdit, cxLabel, cxTextEdit, Vcl.StdCtrls, cxRadioGroup, Vcl.Menus, cxButtons, Vcl.ActnList;
+  cxLookAndFeelPainters, cxContainer, cxEdit, cxLabel, cxTextEdit, Vcl.StdCtrls, cxRadioGroup, Vcl.Menus, cxButtons, Vcl.ActnList,
+  uMessageItem, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide,
+  dxSkinDevExpressDarkStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky,
+  dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green,
+  dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinPumpkin,
+  dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust, dxSkinSummer2008,
+  dxSkinTheAsphaltWorld, dxSkinsDefaultPainters, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue;
 
 type
   TfrmCreateClub = class(TForm)
@@ -29,11 +35,11 @@ type
     procedure acCancelExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    procedure TCCreateClubOk(const AData: TObject);
-    procedure TCCreateClubNameExists(const AData: TObject);
-    procedure TCCreateClubInvalidName(const AData: TObject);
-    procedure TCCreateClubInvalidCode(const AData: TObject);
-    procedure TCCreateClubNoGold(const AData: TObject);
+    procedure TCCreateClubOk(const AMessage: TMessageItem);
+    procedure TCCreateClubNameExists(const AMessage: TMessageItem);
+    procedure TCCreateClubInvalidName(const AMessage: TMessageItem);
+    procedure TCCreateClubInvalidCode(const AMessage: TMessageItem);
+    procedure TCCreateClubNoGold(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -45,7 +51,9 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uCommon, uServerCodes, uValidators, uMainDataModule, uMessageContainer;
+  uSocketClient, uCommon, uServerCodes, uValidators, uMainDataModule, uMessageContainer,
+  uServerMessageCallback;
+
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
 begin
@@ -103,49 +111,57 @@ begin
 end;
 
 procedure TfrmCreateClub.WndProc(var AMessage: TMessage);
+var
+  msg: TMessageItem;
 begin
   inherited;
-                  {
-  if SocketClient.IsServerResponseMessage(AMessage) then
-    SocketClient.ParseWndMessage(AMessage,
-      [
-        TWndCallback.Create(SR_CREATECLUB_OK, TCCreateClubOk),
-        TWndCallback.Create(SR_CREATECLUB_NAME_EXISTS, TCCreateClubNameExists),
-        TWndCallback.Create(SR_CREATECLUB_INVALID_NAME, TCCreateClubInvalidName),
-        TWndCallback.Create(SR_CREATECLUB_INVALID_CODE, TCCreateClubInvalidCode),
-        TWndCallback.Create(SR_CREATECLUB_NO_GOLD, TCCreateClubNoGold)
-      ]
-    );             }
+
+  if MessageContainer.IsNewMessage(AMessage, msg) then
+  begin
+    case msg.MessageType of
+      mtServerResponse: ProcessServerMessage(msg,
+                           [
+                             TServerMessageCallback.Create(SR_CREATECLUB_OK, TCCreateClubOk),
+                             TServerMessageCallback.Create(SR_CREATECLUB_NAME_EXISTS, TCCreateClubNameExists),
+                             TServerMessageCallback.Create(SR_CREATECLUB_INVALID_NAME, TCCreateClubInvalidName),
+                             TServerMessageCallback.Create(SR_CREATECLUB_INVALID_CODE, TCCreateClubInvalidCode),
+                             TServerMessageCallback.Create(SR_CREATECLUB_NO_TOKENS, TCCreateClubNoGold)
+                           ]
+                         );
+    end;
+
+    msg.IncReadCount;
+  end;
 end;
 
-procedure TfrmCreateClub.TCCreateClubInvalidCode(const AData: TObject);
+procedure TfrmCreateClub.TCCreateClubInvalidCode(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club code', mtError, [mbOK], 0);
   edClubCode.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubInvalidName(const AData: TObject);
+procedure TfrmCreateClub.TCCreateClubInvalidName(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club name', mtError, [mbOK], 0);
   edClubName.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubNoGold(const AData: TObject);
+procedure TfrmCreateClub.TCCreateClubNoGold(const AMessage: TMessageItem);
 begin
   MessageDlg('You don''t have enough tokens to create new club. You can get some at our site!', mtWarning, [mbOK], 0);
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubNameExists(const AData: TObject);
+procedure TfrmCreateClub.TCCreateClubNameExists(const AMessage: TMessageItem);
 begin
   MessageDlg('Club name already exists', mtError, [mbOK], 0);
   edClubName.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubOk(const AData: TObject);
+procedure TfrmCreateClub.TCCreateClubOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Club created successfully!', mtInformation, [mbOK], 0);
   ModalResult := mrOk;

@@ -37,6 +37,7 @@ type
     function GetOwnerMongoId: AnsiString;
 
   public
+    constructor Create(const ASeq: Integer; const AName, APassword: AnsiString; const APrivate: Boolean); overload;
     destructor Destroy; override;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -61,6 +62,14 @@ implementation
 uses
   pbPublic, uCommon;
 
+
+constructor TPB_Club.Create(const ASeq: Integer; const AName, APassword: AnsiString; const APrivate: Boolean);
+begin
+  FSeq := ASeq;
+  FName := AName;
+  FPassword := APassword;
+  FPrivate := APrivate;
+end;
 
 destructor TPB_Club.Destroy;
 begin
@@ -142,6 +151,17 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
+  if FChips <> 0 then
+    pbout.writeInt32(FN_CHIPS, FChips);
+  pbout.writeString(FN_NAME, FName);
+  if FPassword <> '' then
+    pbout.writeString(FN_PASSWORD, FPassword);
+  pbout.writeBoolean(FN_PRIVATE, FPrivate);
+  pbout.writeInt32(FN_SEQ, FSeq);
+  if FHasPassword <> FALSE then
+    pbout.writeBoolean(FN_HAS_PASSWORD, FHasPassword);
+  if FMemberCount <> 0 then
+    pbout.writeInt32(FN_MEMBER_COUNT, FMemberCount);
   result := pbout;
 end;
 
