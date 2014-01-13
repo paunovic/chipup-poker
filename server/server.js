@@ -564,7 +564,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				// FIXME, switch to spendTokens
 				allUsers.findOne({_id:this.userid},function (err,res) {
 					if (res.tokens < sharedconfig.tokenPrices.club_creation) {
-						this.send(codes.SR_CREATECLUB_NO_GOLD);
+						this.send(codes.SR_CREATECLUB_NO_TOKENS);
 						return;
 					}
 					allUsers.update({_id:this.userid},{$inc:{tokens:-sharedconfig.tokenPrices.club_creation}},function (err,res) {
@@ -734,7 +734,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				var that = this;
 				function finish() {
-					that.spendTokens(sharedconfig.tokenPrices.club_change_details,codes.SR_CLUB_DETAILS_CHANGE_NO_GOLD,function () {
+					that.spendTokens(sharedconfig.tokenPrices.club_change_details,codes.SR_CLUB_DETAILS_CHANGE_NO_TOKENS,function () {
 						allClubs.update({_id:club._id},mods,function (err,ret) {
 							this.log('detail update',clubseq,params,mods,err,ret);
 							if (err) {
@@ -923,7 +923,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.CMD_DELETE_GAME:
 			var params = pb.Parse(args,'Poker.DeleteGameParams');
-			var id = new ObjectID(params.game_mongo_id);
+			var id = new toMongoId(params.game_mongo_id);
 			allGames.findOne({_id:id},function (err,game) {
 				if (err) {
 					this.reply(codes.SR_NOT_IMPLEMENTED,"internal error");
