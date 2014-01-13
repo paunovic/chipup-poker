@@ -20,7 +20,7 @@ type
       FToken: Integer;
 
   public
-    constructor Create(const AMethodId, ADataSize: Integer); overload;
+    constructor Create(const AMethodId: Integer; const ADataSize: Integer = 0; const AToken: Integer = 0); overload;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
@@ -36,10 +36,11 @@ uses
   pbPublic;
 
 
-constructor TPB_RpcMessage.Create(const AMethodId, ADataSize: Integer);
+constructor TPB_RpcMessage.Create(const AMethodId: Integer; const ADataSize: Integer = 0; const AToken: Integer = 0);
 begin
   FMethodId := AMethodId;
   FDataSize := ADataSize;
+  FToken := AToken;
 end;
 
 procedure TPB_RpcMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);

@@ -47,7 +47,7 @@ uses
   uPB_Club in 'modules\protobuf\objects\uPB_Club.pas',
   uPB_StatusReply in 'modules\protobuf\objects\uPB_StatusReply.pas',
   uProtobufBaseObject in 'modules\protobuf\uProtobufBaseObject.pas',
-  uPB_HelloArguments in 'modules\protobuf\objects\uPB_HelloArguments.pas',
+  uPB_HelloReply in 'modules\protobuf\objects\uPB_HelloReply.pas',
   uPB_StringSizes in 'modules\protobuf\objects\uPB_StringSizes.pas',
   uPB_TokenPrices in 'modules\protobuf\objects\uPB_TokenPrices.pas',
   uPB_RegisterParams in 'modules\protobuf\objects\uPB_RegisterParams.pas',
@@ -64,8 +64,6 @@ uses
   uPB_Game in 'modules\protobuf\objects\uPB_Game.pas',
   uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
   uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas';
-
-
 
 procedure FocusPokerApp;
 var

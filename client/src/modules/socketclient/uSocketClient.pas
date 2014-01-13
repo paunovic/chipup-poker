@@ -66,7 +66,7 @@ implementation
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSettings, uCommon,
-  uPB_LoginParams, uPB_StatusReply, uPB_HelloArguments, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
+  uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
   uPB_SetAvatarParams,
@@ -219,7 +219,7 @@ begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
       {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED code: %s', [err]), ditException); {$ENDIF}
     end;
-    SR_HELLO: ADataObject := TPB_HelloArguments.Create(ADataPointer, ARpcMessage.DataSize);
+    SR_HELLO: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     SR_LOGIN_OK: ;
     SR_INVALID_LOGIN: ;
     SR_LOGOUT: ;
@@ -302,8 +302,9 @@ procedure TSocketClient.ForgotPassword(const AEMail: String);
 var
   protobuf: TPB_ForgotPasswordParams;
 begin
-  protobuf := TPB_ForgotPasswordParams.Create(AnsiString(AEMail));
+  protobuf := TPB_ForgotPasswordParams.Create;
   try
+    protobuf.Email := AnsiString(AEMail);
     SendProtobuf(CMD_FORGOT_PASSWORD, protobuf);
   finally
     protobuf.Free;
@@ -373,8 +374,10 @@ procedure TSocketClient.GiveOwnership(const AClubId: Int64; const APlayerId: Str
 var
   protobuf: TPB_GiveClubOwnershipParams;
 begin
-  protobuf := TPB_GiveClubOwnershipParams.Create(AClubId, AnsiString(APlayerId));
+  protobuf := TPB_GiveClubOwnershipParams.Create;
   try
+    protobuf.ClubSeq := AClubId;
+    protobuf.PlayerMongoId := AnsiString(APlayerId);
     SendProtobuf(CMD_GIVE_CLUB_OWNERSHIP, protobuf);
   finally
     protobuf.Free;
@@ -464,8 +467,15 @@ procedure TSocketClient.CreateGame(const AClubId: Int64; const AGameName: String
 var
   protobuf: TPB_Game;
 begin
-  protobuf := TPB_Game.Create(AnsiString(AGameName), AClubId, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats);
+  protobuf := TPB_Game.Create;
   try
+    protobuf.Gamename := AnsiString(AGameName);
+    protobuf.Clubseq := AClubId;
+    protobuf.GameType := AGameType;
+    protobuf.GameLimit := AGameLimit;
+    protobuf.SmallBlind := ASmallBlind;
+    protobuf.BigBlind := ABigBlind;
+    protobuf.Seats := ASeats;
     SendProtobuf(CMD_CREATE_GAME, protobuf);
   finally
     protobuf.Free;
@@ -489,9 +499,15 @@ procedure TSocketClient.EditGame(const AGameId, AGameName: String; const AGameTy
 var
   protobuf: TPB_Game;
 begin
-  protobuf := TPB_Game.Create(AnsiString(AGameName), 0, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats);
+  protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AnsiString(AGameId);
+    protobuf.Gamename := AnsiString(AGameName);
+    protobuf.GameType := AGameType;
+    protobuf.GameLimit := AGameLimit;
+    protobuf.SmallBlind := ASmallBlind;
+    protobuf.BigBlind := ABigBlind;
+    protobuf.Seats := ASeats;
     SendProtobuf(CMD_EDIT_GAME, protobuf);
   finally
     protobuf.Free;

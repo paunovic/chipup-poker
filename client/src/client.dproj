@@ -168,7 +168,7 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_Club.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_StatusReply.pas"/>
 			<DCCReference Include="modules\protobuf\uProtobufBaseObject.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uPB_HelloArguments.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_HelloReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_StringSizes.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TokenPrices.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_RegisterParams.pas"/>

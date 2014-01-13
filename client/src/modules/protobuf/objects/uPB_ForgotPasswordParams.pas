@@ -16,12 +16,10 @@ type
       FEmail: AnsiString;
 
   public
-    constructor Create(const AEMail: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: AnsiString read FEmail;
+    property Email: AnsiString read FEmail write FEMail;
   end;
 
 
@@ -30,10 +28,6 @@ implementation
 uses
   pbPublic;
 
-constructor TPB_ForgotPasswordParams.Create(const AEMail: AnsiString);
-begin
-  FEMail := AEMail;
-end;
 
 procedure TPB_ForgotPasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var

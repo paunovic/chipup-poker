@@ -18,13 +18,11 @@ type
       FPlayerMongoId: AnsiString;
 
   public
-    constructor Create(const AClubSeq: Integer; const APlayerMongoId: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property ClubSeq: Integer read FClubSeq;
-    property PlayerMongoId: AnsiString read FPlayerMongoId;
+    property ClubSeq: Integer read FClubSeq write FClubSeq;
+    property PlayerMongoId: AnsiString read FPlayerMongoId write FPlayerMongoId;
   end;
 
 //  TPB_GiveClubOwnershipParamss = TObjectList<TPB_GiveClubOwnershipParams>;
@@ -33,12 +31,6 @@ implementation
 
 uses
   pbPublic;
-
-constructor TPB_GiveClubOwnershipParams.Create(const AClubSeq: Integer; const APlayerMongoId: AnsiString);
-begin
-  FClubSeq := AClubSeq;
-  FPlayerMongoId := APlayerMongoId;
-end;
 
 procedure TPB_GiveClubOwnershipParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var

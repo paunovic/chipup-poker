@@ -22,7 +22,7 @@ message StringSizes {
 	required int32 gamename = 6;
 }
 
-message HelloArguments {
+message HelloReply {
 	required TokenPrices tokenPrices = 1;
 	required StringSizes stringSizes = 2;
 	required int32 ChangeExpireTime = 3;

@@ -18,12 +18,13 @@ uses
 
 class procedure TGenerator.Generate(const AMessageName: String; const AFields: TFields; const AOutputFile: String);
 var
-  fwriter: TStreamWriter;
-  C1     : Integer;
-  cc     : String;
+  fwriter            : TStreamWriter;
+  C1                 : Integer;
+  writable_properties: Boolean;
 begin
-  ForceDirectories(ExtractFilePath(AOutputFile));
+  writable_properties := Pos('Reply', AMessageName) = 0;
 
+  ForceDirectories(ExtractFilePath(AOutputFile));
   fwriter := TStreamWriter.Create(AOutputFile);
   try
     fwriter.WriteLine(Format('unit uPB_%s;', [AMessageName]));
@@ -31,8 +32,7 @@ begin
     fwriter.WriteLine('interface');
     fwriter.WriteLine();
     fwriter.WriteLine('uses');
-    fwriter.WriteLine('  Winapi.Windows,');
-    fwriter.WriteLine('  pbOutput, uProtobufBaseObject, uProtobufReader;');
+    fwriter.WriteLine('  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;');
     fwriter.WriteLine();
     fwriter.WriteLine('type');
     fwriter.WriteLine(Format('  TPB_%s = class(TProtobufBaseObject)', [AMessageName]));
@@ -46,35 +46,27 @@ begin
       fwriter.WriteLine(Format('      %s: %s;', [AFields[C1].AsPrivateProperty, AFields[C1].VarTypeString]));
     fwriter.WriteLine();
     fwriter.WriteLine('  public');
-    fwriter.Write('    constructor Create(');
-    cc := '';
-    for C1 := 0 to AFields.Count - 1 do
-    begin
-      cc := cc + Format('const A%s: %s', [AFields[C1].AsPublicProperty, AFields[C1].VarTypeString]);
-      if C1 < AFields.Count - 1 then
-        cc := cc + '; ';
-    end;
-    fwriter.WriteLine(cc + '); overload;');
-    fwriter.WriteLine;
     fwriter.WriteLine('    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;');
     fwriter.WriteLine('    function GetProtobuf: TProtoBufOutput; override;');
     fwriter.WriteLine();
     for C1 := 0 to AFields.Count - 1 do
-      fwriter.WriteLine(Format('    property %s: %s read %s;', [AFields[C1].AsPublicProperty, AFields[C1].VarTypeString, AFields[C1].AsPrivateProperty]));
+    begin
+      fwriter.Write(Format('    property %s: %s read %s', [AFields[C1].AsPublicProperty, AFields[C1].VarTypeString, AFields[C1].AsPrivateProperty]));
+      if writable_properties then
+        fwriter.Write(Format(' write %s', [AFields[C1].AsPrivateProperty]));
+      fwriter.WriteLine(';');
+    end;
     fwriter.WriteLine('  end;');
     fwriter.WriteLine();
-    fwriter.WriteLine(Format('//  TPB_%ss = TObjectList<TPB_%s>;', [AMessageName, AMessageName]));
-    fwriter.WriteLine();
+    if not writable_properties then
+    begin
+      fwriter.WriteLine(Format('//  TPB_%ss = TObjectList<TPB_%s>;', [AMessageName, AMessageName]));
+      fwriter.WriteLine();
+    end;
     fwriter.WriteLine('implementation');
     fwriter.WriteLine();
     fwriter.WriteLine('uses');
     fwriter.WriteLine('  pbPublic;');
-    fwriter.WriteLine();
-    fwriter.WriteLine(Format('constructor TPB_%s.Create(%s);', [AMessageName, cc]));
-    fwriter.WriteLine('begin');
-    for C1 := 0 to AFields.Count - 1 do
-      fwriter.WriteLine(Format('  %s := A%s;', [AFields[C1].AsPrivateProperty, AFields[C1].AsPublicProperty]));
-    fwriter.WriteLine('end;');
     fwriter.WriteLine();
     fwriter.WriteLine(Format('procedure TPB_%s.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);', [AMessageName]));
     fwriter.WriteLine('var');

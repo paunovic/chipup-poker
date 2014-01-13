@@ -16,10 +16,11 @@ type
                                 TCP_SERVER_ADDRESS : String;
                                 TCP_SERVER_PORT    : Word;
                                 URL                : record
-                                  TOS       : String;
-                                  BUY_TOKENS: String;
-                                  BUY_CHIPS : String;
-                                  GET_AVATAR: String;
+                                  TOS          : String;
+                                  BUY_TOKENS   : String;
+                                  BUY_CHIPS    : String;
+                                  GET_AVATAR   : String;
+                                  UPLOAD_AVATAR: String;
                                 end;
                               end;
   public
@@ -40,10 +41,11 @@ type
 
                                            // urls
                                            URL : (
-                                             TOS       : URL_DOMAIN + '/tos.html';
-                                             BUY_TOKENS: URL_DOMAIN + '/buy-tokens.html';
-                                             BUY_CHIPS : URL_DOMAIN + '/buy-chips.html';
-                                             GET_AVATAR: URL_DOMAIN + '/getavatar?id=%s';
+                                             TOS          : URL_DOMAIN + '/tos.html';
+                                             BUY_TOKENS   : URL_DOMAIN + '/buy-tokens.html';
+                                             BUY_CHIPS    : URL_DOMAIN + '/buy-chips.html';
+                                             GET_AVATAR   : URL_DOMAIN + '/getavatar?id=%s';
+                                             UPLOAD_AVATAR: URL_DOMAIN + '/uploadAvatar';
                                            )
                                          );
   end;

@@ -36,8 +36,6 @@ type
     procedure SetMongoId(const AValue: AnsiString);
 
   public
-    constructor Create(const AGamename: AnsiString; const AClubseq: Integer; const AGameType: Integer; const AGameLimit: Integer; const ASmallBlind: Integer; const ABigBlind: Integer; const ASeats: Integer); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
@@ -59,17 +57,6 @@ implementation
 uses
   pbPublic, uCommon;
 
-
-constructor TPB_Game.Create(const AGamename: AnsiString; const AClubseq: Integer; const AGameType: Integer; const AGameLimit: Integer; const ASmallBlind: Integer; const ABigBlind: Integer; const ASeats: Integer);
-begin
-  FGamename := AGamename;
-  FClubseq := AClubseq;
-  FGameType := AGameType;
-  FGameLimit := AGameLimit;
-  FSmallBlind := ASmallBlind;
-  FBigBlind := ABigBlind;
-  FSeats := ASeats;
-end;
 
 procedure TPB_Game.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var

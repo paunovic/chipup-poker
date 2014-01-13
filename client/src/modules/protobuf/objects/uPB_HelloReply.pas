@@ -1,4 +1,4 @@
-unit uPB_HelloArguments;
+unit uPB_HelloReply;
 
 interface
 
@@ -7,7 +7,7 @@ uses
   pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TPB_HelloArguments = class(TProtobufBaseObject)
+  TPB_HelloReply = class(TProtobufBaseObject)
   private
     const
       FN_TOKENPRICES = 1;
@@ -39,7 +39,7 @@ uses
   pbPublic;
 
 
-destructor TPB_HelloArguments.Destroy;
+destructor TPB_HelloReply.Destroy;
 begin
   if Assigned(FTokenPrices) then
     FTokenPrices.Free;
@@ -49,7 +49,7 @@ begin
   inherited;
 end;
 
-procedure TPB_HelloArguments.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
+procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
@@ -84,7 +84,7 @@ begin
     end;
 end;
 
-function TPB_HelloArguments.GetProtobuf: TProtoBufOutput;
+function TPB_HelloReply.GetProtobuf: TProtoBufOutput;
 var
   pbout: TProtoBufOutput;
 begin

@@ -3,7 +3,7 @@ unit uServerSettings;
 interface
 
 uses
-  uPB_HelloArguments;
+  uPB_HelloReply;
 
 type
   TStringLengths = record
@@ -27,7 +27,7 @@ type
     FTokenPrices                : TTokenPrices;
 
   public
-    procedure ParseHelloMessage(const AHelloArguments: TPB_HelloArguments);
+    procedure ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 
     property EmailConfirmationExpiration: Integer read FEmailConfirmationExpiration;
     property StringLengths: TStringLengths read FStringLengths;
@@ -41,19 +41,19 @@ uses
   superobject;
 
 
-procedure TServerSettings.ParseHelloMessage(const AHelloArguments: TPB_HelloArguments);
+procedure TServerSettings.ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 begin
-  FEmailConfirmationExpiration := AHelloArguments.ChangeExpireTime;
+  FEmailConfirmationExpiration := AHelloReply.ChangeExpireTime;
 
-  FStringLengths.EMail := AHelloArguments.StringSizes.EMail;
-  FStringLengths.Username := AHelloArguments.StringSizes.Username;
-  FStringLengths.Password := AHelloArguments.StringSizes.Password;
-  FStringLengths.ClubName := AHelloArguments.StringSizes.ClubName;
-  FStringLengths.ClubInvCode := AHelloArguments.StringSizes.InvCode;
-  FStringLengths.GameName := AHelloArguments.StringSizes.GameName;
+  FStringLengths.EMail := AHelloReply.StringSizes.EMail;
+  FStringLengths.Username := AHelloReply.StringSizes.Username;
+  FStringLengths.Password := AHelloReply.StringSizes.Password;
+  FStringLengths.ClubName := AHelloReply.StringSizes.ClubName;
+  FStringLengths.ClubInvCode := AHelloReply.StringSizes.InvCode;
+  FStringLengths.GameName := AHelloReply.StringSizes.GameName;
 
-  FTokenPrices.ClubCreation := AHelloArguments.TokenPrices.ClubCreation;
-  FTokenPrices.ClubChangeDetails := AHelloArguments.TokenPrices.ClubChangeDetails;
+  FTokenPrices.ClubCreation := AHelloReply.TokenPrices.ClubCreation;
+  FTokenPrices.ClubChangeDetails := AHelloReply.TokenPrices.ClubChangeDetails;
 end;
 
 end.

@@ -60,7 +60,7 @@ implementation
 
 uses
   uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient,
-  uServerCodes, uCommon, uMainDataModule, uPB_HelloArguments, uPB_StatusReply,
+  uServerCodes, uCommon, uMainDataModule,  uPB_StatusReply, uPB_HelloReply,
   uMessageContainer, uServerMessageCallback;
 
 
@@ -211,9 +211,9 @@ end;
 
 procedure TfrmLogin.TCHello(const AMessage: TMessageItem);
 var
-  pbhello: TPB_HelloArguments;
+  pbhello: TPB_HelloReply;
 begin
-  pbhello := AMessage.Object_ as TPB_HelloArguments;
+  pbhello := AMessage.Object_ as TPB_HelloReply;
 
   dmMain.ServerSettings.ParseHelloMessage(pbhello);
 
