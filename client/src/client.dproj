@@ -95,7 +95,7 @@
 				<DesignClass>TDataModule</DesignClass>
 			</DCCReference>
 			<DCCReference Include="forms\uMainForm.pas">
-				<Form>frmMain</Form>
+				<Form>frmChipUpMain</Form>
 			</DCCReference>
 			<DCCReference Include="forms\uLoginForm.pas">
 				<Form>frmLogin</Form>
