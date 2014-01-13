@@ -11,7 +11,7 @@ uses
   uMessageItem;
 
 type
-  TfrmMain = class(TForm)
+  TfrmChipUpMain = class(TForm)
     alMainForm: TActionList;
     acLogout: TAction;
     MainMenu: TMainMenu;
@@ -106,7 +106,7 @@ type
   end;
 
 var
-  frmMain: TfrmMain;
+  frmChipUpMain: TfrmChipUpMain;
 
 implementation
 
@@ -118,19 +118,19 @@ uses
   uPB_StatusReply, uMessageContainer, uServerMessageCallback;
 
 
-procedure TfrmMain.DoCreate;
+procedure TfrmChipUpMain.DoCreate;
 begin
   inherited;
 
   ShowLoginForm;
 end;
 
-procedure TfrmMain.FormDestroy(Sender: TObject);
+procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveMessageHandler(Handle);
 end;
 
-procedure TfrmMain.WndProc(var AMessage: TMessage);
+procedure TfrmChipUpMain.WndProc(var AMessage: TMessage);
 var
   msg: TMessageItem;
 begin
@@ -156,7 +156,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.DoLogout;
+procedure TfrmChipUpMain.DoLogout;
 begin
   lbUserInfo.Caption := '';
   gridJoinedClubsTable.DataController.SetRecordCount(0);
@@ -165,7 +165,7 @@ begin
   dmMain.Players.Clear;
 end;
 
-function TfrmMain.ShowLoginForm: Integer;
+function TfrmChipUpMain.ShowLoginForm: Integer;
 begin
   DoLogout;
   Hide;
@@ -186,7 +186,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.SocketChangeState(const AOldState, ANewState: TSocketState);
+procedure TfrmChipUpMain.SocketChangeState(const AOldState, ANewState: TSocketState);
 begin
   case ANewState of
     wsClosed: begin
@@ -196,67 +196,67 @@ begin
   end;
 end;
 
-procedure TfrmMain.tiBringToFrontTimer(Sender: TObject);
+procedure TfrmChipUpMain.tiBringToFrontTimer(Sender: TObject);
 begin
   BringToFront;
   tiBringToFront.Enabled := FALSE;
 end;
 
-procedure TfrmMain.acBuyChipsExecute(Sender: TObject);
+procedure TfrmChipUpMain.acBuyChipsExecute(Sender: TObject);
 begin
   dmMain.OpenBuyChipsLink;
 end;
 
-procedure TfrmMain.acBuyTokensExecute(Sender: TObject);
+procedure TfrmChipUpMain.acBuyTokensExecute(Sender: TObject);
 begin
   dmMain.OpenBuyTokensLink;
 end;
 
-procedure TfrmMain.acLogoutExecute(Sender: TObject);
+procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
   SocketClient.Logout;
 end;
 
 
-procedure TfrmMain.acShowChangeAvatarFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
   RunModalForm(TfrmChangeAvatar, self, []);
 end;
 
-procedure TfrmMain.acShowChangeEMailFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowChangeEMailFormExecute(Sender: TObject);
 begin
   RunModalForm(TfrmChangeEMail, self, []);
 end;
 
-procedure TfrmMain.acShowChangePasswordFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowChangePasswordFormExecute(Sender: TObject);
 begin
   RunModalForm(TfrmChangePassword, self, []);
 end;
 
-procedure TfrmMain.acShowCreateClubFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
   if RunModalForM(TfrmCreateClub, self, []) = mrOk then
     SocketClient.Status;
 end;
 
-procedure TfrmMain.acShowJoinClubFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
   if RunModalForM(TfrmJoinClub, self, []) = mrOk then
     SocketClient.Status;
 end;
 
-procedure TfrmMain.acShowManageClubsFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowManageClubsFormExecute(Sender: TObject);
 begin
   RunModalForM(TfrmManageClubs, self, []);
 end;
 
-procedure TfrmMain.acShowPublicGamesListFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowPublicGamesListFormExecute(Sender: TObject);
 begin
   RunModalForm(TfrmPublicClubsList, self, []);
   SocketClient.Status;
 end;
 
-procedure TfrmMain.btLeaveClubClick(Sender: TObject);
+procedure TfrmChipUpMain.btLeaveClubClick(Sender: TObject);
 begin
   if not Assigned(FSelectedClub) then
     Exit;
@@ -264,12 +264,12 @@ begin
   SocketClient.LeaveClub(FSelectedClub.Id);
 end;
 
-procedure TfrmMain.btOpenTableClick(Sender: TObject);
+procedure TfrmChipUpMain.btOpenTableClick(Sender: TObject);
 begin
   dmMain.Tables.AddTable(Random(10000000));
 end;
 
-procedure TfrmMain.ConfigureGUI;
+procedure TfrmChipUpMain.ConfigureGUI;
 begin
   lbUserInfo.Caption := Format('You have %d tokens.', [dmMain.SelfInfo.Tokens]);
 
@@ -278,7 +278,7 @@ begin
     Caption := Caption + ' (account confirmation pending)';
 end;
 
-procedure TfrmMain.UpdateClublist;
+procedure TfrmChipUpMain.UpdateClublist;
 var
   C1    : Integer;
   club  : TClubInfo;
@@ -305,12 +305,12 @@ begin
   end;
 end;
 
-procedure TfrmMain.gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+procedure TfrmChipUpMain.gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acShowManageClubsForm.Execute;
 end;
 
-procedure TfrmMain.gridJoinedClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmChipUpMain.gridJoinedClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
   club_id : Int64;
@@ -335,12 +335,12 @@ begin
     FSelectedClub := nil;
 end;
 
-procedure TfrmMain.TCSecondaryLoginDetected(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.TCSecondaryLoginDetected(const AMessage: TMessageItem);
 begin
   ShowLoginForm;
 end;
 
-procedure TfrmMain.TCStatusReply(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.TCStatusReply(const AMessage: TMessageItem);
 var
   pbstatus: TPB_StatusReply;
 begin
@@ -353,18 +353,18 @@ begin
   UpdateClublist;
 end;
 
-procedure TfrmMain.TCLeaveClubInvalidId(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.TCLeaveClubInvalidId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOK], 0);
 end;
 
-procedure TfrmMain.TCLeaveClubOk(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.TCLeaveClubOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Successfully left the club', mtInformation, [mbOK], 0);
   SocketClient.Status;
 end;
 
-procedure TfrmMain.TCLogout(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.TCLogout(const AMessage: TMessageItem);
 begin
   ShowLoginForm;
 end;

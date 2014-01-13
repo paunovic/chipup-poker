@@ -7,10 +7,12 @@ message RpcMessage {
 	optional int32 DataSize = 2 [ default = 0];
 	optional int32 Token = 3 [ default = 0];
 }
+
 message TokenPrices {
 	required int32 club_change_details = 1;
 	required int32 club_creation = 2;
 }
+
 message StringSizes {
 	required int32 email = 1;
 	required int32 password = 2;
@@ -19,29 +21,32 @@ message StringSizes {
 	required int32 username = 5;
 	required int32 gamename = 6;
 }
+
 message HelloArguments {
 	required TokenPrices tokenPrices = 1;
 	required StringSizes stringSizes = 2;
 	required int32 ChangeExpireTime = 3;
 	required int32 ForgotExpireTime = 4;
 }
+
 message LoginParams {
 	required string username = 1;
 	required string password = 2;
 }
+
 message RegisterParams {
 	required string email = 1;
 	required string password = 2;
 	required string displayName = 3;
 }
+
 message ForgotParams {
 	required string email = 1;
 }
+
 message LoginReply {
 }
-service Server {
-	rpc Login (LoginParams) returns (LoginReply);
-}
+
 message Club {
 	optional bytes _id = 1;
 	optional int32 chips = 2;
@@ -54,6 +59,7 @@ message Club {
 	optional bool has_password = 10;
 	optional int32 member_count = 11;
 }
+
 message User {
 	required bytes _id = 1;
 	required bytes avatar = 2;
@@ -63,6 +69,7 @@ message User {
 	optional bool authed = 6;
 	optional int32 chips = 7;
 }
+
 message Game {
 	optional bytes _id = 1;
 	optional bytes creator = 2;
@@ -74,18 +81,73 @@ message Game {
 	required int32 big_blind = 8;
 	required int32 seats = 9;
 }
+
 message StatusReply {
 	repeated Club clubs = 1;
 	repeated User users = 2;
 	required User self = 3;
 	repeated Game games = 4;
 }
+
 message GetDeckReply {
 	required string deck = 1;
 }
+
 message ListClubsReply {
 	repeated Club clubs = 1;
 }
+
+message CreateClubParams {
+	required string name = 1;
+	required bool private = 2;
+	optional string inv_code = 3;
+}
+
+message JoinClubParams {
+	required int32 id = 1;
+	optional string code = 2;
+}
+
+message KickPlayerParams {
+	required int32 club_seq = 1;
+	required string player_mongo_id = 2;
+}
+
+message LeaveClubParams {
+	required int32 id = 1;
+}
+
+message GiveClubOwnershipParams {
+	required int32 club_seq = 1;
+	required string player_mongo_id = 2;
+}
+
+message DeleteClubParams {
+	required int32 club_seq = 1;
+}
+
+message TransferChipsParams {
+	required int32 club_seq = 1;
+	required string player_mongo_id = 2;
+	required int32 chip_amount = 3;
+}
+
+message ChangeEMailParams {
+	required string new_mail = 1;
+}
+
+message ChangePasswordParams {
+	required string new_password = 1;
+}
+
+message SetAvatarParams {
+	required string avatar_id = 1;
+}
+
+message DeleteGameParams {
+	required bytes game_mongo_id = 1;
+}
+
 enum Commands {
 	SR_NOT_IMPLEMENTED = 0;
 	SR_HELLO = 1;
@@ -151,44 +213,6 @@ enum Commands {
 	CMD_EDIT_GAME = 520;
 }
 
-message CreateClubParams {
-	required string name = 1;
-	required bool private = 2;
-	optional string inv_code = 3;
+service Server {
+	rpc Login (LoginParams) returns (LoginReply);
 }
-message JoinClubParams {
-	required int32 id = 1;
-	optional string code = 2;
-}
-message KickPlayerParams {
-	required int32 club_seq = 1;
-	required string player_mongo_id = 2;
-}
-message LeaveClubParams {
-	required int32 id = 1;
-}
-message GiveClubOwnershipParams {
-	required int32 club_seq = 1;
-	required string player_mongo_id = 2;
-}
-message DeleteClubParams {
-	required int32 club_seq = 1;
-}
-message TransferChipsParams {
-	required int32 club_seq = 1;
-	required string player_mongo_id = 2;
-	required int32 chip_amount = 3;
-}
-message ChangeEMailParams {
-	required string new_mail = 1;
-}
-message ChangePasswordParams {
-	required string new_password = 1;
-}
-message SetAvatarParams {
-	required string avatar_mongo_id = 1;
-}
-message DeleteGameParams {
-	required bytes game_mongo_id = 1;
-}
-

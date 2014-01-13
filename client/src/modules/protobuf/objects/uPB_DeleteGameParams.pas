@@ -3,7 +3,7 @@ unit uPB_DeleteGameParams;
 interface
 
 uses
-  Winapi.Windows,
+  Winapi.Windows, System.SysUtils,
   pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
@@ -13,28 +13,22 @@ type
       FN_GAMEMONGOID = 1;
 
     var
-      FGameMongoId: AnsiString;
+      FGameMongoId: TBytes;
 
   public
-    constructor Create(const AGameMongoId: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property GameMongoId: AnsiString read FGameMongoId;
+    property GameMongoId: TBytes read FGameMongoId write FGameMongoId;
   end;
 
-//  TPB_DeleteGameParamss = TObjectList<TPB_DeleteGameParams>;
 
 implementation
+
 
 uses
   pbPublic;
 
-constructor TPB_DeleteGameParams.Create(const AGameMongoId: AnsiString);
-begin
-  FGameMongoId := AGameMongoId;
-end;
 
 procedure TPB_DeleteGameParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -46,7 +40,7 @@ begin
     case field_number of
       FN_GAMEMONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGameMongoId := AProtobufReader.readString;
+        AProtobufReader.readBytes(FGameMongoId);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -58,7 +52,7 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_GAMEMONGOID, FGameMongoId);
+  pbout.writeBytes(FN_GAMEMONGOID, FGameMongoId);
   result := pbout;
 end;
 

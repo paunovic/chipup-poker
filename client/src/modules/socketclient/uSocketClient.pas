@@ -462,9 +462,12 @@ end;
 procedure TSocketClient.DeleteGame(const AGameId: String);
 var
   protobuf: TPB_DeleteGameParams;
+  bytes   : TBytes;
 begin
-  protobuf := TPB_DeleteGameParams.Create(AnsiString(AGameId));
+  protobuf := TPB_DeleteGameParams.Create;
   try
+    HexToBytes(AnsiString(AGameId), bytes);
+    protobuf.GameMongoId := bytes;
     SendProtobuf(CMD_DELETE_GAME, protobuf);
   finally
     protobuf.Free;

@@ -7,7 +7,7 @@ uses
   Winapi.Windows,
   Vcl.Forms,
   uMainDataModule in 'uMainDataModule.pas' {dmMain: TDataModule},
-  uMainForm in 'forms\uMainForm.pas' {frmMain},
+  uMainForm in 'forms\uMainForm.pas' {frmChipUpMain},
   uLoginForm in 'forms\uLoginForm.pas' {frmLogin},
   uCreateAccountForm in 'forms\uCreateAccountForm.pas' {frmCreateAccount},
   uForgotPasswordForm in 'forms\uForgotPasswordForm.pas' {frmForgotPassword},
@@ -70,12 +70,11 @@ uses
   uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
   uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas';
 
-
 procedure FocusPokerApp;
 var
   window_handle: THandle;
 begin
-  window_handle := FindWindow('TfrmMain', nil);
+  window_handle := FindWindow('TfrmChipUpMain', nil);
   if window_handle <> 0 then
     SetForegroundWindow(window_handle);
 end;
@@ -96,7 +95,7 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);
-  Application.CreateForm(TfrmMain, frmMain);
+  Application.CreateForm(TfrmChipUpMain, frmChipUpMain);
   Application.Run;
 
   TInstanceController.UnregisterInstance;

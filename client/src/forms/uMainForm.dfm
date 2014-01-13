@@ -1,4 +1,4 @@
-object frmMain: TfrmMain
+object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
   ClientHeight = 637
