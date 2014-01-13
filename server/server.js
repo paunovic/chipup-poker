@@ -15,7 +15,7 @@ var crypto = require('crypto');
 var p = require("node-protobuf").Protobuf;
 var Deck = require('./deck');
 
-var pb = new p(fs.readFileSync("message.desc"));
+var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
 protoreader.init(pb);
 
