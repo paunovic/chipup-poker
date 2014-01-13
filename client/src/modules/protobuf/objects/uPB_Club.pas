@@ -37,22 +37,21 @@ type
     function GetOwnerMongoId: AnsiString;
 
   public
-    constructor Create(const ASeq: Integer; const AName, APassword: AnsiString; const APrivate: Boolean); overload;
     destructor Destroy; override;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
     property MongoId: AnsiString read GetMongoId;
-    property Chips: Integer read FChips;
-    property Name: AnsiString read FName;
+    property Chips: Integer read FChips write FChips;
+    property Name: AnsiString read FName write FName;
     property OwnerMongoId: AnsiString read GetOwnerMongoId;
-    property Password: AnsiString read FPassword;
-    property Private: Boolean read FPrivate;
-    property Seq: Integer read FSeq;
+    property Password: AnsiString read FPassword write FPassword;
+    property Private: Boolean read FPrivate write FPrivate;
+    property Seq: Integer read FSeq write FSeq;
     property Members: TStringList read FMembers;
-    property MemberCount: Integer read FMemberCount;
-    property HasPassword: Boolean read FHasPassword;
+    property MemberCount: Integer read FMemberCount write FMemberCount;
+    property HasPassword: Boolean read FHasPassword write FHasPassword;
   end;
 
   TPB_Clubs = TObjectList<TPB_Club>;
@@ -62,14 +61,6 @@ implementation
 uses
   pbPublic, uCommon;
 
-
-constructor TPB_Club.Create(const ASeq: Integer; const AName, APassword: AnsiString; const APrivate: Boolean);
-begin
-  FSeq := ASeq;
-  FName := AName;
-  FPassword := APassword;
-  FPrivate := APrivate;
-end;
 
 destructor TPB_Club.Destroy;
 begin

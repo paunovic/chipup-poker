@@ -16,25 +16,19 @@ type
       FNewPassword: AnsiString;
 
   public
-    constructor Create(const ANewPassword: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property NewPassword: AnsiString read FNewPassword;
+    property NewPassword: AnsiString read FNewPassword write FNewPassword;
   end;
 
-//  TPB_ChangePasswordParamss = TObjectList<TPB_ChangePasswordParams>;
 
 implementation
+
 
 uses
   pbPublic;
 
-constructor TPB_ChangePasswordParams.Create(const ANewPassword: AnsiString);
-begin
-  FNewPassword := ANewPassword;
-end;
 
 procedure TPB_ChangePasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var

@@ -67,9 +67,9 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSettings, uCommon,
   uPB_LoginParams, uPB_StatusReply, uPB_HelloArguments, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
-  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_CreateClubParams, uPB_JoinClubParams, uPB_TransferChipsParams,
-  uPB_KickPlayerParams, uPB_LeaveClubParams, uPB_GiveClubOwnershipParams, uPB_DeleteClubParams, uPB_ChangePasswordParams,
-  uPB_SetAvatarParams, uPB_DeleteGameParams,
+  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
+  uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
+  uPB_SetAvatarParams,
   pbOutput, pbInput, uMessageContainer;
 
 
@@ -317,10 +317,13 @@ end;
 
 procedure TSocketClient.CreateClub(const AName, AInvCode: String; const APrivate: Boolean);
 var
-  protobuf: TPB_CreateClubParams;
+  protobuf: TPB_Club;
 begin
-  protobuf := TPB_CreateClubParams.Create(AnsiString(AName), APrivate, AnsiString(AInvCode));
+  protobuf := TPB_Club.Create;
   try
+    protobuf.Name := AnsiString(AName);
+    protobuf.Private := APrivate;
+    protobuf.Password := AnsiString(AInvCode);
     SendProtobuf(CMD_CREATE_CLUB, protobuf);
   finally
     protobuf.Free;
@@ -329,10 +332,12 @@ end;
 
 procedure TSocketClient.JoinClub(const AId: Int64; const ACode: String);
 var
-  protobuf: TPB_JoinClubParams;
+  protobuf: TPB_Club;
 begin
-  protobuf := TPB_JoinClubParams.Create(AId, AnsiString(ACode));
+  protobuf := TPB_Club.Create;
   try
+    protobuf.Seq := AId;
+    protobuf.Password := AnsiString(ACode);
     SendProtobuf(CMD_JOIN_CLUB, protobuf);
   finally
     protobuf.Free;
@@ -353,10 +358,11 @@ end;
 
 procedure TSocketClient.LeaveClub(const AId: Int64);
 var
-  protobuf: TPB_LeaveClubParams;
+  protobuf: TPB_Club;
 begin
-  protobuf := TPB_LeaveClubParams.Create(AId);
+  protobuf := TPB_Club.Create;
   try
+    protobuf.Seq := AId;
     SendProtobuf(CMD_LEAVE_CLUB, protobuf);
   finally
     protobuf.Free;
@@ -379,8 +385,12 @@ procedure TSocketClient.ChangeClubDetails(const AClubId: Int64; const AClubName,
 var
   protobuf: TPB_Club;
 begin
-  protobuf := TPB_Club.Create(AClubId, AnsiString(AClubName), AnsiString(AClubCode), APrivate);
+  protobuf := TPB_Club.Create;
   try
+    protobuf.Seq := AClubId;
+    protobuf.Name := AnsiString(AClubName);
+    protobuf.Password := AnsiString(AClubCode);
+    protobuf.Private := APrivate;
     SendProtobuf(CMD_CHANGE_CLUB_DETAILS, protobuf);
   finally
     protobuf.Free;
@@ -389,10 +399,11 @@ end;
 
 procedure TSocketClient.DisbandClub(const AClubId: Int64);
 var
-  protobuf: TPB_DeleteClubParams;
+  protobuf: TPB_Club;
 begin
-  protobuf := TPB_DeleteClubParams.Create(AClubId);
+  protobuf := TPB_Club.Create;
   try
+    protobuf.Seq := AClubId;
     SendProtobuf(CMD_DELETE_CLUB, protobuf);
   finally
     protobuf.Free;
@@ -415,8 +426,9 @@ procedure TSocketClient.ChangeEMail(const ANewMail: String);
 var
   protobuf: TPB_ChangeEMailParams;
 begin
-  protobuf := TPB_ChangeEMailParams.Create(AnsiString(ANewMail));
+  protobuf := TPB_ChangeEMailParams.Create;
   try
+    protobuf.NewMail := AnsiString(ANewMail);
     SendProtobuf(CMD_CHANGE_EMAIL, protobuf);
   finally
     protobuf.Free;
@@ -427,8 +439,9 @@ procedure TSocketClient.ChangePassword(const APassword: String);
 var
   protobuf: TPB_ChangePasswordParams;
 begin
-  protobuf := TPB_ChangePasswordParams.Create(AnsiString(APassword));
+  protobuf := TPB_ChangePasswordParams.Create;
   try
+    protobuf.NewPassword := AnsiString(APassword);
     SendProtobuf(CMD_CHANGE_PASSWORD, protobuf);
   finally
     protobuf.Free;
@@ -461,13 +474,11 @@ end;
 
 procedure TSocketClient.DeleteGame(const AGameId: String);
 var
-  protobuf: TPB_DeleteGameParams;
-  bytes   : TBytes;
+  protobuf: TPB_Game;
 begin
-  protobuf := TPB_DeleteGameParams.Create;
+  protobuf := TPB_Game.Create;
   try
-    HexToBytes(AnsiString(AGameId), bytes);
-    protobuf.GameMongoId := bytes;
+    protobuf.MongoId := AnsiString(AGameId);
     SendProtobuf(CMD_DELETE_GAME, protobuf);
   finally
     protobuf.Free;

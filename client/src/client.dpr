@@ -57,18 +57,15 @@ uses
   uMessageItem in 'modules\message_container\uMessageItem.pas',
   uServerMessageCallback in 'modules\message_container\uServerMessageCallback.pas',
   uPB_ListClubsReply in 'modules\protobuf\objects\uPB_ListClubsReply.pas',
-  uPB_CreateClubParams in 'modules\protobuf\objects\uPB_CreateClubParams.pas',
   uPB_GiveClubOwnershipParams in 'modules\protobuf\objects\uPB_GiveClubOwnershipParams.pas',
-  uPB_JoinClubParams in 'modules\protobuf\objects\uPB_JoinClubParams.pas',
   uPB_KickPlayerParams in 'modules\protobuf\objects\uPB_KickPlayerParams.pas',
-  uPB_LeaveClubParams in 'modules\protobuf\objects\uPB_LeaveClubParams.pas',
   uPB_ChangeEMailParams in 'modules\protobuf\objects\uPB_ChangeEMailParams.pas',
   uPB_ChangePasswordParams in 'modules\protobuf\objects\uPB_ChangePasswordParams.pas',
-  uPB_DeleteClubParams in 'modules\protobuf\objects\uPB_DeleteClubParams.pas',
-  uPB_DeleteGameParams in 'modules\protobuf\objects\uPB_DeleteGameParams.pas',
   uPB_Game in 'modules\protobuf\objects\uPB_Game.pas',
   uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
   uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas';
+
+
 
 procedure FocusPokerApp;
 var

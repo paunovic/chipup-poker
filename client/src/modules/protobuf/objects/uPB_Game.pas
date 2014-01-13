@@ -43,13 +43,13 @@ type
 
     property MongoId: AnsiString read GetMongoId write SetMongoId;
     property CreatorMongoId: AnsiString read GetCreatorMongoId;
-    property Gamename: AnsiString read FGamename;
-    property Clubseq: Integer read FClubseq;
-    property GameType: Integer read FGameType;
-    property GameLimit: Integer read FGameLimit;
-    property SmallBlind: Integer read FSmallBlind;
-    property BigBlind: Integer read FBigBlind;
-    property Seats: Integer read FSeats;
+    property Gamename: AnsiString read FGamename write FGamename;
+    property Clubseq: Integer read FClubseq write FClubseq;
+    property GameType: Integer read FGameType write FGameType;
+    property GameLimit: Integer read FGameLimit write FGameLimit;
+    property SmallBlind: Integer read FSmallBlind write FSmallBlind;
+    property BigBlind: Integer read FBigBlind write FBigBlind;
+    property Seats: Integer read FSeats write FSeats;
   end;
 
   TPB_Games = TObjectList<TPB_Game>;

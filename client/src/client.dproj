@@ -178,15 +178,10 @@
 			<DCCReference Include="modules\message_container\uMessageItem.pas"/>
 			<DCCReference Include="modules\message_container\uServerMessageCallback.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ListClubsReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uPB_CreateClubParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_GiveClubOwnershipParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uPB_JoinClubParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_KickPlayerParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uPB_LeaveClubParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeEMailParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangePasswordParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uPB_DeleteClubParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uPB_DeleteGameParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_Game.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_SetAvatarParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TransferChipsParams.pas"/>

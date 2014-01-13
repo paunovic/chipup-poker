@@ -36,7 +36,7 @@ object frmManageClubs: TfrmManageClubs
       Left = 3
       Top = 16
       Width = 314
-      Height = 288
+      Height = 281
       Align = alTop
       Anchors = [akLeft, akTop, akRight, akBottom]
       BevelInner = bvNone
@@ -90,7 +90,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btGiveOwnership: TcxButton
       Left = 113
-      Top = 310
+      Top = 303
       Width = 95
       Height = 28
       Action = acGiveOwnership
@@ -107,7 +107,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btRemovePlayerFromClub: TcxButton
       Left = 214
-      Top = 310
+      Top = 303
       Width = 95
       Height = 28
       Action = acKickPlayer
@@ -125,7 +125,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btGiveChips: TcxButton
       Left = 12
-      Top = 310
+      Top = 303
       Width = 95
       Height = 28
       Action = acGiveChips
@@ -213,7 +213,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btChangeClubType: TcxButton
       Left = 11
-      Top = 310
+      Top = 303
       Width = 117
       Height = 28
       Action = acShowClubChangeDetailsForm
@@ -230,7 +230,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btDisbandClub: TcxButton
       Left = 134
-      Top = 310
+      Top = 303
       Width = 117
       Height = 28
       Action = acDisbandClub
@@ -262,7 +262,7 @@ object frmManageClubs: TfrmManageClubs
       Left = 3
       Top = 16
       Width = 352
-      Height = 288
+      Height = 281
       Align = alTop
       Anchors = [akLeft, akTop, akRight, akBottom]
       BevelInner = bvNone
@@ -326,7 +326,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btNewGame: TcxButton
       Left = 12
-      Top = 310
+      Top = 303
       Width = 95
       Height = 28
       Action = acShowCreateGameForm
@@ -343,7 +343,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btDeleteGame: TcxButton
       Left = 214
-      Top = 310
+      Top = 303
       Width = 95
       Height = 28
       Action = acDeleteGame
@@ -360,7 +360,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btEditGame: TcxButton
       Left = 113
-      Top = 310
+      Top = 303
       Width = 95
       Height = 28
       Action = acShowEditGameForm

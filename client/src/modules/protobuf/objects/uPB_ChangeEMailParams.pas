@@ -16,12 +16,10 @@ type
       FNewMail: AnsiString;
 
   public
-    constructor Create(const ANewMail: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property NewMail: AnsiString read FNewMail;
+    property NewMail: AnsiString read FNewMail write FNewMail;
   end;
 
 //  TPB_ChangeEMailParamss = TObjectList<TPB_ChangeEMailParams>;
@@ -31,10 +29,6 @@ implementation
 uses
   pbPublic;
 
-constructor TPB_ChangeEMailParams.Create(const ANewMail: AnsiString);
-begin
-  FNewMail := ANewMail;
-end;
 
 procedure TPB_ChangeEMailParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
