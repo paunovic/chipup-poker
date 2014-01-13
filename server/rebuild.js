@@ -1,6 +1,6 @@
 var fs = require('fs');
-var data = fs.readFileSync('/home/clever/Dropbox/poker/uServerCodes.pas','utf8');
-var lines = data.split('\r\n');
+var data = fs.readFileSync('client/src/uServerCodes.pas','utf8');
+var lines = data.split('\n');
 var out = fs.openSync("server/codes.js","w");
 fs.writeSync(out,'codes = {};\nmodule.exports = codes;\n');
 for (var i=0; i<lines.length; i++) {
