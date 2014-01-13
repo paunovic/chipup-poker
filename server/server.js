@@ -240,7 +240,7 @@ function ClientSocket(socket) {
 		this.log('client lost');
 	}.bind(this));
 	//this.socket.write("abc\ndef\nghi\n");
-	this.send(codes.SR_HELLO,sharedconfig,'Poker.HelloArguments');
+	this.send(codes.SR_HELLO,sharedconfig,'Poker.HelloReply');
 	this.reader = new protoreader(socket,this);
 	socket.on('error',function() {
 		this.log('error!',arguments);
@@ -868,7 +868,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.CMD_SET_AVATAR:
 			var params = pb.Parse(args,'Poker.SetAvatarParams');
 			this.log('changing avatar',params);
-			var id = params.avatar_mongo_id;
+			var id = params.avatar_id;
 			if (id.length == 24) id = new ObjectID(id);
 			avatars.findOne({_id:id},function(err,row) {
 				if (err) {
