@@ -125,7 +125,7 @@ app.get("/passwordreset",function (req,res) {
 	});
 });
 // FIXME if upload dir doesnt exist, this fails hard
-app.post("/image_upload",function (req,res) {
+app.post("/uploadAvatar",function (req,res) {
 	console.log('files',req.headers);
 	console.log('version',req.httpVersionMajor,req.httpVersionMinor);
 	fs.readFile(req.files.avatar.path,function (err,data) {

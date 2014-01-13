@@ -174,7 +174,7 @@ begin
   http.Connection := 'Keep-Alive';
   http.BandwidthLimit := 0;
   http.RequestVer := '1.1';
-  http.URL := 'http://poker.angeldsis.com/image_upload';
+  http.URL := 'http://chipuppoker.com/uploadAvatar';
   http.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
   http.SendStream := send_stream;
   http.RcvdStream := TMemoryStream.Create;
