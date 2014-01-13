@@ -125,6 +125,24 @@ message SetAvatarParams {
 	required string avatar_id = 1;
 }
 
+message ChatEvent {
+	enum EventType {
+		Message = 0;
+		Join = 1;
+		Part = 2;
+	}
+	required EventType type = 1;
+	repeated ChatMessage message = 2;
+	required string channel = 3;
+}
+
+message ChatMessage {
+	optional bytes _id = 1;
+	optional string username = 2;
+	required string message = 3;
+	optional int64 timestamp = 4;
+}
+
 enum ServerCodes {
 	SR_NOT_IMPLEMENTED = 0;
 	SR_HELLO = 1;
@@ -173,6 +191,7 @@ enum ServerCodes {
 	SR_EDIT_GAME_OK = 44;
 	SR_SECONDARY_LOGIN_DETECTED = 45;
 	SR_DECKREPLY = 46;
+	EVENT_CHAT = 47;
 	CMD_LOGIN = 501;
 	CMD_STATUS = 502;
 	CMD_REGISTER = 503;
@@ -198,3 +217,4 @@ enum ServerCodes {
 service Server {
 	rpc Login (LoginParams) returns (LoginReply);
 }
+
