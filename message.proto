@@ -54,7 +54,7 @@ message Club {
 	optional bytes owner = 5;
 	optional string password = 6;
 	optional bool private = 7;
-	required int32 seq = 8;
+	optional int32 seq = 8;
 	repeated bytes members = 9;
 	optional bool has_password = 10;
 	optional int32 member_count = 11;
