@@ -10,18 +10,16 @@ type
   TPB_SetAvatarParams = class(TProtobufBaseObject)
   private
     const
-      FN_AVATARMONGOID = 1;
+      FN_AVATARID = 1;
 
     var
-      FAvatarMongoId: AnsiString;
+      FAvatarId: AnsiString;
 
   public
-    constructor Create(const AAvatarMongoId: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property AvatarMongoId: AnsiString read FAvatarMongoId;
+    property AvatarId: AnsiString read FAvatarId write FAvatarId;
   end;
 
 //  TPB_SetAvatarParamss = TObjectList<TPB_SetAvatarParams>;
@@ -31,10 +29,6 @@ implementation
 uses
   pbPublic;
 
-constructor TPB_SetAvatarParams.Create(const AAvatarMongoId: AnsiString);
-begin
-  FAvatarMongoId := AAvatarMongoId;
-end;
 
 procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -44,9 +38,9 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
-      FN_AVATARMONGOID: begin
+      FN_AVATARID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FAvatarMongoId := AProtobufReader.readString;
+        FAvatarId := AProtobufReader.readString;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -58,7 +52,7 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_AVATARMONGOID, FAvatarMongoId);
+  pbout.writeString(FN_AVATARID, FAvatarId);
   result := pbout;
 end;
 

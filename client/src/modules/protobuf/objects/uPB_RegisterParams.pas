@@ -20,14 +20,12 @@ type
       FDisplayName: AnsiString;
 
   public
-    constructor Create(const AEMail: AnsiString; const APassword: AnsiString; const ADisplayName: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: AnsiString read FEmail;
-    property Password: AnsiString read FPassword;
-    property DisplayName: AnsiString read FDisplayName;
+    property Email: AnsiString read FEmail write FEmail;
+    property Password: AnsiString read FPassword write FPassword;
+    property DisplayName: AnsiString read FDisplayName write FDisplayName;
   end;
 
 implementation
@@ -35,13 +33,6 @@ implementation
 uses
   pbPublic;
 
-
-constructor TPB_RegisterParams.Create(const AEMail: AnsiString; const APassword: AnsiString; const ADisplayName: AnsiString);
-begin
-  FEMail := AEMail;
-  FPassword := APassword;
-  FDisplayName := ADisplayName;
-end;
 
 procedure TPB_RegisterParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var

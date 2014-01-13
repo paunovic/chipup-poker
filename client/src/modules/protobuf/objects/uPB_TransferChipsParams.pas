@@ -20,14 +20,12 @@ type
       FChipAmount: Integer;
 
   public
-    constructor Create(const AClubSeq: Integer; const APlayerMongoId: AnsiString; const AChipAmount: Integer); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property ClubSeq: Integer read FClubSeq;
-    property PlayerMongoId: AnsiString read FPlayerMongoId;
-    property ChipAmount: Integer read FChipAmount;
+    property ClubSeq: Integer read FClubSeq write FClubSeq;
+    property PlayerMongoId: AnsiString read FPlayerMongoId write FPlayerMongoId;
+    property ChipAmount: Integer read FChipAmount write FChipAmount;
   end;
 
 //  TPB_TransferChipsParamss = TObjectList<TPB_TransferChipsParams>;
@@ -37,12 +35,6 @@ implementation
 uses
   pbPublic;
 
-constructor TPB_TransferChipsParams.Create(const AClubSeq: Integer; const APlayerMongoId: AnsiString; const AChipAmount: Integer);
-begin
-  FClubSeq := AClubSeq;
-  FPlayerMongoId := APlayerMongoId;
-  FChipAmount := AChipAmount;
-end;
 
 procedure TPB_TransferChipsParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var

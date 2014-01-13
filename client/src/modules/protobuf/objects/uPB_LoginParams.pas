@@ -18,13 +18,11 @@ type
       FPassword: AnsiString;
 
   public
-    constructor Create(const AUsername: AnsiString; const APassword: AnsiString); overload;
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Username: AnsiString read FUsername;
-    property Password: AnsiString read FPassword;
+    property Username: AnsiString read FUsername write FUsername;
+    property Password: AnsiString read FPassword write FPassword;
   end;
 
 implementation
@@ -32,12 +30,6 @@ implementation
 uses
   pbPublic;
 
-
-constructor TPB_LoginParams.Create(const AUsername: AnsiString; const APassword: AnsiString);
-begin
-  FUsername := AUsername;
-  FPassword := APassword;
-end;
 
 procedure TPB_LoginParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var

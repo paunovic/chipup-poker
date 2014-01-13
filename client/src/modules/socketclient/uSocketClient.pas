@@ -273,8 +273,10 @@ procedure TSocketClient.Login(const ALogin, APass: String);
 var
   protobuf: TPB_LoginParams;
 begin
-  protobuf := TPB_LoginParams.Create(AnsiString(ALogin), AnsiString(APass));
+  protobuf := TPB_LoginParams.Create;
   try
+    protobuf.Username := AnsiString(ALogin);
+    protobuf.Password := AnsiString(APass);
     SendProtobuf(CMD_LOGIN, protobuf);
   finally
     protobuf.Free;
@@ -290,8 +292,11 @@ procedure TSocketClient.CreateAccount(const AUsername, APassword, AEMail: String
 var
   protobuf: TPB_RegisterParams;
 begin
-  protobuf := TPB_RegisterParams.Create(AnsiString(AEMail), AnsiString(APassword), AnsiString(AUsername));
+  protobuf := TPB_RegisterParams.Create;
   try
+    protobuf.Email := AnsiString(AEMail);
+    protobuf.Password := AnsiString(APassword);
+    protobuf.DisplayName := AnsiString(AUsername);
     SendProtobuf(CMD_REGISTER, protobuf);
   finally
     protobuf.Free;
@@ -349,8 +354,10 @@ procedure TSocketClient.KickPlayer(const AClubId: Int64; const APlayerId: String
 var
   protobuf: TPB_KickPlayerParams;
 begin
-  protobuf := TPB_KickPlayerParams.Create(AClubId, AnsiString(APlayerId));
+  protobuf := TPB_KickPlayerParams.Create;
   try
+    protobuf.ClubSeq := AClubId;
+    protobuf.PlayerMongoId := AnsiString(APlayerId);
     SendProtobuf(CMD_KICK_PLAYER, protobuf);
   finally
     protobuf.Free;
@@ -417,8 +424,11 @@ procedure TSocketClient.TransferChips(const AClubId: Int64; const APlayerId: Str
 var
   protobuf: TPB_TransferChipsParams;
 begin
-  protobuf := TPB_TransferChipsParams.Create(AClubId, AnsiString(APlayerId), AChipAmount);
+  protobuf := TPB_TransferChipsParams.Create;
   try
+    protobuf.ClubSeq := AClubId;
+    protobuf.PlayerMongoId := AnsiString(APlayerId);
+    protobuf.ChipAmount := AChipAmount;
     SendProtobuf(CMD_TRANSFER_CHIPS, protobuf);
   finally
     protobuf.Free;
@@ -455,8 +465,9 @@ procedure TSocketClient.SetAvatar(const AAvatarId: String);
 var
   protobuf: TPB_SetAvatarParams;
 begin
-  protobuf := TPB_SetAvatarParams.Create(AnsiString(AAvatarId));
+  protobuf := TPB_SetAvatarParams.Create;
   try
+    protobuf.AvatarId := AnsiString(AAvatarId);
     SendProtobuf(CMD_SET_AVATAR, protobuf);
   finally
     protobuf.Free;
