@@ -1,0 +1,194 @@
+package Poker;
+
+option optimize_for = LITE_RUNTIME;
+
+message RpcMessage {
+	required int32 MethodId = 1;
+	optional int32 DataSize = 2 [ default = 0];
+	optional int32 Token = 3 [ default = 0];
+}
+message TokenPrices {
+	required int32 club_change_details = 1;
+	required int32 club_creation = 2;
+}
+message StringSizes {
+	required int32 email = 1;
+	required int32 password = 2;
+	required int32 clubname = 3;
+	required int32 invcode = 4;
+	required int32 username = 5;
+	required int32 gamename = 6;
+}
+message HelloArguments {
+	required TokenPrices tokenPrices = 1;
+	required StringSizes stringSizes = 2;
+	required int32 ChangeExpireTime = 3;
+	required int32 ForgotExpireTime = 4;
+}
+message LoginParams {
+	required string username = 1;
+	required string password = 2;
+}
+message RegisterParams {
+	required string email = 1;
+	required string password = 2;
+	required string displayName = 3;
+}
+message ForgotParams {
+	required string email = 1;
+}
+message LoginReply {
+}
+service Server {
+	rpc Login (LoginParams) returns (LoginReply);
+}
+message Club {
+	optional bytes _id = 1;
+	optional int32 chips = 2;
+	required string name = 4;
+	optional bytes owner = 5;
+	optional string password = 6;
+	optional bool private = 7;
+	required int32 seq = 8;
+	repeated bytes members = 9;
+	optional bool has_password = 10;
+	optional int32 member_count = 11;
+}
+message User {
+	required bytes _id = 1;
+	required bytes avatar = 2;
+	required string displayname = 3;
+	optional int32 tokens = 4;
+	optional string email = 5;
+	optional bool authed = 6;
+	optional int32 chips = 7;
+}
+message Game {
+	optional bytes _id = 1;
+	optional bytes creator = 2;
+	required string gamename = 3;
+	required int32 clubseq = 4;
+	required int32 game_type = 5;
+	required int32 game_limit = 6;
+	required int32 small_blind = 7;
+	required int32 big_blind = 8;
+	required int32 seats = 9;
+}
+message StatusReply {
+	repeated Club clubs = 1;
+	repeated User users = 2;
+	required User self = 3;
+	repeated Game games = 4;
+}
+message GetDeckReply {
+	required string deck = 1;
+}
+message ListClubsReply {
+	repeated Club clubs = 1;
+}
+enum Commands {
+	SR_NOT_IMPLEMENTED = 0;
+	SR_HELLO = 1;
+	SR_LOGIN_OK = 2;
+	SR_INVALID_LOGIN = 3;
+	SR_LOGOUT = 4;
+	SR_REGISTER_OK = 5;
+	SR_REGISTER_DUPLICATE_MAIL = 6;
+	SR_REGISTER_DUPLICATE_USERNAME = 7;
+	SR_REGISTER_INVALID_MAIL = 8;
+	SR_LIST_CLUBS = 9;
+	SR_STATUS = 10;
+	SR_CREATECLUB_OK = 11;
+	SR_CREATECLUB_NAME_EXISTS = 12;
+	SR_CREATECLUB_INVALID_NAME = 13;
+	SR_CREATECLUB_INVALID_CODE = 14;
+	SR_JOINCLUB_OK = 15;
+	SR_JOINCLUB_INVALID_ID = 16;
+	SR_JOINCLUB_INVALID_CODE = 17;
+	SR_JOINCLUB_ALREADY_MEMBER = 18;
+	SR_LEAVECLUB_OK = 19;
+	SR_LEAVECLUB_INVALID_ID = 20;
+	SR_KICKPLAYER_OK = 21;
+	SR_KICKPLAYER_INVALID_CLUB_ID = 22;
+	SR_KICKPLAYER_INVALID_PLAYER_ID = 23;
+	SR_OWNERSHIP_GIVEAWAY_NOT_OWNER = 24;
+	SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID = 25;
+	SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID = 26;
+	SR_OWNERSHIP_GIVEAWAY_OK = 27;
+	SR_CLUB_DETAILS_CHANGE_OK = 28;
+	SR_CLUB_DETAILS_CLUBNAME_EXISTS = 29;
+	SR_CLUB_DISBAND_OK = 30;
+	SR_CLUB_TRANFER_CHIPS_OK = 31;
+	SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT = 32;
+	SR_CREATECLUB_NO_GOLD = 33;
+	SR_CLUB_DETAILS_CHANGE_NO_GOLD = 34;
+	SR_CHANGE_MAIL_OK = 35;
+	SR_CHANGE_MAIL_INVALID_MAIL = 36;
+	SR_CHANGE_MAIL_DUPLICATE_MAIL = 37;
+	SR_CHANGE_PASSWORD_OK = 38;
+	SR_CHANGE_PASSWORD_INVALID_PASSWORD = 39;
+	SR_CHANGE_AVATAR_OK = 40;
+	SR_CHANGE_AVATAR_INVALID_ID = 41;
+	SR_CREATE_GAME_OK = 42;
+	SR_DELETE_GAME_OK = 43;
+	SR_EDIT_GAME_OK = 44;
+	SR_SECONDARY_LOGIN_DETECTED = 45;
+	SR_DECKREPLY = 46;
+	CMD_LOGIN = 501;
+	CMD_STATUS = 502;
+	CMD_REGISTER = 503;
+	CMD_FORGOT_PASSWORD = 504;
+	CMD_LOGOUT = 505;
+	CMD_LIST_PUBLIC_CLUBS = 506;
+	
+	CMD_DELETE_CLUB = 513;
+	CMD_TRANSFER_CHIPS = 514;
+	CMD_CHANGE_EMAIL = 515;
+	CMD_CHANGE_PASSWORD = 516;
+	CMD_SET_AVATAR = 517;
+	CMD_CREATE_GAME = 518;
+	CMD_DELETE_GAME = 519;
+	CMD_EDIT_GAME = 520;
+}
+
+message CreateClubParams {
+	required string name = 1;
+	required bool private = 2;
+	optional string inv_code = 3;
+}
+message JoinClubParams {
+	required int32 id = 1;
+	optional string code = 2;
+}
+message KickPlayerParams {
+	required int32 club_seq = 1;
+	required string player_mongo_id = 2;
+}
+message LeaveClubParams {
+	required int32 id = 1;
+}
+message GiveClubOwnershipParams {
+	required int32 club_seq = 1;
+	required string player_mongo_id = 2;
+}
+message DeleteClubParams {
+	required int32 club_seq = 1;
+}
+message TransferChipsParams {
+	required int32 club_seq = 1;
+	required string player_mongo_id = 2;
+	required int32 chip_amount = 3;
+}
+message ChangeEMailParams {
+	required string new_mail = 1;
+}
+message ChangePasswordParams {
+	required string new_password = 1;
+}
+message SetAvatarParams {
+	required string avatar_mongo_id = 1;
+}
+message DeleteGameParams {
+	required string game_mongo_id = 1;
+}
+

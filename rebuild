@@ -1,0 +1,12 @@
+#!/bin/bash -e
+export PATH=cpp-generator/:$PATH
+pushd cpp-generator
+make
+popd
+protoc message.proto -o message.desc --java_out=android/src/ --delphi_out=delphi/
+node server/rebuild.js
+#cp -v message.proto ~/Dropbox/poker/protobuf/
+#cp -vr delphi/ ~/Dropbox/poker/protobuf/
+#pushd cpp-generator
+#cp -vr main.cpp Makefile strutil.h ~/Dropbox/poker/protobuf/generator/
+#popd
