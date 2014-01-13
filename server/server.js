@@ -472,8 +472,10 @@ ClientSocket.prototype.handle = function (code,args) {
 					}
 					if (userlist.indexOf(c.owner) == -1) userlist.push(c.owner);
 					clubids.push(c._id);
-					if (!clubs[x].owner.equals(this.userid)) {
-						delete clubs[x].password; // FIXME, hide it if its blank
+					if (clubs[x].owner.equals(this.userid)) {
+						if (clubs[x].password == null) delete clubs[x].password;
+					} else {
+						delete clubs[x].password;
 					}
 
 					clubs[x]._id = new Buffer(clubs[x]._id.toString(),'hex');
@@ -591,9 +593,9 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.CMD_JOIN_CLUB:
-			var params = pb.Parse(args,'Poker.JoinClubParams');
-			var clubseq = params.id;
-			var pw = params.code
+			var params = pb.Parse(args,'Poker.Club');
+			var clubseq = params.seq;
+			var pw = params.password;
 			this.log('join1',clubseq,pw);
 			allClubs.findOne({seq:clubseq},function (err,item) {
 				if (!item) {
@@ -647,8 +649,8 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.CMD_LEAVE_CLUB:
-			var params = pb.Parse(args,'Poker.LeaveClubParams');
-			var clubid = params.id;
+			var params = pb.Parse(args,'Poker.Club');
+			var clubid = params.seq;
 			// FIXME, check for owner leaving
 			allClubs.update({seq:clubid},
 				{ $pull:{members:this.userid}},
@@ -749,9 +751,9 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.CMD_DELETE_CLUB:
-			var params = pb.Parse(args,'Poker.DeleteClubParams');
-			var clubseq = params.club_seq;
-			this.log('deleting club',clubseq);
+			var params = pb.Parse(args,'Poker.Club');
+			var clubseq = params.seq;
+			this.log('deleting club',params);
 			allClubs.findOne({seq:clubseq},function (err,club) {
 				if (!club) {
 					this.log('club not found');
@@ -922,8 +924,8 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.CMD_DELETE_GAME:
-			var params = pb.Parse(args,'Poker.DeleteGameParams');
-			var id = new toMongoId(params.game_mongo_id);
+			var params = pb.Parse(args,'Poker.Game');
+			var id = new toMongoId(params._id);
 			allGames.findOne({_id:id},function (err,game) {
 				if (err) {
 					this.reply(codes.SR_NOT_IMPLEMENTED,"internal error");

@@ -50,7 +50,7 @@ message LoginReply {
 message Club {
 	optional bytes _id = 1;
 	optional int32 chips = 2;
-	required string name = 4;
+	optional string name = 4;
 	optional bytes owner = 5;
 	optional string password = 6;
 	optional bool private = 7;
@@ -73,13 +73,13 @@ message User {
 message Game {
 	optional bytes _id = 1;
 	optional bytes creator = 2;
-	required string gamename = 3;
-	required int32 clubseq = 4;
-	required int32 game_type = 5;
-	required int32 game_limit = 6;
-	required int32 small_blind = 7;
-	required int32 big_blind = 8;
-	required int32 seats = 9;
+	optional string gamename = 3;
+	optional int32 clubseq = 4;
+	optional int32 game_type = 5;
+	optional int32 game_limit = 6;
+	optional int32 small_blind = 7;
+	optional int32 big_blind = 8;
+	optional int32 seats = 9;
 }
 
 message StatusReply {
@@ -97,33 +97,14 @@ message ListClubsReply {
 	repeated Club clubs = 1;
 }
 
-message CreateClubParams {
-	required string name = 1;
-	required bool private = 2;
-	optional string inv_code = 3;
-}
-
-message JoinClubParams {
-	required int32 id = 1;
-	optional string code = 2;
-}
-
 message KickPlayerParams {
 	required int32 club_seq = 1;
 	required string player_mongo_id = 2;
 }
 
-message LeaveClubParams {
-	required int32 id = 1;
-}
-
 message GiveClubOwnershipParams {
 	required int32 club_seq = 1;
 	required string player_mongo_id = 2;
-}
-
-message DeleteClubParams {
-	required int32 club_seq = 1;
 }
 
 message TransferChipsParams {
@@ -142,10 +123,6 @@ message ChangePasswordParams {
 
 message SetAvatarParams {
 	required string avatar_id = 1;
-}
-
-message DeleteGameParams {
-	required bytes game_mongo_id = 1;
 }
 
 enum ServerCodes {
