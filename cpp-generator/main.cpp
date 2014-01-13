@@ -418,11 +418,28 @@ class DelphiGenerator : public CodeGenerator {
 		for (int i=0; i<file->enum_type_count(); i++) {
 			const EnumDescriptor *type = file->enum_type(i);
 			string name = type->name();
-			//cerr << name;
+			scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("u" + type->name() + ".pas"));
+			io::Printer printer(output.get(), '$');
+			cerr << name << "\n";
+			printer.Print(
+				"unit u$name$;\n"
+				"\n"
+				"interface\n"
+				"\n"
+				"const\n"
+				,"name",type->name());
 			for (int j=0; j<type->value_count(); j++) {
 				const EnumValueDescriptor *value = type->value(j);
 				//cerr << value->name() << " = " << value->number() << "\n";
+				char hack[10];
+				snprintf(hack,9,"%d",value->number());
+				printer.Print("  $name$ = $hack$;\n","name",value->name(),"hack",hack);
 			}
+			printer.Print(
+				"\n"
+				"implementation\n"
+				"\n"
+				"end.");
 		}
 		return true;
 	}
