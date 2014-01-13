@@ -35,7 +35,7 @@ type
                                            SETTINGS_FILENAME: 'settings.dat';
 
                                            // socket server
-                                           TCP_SERVER_ADDRESS: 'ext.earthtools.ca';
+                                           TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
                                            TCP_SERVER_PORT: 12346;
 
                                            // urls

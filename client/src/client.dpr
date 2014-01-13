@@ -70,6 +70,7 @@ uses
   uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
   uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas';
 
+
 procedure FocusPokerApp;
 var
   window_handle: THandle;
