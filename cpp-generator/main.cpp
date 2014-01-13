@@ -30,6 +30,8 @@ string PrivateFieldName(const FieldDescriptor *field) {
 	return out;
 }
 string PropertyName(const FieldDescriptor *field) {
+	//cerr << "getting name for " << field->full_name() << "\n";
+	if (field->name() == "_id") return "MongoId";
 	string out = field->camelcase_name();
 	string::iterator i = out.begin();
 	if ('a' <= *i && *i <= 'z') *i += 'A' - 'a';
@@ -57,6 +59,11 @@ void CreateArguments(io::Printer *printer,const Descriptor *message) {
 		} else if (field->type() == FieldDescriptor::TYPE_STRING) {
 			if (field->label() != FieldDescriptor::LABEL_REPEATED) {
 				printer->Print("const A$name$: AnsiString","name",PrivateFieldName(field));
+				tick = true;
+			}
+		} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
+			if (field->label() != FieldDescriptor::LABEL_REPEATED) {
+				printer->Print("const A$name$: Boolean","name",PrivateFieldName(field));
 				tick = true;
 			}
 		}
@@ -171,11 +178,11 @@ class DelphiGenerator : public CodeGenerator {
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				if (field->type() == FieldDescriptor::TYPE_INT32) {
-					printer.Print("    property $name$: Integer read F$name$;\n","name",PropertyName(field));
+					printer.Print("    property $name$: Integer read F$name$ write F$name$;\n","name",PropertyName(field));
 				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
-					printer.Print("    property $name$: AnsiString read F$name$;\n","name",PropertyName(field));
+					printer.Print("    property $name$: AnsiString read F$name$ write F$name$;\n","name",PropertyName(field));
 				} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
-					printer.Print("    property $name$: Boolean read F$name$;\n","name",PropertyName(field));
+					printer.Print("    property $name$: Boolean read F$name$ write F$name$;\n","name",PropertyName(field));
 				} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
@@ -183,9 +190,10 @@ class DelphiGenerator : public CodeGenerator {
 							,"name",PropertyName(field));
 					} else {
 						printer.Print(
-							"    property $name$: TBytes read F$name$;\n"
+							"    property $name$: TBytes read F$pname$ write F$pname$;\n"
 //							"    property $name$_base64: String read Get$name$_base64;\n"
-							,"name",PropertyName(field));
+							,"name",PropertyName(field)
+							,"pname",PrivateFieldName(field));
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					const Descriptor *subtype = field->message_type();
@@ -225,6 +233,10 @@ class DelphiGenerator : public CodeGenerator {
 						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
+					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
+						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
+					}
+				} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
 					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
 						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
 					}
@@ -275,8 +287,10 @@ class DelphiGenerator : public CodeGenerator {
 						"      FN_$name$:\n"
 						"        begin\n"
 						"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"          F$name$ := AProtobufReader.readString;\n"
-						"        end;\n","name",name);
+						"          F$pname$ := AProtobufReader.readString;\n"
+						"        end;\n"
+						,"pname",PrivateFieldName(field)
+						,"name",name);
 				} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
@@ -284,7 +298,7 @@ class DelphiGenerator : public CodeGenerator {
 						"        begin\n"
 						"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
 						"          SetLength(F$pname$, Length(F$pname$) + 1);\n"
-						"          AProtobufReader.readMongoId(F$pname$[Length(F$pname$)-1]);\n"
+						"          AProtobufReader.readBytes(F$pname$[Length(F$pname$)-1]);\n"
 						"        end;\n"
 						,"name",name
 						,"pname",PrivateFieldName(field));
@@ -364,7 +378,10 @@ class DelphiGenerator : public CodeGenerator {
 							,"name",field->name()
 							,"pname",PrivateFieldName(field));
 					} else {
-						printer.Print("  pboutput.writeString(FN_$name$,F$name$);\n","name",PrivateFieldName(field));
+						printer.Print(
+							"  pboutput.writeString(FN_$name$,F$pname$);\n"
+							,"name",name
+							,"pname",PrivateFieldName(field));
 					}
 				}
 			}

@@ -1,7 +1,7 @@
 [Project]
 FileName=delphi generator.dev
 Name=delphi generator
-UnitCount=1
+UnitCount=3
 Type=1
 Ver=1
 ObjFiles=
@@ -15,7 +15,7 @@ CppCompiler=
 Linker=../../protobuf-2.5.0/protobuf.a_@@_
 IsCpp=1
 Icon=
-ExeOutput=..\..\poker-server
+ExeOutput=
 ObjectOutput=
 OverrideOutput=1
 OverrideOutputName=protoc-gen-delphi.exe
@@ -56,4 +56,23 @@ OriginalFilename=
 ProductName=
 ProductVersion=
 AutoIncBuildNr=0
+
+[Unit2]
+FileName=..\rebuild.bat
+Folder=delphi generator
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit3]
+FileName=..\..\protobuf-2.5.0\src\google\protobuf\descriptor.h
+CompileCpp=1
+Folder=delphi generator
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
 
