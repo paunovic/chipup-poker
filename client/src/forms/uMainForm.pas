@@ -5,10 +5,10 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.AppEvnts, dxSkinsCore,
-  dxSkinDevExpressStyle, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
+  cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem;
+  uMessageItem, dxSkinDarkRoom;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -27,7 +27,6 @@ type
     mmiCreateClub: TMenuItem;
     acShowCreateClubForm: TAction;
     gridJoinedClubsId: TcxGridColumn;
-    btLeaveClub: TcxButton;
     mmiJoinClub: TMenuItem;
     acShowJoinClubForm: TAction;
     acShowManageClubsForm: TAction;
@@ -46,23 +45,24 @@ type
     acShowChangeEMailForm: TAction;
     acShowChangePasswordForm: TAction;
     acShowChangeAvatarForm: TAction;
-    btOpenTable: TButton;
     mmiCashier: TMenuItem;
     gridJoinedClubsStatus: TcxGridColumn;
-    cxButton1: TcxButton;
-    cxButton2: TcxButton;
-    cxButton3: TcxButton;
-    cxGrid1: TcxGrid;
-    cxGridTableView1: TcxGridTableView;
+    btCreateClub: TcxButton;
+    btJoinClub: TcxButton;
+    gridGames: TcxGrid;
+    gridGamesTable: TcxGridTableView;
     cxGridColumn1: TcxGridColumn;
     cxGridColumn2: TcxGridColumn;
     cxGridColumn3: TcxGridColumn;
-    cxGridLevel1: TcxGridLevel;
-    cxGridTableView1Column1: TcxGridColumn;
-    cxGridTableView1Column2: TcxGridColumn;
-    cxGridTableView1Column3: TcxGridColumn;
+    gridGamesLevel: TcxGridLevel;
+    gridGamesTableColumn1: TcxGridColumn;
+    gridGamesTableColumn2: TcxGridColumn;
+    gridGamesTableColumn3: TcxGridColumn;
     SearchPublicClubs1: TMenuItem;
     acShowPublicGamesListForm: TAction;
+    btCashier: TcxButton;
+    btClubLobby: TcxButton;
+    cxLabel1: TcxLabel;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -76,7 +76,6 @@ type
     procedure acShowChangeEMailFormExecute(Sender: TObject);
     procedure acShowChangePasswordFormExecute(Sender: TObject);
     procedure acShowChangeAvatarFormExecute(Sender: TObject);
-    procedure btOpenTableClick(Sender: TObject);
     procedure gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowPublicGamesListFormExecute(Sender: TObject);
@@ -160,7 +159,6 @@ procedure TfrmChipUpMain.DoLogout;
 begin
   lbUserInfo.Caption := '';
   gridJoinedClubsTable.DataController.SetRecordCount(0);
-  btLeaveClub.Enabled := FALSE;
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
 end;
@@ -264,14 +262,9 @@ begin
   SocketClient.LeaveClub(FSelectedClub.Id);
 end;
 
-procedure TfrmChipUpMain.btOpenTableClick(Sender: TObject);
-begin
-  dmMain.Tables.AddTable(Random(10000000));
-end;
-
 procedure TfrmChipUpMain.ConfigureGUI;
 begin
-  lbUserInfo.Caption := Format('You have %d tokens.', [dmMain.SelfInfo.Tokens]);
+  lbUserInfo.Caption := Format('You have %d tokens', [dmMain.SelfInfo.Tokens]);
 
   Caption := Format('ChipUP Poker - Logged in as %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
@@ -318,7 +311,6 @@ begin
   recIndex := gridJoinedClubsTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
   begin
-    btLeaveClub.Enabled := FALSE;
     FSelectedClub := nil;
     Exit;
   end;
@@ -326,10 +318,6 @@ begin
   club_id := gridJoinedClubsTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
   if dmMain.SelfInfo.Clubs.FindClub(club_id, FSelectedClub) then
   begin
-    if FSelectedClub.OwnerId = dmMain.SelfInfo.Id then
-      btLeaveClub.Enabled := FALSE
-    else
-      btLeaveClub.Enabled := TRUE;
   end
   else
     FSelectedClub := nil;

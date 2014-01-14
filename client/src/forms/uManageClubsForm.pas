@@ -5,9 +5,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
-  dxSkinDevExpressStyle, dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxTextEdit, cxSpinEdit,
+  dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxTextEdit, cxSpinEdit,
   cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxContainer,
-  cxLabel, cxRadioGroup, cxGroupBox, dxSkinsForm, uClubInfo, Vcl.ActnList, cxMaskEdit, uPlayerInfo, uGameInfo, uMessageItem;
+  cxLabel, cxRadioGroup, cxGroupBox, dxSkinsForm, uClubInfo, Vcl.ActnList, cxMaskEdit, uPlayerInfo, uGameInfo, uMessageItem, dxSkinDarkRoom;
 
 type
   TfrmManageClubs = class(TForm)

@@ -4,9 +4,9 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, dxSkinsCore, dxSkinDevExpressStyle, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
   cxLookAndFeelPainters, cxContainer, cxEdit, cxLabel, cxTextEdit, Vcl.StdCtrls, cxRadioGroup, Vcl.Menus, cxButtons, Vcl.ActnList,
-  uMessageItem;
+  uMessageItem, dxSkinDarkRoom;
 
 type
   TfrmCreateClub = class(TForm)
@@ -19,10 +19,10 @@ type
     rbPublic: TcxRadioButton;
     alCreateClub: TActionList;
     acOK: TAction;
-    lbInfo: TcxLabel;
     btOK: TcxButton;
     btCancel: TcxButton;
     acCancel: TAction;
+    lbsInfo: TcxLabel;
     procedure acOKExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -52,7 +52,7 @@ uses
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
 begin
-  dmMain.MakeTokenCostMessage(lbInfo, 'Club creation', dmMain.ServerSettings.TokenPrices.ClubCreation);
+  dmMain.MakeTokenCostMessage(lbsInfo, 'Club creation', dmMain.ServerSettings.TokenPrices.ClubCreation);
 
   edClubName.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubName;
   edClubCode.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubInvCode;

@@ -1,7 +1,7 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  ClientHeight = 637
+  ClientHeight = 575
   ClientWidth = 940
   Color = clWindow
   Ctl3D = False
@@ -16,16 +16,17 @@ object frmChipUpMain: TfrmChipUpMain
   OnDestroy = FormDestroy
   DesignSize = (
     940
-    637)
+    575)
   PixelsPerInch = 96
   TextHeight = 14
   object gridJoinedClubs: TcxGrid
     Left = 8
-    Top = 246
+    Top = 184
     Width = 290
     Height = 383
     Anchors = [akLeft, akBottom]
     TabOrder = 0
+    ExplicitTop = 246
     object gridJoinedClubsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridJoinedClubsTableCellDblClick
@@ -71,68 +72,53 @@ object frmChipUpMain: TfrmChipUpMain
       GridView = gridJoinedClubsTable
     end
   end
-  object btLeaveClub: TcxButton
-    Left = 60
-    Top = 97
-    Width = 105
-    Height = 32
-    Caption = 'Leave Club'
-    Enabled = False
-    TabOrder = 1
-    OnClick = btLeaveClubClick
-  end
   object lbUserInfo: TcxLabel
-    Left = 8
-    Top = 191
+    Left = 748
+    Top = 74
+    Caption = 'You have 100 tokens'
     Transparent = True
   end
-  object btOpenTable: TButton
-    Left = 360
-    Top = 101
-    Width = 75
-    Height = 25
-    Caption = 'Open Table'
-    TabOrder = 3
-    OnClick = btOpenTableClick
-  end
-  object cxButton1: TcxButton
-    Left = 216
-    Top = 57
-    Width = 105
-    Height = 32
-    Caption = 'Create Club'
-    Enabled = False
-    TabOrder = 4
-    OnClick = btLeaveClubClick
-  end
-  object cxButton2: TcxButton
-    Left = 60
-    Top = 57
-    Width = 105
-    Height = 32
-    Caption = 'Join Club'
-    Enabled = False
-    TabOrder = 5
-    OnClick = btLeaveClubClick
-  end
-  object cxButton3: TcxButton
-    Left = 216
-    Top = 97
-    Width = 105
-    Height = 32
-    Caption = 'Manage Club'
-    Enabled = False
-    TabOrder = 6
-    OnClick = btLeaveClubClick
-  end
-  object cxGrid1: TcxGrid
+  object btCreateClub: TcxButton
     Left = 304
-    Top = 246
+    Top = 139
+    Width = 157
+    Height = 40
+    Action = acShowCreateClubForm
+    Anchors = [akLeft, akBottom]
+    Caption = 'CREATE CLUB'
+    TabOrder = 2
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object btJoinClub: TcxButton
+    Left = 467
+    Top = 139
+    Width = 157
+    Height = 40
+    Action = acShowJoinClubForm
+    Anchors = [akLeft, akBottom]
+    Caption = 'JOIN CLUB'
+    TabOrder = 3
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object gridGames: TcxGrid
+    Left = 304
+    Top = 184
     Width = 628
     Height = 383
     Anchors = [akLeft, akBottom]
-    TabOrder = 7
-    object cxGridTableView1: TcxGridTableView
+    TabOrder = 4
+    ExplicitTop = 246
+    object gridGamesTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridJoinedClubsTableCellDblClick
       OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
@@ -171,25 +157,72 @@ object frmChipUpMain: TfrmChipUpMain
         HeaderAlignmentHorz = taCenter
         Width = 49
       end
-      object cxGridTableView1Column1: TcxGridColumn
+      object gridGamesTableColumn1: TcxGridColumn
         Caption = 'Blinds'
         HeaderAlignmentHorz = taCenter
         Width = 53
       end
-      object cxGridTableView1Column2: TcxGridColumn
+      object gridGamesTableColumn2: TcxGridColumn
         Caption = 'Players'
         HeaderAlignmentHorz = taCenter
         Width = 64
       end
-      object cxGridTableView1Column3: TcxGridColumn
+      object gridGamesTableColumn3: TcxGridColumn
         Caption = 'Status'
         HeaderAlignmentHorz = taCenter
         Width = 133
       end
     end
-    object cxGridLevel1: TcxGridLevel
-      GridView = cxGridTableView1
+    object gridGamesLevel: TcxGridLevel
+      GridView = gridGamesTable
     end
+  end
+  object btCashier: TcxButton
+    Left = 678
+    Top = 139
+    Width = 254
+    Height = 40
+    Anchors = [akLeft, akBottom]
+    Caption = 'CASHIER'
+    Enabled = False
+    TabOrder = 5
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = btLeaveClubClick
+  end
+  object btClubLobby: TcxButton
+    Left = 8
+    Top = 139
+    Width = 290
+    Height = 40
+    Anchors = [akLeft, akBottom]
+    Caption = 'OPEN CLUB LOBBY'
+    Enabled = False
+    TabOrder = 6
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = btLeaveClubClick
+  end
+  object cxLabel1: TcxLabel
+    Left = 32
+    Top = 39
+    Caption = 'LOGO AND DESIGN'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -40
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.IsFontAssigned = True
+    Transparent = True
   end
   object alMainForm: TActionList
     Left = 552
@@ -304,7 +337,7 @@ object frmChipUpMain: TfrmChipUpMain
     Top = 24
   end
   object SkinController: TdxSkinController
-    SkinName = 'DevExpressStyle'
+    SkinName = 'Darkroom'
     Left = 552
     Top = 80
   end

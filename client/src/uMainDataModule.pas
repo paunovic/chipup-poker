@@ -86,15 +86,16 @@ begin
     caption := caption + #10 + 'Click here to get more tokens';
     ALabel.OnClick := lbGetTokensClick;
     ALabel.Cursor := crHandPoint;
-    ALabel.Style.TextColor := clNavy;
+    ALabel.Style.TextColor := clAqua;
     ALabel.Style.TextStyle := [fsUnderline];
   end
   else
   begin
     ALabel.OnClick := nil;
     ALabel.Cursor := crDefault;
-    ALabel.Style.TextColor := clDefault;
+    ALabel.Style.TextColor := clWindowText;
     ALabel.Style.TextStyle := [];
+    ALabel.Style.AssignedValues := [];
   end;
 
   ALabel.Caption := caption;

@@ -5,8 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  dxSkinDevExpressStyle, Vcl.StdCtrls, cxRadioGroup, cxLabel, cxTextEdit, Vcl.Menus, cxButtons, uClubInfo, Vcl.ActnList, uIFormParams,
-  uMessageItem;
+  Vcl.StdCtrls, cxRadioGroup, cxLabel, cxTextEdit, Vcl.Menus, cxButtons, uClubInfo, Vcl.ActnList, uIFormParams,
+  uMessageItem, dxSkinDarkRoom;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams)

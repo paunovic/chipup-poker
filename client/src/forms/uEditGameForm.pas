@@ -5,8 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  dxSkinDevExpressStyle, Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  Vcl.Samples.Spin, cxSpinEdit, uGameInfo, uIFormParams, uMessageItem;
+  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  Vcl.Samples.Spin, cxSpinEdit, uGameInfo, uIFormParams, uMessageItem, dxSkinDarkRoom;
 
 type
   TfrmEditGame = class(TForm, IFormParams)

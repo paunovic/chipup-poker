@@ -141,13 +141,13 @@ object frmCreateAccount: TfrmCreateAccount
     Transparent = True
   end
   object lbTOS: TcxLabel
-    Left = 88
+    Left = 89
     Top = 176
     Cursor = crHandPoint
     Caption = 'Terms and Conditions'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
-    Style.Font.Color = clNavy
+    Style.Font.Color = clAqua
     Style.Font.Height = -11
     Style.Font.Name = 'Arial'
     Style.Font.Style = []

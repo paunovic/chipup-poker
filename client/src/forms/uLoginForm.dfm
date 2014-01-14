@@ -129,6 +129,7 @@ object frmLogin: TfrmLogin
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
+    Visible = False
   end
   object alLogin: TActionList
     Left = 36
@@ -150,7 +151,7 @@ object frmLogin: TfrmLogin
     end
   end
   object SkinController: TdxSkinController
-    SkinName = 'DevExpressStyle'
+    SkinName = 'Darkroom'
     Left = 496
     Top = 12
   end

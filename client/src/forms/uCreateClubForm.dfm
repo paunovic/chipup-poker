@@ -101,31 +101,6 @@ object frmCreateClub: TfrmCreateClub
     TabStop = True
     Transparent = True
   end
-  object lbInfo: TcxLabel
-    AlignWithMargins = True
-    Left = 10
-    Top = 3
-    Margins.Left = 10
-    Margins.Right = 10
-    Align = alTop
-    AutoSize = False
-    ParentFont = False
-    Style.Font.Charset = ANSI_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = [fsBold]
-    Style.TextStyle = []
-    Style.IsFontAssigned = True
-    Properties.Alignment.Horz = taCenter
-    Properties.Alignment.Vert = taVCenter
-    Properties.WordWrap = True
-    Transparent = True
-    Height = 36
-    Width = 366
-    AnchorX = 193
-    AnchorY = 21
-  end
   object btOK: TcxButton
     Left = 177
     Top = 136
@@ -134,7 +109,7 @@ object frmCreateClub: TfrmCreateClub
     Action = acOK
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 8
+    TabOrder = 7
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -13
@@ -150,13 +125,27 @@ object frmCreateClub: TfrmCreateClub
     Action = acCancel
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 9
+    TabOrder = 8
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+  end
+  object lbsInfo: TcxLabel
+    Left = 0
+    Top = 0
+    Align = alTop
+    AutoSize = False
+    ParentFont = False
+    Properties.Alignment.Horz = taCenter
+    Properties.Alignment.Vert = taVCenter
+    Transparent = True
+    Height = 36
+    Width = 386
+    AnchorX = 193
+    AnchorY = 18
   end
   object alCreateClub: TActionList
     Left = 24
