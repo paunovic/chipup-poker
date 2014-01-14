@@ -10,7 +10,7 @@ var SmtpConnection = require('./smtp');
 var express = require('express');
 var uuid = require('node-uuid');
 var generatePassword = require('password-generator');
-var codes = require('./codes');
+var codes = require('./ServerCodes');
 var crypto = require('crypto');
 var p = require("node-protobuf").Protobuf;
 var Deck = require('./deck');
@@ -238,6 +238,7 @@ function ClientSocket(socket) {
 	this.socket = socket;
 	socket.on('end',function() {
 		this.log('client lost');
+		delete activeUsers[this.userid];
 	}.bind(this));
 	//this.socket.write("abc\ndef\nghi\n");
 	this.send(codes.SR_HELLO,sharedconfig,'Poker.HelloReply');
@@ -271,7 +272,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password) {
 	}
 }
 ClientSocket.prototype.logout = function () {
-	activeUsers[this.userid] = null;
+	delete activeUsers[this.userid];
 	this.state = 1;
 	this.userid = null;
 	this.nick = null;
@@ -970,8 +971,33 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.send(codes.SR_EDIT_GAME_OK);
 			}.bind(this));
 			break;
+		case codes.EVENT_CHAT:
+			var event = pb.Parse(args,'Poker.ChatEvent');
+			console.log(event);
+			this.handleChatEvent(event,Date.now());
+			break;
 		}
 	}
+}
+ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
+	switch (ev.event) {
+	case 'Message':
+		for (var x=0; x<ev.messages.length; x++) {
+			ev.messages[x].username = this.nick;
+			ev.messages[x].timestamp = ts;
+		}
+		switch (ev.channel) {
+		case 'Global':
+			this.log('global channel');
+			for (key in activeUsers) {
+				if (key == this.userid) continue;
+				activeUsers[key].send(codes.EVENT_CHAT,ev,'Poker.ChatEvent');
+			}
+			break;
+		}
+		break;
+	}
+
 }
 function checkGameParams(smallblind,bigblind,gamename,seats,game_type,game_limit) {
 	if (smallblind < 1) return true;

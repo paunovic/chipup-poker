@@ -92,6 +92,7 @@ type
     procedure TCLeaveClubInvalidId(const AMessage: TMessageItem);
     procedure TCLogout(const AMessage: TMessageItem);
     procedure TCSecondaryLoginDetected(const AMessage: TMessageItem);
+    procedure TCChatEvent(const AMessage: TMessageItem);
 
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
@@ -114,7 +115,8 @@ implementation
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
   uPlayerInfo, uManageClubsForm, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatar, uPublicClubsList,
-  uPB_StatusReply, uMessageContainer, uServerMessageCallback;
+  uPB_StatusReply, uMessageContainer, uServerMessageCallback,
+  uPB_ChatEvent,uPB_ChatMessage,uDebugForm;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -144,7 +146,8 @@ begin
                             TServerMessageCallback.Create(SR_LOGOUT, TCLogout),
                             TServerMessageCallback.Create(SR_LEAVECLUB_OK, TCLeaveClubOk),
                             TServerMessageCallback.Create(SR_LEAVECLUB_INVALID_ID, TCLeaveClubInvalidId),
-                            TServerMessageCallback.Create(SR_SECONDARY_LOGIN_DETECTED, TCSecondaryLoginDetected)
+                            TServerMessageCallback.Create(SR_SECONDARY_LOGIN_DETECTED, TCSecondaryLoginDetected),
+                            TServerMessageCallback.Create(EVENT_CHAT,TCChatEvent)
                           ]
                         );
 
@@ -326,6 +329,18 @@ end;
 procedure TfrmChipUpMain.TCSecondaryLoginDetected(const AMessage: TMessageItem);
 begin
   ShowLoginForm;
+end;
+
+procedure TfrmChipUpMain.TCChatEvent(const AMessage: TMessageItem);
+var
+  chatEvent: TPB_ChatEvent;
+  messages: TPB_ChatMessages;
+  msg: TPB_ChatMessage;
+begin
+  chatEvent := AMessage.Object_ as TPB_ChatEvent;
+  messages := chatEvent.Messages;
+  msg := messages[0];
+  DebugLn(Format('Chat message <%s> %s', [msg.Username, msg.Msg]), ditSocketInc);
 end;
 
 procedure TfrmChipUpMain.TCStatusReply(const AMessage: TMessageItem);

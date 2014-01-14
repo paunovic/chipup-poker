@@ -63,7 +63,10 @@ uses
   uPB_ChangePasswordParams in 'modules\protobuf\objects\uPB_ChangePasswordParams.pas',
   uPB_Game in 'modules\protobuf\objects\uPB_Game.pas',
   uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
-  uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas';
+  uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas',
+  uPB_ChatMessage in 'modules\protobuf\objects\uPB_ChatMessage.pas',
+  uPB_ChatEvent in 'modules\protobuf\objects\uPB_ChatEvent.pas',
+  uEventType in 'modules\protobuf\objects\uEventType.pas';
 
 procedure FocusPokerApp;
 var
