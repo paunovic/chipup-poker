@@ -26,7 +26,6 @@ object frmChipUpMain: TfrmChipUpMain
     Height = 383
     Anchors = [akLeft, akBottom]
     TabOrder = 0
-    ExplicitTop = 246
     object gridJoinedClubsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridJoinedClubsTableCellDblClick
@@ -117,7 +116,6 @@ object frmChipUpMain: TfrmChipUpMain
     Height = 383
     Anchors = [akLeft, akBottom]
     TabOrder = 4
-    ExplicitTop = 246
     object gridGamesTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridJoinedClubsTableCellDblClick
@@ -223,6 +221,15 @@ object frmChipUpMain: TfrmChipUpMain
     Style.Font.Style = [fsBold]
     Style.IsFontAssigned = True
     Transparent = True
+  end
+  object Button1: TButton
+    Left = 460
+    Top = 84
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 8
+    OnClick = Button1Click
   end
   object alMainForm: TActionList
     Left = 552

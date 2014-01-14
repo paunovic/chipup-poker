@@ -6,7 +6,7 @@ uses
   System.Generics.Collections;
 
 type
-  TFieldVarType = (fvtUnknown, fvtInt32, fvtString, fvtBoolean, fvtBytes, fvtClass);
+  TFieldVarType = (fvtUnknown, fvtInt32, fvtString, fvtBoolean, fvtBytes, fvtClass, fvtInt64);
   TFieldType    = (ftUnknown, ftRequired, ftOptional, ftRepeated);
 
   TField = class
@@ -133,6 +133,9 @@ begin
   if AString = 'int32' then
     Exit(fvtInt32);
 
+  if AString = 'int64' then
+    Exit(fvtInt64);
+
   if AString = 'string' then
     Exit(fvtString);
 
@@ -177,6 +180,7 @@ begin
     fvtUnknown: result := 'Unknown';
     fvtClass: result := 'TPB_' + FVarTypeStr;
     fvtInt32: result := 'Integer';
+    fvtInt64: result := 'Int64';
     fvtString: result := 'AnsiString';
     fvtBoolean: result := 'Boolean';
     fvtBytes: result := 'TBytes';
@@ -193,6 +197,7 @@ begin
     fvtUnknown: result := 'readUnknown';
     fvtClass: result := 'readClass';
     fvtInt32: result := 'readInt32';
+    fvtInt64: result := 'readInt64';
     fvtString: result := 'readString';
     fvtBoolean: result := 'readBoolean';
     fvtBytes: result := Format('readBytes(%s)', [AsPrivateProperty]);
@@ -204,6 +209,7 @@ begin
   case FVarType of
     fvtUnknown: result := 'writeUnknown';
     fvtInt32: result := 'writeInt32';
+    fvtInt64: result := 'writeInt64';
     fvtString: result := 'writeString';
     fvtBoolean: result := 'writeBoolean';
     fvtClass: result := 'writeClass';
@@ -216,6 +222,7 @@ begin
   case FVarType of
     fvtUnknown: result := 'UNKNOWN';
     fvtInt32: result := '0';
+    fvtInt64: result := '0';
     fvtString: result := '''''';
     fvtBoolean: result := 'FALSE';
     fvtBytes: result := '''''';
@@ -228,6 +235,7 @@ begin
     fvtUnknown: result := 'WIRETYPE_UNKNOWN';
     fvtClass: result := 'WIRETYPE_LENGTH_DELIMITED';
     fvtInt32: result := 'WIRETYPE_VARINT';
+    fvtInt64: result := 'WIRETYPE_VARINT';
     fvtString: result := 'WIRETYPE_LENGTH_DELIMITED';
     fvtBoolean: result := 'WIRETYPE_VARINT';
     fvtBytes: result := 'WIRETYPE_LENGTH_DELIMITED';

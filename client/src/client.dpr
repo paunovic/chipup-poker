@@ -23,7 +23,7 @@ uses
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableForm in 'forms\uTableForm.pas' {frmTable},
   uCreateGameForm in 'forms\uCreateGameForm.pas' {frmCreateGame},
-  uDebugForm in 'forms\uDebugForm.pas' {frmDebug},
+  {$IFDEF DEBUG} uDebugForm in 'forms\uDebugForm.pas' {frmDebug}, {$ENDIF}
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',
@@ -65,8 +65,7 @@ uses
   uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
   uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas',
   uPB_ChatMessage in 'modules\protobuf\objects\uPB_ChatMessage.pas',
-  uPB_ChatEvent in 'modules\protobuf\objects\uPB_ChatEvent.pas',
-  uEventType in 'modules\protobuf\objects\uEventType.pas';
+  uPB_ChatEvent in 'modules\protobuf\objects\uPB_ChatEvent.pas';
 
 procedure FocusPokerApp;
 var
@@ -80,7 +79,7 @@ end;
 
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
-
+                     {
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then
   begin
@@ -88,7 +87,7 @@ begin
     Exit;
   end;
 
-  TInstanceController.RegisterInstance;
+  TInstanceController.RegisterInstance;  }
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;

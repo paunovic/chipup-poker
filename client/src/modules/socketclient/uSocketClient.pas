@@ -52,6 +52,7 @@ type
     procedure DeleteGame(const AGameId: String);
     procedure EditGame(const AGameId: String; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
     procedure ListPublicClubs;
+    procedure SendChatEvent(const AChannel, AMessage: String);
 
     property Socket     : TSslWSocket read FSocket;
     property ConnectCode: Integer read FConnectCode;
@@ -69,9 +70,8 @@ uses
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
-  uPB_SetAvatarParams,
-  pbOutput, pbInput, uMessageContainer,
-  uPB_ChatEvent;
+  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage,
+  pbOutput, pbInput, uMessageContainer;
 
 
 constructor TSocketClient.Create(const AServer: String; const APort: Integer);
@@ -230,7 +230,6 @@ begin
     SR_REGISTER_INVALID_MAIL: ;
     SR_LIST_CLUBS: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     SR_STATUS: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    EVENT_CHAT: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     SR_CREATECLUB_OK: ;
     SR_CREATECLUB_NAME_EXISTS: ;
     SR_CREATECLUB_INVALID_NAME: ;
@@ -266,6 +265,7 @@ begin
     SR_DELETE_GAME_OK: ;
     SR_EDIT_GAME_OK: ;
     SR_SECONDARY_LOGIN_DETECTED: ;
+    EVENT_CHAT: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
   end;
@@ -530,6 +530,22 @@ end;
 procedure TSocketClient.ListPublicClubs;
 begin
   SendProtobuf(CMD_LIST_PUBLIC_CLUBS, nil);
+end;
+
+procedure TSocketClient.SendChatEvent(const AChannel, AMessage: String);
+var
+  protobuf: TPB_ChatEvent;
+begin
+  protobuf := TPB_ChatEvent.Create;
+  try
+    protobuf.Event := ceMessage;
+    protobuf.Channel := AnsiString(AChannel);
+    protobuf.ChatMessage := TPB_ChatMessage.Create;
+    protobuf.ChatMessage.Msg := AnsiString(AMessage);
+    SendProtobuf(EVENT_CHAT, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.SendProtobuf(const AMethodId: DWORD; const AProtobuf: TProtobufBaseObject);

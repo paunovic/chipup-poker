@@ -8,7 +8,12 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, dxSkinDarkRoom;
+  uMessageItem, dxSkinDarkRoom, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkSide,
+  dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian,
+  dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue,
+  dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver,
+  dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust,
+  dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinsDefaultPainters, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -63,6 +68,7 @@ type
     btCashier: TcxButton;
     btClubLobby: TcxButton;
     cxLabel1: TcxLabel;
+    Button1: TButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -76,9 +82,9 @@ type
     procedure acShowChangeEMailFormExecute(Sender: TObject);
     procedure acShowChangePasswordFormExecute(Sender: TObject);
     procedure acShowChangeAvatarFormExecute(Sender: TObject);
-    procedure gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowPublicGamesListFormExecute(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     FSelectedClub: TClubInfo;
 
@@ -116,7 +122,8 @@ uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
   uPlayerInfo, uManageClubsForm, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatar, uPublicClubsList,
   uPB_StatusReply, uMessageContainer, uServerMessageCallback,
-  uPB_ChatEvent,uPB_ChatMessage,uDebugForm;
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
+  uPB_ChatEvent, uPB_ChatMessage;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -147,7 +154,7 @@ begin
                             TServerMessageCallback.Create(SR_LEAVECLUB_OK, TCLeaveClubOk),
                             TServerMessageCallback.Create(SR_LEAVECLUB_INVALID_ID, TCLeaveClubInvalidId),
                             TServerMessageCallback.Create(SR_SECONDARY_LOGIN_DETECTED, TCSecondaryLoginDetected),
-                            TServerMessageCallback.Create(EVENT_CHAT,TCChatEvent)
+                            TServerMessageCallback.Create(EVENT_CHAT, TCChatEvent)
                           ]
                         );
 
@@ -265,6 +272,11 @@ begin
   SocketClient.LeaveClub(FSelectedClub.Id);
 end;
 
+procedure TfrmChipUpMain.Button1Click(Sender: TObject);
+begin
+  SocketClient.SendChatEvent('Global', 'test123');
+end;
+
 procedure TfrmChipUpMain.ConfigureGUI;
 begin
   lbUserInfo.Caption := Format('You have %d tokens', [dmMain.SelfInfo.Tokens]);
@@ -331,18 +343,6 @@ begin
   ShowLoginForm;
 end;
 
-procedure TfrmChipUpMain.TCChatEvent(const AMessage: TMessageItem);
-var
-  chatEvent: TPB_ChatEvent;
-  messages: TPB_ChatMessages;
-  msg: TPB_ChatMessage;
-begin
-  chatEvent := AMessage.Object_ as TPB_ChatEvent;
-  messages := chatEvent.Messages;
-  msg := messages[0];
-  DebugLn(Format('Chat message <%s> %s', [msg.Username, msg.Msg]), ditSocketInc);
-end;
-
 procedure TfrmChipUpMain.TCStatusReply(const AMessage: TMessageItem);
 var
   pbstatus: TPB_StatusReply;
@@ -371,5 +371,17 @@ procedure TfrmChipUpMain.TCLogout(const AMessage: TMessageItem);
 begin
   ShowLoginForm;
 end;
+
+procedure TfrmChipUpMain.TCChatEvent(const AMessage: TMessageItem);
+var
+  chatEvent: TPB_ChatEvent;
+begin
+  chatEvent := AMessage.Object_ as TPB_ChatEvent;
+
+  {$IFDEF DEBUG} DebugLn(Format('Chat message <%s> %s', [chatEvent.ChatMessage.Username, chatEvent.ChatMessage.Msg]), ditSocketInc); {$ENDIF}
+end;
+
+
+
 
 end.

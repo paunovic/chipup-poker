@@ -187,7 +187,6 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_TransferChipsParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChatMessage.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChatEvent.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uEventType.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
@@ -338,9 +337,9 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
+					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win64"/>
-					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 				</Deployment>
 				<Platforms>
 					<Platform value="Win64">True</Platform>
