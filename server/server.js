@@ -980,11 +980,11 @@ ClientSocket.prototype.handle = function (code,args) {
 	}
 }
 ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
-	switch (ev.type) {
+	switch (ev.event) {
 	case 'Message':
-		for (var x=0; x<ev.message.length; x++) {
-			ev.message[x].username = this.nick;
-			ev.message[x].timestamp = ts;
+		for (var x=0; x<ev.messages.length; x++) {
+			ev.messages[x].username = this.nick;
+			ev.messages[x].timestamp = ts;
 		}
 		switch (ev.channel) {
 		case 'Global':
