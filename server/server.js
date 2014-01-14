@@ -238,7 +238,7 @@ function ClientSocket(socket) {
 	this.socket = socket;
 	socket.on('end',function() {
 		this.log('client lost');
-		activeUsers[this.userid] = null;
+		delete activeUsers[this.userid];
 	}.bind(this));
 	//this.socket.write("abc\ndef\nghi\n");
 	this.send(codes.SR_HELLO,sharedconfig,'Poker.HelloReply');
@@ -272,7 +272,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password) {
 	}
 }
 ClientSocket.prototype.logout = function () {
-	activeUsers[this.userid] = null;
+	delete activeUsers[this.userid];
 	this.state = 1;
 	this.userid = null;
 	this.nick = null;
