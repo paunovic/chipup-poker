@@ -131,15 +131,15 @@ message ChatEvent {
 		Join = 1;
 		Part = 2;
 	}
-	required EventType type = 1;
-	repeated ChatMessage message = 2;
+	required EventType event = 1;
+	repeated ChatMessage messages = 2;
 	required string channel = 3;
 }
 
 message ChatMessage {
 	optional bytes _id = 1;
 	optional string username = 2;
-	required string message = 3;
+	required string msg = 3;
 	optional int64 timestamp = 4;
 }
 

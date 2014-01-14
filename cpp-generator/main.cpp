@@ -37,7 +37,7 @@ string PropertyName(const FieldDescriptor *field) {
 	if ('a' <= *i && *i <= 'z') *i += 'A' - 'a';
 	return out;
 }
-void CreateArguments(io::Printer *printer,const Descriptor *message) {
+/*void CreateArguments(io::Printer *printer,const Descriptor *message) {
 	bool first = true;
 	bool tick = false;
 	for (int j=0; j<message->field_count(); j++) {
@@ -68,6 +68,31 @@ void CreateArguments(io::Printer *printer,const Descriptor *message) {
 			}
 		}
 	}
+}*/
+void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_context) {
+	string name = type->name();
+	scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("u" + type->name() + ".pas"));
+	io::Printer printer(output.get(), '$');
+	cerr << name << "\n";
+	printer.Print(
+		"unit u$name$;\n"
+		"\n"
+		"interface\n"
+		"\n"
+		"const\n"
+		,"name",type->name());
+	for (int j=0; j<type->value_count(); j++) {
+		const EnumValueDescriptor *value = type->value(j);
+		//cerr << value->name() << " = " << value->number() << "\n";
+		char hack[10];
+		snprintf(hack,9,"%d",value->number());
+		printer.Print("  $name$ = $hack$;\n","name",value->name(),"hack",hack);
+	}
+	printer.Print(
+		"\n"
+		"implementation\n"
+		"\n"
+		"end.");
 }
 // some code based on http://sourceforge.net/p/protobuf-delphi/wiki/Example/
 class DelphiGenerator : public CodeGenerator {
@@ -79,6 +104,10 @@ class DelphiGenerator : public CodeGenerator {
 		for (int i=0; i<file->message_type_count(); i++) {
 			const Descriptor *message = file->message_type(i);
 			cerr << "message#" << i << " " << message->name() << "\n";
+			for (int j=0; j < message->enum_type_count(); j++) {
+				const EnumDescriptor *enum_type = message->enum_type(j);
+				GenerateEnum(enum_type,generator_context);
+			}
 			scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("uPB_" + message->name() + ".pas"));
 			io::Printer printer(output.get(), '$');
 			printer.Print(
@@ -149,6 +178,12 @@ class DelphiGenerator : public CodeGenerator {
 							"      F$name$: TPB_$subname$;\n"
 							,"name",field->camelcase_name(),"subname",subtype->name());
 					}
+				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
+						//const EnumDescriptor *type = field->enum_type();
+						// FIXME, use a delphi enum?
+						printer.Print("      F$name$: Integer;\n","name",PrivateFieldName(field));
+					}
 				}
 			}
 			for (int j=0; j<message->field_count(); j++) {
@@ -166,11 +201,11 @@ class DelphiGenerator : public CodeGenerator {
 //				"    procedure Read(const AStream: TStream);\n"
 //				"    procedure Write: TProtoBufOutput;\n"
 				"  public\n"
-				"    constructor Create("
+//				"    constructor Create("
 				);
-			CreateArguments(&printer,message);
+//			CreateArguments(&printer,message);
 			printer.Print(
-				"); overload;\n"
+//				"); overload;\n"
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
 				"    function GetProtobuf: TProtoBufOutput; override;\n"
@@ -205,6 +240,15 @@ class DelphiGenerator : public CodeGenerator {
 						printer.Print(
 							"    property $name$: TPB_$subname$ read F$name$;\n","name",field->name(),"subname",subtype->name());
 					}
+				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
+						//const EnumDescriptor *type = field->enum_type();
+						// FIXME, same as above
+						printer.Print("    property $name$: Integer read F$pname$;\n"
+							,"name",PropertyName(field)
+							//,"subname",type->name()
+							,"pname",PrivateFieldName(field));
+					}
 				}
 			}
 			printer.Print(
@@ -218,9 +262,9 @@ class DelphiGenerator : public CodeGenerator {
 				"  pbPublic, uCommon;\n"
 				"\n"
 				"\n"
-				"constructor TPB_$name$.Create("
+//				"constructor TPB_$name$.Create("
 				,"name",message->name());
-			CreateArguments(&printer,message);
+/*			CreateArguments(&printer,message);
 			printer.Print(");\nbegin\n");
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
@@ -241,9 +285,9 @@ class DelphiGenerator : public CodeGenerator {
 						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
 					}
 				}
-			}
+			}*/
 			printer.Print(
-				"end;\n"
+//				"end;\n"
 //				"{ TPBR_$name$ }\n"
 				"destructor TPB_$name$.Destroy;\n"
 				"begin\n"
@@ -340,6 +384,18 @@ class DelphiGenerator : public CodeGenerator {
 							,"name",name
 							,"subname",subtype->name());
 					}
+				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
+						const EnumDescriptor *type = field->enum_type();
+						printer.Print(
+							"      FN_$name$:\n"
+							"        begin\n"
+							"          Assert(wire_type = WIRETYPE_VARINT);\n"
+							"          F$pname$ := AProtobufReader.readInt32;\n"
+							"        end;\n"
+							,"name",name
+							,"pname",PrivateFieldName(field));
+					}
 				}
 			}
 			printer.Print(
@@ -417,29 +473,7 @@ class DelphiGenerator : public CodeGenerator {
 		}
 		for (int i=0; i<file->enum_type_count(); i++) {
 			const EnumDescriptor *type = file->enum_type(i);
-			string name = type->name();
-			scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("u" + type->name() + ".pas"));
-			io::Printer printer(output.get(), '$');
-			cerr << name << "\n";
-			printer.Print(
-				"unit u$name$;\n"
-				"\n"
-				"interface\n"
-				"\n"
-				"const\n"
-				,"name",type->name());
-			for (int j=0; j<type->value_count(); j++) {
-				const EnumValueDescriptor *value = type->value(j);
-				//cerr << value->name() << " = " << value->number() << "\n";
-				char hack[10];
-				snprintf(hack,9,"%d",value->number());
-				printer.Print("  $name$ = $hack$;\n","name",value->name(),"hack",hack);
-			}
-			printer.Print(
-				"\n"
-				"implementation\n"
-				"\n"
-				"end.");
+			GenerateEnum(type,generator_context);
 		}
 		return true;
 	}

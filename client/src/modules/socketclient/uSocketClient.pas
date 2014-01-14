@@ -70,7 +70,8 @@ uses
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
   uPB_SetAvatarParams,
-  pbOutput, pbInput, uMessageContainer;
+  pbOutput, pbInput, uMessageContainer,
+  uPB_ChatEvent;
 
 
 constructor TSocketClient.Create(const AServer: String; const APort: Integer);
@@ -229,6 +230,7 @@ begin
     SR_REGISTER_INVALID_MAIL: ;
     SR_LIST_CLUBS: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     SR_STATUS: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
+    EVENT_CHAT: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     SR_CREATECLUB_OK: ;
     SR_CREATECLUB_NAME_EXISTS: ;
     SR_CREATECLUB_INVALID_NAME: ;

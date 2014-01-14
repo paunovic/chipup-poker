@@ -185,6 +185,9 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_Game.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_SetAvatarParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TransferChipsParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_ChatMessage.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_ChatEvent.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uEventType.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
