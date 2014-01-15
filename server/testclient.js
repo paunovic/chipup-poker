@@ -27,7 +27,7 @@ Client.prototype.handle = function handle(code,data) {
 		var params = pb.Parse(data,'Poker.StatusReply');
 		//console.log(params);
 		//this.reply(codes.CMD_GETDECK);
-		this.reply(codes.EVENT_CHAT,{event:'Message',channel:'Global',messages:[{msg:'test'}]},'Poker.ChatEvent');
+		this.reply(codes.EVENT_CHAT,{event:'Message',channel:'Global',message:{msg:'test'}},'Poker.ChatEvent');
 		break;
 	case codes.EVENT_CHAT:
 		var event = pb.Parse(data,'Poker.ChatEvent');
@@ -50,6 +50,6 @@ Client.prototype.log = function log() {
 var client = new Client();
 process.stdin.setEncoding('utf8');
 process.stdin.on('data',function (line) {
-	client.reply(codes.EVENT_CHAT,{event:'Message',channel:'Global',messages:[{msg:line.trim()}]},'Poker.ChatEvent');
+	client.reply(codes.EVENT_CHAT,{event:'Message',channel:'Global',message:{msg:line.trim()}},'Poker.ChatEvent');
 });
 process.stdin.resume();
