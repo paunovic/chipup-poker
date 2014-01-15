@@ -27,7 +27,7 @@ function EncodeURL(const ASrc: String): String;
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
 procedure HexToBytes(const AString: AnsiString; var ABytes: TBytes);
-function BytesToHex(const ABytes: TBytes): AnsiString;
+function BytesToHex(const ABytes: TBytes): String;
 
 implementation
 
@@ -461,13 +461,13 @@ begin
   HexToBin(PAnsiChar(AString), ABytes[0], bsize);
 end;
 
-function BytesToHex(const ABytes: TBytes): AnsiString;
+function BytesToHex(const ABytes: TBytes): String;
 var
   C1: Integer;
 begin
   result := '';
   for C1 := 0 to Length(ABytes) - 1 do
-    result := result + AnsiString(IntToHex(ABytes[C1], 2));
+    result := result + IntToHex(ABytes[C1], 2);
 end;
 
 initialization
