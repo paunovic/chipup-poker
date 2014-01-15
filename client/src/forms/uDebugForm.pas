@@ -9,7 +9,7 @@ uses
   Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, dxSkinDarkRoom;
 
 type
-  TDebugInfoType = (ditException = 0, ditApplication, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm);
+  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm);
   TDebugInfoTypes = set of TDebugInfoType;
 
   TfrmDebug = class(TForm)
@@ -45,6 +45,7 @@ type
     N2: TMenuItem;
     lbsMessages: TLabel;
     lbvMessages: TLabel;
+    cbSocket: TcxCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -86,35 +87,39 @@ begin
   logit := AType in frmDebug.FDebugInfoTypes;
   case AType of
     ditException: begin
-      type_str := 'EXC';
+      type_str := 'EXCP';
       type_color := clRed;
     end;
     ditApplication: begin
-      type_str := 'APP';
+      type_str := 'APPL';
       type_color := clBlack;
     end;
     ditSocketInc: begin
-      type_str := 'INC';
+      type_str := 'SINC';
       type_color := clGreen;
     end;
     ditSocketOut: begin
-      type_str := 'OUT';
+      type_str := 'SOUT';
       type_color := clGreen;
     end;
+    ditSocket: begin
+      type_str := 'SOCK';
+      type_color := $00136225;
+    end;
     ditNetInc: begin
-      type_str := 'INC';
+      type_str := 'NINC';
       type_color := clTeal;
     end;
     ditNetOut: begin
-      type_str := 'OUT';
+      type_str := 'NOUT';
       type_color := clTeal;
     end;
     ditForm: begin
-      type_str := 'FRM';
+      type_str := 'FORM';
       type_color := clSilver;
     end
   else
-    type_str := 'UNK';
+    type_str := 'UNKN';
     type_color := clBlack;
     logit := TRUE;
   end;
@@ -139,7 +144,7 @@ begin
 
   acWordWrap.Execute;
 
-  FDebugInfoTypes := [ditException, ditApplication, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut];
+  FDebugInfoTypes := [ditException, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut];
 
   Screen.OnActiveFormChange := ActiveFormChange;
 end;
