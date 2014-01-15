@@ -1,6 +1,6 @@
 CFLAGS=-Wall
 ifeq ($(OS),Windows_NT)
-	LDFLAGS += protoc.a
+	LDFLAGS += protobuf.a
 else
 	LDFLAGS += -lprotoc
 endif
