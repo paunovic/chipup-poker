@@ -15,7 +15,6 @@ type
     FConnectCode      : Integer;
     FReceiveBuffer    : PAnsiChar;
     FReceiveBufferSize: Integer;
-    FOnSessionClosed  : TNotifyEvent;
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -28,6 +27,7 @@ type
 
   public
     constructor Create(const AServer: String; const APort: Integer);
+    destructor Destroy; override;
 
     procedure Connect;
     procedure Disconnect;
@@ -57,8 +57,6 @@ type
     procedure ListPublicClubs;
     procedure SendChatEvent(const AChannel, AMessage: String);
 
-    property OnSessionClosed: TNotifyEvent read FOnSessionClosed write FOnSessionClosed;
-
     property Socket     : TSslWSocket read FSocket;
     property ConnectCode: Integer read FConnectCode;
 
@@ -84,31 +82,43 @@ begin
   FConnectCode := -1;
   FServer := AServer;
   FPort := APort;
-end;
-
-procedure TSocketClient.Connect;
-begin
-  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditApplication); {$ENDIF}
-
-  FReceiveBufferSize := 0;
 
   FSocket := TSslWSocket.Create(nil);
   FSocket.Addr := FServer;
   FSocket.Port := IntToStr(FPort);
   FSocket.TimeoutConnect := 10000;
+  FSocket.SslContext := TSslContext.Create(nil);
+  FSocket.SslContext.InitContext;
+  FSocket.SslEnable := TRUE;
   FSocket.OnChangeState := SocketChangeState;
   FSocket.OnDataAvailable := SocketDataAvailable;
   FSocket.OnError := SocketError;
   FSocket.OnSessionConnected := SocketSessionConnected;
   FSocket.OnSessionClosed := SocketSessionClosed;
   FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
+end;
 
+destructor TSocketClient.Destroy;
+begin
+  FSocket.SslContext.DeInitContext;
+  FSocket.SslContext.Free;
+  FSocket.Free;
+
+  inherited;
+end;
+
+
+procedure TSocketClient.Connect;
+begin
+  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
+
+  FReceiveBufferSize := 0;
   FSocket.Connect;
 end;
 
 procedure TSocketClient.Disconnect;
 begin
-  {$IFDEF DEBUG} DebugLn('Closing socket...', ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
 
   if FSocket.State <> TSocketState.wsClosed then
   begin
@@ -127,36 +137,25 @@ end;
 
 procedure TSocketClient.SocketSessionConnected(Sender: TObject; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn('Session connected. Starting SSL handshake...', ditApplication); {$ENDIF}
-
-  FSocket.SslEnable := TRUE;
-  FSocket.SslContext := TSslContext.Create(nil);
-  FSocket.SslContext.InitContext;
+  {$IFDEF DEBUG} DebugLn('Connected. Starting SSL handshake...', ditSocket); {$ENDIF}
   FSocket.StartSslHandshake;
 end;
 
 procedure TSocketClient.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn('Session closed.', ditApplication); {$ENDIF}
-
-  FSocket.SslContext.DeInitContext;
-  FSocket.SslContext.Free;
-  FreeAndNil(FSocket);
+  {$IFDEF DEBUG} DebugLn('Session closed.', ditSocket); {$ENDIF}
 
   if FReceiveBufferSize > 0 then
     FreeMem(FReceiveBuffer, FReceiveBufferSize);
 
   FConnectCode := -1;
-
-  if Assigned(FOnSessionClosed) then
-    FOnSessionClosed(self);
 end;
 
 procedure TSocketClient.SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; PeerCert: TX509Base; var Disconnect: Boolean);
 begin
   if ErrCode = 0 then
   begin
-    {$IFDEF DEBUG} DebugLn('SSL handshake completed successfully', ditApplication); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn('SSL handshake completed successfully', ditSocket); {$ENDIF}
   end
   else
   begin

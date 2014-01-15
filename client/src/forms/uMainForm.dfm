@@ -85,6 +85,7 @@ object frmChipUpMain: TfrmChipUpMain
     Action = acShowCreateClubForm
     Anchors = [akLeft, akBottom]
     Caption = 'CREATE CLUB'
+    SpeedButtonOptions.CanBeFocused = False
     TabOrder = 2
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -101,6 +102,7 @@ object frmChipUpMain: TfrmChipUpMain
     Action = acShowJoinClubForm
     Anchors = [akLeft, akBottom]
     Caption = 'JOIN CLUB'
+    SpeedButtonOptions.CanBeFocused = False
     TabOrder = 3
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -183,6 +185,7 @@ object frmChipUpMain: TfrmChipUpMain
     Anchors = [akLeft, akBottom]
     Caption = 'CASHIER'
     Enabled = False
+    SpeedButtonOptions.CanBeFocused = False
     TabOrder = 5
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -200,6 +203,7 @@ object frmChipUpMain: TfrmChipUpMain
     Anchors = [akLeft, akBottom]
     Caption = 'OPEN CLUB LOBBY'
     Enabled = False
+    SpeedButtonOptions.CanBeFocused = False
     TabOrder = 6
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText

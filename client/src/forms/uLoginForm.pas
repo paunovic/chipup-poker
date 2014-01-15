@@ -89,7 +89,7 @@ procedure TfrmLogin.FormShow(Sender: TObject);
 begin
   MessageContainer.AddMessageHandler(Handle);
 
-  if not Assigned(SocketClient.Socket) then
+  if SocketClient.Socket.State = wsClosed then
     SocketClient.Connect;
 end;
 
@@ -158,22 +158,19 @@ var
 begin
   status := TrimLeft(StatusBar.Panels[0].Text);
 
-  if not Assigned(SocketClient.Socket) then
-    SocketClient.Connect
-  else
-    case ANewState of
-      wsOpened,
-      wsBound,
-      wsConnecting: begin
-        status := 'Connecting to server...';
-        EnableGUI(FALSE);
-      end;
-      wsClosed: begin
-        EnableGUI(FALSE);
-        SocketClient.Disconnect;
-        SocketClient.Connect;
-      end;
+  case ANewState of
+    wsOpened,
+    wsBound,
+    wsConnecting: begin
+      status := 'Connecting to server...';
+      EnableGUI(FALSE);
     end;
+    wsClosed: begin
+      EnableGUI(FALSE);
+      SocketClient.Disconnect;
+      SocketClient.Connect;
+    end;
+  end;
 
   SetStatus(status)
 end;
