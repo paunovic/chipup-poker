@@ -132,7 +132,7 @@ message ChatEvent {
 		Part = 2;
 	}
 	required EventType event = 1;
-	optional ChatMessage message = 2;
+	optional ChatMessage msg = 2;
 	required string channel = 3;
 }
 
