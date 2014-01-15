@@ -3,8 +3,7 @@ unit uPB_HelloReply;
 interface
 
 uses
-  Winapi.Windows, uPB_TokenPrices, uPB_StringSizes,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader, uPB_TokenPrices, uPB_StringSizes;
 
 type
   TPB_HelloReply = class(TProtobufBaseObject)
@@ -16,10 +15,15 @@ type
       FN_FORGOTEXPIRETIME = 4;
 
     var
-      FTokenPrices: TPB_TokenPrices;
-      FStringSizes: TPB_StringSizes;
-      FChangeExpireTime: Integer;
-      FForgotExpireTime: Integer;
+      FTokenprices: TPB_TokenPrices;
+      FStringsizes: TPB_StringSizes;
+      FChangeexpiretime: Integer;
+      FForgotexpiretime: Integer;
+
+    procedure SetTokenprices(const AValue: TPB_TokenPrices);
+    procedure SetStringsizes(const AValue: TPB_StringSizes);
+    procedure SetChangeexpiretime(const AValue: Integer);
+    procedure SetForgotexpiretime(const AValue: Integer);
 
   public
     destructor Destroy; override;
@@ -27,24 +31,26 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property TokenPrices: TPB_TokenPrices read FTokenPrices;
-    property StringSizes: TPB_StringSizes read FStringSizes;
-    property ChangeExpireTime: Integer read FChangeExpireTime;
-    property ForgotExpireTime: Integer read FForgotExpireTime;
+    property Tokenprices: TPB_TokenPrices read FTokenprices;
+    property Stringsizes: TPB_StringSizes read FStringsizes;
+    property Changeexpiretime: Integer read FChangeexpiretime;
+    property Forgotexpiretime: Integer read FForgotexpiretime;
   end;
+
+//  TPB_HelloReplys = TObjectList<TPB_HelloReply>;
 
 implementation
 
 uses
-  pbPublic;
+  pbPublic, pbInput;
 
 
 destructor TPB_HelloReply.Destroy;
 begin
-  if Assigned(FTokenPrices) then
-    FTokenPrices.Free;
-  if Assigned(FStringSizes) then
-    FStringSizes.Free;
+  if Assigned(FTokenprices) then
+    FTokenprices.Free;
+  if Assigned(FStringsizes) then
+    FStringsizes.Free;
 
   inherited;
 end;
@@ -53,31 +59,25 @@ procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobuf
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
-  if not Assigned(FTokenPrices) then
-    FTokenPrices := TPB_TokenPrices.Create;
-
-  if not Assigned(FStringSizes) then
-    FStringSizes := TPB_StringSizes.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
       FN_TOKENPRICES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FTokenPrices.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+        SetTokenprices(TPB_TokenPrices.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
       FN_STRINGSIZES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FStringSizes.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+        SetStringsizes(TPB_StringSizes.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
       FN_CHANGEEXPIRETIME: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FChangeExpireTime := AProtobufReader.readInt32;
+        SetChangeexpiretime(AProtobufReader.readInt32);
       end;
       FN_FORGOTEXPIRETIME: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FForgotExpireTime := AProtobufReader.readInt32;
+        SetForgotexpiretime(AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -89,7 +89,39 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
+  if IsModifiedField(FN_TOKENPRICES) then
+    pbout.writeProtobufBaseObject(FN_TOKENPRICES, FTokenprices);
+  if IsModifiedField(FN_STRINGSIZES) then
+    pbout.writeProtobufBaseObject(FN_STRINGSIZES, FStringsizes);
+  if IsModifiedField(FN_CHANGEEXPIRETIME) then
+    pbout.writeInt32(FN_CHANGEEXPIRETIME, FChangeexpiretime);
+  if IsModifiedField(FN_FORGOTEXPIRETIME) then
+    pbout.writeInt32(FN_FORGOTEXPIRETIME, FForgotexpiretime);
   result := pbout;
+end;
+
+procedure TPB_HelloReply.SetTokenprices(const AValue: TPB_TokenPrices);
+begin
+  FTokenprices := AValue;
+  AddModifiedField(FN_TOKENPRICES);
+end;
+
+procedure TPB_HelloReply.SetStringsizes(const AValue: TPB_StringSizes);
+begin
+  FStringsizes := AValue;
+  AddModifiedField(FN_STRINGSIZES);
+end;
+
+procedure TPB_HelloReply.SetChangeexpiretime(const AValue: Integer);
+begin
+  FChangeexpiretime := AValue;
+  AddModifiedField(FN_CHANGEEXPIRETIME);
+end;
+
+procedure TPB_HelloReply.SetForgotexpiretime(const AValue: Integer);
+begin
+  FForgotexpiretime := AValue;
+  AddModifiedField(FN_FORGOTEXPIRETIME);
 end;
 
 end.

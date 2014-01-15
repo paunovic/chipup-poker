@@ -3,8 +3,7 @@ unit uPB_SetAvatarParams;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_SetAvatarParams = class(TProtobufBaseObject)
@@ -15,20 +14,19 @@ type
     var
       FAvatarId: AnsiString;
 
+    procedure SetAvatarId(const AValue: AnsiString);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property AvatarId: AnsiString read FAvatarId write FAvatarId;
+    property AvatarId: AnsiString read FAvatarId write SetAvatarId;
   end;
-
-//  TPB_SetAvatarParamss = TObjectList<TPB_SetAvatarParams>;
 
 implementation
 
 uses
   pbPublic;
-
 
 procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -40,7 +38,7 @@ begin
     case field_number of
       FN_AVATARID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FAvatarId := AProtobufReader.readString;
+        SetAvatarId(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -52,8 +50,16 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_AVATARID, FAvatarId);
+  if IsModifiedField(FN_AVATARID) then
+    pbout.writeString(FN_AVATARID, FAvatarId);
   result := pbout;
 end;
 
+procedure TPB_SetAvatarParams.SetAvatarId(const AValue: AnsiString);
+begin
+  FAvatarId := AValue;
+  AddModifiedField(FN_AVATARID);
+end;
+
 end.
+

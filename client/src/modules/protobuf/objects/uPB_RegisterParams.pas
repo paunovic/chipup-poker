@@ -3,8 +3,7 @@ unit uPB_RegisterParams;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_RegisterParams = class(TProtobufBaseObject)
@@ -17,22 +16,25 @@ type
     var
       FEmail: AnsiString;
       FPassword: AnsiString;
-      FDisplayName: AnsiString;
+      FDisplayname: AnsiString;
+
+    procedure SetEmail(const AValue: AnsiString);
+    procedure SetPassword(const AValue: AnsiString);
+    procedure SetDisplayname(const AValue: AnsiString);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: AnsiString read FEmail write FEmail;
-    property Password: AnsiString read FPassword write FPassword;
-    property DisplayName: AnsiString read FDisplayName write FDisplayName;
+    property Email: AnsiString read FEmail write SetEmail;
+    property Password: AnsiString read FPassword write SetPassword;
+    property Displayname: AnsiString read FDisplayname write SetDisplayname;
   end;
 
 implementation
 
 uses
   pbPublic;
-
 
 procedure TPB_RegisterParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -44,15 +46,15 @@ begin
     case field_number of
       FN_EMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FEmail := AProtobufReader.readString;
+        SetEmail(AProtobufReader.readString);
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPassword := AProtobufReader.readString;
+        SetPassword(AProtobufReader.readString);
       end;
       FN_DISPLAYNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FDisplayName := AProtobufReader.readString;
+        SetDisplayname(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -64,10 +66,31 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_EMAIL, FEmail);
-  pbout.writeString(FN_PASSWORD, FPassword);
-  pbout.writeString(FN_DISPLAYNAME, FDisplayName);
+  if IsModifiedField(FN_EMAIL) then
+    pbout.writeString(FN_EMAIL, FEmail);
+  if IsModifiedField(FN_PASSWORD) then
+    pbout.writeString(FN_PASSWORD, FPassword);
+  if IsModifiedField(FN_DISPLAYNAME) then
+    pbout.writeString(FN_DISPLAYNAME, FDisplayname);
   result := pbout;
+end;
+
+procedure TPB_RegisterParams.SetEmail(const AValue: AnsiString);
+begin
+  FEmail := AValue;
+  AddModifiedField(FN_EMAIL);
+end;
+
+procedure TPB_RegisterParams.SetPassword(const AValue: AnsiString);
+begin
+  FPassword := AValue;
+  AddModifiedField(FN_PASSWORD);
+end;
+
+procedure TPB_RegisterParams.SetDisplayname(const AValue: AnsiString);
+begin
+  FDisplayname := AValue;
+  AddModifiedField(FN_DISPLAYNAME);
 end;
 
 end.

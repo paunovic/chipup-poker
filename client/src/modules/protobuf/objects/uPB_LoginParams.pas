@@ -3,8 +3,7 @@ unit uPB_LoginParams;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_LoginParams = class(TProtobufBaseObject)
@@ -17,19 +16,21 @@ type
       FUsername: AnsiString;
       FPassword: AnsiString;
 
+    procedure SetUsername(const AValue: AnsiString);
+    procedure SetPassword(const AValue: AnsiString);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Username: AnsiString read FUsername write FUsername;
-    property Password: AnsiString read FPassword write FPassword;
+    property Username: AnsiString read FUsername write SetUsername;
+    property Password: AnsiString read FPassword write SetPassword;
   end;
 
 implementation
 
 uses
   pbPublic;
-
 
 procedure TPB_LoginParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -41,11 +42,11 @@ begin
     case field_number of
       FN_USERNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsername := AProtobufReader.readString;
+        SetUsername(AProtobufReader.readString);
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPassword := AProtobufReader.readString;
+        SetPassword(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -57,9 +58,23 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_USERNAME, FUsername);
-  pbout.writeString(FN_PASSWORD, FPassword);
+  if IsModifiedField(FN_USERNAME) then
+    pbout.writeString(FN_USERNAME, FUsername);
+  if IsModifiedField(FN_PASSWORD) then
+    pbout.writeString(FN_PASSWORD, FPassword);
   result := pbout;
+end;
+
+procedure TPB_LoginParams.SetUsername(const AValue: AnsiString);
+begin
+  FUsername := AValue;
+  AddModifiedField(FN_USERNAME);
+end;
+
+procedure TPB_LoginParams.SetPassword(const AValue: AnsiString);
+begin
+  FPassword := AValue;
+  AddModifiedField(FN_PASSWORD);
 end;
 
 end.

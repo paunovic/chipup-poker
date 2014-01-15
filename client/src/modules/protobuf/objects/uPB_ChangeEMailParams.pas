@@ -3,8 +3,7 @@ unit uPB_ChangeEMailParams;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_ChangeEMailParams = class(TProtobufBaseObject)
@@ -15,6 +14,8 @@ type
     var
       FNewMail: AnsiString;
 
+    procedure SetNewMail(const AValue: AnsiString);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
@@ -22,13 +23,10 @@ type
     property NewMail: AnsiString read FNewMail write FNewMail;
   end;
 
-//  TPB_ChangeEMailParamss = TObjectList<TPB_ChangeEMailParams>;
-
 implementation
 
 uses
   pbPublic;
-
 
 procedure TPB_ChangeEMailParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -40,7 +38,7 @@ begin
     case field_number of
       FN_NEWMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FNewMail := AProtobufReader.readString;
+        SetNewMail(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -52,8 +50,16 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_NEWMAIL, FNewMail);
+  if IsModifiedField(FN_NEWMAIL) then
+    pbout.writeString(FN_NEWMAIL, FNewMail);
   result := pbout;
 end;
 
+procedure TPB_ChangeEMailParams.SetNewMail(const AValue: AnsiString);
+begin
+  FNewMail := AValue;
+  AddModifiedField(FN_NEWMAIL);
+end;
+
 end.
+

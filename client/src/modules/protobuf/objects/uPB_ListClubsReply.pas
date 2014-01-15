@@ -3,8 +3,7 @@ unit uPB_ListClubsReply;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club;
 
 type
   TPB_ListClubsReply = class(TProtobufBaseObject)
@@ -23,6 +22,8 @@ type
 
     property Clubs: TPB_Clubs read FClubs;
   end;
+
+//  TPB_ListClubsReplys = TObjectList<TPB_ListClubsReply>;
 
 implementation
 
@@ -44,7 +45,6 @@ var
 begin
   if not Assigned(FClubs) then
     FClubs := TPB_Clubs.Create;
-  FClubs.Clear;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -53,6 +53,7 @@ begin
       FN_CLUBS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
+        AddModifiedField(FN_CLUBS);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -64,6 +65,8 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
+//  if IsModifiedField(FN_CLUBS) then
+//    pbout.writeProtobufBaseObject(FN_CLUBS, FClubs);
   result := pbout;
 end;
 

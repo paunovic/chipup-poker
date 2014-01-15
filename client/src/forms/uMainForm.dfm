@@ -222,15 +222,6 @@ object frmChipUpMain: TfrmChipUpMain
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object Button1: TButton
-    Left = 460
-    Top = 84
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
-    TabOrder = 8
-    OnClick = Button1Click
-  end
   object alMainForm: TActionList
     Left = 552
     Top = 24

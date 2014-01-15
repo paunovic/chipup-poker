@@ -43,7 +43,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Vcl.Graphics, Vcl.Controls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms,
   uSocketClient, uSettings, uCommon;
 
 
@@ -63,7 +63,7 @@ end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
-  if Assigned(SocketClient.Socket) then
+  if SocketClient.IsConnected then
     SocketClient.Disconnect;
   FreeAndNil(SocketClient);
 

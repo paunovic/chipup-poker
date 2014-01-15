@@ -94,7 +94,7 @@ begin
   FNick := String(AStatusReply.Self.DisplayName);
   FTokens := AStatusReply.Self.Tokens;
   FAuthed := AStatusReply.Self.Authed;
-  FAvatarId := String(AStatusReply.Self.AvatarMongoId);
+  FAvatarId := String(AStatusReply.Self.Avatar);
   FBalance := AStatusReply.Self.Chips;
 
   FClubs.Clear;
@@ -125,7 +125,7 @@ begin
       game_type := TGameType(pbgame.GameType);
       game_limit := TGameLimit(pbgame.GameLimit);
 
-      club.Games.AddGame(String(pbgame.MongoId), String(pbgame.CreatorMongoId), game_clubid, String(pbgame.Gamename),
+      club.Games.AddGame(String(pbgame.MongoIdHex), String(pbgame.CreatorMongoIdHex), game_clubid, String(pbgame.Gamename),
                          game_type, game_limit, pbgame.SmallBlind, pbgame.BigBlind, pbgame.Seats);
     end;
 

@@ -20,15 +20,19 @@ type
       FMessage: TPB_ChatMessage;
       FChannel: AnsiString;
 
+    procedure SetEvent(const AValue: TChatEvent);
+    procedure SetMessage(const AValue: TPB_ChatMessage);
+    procedure SetChannel(const AValue: AnsiString);
+
   public
     destructor Destroy; override;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Event: TChatEvent read FEvent write FEvent;
-    property ChatMessage: TPB_ChatMessage read FMessage write FMessage;
-    property Channel: AnsiString read FChannel write FChannel;
+    property Event: TChatEvent read FEvent write SetEvent;
+    property ChatMessage: TPB_ChatMessage read FMessage write SetMessage;
+    property Channel: AnsiString read FChannel write SetChannel;
   end;
 
 implementation
@@ -55,41 +59,51 @@ begin
     case field_number of
       FN_EVENT: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FEvent := TChatEvent(AProtobufReader.readEnum);
+        SetEvent(TChatEvent(AProtobufReader.readEnum));
       end;
       FN_MESSAGE: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if Assigned(FMessage) then
-          FreeAndNil(FMessage);
-        FMessage := TPB_ChatMessage.Create(AProtobufReader,AProtobufReader.readInt32);
+        SetMessage(TPB_ChatMessage.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
       FN_CHANNEL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FChannel := AProtobufReader.readString;
+        SetChannel(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-
 function TPB_ChatEvent.GetProtobuf: TProtoBufOutput;
 var
-  pbout, pbmsg: TProtoBufOutput;
+  pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeInt32(FN_EVENT, Integer(FEvent));
-  pbout.writeString(FN_CHANNEL, FChannel);
-  if Assigned(FMessage) then
-  begin
-    pbmsg := FMessage.GetProtobuf;
-    try
-      pbmsg.writeTo(pbout);
-    finally
-      pbmsg.Free;
-    end;
-  end;
+  if IsModifiedField(FN_EVENT) then
+    pbout.writeInt32(FN_EVENT, Integer(FEvent));
+  if IsModifiedField(FN_MESSAGE) then
+    pbout.writeProtobufBaseObject(FN_MESSAGE, FMessage);
+  if IsModifiedField(FN_CHANNEL) then
+    pbout.writeString(FN_CHANNEL, FChannel);
   result := pbout;
+end;
+
+procedure TPB_ChatEvent.SetEvent(const AValue: TChatEvent);
+begin
+  FEvent := AValue;
+  AddModifiedField(FN_EVENT);
+end;
+
+procedure TPB_ChatEvent.SetMessage(const AValue: TPB_ChatMessage);
+begin
+  FMessage := AValue;
+  AddModifiedField(FN_MESSAGE);
+end;
+
+procedure TPB_ChatEvent.SetChannel(const AValue: AnsiString);
+begin
+  FChannel := AValue;
+  AddModifiedField(FN_CHANNEL);
 end;
 
 end.

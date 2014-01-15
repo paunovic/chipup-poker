@@ -3,8 +3,7 @@ unit uPB_GiveClubOwnershipParams;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_GiveClubOwnershipParams = class(TProtobufBaseObject)
@@ -17,15 +16,16 @@ type
       FClubSeq: Integer;
       FPlayerMongoId: AnsiString;
 
+    procedure SetClubSeq(const AValue: Integer);
+    procedure SetPlayerMongoId(const AValue: AnsiString);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property ClubSeq: Integer read FClubSeq write FClubSeq;
-    property PlayerMongoId: AnsiString read FPlayerMongoId write FPlayerMongoId;
+    property ClubSeq: Integer read FClubSeq write SetClubSeq;
+    property PlayerMongoId: AnsiString read FPlayerMongoId write SetPlayerMongoId;
   end;
-
-//  TPB_GiveClubOwnershipParamss = TObjectList<TPB_GiveClubOwnershipParams>;
 
 implementation
 
@@ -42,11 +42,11 @@ begin
     case field_number of
       FN_CLUBSEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClubSeq := AProtobufReader.readInt32;
+        SetClubSeq(AProtobufReader.readInt32);
       end;
       FN_PLAYERMONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerMongoId := AProtobufReader.readString;
+        SetPlayerMongoId(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -58,9 +58,24 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeInt32(FN_CLUBSEQ, FClubSeq);
-  pbout.writeString(FN_PLAYERMONGOID, FPlayerMongoId);
+  if IsModifiedField(FN_CLUBSEQ) then
+    pbout.writeInt32(FN_CLUBSEQ, FClubSeq);
+  if IsModifiedField(FN_PLAYERMONGOID) then
+    pbout.writeString(FN_PLAYERMONGOID, FPlayerMongoId);
   result := pbout;
 end;
 
+procedure TPB_GiveClubOwnershipParams.SetClubSeq(const AValue: Integer);
+begin
+  FClubSeq := AValue;
+  AddModifiedField(FN_CLUBSEQ);
+end;
+
+procedure TPB_GiveClubOwnershipParams.SetPlayerMongoId(const AValue: AnsiString);
+begin
+  FPlayerMongoId := AValue;
+  AddModifiedField(FN_PLAYERMONGOID);
+end;
+
 end.
+

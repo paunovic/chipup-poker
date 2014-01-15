@@ -9,13 +9,17 @@ uses
 type
   TSocketClient = class
   private
-    FSocket               : TSslWSocket;
-    FServer               : String;
-    FPort                 : Integer;
-    FConnectCode          : Integer;
-    FReceiveBuffer        : PAnsiChar;
-    FReceiveBufferSize    : Integer;
+    FSocket           : TSslWSocket;
+    FServer           : String;
+    FPort             : Integer;
+    FConnectCode      : Integer;
+    FReceiveBuffer    : PAnsiChar;
+    FReceiveBufferSize: Integer;
+    FOnSessionClosed  : TNotifyEvent;
 
+    procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
+    procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
+    procedure SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; PeerCert: TX509Base; var Disconnect: Boolean);
     procedure SocketChangeState(Sender: TObject; OldState, NewState: TSocketState);
     procedure SocketDataAvailable(Sender: TObject; Error: Word);
     procedure SocketError(Sender: TObject);
@@ -24,7 +28,6 @@ type
 
   public
     constructor Create(const AServer: String; const APort: Integer);
-    destructor Destroy; override;
 
     procedure Connect;
     procedure Disconnect;
@@ -54,6 +57,8 @@ type
     procedure ListPublicClubs;
     procedure SendChatEvent(const AChannel, AMessage: String);
 
+    property OnSessionClosed: TNotifyEvent read FOnSessionClosed write FOnSessionClosed;
+
     property Socket     : TSslWSocket read FSocket;
     property ConnectCode: Integer read FConnectCode;
 
@@ -81,11 +86,6 @@ begin
   FPort := APort;
 end;
 
-destructor TSocketClient.Destroy;
-begin
-  inherited;
-end;
-
 procedure TSocketClient.Connect;
 begin
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditApplication); {$ENDIF}
@@ -93,17 +93,15 @@ begin
   FReceiveBufferSize := 0;
 
   FSocket := TSslWSocket.Create(nil);
-  FSocket.MultiThreaded := TRUE;
   FSocket.Addr := FServer;
   FSocket.Port := IntToStr(FPort);
   FSocket.TimeoutConnect := 10000;
-  FSocket.ComponentOptions := [wsoSIO_RCVALL];
-  FSocket.SslEnable := TRUE;
-  FSocket.SslContext := TSslContext.Create(nil);
-  FSocket.SslContext.InitContext;
   FSocket.OnChangeState := SocketChangeState;
   FSocket.OnDataAvailable := SocketDataAvailable;
   FSocket.OnError := SocketError;
+  FSocket.OnSessionConnected := SocketSessionConnected;
+  FSocket.OnSessionClosed := SocketSessionClosed;
+  FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
 
   FSocket.Connect;
 end;
@@ -113,21 +111,58 @@ begin
   {$IFDEF DEBUG} DebugLn('Closing socket...', ditApplication); {$ENDIF}
 
   if FSocket.State <> TSocketState.wsClosed then
+  begin
     FSocket.Close;
-  FSocket.SslContext.DeInitContext;
-  FSocket.SslContext.Free;
-  FSocket.Free;
-  FSocket := nil;
-
-  if FReceiveBufferSize > 0 then
-    FreeMem(FReceiveBuffer, FReceiveBufferSize);
-
-  FConnectCode := -1;
+    while (Assigned(FSocket)) and (FSocket.State <> wsClosed) do
+      FSocket.ProcessMessages;
+  end
+  else
+    SocketSessionClosed(self, 0);
 end;
 
 function TSocketClient.IsConnected: Boolean;
 begin
   result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FConnectCode = SR_HELLO);
+end;
+
+procedure TSocketClient.SocketSessionConnected(Sender: TObject; ErrCode: Word);
+begin
+  {$IFDEF DEBUG} DebugLn('Session connected. Starting SSL handshake...', ditApplication); {$ENDIF}
+
+  FSocket.SslEnable := TRUE;
+  FSocket.SslContext := TSslContext.Create(nil);
+  FSocket.SslContext.InitContext;
+  FSocket.StartSslHandshake;
+end;
+
+procedure TSocketClient.SocketSessionClosed(Sender: TObject; ErrCode: Word);
+begin
+  {$IFDEF DEBUG} DebugLn('Session closed.', ditApplication); {$ENDIF}
+
+  FSocket.SslContext.DeInitContext;
+  FSocket.SslContext.Free;
+  FreeAndNil(FSocket);
+
+  if FReceiveBufferSize > 0 then
+    FreeMem(FReceiveBuffer, FReceiveBufferSize);
+
+  FConnectCode := -1;
+
+  if Assigned(FOnSessionClosed) then
+    FOnSessionClosed(self);
+end;
+
+procedure TSocketClient.SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; PeerCert: TX509Base; var Disconnect: Boolean);
+begin
+  if ErrCode = 0 then
+  begin
+    {$IFDEF DEBUG} DebugLn('SSL handshake completed successfully', ditApplication); {$ENDIF}
+  end
+  else
+  begin
+    {$IFDEF DEBUG} DebugLn('SSL handshake error [%d]', ditException); {$ENDIF}
+    Disconnect := TRUE;
+  end;
 end;
 
 procedure TSocketClient.SocketDataAvailable(Sender: TObject; Error: Word);
@@ -501,7 +536,7 @@ var
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.MongoId := AnsiString(AGameId);
+    protobuf.MongoIdHex := AnsiString(AGameId);
     SendProtobuf(CMD_DELETE_GAME, protobuf);
   finally
     protobuf.Free;
@@ -514,7 +549,7 @@ var
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.MongoId := AnsiString(AGameId);
+    protobuf.MongoIdHex := AnsiString(AGameId);
     protobuf.Gamename := AnsiString(AGameName);
     protobuf.GameType := AGameType;
     protobuf.GameLimit := AGameLimit;
