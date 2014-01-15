@@ -97,9 +97,7 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 // some code based on http://sourceforge.net/p/protobuf-delphi/wiki/Example/
 class DelphiGenerator : public CodeGenerator {
 	bool Generate(const FileDescriptor* file, const string& parameter, GeneratorContext* generator_context, string* error) const {
-		//*error = "unfinished";
 		cerr << file->name() << "\n";
-		//StripProto(file->name());
 
 		for (int i=0; i<file->message_type_count(); i++) {
 			const Descriptor *message = file->message_type(i);
@@ -142,10 +140,11 @@ class DelphiGenerator : public CodeGenerator {
 					snprintf(hack,9,"%d",value->number());
 					printer.Print("ce$name$ = $hack$","name",value->name(),"hack",hack);
 				}
+				printer.Print(
+					");\n");
 			}
 
 			printer.Print(
-				");\n"
 				"  TPB_$name$ = class(TProtobufBaseObject)\n"
 				"  private\n"
 				"    const\n",
@@ -171,8 +170,6 @@ class DelphiGenerator : public CodeGenerator {
 				} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
-//							"      F$name$_bytes: const APointer;\n"
-//							"      F$name$_size: const Integer;\n"
 							"      F$name$: TArray<TBytes>;\n"
 							,"name",PrivateFieldName(field));
 					} else {
@@ -472,7 +469,7 @@ class DelphiGenerator : public CodeGenerator {
 						printer.Print(
 							"  if Assigned(F$pname$) then\n"
 							"  begin\n"
-							"    pbmsg := FMessage.GetProtobuf;\n"
+							"    pbmsg := F$pname$.GetProtobuf;\n"
 							"    try\n"
 							"      pboutput.writeMessage(FN_$name$,pbmsg);\n"
 							"    finally\n"
