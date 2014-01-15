@@ -1,4 +1,5 @@
 #!/bin/bash -e
 export PATH=cpp-generator/:$PATH
+mkdir -p android/src/
 protoc message.proto -o message.desc --java_out=android/src/ --delphi_out=delphi/
 node server/rebuild.js
