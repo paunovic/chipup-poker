@@ -3,8 +3,7 @@ unit uPB_StringSizes;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_StringSizes = class(TProtobufBaseObject)
@@ -20,21 +19,28 @@ type
     var
       FEmail: Integer;
       FPassword: Integer;
-      FClubName: Integer;
-      FInvCode: Integer;
+      FClubname: Integer;
+      FInvcode: Integer;
       FUsername: Integer;
-      FGameName: Integer;
+      FGamename: Integer;
+
+    procedure SetEmail(const AValue: Integer);
+    procedure SetPassword(const AValue: Integer);
+    procedure SetClubname(const AValue: Integer);
+    procedure SetInvcode(const AValue: Integer);
+    procedure SetUsername(const AValue: Integer);
+    procedure SetGamename(const AValue: Integer);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: Integer read FEmail;
-    property Password: Integer read FPassword;
-    property ClubName: Integer read FClubName;
-    property InvCode: Integer read FInvCode;
-    property Username: Integer read FUsername;
-    property GameName: Integer read FGameName;
+    property Email: Integer read FEmail write SetEmail;
+    property Password: Integer read FPassword write SetPassword;
+    property Clubname: Integer read FClubname write SetClubname;
+    property Invcode: Integer read FInvcode write SetInvcode;
+    property Username: Integer read FUsername write SetUsername;
+    property Gamename: Integer read FGamename write SetGamename;
   end;
 
 implementation
@@ -52,27 +58,27 @@ begin
     case field_number of
       FN_EMAIL: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FEmail := AProtobufReader.readInt32;
+        SetEmail(AProtobufReader.readInt32);
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FPassword := AProtobufReader.readInt32;
+        SetPassword(AProtobufReader.readInt32);
       end;
       FN_CLUBNAME: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClubName := AProtobufReader.readInt32;
+        SetClubname(AProtobufReader.readInt32);
       end;
       FN_INVCODE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FInvCode := AProtobufReader.readInt32;
+        SetInvcode(AProtobufReader.readInt32);
       end;
       FN_USERNAME: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FUsername := AProtobufReader.readInt32;
+        SetUsername(AProtobufReader.readInt32);
       end;
       FN_GAMENAME: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FGameName := AProtobufReader.readInt32;
+        SetGamename(AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -84,13 +90,55 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeInt32(FN_EMAIL, FEmail);
-  pbout.writeInt32(FN_PASSWORD, FPassword);
-  pbout.writeInt32(FN_CLUBNAME, FClubName);
-  pbout.writeInt32(FN_INVCODE, FInvCode);
-  pbout.writeInt32(FN_USERNAME, FUsername);
-  pbout.writeInt32(FN_GAMENAME, FGameName);
+  if IsModifiedField(FN_EMAIL) then
+    pbout.writeInt32(FN_EMAIL, FEmail);
+  if IsModifiedField(FN_PASSWORD) then
+    pbout.writeInt32(FN_PASSWORD, FPassword);
+  if IsModifiedField(FN_CLUBNAME) then
+    pbout.writeInt32(FN_CLUBNAME, FClubname);
+  if IsModifiedField(FN_INVCODE) then
+    pbout.writeInt32(FN_INVCODE, FInvcode);
+  if IsModifiedField(FN_USERNAME) then
+    pbout.writeInt32(FN_USERNAME, FUsername);
+  if IsModifiedField(FN_GAMENAME) then
+    pbout.writeInt32(FN_GAMENAME, FGamename);
   result := pbout;
+end;
+
+procedure TPB_StringSizes.SetEmail(const AValue: Integer);
+begin
+  FEmail := AValue;
+  AddModifiedField(FN_EMAIL);
+end;
+
+procedure TPB_StringSizes.SetPassword(const AValue: Integer);
+begin
+  FPassword := AValue;
+  AddModifiedField(FN_PASSWORD);
+end;
+
+procedure TPB_StringSizes.SetClubname(const AValue: Integer);
+begin
+  FClubname := AValue;
+  AddModifiedField(FN_CLUBNAME);
+end;
+
+procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
+begin
+  FInvcode := AValue;
+  AddModifiedField(FN_INVCODE);
+end;
+
+procedure TPB_StringSizes.SetUsername(const AValue: Integer);
+begin
+  FUsername := AValue;
+  AddModifiedField(FN_USERNAME);
+end;
+
+procedure TPB_StringSizes.SetGamename(const AValue: Integer);
+begin
+  FGamename := AValue;
+  AddModifiedField(FN_GAMENAME);
 end;
 
 end.

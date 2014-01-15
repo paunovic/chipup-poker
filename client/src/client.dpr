@@ -67,6 +67,7 @@ uses
   uPB_ChatMessage in 'modules\protobuf\objects\uPB_ChatMessage.pas',
   uPB_ChatEvent in 'modules\protobuf\objects\uPB_ChatEvent.pas';
 
+
 procedure FocusPokerApp;
 var
   window_handle: THandle;
@@ -76,10 +77,9 @@ begin
     SetForegroundWindow(window_handle);
 end;
 
-
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
-                     {
+
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then
   begin
@@ -87,7 +87,7 @@ begin
     Exit;
   end;
 
-  TInstanceController.RegisterInstance;  }
+  TInstanceController.RegisterInstance;
 
   Application.Initialize;
   Application.MainFormOnTaskbar := True;

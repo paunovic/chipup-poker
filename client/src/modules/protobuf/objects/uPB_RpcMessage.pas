@@ -3,8 +3,7 @@ unit uPB_RpcMessage;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_RpcMessage = class(TProtobufBaseObject)
@@ -15,19 +14,23 @@ type
       FN_TOKEN = 3;
 
     var
-      FMethodId: Integer;
-      FDataSize: Integer;
+      FMethodid: Integer;
+      FDatasize: Integer;
       FToken: Integer;
+
+    procedure SetMethodid(const AValue: Integer);
+    procedure SetDatasize(const AValue: Integer);
+    procedure SetToken(const AValue: Integer);
 
   public
     constructor Create(const AMethodId: Integer; const ADataSize: Integer = 0; const AToken: Integer = 0); overload;
 
-    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+  	procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property MethodId: Integer read FMethodId;
-    property DataSize: Integer read FDataSize;
-    property Token: Integer read FToken;
+    property Methodid: Integer read FMethodid write SetMethodid;
+    property Datasize: Integer read FDatasize write SetDatasize;
+    property Token: Integer read FToken write SetToken;
   end;
 
 implementation
@@ -38,9 +41,11 @@ uses
 
 constructor TPB_RpcMessage.Create(const AMethodId: Integer; const ADataSize: Integer = 0; const AToken: Integer = 0);
 begin
-  FMethodId := AMethodId;
-  FDataSize := ADataSize;
-  FToken := AToken;
+  SetMethodid(AMethodId);
+  if ADataSize <> 0 then
+    SetDataSize(ADataSize);
+  if AToken <> 0 then
+    SetToken(AToken);
 end;
 
 procedure TPB_RpcMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -53,15 +58,15 @@ begin
     case field_number of
       FN_METHODID: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FMethodId := AProtobufReader.readInt32;
+        SetMethodid(AProtobufReader.readInt32);
       end;
       FN_DATASIZE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FDataSize := AProtobufReader.readInt32;
+        SetDatasize(AProtobufReader.readInt32);
       end;
       FN_TOKEN: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FToken := AProtobufReader.readInt32;
+        SetToken(AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -73,12 +78,31 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeInt32(FN_METHODID, FMethodId);
-  if FDataSize <> 0 then
-    pbout.writeInt32(FN_DATASIZE, FDataSize);
-  if FToken <> 0 then
+  if IsModifiedField(FN_METHODID) then
+    pbout.writeInt32(FN_METHODID, FMethodid);
+  if IsModifiedField(FN_DATASIZE) then
+    pbout.writeInt32(FN_DATASIZE, FDatasize);
+  if IsModifiedField(FN_TOKEN) then
     pbout.writeInt32(FN_TOKEN, FToken);
   result := pbout;
+end;
+
+procedure TPB_RpcMessage.SetMethodid(const AValue: Integer);
+begin
+  FMethodid := AValue;
+  AddModifiedField(FN_METHODID);
+end;
+
+procedure TPB_RpcMessage.SetDatasize(const AValue: Integer);
+begin
+  FDatasize := AValue;
+  AddModifiedField(FN_DATASIZE);
+end;
+
+procedure TPB_RpcMessage.SetToken(const AValue: Integer);
+begin
+  FToken := AValue;
+  AddModifiedField(FN_TOKEN);
 end;
 
 end.

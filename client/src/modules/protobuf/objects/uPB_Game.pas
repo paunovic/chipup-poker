@@ -3,8 +3,7 @@ unit uPB_Game;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_Game = class(TProtobufBaseObject)
@@ -31,23 +30,34 @@ type
       FBigBlind: Integer;
       FSeats: Integer;
 
-    function GetCreatorMongoId: AnsiString;
-    function GetMongoId: AnsiString;
-    procedure SetMongoId(const AValue: AnsiString);
+    function GetCreatorMongoIdHex: AnsiString;
+    function GetMongoIdHex: AnsiString;
+    procedure SetMongoIdHex(const AValue: AnsiString);
+    procedure SetMongoId(const AValue: TBytes);
+    procedure SetCreator(const AValue: TBytes);
+    procedure SetGamename(const AValue: AnsiString);
+    procedure SetClubseq(const AValue: Integer);
+    procedure SetGameType(const AValue: Integer);
+    procedure SetGameLimit(const AValue: Integer);
+    procedure SetSmallBlind(const AValue: Integer);
+    procedure SetBigBlind(const AValue: Integer);
+    procedure SetSeats(const AValue: Integer);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property MongoId: AnsiString read GetMongoId write SetMongoId;
-    property CreatorMongoId: AnsiString read GetCreatorMongoId;
-    property Gamename: AnsiString read FGamename write FGamename;
-    property Clubseq: Integer read FClubseq write FClubseq;
-    property GameType: Integer read FGameType write FGameType;
-    property GameLimit: Integer read FGameLimit write FGameLimit;
-    property SmallBlind: Integer read FSmallBlind write FSmallBlind;
-    property BigBlind: Integer read FBigBlind write FBigBlind;
-    property Seats: Integer read FSeats write FSeats;
+    property MongoId: TBytes read FMongoId write SetMongoId;
+    property Creator: TBytes read FCreator write SetCreator;
+    property MongoIdHex: AnsiString read GetMongoIdHex write SetMongoIdHex;
+    property CreatorMongoIdHex: AnsiString read GetCreatorMongoIdHex;
+    property Gamename: AnsiString read FGamename write SetGamename;
+    property Clubseq: Integer read FClubseq write SetClubseq;
+    property GameType: Integer read FGameType write SetGameType;
+    property GameLimit: Integer read FGameLimit write SetGameLimit;
+    property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
+    property BigBlind: Integer read FBigBlind write SetBigBlind;
+    property Seats: Integer read FSeats write SetSeats;
   end;
 
   TPB_Games = TObjectList<TPB_Game>;
@@ -61,6 +71,7 @@ uses
 procedure TPB_Game.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
+  bytes                               : TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -68,82 +79,145 @@ begin
     case field_number of
       FN_MONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FMongoId);
+        AProtobufReader.readBytes(bytes);
+        SetMongoId(bytes);
       end;
       FN_CREATOR: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FCreator);
+        AProtobufReader.readBytes(bytes);
+        SetCreator(bytes);
       end;
       FN_GAMENAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGamename := AProtobufReader.readString;
+        SetGamename(AProtobufReader.readString);
       end;
       FN_CLUBSEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClubseq := AProtobufReader.readInt32;
+        SetClubseq(AProtobufReader.readInt32);
       end;
       FN_GAMETYPE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FGameType := AProtobufReader.readInt32;
+        SetGameType(AProtobufReader.readInt32);
       end;
       FN_GAMELIMIT: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FGameLimit := AProtobufReader.readInt32;
+        SetGameLimit(AProtobufReader.readInt32);
       end;
       FN_SMALLBLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSmallBlind := AProtobufReader.readInt32;
+        SetSmallBlind(AProtobufReader.readInt32);
       end;
       FN_BIGBLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FBigBlind := AProtobufReader.readInt32;
+        SetBigBlind(AProtobufReader.readInt32);
       end;
       FN_SEATS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSeats := AProtobufReader.readInt32;
+        SetSeats(AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-
 function TPB_Game.GetProtobuf: TProtoBufOutput;
 var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-
-  if Length(FMongoId) > 0 then
+  if IsModifiedField(FN_MONGOID) then
     pbout.writeBytes(FN_MONGOID, FMongoId);
-
-  if Length(FCreator) > 0 then
+  if IsModifiedField(FN_CREATOR) then
     pbout.writeBytes(FN_CREATOR, FCreator);
-
-  pbout.writeString(FN_GAMENAME, FGamename);
-  pbout.writeInt32(FN_CLUBSEQ, FClubseq);
-  pbout.writeInt32(FN_GAMETYPE, FGameType);
-  pbout.writeInt32(FN_GAMELIMIT, FGameLimit);
-  pbout.writeInt32(FN_SMALLBLIND, FSmallBlind);
-  pbout.writeInt32(FN_BIGBLIND, FBigBlind);
-  pbout.writeInt32(FN_SEATS, FSeats);
+  if IsModifiedField(FN_GAMENAME) then
+    pbout.writeString(FN_GAMENAME, FGamename);
+  if IsModifiedField(FN_CLUBSEQ) then
+    pbout.writeInt32(FN_CLUBSEQ, FClubseq);
+  if IsModifiedField(FN_GAMETYPE) then
+    pbout.writeInt32(FN_GAMETYPE, FGameType);
+  if IsModifiedField(FN_GAMELIMIT) then
+    pbout.writeInt32(FN_GAMELIMIT, FGameLimit);
+  if IsModifiedField(FN_SMALLBLIND) then
+    pbout.writeInt32(FN_SMALLBLIND, FSmallBlind);
+  if IsModifiedField(FN_BIGBLIND) then
+    pbout.writeInt32(FN_BIGBLIND, FBigBlind);
+  if IsModifiedField(FN_SEATS) then
+    pbout.writeInt32(FN_SEATS, FSeats);
   result := pbout;
 end;
 
-function TPB_Game.GetCreatorMongoId: AnsiString;
+function TPB_Game.GetCreatorMongoIdHex: AnsiString;
 begin
   result := BytesToHex(FCreator);
 end;
 
-function TPB_Game.GetMongoId: AnsiString;
+function TPB_Game.GetMongoIdHex: AnsiString;
 begin
   result := BytesToHex(FMongoId);
 end;
 
-procedure TPB_Game.SetMongoId(const AValue: AnsiString);
+procedure TPB_Game.SetMongoId(const AValue: TBytes);
 begin
-  HexToBytes(AValue, FMongoId);
+  FMongoId := AValue;
+  AddModifiedField(FN_MONGOID);
+end;
+
+procedure TPB_Game.SetMongoIdHex(const AValue: AnsiString);
+var
+  bytes: TBytes;
+begin
+  HexToBytes(AValue, bytes);
+  SetMongoId(bytes)
+end;
+
+procedure TPB_Game.SetCreator(const AValue: TBytes);
+begin
+  FCreator := AValue;
+  AddModifiedField(FN_CREATOR);
+end;
+
+procedure TPB_Game.SetGamename(const AValue: AnsiString);
+begin
+  FGamename := AValue;
+  AddModifiedField(FN_GAMENAME);
+end;
+
+procedure TPB_Game.SetClubseq(const AValue: Integer);
+begin
+  FClubseq := AValue;
+  AddModifiedField(FN_CLUBSEQ);
+end;
+
+procedure TPB_Game.SetGameType(const AValue: Integer);
+begin
+  FGameType := AValue;
+  AddModifiedField(FN_GAMETYPE);
+end;
+
+procedure TPB_Game.SetGameLimit(const AValue: Integer);
+begin
+  FGameLimit := AValue;
+  AddModifiedField(FN_GAMELIMIT);
+end;
+
+procedure TPB_Game.SetSmallBlind(const AValue: Integer);
+begin
+  FSmallBlind := AValue;
+  AddModifiedField(FN_SMALLBLIND);
+end;
+
+procedure TPB_Game.SetBigBlind(const AValue: Integer);
+begin
+  FBigBlind := AValue;
+  AddModifiedField(FN_BIGBLIND);
+end;
+
+procedure TPB_Game.SetSeats(const AValue: Integer);
+begin
+  FSeats := AValue;
+  AddModifiedField(FN_SEATS);
 end;
 
 
 end.
+

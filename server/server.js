@@ -54,6 +54,9 @@ app.get('/confirm',function (req,res) {
 			console.log('email confirm time',user);
 			// FIXME, inform the user if they are connected
 			res.send("account activated");
+			var conn = activeUsers[user._id];
+			if (!conn) return;
+			conn.send(codes.SR_ACCOUNT_CONFIRMED);
 		});
 	});
 });

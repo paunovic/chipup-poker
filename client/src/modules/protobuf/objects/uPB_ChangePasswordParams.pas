@@ -3,8 +3,7 @@ unit uPB_ChangePasswordParams;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_ChangePasswordParams = class(TProtobufBaseObject)
@@ -15,6 +14,8 @@ type
     var
       FNewPassword: AnsiString;
 
+    procedure SetNewPassword(const AValue: AnsiString);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
@@ -22,13 +23,10 @@ type
     property NewPassword: AnsiString read FNewPassword write FNewPassword;
   end;
 
-
 implementation
-
 
 uses
   pbPublic;
-
 
 procedure TPB_ChangePasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -40,7 +38,7 @@ begin
     case field_number of
       FN_NEWPASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FNewPassword := AProtobufReader.readString;
+        SetNewPassword(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -52,8 +50,16 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_NEWPASSWORD, FNewPassword);
+  if IsModifiedField(FN_NEWPASSWORD) then
+    pbout.writeString(FN_NEWPASSWORD, FNewPassword);
   result := pbout;
 end;
 
+procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: AnsiString);
+begin
+  FNewPassword := AValue;
+  AddModifiedField(FN_NEWPASSWORD);
+end;
+
 end.
+

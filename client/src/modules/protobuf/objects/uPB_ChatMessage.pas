@@ -20,14 +20,19 @@ type
       FMsg: AnsiString;
       FTimestamp: Int64;
 
+    procedure SetMongoId(const AValue: TBytes);
+    procedure SetUsername(const AValue: AnsiString);
+    procedure SetMsg(const AValue: AnsiString);
+    procedure SetTimestamp(const AValue: Int64);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property MongoId: TBytes read FMongoId write FMongoId;
-    property Username: AnsiString read FUsername write FUsername;
-    property Msg: AnsiString read FMsg write FMsg;
-    property Timestamp: Int64 read FTimestamp write FTimestamp;
+    property MongoId: TBytes read FMongoId write SetMongoId;
+    property Username: AnsiString read FUsername write SetUsername;
+    property Msg: AnsiString read FMsg write SetMsg;
+    property Timestamp: Int64 read FTimestamp write SetTimestamp;
   end;
 
 implementation
@@ -38,6 +43,7 @@ uses
 procedure TPB_ChatMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
+  bytes                               : TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -45,19 +51,20 @@ begin
     case field_number of
       FN_MONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FMongoId);
+        AProtobufReader.readBytes(bytes);
+        SetMongoId(bytes);
       end;
       FN_USERNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsername := AProtobufReader.readString;
+        SetUsername(AProtobufReader.readString);
       end;
       FN_MSG: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FMsg := AProtobufReader.readString;
+        SetMsg(AProtobufReader.readString);
       end;
       FN_TIMESTAMP: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FTimestamp := AProtobufReader.readInt64;
+        SetTimestamp(AProtobufReader.readInt64);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -69,14 +76,39 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  if Length(FMongoId) > 0 then
+  if IsModifiedField(FN_MONGOID) then
     pbout.writeBytes(FN_MONGOID, FMongoId);
-  if FUsername <> '' then
+  if IsModifiedField(FN_USERNAME) then
     pbout.writeString(FN_USERNAME, FUsername);
-  pbout.writeString(FN_MSG, FMsg);
-  if FTimestamp <> 0 then
+  if IsModifiedField(FN_MSG) then
+    pbout.writeString(FN_MSG, FMsg);
+  if IsModifiedField(FN_TIMESTAMP) then
     pbout.writeInt64(FN_TIMESTAMP, FTimestamp);
   result := pbout;
+end;
+
+procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
+begin
+  FMongoId := AValue;
+  AddModifiedField(FN_MONGOID);
+end;
+
+procedure TPB_ChatMessage.SetUsername(const AValue: AnsiString);
+begin
+  FUsername := AValue;
+  AddModifiedField(FN_USERNAME);
+end;
+
+procedure TPB_ChatMessage.SetMsg(const AValue: AnsiString);
+begin
+  FMsg := AValue;
+  AddModifiedField(FN_MSG);
+end;
+
+procedure TPB_ChatMessage.SetTimestamp(const AValue: Int64);
+begin
+  FTimestamp := AValue;
+  AddModifiedField(FN_TIMESTAMP);
 end;
 
 end.

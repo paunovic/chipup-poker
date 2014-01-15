@@ -3,8 +3,7 @@ unit uPB_TokenPrices;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_TokenPrices = class(TProtobufBaseObject)
@@ -17,19 +16,21 @@ type
       FClubChangeDetails: Integer;
       FClubCreation: Integer;
 
+    procedure SetClubChangeDetails(const AValue: Integer);
+    procedure SetClubCreation(const AValue: Integer);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property ClubChangeDetails: Integer read FClubChangeDetails;
-    property ClubCreation: Integer read FClubCreation;
+    property ClubChangeDetails: Integer read FClubChangeDetails write SetClubChangeDetails;
+    property ClubCreation: Integer read FClubCreation write SetClubCreation;
   end;
 
 implementation
 
 uses
   pbPublic;
-
 
 procedure TPB_TokenPrices.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -41,11 +42,11 @@ begin
     case field_number of
       FN_CLUBCHANGEDETAILS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClubChangeDetails := AProtobufReader.readInt32;
+        SetClubChangeDetails(AProtobufReader.readInt32);
       end;
       FN_CLUBCREATION: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClubCreation := AProtobufReader.readInt32;
+        SetClubCreation(AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -57,9 +58,23 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeInt32(FN_CLUBCHANGEDETAILS, FClubChangeDetails);
-  pbout.writeInt32(FN_CLUBCREATION, FClubCreation);
+  if IsModifiedField(FN_CLUBCHANGEDETAILS) then
+    pbout.writeInt32(FN_CLUBCHANGEDETAILS, FClubChangeDetails);
+  if IsModifiedField(FN_CLUBCREATION) then
+    pbout.writeInt32(FN_CLUBCREATION, FClubCreation);
   result := pbout;
+end;
+
+procedure TPB_TokenPrices.SetClubChangeDetails(const AValue: Integer);
+begin
+  FClubChangeDetails := AValue;
+  AddModifiedField(FN_CLUBCHANGEDETAILS);
+end;
+
+procedure TPB_TokenPrices.SetClubCreation(const AValue: Integer);
+begin
+  FClubCreation := AValue;
+  AddModifiedField(FN_CLUBCREATION);
 end;
 
 end.

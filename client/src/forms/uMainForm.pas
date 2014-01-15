@@ -68,7 +68,6 @@ type
     btCashier: TcxButton;
     btClubLobby: TcxButton;
     cxLabel1: TcxLabel;
-    Button1: TButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -84,7 +83,6 @@ type
     procedure acShowChangeAvatarFormExecute(Sender: TObject);
     procedure gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowPublicGamesListFormExecute(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   private
     FSelectedClub: TClubInfo;
 
@@ -270,11 +268,6 @@ begin
     Exit;
 
   SocketClient.LeaveClub(FSelectedClub.Id);
-end;
-
-procedure TfrmChipUpMain.Button1Click(Sender: TObject);
-begin
-  SocketClient.SendChatEvent('Global', 'test123');
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;

@@ -212,8 +212,8 @@ begin
     fvtInt64: result := 'writeInt64';
     fvtString: result := 'writeString';
     fvtBoolean: result := 'writeBoolean';
-    fvtClass: result := 'writeClass';
-    fvtBytes: result := Format('writeRawData(@%s[0], Length(%s))', [AsPrivateProperty, AsPrivateProperty]);
+    fvtClass: result := 'writeProtobufBaseObject';
+    fvtBytes: result := 'writeBytes';
   end;
 end;
 

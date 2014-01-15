@@ -70,15 +70,15 @@ begin
     index := Add(TGameInfo.Create(AMongoId, ACreatorId, AClubId, AName, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats))
   else
   begin
-    Items[index].FMongoId := AMongoId;
-    Items[index].FCreatorId := ACreatorId;
-    Items[index].FClubId := AClubId;
-    Items[index].FName := AName;
-    Items[index].FSmallBlind := ASmallBlind;
-    Items[index].FBigBlind := ABigBlind;
-    Items[index].FGameType := AGameType;
-    Items[index].FGameLimit := AGameLimit;
-    Items[index].FSeats := ASeats;
+    Items[index].MongoId := AMongoId;
+    Items[index].CreatorId := ACreatorId;
+    Items[index].ClubId := AClubId;
+    Items[index].Name := AName;
+    Items[index].SmallBlind := ASmallBlind;
+    Items[index].BigBlind := ABigBlind;
+    Items[index].GameType := AGameType;
+    Items[index].Limit := AGameLimit;
+    Items[index].Seats := ASeats;
   end;
   result := Items[index];
 end;

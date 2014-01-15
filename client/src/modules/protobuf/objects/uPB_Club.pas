@@ -13,28 +13,36 @@ type
       FN_MONGOID = 1;
       FN_CHIPS = 2;
       FN_NAME = 4;
-      FN_OWNERMONGOID = 5;
+      FN_OWNER = 5;
       FN_PASSWORD = 6;
       FN_PRIVATE = 7;
       FN_SEQ = 8;
       FN_MEMBERS = 9;
-      FN_HAS_PASSWORD = 10;
-      FN_MEMBER_COUNT = 11;
+      FN_HASPASSWORD = 10;
+      FN_MEMBERCOUNT = 11;
+    function GetOwnerMongoIdHex: String;
 
     var
       FMongoId: TBytes;
       FChips: Integer;
       FName: AnsiString;
-      FOwnerMongoId: TBytes;
+      FOwner: TBytes;
       FPassword: AnsiString;
       FPrivate: Boolean;
       FSeq: Integer;
       FMembers: TStringList;
-      FMemberCount: Integer;
       FHasPassword: Boolean;
+      FMemberCount: Integer;
 
-    function GetMongoId: AnsiString;
-    function GetOwnerMongoId: AnsiString;
+    procedure SetMongoId(const AValue: TBytes);
+    procedure SetChips(const AValue: Integer);
+    procedure SetName(const AValue: AnsiString);
+    procedure SetOwner(const AValue: TBytes);
+    procedure SetPassword(const AValue: AnsiString);
+    procedure SetPrivate(const AValue: Boolean);
+    procedure SetSeq(const AValue: Integer);
+    procedure SetHasPassword(const AValue: Boolean);
+    procedure SetMemberCount(const AValue: Integer);
 
   public
     destructor Destroy; override;
@@ -42,16 +50,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property MongoId: AnsiString read GetMongoId;
-    property Chips: Integer read FChips write FChips;
-    property Name: AnsiString read FName write FName;
-    property OwnerMongoId: AnsiString read GetOwnerMongoId;
-    property Password: AnsiString read FPassword write FPassword;
-    property Private: Boolean read FPrivate write FPrivate;
-    property Seq: Integer read FSeq write FSeq;
+    property MongoId: TBytes read FMongoId write SetMongoId;
+    property Chips: Integer read FChips write SetChips;
+    property Name: AnsiString read FName write SetName;
+    property Owner: TBytes read FOwner write SetOwner;
+    property OwnerMongoId: String read GetOwnerMongoIdHex;
+    property Password: AnsiString read FPassword write SetPassword;
+    property Private: Boolean read FPrivate write SetPrivate;
+    property Seq: Integer read FSeq write SetSeq;
     property Members: TStringList read FMembers;
-    property MemberCount: Integer read FMemberCount write FMemberCount;
-    property HasPassword: Boolean read FHasPassword write FHasPassword;
+    property HasPassword: Boolean read FHasPassword write SetHasPassword;
+    property MemberCount: Integer read FMemberCount write SetMemberCount;
   end;
 
   TPB_Clubs = TObjectList<TPB_Club>;
@@ -73,7 +82,7 @@ end;
 procedure TPB_Club.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
-  member                              : TBytes;
+  bytes                               : TBytes;
 begin
   if not Assigned(FMembers) then
   begin
@@ -91,46 +100,46 @@ begin
     case field_number of
       FN_MONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FMongoId);
+        AProtobufReader.readBytes(bytes);
+        SetMongoId(bytes);
       end;
       FN_CHIPS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FChips := AProtobufReader.readInt32;
+        SetChips(AProtobufReader.readInt32);
       end;
       FN_NAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FName := AProtobufReader.readString;
+        SetName(AProtobufReader.readString);
       end;
-      FN_OWNERMONGOID: begin
+      FN_OWNER: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FOwnerMongoId);
+        AProtobufReader.readBytes(bytes);
+        SetOwner(bytes);
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPassword := AProtobufReader.readString;
-        FHasPassword := FPassword <> '';
+        SetPassword(AProtobufReader.readString);
       end;
       FN_PRIVATE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FPrivate := AProtobufReader.readBoolean;
+        SetPrivate(AProtobufReader.readBoolean);
       end;
       FN_SEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSeq := AProtobufReader.readInt32;
+        SetSeq(AProtobufReader.readInt32);
       end;
       FN_MEMBERS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(member);
-        FMembers.Add(String(BytesToHex(member)));
-        FMemberCount := FMembers.Count;
+        AProtobufReader.readBytes(bytes);
+        FMembers.Add(String(BytesToHex(bytes)));
       end;
-      FN_HAS_PASSWORD: begin
+      FN_HASPASSWORD: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FHasPassword := AProtobufReader.readBoolean;
+        SetHasPassword(AProtobufReader.readBoolean);
       end;
-      FN_MEMBER_COUNT: begin
+      FN_MEMBERCOUNT: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FMemberCount := AProtobufReader.readInt32;
+        SetMemberCount(AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -142,28 +151,84 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  if FChips <> 0 then
+  if IsModifiedField(FN_MONGOID) then
+    pbout.writeBytes(FN_MONGOID, FMongoId);
+  if IsModifiedField(FN_CHIPS) then
     pbout.writeInt32(FN_CHIPS, FChips);
-  pbout.writeString(FN_NAME, FName);
-  if FPassword <> '' then
+  if IsModifiedField(FN_NAME) then
+    pbout.writeString(FN_NAME, FName);
+  if IsModifiedField(FN_OWNER) then
+    pbout.writeBytes(FN_OWNER, FOwner);
+  if IsModifiedField(FN_PASSWORD) then
     pbout.writeString(FN_PASSWORD, FPassword);
-  pbout.writeBoolean(FN_PRIVATE, FPrivate);
-  pbout.writeInt32(FN_SEQ, FSeq);
-  if FHasPassword <> FALSE then
-    pbout.writeBoolean(FN_HAS_PASSWORD, FHasPassword);
-  if FMemberCount <> 0 then
-    pbout.writeInt32(FN_MEMBER_COUNT, FMemberCount);
+  if IsModifiedField(FN_PRIVATE) then
+    pbout.writeBoolean(FN_PRIVATE, FPrivate);
+  if IsModifiedField(FN_SEQ) then
+    pbout.writeInt32(FN_SEQ, FSeq);
+  if IsModifiedField(FN_HASPASSWORD) then
+    pbout.writeBoolean(FN_HASPASSWORD, FHasPassword);
+  if IsModifiedField(FN_MEMBERCOUNT) then
+    pbout.writeInt32(FN_MEMBERCOUNT, FMemberCount);
   result := pbout;
 end;
 
-function TPB_Club.GetMongoId: AnsiString;
+function TPB_Club.GetOwnerMongoIdHex: String;
 begin
-  result := BytesToHex(FMongoId);
+  result := String(BytesToHex(FOwner));
 end;
 
-function TPB_Club.GetOwnerMongoId: AnsiString;
+procedure TPB_Club.SetMongoId(const AValue: TBytes);
 begin
-  result := BytesToHex(FOwnerMongoId);
+  FMongoId := AValue;
+  AddModifiedField(FN_MONGOID);
+end;
+
+procedure TPB_Club.SetChips(const AValue: Integer);
+begin
+  FChips := AValue;
+  AddModifiedField(FN_CHIPS);
+end;
+
+procedure TPB_Club.SetName(const AValue: AnsiString);
+begin
+  FName := AValue;
+  AddModifiedField(FN_NAME);
+end;
+
+procedure TPB_Club.SetOwner(const AValue: TBytes);
+begin
+  FOwner := AValue;
+  AddModifiedField(FN_OWNER);
+end;
+
+procedure TPB_Club.SetPassword(const AValue: AnsiString);
+begin
+  FPassword := AValue;
+  AddModifiedField(FN_PASSWORD);
+end;
+
+procedure TPB_Club.SetPrivate(const AValue: Boolean);
+begin
+  FPrivate := AValue;
+  AddModifiedField(FN_PRIVATE);
+end;
+
+procedure TPB_Club.SetSeq(const AValue: Integer);
+begin
+  FSeq := AValue;
+  AddModifiedField(FN_SEQ);
+end;
+
+procedure TPB_Club.SetHasPassword(const AValue: Boolean);
+begin
+  FHasPassword := AValue;
+  AddModifiedField(FN_HASPASSWORD);
+end;
+
+procedure TPB_Club.SetMemberCount(const AValue: Integer);
+begin
+  FMemberCount := AValue;
+  AddModifiedField(FN_MEMBERCOUNT);
 end;
 
 end.

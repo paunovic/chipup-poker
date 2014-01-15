@@ -37,6 +37,7 @@ object frmDebug: TfrmDebug
       ParentBackground = False
       ParentCtl3D = False
       TabOrder = 1
+      ExplicitTop = 284
       DesignSize = (
         523
         75)
@@ -159,8 +160,8 @@ object frmDebug: TfrmDebug
         ParentFont = False
       end
       object cbSockInc: TcxCheckBox
-        Tag = 2
-        Left = 6
+        Tag = 3
+        Left = 86
         Top = 21
         Caption = 'SOCK INC'
         Properties.OnChange = cbLogOptionsChange
@@ -170,8 +171,8 @@ object frmDebug: TfrmDebug
         Width = 81
       end
       object cbSockOut: TcxCheckBox
-        Tag = 3
-        Left = 86
+        Tag = 4
+        Left = 166
         Top = 21
         Caption = 'SOCK OUT'
         Properties.OnChange = cbLogOptionsChange
@@ -181,7 +182,7 @@ object frmDebug: TfrmDebug
         Width = 81
       end
       object cbNetInc: TcxCheckBox
-        Tag = 4
+        Tag = 5
         Left = 6
         Top = 36
         Caption = 'NET INC'
@@ -192,7 +193,7 @@ object frmDebug: TfrmDebug
         Width = 81
       end
       object cbNetOut: TcxCheckBox
-        Tag = 5
+        Tag = 6
         Left = 86
         Top = 36
         Caption = 'NET OUT'
@@ -224,12 +225,24 @@ object frmDebug: TfrmDebug
         Width = 81
       end
       object cbForm: TcxCheckBox
-        Tag = 6
+        Tag = 7
         Left = 6
         Top = 51
         Caption = 'FORM'
+        ParentFont = False
         Properties.OnChange = cbLogOptionsChange
         TabOrder = 6
+        Transparent = True
+        Width = 81
+      end
+      object cbSocket: TcxCheckBox
+        Tag = 2
+        Left = 6
+        Top = 21
+        Caption = 'SOCK'
+        Properties.OnChange = cbLogOptionsChange
+        State = cbsChecked
+        TabOrder = 7
         Transparent = True
         Width = 81
       end

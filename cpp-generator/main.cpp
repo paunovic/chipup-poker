@@ -196,9 +196,11 @@ class DelphiGenerator : public CodeGenerator {
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
 					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
-						//const EnumDescriptor *type = field->enum_type();
-						// FIXME, use a delphi enum?
-						printer.Print("      F$name$: Integer;\n","name",PrivateFieldName(field));
+						const EnumDescriptor *type = field->enum_type();
+						printer.Print(
+							"      F$name$: T$subname$;\n"
+							,"name",PrivateFieldName(field)
+							,"subname",type->name());
 					}
 				}
 			}
@@ -254,15 +256,14 @@ class DelphiGenerator : public CodeGenerator {
 							,"name",PropertyName(field),"subname",subtype->name());
 					} else {
 						printer.Print(
-							"    property $name$: TPB_$subname$ read F$name$;\n","name",field->name(),"subname",subtype->name());
+							"    property $name$: TPB_$subname$ read F$name$ write F$name$;\n","name",field->name(),"subname",subtype->name());
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
 					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
-						//const EnumDescriptor *type = field->enum_type();
-						// FIXME, same as above
-						printer.Print("    property $name$: Integer read F$pname$;\n"
+						const EnumDescriptor *type = field->enum_type();
+						printer.Print("    property $name$: T$subname$ read F$pname$ write F$pname$;\n"
 							,"name",PropertyName(field)
-							//,"subname",type->name()
+							,"subname",type->name()
 							,"pname",PrivateFieldName(field));
 					}
 				}
@@ -315,6 +316,8 @@ class DelphiGenerator : public CodeGenerator {
 						printer.Print("  if Assigned(F$name$) then F$name$.Free;\n","name",field->camelcase_name());
 					} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print("  F$name$.Free;\n","name",field->camelcase_name());
+					} else if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
+						printer.Print("  if Assigned(F$name$) then F$name$.Free;\n","name",field->camelcase_name());
 					}
 				}
 			}
@@ -407,10 +410,11 @@ class DelphiGenerator : public CodeGenerator {
 							"      FN_$name$:\n"
 							"        begin\n"
 							"          Assert(wire_type = WIRETYPE_VARINT);\n"
-							"          F$pname$ := AProtobufReader.readInt32;\n"
+							"          F$pname$ := T$subname$(AProtobufReader.readEnum);\n"
 							"        end;\n"
 							,"name",name
-							,"pname",PrivateFieldName(field));
+							,"pname",PrivateFieldName(field)
+							,"subname",type->name());
 					}
 				}
 			}

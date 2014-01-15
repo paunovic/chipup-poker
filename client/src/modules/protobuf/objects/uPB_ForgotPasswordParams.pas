@@ -3,8 +3,7 @@ unit uPB_ForgotPasswordParams;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_ForgotPasswordParams = class(TProtobufBaseObject)
@@ -15,19 +14,19 @@ type
     var
       FEmail: AnsiString;
 
+    procedure SetEmail(const AValue: AnsiString);
+
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     function GetProtobuf: TProtoBufOutput; override;
 
-    property Email: AnsiString read FEmail write FEMail;
+    property Email: AnsiString read FEmail write SetEmail;
   end;
-
 
 implementation
 
 uses
   pbPublic;
-
 
 procedure TPB_ForgotPasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -39,7 +38,7 @@ begin
     case field_number of
       FN_EMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FEmail := AProtobufReader.readString;
+        SetEmail(AProtobufReader.readString);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -51,8 +50,15 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
-  pbout.writeString(FN_EMAIL, FEmail);
+  if IsModifiedField(FN_EMAIL) then
+    pbout.writeString(FN_EMAIL, FEmail);
   result := pbout;
+end;
+
+procedure TPB_ForgotPasswordParams.SetEmail(const AValue: AnsiString);
+begin
+  FEmail := AValue;
+  AddModifiedField(FN_EMAIL);
 end;
 
 end.

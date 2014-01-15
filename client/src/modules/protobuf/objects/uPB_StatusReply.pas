@@ -3,8 +3,7 @@ unit uPB_StatusReply;
 interface
 
 uses
-  Winapi.Windows,
-  pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club, uPB_User, uPB_Game;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader, uPB_Club, uPB_User, uPB_Game;
 
 type
   TPB_StatusReply = class(TProtobufBaseObject)
@@ -33,6 +32,7 @@ type
     property Games: TPB_Games read FGames;
   end;
 
+
 implementation
 
 uses
@@ -57,37 +57,34 @@ procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobu
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
-  if not Assigned(FClubs) then
-    FClubs := TPB_Clubs.Create;
-  if not Assigned(FUsers) then
-    FUsers := TPB_Users.Create;
-  if not Assigned(FSelf) then
-    FSelf := TPB_User.Create;
-  if not Assigned(FGames) then
-    FGames := TPB_Games.Create;
-  FClubs.Clear;
-  FUsers.Clear;
-  FGames.Clear;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
       FN_CLUBS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FClubs) then
+          FClubs := TPB_Clubs.Create;
         FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
+		AddModifiedField(FN_CLUBS);
       end;
       FN_USERS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FUsers) then
+          FUsers := TPB_Users.Create;
         FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
       FN_SELF: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
-      end;
+        if not Assigned(FSelf) then
+          FSelf := TPB_User.Create;
+		FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+	  end;
       FN_GAMES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32));
+        if not Assigned(FGames) then
+          FGames := TPB_Games.Create;
+		FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -99,8 +96,17 @@ var
   pbout: TProtoBufOutput;
 begin
   pbout := TProtoBufOutput.Create;
+//  if IsModifiedField(FN_CLUBS) then
+//    pbout.writeProtobufBaseObject(FN_CLUBS, FClubs);
+//  if IsModifiedField(FN_USERS) then
+//    pbout.writeProtobufBaseObject(FN_USERS, FUsers);
+  if IsModifiedField(FN_SELF) then
+    pbout.writeProtobufBaseObject(FN_SELF, FSelf);
+//  if IsModifiedField(FN_GAMES) then
+//    pbout.writeProtobufBaseObject(FN_GAMES, FGames);
   result := pbout;
 end;
+
 
 end.
 
