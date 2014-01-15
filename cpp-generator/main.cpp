@@ -104,10 +104,6 @@ class DelphiGenerator : public CodeGenerator {
 		for (int i=0; i<file->message_type_count(); i++) {
 			const Descriptor *message = file->message_type(i);
 			cerr << "message#" << i << " " << message->name() << "\n";
-			for (int j=0; j < message->enum_type_count(); j++) {
-				const EnumDescriptor *enum_type = message->enum_type(j);
-				GenerateEnum(enum_type,generator_context);
-			}
 			scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("uPB_" + message->name() + ".pas"));
 			io::Printer printer(output.get(), '$');
 			printer.Print(
@@ -129,7 +125,27 @@ class DelphiGenerator : public CodeGenerator {
 				}
 			}
 			printer.Print(";\n"
-				"type\n"
+				"type\n");
+
+			for (int j=0; j < message->enum_type_count(); j++) {
+				const EnumDescriptor *enum_type = message->enum_type(j);
+				printer.Print(
+					"  T$name$ = ("
+					,"name",enum_type->name());
+				bool tick = false;
+				for (int k=0; k<enum_type->value_count(); k++) {
+					if (tick) printer.Print(",");
+					tick = true;
+					const EnumValueDescriptor *value = enum_type->value(k);
+					//cerr << value->name() << " = " << value->number() << "\n";
+					char hack[10];
+					snprintf(hack,9,"%d",value->number());
+					printer.Print("ce$name$ = $hack$","name",value->name(),"hack",hack);
+				}
+			}
+
+			printer.Print(
+				");\n"
 				"  TPB_$name$ = class(TProtobufBaseObject)\n"
 				"  private\n"
 				"    const\n",
@@ -407,7 +423,7 @@ class DelphiGenerator : public CodeGenerator {
 				"end;\n"
 				"function TPB_$name$.GetProtobuf: TProtoBufOutput;\n"
 				"var\n"
-				"  pboutput: TProtoBufOutput;\n"
+				"  pboutput, pbmsg: TProtoBufOutput;\n"
 				"begin\n"
 				"  pboutput := TProtoBufOutput.Create;\n","name",message->name());
 			for (int j=0; j<message->field_count(); j++) {
@@ -436,6 +452,29 @@ class DelphiGenerator : public CodeGenerator {
 					} else {
 						printer.Print(
 							"  pboutput.writeString(FN_$name$,F$pname$);\n"
+							,"name",name
+							,"pname",PrivateFieldName(field));
+					}
+				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
+						printer.Print(
+							"  pboutput.writeInt32(FN_$name$,Integer(F$pname$));\n"
+							,"name",name
+							,"pname",PrivateFieldName(field));
+					}
+				} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+					const Descriptor *subtype = field->message_type();
+					if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
+						printer.Print(
+							"  if Assigned(F$pname$) then\n"
+							"  begin\n"
+							"    pbmsg := FMessage.GetProtobuf;\n"
+							"    try\n"
+							"      pboutput.writeMessage(FN_$name$,pbmsg);\n"
+							"    finally\n"
+							"      pbmsg.Free;\n"
+							"    end;\n"
+							"  end;\n"
 							,"name",name
 							,"pname",PrivateFieldName(field));
 					}
