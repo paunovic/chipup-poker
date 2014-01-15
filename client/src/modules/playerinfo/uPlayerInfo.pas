@@ -107,7 +107,7 @@ begin
     club_name := String(pbclub.Name);
     club_balance := pbclub.Chips;
     club_ownerid := String(pbclub.OwnerMongoId);
-    club_private := pbclub.Private;
+    club_private := pbclub.IsPrivate;
     club_invcode := String(pbclub.Password);
     club := FClubs.AddClub(club_mongoid, club_ownerid, club_id, club_name, club_balance, club_private, club_invcode);
     club.Players.Add(club_ownerid);

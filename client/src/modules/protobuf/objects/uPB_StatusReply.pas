@@ -57,34 +57,38 @@ procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobu
 var
   tag, wire_type, field_number, endpos: Integer;
 begin
+  if not Assigned(FClubs) then
+    FClubs := TPB_Clubs.Create;
+  if not Assigned(FUsers) then
+    FUsers := TPB_Users.Create;
+  if not Assigned(FSelf) then
+    FSelf := TPB_User.Create;
+  if not Assigned(FGames) then
+    FGames := TPB_Games.Create;
+  FClubs.Clear;
+  FGames.Clear;
+  FUsers.Clear;
+
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
       FN_CLUBS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(FClubs) then
-          FClubs := TPB_Clubs.Create;
         FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
-		AddModifiedField(FN_CLUBS);
+	    	AddModifiedField(FN_CLUBS);
       end;
       FN_USERS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(FUsers) then
-          FUsers := TPB_Users.Create;
         FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
       FN_SELF: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(FSelf) then
-          FSelf := TPB_User.Create;
-		FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
-	  end;
+     		FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+	    end;
       FN_GAMES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(FGames) then
-          FGames := TPB_Games.Create;
-		FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32));
+     		FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);

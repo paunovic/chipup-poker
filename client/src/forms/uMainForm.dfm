@@ -177,24 +177,6 @@ object frmChipUpMain: TfrmChipUpMain
       GridView = gridGamesTable
     end
   end
-  object btCashier: TcxButton
-    Left = 678
-    Top = 139
-    Width = 254
-    Height = 40
-    Anchors = [akLeft, akBottom]
-    Caption = 'CASHIER'
-    Enabled = False
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 5
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-    OnClick = btLeaveClubClick
-  end
   object btClubLobby: TcxButton
     Left = 8
     Top = 139
@@ -204,7 +186,7 @@ object frmChipUpMain: TfrmChipUpMain
     Caption = 'OPEN CLUB LOBBY'
     Enabled = False
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 6
+    TabOrder = 5
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -12

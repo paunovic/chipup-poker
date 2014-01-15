@@ -4,8 +4,8 @@ program client;
 {$R *.res}
 
 uses
-  Winapi.Windows,
-  Vcl.Forms,
+  FastMM4 in '3rdparty\FastMM\FastMM4.pas',
+  Winapi.Windows, Vcl.Forms,
   uMainDataModule in 'uMainDataModule.pas' {dmMain: TDataModule},
   uMainForm in 'forms\uMainForm.pas' {frmChipUpMain},
   uLoginForm in 'forms\uLoginForm.pas' {frmLogin},
@@ -20,11 +20,11 @@ uses
   uChangeEMailForm in 'forms\uChangeEMailForm.pas' {frmChangeEMail},
   uServerSettings in 'modules\server_settings\uServerSettings.pas',
   uChangePasswordForm in 'forms\uChangePasswordForm.pas' {frmChangePassword},
-  uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableForm in 'forms\uTableForm.pas' {frmTable},
   uCreateGameForm in 'forms\uCreateGameForm.pas' {frmCreateGame},
   {$IFDEF DEBUG} uDebugForm in 'forms\uDebugForm.pas' {frmDebug}, {$ENDIF}
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
+  uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',
   uHardcodedSettings in 'modules\settings\uHardcodedSettings.pas',
@@ -65,7 +65,12 @@ uses
   uPB_SetAvatarParams in 'modules\protobuf\objects\uPB_SetAvatarParams.pas',
   uPB_TransferChipsParams in 'modules\protobuf\objects\uPB_TransferChipsParams.pas',
   uPB_ChatMessage in 'modules\protobuf\objects\uPB_ChatMessage.pas',
-  uPB_ChatEvent in 'modules\protobuf\objects\uPB_ChatEvent.pas';
+  uPB_ChatEvent in 'modules\protobuf\objects\uPB_ChatEvent.pas',
+  pbInput in '3rdparty\protobufs\pbInput.pas',
+  pbOutput in '3rdparty\protobufs\pbOutput.pas',
+  pbPublic in '3rdparty\protobufs\pbPublic.pas',
+  StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
+  FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas';
 
 
 procedure FocusPokerApp;

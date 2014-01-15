@@ -8,12 +8,7 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, dxSkinDarkRoom, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkSide,
-  dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian,
-  dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue,
-  dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver,
-  dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust,
-  dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinsDefaultPainters, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue;
+  uMessageItem, dxSkinDarkRoom;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -65,7 +60,6 @@ type
     gridGamesTableColumn3: TcxGridColumn;
     SearchPublicClubs1: TMenuItem;
     acShowPublicGamesListForm: TAction;
-    btCashier: TcxButton;
     btClubLobby: TcxButton;
     cxLabel1: TcxLabel;
     procedure acLogoutExecute(Sender: TObject);
@@ -97,6 +91,7 @@ type
     procedure TCLogout(const AMessage: TMessageItem);
     procedure TCSecondaryLoginDetected(const AMessage: TMessageItem);
     procedure TCChatEvent(const AMessage: TMessageItem);
+    procedure TCAccountConfirmed(const AMessage: TMessageItem);
 
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
@@ -152,7 +147,8 @@ begin
                             TServerMessageCallback.Create(SR_LEAVECLUB_OK, TCLeaveClubOk),
                             TServerMessageCallback.Create(SR_LEAVECLUB_INVALID_ID, TCLeaveClubInvalidId),
                             TServerMessageCallback.Create(SR_SECONDARY_LOGIN_DETECTED, TCSecondaryLoginDetected),
-                            TServerMessageCallback.Create(EVENT_CHAT, TCChatEvent)
+                            TServerMessageCallback.Create(EVENT_CHAT, TCChatEvent),
+                            TServerMessageCallback.Create(SR_ACCOUNT_CONFIRMED, TCAccountConfirmed)
                           ]
                         );
 
@@ -365,13 +361,19 @@ begin
   ShowLoginForm;
 end;
 
+procedure TfrmChipUpMain.TCAccountConfirmed(const AMessage: TMessageItem);
+begin
+  dmMain.SelfInfo.Authed := TRUE;
+  ConfigureGUI;
+end;
+
 procedure TfrmChipUpMain.TCChatEvent(const AMessage: TMessageItem);
 var
   chatEvent: TPB_ChatEvent;
 begin
   chatEvent := AMessage.Object_ as TPB_ChatEvent;
 
-  {$IFDEF DEBUG} DebugLn(Format('Chat message <%s> %s', [chatEvent.ChatMessage.Username, chatEvent.ChatMessage.Msg]), ditSocketInc); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Chat message <%s> %s', [chatEvent.Msg.Username, chatEvent.Msg.Msg]), ditSocketInc); {$ENDIF}
 end;
 
 

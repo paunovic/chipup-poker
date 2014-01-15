@@ -15,12 +15,11 @@ type
       FN_NAME = 4;
       FN_OWNER = 5;
       FN_PASSWORD = 6;
-      FN_PRIVATE = 7;
+      FN_ISPRIVATE = 7;
       FN_SEQ = 8;
       FN_MEMBERS = 9;
       FN_HASPASSWORD = 10;
       FN_MEMBERCOUNT = 11;
-    function GetOwnerMongoIdHex: String;
 
     var
       FMongoId: TBytes;
@@ -28,12 +27,13 @@ type
       FName: AnsiString;
       FOwner: TBytes;
       FPassword: AnsiString;
-      FPrivate: Boolean;
+      FIsPrivate: Boolean;
       FSeq: Integer;
       FMembers: TStringList;
       FHasPassword: Boolean;
       FMemberCount: Integer;
 
+    function GetOwnerMongoIdHex: String;
     procedure SetMongoId(const AValue: TBytes);
     procedure SetChips(const AValue: Integer);
     procedure SetName(const AValue: AnsiString);
@@ -56,7 +56,7 @@ type
     property Owner: TBytes read FOwner write SetOwner;
     property OwnerMongoId: String read GetOwnerMongoIdHex;
     property Password: AnsiString read FPassword write SetPassword;
-    property Private: Boolean read FPrivate write SetPrivate;
+    property IsPrivate: Boolean read FIsPrivate write SetPrivate;
     property Seq: Integer read FSeq write SetSeq;
     property Members: TStringList read FMembers;
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
@@ -120,7 +120,7 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         SetPassword(AProtobufReader.readString);
       end;
-      FN_PRIVATE: begin
+      FN_ISPRIVATE: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetPrivate(AProtobufReader.readBoolean);
       end;
@@ -161,8 +161,8 @@ begin
     pbout.writeBytes(FN_OWNER, FOwner);
   if IsModifiedField(FN_PASSWORD) then
     pbout.writeString(FN_PASSWORD, FPassword);
-  if IsModifiedField(FN_PRIVATE) then
-    pbout.writeBoolean(FN_PRIVATE, FPrivate);
+  if IsModifiedField(FN_ISPRIVATE) then
+    pbout.writeBoolean(FN_ISPRIVATE, FIsPrivate);
   if IsModifiedField(FN_SEQ) then
     pbout.writeInt32(FN_SEQ, FSeq);
   if IsModifiedField(FN_HASPASSWORD) then
@@ -209,8 +209,8 @@ end;
 
 procedure TPB_Club.SetPrivate(const AValue: Boolean);
 begin
-  FPrivate := AValue;
-  AddModifiedField(FN_PRIVATE);
+  FIsPrivate := AValue;
+  AddModifiedField(FN_ISPRIVATE);
 end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);

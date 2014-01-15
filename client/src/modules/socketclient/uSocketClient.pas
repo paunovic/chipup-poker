@@ -300,6 +300,7 @@ begin
     SR_EDIT_GAME_OK: ;
     SR_SECONDARY_LOGIN_DETECTED: ;
     EVENT_CHAT: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
+    SR_ACCOUNT_CONFIRMED: ;
   else
     result := FALSE;
   end;
@@ -364,7 +365,7 @@ begin
   protobuf := TPB_Club.Create;
   try
     protobuf.Name := AnsiString(AName);
-    protobuf.Private := APrivate;
+    protobuf.IsPrivate := APrivate;
     protobuf.Password := AnsiString(AInvCode);
     SendProtobuf(CMD_CREATE_CLUB, protobuf);
   finally
@@ -436,7 +437,7 @@ begin
     protobuf.Seq := AClubId;
     protobuf.Name := AnsiString(AClubName);
     protobuf.Password := AnsiString(AClubCode);
-    protobuf.Private := APrivate;
+    protobuf.IsPrivate := APrivate;
     SendProtobuf(CMD_CHANGE_CLUB_DETAILS, protobuf);
   finally
     protobuf.Free;
@@ -574,8 +575,8 @@ begin
   try
     protobuf.Event := ceMessage;
     protobuf.Channel := AnsiString(AChannel);
-    protobuf.ChatMessage := TPB_ChatMessage.Create;
-    protobuf.ChatMessage.Msg := AnsiString(AMessage);
+    protobuf.Msg := TPB_ChatMessage.Create;
+    protobuf.Msg.Msg := AnsiString(AMessage);
     SendProtobuf(EVENT_CHAT, protobuf);
   finally
     protobuf.Free;

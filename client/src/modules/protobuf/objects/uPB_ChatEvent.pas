@@ -31,7 +31,7 @@ type
     function GetProtobuf: TProtoBufOutput; override;
 
     property Event: TChatEvent read FEvent write SetEvent;
-    property ChatMessage: TPB_ChatMessage read FMessage write SetMessage;
+    property Msg: TPB_ChatMessage read FMessage write SetMessage;
     property Channel: AnsiString read FChannel write SetChannel;
   end;
 

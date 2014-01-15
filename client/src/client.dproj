@@ -90,6 +90,7 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
 			<DCCReference Include="uMainDataModule.pas">
 				<Form>dmMain</Form>
 				<DesignClass>TDataModule</DesignClass>
@@ -131,9 +132,6 @@
 			<DCCReference Include="forms\uChangePasswordForm.pas">
 				<Form>frmChangePassword</Form>
 			</DCCReference>
-			<DCCReference Include="forms\uChangeAvatarForm.pas">
-				<Form>frmChangeAvatar</Form>
-			</DCCReference>
 			<DCCReference Include="forms\uTableForm.pas">
 				<Form>frmTable</Form>
 			</DCCReference>
@@ -145,6 +143,9 @@
 			</DCCReference>
 			<DCCReference Include="forms\uPublicClubsList.pas">
 				<Form>frmPublicClubsList</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uChangeAvatarForm.pas">
+				<Form>frmChangeAvatar</Form>
 			</DCCReference>
 			<DCCReference Include="forms\uIFormParams.pas"/>
 			<DCCReference Include="modules\settings\uSettings.pas"/>
@@ -187,6 +188,11 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_TransferChipsParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChatMessage.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChatEvent.pas"/>
+			<DCCReference Include="3rdparty\protobufs\pbInput.pas"/>
+			<DCCReference Include="3rdparty\protobufs\pbOutput.pas"/>
+			<DCCReference Include="3rdparty\protobufs\pbPublic.pas"/>
+			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
+			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
