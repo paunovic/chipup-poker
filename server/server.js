@@ -527,7 +527,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.CMD_LIST_PUBLIC_CLUBS:
 			// FIXME, limit which columns go out
-			allClubs.find({private:false},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
+			allClubs.find({is_private:false},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
 				for (var x=0; x<arr.length; x++) {
 					if (arr[x].members) {
 						arr[x].member_count = arr[x].members.length + 1;
@@ -549,7 +549,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			//	this.reply(codes.SR_JOINCLUB_OK,"missing arguments");
 			//	return;
 			//}
-			var priv = params.private;
+			var priv = params.is_private;
 			var pass = params.password;
 			var clubname = params.name;
 			if (clubname.length > sharedconfig.stringSizes.clubname) {
@@ -567,7 +567,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.send(codes.SR_CREATECLUB_NAME_EXISTS);
 					return;
 				}
-				var doc = {private:priv,password:pass,name:clubname, owner:this.userid, chips:100000};
+				var doc = {is_private:priv,password:pass,name:clubname, owner:this.userid, chips:100000};
 				// FIXME, switch to spendTokens
 				allUsers.findOne({_id:this.userid},function (err,res) {
 					if (res.tokens < sharedconfig.tokenPrices.club_creation) {
@@ -620,7 +620,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						}
 					}
 				}
-				if (item.private && (pw != item.password)) {
+				if (item.is_private && (pw != item.password)) {
 					this.send(codes.SR_JOINCLUB_INVALID_CODE);
 					return;
 				}
@@ -730,8 +730,8 @@ ClientSocket.prototype.handle = function (code,args) {
 					doit = true;
 					mods.$set.password = params.password;
 				}
-				if ((params.private == 1) || (params.private == 0)) {
-					mods.$set.private = params.private == 1;
+				if ((params.is_private == 1) || (params.is_private == 0)) {
+					mods.$set.is_private = params.is_private == 1;
 					doit = true;
 				}
 				if (!doit) {
