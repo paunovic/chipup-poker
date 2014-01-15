@@ -148,12 +148,12 @@ end;
 
 function TPB_Game.GetCreatorMongoIdHex: AnsiString;
 begin
-  result := AnsiString(BytesToHex(FCreator));
+  result := BytesToHex(FCreator);
 end;
 
 function TPB_Game.GetMongoIdHex: AnsiString;
 begin
-  result := AnsiString(BytesToHex(FMongoId));
+  result := BytesToHex(FMongoId);
 end;
 
 procedure TPB_Game.SetMongoId(const AValue: TBytes);

@@ -130,7 +130,7 @@ end;
 
 function TPB_User.GetMongoIdHex: AnsiString;
 begin
-  result := AnsiString(BytesToHex(FMongoId));
+  result := BytesToHex(FMongoId);
 end;
 
 procedure TPB_User.SetMongoId(const AValue: TBytes);
