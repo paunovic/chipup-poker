@@ -251,6 +251,7 @@ function ClientSocket(socket) {
 }
 ClientSocket.prototype.error = function error(e) {
 	this.log('error!',e);
+	this.log(e.stack);
 	this.logout();
 	this.socket.destroy();
 }
@@ -521,7 +522,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
 			}.bind(this));
 			break;
-		case codes.CMD_LIST_CLUBS:
+		case codes.CMD_LIST_PUBLIC_CLUBS:
 			// FIXME, limit which columns go out
 			allClubs.find({private:false},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
 				for (var x=0; x<arr.length; x++) {
@@ -949,8 +950,9 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.CMD_EDIT_GAME:
 			var params = pb.Parse(args,'Poker.Game');
+			this.log('edit game',params);
 			var id = new toMongoId(params._id);
-			this.log('edit game',params,id);
+			this.log('id is',id);
 			var game_type = params.game_type;
 			var game_limit = params.game_limit;
 			var small_blind = params.small_blind;
