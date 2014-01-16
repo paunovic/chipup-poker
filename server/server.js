@@ -978,7 +978,6 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.EVENT_CHAT:
 			var event = pb.Parse(args,'Poker.ChatEvent');
-			console.log(event);
 			this.handleChatEvent(event,Date.now());
 			break;
 		}
@@ -986,20 +985,20 @@ ClientSocket.prototype.handle = function (code,args) {
 }
 ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
 	switch (ev.event) {
-	case 'Message':
+	case 'UserMessage':
 		//for (var x=0; x<ev.messages.length; x++) {
 			ev.msg.username = this.nick;
 			ev.msg.timestamp = ts;
 		//}
-		switch (ev.channel) {
-		case 'Global':
-			this.log('global channel');
+		//switch (ev.table_id) {
+		//case 'Global':
+			this.log('all channels are global channel!',ev);
 			for (key in activeUsers) {
 				if (key == this.userid) continue;
 				activeUsers[key].send(codes.EVENT_CHAT,ev,'Poker.ChatEvent');
 			}
 			break;
-		}
+		//}
 		break;
 	}
 
