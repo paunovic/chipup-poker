@@ -127,13 +127,12 @@ message SetAvatarParams {
 
 message ChatEvent {
 	enum EventType {
-		Message = 0;
-		Join = 1;
-		Part = 2;
+		UserMessage = 0;
+		ServerMessage = 1;
 	}
 	required EventType event = 1;
-	optional ChatMessage msg = 2;
-	required string channel = 3;
+	required ChatMessage msg = 2;
+	optional bytes table_id = 3;
 }
 
 message ChatMessage {
