@@ -71,6 +71,8 @@ const
   CMD_CREATE_GAME = 518;
   CMD_DELETE_GAME = 519;
   CMD_EDIT_GAME = 520;
+  CMD_TABLE_JOIN = 521;
+  CMD_TABLE_LEAVE = 522;
 
 implementation
 

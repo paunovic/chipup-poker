@@ -15,9 +15,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function AddTable(const ATableId: DWORD): Boolean;
+    function AddTable(const ATableId: String): Boolean;
 
-    procedure NotifyClose(const ATableId: DWORD);
+    procedure NotifyClose(const ATableId: String);
   end;
 
 implementation
@@ -36,7 +36,7 @@ begin
   inherited;
 end;
 
-function TTables.AddTable(const ATableId: DWORD): Boolean;
+function TTables.AddTable(const ATableId: String): Boolean;
 var
   table: TTable;
 begin
@@ -46,7 +46,7 @@ begin
   result := TRUE;
 end;
 
-procedure TTables.NotifyClose(const ATableId: DWORD);
+procedure TTables.NotifyClose(const ATableId: String);
 var
   C1: Integer;
 begin

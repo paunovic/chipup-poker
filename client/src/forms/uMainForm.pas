@@ -8,7 +8,7 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, dxSkinDarkRoom;
+  uMessageItem, dxSkinDarkRoom, uGameInfo;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -51,17 +51,18 @@ type
     btJoinClub: TcxButton;
     gridGames: TcxGrid;
     gridGamesTable: TcxGridTableView;
-    cxGridColumn1: TcxGridColumn;
-    cxGridColumn2: TcxGridColumn;
-    cxGridColumn3: TcxGridColumn;
+    gridGamesId: TcxGridColumn;
+    gridGamesName: TcxGridColumn;
+    gridGamesType: TcxGridColumn;
     gridGamesLevel: TcxGridLevel;
-    gridGamesTableColumn1: TcxGridColumn;
-    gridGamesTableColumn2: TcxGridColumn;
-    gridGamesTableColumn3: TcxGridColumn;
+    gridGamesBlinds: TcxGridColumn;
+    gridGamesPlayers: TcxGridColumn;
+    gridGamesStatus: TcxGridColumn;
     SearchPublicClubs1: TMenuItem;
     acShowPublicGamesListForm: TAction;
     btClubLobby: TcxButton;
     cxLabel1: TcxLabel;
+    acShowGameTableForm: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -77,13 +78,18 @@ type
     procedure acShowChangeAvatarFormExecute(Sender: TObject);
     procedure gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowPublicGamesListFormExecute(Sender: TObject);
+    procedure gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure acShowGameTableFormExecute(Sender: TObject);
   private
     FSelectedClub: TClubInfo;
+    FSelectedGame: TGameInfo;
 
     function ShowLoginForm: Integer;
 
     procedure DoLogout;
     procedure UpdateClublist;
+    procedure UpdateGamelist;
 
     procedure TCStatusReply(const AMessage: TMessageItem);
     procedure TCLeaveClubOk(const AMessage: TMessageItem);
@@ -163,6 +169,7 @@ procedure TfrmChipUpMain.DoLogout;
 begin
   lbUserInfo.Caption := '';
   gridJoinedClubsTable.DataController.SetRecordCount(0);
+  gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
 end;
@@ -241,6 +248,14 @@ begin
     SocketClient.Status;
 end;
 
+procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
+begin
+  if not Assigned(FSelectedGame) then
+    Exit;
+
+  dmMain.Tables.AddTable(FSelectedGame.MongoId);
+end;
+
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
   if RunModalForM(TfrmJoinClub, self, []) = mrOk then
@@ -302,9 +317,44 @@ begin
   end;
 end;
 
+procedure TfrmChipUpMain.UpdateGamelist;
+var
+  C1  : Integer;
+  game: TGameInfo;
+  c   : TcxGridDataController;
+begin
+  c := gridGamesTable.DataController;
+  c.BeginFullUpdate;
+  try
+    if not Assigned(FSelectedClub) then
+      c.SetRecordCount(0)
+    else
+      c.SetRecordCount(FSelectedClub.Games.Count);
+
+    for C1 := 0 to FSelectedClub.Games.Count - 1 do
+    begin
+      game := FSelectedClub.Games[C1];
+
+      c.SetValue(C1, gridGamesId.Index, game.MongoId);
+      c.SetValue(C1, gridGamesName.Index, game.Name);
+      c.SetValue(C1, gridGamesType.Index, game.GameTypeStr);
+      c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [game.SmallBlind, game.BigBlind]));
+      c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [0, game.Seats]));
+      c.SetValue(C1, gridGamesStatus.Index, 'unknown');
+    end;
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
 procedure TfrmChipUpMain.gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acShowManageClubsForm.Execute;
+end;
+
+procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  acShowGameTableForm.Execute;
 end;
 
 procedure TfrmChipUpMain.gridJoinedClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
@@ -321,6 +371,28 @@ begin
 
   club_id := gridJoinedClubsTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
   if dmMain.SelfInfo.Clubs.FindClub(club_id, FSelectedClub) then
+  begin
+  end
+  else
+    FSelectedClub := nil;
+
+  UpdateGamelist;
+end;
+
+procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+var
+  recIndex: Integer;
+  game_id : String;
+begin
+  recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
+  if recIndex = -1 then
+  begin
+    FSelectedGame := nil;
+    Exit;
+  end;
+
+  game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+  if FSelectedClub.Games.FindGame(game_id, FSelectedGame) then
   begin
   end
   else

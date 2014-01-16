@@ -9,17 +9,17 @@ uses
 type
   TTable = class
   private
-    FId          : DWORD;
+    FId          : String;
     FForm        : TfrmTable;
     FTablesObject: TObject;
 
   public
-    constructor Create(const ATablesObject: TObject; const AId: DWORD);
+    constructor Create(const ATablesObject: TObject; const AId: String);
     destructor Destroy; override;
 
     procedure NotifyClose;
 
-    property Id  : DWORD read FId;
+    property Id  : String read FId;
     property Form: TfrmTable read FForm;
 
   end;
@@ -30,7 +30,7 @@ uses
   Vcl.Controls, uTables;
 
 
-constructor TTable.Create(const ATablesObject: TObject; const AId: DWORD);
+constructor TTable.Create(const ATablesObject: TObject; const AId: String);
 begin
   FId := AId;
   FTablesObject := ATablesObject;

@@ -55,7 +55,9 @@ type
     procedure DeleteGame(const AGameId: String);
     procedure EditGame(const AGameId: String; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
     procedure ListPublicClubs;
-    procedure SendChatEvent(const AChannel, AMessage: String);
+    procedure SendTableChatLine(const ATableId, ALine: String);
+    procedure JoinTable(const ATableId: String);
+    procedure LeaveTable(const ATableId: String);
 
     property Socket     : TSslWSocket read FSocket;
     property ConnectCode: Integer read FConnectCode;
@@ -303,6 +305,54 @@ begin
     SR_ACCOUNT_CONFIRMED: ;
   else
     result := FALSE;
+  end;
+end;
+
+procedure TSocketClient.SendProtobuf(const AMethodId: DWORD; const AProtobuf: TProtobufBaseObject);
+var
+  rpc_message: TPB_RpcMessage;
+  mstream    : TMemoryStream;
+  protosize  : Integer;
+  pbobject   : TProtobufOutput;
+  rpcobject  : TProtoBufOutput;
+  rpcsize    : Word;
+begin
+  if Assigned(AProtobuf) then
+  begin
+    pbobject := AProtobuf.GetProtobuf;
+    protosize := pbobject.getSerializedSize;
+  end
+  else
+  begin
+    pbobject := nil;
+    protosize := 0;
+  end;
+
+  rpc_message := TPB_RpcMessage.Create(AMethodId, protosize);
+  try
+    rpcobject := rpc_message.GetProtobuf;
+    try
+      mstream := TMemoryStream.Create;
+      try
+        rpcsize := rpcobject.getSerializedSize;
+        mstream.WriteBuffer(rpcsize, SizeOf(rpcsize));
+        rpcobject.SaveToStream(mstream);
+        if Assigned(pbobject) then
+        begin
+          pbobject.SaveToStream(mstream);
+          pbobject.Free;
+        end;
+
+        {$IFDEF DEBUG} DebugLn(Format('MethodId: %d; DataSize: %d', [rpc_message.MethodId, rpc_message.DataSize]), ditSocketOut); {$ENDIF}
+        FSocket.Send(mstream.Memory, mstream.Size);
+      finally
+        mstream.Free;
+      end;
+    finally
+      rpcobject.Free;
+    end;
+  finally
+    rpc_message.Free;
   end;
 end;
 
@@ -567,68 +617,47 @@ begin
   SendProtobuf(CMD_LIST_PUBLIC_CLUBS, nil);
 end;
 
-procedure TSocketClient.SendChatEvent(const AChannel, AMessage: String);
+procedure TSocketClient.SendTableChatLine(const ATableId, ALine: String);
 var
   protobuf: TPB_ChatEvent;
 begin
   protobuf := TPB_ChatEvent.Create;
   try
-    protobuf.Event := ceMessage;
-    protobuf.Channel := AnsiString(AChannel);
+    protobuf.Event := ceUserMessage;
+    protobuf.TableIdAsHex := AnsiString(ATableId);
     protobuf.Msg := TPB_ChatMessage.Create;
-    protobuf.Msg.Msg := AnsiString(AMessage);
+    protobuf.Msg.Msg := AnsiString(ALine);
     SendProtobuf(EVENT_CHAT, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TSocketClient.SendProtobuf(const AMethodId: DWORD; const AProtobuf: TProtobufBaseObject);
+procedure TSocketClient.JoinTable(const ATableId: String);
 var
-  rpc_message: TPB_RpcMessage;
-  mstream    : TMemoryStream;
-  protosize  : Integer;
-  pbobject   : TProtobufOutput;
-  rpcobject  : TProtoBufOutput;
-  rpcsize    : Word;
+  protobuf: TPB_Game;
 begin
-  if Assigned(AProtobuf) then
-  begin
-    pbobject := AProtobuf.GetProtobuf;
-    protosize := pbobject.getSerializedSize;
-  end
-  else
-  begin
-    pbobject := nil;
-    protosize := 0;
-  end;
-
-  rpc_message := TPB_RpcMessage.Create(AMethodId, protosize);
+  protobuf := TPB_Game.Create;
   try
-    rpcobject := rpc_message.GetProtobuf;
-    try
-      mstream := TMemoryStream.Create;
-      try
-        rpcsize := rpcobject.getSerializedSize;
-        mstream.WriteBuffer(rpcsize, SizeOf(rpcsize));
-        rpcobject.SaveToStream(mstream);
-        if Assigned(pbobject) then
-        begin
-          pbobject.SaveToStream(mstream);
-          pbobject.Free;
-        end;
-
-        {$IFDEF DEBUG} DebugLn(Format('MethodId: %d; DataSize: %d', [rpc_message.MethodId, rpc_message.DataSize]), ditSocketOut); {$ENDIF}
-        FSocket.Send(mstream.Memory, mstream.Size);
-      finally
-        mstream.Free;
-      end;
-    finally
-      rpcobject.Free;
-    end;
+    protobuf.MongoIdHex := AnsiString(ATableId);
+    SendProtobuf(CMD_TABLE_JOIN, protobuf);
   finally
-    rpc_message.Free;
+    protobuf.Free;
   end;
 end;
+
+procedure TSocketClient.LeaveTable(const ATableId: String);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoIdHex := AnsiString(ATableId);
+    SendProtobuf(CMD_TABLE_LEAVE, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 end.
