@@ -236,12 +236,14 @@ var secureServer = tls.createServer(options,function listener(socket) {
 });
 secureServer.listen(12346);
 var activeUsers = {};
+var activeGames = {};
 function ClientSocket(socket) {
 	this.state = 1;
 	this.socket = socket;
 	socket.on('end',function() {
 		this.log('client lost');
 		delete activeUsers[this.userid];
+		Game.handleDisconnect(this);
 	}.bind(this));
 	//this.socket.write("abc\ndef\nghi\n");
 	this.send(codes.SR_HELLO,sharedconfig,'Poker.HelloReply');
@@ -286,6 +288,7 @@ ClientSocket.prototype.eject = function () {
 	this.userid = null;
 	this.nick = null;
 	this.send(codes.SR_SECONDARY_LOGIN_DETECTED);
+	// FIXME, handle activeGames
 }
 ClientSocket.prototype.log = function log() {
 	var out = Array.prototype.slice.call(arguments);
@@ -980,7 +983,45 @@ ClientSocket.prototype.handle = function (code,args) {
 			var event = pb.Parse(args,'Poker.ChatEvent');
 			this.handleChatEvent(event,Date.now());
 			break;
+		case codes.CMD_TABLE_JOIN:
+			var params = pb.Parse(args,'Poker.Game');
+			this.log('table join',params);
+			var id = new toMongoId(params._id);
+			var game = activeGames[id];
+			if (!game) {
+				game = new Game(id);
+			}
+			game.join(this);
+			break;
+		case codes.CMD_TABLE_LEAVE:
+			var params = pb.Parse(args,'Poker.Game');
+			this.log('table leave',params);
+			var id = new toMongoId(params._id);
+			var game = activeGames[id];
+			game.leave(this);
+			break;
 		}
+	}
+}
+function Game(id) {
+	this.users = {};
+	this.id = id;
+	activeGames[id] = this;
+}
+Game.prototype.join = function join(conn) {
+	this.users[conn.userid] = conn;
+	conn.log('joined',this);
+}
+Game.prototype.leave = function leave(conn) {
+	conn.log('before',this);
+	// FIXME, inform other members
+	delete this.users[conn.userid];
+	conn.log('after',this);
+}
+Game.handleDisconnect = function handleDisconnect(conn) {
+	for (key in activeGames) {
+		var game = activeGames[key];
+		if (game.users[conn.userid]) game.leave(conn);
 	}
 }
 ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
@@ -990,15 +1031,17 @@ ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
 			ev.msg.username = this.nick;
 			ev.msg.timestamp = ts;
 		//}
-		//switch (ev.table_id) {
-		//case 'Global':
-			this.log('all channels are global channel!',ev);
-			for (key in activeUsers) {
-				if (key == this.userid) continue;
-				activeUsers[key].send(codes.EVENT_CHAT,ev,'Poker.ChatEvent');
-			}
-			break;
-		//}
+		var id = new toMongoId(ev.table_id);
+		var game = activeGames[id];
+		if (!game) {
+			// FIXME, game doesnt exist server side
+			return;
+		}
+		this.log('found game channel!',ev);
+		for (key in game.users) {
+			//if (key == this.userid) continue;
+			game.users[key].send(codes.EVENT_CHAT,ev,'Poker.ChatEvent');
+		}
 		break;
 	}
 
