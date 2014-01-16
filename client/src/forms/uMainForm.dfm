@@ -120,8 +120,8 @@ object frmChipUpMain: TfrmChipUpMain
     TabOrder = 4
     object gridGamesTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
-      OnCellDblClick = gridJoinedClubsTableCellDblClick
-      OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
+      OnCellDblClick = gridGamesTableCellDblClick
+      OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
@@ -137,40 +137,47 @@ object frmChipUpMain: TfrmChipUpMain
       OptionsView.NoDataToDisplayInfoText = ' '
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False
-      object cxGridColumn1: TcxGridColumn
+      object gridGamesId: TcxGridColumn
         Caption = 'Id'
-        PropertiesClassName = 'TcxSpinEditProperties'
+        PropertiesClassName = 'TcxTextEditProperties'
         Visible = False
       end
-      object cxGridColumn2: TcxGridColumn
+      object gridGamesName: TcxGridColumn
         Caption = 'Game Name'
         PropertiesClassName = 'TcxTextEditProperties'
         HeaderAlignmentHorz = taCenter
         Options.Editing = False
         SortIndex = 0
         SortOrder = soDescending
-        Width = 344
+        Width = 274
       end
-      object cxGridColumn3: TcxGridColumn
+      object gridGamesType: TcxGridColumn
         Caption = 'Type'
         PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
-        Width = 49
+        Width = 108
       end
-      object gridGamesTableColumn1: TcxGridColumn
+      object gridGamesBlinds: TcxGridColumn
         Caption = 'Blinds'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
-        Width = 53
+        Width = 52
       end
-      object gridGamesTableColumn2: TcxGridColumn
+      object gridGamesPlayers: TcxGridColumn
         Caption = 'Players'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
-        Width = 64
+        Width = 62
       end
-      object gridGamesTableColumn3: TcxGridColumn
+      object gridGamesStatus: TcxGridColumn
         Caption = 'Status'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
-        Width = 133
+        Width = 130
       end
     end
     object gridGamesLevel: TcxGridLevel
@@ -250,6 +257,10 @@ object frmChipUpMain: TfrmChipUpMain
     object acShowPublicGamesListForm: TAction
       Caption = 'acShowPublicClubsListForm'
       OnExecute = acShowPublicGamesListFormExecute
+    end
+    object acShowGameTableForm: TAction
+      Caption = 'acShowGameTableForm'
+      OnExecute = acShowGameTableFormExecute
     end
   end
   object MainMenu: TMainMenu

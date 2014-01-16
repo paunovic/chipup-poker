@@ -6,23 +6,25 @@ uses
   Winapi.Windows, System.SysUtils, pbOutput, uProtobufBaseObject, uProtobufReader, uPB_ChatMessage;
 
 type
-  TChatEvent = (ceMessage = 0, ceJoin, cePart);
+  TChatEvent = (ceUserMessage = 0, ceServerMessage);
 
   TPB_ChatEvent = class(TProtobufBaseObject)
   private
     const
       FN_EVENT = 1;
       FN_MESSAGE = 2;
-      FN_CHANNEL = 3;
+      FN_TABLEID = 3;
 
     var
       FEvent: TChatEvent;
       FMessage: TPB_ChatMessage;
-      FChannel: AnsiString;
+      FTableId: TBytes;
 
+    function GetTableIdAsHex: AnsiString;
+    procedure SetTableIdAsHex(const AValue: AnsiString);
     procedure SetEvent(const AValue: TChatEvent);
     procedure SetMessage(const AValue: TPB_ChatMessage);
-    procedure SetChannel(const AValue: AnsiString);
+    procedure SetTableId(const AValue: TBytes);
 
   public
     destructor Destroy; override;
@@ -32,13 +34,14 @@ type
 
     property Event: TChatEvent read FEvent write SetEvent;
     property Msg: TPB_ChatMessage read FMessage write SetMessage;
-    property Channel: AnsiString read FChannel write SetChannel;
+    property TableId: TBytes read FTableId write SetTableId;
+    property TableIdAsHex: AnsiString read GetTableIdAsHex write SetTableIdAsHex;
   end;
 
 implementation
 
 uses
-  pbPublic;
+  pbPublic, uCommon;
 
 
 destructor TPB_ChatEvent.Destroy;
@@ -52,6 +55,7 @@ end;
 procedure TPB_ChatEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
+  bytes                               : TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -65,9 +69,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         SetMessage(TPB_ChatMessage.Create(AProtobufReader, AProtobufReader.readInt32));
       end;
-      FN_CHANNEL: begin
+      FN_TABLEID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetChannel(AProtobufReader.readString);
+        AProtobufReader.readBytes(bytes);
+        SetTableId(bytes);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -83,9 +88,14 @@ begin
     pbout.writeInt32(FN_EVENT, Integer(FEvent));
   if IsModifiedField(FN_MESSAGE) then
     pbout.writeProtobufBaseObject(FN_MESSAGE, FMessage);
-  if IsModifiedField(FN_CHANNEL) then
-    pbout.writeString(FN_CHANNEL, FChannel);
+  if IsModifiedField(FN_TABLEID) then
+    pbout.writeBytes(FN_TABLEID, FTableId);
   result := pbout;
+end;
+
+function TPB_ChatEvent.GetTableIdAsHex: AnsiString;
+begin
+  result := BytesToHex(FTableId);
 end;
 
 procedure TPB_ChatEvent.SetEvent(const AValue: TChatEvent);
@@ -100,10 +110,18 @@ begin
   AddModifiedField(FN_MESSAGE);
 end;
 
-procedure TPB_ChatEvent.SetChannel(const AValue: AnsiString);
+procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);
 begin
-  FChannel := AValue;
-  AddModifiedField(FN_CHANNEL);
+  FTableId := AValue;
+  AddModifiedField(FN_TABLEID);
+end;
+
+procedure TPB_ChatEvent.SetTableIdAsHex(const AValue: AnsiString);
+var
+  bytes: TBytes;
+begin
+  HexToBytes(AValue, bytes);
+  SetTableId(bytes);
 end;
 
 end.

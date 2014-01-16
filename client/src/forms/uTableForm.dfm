@@ -3,7 +3,7 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 400
+  ClientHeight = 456
   ClientWidth = 600
   Color = clWindow
   Constraints.MaxHeight = 1080
@@ -21,16 +21,67 @@ object frmTable: TfrmTable
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 14
   object PaintBox: TPaintBox
     Left = 0
     Top = 0
     Width = 600
-    Height = 400
+    Height = 354
     Align = alClient
     OnPaint = PaintBoxPaint
     ExplicitWidth = 570
     ExplicitHeight = 380
+  end
+  object paBottom: TPanel
+    Left = 0
+    Top = 354
+    Width = 600
+    Height = 102
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 0
+    object paChat: TPanel
+      Left = 0
+      Top = 0
+      Width = 290
+      Height = 102
+      Align = alLeft
+      BevelOuter = bvNone
+      Color = clBlack
+      Padding.Top = 1
+      Padding.Right = 1
+      ParentBackground = False
+      TabOrder = 0
+      object edChat: TcxTextEdit
+        Left = 0
+        Top = 1
+        Align = alTop
+        Style.Edges = [bBottom]
+        TabOrder = 0
+        OnKeyDown = edChatKeyDown
+        Width = 289
+      end
+      object reChat: TRichEdit
+        Left = 0
+        Top = 21
+        Width = 289
+        Height = 81
+        Align = alClient
+        BevelInner = bvNone
+        BevelOuter = bvNone
+        BorderStyle = bsNone
+        Color = 3552822
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clSilver
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+        ScrollBars = ssVertical
+        TabOrder = 1
+      end
+    end
   end
 end
