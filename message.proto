@@ -213,6 +213,8 @@ enum ServerCodes {
 	CMD_EDIT_GAME = 520;
 	CMD_TABLE_JOIN = 521;
 	CMD_TABLE_LEAVE = 522;
+	CMD_TABLE_SIT = 523;
+	CMD_TABLE_STAND_UP = 524;
 }
 
 service Server {
