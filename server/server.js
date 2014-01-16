@@ -1000,17 +1000,43 @@ ClientSocket.prototype.handle = function (code,args) {
 			var game = activeGames[id];
 			game.leave(this);
 			break;
+		case codes.CMD_TABLE_SIT:
+			var params = pb.Parse(args,'Poker.TableSit');
+			var id = new toMongoId(params.game_id);
+			var game = activeGames[id];
+			game.sitDown(this,params);
+			break;
+		case codes.CMD_TABLE_STAND_UP:
+			var params = pb.Parse(args,'Poker.Game');
+			var id = new toMongoId(params._id);
+			var game = activeGames[id];
+			game.standUp(this);
+			break;
 		}
 	}
 }
 function Game(id) {
 	this.users = {};
+	this.members = [];
 	this.id = id;
 	activeGames[id] = this;
 }
 Game.prototype.join = function join(conn) {
 	this.users[conn.userid] = conn;
 	conn.log('joined',this);
+}
+Game.prototype.sitDown = function (conn,params) {
+	// FIXME, handle chips
+	// FIXME, inform others
+	this.members[params.seat_index] = conn;
+}
+Game.prototype.standUp = function (conn) {
+	for (var x=0; x<this.members.length; x++) {
+		if (this.members[x] == conn) {
+			// FIXME, inform others
+			this.members[x] = null;
+		}
+	}
 }
 Game.prototype.leave = function leave(conn) {
 	conn.log('before',this);

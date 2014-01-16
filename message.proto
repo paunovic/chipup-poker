@@ -221,3 +221,8 @@ service Server {
 	rpc Login (LoginParams) returns (LoginReply);
 }
 
+message TableSit {
+	required bytes game_id = 1;
+	required int32 seat_index = 2;
+	required int32 chips = 3;
+}
