@@ -184,7 +184,7 @@ app.get("/getavatar",function (req,res) {
 });
 app.listen(3000);
 
-var conn,allUsers,allClubs,allCounters,avatars;
+var conn,allUsers,allClubs,allCounters,avatars,allGames;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -950,6 +950,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						return;
 					}
 					this.log('removed',err,ret);
+					// FIXME, remove Game object
 					this.send(codes.SR_DELETE_GAME_OK);
 				}.bind(this));
 			}.bind(this));
@@ -976,6 +977,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					return;
 				}
 				this.log('edit game',res);
+				// FIXME, update a Game object
 				this.send(codes.SR_EDIT_GAME_OK);
 			}.bind(this));
 			break;
@@ -987,39 +989,41 @@ ClientSocket.prototype.handle = function (code,args) {
 			var params = pb.Parse(args,'Poker.Game');
 			this.log('table join',params);
 			var id = new toMongoId(params._id);
-			var game = activeGames[id];
-			if (!game) {
-				game = new Game(id);
-			}
-			game.join(this);
+			Game.getGame(id,function (err,game) {
+				game.join(this);
+			}.bind(this));
 			break;
 		case codes.CMD_TABLE_LEAVE:
 			var params = pb.Parse(args,'Poker.Game');
 			this.log('table leave',params);
 			var id = new toMongoId(params._id);
-			var game = activeGames[id];
-			game.leave(this);
+			Game.getGame(id,function (err,game) {
+				game.leave(this);
+			}.bind(this));
 			break;
 		case codes.CMD_TABLE_SIT:
 			var params = pb.Parse(args,'Poker.TableSit');
 			var id = new toMongoId(params.game_id);
-			var game = activeGames[id];
-			game.sitDown(this,params);
+			Game.getGame(id,function (err,game) {
+				game.sitDown(this,params);
+			}.bind(this));
 			break;
 		case codes.CMD_TABLE_STAND_UP:
 			var params = pb.Parse(args,'Poker.Game');
 			var id = new toMongoId(params._id);
-			var game = activeGames[id];
-			game.standUp(this);
+			Game.getGame(id,function (err,game) {
+				if (game.standUp(this)) this.send(codes.SE_TABLE_STAND_UP_OK);
+			}.bind(this));
 			break;
 		}
 	}
 }
-function Game(id) {
+function Game(obj) {
 	this.users = {};
 	this.members = [];
-	this.id = id;
-	activeGames[id] = this;
+	this.obj = obj;
+	this.id = obj._id;
+	activeGames[this.id] = this;
 }
 Game.prototype.join = function join(conn) {
 	this.users[conn.userid] = conn;
@@ -1028,20 +1032,39 @@ Game.prototype.join = function join(conn) {
 Game.prototype.sitDown = function (conn,params) {
 	// FIXME, handle chips
 	// FIXME, inform others
-	this.members[params.seat_index] = conn;
+	conn.log('sitting down',params);
+	if ((params.seat_index < 0) || (params.seat_index >= this.obj.seats)) {
+		conn.reply(0,'invalid seat index');
+		return;
+	}
+	if (this.members[params.seat_index]) {
+		conn.send(codes.SR_TABLE_SIT_SEAT_TAKEN);
+	} else {
+		this.members[params.seat_index] = conn;
+		var tableStatus = {table_id:new Buffer(this.id.toString(),'hex'),seats:[]};
+		for (var x=0; x<this.members.length; x++) {
+			if (!this.members[x]) continue;
+			var seat = this.members[x];
+			tableStatus.seats.push({seat:x, player_id:new Buffer(seat.userid.toString(),'hex'), chips:666});
+		}
+		conn.send(codes.SR_TABLE_SIT_OK,tableStatus,'Poker.TableStatus');
+	}
+	conn.log(this);
 }
 Game.prototype.standUp = function (conn) {
 	for (var x=0; x<this.members.length; x++) {
 		if (this.members[x] == conn) {
 			// FIXME, inform others
 			this.members[x] = null;
+			return true;
 		}
 	}
+	return false;
 }
 Game.prototype.leave = function leave(conn) {
-	conn.log('before',this);
 	// FIXME, inform other members
 	delete this.users[conn.userid];
+	this.standUp(conn);
 	conn.log('after',this);
 }
 Game.handleDisconnect = function handleDisconnect(conn) {
@@ -1049,6 +1072,13 @@ Game.handleDisconnect = function handleDisconnect(conn) {
 		var game = activeGames[key];
 		if (game.users[conn.userid]) game.leave(conn);
 	}
+}
+Game.getGame = function getgame(id,cb) {
+	if (!activeGames[id]) {
+		allGames.findOne({_id:id},function (err,obj) {
+			cb(null,new Game(obj));
+		});
+	} else cb(null,activeGames[id]);
 }
 ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
 	switch (ev.event) {
