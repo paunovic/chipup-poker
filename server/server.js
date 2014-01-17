@@ -326,7 +326,7 @@ function toMongoId(buf) {
 	return new ObjectID(buf.toString('hex'));
 }
 ClientSocket.prototype.handle = function (code,args) {
-	console.log('handle',code,args);
+	console.log('handle',codes.reverse[code],args);
 	if (code == codes.CMD_LOGOUT) {
 		this.logout();
 		this.send(codes.SR_LOGOUT);
@@ -970,6 +970,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.reply(codes.SR_NOT_IMPLEMENTED,"invalid params");
 				return;
 			}
+			// FIXME< run game.preedit
 			var doc = {$set:{game_type:game_type, small_blind:small_blind, big_blind:big_blind, seats:seats, gamename:gamename, game_limit:game_limit }};
 			allGames.update({_id:id},doc,function (err,res) {
 				if (err) {
@@ -977,7 +978,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					return;
 				}
 				this.log('edit game',res);
-				// FIXME, update a Game object
+				if (activeGames[id]) activeGames[id].edited(params);
 				this.send(codes.SR_EDIT_GAME_OK);
 			}.bind(this));
 			break;
@@ -990,7 +991,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			this.log('table join',params);
 			var id = new toMongoId(params._id);
 			Game.getGame(id,function (err,game) {
-				if (game.join(this)) conn.send(codes.SR_TABLE_STATUS,game.getTableStatus(),'Poker.TableStatus');
+				if (game.join(this)) this.send(codes.SR_TABLE_STATUS,game.getTableStatus(),'Poker.TableStatus');
 			}.bind(this));
 			break;
 		case codes.CMD_TABLE_LEAVE:
@@ -1012,7 +1013,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			var params = pb.Parse(args,'Poker.Game');
 			var id = new toMongoId(params._id);
 			Game.getGame(id,function (err,game) {
-				if (game.standUp(this)) this.send(codes.SE_TABLE_STAND_UP_OK);
+				if (game.standUp(this)) this.send(codes.SR_TABLE_STAND_UP_OK,game.getTableStatus(),'Poker.TableStatus');
 			}.bind(this));
 			break;
 		}
@@ -1024,6 +1025,9 @@ function Game(obj) {
 	this.obj = obj;
 	this.id = obj._id;
 	activeGames[this.id] = this;
+}
+Game.prototype.edited = function edited(params) {
+	this.obj.seats = params.seats;
 }
 Game.prototype.join = function join(conn) {
 	this.users[conn.userid] = conn;
@@ -1039,12 +1043,16 @@ Game.prototype.sitDown = function (conn,params) {
 		return;
 	}
 	if (this.members[params.seat_index]) {
-		conn.send(codes.SR_TABLE_SIT_SEAT_TAKEN);
+		conn.send(codes.SR_TABLE_SIT_SEAT_TAKEN,this.getTableStatus(),'Poker.TableStatus');
 	} else {
 		this.members[params.seat_index] = conn;
-		conn.send(codes.SR_TABLE_STATUS,this.getTableStatus(),'Poker.TableStatus');
+		var status = this.getTableStatus();
+		conn.send(codes.SR_TABLE_SIT_OK,status,'Poker.TableStatus');
+		for (var key in this.users) {
+			if (this.users[key] == conn) continue;
+			this.users[key].send(codes.SR_TABLE_STATUS,status,'Poker.TableStatus');
+		}
 	}
-	conn.log(this);
 }
 Game.prototype.getTableStatus = function getTableStatus() {
 	var tableStatus = {table_id:new Buffer(this.id.toString(),'hex'),seats:[]};
@@ -1053,12 +1061,20 @@ Game.prototype.getTableStatus = function getTableStatus() {
 		var seat = this.members[x];
 		tableStatus.seats.push({seat:x, player_id:new Buffer(seat.userid.toString(),'hex'), chips:666});
 	}
+	console.log(tableStatus);
+	return tableStatus;
 }
 Game.prototype.standUp = function (conn) {
 	for (var x=0; x<this.members.length; x++) {
 		if (this.members[x] == conn) {
 			// FIXME, inform others
 			this.members[x] = null;
+			var status = this.getTableStatus();
+			for (var key in this.users) {
+				console.log('interator',key,this.users[key].userid,conn.userid);
+				if (this.users[key] == conn) continue;
+				this.users[key].send(codes.SR_TABLE_STATUS,status,'Poker.TableStatus');
+			}
 			return true;
 		}
 	}
@@ -1068,9 +1084,9 @@ Game.prototype.leave = function leave(conn) {
 	// FIXME, inform other members
 	delete this.users[conn.userid];
 	this.standUp(conn);
-	conn.log('after',this);
 }
 Game.handleDisconnect = function handleDisconnect(conn) {
+	// FIXME
 	for (key in activeGames) {
 		var game = activeGames[key];
 		if (game.users[conn.userid]) game.leave(conn);
