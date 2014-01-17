@@ -203,7 +203,7 @@ procedure TfrmManageClubs.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGr
   AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  game_id : String;
+  game_id : TBytes;
 begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
   if (recIndex = -1) or (not Assigned(FSelectedClub)) then

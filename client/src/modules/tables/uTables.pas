@@ -3,14 +3,14 @@ unit uTables;
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, System.Classes,
+  Winapi.Windows, System.Generics.Collections, System.Classes, System.SysUtils,
   uTable, uGameInfo, uClubInfo;
 
 type
   TTables = class(TObjectList<TTable>)
   public
     function AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
-    procedure NotifyClose(const ATableId: String);
+    procedure NotifyClose(const AGameId: TBytes);
     function SittingCount: Integer;
   end;
 
@@ -27,12 +27,12 @@ begin
   result := TRUE;
 end;
 
-procedure TTables.NotifyClose(const ATableId: String);
+procedure TTables.NotifyClose(const AGameId: TBytes);
 var
   C1: Integer;
 begin
   for C1 := 0 to Length(ToArray) - 1 do
-    if ToArray[C1].Game.MongoId = ATableId then
+    if ToArray[C1].Game.MongoId = AGameId then
     begin
       Delete(C1);
       Exit;

@@ -29,7 +29,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property Seat: Integer read FSeat write SetSeat;
     property PlayerMongoId: TBytes read FPlayerId write SetPlayerId;
@@ -77,44 +76,28 @@ begin
     end;
 end;
 
-function TPB_SeatInfo.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_SEAT) then
-    pbout.writeInt32(FN_SEAT, FSeat);
-  if IsModifiedField(FN_PLAYERID) then
-    pbout.writeBytes(FN_PLAYERID, FPlayerId);
-  if IsModifiedField(FN_CHIPS) then
-    pbout.writeInt32(FN_CHIPS, FChips);
-  if IsModifiedField(FN_CARDS) then
-    pbout.writeInt32(FN_CARDS, FCards);
-  result := pbout;
-end;
-
 procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
-  AddModifiedField(FN_SEAT);
+  ProtobufOutput.writeInt32(FN_SEAT, FSeat);
 end;
 
 procedure TPB_SeatInfo.SetPlayerId(const AValue: TBytes);
 begin
   FPlayerId := AValue;
-  AddModifiedField(FN_PLAYERID);
+  ProtobufOutput.writeBytes(FN_PLAYERID, FPlayerId);
 end;
 
 procedure TPB_SeatInfo.SetChips(const AValue: Integer);
 begin
   FChips := AValue;
-  AddModifiedField(FN_CHIPS);
+  ProtobufOutput.writeInt32(FN_CHIPS, FChips);
 end;
 
 procedure TPB_SeatInfo.SetCards(const AValue: Integer);
 begin
   FCards := AValue;
-  AddModifiedField(FN_CARDS);
+  ProtobufOutput.writeInt32(FN_CARDS, FCards);
 end;
 
 procedure TPB_SeatInfo.SetPlayerIdHex(const AValue: AnsiString);

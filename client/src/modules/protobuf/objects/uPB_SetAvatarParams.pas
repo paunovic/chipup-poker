@@ -18,7 +18,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property AvatarId: AnsiString read FAvatarId write SetAvatarId;
   end;
@@ -45,20 +44,10 @@ begin
     end;
 end;
 
-function TPB_SetAvatarParams.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_AVATARID) then
-    pbout.writeString(FN_AVATARID, FAvatarId);
-  result := pbout;
-end;
-
 procedure TPB_SetAvatarParams.SetAvatarId(const AValue: AnsiString);
 begin
   FAvatarId := AValue;
-  AddModifiedField(FN_AVATARID);
+  ProtobufOutput.writeString(FN_AVATARID, FAvatarId);
 end;
 
 end.

@@ -249,7 +249,7 @@ begin
   case chat_event.Event of
     ceUserMessage: begin
       chat_message := chat_event.Msg;
-      if LowerCase(String(chat_event.TableIdAsHex)) = LowerCase(FTable.Game.MongoId) then
+      if chat_event.TableId = FTable.Game.MongoId then
       begin
         reChat.SelStart := reChat.GetTextLen;
         reChat.SelAttributes.Color := clLime;
@@ -272,7 +272,7 @@ var
   C1: Integer;
 begin
   pbtablestatus := AMessage.Object_ as TPB_TableStatus;
-  if LowerCase(String(pbtablestatus.TableMongoIdHex)) <> LowerCase(FTable.Game.MongoId) then
+  if pbtablestatus.TableMongoId <> FTable.Game.MongoId then
     Exit;
 
   if alTable.State = asSuspended then

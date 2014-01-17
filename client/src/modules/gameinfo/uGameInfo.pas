@@ -3,7 +3,7 @@ unit uGameInfo;
 interface
 
 uses
-  System.Generics.Collections;
+  System.Generics.Collections, System.SysUtils;
 
 type
   TGameType = (gtHoldem, gtOmaha);
@@ -11,9 +11,9 @@ type
 
   TGameInfo = class
   private
-    FMongoId   : String;
+    FMongoId   : TBytes;
     FClubId    : Int64;
-    FCreatorId : String;
+    FCreatorId : TBytes;
     FName      : String;
     FSmallBlind: Integer;
     FBigBlind  : Integer;
@@ -25,11 +25,11 @@ type
     function GetGameTypeStrFull: String;
 
   public
-    constructor Create(const AMongoId, ACreatorId: String; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
+    constructor Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
 
-    property MongoId        : String read FMongoId write FMongoId;
+    property MongoId        : TBytes read FMongoId write FMongoId;
     property ClubId         : Int64 read FClubId write FClubId;
-    property CreatorId      : String read FCreatorId write FCreatorId;
+    property CreatorId      : TBytes read FCreatorId write FCreatorId;
     property Name           : String read FName write FName;
     property SmallBlind     : Integer read FSmallBlind write FSmallBlind;
     property BigBlind       : Integer read FBigBlind write FBigBlind;
@@ -42,16 +42,15 @@ type
 
   TGamesInfo = class(TObjectList<TGameInfo>)
   public
-    function AddGame(const AMongoId, ACreatorId: String; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer): TGameInfo;
-    function FindGame(const AMongoId: String; var AGameInfo: TGameInfo): Boolean;
-    function IndexOf(const AMongoId: String): Integer;
+    function AddGame(const AMongoId, ACreatorId: TBytes; const AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer): TGameInfo;
+    function FindGame(const AMongoId: TBytes; var AGameInfo: TGameInfo): Boolean;
+    function IndexOf(const AMongoId: TBytes): Integer;
   end;
 
 implementation
 
-{ TGameInfo }
 
-constructor TGameInfo.Create(const AMongoId, ACreatorId: String; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
+constructor TGameInfo.Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
 begin
   FMongoId := AMongoId;
   FCreatorId := ACreatorId;
@@ -88,7 +87,7 @@ end;
 
 { TGamesInfo }
 
-function TGamesInfo.AddGame(const AMongoId, ACreatorId: String; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer): TGameInfo;
+function TGamesInfo.AddGame(const AMongoId, ACreatorId: TBytes; const AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer): TGameInfo;
 var
   index: Integer;
 begin
@@ -110,7 +109,7 @@ begin
   result := Items[index];
 end;
 
-function TGamesInfo.FindGame(const AMongoId: String; var AGameInfo: TGameInfo): Boolean;
+function TGamesInfo.FindGame(const AMongoId: TBytes; var AGameInfo: TGameInfo): Boolean;
 var
   gameinfo: TGameInfo;
 begin
@@ -124,7 +123,7 @@ begin
   Exit(FALSE);
 end;
 
-function TGamesInfo.IndexOf(const AMongoId: String): Integer;
+function TGamesInfo.IndexOf(const AMongoId: TBytes): Integer;
 var
   C1: Integer;
 begin

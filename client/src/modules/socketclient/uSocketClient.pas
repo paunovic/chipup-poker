@@ -52,14 +52,14 @@ type
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: String);
     procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
-    procedure DeleteGame(const AGameId: String);
-    procedure EditGame(const AGameId: String; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+    procedure DeleteGame(const AGameId: TBytes);
+    procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
     procedure ListPublicClubs;
-    procedure SendTableChatLine(const ATableId, ALine: String);
-    procedure JoinTable(const ATableId: String);
-    procedure LeaveTable(const ATableId: String);
-    procedure TableSit(const ATableId: String; const ASeatIndex, AChips: Integer);
-    procedure TableStandUp(const ATableId: String);
+    procedure SendTableChatLine(const ATableId: TBytes; const ALine: String);
+    procedure JoinTable(const AGameId: TBytes);
+    procedure LeaveTable(const AGameId: TBytes);
+    procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
+    procedure TableStandUp(const AGameId: TBytes);
 
     property Socket     : TSslWSocket read FSocket;
     property ConnectCode: Integer read FConnectCode;
@@ -331,44 +331,27 @@ procedure TSocketClient.SendProtobuf(const AMethodId: DWORD; const AProtobuf: TP
 var
   rpc_message: TPB_RpcMessage;
   mstream    : TMemoryStream;
-  protosize  : Integer;
-  pbobject   : TProtobufOutput;
-  rpcobject  : TProtoBufOutput;
   rpcsize    : Word;
 begin
-  if Assigned(AProtobuf) then
-  begin
-    pbobject := AProtobuf.GetProtobuf;
-    protosize := pbobject.getSerializedSize;
-  end
-  else
-  begin
-    pbobject := nil;
-    protosize := 0;
-  end;
-
-  rpc_message := TPB_RpcMessage.Create(AMethodId, protosize);
+  rpc_message := TPB_RpcMessage.Create;
   try
-    rpcobject := rpc_message.GetProtobuf;
+    rpc_message.Methodid := AMethodId;
+    if (Assigned(AProtobuf)) and (AProtobuf.ProtobufOutputSize > 0) then
+      rpc_message.Datasize := AProtobuf.ProtobufOutputSize
+    else
+      rpc_message.Datasize := 0;
+    mstream := TMemoryStream.Create;
     try
-      mstream := TMemoryStream.Create;
-      try
-        rpcsize := rpcobject.getSerializedSize;
-        mstream.WriteBuffer(rpcsize, SizeOf(rpcsize));
-        rpcobject.SaveToStream(mstream);
-        if Assigned(pbobject) then
-        begin
-          pbobject.SaveToStream(mstream);
-          pbobject.Free;
-        end;
+      rpcsize := rpc_message.ProtobufOutputSize;
+      mstream.WriteBuffer(rpcsize, SizeOf(rpcsize));
+      rpc_message.ProtobufOutput.SaveToStream(mstream);
+      if rpc_message.Datasize > 0 then
+        AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-        {$IFDEF DEBUG} DebugLn(Format('MethodId: %d; DataSize: %d', [rpc_message.MethodId, rpc_message.DataSize]), ditSocketOut); {$ENDIF}
-        FSocket.Send(mstream.Memory, mstream.Size);
-      finally
-        mstream.Free;
-      end;
+      {$IFDEF DEBUG} DebugLn(Format('MethodId: %d; DataSize: %d; StreamSize: %d', [rpc_message.MethodId, rpc_message.DataSize, mstream.Size]), ditSocketOut); {$ENDIF}
+      FSocket.Send(mstream.Memory, mstream.Size);
     finally
-      rpcobject.Free;
+      mstream.Free;
     end;
   finally
     rpc_message.Free;
@@ -599,26 +582,26 @@ begin
   end;
 end;
 
-procedure TSocketClient.DeleteGame(const AGameId: String);
+procedure TSocketClient.DeleteGame(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.MongoIdHex := AnsiString(AGameId);
+    protobuf.MongoId := AGameId;
     SendProtobuf(CMD_DELETE_GAME, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TSocketClient.EditGame(const AGameId, AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+procedure TSocketClient.EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.MongoIdHex := AnsiString(AGameId);
+    protobuf.MongoId := AGameId;
     protobuf.Gamename := AnsiString(AGameName);
     protobuf.GameType := AGameType;
     protobuf.GameLimit := AGameLimit;
@@ -636,14 +619,14 @@ begin
   SendProtobuf(CMD_LIST_PUBLIC_CLUBS, nil);
 end;
 
-procedure TSocketClient.SendTableChatLine(const ATableId, ALine: String);
+procedure TSocketClient.SendTableChatLine(const ATableId: TBytes; const ALine: String);
 var
   protobuf: TPB_ChatEvent;
 begin
   protobuf := TPB_ChatEvent.Create;
   try
     protobuf.Event := ceUserMessage;
-    protobuf.TableIdAsHex := AnsiString(ATableId);
+    protobuf.TableId := ATableId;
     protobuf.Msg := TPB_ChatMessage.Create;
     protobuf.Msg.Msg := AnsiString(ALine);
     SendProtobuf(EVENT_CHAT, protobuf);
@@ -652,41 +635,39 @@ begin
   end;
 end;
 
-procedure TSocketClient.JoinTable(const ATableId: String);
+procedure TSocketClient.JoinTable(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.MongoIdHex := AnsiString(ATableId);
+    protobuf.MongoId := AGameId;
     SendProtobuf(CMD_TABLE_JOIN, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TSocketClient.LeaveTable(const ATableId: String);
+procedure TSocketClient.LeaveTable(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.MongoIdHex := AnsiString(ATableId);
+    protobuf.MongoId := AGameId;
     SendProtobuf(CMD_TABLE_LEAVE, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TSocketClient.TableSit(const ATableId: String; const ASeatIndex, AChips: Integer);
+procedure TSocketClient.TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
 var
   protobuf: TPB_TableSit;
-  bytes   : TBytes;
 begin
   protobuf := TPB_TableSit.Create;
   try
-    HexToBytes(AnsiString(ATableId), bytes);
-    protobuf.GameId := bytes;
+    protobuf.GameId := AGameId;
     protobuf.SeatIndex := ASeatIndex;
     protobuf.Chips := AChips;
     SendProtobuf(CMD_TABLE_SIT, protobuf);
@@ -695,13 +676,13 @@ begin
   end;
 end;
 
-procedure TSocketClient.TableStandUp(const ATableId: String);
+procedure TSocketClient.TableStandUp(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.MongoIdHex := AnsiString(ATableId);
+    protobuf.MongoId := AGameId;
     SendProtobuf(CMD_TABLE_STAND_UP, protobuf);
   finally
     protobuf.Free;

@@ -24,7 +24,6 @@ type
     destructor Destroy; override;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property TableMongoId: TBytes read FTableId write SetTableId;
     property TableMongoIdHex: AnsiString read GetTableIdHex write SetTableIdHex;
@@ -64,29 +63,16 @@ begin
       FN_SEATS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FSeats.Add(TPB_SeatInfo.Create(AProtobufReader, AProtobufReader.readInt32));
-        AddModifiedField(FN_SEATS);
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-function TPB_TableStatus.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_TABLEID) then
-    pbout.writeBytes(FN_TABLEID, FTableId);
-//  if IsModifiedField(FN_SEATS) then
-//    pbout.writeProtobufBaseObject(FN_SEATS, FSeats);
-  result := pbout;
-end;
-
 procedure TPB_TableStatus.SetTableId(const AValue: TBytes);
 begin
   FTableId := AValue;
-  AddModifiedField(FN_TABLEID);
+  ProtobufOutput.writeBytes(FN_TABLEID, FTableId);
 end;
 
 function TPB_TableStatus.GetTableIdHex: AnsiString;

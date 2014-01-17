@@ -8,7 +8,7 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, dxSkinDarkRoom, uGameInfo;
+  uMessageItem, dxSkinDarkRoom, uGameInfo, cxBlobEdit;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -63,7 +63,6 @@ type
     btClubLobby: TcxButton;
     cxLabel1: TcxLabel;
     acShowGameTableForm: TAction;
-    Button1: TButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -83,10 +82,9 @@ type
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowGameTableFormExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure Button1Click(Sender: TObject);
   private
     FSelectedClub: Integer;
-    FSelectedGame: String;
+    FSelectedGame: TBytes;
 
     function ShowLoginForm: Integer;
 
@@ -311,11 +309,6 @@ begin
   SocketClient.LeaveClub(club.Id);
 end;
 
-procedure TfrmChipUpMain.Button1Click(Sender: TObject);
-begin
-  SocketClient.Status;
-end;
-
 procedure TfrmChipUpMain.ConfigureGUI;
 begin
   lbUserInfo.Caption := Format('You have %d tokens', [dmMain.SelfInfo.Tokens]);
@@ -420,21 +413,29 @@ end;
 procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  game_id : String;
+  game_id : TBytes;
+  g       : AnsiString;
+  C1      : Integer;
   club    : TClubInfo;
+  bytes   : TBytes;
 begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
   if (recIndex = -1) or
      (not GetSelectedClub(club)) then
   begin
-    FSelectedGame := '';
+    SetLength(FSelectedGame, 0);
     Exit;
   end;
 
-  game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+//  game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+  g := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+  SetLength(bytes, Length(g));
+  for C1 := 1 to length(g) do
+    bytes[C1] := Ord(g[C1]);
+
   if club.Games.IndexOf(game_id) = -1 then
   begin
-    FSelectedGame := '';
+    SetLength(FSelectedGame, 0);
     Exit;
   end
   else

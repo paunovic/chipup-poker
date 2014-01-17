@@ -21,7 +21,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property ClubSeq: Integer read FClubSeq write SetClubSeq;
     property PlayerMongoId: AnsiString read FPlayerMongoId write SetPlayerMongoId;
@@ -53,28 +52,16 @@ begin
     end;
 end;
 
-function TPB_GiveClubOwnershipParams.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_CLUBSEQ) then
-    pbout.writeInt32(FN_CLUBSEQ, FClubSeq);
-  if IsModifiedField(FN_PLAYERMONGOID) then
-    pbout.writeString(FN_PLAYERMONGOID, FPlayerMongoId);
-  result := pbout;
-end;
-
 procedure TPB_GiveClubOwnershipParams.SetClubSeq(const AValue: Integer);
 begin
   FClubSeq := AValue;
-  AddModifiedField(FN_CLUBSEQ);
+  ProtobufOutput.writeInt32(FN_CLUBSEQ, FClubSeq);
 end;
 
 procedure TPB_GiveClubOwnershipParams.SetPlayerMongoId(const AValue: AnsiString);
 begin
   FPlayerMongoId := AValue;
-  AddModifiedField(FN_PLAYERMONGOID);
+  ProtobufOutput.writeString(FN_PLAYERMONGOID, FPlayerMongoId);
 end;
 
 end.

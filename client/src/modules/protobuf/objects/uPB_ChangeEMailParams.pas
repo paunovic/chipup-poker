@@ -18,7 +18,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property NewMail: AnsiString read FNewMail write FNewMail;
   end;
@@ -45,20 +44,10 @@ begin
     end;
 end;
 
-function TPB_ChangeEMailParams.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_NEWMAIL) then
-    pbout.writeString(FN_NEWMAIL, FNewMail);
-  result := pbout;
-end;
-
 procedure TPB_ChangeEMailParams.SetNewMail(const AValue: AnsiString);
 begin
   FNewMail := AValue;
-  AddModifiedField(FN_NEWMAIL);
+  ProtobufOutput.writeString(FN_NEWMAIL, FNewMail);
 end;
 
 end.

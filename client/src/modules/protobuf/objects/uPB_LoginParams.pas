@@ -21,7 +21,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property Username: AnsiString read FUsername write SetUsername;
     property Password: AnsiString read FPassword write SetPassword;
@@ -31,6 +30,7 @@ implementation
 
 uses
   pbPublic;
+
 
 procedure TPB_LoginParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -53,28 +53,16 @@ begin
     end;
 end;
 
-function TPB_LoginParams.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_USERNAME) then
-    pbout.writeString(FN_USERNAME, FUsername);
-  if IsModifiedField(FN_PASSWORD) then
-    pbout.writeString(FN_PASSWORD, FPassword);
-  result := pbout;
-end;
-
 procedure TPB_LoginParams.SetUsername(const AValue: AnsiString);
 begin
   FUsername := AValue;
-  AddModifiedField(FN_USERNAME);
+  ProtobufOutput.writeString(FN_USERNAME, AValue);
 end;
 
 procedure TPB_LoginParams.SetPassword(const AValue: AnsiString);
 begin
   FPassword := AValue;
-  AddModifiedField(FN_PASSWORD);
+  ProtobufOutput.writeString(FN_PASSWORD, AValue);
 end;
 
 end.

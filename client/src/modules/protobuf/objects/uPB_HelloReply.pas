@@ -29,7 +29,6 @@ type
     destructor Destroy; override;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property Tokenprices: TPB_TokenPrices read FTokenprices;
     property Stringsizes: TPB_StringSizes read FStringsizes;
@@ -84,44 +83,28 @@ begin
     end;
 end;
 
-function TPB_HelloReply.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_TOKENPRICES) then
-    pbout.writeProtobufBaseObject(FN_TOKENPRICES, FTokenprices);
-  if IsModifiedField(FN_STRINGSIZES) then
-    pbout.writeProtobufBaseObject(FN_STRINGSIZES, FStringsizes);
-  if IsModifiedField(FN_CHANGEEXPIRETIME) then
-    pbout.writeInt32(FN_CHANGEEXPIRETIME, FChangeexpiretime);
-  if IsModifiedField(FN_FORGOTEXPIRETIME) then
-    pbout.writeInt32(FN_FORGOTEXPIRETIME, FForgotexpiretime);
-  result := pbout;
-end;
-
 procedure TPB_HelloReply.SetTokenprices(const AValue: TPB_TokenPrices);
 begin
   FTokenprices := AValue;
-  AddModifiedField(FN_TOKENPRICES);
+  ProtobufOutput.writeMessage(FN_TOKENPRICES, FTokenprices.ProtobufOutput);
 end;
 
 procedure TPB_HelloReply.SetStringsizes(const AValue: TPB_StringSizes);
 begin
   FStringsizes := AValue;
-  AddModifiedField(FN_STRINGSIZES);
+  ProtobufOutput.writeMessage(FN_STRINGSIZES, FStringsizes.ProtobufOutput);
 end;
 
 procedure TPB_HelloReply.SetChangeexpiretime(const AValue: Integer);
 begin
   FChangeexpiretime := AValue;
-  AddModifiedField(FN_CHANGEEXPIRETIME);
+  ProtobufOutput.writeInt32(FN_CHANGEEXPIRETIME, FChangeexpiretime);
 end;
 
 procedure TPB_HelloReply.SetForgotexpiretime(const AValue: Integer);
 begin
   FForgotexpiretime := AValue;
-  AddModifiedField(FN_FORGOTEXPIRETIME);
+  ProtobufOutput.writeInt32(FN_FORGOTEXPIRETIME, FForgotexpiretime);
 end;
 
 end.

@@ -21,7 +21,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property ClubChangeDetails: Integer read FClubChangeDetails write SetClubChangeDetails;
     property ClubCreation: Integer read FClubCreation write SetClubCreation;
@@ -53,28 +52,16 @@ begin
     end;
 end;
 
-function TPB_TokenPrices.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_CLUBCHANGEDETAILS) then
-    pbout.writeInt32(FN_CLUBCHANGEDETAILS, FClubChangeDetails);
-  if IsModifiedField(FN_CLUBCREATION) then
-    pbout.writeInt32(FN_CLUBCREATION, FClubCreation);
-  result := pbout;
-end;
-
 procedure TPB_TokenPrices.SetClubChangeDetails(const AValue: Integer);
 begin
   FClubChangeDetails := AValue;
-  AddModifiedField(FN_CLUBCHANGEDETAILS);
+  ProtobufOutput.writeInt32(FN_CLUBCHANGEDETAILS, FClubChangeDetails);
 end;
 
 procedure TPB_TokenPrices.SetClubCreation(const AValue: Integer);
 begin
   FClubCreation := AValue;
-  AddModifiedField(FN_CLUBCREATION);
+  ProtobufOutput.writeInt32(FN_CLUBCREATION, FClubCreation);
 end;
 
 end.

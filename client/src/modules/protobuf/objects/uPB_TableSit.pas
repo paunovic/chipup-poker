@@ -24,7 +24,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property GameId: TBytes read FGameId write SetGameId;
     property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
@@ -63,36 +62,22 @@ begin
     end;
 end;
 
-function TPB_TableSit.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_GAMEID) then
-    pbout.writeBytes(FN_GAMEID, FGameId);
-  if IsModifiedField(FN_SEATINDEX) then
-    pbout.writeInt32(FN_SEATINDEX, FSeatIndex);
-  if IsModifiedField(FN_CHIPS) then
-    pbout.writeInt32(FN_CHIPS, FChips);
-  result := pbout;
-end;
-
 procedure TPB_TableSit.SetGameId(const AValue: TBytes);
 begin
   FGameId := AValue;
-  AddModifiedField(FN_GAMEID);
+  ProtobufOutput.writeBytes(FN_GAMEID, FGameId);
 end;
 
 procedure TPB_TableSit.SetSeatIndex(const AValue: Integer);
 begin
   FSeatIndex := AValue;
-  AddModifiedField(FN_SEATINDEX);
+  ProtobufOutput.writeInt32(FN_SEATINDEX, FSeatIndex);
 end;
 
 procedure TPB_TableSit.SetChips(const AValue: Integer);
 begin
   FChips := AValue;
-  AddModifiedField(FN_CHIPS);
+  ProtobufOutput.writeInt32(FN_CHIPS, FChips);
 end;
 
 end.
