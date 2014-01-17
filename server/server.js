@@ -259,6 +259,7 @@ ClientSocket.prototype.error = function error(e) {
 	this.log(e.stack);
 	this.logout();
 	this.socket.destroy();
+	Game.handleDisconnect(this);
 }
 ClientSocket.prototype.doLogin = function doLogin(row,password) {
 	// FIXME, crypto
@@ -639,7 +640,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.CMD_KICK_PLAYER:
 			var params = pb.Parse(args,'Poker.KickPlayerParams');
 			var clubid = params.club_seq;
-			var userid = new ObjectID(params.player_mongo_id);
+			var userid = toMongoId(params.player_mongo_id);
 			this.log('kicking',clubid,userid);
 			// FIXME, code 023 kicking somebody not in the club
 			allClubs.findOne({seq:clubid},function (err,club) {
@@ -670,7 +671,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.CMD_GIVE_CLUB_OWNERSHIP:
 			var params = pb.Parse(args,'Poker.GiveClubOwnershipParams');
 			var clubseq = params.club_seq;
-			var newowner = new ObjectID(params.player_mongo_id);
+			var newowner = toMongoId(params.player_mongo_id);
 			this.log('giving ownership away',clubseq,newowner);
 			allClubs.findOne({seq:clubseq},function (err,club) {
 				if (!club) {
@@ -784,7 +785,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.CMD_TRANSFER_CHIPS:
 			var params = pb.Parse(args,'Poker.TransferChipsParams');
 			var clubseq = params.club_seq;
-			var userid = new ObjectID(params.player_mongo_id);
+			var userid = toMongoId(params.player_mongo_id);
 			var chips = params.chip_amount;
 			this.log('transfering chips',clubseq,userid,chips);
 			allClubs.findOne({seq:clubseq},function (err,club) {
