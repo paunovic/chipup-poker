@@ -249,7 +249,7 @@ begin
   case chat_event.Event of
     ceUserMessage: begin
       chat_message := chat_event.Msg;
-      if chat_event.TableId = FTable.Game.MongoId then
+      if CompareBytes(chat_event.TableId, FTable.Game.MongoId) then
       begin
         reChat.SelStart := reChat.GetTextLen;
         reChat.SelAttributes.Color := clLime;

@@ -618,13 +618,15 @@ end;
 procedure TSocketClient.SendTableChatLine(const ATableId: TBytes; const ALine: String);
 var
   protobuf: TPB_ChatEvent;
+  pbmsg   : TPB_ChatMessage;
 begin
   protobuf := TPB_ChatEvent.Create;
   try
     protobuf.Event := ceUserMessage;
     protobuf.TableId := ATableId;
-    protobuf.Msg := TPB_ChatMessage.Create;
-    protobuf.Msg.Msg := AnsiString(ALine);
+    pbmsg := TPB_ChatMessage.Create;
+    pbmsg.Msg := AnsiString(ALine);
+    protobuf.Msg := pbmsg;
     SendProtobuf(EVENT_CHAT, protobuf);
   finally
     protobuf.Free;
