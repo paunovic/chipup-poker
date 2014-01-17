@@ -14,6 +14,11 @@ using namespace std;
 using namespace google::protobuf::compiler;
 using namespace google::protobuf;
 
+struct typeInfo {
+	string delphiName;
+	string writter;
+};
+struct typeInfo *typeinfo[18];
 // taken from cpp_helpers.cc in protobuf
 string StripProto(const string& filename) {
 	if (HasSuffixString(filename, ".protodevel")) {
@@ -100,10 +105,7 @@ string EnumName(const FieldDescriptor *field) {
 	return "FN_"+name;
 }
 const string getDelphiType(const FieldDescriptor *field) {
-	if (field->type() == FieldDescriptor::TYPE_INT32) return "Integer";
-	else if (field->type() == FieldDescriptor::TYPE_STRING) return "String";
-	else if (field->type() == FieldDescriptor::TYPE_BOOL) return "Boolean";
-	else if (field->type() == FieldDescriptor::TYPE_BYTES) return "TBytes";
+	if (typeinfo[field->type()]) return typeinfo[field->type()]->delphiName;
 	else if (field->type() == FieldDescriptor::TYPE_ENUM) {
 		const EnumDescriptor *type = field->enum_type();
 		return string("T")+type->name();
@@ -125,7 +127,7 @@ void GenerateSettersDec(const Descriptor *message, io::Printer *printer) {
 	}
 }
 void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
-	const char *writter;
+	string writter;
 	cerr << "impl\n";
 	map<string,string> vars;
 	for (int j=0; j<message->field_count(); j++) {
@@ -139,11 +141,8 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 		vars["message"] = message->name();
 		vars["pname"] = PrivateFieldName(field);
 		vars["enum"] = EnumName(field);
-		writter = NULL;
-		if (field->type() == FieldDescriptor::TYPE_INT32) writter = "writeInt32";
-		else if (field->type() == FieldDescriptor::TYPE_STRING) writter = "writeString";
-		else if (field->type() == FieldDescriptor::TYPE_BOOL) writter = "writeBoolean";
-		else if (field->type() == FieldDescriptor::TYPE_BYTES) writter = "writeBytes";
+		writter = "";
+		if (typeinfo[field->type()]) writter = typeinfo[field->type()]->writter;
 		else if (field->type() == FieldDescriptor::TYPE_ENUM) writter = "writeInt32";
 		
 		if (field->type() == FieldDescriptor::TYPE_ENUM) {
@@ -151,7 +150,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 		} else {
 			vars["input"] = "AValue";
 		}
-		if (writter) {
+		if (!writter.empty()) {
 			vars["writter"] = writter;
 			printer->Print(vars,
 				"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
@@ -183,13 +182,27 @@ class DelphiGenerator : public CodeGenerator {
 				"interface\n"
 				"uses\n"
 				"  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader","name",message->name());
+			string *types = new string[message->field_count()];
+			int size = 0;
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					const Descriptor *subtype = field->message_type();
-					printer.Print(",uPB_$name$","name",subtype->name());
+					string type = subtype->name();
+					bool addit = true;
+					for (int x=0; x<size; x++) {
+						if (types[x] == type) addit = false;
+					}
+					if (addit) {
+						types[size] = type;
+						size++;
+					}
 				}
 			}
+			for (int j=0; j<size; j++) {
+				printer.Print(",uPB_$name$","name",types[j]);
+			}
+			delete types;
 			printer.Print(";\n"
 				"type\n");
 
@@ -229,13 +242,8 @@ class DelphiGenerator : public CodeGenerator {
 				"    var\n");
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
-				if (field->type() == FieldDescriptor::TYPE_INT32) {
-					printer.Print("      F$name$: Integer;\n","name",PrivateFieldName(field));
-				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
-					printer.Print("      F$name$: String;\n","name",PrivateFieldName(field));
-				} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
-					printer.Print("      F$name$: Boolean;\n","name",PrivateFieldName(field));
-				} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
+				const string type = getDelphiType(field);
+				if (field->type() == FieldDescriptor::TYPE_BYTES) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
 							"      F$name$: TArray<TBytes>;\n"
@@ -246,6 +254,8 @@ class DelphiGenerator : public CodeGenerator {
 //							"      F$name$_size: Integer;\n"
 							,"name",PrivateFieldName(field));
 					}
+				} else if (!type.empty()) {
+					printer.Print("      F$name$: $type$;\n","name",PrivateFieldName(field),"type",type);
 				} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					const Descriptor *subtype = field->message_type();
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
@@ -545,7 +555,17 @@ class DelphiGenerator : public CodeGenerator {
 		return true;
 	}
 };
+struct typeInfo* makeType(string type, string writter) {
+	struct typeInfo *t = new struct typeInfo;
+	t->delphiName = type;
+	t->writter = writter;
+	return t;
+}
 int main(int argc, char *argv[]) {
+	typeinfo[FieldDescriptor::TYPE_INT32] = makeType("Integer","writeInt32");
+	typeinfo[FieldDescriptor::TYPE_STRING] = makeType("String","writeString");
+	typeinfo[FieldDescriptor::TYPE_BOOL] = makeType("Boolean","writeBoolean");
+	typeinfo[FieldDescriptor::TYPE_BYTES] = makeType("TBytes","writeBytes");
 	DelphiGenerator *gen = new DelphiGenerator();
 	return google::protobuf::compiler::PluginMain(argc,argv,gen);
 }
