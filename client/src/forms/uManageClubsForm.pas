@@ -7,7 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
   dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxTextEdit, cxSpinEdit,
   cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxContainer,
-  cxLabel, cxRadioGroup, cxGroupBox, dxSkinsForm, uClubInfo, Vcl.ActnList, cxMaskEdit, uPlayerInfo, uGameInfo, uMessageItem, dxSkinDarkRoom;
+  cxLabel, cxRadioGroup, cxGroupBox, dxSkinsForm, uClubInfo, Vcl.ActnList, cxMaskEdit, uPlayerInfo, uGameInfo, uMessageItem, dxSkinDarkRoom,
+  cxBlobEdit;
 
 type
   TfrmManageClubs = class(TForm)
@@ -161,7 +162,7 @@ begin
   try
     gridClubsTable.DataController.SetRecordCount(0);
     for C1 := 0 to dmMain.SelfInfo.Clubs.Count - 1 do
-      if dmMain.SelfInfo.Clubs[C1].OwnerId = dmMain.SelfInfo.Id then
+      if CompareBytes(dmMain.SelfInfo.Clubs[C1].OwnerId, dmMain.SelfInfo.Id) then
       begin
         gridClubsTable.DataController.SetRecordCount(gridClubsTable.DataController.RecordCount + 1);
         index := gridClubsTable.DataController.RecordCount - 1;
@@ -223,7 +224,7 @@ procedure TfrmManageClubs.gridPlayersListTableFocusedRecordChanged(Sender: TcxCu
   AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex      : Integer;
-  player_id     : String;
+  player_id     : TBytes;
   action_enabled: Boolean;
 begin
   if not Assigned(FSelectedClub) then
@@ -240,7 +241,7 @@ begin
   end;
 
   action_enabled := (Assigned(FSelectedClub)) and (Assigned(FSelectedPlayer)) and
-                    (FSelectedClub.OwnerId = dmMain.SelfInfo.Id) and (FSelectedClub.OwnerId <> FSelectedPlayer.Id);
+                    (CompareBytes(FSelectedClub.OwnerId, dmMain.SelfInfo.Id)) and (not CompareBytes(FSelectedClub.OwnerId, FSelectedPlayer.Id));
   acKickPlayer.Enabled := action_enabled;
   acGiveOwnership.Enabled := action_enabled;
   acGiveChips.Enabled := action_enabled;
@@ -271,8 +272,8 @@ begin
       Exit;
     end;
 
-    gridPlayersListTable.DataController.SetRecordCount(FSelectedClub.Players.Count);
-    for C1 := 0 to FSelectedClub.Players.Count - 1 do
+    gridPlayersListTable.DataController.SetRecordCount(Length(FSelectedClub.Players));
+    for C1 := 0 to Length(FSelectedClub.Players) - 1 do
     begin
       if not dmMain.Players.FindPlayerById(FSelectedClub.Players[C1], player) then
         Continue;

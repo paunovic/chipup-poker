@@ -3,7 +3,7 @@ unit uClubInfo;
 interface
 
 uses
-  System.Generics.Collections, System.Classes,
+  System.Generics.Collections, System.SysUtils,
   uGameInfo;
 
 
@@ -11,32 +11,34 @@ type
   TClubInfo = class
   private
     FId     : Integer;
-    FMongoId: String;
-    FOwnerId: String;
+    FMongoId: TBytes;
+    FOwnerId: TBytes;
     FName   : String;
     FInvCode: String;
     FBalance: Integer;
     FPrivate: Boolean;
-    FPlayers: TStringList;
+    FPlayers: TArray<TBytes>;
     FGames  : TGamesInfo;
   public
-    constructor Create(const AMongoId, AOwnerId: String; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);
+    constructor Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);
     destructor Destroy; override;
 
+    procedure AddPlayer(const AMongoId: TBytes);
+
     property Id       : Integer read FId;
-    property MongoId  : String read FMongoId;
-    property OwnerId  : String read FOwnerId;
+    property MongoId  : TBytes read FMongoId;
+    property OwnerId  : TBytes read FOwnerId;
     property Name     : String read FName;
     property InvCode  : String read FInvCode;
     property Balance  : Integer read FBalance;
     property IsPrivate: Boolean read FPrivate;
-    property Players  : TStringList read FPlayers;
+    property Players  : TArray<TBytes> read FPlayers;
     property Games    : TGamesInfo read FGames;
   end;
 
   TClubsInfo = class(TObjectList<TClubInfo>)
   public
-    function AddClub(const AMongoId, AOwnerId: String; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String): TClubInfo;
+    function AddClub(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String): TClubInfo;
     function FindClub(const AId: Integer; var AClubInfo: TClubInfo): Boolean;
     function IndexOf(const AId: Integer): Integer;
   end;
@@ -45,7 +47,7 @@ implementation
 
 { TClubInfo }
 
-constructor TClubInfo.Create(const AMongoId, AOwnerId: String; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);
+constructor TClubInfo.Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);
 begin
   FId := AId;
   FOwnerId := AOwnerId;
@@ -53,24 +55,26 @@ begin
   FInvCode := AInvCode;
   FBalance := ABalance;
   FPrivate := APrivate;
-  FPlayers := TStringList.Create;
-  FPlayers.Sorted := TRUE;
-  FPlayers.Duplicates := dupIgnore;
-  FPlayers.CaseSensitive := FALSE;
   FGames := TGamesInfo.Create;
 end;
 
 destructor TClubInfo.Destroy;
 begin
   FGames.Free;
-  FPlayers.Free;
 
   inherited;
 end;
 
+procedure TClubInfo.AddPlayer(const AMongoId: TBytes);
+begin
+  SetLength(FPlayers, Length(FPlayers) + 1);
+  FPlayers[Length(FPlayers) - 1] := AMongoId;
+end;
+
+
 { TPlayerClubsInfo }
 
-function TClubsInfo.AddClub(const AMongoId, AOwnerId: String; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String): TClubInfo;
+function TClubsInfo.AddClub(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String): TClubInfo;
 var
   index: Integer;
 begin

@@ -13,8 +13,6 @@ type
       FN_PLAYERID = 2;
       FN_CHIPS = 3;
       FN_CARDS = 4;
-    function GetPlayerIdHex: AnsiString;
-    procedure SetPlayerIdHex(const AValue: AnsiString);
 
     var
       FSeat: Integer;
@@ -32,7 +30,6 @@ type
 
     property Seat: Integer read FSeat write SetSeat;
     property PlayerMongoId: TBytes read FPlayerId write SetPlayerId;
-    property PlayerMongoIdHex: AnsiString read GetPlayerIdHex write SetPlayerIdHex;
     property Chips: Integer read FChips write SetChips;
     property Cards: Integer read FCards write SetCards;
   end;
@@ -43,7 +40,7 @@ type
 implementation
 
 uses
-  pbPublic, uCommon;
+  pbPublic;
 
 procedure TPB_SeatInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
@@ -98,19 +95,6 @@ procedure TPB_SeatInfo.SetCards(const AValue: Integer);
 begin
   FCards := AValue;
   ProtobufOutput.writeInt32(FN_CARDS, FCards);
-end;
-
-procedure TPB_SeatInfo.SetPlayerIdHex(const AValue: AnsiString);
-var
-  bytes: TBytes;
-begin
-  HexToBytes(AValue, bytes);
-  SetPlayerId(bytes);
-end;
-
-function TPB_SeatInfo.GetPlayerIdHex: AnsiString;
-begin
-  result := BytesToHex(FPlayerId);
 end;
 
 

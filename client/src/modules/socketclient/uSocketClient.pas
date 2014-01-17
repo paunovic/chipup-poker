@@ -43,11 +43,11 @@ type
     procedure CreateClub(const AName, AInvCode: String; const APrivate: Boolean);
     procedure JoinClub(const AId: Int64; const ACode: String);
     procedure LeaveClub(const AId: Int64);
-    procedure KickPlayer(const AClubId: Int64; const APlayerId: String);
-    procedure GiveOwnership(const AClubId: Int64; const APlayerId: String);
+    procedure KickPlayer(const AClubId: Int64; const APlayerId: TBytes);
+    procedure GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
     procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean); overload;
     procedure DisbandClub(const AClubId: Int64);
-    procedure TransferChips(const AClubId: Int64; const APlayerId: String; const AChipAmount: Integer);
+    procedure TransferChips(const AClubId: Int64; const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: String);
@@ -61,9 +61,7 @@ type
     procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
 
-    property Socket     : TSslWSocket read FSocket;
-    property ConnectCode: Integer read FConnectCode;
-
+    property Socket: TSslWSocket read FSocket;
   end;
 
 var
@@ -336,10 +334,8 @@ begin
   rpc_message := TPB_RpcMessage.Create;
   try
     rpc_message.Methodid := AMethodId;
-    if (Assigned(AProtobuf)) and (AProtobuf.ProtobufOutputSize > 0) then
-      rpc_message.Datasize := AProtobuf.ProtobufOutputSize
-    else
-      rpc_message.Datasize := 0;
+    if Assigned(AProtobuf) then
+      rpc_message.Datasize := AProtobuf.ProtobufOutputSize;
     mstream := TMemoryStream.Create;
     try
       rpcsize := rpc_message.ProtobufOutputSize;
@@ -439,14 +435,14 @@ begin
   end;
 end;
 
-procedure TSocketClient.KickPlayer(const AClubId: Int64; const APlayerId: String);
+procedure TSocketClient.KickPlayer(const AClubId: Int64; const APlayerId: TBytes);
 var
   protobuf: TPB_KickPlayerParams;
 begin
   protobuf := TPB_KickPlayerParams.Create;
   try
     protobuf.ClubSeq := AClubId;
-    protobuf.PlayerMongoId := AnsiString(APlayerId);
+    protobuf.PlayerMongoId := APlayerId;
     SendProtobuf(CMD_KICK_PLAYER, protobuf);
   finally
     protobuf.Free;
@@ -466,14 +462,14 @@ begin
   end;
 end;
 
-procedure TSocketClient.GiveOwnership(const AClubId: Int64; const APlayerId: String);
+procedure TSocketClient.GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
 var
   protobuf: TPB_GiveClubOwnershipParams;
 begin
   protobuf := TPB_GiveClubOwnershipParams.Create;
   try
     protobuf.ClubSeq := AClubId;
-    protobuf.PlayerMongoId := AnsiString(APlayerId);
+    protobuf.PlayerMongoId := APlayerId;
     SendProtobuf(CMD_GIVE_CLUB_OWNERSHIP, protobuf);
   finally
     protobuf.Free;
@@ -509,7 +505,7 @@ begin
   end;
 end;
 
-procedure TSocketClient.TransferChips(const AClubId: Int64; const APlayerId: String; const AChipAmount: Integer);
+procedure TSocketClient.TransferChips(const AClubId: Int64; const APlayerId: TBytes; const AChipAmount: Integer);
 var
   protobuf: TPB_TransferChipsParams;
 begin

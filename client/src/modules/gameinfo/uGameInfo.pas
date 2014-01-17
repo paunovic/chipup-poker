@@ -49,6 +49,9 @@ type
 
 implementation
 
+uses
+  uCommon;
+
 
 constructor TGameInfo.Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
 begin
@@ -111,24 +114,26 @@ end;
 
 function TGamesInfo.FindGame(const AMongoId: TBytes; var AGameInfo: TGameInfo): Boolean;
 var
-  gameinfo: TGameInfo;
+  index: Integer;
 begin
-  for gameinfo in self.ToArray do
-    if gameinfo.MongoId = AMongoId then
-    begin
-      AGameInfo := gameinfo;
-      Exit(TRUE);
-    end;
-
-  Exit(FALSE);
+  index := IndexOf(AMongoId);
+  if index = -1 then
+    Exit(FALSE)
+  else
+  begin
+    AGameInfo := ToArray[index];
+    Exit(TRUE);
+  end;
 end;
 
 function TGamesInfo.IndexOf(const AMongoId: TBytes): Integer;
 var
-  C1: Integer;
+  C1   : Integer;
+  a1len: Integer;
 begin
-  for C1 := 0 to Length(self.ToArray) - 1 do
-    if self.ToArray[C1].MongoId = AMongoId then
+  a1len := Length(AMongoId);
+  for C1 := 0 to Length(ToArray) - 1 do
+    if CompareBytes(AMongoId, ToArray[C1].MongoId, a1len) then
       Exit(C1);
 
   Exit(-1);

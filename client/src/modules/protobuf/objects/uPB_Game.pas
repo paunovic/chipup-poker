@@ -30,9 +30,6 @@ type
       FBigBlind: Integer;
       FSeats: Integer;
 
-    function GetCreatorMongoIdHex: AnsiString;
-    function GetMongoIdHex: AnsiString;
-    procedure SetMongoIdHex(const AValue: AnsiString);
     procedure SetMongoId(const AValue: TBytes);
     procedure SetCreator(const AValue: TBytes);
     procedure SetGamename(const AValue: AnsiString);
@@ -47,9 +44,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property MongoId: TBytes read FMongoId write SetMongoId;
-    property Creator: TBytes read FCreator write SetCreator;
-//    property MongoIdHex: AnsiString read GetMongoIdHex write SetMongoIdHex;
-//    property CreatorMongoIdHex: AnsiString read GetCreatorMongoIdHex;
+    property CreatorMongoId: TBytes read FCreator write SetCreator;
     property Gamename: AnsiString read FGamename write SetGamename;
     property Clubseq: Integer read FClubseq write SetClubseq;
     property GameType: Integer read FGameType write SetGameType;
@@ -118,24 +113,6 @@ begin
     else
       AProtobufReader.skipField(tag);
     end;
-end;
-
-function TPB_Game.GetCreatorMongoIdHex: AnsiString;
-begin
-  result := BytesToHex(FCreator);
-end;
-
-function TPB_Game.GetMongoIdHex: AnsiString;
-begin
-  result := BytesToHex(FMongoId);
-end;
-
-procedure TPB_Game.SetMongoIdHex(const AValue: AnsiString);
-var
-  bytes: TBytes;
-begin
-  HexToBytes(AValue, bytes);
-  SetMongoId(bytes)
 end;
 
 procedure TPB_Game.SetMongoId(const AValue: TBytes);

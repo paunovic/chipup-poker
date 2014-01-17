@@ -3,7 +3,7 @@ unit uPB_KickPlayerParams;
 interface
 
 uses
-  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, System.SysUtils, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_KickPlayerParams = class(TProtobufBaseObject)
@@ -14,16 +14,16 @@ type
 
     var
       FClubSeq: Integer;
-      FPlayerMongoId: AnsiString;
+      FPlayerMongoId: TBytes;
 
     procedure SetClubSeq(const AValue: Integer);
-    procedure SetPlayerMongoId(const AValue: AnsiString);
+    procedure SetPlayerMongoId(const AValue: TBytes);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property ClubSeq: Integer read FClubSeq write SetClubSeq;
-    property PlayerMongoId: AnsiString read FPlayerMongoId write SetPlayerMongoId;
+    property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
   end;
 
 implementation
@@ -34,6 +34,7 @@ uses
 procedure TPB_KickPlayerParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
+  bytes                               : TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -45,7 +46,8 @@ begin
       end;
       FN_PLAYERMONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetPlayerMongoId(AProtobufReader.readString);
+        AProtobufReader.readBytes(bytes);
+        SetPlayerMongoId(bytes);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -58,10 +60,10 @@ begin
   ProtobufOutput.writeInt32(FN_CLUBSEQ, FClubSeq);
 end;
 
-procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: AnsiString);
+procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: TBytes);
 begin
   FPlayerMongoId := AValue;
-  ProtobufOutput.writeString(FN_PLAYERMONGOID, FPlayerMongoId);
+  ProtobufOutput.writeBytes(FN_PLAYERMONGOID, FPlayerMongoId);
 end;
 
 end.

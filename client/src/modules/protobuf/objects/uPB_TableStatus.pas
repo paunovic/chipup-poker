@@ -16,8 +16,6 @@ type
       FTableId: TBytes;
       FSeats: TPB_SeatInfos;
 
-    function GetTableIdHex: AnsiString;
-    procedure SetTableIdHex(const AValue: AnsiString);
     procedure SetTableId(const AValue: TBytes);
 
   public
@@ -26,7 +24,6 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property TableMongoId: TBytes read FTableId write SetTableId;
-    property TableMongoIdHex: AnsiString read GetTableIdHex write SetTableIdHex;
     property Seats: TPB_SeatInfos read FSeats;
   end;
 
@@ -73,19 +70,6 @@ procedure TPB_TableStatus.SetTableId(const AValue: TBytes);
 begin
   FTableId := AValue;
   ProtobufOutput.writeBytes(FN_TABLEID, FTableId);
-end;
-
-function TPB_TableStatus.GetTableIdHex: AnsiString;
-begin
-  result := BytesToHex(FTableId);
-end;
-
-procedure TPB_TableStatus.SetTableIdHex(const AValue: AnsiString);
-var
-  bytes: TBytes;
-begin
-  HexToBytes(AValue, bytes);
-  SetTableId(bytes);
 end;
 
 end.

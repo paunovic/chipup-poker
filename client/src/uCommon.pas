@@ -26,9 +26,7 @@ function GetWorkingSetSize: DWORD;
 function EncodeURL(const ASrc: String): String;
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
-procedure HexToBytes(const AString: AnsiString; var ABytes: TBytes);
-function BytesToHex(const ABytes: TBytes): AnsiString;
-function WSAErrorMessage(const ACode: Integer): String;
+function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 
 implementation
 
@@ -453,41 +451,14 @@ begin
   end;
 end;
 
-procedure HexToBytes(const AString: AnsiString; var ABytes: TBytes);
-var
-  bsize: Integer;
+function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 begin
-  bsize := Length(AString) div 2;
-  SetLength(ABytes, bsize);
-  HexToBin(PAnsiChar(AString), ABytes[0], bsize);
-end;
+  if A1Len = -1 then
+    A1Len := Length(A1);
+  if A2Len = -1 then
+    A2Len := Length(A2);
 
-function BytesToHex(const ABytes: TBytes): AnsiString;
-var
-  C1: Integer;
-begin
-  result := '';
-  for C1 := 0 to Length(ABytes) - 1 do
-    result := result + AnsiString(IntToHex(ABytes[C1], 2));
-end;
-
-function WSAErrorMessage(const ACode: Integer): String;
-var
-  Buffer: PChar;
-  Len: Integer;
-begin
-  Len := FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM or FORMAT_MESSAGE_IGNORE_INSERTS or FORMAT_MESSAGE_ARGUMENT_ARRAY or FORMAT_MESSAGE_ALLOCATE_BUFFER,
-                       nil, ACode, 0, @Buffer, 0, nil);
-
-  try
-    { Remove the undesired line breaks and '.' char }
-    while (Len > 0) and (CharInSet(Buffer[Len - 1], [#0..#32, '.'])) do Dec(Len);
-    { Convert to Delphi string }
-    SetString(Result, Buffer, Len);
-  finally
-    { Free the OS allocated memory block }
-    LocalFree(HLOCAL(Buffer));
-  end;
+  result := (A1Len = A2Len) and (CompareMem(A1, A2, A1Len));
 end;
 
 

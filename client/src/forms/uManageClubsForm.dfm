@@ -36,14 +36,13 @@ object frmManageClubs: TfrmManageClubs
       Left = 3
       Top = 16
       Width = 314
-      Height = 256
+      Height = 250
       Align = alTop
       Anchors = [akLeft, akTop, akRight, akBottom]
       BevelInner = bvNone
       BevelOuter = bvNone
       BorderStyle = cxcbsNone
       TabOrder = 0
-      ExplicitHeight = 262
       object gridPlayersListTable: TcxGridTableView
         Navigator.Buttons.CustomButtons = <>
         OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
@@ -62,6 +61,13 @@ object frmManageClubs: TfrmManageClubs
         OptionsView.NoDataToDisplayInfoText = ' '
         OptionsView.ColumnAutoWidth = True
         OptionsView.GroupByBox = False
+        object gridPlayersListId: TcxGridColumn
+          Caption = 'Id'
+          DataBinding.ValueType = 'Variant'
+          PropertiesClassName = 'TcxBlobEditProperties'
+          Properties.BlobEditKind = bekMemo
+          Visible = False
+        end
         object gridPlayersListName: TcxGridColumn
           Caption = 'Name'
           PropertiesClassName = 'TcxTextEditProperties'
@@ -78,11 +84,6 @@ object frmManageClubs: TfrmManageClubs
           HeaderAlignmentHorz = taCenter
           Width = 73
         end
-        object gridPlayersListId: TcxGridColumn
-          Caption = 'Id'
-          PropertiesClassName = 'TcxTextEditProperties'
-          Visible = False
-        end
       end
       object gridPlayersListLevel: TcxGridLevel
         GridView = gridPlayersListTable
@@ -90,7 +91,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btGiveOwnership: TcxButton
       Left = 113
-      Top = 278
+      Top = 272
       Width = 95
       Height = 28
       Action = acGiveOwnership
@@ -103,11 +104,10 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
     object btRemovePlayerFromClub: TcxButton
       Left = 214
-      Top = 278
+      Top = 272
       Width = 95
       Height = 28
       Action = acKickPlayer
@@ -121,11 +121,10 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
     object btGiveChips: TcxButton
       Left = 12
-      Top = 278
+      Top = 272
       Width = 95
       Height = 28
       Action = acGiveChips
@@ -138,7 +137,6 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
   end
   object gbClubs: TcxGroupBox
@@ -180,6 +178,7 @@ object frmManageClubs: TfrmManageClubs
         OptionsView.GroupByBox = False
         object gridClubsId: TcxGridColumn
           Caption = 'ID'
+          DataBinding.ValueType = 'Integer'
           PropertiesClassName = 'TcxSpinEditProperties'
           HeaderAlignmentHorz = taCenter
           SortIndex = 0
@@ -213,7 +212,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btChangeClubType: TcxButton
       Left = 11
-      Top = 278
+      Top = 272
       Width = 117
       Height = 28
       Action = acShowClubChangeDetailsForm
@@ -226,11 +225,10 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
     object btDisbandClub: TcxButton
       Left = 134
-      Top = 278
+      Top = 272
       Width = 117
       Height = 28
       Action = acDisbandClub
@@ -244,7 +242,6 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
   end
   object gbGames: TcxGroupBox
@@ -262,14 +259,13 @@ object frmManageClubs: TfrmManageClubs
       Left = 3
       Top = 16
       Width = 352
-      Height = 256
+      Height = 250
       Align = alTop
       Anchors = [akLeft, akTop, akRight, akBottom]
       BevelInner = bvNone
       BevelOuter = bvNone
       BorderStyle = cxcbsNone
       TabOrder = 0
-      ExplicitHeight = 262
       object gridGamesTable: TcxGridTableView
         Navigator.Buttons.CustomButtons = <>
         OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -289,7 +285,9 @@ object frmManageClubs: TfrmManageClubs
         OptionsView.ColumnAutoWidth = True
         OptionsView.GroupByBox = False
         object gridGamesId: TcxGridColumn
-          PropertiesClassName = 'TcxTextEditProperties'
+          DataBinding.ValueType = 'Variant'
+          PropertiesClassName = 'TcxBlobEditProperties'
+          Properties.BlobEditKind = bekMemo
           Visible = False
         end
         object gridGamesName: TcxGridColumn
@@ -326,7 +324,7 @@ object frmManageClubs: TfrmManageClubs
     end
     object btNewGame: TcxButton
       Left = 12
-      Top = 278
+      Top = 272
       Width = 95
       Height = 28
       Action = acShowCreateGameForm
@@ -339,11 +337,10 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
     object btDeleteGame: TcxButton
       Left = 214
-      Top = 278
+      Top = 272
       Width = 95
       Height = 28
       Action = acDeleteGame
@@ -356,11 +353,10 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
     object btEditGame: TcxButton
       Left = 113
-      Top = 278
+      Top = 272
       Width = 95
       Height = 28
       Action = acShowEditGameForm
@@ -373,7 +369,6 @@ object frmManageClubs: TfrmManageClubs
       Font.Name = 'Arial'
       Font.Style = []
       ParentFont = False
-      ExplicitTop = 284
     end
   end
   object alManageClubs: TActionList

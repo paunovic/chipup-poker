@@ -29,11 +29,10 @@ type
       FPassword: AnsiString;
       FIsPrivate: Boolean;
       FSeq: Integer;
-      FMembers: TStringList;
+      FMembers: TArray<TBytes>;
       FHasPassword: Boolean;
       FMemberCount: Integer;
 
-    function GetOwnerMongoIdHex: String;
     procedure SetMongoId(const AValue: TBytes);
     procedure SetChips(const AValue: Integer);
     procedure SetName(const AValue: AnsiString);
@@ -53,11 +52,10 @@ type
     property Chips: Integer read FChips write SetChips;
     property Name: AnsiString read FName write SetName;
     property Owner: TBytes read FOwner write SetOwner;
-    property OwnerMongoId: String read GetOwnerMongoIdHex;
     property Password: AnsiString read FPassword write SetPassword;
     property IsPrivate: Boolean read FIsPrivate write SetPrivate;
     property Seq: Integer read FSeq write SetSeq;
-    property Members: TStringList read FMembers;
+    property Members: TArray<TBytes> read FMembers;
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
     property MemberCount: Integer read FMemberCount write SetMemberCount;
   end;
@@ -72,9 +70,9 @@ uses
 
 destructor TPB_Club.Destroy;
 begin
-  if Assigned(FMembers) then
+{  if Assigned(FMembers) then
     FMembers.Free;
-
+ }
   inherited;
 end;
 
@@ -83,7 +81,7 @@ var
   tag, wire_type, field_number, endpos: Integer;
   bytes                               : TBytes;
 begin
-  if not Assigned(FMembers) then
+{  if not Assigned(FMembers) then
   begin
     FMembers := TStringList.Create;
     FMembers.Sorted := TRUE;
@@ -91,8 +89,7 @@ begin
     FMembers.CaseSensitive := FALSE;
   end;
   FMembers.Clear;
-  FHasPassword := FALSE;
-
+  }
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do
@@ -129,8 +126,9 @@ begin
       end;
       FN_MEMBERS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(bytes);
-        FMembers.Add(String(BytesToHex(bytes)));
+        Inc(FMemberCount);
+        SetLength(FMembers, FMemberCount);
+        AProtobufReader.readBytes(FMembers[FMemberCount - 1]);
       end;
       FN_HASPASSWORD: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -143,11 +141,6 @@ begin
     else
       AProtobufReader.skipField(tag);
     end;
-end;
-
-function TPB_Club.GetOwnerMongoIdHex: String;
-begin
-  result := String(BytesToHex(FOwner));
 end;
 
 procedure TPB_Club.SetMongoId(const AValue: TBytes);

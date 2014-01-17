@@ -140,8 +140,9 @@ object frmChipUpMain: TfrmChipUpMain
       OptionsView.GroupByBox = False
       object gridGamesId: TcxGridColumn
         Caption = 'Id'
+        DataBinding.ValueType = 'Variant'
         PropertiesClassName = 'TcxBlobEditProperties'
-        Properties.BlobEditKind = bekBlob
+        Properties.BlobEditKind = bekMemo
         Visible = False
       end
       object gridGamesName: TcxGridColumn

@@ -19,7 +19,7 @@ type
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property NewPassword: AnsiString read FNewPassword write FNewPassword;
+    property NewPassword: AnsiString read FNewPassword write SetNewPassword;
   end;
 
 implementation

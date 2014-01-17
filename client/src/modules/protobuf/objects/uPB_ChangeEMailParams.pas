@@ -19,7 +19,7 @@ type
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property NewMail: AnsiString read FNewMail write FNewMail;
+    property NewMail: AnsiString read FNewMail write SetNewMail;
   end;
 
 implementation

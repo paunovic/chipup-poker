@@ -272,7 +272,7 @@ var
   C1: Integer;
 begin
   pbtablestatus := AMessage.Object_ as TPB_TableStatus;
-  if pbtablestatus.TableMongoId <> FTable.Game.MongoId then
+  if not CompareBytes(pbtablestatus.TableMongoId, FTable.Game.MongoId) then
     Exit;
 
   if alTable.State = asSuspended then
@@ -289,7 +289,7 @@ begin
   for C1 := 0 to pbtablestatus.Seats.Count - 1 do
   begin
     lbsInfo.Caption := lbsInfo.Caption + IntToStr(pbtablestatus.Seats[C1].Seat);
-    if LowerCase(String(pbtablestatus.Seats[C1].PlayerMongoIdHex)) = LowerCase(dmMain.SelfInfo.Id) then
+    if CompareBytes(pbtablestatus.Seats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
       lbsInfo.Caption := lbsInfo.Caption + ' (you)';
     lbsInfo.Caption := lbsInfo.Caption + ',';
   end;

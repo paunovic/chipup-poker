@@ -3,13 +3,13 @@ unit uPlayerInfo;
 interface
 
 uses
-  System.Generics.Collections,
+  System.Generics.Collections, System.SysUtils,
   uClubInfo, uPB_StatusReply;
 
 type
   TPlayerInfo = class
   private
-    FId      : String;
+    FId      : TBytes;
     FNick    : String;
     FEMail   : String;
     FPassword: String;
@@ -26,7 +26,7 @@ type
 
     function ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
 
-    property Id      : String read FId write FId;
+    property Id      : TBytes read FId write FId;
     property Nick    : String read FNick write FNick;
     property Password: String read FPassword write FPassword;
     property EMail   : String read FEMail write FEMail;
@@ -39,15 +39,15 @@ type
 
   TPlayerInfos = class(TObjectList<TPlayerInfo>)
   public
-    function AddPlayer(const AId, ANick, AEMail: String; const AChips: Integer): TPlayerInfo;
-    function FindPlayerById(const AId: String; var APlayerInfo: TPlayerInfo): Boolean;
+    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer): TPlayerInfo;
+    function FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
     function ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
   end;
 
 implementation
 
 uses
-  System.SysUtils, System.Classes, PNGImage,
+  System.Classes, PNGImage,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uMainDataModule, uSettings, uCommon, uAvatar, uGameInfo,
   uPB_Club, uPB_Game;
@@ -67,7 +67,7 @@ end;
 
 procedure TPlayerInfo.Flush;
 begin
-  FId := '';
+  SetLength(FId, 0);
   FNick := '';
   FClubs.Clear;
 end;
@@ -76,9 +76,7 @@ function TPlayerInfo.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
 var
   club_name   : String;
   club_balance: Integer;
-  club_mongoid: String;
   club_id     : Int64;
-  club_ownerid: String;
   club_invcode: String;
   club_private: Boolean;
   game_clubid : Int64;
@@ -89,7 +87,7 @@ var
   pbgame      : TPB_Game;
   C1, C2      : Integer;
 begin
-  FId := String(AStatusReply.Self.MongoId);
+  FId := AStatusReply.Self.MongoId;
   FEMail := String(AStatusReply.Self.EMail);
   FNick := String(AStatusReply.Self.DisplayName);
   FTokens := AStatusReply.Self.Tokens;
@@ -102,17 +100,15 @@ begin
   begin
     pbclub := AStatusReply.Clubs[C1];
 
-    club_mongoid := String(pbclub.MongoId);
     club_id := pbclub.Seq;
     club_name := String(pbclub.Name);
     club_balance := pbclub.Chips;
-    club_ownerid := String(pbclub.OwnerMongoId);
     club_private := pbclub.IsPrivate;
     club_invcode := String(pbclub.Password);
-    club := FClubs.AddClub(club_mongoid, club_ownerid, club_id, club_name, club_balance, club_private, club_invcode);
-    club.Players.Add(club_ownerid);
-    for C2 := 0 to pbclub.Members.Count - 1 do
-      club.Players.Add(pbclub.Members[C2]);
+    club := FClubs.AddClub(pbclub.MongoId, pbclub.Owner, club_id, club_name, club_balance, club_private, club_invcode);
+    club.AddPlayer(pbclub.Owner);
+    for C2 := 0 to pbclub.MemberCount - 1 do
+      club.AddPlayer(pbclub.Members[C2]);
   end;
 
   for C1 := 0 to AStatusReply.Games.Count - 1 do
@@ -125,7 +121,7 @@ begin
       game_type := TGameType(pbgame.GameType);
       game_limit := TGameLimit(pbgame.GameLimit);
 
-      club.Games.AddGame(pbgame.MongoId, pbgame.Creator, game_clubid, String(pbgame.Gamename),
+      club.Games.AddGame(pbgame.MongoId, pbgame.CreatorMongoId, game_clubid, String(pbgame.Gamename),
                          game_type, game_limit, pbgame.SmallBlind, pbgame.BigBlind, pbgame.Seats);
     end;
 
@@ -137,7 +133,7 @@ end;
 
 { TPlayerInfos }
 
-function TPlayerInfos.AddPlayer(const AId, ANick, AEMail: String; const AChips: Integer): TPlayerInfo;
+function TPlayerInfos.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer): TPlayerInfo;
 var
   player: TPlayerInfo;
 begin
@@ -152,12 +148,14 @@ begin
   result := player;
 end;
 
-function TPlayerInfos.FindPlayerById(const AId: String; var APlayerInfo: TPlayerInfo): Boolean;
+function TPlayerInfos.FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
 var
   player: TPlayerInfo;
+  a1len : Integer;
 begin
+  a1len := Length(AId);
   for player in self.ToArray do
-    if LowerCase(player.Id) = LowerCase(AId) then
+    if CompareBytes(AId, player.Id, a1len) then
     begin
       APlayerInfo := player;
       Exit(TRUE);
@@ -167,21 +165,11 @@ end;
 
 function TPlayerInfos.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
 var
-  playerid: String;
-  email   : String;
-  nick    : String;
-  chips   : Integer;
-  C1      : Integer;
+  C1: Integer;
 begin
   Clear;
   for C1 := 0 to AStatusReply.Users.Count - 1 do
-  begin
-    playerid := String(AStatusReply.Users[C1].MongoId);
-    email := String(AStatusReply.Users[C1].EMail);
-    nick := String(AStatusReply.Users[C1].DisplayName);
-    chips := AStatusReply.Users[C1].Chips;
-    AddPlayer(playerid, nick, email, chips);
-  end;
+    AddPlayer(AStatusReply.Users[C1].MongoId, String(AStatusReply.Users[C1].DisplayName), String(AStatusReply.Users[C1].EMail), AStatusReply.Users[C1].Chips);
 
   Exit(TRUE);
 end;

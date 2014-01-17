@@ -233,7 +233,6 @@ begin
   result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
 end;
 
-
 procedure TfrmChipUpMain.acBuyChipsExecute(Sender: TObject);
 begin
   dmMain.OpenBuyChipsLink;
@@ -334,7 +333,7 @@ begin
       gridJoinedClubsTable.DataController.SetValue(C1, gridJoinedClubsId.Index, club.Id);
       gridJoinedClubsTable.DataController.SetValue(C1, gridJoinedClubsClubName.Index, club.Name);
 
-      if dmMain.SelfInfo.Id = club.OwnerId then
+      if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
         status := 'Owner'
       else
         status := 'Player';
@@ -405,7 +404,11 @@ begin
   if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
     FSelectedClub := -1
   else
+  begin
     FSelectedClub := club_id;
+    SetLength(FSelectedGame, 0);
+    gridGamesTable.DataController.FocusedRecordIndex := -1;
+  end;
 
   UpdateGamelist;
 end;
@@ -414,10 +417,7 @@ procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGri
 var
   recIndex: Integer;
   game_id : TBytes;
-  g       : AnsiString;
-  C1      : Integer;
   club    : TClubInfo;
-  bytes   : TBytes;
 begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
   if (recIndex = -1) or
@@ -427,12 +427,7 @@ begin
     Exit;
   end;
 
-//  game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
-  g := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
-  SetLength(bytes, Length(g));
-  for C1 := 1 to length(g) do
-    bytes[C1] := Ord(g[C1]);
-
+  game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
   if club.Games.IndexOf(game_id) = -1 then
   begin
     SetLength(FSelectedGame, 0);

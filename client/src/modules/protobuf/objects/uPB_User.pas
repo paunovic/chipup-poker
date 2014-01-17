@@ -26,7 +26,6 @@ type
       FAuthed: Boolean;
       FChips: Integer;
 
-    function GetMongoIdHex: AnsiString;
     function GetAvatar: AnsiString;
     procedure SetMongoId(const AValue: TBytes);
     procedure SetAvatar(const AValue: TBytes);
@@ -39,7 +38,7 @@ type
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property MongoId: AnsiString read GetMongoIdHex;
+    property MongoId: TBytes read FMongoId;
     property Avatar: AnsiString read GetAvatar;
     property Displayname: AnsiString read FDisplayname write SetDisplayname;
     property Tokens: Integer read FTokens write SetTokens;
@@ -103,11 +102,6 @@ end;
 function TPB_User.GetAvatar: AnsiString;
 begin
   result := EncodeBase64(@FAvatar[0], Length(FAvatar));
-end;
-
-function TPB_User.GetMongoIdHex: AnsiString;
-begin
-  result := BytesToHex(FMongoId);
 end;
 
 procedure TPB_User.SetMongoId(const AValue: TBytes);
