@@ -8,12 +8,7 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, dxSkinDarkRoom, uGameInfo, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkSide,
-  dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian,
-  dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue,
-  dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver,
-  dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust,
-  dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinsDefaultPainters, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue;
+  uMessageItem, dxSkinDarkRoom, uGameInfo;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -90,8 +85,8 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure Button1Click(Sender: TObject);
   private
-    FSelectedClub: TClubInfo;
-    FSelectedGame: TGameInfo;
+    FSelectedClub: Integer;
+    FSelectedGame: String;
 
     function ShowLoginForm: Integer;
 
@@ -110,6 +105,9 @@ type
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
     procedure ConfigureGUI;
+
+    function GetSelectedGame(var AGame: TGameInfo): Boolean;
+    function GetSelectedClub(var AClub: TClubInfo): Boolean;
 
   protected
     procedure DoCreate; override;
@@ -225,6 +223,19 @@ begin
   tiBringToFront.Enabled := FALSE;
 end;
 
+function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
+begin
+  result := dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, AClub);
+end;
+
+function TfrmChipUpMain.GetSelectedGame(var AGame: TGameInfo): Boolean;
+var
+  club: TClubInfo;
+begin
+  result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
+end;
+
+
 procedure TfrmChipUpMain.acBuyChipsExecute(Sender: TObject);
 begin
   dmMain.OpenBuyChipsLink;
@@ -239,7 +250,6 @@ procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
   SocketClient.Logout;
 end;
-
 
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
@@ -263,11 +273,14 @@ begin
 end;
 
 procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
+var
+  game: TGameInfo;
+  club: TClubInfo;
 begin
-  if not Assigned(FSelectedGame) then
+  if (not GetSelectedClub(club)) or (not GetSelectedGame(game)) then
     Exit;
 
-  dmMain.Tables.AddTable(FSelectedClub, FSelectedGame);
+  dmMain.Tables.AddTable(club, game);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -284,16 +297,18 @@ end;
 
 procedure TfrmChipUpMain.acShowPublicGamesListFormExecute(Sender: TObject);
 begin
-{  if }RunModalForm(TfrmPublicClubsList, self, []);{ = mrOk then}
+  if RunModalForm(TfrmPublicClubsList, self, []) = mrOk then
     SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.btLeaveClubClick(Sender: TObject);
+var
+  club: TClubInfo;
 begin
-  if not Assigned(FSelectedClub) then
+  if not GetSelectedClub(club) then
     Exit;
 
-  SocketClient.LeaveClub(FSelectedClub.Id);
+  SocketClient.LeaveClub(club.Id);
 end;
 
 procedure TfrmChipUpMain.Button1Click(Sender: TObject);
@@ -342,21 +357,22 @@ var
   C1  : Integer;
   game: TGameInfo;
   c   : TcxGridDataController;
+  club: TClubInfo;
 begin
   c := gridGamesTable.DataController;
   c.BeginFullUpdate;
   try
-    if not Assigned(FSelectedClub) then
+    if not GetSelectedClub(club) then
     begin
       c.SetRecordCount(0);
       Exit;
     end
     else
-      c.SetRecordCount(FSelectedClub.Games.Count);
+      c.SetRecordCount(club.Games.Count);
 
-    for C1 := 0 to FSelectedClub.Games.Count - 1 do
+    for C1 := 0 to club.Games.Count - 1 do
     begin
-      game := FSelectedClub.Games[C1];
+      game := club.Games[C1];
 
       c.SetValue(C1, gridGamesId.Index, game.MongoId);
       c.SetValue(C1, gridGamesName.Index, game.Name);
@@ -388,16 +404,15 @@ begin
   recIndex := gridJoinedClubsTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
   begin
-    FSelectedClub := nil;
+    FSelectedClub := -1;
     Exit;
   end;
 
   club_id := gridJoinedClubsTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
-  if dmMain.SelfInfo.Clubs.FindClub(club_id, FSelectedClub) then
-  begin
-  end
+  if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
+    FSelectedClub := -1
   else
-    FSelectedClub := nil;
+    FSelectedClub := club_id;
 
   UpdateGamelist;
 end;
@@ -406,20 +421,24 @@ procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGri
 var
   recIndex: Integer;
   game_id : String;
+  club    : TClubInfo;
 begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
-  if recIndex = -1 then
+  if (recIndex = -1) or
+     (not GetSelectedClub(club)) then
   begin
-    FSelectedGame := nil;
+    FSelectedGame := '';
     Exit;
   end;
 
   game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
-  if FSelectedClub.Games.FindGame(game_id, FSelectedGame) then
+  if club.Games.IndexOf(game_id) = -1 then
   begin
+    FSelectedGame := '';
+    Exit;
   end
   else
-    FSelectedClub := nil;
+    FSelectedGame := game_id;
 end;
 
 procedure TfrmChipUpMain.TCSecondaryLoginDetected(const AMessage: TMessageItem);
