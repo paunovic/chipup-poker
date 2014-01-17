@@ -432,7 +432,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.CMD_FORGOT:
-			var params = pb.Parse(args,'Poker.ForgotParams');
+			var params = pb.Parse(args,'Poker.ForgotPasswordParams');
 			console.log('forgot args',params);
 			var email = params.email;
 			var doc = {};

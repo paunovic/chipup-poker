@@ -40,7 +40,7 @@ message RegisterParams {
 	required string displayName = 3;
 }
 
-message ForgotParams {
+message ForgotPasswordParams {
 	required string email = 1;
 }
 
