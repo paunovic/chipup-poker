@@ -1,4 +1,4 @@
-CFLAGS=-Wall
+CXXFLAGS=-Wall
 ifeq ($(OS),Windows_NT)
 	LDFLAGS += protobuf.a
 else
