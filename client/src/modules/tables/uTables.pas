@@ -39,7 +39,7 @@ end;
 
 procedure TTables.NotifyClose(const AGameId: TBytes);
 var
-  C1: Integer;
+  C1: Integer;                                     !
 begin
   for C1 := 0 to Length(ToArray) - 1 do
     if ToArray[C1].Game.MongoId = AGameId then
