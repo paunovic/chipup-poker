@@ -1,4 +1,5 @@
 module.exports = protoreader;
+var codes = require('./ServerCodes');
 var pb;
 function protoreader(socket,handler) {
 	if (!(this instanceof protoreader)) return new protoreader(socket,handler);
@@ -35,7 +36,11 @@ function protoreader(socket,handler) {
 			return;
 		}
 		var args = this.buffer.slice(2+headersize,2+headersize+header.DataSize);
-		this.handler.handle(header.MethodId,args);
+		try {
+			this.handler.handle(header.MethodId,args);
+		} catch (e) {
+			this.handler.error(e);
+		}
 		//if (2+headersize+header.DataSize == this.buffer.length) this.buffer = null;
 		this.buffer = this.buffer.slice(2+headersize+header.DataSize);
 	}.bind(this));
@@ -65,7 +70,7 @@ protoreader.reply = function reply(code,message,type) {
 	//console.log('header out:',header);
 	//console.log(object);
 	if (code == 100) this.log('sent '+datasize+' bytes for code '+code,message);
-	else this.log('sent '+datasize+' bytes for code '+code);
+	else this.log('sent '+datasize+' bytes for code '+codes.reverse[code]);
 	//console.log(message);
 }
 

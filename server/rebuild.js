@@ -21,6 +21,7 @@ for (var i=0; i<lines.length; i++) {
 var pb = new p(fs.readFileSync("server/descriptor.desc"));
 var messages = fs.readFileSync("message.desc");
 var data = pb.Parse(messages,"google.protobuf.FileDescriptorSet");
+var reverse = [];
 for (var i=0; i<data.file.length; i++) {
 	var file = data.file[i];
 	for (var j=0; j<file.enum_type.length; j++) {
@@ -30,6 +31,8 @@ for (var i=0; i<data.file.length; i++) {
 		for (var x=0; x < enum_type.value.length; x++) {
 			var v = enum_type.value[x];
 			fs.writeSync(out,'codes.'+enum_type.value[x].name+'='+enum_type.value[x].number+';\n');
+			reverse[enum_type.value[x].number] = enum_type.value[x].name;
 		}
 	}
 }
+fs.writeSync(out,'codes.reverse = '+JSON.stringify(reverse)+';');
