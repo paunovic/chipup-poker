@@ -24,7 +24,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property Email: AnsiString read FEmail write SetEmail;
     property Password: AnsiString read FPassword write SetPassword;
@@ -61,36 +60,22 @@ begin
     end;
 end;
 
-function TPB_RegisterParams.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_EMAIL) then
-    pbout.writeString(FN_EMAIL, FEmail);
-  if IsModifiedField(FN_PASSWORD) then
-    pbout.writeString(FN_PASSWORD, FPassword);
-  if IsModifiedField(FN_DISPLAYNAME) then
-    pbout.writeString(FN_DISPLAYNAME, FDisplayname);
-  result := pbout;
-end;
-
 procedure TPB_RegisterParams.SetEmail(const AValue: AnsiString);
 begin
   FEmail := AValue;
-  AddModifiedField(FN_EMAIL);
+  ProtobufOutput.writeString(FN_EMAIL, FEmail);
 end;
 
 procedure TPB_RegisterParams.SetPassword(const AValue: AnsiString);
 begin
   FPassword := AValue;
-  AddModifiedField(FN_PASSWORD);
+  ProtobufOutput.writeString(FN_PASSWORD, FPassword);
 end;
 
 procedure TPB_RegisterParams.SetDisplayname(const AValue: AnsiString);
 begin
   FDisplayname := AValue;
-  AddModifiedField(FN_DISPLAYNAME);
+  ProtobufOutput.writeString(FN_DISPLAYNAME, FDisplayname);
 end;
 
 end.

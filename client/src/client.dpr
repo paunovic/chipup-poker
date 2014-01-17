@@ -5,7 +5,8 @@ program client;
 
 uses
   FastMM4 in '3rdparty\FastMM\FastMM4.pas',
-  Winapi.Windows, Vcl.Forms,
+  Winapi.Windows,
+  Vcl.Forms,
   uMainDataModule in 'uMainDataModule.pas' {dmMain: TDataModule},
   uMainForm in 'forms\uMainForm.pas' {frmChipUpMain},
   uLoginForm in 'forms\uLoginForm.pas' {frmLogin},
@@ -22,7 +23,7 @@ uses
   uChangePasswordForm in 'forms\uChangePasswordForm.pas' {frmChangePassword},
   uTableForm in 'forms\uTableForm.pas' {frmTable},
   uCreateGameForm in 'forms\uCreateGameForm.pas' {frmCreateGame},
-  {$IFDEF DEBUG} uDebugForm in 'forms\uDebugForm.pas' {frmDebug}, {$ENDIF}
+  uDebugForm in 'forms\uDebugForm.pas' {frmDebug},
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uIFormParams in 'forms\uIFormParams.pas',
@@ -46,7 +47,6 @@ uses
   uPB_LoginParams in 'modules\protobuf\objects\uPB_LoginParams.pas',
   uPB_Club in 'modules\protobuf\objects\uPB_Club.pas',
   uPB_StatusReply in 'modules\protobuf\objects\uPB_StatusReply.pas',
-  uProtobufBaseObject in 'modules\protobuf\uProtobufBaseObject.pas',
   uPB_HelloReply in 'modules\protobuf\objects\uPB_HelloReply.pas',
   uPB_StringSizes in 'modules\protobuf\objects\uPB_StringSizes.pas',
   uPB_TokenPrices in 'modules\protobuf\objects\uPB_TokenPrices.pas',
@@ -70,8 +70,12 @@ uses
   pbOutput in '3rdparty\protobufs\pbOutput.pas',
   pbPublic in '3rdparty\protobufs\pbPublic.pas',
   StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
-  FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas';
-
+  FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
+  uPB_TableSit in 'modules\protobuf\objects\uPB_TableSit.pas',
+  uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
+  uProtobufBaseObject in 'modules\protobuf\uProtobufBaseObject.pas',
+  uPB_TableStatus in 'modules\protobuf\objects\uPB_TableStatus.pas',
+  uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas';
 
 procedure FocusPokerApp;
 var
@@ -84,7 +88,7 @@ end;
 
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
-
+                      {
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then
   begin
@@ -93,7 +97,7 @@ begin
   end;
 
   TInstanceController.RegisterInstance;
-
+                                       }
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);

@@ -13,6 +13,7 @@ object frmChipUpMain: TfrmChipUpMain
   Menu = MainMenu
   OldCreateOrder = False
   Position = poScreenCenter
+  OnCloseQuery = FormCloseQuery
   OnDestroy = FormDestroy
   DesignSize = (
     940
@@ -139,7 +140,8 @@ object frmChipUpMain: TfrmChipUpMain
       OptionsView.GroupByBox = False
       object gridGamesId: TcxGridColumn
         Caption = 'Id'
-        PropertiesClassName = 'TcxTextEditProperties'
+        PropertiesClassName = 'TcxBlobEditProperties'
+        Properties.BlobEditKind = bekBlob
         Visible = False
       end
       object gridGamesName: TcxGridColumn

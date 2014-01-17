@@ -58,6 +58,10 @@ procedure TfrmCreateGame.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShi
 begin
   case Key of
     VK_ESCAPE: acCancel.Execute;
+    VK_RETURN: if not cbSeats.Focused then
+                 SelectNext(ActiveControl, TRUE, TRUE)
+               else
+                 acOK.Execute;
   end;
 end;
 

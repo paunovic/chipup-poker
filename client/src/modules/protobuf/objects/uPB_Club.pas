@@ -48,7 +48,6 @@ type
     destructor Destroy; override;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property MongoId: TBytes read FMongoId write SetMongoId;
     property Chips: Integer read FChips write SetChips;
@@ -146,32 +145,6 @@ begin
     end;
 end;
 
-function TPB_Club.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_MONGOID) then
-    pbout.writeBytes(FN_MONGOID, FMongoId);
-  if IsModifiedField(FN_CHIPS) then
-    pbout.writeInt32(FN_CHIPS, FChips);
-  if IsModifiedField(FN_NAME) then
-    pbout.writeString(FN_NAME, FName);
-  if IsModifiedField(FN_OWNER) then
-    pbout.writeBytes(FN_OWNER, FOwner);
-  if IsModifiedField(FN_PASSWORD) then
-    pbout.writeString(FN_PASSWORD, FPassword);
-  if IsModifiedField(FN_ISPRIVATE) then
-    pbout.writeBoolean(FN_ISPRIVATE, FIsPrivate);
-  if IsModifiedField(FN_SEQ) then
-    pbout.writeInt32(FN_SEQ, FSeq);
-  if IsModifiedField(FN_HASPASSWORD) then
-    pbout.writeBoolean(FN_HASPASSWORD, FHasPassword);
-  if IsModifiedField(FN_MEMBERCOUNT) then
-    pbout.writeInt32(FN_MEMBERCOUNT, FMemberCount);
-  result := pbout;
-end;
-
 function TPB_Club.GetOwnerMongoIdHex: String;
 begin
   result := String(BytesToHex(FOwner));
@@ -180,55 +153,55 @@ end;
 procedure TPB_Club.SetMongoId(const AValue: TBytes);
 begin
   FMongoId := AValue;
-  AddModifiedField(FN_MONGOID);
+  ProtobufOutput.writeBytes(FN_MONGOID, FMongoId);
 end;
 
 procedure TPB_Club.SetChips(const AValue: Integer);
 begin
   FChips := AValue;
-  AddModifiedField(FN_CHIPS);
+  ProtobufOutput.writeInt32(FN_CHIPS, FChips);
 end;
 
 procedure TPB_Club.SetName(const AValue: AnsiString);
 begin
   FName := AValue;
-  AddModifiedField(FN_NAME);
+  ProtobufOutput.writeString(FN_NAME, FName);
 end;
 
 procedure TPB_Club.SetOwner(const AValue: TBytes);
 begin
   FOwner := AValue;
-  AddModifiedField(FN_OWNER);
+  ProtobufOutput.writeBytes(FN_OWNER, FOwner);
 end;
 
 procedure TPB_Club.SetPassword(const AValue: AnsiString);
 begin
   FPassword := AValue;
-  AddModifiedField(FN_PASSWORD);
+  ProtobufOutput.writeString(FN_PASSWORD, FPassword);
 end;
 
 procedure TPB_Club.SetPrivate(const AValue: Boolean);
 begin
   FIsPrivate := AValue;
-  AddModifiedField(FN_ISPRIVATE);
+  ProtobufOutput.writeBoolean(FN_ISPRIVATE, FIsPrivate);
 end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);
 begin
   FSeq := AValue;
-  AddModifiedField(FN_SEQ);
+  ProtobufOutput.writeInt32(FN_SEQ, FSeq);
 end;
 
 procedure TPB_Club.SetHasPassword(const AValue: Boolean);
 begin
   FHasPassword := AValue;
-  AddModifiedField(FN_HASPASSWORD);
+  ProtobufOutput.writeBoolean(FN_HASPASSWORD, FHasPassword);
 end;
 
 procedure TPB_Club.SetMemberCount(const AValue: Integer);
 begin
   FMemberCount := AValue;
-  AddModifiedField(FN_MEMBERCOUNT);
+  ProtobufOutput.writeInt32(FN_MEMBERCOUNT, FMemberCount);
 end;
 
 end.

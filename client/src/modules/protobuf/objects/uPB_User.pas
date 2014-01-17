@@ -38,7 +38,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property MongoId: AnsiString read GetMongoIdHex;
     property Avatar: AnsiString read GetAvatar;
@@ -101,28 +100,6 @@ begin
     end;
 end;
 
-function TPB_User.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_MONGOID) then
-    pbout.writeBytes(FN_MONGOID, FMongoId);
-  if IsModifiedField(FN_AVATAR) then
-    pbout.writeBytes(FN_AVATAR, FAvatar);
-  if IsModifiedField(FN_DISPLAYNAME) then
-    pbout.writeString(FN_DISPLAYNAME, FDisplayname);
-  if IsModifiedField(FN_TOKENS) then
-    pbout.writeInt32(FN_TOKENS, FTokens);
-  if IsModifiedField(FN_EMAIL) then
-    pbout.writeString(FN_EMAIL, FEmail);
-  if IsModifiedField(FN_AUTHED) then
-    pbout.writeBoolean(FN_AUTHED, FAuthed);
-  if IsModifiedField(FN_CHIPS) then
-    pbout.writeInt32(FN_CHIPS, FChips);
-  result := pbout;
-end;
-
 function TPB_User.GetAvatar: AnsiString;
 begin
   result := EncodeBase64(@FAvatar[0], Length(FAvatar));
@@ -136,43 +113,43 @@ end;
 procedure TPB_User.SetMongoId(const AValue: TBytes);
 begin
   FMongoId := AValue;
-  AddModifiedField(FN_MONGOID);
+  ProtobufOutput.writeBytes(FN_MONGOID, FMongoId);
 end;
 
 procedure TPB_User.SetAvatar(const AValue: TBytes);
 begin
   FAvatar := AValue;
-  AddModifiedField(FN_AVATAR);
+  ProtobufOutput.writeBytes(FN_AVATAR, FAvatar);
 end;
 
 procedure TPB_User.SetDisplayname(const AValue: AnsiString);
 begin
   FDisplayname := AValue;
-  AddModifiedField(FN_DISPLAYNAME);
+  ProtobufOutput.writeString(FN_DISPLAYNAME, FDisplayname);
 end;
 
 procedure TPB_User.SetTokens(const AValue: Integer);
 begin
   FTokens := AValue;
-  AddModifiedField(FN_TOKENS);
+  ProtobufOutput.writeInt32(FN_TOKENS, FTokens);
 end;
 
 procedure TPB_User.SetEmail(const AValue: AnsiString);
 begin
   FEmail := AValue;
-  AddModifiedField(FN_EMAIL);
+  ProtobufOutput.writeString(FN_EMAIL, FEmail);
 end;
 
 procedure TPB_User.SetAuthed(const AValue: Boolean);
 begin
   FAuthed := AValue;
-  AddModifiedField(FN_AUTHED);
+  ProtobufOutput.writeBoolean(FN_AUTHED, FAuthed);
 end;
 
 procedure TPB_User.SetChips(const AValue: Integer);
 begin
   FChips := AValue;
-  AddModifiedField(FN_CHIPS);
+  ProtobufOutput.writeInt32(FN_CHIPS, FChips);
 end;
 
 end.

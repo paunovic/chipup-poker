@@ -3,60 +3,50 @@ unit uTables;
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, System.Classes,
-  uTable;
+  Winapi.Windows, System.Generics.Collections, System.Classes, System.SysUtils,
+  uTable, uGameInfo, uClubInfo;
 
 type
-  TTables = class
-  private
-    FTables: TObjectList<TTable>;
-
+  TTables = class(TObjectList<TTable>)
   public
-    constructor Create;
-    destructor Destroy; override;
-
-    function AddTable(const ATableId: String): Boolean;
-
-    procedure NotifyClose(const ATableId: String);
+    function AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
+    procedure NotifyClose(const AGameId: TBytes);
+    function SittingCount: Integer;
   end;
 
 implementation
 
 
-constructor TTables.Create;
-begin
-
-  FTables := TObjectList<TTable>.Create;
-end;
-
-destructor TTables.Destroy;
-begin
-  FTables.Free;
-
-  inherited;
-end;
-
-function TTables.AddTable(const ATableId: String): Boolean;
+function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
 var
   table: TTable;
 begin
-  table := TTable.Create(self, ATableId);
+  table := TTable.Create(self, AClub, AGame);
   table.Form.Show;
-  FTables.Add(table);
+  Add(table);
   result := TRUE;
 end;
 
-procedure TTables.NotifyClose(const ATableId: String);
+procedure TTables.NotifyClose(const AGameId: TBytes);
 var
   C1: Integer;
 begin
-  for C1 := 0 to FTables.Count - 1 do
-    if FTables[C1].Id = ATableId then
+  for C1 := 0 to Length(ToArray) - 1 do
+    if ToArray[C1].Game.MongoId = AGameId then
     begin
-      FTables.Delete(C1);
+      Delete(C1);
       Exit;
     end;
 end;
 
+function TTables.SittingCount: Integer;
+var
+  C1: Integer;
+begin
+  result := 0;
+  for C1 := 0 to Length(ToArray) - 1 do
+    if ToArray[C1].IsSitting then
+      Inc(result);
+end;
 
 end.

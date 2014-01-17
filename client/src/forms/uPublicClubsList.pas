@@ -34,6 +34,7 @@ type
     FSelectedClubId: Int64;
 
     procedure TCListClubs(const AMessage: TMessageItem);
+    procedure TCJoinClubOk(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -51,6 +52,7 @@ implementation
 uses
   uSocketClient, uCommon, uServerCodes, uMainDataModule, uJoinClubForm, uMessageContainer, uServerMessageCallback,
   uPB_ListClubsReply, uPB_Club;
+
 
 procedure TfrmPublicClubsList.FormCreate(Sender: TObject);
 begin
@@ -99,7 +101,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_LIST_CLUBS, TCListClubs)
+                            TServerMessageCallback.Create(SR_LIST_CLUBS, TCListClubs),
+                            TServerMessageCallback.Create(SR_JOINCLUB_OK, TCJoinClubOk)
                           ]
                         );
 
@@ -126,6 +129,11 @@ begin
     gridClubsTable.DataController.EndFullUpdate;
   end;
   SocketClient.ListPublicClubs;
+end;
+
+procedure TfrmPublicClubsList.TCJoinClubOk(const AMessage: TMessageItem);
+begin
+  SocketClient.Status;
 end;
 
 procedure TfrmPublicClubsList.TCListClubs(const AMessage: TMessageItem);

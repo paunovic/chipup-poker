@@ -24,7 +24,6 @@ type
     destructor Destroy; override;
 
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property Clubs: TPB_Clubs read FClubs;
     property Users: TPB_Users read FUsers;
@@ -76,7 +75,6 @@ begin
       FN_CLUBS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32));
-	    	AddModifiedField(FN_CLUBS);
       end;
       FN_USERS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -93,22 +91,6 @@ begin
     else
       AProtobufReader.skipField(tag);
     end;
-end;
-
-function TPB_StatusReply.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-//  if IsModifiedField(FN_CLUBS) then
-//    pbout.writeProtobufBaseObject(FN_CLUBS, FClubs);
-//  if IsModifiedField(FN_USERS) then
-//    pbout.writeProtobufBaseObject(FN_USERS, FUsers);
-  if IsModifiedField(FN_SELF) then
-    pbout.writeProtobufBaseObject(FN_SELF, FSelf);
-//  if IsModifiedField(FN_GAMES) then
-//    pbout.writeProtobufBaseObject(FN_GAMES, FGames);
-  result := pbout;
 end;
 
 

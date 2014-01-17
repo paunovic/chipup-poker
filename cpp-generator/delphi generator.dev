@@ -1,7 +1,7 @@
 [Project]
 FileName=delphi generator.dev
 Name=delphi generator
-UnitCount=3
+UnitCount=4
 Type=1
 Ver=1
 ObjFiles=
@@ -12,7 +12,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=
 CppCompiler=
-Linker=../../protobuf-2.5.0/protobuf.a_@@_
+Linker=protobuf.a_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -57,8 +57,9 @@ ProductName=
 ProductVersion=
 AutoIncBuildNr=0
 
-[Unit2]
-FileName=..\rebuild.bat
+[Unit3]
+FileName=..\message.proto
+CompileCpp=1
 Folder=delphi generator
 Compile=0
 Link=0
@@ -66,7 +67,16 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit3]
+[Unit4]
+FileName=rebuild.bat
+Folder=delphi generator
+Compile=0
+Link=0
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit2]
 FileName=..\..\protobuf-2.5.0\src\google\protobuf\descriptor.h
 CompileCpp=1
 Folder=delphi generator

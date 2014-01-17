@@ -40,7 +40,7 @@ message RegisterParams {
 	required string displayName = 3;
 }
 
-message ForgotParams {
+message ForgotPasswordParams {
 	required string email = 1;
 }
 
@@ -99,17 +99,17 @@ message ListClubsReply {
 
 message KickPlayerParams {
 	required int32 club_seq = 1;
-	required string player_mongo_id = 2;
+	required bytes player_mongo_id = 2;
 }
 
 message GiveClubOwnershipParams {
 	required int32 club_seq = 1;
-	required string player_mongo_id = 2;
+	required bytes player_mongo_id = 2;
 }
 
 message TransferChipsParams {
 	required int32 club_seq = 1;
-	required string player_mongo_id = 2;
+	required bytes player_mongo_id = 2;
 	required int32 chip_amount = 3;
 }
 

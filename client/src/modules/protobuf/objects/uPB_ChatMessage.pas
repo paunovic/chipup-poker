@@ -27,7 +27,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property MongoId: TBytes read FMongoId write SetMongoId;
     property Username: AnsiString read FUsername write SetUsername;
@@ -71,44 +70,28 @@ begin
     end;
 end;
 
-function TPB_ChatMessage.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_MONGOID) then
-    pbout.writeBytes(FN_MONGOID, FMongoId);
-  if IsModifiedField(FN_USERNAME) then
-    pbout.writeString(FN_USERNAME, FUsername);
-  if IsModifiedField(FN_MSG) then
-    pbout.writeString(FN_MSG, FMsg);
-  if IsModifiedField(FN_TIMESTAMP) then
-    pbout.writeInt64(FN_TIMESTAMP, FTimestamp);
-  result := pbout;
-end;
-
 procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
 begin
   FMongoId := AValue;
-  AddModifiedField(FN_MONGOID);
+  ProtobufOutput.writeBytes(FN_MONGOID, FMongoId);
 end;
 
 procedure TPB_ChatMessage.SetUsername(const AValue: AnsiString);
 begin
   FUsername := AValue;
-  AddModifiedField(FN_USERNAME);
+  ProtobufOutput.writeString(FN_USERNAME, FUsername);
 end;
 
 procedure TPB_ChatMessage.SetMsg(const AValue: AnsiString);
 begin
   FMsg := AValue;
-  AddModifiedField(FN_MSG);
+  ProtobufOutput.writeString(FN_MSG, FMsg);
 end;
 
 procedure TPB_ChatMessage.SetTimestamp(const AValue: Int64);
 begin
   FTimestamp := AValue;
-  AddModifiedField(FN_TIMESTAMP);
+  ProtobufOutput.writeInt64(FN_TIMESTAMP, FTimestamp);
 end;
 
 end.

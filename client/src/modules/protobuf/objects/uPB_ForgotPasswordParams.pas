@@ -18,7 +18,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property Email: AnsiString read FEmail write SetEmail;
   end;
@@ -45,20 +44,11 @@ begin
     end;
 end;
 
-function TPB_ForgotPasswordParams.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_EMAIL) then
-    pbout.writeString(FN_EMAIL, FEmail);
-  result := pbout;
-end;
 
 procedure TPB_ForgotPasswordParams.SetEmail(const AValue: AnsiString);
 begin
   FEmail := AValue;
-  AddModifiedField(FN_EMAIL);
+  ProtobufOutput.writeString(FN_EMAIL, FEmail);
 end;
 
 end.

@@ -33,7 +33,6 @@ type
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
-    function GetProtobuf: TProtoBufOutput; override;
 
     property Email: Integer read FEmail write SetEmail;
     property Password: Integer read FPassword write SetPassword;
@@ -85,60 +84,40 @@ begin
     end;
 end;
 
-function TPB_StringSizes.GetProtobuf: TProtoBufOutput;
-var
-  pbout: TProtoBufOutput;
-begin
-  pbout := TProtoBufOutput.Create;
-  if IsModifiedField(FN_EMAIL) then
-    pbout.writeInt32(FN_EMAIL, FEmail);
-  if IsModifiedField(FN_PASSWORD) then
-    pbout.writeInt32(FN_PASSWORD, FPassword);
-  if IsModifiedField(FN_CLUBNAME) then
-    pbout.writeInt32(FN_CLUBNAME, FClubname);
-  if IsModifiedField(FN_INVCODE) then
-    pbout.writeInt32(FN_INVCODE, FInvcode);
-  if IsModifiedField(FN_USERNAME) then
-    pbout.writeInt32(FN_USERNAME, FUsername);
-  if IsModifiedField(FN_GAMENAME) then
-    pbout.writeInt32(FN_GAMENAME, FGamename);
-  result := pbout;
-end;
-
 procedure TPB_StringSizes.SetEmail(const AValue: Integer);
 begin
   FEmail := AValue;
-  AddModifiedField(FN_EMAIL);
+  ProtobufOutput.writeInt32(FN_EMAIL, FEmail);
 end;
 
 procedure TPB_StringSizes.SetPassword(const AValue: Integer);
 begin
   FPassword := AValue;
-  AddModifiedField(FN_PASSWORD);
+  ProtobufOutput.writeInt32(FN_PASSWORD, FPassword);
 end;
 
 procedure TPB_StringSizes.SetClubname(const AValue: Integer);
 begin
   FClubname := AValue;
-  AddModifiedField(FN_CLUBNAME);
+  ProtobufOutput.writeInt32(FN_CLUBNAME, FClubname);
 end;
 
 procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
 begin
   FInvcode := AValue;
-  AddModifiedField(FN_INVCODE);
+  ProtobufOutput.writeInt32(FN_INVCODE, FInvcode);
 end;
 
 procedure TPB_StringSizes.SetUsername(const AValue: Integer);
 begin
   FUsername := AValue;
-  AddModifiedField(FN_USERNAME);
+  ProtobufOutput.writeInt32(FN_USERNAME, FUsername);
 end;
 
 procedure TPB_StringSizes.SetGamename(const AValue: Integer);
 begin
   FGamename := AValue;
-  AddModifiedField(FN_GAMENAME);
+  ProtobufOutput.writeInt32(FN_GAMENAME, FGamename);
 end;
 
 end.
