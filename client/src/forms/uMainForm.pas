@@ -8,7 +8,12 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, dxSkinDarkRoom, uGameInfo;
+  uMessageItem, dxSkinDarkRoom, uGameInfo, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkSide,
+  dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian,
+  dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue,
+  dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver,
+  dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust,
+  dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinsDefaultPainters, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -63,6 +68,7 @@ type
     btClubLobby: TcxButton;
     cxLabel1: TcxLabel;
     acShowGameTableForm: TAction;
+    Button1: TButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -81,6 +87,8 @@ type
     procedure gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowGameTableFormExecute(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure Button1Click(Sender: TObject);
   private
     FSelectedClub: TClubInfo;
     FSelectedGame: TGameInfo;
@@ -130,6 +138,12 @@ begin
   inherited;
 
   ShowLoginForm;
+end;
+
+procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if dmMain.Tables.SittingCount > 0 then
+    CanClose := MessageDlg('If you close the application, you will automatically leave the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
@@ -253,24 +267,25 @@ begin
   if not Assigned(FSelectedGame) then
     Exit;
 
-  dmMain.Tables.AddTable(FSelectedGame.MongoId);
+  dmMain.Tables.AddTable(FSelectedClub, FSelectedGame);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
-  if RunModalForM(TfrmJoinClub, self, []) = mrOk then
+  if RunModalForm(TfrmJoinClub, self, []) = mrOk then
     SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.acShowManageClubsFormExecute(Sender: TObject);
 begin
-  RunModalForM(TfrmManageClubs, self, []);
+  if RunModalForm(TfrmManageClubs, self, []) = mrOk then
+    SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.acShowPublicGamesListFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmPublicClubsList, self, []);
-  SocketClient.Status;
+{  if }RunModalForm(TfrmPublicClubsList, self, []);{ = mrOk then}
+    SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.btLeaveClubClick(Sender: TObject);
@@ -279,6 +294,11 @@ begin
     Exit;
 
   SocketClient.LeaveClub(FSelectedClub.Id);
+end;
+
+procedure TfrmChipUpMain.Button1Click(Sender: TObject);
+begin
+  SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -327,7 +347,10 @@ begin
   c.BeginFullUpdate;
   try
     if not Assigned(FSelectedClub) then
-      c.SetRecordCount(0)
+    begin
+      c.SetRecordCount(0);
+      Exit;
+    end
     else
       c.SetRecordCount(FSelectedClub.Games.Count);
 
@@ -337,7 +360,7 @@ begin
 
       c.SetValue(C1, gridGamesId.Index, game.MongoId);
       c.SetValue(C1, gridGamesName.Index, game.Name);
-      c.SetValue(C1, gridGamesType.Index, game.GameTypeStr);
+      c.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
       c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [game.SmallBlind, game.BigBlind]));
       c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [0, game.Seats]));
       c.SetValue(C1, gridGamesStatus.Index, 'unknown');
@@ -415,6 +438,7 @@ begin
   dmMain.Players.ParseStatus(pbstatus);
   ConfigureGUI;
   UpdateClublist;
+  UpdateGamelist;
 end;
 
 procedure TfrmChipUpMain.TCLeaveClubInvalidId(const AMessage: TMessageItem);
@@ -444,8 +468,6 @@ var
   chatEvent: TPB_ChatEvent;
 begin
   chatEvent := AMessage.Object_ as TPB_ChatEvent;
-
-  {$IFDEF DEBUG} DebugLn(Format('Chat message <%s> %s', [chatEvent.Msg.Username, chatEvent.Msg.Msg]), ditSocketInc); {$ENDIF}
 end;
 
 

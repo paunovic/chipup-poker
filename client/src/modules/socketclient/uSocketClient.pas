@@ -58,6 +58,8 @@ type
     procedure SendTableChatLine(const ATableId, ALine: String);
     procedure JoinTable(const ATableId: String);
     procedure LeaveTable(const ATableId: String);
+    procedure TableSit(const ATableId: String; const ASeatIndex, AChips: Integer);
+    procedure TableStandUp(const ATableId: String);
 
     property Socket     : TSslWSocket read FSocket;
     property ConnectCode: Integer read FConnectCode;
@@ -75,8 +77,8 @@ uses
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
-  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage,
-  pbOutput, pbInput, uMessageContainer;
+  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus,
+  pbOutput, pbInput, uMessageContainer, Winapi.WinSock;
 
 
 constructor TSocketClient.Create(const AServer: String; const APort: Integer);
@@ -86,18 +88,8 @@ begin
   FPort := APort;
 
   FSocket := TSslWSocket.Create(nil);
-  FSocket.Addr := FServer;
-  FSocket.Port := IntToStr(FPort);
-  FSocket.TimeoutConnect := 10000;
   FSocket.SslContext := TSslContext.Create(nil);
   FSocket.SslContext.InitContext;
-  FSocket.SslEnable := TRUE;
-  FSocket.OnChangeState := SocketChangeState;
-  FSocket.OnDataAvailable := SocketDataAvailable;
-  FSocket.OnError := SocketError;
-  FSocket.OnSessionConnected := SocketSessionConnected;
-  FSocket.OnSessionClosed := SocketSessionClosed;
-  FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
 end;
 
 destructor TSocketClient.Destroy;
@@ -115,32 +107,43 @@ begin
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
   FReceiveBufferSize := 0;
+  FSocket.Addr := FServer;
+  FSocket.Port := IntToStr(FPort);
+  FSocket.TimeoutConnect := 10000;
+  FSocket.SslEnable := TRUE;
+  FSocket.OnChangeState := SocketChangeState;
+  FSocket.OnDataAvailable := SocketDataAvailable;
+  FSocket.OnError := SocketError;
+  FSocket.OnSessionConnected := SocketSessionConnected;
+  FSocket.OnSessionClosed := SocketSessionClosed;
+  FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
+  FSocket.Flush;
   FSocket.Connect;
 end;
 
 procedure TSocketClient.Disconnect;
 begin
-  {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
-
   if FSocket.State <> TSocketState.wsClosed then
   begin
+    {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
     FSocket.Close;
     while (Assigned(FSocket)) and (FSocket.State <> wsClosed) do
       FSocket.ProcessMessages;
-  end
-  else
-    SocketSessionClosed(self, 0);
-end;
-
-function TSocketClient.IsConnected: Boolean;
-begin
-  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FConnectCode = SR_HELLO);
+  end;
 end;
 
 procedure TSocketClient.SocketSessionConnected(Sender: TObject; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn('Connected. Starting SSL handshake...', ditSocket); {$ENDIF}
-  FSocket.StartSslHandshake;
+  if ErrCode = 0 then
+  begin
+    {$IFDEF DEBUG} DebugLn('Connected. Starting SSL handshake...', ditSocket); {$ENDIF}
+    FSocket.StartSslHandshake;
+  end
+  else
+  begin
+    FSocket.LastError := ErrCode;
+    SocketError(Sender);
+  end;
 end;
 
 procedure TSocketClient.SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -161,8 +164,8 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG} DebugLn('SSL handshake error [%d]', ditException); {$ENDIF}
-    Disconnect := TRUE;
+    FSocket.LastError := ErrCode;
+    SocketError(Sender);
   end;
 end;
 
@@ -177,11 +180,19 @@ var
   data_obj   : TObject;
   ptmp       : pointer;
 begin
+  if Error <> 0 then
+  begin
+    FSocket.LastError := Error;
+    SocketError(Sender);
+    Exit;
+  end;
+
   len := FSocket.Receive(@rcv_buf[0], FSocket.RcvdCount);
 
   if len < 0 then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Socket error: %d', [FSocket.LastError]), ditException); {$ENDIF}
+    FSocket.LastError := WSAGetLastError;
+    SocketError(Sender)
   end
   else
   begin
@@ -237,9 +248,12 @@ end;
 
 procedure TSocketClient.SocketError(Sender: TObject);
 begin
-  {$IFDEF DEBUG} DebugLn(Format('Socket error: %d', [FSocket.LastError]), ditException); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Socket error: %s', [WSocketErrorDesc(FSocket.LastError)]), ditException); {$ENDIF}
+end;
 
-  Disconnect;
+function TSocketClient.IsConnected: Boolean;
+begin
+  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FConnectCode = SR_HELLO);
 end;
 
 function TSocketClient.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
@@ -254,7 +268,7 @@ begin
   case ARpcMessage.MethodId of
     SR_NOT_IMPLEMENTED: begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
-      {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED code: %s', [err]), ditException); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED MethodId: %s', [err]), ditException); {$ENDIF}
     end;
     SR_HELLO: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     SR_LOGIN_OK: ;
@@ -301,10 +315,15 @@ begin
     SR_DELETE_GAME_OK: ;
     SR_EDIT_GAME_OK: ;
     SR_SECONDARY_LOGIN_DETECTED: ;
+    SR_ACCOUNT_CONFIRMED: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     EVENT_CHAT: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
-    SR_ACCOUNT_CONFIRMED: ;
+    SR_TABLE_STATUS,
+    SR_TABLE_SIT_OK,
+    SR_TABLE_SIT_SEAT_TAKEN,
+    SR_TABLE_STAND_UP_OK: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
+    {$IFDEF DEBUG} DebugLn(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
   end;
 end;
 
@@ -654,6 +673,36 @@ begin
   try
     protobuf.MongoIdHex := AnsiString(ATableId);
     SendProtobuf(CMD_TABLE_LEAVE, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TSocketClient.TableSit(const ATableId: String; const ASeatIndex, AChips: Integer);
+var
+  protobuf: TPB_TableSit;
+  bytes   : TBytes;
+begin
+  protobuf := TPB_TableSit.Create;
+  try
+    HexToBytes(AnsiString(ATableId), bytes);
+    protobuf.GameId := bytes;
+    protobuf.SeatIndex := ASeatIndex;
+    protobuf.Chips := AChips;
+    SendProtobuf(CMD_TABLE_SIT, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TSocketClient.TableStandUp(const ATableId: String);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoIdHex := AnsiString(ATableId);
+    SendProtobuf(CMD_TABLE_STAND_UP, protobuf);
   finally
     protobuf.Free;
   end;

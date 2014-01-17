@@ -20,21 +20,24 @@ type
     FGameType  : TGameType;
     FGameLimit : TGameLimit;
     FSeats     : Integer;
+
     function GetGameTypeStr: String;
+    function GetGameTypeStrFull: String;
 
   public
     constructor Create(const AMongoId, ACreatorId: String; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
 
-    property MongoId    : String read FMongoId write FMongoId;
-    property ClubId     : Int64 read FClubId write FClubId;
-    property CreatorId  : String read FCreatorId write FCreatorId;
-    property Name       : String read FName write FName;
-    property SmallBlind : Integer read FSmallBlind write FSmallBlind;
-    property BigBlind   : Integer read FBigBlind write FBigBlind;
-    property GameType   : TGameType read FGameType write FGameType;
-    property GameTypeStr: String read GetGameTypeStr;
-    property Limit      : TGameLimit read FGameLimit write FGameLimit;
-    property Seats      : Integer read FSeats write FSeats;
+    property MongoId        : String read FMongoId write FMongoId;
+    property ClubId         : Int64 read FClubId write FClubId;
+    property CreatorId      : String read FCreatorId write FCreatorId;
+    property Name           : String read FName write FName;
+    property SmallBlind     : Integer read FSmallBlind write FSmallBlind;
+    property BigBlind       : Integer read FBigBlind write FBigBlind;
+    property GameType       : TGameType read FGameType write FGameType;
+    property GameTypeStr    : String read GetGameTypeStr;
+    property GameTypeStrFull: String read GetGameTypeStrFull;
+    property Limit          : TGameLimit read FGameLimit write FGameLimit;
+    property Seats          : Integer read FSeats write FSeats;
   end;
 
   TGamesInfo = class(TObjectList<TGameInfo>)
@@ -62,6 +65,14 @@ begin
 end;
 
 function TGameInfo.GetGameTypeStr: String;
+begin
+  case FGameType of
+    gtHoldem: result := 'Holdem';
+    gtOmaha: result := 'Omaha';
+  end;
+end;
+
+function TGameInfo.GetGameTypeStrFull: String;
 begin
   case FGameType of
     gtHoldem: result := 'Holdem';

@@ -58,16 +58,16 @@ object frmTable: TfrmTable
         Left = 0
         Top = 1
         Align = alTop
-        Style.Edges = [bBottom]
+        Style.Edges = []
         TabOrder = 0
         OnKeyDown = edChatKeyDown
         Width = 289
       end
       object reChat: TRichEdit
         Left = 0
-        Top = 21
+        Top = 19
         Width = 289
-        Height = 81
+        Height = 83
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -79,9 +79,37 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
+        ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 1
       end
+    end
+    object btSitStandUp: TcxButton
+      Left = 396
+      Top = 38
+      Width = 97
+      Height = 34
+      Action = acShowTableSitForm
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 1
+    end
+    object lbsInfo: TcxLabel
+      Left = 296
+      Top = 6
+      Caption = 'lbsInfo'
+      Transparent = True
+    end
+  end
+  object alTable: TActionList
+    Left = 28
+    Top = 16
+    object acShowTableSitForm: TAction
+      Caption = 'Sit'
+      OnExecute = acShowTableSitFormExecute
+    end
+    object acStandUp: TAction
+      Caption = 'Stand Up'
+      OnExecute = acStandUpExecute
     end
   end
 end

@@ -78,7 +78,9 @@ begin
   case Key of
     VK_ESCAPE: acCancel.Execute;
     VK_RETURN: if not edClubCode.Focused then
-                 SelectNext(ActiveControl, TRUE, TRUE);
+                 SelectNext(ActiveControl, TRUE, TRUE)
+               else
+                 acOk.Execute;
   end;
 end;
 

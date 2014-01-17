@@ -5,7 +5,7 @@ interface
 const
   USERNAME_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789 -_';
   PASSWORD_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789-_!@#$%^&*()+=~`';
-  CLUBNAME_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789 -!()[]{}@#$%&*+=/\';
+  CLUBNAME_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789 -!()[]{}@#$%&*+=/\''';
   CLUBCODE_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
 

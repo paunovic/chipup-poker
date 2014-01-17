@@ -168,7 +168,6 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_LoginParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_Club.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_StatusReply.pas"/>
-			<DCCReference Include="modules\protobuf\uProtobufBaseObject.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_HelloReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_StringSizes.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TokenPrices.pas"/>
@@ -193,6 +192,14 @@
 			<DCCReference Include="3rdparty\protobufs\pbPublic.pas"/>
 			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
 			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_TableSit.pas"/>
+			<DCCReference Include="forms\uTableSitForm.pas">
+				<Form>frmTableSit</Form>
+				<FormType>dfm</FormType>
+			</DCCReference>
+			<DCCReference Include="modules\protobuf\uProtobufBaseObject.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_TableStatus.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_SeatInfo.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
