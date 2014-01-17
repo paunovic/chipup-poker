@@ -217,9 +217,10 @@ end;
 
 procedure TfrmTable.edChatKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key = vk_RETURN then
+  if (Key = vk_RETURN) and (edChat.Text <> '') then
   begin
-    SocketClient.SendTableChatLine(FTable.Game.MongoId, edChat.Text);
+    if Trim(edChat.Text) <> '' then
+      SocketClient.SendTableChatLine(FTable.Game.MongoId, Trim(edChat.Text));
     edChat.Clear;
   end;
 end;
