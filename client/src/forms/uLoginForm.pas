@@ -25,6 +25,7 @@ type
     lbsPassword: TcxLabel;
     StatusBar: TdxStatusBar;
     SkinController: TdxSkinController;
+    Timer1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acLoginExecute(Sender: TObject);
@@ -32,6 +33,7 @@ type
     procedure acShowForgotPasswordFormExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     FLoginSuccess: Boolean;
 
@@ -252,6 +254,12 @@ begin
 
   if FLoginSuccess then
     ModalResult := mrOk;
+end;
+
+procedure TfrmLogin.Timer1Timer(Sender: TObject);
+begin
+  if SocketClient.Socket.State = wsClosed then
+    SocketClient.Connect;
 end;
 
 end.

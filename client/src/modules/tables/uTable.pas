@@ -3,38 +3,44 @@ unit uTable;
 interface
 
 uses
-  Winapi.Windows, System.Classes,
-  uTableForm;
+  Winapi.Windows, System.Classes, uGameInfo,
+  uClubInfo, Vcl.Forms;
 
 type
   TTable = class
   private
-    FId          : String;
-    FForm        : TfrmTable;
+    FForm        : TForm;
+    FSeatIndex   : Integer;
+    FGame        : TGameInfo;
+    FClub        : TClubInfo;
     FTablesObject: TObject;
 
   public
-    constructor Create(const ATablesObject: TObject; const AId: String);
+    constructor Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
     destructor Destroy; override;
 
     procedure NotifyClose;
+    function IsSitting: Boolean;
 
-    property Id  : String read FId;
-    property Form: TfrmTable read FForm;
-
+    property Game     : TGameInfo read FGame;
+    property Club     : TClubInfo read FClub;
+    property Form     : TForm read FForm;
+    property SeatIndex: Integer read FSeatIndex;
   end;
 
 implementation
 
 uses
-  Vcl.Controls, uTables;
+  Vcl.Controls, uTables, uTableForm;
 
 
-constructor TTable.Create(const ATablesObject: TObject; const AId: String);
+constructor TTable.Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
 begin
-  FId := AId;
+  FSeatIndex := -1;
+  FGame := AGame;
+  FClub := AClub;
   FTablesObject := ATablesObject;
-  FForm := TfrmTable.Create(self, AId);
+  FForm := TfrmTable.Create(self);
 end;
 
 destructor TTable.Destroy;
@@ -44,9 +50,14 @@ begin
   inherited;
 end;
 
+function TTable.IsSitting: Boolean;
+begin
+  result := FSeatIndex <> -1;
+end;
+
 procedure TTable.NotifyClose;
 begin
-  (FTablesObject as TTables).NotifyClose(FId);
+  (FTablesObject as TTables).NotifyClose(FGame.MongoId);
 end;
 
 

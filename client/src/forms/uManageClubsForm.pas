@@ -288,9 +288,8 @@ end;
 
 procedure TfrmManageClubs.UpdateClubGamesList;
 var
-  C1       : Integer;
-  game     : TGameInfo;
-  game_type: String;
+  C1  : Integer;
+  game: TGameInfo;
 begin
   gridGamesTable.DataController.BeginFullUpdate;
   try
@@ -309,19 +308,7 @@ begin
 
       gridGamesTable.DataController.SetValue(C1, gridGamesId.Index, game.MongoId);
       gridGamesTable.DataController.SetValue(C1, gridGamesName.Index, game.Name);
-      case game.Limit of
-        glNoLimit: game_type := 'NL';
-        glLimit: game_type := 'FL';
-        glPotLimit: game_type := 'PL';
-      end;
-
-      case game.GameType of
-        gtHoldem: game_type := game_type + ' Hold''em';
-        gtOmaha: game_type := game_type + ' Omaha';
-      else
-        game_type := game_type + ' Unknown';
-      end;
-      gridGamesTable.DataController.SetValue(C1, gridGamesType.Index, game_type);
+      gridGamesTable.DataController.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
       gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [game.SmallBlind, game.BigBlind]));
       gridGamesTable.DataController.SetValue(C1, gridGamesSeats.Index, game.Seats);
     end;

@@ -63,6 +63,7 @@ type
     btClubLobby: TcxButton;
     cxLabel1: TcxLabel;
     acShowGameTableForm: TAction;
+    Button1: TButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -81,9 +82,11 @@ type
     procedure gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowGameTableFormExecute(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure Button1Click(Sender: TObject);
   private
-    FSelectedClub: TClubInfo;
-    FSelectedGame: TGameInfo;
+    FSelectedClub: Integer;
+    FSelectedGame: String;
 
     function ShowLoginForm: Integer;
 
@@ -102,6 +105,9 @@ type
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
     procedure ConfigureGUI;
+
+    function GetSelectedGame(var AGame: TGameInfo): Boolean;
+    function GetSelectedClub(var AClub: TClubInfo): Boolean;
 
   protected
     procedure DoCreate; override;
@@ -130,6 +136,12 @@ begin
   inherited;
 
   ShowLoginForm;
+end;
+
+procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if dmMain.Tables.SittingCount > 0 then
+    CanClose := MessageDlg('If you close the application, you will automatically leave the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
@@ -211,6 +223,19 @@ begin
   tiBringToFront.Enabled := FALSE;
 end;
 
+function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
+begin
+  result := dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, AClub);
+end;
+
+function TfrmChipUpMain.GetSelectedGame(var AGame: TGameInfo): Boolean;
+var
+  club: TClubInfo;
+begin
+  result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
+end;
+
+
 procedure TfrmChipUpMain.acBuyChipsExecute(Sender: TObject);
 begin
   dmMain.OpenBuyChipsLink;
@@ -225,7 +250,6 @@ procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
   SocketClient.Logout;
 end;
-
 
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
@@ -249,36 +273,47 @@ begin
 end;
 
 procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
+var
+  game: TGameInfo;
+  club: TClubInfo;
 begin
-  if not Assigned(FSelectedGame) then
+  if (not GetSelectedClub(club)) or (not GetSelectedGame(game)) then
     Exit;
 
-  dmMain.Tables.AddTable(FSelectedGame.MongoId);
+  dmMain.Tables.AddTable(club, game);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
-  if RunModalForM(TfrmJoinClub, self, []) = mrOk then
+  if RunModalForm(TfrmJoinClub, self, []) = mrOk then
     SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.acShowManageClubsFormExecute(Sender: TObject);
 begin
-  RunModalForM(TfrmManageClubs, self, []);
+  if RunModalForm(TfrmManageClubs, self, []) = mrOk then
+    SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.acShowPublicGamesListFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmPublicClubsList, self, []);
-  SocketClient.Status;
+  if RunModalForm(TfrmPublicClubsList, self, []) = mrOk then
+    SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.btLeaveClubClick(Sender: TObject);
+var
+  club: TClubInfo;
 begin
-  if not Assigned(FSelectedClub) then
+  if not GetSelectedClub(club) then
     Exit;
 
-  SocketClient.LeaveClub(FSelectedClub.Id);
+  SocketClient.LeaveClub(club.Id);
+end;
+
+procedure TfrmChipUpMain.Button1Click(Sender: TObject);
+begin
+  SocketClient.Status;
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -322,22 +357,26 @@ var
   C1  : Integer;
   game: TGameInfo;
   c   : TcxGridDataController;
+  club: TClubInfo;
 begin
   c := gridGamesTable.DataController;
   c.BeginFullUpdate;
   try
-    if not Assigned(FSelectedClub) then
-      c.SetRecordCount(0)
-    else
-      c.SetRecordCount(FSelectedClub.Games.Count);
-
-    for C1 := 0 to FSelectedClub.Games.Count - 1 do
+    if not GetSelectedClub(club) then
     begin
-      game := FSelectedClub.Games[C1];
+      c.SetRecordCount(0);
+      Exit;
+    end
+    else
+      c.SetRecordCount(club.Games.Count);
+
+    for C1 := 0 to club.Games.Count - 1 do
+    begin
+      game := club.Games[C1];
 
       c.SetValue(C1, gridGamesId.Index, game.MongoId);
       c.SetValue(C1, gridGamesName.Index, game.Name);
-      c.SetValue(C1, gridGamesType.Index, game.GameTypeStr);
+      c.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
       c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [game.SmallBlind, game.BigBlind]));
       c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [0, game.Seats]));
       c.SetValue(C1, gridGamesStatus.Index, 'unknown');
@@ -365,16 +404,15 @@ begin
   recIndex := gridJoinedClubsTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
   begin
-    FSelectedClub := nil;
+    FSelectedClub := -1;
     Exit;
   end;
 
   club_id := gridJoinedClubsTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
-  if dmMain.SelfInfo.Clubs.FindClub(club_id, FSelectedClub) then
-  begin
-  end
+  if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
+    FSelectedClub := -1
   else
-    FSelectedClub := nil;
+    FSelectedClub := club_id;
 
   UpdateGamelist;
 end;
@@ -383,20 +421,24 @@ procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGri
 var
   recIndex: Integer;
   game_id : String;
+  club    : TClubInfo;
 begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
-  if recIndex = -1 then
+  if (recIndex = -1) or
+     (not GetSelectedClub(club)) then
   begin
-    FSelectedGame := nil;
+    FSelectedGame := '';
     Exit;
   end;
 
   game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
-  if FSelectedClub.Games.FindGame(game_id, FSelectedGame) then
+  if club.Games.IndexOf(game_id) = -1 then
   begin
+    FSelectedGame := '';
+    Exit;
   end
   else
-    FSelectedClub := nil;
+    FSelectedGame := game_id;
 end;
 
 procedure TfrmChipUpMain.TCSecondaryLoginDetected(const AMessage: TMessageItem);
@@ -415,6 +457,7 @@ begin
   dmMain.Players.ParseStatus(pbstatus);
   ConfigureGUI;
   UpdateClublist;
+  UpdateGamelist;
 end;
 
 procedure TfrmChipUpMain.TCLeaveClubInvalidId(const AMessage: TMessageItem);
@@ -444,8 +487,6 @@ var
   chatEvent: TPB_ChatEvent;
 begin
   chatEvent := AMessage.Object_ as TPB_ChatEvent;
-
-  {$IFDEF DEBUG} DebugLn(Format('Chat message <%s> %s', [chatEvent.Msg.Username, chatEvent.Msg.Msg]), ditSocketInc); {$ENDIF}
 end;
 
 

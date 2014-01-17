@@ -63,10 +63,6 @@ end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
-  if SocketClient.IsConnected then
-    SocketClient.Disconnect;
-  FreeAndNil(SocketClient);
-
   FTables.Free;
 
   FAvatars.Free;
@@ -74,6 +70,10 @@ begin
   FSelfInfo.Free;
 
   FServerSettings.Free;
+
+  if SocketClient.IsConnected then
+    SocketClient.Disconnect;
+  FreeAndNil(SocketClient);
 end;
 
 function TdmMain.MakeTokenCostMessage(const ALabel: TcxLabel; const APrefix: String; const ACost: Integer): String;

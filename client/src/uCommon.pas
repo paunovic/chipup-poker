@@ -28,6 +28,7 @@ function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): 
 function IsJPEGStream(const AStream: TStream): Boolean;
 procedure HexToBytes(const AString: AnsiString; var ABytes: TBytes);
 function BytesToHex(const ABytes: TBytes): AnsiString;
+function WSAErrorMessage(const ACode: Integer): String;
 
 implementation
 
@@ -470,6 +471,26 @@ begin
     result := result + AnsiString(IntToHex(ABytes[C1], 2));
 end;
 
+function WSAErrorMessage(const ACode: Integer): String;
+var
+  Buffer: PChar;
+  Len: Integer;
+begin
+  Len := FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM or FORMAT_MESSAGE_IGNORE_INSERTS or FORMAT_MESSAGE_ARGUMENT_ARRAY or FORMAT_MESSAGE_ALLOCATE_BUFFER,
+                       nil, ACode, 0, @Buffer, 0, nil);
+
+  try
+    { Remove the undesired line breaks and '.' char }
+    while (Len > 0) and (CharInSet(Buffer[Len - 1], [#0..#32, '.'])) do Dec(Len);
+    { Convert to Delphi string }
+    SetString(Result, Buffer, Len);
+  finally
+    { Free the OS allocated memory block }
+    LocalFree(HLOCAL(Buffer));
+  end;
+end;
+
+
 initialization
   MakeHardwareUID;
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
@@ -478,3 +499,4 @@ finalization
 
 
 end.
+

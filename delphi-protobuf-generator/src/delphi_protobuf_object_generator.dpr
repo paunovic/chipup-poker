@@ -58,7 +58,7 @@ begin
               WriteLn(Format('Invalid field [%s]', [line]));
           end;
 
-          TGenerator.Generate(msg_name, fields, Format('%su%s.pas', [IncludeTrailingPathDelimiter(output_path), msg_name]));
+          TGenerator.Generate(msg_name, fields, Format('%suPB_%s.pas', [IncludeTrailingPathDelimiter(output_path), msg_name]));
         finally
           fields.Free;
         end;

@@ -34,7 +34,6 @@ type
     FGame: TGameInfo;
 
     procedure TCEditGameOk(const AMessage: TMessageItem);
-
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public

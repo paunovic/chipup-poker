@@ -132,8 +132,8 @@ object frmLogin: TfrmLogin
     Visible = False
   end
   object alLogin: TActionList
-    Left = 36
-    Top = 44
+    Left = 28
+    Top = 16
     object acLogin: TAction
       Caption = 'Login'
       Enabled = False
@@ -154,5 +154,11 @@ object frmLogin: TfrmLogin
     SkinName = 'Darkroom'
     Left = 496
     Top = 12
+  end
+  object Timer1: TTimer
+    Enabled = False
+    OnTimer = Timer1Timer
+    Left = 76
+    Top = 264
   end
 end

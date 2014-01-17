@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SynGdiPlus, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, dxSkinDarkRoom, cxTextEdit, cxMemo, uMessageItem;
+  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, dxSkinDarkRoom, cxTextEdit, cxMemo, uMessageItem, Vcl.Menus, cxButtons,
+  Vcl.ActnList, cxLabel, uTable;
 
 type
   TfrmTable = class(TForm)
@@ -14,6 +15,11 @@ type
     paChat: TPanel;
     edChat: TcxTextEdit;
     reChat: TRichEdit;
+    btSitStandUp: TcxButton;
+    alTable: TActionList;
+    acShowTableSitForm: TAction;
+    acStandUp: TAction;
+    lbsInfo: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -21,21 +27,23 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure edChatKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
+    procedure acShowTableSitFormExecute(Sender: TObject);
+    procedure acStandUpExecute(Sender: TObject);
   private
-    FFormAspectRatio : Double;
-    FSenderObject    : TObject;
-    FId              : String;
+    FFormAspectRatio: Double;
+    FTable          : TTable;
 
-    FPaintBoxBitmap  : TBitmap;
+    FPaintBoxBitmap : TBitmap;
 
-    FMF_Table        : TMetaFile;
-    FImg_Background  : TPngImage;
-    FMFP_Table       : Double;
+    FMF_Table       : TMetaFile;
+    FImg_Background : TPngImage;
+    FMFP_Table      : Double;
 
     function CreateMetafile(const AResourceName: String; var AProportions: Double): TMetaFile;
     procedure ResizeControls;
 
     procedure TCChatEvent(const AMessage: TMessageItem);
+    procedure TCTableStatus(const AMessage: TMessageItem);
 
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -43,7 +51,7 @@ type
     procedure WndProc(var AMessage: TMessage); override;
 
   public
-    constructor Create(const ASender: TObject; const AId: String); reintroduce;
+    constructor Create(const ATable: TTable); reintroduce;
   end;
 
 implementation
@@ -51,23 +59,25 @@ implementation
 {$R *.dfm}
 
 uses
-  uTable, uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uSocketClient;
+  uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_TableStatus,
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule;
 
 
-constructor TfrmTable.Create(const ASender: TObject; const AId: String);
+constructor TfrmTable.Create(const ATable: TTable);
 begin
   inherited Create(nil);
+
+  alTable.State := asSuspended;
 
   if not Assigned(Gdip) then
     Gdip := TGDIPlusFull.Create('gdiplus.dll');
 
-  FId := AId;
-  FSenderObject := ASender;
+  FTable := ATable;
 end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
 begin
-  SocketClient.JoinTable(FId);
+  SocketClient.JoinTable(FTable.Game.MongoId);
 
   reChat.Lines.Clear;
 
@@ -79,7 +89,7 @@ begin
   FImg_Background := TPngImage.Create;
   FImg_Background.LoadFromResourceName(HInstance, 'GameCarpet');
 
-  Caption := Format('Table #%s', [FId]);
+  Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, FTable.Game.SmallBlind, FTable.Game.BigBlind, FTable.Game.GameTypeStrFull]);
 
   ResizeControls;
 end;
@@ -92,7 +102,7 @@ begin
   FImg_Background.Free;
   FPaintBoxBitmap.Free;
 
-  SocketClient.LeaveTable(FId);
+  SocketClient.LeaveTable(FTable.Game.MongoId);
 end;
 
 procedure TfrmTable.CreateParams(var AParams: TCreateParams);
@@ -104,7 +114,7 @@ end;
 
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  (FSenderObject as TTable).NotifyClose;
+  FTable.NotifyClose;
 end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
@@ -147,7 +157,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(EVENT_CHAT, TCChatEvent)
+                            TServerMessageCallback.Create(EVENT_CHAT, TCChatEvent),
+                            TServerMessageCallback.Create(SR_TABLE_STATUS, TCTableStatus),
+                            TServerMessageCallback.Create(SR_TABLE_SIT_OK, TCTableStatus),
+                            TServerMessageCallback.Create(SR_TABLE_STAND_UP_OK, TCTableStatus)
                           ]
                         );
     end;
@@ -206,9 +219,24 @@ procedure TfrmTable.edChatKeyDown(Sender: TObject; var Key: Word; Shift: TShiftS
 begin
   if Key = vk_RETURN then
   begin
-    SocketClient.SendTableChatLine(FId, edChat.Text);
+    SocketClient.SendTableChatLine(FTable.Game.MongoId, edChat.Text);
     edChat.Clear;
   end;
+end;
+
+procedure TfrmTable.acShowTableSitFormExecute(Sender: TObject);
+begin
+  if RunModalForm(TfrmTableSit, self, [FTable.Game]) = mrOk then
+  begin
+    acStandUp.Enabled := TRUE;
+    btSitStandUp.Action := acStandUp;
+  end;
+end;
+
+procedure TfrmTable.acStandUpExecute(Sender: TObject);
+begin
+  SocketClient.TableStandUp(FTable.Game.MongoId);
+  acStandUp.Enabled := FALSE;
 end;
 
 procedure TfrmTable.TCChatEvent(const AMessage: TMessageItem);
@@ -221,7 +249,7 @@ begin
   case chat_event.Event of
     ceUserMessage: begin
       chat_message := chat_event.Msg;
-      if LowerCase(String(chat_event.TableIdAsHex)) = LowerCase(FId) then
+      if LowerCase(String(chat_event.TableIdAsHex)) = LowerCase(FTable.Game.MongoId) then
       begin
         reChat.SelStart := reChat.GetTextLen;
         reChat.SelAttributes.Color := clLime;
@@ -235,6 +263,35 @@ begin
       end;
     end;
     ceServerMessage: ;
+  end;
+end;
+
+procedure TfrmTable.TCTableStatus(const AMessage: TMessageItem);
+var
+  pbtablestatus: TPB_TableStatus;
+  C1: Integer;
+begin
+  pbtablestatus := AMessage.Object_ as TPB_TableStatus;
+  if LowerCase(String(pbtablestatus.TableMongoIdHex)) <> LowerCase(FTable.Game.MongoId) then
+    Exit;
+
+  if alTable.State = asSuspended then
+    alTable.State := asNormal;
+
+  case AMessage.MethodId of
+    SR_TABLE_STAND_UP_OK: begin
+      btSitStandUp.Action := acShowTableSitForm;
+      acShowTableSitForm.Enabled := TRUE;
+    end;
+  end;
+
+  lbsInfo.Caption := 'Taken seats: ';
+  for C1 := 0 to pbtablestatus.Seats.Count - 1 do
+  begin
+    lbsInfo.Caption := lbsInfo.Caption + IntToStr(pbtablestatus.Seats[C1].Seat);
+    if LowerCase(String(pbtablestatus.Seats[C1].PlayerMongoIdHex)) = LowerCase(dmMain.SelfInfo.Id) then
+      lbsInfo.Caption := lbsInfo.Caption + ' (you)';
+    lbsInfo.Caption := lbsInfo.Caption + ',';
   end;
 end;
 
