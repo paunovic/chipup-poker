@@ -990,7 +990,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			this.log('table join',params);
 			var id = new toMongoId(params._id);
 			Game.getGame(id,function (err,game) {
-				game.join(this);
+				if (game.join(this)) conn.send(codes.SR_TABLE_STATUS,game.getTableStatus(),'Poker.TableStatus');
 			}.bind(this));
 			break;
 		case codes.CMD_TABLE_LEAVE:
@@ -1028,6 +1028,7 @@ function Game(obj) {
 Game.prototype.join = function join(conn) {
 	this.users[conn.userid] = conn;
 	conn.log('joined',this);
+	return true;
 }
 Game.prototype.sitDown = function (conn,params) {
 	// FIXME, handle chips
@@ -1041,15 +1042,17 @@ Game.prototype.sitDown = function (conn,params) {
 		conn.send(codes.SR_TABLE_SIT_SEAT_TAKEN);
 	} else {
 		this.members[params.seat_index] = conn;
-		var tableStatus = {table_id:new Buffer(this.id.toString(),'hex'),seats:[]};
-		for (var x=0; x<this.members.length; x++) {
-			if (!this.members[x]) continue;
-			var seat = this.members[x];
-			tableStatus.seats.push({seat:x, player_id:new Buffer(seat.userid.toString(),'hex'), chips:666});
-		}
-		conn.send(codes.SR_TABLE_SIT_OK,tableStatus,'Poker.TableStatus');
+		conn.send(codes.SR_TABLE_STATUS,this.getTableStatus(),'Poker.TableStatus');
 	}
 	conn.log(this);
+}
+Game.prototype.getTableStatus = function getTableStatus() {
+	var tableStatus = {table_id:new Buffer(this.id.toString(),'hex'),seats:[]};
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		var seat = this.members[x];
+		tableStatus.seats.push({seat:x, player_id:new Buffer(seat.userid.toString(),'hex'), chips:666});
+	}
 }
 Game.prototype.standUp = function (conn) {
 	for (var x=0; x<this.members.length; x++) {
