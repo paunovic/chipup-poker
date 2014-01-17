@@ -1,8 +1,7 @@
 #!/bin/bash -e
-export PATH=cpp-generator/:$PATH
-pushd cpp-generator
 make
-popd
+cd ..
+export PATH=cpp-generator/:$PATH
 protoc message.proto -o message.desc --java_out=android/src/ --delphi_out=cpp-generator/output
 node server/rebuild.js
 #cp -v message.proto ~/Dropbox/poker/protobuf/
