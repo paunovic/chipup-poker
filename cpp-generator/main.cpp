@@ -182,27 +182,30 @@ class DelphiGenerator : public CodeGenerator {
 				"interface\n"
 				"uses\n"
 				"  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader","name",message->name());
-			string *types = new string[message->field_count()];
-			int size = 0;
-			for (int j=0; j<message->field_count(); j++) {
-				const FieldDescriptor *field = message->field(j);
-				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-					const Descriptor *subtype = field->message_type();
-					string type = subtype->name();
-					bool addit = true;
-					for (int x=0; x<size; x++) {
-						if (types[x] == type) addit = false;
-					}
-					if (addit) {
-						types[size] = type;
-						size++;
+			if (message->field_count() > 0) {
+				string *types = new string[message->field_count()];
+				cerr << "field count " << message->field_count() << "\n";
+				int size = 0;
+				for (int j=0; j<message->field_count(); j++) {
+					const FieldDescriptor *field = message->field(j);
+					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+						const Descriptor *subtype = field->message_type();
+						string type = subtype->name();
+						bool addit = true;
+						for (int x=0; x<size; x++) {
+							if (types[x] == type) addit = false;
+						}
+						if (addit) {
+							types[size] = type;
+							size++;
+						}
 					}
 				}
+				for (int j=0; j<size; j++) {
+					printer.Print(",uPB_$name$","name",types[j]);
+				}
+				delete[] types;
 			}
-			for (int j=0; j<size; j++) {
-				printer.Print(",uPB_$name$","name",types[j]);
-			}
-			delete types;
 			printer.Print(";\n"
 				"type\n");
 
@@ -503,7 +506,7 @@ class DelphiGenerator : public CodeGenerator {
 				string name = field->name();
 				UpperString(&name);
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-					const Descriptor *subtype = field->message_type();
+					//const Descriptor *subtype = field->message_type();
 					if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
 						printer.Print(
 							"  if Assigned(F$pname$) then\n"
@@ -567,5 +570,7 @@ int main(int argc, char *argv[]) {
 	typeinfo[FieldDescriptor::TYPE_BOOL] = makeType("Boolean","writeBoolean");
 	typeinfo[FieldDescriptor::TYPE_BYTES] = makeType("TBytes","writeBytes");
 	DelphiGenerator *gen = new DelphiGenerator();
-	return google::protobuf::compiler::PluginMain(argc,argv,gen);
+	int ret = google::protobuf::compiler::PluginMain(argc,argv,gen);
+	delete gen;
+	return ret;
 }
