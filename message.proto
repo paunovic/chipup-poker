@@ -72,7 +72,7 @@ message User {
 
 message Game {
 	optional bytes _id = 1;
-	optional bytes creator = 2;
+	optional bytes creator_mongo_id = 2;
 	optional string gamename = 3;
 	optional int32 clubseq = 4;
 	optional int32 game_type = 5;
@@ -232,13 +232,13 @@ message TableSit {
 }
 
 message TableStatus {
-	required bytes table_id = 1;
+	required bytes table_mongo_id = 1;
 	repeated SeatInfo seats = 2;
 }
 
 message SeatInfo {
 	required int32 seat = 1;
-	required bytes player_id = 2;
+	required bytes player_mongo_id = 2;
 	required int32 chips = 3;
 	optional int32 cards = 4;
 }
