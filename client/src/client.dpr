@@ -30,7 +30,6 @@ uses
   uSettings in 'modules\settings\uSettings.pas',
   uHardcodedSettings in 'modules\settings\uHardcodedSettings.pas',
   uCommon in 'uCommon.pas',
-  uServerCodes in 'uServerCodes.pas',
   uValidators in 'modules\validators\uValidators.pas',
   uPlayerInfo in 'modules\playerinfo\uPlayerInfo.pas',
   uClubInfo in 'modules\clubinfo\uClubInfo.pas',
@@ -75,7 +74,8 @@ uses
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
   uProtobufBaseObject in 'modules\protobuf\uProtobufBaseObject.pas',
   uPB_TableStatus in 'modules\protobuf\objects\uPB_TableStatus.pas',
-  uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas';
+  uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas',
+  uServerCodes in 'modules\protobuf\objects\uServerCodes.pas';
 
 procedure FocusPokerApp;
 var

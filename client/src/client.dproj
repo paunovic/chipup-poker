@@ -151,7 +151,6 @@
 			<DCCReference Include="modules\settings\uSettings.pas"/>
 			<DCCReference Include="modules\settings\uHardcodedSettings.pas"/>
 			<DCCReference Include="uCommon.pas"/>
-			<DCCReference Include="uServerCodes.pas"/>
 			<DCCReference Include="modules\validators\uValidators.pas"/>
 			<DCCReference Include="modules\playerinfo\uPlayerInfo.pas"/>
 			<DCCReference Include="modules\clubinfo\uClubInfo.pas"/>
@@ -195,11 +194,11 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_TableSit.pas"/>
 			<DCCReference Include="forms\uTableSitForm.pas">
 				<Form>frmTableSit</Form>
-				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="modules\protobuf\uProtobufBaseObject.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TableStatus.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_SeatInfo.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uServerCodes.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
@@ -350,9 +349,9 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
+					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win64"/>
-					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 				</Deployment>
 				<Platforms>
 					<Platform value="Win64">True</Platform>
