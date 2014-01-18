@@ -1056,11 +1056,12 @@ Game.prototype.sitDown = function (conn,params) {
 	}
 }
 Game.prototype.getTableStatus = function getTableStatus() {
-	var tableStatus = {table_id:new Buffer(this.id.toString(),'hex'),seats:[]};
+	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[]};
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
 		var seat = this.members[x];
-		tableStatus.seats.push({seat:x, player_id:new Buffer(seat.userid.toString(),'hex'), chips:666});
+		console.log('table debug',x,seat.userid);
+		tableStatus.seats.push({seat:x, player_mongo_id:new Buffer(seat.userid.toString(),'hex'), chips:666});
 	}
 	console.log(tableStatus);
 	return tableStatus;
