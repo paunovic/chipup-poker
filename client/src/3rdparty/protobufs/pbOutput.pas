@@ -52,7 +52,8 @@ type
     (* Write a boolean field, including tag. *)
     procedure writeBoolean(fieldNumber: integer; value: boolean);
     (* Write a string field, including tag. *)
-    procedure writeString(fieldNumber: integer; const value: AnsiString);
+    procedure writeString(fieldNumber: integer; const value: AnsiString); overload;
+    procedure writeString(fieldNumber: integer; const value: String); overload;
     (* Write a message field, including tag. *)
     procedure writeMessage(fieldNumber: integer; const value: IpbMessage);
     (*  Write a unsigned int32 field, including tag. *)
@@ -172,6 +173,16 @@ begin
   writeTag(fieldNumber, WIRETYPE_LENGTH_DELIMITED);
   writeRawVarint32(length(value));
   FBuffer.Add(value);
+end;
+
+procedure TProtoBufOutput.writeString(fieldNumber: integer; const value: String);
+var
+  temp: AnsiString;
+begin
+  temp := Utf8Encode(value);
+  writeTag(fieldNumber, WIRETYPE_LENGTH_DELIMITED);
+  writeRawVarint32(length(temp));
+  FBuffer.Add(temp);
 end;
 
 procedure TProtoBufOutput.writeUInt32(fieldNumber: integer; value: cardinal);

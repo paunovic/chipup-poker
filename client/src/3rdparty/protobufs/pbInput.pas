@@ -75,7 +75,8 @@ type
     // Read a boolean field value
     function readBoolean: boolean;
     // Read a AnsiString field value
-    function readString: AnsiString;
+    function readString: AnsiString; overload;
+    function readUtf8String: String; overload;
     // Read nested message
     procedure readMessage(builder: IBuilder; extensionRegistry: IExtensionRegistry);
     // Read a uint32 field value
@@ -244,6 +245,18 @@ begin
   Assert(size >= 0, ProtoBufException + 'readString (size < 0)');
   SetString(result, FBuffer + FPos, size);
   Inc(FPos, size);
+end;
+
+function TProtoBufInput.readUtf8String: String;
+var
+  size: integer;
+  temp: AnsiString;
+begin
+  size := readRawVarint32;
+  Assert(size >= 0, ProtoBufException + 'readString (size < 0)');
+  SetString(temp, FBuffer + FPos, size);
+  Inc(FPos, size);
+  result := Utf8ToString(temp);
 end;
 
 procedure TProtoBufInput.readMessage(builder: IBuilder;
