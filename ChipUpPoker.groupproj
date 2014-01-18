@@ -6,9 +6,6 @@
 			<Projects Include="client\src\client.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="delphi-protobuf-generator\src\delphi_protobuf_object_generator.dproj">
-				<Dependencies/>
-			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -26,23 +23,14 @@
 		<Target Name="client:Make">
 			<MSBuild Targets="Make" Projects="client\src\client.dproj"/>
 		</Target>
-		<Target Name="delphi_protobuf_object_generator">
-			<MSBuild Projects="delphi-protobuf-generator\src\delphi_protobuf_object_generator.dproj"/>
-		</Target>
-		<Target Name="delphi_protobuf_object_generator:Clean">
-			<MSBuild Targets="Clean" Projects="delphi-protobuf-generator\src\delphi_protobuf_object_generator.dproj"/>
-		</Target>
-		<Target Name="delphi_protobuf_object_generator:Make">
-			<MSBuild Targets="Make" Projects="delphi-protobuf-generator\src\delphi_protobuf_object_generator.dproj"/>
-		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="client;delphi_protobuf_object_generator"/>
+			<CallTarget Targets="client"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="client:Clean;delphi_protobuf_object_generator:Clean"/>
+			<CallTarget Targets="client:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="client:Make;delphi_protobuf_object_generator:Make"/>
+			<CallTarget Targets="client:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>
