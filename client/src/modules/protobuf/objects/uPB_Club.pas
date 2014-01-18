@@ -24,9 +24,9 @@ type
     var
       FMongoId: TBytes;
       FChips: Integer;
-      FName: AnsiString;
+      FName: String;
       FOwner: TBytes;
-      FPassword: AnsiString;
+      FPassword: String;
       FIsPrivate: Boolean;
       FSeq: Integer;
       FMembers: TArray<TBytes>;
@@ -35,9 +35,9 @@ type
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetChips(const AValue: Integer);
-    procedure SetName(const AValue: AnsiString);
+    procedure SetName(const AValue: String);
     procedure SetOwner(const AValue: TBytes);
-    procedure SetPassword(const AValue: AnsiString);
+    procedure SetPassword(const AValue: String);
     procedure SetPrivate(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
     procedure SetHasPassword(const AValue: Boolean);
@@ -50,9 +50,9 @@ type
 
     property MongoId: TBytes read FMongoId write SetMongoId;
     property Chips: Integer read FChips write SetChips;
-    property Name: AnsiString read FName write SetName;
+    property Name: String read FName write SetName;
     property Owner: TBytes read FOwner write SetOwner;
-    property Password: AnsiString read FPassword write SetPassword;
+    property Password: String read FPassword write SetPassword;
     property IsPrivate: Boolean read FIsPrivate write SetPrivate;
     property Seq: Integer read FSeq write SetSeq;
     property Members: TArray<TBytes> read FMembers;
@@ -105,7 +105,7 @@ begin
       end;
       FN_NAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetName(AProtobufReader.readString);
+        SetName(AProtobufReader.readUtf8String);
       end;
       FN_OWNER: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -114,7 +114,7 @@ begin
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetPassword(AProtobufReader.readString);
+        SetPassword(AProtobufReader.readUtf8String);
       end;
       FN_ISPRIVATE: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -155,7 +155,7 @@ begin
   ProtobufOutput.writeInt32(FN_CHIPS, FChips);
 end;
 
-procedure TPB_Club.SetName(const AValue: AnsiString);
+procedure TPB_Club.SetName(const AValue: String);
 begin
   FName := AValue;
   ProtobufOutput.writeString(FN_NAME, FName);
@@ -167,7 +167,7 @@ begin
   ProtobufOutput.writeBytes(FN_OWNER, FOwner);
 end;
 
-procedure TPB_Club.SetPassword(const AValue: AnsiString);
+procedure TPB_Club.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
   ProtobufOutput.writeString(FN_PASSWORD, FPassword);

@@ -254,7 +254,7 @@ begin
       begin
         reChat.SelStart := reChat.GetTextLen;
         reChat.SelAttributes.Color := clLime;
-        reChat.SelText := String(chat_message.Username);
+        reChat.SelText := chat_message.Username;
 
         reChat.SelStart := reChat.GetTextLen;
         reChat.SelAttributes.Color := clSilver;

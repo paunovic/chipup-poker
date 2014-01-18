@@ -13,17 +13,17 @@ type
       FN_PASSWORD = 2;
 
     var
-      FUsername: AnsiString;
-      FPassword: AnsiString;
+      FUsername: String;
+      FPassword: String;
 
-    procedure SetUsername(const AValue: AnsiString);
-    procedure SetPassword(const AValue: AnsiString);
+    procedure SetUsername(const AValue: String);
+    procedure SetPassword(const AValue: String);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Username: AnsiString read FUsername write SetUsername;
-    property Password: AnsiString read FPassword write SetPassword;
+    property Username: String read FUsername write SetUsername;
+    property Password: String read FPassword write SetPassword;
   end;
 
 implementation
@@ -42,24 +42,24 @@ begin
     case field_number of
       FN_USERNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetUsername(AProtobufReader.readString);
+        SetUsername(AProtobufReader.readUtf8String);
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetPassword(AProtobufReader.readString);
+        SetPassword(AProtobufReader.readUtf8String);
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-procedure TPB_LoginParams.SetUsername(const AValue: AnsiString);
+procedure TPB_LoginParams.SetUsername(const AValue: String);
 begin
   FUsername := AValue;
   ProtobufOutput.writeString(FN_USERNAME, AValue);
 end;
 
-procedure TPB_LoginParams.SetPassword(const AValue: AnsiString);
+procedure TPB_LoginParams.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
   ProtobufOutput.writeString(FN_PASSWORD, AValue);

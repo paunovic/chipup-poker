@@ -20,29 +20,28 @@ type
     var
       FMongoId: TBytes;
       FAvatar: TBytes;
-      FDisplayname: AnsiString;
+      FDisplayname: String;
       FTokens: Integer;
-      FEmail: AnsiString;
+      FEmail: String;
       FAuthed: Boolean;
       FChips: Integer;
 
-    function GetAvatar: AnsiString;
     procedure SetMongoId(const AValue: TBytes);
     procedure SetAvatar(const AValue: TBytes);
-    procedure SetDisplayname(const AValue: AnsiString);
+    procedure SetDisplayname(const AValue: String);
     procedure SetTokens(const AValue: Integer);
-    procedure SetEmail(const AValue: AnsiString);
+    procedure SetEmail(const AValue: String);
     procedure SetAuthed(const AValue: Boolean);
     procedure SetChips(const AValue: Integer);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property MongoId: TBytes read FMongoId;
-    property Avatar: AnsiString read GetAvatar;
-    property Displayname: AnsiString read FDisplayname write SetDisplayname;
+    property MongoId: TBytes read FMongoId write SetMongoId;
+    property Avatar: TBytes read FAvatar write SetAvatar;
+    property Displayname: String read FDisplayname write SetDisplayname;
     property Tokens: Integer read FTokens write SetTokens;
-    property Email: AnsiString read FEmail write SetEmail;
+    property Email: String read FEmail write SetEmail;
     property Authed: Boolean read FAuthed write SetAuthed;
     property Chips: Integer read FChips write SetChips;
   end;
@@ -76,7 +75,7 @@ begin
       end;
       FN_DISPLAYNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetDisplayname(AProtobufReader.readString);
+        SetDisplayname(AProtobufReader.readUtf8String);
       end;
       FN_TOKENS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -84,7 +83,7 @@ begin
       end;
       FN_EMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetEmail(AProtobufReader.readString);
+        SetEmail(AProtobufReader.readUtf8String);
       end;
       FN_AUTHED: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -99,11 +98,6 @@ begin
     end;
 end;
 
-function TPB_User.GetAvatar: AnsiString;
-begin
-  result := EncodeBase64(@FAvatar[0], Length(FAvatar));
-end;
-
 procedure TPB_User.SetMongoId(const AValue: TBytes);
 begin
   FMongoId := AValue;
@@ -116,7 +110,7 @@ begin
   ProtobufOutput.writeBytes(FN_AVATAR, FAvatar);
 end;
 
-procedure TPB_User.SetDisplayname(const AValue: AnsiString);
+procedure TPB_User.SetDisplayname(const AValue: String);
 begin
   FDisplayname := AValue;
   ProtobufOutput.writeString(FN_DISPLAYNAME, FDisplayname);
@@ -128,7 +122,7 @@ begin
   ProtobufOutput.writeInt32(FN_TOKENS, FTokens);
 end;
 
-procedure TPB_User.SetEmail(const AValue: AnsiString);
+procedure TPB_User.SetEmail(const AValue: String);
 begin
   FEmail := AValue;
   ProtobufOutput.writeString(FN_EMAIL, FEmail);

@@ -3,7 +3,7 @@ unit uPB_TransferChipsParams;
 interface
 
 uses
-  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Winapi.Windows, pbOutput, uProtobufBaseObject, uProtobufReader, System.SysUtils;
 
 type
   TPB_TransferChipsParams = class(TProtobufBaseObject)
@@ -15,18 +15,18 @@ type
 
     var
       FClubSeq: Integer;
-      FPlayerMongoId: AnsiString;
+      FPlayerMongoId: TBytes;
       FChipAmount: Integer;
 
     procedure SetClubSeq(const AValue: Integer);
-    procedure SetPlayerMongoId(const AValue: AnsiString);
+    procedure SetPlayerMongoId(const AValue: TBytes);
     procedure SetChipAmount(const AValue: Integer);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property ClubSeq: Integer read FClubSeq write SetClubSeq;
-    property PlayerMongoId: AnsiString read FPlayerMongoId write SetPlayerMongoId;
+    property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
     property ChipAmount: Integer read FChipAmount write SetChipAmount;
   end;
 
@@ -38,6 +38,7 @@ uses
 procedure TPB_TransferChipsParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;
+  bytes                               : TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -49,7 +50,8 @@ begin
       end;
       FN_PLAYERMONGOID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetPlayerMongoId(AProtobufReader.readString);
+        AProtobufReader.readBytes(bytes);
+        SetPlayerMongoId(bytes);
       end;
       FN_CHIPAMOUNT: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -66,10 +68,10 @@ begin
   ProtobufOutput.writeInt32(FN_CLUBSEQ, FClubSeq);
 end;
 
-procedure TPB_TransferChipsParams.SetPlayerMongoId(const AValue: AnsiString);
+procedure TPB_TransferChipsParams.SetPlayerMongoId(const AValue: TBytes);
 begin
   FPlayerMongoId := AValue;
-  ProtobufOutput.writeString(FN_PLAYERMONGOID, FPlayerMongoId);
+  ProtobufOutput.writeBytes(FN_PLAYERMONGOID, FPlayerMongoId);
 end;
 
 procedure TPB_TransferChipsParams.SetChipAmount(const AValue: Integer);

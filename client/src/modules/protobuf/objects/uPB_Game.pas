@@ -22,7 +22,7 @@ type
     var
       FMongoId: TBytes;
       FCreator: TBytes;
-      FGamename: AnsiString;
+      FGamename: String;
       FClubseq: Integer;
       FGameType: Integer;
       FGameLimit: Integer;
@@ -32,7 +32,7 @@ type
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetCreator(const AValue: TBytes);
-    procedure SetGamename(const AValue: AnsiString);
+    procedure SetGamename(const AValue: String);
     procedure SetClubseq(const AValue: Integer);
     procedure SetGameType(const AValue: Integer);
     procedure SetGameLimit(const AValue: Integer);
@@ -45,7 +45,7 @@ type
 
     property MongoId: TBytes read FMongoId write SetMongoId;
     property CreatorMongoId: TBytes read FCreator write SetCreator;
-    property Gamename: AnsiString read FGamename write SetGamename;
+    property Gamename: String read FGamename write SetGamename;
     property Clubseq: Integer read FClubseq write SetClubseq;
     property GameType: Integer read FGameType write SetGameType;
     property GameLimit: Integer read FGameLimit write SetGameLimit;
@@ -84,7 +84,7 @@ begin
       end;
       FN_GAMENAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetGamename(AProtobufReader.readString);
+        SetGamename(AProtobufReader.readUtf8String);
       end;
       FN_CLUBSEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -127,7 +127,7 @@ begin
   ProtobufOutput.writeBytes(FN_CREATOR, FCreator);
 end;
 
-procedure TPB_Game.SetGamename(const AValue: AnsiString);
+procedure TPB_Game.SetGamename(const AValue: String);
 begin
   FGamename := AValue;
   ProtobufOutput.writeString(FN_GAMENAME, FGamename);

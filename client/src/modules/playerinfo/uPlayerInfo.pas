@@ -16,7 +16,7 @@ type
     FTokens  : Integer;
     FBalance : Integer;
     FAuthed  : Boolean;
-    FAvatarId: String;
+    FAvatarId: AnsiString;
     FClubs   : TClubsInfo;
   public
     constructor Create;
@@ -33,7 +33,7 @@ type
     property Tokens  : Integer read FTokens write FTokens;
     property Balance : Integer read FBalance write FBalance;
     property Authed  : Boolean read FAuthed write FAuthed;
-    property AvatarId: String read FAvatarId write FAvatarId;
+    property AvatarId: AnsiString read FAvatarId write FAvatarId;
     property Clubs   : TClubsInfo read FClubs;
   end;
 
@@ -47,7 +47,7 @@ type
 implementation
 
 uses
-  System.Classes, PNGImage,
+  System.Classes, PNGImage, Soap.EncdDecd,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uMainDataModule, uSettings, uCommon, uAvatar, uGameInfo,
   uPB_Club, uPB_Game;
@@ -88,11 +88,11 @@ var
   C1, C2      : Integer;
 begin
   FId := AStatusReply.Self.MongoId;
-  FEMail := String(AStatusReply.Self.EMail);
-  FNick := String(AStatusReply.Self.DisplayName);
+  FEMail := AStatusReply.Self.EMail;
+  FNick := AStatusReply.Self.DisplayName;
   FTokens := AStatusReply.Self.Tokens;
   FAuthed := AStatusReply.Self.Authed;
-  FAvatarId := String(AStatusReply.Self.Avatar);
+  FAvatarId := EncodeBase64(@AStatusReply.Self.Avatar[0], Length(AStatusReply.Self.Avatar));
   FBalance := AStatusReply.Self.Chips;
 
   FClubs.Clear;
@@ -101,10 +101,10 @@ begin
     pbclub := AStatusReply.Clubs[C1];
 
     club_id := pbclub.Seq;
-    club_name := String(pbclub.Name);
+    club_name := pbclub.Name;
     club_balance := pbclub.Chips;
     club_private := pbclub.IsPrivate;
-    club_invcode := String(pbclub.Password);
+    club_invcode := pbclub.Password;
     club := FClubs.AddClub(pbclub.MongoId, pbclub.Owner, club_id, club_name, club_balance, club_private, club_invcode);
     club.AddPlayer(pbclub.Owner);
     for C2 := 0 to pbclub.MemberCount - 1 do
@@ -121,7 +121,7 @@ begin
       game_type := TGameType(pbgame.GameType);
       game_limit := TGameLimit(pbgame.GameLimit);
 
-      club.Games.AddGame(pbgame.MongoId, pbgame.CreatorMongoId, game_clubid, String(pbgame.Gamename),
+      club.Games.AddGame(pbgame.MongoId, pbgame.CreatorMongoId, game_clubid, pbgame.Gamename,
                          game_type, game_limit, pbgame.SmallBlind, pbgame.BigBlind, pbgame.Seats);
     end;
 
@@ -169,7 +169,7 @@ var
 begin
   Clear;
   for C1 := 0 to AStatusReply.Users.Count - 1 do
-    AddPlayer(AStatusReply.Users[C1].MongoId, String(AStatusReply.Users[C1].DisplayName), String(AStatusReply.Users[C1].EMail), AStatusReply.Users[C1].Chips);
+    AddPlayer(AStatusReply.Users[C1].MongoId, AStatusReply.Users[C1].DisplayName, AStatusReply.Users[C1].EMail, AStatusReply.Users[C1].Chips);
 
   Exit(TRUE);
 end;

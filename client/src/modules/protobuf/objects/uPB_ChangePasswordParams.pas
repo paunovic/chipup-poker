@@ -12,14 +12,14 @@ type
       FN_NEWPASSWORD = 1;
 
     var
-      FNewPassword: AnsiString;
+      FNewPassword: String;
 
-    procedure SetNewPassword(const AValue: AnsiString);
+    procedure SetNewPassword(const AValue: String);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property NewPassword: AnsiString read FNewPassword write SetNewPassword;
+    property NewPassword: String read FNewPassword write SetNewPassword;
   end;
 
 implementation
@@ -37,14 +37,14 @@ begin
     case field_number of
       FN_NEWPASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetNewPassword(AProtobufReader.readString);
+        SetNewPassword(AProtobufReader.readUtf8String);
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: AnsiString);
+procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);
 begin
   FNewPassword := AValue;
   ProtobufOutput.writeString(FN_NEWPASSWORD, FNewPassword);

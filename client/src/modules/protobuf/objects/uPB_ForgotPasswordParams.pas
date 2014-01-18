@@ -12,14 +12,14 @@ type
       FN_EMAIL = 1;
 
     var
-      FEmail: AnsiString;
+      FEmail: String;
 
-    procedure SetEmail(const AValue: AnsiString);
+    procedure SetEmail(const AValue: String);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Email: AnsiString read FEmail write SetEmail;
+    property Email: String read FEmail write SetEmail;
   end;
 
 implementation
@@ -37,7 +37,7 @@ begin
     case field_number of
       FN_EMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetEmail(AProtobufReader.readString);
+        SetEmail(AProtobufReader.readUtf8String);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -45,7 +45,7 @@ begin
 end;
 
 
-procedure TPB_ForgotPasswordParams.SetEmail(const AValue: AnsiString);
+procedure TPB_ForgotPasswordParams.SetEmail(const AValue: String);
 begin
   FEmail := AValue;
   ProtobufOutput.writeString(FN_EMAIL, FEmail);

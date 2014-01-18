@@ -3,7 +3,7 @@ unit pbOutput;
 interface
 
 uses
-  Classes, StrBuffer, pbPublic;
+  Classes, StrBuffer, pbPublic, System.SysUtils;
 
 type
 
@@ -62,6 +62,8 @@ type
     function getSerializedSize: integer;
     (* Write to buffer *)
     procedure writeTo(buffer: TProtoBufOutput);
+
+    procedure writeBytes(const AFieldNumber: Integer; const ABytes: TBytes);
   end;
 
 implementation
@@ -176,13 +178,8 @@ begin
 end;
 
 procedure TProtoBufOutput.writeString(fieldNumber: integer; const value: String);
-var
-  temp: AnsiString;
 begin
-  temp := Utf8Encode(value);
-  writeTag(fieldNumber, WIRETYPE_LENGTH_DELIMITED);
-  writeRawVarint32(length(temp));
-  FBuffer.Add(temp);
+  writeString(fieldNumber, Utf8Encode(value));
 end;
 
 procedure TProtoBufOutput.writeUInt32(fieldNumber: integer; value: cardinal);
@@ -223,5 +220,13 @@ procedure TProtoBufOutput.writeTo(buffer: TProtoBufOutput);
 begin
   buffer.FBuffer.Add(GetText);
 end;
+
+procedure TProtoBufOutput.writeBytes(const AFieldNumber: Integer; const ABytes: TBytes);
+begin
+  writeTag(AFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+  writeRawVarint32(Length(ABytes));
+  writeRawData(@ABytes[0], Length(ABytes));
+end;
+
 
 end.

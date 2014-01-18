@@ -15,12 +15,12 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function IndexOf(const AId: String): Integer;
-    function Find(const AId: String): TAvatar;
-    function Add(const AId: String; const AImage: TJPEGImage = nil): TAvatar;
-    function Remove(const AId: String): Boolean;
-    function Refresh(const AId: String): Boolean;
-    function SetAvatarImage(const AId: String; const AImage: TJPEGImage): Boolean;
+    function IndexOf(const AId: AnsiString): Integer;
+    function Find(const AId: AnsiString): TAvatar;
+    function Add(const AId: AnsiString; const AImage: TJPEGImage = nil): TAvatar;
+    function Remove(const AId: AnsiString): Boolean;
+    function Refresh(const AId: AnsiString): Boolean;
+    function SetAvatarImage(const AId: AnsiString; const AImage: TJPEGImage): Boolean;
   end;
 
 implementation
@@ -45,17 +45,17 @@ begin
   inherited;
 end;
 
-function TAvatars.IndexOf(const AId: String): Integer;
+function TAvatars.IndexOf(const AId: AnsiString): Integer;
 begin
   result := FAvatarList.IndexOf(AId);
 end;
 
-function TAvatars.Find(const AId: String): TAvatar;
+function TAvatars.Find(const AId: AnsiString): TAvatar;
 begin
   result := FAvatarList.Find(AId);
 end;
 
-function TAvatars.Add(const AId: String; const AImage: TJPEGImage = nil): TAvatar;
+function TAvatars.Add(const AId: AnsiString; const AImage: TJPEGImage = nil): TAvatar;
 var
   index : Integer;
   avatar: TAvatar;
@@ -79,7 +79,7 @@ begin
   Exit(avatar);
 end;
 
-function TAvatars.Remove(const AId: String): Boolean;
+function TAvatars.Remove(const AId: AnsiString): Boolean;
 var
   index: Integer;
 begin
@@ -91,7 +91,7 @@ begin
   Exit(TRUE);
 end;
 
-function TAvatars.Refresh(const AId: String): Boolean;
+function TAvatars.Refresh(const AId: AnsiString): Boolean;
 var
   avatar: TAvatar;
 begin
@@ -103,7 +103,7 @@ begin
   Exit(TRUE);
 end;
 
-function TAvatars.SetAvatarImage(const AId: String; const AImage: TJPEGImage): Boolean;
+function TAvatars.SetAvatarImage(const AId: AnsiString; const AImage: TJPEGImage): Boolean;
 var
   avatar: TAvatar;
 begin

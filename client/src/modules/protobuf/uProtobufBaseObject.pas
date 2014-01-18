@@ -26,10 +26,6 @@ type
     property ProtobufOutputSize: Word read GetProtobufOutputSize;
   end;
 
-  TProtobufOutputHelper = class helper for TProtobufOutput
-  public
-    procedure writeBytes(const AFieldNumber: Integer; const ABytes: TBytes);
-  end;
 
 implementation
 
@@ -78,16 +74,5 @@ begin
   result := FProtobufOutput.getSerializedSize;
 end;
 
-
-
-
-{ TProtobufOutputHelper }
-
-procedure TProtobufOutputHelper.writeBytes(const AFieldNumber: Integer; const ABytes: TBytes);
-begin
-  writeTag(AFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-  writeRawVarint32(Length(ABytes));
-  writeRawData(@ABytes[0], Length(ABytes));
-end;
 
 end.

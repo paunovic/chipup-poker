@@ -9,27 +9,27 @@ uses
 type
   TAvatar = class
   private
-    FId   : String;
+    FId   : AnsiString;
     FImage: TJPEGImage;
 
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 
   public
-    constructor Create(const AId: String); overload;
+    constructor Create(const AId: AnsiString); overload;
     constructor Create(const AStream: TStream); overload;
     destructor Destroy; override;
 
     procedure Refresh;
     procedure WriteToStream(const AStream: TStream);
 
-    property Id   : String read FId;
+    property Id   : AnsiString read FId;
     property Image: TJPEGImage read FImage;
   end;
 
   TAvatarList = class(TObjectList<TAvatar>)
   public
-    function IndexOf(const AId: String): Integer;
-    function Find(const AId: String): TAvatar;
+    function IndexOf(const AId: AnsiString): Integer;
+    function Find(const AId: AnsiString): TAvatar;
 
     procedure Load(const AFile: String);
     procedure Save(const AFile: String);
@@ -44,7 +44,7 @@ uses
 
 { TAvatar }
 
-constructor TAvatar.Create(const AId: String);
+constructor TAvatar.Create(const AId: AnsiString);
 begin
   FId := AId;
   FImage := TJPEGImage.Create;
@@ -117,7 +117,7 @@ begin
   http.BandwidthLimit := 0;
   http.RequestVer := '1.1';
   http.RcvdStream := TMemoryStream.Create;
-  http.URL := Format(Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(FId)]);
+  http.URL := Format(Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FId))]);
   http.OnRequestDone := HTTPRequestDone;
   http.GetAsync;
 end;
@@ -210,7 +210,7 @@ begin
   end;
 end;
 
-function TAvatarList.IndexOf(const AId: String): Integer;
+function TAvatarList.IndexOf(const AId: AnsiString): Integer;
 var
   C1: Integer;
 begin
@@ -220,7 +220,7 @@ begin
   Exit(-1);
 end;
 
-function TAvatarList.Find(const AId: String): TAvatar;
+function TAvatarList.Find(const AId: AnsiString): TAvatar;
 var
   index: Integer;
 begin

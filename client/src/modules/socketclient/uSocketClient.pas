@@ -50,7 +50,7 @@ type
     procedure TransferChips(const AClubId: Int64; const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
-    procedure SetAvatar(const AAvatarId: String);
+    procedure SetAvatar(const AAvatarId: AnsiString);
     procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
     procedure DeleteGame(const AGameId: TBytes);
     procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
@@ -360,8 +360,8 @@ var
 begin
   protobuf := TPB_LoginParams.Create;
   try
-    protobuf.Username := AnsiString(ALogin);
-    protobuf.Password := AnsiString(APass);
+    protobuf.Username := ALogin;
+    protobuf.Password := APass;
     SendProtobuf(CMD_LOGIN, protobuf);
   finally
     protobuf.Free;
@@ -379,9 +379,9 @@ var
 begin
   protobuf := TPB_RegisterParams.Create;
   try
-    protobuf.Email := AnsiString(AEMail);
-    protobuf.Password := AnsiString(APassword);
-    protobuf.DisplayName := AnsiString(AUsername);
+    protobuf.Email := AEMail;
+    protobuf.Password := APassword;
+    protobuf.DisplayName := AUsername;
     SendProtobuf(CMD_REGISTER, protobuf);
   finally
     protobuf.Free;
@@ -394,7 +394,7 @@ var
 begin
   protobuf := TPB_ForgotPasswordParams.Create;
   try
-    protobuf.Email := AnsiString(AEMail);
+    protobuf.Email := AEMail;
     SendProtobuf(CMD_FORGOT_PASSWORD, protobuf);
   finally
     protobuf.Free;
@@ -412,9 +412,9 @@ var
 begin
   protobuf := TPB_Club.Create;
   try
-    protobuf.Name := AnsiString(AName);
+    protobuf.Name := AName;
     protobuf.IsPrivate := APrivate;
-    protobuf.Password := AnsiString(AInvCode);
+    protobuf.Password := AInvCode;
     SendProtobuf(CMD_CREATE_CLUB, protobuf);
   finally
     protobuf.Free;
@@ -428,7 +428,7 @@ begin
   protobuf := TPB_Club.Create;
   try
     protobuf.Seq := AId;
-    protobuf.Password := AnsiString(ACode);
+    protobuf.Password := ACode;
     SendProtobuf(CMD_JOIN_CLUB, protobuf);
   finally
     protobuf.Free;
@@ -483,8 +483,8 @@ begin
   protobuf := TPB_Club.Create;
   try
     protobuf.Seq := AClubId;
-    protobuf.Name := AnsiString(AClubName);
-    protobuf.Password := AnsiString(AClubCode);
+    protobuf.Name := AClubName;
+    protobuf.Password := AClubCode;
     protobuf.IsPrivate := APrivate;
     SendProtobuf(CMD_CHANGE_CLUB_DETAILS, protobuf);
   finally
@@ -512,7 +512,7 @@ begin
   protobuf := TPB_TransferChipsParams.Create;
   try
     protobuf.ClubSeq := AClubId;
-    protobuf.PlayerMongoId := AnsiString(APlayerId);
+    protobuf.PlayerMongoId := APlayerId;
     protobuf.ChipAmount := AChipAmount;
     SendProtobuf(CMD_TRANSFER_CHIPS, protobuf);
   finally
@@ -526,7 +526,7 @@ var
 begin
   protobuf := TPB_ChangeEMailParams.Create;
   try
-    protobuf.NewMail := AnsiString(ANewMail);
+    protobuf.NewMail := ANewMail;
     SendProtobuf(CMD_CHANGE_EMAIL, protobuf);
   finally
     protobuf.Free;
@@ -539,20 +539,20 @@ var
 begin
   protobuf := TPB_ChangePasswordParams.Create;
   try
-    protobuf.NewPassword := AnsiString(APassword);
+    protobuf.NewPassword := APassword;
     SendProtobuf(CMD_CHANGE_PASSWORD, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TSocketClient.SetAvatar(const AAvatarId: String);
+procedure TSocketClient.SetAvatar(const AAvatarId: AnsiString);
 var
   protobuf: TPB_SetAvatarParams;
 begin
   protobuf := TPB_SetAvatarParams.Create;
   try
-    protobuf.AvatarId := AnsiString(AAvatarId);
+    protobuf.AvatarId := AAvatarId;
     SendProtobuf(CMD_SET_AVATAR, protobuf);
   finally
     protobuf.Free;
@@ -565,7 +565,7 @@ var
 begin
   protobuf := TPB_Game.Create;
   try
-    protobuf.Gamename := AnsiString(AGameName);
+    protobuf.Gamename := AGameName;
     protobuf.Clubseq := AClubId;
     protobuf.GameType := AGameType;
     protobuf.GameLimit := AGameLimit;
@@ -598,7 +598,7 @@ begin
   protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AGameId;
-    protobuf.Gamename := AnsiString(AGameName);
+    protobuf.Gamename := AGameName;
     protobuf.GameType := AGameType;
     protobuf.GameLimit := AGameLimit;
     protobuf.SmallBlind := ASmallBlind;
@@ -625,7 +625,7 @@ begin
     protobuf.Event := ceUserMessage;
     protobuf.TableId := ATableId;
     pbmsg := TPB_ChatMessage.Create;
-    pbmsg.Msg := AnsiString(ALine);
+    pbmsg.Msg := ALine;
     protobuf.Msg := pbmsg;
     SendProtobuf(EVENT_CHAT, protobuf);
   finally

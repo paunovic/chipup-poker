@@ -16,21 +16,21 @@ type
 
     var
       FMongoId: TBytes;
-      FUsername: AnsiString;
-      FMsg: AnsiString;
+      FUsername: String;
+      FMsg: String;
       FTimestamp: Int64;
 
     procedure SetMongoId(const AValue: TBytes);
-    procedure SetUsername(const AValue: AnsiString);
-    procedure SetMsg(const AValue: AnsiString);
+    procedure SetUsername(const AValue: String);
+    procedure SetMsg(const AValue: String);
     procedure SetTimestamp(const AValue: Int64);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property MongoId: TBytes read FMongoId write SetMongoId;
-    property Username: AnsiString read FUsername write SetUsername;
-    property Msg: AnsiString read FMsg write SetMsg;
+    property Username: String read FUsername write SetUsername;
+    property Msg: String read FMsg write SetMsg;
     property Timestamp: Int64 read FTimestamp write SetTimestamp;
   end;
 
@@ -55,11 +55,11 @@ begin
       end;
       FN_USERNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetUsername(AProtobufReader.readString);
+        SetUsername(AProtobufReader.readUtf8String);
       end;
       FN_MSG: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetMsg(AProtobufReader.readString);
+        SetMsg(AProtobufReader.readUtf8String);
       end;
       FN_TIMESTAMP: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -76,13 +76,13 @@ begin
   ProtobufOutput.writeBytes(FN_MONGOID, FMongoId);
 end;
 
-procedure TPB_ChatMessage.SetUsername(const AValue: AnsiString);
+procedure TPB_ChatMessage.SetUsername(const AValue: String);
 begin
   FUsername := AValue;
   ProtobufOutput.writeString(FN_USERNAME, FUsername);
 end;
 
-procedure TPB_ChatMessage.SetMsg(const AValue: AnsiString);
+procedure TPB_ChatMessage.SetMsg(const AValue: String);
 begin
   FMsg := AValue;
   ProtobufOutput.writeString(FN_MSG, FMsg);

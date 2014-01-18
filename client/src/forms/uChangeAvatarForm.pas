@@ -28,7 +28,7 @@ type
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure HTTPSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
   private
-    FAvatarId : String;
+    FAvatarId : AnsiString;
     FAvatarJPG: TJPEGImage;
 
     procedure TCChangeAvatarOk(const AMessage: TMessageItem);
@@ -102,7 +102,7 @@ begin
     if Assigned(json) then
     begin
       {$IFDEF DEBUG} DebugLn(Format('Change avatar response: %s', [json.AsJson]), ditNetInc); {$ENDIF}
-      FAvatarId := json.S['id'];
+      FAvatarId := AnsiString(json.S['id']);
       SocketClient.SetAvatar(FAvatarId);
     end
     else

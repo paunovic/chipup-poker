@@ -14,20 +14,20 @@ type
       FN_DISPLAYNAME = 3;
 
     var
-      FEmail: AnsiString;
-      FPassword: AnsiString;
-      FDisplayname: AnsiString;
+      FEmail: String;
+      FPassword: String;
+      FDisplayname: String;
 
-    procedure SetEmail(const AValue: AnsiString);
-    procedure SetPassword(const AValue: AnsiString);
-    procedure SetDisplayname(const AValue: AnsiString);
+    procedure SetEmail(const AValue: String);
+    procedure SetPassword(const AValue: String);
+    procedure SetDisplayname(const AValue: String);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Email: AnsiString read FEmail write SetEmail;
-    property Password: AnsiString read FPassword write SetPassword;
-    property Displayname: AnsiString read FDisplayname write SetDisplayname;
+    property Email: String read FEmail write SetEmail;
+    property Password: String read FPassword write SetPassword;
+    property Displayname: String read FDisplayname write SetDisplayname;
   end;
 
 implementation
@@ -45,34 +45,34 @@ begin
     case field_number of
       FN_EMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetEmail(AProtobufReader.readString);
+        SetEmail(AProtobufReader.readUtf8String);
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetPassword(AProtobufReader.readString);
+        SetPassword(AProtobufReader.readUtf8String);
       end;
       FN_DISPLAYNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetDisplayname(AProtobufReader.readString);
+        SetDisplayname(AProtobufReader.readUtf8String);
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-procedure TPB_RegisterParams.SetEmail(const AValue: AnsiString);
+procedure TPB_RegisterParams.SetEmail(const AValue: String);
 begin
   FEmail := AValue;
   ProtobufOutput.writeString(FN_EMAIL, FEmail);
 end;
 
-procedure TPB_RegisterParams.SetPassword(const AValue: AnsiString);
+procedure TPB_RegisterParams.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
   ProtobufOutput.writeString(FN_PASSWORD, FPassword);
 end;
 
-procedure TPB_RegisterParams.SetDisplayname(const AValue: AnsiString);
+procedure TPB_RegisterParams.SetDisplayname(const AValue: String);
 begin
   FDisplayname := AValue;
   ProtobufOutput.writeString(FN_DISPLAYNAME, FDisplayname);

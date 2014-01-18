@@ -248,15 +248,8 @@ begin
 end;
 
 function TProtoBufInput.readUtf8String: String;
-var
-  size: integer;
-  temp: AnsiString;
 begin
-  size := readRawVarint32;
-  Assert(size >= 0, ProtoBufException + 'readString (size < 0)');
-  SetString(temp, FBuffer + FPos, size);
-  Inc(FPos, size);
-  result := Utf8ToString(temp);
+  result := Utf8ToString(readString);
 end;
 
 procedure TProtoBufInput.readMessage(builder: IBuilder;

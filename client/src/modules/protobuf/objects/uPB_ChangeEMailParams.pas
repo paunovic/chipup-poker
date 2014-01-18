@@ -12,14 +12,14 @@ type
       FN_NEWMAIL = 1;
 
     var
-      FNewMail: AnsiString;
+      FNewMail: String;
 
-    procedure SetNewMail(const AValue: AnsiString);
+    procedure SetNewMail(const AValue: String);
 
   public
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property NewMail: AnsiString read FNewMail write SetNewMail;
+    property NewMail: String read FNewMail write SetNewMail;
   end;
 
 implementation
@@ -37,14 +37,14 @@ begin
     case field_number of
       FN_NEWMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetNewMail(AProtobufReader.readString);
+        SetNewMail(AProtobufReader.readUtf8String);
       end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
-procedure TPB_ChangeEMailParams.SetNewMail(const AValue: AnsiString);
+procedure TPB_ChangeEMailParams.SetNewMail(const AValue: String);
 begin
   FNewMail := AValue;
   ProtobufOutput.writeString(FN_NEWMAIL, FNewMail);
