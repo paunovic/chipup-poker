@@ -1,11 +1,11 @@
 [Project]
 FileName=delphi generator.dev
 Name=delphi generator
-UnitCount=4
+UnitCount=3
 Type=1
 Ver=1
 ObjFiles=
-Includes=C:\Poker\protobuf-2.5.0\src
+Includes=
 Libs=
 PrivateResource=
 ResourceIncludes=
@@ -58,7 +58,7 @@ ProductVersion=
 AutoIncBuildNr=0
 
 [Unit3]
-FileName=..\message.proto
+FileName=rebuild.bat
 CompileCpp=1
 Folder=delphi generator
 Compile=0
@@ -77,11 +77,11 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit2]
-FileName=..\..\protobuf-2.5.0\src\google\protobuf\descriptor.h
+FileName=..\message.proto
 CompileCpp=1
 Folder=delphi generator
-Compile=1
-Link=1
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=

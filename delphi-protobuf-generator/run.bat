@@ -1,1 +1,0 @@
-bin\win32\debug\delphi_protobuf_object_generator.exe ..\message.proto output
