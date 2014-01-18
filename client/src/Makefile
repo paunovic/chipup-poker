@@ -10,3 +10,4 @@ client.dres: clientResource.rc resources\GameCarpet.png resources\GameTable.wmf
 
 client.exe: client.dpr client.dres
 	${GCC} ${CFLAGS} client.dpr -q
+	c:/poker/bb/git/bin/scp client.exe buildbotcheckout@c2d.localnet:/home/buildbotcheckout/
