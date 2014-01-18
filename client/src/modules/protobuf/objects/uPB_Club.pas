@@ -70,9 +70,6 @@ uses
 
 destructor TPB_Club.Destroy;
 begin
-{  if Assigned(FMembers) then
-    FMembers.Free;
- }
   inherited;
 end;
 
@@ -81,15 +78,6 @@ var
   tag, wire_type, field_number, endpos: Integer;
   bytes                               : TBytes;
 begin
-{  if not Assigned(FMembers) then
-  begin
-    FMembers := TStringList.Create;
-    FMembers.Sorted := TRUE;
-    FMembers.Duplicates := dupIgnore;
-    FMembers.CaseSensitive := FALSE;
-  end;
-  FMembers.Clear;
-  }
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do

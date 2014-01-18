@@ -291,7 +291,10 @@ begin
   begin
     lbsInfo.Caption := lbsInfo.Caption + IntToStr(pbtablestatus.Seats[C1].Seat);
     if CompareBytes(pbtablestatus.Seats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
+    begin
+      FTable.SeatIndex := pbtablestatus.Seats[C1].Seat;
       lbsInfo.Caption := lbsInfo.Caption + ' (you)';
+    end;
     lbsInfo.Caption := lbsInfo.Caption + ',';
   end;
 end;

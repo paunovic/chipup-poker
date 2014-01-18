@@ -25,7 +25,7 @@ type
     property Game     : TGameInfo read FGame;
     property Club     : TClubInfo read FClub;
     property Form     : TForm read FForm;
-    property SeatIndex: Integer read FSeatIndex;
+    property SeatIndex: Integer read FSeatIndex write FSeatIndex;
   end;
 
 implementation
