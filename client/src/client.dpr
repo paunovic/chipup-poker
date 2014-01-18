@@ -75,7 +75,8 @@ uses
   uProtobufBaseObject in 'modules\protobuf\uProtobufBaseObject.pas',
   uPB_TableStatus in 'modules\protobuf\objects\uPB_TableStatus.pas',
   uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas',
-  uServerCodes in 'modules\protobuf\objects\uServerCodes.pas';
+  uServerCodes in 'modules\protobuf\objects\uServerCodes.pas',
+  uSimpleDebug in 'modules\simpleDebug\uSimpleDebug.pas';
 
 procedure FocusPokerApp;
 var

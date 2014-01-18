@@ -199,6 +199,7 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_TableStatus.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_SeatInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uServerCodes.pas"/>
+			<DCCReference Include="modules\simpleDebug\uSimpleDebug.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
