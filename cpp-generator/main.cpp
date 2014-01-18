@@ -159,8 +159,8 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 			vars["input"] = "Integer(AValue)";
 		} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 			vars["input"] = "AValue.ProtobufOutput";
-		} else if (field->type() == FieldDescriptor::TYPE_STRING) {
-			vars["input"] = "AnsiString(AValue)"; // FIXME
+		//} else if (field->type() == FieldDescriptor::TYPE_STRING) {
+		//	vars["input"] = "AnsiString(AValue)"; // FIXME
 		} else {
 			vars["input"] = "AValue";
 		}
@@ -446,7 +446,7 @@ class DelphiGenerator : public CodeGenerator {
 						"      FN_$name$:\n"
 						"        begin\n"
 						"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"          F$pname$ := String(AProtobufReader.readString); // FIXME\n" // FIXME
+						"          F$pname$ := String(AProtobufReader.readUtf8String);\n"
 						"        end;\n"
 						,"pname",PrivateFieldName(field)
 						,"name",name);
