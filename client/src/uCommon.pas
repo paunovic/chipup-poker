@@ -28,6 +28,7 @@ function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): 
 function IsJPEGStream(const AStream: TStream): Boolean;
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 function IsInWine: Boolean;
+procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
 
 implementation
 
@@ -480,6 +481,33 @@ begin
     finally
       FreeLibrary(hnd);
     end;
+end;
+
+procedure PatchCode(Address: Pointer; const NewCode; Size: Integer);
+var
+  OldProtect: DWORD;
+begin
+  if VirtualProtect(Address, Size, PAGE_EXECUTE_READWRITE, OldProtect) then
+  begin
+    Move(NewCode, Address^, Size);
+    FlushInstructionCache(GetCurrentProcess, Address, Size);
+    VirtualProtect(Address, Size, OldProtect, @OldProtect);
+  end;
+end;
+
+procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
+type
+  PInstruction = ^TInstruction;
+  TInstruction = packed record
+    Opcode: Byte;
+    Offset: Integer;
+  end;
+var
+  NewCode: TInstruction;
+begin
+  NewCode.Opcode := $E9; //jump relative
+  NewCode.Offset := NativeInt(NewAddress) - NativeInt(OldAddress) - SizeOf(NewCode);
+  PatchCode(OldAddress, NewCode, SizeOf(NewCode));
 end;
 
 

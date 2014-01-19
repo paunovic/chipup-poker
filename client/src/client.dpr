@@ -1,7 +1,5 @@
 program client;
 
-//{$IFDEF DEBUG} {$APPTYPE CONSOLE} {$ENDIF}
-
 {$R *.dres}
 {$R *.res}
 

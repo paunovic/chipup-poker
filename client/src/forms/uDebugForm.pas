@@ -71,8 +71,12 @@ implementation
 uses
   uCommon, uSocketClient, uMessageContainer;
 
+function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
+function FreeConsole: Boolean; stdcall; external 'kernel32.dll';
+
 var
   frmDebug: TfrmDebug;
+  ConsoleAttached: Boolean;
 
 
 procedure DebugLn(const AData: String; const AType: TDebugInfoType);
@@ -136,7 +140,7 @@ begin
   SendMessage(frmDebug.reLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
 
   OutputDebugString(PChar(output));
-  if IsConsole then
+  if ConsoleAttached then
     WriteLn(output);
 end;
 
@@ -232,10 +236,15 @@ end;
 
 
 initialization
+  ConsoleAttached := AttachConsole(-1); // ATTACH_PARENT_PROCESS
+
   frmDebug := TfrmDebug.Create(nil);
   frmDebug.Show;
 
 finalization
   frmDebug.Free;
+
+  if ConsoleAttached then
+    FreeConsole;
 
 end.
