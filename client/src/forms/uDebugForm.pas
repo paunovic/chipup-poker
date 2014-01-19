@@ -234,7 +234,7 @@ begin
     Exclude(FDebugInfoTypes, TDebugInfoType((Sender as TcxCheckBox).Tag));
 end;
 
-
+{$IFDEF DEBUG}
 initialization
   ConsoleAttached := AttachConsole(-1); // ATTACH_PARENT_PROCESS
 
@@ -246,5 +246,6 @@ finalization
 
   if ConsoleAttached then
     FreeConsole;
+{$ENDIF}
 
 end.
