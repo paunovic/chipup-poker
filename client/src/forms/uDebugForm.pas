@@ -69,7 +69,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uCommon, uSocketClient, uMessageContainer;
+  uCommon, uSocketClient, uMessageContainer, uSimpleDebug;
 
 var
   frmDebug: TfrmDebug;
@@ -81,6 +81,7 @@ var
   type_str  : String;
   type_color: TColor;
   logit     : Boolean;
+  output    : String;
 begin
   time_str := FormatDateTime('hh:nn:ss:zzz', Now);
 
@@ -129,7 +130,9 @@ begin
 
   frmDebug.reLog.SelStart := frmDebug.reLog.GetTextLen;
   frmDebug.reLog.SelAttributes.Color := type_color;
-  frmDebug.reLog.Lines.Add(Format('%s [%s] %s', [time_str, type_str, AData]));
+  output := Format('%s [%s] %s', [time_str, type_str, AData]);
+  SimpleDebug(output);
+  frmDebug.reLog.Lines.Add(output);
 
   SendMessage(frmDebug.reLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
 end;

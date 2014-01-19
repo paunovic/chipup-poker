@@ -6,6 +6,8 @@ procedure SimpleDebug(const msg: String);
 
 implementation
 
+uses Windows;
+
 var
   capable: Boolean;
 
@@ -14,6 +16,7 @@ function FreeConsole(): Boolean; stdcall; external 'kernel32.dll';
 
 procedure SimpleDebug(const msg: String);
 begin
+  OutputDebugString(PChar(msg));
   if capable then WriteLn(msg);
 end;
 initialization
