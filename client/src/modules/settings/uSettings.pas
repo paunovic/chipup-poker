@@ -78,9 +78,9 @@ begin
   try
     mstream.LoadFromFile(FSettingsFile);
 
-    if DecompressStream(mstream) then
+    if (DecompressStream(mstream)) and
+       (AES256DecryptStream(mstream, HardwareUID)) then
     begin
-      AES256DecryptStream(mstream, HardwareUID);
       mstream.Position := 0;
       FJSON := TSuperObject.ParseStream(mstream, FALSE);
       result := Assigned(FJSON);
@@ -99,18 +99,13 @@ begin
   mstream := TMemoryStream.Create;
   try
     FJSON.SaveTo(mstream);
-    AES256EncryptStream(mstream, HardwareUID);
-    if CompressStream(mstream) then
+    if (AES256EncryptStream(mstream, HardwareUID)) and
+       (CompressStream(mstream)) then
       mstream.SaveToFile(FSettingsFile);
   finally
     mstream.Free;
   end;
 end;
-
-
-
-
-
 
 
 

@@ -37,7 +37,6 @@ object frmDebug: TfrmDebug
       ParentBackground = False
       ParentCtl3D = False
       TabOrder = 1
-      ExplicitTop = 284
       DesignSize = (
         523
         75)

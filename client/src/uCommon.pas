@@ -27,6 +27,7 @@ function EncodeURL(const ASrc: String): String;
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
+function IsInWine: Boolean;
 
 implementation
 
@@ -383,27 +384,32 @@ var
 begin
   str := '';
 
-  smb := TSMBios.Create;
-  try
-    if smb.HasBaseBoardInfo then
-      for bbinfo in smb.BaseBoardInfo do
-      begin
-        str := str + bbinfo.ManufacturerStr;
-        str := str + bbinfo.SerialNumberStr;
-      end;
+  if IsInWine then
+    str := '123456789linux'
+  else
+  begin
+    smb := TSMBios.Create;
+    try
+      if smb.HasBaseBoardInfo then
+        for bbinfo in smb.BaseBoardInfo do
+        begin
+          str := str + bbinfo.ManufacturerStr;
+          str := str + bbinfo.SerialNumberStr;
+        end;
 
-    if smb.HasProcessorInfo then
-      for cpuinfo in smb.ProcessorInfo do
-      begin
-        str := str + cpuinfo.ProcessorManufacturerStr;
-        str := str + cpuinfo.SerialNumberStr;
-      end;
-  finally
-    smb.Free;
+      if smb.HasProcessorInfo then
+        for cpuinfo in smb.ProcessorInfo do
+        begin
+          str := str + cpuinfo.ProcessorManufacturerStr;
+          str := str + cpuinfo.SerialNumberStr;
+        end;
+    finally
+      smb.Free;
+    end;
+
+    if str = '' then
+      str := '12345689default';
   end;
-
-  if str = '' then
-    str := '123456';
 
   for C1 := 1 to Length(str) do
     str[C1] := AnsiChar(Ord(str[C1]) xor 3);
@@ -459,6 +465,21 @@ begin
     A2Len := Length(A2);
 
   result := (A1Len = A2Len) and (CompareMem(A1, A2, A1Len));
+end;
+
+function IsInWine: Boolean;
+var
+  hnd: THandle;
+begin
+  result := FALSE;
+  hnd := LoadLibrary('ntdll.dll');
+  if hnd > 32 then
+    try
+      result := Assigned(GetProcAddress(hnd, 'wine_get_version')) or
+                Assigned(GetProcAddress(hnd, 'wine_nt_to_unix_file_name'));
+    finally
+      FreeLibrary(hnd);
+    end;
 end;
 
 

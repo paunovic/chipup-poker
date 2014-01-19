@@ -1,5 +1,7 @@
 program client;
 
+//{$IFDEF DEBUG} {$APPTYPE CONSOLE} {$ENDIF}
+
 {$R *.dres}
 {$R *.res}
 
@@ -26,6 +28,7 @@ uses
   uDebugForm in 'forms\uDebugForm.pas' {frmDebug},
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
+  uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',
   uHardcodedSettings in 'modules\settings\uHardcodedSettings.pas',
@@ -71,12 +74,11 @@ uses
   StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
   FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
   uPB_TableSit in 'modules\protobuf\objects\uPB_TableSit.pas',
-  uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
   uProtobufBaseObject in 'modules\protobuf\uProtobufBaseObject.pas',
   uPB_TableStatus in 'modules\protobuf\objects\uPB_TableStatus.pas',
   uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas',
   uServerCodes in 'modules\protobuf\objects\uServerCodes.pas',
-  uSimpleDebug in 'modules\simpleDebug\uSimpleDebug.pas';
+  dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas';
 
 procedure FocusPokerApp;
 var
@@ -89,7 +91,7 @@ end;
 
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
-                      {
+
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then
   begin
@@ -98,7 +100,7 @@ begin
   end;
 
   TInstanceController.RegisterInstance;
-                                       }
+
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);

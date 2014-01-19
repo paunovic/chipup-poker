@@ -42,6 +42,7 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uCommon, uEncryption, uMainDataModule, uSettings;
 
+
 { TAvatar }
 
 constructor TAvatar.Create(const AId: AnsiString);
@@ -57,7 +58,7 @@ var
   tmpms : TMemoryStream;
 begin
   AStream.ReadBuffer(id_len, SizeOf(id_len));
-  if id_len <= 0 then
+  if (id_len <= 0) or (id_len > 100 * 1024) then
     Exit;
 
   SetLength(FId, id_len);
@@ -160,10 +161,9 @@ begin
   try
     ms.LoadFromFile(AFile);
 
-    if DecompressStream(ms) then
+    if (DecompressStream(ms)) and
+       (AES256DecryptStream(ms, HardwareUID)) then
     begin
-      AES256DecryptStream(ms, HardwareUID);
-
       if ms.Size = 0 then
         DeleteFile(AFile)
       else
@@ -199,12 +199,10 @@ begin
       if Assigned(ToArray[C1].Image) then
         ToArray[C1].WriteToStream(ms);
 
-    if ms.Size > 0 then
-    begin
-      AES256EncryptStream(ms, HardwareUID);
-      if CompressStream(ms) then
-        ms.SaveToFile(AFile);
-    end;
+    if (ms.Size > 0) and
+       (AES256EncryptStream(ms, HardwareUID)) and
+       (CompressStream(ms)) then
+      ms.SaveToFile(AFile);
   finally
     ms.Free;
   end;

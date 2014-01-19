@@ -69,7 +69,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uCommon, uSocketClient, uMessageContainer, uSimpleDebug;
+  uCommon, uSocketClient, uMessageContainer;
 
 var
   frmDebug: TfrmDebug;
@@ -131,10 +131,13 @@ begin
   frmDebug.reLog.SelStart := frmDebug.reLog.GetTextLen;
   frmDebug.reLog.SelAttributes.Color := type_color;
   output := Format('%s [%s] %s', [time_str, type_str, AData]);
-  SimpleDebug(output);
   frmDebug.reLog.Lines.Add(output);
 
   SendMessage(frmDebug.reLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+
+  OutputDebugString(PChar(output));
+  if IsConsole then
+    WriteLn(output);
 end;
 
 
@@ -226,6 +229,7 @@ begin
   else
     Exclude(FDebugInfoTypes, TDebugInfoType((Sender as TcxCheckBox).Tag));
 end;
+
 
 initialization
   frmDebug := TfrmDebug.Create(nil);

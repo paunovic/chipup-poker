@@ -147,6 +147,9 @@
 			<DCCReference Include="forms\uChangeAvatarForm.pas">
 				<Form>frmChangeAvatar</Form>
 			</DCCReference>
+			<DCCReference Include="forms\uTableSitForm.pas">
+				<Form>frmTableSit</Form>
+			</DCCReference>
 			<DCCReference Include="forms\uIFormParams.pas"/>
 			<DCCReference Include="modules\settings\uSettings.pas"/>
 			<DCCReference Include="modules\settings\uHardcodedSettings.pas"/>
@@ -192,14 +195,11 @@
 			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
 			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TableSit.pas"/>
-			<DCCReference Include="forms\uTableSitForm.pas">
-				<Form>frmTableSit</Form>
-			</DCCReference>
 			<DCCReference Include="modules\protobuf\uProtobufBaseObject.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TableStatus.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_SeatInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uServerCodes.pas"/>
-			<DCCReference Include="modules\simpleDebug\uSimpleDebug.pas"/>
+			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
@@ -350,9 +350,9 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
-					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win64"/>
+					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 				</Deployment>
 				<Platforms>
 					<Platform value="Win64">True</Platform>
