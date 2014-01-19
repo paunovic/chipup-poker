@@ -77,51 +77,42 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN__ID:
-        begin
-          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-          AprotobufReader.readBytes(FId);
-        end;
-      FN_CREATOR_MONGO_ID:
-        begin
-          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-          AprotobufReader.readBytes(FCreatorMongoId);
-        end;
-      FN_GAMENAME:
-        begin
-          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-          FGamename := String(AProtobufReader.readUtf8String);
-        end;
-      FN_CLUBSEQ:
-        begin
-          Assert(wire_type = WIRETYPE_VARINT);
-          FClubseq := AProtobufReader.readInt32;
-        end;
-      FN_GAME_TYPE:
-        begin
-          Assert(wire_type = WIRETYPE_VARINT);
-          FGameType := AProtobufReader.readInt32;
-        end;
-      FN_GAME_LIMIT:
-        begin
-          Assert(wire_type = WIRETYPE_VARINT);
-          FGameLimit := AProtobufReader.readInt32;
-        end;
-      FN_SMALL_BLIND:
-        begin
-          Assert(wire_type = WIRETYPE_VARINT);
-          FSmallBlind := AProtobufReader.readInt32;
-        end;
-      FN_BIG_BLIND:
-        begin
-          Assert(wire_type = WIRETYPE_VARINT);
-          FBigBlind := AProtobufReader.readInt32;
-        end;
-      FN_SEATS:
-        begin
-          Assert(wire_type = WIRETYPE_VARINT);
-          FSeats := AProtobufReader.readInt32;
-        end;
+      FN__ID: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AprotobufReader.readBytes(FId);
+      end;
+      FN_CREATOR_MONGO_ID: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AprotobufReader.readBytes(FCreatorMongoId);
+      end;
+      FN_GAMENAME: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FGamename := String(AProtobufReader.readUtf8String);
+      end;
+      FN_CLUBSEQ: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FClubseq := AProtobufReader.readInt32;
+      end;
+      FN_GAME_TYPE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FGameType := AProtobufReader.readInt32;
+      end;
+      FN_GAME_LIMIT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FGameLimit := AProtobufReader.readInt32;
+      end;
+      FN_SMALL_BLIND: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSmallBlind := AProtobufReader.readInt32;
+      end;
+      FN_BIG_BLIND: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBigBlind := AProtobufReader.readInt32;
+      end;
+      FN_SEATS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSeats := AProtobufReader.readInt32;
+      end;
       else
         AProtobufReader.skipField(tag);
     end;

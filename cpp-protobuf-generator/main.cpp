@@ -451,39 +451,35 @@ class DelphiGenerator : public CodeGenerator {
 				UpperString(&name);
 				if (field->type() == FieldDescriptor::TYPE_INT32) {
 					printer.Print(
-						"      $name$:\n"
-						"        begin\n"
-						"          Assert(wire_type = WIRETYPE_VARINT);\n"
-						"          $pname$ := AProtobufReader.readInt32;\n"
-						"        end;\n","name",EnumName(field)
+						"      $name$: begin\n"
+						"        Assert(wire_type = WIRETYPE_VARINT);\n"
+						"        $pname$ := AProtobufReader.readInt32;\n"
+						"      end;\n","name",EnumName(field)
 						,"pname",PrivateFieldName(field));
 				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
 					printer.Print(
-						"      $name$:\n"
-						"        begin\n"
-						"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"          $pname$ := String(AProtobufReader.readUtf8String);\n"
-						"        end;\n"
+						"      $name$: begin\n"
+						"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+						"        $pname$ := String(AProtobufReader.readUtf8String);\n"
+						"      end;\n"
 						,"pname",PrivateFieldName(field)
 						,"name",EnumName(field));
 				} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
-						"      $name$:\n"
-						"        begin\n"
-						"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"          SetLength($pname$, Length($pname$) + 1);\n"
-						"          AProtobufReader.readBytes($pname$[Length($pname$)-1]);\n"
-						"        end;\n"
+						"      $name$: begin\n"
+						"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+						"        SetLength($pname$, Length($pname$) + 1);\n"
+						"        AProtobufReader.readBytes($pname$[Length($pname$)-1]);\n"
+						"      end;\n"
 						,"name",EnumName(field)
 						,"pname",PrivateFieldName(field));
 					} else {
 						printer.Print(
-						"      $name$:\n"
-						"        begin\n"
-						"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"          AprotobufReader.readBytes($pname$);\n"
-						"        end;\n"
+						"      $name$: begin\n"
+						"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+						"        AprotobufReader.readBytes($pname$);\n"
+						"      end;\n"
 						,"name",EnumName(field)
 						,"pname",PrivateFieldName(field));
 					}
@@ -491,23 +487,21 @@ class DelphiGenerator : public CodeGenerator {
 					const Descriptor *subtype = field->message_type(); 
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
-							"        $name$:\n"
-							"          begin\n"
-							"            Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-							"            $pname$.Add(TPB_$subname$.Create(AProtobufReader,AProtobufReader.readInt32));\n"
-							"          end;\n"
+							"        $name$: begin\n"
+							"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+							"          $pname$.Add(TPB_$subname$.Create(AProtobufReader,AProtobufReader.readInt32));\n"
+							"        end;\n"
 							,"name",EnumName(field)
 							,"pname",PrivateFieldName(field)
 							,"subname",subtype->name());
 					} else {
 						printer.Print(
-							"      $name$:\n"
-							"        begin\n"
-							"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-							"          if not Assigned($pname$) then\n"
-							"            $pname$ := TPB_$subname$.Create;\n"
-							"          $pname$.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);\n"
-							"        end;\n"
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+							"        if not Assigned($pname$) then\n"
+							"          $pname$ := TPB_$subname$.Create;\n"
+							"        $pname$.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);\n"
+							"      end;\n"
 							,"name",EnumName(field)
 							,"pname",PrivateFieldName(field)
 							,"subname",subtype->name());
@@ -516,11 +510,10 @@ class DelphiGenerator : public CodeGenerator {
 					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
 						const EnumDescriptor *type = field->enum_type();
 						printer.Print(
-							"      $name$:\n"
-							"        begin\n"
-							"          Assert(wire_type = WIRETYPE_VARINT);\n"
-							"          $pname$ := T$subname$(AProtobufReader.readEnum);\n"
-							"        end;\n"
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        $pname$ := T$subname$(AProtobufReader.readEnum);\n"
+							"      end;\n"
 							,"name",EnumName(field)
 							,"pname",PrivateFieldName(field)
 							,"subname",type->name());
