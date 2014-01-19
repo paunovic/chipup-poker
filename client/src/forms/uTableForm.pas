@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SynGdiPlus, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, dxSkinDarkRoom, cxMemo, uMessageItem, Vcl.Menus, cxButtons,
-  Vcl.ActnList, cxLabel, uTable, cxTextEdit;
+  Vcl.ActnList, cxLabel, uTables, cxTextEdit;
 
 type
   TfrmTable = class(TForm)

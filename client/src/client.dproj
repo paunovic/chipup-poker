@@ -129,7 +129,6 @@
 			<DCCReference Include="forms\uChangeEMailForm.pas">
 				<Form>frmChangeEMail</Form>
 			</DCCReference>
-			<DCCReference Include="modules\server_settings\uServerSettings.pas"/>
 			<DCCReference Include="forms\uChangePasswordForm.pas">
 				<Form>frmChangePassword</Form>
 			</DCCReference>
@@ -151,21 +150,20 @@
 			<DCCReference Include="forms\uTableSitForm.pas">
 				<Form>frmTableSit</Form>
 			</DCCReference>
+			<DCCReference Include="modules\uServerSettings.pas"/>
 			<DCCReference Include="forms\uIFormParams.pas"/>
 			<DCCReference Include="modules\settings\uSettings.pas"/>
 			<DCCReference Include="modules\settings\uHardcodedSettings.pas"/>
 			<DCCReference Include="uCommon.pas"/>
-			<DCCReference Include="modules\validators\uValidators.pas"/>
-			<DCCReference Include="modules\playerinfo\uPlayerInfo.pas"/>
-			<DCCReference Include="modules\clubinfo\uClubInfo.pas"/>
-			<DCCReference Include="modules\tables\uTables.pas"/>
-			<DCCReference Include="modules\tables\uTable.pas"/>
-			<DCCReference Include="modules\gameinfo\uGameInfo.pas"/>
-			<DCCReference Include="modules\instance_controller\uInstanceController.pas"/>
-			<DCCReference Include="modules\avatars\uAvatars.pas"/>
-			<DCCReference Include="modules\avatars\uAvatar.pas"/>
-			<DCCReference Include="modules\encryption\uEncryption.pas"/>
-			<DCCReference Include="modules\socketclient\uSocketClient.pas"/>
+			<DCCReference Include="modules\uValidators.pas"/>
+			<DCCReference Include="modules\uPlayerInfo.pas"/>
+			<DCCReference Include="modules\uClubInfo.pas"/>
+			<DCCReference Include="modules\uTables.pas"/>
+			<DCCReference Include="modules\uGameInfo.pas"/>
+			<DCCReference Include="modules\uInstanceController.pas"/>
+			<DCCReference Include="modules\uAvatars.pas"/>
+			<DCCReference Include="modules\uEncryption.pas"/>
+			<DCCReference Include="modules\uSocketClient.pas"/>
 			<DCCReference Include="modules\protobuf\uProtobufReader.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_RpcMessage.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_LoginParams.pas"/>

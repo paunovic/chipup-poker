@@ -49,7 +49,7 @@ implementation
 uses
   System.Classes, PNGImage, Soap.EncdDecd,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uMainDataModule, uSettings, uCommon, uAvatar, uGameInfo,
+  uMainDataModule, uSettings, uCommon, uAvatars, uGameInfo,
   uPB_Club, uPB_Game;
 
 

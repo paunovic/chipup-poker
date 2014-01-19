@@ -249,7 +249,7 @@ begin
   pbstatus := AMessage.Object_ as TPB_StatusReply;
 
   dmMain.SelfInfo.ParseStatus(pbstatus);
-  dmMain.Avatars.Add(dmMain.SelfInfo.AvatarId);
+  dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   dmMain.Players.ParseStatus(pbstatus);
 
   if FLoginSuccess then

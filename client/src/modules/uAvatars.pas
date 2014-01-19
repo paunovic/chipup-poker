@@ -1,4 +1,4 @@
-unit uAvatar;
+unit uAvatars;
 
 interface
 
@@ -26,10 +26,17 @@ type
     property Image: TJPEGImage read FImage;
   end;
 
-  TAvatarList = class(TObjectList<TAvatar>)
+  TAvatars = class(TObjectList<TAvatar>)
   public
+    constructor Create;
+    destructor Destroy; override;
+
     function IndexOf(const AId: AnsiString): Integer;
     function Find(const AId: AnsiString): TAvatar;
+    function AddAvatar(const AId: AnsiString; const AImage: TJPEGImage = nil): TAvatar;
+    function RemoveAvatar(const AId: AnsiString): Boolean;
+    function RefreshAvatar(const AId: AnsiString): Boolean;
+    function SetAvatarImage(const AId: AnsiString; const AImage: TJPEGImage): Boolean;
 
     procedure Load(const AFile: String);
     procedure Save(const AFile: String);
@@ -145,9 +152,24 @@ begin
   end;
 end;
 
-{ TAvatarList }
 
-procedure TAvatarList.Load(const AFile: String);
+{ TAvatars }
+
+constructor TAvatars.Create;
+begin
+  inherited Create;
+
+  Load(SelfPath + 'avatars.dat');
+end;
+
+destructor TAvatars.Destroy;
+begin
+  Save(SelfPath + 'avatars.dat');
+
+  inherited;
+end;
+
+procedure TAvatars.Load(const AFile: String);
 var
   ms    : TMemoryStream;
   avatar: TAvatar;
@@ -188,7 +210,7 @@ begin
   end;
 end;
 
-procedure TAvatarList.Save(const AFile: String);
+procedure TAvatars.Save(const AFile: String);
 var
   C1: Integer;
   ms: TMemoryStream;
@@ -208,7 +230,7 @@ begin
   end;
 end;
 
-function TAvatarList.IndexOf(const AId: AnsiString): Integer;
+function TAvatars.IndexOf(const AId: AnsiString): Integer;
 var
   C1: Integer;
 begin
@@ -218,7 +240,7 @@ begin
   Exit(-1);
 end;
 
-function TAvatarList.Find(const AId: AnsiString): TAvatar;
+function TAvatars.Find(const AId: AnsiString): TAvatar;
 var
   index: Integer;
 begin
@@ -226,6 +248,66 @@ begin
   if index = -1 then
     Exit(nil);
   Exit(ToArray[index]);
+end;
+
+function TAvatars.AddAvatar(const AId: AnsiString; const AImage: TJPEGImage): TAvatar;
+var
+  index : Integer;
+  avatar: TAvatar;
+begin
+  index := IndexOf(AId);
+  if index <> -1 then
+  begin
+    if Assigned(AImage) then
+      ToArray[index].Image.Assign(AImage);
+    Exit(ToArray[index]);
+  end;
+
+  {$IFDEF DEBUG} DebugLn(Format('Adding avatar to database: %s', [AId]), ditApplication); {$ENDIF}
+  avatar := TAvatar.Create(AId);
+  if Assigned(AImage) then
+    avatar.Image.Assign(AImage)
+  else
+    avatar.Refresh;
+  Add(avatar);
+
+  Exit(avatar);
+end;
+
+function TAvatars.RemoveAvatar(const AId: AnsiString): Boolean;
+var
+  index: Integer;
+begin
+  index := IndexOf(AId);
+  if index = -1 then
+    Exit(FALSE);
+
+  Delete(index);
+  Exit(TRUE);
+end;
+
+function TAvatars.RefreshAvatar(const AId: AnsiString): Boolean;
+var
+  avatar: TAvatar;
+begin
+  avatar := Find(AId);
+  if not Assigned(avatar) then
+    Exit(FALSE);
+
+  avatar.Refresh;
+  Exit(TRUE);
+end;
+
+function TAvatars.SetAvatarImage(const AId: AnsiString; const AImage: TJPEGImage): Boolean;
+var
+  avatar: TAvatar;
+begin
+  avatar := Find(AId);
+  if not Assigned(avatar) then
+    Exit(FALSE);
+
+  avatar.Image.Assign(AImage);
+  Exit(TRUE);
 end;
 
 

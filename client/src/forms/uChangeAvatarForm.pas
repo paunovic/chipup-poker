@@ -47,7 +47,7 @@ implementation
 {$R *.dfm}
 
 uses
-  superobject, PNGImage, uAvatar, uMessageContainer, uServerMessageCallback,
+  superobject, PNGImage, uAvatars, uMessageContainer, uServerMessageCallback,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSocketClient, uCommon, uSettings, uMainDataModule;
 
@@ -58,7 +58,7 @@ var
 begin
   FAvatarJPG := TJPEGImage.Create;
 
-  avatar := dmMain.Avatars.Add(dmMain.SelfInfo.AvatarId);
+  avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   imgAvatar.Picture.Assign(avatar.Image);
 end;
 
@@ -248,7 +248,7 @@ var
   avatar: TAvatar;
 begin
   dmMain.SelfInfo.AvatarId := FAvatarId;
-  avatar := dmMain.Avatars.Add(dmMain.SelfInfo.AvatarId, FAvatarJPG);
+  avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
   imgAvatar.Picture.Assign(avatar.Image);
 
   acChange.Enabled := TRUE;

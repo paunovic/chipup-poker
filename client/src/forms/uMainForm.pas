@@ -123,7 +123,7 @@ implementation
 
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
-  uPlayerInfo, uManageClubsForm, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatar, uPublicClubsList,
+  uPlayerInfo, uManageClubsForm, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
   uPB_StatusReply, uMessageContainer, uServerMessageCallback,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_ChatEvent, uPB_ChatMessage;
@@ -449,7 +449,7 @@ begin
   pbstatus := AMessage.Object_ as TPB_StatusReply;
 
   dmMain.SelfInfo.ParseStatus(pbstatus);
-  dmMain.Avatars.Add(dmMain.SelfInfo.AvatarId);
+  dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   dmMain.Players.ParseStatus(pbstatus);
   ConfigureGUI;
   UpdateClublist;
