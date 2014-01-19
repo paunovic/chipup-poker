@@ -338,7 +338,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		switch (code) {
 		case codes.CMD_LOGIN:
 			var params = pb.Parse(args,'Poker.LoginParams');
-			// FIXME, kick out other sessions
+			this.log(params);
 			allUsers.findOne({email:params.username},function (err,row) {
 				if (row) {
 					if (row.changecode) {
@@ -508,7 +508,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							}
 							for (var x=0; x<games.length; x++) {
 								games[x]._id = new Buffer(games[x]._id.toString(),'hex');
-								games[x].creator = new Buffer(games[x].creator.toString(),'hex');
+								games[x].creator_mongo_id = new Buffer(games[x].creator_mongo_id.toString(),'hex');
 							}
 							//this.log('games list',games);
 							status.games = games;
@@ -911,7 +911,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.reply(codes.SR_NOT_IMPLEMENTED,"invalid params");
 				return;
 			}
-			var doc = {game_type:game_type, small_blind:small_blind, big_blind:big_blind, seats:seats, creator:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit};
+			var doc = {game_type:game_type, small_blind:small_blind, big_blind:big_blind, seats:seats, creator_mongo_id:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit};
 			allClubs.findOne({seq:clubseq},function (err,row) {
 				if (err) {
 					this.reply(codes.SR_NOT_IMPLEMENTED,"internal error");
