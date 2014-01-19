@@ -5,6 +5,7 @@ CFLAGS+=-Umodules/playerinfo -Umodules/clubinfo -Umodules/gameinfo -Umodules/pro
 CFLAGS+=-U3rdparty/protobufs -Umodules/protobuf -Umodules/server_settings -Umodules/tables -UC:/poker/syngdiplus
 CFLAGS+=-Umodules/avatars -UC:/Poker/icsv8w/Lib/Debug/Win32/XE2 -Umodules/encryption -UC:/Poker/Dec/Part_I
 CFLAGS+=-Umodules/socketclient -Umodules/settings -UC:/Poker/SuperObject -Umodules/message_container
+CFLAGS+="-UC:/Program Files/DevExpress VCL/Library/RS16"
 GCC=dcc32
 
 %.dcu: %.pas
