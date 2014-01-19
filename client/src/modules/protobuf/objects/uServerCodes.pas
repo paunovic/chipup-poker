@@ -80,10 +80,13 @@ const
   CMD_TABLE_SIT = 523;
   CMD_TABLE_STAND_UP = 524;
 
+{$IFDEF DEBUG}
 function TranslateServerCode(const ACode: Integer): String;
+{$ENDIF DEBUG}
 
 implementation
 
+{$IFDEF DEBUG}
 uses System.SysUtils;
 
 function TranslateServerCode(const ACode: Integer): String;
@@ -169,5 +172,6 @@ begin
     result := Format('UNKNOWN CODE [%d]',[ACode]);
   end;
 end;
+{$ENDIF DEBUG}
 
 end.
