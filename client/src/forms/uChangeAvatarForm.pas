@@ -18,7 +18,6 @@ type
     acClose: TAction;
     imgAvatar: TcxImage;
     OpenDialog: TOpenDialog;
-    pbUpload: TcxProgressBar;
     procedure acCloseExecute(Sender: TObject);
     procedure acChangeExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -26,7 +25,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
-    procedure HTTPSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
   private
     FAvatarId : AnsiString;
     FAvatarJPG: TJPEGImage;
@@ -117,14 +115,6 @@ begin
   http.Free;
 end;
 
-procedure TfrmChangeAvatar.HTTPSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
-var
-  http : THTTPcli;
-begin
-  http := Sender as THttpCli;
-  pbUpload.Position := Round((http.SentCount / http.SendStream.Size) * 100)
-end;
-
 procedure TfrmChangeAvatar.acCloseExecute(Sender: TObject);
 begin
   ModalResult := mrClose;
@@ -179,7 +169,6 @@ begin
   http.SendStream := send_stream;
   http.RcvdStream := TMemoryStream.Create;
   http.OnRequestDone := HTTPRequestDone;
-  http.OnSendData := HTTPSendData;
   http.PostASync;
 end;
 
@@ -227,8 +216,6 @@ begin
   if error = '' then
   begin
     acChange.Enabled := FALSE;
-    pbUpload.Position := 0;
-    pbUpload.Visible := TRUE;
     UploadAvatar(fname);
   end
   else
@@ -240,7 +227,6 @@ begin
   MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
 
   acChange.Enabled := TRUE;
-  pbUpload.Visible := FALSE;
 end;
 
 procedure TfrmChangeAvatar.TCChangeAvatarOk(const AMessage: TMessageItem);
@@ -252,7 +238,6 @@ begin
   imgAvatar.Picture.Assign(avatar.Image);
 
   acChange.Enabled := TRUE;
-  pbUpload.Visible := FALSE;
 end;
 
 

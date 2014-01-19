@@ -724,24 +724,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Height = 150
     Width = 150
   end
-  object pbUpload: TcxProgressBar
-    Left = 17
-    Top = 217
-    AutoSize = False
-    Properties.BeginColor = 54056
-    Properties.EndColor = 54056
-    Properties.PeakValue = 80.000000000000000000
-    Properties.ShowText = False
-    Properties.ShowTextStyle = cxtsText
-    Style.LookAndFeel.SkinName = ''
-    StyleDisabled.LookAndFeel.SkinName = ''
-    StyleFocused.LookAndFeel.SkinName = ''
-    StyleHot.LookAndFeel.SkinName = ''
-    TabOrder = 4
-    Visible = False
-    Height = 8
-    Width = 196
-  end
   object alChangeAvatar: TActionList
     Left = 104
     Top = 124

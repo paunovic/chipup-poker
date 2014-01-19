@@ -27,8 +27,10 @@ type
   end;
 
   TAvatars = class(TObjectList<TAvatar>)
+  private
+    FDatabasePath: String;
   public
-    constructor Create;
+    constructor Create(const ADatabasePath: String);
     destructor Destroy; override;
 
     function IndexOf(const AId: AnsiString): Integer;
@@ -155,16 +157,18 @@ end;
 
 { TAvatars }
 
-constructor TAvatars.Create;
+constructor TAvatars.Create(const ADatabasePath: String);
 begin
   inherited Create;
 
-  Load(SelfPath + 'avatars.dat');
+  FDatabasePath := ADatabasePath;
+
+  Load(FDatabasePath);
 end;
 
 destructor TAvatars.Destroy;
 begin
-  Save(SelfPath + 'avatars.dat');
+  Save(FDatabasePath);
 
   inherited;
 end;

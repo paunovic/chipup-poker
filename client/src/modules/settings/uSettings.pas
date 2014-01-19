@@ -150,7 +150,7 @@ begin
 end;
 
 initialization
-  Settings := TSettings.Create(ExpandFileName(THardcodedSettings.Hardcoded.SETTINGS_FILENAME));
+  Settings := TSettings.Create(AppDataLocalPath + THardcodedSettings.Hardcoded.SETTINGS_FILENAME);
   Settings.Load;
 
 finalization

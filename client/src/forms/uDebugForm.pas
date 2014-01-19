@@ -152,6 +152,7 @@ begin
   Top := 0;
   reLog.Clear;
 
+  pmiLogWordWrap.Checked := TRUE;
   acWordWrap.Execute;
 
   FDebugInfoTypes := [ditException, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut];

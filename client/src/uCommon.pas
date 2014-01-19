@@ -6,8 +6,10 @@ uses
   Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms;
 
 var
-  SelfPath   : String;
-  HardwareUID: String;
+  SelfPath          : String;
+  AppDataLocalPath  : String;
+  AppDataRoamingPath: String;
+  HardwareUID       : String;
 
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
@@ -29,11 +31,12 @@ function IsJPEGStream(const AStream: TStream): Boolean;
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 function IsInWine: Boolean;
 procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
+function GetSpecialFolderPath(const ACSIDL: Integer): String;
 
 implementation
 
 uses
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, uSMBIOS,
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, uSMBIOS, Winapi.ShlObj,
   uIFormParams;
 
 
@@ -510,10 +513,30 @@ begin
   PatchCode(OldAddress, NewCode, SizeOf(NewCode));
 end;
 
+function GetSpecialFolderPath(const ACSIDL: Integer): String;
+var
+  RecPath: PWideChar;
+begin
+  RecPath := StrAlloc(MAX_PATH);
+  try
+    FillChar(RecPath^, MAX_PATH, 0);
+    if SHGetSpecialFolderPath(0, RecPath, ACSIDL, FALSE) then
+      result := RecPath
+    else
+      result := '';
+  finally
+    StrDispose(RecPath);
+  end;
+end;
+
 
 initialization
   MakeHardwareUID;
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
+  AppDataLocalPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
+  AppDataRoamingPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_APPDATA)) + 'ChipUP Poker');
+  ForceDirectories(AppDataLocalPath);
+  ForceDirectories(AppDataRoamingPath);
 
 finalization
 

@@ -13,6 +13,7 @@ type
                                 VERSION            : String;
                                 INSTANCE_MUTEX_NAME: String;
                                 SETTINGS_FILENAME  : String;
+                                AVATARS_FILENAME   : String;
                                 TCP_SERVER_ADDRESS : String;
                                 TCP_SERVER_PORT    : Word;
                                 URL                : record
@@ -32,8 +33,9 @@ type
                                            // instance mutex name
                                            INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
 
-                                           // settings filename
+                                           // filenames
                                            SETTINGS_FILENAME: 'settings.dat';
+                                           AVATARS_FILENAME: 'avatars.dat';
 
                                            // socket server
                                            TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
