@@ -94,9 +94,33 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 	}
 	printer.Print(
 		"\n"
+		"$begin$\n"
+		"function TranslateServerCode(const ACode: Integer): String;\n"
+		"$end$\n"
+		"\n"
 		"implementation\n"
 		"\n"
-		"end.");
+		"$begin$\n"
+		"uses System.SysUtils;\n"
+		"\n"
+		"function TranslateServerCode(const ACode: Integer): String;\n"
+		"begin\n"
+		"  case ACode of\n"
+		,"begin","{$IFDEF DEBUG}"
+		,"end","{$ENDIF DEBUG}");
+	for (int j=0; j<type->value_count(); j++) {
+		const EnumValueDescriptor *value = type->value(j);
+		printer.Print("    $name$: result := '$name$';\n","name",value->name());
+	}
+	printer.Print(
+		"  else\n"
+		"    result := Format('UNKNOWN CODE [%d]',[ACode]);\n"
+		"  end;\n"
+		"end;\n"
+		"$end$\n"
+		"\n"
+		"end."
+		,"end","{$ENDIF DEBUG}");
 }
 string EnumName(const FieldDescriptor *field) {
 	string name = field->name();

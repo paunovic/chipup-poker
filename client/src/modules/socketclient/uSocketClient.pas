@@ -213,7 +213,7 @@ begin
 
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
-      {$IFDEF DEBUG} DebugLn(Format('MethodId: %d; DataSize: %d', [rpc_message.MethodId, rpc_message.DataSize]), ditSocketInc); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc); {$ENDIF}
       MessageContainer.AddServerMessage(rpc_message.MethodId, data_obj);
     end;
 
@@ -344,7 +344,7 @@ begin
       if rpc_message.Datasize > 0 then
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-      {$IFDEF DEBUG} DebugLn(Format('MethodId: %d; DataSize: %d; StreamSize: %d', [rpc_message.MethodId, rpc_message.DataSize, mstream.Size]), ditSocketOut); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), ditSocketOut); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
