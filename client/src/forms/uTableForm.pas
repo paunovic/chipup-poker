@@ -64,7 +64,8 @@ implementation
 
 uses
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo,
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars;
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars
+  {$IFDEF DEBUG}, uDebugForm {$ENDIF};
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -345,6 +346,7 @@ begin
       seat.Seat := ASource.Seats[C1].Seat;
       seat.Chips := ASource.Seats[C1].Chips;
       seat.Cards := ASource.Seats[C1].Cards;
+      seat.CardCount := ASource.Seats[C1].CardCount;
       ATarget.Seats.Add(seat);
     end;
 end;
@@ -424,6 +426,7 @@ begin
     begin
       FTable.SeatIndex := pbtablestatus.Seats[C1].Seat;
       lbsInfo.Caption := lbsInfo.Caption + ' (you)';
+      {$IFDEF DEBUG} DebugLn(Format('your cards:%s',[pbtablestatus.Seats[C1].Cards]),ditSocket); {$ENDIF}
     end;
     lbsInfo.Caption := lbsInfo.Caption + ',';
   end;
