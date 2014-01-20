@@ -59,13 +59,13 @@ end;
 
 function ValidateClubName(const AClubName: String; out AError: String): Boolean;
 begin
-  AError := '';     {
+  AError := '';
   if (Length(AClubName) < 6) or (Length(AClubName) > dmMain.ServerSettings.StringLengths.ClubName) then
     AError := Format('Club name length must be between 6 and %d characters', [dmMain.ServerSettings.StringLengths.ClubName])
   else
     if not IsValidString(AClubName, CLUBNAME_ALLOWED_CHARS) then
       AError := 'Invalid characters in club name';
-             }
+
   result := AError = '';
 end;
 

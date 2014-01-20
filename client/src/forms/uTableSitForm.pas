@@ -17,14 +17,14 @@ type
     alTableSit: TActionList;
     acOK: TAction;
     acCancel: TAction;
-    Edit1: TEdit;
     procedure acCancelExecute(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
-    FGame: TGameInfo;
+    FGame     : TGameInfo;
+    FSeatIndex: Integer;
 
     procedure TCTableSitOk(const AMessage: TMessageItem);
     procedure TCTableSitSeatTaken(const AMessage: TMessageItem);
@@ -65,6 +65,7 @@ end;
 procedure TfrmTableSit.SetParams(const AParams: array of pointer);
 begin
   FGame := AParams[0];
+  FSeatIndex := PInteger(AParams[1])^;
 end;
 
 procedure TfrmTableSit.WndProc(var AMessage: TMessage);
@@ -95,7 +96,7 @@ end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);
 begin
-  SocketClient.TableSit(FGame.MongoId, StrToInt(Edit1.Text), seBuyin.Value);
+  SocketClient.TableSit(FGame.MongoId, FSeatIndex, seBuyin.Value);
   acOK.Enabled := FALSE;
 end;
 

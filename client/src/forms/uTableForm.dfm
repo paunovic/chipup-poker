@@ -30,6 +30,7 @@ object frmTable: TfrmTable
     Width = 600
     Height = 354
     Align = alClient
+    OnClick = PaintBoxClick
     OnPaint = PaintBoxPaint
     ExplicitWidth = 570
     ExplicitHeight = 380
@@ -84,14 +85,15 @@ object frmTable: TfrmTable
         TabOrder = 1
       end
     end
-    object btSitStandUp: TcxButton
-      Left = 396
-      Top = 38
+    object btStandUp: TcxButton
+      Left = 388
+      Top = 34
       Width = 97
       Height = 34
-      Action = acShowTableSitForm
+      Action = acStandUp
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 1
+      Visible = False
     end
     object lbsInfo: TcxLabel
       Left = 296
@@ -103,12 +105,9 @@ object frmTable: TfrmTable
   object alTable: TActionList
     Left = 28
     Top = 16
-    object acShowTableSitForm: TAction
-      Caption = 'Sit'
-      OnExecute = acShowTableSitFormExecute
-    end
     object acStandUp: TAction
       Caption = 'Stand Up'
+      Enabled = False
       OnExecute = acStandUpExecute
     end
   end

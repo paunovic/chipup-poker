@@ -53,7 +53,7 @@ object frmTableSit: TfrmTableSit
     Properties.ValueType = vtInt
     TabOrder = 1
     Value = 1
-    Width = 87
+    Width = 125
   end
   object btOK: TcxButton
     Left = 25
@@ -86,14 +86,6 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-  end
-  object Edit1: TEdit
-    Left = 185
-    Top = 13
-    Width = 33
-    Height = 19
-    TabOrder = 4
-    Text = '1'
   end
   object alTableSit: TActionList
     Left = 24

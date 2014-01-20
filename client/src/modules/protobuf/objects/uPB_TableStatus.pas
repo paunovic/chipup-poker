@@ -24,7 +24,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property TableMongoId: TBytes read FTableId write SetTableId;
-    property Seats: TPB_SeatInfos read FSeats;
+    property Seats: TPB_SeatInfos read FSeats write FSeats;
   end;
 
 implementation

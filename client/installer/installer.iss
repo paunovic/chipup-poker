@@ -11,7 +11,7 @@ UninstallDisplayName={#ApplicationName}
 Compression=lzma2                                                                                 
 SolidCompression=yes
 OutputDir=.\
-OutputBaseFilename=chipup_poker_install
+OutputBaseFilename=install_chipuppoker
 UninstallDisplayIcon={app}\{#ApplicationExe}
 DisableProgramGroupPage=yes
 AppMutex=CHIPUPINSTANCEMUTEX
@@ -19,7 +19,7 @@ WizardImageFile=installer_images\installer-1.bmp
 WizardSmallImageFile=installer_images\installer-2.bmp
 
 [Files]
-Source: "client_files\*.*"; DestDir: "{app}" 
+Source: "client_files\*.*"; DestDir: "{app}"
 Source: "ssl_libs\*.*"; DestDir: "{app}"
 
 [Icons]
