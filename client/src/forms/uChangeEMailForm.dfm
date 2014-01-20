@@ -71,7 +71,6 @@ object frmChangeEMail: TfrmChangeEMail
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.ReadOnly = True
-    Style.Color = clSilver
     TabOrder = 0
     Width = 291
   end
