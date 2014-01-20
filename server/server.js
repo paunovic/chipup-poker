@@ -13,7 +13,10 @@ var generatePassword = require('password-generator');
 var codes = require('./ServerCodes');
 var crypto = require('crypto');
 var p = require("node-protobuf").Protobuf;
-var Deck = require('./deck');
+var deck = require('./deck');
+var Deck = deck.Deck;
+var Hand = deck.Hand;
+var https = require('https');
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
@@ -160,6 +163,43 @@ app.post("/uploadAvatar",function (req,res) {
 			}
 		});
 	});
+});
+app.post('/paypal_callback',function (req,res) {
+	if (req.body.test_ipn) var host = 'www.sandbox.paypal.com';
+	else var host = 'www.paypal.com';
+	var raw_post = [];
+	for (key in req.body) {
+		raw_post.push(key+'='+escape(req.body[key]));
+	}
+	raw_post.push('cmd=_notify-validate');
+	raw_post = raw_post.join('&');
+	var req2 = https.request({
+		hostname:host,
+		port:443,
+		path:'/cgi-bin/webscr',
+		method:'POST',
+		headers:{
+			'Content-length':raw_post.length
+		}},function (res2) {
+			res2.setEncoding('utf8');
+			var buffer = '';
+			res2.on('data',function (chunk) {
+				buffer += chunk;
+			});
+			res2.on('end',function () {
+				if ((res2.statusCode == 200) && (buffer.trim() == 'VERIFIED')) {
+					res.send(200,'');
+					console.log('all good');
+					console.log(req.body);
+				} else {
+					res.send(500,'problem verifying data');
+					console.log('error, reply:',buffer);
+					console.log(res2.statusCode,res2.headers);
+				}
+			});
+		});
+	req2.write(raw_post);
+	req2.end();
 });
 app.get("/test",function (req,res) {
 	res.send("<form method='post' action='/image_upload' enctype='multipart/form-data'><input type='file' name='avatar'><input type='submit'></form>");
@@ -1032,12 +1072,10 @@ Game.prototype.edited = function edited(params) {
 }
 Game.prototype.join = function join(conn) {
 	this.users[conn.userid] = conn;
-	conn.log('joined',this);
 	return true;
 }
 Game.prototype.sitDown = function (conn,params) {
 	// FIXME, handle chips
-	// FIXME, inform others
 	conn.log('sitting down',params);
 	if ((params.seat_index < 0) || (params.seat_index >= this.obj.seats)) {
 		conn.reply(0,'invalid seat index');
@@ -1046,7 +1084,8 @@ Game.prototype.sitDown = function (conn,params) {
 	if (this.members[params.seat_index]) {
 		conn.send(codes.SR_TABLE_SIT_SEAT_TAKEN,this.getTableStatus(),'Poker.TableStatus');
 	} else {
-		this.members[params.seat_index] = conn;
+		this.members[params.seat_index] = { conn:conn, hand: new Hand() };
+		this.deck.draw(4,this.members[params.seat_index].hand);
 		var status = this.getTableStatus();
 		conn.send(codes.SR_TABLE_SIT_OK,status,'Poker.TableStatus');
 		for (var key in this.users) {
@@ -1060,16 +1099,18 @@ Game.prototype.getTableStatus = function getTableStatus() {
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
 		var seat = this.members[x];
-		console.log('table debug',x,seat.userid);
-		tableStatus.seats.push({seat:x, player_mongo_id:new Buffer(seat.userid.toString(),'hex'), chips:666});
+		console.log('table debug',x,seat.conn.userid,seat.hand.prettyPrint());
+		var obj = {seat:x, player_mongo_id:new Buffer(seat.conn.userid.toString(),'hex'), chips:666}
+		obj.cards = seat.hand.prettyPrint();
+		tableStatus.seats.push(obj);
 	}
 	console.log(tableStatus);
 	return tableStatus;
 }
 Game.prototype.standUp = function (conn) {
 	for (var x=0; x<this.members.length; x++) {
-		if (this.members[x] == conn) {
-			// FIXME, inform others
+		if (this.members[x].conn == conn) {
+			// FIXME, do something with his cards
 			this.members[x] = null;
 			var status = this.getTableStatus();
 			for (var key in this.users) {
@@ -1097,8 +1138,14 @@ Game.handleDisconnect = function handleDisconnect(conn) {
 Game.getGame = function getgame(id,cb) {
 	if (!activeGames[id]) {
 		allGames.findOne({_id:id},function (err,obj) {
-			cb(null,new Game(obj));
-		});
+			var game = new Game(obj);
+			game.deck = new Deck();
+			game.deck.shuffle(function shuffled(){
+				console.log(game.deck.prettyPrint());
+				//this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
+				cb(null,game);
+			}.bind(this));
+		}.bind(this));
 	} else cb(null,activeGames[id]);
 }
 ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
