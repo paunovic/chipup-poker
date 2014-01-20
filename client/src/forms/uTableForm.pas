@@ -40,7 +40,7 @@ type
     FMFP_Table      : Double;
 
     function CreateMetafile(const AResourceName: String; var AProportions: Double): TMetaFile;
-    procedure RedrawControls(const APaintboxRepaint: Boolean = FALSE);
+    procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AssignTableStatus(const ASource, ATarget: TPB_TableStatus);
 
     procedure DrawSeat(const ASeatIndex: Integer);
@@ -64,7 +64,7 @@ implementation
 
 uses
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo,
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule;
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -97,7 +97,7 @@ begin
 
   Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, FTable.Game.SmallBlind, FTable.Game.BigBlind, FTable.Game.GameTypeStrFull]);
 
-  RedrawControls;
+  Redraw;
 end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
@@ -130,7 +130,7 @@ begin
   if Width / Height <> FFormAspectRatio then
     Height := Round(Width / FFormAspectRatio);
 
-  RedrawControls;
+  Redraw;
 end;
 
 procedure TfrmTable.FormShow(Sender: TObject);
@@ -222,12 +222,16 @@ begin
   end;
 end;
 
-procedure TfrmTable.RedrawControls(const APaintboxRepaint: Boolean = FALSE);
+procedure TfrmTable.Redraw(const APaintboxRepaint: Boolean = FALSE);
 var
   w, h: Integer;
   R   : TRect;
   X, Y: Integer;
   C1  : Integer;
+  player_info: TPlayerInfo;
+  avatar     : TAvatar;
+  seat_point : TPoint;
+  avatar_rect: TRect;
 begin
   R := TRect.Create(0, 0, PaintBox.Width, PaintBox.Height);
 
@@ -256,6 +260,25 @@ begin
   for C1 := 0 to FTable.Game.Seats - 1 do
     DrawSeat(C1);
 
+  // draw avatars
+  if Assigned(FLastTableStatus) then
+    if Assigned(FLastTableStatus.Seats) then
+      for C1 := 0 to FLastTableStatus.Seats.Count - 1 do
+      begin
+        if dmMain.Players.FindPlayerById(FLastTableStatus.Seats[C1].PlayerMongoId, player_info) then
+        begin
+          if dmMain.Avatars.Find(player_info.AvatarId, avatar) then // if avatar is found, draw it
+          begin
+            seat_point := GetSeatPoint(FLastTableStatus.Seats[C1].Seat);
+            avatar_rect := TRect.Create(Point(seat_point.X - 25, seat_point.Y - 70), Point(seat_point.X + 25, seat_point.Y - 20));
+            FPaintBoxBitmap.Canvas.StretchDraw(avatar_rect, avatar.Image);
+          end
+          else // if avatar is not found, add it to avatar list, which will download it automatically
+            dmMain.Avatars.AddAvatar(player_info.AvatarId);
+        end;
+      end;
+
+  // repaint paintbox if needed
   if APaintboxRepaint then
     PaintBox.Repaint;
 end;
@@ -380,7 +403,7 @@ begin
 
   AssignTableStatus(pbtablestatus, FLastTableStatus);
 
-  RedrawControls(TRUE);
+  Redraw(TRUE);
 
   if alTable.State = asSuspended then
     alTable.State := asNormal;

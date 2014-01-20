@@ -34,7 +34,7 @@ type
     destructor Destroy; override;
 
     function IndexOf(const AId: AnsiString): Integer;
-    function Find(const AId: AnsiString): TAvatar;
+    function Find(const AId: AnsiString; out AAvatar: TAvatar): Boolean;
     function AddAvatar(const AId: AnsiString; const AImage: TJPEGImage = nil): TAvatar;
     function RemoveAvatar(const AId: AnsiString): Boolean;
     function RefreshAvatar(const AId: AnsiString): Boolean;
@@ -244,14 +244,15 @@ begin
   Exit(-1);
 end;
 
-function TAvatars.Find(const AId: AnsiString): TAvatar;
+function TAvatars.Find(const AId: AnsiString; out AAvatar: TAvatar): Boolean;
 var
   index: Integer;
 begin
   index := IndexOf(AId);
   if index = -1 then
-    Exit(nil);
-  Exit(ToArray[index]);
+    Exit(FALSE);
+  AAvatar := ToArray[index];
+  Exit(TRUE);
 end;
 
 function TAvatars.AddAvatar(const AId: AnsiString; const AImage: TJPEGImage): TAvatar;
@@ -294,8 +295,7 @@ function TAvatars.RefreshAvatar(const AId: AnsiString): Boolean;
 var
   avatar: TAvatar;
 begin
-  avatar := Find(AId);
-  if not Assigned(avatar) then
+  if not Find(AId, avatar) then
     Exit(FALSE);
 
   avatar.Refresh;
@@ -306,8 +306,7 @@ function TAvatars.SetAvatarImage(const AId: AnsiString; const AImage: TJPEGImage
 var
   avatar: TAvatar;
 begin
-  avatar := Find(AId);
-  if not Assigned(avatar) then
+  if not Find(AId, avatar) then
     Exit(FALSE);
 
   avatar.Image.Assign(AImage);

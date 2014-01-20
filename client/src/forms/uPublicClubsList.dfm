@@ -4,7 +4,7 @@ object frmPublicClubsList: TfrmPublicClubsList
   BorderStyle = bsDialog
   Caption = 'Public Clubs List'
   ClientHeight = 416
-  ClientWidth = 533
+  ClientWidth = 477
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -20,17 +20,18 @@ object frmPublicClubsList: TfrmPublicClubsList
   OnKeyDown = FormKeyDown
   OnShow = FormShow
   DesignSize = (
-    533
+    477
     416)
   PixelsPerInch = 96
   TextHeight = 13
   object gridClubs: TcxGrid
     Left = 8
     Top = 8
-    Width = 515
+    Width = 459
     Height = 362
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
+    ExplicitWidth = 515
     object gridClubsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnFocusedRecordChanged = gridClubsTableFocusedRecordChanged
@@ -53,7 +54,7 @@ object frmPublicClubsList: TfrmPublicClubsList
         Caption = 'Club ID'
         PropertiesClassName = 'TcxSpinEditProperties'
         HeaderAlignmentHorz = taCenter
-        Width = 61
+        Width = 67
       end
       object gridClubsName: TcxGridColumn
         Caption = 'Club name'
@@ -62,20 +63,20 @@ object frmPublicClubsList: TfrmPublicClubsList
         Options.Editing = False
         SortIndex = 0
         SortOrder = soDescending
-        Width = 272
+        Width = 219
       end
       object gridClubsInvitationCode: TcxGridColumn
         Caption = 'Invitation Code'
         PropertiesClassName = 'TcxTextEditProperties'
         Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
-        Width = 105
+        Width = 100
       end
       object gridClubsPlayers: TcxGridColumn
         Caption = 'Players'
         PropertiesClassName = 'TcxSpinEditProperties'
         HeaderAlignmentHorz = taCenter
-        Width = 75
+        Width = 71
       end
     end
     object gridClubsLevel: TcxGridLevel
@@ -83,13 +84,14 @@ object frmPublicClubsList: TfrmPublicClubsList
     end
   end
   object btJoinClub: TcxButton
-    Left = 433
+    Left = 377
     Top = 379
     Width = 90
     Height = 27
     Action = acJoinClub
     Anchors = [akRight, akBottom]
     TabOrder = 1
+    ExplicitLeft = 433
   end
   object btRefreshList: TcxButton
     Left = 8
@@ -101,11 +103,10 @@ object frmPublicClubsList: TfrmPublicClubsList
     TabOrder = 2
   end
   object alPublicClubsList: TActionList
-    Left = 120
-    Top = 136
+    Left = 96
+    Top = 140
     object acRefresh: TAction
       Caption = 'Refresh List'
-      Enabled = False
       OnExecute = acRefreshExecute
     end
     object acJoinClub: TAction
@@ -113,5 +114,12 @@ object frmPublicClubsList: TfrmPublicClubsList
       Enabled = False
       OnExecute = acJoinClubExecute
     end
+  end
+  object tiRefreshActionEnabler: TTimer
+    Enabled = False
+    Interval = 10000
+    OnTimer = tiRefreshActionEnablerTimer
+    Left = 200
+    Top = 140
   end
 end

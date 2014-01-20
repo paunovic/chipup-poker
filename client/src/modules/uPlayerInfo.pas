@@ -39,7 +39,7 @@ type
 
   TPlayerInfos = class(TObjectList<TPlayerInfo>)
   public
-    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer): TPlayerInfo;
+    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer; const AAvatarId: TBytes): TPlayerInfo;
     function FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
     function ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
   end;
@@ -133,7 +133,7 @@ end;
 
 { TPlayerInfos }
 
-function TPlayerInfos.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer): TPlayerInfo;
+function TPlayerInfos.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer; const AAvatarId: TBytes): TPlayerInfo;
 var
   player: TPlayerInfo;
 begin
@@ -144,6 +144,7 @@ begin
   player.FNick := ANick;
   player.FEMail := AEMail;
   player.FBalance := AChips;
+  player.AvatarId := EncodeBase64(@AAvatarId[0], Length(AAvatarId));
   Add(player);
   result := player;
 end;
@@ -169,7 +170,7 @@ var
 begin
   Clear;
   for C1 := 0 to AStatusReply.Users.Count - 1 do
-    AddPlayer(AStatusReply.Users[C1].MongoId, AStatusReply.Users[C1].DisplayName, AStatusReply.Users[C1].EMail, AStatusReply.Users[C1].Chips);
+    AddPlayer(AStatusReply.Users[C1].MongoId, AStatusReply.Users[C1].DisplayName, AStatusReply.Users[C1].EMail, AStatusReply.Users[C1].Chips, AStatusReply.Users[C1].Avatar);
 
   Exit(TRUE);
 end;

@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
   dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxSpinEdit, cxTextEdit,
   Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid,
-  uMessageItem, dxSkinDarkRoom;
+  uMessageItem, dxSkinDarkRoom, Vcl.ExtCtrls;
 
 type
   TfrmPublicClubsList = class(TForm)
@@ -23,6 +23,7 @@ type
     alPublicClubsList: TActionList;
     acRefresh: TAction;
     acJoinClub: TAction;
+    tiRefreshActionEnabler: TTimer;
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acRefreshExecute(Sender: TObject);
@@ -30,6 +31,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure acJoinClubExecute(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure tiRefreshActionEnablerTimer(Sender: TObject);
   private
     FSelectedClubId: Int64;
 
@@ -120,8 +122,8 @@ end;
 
 procedure TfrmPublicClubsList.acRefreshExecute(Sender: TObject);
 begin
-  acJoinClub.Enabled := FALSE;
   acRefresh.Enabled := FALSE;
+
   gridClubsTable.DataController.BeginFullUpdate;
   try
     gridClubsTable.DataController.SetRecordCount(0);
@@ -129,6 +131,8 @@ begin
     gridClubsTable.DataController.EndFullUpdate;
   end;
   SocketClient.ListPublicClubs;
+
+  tiRefreshActionEnabler.Enabled := TRUE;
 end;
 
 procedure TfrmPublicClubsList.TCJoinClubOk(const AMessage: TMessageItem);
@@ -168,10 +172,14 @@ begin
   finally
     gridClubsTable.DataController.EndFullUpdate;
   end;
-
-  acRefresh.Enabled := TRUE;
 end;
 
 
+
+procedure TfrmPublicClubsList.tiRefreshActionEnablerTimer(Sender: TObject);
+begin
+  acRefresh.Enabled := TRUE;
+  tiRefreshActionEnabler.Enabled := FALSE;
+end;
 
 end.
