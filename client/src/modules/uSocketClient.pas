@@ -101,6 +101,8 @@ end;
 
 
 procedure TSocketClient.Connect;
+var
+  err : ESocketException;
 begin
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
@@ -116,7 +118,16 @@ begin
   FSocket.OnSessionClosed := SocketSessionClosed;
   FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
   FSocket.Flush;
-  FSocket.Connect;
+  try
+    FSocket.Connect;
+  except
+    if ExceptObject is ESocketException then
+    begin
+      err := ExceptObject as ESocketException;
+      {$IFDEF DEBUG} DebugLn(Format('Error connecting to server:',[err.Message]),ditSocket); {$ENDIF}
+    end;
+    // do something with ExceptObject which implents ESocketException
+  end;
 end;
 
 procedure TSocketClient.Disconnect;
@@ -552,7 +563,7 @@ var
 begin
   protobuf := TPB_SetAvatarParams.Create;
   try
-    protobuf.AvatarId := AAvatarId;
+    protobuf.AvatarId := String(AAvatarId);
     SendProtobuf(CMD_SET_AVATAR, protobuf);
   finally
     protobuf.Free;
