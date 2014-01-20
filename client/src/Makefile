@@ -2,7 +2,7 @@ include Makefile.include
 
 release: all
 debug: all
-FLAGS=-DDEBUG
+	$(eval FLAGS := -DDEBUG)
 
 all: clean client.exe
 
