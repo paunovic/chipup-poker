@@ -53,7 +53,7 @@ object frmPublicClubsList: TfrmPublicClubsList
         Caption = 'Club ID'
         PropertiesClassName = 'TcxSpinEditProperties'
         HeaderAlignmentHorz = taCenter
-        Width = 64
+        Width = 61
       end
       object gridClubsName: TcxGridColumn
         Caption = 'Club name'
@@ -62,19 +62,20 @@ object frmPublicClubsList: TfrmPublicClubsList
         Options.Editing = False
         SortIndex = 0
         SortOrder = soDescending
-        Width = 202
+        Width = 272
       end
       object gridClubsInvitationCode: TcxGridColumn
         Caption = 'Invitation Code'
         PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
-        Width = 81
+        Width = 105
       end
       object gridClubsPlayers: TcxGridColumn
         Caption = 'Players'
         PropertiesClassName = 'TcxSpinEditProperties'
         HeaderAlignmentHorz = taCenter
-        Width = 52
+        Width = 75
       end
     end
     object gridClubsLevel: TcxGridLevel

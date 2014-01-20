@@ -141,6 +141,7 @@ var
   rcount: Integer;
   club  : TPB_Club;
   clubs : TPB_ListClubsReply;
+  tmp   : String;
 begin
   clubs := AMessage.Object_ as TPB_ListClubsReply;
 
@@ -155,7 +156,13 @@ begin
       gridClubsTable.DataController.SetRecordCount(rcount);
       gridClubsTable.DataController.SetValue(rcount - 1, gridClubsId.Index, club.Seq);
       gridClubsTable.DataController.SetValue(rcount - 1, gridClubsName.Index, club.Name);
-      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsInvitationCode.Index, club.HasPassword);
+
+      if club.HasPassword then
+        tmp := 'Yes'
+      else
+        tmp := 'No';
+      gridClubsTable.DataController.SetValue(rcount - 1, gridClubsInvitationCode.Index, tmp);
+
       gridClubsTable.DataController.SetValue(rcount - 1, gridClubsPlayers.Index, club.MemberCount);
     end;
   finally
