@@ -11,7 +11,9 @@ fs.open('/dev/urandom','r',function (err,fd) {
 		});
 	}
 });
-module.exports = Deck;
+module.exports.Deck = Deck;
+module.exports.getRandom = getRandom;
+module.exports.Hand = Hand;
 function Deck() {
 	if (!(this instanceof Deck)) return new Deck();
 	this.cards = [];
@@ -21,8 +23,11 @@ function Deck() {
 		}
 	}
 }
+function Hand() {
+	this.cards = [];
+}
 Deck.suits = ['H','D','S','C'];
-Deck.prototype.prettyPrint = function prettyPrint() {
+Hand.prototype.prettyPrint = Deck.prototype.prettyPrint = function prettyPrint() {
 	var out = [];
 	for (var i=0; i<this.cards.length; i++) {
 		out.push(this.cards[i].getValue()+this.cards[i].suit);
@@ -49,6 +54,21 @@ Deck.prototype.shuffle = function shuffle(callback) {
 	}.bind(this);
 	recurse();
 }
+Deck.prototype.draw = function (count,hand) {
+	console.log('before:'+this.prettyPrint());
+	var out = this.cards.splice(0,count);
+	console.log(out);
+	console.log('after:'+this.prettyPrint());
+	console.log('before2:',hand.cards);
+	hand.cards = hand.cards.concat(out);
+	console.log('after2:',hand.cards);
+}
+function getRandom(size,callback) {
+	var buffer = new Buffer(size);
+	fs.read(rand,buffer,0,size,null,function () {
+		callback(buffer);
+	});
+}
 function Card(suit,value) {
 	this.value = value;
 	this.suit = suit;
@@ -63,4 +83,3 @@ Card.prototype.getValue = function getValue() {
 	default: return this.value;
 	}
 }
-
