@@ -195,6 +195,7 @@ enum ServerCodes {
     SR_TABLE_SIT_OK = 49;
     SR_TABLE_SIT_SEAT_TAKEN = 50;
     SR_TABLE_STAND_UP_OK = 51;
+	SR_PONG = 52;
 	CMD_LOGIN = 501;
 	CMD_STATUS = 502;
 	CMD_REGISTER = 503;
@@ -219,6 +220,7 @@ enum ServerCodes {
 	CMD_TABLE_LEAVE = 522;
 	CMD_TABLE_SIT = 523;
 	CMD_TABLE_STAND_UP = 524;
+	CMD_PING = 525;
 }
 
 service Server {
