@@ -17,6 +17,7 @@ type
       FN_CHIPS = 3;
       FN_CARD_COUNT = 4;
       FN_CARDS = 5;
+      FN_INHAND = 6;
 
     var
       FSeat: Integer;
@@ -24,12 +25,14 @@ type
       FChips: Integer;
       FCardCount: Integer;
       FCards: String;
+      FInhand: Boolean;
 
     procedure SetSeat(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
     procedure SetChips(const AValue: Integer);
     procedure SetCardCount(const AValue: Integer);
     procedure SetCards(const AValue: String);
+    procedure SetInhand(const AValue: Boolean);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -39,6 +42,7 @@ type
     property Chips: Integer read FChips write SetChips;
     property CardCount: Integer read FCardCount write SetCardCount;
     property Cards: String read FCards write SetCards;
+    property Inhand: Boolean read FInhand write SetInhand;
   end;
 
   TPB_SeatInfos = TObjectList<TPB_SeatInfo>;
@@ -53,14 +57,13 @@ destructor TPB_SeatInfo.Destroy;
 begin
   inherited;
 end;
-
 procedure TPB_SeatInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
-        (AProtobufReader.GetNext(tag, wire_type, field_number)) do
+        (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
       FN_SEAT: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -85,8 +88,8 @@ begin
       else
         AProtobufReader.skipField(tag);
     end;
+  end;
 end;
-
 procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
@@ -115,6 +118,12 @@ procedure TPB_SeatInfo.SetCards(const AValue: String);
 begin
   FCards := AValue;
   ProtobufOutput.writeString(FN_CARDS, AValue);
+end;
+
+procedure TPB_SeatInfo.SetInhand(const AValue: Boolean);
+begin
+  FInhand := AValue;
+  ProtobufOutput.writeBoolean(FN_INHAND, AValue);
 end;
 
 end.

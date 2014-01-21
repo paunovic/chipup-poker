@@ -32,6 +32,7 @@ type
     procedure acJoinClubExecute(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure tiRefreshActionEnablerTimer(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FSelectedClubId: Int64;
 
@@ -70,6 +71,16 @@ procedure TfrmPublicClubsList.FormKeyDown(Sender: TObject; var Key: Word; Shift:
 begin
   case Key of
     VK_ESCAPE: ModalResult := mrCancel;
+  end;
+end;
+
+procedure TfrmPublicClubsList.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      ModalResult := mrCancel;
+      Key := #0;
+    end;
   end;
 end;
 

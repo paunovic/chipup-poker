@@ -16,12 +16,12 @@ type
     btCancel: TcxButton;
     edEMail: TcxTextEdit;
     lbsEMail: TcxLabel;
-    cxLabel1: TcxLabel;
+    lbsInfo: TcxLabel;
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure edEmailChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
   public
   end;
@@ -38,11 +38,17 @@ begin
   edEMail.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
 end;
 
-procedure TfrmForgotPassword.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmForgotPassword.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_RETURN: acOK.Execute;
-    VK_ESCAPE: acCancel.Execute;
+  case Ord(Key) of
+    VK_RETURN: begin
+      acOK.Execute;
+      Key := #0;
+    end;
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
   end;
 end;
 

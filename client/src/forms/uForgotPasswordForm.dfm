@@ -16,7 +16,7 @@ object frmForgotPassword: TfrmForgotPassword
   OldCreateOrder = False
   Position = poOwnerFormCenter
   OnCreate = FormCreate
-  OnKeyDown = FormKeyDown
+  OnKeyPress = FormKeyPress
   DesignSize = (
     305
     158)
@@ -77,7 +77,7 @@ object frmForgotPassword: TfrmForgotPassword
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object cxLabel1: TcxLabel
+  object lbsInfo: TcxLabel
     AlignWithMargins = True
     Left = 10
     Top = 3

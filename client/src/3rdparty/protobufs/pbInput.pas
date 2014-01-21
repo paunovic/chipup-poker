@@ -354,7 +354,7 @@ end;
 procedure TProtoBufInput.skipRawBytes(size: integer);
 begin
   Assert(size >= 0, ProtoBufException + 'negative Size');
-  Assert((FPos + size) < FLen, ProtoBufException + 'truncated Message');
+  Assert((FPos + size) <= FLen, ProtoBufException + 'truncated Message');
   Inc(FPos, size);
 end;
 

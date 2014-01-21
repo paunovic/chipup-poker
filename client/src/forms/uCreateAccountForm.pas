@@ -25,11 +25,11 @@ type
     lbsUsername: TcxLabel;
     lbTOS: TcxLabel;
     procedure acSignUpExecute(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure lbTOSClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     function ValidateForm: Boolean;
 
@@ -66,12 +66,18 @@ begin
   MessageContainer.RemoveMessageHandler(Handle);
 end;
 
-procedure TfrmCreateAccount.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmCreateAccount.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_ESCAPE: ModalResult := mrCancel;
-    VK_RETURN: if not edUsername.Focused then
-                 SelectNext(ActiveControl, TRUE, TRUE);
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      ModalResult := mrCancel;
+      Key := #0;
+    end;
+    VK_RETURN: begin
+      if not edUsername.Focused then
+        SelectNext(ActiveControl, TRUE, TRUE);
+      Key := #0;
+    end;
   end;
 end;
 

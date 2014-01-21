@@ -24,10 +24,10 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure PaintBoxPaint(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure edChatKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure acStandUpExecute(Sender: TObject);
     procedure PaintBoxClick(Sender: TObject);
+    procedure edChatKeyPress(Sender: TObject; var Key: Char);
   private
     FFormAspectRatio: Double;
     FTable          : TTable;
@@ -351,13 +351,18 @@ begin
     end;
 end;
 
-procedure TfrmTable.edChatKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmTable.edChatKeyPress(Sender: TObject; var Key: Char);
 begin
-  if (Key = vk_RETURN) and (edChat.Text <> '') then
-  begin
-    if Trim(edChat.Text) <> '' then
-      SocketClient.SendTableChatLine(FTable.Game.MongoId, Trim(edChat.Text));
-    edChat.Clear;
+  case Ord(Key) of
+    VK_RETURN: begin
+      if edChat.Text <> '' then
+      begin
+        if Trim(edChat.Text) <> '' then
+          SocketClient.SendTableChatLine(FTable.Game.MongoId, Trim(edChat.Text));
+        edChat.Clear;
+      end;
+      Key := #0;
+    end;
   end;
 end;
 
@@ -381,11 +386,14 @@ begin
       begin
         reChat.SelStart := reChat.GetTextLen;
         reChat.SelAttributes.Color := clLime;
-        reChat.SelText := chat_message.Username;
+        if reChat.SelStart = 0 then
+          reChat.SelText := chat_message.Username
+        else
+          reChat.SelText := sLineBreak + chat_message.Username;
 
         reChat.SelStart := reChat.GetTextLen;
         reChat.SelAttributes.Color := clSilver;
-        reChat.SelText := Format(': %s', [chat_message.Msg]) + sLineBreak;
+        reChat.SelText := Format(': %s', [chat_message.Msg]);
 
         SendMessage(reChat.Handle, WM_VSCROLL, SB_BOTTOM, 0);
       end;

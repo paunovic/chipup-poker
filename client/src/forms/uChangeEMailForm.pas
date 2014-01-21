@@ -20,12 +20,12 @@ type
     acOK: TAction;
     acCancel: TAction;
     procedure acCancelExecute(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormCreate(Sender: TObject);
     procedure edNewMailPropertiesChange(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     procedure TCChangeMailOk(const AMessage: TMessageItem);
     procedure TCChangeMailInvalidMail(const AMessage: TMessageItem);
@@ -95,14 +95,21 @@ begin
   acOK.Enabled := (ValidateEMail(edNewMail.Text, err)) and (edNewMail.Text <> dmMain.SelfInfo.EMail);
 end;
 
-procedure TfrmChangeEMail.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmChangeEMail.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_ESCAPE: acCancel.Execute;
-    VK_RETURN: if edNewMail.Focused then
-                 acOK.Execute;
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
+    VK_RETURN: begin
+      if edNewMail.Focused then
+        acOK.Execute;
+      Key := #0;
+    end;
   end;
 end;
+
 procedure TfrmChangeEMail.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;

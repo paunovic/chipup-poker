@@ -28,7 +28,7 @@ object frmTable: TfrmTable
     Left = 0
     Top = 0
     Width = 600
-    Height = 354
+    Height = 345
     Align = alClient
     OnClick = PaintBoxClick
     OnPaint = PaintBoxPaint
@@ -37,9 +37,9 @@ object frmTable: TfrmTable
   end
   object paBottom: TPanel
     Left = 0
-    Top = 354
+    Top = 345
     Width = 600
-    Height = 102
+    Height = 111
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 0
@@ -47,7 +47,7 @@ object frmTable: TfrmTable
       Left = 0
       Top = 0
       Width = 290
-      Height = 102
+      Height = 111
       Align = alLeft
       BevelOuter = bvNone
       Color = clBlack
@@ -61,14 +61,14 @@ object frmTable: TfrmTable
         Align = alTop
         Style.Edges = []
         TabOrder = 0
-        OnKeyDown = edChatKeyDown
+        OnKeyPress = edChatKeyPress
         Width = 289
       end
       object reChat: TRichEdit
         Left = 0
         Top = 19
         Width = 289
-        Height = 83
+        Height = 92
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -79,6 +79,8 @@ object frmTable: TfrmTable
         Font.Height = -11
         Font.Name = 'Arial'
         Font.Style = []
+        Lines.Strings = (
+          '')
         ParentFont = False
         ReadOnly = True
         ScrollBars = ssVertical

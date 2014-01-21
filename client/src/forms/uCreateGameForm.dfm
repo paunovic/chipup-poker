@@ -15,7 +15,7 @@ object frmCreateGame: TfrmCreateGame
   OldCreateOrder = False
   Position = poOwnerFormCenter
   OnDestroy = FormDestroy
-  OnKeyDown = FormKeyDown
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   DesignSize = (
     376

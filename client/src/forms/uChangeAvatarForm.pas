@@ -23,8 +23,8 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FAvatarId : AnsiString;
     FAvatarJPG: TJPEGImage;
@@ -67,10 +67,13 @@ begin
   FAvatarJPG.Free;
 end;
 
-procedure TfrmChangeAvatar.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmChangeAvatar.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_ESCAPE: acClose.Execute;
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      acClose.Execute;
+      Key := #0;
+    end;
   end;
 end;
 

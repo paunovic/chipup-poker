@@ -26,12 +26,12 @@ type
     StatusBar: TdxStatusBar;
     SkinController: TdxSkinController;
     procedure FormCreate(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acLoginExecute(Sender: TObject);
     procedure acShowCreateAccountFormExecute(Sender: TObject);
     procedure acShowForgotPasswordFormExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FLoginSuccess: Boolean;
 
@@ -182,10 +182,13 @@ begin
   acShowForgotPasswordForm.Enabled := AEnable;
 end;
 
-procedure TfrmLogin.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_RETURN: acLogin.Execute;
+  case Ord(Key) of
+    VK_RETURN: begin
+      acLogin.Execute;
+      Key := #0;
+    end;
   end;
 end;
 

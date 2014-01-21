@@ -26,6 +26,7 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FClub  : TClubInfo;
     FPlayer: TPlayerInfo;
@@ -87,6 +88,16 @@ begin
   end;
 end;
 
+
+procedure TfrmGiveChips.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
+  end;
+end;
 
 procedure TfrmGiveChips.SetParams(const AParams: array of pointer);
 begin

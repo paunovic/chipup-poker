@@ -21,7 +21,7 @@ type
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FGame     : TGameInfo;
     FSeatIndex: Integer;
@@ -55,10 +55,17 @@ begin
   MessageContainer.AddMessageHandler(Handle);
 end;
 
-procedure TfrmTableSit.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmTableSit.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_RETURN: acOK.Execute;
+  case Ord(Key) of
+    VK_RETURN: begin
+      acOK.Execute;
+      Key := #0;
+    end;
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
   end;
 end;
 

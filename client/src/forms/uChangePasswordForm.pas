@@ -24,8 +24,8 @@ type
     procedure acOKExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acCancelExecute(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     procedure TCChangePasswordOk(const AMessage: TMessageItem);
     procedure TCChangePasswordInvalid(const AMessage: TMessageItem);
@@ -80,14 +80,20 @@ begin
   end;
 end;
 
-procedure TfrmChangePassword.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmChangePassword.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_ESCAPE: acCancel.Execute;
-    VK_RETURN: if edConfirmPassword.Focused then
-                 acOK.Execute
-               else
-                 SelectNext(ActiveControl, TRUE, TRUE);
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
+    VK_RETURN: begin
+      if edConfirmPassword.Focused then
+        acOK.Execute
+      else
+        SelectNext(ActiveControl, TRUE, TRUE);
+      Key := #0;
+    end;
   end;
 end;
 
