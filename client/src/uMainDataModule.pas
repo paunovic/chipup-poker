@@ -50,8 +50,6 @@ uses
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
-//  SystemParametersInfo(SPI_SETBEEP, 0, nil, SPIF_SENDWININICHANGE);
-
   FServerSettings := TServerSettings.Create;
 
   FSelfInfo := TPlayerInfo.Create;
@@ -76,8 +74,6 @@ begin
   if SocketClient.IsConnected then
     SocketClient.Disconnect;
   FreeAndNil(SocketClient);
-
-//  SystemParametersInfo(SPI_SETBEEP, 1, nil, SPIF_SENDWININICHANGE);
 end;
 
 function TdmMain.MakeTokenCostMessage(const ALabel: TcxLabel; const APrefix: String; const ACost: Integer): String;
