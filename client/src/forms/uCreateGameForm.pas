@@ -29,7 +29,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FClub: TClubInfo;
 
@@ -54,14 +54,20 @@ begin
   MessageContainer.RemoveMessageHandler(Handle);
 end;
 
-procedure TfrmCreateGame.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmCreateGame.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_ESCAPE: acCancel.Execute;
-    VK_RETURN: if not cbSeats.Focused then
-                 SelectNext(ActiveControl, TRUE, TRUE)
-               else
-                 acOK.Execute;
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
+    VK_RETURN: begin
+      if not cbSeats.Focused then
+        SelectNext(ActiveControl, TRUE, TRUE)
+      else
+        acOK.Execute;
+      Key := #0;
+    end;
   end;
 end;
 

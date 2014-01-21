@@ -26,9 +26,9 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FClub: TClubInfo;
 
@@ -60,12 +60,18 @@ begin
   MessageContainer.RemoveMessageHandler(Handle);
 end;
 
-procedure TfrmChangeClubDetails.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmChangeClubDetails.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_ESCAPE: acCancel.Execute;
-    VK_RETURN: if not edInvitationCode.Focused then
-                 SelectNext(ActiveControl, TRUE, TRUE);
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
+    VK_RETURN: begin
+      if not edInvitationCode.Focused then
+        SelectNext(ActiveControl, TRUE, TRUE);
+      Key := #0;
+    end;
   end;
 end;
 

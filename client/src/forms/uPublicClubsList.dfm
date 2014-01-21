@@ -18,6 +18,7 @@ object frmPublicClubsList: TfrmPublicClubsList
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   DesignSize = (
     477
@@ -31,7 +32,6 @@ object frmPublicClubsList: TfrmPublicClubsList
     Height = 362
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
-    ExplicitWidth = 515
     object gridClubsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnFocusedRecordChanged = gridClubsTableFocusedRecordChanged
@@ -91,7 +91,6 @@ object frmPublicClubsList: TfrmPublicClubsList
     Action = acJoinClub
     Anchors = [akRight, akBottom]
     TabOrder = 1
-    ExplicitLeft = 433
   end
   object btRefreshList: TcxButton
     Left = 8

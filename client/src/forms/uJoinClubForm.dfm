@@ -18,6 +18,7 @@ object frmJoinClub: TfrmJoinClub
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   DesignSize = (
     292

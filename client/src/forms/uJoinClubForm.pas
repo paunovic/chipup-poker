@@ -26,6 +26,7 @@ type
     procedure edClubIDPropertiesChange(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     procedure TCJoinClubOk(const AMessage: TMessageItem);
     procedure TCJoinClubInvalidId(const AMessage: TMessageItem);
@@ -77,10 +78,24 @@ procedure TfrmJoinClub.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShift
 begin
   case Key of
     VK_ESCAPE: acCancel.Execute;
-    VK_RETURN: if not edClubCode.Focused then
-                 SelectNext(ActiveControl, TRUE, TRUE)
-               else
-                 acOk.Execute;
+    VK_RETURN:
+  end;
+end;
+
+procedure TfrmJoinClub.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  case Ord(Key) of
+    VK_RETURN: begin
+      if not edClubCode.Focused then
+        SelectNext(ActiveControl, TRUE, TRUE)
+      else
+        acOk.Execute;
+      Key := #0;
+    end;
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
   end;
 end;
 

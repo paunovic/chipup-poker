@@ -29,7 +29,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     FGame: TGameInfo;
 
@@ -54,10 +54,13 @@ begin
   MessageContainer.RemoveMessageHandler(Handle);
 end;
 
-procedure TfrmEditGame.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TfrmEditGame.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  case Key of
-    VK_ESCAPE: acCancel.Execute;
+  case Ord(Key) of
+    VK_ESCAPE: begin
+      acCancel.Execute;
+      Key := #0;
+    end;
   end;
 end;
 

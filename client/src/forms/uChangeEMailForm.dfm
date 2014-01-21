@@ -17,7 +17,7 @@ object frmChangeEMail: TfrmChangeEMail
   Position = poOwnerFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnKeyDown = FormKeyDown
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   DesignSize = (
     428

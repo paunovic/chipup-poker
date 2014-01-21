@@ -16,7 +16,7 @@ object frmTableSit: TfrmTableSit
   OldCreateOrder = False
   Position = poOwnerFormCenter
   OnDestroy = FormDestroy
-  OnKeyDown = FormKeyDown
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   DesignSize = (
     226
