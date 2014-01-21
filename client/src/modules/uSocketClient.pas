@@ -9,12 +9,20 @@ uses
 type
   TSocketClient = class
   private
-    FSocket           : TSslWSocket;
-    FServer           : String;
-    FPort             : Integer;
-    FConnectCode      : Integer;
-    FReceiveBuffer    : PAnsiChar;
-    FReceiveBufferSize: Integer;
+    const
+      TIMER_ID_PING         = 1;
+      TIMER_ID_PING_TIMEOUT = 2;
+
+    var
+      FSocket                : TSslWSocket;
+      FServer                : String;
+      FPort                  : Integer;
+      FConnectCode           : Integer;
+      FReceiveBuffer         : PAnsiChar;
+      FReceiveBufferSize     : Integer;
+      FInternalMessageHandler: HWND;
+
+    procedure WndMethod(var AMessage: TMessage);
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -24,6 +32,11 @@ type
     procedure SocketError(Sender: TObject);
 
     function ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
+
+    procedure ResetPingTimeoutTimer;
+    procedure ResetPingTimer;
+    procedure KillPingTimer;
+    procedure KillPingTimeoutTimer;
 
   public
     constructor Create(const AServer: String; const APort: Integer);
@@ -60,6 +73,7 @@ type
     procedure LeaveTable(const AGameId: TBytes);
     procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
+    procedure Ping;
 
     property Socket: TSslWSocket read FSocket;
   end;
@@ -85,6 +99,8 @@ begin
   FServer := AServer;
   FPort := APort;
 
+  FInternalMessageHandler := AllocateHWnd(WndMethod);
+
   FSocket := TSslWSocket.Create(nil);
   FSocket.SslContext := TSslContext.Create(nil);
   FSocket.SslContext.InitContext;
@@ -95,6 +111,8 @@ begin
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
   FSocket.Free;
+
+  DeallocateHWnd(FInternalMessageHandler);
 
   inherited;
 end;
@@ -117,6 +135,8 @@ begin
   FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
   FSocket.Flush;
 
+  ResetPingTimer;
+
   try
     FSocket.Connect;
   except
@@ -129,6 +149,8 @@ end;
 
 procedure TSocketClient.Disconnect;
 begin
+  KillPingTimer;
+
   if FSocket.State <> TSocketState.wsClosed then
   begin
     {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
@@ -198,7 +220,7 @@ begin
   if len < 0 then
   begin
     FSocket.LastError := WSAGetLastError;
-    SocketError(Sender)
+    SocketError(Sender);
   end
   else
   begin
@@ -222,6 +244,7 @@ begin
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc); {$ENDIF}
+      ResetPingTimer;
       MessageContainer.AddServerMessage(rpc_message.MethodId, data_obj);
     end;
 
@@ -255,6 +278,46 @@ end;
 procedure TSocketClient.SocketError(Sender: TObject);
 begin
   {$IFDEF DEBUG} DebugLn(Format('Socket error: %s', [WSocketErrorDesc(FSocket.LastError)]), ditException); {$ENDIF}
+end;
+
+procedure TSocketClient.ResetPingTimer;
+begin
+  SetTimer(FInternalMessageHandler, TIMER_ID_PING, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, nil);
+end;
+
+procedure TSocketClient.ResetPingTimeoutTimer;
+begin
+  SetTimer(FInternalMessageHandler, TIMER_ID_PING_TIMEOUT, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, nil);
+end;
+
+procedure TSocketClient.KillPingTimer;
+begin
+  KillTimer(FInternalMessageHandler, TIMER_ID_PING);
+end;
+
+procedure TSocketClient.KillPingTimeoutTimer;
+begin
+  KillTimer(FInternalMessageHandler, TIMER_ID_PING_TIMEOUT);
+end;
+
+
+procedure TSocketClient.WndMethod(var AMessage: TMessage);
+begin
+  case AMessage.Msg of
+    WM_TIMER: case AMessage.WParam of
+                TIMER_ID_PING: begin
+                  Ping;
+                  KillPingTimer;
+                  ResetPingTimeoutTimer;
+                end;
+
+                TIMER_ID_PING_TIMEOUT: begin
+                  {$IFDEF DEBUG} DebugLn('Ping timeout', ditException); {$ENDIF}
+                  KillPingTimeoutTimer;
+                  Disconnect;
+                end;
+              end;
+  end;
 end;
 
 function TSocketClient.IsConnected: Boolean;
@@ -327,6 +390,10 @@ begin
     SR_TABLE_SIT_OK,
     SR_TABLE_SIT_SEAT_TAKEN,
     SR_TABLE_STAND_UP_OK: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
+    SR_PONG: begin
+      KillPingTimeoutTimer;
+      ResetPingTimer;
+    end;
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
@@ -694,6 +761,12 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TSocketClient.Ping;
+begin
+  SendProtobuf(CMD_PING, nil);
+end;
+
 
 
 end.

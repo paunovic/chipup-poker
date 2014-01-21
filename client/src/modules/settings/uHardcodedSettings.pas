@@ -16,6 +16,8 @@ type
                                 AVATARS_FILENAME   : String;
                                 TCP_SERVER_ADDRESS : String;
                                 TCP_SERVER_PORT    : Word;
+                                TCP_PING_INTERVAL  : Word;
+                                TCP_PING_TIMEOUT   : Word;
                                 URL                : record
                                   TOS          : String;
                                   BUY_TOKENS   : String;
@@ -40,6 +42,8 @@ type
                                            // socket server
                                            TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
                                            TCP_SERVER_PORT: 12346;
+                                           TCP_PING_INTERVAL: 300; // in seconds
+                                           TCP_PING_TIMEOUT: 15; // in seconds
 
                                            // urls
                                            URL : (
