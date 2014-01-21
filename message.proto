@@ -122,7 +122,7 @@ message ChangePasswordParams {
 }
 
 message SetAvatarParams {
-	required string avatar_id = 1;
+	required bytes avatar_id = 1;
 }
 
 message ChatEvent {
