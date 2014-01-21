@@ -53,13 +53,14 @@ destructor TPB_SeatInfo.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_SeatInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
-        (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
+        (AProtobufReader.GetNext(tag, wire_type, field_number)) do
     case field_number of
       FN_SEAT: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -84,8 +85,8 @@ begin
       else
         AProtobufReader.skipField(tag);
     end;
-  end;
 end;
+
 procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;

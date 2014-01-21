@@ -155,10 +155,4 @@ object frmLogin: TfrmLogin
     Left = 496
     Top = 12
   end
-  object Timer1: TTimer
-    Enabled = False
-    OnTimer = Timer1Timer
-    Left = 76
-    Top = 264
-  end
 end

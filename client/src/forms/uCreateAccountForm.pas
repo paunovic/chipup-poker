@@ -146,6 +146,10 @@ end;
 procedure TfrmCreateAccount.TCRegisterOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Account successfully created. Please check your inbox for confirmation e-mail', mtInformation, [mbOK], 0);
+
+  if Settings.Login = '' then
+    Settings.Login := edEMail.Text;
+
   ModalResult := mrOk;
 end;
 

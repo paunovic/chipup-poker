@@ -27,6 +27,7 @@ implementation
 uses
   pbPublic;
 
+
 procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, wire_type, field_number, endpos: Integer;

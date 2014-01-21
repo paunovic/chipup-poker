@@ -25,7 +25,6 @@ type
     lbsPassword: TcxLabel;
     StatusBar: TdxStatusBar;
     SkinController: TdxSkinController;
-    Timer1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acLoginExecute(Sender: TObject);
@@ -33,7 +32,6 @@ type
     procedure acShowForgotPasswordFormExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
   private
     FLoginSuccess: Boolean;
 
@@ -62,7 +60,7 @@ implementation
 
 uses
   uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient,
-  uServerCodes, uCommon, uMainDataModule,  uPB_StatusReply, uPB_HelloReply,
+  uServerCodes, uCommon, uMainDataModule, uPB_StatusReply, uPB_HelloReply,
   uMessageContainer, uServerMessageCallback;
 
 
@@ -200,7 +198,15 @@ end;
 
 procedure TfrmLogin.acShowCreateAccountFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmCreateAccount, self, []);
+  if RunModalForm(TfrmCreateAccount, self, []) = mrOk then
+  begin
+    if edLogin.Text = '' then
+    begin
+      cbRememberLogin.Checked := TRUE;
+      edLogin.Text := Settings.Login;
+      edPassword.SetFocus;
+    end;
+  end;
 end;
 
 procedure TfrmLogin.acShowForgotPasswordFormExecute(Sender: TObject);
@@ -254,12 +260,6 @@ begin
 
   if FLoginSuccess then
     ModalResult := mrOk;
-end;
-
-procedure TfrmLogin.Timer1Timer(Sender: TObject);
-begin
-  if SocketClient.Socket.State = wsClosed then
-    SocketClient.Connect;
 end;
 
 end.
