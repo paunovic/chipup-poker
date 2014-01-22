@@ -53,7 +53,7 @@ protoreader.reply = function reply(code,message,type) {
 	var args;
 	var datasize = 0;
 	if (type == 'raw') {
-		args = new Buffer(message,'utf8');
+		args = message;
 		datasize = args.length;
 	} else if (message) {
 		args = pb.Serialize(message,type);

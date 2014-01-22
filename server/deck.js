@@ -12,7 +12,6 @@ fs.open('/dev/urandom','r',function (err,fd) {
 	}
 });
 module.exports.Deck = Deck;
-module.exports.getRandom = getRandom;
 module.exports.Hand = Hand;
 function Deck() {
 	if (!(this instanceof Deck)) return new Deck();
@@ -69,6 +68,7 @@ function getRandom(size,callback) {
 		callback(buffer);
 	});
 }
+module.exports.getRandom = getRandom;
 function Card(suit,value) {
 	this.value = value;
 	this.suit = suit;

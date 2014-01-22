@@ -6,14 +6,15 @@ var codes = require('./ServerCodes');
 var protoreader = require('./protoreader');
 protoreader.init(pb);
 
-function Client() {
+function Client(handle) {
 	this.socket = net.connect(12345,'192.168.2.61',function cb2() {
 		console.log('connected');
 	});
 	this.reader = new protoreader(this.socket,this);
+	this.handle = handle;
 }
 Client.prototype.reply = protoreader.reply;
-Client.prototype.handle = function handle(code,data) {
+function testchathandle(code,data) {
 	switch (code) {
 	case codes.SR_HELLO:
 		var params = pb.Parse(data,'Poker.HelloReply');
@@ -27,7 +28,6 @@ Client.prototype.handle = function handle(code,data) {
 		var params = pb.Parse(data,'Poker.StatusReply');
 		//console.log(params);
 		//this.reply(codes.CMD_GETDECK);
-		this.reply(codes.EVENT_CHAT,{event:'UserMessage',table_id:'Global',msg:{msg:'test'}},'Poker.ChatEvent');
 		break;
 	case codes.EVENT_CHAT:
 		var event = pb.Parse(data,'Poker.ChatEvent');
@@ -47,9 +47,23 @@ Client.prototype.log = function log() {
 	out.unshift(new Date().toString()+":");
 	console.log.apply(this,out);
 }
-var client = new Client();
-process.stdin.setEncoding('utf8');
-process.stdin.on('data',function (line) {
-	client.reply(codes.EVENT_CHAT,{event:'UserMessage',table_id:'Global',msg:{msg:line.trim()}},'Poker.ChatEvent');
-});
-process.stdin.resume();
+function testchat () {
+	var client = new Client();
+	process.stdin.setEncoding('utf8');
+	process.stdin.on('data',function (line) {
+		client.reply(codes.EVENT_CHAT,{event:'UserMessage',table_id:'Global',msg:{msg:line.trim()}},'Poker.ChatEvent');
+	});
+	process.stdin.resume();
+}
+function testregister() {
+	function testregisterhandle(code,data) {
+		this.log('handle',code,data);
+		switch (code) {
+		case codes.SR_HELLO:
+			this.reply(codes.CMD_REGISTER,{email:'test@server.com',password:'password',displayName:'name'},'Poker.RegisterParams');
+			break;
+		}
+	}
+	var client = new Client(testregisterhandle);
+}
+testregister();

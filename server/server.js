@@ -114,18 +114,24 @@ app.get("/passwordreset",function (req,res) {
 			}.bind(this));
 			return;
 		}
-		var newpassword = generatePassword();generatePassword
-		allUsers.update({_id:user._id},{$set:{password:newpassword},$unset:{forgotcode:"",forgottime:""}},function (err,result) {
-			console.log('passwprd change time',user);
-			res.send("password changed, new password sent to your email");
-			var test = new SmtpConnection();
-			var message = 'your new password is: '+newpassword;
-			test.sendMail(user.email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\n'+message,function cb(err,ret) {
-				console.log('cb',err,ret);
-				if (err) {
-					console.log('password reset email error',err);
-					return;
-				}
+		var newpassword = generatePassword();
+		deck.getRandom(16,function (salt) {
+			var hasher = crypto.createHash('sha256');
+			hasher.update(salt);
+			hasher.update(newpassword);
+			var hash = hasher.digest();
+			allUsers.update({_id:user._id},{$set:{password:hash,salt:salt},$unset:{forgotcode:"",forgottime:""}},function (err,result) {
+				console.log('password change time',user);
+				res.send("password changed, new password sent to your email");
+				var test = new SmtpConnection();
+				var message = 'your new password is: '+newpassword;
+				test.sendMail(user.email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\n'+message,function cb(err,ret) {
+					console.log('cb',err,ret);
+					if (err) {
+						console.log('password reset email error',err);
+						return;
+					}
+				});
 			});
 		});
 	});
@@ -146,9 +152,9 @@ app.post("/uploadAvatar",function (req,res) {
 				return;
 			}
 			if (row) {
-				var reply = {};
-				reply.id = hash;
-				res.send(JSON.stringify(reply));
+				var out = new Buffer(hash,'base64');
+				console.log('sending dup id',out);
+				res.send(200,out);
 			} else {
 				avatars.insert({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension},function (err,row) {
 					if (err) {
@@ -156,9 +162,9 @@ app.post("/uploadAvatar",function (req,res) {
 						res.send(JSON.stringify(err));
 						return;
 					}
-					var reply = {};
-					reply.id = row[0]._id;
-					res.send(JSON.stringify(reply));
+					var out = new Buffer(row[0]._id,'base64');
+					console.log('sending unique id',out);
+					res.send(200,out);
 				});
 			}
 		});
@@ -206,17 +212,15 @@ app.get("/test",function (req,res) {
 });
 app.get("/getavatar",function (req,res) {
 	var id = req.query.id;
-	console.log(req.query,id.length);
-	if (id.length == 24) {
-		id = new ObjectID(id);
-		console.log('converted');
-	}
-	avatars.findOne({_id:id},function (err,row) {
+	console.log('getting avatar',req.query,id.length);
+	var raw = new Buffer(id,'hex');
+	var base64 = raw.toString('base64');
+	avatars.findOne({_id:base64},function (err,row) {
 		if (!row) {
 			res.send(404);
 			return;
 		}
-		var filename = req.query.id+"."+row.ext;
+		var filename = req.query.hex+"."+row.ext;
 		console.log(filename);
 		res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
 		res.send(row.image.buffer);
@@ -301,9 +305,36 @@ ClientSocket.prototype.error = function error(e) {
 	this.socket.destroy();
 	Game.handleDisconnect(this);
 }
+function bufferMatch(a,b) {
+	if (a.length != b.length) return false;
+	for (var x=0; x<a.length; x++) {
+		if (a[x] != b[x]) return false;
+	}
+	return true;
+}
 ClientSocket.prototype.doLogin = function doLogin(row,password) {
-	// FIXME, crypto
-	if (row.password == password) {
+	if (row.salt) {
+		var hasher = crypto.createHash('sha256');
+		this.log(row);
+		hasher.update(row.salt.buffer);
+		hasher.update(password);
+		var hash = hasher.digest();
+		this.log('passwords',hash,row.password);
+		if (bufferMatch(hash,row.password.buffer)) {
+			var oldconn = activeUsers[row._id];
+			if (oldconn) {
+				oldconn.eject();
+			}
+			this.state = 2;
+			this.userid = row._id;
+			this.nick = row.displayname;
+			this.send(codes.SR_LOGIN_OK);
+			this.log('sucessfully logged in with salt');
+			activeUsers[row._id] = this;
+		} else {
+			this.send(codes.SR_INVALID_LOGIN);
+		}
+	} else if (row.password == password) {
 		var oldconn = activeUsers[row._id];
 		if (oldconn) {
 			oldconn.eject();
@@ -344,7 +375,7 @@ ClientSocket.prototype.reply = function reply(code,message,type) {
 	if (obj.code != 0) {
 		process.exit();
 	}
-	this.send(0,message,"raw");
+	this.send(0,new Buffer(message,'utf8'),"raw");
 }
 ClientSocket.prototype.send = protoreader.reply;
 ClientSocket.prototype.spendTokens = function spendTokens(tokens,failcode,callback) {
@@ -371,6 +402,9 @@ ClientSocket.prototype.handle = function (code,args) {
 	if (code == codes.CMD_LOGOUT) {
 		this.logout();
 		this.send(codes.SR_LOGOUT);
+		return;
+	} else if (code == codes.CMD_PING) {
+		this.send(codes.SR_PONG,args,'raw');
 		return;
 	}
 	switch (this.state) {
@@ -409,7 +443,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.CMD_REGISTER:
 			var params = pb.Parse(args,'Poker.RegisterParams');
 			console.log('register params',params);
-			var doc = {email:params.email, password:params.password, displayname:params.displayName, tokens:100, authed:false };
+			var doc = {email:params.email, displayname:params.displayName, tokens:100, authed:false };
 			doc.authcode = uuid.v4();
 			// FIXME, give a better default
 			doc.avatar = "2vjw2PHZKtTC1oAiXpF8dnqKh++XT5biqzainRgOcuo=";
@@ -426,53 +460,63 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.send(codes.SR_REGISTER_INVALID_MAIL);
 				return;
 			}
-			if (doc.password.length > sharedconfig.stringSizes.password) {
+			if (params.password.length > sharedconfig.stringSizes.password) {
 				this.reply(codes.SR_NOT_IMPLEMENTED,"password too long");
 				return;
 			}
-			// FIXME, case insensitive
-			allUsers.findOne({email:params.email},function (err,row) {
-				if (row) {
-					console.log('found it',row);
-					console.log('error, dup!');
-					this.send(codes.SR_REGISTER_DUPLICATE_MAIL);
-				} else {
-					allUsers.findOne({displayname:params.displayName},function (err,row) {
-						if (row) {
+			deck.getRandom(16,function (salt) {
+				this.log('salt',salt);
+				var hasher = crypto.createHash('sha256');
+				hasher.update(salt);
+				hasher.update(params.password);
+				var hash = hasher.digest();
+				this.log('pw hash is',hash);
+				doc.password = hash;
+				doc.salt = salt;
+				// FIXME, case insensitive
+				allUsers.findOne({email:params.email},function (err,row) {
+					if (row) {
+						console.log('found it',row);
+						console.log('error, dup!');
+						this.send(codes.SR_REGISTER_DUPLICATE_MAIL);
+					} else {
+						allUsers.findOne({displayname:params.displayName},function (err,row) {
+							if (row) {
 							this.send(codes.SR_REGISTER_DUPLICATE_USERNAME);
-						} else {
-							allUsers.insert(doc,function(err,result) {
-								if (err) {
-									console.log('error 1',err);
-									process.exit(1);
-								}
-								console.log('registered',result);
-								var test = new SmtpConnection();
-								var link = domain+'confirm?code='+doc.authcode;
-								test.sendMail(doc.email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
-									console.log('cb',err,ret);
+							} else {
+								allUsers.insert(doc,function(err,result) {
 									if (err) {
-										if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
-											this.log('invalid email server');
-											this.send(codes.SR_REGISTER_INVALID_MAIL);
-											allUsers.remove({_id:result[0]._id},function (err,res) {
-												this.log('delete done',err,res,result);
-											}.bind(this));
+										console.log('error 1',err);
+										process.exit(1);
+									}
+									console.log('registered',result);
+									var test = new SmtpConnection();
+									var link = domain+'confirm?code='+doc.authcode;
+									test.sendMail(doc.email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
+										console.log('cb',err,ret);
+										if (err) {
+											if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
+												this.log('invalid email server');
+												this.send(codes.SR_REGISTER_INVALID_MAIL);
+												allUsers.remove({_id:result[0]._id},function (err,res) {
+													this.log('delete done',err,res,result);
+												}.bind(this));
+												return;
+											}
+											this.log('internal error sending email');
+											this.reply(codes.SR_NOT_IMPLEMENTED,"internal error");
 											return;
 										}
-										this.log('internal error sending email');
-										this.reply(codes.SR_NOT_IMPLEMENTED,"internal error");
-										return;
-									}
-									this.send(codes.SR_REGISTER_OK);
+										this.send(codes.SR_REGISTER_OK);
+									}.bind(this));
 								}.bind(this));
-							}.bind(this));
-						}
-					}.bind(this));
-				}
+							}
+						}.bind(this));
+					}
+				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.CMD_FORGOT:
+		case codes.CMD_FORGOT_PASSWORD:
 			var params = pb.Parse(args,'Poker.ForgotPasswordParams');
 			console.log('forgot args',params);
 			var email = params.email;
@@ -560,7 +604,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.CMD_GETDECK:
+/*		case codes.CMD_GETDECK:
 			console.log(args);
 			var deck = new Deck();
 			deck.shuffle(function shuffled(){
@@ -568,7 +612,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				console.log(deck.prettyPrint());
 				this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
 			}.bind(this));
-			break;
+			break;*/
 		case codes.CMD_LIST_PUBLIC_CLUBS:
 			// FIXME, limit which columns go out
 			allClubs.find({is_private:false},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
@@ -900,25 +944,31 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.CMD_CHANGE_PASSWORD:
 			var params = pb.Parse(args,'Poker.ChangePasswordParams');
-			var newpw = params.new_password;
-			if (newpw.length > sharedconfig.stringSizes.password) {
+			if (params.new_password.length > sharedconfig.stringSizes.password) {
 				this.send(codes.SR_CHANGE_PASSWORD_INVALID_PASSWORD);
 				return;
 			}
-			// FIXME crypto
-			allUsers.update({_id:this.userid},{$set:{password:newpw}},function (err,res) {
-				if (err) {
-					this.reply("000","internal error");
-					return;
-				}
-				this.send(codes.SR_CHANGE_PASSWORD_OK);
+			deck.getRandom(16,function (salt) {
+				this.log('salt',salt);
+				var hasher = crypto.createHash('sha256');
+				hasher.update(salt);
+				hasher.update(params.new_password);
+				var hash = hasher.digest();
+				this.log('pw hash is',hash);
+				allUsers.update({_id:this.userid},{$set:{password:hash,salt:salt}},function (err,res) {
+					if (err) {
+						this.reply("000","internal error");
+						return;
+					}
+					this.send(codes.SR_CHANGE_PASSWORD_OK);
+				}.bind(this));
 			}.bind(this));
 			break;
 		case codes.CMD_SET_AVATAR:
 			var params = pb.Parse(args,'Poker.SetAvatarParams');
 			this.log('changing avatar',params);
-			var id = params.avatar_id;
-			if (id.length == 24) id = new ObjectID(id);
+			var id = params.avatar_id.toString('base64');
+			this.log('id is',id);
 			avatars.findOne({_id:id},function(err,row) {
 				if (err) {
 					this.reply("000","internal error");
@@ -1066,6 +1116,7 @@ function Game(obj) {
 	this.obj = obj;
 	this.id = obj._id;
 	activeGames[this.id] = this;
+	this.state = 'idle';
 }
 Game.prototype.edited = function edited(params) {
 	this.obj.seats = params.seats;
@@ -1084,9 +1135,19 @@ Game.prototype.sitDown = function (conn,params) {
 	if (this.members[params.seat_index]) {
 		conn.send(codes.SR_TABLE_SIT_SEAT_TAKEN,this.getTableStatus(),'Poker.TableStatus');
 	} else {
-		this.members[params.seat_index] = { conn:conn, hand: new Hand() };
-		this.deck.draw(4,this.members[params.seat_index].hand);
+		this.members[params.seat_index] = { conn:conn, hand: new Hand(), inhand:false };
+		if (this.state == 'idle') {
+			if (this.sittingCount() > 1) {
+				for (var x=0; x<this.members.length; x++) {
+					if (!this.members[x]) continue;
+					this.deck.draw(2,this.members[x].hand);
+					this.members[x].inhand = true;
+				}
+				this.state = 'preflop';
+			}
+		}
 		var status = this.getTableStatus();
+		console.log('sending table status to all');
 		conn.send(codes.SR_TABLE_SIT_OK,status,'Poker.TableStatus');
 		for (var key in this.users) {
 			if (this.users[key] == conn) continue;
@@ -1094,24 +1155,83 @@ Game.prototype.sitDown = function (conn,params) {
 		}
 	}
 }
+Game.prototype.fold = function fold(seat) {
+	switch (this.state) {
+	case 'idle':
+		break;
+	case 'preflop': // most states go here
+		if (this.inHandCount() == 1) {
+			var seat;
+			for (var x=0; x<this.members.length; x++) {
+				if (!this.members[x]) continue;
+				if (!this.members[x].inhand) continue;
+				seat = x;
+			}
+			console.log('remaining guy wins everything',seat);
+			this.state = 'winnning';
+			setTimeout(function () {
+				this.deck = new Deck();
+				this.deck.shuffle(function () {
+					for (var x=0; x<this.members.length; x++) {
+						if (!this.members[x]) continue;
+						this.members[x].inhand = false;
+						this.members[x].hand = new Hand();
+					}
+					this.state = 'idle';
+					console.log('reset');
+					this.broadcastStatus(null);
+				}.bind(this))
+			}.bind(this),2000);
+		}
+		break;
+	}
+}
+Game.prototype.broadcastStatus = function (conn) {
+	var status = this.getTableStatus();
+	console.log('sending table status to all');
+	for (var key in this.users) {
+		if (this.users[key] == conn) continue;
+		this.users[key].send(codes.SR_TABLE_STATUS,status,'Poker.TableStatus');
+	}
+}
 Game.prototype.getTableStatus = function getTableStatus() {
-	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[]};
+	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[], state:this.state};
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
 		var seat = this.members[x];
-		console.log('table debug',x,seat.conn.userid,seat.hand.prettyPrint());
-		var obj = {seat:x, player_mongo_id:new Buffer(seat.conn.userid.toString(),'hex'), chips:666}
+		//console.log('table debug',x,seat.conn.userid,seat.hand.prettyPrint());
+		var obj = {seat:x, player_mongo_id:new Buffer(seat.conn.userid.toString(),'hex'), chips:666, inhand:seat.inhand}
 		obj.cards = seat.hand.prettyPrint();
+		obj.card_count = obj.cards.length / 2;
 		tableStatus.seats.push(obj);
 	}
 	console.log(tableStatus);
 	return tableStatus;
 }
+Game.prototype.sittingCount = function () {
+	var count = 0;
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		count++;
+	}
+	return count;
+}
+Game.prototype.inHandCount = function () {
+	var count = 0;
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		if (!this.members[x].inhand) continue;
+		count++;
+	}
+	return count;
+}
 Game.prototype.standUp = function (conn) {
 	for (var x=0; x<this.members.length; x++) {
-		if (this.members[x].conn == conn) {
+		if ((this.members[x]) && (this.members[x].conn == conn)) {
 			// FIXME, do something with his cards
+			var seating = this.members[x];
 			this.members[x] = null;
+			if (seating.inhand) this.fold(x,seating);
 			var status = this.getTableStatus();
 			for (var key in this.users) {
 				console.log('interator',key,this.users[key].userid,conn.userid);
