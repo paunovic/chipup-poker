@@ -7,7 +7,7 @@ uses
 
 type
   TGameType = (gtHoldem, gtOmaha);
-  TGameLimit = (glNoLimit, glLimit, glPotLimit);
+  TGameLimit = (glNoLimit, glFixedLimit, glPotLimit);
 
   TGameInfo = class
   private
@@ -83,7 +83,7 @@ begin
 
   case FGameLimit of
     glNoLimit: result := 'NL ' + result;
-    glLimit: result := 'L ' + result;
+    glFixedLimit: result := 'FL ' + result;
     glPotLimit: result := 'PL ' + result;
   end;
 end;

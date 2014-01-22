@@ -15,7 +15,6 @@ uses
   uCreateClubForm in 'forms\uCreateClubForm.pas' {frmCreateClub},
   uJoinClubForm in 'forms\uJoinClubForm.pas' {frmJoinClub},
   uEditGameForm in 'forms\uEditGameForm.pas' {frmEditGame},
-  uManageClubsForm in 'forms\uManageClubsForm.pas' {frmManageClubs},
   uChangeClubDetailsForm in 'forms\uChangeClubDetailsForm.pas' {frmChangeClubDetails},
   uGiveChipsForm in 'forms\uGiveChipsForm.pas' {frmGiveChips},
   uChangeEMailForm in 'forms\uChangeEMailForm.pas' {frmChangeEMail},
@@ -74,7 +73,8 @@ uses
   uPB_TableStatus in 'modules\protobuf\objects\uPB_TableStatus.pas',
   uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas',
   uServerCodes in 'modules\protobuf\objects\uServerCodes.pas',
-  dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas';
+  dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
+  uClubLobbyManagerForm in 'forms\uClubLobbyManagerForm.pas' {frmClubLobbyManager};
 
 procedure FocusPokerApp;
 var

@@ -187,14 +187,14 @@ object frmChipUpMain: TfrmChipUpMain
       GridView = gridGamesTable
     end
   end
-  object btClubLobby: TcxButton
+  object btOpenClubLobby: TcxButton
     Left = 8
     Top = 139
     Width = 290
     Height = 40
+    Action = acOpenClubLobby
     Anchors = [akLeft, akBottom]
     Caption = 'OPEN CLUB LOBBY'
-    Enabled = False
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 5
     Font.Charset = DEFAULT_CHARSET
@@ -203,7 +203,6 @@ object frmChipUpMain: TfrmChipUpMain
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    OnClick = btLeaveClubClick
   end
   object cxLabel1: TcxLabel
     Left = 32
@@ -233,10 +232,6 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Join club'
       OnExecute = acShowJoinClubFormExecute
     end
-    object acShowManageClubsForm: TAction
-      Caption = 'Manage your clubs'
-      OnExecute = acShowManageClubsFormExecute
-    end
     object acBuyTokens: TAction
       Caption = 'acBuyTokens'
       OnExecute = acBuyTokensExecute
@@ -264,6 +259,11 @@ object frmChipUpMain: TfrmChipUpMain
     object acShowGameTableForm: TAction
       Caption = 'acShowGameTableForm'
       OnExecute = acShowGameTableFormExecute
+    end
+    object acOpenClubLobby: TAction
+      Caption = 'acOpenClubLobby'
+      Enabled = False
+      OnExecute = acOpenClubLobbyExecute
     end
   end
   object MainMenu: TMainMenu
@@ -314,13 +314,6 @@ object frmChipUpMain: TfrmChipUpMain
       object SearchPublicClubs1: TMenuItem
         Action = acShowPublicGamesListForm
         Caption = 'Search Public Clubs...'
-      end
-      object mmiSeparator3: TMenuItem
-        Caption = '-'
-      end
-      object Manageclubs1: TMenuItem
-        Action = acShowManageClubsForm
-        Caption = 'Manage Your Clubs...'
       end
     end
     object mmiOptions: TMenuItem

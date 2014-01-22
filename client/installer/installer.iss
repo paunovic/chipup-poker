@@ -43,8 +43,8 @@ begin
       mres := MsgBox('Do you want to delete user data?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2)
       if mres = IDYES then
       begin   
-        DeleteFile(ExpandConstant('{app}\settings.dat'));
-        DeleteFile(ExpandConstant('{app}\avatars.dat'));
+        DelTree(ExpandConstant('{localappdata}\ChipUP Poker'), TRUE, TRUE, TRUE);
+        DelTree(ExpandConstant('{userappdata}\ChipUP Poker'), TRUE, TRUE, TRUE);
       end;
     end;  
   end;

@@ -149,8 +149,8 @@ object frmCreateGame: TfrmCreateGame
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
       'No Limit'
-      'Fixed Limit'
-      'Pot Limit')
+      'Pot Limit'
+      'Fixed')
     TabOrder = 2
     Text = 'No Limit'
     Width = 273

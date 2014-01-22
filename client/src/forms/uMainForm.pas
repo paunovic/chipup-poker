@@ -29,9 +29,6 @@ type
     gridJoinedClubsId: TcxGridColumn;
     mmiJoinClub: TMenuItem;
     acShowJoinClubForm: TAction;
-    acShowManageClubsForm: TAction;
-    mmiSeparator3: TMenuItem;
-    Manageclubs1: TMenuItem;
     SkinController: TdxSkinController;
     lbUserInfo: TcxLabel;
     mmiSeparator1: TMenuItem;
@@ -60,9 +57,10 @@ type
     gridGamesStatus: TcxGridColumn;
     SearchPublicClubs1: TMenuItem;
     acShowPublicGamesListForm: TAction;
-    btClubLobby: TcxButton;
+    btOpenClubLobby: TcxButton;
     cxLabel1: TcxLabel;
     acShowGameTableForm: TAction;
+    acOpenClubLobby: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -70,7 +68,6 @@ type
     procedure acShowJoinClubFormExecute(Sender: TObject);
     procedure btLeaveClubClick(Sender: TObject);
     procedure gridJoinedClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
-    procedure acShowManageClubsFormExecute(Sender: TObject);
     procedure acBuyTokensExecute(Sender: TObject);
     procedure acBuyChipsExecute(Sender: TObject);
     procedure acShowChangeEMailFormExecute(Sender: TObject);
@@ -82,6 +79,7 @@ type
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowGameTableFormExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure acOpenClubLobbyExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -123,10 +121,10 @@ implementation
 
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
-  uPlayerInfo, uManageClubsForm, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
+  uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
   uPB_StatusReply, uMessageContainer, uServerMessageCallback,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uPB_ChatEvent, uPB_ChatMessage;
+  uPB_ChatEvent, uPB_ChatMessage, uClubLobbyManagerForm;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -248,6 +246,17 @@ begin
   SocketClient.Logout;
 end;
 
+procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
+var
+  club: TClubInfo;
+begin
+  if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
+    Exit;
+
+  if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
+    RunModalForm(TfrmClubLobbyManager, self, [@FSelectedClub]);
+end;
+
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
   RunModalForm(TfrmChangeAvatar, self, []);
@@ -283,12 +292,6 @@ end;
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
   if RunModalForm(TfrmJoinClub, self, []) = mrOk then
-    SocketClient.Status;
-end;
-
-procedure TfrmChipUpMain.acShowManageClubsFormExecute(Sender: TObject);
-begin
-  if RunModalForm(TfrmManageClubs, self, []) = mrOk then
     SocketClient.Status;
 end;
 
@@ -380,7 +383,7 @@ end;
 
 procedure TfrmChipUpMain.gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
-  acShowManageClubsForm.Execute;
+  acOpenClubLobby.Execute;
 end;
 
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -410,6 +413,7 @@ begin
     gridGamesTable.DataController.FocusedRecordIndex := -1;
   end;
 
+  acOpenClubLobby.Enabled := FSelectedClub <> -1;
   UpdateGamelist;
 end;
 
