@@ -16,7 +16,7 @@ type
     FTokens  : Integer;
     FBalance : Integer;
     FAuthed  : Boolean;
-    FAvatarId: AnsiString;
+    FAvatarId: TBytes;
     FClubs   : TClubsInfo;
   public
     constructor Create;
@@ -33,7 +33,7 @@ type
     property Tokens  : Integer read FTokens write FTokens;
     property Balance : Integer read FBalance write FBalance;
     property Authed  : Boolean read FAuthed write FAuthed;
-    property AvatarId: AnsiString read FAvatarId write FAvatarId;
+    property AvatarId: TBytes read FAvatarId write FAvatarId;
     property Clubs   : TClubsInfo read FClubs;
   end;
 
@@ -92,7 +92,7 @@ begin
   FNick := AStatusReply.Self.DisplayName;
   FTokens := AStatusReply.Self.Tokens;
   FAuthed := AStatusReply.Self.Authed;
-  FAvatarId := EncodeBase64(@AStatusReply.Self.Avatar[0], Length(AStatusReply.Self.Avatar));
+  FAvatarId := AStatusReply.Self.Avatar;
   FBalance := AStatusReply.Self.Chips;
 
   FClubs.Clear;
@@ -144,7 +144,7 @@ begin
   player.FNick := ANick;
   player.FEMail := AEMail;
   player.FBalance := AChips;
-  player.AvatarId := EncodeBase64(@AAvatarId[0], Length(AAvatarId));
+  player.AvatarId := AAvatarId;
   Add(player);
   result := player;
 end;

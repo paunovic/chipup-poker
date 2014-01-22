@@ -3,92 +3,77 @@ unit uAvatars;
 interface
 
 uses
-  JPEG, System.Generics.Collections, System.Classes,
+  JPEG, System.Generics.Collections, System.Classes, System.SysUtils,
   OverbyteIcsWndControl, OverbyteIcsHttpProt;
 
 type
   TAvatar = class
   private
-    FId   : AnsiString;
-    FImage: TJPEGImage;
+    FId        : TBytes;
+    FIdAsString: String;
+    FImage     : TJPEGImage;
 
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
+    procedure SetId(const AValue: TBytes);
+    function GetAvatarPath(const AStoragePath: String): String;
 
   public
-    constructor Create(const AId: AnsiString); overload;
-    constructor Create(const AStream: TStream); overload;
+    constructor Create(const AId: TBytes); overload;
     destructor Destroy; override;
 
     procedure Refresh;
-    procedure WriteToStream(const AStream: TStream);
 
-    property Id   : AnsiString read FId;
-    property Image: TJPEGImage read FImage;
+    procedure SetImage(const AImage: TJPEGImage); overload;
+    function SetImage(const AStoragePath, AId: String): Boolean; overload;
+    procedure Save(const AStoragePath: String);
+
+    property Id        : TBytes read FId write SetId;
+    property IdAsString: String read FIdAsString;
+    property Image     : TJPEGImage read FImage;
   end;
 
   TAvatars = class(TObjectList<TAvatar>)
   private
-    FDatabasePath: String;
+    FStoragePath: String;
   public
-    constructor Create(const ADatabasePath: String);
+    constructor Create(const AStoragePath: String);
     destructor Destroy; override;
 
-    function IndexOf(const AId: AnsiString): Integer;
-    function Find(const AId: AnsiString; out AAvatar: TAvatar): Boolean;
-    function AddAvatar(const AId: AnsiString; const AImage: TJPEGImage = nil): TAvatar;
-    function RemoveAvatar(const AId: AnsiString): Boolean;
-    function RefreshAvatar(const AId: AnsiString): Boolean;
-    function SetAvatarImage(const AId: AnsiString; const AImage: TJPEGImage): Boolean;
+    function IndexOf(const AId: TBytes): Integer;
+    function Find(const AId: TBytes; out AAvatar: TAvatar): Boolean;
+    function AddAvatar(const AId: TBytes; const AImage: TJPEGImage = nil): TAvatar;
+    function RemoveAvatar(const AId: TBytes): Boolean;
+    function RefreshAvatar(const AId: TBytes): Boolean;
+    function SetAvatarImage(const AId: TBytes; const AImage: TJPEGImage): Boolean;
 
-    procedure Load(const AFile: String);
-    procedure Save(const AFile: String);
+    procedure Save;
   end;
 
 implementation
 
 uses
-  System.SysUtils,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uCommon, uEncryption, uMainDataModule, uSettings;
+  uCommon, uMainDataModule, uSettings, uEncryption;
 
 
 { TAvatar }
 
-constructor TAvatar.Create(const AId: AnsiString);
+constructor TAvatar.Create(const AId: TBytes);
 begin
-  FId := AId;
-  FImage := TJPEGImage.Create;
-end;
-
-constructor TAvatar.Create(const AStream: TStream);
-var
-  id_len: Integer;
-  bsize : Int64;
-  tmpms : TMemoryStream;
-begin
-  AStream.ReadBuffer(id_len, SizeOf(id_len));
-  if (id_len <= 0) or (id_len > 100 * 1024) then
-    Exit;
-
-  SetLength(FId, id_len);
-  AStream.ReadBuffer(FId[1], id_len * SizeOf(Char));
-  FImage := TJPEGImage.Create;
-  AStream.ReadBuffer(bsize, SizeOf(bsize));
-  tmpms := TMemoryStream.Create;
-  try
-    tmpms.CopyFrom(AStream, bsize);
-    tmpms.Position := 0;
-    FImage.LoadFromStream(tmpms);
-  finally
-    tmpms.Free;
-  end;
+  SetId(AId);
 end;
 
 destructor TAvatar.Destroy;
 begin
-  FImage.Free;
+  if Assigned(FImage) then
+    FreeAndNil(FImage);
 
   inherited;
+end;
+
+function TAvatar.GetAvatarPath(const AStoragePath: String): String;
+begin
+  result := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AStoragePath) + Copy(FIdAsString, 1, 3)) + FIdAsString;
 end;
 
 procedure TAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
@@ -107,6 +92,8 @@ begin
     http.RcvdStream.Position := 0;
     if IsJPEGStream(http.RcvdStream) then
     begin
+      if not Assigned(FImage) then
+        FImage := TJPEGImage.Create;
       http.RcvdStream.Position := 0;
       FImage.LoadFromStream(http.RcvdStream);
     end;
@@ -120,131 +107,111 @@ procedure TAvatar.Refresh;
 var
   http: THTTPCli;
 begin
-  {$IFDEF DEBUG} DebugLn(Format('GET avatar: %s...', [FId]), ditNetOut); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('GET avatar: %s...', [FIdAsString]), ditNetOut); {$ENDIF}
 
   http := THTTPCli.Create(nil);
   http.Connection := 'Keep-Alive';
   http.BandwidthLimit := 0;
   http.RequestVer := '1.1';
   http.RcvdStream := TMemoryStream.Create;
-  http.URL := Format(Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FId))]);
+  http.URL := Format(Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   http.OnRequestDone := HTTPRequestDone;
   http.GetAsync;
 end;
 
-procedure TAvatar.WriteToStream(const AStream: TStream);
+procedure TAvatar.Save(const AStoragePath: String);
 var
-  id_len: Integer;
-  bsize : Int64;
-  tmpms : TMemoryStream;
+  apath: String;
 begin
-  id_len := Length(FId);
-  AStream.WriteBuffer(id_len, SizeOf(id_len));
-  AStream.WriteBuffer(FId[1], id_len * SizeOf(Char));
-
-  tmpms := TMemoryStream.Create;
-  try
-    FImage.SaveToStream(tmpms);
-    tmpms.Position := 0;
-    bsize := tmpms.Size;
-    AStream.WriteBuffer(bsize, SizeOf(bsize));
-    tmpms.SaveToStream(AStream);
-  finally
-    tmpms.Free;
+  if Assigned(FImage) then
+  begin
+    apath := GetAvatarPath(AStoragePath);
+    ForceDirectories(ExtractFilePath(apath));
+    FImage.SaveToFile(apath);
   end;
 end;
 
-
-{ TAvatars }
-
-constructor TAvatars.Create(const ADatabasePath: String);
-begin
-  inherited Create;
-
-  FDatabasePath := ADatabasePath;
-
-  Load(FDatabasePath);
-end;
-
-destructor TAvatars.Destroy;
-begin
-  Save(FDatabasePath);
-
-  inherited;
-end;
-
-procedure TAvatars.Load(const AFile: String);
+procedure TAvatar.SetId(const AValue: TBytes);
 var
-  ms    : TMemoryStream;
-  avatar: TAvatar;
+  C1: Integer;
 begin
-  Clear;
+  FId := AValue;
 
-  if not FileExists(AFile) then
+  FIdAsString := '';
+  for C1 := 0 to Length(AValue) - 1 do
+    FIdAsString := FIdAsString + IntToHex(AValue[C1], 2);
+  FIdAsString := LowerCase(FIdAsString);
+end;
+
+function TAvatar.SetImage(const AStoragePath, AId: String): Boolean;
+var
+  ms   : TMemoryStream;
+  apath: String;
+begin
+  result := FALSE;
+
+  apath := GetAvatarPath(AStoragePath);
+  if not FileExists(apath) then
     Exit;
 
   ms := TMemoryStream.Create;
   try
-    ms.LoadFromFile(AFile);
-
-    if (DecompressStream(ms)) and
-       (AES256DecryptStream(ms, HardwareUID)) then
+    ms.LoadFromFile(apath);
+    if IsJPEGStream(ms) then
     begin
-      if ms.Size = 0 then
-        DeleteFile(AFile)
-      else
-      begin
-        ms.Position := 0;
-        while ms.Position < ms.Size do
-        begin
-          avatar := TAvatar.Create(ms);
-          if Assigned(avatar.Image) then
-            Add(avatar)
-          else
-          begin
-            avatar.Free;
-            DeleteFile(AFile);
-            Break;
-          end;
-        end;
-      end;
+      FImage := TJPEGImage.Create;
+      ms.Position := 0;
+      FImage.LoadFromStream(ms);
+      result := TRUE;
     end;
   finally
     ms.Free;
   end;
 end;
 
-procedure TAvatars.Save(const AFile: String);
-var
-  C1: Integer;
-  ms: TMemoryStream;
+procedure TAvatar.SetImage(const AImage: TJPEGImage);
 begin
-  ms := TMemoryStream.Create;
-  try
-    for C1 := 0 to Length(ToArray) - 1 do
-      if Assigned(ToArray[C1].Image) then
-        ToArray[C1].WriteToStream(ms);
+  if not Assigned(FImage) then
+    FImage := TJPEGImage.Create;
 
-    if (ms.Size > 0) and
-       (AES256EncryptStream(ms, HardwareUID)) and
-       (CompressStream(ms)) then
-      ms.SaveToFile(AFile);
-  finally
-    ms.Free;
-  end;
+  FImage.Assign(AImage);
 end;
 
-function TAvatars.IndexOf(const AId: AnsiString): Integer;
+{ TAvatars }
+
+constructor TAvatars.Create(const AStoragePath: String);
+begin
+  inherited Create;
+
+  FStoragePath := AStoragePath;
+end;
+
+destructor TAvatars.Destroy;
+begin
+  Save;
+
+  inherited;
+end;
+
+procedure TAvatars.Save;
 var
   C1: Integer;
 begin
   for C1 := 0 to Length(ToArray) - 1 do
-    if ToArray[C1].Id = AId then
+    ToArray[C1].Save(FStoragePath);
+end;
+
+function TAvatars.IndexOf(const AId: TBytes): Integer;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to Length(ToArray) - 1 do
+    if CompareBytes(ToArray[C1].Id, AId) then
       Exit(C1);
   Exit(-1);
 end;
 
-function TAvatars.Find(const AId: AnsiString; out AAvatar: TAvatar): Boolean;
+function TAvatars.Find(const AId: TBytes; out AAvatar: TAvatar): Boolean;
 var
   index: Integer;
 begin
@@ -255,7 +222,7 @@ begin
   Exit(TRUE);
 end;
 
-function TAvatars.AddAvatar(const AId: AnsiString; const AImage: TJPEGImage): TAvatar;
+function TAvatars.AddAvatar(const AId: TBytes; const AImage: TJPEGImage): TAvatar;
 var
   index : Integer;
   avatar: TAvatar;
@@ -264,22 +231,27 @@ begin
   if index <> -1 then
   begin
     if Assigned(AImage) then
-      ToArray[index].Image.Assign(AImage);
+      ToArray[index].SetImage(AImage);
+
+    if not Assigned(ToArray[index].Image) then
+      ToArray[index].SetImage(FStoragePath, ToArray[index].IdAsString);
+
     Exit(ToArray[index]);
   end;
 
-  {$IFDEF DEBUG} DebugLn(Format('Adding avatar to database: %s', [AId]), ditApplication); {$ENDIF}
   avatar := TAvatar.Create(AId);
   if Assigned(AImage) then
-    avatar.Image.Assign(AImage)
+    avatar.SetImage(AImage)
   else
-    avatar.Refresh;
+    if not avatar.SetImage(FStoragePath, avatar.IdAsString) then
+      avatar.Refresh;
+
   Add(avatar);
 
   Exit(avatar);
 end;
 
-function TAvatars.RemoveAvatar(const AId: AnsiString): Boolean;
+function TAvatars.RemoveAvatar(const AId: TBytes): Boolean;
 var
   index: Integer;
 begin
@@ -291,7 +263,7 @@ begin
   Exit(TRUE);
 end;
 
-function TAvatars.RefreshAvatar(const AId: AnsiString): Boolean;
+function TAvatars.RefreshAvatar(const AId: TBytes): Boolean;
 var
   avatar: TAvatar;
 begin
@@ -302,14 +274,14 @@ begin
   Exit(TRUE);
 end;
 
-function TAvatars.SetAvatarImage(const AId: AnsiString; const AImage: TJPEGImage): Boolean;
+function TAvatars.SetAvatarImage(const AId: TBytes; const AImage: TJPEGImage): Boolean;
 var
   avatar: TAvatar;
 begin
   if not Find(AId, avatar) then
     Exit(FALSE);
 
-  avatar.Image.Assign(AImage);
+  avatar.SetImage(AImage);
   Exit(TRUE);
 end;
 
