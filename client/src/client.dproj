@@ -201,6 +201,7 @@
 				<Form>frmClubLobbyManager</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
+			<DCCReference Include="modules\protobuf\objects\uPB_ChangeSuspendState.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>

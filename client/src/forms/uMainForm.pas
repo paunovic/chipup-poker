@@ -286,7 +286,10 @@ begin
   if (not GetSelectedClub(club)) or (not GetSelectedGame(game)) then
     Exit;
 
-  dmMain.Tables.AddTable(club, game);
+  if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
+    MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve the issue.', mtWarning, [mbOK], 0)
+  else
+    dmMain.Tables.AddTable(club, game);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);

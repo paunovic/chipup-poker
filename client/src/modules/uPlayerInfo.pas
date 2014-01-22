@@ -106,9 +106,11 @@ begin
     club_private := pbclub.IsPrivate;
     club_invcode := pbclub.Password;
     club := FClubs.AddClub(pbclub.MongoId, pbclub.Owner, club_id, club_name, club_balance, club_private, club_invcode);
-    club.AddPlayer(pbclub.Owner);
-    for C2 := 0 to pbclub.MemberCount - 1 do
-      club.AddPlayer(pbclub.Members[C2]);
+    club.AddPlayer(pbclub.Owner, FALSE);
+    for C2 := 0 to Length(pbclub.Members) - 1 do
+      club.AddPlayer(pbclub.Members[C2], FALSE);
+    for C2 := 0 to Length(pbclub.SuspendedMembers) - 1 do
+      club.AddPlayer(pbclub.SuspendedMembers[C2], TRUE);
   end;
 
   for C1 := 0 to AStatusReply.Games.Count - 1 do

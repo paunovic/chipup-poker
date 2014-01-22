@@ -56,6 +56,8 @@ const
   SR_TABLE_SIT_SEAT_TAKEN = 50;
   SR_TABLE_STAND_UP_OK = 51;
   SR_PONG = 52;
+  SR_SUSPEND_PLAYER_OK = 53;
+  SR_REINSTATE_PLAYER_OK = 54;
   CMD_LOGIN = 501;
   CMD_STATUS = 502;
   CMD_REGISTER = 503;
@@ -81,6 +83,7 @@ const
   CMD_TABLE_SIT = 523;
   CMD_TABLE_STAND_UP = 524;
   CMD_PING = 525;
+  CMD_SUSPEND_PLAYER = 526;
 
 {$IFDEF DEBUG}
 function TranslateServerCode(const ACode: Integer): String;
@@ -147,6 +150,8 @@ begin
     SR_TABLE_SIT_SEAT_TAKEN: result := 'SR_TABLE_SIT_SEAT_TAKEN';
     SR_TABLE_STAND_UP_OK: result := 'SR_TABLE_STAND_UP_OK';
     SR_PONG: result := 'SR_PONG';
+    SR_SUSPEND_PLAYER_OK: result := 'SR_SUSPEND_PLAYER_OK';
+    SR_REINSTATE_PLAYER_OK: result := 'SR_REINSTATE_PLAYER_OK';
     CMD_LOGIN: result := 'CMD_LOGIN';
     CMD_STATUS: result := 'CMD_STATUS';
     CMD_REGISTER: result := 'CMD_REGISTER';
@@ -172,6 +177,7 @@ begin
     CMD_TABLE_SIT: result := 'CMD_TABLE_SIT';
     CMD_TABLE_STAND_UP: result := 'CMD_TABLE_STAND_UP';
     CMD_PING: result := 'CMD_PING';
+    CMD_SUSPEND_PLAYER: result := 'CMD_SUSPEND_PLAYER';
   else
     result := Format('UNKNOWN CODE [%d]',[ACode]);
   end;

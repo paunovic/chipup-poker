@@ -74,6 +74,7 @@ type
     procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
     procedure Ping;
+    procedure ChangeSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
 
     property Socket: TSslWSocket read FSocket;
   end;
@@ -89,7 +90,7 @@ uses
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
-  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus,
+  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState,
   pbOutput, pbInput, uMessageContainer, Winapi.WinSock;
 
 
@@ -399,6 +400,8 @@ begin
       KillPingTimeoutTimer;
       ResetPingTimer;
     end;
+    SR_SUSPEND_PLAYER_OK: ;
+    SR_REINSTATE_PLAYER_OK: ;
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
@@ -771,6 +774,22 @@ procedure TSocketClient.Ping;
 begin
   SendProtobuf(CMD_PING, nil);
 end;
+
+procedure TSocketClient.ChangeSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
+var
+  protobuf: TPB_ChangeSuspendState;
+begin
+  protobuf := TPB_ChangeSuspendState.Create;
+  try
+    protobuf.ClubMongoId := AClubId;
+    protobuf.PlayerMongoId := APlayerId;
+    protobuf.Suspended := ASuspended;
+    SendProtobuf(CMD_SUSPEND_PLAYER, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 
 

@@ -44,7 +44,6 @@ type
     gridPlayersListStatus: TcxGridColumn;
     Bevel1: TdxBevel;
     btSuspendUnsuspend: TcxButton;
-    acSuspend: TAction;
     gbGames: TcxGroupBox;
     gridGames: TcxGrid;
     gridGamesTable: TcxGridTableView;
@@ -57,6 +56,8 @@ type
     btNewGame: TcxButton;
     btDeleteGame: TcxButton;
     btEditGame: TcxButton;
+    acSuspendPlayer: TAction;
+    acReinstatePlayer: TAction;
     procedure btManageClubClick(Sender: TObject);
     procedure btGamesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -71,6 +72,8 @@ type
     procedure acShowCreateGameFormExecute(Sender: TObject);
     procedure acDeleteGameExecute(Sender: TObject);
     procedure acShowEditGameFormExecute(Sender: TObject);
+    procedure acSuspendPlayerExecute(Sender: TObject);
+    procedure acReinstatePlayerExecute(Sender: TObject);
   private
     FClubId: Integer;
     FSelectedPlayerId: TBytes;
@@ -91,6 +94,8 @@ type
     procedure TCOwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
     procedure TCClubDisbandOk(const AMessage: TMessageItem);
     procedure TCDeleteGameOk(const AMessage: TMessageItem);
+    procedure TCSuspendPlayerOk(const AMessage: TMessageItem);
+    procedure TCReinstatePlayerOk(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -147,7 +152,9 @@ begin
                             TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID, TCOwnerGiveawayInvalidClubId),
                             TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_OK, TCOwnerGiveawayOk),
                             TServerMessageCallback.Create(SR_CLUB_DISBAND_OK, TCClubDisbandOk),
-                            TServerMessageCallback.Create(SR_DELETE_GAME_OK, TCDeleteGameOk)
+                            TServerMessageCallback.Create(SR_DELETE_GAME_OK, TCDeleteGameOk),
+                            TServerMessageCallback.Create(SR_SUSPEND_PLAYER_OK, TCSuspendPlayerOk),
+                            TServerMessageCallback.Create(SR_REINSTATE_PLAYER_OK, TCReinstatePlayerOk)
                           ]
                         );
     end;
@@ -221,15 +228,58 @@ begin
   acRemovePlayer.Enabled := action_enabled;
   acGiveOwnership.Enabled := action_enabled;
   acGiveChips.Enabled := action_enabled;
-  acSuspend.Enabled := action_enabled;
+
+  if action_enabled then
+  begin
+    if club.IsSuspendedPlayer(FSelectedPlayerId) then
+    begin
+      btSuspendUnsuspend.Action := acReinstatePlayer;
+      acSuspendPlayer.Enabled := FALSE;
+      acReinstatePlayer.Enabled := TRUE;
+    end
+    else
+    begin
+      btSuspendUnsuspend.Action := acSuspendPlayer;
+      acReinstatePlayer.Enabled := FALSE;
+      acSuspendPlayer.Enabled := TRUE;
+    end;
+  end
+  else
+  begin
+    acSuspendPlayer.Enabled := FALSE;
+    acReinstatePlayer.Enabled := FALSE;
+  end;
 end;
 
 procedure TfrmClubLobbyManager.UpdatePlayerlist;
 var
-  C1    : Integer;
-  player: TPlayerInfo;
-  status: String;
-  club  : TClubInfo;
+  club: TClubInfo;
+
+  procedure AddPlayerToGrid(const ARowIndex: Integer; AId: TBytes);
+  var
+    player: TPlayerInfo;
+    status: String;
+  begin
+    if not dmMain.Players.FindPlayerById(AId, player) then
+      Exit;
+
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, player.Id);
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick);
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance);
+
+    if CompareBytes(player.Id, club.OwnerId) then
+      status := 'Owner'
+    else
+    begin
+      status := 'Member';
+      if club.IsSuspendedPlayer(AId) then
+        status := 'Suspended';
+    end;
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListStatus.Index, status);
+  end;
+
+var
+  C1: Integer;
 begin
   gridPlayersListTable.DataController.BeginFullUpdate;
   try
@@ -243,20 +293,7 @@ begin
 
     gridPlayersListTable.DataController.SetRecordCount(Length(club.Players));
     for C1 := 0 to Length(club.Players) - 1 do
-    begin
-      if not dmMain.Players.FindPlayerById(club.Players[C1], player) then
-        Continue;
-
-      gridPlayersListTable.DataController.SetValue(C1, gridPlayersListId.Index, player.Id);
-      gridPlayersListTable.DataController.SetValue(C1, gridPlayersListName.Index, player.Nick);
-      gridPlayersListTable.DataController.SetValue(C1, gridPlayersListBalance.Index, player.Balance);
-
-      if CompareBytes(player.Id, club.OwnerId) then
-        status := 'Owner'
-      else
-        status := 'Player';
-      gridPlayersListTable.DataController.SetValue(C1, gridPlayersListStatus.Index, status);
-    end;
+      AddPlayerToGrid(C1, club.Players[C1]);
   finally
     gridPlayersListTable.DataController.EndFullUpdate;
   end;
@@ -379,22 +416,34 @@ begin
     SocketClient.Status;
 end;
 
+procedure TfrmClubLobbyManager.acSuspendPlayerExecute(Sender: TObject);
+var
+  club: TClubInfo;
+begin
+  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    Exit;
+
+  SocketClient.ChangeSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
+end;
+
+procedure TfrmClubLobbyManager.acReinstatePlayerExecute(Sender: TObject);
+var
+  club: TClubInfo;
+begin
+  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    Exit;
+
+  SocketClient.ChangeSuspendState(club.MongoId, FSelectedPlayerId, FALSE);
+end;
+
 procedure TfrmClubLobbyManager.acDeleteGameExecute(Sender: TObject);
 begin
   SocketClient.DeleteGame(FSelectedGameId);
 end;
 
 
-
 procedure TfrmClubLobbyManager.TCStatusReply(const AMessage: TMessageItem);
-var
-  pbstatus: TPB_StatusReply;
 begin
-  pbstatus := AMessage.Object_ as TPB_StatusReply;
-
-  dmMain.SelfInfo.ParseStatus(pbstatus);
-  dmMain.Players.ParseStatus(pbstatus);
-
   ConfigureGUI;
 end;
 
@@ -443,5 +492,16 @@ procedure TfrmClubLobbyManager.TCDeleteGameOk(const AMessage: TMessageItem);
 begin
   SocketClient.Status;
 end;
+
+procedure TfrmClubLobbyManager.TCSuspendPlayerOk(const AMessage: TMessageItem);
+begin
+  SocketClient.Status;
+end;
+
+procedure TfrmClubLobbyManager.TCReinstatePlayerOk(const AMessage: TMessageItem);
+begin
+  SocketClient.Status;
+end;
+
 
 end.
