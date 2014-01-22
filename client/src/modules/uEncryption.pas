@@ -71,10 +71,10 @@ function AES256EncryptStream(const AInStream: TStream; const AOutStream: TStream
   end;
 
 var
-  ASalt  : Binary;
-  AData  : Binary;
-  APass  : Binary;
-  shapass: RawByteString;
+  ASalt : Binary;
+  AData : Binary;
+  APass : Binary;
+  sha256: RawByteString;
 begin
   with ValidCipher(TCipher_Rijndael).Create, Context do
   try
@@ -82,9 +82,10 @@ begin
     APass := ValidHash(THash_Whirlpool).KDFx(Binary(APassword), ASalt, KeySize);
     Mode := cmCBCx;
     Init(APass);
-    shapass := SHA256String(APassword);
-    WriteBinary(shapass);
     WriteBinary(ASalt);
+    sha256 := SHA256Stream(AInStream);
+    WriteBinary(sha256);
+    AInStream.Position := 0;
     EncodeStream(AInStream, AOutStream, AInStream.Size);
     result := TRUE;
   finally
@@ -137,26 +138,21 @@ function AES256DecryptStream(const AInStream: TStream; const AOutStream: TStream
   end;
 
 var
-  ASalt          : Binary;
-  AData          : Binary;
-  APass          : Binary;
-  shapass        : RawByteString;
-  shapass_current: RawByteString;
+  ASalt : Binary;
+  AData : Binary;
+  APass : Binary;
+  sha256: RawByteString;
 begin
   with ValidCipher(TCipher_Rijndael).Create, Context do
   try
-    shapass := SHA256String(APassword);
-    if (not ReadBinary(shapass_current)) or
-       (shapass <> shapass_current) or
-       (not ReadBinary(ASalt)) then
-      Exit(FALSE);
-
+    ReadBinary(ASalt);
+    ReadBinary(sha256);
     APass := ValidHash(THash_Whirlpool).KDFx(Binary(APassword), ASalt, KeySize);
     Mode := cmCBCx;
     Init(APass);
-
-    DecodeStream(AInStream, AOutStream, AInStream.Size - Length(shapass_current) - Length(ASalt) - SizeOf(Integer) * 2);
-    Exit(TRUE);
+    DecodeStream(AInStream, AOutStream, AInStream.Size - Length(ASalt) - Length(sha256) - 2 * SizeOf(Integer));
+    AOutStream.Position := 0;
+    result := SHA256Stream(AOutStream) = sha256;
   finally
     Free;
     ProtectBinary(ASalt);
