@@ -5,6 +5,9 @@ interface
 uses
   Winapi.Windows, System.Classes, System.SysUtils;
 
+function SHA256Stream(const AStream: TStream): RawByteString;
+function SHA256Bytes(const ABytes: TBytes): RawByteString;
+function SHA256String(const AString: String): RawByteString;
 function AES256EncryptStream(const AInStream: TStream; const AOutStream: TStream; const APassword: String): Boolean; overload;
 function AES256EncryptStream(const AStream: TMemoryStream; const AKey: String): Boolean; overload;
 function AES256DecryptStream(const AInStream: TStream; const AOutStream: TStream; const APassword: String): Boolean; overload;
@@ -16,6 +19,20 @@ uses
   DECCipher, DECHash, DECUtil, DECFmt;
 
 
+
+function SHA256Stream(const AStream: TStream): RawByteString;
+var
+  hash: THash_SHA256;
+begin
+  hash := THash_SHA256.Create;
+  try
+    hash.Init;
+    result := hash.CalcStream(AStream, AStream.Size, TFormat_Copy);
+    hash.Done;
+  finally
+    hash.Free;
+  end;
+end;
 
 function SHA256Bytes(const ABytes: TBytes): RawByteString;
 var
@@ -31,13 +48,13 @@ begin
   end;
 end;
 
-function GetStringSHA256(const APassword: String): RawByteString;
+function SHA256String(const AString: String): RawByteString;
 var
-  pass: TBytes;
+  bytes: TBytes;
 begin
-  SetLength(pass, Length(APassword) * 2);
-  Move(APassword[1], pass[0], Length(pass));
-  result := SHA256Bytes(pass);
+  SetLength(bytes, Length(AString) * 2);
+  Move(AString[1], bytes[0], Length(bytes));
+  result := SHA256Bytes(bytes);
 end;
 
 function AES256EncryptStream(const AInStream: TStream; const AOutStream: TStream; const APassword: String): Boolean;
@@ -65,7 +82,7 @@ begin
     APass := ValidHash(THash_Whirlpool).KDFx(Binary(APassword), ASalt, KeySize);
     Mode := cmCBCx;
     Init(APass);
-    shapass := GetStringSHA256(APassword);
+    shapass := SHA256String(APassword);
     WriteBinary(shapass);
     WriteBinary(ASalt);
     EncodeStream(AInStream, AOutStream, AInStream.Size);
@@ -128,7 +145,7 @@ var
 begin
   with ValidCipher(TCipher_Rijndael).Create, Context do
   try
-    shapass := GetStringSHA256(APassword);
+    shapass := SHA256String(APassword);
     if (not ReadBinary(shapass_current)) or
        (shapass <> shapass_current) or
        (not ReadBinary(ASalt)) then

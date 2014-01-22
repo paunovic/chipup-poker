@@ -26,13 +26,14 @@ type
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    FAvatarId : AnsiString;
+    FAvatarId : TBytes;
     FAvatarJPG: TJPEGImage;
+    FAvatarChanged: Boolean;
 
     procedure TCChangeAvatarOk(const AMessage: TMessageItem);
     procedure TCChangeAvatarInvalidId(const AMessage: TMessageItem);
 
-    procedure UploadAvatar(const AAvatarFile: String);
+    procedure UploadAvatar;
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -47,7 +48,7 @@ implementation
 uses
   superobject, PNGImage, uAvatars, uMessageContainer, uServerMessageCallback,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uServerCodes, uSocketClient, uCommon, uSettings, uMainDataModule;
+  uServerCodes, uSocketClient, uCommon, uEncryption, uSettings, uMainDataModule;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
@@ -84,7 +85,6 @@ end;
 
 procedure TfrmChangeAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 var
-  json : ISuperObject;
   error: String;
   http : THTTPcli;
 begin
@@ -97,17 +97,12 @@ begin
 
   if Assigned(http.RcvdStream) then
   begin
+    {$IFDEF DEBUG} DebugLn(Format('Avatar received. Size: %d', [http.RcvdStream.Size]), ditNetInc); {$ENDIF}
     http.RcvdStream.Position := 0;
-    json := TSuperObject.ParseStream(http.RcvdStream as TMemoryStream, FALSE);
+    SetLength(FAvatarId, http.RcvdStream.Size);
+    Move((http.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], http.RcvdStream.Size);
     (http.RcvdStream as TMemoryStream).Free;
-    if Assigned(json) then
-    begin
-      {$IFDEF DEBUG} DebugLn(Format('Change avatar response: %s', [json.AsJson]), ditNetInc); {$ENDIF}
-      FAvatarId := AnsiString(json.S['id']);
-      SocketClient.SetAvatar(FAvatarId);
-    end
-    else
-      error := 'Invalid response from server';
+    SocketClient.SetAvatar(FAvatarId);
   end
   else
     error := 'Invalid response from server';
@@ -144,7 +139,7 @@ begin
   end;
 end;
 
-procedure TfrmChangeAvatar.UploadAvatar(const AAvatarFile: String);
+procedure TfrmChangeAvatar.UploadAvatar;
 var
   send_stream: TMemoryStream;
   http       : THTTPCli;
@@ -177,10 +172,12 @@ end;
 
 procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);
 var
+  ms     : TMemoryStream;
   fname  : String;
   picture: TPicture;
   bmp    : TBitmap;
   error  : String;
+  sha256 : RawByteString;
 begin
   if not OpenDialog.Execute(Handle) then
     Exit;
@@ -219,7 +216,18 @@ begin
   if error = '' then
   begin
     acChange.Enabled := FALSE;
-    UploadAvatar(fname);
+    FAvatarChanged := TRUE;
+    ms := TMemoryStream.Create;
+    try
+      FAvatarJPG.SaveToStream(ms);
+      ms.Position := 0;
+      sha256 := SHA256Stream(ms);
+      SetLength(FAvatarId, Length(sha256));
+      Move(sha256[1], FAvatarId[0], Length(sha256));
+    finally
+      ms.Free;
+    end;
+    SocketClient.SetAvatar(FAvatarId);
   end
   else
     MessageDlg(error, mtError, [mbOK], 0);
@@ -227,9 +235,14 @@ end;
 
 procedure TfrmChangeAvatar.TCChangeAvatarInvalidId(const AMessage: TMessageItem);
 begin
-  MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
-
-  acChange.Enabled := TRUE;
+  if FAvatarChanged then
+    UploadAvatar
+  else
+  begin
+    FAvatarChanged := FALSE;
+    MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
+    acChange.Enabled := TRUE;
+  end;
 end;
 
 procedure TfrmChangeAvatar.TCChangeAvatarOk(const AMessage: TMessageItem);
@@ -240,6 +253,7 @@ begin
   avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
   imgAvatar.Picture.Assign(avatar.Image);
 
+  FAvatarChanged := FALSE;
   acChange.Enabled := TRUE;
 end;
 

@@ -63,7 +63,7 @@ type
     procedure TransferChips(const AClubId: Int64; const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
-    procedure SetAvatar(const AAvatarId: AnsiString);
+    procedure SetAvatar(const AAvatarId: TBytes);
     procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
     procedure DeleteGame(const AGameId: TBytes);
     procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
@@ -243,7 +243,12 @@ begin
 
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
-      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc); {$ENDIF}
+      {$IFDEF DEBUG}
+      if rpc_message.DataSize = 0 then
+        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), ditSocketInc)
+      else
+        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
+      {$ENDIF}
       ResetPingTimer;
       MessageContainer.AddServerMessage(rpc_message.MethodId, data_obj);
     end;
@@ -621,7 +626,7 @@ begin
   end;
 end;
 
-procedure TSocketClient.SetAvatar(const AAvatarId: AnsiString);
+procedure TSocketClient.SetAvatar(const AAvatarId: TBytes);
 var
   protobuf: TPB_SetAvatarParams;
 begin

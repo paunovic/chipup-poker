@@ -13,7 +13,7 @@ type
                                 VERSION            : String;
                                 INSTANCE_MUTEX_NAME: String;
                                 SETTINGS_FILENAME  : String;
-                                AVATARS_FILENAME   : String;
+                                AVATARS_SUBDIR     : String;
                                 TCP_SERVER_ADDRESS : String;
                                 TCP_SERVER_PORT    : Word;
                                 TCP_PING_INTERVAL  : Word;
@@ -37,7 +37,7 @@ type
 
                                            // filenames
                                            SETTINGS_FILENAME: 'settings.dat';
-                                           AVATARS_FILENAME: 'avatars.dat';
+                                           AVATARS_SUBDIR: 'avatars';
 
                                            // socket server
                                            TCP_SERVER_ADDRESS: 'server.chipuppoker.com';

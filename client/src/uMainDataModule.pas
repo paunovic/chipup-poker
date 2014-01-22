@@ -54,7 +54,7 @@ begin
 
   FSelfInfo := TPlayerInfo.Create;
   FPlayers := TPlayerInfos.Create;
-  FAvatars := TAvatars.Create(AppDataRoamingPath + TSettings.Hardcoded.AVATARS_FILENAME);
+  FAvatars := TAvatars.Create(AppDataRoamingPath + TSettings.Hardcoded.AVATARS_SUBDIR);
 
   FTables := TTables.Create;
 
