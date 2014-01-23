@@ -308,10 +308,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     object tsGames: TcxTabSheet
       Caption = 'tsGames'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         579
         353)
@@ -337,7 +333,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitHeight = 275
           object gridGamesTable: TcxGridTableView
             Navigator.Buttons.CustomButtons = <>
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -409,7 +404,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 297
         end
         object btDeleteGame: TcxButton
           Left = 216
@@ -426,7 +420,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 297
         end
         object btEditGame: TcxButton
           Left = 112
@@ -443,7 +436,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 297
         end
       end
     end

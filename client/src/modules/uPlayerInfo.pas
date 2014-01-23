@@ -74,14 +74,11 @@ end;
 
 function TPlayerInfo.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
 var
-  game_clubid: Int64;
-  game_type  : TGameType;
-  game_limit : TGameLimit;
-  club       : TClubInfo;
-  pbclub     : TPB_Club;
-  pbgame     : TPB_Game;
-  C1         : Integer;
-  index      : Integer;
+  club  : TClubInfo;
+  pbclub: TPB_Club;
+  pbgame: TPB_Game;
+  C1    : Integer;
+  index : Integer;
 begin
   FId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
@@ -97,25 +94,16 @@ begin
     pbclub := AStatusReply.Clubs[C1];
     index := FClubs.IndexOf(pbclub.Seq);
     if index = -1 then
-      index := FClubs.Add(TClubInfo.Create);
-    club := FClubs[index];
-    club.UpdateFromProtobufObject(pbclub);
+      FClubs.Add(TClubInfo.Create(pbclub))
+    else
+      FClubs[index].UpdateFromProtobufObject(pbclub);
   end;
 
   for C1 := 0 to AStatusReply.Games.Count - 1 do
   begin
     pbgame := AStatusReply.Games[C1];
-
-    game_clubid := pbgame.ClubSeq;
-    if FClubs.FindClub(game_clubid, club) then
-    begin
-      game_type := TGameType(pbgame.GameType);
-      game_limit := TGameLimit(pbgame.GameLimit);
-
-      club.Games.AddGame(pbgame.MongoId, pbgame.CreatorMongoId, game_clubid, pbgame.Gamename,
-                         game_type, game_limit, pbgame.SmallBlind, pbgame.BigBlind, pbgame.Seats);
-    end;
-
+    if FClubs.FindClub(pbgame.ClubSeq, club) then
+      club.Games.AddGame(pbgame);
   end;
 
   Exit(TRUE);

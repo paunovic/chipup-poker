@@ -21,7 +21,7 @@ type
     FSuspendedPlayers: TArray<TBytes>;
     FGames           : TGamesInfo;
   public
-    constructor Create; overload;
+    constructor Create(const AProtobufObject: TPB_Club); overload;
     constructor Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String); overload;
     destructor Destroy; override;
 
@@ -57,9 +57,10 @@ uses
 
 { TClubInfo }
 
-constructor TClubInfo.Create;
+constructor TClubInfo.Create(const AProtobufObject: TPB_Club);
 begin
   FGames := TGamesInfo.Create;
+  UpdateFromProtobufObject(AProtobufObject);
 end;
 
 constructor TClubInfo.Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);

@@ -99,6 +99,7 @@ type
     procedure TCReinstatePlayerOk(const AMessage: TMessageItem);
     procedure CSEClubChange(const AMessage: TMessageItem);
     procedure CSEClubDeleted(const AMessage: TMessageItem);
+    procedure CSEGameChange(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -114,7 +115,7 @@ implementation
 
 uses
   uCommon, uSocketClient, uMainDataModule, uGiveChipsForm, uChangeClubDetailsForm, uServerMessageCallback, uServerCodes,
-  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm, uPB_Club;
+  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm, uPB_Club, uPB_Game;
 
 
 procedure TfrmClubLobbyManager.FormCreate(Sender: TObject);
@@ -172,6 +173,7 @@ begin
                             TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk),
                             TServerMessageCallback.Create(seClubChange, CSEClubChange),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted)
+//                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
                           ]
                         );
     end;
@@ -553,5 +555,14 @@ begin
     ModalResult := mrClose;
 end;
 
+procedure TfrmClubLobbyManager.CSEGameChange(const AMessage: TMessageItem);
+var
+  pbgame: TPB_Game;
+begin
+  pbgame := AMessage.Object_ as TPB_Game;
+
+  if pbgame.Clubseq = FClubId then
+    ConfigureGUI;
+end;
 
 end.
