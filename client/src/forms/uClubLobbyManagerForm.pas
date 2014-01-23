@@ -74,6 +74,7 @@ type
     procedure acShowEditGameFormExecute(Sender: TObject);
     procedure acSuspendPlayerExecute(Sender: TObject);
     procedure acReinstatePlayerExecute(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     FClubId: Integer;
     FSelectedPlayerId: TBytes;
@@ -113,6 +114,18 @@ uses
   uCommon, uSocketClient, uMainDataModule, uGiveChipsForm, uChangeClubDetailsForm, uServerMessageCallback, uServerCodes,
   uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm;
 
+
+procedure TfrmClubLobbyManager.FormCreate(Sender: TObject);
+begin
+  btGiveChips.Top := gbPlayers.Height - btGiveChips.Height - 13;
+  btGiveOwnership.Top := btGiveChips.Top;
+  btRemovePlayerFromClub.Top := btGiveChips.Top;
+  btSuspendUnsuspend.Top := btGiveChips.Top - btGiveChips.Height - 5;
+
+  btNewGame.Top := gbGames.Height - btNewGame.Height - 13;
+  btEditGame.Top := btNewGame.Top;
+  btDeleteGame.Top := btNewGame.Top;
+end;
 
 procedure TfrmClubLobbyManager.FormDestroy(Sender: TObject);
 begin

@@ -15,6 +15,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
   Font.Style = []
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
   DesignSize = (
@@ -39,6 +40,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Transparent = True
+    ExplicitLeft = -1
     Height = 80
     Width = 581
     AnchorX = 291
@@ -240,7 +242,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 297
+          Top = 309
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -256,7 +258,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 297
+          Top = 309
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -272,7 +274,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 297
+          Top = 309
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -288,7 +290,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 263
+          Top = 275
           Width = 98
           Height = 28
           Action = acSuspendPlayer
