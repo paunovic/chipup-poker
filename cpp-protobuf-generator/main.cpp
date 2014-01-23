@@ -83,16 +83,24 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"\n"
 		"interface\n"
 		"\n"
-		"const\n"
+		"type\n"
+		"  T$name$ = (\n"
 		,"name",type->name());
 	for (int j=0; j<type->value_count(); j++) {
 		const EnumValueDescriptor *value = type->value(j);
 		//cerr << value->name() << " = " << value->number() << "\n";
 		char hack[10];
 		snprintf(hack,9,"%d",value->number());
-		printer.Print("  $name$ = $hack$;\n","name",value->name(),"hack",hack);
+		const char *end = ",";
+		if (j == (type->value_count()-1)) end = "";
+		printer.Print(
+			"    $name$ = $hack$$end$\n"
+			,"name",value->name()
+			,"hack",hack
+			,"end",end);
 	}
 	printer.Print(
+		"  );\n"
 		"\n"
 		"$begin$\n"
 		"function TranslateServerCode(const ACode: Integer): String;\n"
@@ -104,8 +112,25 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"uses System.SysUtils;\n"
 		"\n"
 		"function TranslateServerCode(const ACode: Integer): String;\n"
+		"var\n"
+		"  sc      : T$name$;\n"
+		"  sc_valid: Boolean;\n"
 		"begin\n"
-		"  case ACode of\n"
+		"  sc_valid := FALSE;\n"
+		"  for sc := Low(TServerCodes) to High(TServerCodes) do\n"
+		"    if Integer(sc) = ACode then\n"
+		"    begin\n"
+		"      sc_valid := TRUE;\n"
+		"      Break;\n"
+		"    end;\n"
+		"\n"
+		"  if not sc_valid then\n"
+		"  begin\n"
+		"    result := Format('UNKNOWN CODE [%d]', [ACode]);\n"
+		"  end;\n"
+		"\n"
+		"  case TServerCodes(ACode) of\n"
+		,"name",type->name()
 		,"begin","{$IFDEF DEBUG}"
 		,"end","{$ENDIF DEBUG}");
 	for (int j=0; j<type->value_count(); j++) {
@@ -113,8 +138,8 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		printer.Print("    $name$: result := '$name$';\n","name",value->name());
 	}
 	printer.Print(
-		"  else\n"
-		"    result := Format('UNKNOWN CODE [%d]',[ACode]);\n"
+//		"  else\n"
+//		"    result := Format('UNKNOWN CODE [%d]',[ACode]);\n"
 		"  end;\n"
 		"end;\n"
 		"$end$\n"

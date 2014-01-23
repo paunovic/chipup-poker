@@ -85,7 +85,7 @@ type
     scTableLeave = 522,
     scTableSit = 523,
     scTableStandUp = 524,
-    scPing= 525,
+    scPing = 525,
     scSuspendPlayer = 526
   );
 
@@ -118,6 +118,88 @@ begin
 
   case TServerCodes(ACode) of
     srNotImplemented: result := 'srNotImplemented';
+    srHello: result := 'srHello';
+    srLoginOk: result := 'srLoginOk';
+    srInvalidLogin: result := 'srInvalidLogin';
+    srLogout: result := 'srLogout';
+    srRegisterOk: result := 'srRegisterOk';
+    srRegisterDuplicateMail: result := 'srRegisterDuplicateMail';
+    srRegisterDuplicateUsername: result := 'srRegisterDuplicateUsername';
+    srRegisterInvalidMail: result := 'srRegisterInvalidMail';
+    srListClubs: result := 'srListClubs';
+    srStatus: result := 'srStatus';
+    srCreateClubOk: result := 'srCreateClubOk';
+    srCreateClubNameExists: result := 'srCreateClubNameExists';
+    srCreateClubInvalidName: result := 'srCreateClubInvalidName';
+    srCreateClubInvalidCode: result := 'srCreateClubInvalidCode';
+    srJoinClubOk: result := 'srJoinClubOk';
+    srJoinClubInvalidId: result := 'srJoinClubInvalidId';
+    srJoinClubInvalidCode: result := 'srJoinClubInvalidCode';
+    srJoinClubAlareadyMember: result := 'srJoinClubAlareadyMember';
+    srLeaveClubOk: result := 'srLeaveClubOk';
+    srLeaveClubInvalidId: result := 'srLeaveClubInvalidId';
+    srKickPlayerOk: result := 'srKickPlayerOk';
+    srKickPlayerInvalidClubId: result := 'srKickPlayerInvalidClubId';
+    srKickPlayerInvalidPlayerId: result := 'srKickPlayerInvalidPlayerId';
+    srOwnershipGivewayNotOwner: result := 'srOwnershipGivewayNotOwner';
+    srOwnershipGiveawayInvalidPlayerId: result := 'srOwnershipGiveawayInvalidPlayerId';
+    srOwnerhipGiveAwayInvalidClubId: result := 'srOwnerhipGiveAwayInvalidClubId';
+    srOwnershipGiveAwayOk: result := 'srOwnershipGiveAwayOk';
+    srClubDetailsChangeOk: result := 'srClubDetailsChangeOk';
+    srClubDetailsClubnameExists: result := 'srClubDetailsClubnameExists';
+    srClubDisbandOk: result := 'srClubDisbandOk';
+    srClubTransferChipsOk: result := 'srClubTransferChipsOk';
+    srClubTransferChipsInvalidAmount: result := 'srClubTransferChipsInvalidAmount';
+    srCreateClubNoTokens: result := 'srCreateClubNoTokens';
+    srClubDetailsChangeNoTokens: result := 'srClubDetailsChangeNoTokens';
+    srChangeMailOk: result := 'srChangeMailOk';
+    srChangeMailInvalidMail: result := 'srChangeMailInvalidMail';
+    srChangeMailDuplicateMail: result := 'srChangeMailDuplicateMail';
+    srChangePasswordOk: result := 'srChangePasswordOk';
+    srChangePasswordInvalidPassword: result := 'srChangePasswordInvalidPassword';
+    srChangeAvatarOk: result := 'srChangeAvatarOk';
+    srChangeAvatarInvalidId: result := 'srChangeAvatarInvalidId';
+    srCreateGameOk: result := 'srCreateGameOk';
+    srDeleteGameOk: result := 'srDeleteGameOk';
+    srEditGameOk: result := 'srEditGameOk';
+    srTableStatus: result := 'srTableStatus';
+    srTableSitOk: result := 'srTableSitOk';
+    srTableSitSeatTaken: result := 'srTableSitSeatTaken';
+    srTableStandUpOk: result := 'srTableStandUpOk';
+    srPong: result := 'srPong';
+    srSuspendPlayerOk: result := 'srSuspendPlayerOk';
+    srReinstatePlayerOk: result := 'srReinstatePlayerOk';
+    seChat: result := 'seChat';
+    seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
+    seAccountConfirmed: result := 'seAccountConfirmed';
+    seClubChange: result := 'seClubChange';
+    seClubDeleted: result := 'seClubDeleted';
+    scLogin: result := 'scLogin';
+    scStatus: result := 'scStatus';
+    scRegister: result := 'scRegister';
+    scForgotPassword: result := 'scForgotPassword';
+    scLogout: result := 'scLogout';
+    scListPublicClubs: result := 'scListPublicClubs';
+    scCreateClub: result := 'scCreateClub';
+    scJoinClub: result := 'scJoinClub';
+    scKickPlayer: result := 'scKickPlayer';
+    scLeaveClub: result := 'scLeaveClub';
+    scGiveClubOwnership: result := 'scGiveClubOwnership';
+    scChangeClubDetails: result := 'scChangeClubDetails';
+    scDeleteClub: result := 'scDeleteClub';
+    scTransferChips: result := 'scTransferChips';
+    scChangeEmail: result := 'scChangeEmail';
+    scChangePassword: result := 'scChangePassword';
+    scSetAvatar: result := 'scSetAvatar';
+    scCreateGame: result := 'scCreateGame';
+    scDeleteGame: result := 'scDeleteGame';
+    scEditGame: result := 'scEditGame';
+    scTableJoin: result := 'scTableJoin';
+    scTableLeave: result := 'scTableLeave';
+    scTableSit: result := 'scTableSit';
+    scTableStandUp: result := 'scTableStandUp';
+    scPing: result := 'scPing';
+    scSuspendPlayer: result := 'scSuspendPlayer';
   end;
 end;
 {$ENDIF DEBUG}
