@@ -2,88 +2,92 @@ unit uServerCodes;
 
 interface
 
-const
-  SR_NOT_IMPLEMENTED = 0;
-  SR_HELLO = 1;
-  SR_LOGIN_OK = 2;
-  SR_INVALID_LOGIN = 3;
-  SR_LOGOUT = 4;
-  SR_REGISTER_OK = 5;
-  SR_REGISTER_DUPLICATE_MAIL = 6;
-  SR_REGISTER_DUPLICATE_USERNAME = 7;
-  SR_REGISTER_INVALID_MAIL = 8;
-  SR_LIST_CLUBS = 9;
-  SR_STATUS = 10;
-  SR_CREATECLUB_OK = 11;
-  SR_CREATECLUB_NAME_EXISTS = 12;
-  SR_CREATECLUB_INVALID_NAME = 13;
-  SR_CREATECLUB_INVALID_CODE = 14;
-  SR_JOINCLUB_OK = 15;
-  SR_JOINCLUB_INVALID_ID = 16;
-  SR_JOINCLUB_INVALID_CODE = 17;
-  SR_JOINCLUB_ALREADY_MEMBER = 18;
-  SR_LEAVECLUB_OK = 19;
-  SR_LEAVECLUB_INVALID_ID = 20;
-  SR_KICKPLAYER_OK = 21;
-  SR_KICKPLAYER_INVALID_CLUB_ID = 22;
-  SR_KICKPLAYER_INVALID_PLAYER_ID = 23;
-  SR_OWNERSHIP_GIVEAWAY_NOT_OWNER = 24;
-  SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID = 25;
-  SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID = 26;
-  SR_OWNERSHIP_GIVEAWAY_OK = 27;
-  SR_CLUB_DETAILS_CHANGE_OK = 28;
-  SR_CLUB_DETAILS_CLUBNAME_EXISTS = 29;
-  SR_CLUB_DISBAND_OK = 30;
-  SR_CLUB_TRANFER_CHIPS_OK = 31;
-  SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT = 32;
-  SR_CREATECLUB_NO_TOKENS = 33;
-  SR_CLUB_DETAILS_CHANGE_NO_TOKENS = 34;
-  SR_CHANGE_MAIL_OK = 35;
-  SR_CHANGE_MAIL_INVALID_MAIL = 36;
-  SR_CHANGE_MAIL_DUPLICATE_MAIL = 37;
-  SR_CHANGE_PASSWORD_OK = 38;
-  SR_CHANGE_PASSWORD_INVALID_PASSWORD = 39;
-  SR_CHANGE_AVATAR_OK = 40;
-  SR_CHANGE_AVATAR_INVALID_ID = 41;
-  SR_CREATE_GAME_OK = 42;
-  SR_DELETE_GAME_OK = 43;
-  SR_EDIT_GAME_OK = 44;
-  SR_SECONDARY_LOGIN_DETECTED = 45;
-  SR_ACCOUNT_CONFIRMED = 46;
-  EVENT_CHAT = 47;
-  SR_TABLE_STATUS = 48;
-  SR_TABLE_SIT_OK = 49;
-  SR_TABLE_SIT_SEAT_TAKEN = 50;
-  SR_TABLE_STAND_UP_OK = 51;
-  SR_PONG = 52;
-  SR_SUSPEND_PLAYER_OK = 53;
-  SR_REINSTATE_PLAYER_OK = 54;
-  CMD_LOGIN = 501;
-  CMD_STATUS = 502;
-  CMD_REGISTER = 503;
-  CMD_FORGOT_PASSWORD = 504;
-  CMD_LOGOUT = 505;
-  CMD_LIST_PUBLIC_CLUBS = 506;
-  CMD_CREATE_CLUB = 507;
-  CMD_JOIN_CLUB = 508;
-  CMD_KICK_PLAYER = 509;
-  CMD_LEAVE_CLUB = 510;
-  CMD_GIVE_CLUB_OWNERSHIP = 511;
-  CMD_CHANGE_CLUB_DETAILS = 512;
-  CMD_DELETE_CLUB = 513;
-  CMD_TRANSFER_CHIPS = 514;
-  CMD_CHANGE_EMAIL = 515;
-  CMD_CHANGE_PASSWORD = 516;
-  CMD_SET_AVATAR = 517;
-  CMD_CREATE_GAME = 518;
-  CMD_DELETE_GAME = 519;
-  CMD_EDIT_GAME = 520;
-  CMD_TABLE_JOIN = 521;
-  CMD_TABLE_LEAVE = 522;
-  CMD_TABLE_SIT = 523;
-  CMD_TABLE_STAND_UP = 524;
-  CMD_PING = 525;
-  CMD_SUSPEND_PLAYER = 526;
+type
+  TServerCodes = (
+    srNotImplemented = 0,
+    srHello = 1,
+    srLoginOk = 2,
+    srInvalidLogin = 3,
+    srLogout = 4,
+    srRegisterOk = 5,
+    srRegisterDuplicateMail = 6,
+    srRegisterDuplicateUsername = 7,
+    srRegisterInvalidMail = 8,
+    srListClubs = 9,
+    srStatus = 10,
+    srCreateClubOk = 11,
+    srCreateClubNameExists = 12,
+    srCreateClubInvalidName = 13,
+    srCreateClubInvalidCode = 14,
+    srJoinClubOk = 15,
+    srJoinClubInvalidId = 16,
+    srJoinClubInvalidCode = 17,
+    srJoinClubAlareadyMember = 18,
+    srLeaveClubOk = 19,
+    srLeaveClubInvalidId = 20,
+    srKickPlayerOk = 21,
+    srKickPlayerInvalidClubId = 22,
+    srKickPlayerInvalidPlayerId = 23,
+    srOwnershipGivewayNotOwner = 24,
+    srOwnershipGiveawayInvalidPlayerId = 25,
+    srOwnerhipGiveAwayInvalidClubId = 26,
+    srOwnershipGiveAwayOk = 27,
+    srClubDetailsChangeOk = 28,
+    srClubDetailsClubnameExists = 29,
+    srClubDisbandOk = 30,
+    srClubTransferChipsOk = 31,
+    srClubTransferChipsInvalidAmount = 32,
+    srCreateClubNoTokens = 33,
+    srClubDetailsChangeNoTokens = 34,
+    srChangeMailOk = 35,
+    srChangeMailInvalidMail = 36,
+    srChangeMailDuplicateMail = 37,
+    srChangePasswordOk = 38,
+    srChangePasswordInvalidPassword = 39,
+    srChangeAvatarOk = 40,
+    srChangeAvatarInvalidId = 41,
+    srCreateGameOk = 42,
+    srDeleteGameOk = 43,
+    srEditGameOk = 44,
+    srTableStatus = 45,
+    srTableSitOk = 46,
+    srTableSitSeatTaken = 47,
+    srTableStandUpOk = 48,
+    srPong = 49,
+    srSuspendPlayerOk = 50,
+    srReinstatePlayerOk = 51,
+    seChat = 200,
+    seSecondaryLoginDetected = 201,
+    seAccountConfirmed = 202,
+    seClubChange = 203,
+    seClubDeleted = 204,
+    scLogin = 501,
+    scStatus = 502,
+    scRegister = 503,
+    scForgotPassword = 504,
+    scLogout = 505,
+    scListPublicClubs = 506,
+    scCreateClub = 507,
+    scJoinClub = 508,
+    scKickPlayer = 509,
+    scLeaveClub = 510,
+    scGiveClubOwnership = 511,
+    scChangeClubDetails = 512,
+    scDeleteClub = 513,
+    scTransferChips = 514,
+    scChangeEmail = 515,
+    scChangePassword = 516,
+    scSetAvatar = 517,
+    scCreateGame = 518,
+    scDeleteGame = 519,
+    scEditGame = 520,
+    scTableJoin = 521,
+    scTableLeave = 522,
+    scTableSit = 523,
+    scTableStandUp = 524,
+    scPing= 525,
+    scSuspendPlayer = 526
+  );
 
 {$IFDEF DEBUG}
 function TranslateServerCode(const ACode: Integer): String;
@@ -95,91 +99,25 @@ implementation
 uses System.SysUtils;
 
 function TranslateServerCode(const ACode: Integer): String;
+var
+  sc      : TServerCodes;
+  sc_valid: Boolean;
 begin
-  case ACode of
-    SR_NOT_IMPLEMENTED: result := 'SR_NOT_IMPLEMENTED';
-    SR_HELLO: result := 'SR_HELLO';
-    SR_LOGIN_OK: result := 'SR_LOGIN_OK';
-    SR_INVALID_LOGIN: result := 'SR_INVALID_LOGIN';
-    SR_LOGOUT: result := 'SR_LOGOUT';
-    SR_REGISTER_OK: result := 'SR_REGISTER_OK';
-    SR_REGISTER_DUPLICATE_MAIL: result := 'SR_REGISTER_DUPLICATE_MAIL';
-    SR_REGISTER_DUPLICATE_USERNAME: result := 'SR_REGISTER_DUPLICATE_USERNAME';
-    SR_REGISTER_INVALID_MAIL: result := 'SR_REGISTER_INVALID_MAIL';
-    SR_LIST_CLUBS: result := 'SR_LIST_CLUBS';
-    SR_STATUS: result := 'SR_STATUS';
-    SR_CREATECLUB_OK: result := 'SR_CREATECLUB_OK';
-    SR_CREATECLUB_NAME_EXISTS: result := 'SR_CREATECLUB_NAME_EXISTS';
-    SR_CREATECLUB_INVALID_NAME: result := 'SR_CREATECLUB_INVALID_NAME';
-    SR_CREATECLUB_INVALID_CODE: result := 'SR_CREATECLUB_INVALID_CODE';
-    SR_JOINCLUB_OK: result := 'SR_JOINCLUB_OK';
-    SR_JOINCLUB_INVALID_ID: result := 'SR_JOINCLUB_INVALID_ID';
-    SR_JOINCLUB_INVALID_CODE: result := 'SR_JOINCLUB_INVALID_CODE';
-    SR_JOINCLUB_ALREADY_MEMBER: result := 'SR_JOINCLUB_ALREADY_MEMBER';
-    SR_LEAVECLUB_OK: result := 'SR_LEAVECLUB_OK';
-    SR_LEAVECLUB_INVALID_ID: result := 'SR_LEAVECLUB_INVALID_ID';
-    SR_KICKPLAYER_OK: result := 'SR_KICKPLAYER_OK';
-    SR_KICKPLAYER_INVALID_CLUB_ID: result := 'SR_KICKPLAYER_INVALID_CLUB_ID';
-    SR_KICKPLAYER_INVALID_PLAYER_ID: result := 'SR_KICKPLAYER_INVALID_PLAYER_ID';
-    SR_OWNERSHIP_GIVEAWAY_NOT_OWNER: result := 'SR_OWNERSHIP_GIVEAWAY_NOT_OWNER';
-    SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID: result := 'SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID';
-    SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID: result := 'SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID';
-    SR_OWNERSHIP_GIVEAWAY_OK: result := 'SR_OWNERSHIP_GIVEAWAY_OK';
-    SR_CLUB_DETAILS_CHANGE_OK: result := 'SR_CLUB_DETAILS_CHANGE_OK';
-    SR_CLUB_DETAILS_CLUBNAME_EXISTS: result := 'SR_CLUB_DETAILS_CLUBNAME_EXISTS';
-    SR_CLUB_DISBAND_OK: result := 'SR_CLUB_DISBAND_OK';
-    SR_CLUB_TRANFER_CHIPS_OK: result := 'SR_CLUB_TRANFER_CHIPS_OK';
-    SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT: result := 'SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT';
-    SR_CREATECLUB_NO_TOKENS: result := 'SR_CREATECLUB_NO_TOKENS';
-    SR_CLUB_DETAILS_CHANGE_NO_TOKENS: result := 'SR_CLUB_DETAILS_CHANGE_NO_TOKENS';
-    SR_CHANGE_MAIL_OK: result := 'SR_CHANGE_MAIL_OK';
-    SR_CHANGE_MAIL_INVALID_MAIL: result := 'SR_CHANGE_MAIL_INVALID_MAIL';
-    SR_CHANGE_MAIL_DUPLICATE_MAIL: result := 'SR_CHANGE_MAIL_DUPLICATE_MAIL';
-    SR_CHANGE_PASSWORD_OK: result := 'SR_CHANGE_PASSWORD_OK';
-    SR_CHANGE_PASSWORD_INVALID_PASSWORD: result := 'SR_CHANGE_PASSWORD_INVALID_PASSWORD';
-    SR_CHANGE_AVATAR_OK: result := 'SR_CHANGE_AVATAR_OK';
-    SR_CHANGE_AVATAR_INVALID_ID: result := 'SR_CHANGE_AVATAR_INVALID_ID';
-    SR_CREATE_GAME_OK: result := 'SR_CREATE_GAME_OK';
-    SR_DELETE_GAME_OK: result := 'SR_DELETE_GAME_OK';
-    SR_EDIT_GAME_OK: result := 'SR_EDIT_GAME_OK';
-    SR_SECONDARY_LOGIN_DETECTED: result := 'SR_SECONDARY_LOGIN_DETECTED';
-    SR_ACCOUNT_CONFIRMED: result := 'SR_ACCOUNT_CONFIRMED';
-    EVENT_CHAT: result := 'EVENT_CHAT';
-    SR_TABLE_STATUS: result := 'SR_TABLE_STATUS';
-    SR_TABLE_SIT_OK: result := 'SR_TABLE_SIT_OK';
-    SR_TABLE_SIT_SEAT_TAKEN: result := 'SR_TABLE_SIT_SEAT_TAKEN';
-    SR_TABLE_STAND_UP_OK: result := 'SR_TABLE_STAND_UP_OK';
-    SR_PONG: result := 'SR_PONG';
-    SR_SUSPEND_PLAYER_OK: result := 'SR_SUSPEND_PLAYER_OK';
-    SR_REINSTATE_PLAYER_OK: result := 'SR_REINSTATE_PLAYER_OK';
-    CMD_LOGIN: result := 'CMD_LOGIN';
-    CMD_STATUS: result := 'CMD_STATUS';
-    CMD_REGISTER: result := 'CMD_REGISTER';
-    CMD_FORGOT_PASSWORD: result := 'CMD_FORGOT_PASSWORD';
-    CMD_LOGOUT: result := 'CMD_LOGOUT';
-    CMD_LIST_PUBLIC_CLUBS: result := 'CMD_LIST_PUBLIC_CLUBS';
-    CMD_CREATE_CLUB: result := 'CMD_CREATE_CLUB';
-    CMD_JOIN_CLUB: result := 'CMD_JOIN_CLUB';
-    CMD_KICK_PLAYER: result := 'CMD_KICK_PLAYER';
-    CMD_LEAVE_CLUB: result := 'CMD_LEAVE_CLUB';
-    CMD_GIVE_CLUB_OWNERSHIP: result := 'CMD_GIVE_CLUB_OWNERSHIP';
-    CMD_CHANGE_CLUB_DETAILS: result := 'CMD_CHANGE_CLUB_DETAILS';
-    CMD_DELETE_CLUB: result := 'CMD_DELETE_CLUB';
-    CMD_TRANSFER_CHIPS: result := 'CMD_TRANSFER_CHIPS';
-    CMD_CHANGE_EMAIL: result := 'CMD_CHANGE_EMAIL';
-    CMD_CHANGE_PASSWORD: result := 'CMD_CHANGE_PASSWORD';
-    CMD_SET_AVATAR: result := 'CMD_SET_AVATAR';
-    CMD_CREATE_GAME: result := 'CMD_CREATE_GAME';
-    CMD_DELETE_GAME: result := 'CMD_DELETE_GAME';
-    CMD_EDIT_GAME: result := 'CMD_EDIT_GAME';
-    CMD_TABLE_JOIN: result := 'CMD_TABLE_JOIN';
-    CMD_TABLE_LEAVE: result := 'CMD_TABLE_LEAVE';
-    CMD_TABLE_SIT: result := 'CMD_TABLE_SIT';
-    CMD_TABLE_STAND_UP: result := 'CMD_TABLE_STAND_UP';
-    CMD_PING: result := 'CMD_PING';
-    CMD_SUSPEND_PLAYER: result := 'CMD_SUSPEND_PLAYER';
-  else
-    result := Format('UNKNOWN CODE [%d]',[ACode]);
+  sc_valid := FALSE;
+  for sc := Low(TServerCodes) to High(TServerCodes) do
+    if Integer(sc) = ACode then
+    begin
+      sc_valid := TRUE;
+      Break;
+    end;
+
+  if not sc_valid then
+  begin
+    result := Format('UNKNOWN CODE [%d]', [ACode]);
+  end;
+
+  case TServerCodes(ACode) of
+    srNotImplemented: result := 'srNotImplemented';
   end;
 end;
 {$ENDIF DEBUG}
