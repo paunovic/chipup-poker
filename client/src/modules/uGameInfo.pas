@@ -3,7 +3,7 @@ unit uGameInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils;
+  System.Generics.Collections, System.SysUtils, uPB_Game;
 
 type
   TGameType = (gtHoldem, gtOmaha);
@@ -25,7 +25,10 @@ type
     function GetGameTypeStrFull: String;
 
   public
-    constructor Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
+    constructor Create(const AProtobufObject: TPB_Game); overload;
+    constructor Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer); overload;
+
+    procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Game);
 
     property MongoId        : TBytes read FMongoId write FMongoId;
     property ClubId         : Int64 read FClubId write FClubId;
@@ -42,7 +45,7 @@ type
 
   TGamesInfo = class(TObjectList<TGameInfo>)
   public
-    function AddGame(const AMongoId, ACreatorId: TBytes; const AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer): TGameInfo;
+    function AddGame(const AProtobufObject: TPB_Game): TGameInfo;
     function FindGame(const AMongoId: TBytes; var AGameInfo: TGameInfo): Boolean;
     function IndexOf(const AMongoId: TBytes): Integer;
   end;
@@ -52,6 +55,11 @@ implementation
 uses
   uCommon;
 
+
+constructor TGameInfo.Create(const AProtobufObject: TPB_Game);
+begin
+  UpdateFromProtobufObject(AProtobufObject);
+end;
 
 constructor TGameInfo.Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
 begin
@@ -64,6 +72,19 @@ begin
   FGameType := AGameType;
   FGameLimit := AGameLimit;
   FSeats := ASeats;
+end;
+
+procedure TGameInfo.UpdateFromProtobufObject(const AProtobufObject: TPB_Game);
+begin
+  FMongoId := AProtobufObject.MongoId;
+  FCreatorId := AProtobufObject.CreatorMongoId;
+  FClubId := AProtobufObject.Clubseq;
+  FName := AProtobufObject.Gamename;
+  FSmallBlind := AProtobufObject.SmallBlind;
+  FBigBlind := AProtobufObject.BigBlind;
+  FGameType := TGameType(AProtobufObject.GameType);
+  FGameLimit := TGameLimit(AProtobufObject.GameLimit);
+  FSeats := AProtobufObject.Seats;
 end;
 
 function TGameInfo.GetGameTypeStr: String;
@@ -88,27 +109,18 @@ begin
   end;
 end;
 
+
 { TGamesInfo }
 
-function TGamesInfo.AddGame(const AMongoId, ACreatorId: TBytes; const AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer): TGameInfo;
+function TGamesInfo.AddGame(const AProtobufObject: TPB_Game): TGameInfo;
 var
   index: Integer;
 begin
-  index := IndexOf(AMongoId);
+  index := IndexOf(AProtobufObject.MongoId);
   if index = -1 then
-    index := Add(TGameInfo.Create(AMongoId, ACreatorId, AClubId, AName, AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats))
+    index := Add(TGameInfo.Create(AProtobufObject))
   else
-  begin
-    Items[index].MongoId := AMongoId;
-    Items[index].CreatorId := ACreatorId;
-    Items[index].ClubId := AClubId;
-    Items[index].Name := AName;
-    Items[index].SmallBlind := ASmallBlind;
-    Items[index].BigBlind := ABigBlind;
-    Items[index].GameType := AGameType;
-    Items[index].Limit := AGameLimit;
-    Items[index].Seats := ASeats;
-  end;
+    Items[index].UpdateFromProtobufObject(AProtobufObject);
   result := Items[index];
 end;
 

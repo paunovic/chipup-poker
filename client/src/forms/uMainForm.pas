@@ -99,6 +99,7 @@ type
     procedure TCAccountConfirmed(const AMessage: TMessageItem);
     procedure CSEClubDeleted(const AMessage: TMessageItem);
     procedure CSEClubChange(const AMessage: TMessageItem);
+    procedure CSEGameChange(const AMessage: TMessageItem);
 
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
@@ -124,7 +125,7 @@ implementation
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
   uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
-  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club,
+  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_ChatEvent, uPB_ChatMessage, uClubLobbyManagerForm;
 
@@ -167,6 +168,7 @@ begin
                             TServerMessageCallback.Create(seAccountConfirmed, TCAccountConfirmed),
                             TServerMessageCallback.Create(seClubChange, CSEClubChange),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted)
+//                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
                           ]
                         );
 
@@ -529,8 +531,21 @@ begin
   ConfigureGUI;
 end;
 
+procedure TfrmChipUpMain.CSEGameChange(const AMessage: TMessageItem);
+var
+  pbgame: TPB_Game;
+  club  : TClubInfo;
+  game  : TGameInfo;
+begin
+  pbgame := AMessage.Object_ as TPB_Game;
 
+  if not dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
+    Exit;
 
+  if club.Games.FindGame(pbgame.MongoId, game) then
+    game.UpdateFromProtobufObject(pbgame);
 
+  ConfigureGUI;
+end;
 
 end.

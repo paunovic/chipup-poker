@@ -201,6 +201,9 @@ enum ServerCodes {
     seAccountConfirmed = 202;
     seClubChange = 203;
     seClubDeleted = 204;
+	seGameChange = 205;
+	seGameCreate = 206;
+	seGameDelete = 207;
     scLogin = 501;
     scStatus = 502;
     scRegister = 503;
@@ -225,7 +228,7 @@ enum ServerCodes {
     scTableLeave = 522;
     scTableSit = 523;
     scTableStandUp = 524;
-    scPing= 525;
+    scPing = 525;
     scSuspendPlayer = 526;
 }
 
