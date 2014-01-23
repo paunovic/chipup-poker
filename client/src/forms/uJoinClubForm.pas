@@ -110,10 +110,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                            [
-                             TServerMessageCallback.Create(SR_JOINCLUB_OK , TCJoinClubOk),
-                             TServerMessageCallback.Create(SR_JOINCLUB_INVALID_ID, TCJoinClubInvalidId),
-                             TServerMessageCallback.Create(SR_JOINCLUB_INVALID_CODE, TCJoinClubInvalidCode),
-                             TServerMessageCallback.Create(SR_JOINCLUB_ALREADY_MEMBER, TCJoinClubAlreadyMember)
+                             TServerMessageCallback.Create(srJoinClubOk, TCJoinClubOk),
+                             TServerMessageCallback.Create(srJoinClubInvalidId, TCJoinClubInvalidId),
+                             TServerMessageCallback.Create(srJoinClubInvalidCode, TCJoinClubInvalidCode),
+                             TServerMessageCallback.Create(srJoinClubAlreadyMember, TCJoinClubAlreadyMember)
                            ]
                          );
     end;

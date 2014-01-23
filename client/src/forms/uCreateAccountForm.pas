@@ -97,10 +97,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_REGISTER_OK, TCRegisterOk),
-                            TServerMessageCallback.Create(SR_REGISTER_DUPLICATE_MAIL, TCRegisterDuplicateMail),
-                            TServerMessageCallback.Create(SR_REGISTER_DUPLICATE_USERNAME, TCRegisterDuplicateUser),
-                            TServerMessageCallback.Create(SR_REGISTER_INVALID_MAIL, TCRegisterInvalidMail)
+                            TServerMessageCallback.Create(srRegisterOk, TCRegisterOk),
+                            TServerMessageCallback.Create(srRegisterDuplicateMail, TCRegisterDuplicateMail),
+                            TServerMessageCallback.Create(srRegisterDuplicateUsername, TCRegisterDuplicateUser),
+                            TServerMessageCallback.Create(srRegisterInvalidMail, TCRegisterInvalidMail)
                           ]
                         );
     end;

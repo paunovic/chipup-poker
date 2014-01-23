@@ -166,10 +166,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(EVENT_CHAT, TCChatEvent),
-                            TServerMessageCallback.Create(SR_TABLE_STATUS, TCTableStatus),
-                            TServerMessageCallback.Create(SR_TABLE_SIT_OK, TCTableStatus),
-                            TServerMessageCallback.Create(SR_TABLE_STAND_UP_OK, TCTableStatus)
+                            TServerMessageCallback.Create(seChat, TCChatEvent),
+                            TServerMessageCallback.Create(srTableStatus, TCTableStatus),
+                            TServerMessageCallback.Create(srTableSitOk, TCTableStatus),
+                            TServerMessageCallback.Create(srTableStandUpOk, TCTableStatus)
                           ]
                         );
     end;
@@ -419,7 +419,7 @@ begin
     alTable.State := asNormal;
 
   case AMessage.MethodId of
-    SR_TABLE_STAND_UP_OK: begin
+    Integer(srTableStandUpOk): begin
       FTable.SeatIndex := -1;
       acStandUp.Enabled := FALSE;
       btStandUp.Visible := FALSE;

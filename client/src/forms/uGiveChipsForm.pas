@@ -71,8 +71,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_CLUB_TRANFER_CHIPS_OK, TCClubTransferChipsOk),
-                            TServerMessageCallback.Create(SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT, TCClubTransferChipsInvalidAmount)
+                            TServerMessageCallback.Create(srClubTransferChipsOk, TCClubTransferChipsOk),
+                            TServerMessageCallback.Create(srClubTransferChipsInvalidAmount, TCClubTransferChipsInvalidAmount)
                           ]
                         );
     end;

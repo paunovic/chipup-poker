@@ -156,18 +156,18 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_STATUS, TCStatusReply),
-                            TServerMessageCallback.Create(SR_KICKPLAYER_OK, TCKickPlayerOk),
-                            TServerMessageCallback.Create(SR_KICKPLAYER_INVALID_CLUB_ID, TCKickPlayerInvalidClubId),
-                            TServerMessageCallback.Create(SR_KICKPLAYER_INVALID_PLAYER_ID, TCKickPlayerInvalidPlayerId),
-                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_NOT_OWNER, TCOwnerGiveawayNotOwner),
-                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID, TCOwnerGiveawayInvalidPlayerId),
-                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID, TCOwnerGiveawayInvalidClubId),
-                            TServerMessageCallback.Create(SR_OWNERSHIP_GIVEAWAY_OK, TCOwnerGiveawayOk),
-                            TServerMessageCallback.Create(SR_CLUB_DISBAND_OK, TCClubDisbandOk),
-                            TServerMessageCallback.Create(SR_DELETE_GAME_OK, TCDeleteGameOk),
-                            TServerMessageCallback.Create(SR_SUSPEND_PLAYER_OK, TCSuspendPlayerOk),
-                            TServerMessageCallback.Create(SR_REINSTATE_PLAYER_OK, TCReinstatePlayerOk)
+                            TServerMessageCallback.Create(srStatus, TCStatusReply),
+                            TServerMessageCallback.Create(srKickPlayerOk, TCKickPlayerOk),
+                            TServerMessageCallback.Create(srKickPlayerInvalidClubId, TCKickPlayerInvalidClubId),
+                            TServerMessageCallback.Create(srKickPlayerInvalidPlayerId, TCKickPlayerInvalidPlayerId),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, TCOwnerGiveawayNotOwner),
+                            TServerMessageCallback.Create(srOwnershipGiveawayInvalidPlayerId, TCOwnerGiveawayInvalidPlayerId),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, TCOwnerGiveawayInvalidClubId),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayOk, TCOwnerGiveawayOk),
+                            TServerMessageCallback.Create(srClubDisbandOk, TCClubDisbandOk),
+                            TServerMessageCallback.Create(srDeleteGameOk, TCDeleteGameOk),
+                            TServerMessageCallback.Create(srSuspendPlayerOk, TCSuspendPlayerOk),
+                            TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk)
                           ]
                         );
     end;

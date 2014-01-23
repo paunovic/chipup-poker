@@ -4,16 +4,16 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages,
-  uMessageItem;
+  uServerCodes, uMessageItem;
 
 type
   TServerMessageCallbackMethod = procedure(const AMessage: TMessageItem) of object;
 
   TServerMessageCallback = record
-    Code    : Integer;
+    Code    : TServerCodes;
     Callback: TServerMessageCallbackMethod;
 
-    constructor Create(const ACode: WPARAM; const ACallback: TServerMessageCallbackMethod);
+    constructor Create(const ACode: TServerCodes; const ACallback: TServerMessageCallbackMethod);
   end;
 
 procedure ProcessServerMessage(const AMessage: TMessageItem; const ACallbacks: array of TServerMessageCallback);
@@ -24,7 +24,7 @@ uses
   uMessageContainer;
 
 
-constructor TServerMessageCallback.Create(const ACode: WPARAM; const ACallback: TServerMessageCallbackMethod);
+constructor TServerMessageCallback.Create(const ACode: TServerCodes; const ACallback: TServerMessageCallbackMethod);
 begin
   Code := ACode;
   Callback := ACallback;
@@ -35,7 +35,7 @@ var
   callback: TServerMessageCallback;
 begin
   for callback in ACallbacks do
-    if callback.Code = AMessage.MethodId then
+    if Integer(callback.Code) = AMessage.MethodId then
       callback.Callback(AMessage);
 end;
 

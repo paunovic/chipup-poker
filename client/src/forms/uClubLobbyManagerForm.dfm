@@ -40,7 +40,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Transparent = True
-    ExplicitLeft = -1
     Height = 80
     Width = 581
     AnchorX = 291
@@ -123,6 +122,10 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     object tsManageClub: TcxTabSheet
       Caption = 'tsManageClub'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         579
         353)
@@ -242,7 +245,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 309
+          Top = 303
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -255,10 +258,11 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 309
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 309
+          Top = 303
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -271,10 +275,11 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 309
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 309
+          Top = 303
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -287,10 +292,11 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 309
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 275
+          Top = 269
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -303,12 +309,17 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 275
         end
       end
     end
     object tsGames: TcxTabSheet
       Caption = 'tsGames'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         579
         353)
@@ -327,13 +338,14 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Left = 3
           Top = 16
           Width = 566
-          Height = 275
+          Height = 269
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          ExplicitHeight = 275
           object gridGamesTable: TcxGridTableView
             Navigator.Buttons.CustomButtons = <>
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -392,7 +404,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 297
+          Top = 291
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -405,10 +417,11 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 297
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 297
+          Top = 291
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -421,10 +434,11 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 297
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 297
+          Top = 291
           Width = 98
           Height = 28
           Action = acShowEditGameForm
@@ -437,6 +451,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 297
         end
       end
     end

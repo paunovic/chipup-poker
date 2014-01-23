@@ -86,8 +86,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_TABLE_SIT_OK, TCTableSitOk),
-                            TServerMessageCallback.Create(SR_TABLE_SIT_SEAT_TAKEN, TCTableSitSeatTaken)
+                            TServerMessageCallback.Create(srTableSitOk, TCTableSitOk),
+                            TServerMessageCallback.Create(srTableSitSeatTaken, TCTableSitSeatTaken)
                           ]
                         );
     end;

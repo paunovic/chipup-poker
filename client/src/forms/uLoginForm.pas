@@ -133,10 +133,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_HELLO, TCHello),
-                            TServerMessageCallback.Create(SR_LOGIN_OK, TCLoginSuccess),
-                            TServerMessageCallback.Create(SR_INVALID_LOGIN, TCLoginFail),
-                            TServerMessageCallback.Create(SR_STATUS, TCStatusReply)
+                            TServerMessageCallback.Create(srHello, TCHello),
+                            TServerMessageCallback.Create(srLoginOk, TCLoginSuccess),
+                            TServerMessageCallback.Create(srInvalidLogin, TCLoginFail),
+                            TServerMessageCallback.Create(srStatus, TCStatusReply)
                           ]
                         );
 

@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.Generics.Collections, System.SysUtils,
-  OverbyteIcsWndControl, OverbyteIcsWSocket, uPB_RpcMessage, uProtobufBaseObject;
+  OverbyteIcsWndControl, OverbyteIcsWSocket, uPB_RpcMessage, uProtobufBaseObject, uServerCodes;
 
 type
   TSocketClient = class
@@ -46,7 +46,7 @@ type
     procedure Disconnect;
     function IsConnected: Boolean;
 
-    procedure SendProtobuf(const AMethodId: DWORD; const AProtobuf: TProtobufBaseObject);
+    procedure SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
 
     procedure Login(const ALogin, APass: String);
     procedure Logout;
@@ -86,7 +86,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uServerCodes, uSettings, uCommon,
+  uSettings, uCommon,
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
@@ -328,87 +328,107 @@ end;
 
 function TSocketClient.IsConnected: Boolean;
 begin
-  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FConnectCode = SR_HELLO);
+  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FConnectCode = Integer(srHello));
 end;
 
 function TSocketClient.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
 var
-  err: String;
+  err     : String;
+  sc      : TServerCodes;
+  valid_sc: Boolean;
 begin
   if FConnectCode = -1 then
     FConnectCode := ARpcMessage.MethodId;
 
   ADataObject := nil;
   result := TRUE;
-  case ARpcMessage.MethodId of
-    SR_NOT_IMPLEMENTED: begin
+  valid_sc := FALSE;
+  for sc := Low(TServerCodes) to High(TServerCodes) do
+    if ARpcMessage.MethodId = Integer(sc) then
+    begin
+      valid_sc := TRUE;
+      Break;
+    end;
+
+  if not valid_sc then
+  begin
+    result := FALSE;
+    {$IFDEF DEBUG} DebugLn(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
+    Exit;
+  end;
+
+  case TServerCodes(ARpcMessage.MethodId) of
+    srNotImplemented: begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
       {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED MethodId: %s', [err]), ditException); {$ENDIF}
     end;
-    SR_HELLO: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
-    SR_LOGIN_OK: ;
-    SR_INVALID_LOGIN: ;
-    SR_LOGOUT: ;
-    SR_REGISTER_OK: ;
-    SR_REGISTER_DUPLICATE_MAIL: ;
-    SR_REGISTER_DUPLICATE_USERNAME: ;
-    SR_REGISTER_INVALID_MAIL: ;
-    SR_LIST_CLUBS: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
-    SR_STATUS: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    SR_CREATECLUB_OK: ;
-    SR_CREATECLUB_NAME_EXISTS: ;
-    SR_CREATECLUB_INVALID_NAME: ;
-    SR_CREATECLUB_INVALID_CODE: ;
-    SR_JOINCLUB_OK: ;
-    SR_JOINCLUB_INVALID_ID: ;
-    SR_JOINCLUB_INVALID_CODE: ;
-    SR_JOINCLUB_ALREADY_MEMBER: ;
-    SR_LEAVECLUB_OK: ;
-    SR_LEAVECLUB_INVALID_ID: ;
-    SR_KICKPLAYER_OK: ;
-    SR_KICKPLAYER_INVALID_CLUB_ID: ;
-    SR_KICKPLAYER_INVALID_PLAYER_ID: ;
-    SR_OWNERSHIP_GIVEAWAY_NOT_OWNER: ;
-    SR_OWNERSHIP_GIVEAWAY_INVALID_PLAYER_ID: ;
-    SR_OWNERSHIP_GIVEAWAY_INVALID_CLUB_ID: ;
-    SR_OWNERSHIP_GIVEAWAY_OK: ;
-    SR_CLUB_DETAILS_CHANGE_OK: ;
-    SR_CLUB_DETAILS_CLUBNAME_EXISTS: ;
-    SR_CLUB_DISBAND_OK: ;
-    SR_CLUB_TRANFER_CHIPS_OK: ;
-    SR_CLUB_TRANFER_CHIPS_INVALID_AMOUNT: ;
-    SR_CREATECLUB_NO_TOKENS: ;
-    SR_CLUB_DETAILS_CHANGE_NO_TOKENS: ;
-    SR_CHANGE_MAIL_OK: ;
-    SR_CHANGE_MAIL_INVALID_MAIL: ;
-    SR_CHANGE_MAIL_DUPLICATE_MAIL: ;
-    SR_CHANGE_PASSWORD_OK: ;
-    SR_CHANGE_PASSWORD_INVALID_PASSWORD: ;
-    SR_CHANGE_AVATAR_OK: ;
-    SR_CHANGE_AVATAR_INVALID_ID: ;
-    SR_CREATE_GAME_OK: ;
-    SR_DELETE_GAME_OK: ;
-    SR_EDIT_GAME_OK: ;
-    SR_SECONDARY_LOGIN_DETECTED: ;
-    SR_ACCOUNT_CONFIRMED: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
-    EVENT_CHAT: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
-    SR_TABLE_STATUS,
-    SR_TABLE_SIT_OK,
-    SR_TABLE_SIT_SEAT_TAKEN,
-    SR_TABLE_STAND_UP_OK: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
-    SR_PONG: begin
+    srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srLoginOk: ;
+    srInvalidLogin: ;
+    srLogout: ;
+    srRegisterOk: ;
+    srRegisterDuplicateMail: ;
+    srRegisterDuplicateUsername: ;
+    srRegisterInvalidMail: ;
+    srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srCreateClubOk: ;
+    srCreateClubNameExists: ;
+    srCreateClubInvalidName: ;
+    srCreateClubInvalidCode: ;
+    srJoinClubOk: ;
+    srJoinClubInvalidId: ;
+    srJoinClubInvalidCode: ;
+    srJoinClubAlreadyMember: ;
+    srLeaveClubOk: ;
+    srLeaveClubInvalidId: ;
+    srKickPlayerOk: ;
+    srKickPlayerInvalidClubId: ;
+    srKickPlayerInvalidPlayerId: ;
+    srOwnershipGiveAwayNotOwner: ;
+    srOwnershipGiveawayInvalidPlayerId: ;
+    srOwnershipGiveAwayInvalidClubId: ;
+    srOwnershipGiveAwayOk: ;
+    srClubDetailsChangeOk: ;
+    srClubDetailsClubnameExists: ;
+    srClubDisbandOk: ;
+    srClubTransferChipsOk: ;
+    srClubTransferChipsInvalidAmount: ;
+    srCreateClubNoTokens: ;
+    srClubDetailsChangeNoTokens: ;
+    srChangeMailOk: ;
+    srChangeMailInvalidMail: ;
+    srChangeMailDuplicateMail: ;
+    srChangePasswordOk: ;
+    srChangePasswordInvalidPassword: ;
+    srChangeAvatarOk: ;
+    srChangeAvatarInvalidId: ;
+    srCreateGameOk: ;
+    srDeleteGameOk: ;
+    srEditGameOk: ;
+    srTableStatus,
+    srTableSitOk,
+    srTableSitSeatTaken,
+    srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
+    srPong: begin
       KillPingTimeoutTimer;
       ResetPingTimer;
     end;
-    SR_SUSPEND_PLAYER_OK: ;
-    SR_REINSTATE_PLAYER_OK: ;
+    srSuspendPlayerOk: ;
+    srReinstatePlayerOk: ;
+
+    seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
+    seSecondaryLoginDetected: ;
+    seAccountConfirmed: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
+    seClubChange: ;
+    seClubDeleted: ;
   else
     result := FALSE;
-    {$IFDEF DEBUG} DebugLn(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
   end;
 end;
 
-procedure TSocketClient.SendProtobuf(const AMethodId: DWORD; const AProtobuf: TProtobufBaseObject);
+procedure TSocketClient.SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
 var
   rpc_message: TPB_RpcMessage;
   mstream    : TMemoryStream;
@@ -416,7 +436,7 @@ var
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
-    rpc_message.Methodid := AMethodId;
+    rpc_message.Methodid := Integer(AMethodId);
     if Assigned(AProtobuf) then
       rpc_message.Datasize := AProtobuf.ProtobufOutputSize;
     mstream := TMemoryStream.Create;
@@ -445,7 +465,7 @@ begin
   try
     protobuf.Username := ALogin;
     protobuf.Password := APass;
-    SendProtobuf(CMD_LOGIN, protobuf);
+    SendProtobuf(scLogin, protobuf);
   finally
     protobuf.Free;
   end;
@@ -453,7 +473,7 @@ end;
 
 procedure TSocketClient.Logout;
 begin
-  SendProtobuf(CMD_LOGOUT, nil);
+  SendProtobuf(scLogout, nil);
 end;
 
 procedure TSocketClient.CreateAccount(const AUsername, APassword, AEMail: String);
@@ -465,7 +485,7 @@ begin
     protobuf.Email := AEMail;
     protobuf.Password := APassword;
     protobuf.DisplayName := AUsername;
-    SendProtobuf(CMD_REGISTER, protobuf);
+    SendProtobuf(scRegister, protobuf);
   finally
     protobuf.Free;
   end;
@@ -478,7 +498,7 @@ begin
   protobuf := TPB_ForgotPasswordParams.Create;
   try
     protobuf.Email := AEMail;
-    SendProtobuf(CMD_FORGOT_PASSWORD, protobuf);
+    SendProtobuf(scForgotPassword, protobuf);
   finally
     protobuf.Free;
   end;
@@ -486,7 +506,7 @@ end;
 
 procedure TSocketClient.Status;
 begin
-  SendProtobuf(CMD_STATUS, nil);
+  SendProtobuf(scStatus, nil);
 end;
 
 procedure TSocketClient.CreateClub(const AName, AInvCode: String; const APrivate: Boolean);
@@ -498,7 +518,7 @@ begin
     protobuf.Name := AName;
     protobuf.IsPrivate := APrivate;
     protobuf.Password := AInvCode;
-    SendProtobuf(CMD_CREATE_CLUB, protobuf);
+    SendProtobuf(scCreateClub, protobuf);
   finally
     protobuf.Free;
   end;
@@ -512,7 +532,7 @@ begin
   try
     protobuf.Seq := AId;
     protobuf.Password := ACode;
-    SendProtobuf(CMD_JOIN_CLUB, protobuf);
+    SendProtobuf(scJoinClub, protobuf);
   finally
     protobuf.Free;
   end;
@@ -526,7 +546,7 @@ begin
   try
     protobuf.ClubSeq := AClubId;
     protobuf.PlayerMongoId := APlayerId;
-    SendProtobuf(CMD_KICK_PLAYER, protobuf);
+    SendProtobuf(scKickPlayer, protobuf);
   finally
     protobuf.Free;
   end;
@@ -539,7 +559,7 @@ begin
   protobuf := TPB_Club.Create;
   try
     protobuf.Seq := AId;
-    SendProtobuf(CMD_LEAVE_CLUB, protobuf);
+    SendProtobuf(scLeaveClub, protobuf);
   finally
     protobuf.Free;
   end;
@@ -553,7 +573,7 @@ begin
   try
     protobuf.ClubSeq := AClubId;
     protobuf.PlayerMongoId := APlayerId;
-    SendProtobuf(CMD_GIVE_CLUB_OWNERSHIP, protobuf);
+    SendProtobuf(scGiveClubOwnership, protobuf);
   finally
     protobuf.Free;
   end;
@@ -569,7 +589,7 @@ begin
     protobuf.Name := AClubName;
     protobuf.Password := AClubCode;
     protobuf.IsPrivate := APrivate;
-    SendProtobuf(CMD_CHANGE_CLUB_DETAILS, protobuf);
+    SendProtobuf(scChangeClubDetails, protobuf);
   finally
     protobuf.Free;
   end;
@@ -582,7 +602,7 @@ begin
   protobuf := TPB_Club.Create;
   try
     protobuf.Seq := AClubId;
-    SendProtobuf(CMD_DELETE_CLUB, protobuf);
+    SendProtobuf(scDeleteClub, protobuf);
   finally
     protobuf.Free;
   end;
@@ -597,7 +617,7 @@ begin
     protobuf.ClubSeq := AClubId;
     protobuf.PlayerMongoId := APlayerId;
     protobuf.ChipAmount := AChipAmount;
-    SendProtobuf(CMD_TRANSFER_CHIPS, protobuf);
+    SendProtobuf(scTransferChips, protobuf);
   finally
     protobuf.Free;
   end;
@@ -610,7 +630,7 @@ begin
   protobuf := TPB_ChangeEMailParams.Create;
   try
     protobuf.NewMail := ANewMail;
-    SendProtobuf(CMD_CHANGE_EMAIL, protobuf);
+    SendProtobuf(scChangeEmail, protobuf);
   finally
     protobuf.Free;
   end;
@@ -623,7 +643,7 @@ begin
   protobuf := TPB_ChangePasswordParams.Create;
   try
     protobuf.NewPassword := APassword;
-    SendProtobuf(CMD_CHANGE_PASSWORD, protobuf);
+    SendProtobuf(scChangePassword, protobuf);
   finally
     protobuf.Free;
   end;
@@ -636,7 +656,7 @@ begin
   protobuf := TPB_SetAvatarParams.Create;
   try
     protobuf.AvatarId := AAvatarId;
-    SendProtobuf(CMD_SET_AVATAR, protobuf);
+    SendProtobuf(scSetAvatar, protobuf);
   finally
     protobuf.Free;
   end;
@@ -655,7 +675,7 @@ begin
     protobuf.SmallBlind := ASmallBlind;
     protobuf.BigBlind := ABigBlind;
     protobuf.Seats := ASeats;
-    SendProtobuf(CMD_CREATE_GAME, protobuf);
+    SendProtobuf(scCreateGame, protobuf);
   finally
     protobuf.Free;
   end;
@@ -668,7 +688,7 @@ begin
   protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AGameId;
-    SendProtobuf(CMD_DELETE_GAME, protobuf);
+    SendProtobuf(scDeleteGame, protobuf);
   finally
     protobuf.Free;
   end;
@@ -687,7 +707,7 @@ begin
     protobuf.SmallBlind := ASmallBlind;
     protobuf.BigBlind := ABigBlind;
     protobuf.Seats := ASeats;
-    SendProtobuf(CMD_EDIT_GAME, protobuf);
+    SendProtobuf(scEditGame, protobuf);
   finally
     protobuf.Free;
   end;
@@ -695,7 +715,7 @@ end;
 
 procedure TSocketClient.ListPublicClubs;
 begin
-  SendProtobuf(CMD_LIST_PUBLIC_CLUBS, nil);
+  SendProtobuf(scListPublicClubs, nil);
 end;
 
 procedure TSocketClient.SendTableChatLine(const ATableId: TBytes; const ALine: String);
@@ -710,7 +730,7 @@ begin
     pbmsg := TPB_ChatMessage.Create;
     pbmsg.Msg := ALine;
     protobuf.Msg := pbmsg;
-    SendProtobuf(EVENT_CHAT, protobuf);
+    SendProtobuf(seChat, protobuf);
   finally
     protobuf.Free;
   end;
@@ -723,7 +743,7 @@ begin
   protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AGameId;
-    SendProtobuf(CMD_TABLE_JOIN, protobuf);
+    SendProtobuf(scTableJoin, protobuf);
   finally
     protobuf.Free;
   end;
@@ -736,7 +756,7 @@ begin
   protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AGameId;
-    SendProtobuf(CMD_TABLE_LEAVE, protobuf);
+    SendProtobuf(scTableLeave, protobuf);
   finally
     protobuf.Free;
   end;
@@ -751,7 +771,7 @@ begin
     protobuf.GameId := AGameId;
     protobuf.SeatIndex := ASeatIndex;
     protobuf.Chips := AChips;
-    SendProtobuf(CMD_TABLE_SIT, protobuf);
+    SendProtobuf(scTableSit, protobuf);
   finally
     protobuf.Free;
   end;
@@ -764,7 +784,7 @@ begin
   protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AGameId;
-    SendProtobuf(CMD_TABLE_STAND_UP, protobuf);
+    SendProtobuf(scTableStandUp, protobuf);
   finally
     protobuf.Free;
   end;
@@ -772,7 +792,7 @@ end;
 
 procedure TSocketClient.Ping;
 begin
-  SendProtobuf(CMD_PING, nil);
+  SendProtobuf(scPing, nil);
 end;
 
 procedure TSocketClient.ChangeSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
@@ -784,7 +804,7 @@ begin
     protobuf.ClubMongoId := AClubId;
     protobuf.PlayerMongoId := APlayerId;
     protobuf.Suspended := ASuspended;
-    SendProtobuf(CMD_SUSPEND_PLAYER, protobuf);
+    SendProtobuf(scSuspendPlayer, protobuf);
   finally
     protobuf.Free;
   end;

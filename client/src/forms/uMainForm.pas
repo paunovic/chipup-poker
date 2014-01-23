@@ -156,13 +156,13 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_STATUS, TCStatusReply),
-                            TServerMessageCallback.Create(SR_LOGOUT, TCLogout),
-                            TServerMessageCallback.Create(SR_LEAVECLUB_OK, TCLeaveClubOk),
-                            TServerMessageCallback.Create(SR_LEAVECLUB_INVALID_ID, TCLeaveClubInvalidId),
-                            TServerMessageCallback.Create(SR_SECONDARY_LOGIN_DETECTED, TCSecondaryLoginDetected),
-                            TServerMessageCallback.Create(EVENT_CHAT, TCChatEvent),
-                            TServerMessageCallback.Create(SR_ACCOUNT_CONFIRMED, TCAccountConfirmed)
+                            TServerMessageCallback.Create(srStatus, TCStatusReply),
+                            TServerMessageCallback.Create(srLogout, TCLogout),
+                            TServerMessageCallback.Create(srLeaveClubOk, TCLeaveClubOk),
+                            TServerMessageCallback.Create(srLeaveClubInvalidId, TCLeaveClubInvalidId),
+                            TServerMessageCallback.Create(seSecondaryLoginDetected, TCSecondaryLoginDetected),
+                            TServerMessageCallback.Create(seChat, TCChatEvent),
+                            TServerMessageCallback.Create(seAccountConfirmed, TCAccountConfirmed)
                           ]
                         );
 

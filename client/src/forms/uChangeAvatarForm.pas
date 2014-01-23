@@ -129,8 +129,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_CHANGE_AVATAR_OK, TCChangeAvatarOk),
-                            TServerMessageCallback.Create(SR_CHANGE_AVATAR_INVALID_ID, TCChangeAvatarInvalidId)
+                            TServerMessageCallback.Create(srChangeAvatarOk, TCChangeAvatarOk),
+                            TServerMessageCallback.Create(srChangeAvatarInvalidId, TCChangeAvatarInvalidId)
                           ]
                         );
     end;

@@ -114,8 +114,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_LIST_CLUBS, TCListClubs),
-                            TServerMessageCallback.Create(SR_JOINCLUB_OK, TCJoinClubOk)
+                            TServerMessageCallback.Create(srListClubs, TCListClubs),
+                            TServerMessageCallback.Create(srJoinClubOk, TCJoinClubOk)
                           ]
                         );
 

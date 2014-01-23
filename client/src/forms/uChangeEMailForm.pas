@@ -76,9 +76,9 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_CHANGE_MAIL_OK, TCChangeMailOk),
-                            TServerMessageCallback.Create(SR_CHANGE_MAIL_INVALID_MAIL, TCChangeMailInvalidMail),
-                            TServerMessageCallback.Create(SR_CHANGE_MAIL_DUPLICATE_MAIL, TCChangeMailDuplicateMail)
+                            TServerMessageCallback.Create(srChangeMailOk, TCChangeMailOk),
+                            TServerMessageCallback.Create(srChangeMailInvalidMail, TCChangeMailInvalidMail),
+                            TServerMessageCallback.Create(srChangeMailDuplicateMail, TCChangeMailDuplicateMail)
                           ]
                         );
     end;

@@ -122,11 +122,11 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                            [
-                             TServerMessageCallback.Create(SR_CREATECLUB_OK, TCCreateClubOk),
-                             TServerMessageCallback.Create(SR_CREATECLUB_NAME_EXISTS, TCCreateClubNameExists),
-                             TServerMessageCallback.Create(SR_CREATECLUB_INVALID_NAME, TCCreateClubInvalidName),
-                             TServerMessageCallback.Create(SR_CREATECLUB_INVALID_CODE, TCCreateClubInvalidCode),
-                             TServerMessageCallback.Create(SR_CREATECLUB_NO_TOKENS, TCCreateClubNoGold)
+                             TServerMessageCallback.Create(srCreateClubOk, TCCreateClubOk),
+                             TServerMessageCallback.Create(srCreateClubNameExists, TCCreateClubNameExists),
+                             TServerMessageCallback.Create(srCreateClubInvalidName, TCCreateClubInvalidName),
+                             TServerMessageCallback.Create(srCreateClubInvalidCode, TCCreateClubInvalidCode),
+                             TServerMessageCallback.Create(srCreateClubNoTokens, TCCreateClubNoGold)
                            ]
                          );
     end;

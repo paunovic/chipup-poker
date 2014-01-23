@@ -70,8 +70,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_CHANGE_PASSWORD_OK, TCChangePasswordOk),
-                            TServerMessageCallback.Create(SR_CHANGE_PASSWORD_INVALID_PASSWORD, TCChangePasswordInvalid)
+                            TServerMessageCallback.Create(srChangePasswordOk, TCChangePasswordOk),
+                            TServerMessageCallback.Create(srChangePasswordInvalidPassword, TCChangePasswordInvalid)
                           ]
                         );
     end;

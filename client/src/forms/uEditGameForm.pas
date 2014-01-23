@@ -109,7 +109,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_EDIT_GAME_OK, TCEditGameOk)
+                            TServerMessageCallback.Create(srEditGameOk, TCEditGameOk)
                           ]
                         );
     end;

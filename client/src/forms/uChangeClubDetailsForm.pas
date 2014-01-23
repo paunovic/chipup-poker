@@ -101,9 +101,9 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_CLUB_DETAILS_CHANGE_OK, TCClubDetailsChangeOk),
-                            TServerMessageCallback.Create(SR_CLUB_DETAILS_CLUBNAME_EXISTS, TCClubDetailsChangeClubnameExists),
-                            TServerMessageCallback.Create(SR_CLUB_DETAILS_CHANGE_NO_TOKENS, TCClubDetailsChangeNoGold)
+                            TServerMessageCallback.Create(srClubDetailsChangeOk, TCClubDetailsChangeOk),
+                            TServerMessageCallback.Create(srClubDetailsClubnameExists, TCClubDetailsChangeClubnameExists),
+                            TServerMessageCallback.Create(srClubDetailsChangeNoTokens, TCClubDetailsChangeNoGold)
                           ]
                         );
     end;

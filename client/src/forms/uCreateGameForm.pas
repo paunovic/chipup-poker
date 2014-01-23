@@ -92,7 +92,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(SR_CREATE_GAME_OK, TCCreateGameOk)
+                            TServerMessageCallback.Create(srCreateGameOk, TCCreateGameOk)
                           ]
                         );
     end;
