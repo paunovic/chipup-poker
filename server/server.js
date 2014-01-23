@@ -1076,7 +1076,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.send(codes.srEditGameOk);
 			}.bind(this));
 			break;
-		case codes.EVENT_CHAT:
+		case codes.seChat:
 			var event = pb.Parse(args,'Poker.ChatEvent');
 			this.handleChatEvent(event,Date.now());
 			break;
@@ -1342,7 +1342,7 @@ ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
 		this.log('found game channel!',ev);
 		for (key in game.users) {
 			//if (key == this.userid) continue;
-			game.users[key].send(codes.EVENT_CHAT,ev,'Poker.ChatEvent');
+			game.users[key].send(codes.seChat,ev,'Poker.ChatEvent');
 		}
 		break;
 	}
