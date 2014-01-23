@@ -182,14 +182,21 @@ end;
 
 procedure TfrmClubLobbyManager.ConfigureGUI;
 var
-  club: TClubInfo;
+  club   : TClubInfo;
+  player : TPlayerInfo;
+  manager: String;
 begin
   if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
   begin
     Caption := Format('%s Lobby', [club.Name]);
 
     lbsHeader.Caption := club.Name;
-    lbsSubheader.Caption := Format('Club Manager: %s          Members: %d          Club ID: %d', [dmMain.SelfInfo.Nick, Length(club.Players), club.Id]);
+
+    manager := '';
+    if dmMain.Players.FindPlayerById(club.OwnerId, player) then
+      manager := player.Nick;
+
+    lbsSubheader.Caption := Format('Club Manager: %s          Members: %d          Club ID: %d', [manager, Length(club.Players), club.Id]);
 
     UpdatePlayerlist;
     UpdateGamesList;
