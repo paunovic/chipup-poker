@@ -196,11 +196,16 @@ enum ServerCodes {
     srPong = 49;
     srSuspendPlayerOk = 50;
     srReinstatePlayerOk = 51;
+
     seChat = 200;
     seSecondaryLoginDetected = 201;
     seAccountConfirmed = 202;
     seClubChange = 203;
     seClubDeleted = 204;
+	seGameChange = 205;
+	seGameCreate = 206;
+	seGameDelete = 207;
+
     scLogin = 501;
     scStatus = 502;
     scRegister = 503;
