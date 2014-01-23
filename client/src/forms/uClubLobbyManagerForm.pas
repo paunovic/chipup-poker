@@ -97,6 +97,8 @@ type
     procedure TCDeleteGameOk(const AMessage: TMessageItem);
     procedure TCSuspendPlayerOk(const AMessage: TMessageItem);
     procedure TCReinstatePlayerOk(const AMessage: TMessageItem);
+    procedure CSEClubChange(const AMessage: TMessageItem);
+    procedure CSEClubDeleted(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -112,7 +114,7 @@ implementation
 
 uses
   uCommon, uSocketClient, uMainDataModule, uGiveChipsForm, uChangeClubDetailsForm, uServerMessageCallback, uServerCodes,
-  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm;
+  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm, uPB_Club;
 
 
 procedure TfrmClubLobbyManager.FormCreate(Sender: TObject);
@@ -167,7 +169,9 @@ begin
                             TServerMessageCallback.Create(srClubDisbandOk, TCClubDisbandOk),
                             TServerMessageCallback.Create(srDeleteGameOk, TCDeleteGameOk),
                             TServerMessageCallback.Create(srSuspendPlayerOk, TCSuspendPlayerOk),
-                            TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk)
+                            TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk),
+                            TServerMessageCallback.Create(seClubChange, CSEClubChange),
+                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted)
                           ]
                         );
     end;
@@ -514,6 +518,32 @@ end;
 procedure TfrmClubLobbyManager.TCReinstatePlayerOk(const AMessage: TMessageItem);
 begin
   SocketClient.Status;
+end;
+
+procedure TfrmClubLobbyManager.CSEClubChange(const AMessage: TMessageItem);
+var
+  pbclub: TPB_Club;
+  club  : TClubInfo;
+begin
+  pbclub := AMessage.Object_ as TPB_Club;
+
+  if FClubId <> pbclub.Seq then
+    Exit;
+
+  if dmMain.SelfInfo.Clubs.FindClub(pbclub.Seq, club) then
+    ConfigureGUI
+  else
+    ModalResult := mrClose
+end;
+
+procedure TfrmClubLobbyManager.CSEClubDeleted(const AMessage: TMessageItem);
+var
+  pbclub: TPB_Club;
+begin
+  pbclub := AMessage.Object_ as TPB_Club;
+
+  if FClubId = pbclub.Seq then
+    ModalResult := mrClose;
 end;
 
 

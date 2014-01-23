@@ -97,6 +97,8 @@ type
     procedure TCSecondaryLoginDetected(const AMessage: TMessageItem);
     procedure TCChatEvent(const AMessage: TMessageItem);
     procedure TCAccountConfirmed(const AMessage: TMessageItem);
+    procedure CSEClubDeleted(const AMessage: TMessageItem);
+    procedure CSEClubChange(const AMessage: TMessageItem);
 
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
@@ -122,7 +124,7 @@ implementation
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
   uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
-  uPB_StatusReply, uMessageContainer, uServerMessageCallback,
+  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_ChatEvent, uPB_ChatMessage, uClubLobbyManagerForm;
 
@@ -162,7 +164,9 @@ begin
                             TServerMessageCallback.Create(srLeaveClubInvalidId, TCLeaveClubInvalidId),
                             TServerMessageCallback.Create(seSecondaryLoginDetected, TCSecondaryLoginDetected),
                             TServerMessageCallback.Create(seChat, TCChatEvent),
-                            TServerMessageCallback.Create(seAccountConfirmed, TCAccountConfirmed)
+                            TServerMessageCallback.Create(seAccountConfirmed, TCAccountConfirmed),
+                            TServerMessageCallback.Create(seClubChange, CSEClubChange),
+                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted)
                           ]
                         );
 
@@ -192,7 +196,6 @@ begin
   begin
     MessageContainer.AddMessageHandler(Handle);
     ConfigureGUI;
-    UpdateClublist;
     Show;
     tiBringToFront.Enabled := TRUE;
   end
@@ -253,7 +256,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
-  if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
+//  if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
     RunModalForm(TfrmClubLobbyManager, self, [@FSelectedClub]);
 end;
 
@@ -321,6 +324,9 @@ begin
   Caption := Format('ChipUP Poker - Logged in as %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
     Caption := Caption + ' (account confirmation pending)';
+
+  UpdateClublist;
+  UpdateGamelist;
 end;
 
 procedure TfrmChipUpMain.UpdateClublist;
@@ -459,8 +465,6 @@ begin
   dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   dmMain.Players.ParseStatus(pbstatus);
   ConfigureGUI;
-  UpdateClublist;
-  UpdateGamelist;
 end;
 
 procedure TfrmChipUpMain.TCLeaveClubInvalidId(const AMessage: TMessageItem);
@@ -491,6 +495,40 @@ var
 begin
   chatEvent := AMessage.Object_ as TPB_ChatEvent;
 end;
+
+procedure TfrmChipUpMain.CSEClubChange(const AMessage: TMessageItem);
+var
+  pbclub: TPB_Club;
+  club  : TClubInfo;
+begin
+  pbclub := AMessage.Object_ as TPB_Club;
+
+  if not dmMain.SelfInfo.Clubs.FindClub(pbclub.Seq, club) then
+    Exit;
+
+  club.UpdateFromProtobufObject(pbclub);
+
+  if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
+    dmMain.SelfInfo.Clubs.Remove(club);
+
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSEClubDeleted(const AMessage: TMessageItem);
+var
+  pbclub: TPB_Club;
+  index : Integer;
+begin
+  pbclub := AMessage.Object_ as TPB_Club;
+
+  index := dmMain.SelfInfo.Clubs.IndexOf(pbclub.Seq);
+  if index = -1 then
+    Exit;
+
+  dmMain.SelfInfo.Clubs.Delete(index);
+  ConfigureGUI;
+end;
+
 
 
 

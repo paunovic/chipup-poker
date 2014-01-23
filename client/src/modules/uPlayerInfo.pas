@@ -74,18 +74,14 @@ end;
 
 function TPlayerInfo.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
 var
-  club_name   : String;
-  club_balance: Integer;
-  club_id     : Int64;
-  club_invcode: String;
-  club_private: Boolean;
-  game_clubid : Int64;
-  game_type   : TGameType;
-  game_limit  : TGameLimit;
-  club        : TClubInfo;
-  pbclub      : TPB_Club;
-  pbgame      : TPB_Game;
-  C1, C2      : Integer;
+  game_clubid: Int64;
+  game_type  : TGameType;
+  game_limit : TGameLimit;
+  club       : TClubInfo;
+  pbclub     : TPB_Club;
+  pbgame     : TPB_Game;
+  C1         : Integer;
+  index      : Integer;
 begin
   FId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
@@ -99,18 +95,11 @@ begin
   for C1 := 0 to AStatusReply.Clubs.Count - 1 do
   begin
     pbclub := AStatusReply.Clubs[C1];
-
-    club_id := pbclub.Seq;
-    club_name := pbclub.Name;
-    club_balance := pbclub.Chips;
-    club_private := pbclub.IsPrivate;
-    club_invcode := pbclub.Password;
-    club := FClubs.AddClub(pbclub.MongoId, pbclub.Owner, club_id, club_name, club_balance, club_private, club_invcode);
-    club.AddPlayer(pbclub.Owner, FALSE);
-    for C2 := 0 to Length(pbclub.Members) - 1 do
-      club.AddPlayer(pbclub.Members[C2], FALSE);
-    for C2 := 0 to Length(pbclub.SuspendedMembers) - 1 do
-      club.AddPlayer(pbclub.SuspendedMembers[C2], TRUE);
+    index := FClubs.IndexOf(pbclub.Seq);
+    if index = -1 then
+      index := FClubs.Add(TClubInfo.Create);
+    club := FClubs[index];
+    club.UpdateFromProtobufObject(pbclub);
   end;
 
   for C1 := 0 to AStatusReply.Games.Count - 1 do

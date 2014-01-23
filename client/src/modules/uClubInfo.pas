@@ -4,7 +4,7 @@ interface
 
 uses
   System.Generics.Collections, System.SysUtils,
-  uGameInfo;
+  uGameInfo, uPB_Club;
 
 
 type
@@ -21,11 +21,15 @@ type
     FSuspendedPlayers: TArray<TBytes>;
     FGames           : TGamesInfo;
   public
-    constructor Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);
+    constructor Create; overload;
+    constructor Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String); overload;
     destructor Destroy; override;
+
+    procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
 
     procedure AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);
     function IsSuspendedPlayer(const AMongoId: TBytes): Boolean;
+    function IsPlayerInTheClub(const AMongoId: TBytes): Boolean;
 
     property Id              : Integer read FId;
     property MongoId         : TBytes read FMongoId;
@@ -53,6 +57,11 @@ uses
 
 { TClubInfo }
 
+constructor TClubInfo.Create;
+begin
+  FGames := TGamesInfo.Create;
+end;
+
 constructor TClubInfo.Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);
 begin
   FId := AId;
@@ -72,6 +81,20 @@ begin
   inherited;
 end;
 
+function TClubInfo.IsPlayerInTheClub(const AMongoId: TBytes): Boolean;
+var
+  C1, a1len: Integer;
+begin
+  a1len := Length(AMongoId);
+  for C1 := 0 to Length(FPlayers) - 1 do
+    if CompareBytes(AMongoId, FPlayers[C1], a1len) then
+      Exit(TRUE);
+  for C1 := 0 to Length(FSuspendedPlayers) - 1 do
+    if CompareBytes(AMongoId, FSuspendedPlayers[C1], a1len) then
+      Exit(TRUE);
+  Exit(FALSE);
+end;
+
 function TClubInfo.IsSuspendedPlayer(const AMongoId: TBytes): Boolean;
 var
   C1, a1len: Integer;
@@ -81,6 +104,26 @@ begin
     if CompareBytes(AMongoId, FSuspendedPlayers[C1], a1len) then
       Exit(TRUE);
   Exit(FALSE);
+end;
+
+procedure TClubInfo.UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
+var
+  C1: Integer;
+begin
+  FMongoId := AProtobufObject.MongoId;
+  FOwnerId := AProtobufObject.Owner;
+  FId := AProtobufObject.Seq;
+  FName := AProtobufObject.Name;
+  FBalance := AProtobufObject.Chips;
+  FPrivate := AProtobufObject.IsPrivate;
+  FInvCode := AProtobufObject.Password;
+  SetLength(FPlayers, 0);
+  SetLength(FSuspendedPlayers, 0);
+  AddPlayer(AProtobufObject.Owner, FALSE);
+  for C1 := 0 to Length(AProtobufObject.Members) - 1 do
+    AddPlayer(AProtobufObject.Members[C1], FALSE);
+  for C1 := 0 to Length(AProtobufObject.SuspendedMembers) - 1 do
+    AddPlayer(AProtobufObject.SuspendedMembers[C1], TRUE);
 end;
 
 procedure TClubInfo.AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);

@@ -420,8 +420,8 @@ begin
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
-    seClubChange: ;
-    seClubDeleted: ;
+    seClubChange: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
+    seClubDeleted: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
