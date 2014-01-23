@@ -220,7 +220,7 @@ app.get("/getavatar",function (req,res) {
 			res.send(404);
 			return;
 		}
-		var filename = req.query.hex+"."+row.ext;
+		var filename = req.query.id+"."+row.ext;
 		console.log(filename);
 		res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
 		res.send(row.image.buffer);
@@ -556,7 +556,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				var userlist = [];
 				var clubids = [];
 				for (x=0; x<clubs.length; x++) {
-					// FIXME club
 					var c = clubs[x];
 					if (userlist.indexOf(c.owner) == -1) userlist.push(c.owner);
 					if (clubs[x].owner.equals(this.userid)) {
@@ -584,8 +583,7 @@ ClientSocket.prototype.handle = function (code,args) {
 								return;
 							}
 							for (var x=0; x<games.length; x++) {
-								games[x]._id = new Buffer(games[x]._id.toString(),'hex');
-								games[x].creator_mongo_id = new Buffer(games[x].creator_mongo_id.toString(),'hex');
+								games[x] = makeGameProtobuf(games[x]);
 							}
 							//this.log('games list',games);
 							status.games = games;
@@ -710,6 +708,15 @@ ClientSocket.prototype.handle = function (code,args) {
 					function (err,res) {
 						this.send(codes.srJoinClubOk);
 						this.log('join2',err,res);
+						allClubs.findOne({_id:item._id},function cb(err,row) {
+							var userlist = [ row.owner ];
+							var out = makeClubProtobuf(row,userlist);
+							this.log('userlist to inform:',userlist);
+							for (var x=0; x<userlist.length; x++) {
+								var user = activeUsers[userlist[x]];
+								if (user) user.send(codes.seClubChange,out,'Poker.Club');
+							}
+						}.bind(this));
 					}.bind(this));
 				this.log('join3',err,item,this.userid);
 			}.bind(this));
@@ -751,7 +758,19 @@ ClientSocket.prototype.handle = function (code,args) {
 				{ $pull:{members:this.userid}},
 				function (err,res) {
 					if (res == 0) this.send(codes.srLeaveClubInvalidId);
-					else this.send(codes.srLeaveClubOk);
+					else {
+						this.send(codes.srLeaveClubOk);
+						// FIXME club
+						allClubs.findOne({_id:club._id},function cb(err,row) {
+							var userlist = [ userid ];
+							var out = makeClubProtobuf(row,userlist);
+							this.log('userlist to inform:',userlist);
+							for (var x=0; x<userlist.length; x++) {
+								var user = activeUsers[userlist[x]];
+								if (user) user.send(codes.seClubChange,out,'Poker.Club');
+							}
+						}.bind(this));
+					}
 				}.bind(this));
 			break;
 		case codes.scGiveClubOwnership:
@@ -839,6 +858,15 @@ ClientSocket.prototype.handle = function (code,args) {
 							} else {
 								this.send(codes.srClubDetailsChangeOk);
 								// FIXME club
+								allClubs.findOne({_id:club._id},function cb(err,row) {
+									var userlist = [ userid ];
+									var out = makeClubProtobuf(row,userlist);
+									this.log('userlist to inform:',userlist);
+									for (var x=0; x<userlist.length; x++) {
+										var user = activeUsers[userlist[x]];
+										if (user) user.send(codes.seClubChange,out,'Poker.Club');
+									}
+								}.bind(this));
 							}
 						}.bind(that));
 					}.bind(that));
@@ -863,9 +891,16 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				allClubs.remove({_id:club._id},function (err,res) {
 					this.log('delete worked',err,res);
-					// FIXME club, inform all other users
 					// FIXME, force end games in this club?
 					this.send(codes.srClubDisbandOk);
+					
+					var userlist = [];
+					var out = makeClubProtobuf(club,userlist);
+					this.log('userlist to inform:',userlist);
+					for (var x=0; x<userlist.length; x++) {
+						var user = activeUsers[userlist[x]];
+						if (user) user.send(codes.seClubDeleted,out,'Poker.Club');
+					}
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1005,23 +1040,29 @@ ClientSocket.prototype.handle = function (code,args) {
 				return;
 			}
 			var doc = {game_type:game_type, small_blind:small_blind, big_blind:big_blind, seats:seats, creator_mongo_id:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit};
-			allClubs.findOne({seq:clubseq},function (err,row) {
+			allClubs.findOne({seq:clubseq},function (err,club) {
 				if (err) {
 					this.reply(0,"internal error");
 					return;
 				}
-				if (!row) {
+				if (!club) {
 					this.reply(0,"club not found");
 					return;
 				}
-				doc.clubid = row._id;
-				allGames.insert(doc,function (err,row) {
+				doc.clubid = club._id;
+				allGames.insert(doc,function (err,game) {
 					if (err) {
 						this.reply(0,"internal error");
 						return;
 					}
-					this.log('inserted',row);
-					this.send(codes.srCreateGameOk);
+					this.log('inserted',game[0]);
+					var g = makeGameProtobuf(game[0]);
+					this.send(codes.srCreateGameOk,g,'Poker.Game');
+					for (var x=0; x<club.members.length; x++) {
+						var conn = activeUsers[club.members[x]];
+						if (!conn) continue;
+						conn.send(codes.seGameCreate,g,'Poker.Game');
+					}
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1046,6 +1087,14 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.log('removed',err,ret);
 					// FIXME, remove Game object
 					this.send(codes.srDeleteGameOk);
+					allClubs.findOne({_id:game.clubid},function (err,club) {
+						var g = makeGameProtobuf(game);
+						for (var x=0; x<club.members.length; x++) {
+							var conn = activeUsers[club.members[x]];
+							if (!conn) continue;
+							conn.send(codes.seGameDelete,g,'Poker.Game');
+						}
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1064,7 +1113,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.reply(0,"invalid params");
 				return;
 			}
-			// FIXME< run game.preedit
+			// FIXME, run game.preedit
 			var doc = {$set:{game_type:game_type, small_blind:small_blind, big_blind:big_blind, seats:seats, gamename:gamename, game_limit:game_limit }};
 			allGames.update({_id:id},doc,function (err,res) {
 				if (err) {
@@ -1074,6 +1123,17 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.log('edit game',res);
 				if (activeGames[id]) activeGames[id].edited(params);
 				this.send(codes.srEditGameOk);
+				// FIXME performance?
+				allGames.findOne({_id:id},function (err,game) {
+					allClubs.findOne({_id:game.clubid},function (err,club) {
+						var g = makeGameProtobuf(game);
+						for (var x=0; x<club.members.length; x++) {
+							var conn = activeUsers[club.members[x]];
+							if (!conn) continue;
+							conn.send(codes.seGameChange,g,'Poker.Game');
+						}
+					}.bind(this));
+				}.bind(this));
 			}.bind(this));
 			break;
 		case codes.seChat:
@@ -1128,12 +1188,25 @@ ClientSocket.prototype.handle = function (code,args) {
 			this.log(params);
 			var clubid = toMongoId(params.club_mongo_id);
 			var playerid = toMongoId(params.player_mongo_id);
+			var broadcast = function broadcast() {
+				// FIXME club
+				allClubs.findOne({_id:clubid},function cb(err,row) {
+					var userlist = [ ];
+					var out = makeClubProtobuf(row,userlist);
+					this.log('userlist to inform:',userlist);
+					for (var x=0; x<userlist.length; x++) {
+						var user = activeUsers[userlist[x]];
+						if (user) user.send(codes.seClubChange,out,'Poker.Club');
+					}
+				}.bind(this));
+			}.bind(this);
 			if (params.suspended) {
 				allClubs.update({_id:clubid},
 					{ $addToSet: { suspended: playerid} },
 					function (err,res) {
 						this.log('suspend push',err,res);
 						this.send(codes.srSuspendPlayerOk);
+						broadcast();
 					}.bind(this)
 				);
 			} else {
@@ -1142,6 +1215,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					function (err,res) {
 						this.log('suspend pull',err,res);
 						this.send(codes.srReinstatePlayerOk);
+						broadcast();
 					}.bind(this)
 				);
 			}
@@ -1150,7 +1224,7 @@ ClientSocket.prototype.handle = function (code,args) {
 	}
 }
 function makeClubProtobuf(c,userlist) {
-// FIXME club
+	// FIXME club
 	if (c.members) {
 		for (y=0; y<c.members.length; y++) {
 			if (userlist && (userlist.indexOf(c.members[y]) == -1)) userlist.push(c.members[y]);
@@ -1168,6 +1242,15 @@ function makeClubProtobuf(c,userlist) {
 	c.owner = new Buffer(c.owner.toString(),'hex');
 	return c;
 }
+function makeGameProtobuf(g) {
+	// FIXME game, include number of people sitting
+	var gameobj = activeGames[g._id];
+	if (gameobj) g.sitting = gameobj.sittingCount();
+	g._id = new Buffer(g._id.toString(),'hex');
+	g.creator_mongo_id = new Buffer(g.creator_mongo_id.toString(),'hex');
+	console.log(g);
+	return g;
+}
 function Game(obj) {
 	this.users = {};
 	this.members = [];
@@ -1177,6 +1260,7 @@ function Game(obj) {
 	this.state = 'idle';
 }
 Game.prototype.edited = function edited(params) {
+	// FIXME, more fields, also now acts as a cache for seGameChange/seGameDelete
 	this.obj.seats = params.seats;
 }
 Game.prototype.join = function join(conn) {
@@ -1211,6 +1295,15 @@ Game.prototype.sitDown = function (conn,params) {
 			if (this.users[key] == conn) continue;
 			this.users[key].send(codes.srTableStatus,status,'Poker.TableStatus');
 		}
+		// FIXME double send, and json performance hack
+		allClubs.findOne({_id:this.obj.clubid},function (err,club) {
+			var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+			for (var x=0; x<club.members.length; x++) {
+				var conn = activeUsers[club.members[x]];
+				if (!conn) continue;
+				conn.send(codes.seGameChange,g,'Poker.Game');
+			}
+		}.bind(this));
 	}
 }
 Game.prototype.fold = function fold(seat) {
@@ -1296,6 +1389,15 @@ Game.prototype.standUp = function (conn) {
 				if (this.users[key] == conn) continue;
 				this.users[key].send(codes.srTableStatus,status,'Poker.TableStatus');
 			}
+			// FIXME double send, and json performance hack
+			allClubs.findOne({_id:this.obj.clubid},function (err,club) {
+				var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+				for (var x=0; x<club.members.length; x++) {
+					var conn = activeUsers[club.members[x]];
+					if (!conn) continue;
+					conn.send(codes.seGameChange,g,'Poker.Game');
+				}
+			}.bind(this));
 			return true;
 		}
 	}

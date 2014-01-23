@@ -81,6 +81,7 @@ message Game {
 	optional int32 small_blind = 7;
 	optional int32 big_blind = 8;
 	optional int32 seats = 9;
+	optional int32 sitting = 10;
 }
 
 message StatusReply {
