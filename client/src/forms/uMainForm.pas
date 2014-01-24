@@ -126,7 +126,7 @@ uses
   uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
   uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uPB_ChatEvent, uPB_ChatMessage, uClubLobbyManagerForm;
+  uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -273,8 +273,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
-//  if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
-    RunModalForm(TfrmClubLobbyManager, self, [@FSelectedClub]);
+  RunModalForm(TfrmClubLobby, self, [@FSelectedClub]);
 end;
 
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);

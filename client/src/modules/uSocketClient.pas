@@ -362,7 +362,6 @@ begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
       {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED MethodId: %s', [err]), ditException); {$ENDIF}
     end;
-    srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLoginOk: ;
     srInvalidLogin: ;
     srLogout: ;
@@ -370,8 +369,6 @@ begin
     srRegisterDuplicateMail: ;
     srRegisterDuplicateUsername: ;
     srRegisterInvalidMail: ;
-    srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
     srCreateClubNameExists: ;
     srCreateClubInvalidName: ;
     srCreateClubInvalidCode: ;
@@ -379,7 +376,6 @@ begin
     srJoinClubInvalidId: ;
     srJoinClubInvalidCode: ;
     srJoinClubAlreadyMember: ;
-    srLeaveClubOk: ;
     srLeaveClubInvalidId: ;
     srKickPlayerInvalidClubId: ;
     srKickPlayerInvalidPlayerId: ;
@@ -397,6 +393,9 @@ begin
     srChangePasswordInvalidPassword: ;
     srChangeAvatarOk: ;
     srChangeAvatarInvalidId: ;
+    srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
     srCreateGameOk,
     srDeleteGameOk,
     srTableStatus,
@@ -411,6 +410,7 @@ begin
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDisbandOk,
+    srLeaveClubOk,
     srClubDetailsChangeOk,
     srCreateClubOk,
     srClubTransferChipsOk,

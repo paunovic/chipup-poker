@@ -1,4 +1,4 @@
-unit uClubLobbyManagerForm;
+unit uClubLobbyForm;
 
 interface
 
@@ -11,7 +11,7 @@ uses
   uMessageItem;
 
 type
-  TfrmClubLobbyManager = class(TForm, IFormParams)
+  TfrmClubLobby = class(TForm, IFormParams)
     lbsHeader: TcxLabel;
     lbsSubheader: TcxLabel;
     btManageClub: TcxButton;
@@ -58,6 +58,8 @@ type
     btEditGame: TcxButton;
     acSuspendPlayer: TAction;
     acReinstatePlayer: TAction;
+    btLeaveClub: TcxButton;
+    acLeaveClub: TAction;
     procedure btManageClubClick(Sender: TObject);
     procedure btGamesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -75,6 +77,7 @@ type
     procedure acSuspendPlayerExecute(Sender: TObject);
     procedure acReinstatePlayerExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure acLeaveClubExecute(Sender: TObject);
   private
     FClubId: Integer;
     FSelectedPlayerId: TBytes;
@@ -111,7 +114,7 @@ uses
   uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm, uPB_Club, uPB_Game;
 
 
-procedure TfrmClubLobbyManager.FormCreate(Sender: TObject);
+procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
   btGiveChips.Top := gbPlayers.Height - btGiveChips.Height - 13;
   btGiveOwnership.Top := btGiveChips.Top;
@@ -123,17 +126,17 @@ begin
   btDeleteGame.Top := btNewGame.Top;
 end;
 
-procedure TfrmClubLobbyManager.FormDestroy(Sender: TObject);
+procedure TfrmClubLobby.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveMessageHandler(Handle);
 end;
 
-procedure TfrmClubLobbyManager.FormShow(Sender: TObject);
+procedure TfrmClubLobby.FormShow(Sender: TObject);
 begin
   MessageContainer.AddMessageHandler(Handle);
 end;
 
-procedure TfrmClubLobbyManager.SetParams(const AParams: array of pointer);
+procedure TfrmClubLobby.SetParams(const AParams: array of pointer);
 begin
   FClubId := PInteger(AParams[0])^;
 
@@ -141,7 +144,7 @@ begin
   ConfigureGUI;
 end;
 
-procedure TfrmClubLobbyManager.WndProc(var AMessage: TMessage);
+procedure TfrmClubLobby.WndProc(var AMessage: TMessage);
 var
   msg: TMessageItem;
 begin
@@ -169,6 +172,7 @@ begin
                             TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                             TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
+                            TServerMessageCallback.Create(srLeaveClubOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubDetailsChangeOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubTransferChipsOk, CSREClubOperation),
@@ -181,11 +185,12 @@ begin
   end;
 end;
 
-procedure TfrmClubLobbyManager.ConfigureGUI;
+procedure TfrmClubLobby.ConfigureGUI;
 var
-  club   : TClubInfo;
-  player : TPlayerInfo;
-  manager: String;
+  club         : TClubInfo;
+  player       : TPlayerInfo;
+  manager      : String;
+  admin_visible: Boolean;
 begin
   if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
   begin
@@ -199,22 +204,36 @@ begin
 
     lbsSubheader.Caption := Format('Club Manager: %s          Members: %d          Club ID: %d', [manager, Length(club.Players), club.Id]);
 
+    admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
+
+    btChangeClubDetails.Visible := admin_visible;
+    btCloseClub.Visible := admin_visible;
+    btGiveChips.Visible := admin_visible;
+    btGiveOwnership.Visible := admin_visible;
+    btRemovePlayerFromClub.Visible := admin_visible;
+    btSuspendUnsuspend.Visible := admin_visible;
+    btNewGame.Visible := admin_visible;
+    btDeleteGame.Visible := admin_visible;
+    btEditGame.Visible := admin_visible;
+    Bevel1.Visible := admin_visible;
+    btLeaveClub.Visible := not admin_visible;
+
     UpdatePlayerlist;
     UpdateGamesList;
   end;
 end;
 
-procedure TfrmClubLobbyManager.btGamesClick(Sender: TObject);
+procedure TfrmClubLobby.btGamesClick(Sender: TObject);
 begin
   pcTabs.ActivePage := tsGames;
 end;
 
-procedure TfrmClubLobbyManager.btManageClubClick(Sender: TObject);
+procedure TfrmClubLobby.btManageClubClick(Sender: TObject);
 begin
   pcTabs.ActivePage := tsManageClub;
 end;
 
-procedure TfrmClubLobbyManager.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex       : Integer;
   club           : TClubInfo;
@@ -234,7 +253,7 @@ begin
   acShowEditGameForm.Enabled := actions_enabled;
 end;
 
-procedure TfrmClubLobbyManager.gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmClubLobby.gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex      : Integer;
   action_enabled: Boolean;
@@ -276,7 +295,7 @@ begin
   end;
 end;
 
-procedure TfrmClubLobbyManager.UpdatePlayerlist;
+procedure TfrmClubLobby.UpdatePlayerlist;
 var
   club: TClubInfo;
 
@@ -324,7 +343,7 @@ begin
   end;
 end;
 
-procedure TfrmClubLobbyManager.UpdateGamesList;
+procedure TfrmClubLobby.UpdateGamesList;
 var
   C1  : Integer;
   game: TGameInfo;
@@ -356,7 +375,7 @@ begin
   end;
 end;
 
-procedure TfrmClubLobbyManager.acCloseClubExecute(Sender: TObject);
+procedure TfrmClubLobby.acCloseClubExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
@@ -367,7 +386,7 @@ begin
     SocketClient.DisbandClub(club.Id);
 end;
 
-procedure TfrmClubLobbyManager.acGiveChipsExecute(Sender: TObject);
+procedure TfrmClubLobby.acGiveChipsExecute(Sender: TObject);
 var
   club  : TClubInfo;
   player: TPlayerInfo;
@@ -380,7 +399,7 @@ begin
     SocketClient.Status;
 end;
 
-procedure TfrmClubLobbyManager.acGiveOwnershipExecute(Sender: TObject);
+procedure TfrmClubLobby.acGiveOwnershipExecute(Sender: TObject);
 var
   club  : TClubInfo;
   player: TPlayerInfo;
@@ -393,7 +412,13 @@ begin
     SocketClient.GiveOwnership(club.Id, player.Id);
 end;
 
-procedure TfrmClubLobbyManager.acRemovePlayerExecute(Sender: TObject);
+procedure TfrmClubLobby.acLeaveClubExecute(Sender: TObject);
+begin
+  if MessageDlg('Are you sure you want to leave this club?', mtConfirmation, mbYesNo, 0) = mrYes then
+    SocketClient.LeaveClub(FClubId);
+end;
+
+procedure TfrmClubLobby.acRemovePlayerExecute(Sender: TObject);
 var
   club  : TClubInfo;
   player: TPlayerInfo;
@@ -406,7 +431,7 @@ begin
     SocketClient.KickPlayer(club.Id, player.Id);
 end;
 
-procedure TfrmClubLobbyManager.acShowClubChangeDetailsFormExecute(Sender: TObject);
+procedure TfrmClubLobby.acShowClubChangeDetailsFormExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
@@ -416,7 +441,7 @@ begin
   RunModalForm(TfrmChangeClubDetails, self, [club]);
 end;
 
-procedure TfrmClubLobbyManager.acShowCreateGameFormExecute(Sender: TObject);
+procedure TfrmClubLobby.acShowCreateGameFormExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
@@ -426,7 +451,7 @@ begin
   RunModalForm(TfrmCreateGame, self, [club]);
 end;
 
-procedure TfrmClubLobbyManager.acShowEditGameFormExecute(Sender: TObject);
+procedure TfrmClubLobby.acShowEditGameFormExecute(Sender: TObject);
 var
   club: TClubInfo;
   game: TGameInfo;
@@ -438,7 +463,7 @@ begin
   RunModalForm(TfrmEditGame, self, [game]);
 end;
 
-procedure TfrmClubLobbyManager.acSuspendPlayerExecute(Sender: TObject);
+procedure TfrmClubLobby.acSuspendPlayerExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
@@ -448,7 +473,7 @@ begin
   SocketClient.ChangeSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
 end;
 
-procedure TfrmClubLobbyManager.acReinstatePlayerExecute(Sender: TObject);
+procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
@@ -458,43 +483,43 @@ begin
   SocketClient.ChangeSuspendState(club.MongoId, FSelectedPlayerId, FALSE);
 end;
 
-procedure TfrmClubLobbyManager.acDeleteGameExecute(Sender: TObject);
+procedure TfrmClubLobby.acDeleteGameExecute(Sender: TObject);
 begin
   SocketClient.DeleteGame(FSelectedGameId);
 end;
 
 
-procedure TfrmClubLobbyManager.CSRStatusReply(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSRStatusReply(const AMessage: TMessageItem);
 begin
   ConfigureGUI;
 end;
 
-procedure TfrmClubLobbyManager.CSRKickPlayerInvalidClubId(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSRKickPlayerInvalidClubId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.CSRKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSRKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.CSROwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSROwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.CSROwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSROwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
 begin
   MessageDlg('You are not owner of this club', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.CSREClubOperation(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSREClubOperation(const AMessage: TMessageItem);
 var
   pbclub: TPB_Club;
   club  : TClubInfo;
@@ -510,7 +535,7 @@ begin
     ModalResult := mrClose
 end;
 
-procedure TfrmClubLobbyManager.CSREGameOperation(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSREGameOperation(const AMessage: TMessageItem);
 var
   pbgame: TPB_Game;
 begin

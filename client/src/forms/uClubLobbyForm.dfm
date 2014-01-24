@@ -1,4 +1,4 @@
-object frmClubLobbyManager: TfrmClubLobbyManager
+object frmClubLobby: TfrmClubLobby
   Left = 0
   Top = 0
   Caption = 'Lobby'
@@ -164,6 +164,16 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 1
         end
+        object btLeaveClub: TcxButton
+          Left = 10
+          Top = 23
+          Width = 224
+          Height = 28
+          Action = acLeaveClub
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 2
+          Visible = False
+        end
       end
       object gbPlayers: TcxGroupBox
         Left = 4
@@ -241,7 +251,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 285
+          Top = 279
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -257,7 +267,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 285
+          Top = 279
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -273,7 +283,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 285
+          Top = 279
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -289,7 +299,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 251
+          Top = 245
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -308,10 +318,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     object tsGames: TcxTabSheet
       Caption = 'tsGames'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         579
         353)
@@ -330,14 +336,13 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Left = 3
           Top = 16
           Width = 566
-          Height = 251
+          Height = 245
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitHeight = 263
           object gridGamesTable: TcxGridTableView
             Navigator.Buttons.CustomButtons = <>
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -396,7 +401,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 273
+          Top = 267
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -409,11 +414,10 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 285
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 273
+          Top = 267
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -426,11 +430,10 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 285
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 273
+          Top = 267
           Width = 98
           Height = 28
           Action = acShowEditGameForm
@@ -443,7 +446,6 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 285
         end
       end
     end
@@ -497,6 +499,10 @@ object frmClubLobbyManager: TfrmClubLobbyManager
       Caption = 'Reinstate'
       Enabled = False
       OnExecute = acReinstatePlayerExecute
+    end
+    object acLeaveClub: TAction
+      Caption = 'Leave Club'
+      OnExecute = acLeaveClubExecute
     end
   end
 end

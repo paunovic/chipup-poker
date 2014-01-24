@@ -197,8 +197,8 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_SeatInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uServerCodes.pas"/>
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
-			<DCCReference Include="forms\uClubLobbyManagerForm.pas">
-				<Form>frmClubLobbyManager</Form>
+			<DCCReference Include="forms\uClubLobbyForm.pas">
+				<Form>frmClubLobby</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeSuspendState.pas"/>

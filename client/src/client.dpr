@@ -74,7 +74,7 @@ uses
   uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas',
   uServerCodes in 'modules\protobuf\objects\uServerCodes.pas',
   dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
-  uClubLobbyManagerForm in 'forms\uClubLobbyManagerForm.pas' {frmClubLobbyManager},
+  uClubLobbyForm in 'forms\uClubLobbyForm.pas' {frmClubLobby},
   uPB_ChangeSuspendState in 'modules\protobuf\objects\uPB_ChangeSuspendState.pas';
 
 procedure FocusPokerApp;
