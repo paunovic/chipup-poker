@@ -45,7 +45,7 @@ type
 
   TClubsInfo = class(TObjectList<TClubInfo>)
   public
-    function AddClub(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String): TClubInfo;
+    function AddClub(const AProtobufObject: TPB_Club): TClubInfo;
     function FindClub(const AId: Integer; var AClubInfo: TClubInfo): Boolean;
     function IndexOf(const AId: Integer): Integer;
   end;
@@ -144,22 +144,16 @@ end;
 
 { TPlayerClubsInfo }
 
-function TClubsInfo.AddClub(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String): TClubInfo;
+function TClubsInfo.AddClub(const AProtobufObject: TPB_Club): TClubInfo;
 var
   index: Integer;
 begin
-  index := IndexOf(AId);
+  index := IndexOf(AProtobufObject.Seq);
   if index = -1 then
-    index := Add(TClubInfo.Create(AMongoId, AOwnerId, AId, AName, ABalance, APrivate, AInvCode))
+    index := Add(TClubInfo.Create(AProtobufObject))
   else
-  begin
-    Items[index].FMongoId := AMongoId;
-    Items[index].FOwnerId := AOwnerId;
-    Items[index].FName := AName;
-    Items[index].FInvCode := AInvCode;
-    Items[index].FBalance := ABalance;
-    Items[index].FPrivate := APrivate;
-  end;
+    Items[index].UpdateFromProtobufObject(AProtobufObject);
+
   result := Items[index];
 end;
 

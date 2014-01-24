@@ -21,6 +21,7 @@ type
       FN_SMALL_BLIND = 7;
       FN_BIG_BLIND = 8;
       FN_SEATS = 9;
+      FN_SITTING = 10;
 
     var
       FId: TBytes;
@@ -32,6 +33,7 @@ type
       FSmallBlind: Integer;
       FBigBlind: Integer;
       FSeats: Integer;
+      FSitting: Integer;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetCreatorMongoId(const AValue: TBytes);
@@ -42,6 +44,7 @@ type
     procedure SetSmallBlind(const AValue: Integer);
     procedure SetBigBlind(const AValue: Integer);
     procedure SetSeats(const AValue: Integer);
+    procedure SetSitting(const AValue: Integer);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -55,6 +58,7 @@ type
     property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
     property BigBlind: Integer read FBigBlind write SetBigBlind;
     property Seats: Integer read FSeats write SetSeats;
+    property Sitting: Integer read FSitting write SetSitting;
   end;
 
   TPB_Games = TObjectList<TPB_Game>;
@@ -113,6 +117,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeats := AProtobufReader.readInt32;
       end;
+      FN_SITTING: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSitting := AProtobufReader.readInt32;
+      end;
       else
         AProtobufReader.skipField(tag);
     end;
@@ -170,6 +178,12 @@ procedure TPB_Game.SetSeats(const AValue: Integer);
 begin
   FSeats := AValue;
   ProtobufOutput.writeInt32(FN_SEATS, AValue);
+end;
+
+procedure TPB_Game.SetSitting(const AValue: Integer);
+begin
+  FSitting := AValue;
+  ProtobufOutput.writeInt32(FN_SITTING, AValue);
 end;
 
 end.

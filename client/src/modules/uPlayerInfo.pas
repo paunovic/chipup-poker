@@ -75,10 +75,8 @@ end;
 function TPlayerInfo.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
 var
   club  : TClubInfo;
-  pbclub: TPB_Club;
   pbgame: TPB_Game;
   C1    : Integer;
-  index : Integer;
 begin
   FId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
@@ -90,14 +88,7 @@ begin
 
   FClubs.Clear;
   for C1 := 0 to AStatusReply.Clubs.Count - 1 do
-  begin
-    pbclub := AStatusReply.Clubs[C1];
-    index := FClubs.IndexOf(pbclub.Seq);
-    if index = -1 then
-      FClubs.Add(TClubInfo.Create(pbclub))
-    else
-      FClubs[index].UpdateFromProtobufObject(pbclub);
-  end;
+    FClubs.AddClub(AStatusReply.Clubs[C1]);
 
   for C1 := 0 to AStatusReply.Games.Count - 1 do
   begin

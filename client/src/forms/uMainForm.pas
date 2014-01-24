@@ -97,10 +97,10 @@ type
     procedure TCSecondaryLoginDetected(const AMessage: TMessageItem);
     procedure TCChatEvent(const AMessage: TMessageItem);
     procedure TCAccountConfirmed(const AMessage: TMessageItem);
-    procedure CSREditGameOk(const AMessage: TMessageItem);
     procedure CSEClubDeleted(const AMessage: TMessageItem);
-    procedure CSEClubChange(const AMessage: TMessageItem);
-    procedure CSEGameChange(const AMessage: TMessageItem);
+    procedure CSREClubOperation(const AMessage: TMessageItem);
+    procedure CSREGameOperation(const AMessage: TMessageItem);
+    procedure CSREGameDelete(const AMessage: TMessageItem);
 
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
@@ -162,15 +162,22 @@ begin
                           [
                             TServerMessageCallback.Create(srStatus, TCStatusReply),
                             TServerMessageCallback.Create(srLogout, TCLogout),
-                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk),
+                            TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
+                            TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srLeaveClubOk, TCLeaveClubOk),
                             TServerMessageCallback.Create(srLeaveClubInvalidId, TCLeaveClubInvalidId),
+                            TServerMessageCallback.Create(srClubDetailsChangeOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srCreateClubOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
                             TServerMessageCallback.Create(seSecondaryLoginDetected, TCSecondaryLoginDetected),
                             TServerMessageCallback.Create(seChat, TCChatEvent),
                             TServerMessageCallback.Create(seAccountConfirmed, TCAccountConfirmed),
-                            TServerMessageCallback.Create(seClubChange, CSEClubChange),
+                            TServerMessageCallback.Create(seClubChange, CSREClubOperation),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
-                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
+                            TServerMessageCallback.Create(seGameChange, CSREGameOperation),
+                            TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
+                            TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
+                            TServerMessageCallback.Create(srDeleteGameOk, CSREGameDelete)
                           ]
                         );
 
@@ -281,8 +288,7 @@ end;
 
 procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
-  if RunModalForM(TfrmCreateClub, self, []) = mrOk then
-    SocketClient.Status;
+  RunModalForM(TfrmCreateClub, self, []);
 end;
 
 procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
@@ -500,24 +506,6 @@ begin
   chatEvent := AMessage.Object_ as TPB_ChatEvent;
 end;
 
-procedure TfrmChipUpMain.CSEClubChange(const AMessage: TMessageItem);
-var
-  pbclub: TPB_Club;
-  club  : TClubInfo;
-begin
-  pbclub := AMessage.Object_ as TPB_Club;
-
-  if not dmMain.SelfInfo.Clubs.FindClub(pbclub.Seq, club) then
-    Exit;
-
-  club.UpdateFromProtobufObject(pbclub);
-
-  if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
-    dmMain.SelfInfo.Clubs.Remove(club);
-
-  ConfigureGUI;
-end;
-
 procedure TfrmChipUpMain.CSEClubDeleted(const AMessage: TMessageItem);
 var
   pbclub: TPB_Club;
@@ -533,24 +521,7 @@ begin
   ConfigureGUI;
 end;
 
-procedure TfrmChipUpMain.CSEGameChange(const AMessage: TMessageItem);
-var
-  pbgame: TPB_Game;
-  club  : TClubInfo;
-  game  : TGameInfo;
-begin
-  pbgame := AMessage.Object_ as TPB_Game;
-
-  if not dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
-    Exit;
-
-  if club.Games.FindGame(pbgame.MongoId, game) then
-    game.UpdateFromProtobufObject(pbgame);
-
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSREditGameOk(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSREGameDelete(const AMessage: TMessageItem);
 var
   pbgame: TPB_Game;
   club  : TClubInfo;
@@ -560,7 +531,33 @@ begin
 
   if (dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club)) and
      (club.Games.FindGame(pbgame.MongoId, game)) then
-    game.UpdateFromProtobufObject(pbgame);
+    club.Games.Remove(game);
+end;
+
+procedure TfrmChipUpMain.CSREClubOperation(const AMessage: TMessageItem);
+var
+  pbclub: TPB_Club;
+  club  : TClubInfo;
+begin
+  pbclub := AMessage.Object_ as TPB_Club;
+
+  club := dmMain.SelfInfo.Clubs.AddClub(pbclub);
+
+  if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
+    dmMain.SelfInfo.Clubs.Remove(club);
+
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSREGameOperation(const AMessage: TMessageItem);
+var
+  pbgame: TPB_Game;
+  club  : TClubInfo;
+begin
+  pbgame := AMessage.Object_ as TPB_Game;
+
+  if dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
+    club.Games.AddGame(pbgame);
 end;
 
 end.

@@ -94,13 +94,10 @@ type
     procedure TCOwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
     procedure TCOwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
     procedure TCClubDisbandOk(const AMessage: TMessageItem);
-    procedure TCDeleteGameOk(const AMessage: TMessageItem);
     procedure TCSuspendPlayerOk(const AMessage: TMessageItem);
     procedure TCReinstatePlayerOk(const AMessage: TMessageItem);
-    procedure CSREditGameOk(const AMessage: TMessageItem);
-    procedure CSEClubChange(const AMessage: TMessageItem);
-    procedure CSEClubDeleted(const AMessage: TMessageItem);
-    procedure CSEGameChange(const AMessage: TMessageItem);
+    procedure CSREGameOperation(const AMessage: TMessageItem);
+    procedure CSREClubOperation(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -169,13 +166,18 @@ begin
                             TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, TCOwnerGiveawayInvalidClubId),
                             TServerMessageCallback.Create(srOwnershipGiveAwayOk, TCOwnerGiveawayOk),
                             TServerMessageCallback.Create(srClubDisbandOk, TCClubDisbandOk),
-                            TServerMessageCallback.Create(srDeleteGameOk, TCDeleteGameOk),
                             TServerMessageCallback.Create(srSuspendPlayerOk, TCSuspendPlayerOk),
                             TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk),
-                            TServerMessageCallback.Create(seClubChange, CSEClubChange),
-                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
-                            TServerMessageCallback.Create(seGameChange, CSEGameChange),
-                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk)
+                            TServerMessageCallback.Create(seClubChange, CSREClubOperation),
+                            TServerMessageCallback.Create(seClubDeleted, CSREClubOperation),
+                            TServerMessageCallback.Create(seGameDelete, CSREGameOperation),
+                            TServerMessageCallback.Create(seGameChange, CSREGameOperation),
+                            TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
+                            TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
+                            TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
+                            TServerMessageCallback.Create(srClubDetailsChangeOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation)
                           ]
                         );
     end;
@@ -416,8 +418,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  if RunModalForm(TfrmChangeClubDetails, self, [club]) = mrOk then
-    SocketClient.Status;
+  RunModalForm(TfrmChangeClubDetails, self, [club]);
 end;
 
 procedure TfrmClubLobbyManager.acShowCreateGameFormExecute(Sender: TObject);
@@ -514,11 +515,6 @@ begin
   SocketClient.Status;
 end;
 
-procedure TfrmClubLobbyManager.TCDeleteGameOk(const AMessage: TMessageItem);
-begin
-  SocketClient.Status;
-end;
-
 procedure TfrmClubLobbyManager.TCSuspendPlayerOk(const AMessage: TMessageItem);
 begin
   SocketClient.Status;
@@ -529,7 +525,7 @@ begin
   SocketClient.Status;
 end;
 
-procedure TfrmClubLobbyManager.CSEClubChange(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSREClubOperation(const AMessage: TMessageItem);
 var
   pbclub: TPB_Club;
   club  : TClubInfo;
@@ -545,27 +541,7 @@ begin
     ModalResult := mrClose
 end;
 
-procedure TfrmClubLobbyManager.CSEClubDeleted(const AMessage: TMessageItem);
-var
-  pbclub: TPB_Club;
-begin
-  pbclub := AMessage.Object_ as TPB_Club;
-
-  if FClubId = pbclub.Seq then
-    ModalResult := mrClose;
-end;
-
-procedure TfrmClubLobbyManager.CSEGameChange(const AMessage: TMessageItem);
-var
-  pbgame: TPB_Game;
-begin
-  pbgame := AMessage.Object_ as TPB_Game;
-
-  if pbgame.Clubseq = FClubId then
-    ConfigureGUI;
-end;
-
-procedure TfrmClubLobbyManager.CSREditGameOk(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSREGameOperation(const AMessage: TMessageItem);
 var
   pbgame: TPB_Game;
 begin

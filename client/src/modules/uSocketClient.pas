@@ -372,7 +372,7 @@ begin
     srRegisterInvalidMail: ;
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srCreateClubOk: ;
+    srCreateClubOk: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
     srCreateClubNameExists: ;
     srCreateClubInvalidName: ;
     srCreateClubInvalidCode: ;
@@ -389,9 +389,9 @@ begin
     srOwnershipGiveawayInvalidPlayerId: ;
     srOwnershipGiveAwayInvalidClubId: ;
     srOwnershipGiveAwayOk: ;
-    srClubDetailsChangeOk: ;
+    srClubDisbandOk,
+    srClubDetailsChangeOk: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDetailsClubnameExists: ;
-    srClubDisbandOk: ;
     srClubTransferChipsOk: ;
     srClubTransferChipsInvalidAmount: ;
     srCreateClubNoTokens: ;
@@ -403,8 +403,8 @@ begin
     srChangePasswordInvalidPassword: ;
     srChangeAvatarOk: ;
     srChangeAvatarInvalidId: ;
-    srCreateGameOk: ;
-    srDeleteGameOk: ;
+    srCreateGameOk,
+    srDeleteGameOk,
     srEditGameOk: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatus,
     srTableSitOk,
