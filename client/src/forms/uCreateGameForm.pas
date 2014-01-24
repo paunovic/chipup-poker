@@ -33,7 +33,7 @@ type
   private
     FClub: TClubInfo;
 
-    procedure TCCreateGameOk(const AMessage: TMessageItem);
+    procedure CSRCreateGameOk(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -92,7 +92,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srCreateGameOk, TCCreateGameOk)
+                            TServerMessageCallback.Create(srCreateGameOk, CSRCreateGameOk)
                           ]
                         );
     end;
@@ -117,7 +117,7 @@ begin
   SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
 end;
 
-procedure TfrmCreateGame.TCCreateGameOk(const AMessage: TMessageItem);
+procedure TfrmCreateGame.CSRCreateGameOk(const AMessage: TMessageItem);
 begin
   ModalResult := mrOk;
 end;

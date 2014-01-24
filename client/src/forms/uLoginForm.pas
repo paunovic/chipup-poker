@@ -25,6 +25,7 @@ type
     lbsPassword: TcxLabel;
     StatusBar: TdxStatusBar;
     SkinController: TdxSkinController;
+    tiConnect: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure acLoginExecute(Sender: TObject);
     procedure acShowCreateAccountFormExecute(Sender: TObject);
@@ -32,6 +33,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure tiConnectTimer(Sender: TObject);
   private
     FLoginSuccess: Boolean;
 
@@ -40,10 +42,10 @@ type
 
     procedure SetStatus(const AStatus: String);
 
-    procedure TCLoginSuccess(const AMessage: TMessageItem);
-    procedure TCLoginFail(const AMessage: TMessageItem);
-    procedure TCStatusReply(const AMessage: TMessageItem);
-    procedure TCHello(const AMessage: TMessageItem);
+    procedure CSRLoginSuccess(const AMessage: TMessageItem);
+    procedure CSRLoginFail(const AMessage: TMessageItem);
+    procedure CSRStatusReply(const AMessage: TMessageItem);
+    procedure CSRHello(const AMessage: TMessageItem);
 
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
@@ -133,10 +135,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srHello, TCHello),
-                            TServerMessageCallback.Create(srLoginOk, TCLoginSuccess),
-                            TServerMessageCallback.Create(srInvalidLogin, TCLoginFail),
-                            TServerMessageCallback.Create(srStatus, TCStatusReply)
+                            TServerMessageCallback.Create(srHello, CSRHello),
+                            TServerMessageCallback.Create(srLoginOk, CSRLoginSuccess),
+                            TServerMessageCallback.Create(srInvalidLogin, CSRLoginFail),
+                            TServerMessageCallback.Create(srStatus, CSRStatusReply)
                           ]
                         );
 
@@ -168,11 +170,17 @@ begin
     wsClosed: begin
       EnableGUI(FALSE);
       SocketClient.Disconnect;
-      SocketClient.Connect;
+      tiConnect.Enabled := TRUE;
     end;
   end;
 
   SetStatus(status)
+end;
+
+procedure TfrmLogin.tiConnectTimer(Sender: TObject);
+begin
+  SocketClient.Connect;
+  tiConnect.Enabled := FALSE;
 end;
 
 procedure TfrmLogin.EnableGUI(const AEnable: Boolean);
@@ -217,7 +225,7 @@ begin
   RunModalForm(TfrmForgotPassword, self, []);
 end;
 
-procedure TfrmLogin.TCHello(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRHello(const AMessage: TMessageItem);
 var
   pbhello: TPB_HelloReply;
 begin
@@ -236,7 +244,7 @@ begin
   EnableGUI(SocketClient.IsConnected);
 end;
 
-procedure TfrmLogin.TCLoginFail(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRLoginFail(const AMessage: TMessageItem);
 begin
   SetStatus('');
   MessageDlg('Invalid login/password', mtError, [mbOK], 0);
@@ -244,14 +252,14 @@ begin
   edLogin.SetFocus;
 end;
 
-procedure TfrmLogin.TCLoginSuccess(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRLoginSuccess(const AMessage: TMessageItem);
 begin
   dmMain.SelfInfo.Password := edPassword.Text;
   FLoginSuccess := TRUE;
   SocketClient.Status;
 end;
 
-procedure TfrmLogin.TCStatusReply(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRStatusReply(const AMessage: TMessageItem);
 var
   pbstatus: TPB_StatusReply;
 begin

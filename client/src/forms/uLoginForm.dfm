@@ -155,4 +155,10 @@ object frmLogin: TfrmLogin
     Left = 496
     Top = 12
   end
+  object tiConnect: TTimer
+    Enabled = False
+    OnTimer = tiConnectTimer
+    Left = 52
+    Top = 184
+  end
 end

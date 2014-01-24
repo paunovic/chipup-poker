@@ -3,7 +3,7 @@ unit uGameInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, uPB_Game;
+  System.Generics.Collections, System.SysUtils, uPB_Game, uPB_TableStatus;
 
 type
   TGameType = (gtHoldem, gtOmaha);
@@ -20,15 +20,16 @@ type
     FGameType  : TGameType;
     FGameLimit : TGameLimit;
     FSeats     : Integer;
+    FSitting   : Integer;
 
     function GetGameTypeStr: String;
     function GetGameTypeStrFull: String;
 
   public
     constructor Create(const AProtobufObject: TPB_Game); overload;
-    constructor Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer); overload;
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Game);
+    procedure UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
 
     property MongoId        : TBytes read FMongoId write FMongoId;
     property ClubId         : Int64 read FClubId write FClubId;
@@ -41,6 +42,7 @@ type
     property GameTypeStrFull: String read GetGameTypeStrFull;
     property Limit          : TGameLimit read FGameLimit write FGameLimit;
     property Seats          : Integer read FSeats write FSeats;
+    property Sitting        : Integer read FSitting write FSitting;
   end;
 
   TGamesInfo = class(TObjectList<TGameInfo>)
@@ -61,19 +63,6 @@ begin
   UpdateFromProtobufObject(AProtobufObject);
 end;
 
-constructor TGameInfo.Create(const AMongoId, ACreatorId: TBytes; AClubId: Int64; const AName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ASeats: Integer);
-begin
-  FMongoId := AMongoId;
-  FCreatorId := ACreatorId;
-  FClubId := AClubId;
-  FName := AName;
-  FSmallBlind := ASmallBlind;
-  FBigBlind := ABigBlind;
-  FGameType := AGameType;
-  FGameLimit := AGameLimit;
-  FSeats := ASeats;
-end;
-
 procedure TGameInfo.UpdateFromProtobufObject(const AProtobufObject: TPB_Game);
 begin
   FMongoId := AProtobufObject.MongoId;
@@ -85,6 +74,13 @@ begin
   FGameType := TGameType(AProtobufObject.GameType);
   FGameLimit := TGameLimit(AProtobufObject.GameLimit);
   FSeats := AProtobufObject.Seats;
+  FSitting := AProtobufObject.Sitting;
+end;
+
+procedure TGameInfo.UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
+begin
+  FMongoId := ATableStatus.TableMongoId;
+  FSitting := ATableStatus.Seats.Count;
 end;
 
 function TGameInfo.GetGameTypeStr: String;

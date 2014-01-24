@@ -85,17 +85,12 @@ type
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
 
-    procedure TCStatusReply(const AMessage: TMessageItem);
-    procedure TCKickPlayerOk(const AMessage: TMessageItem);
-    procedure TCKickPlayerInvalidClubId(const AMessage: TMessageItem);
-    procedure TCKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
-    procedure TCOwnerGiveawayOk(const AMessage: TMessageItem);
-    procedure TCOwnerGiveawayNotOwner(const AMessage: TMessageItem);
-    procedure TCOwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
-    procedure TCOwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
-    procedure TCClubDisbandOk(const AMessage: TMessageItem);
-    procedure TCSuspendPlayerOk(const AMessage: TMessageItem);
-    procedure TCReinstatePlayerOk(const AMessage: TMessageItem);
+    procedure CSRStatusReply(const AMessage: TMessageItem);
+    procedure CSRKickPlayerInvalidClubId(const AMessage: TMessageItem);
+    procedure CSRKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
+    procedure CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
+    procedure CSROwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
+    procedure CSROwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
     procedure CSREGameOperation(const AMessage: TMessageItem);
     procedure CSREClubOperation(const AMessage: TMessageItem);
 
@@ -157,17 +152,16 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srStatus, TCStatusReply),
-                            TServerMessageCallback.Create(srKickPlayerOk, TCKickPlayerOk),
-                            TServerMessageCallback.Create(srKickPlayerInvalidClubId, TCKickPlayerInvalidClubId),
-                            TServerMessageCallback.Create(srKickPlayerInvalidPlayerId, TCKickPlayerInvalidPlayerId),
-                            TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, TCOwnerGiveawayNotOwner),
-                            TServerMessageCallback.Create(srOwnershipGiveawayInvalidPlayerId, TCOwnerGiveawayInvalidPlayerId),
-                            TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, TCOwnerGiveawayInvalidClubId),
-                            TServerMessageCallback.Create(srOwnershipGiveAwayOk, TCOwnerGiveawayOk),
-                            TServerMessageCallback.Create(srClubDisbandOk, TCClubDisbandOk),
-                            TServerMessageCallback.Create(srSuspendPlayerOk, TCSuspendPlayerOk),
-                            TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk),
+                            TServerMessageCallback.Create(srStatus, CSRStatusReply),
+                            TServerMessageCallback.Create(srKickPlayerOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srKickPlayerInvalidClubId, CSRKickPlayerInvalidClubId),
+                            TServerMessageCallback.Create(srKickPlayerInvalidPlayerId, CSRKickPlayerInvalidPlayerId),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, CSROwnerGiveawayNotOwner),
+                            TServerMessageCallback.Create(srOwnershipGiveawayInvalidPlayerId, CSROwnerGiveawayInvalidPlayerId),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, CSROwnerGiveawayInvalidClubId),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(seClubChange, CSREClubOperation),
                             TServerMessageCallback.Create(seClubDeleted, CSREClubOperation),
                             TServerMessageCallback.Create(seGameDelete, CSREGameOperation),
@@ -177,6 +171,7 @@ begin
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srClubDetailsChangeOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srClubTransferChipsOk, CSREClubOperation),
                             TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation)
                           ]
                         );
@@ -469,60 +464,34 @@ begin
 end;
 
 
-procedure TfrmClubLobbyManager.TCStatusReply(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSRStatusReply(const AMessage: TMessageItem);
 begin
   ConfigureGUI;
 end;
 
-procedure TfrmClubLobbyManager.TCKickPlayerInvalidClubId(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSRKickPlayerInvalidClubId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.TCKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSRKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.TCKickPlayerOk(const AMessage: TMessageItem);
-begin
-  SocketClient.Status;
-end;
-
-procedure TfrmClubLobbyManager.TCOwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSROwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.TCOwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSROwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
 end;
 
-procedure TfrmClubLobbyManager.TCOwnerGiveawayNotOwner(const AMessage: TMessageItem);
+procedure TfrmClubLobbyManager.CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
 begin
   MessageDlg('You are not owner of this club', mtError, [mbOk], 0);
-end;
-
-procedure TfrmClubLobbyManager.TCOwnerGiveawayOk(const AMessage: TMessageItem);
-begin
-  SocketClient.Status;
-end;
-
-procedure TfrmClubLobbyManager.TCClubDisbandOk(const AMessage: TMessageItem);
-begin
-  ModalResult := mrClose;
-  SocketClient.Status;
-end;
-
-procedure TfrmClubLobbyManager.TCSuspendPlayerOk(const AMessage: TMessageItem);
-begin
-  SocketClient.Status;
-end;
-
-procedure TfrmClubLobbyManager.TCReinstatePlayerOk(const AMessage: TMessageItem);
-begin
-  SocketClient.Status;
 end;
 
 procedure TfrmClubLobbyManager.CSREClubOperation(const AMessage: TMessageItem);

@@ -27,8 +27,8 @@ type
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    procedure TCChangePasswordOk(const AMessage: TMessageItem);
-    procedure TCChangePasswordInvalid(const AMessage: TMessageItem);
+    procedure CSRChangePasswordOk(const AMessage: TMessageItem);
+    procedure CSRChangePasswordInvalid(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -70,8 +70,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srChangePasswordOk, TCChangePasswordOk),
-                            TServerMessageCallback.Create(srChangePasswordInvalidPassword, TCChangePasswordInvalid)
+                            TServerMessageCallback.Create(srChangePasswordOk, CSRChangePasswordOk),
+                            TServerMessageCallback.Create(srChangePasswordInvalidPassword, CSRChangePasswordInvalid)
                           ]
                         );
     end;
@@ -126,14 +126,14 @@ begin
   SocketClient.ChangePassword(edNewPassword.Text);
 end;
 
-procedure TfrmChangePassword.TCChangePasswordInvalid(const AMessage: TMessageItem);
+procedure TfrmChangePassword.CSRChangePasswordInvalid(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid password', mtError, [mbOK], 0);
   edNewPassword.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmChangePassword.TCChangePasswordOk(const AMessage: TMessageItem);
+procedure TfrmChangePassword.CSRChangePasswordOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Password successfully changed', mtInformation, [mbOK], 0);
   dmMain.SelfInfo.Password := edNewPassword.Text;

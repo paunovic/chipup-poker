@@ -241,7 +241,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 291
+          Top = 285
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -257,7 +257,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 291
+          Top = 285
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -273,7 +273,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 291
+          Top = 285
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -289,7 +289,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 257
+          Top = 251
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -330,7 +330,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Left = 3
           Top = 16
           Width = 566
-          Height = 257
+          Height = 251
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -396,7 +396,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 279
+          Top = 273
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -413,7 +413,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 279
+          Top = 273
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -430,7 +430,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 279
+          Top = 273
           Width = 98
           Height = 28
           Action = acShowEditGameForm

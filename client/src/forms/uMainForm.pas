@@ -66,7 +66,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
     procedure acShowJoinClubFormExecute(Sender: TObject);
-    procedure btLeaveClubClick(Sender: TObject);
     procedure gridJoinedClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure acBuyTokensExecute(Sender: TObject);
     procedure acBuyChipsExecute(Sender: TObject);
@@ -90,17 +89,16 @@ type
     procedure UpdateClublist;
     procedure UpdateGamelist;
 
-    procedure TCStatusReply(const AMessage: TMessageItem);
-    procedure TCLeaveClubOk(const AMessage: TMessageItem);
-    procedure TCLeaveClubInvalidId(const AMessage: TMessageItem);
-    procedure TCLogout(const AMessage: TMessageItem);
-    procedure TCSecondaryLoginDetected(const AMessage: TMessageItem);
-    procedure TCChatEvent(const AMessage: TMessageItem);
-    procedure TCAccountConfirmed(const AMessage: TMessageItem);
+    procedure CSRStatusReply(const AMessage: TMessageItem);
+    procedure CSRLogout(const AMessage: TMessageItem);
+    procedure CSESecondaryLoginDetected(const AMessage: TMessageItem);
+    procedure CSEChatEvent(const AMessage: TMessageItem);
+    procedure CSEAccountConfirmed(const AMessage: TMessageItem);
     procedure CSEClubDeleted(const AMessage: TMessageItem);
     procedure CSREClubOperation(const AMessage: TMessageItem);
     procedure CSREGameOperation(const AMessage: TMessageItem);
     procedure CSREGameDelete(const AMessage: TMessageItem);
+    procedure CSRTableStatus(const AMessage: TMessageItem);
 
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
@@ -126,7 +124,7 @@ implementation
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
   uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
-  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game,
+  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_ChatEvent, uPB_ChatMessage, uClubLobbyManagerForm;
 
@@ -160,24 +158,32 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srStatus, TCStatusReply),
-                            TServerMessageCallback.Create(srLogout, TCLogout),
+                            TServerMessageCallback.Create(srStatus, CSRStatusReply),
+                            TServerMessageCallback.Create(srLogout, CSRLogout),
                             TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                            TServerMessageCallback.Create(srLeaveClubOk, TCLeaveClubOk),
-                            TServerMessageCallback.Create(srLeaveClubInvalidId, TCLeaveClubInvalidId),
                             TServerMessageCallback.Create(srClubDetailsChangeOk, CSREClubOperation),
                             TServerMessageCallback.Create(srCreateClubOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                            TServerMessageCallback.Create(seSecondaryLoginDetected, TCSecondaryLoginDetected),
-                            TServerMessageCallback.Create(seChat, TCChatEvent),
-                            TServerMessageCallback.Create(seAccountConfirmed, TCAccountConfirmed),
+                            TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
+                            TServerMessageCallback.Create(seChat, CSEChatEvent),
+                            TServerMessageCallback.Create(seAccountConfirmed, CSEAccountConfirmed),
                             TServerMessageCallback.Create(seClubChange, CSREClubOperation),
+                            TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srKickPlayerOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srLeaveClubOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srClubTransferChipsOk, CSREClubOperation),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
                             TServerMessageCallback.Create(seGameChange, CSREGameOperation),
                             TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                             TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
-                            TServerMessageCallback.Create(srDeleteGameOk, CSREGameDelete)
+                            TServerMessageCallback.Create(srDeleteGameOk, CSREGameDelete),
+                            TServerMessageCallback.Create(srTableStatus, CSRTableStatus),
+                            TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
+                            TServerMessageCallback.Create(srTableSitOk, CSRTableStatus)
+
                           ]
                         );
 
@@ -307,24 +313,12 @@ end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
-  if RunModalForm(TfrmJoinClub, self, []) = mrOk then
-    SocketClient.Status;
+  RunModalForm(TfrmJoinClub, self, []);
 end;
 
 procedure TfrmChipUpMain.acShowPublicGamesListFormExecute(Sender: TObject);
 begin
-  if RunModalForm(TfrmPublicClubsList, self, []) = mrOk then
-    SocketClient.Status;
-end;
-
-procedure TfrmChipUpMain.btLeaveClubClick(Sender: TObject);
-var
-  club: TClubInfo;
-begin
-  if not GetSelectedClub(club) then
-    Exit;
-
-  SocketClient.LeaveClub(club.Id);
+  RunModalForm(TfrmPublicClubsList, self, []);
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -392,7 +386,7 @@ begin
       c.SetValue(C1, gridGamesName.Index, game.Name);
       c.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
       c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [game.SmallBlind, game.BigBlind]));
-      c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [0, game.Seats]));
+      c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
       c.SetValue(C1, gridGamesStatus.Index, 'unknown');
     end;
   finally
@@ -460,12 +454,12 @@ begin
     FSelectedGame := game_id;
 end;
 
-procedure TfrmChipUpMain.TCSecondaryLoginDetected(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMessage: TMessageItem);
 begin
   ShowLoginForm;
 end;
 
-procedure TfrmChipUpMain.TCStatusReply(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSRStatusReply(const AMessage: TMessageItem);
 var
   pbstatus: TPB_StatusReply;
 begin
@@ -477,29 +471,18 @@ begin
   ConfigureGUI;
 end;
 
-procedure TfrmChipUpMain.TCLeaveClubInvalidId(const AMessage: TMessageItem);
-begin
-  MessageDlg('Invalid club ID', mtError, [mbOK], 0);
-end;
-
-procedure TfrmChipUpMain.TCLeaveClubOk(const AMessage: TMessageItem);
-begin
-  MessageDlg('Successfully left the club', mtInformation, [mbOK], 0);
-  SocketClient.Status;
-end;
-
-procedure TfrmChipUpMain.TCLogout(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSRLogout(const AMessage: TMessageItem);
 begin
   ShowLoginForm;
 end;
 
-procedure TfrmChipUpMain.TCAccountConfirmed(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSEAccountConfirmed(const AMessage: TMessageItem);
 begin
   dmMain.SelfInfo.Authed := TRUE;
   ConfigureGUI;
 end;
 
-procedure TfrmChipUpMain.TCChatEvent(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSEChatEvent(const AMessage: TMessageItem);
 var
   chatEvent: TPB_ChatEvent;
 begin
@@ -558,6 +541,23 @@ begin
 
   if dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
     club.Games.AddGame(pbgame);
+
+  ConfigureGUI;
 end;
+
+procedure TfrmChipUpMain.CSRTableStatus(const AMessage: TMessageItem);
+var
+  pbtstatus: TPB_TableStatus;
+  table    : TTable;
+begin
+  pbtstatus := AMessage.Object_ as TPB_TableStatus;
+
+  if not dmMain.Tables.FindTable(pbtstatus.TableMongoId, table) then
+    Exit;
+
+  table.Game.UpdateFromTableStatus(pbtstatus);
+  ConfigureGUI;
+end;
+
 
 end.

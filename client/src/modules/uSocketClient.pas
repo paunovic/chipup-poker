@@ -372,7 +372,6 @@ begin
     srRegisterInvalidMail: ;
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srCreateClubOk: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
     srCreateClubNameExists: ;
     srCreateClubInvalidName: ;
     srCreateClubInvalidCode: ;
@@ -382,17 +381,12 @@ begin
     srJoinClubAlreadyMember: ;
     srLeaveClubOk: ;
     srLeaveClubInvalidId: ;
-    srKickPlayerOk: ;
     srKickPlayerInvalidClubId: ;
     srKickPlayerInvalidPlayerId: ;
     srOwnershipGiveAwayNotOwner: ;
     srOwnershipGiveawayInvalidPlayerId: ;
     srOwnershipGiveAwayInvalidClubId: ;
-    srOwnershipGiveAwayOk: ;
-    srClubDisbandOk,
-    srClubDetailsChangeOk: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDetailsClubnameExists: ;
-    srClubTransferChipsOk: ;
     srClubTransferChipsInvalidAmount: ;
     srCreateClubNoTokens: ;
     srClubDetailsChangeNoTokens: ;
@@ -405,7 +399,6 @@ begin
     srChangeAvatarInvalidId: ;
     srCreateGameOk,
     srDeleteGameOk,
-    srEditGameOk: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,
@@ -414,14 +407,20 @@ begin
       KillPingTimeoutTimer;
       ResetPingTimer;
     end;
-    srSuspendPlayerOk: ;
-    srReinstatePlayerOk: ;
-
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
+    srClubDisbandOk,
+    srClubDetailsChangeOk,
+    srCreateClubOk,
+    srClubTransferChipsOk,
+    srOwnershipGiveAwayOk,
+    srKickPlayerOk,
+    srSuspendPlayerOk,
+    srReinstatePlayerOk,
     seClubChange,
     seClubDeleted: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
+    srEditGameOk,
     seGameChange,
     seGameCreate,
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);

@@ -30,8 +30,8 @@ type
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
 
-    procedure TCChangeAvatarOk(const AMessage: TMessageItem);
-    procedure TCChangeAvatarInvalidId(const AMessage: TMessageItem);
+    procedure CSRChangeAvatarOk(const AMessage: TMessageItem);
+    procedure CSRChangeAvatarInvalidId(const AMessage: TMessageItem);
 
     procedure UploadAvatar;
 
@@ -129,8 +129,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srChangeAvatarOk, TCChangeAvatarOk),
-                            TServerMessageCallback.Create(srChangeAvatarInvalidId, TCChangeAvatarInvalidId)
+                            TServerMessageCallback.Create(srChangeAvatarOk, CSRChangeAvatarOk),
+                            TServerMessageCallback.Create(srChangeAvatarInvalidId, CSRChangeAvatarInvalidId)
                           ]
                         );
     end;
@@ -233,7 +233,7 @@ begin
     MessageDlg(error, mtError, [mbOK], 0);
 end;
 
-procedure TfrmChangeAvatar.TCChangeAvatarInvalidId(const AMessage: TMessageItem);
+procedure TfrmChangeAvatar.CSRChangeAvatarInvalidId(const AMessage: TMessageItem);
 begin
   if FAvatarChanged then
     UploadAvatar
@@ -245,7 +245,7 @@ begin
   end;
 end;
 
-procedure TfrmChangeAvatar.TCChangeAvatarOk(const AMessage: TMessageItem);
+procedure TfrmChangeAvatar.CSRChangeAvatarOk(const AMessage: TMessageItem);
 var
   avatar: TAvatar;
 begin
