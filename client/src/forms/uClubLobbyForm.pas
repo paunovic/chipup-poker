@@ -14,7 +14,7 @@ type
   TfrmClubLobby = class(TForm, IFormParams)
     lbsHeader: TcxLabel;
     lbsSubheader: TcxLabel;
-    btManageClub: TcxButton;
+    btClubHome: TcxButton;
     btGames: TcxButton;
     pcTabs: TcxPageControl;
     tsManageClub: TcxTabSheet;
@@ -60,7 +60,7 @@ type
     acReinstatePlayer: TAction;
     btLeaveClub: TcxButton;
     acLeaveClub: TAction;
-    procedure btManageClubClick(Sender: TObject);
+    procedure btClubHomeClick(Sender: TObject);
     procedure btGamesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
     procedure gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
@@ -140,7 +140,7 @@ procedure TfrmClubLobby.SetParams(const AParams: array of pointer);
 begin
   FClubId := PInteger(AParams[0])^;
 
-  btManageClub.Click;
+  btClubHome.Click;
   ConfigureGUI;
 end;
 
@@ -228,7 +228,7 @@ begin
   pcTabs.ActivePage := tsGames;
 end;
 
-procedure TfrmClubLobby.btManageClubClick(Sender: TObject);
+procedure TfrmClubLobby.btClubHomeClick(Sender: TObject);
 begin
   pcTabs.ActivePage := tsManageClub;
 end;

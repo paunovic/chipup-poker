@@ -67,13 +67,13 @@ object frmClubLobby: TfrmClubLobby
     AnchorX = 291
     AnchorY = 92
   end
-  object btManageClub: TcxButton
+  object btClubHome: TcxButton
     Left = 146
     Top = 114
     Width = 144
     Height = 38
     Anchors = [akTop]
-    Caption = 'Manage Club'
+    Caption = 'Club Home'
     SpeedButtonOptions.GroupIndex = 1
     SpeedButtonOptions.CanBeFocused = False
     SpeedButtonOptions.Down = True
@@ -84,7 +84,7 @@ object frmClubLobby: TfrmClubLobby
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    OnClick = btManageClubClick
+    OnClick = btClubHomeClick
   end
   object btGames: TcxButton
     Left = 296
