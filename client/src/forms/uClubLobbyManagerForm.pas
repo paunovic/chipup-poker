@@ -427,6 +427,8 @@ begin
 
   if RunModalForm(TfrmCreateGame, self, [club]) = mrOk then
     SocketClient.Status;
+  // FIXME, srCreateGameOk now returns a Game object to TfrmCreateGame, use that
+  // dont re-run status
 end;
 
 procedure TfrmClubLobbyManager.acShowEditGameFormExecute(Sender: TObject);
