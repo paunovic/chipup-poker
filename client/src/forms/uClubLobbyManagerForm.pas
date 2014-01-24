@@ -175,7 +175,7 @@ begin
                             TServerMessageCallback.Create(seClubChange, CSEClubChange),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
                             TServerMessageCallback.Create(seGameChange, CSEGameChange),
-                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk),
+                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk)
                           ]
                         );
     end;
