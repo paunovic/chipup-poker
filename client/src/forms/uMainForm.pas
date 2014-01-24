@@ -167,8 +167,8 @@ begin
                             TServerMessageCallback.Create(seChat, TCChatEvent),
                             TServerMessageCallback.Create(seAccountConfirmed, TCAccountConfirmed),
                             TServerMessageCallback.Create(seClubChange, CSEClubChange),
-                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted)
-//                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
+                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
+                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
                           ]
                         );
 

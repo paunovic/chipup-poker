@@ -172,8 +172,8 @@ begin
                             TServerMessageCallback.Create(srSuspendPlayerOk, TCSuspendPlayerOk),
                             TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk),
                             TServerMessageCallback.Create(seClubChange, CSEClubChange),
-                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted)
-//                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
+                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
+                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
                           ]
                         );
     end;
@@ -425,10 +425,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  if RunModalForm(TfrmCreateGame, self, [club]) = mrOk then
-    SocketClient.Status;
-  // FIXME, srCreateGameOk now returns a Game object to TfrmCreateGame, use that
-  // dont re-run status
+  RunModalForm(TfrmCreateGame, self, [club]);
 end;
 
 procedure TfrmClubLobbyManager.acShowEditGameFormExecute(Sender: TObject);
@@ -440,8 +437,7 @@ begin
      (not club.Games.FindGame(FSelectedGameId, game)) then
     Exit;
 
-  if RunModalForm(TfrmEditGame, self, [game]) = mrOk then
-    SocketClient.Status;
+  RunModalForm(TfrmEditGame, self, [game]);
 end;
 
 procedure TfrmClubLobbyManager.acSuspendPlayerExecute(Sender: TObject);
