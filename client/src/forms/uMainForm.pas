@@ -97,6 +97,7 @@ type
     procedure TCSecondaryLoginDetected(const AMessage: TMessageItem);
     procedure TCChatEvent(const AMessage: TMessageItem);
     procedure TCAccountConfirmed(const AMessage: TMessageItem);
+    procedure CSREditGameOk(const AMessage: TMessageItem);
     procedure CSEClubDeleted(const AMessage: TMessageItem);
     procedure CSEClubChange(const AMessage: TMessageItem);
     procedure CSEGameChange(const AMessage: TMessageItem);
@@ -161,6 +162,7 @@ begin
                           [
                             TServerMessageCallback.Create(srStatus, TCStatusReply),
                             TServerMessageCallback.Create(srLogout, TCLogout),
+                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk),
                             TServerMessageCallback.Create(srLeaveClubOk, TCLeaveClubOk),
                             TServerMessageCallback.Create(srLeaveClubInvalidId, TCLeaveClubInvalidId),
                             TServerMessageCallback.Create(seSecondaryLoginDetected, TCSecondaryLoginDetected),
@@ -546,6 +548,19 @@ begin
     game.UpdateFromProtobufObject(pbgame);
 
   ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSREditGameOk(const AMessage: TMessageItem);
+var
+  pbgame: TPB_Game;
+  club  : TClubInfo;
+  game  : TGameInfo;
+begin
+  pbgame := AMessage.Object_ as TPB_Game;
+
+  if (dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club)) and
+     (club.Games.FindGame(pbgame.MongoId, game)) then
+    game.UpdateFromProtobufObject(pbgame);
 end;
 
 end.

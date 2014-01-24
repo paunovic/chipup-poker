@@ -405,7 +405,7 @@ begin
     srChangeAvatarInvalidId: ;
     srCreateGameOk: ;
     srDeleteGameOk: ;
-    srEditGameOk: ;
+    srEditGameOk: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,

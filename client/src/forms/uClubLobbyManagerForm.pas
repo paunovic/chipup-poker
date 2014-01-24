@@ -97,6 +97,7 @@ type
     procedure TCDeleteGameOk(const AMessage: TMessageItem);
     procedure TCSuspendPlayerOk(const AMessage: TMessageItem);
     procedure TCReinstatePlayerOk(const AMessage: TMessageItem);
+    procedure CSREditGameOk(const AMessage: TMessageItem);
     procedure CSEClubChange(const AMessage: TMessageItem);
     procedure CSEClubDeleted(const AMessage: TMessageItem);
     procedure CSEGameChange(const AMessage: TMessageItem);
@@ -173,7 +174,8 @@ begin
                             TServerMessageCallback.Create(srReinstatePlayerOk, TCReinstatePlayerOk),
                             TServerMessageCallback.Create(seClubChange, CSEClubChange),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
-                            TServerMessageCallback.Create(seGameChange, CSEGameChange)
+                            TServerMessageCallback.Create(seGameChange, CSEGameChange),
+                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk),
                           ]
                         );
     end;
@@ -554,6 +556,16 @@ begin
 end;
 
 procedure TfrmClubLobbyManager.CSEGameChange(const AMessage: TMessageItem);
+var
+  pbgame: TPB_Game;
+begin
+  pbgame := AMessage.Object_ as TPB_Game;
+
+  if pbgame.Clubseq = FClubId then
+    ConfigureGUI;
+end;
+
+procedure TfrmClubLobbyManager.CSREditGameOk(const AMessage: TMessageItem);
 var
   pbgame: TPB_Game;
 begin
