@@ -17,7 +17,7 @@ type
     btClubHome: TcxButton;
     btGames: TcxButton;
     pcTabs: TcxPageControl;
-    tsManageClub: TcxTabSheet;
+    tsClubHome: TcxTabSheet;
     tsGames: TcxTabSheet;
     gbClubSettings: TcxGroupBox;
     btCloseClub: TcxButton;
@@ -217,6 +217,16 @@ begin
     btEditGame.Visible := admin_visible;
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
+    if admin_visible then
+    begin
+      gridPlayersList.Align := alTop;
+      gridGames.Align := alTop;
+    end
+    else
+    begin
+      gridPlayersList.Align := alClient;
+      gridGames.Align := alClient;
+    end;
 
     UpdatePlayerlist;
     UpdateGamesList;
@@ -230,7 +240,7 @@ end;
 
 procedure TfrmClubLobby.btClubHomeClick(Sender: TObject);
 begin
-  pcTabs.ActivePage := tsManageClub;
+  pcTabs.ActivePage := tsClubHome;
 end;
 
 procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);

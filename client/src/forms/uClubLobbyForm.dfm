@@ -112,15 +112,15 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 4
-    Properties.ActivePage = tsManageClub
+    Properties.ActivePage = tsGames
     Properties.CustomButtons.Buttons = <>
     Properties.HideTabs = True
     ClientRectBottom = 354
     ClientRectLeft = 1
     ClientRectRight = 580
     ClientRectTop = 1
-    object tsManageClub: TcxTabSheet
-      Caption = 'tsManageClub'
+    object tsClubHome: TcxTabSheet
+      Caption = 'tsClubHome'
       ImageIndex = 0
       DesignSize = (
         579
@@ -374,25 +374,28 @@ object frmClubLobby: TfrmClubLobby
               Options.Editing = False
               SortIndex = 0
               SortOrder = soAscending
-              Width = 162
+              Width = 287
             end
             object gridGamesType: TcxGridColumn
               Caption = 'Type'
               PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 76
+              Width = 117
             end
             object gridGamesBlinds: TcxGridColumn
               Caption = 'Stakes'
               PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 69
+              Width = 98
             end
             object gridGamesSeats: TcxGridColumn
               Caption = 'Seats'
               PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 45
+              Width = 64
             end
           end
           object gridGamesLevel: TcxGridLevel

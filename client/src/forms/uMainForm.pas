@@ -24,10 +24,8 @@ type
     gridJoinedClubs: TcxGrid;
     gridJoinedClubsTable: TcxGridTableView;
     gridJoinedClubsClubName: TcxGridColumn;
-    mmiCreateClub: TMenuItem;
     acShowCreateClubForm: TAction;
     gridJoinedClubsId: TcxGridColumn;
-    mmiJoinClub: TMenuItem;
     acShowJoinClubForm: TAction;
     SkinController: TdxSkinController;
     lbUserInfo: TcxLabel;
