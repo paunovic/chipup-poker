@@ -87,7 +87,11 @@ type
     procedure UpdateClublist;
     procedure UpdateGamelist;
 
+    procedure CSRLeaveClub(const AMessage: TMessageItem);
+    procedure CSRClubDetailsChange(const AMessage: TMessageItem);
     procedure CSRStatusReply(const AMessage: TMessageItem);
+    procedure CSRCreateClub(const AMessage: TMessageItem);
+
     procedure CSRLogout(const AMessage: TMessageItem);
     procedure CSESecondaryLoginDetected(const AMessage: TMessageItem);
     procedure CSEChatEvent(const AMessage: TMessageItem);
@@ -121,7 +125,7 @@ implementation
 
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
-  uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList,
+  uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply,
   uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
@@ -157,11 +161,12 @@ begin
       mtServerResponse: ProcessServerMessage(msg,
                           [
                             TServerMessageCallback.Create(srStatus, CSRStatusReply),
+                            TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
+                            TServerMessageCallback.Create(srClubDetailsChangeReply, CSRClubDetailsChange),
+                            TServerMessageCallback.Create(srCreateClubReply, CSRCreateClub),
                             TServerMessageCallback.Create(srLogout, CSRLogout),
                             TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                            TServerMessageCallback.Create(srClubDetailsChangeOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srCreateClubOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
                             TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
                             TServerMessageCallback.Create(seChat, CSEChatEvent),
@@ -171,7 +176,6 @@ begin
                             TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(srKickPlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srLeaveClubOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubTransferChipsOk, CSREClubOperation),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
                             TServerMessageCallback.Create(seGameChange, CSREGameOperation),
@@ -466,6 +470,65 @@ begin
   dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   dmMain.Players.ParseStatus(pbstatus);
   ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSRLeaveClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+  index  : Integer;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
+      if index <> -1 then
+        dmMain.SelfInfo.Clubs.Delete(index);
+      ConfigureGUI;
+    end;
+    csInvalidClubId: ;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
+end;
+
+procedure TfrmChipUpMain.CSRClubDetailsChange(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+  index  : Integer;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
+      if index <> -1 then
+        dmMain.SelfInfo.Clubs[index].UpdateFromProtobufObject(pbreply.Club);
+      ConfigureGUI;
+    end;
+    csNameExists: ;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRClubDetailsChange: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
+end;
+
+procedure TfrmChipUpMain.CSRCreateClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
+      ConfigureGUI;
+    end;
+    csInvalidName: ;
+    csInvalidPassword: ;
+    csNameExists: ;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRCreateClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
 end;
 
 procedure TfrmChipUpMain.CSRLogout(const AMessage: TMessageItem);

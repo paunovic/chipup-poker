@@ -76,7 +76,9 @@ uses
   dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
   uClubLobbyForm in 'forms\uClubLobbyForm.pas' {frmClubLobby},
   uPB_ChangeSuspendState in 'modules\protobuf\objects\uPB_ChangeSuspendState.pas',
-  uPB_ClubJoinReply in 'modules\protobuf\objects\uPB_ClubJoinReply.pas';
+  uPB_RegisterReply in 'modules\protobuf\objects\uPB_RegisterReply.pas',
+  uPB_ClubCommandReply in 'modules\protobuf\objects\uPB_ClubCommandReply.pas',
+  uPB_LoginReply in 'modules\protobuf\objects\uPB_LoginReply.pas';
 
 procedure FocusPokerApp;
 var

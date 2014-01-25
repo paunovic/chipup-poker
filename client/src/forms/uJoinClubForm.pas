@@ -28,10 +28,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    procedure CSRJoinClubOk(const AMessage: TMessageItem);
-    procedure CSRJoinClubInvalidId(const AMessage: TMessageItem);
-    procedure CSRJoinClubInvalidCode(const AMessage: TMessageItem);
-    procedure CSRJoinClubAlreadyMember(const AMessage: TMessageItem);
+    procedure CSRJoinClub(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -43,7 +40,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uCommon, uServerCodes, uMainDataModule, uMessageContainer, uServerMessageCallback;
+  uSocketClient, uCommon, uServerCodes, uMainDataModule, uMessageContainer, uServerMessageCallback, uPB_ClubCommandReply;
 
 
 procedure TfrmJoinClub.edClubIDPropertiesChange(Sender: TObject);
@@ -110,10 +107,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                            [
-                             TServerMessageCallback.Create(srJoinClubOk, CSRJoinClubOk),
-                             TServerMessageCallback.Create(srJoinClubInvalidId, CSRJoinClubInvalidId),
-                             TServerMessageCallback.Create(srJoinClubInvalidCode, CSRJoinClubInvalidCode),
-                             TServerMessageCallback.Create(srJoinClubAlreadyMember, CSRJoinClubAlreadyMember)
+                             TServerMessageCallback.Create(srJoinClubReply, CSRJoinClub)
                            ]
                          );
     end;
@@ -133,31 +127,32 @@ begin
   SocketClient.JoinClub(edClubID.Value, edClubCode.Text);
 end;
 
-procedure TfrmJoinClub.CSRJoinClubAlreadyMember(const AMessage: TMessageItem);
+procedure TfrmJoinClub.CSRJoinClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
 begin
-  MessageDlg('You are already member of this club', mtInformation, [mbOK], 0);
-  edClubID.SetFocus;
-  acOK.Enabled := TRUE;
-end;
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
 
-procedure TfrmJoinClub.CSRJoinClubInvalidCode(const AMessage: TMessageItem);
-begin
-  MessageDlg('Invalid club code', mtError, [mbOK], 0);
-  edClubCode.SetFocus;
-  acOK.Enabled := TRUE;
-end;
+  case pbreply.Status of
+    csSuccess: begin
+      MessageDlg('Successfully joined', mtInformation, [mbOK], 0);
+      ModalResult := mrOk;
+    end;
+    csInvalidClubId: begin
+      MessageDlg('Invalid club ID', mtError, [mbOK], 0);
+      edClubID.SetFocus;
+    end;
+    csAlreadyMember: begin
+      MessageDlg('You are already member of this club', mtInformation, [mbOK], 0);
+      edClubID.SetFocus;
+    end;
+    csBadPassword: begin
+      MessageDlg('Invalid club code', mtError, [mbOK], 0);
+      edClubCode.SetFocus;
+    end;
+  end;
 
-procedure TfrmJoinClub.CSRJoinClubInvalidId(const AMessage: TMessageItem);
-begin
-  MessageDlg('Invalid club ID', mtError, [mbOK], 0);
-  edClubID.SetFocus;
   acOK.Enabled := TRUE;
-end;
-
-procedure TfrmJoinClub.CSRJoinClubOk(const AMessage: TMessageItem);
-begin
-  MessageDlg('Successfully joined', mtInformation, [mbOK], 0);
-  ModalResult := mrOk;
 end;
 
 

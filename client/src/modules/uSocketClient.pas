@@ -88,8 +88,8 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uSettings, uCommon,
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
-  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams,
-  uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams,
+  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply,
+  uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply,
   uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState,
   pbOutput, pbInput, uMessageContainer, Winapi.WinSock;
 
@@ -362,30 +362,16 @@ begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
       {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED MethodId: %s', [err]), ditException); {$ENDIF}
     end;
-    srLoginOk: ;
-    srInvalidLogin: ;
+    srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;
-    srRegisterOk: ;
-    srRegisterDuplicateMail: ;
-    srRegisterDuplicateUsername: ;
-    srRegisterInvalidMail: ;
-    srCreateClubNameExists: ;
-    srCreateClubInvalidName: ;
-    srCreateClubInvalidCode: ;
-    srJoinClubOk: ;
-    srJoinClubInvalidId: ;
-    srJoinClubInvalidCode: ;
-    srJoinClubAlreadyMember: ;
-    srLeaveClubInvalidId: ;
+    srRegisterReply: ADataObject := TPB_RegisterReply.Create(ADataPointer, ARpcMessage.DataSize);
     srKickPlayerInvalidClubId: ;
     srKickPlayerInvalidPlayerId: ;
     srOwnershipGiveAwayNotOwner: ;
     srOwnershipGiveawayInvalidPlayerId: ;
     srOwnershipGiveAwayInvalidClubId: ;
-    srClubDetailsClubnameExists: ;
     srClubTransferChipsInvalidAmount: ;
     srCreateClubNoTokens: ;
-    srClubDetailsChangeNoTokens: ;
     srChangeMailOk: ;
     srChangeMailInvalidMail: ;
     srChangeMailDuplicateMail: ;
@@ -393,6 +379,14 @@ begin
     srChangePasswordInvalidPassword: ;
     srChangeAvatarOk: ;
     srChangeAvatarInvalidId: ;
+    seSecondaryLoginDetected: ;
+    seAccountConfirmed: ;
+
+    srCreateClubReply,
+    srJoinClubReply,
+    srLeaveClubReply,
+    srClubDetailsChangeReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
+
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
@@ -407,12 +401,7 @@ begin
       ResetPingTimer;
     end;
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
-    seSecondaryLoginDetected: ;
-    seAccountConfirmed: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDisbandOk,
-    srLeaveClubOk,
-    srClubDetailsChangeOk,
-    srCreateClubOk,
     srClubTransferChipsOk,
     srOwnershipGiveAwayOk,
     srKickPlayerOk,

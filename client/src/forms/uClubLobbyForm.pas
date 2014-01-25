@@ -89,7 +89,10 @@ type
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
 
-    procedure CSRStatusReply(const AMessage: TMessageItem);
+    procedure CSRLeaveClub(const AMessage: TMessageItem);
+    procedure CSRClubDetailsChange(const AMessage: TMessageItem);
+    procedure CSRStatus(const AMessage: TMessageItem);
+
     procedure CSRKickPlayerInvalidClubId(const AMessage: TMessageItem);
     procedure CSRKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
     procedure CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
@@ -111,8 +114,9 @@ implementation
 {$R *.dfm}
 
 uses
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uCommon, uSocketClient, uMainDataModule, uGiveChipsForm, uChangeClubDetailsForm, uServerMessageCallback, uServerCodes,
-  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm, uPB_Club, uPB_Game;
+  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm, uPB_Club, uPB_Game, uPB_ClubCommandReply;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -158,7 +162,9 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srStatus, CSRStatusReply),
+                            TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
+                            TServerMessageCallback.Create(srClubDetailsChangeReply, CSRClubDetailsChange),
+                            TServerMessageCallback.Create(srStatus, CSRStatus),
                             TServerMessageCallback.Create(srKickPlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(srKickPlayerInvalidClubId, CSRKickPlayerInvalidClubId),
                             TServerMessageCallback.Create(srKickPlayerInvalidPlayerId, CSRKickPlayerInvalidPlayerId),
@@ -175,8 +181,6 @@ begin
                             TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                             TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                            TServerMessageCallback.Create(srLeaveClubOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srClubDetailsChangeOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubTransferChipsOk, CSREClubOperation),
                             TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation)
@@ -521,7 +525,7 @@ begin
 end;
 
 
-procedure TfrmClubLobby.CSRStatusReply(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSRStatus(const AMessage: TMessageItem);
 begin
   ConfigureGUI;
 end;
@@ -575,6 +579,35 @@ begin
 
   if pbgame.Clubseq = FClubId then
     ConfigureGUI;
+end;
+
+
+procedure TfrmClubLobby.CSRClubDetailsChange(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: ConfigureGUI;
+    csNameExists: ;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
+end;
+
+procedure TfrmClubLobby.CSRLeaveClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: ModalResult := mrClose;
+    csInvalidClubId: ;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
 end;
 
 end.

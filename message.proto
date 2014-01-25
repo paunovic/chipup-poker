@@ -154,7 +154,7 @@ enum ServerCodes {
 	srHello = 1;
 	srLoginReply = 2;
 	srRegisterReply = 3;
-	srCreateClubReply = 41;
+	srCreateClubReply = 4;
 	srJoinClubReply = 5;
 	srLeaveClubReply = 6;
 	srClubDetailsChangeReply = 7;

@@ -32,9 +32,7 @@ type
   private
     FClub: TClubInfo;
 
-    procedure CSRClubDetailsChangeOk(const AMessage: TMessageItem);
-    procedure CSRClubDetailsChangeClubnameExists(const AMessage: TMessageItem);
-    procedure CSRClubDetailsChangeNoGold(const AMessage: TMessageItem);
+    procedure CSRClubDetailsChange(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -47,7 +45,8 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uMessageContainer, uServerMessageCallback;
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
+  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uMessageContainer, uServerMessageCallback, uPB_ClubCommandReply;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
@@ -101,9 +100,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srClubDetailsChangeOk, CSRClubDetailsChangeOk),
-                            TServerMessageCallback.Create(srClubDetailsClubnameExists, CSRClubDetailsChangeClubnameExists),
-                            TServerMessageCallback.Create(srClubDetailsChangeNoTokens, CSRClubDetailsChangeNoGold)
+                            TServerMessageCallback.Create(srClubDetailsChangeReply, CSRClubDetailsChange)
                           ]
                         );
     end;
@@ -140,23 +137,23 @@ begin
   SocketClient.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rbPrivate.Checked);
 end;
 
-procedure TfrmChangeClubDetails.CSRClubDetailsChangeClubnameExists(const AMessage: TMessageItem);
+procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
 begin
-  MessageDlg('Club name already exists', mtError, [mbOk], 0);
-  edClubName.SetFocus;
-  acOK.Enabled := TRUE;
-end;
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
 
-procedure TfrmChangeClubDetails.CSRClubDetailsChangeNoGold(const AMessage: TMessageItem);
-begin
-  MessageDlg('You don''t have enough tokens to change club details. You can get some at our site!', mtWarning, [mbYes], 0);
-  edClubName.SetFocus;
-  acOK.Enabled := TRUE;
-end;
+  case pbreply.Status of
+    csSuccess: ModalResult := mrOk;
+    csNameExists: begin
+      MessageDlg('Club name already exists', mtError, [mbOk], 0);
+      edClubName.SetFocus;
+    end;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRClubDetailsChange: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
 
-procedure TfrmChangeClubDetails.CSRClubDetailsChangeOk(const AMessage: TMessageItem);
-begin
-  ModalResult := mrOk;
+  acOK.Enabled := TRUE;
 end;
 
 end.

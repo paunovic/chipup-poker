@@ -42,8 +42,7 @@ type
 
     procedure SetStatus(const AStatus: String);
 
-    procedure CSRLoginSuccess(const AMessage: TMessageItem);
-    procedure CSRLoginFail(const AMessage: TMessageItem);
+    procedure CSRLogin(const AMessage: TMessageItem);
     procedure CSRStatusReply(const AMessage: TMessageItem);
     procedure CSRHello(const AMessage: TMessageItem);
 
@@ -61,8 +60,9 @@ implementation
 {$R *.dfm}
 
 uses
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient,
-  uServerCodes, uCommon, uMainDataModule, uPB_StatusReply, uPB_HelloReply,
+  uServerCodes, uCommon, uMainDataModule, uPB_StatusReply, uPB_HelloReply, uPB_LoginReply,
   uMessageContainer, uServerMessageCallback;
 
 
@@ -136,8 +136,7 @@ begin
       mtServerResponse: ProcessServerMessage(msg,
                           [
                             TServerMessageCallback.Create(srHello, CSRHello),
-                            TServerMessageCallback.Create(srLoginOk, CSRLoginSuccess),
-                            TServerMessageCallback.Create(srInvalidLogin, CSRLoginFail),
+                            TServerMessageCallback.Create(srLoginReply, CSRLogin),
                             TServerMessageCallback.Create(srStatus, CSRStatusReply)
                           ]
                         );
@@ -244,19 +243,28 @@ begin
   EnableGUI(SocketClient.IsConnected);
 end;
 
-procedure TfrmLogin.CSRLoginFail(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRLogin(const AMessage: TMessageItem);
+var
+  pbreply: TPB_LoginReply;
 begin
-  SetStatus('');
-  MessageDlg('Invalid login/password', mtError, [mbOK], 0);
-  EnableGUI(TRUE);
-  edLogin.SetFocus;
-end;
+  pbreply := AMessage.Object_ as TPB_LoginReply;
 
-procedure TfrmLogin.CSRLoginSuccess(const AMessage: TMessageItem);
-begin
-  dmMain.SelfInfo.Password := edPassword.Text;
-  FLoginSuccess := TRUE;
-  SocketClient.Status;
+  case pbreply.Status of
+    lrSuccess: begin
+      dmMain.SelfInfo.Password := edPassword.Text;
+      FLoginSuccess := TRUE;
+      SocketClient.Status;
+    end;
+    lrInvalid: begin
+      SetStatus('');
+      MessageDlg('Invalid login/password', mtError, [mbOK], 0);
+      EnableGUI(TRUE);
+      edLogin.SetFocus;
+    end;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    edLogin.SetFocus;
+  end;
 end;
 
 procedure TfrmLogin.CSRStatusReply(const AMessage: TMessageItem);
