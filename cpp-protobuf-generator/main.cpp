@@ -552,7 +552,7 @@ class DelphiGenerator : public CodeGenerator {
 //				"    tag := AProtobufReader.readTag;\n"
 				"  end;\n"
 				"end;\n");
-			for (int j=0; j<message->field_count(); j++) {
+			/*FIXME for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				string name = field->name();
 				UpperString(&name);
@@ -573,7 +573,7 @@ class DelphiGenerator : public CodeGenerator {
 							,"pname",PrivateFieldName(field));
 					}
 				}
-			}
+			}*/
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				if (field->type() == FieldDescriptor::TYPE_BYTES) {

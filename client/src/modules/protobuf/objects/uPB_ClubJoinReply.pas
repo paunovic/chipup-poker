@@ -77,15 +77,6 @@ begin
     end;
   end;
 end;
-  if Assigned(FFClub) then
-  begin
-    pbmsg := FFClub.GetProtobuf;
-    try
-      pboutput.writeMessage(FN_CLUB,pbmsg);
-    finally
-      pbmsg.Free;
-    end;
-  end;
 procedure TPB_ClubJoinReply.SetStatus(const AValue: TClubJoinStatusCode);
 begin
   FStatus := AValue;
