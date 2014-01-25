@@ -134,8 +134,8 @@ message SetAvatarParams {
 
 message ChatEvent {
 	enum EventType {
-		UserMessage = 0;
-		ServerMessage = 1;
+		ceUserMessage = 0;
+		ceServerMessage = 1;
 	}
 	required EventType event = 1;
 	required ChatMessage msg = 2;

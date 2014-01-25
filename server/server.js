@@ -342,7 +342,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password) {
 		this.state = 2;
 		this.userid = row._id;
 		this.nick = row.displayname;
-		this.send(codes.srLoginReply,{status:'lrSuccess'},'Poker.LoginReply'
+		this.send(codes.srLoginReply,{status:'lrSuccess'},'Poker.LoginReply');
 		this.log('sucessfully logged in');
 		activeUsers[row._id] = this;
 	} else {
@@ -1448,7 +1448,7 @@ Game.getGame = function getgame(id,cb) {
 }
 ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
 	switch (ev.event) {
-	case 'UserMessage':
+	case 'ceUserMessage':
 		//for (var x=0; x<ev.messages.length; x++) {
 			ev.msg.username = this.nick;
 			ev.msg.timestamp = ts;
