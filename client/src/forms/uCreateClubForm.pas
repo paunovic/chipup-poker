@@ -30,11 +30,11 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    procedure TCCreateClubOk(const AMessage: TMessageItem);
-    procedure TCCreateClubNameExists(const AMessage: TMessageItem);
-    procedure TCCreateClubInvalidName(const AMessage: TMessageItem);
-    procedure TCCreateClubInvalidCode(const AMessage: TMessageItem);
-    procedure TCCreateClubNoGold(const AMessage: TMessageItem);
+    procedure CSRCreateClubOk(const AMessage: TMessageItem);
+    procedure CSRCreateClubNameExists(const AMessage: TMessageItem);
+    procedure CSRCreateClubInvalidName(const AMessage: TMessageItem);
+    procedure CSRCreateClubInvalidCode(const AMessage: TMessageItem);
+    procedure CSRCreateClubNoGold(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -122,11 +122,11 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                            [
-                             TServerMessageCallback.Create(srCreateClubOk, TCCreateClubOk),
-                             TServerMessageCallback.Create(srCreateClubNameExists, TCCreateClubNameExists),
-                             TServerMessageCallback.Create(srCreateClubInvalidName, TCCreateClubInvalidName),
-                             TServerMessageCallback.Create(srCreateClubInvalidCode, TCCreateClubInvalidCode),
-                             TServerMessageCallback.Create(srCreateClubNoTokens, TCCreateClubNoGold)
+                             TServerMessageCallback.Create(srCreateClubOk, CSRCreateClubOk),
+                             TServerMessageCallback.Create(srCreateClubNameExists, CSRCreateClubNameExists),
+                             TServerMessageCallback.Create(srCreateClubInvalidName, CSRCreateClubInvalidName),
+                             TServerMessageCallback.Create(srCreateClubInvalidCode, CSRCreateClubInvalidCode),
+                             TServerMessageCallback.Create(srCreateClubNoTokens, CSRCreateClubNoGold)
                            ]
                          );
     end;
@@ -135,34 +135,34 @@ begin
   end;
 end;
 
-procedure TfrmCreateClub.TCCreateClubInvalidCode(const AMessage: TMessageItem);
+procedure TfrmCreateClub.CSRCreateClubInvalidCode(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club code', mtError, [mbOK], 0);
   edClubCode.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubInvalidName(const AMessage: TMessageItem);
+procedure TfrmCreateClub.CSRCreateClubInvalidName(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid club name', mtError, [mbOK], 0);
   edClubName.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubNoGold(const AMessage: TMessageItem);
+procedure TfrmCreateClub.CSRCreateClubNoGold(const AMessage: TMessageItem);
 begin
   MessageDlg('You don''t have enough tokens to create new club. You can get some at our site!', mtWarning, [mbOK], 0);
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubNameExists(const AMessage: TMessageItem);
+procedure TfrmCreateClub.CSRCreateClubNameExists(const AMessage: TMessageItem);
 begin
   MessageDlg('Club name already exists', mtError, [mbOK], 0);
   edClubName.SetFocus;
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmCreateClub.TCCreateClubOk(const AMessage: TMessageItem);
+procedure TfrmCreateClub.CSRCreateClubOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Club created successfully!', mtInformation, [mbOK], 0);
   ModalResult := mrOk;

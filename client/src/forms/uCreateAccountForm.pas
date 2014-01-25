@@ -33,10 +33,10 @@ type
   private
     function ValidateForm: Boolean;
 
-    procedure TCRegisterOk(const AMessage: TMessageItem);
-    procedure TCRegisterDuplicateMail(const AMessage: TMessageItem);
-    procedure TCRegisterDuplicateUser(const AMessage: TMessageItem);
-    procedure TCRegisterInvalidMail(const AMessage: TMessageItem);
+    procedure CSRRegisterOk(const AMessage: TMessageItem);
+    procedure CSRRegisterDuplicateMail(const AMessage: TMessageItem);
+    procedure CSRRegisterDuplicateUser(const AMessage: TMessageItem);
+    procedure CSRRegisterInvalidMail(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -97,10 +97,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srRegisterOk, TCRegisterOk),
-                            TServerMessageCallback.Create(srRegisterDuplicateMail, TCRegisterDuplicateMail),
-                            TServerMessageCallback.Create(srRegisterDuplicateUsername, TCRegisterDuplicateUser),
-                            TServerMessageCallback.Create(srRegisterInvalidMail, TCRegisterInvalidMail)
+                            TServerMessageCallback.Create(srRegisterOk, CSRRegisterOk),
+                            TServerMessageCallback.Create(srRegisterDuplicateMail, CSRRegisterDuplicateMail),
+                            TServerMessageCallback.Create(srRegisterDuplicateUsername, CSRRegisterDuplicateUser),
+                            TServerMessageCallback.Create(srRegisterInvalidMail, CSRRegisterInvalidMail)
                           ]
                         );
     end;
@@ -149,7 +149,7 @@ begin
   SocketClient.CreateAccount(edUsername.Text, edPassword.Text, edEmail.Text);
 end;
 
-procedure TfrmCreateAccount.TCRegisterOk(const AMessage: TMessageItem);
+procedure TfrmCreateAccount.CSRRegisterOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Account successfully created. Please check your inbox for confirmation e-mail', mtInformation, [mbOK], 0);
 
@@ -159,21 +159,21 @@ begin
   ModalResult := mrOk;
 end;
 
-procedure TfrmCreateAccount.TCRegisterDuplicateMail(const AMessage: TMessageItem);
+procedure TfrmCreateAccount.CSRRegisterDuplicateMail(const AMessage: TMessageItem);
 begin
   MessageDlg('E-mail address already exists', mtError, [mbOK], 0);
   edEmail.SetFocus;
   acSignUp.Enabled := TRUE;
 end;
 
-procedure TfrmCreateAccount.TCRegisterDuplicateUser(const AMessage: TMessageItem);
+procedure TfrmCreateAccount.CSRRegisterDuplicateUser(const AMessage: TMessageItem);
 begin
   MessageDlg('Username already exists', mtError, [mbOK], 0);
   edUsername.SetFocus;
   acSignUp.Enabled := TRUE;
 end;
 
-procedure TfrmCreateAccount.TCRegisterInvalidMail(const AMessage: TMessageItem);
+procedure TfrmCreateAccount.CSRRegisterInvalidMail(const AMessage: TMessageItem);
 begin
   MessageDlg('Invalid E-mail address', mtError, [mbOK], 0);
   edEmail.SetFocus;

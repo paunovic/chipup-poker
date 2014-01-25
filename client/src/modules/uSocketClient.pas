@@ -362,7 +362,6 @@ begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
       {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED MethodId: %s', [err]), ditException); {$ENDIF}
     end;
-    srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLoginOk: ;
     srInvalidLogin: ;
     srLogout: ;
@@ -370,9 +369,6 @@ begin
     srRegisterDuplicateMail: ;
     srRegisterDuplicateUsername: ;
     srRegisterInvalidMail: ;
-    srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srCreateClubOk: ;
     srCreateClubNameExists: ;
     srCreateClubInvalidName: ;
     srCreateClubInvalidCode: ;
@@ -380,19 +376,13 @@ begin
     srJoinClubInvalidId: ;
     srJoinClubInvalidCode: ;
     srJoinClubAlreadyMember: ;
-    srLeaveClubOk: ;
     srLeaveClubInvalidId: ;
-    srKickPlayerOk: ;
     srKickPlayerInvalidClubId: ;
     srKickPlayerInvalidPlayerId: ;
     srOwnershipGiveAwayNotOwner: ;
     srOwnershipGiveawayInvalidPlayerId: ;
     srOwnershipGiveAwayInvalidClubId: ;
-    srOwnershipGiveAwayOk: ;
-    srClubDetailsChangeOk: ;
     srClubDetailsClubnameExists: ;
-    srClubDisbandOk: ;
-    srClubTransferChipsOk: ;
     srClubTransferChipsInvalidAmount: ;
     srCreateClubNoTokens: ;
     srClubDetailsChangeNoTokens: ;
@@ -403,9 +393,11 @@ begin
     srChangePasswordInvalidPassword: ;
     srChangeAvatarOk: ;
     srChangeAvatarInvalidId: ;
-    srCreateGameOk: ;
-    srDeleteGameOk: ;
-    srEditGameOk: ;
+    srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srCreateGameOk,
+    srDeleteGameOk,
     srTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,
@@ -414,14 +406,24 @@ begin
       KillPingTimeoutTimer;
       ResetPingTimer;
     end;
-    srSuspendPlayerOk: ;
-    srReinstatePlayerOk: ;
-
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
-    seClubChange: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
+    srClubDisbandOk,
+    srLeaveClubOk,
+    srClubDetailsChangeOk,
+    srCreateClubOk,
+    srClubTransferChipsOk,
+    srOwnershipGiveAwayOk,
+    srKickPlayerOk,
+    srSuspendPlayerOk,
+    srReinstatePlayerOk,
+    seClubChange,
     seClubDeleted: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
+    srEditGameOk,
+    seGameChange,
+    seGameCreate,
+    seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}

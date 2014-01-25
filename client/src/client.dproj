@@ -73,9 +73,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<Icon_MainIcon>resources\Icon.ico</Icon_MainIcon>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUP Poker;LegalCopyright=;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUP Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
 			<DCC_ExeOutput>..\bin\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_MapFile>3</DCC_MapFile>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
@@ -197,8 +195,8 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_SeatInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uServerCodes.pas"/>
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
-			<DCCReference Include="forms\uClubLobbyManagerForm.pas">
-				<Form>frmClubLobbyManager</Form>
+			<DCCReference Include="forms\uClubLobbyForm.pas">
+				<Form>frmClubLobby</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeSuspendState.pas"/>

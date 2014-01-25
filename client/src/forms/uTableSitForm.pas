@@ -26,8 +26,8 @@ type
     FGame     : TGameInfo;
     FSeatIndex: Integer;
 
-    procedure TCTableSitOk(const AMessage: TMessageItem);
-    procedure TCTableSitSeatTaken(const AMessage: TMessageItem);
+    procedure CSRTableSitOk(const AMessage: TMessageItem);
+    procedure CSRTableSitSeatTaken(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -86,8 +86,8 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srTableSitOk, TCTableSitOk),
-                            TServerMessageCallback.Create(srTableSitSeatTaken, TCTableSitSeatTaken)
+                            TServerMessageCallback.Create(srTableSitOk, CSRTableSitOk),
+                            TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken)
                           ]
                         );
     end;
@@ -107,12 +107,12 @@ begin
   acOK.Enabled := FALSE;
 end;
 
-procedure TfrmTableSit.TCTableSitOk(const AMessage: TMessageItem);
+procedure TfrmTableSit.CSRTableSitOk(const AMessage: TMessageItem);
 begin
   ModalResult := mrOk;
 end;
 
-procedure TfrmTableSit.TCTableSitSeatTaken(const AMessage: TMessageItem);
+procedure TfrmTableSit.CSRTableSitSeatTaken(const AMessage: TMessageItem);
 begin
   MessageDlg('Seat is already taken. Please choose another seat', mtWarning, [mbOK], 0);
   ModalResult := mrClose;

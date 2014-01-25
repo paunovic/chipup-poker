@@ -33,7 +33,7 @@ type
   private
     FGame: TGameInfo;
 
-    procedure TCEditGameOk(const AMessage: TMessageItem);
+    procedure CSREditGameOk(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -46,7 +46,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
+  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uPB_Game, uMainDataModule, uClubInfo;
 
 
 procedure TfrmEditGame.FormDestroy(Sender: TObject);
@@ -109,7 +109,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srEditGameOk, TCEditGameOk)
+                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk)
                           ]
                         );
     end;
@@ -135,7 +135,7 @@ begin
   SocketClient.EditGame(FGame.MongoId, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
 end;
 
-procedure TfrmEditGame.TCEditGameOk(const AMessage: TMessageItem);
+procedure TfrmEditGame.CSREditGameOk(const AMessage: TMessageItem);
 begin
   ModalResult := mrOk;
 end;

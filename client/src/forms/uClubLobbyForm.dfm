@@ -1,4 +1,4 @@
-object frmClubLobbyManager: TfrmClubLobbyManager
+object frmClubLobby: TfrmClubLobby
   Left = 0
   Top = 0
   Caption = 'Lobby'
@@ -67,13 +67,13 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     AnchorX = 291
     AnchorY = 92
   end
-  object btManageClub: TcxButton
+  object btClubHome: TcxButton
     Left = 146
     Top = 114
     Width = 144
     Height = 38
     Anchors = [akTop]
-    Caption = 'Manage Club'
+    Caption = 'Club Home'
     SpeedButtonOptions.GroupIndex = 1
     SpeedButtonOptions.CanBeFocused = False
     SpeedButtonOptions.Down = True
@@ -84,7 +84,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    OnClick = btManageClubClick
+    OnClick = btClubHomeClick
   end
   object btGames: TcxButton
     Left = 296
@@ -112,21 +112,21 @@ object frmClubLobbyManager: TfrmClubLobbyManager
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 4
-    Properties.ActivePage = tsManageClub
+    Properties.ActivePage = tsClubHome
     Properties.CustomButtons.Buttons = <>
     Properties.HideTabs = True
     ClientRectBottom = 354
     ClientRectLeft = 1
     ClientRectRight = 580
     ClientRectTop = 1
-    object tsManageClub: TcxTabSheet
-      Caption = 'tsManageClub'
+    object tsClubHome: TcxTabSheet
+      Caption = 'tsClubHome'
       ImageIndex = 0
       DesignSize = (
         579
         353)
       object gbClubSettings: TcxGroupBox
-        Left = 331
+        Left = 332
         Top = 4
         Anchors = [akTop, akRight, akBottom]
         Caption = 'Club Settings'
@@ -164,6 +164,16 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 1
         end
+        object btLeaveClub: TcxButton
+          Left = 10
+          Top = 23
+          Width = 224
+          Height = 28
+          Action = acLeaveClub
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 2
+          Visible = False
+        end
       end
       object gbPlayers: TcxGroupBox
         Left = 4
@@ -180,7 +190,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Left = 3
           Top = 16
           Width = 317
-          Height = 273
+          Height = 252
           Align = alTop
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -241,7 +251,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 297
+          Top = 308
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -257,7 +267,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 297
+          Top = 308
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -273,7 +283,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 297
+          Top = 308
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -289,7 +299,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 263
+          Top = 274
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -326,7 +336,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           Left = 3
           Top = 16
           Width = 566
-          Height = 263
+          Height = 286
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -335,6 +345,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
           TabOrder = 0
           object gridGamesTable: TcxGridTableView
             Navigator.Buttons.CustomButtons = <>
+            OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
@@ -364,25 +375,28 @@ object frmClubLobbyManager: TfrmClubLobbyManager
               Options.Editing = False
               SortIndex = 0
               SortOrder = soAscending
-              Width = 162
+              Width = 287
             end
             object gridGamesType: TcxGridColumn
               Caption = 'Type'
               PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 76
+              Width = 117
             end
             object gridGamesBlinds: TcxGridColumn
               Caption = 'Stakes'
               PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 69
+              Width = 98
             end
             object gridGamesSeats: TcxGridColumn
               Caption = 'Seats'
               PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 45
+              Width = 64
             end
           end
           object gridGamesLevel: TcxGridLevel
@@ -391,7 +405,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 285
+          Top = 308
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -407,7 +421,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 285
+          Top = 308
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -423,7 +437,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 285
+          Top = 308
           Width = 98
           Height = 28
           Action = acShowEditGameForm
@@ -449,7 +463,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
       OnExecute = acRemovePlayerExecute
     end
     object acGiveOwnership: TAction
-      Caption = 'Give ownership'
+      Caption = 'Give Ownership'
       Enabled = False
       OnExecute = acGiveOwnershipExecute
     end
@@ -462,7 +476,7 @@ object frmClubLobbyManager: TfrmClubLobbyManager
       OnExecute = acCloseClubExecute
     end
     object acGiveChips: TAction
-      Caption = 'Give chips'
+      Caption = 'Give Chips...'
       Enabled = False
       OnExecute = acGiveChipsExecute
     end
@@ -489,6 +503,10 @@ object frmClubLobbyManager: TfrmClubLobbyManager
       Caption = 'Reinstate'
       Enabled = False
       OnExecute = acReinstatePlayerExecute
+    end
+    object acLeaveClub: TAction
+      Caption = 'Leave Club'
+      OnExecute = acLeaveClubExecute
     end
   end
 end

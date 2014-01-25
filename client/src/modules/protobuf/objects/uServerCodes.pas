@@ -61,6 +61,9 @@ type
     seAccountConfirmed = 202,
     seClubChange = 203,
     seClubDeleted = 204,
+    seGameChange = 205,
+    seGameCreate = 206,
+    seGameDelete = 207,
     scLogin = 501,
     scStatus = 502,
     scRegister = 503,
@@ -174,6 +177,9 @@ begin
     seAccountConfirmed: result := 'seAccountConfirmed';
     seClubChange: result := 'seClubChange';
     seClubDeleted: result := 'seClubDeleted';
+    seGameChange: result := 'seGameChange';
+    seGameCreate: result := 'seGameCreate';
+    seGameDelete: result := 'seGameDelete';
     scLogin: result := 'scLogin';
     scStatus: result := 'scStatus';
     scRegister: result := 'scRegister';

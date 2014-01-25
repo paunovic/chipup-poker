@@ -46,8 +46,8 @@ type
     procedure DrawSeat(const ASeatIndex: Integer);
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
 
-    procedure TCChatEvent(const AMessage: TMessageItem);
-    procedure TCTableStatus(const AMessage: TMessageItem);
+    procedure CSRChatEvent(const AMessage: TMessageItem);
+    procedure CSRTableStatus(const AMessage: TMessageItem);
 
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -166,10 +166,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(seChat, TCChatEvent),
-                            TServerMessageCallback.Create(srTableStatus, TCTableStatus),
-                            TServerMessageCallback.Create(srTableSitOk, TCTableStatus),
-                            TServerMessageCallback.Create(srTableStandUpOk, TCTableStatus)
+                            TServerMessageCallback.Create(seChat, CSRChatEvent),
+                            TServerMessageCallback.Create(srTableStatus, CSRTableStatus),
+                            TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
+                            TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus)
                           ]
                         );
     end;
@@ -372,7 +372,7 @@ begin
   acStandUp.Enabled := FALSE;
 end;
 
-procedure TfrmTable.TCChatEvent(const AMessage: TMessageItem);
+procedure TfrmTable.CSRChatEvent(const AMessage: TMessageItem);
 var
   chat_event  : TPB_ChatEvent;
   chat_message: TPB_ChatMessage;
@@ -402,7 +402,7 @@ begin
   end;
 end;
 
-procedure TfrmTable.TCTableStatus(const AMessage: TMessageItem);
+procedure TfrmTable.CSRTableStatus(const AMessage: TMessageItem);
 var
   pbtablestatus: TPB_TableStatus;
   C1: Integer;

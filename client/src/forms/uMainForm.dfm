@@ -303,14 +303,6 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object mmiClubs: TMenuItem
       Caption = 'Clubs'
-      object mmiCreateClub: TMenuItem
-        Action = acShowCreateClubForm
-        Caption = 'Create Club...'
-      end
-      object mmiJoinClub: TMenuItem
-        Action = acShowJoinClubForm
-        Caption = 'Join Club...'
-      end
       object SearchPublicClubs1: TMenuItem
         Action = acShowPublicGamesListForm
         Caption = 'Search Public Clubs...'

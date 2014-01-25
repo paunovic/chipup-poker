@@ -36,8 +36,7 @@ type
   private
     FSelectedClubId: Int64;
 
-    procedure TCListClubs(const AMessage: TMessageItem);
-    procedure TCJoinClubOk(const AMessage: TMessageItem);
+    procedure CSRListClubs(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -114,8 +113,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srListClubs, TCListClubs),
-                            TServerMessageCallback.Create(srJoinClubOk, TCJoinClubOk)
+                            TServerMessageCallback.Create(srListClubs, CSRListClubs)
                           ]
                         );
 
@@ -146,12 +144,7 @@ begin
   tiRefreshActionEnabler.Enabled := TRUE;
 end;
 
-procedure TfrmPublicClubsList.TCJoinClubOk(const AMessage: TMessageItem);
-begin
-  SocketClient.Status;
-end;
-
-procedure TfrmPublicClubsList.TCListClubs(const AMessage: TMessageItem);
+procedure TfrmPublicClubsList.CSRListClubs(const AMessage: TMessageItem);
 var
   rcount: Integer;
   club  : TPB_Club;
