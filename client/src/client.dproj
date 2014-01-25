@@ -197,9 +197,9 @@
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
 			<DCCReference Include="forms\uClubLobbyForm.pas">
 				<Form>frmClubLobby</Form>
-				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeSuspendState.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_ClubJoinReply.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
@@ -350,9 +350,9 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
+					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win64"/>
-					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 				</Deployment>
 				<Platforms>
 					<Platform value="Win64">True</Platform>
