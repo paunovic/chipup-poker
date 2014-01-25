@@ -154,11 +154,10 @@ enum ServerCodes {
 
     srListClubs = 9;
     srStatus = 10;
-	srCreateClub = 11;
-	srJoinClubReply = 15;
+	srCreateClubReply = 11;
+	srJoinClubReply = 12;
+	srLeaveClubReply = 13;
 
-    srLeaveClubOk = 19;
-    srLeaveClubInvalidId = 20;
     srKickPlayerOk = 21;
     srKickPlayerInvalidClubId = 22;
     srKickPlayerInvalidPlayerId = 23;

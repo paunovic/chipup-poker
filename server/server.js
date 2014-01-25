@@ -631,18 +631,18 @@ ClientSocket.prototype.handle = function (code,args) {
 			var pass = params.password;
 			var clubname = params.name;
 			if (clubname.length > sharedconfig.stringSizes.clubname) {
-				this.send(codes.srCreateClub,{status:'csInvalidName'},'Poker.ClubCommandReply');
+				this.send(codes.srCreateClubReply,{status:'csInvalidName'},'Poker.ClubCommandReply');
 				return;
 			}
 			if (pass && (pass.length > sharedconfig.stringSizes.invcode)) {
-				this.send(codes.srCreateClub,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
+				this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
 				return;
 			}
 			// FIXME, dont allow a blank pw on priv clubs
 			allClubs.findOne({name:{$regex:new RegExp('^'+clubname+'$','i')}},function (err,row) {
 				if (row) {
 					this.log('SR_CREATECLUB_NAME_EXISTS',err);
-					this.send(codes.srCreateClub,{status:'csNameExists'},'Poker.ClubCommandReply');
+					this.send(codes.srCreateClubReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 					return;
 				}
 				var doc = {is_private:priv,password:pass,name:clubname, owner:this.userid, chips:100000};
@@ -655,7 +655,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					allUsers.update({_id:this.userid},{$inc:{tokens:-sharedconfig.tokenPrices.club_creation}},function (err,res) {
 						if (err) {
 							this.log('shouldnt happen 012 1',err);
-							this.send(codes.srCreateClub,{status:'csNameExists'},'Poker.ClubCommandReply');
+							this.send(codes.srCreateClubReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 							return;
 						}
 						this.log('dropped tokens',err,res);
@@ -664,11 +664,11 @@ ClientSocket.prototype.handle = function (code,args) {
 							allClubs.insert(doc,function(err,result) {
 								if (err) {
 									this.log('shouldnt happen 012',err);
-									this.send(codes.srCreateClub,{status:'csNameExists'},'Poker.ClubCommandReply');
+									this.send(codes.srCreateClubReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 									return;
 								}
 								var out = makeClubProtobuf(result[0]);
-								this.send(codes.srCreateClub,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
+								this.send(codes.srCreateClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 							}.bind(this));
 						}.bind(this));
 					}.bind(this));
@@ -768,13 +768,13 @@ ClientSocket.prototype.handle = function (code,args) {
 			allClubs.update({seq:clubid},
 				{ $pull:{members:this.userid}},
 				function (err,res) {
-					if (res == 0) this.send(codes.srLeaveClubInvalidId);
+					if (res == 0) this.send(codes.srLeaveClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 					else {
 						// FIXME club
 						allClubs.findOne({seq:clubid},function cb(err,row) {
 							var userlist = [ ];
 							var out = makeClubProtobuf(row,userlist);
-							this.send(codes.srLeaveClubOk,out,'Poker.Club');
+							this.send(codes.srLeaveClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 							this.log('userlist to inform:',userlist);
 							for (var x=0; x<userlist.length; x++) {
 								var user = activeUsers[userlist[x]];
