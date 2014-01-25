@@ -120,7 +120,6 @@ uses
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
-{
   btGiveChips.Top := gbPlayers.Height - btGiveChips.Height - 13;
   btGiveOwnership.Top := btGiveChips.Top;
   btRemovePlayerFromClub.Top := btGiveChips.Top;
@@ -129,7 +128,6 @@ begin
   btNewGame.Top := gbGames.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
   btDeleteGame.Top := btNewGame.Top;
-}
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
