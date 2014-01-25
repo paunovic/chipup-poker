@@ -543,11 +543,21 @@ class DelphiGenerator : public CodeGenerator {
 							,"pname",PrivateFieldName(field)
 							,"subname",type->name());
 					}
+				} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
+					if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        $pname$ := AProtobufReader.readBoolean;\n"
+							"      end;\n"
+							,"name",EnumName(field)
+							,"pname",PrivateFieldName(field));
+					}
 				}
 			}
 			printer.Print(
-				"      else\n"
-				"        AProtobufReader.skipField(tag);\n"
+				"    else\n"
+				"      AProtobufReader.skipField(tag);\n"
 				"    end;\n"
 //				"    tag := AProtobufReader.readTag;\n"
 				"  end;\n"
