@@ -631,18 +631,18 @@ ClientSocket.prototype.handle = function (code,args) {
 			var pass = params.password;
 			var clubname = params.name;
 			if (clubname.length > sharedconfig.stringSizes.clubname) {
-				this.send(codes.srCreateClubInvalidName);
+				this.send(codes.srCreateClub,{status:'csInvalidName'},'Poker.ClubCommandReply');
 				return;
 			}
 			if (pass && (pass.length > sharedconfig.stringSizes.invcode)) {
-				this.send(codes.srCreateClubInvalidCode);
+				this.send(codes.srCreateClub,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
 				return;
 			}
 			// FIXME, dont allow a blank pw on priv clubs
 			allClubs.findOne({name:{$regex:new RegExp('^'+clubname+'$','i')}},function (err,row) {
 				if (row) {
 					this.log('SR_CREATECLUB_NAME_EXISTS',err);
-					this.send(codes.srCreateClubNameExists);
+					this.send(codes.srCreateClub,{status:'csNameExists'},'Poker.ClubCommandReply');
 					return;
 				}
 				var doc = {is_private:priv,password:pass,name:clubname, owner:this.userid, chips:100000};
@@ -655,7 +655,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					allUsers.update({_id:this.userid},{$inc:{tokens:-sharedconfig.tokenPrices.club_creation}},function (err,res) {
 						if (err) {
 							this.log('shouldnt happen 012 1',err);
-							this.send(codes.srCreateClubNameExists);
+							this.send(codes.srCreateClub,{status:'csNameExists'},'Poker.ClubCommandReply');
 							return;
 						}
 						this.log('dropped tokens',err,res);
@@ -664,11 +664,11 @@ ClientSocket.prototype.handle = function (code,args) {
 							allClubs.insert(doc,function(err,result) {
 								if (err) {
 									this.log('shouldnt happen 012',err);
-									this.send(codes.srCreateClubNameExists);
+									this.send(codes.srCreateClub,{status:'csNameExists'},'Poker.ClubCommandReply');
 									return;
 								}
 								var out = makeClubProtobuf(result[0]);
-								this.send(codes.srCreateClubOk,out,'Poker.Club');
+								this.send(codes.srCreateClub,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 							}.bind(this));
 						}.bind(this));
 					}.bind(this));
@@ -682,24 +682,24 @@ ClientSocket.prototype.handle = function (code,args) {
 			this.log('join1',clubseq,pw);
 			allClubs.findOne({seq:clubseq},function (err,item) {
 				if (!item) {
-					this.send(codes.srJoinClubReply,{status:'cjsInvalidClubId'},'Poker.ClubJoinReply');
+					this.send(codes.srJoinClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 					return;
 				}
 				if (item.owner.equals(this.userid)) {
-					this.send(codes.srJoinClubReply,{status:'cjsAlreadyMember'},'Poker.ClubJoinReply');
+					this.send(codes.srJoinClubReply,{status:'csAlreadyMember'},'Poker.ClubCommandReply');
 					return;
 				}
 				if (item.members) {
 					for (var x=0; x<item.members.length; x++) {
 						if (item.members[x].equals(this.userid)) {
 							this.log('already a member');
-							this.send(codes.srJoinClubReply,{status:'cjsAlreadyMember'},'Poker.ClubJoinReply');
+							this.send(codes.srJoinClubReply,{status:'csAlreadyMember'},'Poker.ClubCommandReply');
 							return;
 						}
 					}
 				}
 				if (item.is_private && (pw != item.password)) {
-					this.send(codes.srJoinClubReply,{status:'cjsBadPassword'},'Poker.ClubJoinReply');
+					this.send(codes.srJoinClubReply,{status:'csBadPassword'},'Poker.ClubCommandReply');
 					return;
 				}
 				allClubs.update({_id:item._id},
@@ -714,8 +714,8 @@ ClientSocket.prototype.handle = function (code,args) {
 								}
 								var userlist = [ row.owner ];
 								var clubinfo = makeClubProtobuf(row,userlist);
-								var joininfo = {status:'cjsSuccess',club:clubinfo,games:games};
-								this.send(codes.srJoinClubReply,joininfo,'Poker.ClubJoinReply');
+								var joininfo = {status:'csSuccess',club:clubinfo,games:games};
+								this.send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
 								this.log('userlist to inform:',userlist);
 								// FIXME, dont send to current user
 								for (var x=0; x<userlist.length; x++) {

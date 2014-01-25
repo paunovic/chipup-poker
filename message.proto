@@ -154,10 +154,7 @@ enum ServerCodes {
 
     srListClubs = 9;
     srStatus = 10;
-    srCreateClubOk = 11;
-    srCreateClubNameExists = 12;
-    srCreateClubInvalidName = 13;
-    srCreateClubInvalidCode = 14;
+	srCreateClub = 11;
 	srJoinClubReply = 15;
 
     srLeaveClubOk = 19;
@@ -260,17 +257,6 @@ message ChangeSuspendState {
 	required bytes player_mongo_id = 3;
 	required bool suspended = 2;
 }
-message ClubJoinReply {
-	enum ClubJoinStatus {
-		cjsSuccess = 0;
-		cjsInvalidClubId = 1;
-		cjsAlreadyMember = 2;
-		cjsBadPassword = 3;
-	}
-	required ClubJoinStatus status = 1;
-	optional Club club = 2;
-	repeated Game games = 3;
-}
 message RegisterReply {
 	enum RegisterStatus {
 		regSuccess = 0;
@@ -280,4 +266,18 @@ message RegisterReply {
 		regInvalidName = 4;
 	}
 	required RegisterStatus status = 1;
+}
+message ClubCommandReply {
+	enum ClubStatus {
+		csSuccess = 0;
+		csInvalidName = 1;
+		csInvalidPassword = 2;
+		csNameExists = 3;
+		csInvalidClubId = 4;
+		csAlreadyMember = 5;
+		csBadPassword = 6;
+	}
+	required ClubStatus status = 1;
+	optional Club club = 2;
+	repeated Game games = 3;
 }
