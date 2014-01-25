@@ -28,7 +28,6 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     procedure CSRChangePasswordOk(const AMessage: TMessageItem);
-    procedure CSRChangePasswordInvalid(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -70,8 +69,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srChangePasswordOk, CSRChangePasswordOk),
-                            TServerMessageCallback.Create(srChangePasswordInvalidPassword, CSRChangePasswordInvalid)
+                            TServerMessageCallback.Create(srChangePasswordOk, CSRChangePasswordOk)
                           ]
                         );
     end;
@@ -124,13 +122,6 @@ begin
 
   acOK.Enabled := FALSE;
   SocketClient.ChangePassword(edNewPassword.Text);
-end;
-
-procedure TfrmChangePassword.CSRChangePasswordInvalid(const AMessage: TMessageItem);
-begin
-  MessageDlg('Invalid password', mtError, [mbOK], 0);
-  edNewPassword.SetFocus;
-  acOK.Enabled := TRUE;
 end;
 
 procedure TfrmChangePassword.CSRChangePasswordOk(const AMessage: TMessageItem);

@@ -15,23 +15,16 @@ type
     GameName   : Integer;
   end;
 
-  TTokenPrices = record
-    ClubCreation     : Integer;
-    ClubChangeDetails: Integer;
-  end;
-
   TServerSettings = class
   private
     FEmailConfirmationExpiration: Integer;
     FStringLengths              : TStringLengths;
-    FTokenPrices                : TTokenPrices;
 
   public
     procedure ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 
     property EmailConfirmationExpiration: Integer read FEmailConfirmationExpiration;
     property StringLengths: TStringLengths read FStringLengths;
-    property TokenPrices: TTokenPrices read FTokenPrices;
 
   end;
 
@@ -48,9 +41,6 @@ begin
   FStringLengths.ClubName := AHelloReply.StringSizes.ClubName;
   FStringLengths.ClubInvCode := AHelloReply.StringSizes.InvCode;
   FStringLengths.GameName := AHelloReply.StringSizes.GameName;
-
-  FTokenPrices.ClubCreation := AHelloReply.TokenPrices.ClubCreation;
-  FTokenPrices.ClubChangeDetails := AHelloReply.TokenPrices.ClubChangeDetails;
 end;
 
 end.

@@ -24,7 +24,6 @@ type
     btCancel: TcxButton;
     acCancel: TAction;
     procedure FormShow(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
@@ -48,11 +47,6 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uMessageContainer, uServerMessageCallback, uPB_ClubCommandReply;
 
-
-procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
-begin
-  dmMain.MakeTokenCostMessage(lbInfo, 'Changing club details', dmMain.ServerSettings.TokenPrices.ClubChangeDetails);
-end;
 
 procedure TfrmChangeClubDetails.FormDestroy(Sender: TObject);
 begin
@@ -100,7 +94,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srClubDetailsChangeReply, CSRClubDetailsChange)
+                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange)
                           ]
                         );
     end;

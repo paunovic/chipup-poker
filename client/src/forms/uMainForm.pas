@@ -28,13 +28,10 @@ type
     gridJoinedClubsId: TcxGridColumn;
     acShowJoinClubForm: TAction;
     SkinController: TdxSkinController;
-    lbUserInfo: TcxLabel;
     mmiSeparator1: TMenuItem;
-    mmiBuyTokens: TMenuItem;
     mmiChangeEMail: TMenuItem;
     mmiChangePassword: TMenuItem;
     mmiChangeAvatar: TMenuItem;
-    acBuyTokens: TAction;
     mmiBuyChips: TMenuItem;
     acBuyChips: TAction;
     acShowChangeEMailForm: TAction;
@@ -65,7 +62,6 @@ type
     procedure acShowCreateClubFormExecute(Sender: TObject);
     procedure acShowJoinClubFormExecute(Sender: TObject);
     procedure gridJoinedClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
-    procedure acBuyTokensExecute(Sender: TObject);
     procedure acBuyChipsExecute(Sender: TObject);
     procedure acShowChangeEMailFormExecute(Sender: TObject);
     procedure acShowChangePasswordFormExecute(Sender: TObject);
@@ -89,8 +85,10 @@ type
 
     procedure CSRLeaveClub(const AMessage: TMessageItem);
     procedure CSRClubDetailsChange(const AMessage: TMessageItem);
-    procedure CSRStatusReply(const AMessage: TMessageItem);
+    procedure CSRStatus(const AMessage: TMessageItem);
     procedure CSRCreateClub(const AMessage: TMessageItem);
+    procedure CSRJoinClub(const AMessage: TMessageItem);
+    procedure CSRKickPlayer(const AMessage: TMessageItem);
 
     procedure CSRLogout(const AMessage: TMessageItem);
     procedure CSESecondaryLoginDetected(const AMessage: TMessageItem);
@@ -160,10 +158,12 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srStatus, CSRStatusReply),
+                            TServerMessageCallback.Create(srStatus, CSRStatus),
                             TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                            TServerMessageCallback.Create(srClubDetailsChangeReply, CSRClubDetailsChange),
+                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
                             TServerMessageCallback.Create(srCreateClubReply, CSRCreateClub),
+                            TServerMessageCallback.Create(srJoinClubReply, CSRJoinClub),
+                            TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),
                             TServerMessageCallback.Create(srLogout, CSRLogout),
                             TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
@@ -174,7 +174,6 @@ begin
                             TServerMessageCallback.Create(seClubChange, CSREClubOperation),
                             TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srKickPlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
                             TServerMessageCallback.Create(srClubTransferChipsOk, CSREClubOperation),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
@@ -198,7 +197,6 @@ end;
 
 procedure TfrmChipUpMain.DoLogout;
 begin
-  lbUserInfo.Caption := '';
   gridJoinedClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
@@ -256,11 +254,6 @@ end;
 procedure TfrmChipUpMain.acBuyChipsExecute(Sender: TObject);
 begin
   dmMain.OpenBuyChipsLink;
-end;
-
-procedure TfrmChipUpMain.acBuyTokensExecute(Sender: TObject);
-begin
-  dmMain.OpenBuyTokensLink;
 end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
@@ -324,8 +317,6 @@ end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
 begin
-  lbUserInfo.Caption := Format('You have %d tokens', [dmMain.SelfInfo.Tokens]);
-
   Caption := Format('ChipUP Poker - Logged in as %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
     Caption := Caption + ' (account confirmation pending)';
@@ -460,7 +451,7 @@ begin
   ShowLoginForm;
 end;
 
-procedure TfrmChipUpMain.CSRStatusReply(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSRStatus(const AMessage: TMessageItem);
 var
   pbstatus: TPB_StatusReply;
 begin
@@ -470,65 +461,6 @@ begin
   dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   dmMain.Players.ParseStatus(pbstatus);
   ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSRLeaveClub(const AMessage: TMessageItem);
-var
-  pbreply: TPB_ClubCommandReply;
-  index  : Integer;
-begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
-
-  case pbreply.Status of
-    csSuccess: begin
-      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
-      if index <> -1 then
-        dmMain.SelfInfo.Clubs.Delete(index);
-      ConfigureGUI;
-    end;
-    csInvalidClubId: ;
-  else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
-  end;
-end;
-
-procedure TfrmChipUpMain.CSRClubDetailsChange(const AMessage: TMessageItem);
-var
-  pbreply: TPB_ClubCommandReply;
-  index  : Integer;
-begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
-
-  case pbreply.Status of
-    csSuccess: begin
-      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
-      if index <> -1 then
-        dmMain.SelfInfo.Clubs[index].UpdateFromProtobufObject(pbreply.Club);
-      ConfigureGUI;
-    end;
-    csNameExists: ;
-  else
-    {$IFDEF DEBUG} DebugLn(Format('CSRClubDetailsChange: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
-  end;
-end;
-
-procedure TfrmChipUpMain.CSRCreateClub(const AMessage: TMessageItem);
-var
-  pbreply: TPB_ClubCommandReply;
-begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
-
-  case pbreply.Status of
-    csSuccess: begin
-      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
-      ConfigureGUI;
-    end;
-    csInvalidName: ;
-    csInvalidPassword: ;
-    csNameExists: ;
-  else
-    {$IFDEF DEBUG} DebugLn(Format('CSRCreateClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
-  end;
 end;
 
 procedure TfrmChipUpMain.CSRLogout(const AMessage: TMessageItem);
@@ -619,5 +551,80 @@ begin
   ConfigureGUI;
 end;
 
+procedure TfrmChipUpMain.CSRLeaveClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+  index  : Integer;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
+      if index <> -1 then
+        dmMain.SelfInfo.Clubs.Delete(index);
+      ConfigureGUI;
+    end;
+  end;
+end;
+
+procedure TfrmChipUpMain.CSRClubDetailsChange(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+  index  : Integer;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
+      if index <> -1 then
+        dmMain.SelfInfo.Clubs[index].UpdateFromProtobufObject(pbreply.Club);
+      ConfigureGUI;
+    end;
+  end;
+end;
+
+procedure TfrmChipUpMain.CSRCreateClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
+      ConfigureGUI;
+    end;
+  end;
+end;
+
+procedure TfrmChipUpMain.CSRJoinClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
+      ConfigureGUI;
+    end;
+  end;
+end;
+
+procedure TfrmChipUpMain.CSRKickPlayer(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: begin
+      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
+      ConfigureGUI;
+    end;
+  end;
+end;
 
 end.

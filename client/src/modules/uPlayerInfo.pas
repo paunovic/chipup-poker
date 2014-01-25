@@ -13,7 +13,6 @@ type
     FNick    : String;
     FEMail   : String;
     FPassword: String;
-    FTokens  : Integer;
     FBalance : Integer;
     FAuthed  : Boolean;
     FAvatarId: TBytes;
@@ -30,7 +29,6 @@ type
     property Nick    : String read FNick write FNick;
     property Password: String read FPassword write FPassword;
     property EMail   : String read FEMail write FEMail;
-    property Tokens  : Integer read FTokens write FTokens;
     property Balance : Integer read FBalance write FBalance;
     property Authed  : Boolean read FAuthed write FAuthed;
     property AvatarId: TBytes read FAvatarId write FAvatarId;
@@ -81,7 +79,6 @@ begin
   FId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
   FNick := AStatusReply.Self.DisplayName;
-  FTokens := AStatusReply.Self.Tokens;
   FAuthed := AStatusReply.Self.Authed;
   FAvatarId := AStatusReply.Self.Avatar;
   FBalance := AStatusReply.Self.Chips;

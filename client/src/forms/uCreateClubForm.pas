@@ -48,7 +48,6 @@ uses
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
 begin
-  dmMain.MakeTokenCostMessage(lbsInfo, 'Club creation', dmMain.ServerSettings.TokenPrices.ClubCreation);
 
   edClubName.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubName;
   edClubCode.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubInvCode;

@@ -32,7 +32,6 @@ type
     FPlayer: TPlayerInfo;
 
     procedure CSRClubTransferChipsOk(const AMessage: TMessageItem);
-    procedure CSRClubTransferChipsInvalidAmount(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -71,8 +70,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srClubTransferChipsOk, CSRClubTransferChipsOk),
-                            TServerMessageCallback.Create(srClubTransferChipsInvalidAmount, CSRClubTransferChipsInvalidAmount)
+                            TServerMessageCallback.Create(srClubTransferChipsOk, CSRClubTransferChipsOk)
                           ]
                         );
     end;
@@ -115,13 +113,14 @@ end;
 
 procedure TfrmGiveChips.acOKExecute(Sender: TObject);
 begin
-  SocketClient.TransferChips(FClub.Id, FPlayer.Id, seChipAmount.Value);
-end;
+  if (seChipAmount.Value <= 0) or (seChipAmount.Value > dmMain.SelfInfo.Balance) then
+  begin
+    MessageDlg('Invalid chip amount', mtError, [mbOK], 0);
+    seChipAmount.SetFocus;
+    Exit;
+  end;
 
-procedure TfrmGiveChips.CSRClubTransferChipsInvalidAmount(const AMessage: TMessageItem);
-begin
-  MessageDlg('Invalid chip amount to transfer', mtError, [mbOK], 0);
-  seChipAmount.SetFocus;
+  SocketClient.TransferChips(FClub.Id, FPlayer.Id, seChipAmount.Value);
 end;
 
 procedure TfrmGiveChips.CSRClubTransferChipsOk(const AMessage: TMessageItem);
