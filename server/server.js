@@ -745,13 +745,13 @@ ClientSocket.prototype.handle = function (code,args) {
 					{ $pull:{members:userid}},
 					function (err,res) {
 						if (res == 0) {
-							this.send(codes.srKickPlayerInvalidClubId);
+							this.send(codes.srKickPlayerReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 							return;
 						}
 						allClubs.findOne({_id:club._id},function cb(err,row) {
 							var userlist = [ userid ];
 							var out = makeClubProtobuf(row,userlist);
-							this.send(codes.srKickPlayerOk,out,'Poker.Club');
+							this.send(codes.srKickPlayerReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 							this.log('userlist to inform:',userlist);
 							for (var x=0; x<userlist.length; x++) {
 								var user = activeUsers[userlist[x]];

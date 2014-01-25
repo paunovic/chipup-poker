@@ -161,10 +161,8 @@ enum ServerCodes {
 	srLogout = 8;
 	srListClubs = 9;
 	srStatus = 10;
+	srKickPlayerReply = 11;
 
-    srKickPlayerOk = 21;
-    srKickPlayerInvalidClubId = 22;
-    srKickPlayerInvalidPlayerId = 23;
     srOwnershipGiveAwayNotOwner = 24;
     srOwnershipGiveAwayInvalidPlayerId = 25;
     srOwnershipGiveAwayInvalidClubId = 26;
