@@ -449,15 +449,15 @@ ClientSocket.prototype.handle = function (code,args) {
 			doc.avatar = "2vjw2PHZKtTC1oAiXpF8dnqKh++XT5biqzainRgOcuo=";
 			if (doc.email.indexOf('@') < 1) {
 				console.log('email invalid',doc.email.indexOf('@'),doc.email);
-				this.send(codes.srRegisterInvalidMail);
+				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
 			if (doc.email.length > sharedconfig.stringSizes.email) {
-				this.send(codes.srRegisterInvalidMail);
+				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
 			if (doc.displayname.length > sharedconfig.stringSizes.username) {
-				this.send(codes.srRegisterInvalidMail);
+				this.send(codes.srRegisterReply,{status:'regInvalidName'},'Poker.RegisterReply');
 				return;
 			}
 			if (params.password.length > sharedconfig.stringSizes.password) {
@@ -478,11 +478,11 @@ ClientSocket.prototype.handle = function (code,args) {
 					if (row) {
 						console.log('found it',row);
 						console.log('error, dup!');
-						this.send(codes.srRegisterDuplicateMail);
+						this.send(codes.srRegisterReply,{status:'regDuplicateEmail'},'Poker.RegisterReply');
 					} else {
 						allUsers.findOne({displayname:params.displayName},function (err,row) {
 							if (row) {
-							this.send(codes.srRegisterDuplicateUsername);
+							this.send(codes.srRegisterReply,{status:'regDupUsername'},'Poker.RegisterReply');
 							} else {
 								allUsers.insert(doc,function(err,result) {
 									if (err) {
@@ -497,7 +497,7 @@ ClientSocket.prototype.handle = function (code,args) {
 										if (err) {
 											if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
 												this.log('invalid email server');
-												this.send(codes.srRegisterInvalidMail);
+												this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 												allUsers.remove({_id:result[0]._id},function (err,res) {
 													this.log('delete done',err,res,result);
 												}.bind(this));
@@ -507,7 +507,7 @@ ClientSocket.prototype.handle = function (code,args) {
 											this.reply(0,"internal error");
 											return;
 										}
-										this.send(codes.srRegisterOk);
+										this.send(codes.srRegisterReply,{status:'regWorked'},'Poker.RegisterReply');
 									}.bind(this));
 								}.bind(this));
 							}
@@ -720,6 +720,7 @@ ClientSocket.prototype.handle = function (code,args) {
 								// FIXME, dont send to current user
 								for (var x=0; x<userlist.length; x++) {
 									var user = activeUsers[userlist[x]];
+									if (user == this) continue;
 									if (user) user.send(codes.seClubChange,clubinfo,'Poker.Club');
 								}
 							}.bind(this));

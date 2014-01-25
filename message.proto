@@ -150,10 +150,8 @@ enum ServerCodes {
     srLoginOk = 2;
     srInvalidLogin = 3;
     srLogout = 4;
-    srRegisterOk = 5;
-    srRegisterDuplicateMail = 6;
-    srRegisterDuplicateUsername = 7;
-    srRegisterInvalidMail = 8;
+	srRegisterReply = 5;
+
     srListClubs = 9;
     srStatus = 10;
     srCreateClubOk = 11;
@@ -272,4 +270,14 @@ message ClubJoinReply {
 	required ClubJoinStatusCode status = 1;
 	optional Club club = 2;
 	repeated Game games = 3;
+}
+message RegisterReply {
+	enum RegisterStatus {
+		regWorked = 0;
+		regDuplicateEmail = 1;
+		regDupUsername = 2;
+		regInvalidEmail = 3;
+		regInvalidName = 4;
+	}
+	required RegisterStatus status = 1;
 }
