@@ -23,9 +23,7 @@ var protoreader = require('./protoreader');
 protoreader.init(pb);
 
 var domain = "http://chipuppoker.com/";
-var sharedconfig = {tokenPrices:{},stringSizes:{}};
-sharedconfig.tokenPrices.club_change_details = 20;
-sharedconfig.tokenPrices.club_creation = 50;
+var sharedconfig = {stringSizes:{}};
 sharedconfig.stringSizes.email = 200
 sharedconfig.stringSizes.password = 32
 sharedconfig.stringSizes.clubname = 64
@@ -969,7 +967,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			// FIXME return 037 if email already exists
 			if (newemail.indexOf('@') < 1) {
 				console.log('email invalid',doc.email.indexOf('@'),doc.email);
-				this.send(codes.srChangeMailInvalidMail);
+				this.reply(0,'invalid email');
 				return;
 			}
 			allUsers.findOne({email:newemail},function (err,dup) {
@@ -1000,7 +998,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scChangePassword:
 			var params = pb.Parse(args,'Poker.ChangePasswordParams');
 			if (params.new_password.length > sharedconfig.stringSizes.password) {
-				this.send(codes.srChangePasswordInvalidPassword);
+				this.reply(0,'password too long');
 				return;
 			}
 			deck.getRandom(16,function (salt) {

@@ -8,11 +8,6 @@ message RpcMessage {
 	optional int32 Token = 3 [ default = 0];
 }
 
-message TokenPrices {
-	required int32 club_change_details = 1;
-	required int32 club_creation = 2;
-}
-
 message StringSizes {
 	required int32 email = 1;
 	required int32 password = 2;
@@ -23,7 +18,6 @@ message StringSizes {
 }
 
 message HelloReply {
-	required TokenPrices tokenPrices = 1;
 	required StringSizes stringSizes = 2;
 	required int32 ChangeExpireTime = 3;
 	required int32 ForgotExpireTime = 4;
@@ -171,13 +165,12 @@ enum ServerCodes {
     srClubDisbandOk = 30;
     srClubTransferChipsOk = 31;
     srClubTransferChipsInvalidAmount = 32;
-    srCreateClubNoTokens = 33;
 
     srChangeMailOk = 35;
-    srChangeMailInvalidMail = 36;
+
     srChangeMailDuplicateMail = 37;
     srChangePasswordOk = 38;
-    srChangePasswordInvalidPassword = 39;
+
     srChangeAvatarOk = 40;
     srChangeAvatarInvalidId = 41;
     srCreateGameOk = 42;
