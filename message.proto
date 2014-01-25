@@ -264,3 +264,14 @@ message ChangeSuspendState {
 	required bytes player_mongo_id = 3;
 	required bool suspended = 2;
 }
+message ClubJoinReply {
+	enum ClubJoinStatusCode {
+		worked = 0;
+		invalidClubId = 1;
+		alreadyMember = 2;
+		badPassword = 3;
+	}
+	required ClubJoinStatusCode status = 1;
+	optional Club club = 2;
+	repeated Game games = 3;
+}
