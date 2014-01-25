@@ -1028,7 +1028,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					return;
 				}
 				if (!row) {
-					this.send(codes.srChangeAvatarInvalidId);
+					this.send(codes.srSetAvatarReply,{status:'saNotFound'},'Poker.SetAvatarReply');
 					return;
 				}
 				allUsers.update({_id:this.userid},{$set:{avatar:id}},function (err,res) {
@@ -1037,7 +1037,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						return;
 					}
 					// FIXME, inform other users
-					this.send(codes.srChangeAvatarOk);
+					this.send(codes.srSetAvatarReply,{status:'saSuccess'},'Poker.SetAvatarReply');
 				}.bind(this));
 			}.bind(this));
 			break;

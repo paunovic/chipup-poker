@@ -125,6 +125,13 @@ message ChangePasswordParams {
 message SetAvatarParams {
 	required bytes avatar_id = 1;
 }
+message SetAvatarReply {
+	enum SetAvatarStatus {
+		saSuccess = 1;
+		saNotFound = 2;
+	}
+	required SetAvatarStatus status = 1;
+}
 
 message ChatEvent {
 	enum EventType {
@@ -156,6 +163,7 @@ enum ServerCodes {
 	srListClubs = 9;
 	srStatus = 10;
 	srKickPlayerReply = 11;
+	srSetAvatarReply = 12;
 
     srOwnershipGiveAwayNotOwner = 24;
     srOwnershipGiveAwayInvalidPlayerId = 25;
@@ -171,8 +179,6 @@ enum ServerCodes {
     srChangeMailDuplicateMail = 37;
     srChangePasswordOk = 38;
 
-    srChangeAvatarOk = 40;
-    srChangeAvatarInvalidId = 41;
     srCreateGameOk = 42;
     srDeleteGameOk = 43;
     srEditGameOk = 44;
