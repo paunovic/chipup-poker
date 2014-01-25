@@ -78,6 +78,7 @@ type
     procedure acReinstatePlayerExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure acLeaveClubExecute(Sender: TObject);
+    procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
   private
     FClubId: Integer;
     FSelectedPlayerId: TBytes;
@@ -116,6 +117,7 @@ uses
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
+{
   btGiveChips.Top := gbPlayers.Height - btGiveChips.Height - 13;
   btGiveOwnership.Top := btGiveChips.Top;
   btRemovePlayerFromClub.Top := btGiveChips.Top;
@@ -124,6 +126,7 @@ begin
   btNewGame.Top := gbGames.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
   btDeleteGame.Top := btNewGame.Top;
+}
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
@@ -207,20 +210,34 @@ begin
     admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
 
     btChangeClubDetails.Visible := admin_visible;
+    acShowClubChangeDetailsForm.Enabled := admin_visible;
     btCloseClub.Visible := admin_visible;
+    acCloseClub.Enabled := admin_visible;
     btGiveChips.Visible := admin_visible;
+    acGiveChips.Enabled := admin_visible;
     btGiveOwnership.Visible := admin_visible;
+    acGiveOwnership.Enabled := admin_visible;
     btRemovePlayerFromClub.Visible := admin_visible;
+    acRemovePlayer.Enabled := admin_visible;
     btSuspendUnsuspend.Visible := admin_visible;
+    acSuspendPlayer.Enabled := admin_visible;
+    acReinstatePlayer.Enabled := admin_visible;
     btNewGame.Visible := admin_visible;
+    acShowCreateGameForm.Enabled := admin_visible;
     btDeleteGame.Visible := admin_visible;
+    acDeleteGame.Enabled := admin_visible;
     btEditGame.Visible := admin_visible;
+    acShowEditGameForm.Enabled := admin_visible;
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
+    acLeaveClub.Enabled := not admin_visible;
     if admin_visible then
     begin
       gridPlayersList.Align := alTop;
       gridGames.Align := alTop;
+
+      gridPlayersList.Height := btSuspendUnsuspend.Top - 5;
+      gridGames.Height := btNewGame.Top - 5;
     end
     else
     begin
@@ -243,6 +260,11 @@ begin
   pcTabs.ActivePage := tsClubHome;
 end;
 
+procedure TfrmClubLobby.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  acShowEditGameForm.Execute;
+end;
+
 procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex       : Integer;
@@ -258,7 +280,7 @@ begin
   else
     FSelectedGameId := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
 
-  actions_enabled := Length(FSelectedGameId) > 0;
+  actions_enabled := (Length(FSelectedGameId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
   acDeleteGame.Enabled := actions_enabled;
   acShowEditGameForm.Enabled := actions_enabled;
 end;
