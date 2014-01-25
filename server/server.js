@@ -507,7 +507,7 @@ ClientSocket.prototype.handle = function (code,args) {
 											this.reply(0,"internal error");
 											return;
 										}
-										this.send(codes.srRegisterReply,{status:'regWorked'},'Poker.RegisterReply');
+										this.send(codes.srRegisterReply,{status:'regSuccess'},'Poker.RegisterReply');
 									}.bind(this));
 								}.bind(this));
 							}
@@ -682,24 +682,24 @@ ClientSocket.prototype.handle = function (code,args) {
 			this.log('join1',clubseq,pw);
 			allClubs.findOne({seq:clubseq},function (err,item) {
 				if (!item) {
-					this.send(codes.srJoinClubReply,{status:'invalidClubId'},'Poker.ClubJoinReply');
+					this.send(codes.srJoinClubReply,{status:'cjsInvalidClubId'},'Poker.ClubJoinReply');
 					return;
 				}
 				if (item.owner.equals(this.userid)) {
-					this.send(codes.srJoinClubReply,{status:'alreadyMember'},'Poker.ClubJoinReply');
+					this.send(codes.srJoinClubReply,{status:'cjsAlreadyMember'},'Poker.ClubJoinReply');
 					return;
 				}
 				if (item.members) {
 					for (var x=0; x<item.members.length; x++) {
 						if (item.members[x].equals(this.userid)) {
 							this.log('already a member');
-							this.send(codes.srJoinClubReply,{status:'alreadyMember'},'Poker.ClubJoinReply');
+							this.send(codes.srJoinClubReply,{status:'cjsAlreadyMember'},'Poker.ClubJoinReply');
 							return;
 						}
 					}
 				}
 				if (item.is_private && (pw != item.password)) {
-					this.send(codes.srJoinClubReply,{status:'badPassword'},'Poker.ClubJoinReply');
+					this.send(codes.srJoinClubReply,{status:'cjsBadPassword'},'Poker.ClubJoinReply');
 					return;
 				}
 				allClubs.update({_id:item._id},
@@ -714,7 +714,7 @@ ClientSocket.prototype.handle = function (code,args) {
 								}
 								var userlist = [ row.owner ];
 								var clubinfo = makeClubProtobuf(row,userlist);
-								var joininfo = {status:'worked',club:clubinfo,games:games};
+								var joininfo = {status:'cjsSuccess',club:clubinfo,games:games};
 								this.send(codes.srJoinClubReply,joininfo,'Poker.ClubJoinReply');
 								this.log('userlist to inform:',userlist);
 								// FIXME, dont send to current user

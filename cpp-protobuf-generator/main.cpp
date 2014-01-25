@@ -284,7 +284,7 @@ class DelphiGenerator : public CodeGenerator {
 					//cerr << value->name() << " = " << value->number() << "\n";
 					char hack[10];
 					snprintf(hack,9,"%d",value->number());
-					printer.Print("ce$name$ = $hack$","name",value->name(),"hack",hack);
+					printer.Print("$name$ = $hack$","name",value->name(),"hack",hack);
 				}
 				printer.Print(
 					");\n");

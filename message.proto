@@ -261,19 +261,19 @@ message ChangeSuspendState {
 	required bool suspended = 2;
 }
 message ClubJoinReply {
-	enum ClubJoinStatusCode {
-		worked = 0;
-		invalidClubId = 1;
-		alreadyMember = 2;
-		badPassword = 3;
+	enum ClubJoinStatus {
+		cjsSuccess = 0;
+		cjsInvalidClubId = 1;
+		cjsAlreadyMember = 2;
+		cjsBadPassword = 3;
 	}
-	required ClubJoinStatusCode status = 1;
+	required ClubJoinStatus status = 1;
 	optional Club club = 2;
 	repeated Game games = 3;
 }
 message RegisterReply {
 	enum RegisterStatus {
-		regWorked = 0;
+		regSuccess = 0;
 		regDuplicateEmail = 1;
 		regDupUsername = 2;
 		regInvalidEmail = 3;
