@@ -45,6 +45,11 @@ message ForgotPasswordParams {
 }
 
 message LoginReply {
+	enum LoginStatus {
+		lrSuccess = 0;
+		lrInvalid = 1;
+	}
+	required LoginStatus status = 1;
 }
 
 message Club {
@@ -145,18 +150,17 @@ message ChatMessage {
 }
 
 enum ServerCodes {
-    srNotImplemented = 0;
-    srHello = 1;
-    srLoginOk = 2;
-    srInvalidLogin = 3;
-    srLogout = 4;
-	srRegisterReply = 5;
-
-    srListClubs = 9;
-    srStatus = 10;
-	srCreateClubReply = 11;
-	srJoinClubReply = 12;
-	srLeaveClubReply = 13;
+	srNotImplemented = 0;
+	srHello = 1;
+	srLoginReply = 2;
+	srRegisterReply = 3;
+	srCreateClubReply = 41;
+	srJoinClubReply = 5;
+	srLeaveClubReply = 6;
+	srClubDetailsChangeReply = 7;
+	srLogout = 8;
+	srListClubs = 9;
+	srStatus = 10;
 
     srKickPlayerOk = 21;
     srKickPlayerInvalidClubId = 22;
@@ -165,13 +169,12 @@ enum ServerCodes {
     srOwnershipGiveAwayInvalidPlayerId = 25;
     srOwnershipGiveAwayInvalidClubId = 26;
     srOwnershipGiveAwayOk = 27;
-    srClubDetailsChangeOk = 28;
-    srClubDetailsClubnameExists = 29;
+
     srClubDisbandOk = 30;
     srClubTransferChipsOk = 31;
     srClubTransferChipsInvalidAmount = 32;
     srCreateClubNoTokens = 33;
-    srClubDetailsChangeNoTokens = 34;
+
     srChangeMailOk = 35;
     srChangeMailInvalidMail = 36;
     srChangeMailDuplicateMail = 37;

@@ -328,11 +328,11 @@ ClientSocket.prototype.doLogin = function doLogin(row,password) {
 			this.state = 2;
 			this.userid = row._id;
 			this.nick = row.displayname;
-			this.send(codes.srLoginOk);
+			this.send(codes.srLoginReply,{status:'lrSuccess'},'Poker.LoginReply');
 			this.log('sucessfully logged in with salt');
 			activeUsers[row._id] = this;
 		} else {
-			this.send(codes.srInvalidLogin);
+			this.send(codes.srLoginReply,{status:'lrInvalid'},'Poker.LoginReply');
 		}
 	} else if (row.password == password) {
 		var oldconn = activeUsers[row._id];
@@ -342,11 +342,11 @@ ClientSocket.prototype.doLogin = function doLogin(row,password) {
 		this.state = 2;
 		this.userid = row._id;
 		this.nick = row.displayname;
-		this.send(codes.srLoginOk);
+		this.send(codes.srLoginReply,{status:'lrSuccess'},'Poker.LoginReply'
 		this.log('sucessfully logged in');
 		activeUsers[row._id] = this;
 	} else {
-		this.send(codes.srInvalidLogin);
+		this.send(codes.srLoginReply,{status:'lrInvalid'},'Poker.LoginReply');
 	}
 }
 ClientSocket.prototype.logout = function () {
@@ -424,7 +424,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							}.bind(this));
 							return;
 						} else {
-							this.send(codes.srInvalidLogin);
+							this.send(codes.srLoginReply,{status:'lrInvalid'},'Poker.LoginReply');
 						}
 						return;
 					}
@@ -432,7 +432,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				} else {
 					allUsers.findOne({displayname:params.username},function (err,row) {
 						if (!row) {
-							this.send(codes.srInvalidLogin);
+							this.send(codes.srLoginReply,{status:'lrInvalid'},'Poker.LoginReply');
 							return;
 						}
 						this.doLogin(row,params.password);
@@ -844,7 +844,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					}
 					allClubs.findOne({name:{$regex:new RegExp('^'+params.name+'$','i')}},function (err,row) {
 						if (row) {
-							this.send(codes.srClubDetailsClubnameExists);
+							this.send(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 						} else finish();
 					}.bind(this));
 					autofinish = false;
@@ -868,13 +868,13 @@ ClientSocket.prototype.handle = function (code,args) {
 						allClubs.update({_id:club._id},mods,function (err,ret) {
 							this.log('detail update',clubseq,params,mods,err,ret);
 							if (err) {
-								this.reply(codes.srClubDetailsClubnameExists,err.err);
+								this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 							} else {
 								// FIXME club
 								allClubs.findOne({_id:club._id},function cb(err,row) {
 									var userlist = [ ];
 									var out = makeClubProtobuf(row,userlist);
-									this.send(codes.srClubDetailsChangeOk,out,'Poker.Club');
+									this.send(codes.srChangeClubDetailsReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 									this.log('userlist to inform:',userlist);
 									for (var x=0; x<userlist.length; x++) {
 										var user = activeUsers[userlist[x]];
