@@ -160,10 +160,8 @@ enum ServerCodes {
     srCreateClubNameExists = 12;
     srCreateClubInvalidName = 13;
     srCreateClubInvalidCode = 14;
-    srJoinClubOk = 15;
-    srJoinClubInvalidId = 16;
-    srJoinClubInvalidCode = 17;
-    srJoinClubAlreadyMember = 18;
+	srJoinClubReply = 15;
+
     srLeaveClubOk = 19;
     srLeaveClubInvalidId = 20;
     srKickPlayerOk = 21;
