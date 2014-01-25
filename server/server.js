@@ -932,7 +932,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.log('attempted to transfer while not owner');
 					return;
 				}
-				if (club.chips < chips) {
+				/*if (club.chips < chips) {
 					this.send(codes.srClubTransferChipsInvalidAmount);
 					return;
 				}
@@ -940,9 +940,9 @@ ClientSocket.prototype.handle = function (code,args) {
 				if (chips > 2000) {
 					this.send(codes.srClubTransferChipsInvalidAmount);
 					return;
-				}
+				}*/
 				if (chips < 1) {
-					this.send(codes.srClubTransferChipsInvalidAmount);
+					this.reply(0,'error, sending negative');
 					return;
 				}
 				allUsers.update({_id:userid},

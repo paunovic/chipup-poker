@@ -173,7 +173,6 @@ enum ServerCodes {
 
     srClubDisbandOk = 30;
     srClubTransferChipsOk = 31;
-    srClubTransferChipsInvalidAmount = 32;
 
 
     srChangePasswordOk = 38;
