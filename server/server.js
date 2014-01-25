@@ -972,7 +972,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			}
 			allUsers.findOne({email:newemail},function (err,dup) {
 				if (dup) {
-					this.send(codes.srChangeMailDuplicateMail);
+					this.send(codes.srChangeMailReply,{status:'cmDuplicateMail'},'Poker.ChangeMailReply');
 					return;
 				}
 				var authcode = uuid.v4();
@@ -990,7 +990,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							this.reply("000","internal error");
 							return;
 						}
-						this.send(codes.srChangeMailOk);
+						this.send(codes.srChangeMailReply,{status:'cmSuccess'},'Poker.ChangeMailReply');
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));

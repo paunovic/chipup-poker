@@ -164,6 +164,7 @@ enum ServerCodes {
 	srStatus = 10;
 	srKickPlayerReply = 11;
 	srSetAvatarReply = 12;
+	srChangeMailReply = 13;
 
     srOwnershipGiveAwayNotOwner = 24;
     srOwnershipGiveAwayInvalidPlayerId = 25;
@@ -174,9 +175,7 @@ enum ServerCodes {
     srClubTransferChipsOk = 31;
     srClubTransferChipsInvalidAmount = 32;
 
-    srChangeMailOk = 35;
 
-    srChangeMailDuplicateMail = 37;
     srChangePasswordOk = 38;
 
     srCreateGameOk = 42;
@@ -280,4 +279,11 @@ message ClubCommandReply {
 	required ClubStatus status = 1;
 	optional Club club = 2;
 	repeated Game games = 3;
+}
+message ChangeMailReply {
+	enum ChangeMailStatus {
+		cmSuccess = 0;
+		cmDuplicateMail = 1;
+	}
+	required ChangeMailStatus status = 1;
 }
