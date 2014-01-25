@@ -64,7 +64,7 @@ message User {
 	required bytes _id = 1;
 	required bytes avatar = 2;
 	required string displayname = 3;
-	optional int32 tokens = 4;
+	
 	optional string email = 5;
 	optional bool authed = 6;
 	optional int32 chips = 7;
@@ -269,6 +269,7 @@ message ClubCommandReply {
 		csInvalidClubId = 4;
 		csAlreadyMember = 5;
 		csBadPassword = 6;
+		csInvalidPlayerId = 7;
 	}
 	required ClubStatus status = 1;
 	optional Club club = 2;
