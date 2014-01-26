@@ -165,6 +165,7 @@ enum ServerCodes {
 	srKickPlayerReply = 11;
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
+	srGetPlayers = 14;
 
     srOwnershipGiveAwayNotOwner = 24;
     srOwnershipGiveAwayInvalidPlayerId = 25;
@@ -223,6 +224,7 @@ enum ServerCodes {
     scTableStandUp = 524;
     scPing = 525;
     scSuspendPlayer = 526;
+    scGetPlayers = 527;
 }
 
 service Server {
@@ -285,4 +287,8 @@ message ChangeMailReply {
 		cmDuplicateMail = 1;
 	}
 	required ChangeMailStatus status = 1;
+}
+message GetUserParams {
+	repeated bytes user_mongo_ids = 1;
+	repeated User users = 2;
 }

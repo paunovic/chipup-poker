@@ -566,14 +566,11 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				allUsers.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""}).toArray(function(err,users) {
 					for (var x=0; x<users.length; x++) {
-						users[x].avatar = new Buffer(users[x].avatar,'base64');
-						users[x]._id = new Buffer(users[x]._id.toString(),'hex');
+						users[x] = makeUserProtobuf(users[x]);
 					}
 					status.users = users;
 					allUsers.findOne({_id:this.userid},{tokens:"",displayname:"",email:"",authed:"", avatar:""},function(err,self) {
-						self.avatar = new Buffer(self.avatar,'base64');
-						self._id = new Buffer(self._id.toString(),'hex');
-						status.self = self;
+						status.self = makeUserProtobuf(self);
 						// FIXME hide some fields in games
 						allGames.find({clubid:{$in:clubids}}).toArray(function (err,games) {
 							if (err) {
@@ -646,11 +643,11 @@ ClientSocket.prototype.handle = function (code,args) {
 				var doc = {is_private:priv,password:pass,name:clubname, owner:this.userid, chips:100000};
 				// FIXME, switch to spendTokens
 				allUsers.findOne({_id:this.userid},function (err,res) {
-					if (res.tokens < sharedconfig.tokenPrices.club_creation) {
+					if (res.tokens < 1) {
 						this.send(codes.srCreateClubNoTokens);
 						return;
 					}
-					allUsers.update({_id:this.userid},{$inc:{tokens:-sharedconfig.tokenPrices.club_creation}},function (err,res) {
+					allUsers.update({_id:this.userid},{$inc:{tokens:-1}},function (err,res) {
 						if (err) {
 							this.log('shouldnt happen 012 1',err);
 							this.send(codes.srCreateClubReply,{status:'csNameExists'},'Poker.ClubCommandReply');
@@ -862,7 +859,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				var that = this;
 				function finish() {
-					that.spendTokens(sharedconfig.tokenPrices.club_change_details,codes.srClubDetailsChangeNoTokens,function () {
+					that.spendTokens(1,codes.srClubDetailsChangeNoTokens,function () {
 						allClubs.update({_id:club._id},mods,function (err,ret) {
 							this.log('detail update',clubseq,params,mods,err,ret);
 							if (err) {
@@ -1235,6 +1232,19 @@ ClientSocket.prototype.handle = function (code,args) {
 				);
 			}
 			break;
+		case codes.scGetPlayers:
+			var params = pb.Parse(args,'Poker.GetUserParams');
+			for (var x=0; x<params.user_mongo_ids.length; x++) {
+				params.user_mongo_ids[x] = toMongoId(params.user_mongo_ids[x]);
+			}
+			allUsers.find({_id:{$id:params.user_mongo_ids}}).toArray(function (err,users) {
+				var out = {users:[]};
+				for (var x=0; x<users.length; x++) {
+					users[x] = makeUserProtobuf(users[x]);
+				}
+				this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
+			}.bind(this));
+			break;
 		}
 	}
 }
@@ -1264,6 +1274,11 @@ function makeGameProtobuf(g) {
 	g._id = new Buffer(g._id.toString(),'hex');
 	g.creator_mongo_id = new Buffer(g.creator_mongo_id.toString(),'hex');
 	return g;
+}
+function makeUserProtobuf(u) {
+	u.avatar = new Buffer(u.avatar,'base64');
+	u._id = new Buffer(u._id.toString(),'hex');
+	return u;
 }
 function Game(obj) {
 	this.users = {};
