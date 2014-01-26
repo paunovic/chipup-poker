@@ -93,6 +93,7 @@ type
     procedure CSRLeaveClub(const AMessage: TMessageItem);
     procedure CSRClubDetailsChange(const AMessage: TMessageItem);
     procedure CSRKickPlayer(const AMessage: TMessageItem);
+    procedure CSRGetUsers(const AMessage: TMessageItem);
 
     procedure CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
     procedure CSROwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
@@ -163,6 +164,7 @@ begin
                             TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
                             TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
                             TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),
+                            TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
                             TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, CSROwnerGiveawayNotOwner),
                             TServerMessageCallback.Create(srOwnershipGiveawayInvalidPlayerId, CSROwnerGiveawayInvalidPlayerId),
                             TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, CSROwnerGiveawayInvalidClubId),
@@ -608,6 +610,9 @@ begin
     ConfigureGUI;
 end;
 
-
+procedure TfrmClubLobby.CSRGetUsers(const AMessage: TMessageItem);
+begin
+  UpdatePlayerlist;
+end;
 
 end.

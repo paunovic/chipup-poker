@@ -127,6 +127,7 @@ uses
   uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
 
 
+
 procedure TfrmChipUpMain.DoCreate;
 begin
   inherited;
@@ -587,7 +588,12 @@ begin
           query_users[Length(query_users) - 1] := pbreply.Club.Members[C1];
         end;
       if Length(query_users) > 0 then
+      begin
+        for C1 := 0 to Length(query_users) do
+           dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, query_users[C1]); // FIXME, should add default avatar
+
         SocketClient.GetUserInfos(query_users);
+      end;
 
       ConfigureGUI;
     end;

@@ -24,7 +24,6 @@ type
 
     procedure Flush;
 
-    procedure LoadFromUserProtobuf(const AUser: TPB_User);
     procedure LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 
     property Id      : TBytes read FId write FId;
@@ -98,10 +97,6 @@ begin
   end;
 end;
 
-procedure TPlayerInfo.LoadFromUserProtobuf(const AUser: TPB_User);
-begin
-
-end;
 
 { TPlayerInfos }
 
@@ -110,14 +105,16 @@ var
   player: TPlayerInfo;
 begin
   if not FindPlayerById(AId, player) then
+  begin
     player := TPlayerInfo.Create;
+    Add(player);
+  end;
 
   player.FId := AId;
   player.FNick := ANick;
   player.FEMail := AEMail;
   player.FBalance := AChips;
   player.AvatarId := AAvatarId;
-  Add(player);
   result := player;
 end;
 
