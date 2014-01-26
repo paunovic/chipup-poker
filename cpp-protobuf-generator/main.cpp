@@ -202,11 +202,19 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 		if (field->type() == FieldDescriptor::TYPE_ENUM) {
 			vars["input"] = "Integer(AValue)";
 		} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-			vars["input"] = "AValue.ProtobufOutput";
+			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+				vars["input"] = "AValue[C1].ProtobufOutput";
+			} else {
+				vars["input"] = "AValue.ProtobufOutput";
+			}
 		//} else if (field->type() == FieldDescriptor::TYPE_STRING) {
 		//	vars["input"] = "AnsiString(AValue)"; // FIXME
 		} else {
-			vars["input"] = "AValue";
+			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+				vars["input"] = "AValue[C1]";
+			} else {
+				vars["input"] = "AValue";
+			}
 		}
 		if (!writter.empty()) {
 			vars["writter"] = writter;
@@ -218,7 +226,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 					"begin\n"
 					"  $pname$ := AValue;\n"
 					"  for C1 := 0 to Length($pname$) - 1 do\n"
-					"    ProtobufOutput.$writter$($enum$, $input$[C1]);\n"
+					"    ProtobufOutput.$writter$($enum$, $input$);\n"
 					"end;\n\n");
 			} else {
 				printer->Print(vars,
