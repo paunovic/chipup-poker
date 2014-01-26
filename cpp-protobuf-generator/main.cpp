@@ -173,7 +173,6 @@ const string getDelphiType(const FieldDescriptor *field) {
 void GenerateSettersDec(const Descriptor *message, io::Printer *printer) {
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
-		if (field->label() == FieldDescriptor::LABEL_REPEATED) continue;
 		const string type = getDelphiType(field);
 		
 		if (!type.empty()) {
@@ -186,7 +185,6 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 	map<string,string> vars;
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
-		if (field->label() == FieldDescriptor::LABEL_REPEATED) continue;
 		const string type = getDelphiType(field);
 		if (type.empty()) continue;
 		vars["type"] = type;
@@ -212,12 +210,24 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 		}
 		if (!writter.empty()) {
 			vars["writter"] = writter;
-			printer->Print(vars,
-				"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
-				"begin\n"
-				"  $pname$ := AValue;\n"
-				"  ProtobufOutput.$writter$($enum$, $input$);\n"
-				"end;\n\n");
+			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+				printer->Print(vars,
+					"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
+					"var\n"
+					"  C1: Integer;\n"
+					"begin\n"
+					"  $pname$ := AValue;\n"
+					"  for C1 := 0 to Length($pname$) - 1 do\n"
+					"    ProtobufOutput.$writter$($enum$, $input$[C1]);\n"
+					"end;\n\n");
+			} else {
+				printer->Print(vars,
+					"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
+					"begin\n"
+					"  $pname$ := AValue;\n"
+					"  ProtobufOutput.$writter$($enum$, $input$);\n"
+					"end;\n\n");
+			}
 		}
 	}
 }
@@ -363,7 +373,7 @@ class DelphiGenerator : public CodeGenerator {
 				vars["pname"] = PrivateFieldName(field);
 				vars["name"] = PropertyName(field);
 				string type = getDelphiType(field);
-				if (field->type() == FieldDescriptor::TYPE_BYTES) {
+				/*if (field->type() == FieldDescriptor::TYPE_BYTES) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(vars,"    property $name$: TArray<TBytes> read $pname$;\n");
 					} else {
@@ -373,7 +383,7 @@ class DelphiGenerator : public CodeGenerator {
 							,"name",PropertyName(field)
 							,"pname",PrivateFieldName(field));
 					}
-				} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+				} else*/ if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					const Descriptor *subtype = field->message_type();
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						vars["subname"] = subtype->name();
@@ -437,7 +447,7 @@ class DelphiGenerator : public CodeGenerator {
 					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
 						printer.Print("  if Assigned($name$) then $name$.Free;\n","name",PrivateFieldName(field));
 					} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						printer.Print("  $name$.Free;\n","name",PrivateFieldName(field));
+						printer.Print("  if Assigned($name$) then\n    $name$.Free;\n","name",PrivateFieldName(field));
 					} else if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
 						printer.Print("  if Assigned($name$) then $name$.Free;\n","name",PrivateFieldName(field));
 					}
@@ -512,10 +522,10 @@ class DelphiGenerator : public CodeGenerator {
 					const Descriptor *subtype = field->message_type(); 
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
-							"        $name$: begin\n"
-							"          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-							"          $pname$.Add(TPB_$subname$.Create(AProtobufReader,AProtobufReader.readInt32));\n"
-							"        end;\n"
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+							"        $pname$.Add(TPB_$subname$.Create(AProtobufReader,AProtobufReader.readInt32));\n"
+							"      end;\n"
 							,"name",EnumName(field)
 							,"pname",PrivateFieldName(field)
 							,"subname",subtype->name());
