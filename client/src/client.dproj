@@ -167,7 +167,6 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_StatusReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_HelloReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_StringSizes.pas"/>
-			<DCCReference Include="modules\protobuf\objects\uPB_TokenPrices.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_RegisterParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ForgotPasswordParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_User.pas"/>
@@ -203,6 +202,8 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_RegisterReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ClubCommandReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_LoginReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_SetAvatarReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_ChangeMailReply.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>

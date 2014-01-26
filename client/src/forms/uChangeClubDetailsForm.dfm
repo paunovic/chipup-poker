@@ -15,7 +15,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
-  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   OnShow = FormShow

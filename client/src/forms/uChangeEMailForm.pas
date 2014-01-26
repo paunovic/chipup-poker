@@ -27,9 +27,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    procedure CSRChangeMailOk(const AMessage: TMessageItem);
-    procedure CSRChangeMailInvalidMail(const AMessage: TMessageItem);
-    procedure CSRChangeMailDuplicateMail(const AMessage: TMessageItem);
+    procedure CSRChangeMail(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -40,7 +38,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
+  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uPB_ChangeMailReply;
 
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
@@ -76,9 +74,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srChangeMailOk, CSRChangeMailOk),
-                            TServerMessageCallback.Create(srChangeMailInvalidMail, CSRChangeMailInvalidMail),
-                            TServerMessageCallback.Create(srChangeMailDuplicateMail, CSRChangeMailDuplicateMail)
+                            TServerMessageCallback.Create(srChangeMailReply, CSRChangeMail)
                           ]
                         );
     end;
@@ -121,29 +117,23 @@ begin
   acOK.Enabled := FALSE;
 end;
 
-procedure TfrmChangeEMail.CSRChangeMailDuplicateMail(const AMessage: TMessageItem);
+procedure TfrmChangeEMail.CSRChangeMail(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ChangeMailReply;
 begin
-  MessageDlg('E-mail address is already in use', mtError, [mbOK], 0);
-  edNewMail.SetFocus;
-  acOK.Enabled := TRUE;
+  pbreply := AMessage.Object_ as TPB_ChangeMailReply;
+
+  case pbreply.Status of
+    cmSuccess: begin
+      MessageDlg('E-mail address successfully changed. Please check your inbox for confirmation link.', mtInformation, [mbOK], 0);
+      ModalResult := mrOk;
+    end;
+    cmDuplicateMail: begin
+      MessageDlg('E-mail address is already in use', mtError, [mbOK], 0);
+      edNewMail.SetFocus;
+      acOK.Enabled := TRUE;
+    end;
+  end;
 end;
-
-procedure TfrmChangeEMail.CSRChangeMailInvalidMail(const AMessage: TMessageItem);
-begin
-  MessageDlg('Invalid E-mail address', mtError, [mbOK], 0);
-  edNewMail.SetFocus;
-  acOK.Enabled := TRUE;
-end;
-
-procedure TfrmChangeEMail.CSRChangeMailOk(const AMessage: TMessageItem);
-begin
-  MessageDlg('E-mail address successfully changed. Please check your inbox for confirmation link.', mtInformation, [mbOK], 0);
-  ModalResult := mrOk;
-end;
-
-
-
-
-
 
 end.

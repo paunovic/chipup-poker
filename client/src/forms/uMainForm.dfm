@@ -72,12 +72,6 @@ object frmChipUpMain: TfrmChipUpMain
       GridView = gridJoinedClubsTable
     end
   end
-  object lbUserInfo: TcxLabel
-    Left = 748
-    Top = 74
-    Caption = 'You have 100 tokens'
-    Transparent = True
-  end
   object btCreateClub: TcxButton
     Left = 304
     Top = 139
@@ -87,7 +81,7 @@ object frmChipUpMain: TfrmChipUpMain
     Anchors = [akLeft, akBottom]
     Caption = 'CREATE CLUB'
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 2
+    TabOrder = 1
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
@@ -104,7 +98,7 @@ object frmChipUpMain: TfrmChipUpMain
     Anchors = [akLeft, akBottom]
     Caption = 'JOIN CLUB'
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 3
+    TabOrder = 2
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
@@ -118,7 +112,7 @@ object frmChipUpMain: TfrmChipUpMain
     Width = 628
     Height = 383
     Anchors = [akLeft, akBottom]
-    TabOrder = 4
+    TabOrder = 3
     object gridGamesTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridGamesTableCellDblClick
@@ -196,7 +190,7 @@ object frmChipUpMain: TfrmChipUpMain
     Anchors = [akLeft, akBottom]
     Caption = 'OPEN CLUB LOBBY'
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 5
+    TabOrder = 4
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
@@ -231,10 +225,6 @@ object frmChipUpMain: TfrmChipUpMain
     object acShowJoinClubForm: TAction
       Caption = 'Join club'
       OnExecute = acShowJoinClubFormExecute
-    end
-    object acBuyTokens: TAction
-      Caption = 'acBuyTokens'
-      OnExecute = acBuyTokensExecute
     end
     object acBuyChips: TAction
       Caption = 'acBuyChips'
@@ -295,10 +285,6 @@ object frmChipUpMain: TfrmChipUpMain
       object mmiBuyChips: TMenuItem
         Action = acBuyChips
         Caption = 'Get More Chips...'
-      end
-      object mmiBuyTokens: TMenuItem
-        Action = acBuyTokens
-        Caption = 'Get More Tokens...'
       end
     end
     object mmiClubs: TMenuItem

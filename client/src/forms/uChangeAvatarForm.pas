@@ -30,8 +30,7 @@ type
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
 
-    procedure CSRChangeAvatarOk(const AMessage: TMessageItem);
-    procedure CSRChangeAvatarInvalidId(const AMessage: TMessageItem);
+    procedure CSRSetAvatar(const AMessage: TMessageItem);
 
     procedure UploadAvatar;
 
@@ -46,7 +45,7 @@ implementation
 {$R *.dfm}
 
 uses
-  superobject, PNGImage, uAvatars, uMessageContainer, uServerMessageCallback,
+  superobject, PNGImage, uAvatars, uMessageContainer, uServerMessageCallback, uPB_SetAvatarReply,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSocketClient, uCommon, uEncryption, uSettings, uMainDataModule;
 
@@ -129,8 +128,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srChangeAvatarOk, CSRChangeAvatarOk),
-                            TServerMessageCallback.Create(srChangeAvatarInvalidId, CSRChangeAvatarInvalidId)
+                            TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
                           ]
                         );
     end;
@@ -233,28 +231,33 @@ begin
     MessageDlg(error, mtError, [mbOK], 0);
 end;
 
-procedure TfrmChangeAvatar.CSRChangeAvatarInvalidId(const AMessage: TMessageItem);
-begin
-  if FAvatarChanged then
-    UploadAvatar
-  else
-  begin
-    FAvatarChanged := FALSE;
-    MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
-    acChange.Enabled := TRUE;
-  end;
-end;
-
-procedure TfrmChangeAvatar.CSRChangeAvatarOk(const AMessage: TMessageItem);
+procedure TfrmChangeAvatar.CSRSetAvatar(const AMessage: TMessageItem);
 var
-  avatar: TAvatar;
+  avatar : TAvatar;
+  pbreply: TPB_SetAvatarReply;
 begin
-  dmMain.SelfInfo.AvatarId := FAvatarId;
-  avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
-  imgAvatar.Picture.Assign(avatar.Image);
+  pbreply := AMessage.Object_ as TPB_SetAvatarReply;
 
-  FAvatarChanged := FALSE;
-  acChange.Enabled := TRUE;
+  case pbreply.Status of
+    saSuccess: begin
+      dmMain.SelfInfo.AvatarId := FAvatarId;
+      avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
+      imgAvatar.Picture.Assign(avatar.Image);
+
+      FAvatarChanged := FALSE;
+      acChange.Enabled := TRUE;
+    end;
+    saNotFound: begin
+      if FAvatarChanged then
+        UploadAvatar
+      else
+      begin
+        FAvatarChanged := FALSE;
+        MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
+        acChange.Enabled := TRUE;
+      end;
+    end;
+  end;
 end;
 
 

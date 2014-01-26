@@ -46,7 +46,6 @@ uses
   uPB_StatusReply in 'modules\protobuf\objects\uPB_StatusReply.pas',
   uPB_HelloReply in 'modules\protobuf\objects\uPB_HelloReply.pas',
   uPB_StringSizes in 'modules\protobuf\objects\uPB_StringSizes.pas',
-  uPB_TokenPrices in 'modules\protobuf\objects\uPB_TokenPrices.pas',
   uPB_RegisterParams in 'modules\protobuf\objects\uPB_RegisterParams.pas',
   uPB_ForgotPasswordParams in 'modules\protobuf\objects\uPB_ForgotPasswordParams.pas',
   uPB_User in 'modules\protobuf\objects\uPB_User.pas',
@@ -78,7 +77,9 @@ uses
   uPB_ChangeSuspendState in 'modules\protobuf\objects\uPB_ChangeSuspendState.pas',
   uPB_RegisterReply in 'modules\protobuf\objects\uPB_RegisterReply.pas',
   uPB_ClubCommandReply in 'modules\protobuf\objects\uPB_ClubCommandReply.pas',
-  uPB_LoginReply in 'modules\protobuf\objects\uPB_LoginReply.pas';
+  uPB_LoginReply in 'modules\protobuf\objects\uPB_LoginReply.pas',
+  uPB_SetAvatarReply in 'modules\protobuf\objects\uPB_SetAvatarReply.pas',
+  uPB_ChangeMailReply in 'modules\protobuf\objects\uPB_ChangeMailReply.pas';
 
 procedure FocusPokerApp;
 var

@@ -88,9 +88,9 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uSettings, uCommon,
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
-  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply,
+  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply,
-  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState,
+  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply,
   pbOutput, pbInput, uMessageContainer, Winapi.WinSock;
 
 
@@ -365,27 +365,20 @@ begin
     srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;
     srRegisterReply: ADataObject := TPB_RegisterReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srKickPlayerInvalidClubId: ;
-    srKickPlayerInvalidPlayerId: ;
     srOwnershipGiveAwayNotOwner: ;
     srOwnershipGiveawayInvalidPlayerId: ;
     srOwnershipGiveAwayInvalidClubId: ;
-    srClubTransferChipsInvalidAmount: ;
-    srCreateClubNoTokens: ;
-    srChangeMailOk: ;
-    srChangeMailInvalidMail: ;
-    srChangeMailDuplicateMail: ;
     srChangePasswordOk: ;
-    srChangePasswordInvalidPassword: ;
-    srChangeAvatarOk: ;
-    srChangeAvatarInvalidId: ;
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ;
 
+    srChangeMailReply: ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srSetAvatarReply: ADataObject := TPB_SetAvatarReply.Create(ADataPointer, ARpcMessage.DataSize);
     srCreateClubReply,
     srJoinClubReply,
     srLeaveClubReply,
-    srClubDetailsChangeReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srChangeClubDetailsReply,
+    srKickPlayerReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
 
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
@@ -404,7 +397,6 @@ begin
     srClubDisbandOk,
     srClubTransferChipsOk,
     srOwnershipGiveAwayOk,
-    srKickPlayerOk,
     srSuspendPlayerOk,
     srReinstatePlayerOk,
     seClubChange,

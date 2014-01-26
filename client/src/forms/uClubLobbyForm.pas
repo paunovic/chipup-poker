@@ -89,12 +89,11 @@ type
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
 
+    procedure CSRStatus(const AMessage: TMessageItem);
     procedure CSRLeaveClub(const AMessage: TMessageItem);
     procedure CSRClubDetailsChange(const AMessage: TMessageItem);
-    procedure CSRStatus(const AMessage: TMessageItem);
+    procedure CSRKickPlayer(const AMessage: TMessageItem);
 
-    procedure CSRKickPlayerInvalidClubId(const AMessage: TMessageItem);
-    procedure CSRKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
     procedure CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
     procedure CSROwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
     procedure CSROwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
@@ -121,7 +120,6 @@ uses
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
-{
   btGiveChips.Top := gbPlayers.Height - btGiveChips.Height - 13;
   btGiveOwnership.Top := btGiveChips.Top;
   btRemovePlayerFromClub.Top := btGiveChips.Top;
@@ -130,7 +128,6 @@ begin
   btNewGame.Top := gbGames.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
   btDeleteGame.Top := btNewGame.Top;
-}
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
@@ -162,12 +159,10 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                            TServerMessageCallback.Create(srClubDetailsChangeReply, CSRClubDetailsChange),
                             TServerMessageCallback.Create(srStatus, CSRStatus),
-                            TServerMessageCallback.Create(srKickPlayerOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srKickPlayerInvalidClubId, CSRKickPlayerInvalidClubId),
-                            TServerMessageCallback.Create(srKickPlayerInvalidPlayerId, CSRKickPlayerInvalidPlayerId),
+                            TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
+                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
+                            TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),
                             TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, CSROwnerGiveawayNotOwner),
                             TServerMessageCallback.Create(srOwnershipGiveawayInvalidPlayerId, CSROwnerGiveawayInvalidPlayerId),
                             TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, CSROwnerGiveawayInvalidClubId),
@@ -530,14 +525,46 @@ begin
   ConfigureGUI;
 end;
 
-procedure TfrmClubLobby.CSRKickPlayerInvalidClubId(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSRClubDetailsChange(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
 begin
-  MessageDlg('Invalid club ID', mtError, [mbOk], 0);
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: ConfigureGUI;
+    csNameExists: ;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
 end;
 
-procedure TfrmClubLobby.CSRKickPlayerInvalidPlayerId(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSRLeaveClub(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
 begin
-  MessageDlg('Invalid player ID', mtError, [mbOk], 0);
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: ModalResult := mrClose;
+    csInvalidClubId: ;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
+end;
+
+procedure TfrmClubLobby.CSRKickPlayer(const AMessage: TMessageItem);
+var
+  pbreply: TPB_ClubCommandReply;
+begin
+  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+
+  case pbreply.Status of
+    csSuccess: ConfigureGUI;
+    csInvalidClubId: MessageDlg('Invalid club ID', mtError, [mbOk], 0);
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+  end;
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayInvalidClubId(const AMessage: TMessageItem);
@@ -582,32 +609,5 @@ begin
 end;
 
 
-procedure TfrmClubLobby.CSRClubDetailsChange(const AMessage: TMessageItem);
-var
-  pbreply: TPB_ClubCommandReply;
-begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
-
-  case pbreply.Status of
-    csSuccess: ConfigureGUI;
-    csNameExists: ;
-  else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
-  end;
-end;
-
-procedure TfrmClubLobby.CSRLeaveClub(const AMessage: TMessageItem);
-var
-  pbreply: TPB_ClubCommandReply;
-begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
-
-  case pbreply.Status of
-    csSuccess: ModalResult := mrClose;
-    csInvalidClubId: ;
-  else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
-  end;
-end;
 
 end.

@@ -20,7 +20,6 @@ type
                                 TCP_PING_TIMEOUT   : Word;
                                 URL                : record
                                   TOS          : String;
-                                  BUY_TOKENS   : String;
                                   BUY_CHIPS    : String;
                                   GET_AVATAR   : String;
                                   UPLOAD_AVATAR: String;
@@ -48,7 +47,6 @@ type
                                            // urls
                                            URL : (
                                              TOS          : URL_DOMAIN + '/tos.html';
-                                             BUY_TOKENS   : URL_DOMAIN + '/buy-tokens.html';
                                              BUY_CHIPS    : URL_DOMAIN + '/buy-chips.html';
                                              GET_AVATAR   : URL_DOMAIN + '/getavatar?id=%s';
                                              UPLOAD_AVATAR: URL_DOMAIN + '/uploadAvatar';
