@@ -173,6 +173,7 @@ const string getDelphiType(const FieldDescriptor *field) {
 void GenerateSettersDec(const Descriptor *message, io::Printer *printer) {
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
+		if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) continue;
 		const string type = getDelphiType(field);
 		
 		if (!type.empty()) {
@@ -185,6 +186,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 	map<string,string> vars;
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
+		if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) continue;
 		const string type = getDelphiType(field);
 		if (type.empty()) continue;
 		vars["type"] = type;
@@ -395,7 +397,7 @@ class DelphiGenerator : public CodeGenerator {
 					const Descriptor *subtype = field->message_type();
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						vars["subname"] = subtype->name();
-						printer.Print(vars,"    property $name$: TPB_$subname$s read $pname$;\n");
+						printer.Print(vars,"    property $name$: TPB_$subname$s read $pname$ write $pname$;\n");
 					} else {
 						printer.Print(
 							"    property $name$: TPB_$subname$ read $pname$ write Set$name$;\n"
