@@ -643,11 +643,11 @@ ClientSocket.prototype.handle = function (code,args) {
 				var doc = {is_private:priv,password:pass,name:clubname, owner:this.userid, chips:100000};
 				// FIXME, switch to spendTokens
 				allUsers.findOne({_id:this.userid},function (err,res) {
-					if (res.tokens < 1) {
+					if (res.clubCreateTokens < 1) {
 						this.send(codes.srCreateClubNoTokens);
 						return;
 					}
-					allUsers.update({_id:this.userid},{$inc:{tokens:-1}},function (err,res) {
+					allUsers.update({_id:this.userid},{$inc:{clubCreateTokens:-1}},function (err,res) {
 						if (err) {
 							this.log('shouldnt happen 012 1',err);
 							this.send(codes.srCreateClubReply,{status:'csNameExists'},'Poker.ClubCommandReply');
@@ -859,7 +859,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				var that = this;
 				function finish() {
-					that.spendTokens(1,codes.srClubDetailsChangeNoTokens,function () {
+					//that.spendTokens(1,codes.srClubDetailsChangeNoTokens,function () {
 						allClubs.update({_id:club._id},mods,function (err,ret) {
 							this.log('detail update',clubseq,params,mods,err,ret);
 							if (err) {
@@ -878,7 +878,7 @@ ClientSocket.prototype.handle = function (code,args) {
 								}.bind(this));
 							}
 						}.bind(that));
-					}.bind(that));
+					//}.bind(that));
 				}
 				if (autofinish) finish();
 			}.bind(this));
@@ -984,7 +984,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					test.sendMail(newemail,'Subject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
 						console.log('cb',err,ret);
 						if (err) {
-							this.reply("000","internal error");
+							this.send(codes.srChangeMailReply,{status:'cmInvalidEmail'},'Poker.ChangeMailReply');
 							return;
 						}
 						this.send(codes.srChangeMailReply,{status:'cmSuccess'},'Poker.ChangeMailReply');
@@ -1234,13 +1234,15 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.scGetPlayers:
 			var params = pb.Parse(args,'Poker.GetUserParams');
+			this.log(params);
 			for (var x=0; x<params.user_mongo_ids.length; x++) {
 				params.user_mongo_ids[x] = toMongoId(params.user_mongo_ids[x]);
 			}
-			allUsers.find({_id:{$id:params.user_mongo_ids}}).toArray(function (err,users) {
+			allUsers.find({_id:{$in:params.user_mongo_ids}}).toArray(function (err,users) {
+				this.log(params.user_mongo_ids,users);
 				var out = {users:[]};
 				for (var x=0; x<users.length; x++) {
-					users[x] = makeUserProtobuf(users[x]);
+					out.users[x] = makeUserProtobuf(users[x]);
 				}
 				this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
 			}.bind(this));

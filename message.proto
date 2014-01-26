@@ -285,6 +285,7 @@ message ChangeMailReply {
 	enum ChangeMailStatus {
 		cmSuccess = 0;
 		cmDuplicateMail = 1;
+		cmInvalidEmail = 2;
 	}
 	required ChangeMailStatus status = 1;
 }
