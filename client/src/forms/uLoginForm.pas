@@ -273,7 +273,7 @@ var
 begin
   pbstatus := AMessage.Object_ as TPB_StatusReply;
 
-  dmMain.SelfInfo.ParseStatus(pbstatus);
+  dmMain.SelfInfo.LoadFromStatusProtobuf(pbstatus);
   dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   dmMain.Players.ParseStatus(pbstatus);
 

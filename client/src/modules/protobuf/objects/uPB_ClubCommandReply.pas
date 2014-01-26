@@ -44,8 +44,10 @@ uses
 
 destructor TPB_ClubCommandReply.Destroy;
 begin
-  if Assigned(FClub) then FClub.Free;
-  FGames.Free;
+  if Assigned(FClub) then
+    FClub.Free;
+  if Assigned(FGames) then
+    FGames.Free;
   inherited;
 end;
 procedure TPB_ClubCommandReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);

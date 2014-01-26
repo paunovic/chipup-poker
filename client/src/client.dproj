@@ -204,6 +204,7 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_LoginReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_SetAvatarReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeMailReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_GetUserParams.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>

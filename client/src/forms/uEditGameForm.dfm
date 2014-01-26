@@ -2,7 +2,7 @@ object frmEditGame: TfrmEditGame
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'Edit Game'
+  Caption = 'Edit Table'
   ClientHeight = 197
   ClientWidth = 376
   Color = clWindow

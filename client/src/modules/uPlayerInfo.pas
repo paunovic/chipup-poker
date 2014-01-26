@@ -4,7 +4,7 @@ interface
 
 uses
   System.Generics.Collections, System.SysUtils,
-  uClubInfo, uPB_StatusReply;
+  uClubInfo, uPB_StatusReply, uPB_User;
 
 type
   TPlayerInfo = class
@@ -17,13 +17,15 @@ type
     FAuthed  : Boolean;
     FAvatarId: TBytes;
     FClubs   : TClubsInfo;
+
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure Flush;
 
-    function ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
+    procedure LoadFromUserProtobuf(const AUser: TPB_User);
+    procedure LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 
     property Id      : TBytes read FId write FId;
     property Nick    : String read FNick write FNick;
@@ -37,7 +39,8 @@ type
 
   TPlayerInfos = class(TObjectList<TPlayerInfo>)
   public
-    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer; const AAvatarId: TBytes): TPlayerInfo;
+    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer; const AAvatarId: TBytes): TPlayerInfo; overload;
+    function AddPlayer(const AUser: TPB_User): TPlayerInfo; overload;
     function FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
     function ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
   end;
@@ -70,7 +73,7 @@ begin
   FClubs.Clear;
 end;
 
-function TPlayerInfo.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
+procedure TPlayerInfo.LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 var
   club  : TClubInfo;
   pbgame: TPB_Game;
@@ -93,10 +96,12 @@ begin
     if FClubs.FindClub(pbgame.ClubSeq, club) then
       club.Games.AddGame(pbgame);
   end;
-
-  Exit(TRUE);
 end;
 
+procedure TPlayerInfo.LoadFromUserProtobuf(const AUser: TPB_User);
+begin
+
+end;
 
 { TPlayerInfos }
 
@@ -114,6 +119,11 @@ begin
   player.AvatarId := AAvatarId;
   Add(player);
   result := player;
+end;
+
+function TPlayerInfos.AddPlayer(const AUser: TPB_User): TPlayerInfo;
+begin
+  result := AddPlayer(AUser.MongoId, AUser.Displayname, AUser.Email, AUser.Chips, AUser.Avatar);
 end;
 
 function TPlayerInfos.FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;

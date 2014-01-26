@@ -42,7 +42,8 @@ uses
 
 destructor TPB_TableStatus.Destroy;
 begin
-  FSeats.Free;
+  if Assigned(FSeats) then
+    FSeats.Free;
   inherited;
 end;
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);

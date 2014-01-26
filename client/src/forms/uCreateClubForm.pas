@@ -22,7 +22,6 @@ type
     btOK: TcxButton;
     btCancel: TcxButton;
     acCancel: TAction;
-    lbsInfo: TcxLabel;
     procedure acOKExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);

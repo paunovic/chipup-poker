@@ -2,7 +2,7 @@ object frmCreateGame: TfrmCreateGame
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'New Game'
+  Caption = 'Create a Table'
   ClientHeight = 204
   ClientWidth = 376
   Color = clWindow

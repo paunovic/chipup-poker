@@ -133,6 +133,11 @@ begin
       edNewMail.SetFocus;
       acOK.Enabled := TRUE;
     end;
+    cmInvalidEmail: begin
+      MessageDlg('Invalid E-mail address', mtError, [mbOK], 0);
+      edNewMail.SetFocus;
+      acOK.Enabled := TRUE;
+    end;
   end;
 end;
 

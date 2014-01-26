@@ -74,7 +74,8 @@ type
     procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
     procedure Ping;
-    procedure ChangeSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
+    procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
+    procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
 
     property Socket: TSslWSocket read FSocket;
   end;
@@ -89,7 +90,7 @@ uses
   uSettings, uCommon,
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply,
-  uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply,
+  uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams,
   uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply,
   pbOutput, pbInput, uMessageContainer, Winapi.WinSock;
 
@@ -372,6 +373,7 @@ begin
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ;
 
+    srGetPlayers: ADataObject := TPB_GetUserParams.Create(ADataPointer, ARpcMessage.DataSize);
     srChangeMailReply: ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
     srSetAvatarReply: ADataObject := TPB_SetAvatarReply.Create(ADataPointer, ARpcMessage.DataSize);
     srCreateClubReply,
@@ -383,8 +385,6 @@ begin
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srCreateGameOk,
-    srDeleteGameOk,
     srTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,
@@ -402,6 +402,8 @@ begin
     seClubChange,
     seClubDeleted: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
     srEditGameOk,
+    srCreateGameOk,
+    srDeleteGameOk,
     seGameChange,
     seGameCreate,
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
@@ -778,7 +780,7 @@ begin
   SendProtobuf(scPing, nil);
 end;
 
-procedure TSocketClient.ChangeSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
+procedure TSocketClient.ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
 var
   protobuf: TPB_ChangeSuspendState;
 begin
@@ -788,6 +790,19 @@ begin
     protobuf.PlayerMongoId := APlayerId;
     protobuf.Suspended := ASuspended;
     SendProtobuf(scSuspendPlayer, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TSocketClient.GetUserInfos(const AMongoIds: TArray<TBytes>);
+var
+  protobuf: TPB_GetUserParams;
+begin
+  protobuf := TPB_GetUserParams.Create;
+  try
+    protobuf.UserMongoIds := AMongoIds;
+    SendProtobuf(scGetPlayers, protobuf);
   finally
     protobuf.Free;
   end;

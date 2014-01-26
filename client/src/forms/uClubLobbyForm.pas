@@ -501,7 +501,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  SocketClient.ChangeSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
+  SocketClient.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
 end;
 
 procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);
@@ -511,7 +511,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  SocketClient.ChangeSuspendState(club.MongoId, FSelectedPlayerId, FALSE);
+  SocketClient.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, FALSE);
 end;
 
 procedure TfrmClubLobby.acDeleteGameExecute(Sender: TObject);

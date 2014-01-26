@@ -33,6 +33,8 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure tiRefreshActionEnablerTimer(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure gridClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+      AShift: TShiftState; var AHandled: Boolean);
   private
     FSelectedClubId: Int64;
 
@@ -87,6 +89,12 @@ procedure TfrmPublicClubsList.FormShow(Sender: TObject);
 begin
   MessageContainer.AddMessageHandler(Handle);
   SocketClient.ListPublicClubs;
+end;
+
+procedure TfrmPublicClubsList.gridClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  if acJoinClub.Enabled then
+    acJoinClub.Execute;
 end;
 
 procedure TfrmPublicClubsList.gridClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);

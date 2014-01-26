@@ -18,6 +18,7 @@ type
     srKickPlayerReply = 11,
     srSetAvatarReply = 12,
     srChangeMailReply = 13,
+    srGetPlayers = 14,
     srOwnershipGiveAwayNotOwner = 24,
     srOwnershipGiveAwayInvalidPlayerId = 25,
     srOwnershipGiveAwayInvalidClubId = 26,
@@ -68,7 +69,8 @@ type
     scTableSit = 523,
     scTableStandUp = 524,
     scPing = 525,
-    scSuspendPlayer = 526
+    scSuspendPlayer = 526,
+    scGetPlayers = 527
   );
 
 {$IFDEF DEBUG}
@@ -113,6 +115,7 @@ begin
     srKickPlayerReply: result := 'srKickPlayerReply';
     srSetAvatarReply: result := 'srSetAvatarReply';
     srChangeMailReply: result := 'srChangeMailReply';
+    srGetPlayers: result := 'srGetPlayers';
     srOwnershipGiveAwayNotOwner: result := 'srOwnershipGiveAwayNotOwner';
     srOwnershipGiveAwayInvalidPlayerId: result := 'srOwnershipGiveAwayInvalidPlayerId';
     srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
@@ -164,6 +167,7 @@ begin
     scTableStandUp: result := 'scTableStandUp';
     scPing: result := 'scPing';
     scSuspendPlayer: result := 'scSuspendPlayer';
+    scGetPlayers: result := 'scGetPlayers';
   end;
 end;
 {$ENDIF DEBUG}

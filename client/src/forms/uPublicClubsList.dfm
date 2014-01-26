@@ -34,6 +34,7 @@ object frmPublicClubsList: TfrmPublicClubsList
     TabOrder = 0
     object gridClubsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
+      OnCellDblClick = gridClubsTableCellDblClick
       OnFocusedRecordChanged = gridClubsTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
@@ -116,7 +117,7 @@ object frmPublicClubsList: TfrmPublicClubsList
   end
   object tiRefreshActionEnabler: TTimer
     Enabled = False
-    Interval = 10000
+    Interval = 5000
     OnTimer = tiRefreshActionEnablerTimer
     Left = 200
     Top = 140

@@ -19,7 +19,6 @@ type
     edInvitationCode: TcxTextEdit;
     acChangeClubDetails: TActionList;
     acOK: TAction;
-    lbInfo: TcxLabel;
     btOK: TcxButton;
     btCancel: TcxButton;
     acCancel: TAction;

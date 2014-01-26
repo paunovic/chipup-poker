@@ -84,11 +84,9 @@ type
     procedure UpdateGamelist;
 
     procedure CSRLeaveClub(const AMessage: TMessageItem);
-    procedure CSRClubDetailsChange(const AMessage: TMessageItem);
+    procedure CSRClubCommand(const AMessage: TMessageItem);
     procedure CSRStatus(const AMessage: TMessageItem);
-    procedure CSRCreateClub(const AMessage: TMessageItem);
-    procedure CSRJoinClub(const AMessage: TMessageItem);
-    procedure CSRKickPlayer(const AMessage: TMessageItem);
+    procedure CSRGetUsers(const AMessage: TMessageItem);
 
     procedure CSRLogout(const AMessage: TMessageItem);
     procedure CSESecondaryLoginDetected(const AMessage: TMessageItem);
@@ -123,8 +121,8 @@ implementation
 
 uses
   uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
-  uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply,
-  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables,
+  uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply, uPB_User,
+  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
 
@@ -160,10 +158,11 @@ begin
                           [
                             TServerMessageCallback.Create(srStatus, CSRStatus),
                             TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange),
-                            TServerMessageCallback.Create(srCreateClubReply, CSRCreateClub),
-                            TServerMessageCallback.Create(srJoinClubReply, CSRJoinClub),
-                            TServerMessageCallback.Create(srKickPlayerReply, CSRKickPlayer),
+                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srCreateClubReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srJoinClubReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srKickPlayerReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
                             TServerMessageCallback.Create(srLogout, CSRLogout),
                             TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
@@ -184,7 +183,6 @@ begin
                             TServerMessageCallback.Create(srTableStatus, CSRTableStatus),
                             TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                             TServerMessageCallback.Create(srTableSitOk, CSRTableStatus)
-
                           ]
                         );
 
@@ -300,7 +298,7 @@ begin
     Exit;
 
   if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
-    MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve the issue.', mtWarning, [mbOK], 0)
+    MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
     dmMain.Tables.AddTable(club, game);
 end;
@@ -457,7 +455,7 @@ var
 begin
   pbstatus := AMessage.Object_ as TPB_StatusReply;
 
-  dmMain.SelfInfo.ParseStatus(pbstatus);
+  dmMain.SelfInfo.LoadFromStatusProtobuf(pbstatus);
   dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   dmMain.Players.ParseStatus(pbstatus);
   ConfigureGUI;
@@ -568,63 +566,44 @@ begin
   end;
 end;
 
-procedure TfrmChipUpMain.CSRClubDetailsChange(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSRClubCommand(const AMessage: TMessageItem);
 var
-  pbreply: TPB_ClubCommandReply;
-  index  : Integer;
-begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
-
-  case pbreply.Status of
-    csSuccess: begin
-      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
-      if index <> -1 then
-        dmMain.SelfInfo.Clubs[index].UpdateFromProtobufObject(pbreply.Club);
-      ConfigureGUI;
-    end;
-  end;
-end;
-
-procedure TfrmChipUpMain.CSRCreateClub(const AMessage: TMessageItem);
-var
-  pbreply: TPB_ClubCommandReply;
+  pbreply    : TPB_ClubCommandReply;
+  C1         : Integer;
+  player     : TPlayerInfo;
+  query_users: TArray<TBytes>;
 begin
   pbreply := AMessage.Object_ as TPB_ClubCommandReply;
 
   case pbreply.Status of
     csSuccess: begin
       dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
+
+      SetLength(query_users, 0);
+      for C1 := 0 to Length(pbreply.Club.Members) - 1 do
+        if not dmMain.Players.FindPlayerById(pbreply.Club.Members[C1], player) then
+        begin
+          SetLength(query_users, Length(query_users) + 1);
+          query_users[Length(query_users) - 1] := pbreply.Club.Members[C1];
+        end;
+      if Length(query_users) > 0 then
+        SocketClient.GetUserInfos(query_users);
+
       ConfigureGUI;
     end;
   end;
 end;
 
-procedure TfrmChipUpMain.CSRJoinClub(const AMessage: TMessageItem);
+procedure TfrmChipUpMain.CSRGetUsers(const AMessage: TMessageItem);
 var
-  pbreply: TPB_ClubCommandReply;
+  pbreply: TPB_GetUserParams;
+  user   : TPB_User;
 begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+  pbreply := AMessage.Object_ as TPB_GetUserParams;
 
-  case pbreply.Status of
-    csSuccess: begin
-      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
-      ConfigureGUI;
-    end;
-  end;
+  for user in pbreply.Users do
+    dmMain.Players.AddPlayer(user);
 end;
 
-procedure TfrmChipUpMain.CSRKickPlayer(const AMessage: TMessageItem);
-var
-  pbreply: TPB_ClubCommandReply;
-begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
-
-  case pbreply.Status of
-    csSuccess: begin
-      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
-      ConfigureGUI;
-    end;
-  end;
-end;
 
 end.

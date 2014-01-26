@@ -9,7 +9,7 @@ uses
   WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TChangeMailStatus = (cmSuccess = 0,cmDuplicateMail = 1);
+  TChangeMailStatus = (cmSuccess = 0,cmDuplicateMail = 1,cmInvalidEmail = 2);
   TPB_ChangeMailReply = class(TProtobufBaseObject)
   private
     const
