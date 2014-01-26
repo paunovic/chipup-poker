@@ -22,14 +22,13 @@ type
       FState: String;
 
     procedure SetTableMongoId(const AValue: TBytes);
-    procedure SetSeats(const AValue: TPB_SeatInfos);
     procedure SetState(const AValue: String);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
-    property Seats: TPB_SeatInfos read FSeats;
+    property Seats: TPB_SeatInfos read FSeats write FSeats;
     property State: String read FState write SetState;
   end;
 
@@ -79,15 +78,6 @@ procedure TPB_TableStatus.SetTableMongoId(const AValue: TBytes);
 begin
   FTableMongoId := AValue;
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
-end;
-
-procedure TPB_TableStatus.SetSeats(const AValue: TPB_SeatInfos);
-var
-  C1: Integer;
-begin
-  FSeats := AValue;
-  for C1 := 0 to Length(FSeats) - 1 do
-    ProtobufOutput.writeMessage(FN_SEATS, AValue[C1].ProtobufOutput);
 end;
 
 procedure TPB_TableStatus.SetState(const AValue: String);

@@ -20,13 +20,12 @@ type
       FUsers: TPB_Users;
 
     procedure SetUserMongoIds(const AValue: TArray<TBytes>);
-    procedure SetUsers(const AValue: TPB_Users);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property UserMongoIds: TArray<TBytes> read FUserMongoIds write SetUserMongoIds;
-    property Users: TPB_Users read FUsers;
+    property Users: TPB_Users read FUsers write FUsers;
   end;
 
   TPB_GetUserParamss = TObjectList<TPB_GetUserParams>;
@@ -75,15 +74,6 @@ begin
   FUserMongoIds := AValue;
   for C1 := 0 to Length(FUserMongoIds) - 1 do
     ProtobufOutput.writeBytes(FN_USER_MONGO_IDS, AValue[C1]);
-end;
-
-procedure TPB_GetUserParams.SetUsers(const AValue: TPB_Users);
-var
-  C1: Integer;
-begin
-  FUsers := AValue;
-  for C1 := 0 to Length(FUsers) - 1 do
-    ProtobufOutput.writeMessage(FN_USERS, AValue[C1].ProtobufOutput);
 end;
 
 end.
