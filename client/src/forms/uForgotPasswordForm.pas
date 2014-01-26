@@ -12,11 +12,11 @@ type
     alForgotPassword: TActionList;
     acOK: TAction;
     acCancel: TAction;
-    btOk: TcxButton;
-    btCancel: TcxButton;
     edEMail: TcxTextEdit;
     lbsEMail: TcxLabel;
     lbsInfo: TcxLabel;
+    btOK: TcxButton;
+    btCancel: TcxButton;
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure edEmailChange(Sender: TObject);

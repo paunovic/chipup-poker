@@ -3,7 +3,7 @@ object frmForgotPassword: TfrmForgotPassword
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Forgot password'
-  ClientHeight = 158
+  ClientHeight = 131
   ClientWidth = 305
   Color = clWindow
   Ctl3D = False
@@ -19,53 +19,22 @@ object frmForgotPassword: TfrmForgotPassword
   OnKeyPress = FormKeyPress
   DesignSize = (
     305
-    158)
+    131)
   PixelsPerInch = 96
   TextHeight = 14
-  object btOk: TcxButton
-    Left = 20
-    Top = 102
-    Width = 126
-    Height = 38
-    Action = acOK
-    Enabled = False
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 0
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object btCancel: TcxButton
-    Left = 159
-    Top = 102
-    Width = 126
-    Height = 38
-    Action = acCancel
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 1
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Arial'
-    Font.Style = []
-    ParentFont = False
-  end
   object edEMail: TcxTextEdit
     Left = 104
-    Top = 66
+    Top = 55
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 200
     Properties.OnChange = edEmailChange
-    TabOrder = 2
-    Width = 181
+    TabOrder = 0
+    Width = 187
   end
   object lbsEMail: TcxLabel
     Left = 20
-    Top = 66
+    Top = 55
     Caption = 'E-mail address:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -100,9 +69,41 @@ object frmForgotPassword: TfrmForgotPassword
     Properties.Alignment.Vert = taVCenter
     Properties.WordWrap = True
     Transparent = True
-    Height = 57
+    Height = 42
     Width = 285
-    AnchorY = 32
+    AnchorY = 24
+  end
+  object btOK: TcxButton
+    Left = 99
+    Top = 90
+    Width = 93
+    Height = 27
+    Action = acOK
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 3
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object btCancel: TcxButton
+    Left = 198
+    Top = 90
+    Width = 93
+    Height = 27
+    Action = acCancel
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 4
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
   end
   object alForgotPassword: TActionList
     Left = 36

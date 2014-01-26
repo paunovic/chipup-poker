@@ -7,6 +7,7 @@ const
   PASSWORD_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789-_!@#$%^&*()+=~`';
   CLUBNAME_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789 -!()[]{}@#$%&*+=/\''';
   CLUBCODE_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  GAMENAME_ALLOWED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789 -!()[]{}@#$%&*+=/\''';
 
 
 function ValidateUsername(const AUsername: String; out AError: String): Boolean;
@@ -99,12 +100,12 @@ end;
 function ValidateGameName(const AGameName: String; out AError: String): Boolean;
 begin
   if (Length(AGameName) < 3) or (Length(AGameName) > dmMain.ServerSettings.StringLengths.GameName) then
-  begin
-    AError := Format('Game name length must be between 3 and %d characters', [dmMain.ServerSettings.StringLengths.GameName]);
-    Exit(FALSE);
-  end;
+    AError := Format('Table name length must be between 3 and %d characters', [dmMain.ServerSettings.StringLengths.GameName])
+  else
+    if not IsValidString(AGameName, GAMENAME_ALLOWED_CHARS) then
+      AError := 'Invalid characters in table name';
 
-  Exit(TRUE);
+  result := AError = '';
 end;
 
 end.

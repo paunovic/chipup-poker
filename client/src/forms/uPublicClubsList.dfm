@@ -85,8 +85,8 @@ object frmPublicClubsList: TfrmPublicClubsList
     end
   end
   object btJoinClub: TcxButton
-    Left = 377
-    Top = 379
+    Left = 8
+    Top = 380
     Width = 90
     Height = 27
     Action = acJoinClub
@@ -94,8 +94,8 @@ object frmPublicClubsList: TfrmPublicClubsList
     TabOrder = 1
   end
   object btRefreshList: TcxButton
-    Left = 8
-    Top = 379
+    Left = 377
+    Top = 380
     Width = 90
     Height = 27
     Action = acRefresh

@@ -3,7 +3,7 @@ object frmCreateClub: TfrmCreateClub
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Create Club'
-  ClientHeight = 142
+  ClientHeight = 145
   ClientWidth = 386
   Color = clWindow
   Ctl3D = False
@@ -21,7 +21,7 @@ object frmCreateClub: TfrmCreateClub
   OnShow = FormShow
   DesignSize = (
     386
-    142)
+    145)
   PixelsPerInch = 96
   TextHeight = 14
   object edClubName: TcxTextEdit
@@ -103,7 +103,7 @@ object frmCreateClub: TfrmCreateClub
   end
   object btOK: TcxButton
     Left = 177
-    Top = 104
+    Top = 105
     Width = 93
     Height = 27
     Action = acOK
@@ -116,11 +116,11 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 136
+    ExplicitTop = 104
   end
   object btCancel: TcxButton
     Left = 276
-    Top = 104
+    Top = 105
     Width = 93
     Height = 27
     Action = acCancel
@@ -133,7 +133,7 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 136
+    ExplicitTop = 104
   end
   object alCreateClub: TActionList
     Left = 24

@@ -3,8 +3,8 @@ object frmChangeAvatar: TfrmChangeAvatar
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Change Avatar'
-  ClientHeight = 269
-  ClientWidth = 230
+  ClientHeight = 250
+  ClientWidth = 226
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -20,8 +20,8 @@ object frmChangeAvatar: TfrmChangeAvatar
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   DesignSize = (
-    230
-    269)
+    226
+    250)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsInfo: TcxLabel
@@ -34,7 +34,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     AutoSize = False
     Caption = 
       'Maximum allowed size of avatar is 100kb. Maximum dimensions are ' +
-      '150x150px. Your current avatar:'
+      '150x150px.'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
@@ -47,13 +47,13 @@ object frmChangeAvatar: TfrmChangeAvatar
     Properties.Alignment.Vert = taVCenter
     Properties.WordWrap = True
     Transparent = True
-    Height = 57
-    Width = 210
-    AnchorY = 32
+    Height = 44
+    Width = 206
+    AnchorY = 25
   end
   object btChange: TcxButton
-    Left = 17
-    Top = 227
+    Left = 15
+    Top = 213
     Width = 93
     Height = 27
     Action = acChange
@@ -66,10 +66,11 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 216
   end
   object btCancel: TcxButton
-    Left = 120
-    Top = 227
+    Left = 118
+    Top = 213
     Width = 93
     Height = 27
     Action = acClose
@@ -82,10 +83,11 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 216
   end
   object imgAvatar: TcxImage
-    Left = 40
-    Top = 64
+    Left = 38
+    Top = 53
     Properties.PopupMenuLayout.MenuItems = []
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False

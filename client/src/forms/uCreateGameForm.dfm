@@ -3,7 +3,7 @@ object frmCreateGame: TfrmCreateGame
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Create a Table'
-  ClientHeight = 204
+  ClientHeight = 200
   ClientWidth = 376
   Color = clWindow
   Ctl3D = False
@@ -19,7 +19,7 @@ object frmCreateGame: TfrmCreateGame
   OnShow = FormShow
   DesignSize = (
     376
-    204)
+    200)
   PixelsPerInch = 96
   TextHeight = 14
   object edGameName: TcxTextEdit
@@ -59,7 +59,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object btOK: TcxButton
     Left = 169
-    Top = 165
+    Top = 161
     Width = 93
     Height = 27
     Action = acOK
@@ -72,10 +72,11 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 165
   end
   object btCancel: TcxButton
     Left = 268
-    Top = 165
+    Top = 161
     Width = 93
     Height = 27
     Action = acCancel
@@ -88,6 +89,7 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 165
   end
   object cbGameType: TcxComboBox
     Left = 88

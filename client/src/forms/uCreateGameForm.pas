@@ -46,7 +46,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
+  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uValidators;
 
 
 procedure TfrmCreateGame.FormDestroy(Sender: TObject);
@@ -109,12 +109,19 @@ end;
 procedure TfrmCreateGame.acOKExecute(Sender: TObject);
 var
   sb, bb: Integer;
+  err   : String;
 begin
   if not GetBlinds(cbBlinds.Text, sb, bb) then
     Exit;
 
-  acOK.Enabled := FALSE;
-  SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+  if ValidateGameName(edGameName.Text, err) then
+  begin
+    acOK.Enabled := FALSE;
+    SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+  end;
+
+  if err <> '' then
+    MessageDlg(err, mtError, [mbOK], 0);
 end;
 
 procedure TfrmCreateGame.CSRCreateGameOk(const AMessage: TMessageItem);

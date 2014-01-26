@@ -47,6 +47,8 @@ procedure TfrmJoinClub.edClubIDPropertiesChange(Sender: TObject);
 begin
   if edClubID.Value > edClubID.Properties.MaxValue then
     edClubID.Value := edClubID.Properties.MaxValue;
+  if edClubID.Value < 1 then
+    edClubID.Value := 1;
 end;
 
 procedure TfrmJoinClub.FormCreate(Sender: TObject);

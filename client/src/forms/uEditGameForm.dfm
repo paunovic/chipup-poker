@@ -3,7 +3,7 @@ object frmEditGame: TfrmEditGame
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Edit Table'
-  ClientHeight = 197
+  ClientHeight = 196
   ClientWidth = 376
   Color = clWindow
   Ctl3D = False
@@ -19,7 +19,7 @@ object frmEditGame: TfrmEditGame
   OnShow = FormShow
   DesignSize = (
     376
-    197)
+    196)
   PixelsPerInch = 96
   TextHeight = 14
   object edGameName: TcxTextEdit
@@ -45,7 +45,7 @@ object frmEditGame: TfrmEditGame
   end
   object btOK: TcxButton
     Left = 169
-    Top = 158
+    Top = 157
     Width = 93
     Height = 27
     Action = acOK
@@ -58,10 +58,11 @@ object frmEditGame: TfrmEditGame
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 158
   end
   object btCancel: TcxButton
     Left = 268
-    Top = 158
+    Top = 157
     Width = 93
     Height = 27
     Action = acCancel
@@ -74,6 +75,7 @@ object frmEditGame: TfrmEditGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 158
   end
   object lbsSeats: TcxLabel
     Left = 18

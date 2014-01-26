@@ -3,7 +3,7 @@ object frmGiveChips: TfrmGiveChips
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Give Chips To Player'
-  ClientHeight = 143
+  ClientHeight = 140
   ClientWidth = 359
   Color = clWindow
   Ctl3D = False
@@ -21,7 +21,7 @@ object frmGiveChips: TfrmGiveChips
   OnShow = FormShow
   DesignSize = (
     359
-    143)
+    140)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsClubName: TcxLabel
@@ -96,7 +96,7 @@ object frmGiveChips: TfrmGiveChips
   end
   object btOK: TcxButton
     Left = 155
-    Top = 104
+    Top = 101
     Width = 93
     Height = 27
     Action = acOK
@@ -109,10 +109,11 @@ object frmGiveChips: TfrmGiveChips
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 104
   end
   object btCancel: TcxButton
     Left = 256
-    Top = 104
+    Top = 101
     Width = 93
     Height = 27
     Action = acCancel
@@ -125,6 +126,7 @@ object frmGiveChips: TfrmGiveChips
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 104
   end
   object alChipTransfer: TActionList
     Left = 44

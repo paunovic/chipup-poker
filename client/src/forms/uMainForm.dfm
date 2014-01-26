@@ -1,9 +1,11 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  ClientHeight = 575
-  ClientWidth = 940
+  ClientHeight = 618
+  ClientWidth = 973
   Color = clWindow
+  Constraints.MinHeight = 600
+  Constraints.MinWidth = 800
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,17 +18,18 @@ object frmChipUpMain: TfrmChipUpMain
   OnCloseQuery = FormCloseQuery
   OnDestroy = FormDestroy
   DesignSize = (
-    940
-    575)
+    973
+    618)
   PixelsPerInch = 96
   TextHeight = 14
   object gridJoinedClubs: TcxGrid
     Left = 8
     Top = 184
     Width = 290
-    Height = 383
-    Anchors = [akLeft, akBottom]
+    Height = 426
+    Anchors = [akLeft, akTop, akBottom]
     TabOrder = 0
+    ExplicitHeight = 383
     object gridJoinedClubsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridJoinedClubsTableCellDblClick
@@ -62,6 +65,7 @@ object frmChipUpMain: TfrmChipUpMain
       object gridJoinedClubsStatus: TcxGridColumn
         Caption = 'Status'
         PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
         HeaderAlignmentHorz = taCenter
         SortIndex = 0
         SortOrder = soAscending
@@ -78,7 +82,6 @@ object frmChipUpMain: TfrmChipUpMain
     Width = 157
     Height = 40
     Action = acShowCreateClubForm
-    Anchors = [akLeft, akBottom]
     Caption = 'CREATE CLUB'
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 1
@@ -95,7 +98,6 @@ object frmChipUpMain: TfrmChipUpMain
     Width = 157
     Height = 40
     Action = acShowJoinClubForm
-    Anchors = [akLeft, akBottom]
     Caption = 'JOIN CLUB'
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 2
@@ -109,10 +111,12 @@ object frmChipUpMain: TfrmChipUpMain
   object gridGames: TcxGrid
     Left = 304
     Top = 184
-    Width = 628
-    Height = 383
-    Anchors = [akLeft, akBottom]
+    Width = 661
+    Height = 426
+    Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 3
+    ExplicitWidth = 628
+    ExplicitHeight = 383
     object gridGamesTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridGamesTableCellDblClick
@@ -187,7 +191,6 @@ object frmChipUpMain: TfrmChipUpMain
     Width = 290
     Height = 40
     Action = acOpenClubLobby
-    Anchors = [akLeft, akBottom]
     Caption = 'OPEN CLUB LOBBY'
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 4

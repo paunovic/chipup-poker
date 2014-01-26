@@ -3,7 +3,7 @@ object frmJoinClub: TfrmJoinClub
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Join Club'
-  ClientHeight = 121
+  ClientHeight = 120
   ClientWidth = 292
   Color = clWindow
   Ctl3D = False
@@ -22,7 +22,7 @@ object frmJoinClub: TfrmJoinClub
   OnShow = FormShow
   DesignSize = (
     292
-    121)
+    120)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsClubID: TcxLabel
@@ -66,14 +66,17 @@ object frmJoinClub: TfrmJoinClub
     Top = 17
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxValue = 999999999.000000000000000000
+    Properties.MinValue = 1.000000000000000000
     Properties.SpinButtons.Visible = False
+    Properties.ValueType = vtInt
     Properties.OnChange = edClubIDPropertiesChange
     TabOrder = 0
+    Value = 1
     Width = 179
   end
   object btOK: TcxButton
     Left = 85
-    Top = 82
+    Top = 81
     Width = 93
     Height = 27
     Action = acOk
@@ -86,10 +89,11 @@ object frmJoinClub: TfrmJoinClub
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 82
   end
   object btCancel: TcxButton
     Left = 184
-    Top = 82
+    Top = 81
     Width = 93
     Height = 27
     Action = acCancel
@@ -102,6 +106,7 @@ object frmJoinClub: TfrmJoinClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 82
   end
   object alJoinClub: TActionList
     Left = 24

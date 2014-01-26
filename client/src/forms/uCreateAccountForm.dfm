@@ -3,7 +3,7 @@ object frmCreateAccount: TfrmCreateAccount
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Create New Account'
-  ClientHeight = 264
+  ClientHeight = 258
   ClientWidth = 336
   Color = clWindow
   Ctl3D = False
@@ -71,7 +71,7 @@ object frmCreateAccount: TfrmCreateAccount
   end
   object btSignUp: TcxButton
     Left = 188
-    Top = 212
+    Top = 206
     Width = 130
     Height = 36
     Action = acSignUp
@@ -162,7 +162,7 @@ object frmCreateAccount: TfrmCreateAccount
   end
   object alCreateAccount: TActionList
     Left = 44
-    Top = 216
+    Top = 196
     object acSignUp: TAction
       Caption = 'SIGN ME UP'
       OnExecute = acSignUpExecute
