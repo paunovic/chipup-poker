@@ -98,6 +98,8 @@ type
     procedure CSREGameDelete(const AMessage: TMessageItem);
     procedure CSRTableStatus(const AMessage: TMessageItem);
 
+    function ConfirmToCloseTables: Boolean;
+
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
     procedure ConfigureGUI;
@@ -137,8 +139,7 @@ end;
 
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  if dmMain.Tables.SittingCount > 0 then
-    CanClose := MessageDlg('If you close the application, you will automatically leave the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
+  CanClose := ConfirmToCloseTables;
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
@@ -200,6 +201,7 @@ begin
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
+  dmMain.Tables.CloseAllWithoutNotification;
 end;
 
 function TfrmChipUpMain.ShowLoginForm: Integer;
@@ -257,6 +259,9 @@ end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
+  if not ConfirmToCloseTables then
+    Exit;
+
   SocketClient.Logout;
 end;
 
@@ -322,6 +327,13 @@ begin
 
   UpdateClublist;
   UpdateGamelist;
+end;
+
+function TfrmChipUpMain.ConfirmToCloseTables: Boolean;
+begin
+  result := TRUE;
+  if dmMain.Tables.SittingCount > 0 then
+    result := MessageDlg('If you close the application, you will automatically leave the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmChipUpMain.UpdateClublist;
@@ -455,10 +467,7 @@ var
   pbstatus: TPB_StatusReply;
 begin
   pbstatus := AMessage.Object_ as TPB_StatusReply;
-
-  dmMain.SelfInfo.LoadFromStatusProtobuf(pbstatus);
-  dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
-  dmMain.Players.ParseStatus(pbstatus);
+  dmMain.ProcessStatusProtobuf(pbstatus);
   ConfigureGUI;
 end;
 

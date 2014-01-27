@@ -272,11 +272,7 @@ var
   pbstatus: TPB_StatusReply;
 begin
   pbstatus := AMessage.Object_ as TPB_StatusReply;
-
-  dmMain.SelfInfo.LoadFromStatusProtobuf(pbstatus);
-  dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
-  dmMain.Players.ParseStatus(pbstatus);
-
+  dmMain.ProcessStatusProtobuf(pbstatus);
   if FLoginSuccess then
     ModalResult := mrOk;
 end;

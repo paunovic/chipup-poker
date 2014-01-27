@@ -14,6 +14,7 @@ type
     FGame        : TGameInfo;
     FClub        : TClubInfo;
     FTablesObject: TObject;
+    FNotifyServer: Boolean;
 
   public
     constructor Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
@@ -35,27 +36,34 @@ type
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
     function FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;
+    procedure CloseAllWithoutNotification;
   end;
 
 
 implementation
 
 uses
-  Vcl.Controls, uTableForm, uCommon;
+  Vcl.Controls, uTableForm, uCommon, uSocketClient;
 
 
 constructor TTable.Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
 begin
+  FNotifyServer := TRUE;
   FSeatIndex := -1;
   FGame := AGame;
   FClub := AClub;
   FTablesObject := ATablesObject;
   FForm := TfrmTable.Create(self);
+
+  SocketClient.JoinTable(FGame.MongoId);
 end;
 
 destructor TTable.Destroy;
 begin
   FForm.Free;
+
+  if FNotifyServer then
+    SocketClient.LeaveTable(FGame.MongoId);
 
   inherited;
 end;
@@ -119,6 +127,15 @@ begin
     if CompareBytes(AGameId, ToArray[C1].Game.MongoId, game_len) then
       Exit(C1);
   Exit(-1);
+end;
+
+procedure TTables.CloseAllWithoutNotification;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to Length(ToArray) - 1 do
+    ToArray[C1].FNotifyServer := FALSE;
+  Clear;
 end;
 
 function TTables.FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;

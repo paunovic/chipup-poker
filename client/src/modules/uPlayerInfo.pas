@@ -41,7 +41,7 @@ type
     function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer; const AAvatarId: TBytes): TPlayerInfo; overload;
     function AddPlayer(const AUser: TPB_User): TPlayerInfo; overload;
     function FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
-    function ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
+    procedure LoadFromUsersProtobuf(const AUsers: TPB_Users);
   end;
 
 implementation
@@ -138,15 +138,12 @@ begin
   Exit(FALSE);
 end;
 
-function TPlayerInfos.ParseStatus(const AStatusReply: TPB_StatusReply): Boolean;
+procedure TPlayerInfos.LoadFromUsersProtobuf(const AUsers: TPB_Users);
 var
-  C1: Integer;
+  user: TPB_User;
 begin
-  Clear;
-  for C1 := 0 to AStatusReply.Users.Count - 1 do
-    AddPlayer(AStatusReply.Users[C1].MongoId, AStatusReply.Users[C1].DisplayName, AStatusReply.Users[C1].EMail, AStatusReply.Users[C1].Chips, AStatusReply.Users[C1].Avatar);
-
-  Exit(TRUE);
+  for user in AUsers do
+    AddPlayer(user.MongoId, user.DisplayName, user.EMail, user.Chips, user.Avatar);
 end;
 
 end.

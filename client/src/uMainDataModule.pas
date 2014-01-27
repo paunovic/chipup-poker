@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, cxLabel,
-  uPlayerInfo, uServerSettings, uTables, uAvatars;
+  uPlayerInfo, uServerSettings, uTables, uAvatars, uPB_StatusReply;
 
 type
   TdmMain = class(TDataModule)
@@ -19,6 +19,8 @@ type
     FAvatars       : TAvatars;
 
   public
+    procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
+
     procedure OpenBuyChipsLink;
     procedure OpenTOSLink;
 
@@ -80,6 +82,13 @@ end;
 procedure TdmMain.OpenTOSLink;
 begin
   ShellOpen(PChar(Settings.Hardcoded.URL.TOS));
+end;
+
+procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
+begin
+  FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
+  FAvatars.AddAvatar(FSelfInfo.AvatarId);
+  FPlayers.LoadFromUsersProtobuf(AStatusProtobuf.Users);
 end;
 
 

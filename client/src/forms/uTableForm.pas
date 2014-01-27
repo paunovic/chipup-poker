@@ -84,8 +84,6 @@ procedure TfrmTable.FormCreate(Sender: TObject);
 begin
   FLastTableStatus := TPB_TableStatus.Create;
 
-  SocketClient.JoinTable(FTable.Game.MongoId);
-
   reChat.Lines.Clear;
 
   FFormAspectRatio := Width / Height;
@@ -108,8 +106,6 @@ begin
   FMF_Table.Free;
   FImg_Background.Free;
   FPaintBoxBitmap.Free;
-
-  SocketClient.LeaveTable(FTable.Game.MongoId);
 
   FLastTableStatus.Free;
 end;
