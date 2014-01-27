@@ -181,8 +181,9 @@ begin
       EnableGUI(FALSE);
     end;
     wsConnected: begin
-      CurrentStatus := lsConnected;
-      EnableGUI(TRUE);
+      if SocketClient.IsConnected then
+        CurrentStatus := lsConnected;
+      EnableGUI(SocketClient.IsConnected);
     end;
     wsClosed: begin
       CurrentStatus := lsConnecting;

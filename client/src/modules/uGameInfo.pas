@@ -47,6 +47,8 @@ type
 
   TGamesInfo = class(TObjectList<TGameInfo>)
   public
+    procedure UpdateFromProtobufObjects(const AProtobufObjects: TPB_Games);
+
     function AddGame(const AProtobufObject: TPB_Game): TGameInfo;
     function FindGame(const AMongoId: TBytes; var AGameInfo: TGameInfo): Boolean;
     function IndexOf(const AMongoId: TBytes): Integer;
@@ -147,5 +149,13 @@ begin
   Exit(-1);
 end;
 
+procedure TGamesInfo.UpdateFromProtobufObjects(const AProtobufObjects: TPB_Games);
+var
+  game: TPB_Game;
+begin
+  Clear;
+  for game in AProtobufObjects do
+    AddGame(game);
+end;
 
 end.

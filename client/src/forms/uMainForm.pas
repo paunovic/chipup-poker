@@ -571,6 +571,7 @@ procedure TfrmChipUpMain.CSRClubCommand(const AMessage: TMessageItem);
 var
   pbreply    : TPB_ClubCommandReply;
   C1         : Integer;
+  club       : TClubInfo;
   player     : TPlayerInfo;
   query_users: TArray<TBytes>;
 begin
@@ -578,7 +579,8 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
-      dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
+      club := dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
+      club.Games.UpdateFromProtobufObjects(pbreply.Games);
 
       SetLength(query_users, 0);
       for C1 := 0 to Length(pbreply.Club.Members) - 1 do
