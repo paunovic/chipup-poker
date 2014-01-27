@@ -10,15 +10,16 @@ type
   private
     type
       THardcodedSettingsRec = record
-                                VERSION            : String;
-                                INSTANCE_MUTEX_NAME: String;
-                                SETTINGS_FILENAME  : String;
-                                AVATARS_SUBDIR     : String;
-                                TCP_SERVER_ADDRESS : String;
-                                TCP_SERVER_PORT    : Word;
-                                TCP_PING_INTERVAL  : Word;
-                                TCP_PING_TIMEOUT   : Word;
-                                URL                : record
+                                VERSION                : String;
+                                INSTANCE_MUTEX_NAME    : String;
+                                SETTINGS_FILENAME      : String;
+                                SETTINGS_ENCRYPTION_KEY: String;
+                                AVATARS_SUBDIR         : String;
+                                TCP_SERVER_ADDRESS     : String;
+                                TCP_SERVER_PORT        : Word;
+                                TCP_PING_INTERVAL      : Word;
+                                TCP_PING_TIMEOUT       : Word;
+                                URL                    : record
                                   TOS          : String;
                                   BUY_CHIPS    : String;
                                   GET_AVATAR   : String;
@@ -36,6 +37,7 @@ type
 
                                            // filenames
                                            SETTINGS_FILENAME: 'settings.dat';
+                                           SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
                                            AVATARS_SUBDIR: 'avatars';
 
                                            // socket server

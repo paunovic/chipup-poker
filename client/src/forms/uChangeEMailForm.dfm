@@ -5,7 +5,7 @@ object frmChangeEMail: TfrmChangeEMail
   Caption = 'Change E-mail Address'
   ClientHeight = 174
   ClientWidth = 428
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -37,7 +37,7 @@ object frmChangeEMail: TfrmChangeEMail
     Style.Font.Color = clWindowText
     Style.Font.Height = -11
     Style.Font.Name = 'Arial'
-    Style.Font.Style = [fsBold]
+    Style.Font.Style = []
     Style.TextColor = clRed
     Style.TextStyle = []
     Style.IsFontAssigned = True

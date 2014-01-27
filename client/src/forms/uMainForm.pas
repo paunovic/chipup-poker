@@ -8,36 +8,17 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, dxSkinDarkRoom, uGameInfo, cxBlobEdit;
+  uMessageItem, uGameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, AdvMenus, dxGDIPlusClasses;
 
 type
   TfrmChipUpMain = class(TForm)
-    alMainForm: TActionList;
-    acLogout: TAction;
-    MainMenu: TMainMenu;
-    mmiAccount: TMenuItem;
-    mmiClubs: TMenuItem;
-    mmiOptions: TMenuItem;
-    mmiLogout: TMenuItem;
-    tiBringToFront: TTimer;
     gridJoinedClubsLevel: TcxGridLevel;
     gridJoinedClubs: TcxGrid;
     gridJoinedClubsTable: TcxGridTableView;
     gridJoinedClubsClubName: TcxGridColumn;
-    acShowCreateClubForm: TAction;
     gridJoinedClubsId: TcxGridColumn;
-    acShowJoinClubForm: TAction;
     SkinController: TdxSkinController;
-    mmiSeparator1: TMenuItem;
-    mmiChangeEMail: TMenuItem;
-    mmiChangePassword: TMenuItem;
-    mmiChangeAvatar: TMenuItem;
-    mmiBuyChips: TMenuItem;
-    acBuyChips: TAction;
-    acShowChangeEMailForm: TAction;
-    acShowChangePasswordForm: TAction;
-    acShowChangeAvatarForm: TAction;
-    mmiCashier: TMenuItem;
     gridJoinedClubsStatus: TcxGridColumn;
     btCreateClub: TcxButton;
     btJoinClub: TcxButton;
@@ -50,14 +31,28 @@ type
     gridGamesBlinds: TcxGridColumn;
     gridGamesPlayers: TcxGridColumn;
     gridGamesStatus: TcxGridColumn;
-    SearchPublicClubs1: TMenuItem;
-    acShowPublicGamesListForm: TAction;
     btOpenClubLobby: TcxButton;
-    cxLabel1: TcxLabel;
+    cxImage1: TcxImage;
+    ActionManager: TActionManager;
+    acLogout: TAction;
+    acShowChangeEMailForm: TAction;
+    acShowChangePasswordForm: TAction;
+    acShowChangeAvatarForm: TAction;
+    acShowCreateClubForm: TAction;
+    acShowPublicClubsListForm: TAction;
+    acShowJoinClubForm: TAction;
     acShowGameTableForm: TAction;
     acOpenClubLobby: TAction;
+    MainMenu: TMainMenu;
+    Account1: TMenuItem;
+    Clubs1: TMenuItem;
+    ChangeEmailAddress1: TMenuItem;
+    ChangePassword1: TMenuItem;
+    ChangeAvatar1: TMenuItem;
+    N1: TMenuItem;
+    Logout1: TMenuItem;
+    SearchPublicClubs1: TMenuItem;
     procedure acLogoutExecute(Sender: TObject);
-    procedure tiBringToFrontTimer(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
     procedure acShowJoinClubFormExecute(Sender: TObject);
@@ -67,12 +62,12 @@ type
     procedure acShowChangePasswordFormExecute(Sender: TObject);
     procedure acShowChangeAvatarFormExecute(Sender: TObject);
     procedure gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-    procedure acShowPublicGamesListFormExecute(Sender: TObject);
     procedure gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowGameTableFormExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure acOpenClubLobbyExecute(Sender: TObject);
+    procedure acShowPublicClubsListFormExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -217,7 +212,7 @@ begin
     MessageContainer.AddMessageHandler(Handle);
     ConfigureGUI;
     Show;
-    tiBringToFront.Enabled := TRUE;
+//    tiBringToFront.Enabled := TRUE;
   end
   else
   begin
@@ -234,12 +229,6 @@ begin
       ShowLoginForm;
     end;
   end;
-end;
-
-procedure TfrmChipUpMain.tiBringToFrontTimer(Sender: TObject);
-begin
-  BringToFront;
-  tiBringToFront.Enabled := FALSE;
 end;
 
 function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
@@ -294,7 +283,7 @@ end;
 
 procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
-  RunModalForM(TfrmCreateClub, self, []);
+  RunModalForm(TfrmCreateClub, self, []);
 end;
 
 procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
@@ -316,7 +305,7 @@ begin
   RunModalForm(TfrmJoinClub, self, []);
 end;
 
-procedure TfrmChipUpMain.acShowPublicGamesListFormExecute(Sender: TObject);
+procedure TfrmChipUpMain.acShowPublicClubsListFormExecute(Sender: TObject);
 begin
   RunModalForm(TfrmPublicClubsList, self, []);
 end;

@@ -5,7 +5,7 @@ object frmPublicClubsList: TfrmPublicClubsList
   Caption = 'Public Clubs List'
   ClientHeight = 416
   ClientWidth = 477
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

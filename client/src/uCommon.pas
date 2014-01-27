@@ -9,7 +9,6 @@ var
   SelfPath          : String;
   AppDataLocalPath  : String;
   AppDataRoamingPath: String;
-  HardwareUID       : String;
 
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
@@ -36,7 +35,7 @@ function GetSpecialFolderPath(const ACSIDL: Integer): String;
 implementation
 
 uses
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, uSMBIOS, Winapi.ShlObj,
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj,
   uIFormParams;
 
 
@@ -378,49 +377,6 @@ begin
   SetLength(Result, J-1);
 end;
 
-procedure MakeHardwareUID;
-var
-  smb    : TSMBios;
-  cpuinfo: TProcessorInformation;
-  bbinfo : TBaseBoardInformation;
-  str    : AnsiString;
-  C1     : Integer;
-begin
-  str := '';
-
-  if IsInWine then
-    str := '123456789linux'
-  else
-  begin
-    smb := TSMBios.Create;
-    try
-      if smb.HasBaseBoardInfo then
-        for bbinfo in smb.BaseBoardInfo do
-        begin
-          str := str + bbinfo.ManufacturerStr;
-          str := str + bbinfo.SerialNumberStr;
-        end;
-
-      if smb.HasProcessorInfo then
-        for cpuinfo in smb.ProcessorInfo do
-        begin
-          str := str + cpuinfo.ProcessorManufacturerStr;
-          str := str + cpuinfo.SerialNumberStr;
-        end;
-    finally
-      smb.Free;
-    end;
-
-    if str = '' then
-      str := '12345689default';
-  end;
-
-  for C1 := 1 to Length(str) do
-    str[C1] := AnsiChar(Ord(str[C1]) xor 3);
-
-  HardwareUID := String(str);
-end;
-
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 var
   slash_pos: Integer;
@@ -531,7 +487,6 @@ end;
 
 
 initialization
-  MakeHardwareUID;
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   AppDataLocalPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
   AppDataRoamingPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_APPDATA)) + 'ChipUP Poker');

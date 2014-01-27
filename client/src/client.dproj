@@ -146,6 +146,7 @@
 			<DCCReference Include="forms\uTableSitForm.pas">
 				<Form>frmTableSit</Form>
 			</DCCReference>
+			<DCCReference Include="skins\ChipUpDarkStyle\dxsChipUpDark.pas"/>
 			<DCCReference Include="modules\uServerSettings.pas"/>
 			<DCCReference Include="forms\uIFormParams.pas"/>
 			<DCCReference Include="modules\settings\uSettings.pas"/>
@@ -196,7 +197,6 @@
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
 			<DCCReference Include="forms\uClubLobbyForm.pas">
 				<Form>frmClubLobby</Form>
-				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeSuspendState.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_RegisterReply.pas"/>

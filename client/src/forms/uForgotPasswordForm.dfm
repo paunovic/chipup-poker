@@ -5,7 +5,7 @@ object frmForgotPassword: TfrmForgotPassword
   Caption = 'Forgot password'
   ClientHeight = 131
   ClientWidth = 305
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText

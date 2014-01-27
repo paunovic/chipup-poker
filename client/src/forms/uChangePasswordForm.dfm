@@ -5,7 +5,7 @@ object frmChangePassword: TfrmChangePassword
   Caption = 'Change Password'
   ClientHeight = 137
   ClientWidth = 301
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

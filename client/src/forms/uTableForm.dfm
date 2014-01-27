@@ -5,7 +5,7 @@ object frmTable: TfrmTable
   Caption = 'Table'
   ClientHeight = 456
   ClientWidth = 600
-  Color = clWindow
+  Color = clBlack
   Constraints.MaxHeight = 1080
   Constraints.MaxWidth = 1538
   Constraints.MinHeight = 427

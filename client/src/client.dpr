@@ -25,6 +25,7 @@ uses
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
+  dxsChipUpDark in 'skins\ChipUpDarkStyle\dxsChipUpDark.pas',
   uServerSettings in 'modules\uServerSettings.pas',
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',

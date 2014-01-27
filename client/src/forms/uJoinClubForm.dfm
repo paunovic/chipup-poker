@@ -5,7 +5,7 @@ object frmJoinClub: TfrmJoinClub
   Caption = 'Join Club'
   ClientHeight = 120
   ClientWidth = 292
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -89,7 +89,6 @@ object frmJoinClub: TfrmJoinClub
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 82
   end
   object btCancel: TcxButton
     Left = 184
@@ -106,7 +105,6 @@ object frmJoinClub: TfrmJoinClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 82
   end
   object alJoinClub: TActionList
     Left = 24

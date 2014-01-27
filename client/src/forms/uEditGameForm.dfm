@@ -5,7 +5,7 @@ object frmEditGame: TfrmEditGame
   Caption = 'Edit Table'
   ClientHeight = 196
   ClientWidth = 376
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -58,7 +58,6 @@ object frmEditGame: TfrmEditGame
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 158
   end
   object btCancel: TcxButton
     Left = 268
@@ -75,7 +74,6 @@ object frmEditGame: TfrmEditGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 158
   end
   object lbsSeats: TcxLabel
     Left = 18

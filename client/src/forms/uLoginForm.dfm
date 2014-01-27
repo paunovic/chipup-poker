@@ -6,7 +6,7 @@ object frmLogin: TfrmLogin
   Caption = 'Welcome to ChipUP Poker'
   ClientHeight = 368
   ClientWidth = 552
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -27,6 +27,12 @@ object frmLogin: TfrmLogin
     Top = 114
     Caption = 'Remember login'
     ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Tahoma'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
     TabOrder = 2
     Transparent = True
     Width = 129
@@ -151,7 +157,7 @@ object frmLogin: TfrmLogin
     end
   end
   object SkinController: TdxSkinController
-    SkinName = 'Darkroom'
+    SkinName = 'ChipUpDarkStyle'
     Left = 496
     Top = 12
   end

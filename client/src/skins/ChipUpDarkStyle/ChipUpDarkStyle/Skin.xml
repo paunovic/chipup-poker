@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dxSkin Version="1.1" Name="ChipUpDarkStyle" Parent="Darkroom">
+<Details>
+<SkinGroupName Value="Standard Skins"/>
+<DisplayName Value="ChipUpDarkStyle"/>
+<SkinIcon Name="16x16" Value="SkinIcon16x16.png"/>
+<SkinIcon Name="48x48" Value="SkinIcon48x48.png"/>
+</Details>
+<AdditionalProperties>
+<Colors/>
+<Properties/>
+</AdditionalProperties>
+<ControlParts Name="Bars">
+<Properties/>
+</ControlParts>
+<ControlParts Name="Common">
+<Properties/>
+</ControlParts>
+<ControlParts Name="Docking">
+<Properties/>
+</ControlParts>
+<ControlParts Name="Editors">
+<Properties/>
+</ControlParts>
+<ControlParts Name="Form">
+<Properties/>
+<Part Name="FormContent" Alpha="255" Color="0" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image ImageCount="1" Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph ImageCount="1" Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Grid">
+<Properties/>
+</ControlParts>
+<ControlParts Name="NavBar">
+<Properties/>
+</ControlParts>
+<ControlParts Name="NavPane">
+<Properties/>
+</ControlParts>
+<ControlParts Name="PageControl">
+<Properties/>
+</ControlParts>
+<ControlParts Name="PrintingSystem">
+<Properties/>
+</ControlParts>
+<ControlParts Name="Ribbon">
+<Properties/>
+</ControlParts>
+<ControlParts Name="Scheduler">
+<Properties/>
+</ControlParts>
+<ControlParts Name="TileControl">
+<Properties/>
+</ControlParts>
+<ControlParts Name="VerticalGrid">
+<Properties/>
+</ControlParts>
+</dxSkin>

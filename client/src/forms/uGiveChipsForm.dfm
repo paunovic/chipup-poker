@@ -5,7 +5,7 @@ object frmGiveChips: TfrmGiveChips
   Caption = 'Give Chips To Player'
   ClientHeight = 140
   ClientWidth = 359
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -109,7 +109,6 @@ object frmGiveChips: TfrmGiveChips
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 104
   end
   object btCancel: TcxButton
     Left = 256
@@ -126,7 +125,6 @@ object frmGiveChips: TfrmGiveChips
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 104
   end
   object alChipTransfer: TActionList
     Left = 44

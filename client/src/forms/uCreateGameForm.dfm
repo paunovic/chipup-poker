@@ -5,7 +5,7 @@ object frmCreateGame: TfrmCreateGame
   Caption = 'Create a Table'
   ClientHeight = 200
   ClientWidth = 376
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -72,7 +72,6 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 165
   end
   object btCancel: TcxButton
     Left = 268
@@ -89,7 +88,6 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 165
   end
   object cbGameType: TcxComboBox
     Left = 88

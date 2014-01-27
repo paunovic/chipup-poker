@@ -5,7 +5,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   Caption = 'Change Avatar'
   ClientHeight = 250
   ClientWidth = 226
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -66,7 +66,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 216
   end
   object btCancel: TcxButton
     Left = 118
@@ -83,7 +82,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 216
   end
   object imgAvatar: TcxImage
     Left = 38

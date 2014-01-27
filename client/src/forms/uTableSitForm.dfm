@@ -5,7 +5,7 @@ object frmTableSit: TfrmTableSit
   Caption = 'Table Sit Options'
   ClientHeight = 81
   ClientWidth = 226
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
