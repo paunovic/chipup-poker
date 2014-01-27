@@ -34,7 +34,7 @@ uses
   uValidators in 'modules\uValidators.pas',
   uPlayerInfo in 'modules\uPlayerInfo.pas',
   uClubInfo in 'modules\uClubInfo.pas',
-  uTables in 'modules\uTables.pas',
+  uTables in 'modules\table\uTables.pas',
   uGameInfo in 'modules\uGameInfo.pas',
   uInstanceController in 'modules\uInstanceController.pas',
   uAvatars in 'modules\uAvatars.pas',

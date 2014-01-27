@@ -155,7 +155,7 @@
 			<DCCReference Include="modules\uValidators.pas"/>
 			<DCCReference Include="modules\uPlayerInfo.pas"/>
 			<DCCReference Include="modules\uClubInfo.pas"/>
-			<DCCReference Include="modules\uTables.pas"/>
+			<DCCReference Include="modules\table\uTables.pas"/>
 			<DCCReference Include="modules\uGameInfo.pas"/>
 			<DCCReference Include="modules\uInstanceController.pas"/>
 			<DCCReference Include="modules\uAvatars.pas"/>
