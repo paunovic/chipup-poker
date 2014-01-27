@@ -495,12 +495,22 @@ class DelphiGenerator : public CodeGenerator {
 				string name = field->name();
 				UpperString(&name);
 				if (field->type() == FieldDescriptor::TYPE_INT32) {
-					printer.Print(
-						"      $name$: begin\n"
-						"        Assert(wire_type = WIRETYPE_VARINT);\n"
-						"        $pname$ := AProtobufReader.readInt32;\n"
-						"      end;\n","name",EnumName(field)
-						,"pname",PrivateFieldName(field));
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        SetLength($pname$, Length($pname$) + 1);\n"
+							"        $pname$[Length($pname$)-1] := AProtobufReader.readInt32;\n"
+							"      end;\n","name",EnumName(field)
+							,"pname",PrivateFieldName(field));
+					} else {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        $pname$ := AProtobufReader.readInt32;\n"
+							"      end;\n","name",EnumName(field)
+							,"pname",PrivateFieldName(field));
+					}
 				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
 					printer.Print(
 						"      $name$: begin\n"

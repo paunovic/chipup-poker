@@ -9,28 +9,28 @@ uses
   WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3);
+  TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3,teWinning = 4,teDealing = 5);
   TPB_TableEvent = class(TProtobufBaseObject)
   private
     const
       FN_EVENT = 1;
-      FN_SEAT = 2;
+      FN_SEATS = 2;
       FN_TABLE_MONGO_ID = 3;
 
     var
       FEvent: TTableEventType;
-      FSeat: Integer;
+      FSeats: TArray<Integer>;
       FTableMongoId: TBytes;
 
     procedure SetEvent(const AValue: TTableEventType);
-    procedure SetSeat(const AValue: Integer);
+    procedure SetSeats(const AValue: TArray<Integer>);
     procedure SetTableMongoId(const AValue: TBytes);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Event: TTableEventType read FEvent write SetEvent;
-    property Seat: Integer read FSeat write SetSeat;
+    property Seats: TArray<Integer> read FSeats write SetSeats;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
   end;
 
@@ -58,9 +58,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEvent := TTableEventType(AProtobufReader.readEnum);
       end;
-      FN_SEAT: begin
+      FN_SEATS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSeat := AProtobufReader.readInt32;
+        SetLength(FSeats, Length(FSeats) + 1);
+        FSeats[Length(FSeats)-1] := AProtobufReader.readInt32;
       end;
       FN_TABLE_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -77,10 +78,13 @@ begin
   ProtobufOutput.writeInt32(FN_EVENT, Integer(AValue));
 end;
 
-procedure TPB_TableEvent.SetSeat(const AValue: Integer);
+procedure TPB_TableEvent.SetSeats(const AValue: TArray<Integer>);
+var
+  C1: Integer;
 begin
-  FSeat := AValue;
-  ProtobufOutput.writeInt32(FN_SEAT, AValue);
+  FSeats := AValue;
+  for C1 := 0 to Length(FSeats) - 1 do
+    ProtobufOutput.writeInt32(FN_SEATS, AValue[C1]);
 end;
 
 procedure TPB_TableEvent.SetTableMongoId(const AValue: TBytes);
