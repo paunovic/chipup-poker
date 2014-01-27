@@ -309,8 +309,9 @@ message TableEvent {
 		teFold = 1;
 		teSit = 2;
 		teStandUp = 3;
+		teWinning = 4;
 	}
 	required TableEventType event = 1;
-	required int32 seat = 2;
+	repeated int32 seats = 2;
 	required bytes table_mongo_id = 3;
 }
