@@ -9,6 +9,7 @@ uses
   WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
+  TPlayerStatus = (psOutOfPlay = 1,psOutOfHand = 2,psInHand = 3,psFolded = 4);
   TPB_SeatInfo = class(TProtobufBaseObject)
   private
     const
@@ -17,7 +18,7 @@ type
       FN_CHIPS = 3;
       FN_CARD_COUNT = 4;
       FN_CARDS = 5;
-      FN_INHAND = 6;
+      FN_STATUS = 6;
 
     var
       FSeat: Integer;
@@ -25,14 +26,14 @@ type
       FChips: Integer;
       FCardCount: Integer;
       FCards: String;
-      FInhand: Boolean;
+      FStatus: TPlayerStatus;
 
     procedure SetSeat(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
     procedure SetChips(const AValue: Integer);
     procedure SetCardCount(const AValue: Integer);
     procedure SetCards(const AValue: String);
-    procedure SetInhand(const AValue: Boolean);
+    procedure SetStatus(const AValue: TPlayerStatus);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -42,7 +43,7 @@ type
     property Chips: Integer read FChips write SetChips;
     property CardCount: Integer read FCardCount write SetCardCount;
     property Cards: String read FCards write SetCards;
-    property Inhand: Boolean read FInhand write SetInhand;
+    property Status: TPlayerStatus read FStatus write SetStatus;
   end;
 
   TPB_SeatInfos = TObjectList<TPB_SeatInfo>;
@@ -85,8 +86,12 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FCards := String(AProtobufReader.readUtf8String);
       end;
-      else
-        AProtobufReader.skipField(tag);
+      FN_STATUS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FStatus := TPlayerStatus(AProtobufReader.readEnum);
+      end;
+    else
+      AProtobufReader.skipField(tag);
     end;
   end;
 end;
@@ -120,10 +125,10 @@ begin
   ProtobufOutput.writeString(FN_CARDS, AValue);
 end;
 
-procedure TPB_SeatInfo.SetInhand(const AValue: Boolean);
+procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
 begin
-  FInhand := AValue;
-  ProtobufOutput.writeBoolean(FN_INHAND, AValue);
+  FStatus := AValue;
+  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
 end;
 
 end.

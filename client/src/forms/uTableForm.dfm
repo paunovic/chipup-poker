@@ -115,7 +115,7 @@ object frmTable: TfrmTable
     end
   end
   object ActionManager: TActionManager
-    Left = 208
+    Left = 212
     Top = 180
     StyleName = 'Platform Default'
     object acStandUp: TAction
@@ -128,6 +128,7 @@ object frmTable: TfrmTable
       Category = 'Game'
       Caption = 'Fold'
       Enabled = False
+      OnExecute = acFoldExecute
     end
   end
 end

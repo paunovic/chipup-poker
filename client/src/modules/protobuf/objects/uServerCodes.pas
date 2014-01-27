@@ -70,7 +70,8 @@ type
     scTableStandUp = 524,
     scPing = 525,
     scSuspendPlayer = 526,
-    scGetPlayers = 527
+    scGetPlayers = 527,
+    scFold = 528
   );
 
 {$IFDEF DEBUG}
@@ -168,6 +169,7 @@ begin
     scPing: result := 'scPing';
     scSuspendPlayer: result := 'scSuspendPlayer';
     scGetPlayers: result := 'scGetPlayers';
+    scFold: result := 'scFold';
   end;
 end;
 {$ENDIF DEBUG}

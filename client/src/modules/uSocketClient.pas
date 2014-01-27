@@ -76,6 +76,7 @@ type
     procedure Ping;
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
     procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
+    procedure Fold(const AGameId: TBytes);
 
     property Socket: TSslWSocket read FSocket;
   end;
@@ -807,6 +808,20 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TSocketClient.Fold(const AGameId: TBytes);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoId := AGameId;
+    SendProtobuf(scFold, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 
 

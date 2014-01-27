@@ -30,6 +30,7 @@ type
     procedure acStandUpExecute(Sender: TObject);
     procedure PaintBoxClick(Sender: TObject);
     procedure edChatKeyPress(Sender: TObject; var Key: Char);
+    procedure acFoldExecute(Sender: TObject);
   private
     FFormAspectRatio: Double;
     FTable          : TTable;
@@ -442,7 +443,7 @@ begin
     end;
   end;
 
-  info := Format('S:%s SI:%d D:%d CS:%d [%s]', [FLastTableStatus.State, FTable.SeatIndex, FLastTableStatus.Dealer, FLastTableStatus.CurrentSeat, cards]);
+  info := Format('State: %s SeatIndex: %d [%s] CurrentSeat: %d Dealer: %d', [FLastTableStatus.State, FTable.SeatIndex, cards, FLastTableStatus.Dealer, FLastTableStatus.CurrentSeat]);
 
   lbsInfo.Caption := info;
 
@@ -458,6 +459,10 @@ begin
   btFold.Visible := acFold.Enabled;
 end;
 
+procedure TfrmTable.acFoldExecute(Sender: TObject);
+begin
+  SocketClient.Fold(FTable.Game.MongoId);
+end;
 
 end.
 
