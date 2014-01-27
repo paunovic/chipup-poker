@@ -52,6 +52,7 @@ object frmLogin: TfrmLogin
     Width = 170
     Height = 50
     Action = acLogin
+    Caption = 'Connecting...'
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 4
     Font.Charset = ANSI_CHARSET
@@ -120,22 +121,6 @@ object frmLogin: TfrmLogin
     Caption = 'Password:'
     ParentFont = False
     Transparent = True
-  end
-  object StatusBar: TdxStatusBar
-    Left = 0
-    Top = 348
-    Width = 552
-    Height = 20
-    Panels = <
-      item
-        PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
-      end>
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    Visible = False
   end
   object alLogin: TActionList
     Left = 28

@@ -9,6 +9,8 @@ uses
   cxButtons, cxCheckBox, OverbyteIcsWSocket, uMessageItem, dxsChipUpDark;
 
 type
+  TLoginStatus = (lsConnecting, lsConnected, lsLoggingIn);
+
   TfrmLogin = class(TForm)
     alLogin: TActionList;
     acLogin: TAction;
@@ -23,7 +25,6 @@ type
     edPassword: TcxTextEdit;
     lbsLogin: TcxLabel;
     lbsPassword: TcxLabel;
-    StatusBar: TdxStatusBar;
     SkinController: TdxSkinController;
     tiConnect: TTimer;
     procedure FormCreate(Sender: TObject);
@@ -36,11 +37,10 @@ type
     procedure tiConnectTimer(Sender: TObject);
   private
     FLoginSuccess: Boolean;
+    FCurrentStatus: TLoginStatus;
 
     procedure ApplySettings;
     procedure SaveSettings;
-
-    procedure SetStatus(const AStatus: String);
 
     procedure CSRLogin(const AMessage: TMessageItem);
     procedure CSRStatusReply(const AMessage: TMessageItem);
@@ -49,10 +49,12 @@ type
     procedure SocketChangeState(const AOldState, ANewState: TSocketState);
 
     procedure EnableGUI(const AEnable: Boolean);
+    procedure SetCurrentStatus(const AValue: TLoginStatus);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure WndProc(var AMessage: TMessage); override;
   public
+    property CurrentStatus: TLoginStatus read FCurrentStatus write SetCurrentStatus;
   end;
 
 implementation
@@ -68,6 +70,7 @@ uses
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
+  CurrentStatus := lsConnecting;
   FLoginSuccess := FALSE;
   edPassword.Properties.PasswordChar := Chr($25CF);
   ApplySettings;
@@ -91,8 +94,13 @@ procedure TfrmLogin.FormShow(Sender: TObject);
 begin
   MessageContainer.AddMessageHandler(Handle);
 
-  if SocketClient.Socket.State = wsClosed then
-    SocketClient.Connect;
+  case SocketClient.Socket.State of
+    wsClosed: begin
+      CurrentStatus := lsConnecting;
+      SocketClient.Connect;
+    end;
+    wsConnected: CurrentStatus := lsConnected;
+  end;
 end;
 
 procedure TfrmLogin.ApplySettings;
@@ -148,32 +156,41 @@ begin
   end;
 end;
 
-procedure TfrmLogin.SetStatus(const AStatus: String);
-begin
-  StatusBar.Panels[0].Text := ' ' + AStatus;
-end;
-
-procedure TfrmLogin.SocketChangeState(const AOldState, ANewState: TSocketState);
+procedure TfrmLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var
   status: String;
 begin
-  status := TrimLeft(StatusBar.Panels[0].Text);
+  FCurrentStatus := AValue;
 
+  case FCurrentStatus of
+    lsConnecting: status := 'Connecting...';
+    lsConnected: status := 'Login';
+    lsLoggingIn: status := 'Logging in...';
+  end;
+
+  btLogin.Caption := status;
+end;
+
+procedure TfrmLogin.SocketChangeState(const AOldState, ANewState: TSocketState);
+begin
   case ANewState of
     wsOpened,
     wsBound,
     wsConnecting: begin
-      status := 'Connecting to server...';
+      CurrentStatus := lsConnecting;
       EnableGUI(FALSE);
     end;
+    wsConnected: begin
+      CurrentStatus := lsConnected;
+      EnableGUI(TRUE);
+    end;
     wsClosed: begin
+      CurrentStatus := lsConnecting;
       EnableGUI(FALSE);
       SocketClient.Disconnect;
       tiConnect.Enabled := TRUE;
     end;
   end;
-
-  SetStatus(status)
 end;
 
 procedure TfrmLogin.tiConnectTimer(Sender: TObject);
@@ -201,7 +218,7 @@ end;
 
 procedure TfrmLogin.acLoginExecute(Sender: TObject);
 begin
-  SetStatus('Logging in...');
+  CurrentStatus := lsLoggingIn;
   EnableGUI(FALSE);
   SocketClient.Login(edLogin.Text, edPassword.Text);
 end;
@@ -239,8 +256,11 @@ begin
 
   edPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
 
-  SetStatus('');
   EnableGUI(SocketClient.IsConnected);
+  if SocketClient.IsConnected then
+    CurrentStatus := lsConnected
+  else
+    SocketClient.Disconnect;
 end;
 
 procedure TfrmLogin.CSRLogin(const AMessage: TMessageItem);
@@ -256,7 +276,7 @@ begin
       SocketClient.Status;
     end;
     lrInvalid: begin
-      SetStatus('');
+      CurrentStatus := lsConnected;
       MessageDlg('Invalid login/password', mtError, [mbOK], 0);
       EnableGUI(TRUE);
       edLogin.SetFocus;
