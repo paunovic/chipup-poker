@@ -54,13 +54,13 @@ Deck.prototype.shuffle = function shuffle(callback) {
 	recurse();
 }
 Deck.prototype.draw = function (count,hand) {
-	console.log('before:'+this.prettyPrint());
+	//console.log('before:'+this.prettyPrint());
 	var out = this.cards.splice(0,count);
-	console.log(out);
-	console.log('after:'+this.prettyPrint());
-	console.log('before2:',hand.cards);
+	//console.log(out);
+	//console.log('after:'+this.prettyPrint());
+	//console.log('before2:',hand.cards);
 	hand.cards = hand.cards.concat(out);
-	console.log('after2:',hand.cards);
+	//console.log('after2:',hand.cards);
 }
 function getRandom(size,callback) {
 	var buffer = new Buffer(size);

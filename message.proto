@@ -181,13 +181,12 @@ enum ServerCodes {
     srCreateGameOk = 42;
     srDeleteGameOk = 43;
     srEditGameOk = 44;
-    srTableStatus = 45;
-    srTableSitOk = 46;
-    srTableSitSeatTaken = 47;
-    srTableStandUpOk = 48;
-    srPong = 49;
-    srSuspendPlayerOk = 50;
-    srReinstatePlayerOk = 51;
+    srTableSitOk = 45;
+    srTableSitSeatTaken = 46;
+    srTableStandUpOk = 47;
+    srPong = 48;
+    srSuspendPlayerOk = 49;
+    srReinstatePlayerOk = 50;
 
     seChat = 200;
     seSecondaryLoginDetected = 201;
@@ -198,6 +197,7 @@ enum ServerCodes {
 	seGameCreate = 206;
 	seGameDelete = 207;
 	seTableEvent = 208;
+	seTableStatus = 209;
 
     scLogin = 501;
     scStatus = 502;
@@ -306,10 +306,11 @@ message GetUserParams {
 
 message TableEvent {
 	enum TableEventType {
-		teFolded = 1;
+		teFold = 1;
 		teSit = 2;
 		teStandUp = 3;
 	}
 	required TableEventType event = 1;
 	required int32 seat = 2;
+	required bytes table_mongo_id = 3;
 }
