@@ -88,8 +88,8 @@ object frmTable: TfrmTable
       end
     end
     object btStandUp: TcxButton
-      Left = 388
-      Top = 34
+      Left = 296
+      Top = 38
       Width = 97
       Height = 34
       Action = acStandUp
@@ -103,14 +103,31 @@ object frmTable: TfrmTable
       Caption = 'lbsInfo'
       Transparent = True
     end
+    object btFold: TcxButton
+      Left = 399
+      Top = 38
+      Width = 97
+      Height = 34
+      Action = acFold
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 3
+      Visible = False
+    end
   end
-  object alTable: TActionList
-    Left = 28
-    Top = 16
+  object ActionManager: TActionManager
+    Left = 208
+    Top = 180
+    StyleName = 'Platform Default'
     object acStandUp: TAction
+      Category = 'Game'
       Caption = 'Stand Up'
       Enabled = False
       OnExecute = acStandUpExecute
+    end
+    object acFold: TAction
+      Category = 'Game'
+      Caption = 'Fold'
+      Enabled = False
     end
   end
 end

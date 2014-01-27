@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SynGdiPlus, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons,
-  Vcl.ActnList, cxLabel, uTables, cxTextEdit, uPB_TableStatus, dxsChipUpDark;
+  Vcl.ActnList, cxLabel, uTables, cxTextEdit, uPB_TableStatus, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan;
 
 type
   TfrmTable = class(TForm)
@@ -16,9 +16,11 @@ type
     edChat: TcxTextEdit;
     reChat: TRichEdit;
     btStandUp: TcxButton;
-    alTable: TActionList;
-    acStandUp: TAction;
     lbsInfo: TcxLabel;
+    btFold: TcxButton;
+    ActionManager: TActionManager;
+    acStandUp: TAction;
+    acFold: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -72,7 +74,7 @@ constructor TfrmTable.Create(const ATable: TTable);
 begin
   inherited Create(nil);
 
-  alTable.State := asSuspended;
+  ActionManager.State := asSuspended;
 
   if not Assigned(Gdip) then
     Gdip := TGDIPlusFull.Create('gdiplus.dll');
@@ -221,10 +223,10 @@ end;
 
 procedure TfrmTable.Redraw(const APaintboxRepaint: Boolean = FALSE);
 var
-  w, h: Integer;
-  R   : TRect;
-  X, Y: Integer;
-  C1  : Integer;
+  w, h       : Integer;
+  R          : TRect;
+  X, Y       : Integer;
+  C1         : Integer;
   player_info: TPlayerInfo;
   avatar     : TAvatar;
   seat_point : TPoint;
@@ -257,6 +259,10 @@ begin
   for C1 := 0 to FTable.Game.Seats - 1 do
     DrawSeat(C1);
 
+  // dealer button
+  seat_point := GetSeatPoint(FLastTableStatus.Dealer);
+  FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 2, seat_point.Y + 17, 'D');
+
   // draw avatars
   if Assigned(FLastTableStatus) then
     if Assigned(FLastTableStatus.Seats) then
@@ -285,19 +291,19 @@ begin
   case FTable.Game.Seats of
     2: begin
       case ASeatIndex of
-        0: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2, 50 + FMF_Table.Height div 2);
-        1: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2 + FMF_Table.Width, 50 + FMF_Table.Height div 2);
+        1: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2, 50 + FMF_Table.Height div 2);
+        0: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2 + FMF_Table.Width, 50 + FMF_Table.Height div 2);
       end;
     end;
 
     6: begin
       case ASeatIndex of
-        0: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2, 50 + FMF_Table.Height div 2 - 40);
-        1: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2, 50 + FMF_Table.Height div 2 + 40);
-        2: result := TPoint.Create(FPaintBoxBitmap.Width div 2 - 120, 50 + FMF_Table.Height);
-        3: result := TPoint.Create(FPaintBoxBitmap.Width div 2 + 120, 50 + FMF_Table.Height);
-        4: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2 + FMF_Table.Width, 50 + FMF_Table.Height div 2 + 40);
-        5: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2 + FMF_Table.Width, 50 + FMF_Table.Height div 2 - 40);
+        5: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2, 50 + FMF_Table.Height div 2 - 40);
+        4: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2, 50 + FMF_Table.Height div 2 + 40);
+        3: result := TPoint.Create(FPaintBoxBitmap.Width div 2 - 120, 50 + FMF_Table.Height);
+        2: result := TPoint.Create(FPaintBoxBitmap.Width div 2 + 120, 50 + FMF_Table.Height);
+        1: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2 + FMF_Table.Width, 50 + FMF_Table.Height div 2 + 40);
+        0: result := TPoint.Create((FPaintBoxBitmap.Width - FMF_Table.Width) div 2 + FMF_Table.Width, 50 + FMF_Table.Height div 2 - 40);
       end;
     end;
   end;
@@ -329,6 +335,9 @@ var
   seat: TPB_SeatInfo;
 begin
   ATarget.TableMongoId := ASource.TableMongoId;
+  ATarget.State := ASource.State;
+  ATarget.Dealer := ASource.Dealer;
+  ATarget.CurrentSeat := ASource.CurrentSeat;
 
   if not Assigned(ATarget.Seats) then
     ATarget.Seats := TPB_SeatInfos.Create;
@@ -402,6 +411,7 @@ procedure TfrmTable.CSRTableStatus(const AMessage: TMessageItem);
 var
   pbtablestatus: TPB_TableStatus;
   C1: Integer;
+  info, cards: String;
 begin
   pbtablestatus := AMessage.Object_ as TPB_TableStatus;
   if not CompareBytes(pbtablestatus.TableMongoId, FTable.Game.MongoId) then
@@ -411,8 +421,8 @@ begin
 
   Redraw(TRUE);
 
-  if alTable.State = asSuspended then
-    alTable.State := asNormal;
+  if ActionManager.State = asSuspended then
+    ActionManager.State := asNormal;
 
   case AMessage.MethodId of
     Integer(srTableStandUpOk): begin
@@ -422,18 +432,30 @@ begin
     end;
   end;
 
-  lbsInfo.Caption := 'Taken seats: ';
+  cards := '';
   for C1 := 0 to pbtablestatus.Seats.Count - 1 do
   begin
-    lbsInfo.Caption := lbsInfo.Caption + IntToStr(pbtablestatus.Seats[C1].Seat);
     if CompareBytes(pbtablestatus.Seats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
     begin
       FTable.SeatIndex := pbtablestatus.Seats[C1].Seat;
-      lbsInfo.Caption := lbsInfo.Caption + ' (you)';
-      {$IFDEF DEBUG} DebugLn(Format('your cards:%s',[pbtablestatus.Seats[C1].Cards]),ditSocket); {$ENDIF}
+      cards := pbtablestatus.Seats[C1].Cards;
     end;
-    lbsInfo.Caption := lbsInfo.Caption + ',';
   end;
+
+  info := Format('S:%s SI:%d D:%d CS:%d [%s]', [FLastTableStatus.State, FTable.SeatIndex, FLastTableStatus.Dealer, FLastTableStatus.CurrentSeat, cards]);
+
+  lbsInfo.Caption := info;
+
+  if FTable.SeatIndex = FLastTableStatus.CurrentSeat then
+  begin
+    acFold.Enabled := TRUE;
+  end
+  else
+  begin
+    acFold.Enabled := FALSE;
+  end;
+
+  btFold.Visible := acFold.Enabled;
 end;
 
 

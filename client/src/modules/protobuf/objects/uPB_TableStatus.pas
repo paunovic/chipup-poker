@@ -15,14 +15,20 @@ type
       FN_TABLE_MONGO_ID = 1;
       FN_SEATS = 2;
       FN_STATE = 3;
+      FN_DEALER = 4;
+      FN_CURRENT_SEAT = 5;
 
     var
       FTableMongoId: TBytes;
       FSeats: TPB_SeatInfos;
       FState: String;
+      FDealer: Integer;
+      FCurrentSeat: Integer;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: String);
+    procedure SetDealer(const AValue: Integer);
+    procedure SetCurrentSeat(const AValue: Integer);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -30,6 +36,8 @@ type
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
     property Seats: TPB_SeatInfos read FSeats write FSeats;
     property State: String read FState write SetState;
+    property Dealer: Integer read FDealer write SetDealer;
+    property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
   end;
 
   TPB_TableStatuss = TObjectList<TPB_TableStatus>;
@@ -69,6 +77,14 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FState := String(AProtobufReader.readUtf8String);
       end;
+      FN_DEALER: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FDealer := AProtobufReader.readInt32;
+      end;
+      FN_CURRENT_SEAT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCurrentSeat := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -84,6 +100,18 @@ procedure TPB_TableStatus.SetState(const AValue: String);
 begin
   FState := AValue;
   ProtobufOutput.writeString(FN_STATE, AValue);
+end;
+
+procedure TPB_TableStatus.SetDealer(const AValue: Integer);
+begin
+  FDealer := AValue;
+  ProtobufOutput.writeInt32(FN_DEALER, AValue);
+end;
+
+procedure TPB_TableStatus.SetCurrentSeat(const AValue: Integer);
+begin
+  FCurrentSeat := AValue;
+  ProtobufOutput.writeInt32(FN_CURRENT_SEAT, AValue);
 end;
 
 end.
