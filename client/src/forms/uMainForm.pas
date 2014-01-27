@@ -140,6 +140,8 @@ end;
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := ConfirmToCloseTables;
+  if CanClose then
+    dmMain.Tables.ClearWithoutNotification;
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
@@ -201,7 +203,7 @@ begin
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
-  dmMain.Tables.CloseAllWithoutNotification;
+  dmMain.Tables.ClearWithoutNotification
 end;
 
 function TfrmChipUpMain.ShowLoginForm: Integer;

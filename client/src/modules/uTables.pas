@@ -14,7 +14,6 @@ type
     FGame        : TGameInfo;
     FClub        : TClubInfo;
     FTablesObject: TObject;
-    FNotifyServer: Boolean;
 
   public
     constructor Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
@@ -30,13 +29,17 @@ type
   end;
 
   TTables = class(TObjectList<TTable>)
+  var
+    FNotifyServer: Boolean;
   public
+    constructor Create;
+
     function AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
     procedure NotifyClose(const AGameId: TBytes);
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
     function FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;
-    procedure CloseAllWithoutNotification;
+    procedure ClearWithoutNotification;
   end;
 
 
@@ -48,7 +51,6 @@ uses
 
 constructor TTable.Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
 begin
-  FNotifyServer := TRUE;
   FSeatIndex := -1;
   FGame := AGame;
   FClub := AClub;
@@ -61,9 +63,6 @@ end;
 destructor TTable.Destroy;
 begin
   FForm.Free;
-
-  if FNotifyServer then
-    SocketClient.LeaveTable(FGame.MongoId);
 
   inherited;
 end;
@@ -79,6 +78,12 @@ begin
 end;
 
 
+
+constructor TTables.Create;
+begin
+  inherited Create;
+  FNotifyServer := TRUE;
+end;
 
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
 var
@@ -102,6 +107,8 @@ begin
   for C1 := 0 to Length(ToArray) - 1 do
     if ToArray[C1].Game.MongoId = AGameId then
     begin
+      if FNotifyServer then
+        SocketClient.LeaveTable(AGameId);
       Delete(C1);
       Exit;
     end;
@@ -129,12 +136,9 @@ begin
   Exit(-1);
 end;
 
-procedure TTables.CloseAllWithoutNotification;
-var
-  C1: Integer;
+procedure TTables.ClearWithoutNotification;
 begin
-  for C1 := 0 to Length(ToArray) - 1 do
-    ToArray[C1].FNotifyServer := FALSE;
+  FNotifyServer := FALSE;
   Clear;
 end;
 
