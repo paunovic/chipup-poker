@@ -459,8 +459,15 @@ begin
     teDealing: event := 'DEALING';
   end;
 
-  for C1 := 0 to Length(pbtevent.Seats) - 1 do
-    DebugLn(Format('Player %d: %s', [pbtevent.Seats[C1], event]), ditApplication);
+  {$IFDEF DEBUG}
+  if Length(pbtevent.Seats) = 0 then
+  begin
+    for C1 := 0 to Length(pbtevent.Seats) - 1 do
+      DebugLn(Format('Player %d: %s', [pbtevent.Seats[C1], event]), ditApplication);
+  end
+  else
+    DebugLn(Format('TABLE EVENT: %s', [event]), ditApplication);
+  {$ENDIF}
 end;
 
 procedure TfrmTable.acFoldExecute(Sender: TObject);
