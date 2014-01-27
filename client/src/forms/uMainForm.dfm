@@ -29,7 +29,6 @@ object frmChipUpMain: TfrmChipUpMain
     Height = 403
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 0
-    ExplicitHeight = 410
     object gridJoinedClubsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridJoinedClubsTableCellDblClick
@@ -115,8 +114,6 @@ object frmChipUpMain: TfrmChipUpMain
     Height = 403
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 3
-    ExplicitWidth = 661
-    ExplicitHeight = 410
     object gridGamesTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridGamesTableCellDblClick
