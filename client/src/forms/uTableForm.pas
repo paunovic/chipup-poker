@@ -455,6 +455,8 @@ begin
     teFold: event := 'FOLD';
     teSit: event := 'SIT';
     teStandUp: event := 'STAND UP';
+    teWinning: event := 'WINNING';
+    teDealing: event := 'DEALING';
   end;
 
   for C1 := 0 to Length(pbtevent.Seats) - 1 do
