@@ -574,6 +574,7 @@ var
   club       : TClubInfo;
   player     : TPlayerInfo;
   query_users: TArray<TBytes>;
+  empty_array: TBytes;
 begin
   pbreply := AMessage.Object_ as TPB_ClubCommandReply;
 
@@ -591,8 +592,9 @@ begin
         end;
       if Length(query_users) > 0 then
       begin
+        SetLength(empty_array, 0);
         for C1 := 0 to Length(query_users) do
-           dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, query_users[C1]); // FIXME, should add default avatar
+          dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array); // FIXME, should add default avatar
 
         SocketClient.GetUserInfos(query_users);
       end;

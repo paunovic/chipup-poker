@@ -197,6 +197,7 @@ enum ServerCodes {
 	seGameChange = 205;
 	seGameCreate = 206;
 	seGameDelete = 207;
+	seTableEvent = 208;
 
     scLogin = 501;
     scStatus = 502;
@@ -301,4 +302,14 @@ message ChangeMailReply {
 message GetUserParams {
 	repeated bytes user_mongo_ids = 1;
 	repeated User users = 2;
+}
+
+message TableEvent {
+	enum TableEventType {
+		teFolded = 1;
+		teSit = 2;
+		teStandUp = 3;
+	}
+	required TableEventType event = 1;
+	required int32 seat = 2;
 }

@@ -44,6 +44,7 @@ type
     seGameChange = 205,
     seGameCreate = 206,
     seGameDelete = 207,
+    seTableEvent = 208,
     scLogin = 501,
     scStatus = 502,
     scRegister = 503,
@@ -142,6 +143,7 @@ begin
     seGameChange: result := 'seGameChange';
     seGameCreate: result := 'seGameCreate';
     seGameDelete: result := 'seGameDelete';
+    seTableEvent: result := 'seTableEvent';
     scLogin: result := 'scLogin';
     scStatus: result := 'scStatus';
     scRegister: result := 'scRegister';

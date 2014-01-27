@@ -140,6 +140,8 @@ begin
   FIdAsString := '';
   for C1 := 0 to Length(AValue) - 1 do
     FIdAsString := FIdAsString + IntToHex(AValue[C1], 2);
+  if FIdAsString = '' then
+    FIdAsString := 'default';
   FIdAsString := LowerCase(FIdAsString);
 end;
 
