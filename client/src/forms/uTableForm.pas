@@ -460,7 +460,7 @@ begin
   end;
 
   {$IFDEF DEBUG}
-  if Length(pbtevent.Seats) = 0 then
+  if Length(pbtevent.Seats) > 0 then
   begin
     for C1 := 0 to Length(pbtevent.Seats) - 1 do
       DebugLn(Format('Player %d: %s', [pbtevent.Seats[C1], event]), ditApplication);
