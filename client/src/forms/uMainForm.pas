@@ -179,7 +179,7 @@ begin
                             TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                             TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
                             TServerMessageCallback.Create(srDeleteGameOk, CSREGameDelete),
-                            TServerMessageCallback.Create(srTableStatus, CSRTableStatus),
+                            TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
                             TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                             TServerMessageCallback.Create(srTableSitOk, CSRTableStatus)
                           ]

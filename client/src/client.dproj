@@ -206,6 +206,7 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeMailReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_GetUserParams.pas"/>
 			<DCCReference Include="modules\table\uTableStatus.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_TableEvent.pas"/>
 			<RcItem Include="resources\GameCarpet.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>GameCarpet</ResourceId>
