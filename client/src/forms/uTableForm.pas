@@ -49,7 +49,8 @@ type
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
 
     procedure CSRChatEvent(const AMessage: TMessageItem);
-    procedure CSRTableStatus(const AMessage: TMessageItem);
+    procedure CSRETableStatus(const AMessage: TMessageItem);
+    procedure CSETableEvent(const AMessage: TMessageItem);
 
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -67,7 +68,7 @@ implementation
 uses
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus;
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -165,9 +166,10 @@ begin
       mtServerResponse: ProcessServerMessage(msg,
                           [
                             TServerMessageCallback.Create(seChat, CSRChatEvent),
-                            TServerMessageCallback.Create(srTableStatus, CSRTableStatus),
-                            TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
-                            TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus)
+                            TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
+                            TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
+                            TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
+                            TServerMessageCallback.Create(seTableEvent, CSETableEvent)
                           ]
                         );
     end;
@@ -377,7 +379,7 @@ begin
   end;
 end;
 
-procedure TfrmTable.CSRTableStatus(const AMessage: TMessageItem);
+procedure TfrmTable.CSRETableStatus(const AMessage: TMessageItem);
 var
   pbtablestatus: TPB_TableStatus;
   C1: Integer;
@@ -437,6 +439,24 @@ begin
 
   btStandUp.Visible := acStandUp.Enabled;
   btFold.Visible := acFold.Enabled;
+end;
+
+procedure TfrmTable.CSETableEvent(const AMessage: TMessageItem);
+var
+  pbtevent: TPB_TableEvent;
+  event   : String;
+begin
+  pbtevent := AMessage.Object_ as TPB_TableEvent;
+  if not CompareBytes(pbtevent.TableMongoId, FTable.Game.MongoId) then
+    Exit;
+
+  case pbtevent.Event of
+    teFold: event := 'FOLD';
+    teSit: event := 'SIT';
+    teStandUp: event := 'STAND UP';
+  end;
+
+  DebugLn(Format('Player %d: %s', [pbtevent.Seat, event]), ditApplication);
 end;
 
 procedure TfrmTable.acFoldExecute(Sender: TObject);

@@ -93,7 +93,7 @@ uses
   uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply,
   uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams,
   uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply,
-  pbOutput, pbInput, uMessageContainer, Winapi.WinSock;
+  pbOutput, pbInput, uMessageContainer, Winapi.WinSock, uPB_TableEvent;
 
 
 constructor TSocketClient.Create(const AServer: String; const APort: Integer);
@@ -383,10 +383,11 @@ begin
     srChangeClubDetailsReply,
     srKickPlayerReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
 
+    seTableEvent: ADataObject := TPB_TableEvent.Create(ADataPointer, ARpcMessage.DataSize);
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srTableStatus,
+    seTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);

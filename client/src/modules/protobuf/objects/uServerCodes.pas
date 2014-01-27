@@ -29,13 +29,12 @@ type
     srCreateGameOk = 42,
     srDeleteGameOk = 43,
     srEditGameOk = 44,
-    srTableStatus = 45,
-    srTableSitOk = 46,
-    srTableSitSeatTaken = 47,
-    srTableStandUpOk = 48,
-    srPong = 49,
-    srSuspendPlayerOk = 50,
-    srReinstatePlayerOk = 51,
+    srTableSitOk = 45,
+    srTableSitSeatTaken = 46,
+    srTableStandUpOk = 47,
+    srPong = 48,
+    srSuspendPlayerOk = 49,
+    srReinstatePlayerOk = 50,
     seChat = 200,
     seSecondaryLoginDetected = 201,
     seAccountConfirmed = 202,
@@ -45,6 +44,7 @@ type
     seGameCreate = 206,
     seGameDelete = 207,
     seTableEvent = 208,
+    seTableStatus = 209,
     scLogin = 501,
     scStatus = 502,
     scRegister = 503,
@@ -128,7 +128,6 @@ begin
     srCreateGameOk: result := 'srCreateGameOk';
     srDeleteGameOk: result := 'srDeleteGameOk';
     srEditGameOk: result := 'srEditGameOk';
-    srTableStatus: result := 'srTableStatus';
     srTableSitOk: result := 'srTableSitOk';
     srTableSitSeatTaken: result := 'srTableSitSeatTaken';
     srTableStandUpOk: result := 'srTableStandUpOk';
@@ -144,6 +143,7 @@ begin
     seGameCreate: result := 'seGameCreate';
     seGameDelete: result := 'seGameDelete';
     seTableEvent: result := 'seTableEvent';
+    seTableStatus: result := 'seTableStatus';
     scLogin: result := 'scLogin';
     scStatus: result := 'scStatus';
     scRegister: result := 'scRegister';
