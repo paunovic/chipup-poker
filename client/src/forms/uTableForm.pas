@@ -445,6 +445,7 @@ procedure TfrmTable.CSETableEvent(const AMessage: TMessageItem);
 var
   pbtevent: TPB_TableEvent;
   event   : String;
+  C1      : Integer;
 begin
   pbtevent := AMessage.Object_ as TPB_TableEvent;
   if not CompareBytes(pbtevent.TableMongoId, FTable.Game.MongoId) then
@@ -456,7 +457,8 @@ begin
     teStandUp: event := 'STAND UP';
   end;
 
-  DebugLn(Format('Player %d: %s', [pbtevent.Seat, event]), ditApplication);
+  for C1 := 0 to Length(pbtevent.Seats) - 1 do
+    DebugLn(Format('Player %d: %s', [pbtevent.Seats[C1], event]), ditApplication);
 end;
 
 procedure TfrmTable.acFoldExecute(Sender: TObject);
