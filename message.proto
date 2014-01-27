@@ -241,6 +241,8 @@ message TableStatus {
 	required bytes table_mongo_id = 1;
 	repeated SeatInfo seats = 2;
 	required string state = 3;
+	required int32 dealer = 4;
+	required int32 current_seat = 5;
 }
 
 message SeatInfo {

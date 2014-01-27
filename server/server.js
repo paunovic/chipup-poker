@@ -293,6 +293,7 @@ function ClientSocket(socket) {
 	socket.on('error',function() {
 		this.log('error!',arguments);
 		this.logout();
+		Game.handleDisconnect(this);
 	}.bind(this));
 	this.log('new socket setup');
 }
@@ -313,11 +314,9 @@ function bufferMatch(a,b) {
 ClientSocket.prototype.doLogin = function doLogin(row,password) {
 	if (row.salt) {
 		var hasher = crypto.createHash('sha256');
-		this.log(row);
 		hasher.update(row.salt.buffer);
 		hasher.update(password);
 		var hash = hasher.digest();
-		this.log('passwords',hash,row.password);
 		if (bufferMatch(hash,row.password.buffer)) {
 			var oldconn = activeUsers[row._id];
 			if (oldconn) {
@@ -398,6 +397,7 @@ function toMongoId(buf) {
 ClientSocket.prototype.handle = function (code,args) {
 	console.log('handle',codes.reverse[code],args);
 	if (code == codes.scLogout) {
+		Game.handleDisconnect(this);
 		this.logout();
 		this.send(codes.srLogout);
 		return;
@@ -410,7 +410,6 @@ ClientSocket.prototype.handle = function (code,args) {
 		switch (code) {
 		case codes.scLogin:
 			var params = pb.Parse(args,'Poker.LoginParams');
-			this.log(params);
 			allUsers.findOne({email:params.username},function (err,row) {
 				if (row) {
 					if (row.changecode) {
@@ -569,7 +568,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						users[x] = makeUserProtobuf(users[x]);
 					}
 					status.users = users;
-					allUsers.findOne({_id:this.userid},{tokens:"",displayname:"",email:"",authed:"", avatar:""},function(err,self) {
+					allUsers.findOne({_id:this.userid},function(err,self) {
 						status.self = makeUserProtobuf(self);
 						// FIXME hide some fields in games
 						allGames.find({clubid:{$in:clubids}}).toArray(function (err,games) {
@@ -1388,6 +1387,8 @@ Game.prototype.getTableStatus = function getTableStatus() {
 		obj.card_count = obj.cards.length / 2;
 		tableStatus.seats.push(obj);
 	}
+	tableStatus.dealer = 0;
+	tableStatus.current_seat = 0;
 	console.log(tableStatus);
 	return tableStatus;
 }
