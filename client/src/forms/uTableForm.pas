@@ -391,8 +391,6 @@ begin
 
   FTableStatus.Assign(pbtablestatus);
 
-  Redraw(TRUE);
-
   if ActionManager.State = asSuspended then
     ActionManager.State := asNormal;
 
@@ -439,6 +437,8 @@ begin
 
   btStandUp.Visible := acStandUp.Enabled;
   btFold.Visible := acFold.Enabled;
+
+  Redraw(TRUE);
 end;
 
 procedure TfrmTable.CSETableEvent(const AMessage: TMessageItem);
