@@ -241,14 +241,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 		}
 	}
 }
-// some code based on http://sourceforge.net/p/protobuf-delphi/wiki/Example/
-class DelphiGenerator : public CodeGenerator {
-	bool Generate(const FileDescriptor* file, const string& parameter, GeneratorContext* generator_context, string* error) const {
-		cerr << file->name() << "\n";
-
-		for (int i=0; i<file->message_type_count(); i++) {
-			const Descriptor *message = file->message_type(i);
-			cerr << "message#" << i << " " << message->name() << "\n";
+void GenerateMessage(const FileDescriptor* file, const Descriptor *message, GeneratorContext* generator_context) {
 			scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("uPB_" + message->name() + ".pas"));
 			io::Printer printer(output.get(), '$');
 			printer.Print(
@@ -263,7 +256,7 @@ class DelphiGenerator : public CodeGenerator {
 				"interface\n"
 				"\n"
 				"uses\n"
-				"  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader","name",message->name());
+				"  Classes, SysUtils, {$$IFNDEF FPC}System.Generics.Collections{$$ELSE}Contnrs{$$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader","name",message->name());
 			if (message->field_count() > 0) {
 				string *types = new string[message->field_count()];
 				int size = 0;
@@ -413,8 +406,6 @@ class DelphiGenerator : public CodeGenerator {
 			printer.Print(
 				"  end;\n"
 				"\n"
-				"  TPB_$name$s = TObjectList<TPB_$name$>;\n"
-				"\n"
 				"implementation\n"
 				"\n"
 				"uses\n"
@@ -495,12 +486,22 @@ class DelphiGenerator : public CodeGenerator {
 				string name = field->name();
 				UpperString(&name);
 				if (field->type() == FieldDescriptor::TYPE_INT32) {
-					printer.Print(
-						"      $name$: begin\n"
-						"        Assert(wire_type = WIRETYPE_VARINT);\n"
-						"        $pname$ := AProtobufReader.readInt32;\n"
-						"      end;\n","name",EnumName(field)
-						,"pname",PrivateFieldName(field));
+					if (field->is_packed()) {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+							"        // FIXME $pname$ := AProtobufReader.readInt32;\n"
+							"        AProtobufReader.skipField(tag);\n"
+							"      end;\n","name",EnumName(field)
+							,"pname",PrivateFieldName(field));
+					} else {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        $pname$ := AProtobufReader.readInt32;\n"
+							"      end;\n","name",EnumName(field)
+							,"pname",PrivateFieldName(field));
+					}
 				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
 					printer.Print(
 						"      $name$: begin\n"
@@ -631,6 +632,20 @@ class DelphiGenerator : public CodeGenerator {
 			GenerateSettersImpl(message,&printer);
 			printer.Print(
 				"end.\n");
+}
+// some code based on http://sourceforge.net/p/protobuf-delphi/wiki/Example/
+class DelphiGenerator : public CodeGenerator {
+	bool Generate(const FileDescriptor* file, const string& parameter, GeneratorContext* generator_context, string* error) const {
+		cerr << file->name() << "\n";
+
+		for (int i=0; i<file->message_type_count(); i++) {
+			const Descriptor *message = file->message_type(i);
+			cerr << "message#" << i << " " << message->name() << "\n";
+			GenerateMessage(file,message,generator_context);
+			for (int j=0; j<message->nested_type_count(); j++) {
+				const Descriptor *submessage = message->nested_type(j);
+				GenerateMessage(file,submessage,generator_context);
+			}
 		}
 		for (int i=0; i<file->enum_type_count(); i++) {
 			const EnumDescriptor *type = file->enum_type(i);
