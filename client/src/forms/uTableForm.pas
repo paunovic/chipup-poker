@@ -446,10 +446,9 @@ begin
 
   if FTable.IsSitting then
   begin
+    acStandUp.Enabled := TRUE;
     case FTableStatus.State of
-      tsIdle: begin
-        acStandUp.Enabled := TRUE;
-      end;
+      tsIdle: ;
       tsPreFlop: begin
         if FTableStatus.CurrentSeat = FTable.SeatIndex then
         begin
