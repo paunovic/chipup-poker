@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  Vcl.Menus, cxGraphics, dxSkinsdxStatusBarPainter, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, dxStatusBar, cxLabel, cxTextEdit, Vcl.StdCtrls,
+  Vcl.Menus, cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls,
   cxButtons, cxCheckBox, OverbyteIcsWSocket, uMessageItem, dxsChipUpDark;
 
 type

@@ -9,7 +9,7 @@ uses
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
   uMessageItem, uGameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, dxGDIPlusClasses;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, dxGDIPlusClasses, dxsChipUpDarkTabs;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -32,7 +32,7 @@ type
     gridGamesPlayers: TcxGridColumn;
     gridGamesStatus: TcxGridColumn;
     btOpenClubLobby: TcxButton;
-    cxImage1: TcxImage;
+    imgLogo: TcxImage;
     ActionManager: TActionManager;
     acLogout: TAction;
     acShowChangeEMailForm: TAction;
@@ -52,6 +52,22 @@ type
     N1: TMenuItem;
     Logout1: TMenuItem;
     SearchPublicClubs1: TMenuItem;
+    btHomeGames: TcxButton;
+    btTournaments: TcxButton;
+    Shape1: TShape;
+    cxLabel1: TcxLabel;
+    gridTournaments: TcxGrid;
+    cxGridTableView1: TcxGridTableView;
+    cxGridColumn2: TcxGridColumn;
+    cxGridColumn3: TcxGridColumn;
+    cxGridLevel1: TcxGridLevel;
+    cxGridTableView1Column1: TcxGridColumn;
+    cxGridTableView1Column2: TcxGridColumn;
+    cxGridTableView1Column3: TcxGridColumn;
+    cxGridTableView1Column4: TcxGridColumn;
+    acShowTournamentLayout: TAction;
+    acShowHomeGamesLayout: TAction;
+    btOpenTournamentLobby: TcxButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -68,6 +84,8 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure acOpenClubLobbyExecute(Sender: TObject);
     procedure acShowPublicClubsListFormExecute(Sender: TObject);
+    procedure acShowHomeGamesLayoutExecute(Sender: TObject);
+    procedure acShowTournamentLayoutExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -122,7 +140,6 @@ uses
   uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
-
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -210,9 +227,10 @@ begin
   if result = mrOk then
   begin
     MessageContainer.AddMessageHandler(Handle);
+    FSelectedClub := -1;
+    SetLength(FSelectedGame, 0);
     ConfigureGUI;
     Show;
-//    tiBringToFront.Enabled := TRUE;
   end
   else
   begin
@@ -316,6 +334,7 @@ begin
   if not dmMain.SelfInfo.Authed then
     Caption := Caption + ' (account confirmation pending)';
 
+  acOpenClubLobby.Enabled := FSelectedClub <> -1;
   UpdateClublist;
   UpdateGamelist;
 end;
@@ -594,7 +613,7 @@ begin
       begin
         SetLength(empty_array, 0);
         for C1 := 0 to Length(query_users) do
-          dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array); // FIXME, should add default avatar
+          dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
 
         SocketClient.GetUserInfos(query_users);
       end;
@@ -614,6 +633,29 @@ begin
   for user in pbreply.Users do
     dmMain.Players.AddPlayer(user);
 end;
+
+procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);
+begin
+  btCreateClub.Show;
+  btJoinClub.Show;
+  btOpenTournamentLobby.Hide;
+  gridTournaments.Hide;
+  gridJoinedClubs.Show;
+  gridGames.Show;
+  btOpenClubLobby.Show;
+end;
+
+procedure TfrmChipUpMain.acShowTournamentLayoutExecute(Sender: TObject);
+begin
+  btCreateClub.Hide;
+  btJoinClub.Hide;
+  btOpenTournamentLobby.Show;
+  gridTournaments.Show;
+  gridJoinedClubs.Hide;
+  gridGames.Hide;
+  btOpenClubLobby.Hide;
+end;
+
 
 
 end.

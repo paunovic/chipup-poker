@@ -1,0 +1,87 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{F8911FA1-88BE-423D-896F-68470694E38A}</ProjectGuid>
+    <MainSource>dxsChipUpDarkTabsRS17.cpp</MainSource>
+    <Config Condition="'$(Config)'==''">Release</Config>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+    <Base>true</Base>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
+    <Base>true</Base>
+    <Cfg_2>true</Cfg_2>
+    <CfgParent>Base</CfgParent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Base)'!=''">
+    <BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
+    <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+    <Defines>NO_STRICT</Defines>
+    <DynamicRTL>true</DynamicRTL>
+    <ILINK_GenerateLibFile>true</ILINK_GenerateLibFile>
+    <ILINK_GenerateImportLibrary>true</ILINK_GenerateImportLibrary>
+    <UsePackages>true</UsePackages>
+    <ProjectType>CppPackage</ProjectType>
+    <ILINK_Description>ExpressSkins - ChipUpDarkTabsStyle Skin </ILINK_Description>
+    <BCC_wpar>false</BCC_wpar>
+    <IncludePath>$(BDS)\include;$(BDS)\include\dinkumware;$(BDS)\include\vcl;</IncludePath>
+    <ILINK_LibraryPath>$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk;</ILINK_LibraryPath>
+    <Multithreaded>true</Multithreaded>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Cfg_2)'!=''">
+    <Defines>NDEBUG;$(Defines)</Defines>
+    <IntermediateOutputDir>Release</IntermediateOutputDir>
+    <TASM_Debugging>None</TASM_Debugging>
+    <IncludePath>$(IncludePath);$(BDS)\include\windows\vcl;$(BDS)\include\windows\rtl;$(BDS)\include\windows\crtl;$(BDS)\include\windows\sdk;</IncludePath>
+    <ILINK_LibraryPath>$(LIBDIR);$(BDS)\lib\release;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+    <DCC_Namespace>System;Vcl;Xml;Data;Datasnap;Web;Soap;Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+  </PropertyGroup>
+  <ProjectExtensions>
+    <Borland.Personality>CPlusPlusBuilder.Personality</Borland.Personality>
+    <Borland.ProjectType>CppPackage</Borland.ProjectType>
+    <BorlandProject>
+      <BorlandProject>
+        <CPlusPlusBuilder.Personality>
+          <Source>
+            <Source Name="MainSource">dxsChipUpDarkTabsRS17.cpp</Source>
+          </Source>
+        </CPlusPlusBuilder.Personality>
+      </BorlandProject>
+    </BorlandProject>
+  </ProjectExtensions>
+  <Import Project="$(BDS)\Bin\CodeGear.Cpp.Targets" />
+  <ItemGroup>
+    <PackageImport Include="rtl.bpi">
+      <BuildOrder>0</BuildOrder>
+    </PackageImport>
+    <PackageImport Include="vcl.bpi">
+      <BuildOrder>1</BuildOrder>
+    </PackageImport>
+    <PackageImport Include="dxGDIPlusRS17.bpi">
+      <BuildOrder>2</BuildOrder>
+    </PackageImport>
+    <PackageImport Include="dxThemeRS17.bpi">
+      <BuildOrder>3</BuildOrder>
+    </PackageImport>
+    <PackageImport Include="cxLibraryRS17.bpi">
+      <BuildOrder>4</BuildOrder>
+    </PackageImport>
+    <PackageImport Include="dxSkinsCoreRS17.bpi">
+      <BuildOrder>5</BuildOrder>
+    </PackageImport>
+    <PackageImport Include="dxCoreRS17.bpi">
+      <BuildOrder>6</BuildOrder>
+    </PackageImport>
+    <DelphiCompile Include="dxsChipUpDarkTabs.pas">
+      <BuildOrder>7</BuildOrder>
+    </DelphiCompile>
+    <CppCompile Include="dxsChipUpDarkTabsRS17.cpp">
+      <BuildOrder>8</BuildOrder>
+    </CppCompile>
+    <ResFiles Include="dxsChipUpDarkTabs.res">
+      <BuildOrder>9</BuildOrder>
+    </ResFiles>
+    <BuildConfiguration Include="Release">
+      <Key>Cfg_2</Key>
+    </BuildConfiguration>
+  </ItemGroup>
+</Project>

@@ -29,11 +29,10 @@ type
 
   TTableStatus = class
   private
-    FState       : String;
-    FDealer      : Integer;
-    FCurrentSeat : Integer;
-    FSeatInfos   : TSeatInfos;
-    FSelfSeatInfo: TSeatInfo;
+    FState      : String;
+    FDealer     : Integer;
+    FCurrentSeat: Integer;
+    FSeatInfos  : TSeatInfos;
 
   public
     constructor Create;

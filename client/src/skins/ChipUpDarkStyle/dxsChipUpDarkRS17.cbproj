@@ -1,6 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{1A8139AB-288A-4530-B53E-BC10E1AF5E28}</ProjectGuid>
+    <ProjectGuid>{2E9E8B81-DC78-45A1-993F-7C0A2B1DD384}</ProjectGuid>
     <MainSource>dxsChipUpDarkRS17.cpp</MainSource>
     <Config Condition="'$(Config)'==''">Release</Config>
   </PropertyGroup>

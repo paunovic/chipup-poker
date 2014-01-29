@@ -8,17 +8,17 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, Vcl.Menus, cxButtons, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, uPlayerInfo, dxBevel,
-  uMessageItem, dxsChipUpDark;
+  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
     lbsHeader: TcxLabel;
     lbsSubheader: TcxLabel;
     btClubHome: TcxButton;
-    btGames: TcxButton;
+    btTables: TcxButton;
     pcTabs: TcxPageControl;
     tsClubHome: TcxTabSheet;
-    tsGames: TcxTabSheet;
+    tsTables: TcxTabSheet;
     gbClubSettings: TcxGroupBox;
     btCloseClub: TcxButton;
     gbPlayers: TcxGroupBox;
@@ -44,7 +44,7 @@ type
     gridPlayersListStatus: TcxGridColumn;
     Bevel1: TdxBevel;
     btSuspendUnsuspend: TcxButton;
-    gbGames: TcxGroupBox;
+    gbTables: TcxGroupBox;
     gridGames: TcxGrid;
     gridGamesTable: TcxGridTableView;
     gridGamesId: TcxGridColumn;
@@ -61,7 +61,7 @@ type
     btLeaveClub: TcxButton;
     acLeaveClub: TAction;
     procedure btClubHomeClick(Sender: TObject);
-    procedure btGamesClick(Sender: TObject);
+    procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
     procedure gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure acGiveChipsExecute(Sender: TObject);
@@ -121,12 +121,12 @@ uses
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
 begin
+  // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
   btGiveChips.Top := gbPlayers.Height - btGiveChips.Height - 13;
   btGiveOwnership.Top := btGiveChips.Top;
   btRemovePlayerFromClub.Top := btGiveChips.Top;
   btSuspendUnsuspend.Top := btGiveChips.Top - btGiveChips.Height - 5;
-
-  btNewGame.Top := gbGames.Height - btNewGame.Height - 13;
+  btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
   btDeleteGame.Top := btNewGame.Top;
 end;
@@ -251,9 +251,9 @@ begin
   end;
 end;
 
-procedure TfrmClubLobby.btGamesClick(Sender: TObject);
+procedure TfrmClubLobby.btTablesClick(Sender: TObject);
 begin
-  pcTabs.ActivePage := tsGames;
+  pcTabs.ActivePage := tsTables;
 end;
 
 procedure TfrmClubLobby.btClubHomeClick(Sender: TObject);

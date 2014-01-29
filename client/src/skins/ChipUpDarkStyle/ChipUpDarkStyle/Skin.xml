@@ -15,6 +15,22 @@
 </ControlParts>
 <ControlParts Name="Common">
 <Properties/>
+<Part Name="Button" Alpha="255" TextColor="11842740">
+<Properties/>
+<MinSize Width="16" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image ImageCount="1" Layout="Vertical" Stretch="Stretch" States="159" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="11" Right="2" Bottom="2"/>
+<File Name="Button_Image.png"/>
+</Image>
+<Glyph ImageCount="1" Layout="Vertical" Stretch="NoResize" States="159" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
 </ControlParts>
 <ControlParts Name="Docking">
 <Properties/>
@@ -39,6 +55,20 @@
 </ControlParts>
 <ControlParts Name="Grid">
 <Properties/>
+<Part Name="GridGroupPanel" Alpha="255" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="4342338" Thin="0"/>
+<Top Color="4342338" Thin="0"/>
+<Right Color="4342338" Thin="0"/>
+<Bottom Color="4342338" Thin="0"/>
+</Borders>
+<Image ImageCount="1" Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="GridGroupPanel_Image.png"/>
+</Image>
+<Glyph ImageCount="1" Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
 </ControlParts>
 <ControlParts Name="NavBar">
 <Properties/>

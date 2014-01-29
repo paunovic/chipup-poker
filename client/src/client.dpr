@@ -26,6 +26,7 @@ uses
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
   dxsChipUpDark in 'skins\ChipUpDarkStyle\dxsChipUpDark.pas',
+  dxsChipUpDarkTabs in 'skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas',
   uServerSettings in 'modules\uServerSettings.pas',
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',

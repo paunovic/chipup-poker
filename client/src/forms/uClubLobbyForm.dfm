@@ -68,12 +68,14 @@ object frmClubLobby: TfrmClubLobby
     AnchorY = 92
   end
   object btClubHome: TcxButton
-    Left = 146
-    Top = 114
-    Width = 144
-    Height = 38
+    Left = 5
+    Top = 121
+    Width = 125
+    Height = 32
     Anchors = [akTop]
     Caption = 'Club Home'
+    Colors.PressedText = 15461355
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
     SpeedButtonOptions.GroupIndex = 1
     SpeedButtonOptions.CanBeFocused = False
     SpeedButtonOptions.Down = True
@@ -86,13 +88,15 @@ object frmClubLobby: TfrmClubLobby
     ParentFont = False
     OnClick = btClubHomeClick
   end
-  object btGames: TcxButton
-    Left = 296
-    Top = 114
-    Width = 144
-    Height = 38
+  object btTables: TcxButton
+    Left = 132
+    Top = 121
+    Width = 125
+    Height = 32
     Anchors = [akTop]
-    Caption = 'Games'
+    Caption = 'Tables'
+    Colors.PressedText = 15461355
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
     SpeedButtonOptions.GroupIndex = 1
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 3
@@ -102,7 +106,7 @@ object frmClubLobby: TfrmClubLobby
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    OnClick = btGamesClick
+    OnClick = btTablesClick
   end
   object pcTabs: TcxPageControl
     Left = 0
@@ -112,7 +116,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 4
-    Properties.ActivePage = tsGames
+    Properties.ActivePage = tsTables
     Properties.CustomButtons.Buttons = <>
     Properties.HideTabs = True
     ClientRectBottom = 354
@@ -122,20 +126,16 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         579
         353)
       object gbClubSettings: TcxGroupBox
         Left = 332
-        Top = 4
+        Top = -1
         Anchors = [akTop, akRight, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
-        Height = 344
+        Height = 351
         Width = 244
         object Bevel1: TdxBevel
           Left = 13
@@ -181,14 +181,14 @@ object frmClubLobby: TfrmClubLobby
       end
       object gbPlayers: TcxGroupBox
         Left = 4
-        Top = 4
+        Top = -1
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Players'
         TabOrder = 1
         DesignSize = (
           323
-          338)
-        Height = 344
+          345)
+        Height = 351
         Width = 323
         object gridPlayersList: TcxGrid
           Left = 3
@@ -255,7 +255,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 261
+          Top = 256
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -268,11 +268,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 279
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 261
+          Top = 256
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -285,11 +284,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 279
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 261
+          Top = 256
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -302,11 +300,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 279
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 227
+          Top = 222
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -319,32 +316,31 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 245
         end
       end
     end
-    object tsGames: TcxTabSheet
-      Caption = 'tsGames'
+    object tsTables: TcxTabSheet
+      Caption = 'tsTables'
       ImageIndex = 1
       DesignSize = (
         579
         353)
-      object gbGames: TcxGroupBox
+      object gbTables: TcxGroupBox
         Left = 4
-        Top = 4
+        Top = -1
         Anchors = [akLeft, akTop, akRight, akBottom]
-        Caption = 'Games'
+        Caption = 'Tables'
         TabOrder = 0
         DesignSize = (
           572
-          338)
-        Height = 344
+          345)
+        Height = 351
         Width = 572
         object gridGames: TcxGrid
           Left = 3
           Top = 16
           Width = 566
-          Height = 232
+          Height = 227
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -413,7 +409,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 261
+          Top = 256
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -429,7 +425,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 261
+          Top = 256
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -445,7 +441,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 261
+          Top = 256
           Width = 98
           Height = 28
           Action = acShowEditGameForm
