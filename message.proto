@@ -227,6 +227,7 @@ enum ServerCodes {
     scSuspendPlayer = 526;
     scGetPlayers = 527;
 	scFold = 528;
+	scPutChips = 529;
 }
 
 service Server {
@@ -316,4 +317,9 @@ message TableEvent {
 	required TableEventType event = 1;
 	repeated int32 seats = 2;
 	required bytes table_mongo_id = 3;
+}
+
+message PutChips {
+	required bytes table_mongo_id = 1;
+	required int chip_amount = 2;
 }

@@ -17,6 +17,7 @@ type
       FN_STATE = 3;
       FN_DEALER = 4;
       FN_CURRENT_SEAT = 5;
+      FN_BETS = 6;
 
     var
       FTableMongoId: TBytes;
@@ -24,11 +25,13 @@ type
       FState: String;
       FDealer: Integer;
       FCurrentSeat: Integer;
+      FBets: TArray<Integer>;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: String);
     procedure SetDealer(const AValue: Integer);
     procedure SetCurrentSeat(const AValue: Integer);
+    procedure SetBets(const AValue: TArray<Integer>);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -38,6 +41,7 @@ type
     property State: String read FState write SetState;
     property Dealer: Integer read FDealer write SetDealer;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
+    property Bets: TArray<Integer> read FBets write SetBets;
   end;
 
 implementation
@@ -83,6 +87,11 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentSeat := AProtobufReader.readInt32;
       end;
+      FN_BETS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        SetLength(FBets, Length(FBets) + 1);
+        FBets[Length(FBets)-1] := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -110,6 +119,15 @@ procedure TPB_TableStatus.SetCurrentSeat(const AValue: Integer);
 begin
   FCurrentSeat := AValue;
   ProtobufOutput.writeInt32(FN_CURRENT_SEAT, AValue);
+end;
+
+procedure TPB_TableStatus.SetBets(const AValue: TArray<Integer>);
+var
+  C1: Integer;
+begin
+  FBets := AValue;
+  for C1 := 0 to Length(FBets) - 1 do
+    ProtobufOutput.writeInt32(FN_BETS, AValue[C1]);
 end;
 
 end.

@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SynGdiPlus, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
-  Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan;
+  Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs;
 
 type
   TfrmTable = class(TForm)
@@ -411,7 +411,7 @@ begin
     end;
   end;
 
-  info := Format('State: %s SeatIndex: %d [%s] CurrentSeat: %d Dealer: %d', [FTableStatus.State, FTable.SeatIndex, cards, FTableStatus.Dealer, FTableStatus.CurrentSeat]);
+  info := Format('State: %s SeatIndex: %d [%s] CurrentSeat: %d Dealer: %d', [FTableStatus.State, FTable.SeatIndex, cards, FTableStatus.CurrentSeat, FTableStatus.Dealer]);
 
   lbsInfo.Caption := info;
 
@@ -437,6 +437,11 @@ begin
 
   btStandUp.Visible := acStandUp.Enabled;
   btFold.Visible := acFold.Enabled;
+
+  {$IFDEF DEBUG}
+  for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
+    DebugLn(Format('SEAT %d, BET = %d', [C1, pbtablestatus.Bets[C1]]), ditApplication);
+  {$ENDIF}
 
   Redraw(TRUE);
 end;
