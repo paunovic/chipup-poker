@@ -375,22 +375,6 @@ ClientSocket.prototype.reply = function reply(code,message,type) {
 	this.send(0,new Buffer(message,'utf8'),"raw");
 }
 ClientSocket.prototype.send = protoreader.reply;
-ClientSocket.prototype.spendTokens = function spendTokens(tokens,failcode,callback) {
-	allUsers.findOne({_id:this.userid},function (err,res) {
-		if (res.tokens < tokens) {
-			this.send(failcode);
-			return;
-		}
-		allUsers.update({_id:this.userid},{$inc:{tokens:-tokens}},function (err,res) {
-			if (err) {
-				this.log('shouldnt happen 012 1',err);
-				this.reply(0,"error updating user");
-				return;
-			}
-			callback();
-		}.bind(this));
-	}.bind(this));
-}
 function toMongoId(buf) {
 	return new ObjectID(buf.toString('hex'));
 }
@@ -462,12 +446,10 @@ ClientSocket.prototype.handle = function (code,args) {
 				return;
 			}
 			deck.getRandom(16,function (salt) {
-				this.log('salt',salt);
 				var hasher = crypto.createHash('sha256');
 				hasher.update(salt);
 				hasher.update(params.password);
 				var hash = hasher.digest();
-				this.log('pw hash is',hash);
 				doc.password = hash;
 				doc.salt = salt;
 				// FIXME, case insensitive
@@ -486,7 +468,6 @@ ClientSocket.prototype.handle = function (code,args) {
 										console.log('error 1',err);
 										process.exit(1);
 									}
-									console.log('registered',result);
 									var test = new SmtpConnection();
 									var link = domain+'confirm?code='+doc.authcode;
 									test.sendMail(doc.email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
@@ -640,7 +621,6 @@ ClientSocket.prototype.handle = function (code,args) {
 					return;
 				}
 				var doc = {is_private:priv,password:pass,name:clubname, owner:this.userid, chips:100000};
-				// FIXME, switch to spendTokens
 				allUsers.findOne({_id:this.userid},function (err,res) {
 					if (res.clubCreateTokens < 1) {
 						this.send(codes.srCreateClubNoTokens);
@@ -858,26 +838,24 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				var that = this;
 				function finish() {
-					//that.spendTokens(1,codes.srClubDetailsChangeNoTokens,function () {
-						allClubs.update({_id:club._id},mods,function (err,ret) {
-							this.log('detail update',clubseq,params,mods,err,ret);
-							if (err) {
-								this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
-							} else {
-								// FIXME club
-								allClubs.findOne({_id:club._id},function cb(err,row) {
-									var userlist = [ ];
-									var out = makeClubProtobuf(row,userlist);
-									this.send(codes.srChangeClubDetailsReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
-									this.log('userlist to inform:',userlist);
-									for (var x=0; x<userlist.length; x++) {
-										var user = activeUsers[userlist[x]];
-										if (user) user.send(codes.seClubChange,out,'Poker.Club');
-									}
-								}.bind(this));
-							}
-						}.bind(that));
-					//}.bind(that));
+					allClubs.update({_id:club._id},mods,function (err,ret) {
+						this.log('detail update',clubseq,params,mods,err,ret);
+						if (err) {
+							this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
+						} else {
+							// FIXME club
+							allClubs.findOne({_id:club._id},function cb(err,row) {
+								var userlist = [ ];
+								var out = makeClubProtobuf(row,userlist);
+								this.send(codes.srChangeClubDetailsReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
+								this.log('userlist to inform:',userlist);
+								for (var x=0; x<userlist.length; x++) {
+									var user = activeUsers[userlist[x]];
+									if (user) user.send(codes.seClubChange,out,'Poker.Club');
+								}
+							}.bind(this));
+						}
+					}.bind(that));
 				}
 				if (autofinish) finish();
 			}.bind(this));
@@ -1153,6 +1131,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			this.handleChatEvent(event,Date.now());
 			break;
 		case codes.scTableJoin:
+			// FIXME, verify user is in club
 			var params = pb.Parse(args,'Poker.Game');
 			this.log('table join',params);
 			var id = new toMongoId(params._id);
@@ -1169,7 +1148,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							}
 						}
 					}
-					if (game.join(this)) this.send(codes.srTableStatus,game.getTableStatus(),'Poker.TableStatus');
+					if (game.join(this)) this.send(codes.seTableStatus,game.getTableStatus(),'Poker.TableStatus');
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1308,6 +1287,8 @@ function Game(obj) {
 	this.state = 'idle';
 	this.dealer = -1;
 	this.current_seat = -1;
+	this.bets = [];
+	this.pot = 0;
 }
 Game.prototype.edited = function edited(params) {
 	// FIXME, more fields, also now acts as a cache for seGameChange/seGameDelete
@@ -1335,15 +1316,16 @@ Game.prototype.sitDown = function (conn,params) {
 			}
 		}
 		var status = this.getTableStatus();
-		console.log('sending table status to all');
+		console.log('sending table status to all 1');
 		conn.send(codes.srTableSitOk,status,'Poker.TableStatus');
 		for (var key in this.users) {
 			if (this.users[key] == conn) continue;
-			this.users[key].send(codes.srTableStatus,status,'Poker.TableStatus');
+			this.users[key].send(codes.seTableStatus,status,'Poker.TableStatus');
 		}
 		// FIXME json performance hack
 		allClubs.findOne({_id:this.obj.clubid},function (err,club) {
 			var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+			if (!club.members) return;
 			for (var x=0; x<club.members.length; x++) {
 				var conn2 = activeUsers[club.members[x]];
 				if (!conn2) continue;
@@ -1351,17 +1333,28 @@ Game.prototype.sitDown = function (conn,params) {
 				conn2.send(codes.seGameChange,g,'Poker.Game');
 			}
 		}.bind(this));
+		this.sendEvent('teSit',[params.seat_index]);
 	}
 }
 Game.prototype.deal = function deal() {
 	this.current_seat = this.dealer;
-	while (!this.members[this.current_seat]) this.current_seat++;
+	//while (!this.members[this.current_seat]) this.current_seat++;
+	this.bets[this.current_seat] = this.obj.small_blind;
+	this.current_seat = this.getNextSeat(this.current_seat);
+	this.bets[this.current_seat] = this.obj.big_blind;
+	this.current_seat = this.getNextSeat(this.current_seat);
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
 		this.deck.draw(2,this.members[x].hand);
 		this.members[x].status = 'psInHand';
 	}
 	this.state = 'preflop';
+	this.sendEvent('teDealing',[]);
+}
+Game.prototype.getNextSeat = function (current) {
+	current++;
+	while (!this.members[current]) current++;
+	return current;
 }
 Game.prototype.fold = function fold(seat) {
 	var status = this.getTableStatus();
@@ -1379,7 +1372,7 @@ Game.prototype.fold = function fold(seat) {
 				lastseat = x;
 			}
 			console.log('remaining guy wins everything',lastseat);
-			this.state = 'winnning';
+			this.state = 'winning';
 			setTimeout(function () {
 				this.deck = new Deck();
 				this.deck.shuffle(function () {
@@ -1396,17 +1389,16 @@ Game.prototype.fold = function fold(seat) {
 					this.stateMachine();
 				}.bind(this))
 			}.bind(this),2000);
-			this.sendEvent('teFold',seat);
+			this.sendEvent('teFold',[seat]);
+			this.sendEvent('teWinning',[lastseat]);
 		} else {
-			// FIXME
-			console.log('fixme');
-			this.current_seat++
+			if (seat == this.current_seat) this.current_seat++;
 			while (!this.members[this.current_seat]) {
 				this.current_seat++;
 				if (this.current_seat >= this.obj.seats) this.current_seat = 0;
 			}
 			this.broadcastStatus(null);
-			this.sendEvent('teFold',seat);
+			this.sendEvent('teFold',[seat]);
 		}
 		break;
 	}
@@ -1425,7 +1417,7 @@ Game.prototype.stateMachine = function stateMachine() {
 			}
 			this.deal();
 		}
-		console.log('sending out status');
+		console.log('sending out status',this.state);
 		this.broadcastStatus(null);
 		break;
 	case 'preflop':
@@ -1433,23 +1425,23 @@ Game.prototype.stateMachine = function stateMachine() {
 		while (!this.members[this.current_seat]) this.current_seat++;
 	}
 }
-Game.prototype.sendEvent = function (event,seat) {
-	var obj = {event:event, seat:seat, table_mongo_id:new Buffer(this.id.toString(),'hex')};
+Game.prototype.sendEvent = function (event,seats) {
+	var obj = {event:event, seats:seats, table_mongo_id:new Buffer(this.id.toString(),'hex')};
 	for (var key in this.users) {
 		if (this.users[key] == conn) continue;
-		this.users[key].send(codes.seTableEvent,obj,'Poker.TableStatus');
+		this.users[key].send(codes.seTableEvent,obj,'Poker.TableEvent');
 	}
 }
 Game.prototype.broadcastStatus = function (conn) {
 	var status = this.getTableStatus();
-	console.log('sending table status to all');
+	console.log('sending table status to all 2',status.counter);
 	for (var key in this.users) {
 		if (this.users[key] == conn) continue;
-		this.users[key].send(codes.srTableStatus,status,'Poker.TableStatus');
+		this.users[key].send(codes.seTableStatus,status,'Poker.TableStatus');
 	}
 }
 Game.prototype.getTableStatus = function getTableStatus() {
-	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[], state:this.state};
+	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[], state:this.state, bets:this.bets};
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
 		var seat = this.members[x];
@@ -1490,13 +1482,15 @@ Game.prototype.standUp = function (conn) {
 			if (seating.status == 'psInHand') this.fold(x,seating);
 			this.members[x] = null;
 			var status = this.getTableStatus();
+			this.sendEvent('teStandUp',[x]);
 			for (var key in this.users) {
 				console.log('interator',key,this.users[key].userid,conn.userid);
 				if (this.users[key] == conn) continue;
-				this.users[key].send(codes.srTableStatus,status,'Poker.TableStatus');
+				this.users[key].send(codes.seTableStatus,status,'Poker.TableStatus');
 			}
 			// FIXME json performance hack
 			allClubs.findOne({_id:this.obj.clubid},function (err,club) {
+				if (!club.members) return;
 				var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
 				for (var x=0; x<club.members.length; x++) {
 					var conn2 = activeUsers[club.members[x]];
@@ -1549,7 +1543,6 @@ ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts) {
 			// FIXME, game doesnt exist server side
 			return;
 		}
-		this.log('found game channel!',ev);
 		for (key in game.users) {
 			//if (key == this.userid) continue;
 			game.users[key].send(codes.seChat,ev,'Poker.ChatEvent');
