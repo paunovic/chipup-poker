@@ -34,7 +34,8 @@ type
     procedure PaintBoxClick(Sender: TObject);
     procedure edChatKeyPress(Sender: TObject; var Key: Char);
     procedure acFoldExecute(Sender: TObject);
-    procedure btCallClick(Sender: TObject);
+    procedure acCallExecute(Sender: TObject);
+    procedure acCheckExecute(Sender: TObject);
   private
     FFormAspectRatio: Double;
     FTable          : TTable;
@@ -484,7 +485,9 @@ begin
     else
       btCallCheck.Action := acCheck;
     btCallCheck.Visible := TRUE;
-  end;
+  end
+  else
+    btCallCheck.Visible := FALSE;
 
   Redraw(TRUE);
 end;
@@ -518,22 +521,19 @@ begin
   {$ENDIF}
 end;
 
+procedure TfrmTable.acCallExecute(Sender: TObject);
+begin
+  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet);
+end;
+
+procedure TfrmTable.acCheckExecute(Sender: TObject);
+begin
+  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.GetBet(FTable.SeatIndex));
+end;
+
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
   SocketClient.Fold(FTable.Game.MongoId);
-end;
-
-procedure TfrmTable.btCallClick(Sender: TObject);
-var
-  C1 : Integer;
-  bet: Integer;
-begin
-  bet := 0;
-  for C1 := 0 to Length(FTableStatus.Bets) - 1 do
-    if FTableStatus.Bets[C1] > bet then
-      bet := FTableStatus.Bets[C1];
-
-  SocketClient.PutChips(FTable.Game.MongoId, bet);
 end;
 
 end.

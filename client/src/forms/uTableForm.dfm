@@ -144,11 +144,13 @@ object frmTable: TfrmTable
       Category = 'Game'
       Caption = 'CALL'
       Enabled = False
+      OnExecute = acCallExecute
     end
     object acCheck: TAction
       Category = 'Game'
       Caption = 'CHECK'
       Enabled = False
+      OnExecute = acCheckExecute
     end
   end
 end
