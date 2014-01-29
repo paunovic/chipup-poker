@@ -247,6 +247,7 @@ message TableStatus {
 	required int32 dealer = 4;
 	required int32 current_seat = 5;
 	repeated int32 bets = 6;
+	optional string flop = 7;
 }
 
 message SeatInfo {
