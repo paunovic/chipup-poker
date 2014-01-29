@@ -241,9 +241,18 @@ message TableSit {
 }
 
 message TableStatus {
+	enum TableState {
+		tsIdle = 1;
+		tsPreFlop = 2;
+		tsFlop = 3;
+		tsTurn = 4;
+		tsRiver = 5;
+		tsWinning = 6;
+	}
+	
 	required bytes table_mongo_id = 1;
 	repeated SeatInfo seats = 2;
-	required string state = 3;
+	required TableState state = 3;
 	required int32 dealer = 4;
 	required int32 current_seat = 5;
 	repeated int32 bets = 6;
