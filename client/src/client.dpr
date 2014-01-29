@@ -84,7 +84,8 @@ uses
   uPB_ChangeMailReply in 'modules\protobuf\objects\uPB_ChangeMailReply.pas',
   uPB_GetUserParams in 'modules\protobuf\objects\uPB_GetUserParams.pas',
   uTableStatus in 'modules\table\uTableStatus.pas',
-  uPB_TableEvent in 'modules\protobuf\objects\uPB_TableEvent.pas';
+  uPB_TableEvent in 'modules\protobuf\objects\uPB_TableEvent.pas',
+  uPB_PutChips in 'modules\protobuf\objects\uPB_PutChips.pas';
 
 procedure FocusPokerApp;
 var

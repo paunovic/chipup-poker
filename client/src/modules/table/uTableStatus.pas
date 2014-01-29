@@ -3,7 +3,7 @@ unit uTableStatus;
 interface
 
 uses
-  uPB_TableStatus, uPB_SeatInfo, System.SysUtils, System.Generics.Collections;
+  uPB_TableStatus, uPB_SeatInfo, System.SysUtils, System.Generics.Collections, System.Generics.Defaults;
 
 type
   TSeatInfo = class
@@ -25,7 +25,9 @@ type
     property Status: TPlayerStatus read FStatus;
   end;
 
-  TSeatInfos = TObjectList<TSeatInfo>;
+  TSeatInfos = class(TObjectList<TSeatInfo>)
+    procedure Sort; reintroduce;
+  end;
 
   TTableStatus = class
   private
@@ -34,14 +36,20 @@ type
     FCurrentSeat: Integer;
     FSeatInfos  : TSeatInfos;
 
+    function GetBigBlindSeat: Integer;
+    function GetSmallBlindSeat: Integer;
+
   public
     constructor Create;
     destructor Destroy; override;
 
+    function GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
 
     property State: String read FState;
     property Dealer: Integer read FDealer;
+    property SmallBlindSeat: Integer read GetSmallBlindSeat;
+    property BigBlindSeat: Integer read GetBigBlindSeat;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
   end;
@@ -74,6 +82,35 @@ begin
   inherited;
 end;
 
+function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
+var
+  C1: Integer;
+begin
+  if not Assigned(FSeatInfos) then
+    Exit(-1);
+
+  result := -1;
+  for C1 := 0 to FSeatInfos.Count - 1 do
+    if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
+    begin
+      if C1 = FSeatInfos.Count - 1 then
+        result := FSeatInfos[0].SeatIndex
+      else
+        result := FSeatInfos[C1 + 1].SeatIndex;
+      Break;
+    end;
+end;
+
+function TTableStatus.GetBigBlindSeat: Integer;
+begin
+  result := GetNextSeatIndex(GetSmallBlindSeat);
+end;
+
+function TTableStatus.GetSmallBlindSeat: Integer;
+begin
+  result := GetNextSeatIndex(FDealer);
+end;
+
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
 var
   C1  : Integer;
@@ -85,12 +122,37 @@ begin
 
   FSeatInfos.Clear;
   if Assigned(ATableStatusProtobuf.Seats) then
+  begin
     for C1 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
     begin
       seat := TSeatInfo.Create;
       seat.Assign(ATableStatusProtobuf.Seats[C1]);
       FSeatInfos.Add(seat);
     end;
+    FSeatInfos.Sort;
+  end;
+end;
+
+{ TSeatInfos }
+
+procedure TSeatInfos.Sort;
+var
+  comparer  : IComparer<TSeatInfo>;
+  comparison: TComparison<TSeatInfo>;
+begin
+  comparison := function(const ASeatInfo1, ASeatInfo2: TSeatInfo): Integer
+  begin
+    if ASeatInfo1.SeatIndex < ASeatInfo2.SeatIndex then
+      result := -1
+    else
+      if ASeatInfo1.SeatIndex > ASeatInfo2.SeatIndex then
+        result := 1
+      else
+        result := 0;
+  end;
+
+  comparer := TComparer<TSeatInfo>.Construct(comparison);
+  inherited Sort(comparer);
 end;
 
 end.

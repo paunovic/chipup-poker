@@ -263,7 +263,17 @@ begin
 
   // dealer button
   seat_point := GetSeatPoint(FTableStatus.Dealer);
-  FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 2, seat_point.Y + 17, 'D');
+  FPaintBoxBitmap.Canvas.TextOut(seat_point.X + 17, seat_point.Y, 'D');
+
+  // sb/bb
+  seat_point := GetSeatPoint(FTableStatus.SmallBlindSeat);
+  FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 4, seat_point.Y + 17, 'SB');
+  seat_point := GetSeatPoint(FTableStatus.BigBlindSeat);
+  FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 4, seat_point.Y + 17, 'BB');
+
+  // on the move
+  seat_point := GetSeatPoint(FTableStatus.CurrentSeat);
+  FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 6, seat_point.Y - 7, IntToStr(FTableStatus.CurrentSeat) + '!');
 
   // draw avatars
   for C1 := 0 to FTableStatus.Seats.Count - 1 do

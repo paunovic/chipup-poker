@@ -87,13 +87,13 @@ var
 implementation
 
 uses
+  Winapi.WinSock, uSettings, uCommon, pbOutput, pbInput, uMessageContainer,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSettings, uCommon,
-  uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams,
-  uPB_ForgotPasswordParams, uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply,
-  uPB_KickPlayerParams, uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams,
-  uPB_SetAvatarParams, uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply,
-  pbOutput, pbInput, uMessageContainer, Winapi.WinSock, uPB_TableEvent;
+  uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams, uPB_ForgotPasswordParams,
+  uPB_Game, uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply, uPB_KickPlayerParams,
+  uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams, uPB_SetAvatarParams,
+  uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply, uPB_TableEvent,
+  uPB_PutChips;
 
 
 constructor TSocketClient.Create(const AServer: String; const APort: Integer);
@@ -307,7 +307,6 @@ procedure TSocketClient.KillPingTimeoutTimer;
 begin
   KillTimer(FInternalMessageHandler, TIMER_ID_PING_TIMEOUT);
 end;
-
 
 procedure TSocketClient.WndMethod(var AMessage: TMessage);
 begin

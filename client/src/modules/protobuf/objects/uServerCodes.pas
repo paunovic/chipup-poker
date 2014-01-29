@@ -72,7 +72,8 @@ type
     scPing = 525,
     scSuspendPlayer = 526,
     scGetPlayers = 527,
-    scFold = 528
+    scFold = 528,
+    scPutChips = 529
   );
 
 {$IFDEF DEBUG}
@@ -172,6 +173,7 @@ begin
     scSuspendPlayer: result := 'scSuspendPlayer';
     scGetPlayers: result := 'scGetPlayers';
     scFold: result := 'scFold';
+    scPutChips: result := 'scPutChips';
   end;
 end;
 {$ENDIF DEBUG}
