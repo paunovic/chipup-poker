@@ -3,7 +3,7 @@ unit uGameInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, uPB_Game, uPB_TableStatus;
+  System.Generics.Collections, System.SysUtils, uPB_Game, uPB_TableStatus, uCommon;
 
 type
   TGameType = (gtHoldem, gtOmaha);
@@ -55,10 +55,6 @@ type
   end;
 
 implementation
-
-uses
-  uCommon;
-
 
 constructor TGameInfo.Create(const AProtobufObject: TPB_Game);
 begin

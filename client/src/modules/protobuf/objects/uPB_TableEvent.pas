@@ -6,7 +6,7 @@ unit uPB_TableEvent;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3,teWinning = 4,teDealing = 5);
@@ -33,8 +33,6 @@ type
     property Seats: TArray<Integer> read FSeats write SetSeats;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
   end;
-
-  TPB_TableEvents = TObjectList<TPB_TableEvent>;
 
 implementation
 

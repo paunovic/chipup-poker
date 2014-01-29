@@ -3,7 +3,7 @@ unit uCommon;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms;
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, Generics.Collections, uPB_Game, uPB_User;
 
 var
   SelfPath          : String;
@@ -31,6 +31,10 @@ function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer 
 function IsInWine: Boolean;
 procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
+
+type
+  TPB_Games = TObjectList<TPB_Game>;
+  TPB_Users = TObjectList<TPB_User>;
 
 implementation
 

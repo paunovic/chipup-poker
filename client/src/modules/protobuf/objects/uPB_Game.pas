@@ -6,7 +6,7 @@ unit uPB_Game;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_Game = class(TProtobufBaseObject)
@@ -60,8 +60,6 @@ type
     property Seats: Integer read FSeats write SetSeats;
     property Sitting: Integer read FSitting write SetSitting;
   end;
-
-  TPB_Games = TObjectList<TPB_Game>;
 
 implementation
 
@@ -121,8 +119,8 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSitting := AProtobufReader.readInt32;
       end;
-      else
-        AProtobufReader.skipField(tag);
+    else
+      AProtobufReader.skipField(tag);
     end;
   end;
 end;

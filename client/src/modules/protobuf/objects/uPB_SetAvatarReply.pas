@@ -6,7 +6,7 @@ unit uPB_SetAvatarReply;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TSetAvatarStatus = (saSuccess = 1,saNotFound = 2);
@@ -25,8 +25,6 @@ type
 
     property Status: TSetAvatarStatus read FStatus write SetStatus;
   end;
-
-  TPB_SetAvatarReplys = TObjectList<TPB_SetAvatarReply>;
 
 implementation
 

@@ -6,7 +6,7 @@ unit uPB_Club;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_Club = class(TProtobufBaseObject)
@@ -44,8 +44,10 @@ type
     procedure SetPassword(const AValue: String);
     procedure SetIsPrivate(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
+    procedure SetMembers(const AValue: TArray<TBytes>);
     procedure SetHasPassword(const AValue: Boolean);
     procedure SetMemberCount(const AValue: Integer);
+    procedure SetSuspendedMembers(const AValue: TArray<TBytes>);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -57,13 +59,11 @@ type
     property Password: String read FPassword write SetPassword;
     property IsPrivate: Boolean read FIsPrivate write SetIsPrivate;
     property Seq: Integer read FSeq write SetSeq;
-    property Members: TArray<TBytes> read FMembers;
+    property Members: TArray<TBytes> read FMembers write SetMembers;
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
     property MemberCount: Integer read FMemberCount write SetMemberCount;
-    property SuspendedMembers: TArray<TBytes> read FSuspendedMembers;
+    property SuspendedMembers: TArray<TBytes> read FSuspendedMembers write SetSuspendedMembers;
   end;
-
-  TPB_Clubs = TObjectList<TPB_Club>;
 
 implementation
 
@@ -103,6 +103,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := String(AProtobufReader.readUtf8String);
       end;
+      FN_IS_PRIVATE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FIsPrivate := AProtobufReader.readBoolean;
+      end;
       FN_SEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readInt32;
@@ -111,6 +115,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         SetLength(FMembers, Length(FMembers) + 1);
         AProtobufReader.readBytes(FMembers[Length(FMembers)-1]);
+      end;
+      FN_HAS_PASSWORD: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FHasPassword := AProtobufReader.readBoolean;
       end;
       FN_MEMBER_COUNT: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -121,8 +129,8 @@ begin
         SetLength(FSuspendedMembers, Length(FSuspendedMembers) + 1);
         AProtobufReader.readBytes(FSuspendedMembers[Length(FSuspendedMembers)-1]);
       end;
-      else
-        AProtobufReader.skipField(tag);
+    else
+      AProtobufReader.skipField(tag);
     end;
   end;
 end;
@@ -168,6 +176,15 @@ begin
   ProtobufOutput.writeInt32(FN_SEQ, AValue);
 end;
 
+procedure TPB_Club.SetMembers(const AValue: TArray<TBytes>);
+var
+  C1: Integer;
+begin
+  FMembers := AValue;
+  for C1 := 0 to Length(FMembers) - 1 do
+    ProtobufOutput.writeBytes(FN_MEMBERS, AValue[C1]);
+end;
+
 procedure TPB_Club.SetHasPassword(const AValue: Boolean);
 begin
   FHasPassword := AValue;
@@ -178,6 +195,15 @@ procedure TPB_Club.SetMemberCount(const AValue: Integer);
 begin
   FMemberCount := AValue;
   ProtobufOutput.writeInt32(FN_MEMBER_COUNT, AValue);
+end;
+
+procedure TPB_Club.SetSuspendedMembers(const AValue: TArray<TBytes>);
+var
+  C1: Integer;
+begin
+  FSuspendedMembers := AValue;
+  for C1 := 0 to Length(FSuspendedMembers) - 1 do
+    ProtobufOutput.writeBytes(FN_SUSPENDED_MEMBERS, AValue[C1]);
 end;
 
 end.

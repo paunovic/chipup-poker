@@ -6,7 +6,7 @@ unit uPB_ChangeMailReply;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TChangeMailStatus = (cmSuccess = 0,cmDuplicateMail = 1,cmInvalidEmail = 2);
@@ -25,8 +25,6 @@ type
 
     property Status: TChangeMailStatus read FStatus write SetStatus;
   end;
-
-  TPB_ChangeMailReplys = TObjectList<TPB_ChangeMailReply>;
 
 implementation
 

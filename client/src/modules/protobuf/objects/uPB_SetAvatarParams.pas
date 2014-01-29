@@ -6,7 +6,7 @@ unit uPB_SetAvatarParams;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_SetAvatarParams = class(TProtobufBaseObject)
@@ -24,8 +24,6 @@ type
 
     property AvatarId: TBytes read FAvatarId write SetAvatarId;
   end;
-
-  TPB_SetAvatarParamss = TObjectList<TPB_SetAvatarParams>;
 
 implementation
 
@@ -49,8 +47,8 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AprotobufReader.readBytes(FAvatarId);
       end;
-      else
-        AProtobufReader.skipField(tag);
+    else
+      AProtobufReader.skipField(tag);
     end;
   end;
 end;

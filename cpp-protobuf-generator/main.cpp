@@ -161,7 +161,7 @@ const string getDelphiType(const FieldDescriptor *field) {
 	} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 		const Descriptor *subtype = field->message_type();
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-			return "TPB_"+subtype->name()+"s";
+			return "TObjectList<TPB_"+subtype->name()+">";
 		} else {
 			return "TPB_"+subtype->name();
 		}
@@ -390,7 +390,8 @@ void GenerateMessage(const FileDescriptor* file, const Descriptor *message, Gene
 					const Descriptor *subtype = field->message_type();
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						vars["subname"] = subtype->name();
-						printer.Print(vars,"    property $name$: TPB_$subname$s read $pname$ write $pname$;\n");
+						vars["type"] = getDelphiType(field);
+						printer.Print(vars,"    property $name$: $type$ read $pname$ write $pname$;\n");
 					} else {
 						printer.Print(
 							"    property $name$: TPB_$subname$ read $pname$ write Set$name$;\n"
@@ -469,10 +470,10 @@ void GenerateMessage(const FileDescriptor* file, const Descriptor *message, Gene
 						const Descriptor *subtype = field->message_type();
 						printer.Print(
 							"  if not Assigned($pname$) then\n"
-							"    $pname$ := TPB_$subname$s.Create;\n"
+							"    $pname$ := $subname$.Create;\n"
 							"\n"
 							,"pname",PrivateFieldName(field)
-							,"subname",subtype->name());
+							,"subname",getDelphiType(subtype));
 					}
 				}
 			}

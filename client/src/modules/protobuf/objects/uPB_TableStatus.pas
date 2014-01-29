@@ -6,7 +6,7 @@ unit uPB_TableStatus;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo;
 
 type
   TPB_TableStatus = class(TProtobufBaseObject)
@@ -20,7 +20,7 @@ type
 
     var
       FTableMongoId: TBytes;
-      FSeats: TPB_SeatInfos;
+      FSeats: TObjectList<TPB_SeatInfo>;
       FState: String;
       FDealer: Integer;
       FCurrentSeat: Integer;
@@ -34,13 +34,11 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
-    property Seats: TPB_SeatInfos read FSeats write FSeats;
+    property Seats: TObjectList<TPB_SeatInfo> read FSeats write FSeats;
     property State: String read FState write SetState;
     property Dealer: Integer read FDealer write SetDealer;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
   end;
-
-  TPB_TableStatuss = TObjectList<TPB_TableStatus>;
 
 implementation
 
@@ -59,7 +57,7 @@ var
   tag,field_number,wire_type,endpos : Integer;
 begin
   if not Assigned(FSeats) then
-    FSeats := TPB_SeatInfos.Create;
+    FSeats := TObjectList<TPB_SeatInfo>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

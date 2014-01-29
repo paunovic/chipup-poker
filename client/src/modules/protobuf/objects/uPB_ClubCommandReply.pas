@@ -6,11 +6,10 @@ unit uPB_ClubCommandReply;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_Club,uPB_Game;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_Club,uPB_Game;
 
 type
-  TClubStatus = (csSuccess = 0,csInvalidName = 1,csInvalidPassword = 2,csNameExists = 3,csInvalidClubId = 4,csAlreadyMember = 5,csBadPassword = 6);
-
+  TClubStatus = (csSuccess = 0,csInvalidName = 1,csInvalidPassword = 2,csNameExists = 3,csInvalidClubId = 4,csAlreadyMember = 5,csBadPassword = 6,csInvalidPlayerId = 7);
   TPB_ClubCommandReply = class(TProtobufBaseObject)
   private
     const
@@ -21,7 +20,7 @@ type
     var
       FStatus: TClubStatus;
       FClub: TPB_Club;
-      FGames: TPB_Games;
+      FGames: TObjectList<TPB_Game>;
 
     procedure SetStatus(const AValue: TClubStatus);
     procedure SetClub(const AValue: TPB_Club);
@@ -31,10 +30,8 @@ type
 
     property Status: TClubStatus read FStatus write SetStatus;
     property Club: TPB_Club read FClub write SetClub;
-    property Games: TPB_Games read FGames;
+    property Games: TObjectList<TPB_Game> read FGames write FGames;
   end;
-
-  TPB_ClubCommandReplys = TObjectList<TPB_ClubCommandReply>;
 
 implementation
 
@@ -44,8 +41,7 @@ uses
 
 destructor TPB_ClubCommandReply.Destroy;
 begin
-  if Assigned(FClub) then
-    FClub.Free;
+  if Assigned(FClub) then FClub.Free;
   if Assigned(FGames) then
     FGames.Free;
   inherited;
@@ -55,7 +51,7 @@ var
   tag,field_number,wire_type,endpos : Integer;
 begin
   if not Assigned(FGames) then
-    FGames := TPB_Games.Create;
+    FGames := TObjectList<TPB_Game>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -71,12 +67,12 @@ begin
           FClub := TPB_Club.Create;
         FClub.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
       end;
-        FN_GAMES: begin
-          Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-          FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
-        end;
-      else
-        AProtobufReader.skipField(tag);
+      FN_GAMES: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
+    else
+      AProtobufReader.skipField(tag);
     end;
   end;
 end;

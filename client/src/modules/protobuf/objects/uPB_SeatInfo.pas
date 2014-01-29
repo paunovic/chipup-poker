@@ -6,7 +6,7 @@ unit uPB_SeatInfo;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPlayerStatus = (psOutOfPlay = 1,psOutOfHand = 2,psInHand = 3,psFolded = 4);
@@ -45,8 +45,6 @@ type
     property Cards: String read FCards write SetCards;
     property Status: TPlayerStatus read FStatus write SetStatus;
   end;
-
-  TPB_SeatInfos = TObjectList<TPB_SeatInfo>;
 
 implementation
 

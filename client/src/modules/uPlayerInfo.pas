@@ -4,7 +4,7 @@ interface
 
 uses
   System.Generics.Collections, System.SysUtils,
-  uClubInfo, uPB_StatusReply, uPB_User;
+  uClubInfo, uPB_StatusReply, uPB_User, uCommon;
 
 type
   TPlayerInfo = class
@@ -49,7 +49,7 @@ implementation
 uses
   System.Classes, PNGImage, Soap.EncdDecd,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uMainDataModule, uSettings, uCommon, uAvatars, uGameInfo,
+  uMainDataModule, uSettings, uAvatars, uGameInfo,
   uPB_Club, uPB_Game;
 
 

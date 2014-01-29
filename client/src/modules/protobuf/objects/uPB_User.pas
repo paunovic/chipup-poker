@@ -6,7 +6,7 @@ unit uPB_User;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
   TPB_User = class(TProtobufBaseObject)
@@ -44,8 +44,6 @@ type
     property Authed: Boolean read FAuthed write SetAuthed;
     property Chips: Integer read FChips write SetChips;
   end;
-
-  TPB_Users = TObjectList<TPB_User>;
 
 implementation
 

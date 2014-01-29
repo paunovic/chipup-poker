@@ -6,7 +6,7 @@ unit uPB_GetUserParams;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_User;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_User;
 
 type
   TPB_GetUserParams = class(TProtobufBaseObject)
@@ -17,7 +17,7 @@ type
 
     var
       FUserMongoIds: TArray<TBytes>;
-      FUsers: TPB_Users;
+      FUsers: TObjectList<TPB_User>;
 
     procedure SetUserMongoIds(const AValue: TArray<TBytes>);
   public
@@ -25,10 +25,8 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property UserMongoIds: TArray<TBytes> read FUserMongoIds write SetUserMongoIds;
-    property Users: TPB_Users read FUsers write FUsers;
+    property Users: TObjectList<TPB_User> read FUsers write FUsers;
   end;
-
-  TPB_GetUserParamss = TObjectList<TPB_GetUserParams>;
 
 implementation
 
@@ -47,7 +45,7 @@ var
   tag,field_number,wire_type,endpos : Integer;
 begin
   if not Assigned(FUsers) then
-    FUsers := TPB_Users.Create;
+    FUsers := TObjectList<TPB_User>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

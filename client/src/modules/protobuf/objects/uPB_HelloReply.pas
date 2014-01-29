@@ -6,7 +6,7 @@ unit uPB_HelloReply;
 interface
 
 uses
-  WinApi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_StringSizes;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_StringSizes;
 
 type
   TPB_HelloReply = class(TProtobufBaseObject)
@@ -32,8 +32,6 @@ type
     property ChangeExpireTime: Integer read FChangeExpireTime write SetChangeExpireTime;
     property ForgotExpireTime: Integer read FForgotExpireTime write SetForgotExpireTime;
   end;
-
-  TPB_HelloReplys = TObjectList<TPB_HelloReply>;
 
 implementation
 
