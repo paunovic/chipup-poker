@@ -467,13 +467,12 @@ void GenerateMessage(const FileDescriptor* file, const Descriptor *message, Gene
 				const FieldDescriptor *field = message->field(j);
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						const Descriptor *subtype = field->message_type();
 						printer.Print(
 							"  if not Assigned($pname$) then\n"
 							"    $pname$ := $subname$.Create;\n"
 							"\n"
 							,"pname",PrivateFieldName(field)
-							,"subname",getDelphiType(subtype));
+							,"subname",getDelphiType(field));
 					}
 				}
 			}
