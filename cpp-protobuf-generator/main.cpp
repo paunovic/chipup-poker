@@ -486,20 +486,20 @@ void GenerateMessage(const FileDescriptor* file, const Descriptor *message, Gene
 				string name = field->name();
 				UpperString(&name);
 				if (field->type() == FieldDescriptor::TYPE_INT32) {
-					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						printer.Print(
-							"      $name$: begin\n"
-							"        Assert(wire_type = WIRETYPE_VARINT);\n"
-							"        SetLength($pname$, Length($pname$) + 1);\n"
-							"        $pname$[Length($pname$)-1] := AProtobufReader.readInt32;\n"
-							"      end;\n","name",EnumName(field)
-							,"pname",PrivateFieldName(field));
-					} else if (field->is_packed()) {
+					if (field->is_packed()) {
 						printer.Print(
 							"      $name$: begin\n"
 							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
 							"        // FIXME $pname$ := AProtobufReader.readInt32;\n"
 							"        AProtobufReader.skipField(tag);\n"
+							"      end;\n","name",EnumName(field)
+							,"pname",PrivateFieldName(field));
+					} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        SetLength($pname$, Length($pname$) + 1);\n"
+							"        $pname$[Length($pname$)-1] := AProtobufReader.readInt32;\n"
 							"      end;\n","name",EnumName(field)
 							,"pname",PrivateFieldName(field));
 					} else {
