@@ -31,7 +31,7 @@ type
 
   TTableStatus = class
   private
-    FState      : String;
+    FState      : TTableState;
     FDealer     : Integer;
     FCurrentSeat: Integer;
     FSeatInfos  : TSeatInfos;
@@ -39,21 +39,24 @@ type
 
     function GetBigBlindSeat: Integer;
     function GetSmallBlindSeat: Integer;
+    function GetHighestBet: Integer;
 
   public
     constructor Create;
     destructor Destroy; override;
 
     function GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
+    function GetBet(const ASeatIndex: Integer): Integer;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
 
-    property State: String read FState;
+    property State: TTableState read FState;
     property Dealer: Integer read FDealer;
     property SmallBlindSeat: Integer read GetSmallBlindSeat;
     property BigBlindSeat: Integer read GetBigBlindSeat;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TArray<Integer> read FBets;
+    property HighestBet: Integer read GetHighestBet;
   end;
 
 implementation
@@ -106,6 +109,25 @@ end;
 function TTableStatus.GetBigBlindSeat: Integer;
 begin
   result := GetNextSeatIndex(GetSmallBlindSeat);
+end;
+
+function TTableStatus.GetHighestBet: Integer;
+var
+  C1: Integer;
+begin
+  result := 0;
+  for C1 := Low(FBets) to High(FBets) do
+    if FBets[C1] > result then
+      result := FBets[C1];
+end;
+
+function TTableStatus.GetBet(const ASeatIndex: Integer): Integer;
+begin
+  if (ASeatIndex < Low(FBets)) or
+     (ASeatIndex > High(FBets)) then
+    Exit(0)
+  else
+    Exit(FBets[ASeatIndex]);
 end;
 
 function TTableStatus.GetSmallBlindSeat: Integer;

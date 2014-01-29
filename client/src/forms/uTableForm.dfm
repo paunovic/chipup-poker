@@ -113,27 +113,15 @@ object frmTable: TfrmTable
       TabOrder = 3
       Visible = False
     end
-    object btCall: TcxButton
+    object btCallCheck: TcxButton
       Left = 398
       Top = 65
       Width = 97
       Height = 34
-      Caption = 'Call'
+      Action = acCall
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 4
       Visible = False
-      OnClick = btCallClick
-    end
-    object btCheck: TcxButton
-      Left = 498
-      Top = 65
-      Width = 97
-      Height = 34
-      Caption = 'Check'
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 5
-      Visible = False
-      OnClick = btCheckClick
     end
   end
   object ActionManager: TActionManager
@@ -142,15 +130,25 @@ object frmTable: TfrmTable
     StyleName = 'Platform Default'
     object acStandUp: TAction
       Category = 'Game'
-      Caption = 'Stand Up'
+      Caption = 'STAND UP'
       Enabled = False
       OnExecute = acStandUpExecute
     end
     object acFold: TAction
       Category = 'Game'
-      Caption = 'Fold'
+      Caption = 'FOLD'
       Enabled = False
       OnExecute = acFoldExecute
+    end
+    object acCall: TAction
+      Category = 'Game'
+      Caption = 'CALL'
+      Enabled = False
+    end
+    object acCheck: TAction
+      Category = 'Game'
+      Caption = 'CHECK'
+      Enabled = False
     end
   end
 end

@@ -9,6 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo;
 
 type
+  TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6);
   TPB_TableStatus = class(TProtobufBaseObject)
   private
     const
@@ -18,30 +19,34 @@ type
       FN_DEALER = 4;
       FN_CURRENT_SEAT = 5;
       FN_BETS = 6;
+      FN_FLOP = 7;
 
     var
       FTableMongoId: TBytes;
       FSeats: TObjectList<TPB_SeatInfo>;
-      FState: String;
+      FState: TTableState;
       FDealer: Integer;
       FCurrentSeat: Integer;
       FBets: TArray<Integer>;
+      FFlop: String;
 
     procedure SetTableMongoId(const AValue: TBytes);
-    procedure SetState(const AValue: String);
+    procedure SetState(const AValue: TTableState);
     procedure SetDealer(const AValue: Integer);
     procedure SetCurrentSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<Integer>);
+    procedure SetFlop(const AValue: String);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
     property Seats: TObjectList<TPB_SeatInfo> read FSeats write FSeats;
-    property State: String read FState write SetState;
+    property State: TTableState read FState write SetState;
     property Dealer: Integer read FDealer write SetDealer;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
     property Bets: TArray<Integer> read FBets write SetBets;
+    property Flop: String read FFlop write SetFlop;
   end;
 
 implementation
@@ -76,8 +81,8 @@ begin
         FSeats.Add(TPB_SeatInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
       FN_STATE: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FState := String(AProtobufReader.readUtf8String);
+        Assert(wire_type = WIRETYPE_VARINT);
+        FState := TTableState(AProtobufReader.readEnum);
       end;
       FN_DEALER: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -92,6 +97,10 @@ begin
         SetLength(FBets, Length(FBets) + 1);
         FBets[Length(FBets)-1] := AProtobufReader.readInt32;
       end;
+      FN_FLOP: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FFlop := String(AProtobufReader.readUtf8String);
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -103,10 +112,10 @@ begin
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
 end;
 
-procedure TPB_TableStatus.SetState(const AValue: String);
+procedure TPB_TableStatus.SetState(const AValue: TTableState);
 begin
   FState := AValue;
-  ProtobufOutput.writeString(FN_STATE, AValue);
+  ProtobufOutput.writeInt32(FN_STATE, Integer(AValue));
 end;
 
 procedure TPB_TableStatus.SetDealer(const AValue: Integer);
@@ -128,6 +137,12 @@ begin
   FBets := AValue;
   for C1 := 0 to Length(FBets) - 1 do
     ProtobufOutput.writeInt32(FN_BETS, AValue[C1]);
+end;
+
+procedure TPB_TableStatus.SetFlop(const AValue: String);
+begin
+  FFlop := AValue;
+  ProtobufOutput.writeString(FN_FLOP, AValue);
 end;
 
 end.

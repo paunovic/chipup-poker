@@ -21,8 +21,9 @@ type
     ActionManager: TActionManager;
     acStandUp: TAction;
     acFold: TAction;
-    btCall: TcxButton;
-    btCheck: TcxButton;
+    btCallCheck: TcxButton;
+    acCall: TAction;
+    acCheck: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -34,7 +35,6 @@ type
     procedure edChatKeyPress(Sender: TObject; var Key: Char);
     procedure acFoldExecute(Sender: TObject);
     procedure btCallClick(Sender: TObject);
-    procedure btCheckClick(Sender: TObject);
   private
     FFormAspectRatio: Double;
     FTable          : TTable;
@@ -428,43 +428,63 @@ begin
     end;
   end;
 
-  info := Format('State: %s SeatIndex: %d [%s] CurrentSeat: %d Dealer: %d', [FTableStatus.State, FTable.SeatIndex, cards, FTableStatus.CurrentSeat, FTableStatus.Dealer]);
-
+  info := Format('State: %d SeatIndex: %d [%s] CurrentSeat: %d Dealer: %d', [Integer(FTableStatus.State), FTable.SeatIndex, cards, FTableStatus.CurrentSeat, FTableStatus.Dealer]);
   lbsInfo.Caption := info;
-
-  if FTable.IsSitting then
-  begin
-    acStandUp.Enabled := TRUE;
-
-    if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
-       (FTableStatus.State = 'preflop') then
-    begin
-      acFold.Enabled := TRUE;
-      btCall.Visible := TRUE;
-      btCheck.Visible := TRUE;
-    end
-    else
-    begin
-      acFold.Enabled := FALSE;
-      btCall.Visible := FALSE;
-      btCheck.Visible := FALSE;
-    end;
-  end
-  else
-  begin
-    acFold.Enabled := FALSE;
-    acStandUp.Enabled := FALSE;
-    btCall.Visible := FALSE;
-    btCheck.Visible := FALSE;
-  end;
-
-  btStandUp.Visible := acStandUp.Enabled;
-  btFold.Visible := acFold.Enabled;
 
   {$IFDEF DEBUG}
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     DebugLn(Format('SEAT %d, BET = %d', [C1, pbtablestatus.Bets[C1]]), ditApplication);
+  if pbtablestatus.State = tsFlop then
+    DebugLn(Format('FLOP: %s', [pbtablestatus.Flop]), ditApplication);
   {$ENDIF}
+
+  acStandUp.Enabled := FALSE;
+  acFold.Enabled := FALSE;
+  acCall.Enabled := FALSE;
+  acCheck.Enabled := FALSE;
+
+  if FTable.IsSitting then
+  begin
+    case FTableStatus.State of
+      tsIdle: begin
+        acStandUp.Enabled := TRUE;
+      end;
+      tsPreFlop: begin
+        if FTableStatus.CurrentSeat = FTable.SeatIndex then
+        begin
+          if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
+            acCall.Enabled := TRUE
+          else
+            acCheck.Enabled := TRUE;
+          acFold.Enabled := TRUE;
+        end;
+      end;
+      tsFlop: begin
+        if FTableStatus.CurrentSeat = FTable.SeatIndex then
+        begin
+          if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
+            acCall.Enabled := TRUE
+          else
+            acCheck.Enabled := TRUE;
+          acFold.Enabled := TRUE;
+        end;
+      end;
+      tsTurn: ;
+      tsRiver: ;
+      tsWinning: ;
+    end;
+  end;
+
+  btStandUp.Visible := acStandUp.Enabled;
+  btFold.Visible := acFold.Enabled;
+  if (acCall.Enabled) or (acCheck.Enabled) then
+  begin
+    if acCall.Enabled then
+      btCallCheck.Action := acCall
+    else
+      btCallCheck.Action := acCheck;
+    btCallCheck.Visible := TRUE;
+  end;
 
   Redraw(TRUE);
 end;
@@ -512,18 +532,6 @@ begin
   for C1 := 0 to Length(FTableStatus.Bets) - 1 do
     if FTableStatus.Bets[C1] > bet then
       bet := FTableStatus.Bets[C1];
-
-  SocketClient.PutChips(FTable.Game.MongoId, bet);
-end;
-
-procedure TfrmTable.btCheckClick(Sender: TObject);
-var
-  bet: Integer;
-begin
-  if FTable.SeatIndex >= Length(FTableStatus.Bets) then
-    bet := 0
-  else
-    bet := FTableStatus.Bets[FTable.SeatIndex];
 
   SocketClient.PutChips(FTable.Game.MongoId, bet);
 end;
