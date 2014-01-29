@@ -35,6 +35,7 @@ type
     FDealer     : Integer;
     FCurrentSeat: Integer;
     FSeatInfos  : TSeatInfos;
+    FBets       : TArray<Integer>;
 
     function GetBigBlindSeat: Integer;
     function GetSmallBlindSeat: Integer;
@@ -52,6 +53,7 @@ type
     property BigBlindSeat: Integer read GetBigBlindSeat;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
+    property Bets: TArray<Integer> read FBets;
   end;
 
 implementation
@@ -131,6 +133,8 @@ begin
     end;
     FSeatInfos.Sort;
   end;
+
+  FBets := ATableStatusProtobuf.Bets;
 end;
 
 { TSeatInfos }

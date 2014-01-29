@@ -88,8 +88,8 @@ object frmTable: TfrmTable
       end
     end
     object btStandUp: TcxButton
-      Left = 296
-      Top = 38
+      Left = 295
+      Top = 25
       Width = 97
       Height = 34
       Action = acStandUp
@@ -104,14 +104,36 @@ object frmTable: TfrmTable
       Transparent = True
     end
     object btFold: TcxButton
-      Left = 399
-      Top = 38
+      Left = 296
+      Top = 65
       Width = 97
       Height = 34
       Action = acFold
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 3
       Visible = False
+    end
+    object btCall: TcxButton
+      Left = 398
+      Top = 65
+      Width = 97
+      Height = 34
+      Caption = 'Call'
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 4
+      Visible = False
+      OnClick = btCallClick
+    end
+    object btCheck: TcxButton
+      Left = 498
+      Top = 65
+      Width = 97
+      Height = 34
+      Caption = 'Check'
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 5
+      Visible = False
+      OnClick = btCheckClick
     end
   end
   object ActionManager: TActionManager

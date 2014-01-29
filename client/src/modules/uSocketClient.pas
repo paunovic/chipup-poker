@@ -77,6 +77,7 @@ type
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
     procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
     procedure Fold(const AGameId: TBytes);
+    procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer);
 
     property Socket: TSslWSocket read FSocket;
   end;
@@ -822,6 +823,20 @@ begin
   end;
 end;
 
+procedure TSocketClient.PutChips(const AGameId: TBytes; const AChipAmount: Integer);
+var
+  protobuf: TPB_PutChips;
+begin
+  protobuf := TPB_PutChips.Create;
+  try
+    protobuf.TableMongoId := AGameId;
+    protobuf.ChipAmount := AChipAmount;
+    SendProtobuf(scPutChips, protobuf);
+  finally
+    protobuf.Free;
+  end;
+
+end;
 
 
 

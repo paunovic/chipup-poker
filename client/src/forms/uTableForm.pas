@@ -21,6 +21,8 @@ type
     ActionManager: TActionManager;
     acStandUp: TAction;
     acFold: TAction;
+    btCall: TcxButton;
+    btCheck: TcxButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -31,6 +33,8 @@ type
     procedure PaintBoxClick(Sender: TObject);
     procedure edChatKeyPress(Sender: TObject; var Key: Char);
     procedure acFoldExecute(Sender: TObject);
+    procedure btCallClick(Sender: TObject);
+    procedure btCheckClick(Sender: TObject);
   private
     FFormAspectRatio: Double;
     FTable          : TTable;
@@ -267,12 +271,15 @@ begin
 
   // sb/bb
   seat_point := GetSeatPoint(FTableStatus.SmallBlindSeat);
+  FPaintBoxBitmap.Canvas.Brush.Color := clMoneyGreen;
   FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 4, seat_point.Y + 17, 'SB');
   seat_point := GetSeatPoint(FTableStatus.BigBlindSeat);
+  FPaintBoxBitmap.Canvas.Brush.Color := clLime;
   FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 4, seat_point.Y + 17, 'BB');
 
   // on the move
   seat_point := GetSeatPoint(FTableStatus.CurrentSeat);
+  FPaintBoxBitmap.Canvas.Brush.Color := clWhite;
   FPaintBoxBitmap.Canvas.TextOut(seat_point.X - 6, seat_point.Y - 7, IntToStr(FTableStatus.CurrentSeat) + '!');
 
   // draw avatars
@@ -433,16 +440,22 @@ begin
        (FTableStatus.State = 'preflop') then
     begin
       acFold.Enabled := TRUE;
+      btCall.Visible := TRUE;
+      btCheck.Visible := TRUE;
     end
     else
     begin
       acFold.Enabled := FALSE;
+      btCall.Visible := FALSE;
+      btCheck.Visible := FALSE;
     end;
   end
   else
   begin
     acFold.Enabled := FALSE;
     acStandUp.Enabled := FALSE;
+    btCall.Visible := FALSE;
+    btCheck.Visible := FALSE;
   end;
 
   btStandUp.Visible := acStandUp.Enabled;
@@ -488,6 +501,31 @@ end;
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
   SocketClient.Fold(FTable.Game.MongoId);
+end;
+
+procedure TfrmTable.btCallClick(Sender: TObject);
+var
+  C1 : Integer;
+  bet: Integer;
+begin
+  bet := 0;
+  for C1 := 0 to Length(FTableStatus.Bets) - 1 do
+    if FTableStatus.Bets[C1] > bet then
+      bet := FTableStatus.Bets[C1];
+
+  SocketClient.PutChips(FTable.Game.MongoId, bet);
+end;
+
+procedure TfrmTable.btCheckClick(Sender: TObject);
+var
+  bet: Integer;
+begin
+  if FTable.SeatIndex >= Length(FTableStatus.Bets) then
+    bet := 0
+  else
+    bet := FTableStatus.Bets[FTable.SeatIndex];
+
+  SocketClient.PutChips(FTable.Game.MongoId, bet);
 end;
 
 end.
