@@ -321,5 +321,5 @@ message TableEvent {
 
 message PutChips {
 	required bytes table_mongo_id = 1;
-	required int chip_amount = 2;
+	required int32 chip_amount = 2;
 }
