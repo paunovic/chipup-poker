@@ -18,6 +18,7 @@ object frmTable: TfrmTable
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
@@ -89,7 +90,7 @@ object frmTable: TfrmTable
     end
     object btStandUp: TcxButton
       Left = 295
-      Top = 25
+      Top = 63
       Width = 97
       Height = 34
       Action = acStandUp
@@ -97,31 +98,34 @@ object frmTable: TfrmTable
       TabOrder = 1
       Visible = False
     end
-    object lbsInfo: TcxLabel
-      Left = 296
-      Top = 6
-      Caption = 'lbsInfo'
-      Transparent = True
-    end
     object btFold: TcxButton
-      Left = 296
-      Top = 65
+      Left = 295
+      Top = 23
       Width = 97
       Height = 34
       Action = acFold
       SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 3
+      TabOrder = 2
       Visible = False
     end
     object btCallCheck: TcxButton
-      Left = 398
-      Top = 65
+      Left = 397
+      Top = 23
       Width = 97
       Height = 34
       Action = acCall
       SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 4
+      TabOrder = 3
       Visible = False
+    end
+    object btRaise: TcxButton
+      Left = 500
+      Top = 23
+      Width = 97
+      Height = 34
+      Action = acRaise
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 4
     end
   end
   object ActionManager: TActionManager
@@ -151,6 +155,12 @@ object frmTable: TfrmTable
       Caption = 'CHECK'
       Enabled = False
       OnExecute = acCheckExecute
+    end
+    object acRaise: TAction
+      Category = 'Game'
+      Caption = 'RAISE'
+      Enabled = False
+      OnExecute = acRaiseExecute
     end
   end
 end

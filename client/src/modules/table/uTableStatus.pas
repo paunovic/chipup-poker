@@ -47,6 +47,7 @@ type
 
     function GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
     function GetBet(const ASeatIndex: Integer): Integer;
+    function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
 
     property State: TTableState read FState;
@@ -133,6 +134,19 @@ end;
 function TTableStatus.GetSmallBlindSeat: Integer;
 begin
   result := GetNextSeatIndex(FDealer);
+end;
+
+function TTableStatus.IsSeatTaken(const ASeatIndex: Integer): Boolean;
+var
+  C1: Integer;
+begin
+  if not Assigned(FSeatInfos) then
+    Exit(FALSE);
+
+  for C1 := 0 to FSeatInfos.Count - 1 do
+    if FSeatInfos[C1].SeatIndex = ASeatIndex then
+      Exit(TRUE);
+  Exit(FALSE);
 end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);

@@ -16,7 +16,6 @@ type
     edChat: TcxTextEdit;
     reChat: TRichEdit;
     btStandUp: TcxButton;
-    lbsInfo: TcxLabel;
     btFold: TcxButton;
     ActionManager: TActionManager;
     acStandUp: TAction;
@@ -24,6 +23,8 @@ type
     btCallCheck: TcxButton;
     acCall: TAction;
     acCheck: TAction;
+    btRaise: TcxButton;
+    acRaise: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -36,6 +37,8 @@ type
     procedure acFoldExecute(Sender: TObject);
     procedure acCallExecute(Sender: TObject);
     procedure acCheckExecute(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure acRaiseExecute(Sender: TObject);
   private
     FFormAspectRatio: Double;
     FTable          : TTable;
@@ -56,6 +59,8 @@ type
     procedure CSRChatEvent(const AMessage: TMessageItem);
     procedure CSRETableStatus(const AMessage: TMessageItem);
     procedure CSETableEvent(const AMessage: TMessageItem);
+
+    procedure ConfigureGUI;
 
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -128,6 +133,13 @@ end;
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FTable.NotifyClose;
+end;
+
+procedure TfrmTable.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := TRUE;
+  if FTable.IsSitting then
+    CanClose := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and any chips that are in pot.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
@@ -215,7 +227,8 @@ begin
     if (client_cursor_pos.X >= seat_rect.Left) and (client_cursor_pos.X <= seat_rect.Right) and
        (client_cursor_pos.Y >= seat_rect.Top) and (client_cursor_pos.Y <= seat_rect.Bottom) then
     begin
-      if not FTable.IsSitting then // not sitting, show table sit form then
+      if (not FTable.IsSitting) and
+         (not FTableStatus.IsSeatTaken(C1)) then
       begin
         if RunModalForm(TfrmTableSit, self, [FTable.Game, @C1]) = mrOk then
         begin
@@ -397,11 +410,58 @@ begin
   end;
 end;
 
+procedure TfrmTable.ConfigureGUI;
+begin
+  acStandUp.Enabled := FALSE;
+  acFold.Enabled := FALSE;
+  acCall.Enabled := FALSE;
+  acCheck.Enabled := FALSE;
+  acRaise.Enabled := FALSE;
+
+  if FTable.IsSitting then
+  begin
+    acStandUp.Enabled := TRUE;
+    case FTableStatus.State of
+      tsIdle: ;
+      tsPreFlop,
+      tsFlop,
+      tsTurn,
+      tsRiver: begin
+        if FTableStatus.CurrentSeat = FTable.SeatIndex then
+        begin
+          if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
+            acCall.Enabled := TRUE
+          else
+            acCheck.Enabled := TRUE;
+          acFold.Enabled := TRUE;
+          acRaise.Enabled := TRUE;
+        end;
+      end;
+      tsWinning: ;
+    end;
+  end;
+
+  btStandUp.Visible := acStandUp.Enabled;
+  btFold.Visible := acFold.Enabled;
+  btRaise.Visible := acRaise.Enabled;
+
+  if (acCall.Enabled) or (acCheck.Enabled) then
+  begin
+    if acCall.Enabled then
+      btCallCheck.Action := acCall
+    else
+      btCallCheck.Action := acCheck;
+    btCallCheck.Visible := TRUE;
+  end
+  else
+    btCallCheck.Visible := FALSE;  
+end;
+
 procedure TfrmTable.CSRETableStatus(const AMessage: TMessageItem);
 var
   pbtablestatus: TPB_TableStatus;
-  C1: Integer;
-  info, cards: String;
+  C1           : Integer;
+  tmp: String;
 begin
   pbtablestatus := AMessage.Object_ as TPB_TableStatus;
   if not CompareBytes(pbtablestatus.TableMongoId, FTable.Game.MongoId) then
@@ -413,80 +473,33 @@ begin
     ActionManager.State := asNormal;
 
   case AMessage.MethodId of
-    Integer(srTableStandUpOk): begin
-      FTable.SeatIndex := -1;
-      acStandUp.Enabled := FALSE;
-    end;
+    Integer(srTableStandUpOk): FTable.SeatIndex := -1;
   end;
 
-  cards := '';
   for C1 := 0 to pbtablestatus.Seats.Count - 1 do
-  begin
     if CompareBytes(pbtablestatus.Seats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
     begin
       FTable.SeatIndex := pbtablestatus.Seats[C1].Seat;
-      cards := pbtablestatus.Seats[C1].Cards;
+      Break;
     end;
-  end;
-
-  info := Format('State: %d SeatIndex: %d [%s] CurrentSeat: %d Dealer: %d', [Integer(FTableStatus.State), FTable.SeatIndex, cards, FTableStatus.CurrentSeat, FTableStatus.Dealer]);
-  lbsInfo.Caption := info;
 
   {$IFDEF DEBUG}
+  tmp := '';
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
-    DebugLn(Format('SEAT %d, BET = %d', [C1, pbtablestatus.Bets[C1]]), ditApplication);
-  if pbtablestatus.State = tsFlop then
-    DebugLn(Format('FLOP: %s', [pbtablestatus.Flop]), ditApplication);
+  begin
+    tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);
+    tmp := Trim(tmp);
+  end;
+  if tmp <> '' then
+    DebugLn('CARDS: ' + tmp, ditApplication);
+  case pbtablestatus.State of
+    tsFlop: DebugLn(Format('FLOP: %s', [pbtablestatus.Flop]), ditApplication);
+//    tsTurn: DebugLn(Format('TURN: %s', [pbtablestatus.Turn]), ditApplication);
+//    tsRiver: DebugLn(Format('RIVER: %s', [pbtablestatus.River]), ditApplication); 
+  end;
   {$ENDIF}
 
-  acStandUp.Enabled := FALSE;
-  acFold.Enabled := FALSE;
-  acCall.Enabled := FALSE;
-  acCheck.Enabled := FALSE;
-
-  if FTable.IsSitting then
-  begin
-    acStandUp.Enabled := TRUE;
-    case FTableStatus.State of
-      tsIdle: ;
-      tsPreFlop: begin
-        if FTableStatus.CurrentSeat = FTable.SeatIndex then
-        begin
-          if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
-            acCall.Enabled := TRUE
-          else
-            acCheck.Enabled := TRUE;
-          acFold.Enabled := TRUE;
-        end;
-      end;
-      tsFlop: begin
-        if FTableStatus.CurrentSeat = FTable.SeatIndex then
-        begin
-          if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
-            acCall.Enabled := TRUE
-          else
-            acCheck.Enabled := TRUE;
-          acFold.Enabled := TRUE;
-        end;
-      end;
-      tsTurn: ;
-      tsRiver: ;
-      tsWinning: ;
-    end;
-  end;
-
-  btStandUp.Visible := acStandUp.Enabled;
-  btFold.Visible := acFold.Enabled;
-  if (acCall.Enabled) or (acCheck.Enabled) then
-  begin
-    if acCall.Enabled then
-      btCallCheck.Action := acCall
-    else
-      btCallCheck.Action := acCheck;
-    btCallCheck.Visible := TRUE;
-  end
-  else
-    btCallCheck.Visible := FALSE;
+  ConfigureGUI;
 
   Redraw(TRUE);
 end;
@@ -533,6 +546,11 @@ end;
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
   SocketClient.Fold(FTable.Game.MongoId);
+end;
+
+procedure TfrmTable.acRaiseExecute(Sender: TObject);
+begin
+  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet * 2);
 end;
 
 end.
