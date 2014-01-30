@@ -257,6 +257,8 @@ message TableStatus {
 	required int32 current_seat = 5;
 	repeated int32 bets = 6;
 	optional string flop = 7;
+	optional string turn = 8;
+	optional string river = 9;
 }
 
 message SeatInfo {
