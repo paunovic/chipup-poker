@@ -326,9 +326,27 @@ message TableEvent {
 		teWinning = 4;
 		teDealing = 5;
 	}
+	message WinnerData {
+		enum CardRankings {
+			crRoyalFlush = 1;
+			crStraightFlush = 2;
+			cr4OfKind = 3;
+			crFullHouse = 4;
+			crFlush = 5;
+			crStraight = 6;
+			crThreeOfKind = 7;
+			crTwoPair = 8;
+			crOnePair = 9;
+			crHighCard = 10;
+		}
+		required CardRankings primaryRank = 1;
+		required int32 secondaryRank = 2;
+		required int32 seat = 3;
+	}
 	required TableEventType event = 1;
 	repeated int32 seats = 2;
 	required bytes table_mongo_id = 3;
+	repeated WinnerData seatsData = 4;
 }
 
 message PutChips {
