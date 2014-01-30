@@ -17,7 +17,7 @@ var deck = require('./deck');
 var Deck = deck.Deck;
 var Hand = deck.Hand;
 var https = require('https');
-var dag = require('./dag/build/Debug/dag');
+var dag = require('./dag/build/Release/dag');
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
