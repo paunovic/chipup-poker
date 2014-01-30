@@ -1467,7 +1467,15 @@ Game.prototype.checkRoundPass = function () {
 				this.state = 'tsRiver';
 				this.passed = false;
 			} else {
-				console.log('what next??');
+				var hands = [];
+				for (var x=0; x<this.members.length; x++) {
+					if (!this.members[x]) continue;
+					if (this.members[x].status != 'psInHand') continue;
+					hands.push({seat:x,hand:this.members[x].cards.prettyPrint()});
+				}
+				console.log(hands);
+				var result = dag.rankHands(this.flop.prettyPrint()+this.turn.prettyPrint()+this.river.prettyPrint(),hands);
+				console.log('what next??',result);
 			}
 		}
 	}
