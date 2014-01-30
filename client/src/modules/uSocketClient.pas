@@ -47,7 +47,7 @@ type
     function IsConnected: Boolean;
 
     procedure SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
-    procedure SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const size: Integer);
+    procedure SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
 
     procedure Login(const ALogin, APass: String);
     procedure Logout;
@@ -339,7 +339,9 @@ var
   err     : String;
   sc      : TServerCodes;
   valid_sc: Boolean;
-  ts1,ts2 : DWORD;
+  {$IFDEF DEBUG}
+  ts1, ts2: DWORD;
+  {$ENDIF}
 begin
   if FConnectCode = -1 then
     FConnectCode := ARpcMessage.MethodId;
@@ -394,12 +396,14 @@ begin
     srTableSitSeatTaken,
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srPong: begin
-      KillPingTimeoutTimer;
-      ResetPingTimer;
+      {$IFDEF DEBUG}
       ts1 := GetTickCount();
       ts2 := PDWORD(ADataPointer)^;
-      // lag is ts1 - ts2
-      {$IFDEF DEBUG} DebugLn(Format('Lag is: %dms', [ts1 - ts2]), ditException); {$ENDIF}
+      DebugLn(Format('Lag is: %dms', [ts1 - ts2]), ditException);
+      {$ENDIF}
+
+      KillPingTimeoutTimer;
+      ResetPingTimer;
     end;
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDisbandOk,
@@ -421,7 +425,7 @@ begin
   end;
 end;
 
-procedure TSocketClient.SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const size: Integer);
+procedure TSocketClient.SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
 var
   rpc_message: TPB_RpcMessage;
   mstream    : TMemoryStream;
@@ -430,17 +434,17 @@ begin
   rpc_message := TPB_RpcMessage.Create;
   try
     rpc_message.MethodId := Integer(AMethodId);
-    if size > 0 then
-      rpc_message.DataSize := size;
+    if ASize > 0 then
+      rpc_message.DataSize := ASize;
     mstream := TMemoryStream.Create;
     try
       rpcsize := rpc_message.ProtobufOutputSize;
-      mstream.WriteBuffer(rpcsize,SizeOf(rpcsize));
+      mstream.WriteBuffer(rpcsize, SizeOf(rpcsize));
       rpc_message.ProtobufOutput.SaveToStream(mstream);
-      if size > 0 then
-        mstream.Write(AProtobuf,rpc_message.DataSize);
+      if ASize > 0 then
+        mstream.Write(AProtobuf, rpc_message.DataSize);
 
-      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), size, mstream.Size]), ditSocketOut); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), ASize, mstream.Size]), ditSocketOut); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -817,7 +821,7 @@ var
   ts : DWORD;
 begin
   ts := GetTickCount();
-  SendRawBytes(scPing, ts,SizeOf(ts));
+  SendRawBytes(scPing, ts, SizeOf(ts));
 end;
 
 procedure TSocketClient.ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);

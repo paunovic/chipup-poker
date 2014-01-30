@@ -54,26 +54,26 @@ type
     SearchPublicClubs1: TMenuItem;
     btHomeGames: TcxButton;
     btTournaments: TcxButton;
-    Shape1: TShape;
-    cxLabel1: TcxLabel;
     gridTournaments: TcxGrid;
-    cxGridTableView1: TcxGridTableView;
+    gridTournamentsTable: TcxGridTableView;
     cxGridColumn2: TcxGridColumn;
     cxGridColumn3: TcxGridColumn;
-    cxGridLevel1: TcxGridLevel;
-    cxGridTableView1Column1: TcxGridColumn;
-    cxGridTableView1Column2: TcxGridColumn;
-    cxGridTableView1Column3: TcxGridColumn;
-    cxGridTableView1Column4: TcxGridColumn;
+    gridTournamentsLevel: TcxGridLevel;
+    gridTournamentsTableColumn1: TcxGridColumn;
+    gridTournamentsTableColumn2: TcxGridColumn;
+    gridTournamentsTableColumn3: TcxGridColumn;
+    gridTournamentsTableColumn4: TcxGridColumn;
     acShowTournamentLayout: TAction;
     acShowHomeGamesLayout: TAction;
     btOpenTournamentLobby: TcxButton;
+    btPrijatnaPunina: TcxButton;
+    imgCashier: TcxImage;
+    acOpenCashier: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
     procedure acShowJoinClubFormExecute(Sender: TObject);
     procedure gridJoinedClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
-    procedure acBuyChipsExecute(Sender: TObject);
     procedure acShowChangeEMailFormExecute(Sender: TObject);
     procedure acShowChangePasswordFormExecute(Sender: TObject);
     procedure acShowChangeAvatarFormExecute(Sender: TObject);
@@ -86,6 +86,10 @@ type
     procedure acShowPublicClubsListFormExecute(Sender: TObject);
     procedure acShowHomeGamesLayoutExecute(Sender: TObject);
     procedure acShowTournamentLayoutExecute(Sender: TObject);
+    procedure imgCashierMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure acOpenCashierExecute(Sender: TObject);
+    procedure imgCashierMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure FormCreate(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -154,6 +158,11 @@ begin
   CanClose := ConfirmToCloseTables;
   if CanClose then
     dmMain.Tables.ClearWithoutNotification;
+end;
+
+procedure TfrmChipUpMain.FormCreate(Sender: TObject);
+begin
+  LoadImageFromResource(imgCashier, 'CashierNormal');
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
@@ -261,17 +270,17 @@ begin
   result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
 end;
 
-procedure TfrmChipUpMain.acBuyChipsExecute(Sender: TObject);
-begin
-  dmMain.OpenBuyChipsLink;
-end;
-
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
   if not ConfirmToCloseTables then
     Exit;
 
   SocketClient.Logout;
+end;
+
+procedure TfrmChipUpMain.acOpenCashierExecute(Sender: TObject);
+begin
+  dmMain.OpenCashierLink;
 end;
 
 procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
@@ -567,6 +576,29 @@ begin
 
   table.Game.UpdateFromTableStatus(pbtstatus);
   ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.imgCashierMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  color: TColor;
+begin
+  if Button = mbLeft then
+  begin
+    color := imgCashier.Canvas.Canvas.Pixels[X, Y];
+    if color <> 0 then
+      LoadImageFromResource(imgCashier, 'CashierPressed');
+  end;
+end;
+
+procedure TfrmChipUpMain.imgCashierMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  if Button = mbLeft then
+  begin
+    color := imgCashier.Canvas.Canvas.Pixels[X, Y];
+    if color > 0 then
+      dmMain.OpenCashierLink;
+    LoadImageFromResource(imgCashier, 'CashierNormal');
+  end;
 end;
 
 procedure TfrmChipUpMain.CSRLeaveClub(const AMessage: TMessageItem);

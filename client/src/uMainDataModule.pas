@@ -21,7 +21,7 @@ type
   public
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
 
-    procedure OpenBuyChipsLink;
+    procedure OpenCashierLink;
     procedure OpenTOSLink;
 
     property SelfInfo      : TPlayerInfo read FSelfInfo;
@@ -74,9 +74,9 @@ begin
   FreeAndNil(SocketClient);
 end;
 
-procedure TdmMain.OpenBuyChipsLink;
+procedure TdmMain.OpenCashierLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.URL.BUY_CHIPS));
+  ShellOpen(PChar(Settings.Hardcoded.URL.CASHIER));
 end;
 
 procedure TdmMain.OpenTOSLink;

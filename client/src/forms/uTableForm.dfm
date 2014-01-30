@@ -126,6 +126,7 @@ object frmTable: TfrmTable
       Action = acRaise
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 4
+      Visible = False
     end
   end
   object ActionManager: TActionManager

@@ -1,6 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{F8911FA1-88BE-423D-896F-68470694E38A}</ProjectGuid>
+    <ProjectGuid>{63BE7D96-7FB3-486A-986A-93BE6D0F77E1}</ProjectGuid>
     <MainSource>dxsChipUpDarkTabsRS17.cpp</MainSource>
     <Config Condition="'$(Config)'==''">Release</Config>
   </PropertyGroup>

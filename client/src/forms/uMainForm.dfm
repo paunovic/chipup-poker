@@ -16,29 +16,22 @@ object frmChipUpMain: TfrmChipUpMain
   OldCreateOrder = False
   Position = poScreenCenter
   OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   DesignSize = (
     881
     589)
   PixelsPerInch = 96
   TextHeight = 14
-  object Shape1: TShape
-    Left = 736
-    Top = 20
-    Width = 111
-    Height = 87
-    Brush.Color = clRed
-    Shape = stCircle
-  end
   object gridTournaments: TcxGrid
     Left = 8
     Top = 169
-    Width = 865
+    Width = 864
     Height = 413
-    Anchors = [akLeft, akTop, akBottom]
-    TabOrder = 9
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    TabOrder = 8
     Visible = False
-    object cxGridTableView1: TcxGridTableView
+    object gridTournamentsTable: TcxGridTableView
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridJoinedClubsTableCellDblClick
       OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
@@ -66,19 +59,19 @@ object frmChipUpMain: TfrmChipUpMain
         SortOrder = soDescending
         Width = 161
       end
-      object cxGridTableView1Column4: TcxGridColumn
+      object gridTournamentsTableColumn4: TcxGridColumn
         Caption = 'Game Type'
         HeaderAlignmentHorz = taCenter
       end
-      object cxGridTableView1Column3: TcxGridColumn
+      object gridTournamentsTableColumn3: TcxGridColumn
         Caption = 'Buyin'
         HeaderAlignmentHorz = taCenter
       end
-      object cxGridTableView1Column1: TcxGridColumn
+      object gridTournamentsTableColumn1: TcxGridColumn
         Caption = 'Structure'
         HeaderAlignmentHorz = taCenter
       end
-      object cxGridTableView1Column2: TcxGridColumn
+      object gridTournamentsTableColumn2: TcxGridColumn
         Caption = 'Players'
         HeaderAlignmentHorz = taCenter
       end
@@ -90,15 +83,15 @@ object frmChipUpMain: TfrmChipUpMain
         Width = 62
       end
     end
-    object cxGridLevel1: TcxGridLevel
-      GridView = cxGridTableView1
+    object gridTournamentsLevel: TcxGridLevel
+      GridView = gridTournamentsTable
     end
   end
   object gridJoinedClubs: TcxGrid
     Left = 8
     Top = 169
-    Width = 289
-    Height = 377
+    Width = 290
+    Height = 379
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 0
     object gridJoinedClubsTable: TcxGridTableView
@@ -148,11 +141,12 @@ object frmChipUpMain: TfrmChipUpMain
     end
   end
   object btCreateClub: TcxButton
-    Left = 630
-    Top = 135
-    Width = 120
+    Left = 583
+    Top = 136
+    Width = 144
     Height = 30
     Action = acShowCreateClubForm
+    Anchors = [akTop, akRight]
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 1
     Font.Charset = DEFAULT_CHARSET
@@ -163,11 +157,12 @@ object frmChipUpMain: TfrmChipUpMain
     ParentFont = False
   end
   object btJoinClub: TcxButton
-    Left = 753
-    Top = 135
-    Width = 120
+    Left = 729
+    Top = 136
+    Width = 143
     Height = 30
     Action = acShowJoinClubForm
+    Anchors = [akTop, akRight]
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 2
     Font.Charset = DEFAULT_CHARSET
@@ -178,7 +173,7 @@ object frmChipUpMain: TfrmChipUpMain
     ParentFont = False
   end
   object gridGames: TcxGrid
-    Left = 301
+    Left = 300
     Top = 169
     Width = 572
     Height = 413
@@ -269,7 +264,7 @@ object frmChipUpMain: TfrmChipUpMain
     ParentFont = False
   end
   object imgLogo: TcxImage
-    Left = 28
+    Left = 42
     Top = 25
     Picture.Data = {
       0B546478504E47496D61676589504E470D0A1A0A0000000D494844520000012F
@@ -1165,12 +1160,12 @@ object frmChipUpMain: TfrmChipUpMain
     TabOrder = 5
     Transparent = True
     Height = 84
-    Width = 282
+    Width = 252
   end
   object btHomeGames: TcxButton
     Left = 8
-    Top = 135
-    Width = 143
+    Top = 136
+    Width = 144
     Height = 30
     Action = acShowHomeGamesLayout
     Colors.PressedText = 15461355
@@ -1188,8 +1183,8 @@ object frmChipUpMain: TfrmChipUpMain
   end
   object btTournaments: TcxButton
     Left = 153
-    Top = 135
-    Width = 143
+    Top = 136
+    Width = 145
     Height = 30
     Action = acShowTournamentLayout
     Colors.PressedText = 15461355
@@ -1204,22 +1199,15 @@ object frmChipUpMain: TfrmChipUpMain
     Font.Style = [fsBold]
     ParentFont = False
   end
-  object cxLabel1: TcxLabel
-    Left = 767
-    Top = 59
-    Caption = 'CASHIER'
-    Style.TextColor = clBlack
-    Style.TextStyle = [fsBold]
-    Transparent = True
-  end
   object btOpenTournamentLobby: TcxButton
-    Left = 692
-    Top = 135
-    Width = 181
+    Left = 583
+    Top = 136
+    Width = 289
     Height = 30
+    Anchors = [akTop, akRight]
     Caption = 'OPEN TOURNAMENT LOBBY'
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 10
+    TabOrder = 9
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -1228,10 +1216,47 @@ object frmChipUpMain: TfrmChipUpMain
     Font.Style = [fsBold]
     ParentFont = False
   end
+  object btPrijatnaPunina: TcxButton
+    Left = 300
+    Top = 136
+    Width = 281
+    Height = 30
+    Anchors = [akLeft, akTop, akRight]
+    Enabled = False
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 10
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object imgCashier: TcxImage
+    Left = 733
+    Top = 8
+    Properties.Proportional = False
+    Properties.ReadOnly = True
+    Properties.ShowFocusRect = False
+    Style.BorderStyle = ebsOffice11
+    Style.Edges = []
+    Style.HotTrack = False
+    Style.LookAndFeel.SkinName = ''
+    StyleDisabled.LookAndFeel.SkinName = ''
+    StyleFocused.LookAndFeel.SkinName = ''
+    StyleHot.LookAndFeel.SkinName = ''
+    TabOrder = 11
+    Transparent = True
+    OnMouseDown = imgCashierMouseDown
+    OnMouseUp = imgCashierMouseUp
+    Height = 122
+    Width = 120
+  end
   object SkinController: TdxSkinController
     SkinName = 'ChipUpDarkStyle'
-    Left = 336
-    Top = 242
+    Left = 344
+    Top = 214
   end
   object ActionManager: TActionManager
     ActionBars = <
@@ -1308,8 +1333,8 @@ object frmChipUpMain: TfrmChipUpMain
             Caption = '&Account'
           end>
       end>
-    Left = 412
-    Top = 242
+    Left = 420
+    Top = 214
     StyleName = 'Platform Default'
     object acLogout: TAction
       Category = 'Account'
@@ -1361,10 +1386,14 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'HOME GAMES'
       OnExecute = acShowHomeGamesLayoutExecute
     end
+    object acOpenCashier: TAction
+      Caption = 'acOpenCashier'
+      OnExecute = acOpenCashierExecute
+    end
   end
   object MainMenu: TMainMenu
-    Left = 484
-    Top = 242
+    Left = 492
+    Top = 214
     object Account1: TMenuItem
       Caption = 'Account'
       object ChangeEmailAddress1: TMenuItem

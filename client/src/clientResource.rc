@@ -1,2 +1,4 @@
 GameCarpet RCDATA "resources\\GameCarpet.png"
 GameTable RCDATA "resources\\GameTable.wmf"
+CashierNormal RCDATA "resources\\cashier\\Normal.png"
+CashierPressed RCDATA "resources\\cashier\\Pressed.png"

@@ -3,7 +3,8 @@ unit uCommon;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, Generics.Collections, uPB_Game, uPB_User;
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, Generics.Collections, uPB_Game, uPB_User,
+  cxImage;
 
 var
   SelfPath          : String;
@@ -31,6 +32,7 @@ function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer 
 function IsInWine: Boolean;
 procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
+procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -39,7 +41,7 @@ type
 implementation
 
 uses
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj,
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses,
   uIFormParams;
 
 
@@ -486,6 +488,19 @@ begin
       result := '';
   finally
     StrDispose(RecPath);
+  end;
+end;
+
+procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
+var
+  png: TdxPNGImage;
+begin
+  png := TdxPNGImage.Create;
+  try
+    png.LoadFromResource(HInstance, AResourceName, RT_RCDATA);
+    AImage.Picture.Assign(png);
+  finally
+    png.Free;
   end;
 end;
 
