@@ -1,4 +1,7 @@
-var dag = require('./build/Debug/dag');
-console.log(dag);
+var dag = require('./build/Release/dag');
 dag.init();
-console.log(dag.rankHands("8S8H6S9D4C",['4HJC','5D7C']));
+var flop = [{value:8,suit:'S'},{value:8,suit:'H'},{value:6,suit:'S'}];
+var foo = { flop:{cards:flop},
+	turn:{cards:[{value:9,suit:'D'}]},
+	river:{cards:[{value:4,suit:'C'}]}};
+console.log(dag.rankHands(foo,[{seat:5,hand:[{value:1,suit:'H'},{value:2,suit:'C'}]} ]));

@@ -21,7 +21,7 @@ void errorline(char* msg, unsigned int line) {
 void load_equivalenceclasses(char* fn) {
 	char buf[1024];
 	static const char *DELIM = "\t";
-	unsigned int i=1,j;
+	unsigned int i=1;
 	FILE* f = fopen(fn, "r");
 	assert(f);
 	while (fgets(buf, 1024, f)) {	// read a line
@@ -37,7 +37,6 @@ void load_equivalenceclasses(char* fn) {
 		i++;
 	}
 	fclose(f);
-	return 1;
 }
 
 void load_dag(char* fn) {
@@ -165,7 +164,7 @@ void handeval_init() {
 }
 
 void partial_evaluate(unsigned int cardcnt, char* cards, partial_evaluation* pe) {
-	unsigned int i, j, r, c;
+	unsigned int i, r, c;
 	assert(cardcnt);				// there must be more than one card
 	pe->evaluated = cardcnt;
 	for (i=0; i < 4; i++) {
@@ -193,7 +192,7 @@ void partial_evaluate(unsigned int cardcnt, char* cards, partial_evaluation* pe)
 
 
 handeval_eq_class* resume_evaluation(char* cards, const partial_evaluation* pe) {
-	unsigned int i, j, r, c;
+	unsigned int i, r, c;
 	handeval_dag_node *n = pe->noflushnode;
 	unsigned int remain = 7 - pe->evaluated;
 	int cl;
@@ -237,7 +236,7 @@ handeval_eq_class* resume_evaluation(char* cards, const partial_evaluation* pe) 
 }
 
 handeval_eq_class* calculate_minimal_class(unsigned int cardcnt, char* cards) {
-	unsigned int i, j, r, c;
+	unsigned int i, r, c;
 	partial_evaluation pe;
 	assert(cardcnt);				// there must be more than one card
 	pe.noflushnode = 0;

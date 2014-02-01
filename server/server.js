@@ -1385,7 +1385,6 @@ Game.prototype.getNextSeat = function (current) {
 		return x;
 	}
 	current = getNextSatIn.call(this,current);
-	console.log(this.members,new Error().stack);
 	while (this.members[current].status != 'psInHand') {
 		current = getNextSatIn.call(this,current);
 	}
@@ -1410,23 +1409,7 @@ Game.prototype.fold = function fold(seat) {
 				lastseat = x;
 			}
 			console.log('remaining guy wins everything',lastseat);
-			this.state = 'tsWinning';
-			setTimeout(function () {
-				this.deck = new Deck();
-				this.deck.shuffle(function () {
-					if (this.inHandCount() > 1) var nextstate = 'psInHand';
-					else var nextstate = 'psOutOfHand';
-					for (var x=0; x<this.members.length; x++) {
-						if (!this.members[x]) continue;
-						this.members[x].status = nextstate;
-						this.members[x].hand = new Hand();
-					}
-					this.state = 'tsIdle';
-					console.log('reset');
-					this.broadcastStatus(null);
-					this.stateMachine();
-				}.bind(this))
-			}.bind(this),2000);
+			this.doWin();
 			this.sendEvent('teFold',[seat]);
 			this.sendEvent('teWinning',[lastseat]);
 		} else {
@@ -1439,6 +1422,25 @@ Game.prototype.fold = function fold(seat) {
 		}
 		break;
 	}
+}
+Game.prototype.doWin = function () {
+	this.state = 'tsWinning';
+	setTimeout(function () {
+		this.deck = new Deck();
+		this.deck.shuffle(function () {
+			if (this.inHandCount() > 1) var nextstate = 'psInHand';
+			else var nextstate = 'psOutOfHand';
+			for (var x=0; x<this.members.length; x++) {
+				if (!this.members[x]) continue;
+				this.members[x].status = nextstate;
+				this.members[x].hand = new Hand();
+			}
+			this.state = 'tsIdle';
+			console.log('reset');
+			this.broadcastStatus(null);
+			this.stateMachine();
+		}.bind(this))
+	}.bind(this),2000);
 }
 Game.prototype.checkRoundPass = function () {
 	console.log('key seat is',this.keyseat);
@@ -1471,11 +1473,26 @@ Game.prototype.checkRoundPass = function () {
 				for (var x=0; x<this.members.length; x++) {
 					if (!this.members[x]) continue;
 					if (this.members[x].status != 'psInHand') continue;
-					hands.push({seat:x,hand:this.members[x].cards.prettyPrint()});
+					hands.push({seat:x,hand:this.members[x].hand.cards});
 				}
-				console.log(hands);
-				var result = dag.rankHands(this.flop.prettyPrint()+this.turn.prettyPrint()+this.river.prettyPrint(),hands);
+				console.log(hands[0]);
+				var result = dag.rankHands(this,hands);
 				console.log('what next??',result);
+				var lowestid = -1;
+				var winningindex = -1;
+				for (var x=0; x<result.outputs.length; x++) {
+					if (lowestid == -1) {
+						lowestid = result.outputs[x].id;
+						winningindex = x;
+					}
+					if (result.outputs[x].id < lowestid) {
+						lowestid = result.outputs[x].id;
+						winningindex = x;
+					}
+				}
+				console.log(result.outputs[winningindex]);
+				this.doWin();
+				this.sendEvent('teWinning',[result.outputs[winningindex].seat]);
 			}
 		}
 	}
@@ -1572,7 +1589,6 @@ Game.prototype.getTableStatus = function getTableStatus() {
 	if (['tsFlop','tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.flop = this.flop.prettyPrint();
 	if (['tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = this.turn.prettyPrint();
 	if (this.state == 'tsRiver') tableStatus.river = this.river.prettyPrint();
-	console.log(tableStatus);
 	return tableStatus;
 }
 Game.prototype.sittingCount = function () {

@@ -6,11 +6,7 @@ function protoreader(socket,handler) {
 	this.socket = socket;
 	this.handler = handler;
 	this.buffer = null;
-	this.socket.on('data',function (chunk) {
-		if (this.buffer) {
-			this.buffer = Buffer.concat([this.buffer,chunk]);
-		}
-		else this.buffer = chunk;
+	function process_packet() {
 		if (this.buffer.length < 2) {
 			console.log('size prefix not in buffer yet');
 			return;
@@ -18,7 +14,7 @@ function protoreader(socket,handler) {
 		var headersize = this.buffer.readInt16LE(0);
 		if (this.buffer.length < (2+headersize)) {
 			console.log('header not in buffer yet',headersize);
-			return;
+			return false;
 		}
 		//console.log('\nheader size:',headersize,this.buffer);
 		var header = this.buffer.slice(2,2+headersize);
@@ -29,11 +25,11 @@ function protoreader(socket,handler) {
 		} catch (e) {
 			console.log(header);
 			this.handler.error(e);
-			return;
+			return false;
 		}
 		if (this.buffer.length < (2+headersize+header.DataSize)) {
 			console.log('arguments not in buffer yet');
-			return;
+			return false;
 		}
 		var args = this.buffer.slice(2+headersize,2+headersize+header.DataSize);
 		try {
@@ -41,8 +37,16 @@ function protoreader(socket,handler) {
 		} catch (e) {
 			this.handler.error(e);
 		}
-		//if (2+headersize+header.DataSize == this.buffer.length) this.buffer = null;
 		this.buffer = this.buffer.slice(2+headersize+header.DataSize);
+		return true;
+	}
+	this.socket.on('data',function (chunk) {
+		if (this.buffer) {
+			this.buffer = Buffer.concat([this.buffer,chunk]);
+		}
+		else this.buffer = chunk;
+		while ((this.buffer.length > 0) && process_packet.call(this)) { }
+		if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
 	}.bind(this));
 }
 protoreader.init = function init(input) {
@@ -66,10 +70,12 @@ protoreader.reply = function reply(code,message,type) {
 	messageOut.writeUInt16LE(header.length,0);
 	header.copy(messageOut,2);
 	if (datasize > 0) args.copy(messageOut,2+header.length);
-	this.socket.write(messageOut);
+	var alldone = this.socket.write(messageOut);
+	if (!alldone) this.log('partial message write');
 	//console.log('header out:',header);
 	//console.log(object);
-	if (code == 100) this.log('sent '+datasize+' bytes for code '+code,message);
+	if ([codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus].indexOf(code) != -1) {
+	} else if (code == 100) this.log('sent '+datasize+' bytes for code '+code,message);
 	else this.log('sent '+datasize+' bytes for code '+codes.reverse[code]);
 	//console.log(message);
 }

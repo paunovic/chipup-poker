@@ -1,3 +1,3 @@
 #!/bin/bash -e
-BUILDTYPE=Debug /usr/lib/node_modules/npm/bin/node-gyp-bin/node-gyp build
+/usr/lib/node_modules/npm/bin/node-gyp-bin/node-gyp build
 node test.js

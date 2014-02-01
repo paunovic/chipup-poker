@@ -26,14 +26,36 @@ int cardToNumber(const char *card) {
 	}
 	return (value*4)+suit;
 }
+int cardToNumber(Local<Array> cards,int index) {
+	Local<Object> card = cards->Get(index)->ToObject();
+	int value = card->Get(String::NewSymbol("value"))->Int32Value();
+	Local<Value> suitin = card->Get(String::NewSymbol("suit"));
+	String::AsciiValue str(suitin);
+	const char *raw = *str;
+	int suit;
+	switch (raw[0]) {
+	case 'H': suit=0;break;
+	case 'S': suit=1;break;
+	case 'C': suit=2;break;
+	case 'D': suit=3;break;
+	}
+	int v;
+	if (value == 1) v = 12; // ace
+	else v = value - 2;
+	return (v*4)+suit;
+}
+Local<Array> getCards(Local<Object> game,const char *field) {
+	return Local<Array>::Cast(game->Get(String::NewSymbol(field))->ToObject()->Get(String::NewSymbol("cards")));
+}
 Handle<Value> RankHands(const Arguments& args) {
 	HandleScope scope;
+	char cards[7];
 	if (args.Length() < 2) {
 		ThrowException(Exception::TypeError(String::New("wrong number of arguments")));
 		return scope.Close(Undefined());
 	}
-	if (!args[0]->IsString()) {
-		ThrowException(Exception::TypeError(String::New("first argument must be a string")));
+	if (!args[0]->IsObject()) {
+		ThrowException(Exception::TypeError(String::New("first argument must be a Game")));
 		return scope.Close(Undefined());
 	}
 	if (!args[1]->IsArray()) {
@@ -43,40 +65,41 @@ Handle<Value> RankHands(const Arguments& args) {
 	Local<Object> root = Object::New();
 	Local<Array> outputs = Array::New();
 	root->Set(String::NewSymbol("outputs"),outputs);
-	String::AsciiValue str(args[0]);
-	const char *raw = *str;
-	char cards[7];
-	printf("string is '%s'\n",raw);
-	for (int j=0; j<5; j++) {
-		printf("%c%c\n",raw[j*2],raw[(j*2)+1]);
-		cards[j] = cardToNumber(raw+(j*2));
+
+	Local<Object> game = args[0]->ToObject();
+	Local<Array> flop = getCards(game,"flop");
+	if (flop->Length() != 3) {
+		ThrowException(Exception::TypeError(String::New("first argument must be a array of 3 Cards")));
+		return scope.Close(Undefined());
 	}
+	cards[0] = cardToNumber(flop,0);
+	cards[1] = cardToNumber(flop,1);
+	cards[2] = cardToNumber(flop,2);
+	cards[3] = cardToNumber(getCards(game,"turn"),0);
+	cards[4] = cardToNumber(getCards(game,"river"),0);
 	root->Set(String::NewSymbol("input"),String::New(hand_to_str(cards,5)));
 	Local<Array> hands = Local<Array>::Cast(args[1]);
-	printf("hands %d\n",hands->Length());
-	for (int j=0; j<hands->Length(); j++) {
-		printf("ranking hand %s\n",hand_to_str(cards,7));
+	for (unsigned int j=0; j<hands->Length(); j++) {
 		Local<Value> item = hands->Get(j);
-		if (!item->IsString()) {
+		if (!item->IsObject()) {
 			ThrowException(Exception::TypeError(String::New("second argument must be an array of strings")));
 			return scope.Close(Undefined());
 		}
-		String::AsciiValue hole(item);
-		raw = *hole;
-		printf("hole: %s\n",raw);
-		cards[5] = cardToNumber(raw);
-		cards[6] = cardToNumber(raw+2);
+		Local<Object> hand = item->ToObject();
+		Local<Array> cardlist = Local<Array>::Cast(hand->Get(String::NewSymbol("hand"))); // array of Card objects
+		
+		cards[5] = cardToNumber(cardlist,0);
+		cards[6] = cardToNumber(cardlist,1);
+		printf("ranking hand %s + %s\n",hand_to_str(cards,5),hand_to_str(cards+5,2));
 		handeval_eq_class *rank = calculate_equivalence_class(cards);
 
-		Local<Object> obj = Object::New();
-
-		obj->Set(String::NewSymbol("id"),Number::New(rank->id));
-		obj->Set(String::NewSymbol("desc"),String::New(rank->desc));
-		obj->Set(String::NewSymbol("domination"),Number::New(rank->domination));
-		obj->Set(String::NewSymbol("likelihood"),Number::New(rank->likelihood));
-		obj->Set(String::NewSymbol("cards"),String::New(rank->cards));
-		obj->Set(String::NewSymbol("input"),String::New(hand_to_str(cards+5,2)));
-		outputs->Set(j,obj);
+		hand->Set(String::NewSymbol("id"),Number::New(rank->id));
+		hand->Set(String::NewSymbol("desc"),String::New(rank->desc));
+		hand->Set(String::NewSymbol("domination"),Number::New(rank->domination));
+		hand->Set(String::NewSymbol("likelihood"),Number::New(rank->likelihood));
+		hand->Set(String::NewSymbol("cards"),String::New(rank->cards));
+		hand->Set(String::NewSymbol("input"),String::New(hand_to_str(cards+5,2)));
+		outputs->Set(j,hand);
 	}
 	return scope.Close(root);
 }
