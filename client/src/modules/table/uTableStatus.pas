@@ -36,6 +36,9 @@ type
     FCurrentSeat: Integer;
     FSeatInfos  : TSeatInfos;
     FBets       : TArray<Integer>;
+    FFlopCards  : String;
+    FTurnCard   : String;
+    FRiverCard  : String;
 
     function GetBigBlindSeat: Integer;
     function GetSmallBlindSeat: Integer;
@@ -59,6 +62,9 @@ type
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TArray<Integer> read FBets;
     property HighestBet: Integer read GetHighestBet;
+    property FlopCards: String read FFlopCards;
+    property TurnCard: String read FTurnCard;
+    property RiverCard: String read FRiverCard;
   end;
 
 implementation
@@ -175,6 +181,9 @@ begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
+  FFlopCards := ATableStatusProtobuf.Flop;
+  FTurnCard := ATableStatusProtobuf.Turn;
+  FRiverCard := ATableStatusProtobuf.River;
 
   FSeatInfos.Clear;
   if Assigned(ATableStatusProtobuf.Seats) then

@@ -301,15 +301,22 @@ begin
       PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'BB');
     end;
 
+    // draw table cards
+    PaintBox.Buffer.Font.Color := clWhite;
+    PaintBox.Buffer.Font.Style := [fsBold];
+    PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, FTableStatus.FlopCards + ' ' + FTableStatus.TurnCard + ' ' + FTableStatus.RiverCard);
+    PaintBox.Buffer.Font.Style := [];
+
     // draw player cards
+    PaintBox.Buffer.Font.Color := clWhite;
+    PaintBox.Buffer.Font.Style := [fsBold];
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
       if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
       begin
         seat_point := GetSeatPoint(seat_info.SeatIndex);
-
-        PaintBox.Buffer.Font.Color := clRed;
         PaintBox.Buffer.TextOut(seat_point.X - 5, seat_point.Y - 40, seat_info.Cards);
       end;
+    PaintBox.Buffer.Font.Style := [];
 
     // draw avatars
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
