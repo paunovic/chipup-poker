@@ -34,9 +34,6 @@ object frmChipUpMain: TfrmChipUpMain
     Color = clBlack
     ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 148
-    ExplicitWidth = 866
-    ExplicitHeight = 469
     DesignSize = (
       860
       462)
@@ -48,8 +45,6 @@ object frmChipUpMain: TfrmChipUpMain
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 0
       Visible = False
-      ExplicitWidth = 854
-      ExplicitHeight = 423
       object gridTournamentsTable: TcxGridTableView
         Navigator.Buttons.CustomButtons = <>
         OnCellDblClick = gridJoinedClubsTableCellDblClick
@@ -121,7 +116,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitTop = 430
     end
     object gridGames: TcxGrid
       Left = 300
@@ -130,8 +124,6 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 416
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 2
-      ExplicitWidth = 560
-      ExplicitHeight = 423
       object gridGamesTable: TcxGridTableView
         Navigator.Buttons.CustomButtons = <>
         OnCellDblClick = gridGamesTableCellDblClick
@@ -207,7 +199,6 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 382
       Anchors = [akLeft, akTop, akBottom]
       TabOrder = 3
-      ExplicitHeight = 389
       object gridJoinedClubsTable: TcxGridTableView
         Navigator.Buttons.CustomButtons = <>
         OnCellDblClick = gridJoinedClubsTableCellDblClick
@@ -307,7 +298,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitWidth = 269
     end
     object btOpenTournamentLobby: TcxButton
       Left = 565
@@ -325,7 +315,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 571
     end
     object btCreateClub: TcxButton
       Left = 565
@@ -342,7 +331,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 571
     end
     object btJoinClub: TcxButton
       Left = 711
@@ -359,7 +347,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 717
     end
   end
   object imgHeader: TcxImage
@@ -452,8 +439,8 @@ object frmChipUpMain: TfrmChipUpMain
       9F544CAA4C364F994D9D9A769FBEF174E5D38967E9CF16660A7F95FEB5F6B9CE
       F31F7E73FCAD7F366276E205FFC5A7DF4B5ECABF3CF46AD9AB9EB980B947AF53
       5F2FCC17BD917F73F82DE36DDFBBF077930B59EFB1EF2B3FE87EE8FEE8F3F1C1
-      A7D44F9FFE050398F3FCBAC4E8D3000000097048597300000361000003610166
-      8534790000F54149444154785EB4DDF9AFAF5775DFF1CA60E679F488F16C03C6
+      A7D44F9FFE050398F3FCBAC4E8D30000000970485973000003600000036001B4
+      C2D69D0000F54149444154785EB4DDF9AFAF5775DFF1CA60E679F488F16C03C6
       CC3670AF07B0CD8C478C076C86165A6853869819870451E62949A5AAFF477EAD
       DAAAFDA1AD1A296D259A44AAD22A2DA954C5C97FF0ED793DF6FB64DDEDEF39F7
       0249A4A5BDF75A9FF5596BEFE779F65E9BEFF1CDDF3BF8BF1D79CA539E724672
@@ -3877,7 +3864,6 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
     OnMouseDown = imgCashierMouseDown
     OnMouseUp = imgCashierMouseUp
-    ExplicitLeft = 717
     Height = 140
     Width = 140
   end

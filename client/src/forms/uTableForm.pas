@@ -106,6 +106,7 @@ begin
   FFormAspectRatio := Width / Height;
   PaintBox.BufferOversize := 0;
 
+  // load table image
   png := TPortableNetworkGraphic32.Create;
   try
     rstream := TResourceStream.Create(HInstance, 'Table', RT_RCDATA);
@@ -128,6 +129,7 @@ begin
     png.Free;
   end;
 
+  // load background image
   FImg_Background := TBitmap32.Create;
   jpg := TJPEGImage.Create;
   try
@@ -333,8 +335,8 @@ begin
       case ASeatIndex of
         5: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2, FTableYOffset + FTableHeight div 2 - 40);
         4: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2, FTableYOffset + FTableHeight div 2 + 40);
-        3: result := TPoint.Create(PaintBox.Buffer.Width div 2 - 120, FTableYOffset + FTableHeight);
-        2: result := TPoint.Create(PaintBox.Buffer.Width div 2 + 120, FTableYOffset + FTableHeight);
+        3: result := TPoint.Create(PaintBox.Buffer.Width div 2 - 120, FTableYOffset + FTableHeight - 10);
+        2: result := TPoint.Create(PaintBox.Buffer.Width div 2 + 120, FTableYOffset + FTableHeight - 10);
         1: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth, FTableYOffset + FTableHeight div 2 + 40);
         0: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth, FTableYOffset + FTableHeight div 2 - 40);
       end;

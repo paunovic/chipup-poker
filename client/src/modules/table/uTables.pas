@@ -140,6 +140,7 @@ procedure TTables.ClearWithoutNotification;
 begin
   FNotifyServer := FALSE;
   Clear;
+  FNotifyServer := TRUE;
 end;
 
 function TTables.FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;

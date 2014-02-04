@@ -225,7 +225,7 @@ begin
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
-  dmMain.Tables.ClearWithoutNotification
+  dmMain.Tables.ClearWithoutNotification;
 end;
 
 function TfrmChipUpMain.ShowLoginForm: Integer;
