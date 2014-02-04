@@ -3,13 +3,13 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 456
-  ClientWidth = 600
+  ClientHeight = 413
+  ClientWidth = 552
   Color = clBlack
-  Constraints.MaxHeight = 1080
-  Constraints.MaxWidth = 1538
-  Constraints.MinHeight = 427
-  Constraints.MinWidth = 608
+  Constraints.MaxHeight = 1037
+  Constraints.MaxWidth = 1320
+  Constraints.MinHeight = 440
+  Constraints.MinWidth = 560
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -25,30 +25,21 @@ object frmTable: TfrmTable
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 14
-  object PaintBox: TPaintBox
-    Left = 0
-    Top = 0
-    Width = 600
-    Height = 345
-    Align = alClient
-    OnClick = PaintBoxClick
-    OnPaint = PaintBoxPaint
-    ExplicitWidth = 570
-    ExplicitHeight = 380
-  end
   object paBottom: TPanel
     Left = 0
-    Top = 345
-    Width = 600
-    Height = 111
+    Top = 330
+    Width = 552
+    Height = 83
     Align = alBottom
     BevelOuter = bvNone
+    DoubleBuffered = True
+    ParentDoubleBuffered = False
     TabOrder = 0
     object paChat: TPanel
       Left = 0
       Top = 0
-      Width = 290
-      Height = 111
+      Width = 264
+      Height = 83
       Align = alLeft
       BevelOuter = bvNone
       Color = clBlack
@@ -63,13 +54,13 @@ object frmTable: TfrmTable
         Style.Edges = []
         TabOrder = 0
         OnKeyPress = edChatKeyPress
-        Width = 289
+        Width = 263
       end
       object reChat: TRichEdit
         Left = 0
         Top = 19
-        Width = 289
-        Height = 92
+        Width = 263
+        Height = 64
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -89,45 +80,59 @@ object frmTable: TfrmTable
       end
     end
     object btStandUp: TcxButton
-      Left = 295
-      Top = 63
-      Width = 97
-      Height = 34
+      Left = 270
+      Top = 40
+      Width = 89
+      Height = 29
       Action = acStandUp
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 1
       Visible = False
     end
     object btFold: TcxButton
-      Left = 295
-      Top = 23
-      Width = 97
-      Height = 34
+      Left = 270
+      Top = 6
+      Width = 89
+      Height = 29
       Action = acFold
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 2
       Visible = False
     end
     object btCallCheck: TcxButton
-      Left = 397
-      Top = 23
-      Width = 97
-      Height = 34
+      Left = 364
+      Top = 6
+      Width = 89
+      Height = 29
       Action = acCall
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 3
       Visible = False
     end
     object btRaise: TcxButton
-      Left = 500
-      Top = 23
-      Width = 97
-      Height = 34
+      Left = 458
+      Top = 6
+      Width = 89
+      Height = 29
       Action = acRaise
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 4
       Visible = False
     end
+  end
+  object PaintBox: TPaintBox32
+    Left = 0
+    Top = 0
+    Width = 552
+    Height = 330
+    Align = alClient
+    RepaintMode = rmOptimizer
+    TabOrder = 1
+    OnClick = PaintBoxClick
+    ExplicitLeft = 312
+    ExplicitTop = 100
+    ExplicitWidth = 192
+    ExplicitHeight = 192
   end
   object ActionManager: TActionManager
     Left = 212

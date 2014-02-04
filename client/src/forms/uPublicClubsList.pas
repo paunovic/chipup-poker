@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
   dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxSpinEdit, cxTextEdit,
   Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid,
-  uMessageItem, Vcl.ExtCtrls, dxsChipUpDark;
+  uMessageItem, Vcl.ExtCtrls, dxsChipUpDark, dxsChipUpDarkTabs;
 
 type
   TfrmPublicClubsList = class(TForm)

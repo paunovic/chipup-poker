@@ -20,6 +20,8 @@ type
       FN_CURRENT_SEAT = 5;
       FN_BETS = 6;
       FN_FLOP = 7;
+      FN_TURN = 8;
+      FN_RIVER = 9;
 
     var
       FTableMongoId: TBytes;
@@ -29,6 +31,8 @@ type
       FCurrentSeat: Integer;
       FBets: TArray<Integer>;
       FFlop: String;
+      FTurn: String;
+      FRiver: String;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -36,6 +40,8 @@ type
     procedure SetCurrentSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<Integer>);
     procedure SetFlop(const AValue: String);
+    procedure SetTurn(const AValue: String);
+    procedure SetRiver(const AValue: String);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -47,6 +53,8 @@ type
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
     property Bets: TArray<Integer> read FBets write SetBets;
     property Flop: String read FFlop write SetFlop;
+    property Turn: String read FTurn write SetTurn;
+    property River: String read FRiver write SetRiver;
   end;
 
 implementation
@@ -101,6 +109,14 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FFlop := String(AProtobufReader.readUtf8String);
       end;
+      FN_TURN: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FTurn := String(AProtobufReader.readUtf8String);
+      end;
+      FN_RIVER: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FRiver := String(AProtobufReader.readUtf8String);
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -143,6 +159,18 @@ procedure TPB_TableStatus.SetFlop(const AValue: String);
 begin
   FFlop := AValue;
   ProtobufOutput.writeString(FN_FLOP, AValue);
+end;
+
+procedure TPB_TableStatus.SetTurn(const AValue: String);
+begin
+  FTurn := AValue;
+  ProtobufOutput.writeString(FN_TURN, AValue);
+end;
+
+procedure TPB_TableStatus.SetRiver(const AValue: String);
+begin
+  FRiver := AValue;
+  ProtobufOutput.writeString(FN_RIVER, AValue);
 end;
 
 end.

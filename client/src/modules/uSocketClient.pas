@@ -397,9 +397,9 @@ begin
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srPong: begin
       {$IFDEF DEBUG}
-      ts1 := GetTickCount();
+      ts1 := GetTickCount;
       ts2 := PDWORD(ADataPointer)^;
-      DebugLn(Format('Lag is: %dms', [ts1 - ts2]), ditException);
+      DebugLn(Format('LAG: %dms', [ts1 - ts2]), ditApplication);
       {$ENDIF}
 
       KillPingTimeoutTimer;

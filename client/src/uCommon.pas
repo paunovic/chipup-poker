@@ -33,6 +33,7 @@ function IsInWine: Boolean;
 procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
+function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Integer; ARadius: Double): Boolean;
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -502,6 +503,11 @@ begin
   finally
     png.Free;
   end;
+end;
+
+function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Integer; ARadius: Double): Boolean;
+begin
+  result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) < ARadius * ARadius;
 end;
 
 
