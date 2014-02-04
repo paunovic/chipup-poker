@@ -302,13 +302,14 @@ begin
     end;
 
     // draw player cards
-    if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
-    begin
-      seat_point := GetSeatPoint(FTable.SeatIndex);
+    for C1 := 0 to FTableStatus.Seats.Count - 1 do
+      if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
+      begin
+        seat_point := GetSeatPoint(seat_info.SeatIndex);
 
-      PaintBox.Buffer.Font.Color := clRed;
-      PaintBox.Buffer.TextOut(seat_point.X - 5, seat_point.Y - 40, seat_info.Cards);
-    end;
+        PaintBox.Buffer.Font.Color := clRed;
+        PaintBox.Buffer.TextOut(seat_point.X - 5, seat_point.Y - 40, seat_info.Cards);
+      end;
 
     // draw avatars
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
