@@ -1,0 +1,22 @@
+package Backend;
+
+import "common.proto";
+
+enum BackendFunctions {
+	Hello = 0;
+	StartServer = 1;
+	StopServer = 2;
+	RestartServer = 3;
+	Starting = 4;
+	Stopping = 5;
+	PerClientMsgEvent = 6;
+	GlobalMsgEvent = 7;
+}
+message PerClientMsg {
+	required string ts = 1;
+	repeated string objects = 2;
+	optional string nick = 3;
+}
+message GlobalMsg {
+	required string msg = 1;
+}

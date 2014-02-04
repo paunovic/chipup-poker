@@ -21,7 +21,7 @@ var dag = require('./dag/build/Release/dag');
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
-protoreader.init(pb);
+protoreader.init(pb,codes);
 
 dag.init();
 
@@ -236,14 +236,14 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		process.exit(1);
 	}
 	conn = db;
-	console.log('connected');
+	process.send({msg:'connected'});
 	db.collection('users',function (err,collection) {
 		if (err) {
 			console.log(err);
 			process.exit(1);
 		}
 		allUsers = collection;
-		console.log('got user list');
+		process.send({msg:'got user list'});
 		allUsers.createIndex("email",{unique:true}, function (err,res) {
 		});
 		allUsers.createIndex("displayname",{unique:true}, function (err,res) {
@@ -364,8 +364,8 @@ ClientSocket.prototype.eject = function () {
 }
 ClientSocket.prototype.log = function log() {
 	var out = Array.prototype.slice.call(arguments);
+	process.send({type:'conn',nick:this.nick,ts:new Date().toString(),objects:out});
 	out.unshift(new Date().toString()+' '+this.nick+":");
-	console.log.apply(this,out);
 }
 ClientSocket.prototype.reply = function reply(code,message,type) {
 	var obj;
@@ -382,7 +382,7 @@ function toMongoId(buf) {
 	return new ObjectID(buf.toString('hex'));
 }
 ClientSocket.prototype.handle = function (code,args) {
-	console.log('handle',codes.reverse[code],args);
+	this.log('handle',codes.reverse[code]);
 	if (code == codes.scLogout) {
 		Game.handleDisconnect(this);
 		this.logout();
@@ -1136,8 +1136,8 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scTableJoin:
 			// FIXME, verify user is in club
 			var params = pb.Parse(args,'Poker.Game');
-			this.log('table join',params);
 			var id = new toMongoId(params._id);
+			this.log('table join',id);
 			Game.getGame(id,function (err,game) {
 				this.log('game info',game.obj.clubid);
 				allClubs.findOne({_id:game.obj.clubid},function (err,club) {
@@ -1157,8 +1157,9 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.scTableLeave:
 			var params = pb.Parse(args,'Poker.Game');
-			this.log('table leave',params);
 			var id = new toMongoId(params._id);
+			delete params._id;
+			this.log('table leave',params);
 			Game.getGame(id,function (err,game) {
 				game.leave(this);
 			}.bind(this));
@@ -1166,6 +1167,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scTableSit:
 			var params = pb.Parse(args,'Poker.TableSit');
 			var id = new toMongoId(params.game_id);
+			delete params.game_id;
 			Game.getGame(id,function (err,game) {
 				game.sitDown(this,params);
 			}.bind(this));
@@ -1435,7 +1437,7 @@ Game.prototype.doWin = function () {
 				this.members[x].status = nextstate;
 				this.members[x].hand = new Hand();
 			}
-			this.state = 'tsIdle';
+			this.state = 'tsWinning2';
 			console.log('reset');
 			this.broadcastStatus(null);
 			this.stateMachine();
@@ -1539,6 +1541,10 @@ Game.prototype.findSeat = function (conn) {
 Game.prototype.stateMachine = function stateMachine() {
 	console.log('state machine:','"'+this.state+'"');
 	switch (this.state) {
+	case 'tsWinning2':
+		if (this.sittingCount() < 2) {
+			this.dealer = -1;
+		}
 	case 'tsIdle':
 		console.log('its idle');
 		if (this.sittingCount() > 1) {
@@ -1659,7 +1665,6 @@ Game.getGame = function getgame(id,cb) {
 			var game = new Game(obj);
 			game.deck = new Deck();
 			game.deck.shuffle(function shuffled(){
-				console.log(game.deck.prettyPrint());
 				//this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
 				cb(null,game);
 			}.bind(this));
@@ -1692,7 +1697,7 @@ function checkGameParams(smallblind,bigblind,gamename,seats,game_type,game_limit
 	if (smallblind > bigblind) return true;
 	if (gamename.length < 3) return true;
 	if (gamename.length >= sharedconfig.stringSizes.gamename) return true;
-	if ([2,6,9,10].indexOf(seats) == -1) return true;
+	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
 	if ([0,1].indexOf(game_type) == -1) return true;
 	if ([0,1,2].indexOf(game_limit) == -1) return true;
 	return false;

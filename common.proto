@@ -1,0 +1,7 @@
+package Poker;
+
+message RpcMessage {
+	required int32 MethodId = 1;
+	optional int32 DataSize = 2 [ default = 0];
+	optional int32 Token = 3 [ default = 0];
+}

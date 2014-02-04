@@ -2,11 +2,7 @@ package Poker;
 
 option optimize_for = LITE_RUNTIME;
 
-message RpcMessage {
-	required int32 MethodId = 1;
-	optional int32 DataSize = 2 [ default = 0];
-	optional int32 Token = 3 [ default = 0];
-}
+import "common.proto";
 
 message StringSizes {
 	required int32 email = 1;
@@ -248,6 +244,7 @@ message TableStatus {
 		tsTurn = 4;
 		tsRiver = 5;
 		tsWinning = 6;
+		tsWinning2 = 7;
 	}
 	
 	required bytes table_mongo_id = 1;
