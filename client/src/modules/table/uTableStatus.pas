@@ -88,6 +88,8 @@ end;
 
 constructor TTableStatus.Create;
 begin
+  FDealer := -1;
+  FCurrentSeat := -1;
   FSeatInfos := TSeatInfos.Create;
 end;
 

@@ -27,9 +27,9 @@ object frmTable: TfrmTable
   TextHeight = 14
   object paBottom: TPanel
     Left = 0
-    Top = 330
+    Top = 333
     Width = 552
-    Height = 83
+    Height = 80
     Align = alBottom
     BevelOuter = bvNone
     DoubleBuffered = True
@@ -38,8 +38,8 @@ object frmTable: TfrmTable
     object paChat: TPanel
       Left = 0
       Top = 0
-      Width = 264
-      Height = 83
+      Width = 250
+      Height = 80
       Align = alLeft
       BevelOuter = bvNone
       Color = clBlack
@@ -54,13 +54,14 @@ object frmTable: TfrmTable
         Style.Edges = []
         TabOrder = 0
         OnKeyPress = edChatKeyPress
-        Width = 263
+        ExplicitWidth = 263
+        Width = 249
       end
       object reChat: TRichEdit
         Left = 0
-        Top = 23
-        Width = 263
-        Height = 60
+        Top = 19
+        Width = 249
+        Height = 61
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -77,58 +78,77 @@ object frmTable: TfrmTable
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 1
+        ExplicitWidth = 263
+        ExplicitHeight = 64
       end
     end
-    object btStandUp: TcxButton
-      Left = 270
-      Top = 40
-      Width = 89
-      Height = 29
-      Action = acStandUp
-      SpeedButtonOptions.CanBeFocused = False
+    object paButtons: TPanel
+      Left = 250
+      Top = 0
+      Width = 302
+      Height = 80
+      Align = alClient
+      BevelOuter = bvNone
+      Color = clBlack
+      Padding.Top = 1
+      Padding.Right = 1
+      ParentBackground = False
       TabOrder = 1
-      Visible = False
-    end
-    object btFold: TcxButton
-      Left = 270
-      Top = 6
-      Width = 89
-      Height = 29
-      Action = acFold
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 2
-      Visible = False
-    end
-    object btCallCheck: TcxButton
-      Left = 364
-      Top = 6
-      Width = 89
-      Height = 29
-      Action = acCall
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 3
-      Visible = False
-    end
-    object btRaise: TcxButton
-      Left = 458
-      Top = 6
-      Width = 89
-      Height = 29
-      Action = acRaise
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 4
-      Visible = False
+      ExplicitLeft = 352
+      ExplicitTop = 6
+      ExplicitWidth = 250
+      object btCallCheck: TcxButton
+        Left = 13
+        Top = 6
+        Width = 85
+        Height = 27
+        Action = acCall
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 0
+        Visible = False
+      end
+      object btFold: TcxButton
+        Left = 195
+        Top = 6
+        Width = 85
+        Height = 27
+        Action = acFold
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 1
+        Visible = False
+      end
+      object btRaise: TcxButton
+        Left = 104
+        Top = 6
+        Width = 85
+        Height = 27
+        Action = acRaise
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 2
+        Visible = False
+      end
+      object btStandUp: TcxButton
+        Left = 13
+        Top = 38
+        Width = 85
+        Height = 27
+        Action = acStandUp
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 3
+        Visible = False
+      end
     end
   end
   object PaintBox: TPaintBox32
     Left = 0
     Top = 0
     Width = 552
-    Height = 330
+    Height = 333
     Align = alClient
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
+    ExplicitHeight = 330
   end
   object ActionManager: TActionManager
     Left = 212
