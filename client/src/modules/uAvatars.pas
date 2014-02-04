@@ -4,14 +4,15 @@ interface
 
 uses
   JPEG, System.Generics.Collections, System.Classes, System.SysUtils,
-  OverbyteIcsWndControl, OverbyteIcsHttpProt;
+  OverbyteIcsWndControl, OverbyteIcsHttpProt, GR32;
 
 type
   TAvatar = class
   private
-    FId        : TBytes;
-    FIdAsString: String;
-    FImage     : TJPEGImage;
+    FId         : TBytes;
+    FIdAsString : String;
+    FImage      : TJPEGImage;
+    FImageBitmap: TBitmap32;
 
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure SetId(const AValue: TBytes);
@@ -27,9 +28,10 @@ type
     function SetImage(const AStoragePath, AId: String): Boolean; overload;
     procedure Save(const AStoragePath: String);
 
-    property Id        : TBytes read FId write SetId;
-    property IdAsString: String read FIdAsString;
-    property Image     : TJPEGImage read FImage;
+    property Id         : TBytes read FId write SetId;
+    property IdAsString : String read FIdAsString;
+    property Image      : TJPEGImage read FImage;
+    property ImageBitmap: TBitmap32 read FImageBitmap;
   end;
 
   TAvatars = class(TObjectList<TAvatar>)
@@ -68,6 +70,9 @@ begin
   if Assigned(FImage) then
     FreeAndNil(FImage);
 
+  if Assigned(FImageBitmap) then
+    FImageBitmap.Free;
+
   inherited;
 end;
 
@@ -96,6 +101,9 @@ begin
         FImage := TJPEGImage.Create;
       http.RcvdStream.Position := 0;
       FImage.LoadFromStream(http.RcvdStream);
+      if not Assigned(FImageBitmap) then
+        FImageBitmap := TBitmap32.Create;
+      FImageBitmap.Assign(FImage);
     end;
     (http.RcvdStream as TMemoryStream).Free;
   end;
@@ -164,6 +172,11 @@ begin
       FImage := TJPEGImage.Create;
       ms.Position := 0;
       FImage.LoadFromStream(ms);
+
+      if not Assigned(FImageBitmap) then
+        FImageBitmap := TBitmap32.Create;
+      FImageBitmap.Assign(FImage);
+
       result := TRUE;
     end;
   finally
@@ -177,6 +190,10 @@ begin
     FImage := TJPEGImage.Create;
 
   FImage.Assign(AImage);
+
+  if not Assigned(FImageBitmap) then
+    FImageBitmap := TBitmap32.Create;
+  FImageBitmap.Assign(FImage);
 end;
 
 { TAvatars }

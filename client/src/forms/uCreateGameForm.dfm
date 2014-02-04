@@ -133,9 +133,15 @@ object frmCreateGame: TfrmCreateGame
     Left = 88
     Top = 127
     Properties.DropDownListStyle = lsFixedList
+    Properties.DropDownRows = 10
     Properties.Items.Strings = (
       '2'
+      '3'
+      '4'
+      '5'
       '6'
+      '7'
+      '8'
       '9'
       '10')
     Properties.ReadOnly = False

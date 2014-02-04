@@ -209,15 +209,6 @@
 			<DCCReference Include="modules\table\uTableStatus.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TableEvent.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_PutChips.pas"/>
-			<RcItem Include="resources\GameCarpet.png">
-				<ResourceType>RCDATA</ResourceType>
-				<ResourceId>GameCarpet</ResourceId>
-			</RcItem>
-			<RcItem Include="resources\GameTable.wmf">
-				<ContainerId>ResourceItem</ContainerId>
-				<ResourceType>RCDATA</ResourceType>
-				<ResourceId>GameTable</ResourceId>
-			</RcItem>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -225,6 +216,14 @@
 			<RcItem Include="resources\cashier\Pressed.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierPressed</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\table\Background.jpg">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>TableBackground</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\table\Table.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>Table</ResourceId>
 			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

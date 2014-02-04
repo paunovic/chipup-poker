@@ -13,26 +13,7 @@ uses
 
 type
   TfrmChipUpMain = class(TForm)
-    gridJoinedClubsLevel: TcxGridLevel;
-    gridJoinedClubs: TcxGrid;
-    gridJoinedClubsTable: TcxGridTableView;
-    gridJoinedClubsClubName: TcxGridColumn;
-    gridJoinedClubsId: TcxGridColumn;
     SkinController: TdxSkinController;
-    gridJoinedClubsStatus: TcxGridColumn;
-    btCreateClub: TcxButton;
-    btJoinClub: TcxButton;
-    gridGames: TcxGrid;
-    gridGamesTable: TcxGridTableView;
-    gridGamesId: TcxGridColumn;
-    gridGamesName: TcxGridColumn;
-    gridGamesType: TcxGridColumn;
-    gridGamesLevel: TcxGridLevel;
-    gridGamesBlinds: TcxGridColumn;
-    gridGamesPlayers: TcxGridColumn;
-    gridGamesStatus: TcxGridColumn;
-    btOpenClubLobby: TcxButton;
-    imgLogo: TcxImage;
     ActionManager: TActionManager;
     acLogout: TAction;
     acShowChangeEMailForm: TAction;
@@ -52,23 +33,43 @@ type
     N1: TMenuItem;
     Logout1: TMenuItem;
     SearchPublicClubs1: TMenuItem;
-    btHomeGames: TcxButton;
-    btTournaments: TcxButton;
+    acShowTournamentLayout: TAction;
+    acShowHomeGamesLayout: TAction;
+    imgCashier: TcxImage;
+    acOpenCashier: TAction;
+    imgHeader: TcxImage;
+    paMain: TPanel;
     gridTournaments: TcxGrid;
     gridTournamentsTable: TcxGridTableView;
     cxGridColumn2: TcxGridColumn;
-    cxGridColumn3: TcxGridColumn;
-    gridTournamentsLevel: TcxGridLevel;
+    gridTournamentsTableColumn4: TcxGridColumn;
+    gridTournamentsTableColumn3: TcxGridColumn;
     gridTournamentsTableColumn1: TcxGridColumn;
     gridTournamentsTableColumn2: TcxGridColumn;
-    gridTournamentsTableColumn3: TcxGridColumn;
-    gridTournamentsTableColumn4: TcxGridColumn;
-    acShowTournamentLayout: TAction;
-    acShowHomeGamesLayout: TAction;
-    btOpenTournamentLobby: TcxButton;
+    cxGridColumn3: TcxGridColumn;
+    gridTournamentsLevel: TcxGridLevel;
+    btOpenClubLobby: TcxButton;
+    gridGames: TcxGrid;
+    gridGamesTable: TcxGridTableView;
+    gridGamesId: TcxGridColumn;
+    gridGamesName: TcxGridColumn;
+    gridGamesType: TcxGridColumn;
+    gridGamesBlinds: TcxGridColumn;
+    gridGamesPlayers: TcxGridColumn;
+    gridGamesStatus: TcxGridColumn;
+    gridGamesLevel: TcxGridLevel;
+    gridJoinedClubs: TcxGrid;
+    gridJoinedClubsTable: TcxGridTableView;
+    gridJoinedClubsId: TcxGridColumn;
+    gridJoinedClubsClubName: TcxGridColumn;
+    gridJoinedClubsStatus: TcxGridColumn;
+    gridJoinedClubsLevel: TcxGridLevel;
+    btTournaments: TcxButton;
+    btHomeGames: TcxButton;
     btPrijatnaPunina: TcxButton;
-    imgCashier: TcxImage;
-    acOpenCashier: TAction;
+    btOpenTournamentLobby: TcxButton;
+    btCreateClub: TcxButton;
+    btJoinClub: TcxButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -224,7 +225,7 @@ begin
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
-  dmMain.Tables.ClearWithoutNotification
+  dmMain.Tables.ClearWithoutNotification;
 end;
 
 function TfrmChipUpMain.ShowLoginForm: Integer;
@@ -579,13 +580,10 @@ begin
 end;
 
 procedure TfrmChipUpMain.imgCashierMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-var
-  color: TColor;
 begin
   if Button = mbLeft then
   begin
-    color := imgCashier.Canvas.Canvas.Pixels[X, Y];
-    if color <> 0 then
+    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       LoadImageFromResource(imgCashier, 'CashierPressed');
   end;
 end;
@@ -594,8 +592,7 @@ procedure TfrmChipUpMain.imgCashierMouseUp(Sender: TObject; Button: TMouseButton
 begin
   if Button = mbLeft then
   begin
-    color := imgCashier.Canvas.Canvas.Pixels[X, Y];
-    if color > 0 then
+    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       dmMain.OpenCashierLink;
     LoadImageFromResource(imgCashier, 'CashierNormal');
   end;
