@@ -263,6 +263,7 @@ var
   avatar     : TAvatar;
   seat_point : TPoint;
   avatar_rect: TRect;
+  seat_info  : TSeatInfo;
 begin
   PaintBox.Buffer.BeginUpdate;
   try
@@ -282,21 +283,32 @@ begin
       DrawSeat(C1);
 
     // dealer button
-    seat_point := GetSeatPoint(FTableStatus.Dealer);
-    PaintBox.Buffer.TextOut(seat_point.X + 17, seat_point.Y, 'D');
+    if FTableStatus.Dealer > -1 then
+    begin
+      seat_point := GetSeatPoint(FTableStatus.Dealer);
+      PaintBox.Buffer.Font.Color := clYellow;
+      PaintBox.Buffer.TextOut(seat_point.X + 17, seat_point.Y, 'D');
+    end;
 
     // sb/bb
-    seat_point := GetSeatPoint(FTableStatus.SmallBlindSeat);
-    PaintBox.Buffer.Font.Color := clMoneyGreen;
-    PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'SB');
-    seat_point := GetSeatPoint(FTableStatus.BigBlindSeat);
-    PaintBox.Buffer.Font.Color := clLime;
-    PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'BB');
+    if FTableStatus.SmallBlindSeat > -1 then
+    begin
+      seat_point := GetSeatPoint(FTableStatus.SmallBlindSeat);
+      PaintBox.Buffer.Font.Color := clMoneyGreen;
+      PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'SB');
+      seat_point := GetSeatPoint(FTableStatus.BigBlindSeat);
+      PaintBox.Buffer.Font.Color := clLime;
+      PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'BB');
+    end;
 
-    // on the move
-    seat_point := GetSeatPoint(FTableStatus.CurrentSeat);
-    PaintBox.Buffer.Font.Color := clWhite;
-    PaintBox.Buffer.TextOut(seat_point.X - 6, seat_point.Y - 7, IntToStr(FTableStatus.CurrentSeat) + '!');
+    // draw player cards
+    if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+    begin
+      seat_point := GetSeatPoint(FTable.SeatIndex);
+
+      PaintBox.Buffer.Font.Color := clRed;
+      PaintBox.Buffer.TextOut(seat_point.X - 5, seat_point.Y - 40, seat_info.Cards);
+    end;
 
     // draw avatars
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
@@ -306,7 +318,7 @@ begin
         if dmMain.Avatars.Find(player_info.AvatarId, avatar) then // if avatar is found, draw it
         begin
           seat_point := GetSeatPoint(FTableStatus.Seats[C1].SeatIndex);
-          avatar_rect := TRect.Create(Point(seat_point.X - 25, seat_point.Y - 70), Point(seat_point.X + 25, seat_point.Y - 20));
+          avatar_rect := TRect.Create(Point(seat_point.X - 25, seat_point.Y - 100), Point(seat_point.X + 25, seat_point.Y - 50));
           PaintBox.Buffer.Draw(avatar_rect, avatar.ImageBitmap.BoundsRect, avatar.ImageBitmap);
         end
         else // if avatar is not found, add it to avatar list, which will download it automatically
@@ -346,20 +358,21 @@ end;
 
 procedure TfrmTable.DrawSeat(const ASeatIndex: Integer);
 var
-  C1        : Integer;
   seat_point: TPoint;
+  seat_info : TSeatInfo;
 begin
   seat_point := GetSeatPoint(ASeatIndex);
 
   PaintBox.Buffer.Canvas.Brush.Color := clWhite;
-  for C1 := 0 to FTableStatus.Seats.Count - 1 do
-    if FTableStatus.Seats[C1].SeatIndex = ASeatIndex then
-    begin
+  if FTableStatus.GetSeatInfo(ASeatIndex, seat_info) then
+  begin
+    PaintBox.Buffer.Canvas.Brush.Color := clSkyBlue;
+    if FTableStatus.CurrentSeat = ASeatIndex then
       PaintBox.Buffer.Canvas.Brush.Color := clRed;
-      Break;
-    end;
+  end;
 
   PaintBox.Buffer.Canvas.Ellipse(seat_point.X - 15, seat_point.Y - 15, seat_point.X + 15, seat_point.Y + 15);
+
   PaintBox.Buffer.Font.Color := clBlack;
   PaintBox.Buffer.TextOut(seat_point.X - 3, seat_point.Y - 7, IntToStr(ASeatIndex));
 end;
@@ -490,6 +503,7 @@ begin
 
   {$IFDEF DEBUG}
   tmp := '';
+  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State)]), ditApplication);
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);
   tmp := Trim(tmp);

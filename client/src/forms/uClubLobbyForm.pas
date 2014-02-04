@@ -521,7 +521,6 @@ begin
   SocketClient.DeleteGame(FSelectedGameId);
 end;
 
-
 procedure TfrmClubLobby.CSRStatus(const AMessage: TMessageItem);
 begin
   ConfigureGUI;

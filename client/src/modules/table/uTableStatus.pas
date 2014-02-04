@@ -48,6 +48,7 @@ type
     function GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
     function GetBet(const ASeatIndex: Integer): Integer;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
+    function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
 
     property State: TTableState read FState;
@@ -61,6 +62,9 @@ type
   end;
 
 implementation
+
+uses
+  uCommon;
 
 { TSeatInfo }
 
@@ -129,6 +133,20 @@ begin
     Exit(0)
   else
     Exit(FBets[ASeatIndex]);
+end;
+
+function TTableStatus.GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to FSeatInfos.Count - 1 do
+    if FSeatInfos[C1].SeatIndex = ASeatIndex then
+    begin
+      ASeatInfo := FSeatInfos[C1];
+      Exit(TRUE);
+    end;
+
+  Exit(FALSE);
 end;
 
 function TTableStatus.GetSmallBlindSeat: Integer;

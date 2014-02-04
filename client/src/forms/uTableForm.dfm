@@ -58,9 +58,9 @@ object frmTable: TfrmTable
       end
       object reChat: TRichEdit
         Left = 0
-        Top = 19
+        Top = 23
         Width = 263
-        Height = 64
+        Height = 60
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -129,10 +129,6 @@ object frmTable: TfrmTable
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
-    ExplicitLeft = 312
-    ExplicitTop = 100
-    ExplicitWidth = 192
-    ExplicitHeight = 192
   end
   object ActionManager: TActionManager
     Left = 212
