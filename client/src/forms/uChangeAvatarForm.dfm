@@ -62,7 +62,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     TabOrder = 1
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -11
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
@@ -78,7 +78,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     TabOrder = 2
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -11
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False

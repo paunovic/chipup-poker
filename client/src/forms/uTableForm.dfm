@@ -35,8 +35,6 @@ object frmTable: TfrmTable
     DoubleBuffered = True
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitTop = 333
-    ExplicitWidth = 552
     object paChat: TPanel
       Left = 0
       Top = 0
@@ -56,7 +54,6 @@ object frmTable: TfrmTable
         Style.Edges = []
         TabOrder = 0
         OnKeyPress = edChatKeyPress
-        ExplicitWidth = 263
         Width = 249
       end
       object reChat: TRichEdit
@@ -80,8 +77,6 @@ object frmTable: TfrmTable
         ReadOnly = True
         ScrollBars = ssVertical
         TabOrder = 1
-        ExplicitWidth = 263
-        ExplicitHeight = 64
       end
     end
     object paButtons: TPanel
@@ -96,9 +91,6 @@ object frmTable: TfrmTable
       Padding.Right = 1
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 352
-      ExplicitTop = 6
-      ExplicitWidth = 250
       object btCallCheck: TcxButton
         Left = 13
         Top = 6
@@ -108,6 +100,12 @@ object frmTable: TfrmTable
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 0
         Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
       end
       object btFold: TcxButton
         Left = 195
@@ -118,6 +116,12 @@ object frmTable: TfrmTable
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 1
         Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
       end
       object btRaise: TcxButton
         Left = 104
@@ -128,6 +132,12 @@ object frmTable: TfrmTable
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 2
         Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
       end
       object btStandUp: TcxButton
         Left = 13
@@ -138,6 +148,12 @@ object frmTable: TfrmTable
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 3
         Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
       end
     end
   end
@@ -150,8 +166,6 @@ object frmTable: TfrmTable
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
-    ExplicitWidth = 552
-    ExplicitHeight = 330
   end
   object ActionManager: TActionManager
     Left = 212

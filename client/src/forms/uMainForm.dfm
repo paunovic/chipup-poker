@@ -113,8 +113,8 @@ object frmChipUpMain: TfrmChipUpMain
       9F544CAA4C364F994D9D9A769FBEF174E5D38967E9CF16660A7F95FEB5F6B9CE
       F31F7E73FCAD7F366276E205FFC5A7DF4B5ECABF3CF46AD9AB9EB980B947AF53
       5F2FCC17BD917F73F82DE36DDFBBF077930B59EFB1EF2B3FE87EE8FEE8F3F1C1
-      A7D44F9FFE050398F3FCBAC4E8D3000000097048597300000361000003610166
-      8534790000F54149444154785EB4DDF9AF775775DFF18A799E0CC678E4F18CB1
+      A7D44F9FFE050398F3FCBAC4E8D300000009704859730000035E0000035E01CB
+      77AB3D0000F54149444154785EB4DDF9AF775775DFF18A799E0CC678E4F18CB1
       996C63031E984C12266366838D8D018319CA64CC60638610C630854A95FA0F54
       6A7F68D586B495A2242A6D3AA891D25642255295564D49A52A24FFC1E97D1D3F
       EFDB758FBFF73E0F43222DEDBDD7FAACCF5A7B9F73F65E9BEFF593BFB3F77F0B
@@ -3546,9 +3546,9 @@ object frmChipUpMain: TfrmChipUpMain
       462)
     object gridTournaments: TcxGrid
       Left = 6
-      Top = 39
+      Top = 47
       Width = 848
-      Height = 416
+      Height = 408
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 0
       Visible = False
@@ -3619,16 +3619,16 @@ object frmChipUpMain: TfrmChipUpMain
       TabOrder = 1
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Arial'
+      Font.Height = -11
+      Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object gridGames: TcxGrid
       Left = 290
-      Top = 39
+      Top = 47
       Width = 563
-      Height = 416
+      Height = 408
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 2
       object gridGamesTable: TcxGridTableView
@@ -3703,9 +3703,9 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object gridJoinedClubs: TcxGrid
       Left = 6
-      Top = 39
+      Top = 47
       Width = 281
-      Height = 381
+      Height = 373
       Anchors = [akLeft, akTop, akBottom]
       TabOrder = 3
       object gridJoinedClubsTable: TcxGridTableView
@@ -3756,7 +3756,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object btTournaments: TcxButton
       Left = 148
-      Top = 4
+      Top = 12
       Width = 139
       Height = 32
       Action = acShowTournamentLayout
@@ -3767,14 +3767,14 @@ object frmChipUpMain: TfrmChipUpMain
       TabOrder = 4
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Arial'
+      Font.Height = -11
+      Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object btHomeGames: TcxButton
       Left = 6
-      Top = 4
+      Top = 12
       Width = 139
       Height = 32
       Action = acShowHomeGamesLayout
@@ -3786,14 +3786,14 @@ object frmChipUpMain: TfrmChipUpMain
       TabOrder = 5
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Arial'
+      Font.Height = -11
+      Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object btPrijatnaPunina: TcxButton
       Left = 290
-      Top = 4
+      Top = 12
       Width = 271
       Height = 32
       Anchors = [akLeft, akTop, akRight]
@@ -3810,7 +3810,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object btOpenTournamentLobby: TcxButton
       Left = 564
-      Top = 4
+      Top = 12
       Width = 290
       Height = 32
       Anchors = [akTop, akRight]
@@ -3820,14 +3820,14 @@ object frmChipUpMain: TfrmChipUpMain
       Visible = False
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Arial'
+      Font.Height = -11
+      Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object btCreateClub: TcxButton
       Left = 564
-      Top = 4
+      Top = 12
       Width = 144
       Height = 32
       Action = acShowCreateClubForm
@@ -3836,14 +3836,14 @@ object frmChipUpMain: TfrmChipUpMain
       TabOrder = 8
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Arial'
+      Font.Height = -11
+      Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
     end
     object btJoinClub: TcxButton
       Left = 711
-      Top = 4
+      Top = 12
       Width = 143
       Height = 32
       Action = acShowJoinClubForm
@@ -3852,8 +3852,8 @@ object frmChipUpMain: TfrmChipUpMain
       TabOrder = 9
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Arial'
+      Font.Height = -11
+      Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
     end

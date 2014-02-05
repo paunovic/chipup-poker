@@ -112,7 +112,7 @@ object frmCreateClub: TfrmCreateClub
     TabOrder = 7
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
@@ -128,7 +128,7 @@ object frmCreateClub: TfrmCreateClub
     TabOrder = 8
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False

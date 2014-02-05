@@ -52,12 +52,12 @@ object frmLogin: TfrmLogin
     Width = 170
     Height = 50
     Action = acLogin
-    Caption = 'Connecting...'
+    Caption = 'CONNECTING...'
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 4
-    Font.Charset = ANSI_CHARSET
+    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -16
+    Font.Height = -15
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
@@ -70,11 +70,11 @@ object frmLogin: TfrmLogin
     Action = acShowCreateAccountForm
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 5
-    Font.Charset = ANSI_CHARSET
+    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Arial'
-    Font.Style = []
+    Font.Height = -11
+    Font.Name = 'Sintony'
+    Font.Style = [fsBold]
     ParentFont = False
   end
   object btForgotPassword: TcxButton
@@ -85,11 +85,11 @@ object frmLogin: TfrmLogin
     Action = acShowForgotPasswordForm
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 6
-    Font.Charset = ANSI_CHARSET
+    Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Arial'
-    Font.Style = []
+    Font.Height = -11
+    Font.Name = 'Sintony'
+    Font.Style = [fsBold]
     ParentFont = False
   end
   object edLogin: TcxTextEdit
@@ -126,17 +126,17 @@ object frmLogin: TfrmLogin
     Left = 28
     Top = 16
     object acLogin: TAction
-      Caption = 'Login'
+      Caption = 'LOGIN'
       Enabled = False
       OnExecute = acLoginExecute
     end
     object acShowCreateAccountForm: TAction
-      Caption = 'Create new account'
+      Caption = 'CREATE NEW ACCOUNT'
       Enabled = False
       OnExecute = acShowCreateAccountFormExecute
     end
     object acShowForgotPasswordForm: TAction
-      Caption = 'Forgot password'
+      Caption = 'FORGOT PASSWORD'
       Enabled = False
       OnExecute = acShowForgotPasswordFormExecute
     end
