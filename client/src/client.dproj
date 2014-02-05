@@ -209,6 +209,7 @@
 			<DCCReference Include="modules\table\uTableStatus.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_TableEvent.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_PutChips.pas"/>
+			<DCCReference Include="modules\table\uTableResources.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

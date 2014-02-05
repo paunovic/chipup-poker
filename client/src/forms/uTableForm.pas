@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SynGdiPlus, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
   GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image;
@@ -44,19 +44,11 @@ type
     FFormAspectRatio: Double;
     FTable          : TTable;
     FTableStatus    : TTableStatus;
-    FSeatPoints     : array[2..10, 0..9] of TPoint;
 
-    FOrigTableW     : Integer;
-    FOrigTableH     : Integer;
     FTableWidth     : Integer;
     FTableHeight    : Integer;
     FTableXOffset   : Integer;
     FTableYOffset   : Integer;
-
-    FImg_TableBitmap: TBitmap32;
-    FImg_Background : TBitmap32;
-
-    procedure ConfigureSeatPoints;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
 
@@ -84,7 +76,7 @@ implementation
 
 uses
   System.Types,
-  uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo,
+  uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent;
 
@@ -95,17 +87,10 @@ begin
 
   ActionManager.State := asSuspended;
 
-  if not Assigned(Gdip) then
-    Gdip := TGDIPlusFull.Create('gdiplus.dll');
-
   FTable := ATable;
 end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
-var
-  rstream: TResourceStream;
-  jpg    : TJPEGImage;
-  png    : TPortableNetworkGraphic32;
 begin
   FTableStatus := TTableStatus.Create;
 
@@ -114,49 +99,11 @@ begin
   FFormAspectRatio := Width / Height;
   PaintBox.BufferOversize := 0;
 
-  // load table image
-  png := TPortableNetworkGraphic32.Create;
-  try
-    rstream := TResourceStream.Create(HInstance, 'Table', RT_RCDATA);
-    try
-      png.LoadFromStream(rstream);
-      FImg_TableBitmap := TBitmap32.Create;
-      FImg_TableBitmap.DrawMode := dmBlend;
-      FImg_TableBitmap.Assign(png);
-      FTableWidth := FImg_TableBitmap.Width;
-      FTableHeight := FImg_TableBitmap.Height;
-      FOrigTableW := FTableWidth;
-      FOrigTableH := FTableHeight;
-      ConfigureSeatPoints;
+  if not TTableResources.IsInitialized then
+    TTableResources.Initialize;
 
-      FImg_TableBitmap.Resampler := TDraftResampler.Create;
-
-      // Alternative is KernelResampler. Slower, but slightly higher quality resample. Code below:
-  {
-      FImg_TableBitmap.Resampler := TKernelResampler.Create;
-      (FImg_TableBitmap.Resampler as TKernelResampler).Kernel := TLanczosKernel.Create;
-  }
-    finally
-      rstream.Free;
-    end;
-  finally
-    png.Free;
-  end;
-
-  // load background image
-  FImg_Background := TBitmap32.Create;
-  jpg := TJPEGImage.Create;
-  try
-    rstream := TResourceStream.Create(HInstance, 'TableBackground', RT_RCDATA);
-    try
-      jpg.LoadFromStream(rstream);
-      FImg_Background.Assign(jpg);
-    finally
-      rstream.Free;
-    end;
-  finally
-    jpg.Free;
-  end;
+  FTableWidth := TTableResources.TableImage.Width;
+  FTableHeight := TTableResources.TableImage.Height;
 
   Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, FTable.Game.SmallBlind, FTable.Game.BigBlind, FTable.Game.GameTypeStrFull]);
   Redraw;
@@ -165,9 +112,6 @@ end;
 procedure TfrmTable.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveMessageHandler(Handle);
-
-  FImg_Background.Free;
-  FImg_TableBitmap.Free;
 
   FTableStatus.Free;
 end;
@@ -284,16 +228,16 @@ begin
   PaintBox.Buffer.BeginUpdate;
   try
     // draw background
-    PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, FImg_Background.BoundsRect, FImg_Background);
+    PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
     // calculate table size and draw it
     FTableWidth := Round(0.85 * PaintBox.Buffer.Width);
-    FTableHeight := Round(FTableWidth / (FImg_TableBitmap.Width / FImg_TableBitmap.Height));
+    FTableHeight := Round(FTableWidth / (TTableResources.TableImage.Width / TTableResources.TableImage.Height));
     FTableXOffset := (PaintBox.Buffer.Width - FTableWidth) div 2;
     FTableYOffset := Round(PaintBox.Buffer.Height / 7);
     PaintBox.Buffer.Draw(Rect(FTableXOffset, FTableYOffset, FTableXOffset + FTableWidth, FTableYOffset + FTableHeight),
-                         FImg_TableBitmap.BoundsRect,
-                         FImg_TableBitmap);
+                         TTableResources.TableImage.BoundsRect,
+                         TTableResources.TableImage);
 
     // draw seats
     for C1 := 0 to FTable.Game.Seats - 1 do
@@ -358,54 +302,10 @@ begin
     PaintBox.Flush;
 end;
 
-procedure TfrmTable.ConfigureSeatPoints;
-var
-  y_center_point: Integer;
-  x_center_point: Integer;
-begin
-  y_center_point := FTableHeight div 2 - 60;
-  x_center_point := FTableWidth div 2;
-
-  FSeatPoints[2, 0] := GR32.Point(FTableWidth - 75, y_center_point);
-  FSeatPoints[2, 1] := GR32.Point(75, y_center_point);
-
-  FSeatPoints[3, 0] := GR32.Point(FTableWidth - 75, y_center_point);
-  FSeatPoints[3, 1] := GR32.Point(x_center_point, FTableHeight - 170);
-  FSeatPoints[3, 2] := GR32.Point(75, y_center_point);
-
-  FSeatPoints[4, 0] := GR32.Point(FTableWidth - 175, FTableHeight div 2 - 218);
-  FSeatPoints[4, 1] := GR32.Point(FTableWidth - 175, FTableHeight div 2 + 100);
-  FSeatPoints[4, 2] := GR32.Point(175, FTableHeight div 2 + 100);
-  FSeatPoints[4, 3] := GR32.Point(175, FTableHeight div 2 - 218);
-
-  FSeatPoints[5, 0] := GR32.Point(FTableWidth - 175, FTableHeight div 2 - 218);
-  FSeatPoints[5, 1] := GR32.Point(FTableWidth - 175, FTableHeight div 2 + 100);
-  FSeatPoints[5, 2] := GR32.Point(x_center_point, FTableHeight - 170);
-  FSeatPoints[5, 3] := GR32.Point(175, FTableHeight div 2 + 100);
-  FSeatPoints[5, 4] := GR32.Point(175, FTableHeight div 2 - 218);
-
-  FSeatPoints[6, 0] := GR32.Point(FTableWidth - 285, FTableHeight div 2 - 263);
-  FSeatPoints[6, 1] := GR32.Point(FTableWidth - 75, y_center_point);
-  FSeatPoints[6, 2] := GR32.Point(FTableWidth - 285, FTableHeight div 2 + 145);
-  FSeatPoints[6, 3] := GR32.Point(285, FTableHeight div 2 + 145);
-  FSeatPoints[6, 4] := GR32.Point(75, y_center_point);
-  FSeatPoints[6, 5] := GR32.Point(285, FTableHeight div 2 - 263);
-
-  FSeatPoints[7, 0] := GR32.Point(FTableWidth - 285, FTableHeight div 2 - 263);
-  FSeatPoints[7, 1] := GR32.Point(FTableWidth - 75, y_center_point);
-  FSeatPoints[7, 2] := GR32.Point(FTableWidth - 285, FTableHeight div 2 + 155);
-  FSeatPoints[7, 3] := GR32.Point(x_center_point, FTableHeight - 170);
-  FSeatPoints[7, 4] := GR32.Point(285, FTableHeight div 2 + 155);
-  FSeatPoints[7, 5] := GR32.Point(75, y_center_point);
-  FSeatPoints[7, 6] := GR32.Point(285, FTableHeight div 2 - 263);
-
-  // FIXME
-end;
-
 function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint;
 begin
-  result := GR32.Point(FTableXOffset + Round(FSeatPoints[FTable.Game.Seats, ASeatIndex].X * (FTableWidth / FOrigTableW)),
-                       FTableYOffset + Round(FSeatPoints[FTable.Game.Seats, ASeatIndex].Y * (FTableHeight / FOrigTableH)));
+  result := GR32.Point(FTableXOffset + Round(TTableResources.SeatPoints[FTable.Game.Seats, ASeatIndex].X * (FTableWidth / TTableResources.TableOriginalWidth)),
+                       FTableYOffset + Round(TTableResources.SeatPoints[FTable.Game.Seats, ASeatIndex].Y * (FTableHeight / TTableResources.TableOriginalHeight)));
 end;
 
 procedure TfrmTable.DrawSeat(const ASeatIndex: Integer);

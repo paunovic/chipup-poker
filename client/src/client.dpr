@@ -85,7 +85,8 @@ uses
   uPB_GetUserParams in 'modules\protobuf\objects\uPB_GetUserParams.pas',
   uTableStatus in 'modules\table\uTableStatus.pas',
   uPB_TableEvent in 'modules\protobuf\objects\uPB_TableEvent.pas',
-  uPB_PutChips in 'modules\protobuf\objects\uPB_PutChips.pas';
+  uPB_PutChips in 'modules\protobuf\objects\uPB_PutChips.pas',
+  uTableResources in 'modules\table\uTableResources.pas';
 
 procedure FocusPokerApp;
 var
