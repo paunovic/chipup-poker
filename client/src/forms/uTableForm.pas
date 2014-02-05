@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton;
 
 type
   TfrmTable = class(TForm)
@@ -51,6 +51,9 @@ type
     FTableYOffset   : Integer;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
+
+    function ConfirmLeaveTable: Boolean;
+    function ConfirmStandUp: Boolean;
 
     procedure DrawSeat(const ASeatIndex: Integer);
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
@@ -130,9 +133,7 @@ end;
 
 procedure TfrmTable.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := TRUE;
-  if FTable.IsSitting then
-    CanClose := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and any chips that are in pot.', mtWarning, mbYesNo, 0) = mrYes;
+  CanClose := ConfirmLeaveTable;
 end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
@@ -346,6 +347,9 @@ end;
 
 procedure TfrmTable.acStandUpExecute(Sender: TObject);
 begin
+  if not ConfirmStandUp then
+    Exit;
+
   SocketClient.TableStandUp(FTable.Game.MongoId);
   acStandUp.Enabled := FALSE;
 end;
@@ -425,6 +429,20 @@ begin
   end
   else
     btCallCheck.Visible := FALSE;  
+end;
+
+function TfrmTable.ConfirmLeaveTable: Boolean;
+begin
+  result := TRUE;
+  if FTable.IsSitting then
+    result := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
+end;
+
+function TfrmTable.ConfirmStandUp: Boolean;
+begin
+  result := TRUE;
+  if FTable.IsSitting then
+    result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmTable.CSRETableStatus(const AMessage: TMessageItem);

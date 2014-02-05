@@ -113,8 +113,8 @@ object frmChipUpMain: TfrmChipUpMain
       9F544CAA4C364F994D9D9A769FBEF174E5D38967E9CF16660A7F95FEB5F6B9CE
       F31F7E73FCAD7F366276E205FFC5A7DF4B5ECABF3CF46AD9AB9EB980B947AF53
       5F2FCC17BD917F73F82DE36DDFBBF077930B59EFB1EF2B3FE87EE8FEE8F3F1C1
-      A7D44F9FFE050398F3FCBAC4E8D300000009704859730000035D0000035D0166
-      CE8A500000F54149444154785EB4DDF9AF775775DFF18A799E0CC678E4F18CB1
+      A7D44F9FFE050398F3FCBAC4E8D300000009704859730000035C0000035C01B4
+      8968B40000F54149444154785EB4DDF9AF775775DFF18A799E0CC678E4F18CB1
       996C63031E984C12266366838D8D018319CA64CC60638610C630854A95FA0F54
       6A7F68D586B495A2242A6D3AA891D25642255295564D49A52A24FFC1E97D1D3F
       EFDB758FBFF73E0F43222DEDBDD7FAACCF5A7B9F73F65E9BEFF593BFB3F77F0B
@@ -3541,7 +3541,6 @@ object frmChipUpMain: TfrmChipUpMain
     Color = clBlack
     ParentBackground = False
     TabOrder = 2
-    ExplicitHeight = 462
     DesignSize = (
       860
       434)
@@ -3553,9 +3552,7 @@ object frmChipUpMain: TfrmChipUpMain
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 0
       Visible = False
-      ExplicitHeight = 408
       object gridTournamentsTable: TcxGridTableView
-        Navigator.Buttons.CustomButtons = <>
         OnCellDblClick = gridJoinedClubsTableCellDblClick
         OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
         DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3625,7 +3622,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitTop = 423
     end
     object gridGames: TcxGrid
       Left = 290
@@ -3634,9 +3630,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 380
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 2
-      ExplicitHeight = 408
       object gridGamesTable: TcxGridTableView
-        Navigator.Buttons.CustomButtons = <>
         OnCellDblClick = gridGamesTableCellDblClick
         OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
         DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3712,9 +3706,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 345
       Anchors = [akLeft, akTop, akBottom]
       TabOrder = 3
-      ExplicitHeight = 373
       object gridJoinedClubsTable: TcxGridTableView
-        Navigator.Buttons.CustomButtons = <>
         OnCellDblClick = gridJoinedClubsTableCellDblClick
         OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
         DataController.Summary.DefaultGroupSummaryItems = <>
