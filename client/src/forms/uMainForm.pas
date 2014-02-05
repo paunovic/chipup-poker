@@ -9,7 +9,7 @@ uses
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
   uMessageItem, uGameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, dxGDIPlusClasses, dxsChipUpDarkTabs;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, dxGDIPlusClasses, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmChipUpMain = class(TForm)

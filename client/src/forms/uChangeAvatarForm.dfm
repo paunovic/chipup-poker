@@ -52,7 +52,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     AnchorY = 25
   end
   object btChange: TcxButton
-    Left = 15
+    Left = 17
     Top = 213
     Width = 93
     Height = 27
@@ -68,7 +68,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     ParentFont = False
   end
   object btCancel: TcxButton
-    Left = 118
+    Left = 116
     Top = 213
     Width = 93
     Height = 27

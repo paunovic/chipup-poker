@@ -27,6 +27,7 @@ uses
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
   dxsChipUpDark in 'skins\ChipUpDarkStyle\dxsChipUpDark.pas',
   dxsChipUpDarkTabs in 'skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas',
+  dxsChipUpRedButton in 'skins\ChipUpRedButton\dxsChipUpRedButton.pas',
   uServerSettings in 'modules\uServerSettings.pas',
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',

@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ExtCtrls, cxLabel, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg,
-  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs;
+  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmChangeAvatar = class(TForm)

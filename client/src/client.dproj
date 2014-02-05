@@ -148,6 +148,7 @@
 			</DCCReference>
 			<DCCReference Include="skins\ChipUpDarkStyle\dxsChipUpDark.pas"/>
 			<DCCReference Include="skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas"/>
+			<DCCReference Include="skins\ChipUpRedButton\dxsChipUpRedButton.pas"/>
 			<DCCReference Include="modules\uServerSettings.pas"/>
 			<DCCReference Include="forms\uIFormParams.pas"/>
 			<DCCReference Include="modules\settings\uSettings.pas"/>
