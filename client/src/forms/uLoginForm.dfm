@@ -111,8 +111,8 @@ object frmLogin: TfrmLogin
       9F544CAA4C364F994D9D9A769FBEF174E5D38967E9CF16660A7F95FEB5F6B9CE
       F31F7E73FCAD7F366276E205FFC5A7DF4B5ECABF3CF46AD9AB9EB980B947AF53
       5F2FCC17BD917F73F82DE36DDFBBF077930B59EFB1EF2B3FE87EE8FEE8F3F1C1
-      A7D44F9FFE050398F3FCBAC4E8D300000009704859730000022D0000022D01E5
-      669FE40000F54149444154785ED4DDF7EFE7D795DF772E25B1F7DEEBB0770E7B
+      A7D44F9FFE050398F3FCBAC4E8D300000009704859730000022C0000022C0137
+      217D000000F54149444154785ED4DDF7EFE7D795DF772E25B1F7DEEBB0770E7B
       190E6786BDCFB0579112A92E521445B55DAD765796B6689B1D3B709C18369220
       4190C080611B3690C4306CC780030769700B0223096C0708BCF67FF0CE7DBC67
       9EA3CBCF7E4951BB4AF10F07F7DC735EE775CEBDEFF7FBDCCBEFF74BF290C30F
@@ -3161,8 +3161,8 @@ object frmLogin: TfrmLogin
     Width = 562
   end
   object cbRememberLogin: TcxCheckBox
-    Left = 181
-    Top = 214
+    Left = 134
+    Top = 223
     Caption = 'Remember login'
     ParentFont = False
     Style.Font.Charset = DEFAULT_CHARSET
@@ -3176,8 +3176,8 @@ object frmLogin: TfrmLogin
     Width = 129
   end
   object cbRememberPassword: TcxCheckBox
-    Left = 181
-    Top = 236
+    Left = 134
+    Top = 245
     Caption = 'Remember password'
     ParentFont = False
     TabOrder = 3
@@ -3185,9 +3185,9 @@ object frmLogin: TfrmLogin
     Width = 129
   end
   object btLogin: TcxButton
-    Left = 139
-    Top = 285
-    Width = 171
+    Left = 136
+    Top = 288
+    Width = 174
     Height = 30
     Action = acLogin
     Caption = 'CONNECTING...'
@@ -3204,9 +3204,9 @@ object frmLogin: TfrmLogin
     ParentFont = False
   end
   object btCreateAccount: TcxButton
-    Left = 331
-    Top = 252
-    Width = 171
+    Left = 330
+    Top = 255
+    Width = 174
     Height = 30
     Action = acShowCreateAccountForm
     Caption = 'Create New Account'
@@ -3214,15 +3214,15 @@ object frmLogin: TfrmLogin
     TabOrder = 5
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Sintony'
-    Font.Style = [fsBold]
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = []
     ParentFont = False
   end
   object btForgotPassword: TcxButton
-    Left = 331
-    Top = 285
-    Width = 171
+    Left = 330
+    Top = 288
+    Width = 174
     Height = 30
     Action = acShowForgotPasswordForm
     Caption = 'Forgot Password'
@@ -3230,36 +3230,57 @@ object frmLogin: TfrmLogin
     TabOrder = 6
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Sintony'
-    Font.Style = [fsBold]
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = []
     ParentFont = False
   end
   object edLogin: TcxTextEdit
-    Left = 139
-    Top = 156
+    Left = 138
+    Top = 146
+    AutoSize = False
+    ParentFont = False
+    Properties.Alignment.Vert = taVCenter
     Properties.MaxLength = 200
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
     TabOrder = 0
-    Width = 171
+    Text = 'mpaunovic'
+    Height = 30
+    Width = 174
   end
   object edPassword: TcxTextEdit
-    Left = 139
-    Top = 183
+    Left = 138
+    Top = 178
+    AutoSize = False
+    ParentFont = False
+    Properties.Alignment.Vert = taVCenter
     Properties.EchoMode = eemPassword
     Properties.MaxLength = 32
     Properties.PasswordChar = '*'
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.IsFontAssigned = True
     TabOrder = 1
-    Width = 171
+    Height = 30
+    Width = 174
   end
   object lbsLogin: TcxLabel
-    Left = 76
-    Top = 157
+    Left = 92
+    Top = 153
     Caption = 'Login:'
     ParentFont = False
     Transparent = True
   end
   object lbsPassword: TcxLabel
-    Left = 76
+    Left = 71
     Top = 184
     Caption = 'Password:'
     ParentFont = False

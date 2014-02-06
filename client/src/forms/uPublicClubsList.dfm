@@ -33,7 +33,6 @@ object frmPublicClubsList: TfrmPublicClubsList
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object gridClubsTable: TcxGridTableView
-      Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridClubsTableCellDblClick
       OnFocusedRecordChanged = gridClubsTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
