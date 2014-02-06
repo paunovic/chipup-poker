@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo;
 
 type
-  TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6);
+  TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6,tsWinning2 = 7);
   TPB_TableStatus = class(TProtobufBaseObject)
   private
     const

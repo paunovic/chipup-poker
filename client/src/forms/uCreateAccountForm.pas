@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
   cxContainer, cxEdit, dxSkinsCore, Vcl.Menus, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList, Vcl.ExtCtrls,
-  dxSkinsForm, uMessageItem, dxsChipUpDark;
+  dxSkinsForm, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs;
 
 type
   TfrmCreateAccount = class(TForm)

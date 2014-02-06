@@ -52,7 +52,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     AnchorY = 25
   end
   object btChange: TcxButton
-    Left = 15
+    Left = 17
     Top = 213
     Width = 93
     Height = 27
@@ -62,13 +62,13 @@ object frmChangeAvatar: TfrmChangeAvatar
     TabOrder = 1
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -11
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
   end
   object btCancel: TcxButton
-    Left = 118
+    Left = 116
     Top = 213
     Width = 93
     Height = 27
@@ -78,7 +78,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     TabOrder = 2
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -11
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False

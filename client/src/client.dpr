@@ -27,6 +27,7 @@ uses
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
   dxsChipUpDark in 'skins\ChipUpDarkStyle\dxsChipUpDark.pas',
   dxsChipUpDarkTabs in 'skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas',
+  dxsChipUpRedButton in 'skins\ChipUpRedButton\dxsChipUpRedButton.pas',
   uServerSettings in 'modules\uServerSettings.pas',
   uIFormParams in 'forms\uIFormParams.pas',
   uSettings in 'modules\settings\uSettings.pas',
@@ -85,7 +86,8 @@ uses
   uPB_GetUserParams in 'modules\protobuf\objects\uPB_GetUserParams.pas',
   uTableStatus in 'modules\table\uTableStatus.pas',
   uPB_TableEvent in 'modules\protobuf\objects\uPB_TableEvent.pas',
-  uPB_PutChips in 'modules\protobuf\objects\uPB_PutChips.pas';
+  uPB_PutChips in 'modules\protobuf\objects\uPB_PutChips.pas',
+  uTableResources in 'modules\table\uTableResources.pas';
 
 procedure FocusPokerApp;
 var

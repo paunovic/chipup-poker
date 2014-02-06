@@ -36,6 +36,9 @@ type
     FCurrentSeat: Integer;
     FSeatInfos  : TSeatInfos;
     FBets       : TArray<Integer>;
+    FFlopCards  : String;
+    FTurnCard   : String;
+    FRiverCard  : String;
 
     function GetBigBlindSeat: Integer;
     function GetSmallBlindSeat: Integer;
@@ -48,6 +51,7 @@ type
     function GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
     function GetBet(const ASeatIndex: Integer): Integer;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
+    function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
 
     property State: TTableState read FState;
@@ -58,9 +62,15 @@ type
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TArray<Integer> read FBets;
     property HighestBet: Integer read GetHighestBet;
+    property FlopCards: String read FFlopCards;
+    property TurnCard: String read FTurnCard;
+    property RiverCard: String read FRiverCard;
   end;
 
 implementation
+
+uses
+  uCommon;
 
 { TSeatInfo }
 
@@ -78,6 +88,8 @@ end;
 
 constructor TTableStatus.Create;
 begin
+  FDealer := -1;
+  FCurrentSeat := -1;
   FSeatInfos := TSeatInfos.Create;
 end;
 
@@ -131,6 +143,20 @@ begin
     Exit(FBets[ASeatIndex]);
 end;
 
+function TTableStatus.GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to FSeatInfos.Count - 1 do
+    if FSeatInfos[C1].SeatIndex = ASeatIndex then
+    begin
+      ASeatInfo := FSeatInfos[C1];
+      Exit(TRUE);
+    end;
+
+  Exit(FALSE);
+end;
+
 function TTableStatus.GetSmallBlindSeat: Integer;
 begin
   result := GetNextSeatIndex(FDealer);
@@ -157,6 +183,9 @@ begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
+  FFlopCards := ATableStatusProtobuf.Flop;
+  FTurnCard := ATableStatusProtobuf.Turn;
+  FRiverCard := ATableStatusProtobuf.River;
 
   FSeatInfos.Clear;
   if Assigned(ATableStatusProtobuf.Seats) then

@@ -316,15 +316,6 @@ type
     ColorMatrixFlagsAltGray
   );
 
-  TGPCombineMode = (
-    CombineModeReplace,
-    CombineModeIntersect,
-    CombineModeUnion,
-    CombineModeXor,
-    CombineModeExclude,
-    CombineModeComplement
-    );
-
 type
   // Represents a dimension in a 2D coordinate system (floating-point coordinates)
   PdxGPSizeF = ^TdxGPSizeF;
@@ -443,7 +434,6 @@ type
 
   GpBrush = Pointer;
   GpTexture = Pointer;
-  GpRegion = Pointer;
   GpSolidFill = Pointer;
   GpLineGradient = Pointer;
   GpPathGradient = Pointer;
@@ -647,17 +637,6 @@ var
   GdipCloneBitmapAreaI: function(x: Integer; y: Integer; width: Integer;
     height: Integer; format: Cardinal; srcBitmap: GPBITMAP; out dstBitmap: GPBITMAP): GPSTATUS; stdcall;
 
-  //clipping
-  GdipCreateRegion: function(out region: GpRegion): GpStatus; stdcall;
-  GdipDeleteRegion: function(region: GpRegion): GpStatus; stdcall;
-  GdipGetClip: function(graphics: GpGraphics; region: GpRegion): GpStatus; stdcall;
-  GdipResetClip: function(graphics: GpGraphics): GpStatus; stdcall;
-  GdipSetClipRegion: function(graphics: GpGraphics; region: GpRegion; combineMode: TGPCombineMode): GpStatus; stdcall;
-  GdipSetClipRectI: function(graphics: GpGraphics; x: Integer; y: Integer;
-    width: Integer; height: Integer; combineMode: TGPCombineMode): GpStatus; stdcall;
-
-
-
   GdipIsVisibleRect: function (Graphics: GpGraphics; X, Y, Width, Height: Single; var Result: LongBool): GpStatus; stdcall;
   GdipIsVisibleRectI: function (Graphics: GpGraphics; X, Y, Width, Height: Integer; var Result: LongBool): GpStatus; stdcall;
 
@@ -696,11 +675,11 @@ procedure GdipCheck(AStatus: GPStatus); overload;
 function dxGpColorToARGB(AColor: TColor; AAlpha: Byte = 255): ARGB;
 function dxGpMakeARGBColor(A, R, G, B: Byte): ARGB;
 
-
 function dxGpCreateBitmap(AWidth, AHeight: Integer): GpBitmap; overload;
 function dxGpCreateBitmap(const ASize: TSize): GpBitmap; overload;
 function dxGpCreateBitmap(const R: TRect): GpBitmap; overload;
 // CLR
+
 function CheckGdiPlus(AHaltOnError: Boolean = False): Boolean;
 
 resourcestring
@@ -893,14 +872,6 @@ begin
     GdipCloneBitmapAreaI := LoadGdiPlusMethod('GdipCloneBitmapAreaI');
 
     GdipGetImageRawFormat :=  LoadGdiPlusMethod('GdipGetImageRawFormat');
-
-    GdipCreateRegion := LoadGdiPlusMethod('GdipCreateRegion');
-    GdipDeleteRegion := LoadGdiPlusMethod('GdipDeleteRegion');
-    GdipGetClip := LoadGdiPlusMethod('GdipGetClip');
-    GdipResetClip := LoadGdiPlusMethod('GdipResetClip');
-    GdipSetClipRegion := LoadGdiPlusMethod('GdipSetClipRegion');
-    GdipSetClipRectI := LoadGdiPlusMethod('GdipSetClipRectI');
-
     //
     if (GdiPlusStartup(FGDIPlusToken, DefaultStartup, @FGdiPlusHook) <> OK) or
       (FGdiPlusHook.NotificationHook(FGDIPlusToken) <> Ok) then
@@ -1083,7 +1054,7 @@ begin
   CheckCodec('image/png', PngCodec);
   CheckCodec('image/jpeg', JpegCodec);
   CheckCodec('image/tiff', TiffCodec);
-//  CheckCodec('image/gif', GifCodec);
+// CheckCodec('image/gif', GifCodec);
 end;
 
 procedure CheckPngCodec;
@@ -1231,4 +1202,3 @@ initialization
 finalization
   dxUnitsLoader.RemoveUnit(@UnregisterAssistants);
 end.
-

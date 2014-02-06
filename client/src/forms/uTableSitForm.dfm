@@ -66,7 +66,7 @@ object frmTableSit: TfrmTableSit
     TabOrder = 2
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
@@ -82,7 +82,7 @@ object frmTableSit: TfrmTableSit
     TabOrder = 3
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False

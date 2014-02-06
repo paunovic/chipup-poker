@@ -22,6 +22,9 @@ WizardSmallImageFile=installer_images\installer-2.bmp
 Source: "client_files\*.*"; DestDir: "{app}"
 Source: "ssl_libs\*.*"; DestDir: "{app}"
 
+Source: "fonts\Sintony-Regular.ttf"; DestDir: "{fonts}"; FontInstall: "Sintony"; Flags: uninsneveruninstall
+Source: "fonts\Sintony-Bold.ttf"; DestDir: "{fonts}"; FontInstall: "Sintony"; Flags: uninsneveruninstall
+
 [Icons]
 Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"
 Name: "{group}\Uninstall"; Filename: "{uninstallexe}"

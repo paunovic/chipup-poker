@@ -33,7 +33,6 @@ object frmPublicClubsList: TfrmPublicClubsList
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object gridClubsTable: TcxGridTableView
-      Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = gridClubsTableCellDblClick
       OnFocusedRecordChanged = gridClubsTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
@@ -86,21 +85,33 @@ object frmPublicClubsList: TfrmPublicClubsList
   end
   object btJoinClub: TcxButton
     Left = 8
-    Top = 380
-    Width = 90
-    Height = 27
+    Top = 378
+    Width = 96
+    Height = 28
     Action = acJoinClub
     Anchors = [akRight, akBottom]
     TabOrder = 1
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
   end
   object btRefreshList: TcxButton
-    Left = 377
-    Top = 380
-    Width = 90
-    Height = 27
+    Left = 372
+    Top = 378
+    Width = 96
+    Height = 29
     Action = acRefresh
     Anchors = [akLeft, akBottom]
     TabOrder = 2
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
   end
   object alPublicClubsList: TActionList
     Left = 96

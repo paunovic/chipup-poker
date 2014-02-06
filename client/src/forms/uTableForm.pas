@@ -4,10 +4,10 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, SynGdiPlus, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton;
 
 type
   TfrmTable = class(TForm)
@@ -15,17 +15,18 @@ type
     paChat: TPanel;
     edChat: TcxTextEdit;
     reChat: TRichEdit;
-    btStandUp: TcxButton;
-    btFold: TcxButton;
     ActionManager: TActionManager;
     acStandUp: TAction;
     acFold: TAction;
-    btCallCheck: TcxButton;
     acCall: TAction;
     acCheck: TAction;
-    btRaise: TcxButton;
     acRaise: TAction;
     PaintBox: TPaintBox32;
+    paButtons: TPanel;
+    btCallCheck: TcxButton;
+    btFold: TcxButton;
+    btRaise: TcxButton;
+    btStandUp: TcxButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -46,12 +47,13 @@ type
 
     FTableWidth     : Integer;
     FTableHeight    : Integer;
+    FTableXOffset   : Integer;
     FTableYOffset   : Integer;
 
-    FImg_TableBitmap: TBitmap32;
-    FImg_Background : TBitmap32;
-
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
+
+    function ConfirmLeaveTable: Boolean;
+    function ConfirmStandUp: Boolean;
 
     procedure DrawSeat(const ASeatIndex: Integer);
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
@@ -76,7 +78,8 @@ implementation
 {$R *.dfm}
 
 uses
-  uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo,
+  System.Types,
+  uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent;
 
@@ -87,17 +90,10 @@ begin
 
   ActionManager.State := asSuspended;
 
-  if not Assigned(Gdip) then
-    Gdip := TGDIPlusFull.Create('gdiplus.dll');
-
   FTable := ATable;
 end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
-var
-  rstream: TResourceStream;
-  jpg    : TJPEGImage;
-  png    : TPortableNetworkGraphic32;
 begin
   FTableStatus := TTableStatus.Create;
 
@@ -106,55 +102,19 @@ begin
   FFormAspectRatio := Width / Height;
   PaintBox.BufferOversize := 0;
 
-  // load table image
-  png := TPortableNetworkGraphic32.Create;
-  try
-    rstream := TResourceStream.Create(HInstance, 'Table', RT_RCDATA);
-    try
-      png.LoadFromStream(rstream);
-      FImg_TableBitmap := TBitmap32.Create;
-      FImg_TableBitmap.DrawMode := dmBlend;
-      FImg_TableBitmap.Assign(png);
-      FImg_TableBitmap.Resampler := TDraftResampler.Create;
+  if not TTableResources.IsInitialized then
+    TTableResources.Initialize;
 
-    // for higher quality use KernelResampler! code below:
-  {
-      FImg_TableBitmap.Resampler := TKernelResampler.Create;
-      (FImg_TableBitmap.Resampler as TKernelResampler).Kernel := TLanczosKernel.Create;
-  }
-    finally
-      rstream.Free;
-    end;
-  finally
-    png.Free;
-  end;
-
-  // load background image
-  FImg_Background := TBitmap32.Create;
-  jpg := TJPEGImage.Create;
-  try
-    rstream := TResourceStream.Create(HInstance, 'TableBackground', RT_RCDATA);
-    try
-      jpg.LoadFromStream(rstream);
-      FImg_Background.Assign(jpg);
-    finally
-      rstream.Free;
-    end;
-  finally
-    jpg.Free;
-  end;
+  FTableWidth := TTableResources.TableImage.Width;
+  FTableHeight := TTableResources.TableImage.Height;
 
   Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, FTable.Game.SmallBlind, FTable.Game.BigBlind, FTable.Game.GameTypeStrFull]);
-
   Redraw;
 end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveMessageHandler(Handle);
-
-  FImg_Background.Free;
-  FImg_TableBitmap.Free;
 
   FTableStatus.Free;
 end;
@@ -173,9 +133,7 @@ end;
 
 procedure TfrmTable.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := TRUE;
-  if FTable.IsSitting then
-    CanClose := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and any chips that are in pot.', mtWarning, mbYesNo, 0) = mrYes;
+  CanClose := ConfirmLeaveTable;
 end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
@@ -263,40 +221,64 @@ var
   avatar     : TAvatar;
   seat_point : TPoint;
   avatar_rect: TRect;
+  seat_info  : TSeatInfo;
 begin
+  paBottom.Height := Round(Height / 5);
+  paChat.Width := Round(Width / 2.5);
+
   PaintBox.Buffer.BeginUpdate;
   try
     // draw background
-    PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, FImg_Background.BoundsRect, FImg_Background);
+    PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
     // calculate table size and draw it
-    FTableWidth := Round(0.75 * PaintBox.Buffer.Width);
-    FTableHeight := Round(FTableWidth / (FImg_TableBitmap.Width / FImg_TableBitmap.Height));
-    FTableYOffset := Round(PaintBox.Buffer.Height / 5);
-    PaintBox.Buffer.Draw(Rect((PaintBox.Buffer.Width - FTableWidth) div 2, FTableYOffset, (PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth, FTableYOffset + FTableHeight),
-                         FImg_TableBitmap.BoundsRect,
-                         FImg_TableBitmap);
+    FTableWidth := Round(0.85 * PaintBox.Buffer.Width);
+    FTableHeight := Round(FTableWidth / (TTableResources.TableImage.Width / TTableResources.TableImage.Height));
+    FTableXOffset := (PaintBox.Buffer.Width - FTableWidth) div 2;
+    FTableYOffset := Round(PaintBox.Buffer.Height / 7);
+    PaintBox.Buffer.Draw(Rect(FTableXOffset, FTableYOffset, FTableXOffset + FTableWidth, FTableYOffset + FTableHeight),
+                         TTableResources.TableImage.BoundsRect,
+                         TTableResources.TableImage);
 
     // draw seats
     for C1 := 0 to FTable.Game.Seats - 1 do
       DrawSeat(C1);
 
     // dealer button
-    seat_point := GetSeatPoint(FTableStatus.Dealer);
-    PaintBox.Buffer.TextOut(seat_point.X + 17, seat_point.Y, 'D');
+    if FTableStatus.Dealer > -1 then
+    begin
+      seat_point := GetSeatPoint(FTableStatus.Dealer);
+      PaintBox.Buffer.Font.Color := clYellow;
+      PaintBox.Buffer.TextOut(seat_point.X + 17, seat_point.Y, 'D');
+    end;
 
     // sb/bb
-    seat_point := GetSeatPoint(FTableStatus.SmallBlindSeat);
-    PaintBox.Buffer.Font.Color := clMoneyGreen;
-    PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'SB');
-    seat_point := GetSeatPoint(FTableStatus.BigBlindSeat);
-    PaintBox.Buffer.Font.Color := clLime;
-    PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'BB');
+    if FTableStatus.SmallBlindSeat > -1 then
+    begin
+      seat_point := GetSeatPoint(FTableStatus.SmallBlindSeat);
+      PaintBox.Buffer.Font.Color := clMoneyGreen;
+      PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'SB');
+      seat_point := GetSeatPoint(FTableStatus.BigBlindSeat);
+      PaintBox.Buffer.Font.Color := clLime;
+      PaintBox.Buffer.TextOut(seat_point.X - 4, seat_point.Y + 17, 'BB');
+    end;
 
-    // on the move
-    seat_point := GetSeatPoint(FTableStatus.CurrentSeat);
+    // draw table cards
     PaintBox.Buffer.Font.Color := clWhite;
-    PaintBox.Buffer.TextOut(seat_point.X - 6, seat_point.Y - 7, IntToStr(FTableStatus.CurrentSeat) + '!');
+    PaintBox.Buffer.Font.Style := [fsBold];
+    PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, FTableStatus.FlopCards + ' ' + FTableStatus.TurnCard + ' ' + FTableStatus.RiverCard);
+    PaintBox.Buffer.Font.Style := [];
+
+    // draw player cards
+    PaintBox.Buffer.Font.Color := clWhite;
+    PaintBox.Buffer.Font.Style := [fsBold];
+    for C1 := 0 to FTableStatus.Seats.Count - 1 do
+      if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
+      begin
+        seat_point := GetSeatPoint(seat_info.SeatIndex);
+        PaintBox.Buffer.TextOut(seat_point.X - 5, seat_point.Y - 40, seat_info.Cards);
+      end;
+    PaintBox.Buffer.Font.Style := [];
 
     // draw avatars
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
@@ -306,7 +288,7 @@ begin
         if dmMain.Avatars.Find(player_info.AvatarId, avatar) then // if avatar is found, draw it
         begin
           seat_point := GetSeatPoint(FTableStatus.Seats[C1].SeatIndex);
-          avatar_rect := TRect.Create(Point(seat_point.X - 25, seat_point.Y - 70), Point(seat_point.X + 25, seat_point.Y - 20));
+          avatar_rect := TRect.Create(GR32.Point(seat_point.X - 25, seat_point.Y - 100), GR32.Point(seat_point.X + 25, seat_point.Y - 50));
           PaintBox.Buffer.Draw(avatar_rect, avatar.ImageBitmap.BoundsRect, avatar.ImageBitmap);
         end
         else // if avatar is not found, add it to avatar list, which will download it automatically
@@ -323,43 +305,27 @@ end;
 
 function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint;
 begin
-  case FTable.Game.Seats of
-    2: begin
-      case ASeatIndex of
-        1: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2, FTableYOffset + FTableHeight div 2);
-        0: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableHeight, FTableYOffset + FImg_TableBitmap.Height div 2);
-      end;
-    end;
-
-    6: begin
-      case ASeatIndex of
-        5: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2, FTableYOffset + FTableHeight div 2 - 40);
-        4: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2, FTableYOffset + FTableHeight div 2 + 40);
-        3: result := TPoint.Create(PaintBox.Buffer.Width div 2 - 120, FTableYOffset + FTableHeight - 10);
-        2: result := TPoint.Create(PaintBox.Buffer.Width div 2 + 120, FTableYOffset + FTableHeight - 10);
-        1: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth, FTableYOffset + FTableHeight div 2 + 40);
-        0: result := TPoint.Create((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth, FTableYOffset + FTableHeight div 2 - 40);
-      end;
-    end;
-  end;
+  result := GR32.Point(FTableXOffset + Round(TTableResources.SeatPoints[FTable.Game.Seats, ASeatIndex].X * (FTableWidth / TTableResources.TableOriginalWidth)),
+                       FTableYOffset + Round(TTableResources.SeatPoints[FTable.Game.Seats, ASeatIndex].Y * (FTableHeight / TTableResources.TableOriginalHeight)));
 end;
 
 procedure TfrmTable.DrawSeat(const ASeatIndex: Integer);
 var
-  C1        : Integer;
   seat_point: TPoint;
+  seat_info : TSeatInfo;
 begin
   seat_point := GetSeatPoint(ASeatIndex);
 
   PaintBox.Buffer.Canvas.Brush.Color := clWhite;
-  for C1 := 0 to FTableStatus.Seats.Count - 1 do
-    if FTableStatus.Seats[C1].SeatIndex = ASeatIndex then
-    begin
+  if FTableStatus.GetSeatInfo(ASeatIndex, seat_info) then
+  begin
+    PaintBox.Buffer.Canvas.Brush.Color := clSkyBlue;
+    if FTableStatus.CurrentSeat = ASeatIndex then
       PaintBox.Buffer.Canvas.Brush.Color := clRed;
-      Break;
-    end;
+  end;
 
   PaintBox.Buffer.Canvas.Ellipse(seat_point.X - 15, seat_point.Y - 15, seat_point.X + 15, seat_point.Y + 15);
+
   PaintBox.Buffer.Font.Color := clBlack;
   PaintBox.Buffer.TextOut(seat_point.X - 3, seat_point.Y - 7, IntToStr(ASeatIndex));
 end;
@@ -381,6 +347,9 @@ end;
 
 procedure TfrmTable.acStandUpExecute(Sender: TObject);
 begin
+  if not ConfirmStandUp then
+    Exit;
+
   SocketClient.TableStandUp(FTable.Game.MongoId);
   acStandUp.Enabled := FALSE;
 end;
@@ -462,6 +431,20 @@ begin
     btCallCheck.Visible := FALSE;  
 end;
 
+function TfrmTable.ConfirmLeaveTable: Boolean;
+begin
+  result := TRUE;
+  if FTable.IsSitting then
+    result := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
+end;
+
+function TfrmTable.ConfirmStandUp: Boolean;
+begin
+  result := TRUE;
+  if FTable.IsSitting then
+    result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
+end;
+
 procedure TfrmTable.CSRETableStatus(const AMessage: TMessageItem);
 var
   pbtablestatus: TPB_TableStatus;
@@ -490,6 +473,7 @@ begin
 
   {$IFDEF DEBUG}
   tmp := '';
+  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State)]), ditApplication);
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);
   tmp := Trim(tmp);

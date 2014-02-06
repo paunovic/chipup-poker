@@ -8,7 +8,7 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, Vcl.Menus, cxButtons, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, uPlayerInfo, dxBevel,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs;
+  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -520,7 +520,6 @@ procedure TfrmClubLobby.acDeleteGameExecute(Sender: TObject);
 begin
   SocketClient.DeleteGame(FSelectedGameId);
 end;
-
 
 procedure TfrmClubLobby.CSRStatus(const AMessage: TMessageItem);
 begin

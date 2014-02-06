@@ -3,8 +3,8 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 413
-  ClientWidth = 552
+  ClientHeight = 531
+  ClientWidth = 702
   Color = clBlack
   Constraints.MaxHeight = 1037
   Constraints.MaxWidth = 1320
@@ -27,9 +27,9 @@ object frmTable: TfrmTable
   TextHeight = 14
   object paBottom: TPanel
     Left = 0
-    Top = 330
-    Width = 552
-    Height = 83
+    Top = 451
+    Width = 702
+    Height = 80
     Align = alBottom
     BevelOuter = bvNone
     DoubleBuffered = True
@@ -38,8 +38,8 @@ object frmTable: TfrmTable
     object paChat: TPanel
       Left = 0
       Top = 0
-      Width = 264
-      Height = 83
+      Width = 250
+      Height = 80
       Align = alLeft
       BevelOuter = bvNone
       Color = clBlack
@@ -54,13 +54,13 @@ object frmTable: TfrmTable
         Style.Edges = []
         TabOrder = 0
         OnKeyPress = edChatKeyPress
-        Width = 263
+        Width = 249
       end
       object reChat: TRichEdit
         Left = 0
         Top = 19
-        Width = 263
-        Height = 64
+        Width = 249
+        Height = 61
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -79,60 +79,93 @@ object frmTable: TfrmTable
         TabOrder = 1
       end
     end
-    object btStandUp: TcxButton
-      Left = 270
-      Top = 40
-      Width = 89
-      Height = 29
-      Action = acStandUp
-      SpeedButtonOptions.CanBeFocused = False
+    object paButtons: TPanel
+      Left = 250
+      Top = 0
+      Width = 452
+      Height = 80
+      Align = alClient
+      BevelOuter = bvNone
+      Color = clBlack
+      Padding.Top = 1
+      Padding.Right = 1
+      ParentBackground = False
       TabOrder = 1
-      Visible = False
-    end
-    object btFold: TcxButton
-      Left = 270
-      Top = 6
-      Width = 89
-      Height = 29
-      Action = acFold
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 2
-      Visible = False
-    end
-    object btCallCheck: TcxButton
-      Left = 364
-      Top = 6
-      Width = 89
-      Height = 29
-      Action = acCall
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 3
-      Visible = False
-    end
-    object btRaise: TcxButton
-      Left = 458
-      Top = 6
-      Width = 89
-      Height = 29
-      Action = acRaise
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 4
-      Visible = False
+      object btCallCheck: TcxButton
+        Left = 13
+        Top = 6
+        Width = 85
+        Height = 27
+        Action = acCall
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 0
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
+      object btFold: TcxButton
+        Left = 195
+        Top = 6
+        Width = 85
+        Height = 27
+        Action = acFold
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 1
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
+      object btRaise: TcxButton
+        Left = 104
+        Top = 6
+        Width = 85
+        Height = 27
+        Action = acRaise
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 2
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
+      object btStandUp: TcxButton
+        Left = 13
+        Top = 38
+        Width = 85
+        Height = 27
+        Action = acStandUp
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 3
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
     end
   end
   object PaintBox: TPaintBox32
     Left = 0
     Top = 0
-    Width = 552
-    Height = 330
+    Width = 702
+    Height = 451
     Align = alClient
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
-    ExplicitLeft = 312
-    ExplicitTop = 100
-    ExplicitWidth = 192
-    ExplicitHeight = 192
   end
   object ActionManager: TActionManager
     Left = 212
