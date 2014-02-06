@@ -168,8 +168,9 @@ enum ServerCodes {
     srOwnershipGiveAwayOk = 27;
 
     srClubDisbandOk = 30;
-    srClubTransferChipsOk = 31;
-
+	
+    srTransferChipsOk = 31;
+	srTransferChipsInvalidAmount = 32;
 
     srChangePasswordOk = 38;
 
