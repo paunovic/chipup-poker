@@ -46,6 +46,7 @@ type
     seGameDelete = 207,
     seTableEvent = 208,
     seTableStatus = 209,
+    seTransferChips = 210,
     scLogin = 501,
     scStatus = 502,
     scRegister = 503,
@@ -147,6 +148,7 @@ begin
     seGameDelete: result := 'seGameDelete';
     seTableEvent: result := 'seTableEvent';
     seTableStatus: result := 'seTableStatus';
+    seTransferChips: result := 'seTransferChips';
     scLogin: result := 'scLogin';
     scStatus: result := 'scStatus';
     scRegister: result := 'scRegister';

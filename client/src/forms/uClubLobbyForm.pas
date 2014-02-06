@@ -94,7 +94,7 @@ type
     procedure CSRClubDetailsChange(const AMessage: TMessageItem);
     procedure CSRKickPlayer(const AMessage: TMessageItem);
     procedure CSRGetUsers(const AMessage: TMessageItem);
-    procedure CSRTransferChipsOk(const AMessage: TMessageItem);
+    procedure CSRETransferChipsOk(const AMessage: TMessageItem);
 
     procedure CSROwnerGiveawayNotOwner(const AMessage: TMessageItem);
     procedure CSROwnerGiveawayInvalidPlayerId(const AMessage: TMessageItem);
@@ -180,7 +180,8 @@ begin
                             TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
                             TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srTransferChipsOk, CSRTransferChipsOk),
+                            TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
+                            TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
                             TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation)
                           ]
                         );
@@ -527,7 +528,7 @@ begin
   ConfigureGUI;
 end;
 
-procedure TfrmClubLobby.CSRTransferChipsOk(const AMessage: TMessageItem);
+procedure TfrmClubLobby.CSRETransferChipsOk(const AMessage: TMessageItem);
 begin
   ConfigureGUI;
 end;
