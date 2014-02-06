@@ -105,7 +105,6 @@ message GiveClubOwnershipParams {
 }
 
 message TransferChipsParams {
-	required int32 club_seq = 1;
 	required bytes player_mongo_id = 2;
 	required int32 chip_amount = 3;
 }
