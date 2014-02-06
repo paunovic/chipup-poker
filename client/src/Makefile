@@ -9,7 +9,7 @@ all: clean client.exe
 clean:
 	del client.exe
 
-client.dres: clientResource.rc resources/GameTable.wmf resources/table/Background.jpg resources/table/Table.png
+client.dres: clientResource.rc resources/cashier/Normal.png resources/cashier/Pressed.png resources/table/Background.jpg resources/table/Table.png
 	cgrc.exe -c65001 $< -fo$@
 
 client.exe: client.dpr client.dres
