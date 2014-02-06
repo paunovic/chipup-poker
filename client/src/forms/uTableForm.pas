@@ -277,7 +277,18 @@ begin
       if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
       begin
         seat_point := GetSeatPoint(seat_info.SeatIndex);
-        PaintBox.Buffer.TextOut(seat_point.X - 5, seat_point.Y - 40, seat_info.Cards);
+        PaintBox.Buffer.TextOut(seat_point.X - 15, seat_point.Y - 45, seat_info.Cards);
+      end;
+    PaintBox.Buffer.Font.Style := [];
+
+    // draw player balances
+    PaintBox.Buffer.Font.Color := clLime;
+    PaintBox.Buffer.Font.Style := [fsBold];
+    for C1 := 0 to FTableStatus.Seats.Count - 1 do
+      if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
+      begin
+        seat_point := GetSeatPoint(seat_info.SeatIndex);
+        PaintBox.Buffer.TextOut(seat_point.X - 15, seat_point.Y - 30, IntToStr(seat_info.Chips));
       end;
     PaintBox.Buffer.Font.Style := [];
 
