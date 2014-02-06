@@ -48,7 +48,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
+    function GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
     function GetBet(const ASeatIndex: Integer): Integer;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
@@ -100,24 +100,43 @@ begin
   inherited;
 end;
 
-function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
+function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
 var
-  C1: Integer;
+  C1   : Integer;
+  seat : TSeatInfo;
+  index: Integer;
 begin
   if not Assigned(FSeatInfos) then
     Exit(-1);
 
-  result := -1;
+  index := -1;
   for C1 := 0 to FSeatInfos.Count - 1 do
     if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
     begin
       if C1 = FSeatInfos.Count - 1 then
-        result := FSeatInfos[0].SeatIndex
+        index := FSeatInfos[0].SeatIndex
       else
-        result := FSeatInfos[C1 + 1].SeatIndex;
-
+        index := FSeatInfos[C1 + 1].SeatIndex;
       Break;
     end;
+
+  if (index = -1) or
+     (not AOnlyInHand) then
+    Exit(index);
+
+  if GetSeatInfo(index, seat) then
+  begin
+    while seat.Status <> psInHand do
+    begin
+      index := GetNextSeatIndex(index, AOnlyInHand);
+      if (not GetSeatInfo(index, seat)) or
+         (index = ACurrentSeatIndex) then
+        Exit(-1);
+    end;
+    Exit(seat.SeatIndex);
+  end
+  else
+    Exit(-1);
 end;
 
 function TTableStatus.GetHighestBet: Integer;
@@ -170,7 +189,6 @@ procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
 var
   C1   : Integer;
   seat : TSeatInfo;
-  index: Integer;
 begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
@@ -191,49 +209,15 @@ begin
     FSeatInfos.Sort;
   end;
 
-  if FState = tsIdle then
-  begin
-    FSmallBlindSeat := -1;
-    FBigBlindSeat := -1;
-  end;
-
-  if FState = TTableState.tsPreFlop then
-  begin
-    index := GetNextSeatIndex(FDealer);
-    if GetSeatInfo(index, seat) then
-    begin
-      while seat.Status <> TPlayerStatus.psInHand do
-      begin
-        index := GetNextSeatIndex(index);
-        if not GetSeatInfo(index, seat) then
-        begin
-          index := -1;
-          Break;
-        end;
-        Assert(index <> FDealer);
-      end;
-      FSmallBlindSeat := index;
-    end
-    else
+  case FState of
+    tsIdle: begin
       FSmallBlindSeat := -1;
-
-    index := GetNextSeatIndex(FSmallBlindSeat);
-    if GetSeatInfo(index, seat) then
-    begin
-      while seat.Status <> TPlayerStatus.psInHand do
-      begin
-        index := GetNextSeatIndex(index);
-        if not GetSeatInfo(index, seat) then
-        begin
-          index := -1;
-          Break;
-        end;
-        Assert(index <> FSmallBlindSeat);
-      end;
-      FBigBlindSeat := index;
-    end
-    else
-      FSmallBlindSeat := -1;
+      FBigBlindSeat := -1;
+    end;
+    tsPreFlop: begin
+      FSmallBlindSeat := GetNextSeatIndex(FDealer, TRUE);
+      FBigBlindSeat := GetNextSeatIndex(FSmallBlindSeat, TRUE);
+    end;
   end;
 
   FBets := ATableStatusProtobuf.Bets;
