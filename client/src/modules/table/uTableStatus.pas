@@ -200,24 +200,40 @@ begin
   if FState = TTableState.tsPreFlop then
   begin
     index := GetNextSeatIndex(FDealer);
-    Assert(GetSeatInfo(index, seat));
-    while seat.Status <> TPlayerStatus.psInHand do
+    if GetSeatInfo(index, seat) then
     begin
-      index := GetNextSeatIndex(index);
-      Assert(GetSeatInfo(index, seat));
-      Assert(index <> FDealer);
-    end;
-    FSmallBlindSeat := index;
+      while seat.Status <> TPlayerStatus.psInHand do
+      begin
+        index := GetNextSeatIndex(index);
+        if not GetSeatInfo(index, seat) then
+        begin
+          index := -1;
+          Break;
+        end;
+        Assert(index <> FDealer);
+      end;
+      FSmallBlindSeat := index;
+    end
+    else
+      FSmallBlindSeat := -1;
 
     index := GetNextSeatIndex(FSmallBlindSeat);
-    Assert(GetSeatInfo(index, seat));
-    while seat.Status <> TPlayerStatus.psInHand do
+    if GetSeatInfo(index, seat) then
     begin
-      index := GetNextSeatIndex(index);
-      Assert(GetSeatInfo(index, seat));
-      Assert(index <> FSmallBlindSeat);
-    end;
-    FBigBlindSeat := index;
+      while seat.Status <> TPlayerStatus.psInHand do
+      begin
+        index := GetNextSeatIndex(index);
+        if not GetSeatInfo(index, seat) then
+        begin
+          index := -1;
+          Break;
+        end;
+        Assert(index <> FSmallBlindSeat);
+      end;
+      FBigBlindSeat := index;
+    end
+    else
+      FSmallBlindSeat := -1;
   end;
 
   FBets := ATableStatusProtobuf.Bets;
