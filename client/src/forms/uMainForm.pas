@@ -105,6 +105,7 @@ type
     procedure CSRClubCommand(const AMessage: TMessageItem);
     procedure CSRStatus(const AMessage: TMessageItem);
     procedure CSRGetUsers(const AMessage: TMessageItem);
+    procedure CSRTransferChipsOk(const AMessage: TMessageItem);
 
     procedure CSRLogout(const AMessage: TMessageItem);
     procedure CSESecondaryLoginDetected(const AMessage: TMessageItem);
@@ -144,7 +145,7 @@ uses
   uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply, uPB_User,
   uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
+  uPB_TransferChipsParams, uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -200,7 +201,7 @@ begin
                             TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
                             TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srClubTransferChipsOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srTransferChipsOk, CSRTransferChipsOk),
                             TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
                             TServerMessageCallback.Create(seGameChange, CSREGameOperation),
                             TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
@@ -665,6 +666,18 @@ begin
 
   for user in pbreply.Users do
     dmMain.Players.AddPlayer(user);
+end;
+
+procedure TfrmChipUpMain.CSRTransferChipsOk(const AMessage: TMessageItem);
+var
+  pbreply    : TPB_TransferChipsParams;
+  player_info: TPlayerInfo;
+begin
+  pbreply := AMessage.Object_ as TPB_TransferChipsParams;
+
+  dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
+  if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+    player_info.Balance := player_info.Balance + pbreply.ChipAmount;
 end;
 
 procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);

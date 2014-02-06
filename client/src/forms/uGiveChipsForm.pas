@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxTextEdit, cxLabel, cxMaskEdit, cxSpinEdit, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList, uClubInfo,
-  uPlayerInfo, uIFormParams, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs;
+  uPlayerInfo, uIFormParams, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmGiveChips = class(TForm, IFormParams)
@@ -31,7 +31,7 @@ type
     FClub  : TClubInfo;
     FPlayer: TPlayerInfo;
 
-    procedure CSRClubTransferChipsOk(const AMessage: TMessageItem);
+    procedure CSRTransferChipsOk(const AMessage: TMessageItem);
 
   protected
     procedure WndProc(var AMessage: TMessage); override;
@@ -70,7 +70,7 @@ begin
     case msg.MessageType of
       mtServerResponse: ProcessServerMessage(msg,
                           [
-                            TServerMessageCallback.Create(srClubTransferChipsOk, CSRClubTransferChipsOk)
+                            TServerMessageCallback.Create(srTransferChipsOk, CSRTransferChipsOk)
                           ]
                         );
     end;
@@ -120,10 +120,10 @@ begin
     Exit;
   end;
 
-  SocketClient.TransferChips(FClub.Id, FPlayer.Id, seChipAmount.Value);
+  SocketClient.TransferChips(FPlayer.Id, seChipAmount.Value);
 end;
 
-procedure TfrmGiveChips.CSRClubTransferChipsOk(const AMessage: TMessageItem);
+procedure TfrmGiveChips.CSRTransferChipsOk(const AMessage: TMessageItem);
 begin
   MessageDlg('Chips successfully transferred', mtInformation, [mbOK], 0);
   ModalResult := mrOk;

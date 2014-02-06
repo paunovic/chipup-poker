@@ -61,7 +61,7 @@ type
     procedure GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
     procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean); overload;
     procedure DisbandClub(const AClubId: Int64);
-    procedure TransferChips(const AClubId: Int64; const APlayerId: TBytes; const AChipAmount: Integer);
+    procedure TransferChips(const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
@@ -377,7 +377,9 @@ begin
     srChangePasswordOk: ;
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ;
+    srTransferChipsInvalidAmount: ;
 
+    srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);
     srGetPlayers: ADataObject := TPB_GetUserParams.Create(ADataPointer, ARpcMessage.DataSize);
     srChangeMailReply: ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
     srSetAvatarReply: ADataObject := TPB_SetAvatarReply.Create(ADataPointer, ARpcMessage.DataSize);
@@ -407,7 +409,6 @@ begin
     end;
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDisbandOk,
-    srClubTransferChipsOk,
     srOwnershipGiveAwayOk,
     srSuspendPlayerOk,
     srReinstatePlayerOk,
@@ -634,13 +635,12 @@ begin
   end;
 end;
 
-procedure TSocketClient.TransferChips(const AClubId: Int64; const APlayerId: TBytes; const AChipAmount: Integer);
+procedure TSocketClient.TransferChips(const APlayerId: TBytes; const AChipAmount: Integer);
 var
   protobuf: TPB_TransferChipsParams;
 begin
   protobuf := TPB_TransferChipsParams.Create;
   try
-    protobuf.ClubSeq := AClubId;
     protobuf.PlayerMongoId := APlayerId;
     protobuf.ChipAmount := AChipAmount;
     SendProtobuf(scTransferChips, protobuf);
