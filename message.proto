@@ -257,6 +257,7 @@ message TableStatus {
 	optional string flop = 7;
 	optional string turn = 8;
 	optional string river = 9;
+	required int32 pot = 10;
 }
 
 message SeatInfo {
