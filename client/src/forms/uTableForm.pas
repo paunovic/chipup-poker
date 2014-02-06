@@ -27,6 +27,7 @@ type
     btFold: TcxButton;
     btRaise: TcxButton;
     btStandUp: TcxButton;
+    lbsInfo: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -470,6 +471,8 @@ begin
       FTable.SeatIndex := pbtablestatus.Seats[C1].Seat;
       Break;
     end;
+
+  lbsInfo.Caption := Format('Pot: %d', [pbtablestatus.Pot]);
 
   {$IFDEF DEBUG}
   tmp := '';

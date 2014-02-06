@@ -379,6 +379,7 @@ begin
     seAccountConfirmed: ;
     srTransferChipsInvalidAmount: ;
 
+    seTransferChips,
     srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);
     srGetPlayers: ADataObject := TPB_GetUserParams.Create(ADataPointer, ARpcMessage.DataSize);
     srChangeMailReply: ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
