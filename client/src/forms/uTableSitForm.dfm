@@ -52,7 +52,7 @@ object frmTableSit: TfrmTableSit
     Properties.SpinButtons.Visible = False
     Properties.ValueType = vtInt
     TabOrder = 1
-    Value = 1
+    Value = 1500
     Width = 125
   end
   object btOK: TcxButton

@@ -24,7 +24,8 @@ type
     srOwnershipGiveAwayInvalidClubId = 26,
     srOwnershipGiveAwayOk = 27,
     srClubDisbandOk = 30,
-    srClubTransferChipsOk = 31,
+    srTransferChipsOk = 31,
+    srTransferChipsInvalidAmount = 32,
     srChangePasswordOk = 38,
     srCreateGameOk = 42,
     srDeleteGameOk = 43,
@@ -124,7 +125,8 @@ begin
     srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
     srOwnershipGiveAwayOk: result := 'srOwnershipGiveAwayOk';
     srClubDisbandOk: result := 'srClubDisbandOk';
-    srClubTransferChipsOk: result := 'srClubTransferChipsOk';
+    srTransferChipsOk: result := 'srTransferChipsOk';
+    srTransferChipsInvalidAmount: result := 'srTransferChipsInvalidAmount';
     srChangePasswordOk: result := 'srChangePasswordOk';
     srCreateGameOk: result := 'srCreateGameOk';
     srDeleteGameOk: result := 'srDeleteGameOk';
