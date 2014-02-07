@@ -3,7 +3,7 @@ object frmCreateClub: TfrmCreateClub
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Create Club'
-  ClientHeight = 145
+  ClientHeight = 141
   ClientWidth = 386
   Color = clBlack
   Ctl3D = False
@@ -21,7 +21,7 @@ object frmCreateClub: TfrmCreateClub
   OnShow = FormShow
   DesignSize = (
     386
-    145)
+    141)
   PixelsPerInch = 96
   TextHeight = 14
   object edClubName: TcxTextEdit
@@ -47,14 +47,14 @@ object frmCreateClub: TfrmCreateClub
   end
   object edClubCode: TcxTextEdit
     Left = 100
-    Top = 43
+    Top = 41
     Properties.MaxLength = 32
     TabOrder = 1
     Width = 269
   end
   object lbsInvCode: TcxLabel
     Left = 18
-    Top = 44
+    Top = 42
     Caption = 'Invitation code:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -68,7 +68,7 @@ object frmCreateClub: TfrmCreateClub
   end
   object lbsClubType: TcxLabel
     Left = 18
-    Top = 73
+    Top = 69
     Caption = 'Type:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -82,7 +82,7 @@ object frmCreateClub: TfrmCreateClub
   end
   object rbPrivate: TcxRadioButton
     Left = 100
-    Top = 75
+    Top = 71
     Width = 61
     Height = 17
     Caption = 'Private'
@@ -93,7 +93,7 @@ object frmCreateClub: TfrmCreateClub
   end
   object rbPublic: TcxRadioButton
     Left = 167
-    Top = 75
+    Top = 71
     Width = 61
     Height = 17
     Caption = 'Public'
@@ -103,7 +103,7 @@ object frmCreateClub: TfrmCreateClub
   end
   object btOK: TcxButton
     Left = 177
-    Top = 105
+    Top = 101
     Width = 93
     Height = 27
     Action = acOK
@@ -116,10 +116,11 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 105
   end
   object btCancel: TcxButton
     Left = 276
-    Top = 105
+    Top = 101
     Width = 93
     Height = 27
     Action = acCancel
@@ -132,6 +133,7 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 105
   end
   object alCreateClub: TActionList
     Left = 24

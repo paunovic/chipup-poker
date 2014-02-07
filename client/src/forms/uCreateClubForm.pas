@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
   cxLookAndFeelPainters, cxContainer, cxEdit, cxLabel, cxTextEdit, Vcl.StdCtrls, cxRadioGroup, Vcl.Menus, cxButtons, Vcl.ActnList,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs;
+  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmCreateClub = class(TForm)
