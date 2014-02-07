@@ -103,40 +103,43 @@ end;
 function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
 var
   C1   : Integer;
-  seat : TSeatInfo;
   index: Integer;
+  sind : Integer;
 begin
   if not Assigned(FSeatInfos) then
     Exit(-1);
 
+  sind := -1;
   index := -1;
   for C1 := 0 to FSeatInfos.Count - 1 do
     if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
     begin
+      sind := C1;
       if C1 = FSeatInfos.Count - 1 then
-        index := FSeatInfos[0].SeatIndex
+        index := 0
       else
-        index := FSeatInfos[C1 + 1].SeatIndex;
+        index := sind + 1;
       Break;
     end;
 
-  if (index = -1) or
-     (not AOnlyInHand) then
-    Exit(index);
-
-  if GetSeatInfo(index, seat) then
-  begin
-    while seat.Status <> psInHand do
-    begin
-      index := GetNextSeatIndex(index, AOnlyInHand);
-      if (not GetSeatInfo(index, seat)) or
-         (index = ACurrentSeatIndex) then
-        Exit(-1);
-    end;
-    Exit(seat.SeatIndex);
-  end
-  else
+  if index = -1 then
     Exit(-1);
+
+  if not AOnlyInHand then
+    Exit(FSeatInfos[index].SeatIndex);
+
+  while index <> sind do
+  begin
+    if FSeatInfos[index].Status = psInHand then
+      Exit(FSeatInfos[index].SeatIndex);
+
+    if index = FSeatInfos.Count - 1 then
+      index := 0
+    else
+      Inc(index)
+  end;
+
+  Exit(-1);
 end;
 
 function TTableStatus.GetHighestBet: Integer;
