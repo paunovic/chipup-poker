@@ -257,7 +257,7 @@ message TableStatus {
 	optional string flop = 7;
 	optional string turn = 8;
 	optional string river = 9;
-	required int32 pot = 10;
+	repeated int32 pots = 10;
 }
 
 message SeatInfo {
@@ -324,6 +324,9 @@ message TableEvent {
 		teStandUp = 3;
 		teWinning = 4;
 		teDealing = 5;
+		teCheck = 6;
+		teCall = 7;
+		teRaise = 8;
 	}
 	message WinnerData {
 		enum CardRankings {
