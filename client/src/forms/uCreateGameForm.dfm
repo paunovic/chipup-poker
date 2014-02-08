@@ -3,7 +3,7 @@ object frmCreateGame: TfrmCreateGame
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Create a Table'
-  ClientHeight = 200
+  ClientHeight = 194
   ClientWidth = 376
   Color = clBlack
   Ctl3D = False
@@ -19,7 +19,7 @@ object frmCreateGame: TfrmCreateGame
   OnShow = FormShow
   DesignSize = (
     376
-    200)
+    194)
   PixelsPerInch = 96
   TextHeight = 14
   object edGameName: TcxTextEdit
@@ -59,7 +59,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object btOK: TcxButton
     Left = 169
-    Top = 161
+    Top = 155
     Width = 93
     Height = 27
     Action = acOK
@@ -72,10 +72,11 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 161
   end
   object btCancel: TcxButton
     Left = 268
-    Top = 161
+    Top = 155
     Width = 93
     Height = 27
     Action = acCancel
@@ -88,6 +89,7 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 161
   end
   object cbGameType: TcxComboBox
     Left = 88
@@ -103,7 +105,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object lbsBlinds: TcxLabel
     Left = 18
-    Top = 100
+    Top = 99
     Caption = 'Blinds:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -117,7 +119,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object lbsSeats: TcxLabel
     Left = 18
-    Top = 128
+    Top = 126
     Caption = 'Seats:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -131,7 +133,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object cbSeats: TcxComboBox
     Left = 88
-    Top = 127
+    Top = 125
     Properties.DropDownListStyle = lsFixedList
     Properties.DropDownRows = 10
     Properties.Items.Strings = (
@@ -177,7 +179,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object cbBlinds: TcxComboBox
     Left = 88
-    Top = 99
+    Top = 98
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
       '1/2'

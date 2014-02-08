@@ -70,6 +70,70 @@
 </ControlParts>
 <ControlParts Name="Form">
 <Properties/>
+<Part Name="FormButtonClose">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonClose_Image.png"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonClose_Glyph.png"/>
+</Glyph>
+</Part>
+<Part Name="FormButtonMaximize">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonMaximize_Image.png"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonMaximize_Glyph.png"/>
+</Glyph>
+</Part>
+<Part Name="FormButtonMinimize">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonMinimize_Image.png"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonMinimize_Glyph.png"/>
+</Glyph>
+</Part>
+<Part Name="FormButtonRestore">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonRestore_Image.png"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<File Name="FormButtonRestore_Glyph.png"/>
+</Glyph>
+</Part>
 <Part Name="FormContent" Color="0" TextColor="11842740">
 <Properties/>
 <MinSize Width="0" Height="0"/>

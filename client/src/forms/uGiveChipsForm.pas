@@ -83,6 +83,8 @@ procedure TfrmGiveChips.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShif
 begin
   case Key of
     VK_ESCAPE: acCancel.Execute;
+    VK_RETURN: if seChipAmount.Focused then
+                 acOK.Execute;
   end;
 end;
 

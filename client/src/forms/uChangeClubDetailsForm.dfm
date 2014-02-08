@@ -25,7 +25,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   TextHeight = 14
   object lbsClubType: TcxLabel
     Left = 12
-    Top = 66
+    Top = 65
     Caption = 'Club type:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -39,7 +39,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   end
   object rbPrivate: TcxRadioButton
     Left = 94
-    Top = 67
+    Top = 66
     Width = 61
     Height = 17
     Caption = 'Private'
@@ -50,7 +50,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   end
   object rbPublic: TcxRadioButton
     Left = 161
-    Top = 68
+    Top = 67
     Width = 61
     Height = 17
     Caption = 'Public'
@@ -84,7 +84,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   end
   object lbsInvitationCode: TcxLabel
     Left = 12
-    Top = 39
+    Top = 38
     Caption = 'Invitation code:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -98,7 +98,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   end
   object edInvitationCode: TcxTextEdit
     Left = 94
-    Top = 38
+    Top = 37
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 32

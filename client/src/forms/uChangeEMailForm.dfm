@@ -76,7 +76,7 @@ object frmChangeEMail: TfrmChangeEMail
   end
   object lbsNewMail: TcxLabel
     Left = 7
-    Top = 106
+    Top = 105
     Caption = 'New e-mail address:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -90,7 +90,7 @@ object frmChangeEMail: TfrmChangeEMail
   end
   object edNewMail: TcxTextEdit
     Left = 127
-    Top = 105
+    Top = 104
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 32

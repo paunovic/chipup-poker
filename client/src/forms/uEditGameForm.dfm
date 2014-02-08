@@ -3,7 +3,7 @@ object frmEditGame: TfrmEditGame
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Edit Table'
-  ClientHeight = 196
+  ClientHeight = 193
   ClientWidth = 376
   Color = clBlack
   Ctl3D = False
@@ -19,7 +19,7 @@ object frmEditGame: TfrmEditGame
   OnShow = FormShow
   DesignSize = (
     376
-    196)
+    193)
   PixelsPerInch = 96
   TextHeight = 14
   object edGameName: TcxTextEdit
@@ -45,7 +45,7 @@ object frmEditGame: TfrmEditGame
   end
   object btOK: TcxButton
     Left = 169
-    Top = 157
+    Top = 155
     Width = 93
     Height = 27
     Action = acOK
@@ -61,7 +61,7 @@ object frmEditGame: TfrmEditGame
   end
   object btCancel: TcxButton
     Left = 268
-    Top = 157
+    Top = 154
     Width = 93
     Height = 27
     Action = acCancel
@@ -74,10 +74,11 @@ object frmEditGame: TfrmEditGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 157
   end
   object lbsSeats: TcxLabel
     Left = 18
-    Top = 128
+    Top = 127
     Caption = 'Seats:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -91,7 +92,7 @@ object frmEditGame: TfrmEditGame
   end
   object cbSeats: TcxComboBox
     Left = 88
-    Top = 127
+    Top = 126
     Properties.DropDownListStyle = lsFixedList
     Properties.DropDownRows = 10
     Properties.Items.Strings = (
@@ -137,7 +138,7 @@ object frmEditGame: TfrmEditGame
   end
   object lbsBlinds: TcxLabel
     Left = 18
-    Top = 100
+    Top = 99
     Caption = 'Blinds:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -163,7 +164,7 @@ object frmEditGame: TfrmEditGame
   end
   object lbsLimit: TcxLabel
     Left = 18
-    Top = 71
+    Top = 70
     Caption = 'Limit:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -177,7 +178,7 @@ object frmEditGame: TfrmEditGame
   end
   object cbBlinds: TcxComboBox
     Left = 88
-    Top = 99
+    Top = 98
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
       '1/2'

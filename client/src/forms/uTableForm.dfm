@@ -155,6 +155,11 @@ object frmTable: TfrmTable
         Font.Style = []
         ParentFont = False
       end
+      object lbsInfo: TcxLabel
+        Left = 236
+        Top = 52
+        Caption = 'lbsInfo'
+      end
     end
   end
   object PaintBox: TPaintBox32

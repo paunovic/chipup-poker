@@ -31,24 +31,24 @@ type
 
   TTableStatus = class
   private
-    FState      : TTableState;
-    FDealer     : Integer;
-    FCurrentSeat: Integer;
-    FSeatInfos  : TSeatInfos;
-    FBets       : TArray<Integer>;
-    FFlopCards  : String;
-    FTurnCard   : String;
-    FRiverCard  : String;
+    FState         : TTableState;
+    FDealer        : Integer;
+    FCurrentSeat   : Integer;
+    FSeatInfos     : TSeatInfos;
+    FBets          : TArray<Integer>;
+    FFlopCards     : String;
+    FTurnCard      : String;
+    FRiverCard     : String;
+    FSmallBlindSeat: Integer;
+    FBigBlindSeat  : Integer;
 
-    function GetBigBlindSeat: Integer;
-    function GetSmallBlindSeat: Integer;
     function GetHighestBet: Integer;
 
   public
     constructor Create;
     destructor Destroy; override;
 
-    function GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
+    function GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
     function GetBet(const ASeatIndex: Integer): Integer;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
@@ -56,8 +56,6 @@ type
 
     property State: TTableState read FState;
     property Dealer: Integer read FDealer;
-    property SmallBlindSeat: Integer read GetSmallBlindSeat;
-    property BigBlindSeat: Integer read GetBigBlindSeat;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TArray<Integer> read FBets;
@@ -65,6 +63,8 @@ type
     property FlopCards: String read FFlopCards;
     property TurnCard: String read FTurnCard;
     property RiverCard: String read FRiverCard;
+    property SmallBlindSeat: Integer read FSmallBlindSeat;
+    property BigBlindSeat: Integer read FBigBlindSeat;
   end;
 
 implementation
@@ -100,28 +100,46 @@ begin
   inherited;
 end;
 
-function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer): Integer;
+function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
 var
-  C1: Integer;
+  C1   : Integer;
+  index: Integer;
+  sind : Integer;
 begin
   if not Assigned(FSeatInfos) then
     Exit(-1);
 
-  result := -1;
+  sind := -1;
+  index := -1;
   for C1 := 0 to FSeatInfos.Count - 1 do
     if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
     begin
+      sind := C1;
       if C1 = FSeatInfos.Count - 1 then
-        result := FSeatInfos[0].SeatIndex
+        index := 0
       else
-        result := FSeatInfos[C1 + 1].SeatIndex;
+        index := sind + 1;
       Break;
     end;
-end;
 
-function TTableStatus.GetBigBlindSeat: Integer;
-begin
-  result := GetNextSeatIndex(GetSmallBlindSeat);
+  if index = -1 then
+    Exit(-1);
+
+  if not AOnlyInHand then
+    Exit(FSeatInfos[index].SeatIndex);
+
+  while index <> sind do
+  begin
+    if FSeatInfos[index].Status = psInHand then
+      Exit(FSeatInfos[index].SeatIndex);
+
+    if index = FSeatInfos.Count - 1 then
+      index := 0
+    else
+      Inc(index)
+  end;
+
+  Exit(-1);
 end;
 
 function TTableStatus.GetHighestBet: Integer;
@@ -157,11 +175,6 @@ begin
   Exit(FALSE);
 end;
 
-function TTableStatus.GetSmallBlindSeat: Integer;
-begin
-  result := GetNextSeatIndex(FDealer);
-end;
-
 function TTableStatus.IsSeatTaken(const ASeatIndex: Integer): Boolean;
 var
   C1: Integer;
@@ -177,8 +190,8 @@ end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
 var
-  C1  : Integer;
-  seat: TSeatInfo;
+  C1   : Integer;
+  seat : TSeatInfo;
 begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
@@ -197,6 +210,17 @@ begin
       FSeatInfos.Add(seat);
     end;
     FSeatInfos.Sort;
+  end;
+
+  case FState of
+    tsIdle: begin
+      FSmallBlindSeat := -1;
+      FBigBlindSeat := -1;
+    end;
+    tsPreFlop: begin
+      FSmallBlindSeat := GetNextSeatIndex(FDealer, TRUE);
+      FBigBlindSeat := GetNextSeatIndex(FSmallBlindSeat, TRUE);
+    end;
   end;
 
   FBets := ATableStatusProtobuf.Bets;

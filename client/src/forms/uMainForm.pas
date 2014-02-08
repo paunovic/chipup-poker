@@ -342,7 +342,7 @@ end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
 begin
-  Caption := Format('ChipUP Poker - Logged in as %s', [dmMain.SelfInfo.Nick]);
+  Caption := Format(' ChipUP Poker - Logged in as %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
     Caption := Caption + ' (account confirmation pending)';
 
@@ -673,23 +673,22 @@ procedure TfrmChipUpMain.CSRETransferChipsOk(const AMessage: TMessageItem);
 var
   pbreply    : TPB_TransferChipsParams;
   player_info: TPlayerInfo;
+  multiplier : Integer;
 begin
   pbreply := AMessage.Object_ as TPB_TransferChipsParams;
 
   if AMessage.MethodId = Integer(seTransferChips) then
-  begin
-    dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount;
-
-    if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
-      player_info.Balance := player_info.Balance - pbreply.ChipAmount;
-  end
+    multiplier := 1
   else
-  begin
-    dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
+    multiplier := -1;
 
-    if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
-      player_info.Balance := player_info.Balance + pbreply.ChipAmount;
-  end;
+  dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount * multiplier;
+
+  if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+    player_info.Balance := player_info.Balance + pbreply.ChipAmount * multiplier;
+
+  if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+    player_info.Balance := player_info.Balance - pbreply.ChipAmount * multiplier;
 end;
 
 procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);

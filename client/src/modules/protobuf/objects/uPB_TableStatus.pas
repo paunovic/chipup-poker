@@ -22,6 +22,7 @@ type
       FN_FLOP = 7;
       FN_TURN = 8;
       FN_RIVER = 9;
+      FN_POT = 10;
 
     var
       FTableMongoId: TBytes;
@@ -33,6 +34,7 @@ type
       FFlop: String;
       FTurn: String;
       FRiver: String;
+      FPot: Integer;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -42,6 +44,7 @@ type
     procedure SetFlop(const AValue: String);
     procedure SetTurn(const AValue: String);
     procedure SetRiver(const AValue: String);
+    procedure SetPot(const AValue: Integer);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -55,6 +58,7 @@ type
     property Flop: String read FFlop write SetFlop;
     property Turn: String read FTurn write SetTurn;
     property River: String read FRiver write SetRiver;
+    property Pot: Integer read FPot write SetPot;
   end;
 
 implementation
@@ -117,6 +121,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FRiver := String(AProtobufReader.readUtf8String);
       end;
+      FN_POT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FPot := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -171,6 +179,12 @@ procedure TPB_TableStatus.SetRiver(const AValue: String);
 begin
   FRiver := AValue;
   ProtobufOutput.writeString(FN_RIVER, AValue);
+end;
+
+procedure TPB_TableStatus.SetPot(const AValue: Integer);
+begin
+  FPot := AValue;
+  ProtobufOutput.writeInt32(FN_POT, AValue);
 end;
 
 end.

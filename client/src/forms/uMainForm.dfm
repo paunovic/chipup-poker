@@ -7,6 +7,7 @@ object frmChipUpMain: TfrmChipUpMain
   Constraints.MinHeight = 600
   Constraints.MinWidth = 800
   Ctl3D = False
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
