@@ -52,6 +52,7 @@ type
     FTableYOffset   : Integer;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
+    procedure AddUserChatMessage(const AUser, AMessage: String);
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -366,6 +367,22 @@ begin
   acStandUp.Enabled := FALSE;
 end;
 
+procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
+begin
+  reChat.SelStart := reChat.GetTextLen;
+  reChat.SelAttributes.Color := clLime;
+  if reChat.SelStart = 0 then
+    reChat.SelText := AUser
+  else
+    reChat.SelText := sLineBreak + AUser;
+
+  reChat.SelStart := reChat.GetTextLen;
+  reChat.SelAttributes.Color := clSilver;
+  reChat.SelText := Format(': %s', [AMessage]);
+
+  SendMessage(reChat.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+end;
+
 procedure TfrmTable.CSRChatEvent(const AMessage: TMessageItem);
 var
   chat_event  : TPB_ChatEvent;
@@ -377,20 +394,7 @@ begin
     ceUserMessage: begin
       chat_message := chat_event.Msg;
       if CompareBytes(chat_event.TableId, FTable.Game.MongoId) then
-      begin
-        reChat.SelStart := reChat.GetTextLen;
-        reChat.SelAttributes.Color := clLime;
-        if reChat.SelStart = 0 then
-          reChat.SelText := chat_message.Username
-        else
-          reChat.SelText := sLineBreak + chat_message.Username;
-
-        reChat.SelStart := reChat.GetTextLen;
-        reChat.SelAttributes.Color := clSilver;
-        reChat.SelText := Format(': %s', [chat_message.Msg]);
-
-        SendMessage(reChat.Handle, WM_VSCROLL, SB_BOTTOM, 0);
-      end;
+        AddUserChatMessage(chat_message.Username, chat_message.Msg);
     end;
     ceServerMessage: ;
   end;
@@ -537,7 +541,7 @@ begin
       DebugLn(Format('Player %d: %s', [pbtevent.Seats[C1], event]), ditApplication);
   end
   else
-    DebugLn(Format('TABLE EVENT: %s', [event]), ditApplication);
+    AddUserChatMessage('TBLEVENT', event);
   {$ENDIF}
 end;
 
@@ -558,7 +562,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, FTable.Game.BigBlind);
+  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet + FTable.Game.BigBlind);
 end;
 
 end.

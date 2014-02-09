@@ -6,21 +6,23 @@ unit uPB_TableEvent;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader, uPB_WinnerData;
 
 type
-  TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3,teWinning = 4,teDealing = 5);
+  TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3,teWinning = 4,teDealing = 5,teCheck = 6,teCall = 7,teRaise = 8);
   TPB_TableEvent = class(TProtobufBaseObject)
   private
     const
       FN_EVENT = 1;
       FN_SEATS = 2;
       FN_TABLE_MONGO_ID = 3;
+      FN_SEATSDATA = 4;
 
     var
       FEvent: TTableEventType;
       FSeats: TArray<Integer>;
       FTableMongoId: TBytes;
+      FSeatsData: TObjectList<TPB_WinnerData>;
 
     procedure SetEvent(const AValue: TTableEventType);
     procedure SetSeats(const AValue: TArray<Integer>);
@@ -32,6 +34,7 @@ type
     property Event: TTableEventType read FEvent write SetEvent;
     property Seats: TArray<Integer> read FSeats write SetSeats;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
+    property SeatsData: TObjectList<TPB_WinnerData> read FSeatsData write FSeatsData;
   end;
 
 implementation
@@ -42,12 +45,17 @@ uses
 
 destructor TPB_TableEvent.Destroy;
 begin
+  if Assigned(FSeatsData) then
+    FSeatsData.Free;
   inherited;
 end;
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
+  if not Assigned(FSeatsData) then
+    FSeatsData := TObjectList<TPB_WinnerData>.Create;
+
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -64,6 +72,10 @@ begin
       FN_TABLE_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AprotobufReader.readBytes(FTableMongoId);
+      end;
+      FN_SEATSDATA: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FSeatsData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
