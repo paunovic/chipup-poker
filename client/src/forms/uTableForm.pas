@@ -532,13 +532,16 @@ begin
     teStandUp: event := 'STAND UP';
     teWinning: event := 'WINNING';
     teDealing: event := 'DEALING';
+    teCheck: event := 'CHECK';
+    teCall: event := 'CALL';
+    teRaise: event := 'RAISE';
   end;
 
   {$IFDEF DEBUG}
   if Length(pbtevent.Seats) > 0 then
   begin
     for C1 := 0 to Length(pbtevent.Seats) - 1 do
-      DebugLn(Format('Player %d: %s', [pbtevent.Seats[C1], event]), ditApplication);
+      AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), event);
   end
   else
     AddUserChatMessage('TBLEVENT', event);
