@@ -483,7 +483,14 @@ begin
       Break;
     end;
 
-  lbsInfo.Caption := Format('Pot: %d', [pbtablestatus.Pot]);
+  tmp := '';
+  for C1 := Low(pbtablestatus.Pots) to High(pbtablestatus.Pots) do
+    if C1 = High(pbtablestatus.Pots) then
+      tmp := tmp + IntToStr(pbtablestatus.Pots[C1])
+    else
+      tmp := tmp + IntToStr(pbtablestatus.Pots[C1]) + ', ';
+
+  lbsInfo.Caption := Format('Pots: %s', [tmp]);
 
   {$IFDEF DEBUG}
   tmp := '';
@@ -551,7 +558,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet * 2);
+  SocketClient.PutChips(FTable.Game.MongoId, FTable.Game.BigBlind);
 end;
 
 end.
