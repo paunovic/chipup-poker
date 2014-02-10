@@ -21,7 +21,8 @@ type
     constructor Create(const AValue: TCardValue; const ASuit: TCardSuit); overload;
     constructor Create(const AByte: Byte); overload;
 
-    procedure Assign(const AByte: Byte);
+    procedure Assign(const AByte: Byte); overload;
+    procedure Assign(const ABytes: TBytes); overload;
 
     property Value: TCardValue read FValue;
     property Suit: TCardSuit read FSuit;
@@ -74,6 +75,18 @@ begin
   Assert(m in [0..3]);
   FSuit := TCardSuit(m + 1);
 end;
+
+procedure TCard.Assign(const ABytes: TBytes);
+begin
+  if Length(ABytes) = 0 then
+  begin
+    FValue := cvUnknown;
+    FSuit := csUnknown;
+  end
+  else
+    Assign(ABytes[0]);
+end;
+
 
 function TCard.GetAsString: String;
 var
