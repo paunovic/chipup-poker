@@ -302,7 +302,7 @@ begin
       if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
       begin
         seat_point := GetSeatPoint(seat_info.SeatIndex);
-        PaintBox.Buffer.TextOut(seat_point.X - 15, seat_point.Y - 45, seat_info.Cards);
+        PaintBox.Buffer.TextOut(seat_point.X - 15, seat_point.Y - 45, seat_info.Cards.AsString);
       end;
     PaintBox.Buffer.Font.Style := [];
 
@@ -528,11 +528,6 @@ begin
   tmp := Trim(tmp);
   if tmp <> '' then
     DebugLn('BETS: ' + tmp, ditApplication);
-  case pbtablestatus.State of
-    tsFlop: DebugLn(Format('FLOP: %s', [pbtablestatus.Flop]), ditApplication);
-    tsTurn: DebugLn(Format('TURN: %s', [pbtablestatus.Turn]), ditApplication);
-    tsRiver: DebugLn(Format('RIVER: %s', [pbtablestatus.River]), ditApplication);
-  end;
   {$ENDIF}
 
   ConfigureGUI;

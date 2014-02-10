@@ -12,16 +12,18 @@ type
     FPlayerMongoId: TBytes;
     FChips: Integer;
     FCardCount: Integer;
-    FCards: String;
+    FCards: TCards;
     FStatus: TPlayerStatus;
   public
+    destructor Destroy; override;
+
     procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
 
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
     property Chips: Integer read FChips;
     property CardCount: Integer read FCardCount;
-    property Cards: String read FCards;
+    property Cards: TCards read FCards;
     property Status: TPlayerStatus read FStatus;
   end;
 
@@ -80,8 +82,15 @@ begin
   FPlayerMongoId := ASeatInfoProtobuf.PlayerMongoId;
   FChips := ASeatInfoProtobuf.Chips;
   FCardCount := ASeatInfoProtobuf.CardCount;
-  FCards := ASeatInfoProtobuf.Cards;
+  FCards := TCards.Create(ASeatInfoProtobuf.Cards);
   FStatus := ASeatInfoProtobuf.Status;
+end;
+
+destructor TSeatInfo.Destroy;
+begin
+  FCards.Free;
+
+  inherited;
 end;
 
 { TTableStatus }

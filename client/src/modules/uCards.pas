@@ -33,6 +33,8 @@ type
     function GetAsString: String;
 
   public
+    constructor Create(const ABytes: TBytes); overload;
+
     procedure Assign(const ABytes: TBytes);
 
     property AsString: String read GetAsString;
@@ -67,10 +69,10 @@ begin
   m := AByte mod 4;
 
   Assert(d in [0..12]);
-  FValue := TCardValue(d);
+  FValue := TCardValue(d + 1);
 
   Assert(m in [0..3]);
-  FSuit := TCardSuit(m);
+  FSuit := TCardSuit(m + 1);
 end;
 
 function TCard.GetAsString: String;
@@ -108,6 +110,13 @@ begin
 end;
 
 { TCards }
+
+constructor TCards.Create(const ABytes: TBytes);
+begin
+  inherited Create;
+
+  Assign(ABytes);
+end;
 
 procedure TCards.Assign(const ABytes: TBytes);
 var
