@@ -161,6 +161,7 @@ enum ServerCodes {
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
 	srGetPlayers = 14;
+	srTableSitNoChips = 15;
 
     srOwnershipGiveAwayNotOwner = 24;
     srOwnershipGiveAwayInvalidPlayerId = 25;

@@ -298,6 +298,7 @@ var activeGames = {};
 function ClientSocket(socket) {
 	this.state = 1;
 	this.socket = socket;
+	this.boughtin = 0;
 	socket.on('end',function() {
 		this.log('client lost');
 		delete activeUsers[this.userid];
@@ -1337,24 +1338,30 @@ Game.prototype.sitDown = function (conn,params) {
 		conn.log('seat taken by',util.inspect(this.members[params.seat_index]));
 		conn.send(codes.srTableSitSeatTaken,this.getTableStatus(),'Poker.TableStatus');
 	} else {
-		// FIXME, verify that chips > user.chips
-		this.members[params.seat_index] = { conn:conn, hand: new Hand(), status:'psOutOfHand', chips:params.chips, seat:params.seat_index };
-		// FIXME, should always be 0?
-		if (this.bets[params.seat_index] == undefined) this.bets[params.seat_index] = 0;
-		this.sendEvent('teSit',[params.seat_index]);
-		if (this.state == 'tsIdle') {
-			if (this.sittingCount() > 1) {
-				this.deal(finish.bind(this));
-			} else {
-				this.dealer++;
-				while (!this.members[this.dealer]) {
-					conn.log('setting dealer to',this.dealer);
-					this.dealer++
-					if (this.dealer >= this.obj.seats) this.dealer = 0;
-				}
-				finish.call(this);
+		allUsers.findOne({_id:conn.userid},function (err,userinfo) {
+			if (params.chips > (userinfo.chips - conn.boughtin)) {
+				conn.send(codes.srTableSitNoChips);
+				return;
 			}
-		} else finish.call(this);
+			this.members[params.seat_index] = { conn:conn, hand: new Hand(), status:'psOutOfHand', chips:params.chips, seat:params.seat_index };
+			conn.boughtin += params.chips;
+			// FIXME, should always be 0?
+			if (this.bets[params.seat_index] == undefined) this.bets[params.seat_index] = 0;
+			this.sendEvent('teSit',[params.seat_index]);
+			if (this.state == 'tsIdle') {
+				if (this.sittingCount() > 1) {
+					this.deal(finish.bind(this));
+				} else {
+					this.dealer++;
+					while (!this.members[this.dealer]) {
+						conn.log('setting dealer to',this.dealer);
+						this.dealer++
+						if (this.dealer >= this.obj.seats) this.dealer = 0;
+					}
+					finish.call(this);
+				}
+			} else finish.call(this);
+		}.bind(this));
 		function finish() {
 			var status = this.getTableStatus();
 			console.log('sending table status to all 1');
@@ -1487,7 +1494,7 @@ Game.prototype.doWin = function (winners) {
 		setTimeout(function () {
 			this.deck = new Deck();
 			this.deck.shuffle(function () {
-				console.log('shuffled deck is',deck.prettyPrint());
+				console.log('shuffled deck is',this.deck.cards);
 				if (this.inHandCount() > 1) var nextstate = 'psInHand';
 				else var nextstate = 'psOutOfHand';
 				for (var x=0; x<this.members.length; x++) {
@@ -1520,6 +1527,7 @@ Game.prototype.doWin = function (winners) {
 		allUsers.update({_id:winnerObjects[0].conn.userid},{$inc:{chips:this.pots[0].value}},function (err,res) {
 			assert(!err,err);
 			assert(res == 1,'win update:'+res);
+			winnerObjects[0].conn.boughtin += this.pots[0].value;
 			winnerObjects[0].chips += this.pots[0].value;
 			this.pots = undefined;
 			allGames.update({_id:this.obj._id},{$unset:{pot:0}},function (err,res) {
@@ -1628,6 +1636,7 @@ Game.prototype.moveToPot = function (cb1) {
 							assert(!err);
 							assert(res == 1);
 							item.conn.log('lost chips',increase,this.bets[item.seat],item.seat);
+							item.conn.boughtin -= this.bets[item.seat];
 							this.bets[item.seat] = 0;
 							idx++;
 							repeat.call(this);
@@ -1771,8 +1780,9 @@ Game.prototype.getTableStatus = function getTableStatus() {
 	tableStatus.dealer = this.dealer;
 	tableStatus.current_seat = this.current_seat;
 	if (['tsFlop','tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.flop = new Buffer(this.flop.cards);
-	if (['tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = this.turn.cards[0];
-	if (this.state == 'tsRiver') tableStatus.river = this.river.cards[0];
+	if (['tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = new Buffer(this.turn.cards);
+	if (this.state == 'tsRiver') tableStatus.river = new Buffer(this.river.cards);
+	console.log('table status',tableStatus);
 	return tableStatus;
 }
 Game.prototype.sittingCount = function () {
@@ -1796,6 +1806,7 @@ Game.prototype.standUp = function (conn,cb1) {
 	var seatIdx = this.findSeat(conn);
 	console.log('standing up',seatIdx);
 	var seatObj = this.members[seatIdx];
+	conn.boughtin -= seatObj.chips;
 	// FIXME, do something with his cards
 	// FIXME, keep his bet and pay out to the winner
 	if (seatObj.status == 'psInHand') this.fold(seatIdx,finish.bind(this));
