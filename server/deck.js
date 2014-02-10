@@ -8,6 +8,9 @@ fs.open('/dev/urandom','r',function (err,fd) {
 		console.log('initial  deck is',deck.prettyPrint());
 		deck.shuffle(function () {
 			console.log('shuffled deck is',deck.prettyPrint());
+			var hand = new Hand();
+			deck.draw(3,hand);
+			console.log('first 3 cards are',hand.prettyPrint());
 		});
 	}
 });
@@ -16,11 +19,10 @@ module.exports.Hand = Hand;
 function Deck() {
 	if (!(this instanceof Deck)) return new Deck();
 	this.cards = [];
-	for (var i=0; i<4; i++) {
-		for (var j=1; j<14; j++) {
-			this.cards.push(new Card(Deck.suits[i],j));
-		}
+	for (var i=0; i<52; i++) {
+		this.cards[i] = i;
 	}
+	this.pos = 51;
 }
 function Hand() {
 	this.cards = [];
@@ -29,9 +31,29 @@ Deck.suits = ['H','D','S','C'];
 Hand.prototype.prettyPrint = Deck.prototype.prettyPrint = function prettyPrint() {
 	var out = [];
 	for (var i=0; i<this.cards.length; i++) {
-		out.push(this.cards[i].getValue()+this.cards[i].suit);
+		out.push(getValue(this.cards[i])+getSuit(this.cards[i]));
 	}
 	return out.join('');
+}
+function getValue(code) {
+	var c = Math.floor(code/4);
+	switch (c) {
+	case 8: return 'T';
+	case 9: return 'J';
+	case 10: return 'Q';
+	case 11: return 'K';
+	case 12: return 'A';
+	}
+	return c+2;
+}
+function getSuit(code) {
+	var c = code%4;
+	switch (c) {
+	case 0: return 'H';
+	case 1: return 'S';
+	case 2: return 'C';
+	case 3: return 'D';
+	}
 }
 Deck.prototype.shuffle = function shuffle(callback) {
 	var output = [];
@@ -53,6 +75,7 @@ Deck.prototype.shuffle = function shuffle(callback) {
 	}.bind(this);
 	recurse();
 }
+// FIXME, use the same logic as the DAG, dont shuffle
 Deck.prototype.draw = function (count,hand) {
 	//console.log('before:'+this.prettyPrint());
 	var out = this.cards.splice(0,count);
