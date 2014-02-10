@@ -3,7 +3,7 @@ unit uTableStatus;
 interface
 
 uses
-  uPB_TableStatus, uPB_SeatInfo, System.SysUtils, System.Generics.Collections, System.Generics.Defaults;
+  uPB_TableStatus, uPB_SeatInfo, System.SysUtils, System.Generics.Collections, System.Generics.Defaults, uCards;
 
 type
   TSeatInfo = class
@@ -36,9 +36,9 @@ type
     FCurrentSeat   : Integer;
     FSeatInfos     : TSeatInfos;
     FBets          : TArray<Integer>;
-    FFlopCards     : String;
-    FTurnCard      : String;
-    FRiverCard     : String;
+    FFlopCards     : TCards;
+    FTurnCard      : TCard;
+    FRiverCard     : TCard;
     FSmallBlindSeat: Integer;
     FBigBlindSeat  : Integer;
 
@@ -60,9 +60,9 @@ type
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TArray<Integer> read FBets;
     property HighestBet: Integer read GetHighestBet;
-    property FlopCards: String read FFlopCards;
-    property TurnCard: String read FTurnCard;
-    property RiverCard: String read FRiverCard;
+    property FlopCards: TCards read FFlopCards;
+    property TurnCard: TCard read FTurnCard;
+    property RiverCard: TCard read FRiverCard;
     property SmallBlindSeat: Integer read FSmallBlindSeat;
     property BigBlindSeat: Integer read FBigBlindSeat;
   end;
@@ -91,11 +91,19 @@ begin
   FDealer := -1;
   FCurrentSeat := -1;
   FSeatInfos := TSeatInfos.Create;
+
+  FFlopCards := TCards.Create;
+  FTurnCard := TCard.Create;
+  FRiverCard := TCard.Create;
 end;
 
 destructor TTableStatus.Destroy;
 begin
   FSeatInfos.Free;
+
+  FFlopCards.Free;
+  FTurnCard.Free;
+  FRiverCard.Free;
 
   inherited;
 end;
@@ -196,9 +204,9 @@ begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
-  FFlopCards := ATableStatusProtobuf.Flop;
-  FTurnCard := ATableStatusProtobuf.Turn;
-  FRiverCard := ATableStatusProtobuf.River;
+  FFlopCards.Assign(ATableStatusProtobuf.Flop);
+  FTurnCard.Assign(ATableStatusProtobuf.Turn);
+  FRiverCard.Assign(ATableStatusProtobuf.River);
 
   FSeatInfos.Clear;
   if Assigned(ATableStatusProtobuf.Seats) then

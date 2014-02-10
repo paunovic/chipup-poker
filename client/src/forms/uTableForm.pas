@@ -226,6 +226,7 @@ var
   avatar_rect: TRect;
   seat_info  : TSeatInfo;
   chat_width : Integer;
+  cards      : String;
 begin
   paBottom.Height := Round(Height / 5);
   chat_width := Round(Width / 2.5);
@@ -282,7 +283,16 @@ begin
     // draw table cards
     PaintBox.Buffer.Font.Color := clWhite;
     PaintBox.Buffer.Font.Style := [fsBold];
-    PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, FTableStatus.FlopCards + ' ' + FTableStatus.TurnCard + ' ' + FTableStatus.RiverCard);
+
+    case FTableStatus.State of
+      tsFlop: cards := FTableStatus.FlopCards.AsString;
+      tsTurn: cards := FTableStatus.FlopCards.AsString + ' '  + FTableStatus.TurnCard.AsString;
+      tsRiver,
+      tsWinning,
+      tsWinning2: cards := FTableStatus.FlopCards.AsString + ' '  + FTableStatus.TurnCard.AsString + ' ' + FTableStatus.RiverCard.AsString;
+    end;
+
+    PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, cards);
     PaintBox.Buffer.Font.Style := [];
 
     // draw player cards

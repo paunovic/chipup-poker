@@ -31,9 +31,9 @@ type
       FDealer: Integer;
       FCurrentSeat: Integer;
       FBets: TArray<Integer>;
-      FFlop: String;
-      FTurn: String;
-      FRiver: String;
+      FFlop: TBytes;
+      FTurn: Integer;
+      FRiver: Integer;
       FPots: TArray<Integer>;
 
     procedure SetTableMongoId(const AValue: TBytes);
@@ -41,9 +41,9 @@ type
     procedure SetDealer(const AValue: Integer);
     procedure SetCurrentSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<Integer>);
-    procedure SetFlop(const AValue: String);
-    procedure SetTurn(const AValue: String);
-    procedure SetRiver(const AValue: String);
+    procedure SetFlop(const AValue: TBytes);
+    procedure SetTurn(const AValue: Integer);
+    procedure SetRiver(const AValue: Integer);
     procedure SetPots(const AValue: TArray<Integer>);
   public
     destructor Destroy; override;
@@ -55,9 +55,9 @@ type
     property Dealer: Integer read FDealer write SetDealer;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
     property Bets: TArray<Integer> read FBets write SetBets;
-    property Flop: String read FFlop write SetFlop;
-    property Turn: String read FTurn write SetTurn;
-    property River: String read FRiver write SetRiver;
+    property Flop: TBytes read FFlop write SetFlop;
+    property Turn: Integer read FTurn write SetTurn;
+    property River: Integer read FRiver write SetRiver;
     property Pots: TArray<Integer> read FPots write SetPots;
   end;
 
@@ -111,15 +111,15 @@ begin
       end;
       FN_FLOP: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FFlop := String(AProtobufReader.readUtf8String);
+        AprotobufReader.readBytes(FFlop);
       end;
       FN_TURN: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FTurn := String(AProtobufReader.readUtf8String);
+        Assert(wire_type = WIRETYPE_VARINT);
+        FTurn := AProtobufReader.readInt32;
       end;
       FN_RIVER: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FRiver := String(AProtobufReader.readUtf8String);
+        Assert(wire_type = WIRETYPE_VARINT);
+        FRiver := AProtobufReader.readInt32;
       end;
       FN_POTS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -164,22 +164,22 @@ begin
     ProtobufOutput.writeInt32(FN_BETS, AValue[C1]);
 end;
 
-procedure TPB_TableStatus.SetFlop(const AValue: String);
+procedure TPB_TableStatus.SetFlop(const AValue: TBytes);
 begin
   FFlop := AValue;
-  ProtobufOutput.writeString(FN_FLOP, AValue);
+  ProtobufOutput.writeBytes(FN_FLOP, AValue);
 end;
 
-procedure TPB_TableStatus.SetTurn(const AValue: String);
+procedure TPB_TableStatus.SetTurn(const AValue: Integer);
 begin
   FTurn := AValue;
-  ProtobufOutput.writeString(FN_TURN, AValue);
+  ProtobufOutput.writeInt32(FN_TURN, AValue);
 end;
 
-procedure TPB_TableStatus.SetRiver(const AValue: String);
+procedure TPB_TableStatus.SetRiver(const AValue: Integer);
 begin
   FRiver := AValue;
-  ProtobufOutput.writeString(FN_RIVER, AValue);
+  ProtobufOutput.writeInt32(FN_RIVER, AValue);
 end;
 
 procedure TPB_TableStatus.SetPots(const AValue: TArray<Integer>);
