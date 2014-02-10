@@ -22,7 +22,7 @@ type
       FN_FLOP = 7;
       FN_TURN = 8;
       FN_RIVER = 9;
-      FN_POT = 10;
+      FN_POTS = 10;
 
     var
       FTableMongoId: TBytes;
@@ -34,7 +34,7 @@ type
       FFlop: String;
       FTurn: String;
       FRiver: String;
-      FPot: Integer;
+      FPots: TArray<Integer>;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -44,7 +44,7 @@ type
     procedure SetFlop(const AValue: String);
     procedure SetTurn(const AValue: String);
     procedure SetRiver(const AValue: String);
-    procedure SetPot(const AValue: Integer);
+    procedure SetPots(const AValue: TArray<Integer>);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -58,7 +58,7 @@ type
     property Flop: String read FFlop write SetFlop;
     property Turn: String read FTurn write SetTurn;
     property River: String read FRiver write SetRiver;
-    property Pot: Integer read FPot write SetPot;
+    property Pots: TArray<Integer> read FPots write SetPots;
   end;
 
 implementation
@@ -121,9 +121,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FRiver := String(AProtobufReader.readUtf8String);
       end;
-      FN_POT: begin
+      FN_POTS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FPot := AProtobufReader.readInt32;
+        SetLength(FPots, Length(FPots) + 1);
+        FPots[Length(FPots)-1] := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -181,10 +182,13 @@ begin
   ProtobufOutput.writeString(FN_RIVER, AValue);
 end;
 
-procedure TPB_TableStatus.SetPot(const AValue: Integer);
+procedure TPB_TableStatus.SetPots(const AValue: TArray<Integer>);
+var
+  C1: Integer;
 begin
-  FPot := AValue;
-  ProtobufOutput.writeInt32(FN_POT, AValue);
+  FPots := AValue;
+  for C1 := 0 to Length(FPots) - 1 do
+    ProtobufOutput.writeInt32(FN_POTS, AValue[C1]);
 end;
 
 end.

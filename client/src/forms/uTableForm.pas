@@ -7,14 +7,13 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit;
 
 type
   TfrmTable = class(TForm)
     paBottom: TPanel;
     paChat: TPanel;
     edChat: TcxTextEdit;
-    reChat: TRichEdit;
     ActionManager: TActionManager;
     acStandUp: TAction;
     acFold: TAction;
@@ -28,6 +27,7 @@ type
     btRaise: TcxButton;
     btStandUp: TcxButton;
     lbsInfo: TcxLabel;
+    reChat: TcxRichEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -52,6 +52,7 @@ type
     FTableYOffset   : Integer;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
+    procedure AddUserChatMessage(const AUser, AMessage: String);
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -79,7 +80,7 @@ implementation
 {$R *.dfm}
 
 uses
-  System.Types,
+  System.Types, cxClasses,
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent;
@@ -124,6 +125,7 @@ procedure TfrmTable.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
 
+//  AParams.ExStyle := AParams.ExStyle + WS_CLIPCHILDREN;
   AParams.WndParent := 0;
 end;
 
@@ -223,9 +225,22 @@ var
   seat_point : TPoint;
   avatar_rect: TRect;
   seat_info  : TSeatInfo;
+  chat_width : Integer;
 begin
   paBottom.Height := Round(Height / 5);
-  paChat.Width := Round(Width / 2.5);
+  chat_width := Round(Width / 2.5);
+
+  // dirty hack to resize chat box controls, we have to make them 1px wider than panel, to hide ugly white border on RichEdit
+  // FIXME! find a way to hide white border without this hack
+  if paChat.Width <> chat_width then
+  begin
+    if edChat.Width > chat_width then
+      paChat.Width := chat_width;
+    edChat.Width := chat_width + 1;
+    reChat.Width := chat_width + 1;
+    reChat.Height := paChat.Height - reChat.Top + 1;
+    paChat.Width := chat_width;
+  end;
 
   PaintBox.Buffer.BeginUpdate;
   try
@@ -366,6 +381,22 @@ begin
   acStandUp.Enabled := FALSE;
 end;
 
+procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
+begin
+  reChat.SelStart := reChat.GetTextLen;
+  reChat.SelAttributes.Color := clLime;
+  if reChat.SelStart = 0 then
+    reChat.SelText := AUser
+  else
+    reChat.SelText := sLineBreak + AUser;
+
+  reChat.SelStart := reChat.GetTextLen;
+  reChat.SelAttributes.Color := clSilver;
+  reChat.SelText := Format(': %s', [AMessage]);
+
+  reChat.ScrollContent(dirDown); reChat.ScrollContent(dirDown); // FIXME! yuck
+end;
+
 procedure TfrmTable.CSRChatEvent(const AMessage: TMessageItem);
 var
   chat_event  : TPB_ChatEvent;
@@ -377,20 +408,7 @@ begin
     ceUserMessage: begin
       chat_message := chat_event.Msg;
       if CompareBytes(chat_event.TableId, FTable.Game.MongoId) then
-      begin
-        reChat.SelStart := reChat.GetTextLen;
-        reChat.SelAttributes.Color := clLime;
-        if reChat.SelStart = 0 then
-          reChat.SelText := chat_message.Username
-        else
-          reChat.SelText := sLineBreak + chat_message.Username;
-
-        reChat.SelStart := reChat.GetTextLen;
-        reChat.SelAttributes.Color := clSilver;
-        reChat.SelText := Format(': %s', [chat_message.Msg]);
-
-        SendMessage(reChat.Handle, WM_VSCROLL, SB_BOTTOM, 0);
-      end;
+        AddUserChatMessage(chat_message.Username, chat_message.Msg);
     end;
     ceServerMessage: ;
   end;
@@ -483,7 +501,14 @@ begin
       Break;
     end;
 
-  lbsInfo.Caption := Format('Pot: %d', [pbtablestatus.Pot]);
+  tmp := '';
+  for C1 := Low(pbtablestatus.Pots) to High(pbtablestatus.Pots) do
+    if C1 = High(pbtablestatus.Pots) then
+      tmp := tmp + IntToStr(pbtablestatus.Pots[C1])
+    else
+      tmp := tmp + IntToStr(pbtablestatus.Pots[C1]) + ', ';
+
+  lbsInfo.Caption := Format('Pots: %s', [tmp]);
 
   {$IFDEF DEBUG}
   tmp := '';
@@ -521,16 +546,19 @@ begin
     teStandUp: event := 'STAND UP';
     teWinning: event := 'WINNING';
     teDealing: event := 'DEALING';
+    teCheck: event := 'CHECK';
+    teCall: event := 'CALL';
+    teRaise: event := 'RAISE';
   end;
 
   {$IFDEF DEBUG}
   if Length(pbtevent.Seats) > 0 then
   begin
     for C1 := 0 to Length(pbtevent.Seats) - 1 do
-      DebugLn(Format('Player %d: %s', [pbtevent.Seats[C1], event]), ditApplication);
+      AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), event);
   end
   else
-    DebugLn(Format('TABLE EVENT: %s', [event]), ditApplication);
+    AddUserChatMessage('TBLEVENT', event);
   {$ENDIF}
 end;
 
@@ -551,7 +579,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet * 2);
+  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet + FTable.Game.BigBlind);
 end;
 
 end.

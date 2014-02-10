@@ -1,7 +1,8 @@
 object frmCreateAccount: TfrmCreateAccount
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Create New Account'
   ClientHeight = 239
   ClientWidth = 336
@@ -87,7 +88,6 @@ object frmCreateAccount: TfrmCreateAccount
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 186
   end
   object lbsEMail: TcxLabel
     Left = 22

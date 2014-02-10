@@ -50,33 +50,30 @@ object frmTable: TfrmTable
       object edChat: TcxTextEdit
         Left = 0
         Top = 1
-        Align = alTop
+        Style.BorderStyle = ebsNone
         Style.Edges = []
+        Style.TransparentBorder = False
         TabOrder = 0
         OnKeyPress = edChatKeyPress
-        Width = 249
+        Width = 251
       end
-      object reChat: TRichEdit
+      object reChat: TcxRichEdit
         Left = 0
-        Top = 19
-        Width = 249
-        Height = 61
-        Align = alClient
-        BevelInner = bvNone
-        BevelOuter = bvNone
-        BorderStyle = bsNone
-        Color = 3552822
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clSilver
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
+        Top = 20
+        Properties.AutoURLDetect = True
+        Properties.ReadOnly = True
+        Properties.ScrollBars = ssVertical
         Lines.Strings = (
-          '')
-        ParentFont = False
-        ReadOnly = True
-        ScrollBars = ssVertical
+          'reChat')
+        Style.BorderStyle = ebsNone
+        Style.Edges = []
+        Style.Shadow = False
+        Style.TransparentBorder = False
+        StyleFocused.BorderStyle = ebsNone
+        StyleHot.BorderStyle = ebsNone
         TabOrder = 1
+        Height = 61
+        Width = 251
       end
     end
     object paButtons: TPanel
