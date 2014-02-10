@@ -32,8 +32,8 @@ type
       FCurrentSeat: Integer;
       FBets: TArray<Integer>;
       FFlop: TBytes;
-      FTurn: Integer;
-      FRiver: Integer;
+      FTurn: TBytes;
+      FRiver: TBytes;
       FPots: TArray<Integer>;
 
     procedure SetTableMongoId(const AValue: TBytes);
@@ -42,8 +42,8 @@ type
     procedure SetCurrentSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<Integer>);
     procedure SetFlop(const AValue: TBytes);
-    procedure SetTurn(const AValue: Integer);
-    procedure SetRiver(const AValue: Integer);
+    procedure SetTurn(const AValue: TBytes);
+    procedure SetRiver(const AValue: TBytes);
     procedure SetPots(const AValue: TArray<Integer>);
   public
     destructor Destroy; override;
@@ -56,8 +56,8 @@ type
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
     property Bets: TArray<Integer> read FBets write SetBets;
     property Flop: TBytes read FFlop write SetFlop;
-    property Turn: Integer read FTurn write SetTurn;
-    property River: Integer read FRiver write SetRiver;
+    property Turn: TBytes read FTurn write SetTurn;
+    property River: TBytes read FRiver write SetRiver;
     property Pots: TArray<Integer> read FPots write SetPots;
   end;
 
@@ -114,12 +114,12 @@ begin
         AprotobufReader.readBytes(FFlop);
       end;
       FN_TURN: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FTurn := AProtobufReader.readInt32;
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AprotobufReader.readBytes(FTurn);
       end;
       FN_RIVER: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FRiver := AProtobufReader.readInt32;
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AprotobufReader.readBytes(FRiver);
       end;
       FN_POTS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -170,16 +170,16 @@ begin
   ProtobufOutput.writeBytes(FN_FLOP, AValue);
 end;
 
-procedure TPB_TableStatus.SetTurn(const AValue: Integer);
+procedure TPB_TableStatus.SetTurn(const AValue: TBytes);
 begin
   FTurn := AValue;
-  ProtobufOutput.writeInt32(FN_TURN, AValue);
+  ProtobufOutput.writeBytes(FN_TURN, AValue);
 end;
 
-procedure TPB_TableStatus.SetRiver(const AValue: Integer);
+procedure TPB_TableStatus.SetRiver(const AValue: TBytes);
 begin
   FRiver := AValue;
-  ProtobufOutput.writeInt32(FN_RIVER, AValue);
+  ProtobufOutput.writeBytes(FN_RIVER, AValue);
 end;
 
 procedure TPB_TableStatus.SetPots(const AValue: TArray<Integer>);
