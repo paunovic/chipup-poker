@@ -100,7 +100,10 @@ function startImHub() {
 			}
 			break;
 		default:
-			console.log('child message'.green,util.inspect(msg,{colors:true}));
+			var string = msg.msg;
+			delete msg.msg;
+			console.log('child message'.green,util.inspect(msg,{colors:true}),string);
+			msg.msg = string;
 			for (var x=0; x<clients.length; x++) {
 				clients[x].reply(codes.GlobalMsgEvent,msg,'Backend.GlobalMsg');
 			}
@@ -133,7 +136,7 @@ function restartImHub(code) {
 		console.log('restarting...');
 	//db.doQuery('INSERT INTO im_hub_crashes (buffer,code) VALUES (?,?)',[fulllog,code]);
 	//db.db.end();
-		setTimeout(startImHub,5000);
+		setTimeout(startImHub,1000);
 	} else {
 		console.log('leaving server down');
 	}

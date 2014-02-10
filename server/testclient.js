@@ -8,7 +8,7 @@ var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var colors = require('colors');
 
-protoreader.init(pb);
+protoreader.init(pb,codes);
 
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -137,7 +137,7 @@ function testmenu(cb) {
 		for (var x=0; x<conn.tableStatus.seats.length; x++) {
 			var seat = conn.tableStatus.seats[x];
 			if (seat.status == 'psInHand') {
-				if (conn.tableStatus.bets[seat.seat] > max) max = conn.tableStatus.bets[seat.seat];
+				if (conn.tableStatus.bets[x] > max) max = conn.tableStatus.bets[x];
 			}
 		}
 		var oldbet = conn.tableStatus.bets[conn.seat];
@@ -162,6 +162,21 @@ function testmenu(cb) {
 		}
 		doMenu(moves);
 	}
+	function checkAndPrint(params) {
+		if (params.current_seat == this.seat) {
+			console.log('table state:',params.state,'active seat:',params.current_seat,'pots:',params.pots);
+			console.log('flop:',params.flop,'turn:',params.turn,'river:',params.river);
+			if (params.state != 'tsIdle') {
+				for (var x=0; x<params.seats.length; x++) {
+					var s = params.seats[x];
+					var line = 'player#'+s.seat+' state:'+s.status+' bet:'+params.bets[x]+' cards:'+params.seats[x].cards;
+					if (s.seat == params.current_seat) console.log(line.green);
+					else console.log(line);
+				}
+			}
+			process.stdout.write("\n");
+		}
+	}
 	function common(code,data) {
 		switch (code) {
 		case codes.srNotImplemented:
@@ -185,19 +200,7 @@ function testmenu(cb) {
 			var params = pb.Parse(data,'Poker.TableStatus');
 			this.tableStatus = params;
 			
-			if (params.current_seat == this.seat) {
-				console.log('table state:',params.state,'active seat:',params.current_seat);
-				console.log('flop:',params.flop,'turn:',params.turn,'river:',params.river);
-				if (params.state != 'tsIdle') {
-					for (var x=0; x<params.seats.length; x++) {
-						var s = params.seats[x];
-						var line = 'player#'+s.seat+' state:'+s.status+' bet:'+params.bets[x]+' cards:'+params.seats[x].cards;
-						if (s.seat == params.current_seat) console.log(line.green);
-						else console.log(line);
-					}
-				}
-				process.stdout.write("\n");
-			}
+			checkAndPrint.call(this,params);
 			
 			if (this.sitting) {
 				if ((params.current_seat == this.seat) && (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(params.state) != -1)) {
@@ -206,18 +209,21 @@ function testmenu(cb) {
 					//this.reply(codes.seChat,{event: 'ceUserMessage',msg:{msg:'my hand sucks, *folding*'},table_id:gameid},'Poker.ChatEvent');
 					//this.reply(codes.scFold,{_id:gameid},'Poker.Game');
 				} else {
-					//this.log('not my turn');
+					this.log('not my turn',params.current_seat,this.seat);
 				}
 			} else if (this.joining) {
 				this.joining = false;
-				this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:666},'Poker.TableSit');
+				this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:1500},'Poker.TableSit');
 				return;
 			}
 			break;
 		case codes.srTableSitOk:
+			this.log('sit ok');
 			this.sitting = true;
 			var params = pb.Parse(data,'Poker.TableStatus');
-			if (['tsPreFlop'].indexOf(this.seat,params.state) == -1) break;
+			this.tableStatus = params;
+			if (['tsPreFlop'].indexOf(params.state) == -1) break;
+			checkAndPrint.call(this,params);
 			if (params.current_seat == this.seat) {
 				this.log('its my turnA',this.seat,params.state);
 				showMoves(this);
@@ -300,7 +306,7 @@ function testmenu(cb) {
 		case codes.srTableSitOk:
 			var params = pb.Parse(data,'Poker.TableStatus');
 			//this.log(params);
-			for (var x=1; x<5; x++) {
+			for (var x=1; x<2; x++) {
 				var client2 = new Client(doClient2);
 				client2.name = 'client'+x;
 				client2.seat = x;
