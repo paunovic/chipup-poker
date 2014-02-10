@@ -27,22 +27,8 @@ int cardToNumber(const char *card) {
 	return (value*4)+suit;
 }
 int cardToNumber(Local<Array> cards,int index) {
-	Local<Object> card = cards->Get(index)->ToObject();
-	int value = card->Get(String::NewSymbol("value"))->Int32Value();
-	Local<Value> suitin = card->Get(String::NewSymbol("suit"));
-	String::AsciiValue str(suitin);
-	const char *raw = *str;
-	int suit;
-	switch (raw[0]) {
-	case 'H': suit=0;break;
-	case 'S': suit=1;break;
-	case 'C': suit=2;break;
-	case 'D': suit=3;break;
-	}
-	int v;
-	if (value == 1) v = 12; // ace
-	else v = value - 2;
-	return (v*4)+suit;
+	int value = cards->Get(index)->Int32Value();
+	return value;
 }
 Local<Array> getCards(Local<Object> game,const char *field) {
 	return Local<Array>::Cast(game->Get(String::NewSymbol(field))->ToObject()->Get(String::NewSymbol("cards")));

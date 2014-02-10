@@ -1764,15 +1764,15 @@ Game.prototype.getTableStatus = function getTableStatus() {
 		var seat = this.members[x];
 		//console.log('table debug',x,seat.conn.userid,seat.hand.prettyPrint());
 		var obj = {seat:x, player_mongo_id:new Buffer(seat.conn.userid.toString(),'hex'), chips:seat.chips, status:seat.status}
-		obj.cards = seat.hand.prettyPrint();
-		obj.card_count = obj.cards.length / 2;
+		obj.cards = new Buffer(seat.hand.cards);
+		obj.card_count = obj.cards.length;
 		tableStatus.seats.push(obj);
 	}
 	tableStatus.dealer = this.dealer;
 	tableStatus.current_seat = this.current_seat;
-	if (['tsFlop','tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.flop = this.flop.prettyPrint();
-	if (['tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = this.turn.prettyPrint();
-	if (this.state == 'tsRiver') tableStatus.river = this.river.prettyPrint();
+	if (['tsFlop','tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.flop = new Buffer(this.flop.cards);
+	if (['tsTurn','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = this.turn.cards[0];
+	if (this.state == 'tsRiver') tableStatus.river = this.river.cards[0];
 	return tableStatus;
 }
 Game.prototype.sittingCount = function () {
