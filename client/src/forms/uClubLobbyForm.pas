@@ -210,7 +210,7 @@ begin
     if dmMain.Players.FindPlayerById(club.OwnerId, player) then
       manager := player.Nick;
 
-    lbsSubheader.Caption := Format('Club Manager: %s          Members: %d          Club ID: %d', [manager, Length(club.Players), club.Id]);
+    lbsSubheader.Caption := Format('Club Manager: %s           Members: %d           Club ID: %d', [manager, Length(club.Players), club.Id]);
 
     admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
 
