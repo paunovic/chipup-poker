@@ -7,14 +7,13 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit;
 
 type
   TfrmTable = class(TForm)
     paBottom: TPanel;
     paChat: TPanel;
     edChat: TcxTextEdit;
-    reChat: TRichEdit;
     ActionManager: TActionManager;
     acStandUp: TAction;
     acFold: TAction;
@@ -28,6 +27,7 @@ type
     btRaise: TcxButton;
     btStandUp: TcxButton;
     lbsInfo: TcxLabel;
+    reChat: TcxRichEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -80,7 +80,7 @@ implementation
 {$R *.dfm}
 
 uses
-  System.Types,
+  System.Types, cxClasses,
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent;
@@ -125,6 +125,7 @@ procedure TfrmTable.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
 
+//  AParams.ExStyle := AParams.ExStyle + WS_CLIPCHILDREN;
   AParams.WndParent := 0;
 end;
 
@@ -224,9 +225,22 @@ var
   seat_point : TPoint;
   avatar_rect: TRect;
   seat_info  : TSeatInfo;
+  chat_width : Integer;
 begin
   paBottom.Height := Round(Height / 5);
-  paChat.Width := Round(Width / 2.5);
+  chat_width := Round(Width / 2.5);
+
+  // dirty hack to resize chat box controls, we have to make them 1px wider than panel, to hide ugly white border on RichEdit
+  // FIXME! find a way to hide white border without this hack
+  if paChat.Width <> chat_width then
+  begin
+    if edChat.Width > chat_width then
+      paChat.Width := chat_width;
+    edChat.Width := chat_width + 1;
+    reChat.Width := chat_width + 1;
+    reChat.Height := paChat.Height - reChat.Top + 1;
+    paChat.Width := chat_width;
+  end;
 
   PaintBox.Buffer.BeginUpdate;
   try
@@ -380,7 +394,7 @@ begin
   reChat.SelAttributes.Color := clSilver;
   reChat.SelText := Format(': %s', [AMessage]);
 
-  SendMessage(reChat.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+  reChat.ScrollContent(dirDown); reChat.ScrollContent(dirDown); // FIXME! yuck
 end;
 
 procedure TfrmTable.CSRChatEvent(const AMessage: TMessageItem);
