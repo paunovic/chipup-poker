@@ -83,7 +83,7 @@ uses
   System.Types, cxClasses,
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent;
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent, uCards;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -287,9 +287,18 @@ begin
     case FTableStatus.State of
       tsFlop: cards := FTableStatus.FlopCards.AsString;
       tsTurn: cards := FTableStatus.FlopCards.AsString + ' '  + FTableStatus.TurnCard.AsString;
-      tsRiver,
+      tsRiver: cards := FTableStatus.FlopCards.AsString + ' '  + FTableStatus.TurnCard.AsString + ' ' + FTableStatus.RiverCard.AsString;
       tsWinning,
-      tsWinning2: cards := FTableStatus.FlopCards.AsString + ' '  + FTableStatus.TurnCard.AsString + ' ' + FTableStatus.RiverCard.AsString;
+      tsWinning2: begin
+        cards := '';
+        if FTableStatus.FlopCards.Count = 3 then
+          cards := FTableStatus.FlopCards.AsString + ' ';
+        if FTableStatus.TurnCard.Value <> cvUnknown then
+          cards := cards + FTableStatus.TurnCard.AsString + ' ';
+        if FTableStatus.RiverCard.Value <> cvUnknown then
+          cards := cards + FTableStatus.TurnCard.AsString;
+        cards := Trim(cards);
+      end;
     end;
 
     PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, cards);
