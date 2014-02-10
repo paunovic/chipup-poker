@@ -28,6 +28,7 @@ type
 
     procedure CSRTableSitOk(const AMessage: TMessageItem);
     procedure CSRTableSitSeatTaken(const AMessage: TMessageItem);
+    procedure CSRTableSitNoChips(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -87,7 +88,8 @@ begin
       mtServerResponse: ProcessServerMessage(msg,
                           [
                             TServerMessageCallback.Create(srTableSitOk, CSRTableSitOk),
-                            TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken)
+                            TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken),
+                            TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips)
                           ]
                         );
     end;
@@ -105,6 +107,12 @@ procedure TfrmTableSit.acOKExecute(Sender: TObject);
 begin
   SocketClient.TableSit(FGame.MongoId, FSeatIndex, seBuyin.Value);
   acOK.Enabled := FALSE;
+end;
+
+procedure TfrmTableSit.CSRTableSitNoChips(const AMessage: TMessageItem);
+begin
+  MessageDlg('Insufficient chips', mtWarning, [mbOK], 0);
+  acOK.Enabled := TRUE;
 end;
 
 procedure TfrmTableSit.CSRTableSitOk(const AMessage: TMessageItem);

@@ -378,6 +378,7 @@ begin
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ;
     srTransferChipsInvalidAmount: ;
+    srTableSitNoChips: ;
 
     seTransferChips,
     srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);

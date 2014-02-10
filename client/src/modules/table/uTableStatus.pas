@@ -213,9 +213,12 @@ begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
-  FFlopCards.Assign(ATableStatusProtobuf.Flop);
-  FTurnCard.Assign(ATableStatusProtobuf.Turn);
-  FRiverCard.Assign(ATableStatusProtobuf.River);
+  if State <> tsWinning then
+  begin
+    FFlopCards.Assign(ATableStatusProtobuf.Flop);
+    FTurnCard.Assign(ATableStatusProtobuf.Turn);
+    FRiverCard.Assign(ATableStatusProtobuf.River);
+  end;
 
   FSeatInfos.Clear;
   if Assigned(ATableStatusProtobuf.Seats) then

@@ -19,6 +19,7 @@ type
     srSetAvatarReply = 12,
     srChangeMailReply = 13,
     srGetPlayers = 14,
+    srTableSitNoChips = 15,
     srOwnershipGiveAwayNotOwner = 24,
     srOwnershipGiveAwayInvalidPlayerId = 25,
     srOwnershipGiveAwayInvalidClubId = 26,
@@ -121,6 +122,7 @@ begin
     srSetAvatarReply: result := 'srSetAvatarReply';
     srChangeMailReply: result := 'srChangeMailReply';
     srGetPlayers: result := 'srGetPlayers';
+    srTableSitNoChips: result := 'srTableSitNoChips';
     srOwnershipGiveAwayNotOwner: result := 'srOwnershipGiveAwayNotOwner';
     srOwnershipGiveAwayInvalidPlayerId: result := 'srOwnershipGiveAwayInvalidPlayerId';
     srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
