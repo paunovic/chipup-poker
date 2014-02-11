@@ -316,7 +316,7 @@ begin
         if FTableStatus.TurnCard.Value <> cvUnknown then
           cards := cards + FTableStatus.TurnCard.AsString + ' ';
         if FTableStatus.RiverCard.Value <> cvUnknown then
-          cards := cards + FTableStatus.TurnCard.AsString;
+          cards := cards + FTableStatus.RiverCard.AsString;
         cards := Trim(cards);
       end;
     end;
