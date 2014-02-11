@@ -3,8 +3,8 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 531
-  ClientWidth = 702
+  ClientHeight = 535
+  ClientWidth = 707
   Color = clBlack
   Constraints.MaxHeight = 1037
   Constraints.MaxWidth = 1320
@@ -27,8 +27,8 @@ object frmTable: TfrmTable
   TextHeight = 14
   object paBottom: TPanel
     Left = 0
-    Top = 451
-    Width = 702
+    Top = 455
+    Width = 707
     Height = 80
     Align = alBottom
     BevelOuter = bvNone
@@ -79,7 +79,7 @@ object frmTable: TfrmTable
     object paButtons: TPanel
       Left = 250
       Top = 0
-      Width = 452
+      Width = 457
       Height = 80
       Align = alClient
       BevelOuter = bvNone
@@ -162,8 +162,8 @@ object frmTable: TfrmTable
   object PaintBox: TPaintBox32
     Left = 0
     Top = 0
-    Width = 702
-    Height = 451
+    Width = 707
+    Height = 455
     Align = alClient
     RepaintMode = rmOptimizer
     TabOrder = 1

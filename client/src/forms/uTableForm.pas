@@ -380,7 +380,7 @@ begin
 
   dealer_point := GetDealerPoint(ASeatIndex);
   dealerw := Round(TTableResources.DealerButtonWidth * FTableResizeRatio);
-  dealerh := Round(dealerw * TTableResources.DealerButtonAspectRatio);
+  dealerh := Round(dealerw / TTableResources.DealerButtonAspectRatio);
 
   PaintBox.Buffer.Draw(Rect(dealer_point.X - dealerw div 2, dealer_point.Y - dealerh div 2, dealer_point.X + dealerw div 2, dealer_point.Y + dealerh div 2),
                        TTableResources.DealerButtonImage.BoundsRect,

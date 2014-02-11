@@ -48,7 +48,7 @@ uses
   Winapi.Windows, System.Classes, System.Types, JPEG, PNGImage, GR32_Resamplers, GR32_PNG;
 
 
-procedure LoadPNGResourceToBitmap32(var ABitmap: TBitmap32; const AResourceName: String);
+procedure LoadPNGResourceToBitmap32(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TCustomResampler);
 var
   png    : TPortableNetworkGraphic32;
   rstream: TResourceStream;
@@ -61,7 +61,7 @@ begin
       ABitmap := TBitmap32.Create;
       ABitmap.DrawMode := dmBlend;
       ABitmap.Assign(png);
-      ABitmap.Resampler := TDraftResampler.Create;
+      ABitmap.Resampler := AResampler;
       // Alternative is KernelResampler. Slower, but slightly higher quality resample. Code below:
   {
       ABitmap.Resampler := TKernelResampler.Create;
@@ -94,8 +94,10 @@ begin
     jpg.Free;
   end;
 
-  LoadPNGResourceToBitmap32(FImg_Table, 'Table');
-  LoadPNGResourceToBitmap32(FImg_DealerButton, 'DealerButton');
+  LoadPNGResourceToBitmap32(FImg_Table, 'Table', TDraftResampler.Create);
+
+  LoadPNGResourceToBitmap32(FImg_DealerButton, 'DealerButton', TKernelResampler.Create);
+  (FImg_DealerButton.Resampler as TKernelResampler).Kernel := TLanczosKernel.Create;
 
   FTableWidth := 962;
   FTableHeight := 492;
