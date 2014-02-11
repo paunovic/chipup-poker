@@ -42,23 +42,27 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure acRaiseExecute(Sender: TObject);
   private
-    FFormAspectRatio: Double;
-    FTable          : TTable;
-    FTableStatus    : TTableStatus;
+    FFormAspectRatio : Double;
+    FTable           : TTable;
+    FTableStatus     : TTableStatus;
 
-    FTableWidth     : Integer;
-    FTableHeight    : Integer;
-    FTableXOffset   : Integer;
-    FTableYOffset   : Integer;
+    FTableResizeRatio: Double;
+    FTableWidth      : Integer;
+    FTableHeight     : Integer;
+    FTableXOffset    : Integer;
+    FTableYOffset    : Integer;
+    FTableCenter     : TPoint;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AddUserChatMessage(const AUser, AMessage: String);
+    procedure DrawDealerButton(const ASeatIndex: Integer);
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
 
     procedure DrawSeat(const ASeatIndex: Integer);
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
+    function GetDealerPoint(const ASeatIndex: Integer): TPoint;
 
     procedure CSRChatEvent(const AMessage: TMessageItem);
     procedure CSRETableStatus(const AMessage: TMessageItem);
@@ -80,7 +84,7 @@ implementation
 {$R *.dfm}
 
 uses
-  System.Types, cxClasses,
+  System.Types, cxClasses, System.Math,
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent, uCards;
@@ -219,14 +223,16 @@ end;
 
 procedure TfrmTable.Redraw(const APaintboxRepaint: Boolean = FALSE);
 var
-  C1         : Integer;
-  player_info: TPlayerInfo;
-  avatar     : TAvatar;
-  seat_point : TPoint;
-  avatar_rect: TRect;
-  seat_info  : TSeatInfo;
-  chat_width : Integer;
-  cards      : String;
+  C1          : Integer;
+  player_info : TPlayerInfo;
+  avatar      : TAvatar;
+  seat_point  : TPoint;
+  avatar_rect : TRect;
+  seat_info   : TSeatInfo;
+  chat_width  : Integer;
+  cards       : String;
+  tblx, tbly  : Integer;
+  tblw, tblh  : Integer;
 begin
   paBottom.Height := Round(Height / 5);
   chat_width := Round(Width / 2.5);
@@ -249,25 +255,39 @@ begin
     PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
     // calculate table size and draw it
-    FTableWidth := Round(0.85 * PaintBox.Buffer.Width);
-    FTableHeight := Round(FTableWidth / (TTableResources.TableImage.Width / TTableResources.TableImage.Height));
-    FTableXOffset := (PaintBox.Buffer.Width - FTableWidth) div 2;
-    FTableYOffset := Round(PaintBox.Buffer.Height / 7);
-    PaintBox.Buffer.Draw(Rect(FTableXOffset, FTableYOffset, FTableXOffset + FTableWidth, FTableYOffset + FTableHeight),
-                         TTableResources.TableImage.BoundsRect,
-                         TTableResources.TableImage);
+    FTableWidth := Round(0.75 * PaintBox.Buffer.Width);
+    FTableHeight := Round(FTableWidth / TTableResources.TableAspectRatio);
+    FTableResizeRatio := FTableWidth / TTableResources.TableWidth;
+    FTableXOffset := Round(FTableResizeRatio * TTableResources.TableXOffset);
+    FTableYOffset := Round(FTableResizeRatio * TTableResources.TableYOffset);
+    tblw := Round(FTableResizeRatio * TTableResources.TableImage.Width);
+    tblh := Round(FTableResizeRatio * TTableResources.TableImage.Height);
+    tblx := (PaintBox.Buffer.Width - tblw) div 2;
+    tbly := (PaintBox.Buffer.Height - tblh) div 2 + 50;
+    FTableCenter.X := tblx + FTableXOffset + FTableWidth div 2;
+    FTableCenter.Y := tbly + FTableYOffset + FTableHeight div 2;
+    PaintBox.Buffer.Draw(Rect(tblx, tbly, tblx + tblw, tbly + tblh), TTableResources.TableImage.BoundsRect, TTableResources.TableImage);
+                                                                              {
+    for C1 := 0 to Round((2 * pi) * 10000) do
+      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth - 20) / 2) * Cos(C1)),
+                            FTableCenter.Y + Round(((FTableHeight - 15) / 2) * Sin(C1)) - 5] := clRed; // BLUE!
+                                                                                                                  }
+                     {
+    for C1 := 0 to Round((2 * pi) * 10000) do
+      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth - 60 - 80 * FTableResizeRatio) / 2) * Cos(C1)),
+                            FTableCenter.Y + Round(((FTableHeight - 120 * FTableResizeRatio) / 2) * Sin(C1)) - Round(20 * FTableResizeRatio)] := clBlue; // RED
+                           }
+{
+    PaintBox.Buffer.Draw(Rect(FTableCenter.X - 5, FTableCenter.Y - 5, FTableCenter.X + 5, FTableCenter.Y + 5),
+                         TTableResources.DealerButtonImage.BoundsRect,
+                         TTableResources.DealerButtonImage);
+}
+    // dealer button
+    DrawDealerButton(FTableStatus.Dealer);
 
     // draw seats
     for C1 := 0 to FTable.Game.Seats - 1 do
       DrawSeat(C1);
-
-    // dealer button
-    if FTableStatus.Dealer > -1 then
-    begin
-      seat_point := GetSeatPoint(FTableStatus.Dealer);
-      PaintBox.Buffer.Font.Color := clYellow;
-      PaintBox.Buffer.TextOut(seat_point.X + 17, seat_point.Y, 'D');
-    end;
 
     // sb/bb
     if FTableStatus.SmallBlindSeat > -1 then
@@ -301,7 +321,7 @@ begin
       end;
     end;
 
-    PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, cards);
+//    PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, cards);
     PaintBox.Buffer.Font.Style := [];
 
     // draw player cards
@@ -349,10 +369,46 @@ begin
     PaintBox.Flush;
 end;
 
-function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint;
+procedure TfrmTable.DrawDealerButton(const ASeatIndex: Integer);
+var
+  dealer_point: TPoint;
+  dealerw     : Integer;
+  dealerh     : Integer;
 begin
-  result := GR32.Point(FTableXOffset + Round(TTableResources.SeatPoints[FTable.Game.Seats, ASeatIndex].X * (FTableWidth / TTableResources.TableOriginalWidth)),
-                       FTableYOffset + Round(TTableResources.SeatPoints[FTable.Game.Seats, ASeatIndex].Y * (FTableHeight / TTableResources.TableOriginalHeight)));
+  if ASeatIndex = -1 then
+    Exit;
+
+  dealer_point := GetDealerPoint(ASeatIndex);
+  dealerw := Round(TTableResources.DealerButtonWidth * FTableResizeRatio);
+  dealerh := Round(dealerw * TTableResources.DealerButtonAspectRatio);
+
+  PaintBox.Buffer.Draw(Rect(dealer_point.X - dealerw div 2, dealer_point.Y - dealerh div 2, dealer_point.X + dealerw div 2, dealer_point.Y + dealerh div 2),
+                       TTableResources.DealerButtonImage.BoundsRect,
+                       TTableResources.DealerButtonImage);
+end;
+
+function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint;
+var
+  seat_radians: Double;
+  x, y        : Integer;
+begin
+  seat_radians := (2 * pi) / (FTable.Game.Seats / (ASeatIndex + 1));
+  x := FTableCenter.X + Round(((FTableWidth - 20) / 2) * Cos(seat_radians));
+  y := FTableCenter.Y + Round(((FTableHeight - 15) / 2) * Sin(seat_radians)) - 5;
+
+  result := GR32.Point(x, y);
+end;
+
+function TfrmTable.GetDealerPoint(const ASeatIndex: Integer): TPoint;
+var
+  seat_radians: Double;
+  x, y        : Integer;
+begin
+  seat_radians := (2 * pi) / (FTable.Game.Seats / (ASeatIndex + 1));
+  x := FTableCenter.X + Round(((FTableWidth - 60 - 100 * FTableResizeRatio) / 2) * Cos(seat_radians));
+  y := FTableCenter.Y + Round(((FTableHeight - 133 * FTableResizeRatio) / 2) * Sin(seat_radians)) - Round(20 * FTableResizeRatio);
+
+  result := GR32.Point(x, y);
 end;
 
 procedure TfrmTable.DrawSeat(const ASeatIndex: Integer);
