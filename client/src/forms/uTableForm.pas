@@ -321,7 +321,7 @@ begin
       end;
     end;
 
-//    PaintBox.Buffer.TextOut((PaintBox.Buffer.Width - FTableWidth) div 2 + FTableWidth div 2 - 50, FTableYOffset + FTableHeight div 2 + 30, cards);
+    PaintBox.Buffer.TextOut(FTableCenter.X - 50, FTableCenter.Y + 30, cards);
     PaintBox.Buffer.Font.Style := [];
 
     // draw player cards
