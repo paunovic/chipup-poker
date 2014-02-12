@@ -83,7 +83,8 @@ begin
       end;
       FN_MSGS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FMsgs := String(AProtobufReader.readUtf8String);
+        SetLength(FMsgs, Length(FMsgs) + 1);
+        FMsgs[Length(FMsgs)-1] := String(AProtobufReader.readUtf8String);
       end;
     else
       AProtobufReader.skipField(tag);

@@ -631,7 +631,14 @@ begin
   if Length(pbtevent.Seats) > 0 then
   begin
     for C1 := 0 to Length(pbtevent.Seats) - 1 do
-      AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), event);
+    begin
+      if Length(pbtevent.Msgs) >= (C1+1) then
+      begin
+        AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), Format('%s %s',[event,pbtevent.msgs[C1]]));
+      end
+      else
+        AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), event);
+    end;
   end
   else
     AddUserChatMessage('TBLEVENT', event);

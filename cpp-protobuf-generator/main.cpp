@@ -511,13 +511,24 @@ void GenerateMessage(const FileDescriptor* file, const Descriptor *message, Gene
 							,"pname",PrivateFieldName(field));
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
-					printer.Print(
-						"      $name$: begin\n"
-						"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"        $pname$ := String(AProtobufReader.readUtf8String);\n"
-						"      end;\n"
-						,"pname",PrivateFieldName(field)
-						,"name",EnumName(field));
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+							"        SetLength($pname$, Length($pname$) + 1);\n"
+							"        $pname$[Length($pname$)-1] := String(AProtobufReader.readUtf8String);\n"
+							"      end;\n"
+							,"pname",PrivateFieldName(field)
+							,"name",EnumName(field));
+					} else {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
+							"        $pname$ := String(AProtobufReader.readUtf8String);\n"
+							"      end;\n"
+							,"pname",PrivateFieldName(field)
+							,"name",EnumName(field));
+					}
 				} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
