@@ -105,7 +105,7 @@ end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);
 begin
-  SocketClient.TableSit(FGame.MongoId, FSeatIndex, seBuyin.Value * 100);
+  SocketClient.TableSit(FGame.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100));
   acOK.Enabled := FALSE;
 end;
 

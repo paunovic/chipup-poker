@@ -50,9 +50,9 @@ object frmTableSit: TfrmTableSit
     Top = 12
     Properties.MinValue = 1.000000000000000000
     Properties.SpinButtons.Visible = False
-    Properties.ValueType = vtInt
+    Properties.ValueType = vtFloat
     TabOrder = 1
-    Value = 100
+    Value = 100.000000000000000000
     Width = 125
   end
   object btOK: TcxButton

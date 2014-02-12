@@ -347,7 +347,7 @@ begin
       if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
       begin
         seat_point := GetSeatPoint(seat_info.SeatIndex);
-        PaintBox.Buffer.TextOut(seat_point.X - 15, seat_point.Y - 30, IntToStr(seat_info.Chips));
+        PaintBox.Buffer.TextOut(seat_point.X - 15, seat_point.Y - 30, FloatToStr(seat_info.Chips / 100));
       end;
     PaintBox.Buffer.Font.Style := [];
 
