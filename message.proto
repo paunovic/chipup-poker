@@ -351,6 +351,7 @@ message TableEvent {
 	repeated int32 seats = 2;
 	required bytes table_mongo_id = 3;
 	repeated WinnerData seatsData = 4;
+	repeated string msgs = 5;
 }
 
 message PutChips {

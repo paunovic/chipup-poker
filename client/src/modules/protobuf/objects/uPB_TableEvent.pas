@@ -6,7 +6,7 @@ unit uPB_TableEvent;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader, uPB_WinnerData;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_WinnerData;
 
 type
   TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3,teWinning = 4,teDealing = 5,teCheck = 6,teCall = 7,teRaise = 8);
@@ -17,16 +17,19 @@ type
       FN_SEATS = 2;
       FN_TABLE_MONGO_ID = 3;
       FN_SEATSDATA = 4;
+      FN_MSGS = 5;
 
     var
       FEvent: TTableEventType;
       FSeats: TArray<Integer>;
       FTableMongoId: TBytes;
       FSeatsData: TObjectList<TPB_WinnerData>;
+      FMsgs: TArray<String>;
 
     procedure SetEvent(const AValue: TTableEventType);
     procedure SetSeats(const AValue: TArray<Integer>);
     procedure SetTableMongoId(const AValue: TBytes);
+    procedure SetMsgs(const AValue: TArray<String>);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -35,6 +38,7 @@ type
     property Seats: TArray<Integer> read FSeats write SetSeats;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
     property SeatsData: TObjectList<TPB_WinnerData> read FSeatsData write FSeatsData;
+    property Msgs: TArray<String> read FMsgs write SetMsgs;
   end;
 
 implementation
@@ -77,6 +81,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FSeatsData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
+      FN_MSGS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FMsgs := String(AProtobufReader.readUtf8String);
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -101,6 +109,15 @@ procedure TPB_TableEvent.SetTableMongoId(const AValue: TBytes);
 begin
   FTableMongoId := AValue;
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
+end;
+
+procedure TPB_TableEvent.SetMsgs(const AValue: TArray<String>);
+var
+  C1: Integer;
+begin
+  FMsgs := AValue;
+  for C1 := 0 to Length(FMsgs) - 1 do
+    ProtobufOutput.writeString(FN_MSGS, AValue[C1]);
 end;
 
 end.
