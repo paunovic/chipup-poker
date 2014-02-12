@@ -23,6 +23,7 @@ type
       FN_TURN = 8;
       FN_RIVER = 9;
       FN_POTS = 10;
+      FN_LOCKED = 11;
 
     var
       FTableMongoId: TBytes;
@@ -35,6 +36,7 @@ type
       FTurn: TBytes;
       FRiver: TBytes;
       FPots: TArray<Integer>;
+      FLocked: Boolean;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -45,6 +47,7 @@ type
     procedure SetTurn(const AValue: TBytes);
     procedure SetRiver(const AValue: TBytes);
     procedure SetPots(const AValue: TArray<Integer>);
+    procedure SetLocked(const AValue: Boolean);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -59,6 +62,7 @@ type
     property Turn: TBytes read FTurn write SetTurn;
     property River: TBytes read FRiver write SetRiver;
     property Pots: TArray<Integer> read FPots write SetPots;
+    property Locked: Boolean read FLocked write SetLocked;
   end;
 
 implementation
@@ -189,6 +193,12 @@ begin
   FPots := AValue;
   for C1 := 0 to Length(FPots) - 1 do
     ProtobufOutput.writeInt32(FN_POTS, AValue[C1]);
+end;
+
+procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
+begin
+  FLocked := AValue;
+  ProtobufOutput.writeBoolean(FN_LOCKED, AValue);
 end;
 
 end.

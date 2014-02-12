@@ -129,7 +129,7 @@ procedure TfrmTable.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
 
-//  AParams.ExStyle := AParams.ExStyle + WS_CLIPCHILDREN;
+  AParams.ExStyle := AParams.ExStyle or WS_EX_APPWINDOW;
   AParams.WndParent := 0;
 end;
 
@@ -171,6 +171,11 @@ procedure TfrmTable.WndProc(var AMessage: TMessage);
 var
   msg: TMessageItem;
 begin
+  // prevent ALT key from tabbing between forms
+  if (AMessage.Msg = WM_SYSCOMMAND) and
+     (AMessage.WParam = SC_KEYMENU) then
+    Exit;
+
   inherited;
 
   if MessageContainer.IsNewMessage(AMessage, msg) then
@@ -500,24 +505,25 @@ begin
   if FTable.IsSitting then
   begin
     acStandUp.Enabled := TRUE;
-    case FTableStatus.State of
-      tsIdle: ;
-      tsPreFlop,
-      tsFlop,
-      tsTurn,
-      tsRiver: begin
-        if FTableStatus.CurrentSeat = FTable.SeatIndex then
-        begin
-          if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
-            acCall.Enabled := TRUE
-          else
-            acCheck.Enabled := TRUE;
-          acFold.Enabled := TRUE;
-          acRaise.Enabled := TRUE;
+    if not FTableStatus.Locked then
+      case FTableStatus.State of
+        tsIdle: ;
+        tsPreFlop,
+        tsFlop,
+        tsTurn,
+        tsRiver: begin
+          if FTableStatus.CurrentSeat = FTable.SeatIndex then
+          begin
+            if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
+              acCall.Enabled := TRUE
+            else
+              acCheck.Enabled := TRUE;
+            acFold.Enabled := TRUE;
+            acRaise.Enabled := TRUE;
+          end;
         end;
+        tsWinning: ;
       end;
-      tsWinning: ;
-    end;
   end;
 
   btStandUp.Visible := acStandUp.Enabled;
