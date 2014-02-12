@@ -410,7 +410,7 @@ begin
       gridGamesTable.DataController.SetValue(C1, gridGamesId.Index, game.MongoId);
       gridGamesTable.DataController.SetValue(C1, gridGamesName.Index, game.Name);
       gridGamesTable.DataController.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
-      gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [game.SmallBlind, game.BigBlind]));
+      gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
       gridGamesTable.DataController.SetValue(C1, gridGamesSeats.Index, game.Seats);
     end;
   finally

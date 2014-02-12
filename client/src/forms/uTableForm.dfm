@@ -157,6 +157,15 @@ object frmTable: TfrmTable
         Top = 52
         Caption = 'lbsInfo'
       end
+      object seRaiseAmount: TcxSpinEdit
+        Left = 104
+        Top = 39
+        Properties.SpinButtons.Visible = False
+        Properties.ValueType = vtFloat
+        TabOrder = 5
+        Visible = False
+        Width = 85
+      end
     end
   end
   object PaintBox: TPaintBox32

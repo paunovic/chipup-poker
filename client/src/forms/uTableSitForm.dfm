@@ -50,6 +50,7 @@ object frmTableSit: TfrmTableSit
     Top = 12
     Properties.MinValue = 1.000000000000000000
     Properties.SpinButtons.Visible = False
+    Properties.UseLeftAlignmentOnEditing = False
     Properties.ValueType = vtFloat
     TabOrder = 1
     Value = 100.000000000000000000

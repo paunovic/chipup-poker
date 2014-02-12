@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit;
 
 type
   TfrmTable = class(TForm)
@@ -28,6 +28,7 @@ type
     btStandUp: TcxButton;
     lbsInfo: TcxLabel;
     reChat: TcxRichEdit;
+    seRaiseAmount: TcxSpinEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -530,6 +531,9 @@ begin
   btStandUp.Visible := acStandUp.Enabled;
   btFold.Visible := acFold.Enabled;
   btRaise.Visible := acRaise.Enabled;
+  seRaiseAmount.Visible := acRaise.Enabled;
+  seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
+  seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
 
   if (acCall.Enabled) or (acCheck.Enabled) then
   begin
@@ -586,9 +590,9 @@ begin
   tmp := '';
   for C1 := Low(pbtablestatus.Pots) to High(pbtablestatus.Pots) do
     if C1 = High(pbtablestatus.Pots) then
-      tmp := tmp + IntToStr(pbtablestatus.Pots[C1])
+      tmp := tmp + FloatToStr(pbtablestatus.Pots[C1] / 100)
     else
-      tmp := tmp + IntToStr(pbtablestatus.Pots[C1]) + ', ';
+      tmp := tmp + FloatToStr(pbtablestatus.Pots[C1] / 100) + ', ';
 
   lbsInfo.Caption := Format('Pots: %s', [tmp]);
 
@@ -663,7 +667,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet + FTable.Game.BigBlind * 100);
+  SocketClient.PutChips(FTable.Game.MongoId, seRaiseAmount.Value * 100);
 end;
 
 end.
