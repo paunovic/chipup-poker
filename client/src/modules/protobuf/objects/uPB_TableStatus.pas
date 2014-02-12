@@ -130,6 +130,10 @@ begin
         SetLength(FPots, Length(FPots) + 1);
         FPots[Length(FPots)-1] := AProtobufReader.readInt32;
       end;
+      FN_LOCKED: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FLocked := AProtobufReader.readBoolean;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;

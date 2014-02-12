@@ -573,7 +573,7 @@ void GenerateMessage(const FileDescriptor* file, const Descriptor *message, Gene
 							,"subname",type->name());
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
-					if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
+					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(
 							"      $name$: begin\n"
 							"        Assert(wire_type = WIRETYPE_VARINT);\n"
