@@ -259,6 +259,7 @@ message TableStatus {
 	optional bytes turn = 8;
 	optional bytes river = 9;
 	repeated int32 pots = 10;
+	required bool locked = 11;
 }
 
 message SeatInfo {

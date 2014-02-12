@@ -90,6 +90,9 @@ function startImHub() {
 	im_hub.on('message',function (msg) {
 		buffer.push(msg);
 		switch (msg.type) {
+		case 'control':
+			if (msg.cmd == 'autooff') autoRestart = false;
+			break;
 		case 'conn':
 			console.log(msg.ts,msg.nick,util.inspect(msg.objects,{colors:true}));
 			for (var x=0; x<msg.objects.length; x++) {
