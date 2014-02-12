@@ -72,7 +72,6 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 161
   end
   object btCancel: TcxButton
     Left = 268
@@ -89,7 +88,6 @@ object frmCreateGame: TfrmCreateGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 161
   end
   object cbGameType: TcxComboBox
     Left = 88

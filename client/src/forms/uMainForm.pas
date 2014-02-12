@@ -293,7 +293,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
-  RunModalForm(TfrmClubLobby, self, [@FSelectedClub]);
+  RunForm(TfrmClubLobby, nil, [@FSelectedClub]);
 end;
 
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);

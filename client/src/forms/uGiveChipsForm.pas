@@ -122,7 +122,7 @@ begin
     Exit;
   end;
 
-  SocketClient.TransferChips(FPlayer.Id, seChipAmount.Value);
+  SocketClient.TransferChips(FPlayer.Id, seChipAmount.Value * 100);
 end;
 
 procedure TfrmGiveChips.CSRTransferChipsOk(const AMessage: TMessageItem);

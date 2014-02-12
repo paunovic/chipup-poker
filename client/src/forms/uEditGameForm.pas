@@ -132,7 +132,7 @@ begin
     Exit;
 
   acOK.Enabled := FALSE;
-  SocketClient.EditGame(FGame.MongoId, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+  SocketClient.EditGame(FGame.MongoId, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb * 100, bb * 100, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
 end;
 
 procedure TfrmEditGame.CSREditGameOk(const AMessage: TMessageItem);

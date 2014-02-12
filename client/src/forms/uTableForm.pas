@@ -522,7 +522,8 @@ begin
             acRaise.Enabled := TRUE;
           end;
         end;
-        tsWinning: ;
+        tsWinning,
+        tsWinning2: ;
       end;
   end;
 
@@ -634,7 +635,7 @@ begin
     begin
       if Length(pbtevent.Msgs) >= (C1+1) then
       begin
-        AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), Format('%s %s',[event,pbtevent.msgs[C1]]));
+        AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), Format('%s %s', [event, pbtevent.msgs[C1]]));
       end
       else
         AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), event);
@@ -662,7 +663,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet + FTable.Game.BigBlind);
+  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet + FTable.Game.BigBlind * 100);
 end;
 
 end.

@@ -91,6 +91,7 @@ object frmGiveChips: TfrmGiveChips
     Top = 66
     Properties.MaxValue = 2000.000000000000000000
     Properties.SpinButtons.Visible = False
+    Properties.ValueType = vtFloat
     TabOrder = 2
     Width = 255
   end
@@ -109,7 +110,6 @@ object frmGiveChips: TfrmGiveChips
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 104
   end
   object btCancel: TcxButton
     Left = 256
@@ -126,7 +126,6 @@ object frmGiveChips: TfrmGiveChips
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 104
   end
   object alChipTransfer: TActionList
     Left = 44
