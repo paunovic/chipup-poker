@@ -129,6 +129,7 @@ end;
 
 destructor TSocketClient.Destroy;
 begin
+  {$IFDEF DEBUG} DebugLn('TSocketClient.Destroy', ditSocket); {$ENDIF}
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
   FSocket.Free;
