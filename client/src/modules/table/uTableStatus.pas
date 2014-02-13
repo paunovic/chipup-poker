@@ -149,7 +149,7 @@ begin
 
   while index <> sind do
   begin
-    if FSeatInfos[index].Status = psInHand then
+    if FSeatInfos[index].Status in [psInHand, psAllIn] then
       Exit(FSeatInfos[index].SeatIndex);
 
     if index = FSeatInfos.Count - 1 then
