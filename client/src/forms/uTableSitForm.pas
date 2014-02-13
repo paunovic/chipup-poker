@@ -17,11 +17,13 @@ type
     alTableSit: TActionList;
     acOK: TAction;
     acCancel: TAction;
+    cxButton1: TcxButton;
     procedure acCancelExecute(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure cxButton1Click(Sender: TObject);
   private
     FGame     : TGameInfo;
     FSeatIndex: Integer;
@@ -124,6 +126,11 @@ procedure TfrmTableSit.CSRTableSitSeatTaken(const AMessage: TMessageItem);
 begin
   MessageDlg('Seat is already taken. Please choose another seat', mtWarning, [mbOK], 0);
   ModalResult := mrClose;
+end;
+
+procedure TfrmTableSit.cxButton1Click(Sender: TObject);
+begin
+  SocketClient.TableAddOn(FGame.MongoId, Trunc(seBuyin.Value * 100));
 end;
 
 end.

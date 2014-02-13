@@ -4,7 +4,7 @@ object frmTableSit: TfrmTableSit
   BorderStyle = bsDialog
   Caption = 'Table Sit Options'
   ClientHeight = 81
-  ClientWidth = 226
+  ClientWidth = 344
   Color = clBlack
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object frmTableSit: TfrmTableSit
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   DesignSize = (
-    226
+    344
     81)
   PixelsPerInch = 96
   TextHeight = 13
@@ -57,7 +57,7 @@ object frmTableSit: TfrmTableSit
     Width = 125
   end
   object btOK: TcxButton
-    Left = 25
+    Left = 143
     Top = 46
     Width = 93
     Height = 27
@@ -71,9 +71,10 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitLeft = 25
   end
   object btCancel: TcxButton
-    Left = 124
+    Left = 242
     Top = 46
     Width = 93
     Height = 27
@@ -87,6 +88,24 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitLeft = 124
+  end
+  object cxButton1: TcxButton
+    Left = 44
+    Top = 46
+    Width = 93
+    Height = 27
+    Anchors = [akRight, akBottom]
+    Caption = 'ADDON'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 4
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = cxButton1Click
   end
   object alTableSit: TActionList
     Left = 24
