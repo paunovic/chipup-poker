@@ -48,7 +48,6 @@ type
     FFormAspectRatio : Double;
     FTable           : TTable;
     FTableStatus     : TTableStatus;
-
     FTableResizeRatio: Double;
     FTableWidth      : Integer;
     FTableHeight     : Integer;
@@ -531,12 +530,28 @@ begin
         tsRiver: begin
           if FTableStatus.CurrentSeat = FTable.SeatIndex then
           begin
+            Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
             if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
-              acCall.Enabled := TRUE
+            begin
+              if seat_info.Chips < FTableStatus.HighestBet then
+                acCall.Caption := 'CALL (ALL-IN)'
+              else
+                acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - FTableStatus.GetBet(FTable.SeatIndex)) / 100]);
+              acCall.Enabled := TRUE;
+
+              if seat_info.Chips > FTableStatus.HighestBet then
+              begin
+                acRaise.Caption := 'RAISE';
+                acRaise.Enabled := TRUE;
+              end;
+            end
             else
+            begin
               acCheck.Enabled := TRUE;
+              acRaise.Caption := 'BET';
+              acRaise.Enabled := TRUE;
+            end;
             acFold.Enabled := TRUE;
-            acRaise.Enabled := TRUE;
           end;
         end;
         tsWinning,
@@ -556,7 +571,7 @@ begin
     seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
     tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-    tbRaise.Properties.Max := seat_info.Chips;
+    tbRaise.Properties.Max := FTableStatus.GetBet(seat_info.SeatIndex) + seat_info.Chips;
   end;
 
   if (acCall.Enabled) or (acCheck.Enabled) then
@@ -677,8 +692,17 @@ begin
 end;
 
 procedure TfrmTable.acCallExecute(Sender: TObject);
+var
+  seat_info  : TSeatInfo;
+  call_amount: Integer;
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, FTableStatus.HighestBet);
+  Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
+  if seat_info.Chips < FTableStatus.HighestBet then
+    call_amount := seat_info.Chips
+  else
+    call_amount := FTableStatus.HighestBet;
+
+  SocketClient.PutChips(FTable.Game.MongoId, call_amount);
 end;
 
 procedure TfrmTable.acCheckExecute(Sender: TObject);
