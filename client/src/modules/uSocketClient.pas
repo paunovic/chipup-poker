@@ -73,6 +73,7 @@ type
     procedure JoinTable(const AGameId: TBytes);
     procedure LeaveTable(const AGameId: TBytes);
     procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
+    procedure TableAddOn(const AGameId: TBytes; const AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
     procedure Ping;
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
@@ -820,6 +821,21 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TSocketClient.TableAddOn(const AGameId: TBytes; const AChips: Integer);
+var
+  protobuf: TPB_TableSit;
+begin
+  protobuf := TPB_TableSit.Create;
+  try
+    protobuf.GameId := AGameId;
+    protobuf.Chips := AChips;
+    SendProtobuf(scTableAddOn, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 procedure TSocketClient.TableStandUp(const AGameId: TBytes);
 var

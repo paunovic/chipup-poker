@@ -639,7 +639,7 @@ procedure TfrmTable.CSETableEvent(const AMessage: TMessageItem);
 var
   pbtevent  : TPB_TableEvent;
   event     : String;
-  C1, C2    : Integer;
+  C1        : Integer;
   seat_info : TSeatInfo;
 begin
   pbtevent := AMessage.Object_ as TPB_TableEvent;
@@ -663,18 +663,13 @@ begin
     if ((pbtevent.Event = teCall) or (pbtevent.Event = teRaise)) and
        (FTableStatus.GetSeatInfo(pbtevent.Seats[0], seat_info)) and
        (seat_info.Chips = 0) then
-      event := 'All IN';
+      event := 'ALL IN';
 
     for C1 := 0 to Length(pbtevent.Seats) - 1 do
-    begin
-      if Length(pbtevent.Msgs) > 0 then
-      begin
-        for C2 := Low(pbtevent.Msgs) to High(pbtevent.Msgs) do
-          AddUserChatMessage(Format('TBLEVENT [%d, %d]', [pbtevent.Seats[C1], C2]), Format('%s %s', [event, pbtevent.msgs[C2]]));
-      end
+      if Length(pbtevent.Msgs) > C1 then
+        AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), Format('%s %s', [event, pbtevent.msgs[C1]]))
       else
         AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), event);
-    end;
   end
   else
     AddUserChatMessage('TBLEVENT', event);
