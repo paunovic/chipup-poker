@@ -153,8 +153,8 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object lbsInfo: TcxLabel
-        Left = 236
-        Top = 52
+        Left = 286
+        Top = 6
         Caption = 'lbsInfo'
       end
       object seRaiseAmount: TcxSpinEdit
@@ -165,6 +165,20 @@ object frmTable: TfrmTable
         TabOrder = 5
         Visible = False
         Width = 85
+      end
+      object tbRaise: TcxTrackBar
+        Left = 195
+        Top = 39
+        Properties.AutoSize = False
+        Properties.ShowTicks = False
+        Properties.OnChange = tbRaisePropertiesChange
+        Style.Edges = []
+        Style.TransparentBorder = True
+        TabOrder = 6
+        Transparent = True
+        Visible = False
+        Height = 25
+        Width = 196
       end
     end
   end

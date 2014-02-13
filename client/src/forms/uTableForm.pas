@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar;
 
 type
   TfrmTable = class(TForm)
@@ -29,6 +29,7 @@ type
     lbsInfo: TcxLabel;
     reChat: TcxRichEdit;
     seRaiseAmount: TcxSpinEdit;
+    tbRaise: TcxTrackBar;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -42,6 +43,7 @@ type
     procedure acCheckExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure acRaiseExecute(Sender: TObject);
+    procedure tbRaisePropertiesChange(Sender: TObject);
   private
     FFormAspectRatio : Double;
     FTable           : TTable;
@@ -115,7 +117,7 @@ begin
   FTableWidth := TTableResources.TableImage.Width;
   FTableHeight := TTableResources.TableImage.Height;
 
-  Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, FTable.Game.SmallBlind, FTable.Game.BigBlind, FTable.Game.GameTypeStrFull]);
+  Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, Trunc(FTable.Game.SmallBlind / 100), Trunc(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull]);
   Redraw;
 end;
 
@@ -375,6 +377,11 @@ begin
     PaintBox.Flush;
 end;
 
+procedure TfrmTable.tbRaisePropertiesChange(Sender: TObject);
+begin
+  seRaiseAmount.Value := tbRaise.Position / 100;
+end;
+
 procedure TfrmTable.DrawDealerButton(const ASeatIndex: Integer);
 var
   dealer_point: TPoint;
@@ -496,6 +503,8 @@ begin
 end;
 
 procedure TfrmTable.ConfigureGUI;
+var
+  seat_info: TSeatInfo;
 begin
   acStandUp.Enabled := FALSE;
   acFold.Enabled := FALSE;
@@ -532,8 +541,16 @@ begin
   btFold.Visible := acFold.Enabled;
   btRaise.Visible := acRaise.Enabled;
   seRaiseAmount.Visible := acRaise.Enabled;
-  seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
-  seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
+  tbRaise.Visible := acRaise.Enabled;
+
+  if tbRaise.Visible then
+  begin
+    seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
+    seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
+    tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
+    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
+    tbRaise.Properties.Max := seat_info.Chips;
+  end;
 
   if (acCall.Enabled) or (acCheck.Enabled) then
   begin
