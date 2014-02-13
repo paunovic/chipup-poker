@@ -640,7 +640,6 @@ var
   pbtevent  : TPB_TableEvent;
   event     : String;
   C1        : Integer;
-  seat_info : TSeatInfo;
 begin
   pbtevent := AMessage.Object_ as TPB_TableEvent;
   if not CompareBytes(pbtevent.TableMongoId, FTable.Game.MongoId) then
@@ -655,16 +654,12 @@ begin
     teCheck: event := 'CHECK';
     teCall: event := 'CALL';
     teRaise: event := 'RAISE';
+    teAllIn: event := 'ALL IN';
   end;
 
   {$IFDEF DEBUG}
   if Length(pbtevent.Seats) > 0 then
   begin
-    if ((pbtevent.Event = teCall) or (pbtevent.Event = teRaise)) and
-       (FTableStatus.GetSeatInfo(pbtevent.Seats[0], seat_info)) and
-       (seat_info.Chips = 0) then
-      event := 'ALL IN';
-
     for C1 := 0 to Length(pbtevent.Seats) - 1 do
       if Length(pbtevent.Msgs) > C1 then
         AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), Format('%s %s', [event, pbtevent.msgs[C1]]))
