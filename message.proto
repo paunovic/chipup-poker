@@ -226,6 +226,7 @@ enum ServerCodes {
     scGetPlayers = 527;
 	scFold = 528;
 	scPutChips = 529;
+	scTableAddOn = 530;
 }
 
 service Server {

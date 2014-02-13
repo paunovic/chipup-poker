@@ -225,6 +225,13 @@ begin
         end;
         Break;
       end;
+
+      if (FTable.IsSitting) and
+         (FTable.SeatIndex = C1) then
+      begin
+        RunModalForm(TfrmTableSit, self, [FTable.Game, @C1]);
+        Break;
+      end;
     end;
   end;
 end;
@@ -632,7 +639,7 @@ procedure TfrmTable.CSETableEvent(const AMessage: TMessageItem);
 var
   pbtevent  : TPB_TableEvent;
   event     : String;
-  C1        : Integer;
+  C1, C2    : Integer;
   seat_info : TSeatInfo;
 begin
   pbtevent := AMessage.Object_ as TPB_TableEvent;
@@ -649,23 +656,21 @@ begin
     teCall: event := 'CALL';
     teRaise: event := 'RAISE';
   end;
-  if (pbtevent.Event = teCall) or (pbtevent.Event = teRaise) then
-  begin
-    C1 := pbtevent.Seats[0];
-    FTableStatus.GetSeatInfo(C1, seat_info);
-    if seat_info.Chips = 0 then
-      event := 'All In';
-  end;
-
 
   {$IFDEF DEBUG}
   if Length(pbtevent.Seats) > 0 then
   begin
+    if ((pbtevent.Event = teCall) or (pbtevent.Event = teRaise)) and
+       (FTableStatus.GetSeatInfo(pbtevent.Seats[0], seat_info)) and
+       (seat_info.Chips = 0) then
+      event := 'All IN';
+
     for C1 := 0 to Length(pbtevent.Seats) - 1 do
     begin
-      if Length(pbtevent.Msgs) >= (C1+1) then
+      if Length(pbtevent.Msgs) > 0 then
       begin
-        AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), Format('%s %s', [event, pbtevent.msgs[C1]]));
+        for C2 := Low(pbtevent.Msgs) to High(pbtevent.Msgs) do
+          AddUserChatMessage(Format('TBLEVENT [%d, %d]', [pbtevent.Seats[C1], C2]), Format('%s %s', [event, pbtevent.msgs[C2]]));
       end
       else
         AddUserChatMessage(Format('TBLEVENT [%d]', [pbtevent.Seats[C1]]), event);
