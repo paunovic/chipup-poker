@@ -630,9 +630,10 @@ end;
 
 procedure TfrmTable.CSETableEvent(const AMessage: TMessageItem);
 var
-  pbtevent: TPB_TableEvent;
-  event   : String;
-  C1      : Integer;
+  pbtevent  : TPB_TableEvent;
+  event     : String;
+  C1        : Integer;
+  seat_info : TSeatInfo;
 begin
   pbtevent := AMessage.Object_ as TPB_TableEvent;
   if not CompareBytes(pbtevent.TableMongoId, FTable.Game.MongoId) then
@@ -648,6 +649,14 @@ begin
     teCall: event := 'CALL';
     teRaise: event := 'RAISE';
   end;
+  if (pbtevent.Event = teCall) or (pbtevent.Event = teRaise) then
+  begin
+    C1 := pbtevent.Seats[0];
+    FTableStatus.GetSeatInfo(C1, seat_info);
+    if seat_info.Chips = 0 then
+      event := 'All In';
+  end;
+
 
   {$IFDEF DEBUG}
   if Length(pbtevent.Seats) > 0 then
