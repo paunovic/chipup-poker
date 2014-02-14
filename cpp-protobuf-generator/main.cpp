@@ -152,25 +152,25 @@ string EnumName(const FieldDescriptor *field) {
 	UpperString(&name);
 	return "FN_"+name;
 }
-const string getDelphiType(const FieldDescriptor *field) {
-	string out;
-	if (typeinfo[field->type()]) out = typeinfo[field->type()]->delphiName;
-	else if (field->type() == FieldDescriptor::TYPE_ENUM) {
-		const EnumDescriptor *type = field->enum_type();
-		out = string("T")+type->name();
-	} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-		const Descriptor *subtype = field->message_type();
-		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-			return "TObjectList<TPB_"+subtype->name()+">";
-		} else {
-			return "TPB_"+subtype->name();
+// some code based on http://sourceforge.net/p/protobuf-delphi/wiki/Example/
+class BaseGenerator : public CodeGenerator {
+	bool Generate(const FileDescriptor* file, const string& parameter, GeneratorContext* generator_context, string* error) const {
+		for (int i=0; i<file->message_type_count(); i++) {
+			const Descriptor *message = file->message_type(i);
+			//cerr << "message#" << i << " " << message->name() << "\n";
+			GenerateMessage(file,message,generator_context);
+			for (int j=0; j<message->nested_type_count(); j++) {
+				const Descriptor *submessage = message->nested_type(j);
+				GenerateMessage(file,submessage,generator_context);
+			}
 		}
-	} else return "";
-	if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-		return "TArray<"+out+">";
-	} else return out;
-}
-void GenerateSettersDec(const Descriptor *message, io::Printer *printer) {
+		for (int i=0; i<file->enum_type_count(); i++) {
+			const EnumDescriptor *type = file->enum_type(i);
+			GenerateEnum(type,generator_context);
+		}
+		return true;
+	}
+void GenerateSettersDec(const Descriptor *message, io::Printer *printer) const {
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
 		if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) continue;
@@ -181,7 +181,7 @@ void GenerateSettersDec(const Descriptor *message, io::Printer *printer) {
 		}
 	}
 }
-void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
+void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const {
 	string writter;
 	map<string,string> vars;
 	for (int j=0; j<message->field_count(); j++) {
@@ -241,7 +241,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) {
 		}
 	}
 }
-void GenerateMessage(const FileDescriptor* file, const Descriptor *message, GeneratorContext* generator_context) {
+	void GenerateMessage(const FileDescriptor* file, const Descriptor *message, GeneratorContext* generator_context) const {
 			scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("uPB_" + message->name() + ".pas"));
 			io::Printer printer(output.get(), '$');
 			printer.Print(
@@ -640,27 +640,48 @@ void GenerateMessage(const FileDescriptor* file, const Descriptor *message, Gene
 			GenerateSettersImpl(message,&printer);
 			printer.Print(
 				"end.\n");
-}
-// some code based on http://sourceforge.net/p/protobuf-delphi/wiki/Example/
-class DelphiGenerator : public CodeGenerator {
-	bool Generate(const FileDescriptor* file, const string& parameter, GeneratorContext* generator_context, string* error) const {
-		cerr << file->name() << "\n";
-
-		for (int i=0; i<file->message_type_count(); i++) {
-			const Descriptor *message = file->message_type(i);
-			cerr << "message#" << i << " " << message->name() << "\n";
-			GenerateMessage(file,message,generator_context);
-			for (int j=0; j<message->nested_type_count(); j++) {
-				const Descriptor *submessage = message->nested_type(j);
-				GenerateMessage(file,submessage,generator_context);
-			}
-		}
-		for (int i=0; i<file->enum_type_count(); i++) {
-			const EnumDescriptor *type = file->enum_type(i);
-			GenerateEnum(type,generator_context);
-		}
-		return true;
 	}
+	virtual const string getDelphiType(const FieldDescriptor *field) const = 0;
+};
+class PascalGenerator : public BaseGenerator {
+	const string getDelphiType(const FieldDescriptor *field) const {
+		string out;
+		if (typeinfo[field->type()]) out = typeinfo[field->type()]->delphiName;
+		else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+			const EnumDescriptor *type = field->enum_type();
+			out = string("T")+type->name();
+		} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+			const Descriptor *subtype = field->message_type();
+			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+				return "array of TPB_"+subtype->name();
+			} else {
+				return "TPB_"+subtype->name();
+			}
+		} else return "";
+		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+			return "array of "+out;
+		} else return out;
+	}
+};
+class DelphiGenerator : public BaseGenerator {
+const string getDelphiType(const FieldDescriptor *field) const {
+	string out;
+	if (typeinfo[field->type()]) out = typeinfo[field->type()]->delphiName;
+	else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+		const EnumDescriptor *type = field->enum_type();
+		out = string("T")+type->name();
+	} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+		const Descriptor *subtype = field->message_type();
+		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+			return "TObjectList<TPB_"+subtype->name()+">";
+		} else {
+			return "TPB_"+subtype->name();
+		}
+	} else return "";
+	if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+		return "TArray<"+out+">";
+	} else return out;
+}
 };
 struct typeInfo* makeType(string type, string writter) {
 	struct typeInfo *t = new struct typeInfo;
@@ -673,7 +694,10 @@ int main(int argc, char *argv[]) {
 	typeinfo[FieldDescriptor::TYPE_STRING] = makeType("String","writeString");
 	typeinfo[FieldDescriptor::TYPE_BOOL] = makeType("Boolean","writeBoolean");
 	typeinfo[FieldDescriptor::TYPE_BYTES] = makeType("TBytes","writeBytes");
-	DelphiGenerator *gen = new DelphiGenerator();
+	cerr << "self " << argv[0] << " " << argc << "\n";
+	BaseGenerator *gen;
+	if (strcmp("protoc-gen-pascal",argv[0]) == 0) gen = new PascalGenerator();
+	else gen = new DelphiGenerator();
 	int ret = google::protobuf::compiler::PluginMain(argc,argv,gen);
 	delete gen;
 	return ret;
