@@ -227,4 +227,10 @@ object frmTable: TfrmTable
       OnExecute = acRaiseExecute
     end
   end
+  object tiActiveFrameBlink: TTimer
+    Enabled = False
+    OnTimer = tiActiveFrameBlinkTimer
+    Left = 140
+    Top = 284
+  end
 end

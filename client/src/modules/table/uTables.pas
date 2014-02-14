@@ -56,7 +56,6 @@ begin
   FClub := AClub;
   FTablesObject := ATablesObject;
   FForm := TfrmTable.Create(self);
-
   SocketClient.JoinTable(FGame.MongoId);
 end;
 
