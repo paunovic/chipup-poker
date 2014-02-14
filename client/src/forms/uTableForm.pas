@@ -523,7 +523,7 @@ begin
       begin
         tw := PaintBox.Buffer.TextWidthW(player_info.Nick);
         th := PaintBox.Buffer.TextHeightW(player_info.Nick);
-        PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(upt + (upb - upt) / 2 - th / 1.75), player_info.Nick, 1, $FFCCCCCC);
+        PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(upt + (upb - upt) / 2 - th / 1.75), player_info.Nick, 4, $FFCCCCCC);
       end;
 
       // draw chips

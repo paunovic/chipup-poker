@@ -47,7 +47,7 @@ implementation
 uses
   superobject, PNGImage, uAvatars, uMessageContainer, uServerMessageCallback, uPB_SetAvatarReply,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uServerCodes, uSocketClient, uCommon, uEncryption, uSettings, uMainDataModule;
+  uServerCodes, uSocketClient, uCommon, uEncryption, uSettings, uMainDataModule, uPlayerInfo;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
@@ -233,8 +233,9 @@ end;
 
 procedure TfrmChangeAvatar.CSRSetAvatar(const AMessage: TMessageItem);
 var
-  avatar : TAvatar;
-  pbreply: TPB_SetAvatarReply;
+  avatar     : TAvatar;
+  pbreply    : TPB_SetAvatarReply;
+  player_info: TPlayerInfo;
 begin
   pbreply := AMessage.Object_ as TPB_SetAvatarReply;
 
@@ -242,6 +243,8 @@ begin
     saSuccess: begin
       dmMain.SelfInfo.AvatarId := FAvatarId;
       avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
+      if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+        player_info.AvatarId := dmMain.SelfInfo.AvatarId;
       imgAvatar.Picture.Assign(avatar.Image);
 
       FAvatarChanged := FALSE;

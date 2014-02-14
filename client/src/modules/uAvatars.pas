@@ -56,7 +56,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uCommon, uMainDataModule, uSettings, uEncryption, GR32_Resamplers;
+  uCommon, uMainDataModule, uSettings, uEncryption, GR32_Resamplers, GR32_Backends;
 
 
 { TAvatar }
@@ -82,6 +82,9 @@ var
   C1, C2: Integer;
   cx, cy: Integer;
   radius: Integer;
+  x1, y1: Integer;
+  x2, y2: Integer;
+  tmpb  : TBitmap32;
 begin
   if not Assigned(FImageCircle) then
   begin
@@ -91,17 +94,46 @@ begin
   end;
 
   FImageCircle.Assign(FImage);
-  FImageCircle.DrawMode := dmBlend;
   cx := FImageCircle.Width div 2;
   cy := FImageCircle.Height div 2;
   if cx < cy then
     radius := cx
   else
     radius := cy;
+
+  x1 := FImageCircle.Width; y1 := FImageCircle.Height;
+  x2 := 0; y2 := 0;
   for C1 := 0 to FImageCircle.Width - 1 do
+  begin
     for C2 := 0 to FImageCircle.Height - 1 do
+    begin
       if not IsPointInsideCircle(C1, C2, cx, cy, radius) then
-        FImageCircle.PixelPtr[C1, C2]^ := $00000000;
+        FImageCircle.PixelPtr[C1, C2]^ := $00000000
+      else
+      begin
+        if C1 < x1 then
+          x1 := C1;
+        if C2 < y1 then
+          y1 := C2;
+
+        if C1 > x2 then
+          x2 := C1;
+        if C2 > y2 then
+          y2 := C2;
+      end;
+    end;
+  end;
+
+  tmpb := TBitmap32.Create;
+  try
+    tmpb.SetSize(x2 - x1, y2 - y1);
+    tmpb.Canvas.CopyRect(tmpb.BoundsRect, FImageCircle.Canvas, Rect(x1, y1, x2, y2));
+    FImageCircle.Assign(tmpb);
+  finally
+    tmpb.Free;
+  end;
+
+  FImageCircle.DrawMode := dmBlend;
 end;
 
 function TAvatar.GetAvatarPath(const AStoragePath: String): String;
