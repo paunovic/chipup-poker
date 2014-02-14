@@ -59,6 +59,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AprotobufReader.readBytes(FPlayerMongoId);
       end;
+      FN_SUSPENDED: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSuspended := AProtobufReader.readBoolean;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;

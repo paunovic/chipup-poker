@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.Menus, cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls,
   cxButtons, cxCheckBox, OverbyteIcsWSocket, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, Vcl.Imaging.jpeg, cxImage, dxsChipUpRedButton,
-  dxGDIPlusClasses;
+  dxGDIPlusClasses, uIFormParams;
 
 type
   TLoginStatus = (lsConnecting, lsConnected, lsLoggingIn);

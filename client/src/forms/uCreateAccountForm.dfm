@@ -146,7 +146,7 @@ object frmCreateAccount: TfrmCreateAccount
     Transparent = True
   end
   object lbTOS: TcxLabel
-    Left = 89
+    Left = 90
     Top = 153
     Cursor = crHandPoint
     Caption = 'Terms and Conditions'

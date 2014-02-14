@@ -74,7 +74,6 @@ object frmEditGame: TfrmEditGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 157
   end
   object lbsSeats: TcxLabel
     Left = 18

@@ -20,6 +20,7 @@ function GetString(const ALParam: LPARAM; var AString: String): Boolean;
 procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
                 const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
 function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): Integer;
+procedure RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer);
 function CompressStream(const AStream: TMemoryStream): Boolean;
 function DecompressStream(const AStream: TMemoryStream): Boolean;
 function GetFileSize(const AFile: String): DWORD;
@@ -136,6 +137,21 @@ begin
   finally
     FreeAndNil(modal_form);
   end;
+end;
+
+procedure RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer);
+var
+  form: TForm;
+begin
+  form := AClassType.Create(AOwner);
+
+  if Assigned(AOwner) then
+    form.PopupParent := AOwner;
+
+  if Length(AParams) > 0 then
+    (form as IFormParams).SetParams(AParams);
+
+  form.Show;
 end;
 
 function MyZCompressStream(inStream, outStream: TStream; level: TZCompressionLevel): Boolean;

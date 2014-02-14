@@ -117,7 +117,7 @@ begin
   if ValidateGameName(edGameName.Text, err) then
   begin
     acOK.Enabled := FALSE;
-    SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb, bb, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+    SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb * 100, bb * 100, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
   end;
 
   if err <> '' then

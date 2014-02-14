@@ -43,6 +43,7 @@ type
     FRiverCard     : TCard;
     FSmallBlindSeat: Integer;
     FBigBlindSeat  : Integer;
+    FLocked        : Boolean;
 
     function GetHighestBet: Integer;
 
@@ -67,6 +68,7 @@ type
     property RiverCard: TCard read FRiverCard;
     property SmallBlindSeat: Integer read FSmallBlindSeat;
     property BigBlindSeat: Integer read FBigBlindSeat;
+    property Locked: Boolean read FLocked;
   end;
 
 implementation
@@ -147,7 +149,7 @@ begin
 
   while index <> sind do
   begin
-    if FSeatInfos[index].Status = psInHand then
+    if FSeatInfos[index].Status in [psInHand, psAllIn] then
       Exit(FSeatInfos[index].SeatIndex);
 
     if index = FSeatInfos.Count - 1 then
@@ -244,6 +246,7 @@ begin
   end;
 
   FBets := ATableStatusProtobuf.Bets;
+  FLocked := ATableStatusProtobuf.Locked;
 end;
 
 { TSeatInfos }

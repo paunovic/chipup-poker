@@ -3,7 +3,7 @@ ifeq ($(OS),Windows_NT)
 	LDFLAGS += protobuf.a
 	EXTENSION = .exe
 else
-	LDFLAGS += -lprotoc
+	LDFLAGS += -lprotoc -lprotobuf
 endif
 all: protoc-gen-delphi${EXTENSION}
 protoc-gen-delphi${EXTENSION}: main.o

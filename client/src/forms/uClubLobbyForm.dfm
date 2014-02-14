@@ -17,6 +17,7 @@ object frmClubLobby: TfrmClubLobby
   Font.Style = []
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -2812,15 +2813,16 @@ object frmClubLobby: TfrmClubLobby
     TabOrder = 2
     Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
-    ClientRectBottom = 364
-    ClientRectRight = 594
-    ClientRectTop = 0
+    ClientRectBottom = 363
+    ClientRectLeft = 1
+    ClientRectRight = 593
+    ClientRectTop = 1
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
       DesignSize = (
-        594
-        364)
+        592
+        362)
       object gbClubSettings: TcxGroupBox
         Left = 7
         Top = 0
@@ -2829,8 +2831,8 @@ object frmClubLobby: TfrmClubLobby
         TabOrder = 0
         DesignSize = (
           250
-          357)
-        Height = 357
+          349)
+        Height = 355
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
@@ -2900,14 +2902,14 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Members'
         TabOrder = 1
         DesignSize = (
-          328
-          357)
-        Height = 357
-        Width = 328
+          326
+          349)
+        Height = 355
+        Width = 326
         object gridPlayersList: TcxGrid
-          Left = 2
-          Top = 19
-          Width = 324
+          Left = 3
+          Top = 16
+          Width = 320
           Height = 252
           Align = alTop
           BevelInner = bvNone
@@ -2949,8 +2951,10 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridPlayersListBalance: TcxGridColumn
               Caption = 'Balance'
+              DataBinding.ValueType = 'Float'
               PropertiesClassName = 'TcxSpinEditProperties'
               Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
               HeaderAlignmentHorz = taCenter
               Width = 71
             end
@@ -2968,7 +2972,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 316
+          Top = 308
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -2984,7 +2988,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 316
+          Top = 308
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -3000,7 +3004,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 316
+          Top = 308
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -3016,7 +3020,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 282
+          Top = 274
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -3035,37 +3039,31 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 601
-      ExplicitHeight = 374
       DesignSize = (
-        594
-        364)
+        592
+        362)
       object gbTables: TcxGroupBox
         Left = 7
         Top = 0
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 578
-        ExplicitHeight = 355
         DesignSize = (
-          580
-          357)
-        Height = 357
-        Width = 580
+          578
+          349)
+        Height = 355
+        Width = 578
         object gridGames: TcxGrid
-          Left = 2
-          Top = 19
-          Width = 576
-          Height = 167
+          Left = 3
+          Top = 16
+          Width = 572
+          Height = 159
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = 16
           ExplicitWidth = 588
           ExplicitHeight = 182
           object gridGamesTable: TcxGridTableView
@@ -3129,7 +3127,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 317
+          Top = 309
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -3146,7 +3144,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 317
+          Top = 309
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -3163,7 +3161,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 317
+          Top = 309
           Width = 98
           Height = 28
           Action = acShowEditGameForm

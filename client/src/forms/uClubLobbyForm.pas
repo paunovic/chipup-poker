@@ -81,6 +81,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure acLeaveClubExecute(Sender: TObject);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FClubId: Integer;
     FSelectedPlayerId: TBytes;
@@ -137,6 +138,11 @@ end;
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveMessageHandler(Handle);
+end;
+
+procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
 end;
 
 procedure TfrmClubLobby.FormShow(Sender: TObject);
@@ -346,7 +352,7 @@ var
 
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, player.Id);
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick);
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance);
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance / 100);
 
     if CompareBytes(player.Id, club.OwnerId) then
       status := 'Owner'
@@ -404,7 +410,7 @@ begin
       gridGamesTable.DataController.SetValue(C1, gridGamesId.Index, game.MongoId);
       gridGamesTable.DataController.SetValue(C1, gridGamesName.Index, game.Name);
       gridGamesTable.DataController.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
-      gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [game.SmallBlind, game.BigBlind]));
+      gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
       gridGamesTable.DataController.SetValue(C1, gridGamesSeats.Index, game.Seats);
     end;
   finally

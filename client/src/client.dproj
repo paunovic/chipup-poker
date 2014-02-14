@@ -234,6 +234,30 @@
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>DealerButton</ResourceId>
 			</RcItem>
+			<RcItem Include="resources\seats\EmptySeatLeft.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>EmptySeatLeft</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\seats\EmptySeatRight.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>EmptySeatRight</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\seats\SeatDarkLeft.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>SeatDarkLeft</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\seats\SeatDarkRight.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>SeatDarkRight</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\seats\SeatLightLeft.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>SeatLightLeft</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\seats\SeatLightRight.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>SeatLightRight</ResourceId>
+			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

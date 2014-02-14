@@ -5,8 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit, cxSpinEdit, cxLabel, Vcl.ActnList, uGameInfo, uIFormParams,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit, cxSpinEdit, cxLabel, Vcl.ActnList, uIFormParams,
+  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uTables;
 
 type
   TfrmTableSit = class(TForm, IFormParams)
@@ -23,8 +23,9 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    FGame     : TGameInfo;
+    FTable    : TTable;
     FSeatIndex: Integer;
+
 
     procedure CSRTableSitOk(const AMessage: TMessageItem);
     procedure CSRTableSitSeatTaken(const AMessage: TMessageItem);
@@ -72,7 +73,7 @@ end;
 
 procedure TfrmTableSit.SetParams(const AParams: array of pointer);
 begin
-  FGame := AParams[0];
+  FTable := AParams[0];
   FSeatIndex := PInteger(AParams[1])^;
 end;
 
@@ -105,7 +106,11 @@ end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);
 begin
-  SocketClient.TableSit(FGame.MongoId, FSeatIndex, seBuyin.Value);
+  if FTable.SeatIndex = -1 then
+    SocketClient.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100))
+  else
+    SocketClient.TableAddOn(FTable.Game.MongoId, Trunc(seBuyin.Value * 100));
+
   acOK.Enabled := FALSE;
 end;
 

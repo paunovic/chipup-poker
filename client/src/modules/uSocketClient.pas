@@ -73,6 +73,7 @@ type
     procedure JoinTable(const AGameId: TBytes);
     procedure LeaveTable(const AGameId: TBytes);
     procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
+    procedure TableAddOn(const AGameId: TBytes; const AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
     procedure Ping;
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
@@ -98,6 +99,21 @@ uses
   uPB_PutChips;
 
 
+function DoConnect(AParameter: pointer): Integer;
+begin
+  try
+    SocketClient.Socket.Connect;
+  except
+    on E: Exception do
+    begin
+      {$IFDEF DEBUG} DebugLn(Format('Error connecting to server: ', [E.Message]), ditException); {$ENDIF}
+    end;
+  end;
+
+  result := 0;
+  EndThread(0);
+end;
+
 constructor TSocketClient.Create(const AServer: String; const APort: Integer);
 begin
   FConnectCode := -1;
@@ -113,6 +129,8 @@ end;
 
 destructor TSocketClient.Destroy;
 begin
+  {$IFDEF DEBUG} DebugLn('TSocketClient.Destroy', ditSocket); {$ENDIF}
+
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
   FSocket.Free;
@@ -122,8 +140,9 @@ begin
   inherited;
 end;
 
-
 procedure TSocketClient.Connect;
+var
+  tid: DWORD;
 begin
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
@@ -142,14 +161,7 @@ begin
 
   ResetPingTimer;
 
-  try
-    FSocket.Connect;
-  except
-    on E: ESocketException do
-    begin
-      {$IFDEF DEBUG} DebugLn(Format('Error connecting to server: ', [E.Message]), ditException); {$ENDIF}
-    end;
-  end;
+  CloseHandle(BeginThread(nil, 0, @DoConnect, Addr(FSocket), 0, tid));
 end;
 
 procedure TSocketClient.Disconnect;
@@ -288,6 +300,13 @@ end;
 procedure TSocketClient.SocketError(Sender: TObject);
 begin
   {$IFDEF DEBUG} DebugLn(Format('Socket error: %s', [WSocketErrorDesc(FSocket.LastError)]), ditException); {$ENDIF}
+
+  case FSocket.State of
+    wsConnected: ;
+    wsClosed: Connect;
+  else
+    Disconnect;
+  end;
 end;
 
 procedure TSocketClient.ResetPingTimer;
@@ -804,6 +823,21 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TSocketClient.TableAddOn(const AGameId: TBytes; const AChips: Integer);
+var
+  protobuf: TPB_TableSit;
+begin
+  protobuf := TPB_TableSit.Create;
+  try
+    protobuf.GameId := AGameId;
+    protobuf.Chips := AChips;
+    SendProtobuf(scTableAddOn, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 procedure TSocketClient.TableStandUp(const AGameId: TBytes);
 var

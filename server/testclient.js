@@ -7,9 +7,15 @@ var protoreader = require('./protoreader');
 var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var colors = require('colors');
+var Hand = require('./deck').Hand;
 
 protoreader.init(pb,codes);
 
+function bufToCards(buf) {
+	if (!buf) return 'XXX';
+	var hand = { cards: buf.toJSON() };
+	return Hand.prototype.prettyPrint.call(hand);
+}
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -160,16 +166,20 @@ function testmenu(cb) {
 			console.log('doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
 			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet},'Poker.PutChips');
 		}
-		doMenu(moves);
+		//if (conn.tableStatus.locked) {
+		//	console.log('table locked');
+		//} else {
+			doMenu(moves);
+		//}
 	}
 	function checkAndPrint(params) {
 		if (params.current_seat == this.seat) {
 			console.log('table state:',params.state,'active seat:',params.current_seat,'pots:',params.pots);
-			console.log('flop:',params.flop,'turn:',params.turn,'river:',params.river);
+			console.log('flop:',bufToCards(params.flop),'turn:',bufToCards(params.turn),'river:',bufToCards(params.river));
 			if (params.state != 'tsIdle') {
 				for (var x=0; x<params.seats.length; x++) {
 					var s = params.seats[x];
-					var line = 'player#'+s.seat+' state:'+s.status+' bet:'+params.bets[x]+' cards:'+params.seats[x].cards;
+					var line = 'player#'+s.seat+' state:'+s.status+' bet:'+params.bets[x]+' cards:'+bufToCards(params.seats[x].cards);
 					if (s.seat == params.current_seat) console.log(line.green);
 					else console.log(line);
 				}
@@ -182,6 +192,12 @@ function testmenu(cb) {
 		case codes.srNotImplemented:
 			var msg = data.toString('utf8');
 			this.log(msg);
+			if (msg == 'your not a member of that club') {
+				this.reply(codes.scJoinClub,{seq:clubseq},'Poker.Club');
+			}
+			break;
+		case codes.srJoinClubReply:
+			this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:1500},'Poker.TableSit');
 			break;
 		case codes.srHello:
 			this.reply(codes.scLogin,{username:this.name+'@server.com',password:'password'},'Poker.LoginParams');

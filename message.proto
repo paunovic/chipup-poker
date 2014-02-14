@@ -226,6 +226,7 @@ enum ServerCodes {
     scGetPlayers = 527;
 	scFold = 528;
 	scPutChips = 529;
+	scTableAddOn = 530;
 }
 
 service Server {
@@ -234,7 +235,7 @@ service Server {
 
 message TableSit {
 	required bytes game_id = 1;
-	required int32 seat_index = 2;
+	optional int32 seat_index = 2;
 	required int32 chips = 3;
 }
 
@@ -259,6 +260,7 @@ message TableStatus {
 	optional bytes turn = 8;
 	optional bytes river = 9;
 	repeated int32 pots = 10;
+	required bool locked = 11;
 }
 
 message SeatInfo {
@@ -267,6 +269,7 @@ message SeatInfo {
 		psOutOfHand = 2;
 		psInHand = 3;
 		psFolded = 4;
+		psAllIn = 5;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2;
@@ -328,6 +331,7 @@ message TableEvent {
 		teCheck = 6;
 		teCall = 7;
 		teRaise = 8;
+		teAllIn = 9;
 	}
 	message WinnerData {
 		enum CardRankings {
@@ -350,6 +354,7 @@ message TableEvent {
 	repeated int32 seats = 2;
 	required bytes table_mongo_id = 3;
 	repeated WinnerData seatsData = 4;
+	repeated string msgs = 5;
 }
 
 message PutChips {
