@@ -501,7 +501,8 @@ begin
       // draw player frame
       if FTableStatus.CurrentSeat = seat_info.SeatIndex then
       begin
-        if tiActiveFrameBlink.Tag = 0 then
+        if (tiActiveFrameBlink.Tag = 1) and
+           (not FTableStatus.Locked) then
           seat_image := seat_back_limage
         else
           seat_image := seat_back_dimage;
@@ -530,7 +531,7 @@ begin
       chipsstr := FloatToStr(seat_info.Chips / 100);
       tw := PaintBox.Buffer.TextWidthW(chipsstr);
       th := PaintBox.Buffer.TextHeightW(chipsstr);
-      PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(btt + (btb - btt) / 2 - th / 1.75), chipsstr, 1, $FF8DC63F);
+      PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(btt + (btb - btt) / 2 - th / 1.75), chipsstr, 4, $FF8DC63F);
     end
     else // empty seat
     begin
@@ -650,9 +651,10 @@ begin
   end;
 
   if (FTableStatus.CurrentSeat <> -1) and
-     (not tiActiveFrameBlink.Enabled) then
+     (not tiActiveFrameBlink.Enabled) and
+     (not FTableStatus.Locked) then
   begin
-    tiActiveFrameBlink.Tag := 0;
+    tiActiveFrameBlink.Tag := 1;
     tiActiveFrameBlink.Enabled := TRUE;
   end;
 
