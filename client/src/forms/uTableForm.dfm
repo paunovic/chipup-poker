@@ -180,6 +180,22 @@ object frmTable: TfrmTable
         Height = 25
         Width = 196
       end
+      object btPlayNow: TcxButton
+        Left = 104
+        Top = 38
+        Width = 85
+        Height = 27
+        Action = acPlayNow
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 7
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
     end
   end
   object PaintBox: TPaintBox32
@@ -227,6 +243,12 @@ object frmTable: TfrmTable
       Caption = 'RAISE'
       Enabled = False
       OnExecute = acRaiseExecute
+    end
+    object acPlayNow: TAction
+      Category = 'Game'
+      Caption = 'PLAY NOW'
+      Enabled = False
+      OnExecute = acPlayNowExecute
     end
   end
   object tiActiveFrameBlink: TTimer

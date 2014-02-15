@@ -31,6 +31,8 @@ type
     seRaiseAmount: TcxSpinEdit;
     tbRaise: TcxTrackBar;
     tiActiveFrameBlink: TTimer;
+    btPlayNow: TcxButton;
+    acPlayNow: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -46,6 +48,7 @@ type
     procedure acRaiseExecute(Sender: TObject);
     procedure tbRaisePropertiesChange(Sender: TObject);
     procedure tiActiveFrameBlinkTimer(Sender: TObject);
+    procedure acPlayNowExecute(Sender: TObject);
   private
     type
       TSeatOrientation = (soLeft, soRight);
@@ -340,7 +343,7 @@ begin
           add := add + 'SB';
         if seat_info.SeatIndex = FTableStatus.BigBlindSeat then
           add := add + 'BB';
-        PaintBox.Buffer.TextOut(seat_point.X - 35, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] %s %s', [seat_info.SeatIndex, add, seat_info.Cards.AsString]));
+        PaintBox.Buffer.TextOut(seat_point.X - 35, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] [%d] %s %s', [seat_info.SeatIndex, Integer(seat_info.Status), add, seat_info.Cards.AsString]));
       end;
     PaintBox.Buffer.Font.Style := [];
   finally
@@ -608,46 +611,57 @@ begin
   acCall.Enabled := FALSE;
   acCheck.Enabled := FALSE;
   acRaise.Enabled := FALSE;
+  acPlayNow.Enabled := FALSE;
 
   if FTable.IsSitting then
   begin
-    acStandUp.Enabled := TRUE;
-    if not FTableStatus.Locked then
-      case FTableStatus.State of
-        tsIdle: ;
-        tsPreFlop,
-        tsFlop,
-        tsTurn,
-        tsRiver: begin
-          if FTableStatus.CurrentSeat = FTable.SeatIndex then
-          begin
-            Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-            if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
-            begin
-              if seat_info.Chips < FTableStatus.HighestBet then
-                acCall.Caption := 'CALL (ALL-IN)'
-              else
-                acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - FTableStatus.GetBet(FTable.SeatIndex)) / 100]);
-              acCall.Enabled := TRUE;
+    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
-              if seat_info.Chips > FTableStatus.HighestBet then
+    acStandUp.Enabled := TRUE;
+
+    case seat_info.Status of
+      psOutOfPlay: begin
+        acPlayNow.Enabled := TRUE;
+      end;
+      psOutOfHand: ;
+      psInHand: begin
+        if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
+           (not FTableStatus.Locked) then
+          case FTableStatus.State of
+            tsIdle: ;
+            tsPreFlop,
+            tsFlop,
+            tsTurn,
+            tsRiver: begin
+              if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
               begin
-                acRaise.Caption := 'RAISE';
+                if seat_info.Chips < FTableStatus.HighestBet then
+                  acCall.Caption := 'CALL (ALL-IN)'
+                else
+                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - FTableStatus.GetBet(FTable.SeatIndex)) / 100]);
+                acCall.Enabled := TRUE;
+
+                if seat_info.Chips > FTableStatus.HighestBet then
+                begin
+                  acRaise.Caption := 'RAISE';
+                  acRaise.Enabled := TRUE;
+                end;
+              end
+              else
+              begin
+                acCheck.Enabled := TRUE;
+                acRaise.Caption := 'BET';
                 acRaise.Enabled := TRUE;
               end;
-            end
-            else
-            begin
-              acCheck.Enabled := TRUE;
-              acRaise.Caption := 'BET';
-              acRaise.Enabled := TRUE;
+              acFold.Enabled := TRUE;
             end;
-            acFold.Enabled := TRUE;
+            tsWinning,
+            tsWinning2: ;
           end;
-        end;
-        tsWinning,
-        tsWinning2: ;
       end;
+      psFolded: ;
+      psAllIn: ;
+    end;
   end;
 
   if (FTableStatus.CurrentSeat <> -1) and
@@ -659,6 +673,8 @@ begin
   end;
 
   btStandUp.Visible := acStandUp.Enabled;
+  btPlayNow.Visible := acPlayNow.Enabled;
+
   btFold.Visible := acFold.Enabled;
   btRaise.Visible := acRaise.Enabled;
   seRaiseAmount.Visible := acRaise.Enabled;
@@ -806,6 +822,11 @@ end;
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
   SocketClient.Fold(FTable.Game.MongoId);
+end;
+
+procedure TfrmTable.acPlayNowExecute(Sender: TObject);
+begin
+  SocketClient.TablePlayNow(FTable.Game.MongoId);
 end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);

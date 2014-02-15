@@ -77,7 +77,9 @@ type
     scGetPlayers = 527,
     scFold = 528,
     scPutChips = 529,
-    scTableAddOn = 530
+    scTableAddOn = 530,
+    scTablePlayNow = 531,
+    scTableSitOut = 532
   );
 
 {$IFDEF DEBUG}
@@ -182,6 +184,8 @@ begin
     scFold: result := 'scFold';
     scPutChips: result := 'scPutChips';
     scTableAddOn: result := 'scTableAddOn';
+    scTablePlayNow: result := 'scTablePlayNow';
+    scTableSitOut: result := 'scTableSitOut';
   end;
 end;
 {$ENDIF DEBUG}
