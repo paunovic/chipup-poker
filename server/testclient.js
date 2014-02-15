@@ -142,7 +142,7 @@ function testmenu(cb) {
 		var max = 0;
 		for (var x=0; x<conn.tableStatus.seats.length; x++) {
 			var seat = conn.tableStatus.seats[x];
-			if (seat.status == 'psInHand') {
+			if (['psInHand','psAllIn'].indexOf(seat.status) != -1) {
 				if (conn.tableStatus.bets[x] > max) max = conn.tableStatus.bets[x];
 			}
 		}
@@ -197,7 +197,7 @@ function testmenu(cb) {
 			}
 			break;
 		case codes.srJoinClubReply:
-			this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:1500},'Poker.TableSit');
+			this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:this.buyin},'Poker.TableSit');
 			break;
 		case codes.srHello:
 			this.reply(codes.scLogin,{username:this.name+'@server.com',password:'password'},'Poker.LoginParams');
@@ -229,7 +229,7 @@ function testmenu(cb) {
 				}
 			} else if (this.joining) {
 				this.joining = false;
-				this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:1500},'Poker.TableSit');
+				this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:this.buyin},'Poker.TableSit');
 				return;
 			}
 			break;
@@ -322,10 +322,11 @@ function testmenu(cb) {
 		case codes.srTableSitOk:
 			var params = pb.Parse(data,'Poker.TableStatus');
 			//this.log(params);
-			for (var x=1; x<2; x++) {
+			for (var x=1; x<3; x++) {
 				var client2 = new Client(doClient2);
 				client2.name = 'client'+x;
 				client2.seat = x;
+				client2.buyin = 20;
 			}
 			common.call(this,code,data);
 			break;
@@ -367,5 +368,6 @@ function testmenu(cb) {
 	var client = new Client(testregisterhandle);
 	client.name = 'client0';
 	client.seat = 0;
+	client.buyin = 100;
 }
 tests = [ testmenu ];
