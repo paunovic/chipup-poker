@@ -213,6 +213,7 @@ end;
 procedure TfrmTable.PaintBoxClick(Sender: TObject);
 var
   C1               : Integer;
+  seat_info        : TSeatInfo;
   client_cursor_pos: TPoint;
   seat_point       : TPoint;
   seat_rect        : TRect;
@@ -238,7 +239,9 @@ begin
       end;
 
       if (FTable.IsSitting) and
-         (FTable.SeatIndex = C1) then
+         (FTable.SeatIndex = C1) and
+         (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
+         (seat_info.Status in [psOutOfPlay]) then
       begin
         RunModalForm(TfrmTableSit, self, [FTable, @C1]);
         Break;

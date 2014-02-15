@@ -184,6 +184,8 @@ enum ServerCodes {
     srPong = 48;
     srSuspendPlayerOk = 49;
     srReinstatePlayerOk = 50;
+	srTableAddonOk = 51;
+	srTableAddonOverLimit = 52;
 
     seChat = 200;
     seSecondaryLoginDetected = 201;
