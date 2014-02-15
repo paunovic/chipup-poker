@@ -45,9 +45,10 @@ void load_dag(char* fn) {
 	unsigned int i, id, v, j;
 	int ecf, ecn;
 	handeval_dag_node *n;
+	FILE* f;
 	dag = (handeval_dag_node*) calloc(76154, sizeof(handeval_dag_node));
 	
-	FILE* f = fopen(fn, "r");
+	f = fopen(fn, "r");
 	assert(f);
 	i=0;
 	while (fgets(buf, 1024, f)) {	// read a line
@@ -195,7 +196,7 @@ handeval_eq_class* resume_evaluation(char* cards, const partial_evaluation* pe) 
 	unsigned int i, r, c;
 	handeval_dag_node *n = pe->noflushnode;
 	unsigned int remain = 7 - pe->evaluated;
-	int cl;
+	int cl,fc;
 	char col[4] = {pe->colors[0], pe->colors[1], pe->colors[2], pe->colors[3]};
 	
 	for (i=0; i < remain; i++) {
@@ -205,7 +206,7 @@ handeval_eq_class* resume_evaluation(char* cards, const partial_evaluation* pe) 
 		col[c]++;
 	}
 	// check for flushes
-	int fc = -1;
+	fc = -1;
 	for (i=0; i < 4; i++) {
 		if (col[i] >= 5) {
 			fc = i;
@@ -237,6 +238,7 @@ handeval_eq_class* resume_evaluation(char* cards, const partial_evaluation* pe) 
 
 handeval_eq_class* calculate_minimal_class(unsigned int cardcnt, char* cards) {
 	unsigned int i, r, c;
+	int minc;
 	partial_evaluation pe;
 	assert(cardcnt);				// there must be more than one card
 	pe.noflushnode = 0;
@@ -262,7 +264,7 @@ handeval_eq_class* calculate_minimal_class(unsigned int cardcnt, char* cards) {
 			pe.flushnodes[c] = pe.flushnodes[c]->succs[r];  
 		}
 	}
-	int minc = pe.noflushnode->maxn;
+	minc = pe.noflushnode->maxn;
 	if (minc == 0) {
 		printf("MORE SEVERE BUG!\n\n\n");
 		fflush(stdout);

@@ -5,7 +5,9 @@
 #include <stdlib.h>
 
 /** Helper macros */
+#ifndef min
 #define min(A,B) (((A)<(B))?(A):(B))
+#endif
 
 /** Card specific constants */
 #define HANDTYPECLASSCOUNT 9

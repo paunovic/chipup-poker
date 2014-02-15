@@ -1,8 +1,23 @@
 var fs = require('fs');
 var rand = -1;
+var getRandom;
 fs.open('/dev/urandom','r',function (err,fd) {
-	if (err) return console.log('cant open random:',err);
-	rand = fd;
+	if (err) {
+		getRandom = function winGetRandom(size,callback) {
+			var buffer = new Buffer(size);
+			for (var x=0; x<size; x++) buffer[x] = Math.floor(Math.random() * 255);
+			callback(buffer);
+		}
+		console.log('falling back to Math.random, reason: cant open random:',err);
+	} else {
+		rand = fd;
+		getRandom = function getRandom(size,callback) {
+			var buffer = new Buffer(size);
+			fs.read(rand,buffer,0,size,null,function () {
+				callback(buffer);
+			});
+		}
+	}
 	if (require.main === module) {
 		var deck = new Deck();
 		console.log('initial  deck is',deck.prettyPrint());
@@ -59,8 +74,7 @@ Deck.prototype.shuffle = function shuffle(callback) {
 	var output = [];
 	var recurse = function () {
 		if (this.cards.length) {
-			var buffer = new Buffer(2);
-			fs.read(rand,buffer,0,2,null,function () {
+			getRandom(2,function (buffer) {
 				var index2 = buffer.readUInt16LE(0) % this.cards.length;
 				var index = 0;
 				//console.log(index2);
@@ -85,13 +99,7 @@ Deck.prototype.draw = function (count,hand) {
 	hand.cards = hand.cards.concat(out);
 	//console.log('after2:',hand.cards);
 }
-function getRandom(size,callback) {
-	var buffer = new Buffer(size);
-	fs.read(rand,buffer,0,size,null,function () {
-		callback(buffer);
-	});
-}
-module.exports.getRandom = getRandom;
+module.exports.getRandom = function (size,cb) { getRandom(size,cb); }
 function Card(suit,value) {
 	this.value = value;
 	this.suit = suit;
