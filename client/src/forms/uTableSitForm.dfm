@@ -52,6 +52,7 @@ object frmTableSit: TfrmTableSit
     Properties.SpinButtons.Visible = False
     Properties.UseLeftAlignmentOnEditing = False
     Properties.ValueType = vtFloat
+    Properties.OnChange = seBuyinPropertiesChange
     TabOrder = 1
     Value = 100.000000000000000000
     Width = 128
@@ -71,7 +72,6 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 58
   end
   object btCancel: TcxButton
     Left = 126
@@ -88,13 +88,13 @@ object frmTableSit: TfrmTableSit
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 58
   end
   object alTableSit: TActionList
     Left = 104
     Top = 32
     object acOK: TAction
       Caption = 'OK'
+      Enabled = False
       OnExecute = acOKExecute
     end
     object acCancel: TAction

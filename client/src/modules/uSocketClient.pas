@@ -400,6 +400,7 @@ begin
     seAccountConfirmed: ;
     srTransferChipsInvalidAmount: ;
     srTableSitNoChips: ;
+    srTableAddonOverLimit: ;
 
     seTransferChips,
     srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);
@@ -419,6 +420,7 @@ begin
     seTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,
+    srTableAddonOk,
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srPong: begin
       {$IFDEF DEBUG}

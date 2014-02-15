@@ -200,6 +200,7 @@ begin
                             TServerMessageCallback.Create(seChat, CSRChatEvent),
                             TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
                             TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
+                            TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
                             TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
                             TServerMessageCallback.Create(seTableEvent, CSETableEvent)
                           ]
@@ -241,7 +242,7 @@ begin
       if (FTable.IsSitting) and
          (FTable.SeatIndex = C1) and
          (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
-         (seat_info.Status in [psOutOfPlay]) then
+         (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded]) then
       begin
         RunModalForm(TfrmTableSit, self, [FTable, @C1]);
         Break;

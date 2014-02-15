@@ -22,6 +22,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure seBuyinPropertiesChange(Sender: TObject);
   private
     FTable    : TTable;
     FSeatIndex: Integer;
@@ -30,6 +31,8 @@ type
     procedure CSRTableSitOk(const AMessage: TMessageItem);
     procedure CSRTableSitSeatTaken(const AMessage: TMessageItem);
     procedure CSRTableSitNoChips(const AMessage: TMessageItem);
+    procedure CSRTableAddonOk(const AMessage: TMessageItem);
+    procedure CSRTableAddonOverLimit(const AMessage: TMessageItem);
   protected
     procedure WndProc(var AMessage: TMessage); override;
   public
@@ -55,6 +58,15 @@ end;
 procedure TfrmTableSit.FormShow(Sender: TObject);
 begin
   MessageContainer.AddMessageHandler(Handle);
+
+  seBuyin.Properties.OnChange(Sender);
+end;
+
+procedure TfrmTableSit.seBuyinPropertiesChange(Sender: TObject);
+var
+  val: Double;
+begin
+  acOK.Enabled := (seBuyin.Value > 0) and (TryStrToFloat(seBuyin.Text, val));
 end;
 
 procedure TfrmTableSit.FormKeyPress(Sender: TObject; var Key: Char);
@@ -90,7 +102,9 @@ begin
                           [
                             TServerMessageCallback.Create(srTableSitOk, CSRTableSitOk),
                             TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken),
-                            TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips)
+                            TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips),
+                            TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
+                            TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit)
                           ]
                         );
     end;
@@ -130,5 +144,17 @@ begin
   MessageDlg('Seat is already taken. Please choose another seat', mtWarning, [mbOK], 0);
   ModalResult := mrClose;
 end;
+
+procedure TfrmTableSit.CSRTableAddonOk(const AMessage: TMessageItem);
+begin
+  ModalResult := mrOk;
+end;
+
+procedure TfrmTableSit.CSRTableAddonOverLimit(const AMessage: TMessageItem);
+begin
+  MessageDlg('You can''t addon over maximum table buy-in limit', mtWarning, [mbOK], 0);
+  acOK.Enabled := TRUE;
+end;
+
 
 end.
