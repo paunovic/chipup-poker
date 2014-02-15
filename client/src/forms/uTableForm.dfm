@@ -191,10 +191,12 @@ object frmTable: TfrmTable
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
+    ExplicitLeft = -44
+    ExplicitTop = -136
   end
   object ActionManager: TActionManager
-    Left = 212
-    Top = 180
+    Left = 108
+    Top = 32
     StyleName = 'Platform Default'
     object acStandUp: TAction
       Category = 'Game'
@@ -230,7 +232,7 @@ object frmTable: TfrmTable
   object tiActiveFrameBlink: TTimer
     Enabled = False
     OnTimer = tiActiveFrameBlinkTimer
-    Left = 140
-    Top = 284
+    Left = 52
+    Top = 32
   end
 end

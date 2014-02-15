@@ -731,7 +731,6 @@ begin
       tmp := tmp + FloatToStr(pbtablestatus.Pots[C1] / 100)
     else
       tmp := tmp + FloatToStr(pbtablestatus.Pots[C1] / 100) + ', ';
-
   lbsInfo.Caption := Format('Pots: %s', [tmp]);
 
   {$IFDEF DEBUG}
