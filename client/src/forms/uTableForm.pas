@@ -22,8 +22,8 @@ type
     acRaise: TAction;
     PaintBox: TPaintBox32;
     paButtons: TPanel;
-    btCallCheck: TcxButton;
-    btFold: TcxButton;
+    btCall: TcxButton;
+    btCheckFold: TcxButton;
     btRaise: TcxButton;
     btStandUp: TcxButton;
     lbsInfo: TcxLabel;
@@ -211,7 +211,7 @@ begin
                         );
     end;
 
-    msg.IncReadCount;
+    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
   end;
 end;
 
@@ -675,6 +675,7 @@ begin
                 else
                   acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - FTableStatus.GetBet(FTable.SeatIndex)) / 100]);
                 acCall.Enabled := TRUE;
+                acFold.Enabled := TRUE;
 
                 if seat_info.Chips > FTableStatus.HighestBet then
                 begin
@@ -688,7 +689,6 @@ begin
                 acRaise.Caption := 'BET';
                 acRaise.Enabled := TRUE;
               end;
-              acFold.Enabled := TRUE;
             end;
             tsWinning,
             tsWinning2: ;
@@ -718,7 +718,7 @@ begin
   btStandUp.Visible := acStandUp.Enabled;
   btPlayNow.Visible := acPlayNow.Enabled;
 
-  btFold.Visible := acFold.Enabled;
+  btCall.Visible := acCall.Enabled;
   btRaise.Visible := acRaise.Enabled;
   seRaiseAmount.Visible := acRaise.Enabled;
   tbRaise.Visible := acRaise.Enabled;
@@ -732,16 +732,16 @@ begin
     tbRaise.Properties.Max := FTableStatus.GetBet(seat_info.SeatIndex) + seat_info.Chips;
   end;
 
-  if (acCall.Enabled) or (acCheck.Enabled) then
+  if (acCheck.Enabled) or (acFold.Enabled) then
   begin
-    if acCall.Enabled then
-      btCallCheck.Action := acCall
+    if acCheck.Enabled then
+      btCheckFold.Action := acCheck
     else
-      btCallCheck.Action := acCheck;
-    btCallCheck.Visible := TRUE;
+      btCheckFold.Action := acFold;
+    btCheckFold.Visible := TRUE;
   end
   else
-    btCallCheck.Visible := FALSE;  
+    btCheckFold.Visible := FALSE;
 end;
 
 function TfrmTable.ConfirmLeaveTable: Boolean;
@@ -805,7 +805,7 @@ begin
   end
   else tmp := 'NO';
 
-  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d Seq:%d Locked: %s', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State), pbtablestatus.Seq,tmp]), ditApplication);
+  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d; Seq:%d; Locked: %s', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State), pbtablestatus.Seq, tmp]), ditApplication);
   tmp := '';
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);

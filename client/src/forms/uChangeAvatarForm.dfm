@@ -3,7 +3,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Change Avatar'
-  ClientHeight = 250
+  ClientHeight = 255
   ClientWidth = 226
   Color = clBlack
   Ctl3D = False
@@ -21,7 +21,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   OnShow = FormShow
   DesignSize = (
     226
-    250)
+    255)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsInfo: TcxLabel
@@ -47,13 +47,13 @@ object frmChangeAvatar: TfrmChangeAvatar
     Properties.Alignment.Vert = taVCenter
     Properties.WordWrap = True
     Transparent = True
-    Height = 44
+    Height = 43
     Width = 206
     AnchorY = 25
   end
   object btChange: TcxButton
     Left = 17
-    Top = 213
+    Top = 218
     Width = 93
     Height = 27
     Action = acChange
@@ -66,10 +66,11 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 213
   end
   object btCancel: TcxButton
     Left = 116
-    Top = 213
+    Top = 218
     Width = 93
     Height = 27
     Action = acClose
@@ -82,6 +83,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 213
   end
   object imgAvatar: TcxImage
     Left = 38

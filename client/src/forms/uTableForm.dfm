@@ -88,12 +88,16 @@ object frmTable: TfrmTable
       Padding.Right = 1
       ParentBackground = False
       TabOrder = 1
-      object btCallCheck: TcxButton
-        Left = 177
-        Top = 6
-        Width = 85
-        Height = 27
+      DesignSize = (
+        457
+        80)
+      object btCall: TcxButton
+        Left = 248
+        Top = 41
+        Width = 92
+        Height = 28
         Action = acCall
+        Anchors = [akRight, akBottom]
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 0
         Visible = False
@@ -104,12 +108,13 @@ object frmTable: TfrmTable
         Font.Style = []
         ParentFont = False
       end
-      object btFold: TcxButton
-        Left = 359
-        Top = 6
-        Width = 85
-        Height = 27
-        Action = acFold
+      object btCheckFold: TcxButton
+        Left = 150
+        Top = 41
+        Width = 92
+        Height = 28
+        Action = acCheck
+        Anchors = [akRight, akBottom]
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 1
         Visible = False
@@ -121,11 +126,12 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaise: TcxButton
-        Left = 268
-        Top = 6
-        Width = 85
-        Height = 27
+        Left = 354
+        Top = 41
+        Width = 92
+        Height = 28
         Action = acRaise
+        Anchors = [akRight, akBottom]
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 2
         Visible = False
@@ -137,10 +143,10 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btStandUp: TcxButton
-        Left = 104
-        Top = 46
-        Width = 85
-        Height = 27
+        Left = 40
+        Top = 41
+        Width = 92
+        Height = 28
         Action = acStandUp
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 3
@@ -153,22 +159,24 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object lbsInfo: TcxLabel
-        Left = 358
-        Top = 58
+        Left = 139
+        Top = 6
         Caption = 'lbsInfo'
       end
       object seRaiseAmount: TcxSpinEdit
-        Left = 104
-        Top = 39
+        Left = 305
+        Top = 13
+        Anchors = [akRight, akBottom]
         Properties.SpinButtons.Visible = False
         Properties.ValueType = vtFloat
         TabOrder = 5
         Visible = False
-        Width = 85
+        Width = 46
       end
       object tbRaise: TcxTrackBar
-        Left = 195
-        Top = 39
+        Left = 349
+        Top = 14
+        Anchors = [akRight, akBottom]
         Properties.AutoSize = False
         Properties.ShowTicks = False
         Properties.OnChange = tbRaisePropertiesChange
@@ -178,13 +186,13 @@ object frmTable: TfrmTable
         Transparent = True
         Visible = False
         Height = 25
-        Width = 196
+        Width = 100
       end
       object btPlayNow: TcxButton
-        Left = 195
-        Top = 46
-        Width = 85
-        Height = 27
+        Left = 138
+        Top = 41
+        Width = 92
+        Height = 28
         Action = acPlayNow
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 7
@@ -217,8 +225,6 @@ object frmTable: TfrmTable
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
-    ExplicitLeft = -44
-    ExplicitTop = -136
   end
   object ActionManager: TActionManager
     Left = 108

@@ -2820,6 +2820,10 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         592
         362)
@@ -2972,7 +2976,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 308
+          Top = 296
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -2985,10 +2989,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 308
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 308
+          Top = 296
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -3001,10 +3006,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 308
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 308
+          Top = 296
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -3017,10 +3023,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 308
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 274
+          Top = 262
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -3033,12 +3040,17 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 274
         end
       end
     end
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         592
         362)
@@ -3057,7 +3069,7 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 572
-          Height = 159
+          Height = 147
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -3127,7 +3139,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 309
+          Top = 297
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -3144,7 +3156,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 309
+          Top = 297
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -3161,7 +3173,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 309
+          Top = 297
           Width = 98
           Height = 28
           Action = acShowEditGameForm
