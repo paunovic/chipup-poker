@@ -1,0 +1,11 @@
+codes = {};
+module.exports = codes;
+codes.Hello=0;
+codes.StartServer=1;
+codes.StopServer=2;
+codes.RestartServer=3;
+codes.Starting=4;
+codes.Stopping=5;
+codes.PerClientMsgEvent=6;
+codes.GlobalMsgEvent=7;
+codes.reverse = ["Hello","StartServer","StopServer","RestartServer","Starting","Stopping","PerClientMsgEvent","GlobalMsgEvent"];
