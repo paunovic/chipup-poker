@@ -1,0 +1,17 @@
+1: http://www.mongodb.org/downloads
+2: http://nodejs.org
+3: install the bloody vc++ compiler!
+
+http://stackoverflow.com/questions/17496189/error-in-installing-node-js-module-using-npm
+http://stackoverflow.com/questions/3623129/winsock2-h-no-such-file-or-directory
+http://apdubey.blogspot.ca/2009/04/microsoft-visual-studio-2005-express.html
+
+4: load the google protobuf project vsprojects\protobuf.sln in visual studio
+5: change every project to use /MT
+http://stackoverflow.com/questions/2728649/error-lnk2005-xxx-already-defined-in-msvcrt-libmsvcr100-dllc-something-libc
+6: finish doing what vsprojects\readme.txt says
+7: in poker\server run 'npm install'
+8: in poker\server run 'openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes'
+
+
+to run the server, fire up mongod (if its not a service) and then run 'node master' in poker\server
