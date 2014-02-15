@@ -799,7 +799,14 @@ begin
 
   {$IFDEF DEBUG}
   tmp := '';
-  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State)]), ditApplication);
+  if pbtablestatus.Locked then
+  begin
+    tmp := 'YES';
+  end
+  else tmp := 'NO';
+
+  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d Seq:%d Locked: %s', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State), pbtablestatus.Seq,tmp]), ditApplication);
+  tmp := '';
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);
   tmp := Trim(tmp);
