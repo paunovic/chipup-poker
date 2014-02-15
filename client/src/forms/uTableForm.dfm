@@ -89,7 +89,7 @@ object frmTable: TfrmTable
       ParentBackground = False
       TabOrder = 1
       object btCallCheck: TcxButton
-        Left = 13
+        Left = 177
         Top = 6
         Width = 85
         Height = 27
@@ -105,7 +105,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btFold: TcxButton
-        Left = 195
+        Left = 359
         Top = 6
         Width = 85
         Height = 27
@@ -121,7 +121,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaise: TcxButton
-        Left = 104
+        Left = 268
         Top = 6
         Width = 85
         Height = 27
@@ -137,8 +137,8 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btStandUp: TcxButton
-        Left = 13
-        Top = 38
+        Left = 104
+        Top = 46
         Width = 85
         Height = 27
         Action = acStandUp
@@ -153,8 +153,8 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object lbsInfo: TcxLabel
-        Left = 286
-        Top = 6
+        Left = 358
+        Top = 58
         Caption = 'lbsInfo'
       end
       object seRaiseAmount: TcxSpinEdit
@@ -181,8 +181,8 @@ object frmTable: TfrmTable
         Width = 196
       end
       object btPlayNow: TcxButton
-        Left = 104
-        Top = 38
+        Left = 195
+        Top = 46
         Width = 85
         Height = 27
         Action = acPlayNow
@@ -195,6 +195,16 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
+      end
+      object cbSitOutNextHand: TcxCheckBox
+        Left = 7
+        Top = 6
+        Caption = 'Sit out next hand'
+        Properties.OnChange = cbSitOutNextHandPropertiesChange
+        TabOrder = 8
+        Transparent = True
+        Visible = False
+        Width = 109
       end
     end
   end
@@ -255,6 +265,13 @@ object frmTable: TfrmTable
     Enabled = False
     OnTimer = tiActiveFrameBlinkTimer
     Left = 52
+    Top = 32
+  end
+  object tiSitOutNextHand: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = tiSitOutNextHandTimer
+    Left = 164
     Top = 32
   end
 end

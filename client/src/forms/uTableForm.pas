@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox;
 
 type
   TfrmTable = class(TForm)
@@ -33,6 +33,8 @@ type
     tiActiveFrameBlink: TTimer;
     btPlayNow: TcxButton;
     acPlayNow: TAction;
+    cbSitOutNextHand: TcxCheckBox;
+    tiSitOutNextHand: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -49,6 +51,8 @@ type
     procedure tbRaisePropertiesChange(Sender: TObject);
     procedure tiActiveFrameBlinkTimer(Sender: TObject);
     procedure acPlayNowExecute(Sender: TObject);
+    procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
+    procedure tiSitOutNextHandTimer(Sender: TObject);
   private
     type
       TSeatOrientation = (soLeft, soRight);
@@ -379,6 +383,22 @@ begin
   Redraw(TRUE);
 end;
 
+procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
+var
+  seat_info: TSeatInfo;
+begin
+  if FTable.IsSitting then
+  begin
+    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
+    if cbSitOutNextHand.Checked then
+      SocketClient.TableSitOut(FTable.Game.MongoId)
+    else
+      SocketClient.TablePlayNow(FTable.Game.MongoId);
+  end;
+
+  tiSitOutNextHand.Enabled := FALSE;
+end;
+
 procedure TfrmTable.DrawDealerButton(const ASeatIndex: Integer);
 var
   dealer_point: TPoint;
@@ -589,6 +609,12 @@ begin
   reChat.ScrollContent(dirDown); reChat.ScrollContent(dirDown); // FIXME! yuck
 end;
 
+procedure TfrmTable.cbSitOutNextHandPropertiesChange(Sender: TObject);
+begin
+  tiSitOutNextHand.Enabled := FALSE;
+  tiSitOutNextHand.Enabled := TRUE;
+end;
+
 procedure TfrmTable.CSRChatEvent(const AMessage: TMessageItem);
 var
   chat_event  : TPB_ChatEvent;
@@ -609,6 +635,7 @@ end;
 procedure TfrmTable.ConfigureGUI;
 var
   seat_info: TSeatInfo;
+  sitout   : Boolean;
 begin
   acStandUp.Enabled := FALSE;
   acFold.Enabled := FALSE;
@@ -616,6 +643,7 @@ begin
   acCheck.Enabled := FALSE;
   acRaise.Enabled := FALSE;
   acPlayNow.Enabled := FALSE;
+  sitout := FALSE;
 
   if FTable.IsSitting then
   begin
@@ -627,8 +655,11 @@ begin
       psOutOfPlay: begin
         acPlayNow.Enabled := TRUE;
       end;
-      psOutOfHand: ;
+      psOutOfHand: begin
+        sitout := TRUE;
+      end;
       psInHand: begin
+        sitout := TRUE;
         if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
            (not FTableStatus.Locked) then
           case FTableStatus.State of
@@ -663,8 +694,12 @@ begin
             tsWinning2: ;
           end;
       end;
-      psFolded: ;
-      psAllIn: ;
+      psFolded: begin
+        sitout := TRUE;
+      end;
+      psAllIn: begin
+        sitout := TRUE;
+      end;
     end;
   end;
 
@@ -675,6 +710,10 @@ begin
     tiActiveFrameBlink.Tag := 1;
     tiActiveFrameBlink.Enabled := TRUE;
   end;
+
+  if not sitout then
+    cbSitOutNextHand.Checked := FALSE;
+  cbSitOutNextHand.Visible := sitout;
 
   btStandUp.Visible := acStandUp.Enabled;
   btPlayNow.Visible := acPlayNow.Enabled;
@@ -751,7 +790,12 @@ begin
       tmp := tmp + FloatToStr(pbtablestatus.Pots[C1] / 100)
     else
       tmp := tmp + FloatToStr(pbtablestatus.Pots[C1] / 100) + ', ';
-  lbsInfo.Caption := Format('Pots: %s', [tmp]);
+
+  lbsInfo.Caption := '';
+  if FTableStatus.Locked then
+    lbsInfo.Caption := '[LOCKED] ';
+
+  lbsInfo.Caption := lbsInfo.Caption + Format('Pots: %s', [tmp]);
 
   {$IFDEF DEBUG}
   tmp := '';
