@@ -48,7 +48,9 @@ SmtpConnection.prototype.sendMail = function verify(email,body,callback) {
 	});
 	console.log('verify',email);
 }
-//var test = new SmtpConnection();
-//test.sendMail('paunovic@gmail.com','Subject: test\r\n\r\nbody',function cb(err,ret) {
-//	console.log('cb',err,ret);
-//});
+if (require.main === module) {
+	var test = new SmtpConnection();
+	test.sendMail('clever@echodsi.com','Subject: test\r\n\r\nbody',function cb(err,ret) {
+		console.log('cb',err,ret);
+	});
+}
