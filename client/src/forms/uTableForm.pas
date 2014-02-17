@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox;
 
 type
   TfrmTable = class(TForm)
@@ -22,8 +22,8 @@ type
     acRaise: TAction;
     PaintBox: TPaintBox32;
     paButtons: TPanel;
-    btCallCheck: TcxButton;
-    btFold: TcxButton;
+    btCall: TcxButton;
+    btCheckFold: TcxButton;
     btRaise: TcxButton;
     btStandUp: TcxButton;
     lbsInfo: TcxLabel;
@@ -31,6 +31,10 @@ type
     seRaiseAmount: TcxSpinEdit;
     tbRaise: TcxTrackBar;
     tiActiveFrameBlink: TTimer;
+    btPlayNow: TcxButton;
+    acPlayNow: TAction;
+    cbSitOutNextHand: TcxCheckBox;
+    tiSitOutNextHand: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -46,6 +50,9 @@ type
     procedure acRaiseExecute(Sender: TObject);
     procedure tbRaisePropertiesChange(Sender: TObject);
     procedure tiActiveFrameBlinkTimer(Sender: TObject);
+    procedure acPlayNowExecute(Sender: TObject);
+    procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
+    procedure tiSitOutNextHandTimer(Sender: TObject);
   private
     type
       TSeatOrientation = (soLeft, soRight);
@@ -197,19 +204,21 @@ begin
                             TServerMessageCallback.Create(seChat, CSRChatEvent),
                             TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
                             TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
+                            TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
                             TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
                             TServerMessageCallback.Create(seTableEvent, CSETableEvent)
                           ]
                         );
     end;
 
-    msg.IncReadCount;
+    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
   end;
 end;
 
 procedure TfrmTable.PaintBoxClick(Sender: TObject);
 var
   C1               : Integer;
+  seat_info        : TSeatInfo;
   client_cursor_pos: TPoint;
   seat_point       : TPoint;
   seat_rect        : TRect;
@@ -235,7 +244,9 @@ begin
       end;
 
       if (FTable.IsSitting) and
-         (FTable.SeatIndex = C1) then
+         (FTable.SeatIndex = C1) and
+         (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
+         (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded]) then
       begin
         RunModalForm(TfrmTableSit, self, [FTable, @C1]);
         Break;
@@ -276,7 +287,7 @@ begin
     PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
     // calculate table size and draw it
-    FTableWidth := Round(0.75 * PaintBox.Buffer.Width);
+    FTableWidth := Round(0.65 * PaintBox.Buffer.Width);
     FTableHeight := Round(FTableWidth / TTableResources.TableAspectRatio);
     FTableResizeRatio := FTableWidth / TTableResources.TableWidth;
     FTableXOffset := Round(FTableResizeRatio * TTableResources.TableXOffset);
@@ -288,11 +299,7 @@ begin
     FTableCenter.X := tblx + FTableXOffset + FTableWidth div 2;
     FTableCenter.Y := tbly + FTableYOffset + FTableHeight div 2;
     PaintBox.Buffer.Draw(Rect(tblx, tbly, tblx + tblw, tbly + tblh), TTableResources.TableImage.BoundsRect, TTableResources.TableImage);
-                                                                              {
-    for C1 := 0 to Round((2 * pi) * 10000) do
-      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth - 20) / 2) * Cos(C1)),
-                            FTableCenter.Y + Round(((FTableHeight - 15) / 2) * Sin(C1)) - 5] := clRed; // BLUE!
-                                                                                                                  }
+
 {
     PaintBox.Buffer.Draw(Rect(FTableCenter.X - 5, FTableCenter.Y - 5, FTableCenter.X + 5, FTableCenter.Y + 5),
                          TTableResources.DealerButtonImage.BoundsRect,
@@ -340,7 +347,7 @@ begin
           add := add + 'SB';
         if seat_info.SeatIndex = FTableStatus.BigBlindSeat then
           add := add + 'BB';
-        PaintBox.Buffer.TextOut(seat_point.X - 35, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] %s %s', [seat_info.SeatIndex, add, seat_info.Cards.AsString]));
+        PaintBox.Buffer.TextOut(seat_point.X - 35, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] [%d] %s %s', [seat_info.SeatIndex, Integer(seat_info.Status), add, seat_info.Cards.AsString]));
       end;
     PaintBox.Buffer.Font.Style := [];
   finally
@@ -370,6 +377,22 @@ begin
     tiActiveFrameBlink.Tag := 0;
 
   Redraw(TRUE);
+end;
+
+procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
+var
+  seat_info: TSeatInfo;
+begin
+  if FTable.IsSitting then
+  begin
+    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
+    if cbSitOutNextHand.Checked then
+      SocketClient.TableSitOut(FTable.Game.MongoId)
+    else
+      SocketClient.TablePlayNow(FTable.Game.MongoId);
+  end;
+
+  tiSitOutNextHand.Enabled := FALSE;
 end;
 
 procedure TfrmTable.DrawDealerButton(const ASeatIndex: Integer);
@@ -403,9 +426,15 @@ var
   seat_radians: Double;
   x, y        : Integer;
 begin
+{
+    for x := 0 to Round((2 * pi) * 10000) do
+      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth + 105 * FTableResizeRatio) / 2) * Cos(x)),
+                            FTableCenter.Y + Round(((FTableHeight + 40 * FTableResizeRatio) / 2) * Sin(x))] := clRed; // BLUE!
+}
+
   seat_radians := (2 * pi) / (FTable.Game.Seats / (ASeatIndex + 1));
-  x := FTableCenter.X + Round(((FTableWidth - 20) / 2) * Cos(seat_radians));
-  y := FTableCenter.Y + Round(((FTableHeight - 15) / 2) * Sin(seat_radians)) - 5;
+  x := FTableCenter.X + Round(((FTableWidth + 105 * FTableResizeRatio) / 2) * Cos(seat_radians));
+  y := FTableCenter.Y + Round(((FTableHeight + 50 * FTableResizeRatio) / 2) * Sin(seat_radians));
 
   result := GR32.Point(x, y);
 end;
@@ -582,6 +611,12 @@ begin
   reChat.ScrollContent(dirDown); reChat.ScrollContent(dirDown); // FIXME! yuck
 end;
 
+procedure TfrmTable.cbSitOutNextHandPropertiesChange(Sender: TObject);
+begin
+  tiSitOutNextHand.Enabled := FALSE;
+  tiSitOutNextHand.Enabled := TRUE;
+end;
+
 procedure TfrmTable.CSRChatEvent(const AMessage: TMessageItem);
 var
   chat_event  : TPB_ChatEvent;
@@ -602,52 +637,72 @@ end;
 procedure TfrmTable.ConfigureGUI;
 var
   seat_info: TSeatInfo;
+  sitout   : Boolean;
 begin
   acStandUp.Enabled := FALSE;
   acFold.Enabled := FALSE;
   acCall.Enabled := FALSE;
   acCheck.Enabled := FALSE;
   acRaise.Enabled := FALSE;
+  acPlayNow.Enabled := FALSE;
+  sitout := FALSE;
 
   if FTable.IsSitting then
   begin
-    acStandUp.Enabled := TRUE;
-    if not FTableStatus.Locked then
-      case FTableStatus.State of
-        tsIdle: ;
-        tsPreFlop,
-        tsFlop,
-        tsTurn,
-        tsRiver: begin
-          if FTableStatus.CurrentSeat = FTable.SeatIndex then
-          begin
-            Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-            if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
-            begin
-              if seat_info.Chips < FTableStatus.HighestBet then
-                acCall.Caption := 'CALL (ALL-IN)'
-              else
-                acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - FTableStatus.GetBet(FTable.SeatIndex)) / 100]);
-              acCall.Enabled := TRUE;
+    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
-              if seat_info.Chips > FTableStatus.HighestBet then
+    acStandUp.Enabled := TRUE;
+
+    case seat_info.Status of
+      psOutOfPlay: begin
+        acPlayNow.Enabled := TRUE;
+      end;
+      psOutOfHand: begin
+        sitout := TRUE;
+      end;
+      psInHand: begin
+        sitout := TRUE;
+        if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
+           (not FTableStatus.Locked) then
+          case FTableStatus.State of
+            tsIdle: ;
+            tsPreFlop,
+            tsFlop,
+            tsTurn,
+            tsRiver: begin
+              if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
               begin
-                acRaise.Caption := 'RAISE';
+                if seat_info.Chips < FTableStatus.HighestBet then
+                  acCall.Caption := 'CALL (ALL-IN)'
+                else
+                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - FTableStatus.GetBet(FTable.SeatIndex)) / 100]);
+                acCall.Enabled := TRUE;
+                acFold.Enabled := TRUE;
+
+                if seat_info.Chips > FTableStatus.HighestBet then
+                begin
+                  acRaise.Caption := 'RAISE';
+                  acRaise.Enabled := TRUE;
+                end;
+              end
+              else
+              begin
+                acCheck.Enabled := TRUE;
+                acRaise.Caption := 'BET';
                 acRaise.Enabled := TRUE;
               end;
-            end
-            else
-            begin
-              acCheck.Enabled := TRUE;
-              acRaise.Caption := 'BET';
-              acRaise.Enabled := TRUE;
             end;
-            acFold.Enabled := TRUE;
+            tsWinning,
+            tsWinning2: ;
           end;
-        end;
-        tsWinning,
-        tsWinning2: ;
       end;
+      psFolded: begin
+        sitout := TRUE;
+      end;
+      psAllIn: begin
+        sitout := TRUE;
+      end;
+    end;
   end;
 
   if (FTableStatus.CurrentSeat <> -1) and
@@ -658,8 +713,14 @@ begin
     tiActiveFrameBlink.Enabled := TRUE;
   end;
 
+  if not sitout then
+    cbSitOutNextHand.Checked := FALSE;
+  cbSitOutNextHand.Visible := sitout;
+
   btStandUp.Visible := acStandUp.Enabled;
-  btFold.Visible := acFold.Enabled;
+  btPlayNow.Visible := acPlayNow.Enabled;
+
+  btCall.Visible := acCall.Enabled;
   btRaise.Visible := acRaise.Enabled;
   seRaiseAmount.Visible := acRaise.Enabled;
   tbRaise.Visible := acRaise.Enabled;
@@ -673,16 +734,16 @@ begin
     tbRaise.Properties.Max := FTableStatus.GetBet(seat_info.SeatIndex) + seat_info.Chips;
   end;
 
-  if (acCall.Enabled) or (acCheck.Enabled) then
+  if (acCheck.Enabled) or (acFold.Enabled) then
   begin
-    if acCall.Enabled then
-      btCallCheck.Action := acCall
+    if acCheck.Enabled then
+      btCheckFold.Action := acCheck
     else
-      btCallCheck.Action := acCheck;
-    btCallCheck.Visible := TRUE;
+      btCheckFold.Action := acFold;
+    btCheckFold.Visible := TRUE;
   end
   else
-    btCallCheck.Visible := FALSE;  
+    btCheckFold.Visible := FALSE;
 end;
 
 function TfrmTable.ConfirmLeaveTable: Boolean;
@@ -732,11 +793,22 @@ begin
     else
       tmp := tmp + FloatToStr(pbtablestatus.Pots[C1] / 100) + ', ';
 
-  lbsInfo.Caption := Format('Pots: %s', [tmp]);
+  lbsInfo.Caption := '';
+  if FTableStatus.Locked then
+    lbsInfo.Caption := '[LOCKED] ';
+
+  lbsInfo.Caption := lbsInfo.Caption + Format('Pots: %s', [tmp]);
 
   {$IFDEF DEBUG}
   tmp := '';
-  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State)]), ditApplication);
+  if pbtablestatus.Locked then
+  begin
+    tmp := 'YES';
+  end
+  else tmp := 'NO';
+
+  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d; Seq:%d; Locked: %s', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State), pbtablestatus.Seq, tmp]), ditApplication);
+  tmp := '';
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);
   tmp := Trim(tmp);
@@ -807,6 +879,11 @@ end;
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
   SocketClient.Fold(FTable.Game.MongoId);
+end;
+
+procedure TfrmTable.acPlayNowExecute(Sender: TObject);
+begin
+  SocketClient.TablePlayNow(FTable.Game.MongoId);
 end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);

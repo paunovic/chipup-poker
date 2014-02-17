@@ -88,12 +88,16 @@ object frmTable: TfrmTable
       Padding.Right = 1
       ParentBackground = False
       TabOrder = 1
-      object btCallCheck: TcxButton
-        Left = 13
-        Top = 6
-        Width = 85
-        Height = 27
+      DesignSize = (
+        457
+        80)
+      object btCall: TcxButton
+        Left = 248
+        Top = 41
+        Width = 92
+        Height = 28
         Action = acCall
+        Anchors = [akRight, akBottom]
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 0
         Visible = False
@@ -104,12 +108,13 @@ object frmTable: TfrmTable
         Font.Style = []
         ParentFont = False
       end
-      object btFold: TcxButton
-        Left = 195
-        Top = 6
-        Width = 85
-        Height = 27
-        Action = acFold
+      object btCheckFold: TcxButton
+        Left = 150
+        Top = 41
+        Width = 92
+        Height = 28
+        Action = acCheck
+        Anchors = [akRight, akBottom]
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 1
         Visible = False
@@ -121,11 +126,12 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaise: TcxButton
-        Left = 104
-        Top = 6
-        Width = 85
-        Height = 27
+        Left = 354
+        Top = 41
+        Width = 92
+        Height = 28
         Action = acRaise
+        Anchors = [akRight, akBottom]
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 2
         Visible = False
@@ -137,10 +143,10 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btStandUp: TcxButton
-        Left = 13
-        Top = 38
-        Width = 85
-        Height = 27
+        Left = 40
+        Top = 41
+        Width = 92
+        Height = 28
         Action = acStandUp
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 3
@@ -153,22 +159,24 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object lbsInfo: TcxLabel
-        Left = 286
+        Left = 139
         Top = 6
         Caption = 'lbsInfo'
       end
       object seRaiseAmount: TcxSpinEdit
-        Left = 104
-        Top = 39
+        Left = 305
+        Top = 13
+        Anchors = [akRight, akBottom]
         Properties.SpinButtons.Visible = False
         Properties.ValueType = vtFloat
         TabOrder = 5
         Visible = False
-        Width = 85
+        Width = 46
       end
       object tbRaise: TcxTrackBar
-        Left = 195
-        Top = 39
+        Left = 349
+        Top = 14
+        Anchors = [akRight, akBottom]
         Properties.AutoSize = False
         Properties.ShowTicks = False
         Properties.OnChange = tbRaisePropertiesChange
@@ -178,7 +186,33 @@ object frmTable: TfrmTable
         Transparent = True
         Visible = False
         Height = 25
-        Width = 196
+        Width = 100
+      end
+      object btPlayNow: TcxButton
+        Left = 138
+        Top = 41
+        Width = 92
+        Height = 28
+        Action = acPlayNow
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 7
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+      end
+      object cbSitOutNextHand: TcxCheckBox
+        Left = 7
+        Top = 6
+        Caption = 'Sit out next hand'
+        Properties.OnChange = cbSitOutNextHandPropertiesChange
+        TabOrder = 8
+        Transparent = True
+        Visible = False
+        Width = 109
       end
     end
   end
@@ -193,8 +227,8 @@ object frmTable: TfrmTable
     OnClick = PaintBoxClick
   end
   object ActionManager: TActionManager
-    Left = 212
-    Top = 180
+    Left = 108
+    Top = 32
     StyleName = 'Platform Default'
     object acStandUp: TAction
       Category = 'Game'
@@ -226,11 +260,24 @@ object frmTable: TfrmTable
       Enabled = False
       OnExecute = acRaiseExecute
     end
+    object acPlayNow: TAction
+      Category = 'Game'
+      Caption = 'PLAY NOW'
+      Enabled = False
+      OnExecute = acPlayNowExecute
+    end
   end
   object tiActiveFrameBlink: TTimer
     Enabled = False
     OnTimer = tiActiveFrameBlinkTimer
-    Left = 140
-    Top = 284
+    Left = 52
+    Top = 32
+  end
+  object tiSitOutNextHand: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = tiSitOutNextHandTimer
+    Left = 164
+    Top = 32
   end
 end

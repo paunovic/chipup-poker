@@ -77,6 +77,8 @@ message Game {
 	optional int32 big_blind = 8;
 	optional int32 seats = 9;
 	optional int32 sitting = 10;
+	optional int32 buyin_min = 11;
+	optional int32 buyin_max = 12;
 }
 
 message StatusReply {
@@ -184,6 +186,8 @@ enum ServerCodes {
     srPong = 48;
     srSuspendPlayerOk = 49;
     srReinstatePlayerOk = 50;
+	srTableAddonOk = 51;
+	srTableAddonOverLimit = 52;
 
     seChat = 200;
     seSecondaryLoginDetected = 201;
@@ -227,6 +231,8 @@ enum ServerCodes {
 	scFold = 528;
 	scPutChips = 529;
 	scTableAddOn = 530;
+	scTablePlayNow = 531;
+	scTableSitOut = 532;
 }
 
 service Server {
@@ -261,6 +267,7 @@ message TableStatus {
 	optional bytes river = 9;
 	repeated int32 pots = 10;
 	required bool locked = 11;
+	optional int32 seq = 12;
 }
 
 message SeatInfo {

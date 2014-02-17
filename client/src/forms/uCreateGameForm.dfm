@@ -3,7 +3,7 @@ object frmCreateGame: TfrmCreateGame
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Create a Table'
-  ClientHeight = 194
+  ClientHeight = 226
   ClientWidth = 376
   Color = clBlack
   Ctl3D = False
@@ -19,7 +19,7 @@ object frmCreateGame: TfrmCreateGame
   OnShow = FormShow
   DesignSize = (
     376
-    194)
+    226)
   PixelsPerInch = 96
   TextHeight = 14
   object edGameName: TcxTextEdit
@@ -59,35 +59,37 @@ object frmCreateGame: TfrmCreateGame
   end
   object btOK: TcxButton
     Left = 169
-    Top = 155
+    Top = 187
     Width = 93
     Height = 27
     Action = acOK
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 7
+    TabOrder = 9
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 155
   end
   object btCancel: TcxButton
     Left = 268
-    Top = 155
+    Top = 187
     Width = 93
     Height = 27
     Action = acCancel
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 8
+    TabOrder = 10
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 155
   end
   object cbGameType: TcxComboBox
     Left = 88
@@ -117,7 +119,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object lbsSeats: TcxLabel
     Left = 18
-    Top = 126
+    Top = 154
     Caption = 'Seats:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -131,7 +133,7 @@ object frmCreateGame: TfrmCreateGame
   end
   object cbSeats: TcxComboBox
     Left = 88
-    Top = 125
+    Top = 153
     Properties.DropDownListStyle = lsFixedList
     Properties.DropDownRows = 10
     Properties.Items.Strings = (
@@ -145,7 +147,7 @@ object frmCreateGame: TfrmCreateGame
       '9'
       '10')
     Properties.ReadOnly = False
-    TabOrder = 4
+    TabOrder = 6
     Text = '10'
     Width = 65
   end
@@ -189,6 +191,76 @@ object frmCreateGame: TfrmCreateGame
     TabOrder = 3
     Text = '1/2'
     Width = 273
+  end
+  object cxLabel1: TcxLabel
+    Left = 18
+    Top = 127
+    Caption = 'Buy-in limit:'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object cxSpinEdit1: TcxSpinEdit
+    Left = 111
+    Top = 126
+    TabOrder = 4
+    Value = 20
+    Width = 53
+  end
+  object cxSpinEdit2: TcxSpinEdit
+    Left = 199
+    Top = 126
+    TabOrder = 5
+    Value = 200
+    Width = 53
+  end
+  object cxLabel2: TcxLabel
+    Left = 86
+    Top = 127
+    Caption = 'min'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object cxLabel3: TcxLabel
+    Left = 167
+    Top = 127
+    Caption = ' max'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    Transparent = True
+  end
+  object cxLabel4: TcxLabel
+    Left = 255
+    Top = 127
+    Caption = 'big blinds'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    Transparent = True
   end
   object alCreateGame: TActionList
     Left = 24

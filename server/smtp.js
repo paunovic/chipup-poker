@@ -7,7 +7,7 @@ function SmtpConnection() {
 SmtpConnection.prototype.sendMail = function verify(email,body,callback) {
 	parts = email.split('@');
 	if (parts[1].trim() == 'server.com') {
-		console.log('ding');
+		console.log('ding',body);
 		callback(null,true);
 		return;
 	}

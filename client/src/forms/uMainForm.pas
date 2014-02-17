@@ -217,7 +217,7 @@ begin
       mtSocketChangeState: SocketChangeState(msg.OldState, msg.NewState);
     end;
 
-    msg.IncReadCount;
+    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
   end;
 end;
 

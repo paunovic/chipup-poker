@@ -46,9 +46,6 @@ type
   public
   end;
 
-var
-  frmPublicClubsList: TfrmPublicClubsList;
-
 implementation
 
 {$R *.dfm}
@@ -128,7 +125,7 @@ begin
       mtSocketChangeState: ;
     end;
 
-    msg.IncReadCount;
+    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
   end;
 end;
 

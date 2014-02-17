@@ -114,7 +114,7 @@ begin
                          );
     end;
 
-    msg.IncReadCount;
+    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
   end;
 end;
 

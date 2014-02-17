@@ -24,6 +24,7 @@ type
       FN_RIVER = 9;
       FN_POTS = 10;
       FN_LOCKED = 11;
+      FN_SEQ = 12;
 
     var
       FTableMongoId: TBytes;
@@ -37,6 +38,7 @@ type
       FRiver: TBytes;
       FPots: TArray<Integer>;
       FLocked: Boolean;
+      FSeq: Integer;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -48,6 +50,7 @@ type
     procedure SetRiver(const AValue: TBytes);
     procedure SetPots(const AValue: TArray<Integer>);
     procedure SetLocked(const AValue: Boolean);
+    procedure SetSeq(const AValue: Integer);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -63,6 +66,7 @@ type
     property River: TBytes read FRiver write SetRiver;
     property Pots: TArray<Integer> read FPots write SetPots;
     property Locked: Boolean read FLocked write SetLocked;
+    property Seq: Integer read FSeq write SetSeq;
   end;
 
 implementation
@@ -134,6 +138,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLocked := AProtobufReader.readBoolean;
       end;
+      FN_SEQ: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSeq := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -203,6 +211,12 @@ procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
 begin
   FLocked := AValue;
   ProtobufOutput.writeBoolean(FN_LOCKED, AValue);
+end;
+
+procedure TPB_TableStatus.SetSeq(const AValue: Integer);
+begin
+  FSeq := AValue;
+  ProtobufOutput.writeInt32(FN_SEQ, AValue);
 end;
 
 end.

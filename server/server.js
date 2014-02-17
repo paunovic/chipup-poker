@@ -62,7 +62,6 @@ app.get('/confirm',function (req,res) {
 		}
 		allUsers.update({_id:user._id},{$set:{authed:true},$unset:{authcode:""}},function (err,result) {
 			console.log('email confirm time',user);
-			// FIXME, inform the user if they are connected
 			res.send("account activated");
 			var conn = activeUsers[user._id];
 			if (!conn) return;
@@ -96,6 +95,9 @@ app.get('/confirmchange',function (req,res) {
 			console.log('email change time',user);
 			// FIXME, inform the user if they are connected
 			res.send("email address changed");
+			var conn = activeUsers[user._id];
+			if (!conn) return;
+			//conn.send(codes.seAccountConfirmed);
 		});
 	});
 });
@@ -1186,7 +1188,6 @@ ClientSocket.prototype.handle = function (code,args) {
 			var params = pb.Parse(args,'Poker.Game');
 			var id = new toMongoId(params._id);
 			delete params._id;
-			this.log('table leave',params);
 			Game.getGame(id,function (err,game) {
 				game.leave(this);
 			}.bind(this));
@@ -1423,12 +1424,7 @@ Game.prototype.sitDown = function (conn,params) {
 				if (this.sittingCount() > 1) {
 					this.deal(finish.bind(this));
 				} else {
-					this.dealer++;
-					while (!this.members[this.dealer]) {
-						conn.log('setting dealer to',this.dealer);
-						this.dealer++
-						if (this.dealer >= this.obj.seats) this.dealer = 0;
-					}
+					this.nextDealer();
 					finish.call(this);
 				}
 			} else finish.call(this);
@@ -1524,13 +1520,14 @@ Game.prototype.getNextSeat = function (current) {
 		return x;
 	}
 	current = getNextSatIn.call(this,current);
-	while (this.members[current].status != 'psInHand') {
+	while (['psInHand','psAllIn'].indexOf(this.members[current].status) == -1) {
 		current = getNextSatIn.call(this,current);
 	}
 	return current;
 }
 Game.prototype.fold = function fold(seat,cb1) {
-	log('fold',seat);
+	var seatObj = this.members[seat];
+	seatObj.conn.log('fold',seat);
 	switch (this.state) {
 	case 'tsIdle':
 		break;
@@ -1559,11 +1556,10 @@ Game.prototype.fold = function fold(seat,cb1) {
 				cb1();
 			}.bind(this));
 		} else {
-			log('c');
-			log(this.inHandCount());
+			seatObj.conn.log('fold with more then 1 person remaining',this.inHandCount());
 			if (seat == this.current_seat) {
-				this.current_seat = this.getNextSeat(this.current_seat);
-				this.checkRoundPass(finish.bind(this));
+				seatObj.conn.log('and i was active');
+				this.stateMachine(finish.bind(this));
 			} else finish.call(this);
 			function finish() {
 				this.broadcastStatus(null);
@@ -1641,12 +1637,14 @@ Game.prototype.checkRoundPass = function (cb) {
 		var max = 0;
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
-			if (this.members[x].status != 'psInHand') continue;
+			if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
+			if (this.bets[x] > max) max = this.bets[x];
+			if (this.members[x].status == 'psAllIn') continue;
 			if (min == -1) min = this.bets[x];
 			if (this.bets[x] < min) min = this.bets[x];
-			if (this.bets[x] > max) max = this.bets[x];
 		}
-		console.log('bet ranges',min,max,'all bets',this.bets);
+		log('bet ranges',min,max,'all bets',this.bets);
+		if (min == -1) min = max;
 		if (min == max) {
 			if (this.state == 'tsPreFlop') {
 				log('flopping');
@@ -1657,7 +1655,7 @@ Game.prototype.checkRoundPass = function (cb) {
 					this.moveToPot(cb);
 				}.bind(this),2000);
 			} else if (this.state == 'tsFlop') {
-				console.log('turning');
+				log('turning');
 				this.passed = false;
 				this.broadcastStatus();
 				setTimeout(function () {
@@ -1665,7 +1663,7 @@ Game.prototype.checkRoundPass = function (cb) {
 					this.moveToPot(cb);
 				}.bind(this),1500);
 			} else if (this.state == 'tsTurn') {
-				console.log('river time');
+				log('river time');
 				this.passed = false;
 				this.broadcastStatus();
 				setTimeout(function () {
@@ -1679,12 +1677,12 @@ Game.prototype.checkRoundPass = function (cb) {
 					var hands = [];
 					for (var x=0; x<this.members.length; x++) {
 						if (!this.members[x]) continue;
-						if (this.members[x].status != 'psInHand') continue;
+						if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
 						hands.push({seat:x,hand:this.members[x].hand.cards});
 					}
-					console.log(hands[0]);
+					log(hands[0]);
 					var result = dag.rankHands(this,hands);
-					console.log('what next??',result);
+					log('what next??',result);
 					var lowestid = -1;
 					var winningindex = -1;
 					var winner;
@@ -1707,7 +1705,7 @@ Game.prototype.checkRoundPass = function (cb) {
 						if (result.outputs[x].id == lowestid) {
 							winners.push(result.outputs[x].seat);
 							msgs.push(result.outputs[x].desc);
-							console.log(result.outputs[x]);
+							log(result.outputs[x]);
 						}
 					}
 					this.doWin(winners);
@@ -1727,6 +1725,8 @@ Game.prototype.moveToPot = function (cb1) {
 
 	// FIXME, remove this check later?
 	for (var x=0; x<this.members.length; x++) if (this.members[x]) assert(this.members[x].conn.nick);
+
+	// FIXME, figure out how much to put into each pot
 
 	async.parallel([
 		function (cb) {
@@ -1748,8 +1748,13 @@ Game.prototype.moveToPot = function (cb1) {
 					return;
 				}
 				var item = this.members[idx];
+				if (item.status == 'psOutOfHand') {
+					idx++;
+					return repeat.call(this);
+				}
 					item.conn.log('removing chips',item.conn.nick,this.bets,item.seat);
 					assert(item.conn.nick);
+					assert.equal(typeof this.bets[item.seat],'number');
 					allUsers.update({_id:item.conn.userid},
 						{ $inc:{chips:-this.bets[item.seat]}},function (err,res) {
 							assert(!err);
@@ -1784,7 +1789,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	var max = 0;
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
-		if (this.members[x].status != 'psInHand') continue;
+		if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
 		if (this.bets[x] > max) max = this.bets[x];
 	}
 
@@ -1793,7 +1798,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	var oldbet = this.bets[seat];
 
 	if (chips < oldbet) { // cheater!
-		conn.error('cheater detected, betting low');
+		conn.error('cheater detected, lowering bet');
 		conn.destroy();
 		cb();
 		return;
@@ -1807,20 +1812,20 @@ Game.prototype.putChips = function (conn,chips,cb) {
 		return;
 	} else if (chips > max) {
 		event = 'teRaise';
-	} else if (chips == max) {
-		event = 'teCall';
 	} else if (this.bets[seat] == chips) { // check
 		event = 'teCheck';
+	} else if (chips == max) {
+		event = 'teCall';
 	}
 
 	if (increase > this.members[seat].chips) {
 		conn.error('cheater detected, overbetting');
 		conn.destroy();
+		cb();
 		return;
 	}
 	conn.log('eating',this.bets,increase,chips,seat);
 	this.setBet(seat,chips);
-	this.broadcastStatus(); // FIXME, status spam
 	this.sendEvent(event,[seat]);
 	
 	this.stateMachine(cb);
@@ -1832,30 +1837,40 @@ Game.prototype.findSeat = function (conn) {
 		}
 	}
 }
+Game.prototype.nextDealer = function () {
+	var limit = 100;
+	this.dealer++;
+	while (limit-- > 0) { // FIXME
+		log('dealer loop',limit,this.dealer);
+		if (limit-- < 0) break;
+		if (this.dealer >= this.obj.seats) this.dealer = 0;
+		if (!this.members[this.dealer]) { this.dealer++; continue; }
+		if (this.members[this.dealer].chips > 0) break;
+		this.dealer++;
+	}
+}
 Game.prototype.stateMachine = function stateMachine(cb) {
 	log('state machine:','"'+this.state+'"');
 	switch (this.state) {
 	case 'tsWinning2':
-		if (this.sittingCount() == 0) {
+		var havechips = 0;
+		for (var x=0; x<this.members.length; x++) if (this.members[x] && (this.members[x].chips > 0)) havechips++;
+		if (havechips == 0) {
+			log('nobody has chips');
 			this.dealer = -1;
 			this.current_seat = -1;
-		} else if (this.sittingCount() < 2) {
-			this.dealer++;
-			while (!this.members[this.dealer]) {
-				this.dealer++;
-				if (this.dealer >= this.obj.seats) this.dealer = 0;
-			}
+		} else if (havechips < 2) {
+			log('only one guy has chips');
+			this.nextDealer();
 		}
 		this.state = 'tsIdle';
 		this.current_seat = -1;
 	case 'tsIdle':
-		if (this.sittingCount() > 1) {
-			console.log('enough are sitting');
-			this.dealer++;
-			while (!this.members[this.dealer]) {
-				this.dealer++;
-				if (this.dealer >= this.obj.seats) this.dealer = 0;
-			}
+		var havechips = 0;
+		for (var x=0; x<this.members.length; x++) if (this.members[x] && (this.members[x].chips > 0)) havechips++;
+		if (havechips > 1) {
+			log('enough are sitting');
+			this.nextDealer();
 			this.deal(finish1.bind(this));
 		} else finish1.call(this);
 		function finish1() {
@@ -1874,15 +1889,20 @@ Game.prototype.stateMachine = function stateMachine(cb) {
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
 			if (this.members[x].status == 'psInHand') {
-				if (this.members[x].chips == 0) cantplay++;
-				else {
-					canplay++;
-					if (this.canCheck(x)) cancheck++;
-				}
-			}
+				canplay++;
+				if (this.canCheck(x)) cancheck++;
+			} else if (this.members[x].status == 'psAllIn') cantplay++;
 		}
 		log('cantplay:'+cantplay+' canplay:'+canplay+' cancheck:'+cancheck);
-		if ((cantplay == 1) && (canplay == 1) && (cancheck == 1)) {
+		var skip = false;
+		if ((cantplay == 1) && (canplay == 1) && (cancheck == 1)) skip = true;
+		if ((cantplay == 2) && (canplay == 1) && (cancheck == 1)) skip = true;
+		if ((cantplay == 3) && (canplay == 1) && (cancheck == 1)) skip = true;
+		if ((canplay == 0) && (cancheck == 0)) {
+			skip = true;
+			this.passed = true;
+		}
+		if (skip) {
 			log('skipping a player');
 			this.current_seat = this.getNextSeat(this.current_seat);
 			this.checkRoundPass(function () {
@@ -1902,6 +1922,7 @@ Game.prototype.stateMachine = function stateMachine(cb) {
 				return this.stateMachine(cb);
 			}
 			if (this.ranOut && (this.inHandCount() == 2)) {
+				log('somebody ran out, auto finishing');
 				return this.stateMachine(cb);
 			}
 			this.broadcastStatus(null);
@@ -1915,7 +1936,7 @@ Game.prototype.canCheck = function (seatIdx) {
 	var max = 0;
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
-		if (this.members[x].status != 'psInHand') continue;
+		if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
 		if (this.bets[x] > max) max = this.bets[x];
 	}
 	if (this.bets[seatIdx] == max) return true;
@@ -1926,6 +1947,7 @@ Game.prototype.sendEvent = function (event,seats,msgs) {
 	for (var key in this.users) {
 		if (this.users[key] == conn) continue;
 		this.users[key].send(codes.seTableEvent,obj,'Poker.TableEvent');
+		this.users[key].log('send event:',event);
 	}
 }
 Game.prototype.broadcastStatus = function (conn) {
@@ -1972,7 +1994,7 @@ Game.prototype.inHandCount = function () {
 	var count = 0;
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;
-		if (this.members[x].status != 'psInHand') continue;
+		if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
 		count++;
 	}
 	return count;
@@ -1991,15 +2013,11 @@ Game.prototype.standUp = function (conn,cb1) {
 		this.members[seatIdx] = null;
 		var status = this.getTableStatus();
 		this.sendEvent('teStandUp',[seatIdx]);
-		for (var key in this.users) {
-			console.log('interator',key,this.users[key].userid,conn.userid);
-			if (this.users[key] == conn) continue;
-			this.users[key].send(codes.seTableStatus,status,'Poker.TableStatus');
-		}
 		if (this.sittingCount() == 0) {
 			this.dealer = -1;
 			this.current_seat = -1;
 		}
+		this.broadcastStatus(conn);
 		// FIXME json performance hack
 		allClubs.findOne({_id:this.obj.clubid},function (err,club) {
 			if (!club.members) return;

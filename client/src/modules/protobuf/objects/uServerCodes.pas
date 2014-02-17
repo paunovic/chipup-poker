@@ -37,6 +37,8 @@ type
     srPong = 48,
     srSuspendPlayerOk = 49,
     srReinstatePlayerOk = 50,
+    srTableAddonOk = 51,
+    srTableAddonOverLimit = 52,
     seChat = 200,
     seSecondaryLoginDetected = 201,
     seAccountConfirmed = 202,
@@ -77,7 +79,9 @@ type
     scGetPlayers = 527,
     scFold = 528,
     scPutChips = 529,
-    scTableAddOn = 530
+    scTableAddOn = 530,
+    scTablePlayNow = 531,
+    scTableSitOut = 532
   );
 
 {$IFDEF DEBUG}
@@ -141,6 +145,8 @@ begin
     srPong: result := 'srPong';
     srSuspendPlayerOk: result := 'srSuspendPlayerOk';
     srReinstatePlayerOk: result := 'srReinstatePlayerOk';
+    srTableAddonOk: result := 'srTableAddonOk';
+    srTableAddonOverLimit: result := 'srTableAddonOverLimit';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -182,6 +188,8 @@ begin
     scFold: result := 'scFold';
     scPutChips: result := 'scPutChips';
     scTableAddOn: result := 'scTableAddOn';
+    scTablePlayNow: result := 'scTablePlayNow';
+    scTableSitOut: result := 'scTableSitOut';
   end;
 end;
 {$ENDIF DEBUG}

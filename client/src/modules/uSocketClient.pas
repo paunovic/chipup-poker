@@ -69,12 +69,14 @@ type
     procedure DeleteGame(const AGameId: TBytes);
     procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
     procedure ListPublicClubs;
-    procedure SendTableChatLine(const ATableId: TBytes; const ALine: String);
+    procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
     procedure LeaveTable(const AGameId: TBytes);
     procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
     procedure TableAddOn(const AGameId: TBytes; const AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
+    procedure TablePlayNow(const AGameId: TBytes);
+    procedure TableSitOut(const AGameId: TBytes);
     procedure Ping;
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
     procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
@@ -398,6 +400,7 @@ begin
     seAccountConfirmed: ;
     srTransferChipsInvalidAmount: ;
     srTableSitNoChips: ;
+    srTableAddonOverLimit: ;
 
     seTransferChips,
     srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);
@@ -417,6 +420,7 @@ begin
     seTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,
+    srTableAddonOk,
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srPong: begin
       {$IFDEF DEBUG}
@@ -765,7 +769,7 @@ begin
   SendProtobuf(scListPublicClubs, nil);
 end;
 
-procedure TSocketClient.SendTableChatLine(const ATableId: TBytes; const ALine: String);
+procedure TSocketClient.SendTableChatLine(const AGameId: TBytes; const ALine: String);
 var
   protobuf: TPB_ChatEvent;
   pbmsg   : TPB_ChatMessage;
@@ -773,7 +777,7 @@ begin
   protobuf := TPB_ChatEvent.Create;
   try
     protobuf.Event := ceUserMessage;
-    protobuf.TableId := ATableId;
+    protobuf.TableId := AGameId;
     pbmsg := TPB_ChatMessage.Create;
     pbmsg.Msg := ALine;
     protobuf.Msg := pbmsg;
@@ -837,7 +841,6 @@ begin
     protobuf.Free;
   end;
 end;
-
 
 procedure TSocketClient.TableStandUp(const AGameId: TBytes);
 var
@@ -913,8 +916,34 @@ begin
   finally
     protobuf.Free;
   end;
-
 end;
+
+procedure TSocketClient.TablePlayNow(const AGameId: TBytes);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoId := AGameId;
+    SendProtobuf(scTablePlayNow, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TSocketClient.TableSitOut(const AGameId: TBytes);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoId := AGameId;
+    SendProtobuf(scTableSitOut, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 
 

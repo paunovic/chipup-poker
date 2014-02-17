@@ -14,16 +14,19 @@ type
     FMessageHandlers: TList<HWND>;
     FNextId         : Integer;
 
+    procedure AddMessage(const AMessage: TMessageItem);
+    procedure CleanupMessages;
+
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure AddMessageHandler(const AHWND: HWND);
     procedure RemoveMessageHandler(const AHWND: HWND);
+    procedure RemoveMessageReader(const AMessageId: Integer; const AReaderHandle: HWND);
 
     function IsNewMessage(const AMessage: TMessage; out AMessageItem: TMessageItem): Boolean;
 
-    procedure AddMessage(const AMessage: TMessageItem);
     procedure AddServerMessage(const AMethodId: Integer; const AObject: TObject);
     procedure AddSocketChangeMessage(const AOldState, ANewState: TSocketState);
 
@@ -82,6 +85,10 @@ var
 begin
   {$IFDEF DEBUG} DebugLn(Format('Remove message handler [%d]', [AHWND]), ditForm); {$ENDIF}
 
+  for C1 := 0 to FItems.Count - 1 do
+    FItems[C1].RemoveReader(AHWND);
+  CleanupMessages;
+
   C1 := 0;
   while C1 < FMessageHandlers.Count do
   begin
@@ -92,37 +99,53 @@ begin
   end;
 end;
 
-function TMessageContainer.IsNewMessage(const AMessage: TMessage; out AMessageItem: TMessageItem): Boolean;
+procedure TMessageContainer.RemoveMessageReader(const AMessageId: Integer; const AReaderHandle: HWND);
+var
+  msg: TMessageItem;
 begin
-  result := (AMessage.Msg = FMsg_NewMessage) and (GetMessage(AMessage.WParam, AMessageItem));
+  if GetMessage(AMessageId, msg) then
+  begin
+    msg.RemoveReader(AReaderHandle);
+    CleanupMessages;
+  end;
 end;
 
-procedure TMessageContainer.AddMessage(const AMessage: TMessageItem);
+procedure TMessageContainer.CleanupMessages;
 var
   C1: Integer;
 begin
   C1 := 0;
   while C1 < FItems.Count do
-    if FItems[C1].ReadCount >= FItems[C1].Readers then
+    if FItems[C1].ReaderCount = 0 then
       FItems.Delete(C1)
     else
       Inc(C1);
 
   if FItems.Count = 0 then
     FNextId := 0;
+end;
 
+function TMessageContainer.IsNewMessage(const AMessage: TMessage; out AMessageItem: TMessageItem): Boolean;
+begin
+  if AMessage.Msg <> FMsg_NewMessage then
+    Exit(FALSE);
+
+  result := (AMessage.Msg = FMsg_NewMessage) and (GetMessage(AMessage.WParam, AMessageItem));
+end;
+
+procedure TMessageContainer.AddMessage(const AMessage: TMessageItem);
+begin
   Inc(FNextId);
   FItems.Add(AMessage);
 
-  for C1 := 0 to FMessageHandlers.Count - 1 do
-    PostMessage(FMessageHandlers[C1], FMsg_NewMessage, AMessage.Id, 0)
+  AMessage.NotifyHandlers(FMsg_NewMessage);
 end;
 
 procedure TMessageContainer.AddServerMessage(const AMethodId: Integer; const AObject: TObject);
 var
   srv_message: TMessageItem;
 begin
-  srv_message := TMessageItem.Create(FNextId, mtServerResponse, FMessageHandlers.Count);
+  srv_message := TMessageItem.Create(FNextId, mtServerResponse, FMessageHandlers);
   srv_message.SetServerResponseParams(AMethodId, AObject);
   AddMessage(srv_message);
 end;
@@ -131,7 +154,7 @@ procedure TMessageContainer.AddSocketChangeMessage(const AOldState, ANewState: T
 var
   sc_message: TMessageItem;
 begin
-  sc_message := TMessageItem.Create(FNextId, mtSocketChangeState, FMessageHandlers.Count);
+  sc_message := TMessageItem.Create(FNextId, mtSocketChangeState, FMessageHandlers);
   sc_message.SetSocketChangeStateParams(AOldState, ANewState);
   AddMessage(sc_message);
 end;
