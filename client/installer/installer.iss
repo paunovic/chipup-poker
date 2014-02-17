@@ -28,6 +28,7 @@ Source: "ssl_libs\*.*"; DestDir: "{app}"
 
 Source: "fonts\Sintony-Regular.ttf"; DestDir: "{fonts}"; FontInstall: "Sintony"; Flags: uninsneveruninstall
 Source: "fonts\Sintony-Bold.ttf"; DestDir: "{fonts}"; FontInstall: "Sintony"; Flags: uninsneveruninstall
+Source: "fonts\Barmeno-Regular.ttf"; DestDir: "{fonts}"; FontInstall: "Barmeno"; Flags: uninsneveruninstall
 
 [Icons]
 Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"

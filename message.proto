@@ -77,6 +77,8 @@ message Game {
 	optional int32 big_blind = 8;
 	optional int32 seats = 9;
 	optional int32 sitting = 10;
+	optional int32 buyin_min = 11;
+	optional int32 buyin_max = 12;
 }
 
 message StatusReply {

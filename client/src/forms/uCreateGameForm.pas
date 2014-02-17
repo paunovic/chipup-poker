@@ -25,6 +25,12 @@ type
     cbLimit: TcxComboBox;
     lbsLimit: TcxLabel;
     cbBlinds: TcxComboBox;
+    cxLabel1: TcxLabel;
+    cxSpinEdit1: TcxSpinEdit;
+    cxSpinEdit2: TcxSpinEdit;
+    cxLabel2: TcxLabel;
+    cxLabel3: TcxLabel;
+    cxLabel4: TcxLabel;
     procedure acOKExecute(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);

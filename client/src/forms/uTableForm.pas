@@ -287,7 +287,7 @@ begin
     PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
     // calculate table size and draw it
-    FTableWidth := Round(0.75 * PaintBox.Buffer.Width);
+    FTableWidth := Round(0.65 * PaintBox.Buffer.Width);
     FTableHeight := Round(FTableWidth / TTableResources.TableAspectRatio);
     FTableResizeRatio := FTableWidth / TTableResources.TableWidth;
     FTableXOffset := Round(FTableResizeRatio * TTableResources.TableXOffset);
@@ -299,11 +299,7 @@ begin
     FTableCenter.X := tblx + FTableXOffset + FTableWidth div 2;
     FTableCenter.Y := tbly + FTableYOffset + FTableHeight div 2;
     PaintBox.Buffer.Draw(Rect(tblx, tbly, tblx + tblw, tbly + tblh), TTableResources.TableImage.BoundsRect, TTableResources.TableImage);
-                                                                              {
-    for C1 := 0 to Round((2 * pi) * 10000) do
-      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth - 20) / 2) * Cos(C1)),
-                            FTableCenter.Y + Round(((FTableHeight - 15) / 2) * Sin(C1)) - 5] := clRed; // BLUE!
-                                                                                                                  }
+
 {
     PaintBox.Buffer.Draw(Rect(FTableCenter.X - 5, FTableCenter.Y - 5, FTableCenter.X + 5, FTableCenter.Y + 5),
                          TTableResources.DealerButtonImage.BoundsRect,
@@ -430,9 +426,15 @@ var
   seat_radians: Double;
   x, y        : Integer;
 begin
+{
+    for x := 0 to Round((2 * pi) * 10000) do
+      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth + 105 * FTableResizeRatio) / 2) * Cos(x)),
+                            FTableCenter.Y + Round(((FTableHeight + 40 * FTableResizeRatio) / 2) * Sin(x))] := clRed; // BLUE!
+}
+
   seat_radians := (2 * pi) / (FTable.Game.Seats / (ASeatIndex + 1));
-  x := FTableCenter.X + Round(((FTableWidth - 20) / 2) * Cos(seat_radians));
-  y := FTableCenter.Y + Round(((FTableHeight - 15) / 2) * Sin(seat_radians)) - 5;
+  x := FTableCenter.X + Round(((FTableWidth + 105 * FTableResizeRatio) / 2) * Cos(seat_radians));
+  y := FTableCenter.Y + Round(((FTableHeight + 50 * FTableResizeRatio) / 2) * Sin(seat_radians));
 
   result := GR32.Point(x, y);
 end;
