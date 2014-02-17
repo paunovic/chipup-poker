@@ -19,6 +19,8 @@ type
     FBigBlind  : Integer;
     FGameType  : TGameType;
     FGameLimit : TGameLimit;
+    FMinBuyin  : Integer;
+    FMaxBuyin  : Integer;
     FSeats     : Integer;
     FSitting   : Integer;
 
@@ -41,6 +43,8 @@ type
     property GameTypeStr    : String read GetGameTypeStr;
     property GameTypeStrFull: String read GetGameTypeStrFull;
     property Limit          : TGameLimit read FGameLimit write FGameLimit;
+    property MinBuyin       : Integer read FMinBuyin write FMinBuyin;
+    property MaxBuyin       : Integer read FMaxBuyin write FMaxBuyin;
     property Seats          : Integer read FSeats write FSeats;
     property Sitting        : Integer read FSitting write FSitting;
   end;
@@ -71,6 +75,8 @@ begin
   FBigBlind := AProtobufObject.BigBlind;
   FGameType := TGameType(AProtobufObject.GameType);
   FGameLimit := TGameLimit(AProtobufObject.GameLimit);
+  FMinBuyin := AProtobufObject.BuyinMin;
+  FMaxBuyin := AProtobufObject.BuyinMax;
   FSeats := AProtobufObject.Seats;
   FSitting := AProtobufObject.Sitting;
 end;

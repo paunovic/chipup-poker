@@ -235,7 +235,7 @@ begin
       if (not FTable.IsSitting) and
          (not FTableStatus.IsSeatTaken(C1)) then
       begin
-        if RunModalForm(TfrmTableSit, self, [FTable, @C1]) = mrOk then
+        if RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1]) = mrOk then
         begin
           acStandUp.Enabled := TRUE;
           btStandUp.Visible := TRUE;
@@ -248,7 +248,7 @@ begin
          (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
          (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded]) then
       begin
-        RunModalForm(TfrmTableSit, self, [FTable, @C1]);
+        RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1]);
         Break;
       end;
     end;

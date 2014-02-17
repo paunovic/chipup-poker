@@ -65,9 +65,9 @@ type
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
-    procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+    procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure DeleteGame(const AGameId: TBytes);
-    procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+    procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure ListPublicClubs;
     procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
@@ -713,7 +713,7 @@ begin
   end;
 end;
 
-procedure TSocketClient.CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+procedure TSocketClient.CreateGame(const AClubId: Int64; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
@@ -725,6 +725,8 @@ begin
     protobuf.GameLimit := AGameLimit;
     protobuf.SmallBlind := ASmallBlind;
     protobuf.BigBlind := ABigBlind;
+    protobuf.BuyinMin := ABuyinMin;
+    protobuf.BuyinMax := ABuyinMax;
     protobuf.Seats := ASeats;
     SendProtobuf(scCreateGame, protobuf);
   finally
@@ -745,7 +747,7 @@ begin
   end;
 end;
 
-procedure TSocketClient.EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ASeats: Integer);
+procedure TSocketClient.EditGame(const AGameId: TBytes; const AGameName: String; const AGameType, AGameLimit, ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
@@ -757,6 +759,8 @@ begin
     protobuf.GameLimit := AGameLimit;
     protobuf.SmallBlind := ASmallBlind;
     protobuf.BigBlind := ABigBlind;
+    protobuf.BuyinMin := ABuyinMin;
+    protobuf.BuyinMax := ABuyinMax;
     protobuf.Seats := ASeats;
     SendProtobuf(scEditGame, protobuf);
   finally

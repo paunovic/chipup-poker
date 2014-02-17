@@ -2811,7 +2811,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsClubHome
+    Properties.ActivePage = tsTables
     Properties.HideTabs = True
     ClientRectBottom = 363
     ClientRectLeft = 1
@@ -2820,10 +2820,6 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         592
         362)
@@ -2976,7 +2972,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 296
+          Top = 290
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -2989,11 +2985,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 308
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 296
+          Top = 290
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -3006,11 +3001,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 308
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 296
+          Top = 290
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -3023,11 +3017,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 308
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 262
+          Top = 256
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -3040,17 +3033,12 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 274
         end
       end
     end
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         592
         362)
@@ -3069,15 +3057,13 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 572
-          Height = 147
+          Height = 141
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitWidth = 588
-          ExplicitHeight = 182
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3109,28 +3095,35 @@ object frmClubLobby: TfrmClubLobby
               Options.Editing = False
               SortIndex = 0
               SortOrder = soAscending
-              Width = 287
+              Width = 221
             end
             object gridGamesType: TcxGridColumn
               Caption = 'Type'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 117
+              Width = 120
             end
             object gridGamesBlinds: TcxGridColumn
               Caption = 'Stakes'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 98
+              Width = 73
+            end
+            object gridGamesBuyinLimits: TcxGridColumn
+              Caption = 'Buy-in Limits'
+              PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
+              HeaderAlignmentHorz = taCenter
+              Width = 80
             end
             object gridGamesSeats: TcxGridColumn
               Caption = 'Seats'
               PropertiesClassName = 'TcxSpinEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
-              Width = 64
+              Width = 78
             end
           end
           object gridGamesLevel: TcxGridLevel
@@ -3139,7 +3132,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 297
+          Top = 291
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -3152,11 +3145,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 314
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 297
+          Top = 291
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -3169,11 +3161,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 314
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 297
+          Top = 291
           Width = 98
           Height = 28
           Action = acShowEditGameForm
@@ -3186,7 +3177,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 314
         end
       end
     end

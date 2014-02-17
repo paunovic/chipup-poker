@@ -22,6 +22,8 @@ type
       FN_BIG_BLIND = 8;
       FN_SEATS = 9;
       FN_SITTING = 10;
+      FN_BUYIN_MIN = 11;
+      FN_BUYIN_MAX = 12;
 
     var
       FId: TBytes;
@@ -34,6 +36,8 @@ type
       FBigBlind: Integer;
       FSeats: Integer;
       FSitting: Integer;
+      FBuyinMin: Integer;
+      FBuyinMax: Integer;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetCreatorMongoId(const AValue: TBytes);
@@ -45,6 +49,8 @@ type
     procedure SetBigBlind(const AValue: Integer);
     procedure SetSeats(const AValue: Integer);
     procedure SetSitting(const AValue: Integer);
+    procedure SetBuyinMin(const AValue: Integer);
+    procedure SetBuyinMax(const AValue: Integer);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -59,6 +65,8 @@ type
     property BigBlind: Integer read FBigBlind write SetBigBlind;
     property Seats: Integer read FSeats write SetSeats;
     property Sitting: Integer read FSitting write SetSitting;
+    property BuyinMin: Integer read FBuyinMin write SetBuyinMin;
+    property BuyinMax: Integer read FBuyinMax write SetBuyinMax;
   end;
 
 implementation
@@ -118,6 +126,14 @@ begin
       FN_SITTING: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSitting := AProtobufReader.readInt32;
+      end;
+      FN_BUYIN_MIN: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBuyinMin := AProtobufReader.readInt32;
+      end;
+      FN_BUYIN_MAX: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBuyinMax := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -182,6 +198,18 @@ procedure TPB_Game.SetSitting(const AValue: Integer);
 begin
   FSitting := AValue;
   ProtobufOutput.writeInt32(FN_SITTING, AValue);
+end;
+
+procedure TPB_Game.SetBuyinMin(const AValue: Integer);
+begin
+  FBuyinMin := AValue;
+  ProtobufOutput.writeInt32(FN_BUYIN_MIN, AValue);
+end;
+
+procedure TPB_Game.SetBuyinMax(const AValue: Integer);
+begin
+  FBuyinMax := AValue;
+  ProtobufOutput.writeInt32(FN_BUYIN_MAX, AValue);
 end;
 
 end.

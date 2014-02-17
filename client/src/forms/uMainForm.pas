@@ -70,6 +70,7 @@ type
     btOpenTournamentLobby: TcxButton;
     btCreateClub: TcxButton;
     btJoinClub: TcxButton;
+    gridGamesBuyinLimits: TcxGridColumn;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -411,6 +412,7 @@ begin
       c.SetValue(C1, gridGamesName.Index, game.Name);
       c.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
       c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
+      c.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
       c.SetValue(C1, gridGamesStatus.Index, 'unknown');
     end;

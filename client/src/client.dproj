@@ -114,9 +114,6 @@
 			<DCCReference Include="forms\uJoinClubForm.pas">
 				<Form>frmJoinClub</Form>
 			</DCCReference>
-			<DCCReference Include="forms\uEditGameForm.pas">
-				<Form>frmEditGame</Form>
-			</DCCReference>
 			<DCCReference Include="forms\uChangeClubDetailsForm.pas">
 				<Form>frmChangeClubDetails</Form>
 			</DCCReference>
@@ -132,8 +129,8 @@
 			<DCCReference Include="forms\uTableForm.pas">
 				<Form>frmTable</Form>
 			</DCCReference>
-			<DCCReference Include="forms\uCreateGameForm.pas">
-				<Form>frmCreateGame</Form>
+			<DCCReference Include="forms\uCreateEditGameForm.pas">
+				<Form>frmCreateEditGame</Form>
 			</DCCReference>
 			<DCCReference Include="forms\uDebugForm.pas">
 				<Form>frmDebug</Form>

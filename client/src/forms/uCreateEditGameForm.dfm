@@ -1,8 +1,7 @@
-object frmCreateGame: TfrmCreateGame
+object frmCreateEditGame: TfrmCreateEditGame
   Left = 0
   Top = 0
   BorderStyle = bsDialog
-  Caption = 'Create a Table'
   ClientHeight = 226
   ClientWidth = 376
   Color = clBlack
@@ -192,7 +191,7 @@ object frmCreateGame: TfrmCreateGame
     Text = '1/2'
     Width = 273
   end
-  object cxLabel1: TcxLabel
+  object lbsBuyinLimit: TcxLabel
     Left = 18
     Top = 127
     Caption = 'Buy-in limit:'
@@ -206,21 +205,23 @@ object frmCreateGame: TfrmCreateGame
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object cxSpinEdit1: TcxSpinEdit
+  object seBuyinMin: TcxSpinEdit
     Left = 111
     Top = 126
+    Properties.MinValue = 5.000000000000000000
     TabOrder = 4
     Value = 20
     Width = 53
   end
-  object cxSpinEdit2: TcxSpinEdit
+  object seBuyinMax: TcxSpinEdit
     Left = 199
     Top = 126
+    Properties.MinValue = 10.000000000000000000
     TabOrder = 5
     Value = 200
     Width = 53
   end
-  object cxLabel2: TcxLabel
+  object lbsBuyinMin: TcxLabel
     Left = 86
     Top = 127
     Caption = 'min'
@@ -234,7 +235,7 @@ object frmCreateGame: TfrmCreateGame
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object cxLabel3: TcxLabel
+  object lbsBuyinMax: TcxLabel
     Left = 167
     Top = 127
     Caption = ' max'
@@ -248,7 +249,7 @@ object frmCreateGame: TfrmCreateGame
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object cxLabel4: TcxLabel
+  object lbsBuyinBigBlinds: TcxLabel
     Left = 255
     Top = 127
     Caption = 'big blinds'

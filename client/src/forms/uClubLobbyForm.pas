@@ -62,6 +62,7 @@ type
     acLeaveClub: TAction;
     imgHeader: TcxImage;
     btPrijatnaPunina: TcxButton;
+    gridGamesBuyinLimits: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -120,7 +121,7 @@ implementation
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uCommon, uSocketClient, uMainDataModule, uGiveChipsForm, uChangeClubDetailsForm, uServerMessageCallback, uServerCodes,
-  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateGameForm, uEditGameForm, uPB_Club, uPB_Game, uPB_ClubCommandReply;
+  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateEditGameForm, uPB_Club, uPB_Game, uPB_ClubCommandReply;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -411,6 +412,7 @@ begin
       gridGamesTable.DataController.SetValue(C1, gridGamesName.Index, game.Name);
       gridGamesTable.DataController.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
       gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
+      gridGamesTable.DataController.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       gridGamesTable.DataController.SetValue(C1, gridGamesSeats.Index, game.Seats);
     end;
   finally
@@ -487,23 +489,27 @@ end;
 procedure TfrmClubLobby.acShowCreateGameFormExecute(Sender: TObject);
 var
   club: TClubInfo;
+  pint: Integer;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  RunModalForm(TfrmCreateGame, self, [club]);
+  pint := 0;
+  RunModalForm(TfrmCreateEditGame, self, [@pint, club]);
 end;
 
 procedure TfrmClubLobby.acShowEditGameFormExecute(Sender: TObject);
 var
   club: TClubInfo;
   game: TGameInfo;
+  pint: Integer;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
      (not club.Games.FindGame(FSelectedGameId, game)) then
     Exit;
 
-  RunModalForm(TfrmEditGame, self, [game]);
+  pint := 1;
+  RunModalForm(TfrmCreateEditGame, self, [@pint, game]);
 end;
 
 procedure TfrmClubLobby.acSuspendPlayerExecute(Sender: TObject);

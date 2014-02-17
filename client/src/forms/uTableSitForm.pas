@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit, cxSpinEdit, cxLabel, Vcl.ActnList, uIFormParams,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uTables;
+  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uTables, uTableStatus;
 
 type
   TfrmTableSit = class(TForm, IFormParams)
@@ -24,8 +24,9 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure seBuyinPropertiesChange(Sender: TObject);
   private
-    FTable    : TTable;
-    FSeatIndex: Integer;
+    FTable      : TTable;
+    FTableStatus: TTableStatus;
+    FSeatIndex  : Integer;
 
 
     procedure CSRTableSitOk(const AMessage: TMessageItem);
@@ -86,7 +87,8 @@ end;
 procedure TfrmTableSit.SetParams(const AParams: array of pointer);
 begin
   FTable := AParams[0];
-  FSeatIndex := PInteger(AParams[1])^;
+  FTableStatus := AParams[1];
+  FSeatIndex := PInteger(AParams[2])^;
 end;
 
 procedure TfrmTableSit.WndProc(var AMessage: TMessage);
@@ -119,13 +121,37 @@ begin
 end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);
+var
+  err      : String;
+  seat_info: TSeatInfo;
 begin
   if FTable.SeatIndex = -1 then
-    SocketClient.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100))
-  else
-    SocketClient.TableAddOn(FTable.Game.MongoId, Trunc(seBuyin.Value * 100));
+  begin
+    if seBuyin.Value * 100 > FTable.Game.MaxBuyin * FTable.Game.BigBlind then
+      err := Format('Maximum buy-in for this table is %d', [(FTable.Game.MaxBuyin * FTable.Game.BigBlind) div 100])
+    else
+      if seBuyin.Value * 100 < FTable.Game.MinBuyin * FTable.Game.BigBlind then
+        err := Format('Minimum buy-in for this table is %d', [(FTable.Game.MinBuyin * FTable.Game.BigBlind) div 100]);
 
-  acOK.Enabled := FALSE;
+    if err = '' then
+      SocketClient.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100));
+  end
+  else
+  begin
+    if not FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+      err := 'Invalid seat index'
+    else
+      if seBuyin.Value * 100 > FTable.Game.MaxBuyin * FTable.Game.BigBlind - seat_info.Chips  then
+        err := Format('Maximum buy-in for this table is %d', [(FTable.Game.MaxBuyin * FTable.Game.BigBlind) div 100]);
+
+    if err = '' then
+      SocketClient.TableAddOn(FTable.Game.MongoId, Trunc(seBuyin.Value * 100));
+  end;
+
+  if err = '' then
+    acOK.Enabled := FALSE
+  else
+    MessageDlg(err, mtError, [mbOK], 0);
 end;
 
 procedure TfrmTableSit.CSRTableSitNoChips(const AMessage: TMessageItem);
