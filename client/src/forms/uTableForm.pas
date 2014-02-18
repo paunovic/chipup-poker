@@ -383,9 +383,8 @@ procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
 var
   seat_info: TSeatInfo;
 begin
-  if FTable.IsSitting then
+  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
   begin
-    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
     if cbSitOutNextHand.Checked then
       SocketClient.TableSitOut(FTable.Game.MongoId)
     else
@@ -647,10 +646,8 @@ begin
   acPlayNow.Enabled := FALSE;
   sitout := FALSE;
 
-  if FTable.IsSitting then
+  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
   begin
-    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-
     acStandUp.Enabled := TRUE;
 
     case seat_info.Status of
