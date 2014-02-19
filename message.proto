@@ -268,6 +268,7 @@ message TableStatus {
 	repeated int32 pots = 10;
 	required bool locked = 11;
 	optional int32 seq = 12;
+	optional int32 minimum_bet = 13;
 }
 
 message SeatInfo {
@@ -277,6 +278,7 @@ message SeatInfo {
 		psInHand = 3;
 		psFolded = 4;
 		psAllIn = 5;
+		psStandingUp = 6;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2;
