@@ -139,38 +139,31 @@ function testmenu(cb) {
 		moves = {fold:function() {
 			conn.reply(codes.scFold,{_id:gameid},'Poker.Game');
 		}};
-		var max = 0;
-		for (var x=0; x<conn.tableStatus.seats.length; x++) {
-			var seat = conn.tableStatus.seats[x];
-			if (['psInHand','psAllIn'].indexOf(seat.status) != -1) {
-				if (conn.tableStatus.bets[x] > max) max = conn.tableStatus.bets[x];
-			}
-		}
 		var oldbet = conn.tableStatus.bets[conn.seat];
 		if (oldbet === undefined) oldbet = 0;
-		if (max == oldbet) {
+		if (conn.tableStatus.minimum_bet == oldbet) {
 			moves.check = function () {
 				console.log('doing check with',oldbet,'all bets are',conn.tableStatus.bets);
 				conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount: oldbet},'Poker.PutChips');
 			}
 		}
-		if (oldbet < max) {
+		if (oldbet < conn.tableStatus.minimum_bet) {
 			moves.call = function () {
-				console.log('doing call from '+oldbet+'->'+max+'(adding '+(max-oldbet)+')');
-				conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:max},'Poker.PutChips');
+				console.log('doing call from '+oldbet+'->'+conn.tableStatus.minimum_bet+'(adding '+(conn.tableStatus.minimum_bet-oldbet)+')');
+				conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:conn.tableStatus.minimum_bet},'Poker.PutChips');
 			}
-			moves.call.info = oldbet+'->'+max+'(adding '+(max-oldbet)+')';
+			moves.call.info = oldbet+'->'+conn.tableStatus.minimum_bet+'(adding '+(conn.tableStatus.minimum_bet-oldbet)+')';
 		}
 		moves.raise = function (args) {
 			var newbet = parseInt(args[0]);
 			console.log('doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
 			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet},'Poker.PutChips');
 		}
-		//if (conn.tableStatus.locked) {
-		//	console.log('table locked');
-		//} else {
+		if (conn.tableStatus.locked) {
+			console.log('table locked');
+		} else {
 			doMenu(moves);
-		//}
+		}
 	}
 	function checkAndPrint(params) {
 		if (params.current_seat == this.seat) {
@@ -238,6 +231,7 @@ function testmenu(cb) {
 			this.sitting = true;
 			var params = pb.Parse(data,'Poker.TableStatus');
 			this.tableStatus = params;
+			this.reply(codes.scTablePlayNow,{_id:gameid},'Poker.Game');
 			if (['tsPreFlop'].indexOf(params.state) == -1) break;
 			checkAndPrint.call(this,params);
 			if (params.current_seat == this.seat) {

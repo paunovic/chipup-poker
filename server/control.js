@@ -23,10 +23,16 @@ Client.prototype.handle = function (code,data) {
 	switch (code) {
 	case codes.PerClientMsgEvent:
 		var msg = pb.Parse(data,'Backend.PerClientMsg');
-		msg.objects.unshift(msg.nick);
+		msg.objects.unshift(msg.nick+':');
 		msg.objects.unshift(msg.ts);
 		console.log.apply(this,msg.objects);
 		//console.log(msg.ts,msg.nick,msg.objects);
+		break;
+	case codes.PerGameMsgEvent:
+		var msg = pb.Parse(data,'Backend.PerGameMsg');
+		msg.objects.unshift(msg.name+':');
+		msg.objects.unshift(msg.ts);
+		console.log.apply(this,msg.objects);
 		break;
 	case codes.GlobalMsgEvent:
 		var msg = pb.Parse(data,'Backend.GlobalMsg');

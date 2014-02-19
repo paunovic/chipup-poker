@@ -12,6 +12,8 @@ protoreader.init(pb,codes);
 
 var clients = [];
 
+var logs = {};
+
 var server = net.createServer(function (socket) {
 	var handler = new Client(socket);
 });
@@ -77,6 +79,12 @@ var buffer = [];
 var autoRestart = true;
 Error.stackTraceLimit = 20;
 var retry = 20;
+function getLog(name) {
+	if (!logs[name]) {
+		logs[name] = fs.createWriteStream('logs/'+name+'.log');
+	}
+	return logs[name];
+}
 function startImHub() {
 	for (var x=0; x<clients.length; x++) {
 		clients[x].reply(codes.Starting);
@@ -87,6 +95,7 @@ function startImHub() {
 	//im_hub.stderr.setEncoding('utf8');
 	//im_hub.stderr.on('data',readStdErr);
 	//process.stdin.pipe(im_hub.stdin);
+	setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
 	im_hub.on('message',function (msg) {
 		buffer.push(msg);
 		switch (msg.type) {
@@ -101,6 +110,17 @@ function startImHub() {
 			for (var x=0; x<clients.length; x++) {
 				clients[x].reply(codes.PerClientMsgEvent,msg,'Backend.PerClientMsg');
 			}
+			getLog('client_'+msg.nick).write(msg.ts+','+msg.nick+','+util.inspect(msg.objects)+'\n');
+			break;
+		case 'game':
+			console.log(msg.ts,msg.name+':',util.inspect(msg.objects,{colors:true}));
+			for (var x=0; x<msg.objects.length; x++) {
+				if (typeof msg.objects[x] == 'object') msg.objects[x]= util.inspect(msg.objects[x]);
+			}
+			for (var x=0; x<clients.length; x++) {
+				clients[x].reply(codes.PerGameMsgEvent,msg,'Backend.PerGameMsg');
+			}
+			getLog('game_'+msg.name).write(msg.ts+','+msg.name+','+util.inspect(msg.objects)+'\n');
 			break;
 		default:
 			var string = msg.msg;
@@ -110,6 +130,7 @@ function startImHub() {
 			for (var x=0; x<clients.length; x++) {
 				clients[x].reply(codes.GlobalMsgEvent,msg,'Backend.GlobalMsg');
 			}
+			getLog('global').write(string+'\n');
 		}
 		while (buffer.length > 200) buffer.shift();
 	});

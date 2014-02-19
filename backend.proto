@@ -11,11 +11,17 @@ enum BackendFunctions {
 	Stopping = 5;
 	PerClientMsgEvent = 6;
 	GlobalMsgEvent = 7;
+	PerGameMsgEvent = 8;
 }
 message PerClientMsg {
 	required string ts = 1;
 	repeated string objects = 2;
 	optional string nick = 3;
+}
+message PerGameMsg {
+	required string ts = 1;
+	repeated string objects = 2;
+	required string name = 3;
 }
 message GlobalMsg {
 	required string msg = 1;
