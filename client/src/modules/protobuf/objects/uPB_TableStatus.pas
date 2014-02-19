@@ -25,6 +25,7 @@ type
       FN_POTS = 10;
       FN_LOCKED = 11;
       FN_SEQ = 12;
+      FN_MINIMUM_BET = 13;
 
     var
       FTableMongoId: TBytes;
@@ -39,6 +40,7 @@ type
       FPots: TArray<Integer>;
       FLocked: Boolean;
       FSeq: Integer;
+      FMinimumBet: Integer;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -51,6 +53,7 @@ type
     procedure SetPots(const AValue: TArray<Integer>);
     procedure SetLocked(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
+    procedure SetMinimumBet(const AValue: Integer);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -67,6 +70,7 @@ type
     property Pots: TArray<Integer> read FPots write SetPots;
     property Locked: Boolean read FLocked write SetLocked;
     property Seq: Integer read FSeq write SetSeq;
+    property MinimumBet: Integer read FMinimumBet write SetMinimumBet;
   end;
 
 implementation
@@ -141,6 +145,10 @@ begin
       FN_SEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readInt32;
+      end;
+      FN_MINIMUM_BET: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FMinimumBet := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -217,6 +225,12 @@ procedure TPB_TableStatus.SetSeq(const AValue: Integer);
 begin
   FSeq := AValue;
   ProtobufOutput.writeInt32(FN_SEQ, AValue);
+end;
+
+procedure TPB_TableStatus.SetMinimumBet(const AValue: Integer);
+begin
+  FMinimumBet := AValue;
+  ProtobufOutput.writeInt32(FN_MINIMUM_BET, AValue);
 end;
 
 end.

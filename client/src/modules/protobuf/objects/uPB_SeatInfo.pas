@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
-  TPlayerStatus = (psOutOfPlay = 1,psOutOfHand = 2,psInHand = 3,psFolded = 4,psAllIn = 5);
+  TPlayerStatus = (psOutOfPlay = 1,psOutOfHand = 2,psInHand = 3,psFolded = 4,psAllIn = 5,psStandingUp = 6);
   TPB_SeatInfo = class(TProtobufBaseObject)
   private
     const

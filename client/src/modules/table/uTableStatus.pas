@@ -44,8 +44,7 @@ type
     FSmallBlindSeat: Integer;
     FBigBlindSeat  : Integer;
     FLocked        : Boolean;
-
-    function GetHighestBet: Integer;
+    FHighestBet    : Integer;
 
   public
     constructor Create;
@@ -62,7 +61,7 @@ type
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TArray<Integer> read FBets;
-    property HighestBet: Integer read GetHighestBet;
+    property HighestBet: Integer read FHighestBet;
     property FlopCards: TCards read FFlopCards;
     property TurnCard: TCard read FTurnCard;
     property RiverCard: TCard read FRiverCard;
@@ -161,16 +160,6 @@ begin
   Exit(-1);
 end;
 
-function TTableStatus.GetHighestBet: Integer;
-var
-  C1: Integer;
-begin
-  result := 0;
-  for C1 := Low(FBets) to High(FBets) do
-    if FBets[C1] > result then
-      result := FBets[C1];
-end;
-
 function TTableStatus.GetBet(const ASeatIndex: Integer): Integer;
 begin
   if (ASeatIndex < Low(FBets)) or
@@ -215,6 +204,7 @@ begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
+  FHighestBet := ATableStatusProtobuf.MinimumBet;
   if State <> tsWinning then
   begin
     FFlopCards.Assign(ATableStatusProtobuf.Flop);
