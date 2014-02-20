@@ -347,6 +347,7 @@ begin
           add := add + 'SB';
         if seat_info.SeatIndex = FTableStatus.BigBlindSeat then
           add := add + 'BB';
+
         PaintBox.Buffer.TextOut(seat_point.X - 35, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] [%d] %s %s', [seat_info.SeatIndex, Integer(seat_info.Status), add, seat_info.Cards.AsString]));
       end;
     PaintBox.Buffer.Font.Style := [];
@@ -513,7 +514,8 @@ begin
     btt := seat_point.Y + 3;
     btb := Round(seat_point.Y + FSeatHeight div 2 - FSeatHeight / 10);
 
-    if FTableStatus.GetSeatInfo(C1, seat_info) then // seat taken
+    if (FTableStatus.GetSeatInfo(C1, seat_info)) and
+       (seat_info.Status <> psStandingUp) then // seat taken and its not in psStandingUp state
     begin
       dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
 
@@ -710,8 +712,13 @@ begin
     tiActiveFrameBlink.Enabled := TRUE;
   end;
 
-  if not sitout then
+  if (not cbSitOutNextHand.Visible) and
+     (sitout) then
+  begin
+    cbSitOutNextHand.Properties.OnChange := nil;
     cbSitOutNextHand.Checked := FALSE;
+    cbSitOutNextHand.Properties.OnChange := cbSitOutNextHandPropertiesChange;
+  end;
   cbSitOutNextHand.Visible := sitout;
 
   btStandUp.Visible := acStandUp.Enabled;
@@ -762,6 +769,7 @@ var
   pbtablestatus: TPB_TableStatus;
   C1           : Integer;
   tmp          : String;
+  seat_index   : Integer;
 begin
   pbtablestatus := AMessage.Object_ as TPB_TableStatus;
   if not CompareBytes(pbtablestatus.TableMongoId, FTable.Game.MongoId) then
@@ -776,12 +784,14 @@ begin
     Integer(srTableStandUpOk): FTable.SeatIndex := -1;
   end;
 
+  seat_index := -1;
   for C1 := 0 to pbtablestatus.Seats.Count - 1 do
     if CompareBytes(pbtablestatus.Seats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
     begin
-      FTable.SeatIndex := pbtablestatus.Seats[C1].Seat;
+      seat_index := pbtablestatus.Seats[C1].Seat;
       Break;
     end;
+  FTable.SeatIndex := seat_index;
 
   tmp := '';
   for C1 := Low(pbtablestatus.Pots) to High(pbtablestatus.Pots) do

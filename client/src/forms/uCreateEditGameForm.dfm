@@ -13,6 +13,7 @@ object frmCreateEditGame: TfrmCreateEditGame
   Font.Style = []
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClick = acCancelExecute
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -71,7 +72,6 @@ object frmCreateEditGame: TfrmCreateEditGame
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 155
   end
   object btCancel: TcxButton
     Left = 268
@@ -88,7 +88,6 @@ object frmCreateEditGame: TfrmCreateEditGame
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 155
   end
   object cbGameType: TcxComboBox
     Left = 88
