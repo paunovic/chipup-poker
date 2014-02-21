@@ -870,8 +870,8 @@ var
   call_amount: Integer;
 begin
   Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-  if seat_info.Chips < FTableStatus.HighestBet then
-    call_amount := seat_info.Chips
+  if seat_info.Chips < FTableStatus.HighestBet - FTableStatus.GetBet(seat_info.SeatIndex) then
+    call_amount := seat_info.Chips + FTableStatus.GetBet(seat_info.SeatIndex)
   else
     call_amount := FTableStatus.HighestBet;
 

@@ -120,23 +120,21 @@ end;
 
 function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
 var
-  C1   : Integer;
-  index: Integer;
-  sind : Integer;
+  C1         : Integer;
+  index      : Integer;
+  pivot_index: Integer;
 begin
   if not Assigned(FSeatInfos) then
     Exit(-1);
 
-  sind := -1;
   index := -1;
   for C1 := 0 to FSeatInfos.Count - 1 do
     if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
     begin
-      sind := C1;
       if C1 = FSeatInfos.Count - 1 then
         index := 0
       else
-        index := sind + 1;
+        index := C1 + 1;
       Break;
     end;
 
@@ -146,9 +144,10 @@ begin
   if not AOnlyInHand then
     Exit(FSeatInfos[index].SeatIndex);
 
-  while index <> sind do
+  pivot_index := index;
+  while index <> pivot_index do
   begin
-    if FSeatInfos[index].Status in [psInHand, psAllIn] then
+    if FSeatInfos[index].Status in [psInHand, psFolded, psStandingUp, psAllIn] then
       Exit(FSeatInfos[index].SeatIndex);
 
     if index = FSeatInfos.Count - 1 then
