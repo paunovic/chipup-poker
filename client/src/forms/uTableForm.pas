@@ -848,6 +848,8 @@ begin
   if not CompareBytes(pbtevent.TableMongoId, FTable.Game.MongoId) then
     Exit;
 
+  FTableStatus.Assign(pbtevent);
+
   case pbtevent.Event of
     teFold: event := 'FOLD';
     teSit: event := 'SIT';

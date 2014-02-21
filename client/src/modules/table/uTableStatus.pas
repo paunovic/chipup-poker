@@ -3,7 +3,7 @@ unit uTableStatus;
 interface
 
 uses
-  uPB_TableStatus, uPB_SeatInfo, System.SysUtils, System.Generics.Collections, System.Generics.Defaults, uCards;
+  uPB_TableStatus, uPB_SeatInfo, uPB_TableEvent, System.SysUtils, System.Generics.Collections, System.Generics.Defaults, uCards;
 
 type
   TSeatInfo = class
@@ -54,7 +54,8 @@ type
     function GetBet(const ASeatIndex: Integer): Integer;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
-    procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
+    procedure Assign(const ATableStatusProtobuf: TPB_TableStatus); overload;
+    procedure Assign(const ATableStatusProtobuf: TPB_TableEvent); overload;
 
     property State: TTableState read FState;
     property Dealer: Integer read FDealer;
@@ -198,8 +199,8 @@ end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
 var
-  C1   : Integer;
-  seat : TSeatInfo;
+  C1        : Integer;
+  seat      : TSeatInfo;
 begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
@@ -229,14 +230,28 @@ begin
       FSmallBlindSeat := -1;
       FBigBlindSeat := -1;
     end;
-    tsPreFlop: begin
-      FSmallBlindSeat := GetNextSeatIndex(FDealer, TRUE);
-      FBigBlindSeat := GetNextSeatIndex(FSmallBlindSeat, TRUE);
-    end;
   end;
 
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
+end;
+
+procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableEvent);
+begin
+  case ATableStatusProtobuf.Event of
+    teFold: ;
+    teSit: ;
+    teStandUp: ;
+    teWinning: ;
+    teDealing: begin
+      FSmallBlindSeat := GetNextSeatIndex(FDealer, TRUE);
+      FBigBlindSeat := GetNextSeatIndex(FSmallBlindSeat, TRUE);
+    end;
+    teCheck: ;
+    teCall: ;
+    teRaise: ;
+    teAllIn: ;
+  end;
 end;
 
 { TSeatInfos }
