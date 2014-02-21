@@ -58,7 +58,7 @@ message Club {
 
 message User {
 	required bytes _id = 1;
-	required bytes avatar = 2;
+	optional bytes avatar = 2;
 	required string displayname = 3;
 	
 	optional string email = 5;
