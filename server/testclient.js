@@ -42,7 +42,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 });
 
 function Client(handle) {
-	this.socket = net.connect(12345,'192.168.2.61',function cb2() {
+	this.socket = net.connect(12345,'127.0.0.1',function cb2() {
 	});
 	this.reader = new protoreader(this.socket,this);
 	this.handle = handle;
@@ -253,6 +253,7 @@ function testmenu(cb,config) {
 				conn.close();
 				return;
 			}
+			this.reply(codes.scLogin,{username:this.name+'@server.com',password:'password'},'Poker.LoginParams');
 			break;
 		case codes.seTableStatus:
 			var params = pb.Parse(data,'Poker.TableStatus');
@@ -310,6 +311,10 @@ function testmenu(cb,config) {
 		switch (code) {
 		case codes.srLoginReply:
 			var params = pb.Parse(data,'Poker.LoginReply');
+			if (params.status == 'lrInvalid') {
+				this.reply(codes.scRegister,{email:this.name+'@server.com',password:'password',displayName:this.name},'Poker.RegisterParams');
+				return;
+			}
 			if (params.status != 'lrSuccess') {
 				this.log(params);
 				this.socket.destroy();
@@ -352,7 +357,9 @@ function testmenu(cb,config) {
 				return;
 			}
 			this.log('club seq is',params.club.seq);
-			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:1, game_limit:1, small_blind:5, big_blind:10, seats:6, gamename:'testbot game'},'Poker.Game');
+			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:1,
+				game_limit:1, small_blind:5, big_blind:10, seats:6, gamename:'testbot game',
+				buyin_max:2000, buyin_min:5},'Poker.Game');
 			break;
 		case codes.srCreateGameOk:
 			var params = pb.Parse(data,'Poker.Game');
@@ -397,6 +404,10 @@ function testmenu(cb,config) {
 		switch (code) {
 		case codes.srLoginReply:
 			var params = pb.Parse(data,'Poker.LoginReply');
+			if (params.status == 'lrInvalid') {
+				this.reply(codes.scRegister,{email:this.name+'@server.com',password:'password',displayName:this.name},'Poker.RegisterParams');
+				return;
+			}
 			if (params.status != 'lrSuccess') {
 				this.log(params);
 				this.socket.destroy();
@@ -422,5 +433,5 @@ function testmenu(cb,config) {
 function autobot(cb) {
 	testmenu(cb,{moves:[],autoRandom:{call:8,check:8,fold:1,raise:12}});
 }
-tests = [ autobot ];
-//tests = [ testmenu ];
+//tests = [ autobot ];
+tests = [ testmenu ];

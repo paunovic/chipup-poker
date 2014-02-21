@@ -1183,7 +1183,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							}
 						}
 					}
-					if (!compareObjectID(this.userid,club.owner) && !containsObjectID(club.members,this.userid)) {
+					if (!compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid))) {
 						this.log('i am not a member');
 						this.reply(0,'your not a member of that club'); // FIXME
 					} else if (game.join(this)) this.send(codes.seTableStatus,game.getTableStatus(),'Poker.TableStatus');
