@@ -127,10 +127,12 @@ begin
   if not Assigned(FSeatInfos) then
     Exit(-1);
 
+  pivot_index := -1;
   index := -1;
   for C1 := 0 to FSeatInfos.Count - 1 do
     if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
     begin
+      pivot_index := C1;
       if C1 = FSeatInfos.Count - 1 then
         index := 0
       else
@@ -144,7 +146,6 @@ begin
   if not AOnlyInHand then
     Exit(FSeatInfos[index].SeatIndex);
 
-  pivot_index := index;
   while index <> pivot_index do
   begin
     if FSeatInfos[index].Status in [psInHand, psFolded, psStandingUp, psAllIn] then

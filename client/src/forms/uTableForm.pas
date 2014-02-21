@@ -673,7 +673,7 @@ begin
             tsRiver: begin
               if seat_bet < FTableStatus.HighestBet then
               begin
-                if seat_info.Chips + seat_bet < FTableStatus.HighestBet then
+                if seat_info.Chips + seat_bet <= FTableStatus.HighestBet then
                   acCall.Caption := 'CALL (ALL-IN)'
                 else
                   acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - seat_bet) / 100]);
@@ -733,11 +733,19 @@ begin
 
   if tbRaise.Visible then
   begin
-    seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
-    seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
-    tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-    tbRaise.Properties.Max := FTableStatus.GetBet(seat_info.SeatIndex) + seat_info.Chips;
+
+    seRaiseAmount.Properties.MaxValue := (FTableStatus.GetBet(seat_info.SeatIndex) + seat_info.Chips) / 100;
+    seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
+    if seRaiseAmount.Properties.MinValue > seRaiseAmount.Properties.MaxValue then
+      seRaiseAmount.Properties.MinValue := seRaiseAmount.Properties.MaxValue;
+
+    DebugLn(Format('MIN: %.2f, MAX: %.2f', [seRaiseAmount.Properties.MinValue, seRaiseAmount.Properties.MaxValue]), ditApplication);
+
+    seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
+
+    tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
+    tbRaise.Properties.Max := Trunc(seRaiseAmount.Properties.MaxValue * 100);
   end;
 
   if (acCheck.Enabled) or (acFold.Enabled) then
