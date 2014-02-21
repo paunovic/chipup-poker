@@ -639,6 +639,7 @@ procedure TfrmTable.ConfigureGUI;
 var
   seat_info: TSeatInfo;
   sitout   : Boolean;
+  seat_bet : Integer;
 begin
   acStandUp.Enabled := FALSE;
   acFold.Enabled := FALSE;
@@ -651,6 +652,7 @@ begin
   if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
   begin
     acStandUp.Enabled := TRUE;
+    seat_bet := FTableStatus.GetBet(FTable.SeatIndex);
 
     case seat_info.Status of
       psOutOfPlay: begin
@@ -669,16 +671,16 @@ begin
             tsFlop,
             tsTurn,
             tsRiver: begin
-              if FTableStatus.GetBet(FTable.SeatIndex) < FTableStatus.HighestBet then
+              if seat_bet < FTableStatus.HighestBet then
               begin
-                if seat_info.Chips < FTableStatus.HighestBet then
+                if seat_info.Chips + seat_bet < FTableStatus.HighestBet then
                   acCall.Caption := 'CALL (ALL-IN)'
                 else
-                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - FTableStatus.GetBet(FTable.SeatIndex)) / 100]);
+                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - seat_bet) / 100]);
                 acCall.Enabled := TRUE;
                 acFold.Enabled := TRUE;
 
-                if seat_info.Chips > FTableStatus.HighestBet then
+                if seat_info.Chips + seat_bet > FTableStatus.HighestBet then
                 begin
                   acRaise.Caption := 'RAISE';
                   acRaise.Enabled := TRUE;
@@ -867,11 +869,13 @@ end;
 procedure TfrmTable.acCallExecute(Sender: TObject);
 var
   seat_info  : TSeatInfo;
+  seat_bet   : Integer;
   call_amount: Integer;
 begin
   Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-  if seat_info.Chips < FTableStatus.HighestBet - FTableStatus.GetBet(seat_info.SeatIndex) then
-    call_amount := seat_info.Chips + FTableStatus.GetBet(seat_info.SeatIndex)
+  seat_bet := FTableStatus.GetBet(seat_info.SeatIndex);
+  if seat_bet + seat_info.Chips < FTableStatus.HighestBet then
+    call_amount := seat_bet + seat_info.Chips
   else
     call_amount := FTableStatus.HighestBet;
 
