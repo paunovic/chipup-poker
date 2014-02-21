@@ -740,8 +740,6 @@ begin
     if seRaiseAmount.Properties.MinValue > seRaiseAmount.Properties.MaxValue then
       seRaiseAmount.Properties.MinValue := seRaiseAmount.Properties.MaxValue;
 
-    DebugLn(Format('MIN: %.2f, MAX: %.2f', [seRaiseAmount.Properties.MinValue, seRaiseAmount.Properties.MaxValue]), ditApplication);
-
     seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
 
     tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
