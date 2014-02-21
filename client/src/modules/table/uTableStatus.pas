@@ -14,6 +14,7 @@ type
     FCardCount: Integer;
     FCards: TCards;
     FStatus: TPlayerStatus;
+    function GetStatusStr: String;
   public
     destructor Destroy; override;
 
@@ -25,6 +26,7 @@ type
     property CardCount: Integer read FCardCount;
     property Cards: TCards read FCards;
     property Status: TPlayerStatus read FStatus;
+    property StatusAsStr: String read GetStatusStr;
   end;
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
@@ -93,6 +95,18 @@ begin
   FCards.Free;
 
   inherited;
+end;
+
+function TSeatInfo.GetStatusStr: String;
+begin
+  case FStatus of
+    psOutOfPlay: result := 'OutOfPlay';
+    psOutOfHand: result := 'OutOfHand';
+    psInHand: result := 'InHand';
+    psFolded: result := 'Folded';
+    psAllIn: result := 'AllIn';
+    psStandingUp: result := 'StandingUp';
+  end;
 end;
 
 { TTableStatus }

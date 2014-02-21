@@ -259,6 +259,7 @@ procedure TfrmTable.Redraw(const APaintboxRepaint: Boolean = FALSE);
 var
   C1          : Integer;
   seat_point  : TPoint;
+  dealer_point: TPoint;
   seat_info   : TSeatInfo;
   chat_width  : Integer;
   cards       : String;
@@ -335,7 +336,7 @@ begin
     PaintBox.Buffer.TextOut(FTableCenter.X - 50, FTableCenter.Y + 30, cards);
     PaintBox.Buffer.Font.Style := [];
 
-    // draw player cards and blinds
+    // draw player cards and blinds and bets
     PaintBox.Buffer.Font.Color := clWhite;
     PaintBox.Buffer.Font.Style := [fsBold];
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
@@ -348,9 +349,20 @@ begin
         if seat_info.SeatIndex = FTableStatus.BigBlindSeat then
           add := add + 'BB';
 
-        PaintBox.Buffer.TextOut(seat_point.X - 35, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] [%d] %s %s', [seat_info.SeatIndex, Integer(seat_info.Status), add, seat_info.Cards.AsString]));
+        PaintBox.Buffer.TextOut(seat_point.X - 55, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] [%s] %s %s', [seat_info.SeatIndex, seat_info.StatusAsStr, add, seat_info.Cards.AsString]));
+
+        // draw player bets
+        if (Length(FTableStatus.Bets) > seat_info.SeatIndex) and
+           (FTableStatus.Bets[seat_info.SeatIndex] > 0) then
+        begin
+          dealer_point := GetDealerPoint(seat_info.SeatIndex);
+          PaintBox.Buffer.Font.Color := clWhite;
+          PaintBox.Buffer.Font.Style := [fsBold];
+          PaintBox.Buffer.TextOut(dealer_point.X - 50, dealer_point.Y - 10, FloatToStr(FTableStatus.Bets[seat_info.SeatIndex] / 100));
+        end;
       end;
     PaintBox.Buffer.Font.Style := [];
+
   finally
     PaintBox.Buffer.EndUpdate;
   end;
@@ -744,6 +756,7 @@ begin
 
     tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
     tbRaise.Properties.Max := Trunc(seRaiseAmount.Properties.MaxValue * 100);
+    tbRaise.POsition := tbRaise.Properties.Min;
   end;
 
   if (acCheck.Enabled) or (acFold.Enabled) then
