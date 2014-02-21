@@ -89,6 +89,8 @@ begin
   FTable := AParams[0];
   FTableStatus := AParams[1];
   FSeatIndex := PInteger(AParams[2])^;
+
+  seBuyin.Value := (FTable.Game.MinBuyin * FTable.Game.BigBlind + (FTable.Game.MaxBuyin * FTable.Game.BigBlind - FTable.Game.MinBuyin * FTable.Game.BigBlind) / 2) / 100;
 end;
 
 procedure TfrmTableSit.WndProc(var AMessage: TMessage);
