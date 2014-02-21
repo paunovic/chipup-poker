@@ -74,7 +74,7 @@ protoreader.reply = function reply(code,message,type) {
 	if (!alldone) this.log('partial message write');
 	//console.log('header out:',header);
 	//console.log(object);
-	if ([codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange].indexOf(code) != -1) {
+	if ([codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange,codes.srHello,codes.PerGameMsgEvent].indexOf(code) != -1) {
 	} else if (code == 100) this.log('sent '+datasize+' bytes for code '+code,message);
 	else this.log('sent '+datasize+' bytes for code '+codes.reverse[code]);
 	//console.log(message);
