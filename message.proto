@@ -357,9 +357,10 @@ message TableEvent {
 			crOnePair = 9;
 			crHighCard = 10;
 		}
-		required CardRankings primaryRank = 1;
-		required int32 secondaryRank = 2;
+		optional CardRankings primaryRank = 1;
+		optional int32 secondaryRank = 2;
 		required int32 seat = 3;
+		required string msg = 4;
 	}
 	required TableEventType event = 1;
 	repeated int32 seats = 2;

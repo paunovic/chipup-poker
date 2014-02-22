@@ -289,7 +289,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	allCounters = db.collection('counters');
 	bugs = db.collection('bugs');
 
-	bugsView.setup(app,bugs);
+	bugsView.setup(app,bugs,allUsers);
 
 	allUsers.createIndex("email",{unique:true}, function (err,res) {});
 	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
@@ -1880,17 +1880,19 @@ Game.prototype.checkRoundPass = function (cb) {
 					var winners = [];
 					var msgs = [];
 					var logmsg = [];
+					var data = [];
 					for (var x=0; x<result.outputs.length; x++) {
 						if (result.outputs[x].id == lowestid) {
 							winners.push(result.outputs[x].seat);
 							msgs.push(result.outputs[x].desc);
 							this.log(result.outputs[x]);
 							logmsg.push(this.seats[result.outputs[x].seat].conn.nick+' '+this.seats[result.outputs[x].seat].userid);
+							data.push({seat:result.outputs[x].seat,msg:result.outputs[x].desc});
 						}
 					}
 					this.doWin(winners,cb);
 					this.log('MOVE WIN END '+logmsg.join(','));
-					this.sendEvent('teWinning',winners,msgs);
+					this.sendEvent('teWinning',winners,msgs,data);
 				}.bind(this));
 			}
 		} else cb();
@@ -2157,8 +2159,9 @@ Game.prototype.canCheck = function (seatIdx) {
 	if (this.bets[seatIdx] == max) return true;
 	return false;
 }
-Game.prototype.sendEvent = function (event,seats,msgs) {
+Game.prototype.sendEvent = function (event,seats,msgs,data) {
 	var obj = {event:event, seats:seats, table_mongo_id:new Buffer(this.id.toString(),'hex'), msgs:msgs};
+	if (data) obj.seatsData = data;
 	for (var key in this.users) {
 		if (this.users[key] == conn) continue;
 		this.users[key].send(codes.seTableEvent,obj,'Poker.TableEvent');
