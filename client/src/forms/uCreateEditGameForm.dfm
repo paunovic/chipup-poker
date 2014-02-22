@@ -11,9 +11,9 @@ object frmCreateEditGame: TfrmCreateEditGame
   Font.Height = -11
   Font.Name = 'Arial'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
-  OnClick = acCancelExecute
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   OnShow = FormShow

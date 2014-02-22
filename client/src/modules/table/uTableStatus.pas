@@ -3,6 +3,7 @@ unit uTableStatus;
 interface
 
 uses
+  System.SyncObjs,
   uPB_TableStatus, uPB_SeatInfo, uPB_TableEvent, System.SysUtils, System.Generics.Collections, System.Generics.Defaults, uCards;
 
 type
@@ -14,8 +15,11 @@ type
     FCardCount: Integer;
     FCards: TCards;
     FStatus: TPlayerStatus;
+    FCaption: String;
+
     function GetStatusStr: String;
   public
+    constructor Create;
     destructor Destroy; override;
 
     procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
@@ -27,9 +31,20 @@ type
     property Cards: TCards read FCards;
     property Status: TPlayerStatus read FStatus;
     property StatusAsStr: String read GetStatusStr;
+    property Caption: String read FCaption write FCaption;
   end;
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
+  private
+    FLock: TCriticalSection;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure ClearCaptions;
+
+    procedure Lock;
+    procedure Unlock;
     procedure Sort; reintroduce;
   end;
 
@@ -80,14 +95,9 @@ uses
 
 { TSeatInfo }
 
-procedure TSeatInfo.Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
+constructor TSeatInfo.Create;
 begin
-  FSeatIndex := ASeatInfoProtobuf.Seat;
-  FPlayerMongoId := ASeatInfoProtobuf.PlayerMongoId;
-  FChips := ASeatInfoProtobuf.Chips;
-  FCardCount := ASeatInfoProtobuf.CardCount;
-  FCards := TCards.Create(ASeatInfoProtobuf.Cards);
-  FStatus := ASeatInfoProtobuf.Status;
+  FCards := TCards.Create;
 end;
 
 destructor TSeatInfo.Destroy;
@@ -96,6 +106,17 @@ begin
 
   inherited;
 end;
+
+procedure TSeatInfo.Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
+begin
+  FSeatIndex := ASeatInfoProtobuf.Seat;
+  FPlayerMongoId := ASeatInfoProtobuf.PlayerMongoId;
+  FChips := ASeatInfoProtobuf.Chips;
+  FCardCount := ASeatInfoProtobuf.CardCount;
+  FCards.Assign(ASeatInfoProtobuf.Cards);
+  FStatus := ASeatInfoProtobuf.Status;
+end;
+
 
 function TSeatInfo.GetStatusStr: String;
 begin
@@ -144,32 +165,37 @@ begin
 
   pivot_index := -1;
   index := -1;
-  for C1 := 0 to FSeatInfos.Count - 1 do
-    if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
-    begin
-      pivot_index := C1;
-      if C1 = FSeatInfos.Count - 1 then
-        index := 0
-      else
-        index := C1 + 1;
-      Break;
-    end;
+  FSeatInfos.Lock;
+  try
+    for C1 := 0 to FSeatInfos.Count - 1 do
+      if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
+      begin
+        pivot_index := C1;
+        if C1 = FSeatInfos.Count - 1 then
+          index := 0
+        else
+          index := C1 + 1;
+        Break;
+      end;
 
-  if index = -1 then
-    Exit(-1);
+    if index = -1 then
+      Exit(-1);
 
-  if not AOnlyInHand then
-    Exit(FSeatInfos[index].SeatIndex);
-
-  while index <> pivot_index do
-  begin
-    if FSeatInfos[index].Status in [psInHand, psFolded, psStandingUp, psAllIn] then
+    if not AOnlyInHand then
       Exit(FSeatInfos[index].SeatIndex);
 
-    if index = FSeatInfos.Count - 1 then
-      index := 0
-    else
-      Inc(index)
+    while index <> pivot_index do
+    begin
+      if FSeatInfos[index].Status in [psInHand, psFolded, psStandingUp, psAllIn] then
+        Exit(FSeatInfos[index].SeatIndex);
+
+      if index = FSeatInfos.Count - 1 then
+        index := 0
+      else
+        Inc(index)
+    end;
+  finally
+    FSeatInfos.Unlock;
   end;
 
   Exit(-1);
@@ -213,8 +239,9 @@ end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
 var
-  C1        : Integer;
-  seat      : TSeatInfo;
+  C1, C2: Integer;
+  seat  : TSeatInfo;
+  delete: Boolean;
 begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
@@ -227,17 +254,51 @@ begin
     FRiverCard.Assign(ATableStatusProtobuf.River);
   end;
 
-  FSeatInfos.Clear;
   if Assigned(ATableStatusProtobuf.Seats) then
   begin
-    for C1 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
-    begin
-      seat := TSeatInfo.Create;
-      seat.Assign(ATableStatusProtobuf.Seats[C1]);
-      FSeatInfos.Add(seat);
+    C1 := 0;
+    FSeatInfos.Lock;
+    try
+      while C1 < FSeatInfos.Count do
+      begin
+        delete := TRUE;
+        for C2 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
+          if ATableStatusProtobuf.Seats[C2].Seat = FSeatInfos[C1].SeatIndex then
+          begin
+            delete := FALSE;
+            Break;
+          end;
+
+        if delete then
+          FSeatInfos.Delete(C1)
+        else
+          Inc(C1);
+      end;
+
+      for C1 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
+      begin
+        seat := nil;
+        for C2 := 0 to FSeatInfos.Count - 1 do
+          if FSeatInfos[C2].SeatIndex = ATableStatusProtobuf.Seats[C1].Seat then
+          begin
+            seat := FSeatInfos[C2];
+            Break;
+          end;
+        if not Assigned(seat) then
+        begin
+          seat := TSeatInfo.Create;
+          FSeatInfos.Add(seat);
+        end;
+        seat.Assign(ATableStatusProtobuf.Seats[C1]);
+      end;
+
+      FSeatInfos.Sort;
+    finally
+      FSeatInfos.Unlock;
     end;
-    FSeatInfos.Sort;
-  end;
+  end
+  else
+    FSeatInfos.Clear;
 
   case FState of
     tsIdle: begin
@@ -288,6 +349,36 @@ begin
 
   comparer := TComparer<TSeatInfo>.Construct(comparison);
   inherited Sort(comparer);
+end;
+
+procedure TSeatInfos.ClearCaptions;
+var
+  C1: Integer;
+begin
+  for C1 := Low(ToArray) to High(ToArray) do
+    ToArray[C1].Caption := '';
+end;
+
+constructor TSeatInfos.Create;
+begin
+  inherited Create;
+  FLock := TCriticalSection.Create;
+end;
+
+destructor TSeatInfos.Destroy;
+begin
+  FLock.Free;
+  inherited;
+end;
+
+procedure TSeatInfos.Lock;
+begin
+  FLock.Acquire;
+end;
+
+procedure TSeatInfos.Unlock;
+begin
+  FLock.Release;
 end;
 
 end.

@@ -280,4 +280,11 @@ object frmTable: TfrmTable
     Left = 164
     Top = 32
   end
+  object tiSeatCaptionClear: TTimer
+    Enabled = False
+    Interval = 1800
+    OnTimer = tiSeatClearCaptionTimer
+    Left = 220
+    Top = 32
+  end
 end

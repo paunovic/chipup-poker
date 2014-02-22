@@ -34,6 +34,7 @@ type
     function GetAsString: String;
 
   public
+    constructor Create; overload;
     constructor Create(const ABytes: TBytes); overload;
 
     procedure Assign(const ABytes: TBytes);
@@ -123,6 +124,11 @@ begin
 end;
 
 { TCards }
+
+constructor TCards.Create;
+begin
+  inherited Create;
+end;
 
 constructor TCards.Create(const ABytes: TBytes);
 begin

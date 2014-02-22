@@ -649,7 +649,7 @@ begin
       if Length(query_users) > 0 then
       begin
         SetLength(empty_array, 0);
-        for C1 := 0 to Length(query_users) do
+        for C1 := 0 to Length(query_users) - 1 do
           dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
 
         SocketClient.GetUserInfos(query_users);
