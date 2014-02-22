@@ -17,10 +17,11 @@ type
       FImg_DealerButton       : TBitmap32;
       FImg_SeatEmptyLeft      : TBitmap32;
       FImg_SeatEmptyRight     : TBitmap32;
-      FImg_SeatDarkLeftImage  : TBitmap32;
-      FImg_SeatLightLeftImage : TBitmap32;
-      FImg_SeatDarkRightImage : TBitmap32;
-      FImg_SeatLightRightImage: TBitmap32;
+      FImg_SeatDarkLeft       : TBitmap32;
+      FImg_SeatLightLeft      : TBitmap32;
+      FImg_SeatDarkRight      : TBitmap32;
+      FImg_SeatLightRight     : TBitmap32;
+      FImg_CardBackground     : TBitmap32;
       FTableWidth             : Integer;
       FTableHeight            : Integer;
       FTableAspectRatio       : Double;
@@ -32,6 +33,9 @@ type
       FSeatWidth              : Integer;
       FSeatHeight             : Integer;
       FSeatAspectRatio        : Double;
+      FCardWidth              : Integer;
+      FCardHeight             : Integer;
+      FCardAspectRatio        : Double;
 
   public
     const
@@ -56,10 +60,11 @@ type
     class property DealerButtonImage: TBitmap32 read FImg_DealerButton;
     class property SeatEmptyLeftImage: TBitmap32 read FImg_SeatEmptyLeft;
     class property SeatEmptyRightImage: TBitmap32 read FImg_SeatEmptyRight;
-    class property SeatDarkLeftImage: TBitmap32 read FImg_SeatDarkLeftImage;
-    class property SeatLightLeftImage: TBitmap32 read FImg_SeatLightLeftImage;
-    class property SeatDarkRightImage: TBitmap32 read FImg_SeatDarkRightImage;
-    class property SeatLightRightImage: TBitmap32 read FImg_SeatLightRightImage;
+    class property SeatDarkLeftImage: TBitmap32 read FImg_SeatDarkLeft;
+    class property SeatLightLeftImage: TBitmap32 read FImg_SeatLightLeft;
+    class property SeatDarkRightImage: TBitmap32 read FImg_SeatDarkRight;
+    class property SeatLightRightImage: TBitmap32 read FImg_SeatLightRight;
+    class property CardBackgroundImage: TBitmap32 read FImg_CardBackground;
     class property TableWidth: Integer read FTableWidth;
     class property TableHeight: Integer read FTableHeight;
     class property TableAspectRatio: Double read FTableAspectRatio;
@@ -71,6 +76,9 @@ type
     class property SeatWidth: Integer read FSeatWidth;
     class property SeatHeight: Integer read FSeatHeight;
     class property SeatAspectRatio: Double read FSeatAspectRatio;
+    class property CardWidth: Integer read FCardWidth;
+    class property CardHeight: Integer read FCardHeight;
+    class property CardAspectRatio: Double read FCardAspectRatio;
   end;
 
 implementation
@@ -133,10 +141,11 @@ begin
   LoadPNGResourceToBitmap32(FImg_DealerButton, 'DealerButton', bsKernel);
   LoadPNGResourceToBitmap32(FImg_SeatEmptyLeft, 'EmptySeatLeft', bsKernel);
   LoadPNGResourceToBitmap32(FImg_SeatEmptyRight, 'EmptySeatRight', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatDarkLeftImage, 'SeatDarkLeft', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatLightLeftImage, 'SeatLightLeft', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatDarkRightImage, 'SeatDarkRight', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatLightRightImage, 'SeatLightRight', bsKernel);
+  LoadPNGResourceToBitmap32(FImg_SeatDarkLeft, 'SeatDarkLeft', bsKernel);
+  LoadPNGResourceToBitmap32(FImg_SeatLightLeft, 'SeatLightLeft', bsKernel);
+  LoadPNGResourceToBitmap32(FImg_SeatDarkRight, 'SeatDarkRight', bsKernel);
+  LoadPNGResourceToBitmap32(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
+  LoadPNGResourceToBitmap32(FImg_CardBackground, 'CardBackground', bsKernel);
 
   FTableWidth := 962;
   FTableHeight := 492;
@@ -153,6 +162,10 @@ begin
   FSeatHeight := FImg_SeatEmptyLeft.Height;
   FSeatAspectRatio := FSeatWidth / FSeatHeight;
 
+  FCardWidth := FImg_CardBackground.Width;
+  FCardHeight := FImg_CardBackground.Height;
+  FCardAspectRatio := FCardWidth / FCardHeight;
+
   FInitialized := TRUE;
 end;
 
@@ -163,10 +176,11 @@ begin
   FImg_DealerButton.Free;
   FImg_SeatEmptyLeft.Free;
   FImg_SeatEmptyRight.Free;
-  FImg_SeatDarkLeftImage.Free;
-  FImg_SeatLightLeftImage.Free;
-  FImg_SeatDarkRightImage.Free;
-  FImg_SeatLightRightImage.Free;
+  FImg_SeatDarkLeft.Free;
+  FImg_SeatLightLeft.Free;
+  FImg_SeatDarkRight.Free;
+  FImg_SeatLightRight.Free;
+  FImg_CardBackground.Free;
 
   FInitialized := FALSE;
 end;

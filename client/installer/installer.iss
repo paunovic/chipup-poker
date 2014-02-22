@@ -26,11 +26,6 @@ Source: "skins\{#SkinName}"; DestDir: {app}
 Source: "client_files\*.*"; DestDir: "{app}"
 Source: "ssl_libs\*.*"; DestDir: "{app}"
 
-Source: "fonts\Sintony-Regular.ttf"; DestDir: "{fonts}"; FontInstall: "Sintony"; Flags: uninsneveruninstall
-Source: "fonts\Sintony-Bold.ttf"; DestDir: "{fonts}"; FontInstall: "Sintony"; Flags: uninsneveruninstall
-Source: "fonts\Barmeno-Regular.ttf"; DestDir: "{fonts}"; FontInstall: "Barmeno"; Flags: uninsneveruninstall
-Source: "fonts\Barmeno-Bold.ttf"; DestDir: "{fonts}"; FontInstall: "Barmeno"; Flags: uninsneveruninstall
-
 [Icons]
 Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"
 Name: "{group}\Uninstall"; Filename: "{uninstallexe}"
@@ -48,6 +43,9 @@ procedure UnLoadVCLStylesS; external 'UnLoadVCLStyles@files:VclStylesInno.dll st
 
 procedure LoadVCLStyleU(VClStyleFile: String); external 'LoadVCLStyleW@{app}\VclStylesInno.dll stdcall uninstallonly';
 procedure UnLoadVCLStylesU; external 'UnLoadVCLStyles@{app}\VclStylesInno.dll stdcall uninstallonly';
+
+var
+  ApplicationUninstalled: Boolean;
 
 function InitializeSetup(): Boolean;
 begin
@@ -67,12 +65,21 @@ begin
   result := TRUE;
 end;
 
+procedure InitializeUninstallProgressForm();
+begin
+  ApplicationUninstalled := TRUE;
+end;
+
 procedure DeinitializeUninstall();
 begin
   UnLoadVCLStylesU;
   UnloadDLL(ExpandConstant('{app}\VclStylesInno.dll'));
-  DeleteFile(ExpandConstant('{app}\VclStylesInno.dll'));
-  RemoveDir(ExpandConstant('{app}'));
+
+  if ApplicationUninstalled then
+  begin
+    DeleteFile(ExpandConstant('{app}\VclStylesInno.dll'));
+    RemoveDir(ExpandConstant('{app}'));
+  end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);

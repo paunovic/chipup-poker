@@ -26,6 +26,8 @@ type
       FN_LOCKED = 11;
       FN_SEQ = 12;
       FN_MINIMUM_BET = 13;
+      FN_SMALL_BLIND = 14;
+      FN_BIG_BLIND = 15;
 
     var
       FTableMongoId: TBytes;
@@ -41,6 +43,8 @@ type
       FLocked: Boolean;
       FSeq: Integer;
       FMinimumBet: Integer;
+      FSmallBlind: Integer;
+      FBigBlind: Integer;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -54,6 +58,8 @@ type
     procedure SetLocked(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
     procedure SetMinimumBet(const AValue: Integer);
+    procedure SetSmallBlind(const AValue: Integer);
+    procedure SetBigBlind(const AValue: Integer);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -71,6 +77,8 @@ type
     property Locked: Boolean read FLocked write SetLocked;
     property Seq: Integer read FSeq write SetSeq;
     property MinimumBet: Integer read FMinimumBet write SetMinimumBet;
+    property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
+    property BigBlind: Integer read FBigBlind write SetBigBlind;
   end;
 
 implementation
@@ -149,6 +157,14 @@ begin
       FN_MINIMUM_BET: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMinimumBet := AProtobufReader.readInt32;
+      end;
+      FN_SMALL_BLIND: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FSmallBlind := AProtobufReader.readInt32;
+      end;
+      FN_BIG_BLIND: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBigBlind := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -231,6 +247,18 @@ procedure TPB_TableStatus.SetMinimumBet(const AValue: Integer);
 begin
   FMinimumBet := AValue;
   ProtobufOutput.writeInt32(FN_MINIMUM_BET, AValue);
+end;
+
+procedure TPB_TableStatus.SetSmallBlind(const AValue: Integer);
+begin
+  FSmallBlind := AValue;
+  ProtobufOutput.writeInt32(FN_SMALL_BLIND, AValue);
+end;
+
+procedure TPB_TableStatus.SetBigBlind(const AValue: Integer);
+begin
+  FBigBlind := AValue;
+  ProtobufOutput.writeInt32(FN_BIG_BLIND, AValue);
 end;
 
 end.

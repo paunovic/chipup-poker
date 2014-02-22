@@ -71,6 +71,8 @@ type
       FTableCenter     : TPoint;
       FSeatWidth       : Integer;
       FSeatHeight      : Integer;
+      FCardWidth       : Integer;
+      FCardHeight      : Integer;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AddUserChatMessage(const AUser, AMessage: String);
@@ -303,6 +305,14 @@ begin
     FTableCenter.Y := tbly + FTableYOffset + FTableHeight div 2;
     PaintBox.Buffer.Draw(Rect(tblx, tbly, tblx + tblw, tbly + tblh), TTableResources.TableImage.BoundsRect, TTableResources.TableImage);
 
+    // calculate seats size
+    FSeatWidth := Round(TTableResources.SeatWidth * FTableResizeRatio);
+    FSeatHeight := Round(FSeatWidth / TTableResources.SeatAspectRatio);
+
+    // calculate cards size
+    FCardWidth := Round(TTableResources.CardWidth * FTableResizeRatio);
+    FCardHeight := Round(FCardWidth / TTableResources.CardAspectRatio);
+
 {
     PaintBox.Buffer.Draw(Rect(FTableCenter.X - 5, FTableCenter.Y - 5, FTableCenter.X + 5, FTableCenter.Y + 5),
                          TTableResources.DealerButtonImage.BoundsRect,
@@ -478,7 +488,7 @@ procedure TfrmTable.DrawSeats;
 var
   seat_point      : TPoint;
   seat_info       : TSeatInfo;
-  C1              : Integer;
+  C1, C2          : Integer;
   upl, upr        : Integer;
   upt, upb        : Integer;
   btt, btb        : Integer;
@@ -488,6 +498,7 @@ var
   avatar_radius   : Integer;
   avatar_rect     : TRect;
   avatar_point    : TPoint;
+  card_rects      : array of TRect;
   seat_orientation: TSeatOrientation;
   seat_empty_image: TBitmap32;
   seat_back_dimage: TBitmap32;
@@ -495,10 +506,8 @@ var
   seat_image      : TBitmap32;
   tmpstr          : WideString;
   color           : TColor32;
+  tmpint          : Integer;
 begin
-  FSeatWidth := Round(TTableResources.SeatWidth * FTableResizeRatio);
-  FSeatHeight := Round(FSeatWidth / TTableResources.SeatAspectRatio);
-
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
     seat_point := GetSeatPoint(C1);
@@ -517,7 +526,7 @@ begin
       seat_empty_image := TTableResources.SeatEmptyRightImage;
       seat_back_dimage := TTableResources.SeatDarkRightImage;
       seat_back_limage := TTableResources.SeatLightRightImage;
-      upl := Round(seat_point.X - FSeatWidth / 2 + FSeatWidth / 3.5);
+      upl := Round(seat_point.X - FSeatWidth / 2 + FSeatWidth / 4);
       upr := Round(seat_point.X + FSeatWidth div 2 - FSeatWidth / 14);
       avatar_point := GR32.Point(Round(seat_point.X - FSeatWidth / 2 + 42 * FTableResizeRatio), seat_point.Y);
     end;
@@ -533,6 +542,19 @@ begin
        (seat_info.Status <> psStandingUp) then // seat taken and its not in psStandingUp state
     begin
       dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
+
+      SetLength(card_rects, seat_info.Cards.Count);
+      tmpint := Length(card_rects) * (FCardWidth + 2) - 2;
+      for C2 := 0 to Length(card_rects) - 1 do
+        card_rects[C2] := Rect(seat_point.X - tmpint div 2 + C2 * (FCardWidth + 2),
+                               seat_point.Y - FSeatHeight div 2 - FCardHeight div 3,
+                               seat_point.X - tmpint div 2 + C2 * (FCardWidth + 2) + FCardWidth,
+                               seat_point.Y - FSeatHeight div 2 - FCardHeight div 3 + FCardHeight);
+
+      // draw cards first
+      if seat_info.Status in [psInHand, psAllIn] then
+        for C2 := 0 to Length(card_rects) - 1 do
+          PaintBox.Buffer.Draw(card_rects[C2], TTableResources.CardBackgroundImage.BoundsRect, TTableResources.CardBackgroundImage);
 
       if Assigned(player_info) then
       begin
@@ -900,7 +922,12 @@ begin
     end;
     teSit: event := 'SIT';
     teStandUp: event := 'STAND UP';
-    teWinning: event := 'WINNING';
+    teWinning: begin
+      event := 'WINNING';
+      for C1 := Low(pbtevent.Msgs) to High(pbtevent.Msgs) do
+         if pbtevent.Msgs[C1] <> '' then
+            AddUserChatMessage(Format('Player %d won with', [C1]), pbtevent.Msgs[C1]);
+    end;
     teDealing: event := 'DEALING';
     teCheck: begin
       tiActiveFrameBlink.Enabled := FALSE;

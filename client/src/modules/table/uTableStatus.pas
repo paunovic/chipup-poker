@@ -67,7 +67,6 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
     function GetBet(const ASeatIndex: Integer): Integer;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
@@ -154,53 +153,6 @@ begin
   inherited;
 end;
 
-function TTableStatus.GetNextSeatIndex(const ACurrentSeatIndex: Integer; const AOnlyInHand: Boolean): Integer;
-var
-  C1         : Integer;
-  index      : Integer;
-  pivot_index: Integer;
-begin
-  if not Assigned(FSeatInfos) then
-    Exit(-1);
-
-  pivot_index := -1;
-  index := -1;
-  FSeatInfos.Lock;
-  try
-    for C1 := 0 to FSeatInfos.Count - 1 do
-      if FSeatInfos[C1].SeatIndex = ACurrentSeatIndex then
-      begin
-        pivot_index := C1;
-        if C1 = FSeatInfos.Count - 1 then
-          index := 0
-        else
-          index := C1 + 1;
-        Break;
-      end;
-
-    if index = -1 then
-      Exit(-1);
-
-    if not AOnlyInHand then
-      Exit(FSeatInfos[index].SeatIndex);
-
-    while index <> pivot_index do
-    begin
-      if FSeatInfos[index].Status in [psInHand, psFolded, psStandingUp, psAllIn] then
-        Exit(FSeatInfos[index].SeatIndex);
-
-      if index = FSeatInfos.Count - 1 then
-        index := 0
-      else
-        Inc(index)
-    end;
-  finally
-    FSeatInfos.Unlock;
-  end;
-
-  Exit(-1);
-end;
-
 function TTableStatus.GetBet(const ASeatIndex: Integer): Integer;
 begin
   if (ASeatIndex < Low(FBets)) or
@@ -245,6 +197,8 @@ var
 begin
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
+  FSmallBlindSeat := ATableStatusProtobuf.SmallBlind;
+  FBigBlindSeat := ATableStatusProtobuf.BigBlind;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
   FHighestBet := ATableStatusProtobuf.MinimumBet;
   if State <> tsWinning then
@@ -318,10 +272,7 @@ begin
     teSit: ;
     teStandUp: ;
     teWinning: ;
-    teDealing: begin
-      FSmallBlindSeat := GetNextSeatIndex(FDealer, TRUE);
-      FBigBlindSeat := GetNextSeatIndex(FSmallBlindSeat, TRUE);
-    end;
+    teDealing: ;
     teCheck: ;
     teCall: ;
     teRaise: ;

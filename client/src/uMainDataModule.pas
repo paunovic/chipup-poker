@@ -12,11 +12,17 @@ type
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
-    FSelfInfo      : TPlayerInfo;
-    FPlayers       : TPlayerInfos;
-    FServerSettings: TServerSettings;
-    FTables        : TTables;
-    FAvatars       : TAvatars;
+    const
+      FONTLIST: array[0..1] of String = ('SintonyBold', 'BarmenoBold');
+
+    var
+      FSelfInfo      : TPlayerInfo;
+      FPlayers       : TPlayerInfos;
+      FServerSettings: TServerSettings;
+      FTables        : TTables;
+      FAvatars       : TAvatars;
+
+    procedure LoadFonts;
 
   public
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
@@ -41,13 +47,15 @@ implementation
 {$R *.dfm}
 
 uses
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Winapi.Messages,
   uSocketClient, uSettings, uCommon;
 
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
+  LoadFonts;
+
   FServerSettings := TServerSettings.Create;
 
   FSelfInfo := TPlayerInfo.Create;
@@ -91,6 +99,21 @@ begin
   FPlayers.LoadFromUsersProtobuf(AStatusProtobuf.Users);
 end;
 
-
+procedure TdmMain.LoadFonts;
+var
+  rs         : TResourceStream;
+  nbFontAdded: DWORD;
+  C1         : Integer;
+begin
+  for C1 := Low(FONTLIST) to High(FONTLIST) do
+  begin
+    rs := TResourceStream.Create(HInstance, FONTLIST[C1], RT_RCDATA);
+    try
+      AddFontMemResourceEx(rs.Memory, rs.Size, nil, @nbFontAdded);
+    finally
+      rs.Free;
+    end;
+  end;
+end;
 
 end.
