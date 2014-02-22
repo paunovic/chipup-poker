@@ -434,18 +434,6 @@ begin
 end;
 
 function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint;
-const
-  SEAT_POINTS: array[2..10, 0..9] of Double = (
-    (0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2
-    (0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3
-    (-pi/4, pi/4, pi*3/4, pi*5/4, 0, 0, 0, 0, 0, 0), // 4
-    (-pi/6, pi/6, pi/2, pi*5/6, pi*7/6, 0, 0, 0, 0, 0), // 5
-    (-pi/3.5, 0, pi/3, pi-pi/3, pi, pi+pi/3.5, 0, 0, 0, 0), // 6
-    (-pi/4, 0, pi/4, pi/2, pi*3/4, pi, pi*5/4, 0, 0, 0), // 7
-    (-pi/3, -pi/8.5, pi/8.5, pi/2.8, pi-pi/2.8, pi-pi/8.5, pi+pi/8.5, pi*4/3, 0, 0), // 8
-    (-pi/3, -pi/7.5, pi/16, pi/3.5, pi/2, pi-pi/3.5, pi-pi/16, pi+pi/7.5, pi*4/3, 0), // 9
-    (-pi/3, -pi/6.9, pi/64, pi/5.1, pi/2.5, pi-pi/2.5, pi-pi/5.1, pi-pi/64, pi+pi/6.9, pi*4/3) // 10
-  );
 var
   seat_radians: Double;
   x, y        : Integer;
@@ -456,7 +444,7 @@ begin
                             FTableCenter.Y + Round(((FTableHeight + 40 * FTableResizeRatio) / 2) * Sin(x))] := clRed; // BLUE!
 }
 
-  seat_radians := SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
+  seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
   x := FTableCenter.X + Round(((FTableWidth + 105 * FTableResizeRatio) / 2) * Cos(seat_radians));
   y := FTableCenter.Y + Round(((FTableHeight + 65 * FTableResizeRatio) / 2) * Sin(seat_radians)) + 10;
 
@@ -478,7 +466,7 @@ begin
                           FTableCenter.Y + Round((yr / 2) * Sin(x) - 8 * FTableResizeRatio)] := $FFFF0000;
 }
 
-  seat_radians := (2 * pi) / (FTable.Game.Seats / (ASeatIndex + 1));
+  seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
   x := FTableCenter.X + Round((xr / 2) * Cos(seat_radians));
   y := FTableCenter.Y + Round((yr / 2) * Sin(seat_radians) - 8 * FTableResizeRatio);
   result := GR32.Point(x, y);
