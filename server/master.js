@@ -95,7 +95,9 @@ function startImHub() {
 	//im_hub.stderr.setEncoding('utf8');
 	//im_hub.stderr.on('data',readStdErr);
 	//process.stdin.pipe(im_hub.stdin);
-	setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
+	if (process.platform == 'linux') {
+		setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
+	}
 	im_hub.on('message',function (msg) {
 		buffer.push(msg);
 		switch (msg.type) {
