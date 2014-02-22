@@ -269,6 +269,8 @@ message TableStatus {
 	required bool locked = 11;
 	optional int32 seq = 12;
 	optional int32 minimum_bet = 13;
+	optional int32 small_blind = 14;
+	optional int32 big_blind = 15;
 }
 
 message SeatInfo {
