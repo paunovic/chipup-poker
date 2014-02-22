@@ -150,6 +150,11 @@ function testmenu(cb,config) {
 		}
 		console.log('AUTO',randomMoves);
 	}
+	var timer;
+	function doit(func) {
+		if (timer) clearTimeout(timer);
+		timer = setTimeout(func,(3000 * Math.random())+2000);
+	}
 	function showMoves(conn) {
 		moves = {fold:function() {
 			conn.reply(codes.scFold,{_id:gameid},'Poker.Game');
@@ -176,7 +181,7 @@ function testmenu(cb,config) {
 		}
 		moves.raise = function (args) {
 			var newbet = parseInt(args[0]);
-			console.log('doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
+			conn.log('doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
 			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet},'Poker.PutChips');
 		}
 		if (conn.tableStatus.locked) {
@@ -196,15 +201,27 @@ function testmenu(cb,config) {
 					for (var x=0; x<randomMoves.length; x++) {
 						if ((randomMoves[x].min < rand) && (randomMoves[x].max > rand)) {
 							var next = randomMoves[x].move;
-							if (moves[next]) {
+							if (next == 'call') {
+								var maxchips = conn.tableStatus.seats[conn.seat].chips;
+								conn.log('oldbet',oldbet,'max',maxchips);
+								var newbet = conn.tableStatus.minimum_bet;
+								if (maxchips < (newbet - oldbet)) newbet = oldbet + maxchips;
+								return doit(function () {
+									moves.raise([newbet]);
+								});
+							} else if (moves[next]) {
 								console.log('AUTO',next);
 								if (next == 'raise') {
 									var maxchips = conn.tableStatus.seats[conn.seat].chips;
 									console.log('oldbet',oldbet,'max',maxchips);
 									var newbet = conn.tableStatus.minimum_bet + 10;
 									if (maxchips < (newbet - oldbet)) newbet = oldbet + maxchips;
-									return moves.raise([newbet]);
-								} else return moves[next]();
+									return doit(function () {
+										moves.raise([newbet]);
+									});
+								} else return doit(function () {
+									moves[next]();
+								});
 							} console.log('BAD AUTO',next);
 						}
 					}
@@ -420,7 +437,7 @@ function testmenu(cb,config) {
 	client.buyin = 10000;
 }
 function autobot(cb) {
-	testmenu(cb,{moves:[],autoRandom:{call:8,check:8,fold:1,raise:12}});
+	testmenu(cb,{moves:[],autoRandom:{call:16,fold:1,raise:12}});
 }
 tests = [ autobot ];
 //tests = [ testmenu ];

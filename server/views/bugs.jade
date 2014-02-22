@@ -1,0 +1,17 @@
+doctype html
+html
+  body
+    block content
+      table(border=1)
+        tr
+          th from
+          th subject
+          th body
+          th link
+        each val in bugs
+          tr
+            td=val.MailFrom
+            td=val.MailSubject
+            td=val.MailBody
+            td
+              a(href='/bug?id='+val._id)='info'

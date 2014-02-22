@@ -21,6 +21,7 @@ var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it c
 var deck = require('./deck');
 var codes = require('./ServerCodes');
 var dag = require('./dag/build/Release/dag');
+var bugsView = require('./bugs');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
@@ -217,6 +218,29 @@ app.post('/paypal_callback',function (req,res) {
 	req2.write(raw_post);
 	req2.end();
 });
+app.post('/error_upload',function (req,res) {
+	// fields are req.body.MailFrom MailSubject MailBody
+	var body = req.body;
+	var doc = { MailFrom:body.MailFrom, MailSubject:body.MailSubject, MailBody:body.MailBody };
+	async.parallel([function (cb1) {
+		fs.readFile(req.files.ScreenShot.path,function (err,data) {
+			doc.ScreenShot = data;
+			fs.unlink(req.files.ScreenShot.path);
+			cb1();
+		});
+		},function (cb2) {
+		fs.readFile(req.files.BugReport.path,{encoding:'utf8'},function (err,data) {
+			doc.BugReport = data;
+			fs.unlink(req.files.BugReport.path);
+			cb2();
+		});
+		}],function done() {
+			bugs.insert(doc,function (err,result) {
+				console.log(result);
+				res.send(200);
+			});
+		});
+});
 app.get("/test",function (req,res) {
 	res.send("<form method='post' action='/image_upload' enctype='multipart/form-data'><input type='file' name='avatar'><input type='submit'></form>");
 });
@@ -249,7 +273,7 @@ function goOnline() {
 	server.listen(12345);
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -263,6 +287,9 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	avatars = db.collection('avatars');
 	allGames = db.collection('games');
 	allCounters = db.collection('counters');
+	bugs = db.collection('bugs');
+
+	bugsView.setup(app,bugs);
 
 	allUsers.createIndex("email",{unique:true}, function (err,res) {});
 	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
@@ -1183,7 +1210,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							}
 						}
 					}
-					if (!compareObjectID(this.userid,club.owner) && !containsObjectID(club.members,this.userid)) {
+					if (!compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid))) {
 						this.log('i am not a member');
 						this.reply(0,'your not a member of that club'); // FIXME
 					} else if (game.join(this)) this.send(codes.seTableStatus,game.getTableStatus(),'Poker.TableStatus');
@@ -1210,7 +1237,10 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				this.log('getting lock',game.Lock.readers,game.Lock.trace);
 				game.Lock.writeLock(function (release) {
-					game.sitDown(this,params,release);
+					game.sitDown(this,params,function () {
+						release();
+						game.broadcastStatus();
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1556,7 +1586,7 @@ Game.prototype.deal = function deal(cb) {
 	this.log('pots reset to zero');
 	this.current_seat = this.dealer;
 
-	this.current_seat = this.getNextSeat(this.current_seat);
+	this.small_blind = this.current_seat = this.getNextSeat(this.current_seat);
 	if (this.members[this.current_seat].chips < this.obj.small_blind) {
 		this.setBet(this.current_seat,this.members[this.current_seat].chips);
 		this.members[this.current_seat].status = 'psAllIn';
@@ -1564,7 +1594,7 @@ Game.prototype.deal = function deal(cb) {
 		this.setBet(this.current_seat,this.obj.small_blind);
 	}
 	
-	this.current_seat = this.getNextSeat(this.current_seat);
+	this.big_blind = this.current_seat = this.getNextSeat(this.current_seat);
 	if (this.members[this.current_seat].chips < this.obj.big_blind) {
 		this.setBet(this.current_seat,this.members[this.current_seat].chips);
 		this.members[this.current_seat].status = 'psAllIn';
@@ -1572,8 +1602,7 @@ Game.prototype.deal = function deal(cb) {
 		this.setBet(this.current_seat,this.obj.big_blind);
 	}
 	
-	this.keyseat = this.current_seat;
-	this.passed = false;
+	this.roundEnd();
 	this.ranOut = false;
 	this.flop = new Hand();
 	this.turn = new Hand();
@@ -1692,11 +1721,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 				}.bind(this));
 		} else {
 			priv.conn.log('fold with more then 1 person remaining',this.inHandCount());
-			if (this.keyseat == seat) {
-				this.keyseat = this.getPrevSeat(this.keyseat);
-				priv.conn.log('keyseat bumped back to '+this.keyseat);
-				this.passed = true;
-			}
+			this.keycount--;
 			if (seat == this.current_seat) {
 				priv.conn.log('and i was active');
 				this.stateMachine(finish.bind(this));
@@ -1791,12 +1816,8 @@ Game.prototype.doWin = function (winners,cb) {
 }
 Game.prototype.checkRoundPass = function (cb) {
 	assert.equal(this.Lock.readers,-1);
-	this.log('key seat is',this.keyseat,'passed',this.passed,this.current_seat);
-	if (this.current_seat == this.keyseat) {
-		this.passed = true;
-		this.log("DING, ready to start next round");
-	}
-	if (this.passed) {
+	this.log('key seat count is:'+this.keycount+' current:'+this.current_seat);
+	if (this.keycount <= 0) {
 		var min = -1;
 		var max = 0;
 		for (var x=0; x<this.members.length; x++) {
@@ -1812,25 +1833,22 @@ Game.prototype.checkRoundPass = function (cb) {
 		if (min == max) {
 			if (this.state == 'tsPreFlop') {
 				this.log('flopping');
-				this.passed = false;
 				this.broadcastStatus();
 				this.state = 'tsFlop';
 				this.moveToPot(cb);
-				this.keyseat = this.current_seat;
+				this.roundEnd();
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
-				this.passed = false;
 				this.broadcastStatus();
 				this.state = 'tsTurn';
 				this.moveToPot(cb);
-				this.keyseat = this.current_seat;
+				this.roundEnd();
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
-				this.passed = false;
 				this.broadcastStatus();
 				this.state = 'tsRiver';
 				this.moveToPot(cb);
-				this.keyseat = this.current_seat;
+				this.roundEnd();
 			} else {
 				this.broadcastStatus(null);
 				this.moveToPot(function () {
@@ -1949,6 +1967,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	if (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(this.state) == -1) {
 		// FIXME, fail
 		this.log('putChips fail 1');
+		cb();
 		return;
 	}
 	
@@ -1977,6 +1996,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 		event = 'teCall';
 	}
 	this.log('MOVE '+event+' '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
+	this.keycount--;
 
 	if (increase > this.members[seat].chips) {
 		conn.error('cheater detected, overbetting '+chips+','+increase+','+this.members[seat].chips);
@@ -2093,13 +2113,15 @@ Game.prototype.stateMachine = function stateMachine(cb,conn) {
 		if ((cantplay == 3) && (canplay == 1) && (cancheck == 1)) skip = true;
 		if ((canplay == 0) && (cancheck == 0)) {
 			skip = true;
-			this.passed = true;
+			this.keycount = -1;
 		}
 		if (skip) {
 			this.log('skipping a player');
+			this.keycount--;
+			var last = this.current_seat;
 			this.current_seat = this.getNextSeat(this.current_seat);
 			this.checkRoundPass(function () {
-				this.log('player skipped, doing state again');
+				this.log('player '+last+' skipped, doing state again');
 				return this.stateMachine(cb);
 			}.bind(this));
 			return;
@@ -2153,7 +2175,7 @@ Game.prototype.broadcastStatus = function (conn) {
 }
 var counter = 0;
 Game.prototype.getTableStatus = function getTableStatus() {
-	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet};
+	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind};
 	if (this.pots) {
 		for (var x=0; x<this.pots.length; x++) {
 			tableStatus.pots.push(this.pots[x].value);
@@ -2195,6 +2217,20 @@ Game.prototype.inHandCount = function () {
 	}
 	return count;
 }
+Game.prototype.roundEnd = function () {
+	var havechips = 0;
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		if (this.members[x].status == 'psOutOfPlay') continue;
+		if (this.members[x].status == 'psFolded') continue;
+		if (this.members[x].status == 'psAllIn') continue;
+		if (this.members[x].chips > 0) {
+			this.log('found one',x,this.members[x].status,this.members[x].chips);
+			havechips++;
+		}
+	}
+	this.keycount = havechips;
+}
 Game.prototype.standUp = function (conn,cb2,cb1) {
 	assert.equal(this.Lock.readers,-1);
 	var seatIdx = this.findSeat(conn);
@@ -2204,15 +2240,14 @@ Game.prototype.standUp = function (conn,cb2,cb1) {
 	// FIXME, do something with his cards
 	
 	this.members[seatIdx] = null;
-	if (this.keyseat == seatIdx) {
-		this.keyseat = this.getPrevSeat(this.keyseat);
-		this.passed = true;
-	}
 	conn.log('nulled out seat',seatIdx);
 	cb2();
 	
 	if ((['tsIdle','tsWinning'].indexOf(this.state) == -1) && (['psInHand','psAllIn'].indexOf(seatObj.status) != -1)) this.fold(seatIdx,finish1.bind(this));
-	else finish1.call(this);
+	else {
+		this.keycount--;
+		finish1.call(this);
+	}
 	function finish1() {
 		assert.equal(this.Lock.readers,-1);
 		conn.log('standing up seat:',seatIdx,'bet:',this.bets[seatIdx],'status:',seatObj.status);
