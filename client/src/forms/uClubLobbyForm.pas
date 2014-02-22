@@ -568,7 +568,7 @@ begin
   pbreply := AMessage.Object_ as TPB_ClubCommandReply;
 
   case pbreply.Status of
-    csSuccess: ModalResult := mrClose;
+    csSuccess: Close;
     csInvalidClubId: ;
   else
     {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
@@ -617,7 +617,7 @@ begin
   if dmMain.SelfInfo.Clubs.FindClub(pbclub.Seq, club) then
     ConfigureGUI
   else
-    ModalResult := mrClose
+    Close;
 end;
 
 procedure TfrmClubLobby.CSREGameOperation(const AMessage: TMessageItem);
