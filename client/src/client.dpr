@@ -5,6 +5,11 @@ program client;
 
 uses
   FastMM4 in '3rdparty\FastMM\FastMM4.pas',
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
   Winapi.Windows,
   Vcl.Forms,
   uMainDataModule in 'uMainDataModule.pas' {dmMain: TDataModule},
