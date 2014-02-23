@@ -32,6 +32,9 @@ protoreader.init(pb,codes);
 
 dag.init();
 
+// stats
+var hands = 0;
+
 var domain = "http://chipuppoker.com/";
 var sharedconfig = {stringSizes:{}};
 sharedconfig.stringSizes.email = 200
@@ -271,6 +274,7 @@ function goOnline() {
 	app.listen(3000);
 	secureServer.listen(12346);
 	server.listen(12345);
+	cactiServer.listen(1246);
 }
 
 var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs;
@@ -337,9 +341,13 @@ var options = {
 	key: fs.readFileSync('key.pem'),
 	cert: fs.readFileSync('cert.pem')
 };
+
 var secureServer = tls.createServer(options,function listener(socket) {
 	var handler = new ClientSocket(socket);
 });
+var cactiServer = require('net').createServer(stats_server);
+
+
 var activeUsers = {};
 var activeGames = {};
 function ClientSocket(socket) {
@@ -1567,6 +1575,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 	}
 }
 Game.prototype.deal = function deal(cb) {
+	hands++;
 	if (this.dealer == -1) this.nextDealer();
 	this.bets = [];
 	for (var x=0; x<this.members.length; x++) {
@@ -2405,4 +2414,20 @@ function checkGameParams(smallblind,bigblind,gamename,seats,game_type,game_limit
 }
 ClientSocket.prototype.destroy = function destroy() {
 	this.socket.destroy();
+}
+function cactiStats() {
+	var mem = process.memoryUsage();
+	var data = { hands:hands };
+	var msg = []
+	for (x in data) {
+		msg.push(x+':'+data[x]);
+	}
+	for (x in mem) {
+		msg.push(x+':'+mem[x]);
+	}
+	return msg.join(' ');
+}
+function stats_server(c) {
+	c.write(cactiStats());
+	c.end();
 }
