@@ -3,8 +3,8 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 535
-  ClientWidth = 707
+  ClientHeight = 548
+  ClientWidth = 725
   Color = clBlack
   Constraints.MaxHeight = 1037
   Constraints.MaxWidth = 1320
@@ -27,14 +27,16 @@ object frmTable: TfrmTable
   TextHeight = 14
   object paBottom: TPanel
     Left = 0
-    Top = 455
-    Width = 707
+    Top = 468
+    Width = 725
     Height = 80
     Align = alBottom
     BevelOuter = bvNone
     DoubleBuffered = True
     ParentDoubleBuffered = False
     TabOrder = 0
+    ExplicitTop = 455
+    ExplicitWidth = 707
     object paChat: TPanel
       Left = 0
       Top = 0
@@ -79,7 +81,7 @@ object frmTable: TfrmTable
     object paButtons: TPanel
       Left = 250
       Top = 0
-      Width = 457
+      Width = 475
       Height = 80
       Align = alClient
       BevelOuter = bvNone
@@ -88,11 +90,12 @@ object frmTable: TfrmTable
       Padding.Right = 1
       ParentBackground = False
       TabOrder = 1
+      ExplicitWidth = 457
       DesignSize = (
-        457
+        475
         80)
       object btCall: TcxButton
-        Left = 248
+        Left = 266
         Top = 41
         Width = 92
         Height = 28
@@ -107,9 +110,10 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
+        ExplicitLeft = 248
       end
       object btCheckFold: TcxButton
-        Left = 150
+        Left = 168
         Top = 41
         Width = 92
         Height = 28
@@ -124,9 +128,10 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
+        ExplicitLeft = 150
       end
       object btRaise: TcxButton
-        Left = 354
+        Left = 372
         Top = 41
         Width = 92
         Height = 28
@@ -141,6 +146,7 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
+        ExplicitLeft = 354
       end
       object btStandUp: TcxButton
         Left = 40
@@ -164,17 +170,18 @@ object frmTable: TfrmTable
         Caption = 'lbsInfo'
       end
       object seRaiseAmount: TcxSpinEdit
-        Left = 305
+        Left = 323
         Top = 13
         Anchors = [akRight, akBottom]
         Properties.SpinButtons.Visible = False
         Properties.ValueType = vtFloat
         TabOrder = 5
         Visible = False
+        ExplicitLeft = 305
         Width = 46
       end
       object tbRaise: TcxTrackBar
-        Left = 349
+        Left = 367
         Top = 14
         Anchors = [akRight, akBottom]
         Properties.AutoSize = False
@@ -185,6 +192,7 @@ object frmTable: TfrmTable
         TabOrder = 6
         Transparent = True
         Visible = False
+        ExplicitLeft = 349
         Height = 25
         Width = 100
       end
@@ -219,12 +227,14 @@ object frmTable: TfrmTable
   object PaintBox: TPaintBox32
     Left = 0
     Top = 0
-    Width = 707
-    Height = 455
+    Width = 725
+    Height = 468
     Align = alClient
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
+    ExplicitWidth = 707
+    ExplicitHeight = 455
   end
   object ActionManager: TActionManager
     Left = 108

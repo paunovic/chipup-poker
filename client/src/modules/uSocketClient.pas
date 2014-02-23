@@ -109,6 +109,7 @@ begin
     on E: Exception do
     begin
       {$IFDEF DEBUG} DebugLn(Format('Error connecting to server: ', [E.Message]), ditException); {$ENDIF}
+      SocketClient.SocketError(nil);
     end;
   end;
 

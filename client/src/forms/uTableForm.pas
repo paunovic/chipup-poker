@@ -71,6 +71,7 @@ type
       FTableCenter     : TPoint;
       FSeatWidth       : Integer;
       FSeatHeight      : Integer;
+      FSeatMultiplier  : Double;
       FCardWidth       : Integer;
       FCardHeight      : Integer;
 
@@ -292,7 +293,7 @@ begin
     PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
     // calculate table size and draw it
-    FTableWidth := Round(0.65 * PaintBox.Buffer.Width);
+    FTableWidth := Round(0.63 * PaintBox.Buffer.Width);
     FTableHeight := Round(FTableWidth / TTableResources.TableAspectRatio);
     FTableResizeRatio := FTableWidth / TTableResources.TableWidth;
     FTableXOffset := Round(FTableResizeRatio * TTableResources.TableXOffset);
@@ -306,7 +307,10 @@ begin
     PaintBox.Buffer.Draw(Rect(tblx, tbly, tblx + tblw, tbly + tblh), TTableResources.TableImage.BoundsRect, TTableResources.TableImage);
 
     // calculate seats size
-    FSeatWidth := Round(TTableResources.SeatWidth * FTableResizeRatio);
+    FSeatMultiplier := 1 + (10 - FTable.Game.Seats) / 23;
+    if FSeatMultiplier > 1.3 then
+      FSeatMultiplier := 1.3;
+    FSeatWidth := Round(TTableResources.SeatWidth * FTableResizeRatio * FSeatMultiplier);
     FSeatHeight := Round(FSeatWidth / TTableResources.SeatAspectRatio);
 
     // calculate cards size
@@ -361,7 +365,7 @@ begin
         if seat_info.SeatIndex = FTableStatus.BigBlindSeat then
           add := add + 'BB';
 
-        PaintBox.Buffer.TextOut(seat_point.X - 55, Round(seat_point.Y + 45 * FTableResizeRatio), Format('[#%d] [%s] %s %s', [seat_info.SeatIndex, seat_info.StatusAsStr, add, seat_info.Cards.AsString]));
+        PaintBox.Buffer.TextOut(seat_point.X - 55, Round(seat_point.Y + 50 * FTableResizeRatio), Format('[#%d] [%s] %s %s', [seat_info.SeatIndex, seat_info.StatusAsStr, add, seat_info.Cards.AsString]));
 
         // draw player bets
         if (Length(FTableStatus.Bets) > seat_info.SeatIndex) and
@@ -450,15 +454,15 @@ var
   seat_radians: Double;
   x, y        : Integer;
 begin
-{
+               {
     for x := 0 to Round((2 * pi) * 10000) do
-      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth + 105 * FTableResizeRatio) / 2) * Cos(x)),
-                            FTableCenter.Y + Round(((FTableHeight + 40 * FTableResizeRatio) / 2) * Sin(x))] := clRed; // BLUE!
-}
+      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth + 125 * FTableResizeRatio) / 2) * Cos(x)),
+                            FTableCenter.Y + Round(((FTableHeight + 50 * FTableResizeRatio) / 2) * Sin(x)) + 10] := clRed; // BLUE!
+                         }
 
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
-  x := FTableCenter.X + Round(((FTableWidth + 105 * FTableResizeRatio) / 2) * Cos(seat_radians));
-  y := FTableCenter.Y + Round(((FTableHeight + 65 * FTableResizeRatio) / 2) * Sin(seat_radians)) + 10;
+  x := FTableCenter.X + Round(((FTableWidth + 190 * FTableResizeRatio) / 2) * Cos(seat_radians));
+  y := FTableCenter.Y + Round(((FTableHeight + 90 * FTableResizeRatio) / 2) * Sin(seat_radians)) + 10;
 
   result := GR32.Point(x, y);
 end;
@@ -519,7 +523,7 @@ begin
       seat_back_limage := TTableResources.SeatLightLeftImage;
       upl := Round(seat_point.X - FSeatWidth / 2 + FSeatWidth / 12);
       upr := Round(seat_point.X + FSeatWidth div 2 - FSeatWidth / 3.5);
-      avatar_point := GR32.Point(Round(seat_point.X + FSeatWidth / 2 - 42 * FTableResizeRatio), seat_point.Y);
+      avatar_point := GR32.Point(Round(seat_point.X + FSeatWidth / 2 - 46 * FTableResizeRatio * FSeatMultiplier), seat_point.Y);
     end
     else
     begin
@@ -528,10 +532,10 @@ begin
       seat_back_limage := TTableResources.SeatLightRightImage;
       upl := Round(seat_point.X - FSeatWidth / 2 + FSeatWidth / 4);
       upr := Round(seat_point.X + FSeatWidth div 2 - FSeatWidth / 14);
-      avatar_point := GR32.Point(Round(seat_point.X - FSeatWidth / 2 + 42 * FTableResizeRatio), seat_point.Y);
+      avatar_point := GR32.Point(Round(seat_point.X - FSeatWidth / 2 + 46 * FTableResizeRatio * FSeatMultiplier), seat_point.Y);
     end;
 
-    avatar_radius := Round(30 * FTableResizeRatio);
+    avatar_radius := Round(34 * FTableResizeRatio * FSeatMultiplier);
     avatar_rect := Rect(avatar_point.X - avatar_radius, avatar_point.Y - avatar_radius, avatar_point.X + avatar_radius, avatar_point.Y + avatar_radius);
     upt := Round(seat_point.Y - FSeatHeight / 2 + FSeatHeight / 10);
     upb := seat_point.Y - 3;
@@ -547,9 +551,9 @@ begin
       tmpint := Length(card_rects) * (FCardWidth + 2) - 2;
       for C2 := 0 to Length(card_rects) - 1 do
         card_rects[C2] := Rect(seat_point.X - tmpint div 2 + C2 * (FCardWidth + 2),
-                               seat_point.Y - FSeatHeight div 2 - FCardHeight div 3,
+                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight / 2.5),
                                seat_point.X - tmpint div 2 + C2 * (FCardWidth + 2) + FCardWidth,
-                               seat_point.Y - FSeatHeight div 2 - FCardHeight div 3 + FCardHeight);
+                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight / 2.5 + FCardHeight));
 
       // draw cards first
       if seat_info.Status in [psInHand, psAllIn] then
@@ -563,6 +567,7 @@ begin
         avatar := dmMain.Avatars.AddAvatar(player_info.AvatarId);
         if Assigned(avatar.ImageCircle) then
           PaintBox.Buffer.Draw(avatar_rect, avatar.ImageCircle.BoundsRect, avatar.ImageCircle)
+//        PaintBox.Buffer.Pixels[avatar_point.X, avatar_point.Y] := $FFFFFFFF;
       end;
 
       // draw player frame
@@ -828,9 +833,13 @@ begin
 end;
 
 function TfrmTable.ConfirmStandUp: Boolean;
+var
+  seat: TSeatInfo;
 begin
   result := TRUE;
-  if FTable.IsSitting then
+  if (FTable.IsSitting) and
+     (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat)) and
+     (seat.Status in [psOutOfHand, psInHand, psFolded, psAllIn]) then
     result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
@@ -918,36 +927,38 @@ begin
     teFold: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'FOLD';
-      seat_caption := 'FOLD';
+      seat_caption := 'Fold';
     end;
     teSit: event := 'SIT';
     teStandUp: event := 'STAND UP';
     teWinning: begin
       event := 'WINNING';
-      for C1 := Low(pbtevent.Msgs) to High(pbtevent.Msgs) do
-         if pbtevent.Msgs[C1] <> '' then
-            AddUserChatMessage(Format('Player %d won with', [C1]), pbtevent.Msgs[C1]);
+      for C1 := 0 to pbtevent.SeatsData.Count - 1 do
+        AddUserChatMessage(Format('Player %d won with', [pbtevent.SeatsData[C1].Seat]), pbtevent.SeatsData[C1].Msg);
+{      for C1 := Low(pbtevent.Seats) to High(pbtevent.Seats) do
+        if pbtevent.Msgs[C1] <> '' then
+          AddUserChatMessage(Format('Player %d won with', [C1]), pbtevent.Msgs[C1]);}
     end;
     teDealing: event := 'DEALING';
     teCheck: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'CHECK';
-      seat_caption := 'CHECK';
+      seat_caption := 'Check';
     end;
     teCall: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'CALL';
-      seat_caption := 'CALL';
+      seat_caption := 'Call';
     end;
     teRaise: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'RAISE';
-      seat_caption := 'RAISE';
+      seat_caption := 'Raise';
     end;
     teAllIn: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'ALL-IN';
-      seat_caption := 'ALL-IN';
+      seat_caption := 'All-In';
     end;
   end;
 

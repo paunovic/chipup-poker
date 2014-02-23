@@ -3540,7 +3540,7 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
   end
   object imgCashier: TcxImage
-    Left = 697
+    Left = 684
     Top = 9
     Anchors = [akTop, akRight]
     Properties.PopupMenuLayout.MenuItems = []

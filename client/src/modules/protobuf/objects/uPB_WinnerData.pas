@@ -16,15 +16,18 @@ type
       FN_PRIMARYRANK = 1;
       FN_SECONDARYRANK = 2;
       FN_SEAT = 3;
+      FN_MSG = 4;
 
     var
       FPrimaryRank: TCardRankings;
       FSecondaryRank: Integer;
       FSeat: Integer;
+      FMsg: String;
 
     procedure SetPrimaryRank(const AValue: TCardRankings);
     procedure SetSecondaryRank(const AValue: Integer);
     procedure SetSeat(const AValue: Integer);
+    procedure SetMsg(const AValue: String);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -32,6 +35,7 @@ type
     property PrimaryRank: TCardRankings read FPrimaryRank write SetPrimaryRank;
     property SecondaryRank: Integer read FSecondaryRank write SetSecondaryRank;
     property Seat: Integer read FSeat write SetSeat;
+    property Msg: String read FMsg write SetMsg;
   end;
 
 implementation
@@ -52,10 +56,6 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_PRIMARYRANK: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FPrimaryRank := TCardRankings(AProtobufReader.readEnum);
-      end;
       FN_SECONDARYRANK: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSecondaryRank := AProtobufReader.readInt32;
@@ -63,6 +63,10 @@ begin
       FN_SEAT: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
+      end;
+      FN_MSG: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FMsg := String(AProtobufReader.readUtf8String);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -85,6 +89,12 @@ procedure TPB_WinnerData.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
   ProtobufOutput.writeInt32(FN_SEAT, AValue);
+end;
+
+procedure TPB_WinnerData.SetMsg(const AValue: String);
+begin
+  FMsg := AValue;
+  ProtobufOutput.writeString(FN_MSG, AValue);
 end;
 
 end.
