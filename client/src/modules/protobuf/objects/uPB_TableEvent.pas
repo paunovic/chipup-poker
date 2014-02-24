@@ -6,7 +6,7 @@ unit uPB_TableEvent;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_WinnerData;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_PotInfo;
 
 type
   TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3,teWinning = 4,teDealing = 5,teCheck = 6,teCall = 7,teRaise = 8,teAllIn = 9);
@@ -14,31 +14,23 @@ type
   private
     const
       FN_EVENT = 1;
-      FN_SEATS = 2;
       FN_TABLE_MONGO_ID = 3;
-      FN_SEATSDATA = 4;
-      FN_MSGS = 5;
+      FN_POTS = 6;
 
     var
       FEvent: TTableEventType;
-      FSeats: TArray<Integer>;
       FTableMongoId: TBytes;
-      FSeatsData: TObjectList<TPB_WinnerData>;
-      FMsgs: TArray<String>;
+      FPots: TObjectList<TPB_PotInfo>;
 
     procedure SetEvent(const AValue: TTableEventType);
-    procedure SetSeats(const AValue: TArray<Integer>);
     procedure SetTableMongoId(const AValue: TBytes);
-    procedure SetMsgs(const AValue: TArray<String>);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Event: TTableEventType read FEvent write SetEvent;
-    property Seats: TArray<Integer> read FSeats write SetSeats;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
-    property SeatsData: TObjectList<TPB_WinnerData> read FSeatsData write FSeatsData;
-    property Msgs: TArray<String> read FMsgs write SetMsgs;
+    property Pots: TObjectList<TPB_PotInfo> read FPots write FPots;
   end;
 
 implementation
@@ -49,16 +41,16 @@ uses
 
 destructor TPB_TableEvent.Destroy;
 begin
-  if Assigned(FSeatsData) then
-    FSeatsData.Free;
+  if Assigned(FPots) then
+    FPots.Free;
   inherited;
 end;
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FSeatsData) then
-    FSeatsData := TObjectList<TPB_WinnerData>.Create;
+  if not Assigned(FPots) then
+    FPots := TObjectList<TPB_PotInfo>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -68,23 +60,13 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEvent := TTableEventType(AProtobufReader.readEnum);
       end;
-      FN_SEATS: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FSeats, Length(FSeats) + 1);
-        FSeats[Length(FSeats)-1] := AProtobufReader.readInt32;
-      end;
       FN_TABLE_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AprotobufReader.readBytes(FTableMongoId);
       end;
-      FN_SEATSDATA: begin
+      FN_POTS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FSeatsData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
-      end;
-      FN_MSGS: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetLength(FMsgs, Length(FMsgs) + 1);
-        FMsgs[Length(FMsgs)-1] := String(AProtobufReader.readUtf8String);
+        FPots.Add(TPB_PotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -97,28 +79,10 @@ begin
   ProtobufOutput.writeInt32(FN_EVENT, Integer(AValue));
 end;
 
-procedure TPB_TableEvent.SetSeats(const AValue: TArray<Integer>);
-var
-  C1: Integer;
-begin
-  FSeats := AValue;
-  for C1 := 0 to Length(FSeats) - 1 do
-    ProtobufOutput.writeInt32(FN_SEATS, AValue[C1]);
-end;
-
 procedure TPB_TableEvent.SetTableMongoId(const AValue: TBytes);
 begin
   FTableMongoId := AValue;
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
-end;
-
-procedure TPB_TableEvent.SetMsgs(const AValue: TArray<String>);
-var
-  C1: Integer;
-begin
-  FMsgs := AValue;
-  for C1 := 0 to Length(FMsgs) - 1 do
-    ProtobufOutput.writeString(FN_MSGS, AValue[C1]);
 end;
 
 end.

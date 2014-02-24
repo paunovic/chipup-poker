@@ -362,11 +362,14 @@ message TableEvent {
 		required int32 seat = 3;
 		required string msg = 4;
 	}
+	message PotInfo {
+		required int32 sum = 1;
+		repeated int32 seats = 2;
+		repeated WinnerData seatsData = 3;
+	}
 	required TableEventType event = 1;
-	repeated int32 seats = 2;
 	required bytes table_mongo_id = 3;
-	repeated WinnerData seatsData = 4;
-	repeated string msgs = 5;
+	repeated PotInfo pots = 6;
 }
 
 message PutChips {
