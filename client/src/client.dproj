@@ -230,6 +230,7 @@
 			<DCCReference Include="modules\table\uTableResources.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_WinnerData.pas"/>
 			<DCCReference Include="modules\uCards.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_PotInfo.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

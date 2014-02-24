@@ -112,7 +112,7 @@ uses
   System.Types, cxClasses, System.Math,
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent, uCards;
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent, uCards, uPB_PotInfo;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -951,7 +951,10 @@ var
   seat_caption: String;
   seat        : TSeatInfo;
   seat_index  : Integer;
-  C1          : Integer;
+  pot         : TPB_PotInfo;
+  player      : TPlayerInfo;
+  C1, C2      : Integer;
+  tmpstr      : String;
 begin
   pbtevent := AMessage.Object_ as TPB_TableEvent;
   if not CompareBytes(pbtevent.TableMongoId, FTable.Game.MongoId) then
@@ -970,8 +973,30 @@ begin
     teStandUp: event := 'STAND UP';
     teWinning: begin
       event := 'WINNING';
-      for C1 := 0 to pbtevent.SeatsData.Count - 1 do
-        AddUserChatMessage(Format('Player %d won with', [pbtevent.SeatsData[C1].Seat]), pbtevent.SeatsData[C1].Msg);
+      for C1 := 0 to pbtevent.Pots.Count - 1 do
+      begin
+        pot := pbtevent.Pots[C1];
+
+        tmpstr := Format('[%d chips, %.2f each], won by: ', [pot.Sum, pot.Sum / pot.WinnerData.Count]);
+
+        for C2 := 0 to pot.WinnerData.Count - 1 do
+        begin
+          if FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat) then
+          begin
+            if dmMain.Players.FindPlayerById(seat.PlayerMongoId, player) then
+              tmpstr := tmpstr + player.Nick
+            else
+              tmpstr := tmpstr + '#' + IntToStr(seat.SeatIndex)
+          end
+          else
+            tmpstr := tmpstr + 'UNKNOWN';
+
+          if C2 < pot.WinnerData.Count - 1 then
+            tmpstr := tmpstr + ', ';
+        end;
+
+        AddUserChatMessage(Format('POT %d', [C1]), tmpstr);
+      end;
     end;
     teDealing: event := 'DEALING';
     teCheck: begin
@@ -999,7 +1024,7 @@ begin
   if seat_caption <> '' then
   begin
     FTableStatus.Seats.ClearCaptions;
-    seat_index := pbtevent.Seats[0];
+    seat_index := pbtevent.Seat;
     if FTableStatus.GetSeatInfo(seat_index, seat) then
     begin
       seat.Caption := seat_caption;

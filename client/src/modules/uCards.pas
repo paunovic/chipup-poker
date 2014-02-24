@@ -15,8 +15,6 @@ type
     FValue: TCardValue;
     FSuit : TCardSuit;
 
-    function GetAsString: String; overload;
-
   public
     constructor Create; overload;
     constructor Create(const AValue: TCardValue; const ASuit: TCardSuit); overload;
@@ -25,11 +23,12 @@ type
     procedure Assign(const AByte: Byte); overload;
     procedure Assign(const ABytes: TBytes); overload;
 
+    function AsString: String;
+
     class function GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String; overload;
 
     property Value: TCardValue read FValue;
     property Suit: TCardSuit read FSuit;
-    property AsString: String read GetAsString;
   end;
 
   TCards = class(TObjectList<TCard>)
@@ -126,7 +125,7 @@ begin
   result := value + suit;
 end;
 
-function TCard.GetAsString: String;
+function TCard.AsString: String;
 begin
   result := GetAsString(FValue, FSuit);
 end;

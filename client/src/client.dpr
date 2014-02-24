@@ -95,7 +95,8 @@ uses
   uPB_PutChips in 'modules\protobuf\objects\uPB_PutChips.pas',
   uTableResources in 'modules\table\uTableResources.pas',
   uPB_WinnerData in 'modules\protobuf\objects\uPB_WinnerData.pas',
-  uCards in 'modules\uCards.pas';
+  uCards in 'modules\uCards.pas',
+  uPB_PotInfo in 'modules\protobuf\objects\uPB_PotInfo.pas';
 
 procedure FocusPokerApp;
 var
