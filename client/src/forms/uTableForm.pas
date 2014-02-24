@@ -977,6 +977,7 @@ begin
         begin
           {$IFDEF DEBUG} DebugLn(Format('Pot.Sum = %d; Pot.WinnerData.Count = %d', [pot.Sum, pot.WinnerData.Count]), ditException); {$ENDIF}
           Continue;
+          // trololo
         end;
 
         tmpstr := Format('POT [%d] [%d chips, %.2f each], won by: ', [C1, pot.Sum, pot.Sum / pot.WinnerData.Count]);
