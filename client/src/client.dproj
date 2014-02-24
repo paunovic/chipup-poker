@@ -104,6 +104,12 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<RcCompile Include="resources\cards.rc">
+				<Form>cards.res</Form>
+			</RcCompile>
+			<RcCompile Include="resources\seats.rc">
+				<Form>seats.res</Form>
+			</RcCompile>
 			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
 			<DCCReference Include="uMainDataModule.pas">
 				<Form>dmMain</Form>
@@ -275,10 +281,6 @@
 			<RcItem Include="resources\fonts\Sintony-Bold.ttf">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>SintonyBold</ResourceId>
-			</RcItem>
-			<RcItem Include="resources\cards\Background.png">
-				<ResourceType>RCDATA</ResourceType>
-				<ResourceId>CardBackground</ResourceId>
 			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

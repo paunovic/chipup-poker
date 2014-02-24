@@ -83,6 +83,8 @@ type
     function ConfirmStandUp: Boolean;
 
     procedure DrawSeats;
+    procedure DrawTableCards;
+
     function GetSeatOrientation(const APoint: TPoint): TSeatOrientation;
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
     function GetDealerPoint(const ASeatIndex: Integer): TPoint;
@@ -267,7 +269,6 @@ var
   dealer_point: TPoint;
   seat_info   : TSeatInfo;
   chat_width  : Integer;
-  cards       : String;
   tblx, tbly  : Integer;
   tblw, tblh  : Integer;
   add         : String;
@@ -329,30 +330,14 @@ begin
     DrawDealerButton(FTableStatus.Dealer);
 
     // draw table cards
+    PaintBox.Buffer.Font.Color := clWhite;
+
+    // draw table cards
+    DrawTableCards;
+
+    // textout seatpos/cards/blinds and bets
     PaintBox.Buffer.Font.Name := 'Arial';
     PaintBox.Buffer.Font.Size := 10;
-    PaintBox.Buffer.Font.Color := clWhite;
-    PaintBox.Buffer.Font.Style := [fsBold];
-    case FTableStatus.State of
-      tsFlop: cards := FTableStatus.FlopCards.AsString;
-      tsTurn: cards := FTableStatus.FlopCards.AsString + ' '  + FTableStatus.TurnCard.AsString;
-      tsRiver: cards := FTableStatus.FlopCards.AsString + ' '  + FTableStatus.TurnCard.AsString + ' ' + FTableStatus.RiverCard.AsString;
-      tsWinning,
-      tsWinning2: begin
-        cards := '';
-        if FTableStatus.FlopCards.Count = 3 then
-          cards := FTableStatus.FlopCards.AsString + ' ';
-        if FTableStatus.TurnCard.Value <> cvUnknown then
-          cards := cards + FTableStatus.TurnCard.AsString + ' ';
-        if FTableStatus.RiverCard.Value <> cvUnknown then
-          cards := cards + FTableStatus.RiverCard.AsString;
-        cards := Trim(cards);
-      end;
-    end;
-    PaintBox.Buffer.TextOut(FTableCenter.X - 50, FTableCenter.Y + 30, cards);
-    PaintBox.Buffer.Font.Style := [];
-
-    // draw player cards and blinds and bets
     PaintBox.Buffer.Font.Color := clWhite;
     PaintBox.Buffer.Font.Style := [fsBold];
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
@@ -378,7 +363,6 @@ begin
         end;
       end;
     PaintBox.Buffer.Font.Style := [];
-
   finally
     PaintBox.Buffer.EndUpdate;
   end;
@@ -488,6 +472,41 @@ begin
   result := GR32.Point(x, y);
 end;
 
+procedure TfrmTable.DrawTableCards;
+var
+  C1        : Integer;
+  card_rects: array of TRect;
+  card_img  : TBitmap32;
+begin
+  SetLength(card_rects, 5);
+  for C1 := Low(card_rects) to High(card_rects) do
+  begin
+    card_rects[C1].Left := Round(FTableCenter.X - (FCardWidth * 5) / 2) - 4 * 3 + (C1 * FCardWidth) + (C1 * 3);
+    card_rects[C1].Top := Round(FTableCenter.Y - FCardHeight / 2);
+    card_rects[C1].Right := card_rects[C1].Left + FCardWidth;
+    card_rects[C1].Bottom := card_rects[C1].Top + FCardHeight;
+  end;
+
+  if FTableStatus.FlopCards.Count > 0 then
+    for C1 := 0 to FTableStatus.FlopCards.Count - 1 do
+    begin
+      card_img := TTableResources.GetCardImage(FTableStatus.FlopCards[C1]);
+      PaintBox.Buffer.Draw(card_rects[C1], card_img.BoundsRect, card_img);
+    end;
+
+  if FTableStatus.TurnCard.Value <> cvUnknown then
+  begin
+    card_img := TTableResources.GetCardImage(FTableStatus.TurnCard);
+    PaintBox.Buffer.Draw(card_rects[3], card_img.BoundsRect, card_img);
+  end;
+
+  if FTableStatus.RiverCard.Value <> cvUnknown then
+  begin
+    card_img := TTableResources.GetCardImage(FTableStatus.RiverCard);
+    PaintBox.Buffer.Draw(card_rects[4], card_img.BoundsRect, card_img);
+  end;
+end;
+
 procedure TfrmTable.DrawSeats;
 var
   seat_point      : TPoint;
@@ -511,6 +530,8 @@ var
   tmpstr          : WideString;
   color           : TColor32;
   tmpint          : Integer;
+  cardimg         : TBitmap32;
+  cardvperc       : Double;
 begin
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
@@ -547,18 +568,34 @@ begin
     begin
       dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
 
+      if seat_info.SeatIndex = FTable.SeatIndex then
+      begin
+        cardvperc := 0.75;
+        cardimg := nil;
+      end
+      else
+      begin
+        cardvperc := 0.35;
+        cardimg := TTableResources.CardBackgroundImage;
+      end;
+
       SetLength(card_rects, seat_info.Cards.Count);
-      tmpint := Length(card_rects) * (FCardWidth + 2) - 2;
+      tmpint := Length(card_rects) * FCardWidth;
       for C2 := 0 to Length(card_rects) - 1 do
-        card_rects[C2] := Rect(seat_point.X - tmpint div 2 + C2 * (FCardWidth + 2),
-                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight / 2.5),
-                               seat_point.X - tmpint div 2 + C2 * (FCardWidth + 2) + FCardWidth,
-                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight / 2.5 + FCardHeight));
+        card_rects[C2] := Rect(seat_point.X - tmpint div 2 + C2 * FCardWidth,
+                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * cardvperc),
+                               seat_point.X - tmpint div 2 + (C2 + 1) * FCardWidth,
+                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * cardvperc + FCardHeight));
 
       // draw cards first
       if seat_info.Status in [psInHand, psAllIn] then
-        for C2 := 0 to Length(card_rects) - 1 do
-          PaintBox.Buffer.Draw(card_rects[C2], TTableResources.CardBackgroundImage.BoundsRect, TTableResources.CardBackgroundImage);
+        for C2 := 0 to seat_info.Cards.Count - 1 do
+        begin
+          if seat_info.SeatIndex = FTable.SeatIndex then
+            cardimg := TTableResources.GetCardImage(seat_info.Cards[C2]);
+
+          PaintBox.Buffer.Draw(card_rects[C2], cardimg.BoundsRect, cardimg);
+        end;
 
       if Assigned(player_info) then
       begin
@@ -935,9 +972,6 @@ begin
       event := 'WINNING';
       for C1 := 0 to pbtevent.SeatsData.Count - 1 do
         AddUserChatMessage(Format('Player %d won with', [pbtevent.SeatsData[C1].Seat]), pbtevent.SeatsData[C1].Msg);
-{      for C1 := Low(pbtevent.Seats) to High(pbtevent.Seats) do
-        if pbtevent.Msgs[C1] <> '' then
-          AddUserChatMessage(Format('Player %d won with', [C1]), pbtevent.Msgs[C1]);}
     end;
     teDealing: event := 'DEALING';
     teCheck: begin

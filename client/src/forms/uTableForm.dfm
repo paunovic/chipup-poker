@@ -35,8 +35,6 @@ object frmTable: TfrmTable
     DoubleBuffered = True
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitTop = 455
-    ExplicitWidth = 707
     object paChat: TPanel
       Left = 0
       Top = 0
@@ -90,7 +88,6 @@ object frmTable: TfrmTable
       Padding.Right = 1
       ParentBackground = False
       TabOrder = 1
-      ExplicitWidth = 457
       DesignSize = (
         475
         80)
@@ -110,7 +107,6 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 248
       end
       object btCheckFold: TcxButton
         Left = 168
@@ -128,7 +124,6 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 150
       end
       object btRaise: TcxButton
         Left = 372
@@ -146,7 +141,6 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 354
       end
       object btStandUp: TcxButton
         Left = 40
@@ -177,7 +171,6 @@ object frmTable: TfrmTable
         Properties.ValueType = vtFloat
         TabOrder = 5
         Visible = False
-        ExplicitLeft = 305
         Width = 46
       end
       object tbRaise: TcxTrackBar
@@ -192,7 +185,6 @@ object frmTable: TfrmTable
         TabOrder = 6
         Transparent = True
         Visible = False
-        ExplicitLeft = 349
         Height = 25
         Width = 100
       end
@@ -233,8 +225,6 @@ object frmTable: TfrmTable
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
-    ExplicitWidth = 707
-    ExplicitHeight = 455
   end
   object ActionManager: TActionManager
     Left = 108

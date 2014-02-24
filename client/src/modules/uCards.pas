@@ -7,7 +7,7 @@ uses
 
 
 type
-  TCardSuit = (csUnknown, csHeart, csSpade, csClub, csDiamond);
+  TCardSuit = (csUnknown, csHeart, csDiamond, csClub, csSpade);
   TCardValue = (cvUnknown, cvTwo, cvThree, cvFour, cvFive, cvSix, cvSeven, cvEight, cvNine, cvTen, cvJack, cvQueen, cvKing, cvAce);
 
   TCard = class
@@ -15,7 +15,8 @@ type
     FValue: TCardValue;
     FSuit : TCardSuit;
 
-    function GetAsString: String;
+    function GetAsString: String; overload;
+
   public
     constructor Create; overload;
     constructor Create(const AValue: TCardValue; const ASuit: TCardSuit); overload;
@@ -23,6 +24,8 @@ type
 
     procedure Assign(const AByte: Byte); overload;
     procedure Assign(const ABytes: TBytes); overload;
+
+    class function GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String; overload;
 
     property Value: TCardValue read FValue;
     property Suit: TCardSuit read FSuit;
@@ -89,11 +92,11 @@ begin
 end;
 
 
-function TCard.GetAsString: String;
+class function TCard.GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String;
 var
   value, suit: String;
 begin
-  case FValue of
+  case AValue of
     cvTwo: value := '2';
     cvThree: value := '3';
     cvFour: value := '4';
@@ -111,7 +114,7 @@ begin
     value := 'X';
   end;
 
-  case FSuit of
+  case ASuit of
     csHeart: suit := 'h';
     csSpade: suit := 's';
     csClub: suit := 'c';
@@ -121,6 +124,11 @@ begin
   end;
 
   result := value + suit;
+end;
+
+function TCard.GetAsString: String;
+begin
+  result := GetAsString(FValue, FSuit);
 end;
 
 { TCards }

@@ -3,7 +3,7 @@ unit uTableResources;
 interface
 
 uses
-  GR32;
+  GR32, uCards;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
@@ -22,6 +22,7 @@ type
       FImg_SeatDarkRight      : TBitmap32;
       FImg_SeatLightRight     : TBitmap32;
       FImg_CardBackground     : TBitmap32;
+      FImg_Cards              : array[0..51] of TBitmap32;
       FTableWidth             : Integer;
       FTableHeight            : Integer;
       FTableAspectRatio       : Double;
@@ -55,6 +56,8 @@ type
     class procedure Deinitialize;
     class function IsInitialized: Boolean;
 
+    class function GetCardImage(const ACard: TCard): TBitmap32;
+
     class property BackgroundImage: TBitmap32 read FImg_TableBackground;
     class property TableImage: TBitmap32 read FImg_Table;
     class property DealerButtonImage: TBitmap32 read FImg_DealerButton;
@@ -84,13 +87,13 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Classes, System.Types, JPEG, PNGImage, GR32_Resamplers, GR32_PNG;
+  Winapi.Windows, System.Classes, System.Types, JPEG, PNGImage, GR32_Resamplers, GR32_PNG, System.SysUtils;
 
 type
   TBitmapResampler = (bsDraft, bsKernel);
 
 
-procedure LoadPNGResourceToBitmap32(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler);
+procedure CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler);
 var
   png    : TPortableNetworkGraphic32;
   rstream: TResourceStream;
@@ -122,6 +125,9 @@ class procedure TTableResources.Initialize;
 var
   jpg    : TJPEGImage;
   rstream: TResourceStream;
+  C1     : Integer;
+  CCV    : TCardValue;
+  CCS    : TCardSuit;
 begin
   FImg_TableBackground := TBitmap32.Create;
   jpg := TJPEGImage.Create;
@@ -137,15 +143,24 @@ begin
     jpg.Free;
   end;
 
-  LoadPNGResourceToBitmap32(FImg_Table, 'Table', bsDraft);
-  LoadPNGResourceToBitmap32(FImg_DealerButton, 'DealerButton', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatEmptyLeft, 'EmptySeatLeft', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatEmptyRight, 'EmptySeatRight', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatDarkLeft, 'SeatDarkLeft', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatLightLeft, 'SeatLightLeft', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatDarkRight, 'SeatDarkRight', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
-  LoadPNGResourceToBitmap32(FImg_CardBackground, 'CardBackground', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Table, 'Table', bsDraft);
+  CreateBitmap32FromPNGResource(FImg_DealerButton, 'DealerButton', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_SeatEmptyLeft, 'EmptySeatLeft', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_SeatEmptyRight, 'EmptySeatRight', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_SeatDarkLeft, 'SeatDarkLeft', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_SeatLightLeft, 'SeatLightLeft', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_SeatDarkRight, 'SeatDarkRight', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_CardBackground, 'CardBackground', bsKernel);
+
+  C1 := 0;
+  for CCV := Low(TCardValue) to High(TCardValue) do
+    for CCS := Low(TCardSuit) to High(TCardSuit) do
+      if (CCV <> cvUnknown) and (CCS <> csUnknown) then
+      begin
+        CreateBitmap32FromPNGResource(FImg_Cards[C1], Format('Card%s', [TCard.GetAsString(CCV, CCS)]), bsKernel);
+        Inc(C1);
+      end;
 
   FTableWidth := 962;
   FTableHeight := 492;
@@ -170,6 +185,8 @@ begin
 end;
 
 class procedure TTableResources.Deinitialize;
+var
+  C1: Integer;
 begin
   FImg_TableBackground.Free;
   FImg_Table.Free;
@@ -182,8 +199,21 @@ begin
   FImg_SeatLightRight.Free;
   FImg_CardBackground.Free;
 
+  for C1 := Low(FImg_Cards) to High(FImg_Cards) do
+    FImg_Cards[C1].Free;
+
   FInitialized := FALSE;
 end;
+
+class function TTableResources.GetCardImage(const ACard: TCard): TBitmap32;
+var
+  valueint, suitint: Integer;
+begin
+  valueint := Integer(ACard.Value) - 1;
+  suitint := Integer(ACard.Suit) - 1;
+  result := FImg_Cards[valueint * 4 + suitint];
+end;
+
 
 class function TTableResources.IsInitialized: Boolean;
 begin
