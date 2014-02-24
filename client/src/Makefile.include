@@ -5,8 +5,9 @@ CFLAGS+=-Umodules/playerinfo -Umodules/clubinfo -Umodules/gameinfo -Umodules/pro
 CFLAGS+=-U3rdparty/protobufs -Umodules/protobuf -Umodules/server_settings -Umodules/tables -UC:/poker/syngdiplus
 CFLAGS+=-Umodules/avatars -UC:/Poker/icsv8w/Lib/Debug/Win32/XE2 -Umodules/encryption -UC:/Poker/Dec/Part_I
 CFLAGS+=-Umodules/socketclient -Umodules/settings -UC:/Poker/SuperObject -Umodules/message_container
-CFLAGS+=-UC:\Poker\Graphics32 "-UC:/Program Files/madCollection/madExcept/BDS9/win32"
-CFLAGS+="-IC:/Program Files/madCollection/madExcept/BDS9/win32"
+CFLAGS+=-UC:\Poker\Graphics32 "-UC:\Program Files\madCollection\madExcept\BDS9\win32"
+CFLAGS+="-UC:\Program Files\madCollection\madBasic\BDS9\win32"
+CFLAGS+="-UC:\Program Files\madCollection\madDisAsm\BDS9\win32"
 CFLAGS+="-IC:/Program Files/DevExpress VCL/Library/Delphi16"
 GCC=dcc32
 
