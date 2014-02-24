@@ -14,12 +14,12 @@ type
     const
       FN_SUM = 1;
       FN_SEATS = 2;
-      FN_SEATSDATA = 3;
+      FN_WINNERDATA = 3;
 
     var
       FSum: Integer;
       FSeats: TArray<Integer>;
-      FSeatsData: TObjectList<TPB_WinnerData>;
+      FWinnerData: TObjectList<TPB_WinnerData>;
 
     procedure SetSum(const AValue: Integer);
     procedure SetSeats(const AValue: TArray<Integer>);
@@ -29,7 +29,7 @@ type
 
     property Sum: Integer read FSum write SetSum;
     property Seats: TArray<Integer> read FSeats write SetSeats;
-    property SeatsData: TObjectList<TPB_WinnerData> read FSeatsData write FSeatsData;
+    property WinnerData: TObjectList<TPB_WinnerData> read FWinnerData write FWinnerData;
   end;
 
 implementation
@@ -40,16 +40,16 @@ uses
 
 destructor TPB_PotInfo.Destroy;
 begin
-  if Assigned(FSeatsData) then
-    FSeatsData.Free;
+  if Assigned(FWinnerData) then
+    FWinnerData.Free;
   inherited;
 end;
 procedure TPB_PotInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FSeatsData) then
-    FSeatsData := TObjectList<TPB_WinnerData>.Create;
+  if not Assigned(FWinnerData) then
+    FWinnerData := TObjectList<TPB_WinnerData>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -64,9 +64,9 @@ begin
         SetLength(FSeats, Length(FSeats) + 1);
         FSeats[Length(FSeats)-1] := AProtobufReader.readInt32;
       end;
-      FN_SEATSDATA: begin
+      FN_WINNERDATA: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FSeatsData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
+        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
