@@ -973,11 +973,10 @@ begin
       begin
         pot := pbtevent.Pots[C1];
 
-        if (pot.Sum = 0) and (pot.WinnerData.Count = 0) then
+        if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
         begin
           {$IFDEF DEBUG} DebugLn(Format('Pot.Sum = %d; Pot.WinnerData.Count = %d', [pot.Sum, pot.WinnerData.Count]), ditException); {$ENDIF}
           Continue;
-          // trololo
         end;
 
         tmpstr := Format('POT [%d] [%d chips, %.2f each], won by: ', [C1, pot.Sum, pot.Sum / pot.WinnerData.Count]);
