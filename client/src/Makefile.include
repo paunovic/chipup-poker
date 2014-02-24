@@ -6,6 +6,7 @@ CFLAGS+=-U3rdparty/protobufs -Umodules/protobuf -Umodules/server_settings -Umodu
 CFLAGS+=-Umodules/avatars -UC:/Poker/icsv8w/Lib/Debug/Win32/XE2 -Umodules/encryption -UC:/Poker/Dec/Part_I
 CFLAGS+=-Umodules/socketclient -Umodules/settings -UC:/Poker/SuperObject -Umodules/message_container
 CFLAGS+=-UC:\Poker\Graphics32 "-UC:/Program Files/madCollection/madExcept/BDS9/win32"
+CFLAGS+="-IC:/Program Files/madCollection/madExcept/BDS9/win32"
 CFLAGS+="-IC:/Program Files/DevExpress VCL/Library/Delphi16"
 GCC=dcc32
 
