@@ -31,11 +31,11 @@ function protoreader(socket,handler) {
 			return false;
 		}
 		var args = this.buffer.slice(2+headersize,2+headersize+header.DataSize);
-		try {
+		//try {
 			this.handler.handle(header.MethodId,args);
-		} catch (e) {
-			this.handler.error(e);
-		}
+		//} catch (e) {
+		//	this.handler.error(e);
+		//}
 		this.buffer = this.buffer.slice(2+headersize+header.DataSize);
 		return true;
 	}

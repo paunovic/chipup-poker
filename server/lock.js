@@ -154,6 +154,7 @@ module.exports = function ReadWriteLock() {
 	 */
 	function writeLock(key, callback, options) {
 		var lock;
+		var trace2 = new Error().stack;
 		if (typeof key !== 'function') {
 			if (!table.hasOwnProperty(key)) {
 				table[key] = new Lock();
@@ -191,7 +192,7 @@ module.exports = function ReadWriteLock() {
 					terminated = true;
 					lock.queue.shift();
 					lock.readers = -1;
-					lock.trace = new Error().stack;
+					lock.trace = trace2;
 					callback.call(options.scope, release);
 				}
 			});

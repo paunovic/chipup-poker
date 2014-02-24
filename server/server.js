@@ -1483,6 +1483,14 @@ function makeUserProtobuf(u) {
 }
 function Pot(game) {
 	this.value = 0;
+	this.members = []
+}
+Pot.prototype.add = function (bet,seat) {
+	this.value += bet;
+	for (var x=0; x<this.members.length; x++) {
+		if (this.members[x] == seat) return;
+	}
+	this.members.push(seat);
 }
 function Game(obj) {
 	this.users = {}; // all users, even not sitting
@@ -1544,8 +1552,8 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		cb();
 	} else {
 		allUsers.findOne({_id:conn.userid},function (err,userinfo) {
-			conn.log('self:',userinfo,'boughtin:',conn.boughtin);
-			if (params.chips > (userinfo.chips - conn.boughtin)) {
+			conn.log('self:',userinfo,'boughtin:',conn.boughtin,'chips:',userinfo.chips);
+			if ((userinfo.chips === undefined) || (params.chips > (userinfo.chips - conn.boughtin))) {
 				conn.send(codes.srTableSitNoChips);
 				cb();
 				return;
@@ -1709,15 +1717,18 @@ Game.prototype.fold = function fold(seat,cb1) {
 	assert.equal(this.Lock.readers,-1);
 	var seatObj = this.members[seat];
 	var priv = this.seats[seat];
-	priv.conn.log('fold',seat);
+	priv.conn.log('fold',seat,this.state);
 	switch (this.state) {
+	default:
 	case 'tsIdle':
+		priv.conn.log('fallback');
 		cb1();
 		break;
 	case 'tsPreFlop': // most states go here
 	case 'tsFlop':
 	case 'tsTurn':
 	case 'tsRiver':
+		priv.conn.log('normal fold state');
 		if (seatObj) seatObj.status = 'psFolded';
 		if (this.inHandCount() == 0) {
 			priv.conn.log('wut now??');
@@ -1733,10 +1744,12 @@ Game.prototype.fold = function fold(seat,cb1) {
 			priv.conn.log('remaining guy wins everything',lastseat);
 				this.moveToPot(function () {
 					priv.conn.log('done moving to pot 2');
-					this.doWin([lastseat],cb1);
+					//this.doWin([lastseat],cb1);
+					this.calcWinners(cb1);
 					this.sendEvent('teFold',[seat]);
-					this.sendEvent('teWinning',[lastseat]);
-					this.log('MOVE WIN DEFAULT '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
+					//this.sendEvent('teWinning',[lastseat]);
+					//this.log('MOVE WIN DEFAULT '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
+					//assert(0);
 				}.bind(this));
 		} else {
 			priv.conn.log('fold with more then 1 person remaining',this.inHandCount());
@@ -1754,7 +1767,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 		break;
 	}
 }
-Game.prototype.doWin = function (winners,cb) {
+Game.prototype.doWin = function (cb) {
 	assert.equal(this.Lock.readers,-1);
 	this.state = 'tsWinning';
 	function finish() {
@@ -1799,40 +1812,49 @@ Game.prototype.doWin = function (winners,cb) {
 	}
 	var winnerObjects = [];
 	var winnerids = [];
-	for (var x=0; x<winners.length; x++) {
-		winnerObjects[x] = this.members[winners[x]];
-		var priv = this.seats[winners[x]];
-		console.log('winner debug',winnerObjects[x],winners[x]);
-		assert(priv,'winner must be seated'); // FIXME
-		winnerids.push(priv.userid);
+	var wins = [];
+	function addWin(seat,chips) {
+		if (wins[seat]) wins[seat] += chips;
+		else wins[seat] = chips;
 	}
-	var stack = new Error().stack;
-	allGames.findOne({_id:this.obj._id},function (err,self) {
-		if (self.pot != this.pots[0].value) {
-			this.log('pot mismatch',self.pot,this.bets,this.pots[0]);
-			this.log(stack);
-			console.log(self);
-			process.exit(0);
-		}
-
-		console.log('doWin',winners,this.members);
-		var totalpot = this.pots[0].value;
-		var split = Math.floor(totalpot / winners.length); // destroys any chip that cant evenly be split
-		allUsers.update({_id:{$in:winnerids}},{$inc:{chips:split}},{multi:true},function (err,res) {
-			assert(!err,err);
-			assert(res == winners.length,'win update:'+res+'winners:'+winnerids);
-			for (var x=0; x<winners.length; x++) {
-				this.seats[winners[x]].conn.boughtin += split;
-				if (winnerObjects[x]) winnerObjects[x].chips += split;
+	for (var y=0; y<this.pots.length; y++) {
+		var pot = this.pots[y];
+		var split = Math.floor(pot.value / pot.winners.length); // destroys any chip that cant evenly be split
+		for (var x=0; x<pot.winners.length; x++) {
+			var priv = this.seats[pot.winners[x]];
+			if (winnerObjects.indexOf(this.members[pot.winners[x]]) == -1) {
+				winnerObjects[x] = this.members[pot.winners[x]];
+				winnerids.push(priv.userid);
 			}
-			this.pots = undefined;
+			//console.log('winner debug',winnerObjects[x],pot.winners[x]);
+			assert(priv,'winner must be seated'); // FIXME
+			addWin(pot.winners[x],split);
+		}
+	}
+	this.log('wins',wins,winnerids);
+	var stack = new Error().stack;
+
+	//assert.equal(wins[0],15);
+	console.log('doWin',this.pots,this.members);
+	async.eachSeries(winnerObjects,function (winnerObj,cb2) {
+		var seat = winnerObj.seat;
+		var userid = this.seats[seat].userid;
+		var gain = wins[seat];
+		allUsers.update({_id:userid},{$inc:{chips:gain}},function (err,res) {
+				assert(!err,err);
+				assert.equal(res,1);
+				this.log('seat #'+seat+' gained '+gain);
+				this.seats[seat].conn.boughtin += gain;
+				if (winnerObjects[seat]) winnerObjects[seat].chips += gain;
+				cb2();
+			}.bind(this));
+		}.bind(this),function done() {
 			allGames.update({_id:this.obj._id},{$unset:{pot:0}},function (err,res) {
 				assert(!err,err);
-				assert(res == 1);
+				assert.equal(res,1);
 				finish.call(this);
 			}.bind(this));
 		}.bind(this));
-	}.bind(this));
 }
 Game.prototype.checkRoundPass = function (cb) {
 	assert.equal(this.Lock.readers,-1);
@@ -1872,70 +1894,116 @@ Game.prototype.checkRoundPass = function (cb) {
 			} else {
 				this.broadcastStatus(null);
 				this.moveToPot(function () {
-					var hands = [];
-					for (var x=0; x<this.members.length; x++) {
-						if (!this.members[x]) continue;
-						if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
-						hands.push({seat:x,hand:this.members[x].hand.cards});
-					}
-					this.log(hands[0]);
-					var result = dag.rankHands(this,hands);
-					this.log('what next??',result);
-					var lowestid = -1;
-					var winningindex = -1;
-					var winner;
-					for (var x=0; x<result.outputs.length; x++) {
-						if (lowestid == -1) {
-							lowestid = result.outputs[x].id;
-							winningindex = x;
-							winner =  result.outputs[x];
-						}
-						if (result.outputs[x].id < lowestid) {
-							lowestid = result.outputs[x].id;
-							winningindex = x;
-							winner =  result.outputs[x];
-						}
-					}
-					// split pot has the same .id on multiple people
-					var winners = [];
-					var msgs = [];
-					var logmsg = [];
-					var data = [];
-					for (var x=0; x<result.outputs.length; x++) {
-						if (result.outputs[x].id == lowestid) {
-							winners.push(result.outputs[x].seat);
-							msgs.push(result.outputs[x].desc);
-							this.log(result.outputs[x]);
-							logmsg.push(this.seats[result.outputs[x].seat].conn.nick+' '+this.seats[result.outputs[x].seat].userid);
-							data.push({seat:result.outputs[x].seat,msg:result.outputs[x].desc});
-						}
-					}
-					this.doWin(winners,cb);
-					this.log('MOVE WIN END '+logmsg.join(','));
-					this.sendEvent('teWinning',winners,msgs,data);
+					this.calcWinners(cb);
 				}.bind(this));
 			}
 		} else cb();
 	} else cb();
 }
+Game.prototype.calcWinners = function (cb) {
+	var hands = [];
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
+		hands.push({seat:x,hand:this.members[x].hand.cards});
+	}
+	this.log(hands[0]);
+	var result = dag.rankHands(this,hands);
+	this.log('what next??',result);
+	var potid = 0;
+	async.eachSeries(this.pots,function (pot,cb1) {
+		var lowestid = -1;
+		var winningindex = -1;
+		var winner;
+		this.log('this pot',potid,pot);
+		this.log('results',result);
+		for (var x=0; x<result.outputs.length; x++) {
+			if (pot.members.indexOf(result.outputs[x].seat) == -1) continue;
+			if (lowestid == -1) {
+				lowestid = result.outputs[x].id;
+				winningindex = x;
+				winner =  result.outputs[x];
+			}
+			if (result.outputs[x].id < lowestid) {
+				lowestid = result.outputs[x].id;
+				winningindex = x;
+				winner =  result.outputs[x];
+			}
+		}
+		// split pot has the same .id on multiple people
+		var winners = [];
+		var msgs = [];
+		var logmsg = [];
+		var data = [];
+		for (var x=0; x<result.outputs.length; x++) {
+			if (pot.members.indexOf(result.outputs[x].seat) == -1) continue;
+			if (result.outputs[x].id == lowestid) {
+				winners.push(result.outputs[x].seat);
+				msgs.push(result.outputs[x].desc);
+				this.log(result.outputs[x]);
+				logmsg.push(this.seats[result.outputs[x].seat].conn.nick+' '+this.seats[result.outputs[x].seat].userid);
+				data.push({seat:result.outputs[x].seat,msg:result.outputs[x].desc});
+			}
+		}
+		this.log('winners of pot #'+potid,winners);
+		potid++;
+		pot.winners = winners;
+		cb1();
+	}.bind(this));
+	
+	this.sendEvent('teWinning');
+	this.doWin(cb);
+	//this.log('MOVE WIN END '+logmsg.join(','));
+}
 Game.prototype.moveToPot = function (cb1) {
 	this.log('state:'+this.state+' bets:',this.bets,'pots:',util.inspect(this.pots));
-	var increase = 0;
-	for (var x=0; x<this.bets.length; x++) if (this.bets[x]) increase += this.bets[x];
-	this.log('increase:',increase);
-	this.pots[0].value += increase;
+	var increase;
+	var min;
+	var max;
+	var betsToRemove = [];
+	function removeBet(seat,bet) {
+		if (betsToRemove[seat] === undefined) betsToRemove[seat] = bet;
+		else betsToRemove[seat] += bet;
+	}
+	function calcRanges() {
+		min = -1;
+		max = 0;
+		for (var x=0; x<this.bets.length; x++) {
+			assert.equal(typeof this.bets[x],'number');
+			if (this.bets[x] == 0) continue;
+			if (this.bets[x] > max) max = this.bets[x];
+			if (min == -1) min = this.bets[x];
+			if (this.bets[x] < min) min = this.bets[x];
+		}
+		if (min == -1) min = 0;
+		this.log('SIDE',min,max);
+	}
+	do {
+		calcRanges.call(this);
+		increase = 0;
+		if (max == 0) break;
+		for (var x=0; x<this.bets.length; x++) {
+			if (this.bets[x] >= min) {
+				increase += min;
+				this.bets[x] -= min;
+				removeBet(x,min);
+				this.pots[this.pots.length-1].add(min,x);
+			}
+		}
+		this.log('increase:'+increase+' '+min+'x'+(increase/min));
+		this.log('SIDE1',this.pots,this.bets,betsToRemove);
+		if (min != max) this.pots.push(new Pot());
+	} while (min != max);
 
 	// FIXME, remove this check later?
 	for (var x=0; x<this.seats.length; x++) if (this.seats[x]) assert(this.seats[x].userid);
 
-	// FIXME, figure out how much to put into each pot
-
 	async.parallel([
 		function (cb) {
 			allGames.update({_id:this.obj._id},
-				{$inc:{pot:increase}},function (err,res) {
+				{$set:{pots:this.pots}},function (err,res) {
 					assert(res == 1);
-					this.log('pot for game went up by ',increase);
+					this.log('pot for game updated');
 					cb();
 				}.bind(this));
 		}.bind(this),
@@ -1957,23 +2025,23 @@ Game.prototype.moveToPot = function (cb1) {
 						return repeat.call(this);
 					}
 				}
-				if (this.bets[idx] === undefined) this.bets[idx] = 0;
-				//this.log('removing chips',priv.userid,this.bets,idx);
+				if (betsToRemove[idx] === undefined) betsToRemove[idx] = 0;
+				this.log('removing chips',priv.userid,this.bets,idx,betsToRemove);
 				assert(priv.userid);
-				assert.equal(typeof this.bets[idx],'number');
+				assert.equal(typeof betsToRemove[idx],'number');
 				allUsers.update({_id:priv.userid},
-					{ $inc:{chips:-this.bets[idx]}},function (err,res) {
+					{ $inc:{chips:-betsToRemove[idx]}},function (err,res) {
 						assert(!err);
 						assert(res == 1);
-						//priv.conn.log('lost chips',increase,this.bets[idx],idx);
+						priv.conn.log('lost chips',idx,betsToRemove[idx]);
 						priv.conn.boughtin -= this.bets[idx];
-						this.bets[idx] = 0;
+						betsToRemove[idx] = 0;
 						idx++;
 						repeat.call(this);
 					}.bind(this));
 			}
 			function finish() {
-				this.log('remove chips done');
+				this.log('remove chips done',betsToRemove);
 				cb2();
 			}
 			repeat.call(this);
@@ -2098,7 +2166,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn) {
 			if (!this.members[x]) continue;
 			if (this.members[x].status == 'psOutOfPlay') continue;
 			if (this.members[x].chips > 0) {
-				this.log('found one',x,this.members[x].status,this.members[x].chips);
+				this.log('sm found one',x,this.members[x].status,this.members[x].chips);
 				havechips++;
 			}
 		}
@@ -2248,7 +2316,7 @@ Game.prototype.roundEnd = function () {
 		if (this.members[x].status == 'psFolded') continue;
 		if (this.members[x].status == 'psAllIn') continue;
 		if (this.members[x].chips > 0) {
-			this.log('found one',x,this.members[x].status,this.members[x].chips);
+			this.log('roundend found one',x,this.members[x].status,this.members[x].chips);
 			havechips++;
 		}
 	}
