@@ -568,16 +568,11 @@ begin
     begin
       dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
 
+      // draw cards first
       if seat_info.SeatIndex = FTable.SeatIndex then
-      begin
-        cardvperc := 0.75;
-        cardimg := nil;
-      end
+        cardvperc := 0.75
       else
-      begin
         cardvperc := 0.35;
-        cardimg := TTableResources.CardBackgroundImage;
-      end;
 
       SetLength(card_rects, seat_info.Cards.Count);
       tmpint := Length(card_rects) * FCardWidth;
@@ -587,12 +582,13 @@ begin
                                seat_point.X - tmpint div 2 + (C2 + 1) * FCardWidth,
                                Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * cardvperc + FCardHeight));
 
-      // draw cards first
       if seat_info.Status in [psInHand, psAllIn] then
         for C2 := 0 to seat_info.Cards.Count - 1 do
         begin
-          if seat_info.SeatIndex = FTable.SeatIndex then
-            cardimg := TTableResources.GetCardImage(seat_info.Cards[C2]);
+          if seat_info.Cards[C2].Value <> cvUnknown then
+            cardimg := TTableResources.GetCardImage(seat_info.Cards[C2])
+          else
+            cardimg := TTableResources.CardBackgroundImage;
 
           PaintBox.Buffer.Draw(card_rects[C2], cardimg.BoundsRect, cardimg);
         end;
@@ -977,7 +973,13 @@ begin
       begin
         pot := pbtevent.Pots[C1];
 
-        tmpstr := Format('[%d chips, %.2f each], won by: ', [pot.Sum, pot.Sum / pot.WinnerData.Count]);
+        if (pot.Sum = 0) and (pot.WinnerData.Count = 0) then
+        begin
+          {$IFDEF DEBUG} DebugLn(Format('Pot.Sum = %d; Pot.WinnerData.Count = %d', [pot.Sum, pot.WinnerData.Count]), ditException); {$ENDIF}
+          Continue;
+        end;
+
+        tmpstr := Format('POT [%d] [%d chips, %.2f each], won by: ', [C1, pot.Sum, pot.Sum / pot.WinnerData.Count]);
 
         for C2 := 0 to pot.WinnerData.Count - 1 do
         begin
@@ -995,7 +997,7 @@ begin
             tmpstr := tmpstr + ', ';
         end;
 
-        AddUserChatMessage(Format('POT %d', [C1]), tmpstr);
+        {$IFDEF DEBUG} DebugLn(tmpstr, ditApplication); {$ENDIF}
       end;
     end;
     teDealing: event := 'DEALING';
