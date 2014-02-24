@@ -2427,7 +2427,8 @@ Game.prototype.leave = function leave(conn) {
 			this.standUp(conn,function () {},function () {
 					conn.log('releasing lock');
 					release();
-				});
+					this.broadcastStatus();
+				}.bind(this));
 		}.bind(this));
 	}
 }
