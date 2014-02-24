@@ -18,13 +18,15 @@ if (require.main === module) {
 function setup(app,bugs,users,db) {
 	app.set('view engine','jade');
 	app.get('/bugs',function (req,res) {
+		var start = Date.now();
 		bugs.find({}).toArray(function (err,data) {
-			res.render('bugs',{bugs:data});
+			res.render('bugs',{bugs:data,start:start});
 		});
 	});
 	app.get('/users',function (req,res) {
+		var start = Date.now();
 		users.find({}).toArray(function (err,data) {
-			res.render('users',{users:data});
+			res.render('users',{users:data,start:start});
 		});
 	});
 	app.get('/user',function (req,res) {
@@ -47,8 +49,9 @@ function setup(app,bugs,users,db) {
 		});
 	});
 	app.get('/clubs',function (req,res) {
+		var start = Date.now();
 		db.collection('clubs').find({}).toArray(function (err,data) {
-			res.render('clubs',{clubs:data});
+			res.render('clubs',{clubs:data,start:start});
 		});
 	});
 	app.get('/club',function (req,res) {

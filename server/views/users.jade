@@ -10,7 +10,8 @@ html
           th chips
         each val in users
           tr
-            td=new Date((new Buffer(val._id.toString(),'hex').readUInt32BE(0))*1000)
+            td=val._id.getTimestamp()
             td
               a(href='/user?id='+val._id)=val.displayname
             td=val.chips
+    include footer

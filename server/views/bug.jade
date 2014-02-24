@@ -10,7 +10,7 @@ html
           th subject
           th body
         tr
-          td=new Date((new Buffer(bug._id.toString(),'hex').readUInt32BE(0))*1000)
+          td=bug._id.getTimestamp()
           td=bug.MailFrom
           td=bug.MailSubject
           td=bug.MailBody
