@@ -1,0 +1,20 @@
+doctype html
+html
+  body
+    include header
+    block content
+      table(border=1)
+        tr
+          th name
+        tr
+          td=club.name
+      table(border=1)
+        tr
+          th name
+          th SB/BB
+          th seats
+        each val in games
+          tr
+            td=val.gamename
+            td=val.small_blind/100+'/'+val.big_blind/100
+            td=val.seats

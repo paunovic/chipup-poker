@@ -5,12 +5,12 @@ html
     block content
       table(border=1)
         tr
+          th date registered
           th name
           th chips
-          th link
         each val in users
           tr
-            td=val.displayname
-            td=val.chips
+            td=new Date((new Buffer(val._id.toString(),'hex').readUInt32BE(0))*1000)
             td
-              a(href='/user?id='+val._id)='info'
+              a(href='/user?id='+val._id)=val.displayname
+            td=val.chips

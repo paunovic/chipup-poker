@@ -10,11 +10,12 @@ if (require.main === module) {
 		var app = new express();
 		var bugs = db.collection('bugs');
 		app.configure(function () {});
-		setup(app,bugs,db.collection('users'));
+		setup(app,bugs,db.collection('users'),db);
 		app.listen(3001);
+		console.log('up');
 	});
 }
-function setup(app,bugs,users) {
+function setup(app,bugs,users,db) {
 	app.set('view engine','jade');
 	app.get('/bugs',function (req,res) {
 		bugs.find({}).toArray(function (err,data) {
@@ -24,6 +25,13 @@ function setup(app,bugs,users) {
 	app.get('/users',function (req,res) {
 		users.find({}).toArray(function (err,data) {
 			res.render('users',{users:data});
+		});
+	});
+	app.get('/user',function (req,res) {
+		users.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
+			db.collection('clubs').find({members:new ObjectID(req.query.id)}).toArray(function (err,clubs) {
+				res.render('user',{user:row,clubs:clubs});
+			});
 		});
 	});
 	app.get('/bug',function (req,res) {
@@ -36,6 +44,18 @@ function setup(app,bugs,users) {
 			res.set({"Content-Disposition":'filename="'+row._id+'.png"',
 				'Content-Type':'image/png'});
 			res.send(row.ScreenShot.buffer);
+		});
+	});
+	app.get('/clubs',function (req,res) {
+		db.collection('clubs').find({}).toArray(function (err,data) {
+			res.render('clubs',{clubs:data});
+		});
+	});
+	app.get('/club',function (req,res) {
+		db.collection('clubs').findOne({_id:new ObjectID(req.query.id)},function (err,club) {
+			db.collection('games').find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
+				res.render('club',{club:club,games:games});
+			});
 		});
 	});
 }

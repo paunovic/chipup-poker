@@ -5,12 +5,14 @@ html
     block content
       table(border=1)
         tr
+          th date
           th from
           th subject
           th body
           th link
         each val in bugs
           tr
+            td=new Date((new Buffer(val._id.toString(),'hex').readUInt32BE(0))*1000)
             td=val.MailFrom
             td=val.MailSubject
             td=val.MailBody

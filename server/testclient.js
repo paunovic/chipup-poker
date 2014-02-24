@@ -152,8 +152,10 @@ function testmenu(cb,config) {
 	}
 	var timer;
 	function doit(func) {
+		return func();
+
 		if (timer) clearTimeout(timer);
-		timer = setTimeout(func,(3000 * Math.random())+2000);
+		timer = setTimeout(func,(2000 * Math.random())+1000);
 	}
 	function showMoves(conn) {
 		moves = {fold:function() {
@@ -448,7 +450,7 @@ function testmenu(cb,config) {
 	client.buyin = 10000;
 }
 function autobot(cb) {
-	testmenu(cb,{moves:[],autoRandom:{call:16,fold:1,raise:12}});
+	testmenu(cb,{moves:[],autoRandom:{call:16,fold:4,raise:12}});
 }
-//tests = [ autobot ];
-tests = [ testmenu ];
+tests = [ autobot ];
+//tests = [ testmenu ];

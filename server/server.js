@@ -28,7 +28,7 @@ var Hand = deck.Hand;
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
-protoreader.init(pb,codes);
+protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent]);
 
 dag.init();
 
@@ -270,6 +270,12 @@ app.get("/getavatar",function (req,res) {
 		res.send(row.image.buffer);
 	});
 });
+app.get("/install_chipuppoker.exe",function (req,res) {
+	fs.readFile('/home/buildbotcheckout/release/install_chipuppoker.exe',function (err,data) {
+		if (err) throw err;
+		res.send(data);
+	});
+});
 function goOnline() {
 	app.listen(3000);
 	secureServer.listen(12346);
@@ -293,7 +299,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	allCounters = db.collection('counters');
 	bugs = db.collection('bugs');
 
-	bugsView.setup(app,bugs,allUsers);
+	bugsView.setup(app,bugs,allUsers,db);
 
 	allUsers.createIndex("email",{unique:true}, function (err,res) {});
 	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
@@ -1245,7 +1251,9 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				this.log('getting lock',game.Lock.readers,game.Lock.trace);
 				game.Lock.writeLock(function (release) {
+					this.log('got lock');
 					game.sitDown(this,params,function () {
+						this.log('released lock');
 						release();
 						game.broadcastStatus();
 					}.bind(this));
@@ -1336,6 +1344,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						});
 					} else {
 						this.log('fold error',util.inspect(seating));
+						release();
 					}
 				}.bind(this));
 			}.bind(this));
@@ -1703,6 +1712,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 	priv.conn.log('fold',seat);
 	switch (this.state) {
 	case 'tsIdle':
+		cb1();
 		break;
 	case 'tsPreFlop': // most states go here
 	case 'tsFlop':
@@ -1748,6 +1758,7 @@ Game.prototype.doWin = function (winners,cb) {
 	assert.equal(this.Lock.readers,-1);
 	this.state = 'tsWinning';
 	function finish() {
+		this.current_seat = -1;
 		cb();
 
 		setTimeout(function () {
@@ -1947,14 +1958,14 @@ Game.prototype.moveToPot = function (cb1) {
 					}
 				}
 				if (this.bets[idx] === undefined) this.bets[idx] = 0;
-				this.log('removing chips',priv.userid,this.bets,idx);
+				//this.log('removing chips',priv.userid,this.bets,idx);
 				assert(priv.userid);
 				assert.equal(typeof this.bets[idx],'number');
 				allUsers.update({_id:priv.userid},
 					{ $inc:{chips:-this.bets[idx]}},function (err,res) {
 						assert(!err);
 						assert(res == 1);
-						priv.conn.log('lost chips',increase,this.bets[idx],idx);
+						//priv.conn.log('lost chips',increase,this.bets[idx],idx);
 						priv.conn.boughtin -= this.bets[idx];
 						this.bets[idx] = 0;
 						idx++;
@@ -2174,7 +2185,7 @@ Game.prototype.sendEvent = function (event,seats,msgs,data) {
 	for (var key in this.users) {
 		if (this.users[key] == conn) continue;
 		this.users[key].send(codes.seTableEvent,obj,'Poker.TableEvent');
-		this.users[key].log('send event:',event);
+		//this.users[key].log('send event:',event);
 	}
 }
 Game.prototype.broadcastStatus = function (conn) {
@@ -2263,52 +2274,51 @@ Game.prototype.standUp = function (conn,cb2,cb1) {
 	function finish1() {
 		assert.equal(this.Lock.readers,-1);
 		conn.log('standing up seat:',seatIdx,'bet:',this.bets[seatIdx],'status:',seatObj.status);
-		var instantleave = false;
-			var priv = this.seats[seatIdx];
-			priv.conn.log('instant leave');
+		var priv = this.seats[seatIdx];
+		priv.conn.log('instant leave');
+		this.broadcastStatus();
+		if (this.bets[seatIdx] === undefined) this.bets[seatIdx] = 0;
+		this.log('bets:',this.bets);
+		assert.equal(typeof this.bets[seatIdx],'number');
+		var increase = this.bets[seatIdx];
+		conn.log('increase is',increase);
+		assert(priv);
+		if (['tsIdle','tsWinning'].indexOf(this.state) != -1) {
+			assert.equal(increase,0);
+			this.seats[seatIdx] = null;
+			this.log('nulled out internal seat');
 			this.broadcastStatus();
-			if (this.bets[seatIdx] === undefined) this.bets[seatIdx] = 0;
-			this.log('bets:',this.bets);
-			assert.equal(typeof this.bets[seatIdx],'number');
-			var increase = this.bets[seatIdx];
-			conn.log('increase is',increase);
-			assert(priv);
-			if (['tsIdle','tsWinning'].indexOf(this.state) != -1) {
-				assert.equal(increase,0);
+			finish2.call(this);
+		} else {
+			this.pots[0].value += increase;
+			async.parallel([
+			function (cb) {
+					allGames.update({_id:this.obj._id},
+					{$inc:{pot:increase}},function (err,res) {
+						this.log(err);
+						assert.equal(err,null);
+						assert.equal(res,1);
+						this.log('pot for game went up by ',increase);
+						cb();
+					}.bind(this));
+			}.bind(this),function (cb) {
+				allUsers.update({_id:priv.userid},
+					{ $inc:{chips:-this.bets[seatObj.seat]}},function (err,res) {
+						assert(!err);
+						assert(res == 1);
+						priv.conn.log('lost chips',increase,this.bets[seatIdx],seatIdx);
+						priv.conn.boughtin -= this.bets[seatIdx];
+						this.bets[seatIdx] = 0;
+						cb();
+					}.bind(this));
+			}.bind(this)],function (err) {
+				assert(!err);
 				this.seats[seatIdx] = null;
 				this.log('nulled out internal seat');
 				this.broadcastStatus();
 				finish2.call(this);
-			} else {
-				this.pots[0].value += increase;
-				async.parallel([
-				function (cb) {
-						allGames.update({_id:this.obj._id},
-						{$inc:{pot:increase}},function (err,res) {
-							this.log(err);
-							assert.equal(err,null);
-							assert.equal(res,1);
-							this.log('pot for game went up by ',increase);
-							cb();
-						}.bind(this));
-				}.bind(this),function (cb) {
-					allUsers.update({_id:priv.userid},
-						{ $inc:{chips:-this.bets[seatObj.seat]}},function (err,res) {
-							assert(!err);
-							assert(res == 1);
-							priv.conn.log('lost chips',increase,this.bets[seatIdx],seatIdx);
-							priv.conn.boughtin -= this.bets[seatIdx];
-							this.bets[seatIdx] = 0;
-							cb();
-						}.bind(this));
-				}.bind(this)],function (err) {
-					assert(!err);
-					this.seats[seatIdx] = null;
-					this.log('nulled out internal seat');
-					this.broadcastStatus();
-					finish2.call(this);
-				}.bind(this));
-			}
+			}.bind(this));
+		}
 		function finish2() {
 			conn.log('in standup finish2');
 			//var status = this.getTableStatus();

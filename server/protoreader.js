@@ -1,5 +1,5 @@
 module.exports = protoreader;
-var pb,codes;
+var pb,codes,hidden;
 function protoreader(socket,handler) {
 	if (!(this instanceof protoreader)) return new protoreader(socket,handler);
 	this.socket = socket;
@@ -48,9 +48,10 @@ function protoreader(socket,handler) {
 		if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
 	}.bind(this));
 }
-protoreader.init = function init(input,mapping) {
+protoreader.init = function init(input,mapping,hiddenin) {
 	pb = input;
 	codes = mapping;
+	hidden = hiddenin;
 }
 protoreader.reply = function reply(code,message,type) {
 	code = parseInt(code);
@@ -75,6 +76,7 @@ protoreader.reply = function reply(code,message,type) {
 	//console.log('header out:',header);
 	//console.log(object);
 	if ([codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange,codes.srHello,codes.PerGameMsgEvent].indexOf(code) != -1) {
+	} else if (hidden && hidden.indexOf(code) != -1) {
 	} else if (code == 100) this.log('sent '+datasize+' bytes for code '+code,message);
 	else this.log('sent '+datasize+' bytes for code '+codes.reverse[code]);
 	//console.log(message);
