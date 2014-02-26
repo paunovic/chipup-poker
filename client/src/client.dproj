@@ -110,6 +110,9 @@
 			<RcCompile Include="resources\seats.rc">
 				<Form>seats.res</Form>
 			</RcCompile>
+			<RcCompile Include="resources\fonts.rc">
+				<Form>fonts.res</Form>
+			</RcCompile>
 			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
 			<DCCReference Include="uMainDataModule.pas">
 				<Form>dmMain</Form>
@@ -274,14 +277,6 @@
 			<RcItem Include="resources\seats\SeatLightRight.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>SeatLightRight</ResourceId>
-			</RcItem>
-			<RcItem Include="resources\fonts\Barmeno-Bold.ttf">
-				<ResourceType>RCDATA</ResourceType>
-				<ResourceId>BarmenoBold</ResourceId>
-			</RcItem>
-			<RcItem Include="resources\fonts\Sintony-Bold.ttf">
-				<ResourceType>RCDATA</ResourceType>
-				<ResourceId>SintonyBold</ResourceId>
 			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

@@ -343,7 +343,7 @@ end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
 begin
-  Caption := Format('ChipUP Poker - Logged in as %s', [dmMain.SelfInfo.Nick]);
+  Caption := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
     Caption := Caption + ' (account confirmation pending)';
 

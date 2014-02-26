@@ -22,7 +22,8 @@ type
       FImg_SeatDarkRight      : TBitmap32;
       FImg_SeatLightRight     : TBitmap32;
       FImg_CardBackground     : TBitmap32;
-      FImg_Cards              : array[0..51] of TBitmap32;
+      FImg_CardFrontBackground: TBitmap32;
+      FImg_CardArtworks       : array[0..51] of TBitmap32;
       FTableWidth             : Integer;
       FTableHeight            : Integer;
       FTableAspectRatio       : Double;
@@ -37,6 +38,9 @@ type
       FCardWidth              : Integer;
       FCardHeight             : Integer;
       FCardAspectRatio        : Double;
+      FArtworkWidth           : Integer;
+      FArtworkHeight          : Integer;
+      FArtworkAspectRatio     : Double;
 
   public
     const
@@ -56,7 +60,7 @@ type
     class procedure Deinitialize;
     class function IsInitialized: Boolean;
 
-    class function GetCardImage(const ACard: TCard): TBitmap32;
+    class function GetCardArtwork(const ACard: TCard): TBitmap32;
 
     class property BackgroundImage: TBitmap32 read FImg_TableBackground;
     class property TableImage: TBitmap32 read FImg_Table;
@@ -68,6 +72,7 @@ type
     class property SeatDarkRightImage: TBitmap32 read FImg_SeatDarkRight;
     class property SeatLightRightImage: TBitmap32 read FImg_SeatLightRight;
     class property CardBackgroundImage: TBitmap32 read FImg_CardBackground;
+    class property CardFrontBackgroundImage: TBitmap32 read FImg_CardFrontBackground;
     class property TableWidth: Integer read FTableWidth;
     class property TableHeight: Integer read FTableHeight;
     class property TableAspectRatio: Double read FTableAspectRatio;
@@ -82,6 +87,9 @@ type
     class property CardWidth: Integer read FCardWidth;
     class property CardHeight: Integer read FCardHeight;
     class property CardAspectRatio: Double read FCardAspectRatio;
+    class property ArtworkWidth: Integer read FArtworkWidth;
+    class property ArtworkHeight: Integer read FArtworkHeight;
+    class property ArtworkAspectRatio: Double read FArtworkAspectRatio;
   end;
 
 implementation
@@ -152,13 +160,14 @@ begin
   CreateBitmap32FromPNGResource(FImg_SeatDarkRight, 'SeatDarkRight', bsKernel);
   CreateBitmap32FromPNGResource(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
   CreateBitmap32FromPNGResource(FImg_CardBackground, 'CardBackground', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_CardFrontBackground, 'CardFrontBackground', bsKernel);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
     for CCS := Low(TCardSuit) to High(TCardSuit) do
       if (CCV <> cvUnknown) and (CCS <> csUnknown) then
       begin
-        CreateBitmap32FromPNGResource(FImg_Cards[C1], Format('Card%s', [TCard.GetAsString(CCV, CCS)]), bsKernel);
+        CreateBitmap32FromPNGResource(FImg_CardArtworks[C1], Format('CardArtwork%s', [TCard.GetAsString(CCV, CCS)]), bsKernel);
         Inc(C1);
       end;
 
@@ -181,6 +190,10 @@ begin
   FCardHeight := FImg_CardBackground.Height;
   FCardAspectRatio := FCardWidth / FCardHeight;
 
+  FArtworkWidth := FImg_CardArtworks[0].Width;
+  FArtworkHeight := FImg_CardArtworks[0].Height;
+  FArtworkAspectRatio := FArtworkWidth / FArtworkHeight;
+
   FInitialized := TRUE;
 end;
 
@@ -198,20 +211,21 @@ begin
   FImg_SeatDarkRight.Free;
   FImg_SeatLightRight.Free;
   FImg_CardBackground.Free;
+  FImg_CardFrontBackground.Free;
 
-  for C1 := Low(FImg_Cards) to High(FImg_Cards) do
-    FImg_Cards[C1].Free;
+  for C1 := Low(FImg_CardArtworks) to High(FImg_CardArtworks) do
+    FImg_CardArtworks[C1].Free;
 
   FInitialized := FALSE;
 end;
 
-class function TTableResources.GetCardImage(const ACard: TCard): TBitmap32;
+class function TTableResources.GetCardArtwork(const ACard: TCard): TBitmap32;
 var
   valueint, suitint: Integer;
 begin
   valueint := Integer(ACard.Value) - 1;
   suitint := Integer(ACard.Suit) - 1;
-  result := FImg_Cards[valueint * 4 + suitint];
+  result := FImg_CardArtworks[valueint * 4 + suitint];
 end;
 
 

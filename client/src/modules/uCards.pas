@@ -26,6 +26,8 @@ type
     function AsString: String;
 
     class function GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String; overload;
+    class function SuitAsString(const ASuit: TCardSuit): String;
+    class function ValueAsString(const AValue: TCardValue): String;
 
     property Value: TCardValue read FValue;
     property Suit: TCardSuit read FSuit;
@@ -92,37 +94,41 @@ end;
 
 
 class function TCard.GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String;
-var
-  value, suit: String;
+begin
+  result := ValueAsString(AValue) + SuitAsString(ASuit);
+end;
+
+class function TCard.SuitAsString(const ASuit: TCardSuit): String;
+begin
+  case ASuit of
+    csHeart: result := 'h';
+    csSpade: result := 's';
+    csClub: result := 'c';
+    csDiamond: result := 'd';
+  else
+    result := 'x';
+  end;
+end;
+
+class function TCard.ValueAsString(const Avalue: TCardValue): String;
 begin
   case AValue of
-    cvTwo: value := '2';
-    cvThree: value := '3';
-    cvFour: value := '4';
-    cvFive: value := '5';
-    cvSix: value := '6';
-    cvSeven: value := '7';
-    cvEight: value := '8';
-    cvNine: value := '9';
-    cvTen: value := 'T';
-    cvJack: value := 'J';
-    cvQueen: value := 'Q';
-    cvKing: value := 'K';
-    cvAce: value := 'A';
+    cvTwo: result :=  '2';
+    cvThree: result :=  '3';
+    cvFour: result :=  '4';
+    cvFive: result :=  '5';
+    cvSix: result :=  '6';
+    cvSeven: result :=  '7';
+    cvEight: result :=  '8';
+    cvNine: result :=  '9';
+    cvTen: result :=  'T';
+    cvJack: result :=  'J';
+    cvQueen: result :=  'Q';
+    cvKing: result :=  'K';
+    cvAce: result :=  'A';
   else
-    value := 'X';
+    result :=  'X';
   end;
-
-  case ASuit of
-    csHeart: suit := 'h';
-    csSpade: suit := 's';
-    csClub: suit := 'c';
-    csDiamond: suit := 'd';
-  else
-    suit := 'x';
-  end;
-
-  result := value + suit;
 end;
 
 function TCard.AsString: String;
