@@ -152,7 +152,7 @@ function testmenu(cb,config) {
 	}
 	var timer;
 	function doit(func) {
-		return func();
+		//return func();
 
 		if (timer) clearTimeout(timer);
 		timer = setTimeout(func,(2000 * Math.random())+1000);
@@ -189,11 +189,16 @@ function testmenu(cb,config) {
 		if (conn.tableStatus.locked) {
 			console.log('table locked');
 		} else {
+			if (['psOutOfHand','psOutOfPlay'].indexOf(conn.tableStatus.seats[2].status) != -1) {
+				return doit(moves.fold);
+			}
 			if (autoMoves.length) {
-				var next = autoMoves.shift();
+				var move = autoMoves.shift();
+				var words = move.split(' ');
+				var next = words.shift();
 				if (moves[next]) {
 					console.log('AUTO',next);
-					return moves[next]();
+					return moves[next](words);
 				} console.log('BAD AUTO',next);
 			}
 			if (randomMoves) {
@@ -391,11 +396,11 @@ function testmenu(cb,config) {
 		case codes.srTableSitOk:
 			var params = pb.Parse(data,'Poker.TableStatus');
 			//this.log(params);
-			for (var x=1; x<6; x++) {
+			for (var x=1; x<config.players; x++) {
 				var client2 = new Client(doClient2);
 				client2.name = 'client'+x;
 				client2.seat = x;
-				client2.buyin = 10000;
+				client2.buyin = config.buyins ? config.buyins.shift() : 10000;
 			}
 			common.call(this,code,data);
 			break;
@@ -447,10 +452,14 @@ function testmenu(cb,config) {
 	var client = new Client(testregisterhandle);
 	client.name = 'client0';
 	client.seat = 0;
-	client.buyin = 10000;
+	client.buyin = config.buyins ? config.buyins.shift() : 10000;
 }
 function autobot(cb) {
 	testmenu(cb,{moves:[],autoRandom:{call:16,fold:4,raise:12}});
 }
-tests = [ autobot ];
+function sidepot(cb) {
+	testmenu(cb,{moves:['raise 1000','raise 500','call'],players:3,buyins:[10005,1005,500]});
+}
+//tests = [ autobot ];
 //tests = [ testmenu ];
+tests = [ sidepot ];
