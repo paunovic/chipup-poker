@@ -54,6 +54,7 @@ message Club {
 	optional bool has_password = 10;
 	optional int32 member_count = 11;
 	repeated bytes suspended_members = 12;
+	optional int32 rake = 13;
 }
 
 message User {
