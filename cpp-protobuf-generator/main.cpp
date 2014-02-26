@@ -17,6 +17,7 @@ using namespace google::protobuf;
 struct typeInfo {
 	string delphiName;
 	string writter;
+	string reader;
 };
 struct typeInfo *typeinfo[18];
 // taken from cpp_helpers.cc in protobuf
@@ -593,6 +594,18 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							,"name",EnumName(field)
 							,"pname",PrivateFieldName(field));
 					}
+				} else {
+					string type = getDelphiType(field);
+					if (!type.empty()) {
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        $pname$ := AProtobufReader.$reader$;\n"
+							"      end;\n"
+							,"name",EnumName(field)
+							,"pname",PrivateFieldName(field)
+							,"reader",typeinfo[field->type()]->reader);
+					}
 				}
 			}
 			printer.Print(
@@ -694,17 +707,19 @@ const string getDelphiType(const FieldDescriptor *field) const {
 	} else return out;
 }
 };
-struct typeInfo* makeType(string type, string writter) {
+struct typeInfo* makeType(string type, string writter, string reader) {
 	struct typeInfo *t = new struct typeInfo;
 	t->delphiName = type;
 	t->writter = writter;
+	t->reader = reader;
 	return t;
 }
 int main(int argc, char *argv[]) {
-	typeinfo[FieldDescriptor::TYPE_INT32] = makeType("Integer","writeInt32");
-	typeinfo[FieldDescriptor::TYPE_STRING] = makeType("String","writeString");
-	typeinfo[FieldDescriptor::TYPE_BOOL] = makeType("Boolean","writeBoolean");
-	typeinfo[FieldDescriptor::TYPE_BYTES] = makeType("TBytes","writeBytes");
+	typeinfo[FieldDescriptor::TYPE_INT32] = makeType("Integer","writeInt32","FIXME");
+	typeinfo[FieldDescriptor::TYPE_UINT32] = makeType("UINT32","writeUInt32","readUInt32");
+	typeinfo[FieldDescriptor::TYPE_STRING] = makeType("String","writeString","FIXME");
+	typeinfo[FieldDescriptor::TYPE_BOOL] = makeType("Boolean","writeBoolean","FIXME");
+	typeinfo[FieldDescriptor::TYPE_BYTES] = makeType("TBytes","writeBytes","FIXME");
 	cerr << "self " << argv[0] << " " << argc << "\n";
 	BaseGenerator *gen;
 	if (strcmp("protoc-gen-pascal",argv[0]) == 0) gen = new PascalGenerator();
