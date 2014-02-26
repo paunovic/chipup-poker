@@ -8,8 +8,8 @@ object frmTable: TfrmTable
   Color = clBlack
   Constraints.MaxHeight = 1037
   Constraints.MaxWidth = 1320
-  Constraints.MinHeight = 440
-  Constraints.MinWidth = 560
+  Constraints.MinHeight = 573
+  Constraints.MinWidth = 730
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -161,7 +161,11 @@ object frmTable: TfrmTable
       object lbsInfo: TcxLabel
         Left = 139
         Top = 6
+        AutoSize = False
         Caption = 'lbsInfo'
+        Transparent = True
+        Height = 18
+        Width = 174
       end
       object seRaiseAmount: TcxSpinEdit
         Left = 323

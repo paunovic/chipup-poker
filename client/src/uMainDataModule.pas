@@ -13,7 +13,7 @@ type
     procedure DataModuleDestroy(Sender: TObject);
   private
     const
-      FONTLIST: array[0..1] of String = ('SintonyBold', 'BarmenoBold');
+      FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
 
     var
       FSelfInfo      : TPlayerInfo;

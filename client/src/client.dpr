@@ -2,6 +2,7 @@ program client;
 
 {$R 'cards.res' 'resources\cards.rc'}
 {$R 'seats.res' 'resources\seats.rc'}
+{$R 'fonts.res' 'resources\fonts.rc'}
 {$R *.dres}
 {$R *.res}
 
