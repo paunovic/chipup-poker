@@ -2836,37 +2836,19 @@ object frmClubLobby: TfrmClubLobby
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
-          Top = 59
+          Top = 95
           Width = 225
           Height = 1
           Anchors = [akLeft, akTop, akRight]
-          ExplicitWidth = 294
         end
         object btCloseClub: TcxButton
           Left = 10
-          Top = 67
+          Top = 103
           Width = 231
           Height = 28
           Action = acCloseClub
           Anchors = [akLeft, akTop, akRight]
           LookAndFeel.SkinName = 'ChipUpDarkStyle'
-          SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 0
-          Font.Charset = ANSI_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Arial'
-          Font.Style = []
-          ParentFont = False
-        end
-        object btChangeClubDetails: TcxButton
-          Left = 10
-          Top = 23
-          Width = 231
-          Height = 28
-          Action = acShowClubChangeDetailsForm
-          Anchors = [akLeft, akTop, akRight]
-          Caption = 'Change club details...'
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 1
           Font.Charset = ANSI_CHARSET
@@ -2876,16 +2858,33 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
-        object btLeaveClub: TcxButton
+        object btChangeClubDetails: TcxButton
           Left = 10
-          Top = 23
+          Top = 59
+          Width = 231
+          Height = 28
+          Action = acShowClubChangeDetailsForm
+          Anchors = [akLeft, akTop, akRight]
+          Caption = 'Change club details...'
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 2
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+        object btLeaveClub: TcxButton
+          Left = 16
+          Top = 229
           Width = 231
           Height = 28
           Action = acLeaveClub
           Anchors = [akLeft, akTop, akRight]
           LookAndFeel.SkinName = 'ChipUpDarkStyle'
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 2
+          TabOrder = 3
           Visible = False
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -2893,6 +2892,25 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+        end
+        object lbsClubRake: TcxLabel
+          Left = 10
+          Top = 25
+          Caption = 'Club rake:'
+          Transparent = True
+        end
+        object seClubRake: TcxSpinEdit
+          Left = 68
+          Top = 24
+          Properties.CanEdit = False
+          Properties.DisplayFormat = '#%'
+          Properties.MaxValue = 10.000000000000000000
+          Properties.MinValue = 1.000000000000000000
+          Properties.UseDisplayFormatWhenEditing = True
+          Properties.OnChange = seClubRakePropertiesChange
+          TabOrder = 0
+          Value = 1
+          Width = 56
         end
       end
       object gbPlayers: TcxGroupBox
@@ -2972,7 +2990,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 284
+          Top = 278
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -2988,7 +3006,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 284
+          Top = 278
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -3004,7 +3022,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 284
+          Top = 278
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -3020,7 +3038,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 250
+          Top = 244
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -3057,7 +3075,7 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 572
-          Height = 135
+          Height = 129
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -3132,7 +3150,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 285
+          Top = 279
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -3148,7 +3166,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 285
+          Top = 279
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -3164,7 +3182,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 285
+          Top = 279
           Width = 98
           Height = 28
           Action = acShowEditGameForm
@@ -3252,5 +3270,16 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Leave Club'
       OnExecute = acLeaveClubExecute
     end
+    object acUpdateClubDetails: TAction
+      Caption = 'acUpdateClubDetails'
+      OnExecute = acUpdateClubDetailsExecute
+    end
+  end
+  object tiUpdateClubDetails: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = tiUpdateClubDetailsTimer
+    Left = 120
+    Top = 72
   end
 end

@@ -127,7 +127,7 @@ begin
   end;
 
   acOK.Enabled := FALSE;
-  SocketClient.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rbPrivate.Checked);
+  SocketClient.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rbPrivate.Checked, FClub.Rake);
 end;
 
 procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMessage: TMessageItem);

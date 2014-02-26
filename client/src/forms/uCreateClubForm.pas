@@ -102,7 +102,7 @@ begin
   end;
 
   acOK.Enabled := FALSE;
-  SocketClient.CreateClub(edClubName.Text, edClubCode.Text, rbPrivate.Checked);
+  SocketClient.CreateClub(edClubName.Text, edClubCode.Text, rbPrivate.Checked, 5);
 end;
 
 procedure TfrmCreateClub.WndProc(var AMessage: TMessage);

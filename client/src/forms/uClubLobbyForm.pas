@@ -8,7 +8,7 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, Vcl.Menus, cxButtons, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, uPlayerInfo, dxBevel,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage;
+  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -63,6 +63,10 @@ type
     imgHeader: TcxImage;
     btPrijatnaPunina: TcxButton;
     gridGamesBuyinLimits: TcxGridColumn;
+    lbsClubRake: TcxLabel;
+    seClubRake: TcxSpinEdit;
+    tiUpdateClubDetails: TTimer;
+    acUpdateClubDetails: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -83,6 +87,9 @@ type
     procedure acLeaveClubExecute(Sender: TObject);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure tiUpdateClubDetailsTimer(Sender: TObject);
+    procedure seClubRakePropertiesChange(Sender: TObject);
+    procedure acUpdateClubDetailsExecute(Sender: TObject);
   private
     FClubId: Integer;
     FSelectedPlayerId: TBytes;
@@ -143,6 +150,12 @@ end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  if tiUpdateClubDetails.Enabled then
+  begin
+    tiUpdateClubDetails.Enabled := FALSE;
+    acUpdateClubDetails.Execute;
+  end;
+
   Action := caFree;
 end;
 
@@ -223,6 +236,7 @@ begin
 
     btChangeClubDetails.Visible := admin_visible;
     acShowClubChangeDetailsForm.Enabled := admin_visible;
+    acUpdateClubDetails.Enabled := admin_visible;
     btCloseClub.Visible := admin_visible;
     acCloseClub.Enabled := admin_visible;
     btGiveChips.Visible := admin_visible;
@@ -243,6 +257,8 @@ begin
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
     acLeaveClub.Enabled := not admin_visible;
+    seClubRake.Visible := admin_visible;
+    seClubRake.Value := club.Rake;
     if admin_visible then
     begin
       gridPlayersList.Align := alTop;
@@ -339,6 +355,18 @@ begin
   end;
 end;
 
+procedure TfrmClubLobby.seClubRakePropertiesChange(Sender: TObject);
+var
+  rake: Integer;
+  rt  : String;
+begin
+  tiUpdateClubDetails.Enabled := FALSE;
+  rt := StringReplace(seClubRake.Text, '%', '', [rfReplaceAll]);
+  if (TryStrToInt(rt, rake)) and
+     (rake >= 1) and (rake <= 10) then
+    tiUpdateClubDetails.Enabled := TRUE;
+end;
+
 procedure TfrmClubLobby.UpdatePlayerlist;
 var
   club: TClubInfo;
@@ -419,6 +447,13 @@ begin
     gridGamesTable.DataController.EndFullUpdate;
   end;
 end;
+
+procedure TfrmClubLobby.tiUpdateClubDetailsTimer(Sender: TObject);
+begin
+  acUpdateClubDetails.Execute;
+  tiUpdateClubDetails.Enabled := FALSE;
+end;
+
 
 procedure TfrmClubLobby.acCloseClubExecute(Sender: TObject);
 var
@@ -520,6 +555,16 @@ begin
     Exit;
 
   SocketClient.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
+end;
+
+procedure TfrmClubLobby.acUpdateClubDetailsExecute(Sender: TObject);
+var
+  club: TClubInfo;
+begin
+  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    Exit;
+
+  SocketClient.ChangeClubDetails(club.Id, club.Name, club.InvCode, club.IsPrivate, seClubRake.Value);
 end;
 
 procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);

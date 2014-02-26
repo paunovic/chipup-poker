@@ -218,6 +218,14 @@ object frmTable: TfrmTable
         Visible = False
         Width = 109
       end
+      object lbsHandId: TcxLabel
+        Left = 138
+        Top = 22
+        AutoSize = False
+        Transparent = True
+        Height = 18
+        Width = 174
+      end
     end
   end
   object PaintBox: TPaintBox32

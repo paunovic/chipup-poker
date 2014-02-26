@@ -36,6 +36,7 @@ type
     cbSitOutNextHand: TcxCheckBox;
     tiSitOutNextHand: TTimer;
     tiSeatCaptionClear: TTimer;
+    lbsHandId: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -637,9 +638,10 @@ begin
       // draw cards first
       if seat_info.Status in [psInHand, psAllIn] then
       begin
-        tmpint := seat_info.Cards.Count * FCardWidth;
-        for C2 := 0 to seat_info.Cards.Count - 1 do
-          if seat_info.Cards[C2].Value <> cvUnknown then
+        tmpint := seat_info.CardCount * FCardWidth;
+        for C2 := 0 to seat_info.CardCount - 1 do
+        begin
+          if (C2 >= 0) and (C2 < seat_info.Cards.Count) then
           begin
             card_rect := Rect(Round(seat_point.X - tmpint / 2 + C2 * FCardWidth - C2),
                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_OPEN_PERC),
@@ -655,6 +657,7 @@ begin
                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_HIDDEN_PERC + FCardHeight));
             PaintBox.Buffer.Draw(card_rect, TTableResources.CardBackgroundImage.BoundsRect, TTableResources.CardBackgroundImage);
           end;
+        end;
       end;
 
       if Assigned(player_info) then
@@ -981,6 +984,8 @@ begin
     lbsInfo.Caption := lbsInfo.Caption + ' [LOCKED] ';
   lbsInfo.Refresh;
 
+  lbsHandId.Caption := Format('Hand: #%d', [FTableStatus.HandId]);
+
   {$IFDEF DEBUG}
   tmp := '';
   if pbtablestatus.Locked then
@@ -1037,12 +1042,9 @@ begin
         pot := pbtevent.Pots[C1];
 
         if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
-        begin
-          {$IFDEF DEBUG} DebugLn(Format('Pot.Sum = %d; Pot.WinnerData.Count = %d', [pot.Sum, pot.WinnerData.Count]), ditException); {$ENDIF}
           Continue;
-        end;
 
-        tmpstr := Format('POT [%d] [%d chips, %.2f each], won by: ', [C1, pot.Sum, pot.Sum / pot.WinnerData.Count]);
+        tmpstr := Format('[%d chips, %.2f each], won by: ', [pot.Sum, pot.Sum / pot.WinnerData.Count]);
 
         for C2 := 0 to pot.WinnerData.Count - 1 do
         begin
@@ -1060,7 +1062,7 @@ begin
             tmpstr := tmpstr + ', ';
         end;
 
-        {$IFDEF DEBUG} DebugLn(tmpstr, ditApplication); {$ENDIF}
+        AddUserChatMessage(Format('POT [%d]', [C1]), tmpstr);
       end;
     end;
     teDealing: event := 'DEALING';

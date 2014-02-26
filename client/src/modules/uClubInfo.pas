@@ -20,9 +20,10 @@ type
     FPlayers         : TArray<TBytes>;
     FSuspendedPlayers: TArray<TBytes>;
     FGames           : TGamesInfo;
+    FRake            : Integer;
   public
     constructor Create(const AProtobufObject: TPB_Club); overload;
-    constructor Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String); overload;
+    constructor Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String; const ARake: Integer); overload;
     destructor Destroy; override;
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
@@ -41,6 +42,7 @@ type
     property Players         : TArray<TBytes> read FPlayers;
     property SuspendedPlayers: TArray<TBytes> read FSuspendedPlayers;
     property Games           : TGamesInfo read FGames;
+    property Rake            : Integer read FRake;
   end;
 
   TClubsInfo = class(TObjectList<TClubInfo>)
@@ -63,7 +65,7 @@ begin
   UpdateFromProtobufObject(AProtobufObject);
 end;
 
-constructor TClubInfo.Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String);
+constructor TClubInfo.Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String; const ARake: Integer);
 begin
   FId := AId;
   FMongoId := AMongoId;
@@ -73,6 +75,7 @@ begin
   FBalance := ABalance;
   FPrivate := APrivate;
   FGames := TGamesInfo.Create;
+  FRake := ARake;
 end;
 
 destructor TClubInfo.Destroy;
@@ -125,6 +128,7 @@ begin
     AddPlayer(AProtobufObject.Members[C1], FALSE);
   for C1 := 0 to Length(AProtobufObject.SuspendedMembers) - 1 do
     AddPlayer(AProtobufObject.SuspendedMembers[C1], TRUE);
+  FRake := AProtobufObject.Rake;
 end;
 
 procedure TClubInfo.AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);

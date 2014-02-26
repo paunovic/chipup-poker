@@ -62,6 +62,7 @@ type
     FBigBlindSeat  : Integer;
     FLocked        : Boolean;
     FHighestBet    : Integer;
+    FHandId        : UINT32;
 
   public
     constructor Create;
@@ -85,6 +86,7 @@ type
     property SmallBlindSeat: Integer read FSmallBlindSeat;
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
+    property HandId: UINT32 read FHandId;
   end;
 
 implementation
@@ -201,6 +203,7 @@ begin
   FBigBlindSeat := ATableStatusProtobuf.BigBlind;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
   FHighestBet := ATableStatusProtobuf.MinimumBet;
+  FHandId := ATableStatusProtobuf.Handid;
   if State <> tsWinning then
   begin
     FFlopCards.Assign(ATableStatusProtobuf.Flop);

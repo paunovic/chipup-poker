@@ -54,12 +54,12 @@ type
     procedure CreateAccount(const AUsername, APassword, AEMail: String);
     procedure ForgotPassword(const AEMail: String);
     procedure Status;
-    procedure CreateClub(const AName, AInvCode: String; const APrivate: Boolean);
+    procedure CreateClub(const AName, AInvCode: String; const APrivate: Boolean; const AClubRake: Integer);
     procedure JoinClub(const AId: Int64; const ACode: String);
     procedure LeaveClub(const AId: Int64);
     procedure KickPlayer(const AClubId: Int64; const APlayerId: TBytes);
     procedure GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
-    procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean); overload;
+    procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean; const AClubRake: Integer);
     procedure DisbandClub(const AClubId: Int64);
     procedure TransferChips(const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
@@ -562,7 +562,7 @@ begin
   SendProtobuf(scStatus, nil);
 end;
 
-procedure TSocketClient.CreateClub(const AName, AInvCode: String; const APrivate: Boolean);
+procedure TSocketClient.CreateClub(const AName, AInvCode: String; const APrivate: Boolean; const AClubRake: Integer);
 var
   protobuf: TPB_Club;
 begin
@@ -571,6 +571,7 @@ begin
     protobuf.Name := AName;
     protobuf.IsPrivate := APrivate;
     protobuf.Password := AInvCode;
+    protobuf.Rake := AClubRake;
     SendProtobuf(scCreateClub, protobuf);
   finally
     protobuf.Free;
@@ -632,7 +633,7 @@ begin
   end;
 end;
 
-procedure TSocketClient.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean);
+procedure TSocketClient.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const APrivate: Boolean; const AClubRake: Integer);
 var
   protobuf: TPB_Club;
 begin
@@ -642,6 +643,7 @@ begin
     protobuf.Name := AClubName;
     protobuf.Password := AClubCode;
     protobuf.IsPrivate := APrivate;
+    protobuf.Rake := AClubRake;
     SendProtobuf(scChangeClubDetails, protobuf);
   finally
     protobuf.Free;
