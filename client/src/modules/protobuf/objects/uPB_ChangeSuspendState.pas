@@ -53,11 +53,11 @@ begin
     case field_number of
       FN_CLUB_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FClubMongoId);
+        AProtobufReader.readBytes(FClubMongoId);
       end;
       FN_PLAYER_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FPlayerMongoId);
+        AProtobufReader.readBytes(FPlayerMongoId);
       end;
       FN_SUSPENDED: begin
         Assert(wire_type = WIRETYPE_VARINT);

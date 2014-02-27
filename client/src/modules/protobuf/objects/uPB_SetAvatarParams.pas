@@ -45,7 +45,7 @@ begin
     case field_number of
       FN_AVATAR_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FAvatarId);
+        AProtobufReader.readBytes(FAvatarId);
       end;
     else
       AProtobufReader.skipField(tag);

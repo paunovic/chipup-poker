@@ -18,6 +18,7 @@ struct typeInfo {
 	string delphiName;
 	string writter;
 	string reader;
+	string wiretype;
 };
 struct typeInfo *typeinfo[18];
 // taken from cpp_helpers.cc in protobuf
@@ -486,6 +487,9 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				const FieldDescriptor *field = message->field(j);
 				string name = field->name();
 				UpperString(&name);
+				map<string,string> vars;
+				vars["name"] = EnumName(field);
+				vars["pname"] = PrivateFieldName(field);
 				if (field->type() == FieldDescriptor::TYPE_INT32) {
 					if (field->is_packed()) {
 						printer.Print(
@@ -510,44 +514,6 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							"        $pname$ := AProtobufReader.readInt32;\n"
 							"      end;\n","name",EnumName(field)
 							,"pname",PrivateFieldName(field));
-					}
-				} else if (field->type() == FieldDescriptor::TYPE_STRING) {
-					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						printer.Print(
-							"      $name$: begin\n"
-							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-							"        SetLength($pname$, Length($pname$) + 1);\n"
-							"        $pname$[Length($pname$)-1] := String(AProtobufReader.readUtf8String);\n"
-							"      end;\n"
-							,"pname",PrivateFieldName(field)
-							,"name",EnumName(field));
-					} else {
-						printer.Print(
-							"      $name$: begin\n"
-							"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-							"        $pname$ := String(AProtobufReader.readUtf8String);\n"
-							"      end;\n"
-							,"pname",PrivateFieldName(field)
-							,"name",EnumName(field));
-					}
-				} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
-					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						printer.Print(
-						"      $name$: begin\n"
-						"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"        SetLength($pname$, Length($pname$) + 1);\n"
-						"        AProtobufReader.readBytes($pname$[Length($pname$)-1]);\n"
-						"      end;\n"
-						,"name",EnumName(field)
-						,"pname",PrivateFieldName(field));
-					} else {
-						printer.Print(
-						"      $name$: begin\n"
-						"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"        AprotobufReader.readBytes($pname$);\n"
-						"      end;\n"
-						,"name",EnumName(field)
-						,"pname",PrivateFieldName(field));
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					const Descriptor *subtype = field->message_type(); 
@@ -597,14 +563,39 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				} else {
 					string type = getDelphiType(field);
 					if (!type.empty()) {
-						printer.Print(
-							"      $name$: begin\n"
-							"        Assert(wire_type = WIRETYPE_VARINT);\n"
-							"        $pname$ := AProtobufReader.$reader$;\n"
-							"      end;\n"
-							,"name",EnumName(field)
-							,"pname",PrivateFieldName(field)
-							,"reader",typeinfo[field->type()]->reader);
+						vars["reader"] = typeinfo[field->type()]->reader;
+						vars["wiretype"] = typeinfo[field->type()]->wiretype;
+						if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+							if (field->type() == FieldDescriptor::TYPE_BYTES) {
+								printer.Print(vars,
+									"      $name$: begin\n"
+									"        Assert(wire_type = $wiretype$);\n"
+									"        SetLength($pname$, Length($pname$) + 1);\n"
+									"        AProtobufReader.$reader$($pname$[Length($pname$)-1]);\n"
+									"      end;\n");
+							} else {
+								printer.Print(vars,
+									"      $name$: begin\n"
+									"        Assert(wire_type = $wiretype$);\n"
+									"        SetLength($pname$, Length($pname$) + 1);\n"
+									"        $pname$[Length($pname$)-1] := AProtobufReader.$reader$;\n"
+									"      end;\n");
+							}
+						} else {
+							if (field->type() == FieldDescriptor::TYPE_BYTES) {
+								printer.Print(vars,
+									"      $name$: begin\n"
+									"        Assert(wire_type = $wiretype$);\n"
+									"        AProtobufReader.$reader$($pname$);\n"
+									"      end;\n");
+							} else {
+								printer.Print(vars,
+									"      $name$: begin\n"
+									"        Assert(wire_type = $wiretype$);\n"
+									"        $pname$ := AProtobufReader.$reader$;\n"
+									"      end;\n");
+							}
+						}
 					}
 				}
 			}
@@ -707,19 +698,20 @@ const string getDelphiType(const FieldDescriptor *field) const {
 	} else return out;
 }
 };
-struct typeInfo* makeType(string type, string writter, string reader) {
+struct typeInfo* makeType(string type, string writter, string reader, string wiretype) {
 	struct typeInfo *t = new struct typeInfo;
 	t->delphiName = type;
 	t->writter = writter;
 	t->reader = reader;
+	t->	wiretype = wiretype;
 	return t;
 }
 int main(int argc, char *argv[]) {
-	typeinfo[FieldDescriptor::TYPE_INT32] = makeType("Integer","writeInt32","FIXME");
-	typeinfo[FieldDescriptor::TYPE_UINT32] = makeType("UINT32","writeUInt32","readUInt32");
-	typeinfo[FieldDescriptor::TYPE_STRING] = makeType("String","writeString","FIXME");
-	typeinfo[FieldDescriptor::TYPE_BOOL] = makeType("Boolean","writeBoolean","FIXME");
-	typeinfo[FieldDescriptor::TYPE_BYTES] = makeType("TBytes","writeBytes","FIXME");
+	typeinfo[FieldDescriptor::TYPE_INT32] = makeType("Integer","writeInt32","FIXME","WIRETYPE_VARINT");
+	typeinfo[FieldDescriptor::TYPE_UINT32] = makeType("UINT32","writeUInt32","readUInt32","WIRETYPE_VARINT");
+	typeinfo[FieldDescriptor::TYPE_STRING] = makeType("String","writeString","readUtf8String","WIRETYPE_LENGTH_DELIMITED");
+	typeinfo[FieldDescriptor::TYPE_BOOL] = makeType("Boolean","writeBoolean","FIXME","WIRETYPE_VARINT");
+	typeinfo[FieldDescriptor::TYPE_BYTES] = makeType("TBytes","writeBytes","readBytes","WIRETYPE_LENGTH_DELIMITED");
 	cerr << "self " << argv[0] << " " << argc << "\n";
 	BaseGenerator *gen;
 	if (strcmp("protoc-gen-pascal",argv[0]) == 0) gen = new PascalGenerator();

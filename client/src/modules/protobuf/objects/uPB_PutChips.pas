@@ -49,7 +49,7 @@ begin
     case field_number of
       FN_TABLE_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FTableMongoId);
+        AProtobufReader.readBytes(FTableMongoId);
       end;
       FN_CHIP_AMOUNT: begin
         Assert(wire_type = WIRETYPE_VARINT);

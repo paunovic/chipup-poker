@@ -70,7 +70,7 @@ begin
       end;
       FN_PLAYER_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FPlayerMongoId);
+        AProtobufReader.readBytes(FPlayerMongoId);
       end;
       FN_CHIPS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -82,7 +82,7 @@ begin
       end;
       FN_CARDS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FCards);
+        AProtobufReader.readBytes(FCards);
       end;
       FN_STATUS: begin
         Assert(wire_type = WIRETYPE_VARINT);

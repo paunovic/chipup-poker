@@ -110,7 +110,7 @@ begin
     case field_number of
       FN_TABLE_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FTableMongoId);
+        AProtobufReader.readBytes(FTableMongoId);
       end;
       FN_SEATS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -135,15 +135,15 @@ begin
       end;
       FN_FLOP: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FFlop);
+        AProtobufReader.readBytes(FFlop);
       end;
       FN_TURN: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FTurn);
+        AProtobufReader.readBytes(FTurn);
       end;
       FN_RIVER: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FRiver);
+        AProtobufReader.readBytes(FRiver);
       end;
       FN_POTS: begin
         Assert(wire_type = WIRETYPE_VARINT);

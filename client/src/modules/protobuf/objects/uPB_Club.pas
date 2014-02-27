@@ -89,7 +89,7 @@ begin
     case field_number of
       FN__ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FId);
+        AProtobufReader.readBytes(FId);
       end;
       FN_CHIPS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -97,15 +97,15 @@ begin
       end;
       FN_NAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FName := String(AProtobufReader.readUtf8String);
+        FName := AProtobufReader.readUtf8String;
       end;
       FN_OWNER: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FOwner);
+        AProtobufReader.readBytes(FOwner);
       end;
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPassword := String(AProtobufReader.readUtf8String);
+        FPassword := AProtobufReader.readUtf8String;
       end;
       FN_IS_PRIVATE: begin
         Assert(wire_type = WIRETYPE_VARINT);

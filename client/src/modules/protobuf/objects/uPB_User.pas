@@ -65,19 +65,19 @@ begin
     case field_number of
       FN__ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FId);
+        AProtobufReader.readBytes(FId);
       end;
       FN_AVATAR: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FAvatar);
+        AProtobufReader.readBytes(FAvatar);
       end;
       FN_DISPLAYNAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FDisplayname := String(AProtobufReader.readUtf8String);
+        FDisplayname := AProtobufReader.readUtf8String;
       end;
       FN_EMAIL: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FEmail := String(AProtobufReader.readUtf8String);
+        FEmail := AProtobufReader.readUtf8String;
       end;
       FN_AUTHED: begin
         Assert(wire_type = WIRETYPE_VARINT);

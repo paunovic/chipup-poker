@@ -89,15 +89,15 @@ begin
     case field_number of
       FN__ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FId);
+        AProtobufReader.readBytes(FId);
       end;
       FN_CREATOR_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FCreatorMongoId);
+        AProtobufReader.readBytes(FCreatorMongoId);
       end;
       FN_GAMENAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGamename := String(AProtobufReader.readUtf8String);
+        FGamename := AProtobufReader.readUtf8String;
       end;
       FN_CLUBSEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);

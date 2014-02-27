@@ -49,7 +49,7 @@ begin
     case field_number of
       FN_PLAYER_MONGO_ID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AprotobufReader.readBytes(FPlayerMongoId);
+        AProtobufReader.readBytes(FPlayerMongoId);
       end;
       FN_CHIP_AMOUNT: begin
         Assert(wire_type = WIRETYPE_VARINT);

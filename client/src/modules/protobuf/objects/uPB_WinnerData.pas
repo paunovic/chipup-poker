@@ -66,7 +66,7 @@ begin
       end;
       FN_MSG: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FMsg := String(AProtobufReader.readUtf8String);
+        FMsg := AProtobufReader.readUtf8String;
       end;
     else
       AProtobufReader.skipField(tag);
