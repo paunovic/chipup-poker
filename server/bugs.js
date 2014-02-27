@@ -26,7 +26,11 @@ function setup(app,bugs,users,db) {
 	app.get('/users',function (req,res) {
 		var start = Date.now();
 		users.find({}).toArray(function (err,data) {
-			res.render('users',{users:data,start:start});
+			var sum = 0;
+			for (var x=0; x<data.length; x++) {
+				if (data[x].chips) sum += data[x].chips;
+			}
+			res.render('users',{users:data,start:start,sum:sum});
 		});
 	});
 	app.get('/user',function (req,res) {
@@ -59,6 +63,11 @@ function setup(app,bugs,users,db) {
 			db.collection('games').find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
 				res.render('club',{club:club,games:games});
 			});
+		});
+	});
+	app.get('/hand',function (req,res) {
+		db.collection('handHistory').findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
+			res.render('hand',{hand:hand});
 		});
 	});
 }

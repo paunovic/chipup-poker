@@ -1,0 +1,32 @@
+doctype html
+html
+  body
+    include header
+    block content
+      script.
+        var raw=!{JSON.stringify(hand)};
+      p='rake:'+hand.rake+'%'
+    table(border=1)
+      tr
+        th cards
+      each set in hand.cards
+        tr
+          td=set
+    table(border=1)
+      tr
+        th player mongoid
+      each player in hand.players
+        tr
+          td=player
+    table(border=1)
+      tr
+        th move#
+        th seat
+        th bet
+        th code
+      each move in hand.moves
+        tr
+          td=$index
+          td=move.seat
+          td=move.bet
+          td=move.code

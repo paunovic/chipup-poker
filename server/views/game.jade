@@ -1,0 +1,31 @@
+doctype html
+html
+  body
+    include header
+    block content
+      table(border=1)
+        tr
+          th rake rate
+          th rake collection
+        tr
+          td=game.rake+'%'
+          td=game.obj.rake/100
+      table(border=1)
+        tr
+          th pot#
+          th members
+          th value
+        each pot in game.pots
+          tr
+            td=$index
+            td=pot.members
+            td=pot.value/100
+      table(border=1)
+        tr
+          th started
+          th hand#
+        each hand in hands
+          tr
+            td=hand._id.getTimestamp()
+            td
+              a(href="/hand?id="+hand._id)=hand.seq 

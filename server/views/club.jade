@@ -15,6 +15,7 @@ html
           th seats
         each val in games
           tr
-            td=val.gamename
+            td
+              a(href="/game?id="+val._id)=val.gamename
             td=val.small_blind/100+'/'+val.big_blind/100
             td=val.seats
