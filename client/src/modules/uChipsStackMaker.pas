@@ -9,7 +9,7 @@ uses
 type
   TChipsStack = class
   private
-    FValue     : Integer;
+    FValue     : Double;
     FImage     : TBitmap32;
     FTopChipVal: String;
     FChipCount : Integer;
@@ -17,10 +17,10 @@ type
     procedure MakeBitmap;
 
   public
-    constructor Create(const AValue: Integer);
+    constructor Create(const AValue: Double);
     destructor Destroy; override;
 
-    property Value: Integer read FValue;
+    property Value: Double read FValue;
     property ChipCount: Integer read FChipCount;
     property TopChipVal: String read FTopChipVal;
     property Image: TBitmap32 read FImage;
@@ -35,8 +35,8 @@ type
 
     procedure Clear;
 
-    function MakeStack(const AValue: Integer): TChipsStack;
-    function IndexOf(const AValue: Integer): Integer;
+    function MakeStack(const AValue: Double): TChipsStack;
+    function IndexOf(const AValue: Double): Integer;
   end;
 
 implementation
@@ -46,7 +46,7 @@ uses
 
 { TChipsStack }
 
-constructor TChipsStack.Create(const AValue: Integer);
+constructor TChipsStack.Create(const AValue: Double);
 begin
   FValue := AValue;
   FImage := TBitmap32.Create;
@@ -81,7 +81,7 @@ const
 var
   chip_index, ccount, c1k, c500, c100, c25, c5: Integer;
 begin
-  ccount := FValue;
+  ccount := Trunc(FValue);
 
   c1k := ccount div 1000;
   Dec(ccount, c1k * 1000);
@@ -129,17 +129,17 @@ begin
   inherited;
 end;
 
-function TChipsStackMaker.IndexOf(const AValue: Integer): Integer;
+function TChipsStackMaker.IndexOf(const AValue: Double): Integer;
 var
   C1: Integer;
 begin
   for C1 := 0 to FStacks.Count - 1 do
-    if FStacks[C1].Value = AValue then
+    if Trunc(FStacks[C1].Value) = Trunc(AValue) then
       Exit(C1);
   Exit(-1);
 end;
 
-function TChipsStackMaker.MakeStack(const AValue: Integer): TChipsStack;
+function TChipsStackMaker.MakeStack(const AValue: Double): TChipsStack;
 var
   index: Integer;
 begin

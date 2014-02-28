@@ -56,6 +56,7 @@ type
     procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
     procedure tiSitOutNextHandTimer(Sender: TObject);
     procedure tiSeatClearCaptionTimer(Sender: TObject);
+    procedure seRaiseAmountPropertiesChange(Sender: TObject);
   private
     type
       TSeatOrientation = (soLeft, soRight);
@@ -368,6 +369,16 @@ begin
     PaintBox.Flush;
 end;
 
+procedure TfrmTable.seRaiseAmountPropertiesChange(Sender: TObject);
+var
+  val: Double;
+begin
+  if (TryStrToFloat(seRaiseAmount.Text, val)) and
+     (val >= tbRaise.Properties.Min / 100) and
+     (val <= tbRaise.Properties.Max / 100) then
+    tbRaise.Position := Trunc(val * 100);
+end;
+
 procedure TfrmTable.tbRaisePropertiesChange(Sender: TObject);
 begin
   seRaiseAmount.Value := tbRaise.Position / 100;
@@ -437,7 +448,7 @@ begin
          (FTableStatus.Bets[seat_info.SeatIndex] > 0) then
       begin
         chips_point := GetChipsPoint(seat_info.SeatIndex);
-        chips_stack := FChipsStack.MakeStack(Trunc(FTableStatus.Bets[seat_info.SeatIndex] / 100));
+        chips_stack := FChipsStack.MakeStack(FTableStatus.Bets[seat_info.SeatIndex] / 100);
         chips_rect := Rect(chips_point.X - FChipWidth div 2, chips_point.Y - Round(chips_stack.Image.Height * FTableResizeRatio), chips_point.X + FChipWidth div 2, chips_point.Y);
         PaintBox.Buffer.Draw(chips_rect, chips_stack.Image.BoundsRect, chips_stack.Image);
         DrawTopChipValue(chips_stack, chips_rect);
@@ -448,7 +459,8 @@ end;
 
 procedure TfrmTable.DrawPots;
 var
-  C1, pot    : Integer;
+  C1         : Integer;
+  pot        : Double;
   chips_stack: TChipsStack;
   chips_rect : TRect;
   pot_point  : TPoint;
@@ -458,7 +470,7 @@ begin
     pot_point := GetPotPoint(C1);
     if (pot_point.X <> -1) and (pot_point.Y <> -1) then
     begin
-      pot := Trunc(FTableStatus.Pots[C1] / 100);
+      pot := FTableStatus.Pots[C1] / 100;
       chips_stack := FChipsStack.MakeStack(pot);
       chips_rect := Rect(pot_point.X - FChipWidth div 2, pot_point.Y - Round(chips_stack.Image.Height * FTableResizeRatio), pot_point.X + FChipWidth div 2, pot_point.Y);
       PaintBox.Buffer.Draw(chips_rect, chips_stack.Image.BoundsRect, chips_stack.Image);
@@ -1007,15 +1019,12 @@ begin
   begin
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
-    seRaiseAmount.Properties.MaxValue := FTableStatus.BetLimit / 100;
-    seRaiseAmount.Properties.MinValue := (FTableStatus.MinimumBet + FTable.Game.BigBlind) / 100;
-    if seRaiseAmount.Properties.MinValue > seRaiseAmount.Properties.MaxValue then
-      seRaiseAmount.Properties.MinValue := seRaiseAmount.Properties.MaxValue;
+    tbRaise.Properties.Min := FTableStatus.MinimumBet + FTable.Game.BigBlind;
+    tbRaise.Properties.Max := FTableStatus.MaximumBet;
 
-    seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
+    seRaiseAmount.Properties.MaxValue := tbRaise.Properties.Max / 100;
+    seRaiseAmount.Value := tbRaise.Properties.Min / 100;
 
-    tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
-    tbRaise.Properties.Max := Trunc(seRaiseAmount.Properties.MaxValue * 100);
     tbRaise.Position := tbRaise.Properties.Min;
   end;
 
@@ -1174,6 +1183,8 @@ begin
           else
             tmpstr := tmpstr + 'UNKNOWN';
 
+          tmpstr := tmpstr + Format(' (%s)', [pot.WinnerData[C2].Msg]);
+
           if C2 < pot.WinnerData.Count - 1 then
             tmpstr := tmpstr + ', ';
         end;
@@ -1254,7 +1265,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, seRaiseAmount.Value * 100);
+  SocketClient.PutChips(FTable.Game.MongoId, tbRaise.Position);
 end;
 
 end.

@@ -173,6 +173,7 @@ object frmTable: TfrmTable
         Anchors = [akRight, akBottom]
         Properties.SpinButtons.Visible = False
         Properties.ValueType = vtFloat
+        Properties.OnChange = seRaiseAmountPropertiesChange
         TabOrder = 5
         Visible = False
         Width = 46
