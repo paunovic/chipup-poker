@@ -24,6 +24,12 @@ type
       FImg_CardBackground     : TBitmap32;
       FImg_CardFrontBackground: TBitmap32;
       FImg_CardArtworks       : array[0..51] of TBitmap32;
+      FImg_Chip1              : TBitmap32;
+      FImg_Chip5              : TBitmap32;
+      FImg_Chip25             : TBitmap32;
+      FImg_Chip100            : TBitmap32;
+      FImg_Chip500            : TBitmap32;
+      FImg_Chip1000           : TBitmap32;
       FTableWidth             : Integer;
       FTableHeight            : Integer;
       FTableAspectRatio       : Double;
@@ -41,6 +47,9 @@ type
       FArtworkWidth           : Integer;
       FArtworkHeight          : Integer;
       FArtworkAspectRatio     : Double;
+      FChipWidth              : Integer;
+      FChipHeight             : Integer;
+      FChipAspectRatio        : Double;
 
   public
     const
@@ -73,6 +82,12 @@ type
     class property SeatLightRightImage: TBitmap32 read FImg_SeatLightRight;
     class property CardBackgroundImage: TBitmap32 read FImg_CardBackground;
     class property CardFrontBackgroundImage: TBitmap32 read FImg_CardFrontBackground;
+    class property Chip1Image: TBitmap32 read FImg_Chip1;
+    class property Chip5Image: TBitmap32 read FImg_Chip5;
+    class property Chip25Image: TBitmap32 read FImg_Chip25;
+    class property Chip100Image: TBitmap32 read FImg_Chip100;
+    class property Chip500Image: TBitmap32 read FImg_Chip500;
+    class property Chip1000Image: TBitmap32 read FImg_Chip1000;
     class property TableWidth: Integer read FTableWidth;
     class property TableHeight: Integer read FTableHeight;
     class property TableAspectRatio: Double read FTableAspectRatio;
@@ -90,6 +105,9 @@ type
     class property ArtworkWidth: Integer read FArtworkWidth;
     class property ArtworkHeight: Integer read FArtworkHeight;
     class property ArtworkAspectRatio: Double read FArtworkAspectRatio;
+    class property ChipWidth: Integer read FChipWidth;
+    class property ChipHeight: Integer read FChipHeight;
+    class property ChipAspectRatio: Double read FChipAspectRatio;
   end;
 
 implementation
@@ -161,6 +179,12 @@ begin
   CreateBitmap32FromPNGResource(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
   CreateBitmap32FromPNGResource(FImg_CardBackground, 'CardBackground', bsKernel);
   CreateBitmap32FromPNGResource(FImg_CardFrontBackground, 'CardFrontBackground', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip1, 'Chip1', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip5, 'Chip5', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip25, 'Chip25', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip100, 'Chip100', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip500, 'Chip500', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip1000, 'Chip1000', bsKernel);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
@@ -194,6 +218,10 @@ begin
   FArtworkHeight := FImg_CardArtworks[0].Height;
   FArtworkAspectRatio := FArtworkWidth / FArtworkHeight;
 
+  FChipWidth := FImg_Chip1.Width;
+  FChipHeight := FImg_Chip1.Height;
+  FChipAspectRatio := FCardWidth / FChipHeight;
+
   FInitialized := TRUE;
 end;
 
@@ -212,6 +240,12 @@ begin
   FImg_SeatLightRight.Free;
   FImg_CardBackground.Free;
   FImg_CardFrontBackground.Free;
+  FImg_Chip1.Free;
+  FImg_Chip5.Free;
+  FImg_Chip25.Free;
+  FImg_Chip100.Free;
+  FImg_Chip500.Free;
+  FImg_Chip1000.Free;
 
   for C1 := Low(FImg_CardArtworks) to High(FImg_CardArtworks) do
     FImg_CardArtworks[C1].Free;

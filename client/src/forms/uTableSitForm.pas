@@ -17,18 +17,25 @@ type
     alTableSit: TActionList;
     acOK: TAction;
     acCancel: TAction;
+    lbsInfo: TcxLabel;
+    btMin: TcxButton;
+    btMax: TcxButton;
+    acMin: TAction;
+    acMax: TAction;
     procedure acCancelExecute(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure seBuyinPropertiesChange(Sender: TObject);
+    procedure acMinExecute(Sender: TObject);
+    procedure acMaxExecute(Sender: TObject);
   private
     FTable      : TTable;
     FTableStatus: TTableStatus;
     FSeatIndex  : Integer;
 
-
+    procedure SetBuyin(const ABuyin: Double);
     procedure CSRTableSitOk(const AMessage: TMessageItem);
     procedure CSRTableSitSeatTaken(const AMessage: TMessageItem);
     procedure CSRTableSitNoChips(const AMessage: TMessageItem);
@@ -48,7 +55,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uMessageContainer, uServerCodes, uServerMessageCallback;
+  uSocketClient, uMessageContainer, uServerCodes, uServerMessageCallback, uMainDataModule;
 
 
 procedure TfrmTableSit.FormDestroy(Sender: TObject);
@@ -84,13 +91,35 @@ begin
   end;
 end;
 
+procedure TfrmTableSit.SetBuyin(const ABuyin: Double);
+var
+  buyin: Double;
+begin
+  buyin := ABuyin;
+  if buyin > dmMain.SelfInfo.Balance then
+    buyin := dmMain.SelfInfo.Balance;
+  seBuyin.Value := Trunc(buyin / 100);
+end;
+
 procedure TfrmTableSit.SetParams(const AParams: array of pointer);
+var
+  buyin: Double;
 begin
   FTable := AParams[0];
   FTableStatus := AParams[1];
   FSeatIndex := PInteger(AParams[2])^;
 
-  seBuyin.Value := (FTable.Game.MinBuyin * FTable.Game.BigBlind + (FTable.Game.MaxBuyin * FTable.Game.BigBlind - FTable.Game.MinBuyin * FTable.Game.BigBlind) / 2) / 100;
+  lbsInfo.Caption := Format('%s (%d/%d) %s'#10#10'Min buy-in: %d'#10'Max buy-in: %d'#10#10'Your balance: %.2f',
+    [
+      FTable.Game.Name, Trunc(FTable.Game.SmallBlind / 100), Trunc(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull,
+      Trunc((FTable.Game.MinBuyin * FTable.Game.BigBlind) / 100), Trunc((FTable.Game.MaxBuyin * FTable.Game.BigBlind) / 100),
+      dmMain.SelfInfo.Balance / 100
+    ]);
+
+  buyin := FTable.Game.MinBuyin * FTable.Game.BigBlind;
+  buyin := buyin + (FTable.Game.MaxBuyin * FTable.Game.BigBlind - FTable.Game.MinBuyin * FTable.Game.BigBlind) * 0.75;
+  buyin := Trunc((buyin / 10) * 10);
+  SetBuyin(buyin);
 end;
 
 procedure TfrmTableSit.WndProc(var AMessage: TMessage);
@@ -120,6 +149,16 @@ end;
 procedure TfrmTableSit.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
+end;
+
+procedure TfrmTableSit.acMaxExecute(Sender: TObject);
+begin
+  SetBuyin(FTable.Game.MaxBuyin * FTable.Game.BigBlind);
+end;
+
+procedure TfrmTableSit.acMinExecute(Sender: TObject);
+begin
+  SetBuyin(FTable.Game.MinBuyin * FTable.Game.BigBlind);
 end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);

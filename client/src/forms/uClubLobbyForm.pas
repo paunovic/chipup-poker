@@ -258,7 +258,9 @@ begin
     btLeaveClub.Visible := not admin_visible;
     acLeaveClub.Enabled := not admin_visible;
     seClubRake.Visible := admin_visible;
+    seClubRake.Properties.OnChange := nil;
     seClubRake.Value := club.Rake;
+    seClubRake.Properties.OnChange := seClubRakePropertiesChange;
     if admin_visible then
     begin
       gridPlayersList.Align := alTop;

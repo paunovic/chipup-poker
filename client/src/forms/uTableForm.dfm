@@ -281,6 +281,7 @@ object frmTable: TfrmTable
   end
   object tiActiveFrameBlink: TTimer
     Enabled = False
+    Interval = 700
     OnTimer = tiActiveFrameBlinkTimer
     Left = 52
     Top = 32

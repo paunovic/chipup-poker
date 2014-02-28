@@ -113,6 +113,9 @@
 			<RcCompile Include="resources\fonts.rc">
 				<Form>fonts.res</Form>
 			</RcCompile>
+			<RcCompile Include="resources\chips.rc">
+				<Form>chips.res</Form>
+			</RcCompile>
 			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
 			<DCCReference Include="uMainDataModule.pas">
 				<Form>dmMain</Form>
@@ -234,6 +237,7 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_WinnerData.pas"/>
 			<DCCReference Include="modules\uCards.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_PotInfo.pas"/>
+			<DCCReference Include="modules\uChipsStackMaker.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

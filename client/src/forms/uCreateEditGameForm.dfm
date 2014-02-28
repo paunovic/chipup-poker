@@ -156,7 +156,7 @@ object frmCreateEditGame: TfrmCreateEditGame
     Properties.Items.Strings = (
       'No Limit'
       'Pot Limit'
-      'Fixed')
+      'Fixed Limit')
     TabOrder = 2
     Text = 'No Limit'
     Width = 273

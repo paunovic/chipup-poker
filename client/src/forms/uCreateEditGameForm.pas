@@ -55,7 +55,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uValidators;
+  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uValidators, uPB_Game;
 
 
 procedure TfrmCreateEditGame.FormDestroy(Sender: TObject);
@@ -183,8 +183,8 @@ begin
         begin
           acOK.Enabled := FALSE;
           case FFormType of
-            0: SocketClient.CreateGame(FClub.Id, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb * 100, bb * 100, seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
-            1: SocketClient.EditGame(FGame.MongoId, edGameName.Text, cbGameType.ItemIndex, cbLimit.ItemIndex, sb * 100, bb * 100, seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+            0: SocketClient.CreateGame(FClub.Id, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), sb * 100, bb * 100, seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+            1: SocketClient.EditGame(FGame.MongoId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), sb * 100, bb * 100, seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
           else
             Assert(FALSE, 'Invalid FFormType');
           end;

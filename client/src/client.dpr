@@ -3,6 +3,7 @@ program client;
 {$R 'cards.res' 'resources\cards.rc'}
 {$R 'seats.res' 'resources\seats.rc'}
 {$R 'fonts.res' 'resources\fonts.rc'}
+{$R 'chips.res' 'resources\chips.rc'}
 {$R *.dres}
 {$R *.res}
 
@@ -97,7 +98,8 @@ uses
   uTableResources in 'modules\table\uTableResources.pas',
   uPB_WinnerData in 'modules\protobuf\objects\uPB_WinnerData.pas',
   uCards in 'modules\uCards.pas',
-  uPB_PotInfo in 'modules\protobuf\objects\uPB_PotInfo.pas';
+  uPB_PotInfo in 'modules\protobuf\objects\uPB_PotInfo.pas',
+  uChipsStackMaker in 'modules\uChipsStackMaker.pas';
 
 procedure FocusPokerApp;
 var

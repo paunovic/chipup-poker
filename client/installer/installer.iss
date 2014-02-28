@@ -20,11 +20,11 @@ WizardImageFile=installer_images\installer-1.bmp
 WizardSmallImageFile=installer_images\installer-2.bmp
 
 [Files]
-Source: "skins\VclStylesInno.dll"; DestDir: {app}; Flags: uninsneveruninstall
-Source: "skins\{#SkinName}"; DestDir: {app}
+Source: "skins\VclStylesInno.dll"; DestDir: {app}; Flags: uninsneveruninstall ignoreversion
+Source: "skins\{#SkinName}"; DestDir: {app}; Flags: ignoreversion
 
-Source: "client_files\*.*"; DestDir: "{app}"
-Source: "ssl_libs\*.*"; DestDir: "{app}"
+Source: "client_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ssl_libs\*.*"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"

@@ -1,0 +1,6 @@
+Chip1 RCDATA "chips\\1.png"
+Chip100 RCDATA "chips\\100.png"
+Chip1000 RCDATA "chips\\1000.png"
+Chip25 RCDATA "chips\\25.png"
+Chip5 RCDATA "chips\\5.png"
+Chip500 RCDATA "chips\\500.png"

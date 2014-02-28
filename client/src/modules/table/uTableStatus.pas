@@ -63,7 +63,7 @@ type
     FLocked        : Boolean;
     FHighestBet    : Integer;
     FHandId        : UINT32;
-    FBetLimit      : UINT32;
+    FPots          : TArray<Integer>;
 
   public
     constructor Create;
@@ -88,6 +88,7 @@ type
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
+    property Pots: TArray<Integer> read FPots;
   end;
 
 implementation
@@ -267,7 +268,7 @@ begin
 
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
-  FBetLimit := ATableStatusProtobuf.BetLimit;
+  FPots := ATableStatusProtobuf.Pots;
 end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableEvent);

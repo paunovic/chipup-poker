@@ -6,9 +6,6 @@ uses
   System.Generics.Collections, System.SysUtils, uPB_Game, uPB_TableStatus, uCommon;
 
 type
-  TGameType = (gtHoldem, gtOmaha);
-  TGameLimit = (glNoLimit, glFixedLimit, glPotLimit);
-
   TGameInfo = class
   private
     FMongoId   : TBytes;
