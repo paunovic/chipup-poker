@@ -9,6 +9,8 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader;
 
 type
+  TGameLimit = (glNoLimit = 0,glPotLimit = 1,glFixedLimit = 2);
+  TGameType = (gtHoldem = 0,gtOmaha = 1);
   TPB_Game = class(TProtobufBaseObject)
   private
     const
@@ -30,8 +32,8 @@ type
       FCreatorMongoId: TBytes;
       FGamename: String;
       FClubseq: Integer;
-      FGameType: Integer;
-      FGameLimit: Integer;
+      FGameType: TGameType;
+      FGameLimit: TGameLimit;
       FSmallBlind: Integer;
       FBigBlind: Integer;
       FSeats: Integer;
@@ -43,8 +45,8 @@ type
     procedure SetCreatorMongoId(const AValue: TBytes);
     procedure SetGamename(const AValue: String);
     procedure SetClubseq(const AValue: Integer);
-    procedure SetGameType(const AValue: Integer);
-    procedure SetGameLimit(const AValue: Integer);
+    procedure SetGameType(const AValue: TGameType);
+    procedure SetGameLimit(const AValue: TGameLimit);
     procedure SetSmallBlind(const AValue: Integer);
     procedure SetBigBlind(const AValue: Integer);
     procedure SetSeats(const AValue: Integer);
@@ -59,8 +61,8 @@ type
     property CreatorMongoId: TBytes read FCreatorMongoId write SetCreatorMongoId;
     property Gamename: String read FGamename write SetGamename;
     property Clubseq: Integer read FClubseq write SetClubseq;
-    property GameType: Integer read FGameType write SetGameType;
-    property GameLimit: Integer read FGameLimit write SetGameLimit;
+    property GameType: TGameType read FGameType write SetGameType;
+    property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
     property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
     property BigBlind: Integer read FBigBlind write SetBigBlind;
     property Seats: Integer read FSeats write SetSeats;
@@ -105,11 +107,11 @@ begin
       end;
       FN_GAME_TYPE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FGameType := AProtobufReader.readInt32;
+        FGameType := TGameType(AProtobufReader.readEnum);
       end;
       FN_GAME_LIMIT: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FGameLimit := AProtobufReader.readInt32;
+        FGameLimit := TGameLimit(AProtobufReader.readEnum);
       end;
       FN_SMALL_BLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -164,16 +166,16 @@ begin
   ProtobufOutput.writeInt32(FN_CLUBSEQ, AValue);
 end;
 
-procedure TPB_Game.SetGameType(const AValue: Integer);
+procedure TPB_Game.SetGameType(const AValue: TGameType);
 begin
   FGameType := AValue;
-  ProtobufOutput.writeInt32(FN_GAME_TYPE, AValue);
+  ProtobufOutput.writeInt32(FN_GAME_TYPE, Integer(AValue));
 end;
 
-procedure TPB_Game.SetGameLimit(const AValue: Integer);
+procedure TPB_Game.SetGameLimit(const AValue: TGameLimit);
 begin
   FGameLimit := AValue;
-  ProtobufOutput.writeInt32(FN_GAME_LIMIT, AValue);
+  ProtobufOutput.writeInt32(FN_GAME_LIMIT, Integer(AValue));
 end;
 
 procedure TPB_Game.SetSmallBlind(const AValue: Integer);

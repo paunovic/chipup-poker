@@ -539,7 +539,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							,"subname",subtype->name());
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
-					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
+					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
 						const EnumDescriptor *type = field->enum_type();
 						printer.Print(
 							"      $name$: begin\n"
