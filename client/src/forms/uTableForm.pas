@@ -943,16 +943,16 @@ begin
             tsFlop,
             tsTurn,
             tsRiver: begin
-              if seat_bet < FTableStatus.HighestBet then
+              if seat_bet < FTableStatus.MinimumBet then
               begin
-                if seat_info.Chips + seat_bet <= FTableStatus.HighestBet then
+                if seat_info.Chips + seat_bet <= FTableStatus.MinimumBet then
                   acCall.Caption := 'CALL (ALL-IN)'
                 else
-                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - seat_bet) / 100]);
+                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.MinimumBet - seat_bet) / 100]);
                 acCall.Enabled := TRUE;
                 acFold.Enabled := TRUE;
 
-                if seat_info.Chips + seat_bet > FTableStatus.HighestBet then
+                if seat_info.Chips + seat_bet > FTableStatus.MinimumBet then
                 begin
                   acRaise.Caption := 'RAISE';
                   acRaise.Enabled := TRUE;
@@ -1008,7 +1008,7 @@ begin
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
     seRaiseAmount.Properties.MaxValue := FTableStatus.BetLimit / 100;
-    seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
+    seRaiseAmount.Properties.MinValue := (FTableStatus.MinimumBet + FTable.Game.BigBlind) / 100;
     if seRaiseAmount.Properties.MinValue > seRaiseAmount.Properties.MaxValue then
       seRaiseAmount.Properties.MinValue := seRaiseAmount.Properties.MaxValue;
 
@@ -1229,10 +1229,10 @@ var
 begin
   Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
   seat_bet := FTableStatus.GetBet(seat_info.SeatIndex);
-  if seat_bet + seat_info.Chips < FTableStatus.HighestBet then
+  if seat_bet + seat_info.Chips < FTableStatus.MinimumBet then
     call_amount := seat_bet + seat_info.Chips
   else
-    call_amount := FTableStatus.HighestBet;
+    call_amount := FTableStatus.MinimumBet;
 
   SocketClient.PutChips(FTable.Game.MongoId, call_amount);
 end;
