@@ -29,6 +29,7 @@ type
       FN_SMALL_BLIND = 14;
       FN_BIG_BLIND = 15;
       FN_HANDID = 16;
+      FN_BET_LIMIT = 17;
 
     var
       FTableMongoId: TBytes;
@@ -47,6 +48,7 @@ type
       FSmallBlind: Integer;
       FBigBlind: Integer;
       FHandid: UINT32;
+      FBetLimit: UINT32;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -63,6 +65,7 @@ type
     procedure SetSmallBlind(const AValue: Integer);
     procedure SetBigBlind(const AValue: Integer);
     procedure SetHandid(const AValue: UINT32);
+    procedure SetBetLimit(const AValue: UINT32);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -83,6 +86,7 @@ type
     property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
     property BigBlind: Integer read FBigBlind write SetBigBlind;
     property Handid: UINT32 read FHandid write SetHandid;
+    property BetLimit: UINT32 read FBetLimit write SetBetLimit;
   end;
 
 implementation
@@ -173,6 +177,10 @@ begin
       FN_HANDID: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHandid := AProtobufReader.readUInt32;
+      end;
+      FN_BET_LIMIT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FBetLimit := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -273,6 +281,12 @@ procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
 begin
   FHandid := AValue;
   ProtobufOutput.writeUInt32(FN_HANDID, AValue);
+end;
+
+procedure TPB_TableStatus.SetBetLimit(const AValue: UINT32);
+begin
+  FBetLimit := AValue;
+  ProtobufOutput.writeUInt32(FN_BET_LIMIT, AValue);
 end;
 
 end.
