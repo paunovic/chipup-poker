@@ -63,6 +63,7 @@ type
     FLocked        : Boolean;
     FHighestBet    : Integer;
     FHandId        : UINT32;
+    FBetLimit      : UINT32;
 
   public
     constructor Create;
@@ -266,6 +267,7 @@ begin
 
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
+  FBetLimit := ATableStatusProtobuf.BetLimit;
 end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableEvent);
