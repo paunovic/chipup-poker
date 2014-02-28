@@ -44,7 +44,7 @@ message LoginReply {
 
 message Club {
 	optional bytes _id = 1;
-	optional int32 chips = 2;
+	optional uint32 chips = 2;
 	optional string name = 4;
 	optional bytes owner = 5;
 	optional string password = 6;
@@ -64,7 +64,7 @@ message User {
 	
 	optional string email = 5;
 	optional bool authed = 6;
-	optional int32 chips = 7;
+	optional uint32 chips = 7;
 }
 
 message Game {
@@ -252,7 +252,7 @@ service Server {
 message TableSit {
 	required bytes game_id = 1;
 	optional int32 seat_index = 2;
-	required int32 chips = 3;
+	required uint32 chips = 3;
 }
 
 message TableStatus {
@@ -271,18 +271,18 @@ message TableStatus {
 	required TableState state = 3;
 	required int32 dealer = 4;
 	required int32 current_seat = 5;
-	repeated int32 bets = 6;
+	repeated uint32 bets = 6;
 	optional bytes flop = 7;
 	optional bytes turn = 8;
 	optional bytes river = 9;
-	repeated int32 pots = 10;
+	repeated uint32 pots = 10;
 	required bool locked = 11;
 	optional int32 seq = 12;
-	optional int32 minimum_bet = 13;
-	optional int32 small_blind = 14;
-	optional int32 big_blind = 15;
-	optional uint32 handid = 16;
-	optional uint32 bet_limit = 17;
+	optional uint32 minimum_bet = 13;
+	optional uint32 maximum_limit = 14;
+	optional int32 small_blind = 15;
+	optional int32 big_blind = 16;
+	optional uint32 handid = 17;
 }
 
 message SeatInfo {
@@ -296,7 +296,7 @@ message SeatInfo {
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2;
-	required int32 chips = 3;
+	required uint32 chips = 3;
 	optional int32 card_count = 4;
 	optional bytes cards = 5;
 	required PlayerStatus status = 6;
@@ -375,8 +375,8 @@ message TableEvent {
 		required string msg = 4;
 	}
 	message PotInfo {
-		required int32 sum = 1;
-		repeated int32 seats = 2;
+		required uint32 sum = 1;
+		repeated uint32 seats = 2;
 		repeated WinnerData WinnerData = 3;
 	}
 	required TableEventType event = 1;
@@ -387,5 +387,5 @@ message TableEvent {
 
 message PutChips {
 	required bytes table_mongo_id = 1;
-	required int32 chip_amount = 2;
+	required uint32 chip_amount = 2;
 }
