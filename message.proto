@@ -68,12 +68,17 @@ message User {
 }
 
 message Game {
+	enum GameLimit {
+		glUnlimited = 0;
+		glPotLimit = 1;
+		glFixedLimit = 2;
+	}
 	optional bytes _id = 1;
 	optional bytes creator_mongo_id = 2;
 	optional string gamename = 3;
 	optional int32 clubseq = 4;
 	optional int32 game_type = 5;
-	optional int32 game_limit = 6;
+	optional GameLimit game_limit = 6;
 	optional int32 small_blind = 7;
 	optional int32 big_blind = 8;
 	optional int32 seats = 9;
