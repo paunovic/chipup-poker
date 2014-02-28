@@ -25,14 +25,14 @@ type
       FDisplayname: String;
       FEmail: String;
       FAuthed: Boolean;
-      FChips: Integer;
+      FChips: UINT32;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetAvatar(const AValue: TBytes);
     procedure SetDisplayname(const AValue: String);
     procedure SetEmail(const AValue: String);
     procedure SetAuthed(const AValue: Boolean);
-    procedure SetChips(const AValue: Integer);
+    procedure SetChips(const AValue: UINT32);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -42,7 +42,7 @@ type
     property Displayname: String read FDisplayname write SetDisplayname;
     property Email: String read FEmail write SetEmail;
     property Authed: Boolean read FAuthed write SetAuthed;
-    property Chips: Integer read FChips write SetChips;
+    property Chips: UINT32 read FChips write SetChips;
   end;
 
 implementation
@@ -85,7 +85,7 @@ begin
       end;
       FN_CHIPS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FChips := AProtobufReader.readInt32;
+        FChips := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -122,10 +122,10 @@ begin
   ProtobufOutput.writeBoolean(FN_AUTHED, AValue);
 end;
 
-procedure TPB_User.SetChips(const AValue: Integer);
+procedure TPB_User.SetChips(const AValue: UINT32);
 begin
   FChips := AValue;
-  ProtobufOutput.writeInt32(FN_CHIPS, AValue);
+  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
 end;
 
 end.

@@ -23,14 +23,14 @@ type
     var
       FSeat: Integer;
       FPlayerMongoId: TBytes;
-      FChips: Integer;
+      FChips: UINT32;
       FCardCount: Integer;
       FCards: TBytes;
       FStatus: TPlayerStatus;
 
     procedure SetSeat(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
-    procedure SetChips(const AValue: Integer);
+    procedure SetChips(const AValue: UINT32);
     procedure SetCardCount(const AValue: Integer);
     procedure SetCards(const AValue: TBytes);
     procedure SetStatus(const AValue: TPlayerStatus);
@@ -40,7 +40,7 @@ type
 
     property Seat: Integer read FSeat write SetSeat;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
-    property Chips: Integer read FChips write SetChips;
+    property Chips: UINT32 read FChips write SetChips;
     property CardCount: Integer read FCardCount write SetCardCount;
     property Cards: TBytes read FCards write SetCards;
     property Status: TPlayerStatus read FStatus write SetStatus;
@@ -74,7 +74,7 @@ begin
       end;
       FN_CHIPS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FChips := AProtobufReader.readInt32;
+        FChips := AProtobufReader.readUInt32;
       end;
       FN_CARD_COUNT: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -105,10 +105,10 @@ begin
   ProtobufOutput.writeBytes(FN_PLAYER_MONGO_ID, AValue);
 end;
 
-procedure TPB_SeatInfo.SetChips(const AValue: Integer);
+procedure TPB_SeatInfo.SetChips(const AValue: UINT32);
 begin
   FChips := AValue;
-  ProtobufOutput.writeInt32(FN_CHIPS, AValue);
+  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
 end;
 
 procedure TPB_SeatInfo.SetCardCount(const AValue: Integer);

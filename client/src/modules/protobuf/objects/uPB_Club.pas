@@ -27,7 +27,7 @@ type
 
     var
       FId: TBytes;
-      FChips: Integer;
+      FChips: UINT32;
       FName: String;
       FOwner: TBytes;
       FPassword: String;
@@ -40,7 +40,7 @@ type
       FRake: Integer;
 
     procedure SetMongoId(const AValue: TBytes);
-    procedure SetChips(const AValue: Integer);
+    procedure SetChips(const AValue: UINT32);
     procedure SetName(const AValue: String);
     procedure SetOwner(const AValue: TBytes);
     procedure SetPassword(const AValue: String);
@@ -56,7 +56,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property MongoId: TBytes read FId write SetMongoId;
-    property Chips: Integer read FChips write SetChips;
+    property Chips: UINT32 read FChips write SetChips;
     property Name: String read FName write SetName;
     property Owner: TBytes read FOwner write SetOwner;
     property Password: String read FPassword write SetPassword;
@@ -93,7 +93,7 @@ begin
       end;
       FN_CHIPS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FChips := AProtobufReader.readInt32;
+        FChips := AProtobufReader.readUInt32;
       end;
       FN_NAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -148,10 +148,10 @@ begin
   ProtobufOutput.writeBytes(FN__ID, AValue);
 end;
 
-procedure TPB_Club.SetChips(const AValue: Integer);
+procedure TPB_Club.SetChips(const AValue: UINT32);
 begin
   FChips := AValue;
-  ProtobufOutput.writeInt32(FN_CHIPS, AValue);
+  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
 end;
 
 procedure TPB_Club.SetName(const AValue: String);

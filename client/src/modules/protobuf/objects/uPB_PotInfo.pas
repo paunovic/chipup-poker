@@ -17,18 +17,18 @@ type
       FN_WINNERDATA = 3;
 
     var
-      FSum: Integer;
-      FSeats: TArray<Integer>;
+      FSum: UINT32;
+      FSeats: TArray<UINT32>;
       FWinnerData: TObjectList<TPB_WinnerData>;
 
-    procedure SetSum(const AValue: Integer);
-    procedure SetSeats(const AValue: TArray<Integer>);
+    procedure SetSum(const AValue: UINT32);
+    procedure SetSeats(const AValue: TArray<UINT32>);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Sum: Integer read FSum write SetSum;
-    property Seats: TArray<Integer> read FSeats write SetSeats;
+    property Sum: UINT32 read FSum write SetSum;
+    property Seats: TArray<UINT32> read FSeats write SetSeats;
     property WinnerData: TObjectList<TPB_WinnerData> read FWinnerData write FWinnerData;
   end;
 
@@ -57,12 +57,12 @@ begin
     case field_number of
       FN_SUM: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSum := AProtobufReader.readInt32;
+        FSum := AProtobufReader.readUInt32;
       end;
       FN_SEATS: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FSeats, Length(FSeats) + 1);
-        FSeats[Length(FSeats)-1] := AProtobufReader.readInt32;
+        FSeats[Length(FSeats)-1] := AProtobufReader.readUInt32;
       end;
       FN_WINNERDATA: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -73,19 +73,19 @@ begin
     end;
   end;
 end;
-procedure TPB_PotInfo.SetSum(const AValue: Integer);
+procedure TPB_PotInfo.SetSum(const AValue: UINT32);
 begin
   FSum := AValue;
-  ProtobufOutput.writeInt32(FN_SUM, AValue);
+  ProtobufOutput.writeUInt32(FN_SUM, AValue);
 end;
 
-procedure TPB_PotInfo.SetSeats(const AValue: TArray<Integer>);
+procedure TPB_PotInfo.SetSeats(const AValue: TArray<UINT32>);
 var
   C1: Integer;
 begin
   FSeats := AValue;
   for C1 := 0 to Length(FSeats) - 1 do
-    ProtobufOutput.writeInt32(FN_SEATS, AValue[C1]);
+    ProtobufOutput.writeUInt32(FN_SEATS, AValue[C1]);
 end;
 
 end.
