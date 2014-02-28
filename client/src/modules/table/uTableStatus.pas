@@ -63,6 +63,7 @@ type
     FLocked        : Boolean;
     FHighestBet    : Integer;
     FHandId        : UINT32;
+    FBetLimit      : UINT32;
     FPots          : TArray<Integer>;
 
   public
@@ -89,6 +90,7 @@ type
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
     property Pots: TArray<Integer> read FPots;
+    property BetLimit: UINT32 read FBetLimit;
   end;
 
 implementation
@@ -268,6 +270,7 @@ begin
 
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
+  FBetLimit := ATableStatusProtobuf.BetLimit;
   FPots := ATableStatusProtobuf.Pots;
 end;
 

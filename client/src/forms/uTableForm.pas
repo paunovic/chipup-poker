@@ -1007,7 +1007,7 @@ begin
   begin
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
-    seRaiseAmount.Properties.MaxValue := (FTableStatus.GetBet(seat_info.SeatIndex) + seat_info.Chips) / 100;
+    seRaiseAmount.Properties.MaxValue := FTableStatus.BetLimit / 100;
     seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
     if seRaiseAmount.Properties.MinValue > seRaiseAmount.Properties.MaxValue then
       seRaiseAmount.Properties.MinValue := seRaiseAmount.Properties.MaxValue;
