@@ -282,6 +282,7 @@ message TableStatus {
 	optional int32 small_blind = 14;
 	optional int32 big_blind = 15;
 	optional uint32 handid = 16;
+	optional uint32 bet_limit = 17;
 }
 
 message SeatInfo {
