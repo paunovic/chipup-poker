@@ -193,7 +193,7 @@ enum ServerCodes {
     srTableSitOk = 45;
     srTableSitSeatTaken = 46;
     srTableStandUpOk = 47;
-    srPong = 48;
+	srPong = 48;
     srSuspendPlayerOk = 49;
     srReinstatePlayerOk = 50;
 	srTableAddonOk = 51;
@@ -247,6 +247,15 @@ enum ServerCodes {
 
 service Server {
 	rpc Login (LoginParams) returns (LoginReply);
+}
+
+message PingParams {
+	required uint32 uptime = 1;
+}
+
+message PingReply {
+	required uint32 uptime = 1;
+	required uint64 servertime = 2;
 }
 
 message TableSit {
