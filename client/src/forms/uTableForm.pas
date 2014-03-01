@@ -87,7 +87,7 @@ type
       FChipWidth       : Integer;
       FChipHeight      : Integer;
       FChipsStack      : TChipsStackMaker;
-      FGoalTime        : UINT64;
+      FGoalTime        : UINT32;
       FCurrentPlaytime : UINT64;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
@@ -400,15 +400,15 @@ procedure TfrmTable.tiPlayTimerTimer(Sender: TObject);
 begin
   FCurrentPlaytime := FGoalTime - GetTickCount;
 
-  {$IFDEF DEBUG}
-  DebugLn(Format('FCurrentPlaytime: %d', [FCurrentPlaytime]), ditApplication);
-  {$ENDIF}
-
-{  pbTime.Position := Round((FCurrentPlaytime / FMaxPlayTime) * 100);
+  pbTime.Position := Round(FCurrentPlaytime / 10000);
   if FCurrentPlaytime <= 0 then
   begin
     tiPlayTimer.Enabled := FALSE;
-  end;}
+  end;
+
+  {$IFDEF DEBUG}
+  DebugLn(Format('FCurrentPlaytime: %d', [FCurrentPlaytime]), ditApplication);
+  {$ENDIF}
 end;
 
 procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
@@ -1162,12 +1162,12 @@ begin
 
   if FTableStatus.Time > 0 then
   begin
-    tiPlayTimer.Enabled := FALSE;
     FGoalTime := FTableStatus.Time - SocketClient.TimeOffset;
     tiPlayTimer.Enabled := TRUE;
   end
   else
   begin
+    tiPlayTimer.Enabled := FALSE;
     FGoalTime := 0;
   end;
 

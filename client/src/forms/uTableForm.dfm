@@ -329,7 +329,6 @@ object frmTable: TfrmTable
   end
   object tiPlayTimer: TTimer
     Enabled = False
-    Interval = 200
     OnTimer = tiPlayTimerTimer
     Left = 272
     Top = 32
