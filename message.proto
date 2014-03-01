@@ -292,7 +292,7 @@ message TableStatus {
 	optional int32 small_blind = 15;
 	optional int32 big_blind = 16;
 	optional uint32 handid = 17;
-	optional uint32 time = 18;
+	optional uint64 time = 18;
 }
 
 message SeatInfo {
