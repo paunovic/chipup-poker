@@ -707,6 +707,7 @@ struct typeInfo* makeType(string type, string writter, string reader, string wir
 	return t;
 }
 int main(int argc, char *argv[]) {
+	typeinfo[FieldDescriptor::TYPE_UINT64] = makeType("UInt64","WriteInt64","readInt64","WIRETYPE_VARINT");
 	typeinfo[FieldDescriptor::TYPE_INT32] = makeType("Integer","writeInt32","FIXME","WIRETYPE_VARINT");
 	typeinfo[FieldDescriptor::TYPE_UINT32] = makeType("UINT32","writeUInt32","readUInt32","WIRETYPE_VARINT");
 	typeinfo[FieldDescriptor::TYPE_STRING] = makeType("String","writeString","readUtf8String","WIRETYPE_LENGTH_DELIMITED");
