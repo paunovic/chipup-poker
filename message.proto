@@ -249,6 +249,14 @@ service Server {
 	rpc Login (LoginParams) returns (LoginReply);
 }
 
+message PingParams {
+	required uint32 uptime = 1;
+}
+message PingReply {
+	required uint32 uptime = 1;
+	required uint64 servertime = 2;
+}
+
 message TableSit {
 	required bytes game_id = 1;
 	optional int32 seat_index = 2;
