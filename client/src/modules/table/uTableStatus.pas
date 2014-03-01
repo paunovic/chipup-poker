@@ -54,17 +54,17 @@ type
     FDealer        : Integer;
     FCurrentSeat   : Integer;
     FSeatInfos     : TSeatInfos;
-    FBets          : TArray<Integer>;
+    FBets          : TArray<UINT32>;
     FFlopCards     : TCards;
     FTurnCard      : TCard;
     FRiverCard     : TCard;
     FSmallBlindSeat: Integer;
     FBigBlindSeat  : Integer;
     FLocked        : Boolean;
-    FHighestBet    : Integer;
+    FMinimumBet    : Integer;
     FHandId        : UINT32;
-    FBetLimit      : UINT32;
-    FPots          : TArray<Integer>;
+    FMaximumBet    : UINT32;
+    FPots          : TArray<UINT32>;
 
   public
     constructor Create;
@@ -80,8 +80,8 @@ type
     property Dealer: Integer read FDealer;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
-    property Bets: TArray<Integer> read FBets;
-    property HighestBet: Integer read FHighestBet;
+    property Bets: TArray<UINT32> read FBets;
+    property MinimumBet: Integer read FMinimumBet;
     property FlopCards: TCards read FFlopCards;
     property TurnCard: TCard read FTurnCard;
     property RiverCard: TCard read FRiverCard;
@@ -89,8 +89,8 @@ type
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
-    property Pots: TArray<Integer> read FPots;
-    property BetLimit: UINT32 read FBetLimit;
+    property Pots: TArray<UINT32> read FPots;
+    property MaximumBet: UINT32 read FMaximumBet;
   end;
 
 implementation
@@ -206,7 +206,7 @@ begin
   FSmallBlindSeat := ATableStatusProtobuf.SmallBlind;
   FBigBlindSeat := ATableStatusProtobuf.BigBlind;
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
-  FHighestBet := ATableStatusProtobuf.MinimumBet;
+  FMinimumBet := ATableStatusProtobuf.MinimumBet;
   FHandId := ATableStatusProtobuf.Handid;
   if State <> tsWinning then
   begin
@@ -270,7 +270,7 @@ begin
 
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
-  FBetLimit := ATableStatusProtobuf.BetLimit;
+  FMaximumBet := ATableStatusProtobuf.MaximumLimit;
   FPots := ATableStatusProtobuf.Pots;
 end;
 

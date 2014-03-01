@@ -171,8 +171,10 @@ object frmTable: TfrmTable
         Left = 323
         Top = 13
         Anchors = [akRight, akBottom]
+        Properties.ImmediatePost = True
         Properties.SpinButtons.Visible = False
         Properties.ValueType = vtFloat
+        Properties.OnChange = seRaiseAmountPropertiesChange
         TabOrder = 5
         Visible = False
         Width = 46
@@ -237,6 +239,32 @@ object frmTable: TfrmTable
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
+    ExplicitWidth = 726
+  end
+  object pbTime: TcxProgressBar
+    Left = 52
+    Top = 82
+    AutoSize = False
+    Position = 100.000000000000000000
+    Properties.BarStyle = cxbsGradientLEDs
+    Properties.BeginColor = clRed
+    Properties.EndColor = clLime
+    Properties.PeakValue = 100.000000000000000000
+    Properties.ShowText = False
+    Properties.ShowTextStyle = cxtsText
+    Style.BorderColor = clBlack
+    Style.BorderStyle = ebsNone
+    Style.Edges = []
+    Style.LookAndFeel.SkinName = ''
+    Style.TransparentBorder = True
+    StyleDisabled.LookAndFeel.SkinName = ''
+    StyleFocused.LookAndFeel.SkinName = ''
+    StyleHot.LookAndFeel.SkinName = ''
+    TabOrder = 2
+    Transparent = True
+    Visible = False
+    Height = 7
+    Width = 122
   end
   object ActionManager: TActionManager
     Left = 108

@@ -26,10 +26,10 @@ type
       FN_LOCKED = 11;
       FN_SEQ = 12;
       FN_MINIMUM_BET = 13;
-      FN_SMALL_BLIND = 14;
-      FN_BIG_BLIND = 15;
-      FN_HANDID = 16;
-      FN_BET_LIMIT = 17;
+      FN_MAXIMUM_LIMIT = 14;
+      FN_SMALL_BLIND = 15;
+      FN_BIG_BLIND = 16;
+      FN_HANDID = 17;
 
     var
       FTableMongoId: TBytes;
@@ -37,35 +37,35 @@ type
       FState: TTableState;
       FDealer: Integer;
       FCurrentSeat: Integer;
-      FBets: TArray<Integer>;
+      FBets: TArray<UINT32>;
       FFlop: TBytes;
       FTurn: TBytes;
       FRiver: TBytes;
-      FPots: TArray<Integer>;
+      FPots: TArray<UINT32>;
       FLocked: Boolean;
       FSeq: Integer;
-      FMinimumBet: Integer;
+      FMinimumBet: UINT32;
+      FMaximumLimit: UINT32;
       FSmallBlind: Integer;
       FBigBlind: Integer;
       FHandid: UINT32;
-      FBetLimit: UINT32;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
     procedure SetDealer(const AValue: Integer);
     procedure SetCurrentSeat(const AValue: Integer);
-    procedure SetBets(const AValue: TArray<Integer>);
+    procedure SetBets(const AValue: TArray<UINT32>);
     procedure SetFlop(const AValue: TBytes);
     procedure SetTurn(const AValue: TBytes);
     procedure SetRiver(const AValue: TBytes);
-    procedure SetPots(const AValue: TArray<Integer>);
+    procedure SetPots(const AValue: TArray<UINT32>);
     procedure SetLocked(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
-    procedure SetMinimumBet(const AValue: Integer);
+    procedure SetMinimumBet(const AValue: UINT32);
+    procedure SetMaximumLimit(const AValue: UINT32);
     procedure SetSmallBlind(const AValue: Integer);
     procedure SetBigBlind(const AValue: Integer);
     procedure SetHandid(const AValue: UINT32);
-    procedure SetBetLimit(const AValue: UINT32);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -75,18 +75,18 @@ type
     property State: TTableState read FState write SetState;
     property Dealer: Integer read FDealer write SetDealer;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
-    property Bets: TArray<Integer> read FBets write SetBets;
+    property Bets: TArray<UINT32> read FBets write SetBets;
     property Flop: TBytes read FFlop write SetFlop;
     property Turn: TBytes read FTurn write SetTurn;
     property River: TBytes read FRiver write SetRiver;
-    property Pots: TArray<Integer> read FPots write SetPots;
+    property Pots: TArray<UINT32> read FPots write SetPots;
     property Locked: Boolean read FLocked write SetLocked;
     property Seq: Integer read FSeq write SetSeq;
-    property MinimumBet: Integer read FMinimumBet write SetMinimumBet;
+    property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
+    property MaximumLimit: UINT32 read FMaximumLimit write SetMaximumLimit;
     property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
     property BigBlind: Integer read FBigBlind write SetBigBlind;
     property Handid: UINT32 read FHandid write SetHandid;
-    property BetLimit: UINT32 read FBetLimit write SetBetLimit;
   end;
 
 implementation
@@ -135,7 +135,7 @@ begin
       FN_BETS: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FBets, Length(FBets) + 1);
-        FBets[Length(FBets)-1] := AProtobufReader.readInt32;
+        FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
       end;
       FN_FLOP: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -152,7 +152,7 @@ begin
       FN_POTS: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FPots, Length(FPots) + 1);
-        FPots[Length(FPots)-1] := AProtobufReader.readInt32;
+        FPots[Length(FPots)-1] := AProtobufReader.readUInt32;
       end;
       FN_LOCKED: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -164,7 +164,11 @@ begin
       end;
       FN_MINIMUM_BET: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FMinimumBet := AProtobufReader.readInt32;
+        FMinimumBet := AProtobufReader.readUInt32;
+      end;
+      FN_MAXIMUM_LIMIT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FMaximumLimit := AProtobufReader.readUInt32;
       end;
       FN_SMALL_BLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -177,10 +181,6 @@ begin
       FN_HANDID: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHandid := AProtobufReader.readUInt32;
-      end;
-      FN_BET_LIMIT: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FBetLimit := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -211,13 +211,13 @@ begin
   ProtobufOutput.writeInt32(FN_CURRENT_SEAT, AValue);
 end;
 
-procedure TPB_TableStatus.SetBets(const AValue: TArray<Integer>);
+procedure TPB_TableStatus.SetBets(const AValue: TArray<UINT32>);
 var
   C1: Integer;
 begin
   FBets := AValue;
   for C1 := 0 to Length(FBets) - 1 do
-    ProtobufOutput.writeInt32(FN_BETS, AValue[C1]);
+    ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
 end;
 
 procedure TPB_TableStatus.SetFlop(const AValue: TBytes);
@@ -238,13 +238,13 @@ begin
   ProtobufOutput.writeBytes(FN_RIVER, AValue);
 end;
 
-procedure TPB_TableStatus.SetPots(const AValue: TArray<Integer>);
+procedure TPB_TableStatus.SetPots(const AValue: TArray<UINT32>);
 var
   C1: Integer;
 begin
   FPots := AValue;
   for C1 := 0 to Length(FPots) - 1 do
-    ProtobufOutput.writeInt32(FN_POTS, AValue[C1]);
+    ProtobufOutput.writeUInt32(FN_POTS, AValue[C1]);
 end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
@@ -259,10 +259,16 @@ begin
   ProtobufOutput.writeInt32(FN_SEQ, AValue);
 end;
 
-procedure TPB_TableStatus.SetMinimumBet(const AValue: Integer);
+procedure TPB_TableStatus.SetMinimumBet(const AValue: UINT32);
 begin
   FMinimumBet := AValue;
-  ProtobufOutput.writeInt32(FN_MINIMUM_BET, AValue);
+  ProtobufOutput.writeUInt32(FN_MINIMUM_BET, AValue);
+end;
+
+procedure TPB_TableStatus.SetMaximumLimit(const AValue: UINT32);
+begin
+  FMaximumLimit := AValue;
+  ProtobufOutput.writeUInt32(FN_MAXIMUM_LIMIT, AValue);
 end;
 
 procedure TPB_TableStatus.SetSmallBlind(const AValue: Integer);
@@ -281,12 +287,6 @@ procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
 begin
   FHandid := AValue;
   ProtobufOutput.writeUInt32(FN_HANDID, AValue);
-end;
-
-procedure TPB_TableStatus.SetBetLimit(const AValue: UINT32);
-begin
-  FBetLimit := AValue;
-  ProtobufOutput.writeUInt32(FN_BET_LIMIT, AValue);
 end;
 
 end.

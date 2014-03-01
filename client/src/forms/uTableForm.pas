@@ -1,5 +1,7 @@
 unit uTableForm;
 
+{.$DEFINE SHOW_DEBUG_INFO}
+
 interface
 
 uses
@@ -7,7 +9,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus, uChipsStackMaker,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG, uCards,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
+  cxProgressBar;
 
 type
   TfrmTable = class(TForm)
@@ -37,6 +40,7 @@ type
     tiSitOutNextHand: TTimer;
     tiSeatCaptionClear: TTimer;
     lbsHandId: TcxLabel;
+    pbTime: TcxProgressBar;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -56,6 +60,7 @@ type
     procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
     procedure tiSitOutNextHandTimer(Sender: TObject);
     procedure tiSeatClearCaptionTimer(Sender: TObject);
+    procedure seRaiseAmountPropertiesChange(Sender: TObject);
   private
     type
       TSeatOrientation = (soLeft, soRight);
@@ -94,7 +99,10 @@ type
     procedure DrawPlayerBets;
     procedure DrawPots;
     procedure DrawTopChipValue(const AChipStack: TChipsStack; const ARect: TRect);
-    procedure DrawStackValue(const AChipStack: TChipsStack; const ARect: TRect; const AIsPot: Boolean);
+    procedure DrawStackValue(const AChipStack: TChipsStack; const ARect: TRect; const AValue: Double; const AIsPot: Boolean);
+    {$IFDEF SHOW_DEBUG_INFO}
+    procedure ShowDebugInfo;
+    {$ENDIF}
 
     function GetSeatOrientation(const APoint: TPoint): TSeatOrientation;
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
@@ -153,7 +161,7 @@ begin
   FTableWidth := TTableResources.TableImage.Width;
   FTableHeight := TTableResources.TableImage.Height;
 
-  Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, Trunc(FTable.Game.SmallBlind / 100), Trunc(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull]);
+  Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, Round(FTable.Game.SmallBlind / 100), Round(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull]);
   Redraw;
 end;
 
@@ -279,10 +287,6 @@ end;
 
 procedure TfrmTable.Redraw(const APaintboxRepaint: Boolean = FALSE);
 var
-  C1        : Integer;
-  seat_point: TPoint;
-  seat_info : TSeatInfo;
-  add       : String;
   chat_width: Integer;
   tblx, tbly: Integer;
   tblw, tblh: Integer;
@@ -302,10 +306,7 @@ begin
     paChat.Width := chat_width;
   end;
 
-  // draw background
-  PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
-
-  // calculate table size and positions
+  // calculate table size and table positions
   FTableWidth := Round(0.63 * PaintBox.Buffer.Width);
   FTableHeight := Round(FTableWidth / TTableResources.TableAspectRatio);
   FTableResizeRatio := FTableWidth / TTableResources.TableWidth;
@@ -335,37 +336,39 @@ begin
   FChipWidth := Round(TTableResources.ChipWidth * FTableResizeRatio);
   FChipHeight := Round(FChipWidth / TTableResources.ChipAspectRatio);
 
+  // draw background
+  PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
+
   // draw table
   PaintBox.Buffer.Draw(Rect(tblx, tbly, tblx + tblw, tbly + tblh), TTableResources.TableImage.BoundsRect, TTableResources.TableImage);
 
+  // draw various stuff
   DrawSeats;
   DrawDealerButton;
   DrawTableCards;
   DrawPlayerBets;
   DrawPots;
 
-//  PaintBox.Buffer.Pixels[FTableCenter.X, FTableCenter.Y] := $FFFFFFFF;
+  {$IFDEF SHOW_DEBUG_INFO}
+  ShowDebugInfo;
+  {$ENDIF}
 
-  // textout seatpos/cards/blinds
-{  PaintBox.Buffer.Font.Name := 'Arial';
-  PaintBox.Buffer.Font.Size := 10;
-  PaintBox.Buffer.Font.Color := clWhite;
-  PaintBox.Buffer.Font.Style := [fsBold];
-  for C1 := 0 to FTableStatus.Seats.Count - 1 do
-    if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
-    begin
-      seat_point := GetSeatPoint(seat_info.SeatIndex);
-      add := '';
-      if seat_info.SeatIndex = FTableStatus.SmallBlindSeat then
-        add := add + 'SB';
-      if seat_info.SeatIndex = FTableStatus.BigBlindSeat then
-        add := add + 'BB';
-
-      PaintBox.Buffer.TextOut(seat_point.X - 55, Round(seat_point.Y + 50 * FTableResizeRatio), Format('[#%d] [%s] %s %s', [seat_info.SeatIndex, seat_info.StatusAsStr, add, seat_info.Cards.AsString]));
-    end;
- }
   if APaintboxRepaint then
     PaintBox.Flush;
+end;
+
+procedure TfrmTable.seRaiseAmountPropertiesChange(Sender: TObject);
+var
+  val: Double;
+begin
+  if (TryStrToFloat(seRaiseAmount.Text, val)) and
+     (val >= tbRaise.Properties.Min / 100) and
+     (val <= tbRaise.Properties.Max / 100) then
+  begin
+    tbRaise.Properties.OnChange := nil;
+    tbRaise.Position := Round(val * 100);
+    tbRaise.Properties.OnChange := tbRaisePropertiesChange;
+  end;
 end;
 
 procedure TfrmTable.tbRaisePropertiesChange(Sender: TObject);
@@ -404,6 +407,34 @@ begin
   tiSitOutNextHand.Enabled := FALSE;
 end;
 
+{$IFDEF SHOW_DEBUG_INFO}
+procedure TfrmTable.ShowDebugInfo;
+var
+  C1        : Integer;
+  seat_point: TPoint;
+  seat_info : TSeatInfo;
+  add       : String;
+begin
+  // textout seatpos/cards/blinds
+  PaintBox.Buffer.Font.Name := 'Arial';
+  PaintBox.Buffer.Font.Size := 10;
+  PaintBox.Buffer.Font.Color := clWhite;
+  PaintBox.Buffer.Font.Style := [fsBold];
+  for C1 := 0 to FTableStatus.Seats.Count - 1 do
+    if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
+    begin
+      seat_point := GetSeatPoint(seat_info.SeatIndex);
+      add := '';
+      if seat_info.SeatIndex = FTableStatus.SmallBlindSeat then
+        add := add + 'SB';
+      if seat_info.SeatIndex = FTableStatus.BigBlindSeat then
+        add := add + 'BB';
+
+      PaintBox.Buffer.TextOut(seat_point.X - FSeatWidth div 2, Round(seat_point.Y + FSeatHeight / 2), Format('[#%d] [%s] %s %s', [seat_info.SeatIndex, seat_info.StatusAsStr, add, seat_info.Cards.AsString]));
+    end;
+end;
+{$ENDIF}
+
 procedure TfrmTable.DrawDealerButton;
 var
   dealer_point: TPoint;
@@ -437,18 +468,19 @@ begin
          (FTableStatus.Bets[seat_info.SeatIndex] > 0) then
       begin
         chips_point := GetChipsPoint(seat_info.SeatIndex);
-        chips_stack := FChipsStack.MakeStack(Trunc(FTableStatus.Bets[seat_info.SeatIndex] / 100));
+        chips_stack := FChipsStack.MakeStack(FTableStatus.Bets[seat_info.SeatIndex] div 100);
         chips_rect := Rect(chips_point.X - FChipWidth div 2, chips_point.Y - Round(chips_stack.Image.Height * FTableResizeRatio), chips_point.X + FChipWidth div 2, chips_point.Y);
         PaintBox.Buffer.Draw(chips_rect, chips_stack.Image.BoundsRect, chips_stack.Image);
         DrawTopChipValue(chips_stack, chips_rect);
-        DrawStackValue(chips_stack, chips_rect, FALSE);
+        DrawStackValue(chips_stack, chips_rect, FTableStatus.Bets[seat_info.SeatIndex] / 100, FALSE);
       end;
     end;
 end;
 
 procedure TfrmTable.DrawPots;
 var
-  C1, pot    : Integer;
+  C1         : Integer;
+  pot        : Double;
   chips_stack: TChipsStack;
   chips_rect : TRect;
   pot_point  : TPoint;
@@ -458,12 +490,12 @@ begin
     pot_point := GetPotPoint(C1);
     if (pot_point.X <> -1) and (pot_point.Y <> -1) then
     begin
-      pot := Trunc(FTableStatus.Pots[C1] / 100);
-      chips_stack := FChipsStack.MakeStack(pot);
+      pot := FTableStatus.Pots[C1] / 100;
+      chips_stack := FChipsStack.MakeStack(Trunc(pot));
       chips_rect := Rect(pot_point.X - FChipWidth div 2, pot_point.Y - Round(chips_stack.Image.Height * FTableResizeRatio), pot_point.X + FChipWidth div 2, pot_point.Y);
       PaintBox.Buffer.Draw(chips_rect, chips_stack.Image.BoundsRect, chips_stack.Image);
       DrawTopChipValue(chips_stack, chips_rect);
-      DrawStackValue(chips_stack, chips_rect, TRUE);
+      DrawStackValue(chips_stack, chips_rect, pot, TRUE);
     end;
   end;
 end;
@@ -635,15 +667,12 @@ begin
   PaintBox.Buffer.RenderTextW(tx, ty, AChipStack.TopChipVal, 4, $FF000000);  }
 end;
 
-procedure TfrmTable.DrawStackValue(const AChipStack: TChipsStack; const ARect: TRect; const AIsPot: Boolean);
+procedure TfrmTable.DrawStackValue(const AChipStack: TChipsStack; const ARect: TRect; const AValue: Double; const AIsPot: Boolean);
 var
   tw, th, tx, ty: Integer;
   ctext         : String;
 begin
-  PaintBox.Buffer.Font.Name := 'Arial';
-  PaintBox.Buffer.Font.Size := 6 + Round(7 * FTableResizeRatio);
-  PaintBox.Buffer.Font.Style := [fsBold];
-  ctext := FloatToStr(AChipStack.Value);
+  ctext := FloatToStr(AValue);
 
   tw := PaintBox.Buffer.TextWidthW(ctext);
   th := PaintBox.Buffer.TextHeightW(ctext);
@@ -662,6 +691,9 @@ begin
       tx := Round(ARect.Left - tw - 5 * FTableResizeRatio);
   end;
 
+  PaintBox.Buffer.Font.Name := 'Arial';
+  PaintBox.Buffer.Font.Size := 5 + Round(7 * FTableResizeRatio);
+  PaintBox.Buffer.Font.Style := [fsBold];
   PaintBox.Buffer.RenderTextW(tx, ty, ctext, 4, $FFFFFFFF);
 end;
 
@@ -717,7 +749,9 @@ var
   tmpstr          : WideString;
   color           : TColor32;
   tmpint          : Integer;
+  time_visible    : Boolean;
 begin
+  time_visible := FALSE;
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
     seat_point := GetSeatPoint(C1);
@@ -794,6 +828,10 @@ begin
           seat_image := seat_back_limage
         else
           seat_image := seat_back_dimage;
+        time_visible := TRUE;
+        pbTime.Width := Round(FSeatWidth * 0.68);
+        pbTime.Top := Round(seat_point.Y + FSeatHeight / 2 - 5 * FTableResizeRatio);
+        pbTime.Left := Round(seat_point.X - pbTime.Width / 2);
       end
       else
         seat_image := seat_back_dimage;
@@ -804,7 +842,7 @@ begin
 
       // set font for drawing player info
       PaintBox.Buffer.Font.Name := 'Barmeno';
-      PaintBox.Buffer.Font.Size := Trunc(19 * FTableResizeRatio);
+      PaintBox.Buffer.Font.Size := Round(19 * FTableResizeRatio);
       PaintBox.Buffer.Font.Style := [];
 
       // draw player nick or played action
@@ -842,6 +880,8 @@ begin
                            seat_empty_image);
     end;
   end;
+
+  pbTime.Visible := time_visible;
 end;
 
 procedure TfrmTable.edChatKeyPress(Sender: TObject; var Key: Char);
@@ -943,16 +983,16 @@ begin
             tsFlop,
             tsTurn,
             tsRiver: begin
-              if seat_bet < FTableStatus.HighestBet then
+              if seat_bet < FTableStatus.MinimumBet then
               begin
-                if seat_info.Chips + seat_bet <= FTableStatus.HighestBet then
+                if seat_info.Chips + seat_bet <= FTableStatus.MinimumBet then
                   acCall.Caption := 'CALL (ALL-IN)'
                 else
-                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.HighestBet - seat_bet) / 100]);
+                  acCall.Caption := Format('CALL (%.2f)', [(FTableStatus.MinimumBet - seat_bet) / 100]);
                 acCall.Enabled := TRUE;
                 acFold.Enabled := TRUE;
 
-                if seat_info.Chips + seat_bet > FTableStatus.HighestBet then
+                if seat_info.Chips + seat_bet > FTableStatus.MinimumBet then
                 begin
                   acRaise.Caption := 'RAISE';
                   acRaise.Enabled := TRUE;
@@ -1007,15 +1047,12 @@ begin
   begin
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
-    seRaiseAmount.Properties.MaxValue := FTableStatus.BetLimit / 100;
-    seRaiseAmount.Properties.MinValue := (FTableStatus.HighestBet + FTable.Game.BigBlind) / 100;
-    if seRaiseAmount.Properties.MinValue > seRaiseAmount.Properties.MaxValue then
-      seRaiseAmount.Properties.MinValue := seRaiseAmount.Properties.MaxValue;
+    tbRaise.Properties.Min := FTableStatus.MinimumBet + FTable.Game.BigBlind;
+    tbRaise.Properties.Max := FTableStatus.MaximumBet;
 
-    seRaiseAmount.Value := seRaiseAmount.Properties.MinValue;
+    seRaiseAmount.Properties.MaxValue := tbRaise.Properties.Max / 100;
+    seRaiseAmount.Value := tbRaise.Properties.Min / 100;
 
-    tbRaise.Properties.Min := Trunc(seRaiseAmount.Properties.MinValue * 100);
-    tbRaise.Properties.Max := Trunc(seRaiseAmount.Properties.MaxValue * 100);
     tbRaise.Position := tbRaise.Properties.Min;
   end;
 
@@ -1174,6 +1211,8 @@ begin
           else
             tmpstr := tmpstr + 'UNKNOWN';
 
+          tmpstr := tmpstr + Format(' (%s)', [pot.WinnerData[C2].Msg]);
+
           if C2 < pot.WinnerData.Count - 1 then
             tmpstr := tmpstr + ', ';
         end;
@@ -1229,10 +1268,10 @@ var
 begin
   Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
   seat_bet := FTableStatus.GetBet(seat_info.SeatIndex);
-  if seat_bet + seat_info.Chips < FTableStatus.HighestBet then
+  if seat_bet + seat_info.Chips < FTableStatus.MinimumBet then
     call_amount := seat_bet + seat_info.Chips
   else
-    call_amount := FTableStatus.HighestBet;
+    call_amount := FTableStatus.MinimumBet;
 
   SocketClient.PutChips(FTable.Game.MongoId, call_amount);
 end;
@@ -1254,7 +1293,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  SocketClient.PutChips(FTable.Game.MongoId, seRaiseAmount.Value * 100);
+  SocketClient.PutChips(FTable.Game.MongoId, tbRaise.Position);
 end;
 
 end.

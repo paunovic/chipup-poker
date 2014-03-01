@@ -134,6 +134,7 @@ type
   public
   end;
 
+
 var
   frmChipUpMain: TfrmChipUpMain;
 

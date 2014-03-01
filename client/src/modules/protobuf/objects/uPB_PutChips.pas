@@ -17,16 +17,16 @@ type
 
     var
       FTableMongoId: TBytes;
-      FChipAmount: Integer;
+      FChipAmount: UINT32;
 
     procedure SetTableMongoId(const AValue: TBytes);
-    procedure SetChipAmount(const AValue: Integer);
+    procedure SetChipAmount(const AValue: UINT32);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
-    property ChipAmount: Integer read FChipAmount write SetChipAmount;
+    property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
   end;
 
 implementation
@@ -53,7 +53,7 @@ begin
       end;
       FN_CHIP_AMOUNT: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FChipAmount := AProtobufReader.readInt32;
+        FChipAmount := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -66,10 +66,10 @@ begin
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
 end;
 
-procedure TPB_PutChips.SetChipAmount(const AValue: Integer);
+procedure TPB_PutChips.SetChipAmount(const AValue: UINT32);
 begin
   FChipAmount := AValue;
-  ProtobufOutput.writeInt32(FN_CHIP_AMOUNT, AValue);
+  ProtobufOutput.writeUInt32(FN_CHIP_AMOUNT, AValue);
 end;
 
 end.

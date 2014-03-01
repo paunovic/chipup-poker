@@ -9,7 +9,7 @@ uses
 type
   TChipsStack = class
   private
-    FValue     : Integer;
+    FValue     : UINT32;
     FImage     : TBitmap32;
     FTopChipVal: String;
     FChipCount : Integer;
@@ -17,10 +17,10 @@ type
     procedure MakeBitmap;
 
   public
-    constructor Create(const AValue: Integer);
+    constructor Create(const AValue: UINT32);
     destructor Destroy; override;
 
-    property Value: Integer read FValue;
+    property Value: UINT32 read FValue;
     property ChipCount: Integer read FChipCount;
     property TopChipVal: String read FTopChipVal;
     property Image: TBitmap32 read FImage;
@@ -35,8 +35,8 @@ type
 
     procedure Clear;
 
-    function MakeStack(const AValue: Integer): TChipsStack;
-    function IndexOf(const AValue: Integer): Integer;
+    function MakeStack(const AValue: UINT32): TChipsStack;
+    function IndexOf(const AValue: UINT32): Integer;
   end;
 
 implementation
@@ -46,7 +46,7 @@ uses
 
 { TChipsStack }
 
-constructor TChipsStack.Create(const AValue: Integer);
+constructor TChipsStack.Create(const AValue: UINT32);
 begin
   FValue := AValue;
   FImage := TBitmap32.Create;
@@ -129,7 +129,7 @@ begin
   inherited;
 end;
 
-function TChipsStackMaker.IndexOf(const AValue: Integer): Integer;
+function TChipsStackMaker.IndexOf(const AValue: UINT32): Integer;
 var
   C1: Integer;
 begin
@@ -139,7 +139,7 @@ begin
   Exit(-1);
 end;
 
-function TChipsStackMaker.MakeStack(const AValue: Integer): TChipsStack;
+function TChipsStackMaker.MakeStack(const AValue: UINT32): TChipsStack;
 var
   index: Integer;
 begin
