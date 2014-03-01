@@ -88,7 +88,7 @@ type
       FChipHeight      : Integer;
       FChipsStack      : TChipsStackMaker;
       FGoalTime        : UINT32;
-      FCurrentPlaytime : UINT64;
+      FCurrentPlaytime : Integer;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AddUserChatMessage(const AUser, AMessage: String);
