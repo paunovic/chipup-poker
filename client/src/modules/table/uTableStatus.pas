@@ -67,7 +67,7 @@ type
     FHandId        : UINT32;
     FMaximumBet    : UINT32;
     FPots          : TArray<UINT32>;
-    FTime          : UINT32;
+    FTime          : UINT64;
 
   public
     constructor Create;
@@ -94,7 +94,7 @@ type
     property HandId: UINT32 read FHandId;
     property Pots: TArray<UINT32> read FPots;
     property MaximumBet: UINT32 read FMaximumBet;
-    property Time: UINT32 read FTime;
+    property Time: UINT64 read FTime;
   end;
 
 implementation
