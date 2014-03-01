@@ -283,6 +283,7 @@ message TableStatus {
 	optional int32 small_blind = 15;
 	optional int32 big_blind = 16;
 	optional uint32 handid = 17;
+	optional uint32 time = 18;
 }
 
 message SeatInfo {
@@ -300,6 +301,7 @@ message SeatInfo {
 	optional int32 card_count = 4;
 	optional bytes cards = 5;
 	required PlayerStatus status = 6;
+	required uint32 timebank = 7;
 }
 message ChangeSuspendState {
 	required bytes club_mongo_id = 1;
@@ -369,8 +371,6 @@ message TableEvent {
 			crOnePair = 9;
 			crHighCard = 10;
 		}
-		optional CardRankings primaryRank = 1;
-		optional int32 secondaryRank = 2;
 		required int32 seat = 3;
 		required string msg = 4;
 	}
