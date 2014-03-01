@@ -30,6 +30,7 @@ type
       FN_SMALL_BLIND = 15;
       FN_BIG_BLIND = 16;
       FN_HANDID = 17;
+      FN_TIME = 18;
 
     var
       FTableMongoId: TBytes;
@@ -49,6 +50,7 @@ type
       FSmallBlind: Integer;
       FBigBlind: Integer;
       FHandid: UINT32;
+      FTime: UInt64;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -66,6 +68,7 @@ type
     procedure SetSmallBlind(const AValue: Integer);
     procedure SetBigBlind(const AValue: Integer);
     procedure SetHandid(const AValue: UINT32);
+    procedure SetTime(const AValue: UInt64);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -87,6 +90,7 @@ type
     property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
     property BigBlind: Integer read FBigBlind write SetBigBlind;
     property Handid: UINT32 read FHandid write SetHandid;
+    property Time: UInt64 read FTime write SetTime;
   end;
 
 implementation
@@ -181,6 +185,10 @@ begin
       FN_HANDID: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHandid := AProtobufReader.readUInt32;
+      end;
+      FN_TIME: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FTime := AProtobufReader.readInt64;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -287,6 +295,12 @@ procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
 begin
   FHandid := AValue;
   ProtobufOutput.writeUInt32(FN_HANDID, AValue);
+end;
+
+procedure TPB_TableStatus.SetTime(const AValue: UInt64);
+begin
+  FTime := AValue;
+  ProtobufOutput.WriteInt64(FN_TIME, AValue);
 end;
 
 end.

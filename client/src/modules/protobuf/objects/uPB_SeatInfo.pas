@@ -19,6 +19,7 @@ type
       FN_CARD_COUNT = 4;
       FN_CARDS = 5;
       FN_STATUS = 6;
+      FN_TIMEBANK = 7;
 
     var
       FSeat: Integer;
@@ -27,6 +28,7 @@ type
       FCardCount: Integer;
       FCards: TBytes;
       FStatus: TPlayerStatus;
+      FTimebank: UINT32;
 
     procedure SetSeat(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
@@ -34,6 +36,7 @@ type
     procedure SetCardCount(const AValue: Integer);
     procedure SetCards(const AValue: TBytes);
     procedure SetStatus(const AValue: TPlayerStatus);
+    procedure SetTimebank(const AValue: UINT32);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -44,6 +47,7 @@ type
     property CardCount: Integer read FCardCount write SetCardCount;
     property Cards: TBytes read FCards write SetCards;
     property Status: TPlayerStatus read FStatus write SetStatus;
+    property Timebank: UINT32 read FTimebank write SetTimebank;
   end;
 
 implementation
@@ -88,6 +92,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TPlayerStatus(AProtobufReader.readEnum);
       end;
+      FN_TIMEBANK: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FTimebank := AProtobufReader.readUInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -127,6 +135,12 @@ procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
 begin
   FStatus := AValue;
   ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
+end;
+
+procedure TPB_SeatInfo.SetTimebank(const AValue: UINT32);
+begin
+  FTimebank := AValue;
+  ProtobufOutput.writeUInt32(FN_TIMEBANK, AValue);
 end;
 
 end.

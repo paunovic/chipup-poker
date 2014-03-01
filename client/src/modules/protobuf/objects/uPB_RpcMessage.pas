@@ -15,21 +15,15 @@ type
       FN_METHODID = 1;
       FN_DATASIZE = 2;
       FN_TOKEN = 3;
-      FN_UPTIME = 4;
-      FN_SERVERTIME = 5;
 
     var
       FMethodId: Integer;
       FDataSize: Integer;
       FToken: Integer;
-      FUptime: UINT32;
-      FServertime: UInt64;
 
     procedure SetMethodId(const AValue: Integer);
     procedure SetDataSize(const AValue: Integer);
     procedure SetToken(const AValue: Integer);
-    procedure SetUptime(const AValue: UINT32);
-    procedure SetServertime(const AValue: UInt64);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -37,8 +31,6 @@ type
     property MethodId: Integer read FMethodId write SetMethodId;
     property DataSize: Integer read FDataSize write SetDataSize;
     property Token: Integer read FToken write SetToken;
-    property Uptime: UINT32 read FUptime write SetUptime;
-    property Servertime: UInt64 read FServertime write SetServertime;
   end;
 
 implementation
@@ -71,14 +63,6 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FToken := AProtobufReader.readInt32;
       end;
-      FN_UPTIME: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FUptime := AProtobufReader.readUInt32;
-      end;
-      FN_SERVERTIME: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FServertime := AProtobufReader.readInt64;
-      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -100,18 +84,6 @@ procedure TPB_RpcMessage.SetToken(const AValue: Integer);
 begin
   FToken := AValue;
   ProtobufOutput.writeInt32(FN_TOKEN, AValue);
-end;
-
-procedure TPB_RpcMessage.SetUptime(const AValue: UINT32);
-begin
-  FUptime := AValue;
-  ProtobufOutput.writeUInt32(FN_UPTIME, AValue);
-end;
-
-procedure TPB_RpcMessage.SetServertime(const AValue: UInt64);
-begin
-  FServertime := AValue;
-  ProtobufOutput.WriteInt64(FN_SERVERTIME, AValue);
 end;
 
 end.

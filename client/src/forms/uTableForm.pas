@@ -41,6 +41,7 @@ type
     tiSeatCaptionClear: TTimer;
     lbsHandId: TcxLabel;
     pbTime: TcxProgressBar;
+    tiPlayTimer: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -61,6 +62,7 @@ type
     procedure tiSitOutNextHandTimer(Sender: TObject);
     procedure tiSeatClearCaptionTimer(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
+    procedure tiPlayTimerTimer(Sender: TObject);
   private
     type
       TSeatOrientation = (soLeft, soRight);
@@ -85,6 +87,8 @@ type
       FChipWidth       : Integer;
       FChipHeight      : Integer;
       FChipsStack      : TChipsStackMaker;
+      FGoalTime        : UINT64;
+      FCurrentPlaytime : UINT64;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AddUserChatMessage(const AUser, AMessage: String);
@@ -390,6 +394,21 @@ begin
     tiActiveFrameBlink.Tag := 0;
 
   Redraw(TRUE);
+end;
+
+procedure TfrmTable.tiPlayTimerTimer(Sender: TObject);
+begin
+  FCurrentPlaytime := FGoalTime - GetTickCount;
+
+  {$IFDEF DEBUG}
+  DebugLn(Format('FCurrentPlaytime: %d', [FCurrentPlaytime]), ditApplication);
+  {$ENDIF}
+
+{  pbTime.Position := Round((FCurrentPlaytime / FMaxPlayTime) * 100);
+  if FCurrentPlaytime <= 0 then
+  begin
+    tiPlayTimer.Enabled := FALSE;
+  end;}
 end;
 
 procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
@@ -1102,6 +1121,8 @@ var
   C1           : Integer;
   tmp          : String;
   seat_index   : Integer;
+  seat         : TSeatInfo;
+  tb           : UINT32;
 begin
   pbtablestatus := AMessage.Object_ as TPB_TableStatus;
   if not CompareBytes(pbtablestatus.TableMongoId, FTable.Game.MongoId) then
@@ -1139,6 +1160,22 @@ begin
 
   lbsHandId.Caption := Format('Hand: #%d', [FTableStatus.HandId]);
 
+  if FTableStatus.Time > 0 then
+  begin
+    tiPlayTimer.Enabled := FALSE;
+    FGoalTime := FTableStatus.Time - SocketClient.TimeOffset;
+    tiPlayTimer.Enabled := TRUE;
+  end
+  else
+  begin
+    FGoalTime := 0;
+  end;
+
+  {$IFDEF DEBUG}
+  DebugLn(Format('FGoalTime: %d', [FGoalTime]), ditApplication);
+  {$ENDIF}
+
+
   {$IFDEF DEBUG}
   tmp := '';
   if pbtablestatus.Locked then
@@ -1147,7 +1184,11 @@ begin
   end
   else tmp := 'NO';
 
-  DebugLn(Format('Dealer: %d; CurrentSeat: %d; TableState: %d; Seq:%d; Locked: %s', [pbtablestatus.Dealer, pbtablestatus.CurrentSeat, Integer(pbtablestatus.State), pbtablestatus.Seq, tmp]), ditApplication);
+  tb := 0;
+  if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
+    tb := seat.Timebank;
+
+  DebugLn(Format('D: %d; TS: %d; CS: %d; TIME: %d; TB: %d; SEQ:%d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
   tmp := '';
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);

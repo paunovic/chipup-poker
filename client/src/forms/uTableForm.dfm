@@ -239,7 +239,6 @@ object frmTable: TfrmTable
     RepaintMode = rmOptimizer
     TabOrder = 1
     OnClick = PaintBoxClick
-    ExplicitWidth = 726
   end
   object pbTime: TcxProgressBar
     Left = 52
@@ -326,6 +325,13 @@ object frmTable: TfrmTable
     Interval = 1800
     OnTimer = tiSeatClearCaptionTimer
     Left = 220
+    Top = 32
+  end
+  object tiPlayTimer: TTimer
+    Enabled = False
+    Interval = 200
+    OnTimer = tiPlayTimerTimer
+    Left = 272
     Top = 32
   end
 end
