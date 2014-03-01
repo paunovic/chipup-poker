@@ -116,7 +116,7 @@ uses
   Winapi.Windows, System.Classes, System.Types, JPEG, PNGImage, GR32_Resamplers, GR32_PNG, System.SysUtils;
 
 type
-  TBitmapResampler = (bsDraft, bsKernel);
+  TBitmapResampler = (bsNone, bsDraft, bsKernel, bsLinear);
 
 
 procedure CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler);
@@ -138,6 +138,8 @@ begin
           ABitmap.Resampler := TKernelResampler.Create;
           (ABitmap.Resampler as TKernelResampler).Kernel := TLanczosKernel.Create;
         end;
+        bsLinear: ABitmap.Resampler := TLinearResampler.Create;
+        bsNone: ;
       end;
     finally
       rstream.Free;
@@ -179,12 +181,12 @@ begin
   CreateBitmap32FromPNGResource(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
   CreateBitmap32FromPNGResource(FImg_CardBackground, 'CardBackground', bsKernel);
   CreateBitmap32FromPNGResource(FImg_CardFrontBackground, 'CardFrontBackground', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip1, 'Chip1', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip5, 'Chip5', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip25, 'Chip25', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip100, 'Chip100', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip500, 'Chip500', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip1000, 'Chip1000', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip1, 'Chip1', bsNone);
+  CreateBitmap32FromPNGResource(FImg_Chip5, 'Chip5', bsNone);
+  CreateBitmap32FromPNGResource(FImg_Chip25, 'Chip25', bsNone);
+  CreateBitmap32FromPNGResource(FImg_Chip100, 'Chip100', bsNone);
+  CreateBitmap32FromPNGResource(FImg_Chip500, 'Chip500', bsNone);
+  CreateBitmap32FromPNGResource(FImg_Chip1000, 'Chip1000', bsNone);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
