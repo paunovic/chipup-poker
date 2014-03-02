@@ -223,7 +223,7 @@ procedure TfrmTable.WndProc(var AMessage: TMessage);
 var
   msg: TMessageItem;
 begin
-  // prevent ALT key from tabbing between forms
+  // prevent ALT key from switching between forms
   if (AMessage.Msg = WM_SYSCOMMAND) and
      (AMessage.WParam = SC_KEYMENU) then
     Exit;
@@ -400,7 +400,7 @@ procedure TfrmTable.tiPlayTimerTimer(Sender: TObject);
 begin
   FCurrentPlaytime := FGoalTime - GetTickCount;
 
-  pbTime.Position := Round(FCurrentPlaytime / 10000);
+  pbTime.Position := Round(FCurrentPlaytime / 100);
   if FCurrentPlaytime <= 0 then
   begin
     tiPlayTimer.Enabled := FALSE;
@@ -768,9 +768,8 @@ var
   tmpstr          : WideString;
   color           : TColor32;
   tmpint          : Integer;
-  time_visible    : Boolean;
 begin
-  time_visible := FALSE;
+  pbTime.Visible := FALSE;
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
     seat_point := GetSeatPoint(C1);
@@ -847,10 +846,11 @@ begin
           seat_image := seat_back_limage
         else
           seat_image := seat_back_dimage;
-        time_visible := TRUE;
+
         pbTime.Width := Round(FSeatWidth * 0.68);
         pbTime.Top := Round(seat_point.Y + FSeatHeight / 2 - 5 * FTableResizeRatio);
         pbTime.Left := Round(seat_point.X - pbTime.Width / 2);
+        pbTime.Visible := TRUE;
       end
       else
         seat_image := seat_back_dimage;
@@ -899,8 +899,6 @@ begin
                            seat_empty_image);
     end;
   end;
-
-  pbTime.Visible := time_visible;
 end;
 
 procedure TfrmTable.edChatKeyPress(Sender: TObject; var Key: Char);
