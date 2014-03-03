@@ -26,7 +26,7 @@ type
     FAvatar          : TBytes;
 
   public
-    constructor Create(const ASeatInfo: TSeatInfo; const ARect: TRect; const ATableResizeRatio: Double; const ASeatIndex: Integer; const ASeatWidth, ASeatHeight: Integer;
+    procedure Assign(const ASeatInfo: TSeatInfo; const ARect: TRect; const ATableResizeRatio: Double; const ASeatIndex: Integer; const ASeatWidth, ASeatHeight: Integer;
         const ASeatImage, ACacheImage: TBitmap32; const AAvatar: TBytes; const AUpperText: WideString; const AUpperTextColor: TColor32; const ALowerText: WideString;
         const ALowerTextColor: TColor32);
 
@@ -66,7 +66,14 @@ uses
 
 { TDCSeatData }
 
-constructor TDCSeatData.Create(const ASeatInfo: TSeatInfo; const ARect: TRect; const ATableResizeRatio: Double; const ASeatIndex: Integer; const ASeatWidth, ASeatHeight: Integer;
+destructor TDCSeatData.Destroy;
+begin
+  FCacheImage.Free;
+
+  inherited;
+end;
+
+procedure TDCSeatData.Assign(const ASeatInfo: TSeatInfo; const ARect: TRect; const ATableResizeRatio: Double; const ASeatIndex: Integer; const ASeatWidth, ASeatHeight: Integer;
       const ASeatImage, ACacheImage: TBitmap32; const AAvatar: TBytes; const AUpperText: WideString; const AUpperTextColor: TColor32; const ALowerText: WideString;
       const ALowerTextColor: TColor32);
 begin
@@ -76,6 +83,8 @@ begin
   FSeatWidth := ASeatWidth;
   FSeatHeight := ASeatHeight;
   FSeatImage := ASeatImage;
+  if Assigned(FCacheImage) then
+    FreeAndNil(FCacheImage);
   FCacheImage := ACacheImage;
   FUpperText := AUpperText;
   FLowerText := ALowerText;
@@ -86,12 +95,6 @@ begin
   FAvatar := AAvatar;
 end;
 
-destructor TDCSeatData.Destroy;
-begin
-  FCacheImage.Free;
-
-  inherited;
-end;
 
 { TDCLSeatData }
 
@@ -123,24 +126,23 @@ procedure TDCLSeatData.StoreCachedData(const ASeatInfo: TSeatInfo; const ASource
         const AUpperTextColor: TColor32; const ALowerText: WideString; const ALowerTextColor: TColor32);
 var
   seat : TDCSeatData;
-  C1   : Integer;
   cache: TBitmap32;
 begin
-  for C1 := 0 to Length(ToArray) - 1 do
-  begin
-    seat := ToArray[C1];
-    if seat.SeatIndex = ASeatIndex then
-    begin
-      Delete(C1);
-      Break;
-    end;
-  end;
-
   cache := TBitmap32.Create;
   cache.SetSize(ASourceRect.Width, ASourceRect.Height);
   cache.Draw(cache.BoundsRect, ASourceRect, ASourceBitmap.Handle);
 
-  Add(TDCSeatData.Create(ASeatInfo, ASourceRect, ATableResizeRatio, ASeatIndex, ASeatWidth, ASeatHeight, ASeatImage, cache, AAvatar, AUpperText, AUpperTextColor, ALowerText, ALowerTextColor));
+  for seat in ToArray do
+    if seat.SeatIndex = ASeatIndex then
+    begin
+      seat.Assign(ASeatInfo, ASourceRect, ATableResizeRatio, ASeatIndex, ASeatWidth, ASeatHeight, ASeatImage, cache, AAvatar, AUpperText, AUpperTextColor, ALowerText, ALowerTextColor);
+      Exit;
+    end;
+
+  seat := TDCSeatData.Create;
+  seat.Assign(ASeatInfo, ASourceRect, ATableResizeRatio, ASeatIndex, ASeatWidth, ASeatHeight, ASeatImage, cache, AAvatar, AUpperText, AUpperTextColor, ALowerText, ALowerTextColor);
+
+  Add(seat);
 end;
 
 end.
