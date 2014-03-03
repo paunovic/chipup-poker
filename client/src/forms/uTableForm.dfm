@@ -220,7 +220,7 @@ object frmTable: TfrmTable
         Visible = False
         Width = 109
       end
-      object lbsHandId: TcxLabel
+      object lbsDebug: TcxLabel
         Left = 138
         Top = 22
         AutoSize = False
@@ -251,7 +251,6 @@ object frmTable: TfrmTable
     Properties.PeakValue = 100.000000000000000000
     Properties.ShowText = False
     Properties.ShowTextStyle = cxtsText
-    Properties.TransparentImage = False
     Style.BorderColor = clBlack
     Style.BorderStyle = ebsNone
     Style.Edges = []
@@ -261,6 +260,7 @@ object frmTable: TfrmTable
     StyleFocused.LookAndFeel.SkinName = ''
     StyleHot.LookAndFeel.SkinName = ''
     TabOrder = 2
+    Transparent = True
     Visible = False
     Height = 7
     Width = 122
@@ -329,6 +329,7 @@ object frmTable: TfrmTable
   end
   object tiPlayTimer: TTimer
     Enabled = False
+    Interval = 300
     OnTimer = tiPlayTimerTimer
     Left = 272
     Top = 32

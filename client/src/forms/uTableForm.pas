@@ -39,7 +39,7 @@ type
     cbSitOutNextHand: TcxCheckBox;
     tiSitOutNextHand: TTimer;
     tiSeatCaptionClear: TTimer;
-    lbsHandId: TcxLabel;
+    lbsDebug: TcxLabel;
     pbTime: TcxProgressBar;
     tiPlayTimer: TTimer;
     procedure FormCreate(Sender: TObject);
@@ -102,7 +102,6 @@ type
     procedure DrawCard(const ACard: TCard; const ACardRect: TRect);
     procedure DrawPlayerBets;
     procedure DrawPots;
-    procedure DrawTopChipValue(const AChipStack: TChipsStack; const ARect: TRect);
     procedure DrawStackValue(const AChipStack: TChipsStack; const ARect: TRect; const AValue: Double; const AIsPot: Boolean);
     {$IFDEF SHOW_DEBUG_INFO}
     procedure ShowDebugInfo;
@@ -399,16 +398,15 @@ end;
 procedure TfrmTable.tiPlayTimerTimer(Sender: TObject);
 begin
   FCurrentPlaytime := FGoalTime - GetTickCount;
+  if FCurrentPlaytime <= 0 then
+    FCurrentPlaytime := 0;
 
   pbTime.Position := Round(FCurrentPlaytime / 100);
-  if FCurrentPlaytime <= 0 then
-  begin
-    tiPlayTimer.Enabled := FALSE;
-  end;
 
-  {$IFDEF DEBUG}
-  DebugLn(Format('FCurrentPlaytime: %d', [FCurrentPlaytime]), ditApplication);
-  {$ENDIF}
+  if FCurrentPlaytime = 0 then
+    tiPlayTimer.Enabled := FALSE;
+
+  lbsDebug.Caption := Format('CurrentPlaytime = %d', [FCurrentPlaytime]);
 end;
 
 procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
@@ -490,7 +488,6 @@ begin
         chips_stack := FChipsStack.MakeStack(FTableStatus.Bets[seat_info.SeatIndex] div 100);
         chips_rect := Rect(chips_point.X - FChipWidth div 2, chips_point.Y - Round(chips_stack.Image.Height * FTableResizeRatio), chips_point.X + FChipWidth div 2, chips_point.Y);
         PaintBox.Buffer.Draw(chips_rect, chips_stack.Image.BoundsRect, chips_stack.Image);
-        DrawTopChipValue(chips_stack, chips_rect);
         DrawStackValue(chips_stack, chips_rect, FTableStatus.Bets[seat_info.SeatIndex] / 100, FALSE);
       end;
     end;
@@ -513,7 +510,6 @@ begin
       chips_stack := FChipsStack.MakeStack(Trunc(pot));
       chips_rect := Rect(pot_point.X - FChipWidth div 2, pot_point.Y - Round(chips_stack.Image.Height * FTableResizeRatio), pot_point.X + FChipWidth div 2, pot_point.Y);
       PaintBox.Buffer.Draw(chips_rect, chips_stack.Image.BoundsRect, chips_stack.Image);
-      DrawTopChipValue(chips_stack, chips_rect);
       DrawStackValue(chips_stack, chips_rect, pot, TRUE);
     end;
   end;
@@ -532,15 +528,14 @@ var
   seat_radians: Double;
   x, y        : Integer;
 begin
-               {
+                         {
     for x := 0 to Round((2 * pi) * 10000) do
-      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth + 125 * FTableResizeRatio) / 2) * Cos(x)),
-                            FTableCenter.Y + Round(((FTableHeight + 50 * FTableResizeRatio) / 2) * Sin(x)) + 10] := clRed; // BLUE!
-                         }
-
+      PaintBox.Buffer.Pixel[FTableCenter.X + Round(((FTableWidth + 210 * FTableResizeRatio) / 2) * Cos(x)),
+                            FTableCenter.Y + Round(((FTableHeight + 90 * FTableResizeRatio) / 2) * Sin(x)) + 5 * FTableResizeRatio] := clRed; // BLUE!
+                          }
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
-  x := FTableCenter.X + Round(((FTableWidth + 190 * FTableResizeRatio) / 2) * Cos(seat_radians));
-  y := FTableCenter.Y + Round(((FTableHeight + 90 * FTableResizeRatio) / 2) * Sin(seat_radians)) + 10;
+  x := FTableCenter.X + Round(((FTableWidth + 210 * FTableResizeRatio) / 2) * Cos(seat_radians));
+  y := FTableCenter.Y + Round(((FTableHeight + 90 * FTableResizeRatio) / 2) * Sin(seat_radians) + 5 * FTableResizeRatio);
 
   result := GR32.Point(x, y);
 end;
@@ -669,28 +664,15 @@ begin
   PaintBox.Buffer.Canvas.Rectangle(art_rect);
 end;
 
-procedure TfrmTable.DrawTopChipValue(const AChipStack: TChipsStack; const ARect: TRect);
-{var
-  tw, th, tx, ty: Integer; }
-begin
- { PaintBox.Buffer.Font.Name := 'Arial';
-  PaintBox.Buffer.Font.Size := 3 + Round(5 * FTableResizeRatio);
-  PaintBox.Buffer.Font.Style := [];
-
-  tw := PaintBox.Buffer.TextWidthW(AChipStack.TopChipVal);
-  th := PaintBox.Buffer.TextHeightW(AChipStack.TopChipVal);
-
-  tx := Round(ARect.Left + ARect.Width / 2 - tw / 2);
-  ty := Round(ARect.Top + (TTableResources.ChipHeight * FTableResizeRatio) / 2 - th / 2 - 1);
-
-  PaintBox.Buffer.RenderTextW(tx, ty, AChipStack.TopChipVal, 4, $FF000000);  }
-end;
-
 procedure TfrmTable.DrawStackValue(const AChipStack: TChipsStack; const ARect: TRect; const AValue: Double; const AIsPot: Boolean);
 var
   tw, th, tx, ty: Integer;
   ctext         : String;
 begin
+  PaintBox.Buffer.Font.Name := 'Arial';
+  PaintBox.Buffer.Font.Size := 5 + Round(7 * FTableResizeRatio);
+  PaintBox.Buffer.Font.Style := [fsBold];
+
   ctext := FloatToStr(AValue);
 
   tw := PaintBox.Buffer.TextWidthW(ctext);
@@ -710,9 +692,6 @@ begin
       tx := Round(ARect.Left - tw - 5 * FTableResizeRatio);
   end;
 
-  PaintBox.Buffer.Font.Name := 'Arial';
-  PaintBox.Buffer.Font.Size := 5 + Round(7 * FTableResizeRatio);
-  PaintBox.Buffer.Font.Style := [fsBold];
   PaintBox.Buffer.RenderTextW(tx, ty, ctext, 4, $FFFFFFFF);
 end;
 
@@ -847,10 +826,13 @@ begin
         else
           seat_image := seat_back_dimage;
 
-        pbTime.Width := Round(FSeatWidth * 0.68);
-        pbTime.Top := Round(seat_point.Y + FSeatHeight / 2 - 5 * FTableResizeRatio);
-        pbTime.Left := Round(seat_point.X - pbTime.Width / 2);
-        pbTime.Visible := TRUE;
+        if not FTableStatus.Locked then
+        begin
+          pbTime.Width := Round(FSeatWidth * 0.68);
+          pbTime.Top := Round(seat_point.Y + FSeatHeight / 2 - 5 * FTableResizeRatio);
+          pbTime.Left := Round(seat_point.X - pbTime.Width / 2);
+          pbTime.Visible := TRUE;
+        end;
       end
       else
         seat_image := seat_back_dimage;
@@ -1155,8 +1137,6 @@ begin
   if FTableStatus.Locked then
     lbsInfo.Caption := lbsInfo.Caption + ' [LOCKED] ';
   lbsInfo.Refresh;
-
-  lbsHandId.Caption := Format('Hand: #%d', [FTableStatus.HandId]);
 
   if FTableStatus.Time > 0 then
   begin
