@@ -293,7 +293,9 @@ var
   chat_width: Integer;
   tblx, tbly: Integer;
   tblw, tblh: Integer;
+  start,stop: Integer;
 begin
+  start := GetTickCount;
   paBottom.Height := Round(Height / 5);
   chat_width := Round(Width / 2.5);
 
@@ -361,8 +363,10 @@ begin
   ShowDebugInfo;
   {$ENDIF}
 
+  stop := GetTickCount;
   if APaintboxRepaint then
     PaintBox.Flush;
+  DebugLn(Format('redraw time: %d', [stop - start]), ditApplication);
 end;
 
 procedure TfrmTable.seRaiseAmountPropertiesChange(Sender: TObject);
