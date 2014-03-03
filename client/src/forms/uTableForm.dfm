@@ -285,7 +285,7 @@ object frmTable: TfrmTable
     Enabled = False
     Interval = 700
     OnTimer = tiActiveFrameBlinkTimer
-    Left = 52
+    Left = 56
     Top = 32
   end
   object tiSitOutNextHand: TTimer

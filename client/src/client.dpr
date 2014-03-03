@@ -101,7 +101,9 @@ uses
   uPB_PotInfo in 'modules\protobuf\objects\uPB_PotInfo.pas',
   uChipsStackMaker in 'modules\uChipsStackMaker.pas',
   uPB_PingParams in 'modules\protobuf\objects\uPB_PingParams.pas',
-  uPB_PingReply in 'modules\protobuf\objects\uPB_PingReply.pas';
+  uPB_PingReply in 'modules\protobuf\objects\uPB_PingReply.pas',
+  uDrawingCache in 'modules\uDrawingCache.pas',
+  uDCSeatData in 'modules\drawing_cache\uDCSeatData.pas';
 
 procedure FocusPokerApp;
 var
