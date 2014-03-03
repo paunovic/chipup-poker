@@ -2,6 +2,11 @@ unit uTableForm;
 
 {.$DEFINE SHOW_DEBUG_INFO}
 
+{
+  ISSUES:
+    - teSit happens before player receives TableStatus. Means, if any processing is done in teSit, there would be no info for new player in seat
+}
+
 interface
 
 uses
@@ -60,33 +65,29 @@ type
     procedure tiSeatClearCaptionTimer(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
   private
-    type
-      TSeatOrientation = (soLeft, soRight);
-
-    var
-      FFormAspectRatio : Double;
-      FTableResizeRatio: Double;
-      FTable           : TTable;
-      FTableStatus     : TTableStatus;
-      FTableWidth      : Integer;
-      FTableHeight     : Integer;
-      FTableXOffset    : Integer;
-      FTableYOffset    : Integer;
-      FTableCenter     : TPoint;
-      FSeatWidth       : Integer;
-      FSeatHeight      : Integer;
-      FSeatMultiplier  : Double;
-      FCardWidth       : Integer;
-      FCardHeight      : Integer;
-      FArtWidth        : Integer;
-      FArtHeight       : Integer;
-      FChipWidth       : Integer;
-      FChipHeight      : Integer;
-      FTimebarWidth    : Integer;
-      FTimebarHeight   : Integer;
-      FChipsStack      : TChipsStackMaker;
-      FGoalTime        : UINT32;
-      FCurrentPlaytime : Integer;
+    FFormAspectRatio : Double;
+    FTableResizeRatio: Double;
+    FTable           : TTable;
+    FTableStatus     : TTableStatus;
+    FTableWidth      : Integer;
+    FTableHeight     : Integer;
+    FTableXOffset    : Integer;
+    FTableYOffset    : Integer;
+    FTableCenter     : TPoint;
+    FSeatWidth       : Integer;
+    FSeatHeight      : Integer;
+    FSeatMultiplier  : Double;
+    FCardWidth       : Integer;
+    FCardHeight      : Integer;
+    FArtWidth        : Integer;
+    FArtHeight       : Integer;
+    FChipWidth       : Integer;
+    FChipHeight      : Integer;
+    FTimebarWidth    : Integer;
+    FTimebarHeight   : Integer;
+    FChipsStack      : TChipsStackMaker;
+    FGoalTime        : UINT32;
+    FCurrentPlaytime : Integer;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AddUserChatMessage(const AUser, AMessage: String);
@@ -106,7 +107,7 @@ type
     procedure ShowDebugInfo;
     {$ENDIF}
 
-    function GetSeatOrientation(const APoint: TPoint): TSeatOrientation;
+    function IsLeftSeat(const APoint: TPoint): Boolean;
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
     function GetDealerPoint(const ASeatIndex: Integer): TPoint;
     function GetChipsPoint(const ASeatIndex: Integer): TPoint;
@@ -396,7 +397,7 @@ begin
   else
     tiActiveFrameBlink.Tag := 0;
 
-  Redraw(TRUE);
+  DrawSeats;
 end;
 
 procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
@@ -505,12 +506,9 @@ begin
   end;
 end;
 
-function TfrmTable.GetSeatOrientation(const APoint: TPoint): TSeatOrientation;
+function TfrmTable.IsLeftSeat(const APoint: TPoint): Boolean;
 begin
-  if APoint.X < FTableXOffset + FTableWidth div 2 then
-    result := soLeft
-  else
-    result := soRight;
+  result := APoint.X < FTableXOffset + FTableWidth div 2;
 end;
 
 function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint;
@@ -722,7 +720,10 @@ begin
   if (FTableStatus.Locked) or
      (FTableStatus.Time = 0) or
      (FGoalTime = 0) then
+  begin
+    lbsDebug.Caption := '';
     Exit;
+  end;
 
   for seat in FTableStatus.Seats do
     if seat.SeatIndex = FTableStatus.CurrentSeat then
@@ -732,6 +733,8 @@ begin
       FCurrentPlaytime := FGoalTime - GetTickCount;
       if FCurrentPlaytime <= 0 then
         FCurrentPlaytime := 0;
+
+      lbsDebug.Caption := 'CurrentPlaytime: ' + IntToStr(FCurrentPlaytime);
 
       timebar_percent := (FCurrentPlaytime / (dmMain.ServerSettings.Playtime * 1000)){ * 1.5};
       if timebar_percent > 1 then
@@ -769,7 +772,6 @@ var
   avatar_rect     : TRect;
   avatar_point    : TPoint;
   card_rect       : TRect;
-  seat_orientation: TSeatOrientation;
   seat_empty_image: TBitmap32;
   seat_back_dimage: TBitmap32;
   seat_back_limage: TBitmap32;
@@ -781,8 +783,7 @@ begin
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
     seat_point := GetSeatPoint(C1);
-    seat_orientation := GetSeatOrientation(seat_point);
-    if seat_orientation = soLeft then
+    if IsLeftSeat(seat_point) then
     begin
       seat_empty_image := TTableResources.SeatEmptyLeftImage;
       seat_back_dimage := TTableResources.SeatDarkLeftImage;
