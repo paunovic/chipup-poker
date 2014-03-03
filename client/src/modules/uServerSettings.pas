@@ -18,12 +18,14 @@ type
   TServerSettings = class
   private
     FEmailConfirmationExpiration: Integer;
+    FPlaytime                   : Integer;
     FStringLengths              : TStringLengths;
 
   public
     procedure ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 
     property EmailConfirmationExpiration: Integer read FEmailConfirmationExpiration;
+    property Playtime: Integer read FPlaytime;
     property StringLengths: TStringLengths read FStringLengths;
 
   end;
@@ -34,6 +36,7 @@ implementation
 procedure TServerSettings.ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 begin
   FEmailConfirmationExpiration := AHelloReply.ChangeExpireTime;
+  FPlaytime := AHelloReply.MaxPlayTime;
 
   FStringLengths.EMail := AHelloReply.StringSizes.EMail;
   FStringLengths.Username := AHelloReply.StringSizes.Username;

@@ -240,31 +240,6 @@ object frmTable: TfrmTable
     TabOrder = 1
     OnClick = PaintBoxClick
   end
-  object pbTime: TcxProgressBar
-    Left = 52
-    Top = 82
-    AutoSize = False
-    Position = 100.000000000000000000
-    Properties.BarStyle = cxbsGradientLEDs
-    Properties.BeginColor = clRed
-    Properties.EndColor = clLime
-    Properties.PeakValue = 100.000000000000000000
-    Properties.ShowText = False
-    Properties.ShowTextStyle = cxtsText
-    Style.BorderColor = clBlack
-    Style.BorderStyle = ebsNone
-    Style.Edges = []
-    Style.LookAndFeel.SkinName = ''
-    Style.TransparentBorder = True
-    StyleDisabled.LookAndFeel.SkinName = ''
-    StyleFocused.LookAndFeel.SkinName = ''
-    StyleHot.LookAndFeel.SkinName = ''
-    TabOrder = 2
-    Transparent = True
-    Visible = False
-    Height = 7
-    Width = 122
-  end
   object ActionManager: TActionManager
     Left = 108
     Top = 32
@@ -325,13 +300,6 @@ object frmTable: TfrmTable
     Interval = 1800
     OnTimer = tiSeatClearCaptionTimer
     Left = 220
-    Top = 32
-  end
-  object tiPlayTimer: TTimer
-    Enabled = False
-    Interval = 300
-    OnTimer = tiPlayTimerTimer
-    Left = 272
     Top = 32
   end
 end

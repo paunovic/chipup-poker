@@ -9,8 +9,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus, uChipsStackMaker,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG, uCards,
-  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
-  cxProgressBar;
+  GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox;
 
 type
   TfrmTable = class(TForm)
@@ -40,8 +39,6 @@ type
     tiSitOutNextHand: TTimer;
     tiSeatCaptionClear: TTimer;
     lbsDebug: TcxLabel;
-    pbTime: TcxProgressBar;
-    tiPlayTimer: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -62,16 +59,15 @@ type
     procedure tiSitOutNextHandTimer(Sender: TObject);
     procedure tiSeatClearCaptionTimer(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
-    procedure tiPlayTimerTimer(Sender: TObject);
   private
     type
       TSeatOrientation = (soLeft, soRight);
 
     var
       FFormAspectRatio : Double;
+      FTableResizeRatio: Double;
       FTable           : TTable;
       FTableStatus     : TTableStatus;
-      FTableResizeRatio: Double;
       FTableWidth      : Integer;
       FTableHeight     : Integer;
       FTableXOffset    : Integer;
@@ -86,6 +82,8 @@ type
       FArtHeight       : Integer;
       FChipWidth       : Integer;
       FChipHeight      : Integer;
+      FTimebarWidth    : Integer;
+      FTimebarHeight   : Integer;
       FChipsStack      : TChipsStackMaker;
       FGoalTime        : UINT32;
       FCurrentPlaytime : Integer;
@@ -98,6 +96,7 @@ type
     function ConfirmStandUp: Boolean;
 
     procedure DrawSeats;
+    procedure DrawTimebar;
     procedure DrawTableCards;
     procedure DrawCard(const ACard: TCard; const ACardRect: TRect);
     procedure DrawPlayerBets;
@@ -339,6 +338,10 @@ begin
   FChipWidth := Round(TTableResources.ChipWidth * FTableResizeRatio);
   FChipHeight := Round(FChipWidth / TTableResources.ChipAspectRatio);
 
+  // calculate timebar size
+  FTimebarWidth := Round(TTableResources.TimebarWidth * FTableResizeRatio);
+  FTimebarHeight := Round(FTimebarWidth / TTableResources.TimebarAspectRatio);
+
   // draw background
   PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
@@ -347,6 +350,7 @@ begin
 
   // draw various stuff
   DrawSeats;
+  DrawTimebar;
   DrawDealerButton;
   DrawTableCards;
   DrawPlayerBets;
@@ -393,20 +397,6 @@ begin
     tiActiveFrameBlink.Tag := 0;
 
   Redraw(TRUE);
-end;
-
-procedure TfrmTable.tiPlayTimerTimer(Sender: TObject);
-begin
-  FCurrentPlaytime := FGoalTime - GetTickCount;
-  if FCurrentPlaytime <= 0 then
-    FCurrentPlaytime := 0;
-
-  pbTime.Position := Round(FCurrentPlaytime / 100);
-
-  if FCurrentPlaytime = 0 then
-    tiPlayTimer.Enabled := FALSE;
-
-  lbsDebug.Caption := Format('CurrentPlaytime = %d', [FCurrentPlaytime]);
 end;
 
 procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
@@ -721,6 +711,46 @@ begin
     DrawCard(FTableStatus.RiverCard, card_rects[4]);
 end;
 
+procedure TfrmTable.DrawTimebar;
+var
+  seat           : TSeatInfo;
+  seat_point     : TPoint;
+  timebar_percent: Double;
+  timebar_rect   : TRect;
+  bounds_rect    : TRect;
+begin
+  if (FTableStatus.Locked) or
+     (FTableStatus.Time = 0) or
+     (FGoalTime = 0) then
+    Exit;
+
+  for seat in FTableStatus.Seats do
+    if seat.SeatIndex = FTableStatus.CurrentSeat then
+    begin
+      seat_point := GetSeatPoint(seat.SeatIndex);
+
+      FCurrentPlaytime := FGoalTime - GetTickCount;
+      if FCurrentPlaytime <= 0 then
+        FCurrentPlaytime := 0;
+
+      timebar_percent := (FCurrentPlaytime / (dmMain.ServerSettings.Playtime * 1000)){ * 1.5};
+      if timebar_percent > 1 then
+        timebar_percent := 1;
+
+      timebar_rect.Top := Round(seat_point.Y + FSeatHeight / 2 - 3 * FTableResizeRatio);
+      timebar_rect.Left := Round(seat_point.X - FTimebarWidth / 2);
+      timebar_rect.Width := Round(FTimebarWidth * timebar_percent);
+      timebar_rect.Height := FTimebarHeight;
+
+      bounds_rect := TTableResources.TimebarImage.BoundsRect;
+      bounds_rect.Width := Round(timebar_percent * bounds_rect.Width);
+
+      PaintBox.Buffer.Draw(timebar_rect, bounds_rect, TTableResources.TimebarImage);
+
+      Break;
+    end;
+end;
+
 procedure TfrmTable.DrawSeats;
 const
   CARD_OPEN_PERC   = 0.55;
@@ -748,7 +778,6 @@ var
   color           : TColor32;
   tmpint          : Integer;
 begin
-  pbTime.Visible := FALSE;
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
     seat_point := GetSeatPoint(C1);
@@ -825,14 +854,6 @@ begin
           seat_image := seat_back_limage
         else
           seat_image := seat_back_dimage;
-
-        if not FTableStatus.Locked then
-        begin
-          pbTime.Width := Round(FSeatWidth * 0.68);
-          pbTime.Top := Round(seat_point.Y + FSeatHeight / 2 - 5 * FTableResizeRatio);
-          pbTime.Left := Round(seat_point.X - pbTime.Width / 2);
-          pbTime.Visible := TRUE;
-        end;
       end
       else
         seat_image := seat_back_dimage;
@@ -1139,15 +1160,9 @@ begin
   lbsInfo.Refresh;
 
   if FTableStatus.Time > 0 then
-  begin
-    FGoalTime := FTableStatus.Time - SocketClient.TimeOffset;
-    tiPlayTimer.Enabled := TRUE;
-  end
+    FGoalTime := FTableStatus.Time - SocketClient.TimeOffset
   else
-  begin
-    tiPlayTimer.Enabled := FALSE;
     FGoalTime := 0;
-  end;
 
   {$IFDEF DEBUG}
   DebugLn(Format('FGoalTime: %d', [FGoalTime]), ditApplication);
