@@ -99,7 +99,9 @@ uses
   uPB_WinnerData in 'modules\protobuf\objects\uPB_WinnerData.pas',
   uCards in 'modules\uCards.pas',
   uPB_PotInfo in 'modules\protobuf\objects\uPB_PotInfo.pas',
-  uChipsStackMaker in 'modules\uChipsStackMaker.pas';
+  uChipsStackMaker in 'modules\uChipsStackMaker.pas',
+  uPB_PingParams in 'modules\protobuf\objects\uPB_PingParams.pas',
+  uPB_PingReply in 'modules\protobuf\objects\uPB_PingReply.pas';
 
 procedure FocusPokerApp;
 var

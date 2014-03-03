@@ -21,6 +21,9 @@ type
       FReceiveBuffer         : PAnsiChar;
       FReceiveBufferSize     : Integer;
       FInternalMessageHandler: HWND;
+      FLatency               : Integer;
+      FServerTime            : UINT64;
+      FTimeOffset            : UINT64;
 
     procedure WndMethod(var AMessage: TMessage);
 
@@ -84,6 +87,9 @@ type
     procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer);
 
     property Socket: TSslWSocket read FSocket;
+    property Latency: Integer read FLatency;
+    property ServerTime: UINT64 read FServerTime;
+    property TimeOffset: UINT64 read FTimeOffset;
   end;
 
 var
@@ -95,7 +101,7 @@ uses
   Winapi.WinSock, uSettings, uCommon, pbOutput, pbInput, uMessageContainer,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams, uPB_ForgotPasswordParams,
-  uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply, uPB_KickPlayerParams,
+  uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply, uPB_KickPlayerParams, uPB_PingParams, uPB_PingReply,
   uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams, uPB_SetAvatarParams,
   uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply, uPB_TableEvent,
   uPB_PutChips;
@@ -361,9 +367,7 @@ var
   err     : String;
   sc      : TServerCodes;
   valid_sc: Boolean;
-  {$IFDEF DEBUG}
-  ts1, ts2: DWORD;
-  {$ENDIF}
+  gtc     : DWORD;
 begin
   if FConnectCode = -1 then
     FConnectCode := ARpcMessage.MethodId;
@@ -424,10 +428,14 @@ begin
     srTableAddonOk,
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srPong: begin
+      gtc := GetTickCount;
+      ADataObject := TPB_PingReply.Create(ADataPointer, ARpcMessage.DataSize);
+      FLatency := gtc - (ADataObject as TPB_PingReply).Uptime;
+      FServerTime := (ADataObject as TPB_PingReply).Servertime + FLatency div 2;
+      FTimeOffset := FServerTime - gtc;
+
       {$IFDEF DEBUG}
-      ts1 := GetTickCount;
-      ts2 := PDWORD(ADataPointer)^;
-      DebugLn(Format('LAG: %dms', [ts1 - ts2]), ditApplication);
+      DebugLn(Format('LATENCY: %dms', [FLatency]), ditApplication);
       {$ENDIF}
 
       KillPingTimeoutTimer;
@@ -864,10 +872,15 @@ end;
 
 procedure TSocketClient.Ping;
 var
-  ts : DWORD;
+  protobuf: TPB_PingParams;
 begin
-  ts := GetTickCount();
-  SendRawBytes(scPing, ts, SizeOf(ts));
+  protobuf := TPB_PingParams.Create;
+  try
+    protobuf.Uptime := GetTickCount;
+    SendProtobuf(scPing, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 procedure TSocketClient.ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);

@@ -16,6 +16,7 @@ type
     FCards: TCards;
     FStatus: TPlayerStatus;
     FCaption: String;
+    FTimebank: UINT32;
 
     function GetStatusStr: String;
   public
@@ -32,6 +33,7 @@ type
     property Status: TPlayerStatus read FStatus;
     property StatusAsStr: String read GetStatusStr;
     property Caption: String read FCaption write FCaption;
+    property Timebank: UINT32 read FTimeBank;
   end;
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
@@ -65,6 +67,7 @@ type
     FHandId        : UINT32;
     FMaximumBet    : UINT32;
     FPots          : TArray<UINT32>;
+    FTime          : UINT64;
 
   public
     constructor Create;
@@ -91,6 +94,7 @@ type
     property HandId: UINT32 read FHandId;
     property Pots: TArray<UINT32> read FPots;
     property MaximumBet: UINT32 read FMaximumBet;
+    property Time: UINT64 read FTime;
   end;
 
 implementation
@@ -120,6 +124,7 @@ begin
   FCardCount := ASeatInfoProtobuf.CardCount;
   FCards.Assign(ASeatInfoProtobuf.Cards);
   FStatus := ASeatInfoProtobuf.Status;
+  FTimeBank := ASeatInfoProtobuf.Timebank;
 end;
 
 
@@ -208,6 +213,12 @@ begin
   FCurrentSeat := ATableStatusProtobuf.CurrentSeat;
   FMinimumBet := ATableStatusProtobuf.MinimumBet;
   FHandId := ATableStatusProtobuf.Handid;
+  FTime := ATableStatusProtobuf.Time;
+  FBets := ATableStatusProtobuf.Bets;
+  FLocked := ATableStatusProtobuf.Locked;
+  FMaximumBet := ATableStatusProtobuf.MaximumLimit;
+  FPots := ATableStatusProtobuf.Pots;
+
   if State <> tsWinning then
   begin
     FFlopCards.Assign(ATableStatusProtobuf.Flop);
@@ -267,11 +278,6 @@ begin
       FBigBlindSeat := -1;
     end;
   end;
-
-  FBets := ATableStatusProtobuf.Bets;
-  FLocked := ATableStatusProtobuf.Locked;
-  FMaximumBet := ATableStatusProtobuf.MaximumLimit;
-  FPots := ATableStatusProtobuf.Pots;
 end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableEvent);

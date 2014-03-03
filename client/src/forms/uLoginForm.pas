@@ -261,7 +261,10 @@ begin
 
   EnableGUI(SocketClient.IsConnected);
   if SocketClient.IsConnected then
-    CurrentStatus := lsConnected
+  begin
+    CurrentStatus := lsConnected;
+    SocketClient.Ping;
+  end
   else
     SocketClient.Disconnect;
 end;
