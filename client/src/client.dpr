@@ -102,7 +102,7 @@ uses
   uChipsStackMaker in 'modules\uChipsStackMaker.pas',
   uPB_PingParams in 'modules\protobuf\objects\uPB_PingParams.pas',
   uPB_PingReply in 'modules\protobuf\objects\uPB_PingReply.pas',
-  uDrawingCache in 'modules\uDrawingCache.pas',
+  uDrawingCache in 'modules\drawing_cache\uDrawingCache.pas',
   uDCSeatData in 'modules\drawing_cache\uDCSeatData.pas';
 
 procedure FocusPokerApp;

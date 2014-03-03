@@ -240,7 +240,7 @@
 			<DCCReference Include="modules\uChipsStackMaker.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_PingParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_PingReply.pas"/>
-			<DCCReference Include="modules\uDrawingCache.pas"/>
+			<DCCReference Include="modules\drawing_cache\uDrawingCache.pas"/>
 			<DCCReference Include="modules\drawing_cache\uDCSeatData.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
