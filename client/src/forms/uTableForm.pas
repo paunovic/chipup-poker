@@ -741,7 +741,7 @@ begin
 
       lbsDebug.Caption := 'CurrentPlaytime: ' + IntToStr(FCurrentPlaytime);
 
-      timebar_percent := (FCurrentPlaytime / (dmMain.ServerSettings.Playtime * 1000)){ * 1.5};
+      timebar_percent := (FCurrentPlaytime / (dmMain.ServerSettings.Playtime * 1000)) * 1.5;
       if timebar_percent > 1 then
         timebar_percent := 1;
 
