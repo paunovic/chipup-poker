@@ -2,6 +2,11 @@ unit uTableForm;
 
 {.$DEFINE SHOW_DEBUG_INFO}
 
+{
+  ISSUES:
+    - teSit happens before player receives TableStatus. Means, if any processing is done in teSit, there would be no info for new player in seat
+}
+
 interface
 
 uses
@@ -10,7 +15,7 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus, uChipsStackMaker,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG, uCards,
   GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
-  cxProgressBar;
+  uDrawingCache;
 
 type
   TfrmTable = class(TForm)
@@ -40,8 +45,6 @@ type
     tiSitOutNextHand: TTimer;
     tiSeatCaptionClear: TTimer;
     lbsDebug: TcxLabel;
-    pbTime: TcxProgressBar;
-    tiPlayTimer: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -62,33 +65,31 @@ type
     procedure tiSitOutNextHandTimer(Sender: TObject);
     procedure tiSeatClearCaptionTimer(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
-    procedure tiPlayTimerTimer(Sender: TObject);
   private
-    type
-      TSeatOrientation = (soLeft, soRight);
-
-    var
-      FFormAspectRatio : Double;
-      FTable           : TTable;
-      FTableStatus     : TTableStatus;
-      FTableResizeRatio: Double;
-      FTableWidth      : Integer;
-      FTableHeight     : Integer;
-      FTableXOffset    : Integer;
-      FTableYOffset    : Integer;
-      FTableCenter     : TPoint;
-      FSeatWidth       : Integer;
-      FSeatHeight      : Integer;
-      FSeatMultiplier  : Double;
-      FCardWidth       : Integer;
-      FCardHeight      : Integer;
-      FArtWidth        : Integer;
-      FArtHeight       : Integer;
-      FChipWidth       : Integer;
-      FChipHeight      : Integer;
-      FChipsStack      : TChipsStackMaker;
-      FGoalTime        : UINT32;
-      FCurrentPlaytime : Integer;
+    FFormAspectRatio : Double;
+    FTableResizeRatio: Double;
+    FTable           : TTable;
+    FTableStatus     : TTableStatus;
+    FTableWidth      : Integer;
+    FTableHeight     : Integer;
+    FTableXOffset    : Integer;
+    FTableYOffset    : Integer;
+    FTableCenter     : TPoint;
+    FSeatWidth       : Integer;
+    FSeatHeight      : Integer;
+    FSeatMultiplier  : Double;
+    FCardWidth       : Integer;
+    FCardHeight      : Integer;
+    FArtWidth        : Integer;
+    FArtHeight       : Integer;
+    FChipWidth       : Integer;
+    FChipHeight      : Integer;
+    FTimebarWidth    : Integer;
+    FTimebarHeight   : Integer;
+    FChipsStack      : TChipsStackMaker;
+    FGoalTime        : UINT32;
+    FCurrentPlaytime : Integer;
+    FDrawingCache    : TDrawingCache;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AddUserChatMessage(const AUser, AMessage: String);
@@ -98,6 +99,7 @@ type
     function ConfirmStandUp: Boolean;
 
     procedure DrawSeats;
+    procedure DrawTimebar;
     procedure DrawTableCards;
     procedure DrawCard(const ACard: TCard; const ACardRect: TRect);
     procedure DrawPlayerBets;
@@ -107,7 +109,7 @@ type
     procedure ShowDebugInfo;
     {$ENDIF}
 
-    function GetSeatOrientation(const APoint: TPoint): TSeatOrientation;
+    function IsLeftSeat(const APoint: TPoint): Boolean;
     function GetSeatPoint(const ASeatIndex: Integer): TPoint;
     function GetDealerPoint(const ASeatIndex: Integer): TPoint;
     function GetChipsPoint(const ASeatIndex: Integer): TPoint;
@@ -136,7 +138,8 @@ uses
   System.Types, cxClasses, System.Math,
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent, uPB_PotInfo;
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent, uPB_PotInfo,
+  uDCSeatData;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -152,6 +155,7 @@ procedure TfrmTable.FormCreate(Sender: TObject);
 begin
   FTableStatus := TTableStatus.Create;
   FChipsStack := TChipsStackMaker.Create;
+  FDrawingCache := TDrawingCache.Create;
 
   reChat.Lines.Clear;
 
@@ -172,6 +176,7 @@ procedure TfrmTable.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveMessageHandler(Handle);
 
+  FDrawingCache.Free;
   FChipsStack.Free;
   FTableStatus.Free;
 end;
@@ -339,6 +344,10 @@ begin
   FChipWidth := Round(TTableResources.ChipWidth * FTableResizeRatio);
   FChipHeight := Round(FChipWidth / TTableResources.ChipAspectRatio);
 
+  // calculate timebar size
+  FTimebarWidth := Round(TTableResources.TimebarWidth * FTableResizeRatio);
+  FTimebarHeight := Round(FTimebarWidth / TTableResources.TimebarAspectRatio);
+
   // draw background
   PaintBox.Buffer.Draw(PaintBox.Buffer.BoundsRect, TTableResources.BackgroundImage.BoundsRect, TTableResources.BackgroundImage);
 
@@ -347,6 +356,7 @@ begin
 
   // draw various stuff
   DrawSeats;
+  DrawTimebar;
   DrawDealerButton;
   DrawTableCards;
   DrawPlayerBets;
@@ -393,20 +403,6 @@ begin
     tiActiveFrameBlink.Tag := 0;
 
   Redraw(TRUE);
-end;
-
-procedure TfrmTable.tiPlayTimerTimer(Sender: TObject);
-begin
-  FCurrentPlaytime := FGoalTime - GetTickCount;
-  if FCurrentPlaytime <= 0 then
-    FCurrentPlaytime := 0;
-
-  pbTime.Position := Round(FCurrentPlaytime / 100);
-
-  if FCurrentPlaytime = 0 then
-    tiPlayTimer.Enabled := FALSE;
-
-  lbsDebug.Caption := Format('CurrentPlaytime = %d', [FCurrentPlaytime]);
 end;
 
 procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
@@ -515,12 +511,9 @@ begin
   end;
 end;
 
-function TfrmTable.GetSeatOrientation(const APoint: TPoint): TSeatOrientation;
+function TfrmTable.IsLeftSeat(const APoint: TPoint): Boolean;
 begin
-  if APoint.X < FTableXOffset + FTableWidth div 2 then
-    result := soLeft
-  else
-    result := soRight;
+  result := APoint.X < FTableXOffset + FTableWidth div 2;
 end;
 
 function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint;
@@ -721,6 +714,55 @@ begin
     DrawCard(FTableStatus.RiverCard, card_rects[4]);
 end;
 
+procedure TfrmTable.DrawTimebar;
+var
+  seat           : TSeatInfo;
+  seat_point     : TPoint;
+  timebar_percent: Double;
+  timebar_rect   : TRect;
+  bounds_rect    : TRect;
+begin
+  if (FTableStatus.Locked) or
+     (FTableStatus.Time = 0) or
+     (FGoalTime = 0) then
+  begin
+    lbsDebug.Caption := '';
+    Exit;
+  end;
+
+  for seat in FTableStatus.Seats do
+    if seat.SeatIndex = FTableStatus.CurrentSeat then
+    begin
+      seat_point := GetSeatPoint(seat.SeatIndex);
+
+      FCurrentPlaytime := FGoalTime - GetTickCount;
+      if FCurrentPlaytime <= 0 then
+        FCurrentPlaytime := 0;
+
+      lbsDebug.Caption := 'CurrentPlaytime: ' + IntToStr(FCurrentPlaytime);
+
+      timebar_percent := (FCurrentPlaytime / (dmMain.ServerSettings.Playtime * 1000)) * 1.5;
+      if timebar_percent > 1 then
+        timebar_percent := 1;
+
+      timebar_rect.Top := Round(seat_point.Y + FSeatHeight / 2 - 3 * FTableResizeRatio);
+      timebar_rect.Left := Round(seat_point.X - FTimebarWidth / 2);
+      timebar_rect.Width := Round(FTimebarWidth * timebar_percent);
+      timebar_rect.Height := FTimebarHeight;
+
+      bounds_rect := TTableResources.TimebarImage.BoundsRect;
+      bounds_rect.Width := Round(timebar_percent * bounds_rect.Width);
+{
+      PaintBox.Buffer.Canvas.Pen.Style := psClear;
+      PaintBox.Buffer.Canvas.Brush.Color := clBlack;
+      PaintBox.Buffer.Canvas.Rectangle(timebar_rect.Left, timebar_rect.Top, timebar_rect.Left + FTimebarWidth, timebar_rect.Bottom);
+}
+      PaintBox.Buffer.Draw(timebar_rect, bounds_rect, TTableResources.TimebarImage);
+
+      Break;
+    end;
+end;
+
 procedure TfrmTable.DrawSeats;
 const
   CARD_OPEN_PERC   = 0.55;
@@ -739,21 +781,23 @@ var
   avatar_rect     : TRect;
   avatar_point    : TPoint;
   card_rect       : TRect;
-  seat_orientation: TSeatOrientation;
   seat_empty_image: TBitmap32;
   seat_back_dimage: TBitmap32;
   seat_back_limage: TBitmap32;
   seat_image      : TBitmap32;
-  tmpstr          : WideString;
+  seat_upper_text : WideString;
+  seat_lower_text : WideString;
   color           : TColor32;
   tmpint          : Integer;
+  cache           : TDCSeatData;
+  cache_top_y     : Integer;
+  seat_upper_color: TColor32;
+  seat_lower_color: TColor32;
 begin
-  pbTime.Visible := FALSE;
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
     seat_point := GetSeatPoint(C1);
-    seat_orientation := GetSeatOrientation(seat_point);
-    if seat_orientation = soLeft then
+    if IsLeftSeat(seat_point) then
     begin
       seat_empty_image := TTableResources.SeatEmptyLeftImage;
       seat_back_dimage := TTableResources.SeatDarkLeftImage;
@@ -782,9 +826,64 @@ begin
     if (FTableStatus.GetSeatInfo(C1, seat_info)) and
        (seat_info.Status <> psStandingUp) then // seat taken and its not in psStandingUp state
     begin
+      // find player info
       dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
 
+      // set seat image
+      if FTableStatus.CurrentSeat = seat_info.SeatIndex then
+      begin
+        if (tiActiveFrameBlink.Tag = 1) and
+           (not FTableStatus.Locked) then
+          seat_image := seat_back_limage
+        else
+          seat_image := seat_back_dimage;
+      end
+      else
+        seat_image := seat_back_dimage;
+
+      if Assigned(player_info) then
+      begin
+        // set avatar
+        avatar := dmMain.Avatars.AddAvatar(player_info.AvatarId);
+
+        // set seat upper text
+        if seat_info.Caption <> '' then
+        begin
+          seat_upper_text := seat_info.Caption;
+          seat_upper_color := $FF00A2FF;
+        end
+        else
+        begin
+          seat_upper_text := player_info.Nick;
+          seat_upper_color := $FFCCCCCC;
+        end;
+      end
+      else
+      begin
+        // set seat upper text
+        seat_upper_text := '';
+        seat_upper_color := $FFFFFFFF;
+
+        avatar := dmMain.Avatars.DefaultAvatar;
+      end;
+
+      // set seat lower text
+      if seat_info.Status = psOutOfPlay then
+        seat_lower_text := 'Sitting Out'
+      else
+        seat_lower_text := FloatToStr(seat_info.Chips / 100);
+      seat_lower_color := $FF8DC63F;
+
+      // check if same image exists in cache
+      cache := FDrawingCache.Seats.GetCachedData(seat_info, FTableResizeRatio, C1, seat_point, FSeatWidth, FSeatHeight, seat_image, avatar.Id, seat_upper_text, seat_upper_color, seat_lower_text, seat_lower_color);
+      if Assigned(cache) then
+      begin
+        PaintBox.Buffer.Draw(cache.Rect, cache.CacheImage.BoundsRect, cache.CacheImage.Handle);
+        Continue;
+      end;
+
       // draw cards first
+      cache_top_y := seat_point.Y - FSeatHeight div 2;
       if seat_info.Status in [psInHand, psAllIn] then
       begin
         tmpint := seat_info.CardCount * FCardWidth;
@@ -795,6 +894,7 @@ begin
                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_OPEN_PERC),
                               Round(seat_point.X - tmpint / 2 + C2 * FCardWidth - C2 + FCardWidth),
                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_OPEN_PERC + FCardHeight));
+            cache_top_y := Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_OPEN_PERC);
             DrawCard(seat_info.Cards[C2], card_rect);
           end
           else
@@ -803,76 +903,39 @@ begin
                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_HIDDEN_PERC),
                               Round(seat_point.X - tmpint / 2 + C2 * FCardWidth - C2 + FCardWidth),
                               Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_HIDDEN_PERC + FCardHeight));
+            cache_top_y := Round(seat_point.Y - FSeatHeight / 2 - FCardHeight * CARD_HIDDEN_PERC);
             PaintBox.Buffer.Draw(card_rect, TTableResources.CardBackgroundImage.BoundsRect, TTableResources.CardBackgroundImage);
           end;
       end;
 
-      if Assigned(player_info) then
-      begin
-        // draw avatar, so it is drawn below player frame
-        // if avatar is not found, add it to avatar list, which will download it automatically
-        avatar := dmMain.Avatars.AddAvatar(player_info.AvatarId);
-        if Assigned(avatar.ImageCircle) then
-          PaintBox.Buffer.Draw(avatar_rect, avatar.ImageCircle.BoundsRect, avatar.ImageCircle)
-//        PaintBox.Buffer.Pixels[avatar_point.X, avatar_point.Y] := $FFFFFFFF;
-      end;
+      // draw avatar
+      if Assigned(avatar.ImageCircle) then
+        PaintBox.Buffer.Draw(avatar_rect, avatar.ImageCircle.BoundsRect, avatar.ImageCircle);
 
       // draw player frame
-      if FTableStatus.CurrentSeat = seat_info.SeatIndex then
-      begin
-        if (tiActiveFrameBlink.Tag = 1) and
-           (not FTableStatus.Locked) then
-          seat_image := seat_back_limage
-        else
-          seat_image := seat_back_dimage;
-
-        if not FTableStatus.Locked then
-        begin
-          pbTime.Width := Round(FSeatWidth * 0.68);
-          pbTime.Top := Round(seat_point.Y + FSeatHeight / 2 - 5 * FTableResizeRatio);
-          pbTime.Left := Round(seat_point.X - pbTime.Width / 2);
-          pbTime.Visible := TRUE;
-        end;
-      end
-      else
-        seat_image := seat_back_dimage;
-
       PaintBox.Buffer.Draw(Rect(seat_point.X - FSeatWidth div 2, seat_point.Y - FSeatHeight div 2, seat_point.X + FSeatWidth div 2, seat_point.Y + FSeatHeight div 2),
                            seat_image.BoundsRect,
                            seat_image);
 
-      // set font for drawing player info
+      // set font for drawing seat text
       PaintBox.Buffer.Font.Name := 'Barmeno';
       PaintBox.Buffer.Font.Size := Round(19 * FTableResizeRatio);
       PaintBox.Buffer.Font.Style := [];
 
-      // draw player nick or played action
-      if Assigned(player_info) then
-      begin
-        if seat_info.Caption <> '' then
-        begin
-          tmpstr := seat_info.Caption;
-          color := $FF00A2FF;
-        end
-        else
-        begin
-          tmpstr := player_info.Nick;
-          color := $FFCCCCCC;
-        end;
+      // draw upper seat text
+      tw := PaintBox.Buffer.TextWidthW(seat_upper_text);
+      th := PaintBox.Buffer.TextHeightW(seat_upper_text);
+      PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(upt + (upb - upt) / 2 - th / 1.95), seat_upper_text, 3, seat_upper_color);
 
-        tw := PaintBox.Buffer.TextWidthW(tmpstr);
-        th := PaintBox.Buffer.TextHeightW(tmpstr);
-        PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(upt + (upb - upt) / 2 - th / 1.95), tmpstr, 4, color);
-      end;
+      // draw lower seat text
+      tw := PaintBox.Buffer.TextWidthW(seat_lower_text);
+      th := PaintBox.Buffer.TextHeightW(seat_lower_text);
+      PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(btt + (btb - btt) / 2 - th / 1.75), seat_lower_text, 3, seat_lower_color);
 
-      // draw chips or current state
-      if seat_info.Status = psOutOfPlay then
-        tmpstr := 'Sitting Out'
-      else
-        tmpstr := FloatToStr(seat_info.Chips / 100);
-      tw := PaintBox.Buffer.TextWidthW(tmpstr);
-      th := PaintBox.Buffer.TextHeightW(tmpstr);
-      PaintBox.Buffer.RenderTextW(upl + (upr - upl - tw) div 2, Round(btt + (btb - btt) / 2 - th / 1.75), tmpstr, 4, $FF8DC63F);
+      // store data to cache
+      FDrawingCache.Seats.StoreCachedData(seat_info, PaintBox.Buffer,
+        Rect(seat_point.X - FSeatWidth div 2, cache_top_y, seat_point.X + FSeatWidth div 2, seat_point.Y + FSeatHeight div 2),
+        FTableResizeRatio, C1, FSeatWidth, FSeatHeight, seat_image, avatar.Id, seat_upper_text, seat_upper_color, seat_lower_text, seat_lower_color);
     end
     else // empty seat
     begin
@@ -1139,20 +1202,9 @@ begin
   lbsInfo.Refresh;
 
   if FTableStatus.Time > 0 then
-  begin
-    FGoalTime := FTableStatus.Time - SocketClient.TimeOffset;
-    tiPlayTimer.Enabled := TRUE;
-  end
+    FGoalTime := FTableStatus.Time - SocketClient.TimeOffset
   else
-  begin
-    tiPlayTimer.Enabled := FALSE;
     FGoalTime := 0;
-  end;
-
-  {$IFDEF DEBUG}
-  DebugLn(Format('FGoalTime: %d', [FGoalTime]), ditApplication);
-  {$ENDIF}
-
 
   {$IFDEF DEBUG}
   tmp := '';
@@ -1167,12 +1219,12 @@ begin
     tb := seat.Timebank;
 
   DebugLn(Format('D: %d; TS: %d; CS: %d; TIME: %d; TB: %d; SEQ:%d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
-  tmp := '';
+{  tmp := '';
   for C1 := 0 to Length(pbtablestatus.Bets) - 1 do
     tmp := tmp + Format('%d:%d ', [C1, pbtablestatus.Bets[C1]]);
   tmp := Trim(tmp);
   if tmp <> '' then
-    DebugLn('BETS: ' + tmp, ditApplication);
+    DebugLn('BETS: ' + tmp, ditApplication);}
   {$ENDIF}
 
   ConfigureGUI;

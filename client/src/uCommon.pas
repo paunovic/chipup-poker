@@ -3,7 +3,7 @@ unit uCommon;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, Generics.Collections, uPB_Game, uPB_User,
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections, uPB_Game, uPB_User,
   cxImage;
 
 var
@@ -15,8 +15,6 @@ var
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = nil; const AParams: PChar = nil; const ADirectory: PChar = nil;
                    const AShowCmd: Integer = SW_SHOWNORMAL; const AVerb: String = 'open'; const AMask: DWORD = SEE_MASK_FLAG_NO_UI; const AHWND: HWND = 0): Boolean;
-procedure DisposeString(const ALParam: LPARAM);
-function GetString(const ALParam: LPARAM; var AString: String): Boolean;
 procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
                 const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
 function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): Integer;
@@ -30,8 +28,6 @@ function EncodeURL(const ASrc: String): String;
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
-function IsInWine: Boolean;
-procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
 function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Integer; ARadius: Double): Boolean;
@@ -81,29 +77,6 @@ begin
   result := ShellExecuteEx(@exec_info);
   if Assigned(AExecInfo) then
     AExecInfo^ := exec_info;
-end;
-
-procedure DisposeString(const ALParam: LPARAM);
-var
-  ps: PString;
-begin
-  if ALParam = 0 then
-    Exit;
-
-  ps := PString(ALParam);
-  Dispose(ps);
-end;
-
-function GetString(const ALParam: LPARAM; var AString: String): Boolean;
-var
-  pstr: PString;
-begin
-  if ALParam = 0 then
-    Exit(FALSE);
-
-  pstr := PString(ALParam);
-  AString := pstr^;
-  Exit(TRUE);
 end;
 
 procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
@@ -448,48 +421,6 @@ begin
     A2Len := Length(A2);
 
   result := (A1Len = A2Len) and (CompareMem(A1, A2, A1Len));
-end;
-
-function IsInWine: Boolean;
-var
-  hnd: THandle;
-begin
-  result := FALSE;
-  hnd := LoadLibrary('ntdll.dll');
-  if hnd > 32 then
-    try
-      result := Assigned(GetProcAddress(hnd, 'wine_get_version')) or
-                Assigned(GetProcAddress(hnd, 'wine_nt_to_unix_file_name'));
-    finally
-      FreeLibrary(hnd);
-    end;
-end;
-
-procedure PatchCode(Address: Pointer; const NewCode; Size: Integer);
-var
-  OldProtect: DWORD;
-begin
-  if VirtualProtect(Address, Size, PAGE_EXECUTE_READWRITE, OldProtect) then
-  begin
-    Move(NewCode, Address^, Size);
-    FlushInstructionCache(GetCurrentProcess, Address, Size);
-    VirtualProtect(Address, Size, OldProtect, @OldProtect);
-  end;
-end;
-
-procedure RedirectProcedure(OldAddress, NewAddress: Pointer);
-type
-  PInstruction = ^TInstruction;
-  TInstruction = packed record
-    Opcode: Byte;
-    Offset: Integer;
-  end;
-var
-  NewCode: TInstruction;
-begin
-  NewCode.Opcode := $E9; //jump relative
-  NewCode.Offset := NativeInt(NewAddress) - NativeInt(OldAddress) - SizeOf(NewCode);
-  PatchCode(OldAddress, NewCode, SizeOf(NewCode));
 end;
 
 function GetSpecialFolderPath(const ACSIDL: Integer): String;

@@ -48,6 +48,7 @@ type
     function RemoveAvatar(const AId: TBytes): Boolean;
     function RefreshAvatar(const AId: TBytes): Boolean;
     function SetAvatarImage(const AId: TBytes; const AImage: TJPEGImage): Boolean;
+    function DefaultAvatar: TAvatar;
 
     procedure Save;
   end;
@@ -207,7 +208,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FIdAsString := FIdAsString + IntToHex(AValue[C1], 2);
   if FIdAsString = '' then
-    FIdAsString := 'default';
+    FIdAsString := '';
   FIdAsString := LowerCase(FIdAsString);
 end;
 
@@ -290,6 +291,16 @@ begin
     Exit(FALSE);
   AAvatar := ToArray[index];
   Exit(TRUE);
+end;
+
+function TAvatars.DefaultAvatar: TAvatar;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to Length(ToArray) - 1 do
+    if ToArray[C1].IdAsString = 'default' then
+      Exit(ToArray[C1]);
+  Exit(ToArray[0]);
 end;
 
 function TAvatars.AddAvatar(const AId: TBytes; const AImage: TJPEGImage): TAvatar;

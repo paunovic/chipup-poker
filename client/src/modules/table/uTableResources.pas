@@ -3,15 +3,19 @@ unit uTableResources;
 interface
 
 uses
-  GR32, uCards;
+  GR32, GR32_PNG, GR32_Resamplers, uCards, System.Generics.Collections;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
 
   TTableResources = class
   private
+    type
+      TBitmapResampler = (bsNone, bsDraft, bsKernel, bsLinear);
+
     class var
       FInitialized            : Boolean;
+      FCreatedBitmaps32       : TObjectList<TBitmap32>;
       FImg_TableBackground    : TBitmap32;
       FImg_Table              : TBitmap32;
       FImg_DealerButton       : TBitmap32;
@@ -30,6 +34,7 @@ type
       FImg_Chip100            : TBitmap32;
       FImg_Chip500            : TBitmap32;
       FImg_Chip1000           : TBitmap32;
+      FImg_Timebar            : TBitmap32;
       FTableWidth             : Integer;
       FTableHeight            : Integer;
       FTableAspectRatio       : Double;
@@ -50,6 +55,12 @@ type
       FChipWidth              : Integer;
       FChipHeight             : Integer;
       FChipAspectRatio        : Double;
+      FTimebarWidth           : Integer;
+      FTimebarHeight          : Integer;
+      FTimebarAspectRatio     : Double;
+
+    class procedure CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler; out AWidth, AHeight: Integer; out AAspectRatio: Double); overload;
+    class procedure CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler); overload;
 
   public
     const
@@ -88,6 +99,7 @@ type
     class property Chip100Image: TBitmap32 read FImg_Chip100;
     class property Chip500Image: TBitmap32 read FImg_Chip500;
     class property Chip1000Image: TBitmap32 read FImg_Chip1000;
+    class property TimebarImage: TBitmap32 read FImg_Timebar;
     class property TableWidth: Integer read FTableWidth;
     class property TableHeight: Integer read FTableHeight;
     class property TableAspectRatio: Double read FTableAspectRatio;
@@ -108,18 +120,19 @@ type
     class property ChipWidth: Integer read FChipWidth;
     class property ChipHeight: Integer read FChipHeight;
     class property ChipAspectRatio: Double read FChipAspectRatio;
+    class property TimebarWidth: Integer read FTimebarWidth;
+    class property TimebarHeight: Integer read FTimebarHeight;
+    class property TimebarAspectRatio: Double read FTimebarAspectRatio;
   end;
 
 implementation
 
 uses
-  Winapi.Windows, System.Classes, System.Types, JPEG, PNGImage, GR32_Resamplers, GR32_PNG, System.SysUtils;
-
-type
-  TBitmapResampler = (bsNone, bsDraft, bsKernel, bsLinear);
+  Winapi.Windows, System.Classes, System.Types, JPEG, PNGImage, System.SysUtils;
 
 
-procedure CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler);
+
+class procedure TTableResources.CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler; out AWidth, AHeight: Integer; out AAspectRatio: Double);
 var
   png    : TPortableNetworkGraphic32;
   rstream: TResourceStream;
@@ -147,15 +160,30 @@ begin
   finally
     png.Free;
   end;
+
+  AWidth := ABitmap.Width;
+  AHeight := ABitmap.Height;
+  AAspectRatio := AWidth / AHeight;
+
+  FCreatedBitmaps32.Add(ABitmap);
 end;
+
+class procedure TTableResources.CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler);
+var
+  w, h: Integer;
+  ar  : Double;
+begin
+  CreateBitmap32FromPNGResource(ABitmap, AResourceName, AResampler, w, h, ar);
+end;
+
 
 class procedure TTableResources.Initialize;
 var
-  jpg    : TJPEGImage;
-  rstream: TResourceStream;
-  C1     : Integer;
-  CCV    : TCardValue;
-  CCS    : TCardSuit;
+  jpg     : TJPEGImage;
+  rstream : TResourceStream;
+  C1      : Integer;
+  CCV     : TCardValue;
+  CCS     : TCardSuit;
 begin
   FImg_TableBackground := TBitmap32.Create;
   jpg := TJPEGImage.Create;
@@ -171,29 +199,32 @@ begin
     jpg.Free;
   end;
 
+  FCreatedBitmaps32 := TObjectList<TBitmap32>.Create;
+
   CreateBitmap32FromPNGResource(FImg_Table, 'Table', bsDraft);
-  CreateBitmap32FromPNGResource(FImg_DealerButton, 'DealerButton', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_SeatEmptyLeft, 'EmptySeatLeft', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_DealerButton, 'DealerButton', bsKernel, FDealerButtonWidth, FDealerButtonHeight, FDealerButtonAspectRatio);
+  CreateBitmap32FromPNGResource(FImg_SeatEmptyLeft, 'EmptySeatLeft', bsKernel, FSeatWidth, FSeatHeight, FSeatAspectRatio);
   CreateBitmap32FromPNGResource(FImg_SeatEmptyRight, 'EmptySeatRight', bsKernel);
   CreateBitmap32FromPNGResource(FImg_SeatDarkLeft, 'SeatDarkLeft', bsKernel);
   CreateBitmap32FromPNGResource(FImg_SeatLightLeft, 'SeatLightLeft', bsKernel);
   CreateBitmap32FromPNGResource(FImg_SeatDarkRight, 'SeatDarkRight', bsKernel);
   CreateBitmap32FromPNGResource(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
   CreateBitmap32FromPNGResource(FImg_CardBackground, 'CardBackground', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_CardFrontBackground, 'CardFrontBackground', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip1, 'Chip1', bsNone);
-  CreateBitmap32FromPNGResource(FImg_Chip5, 'Chip5', bsNone);
-  CreateBitmap32FromPNGResource(FImg_Chip25, 'Chip25', bsNone);
-  CreateBitmap32FromPNGResource(FImg_Chip100, 'Chip100', bsNone);
-  CreateBitmap32FromPNGResource(FImg_Chip500, 'Chip500', bsNone);
-  CreateBitmap32FromPNGResource(FImg_Chip1000, 'Chip1000', bsNone);
+  CreateBitmap32FromPNGResource(FImg_CardFrontBackground, 'CardFrontBackground', bsKernel, FCardWidth, FCardHeight, FCardAspectRatio);
+  CreateBitmap32FromPNGResource(FImg_Chip1, 'Chip1', bsKernel, FChipWidth, FChipHeight, FChipAspectRatio);
+  CreateBitmap32FromPNGResource(FImg_Chip5, 'Chip5', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip25, 'Chip25', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip100, 'Chip100', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip500, 'Chip500', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Chip1000, 'Chip1000', bsKernel);
+  CreateBitmap32FromPNGResource(FImg_Timebar, 'Timebar', bsKernel, FTimebarWidth, FTimebarHeight, FTimebarAspectRatio);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
     for CCS := Low(TCardSuit) to High(TCardSuit) do
       if (CCV <> cvUnknown) and (CCS <> csUnknown) then
       begin
-        CreateBitmap32FromPNGResource(FImg_CardArtworks[C1], Format('CardArtwork%s', [TCard.GetAsString(CCV, CCS)]), bsKernel);
+        CreateBitmap32FromPNGResource(FImg_CardArtworks[C1], Format('CardArtwork%s', [TCard.GetAsString(CCV, CCS)]), bsKernel, FArtworkWidth, FArtworkHeight, FArtworkAspectRatio);
         Inc(C1);
       end;
 
@@ -204,53 +235,13 @@ begin
   FTableXOffset := 65;
   FTableYOffset := 42;
 
-  FDealerButtonWidth := FImg_DealerButton.Width;
-  FDealerButtonHeight := FImg_DealerButton.Height;
-  FDealerButtonAspectRatio := FDealerButtonWidth / FDealerButtonHeight;
-
-  FSeatWidth := FImg_SeatEmptyLeft.Width;
-  FSeatHeight := FImg_SeatEmptyLeft.Height;
-  FSeatAspectRatio := FSeatWidth / FSeatHeight;
-
-  FCardWidth := FImg_CardBackground.Width;
-  FCardHeight := FImg_CardBackground.Height;
-  FCardAspectRatio := FCardWidth / FCardHeight;
-
-  FArtworkWidth := FImg_CardArtworks[0].Width;
-  FArtworkHeight := FImg_CardArtworks[0].Height;
-  FArtworkAspectRatio := FArtworkWidth / FArtworkHeight;
-
-  FChipWidth := FImg_Chip1.Width;
-  FChipHeight := FImg_Chip1.Height;
-  FChipAspectRatio := FCardWidth / FChipHeight;
-
   FInitialized := TRUE;
 end;
 
 class procedure TTableResources.Deinitialize;
-var
-  C1: Integer;
 begin
   FImg_TableBackground.Free;
-  FImg_Table.Free;
-  FImg_DealerButton.Free;
-  FImg_SeatEmptyLeft.Free;
-  FImg_SeatEmptyRight.Free;
-  FImg_SeatDarkLeft.Free;
-  FImg_SeatLightLeft.Free;
-  FImg_SeatDarkRight.Free;
-  FImg_SeatLightRight.Free;
-  FImg_CardBackground.Free;
-  FImg_CardFrontBackground.Free;
-  FImg_Chip1.Free;
-  FImg_Chip5.Free;
-  FImg_Chip25.Free;
-  FImg_Chip100.Free;
-  FImg_Chip500.Free;
-  FImg_Chip1000.Free;
-
-  for C1 := Low(FImg_CardArtworks) to High(FImg_CardArtworks) do
-    FImg_CardArtworks[C1].Free;
+  FCreatedBitmaps32.Free;
 
   FInitialized := FALSE;
 end;
