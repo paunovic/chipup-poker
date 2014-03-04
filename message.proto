@@ -294,6 +294,7 @@ message TableStatus {
 	optional int32 big_blind = 16;
 	optional uint32 handid = 17;
 	optional uint64 time = 18;
+	repeated TableEvent events = 19;
 }
 
 message SeatInfo {
@@ -391,7 +392,7 @@ message TableEvent {
 	}
 	required TableEventType event = 1;
 	optional int32 seat = 2;
-	required bytes table_mongo_id = 3;
+	optional bytes table_mongo_id = 3;
 	repeated PotInfo pots = 4;
 }
 
