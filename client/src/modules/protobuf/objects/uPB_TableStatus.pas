@@ -6,7 +6,7 @@ unit uPB_TableStatus;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo,uPB_TableEvent;
 
 type
   TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6,tsWinning2 = 7);
@@ -31,6 +31,7 @@ type
       FN_BIG_BLIND = 16;
       FN_HANDID = 17;
       FN_TIME = 18;
+      FN_EVENTS = 19;
 
     var
       FTableMongoId: TBytes;
@@ -51,6 +52,7 @@ type
       FBigBlind: Integer;
       FHandid: UINT32;
       FTime: UInt64;
+      FEvents: TObjectList<TPB_TableEvent>;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -91,6 +93,7 @@ type
     property BigBlind: Integer read FBigBlind write SetBigBlind;
     property Handid: UINT32 read FHandid write SetHandid;
     property Time: UInt64 read FTime write SetTime;
+    property Events: TObjectList<TPB_TableEvent> read FEvents write FEvents;
   end;
 
 implementation
@@ -103,6 +106,8 @@ destructor TPB_TableStatus.Destroy;
 begin
   if Assigned(FSeats) then
     FSeats.Free;
+  if Assigned(FEvents) then
+    FEvents.Free;
   inherited;
 end;
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -111,6 +116,9 @@ var
 begin
   if not Assigned(FSeats) then
     FSeats := TObjectList<TPB_SeatInfo>.Create;
+
+  if not Assigned(FEvents) then
+    FEvents := TObjectList<TPB_TableEvent>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -189,6 +197,10 @@ begin
       FN_TIME: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTime := AProtobufReader.readInt64;
+      end;
+      FN_EVENTS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FEvents.Add(TPB_TableEvent.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);

@@ -2990,7 +2990,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 266
+          Top = 260
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -3006,7 +3006,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 266
+          Top = 260
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -3022,7 +3022,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 266
+          Top = 260
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -3038,7 +3038,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 232
+          Top = 226
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -3057,6 +3057,10 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         592
         362)
@@ -3075,13 +3079,14 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 572
-          Height = 117
+          Height = 111
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          ExplicitHeight = 117
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3150,7 +3155,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 267
+          Top = 261
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -3163,10 +3168,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 267
         end
         object btDeleteGame: TcxButton
           Left = 216
-          Top = 267
+          Top = 261
           Width = 98
           Height = 28
           Action = acDeleteGame
@@ -3179,10 +3185,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 267
         end
         object btEditGame: TcxButton
           Left = 112
-          Top = 267
+          Top = 261
           Width = 98
           Height = 28
           Action = acShowEditGameForm
@@ -3195,6 +3202,7 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 267
         end
       end
     end

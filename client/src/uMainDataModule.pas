@@ -8,7 +8,6 @@ uses
 
 type
   TdmMain = class(TDataModule)
-    tiServerReconnect: TTimer;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private

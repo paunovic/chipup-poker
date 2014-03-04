@@ -3800,11 +3800,11 @@ object frmChipUpMain: TfrmChipUpMain
       SpeedButtonOptions.GroupIndex = 1
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 4
-      Font.Charset = DEFAULT_CHARSET
+      Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'Sintony'
-      Font.Style = [fsBold]
+      Font.Style = []
       ParentFont = False
     end
     object btHomeGames: TcxButton
@@ -3819,11 +3819,11 @@ object frmChipUpMain: TfrmChipUpMain
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.Down = True
       TabOrder = 5
-      Font.Charset = DEFAULT_CHARSET
+      Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
       Font.Name = 'Sintony'
-      Font.Style = [fsBold]
+      Font.Style = []
       ParentFont = False
     end
     object btPrijatnaPunina: TcxButton

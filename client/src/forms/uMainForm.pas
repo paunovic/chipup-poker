@@ -167,6 +167,16 @@ end;
 procedure TfrmChipUpMain.FormCreate(Sender: TObject);
 begin
   LoadImageFromResource(imgCashier, 'CashierNormal');
+
+  btHomeGames.Font.Name := 'Sintony';
+  btHomeGames.Font.Style := [];
+  btHomeGames.Font.Size := 8;
+
+  btTournaments.Font.Assign(btHomeGames.Font);
+  btOpenClubLobby.Font.Assign(btHomeGames.Font);
+  btOpenTournamentLobby.Font.Assign(btHomeGames.Font);
+  btCreateClub.Font.Assign(btHomeGames.Font);
+  btJoinClub.Font.Assign(btHomeGames.Font);
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);

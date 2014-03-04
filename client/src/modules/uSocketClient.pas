@@ -418,7 +418,6 @@ begin
     srChangeClubDetailsReply,
     srKickPlayerReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
 
-    seTableEvent: ADataObject := TPB_TableEvent.Create(ADataPointer, ARpcMessage.DataSize);
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);

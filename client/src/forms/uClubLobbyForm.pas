@@ -257,6 +257,7 @@ begin
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
     acLeaveClub.Enabled := not admin_visible;
+    lbsClubRake.Visible := admin_visible;
     seClubRake.Visible := admin_visible;
     seClubRake.Properties.OnChange := nil;
     seClubRake.Value := club.Rake;

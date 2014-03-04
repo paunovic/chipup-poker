@@ -3,13 +3,13 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 548
-  ClientWidth = 725
+  ClientHeight = 476
+  ClientWidth = 722
   Color = clBlack
-  Constraints.MaxHeight = 1037
+  Constraints.MaxHeight = 910
   Constraints.MaxWidth = 1320
-  Constraints.MinHeight = 573
-  Constraints.MinWidth = 730
+  Constraints.MinHeight = 503
+  Constraints.MinWidth = 500
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -27,8 +27,8 @@ object frmTable: TfrmTable
   TextHeight = 14
   object paBottom: TPanel
     Left = 0
-    Top = 468
-    Width = 725
+    Top = 396
+    Width = 722
     Height = 80
     Align = alBottom
     BevelOuter = bvNone
@@ -79,7 +79,7 @@ object frmTable: TfrmTable
     object paButtons: TPanel
       Left = 250
       Top = 0
-      Width = 475
+      Width = 472
       Height = 80
       Align = alClient
       BevelOuter = bvNone
@@ -89,10 +89,10 @@ object frmTable: TfrmTable
       ParentBackground = False
       TabOrder = 1
       DesignSize = (
-        475
+        472
         80)
       object btCall: TcxButton
-        Left = 266
+        Left = 263
         Top = 41
         Width = 92
         Height = 28
@@ -109,7 +109,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btCheckFold: TcxButton
-        Left = 168
+        Left = 165
         Top = 41
         Width = 92
         Height = 28
@@ -126,7 +126,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaise: TcxButton
-        Left = 372
+        Left = 369
         Top = 41
         Width = 92
         Height = 28
@@ -168,7 +168,7 @@ object frmTable: TfrmTable
         Width = 174
       end
       object seRaiseAmount: TcxSpinEdit
-        Left = 323
+        Left = 320
         Top = 13
         Anchors = [akRight, akBottom]
         Properties.ImmediatePost = True
@@ -180,7 +180,7 @@ object frmTable: TfrmTable
         Width = 46
       end
       object tbRaise: TcxTrackBar
-        Left = 367
+        Left = 364
         Top = 14
         Anchors = [akRight, akBottom]
         Properties.AutoSize = False
@@ -233,8 +233,8 @@ object frmTable: TfrmTable
   object PaintBox: TPaintBox32
     Left = 0
     Top = 0
-    Width = 725
-    Height = 468
+    Width = 722
+    Height = 396
     Align = alClient
     RepaintMode = rmOptimizer
     TabOrder = 1

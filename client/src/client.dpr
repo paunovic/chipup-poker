@@ -103,7 +103,8 @@ uses
   uPB_PingParams in 'modules\protobuf\objects\uPB_PingParams.pas',
   uPB_PingReply in 'modules\protobuf\objects\uPB_PingReply.pas',
   uDrawingCache in 'modules\drawing_cache\uDrawingCache.pas',
-  uDCSeatData in 'modules\drawing_cache\uDCSeatData.pas';
+  uDCSeatData in 'modules\drawing_cache\uDCSeatData.pas',
+  uFlopTableAnimationThread in 'modules\table_animation_threads\uFlopTableAnimationThread.pas';
 
 procedure FocusPokerApp;
 var

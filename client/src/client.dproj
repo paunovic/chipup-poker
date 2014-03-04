@@ -242,6 +242,7 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_PingReply.pas"/>
 			<DCCReference Include="modules\drawing_cache\uDrawingCache.pas"/>
 			<DCCReference Include="modules\drawing_cache\uDCSeatData.pas"/>
+			<DCCReference Include="modules\table_animation_threads\uFlopTableAnimationThread.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

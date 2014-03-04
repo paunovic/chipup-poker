@@ -15,7 +15,7 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus, uChipsStackMaker,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, JPEG, uCards,
   GR32_Backends, GR32, GR32_Png, GR32_Resamplers, GR32_Image, dxsChipUpRedButton, cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
-  uDrawingCache;
+  uDrawingCache, uFlopTableAnimationThread, uPB_TableEvent;
 
 type
   TfrmTable = class(TForm)
@@ -90,6 +90,8 @@ type
     FGoalTime        : UINT32;
     FCurrentPlaytime : Integer;
     FDrawingCache    : TDrawingCache;
+    FFlopAnimated    : Boolean;
+    FFlopAniThread   : TFlopTableAnimationThread;
 
     procedure Redraw(const APaintboxRepaint: Boolean = FALSE);
     procedure AddUserChatMessage(const AUser, AMessage: String);
@@ -97,6 +99,8 @@ type
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
+
+    procedure FlopThreadAnimaton(Sender: TObject);
 
     procedure DrawSeats;
     procedure DrawTimebar;
@@ -117,7 +121,7 @@ type
 
     procedure CSRChatEvent(const AMessage: TMessageItem);
     procedure CSRETableStatus(const AMessage: TMessageItem);
-    procedure CSETableEvent(const AMessage: TMessageItem);
+    procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 
     procedure ConfigureGUI;
 
@@ -138,7 +142,7 @@ uses
   System.Types, cxClasses, System.Math,
   uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_TableEvent, uPB_PotInfo,
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_PotInfo,
   uDCSeatData;
 
 
@@ -159,7 +163,9 @@ begin
 
   reChat.Lines.Clear;
 
-  FFormAspectRatio := Width / Height;
+  FFormAspectRatio := Constraints.MaxWidth / Constraints.MaxHeight;
+  Constraints.MinHeight := Round(Constraints.MinWidth / FFormAspectRatio);
+
   PaintBox.BufferOversize := 0;
 
   if not TTableResources.IsInitialized then
@@ -169,7 +175,6 @@ begin
   FTableHeight := TTableResources.TableImage.Height;
 
   Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, Round(FTable.Game.SmallBlind / 100), Round(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull]);
-  Redraw;
 end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
@@ -201,7 +206,7 @@ end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
 begin
-  if Width / Height <> FFormAspectRatio then
+  if Height <> Round(Width / FFormAspectRatio) then
     Height := Round(Width / FFormAspectRatio);
 
   Redraw;
@@ -243,8 +248,7 @@ begin
                             TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
                             TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
                             TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
-                            TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
-                            TServerMessageCallback.Create(seTableEvent, CSETableEvent)
+                            TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus)
                           ]
                         );
     end;
@@ -320,8 +324,8 @@ begin
   FTableResizeRatio := FTableWidth / TTableResources.TableWidth;
   tblw := Round(FTableResizeRatio * TTableResources.TableImage.Width);
   tblh := Round(FTableResizeRatio * TTableResources.TableImage.Height);
-  tblx := (PaintBox.Buffer.Width - tblw) div 2;
-  tbly := (PaintBox.Buffer.Height - tblh) div 2 + 54;
+  tblx := Round((PaintBox.Buffer.Width - tblw) / 2);
+  tbly := Round((PaintBox.Buffer.Height - tblh) / 2 + 80 * FTableResizeRatio);
   FTableXOffset := tblx + Round(FTableResizeRatio * TTableResources.TableXOffset);
   FTableYOffset := tbly + Round(FTableResizeRatio * TTableResources.TableYOffset);
   FTableCenter.X := FTableXOffset + FTableWidth div 2;
@@ -367,7 +371,7 @@ begin
   {$ENDIF}
 
   if APaintboxRepaint then
-    PaintBox.Flush;
+    PaintBox.Invalidate;
 end;
 
 procedure TfrmTable.seRaiseAmountPropertiesChange(Sender: TObject);
@@ -599,11 +603,8 @@ var
   text_color: TColor32;
   suit_text : String;
 begin
-  // draw card rect
-  PaintBox.Buffer.Draw(ACardRect, TTableResources.CardFrontBackgroundImage.BoundsRect, TTableResources.CardFrontBackgroundImage);
-
   suit_point.X := ACardRect.Left + Round(2.5 * FTableResizeRatio);
-  suit_point.Y := ACardRect.Top + Round(7 + FTableResizeRatio * 16);
+  suit_point.Y := ACardRect.Top + Round(7 + FTableResizeRatio * 17);
 
   art_rect.Left := ACardRect.Right - FArtWidth - 3;
   art_rect.Top := ACardRect.Top + Round(10 * FTableResizeRatio);
@@ -639,12 +640,15 @@ begin
   if card_val = 'T' then
     card_val := '=';
 
+  // draw card rect
+  PaintBox.Buffer.Draw(ACardRect, TTableResources.CardFrontBackgroundImage.BoundsRect, TTableResources.CardFrontBackgroundImage);
+
   // draw card value
-  PaintBox.Buffer.RenderTextW(ACardRect.Left + Round(5 * FTableResizeRatio), ACardRect.Top, card_val, 4, text_color);
+  PaintBox.Buffer.RenderTextW(ACardRect.Left + Round(5 * FTableResizeRatio), ACardRect.Top, card_val, 3, text_color);
 
   // draw card suit
   PaintBox.Buffer.Font.Size := Round(5 + FTableResizeRatio * 10);
-  PaintBox.Buffer.RenderTextW(suit_point.X, suit_point.Y, suit_text, 4, text_color);
+  PaintBox.Buffer.RenderTextW(suit_point.X, suit_point.Y, suit_text, 3, text_color);
 
   // draw card artwork
   art_img := TTableResources.GetCardArtwork(ACard);
@@ -685,9 +689,13 @@ begin
       tx := Round(ARect.Left - tw - 5 * FTableResizeRatio);
   end;
 
-  PaintBox.Buffer.RenderTextW(tx, ty, ctext, 4, $FFFFFFFF);
+  PaintBox.Buffer.RenderTextW(tx, ty, ctext, 3, $FFFFFFFF);
 end;
 
+procedure TfrmTable.FlopThreadAnimaton(Sender: TObject);
+begin
+  Redraw(TRUE);
+end;
 
 procedure TfrmTable.DrawTableCards;
 var
@@ -704,8 +712,51 @@ begin
   end;
 
   if FTableStatus.FlopCards.Count > 0 then
-    for C1 := 0 to FTableStatus.FlopCards.Count - 1 do
-      DrawCard(FTableStatus.FlopCards[C1], card_rects[C1]);
+  begin
+    if (FTableStatus.TurnCard.Value <> cvUnknown) or
+       (FTableStatus.RiverCard.Value <> cvUnknown) then
+      FFlopAnimated := TRUE;
+
+    if FFlopAnimated then
+    begin
+      for C1 := 0 to FTableStatus.FlopCards.Count - 1 do
+        DrawCard(FTableStatus.FlopCards[C1], card_rects[C1]);
+    end
+    else
+    begin
+      if not Assigned(FFlopAniThread) then
+      begin
+        FFlopAniThread := TFlopTableAnimationThread.Create(card_rects[0], card_rects[0], card_rects[1], card_rects[2]);
+        FFlopAniThread.OnAnimation := FlopThreadAnimaton;
+        FFlopAniThread.Start;
+      end
+      else
+      begin
+        if FFlopAniThread.Done then
+        begin
+          FFlopAniThread := nil;
+          FFlopAnimated := TRUE;
+          DrawTableCards;
+          Exit;
+        end
+        else
+        begin
+          FFlopAniThread.SetPositions(card_rects[0], card_rects[0], card_rects[1], card_rects[2]);
+                   {
+          PaintBox.Buffer.Draw(FFlopAniThread.CurPos1, TTableResources.CardBackgroundImage.BoundsRect, TTableResources.CardBackgroundImage);
+          PaintBox.Buffer.Draw(FFlopAniThread.CurPos2, TTableResources.CardBackgroundImage.BoundsRect, TTableResources.CardBackgroundImage);
+          PaintBox.Buffer.Draw(FFlopAniThread.CurPos3, TTableResources.CardBackgroundImage.BoundsRect, TTableResources.CardBackgroundImage);
+                    }
+          DrawCard(FTableStatus.FlopCards[0], FFlopAniThread.CurPos1);
+          DrawCard(FTableStatus.FlopCards[1], FFlopAniThread.CurPos2);
+          DrawCard(FTableStatus.FlopCards[2], FFlopAniThread.CurPos3);
+
+        end;
+      end;
+    end;
+  end
+  else
+    FFlopAnimated := FALSE;
 
   if FTableStatus.TurnCard.Value <> cvUnknown then
     DrawCard(FTableStatus.TurnCard, card_rects[3]);
@@ -1173,6 +1224,9 @@ begin
 
   FTableStatus.Assign(pbtablestatus);
 
+  for C1 := 0 to pbtablestatus.Events.Count - 1 do
+    ProcessTableEvent(pbtablestatus.Events[C1]);
+
   if ActionManager.State = asSuspended then
     ActionManager.State := asNormal;
 
@@ -1232,9 +1286,8 @@ begin
   Redraw(TRUE);
 end;
 
-procedure TfrmTable.CSETableEvent(const AMessage: TMessageItem);
+procedure TfrmTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 var
-  pbtevent    : TPB_TableEvent;
   event       : String;
   seat_caption: String;
   seat        : TSeatInfo;
@@ -1244,14 +1297,10 @@ var
   C1, C2      : Integer;
   tmpstr      : String;
 begin
-  pbtevent := AMessage.Object_ as TPB_TableEvent;
-  if not CompareBytes(pbtevent.TableMongoId, FTable.Game.MongoId) then
-    Exit;
-
-  FTableStatus.Assign(pbtevent);
+  FTableStatus.Assign(ATableEvent);
 
   seat_caption := '';
-  case pbtevent.Event of
+  case ATableEvent.Event of
     teFold: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'FOLD';
@@ -1261,9 +1310,9 @@ begin
     teStandUp: event := 'STAND UP';
     teWinning: begin
       event := 'WINNING';
-      for C1 := 0 to pbtevent.Pots.Count - 1 do
+      for C1 := 0 to ATableEvent.Pots.Count - 1 do
       begin
-        pot := pbtevent.Pots[C1];
+        pot := ATableEvent.Pots[C1];
 
         if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
           Continue;
@@ -1320,7 +1369,7 @@ begin
   if seat_caption <> '' then
   begin
     FTableStatus.Seats.ClearCaptions;
-    seat_index := pbtevent.Seat;
+    seat_index := ATableEvent.Seat;
     if FTableStatus.GetSeatInfo(seat_index, seat) then
     begin
       seat.Caption := seat_caption;
@@ -1329,6 +1378,10 @@ begin
       tiSeatCaptionClear.Enabled := TRUE;
     end;
   end;
+
+  {$IFDEF DEBUG}
+  DebugLn('Event received: ' + event, ditApplication);
+  {$ENDIF}
 end;
 
 procedure TfrmTable.acCallExecute(Sender: TObject);

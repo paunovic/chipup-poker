@@ -15,25 +15,21 @@ type
     const
       FN_EVENT = 1;
       FN_SEAT = 2;
-      FN_TABLE_MONGO_ID = 3;
       FN_POTS = 4;
 
     var
       FEvent: TTableEventType;
       FSeat: Integer;
-      FTableMongoId: TBytes;
       FPots: TObjectList<TPB_PotInfo>;
 
     procedure SetEvent(const AValue: TTableEventType);
     procedure SetSeat(const AValue: Integer);
-    procedure SetTableMongoId(const AValue: TBytes);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Event: TTableEventType read FEvent write SetEvent;
     property Seat: Integer read FSeat write SetSeat;
-    property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
     property Pots: TObjectList<TPB_PotInfo> read FPots write FPots;
   end;
 
@@ -68,10 +64,6 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
       end;
-      FN_TABLE_MONGO_ID: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FTableMongoId);
-      end;
       FN_POTS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_PotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
@@ -91,12 +83,6 @@ procedure TPB_TableEvent.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
   ProtobufOutput.writeInt32(FN_SEAT, AValue);
-end;
-
-procedure TPB_TableEvent.SetTableMongoId(const AValue: TBytes);
-begin
-  FTableMongoId := AValue;
-  ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
 end;
 
 end.

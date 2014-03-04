@@ -47,7 +47,6 @@ type
     seGameChange = 205,
     seGameCreate = 206,
     seGameDelete = 207,
-    seTableEvent = 208,
     seTableStatus = 209,
     seTransferChips = 210,
     scLogin = 501,
@@ -155,7 +154,6 @@ begin
     seGameChange: result := 'seGameChange';
     seGameCreate: result := 'seGameCreate';
     seGameDelete: result := 'seGameDelete';
-    seTableEvent: result := 'seTableEvent';
     seTableStatus: result := 'seTableStatus';
     seTransferChips: result := 'seTransferChips';
     scLogin: result := 'scLogin';
