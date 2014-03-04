@@ -208,7 +208,7 @@ enum ServerCodes {
 	seGameChange = 205;
 	seGameCreate = 206;
 	seGameDelete = 207;
-	seTableEvent = 208;
+
 	seTableStatus = 209;
 	seTransferChips = 210;
 
@@ -392,7 +392,6 @@ message TableEvent {
 	}
 	required TableEventType event = 1;
 	optional int32 seat = 2;
-	optional bytes table_mongo_id = 3;
 	repeated PotInfo pots = 4;
 }
 
