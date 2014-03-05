@@ -18,6 +18,7 @@ message HelloReply {
 	required int32 ChangeExpireTime = 3;
 	required int32 ForgotExpireTime = 4;
 	required int32 max_play_time = 5;
+	required int32 max_timebank = 6 [ default = 60000 ];
 }
 
 message LoginParams {
