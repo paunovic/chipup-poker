@@ -15,6 +15,7 @@ var https = require('https');
 var assert = require('assert');
 var util = require('util');
 var async = require('async');
+var child_process = require('child_process');
 
 var SmtpConnection = require('./smtp');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
@@ -357,8 +358,15 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	}
 	function initHands() {
 		allCounters.findOne({_id:'handHistory'},function (err,row) {
-			hands = row.seq;
-			goOnline();
+			if (!row) {
+				getNextSequence('handHistory',function(seq) {
+					hands = seq;
+					goOnline();
+				});
+			} else {
+				hands = row.seq;
+				goOnline();
+			}
 		});
 	}
 });
@@ -1590,6 +1598,7 @@ function Game(obj) {
 	this.minBet = 0;
 	this.log('pots initialized to zero');
 	this.Lock = new ReadWriteLock();
+	this.omaha = true;
 }
 Game.prototype.getLimit = function (seat) {
 	if (typeof this.bets[seat] != 'number') this.bets[seat] = 0;
@@ -1706,7 +1715,8 @@ Game.prototype.deal = function deal(cb) {
 				this.members[x].status = 'psOutOfPlay';
 				continue;
 			}
-			this.deck.draw(2,this.members[x].hand);
+			if (this.omaha) this.deck.draw(4,this.members[x].hand);
+			else this.deck.draw(2,this.members[x].hand);
 			this.members[x].status = 'psInHand';
 			this.history.players[x] = this.seats[x].userid;
 			this.history.cards[x+3] = this.members[x].hand.prettyPrint();
@@ -1954,7 +1964,8 @@ Game.prototype.doWin = function (cb) {
 		var pot = this.pots[y];
 		if (pot.value == 0) continue;
 		var rake = pot.value * (this.rake / 100);
-		var split = Math.round((pot.value-rake) / pot.winners.length); // destroys any chip that cant evenly be split
+		this.log('splitting pot#%d',y)
+		var split = Math.round((pot.value-rake) / pot.winners.length);
 		totalrake += pot.value - (split * pot.winners.length);
 		for (var x=0; x<pot.winners.length; x++) {
 			var priv = this.seats[pot.winners[x]];
@@ -2047,23 +2058,89 @@ Game.prototype.checkRoundPass = function (cb,events) {
 	} else cb(events);
 }
 Game.prototype.calcWinners = function (cb,events) {
-	var hands = [];
-	for (var x=0; x<this.members.length; x++) {
-		if (!this.members[x]) continue;
-		if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
-		hands.push({seat:x,hand:this.members[x].hand.cards});
-	}
-	this.log('hands: %j',hands[0]);
-	var forcewin = -1;
-	if (hands.length > 1) {
-		var result = dag.rankHands(this,hands);
-		this.log('dag results:',result);
-	} else {
-		forcewin = hands[0].seat;
-	}
-	var potid = 0;
 	var potdata = [];
 	var logmsg = [];
+	if (this.omaha) {
+		// loop over each pot and figure out which batches of hands to eval
+		var pots = [];
+		var tbl = this.flop.prettyPrint(true)+' '+this.turn.prettyPrint(true)+' '+this.river.prettyPrint(true);
+		for (var x=0; x<this.pots.length; x++) {
+			if (this.pots[x].value == 0) continue;
+			var hands = [];
+			var cards = [];
+			this.log('x%d',x);
+			for (var y=0; y<this.pots[x].members.length; y++) {
+				var z = this.pots[x].members[y];
+				this.log('x%d y%d z%d',x,y,z);
+				if (!this.members[z]) continue;
+				if (['psInHand','psAllIn'].indexOf(this.members[z].status) == -1) continue;
+				hands.push({seat:z});
+				cards.push(this.members[z].hand.prettyPrint(true));
+			}
+			var cmd = "./pokenum -o -t "+cards.join(' - ')+' -- '+tbl;
+			pots[x] = { hands:hands,cmd:cmd };
+		}
+		this.log(pots);
+		if ((pots.length == 1) && (pots[0].hands.length == 1)) {
+			forcewin = pots[0].hands[0].seat;
+			for (var x=0; x<this.pots.length; x++) {
+				var pot = this.pots[x];
+				var winners = [ forcewin ];
+				if (pot.value == 0) continue;
+				potdata[x] = { sum:pot.value, seats:pot.members, WinnerData:[] };
+				this.log('this pot',x,pot);
+				
+				logmsg.push(this.seats[forcewin].conn.nick+' '+this.seats[forcewin].userid);
+				potdata[x].WinnerData.push({seat:forcewin,msg:'default'});
+				
+				this.log('winners of pot #'+potid,winners);
+				pot.winners = winners;
+			}
+			finish1.call(this);
+		} else {
+			var potid = 0;
+			async.eachSeries(pots,function evalPot(pot,cb2){
+				this.log('need to eval:'+pot.cmd);
+				var pokenum = child_process.exec(cmd,{cwd:'./poker-eval-138.0/examples'},function (error,stdout,stderr) {
+					var winners;
+					this.log('reply:'+stdout);
+					var parts = stdout.trim().split(' ');
+					parts.splice(0,2);
+					this.log(parts);
+					for (var x=0; x<parts.length; x++) {
+						if (parts[x] == '1.000000') {
+							winners = [ pot.hands[x].seat ];
+						} else if (parts[x] == '0.000000') {
+						} else assert(0);
+					}
+					potdata[potid] = { sum:pot.value, seats:pot.members, WinnerData:[] };
+					logmsg.push(this.seats[winners[0]].conn.nick+' '+this.seats[winners[0]].userid);
+					potdata[potid].WinnerData.push({seat:winners[0],msg:'omaha 1 way'});
+					this.log('winners of pot #'+potid,winners);
+					this.pots[potid].winners = winners;
+					potid++;
+					cb2();
+				}.bind(this));
+			}.bind(this),function done() {
+				finish1.call(this);
+			}.bind(this));
+		}
+	} else {
+		var potid = 0;
+		var hands = [];
+		for (var x=0; x<this.members.length; x++) {
+			if (!this.members[x]) continue;
+			if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
+			hands.push({seat:x,hand:this.members[x].hand.cards});
+		}
+		this.log('hands: %j',hands[0]);
+		var forcewin = -1;
+		if (hands.length > 1) {
+			var result = dag.rankHands(this,hands);
+			this.log('dag results:',result);
+		} else {
+			forcewin = hands[0].seat;
+		}
 	// FIXME< just use a for loop?
 	async.eachSeries(this.pots,function (pot,cb1) {
 		var lowestid = -1;
@@ -2111,15 +2188,19 @@ Game.prototype.calcWinners = function (cb,events) {
 		pot.winners = winners;
 		cb1();
 	}.bind(this));
+		finish1.call(this);
+	}
 	
-	events.push(this.makeEvent('teWinning',null,potdata));
-	this.addHistory({code:['win1'],potdata:potdata});
-	this.doWin(function () {
-		this.saveHistory(function () {
-			cb(events);
-		});
-	}.bind(this));
-	this.log('MOVE WIN END '+logmsg.join(','));
+	function finish1() {
+		events.push(this.makeEvent('teWinning',null,potdata));
+		this.addHistory({code:['win1'],potdata:potdata});
+		this.doWin(function () {
+			this.saveHistory(function () {
+				cb(events);
+			});
+		}.bind(this));
+		this.log('MOVE WIN END '+logmsg.join(','));
+	}
 }
 Game.prototype.moveToPot = function (reason,cb1) {
 	this.log('state: %s bets: %j pots: %j reason:%s',this.state,this.bets,this.pots,reason);

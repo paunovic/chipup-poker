@@ -43,11 +43,12 @@ function Hand() {
 	this.cards = [];
 }
 Deck.suits = ['H','D','S','C'];
-Hand.prototype.prettyPrint = Deck.prototype.prettyPrint = function prettyPrint() {
+Hand.prototype.prettyPrint = Deck.prototype.prettyPrint = function prettyPrint(spaces) {
 	var out = [];
 	for (var i=0; i<this.cards.length; i++) {
-		out.push(getValue(this.cards[i])+getSuit(this.cards[i]));
+		out.push(getValue(this.cards[i])+getSuit(this.cards[i],spaces));
 	}
+	if (spaces) return out.join(' ');
 	return out.join('');
 }
 function getValue(code) {
@@ -61,13 +62,22 @@ function getValue(code) {
 	}
 	return c+2;
 }
-function getSuit(code) {
+function getSuit(code,spaces) {
 	var c = code%4;
-	switch (c) {
-	case 0: return 'H';
-	case 1: return 'S';
-	case 2: return 'C';
-	case 3: return 'D';
+	if (spaces) {
+		switch (c) {
+		case 0: return 'h';
+		case 1: return 's';
+		case 2: return 'c';
+		case 3: return 'd';
+		}
+	} else {
+		switch (c) {
+		case 0: return 'H';
+		case 1: return 'S';
+		case 2: return 'C';
+		case 3: return 'D';
+		}
 	}
 }
 Deck.prototype.shuffle = function shuffle(callback) {
