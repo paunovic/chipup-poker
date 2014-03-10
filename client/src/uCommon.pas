@@ -18,7 +18,7 @@ function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = 
 procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
                 const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
 function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): Integer;
-procedure RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer);
+function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): TForm;
 function CompressStream(const AStream: TMemoryStream): Boolean;
 function DecompressStream(const AStream: TMemoryStream): Boolean;
 function GetFileSize(const AFile: String): DWORD;
@@ -112,7 +112,7 @@ begin
   end;
 end;
 
-procedure RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer);
+function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): TForm;
 var
   form: TForm;
 begin
@@ -125,6 +125,7 @@ begin
     (form as IFormParams).SetParams(AParams);
 
   form.Show;
+  result := form;
 end;
 
 function MyZCompressStream(inStream, outStream: TStream; level: TZCompressionLevel): Boolean;

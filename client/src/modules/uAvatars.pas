@@ -3,8 +3,9 @@ unit uAvatars;
 interface
 
 uses
-  JPEG, System.Generics.Collections, System.Classes, System.SysUtils,
-  OverbyteIcsWndControl, OverbyteIcsHttpProt, GR32;
+  Winapi.Windows, JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes,
+  System.SysUtils, OverbyteIcsWndControl, OverbyteIcsHttpProt, AsphyreImages, AsphyreJpg,
+  GR32;
 
 type
   TAvatar = class
@@ -12,27 +13,30 @@ type
     FId         : TBytes;
     FIdAsString : String;
     FImage      : TJPEGImage;
-    FImageCircle: TBitmap32;
+    FDXImage    : TAsphyreImage;
+    FStoragePath: String;
 
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure SetId(const AValue: TBytes);
-    function GetAvatarPath(const AStoragePath: String): String;
-    procedure MakeBitmaps32(const Image: TJPEGImage);
+    function GetAvatarPath: String;
+    procedure MakeDXImage;
 
   public
-    constructor Create(const AId: TBytes); overload;
+    constructor Create(const AStoragePath: String; const AId: TBytes);
     destructor Destroy; override;
 
     procedure Refresh;
 
     procedure SetImage(const AImage: TJPEGImage); overload;
-    function SetImage(const AStoragePath, AId: String): Boolean; overload;
-    procedure Save(const AStoragePath: String);
+    function SetImage(const AMemoryStream: TMemoryStream): Boolean; overload;
+    function SetImage(const AId: String): Boolean; overload;
+    procedure Save;
 
-    property Id         : TBytes read FId write SetId;
-    property IdAsString : String read FIdAsString;
-    property Image      : TJPEGImage read FImage;
-    property ImageCircle: TBitmap32 read FImageCircle;
+    property Id        : TBytes read FId write SetId;
+    property IdAsString: String read FIdAsString;
+    property Image     : TJPEGImage read FImage;
+    property DXImage   : TAsphyreImage read FDXImage;
+    property Path      : String read GetAvatarPath;
   end;
 
   TAvatars = class(TObjectList<TAvatar>)
@@ -49,97 +53,37 @@ type
     function RefreshAvatar(const AId: TBytes): Boolean;
     function SetAvatarImage(const AId: TBytes; const AImage: TJPEGImage): Boolean;
     function DefaultAvatar: TAvatar;
-
-    procedure Save;
   end;
 
 implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uCommon, uMainDataModule, uSettings, uEncryption, GR32_Resamplers, GR32_Backends;
+  AsphyreBitmaps, GR32_Backends, AsphyreBMP, AsphyreTypes, uAsphyreImageHelper,
+  uCommon, uMainDataModule, uSettings, uEncryption;
 
 
 { TAvatar }
 
-constructor TAvatar.Create(const AId: TBytes);
+constructor TAvatar.Create(const AStoragePath: String; const AId: TBytes);
 begin
+  FStoragePath := AStoragePath;
+  FImage := TJPEGImage.Create;
+  FDXImage := TAsphyreImage.Create;
   SetId(AId);
 end;
 
 destructor TAvatar.Destroy;
 begin
-  if Assigned(FImage) then
-    FreeAndNil(FImage);
-
-  if Assigned(FImageCircle) then
-    FImageCircle.Free;
+  FreeAndNil(FDXImage);
+  FreeAndNil(FImage);
 
   inherited;
 end;
 
-procedure TAvatar.MakeBitmaps32(const Image: TJPEGImage);
-var
-  C1, C2: Integer;
-  cx, cy: Integer;
-  radius: Integer;
-  x1, y1: Integer;
-  x2, y2: Integer;
-  tmpb  : TBitmap32;
+function TAvatar.GetAvatarPath: String;
 begin
-  if not Assigned(FImageCircle) then
-  begin
-    FImageCircle := TBitmap32.Create;
-    FImageCircle.Resampler := TKernelResampler.Create;
-    (FImageCircle.Resampler as TKernelResampler).Kernel := TLanczosKernel.Create;
-  end;
-
-  FImageCircle.Assign(FImage);
-  cx := FImageCircle.Width div 2;
-  cy := FImageCircle.Height div 2;
-  if cx < cy then
-    radius := cx
-  else
-    radius := cy;
-
-  x1 := FImageCircle.Width; y1 := FImageCircle.Height;
-  x2 := 0; y2 := 0;
-  for C1 := 0 to FImageCircle.Width - 1 do
-  begin
-    for C2 := 0 to FImageCircle.Height - 1 do
-    begin
-      if not IsPointInsideCircle(C1, C2, cx, cy, radius) then
-        FImageCircle.PixelPtr[C1, C2]^ := $00000000
-      else
-      begin
-        if C1 < x1 then
-          x1 := C1;
-        if C2 < y1 then
-          y1 := C2;
-
-        if C1 > x2 then
-          x2 := C1;
-        if C2 > y2 then
-          y2 := C2;
-      end;
-    end;
-  end;
-
-  tmpb := TBitmap32.Create;
-  try
-    tmpb.SetSize(x2 - x1, y2 - y1);
-    tmpb.Canvas.CopyRect(tmpb.BoundsRect, FImageCircle.Canvas, Rect(x1, y1, x2, y2));
-    FImageCircle.Assign(tmpb);
-  finally
-    tmpb.Free;
-  end;
-
-  FImageCircle.DrawMode := dmBlend;
-end;
-
-function TAvatar.GetAvatarPath(const AStoragePath: String): String;
-begin
-  result := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AStoragePath) + Copy(FIdAsString, 1, 3)) + FIdAsString;
+  result := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(FStoragePath) + Copy(FIdAsString, 1, 3)) + FIdAsString + '.cupavt';
 end;
 
 procedure TAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
@@ -156,14 +100,7 @@ begin
   if Assigned(http.RcvdStream) then
   begin
     http.RcvdStream.Position := 0;
-    if IsJPEGStream(http.RcvdStream) then
-    begin
-      if not Assigned(FImage) then
-        FImage := TJPEGImage.Create;
-      http.RcvdStream.Position := 0;
-      FImage.LoadFromStream(http.RcvdStream);
-      MakeBitmaps32(FImage);
-    end;
+    SetImage(http.RcvdStream as TMemoryStream);
     (http.RcvdStream as TMemoryStream).Free;
   end;
 
@@ -186,13 +123,13 @@ begin
   http.GetAsync;
 end;
 
-procedure TAvatar.Save(const AStoragePath: String);
+procedure TAvatar.Save;
 var
   apath: String;
 begin
   if Assigned(FImage) then
   begin
-    apath := GetAvatarPath(AStoragePath);
+    apath := GetAvatarPath;
     ForceDirectories(ExtractFilePath(apath));
     FImage.SaveToFile(apath);
   end;
@@ -212,41 +149,114 @@ begin
   FIdAsString := LowerCase(FIdAsString);
 end;
 
-function TAvatar.SetImage(const AStoragePath, AId: String): Boolean;
+function TAvatar.SetImage(const AId: String): Boolean;
 var
   ms   : TMemoryStream;
   apath: String;
 begin
-  result := FALSE;
-
-  apath := GetAvatarPath(AStoragePath);
+  apath := GetAvatarPath;
   if not FileExists(apath) then
-    Exit;
+    Exit(FALSE);
 
   ms := TMemoryStream.Create;
   try
     ms.LoadFromFile(apath);
-    if IsJPEGStream(ms) then
-    begin
-      FImage := TJPEGImage.Create;
-      ms.Position := 0;
-      FImage.LoadFromStream(ms);
-      MakeBitmaps32(FImage);
-      result := TRUE;
-    end;
+    result := SetImage(ms);
   finally
     ms.Free;
   end;
 end;
 
+function TAvatar.SetImage(const AMemoryStream: TMemoryStream): Boolean;
+var
+  jpg: TJPEGImage;
+begin
+  if IsJPEGStream(AMemoryStream) then
+  begin
+    AMemoryStream.Position := 0;
+    jpg := TJPEGImage.Create;
+    try
+      jpg.LoadFromStream(AMemoryStream);
+      SetImage(jpg);
+      result := TRUE;
+    finally
+      jpg.Free;
+    end;
+  end
+  else
+    result := FALSE;
+end;
+
 procedure TAvatar.SetImage(const AImage: TJPEGImage);
 begin
-  if not Assigned(FImage) then
-    FImage := TJPEGImage.Create;
-
   FImage.Assign(AImage);
-  MakeBitmaps32(FImage);
+  MakeDXImage;
+  Save;
 end;
+
+procedure TAvatar.MakeDXImage;
+var
+  C1, C2, cx, cy, radius, x1, y1, x2, y2: Integer;
+  bmp, tmpb                             : TBitmap32;
+  mstream                               : TMemoryStream;
+begin
+  mstream := TMemoryStream.Create;
+  try
+    bmp := TBitmap32.Create;
+    try
+      bmp.Assign(FImage);
+      cx := bmp.Width div 2;
+      cy := bmp.Height div 2;
+      if cx < cy then
+        radius := cx
+      else
+        radius := cy;
+
+      x1 := bmp.Width; y1 := bmp.Height;
+      x2 := 0; y2 := 0;
+      for C1 := 0 to bmp.Width - 1 do
+      begin
+        for C2 := 0 to bmp.Height - 1 do
+        begin
+          if not IsPointInsideCircle(C1, C2, cx, cy, radius) then
+            bmp.PixelPtr[C1, C2]^ := $00000000
+          else
+          begin
+            if C1 < x1 then
+              x1 := C1;
+            if C2 < y1 then
+              y1 := C2;
+
+            if C1 > x2 then
+              x2 := C1;
+            if C2 > y2 then
+              y2 := C2;
+          end;
+        end;
+      end;
+
+      tmpb := TBitmap32.Create;
+      try
+        tmpb.SetSize(x2 - x1, y2 - y1);
+        tmpb.Canvas.CopyRect(tmpb.BoundsRect, bmp.Canvas, Rect(x1, y1, x2, y2));
+        bmp.Assign(tmpb);
+      finally
+        tmpb.Free;
+      end;
+
+      bmp.DrawMode := dmBlend;
+      bmp.SaveToStream(mstream, TRUE);
+
+      mstream.Position := 0;
+      FDXImage.LoadFromStream('.bmp', mstream);
+    finally
+      bmp.Free;
+    end;
+  finally
+    mstream.Free;
+  end;
+end;
+
 
 { TAvatars }
 
@@ -254,22 +264,14 @@ constructor TAvatars.Create(const AStoragePath: String);
 begin
   inherited Create;
 
+  BitmapManager.RegisterExt('.cupavtr', BMPBitmap);
+
   FStoragePath := AStoragePath;
 end;
 
 destructor TAvatars.Destroy;
 begin
-  Save;
-
   inherited;
-end;
-
-procedure TAvatars.Save;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to Length(ToArray) - 1 do
-    ToArray[C1].Save(FStoragePath);
 end;
 
 function TAvatars.IndexOf(const AId: TBytes): Integer;
@@ -315,16 +317,16 @@ begin
       ToArray[index].SetImage(AImage);
 
     if not Assigned(ToArray[index].Image) then
-      ToArray[index].SetImage(FStoragePath, ToArray[index].IdAsString);
+      ToArray[index].SetImage(ToArray[index].IdAsString);
 
     Exit(ToArray[index]);
   end;
 
-  avatar := TAvatar.Create(AId);
+  avatar := TAvatar.Create(FStoragePath, AId);
   if Assigned(AImage) then
     avatar.SetImage(AImage)
   else
-    if not avatar.SetImage(FStoragePath, avatar.IdAsString) then
+    if not avatar.SetImage(avatar.IdAsString) then
       avatar.Refresh;
 
   Add(avatar);

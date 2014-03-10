@@ -109,11 +109,11 @@ begin
   FTableStatus := AParams[1];
   FSeatIndex := PInteger(AParams[2])^;
 
-  lbsInfo.Caption := Format('%s (%d/%d) %s'#10#10'Min buy-in: %d'#10'Max buy-in: %d'#10#10'Your balance: %.2f',
+  lbsInfo.Caption := Format('%s (%d/%d) %s'#10#10'Min buy-in: %d'#10'Max buy-in: %d'#10#10'Your available balance: %.2f',
     [
       FTable.Game.Name, Trunc(FTable.Game.SmallBlind / 100), Trunc(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull,
       Trunc((FTable.Game.MinBuyin * FTable.Game.BigBlind) / 100), Trunc((FTable.Game.MaxBuyin * FTable.Game.BigBlind) / 100),
-      dmMain.SelfInfo.Balance / 100
+      dmMain.SelfInfo.Balance / 100 {FIXME: AVAIL BALANCE}
     ]);
 
   buyin := FTable.Game.MinBuyin * FTable.Game.BigBlind;

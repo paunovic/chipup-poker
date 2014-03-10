@@ -3,8 +3,8 @@ unit uMainDataModule;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, cxLabel,
-  uPlayerInfo, uServerSettings, uTables, uAvatars, uPB_StatusReply;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, System.Generics.Collections,
+  uPlayerInfo, uServerSettings, uTables, uAvatars, uPB_StatusReply, Vcl.Forms, uFormsContainer;
 
 type
   TdmMain = class(TDataModule)
@@ -20,6 +20,7 @@ type
       FServerSettings: TServerSettings;
       FTables        : TTables;
       FAvatars       : TAvatars;
+      FFormsContainer: TFormsContainer;
 
     procedure LoadFonts;
 
@@ -34,6 +35,7 @@ type
     property ServerSettings: TServerSettings read FServerSettings;
     property Tables        : TTables read FTables;
     property Avatars       : TAvatars read FAvatars;
+    property FormsContainer: TFormsContainer read FFormsContainer;
   end;
 
 var
@@ -46,13 +48,14 @@ implementation
 {$R *.dfm}
 
 uses
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Winapi.Messages,
-  uSocketClient, uSettings, uCommon;
-
+  Vcl.Graphics, Vcl.Controls, Winapi.Messages,
+  uSocketClient, uSettings, uCommon, uDXCore;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
+  InitializeDXCore;
+
   LoadFonts;
 
   FServerSettings := TServerSettings.Create;
@@ -64,10 +67,14 @@ begin
   FTables := TTables.Create;
 
   SocketClient := TSocketClient.Create(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+
+  FFormsContainer := TFormsContainer.Create;
 end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
+  FFormsContainer.Free;
+
   FTables.Free;
 
   FAvatars.Free;

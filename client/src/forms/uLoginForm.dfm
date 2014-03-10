@@ -16,6 +16,7 @@ object frmLogin: TfrmLogin
   KeyPreview = True
   OldCreateOrder = False
   Position = poScreenCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
@@ -3241,7 +3242,7 @@ object frmLogin: TfrmLogin
   end
   object edLogin: TcxTextEdit
     Left = 138
-    Top = 146
+    Top = 147
     AutoSize = False
     ParentFont = False
     Properties.Alignment.Vert = taVCenter
@@ -3253,7 +3254,6 @@ object frmLogin: TfrmLogin
     Style.Font.Style = []
     Style.IsFontAssigned = True
     TabOrder = 0
-    Text = 'mpaunovic'
     Height = 30
     Width = 174
   end

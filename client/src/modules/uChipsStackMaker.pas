@@ -3,27 +3,26 @@ unit uChipsStackMaker;
 interface
 
 uses
-  System.Generics.Collections,
+  System.Generics.Collections, AsphyreImages, uAsphyreImageHelper,
   GR32;
 
 type
+  TChipImages = array of TAsphyreImage;
+
   TChipsStack = class
   private
-    FValue     : UINT32;
-    FImage     : TBitmap32;
-    FTopChipVal: String;
-    FChipCount : Integer;
+    FValue    : UINT32;
+    FChipCount: Integer;
+    FImages   : TChipImages;
 
-    procedure MakeBitmap;
+    procedure MakeImages;
 
   public
     constructor Create(const AValue: UINT32);
-    destructor Destroy; override;
 
     property Value: UINT32 read FValue;
     property ChipCount: Integer read FChipCount;
-    property TopChipVal: String read FTopChipVal;
-    property Image: TBitmap32 read FImage;
+    property Images: TChipImages read FImages;
   end;
 
   TChipsStackMaker = class
@@ -49,35 +48,23 @@ uses
 constructor TChipsStack.Create(const AValue: UINT32);
 begin
   FValue := AValue;
-  FImage := TBitmap32.Create;
-  FImage.DrawMode := dmBlend;
-  MakeBitmap;
+  SetLength(FImages, 0);
+  MakeImages;
 end;
 
-destructor TChipsStack.Destroy;
-begin
-   FImage.Free;
+procedure TChipsStack.MakeImages;
 
-  inherited;
-end;
-
-procedure TChipsStack.MakeBitmap;
-const
-  CHIPS_DELTA_Y = 5;
-
-  function DrawChips(const ACount: Integer; var AChipIndex: Integer; AChipImage: TBitmap32): Boolean;
+  procedure AddImages(const ACount: Integer; var AIndex: Integer; const AImage: TAsphyreImage);
   var
     C1: Integer;
   begin
-    result := FALSE;
-    for C1 := 1 to ACount do
-    begin
-      FImage.Draw(0, FImage.Height - TTableResources.ChipHeight - (AChipIndex * CHIPS_DELTA_Y), AChipImage);
-      Inc(AChipIndex);
-      result := TRUE;
-    end;
+    for C1 := AIndex to AIndex + ACount - 1 do
+      FImages[C1] := AImage;
+    Inc(AIndex, ACount);
   end;
 
+const
+  CHIPS_DELTA_Y = 5;
 var
   chip_index, ccount, c1k, c500, c100, c25, c5: Integer;
 begin
@@ -99,20 +86,14 @@ begin
   Dec(ccount, c5 * 5);
 
   FChipCount := c1k + c500 + c100 + c25 + c5 + ccount;
-  FImage.SetSize(TTableResources.ChipWidth, (FChipCount - 1) * CHIPS_DELTA_Y + TTableResources.ChipHeight);
+  SetLength(FImages, FChipCount);
   chip_index := 0;
-  if DrawChips(ccount, chip_index, TTableResources.Chip1Image) then
-    FTopChipVal := '1';
-  if DrawChips(c5, chip_index, TTableResources.Chip5Image) then
-    FTopChipVal := '5';
-  if DrawChips(c25, chip_index, TTableResources.Chip25Image) then
-    FTopChipVal := '25';
-  if DrawChips(c100, chip_index, TTableResources.Chip100Image) then
-    FTopChipVal := '100';
-  if DrawChips(c500, chip_index, TTableResources.Chip500Image) then
-    FTopChipVal := '500';
-  if DrawChips(c1k, chip_index, TTableResources.Chip1000Image) then
-    FTopChipVal := '1k';
+  AddImages(c1k, chip_index, TableResources.Chip1000Image);
+  AddImages(c500, chip_index, TableResources.Chip500Image);
+  AddImages(c100, chip_index, TableResources.Chip100Image);
+  AddImages(c25, chip_index, TableResources.Chip25Image);
+  AddImages(c5, chip_index, TableResources.Chip5Image);
+  AddImages(ccount, chip_index, TableResources.Chip1Image);
 end;
 
 { TChipsStacks }

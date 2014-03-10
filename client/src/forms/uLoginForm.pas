@@ -37,6 +37,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure tiConnectTimer(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FLoginSuccess: Boolean;
     FCurrentStatus: TLoginStatus;
@@ -57,6 +58,7 @@ type
     procedure WndProc(var AMessage: TMessage); override;
   public
     property CurrentStatus: TLoginStatus read FCurrentStatus write SetCurrentStatus;
+    property LoginSuccess: Boolean read FLoginSuccess;
   end;
 
 implementation
@@ -67,8 +69,14 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient,
   uServerCodes, uCommon, uMainDataModule, uPB_StatusReply, uPB_HelloReply, uPB_LoginReply,
-  uMessageContainer, uServerMessageCallback;
+  uMessageContainer, uServerMessageCallback, uMainForm;
 
+
+procedure TfrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  frmChipUpMain.LoggedIn(FLoginSuccess);
+end;
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
@@ -300,7 +308,7 @@ begin
   pbstatus := AMessage.Object_ as TPB_StatusReply;
   dmMain.ProcessStatusProtobuf(pbstatus);
   if FLoginSuccess then
-    ModalResult := mrOk;
+    Close;
 end;
 
 end.

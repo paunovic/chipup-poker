@@ -9,23 +9,25 @@ uses
 type
   TTable = class
   private
-    FForm        : TForm;
-    FSeatIndex   : Integer;
-    FGame        : TGameInfo;
-    FClub        : TClubInfo;
-    FTablesObject: TObject;
+    FForm          : TForm;
+    FSeatIndex     : Integer;
+    FGame          : TGameInfo;
+    FClub          : TClubInfo;
+    FSwapChainIndex: Integer;
+    FTablesObject  : TObject;
 
   public
-    constructor Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
+    constructor Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
     destructor Destroy; override;
 
     procedure NotifyClose;
     function IsSitting: Boolean;
 
-    property Game     : TGameInfo read FGame;
-    property Club     : TClubInfo read FClub;
-    property Form     : TForm read FForm;
-    property SeatIndex: Integer read FSeatIndex write FSeatIndex;
+    property Game          : TGameInfo read FGame;
+    property Club          : TClubInfo read FClub;
+    property Form          : TForm read FForm;
+    property SeatIndex     : Integer read FSeatIndex write FSeatIndex;
+    property SwapChainIndex: Integer read FSwapChainIndex;
   end;
 
   TTables = class(TObjectList<TTable>)
@@ -46,16 +48,22 @@ type
 implementation
 
 uses
-  Vcl.Controls, uTableForm, uCommon, uSocketClient;
+  Vcl.Controls, uTableForm, uCommon, uSocketClient, uDXCore, Vectors2px;
 
 
-constructor TTable.Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo);
+constructor TTable.Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
+var
+  form: TfrmTable;
 begin
   FSeatIndex := -1;
   FGame := AGame;
   FClub := AClub;
   FTablesObject := ATablesObject;
-  FForm := TfrmTable.Create(self);
+  FSwapChainIndex := ASwapChainIndex;
+  form := TfrmTable.Create(self);
+  FForm := form;
+  DXCore.AcquireSwapChain(FSwapChainIndex, form.PaintPanel.Handle);
+  DXCore.Device.Resize(FSwapChainIndex, Point2px(form.PaintPanel.Width, form.PaintPanel.Height));
   SocketClient.JoinTable(FGame.MongoId);
 end;
 
@@ -87,10 +95,15 @@ end;
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
 var
   table: TTable;
+  sci  : Integer;
 begin
   if not FindTable(AGame.MongoId, table) then
   begin
-    table := TTable.Create(self, AClub, AGame);
+    sci := DXCore.GetFreeSwapChain;
+    if sci = -1 then
+      Exit(FALSE);
+
+    table := TTable.Create(self, AClub, AGame, sci);
     table.Form.Show;
     Add(table);
   end
@@ -108,6 +121,7 @@ begin
     begin
       if FNotifyServer then
         SocketClient.LeaveTable(AGameId);
+      DXCore.ReleaseSwapChain(ToArray[C1].SwapChainIndex);
       Delete(C1);
       Exit;
     end;

@@ -8,7 +8,7 @@ uses
   cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
   cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
   cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, uClubInfo, cxMaskEdit, cxDropDownEdit,
-  uMessageItem, uGameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
+  uMessageItem, uLoginForm, uGameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, dxGDIPlusClasses, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
@@ -96,7 +96,7 @@ type
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
 
-    function ShowLoginForm: Integer;
+    procedure ShowLoginForm;
 
     procedure DoLogout;
     procedure UpdateClublist;
@@ -132,6 +132,8 @@ type
     procedure WndProc(var AMessage: TMessage); override;
 
   public
+
+    procedure LoggedIn(const AValue: Boolean);
   end;
 
 
@@ -143,9 +145,9 @@ implementation
 {$R *.dfm}
 
 uses
-  uSettings, uLoginForm, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
+  uSettings, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
   uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply, uPB_User,
-  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams,
+  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams, uDXCore,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uPB_TransferChipsParams, uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
 
@@ -181,6 +183,8 @@ end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
+  dmMain.FormsContainer.CloseAllForms;
+
   MessageContainer.RemoveMessageHandler(Handle);
 end;
 
@@ -235,6 +239,7 @@ end;
 
 procedure TfrmChipUpMain.DoLogout;
 begin
+  dmMain.FormsContainer.CloseAllForms;
   gridJoinedClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
@@ -242,25 +247,13 @@ begin
   dmMain.Tables.ClearWithoutNotification;
 end;
 
-function TfrmChipUpMain.ShowLoginForm: Integer;
+procedure TfrmChipUpMain.ShowLoginForm;
 begin
+  Application.SHowMainForm := FALSE;
   DoLogout;
   Hide;
   MessageContainer.RemoveMessageHandler(Handle);
-  result := RunModalForm(TfrmLogin, self, []);
-  if result = mrOk then
-  begin
-    MessageContainer.AddMessageHandler(Handle);
-    FSelectedClub := -1;
-    SetLength(FSelectedGame, 0);
-    ConfigureGUI;
-    Show;
-  end
-  else
-  begin
-    Close;
-    Application.Terminate;
-  end;
+  dmMain.FormsContainer.RunForm(TfrmLogin, self, [], FALSE)
 end;
 
 procedure TfrmChipUpMain.SocketChangeState(const AOldState, ANewState: TSocketState);
@@ -305,27 +298,27 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
-  RunForm(TfrmClubLobby, nil, [@FSelectedClub]);
+  dmMain.FormsContainer.RunForm(TfrmClubLobby, nil, [@FSelectedClub], TRUE);
 end;
 
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmChangeAvatar, self, []);
+  dmMain.FormsContainer.RunForm(TfrmChangeAvatar, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowChangeEMailFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmChangeEMail, self, []);
+  dmMain.FormsContainer.RunForm(TfrmChangeEMail, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowChangePasswordFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmChangePassword, self, []);
+  dmMain.FormsContainer.RunForm(TfrmChangePassword, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmCreateClub, self, []);
+  dmMain.FormsContainer.RunForm(TfrmCreateClub, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
@@ -344,12 +337,12 @@ end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmJoinClub, self, []);
+  dmMain.FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowPublicClubsListFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmPublicClubsList, self, []);
+  dmMain.FormsContainer.RunForm(TfrmPublicClubsList, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -614,6 +607,25 @@ begin
     if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       dmMain.OpenCashierLink;
     LoadImageFromResource(imgCashier, 'CashierNormal');
+  end;
+end;
+
+procedure TfrmChipUpMain.LoggedIn(const AValue: Boolean);
+begin
+  dmMain.FormsContainer.Remove(TfrmLogin);
+
+  if AValue then
+  begin
+    MessageContainer.AddMessageHandler(Handle);
+    FSelectedClub := -1;
+    SetLength(FSelectedGame, 0);
+    ConfigureGUI;
+    Show;
+  end
+  else
+  begin
+    Close;
+    Application.Terminate;
   end;
 end;
 

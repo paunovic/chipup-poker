@@ -1,9 +1,6 @@
 program client;
 
-{$R 'cards.res' 'resources\cards.rc'}
-{$R 'seats.res' 'resources\seats.rc'}
 {$R 'fonts.res' 'resources\fonts.rc'}
-{$R 'chips.res' 'resources\chips.rc'}
 {$R *.dres}
 {$R *.res}
 
@@ -99,12 +96,13 @@ uses
   uPB_WinnerData in 'modules\protobuf\objects\uPB_WinnerData.pas',
   uCards in 'modules\uCards.pas',
   uPB_PotInfo in 'modules\protobuf\objects\uPB_PotInfo.pas',
-  uChipsStackMaker in 'modules\uChipsStackMaker.pas',
   uPB_PingParams in 'modules\protobuf\objects\uPB_PingParams.pas',
   uPB_PingReply in 'modules\protobuf\objects\uPB_PingReply.pas',
-  uDrawingCache in 'modules\drawing_cache\uDrawingCache.pas',
-  uDCSeatData in 'modules\drawing_cache\uDCSeatData.pas',
-  uFlopTableAnimationThread in 'modules\table_animation_threads\uFlopTableAnimationThread.pas';
+  uPaintPanel in 'modules\directx_draw\uPaintPanel.pas',
+  uDXCore in 'modules\directx_draw\uDXCore.pas',
+  uAsphyreImageHelper in 'modules\directx_draw\uAsphyreImageHelper.pas',
+  uChipsStackMaker in 'modules\uChipsStackMaker.pas',
+  uFormsContainer in 'modules\uFormsContainer.pas';
 
 procedure FocusPokerApp;
 var
