@@ -41,15 +41,15 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSocketClient, uCommon, uServerCodes, uValidators, uMainDataModule, uMessageContainer, uPB_ClubCommandReply,
+  uSocketClient, uCommon, uServerCodes, uValidators, uMainDataModule, uPB_ClubCommandReply, uMessageContainer, uServerSettings,
   uServerMessageCallback;
 
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
 begin
 
-  edClubName.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubName;
-  edClubCode.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubInvCode;
+  edClubName.Properties.MaxLength := ServerSettings.StringLengths.ClubName;
+  edClubCode.Properties.MaxLength := ServerSettings.StringLengths.ClubInvCode;
 end;
 
 procedure TfrmCreateClub.FormDestroy(Sender: TObject);

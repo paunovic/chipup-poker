@@ -38,14 +38,14 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback;
+  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uServerMessageCallback, uMessageContainer, uServerSettings;
 
 
 procedure TfrmChangePassword.FormCreate(Sender: TObject);
 begin
-  edNewPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
-  edCurrentPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
-  edConfirmPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
+  edNewPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
+  edCurrentPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
+  edConfirmPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
 end;
 
 procedure TfrmChangePassword.FormDestroy(Sender: TObject);

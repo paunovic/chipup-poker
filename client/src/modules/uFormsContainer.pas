@@ -10,6 +10,9 @@ type
   private
     FItems: TObjectList<TForm>;
   public
+    class procedure Initialize;
+    class procedure Deinitialize;
+
     constructor Create;
     destructor Destroy; override;
 
@@ -21,10 +24,25 @@ type
     function Find(const AFormClass: TFormClass; out AForm: TForm): Boolean;
   end;
 
+var
+  FormsContainer: TFormsContainer;
+
 implementation
 
 uses
-  uCommon;
+  uCommon, System.SysUtils;
+
+
+
+class procedure TFormsContainer.Initialize;
+begin
+  FormsContainer := TFormsContainer.Create;
+end;
+
+class procedure TFormsContainer.Deinitialize;
+begin
+  FreeAndNil(FormsContainer);
+end;
 
 
 constructor TFormsContainer.Create;

@@ -44,15 +44,16 @@ implementation
 {$R *.dfm}
 
 uses
-  uSettings, uCommon, uSocketClient, uValidators, uServerCodes, uMainDataModule, uMessageContainer, uServerMessageCallback, uPB_RegisterReply;
+  uSettings, uCommon, uSocketClient, uValidators, uServerCodes, uMainDataModule, uServerMessageCallback, uPB_RegisterReply,
+  uMessageContainer, uServerSettings;
 
 
 procedure TfrmCreateAccount.FormCreate(Sender: TObject);
 begin
-  edEMail.Properties.MaxLength := dmMain.ServerSettings.StringLengths.EMail;
-  edPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
-  edConfirmPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
-  edUsername.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Username;
+  edEMail.Properties.MaxLength := ServerSettings.StringLengths.EMail;
+  edPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
+  edConfirmPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
+  edUsername.Properties.MaxLength := ServerSettings.StringLengths.Username;
 
   edPassword.Properties.PasswordChar := Chr($25CF);
   edConfirmPassword.Properties.PasswordChar := Chr($25CF);

@@ -43,6 +43,9 @@ type
   private
     FStoragePath: String;
   public
+    class procedure Initialize(const AStoragePath: String);
+    class procedure Deinitialize;
+
     constructor Create(const AStoragePath: String);
     destructor Destroy; override;
 
@@ -54,6 +57,9 @@ type
     function SetAvatarImage(const AId: TBytes; const AImage: TJPEGImage): Boolean;
     function DefaultAvatar: TAvatar;
   end;
+
+var
+  Avatars: TAvatars;
 
 implementation
 
@@ -259,6 +265,17 @@ end;
 
 
 { TAvatars }
+
+
+class procedure TAvatars.Initialize(const AStoragePath: String);
+begin
+  Avatars := TAvatars.Create(AStoragePath);
+end;
+
+class procedure TAvatars.Deinitialize;
+begin
+  FreeAndNil(Avatars);
+end;
 
 constructor TAvatars.Create(const AStoragePath: String);
 begin

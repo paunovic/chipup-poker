@@ -55,7 +55,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uValidators, uPB_Game;
+  uSocketClient, uServerCodes, uCommon, uServerMessageCallback, uValidators, uPB_Game, uMainDataModule, uMessageContainer;
 
 
 procedure TfrmCreateEditGame.FormDestroy(Sender: TObject);

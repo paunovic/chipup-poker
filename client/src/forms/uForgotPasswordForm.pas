@@ -32,11 +32,11 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uValidators, uMainDataModule;
+  uSocketClient, uValidators, uMainDataModule, uServerSettings;
 
 procedure TfrmForgotPassword.FormCreate(Sender: TObject);
 begin
-  edEMail.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
+  edEMail.Properties.MaxLength := ServerSettings.StringLengths.Password;
 end;
 
 procedure TfrmForgotPassword.FormKeyPress(Sender: TObject; var Key: Char);

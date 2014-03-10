@@ -167,9 +167,9 @@ implementation
 {$R *.dfm}
 
 uses
-  cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uMessageContainer, uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
+  cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, uMessageContainer, uServerSettings,
+  uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
   AsphyreTypes, AsphyreImages, NativeConnectors, uDXCore, Vectors2, AsphyreFonts,
   uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_PotInfo;
 
@@ -177,7 +177,7 @@ uses
 constructor TfrmTable.Create(const ATable: TTable);
 begin
   if not Assigned(TableResources) then
-    InitializeTableResources(DXCore.Canvas);
+    TTableResources.Initialize(DXCore.Canvas);
 
   inherited Create(nil);
 
@@ -1178,7 +1178,7 @@ begin
     if Assigned(player_info) then
     begin
       // set avatar
-      avatar := dmMain.Avatars.AddAvatar(player_info.AvatarId);
+      avatar := Avatars.AddAvatar(player_info.AvatarId);
 
       // set seat upper text
       if seat_info.Caption <> '' then
@@ -1198,7 +1198,7 @@ begin
       seat_upper_text := '';
       seat_upper_text_color := cColor2($FFFFFFFF);
 
-      avatar := dmMain.Avatars.DefaultAvatar;
+      avatar := Avatars.DefaultAvatar;
     end;
 
     seat_upper_font := TableResources.BarmenoFont_19px;
@@ -1540,13 +1540,13 @@ begin
     if FCurrentPlaytime > 0 then
     begin
       time_image := TableResources.TimebarImage;
-      time_percent := (FCurrentPlaytime / (dmMain.ServerSettings.Playtime * 1000)) * 1.5;
+      time_percent := (FCurrentPlaytime / (ServerSettings.Playtime * 1000)) * 1.5;
     end
     else
     begin
       // using timebank..
       time_image := TableResources.TimebankImage;
-      time_percent := (Integer(seat.Timebank) + FCurrentPlaytime) / (dmMain.ServerSettings.Timebank * 1000);
+      time_percent := (Integer(seat.Timebank) + FCurrentPlaytime) / (ServerSettings.Timebank * 1000);
     end;
 
     if time_percent > 1 then

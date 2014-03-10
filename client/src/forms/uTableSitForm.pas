@@ -55,7 +55,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uMessageContainer, uServerCodes, uServerMessageCallback, uMainDataModule;
+  uSocketClient, uServerCodes, uServerMessageCallback, uMainDataModule, uMessageContainer;
 
 
 procedure TfrmTableSit.FormDestroy(Sender: TObject);

@@ -44,7 +44,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uMessageContainer, uServerMessageCallback, uPB_ClubCommandReply;
+  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uServerMessageCallback, uPB_ClubCommandReply, uMessageContainer;
 
 
 procedure TfrmChangeClubDetails.FormDestroy(Sender: TObject);

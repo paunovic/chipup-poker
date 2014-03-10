@@ -38,7 +38,8 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uPB_ChangeMailReply;
+  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uServerMessageCallback, uPB_ChangeMailReply, uMessageContainer,
+  uServerSettings;
 
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
@@ -46,10 +47,10 @@ begin
   lbInfo.Caption := Format('Upon changing your e-mail address, you will receive an e-mail containing confirmation link. ' +
                            'You must click on confirmation link in order to complete e-mail change process. ' +
                            'Until your new e-mail address has been validated, you can only log into your account using your username. ' +
-                           'Confirmation link will expire in %d hours.', [Round(dmMain.ServerSettings.EmailConfirmationExpiration / 3600)]);
+                           'Confirmation link will expire in %d hours.', [Round(ServerSettings.EmailConfirmationExpiration / 3600)]);
 
   edCurrentMail.Text := dmMain.SelfInfo.EMail;
-  edNewMail.Properties.MaxLength := dmMain.ServerSettings.StringLengths.EMail;
+  edNewMail.Properties.MaxLength := ServerSettings.StringLengths.EMail;
 end;
 
 procedure TfrmChangeEMail.FormDestroy(Sender: TObject);

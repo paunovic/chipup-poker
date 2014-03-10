@@ -69,7 +69,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uCommon, uSocketClient, uMessageContainer;
+  uCommon, uSocketClient, uMainDataModule, uMessageContainer;
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
 function FreeConsole: Boolean; stdcall; external 'kernel32.dll';

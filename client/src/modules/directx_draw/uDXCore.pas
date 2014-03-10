@@ -19,6 +19,9 @@ type
     procedure OnDeviceInit(Sender: TObject; Param: Pointer; var Handled: Boolean);
     procedure OnDeviceCreate(Sender: TObject; Param: Pointer; var Handled: Boolean);
   public
+    class procedure Initialize;
+    class procedure Deinitialize;
+
     constructor Create;
     destructor Destroy; override;
 
@@ -32,8 +35,6 @@ type
     property DummyWindow: HWND read FDummyWindow;
   end;
 
-  procedure InitializeDXCore;
-
 var
   DXCore: TDXCore;
 
@@ -43,9 +44,14 @@ uses
   System.SysUtils, System.Classes, Vectors2px, uTableResources;
 
 
-procedure InitializeDXCore;
+class procedure TDXCore.Initialize;
 begin
   DXCore := TDXCore.Create;
+end;
+
+class procedure TDXCore.Deinitialize;
+begin
+  FreeAndNil(DXCore);
 end;
 
 
@@ -127,10 +133,5 @@ begin
   FDevice.SwapChains.Items[AIndex]^.WindowHandle := FDummyWindow;
 end;
 
-initialization
-
-finalization
-  if Assigned(DXCore) then
-    FreeAndNil(DXCore);
 
 end.

@@ -64,6 +64,9 @@ type
         (-pi/3, -pi/6.9, pi/64, pi/5.1, pi/2.5, pi-pi/2.5, pi-pi/5.1, pi-pi/64, pi+pi/6.9, pi*4/3) // 10
       );
 
+    class procedure Initialize(const ADXCanvas: TAsphyreCanvas);
+    class procedure Deinitialize;
+
     constructor Create(const ADXCanvas: TAsphyreCanvas);
     destructor Destroy; override;
 
@@ -103,8 +106,6 @@ type
     property CardArtworkAspectRatio: Single read FCardArtworkAspectRatio;
   end;
 
-procedure InitializeTableResources(const ADXCanvas: TAsphyreCanvas);
-
 var
   TableResources: TTableResources;
 
@@ -115,9 +116,14 @@ uses
 
 
 
-procedure InitializeTableResources(const ADXCanvas: TAsphyreCanvas);
+class procedure TTableResources.Initialize(const ADXCanvas: TAsphyreCanvas);
 begin
   TableResources := TTableResources.Create(ADXCanvas);
+end;
+
+class procedure TTableResources.Deinitialize;
+begin
+  FreeAndNil(TableResources);
 end;
 
 
@@ -213,11 +219,5 @@ begin
   result := FCardArtworksImages[valueint * 4 + suitint];
 end;
 
-
-initialization
-
-finalization
-  if Assigned(TableResources) then
-    FreeAndNil(TableResources);
 
 end.

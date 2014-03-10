@@ -67,9 +67,9 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient,
+  uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient, uMessageContainer, uServerSettings,
   uServerCodes, uCommon, uMainDataModule, uPB_StatusReply, uPB_HelloReply, uPB_LoginReply,
-  uMessageContainer, uServerMessageCallback, uMainForm;
+  uServerMessageCallback, uMainForm;
 
 
 procedure TfrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -258,14 +258,14 @@ var
 begin
   pbhello := AMessage.Object_ as TPB_HelloReply;
 
-  dmMain.ServerSettings.ParseHelloMessage(pbhello);
+  ServerSettings.ParseHelloMessage(pbhello);
 
-  if dmMain.ServerSettings.StringLengths.EMail > dmMain.ServerSettings.StringLengths.Username then
-    edLogin.Properties.MaxLength := dmMain.ServerSettings.StringLengths.EMail
+  if ServerSettings.StringLengths.EMail > ServerSettings.StringLengths.Username then
+    edLogin.Properties.MaxLength := ServerSettings.StringLengths.EMail
   else
-    edLogin.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Username;
+    edLogin.Properties.MaxLength := ServerSettings.StringLengths.Username;
 
-  edPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
+  edPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
 
   EnableGUI(SocketClient.IsConnected);
   if SocketClient.IsConnected then

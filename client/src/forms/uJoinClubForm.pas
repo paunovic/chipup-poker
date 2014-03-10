@@ -40,7 +40,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uCommon, uServerCodes, uMainDataModule, uMessageContainer, uServerMessageCallback, uPB_ClubCommandReply;
+  uSocketClient, uCommon, uServerCodes, uMainDataModule, uServerMessageCallback, uPB_ClubCommandReply, uMessageContainer, uServerSettings;
 
 
 procedure TfrmJoinClub.edClubIDPropertiesChange(Sender: TObject);
@@ -53,7 +53,7 @@ end;
 
 procedure TfrmJoinClub.FormCreate(Sender: TObject);
 begin
-  edClubCode.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubInvCode;
+  edClubCode.Properties.MaxLength := ServerSettings.StringLengths.ClubInvCode;
 end;
 
 procedure TfrmJoinClub.FormDestroy(Sender: TObject);

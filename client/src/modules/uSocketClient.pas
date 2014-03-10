@@ -42,6 +42,9 @@ type
     procedure KillPingTimeoutTimer;
 
   public
+    class procedure Initialize(const AServer: String; const APort: Integer);
+    class procedure Deinitialize;
+
     constructor Create(const AServer: String; const APort: Integer);
     destructor Destroy; override;
 
@@ -104,7 +107,18 @@ uses
   uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply, uPB_KickPlayerParams, uPB_PingParams, uPB_PingReply,
   uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams, uPB_SetAvatarParams,
   uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply, uPB_TableEvent,
-  uPB_PutChips;
+  uPB_PutChips, uMainDataModule;
+
+
+class procedure TSocketClient.Initialize(const AServer: String; const APort: Integer);
+begin
+  SocketClient := TSocketClient.Create(AServer, APort);
+end;
+
+class procedure TSocketClient.Deinitialize;
+begin
+  FreeAndNil(SocketClient);
+end;
 
 
 function DoConnect(AParameter: pointer): Integer;

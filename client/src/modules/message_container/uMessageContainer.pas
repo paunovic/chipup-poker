@@ -18,6 +18,9 @@ type
     procedure CleanupMessages;
 
   public
+    class procedure Initialize;
+    class procedure Deinitialize;
+
     constructor Create;
     destructor Destroy; override;
 
@@ -46,6 +49,17 @@ implementation
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   System.SysUtils;
+
+
+class procedure TMessageContainer.Initialize;
+begin
+  MessageContainer := TMessageContainer.Create;
+end;
+
+class procedure TMessageContainer.Deinitialize;
+begin
+  FreeAndNil(MessageContainer);
+end;
 
 
 constructor TMessageContainer.Create;
@@ -172,14 +186,6 @@ begin
 
   Exit(FALSE);
 end;
-
-
-
-initialization
-  MessageContainer := TMessageContainer.Create;
-
-finalization
-  MessageContainer.Free;
 
 
 end.

@@ -145,10 +145,10 @@ implementation
 {$R *.dfm}
 
 uses
-  uSettings, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm,
-  uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply, uPB_User,
-  uPB_StatusReply, uMessageContainer, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams, uDXCore,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
+  uSettings, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm, uMessageContainer,
+  uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply, uPB_User,
+  uPB_StatusReply, uServerMessageCallback, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams, uDXCore, uFormsContainer,
   uPB_TransferChipsParams, uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
 
 
@@ -183,7 +183,7 @@ end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
-  dmMain.FormsContainer.CloseAllForms;
+  FormsContainer.CloseAllForms;
 
   MessageContainer.RemoveMessageHandler(Handle);
 end;
@@ -239,7 +239,7 @@ end;
 
 procedure TfrmChipUpMain.DoLogout;
 begin
-  dmMain.FormsContainer.CloseAllForms;
+  FormsContainer.CloseAllForms;
   gridJoinedClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
@@ -253,7 +253,7 @@ begin
   DoLogout;
   Hide;
   MessageContainer.RemoveMessageHandler(Handle);
-  dmMain.FormsContainer.RunForm(TfrmLogin, self, [], FALSE)
+  FormsContainer.RunForm(TfrmLogin, self, [], FALSE)
 end;
 
 procedure TfrmChipUpMain.SocketChangeState(const AOldState, ANewState: TSocketState);
@@ -298,27 +298,27 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
-  dmMain.FormsContainer.RunForm(TfrmClubLobby, nil, [@FSelectedClub], TRUE);
+  FormsContainer.RunForm(TfrmClubLobby, nil, [@FSelectedClub], TRUE);
 end;
 
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
-  dmMain.FormsContainer.RunForm(TfrmChangeAvatar, self, [], FALSE);
+  FormsContainer.RunForm(TfrmChangeAvatar, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowChangeEMailFormExecute(Sender: TObject);
 begin
-  dmMain.FormsContainer.RunForm(TfrmChangeEMail, self, [], FALSE);
+  FormsContainer.RunForm(TfrmChangeEMail, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowChangePasswordFormExecute(Sender: TObject);
 begin
-  dmMain.FormsContainer.RunForm(TfrmChangePassword, self, [], FALSE);
+  FormsContainer.RunForm(TfrmChangePassword, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
-  dmMain.FormsContainer.RunForm(TfrmCreateClub, self, [], FALSE);
+  FormsContainer.RunForm(TfrmCreateClub, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
@@ -337,12 +337,12 @@ end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
-  dmMain.FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
+  FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowPublicClubsListFormExecute(Sender: TObject);
 begin
-  dmMain.FormsContainer.RunForm(TfrmPublicClubsList, self, [], FALSE);
+  FormsContainer.RunForm(TfrmPublicClubsList, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -612,7 +612,7 @@ end;
 
 procedure TfrmChipUpMain.LoggedIn(const AValue: Boolean);
 begin
-  dmMain.FormsContainer.Remove(TfrmLogin);
+  FormsContainer.Remove(TfrmLogin);
 
   if AValue then
   begin

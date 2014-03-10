@@ -46,7 +46,7 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uMainDataModule, uCommon, uMessageContainer, uServerMessageCallback;
+  uSocketClient, uServerCodes, uMainDataModule, uCommon, uServerMessageCallback, uMessageContainer;
 
 
 procedure TfrmGiveChips.FormDestroy(Sender: TObject);

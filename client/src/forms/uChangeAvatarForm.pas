@@ -45,7 +45,7 @@ implementation
 {$R *.dfm}
 
 uses
-  superobject, PNGImage, uAvatars, uMessageContainer, uServerMessageCallback, uPB_SetAvatarReply,
+  superobject, PNGImage, uAvatars, uServerMessageCallback, uPB_SetAvatarReply, uMessageContainer,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   uServerCodes, uSocketClient, uCommon, uEncryption, uSettings, uMainDataModule, uPlayerInfo;
 
@@ -56,7 +56,7 @@ var
 begin
   FAvatarJPG := TJPEGImage.Create;
 
-  avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
+  avatar := Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   imgAvatar.Picture.Assign(avatar.Image);
 end;
 
@@ -242,7 +242,7 @@ begin
   case pbreply.Status of
     saSuccess: begin
       dmMain.SelfInfo.AvatarId := FAvatarId;
-      avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
+      avatar := Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
       if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
         player_info.AvatarId := dmMain.SelfInfo.AvatarId;
       imgAvatar.Picture.Assign(avatar.Image);

@@ -23,6 +23,9 @@ type
     FStringLengths              : TStringLengths;
 
   public
+    class procedure Initialize;
+    class procedure Deinitialize;
+
     procedure ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 
     property EmailConfirmationExpiration: Integer read FEmailConfirmationExpiration;
@@ -32,8 +35,23 @@ type
 
   end;
 
+var
+  ServerSettings: TServerSettings;
+
 implementation
 
+uses
+  System.SysUtils;
+
+class procedure TServerSettings.Initialize;
+begin
+  ServerSettings := TServerSettings.Create;
+end;
+
+class procedure TServerSettings.Deinitialize;
+begin
+  FreeAndNil(ServerSettings);
+end;
 
 procedure TServerSettings.ParseHelloMessage(const AHelloReply: TPB_HelloReply);
 begin

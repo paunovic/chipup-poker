@@ -127,8 +127,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uCommon, uSocketClient, uMainDataModule, uGiveChipsForm, uChangeClubDetailsForm, uServerMessageCallback, uServerCodes,
-  uMessageContainer, uPB_StatusReply, uGameInfo, uCreateEditGameForm, uPB_Club, uPB_Game, uPB_ClubCommandReply;
+  uCommon, uSocketClient, uMainDataModule, uGiveChipsForm, uChangeClubDetailsForm, uServerMessageCallback, uServerCodes, uMessageContainer,
+  uPB_StatusReply, uGameInfo, uCreateEditGameForm, uPB_Club, uPB_Game, uPB_ClubCommandReply;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
