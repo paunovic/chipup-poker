@@ -245,6 +245,7 @@ enum ServerCodes {
 	scTableAddOn = 530;
 	scTablePlayNow = 531;
 	scTableSitOut = 532;
+	scTableSitOutNextBB = 533;
 }
 
 service Server {
@@ -399,4 +400,9 @@ message TableEvent {
 message PutChips {
 	required bytes table_mongo_id = 1;
 	required uint32 chip_amount = 2;
+}
+
+message TableBoolFlag {
+	required bytes table_mongo_id = 1;
+	required bool flag = 2;
 }
