@@ -100,22 +100,21 @@ object frmDebug: TfrmDebug
         ParentFont = False
         ExplicitLeft = 509
       end
-      object lbsMessageHandlers: TLabel
+      object lbsCalbackSets: TLabel
         Left = 355
         Top = 40
-        Width = 92
+        Width = 67
         Height = 14
         Anchors = [akTop, akRight]
-        Caption = 'Message handlers:'
+        Caption = 'Callback sets:'
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 414
       end
-      object lbvMessageHandlers: TLabel
+      object lbvCallbackSets: TLabel
         Left = 450
         Top = 40
         Width = 6
@@ -130,13 +129,13 @@ object frmDebug: TfrmDebug
         ParentFont = False
         ExplicitLeft = 509
       end
-      object lbsMessages: TLabel
+      object lbsSocketState: TLabel
         Left = 355
         Top = 56
-        Width = 77
+        Width = 63
         Height = 14
         Anchors = [akTop, akRight]
-        Caption = 'Message count:'
+        Caption = 'Socket state:'
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -144,7 +143,7 @@ object frmDebug: TfrmDebug
         Font.Style = []
         ParentFont = False
       end
-      object lbvMessages: TLabel
+      object lbvSocketState: TLabel
         Left = 450
         Top = 56
         Width = 6

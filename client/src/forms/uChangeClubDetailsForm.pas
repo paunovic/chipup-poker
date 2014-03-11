@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.StdCtrls, cxRadioGroup, cxLabel, cxTextEdit, Vcl.Menus, cxButtons, uClubInfo, Vcl.ActnList, uIFormParams,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uIModalForm;
 
 type
-  TfrmChangeClubDetails = class(TForm, IFormParams)
+  TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)
     lbsClubType: TcxLabel;
     rbPrivate: TcxRadioButton;
     rbPublic: TcxRadioButton;
@@ -22,19 +22,22 @@ type
     btOK: TcxButton;
     btCancel: TcxButton;
     acCancel: TAction;
-    procedure FormShow(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
   private
+    FCallbacksId: Integer;
     FClub: TClubInfo;
+    FCloseCallback: TNotifyEvent;
 
-    procedure CSRClubDetailsChange(const AMessage: TMessageItem);
+    procedure CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
   protected
-    procedure WndProc(var AMessage: TMessage); override;
   public
     procedure SetParams(const AParams: array of pointer);
+    procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
 
@@ -44,12 +47,28 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uServerMessageCallback, uPB_ClubCommandReply, uMessageContainer;
+  uMainDataModule, uServerCodes, uCommon, uValidators, uSocketClient, uMessageCallbacks, uPB_ClubCommandReply, uMessageContainer,
+  uFormsContainer;
 
+
+procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
+begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                     TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange)
+                  ])
+end;
 
 procedure TfrmChangeClubDetails.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
+end;
+
+procedure TfrmChangeClubDetails.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  if Assigned(FCloseCallback) then
+    FCloseCallback(self);
 end;
 
 procedure TfrmChangeClubDetails.FormKeyPress(Sender: TObject; var Key: Char);
@@ -67,9 +86,9 @@ begin
   end;
 end;
 
-procedure TfrmChangeClubDetails.FormShow(Sender: TObject);
+procedure TfrmChangeClubDetails.SetCloseCallback(const ACallback: TNotifyEvent);
 begin
-  MessageContainer.AddMessageHandler(Handle);
+  FCloseCallback := ACallback;
 end;
 
 procedure TfrmChangeClubDetails.SetParams(const AParams: array of pointer);
@@ -82,29 +101,10 @@ begin
   rbPublic.Checked := not rbPrivate.Checked;
 end;
 
-procedure TfrmChangeClubDetails.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
-end;
-
 procedure TfrmChangeClubDetails.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmChangeClubDetails.acOKExecute(Sender: TObject);
@@ -130,14 +130,17 @@ begin
   SocketClient.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rbPrivate.Checked, FClub.Rake);
 end;
 
-procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMessage: TMessageItem);
+procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+  pbreply := AObject as TPB_ClubCommandReply;
 
   case pbreply.Status of
-    csSuccess: ModalResult := mrOk;
+    csSuccess: begin
+      ModalResult := mrOk;
+      Close;
+    end;
     csNameExists: begin
       MessageDlg('Club name already exists', mtError, [mbOk], 0);
       edClubName.SetFocus;

@@ -15,7 +15,9 @@ object frmForgotPassword: TfrmForgotPassword
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   DesignSize = (
     305

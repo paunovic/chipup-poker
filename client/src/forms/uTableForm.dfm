@@ -21,7 +21,6 @@ object frmTable: TfrmTable
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 14
   object paBottom: TPanel
@@ -106,6 +105,7 @@ object frmTable: TfrmTable
         AutoSize = False
         Caption = 'Sit out next BB'
         ParentFont = False
+        Properties.OnChange = cbSitOutNextBBPropertiesChange
         Style.Font.Charset = DEFAULT_CHARSET
         Style.Font.Color = clWindowText
         Style.Font.Height = 14
@@ -434,5 +434,12 @@ object frmTable: TfrmTable
     OnTimer = tiSeatClearCaptionTimer
     Left = 236
     Top = 32
+  end
+  object tiSitOutNextBB: TTimer
+    Enabled = False
+    Interval = 500
+    OnTimer = tiSitOutNextBBTimer
+    Left = 144
+    Top = 100
   end
 end

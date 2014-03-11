@@ -10,7 +10,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.Generics.Collections,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,  uPaintPanel,
-  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo, uMessageItem, Vcl.Menus, cxButtons, uTableStatus,
+  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo,  Vcl.Menus, cxButtons, uTableStatus,
   Vcl.ActnList, cxLabel, uTables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, dxsChipUpRedButton,
   cxRichEdit, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox, Vectors2px, uPB_TableEvent, uCards, System.Types, uChipsStackMaker;
 
@@ -49,11 +49,11 @@ type
     btRaise3BB: TcxButton;
     btRaisePot: TcxButton;
     btRaiseMax: TcxButton;
+    tiSitOutNextBB: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure acStandUpExecute(Sender: TObject);
     procedure edChatKeyPress(Sender: TObject; var Key: Char);
     procedure acFoldExecute(Sender: TObject);
@@ -72,11 +72,14 @@ type
     procedure acRaise3BBExecute(Sender: TObject);
     procedure acRaisePotExecute(Sender: TObject);
     procedure acRaiseMaxExecute(Sender: TObject);
+    procedure cbSitOutNextBBPropertiesChange(Sender: TObject);
+    procedure tiSitOutNextBBTimer(Sender: TObject);
   private
     type
       TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
 
     var
+      FCallbacksId       : Integer;
       FFormAspectRatio   : Single;
       FTableResizeRatio  : Single;
       FRawTableWidth     : Single;
@@ -135,6 +138,7 @@ type
     procedure RenderTimebar;
 
     procedure AddUserChatMessage(const AUser, AMessage: String);
+    procedure ModalFormClose(Sender: TObject);
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -145,8 +149,8 @@ type
     function GetBetPoint(const ASeatIndex: Integer): TPointF;
     function GetPotPoint(const APotIndex: Integer): TPointF;
 
-    procedure CSRChatEvent(const AMessage: TMessageItem);
-    procedure CSRETableStatus(const AMessage: TMessageItem);
+    procedure CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 
     procedure ConfigureGUI;
@@ -169,8 +173,8 @@ implementation
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, uMessageContainer, uServerSettings,
-  uServerMessageCallback, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
-  AsphyreTypes, AsphyreImages, NativeConnectors, uDXCore, Vectors2, AsphyreFonts,
+  uMessageCallbacks, uServerCodes, uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources,
+  AsphyreTypes, AsphyreImages, NativeConnectors, uDXCore, Vectors2, AsphyreFonts, uFormsContainer,
   uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_PotInfo;
 
 
@@ -188,6 +192,14 @@ end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
 begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TServerMessageCallback.Create(seChat, CSRChatEvent),
+                      TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
+                      TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
+                      TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
+                      TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus)
+                  ]);
+
   FTableStatus := TTableStatus.Create;
   FChipsStackMaker := TChipsStackMaker.Create;
 
@@ -204,7 +216,7 @@ end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
 
   FPaintPanel.Free;
   FChipsStackMaker.Free;
@@ -251,11 +263,6 @@ begin
   FDXAreaSize := Point2px(FPaintPanel.Width, FPaintPanel.Height);
 end;
 
-procedure TfrmTable.FormShow(Sender: TObject);
-begin
-  MessageContainer.AddMessageHandler(Handle);
-end;
-
 procedure TfrmTable.WMSizing(var AMessage: TMessage);
 begin
   inherited;
@@ -268,8 +275,6 @@ begin
 end;
 
 procedure TfrmTable.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
 begin
   // prevent ALT key from switching between forms
   if (AMessage.Msg = WM_SYSCOMMAND) and
@@ -277,23 +282,6 @@ begin
     Exit;
 
   inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(seChat, CSRChatEvent),
-                            TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
-                            TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
-                            TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
-                            TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
 end;
 
 procedure TfrmTable.PaintPanelClick(Sender: TObject);
@@ -313,23 +301,14 @@ begin
     if (client_cursor_pos.X >= seat_rect.Left) and (client_cursor_pos.X <= seat_rect.Right) and
        (client_cursor_pos.Y >= seat_rect.Top) and (client_cursor_pos.Y <= seat_rect.Bottom) then
     begin
-      if (not FTable.IsSitting) and
-         (not FTableStatus.IsSeatTaken(C1)) then
+      if ((not FTable.IsSitting) and
+          (not FTableStatus.IsSeatTaken(C1))) or
+         ((FTable.IsSitting) and
+          (FTable.SeatIndex = C1) and
+          (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
+          (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded])) then
       begin
-        if RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1]) = mrOk then
-        begin
-          acStandUp.Enabled := TRUE;
-          btStandUp.Visible := TRUE;
-        end;
-        Break;
-      end;
-
-      if (FTable.IsSitting) and
-         (FTable.SeatIndex = C1) and
-         (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
-         (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded]) then
-      begin
-        RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1]);
+        FormsContainer.Add(RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1], ModalFormClose));
         Break;
       end;
     end;
@@ -376,17 +355,24 @@ begin
   Render;
 end;
 
+procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
+var
+  seat_info: TSeatInfo;
+begin
+  if (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
+     (seat_info.Status <> psOutOfPlay) then
+    SocketClient.TableSitOutNextBB(FTable.Game.MongoId, cbSitOutNextBB.Checked);
+
+  tiSitOutNextBB.Enabled := FALSE;
+end;
+
 procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
 var
   seat_info: TSeatInfo;
 begin
-  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
-  begin
-    if cbSitOutNextHand.Checked then
-      SocketClient.TableSitOut(FTable.Game.MongoId)
-    else
-      SocketClient.TablePlayNow(FTable.Game.MongoId);
-  end;
+  if (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
+     (seat_info.Status <> psOutOfPlay) then
+    SocketClient.TableSitOutNextHand(FTable.Game.MongoId, cbSitOutNextBB.Checked);
 
   tiSitOutNextHand.Enabled := FALSE;
 end;
@@ -453,6 +439,11 @@ begin
           result := tsBottom
         else
           result := tsMid;
+end;
+
+procedure TfrmTable.ModalFormClose(Sender: TObject);
+begin
+  EnableWindow(Handle, TRUE);
 end;
 
 function TfrmTable.GetDealerPoint(const ASeatIndex: Integer): TPointF;
@@ -551,18 +542,24 @@ begin
   reChat.ScrollContent(dirDown); reChat.ScrollContent(dirDown); // FIXME! yuck
 end;
 
+procedure TfrmTable.cbSitOutNextBBPropertiesChange(Sender: TObject);
+begin
+  tiSitOutNextBB.Enabled := FALSE;
+  tiSitOutNextBB.Enabled := TRUE;
+end;
+
 procedure TfrmTable.cbSitOutNextHandPropertiesChange(Sender: TObject);
 begin
   tiSitOutNextHand.Enabled := FALSE;
   tiSitOutNextHand.Enabled := TRUE;
 end;
 
-procedure TfrmTable.CSRChatEvent(const AMessage: TMessageItem);
+procedure TfrmTable.CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
 var
   chat_event  : TPB_ChatEvent;
   chat_message: TPB_ChatMessage;
 begin
-  chat_event := AMessage.Object_ as TPB_ChatEvent;
+  chat_event := AObject as TPB_ChatEvent;
 
   case chat_event.Event of
     ceUserMessage: begin
@@ -632,6 +629,9 @@ begin
                 acRaise.Caption := 'BET';
                 acRaise.Enabled := TRUE;
               end;
+
+              if cbFoldToAnyBet.Checked then
+                acFold.Execute;
             end;
             tsWinning,
             tsWinning2: ;
@@ -762,7 +762,7 @@ begin
     result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
-procedure TfrmTable.CSRETableStatus(const AMessage: TMessageItem);
+procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtablestatus: TPB_TableStatus;
   C1           : Integer;
@@ -771,7 +771,7 @@ var
   seat         : TSeatInfo;
   tb           : UINT32;
 begin
-  pbtablestatus := AMessage.Object_ as TPB_TableStatus;
+  pbtablestatus := AObject as TPB_TableStatus;
   if not CompareBytes(pbtablestatus.TableMongoId, FTable.Game.MongoId) then
     Exit;
 
@@ -780,7 +780,7 @@ begin
   if ActionManager.State = asSuspended then
     ActionManager.State := asNormal;
 
-  case AMessage.MethodId of
+  case AMethodId of
     Integer(srTableStandUpOk): FTable.SeatIndex := -1;
   end;
 

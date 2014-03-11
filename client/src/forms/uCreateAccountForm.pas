@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
   cxContainer, cxEdit, dxSkinsCore, Vcl.Menus, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList, Vcl.ExtCtrls,
-  dxSkinsForm, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  dxSkinsForm,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uIModalForm;
 
 type
-  TfrmCreateAccount = class(TForm)
+  TfrmCreateAccount = class(TForm, IModalForm)
     alCreateAccount: TActionList;
     acSignUp: TAction;
     edEMail: TcxTextEdit;
@@ -28,15 +28,18 @@ type
     procedure FormCreate(Sender: TObject);
     procedure lbTOSClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
+    FCallbacksId: Integer;
+    FCloseCallback: TNotifyEvent;
+
     function ValidateForm: Boolean;
 
-    procedure CSRRegisterReply(const AMessage: TMessageItem);
+    procedure CSRRegisterReply(const AMethodId: Integer; const AObject: TObject);
   protected
-    procedure WndProc(var AMessage: TMessage); override;
   public
+    procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
 implementation
@@ -44,12 +47,16 @@ implementation
 {$R *.dfm}
 
 uses
-  uSettings, uCommon, uSocketClient, uValidators, uServerCodes, uMainDataModule, uServerMessageCallback, uPB_RegisterReply,
-  uMessageContainer, uServerSettings;
+  uSettings, uCommon, uSocketClient, uValidators, uServerCodes, uMainDataModule, uMessageCallbacks, uPB_RegisterReply,
+  uMessageContainer, uServerSettings, uFormsContainer;
 
 
 procedure TfrmCreateAccount.FormCreate(Sender: TObject);
 begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TServerMessageCallback.Create(srRegisterReply, CSRRegisterReply)
+                  ]);
+
   edEMail.Properties.MaxLength := ServerSettings.StringLengths.EMail;
   edPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
   edConfirmPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
@@ -61,14 +68,24 @@ end;
 
 procedure TfrmCreateAccount.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
 end;
+
+procedure TfrmCreateAccount.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  if Assigned(FCloseCallback) then
+    FCloseCallback(self);
+end;
+
 
 procedure TfrmCreateAccount.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_ESCAPE: begin
       ModalResult := mrCancel;
+      Close;
       Key := #0;
     end;
     VK_RETURN: begin
@@ -76,31 +93,6 @@ begin
         SelectNext(ActiveControl, TRUE, TRUE);
       Key := #0;
     end;
-  end;
-end;
-
-procedure TfrmCreateAccount.FormShow(Sender: TObject);
-begin
-  MessageContainer.AddMessageHandler(Handle);
-end;
-
-procedure TfrmCreateAccount.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srRegisterReply, CSRRegisterReply)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
   end;
 end;
 
@@ -144,11 +136,11 @@ begin
   SocketClient.CreateAccount(edUsername.Text, edPassword.Text, edEmail.Text);
 end;
 
-procedure TfrmCreateAccount.CSRRegisterReply(const AMessage: TMessageItem);
+procedure TfrmCreateAccount.CSRRegisterReply(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_RegisterReply;
 begin
-  pbreply := AMessage.Object_ as TPB_RegisterReply;
+  pbreply := AObject as TPB_RegisterReply;
 
   case pbreply.Status of
    regSuccess: begin
@@ -156,6 +148,7 @@ begin
       if Settings.Login = '' then
         Settings.Login := edEMail.Text;
       ModalResult := mrOk;
+      Close;
    end;
    regDuplicateEmail: begin
      MessageDlg('E-mail address already exists', mtError, [mbOK], 0);
@@ -183,5 +176,9 @@ begin
   dmMain.OpenTOSLink;
 end;
 
+procedure TfrmCreateAccount.SetCloseCallback(const ACallback: TNotifyEvent);
+begin
+  FCloseCallback := ACallback;
+end;
 
 end.

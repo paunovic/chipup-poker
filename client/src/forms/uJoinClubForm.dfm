@@ -15,11 +15,11 @@ object frmJoinClub: TfrmJoinClub
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
-  OnShow = FormShow
   DesignSize = (
     292
     114)
@@ -89,7 +89,6 @@ object frmJoinClub: TfrmJoinClub
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 82
   end
   object btCancel: TcxButton
     Left = 184
@@ -106,7 +105,6 @@ object frmJoinClub: TfrmJoinClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 82
   end
   object alJoinClub: TActionList
     Left = 24

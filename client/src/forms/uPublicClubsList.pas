@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
   dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxSpinEdit, cxTextEdit,
   Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid,
-  uMessageItem, Vcl.ExtCtrls, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+   Vcl.ExtCtrls, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmPublicClubsList = class(TForm)
@@ -24,7 +24,6 @@ type
     acRefresh: TAction;
     acJoinClub: TAction;
     tiRefreshActionEnabler: TTimer;
-    procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acRefreshExecute(Sender: TObject);
     procedure gridClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
@@ -35,14 +34,14 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure gridClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
       AShift: TShiftState; var AHandled: Boolean);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FSelectedClubId: Int64;
+    FCallbacksId: Integer;
 
-    procedure CSRListClubs(const AMessage: TMessageItem);
+    procedure CSRListClubs(const AMethodId: Integer; const AObject: TObject);
 
   protected
-    procedure WndProc(var AMessage: TMessage); override;
-
   public
   end;
 
@@ -51,24 +50,36 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uCommon, uServerCodes, uMainDataModule, uJoinClubForm, uServerMessageCallback, uMessageContainer,
+  uSocketClient, uCommon, uServerCodes, uMainDataModule, uJoinClubForm, uMessageCallbacks, uMessageContainer, uFormsContainer,
   uPB_ListClubsReply, uPB_Club;
 
 
 procedure TfrmPublicClubsList.FormCreate(Sender: TObject);
 begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TServerMessageCallback.Create(srListClubs, CSRListClubs)
+                  ]);
+
   FSelectedClubId := -1;
+
+  SocketClient.ListPublicClubs;
 end;
 
 procedure TfrmPublicClubsList.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
+end;
+
+procedure TfrmPublicClubsList.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
 end;
 
 procedure TfrmPublicClubsList.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    VK_ESCAPE: ModalResult := mrCancel;
+    VK_ESCAPE: Close;
   end;
 end;
 
@@ -76,16 +87,10 @@ procedure TfrmPublicClubsList.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_ESCAPE: begin
-      ModalResult := mrCancel;
+      Close;
       Key := #0;
     end;
   end;
-end;
-
-procedure TfrmPublicClubsList.FormShow(Sender: TObject);
-begin
-  MessageContainer.AddMessageHandler(Handle);
-  SocketClient.ListPublicClubs;
 end;
 
 procedure TfrmPublicClubsList.gridClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -107,31 +112,9 @@ begin
   acJoinClub.Enabled := FSelectedClubId <> -1;
 end;
 
-procedure TfrmPublicClubsList.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srListClubs, CSRListClubs)
-                          ]
-                        );
-
-      mtSocketChangeState: ;
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
-end;
-
 procedure TfrmPublicClubsList.acJoinClubExecute(Sender: TObject);
 begin
-  if RunModalForm(TfrmJoinClub, self, [@FSelectedClubId]) = mrOk then;
+  FormsContainer.RunForm(TfrmJoinClub, self, [@FSelectedClubId], FALSE);
 end;
 
 procedure TfrmPublicClubsList.acRefreshExecute(Sender: TObject);
@@ -149,14 +132,14 @@ begin
   tiRefreshActionEnabler.Enabled := TRUE;
 end;
 
-procedure TfrmPublicClubsList.CSRListClubs(const AMessage: TMessageItem);
+procedure TfrmPublicClubsList.CSRListClubs(const AMethodId: Integer; const AObject: TObject);
 var
   rcount: Integer;
   club  : TPB_Club;
   clubs : TPB_ListClubsReply;
   tmp   : String;
 begin
-  clubs := AMessage.Object_ as TPB_ListClubsReply;
+  clubs := AObject as TPB_ListClubsReply;
 
   gridClubsTable.DataController.BeginFullUpdate;
   try

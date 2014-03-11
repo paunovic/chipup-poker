@@ -16,10 +16,10 @@ object frmCreateAccount: TfrmCreateAccount
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
-  OnShow = FormShow
   DesignSize = (
     336
     239)

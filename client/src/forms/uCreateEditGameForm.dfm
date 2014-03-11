@@ -14,9 +14,10 @@ object frmCreateEditGame: TfrmCreateEditGame
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
-  OnShow = FormShow
   DesignSize = (
     376
     226)

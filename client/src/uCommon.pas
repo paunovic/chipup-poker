@@ -17,7 +17,7 @@ function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = 
                    const AShowCmd: Integer = SW_SHOWNORMAL; const AVerb: String = 'open'; const AMask: DWORD = SEE_MASK_FLAG_NO_UI; const AHWND: HWND = 0): Boolean;
 procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
                 const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
-function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): Integer;
+function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
 function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): TForm;
 function CompressStream(const AStream: TMemoryStream): Boolean;
 function DecompressStream(const AStream: TMemoryStream): Boolean;
@@ -40,7 +40,7 @@ implementation
 
 uses
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses,
-  uIFormParams;
+  uIModalForm, uIFormParams;
 
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
@@ -94,22 +94,27 @@ begin
       AStrings[C1] := Trim(AStrings[C1]);
 end;
 
-function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): Integer;
+function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
 var
-  modal_form: TForm;
+  form: TForm;
 begin
-  modal_form := AClassType.Create(AOwner);
-  try
-    if Assigned(AOwner) then
-      modal_form.PopupParent := AOwner;
+  form := AClassType.Create(AOwner);
 
-    if Length(AParams) > 0 then
-      (modal_form as IFormParams).SetParams(AParams);
-
-    result := modal_form.ShowModal;
-  finally
-    FreeAndNil(modal_form);
+  if Assigned(AOwner) then
+  begin
+    form.PopupParent := AOwner;
+    EnableWindow(AOwner.Handle, FALSE);
   end;
+
+  if Length(AParams) > 0 then
+    (form as IFormParams).SetParams(AParams);
+
+  if Assigned(ACloseCallback) then
+    (form as IModalForm).SetCloseCallback(ACloseCallback);
+
+  form.Show;
+
+  result := form;
 end;
 
 function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer): TForm;

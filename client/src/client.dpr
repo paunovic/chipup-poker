@@ -58,8 +58,7 @@ uses
   uPB_ForgotPasswordParams in 'modules\protobuf\objects\uPB_ForgotPasswordParams.pas',
   uPB_User in 'modules\protobuf\objects\uPB_User.pas',
   uMessageContainer in 'modules\message_container\uMessageContainer.pas',
-  uMessageItem in 'modules\message_container\uMessageItem.pas',
-  uServerMessageCallback in 'modules\message_container\uServerMessageCallback.pas',
+  uMessageCallbacks in 'modules\message_container\uMessageCallbacks.pas',
   uPB_ListClubsReply in 'modules\protobuf\objects\uPB_ListClubsReply.pas',
   uPB_GiveClubOwnershipParams in 'modules\protobuf\objects\uPB_GiveClubOwnershipParams.pas',
   uPB_KickPlayerParams in 'modules\protobuf\objects\uPB_KickPlayerParams.pas',
@@ -102,7 +101,9 @@ uses
   uDXCore in 'modules\directx_draw\uDXCore.pas',
   uAsphyreImageHelper in 'modules\directx_draw\uAsphyreImageHelper.pas',
   uChipsStackMaker in 'modules\uChipsStackMaker.pas',
-  uFormsContainer in 'modules\uFormsContainer.pas';
+  uFormsContainer in 'modules\uFormsContainer.pas',
+  uPB_TableBoolFlag in 'modules\protobuf\objects\uPB_TableBoolFlag.pas',
+  uIModalForm in 'forms\uIModalForm.pas';
 
 procedure FocusPokerApp;
 var

@@ -6,9 +6,10 @@ uses
   System.Generics.Collections, Vcl.Forms;
 
 type
+  TForms = TObjectList<TForm>;
   TFormsContainer = class
   private
-    FItems: TObjectList<TForm>;
+    FItems: TForms;
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -17,11 +18,14 @@ type
     destructor Destroy; override;
 
     procedure Add(const AForm: TForm);
+    procedure Close(const AFormClass: TFormClass);
     procedure Remove(const AForm: TForm); overload;
     procedure Remove(const AFormClass: TFormClass); overload;
     function RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean): TForm;
     procedure CloseAllForms;
     function Find(const AFormClass: TFormClass; out AForm: TForm): Boolean;
+
+    property Items: TForms read FItems;
   end;
 
 var
@@ -47,12 +51,11 @@ end;
 
 constructor TFormsContainer.Create;
 begin
-  FItems := TObjectList<TForm>.Create(FALSE);
+  FItems := TForms.Create(FALSE);
 end;
 
 destructor TFormsContainer.Destroy;
 begin
-  CloseAllForms;
   FItems.Free;
 
   inherited;
@@ -89,13 +92,25 @@ begin
   Exit(FALSE);
 end;
 
-procedure TFormsContainer.CloseAllForms;
+procedure TFormsContainer.Close(const AFormClass: TFormClass);
 var
   form: TForm;
 begin
-  for form in FItems do
+  while Find(AFormClass, form) do
+  begin
+    FItems.Remove(form);
+    form.Close;
     form.Free;
-  FItems.Clear;
+  end;
+end;
+
+procedure TFormsContainer.CloseAllForms;
+begin
+  while FItems.Count > 0 do
+  begin
+    FItems[0].Close;
+    FItems[0].Free;
+  end;
 end;
 
 function TFormsContainer.RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean): TForm;

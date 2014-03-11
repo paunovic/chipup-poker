@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxTextEdit, cxLabel, cxMaskEdit, cxSpinEdit, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList, uClubInfo,
-  uPlayerInfo, uIFormParams, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  uPlayerInfo, uIFormParams,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uIModalForm;
 
 type
-  TfrmGiveChips = class(TForm, IFormParams)
+  TfrmGiveChips = class(TForm, IFormParams, IModalForm)
     lbsClubName: TcxLabel;
     edClubName: TcxTextEdit;
     lbsPlayerName: TcxLabel;
@@ -22,22 +22,24 @@ type
     btCancel: TcxButton;
     acCancel: TAction;
     procedure acOKExecute(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FClub  : TClubInfo;
+    FCallbacksId: Integer;
+    FClub: TClubInfo;
     FPlayer: TPlayerInfo;
+    FCloseCallback: TNotifyEvent;
 
-    procedure CSRTransferChipsOk(const AMessage: TMessageItem);
+    procedure CSRTransferChipsOk(const AMethodId: Integer; const AObject: TObject);
 
   protected
-    procedure WndProc(var AMessage: TMessage); override;
-
   public
     procedure SetParams(const AParams: array of pointer);
+    procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
 
@@ -46,37 +48,29 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uMainDataModule, uCommon, uServerMessageCallback, uMessageContainer;
+  uSocketClient, uServerCodes, uMainDataModule, uCommon, uMessageCallbacks, uMessageContainer, uFormsContainer;
 
+
+
+procedure TfrmGiveChips.FormCreate(Sender: TObject);
+begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TServerMessageCallback.Create(srTransferChipsOk, CSRTransferChipsOk)
+                  ]);
+end;
 
 procedure TfrmGiveChips.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
 end;
 
-procedure TfrmGiveChips.FormShow(Sender: TObject);
+procedure TfrmGiveChips.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  MessageContainer.AddMessageHandler(Handle);
-end;
+  Action := caFree;
 
-procedure TfrmGiveChips.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srTransferChipsOk, CSRTransferChipsOk)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
+  if Assigned(FCloseCallback) then
+    FCloseCallback(self);
 end;
 
 procedure TfrmGiveChips.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -88,7 +82,6 @@ begin
   end;
 end;
 
-
 procedure TfrmGiveChips.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
@@ -97,6 +90,11 @@ begin
       Key := #0;
     end;
   end;
+end;
+
+procedure TfrmGiveChips.SetCloseCallback(const ACallback: TNotifyEvent);
+begin
+  FCloseCallback := ACallback;
 end;
 
 procedure TfrmGiveChips.SetParams(const AParams: array of pointer);
@@ -111,6 +109,7 @@ end;
 procedure TfrmGiveChips.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmGiveChips.acOKExecute(Sender: TObject);
@@ -125,10 +124,11 @@ begin
   SocketClient.TransferChips(FPlayer.Id, seChipAmount.Value * 100);
 end;
 
-procedure TfrmGiveChips.CSRTransferChipsOk(const AMessage: TMessageItem);
+procedure TfrmGiveChips.CSRTransferChipsOk(const AMethodId: Integer; const AObject: TObject);
 begin
   MessageDlg('Chips successfully transferred', mtInformation, [mbOK], 0);
   ModalResult := mrOk;
+  Close;
 end;
 
 end.

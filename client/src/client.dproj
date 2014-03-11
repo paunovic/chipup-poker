@@ -188,8 +188,7 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_ForgotPasswordParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_User.pas"/>
 			<DCCReference Include="modules\message_container\uMessageContainer.pas"/>
-			<DCCReference Include="modules\message_container\uMessageItem.pas"/>
-			<DCCReference Include="modules\message_container\uServerMessageCallback.pas"/>
+			<DCCReference Include="modules\message_container\uMessageCallbacks.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ListClubsReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_GiveClubOwnershipParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_KickPlayerParams.pas"/>
@@ -235,6 +234,8 @@
 			<DCCReference Include="modules\directx_draw\uAsphyreImageHelper.pas"/>
 			<DCCReference Include="modules\uChipsStackMaker.pas"/>
 			<DCCReference Include="modules\uFormsContainer.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_TableBoolFlag.pas"/>
+			<DCCReference Include="forms\uIModalForm.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

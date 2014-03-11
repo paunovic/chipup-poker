@@ -38,14 +38,14 @@ type
     N1: TMenuItem;
     pmiLogWordWrap: TMenuItem;
     acWordWrap: TAction;
-    lbsMessageHandlers: TLabel;
-    lbvMessageHandlers: TLabel;
+    lbsCalbackSets: TLabel;
+    lbvCallbackSets: TLabel;
     pmiLogSave: TMenuItem;
     pmiLogClear: TMenuItem;
     N2: TMenuItem;
-    lbsMessages: TLabel;
-    lbvMessages: TLabel;
     cbSocket: TcxCheckBox;
+    lbsSocketState: TLabel;
+    lbvSocketState: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -71,6 +71,7 @@ implementation
 uses
   uCommon, uSocketClient, uMainDataModule, uMessageContainer;
 
+
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
 function FreeConsole: Boolean; stdcall; external 'kernel32.dll';
 
@@ -89,7 +90,7 @@ var
 begin
   time_str := FormatDateTime('hh:nn:ss:zzz', Now);
 
-  logit := AType in frmDebug.FDebugInfoTypes;
+  logit := (not Assigned(frmDebug)) or (AType in frmDebug.FDebugInfoTypes);
   case AType of
     ditException: begin
       type_str := 'EXCP';
@@ -132,14 +133,18 @@ begin
   if not logit then
     Exit;
 
-  frmDebug.reLog.SelStart := frmDebug.reLog.GetTextLen;
-  frmDebug.reLog.SelAttributes.Color := type_color;
-  output := Format('%s [%s] %s', [time_str, type_str, AData]);
-  frmDebug.reLog.Lines.Add(output);
+  if Assigned(frmDebug) then
+  begin
+    frmDebug.reLog.SelStart := frmDebug.reLog.GetTextLen;
+    frmDebug.reLog.SelAttributes.Color := type_color;
+    output := Format('%s [%s] %s', [time_str, type_str, AData]);
+    frmDebug.reLog.Lines.Add(output);
 
-  SendMessage(frmDebug.reLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+    SendMessage(frmDebug.reLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+  end;
 
   OutputDebugString(PChar(output));
+
   if ConsoleAttached then
     WriteLn(output);
 end;
@@ -162,10 +167,10 @@ end;
 
 procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
 begin
-  lbvThreads.Caption := IntToStr(GetThreadsCount(GetCurrentProcessId));
+  lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
   lbvMemoryUsage.Caption := Format('%dkb', [GetWorkingSetSize div 1024]);
-  lbvMessageHandlers.Caption := IntToStr(MessageContainer.MessageHandlers.Count);
-  lbvMessages.Caption := IntToStr(MessageContainer.Items.Count);
+  lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
+  lbvSocketState.Caption := Format('%d', [Integer(SocketClient.Socket.State)]);
 end;
 
 procedure TfrmDebug.CreateParams(var AParams: TCreateParams);
@@ -243,7 +248,7 @@ initialization
   frmDebug.Show;
 
 finalization
-  frmDebug.Free;
+  FreeAndNil(frmDebug);
 
   if ConsoleAttached then
     FreeConsole;

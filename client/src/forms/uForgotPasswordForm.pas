@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons, Vcl.StdCtrls, Vcl.ActnList, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
   Vcl.Menus, dxSkinsCore, cxButtons, cxControls, cxContainer, cxEdit, cxLabel, cxTextEdit, dxSkinsForm, dxsChipUpDark, dxsChipUpDarkTabs,
-  dxsChipUpRedButton;
+  dxsChipUpRedButton, uIModalForm;
 
 type
-  TfrmForgotPassword = class(TForm)
+  TfrmForgotPassword = class(TForm, IModalForm)
     alForgotPassword: TActionList;
     acOK: TAction;
     acCancel: TAction;
@@ -23,8 +23,12 @@ type
     procedure edEmailChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
   private
+    FCloseCallback: TNotifyEvent;
   public
+    procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
 implementation
@@ -32,12 +36,26 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uValidators, uMainDataModule, uServerSettings;
+  uSocketClient, uValidators, uMainDataModule, uServerSettings, uFormsContainer;
+
 
 procedure TfrmForgotPassword.FormCreate(Sender: TObject);
 begin
   edEMail.Properties.MaxLength := ServerSettings.StringLengths.Password;
 end;
+
+procedure TfrmForgotPassword.FormDestroy(Sender: TObject);
+begin
+  FormsContainer.Remove(self);
+end;
+
+procedure TfrmForgotPassword.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  if Assigned(FCloseCallback) then
+    FCloseCallback(self);
+end;
+
 
 procedure TfrmForgotPassword.FormKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -53,9 +71,15 @@ begin
   end;
 end;
 
+procedure TfrmForgotPassword.SetCloseCallback(const ACallback: TNotifyEvent);
+begin
+  FCloseCallback := ACallback;
+end;
+
 procedure TfrmForgotPassword.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmForgotPassword.acOKExecute(Sender: TObject);
@@ -64,6 +88,7 @@ begin
   SocketClient.ForgotPassword(edEmail.Text);
   MessageDlg('You should soon receive password reset instructions in your inbox', mtInformation, [mbOK], 0);
   ModalResult := mrOk;
+  Close;
 end;
 
 procedure TfrmForgotPassword.edEmailChange(Sender: TObject);
