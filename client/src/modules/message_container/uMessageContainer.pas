@@ -179,15 +179,15 @@ var
 begin
   ProcessMessage(AMessage);
 
-  if FLockCount <> 0 then
-    Exit;
-
-  C1 := 0;
-  while C1 < FCallbackSets.Count do
-    if FCallbackSets[C1].Removed then
-      FCallbackSets.Delete(C1)
-    else
-      Inc(C1);
+  if FLockCount = 0 then
+  begin
+    C1 := 0;
+    while C1 < FCallbackSets.Count do
+      if FCallbackSets[C1].Removed then
+        FCallbackSets.Delete(C1)
+      else
+        Inc(C1);
+  end;
 end;
 
 

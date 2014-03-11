@@ -319,7 +319,7 @@ begin
   for C1 := 0 to Length(ToArray) - 1 do
     if ToArray[C1].IdAsString = 'default' then
       Exit(ToArray[C1]);
-  Exit(ToArray[0]);
+  Exit(nil);
 end;
 
 function TAvatars.AddAvatar(const AId: TBytes; const AImage: TJPEGImage): TAvatar;
@@ -327,26 +327,35 @@ var
   index : Integer;
   avatar: TAvatar;
 begin
-  index := IndexOf(AId);
-  if index <> -1 then
+  avatar := nil;
+  if Length(AId) = 0 then
+    avatar := DefaultAvatar
+  else
   begin
-    if Assigned(AImage) then
-      ToArray[index].SetImage(AImage);
+    index := IndexOf(AId);
+    if index <> -1 then
+    begin
+      if Assigned(AImage) then
+        ToArray[index].SetImage(AImage);
 
-    if not Assigned(ToArray[index].Image) then
-      ToArray[index].SetImage(ToArray[index].IdAsString);
+      if not Assigned(ToArray[index].Image) then
+        ToArray[index].SetImage(ToArray[index].IdAsString);
 
-    Exit(ToArray[index]);
+      Exit(ToArray[index]);
+    end;
   end;
 
-  avatar := TAvatar.Create(FStoragePath, AId);
-  if Assigned(AImage) then
-    avatar.SetImage(AImage)
-  else
-    if not avatar.SetImage(avatar.IdAsString) then
-      avatar.Refresh;
+  if not Assigned(avatar) then
+  begin
+    avatar := TAvatar.Create(FStoragePath, AId);
+    if Assigned(AImage) then
+      avatar.SetImage(AImage)
+    else
+      if not avatar.SetImage(avatar.IdAsString) then
+        avatar.Refresh;
 
-  Add(avatar);
+    Add(avatar);
+  end;
 
   Exit(avatar);
 end;

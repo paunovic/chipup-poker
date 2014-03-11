@@ -519,7 +519,6 @@ begin
     Exit;
 
   pint := 0;
-
   FormsContainer.Add(RunModalForm(TfrmCreateEditGame, self, [@pint, club], ModalFormClose));
 end;
 
@@ -534,7 +533,7 @@ begin
     Exit;
 
   pint := 1;
-  FormsContainer.Add(RunModalForm(TfrmCreateEditGame, self, [@pint, club], ModalFormClose));
+  FormsContainer.Add(RunModalForm(TfrmCreateEditGame, self, [@pint, game], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.acSuspendPlayerExecute(Sender: TObject);
@@ -634,17 +633,38 @@ begin
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayInvalidClubId(const AMethodId: Integer; const AObject: TObject);
+var
+  pbclub: TPB_Club;
 begin
+  pbclub := AObject as TPB_Club;
+
+  if FClubId <> pbclub.Seq then
+    Exit;
+
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer; const AObject: TObject);
+var
+  pbclub: TPB_Club;
 begin
+  pbclub := AObject as TPB_Club;
+
+  if FClubId <> pbclub.Seq then
+    Exit;
+
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayNotOwner(const AMethodId: Integer; const AObject: TObject);
+var
+  pbclub: TPB_Club;
 begin
+  pbclub := AObject as TPB_Club;
+
+  if FClubId <> pbclub.Seq then
+    Exit;
+
   MessageDlg('You are not owner of this club', mtError, [mbOk], 0);
 end;
 

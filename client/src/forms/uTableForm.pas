@@ -372,7 +372,7 @@ var
 begin
   if (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
      (seat_info.Status <> psOutOfPlay) then
-    SocketClient.TableSitOutNextHand(FTable.Game.MongoId, cbSitOutNextBB.Checked);
+    SocketClient.TableSitOutNextHand(FTable.Game.MongoId, cbSitOutNextHand.Checked);
 
   tiSitOutNextHand.Enabled := FALSE;
 end;
@@ -1019,8 +1019,8 @@ const
   TABLE_X_RIGHT       = 64;
   TABLE_Y_TOP         = 66;
   TABLE_Y_BOTTOM      = 133;
-  TABLE_Y_OFFSET      = 40;
-  TABLE_WIDTH_OF_FORM = 0.70;
+  TABLE_Y_OFFSET      = 55;
+  TABLE_WIDTH_OF_FORM = 0.715;
 begin
   // calculate raw dimensions, the ones that include table shadow
   FRawTableWidth := TableResources.TableImage.Texture[0].Width * FTableResizeRatio;
