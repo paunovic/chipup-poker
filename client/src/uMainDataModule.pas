@@ -43,7 +43,7 @@ implementation
 
 uses
   Vcl.Graphics, Vcl.Controls, Winapi.Messages, uSettings, uTableResources, uFormsContainer,
-  uSocketClient, uCommon, uDXCore, uMessageContainer, uAvatars, uServerSettings;
+  uSocketClient, uCommon, uDXCore, UDXTimer, uMessageContainer, uAvatars, uServerSettings;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -52,6 +52,7 @@ begin
 
   TSettings.Initialize;
   TDXCore.Initialize;
+  TDXTimer.Initialize;
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
@@ -79,6 +80,7 @@ begin
   FreeAndNil(ServerSettings);
   if Assigned(TableResources) then
     TTableResources.Deinitialize;
+  TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
   TSettings.Deinitialize;
 end;

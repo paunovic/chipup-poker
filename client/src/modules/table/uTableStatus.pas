@@ -14,6 +14,7 @@ type
     FChips: Integer;
     FCardCount: Integer;
     FCards: TCards;
+    FDealtCards: Integer;
     FStatus: TPlayerStatus;
     FCaption: String;
     FTimebank: UINT32;
@@ -25,6 +26,10 @@ type
 
     procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
 
+    procedure ResetDealtCards;
+    procedure IncDealtCards;
+    procedure FillDealtCards;
+
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
     property Chips: Integer read FChips;
@@ -34,6 +39,7 @@ type
     property StatusAsStr: String read GetStatusStr;
     property Caption: String read FCaption write FCaption;
     property Timebank: UINT32 read FTimeBank;
+    property DealtCards: Integer read FDealtCards;
   end;
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
@@ -139,6 +145,22 @@ begin
     psStandingUp: result := 'StandingUp';
   end;
 end;
+
+procedure TSeatInfo.IncDealtCards;
+begin
+  Inc(FDealtCards);
+end;
+
+procedure TSeatInfo.ResetDealtCards;
+begin
+  FDealtCards := 0;
+end;
+
+procedure TSeatInfo.FillDealtCards;
+begin
+  FDealtCards := FCardCount;
+end;
+
 
 { TTableStatus }
 
