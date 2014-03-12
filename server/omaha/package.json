@@ -1,0 +1,9 @@
+{
+  "name": "omaha",
+  "version": "0.0.1",
+  "description": "omaha tool",
+  "main": "./build/Debug/omaha.node",
+  "author": {
+    "name": "michael bishop"
+  }
+}
