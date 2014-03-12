@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit, cxSpinEdit, cxLabel, Vcl.ActnList, uIFormParams,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uTables, uTableStatus;
+   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uTables, uTableStatus, uIModalForm;
 
 type
-  TfrmTableSit = class(TForm, IFormParams)
+  TfrmTableSit = class(TForm, IFormParams, IModalForm)
     lbsBuyinAmount: TcxLabel;
     seBuyin: TcxSpinEdit;
     btOK: TcxButton;
@@ -30,21 +30,25 @@ type
     procedure seBuyinPropertiesChange(Sender: TObject);
     procedure acMinExecute(Sender: TObject);
     procedure acMaxExecute(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FTable      : TTable;
-    FTableStatus: TTableStatus;
-    FSeatIndex  : Integer;
+    FCallbacksId  : Integer;
+    FTable        : TTable;
+    FTableStatus  : TTableStatus;
+    FSeatIndex    : Integer;
+    FCloseCallback: TNotifyEvent;
 
     procedure SetBuyin(const ABuyin: Double);
-    procedure CSRTableSitOk(const AMessage: TMessageItem);
-    procedure CSRTableSitSeatTaken(const AMessage: TMessageItem);
-    procedure CSRTableSitNoChips(const AMessage: TMessageItem);
-    procedure CSRTableAddonOk(const AMessage: TMessageItem);
-    procedure CSRTableAddonOverLimit(const AMessage: TMessageItem);
+    procedure CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableSitSeatTaken(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableSitNoChips(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableAddonOk(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
   protected
-    procedure WndProc(var AMessage: TMessage); override;
   public
     procedure SetParams(const AParams: array of pointer);
+    procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
 var
@@ -55,18 +59,36 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uMessageContainer, uServerCodes, uServerMessageCallback, uMainDataModule;
+  uCommon, uSocketClient, uServerCodes, uMessageCallbacks, uMainDataModule, uMessageContainer, uFormsContainer, uPB_TableStatus;
 
+
+procedure TfrmTableSit.FormCreate(Sender: TObject);
+begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TServerMessageCallback.Create(srTableSitOk, CSRTableSitOk),
+                      TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken),
+                      TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips),
+                      TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
+                      TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit)
+                  ]);
+end;
 
 procedure TfrmTableSit.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
+end;
+
+procedure TfrmTableSit.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+
+  if Assigned(FCloseCallback) then
+    FCloseCallback(self);
 end;
 
 procedure TfrmTableSit.FormShow(Sender: TObject);
 begin
-  MessageContainer.AddMessageHandler(Handle);
-
   seBuyin.Properties.OnChange(Sender);
 end;
 
@@ -101,6 +123,11 @@ begin
   seBuyin.Value := Trunc(buyin / 100);
 end;
 
+procedure TfrmTableSit.SetCloseCallback(const ACallback: TNotifyEvent);
+begin
+  FCloseCallback := ACallback;
+end;
+
 procedure TfrmTableSit.SetParams(const AParams: array of pointer);
 var
   buyin: Double;
@@ -109,11 +136,11 @@ begin
   FTableStatus := AParams[1];
   FSeatIndex := PInteger(AParams[2])^;
 
-  lbsInfo.Caption := Format('%s (%d/%d) %s'#10#10'Min buy-in: %d'#10'Max buy-in: %d'#10#10'Your balance: %.2f',
+  lbsInfo.Caption := Format('%s (%d/%d) %s'#10#10'Min buy-in: %d'#10'Max buy-in: %d'#10#10'Your available balance: %.2f',
     [
       FTable.Game.Name, Trunc(FTable.Game.SmallBlind / 100), Trunc(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull,
       Trunc((FTable.Game.MinBuyin * FTable.Game.BigBlind) / 100), Trunc((FTable.Game.MaxBuyin * FTable.Game.BigBlind) / 100),
-      dmMain.SelfInfo.Balance / 100
+      dmMain.SelfInfo.Balance / 100 {FIXME: AVAIL BALANCE}
     ]);
 
   buyin := FTable.Game.MinBuyin * FTable.Game.BigBlind;
@@ -122,33 +149,10 @@ begin
   SetBuyin(buyin);
 end;
 
-procedure TfrmTableSit.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srTableSitOk, CSRTableSitOk),
-                            TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken),
-                            TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips),
-                            TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
-                            TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
-end;
-
 procedure TfrmTableSit.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmTableSit.acMaxExecute(Sender: TObject);
@@ -195,30 +199,63 @@ begin
     MessageDlg(err, mtError, [mbOK], 0);
 end;
 
-procedure TfrmTableSit.CSRTableSitNoChips(const AMessage: TMessageItem);
+procedure TfrmTableSit.CSRTableSitNoChips(const AMethodId: Integer; const AObject: TObject);
+var
+  pbstatus: TPB_TableStatus;
 begin
+  pbstatus := AObject as TPB_TableStatus;
+  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+    Exit;
+
   MessageDlg('Insufficient chips', mtWarning, [mbOK], 0);
   acOK.Enabled := TRUE;
 end;
 
-procedure TfrmTableSit.CSRTableSitOk(const AMessage: TMessageItem);
+procedure TfrmTableSit.CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
+var
+  pbstatus: TPB_TableStatus;
 begin
+  pbstatus := AObject as TPB_TableStatus;
+  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+    Exit;
+
   ModalResult := mrOk;
+  Close;
 end;
 
-procedure TfrmTableSit.CSRTableSitSeatTaken(const AMessage: TMessageItem);
+procedure TfrmTableSit.CSRTableSitSeatTaken(const AMethodId: Integer; const AObject: TObject);
+var
+  pbstatus: TPB_TableStatus;
 begin
+  pbstatus := AObject as TPB_TableStatus;
+  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+    Exit;
+
   MessageDlg('Seat is already taken. Please choose another seat', mtWarning, [mbOK], 0);
   ModalResult := mrClose;
+  Close;
 end;
 
-procedure TfrmTableSit.CSRTableAddonOk(const AMessage: TMessageItem);
+procedure TfrmTableSit.CSRTableAddonOk(const AMethodId: Integer; const AObject: TObject);
+var
+  pbstatus: TPB_TableStatus;
 begin
+  pbstatus := AObject as TPB_TableStatus;
+  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+    Exit;
+
   ModalResult := mrOk;
+  Close;
 end;
 
-procedure TfrmTableSit.CSRTableAddonOverLimit(const AMessage: TMessageItem);
+procedure TfrmTableSit.CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
+var
+  pbstatus: TPB_TableStatus;
 begin
+  pbstatus := AObject as TPB_TableStatus;
+  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+    Exit;
+
   MessageDlg('You can''t addon over maximum table buy-in limit', mtWarning, [mbOK], 0);
   acOK.Enabled := TRUE;
 end;

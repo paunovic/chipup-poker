@@ -32,6 +32,9 @@ type
     constructor Create(const ASettingsFile: String);
     destructor Destroy; override;
 
+    class procedure Initialize;
+    class procedure Deinitialize;
+
     function Load: Boolean;
     procedure Save;
 
@@ -54,6 +57,18 @@ uses
   Winapi.Windows, System.SysUtils,
   uCommon, uEncryption, uMainDataModule;
 
+
+class procedure TSettings.Initialize;
+begin
+  Settings := TSettings.Create(AppDataLocalPath + THardcodedSettings.Hardcoded.SETTINGS_FILENAME);
+  Settings.Load;
+end;
+
+class procedure TSettings.Deinitialize;
+begin
+  Settings.Save;
+  FreeAndNil(Settings);
+end;
 
 constructor TSettings.Create(const ASettingsFile: String);
 begin
@@ -148,14 +163,6 @@ procedure TSettings.SetRememberPassword(const AValue: Boolean);
 begin
   FJSON.B[JSON_REMEMBER_PASSWORD] := AValue;
 end;
-
-initialization
-  Settings := TSettings.Create(AppDataLocalPath + THardcodedSettings.Hardcoded.SETTINGS_FILENAME);
-  Settings.Load;
-
-finalization
-  Settings.Save;
-  Settings.Free;
 
 end.
 

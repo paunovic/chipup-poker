@@ -94,6 +94,8 @@ Deck.prototype.shuffle = function shuffle(callback) {
 			}.bind(this));
 		} else {
 			this.cards = output;
+			// sidepots
+			//this.cards = [6,49,39,21,45,11,25,38,29,33,1,30,43,4,3,23,20,40,19,8,42,35,18,14,2,32,31,47,27,24,26,22,28,44,37,41,51,46,12,9,0,10,36,17,5,16,7,15,34,50,48,13];
 			callback();
 		}
 	}.bind(this);

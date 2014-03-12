@@ -15,10 +15,11 @@ object frmGiveChips: TfrmGiveChips
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
+  OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
-  OnShow = FormShow
   DesignSize = (
     359
     136)

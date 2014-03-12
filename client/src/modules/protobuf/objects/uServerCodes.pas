@@ -80,7 +80,8 @@ type
     scPutChips = 529,
     scTableAddOn = 530,
     scTablePlayNow = 531,
-    scTableSitOut = 532
+    scTableSitOut = 532,
+    scTableSitOutNextBB = 533
   );
 
 {$IFDEF DEBUG}
@@ -188,6 +189,7 @@ begin
     scTableAddOn: result := 'scTableAddOn';
     scTablePlayNow: result := 'scTablePlayNow';
     scTableSitOut: result := 'scTableSitOut';
+    scTableSitOutNextBB: result := 'scTableSitOutNextBB';
   end;
 end;
 {$ENDIF DEBUG}

@@ -3,8 +3,8 @@ unit uMainDataModule;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, cxLabel,
-  uPlayerInfo, uServerSettings, uTables, uAvatars, uPB_StatusReply;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, System.Generics.Collections,
+  uPlayerInfo, uTables, uPB_StatusReply, Vcl.Forms;
 
 type
   TdmMain = class(TDataModule)
@@ -15,11 +15,9 @@ type
       FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
 
     var
-      FSelfInfo      : TPlayerInfo;
-      FPlayers       : TPlayerInfos;
-      FServerSettings: TServerSettings;
-      FTables        : TTables;
-      FAvatars       : TAvatars;
+      FSelfInfo: TPlayerInfo;
+      FPlayers : TPlayerInfos;
+      FTables  : TTables;
 
     procedure LoadFonts;
 
@@ -29,11 +27,9 @@ type
     procedure OpenCashierLink;
     procedure OpenTOSLink;
 
-    property SelfInfo      : TPlayerInfo read FSelfInfo;
-    property Players       : TPlayerInfos read FPlayers;
-    property ServerSettings: TServerSettings read FServerSettings;
-    property Tables        : TTables read FTables;
-    property Avatars       : TAvatars read FAvatars;
+    property SelfInfo: TPlayerInfo read FSelfInfo;
+    property Players : TPlayerInfos read FPlayers;
+    property Tables  : TTables read FTables;
   end;
 
 var
@@ -46,39 +42,47 @@ implementation
 {$R *.dfm}
 
 uses
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Winapi.Messages,
-  uSocketClient, uSettings, uCommon;
-
+  Vcl.Graphics, Vcl.Controls, Winapi.Messages, uSettings, uTableResources, uFormsContainer,
+  uSocketClient, uCommon, uDXCore, UDXTimer, uMessageContainer, uAvatars, uServerSettings;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
   LoadFonts;
 
-  FServerSettings := TServerSettings.Create;
+  TSettings.Initialize;
+  TDXCore.Initialize;
+  TDXTimer.Initialize;
+  TServerSettings.Initialize;
+  TMessageContainer.Initialize;
+  TFormsContainer.Initialize;
+  TAvatars.Initialize(AppDataRoamingPath + TSettings.Hardcoded.AVATARS_SUBDIR);
+  TSocketClient.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
 
   FSelfInfo := TPlayerInfo.Create;
   FPlayers := TPlayerInfos.Create;
-  FAvatars := TAvatars.Create(AppDataRoamingPath + TSettings.Hardcoded.AVATARS_SUBDIR);
-
   FTables := TTables.Create;
-
-  SocketClient := TSocketClient.Create(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
 end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
   FTables.Free;
-
-  FAvatars.Free;
   FPlayers.Free;
   FSelfInfo.Free;
 
-  FServerSettings.Free;
-
   if SocketClient.IsConnected then
     SocketClient.Disconnect;
-  FreeAndNil(SocketClient);
+  TSocketClient.Deinitialize;
+
+  TAvatars.Deinitialize;
+  TFormsContainer.Deinitialize;
+  TMessageContainer.Deinitialize;
+  FreeAndNil(ServerSettings);
+  if Assigned(TableResources) then
+    TTableResources.Deinitialize;
+  TDXTimer.Deinitialize;
+  TDXCore.Deinitialize;
+  TSettings.Deinitialize;
 end;
 
 procedure TdmMain.OpenCashierLink;
@@ -94,7 +98,7 @@ end;
 procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
 begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
-  FAvatars.AddAvatar(FSelfInfo.AvatarId);
+  Avatars.AddAvatar(FSelfInfo.AvatarId);
   FPlayers.LoadFromUsersProtobuf(AStatusProtobuf.Users);
 end;
 

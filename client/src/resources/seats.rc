@@ -1,6 +1,0 @@
-EmptySeatLeft RCDATA "resources\\seats\\EmptySeatLeft.png"
-EmptySeatRight RCDATA "resources\\seats\\EmptySeatRight.png"
-SeatDarkLeft RCDATA "resources\\seats\\SeatDarkLeft.png"
-SeatDarkRight RCDATA "resources\\seats\\SeatDarkRight.png"
-SeatLightLeft RCDATA "resources\\seats\\SeatLightLeft.png"
-SeatLightRight RCDATA "resources\\seats\\SeatLightRight.png"

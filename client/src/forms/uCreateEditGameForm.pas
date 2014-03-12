@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  Vcl.Samples.Spin, cxSpinEdit, uIFormParams, uClubInfo, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uGameInfo;
+  Vcl.Samples.Spin, cxSpinEdit, uIFormParams, uClubInfo,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, uGameInfo, uIModalForm;
 
 type
-  TfrmCreateEditGame = class(TForm, IFormParams)
+  TfrmCreateEditGame = class(TForm, IFormParams, IModalForm)
     edGameName: TcxTextEdit;
     lbsGameName: TcxLabel;
     lbsGameType: TcxLabel;
@@ -32,22 +32,26 @@ type
     lbsBuyinMax: TcxLabel;
     lbsBuyinBigBlinds: TcxLabel;
     procedure acOKExecute(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
+    FCallbacksId: Integer;
     FFormType: Integer;
     FClub: TClubInfo;
     FGame: TGameInfo;
+    FCloseCallback: TNotifyEvent;
 
-    procedure CSRCreateGameOk(const AMessage: TMessageItem);
-    procedure CSREditGameOk(const AMessage: TMessageItem);
+    procedure CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
+    procedure CSREditGameOk(const AMethodId: Integer; const AObject: TObject);
 
   protected
-    procedure WndProc(var AMessage: TMessage); override;
   public
     procedure SetParams(const AParams: array of pointer);
+    procedure SetCloseCallback(const ACallback: TNotifyEvent);
+
   end;
 
 implementation
@@ -55,12 +59,30 @@ implementation
 {$R *.dfm}
 
 uses
-  uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uValidators, uPB_Game;
+  uSocketClient, uServerCodes, uCommon, uMessageCallbacks, uValidators, uPB_Game, uMainDataModule, uMessageContainer, uFormsContainer;
 
+
+
+procedure TfrmCreateEditGame.FormCreate(Sender: TObject);
+begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TServerMessageCallback.Create(srCreateGameOk, CSRCreateGameOk),
+                      TServerMessageCallback.Create(srEditGameOk, CSREditGameOk)
+                  ]);
+end;
 
 procedure TfrmCreateEditGame.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
+end;
+
+procedure TfrmCreateEditGame.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+
+  if Assigned(FCloseCallback) then
+    FCloseCallback(self);
 end;
 
 procedure TfrmCreateEditGame.FormKeyPress(Sender: TObject; var Key: Char);
@@ -80,9 +102,9 @@ begin
   end;
 end;
 
-procedure TfrmCreateEditGame.FormShow(Sender: TObject);
+procedure TfrmCreateEditGame.SetCloseCallback(const ACallback: TNotifyEvent);
 begin
-  MessageContainer.AddMessageHandler(Handle);
+  FCloseCallback := ACallback;
 end;
 
 procedure TfrmCreateEditGame.SetParams(const AParams: array of pointer);
@@ -127,30 +149,10 @@ begin
   end;
 end;
 
-procedure TfrmCreateEditGame.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srCreateGameOk, CSRCreateGameOk),
-                            TServerMessageCallback.Create(srEditGameOk, CSREditGameOk)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
-end;
-
 procedure TfrmCreateEditGame.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmCreateEditGame.acOKExecute(Sender: TObject);
@@ -194,14 +196,16 @@ begin
     MessageDlg(err, mtError, [mbOK], 0);
 end;
 
-procedure TfrmCreateEditGame.CSRCreateGameOk(const AMessage: TMessageItem);
+procedure TfrmCreateEditGame.CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
 begin
   ModalResult := mrOk;
+  Close;
 end;
 
-procedure TfrmCreateEditGame.CSREditGameOk(const AMessage: TMessageItem);
+procedure TfrmCreateEditGame.CSREditGameOk(const AMethodId: Integer; const AObject: TObject);
 begin
   ModalResult := mrOk;
+  Close;
 end;
 
 end.

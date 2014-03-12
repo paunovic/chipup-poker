@@ -6,11 +6,11 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.Menus, cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls,
-  cxButtons, cxCheckBox, OverbyteIcsWSocket, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, Vcl.Imaging.jpeg, cxImage, dxsChipUpRedButton,
+  cxButtons, cxCheckBox, OverbyteIcsWSocket,  dxsChipUpDark, dxsChipUpDarkTabs, Vcl.Imaging.jpeg, cxImage, dxsChipUpRedButton,
   dxGDIPlusClasses, uIFormParams;
 
 type
-  TLoginStatus = (lsConnecting, lsConnected, lsLoggingIn);
+  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsLoggingIn);
 
   TfrmLogin = class(TForm)
     alLogin: TActionList;
@@ -37,26 +37,30 @@ type
     procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure tiConnectTimer(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FLoginSuccess: Boolean;
     FCurrentStatus: TLoginStatus;
+    FCallbacksId: Integer;
 
     procedure ApplySettings;
     procedure SaveSettings;
 
-    procedure CSRLogin(const AMessage: TMessageItem);
-    procedure CSRStatusReply(const AMessage: TMessageItem);
-    procedure CSRHello(const AMessage: TMessageItem);
+    procedure ModalFormClose(Sender: TObject);
 
-    procedure SocketChangeState(const AOldState, ANewState: TSocketState);
+    procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRStatusReply(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
+
+    procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
     procedure EnableGUI(const AEnable: Boolean);
     procedure SetCurrentStatus(const AValue: TLoginStatus);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
-    procedure WndProc(var AMessage: TMessage); override;
   public
     property CurrentStatus: TLoginStatus read FCurrentStatus write SetCurrentStatus;
+    property LoginSuccess: Boolean read FLoginSuccess;
   end;
 
 implementation
@@ -65,14 +69,21 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient,
+  uCreateAccountForm, uForgotPasswordForm, uSettings, uSocketClient, uMessageContainer, uServerSettings,
   uServerCodes, uCommon, uMainDataModule, uPB_StatusReply, uPB_HelloReply, uPB_LoginReply,
-  uMessageContainer, uServerMessageCallback;
+  uMessageCallbacks, uMainForm, uFormsContainer;
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
-  CurrentStatus := lsConnecting;
+  FCallbacksId := MessageContainer.AddCallbacks([
+                     TSocketStateChangeCallback.Create(SocketStateChange),
+                     TServerMessageCallback.Create(srHello, CSRHello),
+                     TServerMessageCallback.Create(srLoginReply, CSRLogin),
+                     TServerMessageCallback.Create(srStatus, CSRStatusReply)
+                  ]);
+
+  CurrentStatus := lsIdle;
   FLoginSuccess := FALSE;
   edPassword.Properties.PasswordChar := Chr($25CF);
   ApplySettings;
@@ -82,8 +93,14 @@ end;
 
 procedure TfrmLogin.FormDestroy(Sender: TObject);
 begin
+  MessageContainer.RemoveCallbacks(FCallbacksId);
   SaveSettings;
-  MessageContainer.RemoveMessageHandler(Handle);
+end;
+
+procedure TfrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  frmChipUpMain.LoggedIn(FLoginSuccess);
 end;
 
 procedure TfrmLogin.CreateParams(var AParams: TCreateParams);
@@ -94,8 +111,6 @@ end;
 
 procedure TfrmLogin.FormShow(Sender: TObject);
 begin
-  MessageContainer.AddMessageHandler(Handle);
-
   case SocketClient.Socket.State of
     wsClosed: begin
       CurrentStatus := lsConnecting;
@@ -103,6 +118,22 @@ begin
     end;
     wsConnected: CurrentStatus := lsConnected;
   end;
+end;
+
+procedure TfrmLogin.ModalFormClose(Sender: TObject);
+begin
+  if (Sender is TfrmCreateAccount) and
+     ((Sender as TfrmCreateAccount).ModalResult = mrOk) then
+  begin
+    if edLogin.Text = '' then
+    begin
+      cbRememberLogin.Checked := TRUE;
+      edLogin.Text := Settings.Login;
+      edPassword.SetFocus;
+    end;
+  end;
+
+  EnableWindow(Handle, TRUE);
 end;
 
 procedure TfrmLogin.ApplySettings;
@@ -133,31 +164,6 @@ begin
     Settings.Password := '';
 end;
 
-
-procedure TfrmLogin.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srHello, CSRHello),
-                            TServerMessageCallback.Create(srLoginReply, CSRLogin),
-                            TServerMessageCallback.Create(srStatus, CSRStatusReply)
-                          ]
-                        );
-
-      mtSocketChangeState: SocketChangeState(msg.OldState, msg.NewState);
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
-end;
-
 procedure TfrmLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var
   status: String;
@@ -165,7 +171,7 @@ begin
   FCurrentStatus := AValue;
 
   case FCurrentStatus of
-    lsConnecting: status := 'CONNECTING...';
+    lsIdle, lsConnecting: status := 'CONNECTING...';
     lsConnected: status := 'LOGIN';
     lsLoggingIn: status := 'LOGGING IN...';
   end;
@@ -173,7 +179,7 @@ begin
   btLogin.Caption := status;
 end;
 
-procedure TfrmLogin.SocketChangeState(const AOldState, ANewState: TSocketState);
+procedure TfrmLogin.SocketStateChange(const AOldState, ANewState: TSocketState);
 begin
   case ANewState of
     wsOpened,
@@ -188,18 +194,25 @@ begin
       EnableGUI(SocketClient.IsConnected);
     end;
     wsClosed: begin
-      CurrentStatus := lsConnecting;
+      FormsContainer.Close(TfrmForgotPassword);
+      FormsContainer.Close(TfrmCreateAccount);
+      CurrentStatus := lsIdle;
       EnableGUI(FALSE);
       SocketClient.Disconnect;
-      tiConnect.Enabled := TRUE;
     end;
   end;
 end;
 
 procedure TfrmLogin.tiConnectTimer(Sender: TObject);
 begin
-  SocketClient.Connect;
-  tiConnect.Enabled := FALSE;
+  if SocketClient.Socket.State = wsClosed then
+    FCurrentStatus := lsIdle;
+
+  if CurrentStatus = lsIdle then
+  begin
+    CurrentStatus := lsConnecting;
+    SocketClient.Connect;
+  end;
 end;
 
 procedure TfrmLogin.EnableGUI(const AEnable: Boolean);
@@ -228,36 +241,28 @@ end;
 
 procedure TfrmLogin.acShowCreateAccountFormExecute(Sender: TObject);
 begin
-  if RunModalForm(TfrmCreateAccount, self, []) = mrOk then
-  begin
-    if edLogin.Text = '' then
-    begin
-      cbRememberLogin.Checked := TRUE;
-      edLogin.Text := Settings.Login;
-      edPassword.SetFocus;
-    end;
-  end;
+  FormsContainer.Add(RunModalForm(TfrmCreateAccount, self, [], ModalFormClose));
 end;
 
 procedure TfrmLogin.acShowForgotPasswordFormExecute(Sender: TObject);
 begin
-  RunModalForm(TfrmForgotPassword, self, []);
+  FormsContainer.Add(RunModalForm(TfrmForgotPassword, self, [], ModalFormClose));
 end;
 
-procedure TfrmLogin.CSRHello(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
 var
   pbhello: TPB_HelloReply;
 begin
-  pbhello := AMessage.Object_ as TPB_HelloReply;
+  pbhello := AObject as TPB_HelloReply;
 
-  dmMain.ServerSettings.ParseHelloMessage(pbhello);
+  ServerSettings.ParseHelloMessage(pbhello);
 
-  if dmMain.ServerSettings.StringLengths.EMail > dmMain.ServerSettings.StringLengths.Username then
-    edLogin.Properties.MaxLength := dmMain.ServerSettings.StringLengths.EMail
+  if ServerSettings.StringLengths.EMail > ServerSettings.StringLengths.Username then
+    edLogin.Properties.MaxLength := ServerSettings.StringLengths.EMail
   else
-    edLogin.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Username;
+    edLogin.Properties.MaxLength := ServerSettings.StringLengths.Username;
 
-  edPassword.Properties.MaxLength := dmMain.ServerSettings.StringLengths.Password;
+  edPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
 
   EnableGUI(SocketClient.IsConnected);
   if SocketClient.IsConnected then
@@ -269,11 +274,11 @@ begin
     SocketClient.Disconnect;
 end;
 
-procedure TfrmLogin.CSRLogin(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRLogin(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_LoginReply;
 begin
-  pbreply := AMessage.Object_ as TPB_LoginReply;
+  pbreply := AObject as TPB_LoginReply;
 
   case pbreply.Status of
     lrSuccess: begin
@@ -293,14 +298,14 @@ begin
   end;
 end;
 
-procedure TfrmLogin.CSRStatusReply(const AMessage: TMessageItem);
+procedure TfrmLogin.CSRStatusReply(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_StatusReply;
 begin
-  pbstatus := AMessage.Object_ as TPB_StatusReply;
+  pbstatus := AObject as TPB_StatusReply;
   dmMain.ProcessStatusProtobuf(pbstatus);
   if FLoginSuccess then
-    ModalResult := mrOk;
+    Close;
 end;
 
 end.

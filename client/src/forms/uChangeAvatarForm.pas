@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ExtCtrls, cxLabel, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg,
-  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmChangeAvatar = class(TForm)
@@ -20,23 +20,22 @@ type
     OpenDialog: TOpenDialog;
     procedure acCloseExecute(Sender: TObject);
     procedure acChangeExecute(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
+    FCallbacksId: Integer;
     FAvatarId : TBytes;
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
 
-    procedure CSRSetAvatar(const AMessage: TMessageItem);
+    procedure CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
 
     procedure UploadAvatar;
 
   protected
-    procedure WndProc(var AMessage: TMessage); override;
-
   public
   end;
 
@@ -45,26 +44,36 @@ implementation
 {$R *.dfm}
 
 uses
-  superobject, PNGImage, uAvatars, uMessageContainer, uServerMessageCallback, uPB_SetAvatarReply,
+  superobject, PNGImage, uAvatars, uMessageCallbacks, uPB_SetAvatarReply, uMessageContainer,
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uServerCodes, uSocketClient, uCommon, uEncryption, uSettings, uMainDataModule, uPlayerInfo;
+  uServerCodes, uSocketClient, uCommon, uEncryption, uSettings, uMainDataModule, uPlayerInfo, uFormsContainer;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
 var
   avatar: TAvatar;
 begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                     TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
+  ]);
+
   FAvatarJPG := TJPEGImage.Create;
 
-  avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
+  avatar := Avatars.AddAvatar(dmMain.SelfInfo.AvatarId);
   imgAvatar.Picture.Assign(avatar.Image);
 end;
 
 procedure TfrmChangeAvatar.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
-
   FAvatarJPG.Free;
+
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
+end;
+
+procedure TfrmChangeAvatar.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
 end;
 
 procedure TfrmChangeAvatar.FormKeyPress(Sender: TObject; var Key: Char);
@@ -75,11 +84,6 @@ begin
       Key := #0;
     end;
   end;
-end;
-
-procedure TfrmChangeAvatar.FormShow(Sender: TObject);
-begin
-  MessageContainer.AddMessageHandler(Handle);
 end;
 
 procedure TfrmChangeAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
@@ -114,27 +118,7 @@ end;
 
 procedure TfrmChangeAvatar.acCloseExecute(Sender: TObject);
 begin
-  ModalResult := mrClose;
-end;
-
-procedure TfrmChangeAvatar.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
+  Close;
 end;
 
 procedure TfrmChangeAvatar.UploadAvatar;
@@ -231,18 +215,18 @@ begin
     MessageDlg(error, mtError, [mbOK], 0);
 end;
 
-procedure TfrmChangeAvatar.CSRSetAvatar(const AMessage: TMessageItem);
+procedure TfrmChangeAvatar.CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
 var
   avatar     : TAvatar;
   pbreply    : TPB_SetAvatarReply;
   player_info: TPlayerInfo;
 begin
-  pbreply := AMessage.Object_ as TPB_SetAvatarReply;
+  pbreply := AObject as TPB_SetAvatarReply;
 
   case pbreply.Status of
     saSuccess: begin
       dmMain.SelfInfo.AvatarId := FAvatarId;
-      avatar := dmMain.Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
+      avatar := Avatars.AddAvatar(dmMain.SelfInfo.AvatarId, FAvatarJPG);
       if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
         player_info.AvatarId := dmMain.SelfInfo.AvatarId;
       imgAvatar.Picture.Assign(avatar.Image);

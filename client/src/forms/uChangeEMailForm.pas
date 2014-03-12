@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, Vcl.ActnList, uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, Vcl.ActnList,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmChangeEMail = class(TForm)
@@ -23,13 +23,14 @@ type
     procedure FormCreate(Sender: TObject);
     procedure edNewMailPropertiesChange(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
   private
-    procedure CSRChangeMail(const AMessage: TMessageItem);
+    FCallbacksId: Integer;
+
+    procedure CSRChangeMail(const AMethodId: Integer; const AObject: TObject);
   protected
-    procedure WndProc(var AMessage: TMessage); override;
   public
   end;
 
@@ -38,51 +39,34 @@ implementation
 {$R *.dfm}
 
 uses
-  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageContainer, uServerMessageCallback, uPB_ChangeMailReply;
-
+  uMainDataModule, uValidators, uSocketClient, uServerCodes, uCommon, uMessageCallbacks, uPB_ChangeMailReply, uMessageContainer,
+  uServerSettings, uFormsContainer;
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
 begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                       TServerMessageCallback.Create(srChangeMailReply, CSRChangeMail)
+                   ]);
+
   lbInfo.Caption := Format('Upon changing your e-mail address, you will receive an e-mail containing confirmation link. ' +
                            'You must click on confirmation link in order to complete e-mail change process. ' +
                            'Until your new e-mail address has been validated, you can only log into your account using your username. ' +
-                           'Confirmation link will expire in %d hours.', [Round(dmMain.ServerSettings.EmailConfirmationExpiration / 3600)]);
+                           'Confirmation link will expire in %d hours.', [Round(ServerSettings.EmailConfirmationExpiration / 3600)]);
 
   edCurrentMail.Text := dmMain.SelfInfo.EMail;
-  edNewMail.Properties.MaxLength := dmMain.ServerSettings.StringLengths.EMail;
+  edNewMail.Properties.MaxLength := ServerSettings.StringLengths.EMail;
 end;
 
 procedure TfrmChangeEMail.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
 end;
 
-
-procedure TfrmChangeEMail.FormShow(Sender: TObject);
+procedure TfrmChangeEMail.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  MessageContainer.AddMessageHandler(Handle);
+  Action := caFree;
 end;
-
-procedure TfrmChangeEMail.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
-
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                          [
-                            TServerMessageCallback.Create(srChangeMailReply, CSRChangeMail)
-                          ]
-                        );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
-end;
-
 
 procedure TfrmChangeEMail.edNewMailPropertiesChange(Sender: TObject);
 var
@@ -108,7 +92,7 @@ end;
 
 procedure TfrmChangeEMail.acCancelExecute(Sender: TObject);
 begin
-  ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmChangeEMail.acOKExecute(Sender: TObject);
@@ -117,16 +101,16 @@ begin
   acOK.Enabled := FALSE;
 end;
 
-procedure TfrmChangeEMail.CSRChangeMail(const AMessage: TMessageItem);
+procedure TfrmChangeEMail.CSRChangeMail(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_ChangeMailReply;
 begin
-  pbreply := AMessage.Object_ as TPB_ChangeMailReply;
+  pbreply := AObject as TPB_ChangeMailReply;
 
   case pbreply.Status of
     cmSuccess: begin
       MessageDlg('E-mail address successfully changed. Please check your inbox for confirmation link.', mtInformation, [mbOK], 0);
-      ModalResult := mrOk;
+      Close;
     end;
     cmDuplicateMail: begin
       MessageDlg('E-mail address is already in use', mtError, [mbOK], 0);

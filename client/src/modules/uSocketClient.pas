@@ -42,6 +42,9 @@ type
     procedure KillPingTimeoutTimer;
 
   public
+    class procedure Initialize(const AServer: String; const APort: Integer);
+    class procedure Deinitialize;
+
     constructor Create(const AServer: String; const APort: Integer);
     destructor Destroy; override;
 
@@ -79,12 +82,14 @@ type
     procedure TableAddOn(const AGameId: TBytes; const AChips: Integer);
     procedure TableStandUp(const AGameId: TBytes);
     procedure TablePlayNow(const AGameId: TBytes);
-    procedure TableSitOut(const AGameId: TBytes);
+    procedure TableSitOutNextHand(const AGameId: TBytes; const AFlag: Boolean);
+    procedure TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
     procedure Ping;
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
     procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
     procedure Fold(const AGameId: TBytes);
     procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer);
+    procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
 
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
@@ -103,8 +108,22 @@ uses
   uPB_LoginParams, uPB_StatusReply, uPB_HelloReply, uPB_RegisterParams, uPB_Club, uPB_ChangeEMailParams, uPB_ForgotPasswordParams,
   uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply, uPB_KickPlayerParams, uPB_PingParams, uPB_PingReply,
   uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams, uPB_SetAvatarParams,
-  uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply, uPB_TableEvent,
-  uPB_PutChips;
+  uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply, uPB_TableEvent, uPB_TableBoolFlag,
+  uPB_PutChips, uMainDataModule;
+
+var
+  FConnectThreadId: DWORD;
+
+
+class procedure TSocketClient.Initialize(const AServer: String; const APort: Integer);
+begin
+  SocketClient := TSocketClient.Create(AServer, APort);
+end;
+
+class procedure TSocketClient.Deinitialize;
+begin
+  FreeAndNil(SocketClient);
+end;
 
 
 function DoConnect(AParameter: pointer): Integer;
@@ -115,7 +134,8 @@ begin
     on E: Exception do
     begin
       {$IFDEF DEBUG} DebugLn(Format('Error connecting to server: ', [E.Message]), ditException); {$ENDIF}
-      SocketClient.SocketError(nil);
+      if Assigned(SocketClient) then
+        SocketClient.SocketError(nil);
     end;
   end;
 
@@ -150,8 +170,6 @@ begin
 end;
 
 procedure TSocketClient.Connect;
-var
-  tid: DWORD;
 begin
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
@@ -166,16 +184,24 @@ begin
   FSocket.OnSessionConnected := SocketSessionConnected;
   FSocket.OnSessionClosed := SocketSessionClosed;
   FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
-  FSocket.Flush;
 
   ResetPingTimer;
 
-  CloseHandle(BeginThread(nil, 0, @DoConnect, Addr(FSocket), 0, tid));
+  if FConnectThreadId <> 0 then
+    TerminateThread(FConnectThreadId, 0);
+
+  CloseHandle(BeginThread(nil, 0, @DoConnect, Addr(FSocket), 0, FConnectThreadId));
 end;
 
 procedure TSocketClient.Disconnect;
 begin
   KillPingTimer;
+
+  if FConnectThreadId <> 0 then
+  begin
+    TerminateThread(FConnectThreadId, 0);
+    FConnectThreadId := 0;
+  end;
 
   if FSocket.State <> TSocketState.wsClosed then
   begin
@@ -276,7 +302,8 @@ begin
         DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
       {$ENDIF}
       ResetPingTimer;
-      MessageContainer.AddServerMessage(rpc_message.MethodId, data_obj);
+
+      PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
 
     ptmp := pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
@@ -302,7 +329,7 @@ begin
     wsClosed: ;
   end;
 
-  MessageContainer.AddSocketChangeMessage(OldState, NewState);
+  PostMessage(MessageContainer.ReceiverWnd, MessageContainer.SocketStateChangeMsg, WPARAM(OldState), LPARAM(NewState));
 end;
 
 
@@ -312,7 +339,7 @@ begin
 
   case FSocket.State of
     wsConnected: ;
-    wsClosed: Connect;
+    wsClosed: ;
   else
     Disconnect;
   end;
@@ -397,15 +424,10 @@ begin
     srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;
     srRegisterReply: ADataObject := TPB_RegisterReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srOwnershipGiveAwayNotOwner: ;
-    srOwnershipGiveawayInvalidPlayerId: ;
-    srOwnershipGiveAwayInvalidClubId: ;
     srChangePasswordOk: ;
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ;
     srTransferChipsInvalidAmount: ;
-    srTableSitNoChips: ;
-    srTableAddonOverLimit: ;
 
     seTransferChips,
     srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);
@@ -421,6 +443,8 @@ begin
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srTableSitNoChips,
+    srTableAddonOverLimit,
     seTableStatus,
     srTableSitOk,
     srTableSitSeatTaken,
@@ -442,6 +466,9 @@ begin
     end;
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDisbandOk,
+    srOwnershipGiveAwayNotOwner,
+    srOwnershipGiveawayInvalidPlayerId,
+    srOwnershipGiveAwayInvalidClubId,
     srOwnershipGiveAwayOk,
     srSuspendPlayerOk,
     srReinstatePlayerOk,
@@ -950,21 +977,29 @@ begin
   end;
 end;
 
-procedure TSocketClient.TableSitOut(const AGameId: TBytes);
-var
-  protobuf: TPB_Game;
+procedure TSocketClient.TableSitOutNextHand(const AGameId: TBytes; const AFlag: Boolean);
 begin
-  protobuf := TPB_Game.Create;
+  TableBoolFlag(scTableSitOut, AGameId, AFlag);
+end;
+
+procedure TSocketClient.TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
+begin
+  TableBoolFlag(scTableSitOutNextBB, AGameId, AFlag);
+end;
+
+procedure TSocketClient.TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
+var
+  protobuf: TPB_TableBoolFlag;
+begin
+  protobuf := TPB_TableBoolFlag.Create;
   try
-    protobuf.MongoId := AGameId;
-    SendProtobuf(scTableSitOut, protobuf);
+    protobuf.TableMongoId := AGameId;
+    protobuf.Flag := AFlag;
+    SendProtobuf(ACommand, protobuf);
   finally
     protobuf.Free;
   end;
 end;
-
-
-
 
 
 end.

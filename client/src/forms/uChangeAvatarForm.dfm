@@ -15,10 +15,10 @@ object frmChangeAvatar: TfrmChangeAvatar
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
-  OnShow = FormShow
   DesignSize = (
     226
     255)
@@ -66,7 +66,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 213
   end
   object btCancel: TcxButton
     Left = 116
@@ -83,7 +82,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 213
   end
   object imgAvatar: TcxImage
     Left = 38

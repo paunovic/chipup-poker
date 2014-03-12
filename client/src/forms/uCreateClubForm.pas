@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
   cxLookAndFeelPainters, cxContainer, cxEdit, cxLabel, cxTextEdit, Vcl.StdCtrls, cxRadioGroup, Vcl.Menus, cxButtons, Vcl.ActnList,
-  uMessageItem, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
 
 type
   TfrmCreateClub = class(TForm)
@@ -26,12 +26,13 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    procedure CSRCreateClub(const AMessage: TMessageItem);
+    FCallbacksId: Integer;
+
+    procedure CSRCreateClub(const AMethodId: Integer; const AObject: TObject);
   protected
-    procedure WndProc(var AMessage: TMessage); override;
   public
   end;
 
@@ -41,25 +42,29 @@ implementation
 
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
-  uSocketClient, uCommon, uServerCodes, uValidators, uMainDataModule, uMessageContainer, uPB_ClubCommandReply,
-  uServerMessageCallback;
+  uSocketClient, uCommon, uServerCodes, uValidators, uMainDataModule, uPB_ClubCommandReply, uMessageContainer, uServerSettings,
+  uMessageCallbacks, uFormsContainer;
 
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
 begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TServerMessageCallback.Create(srCreateClubReply, CSRCreateClub)
+                  ]);
 
-  edClubName.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubName;
-  edClubCode.Properties.MaxLength := dmMain.ServerSettings.StringLengths.ClubInvCode;
+  edClubName.Properties.MaxLength := ServerSettings.StringLengths.ClubName;
+  edClubCode.Properties.MaxLength := ServerSettings.StringLengths.ClubInvCode;
 end;
 
 procedure TfrmCreateClub.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveMessageHandler(Handle);
+  MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.Remove(self);
 end;
 
-procedure TfrmCreateClub.FormShow(Sender: TObject);
+procedure TfrmCreateClub.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  MessageContainer.AddMessageHandler(Handle);
+  Action := caFree;
 end;
 
 procedure TfrmCreateClub.FormKeyPress(Sender: TObject; var Key: Char);
@@ -79,7 +84,7 @@ end;
 
 procedure TfrmCreateClub.acCancelExecute(Sender: TObject);
 begin
-  ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmCreateClub.acOKExecute(Sender: TObject);
@@ -105,36 +110,17 @@ begin
   SocketClient.CreateClub(edClubName.Text, edClubCode.Text, rbPrivate.Checked, 5);
 end;
 
-procedure TfrmCreateClub.WndProc(var AMessage: TMessage);
-var
-  msg: TMessageItem;
-begin
-  inherited;
 
-  if MessageContainer.IsNewMessage(AMessage, msg) then
-  begin
-    case msg.MessageType of
-      mtServerResponse: ProcessServerMessage(msg,
-                           [
-                             TServerMessageCallback.Create(srCreateClubReply, CSRCreateClub)
-                           ]
-                         );
-    end;
-
-    MessageContainer.RemoveMessageReader(AMessage.WParam, Handle);
-  end;
-end;
-
-procedure TfrmCreateClub.CSRCreateClub(const AMessage: TMessageItem);
+procedure TfrmCreateClub.CSRCreateClub(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  pbreply := AMessage.Object_ as TPB_ClubCommandReply;
+  pbreply := AObject as TPB_ClubCommandReply;
 
   case pbreply.Status of
     csSuccess: begin
       MessageDlg('Club created successfully!', mtInformation, [mbOK], 0);
-      ModalResult := mrOk;
+      Close;
     end;
     csInvalidName: begin
       MessageDlg('Invalid club name', mtError, [mbOK], 0);

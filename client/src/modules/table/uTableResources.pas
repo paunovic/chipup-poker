@@ -3,6 +3,7 @@ unit uTableResources;
 interface
 
 uses
+  AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas,
   GR32, GR32_PNG, GR32_Resamplers, uCards, System.Generics.Collections;
 
 type
@@ -10,57 +11,44 @@ type
 
   TTableResources = class
   private
-    type
-      TBitmapResampler = (bsNone, bsDraft, bsKernel, bsLinear);
+    FDXImages: TAsphyreImages;
+    FDXMediaFile: TAsphyreArchive;
+    FDXFonts: TAsphyreFonts;
 
-    class var
-      FInitialized            : Boolean;
-      FCreatedBitmaps32       : TObjectList<TBitmap32>;
-      FImg_TableBackground    : TBitmap32;
-      FImg_Table              : TBitmap32;
-      FImg_DealerButton       : TBitmap32;
-      FImg_SeatEmptyLeft      : TBitmap32;
-      FImg_SeatEmptyRight     : TBitmap32;
-      FImg_SeatDarkLeft       : TBitmap32;
-      FImg_SeatLightLeft      : TBitmap32;
-      FImg_SeatDarkRight      : TBitmap32;
-      FImg_SeatLightRight     : TBitmap32;
-      FImg_CardBackground     : TBitmap32;
-      FImg_CardFrontBackground: TBitmap32;
-      FImg_CardArtworks       : array[0..51] of TBitmap32;
-      FImg_Chip1              : TBitmap32;
-      FImg_Chip5              : TBitmap32;
-      FImg_Chip25             : TBitmap32;
-      FImg_Chip100            : TBitmap32;
-      FImg_Chip500            : TBitmap32;
-      FImg_Chip1000           : TBitmap32;
-      FImg_Timebar            : TBitmap32;
-      FTableWidth             : Integer;
-      FTableHeight            : Integer;
-      FTableAspectRatio       : Double;
-      FTableXOffset           : Integer;
-      FTableYOffset           : Integer;
-      FDealerButtonWidth      : Integer;
-      FDealerButtonHeight     : Integer;
-      FDealerButtonAspectRatio: Double;
-      FSeatWidth              : Integer;
-      FSeatHeight             : Integer;
-      FSeatAspectRatio        : Double;
-      FCardWidth              : Integer;
-      FCardHeight             : Integer;
-      FCardAspectRatio        : Double;
-      FArtworkWidth           : Integer;
-      FArtworkHeight          : Integer;
-      FArtworkAspectRatio     : Double;
-      FChipWidth              : Integer;
-      FChipHeight             : Integer;
-      FChipAspectRatio        : Double;
-      FTimebarWidth           : Integer;
-      FTimebarHeight          : Integer;
-      FTimebarAspectRatio     : Double;
+    FBackgroundImage: TAsphyreImage;
+    FTableImage: TAsphyreImage;
+    FCardBackgroundImage: TAsphyreImage;
+    FSeatEmptyLeftImage: TAsphyreImage;
+    FSeatEmptyRightImage: TAsphyreImage;
+    FSeatDarkLeftImage: TAsphyreImage;
+    FSeatDarkRightImage: TAsphyreImage;
+    FSeatLightLeftImage: TAsphyreImage;
+    FSeatLightRightImage: TAsphyreImage;
+    FDealerButtonImage: TAsphyreImage;
+    FChip1Image: TAsphyreImage;
+    FChip5Image: TAsphyreImage;
+    FChip25Image: TAsphyreImage;
+    FChip100Image: TAsphyreImage;
+    FChip500Image: TAsphyreImage;
+    FChip1000Image: TAsphyreImage;
+    FTimebarImage: TAsphyreImage;
+    FTimebankImage: TAsphyreImage;
+    FCardFrontBackgroundImage: TAsphyreImage;
+    FCardArtworksImages: array of TAsphyreImage;
 
-    class procedure CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler; out AWidth, AHeight: Integer; out AAspectRatio: Double); overload;
-    class procedure CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler); overload;
+    FBarmenoFont_19px: TAsphyreFont;
+    FCardCharactersFont_19px: TAsphyreFont;
+
+    FTableAspectRatio: Single;
+    FSeatAspectRatio: Single;
+    FCardAspectRatio: Single;
+    FDealerButtonAspectRatio: Single;
+    FChipAspectRatio: Single;
+    FTimebarAspectRatio: Single;
+    FCardArtworkAspectRatio: Single;
+
+    procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
+    procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
 
   public
     const
@@ -76,195 +64,160 @@ type
         (-pi/3, -pi/6.9, pi/64, pi/5.1, pi/2.5, pi-pi/2.5, pi-pi/5.1, pi-pi/64, pi+pi/6.9, pi*4/3) // 10
       );
 
-    class procedure Initialize;
+    class procedure Initialize(const ADXCanvas: TAsphyreCanvas);
     class procedure Deinitialize;
-    class function IsInitialized: Boolean;
 
-    class function GetCardArtwork(const ACard: TCard): TBitmap32;
+    constructor Create(const ADXCanvas: TAsphyreCanvas);
+    destructor Destroy; override;
 
-    class property BackgroundImage: TBitmap32 read FImg_TableBackground;
-    class property TableImage: TBitmap32 read FImg_Table;
-    class property DealerButtonImage: TBitmap32 read FImg_DealerButton;
-    class property SeatEmptyLeftImage: TBitmap32 read FImg_SeatEmptyLeft;
-    class property SeatEmptyRightImage: TBitmap32 read FImg_SeatEmptyRight;
-    class property SeatDarkLeftImage: TBitmap32 read FImg_SeatDarkLeft;
-    class property SeatLightLeftImage: TBitmap32 read FImg_SeatLightLeft;
-    class property SeatDarkRightImage: TBitmap32 read FImg_SeatDarkRight;
-    class property SeatLightRightImage: TBitmap32 read FImg_SeatLightRight;
-    class property CardBackgroundImage: TBitmap32 read FImg_CardBackground;
-    class property CardFrontBackgroundImage: TBitmap32 read FImg_CardFrontBackground;
-    class property Chip1Image: TBitmap32 read FImg_Chip1;
-    class property Chip5Image: TBitmap32 read FImg_Chip5;
-    class property Chip25Image: TBitmap32 read FImg_Chip25;
-    class property Chip100Image: TBitmap32 read FImg_Chip100;
-    class property Chip500Image: TBitmap32 read FImg_Chip500;
-    class property Chip1000Image: TBitmap32 read FImg_Chip1000;
-    class property TimebarImage: TBitmap32 read FImg_Timebar;
-    class property TableWidth: Integer read FTableWidth;
-    class property TableHeight: Integer read FTableHeight;
-    class property TableAspectRatio: Double read FTableAspectRatio;
-    class property TableXOffset: Integer read FTableXOffset;
-    class property TableYOffset: Integer read FTableYOffset;
-    class property DealerButtonWidth: Integer read FDealerButtonWidth;
-    class property DealerButtonHeight: Integer read FDealerButtonHeight;
-    class property DealerButtonAspectRatio: Double read FDealerButtonAspectRatio;
-    class property SeatWidth: Integer read FSeatWidth;
-    class property SeatHeight: Integer read FSeatHeight;
-    class property SeatAspectRatio: Double read FSeatAspectRatio;
-    class property CardWidth: Integer read FCardWidth;
-    class property CardHeight: Integer read FCardHeight;
-    class property CardAspectRatio: Double read FCardAspectRatio;
-    class property ArtworkWidth: Integer read FArtworkWidth;
-    class property ArtworkHeight: Integer read FArtworkHeight;
-    class property ArtworkAspectRatio: Double read FArtworkAspectRatio;
-    class property ChipWidth: Integer read FChipWidth;
-    class property ChipHeight: Integer read FChipHeight;
-    class property ChipAspectRatio: Double read FChipAspectRatio;
-    class property TimebarWidth: Integer read FTimebarWidth;
-    class property TimebarHeight: Integer read FTimebarHeight;
-    class property TimebarAspectRatio: Double read FTimebarAspectRatio;
+    function GetCardArtwork(const ACard: TCard): TAsphyreImage;
+
+    property DXImages: TAsphyreImages read FDXImages;
+
+    property BackgroundImage: TAsphyreImage read FBackgroundImage;
+    property TableImage: TAsphyreImage read FTableImage;
+    property CardBackgroundImage: TAsphyreImage read FCardBackgroundImage;
+    property SeatEmptyLeftImage: TAsphyreImage read FSeatEmptyLeftImage;
+    property SeatEmptyRightImage: TAsphyreImage read FSeatEmptyRightImage;
+    property SeatDarkLeftImage: TAsphyreImage read FSeatDarkLeftImage;
+    property SeatDarkRightImage: TAsphyreImage read FSeatDarkRightImage;
+    property SeatLightLeftImage: TAsphyreImage read FSeatLightLeftImage;
+    property SeatLightRightImage: TAsphyreImage read FSeatLightRightImage;
+    property DealerButtonImage: TAsphyreImage read FDealerButtonImage;
+    property Chip1Image: TAsphyreImage read FChip1Image;
+    property Chip5Image: TAsphyreImage read FChip5Image;
+    property Chip25Image: TAsphyreImage read FChip25Image;
+    property Chip100Image: TAsphyreImage read FChip100Image;
+    property Chip500Image: TAsphyreImage read FChip500Image;
+    property Chip1000Image: TAsphyreImage read FChip1000Image;
+    property TimebarImage: TAsphyreImage read FTimebarImage;
+    property TimebankImage: TAsphyreImage read FTimebankImage;
+    property CardFrontBackgroundImage: TAsphyreImage read FCardFrontBackgroundImage;
+
+    property BarmenoFont_19px: TAsphyreFont read FBarmenoFont_19px;
+    property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
+
+    property TableAspectRatio: Single read FTableAspectRatio;
+    property SeatAspectRatio: Single read FSeatAspectRatio;
+    property CardAspectRatio: Single read FCardAspectRatio;
+    property DealerButtonAspectRatio: Single read FDealerButtonAspectRatio;
+    property ChipAspectRatio: Single read FChipAspectRatio;
+    property TimebarAspectRatio: Single read FTimebarAspectRatio;
+    property CardArtworkAspectRatio: Single read FCardArtworkAspectRatio;
   end;
+
+var
+  TableResources: TTableResources;
 
 implementation
 
 uses
-  Winapi.Windows, System.Classes, System.Types, JPEG, PNGImage, System.SysUtils;
+  Winapi.Windows, System.Classes, System.SysUtils;
 
 
 
-class procedure TTableResources.CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler; out AWidth, AHeight: Integer; out AAspectRatio: Double);
-var
-  png    : TPortableNetworkGraphic32;
-  rstream: TResourceStream;
+class procedure TTableResources.Initialize(const ADXCanvas: TAsphyreCanvas);
 begin
-  png := TPortableNetworkGraphic32.Create;
-  try
-    rstream := TResourceStream.Create(HInstance, AResourceName, RT_RCDATA);
-    try
-      png.LoadFromStream(rstream);
-      ABitmap := TBitmap32.Create;
-      ABitmap.DrawMode := dmBlend;
-      ABitmap.Assign(png);
-      case AResampler of
-        bsDraft: ABitmap.Resampler := TDraftResampler.Create;
-        bsKernel: begin
-          ABitmap.Resampler := TKernelResampler.Create;
-          (ABitmap.Resampler as TKernelResampler).Kernel := TLanczosKernel.Create;
-        end;
-        bsLinear: ABitmap.Resampler := TLinearResampler.Create;
-        bsNone: ;
-      end;
-    finally
-      rstream.Free;
-    end;
-  finally
-    png.Free;
-  end;
-
-  AWidth := ABitmap.Width;
-  AHeight := ABitmap.Height;
-  AAspectRatio := AWidth / AHeight;
-
-  FCreatedBitmaps32.Add(ABitmap);
+  TableResources := TTableResources.Create(ADXCanvas);
 end;
 
-class procedure TTableResources.CreateBitmap32FromPNGResource(var ABitmap: TBitmap32; const AResourceName: String; const AResampler: TBitmapResampler);
-var
-  w, h: Integer;
-  ar  : Double;
+class procedure TTableResources.Deinitialize;
 begin
-  CreateBitmap32FromPNGResource(ABitmap, AResourceName, AResampler, w, h, ar);
+  FreeAndNil(TableResources);
 end;
 
 
-class procedure TTableResources.Initialize;
+constructor TTableResources.Create(const ADXCanvas: TAsphyreCanvas);
 var
-  jpg     : TJPEGImage;
-  rstream : TResourceStream;
-  C1      : Integer;
-  CCV     : TCardValue;
-  CCS     : TCardSuit;
+  C1, id: Integer;
+  CCV   : TCardValue;
+  CCS   : TCardSuit;
 begin
-  FImg_TableBackground := TBitmap32.Create;
-  jpg := TJPEGImage.Create;
-  try
-    rstream := TResourceStream.Create(HInstance, 'TableBackground', RT_RCDATA);
-    try
-      jpg.LoadFromStream(rstream);
-      FImg_TableBackground.Assign(jpg);
-    finally
-      rstream.Free;
-    end;
-  finally
-    jpg.Free;
-  end;
+  ArchiveTypeAccess := ataResource;
 
-  FCreatedBitmaps32 := TObjectList<TBitmap32>.Create;
+  FDXMediaFile := TAsphyreArchive.Create;
+  FDXMediaFile.OpenMode := aomReadOnly;
+  FDXMediaFile.FileName := 'RoomMedia';
 
-  CreateBitmap32FromPNGResource(FImg_Table, 'Table', bsDraft);
-  CreateBitmap32FromPNGResource(FImg_DealerButton, 'DealerButton', bsKernel, FDealerButtonWidth, FDealerButtonHeight, FDealerButtonAspectRatio);
-  CreateBitmap32FromPNGResource(FImg_SeatEmptyLeft, 'EmptySeatLeft', bsKernel, FSeatWidth, FSeatHeight, FSeatAspectRatio);
-  CreateBitmap32FromPNGResource(FImg_SeatEmptyRight, 'EmptySeatRight', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_SeatDarkLeft, 'SeatDarkLeft', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_SeatLightLeft, 'SeatLightLeft', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_SeatDarkRight, 'SeatDarkRight', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_SeatLightRight, 'SeatLightRight', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_CardBackground, 'CardBackground', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_CardFrontBackground, 'CardFrontBackground', bsKernel, FCardWidth, FCardHeight, FCardAspectRatio);
-  CreateBitmap32FromPNGResource(FImg_Chip1, 'Chip1', bsKernel, FChipWidth, FChipHeight, FChipAspectRatio);
-  CreateBitmap32FromPNGResource(FImg_Chip5, 'Chip5', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip25, 'Chip25', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip100, 'Chip100', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip500, 'Chip500', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Chip1000, 'Chip1000', bsKernel);
-  CreateBitmap32FromPNGResource(FImg_Timebar, 'Timebar', bsKernel, FTimebarWidth, FTimebarHeight, FTimebarAspectRatio);
+  FDXImages := TAsphyreImages.Create;
+
+  AddDXImage('RoomBackground.image', FBackgroundImage);
+  AddDXImage('Table.image', FTableImage, FTableAspectRatio);
+  AddDXImage('EmptySeatLeft.image', FSeatEmptyLeftImage, FSeatAspectRatio);
+  AddDXImage('EmptySeatRight.image', FSeatEmptyRightImage);
+  AddDXImage('SeatDarkLeft.image', FSeatDarkLeftImage);
+  AddDXImage('SeatDarkRight.image', FSeatDarkRightImage);
+  AddDXImage('SeatLightLeft.image', FSeatLightLeftImage);
+  AddDXImage('SeatLightRight.image', FSeatLightRightImage);
+  AddDXImage('SeatLightRight.image', FSeatLightRightImage);
+  AddDXImage('CardBackground.image', FCardBackgroundImage, FCardAspectRatio);
+  AddDXImage('DealerButton.image', FDealerButtonImage, FDealerButtonAspectRatio);
+  AddDXImage('Chip1.image', FChip1Image, FChipAspectRatio);
+  AddDXImage('Chip5.image', FChip5Image);
+  AddDXImage('Chip25.image', FChip25Image);
+  AddDXImage('Chip100.image', FChip100Image);
+  AddDXImage('Chip500.image', FChip500Image);
+  AddDXImage('Chip1000.image', FChip1000Image);
+  AddDXImage('Timebar.image', FTimebarImage, FTimebarAspectRatio);
+  AddDXImage('Timebank.image', FTimebankImage);
+  AddDXImage('CardFrontBackground.image', FCardFrontBackgroundImage);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
     for CCS := Low(TCardSuit) to High(TCardSuit) do
       if (CCV <> cvUnknown) and (CCS <> csUnknown) then
       begin
-        CreateBitmap32FromPNGResource(FImg_CardArtworks[C1], Format('CardArtwork%s', [TCard.GetAsString(CCV, CCS)]), bsKernel, FArtworkWidth, FArtworkHeight, FArtworkAspectRatio);
+        SetLength(FCardArtworksImages, C1 + 1);
+        AddDXImage(Format('CardArtwork%s.image', [TCard.GetAsString(CCV, CCS)]),
+           FCardArtworksImages[C1], FCardArtworkAspectRatio);
         Inc(C1);
       end;
 
-  FTableWidth := 962;
-  FTableHeight := 492;
-  FTableAspectRatio := FTableWidth / FTableHeight;
+  FDXFonts := TAsphyreFonts.Create;
+  FDXFonts.Canvas := ADXCanvas;
+  FDXFonts.Images := FDXImages;
 
-  FTableXOffset := 65;
-  FTableYOffset := 42;
+  FDXImages.AddFromArchive('Barmeno_19px.image', FDXMediaFile);
+  FDXImages.AddFromArchive('CardCharacters_19px.image', FDXMediaFile);
 
-  FInitialized := TRUE;
+  id := FDXFonts.Insert('RoomMedia | Barmeno_19px.xml', 'Barmeno_19px.image');
+  FBarmenoFont_19px := FDXFonts[id];
+
+  id := FDXFonts.Insert('RoomMedia | CardCharacters_19px.xml', 'CardCharacters_19px.image');
+  FCardCharactersFont_19px := FDXFonts[id];
 end;
 
-class procedure TTableResources.Deinitialize;
+destructor TTableResources.Destroy;
 begin
-  FImg_TableBackground.Free;
-  FCreatedBitmaps32.Free;
-
-  FInitialized := FALSE;
+  FDXFonts.Free;
+  FDXImages.Free;
+  FDXMediaFile.Free;
 end;
 
-class function TTableResources.GetCardArtwork(const ACard: TCard): TBitmap32;
+procedure TTableResources.AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single);
+var
+  id: Integer;
+begin
+  id := FDXImages.AddFromArchive(AName, FDXMediaFile);
+  AReceiver := FDXImages[id];
+  AAspectRatio := AReceiver.Texture[0].Width / AReceiver.Texture[0].Height;
+end;
+
+procedure TTableResources.AddDXImage(const AName: String; var AReceiver: TAsphyreImage);
+var
+  ar: Single;
+begin
+  AddDXImage(AName, AReceiver, ar);
+end;
+
+function TTableResources.GetCardArtwork(const ACard: TCard): TAsphyreImage;
 var
   valueint, suitint: Integer;
 begin
   valueint := Integer(ACard.Value) - 1;
   suitint := Integer(ACard.Suit) - 1;
-  result := FImg_CardArtworks[valueint * 4 + suitint];
+  result := FCardArtworksImages[valueint * 4 + suitint];
 end;
 
-
-class function TTableResources.IsInitialized: Boolean;
-begin
-  result := FInitialized;
-end;
-
-initialization
-
-finalization
-  if TTableResources.IsInitialized then
-    TTableResources.Deinitialize;
 
 end.

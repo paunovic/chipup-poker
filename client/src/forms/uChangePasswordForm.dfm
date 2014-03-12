@@ -15,10 +15,10 @@ object frmChangePassword: TfrmChangePassword
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
-  OnShow = FormShow
   DesignSize = (
     301
     133)
@@ -114,7 +114,6 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 101
   end
   object btCancel: TcxButton
     Left = 200
@@ -131,7 +130,6 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 101
   end
   object alChangePassword: TActionList
     Left = 36

@@ -1,9 +1,6 @@
 program client;
 
-{$R 'cards.res' 'resources\cards.rc'}
-{$R 'seats.res' 'resources\seats.rc'}
 {$R 'fonts.res' 'resources\fonts.rc'}
-{$R 'chips.res' 'resources\chips.rc'}
 {$R *.dres}
 {$R *.res}
 
@@ -61,8 +58,7 @@ uses
   uPB_ForgotPasswordParams in 'modules\protobuf\objects\uPB_ForgotPasswordParams.pas',
   uPB_User in 'modules\protobuf\objects\uPB_User.pas',
   uMessageContainer in 'modules\message_container\uMessageContainer.pas',
-  uMessageItem in 'modules\message_container\uMessageItem.pas',
-  uServerMessageCallback in 'modules\message_container\uServerMessageCallback.pas',
+  uMessageCallbacks in 'modules\message_container\uMessageCallbacks.pas',
   uPB_ListClubsReply in 'modules\protobuf\objects\uPB_ListClubsReply.pas',
   uPB_GiveClubOwnershipParams in 'modules\protobuf\objects\uPB_GiveClubOwnershipParams.pas',
   uPB_KickPlayerParams in 'modules\protobuf\objects\uPB_KickPlayerParams.pas',
@@ -99,12 +95,17 @@ uses
   uPB_WinnerData in 'modules\protobuf\objects\uPB_WinnerData.pas',
   uCards in 'modules\uCards.pas',
   uPB_PotInfo in 'modules\protobuf\objects\uPB_PotInfo.pas',
-  uChipsStackMaker in 'modules\uChipsStackMaker.pas',
   uPB_PingParams in 'modules\protobuf\objects\uPB_PingParams.pas',
   uPB_PingReply in 'modules\protobuf\objects\uPB_PingReply.pas',
-  uDrawingCache in 'modules\drawing_cache\uDrawingCache.pas',
-  uDCSeatData in 'modules\drawing_cache\uDCSeatData.pas',
-  uFlopTableAnimationThread in 'modules\table_animation_threads\uFlopTableAnimationThread.pas';
+  uPaintPanel in 'modules\directx_draw\uPaintPanel.pas',
+  uDXCore in 'modules\directx_draw\uDXCore.pas',
+  uAsphyreImageHelper in 'modules\directx_draw\uAsphyreImageHelper.pas',
+  uChipsStackMaker in 'modules\uChipsStackMaker.pas',
+  uFormsContainer in 'modules\uFormsContainer.pas',
+  uPB_TableBoolFlag in 'modules\protobuf\objects\uPB_TableBoolFlag.pas',
+  uIModalForm in 'forms\uIModalForm.pas',
+  uDXTimer in 'modules\directx_draw\uDXTimer.pas',
+  uDXAnimation in 'modules\directx_draw\uDXAnimation.pas';
 
 procedure FocusPokerApp;
 var

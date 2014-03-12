@@ -15,11 +15,11 @@ object frmPublicClubsList: TfrmPublicClubsList
   KeyPreview = True
   OldCreateOrder = False
   Position = poOwnerFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
-  OnShow = FormShow
   DesignSize = (
     477
     416)

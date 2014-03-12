@@ -100,22 +100,21 @@ object frmDebug: TfrmDebug
         ParentFont = False
         ExplicitLeft = 509
       end
-      object lbsMessageHandlers: TLabel
+      object lbsCalbackSets: TLabel
         Left = 355
         Top = 40
-        Width = 92
+        Width = 67
         Height = 14
         Anchors = [akTop, akRight]
-        Caption = 'Message handlers:'
+        Caption = 'Callback sets:'
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Arial'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 414
       end
-      object lbvMessageHandlers: TLabel
+      object lbvCallbackSets: TLabel
         Left = 450
         Top = 40
         Width = 6
@@ -130,13 +129,13 @@ object frmDebug: TfrmDebug
         ParentFont = False
         ExplicitLeft = 509
       end
-      object lbsMessages: TLabel
+      object lbsSocketState: TLabel
         Left = 355
         Top = 56
-        Width = 77
+        Width = 63
         Height = 14
         Anchors = [akTop, akRight]
-        Caption = 'Message count:'
+        Caption = 'Socket state:'
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -144,7 +143,7 @@ object frmDebug: TfrmDebug
         Font.Style = []
         ParentFont = False
       end
-      object lbvMessages: TLabel
+      object lbvSocketState: TLabel
         Left = 450
         Top = 56
         Width = 6
@@ -158,92 +157,24 @@ object frmDebug: TfrmDebug
         Font.Style = [fsBold]
         ParentFont = False
       end
-      object cbSockInc: TcxCheckBox
-        Tag = 3
-        Left = 86
-        Top = 21
-        Caption = 'SOCK INC'
-        Properties.OnChange = cbLogOptionsChange
-        State = cbsChecked
+      object btPause: TcxButton
+        Left = 8
+        Top = 10
+        Width = 93
+        Height = 31
+        Caption = 'PAUSE'
+        Colors.PressedText = clRed
+        SpeedButtonOptions.GroupIndex = 1
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
         TabOrder = 0
-        Transparent = True
-        Width = 81
-      end
-      object cbSockOut: TcxCheckBox
-        Tag = 4
-        Left = 166
-        Top = 21
-        Caption = 'SOCK OUT'
-        Properties.OnChange = cbLogOptionsChange
-        State = cbsChecked
-        TabOrder = 1
-        Transparent = True
-        Width = 81
-      end
-      object cbNetInc: TcxCheckBox
-        Tag = 5
-        Left = 6
-        Top = 36
-        Caption = 'NET INC'
-        Properties.OnChange = cbLogOptionsChange
-        State = cbsChecked
-        TabOrder = 2
-        Transparent = True
-        Width = 81
-      end
-      object cbNetOut: TcxCheckBox
-        Tag = 6
-        Left = 86
-        Top = 36
-        Caption = 'NET OUT'
-        Properties.OnChange = cbLogOptionsChange
-        State = cbsChecked
-        TabOrder = 3
-        Transparent = True
-        Width = 81
-      end
-      object cbApp: TcxCheckBox
-        Tag = 1
-        Left = 86
-        Top = 6
-        Caption = 'APP'
-        Properties.OnChange = cbLogOptionsChange
-        State = cbsChecked
-        TabOrder = 4
-        Transparent = True
-        Width = 81
-      end
-      object cbException: TcxCheckBox
-        Left = 6
-        Top = 6
-        Caption = 'EXCEPTION'
-        Properties.OnChange = cbLogOptionsChange
-        State = cbsChecked
-        TabOrder = 5
-        Transparent = True
-        Width = 81
-      end
-      object cbForm: TcxCheckBox
-        Tag = 7
-        Left = 6
-        Top = 51
-        Caption = 'FORM'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
         ParentFont = False
-        Properties.OnChange = cbLogOptionsChange
-        TabOrder = 6
-        Transparent = True
-        Width = 81
-      end
-      object cbSocket: TcxCheckBox
-        Tag = 2
-        Left = 6
-        Top = 21
-        Caption = 'SOCK'
-        Properties.OnChange = cbLogOptionsChange
-        State = cbsChecked
-        TabOrder = 7
-        Transparent = True
-        Width = 81
+        OnClick = btPauseClick
       end
     end
     object reLog: TRichEdit

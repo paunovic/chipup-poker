@@ -21,14 +21,14 @@ function ValidateGameName(const AGameName: String; out AError: String): Boolean;
 implementation
 
 uses
-  Vcl.Controls, System.SysUtils,
+  Vcl.Controls, System.SysUtils, uServerSettings,
   uCommon, uMainDataModule, uSettings;
 
 function ValidateUsername(const AUsername: String; out AError: String): Boolean;
 begin
   AError := '';
-  if (Length(AUsername) < 3) or (Length(AUsername) > dmMain.ServerSettings.StringLengths.Username) then
-    AError := Format('Username length must be between 3 and %d characters', [dmMain.ServerSettings.StringLengths.Username])
+  if (Length(AUsername) < 3) or (Length(AUsername) > ServerSettings.StringLengths.Username) then
+    AError := Format('Username length must be between 3 and %d characters', [ServerSettings.StringLengths.Username])
   else
     if not IsValidString(AUsername, USERNAME_ALLOWED_CHARS) then
       AError := 'Invalid characters in username';
@@ -39,8 +39,8 @@ end;
 function ValidatePassword(const APassword: String; out AError: String): Boolean;
 begin
   AError := '';
-  if (Length(APassword) < 6) or (Length(APassword) > dmMain.ServerSettings.StringLengths.Password) then
-    AError := Format('Password length must be between 6 and %d characters', [dmMain.ServerSettings.StringLengths.Password])
+  if (Length(APassword) < 6) or (Length(APassword) > ServerSettings.StringLengths.Password) then
+    AError := Format('Password length must be between 6 and %d characters', [ServerSettings.StringLengths.Password])
   else
     if not IsValidString(APassword, PASSWORD_ALLOWED_CHARS) then
       AError := 'Invalid characters in password';
@@ -61,8 +61,8 @@ end;
 function ValidateClubName(const AClubName: String; out AError: String): Boolean;
 begin
   AError := '';
-  if (Length(AClubName) < 6) or (Length(AClubName) > dmMain.ServerSettings.StringLengths.ClubName) then
-    AError := Format('Club name length must be between 6 and %d characters', [dmMain.ServerSettings.StringLengths.ClubName])
+  if (Length(AClubName) < 6) or (Length(AClubName) > ServerSettings.StringLengths.ClubName) then
+    AError := Format('Club name length must be between 6 and %d characters', [ServerSettings.StringLengths.ClubName])
   else
     if not IsValidString(AClubName, CLUBNAME_ALLOWED_CHARS) then
       AError := 'Invalid characters in club name';
@@ -73,8 +73,8 @@ end;
 function ValidateClubCode(const AClubCode: String; out AError: String): Boolean;
 begin
   AError := '';
-  if (Length(AClubCode) > dmMain.ServerSettings.StringLengths.ClubInvCode) then
-    AError := Format('Club invitation code can''t be longer than %d characters', [dmMain.ServerSettings.StringLengths.ClubInvCode])
+  if (Length(AClubCode) > ServerSettings.StringLengths.ClubInvCode) then
+    AError := Format('Club invitation code can''t be longer than %d characters', [ServerSettings.StringLengths.ClubInvCode])
   else
     if not IsValidString(AClubCode, CLUBCODE_ALLOWED_CHARS) then
       AError := 'Invalid characters in club invitation code';
@@ -99,8 +99,8 @@ end;
 
 function ValidateGameName(const AGameName: String; out AError: String): Boolean;
 begin
-  if (Length(AGameName) < 3) or (Length(AGameName) > dmMain.ServerSettings.StringLengths.GameName) then
-    AError := Format('Table name length must be between 3 and %d characters', [dmMain.ServerSettings.StringLengths.GameName])
+  if (Length(AGameName) < 3) or (Length(AGameName) > ServerSettings.StringLengths.GameName) then
+    AError := Format('Table name length must be between 3 and %d characters', [ServerSettings.StringLengths.GameName])
   else
     if not IsValidString(AGameName, GAMENAME_ALLOWED_CHARS) then
       AError := 'Invalid characters in table name';
