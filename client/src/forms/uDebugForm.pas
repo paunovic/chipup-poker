@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxTextEdit, cxMemo, cxRichEdit, cxCheckBox, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList,
-  Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLabel;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm);
@@ -19,38 +19,39 @@ type
     acClearLog: TAction;
     acSaveLog: TAction;
     SaveDialog: TSaveDialog;
-    reLog: TRichEdit;
     pmLog: TPopupMenu;
     pmiLogCopy: TMenuItem;
     acCopyLogSelection: TAction;
     tiAppInfoRefresh: TTimer;
-    lbsThreads: TLabel;
-    lbvThreads: TLabel;
-    lbsMemoryUsage: TLabel;
-    lbvMemoryUsage: TLabel;
     N1: TMenuItem;
     pmiLogWordWrap: TMenuItem;
     acWordWrap: TAction;
-    lbsCalbackSets: TLabel;
-    lbvCallbackSets: TLabel;
     pmiLogSave: TMenuItem;
     pmiLogClear: TMenuItem;
     N2: TMenuItem;
-    lbsSocketState: TLabel;
-    lbvSocketState: TLabel;
     btPause: TcxButton;
+    lbsThreads: TcxLabel;
+    lbsMemoryUsage: TcxLabel;
+    lbsSocketState: TcxLabel;
+    lbsCalbackSets: TcxLabel;
+    lbvThreads: TcxLabel;
+    lbvMemoryUsage: TcxLabel;
+    lbvCallbackSets: TcxLabel;
+    lbvSocketState: TcxLabel;
+    reLog: TcxRichEdit;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
     procedure acCopyLogSelectionExecute(Sender: TObject);
     procedure tiAppInfoRefreshTimer(Sender: TObject);
     procedure acWordWrapExecute(Sender: TObject);
-    procedure btPauseClick(Sender: TObject);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
+    class procedure Initialize;
+    class procedure Deinitialize;
   end;
 
 procedure DebugLn(const AData: String; const AType: TDebugInfoType);
@@ -90,35 +91,35 @@ begin
     end;
     ditApplication: begin
       type_str := 'APPL';
-      type_color := clBlack;
+      type_color := clWhite;
     end;
     ditSocketInc: begin
       type_str := 'SINC';
-      type_color := clGreen;
+      type_color := clLime;
     end;
     ditSocketOut: begin
       type_str := 'SOUT';
-      type_color := clGreen;
+      type_color := clLime;
     end;
     ditSocket: begin
       type_str := 'SOCK';
-      type_color := $00136225;
+      type_color := clLime;
     end;
     ditNetInc: begin
       type_str := 'NINC';
-      type_color := clTeal;
+      type_color := clMoneyGreen;
     end;
     ditNetOut: begin
       type_str := 'NOUT';
-      type_color := clTeal;
+      type_color := clMoneyGreen;
     end;
     ditForm: begin
       type_str := 'FORM';
-      type_color := clSilver;
+      type_color := clGray;
     end
   else
     type_str := 'UNKN';
-    type_color := clBlack;
+    type_color := clRed;
     logit := TRUE;
   end;
 
@@ -144,6 +145,23 @@ end;
 
 
 
+class procedure TfrmDebug.Initialize;
+begin
+  ConsoleAttached := AttachConsole(-1); // ATTACH_PARENT_PROCESS
+
+  frmDebug := TfrmDebug.Create(nil);
+  frmDebug.Show;
+end;
+
+class procedure TfrmDebug.Deinitialize;
+begin
+  FreeAndNil(frmDebug);
+
+  if ConsoleAttached then
+    FreeConsole;
+end;
+
+
 procedure TfrmDebug.FormCreate(Sender: TObject);
 begin
   Left := 0;
@@ -154,6 +172,9 @@ begin
   acWordWrap.Execute;
 
   Screen.OnActiveFormChange := ActiveFormChange;
+
+  Width := Screen.Monitors[0].Width div 3;
+  Height := Round(Screen.Monitors[0].Height / 2.5);
 end;
 
 procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
@@ -216,30 +237,12 @@ end;
 procedure TfrmDebug.acWordWrapExecute(Sender: TObject);
 begin
   pmiLogWordWrap.Checked := not pmiLogWordWrap.Checked;
-  reLog.WordWrap := pmiLogWordWrap.Checked;
-  if reLog.WordWrap then
-    reLog.ScrollBars := ssVertical
+  reLog.Properties.WordWrap := pmiLogWordWrap.Checked;
+  if reLog.Properties.WordWrap then
+    reLog.Properties.ScrollBars := ssVertical
   else
-    reLog.ScrollBars := ssBoth;
+    reLog.Properties.ScrollBars := ssBoth;
 end;
 
-
-procedure TfrmDebug.btPauseClick(Sender: TObject);
-begin
-end;
-
-{$IFDEF DEBUG}
-initialization
-  ConsoleAttached := AttachConsole(-1); // ATTACH_PARENT_PROCESS
-
-  frmDebug := TfrmDebug.Create(nil);
-  frmDebug.Show;
-
-finalization
-  FreeAndNil(frmDebug);
-
-  if ConsoleAttached then
-    FreeConsole;
-{$ENDIF}
 
 end.

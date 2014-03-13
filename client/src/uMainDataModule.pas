@@ -24,6 +24,8 @@ type
   public
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
 
+    function CheckAuthed: Boolean;
+
     procedure OpenCashierLink;
     procedure OpenTOSLink;
 
@@ -42,12 +44,25 @@ implementation
 {$R *.dfm}
 
 uses
-  Vcl.Graphics, Vcl.Controls, Winapi.Messages, uSettings, uTableResources, uFormsContainer,
-  uSocketClient, uCommon, uDXCore, UDXTimer, uMessageContainer, uAvatars, uServerSettings;
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
+  Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, uSettings, uTableResources, uFormsContainer,
+  uSocketClient, uCommon, uDXCore, uDXTimer, uMessageContainer, uAvatars, uServerSettings;
 
+
+function TdmMain.CheckAuthed: Boolean;
+begin
+  result := FSelfInfo.Authed;
+
+  if not result then
+    MessageDlg('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.', mtWarning, [mbOK], 0);
+end;
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG}
+  TfrmDebug.Initialize;
+  {$ENDIF}
+
   LoadFonts;
 
   TSettings.Initialize;
@@ -83,6 +98,10 @@ begin
   TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
   TSettings.Deinitialize;
+
+  {$IFDEF DEBUG}
+  TfrmDebug.Deinitialize;
+  {$ENDIF}
 end;
 
 procedure TdmMain.OpenCashierLink;

@@ -253,6 +253,9 @@ var
   form : TForm;
   found: Boolean;
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
@@ -287,6 +290,9 @@ end;
 
 procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   FormsContainer.RunForm(TfrmCreateClub, self, [], FALSE);
 end;
 
@@ -295,6 +301,9 @@ var
   game: TGameInfo;
   club: TClubInfo;
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   if (not GetSelectedClub(club)) or (not GetSelectedGame(game)) then
     Exit;
 
@@ -306,11 +315,17 @@ end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowPublicClubsListFormExecute(Sender: TObject);
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   FormsContainer.RunForm(TfrmPublicClubsList, self, [], FALSE);
 end;
 
@@ -743,7 +758,5 @@ begin
   gridGames.Hide;
   btOpenClubLobby.Hide;
 end;
-
-
 
 end.

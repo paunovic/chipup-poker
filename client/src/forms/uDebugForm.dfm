@@ -2,8 +2,8 @@ object frmDebug: TfrmDebug
   Left = 0
   Top = 0
   Caption = 'Debug'
-  ClientHeight = 353
-  ClientWidth = 523
+  ClientHeight = 378
+  ClientWidth = 675
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -19,8 +19,8 @@ object frmDebug: TfrmDebug
   object paLog: TPanel
     Left = 0
     Top = 0
-    Width = 523
-    Height = 353
+    Width = 675
+    Height = 378
     Align = alClient
     BevelOuter = bvNone
     Ctl3D = False
@@ -28,135 +28,15 @@ object frmDebug: TfrmDebug
     TabOrder = 0
     object paInfo: TPanel
       Left = 0
-      Top = 278
-      Width = 523
+      Top = 303
+      Width = 675
       Height = 75
       Align = alBottom
       BevelOuter = bvNone
       Ctl3D = False
       ParentBackground = False
       ParentCtl3D = False
-      TabOrder = 1
-      DesignSize = (
-        523
-        75)
-      object lbsThreads: TLabel
-        Left = 355
-        Top = 8
-        Width = 43
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = 'Threads:'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
-        ParentFont = False
-        ExplicitLeft = 414
-      end
-      object lbvThreads: TLabel
-        Left = 450
-        Top = 8
-        Width = 12
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = '00'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-        ExplicitLeft = 509
-      end
-      object lbsMemoryUsage: TLabel
-        Left = 355
-        Top = 24
-        Width = 74
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = 'Memory usage:'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
-        ParentFont = False
-        ExplicitLeft = 414
-      end
-      object lbvMemoryUsage: TLabel
-        Left = 450
-        Top = 24
-        Width = 44
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = '00000kb'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-        ExplicitLeft = 509
-      end
-      object lbsCalbackSets: TLabel
-        Left = 355
-        Top = 40
-        Width = 67
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = 'Callback sets:'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
-        ParentFont = False
-      end
-      object lbvCallbackSets: TLabel
-        Left = 450
-        Top = 40
-        Width = 6
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = '0'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-        ExplicitLeft = 509
-      end
-      object lbsSocketState: TLabel
-        Left = 355
-        Top = 56
-        Width = 63
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = 'Socket state:'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
-        ParentFont = False
-      end
-      object lbvSocketState: TLabel
-        Left = 450
-        Top = 56
-        Width = 6
-        Height = 14
-        Anchors = [akTop, akRight]
-        Caption = '0'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
+      TabOrder = 0
       object btPause: TcxButton
         Left = 8
         Top = 10
@@ -174,29 +54,86 @@ object frmDebug: TfrmDebug
         Font.Name = 'Arial'
         Font.Style = [fsBold]
         ParentFont = False
-        OnClick = btPauseClick
+      end
+      object lbsThreads: TcxLabel
+        Left = 368
+        Top = 6
+        Caption = 'Threads:'
+        Transparent = True
+      end
+      object lbsMemoryUsage: TcxLabel
+        Left = 368
+        Top = 22
+        Caption = 'Memory usage:'
+        Transparent = True
+      end
+      object lbsSocketState: TcxLabel
+        Left = 368
+        Top = 54
+        Caption = 'Socket state:'
+        Transparent = True
+      end
+      object lbsCalbackSets: TcxLabel
+        Left = 368
+        Top = 38
+        Caption = 'Callback sets:'
+        Transparent = True
+      end
+      object lbvThreads: TcxLabel
+        Left = 448
+        Top = 6
+        Caption = '00'
+        Style.TextStyle = [fsBold]
+        Transparent = True
+      end
+      object lbvMemoryUsage: TcxLabel
+        Left = 448
+        Top = 22
+        Caption = '00000kb'
+        Style.TextStyle = [fsBold]
+        Transparent = True
+      end
+      object lbvCallbackSets: TcxLabel
+        Left = 448
+        Top = 38
+        Caption = '0'
+        Style.TextStyle = [fsBold]
+        Transparent = True
+      end
+      object lbvSocketState: TcxLabel
+        Left = 448
+        Top = 54
+        Caption = '0'
+        Style.TextStyle = [fsBold]
+        Transparent = True
       end
     end
-    object reLog: TRichEdit
+    object reLog: TcxRichEdit
       Left = 0
       Top = 0
-      Width = 523
-      Height = 278
       Align = alClient
-      BorderStyle = bsNone
-      Font.Charset = ANSI_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Courier New'
-      Font.Style = []
-      HideSelection = False
-      HideScrollBars = False
       ParentFont = False
       PopupMenu = pmLog
-      ReadOnly = True
-      ScrollBars = ssBoth
-      TabOrder = 0
-      WordWrap = False
+      Properties.AutoURLDetect = True
+      Properties.HideScrollBars = False
+      Properties.HideSelection = False
+      Properties.ReadOnly = True
+      Properties.ScrollBars = ssBoth
+      Properties.WantReturns = False
+      Properties.WordWrap = False
+      Lines.Strings = (
+        'reLog')
+      Style.Edges = []
+      Style.Font.Charset = ANSI_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.TransparentBorder = True
+      Style.IsFontAssigned = True
+      TabOrder = 1
+      Height = 303
+      Width = 675
     end
   end
   object alDebug: TActionList

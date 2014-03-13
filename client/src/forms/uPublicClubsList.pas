@@ -114,6 +114,9 @@ end;
 
 procedure TfrmPublicClubsList.acJoinClubExecute(Sender: TObject);
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   FormsContainer.RunForm(TfrmJoinClub, self, [@FSelectedClubId], FALSE);
 end;
 
