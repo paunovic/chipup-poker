@@ -309,6 +309,13 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		process.exit(1);
 	}
 	conn = db;
+	process.on('uncaughtException',function (err) {
+		console.log(err);
+		db.collection('serverErrors').insert({error:err.toString(),trace:err.stack.split('\n').slice(1).join('\n').trim()},function (err) {
+			if (err) console.log(err);
+			process.exit(-1);
+		});
+	});
 	process.send({msg:'connected'});
 
 	allUsers = db.collection('users');
@@ -2142,7 +2149,7 @@ Game.prototype.calcWinners = function (cb,events) {
 				this.log('x%d y%d z%d',x,y,z);
 				if (!this.members[z]) continue;
 				if (['psInHand','psAllIn'].indexOf(this.members[z].status) == -1) continue;
-				hands.push({seat:z});
+				hands.push({seat:z,hand:this.members.hand.cards});
 				cards.push(this.members[z].hand.prettyPrint(true));
 			}
 			this.log('pot in:%j',this.pots[x]);
@@ -2171,6 +2178,7 @@ Game.prototype.calcWinners = function (cb,events) {
 			var potid = 0;
 			async.eachSeries(pots,function evalPot(pot,cb2){
 				this.log('need to eval:%j',pot);
+				if (false) {
 				var pokenum = child_process.exec(pot.cmd,{cwd:'./poker-eval-138.0/examples'},function (error,stdout,stderr) {
 					var winners = [];
 					this.log('cmd:'+pot.cmd);
@@ -2195,6 +2203,13 @@ Game.prototype.calcWinners = function (cb,events) {
 					potid++;
 					cb2();
 				}.bind(this));
+				} else {
+				for (var x=0; x<pots.length; x++) {
+					var output = omaha.rankHands(this,pots[x].hands);
+					this.log('pot %j resulted in %j',pots[x],output);
+				}
+				assert(0);
+				}
 			}.bind(this),function done() {
 				finish1.call(this);
 			}.bind(this));
