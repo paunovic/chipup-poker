@@ -2844,9 +2844,9 @@ Game.prototype.standUp = function (conn,cb1) {
 }
 Game.prototype.leave = function leave(conn,reason) {
 	conn.log('getting lock:%s',this.Lock.trace);
+	delete this.users[conn.userid];
 	this.Lock.writeLock(function (release) {
 		conn.log('got lock',this.Lock.readers);
-		delete this.users[conn.userid];
 		var seatIdx = this.findSeat(conn);
 		conn.log('leave idx %d %s',seatIdx,reason);
 		if (seatIdx != undefined) {
