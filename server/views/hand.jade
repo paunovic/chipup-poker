@@ -1,32 +1,46 @@
-doctype html
-html
-  body
-    include header
-    block content
-      script.
-        var raw=!{JSON.stringify(hand)};
-      p='rake:'+hand.rake+'%'
-    table(border=1)
-      tr
-        th cards
-      each set in hand.cards
+extends base
+block content
+  script.
+    var raw=!{JSON.stringify(hand)};
+  p='rake:'+hand.rake+'%'
+  a(href='/game?id='+hand.gameid) parent game
+  table(border=1)
+    tr
+      th location
+      th cards
+    each set,idx in hand.cards
+      if set
         tr
+          if idx == 0
+            td flop
+          else if idx == 1
+            td turn
+          else if idx == 2
+            td river
+          else
+            td='seat#'+(idx-3)
           td=set
-    table(border=1)
-      tr
-        th player mongoid
-      each player in hand.players
+  table(border=1)
+    tr
+      th seat#
+      th player mongoid
+    each player,idx in hand.players
+      if player
         tr
+          td=idx
           td=player
-    table(border=1)
+  table(border=1)
+    tr
+      th move#
+      th seat
+      th bet
+      th code
+      th trace
+    each move,idx in hand.moves
       tr
-        th move#
-        th seat
-        th bet
-        th code
-      each move in hand.moves
-        tr
-          td=$index
-          td=move.seat
-          td=move.bet
-          td=move.code
+        td=idx
+        td=move.seat
+        td=move.bet
+        td=move.code
+        td
+          pre=move.trace

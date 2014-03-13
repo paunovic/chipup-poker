@@ -1,21 +1,18 @@
-doctype html
-html
-  body
-    include header
-    block content
-      table(border=1)
-        tr
-          th name
-        tr
-          td=club.name
-      table(border=1)
-        tr
-          th name
-          th SB/BB
-          th seats
-        each val in games
-          tr
-            td
-              a(href="/game?id="+val._id)=val.gamename
-            td=val.small_blind/100+'/'+val.big_blind/100
-            td=val.seats
+extends base
+block content
+  table(border=1)
+    tr
+      th name
+    tr
+      td=club.name
+  table(border=1)
+    tr
+      th name
+      th SB/BB
+      th seats
+    each val in games
+      tr
+        td
+          a(href="/game?id="+val._id)=val.gamename
+        td=val.small_blind/100+'/'+val.big_blind/100
+        td=val.seats

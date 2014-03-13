@@ -1,0 +1,21 @@
+extends base
+block content
+  table(border=1)
+    tr
+      th op
+      th ns
+      th query
+      th scanned
+      th updated
+      th millis
+      th ts
+    each row,idx in rows
+      tr
+        td=row.op
+        td=row.ns
+        td
+          pre=JSON.stringify(row.query)
+        td=row.nscanned
+        td=row.nupdated
+        td=row.millis
+        td=row.ts

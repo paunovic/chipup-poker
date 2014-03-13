@@ -34,15 +34,17 @@ function setup(app,bugs,users,db) {
 		});
 	});
 	app.get('/user',function (req,res) {
+		var start = Date.now();
 		users.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
 			db.collection('clubs').find({members:new ObjectID(req.query.id)}).toArray(function (err,clubs) {
-				res.render('user',{user:row,clubs:clubs});
+				res.render('user',{user:row,clubs:clubs,start:start});
 			});
 		});
 	});
 	app.get('/bug',function (req,res) {
+		var start = Date.now();
 		bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
-			res.render('bug',{bug:row});
+			res.render('bug',{bug:row,start:start});
 		});
 	});
 	app.get('/screenshot',function (req,res) {
@@ -59,15 +61,23 @@ function setup(app,bugs,users,db) {
 		});
 	});
 	app.get('/club',function (req,res) {
+		var start = Date.now();
 		db.collection('clubs').findOne({_id:new ObjectID(req.query.id)},function (err,club) {
 			db.collection('games').find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
-				res.render('club',{club:club,games:games});
+				res.render('club',{club:club,games:games,start:start});
 			});
 		});
 	});
 	app.get('/hand',function (req,res) {
+		var start = Date.now();
 		db.collection('handHistory').findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
-			res.render('hand',{hand:hand});
+			res.render('hand',{hand:hand,start:start});
+		});
+	});
+	app.get('/performance',function (req,res) {
+		var start = Date.now();
+		db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
+			res.render('profile',{rows:rows,start:start});
 		});
 	});
 }

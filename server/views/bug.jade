@@ -1,18 +1,15 @@
-doctype html
-html
-  body
-    include header
-    block content
-      table(border=1)
-        tr
-          th date
-          th from
-          th subject
-          th body
-        tr
-          td=bug._id.getTimestamp()
-          td=bug.MailFrom
-          td=bug.MailSubject
-          td=bug.MailBody
-      pre=bug.BugReport
-      img(src='/screenshot?id='+bug._id)
+extends base
+block content
+  table(border=1)
+    tr
+      th date
+      th from
+      th subject
+      th body
+    tr
+      td=bug._id.getTimestamp()
+      td=bug.MailFrom
+      td=bug.MailSubject
+      td=bug.MailBody
+  pre=bug.BugReport
+  img(src='/screenshot?id='+bug._id)

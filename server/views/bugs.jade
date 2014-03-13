@@ -1,21 +1,17 @@
-doctype html
-html
-  body
-    include header
-    block content
-      table(border=1)
-        tr
-          th date
-          th from
-          th subject
-          th body
-          th link
-        each val in bugs
-          tr
-            td=val._id.getTimestamp()
-            td=val.MailFrom
-            td=val.MailSubject
-            td=val.MailBody
-            td
-              a(href='/bug?id='+val._id)='info'
-    include footer
+extends base
+block content
+  table(border=1)
+    tr
+      th date
+      th from
+      th subject
+      th body
+      th link
+    each val in bugs
+      tr
+        td=val._id.getTimestamp()
+        td=val.MailFrom
+        td=val.MailSubject
+        td=val.MailBody
+        td
+          a(href='/bug?id='+val._id)='info'
