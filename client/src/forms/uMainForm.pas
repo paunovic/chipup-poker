@@ -315,10 +315,14 @@ begin
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
+var
+  cpt: String;
 begin
-  Caption := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Nick]);
+  cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
-    Caption := Caption + ' (account confirmation pending)';
+    cpt := cpt + ' (account confirmation pending)';
+  if cpt <> Caption then
+    Caption := cpt;
 
   acOpenClubLobby.Enabled := FSelectedClub <> -1;
   UpdateClublist;
@@ -660,6 +664,11 @@ begin
       club.Games.UpdateFromProtobufObjects(pbreply.Games);
 
       SetLength(query_users, 0);
+      if not dmMain.Players.FindPlayerById(pbreply.Club.Owner, player) then
+      begin
+        SetLength(query_users, 1);
+        query_users[0] := pbreply.Club.Owner;
+      end;
       for C1 := 0 to Length(pbreply.Club.Members) - 1 do
         if not dmMain.Players.FindPlayerById(pbreply.Club.Members[C1], player) then
         begin

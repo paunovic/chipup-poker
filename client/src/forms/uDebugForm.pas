@@ -28,13 +28,6 @@ type
     lbvThreads: TLabel;
     lbsMemoryUsage: TLabel;
     lbvMemoryUsage: TLabel;
-    cbSockInc: TcxCheckBox;
-    cbSockOut: TcxCheckBox;
-    cbNetInc: TcxCheckBox;
-    cbNetOut: TcxCheckBox;
-    cbApp: TcxCheckBox;
-    cbException: TcxCheckBox;
-    cbForm: TcxCheckBox;
     N1: TMenuItem;
     pmiLogWordWrap: TMenuItem;
     acWordWrap: TAction;
@@ -43,19 +36,17 @@ type
     pmiLogSave: TMenuItem;
     pmiLogClear: TMenuItem;
     N2: TMenuItem;
-    cbSocket: TcxCheckBox;
     lbsSocketState: TLabel;
     lbvSocketState: TLabel;
+    btPause: TcxButton;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
     procedure acCopyLogSelectionExecute(Sender: TObject);
     procedure tiAppInfoRefreshTimer(Sender: TObject);
     procedure acWordWrapExecute(Sender: TObject);
-    procedure cbLogOptionsChange(Sender: TObject);
+    procedure btPauseClick(Sender: TObject);
   private
-    FDebugInfoTypes: TDebugInfoTypes;
-
     procedure ActiveFormChange(Sender: TObject);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -90,7 +81,8 @@ var
 begin
   time_str := FormatDateTime('hh:nn:ss:zzz', Now);
 
-  logit := (not Assigned(frmDebug)) or (AType in frmDebug.FDebugInfoTypes);
+  logit := TRUE;
+
   case AType of
     ditException: begin
       type_str := 'EXCP';
@@ -133,7 +125,8 @@ begin
   if not logit then
     Exit;
 
-  if Assigned(frmDebug) then
+  if (Assigned(frmDebug)) and
+     (not frmDebug.btPause.Down) then
   begin
     frmDebug.reLog.SelStart := frmDebug.reLog.GetTextLen;
     frmDebug.reLog.SelAttributes.Color := type_color;
@@ -159,8 +152,6 @@ begin
 
   pmiLogWordWrap.Checked := TRUE;
   acWordWrap.Execute;
-
-  FDebugInfoTypes := [ditException, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut];
 
   Screen.OnActiveFormChange := ActiveFormChange;
 end;
@@ -232,12 +223,9 @@ begin
     reLog.ScrollBars := ssBoth;
 end;
 
-procedure TfrmDebug.cbLogOptionsChange(Sender: TObject);
+
+procedure TfrmDebug.btPauseClick(Sender: TObject);
 begin
-  if (Sender as TcxCheckBox).Checked then
-    Include(FDebugInfoTypes, TDebugInfoType((Sender as TcxCheckBox).Tag))
-  else
-    Exclude(FDebugInfoTypes, TDebugInfoType((Sender as TcxCheckBox).Tag));
 end;
 
 {$IFDEF DEBUG}

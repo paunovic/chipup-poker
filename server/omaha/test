@@ -1,0 +1,1 @@
+/usr/lib/node_modules/npm/bin/node-gyp-bin/node-gyp configure && /usr/lib/node_modules/npm/bin/node-gyp-bin/node-gyp build && node test.js

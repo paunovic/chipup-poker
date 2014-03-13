@@ -103,7 +103,9 @@ uses
   uChipsStackMaker in 'modules\uChipsStackMaker.pas',
   uFormsContainer in 'modules\uFormsContainer.pas',
   uPB_TableBoolFlag in 'modules\protobuf\objects\uPB_TableBoolFlag.pas',
-  uIModalForm in 'forms\uIModalForm.pas';
+  uIModalForm in 'forms\uIModalForm.pas',
+  uDXTimer in 'modules\directx_draw\uDXTimer.pas',
+  uDXAnimation in 'modules\directx_draw\uDXAnimation.pas';
 
 procedure FocusPokerApp;
 var

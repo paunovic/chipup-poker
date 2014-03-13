@@ -108,7 +108,11 @@ begin
     Add(table);
   end
   else
+  begin
+    if IsIconic(table.Form.Handle) then
+      ShowWindow(table.Form.Handle, SW_RESTORE);
     table.Form.BringToFront;
+  end;
   result := TRUE;
 end;
 

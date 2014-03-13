@@ -424,9 +424,6 @@ begin
     srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;
     srRegisterReply: ADataObject := TPB_RegisterReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srOwnershipGiveAwayNotOwner: ;
-    srOwnershipGiveawayInvalidPlayerId: ;
-    srOwnershipGiveAwayInvalidClubId: ;
     srChangePasswordOk: ;
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ;
@@ -469,6 +466,9 @@ begin
     end;
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDisbandOk,
+    srOwnershipGiveAwayNotOwner,
+    srOwnershipGiveawayInvalidPlayerId,
+    srOwnershipGiveAwayInvalidClubId,
     srOwnershipGiveAwayOk,
     srSuspendPlayerOk,
     srReinstatePlayerOk,

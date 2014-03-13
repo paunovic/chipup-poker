@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, AsphyreFonts,
-  AbstractDevices, AbstractCanvas, AsphyreEvents, AsphyreEventTypes, AsphyreFactory, DX9Providers, NativeConnectors;
+  AbstractDevices, AbstractCanvas, AsphyreEvents, AsphyreEventTypes, AsphyreFactory, DX9Providers, NativeConnectors, AsphyreSwapChains;
 
 type
   TDXCore = class

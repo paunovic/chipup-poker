@@ -38,8 +38,8 @@ object frmChangeEMail: TfrmChangeEMail
     Style.Font.Height = -11
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
-    Style.TextColor = clRed
-    Style.TextStyle = []
+    Style.TextColor = 7434751
+    Style.TextStyle = [fsBold]
     Style.IsFontAssigned = True
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
