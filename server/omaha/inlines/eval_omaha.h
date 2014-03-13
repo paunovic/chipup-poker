@@ -68,8 +68,10 @@ StdDeck_OmahaHiLow8_EVAL(StdDeck_CardMask hole, StdDeck_CardMask board,
       nhole++;
     }
     if (StdDeck_CardMask_CARD_IS_SET(board, i)) {
-      if (StdDeck_CardMask_CARD_IS_SET(hole, i)) /* same card in hole and board */
+      if (StdDeck_CardMask_CARD_IS_SET(hole, i)) {/* same card in hole and board */
+        printf("card %d in both hole and board\n");
         return 2;
+      }
       if (nboard >= OMAHA_MAXBOARD)
         return 3;                               /* too many board cards */
       StdDeck_CardMask_RESET(board1[nboard]);
