@@ -3894,11 +3894,6 @@ object frmChipUpMain: TfrmChipUpMain
       ParentFont = False
     end
   end
-  object SkinController: TdxSkinController
-    SkinName = 'ChipUpDarkStyle'
-    Left = 328
-    Top = 230
-  end
   object ActionManager: TActionManager
     ActionBars = <
       item
@@ -4031,6 +4026,11 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'acOpenCashier'
       OnExecute = acOpenCashierExecute
     end
+    object acResendVerificationMail: TAction
+      Category = 'Account'
+      Caption = 'Resend Verification Mail'
+      OnExecute = acResendVerificationMailExecute
+    end
   end
   object MainMenu: TMainMenu
     Left = 472
@@ -4045,6 +4045,12 @@ object frmChipUpMain: TfrmChipUpMain
       end
       object ChangeAvatar1: TMenuItem
         Action = acShowChangeAvatarForm
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object Resendverificationmail1: TMenuItem
+        Action = acResendVerificationMail
       end
       object N1: TMenuItem
         Caption = '-'

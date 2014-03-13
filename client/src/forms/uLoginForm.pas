@@ -26,7 +26,6 @@ type
     edPassword: TcxTextEdit;
     lbsLogin: TcxLabel;
     lbsPassword: TcxLabel;
-    SkinController: TdxSkinController;
     tiConnect: TTimer;
     imgHeader: TcxImage;
     procedure FormCreate(Sender: TObject);

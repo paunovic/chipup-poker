@@ -3,8 +3,8 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 473
-  ClientWidth = 721
+  ClientHeight = 524
+  ClientWidth = 792
   Color = clWindow
   Constraints.MaxHeight = 910
   Constraints.MaxWidth = 1320
@@ -25,8 +25,8 @@ object frmTable: TfrmTable
   TextHeight = 14
   object paBottom: TPanel
     Left = 0
-    Top = 377
-    Width = 721
+    Top = 428
+    Width = 792
     Height = 96
     Align = alBottom
     BevelOuter = bvNone
@@ -87,7 +87,7 @@ object frmTable: TfrmTable
     object paButtons: TPanel
       Left = 250
       Top = 0
-      Width = 471
+      Width = 542
       Height = 96
       Align = alClient
       BevelOuter = bvNone
@@ -97,7 +97,7 @@ object frmTable: TfrmTable
       ParentBackground = False
       TabOrder = 1
       DesignSize = (
-        471
+        542
         96)
       object cbSitOutNextBB: TcxCheckBox
         Left = -2
@@ -160,7 +160,7 @@ object frmTable: TfrmTable
         Width = 128
       end
       object btAction2: TcxButton
-        Left = 242
+        Left = 313
         Top = 55
         Width = 108
         Height = 37
@@ -178,7 +178,7 @@ object frmTable: TfrmTable
         OnClick = acCallExecute
       end
       object btAction1: TcxButton
-        Left = 125
+        Left = 196
         Top = 55
         Width = 108
         Height = 37
@@ -196,7 +196,7 @@ object frmTable: TfrmTable
         OnClick = acCheckExecute
       end
       object btAction3: TcxButton
-        Left = 359
+        Left = 430
         Top = 55
         Width = 108
         Height = 37
@@ -237,7 +237,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object seRaiseAmount: TcxSpinEdit
-        Left = 189
+        Left = 260
         Top = 27
         Anchors = [akTop, akRight]
         Properties.ImmediatePost = True
@@ -249,7 +249,7 @@ object frmTable: TfrmTable
         Width = 46
       end
       object tbRaise: TcxTrackBar
-        Left = 229
+        Left = 300
         Top = 28
         Anchors = [akTop, akRight]
         Properties.AutoSize = False
@@ -280,7 +280,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaiseMax: TcxButton
-        Left = 415
+        Left = 486
         Top = 5
         Width = 52
         Height = 23
@@ -298,7 +298,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaisePot: TcxButton
-        Left = 357
+        Left = 428
         Top = 5
         Width = 52
         Height = 23
@@ -316,7 +316,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaise3BB: TcxButton
-        Left = 299
+        Left = 370
         Top = 5
         Width = 52
         Height = 23
@@ -334,7 +334,7 @@ object frmTable: TfrmTable
         ParentFont = False
       end
       object btRaiseMin: TcxButton
-        Left = 241
+        Left = 312
         Top = 5
         Width = 52
         Height = 23

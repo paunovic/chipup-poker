@@ -80,8 +80,9 @@ type
     scPutChips = 529,
     scTableAddOn = 530,
     scTablePlayNow = 531,
-    scTableSitOut = 532,
-    scTableSitOutNextBB = 533
+    scTableSitOutNextHand = 532,
+    scTableSitOutNextBB = 533,
+    scResendVerificationMail = 534
   );
 
 {$IFDEF DEBUG}
@@ -188,8 +189,9 @@ begin
     scPutChips: result := 'scPutChips';
     scTableAddOn: result := 'scTableAddOn';
     scTablePlayNow: result := 'scTablePlayNow';
-    scTableSitOut: result := 'scTableSitOut';
+    scTableSitOutNextHand: result := 'scTableSitOutNextHand';
     scTableSitOutNextBB: result := 'scTableSitOutNextBB';
+    scResendVerificationMail: result := 'scResendVerificationMail';
   end;
 end;
 {$ENDIF DEBUG}

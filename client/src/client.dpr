@@ -26,7 +26,9 @@ uses
   uChangePasswordForm in 'forms\uChangePasswordForm.pas' {frmChangePassword},
   uTableForm in 'forms\uTableForm.pas' {frmTable},
   uCreateEditGameForm in 'forms\uCreateEditGameForm.pas' {frmCreateEditGame},
+  {$IFDEF DEBUG}
   uDebugForm in 'forms\uDebugForm.pas' {frmDebug},
+  {$ENDIF}
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
@@ -132,6 +134,7 @@ begin
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);
   Application.CreateForm(TfrmChipUpMain, frmChipUpMain);
+
   Application.Run;
 
   TInstanceController.UnregisterInstance;

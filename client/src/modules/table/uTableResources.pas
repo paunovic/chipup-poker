@@ -11,41 +11,50 @@ type
 
   TTableResources = class
   private
-    FDXImages: TAsphyreImages;
-    FDXMediaFile: TAsphyreArchive;
-    FDXFonts: TAsphyreFonts;
+    type
+      TBarmenoFonts = array[12..19] of TAsphyreFont;
 
-    FBackgroundImage: TAsphyreImage;
-    FTableImage: TAsphyreImage;
-    FCardBackgroundImage: TAsphyreImage;
-    FSeatEmptyLeftImage: TAsphyreImage;
-    FSeatEmptyRightImage: TAsphyreImage;
-    FSeatDarkLeftImage: TAsphyreImage;
-    FSeatDarkRightImage: TAsphyreImage;
-    FSeatLightLeftImage: TAsphyreImage;
-    FSeatLightRightImage: TAsphyreImage;
-    FDealerButtonImage: TAsphyreImage;
-    FChip1Image: TAsphyreImage;
-    FChip5Image: TAsphyreImage;
-    FChip25Image: TAsphyreImage;
-    FChip100Image: TAsphyreImage;
-    FChip500Image: TAsphyreImage;
-    FChip1000Image: TAsphyreImage;
-    FTimebarImage: TAsphyreImage;
-    FTimebankImage: TAsphyreImage;
-    FCardFrontBackgroundImage: TAsphyreImage;
-    FCardArtworksImages: array of TAsphyreImage;
+    var
+      FDXImages: TAsphyreImages;
+      FDXMediaFile: TAsphyreArchive;
+      FDXFonts: TAsphyreFonts;
 
-    FBarmenoFont_19px: TAsphyreFont;
-    FCardCharactersFont_19px: TAsphyreFont;
+      FBackgroundImage: TAsphyreImage;
+      FTableImage: TAsphyreImage;
+      FCardBackgroundImage: TAsphyreImage;
+      FSeatEmptyLeftImage: TAsphyreImage;
+      FSeatEmptyRightImage: TAsphyreImage;
+      FSeatDarkLeftImage: TAsphyreImage;
+      FSeatDarkRightImage: TAsphyreImage;
+      FSeatLightLeftImage: TAsphyreImage;
+      FSeatLightRightImage: TAsphyreImage;
+      FActiveSeatDarkLeftImage: TasphyreImage;
+      FActiveSeatDarkRightImage: TAsphyreImage;
+      FActiveSeatLightLeftImage: TAsphyreImage;
+      FActiveSeatLightRightImage: TAsphyreImage;
+      FDealerButtonImage: TAsphyreImage;
+      FChip1Image: TAsphyreImage;
+      FChip5Image: TAsphyreImage;
+      FChip25Image: TAsphyreImage;
+      FChip100Image: TAsphyreImage;
+      FChip500Image: TAsphyreImage;
+      FChip1000Image: TAsphyreImage;
+      FTimebarImage: TAsphyreImage;
+      FTimebankImage: TAsphyreImage;
+      FCardFrontBackgroundImage: TAsphyreImage;
+      FCardArtworksImages: array of TAsphyreImage;
 
-    FTableAspectRatio: Single;
-    FSeatAspectRatio: Single;
-    FCardAspectRatio: Single;
-    FDealerButtonAspectRatio: Single;
-    FChipAspectRatio: Single;
-    FTimebarAspectRatio: Single;
-    FCardArtworkAspectRatio: Single;
+      FBarmenoFonts: TBarmenoFonts;
+      FArialFont_10px: TAsphyreFont;
+      FCardCharactersFont_19px: TAsphyreFont;
+
+      FTableAspectRatio: Single;
+      FSeatAspectRatio: Single;
+      FCardAspectRatio: Single;
+      FDealerButtonAspectRatio: Single;
+      FChipAspectRatio: Single;
+      FTimebarAspectRatio: Single;
+      FCardArtworkAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -83,6 +92,10 @@ type
     property SeatDarkRightImage: TAsphyreImage read FSeatDarkRightImage;
     property SeatLightLeftImage: TAsphyreImage read FSeatLightLeftImage;
     property SeatLightRightImage: TAsphyreImage read FSeatLightRightImage;
+    property ActiveSeatDarkLeftImage: TAsphyreImage read FActiveSeatDarkLeftImage;
+    property ActiveSeatDarkRightImage: TAsphyreImage read FActiveSeatDarkRightImage;
+    property ActiveSeatLightLeftImage: TAsphyreImage read FActiveSeatLightLeftImage;
+    property ActiveSeatLightRightImage: TAsphyreImage read FActiveSeatLightRightImage;
     property DealerButtonImage: TAsphyreImage read FDealerButtonImage;
     property Chip1Image: TAsphyreImage read FChip1Image;
     property Chip5Image: TAsphyreImage read FChip5Image;
@@ -94,7 +107,8 @@ type
     property TimebankImage: TAsphyreImage read FTimebankImage;
     property CardFrontBackgroundImage: TAsphyreImage read FCardFrontBackgroundImage;
 
-    property BarmenoFont_19px: TAsphyreFont read FBarmenoFont_19px;
+    property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
+    property ArialFont_10px: TAsphyreFont read FArialFont_10px;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
 
     property TableAspectRatio: Single read FTableAspectRatio;
@@ -149,7 +163,10 @@ begin
   AddDXImage('SeatDarkRight.image', FSeatDarkRightImage);
   AddDXImage('SeatLightLeft.image', FSeatLightLeftImage);
   AddDXImage('SeatLightRight.image', FSeatLightRightImage);
-  AddDXImage('SeatLightRight.image', FSeatLightRightImage);
+  AddDXImage('ActiveSeatDarkLeft.image', FActiveSeatDarkLeftImage);
+  AddDXImage('ActiveSeatDarkRight.image', FActiveSeatDarkRightImage);
+  AddDXImage('ActiveSeatLightLeft.image', FActiveSeatLightLeftImage);
+  AddDXImage('ActiveSeatLightRight.image', FActiveSeatLightRightImage);
   AddDXImage('CardBackground.image', FCardBackgroundImage, FCardAspectRatio);
   AddDXImage('DealerButton.image', FDealerButtonImage, FDealerButtonAspectRatio);
   AddDXImage('Chip1.image', FChip1Image, FChipAspectRatio);
@@ -177,14 +194,22 @@ begin
   FDXFonts.Canvas := ADXCanvas;
   FDXFonts.Images := FDXImages;
 
-  FDXImages.AddFromArchive('Barmeno_19px.image', FDXMediaFile);
   FDXImages.AddFromArchive('CardCharacters_19px.image', FDXMediaFile);
-
-  id := FDXFonts.Insert('RoomMedia | Barmeno_19px.xml', 'Barmeno_19px.image');
-  FBarmenoFont_19px := FDXFonts[id];
+  FDXImages.AddFromArchive('Arial_10px.image', FDXMediaFile);
 
   id := FDXFonts.Insert('RoomMedia | CardCharacters_19px.xml', 'CardCharacters_19px.image');
   FCardCharactersFont_19px := FDXFonts[id];
+
+  id := FDXFonts.Insert('RoomMedia | Arial_10px.xml', 'Arial_10px.image');
+  FArialFont_10px := FDXFonts[id];
+
+  for C1 := Low(FBarmenoFonts) to High(FBarmenoFonts) do
+  begin
+    FDXImages.AddFromArchive(Format('Barmeno_%dpx.image', [C1]), FDXMediaFile);
+    id := FDXFonts.Insert(Format('RoomMedia | Barmeno_%dpx.xml', [C1]), Format('Barmeno_%dpx.image', [C1]));
+    FBarmenoFonts[C1] := FDXFonts[id];
+  end;
+
 end;
 
 destructor TTableResources.Destroy;

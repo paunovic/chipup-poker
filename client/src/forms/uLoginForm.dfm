@@ -3309,11 +3309,6 @@ object frmLogin: TfrmLogin
       OnExecute = acShowForgotPasswordFormExecute
     end
   end
-  object SkinController: TdxSkinController
-    SkinName = 'ChipUpDarkStyle'
-    Left = 28
-    Top = 56
-  end
   object tiConnect: TTimer
     OnTimer = tiConnectTimer
     Left = 72

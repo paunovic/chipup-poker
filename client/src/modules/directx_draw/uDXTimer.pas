@@ -3,15 +3,22 @@ unit uDXTimer;
 interface
 
 uses
-  AsphyreTimer, AsphyreImages, uDXAnimation, Vectors2;
+  Winapi.Windows, System.Classes, AsphyreImages, uDXAnimation, Vectors2, AsphyreTiming;
 
 type
-  TDXTimer = class
+  TDXTimer = class(TThread)
   private
-    FAnimations: TDXAnimations;
+    FAnimations   : TDXAnimations;
+    FSignalEvent  : THandle;
+    FMsg_Animation: UINT;
+    FTiming       : TAsphyreTiming;
+    FLastUpdate   : Double;
+    FLockCount    : Integer;
 
-    procedure TimerEvent(Sender: TObject);
-    procedure ProcessEvent(Sender: TObject);
+    procedure Process;
+
+  protected
+    procedure Execute; override;
 
   public
     class procedure Initialize;
@@ -20,9 +27,14 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure AddAnimation(const AHandle: THandle; const AID: Integer; const ACallback: TDXAnimationCallback; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
+    procedure Signal;
+    procedure Shutdown;
+
+    procedure AddAnimation(const AHandle: THandle; const AID: Integer; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
+
+    property AnimationMessage: UINT read FMsg_Animation;
   end;
 
 var
@@ -31,46 +43,54 @@ var
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections;
+  System.SysUtils, System.Generics.Collections;
 
 
 class procedure TDXTimer.Initialize;
 begin
   DXTimer := TDXTimer.Create;
+  DXTimer.Start;
 end;
 
 class procedure TDXTimer.Deinitialize;
 begin
+  DXTimer.Shutdown;
   FreeAndNil(DXTimer);
 end;
 
 
 constructor TDXTimer.Create;
 begin
+  FSignalEvent := CreateEvent(nil, FALSE, FALSE, nil);
+  FTiming := TAsphyreTiming.Create;
+  FMsg_Animation := RegisterWindowMessage('DXTANMSG');
   FAnimations := TDXAnimations.Create;
 
-  Timer.OnTimer := TimerEvent;
-  Timer.OnProcess := ProcessEvent;
-  Timer.Speed := 60;
+  inherited Create(TRUE);
 end;
 
 destructor TDXTimer.Destroy;
 begin
   FAnimations.Free;
+  FTiming.Free;
+  CloseHandle(FSignalEvent);
 
   inherited;
 end;
 
-procedure TDXTimer.AddAnimation(const AHandle: THandle; const AID: Integer; const ACallback: TDXAnimationCallback; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
+procedure TDXTimer.AddAnimation(const AHandle: THandle; const AID: Integer; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
 var
   animation: TDXAnimation;
 begin
   if Find(AHandle, AID, animation) then
-    FAnimations.Remove(animation);
-  animation := TDXAnimation.Create(AHandle, AID, ACallback, AStartPoint, AEndPoint, ASpeed, AStartDelay);
-  FAnimations.Add(animation);
+    animation.SetParams(AHandle, AID, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay)
+  else
+  begin
+    animation := TDXAnimation.Create(AHandle, AID, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay);
+    FAnimations.Add(animation);
+  end;
 
-  Timer.Enabled := TRUE;
+  Signal;
 end;
 
 procedure TDXTimer.RemoveAnimations(const AHandle: THandle);
@@ -80,7 +100,15 @@ begin
   C1 := 0;
   while C1 < FAnimations.Count do
     if FAnimations[C1].Handle = AHandle then
-      FAnimations.Delete(C1)
+    begin
+      if FLockCount = 0 then
+        FAnimations.Delete(C1)
+      else
+      begin
+        FAnimations[C1].Removed := TRUE;
+        Inc(C1);
+      end;
+    end
     else
       Inc(C1);
 end;
@@ -99,43 +127,83 @@ begin
   Exit(FALSE);
 end;
 
-
-procedure TDXTimer.TimerEvent(Sender: TObject);
+procedure TDXTimer.Shutdown;
 begin
-  Timer.Process;
-
-  if FAnimations.Count = 0 then
-    Timer.Enabled := FALSE;
+  Terminate;
+  Signal;
+  WaitFor;
 end;
 
-procedure TDXTimer.ProcessEvent(Sender: TObject);
-var
-  C1       : Integer;
-  currtime : DWORD;
-  callbacks: TList<TDXAnimationCallback>;
+procedure TDXTimer.Signal;
 begin
-  currtime := GetTickCount;
+  SetEvent(FSignalEvent);
+end;
 
-  callbacks := TList<TDXAnimationCallback>.Create;
+procedure TDXTimer.Process;
+const
+  UPDATE_FPS      = 60;
+  UPDATE_INTERVAL = 1000 / UPDATE_FPS;
+var
+  C1            : Integer;
+  callbacks     : TList<THandle>;
+  callbacks_must: TList<THandle>;
+begin
+  callbacks := TList<THandle>.Create;
   try
-    C1 := 0;
-    while C1 < FAnimations.Count do
-    begin
-      FAnimations[C1].Animate(currtime);
+    callbacks_must := TList<THandle>.Create;
+    try
+      Inc(FLockCount);
+      try
+        C1 := 0;
+        while C1 < FAnimations.Count do
+        begin
+          FAnimations[C1].Animate(FTiming.GetTimeValue);
 
-      if callbacks.IndexOf(FAnimations[C1].Callback) = -1 then
-        callbacks.Add(FAnimations[C1].Callback);
+          if FAnimations[C1].Status = asDone then
+          begin
+            callbacks.Remove(FAnimations[C1].Handle);
+            if callbacks_must.IndexOf(FAnimations[C1].Handle) = -1 then
+              callbacks_must.Add(FAnimations[C1].Handle);
+            FAnimations.Delete(C1)
+          end
+          else
+          begin
+            if (callbacks_must.IndexOf(FAnimations[C1].Handle) = -1) and
+               (callbacks.IndexOf(FAnimations[C1].Handle) = -1) then
+              callbacks.Add(FAnimations[C1].Handle);
+            Inc(C1);
+          end;
+        end;
+      finally
+        Dec(FLockCount);
+      end;
 
-      if FAnimations[C1].Status = asDone then
-        FAnimations.Delete(C1)
-      else
-        Inc(C1);
+      for C1 := 0 to callbacks_must.Count - 1 do
+        PostMessage(callbacks_must[C1], FMsg_Animation, 0, 0);
+      if FTiming.GetTimeValue - FLastUpdate > UPDATE_INTERVAL then
+      begin
+        for C1 := 0 to callbacks.Count - 1 do
+          PostMessage(callbacks[C1], FMsg_Animation, 0, 0);
+        FLastUpdate := FTiming.GetTimeValue;
+      end;
+    finally
+      callbacks_must.Free;
     end;
-
-    for C1 := 0 to callbacks.Count - 1 do
-      callbacks[C1](nil);
   finally
     callbacks.Free;
+  end;
+end;
+
+procedure TDXTimer.Execute;
+begin
+  while not Terminated do
+  begin
+    Process;
+    if FAnimations.Count = 0 then
+    begin
+      ResetEvent(FSignalEvent);
+      WaitForSingleObject(FSignalEvent, INFINITE);
+    end;
   end;
 end;
 

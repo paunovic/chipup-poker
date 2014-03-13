@@ -13,7 +13,6 @@ uses
 
 type
   TfrmChipUpMain = class(TForm)
-    SkinController: TdxSkinController;
     ActionManager: TActionManager;
     acLogout: TAction;
     acShowChangeEMailForm: TAction;
@@ -71,6 +70,9 @@ type
     btCreateClub: TcxButton;
     btJoinClub: TcxButton;
     gridGamesBuyinLimits: TcxGridColumn;
+    Resendverificationmail1: TMenuItem;
+    N2: TMenuItem;
+    acResendVerificationMail: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -93,6 +95,7 @@ type
     procedure imgCashierMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure acResendVerificationMailExecute(Sender: TObject);
   private
     FSelectedClub : Integer;
     FSelectedGame : TBytes;
@@ -253,6 +256,9 @@ var
   form : TForm;
   found: Boolean;
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
@@ -268,6 +274,12 @@ begin
 
   if not found then
     FormsContainer.RunForm(TfrmClubLobby, nil, [@FSelectedClub], TRUE);
+end;
+
+procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);
+begin
+  SocketClient.ResendVerificationMail;
+  MessageDlg(Format('Verification mail sent to %s. Please check your inbox.', [dmMain.SelfInfo.EMail]), mtInformation, [mbOK], 0);
 end;
 
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
@@ -287,6 +299,9 @@ end;
 
 procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   FormsContainer.RunForm(TfrmCreateClub, self, [], FALSE);
 end;
 
@@ -295,6 +310,9 @@ var
   game: TGameInfo;
   club: TClubInfo;
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   if (not GetSelectedClub(club)) or (not GetSelectedGame(game)) then
     Exit;
 
@@ -306,11 +324,17 @@ end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowPublicClubsListFormExecute(Sender: TObject);
 begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
   FormsContainer.RunForm(TfrmPublicClubsList, self, [], FALSE);
 end;
 
@@ -323,6 +347,8 @@ begin
     cpt := cpt + ' (account confirmation pending)';
   if cpt <> Caption then
     Caption := cpt;
+
+  Resendverificationmail1.Visible := not dmMain.SelfInfo.Authed;
 
   acOpenClubLobby.Enabled := FSelectedClub <> -1;
   UpdateClublist;
@@ -743,7 +769,5 @@ begin
   gridGames.Hide;
   btOpenClubLobby.Hide;
 end;
-
-
 
 end.
