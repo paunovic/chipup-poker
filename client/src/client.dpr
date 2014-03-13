@@ -134,6 +134,7 @@ begin
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);
   Application.CreateForm(TfrmChipUpMain, frmChipUpMain);
+
   Application.Run;
 
   TInstanceController.UnregisterInstance;

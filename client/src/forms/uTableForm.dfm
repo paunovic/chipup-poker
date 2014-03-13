@@ -33,8 +33,6 @@ object frmTable: TfrmTable
     DoubleBuffered = True
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitTop = 377
-    ExplicitWidth = 721
     object paChat: TPanel
       Left = 0
       Top = 0
@@ -98,7 +96,6 @@ object frmTable: TfrmTable
       Padding.Right = 1
       ParentBackground = False
       TabOrder = 1
-      ExplicitWidth = 471
       DesignSize = (
         542
         96)
@@ -179,7 +176,6 @@ object frmTable: TfrmTable
         Font.Style = [fsBold]
         ParentFont = False
         OnClick = acCallExecute
-        ExplicitLeft = 242
       end
       object btAction1: TcxButton
         Left = 196
@@ -198,7 +194,6 @@ object frmTable: TfrmTable
         Font.Style = [fsBold]
         ParentFont = False
         OnClick = acCheckExecute
-        ExplicitLeft = 125
       end
       object btAction3: TcxButton
         Left = 430
@@ -217,7 +212,6 @@ object frmTable: TfrmTable
         Font.Style = []
         ParentFont = False
         OnClick = acRaiseExecute
-        ExplicitLeft = 359
       end
       object btStandUp: TcxButton
         Left = 3
@@ -252,7 +246,6 @@ object frmTable: TfrmTable
         Properties.OnChange = seRaiseAmountPropertiesChange
         TabOrder = 4
         Visible = False
-        ExplicitLeft = 189
         Width = 46
       end
       object tbRaise: TcxTrackBar
@@ -267,7 +260,6 @@ object frmTable: TfrmTable
         TabOrder = 5
         Transparent = True
         Visible = False
-        ExplicitLeft = 229
         Height = 25
         Width = 245
       end
@@ -304,7 +296,6 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = [fsBold]
         ParentFont = False
-        ExplicitLeft = 415
       end
       object btRaisePot: TcxButton
         Left = 428
@@ -323,7 +314,6 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = [fsBold]
         ParentFont = False
-        ExplicitLeft = 357
       end
       object btRaise3BB: TcxButton
         Left = 370
@@ -342,7 +332,6 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = [fsBold]
         ParentFont = False
-        ExplicitLeft = 299
       end
       object btRaiseMin: TcxButton
         Left = 312
@@ -361,7 +350,6 @@ object frmTable: TfrmTable
         Font.Name = 'Arial'
         Font.Style = [fsBold]
         ParentFont = False
-        ExplicitLeft = 241
       end
     end
   end

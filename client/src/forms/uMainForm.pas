@@ -13,7 +13,6 @@ uses
 
 type
   TfrmChipUpMain = class(TForm)
-    SkinController: TdxSkinController;
     ActionManager: TActionManager;
     acLogout: TAction;
     acShowChangeEMailForm: TAction;
@@ -71,6 +70,9 @@ type
     btCreateClub: TcxButton;
     btJoinClub: TcxButton;
     gridGamesBuyinLimits: TcxGridColumn;
+    Resendverificationmail1: TMenuItem;
+    N2: TMenuItem;
+    acResendVerificationMail: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -93,6 +95,7 @@ type
     procedure imgCashierMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure acResendVerificationMailExecute(Sender: TObject);
   private
     FSelectedClub : Integer;
     FSelectedGame : TBytes;
@@ -273,6 +276,12 @@ begin
     FormsContainer.RunForm(TfrmClubLobby, nil, [@FSelectedClub], TRUE);
 end;
 
+procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);
+begin
+  SocketClient.ResendVerificationMail;
+  MessageDlg(Format('Verification mail sent to %s. Please check your inbox.', [dmMain.SelfInfo.EMail]), mtInformation, [mbOK], 0);
+end;
+
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
   FormsContainer.RunForm(TfrmChangeAvatar, self, [], FALSE);
@@ -338,6 +347,8 @@ begin
     cpt := cpt + ' (account confirmation pending)';
   if cpt <> Caption then
     Caption := cpt;
+
+  Resendverificationmail1.Visible := not dmMain.SelfInfo.Authed;
 
   acOpenClubLobby.Enabled := FSelectedClub <> -1;
   UpdateClublist;

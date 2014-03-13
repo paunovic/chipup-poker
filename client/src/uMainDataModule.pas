@@ -4,10 +4,12 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, System.Generics.Collections,
-  uPlayerInfo, uTables, uPB_StatusReply, Vcl.Forms;
+  uPlayerInfo, uTables, uPB_StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
+  dxSkinsForm;
 
 type
   TdmMain = class(TDataModule)
+    SkinController: TdxSkinController;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private

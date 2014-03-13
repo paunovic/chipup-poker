@@ -90,6 +90,7 @@ type
     procedure Fold(const AGameId: TBytes);
     procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer);
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
+    procedure ResendVerificationMail;
 
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
@@ -228,7 +229,7 @@ end;
 
 procedure TSocketClient.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn('Session closed.', ditSocket); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn('Session closed.', ditException); {$ENDIF}
 
   if FReceiveBufferSize > 0 then
     FreeMem(FReceiveBuffer, FReceiveBufferSize);
@@ -979,7 +980,7 @@ end;
 
 procedure TSocketClient.TableSitOutNextHand(const AGameId: TBytes; const AFlag: Boolean);
 begin
-  TableBoolFlag(scTableSitOut, AGameId, AFlag);
+  TableBoolFlag(scTableSitOutNextHand, AGameId, AFlag);
 end;
 
 procedure TSocketClient.TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
@@ -1000,6 +1001,12 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TSocketClient.ResendVerificationMail;
+begin
+  SendProtobuf(scResendVerificationMail, nil);
+end;
+
 
 
 end.

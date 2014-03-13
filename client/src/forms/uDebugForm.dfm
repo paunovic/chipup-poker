@@ -34,9 +34,14 @@ object frmDebug: TfrmDebug
       Align = alBottom
       BevelOuter = bvNone
       Ctl3D = False
+      DoubleBuffered = True
       ParentBackground = False
       ParentCtl3D = False
+      ParentDoubleBuffered = False
       TabOrder = 0
+      DesignSize = (
+        675
+        75)
       object btPause: TcxButton
         Left = 8
         Top = 10
@@ -56,53 +61,61 @@ object frmDebug: TfrmDebug
         ParentFont = False
       end
       object lbsThreads: TcxLabel
-        Left = 368
+        Left = 536
         Top = 6
+        Anchors = [akRight, akBottom]
         Caption = 'Threads:'
         Transparent = True
       end
       object lbsMemoryUsage: TcxLabel
-        Left = 368
+        Left = 536
         Top = 22
+        Anchors = [akRight, akBottom]
         Caption = 'Memory usage:'
         Transparent = True
       end
       object lbsSocketState: TcxLabel
-        Left = 368
+        Left = 536
         Top = 54
+        Anchors = [akRight, akBottom]
         Caption = 'Socket state:'
         Transparent = True
       end
       object lbsCalbackSets: TcxLabel
-        Left = 368
+        Left = 536
         Top = 38
+        Anchors = [akRight, akBottom]
         Caption = 'Callback sets:'
         Transparent = True
       end
       object lbvThreads: TcxLabel
-        Left = 448
+        Left = 616
         Top = 6
+        Anchors = [akRight, akBottom]
         Caption = '00'
         Style.TextStyle = [fsBold]
         Transparent = True
       end
       object lbvMemoryUsage: TcxLabel
-        Left = 448
+        Left = 616
         Top = 22
+        Anchors = [akRight, akBottom]
         Caption = '00000kb'
         Style.TextStyle = [fsBold]
         Transparent = True
       end
       object lbvCallbackSets: TcxLabel
-        Left = 448
+        Left = 616
         Top = 38
+        Anchors = [akRight, akBottom]
         Caption = '0'
         Style.TextStyle = [fsBold]
         Transparent = True
       end
       object lbvSocketState: TcxLabel
-        Left = 448
+        Left = 616
         Top = 54
+        Anchors = [akRight, akBottom]
         Caption = '0'
         Style.TextStyle = [fsBold]
         Transparent = True
