@@ -17,6 +17,7 @@ var logs = {};
 var server = net.createServer(function (socket) {
 	var handler = new Client(socket);
 });
+var cactiServer = require('net').createServer(stats_server);
 function Client(sockin) {
 	this.socket = sockin;
 	this.reader = new protoreader(this.socket,this);
@@ -36,9 +37,12 @@ Client.prototype.remove = function () {
 	clients.splice(idx,1);
 }
 Client.prototype.reply = protoreader.reply;
-Client.prototype.log = function log() {
+Client.prototype.log = function log(format) {
 	var out = Array.prototype.slice.call(arguments);
 	//out.unshift(new Date().toString()+":");
+	if (format.indexOf('%') != -1) {
+		out = [ util.format.apply(util,out) ]
+	}
 	out.unshift('Master:');
 	if (this.name) out.unshift(this.name);
 	//if (this.name != 'client3') return;
@@ -74,6 +78,7 @@ Client.prototype.handle = function (code,data) {
 	}
 }
 server.listen(45508);
+cactiServer.listen(45509);
 var im_hub;
 var buffer = [];
 var autoRestart = true;
@@ -105,24 +110,34 @@ function startImHub() {
 			if (msg.cmd == 'autooff') autoRestart = false;
 			break;
 		case 'conn':
-			console.log(msg.ts,msg.nick,util.inspect(msg.objects,{colors:true}));
+			var display = [ msg.ts,msg.nick+':' ];
+			var log = [ msg.ts,msg.nick ];
+			//console.log(msg.ts,msg.nick,util.inspect(msg.objects,{colors:true}));
 			for (var x=0; x<msg.objects.length; x++) {
-				if (typeof msg.objects[x] == 'object') msg.objects[x]= util.inspect(msg.objects[x]);
+				display.push(util.inspect(msg.objects[x],{colors:true}));
+				msg.objects[x]= JSON.stringify(msg.objects[x]);
+				log.push(msg.objects[x]);
 			}
+			console.log.apply(console,display);
 			for (var x=0; x<clients.length; x++) {
 				clients[x].reply(codes.PerClientMsgEvent,msg,'Backend.PerClientMsg');
 			}
-			getLog('client_'+msg.nick).write(msg.ts+','+msg.nick+','+util.inspect(msg.objects)+'\n');
+			getLog('client_'+msg.nick).write(log.join(',')+'\n');
 			break;
 		case 'game':
-			console.log(msg.ts,msg.name+':',util.inspect(msg.objects,{colors:true}));
+			var display = [ msg.ts,msg.name+':' ];
+			var log = [ msg.ts,msg.name ];
 			for (var x=0; x<msg.objects.length; x++) {
-				if (typeof msg.objects[x] == 'object') msg.objects[x]= util.inspect(msg.objects[x]);
+				display.push(util.inspect(msg.objects[x],{colors:true}));
+				msg.objects[x] = JSON.stringify(msg.objects[x]);
+				log.push(msg.objects[x]);
 			}
+			//console.log(msg.ts,msg.name+':',util.inspect(msg.objects,{colors:true}));
+			console.log.apply(console,display);
 			for (var x=0; x<clients.length; x++) {
 				clients[x].reply(codes.PerGameMsgEvent,msg,'Backend.PerGameMsg');
 			}
-			getLog('game_'+msg.name).write(msg.ts+','+msg.name+','+util.inspect(msg.objects)+'\n');
+			getLog('game_'+msg.name).write(log.join(',')+'\n');
 			break;
 		default:
 			var string = msg.msg;
@@ -134,7 +149,10 @@ function startImHub() {
 			}
 			getLog('global').write(string+'\n');
 		}
-		while (buffer.length > 200) buffer.shift();
+		while (buffer.length > 200) {
+			//console.log('shrinking buffer');
+			buffer.shift();
+		}
 	});
 	//process.stdin.resume();
 	im_hub.on('exit',restartImHub);
@@ -169,3 +187,19 @@ function restartImHub(code) {
 	buffer = [];
 }
 startImHub();
+function cactiStats() {
+	var mem = process.memoryUsage();
+	var data = { };
+	var msg = []
+	for (x in data) {
+		msg.push(x+':'+data[x]);
+	}
+	for (x in mem) {
+		msg.push(x+':'+mem[x]);
+	}
+	return msg.join(' ');
+}
+function stats_server(c) {
+	c.write(cactiStats());
+	c.end();
+}

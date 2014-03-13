@@ -1,31 +1,32 @@
-doctype html
-html
-  body
-    include header
-    block content
-      table(border=1)
-        tr
-          th rake rate
-          th rake collection
-        tr
-          td=game.rake+'%'
-          td=game.obj.rake/100
-      table(border=1)
-        tr
-          th pot#
-          th members
-          th value
-        each pot in game.pots
-          tr
-            td=$index
-            td=pot.members
-            td=pot.value/100
-      table(border=1)
-        tr
-          th started
-          th hand#
-        each hand in hands
-          tr
-            td=hand._id.getTimestamp()
-            td
-              a(href="/hand?id="+hand._id)=hand.seq 
+extends base
+block content
+  p
+    a(href='/club?id='+game.obj.clubid) parent club
+  table(border=1)
+    tr
+      th rake rate
+      th rake collection
+    tr
+      td=game.rake+'%'
+      td=game.obj.rake/100
+  table(border=1)
+    tr
+      th pot#
+      th members
+      th true members
+      th value
+    each pot,idx in game.pots
+      tr
+        td=idx
+        td=pot.members
+        td=pot.trueMembers
+        td=pot.value/100
+  table(border=1)
+    tr
+      th started
+      th hand#
+    each hand in hands
+      tr
+        td=hand._id.getTimestamp()
+        td
+          a(href="/hand?id="+hand._id)=hand.seq

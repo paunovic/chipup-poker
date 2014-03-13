@@ -28,14 +28,50 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			process.exit(1);
 		}
 		allUsers = collection;
-		async.series(tests,function allgood(err) {
-			if (err) {
-				console.log('error',err);
-			} else {
-				console.log('all done');
+		if (require.main === module) {
+			console.log(process.argv);
+			var mode = process.argv[2];
+			var autoconfig = {moves:[],autoRandom:{call:16,fold:4,raise:12,standup:4},speed:[0,0],players:5, buyins:[100000,100000,100000,100000,100000]};
+			var prefix = process.argv[3];
+			if (prefix) autoconfig.prefix = prefix;
+			switch (mode) {
+			case 'menu':
+				tests = [ function sidepot(cb) {
+					testmenu(cb,{players:5,prefix:prefix});
+				} ];
+				break;
+			case 'sidepot':
+				tests = [ function sidepot(cb) {
+					testmenu(cb,{moves:['raise 1000','raise 500','call'],players:3,buyins:[10005,1005,500],initialFold:true,rounds:3});
+				} ];
+				break;
+			case 'fastbot':
+				tests = [ function autobot(cb) {
+					testmenu(cb,autoconfig);
+				} ];
+				break;
+			case 'slowbot':
+				tests = [ function autobot(cb) {
+					autoconfig.speed = [1000,500];
+					testmenu(cb,autoconfig);
+				} ];
+				break;
+			case 'slowmobot':
+				tests = [ function autobot(cb) {
+					autoconfig.speed = [5000,60000];
+					testmenu(cb,autoconfig);
+				} ];
+				break;
 			}
-			conn.close();
-		});
+			async.series(tests,function allgood(err) {
+				if (err) {
+					console.log('error',err);
+				} else {
+					console.log('all done');
+				}
+				conn.close();
+			});
+		}
 	});
 	clubs = db.collection('clubs');
 	conn.close();
@@ -92,6 +128,12 @@ Client.prototype.log = function log() {
 	//if (this.name != 'client3') return;
 	console.log.apply(this,out);
 }
+Client.prototype.getSeat = function getSeat(seat) {
+	var seats = this.tableStatus.seats;
+	for (var x=0; x<seats.length; x++) {
+		if (seats && seats[x].seat == seat) return seats[x];
+	}
+}
 function testchat () {
 	var client = new Client();
 	process.stdin.setEncoding('utf8');
@@ -138,6 +180,9 @@ function testmenu(cb,config) {
 	var clubseq;
 	var autoMoves = [];
 	var total = 0;
+	var clients = [];
+	var prefix = 'client';
+	if (config && config.prefix) prefix = config.prefix;
 	if (config && config.autoRandom) {
 		for (x in config.autoRandom) {
 			total += config.autoRandom[x];
@@ -152,12 +197,12 @@ function testmenu(cb,config) {
 	}
 	var timer;
 	function doit(func) {
-		//return func();
+		if (config.speed[0] == 0) return func();
 
 		if (timer) clearTimeout(timer);
-		timer = setTimeout(func,(2000 * Math.random())+1000);
+		timer = setTimeout(func,(config.speed[1] * Math.random())+config.speed[0]);
 	}
-	function showMoves(conn) {
+	function showMoves(conn,actseq) {
 		moves = {fold:function() {
 			conn.reply(codes.scFold,{_id:gameid},'Poker.Game');
 		}};
@@ -183,14 +228,18 @@ function testmenu(cb,config) {
 		}
 		moves.raise = function (args) {
 			var newbet = parseInt(args[0]);
-			conn.log('doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
+			conn.log(actseq+':doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
 			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet},'Poker.PutChips');
 		}
+		var ts = conn.tableStatus;
+		console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d state:%s',bufToCards(ts.flop),bufToCards(ts.turn),bufToCards(ts.river),ts.locked,ts.seq,ts.dealer,ts.handid,ts.state);
 		if (conn.tableStatus.locked) {
 			console.log('table locked');
 		} else {
-			if (['psOutOfHand','psOutOfPlay'].indexOf(conn.tableStatus.seats[2].status) != -1) {
-				return doit(moves.fold);
+			if (config && config.initialFold) {
+				if (['psOutOfHand','psOutOfPlay'].indexOf(conn.tableStatus.seats[2].status) != -1) {
+					return doit(moves.fold);
+				}
 			}
 			if (autoMoves.length) {
 				var move = autoMoves.shift();
@@ -208,8 +257,9 @@ function testmenu(cb,config) {
 					for (var x=0; x<randomMoves.length; x++) {
 						if ((randomMoves[x].min < rand) && (randomMoves[x].max > rand)) {
 							var next = randomMoves[x].move;
+							console.log('AUTO',next);
 							if (next == 'call') {
-								var maxchips = conn.tableStatus.seats[conn.seat].chips;
+								var maxchips = conn.getSeat(conn.seat).chips;
 								conn.log('oldbet',oldbet,'max',maxchips);
 								var newbet = conn.tableStatus.minimum_bet;
 								if (maxchips < (newbet - oldbet)) newbet = oldbet + maxchips;
@@ -217,19 +267,28 @@ function testmenu(cb,config) {
 									moves.raise([newbet]);
 								});
 							} else if (moves[next]) {
-								console.log('AUTO',next);
 								if (next == 'raise') {
-									var maxchips = conn.tableStatus.seats[conn.seat].chips;
+									var maxchips = conn.getSeat(conn.seat).chips;
 									console.log('oldbet',oldbet,'max',maxchips);
-									var newbet = conn.tableStatus.minimum_bet + 10;
+									var newbet = conn.tableStatus.minimum_bet + 1000;
 									if (maxchips < (newbet - oldbet)) newbet = oldbet + maxchips;
 									return doit(function () {
 										moves.raise([newbet]);
 									});
+								} else if (next == 'standup') {
+									doit(function() {
+										setTimeout(function () {
+											conn.log('buying in for ',conn.buyin);
+											conn.reply(codes.scTableSit,{game_id:gameid,seat_index:conn.seat,chips:conn.buyin},'Poker.TableSit');
+										},500);
+										moves[next]();
+									});
+									return;
 								} else return doit(function () {
 									moves[next]();
 								});
-							} console.log('BAD AUTO',next);
+							}
+							console.log('BAD AUTO',next);
 						}
 					}
 				}
@@ -241,7 +300,7 @@ function testmenu(cb,config) {
 	function checkAndPrint(params) {
 		if (params.current_seat == this.seat) {
 			console.log('table state:',params.state,'active seat:',params.current_seat,'pots:',params.pots);
-			console.log('flop:',bufToCards(params.flop),'turn:',bufToCards(params.turn),'river:',bufToCards(params.river),'locked:',params.locked,'seq:',params.seq,'dealer:',params.dealer);
+			console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d time:%d',bufToCards(params.flop),bufToCards(params.turn),bufToCards(params.river),params.locked,params.seq,params.dealer,params.handid,params.time);
 			if (params.state != 'tsIdle') {
 				for (var x=0; x<params.seats.length; x++) {
 					var s = params.seats[x];
@@ -257,7 +316,7 @@ function testmenu(cb,config) {
 		switch (code) {
 		case codes.srNotImplemented:
 			var msg = data.toString('utf8');
-			this.log(msg);
+			this.log(msg.red);
 			if (msg == 'your not a member of that club') {
 				this.reply(codes.scJoinClub,{seq:clubseq},'Poker.Club');
 			}
@@ -282,13 +341,14 @@ function testmenu(cb,config) {
 		case codes.seTableStatus:
 			var params = pb.Parse(data,'Poker.TableStatus');
 			this.tableStatus = params;
+			console.log('events:'+params.events);
 			
 			checkAndPrint.call(this,params);
 			
 			if (this.sitting) {
 				if ((params.current_seat == this.seat) && (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(params.state) != -1)) {
 					this.log('its my turnB',params.state);
-					showMoves(this);
+					showMoves(this,params.seq);
 					//this.reply(codes.seChat,{event: 'ceUserMessage',msg:{msg:'my hand sucks, *folding*'},table_id:gameid},'Poker.ChatEvent');
 					//this.reply(codes.scFold,{_id:gameid},'Poker.Game');
 				} else {
@@ -310,7 +370,7 @@ function testmenu(cb,config) {
 			checkAndPrint.call(this,params);
 			if (params.current_seat == this.seat) {
 				this.log('its my turnA',this.seat,params.state);
-				showMoves(this);
+				showMoves(this,params.seq);
 				//this.reply(codes.scFold,{_id:gameid},'Poker.Game');
 			} else {
 				this.log('not my turn in sit ok',params.current_seat,this.seat,params.state);
@@ -330,6 +390,7 @@ function testmenu(cb,config) {
 	function printcode(code,data) {
 		if ([codes.srStatus,codes.seTableEvent,codes.seTableStatus,codes.srLoginReply,codes.srHello,codes.srTableSitOk,codes.srNotImplemented].indexOf(code) == -1) this.log('handle',codes.reverse[code],data);
 	}
+	var madeclients = false;
 	function testregisterhandle(code,data) {
 		printcode.call(this,code,data);
 		switch (code) {
@@ -352,16 +413,16 @@ function testmenu(cb,config) {
 			var params = pb.Parse(data,'Poker.StatusReply');
 			var makeit = true;
 			for (var x=0; x<params.clubs.length; x++) {
-				if (params.clubs[x].name == 'testbot club') {
+				if (params.clubs[x].name == (prefix + ' testbot club')) {
 					clubseq = params.clubs[x].seq;
 					makeit = false;
 				}
 			}
 			if (makeit) {
-				this.reply(codes.scCreateClub,{is_private:false, name:'testbot club'},'Poker.Club');
+				this.reply(codes.scCreateClub,{is_private:false, name:prefix+' testbot club'},'Poker.Club');
 			} else {
 				for (var x=0; x<params.games.length; x++) {
-					if (params.games[x].gamename == 'testbot game') {
+					if (params.games[x].gamename == (prefix+' testbot game')) {
 						gameid = params.games[x]._id;
 					}
 				}
@@ -369,7 +430,7 @@ function testmenu(cb,config) {
 					this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
 					this.joining = true;
 				} else {
-					this.reply(codes.scCreateGame,{clubseq: clubseq, game_type:1, game_limit:1, small_blind:5, big_blind:10, seats:6, gamename:'testbot game'},'Poker.Game');
+					this.reply(codes.scCreateGame,{clubseq: clubseq, game_type:'gtHoldem', game_limit:'glNoLimit', small_blind:5, big_blind:10, seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
 				}
 			}
 			break;
@@ -381,9 +442,9 @@ function testmenu(cb,config) {
 				return;
 			}
 			this.log('club seq is',params.club.seq);
-			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:1,
-				game_limit:1, small_blind:5, big_blind:10, seats:6, gamename:'testbot game',
-				buyin_max:2000, buyin_min:5},'Poker.Game');
+			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:'gtHoldem',
+				game_limit:'glNoLimit', small_blind:5, big_blind:10, seats:6, gamename:'testbot game',
+				buyin_max:20000, buyin_min:5},'Poker.Game');
 			break;
 		case codes.srCreateGameOk:
 			var params = pb.Parse(data,'Poker.Game');
@@ -396,11 +457,16 @@ function testmenu(cb,config) {
 		case codes.srTableSitOk:
 			var params = pb.Parse(data,'Poker.TableStatus');
 			//this.log(params);
-			for (var x=1; x<config.players; x++) {
-				var client2 = new Client(doClient2);
-				client2.name = 'client'+x;
-				client2.seat = x;
-				client2.buyin = config.buyins ? config.buyins.shift() : 10000;
+			if (!madeclients) {
+				console.log('clients',(config && config.players) ? config.players : 3);
+				for (var x=1; x<((config && config.players) ? config.players : 3); x++) {
+					var client2 = new Client(doClient2);
+					client2.name = prefix+x;
+					client2.seat = x;
+					client2.buyin = (config && config.buyins) ? config.buyins.shift() : 10000;
+					clients[x] = client2;
+				}
+				madeclients = true;
 			}
 			common.call(this,code,data);
 			break;
@@ -409,6 +475,14 @@ function testmenu(cb,config) {
 			delete params.table_mongo_id;
 			this.log(JSON.stringify(params).red);
 			if ((params.event == 'teDealing') && config && config.moves) {
+				config.rounds--;
+				if (config.rounds <= 0) {
+					for (var x=0; x<clients.length; x++) {
+						clients[x].socket.destroy();
+					}
+					cb();
+					return;
+				}
 				console.log('reseting moves');
 				for (var x=0; x<config.moves.length; x++) {
 					autoMoves[x] = config.moves[x];
@@ -450,16 +524,8 @@ function testmenu(cb,config) {
 		}
 	}
 	var client = new Client(testregisterhandle);
-	client.name = 'client0';
+	client.name = prefix+'0';
 	client.seat = 0;
-	client.buyin = config.buyins ? config.buyins.shift() : 10000;
+	client.buyin = (config && config.buyins) ? config.buyins.shift() : 10000;
+	clients[0] = client;
 }
-function autobot(cb) {
-	testmenu(cb,{moves:[],autoRandom:{call:16,fold:4,raise:12}});
-}
-function sidepot(cb) {
-	testmenu(cb,{moves:['raise 1000','raise 500','call'],players:3,buyins:[10005,1005,500]});
-}
-//tests = [ autobot ];
-//tests = [ testmenu ];
-tests = [ sidepot ];
