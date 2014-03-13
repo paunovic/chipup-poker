@@ -1,0 +1,11 @@
+extends base
+block content
+  table(border=1)
+    tr
+      th msg
+      th trace
+    each row in rows
+      tr
+        td=row.error
+        td
+          pre=row.trace

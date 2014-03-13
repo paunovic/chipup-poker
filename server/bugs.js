@@ -23,6 +23,12 @@ function setup(app,bugs,users,db) {
 			res.render('bugs',{bugs:data,start:start});
 		});
 	});
+	app.get('/serverBugs',function (req,res) {
+		var start = Date.now();
+		db.collection('serverErrors').find().toArray(function (err,data) {
+			res.render('serverErrors',{rows:data,start:start});
+		});
+	});
 	app.get('/users',function (req,res) {
 		var start = Date.now();
 		users.find({}).toArray(function (err,data) {
