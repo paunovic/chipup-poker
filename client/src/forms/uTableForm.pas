@@ -50,6 +50,7 @@ type
     btRaisePot: TcxButton;
     btRaiseMax: TcxButton;
     tiSitOutNextBB: TTimer;
+    acShowLosingCards: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -74,6 +75,8 @@ type
     procedure acRaiseMaxExecute(Sender: TObject);
     procedure cbSitOutNextBBPropertiesChange(Sender: TObject);
     procedure tiSitOutNextBBTimer(Sender: TObject);
+    procedure cbFoldToAnyBetPropertiesChange(Sender: TObject);
+    procedure acShowLosingCardsExecute(Sender: TObject);
   private
     const
       ANIID_FLOP1  = 1;
@@ -588,6 +591,11 @@ begin
   end;
 end;
 
+procedure TfrmTable.acShowLosingCardsExecute(Sender: TObject);
+begin
+  SocketClient.ShowLosingCards(FTable.Game.MongoId);
+end;
+
 procedure TfrmTable.acStandUpExecute(Sender: TObject);
 begin
   if not ConfirmStandUp then
@@ -611,6 +619,11 @@ begin
   reChat.SelText := Format(': %s', [AMessage]);
 
   reChat.ScrollContent(dirDown); reChat.ScrollContent(dirDown); // FIXME! yuck
+end;
+
+procedure TfrmTable.cbFoldToAnyBetPropertiesChange(Sender: TObject);
+begin
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.cbSitOutNextBBPropertiesChange(Sender: TObject);
@@ -656,6 +669,7 @@ begin
   acCheck.Enabled := FALSE;
   acRaise.Enabled := FALSE;
   acPlayNow.Enabled := FALSE;
+  acShowLosingCards.Enabled := FALSE;
   sitout := FALSE;
   foldtoany := FALSE;
 
@@ -713,6 +727,11 @@ begin
             tsWinning,
             tsWinning2: ;
           end;
+
+        if (FtableStatus.State in [tsWinning, tsWinning2]) and
+           (FTable.SeatIndex = seat_info.SeatIndex) and
+           (seat_info.Status in [psInHand, psAllIn]) then
+          acShowLosingCards.Enabled := TRUE;
       end;
       psFolded: begin
         sitout := TRUE;
@@ -731,17 +750,16 @@ begin
     tiActiveFrameBlink.Enabled := TRUE;
   end;
 
-  if (foldtoany) and
-     (not cbFoldToAnyBet.Visible) then
-  begin
-    event := cbFoldToAnyBet.Properties.OnChange;
-    cbFoldToAnyBet.Properties.OnChange := nil;
-    cbFoldToAnyBet.Checked := FALSE;
-    cbFoldToAnyBet.Properties.OnChange := event;
-  end;
-
   if sitout then
   begin
+    if not cbFoldToAnyBet.Visible then
+    begin
+      event := cbFoldToAnyBet.Properties.OnChange;
+      cbFoldToAnyBet.Properties.OnChange := nil;
+      cbFoldToAnyBet.Checked := FALSE;
+      cbFoldToAnyBet.Properties.OnChange := event;
+    end;
+
     if not cbSitOutNextHand.Visible then
     begin
       event := cbSitOutNextHand.Properties.OnChange;
@@ -759,7 +777,10 @@ begin
     end;
   end;
 
-  cbFoldToAnyBet.Visible := foldtoany;
+  cbFoldToAnyBet.Visible := sitout;
+  if cbFoldToAnyBet.Visible then
+    cbFoldToAnyBet.Enabled := foldtoany;
+
   cbSitOutNextHand.Visible := sitout;
   cbSitOutNextBB.Visible := sitout;
 
@@ -771,7 +792,10 @@ begin
   if acFold.Enabled then
     btAction1.Action := acFold
   else
-    btAction1.Action := nil;
+    if acShowLosingCards.Enabled then
+      btAction1.Action := acShowLosingCards
+    else
+      btAction1.Action := nil;
 
   if (acCall.Enabled) or (acCheck.Enabled) then
   begin
@@ -1334,7 +1358,8 @@ begin
     seat_lower_text_color := cColor2($FF8DC63F);
 
     // render seat cards
-    if seat_info.Status in [psInHand, psAllIn] then
+    if (FTableStatus.State <> tsIdle) and
+       (seat_info.Status in [psInHand, psAllIn]) then
     begin
       for C1 := 0 to seat_info.DealtCards - 1 do
       begin

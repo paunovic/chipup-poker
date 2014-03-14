@@ -82,7 +82,8 @@ type
     scTablePlayNow = 531,
     scTableSitOutNextHand = 532,
     scTableSitOutNextBB = 533,
-    scResendVerificationMail = 534
+    scResendVerificationMail = 534,
+    scShowLosingCards = 535
   );
 
 {$IFDEF DEBUG}
@@ -192,6 +193,7 @@ begin
     scTableSitOutNextHand: result := 'scTableSitOutNextHand';
     scTableSitOutNextBB: result := 'scTableSitOutNextBB';
     scResendVerificationMail: result := 'scResendVerificationMail';
+    scShowLosingCards: result := 'scShowLosingCards';
   end;
 end;
 {$ENDIF DEBUG}

@@ -344,7 +344,7 @@ var
 begin
   cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
-    cpt := cpt + ' (account confirmation pending)';
+    cpt := cpt + ' (account verification pending)';
   if cpt <> Caption then
     Caption := cpt;
 

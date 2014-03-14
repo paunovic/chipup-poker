@@ -91,6 +91,7 @@ type
     procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer);
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
     procedure ResendVerificationMail;
+    procedure ShowLosingCards(const AGameId: TBytes);
 
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
@@ -1005,6 +1006,19 @@ end;
 procedure TSocketClient.ResendVerificationMail;
 begin
   SendProtobuf(scResendVerificationMail, nil);
+end;
+
+procedure TSocketClient.ShowLosingCards(const AGameId: TBytes);
+var
+  protobuf: TPB_Game;
+begin
+  protobuf := TPB_Game.Create;
+  try
+    protobuf.MongoId := AGameId;
+    SendProtobuf(scShowLosingCards, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 

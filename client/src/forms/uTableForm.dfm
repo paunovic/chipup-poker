@@ -145,7 +145,7 @@ object frmTable: TfrmTable
         AutoSize = False
         Caption = 'Fold to any bet'
         ParentFont = False
-        Properties.OnChange = cbSitOutNextHandPropertiesChange
+        Properties.OnChange = cbFoldToAnyBetPropertiesChange
         Style.Font.Charset = DEFAULT_CHARSET
         Style.Font.Color = clWindowText
         Style.Font.Height = 14
@@ -412,6 +412,11 @@ object frmTable: TfrmTable
       Category = 'Game'
       Caption = 'MAX'
       OnExecute = acRaiseMaxExecute
+    end
+    object acShowLosingCards: TAction
+      Category = 'Game'
+      Caption = 'SHOW CARDS'
+      OnExecute = acShowLosingCardsExecute
     end
   end
   object tiActiveFrameBlink: TTimer

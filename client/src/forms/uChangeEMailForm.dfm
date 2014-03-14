@@ -71,7 +71,7 @@ object frmChangeEMail: TfrmChangeEMail
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.ReadOnly = True
-    TabOrder = 0
+    TabOrder = 1
     Width = 291
   end
   object lbsNewMail: TcxLabel
@@ -95,7 +95,7 @@ object frmChangeEMail: TfrmChangeEMail
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 32
     Properties.OnChange = edNewMailPropertiesChange
-    TabOrder = 1
+    TabOrder = 0
     Width = 291
   end
   object btOK: TcxButton
