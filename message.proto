@@ -279,6 +279,10 @@ message TableStatus {
 		tsWinning = 6;
 		tsWinning2 = 7;
 	}
+	message Pot {
+		required uint32 value = 1;
+		repeated uint32 members = 2;
+	}
 	
 	required bytes table_mongo_id = 1;
 	repeated SeatInfo seats = 2;
@@ -289,7 +293,6 @@ message TableStatus {
 	optional bytes flop = 7;
 	optional bytes turn = 8;
 	optional bytes river = 9;
-	repeated uint32 pots = 10;
 	required bool locked = 11;
 	optional int32 seq = 12;
 	optional uint32 minimum_bet = 13;
@@ -299,6 +302,7 @@ message TableStatus {
 	optional uint32 handid = 17;
 	optional uint64 time = 18;
 	repeated TableEvent events = 19;
+	repeated Pot pots = 20;
 }
 
 message SeatInfo {
