@@ -247,6 +247,7 @@ enum ServerCodes {
 	scTableSitOutNextHand = 532;
 	scTableSitOutNextBB = 533;
 	scResendVerificationMail = 534;
+	scShowLosingCards = 535;
 }
 
 service Server {
