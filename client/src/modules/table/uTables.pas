@@ -62,8 +62,8 @@ begin
   FSwapChainIndex := ASwapChainIndex;
   form := TfrmTable.Create(self);
   FForm := form;
-  DXCore.AcquireSwapChain(FSwapChainIndex, form.PaintPanel.Handle);
-  DXCore.Device.Resize(FSwapChainIndex, Point2px(form.PaintPanel.Width, form.PaintPanel.Height));
+  DXCore.AcquireSwapChain(FSwapChainIndex, form.Handle);
+  DXCore.Device.Resize(FSwapChainIndex, Point2px(form.ClientWidth, form.ClientHeight));
   SocketClient.JoinTable(FGame.MongoId);
 end;
 

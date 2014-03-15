@@ -26,9 +26,7 @@ uses
   uChangePasswordForm in 'forms\uChangePasswordForm.pas' {frmChangePassword},
   uTableForm in 'forms\uTableForm.pas' {frmTable},
   uCreateEditGameForm in 'forms\uCreateEditGameForm.pas' {frmCreateEditGame},
-  {$IFDEF DEBUG}
   uDebugForm in 'forms\uDebugForm.pas' {frmDebug},
-  {$ENDIF}
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
@@ -107,7 +105,8 @@ uses
   uPB_TableBoolFlag in 'modules\protobuf\objects\uPB_TableBoolFlag.pas',
   uIModalForm in 'forms\uIModalForm.pas',
   uDXTimer in 'modules\directx_draw\uDXTimer.pas',
-  uDXAnimation in 'modules\directx_draw\uDXAnimation.pas';
+  uDXAnimation in 'modules\directx_draw\uDXAnimation.pas',
+  uPB_Pot in 'modules\protobuf\objects\uPB_Pot.pas';
 
 procedure FocusPokerApp;
 var
@@ -134,7 +133,6 @@ begin
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);
   Application.CreateForm(TfrmChipUpMain, frmChipUpMain);
-
   Application.Run;
 
   TInstanceController.UnregisterInstance;

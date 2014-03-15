@@ -238,6 +238,7 @@
 			<DCCReference Include="forms\uIModalForm.pas"/>
 			<DCCReference Include="modules\directx_draw\uDXTimer.pas"/>
 			<DCCReference Include="modules\directx_draw\uDXAnimation.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_Pot.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

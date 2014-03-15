@@ -43,6 +43,8 @@ type
       FTimebankImage: TAsphyreImage;
       FCardFrontBackgroundImage: TAsphyreImage;
       FCardArtworksImages: array of TAsphyreImage;
+      FRaiseSliderBackgroundImage: TAsphyreImage;
+      FRaiseSliderButtonImage: TAsphyreImage;
 
       FBarmenoFonts: TBarmenoFonts;
       FArialFont_10px: TAsphyreFont;
@@ -55,6 +57,8 @@ type
       FChipAspectRatio: Single;
       FTimebarAspectRatio: Single;
       FCardArtworkAspectRatio: Single;
+      FRaiseSliderAspectRatio: Single;
+      FRaiseSliderButtonAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -72,6 +76,14 @@ type
         (-pi/3, -pi/7.5, pi/16, pi/3.5, pi/2, pi-pi/3.5, pi-pi/16, pi+pi/7.5, pi*4/3, 0), // 9
         (-pi/3, -pi/6.9, pi/64, pi/5.1, pi/2.5, pi-pi/2.5, pi-pi/5.1, pi-pi/64, pi+pi/6.9, pi*4/3) // 10
       );
+
+      RAISE_BOX_WIDTH_PROPORTION  = 0.24774774774774774774774774774775;
+      RAISE_BOX_HEIGHT_PROPORTION = 0.6;
+      RAISE_BOX_X_OFFSET          = 16;
+      RAISE_SLIDER_X              = 144;
+      RAISE_SLIDER_Y              = 11;
+      RAISE_SLIDER_WIDTH          = 284;
+      RAISE_SLIDER_HEIGHT         = 13;
 
     class procedure Initialize(const ADXCanvas: TAsphyreCanvas);
     class procedure Deinitialize;
@@ -106,6 +118,8 @@ type
     property TimebarImage: TAsphyreImage read FTimebarImage;
     property TimebankImage: TAsphyreImage read FTimebankImage;
     property CardFrontBackgroundImage: TAsphyreImage read FCardFrontBackgroundImage;
+    property RaiseSliderBackgroundImage: TAsphyreImage read FRaiseSliderBackgroundImage;
+    property RaiseSliderButtonImage: TAsphyreImage read FRaiseSliderButtonImage;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property ArialFont_10px: TAsphyreFont read FArialFont_10px;
@@ -118,6 +132,8 @@ type
     property ChipAspectRatio: Single read FChipAspectRatio;
     property TimebarAspectRatio: Single read FTimebarAspectRatio;
     property CardArtworkAspectRatio: Single read FCardArtworkAspectRatio;
+    property RaiseSliderAspectRatio: Single read FRaiseSliderAspectRatio;
+    property RaiseSliderButtonAspectRatio: Single read FRaiseSliderButtonAspectRatio;
   end;
 
 var
@@ -126,6 +142,7 @@ var
 implementation
 
 uses
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   Winapi.Windows, System.Classes, System.SysUtils;
 
 
@@ -178,6 +195,8 @@ begin
   AddDXImage('Timebar.image', FTimebarImage, FTimebarAspectRatio);
   AddDXImage('Timebank.image', FTimebankImage);
   AddDXImage('CardFrontBackground.image', FCardFrontBackgroundImage);
+  AddDXImage('RaiseSliderBackground.image', FRaiseSliderBackgroundImage, FRaiseSliderAspectRatio);
+  AddDXImage('RaiseSliderButton.image', FRaiseSliderButtonImage, FRaiseSliderButtonAspectRatio);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
@@ -224,8 +243,15 @@ var
   id: Integer;
 begin
   id := FDXImages.AddFromArchive(AName, FDXMediaFile);
-  AReceiver := FDXImages[id];
-  AAspectRatio := AReceiver.Texture[0].Width / AReceiver.Texture[0].Height;
+  if id <> -1 then
+  begin
+    AReceiver := FDXImages[id];
+    AAspectRatio := AReceiver.Texture[0].Width / AReceiver.Texture[0].Height;
+  end
+  else
+  begin
+    {$IFDEF DEBUG} DebugLn(Format('Failed to load DX image resource: %s', [AName]), ditException); {$ENDIF}
+  end;
 end;
 
 procedure TTableResources.AddDXImage(const AName: String; var AReceiver: TAsphyreImage);

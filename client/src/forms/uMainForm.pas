@@ -510,10 +510,10 @@ begin
 end;
 
 procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: TObject);
-var
-  chatEvent: TPB_ChatEvent;
+//var
+//  chatEvent: TPB_ChatEvent;
 begin
-  chatEvent := AObject as TPB_ChatEvent;
+//  chatEvent := AObject as TPB_ChatEvent;
 end;
 
 procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject: TObject);

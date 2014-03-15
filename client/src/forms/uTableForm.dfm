@@ -3,12 +3,12 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 524
+  ClientHeight = 523
   ClientWidth = 792
-  Color = clWindow
-  Constraints.MaxHeight = 910
+  Color = clBtnFace
+  Constraints.MaxHeight = 907
   Constraints.MaxWidth = 1320
-  Constraints.MinWidth = 650
+  Constraints.MinWidth = 600
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,342 +16,353 @@ object frmTable: TfrmTable
   Font.Name = 'Arial'
   Font.Style = []
   OldCreateOrder = False
+  OnClick = FormClick
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnPaint = FormPaint
   OnResize = FormResize
+  DesignSize = (
+    792
+    523)
   PixelsPerInch = 96
   TextHeight = 14
-  object paBottom: TPanel
-    Left = 0
-    Top = 428
-    Width = 792
-    Height = 96
-    Align = alBottom
-    BevelOuter = bvNone
-    DoubleBuffered = True
-    ParentDoubleBuffered = False
+  object edChat: TcxTextEdit
+    Left = 1
+    Top = 427
+    Margins.Left = 1
+    Margins.Top = 0
+    Margins.Right = 0
+    Margins.Bottom = 0
+    Anchors = [akLeft, akBottom]
+    AutoSize = False
+    Style.BorderStyle = ebsNone
+    Style.Edges = []
+    Style.TransparentBorder = False
     TabOrder = 0
-    object paChat: TPanel
-      Left = 0
-      Top = 0
-      Width = 250
-      Height = 96
-      Align = alLeft
-      BevelOuter = bvNone
-      Color = clBlack
-      Padding.Left = 3
-      Padding.Top = 4
-      Padding.Right = 3
-      Padding.Bottom = 4
-      ParentBackground = False
-      TabOrder = 0
-      object edChat: TcxTextEdit
-        Left = 3
-        Top = 4
-        Margins.Left = 1
-        Margins.Top = 0
-        Margins.Right = 0
-        Margins.Bottom = 0
-        Align = alTop
-        AutoSize = False
-        Style.BorderStyle = ebsNone
-        Style.Edges = []
-        Style.TransparentBorder = False
-        TabOrder = 0
-        OnKeyPress = edChatKeyPress
-        Height = 16
-        Width = 244
-      end
-      object reChat: TcxRichEdit
-        Left = 3
-        Top = 20
-        Align = alClient
-        Properties.AutoURLDetect = True
-        Properties.ReadOnly = True
-        Properties.ScrollBars = ssVertical
-        Lines.Strings = (
-          'reChat')
-        Style.BorderStyle = ebsNone
-        Style.Edges = []
-        Style.Shadow = False
-        Style.TransparentBorder = True
-        StyleFocused.BorderStyle = ebsNone
-        StyleHot.BorderStyle = ebsNone
-        TabOrder = 1
-        Height = 72
-        Width = 244
-      end
-    end
-    object paButtons: TPanel
-      Left = 250
-      Top = 0
-      Width = 542
-      Height = 96
-      Align = alClient
-      BevelOuter = bvNone
-      Color = clBlack
-      Padding.Top = 1
-      Padding.Right = 1
-      ParentBackground = False
-      TabOrder = 1
-      DesignSize = (
-        542
-        96)
-      object cbSitOutNextBB: TcxCheckBox
-        Left = -2
-        Top = 40
-        AutoSize = False
-        Caption = 'Sit out next BB'
-        ParentFont = False
-        Properties.OnChange = cbSitOutNextBBPropertiesChange
-        Style.Font.Charset = DEFAULT_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = 14
-        Style.Font.Name = 'Arial'
-        Style.Font.Style = []
-        Style.HotTrack = False
-        Style.IsFontAssigned = True
-        TabOrder = 9
-        Transparent = True
-        Visible = False
-        Height = 19
-        Width = 128
-      end
-      object cbSitOutNextHand: TcxCheckBox
-        Left = -2
-        Top = 22
-        AutoSize = False
-        Caption = 'Sit out next hand'
-        ParentFont = False
-        Properties.OnChange = cbSitOutNextHandPropertiesChange
-        Style.Font.Charset = DEFAULT_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = 14
-        Style.Font.Name = 'Arial'
-        Style.Font.Style = []
-        Style.HotTrack = False
-        Style.IsFontAssigned = True
-        TabOrder = 8
-        Transparent = True
-        Visible = False
-        Height = 19
-        Width = 128
-      end
-      object cbFoldToAnyBet: TcxCheckBox
-        Left = -2
-        Top = 4
-        AutoSize = False
-        Caption = 'Fold to any bet'
-        ParentFont = False
-        Properties.OnChange = cbFoldToAnyBetPropertiesChange
-        Style.Font.Charset = DEFAULT_CHARSET
-        Style.Font.Color = clWindowText
-        Style.Font.Height = 14
-        Style.Font.Name = 'Arial'
-        Style.Font.Style = []
-        Style.HotTrack = False
-        Style.IsFontAssigned = True
-        TabOrder = 7
-        Transparent = True
-        Visible = False
-        Height = 19
-        Width = 128
-      end
-      object btAction2: TcxButton
-        Left = 313
-        Top = 55
-        Width = 108
-        Height = 37
-        Anchors = [akRight, akBottom]
-        Enabled = False
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 0
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-        OnClick = acCallExecute
-      end
-      object btAction1: TcxButton
-        Left = 196
-        Top = 55
-        Width = 108
-        Height = 37
-        Anchors = [akRight, akBottom]
-        Enabled = False
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 1
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-        OnClick = acCheckExecute
-      end
-      object btAction3: TcxButton
-        Left = 430
-        Top = 55
-        Width = 108
-        Height = 37
-        Anchors = [akRight, akBottom]
-        Enabled = False
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 2
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = []
-        ParentFont = False
-        OnClick = acRaiseExecute
-      end
-      object btStandUp: TcxButton
-        Left = 3
-        Top = 69
-        Width = 79
-        Height = 23
-        Action = acStandUp
-        Anchors = [akLeft, akBottom]
-        Colors.DefaultText = 1933784
-        Colors.NormalText = 1933784
-        Colors.HotText = 1933784
-        Colors.PressedText = 1933784
-        Colors.DisabledText = 1933784
-        LookAndFeel.SkinName = 'ChipUpRedButton'
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 3
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = 4227327
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object seRaiseAmount: TcxSpinEdit
-        Left = 260
-        Top = 27
-        Anchors = [akTop, akRight]
-        Properties.ImmediatePost = True
-        Properties.SpinButtons.Visible = False
-        Properties.ValueType = vtFloat
-        Properties.OnChange = seRaiseAmountPropertiesChange
-        TabOrder = 4
-        Visible = False
-        Width = 46
-      end
-      object tbRaise: TcxTrackBar
-        Left = 300
-        Top = 28
-        Anchors = [akTop, akRight]
-        Properties.AutoSize = False
-        Properties.ShowTicks = False
-        Properties.OnChange = tbRaisePropertiesChange
-        Style.Edges = []
-        Style.TransparentBorder = True
-        TabOrder = 5
-        Transparent = True
-        Visible = False
-        Height = 25
-        Width = 245
-      end
-      object btPlayNow: TcxButton
-        Left = 87
-        Top = 13
-        Width = 91
-        Height = 32
-        Action = acPlayNow
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 6
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object btRaiseMax: TcxButton
-        Left = 486
-        Top = 5
-        Width = 52
-        Height = 23
-        Action = acRaiseMax
-        Anchors = [akTop, akRight]
-        LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 13
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object btRaisePot: TcxButton
-        Left = 428
-        Top = 5
-        Width = 52
-        Height = 23
-        Action = acRaisePot
-        Anchors = [akTop, akRight]
-        LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 12
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object btRaise3BB: TcxButton
-        Left = 370
-        Top = 5
-        Width = 52
-        Height = 23
-        Action = acRaise3BB
-        Anchors = [akTop, akRight]
-        LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 11
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object btRaiseMin: TcxButton
-        Left = 312
-        Top = 5
-        Width = 52
-        Height = 23
-        Action = acRaiseMin
-        Anchors = [akTop, akRight]
-        LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-        SpeedButtonOptions.CanBeFocused = False
-        TabOrder = 10
-        Visible = False
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Arial'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-    end
+    OnKeyPress = edChatKeyPress
+    ExplicitTop = 429
+    Height = 16
+    Width = 244
+  end
+  object reChat: TcxRichEdit
+    Left = 1
+    Top = 443
+    Anchors = [akLeft, akBottom]
+    Properties.AutoURLDetect = True
+    Properties.ReadOnly = True
+    Properties.ScrollBars = ssVertical
+    Lines.Strings = (
+      'reChat')
+    Style.BorderStyle = ebsNone
+    Style.Edges = []
+    Style.Shadow = False
+    Style.TransparentBorder = True
+    StyleFocused.BorderStyle = ebsNone
+    StyleHot.BorderStyle = ebsNone
+    TabOrder = 1
+    ExplicitTop = 445
+    Height = 72
+    Width = 244
+  end
+  object cbFoldToAnyBet: TcxCheckBox
+    Left = 251
+    Top = 434
+    Anchors = [akLeft, akBottom]
+    AutoSize = False
+    Caption = 'Fold to any bet'
+    ParentFont = False
+    Properties.OnChange = cbFoldToAnyBetPropertiesChange
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 14
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    TabOrder = 2
+    Transparent = True
+    Visible = False
+    ExplicitTop = 436
+    Height = 18
+    Width = 113
+  end
+  object cbSitOutNextHand: TcxCheckBox
+    Left = 251
+    Top = 452
+    Anchors = [akLeft, akBottom]
+    AutoSize = False
+    Caption = 'Sit out next hand'
+    ParentFont = False
+    Properties.OnChange = cbSitOutNextHandPropertiesChange
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 14
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    TabOrder = 3
+    Transparent = True
+    Visible = False
+    ExplicitTop = 454
+    Height = 12
+    Width = 113
+  end
+  object btStandUp: TcxButton
+    Left = 251
+    Top = 492
+    Width = 79
+    Height = 23
+    Action = acStandUp
+    Anchors = [akLeft, akBottom]
+    Colors.DefaultText = 1933784
+    Colors.NormalText = 1933784
+    Colors.HotText = 1933784
+    Colors.PressedText = 1933784
+    Colors.DisabledText = 1933784
+    LookAndFeel.SkinName = 'ChipUpRedButton'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 4
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 4227327
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 494
+  end
+  object cbSitOutNextBB: TcxCheckBox
+    Left = 251
+    Top = 467
+    Anchors = [akLeft, akBottom]
+    AutoSize = False
+    Caption = 'Sit out next BB'
+    ParentFont = False
+    Properties.OnChange = cbSitOutNextBBPropertiesChange
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = 14
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
+    Style.HotTrack = False
+    Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    TabOrder = 5
+    Transparent = True
+    Visible = False
+    ExplicitTop = 469
+    Height = 12
+    Width = 113
+  end
+  object btPlayNow: TcxButton
+    Left = 332
+    Top = 148
+    Width = 110
+    Height = 36
+    Action = acPlayNow
+    Anchors = [akLeft, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 6
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 150
+  end
+  object seRaiseAmount: TcxSpinEdit
+    Left = 474
+    Top = 286
+    Anchors = []
+    AutoSize = False
+    ParentFont = False
+    Properties.Alignment.Horz = taCenter
+    Properties.Alignment.Vert = taVCenter
+    Properties.ImmediatePost = True
+    Properties.SpinButtons.Visible = False
+    Properties.UseDisplayFormatWhenEditing = True
+    Properties.ValueType = vtFloat
+    Properties.OnChange = seRaiseAmountPropertiesChange
+    Style.BorderStyle = ebsNone
+    Style.Color = clBlack
+    Style.Edges = []
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = [fsBold]
+    Style.Font.Quality = fqAntialiased
+    Style.TextColor = clRed
+    Style.IsFontAssigned = True
+    TabOrder = 7
+    Visible = False
+    Height = 20
+    Width = 46
+  end
+  object btAction1: TcxButton
+    Left = 412
+    Top = 199
+    Width = 108
+    Height = 37
+    Anchors = []
+    Enabled = False
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 8
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = acCheckExecute
+    ExplicitTop = 200
+  end
+  object btAction2: TcxButton
+    Left = 529
+    Top = 199
+    Width = 108
+    Height = 37
+    Anchors = []
+    Enabled = False
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 9
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = acCallExecute
+    ExplicitTop = 200
+  end
+  object tbRaise: TcxTrackBar
+    Left = 516
+    Top = 170
+    Anchors = []
+    Properties.AutoSize = False
+    Properties.ShowTicks = False
+    Properties.OnChange = tbRaisePropertiesChange
+    Style.Edges = []
+    Style.TransparentBorder = True
+    TabOrder = 10
+    Transparent = True
+    Visible = False
+    ExplicitTop = 171
+    Height = 25
+    Width = 245
+  end
+  object btAction3: TcxButton
+    Left = 646
+    Top = 199
+    Width = 108
+    Height = 37
+    Anchors = []
+    Enabled = False
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 11
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+    OnClick = acRaiseExecute
+    ExplicitTop = 200
+  end
+  object btRaiseMin: TcxButton
+    Left = 528
+    Top = 148
+    Width = 52
+    Height = 23
+    Action = acRaiseMin
+    Anchors = []
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 12
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 149
+  end
+  object btRaise3BB: TcxButton
+    Left = 586
+    Top = 148
+    Width = 52
+    Height = 23
+    Action = acRaise3BB
+    Anchors = []
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 13
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 149
+  end
+  object btRaisePot: TcxButton
+    Left = 644
+    Top = 148
+    Width = 52
+    Height = 23
+    Action = acRaisePot
+    Anchors = []
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 14
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 149
+  end
+  object btRaiseMax: TcxButton
+    Left = 702
+    Top = 148
+    Width = 52
+    Height = 23
+    Action = acRaiseMax
+    Anchors = []
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 15
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 149
   end
   object ActionManager: TActionManager
     Left = 56

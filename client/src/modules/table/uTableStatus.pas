@@ -4,7 +4,7 @@ interface
 
 uses
   System.SyncObjs,
-  uPB_TableStatus, uPB_SeatInfo, uPB_TableEvent, System.SysUtils, System.Generics.Collections, System.Generics.Defaults, uCards;
+  uPB_TableStatus, uPB_SeatInfo, uPB_TableEvent, System.SysUtils, System.Generics.Collections, System.Generics.Defaults, uCards, uPB_Pot;
 
 type
   TSeatInfo = class
@@ -44,16 +44,31 @@ type
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
   private
-    FLock: TCriticalSection;
   public
-    constructor Create;
-    destructor Destroy; override;
-
     procedure ClearCaptions;
 
-    procedure Lock;
-    procedure Unlock;
     procedure Sort; reintroduce;
+  end;
+
+  TPotInfo = class
+  private
+    FValue: UINT32;
+    FMembers: TArray<UINT32>;
+    FAnimating: Boolean;
+  public
+    procedure Assign(const APotProtobuf: TPB_Pot); overload;
+    procedure Assign(const APot: TPotInfo); overload;
+
+    property Value: UINT32 read FValue;
+    property Members: TArray<UINT32> read FMembers;
+    property Animating: Boolean read FAnimating write FAnimating;
+  end;
+
+  TPotInfos = class(TObjectList<TPotInfo>)
+  private
+  public
+    procedure Assign(const APots: TObjectList<TPB_Pot>); overload;
+    procedure Assign(const APots: TPotInfos); overload;
   end;
 
   TTableStatus = class
@@ -62,6 +77,7 @@ type
     FDealer        : Integer;
     FCurrentSeat   : Integer;
     FSeatInfos     : TSeatInfos;
+    FPreviousBets  : TArray<UINT32>;
     FBets          : TArray<UINT32>;
     FFlopCards     : TCards;
     FTurnCard      : TCard;
@@ -72,7 +88,8 @@ type
     FMinimumBet    : Integer;
     FHandId        : UINT32;
     FMaximumBet    : UINT32;
-    FPots          : TArray<UINT32>;
+    FPreviousPots  : TPotInfos;
+    FPots          : TPotInfos;
     FTime          : UINT64;
 
   public
@@ -98,7 +115,9 @@ type
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
-    property Pots: TArray<UINT32> read FPots;
+    property Pots: TPotInfos read FPots;
+    property PreviousPots: TPotInfos read FPreviousPots;
+    property PreviousBets: TArray<UINT32> read FPreviousBets;
     property MaximumBet: UINT32 read FMaximumBet;
     property Time: UINT64 read FTime;
   end;
@@ -170,6 +189,8 @@ begin
   FCurrentSeat := -1;
   FSeatInfos := TSeatInfos.Create;
 
+  FPreviousPots := TPotInfos.Create;
+  FPots := TPotInfos.Create;
   FFlopCards := TCards.Create;
   FTurnCard := TCard.Create;
   FRiverCard := TCard.Create;
@@ -182,6 +203,8 @@ begin
   FFlopCards.Free;
   FTurnCard.Free;
   FRiverCard.Free;
+  FPots.Free;
+  FPreviousPots.Free;
 
   inherited;
 end;
@@ -236,10 +259,12 @@ begin
   FMinimumBet := ATableStatusProtobuf.MinimumBet;
   FHandId := ATableStatusProtobuf.Handid;
   FTime := ATableStatusProtobuf.Time;
+  FPreviousBets := FBets;
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
   FMaximumBet := ATableStatusProtobuf.MaximumLimit;
-  FPots := ATableStatusProtobuf.Pots;
+  FPreviousPots.Assign(FPots);
+  FPots.Assign(ATableStatusProtobuf.Pots);
 
   if State <> tsWinning then
   begin
@@ -251,45 +276,40 @@ begin
   if Assigned(ATableStatusProtobuf.Seats) then
   begin
     C1 := 0;
-    FSeatInfos.Lock;
-    try
-      while C1 < FSeatInfos.Count do
-      begin
-        delete := TRUE;
-        for C2 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
-          if ATableStatusProtobuf.Seats[C2].Seat = FSeatInfos[C1].SeatIndex then
-          begin
-            delete := FALSE;
-            Break;
-          end;
-
-        if delete then
-          FSeatInfos.Delete(C1)
-        else
-          Inc(C1);
-      end;
-
-      for C1 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
-      begin
-        seat := nil;
-        for C2 := 0 to FSeatInfos.Count - 1 do
-          if FSeatInfos[C2].SeatIndex = ATableStatusProtobuf.Seats[C1].Seat then
-          begin
-            seat := FSeatInfos[C2];
-            Break;
-          end;
-        if not Assigned(seat) then
+    while C1 < FSeatInfos.Count do
+    begin
+      delete := TRUE;
+      for C2 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
+        if ATableStatusProtobuf.Seats[C2].Seat = FSeatInfos[C1].SeatIndex then
         begin
-          seat := TSeatInfo.Create;
-          FSeatInfos.Add(seat);
+          delete := FALSE;
+          Break;
         end;
-        seat.Assign(ATableStatusProtobuf.Seats[C1]);
-      end;
 
-      FSeatInfos.Sort;
-    finally
-      FSeatInfos.Unlock;
+      if delete then
+        FSeatInfos.Delete(C1)
+      else
+        Inc(C1);
     end;
+
+    for C1 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
+    begin
+      seat := nil;
+      for C2 := 0 to FSeatInfos.Count - 1 do
+        if FSeatInfos[C2].SeatIndex = ATableStatusProtobuf.Seats[C1].Seat then
+        begin
+          seat := FSeatInfos[C2];
+          Break;
+        end;
+      if not Assigned(seat) then
+      begin
+        seat := TSeatInfo.Create;
+        FSeatInfos.Add(seat);
+      end;
+      seat.Assign(ATableStatusProtobuf.Seats[C1]);
+    end;
+
+    FSeatInfos.Sort;
   end
   else
     FSeatInfos.Clear;
@@ -347,26 +367,51 @@ begin
     ToArray[C1].Caption := '';
 end;
 
-constructor TSeatInfos.Create;
+{ TPotInfo }
+
+procedure TPotInfo.Assign(const APotProtobuf: TPB_Pot);
 begin
-  inherited Create;
-  FLock := TCriticalSection.Create;
+  FValue := APotProtobuf.Value;
+  FMembers := APotProtobuf.Members;
 end;
 
-destructor TSeatInfos.Destroy;
+
+procedure TPotInfo.Assign(const APot: TPotInfo);
 begin
-  FLock.Free;
-  inherited;
+  FValue := APot.Value;
+  FMembers := APot.Members;
 end;
 
-procedure TSeatInfos.Lock;
+{ TPotInfos }
+
+procedure TPotInfos.Assign(const APots: TObjectList<TPB_Pot>);
+var
+  pot: TPotInfo;
+  C1 : Integer;
 begin
-  FLock.Acquire;
+  Clear;
+
+  for C1 := 0 to APots.Count - 1 do
+  begin
+    pot := TPotInfo.Create;
+    pot.Assign(APots[C1]);
+    Add(pot);
+  end;
 end;
 
-procedure TSeatInfos.Unlock;
+procedure TPotInfos.Assign(const APots: TPotInfos);
+var
+  pot: TPotInfo;
+  C1 : Integer;
 begin
-  FLock.Release;
+  Clear;
+
+  for C1 := 0 to APots.Count - 1 do
+  begin
+    pot := TPotInfo.Create;
+    pot.Assign(APots[C1]);
+    Add(pot);
+  end;
 end;
 
 end.

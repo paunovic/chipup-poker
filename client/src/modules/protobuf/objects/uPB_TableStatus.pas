@@ -6,7 +6,7 @@ unit uPB_TableStatus;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo,uPB_TableEvent;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, uProtobufBaseObject, uProtobufReader,uPB_SeatInfo,uPB_TableEvent,uPB_Pot;
 
 type
   TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6,tsWinning2 = 7);
@@ -22,7 +22,6 @@ type
       FN_FLOP = 7;
       FN_TURN = 8;
       FN_RIVER = 9;
-      FN_POTS = 10;
       FN_LOCKED = 11;
       FN_SEQ = 12;
       FN_MINIMUM_BET = 13;
@@ -32,6 +31,7 @@ type
       FN_HANDID = 17;
       FN_TIME = 18;
       FN_EVENTS = 19;
+      FN_POTS = 20;
 
     var
       FTableMongoId: TBytes;
@@ -43,7 +43,6 @@ type
       FFlop: TBytes;
       FTurn: TBytes;
       FRiver: TBytes;
-      FPots: TArray<UINT32>;
       FLocked: Boolean;
       FSeq: Integer;
       FMinimumBet: UINT32;
@@ -53,6 +52,7 @@ type
       FHandid: UINT32;
       FTime: UInt64;
       FEvents: TObjectList<TPB_TableEvent>;
+      FPots: TObjectList<TPB_Pot>;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -62,7 +62,6 @@ type
     procedure SetFlop(const AValue: TBytes);
     procedure SetTurn(const AValue: TBytes);
     procedure SetRiver(const AValue: TBytes);
-    procedure SetPots(const AValue: TArray<UINT32>);
     procedure SetLocked(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
     procedure SetMinimumBet(const AValue: UINT32);
@@ -84,7 +83,6 @@ type
     property Flop: TBytes read FFlop write SetFlop;
     property Turn: TBytes read FTurn write SetTurn;
     property River: TBytes read FRiver write SetRiver;
-    property Pots: TArray<UINT32> read FPots write SetPots;
     property Locked: Boolean read FLocked write SetLocked;
     property Seq: Integer read FSeq write SetSeq;
     property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
@@ -94,6 +92,7 @@ type
     property Handid: UINT32 read FHandid write SetHandid;
     property Time: UInt64 read FTime write SetTime;
     property Events: TObjectList<TPB_TableEvent> read FEvents write FEvents;
+    property Pots: TObjectList<TPB_Pot> read FPots write FPots;
   end;
 
 implementation
@@ -108,6 +107,8 @@ begin
     FSeats.Free;
   if Assigned(FEvents) then
     FEvents.Free;
+  if Assigned(FPots) then
+    FPots.Free;
   inherited;
 end;
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -119,6 +120,9 @@ begin
 
   if not Assigned(FEvents) then
     FEvents := TObjectList<TPB_TableEvent>.Create;
+
+  if not Assigned(FPots) then
+    FPots := TObjectList<TPB_Pot>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -161,11 +165,6 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FRiver);
       end;
-      FN_POTS: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FPots, Length(FPots) + 1);
-        FPots[Length(FPots)-1] := AProtobufReader.readUInt32;
-      end;
       FN_LOCKED: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLocked := AProtobufReader.readBoolean;
@@ -201,6 +200,10 @@ begin
       FN_EVENTS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEvents.Add(TPB_TableEvent.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
+      FN_POTS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -256,15 +259,6 @@ procedure TPB_TableStatus.SetRiver(const AValue: TBytes);
 begin
   FRiver := AValue;
   ProtobufOutput.writeBytes(FN_RIVER, AValue);
-end;
-
-procedure TPB_TableStatus.SetPots(const AValue: TArray<UINT32>);
-var
-  C1: Integer;
-begin
-  FPots := AValue;
-  for C1 := 0 to Length(FPots) - 1 do
-    ProtobufOutput.writeUInt32(FN_POTS, AValue[C1]);
 end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
