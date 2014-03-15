@@ -269,6 +269,11 @@ message TableSit {
 	required uint32 chips = 3;
 }
 
+message Pot {
+	required uint32 value = 1;
+	repeated uint32 members = 2;
+}
+
 message TableStatus {
 	enum TableState {
 		tsIdle = 1;
@@ -278,10 +283,6 @@ message TableStatus {
 		tsRiver = 5;
 		tsWinning = 6;
 		tsWinning2 = 7;
-	}
-	message Pot {
-		required uint32 value = 1;
-		repeated uint32 members = 2;
 	}
 	
 	required bytes table_mongo_id = 1;
@@ -405,6 +406,7 @@ message TableEvent {
 	optional int32 seat = 2;
 	repeated PotInfo pots = 4;
 	repeated uint32 bets = 5;
+	repeated Pot oldpots = 6;
 }
 
 message PutChips {
