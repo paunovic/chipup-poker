@@ -405,6 +405,7 @@ message TableEvent {
 	required TableEventType event = 1;
 	optional int32 seat = 2;
 	repeated PotInfo pots = 4;
+	repeated uint32 bets = 5;
 }
 
 message PutChips {
