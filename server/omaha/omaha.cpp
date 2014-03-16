@@ -101,16 +101,13 @@ Handle<Value> rankHands(const Arguments &args) {
 	} else {
 		enumResultPrint(&result, pockets, board);
 	}
-	Local<Array> nwinhi = Array::New();
-	int winners = 0;
+	Local<Array> winners = Array::New();
 	for (unsigned int j=0; j<hands->Length(); j++) {
-		nwinhi->Set(j,Number::New(result.nwinhi[j]));
-		winners += result.nwinhi[j];
-		assert(!result.ntiehi[j]);
+		int x = result.nwinhi[j] + result.ntiehi[j];
+		winners->Set(j,Number::New(x));
 		assert(!result.nwinlo[j]);
 	}
-	assert(winners == 1);
-	root->Set(String::NewSymbol("nwinhi"),nwinhi);
+	root->Set(String::NewSymbol("winners"),winners);
 	return scope.Close(root);
 }
 void init(Handle<Object> exports) {
