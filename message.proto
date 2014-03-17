@@ -278,11 +278,14 @@ message TableStatus {
 	enum TableState {
 		tsIdle = 1;
 		tsPreFlop = 2;
-		tsFlop = 3;
-		tsTurn = 4;
-		tsRiver = 5;
-		tsWinning = 6;
-		tsWinning2 = 7;
+		tsFlopping = 3;
+		tsFlop = 4;
+		tsTurning = 5;
+		tsTurn = 6;
+		tsRiverTime = 7;
+		tsRiver = 8;
+		tsWinning = 9;
+		tsWinning2 = 10;
 	}
 	
 	required bytes table_mongo_id = 1;
