@@ -319,27 +319,27 @@ begin
       1: if Assigned(FActionButton1Action) then
       begin
         FMouseDownObject := mdoActionButton1;
-        FActionButton1Image := TableResources.ActionButtonPressed;
-        FActionButton2Image := TableResources.ActionButtonNormal;
-        FActionButton3Image := TableResources.ActionButtonNormal;
+        FActionButton1Image := TableResources.ActionButtonPressedImage;
+        FActionButton2Image := TableResources.ActionButtonNormalImage;
+        FActionButton3Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
       end;
 
       2: if Assigned(FActionButton2Action) then
       begin
         FMouseDownObject := mdoActionButton2;
-        FActionButton1Image := TableResources.ActionButtonNormal;
-        FActionButton2Image := TableResources.ActionButtonPressed;
-        FActionButton3Image := TableResources.ActionButtonNormal;
+        FActionButton1Image := TableResources.ActionButtonNormalImage;
+        FActionButton2Image := TableResources.ActionButtonPressedImage;
+        FActionButton3Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
       end;
 
       3: if Assigned(FActionButton3Action) then
       begin
         FMouseDownObject := mdoActionButton3;
-        FActionButton1Image := TableResources.ActionButtonNormal;
-        FActionButton2Image := TableResources.ActionButtonNormal;
-        FActionButton3Image := TableResources.ActionButtonPressed;
+        FActionButton1Image := TableResources.ActionButtonNormalImage;
+        FActionButton2Image := TableResources.ActionButtonNormalImage;
+        FActionButton3Image := TableResources.ActionButtonPressedImage;
         renderit := TRUE;
       end;
     end;
@@ -356,33 +356,33 @@ begin
   case FMouseDownObject of
     mdoNone: case IsPointInActionButtons(X, Y) of
       1: begin
-        FActionButton1Image := TableResources.ActionButtonHot;
-        FActionButton2Image := TableResources.ActionButtonNormal;
-        FActionButton3Image := TableResources.ActionButtonNormal;
+        FActionButton1Image := TableResources.ActionButtonHotImage;
+        FActionButton2Image := TableResources.ActionButtonNormalImage;
+        FActionButton3Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
       end;
 
       2: begin
-        FActionButton1Image := TableResources.ActionButtonNormal;
-        FActionButton2Image := TableResources.ActionButtonHot;
-        FActionButton3Image := TableResources.ActionButtonNormal;
+        FActionButton1Image := TableResources.ActionButtonNormalImage;
+        FActionButton2Image := TableResources.ActionButtonHotImage;
+        FActionButton3Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
       end;
 
       3: begin
-        FActionButton1Image := TableResources.ActionButtonNormal;
-        FActionButton2Image := TableResources.ActionButtonNormal;
-        FActionButton3Image := TableResources.ActionButtonHot;
+        FActionButton1Image := TableResources.ActionButtonNormalImage;
+        FActionButton2Image := TableResources.ActionButtonNormalImage;
+        FActionButton3Image := TableResources.ActionButtonHotImage;
         renderit := TRUE;
       end;
     else
-      if (FActionButton1Image <> TableResources.ActionButtonNormal) or
-         (FActionButton2Image <> TableResources.ActionButtonNormal) or
-         (FActionButton3Image <> TableResources.ActionButtonNormal) then
+      if (FActionButton1Image <> TableResources.ActionButtonNormalImage) or
+         (FActionButton2Image <> TableResources.ActionButtonNormalImage) or
+         (FActionButton3Image <> TableResources.ActionButtonNormalImage) then
       begin
-        FActionButton1Image := TableResources.ActionButtonNormal;
-        FActionButton2Image := TableResources.ActionButtonNormal;
-        FActionButton3Image := TableResources.ActionButtonNormal;
+        FActionButton1Image := TableResources.ActionButtonNormalImage;
+        FActionButton2Image := TableResources.ActionButtonNormalImage;
+        FActionButton3Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
       end;
     end;
@@ -417,19 +417,19 @@ begin
   case FMouseDownObject of
     mdoActionButton1: if actbt = 1 then
     begin
-      FActionButton1Image := TableResources.ActionButtonNormal;
+      FActionButton1Image := TableResources.ActionButtonNormalImage;
       if Assigned(FActionButton1Action) then
         FActionButton1Action.Execute;
     end;
     mdoActionButton2: if actbt = 2 then
     begin
-      FActionButton2Image := TableResources.ActionButtonNormal;
+      FActionButton2Image := TableResources.ActionButtonNormalImage;
       if Assigned(FActionButton2Action) then
         FActionButton2Action.Execute;
     end;
     mdoActionButton3: if actbt = 3 then
     begin
-      FActionButton3Image := TableResources.ActionButtonNormal;
+      FActionButton3Image := TableResources.ActionButtonNormalImage;
       if Assigned(FActionButton3Action) then
         FActionButton3Action.Execute;
     end;
@@ -565,8 +565,8 @@ begin
 
   seRaiseAmount.Width := Round(TableResources.RAISE_VALUEBOX_WIDTH * FRaiseSliderResizeRatio);
   seRaiseAmount.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaiseSliderResizeRatio);
-  seRaiseAmount.Left := Round(FRaiseSliderPoint.x + TableResources.RAISE_VALUEBOX_X_OFFSET * FRaiseSliderResizeRatio);
-  seRaiseAmount.Top := Round(FRaiseSliderPoint.y + TableResources.RAISE_VALUEBOX_Y_OFFSET * FRaiseSliderResizeRatio);
+  seRaiseAmount.Left := Round(FRaiseSliderPoint.x + TableResources.RAISE_VALUEBOX_X * FRaiseSliderResizeRatio);
+  seRaiseAmount.Top := Round(FRaiseSliderPoint.y + TableResources.RAISE_VALUEBOX_Y * FRaiseSliderResizeRatio);
 
   cbFoldToAnyBet.Height := Round(FTableResizeRatio * 28);
   if cbFoldToAnyBet.Height > 18 then
@@ -1479,7 +1479,7 @@ begin
   // calculate lower interface sizes
   FLowerIntfBorder := Round(10 * FTableResizeRatio);
 
-  FActionButtonWidth := TableResources.ActionButtonNormal.Texture[0].Width * FTableResizeRatio;
+  FActionButtonWidth := TableResources.ActionButtonNormalImage.Texture[0].Width * FTableResizeRatio;
   FActionButtonHeight := FActionButtonWidth / TableResources.ActionButtonAspectRatio;
 
   FActionButton3Point := Point2(FDXAreaSize.x - FLowerIntfBorder * 1.5 - FActionButtonWidth, FDXAreaSize.y - FLowerIntfBorder * 1.5 - FActionButtonHeight);
@@ -2173,7 +2173,7 @@ end;
 
 procedure TfrmTable.RenderLowerInterface;
 var
-  red_rect: TRect;
+  red_quad: TPoint4;
 begin
   if acRaise.Enabled then
   begin
@@ -2182,11 +2182,11 @@ begin
     DXCore.Canvas.TexMap(pBounds4(FRaiseSliderPoint.x, FRaiseSliderPoint.y, FRaiseSliderWidth, FRaiseSliderHeight), clWhite4);
 
     // render raise red fill
-    red_rect.Left := Round(FRaiseSliderButtonBounds.Left + 4 * FTableResizeRatio);
-    red_rect.Top := Round(FRaiseSliderButtonBounds.Top + 4 * FTableResizeRatio);
-    red_rect.Right := Round(FRaiseSliderButtonPoint.x);
-    red_rect.Bottom := Round(FRaiseSliderButtonBounds.Bottom - 4 * FTableResizeRatio);
-    DXCore.Canvas.FillRect(red_rect, cColor4($FFB40004));
+    red_quad := pBounds4(FRaiseSliderButtonBounds.Left + 1.5 * FRaiseSliderResizeRatio,
+                         FRaiseSliderButtonBounds.Top + 1.5 * FRaiseSliderResizeRatio,
+                         FRaiseSliderButtonPoint.x - FRaiseSliderButtonBounds.Left - 1.5 * FRaiseSliderResizeRatio,
+                         FRaiseSliderButtonBounds.Height - 3 * FRaiseSliderResizeRatio);
+    DXCore.Canvas.FillQuad(red_quad, cColor4($FFB40004));
 
     // render raise button
     DXCore.Canvas.UseImage(TableResources.RaiseSliderButtonImage, TexFull4);
