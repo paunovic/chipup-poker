@@ -1,6 +1,6 @@
 CFLAGS=-UC:/Poker/SMBIOS "-UC:\Program Files\DevExpress VCL\ExpressEditors Library\Sources"
 CFLAGS+="-UC:\Program Files\DevExpress VCL\Library\Delphi16"
-CFLAGS+=-AComObj=System.Win.ComObj -NSWinapi -NSSystem -NSVcl -Uforms -NSData -NSVcl.Imaging
+CFLAGS+=-AComObj=System.Win.ComObj -NSWinapi -NSSystem -NSVcl -Uforms -NSData -NSVcl.Imaging -NSSystem.Win
 CFLAGS+=-Umodules/playerinfo -Umodules/clubinfo -Umodules/gameinfo -Umodules/protobuf/objects
 CFLAGS+=-U3rdparty/protobufs -Umodules/protobuf -Umodules/server_settings -Umodules/tables -UC:/poker/syngdiplus
 CFLAGS+=-Umodules/avatars -UC:/Poker/icsv8w/Lib/Debug/Win32/XE2 -Umodules/encryption -UC:/Poker/Dec/Part_I
@@ -14,6 +14,7 @@ CFLAGS+="-IC:/Poker/AsphyreSphinx304/Source"
 CFLAGS+="-UC:\Poker\AsphyreSphinx304\Source\Delphi"
 CFLAGS+="-UC:\Poker\AsphyreSphinx304\Source\Providers"
 CFLAGS+="-UC:\Poker\AsphyreSphinx304\Source\Headers"
+CFLAGS+="-UC:\Poker\RichView v13.12.1 FS\1-TrichView"
 GCC=dcc32
 
 %.dcu: %.pas
