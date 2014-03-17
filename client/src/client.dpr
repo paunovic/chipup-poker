@@ -4,6 +4,8 @@ program client;
 {$R *.dres}
 {$R *.res}
 
+{$I defines.inc}
+
 uses
   FastMM4 in '3rdparty\FastMM\FastMM4.pas',
   madExcept,

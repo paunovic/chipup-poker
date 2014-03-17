@@ -77,7 +77,6 @@ type
     FDealer        : Integer;
     FCurrentSeat   : Integer;
     FSeatInfos     : TSeatInfos;
-    FPreviousBets  : TArray<UINT32>;
     FBets          : TArray<UINT32>;
     FFlopCards     : TCards;
     FTurnCard      : TCard;
@@ -117,7 +116,6 @@ type
     property HandId: UINT32 read FHandId;
     property Pots: TPotInfos read FPots;
     property PreviousPots: TPotInfos read FPreviousPots;
-    property PreviousBets: TArray<UINT32> read FPreviousBets;
     property MaximumBet: UINT32 read FMaximumBet;
     property Time: UINT64 read FTime;
   end;
@@ -259,7 +257,6 @@ begin
   FMinimumBet := ATableStatusProtobuf.MinimumBet;
   FHandId := ATableStatusProtobuf.Handid;
   FTime := ATableStatusProtobuf.Time;
-  FPreviousBets := FBets;
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
   FMaximumBet := ATableStatusProtobuf.MaximumLimit;

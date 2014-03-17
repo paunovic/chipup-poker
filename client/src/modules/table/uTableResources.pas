@@ -19,7 +19,7 @@ type
       FDXMediaFile: TAsphyreArchive;
       FDXFonts: TAsphyreFonts;
 
-      FBackgroundImage: TAsphyreImage;
+      FRoomBackgroundImage: TAsphyreImage;
       FTableImage: TAsphyreImage;
       FCardBackgroundImage: TAsphyreImage;
       FSeatEmptyLeftImage: TAsphyreImage;
@@ -45,10 +45,14 @@ type
       FCardArtworksImages: array of TAsphyreImage;
       FRaiseSliderBackgroundImage: TAsphyreImage;
       FRaiseSliderButtonImage: TAsphyreImage;
+      FActionButtonNormalImage: TAsphyreImage;
+      FActionButtonHotImage: TAsphyreImage;
+      FActionButtonPressedImage: TAsphyreImage;
+//      FRaiseMin
 
       FBarmenoFonts: TBarmenoFonts;
-      FArialFont_10px: TAsphyreFont;
       FCardCharactersFont_19px: TAsphyreFont;
+      FSintony_19px: TAsphyreFont;
 
       FTableAspectRatio: Single;
       FSeatAspectRatio: Single;
@@ -59,9 +63,11 @@ type
       FCardArtworkAspectRatio: Single;
       FRaiseSliderAspectRatio: Single;
       FRaiseSliderButtonAspectRatio: Single;
+      FActionButtonAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
+    procedure AddDXFont(const AName: String; var AReceiver: TAsphyreFont);
 
   public
     const
@@ -77,13 +83,14 @@ type
         (-pi/3, -pi/6.9, pi/64, pi/5.1, pi/2.5, pi-pi/2.5, pi-pi/5.1, pi-pi/64, pi+pi/6.9, pi*4/3) // 10
       );
 
-      RAISE_BOX_WIDTH_PROPORTION  = 0.24774774774774774774774774774775;
-      RAISE_BOX_HEIGHT_PROPORTION = 0.6;
-      RAISE_BOX_X_OFFSET          = 16;
-      RAISE_SLIDER_X              = 144;
-      RAISE_SLIDER_Y              = 11;
-      RAISE_SLIDER_WIDTH          = 284;
-      RAISE_SLIDER_HEIGHT         = 13;
+      RAISE_VALUEBOX_WIDTH    = 109;
+      RAISE_VALUEBOX_HEIGHT   = 18;
+      RAISE_VALUEBOX_X        = 14;
+      RAISE_VALUEBOX_Y        = 6;
+      RAISE_SLIDER_X          = 140;
+      RAISE_SLIDER_Y          = 9;
+      RAISE_SLIDER_WIDTH      = 283;
+      RAISE_SLIDER_HEIGHT     = 9;
 
     class procedure Initialize(const ADXCanvas: TAsphyreCanvas);
     class procedure Deinitialize;
@@ -95,7 +102,7 @@ type
 
     property DXImages: TAsphyreImages read FDXImages;
 
-    property BackgroundImage: TAsphyreImage read FBackgroundImage;
+    property RoomBackgroundImage: TAsphyreImage read FRoomBackgroundImage;
     property TableImage: TAsphyreImage read FTableImage;
     property CardBackgroundImage: TAsphyreImage read FCardBackgroundImage;
     property SeatEmptyLeftImage: TAsphyreImage read FSeatEmptyLeftImage;
@@ -120,10 +127,13 @@ type
     property CardFrontBackgroundImage: TAsphyreImage read FCardFrontBackgroundImage;
     property RaiseSliderBackgroundImage: TAsphyreImage read FRaiseSliderBackgroundImage;
     property RaiseSliderButtonImage: TAsphyreImage read FRaiseSliderButtonImage;
+    property ActionButtonNormalImage: TAsphyreImage read FActionButtonNormalImage;
+    property ActionButtonHotImage: TAsphyreImage read FActionButtonHotImage;
+    property ActionButtonPressedImage: TAsphyreImage read FActionButtonPressedImage;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
-    property ArialFont_10px: TAsphyreFont read FArialFont_10px;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
+    property Sintony_19px: TAsphyreFont read FSintony_19px;
 
     property TableAspectRatio: Single read FTableAspectRatio;
     property SeatAspectRatio: Single read FSeatAspectRatio;
@@ -134,6 +144,7 @@ type
     property CardArtworkAspectRatio: Single read FCardArtworkAspectRatio;
     property RaiseSliderAspectRatio: Single read FRaiseSliderAspectRatio;
     property RaiseSliderButtonAspectRatio: Single read FRaiseSliderButtonAspectRatio;
+    property ActionButtonAspectRatio: Single read FActionButtonAspectRatio;
   end;
 
 var
@@ -160,9 +171,9 @@ end;
 
 constructor TTableResources.Create(const ADXCanvas: TAsphyreCanvas);
 var
-  C1, id: Integer;
-  CCV   : TCardValue;
-  CCS   : TCardSuit;
+  C1 : Integer;
+  CCV: TCardValue;
+  CCS: TCardSuit;
 begin
   ArchiveTypeAccess := ataResource;
 
@@ -172,7 +183,7 @@ begin
 
   FDXImages := TAsphyreImages.Create;
 
-  AddDXImage('RoomBackground.image', FBackgroundImage);
+  AddDXImage('TableBackground.image', FRoomBackgroundImage);
   AddDXImage('Table.image', FTableImage, FTableAspectRatio);
   AddDXImage('EmptySeatLeft.image', FSeatEmptyLeftImage, FSeatAspectRatio);
   AddDXImage('EmptySeatRight.image', FSeatEmptyRightImage);
@@ -197,6 +208,9 @@ begin
   AddDXImage('CardFrontBackground.image', FCardFrontBackgroundImage);
   AddDXImage('RaiseSliderBackground.image', FRaiseSliderBackgroundImage, FRaiseSliderAspectRatio);
   AddDXImage('RaiseSliderButton.image', FRaiseSliderButtonImage, FRaiseSliderButtonAspectRatio);
+  AddDXImage('ActionButtonNormal.image', FActionButtonNormalImage, FActionButtonAspectRatio);
+  AddDXImage('ActionButtonHot.image', FActionButtonHotImage);
+  AddDXImage('ActionButtonPressed.image', FActionButtonPressedImage);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
@@ -213,22 +227,10 @@ begin
   FDXFonts.Canvas := ADXCanvas;
   FDXFonts.Images := FDXImages;
 
-  FDXImages.AddFromArchive('CardCharacters_19px.image', FDXMediaFile);
-  FDXImages.AddFromArchive('Arial_10px.image', FDXMediaFile);
-
-  id := FDXFonts.Insert('RoomMedia | CardCharacters_19px.xml', 'CardCharacters_19px.image');
-  FCardCharactersFont_19px := FDXFonts[id];
-
-  id := FDXFonts.Insert('RoomMedia | Arial_10px.xml', 'Arial_10px.image');
-  FArialFont_10px := FDXFonts[id];
-
+  AddDXFont('CardCharacters_19px', FCardCharactersFont_19px);
+  AddDXFont('Sintony_19px', FSintony_19px);
   for C1 := Low(FBarmenoFonts) to High(FBarmenoFonts) do
-  begin
-    FDXImages.AddFromArchive(Format('Barmeno_%dpx.image', [C1]), FDXMediaFile);
-    id := FDXFonts.Insert(Format('RoomMedia | Barmeno_%dpx.xml', [C1]), Format('Barmeno_%dpx.image', [C1]));
-    FBarmenoFonts[C1] := FDXFonts[id];
-  end;
-
+    AddDXFont(Format('Barmeno_%dpx', [C1]), FBarmenoFonts[C1]);
 end;
 
 destructor TTableResources.Destroy;
@@ -260,6 +262,16 @@ var
 begin
   AddDXImage(AName, AReceiver, ar);
 end;
+
+procedure TTableResources.AddDXFont(const AName: String; var AReceiver: TAsphyreFont);
+var
+  id: Integer;
+begin
+  FDXImages.AddFromArchive(Format('%s.image', [AName]), FDXMediaFile);
+  id := FDXFonts.Insert(Format('RoomMedia | %s.xml', [AName]), Format('%s.image', [AName]));
+  AReceiver := FDXFonts[id];
+end;
+
 
 function TTableResources.GetCardArtwork(const ACard: TCard): TAsphyreImage;
 var

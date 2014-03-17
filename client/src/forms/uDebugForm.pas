@@ -5,8 +5,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxTextEdit, cxMemo, cxRichEdit, cxCheckBox, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList,
-  Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLabel;
+  cxTextEdit, cxMemo, cxCheckBox, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList,
+  Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLabel, RVScroll, RichView, RVStyle, RVTable,
+  CRVData;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm);
@@ -23,9 +24,6 @@ type
     pmiLogCopy: TMenuItem;
     acCopyLogSelection: TAction;
     tiAppInfoRefresh: TTimer;
-    N1: TMenuItem;
-    pmiLogWordWrap: TMenuItem;
-    acWordWrap: TAction;
     pmiLogSave: TMenuItem;
     pmiLogClear: TMenuItem;
     N2: TMenuItem;
@@ -38,13 +36,14 @@ type
     lbvMemoryUsage: TcxLabel;
     lbvCallbackSets: TcxLabel;
     lbvSocketState: TcxLabel;
-    reLog: TcxRichEdit;
+    RVStyle: TRVStyle;
+    N1: TMenuItem;
+    rvLog: TRichView;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
     procedure acCopyLogSelectionExecute(Sender: TObject);
     procedure tiAppInfoRefreshTimer(Sender: TObject);
-    procedure acWordWrapExecute(Sender: TObject);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
@@ -52,6 +51,8 @@ type
   public
     class procedure Initialize;
     class procedure Deinitialize;
+
+    procedure Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
   end;
 
 procedure DebugLn(const AData: String; const AType: TDebugInfoType);
@@ -71,71 +72,67 @@ var
   frmDebug: TfrmDebug;
   ConsoleAttached: Boolean;
 
-
 procedure DebugLn(const AData: String; const AType: TDebugInfoType);
 var
-  time_str  : String;
-  type_str  : String;
-  type_color: TColor;
-  logit     : Boolean;
-  output    : String;
+  time_str: String;
+  type_str: String;
+  tstyle  : Integer;
+  dstyle  : Integer;
+  output  : String;
 begin
   time_str := FormatDateTime('hh:nn:ss:zzz', Now);
-
-  logit := TRUE;
 
   case AType of
     ditException: begin
       type_str := 'EXCP';
-      type_color := clRed;
+      tstyle := 1;
+      dstyle := 7;
     end;
     ditApplication: begin
       type_str := 'APPL';
-      type_color := clWhite;
+      tstyle := 2;
+      dstyle := 8;
     end;
     ditSocketInc: begin
       type_str := 'SINC';
-      type_color := clLime;
+      tstyle := 3;
+      dstyle := 9;
     end;
     ditSocketOut: begin
       type_str := 'SOUT';
-      type_color := clLime;
+      tstyle := 3;
+      dstyle := 9;
     end;
     ditSocket: begin
       type_str := 'SOCK';
-      type_color := clLime;
+      tstyle := 3;
+      dstyle := 9;
     end;
     ditNetInc: begin
       type_str := 'NINC';
-      type_color := clMoneyGreen;
+      tstyle := 4;
+      dstyle := 10;
     end;
     ditNetOut: begin
       type_str := 'NOUT';
-      type_color := clMoneyGreen;
+      tstyle := 4;
+      dstyle := 10;
     end;
     ditForm: begin
       type_str := 'FORM';
-      type_color := clGray;
+      tstyle := 5;
+      dstyle := 11;
     end
   else
     type_str := 'UNKN';
-    type_color := clRed;
-    logit := TRUE;
+    tstyle := 6;
+    dstyle := 12;
   end;
 
-  if not logit then
-    Exit;
+  if Assigned(frmDebug) then
+    frmDebug.Add(time_str, type_str, AData, tstyle, dstyle);
 
-  if (Assigned(frmDebug)) and
-     (not frmDebug.btPause.Down) then
-  begin
-    frmDebug.reLog.SelStart := frmDebug.reLog.GetTextLen;
-    frmDebug.reLog.SelAttributes.Color := type_color;
-    output := Format('%s [%s] %s', [time_str, type_str, AData]);
-    frmDebug.reLog.Lines.Add(output);
-
-    SendMessage(frmDebug.reLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
-  end;
+  output := Format('%s [%s] %s', [time_str, type_str, AData]);
 
   OutputDebugString(PChar(output));
 
@@ -144,10 +141,11 @@ begin
 end;
 
 
-
 class procedure TfrmDebug.Initialize;
+const
+  ATTACH_PARENT_PROCESS = -1;
 begin
-  ConsoleAttached := AttachConsole(-1); // ATTACH_PARENT_PROCESS
+  ConsoleAttached := AttachConsole(ATTACH_PARENT_PROCESS);
 
   frmDebug := TfrmDebug.Create(nil);
   frmDebug.Show;
@@ -166,14 +164,13 @@ procedure TfrmDebug.FormCreate(Sender: TObject);
 begin
   Left := 0;
   Top := 0;
-  reLog.Clear;
 
-  pmiLogWordWrap.Checked := TRUE;
-  acWordWrap.Execute;
+  rvLog.ClearAll;
+  rvLog.Format;
 
   Screen.OnActiveFormChange := ActiveFormChange;
 
-  Width := Screen.Monitors[0].Width div 3;
+  Width := Round(Screen.Monitors[0].Width / 2.8);
   Height := Round(Screen.Monitors[0].Height / 2.5);
 end;
 
@@ -194,33 +191,22 @@ end;
 
 procedure TfrmDebug.acClearLogExecute(Sender: TObject);
 begin
-  reLog.Clear;
+  rvLog.ClearAll;
+  rvLog.Format;
 end;
 
 procedure TfrmDebug.acCopyLogSelectionExecute(Sender: TObject);
 begin
-  reLog.CopyToClipboard;
+  rvLog.CopyText;
 end;
 
 procedure TfrmDebug.acSaveLogExecute(Sender: TObject);
-var
-  plain_text: TStringList;
 begin
   if SaveDialog.Execute(Handle) then
-  begin
     case SaveDialog.FilterIndex of
-      1: reLog.Lines.SaveToFile(ChangeFileExt(SaveDialog.FileName, '.rtf'));
-      2: begin
-        plain_text := TStringList.Create;
-        try
-          plain_text.Assign(reLog.Lines);
-          plain_text.SaveToFile(ChangeFileExt(SaveDialog.FileName, '.txt'));
-        finally
-          plain_text.Free;
-        end;
-      end;
+      1: rvLog.SaveRTF(ChangeFileExt(SaveDialog.FileName, '.rtf'), FALSE);
+      2: rvLog.SaveText(ChangeFileExt(SaveDialog.FileName, '.txt'), 0);
     end;
-  end;
 end;
 
 procedure TfrmDebug.ActiveFormChange(Sender: TObject);
@@ -234,16 +220,49 @@ begin
   DebugLn(Format('Active form: %s [%s]', [Screen.ActiveForm.Name, Screen.ActiveForm.Caption]), ditForm);
 end;
 
-procedure TfrmDebug.acWordWrapExecute(Sender: TObject);
+procedure TfrmDebug.Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
+const
+  SCROLLBACK_LINES = 1000;
+var
+  table: TRVTableItemInfo;
 begin
-  pmiLogWordWrap.Checked := not pmiLogWordWrap.Checked;
-  reLog.Properties.WordWrap := pmiLogWordWrap.Checked;
-  if reLog.Properties.WordWrap then
-    reLog.Properties.ScrollBars := ssVertical
-  else
-    reLog.Properties.ScrollBars := ssBoth;
-end;
+  if btPause.Down then
+    Exit;
 
+  if rvLog.ItemCount >= SCROLLBACK_LINES then
+    rvLog.DeleteParas(0, rvLog.ItemCount - SCROLLBACK_LINES + 1);
+
+  table := TRVTableItemInfo.CreateEx(1, 3, rvLog.RVData);
+  with table do
+  begin
+    BorderWidth := 0;
+    CellVPadding := 0;
+    CellBorderWidth := 0;
+    CellVSpacing := 0;
+    BorderVSpacing := 0;
+    Color := clNone;
+    BestWidth := 0;
+    Options := [rvtoRTFAllowAutofit];
+
+    Cells[0, 0].BestWidth := 75;
+    Cells[0, 1].BestWidth := 50;
+
+    Cells[0, 0].Clear;
+    Cells[0, 1].Clear;
+    Cells[0, 2].Clear;
+
+    Cells[0, 0].AddFmt('%s', [ATime], 0, 0);
+    Cells[0, 1].AddFmt('%s', [AType], ATypeStyle, 1);
+    Cells[0, 2].AddFmt('%s', [AData], ADataStyle, 2);
+  end;
+
+  rvLog.AddItem('', table);
+
+  if rvLog.VScrollPos < rvLog.VScrollMax then
+    rvLog.Format
+  else
+    rvLog.FormatTail;
+end;
 
 end.
 

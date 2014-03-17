@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, AsphyreFonts,
-  AbstractDevices, AbstractCanvas, AsphyreEvents, AsphyreEventTypes, AsphyreFactory, DX9Providers, NativeConnectors, AsphyreSwapChains;
+  AbstractDevices, AbstractCanvas, AsphyreEvents, AsphyreEventTypes, AsphyreFactory, NativeConnectors, AsphyreSwapChains;
 
 type
   TDXCore = class
@@ -41,7 +41,7 @@ var
 implementation
 
 uses
-  System.SysUtils, System.Classes, Vectors2px, uTableResources;
+  System.SysUtils, System.Classes, Vectors2px, uTableResources, DX9Providers;
 
 
 class procedure TDXCore.Initialize;
@@ -59,7 +59,7 @@ constructor TDXCore.Create;
 begin
   FDummyWindow := AllocateHwnd(nil);
 
-  Factory.UseProvider(idDirectX9);
+  Factory.UseProvider(idDirectx9);
 
   EventAsphyreCreate.Subscribe(ClassName, OnAsphyreCreate);
   EventAsphyreDestroy.Subscribe(ClassName, OnAsphyreDestroy);
@@ -119,7 +119,7 @@ procedure TDXCore.OnDeviceInit(Sender: TObject; Param: Pointer; var Handled: Boo
 var
   C1: Integer;
 begin
-  for C1 := 0 to 31 do
+  for C1 := 0 to 32 do
     FDevice.SwapChains.Add(FDummyWindow, Point2px(1, 1));
 end;
 
