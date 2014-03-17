@@ -2,6 +2,7 @@
   "name": "dag",
   "version": "0.0.1",
   "description": "dag tool",
+  "main": "./build/Release/dag.node",
   "author": {
     "name": "michael bishop"
   }

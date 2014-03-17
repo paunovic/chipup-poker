@@ -2,10 +2,12 @@ extends base
 block content
   table(border=1)
     tr
+      th ts
       th msg
       th trace
     each row in rows
       tr
+        td=row._id.getTimestamp()
         td=row.error
         td
           pre=row.trace

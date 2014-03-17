@@ -6,6 +6,9 @@ extern "C" {
 
 using namespace v8;
 
+handeval_eq_class *holdemEval(Local<Array> cardlist, char *cards, char *hand);
+handeval_eq_class *omahaEval(Local<Array> cardlist, char *cards, char *hand);
+
 int cardToNumber(const char *card) {
 	int value;
 	switch (card[0]) {
@@ -67,6 +70,9 @@ Handle<Value> RankHands(const Arguments& args) {
 	Local<Array> hands = Local<Array>::Cast(args[1]);
 	for (unsigned int j=0; j<hands->Length(); j++) {
 		Local<Value> item = hands->Get(j);
+		handeval_eq_class *rank = 0;
+		char handcards[4];
+		int handsize = 0;
 		if (!item->IsObject()) {
 			ThrowException(Exception::TypeError(String::New("second argument must be an array of strings")));
 			return scope.Close(Undefined());
@@ -74,20 +80,61 @@ Handle<Value> RankHands(const Arguments& args) {
 		Local<Object> hand = item->ToObject();
 		Local<Array> cardlist = Local<Array>::Cast(hand->Get(String::NewSymbol("hand"))); // array of Card objects
 		
-		cards[5] = cardToNumber(cardlist,0);
-		cards[6] = cardToNumber(cardlist,1);
-		printf("ranking hand %s + %s\n",hand_to_str(cards,5),hand_to_str(cards+5,2));
-		handeval_eq_class *rank = calculate_equivalence_class(cards);
+		if (cardlist->Length() == 2) {
+			handsize = 2;
+			rank = holdemEval(cardlist,cards,handcards);
+		} else if (cardlist->Length() == 4) {
+			handsize = 4;
+			rank = omahaEval(cardlist,cards,handcards);
+		} else {
+			ThrowException(Exception::TypeError(String::New("a user can only have 2 or 4 cards")));
+		}
+		assert(rank);
 
 		hand->Set(String::NewSymbol("id"),Number::New(rank->id));
 		hand->Set(String::NewSymbol("desc"),String::New(rank->desc));
 		hand->Set(String::NewSymbol("domination"),Number::New(rank->domination));
 		hand->Set(String::NewSymbol("likelihood"),Number::New(rank->likelihood));
 		hand->Set(String::NewSymbol("cards"),String::New(rank->cards));
-		hand->Set(String::NewSymbol("input"),String::New(hand_to_str(cards+5,2)));
+		hand->Set(String::NewSymbol("input"),String::New(hand_to_str(handcards,handsize)));
 		outputs->Set(j,hand);
 	}
 	return scope.Close(root);
+}
+handeval_eq_class *holdemEval(int a, int b, char *cards) {
+	cards[5] = a;
+	cards[6] = b;
+	printf("ranking hand %s + %s\n",hand_to_str(cards,5),hand_to_str(cards+5,2));
+	handeval_eq_class *rank = calculate_equivalence_class(cards);
+	return rank;
+}
+handeval_eq_class *holdemEval(Local<Array> cardlist, char *cards,char *hand) {
+	int a = cardToNumber(cardlist,0);
+	int b = cardToNumber(cardlist,1);
+	return holdemEval(a,b,cards);
+}
+handeval_eq_class *omahaEval(Local<Array> cardlist, char *cards,char *hand) {
+	hand[0] = cardToNumber(cardlist,0);
+	hand[1] = cardToNumber(cardlist,1);
+	hand[2] = cardToNumber(cardlist,2);
+	hand[3] = cardToNumber(cardlist,3);
+	handeval_eq_class *best = holdemEval(hand[0],hand[1],cards);
+	handeval_eq_class *test;
+
+#define X(a,b) test = holdemEval(hand[a],hand[b],cards);\
+	if (test->id < best->id) {\
+		best = test;\
+		puts("card " #a " and " #b " beat last one");\
+	}
+	X(0,2);
+	X(0,3);
+	X(1,2);
+	X(1,3);
+	X(2,3);
+#undef X
+
+	printf("%d %s vs %d %s\n",best->id,best->desc,test->id,test->desc);
+	return best;
 }
 Handle<Value> InitDag(const Arguments& args) {
 	HandleScope scope;
