@@ -3,33 +3,36 @@ object frmTable: TfrmTable
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
-  ClientHeight = 523
+  ClientHeight = 524
   ClientWidth = 792
   Color = clBtnFace
-  Constraints.MaxHeight = 907
+  Constraints.MaxHeight = 910
   Constraints.MaxWidth = 1320
   Constraints.MinWidth = 600
-  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Arial'
-  Font.Style = []
+  Font.Height = -21
+  Font.Name = 'Sintony'
+  Font.Style = [fsBold]
   OldCreateOrder = False
+  OnActivate = FormActivate
   OnClick = FormClick
   OnClose = FormClose
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnMouseDown = FormMouseDown
+  OnMouseMove = FormMouseMove
+  OnMouseUp = FormMouseUp
   OnPaint = FormPaint
   OnResize = FormResize
   DesignSize = (
     792
-    523)
+    524)
   PixelsPerInch = 96
-  TextHeight = 14
+  TextHeight = 27
   object edChat: TcxTextEdit
-    Left = 1
+    Left = 16
     Top = 427
     Margins.Left = 1
     Margins.Top = 0
@@ -37,38 +40,25 @@ object frmTable: TfrmTable
     Margins.Bottom = 0
     Anchors = [akLeft, akBottom]
     AutoSize = False
+    ParentFont = False
     Style.BorderStyle = ebsNone
+    Style.Color = 2500134
     Style.Edges = []
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Arial'
+    Style.Font.Style = []
     Style.TransparentBorder = False
+    Style.IsFontAssigned = True
     TabOrder = 0
     OnKeyPress = edChatKeyPress
-    ExplicitTop = 429
     Height = 16
-    Width = 244
-  end
-  object reChat: TcxRichEdit
-    Left = 1
-    Top = 443
-    Anchors = [akLeft, akBottom]
-    Properties.AutoURLDetect = True
-    Properties.ReadOnly = True
-    Properties.ScrollBars = ssVertical
-    Lines.Strings = (
-      'reChat')
-    Style.BorderStyle = ebsNone
-    Style.Edges = []
-    Style.Shadow = False
-    Style.TransparentBorder = True
-    StyleFocused.BorderStyle = ebsNone
-    StyleHot.BorderStyle = ebsNone
-    TabOrder = 1
-    ExplicitTop = 445
-    Height = 72
-    Width = 244
+    Width = 213
   end
   object cbFoldToAnyBet: TcxCheckBox
     Left = 251
-    Top = 434
+    Top = 435
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Fold to any bet'
@@ -85,16 +75,16 @@ object frmTable: TfrmTable
     StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    TabOrder = 2
+    TabOrder = 1
     Transparent = True
     Visible = False
-    ExplicitTop = 436
+    ExplicitTop = 434
     Height = 18
     Width = 113
   end
   object cbSitOutNextHand: TcxCheckBox
     Left = 251
-    Top = 452
+    Top = 453
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Sit out next hand'
@@ -111,16 +101,16 @@ object frmTable: TfrmTable
     StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    TabOrder = 3
+    TabOrder = 2
     Transparent = True
     Visible = False
-    ExplicitTop = 454
+    ExplicitTop = 452
     Height = 12
     Width = 113
   end
   object btStandUp: TcxButton
     Left = 251
-    Top = 492
+    Top = 493
     Width = 79
     Height = 23
     Action = acStandUp
@@ -132,7 +122,7 @@ object frmTable: TfrmTable
     Colors.DisabledText = 1933784
     LookAndFeel.SkinName = 'ChipUpRedButton'
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 4
+    TabOrder = 3
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = 4227327
@@ -140,11 +130,11 @@ object frmTable: TfrmTable
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 494
+    ExplicitTop = 492
   end
   object cbSitOutNextBB: TcxCheckBox
     Left = 251
-    Top = 467
+    Top = 468
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Sit out next BB'
@@ -161,22 +151,22 @@ object frmTable: TfrmTable
     StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    TabOrder = 5
+    TabOrder = 4
     Transparent = True
     Visible = False
-    ExplicitTop = 469
+    ExplicitTop = 467
     Height = 12
     Width = 113
   end
   object btPlayNow: TcxButton
     Left = 332
-    Top = 148
+    Top = 149
     Width = 110
     Height = 36
     Action = acPlayNow
     Anchors = [akLeft, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 6
+    TabOrder = 5
     Visible = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -184,11 +174,11 @@ object frmTable: TfrmTable
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 150
+    ExplicitTop = 148
   end
   object seRaiseAmount: TcxSpinEdit
     Left = 474
-    Top = 286
+    Top = 287
     Anchors = []
     AutoSize = False
     ParentFont = False
@@ -205,18 +195,37 @@ object frmTable: TfrmTable
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
     Style.Font.Height = -11
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = [fsBold]
+    Style.Font.Name = 'Sintony'
+    Style.Font.Style = []
     Style.Font.Quality = fqAntialiased
     Style.TextColor = clRed
     Style.IsFontAssigned = True
-    TabOrder = 7
+    TabOrder = 6
+    Value = 76950.000000000000000000
     Visible = False
-    Height = 20
-    Width = 46
+    Height = 30
+    Width = 106
   end
   object btAction1: TcxButton
     Left = 412
+    Top = 199
+    Width = 108
+    Height = 37
+    Anchors = []
+    Enabled = False
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 7
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = acCheckExecute
+  end
+  object btAction2: TcxButton
+    Left = 529
     Top = 199
     Width = 108
     Height = 37
@@ -231,11 +240,10 @@ object frmTable: TfrmTable
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    OnClick = acCheckExecute
-    ExplicitTop = 200
+    OnClick = acCallExecute
   end
-  object btAction2: TcxButton
-    Left = 529
+  object btAction3: TcxButton
+    Left = 646
     Top = 199
     Width = 108
     Height = 37
@@ -248,45 +256,9 @@ object frmTable: TfrmTable
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-    OnClick = acCallExecute
-    ExplicitTop = 200
-  end
-  object tbRaise: TcxTrackBar
-    Left = 516
-    Top = 170
-    Anchors = []
-    Properties.AutoSize = False
-    Properties.ShowTicks = False
-    Properties.OnChange = tbRaisePropertiesChange
-    Style.Edges = []
-    Style.TransparentBorder = True
-    TabOrder = 10
-    Transparent = True
-    Visible = False
-    ExplicitTop = 171
-    Height = 25
-    Width = 245
-  end
-  object btAction3: TcxButton
-    Left = 646
-    Top = 199
-    Width = 108
-    Height = 37
-    Anchors = []
-    Enabled = False
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 11
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
     OnClick = acRaiseExecute
-    ExplicitTop = 200
   end
   object btRaiseMin: TcxButton
     Left = 528
@@ -294,6 +266,42 @@ object frmTable: TfrmTable
     Width = 52
     Height = 23
     Action = acRaiseMin
+    Anchors = []
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 10
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object btRaise3BB: TcxButton
+    Left = 586
+    Top = 148
+    Width = 52
+    Height = 23
+    Action = acRaise3BB
+    Anchors = []
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 11
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object btRaisePot: TcxButton
+    Left = 644
+    Top = 148
+    Width = 52
+    Height = 23
+    Action = acRaisePot
     Anchors = []
     LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
     SpeedButtonOptions.CanBeFocused = False
@@ -305,14 +313,13 @@ object frmTable: TfrmTable
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 149
   end
-  object btRaise3BB: TcxButton
-    Left = 586
+  object btRaiseMax: TcxButton
+    Left = 702
     Top = 148
     Width = 52
     Height = 23
-    Action = acRaise3BB
+    Action = acRaiseMax
     Anchors = []
     LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
     SpeedButtonOptions.CanBeFocused = False
@@ -324,45 +331,17 @@ object frmTable: TfrmTable
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 149
   end
-  object btRaisePot: TcxButton
-    Left = 644
-    Top = 148
-    Width = 52
-    Height = 23
-    Action = acRaisePot
-    Anchors = []
-    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-    SpeedButtonOptions.CanBeFocused = False
+  object rvChat: TRichView
+    Left = 16
+    Top = 446
+    Width = 213
+    Height = 70
+    Color = 4539717
     TabOrder = 14
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-    ExplicitTop = 149
-  end
-  object btRaiseMax: TcxButton
-    Left = 702
-    Top = 148
-    Width = 52
-    Height = 23
-    Action = acRaiseMax
-    Anchors = []
-    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 15
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-    ExplicitTop = 149
+    BorderStyle = bsNone
+    DoInPaletteMode = rvpaCreateCopies
+    Style = RVStyle
   end
   object ActionManager: TActionManager
     Left = 56
@@ -457,5 +436,170 @@ object frmTable: TfrmTable
     OnTimer = tiSitOutNextBBTimer
     Left = 144
     Top = 100
+  end
+  object RVStyle: TRVStyle
+    TextStyles = <
+      item
+        StyleName = 'User'
+        FontName = 'Arial'
+        Size = 8
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'Normal text'
+        FontName = 'Arial'
+        Size = 8
+        Color = clWhite
+        Unicode = True
+      end>
+    ParaStyles = <
+      item
+        StyleName = 'User'
+        Options = [rvpaoReadOnly]
+        Tabs = <>
+      end
+      item
+        StyleName = 'Message'
+        Options = [rvpaoReadOnly]
+        Tabs = <>
+      end>
+    ListStyles = <>
+    Color = clBlack
+    InvalidPicture.Data = {
+      07544269746D617036100000424D361000000000000036000000280000002000
+      0000200000000100200000000000001000000000000000000000000000000000
+      0000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000C0C0C000C0C0C000C0C0C000C0C0C000C0C0C000C0C0
+      C000C0C0C000C0C0C000C0C0C000C0C0C000C0C0C000C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF000000FF000000FF00FFFF
+      FF00FFFFFF000000FF000000FF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF000000FF000000
+      FF000000FF000000FF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000000
+      FF000000FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF000000FF000000
+      FF000000FF000000FF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF000000FF000000FF00FFFF
+      FF00FFFFFF000000FF000000FF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF0080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C0C0C00000000000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF008080800080808000808080008080800080808000808080008080
+      800080808000808080008080800080808000808080008080800080808000FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      800080808000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000808080008080800080808000808080008080800080808000808080008080
+      8000}
+    StyleTemplates = <>
+    Left = 380
+    Top = 308
   end
 end

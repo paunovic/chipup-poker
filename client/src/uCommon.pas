@@ -30,7 +30,7 @@ function IsJPEGStream(const AStream: TStream): Boolean;
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
-function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Integer; ARadius: Double): Boolean;
+function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -458,7 +458,7 @@ begin
   end;
 end;
 
-function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Integer; ARadius: Double): Boolean;
+function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 begin
   result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) < ARadius * ARadius;
 end;

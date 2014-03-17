@@ -16,14 +16,17 @@ type
       FN_EVENT = 1;
       FN_SEAT = 2;
       FN_POTS = 4;
+      FN_BETS = 5;
 
     var
       FEvent: TTableEventType;
       FSeat: Integer;
       FPots: TObjectList<TPB_PotInfo>;
+      FBets: TArray<UINT32>;
 
     procedure SetEvent(const AValue: TTableEventType);
     procedure SetSeat(const AValue: Integer);
+    procedure SetBets(const AValue: TArray<UINT32>);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -31,6 +34,7 @@ type
     property Event: TTableEventType read FEvent write SetEvent;
     property Seat: Integer read FSeat write SetSeat;
     property Pots: TObjectList<TPB_PotInfo> read FPots write FPots;
+    property Bets: TArray<UINT32> read FBets write SetBets;
   end;
 
 implementation
@@ -68,6 +72,11 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_PotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
+      FN_BETS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        SetLength(FBets, Length(FBets) + 1);
+        FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -83,6 +92,15 @@ procedure TPB_TableEvent.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
   ProtobufOutput.writeInt32(FN_SEAT, AValue);
+end;
+
+procedure TPB_TableEvent.SetBets(const AValue: TArray<UINT32>);
+var
+  C1: Integer;
+begin
+  FBets := AValue;
+  for C1 := 0 to Length(FBets) - 1 do
+    ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
 end;
 
 end.
