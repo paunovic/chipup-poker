@@ -953,8 +953,11 @@ begin
           case FTableStatus.State of
             tsIdle: ;
             tsPreFlop,
+            tsFlopping,
             tsFlop,
+            tsTurning,
             tsTurn,
+            tsRiverTime,
             tsRiver: begin
               acFold.Enabled := TRUE;
               if seat_bet < FTableStatus.MinimumBet then
@@ -1140,9 +1143,9 @@ begin
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
       FTableStatus.Seats[C1].FillDealtCards;
 
-    if FTableStatus.State in [tsFlop, tsTurn, tsRiver, tsWinning, tsWinning2] then
+    if FTableStatus.State in [tsFlop, tsTurning, tsTurn, tsRiverTime, tsRiver, tsWinning, tsWinning2] then
       FFlopAnimations := 6;
-    if FTableStatus.State in [tsTurn, tsRiver, tsWinning, tsWinning2] then
+    if FTableStatus.State in [tsTurn, tsRiverTime, tsRiver, tsWinning, tsWinning2] then
       FTurnAnimations := 1;
     if FTableStatus.State in [tsRiver, tsWinning, tsWinning2] then
       FRiverAnimations := 1;
