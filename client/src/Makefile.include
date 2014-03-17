@@ -9,6 +9,7 @@ CFLAGS+=-UC:\Poker\Graphics32 "-UC:\Program Files\madCollection\madExcept\BDS9\w
 CFLAGS+="-UC:\Program Files\madCollection\madBasic\BDS9\win32"
 CFLAGS+="-UC:\Program Files\madCollection\madDisAsm\BDS9\win32"
 CFLAGS+="-IC:/Program Files/DevExpress VCL/Library/Delphi16"
+CFLAGS+="-UC:\Poker\AsphyreSphinx304\Source"
 GCC=dcc32
 
 %.dcu: %.pas
