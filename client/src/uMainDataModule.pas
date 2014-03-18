@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, System.Generics.Collections,
-  uPlayerInfo, uTables, uPB_StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
+  uPlayerInfo, uPB_StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
   dxSkinsForm;
 
 type
@@ -19,7 +19,6 @@ type
     var
       FSelfInfo: TPlayerInfo;
       FPlayers : TPlayerInfos;
-      FTables  : TTables;
 
     procedure LoadFonts;
 
@@ -33,7 +32,6 @@ type
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property Players : TPlayerInfos read FPlayers;
-    property Tables  : TTables read FTables;
   end;
 
 var
@@ -48,7 +46,7 @@ implementation
 uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, uSettings, uTableResources, uFormsContainer,
-  uSocketClient, uCommon, uDXCore, uDXTimer, uMessageContainer, uAvatars, uServerSettings;
+  uSocketClient, uCommon, uDXCore, uDXTimer, uMessageContainer, uAvatars, uServerSettings, uSounds, uTables;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -75,15 +73,18 @@ begin
   TFormsContainer.Initialize;
   TAvatars.Initialize(AppDataRoamingPath + TSettings.Hardcoded.AVATARS_SUBDIR);
   TSocketClient.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+  TSounds.Initialize;
 
   FSelfInfo := TPlayerInfo.Create;
   FPlayers := TPlayerInfos.Create;
-  FTables := TTables.Create;
+
+  TTables.Initialize;
 end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
-  FTables.Free;
+  TTables.Deinitialize;
+
   FPlayers.Free;
   FSelfInfo.Free;
 
@@ -91,6 +92,7 @@ begin
     SocketClient.Disconnect;
   TSocketClient.Deinitialize;
 
+  TSounds.Deinitialize;
   TAvatars.Deinitialize;
   TFormsContainer.Deinitialize;
   TMessageContainer.Deinitialize;

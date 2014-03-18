@@ -1,6 +1,7 @@
 program client;
 
 {$R 'fonts.res' 'resources\fonts.rc'}
+{$R 'sounds.res' 'resources\sounds.rc'}
 {$R *.dres}
 {$R *.res}
 
@@ -32,6 +33,7 @@ uses
   uPublicClubsList in 'forms\uPublicClubsList.pas' {frmPublicClubsList},
   uChangeAvatarForm in 'forms\uChangeAvatarForm.pas' {frmChangeAvatar},
   uTableSitForm in 'forms\uTableSitForm.pas' {frmTableSit},
+  uClubLobbyForm in 'forms\uClubLobbyForm.pas' {frmClubLobby},
   dxsChipUpDark in 'skins\ChipUpDarkStyle\dxsChipUpDark.pas',
   dxsChipUpDarkTabs in 'skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas',
   dxsChipUpRedButton in 'skins\ChipUpRedButton\dxsChipUpRedButton.pas',
@@ -82,7 +84,6 @@ uses
   uPB_SeatInfo in 'modules\protobuf\objects\uPB_SeatInfo.pas',
   uServerCodes in 'modules\protobuf\objects\uServerCodes.pas',
   dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
-  uClubLobbyForm in 'forms\uClubLobbyForm.pas' {frmClubLobby},
   uPB_ChangeSuspendState in 'modules\protobuf\objects\uPB_ChangeSuspendState.pas',
   uPB_RegisterReply in 'modules\protobuf\objects\uPB_RegisterReply.pas',
   uPB_ClubCommandReply in 'modules\protobuf\objects\uPB_ClubCommandReply.pas',
@@ -108,7 +109,8 @@ uses
   uIModalForm in 'forms\uIModalForm.pas',
   uDXTimer in 'modules\directx_draw\uDXTimer.pas',
   uDXAnimation in 'modules\directx_draw\uDXAnimation.pas',
-  uPB_Pot in 'modules\protobuf\objects\uPB_Pot.pas';
+  uPB_Pot in 'modules\protobuf\objects\uPB_Pot.pas',
+  uSounds in 'modules\sounds\uSounds.pas';
 
 procedure FocusPokerApp;
 var

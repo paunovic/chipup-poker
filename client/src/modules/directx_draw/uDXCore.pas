@@ -3,8 +3,7 @@ unit uDXCore;
 interface
 
 uses
-  Winapi.Windows, AsphyreFonts,
-  AbstractDevices, AbstractCanvas, AsphyreEvents, AsphyreEventTypes, AsphyreFactory, NativeConnectors, AsphyreSwapChains;
+  Winapi.Windows, AsphyreFonts, AbstractDevices, AbstractCanvas;
 
 type
   TDXCore = class
@@ -13,11 +12,6 @@ type
     FCanvas     : TAsphyreCanvas;
     FFonts      : TAsphyreFonts;
     FDummyWindow: HWND;
-
-    procedure OnAsphyreCreate(Sender: TObject; Param: Pointer; var Handled: Boolean);
-    procedure OnAsphyreDestroy(Sender: TObject; Param: Pointer; var Handled: Boolean);
-    procedure OnDeviceInit(Sender: TObject; Param: Pointer; var Handled: Boolean);
-    procedure OnDeviceCreate(Sender: TObject; Param: Pointer; var Handled: Boolean);
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -41,7 +35,8 @@ var
 implementation
 
 uses
-  System.SysUtils, System.Classes, Vectors2px, uTableResources, DX9Providers;
+  {$IFDEF DEBUG} uDebugForm, {$ENDIF}
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, uTableResources, DX9Providers;
 
 
 class procedure TDXCore.Initialize;
@@ -56,25 +51,38 @@ end;
 
 
 constructor TDXCore.Create;
+var
+  C1: Integer;
 begin
   FDummyWindow := AllocateHwnd(nil);
 
   Factory.UseProvider(idDirectx9);
 
-  EventAsphyreCreate.Subscribe(ClassName, OnAsphyreCreate);
-  EventAsphyreDestroy.Subscribe(ClassName, OnAsphyreDestroy);
-  EventDeviceInit.Subscribe(ClassName, OnDeviceInit);
-  EventDeviceCreate.Subscribe(ClassName, OnDeviceCreate);
+  FDevice := Factory.CreateDevice;
+  FCanvas := Factory.CreateCanvas;
+  FFonts := TAsphyreFonts.Create;
+  FFonts.Canvas := FCanvas;
 
-  NativeAsphyreConnect.Init;
+  FCanvas.Antialias := TRUE;
+  FCanvas.MipMapping := TRUE;
+
+  for C1 := 0 to 32 do
+    FDevice.SwapChains.Add(FDummyWindow, Point2px(1, 1));
+
+  if not FDevice.Connect then
+  begin
+    {$IFDEF DEBUG} DebugLn('Failed to connect to DX device!', ditException); {$ENDIF}
+  end;
 end;
 
 destructor TDXCore.Destroy;
 begin
   if Assigned(FDevice) then
     FDevice.Disconnect;
-  NativeAsphyreConnect.Done;
-  EventProviders.Unsubscribe(ClassName);
+
+  FreeAndNil(FFonts);
+  FreeAndNil(FCanvas);
+  FreeAndNil(FDevice);
 
   DeallocateHWnd(FDummyWindow);
 
@@ -89,38 +97,6 @@ begin
    if FDevice.SwapChains[C1].WindowHandle = FDummyWindow then
      Exit(C1);
   Exit(-1);
-end;
-
-procedure TDXCore.OnAsphyreCreate(Sender: TObject; Param: Pointer; var Handled: Boolean);
-begin
-  FDevice := Factory.CreateDevice;
-  FCanvas := Factory.CreateCanvas;
-  FFonts := TAsphyreFonts.Create;
-  FFonts.Canvas := FCanvas;
-
-  FCanvas.Antialias := TRUE;
-  FCanvas.MipMapping := TRUE;
-
-  FDevice.Connect;
-end;
-
-procedure TDXCore.OnAsphyreDestroy(Sender: TObject; Param: Pointer; var Handled: Boolean);
-begin
-  FreeAndNil(FFonts);
-  FreeAndNil(FCanvas);
-  FreeAndNil(FDevice);
-end;
-
-procedure TDXCore.OnDeviceCreate(Sender: TObject; Param: Pointer; var Handled: Boolean);
-begin
-end;
-
-procedure TDXCore.OnDeviceInit(Sender: TObject; Param: Pointer; var Handled: Boolean);
-var
-  C1: Integer;
-begin
-  for C1 := 0 to 32 do
-    FDevice.SwapChains.Add(FDummyWindow, Point2px(1, 1));
 end;
 
 procedure TDXCore.AcquireSwapChain(const AIndex: Integer; const AHandle: THandle);

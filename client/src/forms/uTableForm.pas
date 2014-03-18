@@ -78,6 +78,8 @@ type
     procedure FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormActivate(Sender: TObject);
     procedure tiGameLockTimer(Sender: TObject);
+    procedure edChatExit(Sender: TObject);
+    procedure edChatEnter(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.4505494505494505494505494505495;
@@ -242,7 +244,7 @@ uses
   {$IFDEF DEBUG} uDebugForm, {$ENDIF}
   cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, uMessageContainer, uServerSettings, uMessageCallbacks, uServerCodes,
   uPB_ChatEvent, uPB_ChatMessage, uPB_SeatInfo, uTableResources, NativeConnectors, uDXCore, AsphyreFonts, uFormsContainer,
-  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_PotInfo, RVTable;
+  uSocketClient, uCommon, uTableSitForm, uMainDataModule, uPlayerInfo, uAvatars, uPB_TableStatus, uPB_PotInfo, RVTable, uSounds;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -366,9 +368,9 @@ begin
          (Assigned(FActionButtons[index].Action)) then
       begin
         for C1 := Low(FActionButtons) to High(FActionButtons) do
-          if C1 = index then
+       {   if C1 = index then
             FActionButtons[C1].Image := TableResources.ActionButtonHotImage
-          else
+          else     }
             FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
       end
@@ -385,9 +387,9 @@ begin
          (Assigned(FRaisePresetButtons[index].Action)) then
       begin
         for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
-          if C1 = index then
+       {   if C1 = index then
             FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonHotImage
-          else
+          else   }
             FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
         renderit := TRUE;
       end
@@ -816,6 +818,24 @@ begin
   end;
 end;
 
+procedure TfrmTable.edChatEnter(Sender: TObject);
+begin
+  if edChat.Style.TextColor = clGray then
+  begin
+    edChat.Clear;
+    edChat.Style.TextColor := clWhite;
+  end;
+end;
+
+procedure TfrmTable.edChatExit(Sender: TObject);
+begin
+  if edChat.Text = '' then
+  begin
+    edChat.Style.TextColor := clGray;
+    edChat.Text := 'Click here to chat...';
+  end;
+end;
+
 procedure TfrmTable.edChatKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
@@ -907,6 +927,7 @@ var
   seat_bet : Integer;
   event    : TNotifyEvent;
   C1       : Integer;
+  nofocus  : Boolean;
 begin
   acStandUp.Enabled := FALSE;
   acFold.Enabled := FALSE;
@@ -942,6 +963,7 @@ begin
             tsFlop,
             tsTurn,
             tsRiver: begin
+              nofocus := FALSE;
               acFold.Enabled := TRUE;
               if seat_bet < FTableStatus.MinimumBet then
               begin
@@ -958,7 +980,10 @@ begin
                 end;
 
                 if cbFoldToAnyBet.Checked then
+                begin
+                  nofocus := TRUE;
                   acFold.Execute;
+                end;
               end
               else
               begin
@@ -967,7 +992,29 @@ begin
                 acRaise.Enabled := TRUE;
 
                 if cbFoldToAnyBet.Checked then
+                begin
+                  nofocus := TRUE;
                   acCheck.Execute;
+                end;
+              end;
+
+              if not nofocus then
+              begin
+                for C1 := 0 to Tables.Count - 1 do
+                  if tables[C1].Form.Focused then
+                  begin
+                    nofocus := TRUE;
+                    Break;
+                  end;
+
+                if not nofocus then
+                begin
+                  if IsIconic(Handle) then
+                    ShowWindow(Handle, SW_RESTORE);
+                  BringToFront;
+                  SetForegroundWindow(Handle);
+                  SetFocus;
+                end;
               end;
             end;
             tsWinning,
@@ -1206,8 +1253,11 @@ begin
       event := 'FOLD';
       seat_caption := 'Fold';
     end;
+
     teSit: event := 'SIT';
+
     teStandUp: event := 'STAND UP';
+
     teWinning: begin
       event := 'WINNING';
       for C1 := 0 to ATableEvent.Pots.Count - 1 do
@@ -1240,6 +1290,7 @@ begin
         AddUserChatMessage(Format('POT [%d]', [C1]), tmpstr);
       end;
     end;
+
     teDealing: begin
       event := 'DEALING';
       FFlopAnimations := -1;
@@ -1269,39 +1320,58 @@ begin
         end;
         Inc(card_index);
       until not iterate;
+
+      EnableGameLockTimer(1.5);
+
+      Sounds.Play(Sounds.SOUND_DEALING);
     end;
+
     teCheck: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'CHECK';
       seat_caption := 'Check';
+
+      Sounds.Play(Sounds.SOUND_CHECK);
     end;
+
     teCall: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'CALL';
       seat_caption := 'Call';
+
+      Sounds.Play(Sounds.SOUND_PUTCHIPS_SMALL);
     end;
+
     teRaise: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'RAISE';
       seat_caption := 'Raise';
+
+      Sounds.Play(Sounds.SOUND_PUTCHIPS_SMALL);
     end;
+
     teAllIn: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'ALL-IN';
       seat_caption := 'All-In';
+
+      Sounds.Play(Sounds.SOUND_ALLIN);
     end;
+
     teFlop: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'FLOP';
       EnableGameLockTimer(1.5);
       AnimateBets(ATableEvent.Bets);
     end;
+
     teTurn: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'TURN';
       EnableGameLockTimer(1.5);
       AnimateBets(ATableEvent.Bets);
     end;
+
     teRiver: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'RIVER';
@@ -1506,7 +1576,7 @@ begin
   FRaisePresetButtonWidth := TableResources.RaisePresetButtonNormalImage.Texture[0].Width * FTableResizeRatio;
   FRaisePresetButtonHeight := FRaisePresetButtonWidth / TableResources.RaisePresetButtonAspectRatio;
   FRaisePresetButtons[High(FRaisePresetButtons)].Point := Point2(FRaiseSliderPoint.x + FRaiseSliderWidth - FRaisePresetButtonWidth,
-                                                                 FRaiseSliderPoint.y - FLowerIntfBorder / 2 - FRaisePresetButtonHeight);
+                                                                 FRaiseSliderPoint.y - FLowerIntfBorder / 2.5 - FRaisePresetButtonHeight);
   for C1 := High(FRaisePresetButtons) - 1 downto Low(FRaisePresetButtons) do
     FRaisePresetButtons[C1].Point := Point2(FRaisePresetButtons[C1 + 1].Point.x - FLowerIntfBorder / 2.5 - FRaisePresetButtonWidth, FRaisePresetButtons[C1 + 1].Point.y);
 end;

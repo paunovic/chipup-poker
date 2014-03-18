@@ -49,9 +49,13 @@ object frmTable: TfrmTable
     Style.Font.Height = -11
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
+    Style.TextColor = clGray
     Style.TransparentBorder = False
     Style.IsFontAssigned = True
     TabOrder = 0
+    Text = 'Click here to chat...'
+    OnEnter = edChatEnter
+    OnExit = edChatExit
     OnKeyPress = edChatKeyPress
     Height = 16
     Width = 213
@@ -128,7 +132,6 @@ object frmTable: TfrmTable
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 492
   end
   object cbSitOutNextBB: TcxCheckBox
     Left = 251
@@ -171,7 +174,6 @@ object frmTable: TfrmTable
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 148
   end
   object seRaiseAmount: TcxSpinEdit
     Left = 474

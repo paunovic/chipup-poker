@@ -14,10 +14,9 @@ type
     FGame          : TGameInfo;
     FClub          : TClubInfo;
     FSwapChainIndex: Integer;
-    FTablesObject  : TObject;
 
   public
-    constructor Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
+    constructor Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
     destructor Destroy; override;
 
     procedure NotifyClose;
@@ -34,6 +33,9 @@ type
   var
     FNotifyServer: Boolean;
   public
+    class procedure Initialize;
+    class procedure Deinitialize;
+
     constructor Create;
 
     function AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
@@ -44,6 +46,9 @@ type
     procedure ClearWithoutNotification;
   end;
 
+var
+  Tables: TTables;
+
 
 implementation
 
@@ -51,14 +56,13 @@ uses
   Vcl.Controls, uTableForm, uCommon, uSocketClient, uDXCore, Vectors2px;
 
 
-constructor TTable.Create(const ATablesObject: TObject; const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
+constructor TTable.Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
 var
   form: TfrmTable;
 begin
   FSeatIndex := -1;
   FGame := AGame;
   FClub := AClub;
-  FTablesObject := ATablesObject;
   FSwapChainIndex := ASwapChainIndex;
   form := TfrmTable.Create(self);
   FForm := form;
@@ -81,10 +85,19 @@ end;
 
 procedure TTable.NotifyClose;
 begin
-  (FTablesObject as TTables).NotifyClose(FGame.MongoId);
+  Tables.NotifyClose(FGame.MongoId);
 end;
 
 
+class procedure TTables.Initialize;
+begin
+  Tables := TTables.Create;
+end;
+
+class procedure TTables.Deinitialize;
+begin
+  Tables.Free;
+end;
 
 constructor TTables.Create;
 begin
@@ -103,7 +116,7 @@ begin
     if sci = -1 then
       Exit(FALSE);
 
-    table := TTable.Create(self, AClub, AGame, sci);
+    table := TTable.Create(AClub, AGame, sci);
     table.Form.Show;
     Add(table);
   end

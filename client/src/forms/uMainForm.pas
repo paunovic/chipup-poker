@@ -172,7 +172,7 @@ procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := ConfirmToCloseTables;
   if CanClose then
-    dmMain.Tables.ClearWithoutNotification;
+    Tables.ClearWithoutNotification;
 end;
 
 procedure TfrmChipUpMain.FormCreate(Sender: TObject);
@@ -203,7 +203,7 @@ begin
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
-  dmMain.Tables.ClearWithoutNotification;
+  Tables.ClearWithoutNotification;
 end;
 
 procedure TfrmChipUpMain.ShowLoginForm;
@@ -319,7 +319,7 @@ begin
   if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
     MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
-    dmMain.Tables.AddTable(club, game);
+    Tables.AddTable(club, game);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -358,7 +358,7 @@ end;
 function TfrmChipUpMain.ConfirmToCloseTables: Boolean;
 begin
   result := TRUE;
-  if dmMain.Tables.SittingCount > 0 then
+  if Tables.SittingCount > 0 then
     result := MessageDlg('If you close the application, you will automatically leave the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
@@ -582,7 +582,7 @@ var
 begin
   pbtstatus := AObject as TPB_TableStatus;
 
-  if not dmMain.Tables.FindTable(pbtstatus.TableMongoId, table) then
+  if not Tables.FindTable(pbtstatus.TableMongoId, table) then
     Exit;
 
   table.Game.UpdateFromTableStatus(pbtstatus);

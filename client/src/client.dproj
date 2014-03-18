@@ -107,6 +107,9 @@
 			<RcCompile Include="resources\fonts.rc">
 				<Form>fonts.res</Form>
 			</RcCompile>
+			<RcCompile Include="resources\sounds.rc">
+				<Form>sounds.res</Form>
+			</RcCompile>
 			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
 			<DCCReference Include="uMainDataModule.pas">
 				<Form>dmMain</Form>
@@ -160,6 +163,9 @@
 			<DCCReference Include="forms\uTableSitForm.pas">
 				<Form>frmTableSit</Form>
 			</DCCReference>
+			<DCCReference Include="forms\uClubLobbyForm.pas">
+				<Form>frmClubLobby</Form>
+			</DCCReference>
 			<DCCReference Include="skins\ChipUpDarkStyle\dxsChipUpDark.pas"/>
 			<DCCReference Include="skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas"/>
 			<DCCReference Include="skins\ChipUpRedButton\dxsChipUpRedButton.pas"/>
@@ -210,9 +216,6 @@
 			<DCCReference Include="modules\protobuf\objects\uPB_SeatInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uServerCodes.pas"/>
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
-			<DCCReference Include="forms\uClubLobbyForm.pas">
-				<Form>frmClubLobby</Form>
-			</DCCReference>
 			<DCCReference Include="modules\protobuf\objects\uPB_ChangeSuspendState.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_RegisterReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_ClubCommandReply.pas"/>
@@ -239,6 +242,7 @@
 			<DCCReference Include="modules\directx_draw\uDXTimer.pas"/>
 			<DCCReference Include="modules\directx_draw\uDXAnimation.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_Pot.pas"/>
+			<DCCReference Include="modules\sounds\uSounds.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

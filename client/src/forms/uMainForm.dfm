@@ -3584,6 +3584,7 @@ object frmChipUpMain: TfrmChipUpMain
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 0
       Visible = False
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
       object gridTournamentsTable: TcxGridTableView
         OnCellDblClick = gridJoinedClubsTableCellDblClick
         OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
@@ -3646,6 +3647,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 32
       Action = acOpenClubLobby
       Anchors = [akLeft, akBottom]
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 1
       Font.Charset = DEFAULT_CHARSET
@@ -3662,6 +3664,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 380
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 2
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
       object gridGamesTable: TcxGridTableView
         OnCellDblClick = gridGamesTableCellDblClick
         OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3745,6 +3748,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 345
       Anchors = [akLeft, akTop, akBottom]
       TabOrder = 3
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
       object gridJoinedClubsTable: TcxGridTableView
         OnCellDblClick = gridJoinedClubsTableCellDblClick
         OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
@@ -3851,6 +3855,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 32
       Anchors = [akTop, akRight]
       Caption = 'OPEN TOURNAMENT LOBBY'
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 7
       Visible = False
@@ -3868,6 +3873,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 32
       Action = acShowCreateClubForm
       Anchors = [akTop, akRight]
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 8
       Font.Charset = DEFAULT_CHARSET
@@ -3884,6 +3890,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 32
       Action = acShowJoinClubForm
       Anchors = [akTop, akRight]
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 9
       Font.Charset = DEFAULT_CHARSET
