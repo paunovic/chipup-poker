@@ -48,7 +48,10 @@ type
       FActionButtonNormalImage: TAsphyreImage;
       FActionButtonHotImage: TAsphyreImage;
       FActionButtonPressedImage: TAsphyreImage;
-//      FRaiseMin
+      FRaisePresetButtonNormalImage: TAsphyreImage;
+      FRaisePresetButtonHotImage: TAsphyreImage;
+      FRaisePresetButtonPressedImage: TAsphyreImage;
+
 
       FBarmenoFonts: TBarmenoFonts;
       FCardCharactersFont_19px: TAsphyreFont;
@@ -64,6 +67,7 @@ type
       FRaiseSliderAspectRatio: Single;
       FRaiseSliderButtonAspectRatio: Single;
       FActionButtonAspectRatio: Single;
+      FRaisePresetButtonAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -130,6 +134,9 @@ type
     property ActionButtonNormalImage: TAsphyreImage read FActionButtonNormalImage;
     property ActionButtonHotImage: TAsphyreImage read FActionButtonHotImage;
     property ActionButtonPressedImage: TAsphyreImage read FActionButtonPressedImage;
+    property RaisePresetButtonNormalImage: TAsphyreImage read FRaisePresetButtonNormalImage;
+    property RaisePresetButtonHotImage: TAsphyreImage read FRaisePresetButtonHotImage;
+    property RaisePresetButtonPressedImage: TAsphyreImage read FRaisePresetButtonPressedImage;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
@@ -145,6 +152,7 @@ type
     property RaiseSliderAspectRatio: Single read FRaiseSliderAspectRatio;
     property RaiseSliderButtonAspectRatio: Single read FRaiseSliderButtonAspectRatio;
     property ActionButtonAspectRatio: Single read FActionButtonAspectRatio;
+    property RaisePresetButtonAspectRatio: Single read FRaisePresetButtonAspectRatio;
   end;
 
 var
@@ -211,6 +219,9 @@ begin
   AddDXImage('ActionButtonNormal.image', FActionButtonNormalImage, FActionButtonAspectRatio);
   AddDXImage('ActionButtonHot.image', FActionButtonHotImage);
   AddDXImage('ActionButtonPressed.image', FActionButtonPressedImage);
+  AddDXImage('RaisePresetButtonNormal.image', FRaisePresetButtonNormalImage, FRaisePresetButtonAspectRatio);
+  AddDXImage('RaisePresetButtonHot.image', FRaisePresetButtonHotImage);
+  AddDXImage('RaisePresetButtonPressed.image', FRaisePresetButtonPressedImage);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do

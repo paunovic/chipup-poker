@@ -78,8 +78,7 @@ object frmTable: TfrmTable
     TabOrder = 1
     Transparent = True
     Visible = False
-    ExplicitTop = 434
-    Height = 18
+    Height = 17
     Width = 113
   end
   object cbSitOutNextHand: TcxCheckBox
@@ -104,8 +103,7 @@ object frmTable: TfrmTable
     TabOrder = 2
     Transparent = True
     Visible = False
-    ExplicitTop = 452
-    Height = 12
+    Height = 17
     Width = 113
   end
   object btStandUp: TcxButton
@@ -134,7 +132,7 @@ object frmTable: TfrmTable
   end
   object cbSitOutNextBB: TcxCheckBox
     Left = 251
-    Top = 468
+    Top = 470
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Sit out next BB'
@@ -154,8 +152,7 @@ object frmTable: TfrmTable
     TabOrder = 4
     Transparent = True
     Visible = False
-    ExplicitTop = 467
-    Height = 12
+    Height = 17
     Width = 113
   end
   object btPlayNow: TcxButton
@@ -206,139 +203,13 @@ object frmTable: TfrmTable
     Height = 30
     Width = 106
   end
-  object btAction1: TcxButton
-    Left = 412
-    Top = 199
-    Width = 108
-    Height = 37
-    Anchors = []
-    Enabled = False
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 7
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-    OnClick = acCheckExecute
-  end
-  object btAction2: TcxButton
-    Left = 529
-    Top = 199
-    Width = 108
-    Height = 37
-    Anchors = []
-    Enabled = False
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 8
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-    OnClick = acCallExecute
-  end
-  object btAction3: TcxButton
-    Left = 646
-    Top = 199
-    Width = 108
-    Height = 37
-    Anchors = []
-    Enabled = False
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 9
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = []
-    ParentFont = False
-    OnClick = acRaiseExecute
-  end
-  object btRaiseMin: TcxButton
-    Left = 528
-    Top = 148
-    Width = 52
-    Height = 23
-    Action = acRaiseMin
-    Anchors = []
-    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 10
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object btRaise3BB: TcxButton
-    Left = 586
-    Top = 148
-    Width = 52
-    Height = 23
-    Action = acRaise3BB
-    Anchors = []
-    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 11
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object btRaisePot: TcxButton
-    Left = 644
-    Top = 148
-    Width = 52
-    Height = 23
-    Action = acRaisePot
-    Anchors = []
-    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 12
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object btRaiseMax: TcxButton
-    Left = 702
-    Top = 148
-    Width = 52
-    Height = 23
-    Action = acRaiseMax
-    Anchors = []
-    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 13
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
   object rvChat: TRichView
     Left = 16
     Top = 446
     Width = 213
     Height = 70
     Color = 4539717
-    TabOrder = 14
+    TabOrder = 7
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyle
@@ -601,5 +472,11 @@ object frmTable: TfrmTable
     StyleTemplates = <>
     Left = 380
     Top = 308
+  end
+  object tiGameLock: TTimer
+    Enabled = False
+    OnTimer = tiGameLockTimer
+    Left = 232
+    Top = 104
   end
 end

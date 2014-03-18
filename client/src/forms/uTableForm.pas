@@ -16,7 +16,8 @@ uses
   cxCurrencyEdit, RVStyle, RVScroll, RichView, RVEdit, AsphyreImages;
 
 type
-  TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3);
+  TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
+      mdoRaisePresetButton1, mdoRaisePresetButton2, mdoRaisePresetButton3, mdoRaisePresetButton4);
 
   TfrmTable = class(TForm)
     ActionManager: TActionManager;
@@ -42,15 +43,9 @@ type
     cbSitOutNextBB: TcxCheckBox;
     btPlayNow: TcxButton;
     seRaiseAmount: TcxSpinEdit;
-    btAction1: TcxButton;
-    btAction2: TcxButton;
-    btAction3: TcxButton;
-    btRaiseMin: TcxButton;
-    btRaise3BB: TcxButton;
-    btRaisePot: TcxButton;
-    btRaiseMax: TcxButton;
     RVStyle: TRVStyle;
     rvChat: TRichView;
+    tiGameLock: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -82,8 +77,11 @@ type
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormActivate(Sender: TObject);
+    procedure tiGameLockTimer(Sender: TObject);
   private
     const
+      FORM_ASPECT_RATIO = 1.4505494505494505494505494505495;
+
       ANIID_FLOP1  = 1;
       ANIID_FLOP2  = 2;
       ANIID_FLOP3  = 3;
@@ -103,9 +101,14 @@ type
     type
       TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
 
+      TUIButton = record
+        Image : TAsphyreImage;
+        Point : TPoint2;
+        Action: TAction;
+      end;
+
     var
       FCallbacksId            : Integer;
-      FFormAspectRatio        : Single;
       FTableResizeRatio       : Single;
       FRawTableWidth          : Single;
       FRawTableHeight         : Single;
@@ -142,19 +145,14 @@ type
       FRaiseSliderButtonWidth : Single;
       FRaiseSliderButtonHeight: Single;
       FRaiseSliderPosition    : Single;
+      FRaisePresetButtonWidth : Single;
+      FRaisePresetButtonHeight: Single;
 
       FActionButtonWidth      : Single;
       FActionButtonHeight     : Single;
-      FActionButton1Point     : TPoint2;
-      FActionButton2Point     : TPoint2;
-      FActionButton3Point     : TPoint2;
 
-      FActionButton1Image     : TAsphyreImage;
-      FActionButton2Image     : TAsphyreImage;
-      FActionButton3Image     : TAsphyreImage;
-      FActionButton1Action    : TAction;
-      FActionButton2Action    : TAction;
-      FActionButton3Action    : TAction;
+      FActionButtons          : TArray<TUIButton>;
+      FRaisePresetButtons     : TArray<TUIButton>;
 
       FDXAreaSize        : TPoint2px;
 
@@ -198,6 +196,8 @@ type
     procedure RenderValue(const APoint: TPoint2; const AValue: Single; const AColor: TColor2; const APot: Boolean);
     procedure RenderLowerInterface;
 
+    procedure EnableGameLockTimer(const ASeconds: Single);
+
     procedure AddUserChatMessage(const AUser, AMessage: String);
     procedure ModalFormClose(Sender: TObject);
 
@@ -208,7 +208,7 @@ type
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
 
-    function IsPointInActionButtons(const AX, AY: Integer): Integer;
+    function IsPointInUIButtons(const AX, AY: Integer; const AButtons: TArray<TUIButton>; const AButtonWidth, AButtonHeight: Single; out AIndex: Integer): Boolean;
 
     function GetTableSector(const APoint: TPoint2): TTableSector;
     function GetSeatPoint(const ASeatIndex: Integer): TPoint2;
@@ -255,6 +255,11 @@ begin
   ActionManager.State := asSuspended;
 
   FTable := ATable;
+
+  OnResize := nil;
+  ClientWidth := Round(Screen.Monitors[0].Width / 2.3);
+  ClientHeight := Round(ClientWidth / FORM_ASPECT_RATIO);
+  OnResize := FormResize;
 end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
@@ -274,18 +279,19 @@ begin
   FBetAnimations := 0;
   FillChar(FBetAniStacks[0], Length(FBetAniStacks) * SizeOf(UINT32), 0);
 
+  SetLength(FActionButtons, 3);
+  SetLength(FRaisePresetButtons, 4);
+
   FMouseDownObject := mdoNone;
 
   FTableStatus := TTableStatus.Create;
   FChipsStackMaker := TChipsStackMaker.Create;
 
-  FFormAspectRatio := ClientWidth / ClientHeight;
-
   Constraints.MaxHeight := 910 + (Height - ClientHeight);
-  Constraints.MaxWidth := Round(Constraints.MaxHeight * FFormAspectRatio);
+  Constraints.MaxWidth := Round(Constraints.MaxHeight * FORM_ASPECT_RATIO);
 
   Constraints.MinWidth := 600;
-  Constraints.MinHeight := Round(Constraints.MinWidth / FFormAspectRatio);
+  Constraints.MinHeight := Round(Constraints.MinWidth / FORM_ASPECT_RATIO);
 
   rvChat.ClearAll;
   rvChat.Format;
@@ -306,6 +312,8 @@ end;
 procedure TfrmTable.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   renderit: Boolean;
+  index   : Integer;
+  C1      : Integer;
 begin
   if FMouseDownObject <> mdoNone then
     Exit;
@@ -315,34 +323,32 @@ begin
      (IsPointInsideCircle(X, Y, FRaiseSliderButtonPoint.x, FRaiseSliderButtonPoint.y, FRaiseSliderButtonWidth / 2)) then
     FMouseDownObject := mdoRaiseSliderButton
   else
-    case IsPointInActionButtons(X, Y) of
-      1: if Assigned(FActionButton1Action) then
-      begin
-        FMouseDownObject := mdoActionButton1;
-        FActionButton1Image := TableResources.ActionButtonPressedImage;
-        FActionButton2Image := TableResources.ActionButtonNormalImage;
-        FActionButton3Image := TableResources.ActionButtonNormalImage;
-        renderit := TRUE;
-      end;
-
-      2: if Assigned(FActionButton2Action) then
-      begin
-        FMouseDownObject := mdoActionButton2;
-        FActionButton1Image := TableResources.ActionButtonNormalImage;
-        FActionButton2Image := TableResources.ActionButtonPressedImage;
-        FActionButton3Image := TableResources.ActionButtonNormalImage;
-        renderit := TRUE;
-      end;
-
-      3: if Assigned(FActionButton3Action) then
-      begin
-        FMouseDownObject := mdoActionButton3;
-        FActionButton1Image := TableResources.ActionButtonNormalImage;
-        FActionButton2Image := TableResources.ActionButtonNormalImage;
-        FActionButton3Image := TableResources.ActionButtonPressedImage;
-        renderit := TRUE;
-      end;
+  begin
+    if (IsPointInUIButtons(X, Y, FActionButtons, FActionButtonWidth, FActionButtonHeight, index)) and
+       (Assigned(FActionButtons[index].Action)) then
+    begin
+      FMouseDownObject := TMouseDownObject(Integer(mdoActionButton1) + index);
+      for C1 := Low(FActionButtons) to High(FActionButtons) do
+        if C1 = index then
+          FActionButtons[C1].Image := TableResources.ActionButtonPressedImage
+        else
+          FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
+      renderit := TRUE;
     end;
+
+    if (acRaise.Enabled) and
+       (IsPointInUIButtons(X, Y, FRaisePresetButtons, FRaisePresetButtonWidth, FRaisePresetButtonHeight, index)) and
+       (Assigned(FActionButtons[index].Action)) then
+    begin
+      FMouseDownObject := TMouseDownObject(Integer(mdoRaisePresetButton1) + index);
+      for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+        if C1 = index then
+          FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonPressedImage
+        else
+          FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
+      renderit := TRUE;
+    end;
+  end;
 
   if renderit then
     Render;
@@ -350,41 +356,48 @@ end;
 
 procedure TfrmTable.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-  renderit: Boolean;
+  renderit : Boolean;
+  index, C1: Integer;
 begin
   renderit := FALSE;
   case FMouseDownObject of
-    mdoNone: case IsPointInActionButtons(X, Y) of
-      1: begin
-        FActionButton1Image := TableResources.ActionButtonHotImage;
-        FActionButton2Image := TableResources.ActionButtonNormalImage;
-        FActionButton3Image := TableResources.ActionButtonNormalImage;
-        renderit := TRUE;
-      end;
-
-      2: begin
-        FActionButton1Image := TableResources.ActionButtonNormalImage;
-        FActionButton2Image := TableResources.ActionButtonHotImage;
-        FActionButton3Image := TableResources.ActionButtonNormalImage;
-        renderit := TRUE;
-      end;
-
-      3: begin
-        FActionButton1Image := TableResources.ActionButtonNormalImage;
-        FActionButton2Image := TableResources.ActionButtonNormalImage;
-        FActionButton3Image := TableResources.ActionButtonHotImage;
-        renderit := TRUE;
-      end;
-    else
-      if (FActionButton1Image <> TableResources.ActionButtonNormalImage) or
-         (FActionButton2Image <> TableResources.ActionButtonNormalImage) or
-         (FActionButton3Image <> TableResources.ActionButtonNormalImage) then
+    mdoNone: begin
+      if (IsPointInUIButtons(X, Y, FActionButtons, FActionButtonWidth, FActionButtonHeight, index)) and
+         (Assigned(FActionButtons[index].Action)) then
       begin
-        FActionButton1Image := TableResources.ActionButtonNormalImage;
-        FActionButton2Image := TableResources.ActionButtonNormalImage;
-        FActionButton3Image := TableResources.ActionButtonNormalImage;
+        for C1 := Low(FActionButtons) to High(FActionButtons) do
+          if C1 = index then
+            FActionButtons[C1].Image := TableResources.ActionButtonHotImage
+          else
+            FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
-      end;
+      end
+      else
+        for C1 := Low(FActionButtons) to High(FActionButtons) do
+          if FActionButtons[C1].Image <> TableResources.ActionButtonNormalImage then
+          begin
+            FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
+            renderit := TRUE;
+          end;
+
+      if (acRaise.Enabled) and
+         (IsPointInUIButtons(X, Y, FRaisePresetButtons, FRaisePresetButtonWidth, FRaisePresetButtonHeight, index)) and
+         (Assigned(FRaisePresetButtons[index].Action)) then
+      begin
+        for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+          if C1 = index then
+            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonHotImage
+          else
+            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
+        renderit := TRUE;
+      end
+      else
+        for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+          if FRaisePresetButtons[C1].Image <> TableResources.RaisePresetButtonNormalImage then
+          begin
+            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
+            renderit := TRUE;
+          end;
     end;
 
     mdoRaiseSliderButton: begin
@@ -405,33 +418,30 @@ end;
 
 procedure TfrmTable.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
-  actbt: Integer;
+  index: Integer;
 begin
   if FMouseDownObject = mdoNone then
     Exit;
 
-  actbt := -1;
-  if FMouseDownObject in [mdoActionButton1, mdoActionButton2, mdoActionButton3] then
-    actbt := IsPointInActionButtons(X, Y);
-
   case FMouseDownObject of
-    mdoActionButton1: if actbt = 1 then
-    begin
-      FActionButton1Image := TableResources.ActionButtonNormalImage;
-      if Assigned(FActionButton1Action) then
-        FActionButton1Action.Execute;
+    mdoActionButton1..mdoActionButton3: begin
+      if (IsPointInUIButtons(X, Y, FActionButtons, FActionButtonWidth, FActionButtonHeight, index)) and
+         (Integer(FMouseDownObject) - Integer(mdoActionButton1) = index) then
+      begin
+        FActionButtons[index].Image := TableResources.ActionButtonNormalImage;
+        if Assigned(FActionButtons[index].Action) then
+          FActionButtons[index].Action.Execute;
+      end;
     end;
-    mdoActionButton2: if actbt = 2 then
-    begin
-      FActionButton2Image := TableResources.ActionButtonNormalImage;
-      if Assigned(FActionButton2Action) then
-        FActionButton2Action.Execute;
-    end;
-    mdoActionButton3: if actbt = 3 then
-    begin
-      FActionButton3Image := TableResources.ActionButtonNormalImage;
-      if Assigned(FActionButton3Action) then
-        FActionButton3Action.Execute;
+
+    mdoRaisePresetButton1..mdoRaisePresetButton4: begin
+      if (IsPointInUIButtons(X, Y, FRaisePresetButtons, FRaisePresetButtonWidth, FRaisePresetButtonHeight, index)) and
+         (Integer(FMouseDownObject) - Integer(mdoRaisePresetButton1) = index) then
+      begin
+        FRaisePresetButtons[index].Image := TableResources.RaisePresetButtonNormalImage;
+        if Assigned(FRaisePresetButtons[index].Action) then
+          FRaisePresetButtons[index].Action.Execute;
+      end;
     end;
   end;
 
@@ -504,9 +514,12 @@ begin
 end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
+var
+  hround: Integer;
 begin
-  if Height <> Round(Width / FFormAspectRatio) then
-    Height := Round(Width / FFormAspectRatio);
+  hround := Round(Width / FORM_ASPECT_RATIO);
+  if Height <> hround then
+    Height := hround;
 
   rvChat.Height := ClientHeight div 7;
   rvChat.Width := ClientWidth div 3;
@@ -517,24 +530,19 @@ begin
   edChat.Top := rvChat.Top - edChat.Height;
   edChat.Left := rvChat.Left;
 
-  btStandUp.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder;
-  btStandUp.Top := rvChat.Top + rvChat.Height - btStandUp.Height;
+  btStandUp.Left := ClientWidth - btStandUp.Width;
+  btStandUp.Top := 0;
 
-  btAction3.Height := (rvChat.Height + edChat.Height) div 2;
-  btAction2.Height := btAction3.Height;
-  btAction1.Height := btAction3.Height;
+  cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
+  cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
+  cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
 
-  btAction3.Width := Round((ClientWidth - rvChat.Left - rvChat.Width) / 4.5);
-  btAction2.Width := btAction3.Width;
-  btAction1.Width := btAction3.Width;
+  cbFoldToAnyBet.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder;
+  cbSitOutNextHand.Left := cbFoldToAnyBet.Left;
+  cbSitOutNextBB.Left := cbFoldToAnyBet.Left;
 
-  btAction1.Top := ClientHeight - FLowerIntfBorder - btAction1.Height;
-  btAction2.Top := ClientHeight - FLowerIntfBorder - btAction2.Height;
-  btAction3.Top := ClientHeight - FLowerIntfBorder - btAction3.Height;
-
-  btAction3.Left := ClientWidth - FLowerIntfBorder - btAction3.Width;
-  btAction2.Left := btAction3.Left - FLowerIntfBorder - btAction2.Width;
-  btAction1.Left := btAction2.Left - FLowerIntfBorder - btAction1.Width;
+  btPlayNow.Top := edChat.Top;
+  btPlayNow.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder * 2;
 
   if Assigned(DXCore.Device) then
   begin
@@ -543,50 +551,10 @@ begin
     Render;
   end;
 
-  btRaiseMin.Width := Round(FRaiseSliderWidth / 6.5);
-  btRaise3BB.Width := btRaiseMin.Width;
-  btRaisePot.Width := btRaiseMin.Width;
-  btRaiseMax.Width := btRaiseMin.Width;
-
-  btRaiseMin.Height := ClientHeight div 24;
-  btRaise3BB.Height := btRaiseMin.Height;
-  btRaisePot.Height := btRaiseMin.Height;
-  btRaiseMax.Height := btRaiseMin.Height;
-
-  btRaiseMin.Top := Round(FRaiseSliderPoint.y - btRaiseMin.Height - FLowerIntfBorder / 2);
-  btRaise3BB.Top := btRaiseMin.Top;
-  btRaisePot.Top := btRaiseMin.Top;
-  btRaiseMax.Top := btRaiseMin.Top;
-
-  btRaiseMax.Left := Round(FRaiseSliderPoint.x + FRaiseSliderWidth - btRaiseMax.Width);
-  btRaisePot.Left := Round(btRaiseMax.Left - FLowerIntfBorder / 2 - btRaisePot.Width);
-  btRaise3BB.Left := Round(btRaisePot.Left - FLowerIntfBorder / 2 - btRaise3BB.Width);
-  btRaiseMIn.Left := Round(btRaise3BB.Left - FLowerIntfBorder / 2 - btRaiseMin.Width);
-
   seRaiseAmount.Width := Round(TableResources.RAISE_VALUEBOX_WIDTH * FRaiseSliderResizeRatio);
   seRaiseAmount.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaiseSliderResizeRatio);
   seRaiseAmount.Left := Round(FRaiseSliderPoint.x + TableResources.RAISE_VALUEBOX_X * FRaiseSliderResizeRatio);
   seRaiseAmount.Top := Round(FRaiseSliderPoint.y + TableResources.RAISE_VALUEBOX_Y * FRaiseSliderResizeRatio);
-
-  cbFoldToAnyBet.Height := Round(FTableResizeRatio * 28);
-  if cbFoldToAnyBet.Height > 18 then
-    cbFoldToAnyBet.Height := 18;
-  if cbFoldToAnyBet.Height < 14 then
-    cbFoldToAnyBet.Height := 14;
-
-  cbSitOutNextHand.Height := cbFoldToAnyBet.Height;
-  cbSitOutNextBB.Height := cbFoldToAnyBet.Height;
-
-  cbFoldToAnyBet.Top := edChat.Top;
-  cbSitOutNextHand.Top := cbFoldToAnyBet.Top + cbFoldToAnyBet.Height;
-  cbSitOutNextBB.Top := cbSitOutNextHand.Top + cbSitOutNextHand.Height;
-
-  cbFoldToAnyBet.Left := btStandUp.Left;
-  cbSitOutNextHand.Left := btStandUp.Left;
-  cbSitOutNextBB.Left := btStandUp.Left;
-
-  btPlayNow.Top := edChat.Top;
-  btPlayNow.Left := btStandUp.Left;
 end;
 
 procedure TfrmTable.WMSizing(var AMessage: TMessage);
@@ -594,9 +562,9 @@ begin
   inherited;
 
   case AMessage.wParam of
-    WMSZ_LEFT, WMSZ_RIGHT, WMSZ_BOTTOMLEFT: with PRect(AMessage.LParam)^ do Bottom := Top + Round((Right - Left) / FFormAspectRatio);
-    WMSZ_TOP, WMSZ_BOTTOM, WMSZ_TOPRIGHT, WMSZ_BOTTOMRIGHT: with PRect(AMessage.LParam)^ do Right := Left + Round((Bottom - Top) * FFormAspectRatio);
-    WMSZ_TOPLEFT: with PRect(AMessage.LParam)^ do Top := Bottom - Round((Right - Left) / FFormAspectRatio);
+    WMSZ_LEFT, WMSZ_RIGHT, WMSZ_BOTTOMLEFT: with PRect(AMessage.LParam)^ do Bottom := Top + Round((Right - Left) / FORM_ASPECT_RATIO);
+    WMSZ_TOP, WMSZ_BOTTOM, WMSZ_TOPRIGHT, WMSZ_BOTTOMRIGHT: with PRect(AMessage.LParam)^ do Right := Left + Round((Bottom - Top) * FORM_ASPECT_RATIO);
+    WMSZ_TOPLEFT: with PRect(AMessage.LParam)^ do Top := Bottom - Round((Right - Left) / FORM_ASPECT_RATIO);
   end;
 end;
 
@@ -645,6 +613,12 @@ begin
     tiActiveFrameBlink.Tag := 0;
 
   Render;
+end;
+
+procedure TfrmTable.tiGameLockTimer(Sender: TObject);
+begin
+  tiGameLock.Enabled := FALSE;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
@@ -737,17 +711,18 @@ begin
           result := tsMid;
 end;
 
-function TfrmTable.IsPointInActionButtons(const AX, AY: Integer): Integer;
+function TfrmTable.IsPointInUIButtons(const AX, AY: Integer; const AButtons: TArray<TUIButton>; const AButtonWidth, AButtonHeight: Single; out AIndex: Integer): Boolean;
+var
+  C1: Integer;
 begin
-  if (AY < FActionButton1Point.y) or (AY > FActionButton1Point.y + FActionButtonHeight) then
-    Exit(-1);
-  if (AX >= FActionButton1Point.x) and (AX <= FActionButton1Point.x + FActionButtonWidth) then
-    Exit(1);
-  if (AX >= FActionButton2Point.x) and (AX <= FActionButton2Point.x + FActionButtonWidth) then
-    Exit(2);
-  if (AX >= FActionButton3Point.x) and (AX <= FActionButton3Point.x + FActionButtonWidth) then
-    Exit(3);
-  Exit(-1);
+  for C1 := Low(AButtons) to High(AButtons) do
+    if (AY >= AButtons[C1].Point.y) and (AY <= AButtons[C1].Point.y + AButtonHeight) and
+       (AX >= AButtons[C1].Point.x) and (AX <= AButtons[C1].Point.x + AButtonWidth) then
+    begin
+      AIndex := C1;
+      Exit(TRUE);
+    end;
+  Exit(FALSE);
 end;
 
 procedure TfrmTable.ModalFormClose(Sender: TObject);
@@ -856,9 +831,18 @@ begin
   end;
 end;
 
+procedure TfrmTable.EnableGameLockTimer(const ASeconds: Single);
+begin
+  tiGameLock.Enabled := FALSE;
+  tiGameLock.Interval := Round(ASeconds * 1000);
+  tiGameLock.Enabled := TRUE;
+end;
+
 procedure TfrmTable.acShowLosingCardsExecute(Sender: TObject);
 begin
   SocketClient.ShowLosingCards(FTable.Game.MongoId);
+  acShowLosingCards.Enabled := FALSE;
+  Render;
 end;
 
 procedure TfrmTable.acStandUpExecute(Sender: TObject);
@@ -922,6 +906,7 @@ var
   foldtoany: Boolean;
   seat_bet : Integer;
   event    : TNotifyEvent;
+  C1       : Integer;
 begin
   acStandUp.Enabled := FALSE;
   acFold.Enabled := FALSE;
@@ -949,15 +934,13 @@ begin
         sitout := TRUE;
         foldtoany := TRUE;
         if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
-           (not FTableStatus.Locked) then
+           (not FTableStatus.Locked) and
+           (not tiGameLock.Enabled) then
           case FTableStatus.State of
             tsIdle: ;
             tsPreFlop,
-            tsFlopping,
             tsFlop,
-            tsTurning,
             tsTurn,
-            tsRiverTime,
             tsRiver: begin
               acFold.Enabled := TRUE;
               if seat_bet < FTableStatus.MinimumBet then
@@ -1007,7 +990,8 @@ begin
 
   if (FTableStatus.CurrentSeat <> -1) and
      (not tiActiveFrameBlink.Enabled) and
-     (not FTableStatus.Locked) then
+     (not FTableStatus.Locked) and
+     (not tiGameLock.Enabled) then
   begin
     tiActiveFrameBlink.Tag := 1;
     tiActiveFrameBlink.Enabled := TRUE;
@@ -1053,33 +1037,33 @@ begin
     btPlayNow.Visible := acPlayNow.Enabled;
 
   if acFold.Enabled then
-    FActionButton1Action := acFold
+    FActionButtons[0].Action := acFold
   else
     if acShowLosingCards.Enabled then
-      FActionButton1Action := acShowLosingCards
+      FActionButtons[0].Action := acShowLosingCards
     else
-      FActionButton1Action := nil;
+      FActionButtons[0].Action := nil;
 
   if (acCall.Enabled) or (acCheck.Enabled) then
   begin
     if acCall.Enabled then
-      FActionButton2Action := acCall
+      FActionButtons[1].Action := acCall
     else
-      FActionButton2Action := acCheck;
+      FActionButtons[1].Action := acCheck;
   end
   else
-    FActionButton2Action := nil;
+    FActionButtons[1].Action := nil;
 
   if acRaise.Enabled then
-    FActionButton3Action := acRaise
+    FActionButtons[2].Action := acRaise
   else
-    FActionButton3Action := nil;
+    FActionButtons[2].Action := nil;
 
   seRaiseAmount.Visible := acRaise.Enabled;
-  btRaiseMin.Visible := acRaise.Enabled;
-  btRaise3BB.Visible := acRaise.Enabled;
-  btRaisePot.Visible := acRaise.Enabled;
-  btRaiseMax.Visible := acRaise.Enabled;
+  acRaiseMin.Enabled := acRaise.Enabled;
+  acRaise3BB.Enabled := acRaise.Enabled;
+  acRaisePot.Enabled := acRaise.Enabled;
+  acRaiseMax.Enabled := acRaise.Enabled;
 
   if acRaise.Enabled then
   begin
@@ -1088,10 +1072,18 @@ begin
     FRaiseMin := FTableStatus.MinimumBet + FTable.Game.BigBlind;
     FRaiseMax := FTableStatus.MaximumBet;
 
+    FRaisePresetButtons[0].Action := acRaiseMin;
+    FRaisePresetButtons[1].Action := acRaise3BB;
+    FRaisePresetButtons[2].Action := acRaisePot;
+    FRaisePresetButtons[3].Action := acRaiseMax;
+
     seRaiseAmount.Properties.MaxValue := FRaiseMax / 100;
 
     SetRaiseSliderValue(FRaiseMin);
-  end;
+  end
+  else
+    for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+      FRaisePresetButtons[C1].Action := nil;
 end;
 
 procedure TfrmTable.tiSeatClearCaptionTimer(Sender: TObject);
@@ -1143,9 +1135,9 @@ begin
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
       FTableStatus.Seats[C1].FillDealtCards;
 
-    if FTableStatus.State in [tsFlop, tsTurning, tsTurn, tsRiverTime, tsRiver, tsWinning, tsWinning2] then
+    if FTableStatus.State in [tsFlop, tsTurn, tsRiver, tsWinning, tsWinning2] then
       FFlopAnimations := 6;
-    if FTableStatus.State in [tsTurn, tsRiverTime, tsRiver, tsWinning, tsWinning2] then
+    if FTableStatus.State in [tsTurn, tsRiver, tsWinning, tsWinning2] then
       FTurnAnimations := 1;
     if FTableStatus.State in [tsRiver, tsWinning, tsWinning2] then
       FRiverAnimations := 1;
@@ -1301,16 +1293,19 @@ begin
     teFlop: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'FLOP';
+      EnableGameLockTimer(1.5);
       AnimateBets(ATableEvent.Bets);
     end;
     teTurn: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'TURN';
+      EnableGameLockTimer(1.5);
       AnimateBets(ATableEvent.Bets);
     end;
     teRiver: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'RIVER';
+      EnableGameLockTimer(1.5);
       AnimateBets(ATableEvent.Bets);
     end;
   end;
@@ -1422,8 +1417,10 @@ const
   TABLE_X_RIGHT       = 64;
   TABLE_Y_TOP         = 66;
   TABLE_Y_BOTTOM      = 133;
-  TABLE_Y_OFFSET      = 30;
+  TABLE_Y_OFFSET      = 10;
   TABLE_WIDTH_OF_FORM = 0.715;
+var
+  C1: Integer;
 begin
   // calculate table resize ratio
   FTableResizeRatio := (FDXAreaSize.x * TABLE_WIDTH_OF_FORM) / TableResources.TableImage.Texture[0].Width;
@@ -1485,15 +1482,15 @@ begin
   FActionButtonWidth := TableResources.ActionButtonNormalImage.Texture[0].Width * FTableResizeRatio;
   FActionButtonHeight := FActionButtonWidth / TableResources.ActionButtonAspectRatio;
 
-  FActionButton3Point := Point2(FDXAreaSize.x - FLowerIntfBorder * 1.5 - FActionButtonWidth, FDXAreaSize.y - FLowerIntfBorder * 1.5 - FActionButtonHeight);
-  FActionButton2Point := Point2(FActionButton3Point.x - FLowerIntfBorder * 2 - FActionButtonWidth, FActionButton3Point.y);
-  FActionButton1Point := Point2(FActionButton2Point.x - FLowerIntfBorder * 2 - FActionButtonWidth, FActionButton2Point.y);
+  FActionButtons[High(FActionButtons)].Point := Point2(FDXAreaSize.x - FLowerIntfBorder * 1.5 - FActionButtonWidth, FDXAreaSize.y - FLowerIntfBorder - FActionButtonHeight);
+  for C1 := High(FActionButtons) - 1 downto Low(FActionButtons) do
+    FActionButtons[C1].Point := Point2(FActionButtons[C1 + 1].Point.x - FLowerIntfBorder * 2 - FActionButtonWidth, FActionButtons[C1 + 1].Point.y);
 
-  FRaiseSliderWidth := FActionButton3Point.x + FActionButtonWidth - FActionButton1Point.x;
+  FRaiseSliderWidth := FActionButtons[High(FActionButtons)].Point.x + FActionButtonWidth - FActionButtons[Low(FActionButtons)].Point.x;
   FRaiseSliderHeight := FRaiseSliderWidth / TableResources.RaiseSliderAspectRatio;
   FRaiseSliderResizeRatio := FRaiseSliderWidth / TableResources.RaiseSliderBackgroundImage.Texture[0].Width;
 
-  FRaiseSliderPoint := Point2(FActionButton1Point.x, FActionButton1Point.y - FLowerIntfBorder - FRaiseSliderHeight);
+  FRaiseSliderPoint := Point2(FActionButtons[Low(FActionButtons)].Point.x, FActionButtons[Low(FActionButtons)].Point.y - FLowerIntfBorder - FRaiseSliderHeight);
 
   FRaiseSliderButtonWidth := TableResources.RaiseSliderButtonImage.Texture[0].Width * FRaiseSliderResizeRatio;
   FRaiseSliderButtonHeight := FRaiseSliderButtonWidth * TableResources.RaiseSliderButtonAspectRatio;
@@ -1505,6 +1502,13 @@ begin
 
   FRaiseSliderButtonPoint := Point2(FRaiseSliderButtonBounds.Left + FRaiseSliderButtonBounds.Width * FRaiseSliderPosition,
                                     FRaiseSliderButtonBounds.Top + FRaiseSliderButtonBounds.Height / 2);
+
+  FRaisePresetButtonWidth := TableResources.RaisePresetButtonNormalImage.Texture[0].Width * FTableResizeRatio;
+  FRaisePresetButtonHeight := FRaisePresetButtonWidth / TableResources.RaisePresetButtonAspectRatio;
+  FRaisePresetButtons[High(FRaisePresetButtons)].Point := Point2(FRaiseSliderPoint.x + FRaiseSliderWidth - FRaisePresetButtonWidth,
+                                                                 FRaiseSliderPoint.y - FLowerIntfBorder / 2 - FRaisePresetButtonHeight);
+  for C1 := High(FRaisePresetButtons) - 1 downto Low(FRaisePresetButtons) do
+    FRaisePresetButtons[C1].Point := Point2(FRaisePresetButtons[C1 + 1].Point.x - FLowerIntfBorder / 2.5 - FRaisePresetButtonWidth, FRaisePresetButtons[C1 + 1].Point.y);
 end;
 
 procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
@@ -1623,10 +1627,11 @@ begin
     dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
 
     // set seat image that we should render
-    if FTableStatus.CurrentSeat = seat_info.SeatIndex then
+    if (FTableStatus.CurrentSeat = seat_info.SeatIndex) and
+       (not FTableStatus.Locked) and
+       (not tiGameLock.Enabled) then
     begin
-      if (tiActiveFrameBlink.Tag = 1) and
-         (not FTableStatus.Locked) then
+      if tiActiveFrameBlink.Tag = 1 then
         seat_image := active_seat_light_image
       else
         seat_image := active_seat_dark_image;
@@ -1908,17 +1913,13 @@ begin
     hide_card := FFlopAnimations < 6;
     if FFlopAnimations = -1 then
     begin
-      card_points_curr[0] := FDealerPoint;
-      card_points_curr[1] := FDealerPoint;
-      card_points_curr[2] := FDealerPoint;
+      DXTimer.AddAnimation(Handle, ANIID_FLOP1, FDealerPoint, card_points_mid[0], 0.15, 0.9);
+      DXTimer.AddAnimation(Handle, ANIID_FLOP2, FDealerPoint, card_points_mid[1], 0.15, 0.9);
+      DXTimer.AddAnimation(Handle, ANIID_FLOP3, FDealerPoint, card_points_mid[2], 0.15, 0.9);
 
-      DXTimer.AddAnimation(Handle, ANIID_FLOP1, FDealerPoint, card_points_mid[0], 0.15, 0);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP2, FDealerPoint, card_points_mid[1], 0.15, 0);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP3, FDealerPoint, card_points_mid[2], 0.15, 0);
-
-      DXTimer.AddAnimation(Handle, ANIID_FLOP4, card_points_mid[0], card_points_final[0], 0.2, 0.2);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP5, card_points_mid[1], card_points_final[1], 0.2, 0.2);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP6, card_points_mid[2], card_points_final[2], 0.2, 0.2);
+      DXTimer.AddAnimation(Handle, ANIID_FLOP4, card_points_mid[0], card_points_final[0], 0.2, 1.1);
+      DXTimer.AddAnimation(Handle, ANIID_FLOP5, card_points_mid[1], card_points_final[1], 0.2, 1.1);
+      DXTimer.AddAnimation(Handle, ANIID_FLOP6, card_points_mid[2], card_points_final[2], 0.2, 1.1);
 
       FFlopAnimations := 0;
     end;
@@ -1926,11 +1927,22 @@ begin
     if FFlopAnimations in [0, 1, 2] then
     begin
       if DXTimer.Find(Handle, ANIID_FLOP1, animation) then
-        card_points_curr[0] := animation.CurrPoint;
+        if animation.Status = asAnimating then
+          card_points_curr[0] := animation.CurrPoint
+        else
+          card_points_curr[0].x := -1;
+
       if DXTimer.Find(Handle, ANIID_FLOP2, animation) then
-        card_points_curr[1] := animation.CurrPoint;
+        if animation.Status = asAnimating then
+          card_points_curr[1] := animation.CurrPoint
+        else
+          card_points_curr[1].x := -1;
+
       if DXTimer.Find(Handle, ANIID_FLOP3, animation) then
-        card_points_curr[2] := animation.CurrPoint;
+        if animation.Status = asAnimating then
+          card_points_curr[2] := animation.CurrPoint
+        else
+          card_points_curr[2].x := -1;
     end;
 
     if FFlopAnimations in [3, 4, 5] then
@@ -1958,10 +1970,13 @@ begin
     end;
 
     for C1 := 0 to FTableStatus.FlopCards.Count - 1 do
-      if hide_card then
-        RenderCard(card_points_curr[C1], nil, 1)
+      if card_points_curr[C1].x = -1 then
+        Continue
       else
-        RenderCard(card_points_curr[C1], FTableStatus.FlopCards[C1], 1);
+        if hide_card then
+          RenderCard(card_points_curr[C1], nil, 1)
+        else
+          RenderCard(card_points_curr[C1], FTableStatus.FlopCards[C1], 1);
   end;
 
   if FTableStatus.TurnCard.Value <> cvUnknown then
@@ -1969,19 +1984,24 @@ begin
     hide_card := FTurnAnimations < 1;
     if FTurnAnimations = -1 then
     begin
-      card_points_curr[3] := FDealerPoint;
-      DXTimer.AddAnimation(Handle, ANIID_TURN, FDealerPoint, card_points_final[3], 0.15, 0);
+      DXTimer.AddAnimation(Handle, ANIID_TURN, FDealerPoint, card_points_final[3], 0.15, 0.75);
       FTurnAnimations := 0;
     end;
 
     if FTurnAnimations = 0 then
       if DXTimer.Find(Handle, ANIID_TURN, animation) then
-        card_points_curr[3] := animation.CurrPoint;
+        if animation.Status = asAnimating then
+          card_points_curr[3] := animation.CurrPoint
+        else
+          card_points_curr[3].x := -1;
 
-    if hide_card then
-      RenderCard(card_points_curr[3], nil, 1)
-    else
-      RenderCard(card_points_curr[3], FTableStatus.TurnCard, 1);
+    if card_points_curr[3].x > -1 then
+    begin
+      if hide_card then
+        RenderCard(card_points_curr[3], nil, 1)
+      else
+        RenderCard(card_points_curr[3], FTableStatus.TurnCard, 1);
+    end;
   end;
 
   if FTableStatus.RiverCard.Value <> cvUnknown then
@@ -1990,18 +2010,24 @@ begin
     if FRiverAnimations = -1 then
     begin
       card_points_curr[4] := FDealerPoint;
-      DXTimer.AddAnimation(Handle, ANIID_RIVER, FDealerPoint, card_points_final[4], 0.15, 0);
+      DXTimer.AddAnimation(Handle, ANIID_RIVER, FDealerPoint, card_points_final[4], 0.15, 0.75);
       FRiverAnimations := 0;
     end;
 
     if FRiverAnimations = 0 then
       if DXTimer.Find(Handle, ANIID_RIVER, animation) then
-        card_points_curr[4] := animation.CurrPoint;
+        if animation.Status = asAnimating then
+          card_points_curr[4] := animation.CurrPoint
+        else
+          card_points_curr[4].x := -1;
 
-    if hide_card then
-      RenderCard(card_points_curr[4], nil, 1)
-    else
-      RenderCard(card_points_curr[4], FTableStatus.RiverCard, 1);
+    if card_points_curr[4].x > -1 then
+    begin
+      if hide_card then
+        RenderCard(card_points_curr[4], nil, 1)
+      else
+        RenderCard(card_points_curr[4], FTableStatus.RiverCard, 1);
+    end;
   end;
 end;
 
@@ -2143,7 +2169,8 @@ var
 begin
   if (FTableStatus.Locked) or
      (FTableStatus.Time = 0) or
-     (FGoalTime = 0) then
+     (FGoalTime = 0) or
+     (tiGameLock.Enabled) then
     Exit;
 
   if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
@@ -2177,6 +2204,8 @@ end;
 procedure TfrmTable.RenderLowerInterface;
 var
   red_quad: TPoint4;
+  C1      : Integer;
+  button  : TUIButton;
 begin
   if acRaise.Enabled then
   begin
@@ -2198,49 +2227,44 @@ begin
                                   FRaiseSliderButtonWidth, FRaiseSliderButtonHeight), clWhite4);
   end;
 
-  if Assigned(FActionButton1Action) then
+  for C1 := Low(FActionButtons) to High(FActionButtons) do
   begin
-    DXCore.Canvas.UseImage(FActionButton1Image, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(FActionButton1Point.x, FActionButton1Point.y, FActionButtonWidth, FActionButtonHeight), clWhite4);
+    button := FActionButtons[C1];
+    if not Assigned(button.Action) then
+      Continue;
+
+    DXCore.Canvas.UseImage(button.Image, TexFull4);
+    DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FActionButtonWidth, FActionButtonHeight), clWhite4);
 
     TableResources.Sintony_19px.Kerning := 0;
 
-    if FMouseDownObject = mdoActionButton1 then
+    if Integer(FMouseDownObject) - Integer(mdoActionButton1) = C1 then
       TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.9
     else
       TableResources.Sintony_19px.Scale := FTableResizeRatio;
 
-    TableResources.Sintony_19px.TextMidF(Point2(FActionButton1Point.x + FActionButtonWidth / 2, FActionButton1Point.y + FActionButtonHeight / 2), FActionButton1Action.Caption, clWhite2);
+    TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FActionButtonWidth / 2, button.Point.y + FActionButtonHeight / 2),
+                                         button.Action.Caption, clWhite2);
   end;
 
-  if Assigned(FActionButton2Action) then
+  for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
   begin
-    DXCore.Canvas.UseImage(FActionButton2Image, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(FActionButton2Point.x, FActionButton2Point.y, FActionButtonWidth, FActionButtonHeight), clWhite4);
+    button := FRaisePresetButtons[C1];
+    if not Assigned(button.Action) then
+      Continue;
+
+    DXCore.Canvas.UseImage(button.Image, TexFull4);
+    DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FRaisePresetButtonWidth, FRaisePresetButtonHeight), clWhite4);
 
     TableResources.Sintony_19px.Kerning := 0;
 
-    if FMouseDownObject = mdoActionButton2 then
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.9
+    if Integer(FMouseDownObject) - Integer(mdoRaisePresetButton1) = C1 then
+      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.7
     else
-      TableResources.Sintony_19px.Scale := FTableResizeRatio;
+      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.8;
 
-    TableResources.Sintony_19px.TextMidF(Point2(FActionButton2Point.x + FActionButtonWidth / 2, FActionButton2Point.y + FActionButtonHeight / 2), FActionButton2Action.Caption, clWhite2);
-  end;
-
-  if Assigned(FActionButton3Action) then
-  begin
-    DXCore.Canvas.UseImage(FActionButton3Image, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(FActionButton3Point.x, FActionButton3Point.y, FActionButtonWidth, FActionButtonHeight), clWhite4);
-
-    TableResources.Sintony_19px.Kerning := 0;
-
-    if FMouseDownObject = mdoActionButton3 then
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.9
-    else
-      TableResources.Sintony_19px.Scale := FTableResizeRatio;
-
-    TableResources.Sintony_19px.TextMidF(Point2(FActionButton3Point.x + FActionButtonWidth / 2, FActionButton3Point.y + FActionButtonHeight / 2), FActionButton3Action.Caption, clWhite2);
+    TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FRaisePresetButtonWidth / 2, button.Point.y + FRaisePresetButtonHeight / 2),
+                                         button.Action.Caption, cColor2($FFAAAAAA));
   end;
 end;
 

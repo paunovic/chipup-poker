@@ -222,7 +222,7 @@ end;
 
 procedure TfrmDebug.Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
 const
-  SCROLLBACK_LINES = 1000;
+  SCROLLBACK_LINES = 100;
 var
   table: TRVTableItemInfo;
 begin
