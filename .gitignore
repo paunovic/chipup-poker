@@ -2,3 +2,6 @@ __history
 client/bin
 client/design
 cpp-protobuf-generator/output
+*.local
+*.fbpInf
+*.identcache
