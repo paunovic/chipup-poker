@@ -252,7 +252,7 @@
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierPressed</ResourceId>
 			</RcItem>
-			<RcItem Include="resources\room_media\roommedia.asvf">
+			<RcItem Include="resources\roommedia.asvf">
 				<ContainerId>ResourceItem</ContainerId>
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>RoomMedia</ResourceId>

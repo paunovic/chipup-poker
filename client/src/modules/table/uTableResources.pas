@@ -51,7 +51,10 @@ type
       FRaisePresetButtonNormalImage: TAsphyreImage;
       FRaisePresetButtonHotImage: TAsphyreImage;
       FRaisePresetButtonPressedImage: TAsphyreImage;
-
+      FStandUpButtonNormalImage: TAsphyreImage;
+      FStandUpButtonPressedImage: TAsphyreImage;
+      FPlayNowButtonNormalImage: TAsphyreImage;
+      FPlayNowButtonPressedImage: TAsphyreImage;
 
       FBarmenoFonts: TBarmenoFonts;
       FCardCharactersFont_19px: TAsphyreFont;
@@ -68,6 +71,8 @@ type
       FRaiseSliderButtonAspectRatio: Single;
       FActionButtonAspectRatio: Single;
       FRaisePresetButtonAspectRatio: Single;
+      FStandUpButtonAspectRatio: Single;
+      FPlayNowButtonAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -87,14 +92,15 @@ type
         (-pi/3, -pi/6.9, pi/64, pi/5.1, pi/2.5, pi-pi/2.5, pi-pi/5.1, pi-pi/64, pi+pi/6.9, pi*4/3) // 10
       );
 
-      RAISE_VALUEBOX_WIDTH    = 109;
-      RAISE_VALUEBOX_HEIGHT   = 18;
-      RAISE_VALUEBOX_X        = 14;
-      RAISE_VALUEBOX_Y        = 6;
-      RAISE_SLIDER_X          = 140;
-      RAISE_SLIDER_Y          = 9;
-      RAISE_SLIDER_WIDTH      = 283;
-      RAISE_SLIDER_HEIGHT     = 9;
+      RAISE_VALUEBOX_WIDTH      = 109;
+      RAISE_VALUEBOX_HEIGHT     = 18;
+      RAISE_VALUEBOX_X          = 14;
+      RAISE_VALUEBOX_Y          = 6;
+      RAISE_SLIDER_X            = 140;
+      RAISE_SLIDER_Y            = 9;
+      RAISE_SLIDER_WIDTH        = 283;
+      RAISE_SLIDER_HEIGHT       = 9;
+      STANDUP_BUTTON_TRIANGLE_W = 26;
 
     class procedure Initialize(const ADXCanvas: TAsphyreCanvas);
     class procedure Deinitialize;
@@ -137,6 +143,10 @@ type
     property RaisePresetButtonNormalImage: TAsphyreImage read FRaisePresetButtonNormalImage;
     property RaisePresetButtonHotImage: TAsphyreImage read FRaisePresetButtonHotImage;
     property RaisePresetButtonPressedImage: TAsphyreImage read FRaisePresetButtonPressedImage;
+    property StandUpButtonNormalImage: TAsphyreImage read FStandUpButtonNormalImage;
+    property StandUpButtonPressedImage: TAsphyreImage read FStandUpButtonPressedImage;
+    property PlayNowButtonNormalImage: TAsphyreImage read FPlayNowButtonNormalImage;
+    property PlayNowButtonPressedImage: TAsphyreImage read FPlayNowButtonPressedImage;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
@@ -153,6 +163,8 @@ type
     property RaiseSliderButtonAspectRatio: Single read FRaiseSliderButtonAspectRatio;
     property ActionButtonAspectRatio: Single read FActionButtonAspectRatio;
     property RaisePresetButtonAspectRatio: Single read FRaisePresetButtonAspectRatio;
+    property StandUpButtonAspectRatio: Single read FStandUpButtonAspectRatio;
+    property PlayNowButtonAspectRatio: Single read FPlayNowButtonAspectRatio;
   end;
 
 var
@@ -222,6 +234,10 @@ begin
   AddDXImage('RaisePresetButtonNormal.image', FRaisePresetButtonNormalImage, FRaisePresetButtonAspectRatio);
   AddDXImage('RaisePresetButtonHot.image', FRaisePresetButtonHotImage);
   AddDXImage('RaisePresetButtonPressed.image', FRaisePresetButtonPressedImage);
+  AddDXImage('StandUpButtonNormal.image', FStandUpButtonNormalImage, FStandUpButtonAspectRatio);
+  AddDXImage('StandUpButtonNormal.image', FStandUpButtonPressedImage); // FIXME
+  AddDXImage('PlayNowButtonNormal.image', FPlayNowButtonNormalImage, FPlayNowButtonAspectRatio);
+  AddDXImage('PlayNowButtonPressed.image', FPlayNowButtonPressedImage);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do

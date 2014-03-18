@@ -57,7 +57,7 @@ object frmTable: TfrmTable
     OnEnter = edChatEnter
     OnExit = edChatExit
     OnKeyPress = edChatKeyPress
-    Height = 16
+    Height = 18
     Width = 213
   end
   object cbFoldToAnyBet: TcxCheckBox
@@ -110,29 +110,6 @@ object frmTable: TfrmTable
     Height = 17
     Width = 113
   end
-  object btStandUp: TcxButton
-    Left = 251
-    Top = 493
-    Width = 79
-    Height = 23
-    Action = acStandUp
-    Anchors = [akLeft, akBottom]
-    Colors.DefaultText = 1933784
-    Colors.NormalText = 1933784
-    Colors.HotText = 1933784
-    Colors.PressedText = 1933784
-    Colors.DisabledText = 1933784
-    LookAndFeel.SkinName = 'ChipUpRedButton'
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 3
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = 4227327
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
   object cbSitOutNextBB: TcxCheckBox
     Left = 251
     Top = 470
@@ -152,28 +129,11 @@ object frmTable: TfrmTable
     StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    TabOrder = 4
+    TabOrder = 3
     Transparent = True
     Visible = False
     Height = 17
     Width = 113
-  end
-  object btPlayNow: TcxButton
-    Left = 332
-    Top = 149
-    Width = 110
-    Height = 36
-    Action = acPlayNow
-    Anchors = [akLeft, akBottom]
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 5
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
   end
   object seRaiseAmount: TcxSpinEdit
     Left = 474
@@ -199,7 +159,7 @@ object frmTable: TfrmTable
     Style.Font.Quality = fqAntialiased
     Style.TextColor = clRed
     Style.IsFontAssigned = True
-    TabOrder = 6
+    TabOrder = 4
     Value = 76950.000000000000000000
     Visible = False
     Height = 30
@@ -211,7 +171,7 @@ object frmTable: TfrmTable
     Width = 213
     Height = 70
     Color = 4539717
-    TabOrder = 7
+    TabOrder = 5
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyle

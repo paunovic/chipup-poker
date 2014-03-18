@@ -108,6 +108,7 @@ type
     procedure CSRKickPlayer(const AMethodId: Integer; const AObject: TObject);
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
     procedure CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 
     procedure CSROwnerGiveawayNotOwner(const AMethodId: Integer; const AObject: TObject);
     procedure CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer; const AObject: TObject);
@@ -157,7 +158,8 @@ begin
                       TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
                       TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
                       TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
-                      TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation)
+                      TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation),
+                      TServerMessageCallback.Create(seUserChange, CSEUserChange)
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
@@ -577,6 +579,11 @@ begin
 end;
 
 procedure TfrmClubLobby.CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
+begin
+  ConfigureGUI;
+end;
+
+procedure TfrmClubLobby.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 begin
   ConfigureGUI;
 end;

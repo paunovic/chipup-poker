@@ -17,7 +17,8 @@ uses
 
 type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
-      mdoRaisePresetButton1, mdoRaisePresetButton2, mdoRaisePresetButton3, mdoRaisePresetButton4);
+      mdoRaisePresetButton1, mdoRaisePresetButton2, mdoRaisePresetButton3, mdoRaisePresetButton4,
+      mdoStandUpButton, mdoPlayNowButton);
 
   TfrmTable = class(TForm)
     ActionManager: TActionManager;
@@ -39,9 +40,7 @@ type
     edChat: TcxTextEdit;
     cbFoldToAnyBet: TcxCheckBox;
     cbSitOutNextHand: TcxCheckBox;
-    btStandUp: TcxButton;
     cbSitOutNextBB: TcxCheckBox;
-    btPlayNow: TcxButton;
     seRaiseAmount: TcxSpinEdit;
     RVStyle: TRVStyle;
     rvChat: TRichView;
@@ -149,12 +148,20 @@ type
       FRaiseSliderPosition    : Single;
       FRaisePresetButtonWidth : Single;
       FRaisePresetButtonHeight: Single;
+      FStandUpButtonWidth     : Single;
+      FStandUpButtonHeight    : Single;
+      FStandUpResizeRatio     : Single;
+      FPlayNowButtonWidth     : Single;
+      FPlayNowButtonHeight    : Single;
+      FPlayNowResizeRatio     : Single;
 
       FActionButtonWidth      : Single;
       FActionButtonHeight     : Single;
 
       FActionButtons          : TArray<TUIButton>;
       FRaisePresetButtons     : TArray<TUIButton>;
+      FStandUpButton          : TUIButton;
+      FPlayNowButton          : TUIButton;
 
       FDXAreaSize        : TPoint2px;
 
@@ -214,6 +221,7 @@ type
     function ConfirmStandUp: Boolean;
 
     function IsPointInUIButtons(const AX, AY: Integer; const AButtons: TArray<TUIButton>; const AButtonWidth, AButtonHeight: Single; out AIndex: Integer): Boolean;
+    function IsPointInStandUpButton(const AX, AY: Integer): Boolean;
 
     function GetTableSector(const APoint: TPoint2): TTableSector;
     function GetSeatPoint(const ASeatIndex: Integer): TPoint2;
@@ -224,6 +232,8 @@ type
 
     procedure CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
+
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 
     procedure ConfigureGUI;
@@ -268,13 +278,16 @@ begin
 end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
+var
+  C1: Integer;
 begin
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(seChat, CSRChatEvent),
                       TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
                       TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
                       TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
-                      TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus)
+                      TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
+                      TServerMessageCallback.Create(seUserChange, CSEUserChange)
                   ]);
 
   FFlopAnimations := -1;
@@ -286,6 +299,15 @@ begin
 
   SetLength(FActionButtons, 3);
   SetLength(FRaisePresetButtons, 4);
+  FStandUpButton.Action := acStandUp;
+  FPlayNowButton.Action := acPlayNow;
+
+  for C1 := Low(FActionButtons) to High(FActionButtons) do
+    FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
+  for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+    FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
+  FStandUpButton.Image := TableResources.StandUpButtonNormalImage;
+  FPlayNowButton.IMage := TableResources.PlayNowButtonNormalImage;
 
   FMouseDownObject := mdoNone;
 
@@ -360,7 +382,25 @@ begin
           SetRaiseSliderValue(RoundToBB(FRaiseMin + ((X - FRaiseSliderButtonBounds.Left) / FRaiseSliderButtonBounds.Width) * (FRaiseMax - FRaiseMin)));
           FMouseDownObject := mdoRaiseSliderButton;
           renderit := TRUE;
-        end;
+        end
+        else
+          if (acStandUp.Enabled) and
+             (IsPointInStandUpButton(X, Y)) then
+          begin
+            FStandUpButton.Image := TableResources.StandUpButtonPressedImage;
+            FMouseDownObject := mdoStandUpButton;
+            renderit := TRUE;
+          end
+          else
+            if (acPlayNow.Enabled) and
+               (PtInRect(Rect(Round(FPlayNowButton.Point.x), Round(FPlayNowButton.Point.y),
+                              Round(FPlayNowButton.Point.x + FPlayNowButtonWidth), Round(FPlayNowButton.Point.y + FPlayNowButtonHeight)),
+                              Point(X, Y))) then
+            begin
+              FPlayNowButton.Image := TableResources.PlayNowButtonPressedImage;
+              FMouseDownObject := mdoPlayNowButton;
+              renderit := TRUE;
+            end
   end;
 
   if renderit then
@@ -411,6 +451,33 @@ begin
             FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
             renderit := TRUE;
           end;
+
+      if (acStandUp.Enabled) and
+         (IsPointInStandUpButton(X, Y)) then
+      begin
+//        FStandUpButton.Image := TableResources.StandUpButtonPressedImage;
+        renderit := TRUE;
+      end
+      else
+        if FStandUpButton.Image <> TableResources.StandUpButtonNormalImage then
+        begin
+          FStandUpButton.Image := TableResources.StandUpButtonNormalImage;
+          renderit := TRUE;
+        end;
+
+      if (acPlayNow.Enabled) and
+         (PtInRect(Rect(Round(FPlayNowButton.Point.x), Round(FPlayNowButton.Point.y),
+                        Round(FPlayNowButton.Point.x + FPlayNowButtonWidth), Round(FPlayNowButton.Point.y + FPlayNowButtonHeight)),
+                        Point(X, Y))) then
+      begin
+        renderit := TRUE;
+      end
+      else
+        if FPlayNowButton.Image <> TableResources.PlayNowButtonNormalImage then
+        begin
+          FPlayNowButton.Image := TableResources.PlayNowButtonNormalImage;
+          renderit := TRUE;
+        end;
     end;
 
     mdoRaiseSliderButton: begin
@@ -454,6 +521,26 @@ begin
         FRaisePresetButtons[index].Image := TableResources.RaisePresetButtonNormalImage;
         if Assigned(FRaisePresetButtons[index].Action) then
           FRaisePresetButtons[index].Action.Execute;
+      end;
+    end;
+
+    mdoStandUpButton: begin
+      if IsPointInStandUpButton(X, Y) then
+      begin
+        FStandUpButton.Image := TableResources.StandUpButtonNormalImage;
+        if acStandUp.Enabled then
+          acStandUp.Execute;
+      end;
+    end;
+
+    mdoPlayNowButton: begin
+      if (PtInRect(Rect(Round(FPlayNowButton.Point.x), Round(FPlayNowButton.Point.y),
+                        Round(FPlayNowButton.Point.x + FPlayNowButtonWidth), Round(FPlayNowButton.Point.y + FPlayNowButtonHeight)),
+                        Point(X, Y))) then
+      begin
+        FPlayNowButton.Image := TableResources.PlayNowButtonNormalImage;
+        if acPlayNow.Enabled then
+          acPlayNow.Execute;
       end;
     end;
   end;
@@ -543,9 +630,6 @@ begin
   edChat.Top := rvChat.Top - edChat.Height;
   edChat.Left := rvChat.Left;
 
-  btStandUp.Left := ClientWidth - btStandUp.Width;
-  btStandUp.Top := 0;
-
   cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
   cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
   cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
@@ -553,9 +637,6 @@ begin
   cbFoldToAnyBet.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder;
   cbSitOutNextHand.Left := cbFoldToAnyBet.Left;
   cbSitOutNextBB.Left := cbFoldToAnyBet.Left;
-
-  btPlayNow.Top := edChat.Top;
-  btPlayNow.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder * 2;
 
   if Assigned(DXCore.Device) then
   begin
@@ -632,6 +713,7 @@ procedure TfrmTable.tiGameLockTimer(Sender: TObject);
 begin
   tiGameLock.Enabled := FALSE;
   ConfigureGUI;
+  Render;
 end;
 
 procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
@@ -722,6 +804,21 @@ begin
           result := tsBottom
         else
           result := tsMid;
+end;
+
+function TfrmTable.IsPointInStandUpButton(const AX, AY: Integer): Boolean;
+begin
+  if (AY < FStandUpButton.Point.y) or
+     (AY > FStandUpButton.Point.y + FStandupButtonHeight) or
+     (AX > FStandUpButton.Point.x + FStandUpButtonWidth) or
+     (AX < FStandUpButton.Point.x) then
+    Exit(FALSE);
+
+  // triangle test
+  if FStandUpButtonHeight * (AX - FStandUpButton.Point.x) - TableResources.STANDUP_BUTTON_TRIANGLE_W * FTableResizeRatio * (AY - FStandUpButton.Point.y) < 0 then
+    Exit(FALSE);
+
+  Exit(TRUE);
 end;
 
 function TfrmTable.IsPointInUIButtons(const AX, AY: Integer; const AButtons: TArray<TUIButton>; const AButtonWidth, AButtonHeight: Single; out AIndex: Integer): Boolean;
@@ -910,6 +1007,7 @@ end;
 procedure TfrmTable.cbFoldToAnyBetPropertiesChange(Sender: TObject);
 begin
   ConfigureGUI;
+  Render;
 end;
 
 procedure TfrmTable.cbSitOutNextBBPropertiesChange(Sender: TObject);
@@ -922,6 +1020,12 @@ procedure TfrmTable.cbSitOutNextHandPropertiesChange(Sender: TObject);
 begin
   tiSitOutNextHand.Enabled := FALSE;
   tiSitOutNextHand.Enabled := TRUE;
+end;
+
+procedure TfrmTable.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
+begin
+  ConfigureGUI;
+  Render;
 end;
 
 procedure TfrmTable.CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
@@ -1108,11 +1212,6 @@ begin
   cbSitOutNextHand.Visible := sitout;
   cbSitOutNextBB.Visible := sitout;
 
-  if btStandUp.Visible <> acStandUp.Enabled then
-    btStandUp.Visible := acStandUp.Enabled;
-  if btPlayNow.Visible <> acPlayNow.Enabled then
-    btPlayNow.Visible := acPlayNow.Enabled;
-
   if acFold.Enabled then
     FActionButtons[0].Action := acFold
   else
@@ -1187,7 +1286,7 @@ begin
   result := TRUE;
   if (FTable.IsSitting) and
      (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat)) and
-     (seat.Status in [psOutOfHand, psInHand, psFolded, psAllIn]) then
+     (seat.Status in [psInHand, psFolded, psAllIn]) then
     result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
@@ -1602,6 +1701,26 @@ begin
                                                                  FRaiseSliderPoint.y - FLowerIntfBorder / 2.5 - FRaisePresetButtonHeight);
   for C1 := High(FRaisePresetButtons) - 1 downto Low(FRaisePresetButtons) do
     FRaisePresetButtons[C1].Point := Point2(FRaisePresetButtons[C1 + 1].Point.x - FLowerIntfBorder / 2.5 - FRaisePresetButtonWidth, FRaisePresetButtons[C1 + 1].Point.y);
+
+  FStandUpResizeRatio := FTableResizeRatio * 1.5;
+  if FStandUpResizeRatio > 1 then
+    FStandUpResizeRatio := 1;
+
+  FStandUpButtonWidth := TableResources.StandUpButtonNormalImage.Texture[0].Width * FStandUpResizeRatio;
+  FStandUpButtonHeight := FStandUpButtonWidth / TableResources.StandUpButtonAspectRatio;
+
+  FStandUpButton.Point.x := ClientWidth - FStandUpButtonWidth;
+  FStandUpButton.Point.y := 0;
+
+  FPlayNowResizeRatio := FTableResizeRatio * 1.38;
+  if FPlayNowResizeRatio > 1 then
+    FPlayNowResizeRatio := 1;
+
+  FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
+  FPlayNowButtonHeight := FPlayNowButtonWidth / TableResources.PlayNowButtonAspectRatio;
+
+  FPlayNowButton.Point.x := rvChat.Left + rvChat.Width + (ClientWidth - (rvChat.Left + rvChat.Width)) / 2 - FPlayNowButtonWidth / 2;
+  FPlayNowButton.Point.y := rvChat.Top + (ClientHeight - rvChat.Top) / 2.5 - FPlayNowButtonHeight / 2;
 end;
 
 procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
@@ -2313,13 +2432,35 @@ begin
                          FRaiseSliderButtonBounds.Height - 3 * FRaiseSliderResizeRatio);
     DXCore.Canvas.FillQuad(red_quad, cColor4($FFB40004));
 
-    // render raise button
+    // render raise thumb
     DXCore.Canvas.UseImage(TableResources.RaiseSliderButtonImage, TexFull4);
     DXCore.Canvas.TexMap(pBounds4(FRaiseSliderButtonPoint.x - FRaiseSliderButtonWidth / 2,
                                   FRaiseSliderButtonPoint.y - FRaiseSliderButtonHeight / 2,
                                   FRaiseSliderButtonWidth, FRaiseSliderButtonHeight), clWhite4);
+
+    // render raise preset buttons
+    for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+    begin
+      button := FRaisePresetButtons[C1];
+      if not Assigned(button.Action) then
+        Continue;
+
+      DXCore.Canvas.UseImage(button.Image, TexFull4);
+      DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FRaisePresetButtonWidth, FRaisePresetButtonHeight), clWhite4);
+
+      TableResources.Sintony_19px.Kerning := 0;
+
+      if Integer(FMouseDownObject) - Integer(mdoRaisePresetButton1) = C1 then
+        TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.65
+      else
+        TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.75;
+
+      TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FRaisePresetButtonWidth / 2, button.Point.y + FRaisePresetButtonHeight / 2),
+                                           button.Action.Caption, cColor2($FFAAAAAA));
+    end;
   end;
 
+  // render action buttons
   for C1 := Low(FActionButtons) to High(FActionButtons) do
   begin
     button := FActionButtons[C1];
@@ -2340,24 +2481,18 @@ begin
                                          button.Action.Caption, clWhite2);
   end;
 
-  for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+  // render standup button
+  if acStandup.Enabled then
   begin
-    button := FRaisePresetButtons[C1];
-    if not Assigned(button.Action) then
-      Continue;
+    DXCore.Canvas.UseImage(FStandUpButton.Image, TexFull4);
+    DXCore.Canvas.TexMap(pBounds4(FStandUpButton.Point.x, FStandUpButton.Point.y, FStandUpButtonWidth, FStandUpButtonHeight), clWhite4);
+  end;
 
-    DXCore.Canvas.UseImage(button.Image, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FRaisePresetButtonWidth, FRaisePresetButtonHeight), clWhite4);
-
-    TableResources.Sintony_19px.Kerning := 0;
-
-    if Integer(FMouseDownObject) - Integer(mdoRaisePresetButton1) = C1 then
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.65
-    else
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.75;
-
-    TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FRaisePresetButtonWidth / 2, button.Point.y + FRaisePresetButtonHeight / 2),
-                                         button.Action.Caption, cColor2($FFAAAAAA));
+  // render playnow button
+  if acPlayNow.Enabled then
+  begin
+    DXCore.Canvas.UseImage(FPlayNowButton.Image, TexFull4);
+    DXCore.Canvas.TexMap(pBounds4(FPlayNowButton.Point.x, FPlayNowButton.Point.y, FPlayNowButtonWidth, FPlayNowButtonHeight), clWhite4);
   end;
 end;
 
