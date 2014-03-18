@@ -25,7 +25,10 @@ function setup(app,bugs,users,db) {
 	});
 	app.get('/serverBugs',function (req,res) {
 		var start = Date.now();
-		db.collection('serverErrors').find().toArray(function (err,data) {
+		if (req.query.delete) {
+			db.collection('serverErrors').remove({_id:new ObjectID(req.query.delete)},function () {});
+		}
+		db.collection('serverErrors').find().sort({_id:-1}).toArray(function (err,data) {
 			res.render('serverErrors',{rows:data,start:start});
 		});
 	});

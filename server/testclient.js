@@ -31,7 +31,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		if (require.main === module) {
 			console.log(process.argv);
 			var mode = process.argv[2];
-			var autoconfig = {moves:[],autoRandom:{call:16,fold:4,raise:12,standup:4},speed:[0,0],players:5, buyins:[100000,100000,100000,100000,100000]};
+			var autoconfig = {moves:[],autoRandom:{call:16,fold:2,raise:8,standup:1},speed:[0,0],players:5, buyins:[100000,100000,100000,100000,100000]};
 			var prefix = process.argv[3];
 			if (prefix) autoconfig.prefix = prefix;
 			switch (mode) {
@@ -47,6 +47,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 				break;
 			case 'fastbot':
 				tests = [ function autobot(cb) {
+					autoconfig.speed = [10,0];
 					testmenu(cb,autoconfig);
 				} ];
 				break;
@@ -246,18 +247,18 @@ function testmenu(cb,config) {
 				var words = move.split(' ');
 				var next = words.shift();
 				if (moves[next]) {
-					console.log('AUTO',next);
+					console.log('%d AUTO %s'.red,ts.seq,next);
 					return moves[next](words);
 				} console.log('BAD AUTO',next);
 			}
 			if (randomMoves) {
 				for (var y=0; y<10; y++) {
 					var rand = Math.random();
-					console.log('AUTO',rand);
+					console.log('%d AUTO %s',ts.seq,rand);
 					for (var x=0; x<randomMoves.length; x++) {
 						if ((randomMoves[x].min < rand) && (randomMoves[x].max > rand)) {
 							var next = randomMoves[x].move;
-							console.log('AUTO',next);
+							console.log('%d %d AUTO %s',ts.seq,ts.current_seat,next);
 							if (next == 'call') {
 								var maxchips = conn.getSeat(conn.seat).chips;
 								conn.log('oldbet',oldbet,'max',maxchips);
@@ -341,7 +342,6 @@ function testmenu(cb,config) {
 		case codes.seTableStatus:
 			var params = pb.Parse(data,'Poker.TableStatus');
 			this.tableStatus = params;
-			console.log('events:'+params.events);
 			
 			checkAndPrint.call(this,params);
 			

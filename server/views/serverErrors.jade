@@ -7,7 +7,9 @@ block content
       th trace
     each row in rows
       tr
-        td=row._id.getTimestamp()
+        td
+          span=row._id.getTimestamp()
+          a(href="/serverBugs?delete="+row._id) X
         td=row.error
         td
           pre=row.trace
