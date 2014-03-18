@@ -178,6 +178,8 @@ type
       FRaiseMax          : UINT32;
       FRaiseValue        : UINT32;
 
+      FForceFocused      : Boolean;
+
     procedure SetDXObjectSizes;
     procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
 
@@ -201,6 +203,7 @@ type
     procedure EnableGameLockTimer(const ASeconds: Single);
 
     procedure AddUserChatMessage(const AUser, AMessage: String);
+    procedure AddDealerChatMessage(const AMessage: String);
     procedure ModalFormClose(Sender: TObject);
 
     function RoundToBB(const AValue: Single): UINT32;
@@ -336,20 +339,28 @@ begin
         else
           FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
       renderit := TRUE;
-    end;
-
-    if (acRaise.Enabled) and
-       (IsPointInUIButtons(X, Y, FRaisePresetButtons, FRaisePresetButtonWidth, FRaisePresetButtonHeight, index)) and
-       (Assigned(FActionButtons[index].Action)) then
-    begin
-      FMouseDownObject := TMouseDownObject(Integer(mdoRaisePresetButton1) + index);
-      for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
-        if C1 = index then
-          FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonPressedImage
-        else
-          FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
-      renderit := TRUE;
-    end;
+    end
+    else
+      if (acRaise.Enabled) and
+         (IsPointInUIButtons(X, Y, FRaisePresetButtons, FRaisePresetButtonWidth, FRaisePresetButtonHeight, index)) and
+         (Assigned(FActionButtons[index].Action)) then
+      begin
+        FMouseDownObject := TMouseDownObject(Integer(mdoRaisePresetButton1) + index);
+        for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+          if C1 = index then
+            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonPressedImage
+          else
+            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
+        renderit := TRUE;
+      end
+      else
+        if (acRaise.Enabled) and
+           (PtInRect(FRaiseSliderButtonBounds, Point(X, Y))) then
+        begin
+          SetRaiseSliderValue(RoundToBB(FRaiseMin + ((X - FRaiseSliderButtonBounds.Left) / FRaiseSliderButtonBounds.Width) * (FRaiseMax - FRaiseMin)));
+          FMouseDownObject := mdoRaiseSliderButton;
+          renderit := TRUE;
+        end;
   end;
 
   if renderit then
@@ -874,6 +885,17 @@ begin
   acStandUp.Enabled := FALSE;
 end;
 
+procedure TfrmTable.AddDealerChatMessage(const AMessage: String);
+begin
+  rvChat.AddNL('Dealer: ', 2, 0);
+  rvChat.AddNL(AMessage, 3, -1);
+
+  if rvChat.VScrollPos < rvChat.VScrollMax then
+    rvChat.Format
+  else
+    rvChat.FormatTail;
+end;
+
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
 begin
   rvChat.AddNL(Format('%s: ', [AUser]), 0, 0);
@@ -957,6 +979,7 @@ begin
         if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
            (not FTableStatus.Locked) and
            (not tiGameLock.Enabled) then
+        begin
           case FTableStatus.State of
             tsIdle: ;
             tsPreFlop,
@@ -1000,6 +1023,8 @@ begin
 
               if not nofocus then
               begin
+                FlashWindow(Handle, TRUE);
+
                 for C1 := 0 to Tables.Count - 1 do
                   if tables[C1].Form.Focused then
                   begin
@@ -1007,19 +1032,24 @@ begin
                     Break;
                   end;
 
-                if not nofocus then
+                if (not nofocus) and
+                   (not FForceFocused) then
                 begin
                   if IsIconic(Handle) then
                     ShowWindow(Handle, SW_RESTORE);
                   BringToFront;
                   SetForegroundWindow(Handle);
                   SetFocus;
+                  FForceFocused := TRUE;
                 end;
               end;
             end;
             tsWinning,
             tsWinning2: ;
           end;
+        end
+        else
+          FForceFocused := FALSE;
 
         if (FtableStatus.State in [tsWinning, tsWinning2]) and
            (FTable.SeatIndex = seat_info.SeatIndex) and
@@ -1240,9 +1270,9 @@ var
   pot         : TPB_PotInfo;
   player      : TPlayerInfo;
   C1, C2      : Integer;
-  tmpstr      : String;
   card_index  : Integer;
   iterate     : Boolean;
+  nick        : String;
 begin
   FTableStatus.Assign(ATableEvent);
 
@@ -1267,27 +1297,20 @@ begin
         if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
           Continue;
 
-        tmpstr := Format('[%.2f chips, %.2f each], won by: ', [pot.Sum / 100, (pot.Sum / 100) / pot.WinnerData.Count]);
-
         for C2 := 0 to pot.WinnerData.Count - 1 do
         begin
           if FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat) then
           begin
             if dmMain.Players.FindPlayerById(seat.PlayerMongoId, player) then
-              tmpstr := tmpstr + player.Nick
+              nick := player.Nick
             else
-              tmpstr := tmpstr + '#' + IntToStr(seat.SeatIndex)
+              nick := Format('Seat #%d', [seat.SeatIndex]);
           end
           else
-            tmpstr := tmpstr + 'UNKNOWN';
+            nick := 'Unknown';
 
-          tmpstr := tmpstr + Format(' (%s)', [pot.WinnerData[C2].Msg]);
-
-          if C2 < pot.WinnerData.Count - 1 then
-            tmpstr := tmpstr + ', ';
+          AddDealerChatMessage(Format('%s won %s chips (%s)', [nick, FormatFloat('0.##', (pot.Sum / 100) / pot.WinnerData.Count), pot.WinnerData[C2].Msg]));
         end;
-
-        AddUserChatMessage(Format('POT [%d]', [C1]), tmpstr);
       end;
     end;
 
@@ -2309,9 +2332,9 @@ begin
     TableResources.Sintony_19px.Kerning := 0;
 
     if Integer(FMouseDownObject) - Integer(mdoActionButton1) = C1 then
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.9
+      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.80
     else
-      TableResources.Sintony_19px.Scale := FTableResizeRatio;
+      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.90;
 
     TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FActionButtonWidth / 2, button.Point.y + FActionButtonHeight / 2),
                                          button.Action.Caption, clWhite2);
@@ -2329,9 +2352,9 @@ begin
     TableResources.Sintony_19px.Kerning := 0;
 
     if Integer(FMouseDownObject) - Integer(mdoRaisePresetButton1) = C1 then
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.7
+      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.65
     else
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.8;
+      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.75;
 
     TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FRaisePresetButtonWidth / 2, button.Point.y + FRaisePresetButtonHeight / 2),
                                          button.Action.Caption, cColor2($FFAAAAAA));

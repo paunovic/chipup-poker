@@ -110,7 +110,8 @@ uses
   uDXTimer in 'modules\directx_draw\uDXTimer.pas',
   uDXAnimation in 'modules\directx_draw\uDXAnimation.pas',
   uPB_Pot in 'modules\protobuf\objects\uPB_Pot.pas',
-  uSounds in 'modules\sounds\uSounds.pas';
+  uSounds in 'modules\sounds\uSounds.pas',
+  uPB_UserChangeParams in 'modules\protobuf\objects\uPB_UserChangeParams.pas';
 
 procedure FocusPokerApp;
 var

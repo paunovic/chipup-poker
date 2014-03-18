@@ -111,7 +111,7 @@ uses
   uPB_ListClubsReply, uPB_TransferChipsParams, uPB_ClubCommandReply, uPB_SetAvatarReply, uPB_KickPlayerParams, uPB_PingParams, uPB_PingReply,
   uPB_GiveClubOwnershipParams, uPB_ChangePasswordParams, uPB_RegisterReply, uPB_LoginReply, uPB_GetUserParams, uPB_SetAvatarParams,
   uPB_ChatEvent, uPB_ChatMessage, uPB_TableSit, uPB_TableStatus, uPB_ChangeSuspendState, uPB_ChangeMailReply, uPB_TableEvent, uPB_TableBoolFlag,
-  uPB_PutChips, uMainDataModule;
+  uPB_PutChips, uMainDataModule, uPB_User, uPB_UserChangeParams;
 
 var
   FConnectThreadId: DWORD;
@@ -428,7 +428,7 @@ begin
     srRegisterReply: ADataObject := TPB_RegisterReply.Create(ADataPointer, ARpcMessage.DataSize);
     srChangePasswordOk: ;
     seSecondaryLoginDetected: ;
-    seAccountConfirmed: ;
+    seAccountConfirmed: ADataObject := TPB_User.Create(ADataPointer, ARpcMessage.DataSize);
     srTransferChipsInvalidAmount: ;
 
     seTransferChips,
@@ -482,6 +482,7 @@ begin
     seGameChange,
     seGameCreate,
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
+    seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}

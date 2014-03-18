@@ -243,6 +243,7 @@
 			<DCCReference Include="modules\directx_draw\uDXAnimation.pas"/>
 			<DCCReference Include="modules\protobuf\objects\uPB_Pot.pas"/>
 			<DCCReference Include="modules\sounds\uSounds.pas"/>
+			<DCCReference Include="modules\protobuf\objects\uPB_UserChangeParams.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

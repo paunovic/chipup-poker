@@ -316,14 +316,28 @@ object frmTable: TfrmTable
         StyleName = 'User'
         FontName = 'Arial'
         Size = 8
-        Color = clLime
+        Color = 14803425
         Unicode = True
       end
       item
         StyleName = 'Normal text'
         FontName = 'Arial'
         Size = 8
-        Color = clWhite
+        Color = clSilver
+        Unicode = True
+      end
+      item
+        StyleName = 'Dealer'
+        FontName = 'Arial'
+        Size = 8
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'Dealer Text'
+        FontName = 'Arial'
+        Size = 8
+        Color = 11075496
         Unicode = True
       end>
     ParaStyles = <

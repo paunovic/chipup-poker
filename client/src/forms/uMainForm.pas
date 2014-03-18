@@ -122,6 +122,7 @@ type
     procedure CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
     procedure CSREGameDelete(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 
     function ConfirmToCloseTables: Boolean;
 
@@ -153,7 +154,7 @@ uses
   uSettings, uSocketClient, uServerCodes, uCommon, uMainDataModule, uCreateClubForm, uJoinClubForm, uMessageContainer,
   uPlayerInfo, uChangeEMailForm, uChangePasswordForm, uChangeAvatarForm, uAvatars, uPublicClubsList, uPB_ClubCommandReply, uPB_User,
   uPB_StatusReply, uMessageCallbacks, uPB_Club, uPB_Game, uPB_TableStatus, uTables, uPB_GetUserParams, uDXCore, uFormsContainer,
-  uPB_TransferChipsParams, uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm;
+  uPB_TransferChipsParams, uPB_ChatEvent, uPB_ChatMessage, uClubLobbyForm, uPB_UserChangeParams;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -484,112 +485,6 @@ begin
     FSelectedGame := game_id;
 end;
 
-procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);
-begin
-  ShowLoginForm;
-end;
-
-procedure TfrmChipUpMain.CSRStatus(const AMethodId: Integer; const AObject: TObject);
-var
-  pbstatus: TPB_StatusReply;
-begin
-  pbstatus := AObject as TPB_StatusReply;
-  dmMain.ProcessStatusProtobuf(pbstatus);
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSRLogout(const AMethodId: Integer; const AObject: TObject);
-begin
-  ShowLoginForm;
-end;
-
-procedure TfrmChipUpMain.CSEAccountConfirmed(const AMethodId: Integer; const AObject: TObject);
-begin
-  dmMain.SelfInfo.Authed := TRUE;
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: TObject);
-//var
-//  chatEvent: TPB_ChatEvent;
-begin
-//  chatEvent := AObject as TPB_ChatEvent;
-end;
-
-procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject: TObject);
-var
-  pbclub: TPB_Club;
-  index : Integer;
-begin
-  pbclub := AObject as TPB_Club;
-
-  index := dmMain.SelfInfo.Clubs.IndexOf(pbclub.Seq);
-  if index = -1 then
-    Exit;
-
-  dmMain.SelfInfo.Clubs.Delete(index);
-
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSREGameDelete(const AMethodId: Integer; const AObject: TObject);
-var
-  pbgame: TPB_Game;
-  club  : TClubInfo;
-  game  : TGameInfo;
-begin
-  pbgame := AObject as TPB_Game;
-
-  if (dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club)) and
-     (club.Games.FindGame(pbgame.MongoId, game)) then
-    club.Games.Remove(game);
-
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
-var
-  pbclub: TPB_Club;
-  club  : TClubInfo;
-begin
-  pbclub := AObject as TPB_Club;
-
-  club := dmMain.SelfInfo.Clubs.AddClub(pbclub);
-
-  if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
-    dmMain.SelfInfo.Clubs.Remove(club);
-
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
-var
-  pbgame: TPB_Game;
-  club  : TClubInfo;
-begin
-  pbgame := AObject as TPB_Game;
-
-  if dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
-    club.Games.AddGame(pbgame);
-
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
-var
-  pbtstatus: TPB_TableStatus;
-  table    : TTable;
-begin
-  pbtstatus := AObject as TPB_TableStatus;
-
-  if not Tables.FindTable(pbtstatus.TableMongoId, table) then
-    Exit;
-
-  table.Game.UpdateFromTableStatus(pbtstatus);
-
-  ConfigureGUI;
-end;
-
 procedure TfrmChipUpMain.imgCashierMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if Button = mbLeft then
@@ -644,7 +539,8 @@ begin
                         TServerMessageCallback.Create(srDeleteGameOk, CSREGameDelete),
                         TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
                         TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
-                        TServerMessageCallback.Create(srTableSitOk, CSRTableStatus)
+                        TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
+                        TServerMessageCallback.Create(seUserChange, CSEUserChange)
                     ]);
 
     FSelectedClub := -1;
@@ -768,6 +664,133 @@ begin
   gridJoinedClubs.Hide;
   gridGames.Hide;
   btOpenClubLobby.Hide;
+end;
+
+procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);
+begin
+  ShowLoginForm;
+end;
+
+procedure TfrmChipUpMain.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
+var
+  pbusers: TPB_UserChangeParams;
+  pbuser : TPB_user;
+begin
+  pbusers := AObject as TPB_UserChangeParams;
+
+  for pbuser in pbusers.Users do
+    dmMain.Players.AddPlayer(pbuser);
+end;
+
+procedure TfrmChipUpMain.CSRStatus(const AMethodId: Integer; const AObject: TObject);
+var
+  pbstatus: TPB_StatusReply;
+begin
+  pbstatus := AObject as TPB_StatusReply;
+  dmMain.ProcessStatusProtobuf(pbstatus);
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSRLogout(const AMethodId: Integer; const AObject: TObject);
+begin
+  ShowLoginForm;
+end;
+
+procedure TfrmChipUpMain.CSEAccountConfirmed(const AMethodId: Integer; const AObject: TObject);
+var
+  pbuser: TPB_User;
+begin
+  pbuser := AObject as TPB_User;
+
+  dmMain.SelfInfo.Id := pbuser.MongoId;
+  dmMain.SelfInfo.Balance := pbuser.Chips;
+  dmMain.SelfInfo.EMail := pbuser.Email;
+  dmMain.SelfInfo.Nick := pbuser.Displayname;
+  dmMain.SelfInfo.AvatarId := pbuser.Avatar;
+  dmMain.SelfInfo.Authed := pbuser.Authed;
+
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: TObject);
+//var
+//  chatEvent: TPB_ChatEvent;
+begin
+//  chatEvent := AObject as TPB_ChatEvent;
+end;
+
+procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject: TObject);
+var
+  pbclub: TPB_Club;
+  index : Integer;
+begin
+  pbclub := AObject as TPB_Club;
+
+  index := dmMain.SelfInfo.Clubs.IndexOf(pbclub.Seq);
+  if index = -1 then
+    Exit;
+
+  dmMain.SelfInfo.Clubs.Delete(index);
+
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSREGameDelete(const AMethodId: Integer; const AObject: TObject);
+var
+  pbgame: TPB_Game;
+  club  : TClubInfo;
+  game  : TGameInfo;
+begin
+  pbgame := AObject as TPB_Game;
+
+  if (dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club)) and
+     (club.Games.FindGame(pbgame.MongoId, game)) then
+    club.Games.Remove(game);
+
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
+var
+  pbclub: TPB_Club;
+  club  : TClubInfo;
+begin
+  pbclub := AObject as TPB_Club;
+
+  club := dmMain.SelfInfo.Clubs.AddClub(pbclub);
+
+  if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
+    dmMain.SelfInfo.Clubs.Remove(club);
+
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
+var
+  pbgame: TPB_Game;
+  club  : TClubInfo;
+begin
+  pbgame := AObject as TPB_Game;
+
+  if dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
+    club.Games.AddGame(pbgame);
+
+  ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
+var
+  pbtstatus: TPB_TableStatus;
+  table    : TTable;
+begin
+  pbtstatus := AObject as TPB_TableStatus;
+
+  if not Tables.FindTable(pbtstatus.TableMongoId, table) then
+    Exit;
+
+  table.Game.UpdateFromTableStatus(pbtstatus);
+
+  ConfigureGUI;
 end;
 
 end.
