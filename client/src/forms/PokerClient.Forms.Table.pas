@@ -1295,10 +1295,12 @@ procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TOb
 var
   pbtablestatus: TPB_TableStatus;
   C1           : Integer;
-  tmp          : String;
   seat_index   : Integer;
+  {$IFDEF DEBUG}
+  tmp          : String;
   seat         : TSeatInfo;
   tb           : UINT32;
+  {$ENDIF}
 begin
   pbtablestatus := AObject as TPB_TableStatus;
   if not CompareBytes(pbtablestatus.TableMongoId, FTable.Game.MongoId) then

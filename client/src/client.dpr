@@ -8,8 +8,14 @@ program client;
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Vcl.Forms, FastMM4 in '3rdparty\FastMM\FastMM4.pas',
-  madExcept, madLinkDisAsm, madListHardware, madListProcesses, madListModules,
+  FastMM4 in '3rdparty\FastMM\FastMM4.pas',
+  madExcept,
+  madLinkDisAsm,
+  madListHardware,
+  madListProcesses,
+  madListModules,
+  Winapi.Windows,
+  Vcl.Forms,
   pbInput in '3rdparty\protobufs\pbInput.pas',
   pbOutput in '3rdparty\protobufs\pbOutput.pas',
   pbPublic in '3rdparty\protobufs\pbPublic.pas',
