@@ -13,27 +13,19 @@ type
   TPB_WinnerData = class(TProtobufBaseObject)
   private
     const
-      FN_PRIMARYRANK = 1;
-      FN_SECONDARYRANK = 2;
       FN_SEAT = 3;
       FN_MSG = 4;
 
     var
-      FPrimaryRank: TCardRankings;
-      FSecondaryRank: Integer;
       FSeat: Integer;
       FMsg: String;
 
-    procedure SetPrimaryRank(const AValue: TCardRankings);
-    procedure SetSecondaryRank(const AValue: Integer);
     procedure SetSeat(const AValue: Integer);
     procedure SetMsg(const AValue: String);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property PrimaryRank: TCardRankings read FPrimaryRank write SetPrimaryRank;
-    property SecondaryRank: Integer read FSecondaryRank write SetSecondaryRank;
     property Seat: Integer read FSeat write SetSeat;
     property Msg: String read FMsg write SetMsg;
   end;
@@ -56,10 +48,6 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_SECONDARYRANK: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FSecondaryRank := AProtobufReader.readInt32;
-      end;
       FN_SEAT: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
@@ -73,18 +61,6 @@ begin
     end;
   end;
 end;
-procedure TPB_WinnerData.SetPrimaryRank(const AValue: TCardRankings);
-begin
-  FPrimaryRank := AValue;
-  ProtobufOutput.writeInt32(FN_PRIMARYRANK, Integer(AValue));
-end;
-
-procedure TPB_WinnerData.SetSecondaryRank(const AValue: Integer);
-begin
-  FSecondaryRank := AValue;
-  ProtobufOutput.writeInt32(FN_SECONDARYRANK, AValue);
-end;
-
 procedure TPB_WinnerData.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
