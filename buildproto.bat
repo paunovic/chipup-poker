@@ -3,4 +3,4 @@ cd cpp-protobuf-generator
 make
 cd ..
 protoc message.proto backend.proto common.proto -o message.desc --delphi_out=cpp-protobuf-generator/output/
-copy /y "cpp-protobuf-generator\output\uServerCodes.pas" "client\src\modules\protobuf\objects\uServerCodes.pas"
+copy /y "cpp-protobuf-generator\output\PokerClient.Protobufs.Enum.ServerCodes.pas" "client\src\modules\protobuf\objects\PokerClient.Protobufs.Enum.ServerCodes.pas"
