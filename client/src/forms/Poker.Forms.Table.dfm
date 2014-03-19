@@ -236,10 +236,10 @@ object frmTable: TfrmTable
       Caption = 'MAX'
       OnExecute = acRaiseMaxExecute
     end
-    object acShowLosingCards: TAction
+    object acShowCards: TAction
       Category = 'Game'
       Caption = 'SHOW CARDS'
-      OnExecute = acShowLosingCardsExecute
+      OnExecute = acShowCardsExecute
     end
   end
   object tiActiveFrameBlink: TTimer

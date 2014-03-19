@@ -37,7 +37,7 @@ type
     acRaisePot: TAction;
     acRaiseMax: TAction;
     tiSitOutNextBB: TTimer;
-    acShowLosingCards: TAction;
+    acShowCards: TAction;
     edChat: TcxTextEdit;
     cbFoldToAnyBet: TcxCheckBox;
     cbSitOutNextHand: TcxCheckBox;
@@ -70,7 +70,7 @@ type
     procedure cbSitOutNextBBPropertiesChange(Sender: TObject);
     procedure tiSitOutNextBBTimer(Sender: TObject);
     procedure cbFoldToAnyBetPropertiesChange(Sender: TObject);
-    procedure acShowLosingCardsExecute(Sender: TObject);
+    procedure acShowCardsExecute(Sender: TObject);
     procedure FormClick(Sender: TObject);
     procedure FormPaint(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -169,6 +169,10 @@ type
       FBetAnimations     : TList<Integer>;
       FPotWinAnimations  : TList<Integer>;
 
+      FTurnAniDelay      : Single;
+      FRiverAniDelay     : Single;
+      FWinningAniDelay   : Single;
+
       FMouseDownObject   : TMouseDownObject;
 
       FRaiseMin          : UINT32;
@@ -176,6 +180,8 @@ type
       FRaiseValue        : UINT32;
 
       FForceFocused      : Boolean;
+
+      FEventBuffer       : TObjectList<TPB_TableEvent>;
 
     procedure SetDXObjectSizes;
     procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
@@ -302,6 +308,8 @@ begin
   FStandUpButton.Action := acStandUp;
   FPlayNowButton.Action := acPlayNow;
 
+  FEventBuffer := TObjectList<TPB_TableEvent>.Create;
+
   for C1 := Low(FActionButtons) to High(FActionButtons) do
     FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
   for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
@@ -336,6 +344,8 @@ begin
   FRiverAnimations.Free;
   FBetAnimations.Free;
   FPotWinAnimations.Free;
+
+  FEventBuffer.Free;
 
   DXTimer.RemoveAnimations(Handle);
 
@@ -973,10 +983,11 @@ begin
   tiGameLock.Enabled := TRUE;
 end;
 
-procedure TfrmTable.acShowLosingCardsExecute(Sender: TObject);
+procedure TfrmTable.acShowCardsExecute(Sender: TObject);
 begin
-  ServerSocket.ShowLosingCards(FTable.Game.MongoId);
-  acShowLosingCards.Enabled := FALSE;
+  ServerSocket.ShowCards(FTable.Game.MongoId);
+  acShowCards.Enabled := FALSE;
+  ConfigureGUI;
   Render;
 end;
 
@@ -1080,7 +1091,7 @@ begin
   acCheck.Enabled := FALSE;
   acRaise.Enabled := FALSE;
   acPlayNow.Enabled := FALSE;
-  acShowLosingCards.Enabled := FALSE;
+  acShowCards.Enabled := FALSE;
   sitout := FALSE;
   foldtoany := FALSE;
 
@@ -1175,7 +1186,7 @@ begin
         if (FtableStatus.State in [tsWinning, tsWinning2]) and
            (FTable.SeatIndex = seat_info.SeatIndex) and
            (seat_info.Status in [psInHand, psAllIn]) then
-          acShowLosingCards.Enabled := TRUE;
+          acShowCards.Enabled := TRUE;
       end;
       psFolded: begin
         sitout := TRUE;
@@ -1232,8 +1243,8 @@ begin
   if acFold.Enabled then
     FActionButtons[0].Action := acFold
   else
-    if acShowLosingCards.Enabled then
-      FActionButtons[0].Action := acShowLosingCards
+    if acShowCards.Enabled then
+      FActionButtons[0].Action := acShowCards
     else
       FActionButtons[0].Action := nil;
 
@@ -1309,9 +1320,10 @@ end;
 
 procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
 var
-  pbtablestatus: TPB_TableStatus;
-  C1           : Integer;
-  seat_index   : Integer;
+  pbtablestatus  : TPB_TableStatus;
+  C1             : Integer;
+  seat_index     : Integer;
+  cardshow_events: Integer;
   {$IFDEF DEBUG}
   tmp          : String;
   seat         : TSeatInfo;
@@ -1371,6 +1383,24 @@ begin
   DebugLn(Format('D: %d; TS: %d; CS: %d; TIME: %d; TB: %d; SEQ:%d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
   {$ENDIF}
 
+  FTurnAniDelay := 0;
+  FRiverAniDelay := 0;
+  FWinningAniDelay := 0;
+
+  cardshow_events := 0;
+  for C1 := 0 to pbtablestatus.Events.Count - 1 do
+    if pbtablestatus.Events[C1].Event in [teFlop, teTurn, teRiver, teWinning] then
+      Inc(cardshow_events);
+
+  if cardshow_events > 1 then
+    FTurnAniDelay := 2;
+
+  if cardshow_events > 2 then
+    FRiverAniDelay := 3.25;
+
+  if cardshow_events > 3 then
+    FWinningAniDelay := 4.25;
+
   for C1 := 0 to pbtablestatus.Events.Count - 1 do
     ProcessTableEvent(pbtablestatus.Events[C1]);
 
@@ -1398,10 +1428,17 @@ var
   chips_val   : Single;
   chips_plural: String;
 begin
-  FTableStatus.Assign(ATableEvent);
-
   seat_caption := '';
   case ATableEvent.Event of
+    teExistingCards: begin
+      if Length(ATableEvent.Cards) = 3 then
+        FTableStatus.FlopCards.Assign(ATableEvent.Cards);
+      if Length(ATableEvent.Cards) = 4 then
+        FTableStatus.TurnCard.Assign(ATableEvent.Cards[3]);
+      if Length(ATableEvent.Cards) = 5 then
+        FTableStatus.RiverCard.Assign(ATableEvent.Cards[4]);
+    end;
+
     teFold: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'FOLD';
@@ -1415,15 +1452,17 @@ begin
     tePostRiver: begin
       event := 'POST RIVER';
 
-      AnimateBets(ATableEvent.Bets);
+      FTableStatus.PreviousBets := ATableEvent.Bets;
     end;
 
     teWinning: begin
-      EnableGameLockTimer(2);
+      EnableGameLockTimer(2 + ATableEvent.Pots.Count * 0.5);
 
       event := 'WINNING';
 
       FTableStatus.Pots.Assign(ATableEvent.Pots);
+
+      AnimateBets(FTableStatus.PreviousBets);
 
       for C1 := 0 to ATableEvent.Pots.Count - 1 do
       begin
@@ -1450,7 +1489,7 @@ begin
 
           nicks := nicks + Format('%s, ', [nick]);
 
-          animation := DXTimer.AddAnimation(Handle, GetPotPoint(C1), GetBetPoint(pot.WinnerData[C2].Seat), 0.3, 1.5 + C1 * 0.3);
+          animation := DXTimer.AddAnimation(Handle, GetPotPoint(C1), GetBetPoint(pot.WinnerData[C2].Seat), 0.3, FWinningAniDelay + 1.5 + C1 * 0.5);
           animation.Tag := C1;
           animation.TagSingle := chips_val;
           FPotWinAnimations.Add(animation.Id);
@@ -1491,6 +1530,10 @@ begin
       FRiverAnimated := FALSE;
 
       FChipStackMaker.Clear;
+
+      FTableStatus.FlopCards.Clear;
+      FTableStatus.TurnCard.Clear;
+      FTableStatus.RiverCard.Clear;
 
       card_index := 0;
       repeat
@@ -1550,6 +1593,8 @@ begin
     end;
 
     teFlop: begin
+      FTableStatus.FlopCards.Assign(ATableEvent.Cards);
+
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'FLOP';
       EnableGameLockTimer(1.5);
@@ -1557,6 +1602,8 @@ begin
     end;
 
     teTurn: begin
+      FTableStatus.TurnCard.Assign(ATableEvent.Cards);
+
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'TURN';
       EnableGameLockTimer(1.5);
@@ -1564,6 +1611,8 @@ begin
     end;
 
     teRiver: begin
+      FTableStatus.RiverCard.Assign(ATableEvent.Cards);
+
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'RIVER';
       EnableGameLockTimer(1.5);
@@ -1616,7 +1665,19 @@ begin
 end;
 
 procedure TfrmTable.acPlayNowExecute(Sender: TObject);
+var
+  seat  : TSeatInfo;
+  sindex: Integer;
 begin
+  if (FTable.SeatIndex <> -1) and
+     (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat)) and
+     (seat.Chips = 0) then
+  begin
+    sindex := seat.SeatIndex;
+    FormsContainer.Add(RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @sindex], ModalFormClose));
+    Exit;
+  end;
+
   ServerSocket.TablePlayNow(FTable.Game.MongoId);
 end;
 
@@ -1764,8 +1825,8 @@ begin
   FStandUpButtonWidth := TableResources.StandUpButtonNormalImage.Texture[0].Width * FStandUpResizeRatio;
   FStandUpButtonHeight := FStandUpButtonWidth / TableResources.StandUpButtonAspectRatio;
 
-  FStandUpButton.Point.x := ClientWidth - FStandUpButtonWidth;
-  FStandUpButton.Point.y := 0;
+  FStandUpButton.Point.x := ClientWidth - FStandUpButtonWidth + 1;
+  FStandUpButton.Point.y := -1;
 
   FPlayNowResizeRatio := FTableResizeRatio * 1.38;
   if FPlayNowResizeRatio > 1 then
@@ -2151,7 +2212,7 @@ end;
 
 procedure TfrmTable.RenderTableCards;
 
-  procedure RenderSingleCard(const ACard: TCard; const AAnimationsList: TList<Integer>; var AIsAnimated: Boolean; var ACurrentCardPoint: TPoint2; var AShowCard: Integer; const AAnimateFrom, AAnimateTo: TPoint2);
+  procedure RenderSingleCard(const ACard: TCard; const AAnimationsList: TList<Integer>; var AIsAnimated: Boolean; var ACurrentCardPoint: TPoint2; var AShowCard: Integer; const AAnimateFrom, AAnimateTo: TPoint2; const ADelay: Single);
   var
     animation: TDXAnimation;
     C1       : Integer;
@@ -2161,7 +2222,7 @@ procedure TfrmTable.RenderTableCards;
       if not AIsAnimated then
       begin
         AAnimationsList.Clear;
-        animation := DXTimer.AddAnimation(Handle, AAnimateFrom, AAnimateTo, 0.15, 0.75); AAnimationsList.Add(animation.Id);
+        animation := DXTimer.AddAnimation(Handle, AAnimateFrom, AAnimateTo, 0.15, ADelay); AAnimationsList.Add(animation.Id);
         AIsAnimated := TRUE;
       end;
 
@@ -2257,8 +2318,8 @@ begin
       end;
   end;
 
-  RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FDealerPoint, card_points_final[3]);
-  RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FDealerPoint, card_points_final[4]);
+  RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FDealerPoint, card_points_final[3], 0.75 + FTurnAniDelay);
+  RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FDealerPoint, card_points_final[4], 0.75 + FRiverAniDelay);
 end;
 
 procedure TfrmTable.RenderDealingCardsAni;
@@ -2557,6 +2618,7 @@ begin
     if ABets[C1] > 0 then
     begin
       bet_point := GetBetPoint(C1);
+
       pot_point := GetPotPoint(0);
       animation := DXTimer.AddAnimation(Handle, bet_point, pot_point, 0.25, 0.4);
       animation.TagUINT := ABets[C1];

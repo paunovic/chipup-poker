@@ -23,6 +23,8 @@ type
     procedure Assign(const AByte: Byte); overload;
     procedure Assign(const ABytes: TBytes); overload;
 
+    procedure Clear;
+
     function AsString: String;
 
     class function GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String; overload;
@@ -52,14 +54,19 @@ implementation
 
 constructor TCard.Create;
 begin
-  FValue := cvUnknown;
-  FSuit := csUnknown;
+  Clear;
 end;
 
 constructor TCard.Create(const AValue: TCardValue; const ASuit: TCardSuit);
 begin
   FValue := AValue;
   FSuit := ASuit;
+end;
+
+procedure TCard.Clear;
+begin
+  FValue := cvUnknown;
+  FSuit := csUnknown;
 end;
 
 constructor TCard.Create(const AByte: Byte);
