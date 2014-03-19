@@ -4,7 +4,8 @@ interface
 
 uses
   PokerClient.Protobufs.Objects.TableStatus, PokerClient.Protobufs.Objects.SeatInfo, PokerClient.Protobufs.Objects.TableEvent,
-  System.SysUtils, System.Generics.Collections, System.Generics.Defaults, PokerClient.Cards, PokerClient.Protobufs.Objects.Pot;
+  System.SysUtils, System.Generics.Collections, System.Generics.Defaults, PokerClient.Cards, PokerClient.Protobufs.Objects.Pot,
+  PokerClient.Protobufs.Objects.PotInfo;
 
 type
   TSeatInfo = class
@@ -54,14 +55,13 @@ type
   private
     FValue: UINT32;
     FMembers: TArray<UINT32>;
-    FAnimating: Boolean;
   public
     procedure Assign(const APotProtobuf: TPB_Pot); overload;
     procedure Assign(const APot: TPotInfo); overload;
+    procedure Assign(const APot: TPB_PotInfo); overload;
 
-    property Value: UINT32 read FValue;
+    property Value: UINT32 read FValue write FValue;
     property Members: TArray<UINT32> read FMembers;
-    property Animating: Boolean read FAnimating write FAnimating;
   end;
 
   TPotInfos = class(TObjectList<TPotInfo>)
@@ -69,6 +69,7 @@ type
   public
     procedure Assign(const APots: TObjectList<TPB_Pot>); overload;
     procedure Assign(const APots: TPotInfos); overload;
+    procedure Assign(const APots: TObjectList<TPB_PotInfo>); overload;
   end;
 
   TTableStatus = class
@@ -105,7 +106,7 @@ type
     property Dealer: Integer read FDealer;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
-    property Bets: TArray<UINT32> read FBets;
+    property Bets: TArray<UINT32> read FBets write FBets;
     property MinimumBet: Integer read FMinimumBet;
     property FlopCards: TCards read FFlopCards;
     property TurnCard: TCard read FTurnCard;
@@ -114,8 +115,8 @@ type
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
-    property Pots: TPotInfos read FPots;
-    property PreviousPots: TPotInfos read FPreviousPots;
+    property Pots: TPotInfos read FPots write FPots;
+    property PreviousPots: TPotInfos read FPreviousPots write FPreviousPots;
     property MaximumBet: UINT32 read FMaximumBet;
     property Time: UINT64 read FTime;
   end;
@@ -379,6 +380,12 @@ begin
   FMembers := APot.Members;
 end;
 
+procedure TPotInfo.Assign(const APot: TPB_PotInfo);
+begin
+  FValue := APot.Sum;
+  FMembers := APot.Seats;
+end;
+
 { TPotInfos }
 
 procedure TPotInfos.Assign(const APots: TObjectList<TPB_Pot>);
@@ -397,6 +404,21 @@ begin
 end;
 
 procedure TPotInfos.Assign(const APots: TPotInfos);
+var
+  pot: TPotInfo;
+  C1 : Integer;
+begin
+  Clear;
+
+  for C1 := 0 to APots.Count - 1 do
+  begin
+    pot := TPotInfo.Create;
+    pot.Assign(APots[C1]);
+    Add(pot);
+  end;
+end;
+
+procedure TPotInfos.Assign(const APots: TObjectList<TPB_PotInfo>);
 var
   pot: TPotInfo;
   C1 : Integer;

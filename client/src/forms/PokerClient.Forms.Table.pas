@@ -14,7 +14,7 @@ uses
   PokerClient.DirectX.Animation, Vectors2, Vcl.ActnList, cxLabel, PokerClient.Table.Tables, cxTextEdit, dxsChipUpDark,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, dxsChipUpRedButton, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
   Vectors2px, PokerClient.Protobufs.Objects.TableEvent, System.Types, PokerClient.ChipStackMaker, AsphyreTypes, cxCurrencyEdit, RVStyle,
-  RVScroll, RichView, AsphyreImages, PokerClient.Cards;
+  RVScroll, RichView, AsphyreImages, PokerClient.Cards, Vcl.StdCtrls;
 
 type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
@@ -83,22 +83,8 @@ type
   private
     const
       FORM_ASPECT_RATIO = 1.4505494505494505494505494505495;
-
-      ANIID_FLOP1  = 1;
-      ANIID_FLOP2  = 2;
-      ANIID_FLOP3  = 3;
-      ANIID_FLOP4  = 4;
-      ANIID_FLOP5  = 5;
-      ANIID_FLOP6  = 6;
-      ANIID_TURN   = 7;
-      ANIID_RIVER  = 8;
-
-      ANIID_DEALING = 100; // numbers from 100 to 199 are reserved, for dealing cards
-
-      ANIID_BETS    = 200; // numbers from 200 to 219 are reserved, for bets
-
-      CARD_OPEN_PERC   = 0.55;
-      CARD_HIDDEN_PERC = 0.35;
+      CARD_OPEN_PERC    = 0.55;
+      CARD_HIDDEN_PERC  = 0.35;
 
     type
       TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
@@ -173,12 +159,15 @@ type
       FGoalTime          : UINT32;
       FCurrentPlaytime   : Integer;
 
-      FFlopAnimations    : Integer;
-      FTurnAnimations    : Integer;
-      FRiverAnimations   : Integer;
-      FDealAnimations    : Integer;
-      FBetAnimations     : Integer;
-      FBetAniStacks      : array[0..19] of UINT32;
+      FFlopAnimations    : TList<Integer>;
+      FFlopAnimated      : Boolean;
+      FTurnAnimations    : TList<Integer>;
+      FTurnAnimated      : Boolean;
+      FRiverAnimations   : TList<Integer>;
+      FRiverAnimated     : Boolean;
+      FDealAnimations    : TList<Integer>;
+      FBetAnimations     : TList<Integer>;
+      FPotWinAnimations  : TList<Integer>;
 
       FMouseDownObject   : TMouseDownObject;
 
@@ -213,6 +202,7 @@ type
     procedure AddUserChatMessage(const AUser, AMessage: String);
     procedure AddDealerChatMessage(const AMessage: String);
     procedure ModalFormClose(Sender: TObject);
+    procedure CheckChatScrollbackLimit;
 
     function RoundToBB(const AValue: Single): UINT32;
 
@@ -294,12 +284,18 @@ begin
                       TServerMessageCallback.Create(seUserChange, CSEUserChange)
                   ]);
 
-  FFlopAnimations := -1;
-  FTurnAnimations := -1;
-  FRiverAnimations := -1;
-  FDealAnimations := 0;
-  FBetAnimations := 0;
-  FillChar(FBetAniStacks[0], Length(FBetAniStacks) * SizeOf(UINT32), 0);
+  FFlopAnimations := TList<Integer>.Create;
+  FFlopAnimated := FALSE;
+
+  FTurnAnimations := TList<Integer>.Create;
+  FTurnAnimated := FALSE;
+
+  FRiverAnimations := TList<Integer>.Create;
+  FRiverAnimated := FALSE;
+
+  FDealAnimations := TList<Integer>.Create;
+  FBetAnimations := TList<Integer>.Create;
+  FPotWinAnimations := TList<Integer>.Create;
 
   SetLength(FActionButtons, 3);
   SetLength(FRaisePresetButtons, 4);
@@ -333,6 +329,13 @@ end;
 procedure TfrmTable.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
+
+  FDealAnimations.Free;
+  FFlopAnimations.Free;
+  FTurnAnimations.Free;
+  FRiverAnimations.Free;
+  FBetAnimations.Free;
+  FPotWinAnimations.Free;
 
   DXTimer.RemoveAnimations(Handle);
 
@@ -988,6 +991,8 @@ end;
 
 procedure TfrmTable.AddDealerChatMessage(const AMessage: String);
 begin
+  CheckChatScrollbackLimit;
+
   rvChat.AddNL('Dealer: ', 2, 0);
   rvChat.AddNL(AMessage, 3, -1);
 
@@ -999,6 +1004,8 @@ end;
 
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
 begin
+  CheckChatScrollbackLimit;
+
   rvChat.AddNL(Format('%s: ', [AUser]), 0, 0);
   rvChat.AddNL(AMessage, 1, -1);
 
@@ -1047,6 +1054,14 @@ begin
     end;
     ceServerMessage: ;
   end;
+end;
+
+procedure TfrmTable.CheckChatScrollbackLimit;
+const
+  SCROLLBACK_LINES = 100;
+begin
+  if rvChat.ItemCount >= SCROLLBACK_LINES then
+    rvChat.DeleteParas(0, rvChat.ItemCount - SCROLLBACK_LINES + 1);
 end;
 
 procedure TfrmTable.ConfigureGUI;
@@ -1131,8 +1146,6 @@ begin
 
               if not nofocus then
               begin
-                FlashWindow(Handle, TRUE);
-
                 for C1 := 0 to Tables.Count - 1 do
                   if tables[C1].Form.Focused then
                   begin
@@ -1318,11 +1331,11 @@ begin
       FTableStatus.Seats[C1].FillDealtCards;
 
     if FTableStatus.State in [tsFlop, tsTurn, tsRiver, tsWinning, tsWinning2] then
-      FFlopAnimations := 6;
+      FFlopAnimated := TRUE;
     if FTableStatus.State in [tsTurn, tsRiver, tsWinning, tsWinning2] then
-      FTurnAnimations := 1;
+      FTurnAnimated := TRUE;
     if FTableStatus.State in [tsRiver, tsWinning, tsWinning2] then
-      FRiverAnimations := 1;
+      FRiverAnimated := TRUE;
   end;
 
   case AMethodId of
@@ -1378,6 +1391,12 @@ var
   card_index  : Integer;
   iterate     : Boolean;
   nick        : String;
+  animation   : TDXAnimation;
+  nicks       : String;
+  winmsg      : String;
+  suffix      : String;
+  chips_val   : Single;
+  chips_plural: String;
 begin
   FTableStatus.Assign(ATableEvent);
 
@@ -1393,8 +1412,19 @@ begin
 
     teStandUp: event := 'STAND UP';
 
+    tePostRiver: begin
+      event := 'POST RIVER';
+
+      AnimateBets(ATableEvent.Bets);
+    end;
+
     teWinning: begin
+      EnableGameLockTimer(2);
+
       event := 'WINNING';
+
+      FTableStatus.Pots.Assign(ATableEvent.Pots);
+
       for C1 := 0 to ATableEvent.Pots.Count - 1 do
       begin
         pot := ATableEvent.Pots[C1];
@@ -1402,6 +1432,10 @@ begin
         if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
           Continue;
 
+        chips_val := (pot.Sum / 100) / pot.WinnerData.Count;
+
+        nicks := '';
+        animation := nil;
         for C2 := 0 to pot.WinnerData.Count - 1 do
         begin
           if FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat) then
@@ -1414,19 +1448,48 @@ begin
           else
             nick := 'Unknown';
 
-          AddDealerChatMessage(Format('%s won %s chips (%s)', [nick, FormatFloat('0.##', (pot.Sum / 100) / pot.WinnerData.Count), pot.WinnerData[C2].Msg]));
+          nicks := nicks + Format('%s, ', [nick]);
+
+          animation := DXTimer.AddAnimation(Handle, GetPotPoint(C1), GetBetPoint(pot.WinnerData[C2].Seat), 0.3, 1.5 + C1 * 0.3);
+          animation.Tag := C1;
+          animation.TagSingle := chips_val;
+          FPotWinAnimations.Add(animation.Id);
         end;
+        Delete(nicks, Length(nicks) - 1, 2);
+
+        chips_plural := '';
+        if chips_val <> 1 then
+          chips_plural := 's';
+
+        suffix := '';
+        if pot.WinnerData.Count > 1 then
+          suffix := 'each ';
+
+        winmsg := pot.WinnerData[0].Msg;
+        if winmsg = 'default' then
+          winmsg := ''
+        else
+          winmsg := Format('(%s)', [pot.WinnerData[0].Msg]);
+
+        Assert(Assigned(animation));
+        animation.TagString := Format('%s won %s chip%s %s%s', [nicks, FormatFloat('0.##', chips_val), chips_plural, suffix, winmsg]);
       end;
     end;
 
     teDealing: begin
       event := 'DEALING';
-      FFlopAnimations := -1;
-      FTurnAnimations := -1;
-      FRiverAnimations := -1;
-      FDealAnimations := 0;
-      FBetAnimations := 0;
-      FillChar(FBetAniStacks[0], Length(FBetAniStacks) * SizeOf(UINT32), 0);
+
+      FFlopAnimations.Clear;
+      FTurnAnimations.Clear;
+      FRiverAnimations.Clear;
+      FDealAnimations.Clear;
+      FBetAnimations.Clear;
+      FPotWinAnimations.Clear;
+
+      FFlopAnimated := FALSE;
+      FTurnAnimated := FALSE;
+      FRiverAnimated := FALSE;
+
       FChipStackMaker.Clear;
 
       card_index := 0;
@@ -1439,10 +1502,10 @@ begin
           if seat.CardCount > card_index then
           begin
             seat_point := GetSeatPoint(seat.SeatIndex);
-            DXTimer.AddAnimation(Handle, ANIID_DEALING + seat.SeatIndex * 10 + card_index,
-                 Point2(FTableCenter.x - FCardWidth / 2, FTableYOffset),
-                 GetCardPoint(seat, card_index), 0.15, FDealAnimations * 0.05);
-            Inc(FDealAnimations);
+            animation := DXTimer.AddAnimation(Handle, Point2(FTableCenter.x - FCardWidth / 2, FTableYOffset),
+                                              GetCardPoint(seat, card_index), 0.15, FDealAnimations.Count * 0.05);
+            animation.Tag := seat.SeatIndex;
+            FDealAnimations.Add(animation.Id);
             iterate := TRUE;
           end;
         end;
@@ -2087,24 +2150,61 @@ begin
 end;
 
 procedure TfrmTable.RenderTableCards;
+
+  procedure RenderSingleCard(const ACard: TCard; const AAnimationsList: TList<Integer>; var AIsAnimated: Boolean; var ACurrentCardPoint: TPoint2; var AShowCard: Integer; const AAnimateFrom, AAnimateTo: TPoint2);
+  var
+    animation: TDXAnimation;
+    C1       : Integer;
+  begin
+    if ACard.Value <> cvUnknown then
+    begin
+      if not AIsAnimated then
+      begin
+        AAnimationsList.Clear;
+        animation := DXTimer.AddAnimation(Handle, AAnimateFrom, AAnimateTo, 0.15, 0.75); AAnimationsList.Add(animation.Id);
+        AIsAnimated := TRUE;
+      end;
+
+      if AAnimationsList.Count > 0 then
+      begin
+        for C1 := 0 to AAnimationsList.Count - 1 do
+          if DXTimer.Find(Handle, AAnimationsList[C1], animation) then
+          begin
+            ACurrentCardPoint := animation.CurrPoint;
+            if animation.Status = asAnimating then
+              AShowCard := 1;
+          end;
+      end
+      else
+        AShowCard := 1;
+
+      case AShowCard of
+        -1: ;
+         0: RenderCard(ACurrentCardPoint, nil, 1);
+         1: RenderCard(ACurrentCardPoint, ACard, 1);
+      end;
+    end;
+  end;
+
 var
   C1               : Integer;
   card_points_curr : array of TPoint2;
   card_points_mid  : array of TPoint2;
   card_points_final: array of TPoint2;
-  ani_count        : Integer;
-  hide_card        : Boolean;
+  show_cards       : array of Integer; // -1 - hide completely, 0 - card face down, 1 - card face up
   animation        : TDXAnimation;
 begin
   SetLength(card_points_final, 5);
   SetLength(card_points_curr, 5);
   SetLength(card_points_mid, 5);
+  SetLength(show_cards, 5);
   for C1 := Low(card_points_final) to High(card_points_final) do
   begin
     card_points_final[C1].x := FTableCenter.X - (FCardWidth * 5) / 2 - 4 * 3 + (C1 * FCardWidth) + (C1 * 3);
     card_points_final[C1].y := FTableCenter.Y - FCardHeight / 2;
     card_points_curr[C1] := card_points_final[C1];
     card_points_mid[C1] := card_points_final[C1];
+    show_cards[C1] := -1;
   end;
   card_points_mid[0].x := card_points_final[0].x - 5;
   card_points_mid[1].x := card_points_final[0].x - 0;
@@ -2114,125 +2214,51 @@ begin
 
   if FTableStatus.FlopCards.Count > 0 then
   begin
-    hide_card := FFlopAnimations < 6;
-    if FFlopAnimations = -1 then
+    if not FFlopAnimated then
     begin
-      DXTimer.AddAnimation(Handle, ANIID_FLOP1, FDealerPoint, card_points_mid[0], 0.15, 0.9);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP2, FDealerPoint, card_points_mid[1], 0.15, 0.9);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP3, FDealerPoint, card_points_mid[2], 0.15, 0.9);
+      FFlopAnimations.Clear;
 
-      DXTimer.AddAnimation(Handle, ANIID_FLOP4, card_points_mid[0], card_points_final[0], 0.2, 1.1);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP5, card_points_mid[1], card_points_final[1], 0.2, 1.1);
-      DXTimer.AddAnimation(Handle, ANIID_FLOP6, card_points_mid[2], card_points_final[2], 0.2, 1.1);
+      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[0], 0.15, 0.9); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[1], 0.15, 0.9); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[2], 0.15, 0.9); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
 
-      FFlopAnimations := 0;
+      animation := DXTimer.AddAnimation(Handle, card_points_mid[0], card_points_final[0], 0.2, 1.1); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, card_points_mid[1], card_points_final[1], 0.2, 1.1); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, card_points_mid[2], card_points_final[2], 0.2, 1.1); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
+
+      FFlopAnimated := TRUE;
     end;
 
-    if FFlopAnimations in [0, 1, 2] then
+    if FFlopAnimations.Count > 0 then
     begin
-      if DXTimer.Find(Handle, ANIID_FLOP1, animation) then
-        if animation.Status = asAnimating then
-          card_points_curr[0] := animation.CurrPoint
-        else
-          card_points_curr[0].x := -1;
-
-      if DXTimer.Find(Handle, ANIID_FLOP2, animation) then
-        if animation.Status = asAnimating then
-          card_points_curr[1] := animation.CurrPoint
-        else
-          card_points_curr[1].x := -1;
-
-      if DXTimer.Find(Handle, ANIID_FLOP3, animation) then
-        if animation.Status = asAnimating then
-          card_points_curr[2] := animation.CurrPoint
-        else
-          card_points_curr[2].x := -1;
-    end;
-
-    if FFlopAnimations in [3, 4, 5] then
+      for C1 := 0 to FFlopAnimations.Count - 1 do
+        if (DXTimer.Find(Handle, FFlopAnimations[C1], animation)) and
+           (animation.Status = asAnimating) then
+        begin
+          card_points_curr[animation.Tag] := animation.CurrPoint;
+          if FFlopAnimations.Count > 3 then
+            show_cards[animation.Tag] := 0
+          else
+            show_cards[animation.Tag] := 1;
+        end;
+    end
+    else
     begin
-      ani_count := 0;
-      if DXTimer.Find(Handle, ANIID_FLOP4, animation) then
-      begin
-        card_points_curr[0] := animation.CurrPoint;
-        if animation.Status = asAnimating then
-          Inc(ani_count);
-      end;
-      if DXTimer.Find(Handle, ANIID_FLOP5, animation) then
-      begin
-        card_points_curr[1] := animation.CurrPoint;
-        if animation.Status = asAnimating then
-          Inc(ani_count);
-      end;
-      if DXTimer.Find(Handle, ANIID_FLOP6, animation) then
-      begin
-        card_points_curr[2] := animation.CurrPoint;
-        if animation.Status = asAnimating then
-          Inc(ani_count);
-      end;
-      hide_card := ani_count = 0;
+      show_cards[0] := 1;
+      show_cards[1] := 1;
+      show_cards[2] := 1;
     end;
 
     for C1 := 0 to FTableStatus.FlopCards.Count - 1 do
-      if card_points_curr[C1].x = -1 then
-        Continue
-      else
-        if hide_card then
-          RenderCard(card_points_curr[C1], nil, 1)
-        else
-          RenderCard(card_points_curr[C1], FTableStatus.FlopCards[C1], 1);
+      case show_cards[C1] of
+        -1: Continue;
+         0: RenderCard(card_points_curr[C1], nil, 1);
+         1: RenderCard(card_points_curr[C1], FTableStatus.FlopCards[C1], 1);
+      end;
   end;
 
-  if FTableStatus.TurnCard.Value <> cvUnknown then
-  begin
-    hide_card := FTurnAnimations < 1;
-    if FTurnAnimations = -1 then
-    begin
-      DXTimer.AddAnimation(Handle, ANIID_TURN, FDealerPoint, card_points_final[3], 0.15, 0.75);
-      FTurnAnimations := 0;
-    end;
-
-    if FTurnAnimations = 0 then
-      if DXTimer.Find(Handle, ANIID_TURN, animation) then
-        if animation.Status = asAnimating then
-          card_points_curr[3] := animation.CurrPoint
-        else
-          card_points_curr[3].x := -1;
-
-    if card_points_curr[3].x > -1 then
-    begin
-      if hide_card then
-        RenderCard(card_points_curr[3], nil, 1)
-      else
-        RenderCard(card_points_curr[3], FTableStatus.TurnCard, 1);
-    end;
-  end;
-
-  if FTableStatus.RiverCard.Value <> cvUnknown then
-  begin
-    hide_card := FRiverAnimations < 1;
-    if FRiverAnimations = -1 then
-    begin
-      card_points_curr[4] := FDealerPoint;
-      DXTimer.AddAnimation(Handle, ANIID_RIVER, FDealerPoint, card_points_final[4], 0.15, 0.75);
-      FRiverAnimations := 0;
-    end;
-
-    if FRiverAnimations = 0 then
-      if DXTimer.Find(Handle, ANIID_RIVER, animation) then
-        if animation.Status = asAnimating then
-          card_points_curr[4] := animation.CurrPoint
-        else
-          card_points_curr[4].x := -1;
-
-    if card_points_curr[4].x > -1 then
-    begin
-      if hide_card then
-        RenderCard(card_points_curr[4], nil, 1)
-      else
-        RenderCard(card_points_curr[4], FTableStatus.RiverCard, 1);
-    end;
-  end;
+  RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FDealerPoint, card_points_final[3]);
+  RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FDealerPoint, card_points_final[4]);
 end;
 
 procedure TfrmTable.RenderDealingCardsAni;
@@ -2240,8 +2266,8 @@ var
   C1       : Integer;
   animation: TDXAnimation;
 begin
-  for C1 := ANIID_DEALING to ANIID_DEALING + (FTable.Game.Seats - 1) * 10 do
-    if (DXTimer.Find(Handle, C1, animation)) and
+  for C1 := 0 to FDealAnimations.Count - 1 do
+    if (DXTimer.Find(Handle, FDealAnimations[C1], animation)) and
        (animation.Status = asAnimating) then
       RenderCard(animation.CurrPoint, nil, 1);
 end;
@@ -2266,20 +2292,31 @@ var
   chips_point: TPoint2;
   chips_stack: TChipsStack;
   stack_value: Single;
+  animation  : TDXAnimation;
 begin
-  for C1 := 0 to FTableStatus.Seats.Count - 1 do
-    if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
-    begin
-      if (Length(FTableStatus.Bets) > seat_info.SeatIndex) and
-         (FTableStatus.Bets[seat_info.SeatIndex] > 0) then
+  if FBetAnimations.Count > 0 then
+  begin
+    for C1 := 0 to FBetAnimations.Count - 1 do
+      if DXTimer.Find(Handle, FBetAnimations[C1], animation) then
       begin
-        stack_value := FTableStatus.Bets[seat_info.SeatIndex] / 100;
-        chips_point := GetBetPoint(seat_info.SeatIndex);
-        chips_stack := FChipStackMaker.MakeStack(Trunc(stack_value));
-        RenderChipStack(chips_point, chips_stack);
-        RenderValue(chips_point, stack_value, clWhite2, FALSE);
+        chips_stack := FChipStackMaker.MakeStack(Trunc(animation.TagUINT / 100));
+        RenderChipStack(animation.CurrPoint, chips_stack);
       end;
-    end;
+  end
+  else
+    for C1 := 0 to FTableStatus.Seats.Count - 1 do
+      if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
+      begin
+        if (Length(FTableStatus.Bets) > seat_info.SeatIndex) and
+           (FTableStatus.Bets[seat_info.SeatIndex] > 0) then
+        begin
+          stack_value := FTableStatus.Bets[seat_info.SeatIndex] / 100;
+          chips_point := GetBetPoint(seat_info.SeatIndex);
+          chips_stack := FChipStackMaker.MakeStack(Trunc(stack_value));
+          RenderChipStack(chips_point, chips_stack);
+          RenderValue(chips_point, stack_value, clWhite2, FALSE);
+        end;
+      end;
 end;
 
 procedure TfrmTable.RenderPots;
@@ -2291,18 +2328,32 @@ var
   animation  : TDXAnimation;
   pots       : TPotInfos;
 begin
-  if FBetAnimations > 0 then
+  pots := FTableStatus.Pots;
+
+  if FPotWinAnimations.Count > 0 then
   begin
-    pots := FTableStatus.PreviousPots;
-    for C1 := ANIID_BETS to ANIID_BETS + 19 do
-      if DXTimer.Find(Handle, C1, animation) then
+    for C1 := 0 to FPotWinAnimations.Count - 1 do
+      if (DXTimer.Find(Handle, FPotWinAnimations[C1], animation)) and
+         (animation.Status = asAnimating) then
       begin
-        chips_stack := FChipStackMaker.MakeStack(Trunc(FBetAniStacks[C1 - ANIID_BETS] / 100));
+        chips_stack := FChipStackMaker.MakeStack(Trunc(animation.TagSingle));
         RenderChipStack(animation.CurrPoint, chips_stack);
+
+        if animation.TagString <> '' then
+        begin
+          AddDealerChatMessage(animation.TagString);
+          animation.TagString := '';
+        end;
+
+        if animation.TagSingle * 100 > FTableStatus.Pots[animation.Tag].Value then
+          FTableStatus.Pots[animation.Tag].Value := 0
+        else
+          FTableStatus.Pots[animation.Tag].Value := FTableStatus.Pots[animation.Tag].Value - Trunc(animation.TagSingle * 100);
       end;
-  end
-  else
-    pots := FTableStatus.Pots;
+  end;
+
+  if FBetAnimations.Count > 0 then
+    pots := FTableStatus.PreviousPots;
 
   for C1 := 0 to pots.Count - 1 do
   begin
@@ -2356,6 +2407,9 @@ procedure TfrmTable.RenderChipStack(const APoint: TPoint2; const AChipStack: TCh
 var
   C1: Integer;
 begin
+  if Length(AChipStack.Images) = 0 then
+    Exit;
+
   for C1 := Low(AChipStack.Images) to High(AChipStack.Images) do
   begin
     DXCore.Canvas.UseImage(AChipStack.Images[C1], TexFull4);
@@ -2494,15 +2548,19 @@ var
   C1       : UINT32;
   bet_point: TPoint2;
   pot_point: TPoint2;
+  animation: TDXAnimation;
 begin
+  if Length(ABets) = 0 then
+    Exit;
+
   for C1 := Low(ABets) to High(ABets) do
     if ABets[C1] > 0 then
     begin
-      FBetAniStacks[FBetAnimations] := ABets[C1];
       bet_point := GetBetPoint(C1);
       pot_point := GetPotPoint(0);
-      DXTimer.AddAnimation(HANDLE, ANIID_BETS + FBetAnimations, bet_point, pot_point, 0.25, 0.4);
-      Inc(FBetAnimations);
+      animation := DXTimer.AddAnimation(Handle, bet_point, pot_point, 0.25, 0.4);
+      animation.TagUINT := ABets[C1];
+      FBetAnimations.Add(animation.Id);
     end;
 end;
 
@@ -2520,36 +2578,24 @@ begin
 
   animation := TDXAnimation(AAnimationPointer);
 
-  case animation.ID of
-    ANIID_FLOP1, ANIID_FLOP2, ANIID_FLOP3, ANIID_FLOP4, ANIID_FLOP5, ANIID_FLOP6: begin
-      if animation.Status = asDone then
-        Inc(FFlopAnimations);
-    end;
-
-    ANIID_TURN: begin
-      if animation.Status = asDone then
-        Inc(FTurnAnimations);
-    end;
-
-    ANIID_RIVER: begin
-      if animation.Status = asDone then
-        Inc(FRiverAnimations);
-    end;
-
-    ANIID_DEALING..ANIID_DEALING + 99: begin
-      if animation.Status = asDone then
-      begin
-        seat_index := (animation.ID - ANIID_DEALING) div 10;
-        if FTableStatus.GetSeatInfo(seat_index, seat) then
-          seat.IncDealtCards;
-
-        Dec(FDealAnimations);
-      end;
-    end;
-
-    ANIID_BETS..ANIID_BETS + 19: begin
-      if animation.Status = asDone then
-        Dec(FBetAnimations);
+  if animation.Status = asDone then
+  begin
+    if FFlopAnimations.Contains(animation.Id) then
+      FFlopAnimations.Remove(animation.Id);
+    if FTurnAnimations.Contains(animation.Id) then
+      FTurnAnimations.Remove(animation.Id);
+    if FRiverAnimations.Contains(animation.Id) then
+      FRiverAnimations.Remove(animation.Id);
+    if FBetAnimations.Contains(animation.Id) then
+      FBetAnimations.Remove(animation.Id);
+    if FPotWinAnimations.Contains(animation.Id) then
+      FPotWinAnimations.Remove(animation.Id);
+    if FDealAnimations.Contains(animation.Id) then
+    begin
+      seat_index := animation.Tag;
+      if FTableStatus.GetSeatInfo(seat_index, seat) then
+        seat.IncDealtCards;
+      FDealAnimations.Remove(animation.Id);
     end;
   end;
 end;

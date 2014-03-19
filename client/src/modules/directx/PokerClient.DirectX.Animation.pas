@@ -16,7 +16,7 @@ type
     FAniStartTime: Double;
     FEndTime     : Double;
     FHandle      : THandle;
-    FID          : Integer;
+    FId          : Integer;
     FStartPoint  : TPoint2;
     FEndPoint    : TPoint2;
     FCurrPoint   : TPoint2;
@@ -26,16 +26,18 @@ type
     FAnimationMsg: UINT;
     FProgress    : Single;
     FRemoved     : Boolean;
+    FTag         : Integer;
+    FTagUINT     : UINT32;
+    FTagSingle   : Single;
+    FTagString   : String;
 
   public
     constructor Create(const AHandle: THandle; const AID: Integer; const AAnimationMsg: UINT; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
     destructor Destroy; override;
 
-    procedure SetParams(const AHandle: THandle; const AID: Integer; const AAnimationMsg: UINT; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
-
     procedure Animate(const ACurrentTime: Double);
 
-    property ID: Integer read FID;
+    property Id: Integer read FId;
     property Handle: THandle read FHandle;
     property StartPoint: TPoint2 read FStartPoint;
     property EndPoint: TPoint2 read FEndPoint;
@@ -44,6 +46,10 @@ type
     property Status: TDXAnimationStatus read FStatus;
     property Progress: Single read FProgress;
     property Removed: Boolean read FRemoved write FRemoved;
+    property Tag: Integer read FTag write FTag;
+    property TagUINT: UINT32 read FTagUINT write FTagUINT;
+    property TagSingle: Single read FTagSingle write FTagSingle;
+    property TagString: String read FTagString write FTagString;
   end;
 
   TDXAnimations = TObjectList<TDXAnimation>;
@@ -72,23 +78,6 @@ destructor TDXAnimation.Destroy;
 begin
 
   inherited;
-end;
-
-procedure TDXAnimation.SetParams(const AHandle: THandle; const AID: Integer; const AAnimationMsg: UINT; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
-begin
-  FStartTime := AStartTime;
-  FAniStartTime := AStartTime + AStartDelay * 1000;
-  FEndTime := FAniStartTime + ASpeed * 1000;
-  FHandle := AHandle;
-  FAnimationMsg := AAnimationMsg;
-  FID := AID;
-  FStartPoint := AStartPoint;
-  FEndPoint := AEndPoint;
-  FCurrPoint := FStartPoint;
-  FSpeed := ASpeed;
-  FStartDelay := AStartDelay;
-  FStatus := asIdle;
-  FProgress := 0;
 end;
 
 procedure TDXAnimation.Animate(const ACurrentTime: Double);

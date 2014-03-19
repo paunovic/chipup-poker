@@ -14,6 +14,7 @@ type
     FTiming       : TAsphyreTiming;
     FLastUpdate   : Double;
     FLockCount    : Integer;
+    FNextId       : Integer;
 
     procedure Process;
 
@@ -30,7 +31,7 @@ type
     procedure Signal;
     procedure Shutdown;
 
-    procedure AddAnimation(const AHandle: THandle; const AID: Integer; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
+    function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single): TDXAnimation;
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
 
@@ -61,6 +62,7 @@ end;
 
 constructor TDXTimer.Create;
 begin
+  FNextId := 0;
   FSignalEvent := CreateEvent(nil, FALSE, FALSE, nil);
   FTiming := TAsphyreTiming.Create;
   FMsg_Animation := RegisterWindowMessage('DXTANMSG');
@@ -78,18 +80,14 @@ begin
   inherited;
 end;
 
-procedure TDXTimer.AddAnimation(const AHandle: THandle; const AID: Integer; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
+function TDXTimer.AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single): TDXAnimation;
 var
   animation: TDXAnimation;
 begin
-  if Find(AHandle, AID, animation) then
-    animation.SetParams(AHandle, AID, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay)
-  else
-  begin
-    animation := TDXAnimation.Create(AHandle, AID, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay);
-    FAnimations.Add(animation);
-  end;
-
+  animation := TDXAnimation.Create(AHandle, FNextId, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay);
+  Inc(FNextId);
+  FAnimations.Add(animation);
+  result := animation;
   Signal;
 end;
 
@@ -201,6 +199,7 @@ begin
     Process;
     if FAnimations.Count = 0 then
     begin
+      FNextId := 0;
       ResetEvent(FSignalEvent);
       WaitForSingleObject(FSignalEvent, INFINITE);
     end;
