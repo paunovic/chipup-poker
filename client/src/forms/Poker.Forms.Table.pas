@@ -1606,7 +1606,7 @@ begin
 
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'TURN';
-      EnableGameLockTimer(1.5);
+      EnableGameLockTimer(FTurnAniDelay + 1.5);
       AnimateBets(ATableEvent.Bets);
     end;
 
@@ -1615,7 +1615,7 @@ begin
 
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'RIVER';
-      EnableGameLockTimer(1.5);
+      EnableGameLockTimer(FRiverAniDelay + 1.5);
       AnimateBets(ATableEvent.Bets);
     end;
   end;
