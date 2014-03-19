@@ -3,7 +3,7 @@ unit PokerClient.Server.Socket;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Classes, System.Generics.Collections, System.SysUtils,
+  Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils,
   OverbyteIcsWndControl, OverbyteIcsWSocket, PokerClient.Protobufs.Objects.RpcMessage, PokerClient.Protobufs.Objects.Base, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Protobufs.Objects.Game;
 
 type
@@ -105,13 +105,13 @@ var
 implementation
 
 uses
-  Winapi.WinSock, PokerClient.Settings, PokerClient.Common.Misc, pbOutput, pbInput, PokerClient.Server.MessageContainer,
+  Winapi.WinSock, PokerClient.Settings, PokerClient.Common.Misc, pbOutput, PokerClient.Server.MessageContainer,
   {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
   PokerClient.Protobufs.Objects.LoginParams, PokerClient.Protobufs.Objects.StatusReply, PokerClient.Protobufs.Objects.HelloReply, PokerClient.Protobufs.Objects.RegisterParams, PokerClient.Protobufs.Objects.Club, PokerClient.Protobufs.Objects.ChangeEMailParams, PokerClient.Protobufs.Objects.ForgotPasswordParams,
   PokerClient.Protobufs.Objects.ListClubsReply, PokerClient.Protobufs.Objects.TransferChipsParams, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Protobufs.Objects.SetAvatarReply, PokerClient.Protobufs.Objects.KickPlayerParams, PokerClient.Protobufs.Objects.PingParams, PokerClient.Protobufs.Objects.PingReply,
   PokerClient.Protobufs.Objects.GiveClubOwnershipParams, PokerClient.Protobufs.Objects.ChangePasswordParams, PokerClient.Protobufs.Objects.RegisterReply, PokerClient.Protobufs.Objects.LoginReply, PokerClient.Protobufs.Objects.GetUserParams, PokerClient.Protobufs.Objects.SetAvatarParams,
-  PokerClient.Protobufs.Objects.ChatEvent, PokerClient.Protobufs.Objects.ChatMessage, PokerClient.Protobufs.Objects.TableSit, PokerClient.Protobufs.Objects.TableStatus, PokerClient.Protobufs.Objects.ChangeSuspendState, PokerClient.Protobufs.Objects.ChangeMailReply, PokerClient.Protobufs.Objects.TableEvent, PokerClient.Protobufs.Objects.TableBoolFlag,
-  PokerClient.Protobufs.Objects.PutChips, PokerClient.DataModule, PokerClient.Protobufs.Objects.User, PokerClient.Protobufs.Objects.UserChangeParams;
+  PokerClient.Protobufs.Objects.ChatEvent, PokerClient.Protobufs.Objects.ChatMessage, PokerClient.Protobufs.Objects.TableSit, PokerClient.Protobufs.Objects.TableStatus, PokerClient.Protobufs.Objects.ChangeSuspendState, PokerClient.Protobufs.Objects.ChangeMailReply, PokerClient.Protobufs.Objects.TableBoolFlag,
+  PokerClient.Protobufs.Objects.PutChips, PokerClient.Protobufs.Objects.User, PokerClient.Protobufs.Objects.UserChangeParams;
 
 var
   FConnectThreadId: DWORD;

@@ -5,10 +5,11 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, PokerClient.Interfaces.FormParams, PokerClient.Objects.ClubInfo, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, Vcl.Menus, cxButtons, dxSkinscxPCPainter,
-  cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, cxBlobEdit,
+  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, cxButtons, dxSkinscxPCPainter,
+  cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, PokerClient.Objects.PlayerInfo, dxBevel,
-   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls;
+   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
+  cxData;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -131,8 +132,8 @@ implementation
 uses
   {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
   PokerClient.Common.Misc, PokerClient.Server.Socket, PokerClient.DataModule, PokerClient.Forms.GiveChips, PokerClient.Forms.ChangeClubDetails,
-  PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Server.MessageContainer, PokerClient.Protobufs.Objects.StatusReply, PokerClient.Objects.GameInfo, PokerClient.Forms.CreateEditGame, PokerClient.Protobufs.Objects.Club,
-  PokerClient.Protobufs.Objects.Game, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Common.FormsContainer, PokerClient.Interfaces.ModalForm;
+  PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Server.MessageContainer, PokerClient.Objects.GameInfo, PokerClient.Forms.CreateEditGame, PokerClient.Protobufs.Objects.Club,
+  PokerClient.Protobufs.Objects.Game, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Common.FormsContainer;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);

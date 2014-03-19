@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, PokerClient.Table.Resources, DX9Providers;
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers;
 
 
 class procedure TDXCore.Initialize;

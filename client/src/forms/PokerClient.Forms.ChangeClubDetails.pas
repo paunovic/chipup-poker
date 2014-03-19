@@ -3,10 +3,10 @@ unit PokerClient.Forms.ChangeClubDetails;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  Vcl.StdCtrls, cxRadioGroup, cxLabel, cxTextEdit, Vcl.Menus, cxButtons, PokerClient.Objects.ClubInfo, Vcl.ActnList, PokerClient.Interfaces.FormParams,
-   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, PokerClient.Interfaces.ModalForm;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, Vcl.StdCtrls, cxRadioGroup, cxLabel,
+  cxTextEdit, cxButtons, PokerClient.Objects.ClubInfo, Vcl.ActnList, PokerClient.Interfaces.FormParams, dxsChipUpDark,
+  dxsChipUpDarkTabs, dxsChipUpRedButton, PokerClient.Interfaces.ModalForm, Vcl.Menus;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)
@@ -47,7 +47,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
-  PokerClient.DataModule, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Common.Misc, PokerClient.Server.Validators, PokerClient.Server.Socket, PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Server.MessageContainer,
+  PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Common.Misc, PokerClient.Server.Validators, PokerClient.Server.Socket, PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Server.MessageContainer,
   PokerClient.Common.FormsContainer;
 
 

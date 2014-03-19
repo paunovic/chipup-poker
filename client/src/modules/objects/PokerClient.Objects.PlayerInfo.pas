@@ -47,9 +47,9 @@ type
 implementation
 
 uses
-  System.Classes, PNGImage, Soap.EncdDecd,
-  {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
-  PokerClient.DataModule, PokerClient.Settings, PokerClient.Avatars, PokerClient.Objects.GameInfo,
+  System.Classes, PNGImage,
+  {$IFDEF DEBUG} {$ENDIF}
+  PokerClient.Objects.GameInfo,
   PokerClient.Protobufs.Objects.Club, PokerClient.Protobufs.Objects.Game;
 
 

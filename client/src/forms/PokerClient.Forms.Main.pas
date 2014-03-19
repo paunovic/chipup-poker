@@ -3,13 +3,13 @@ unit PokerClient.Forms.Main;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.AppEvnts, dxSkinsCore,
-  cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls, cxLookAndFeelPainters, cxStyles, dxSkinscxPCPainter,
-  cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxClasses,
-  cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, PokerClient.Objects.ClubInfo, cxMaskEdit, cxDropDownEdit,
-   PokerClient.Forms.Login, PokerClient.Objects.GameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ToolWin, Vcl.ActnMan, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnColorMaps, dxGDIPlusClasses, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ExtCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.AppEvnts, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
+  cxLookAndFeelPainters, dxSkinscxPCPainter, cxCustomData, cxDataStorage, cxEdit, cxGridCustomView,
+  cxGridCustomTableView, cxGridTableView, cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons,
+  OverbyteIcsWSocket, PokerClient.Objects.ClubInfo, cxMaskEdit, cxDropDownEdit, PokerClient.Forms.Login, PokerClient.Objects.GameInfo,
+  cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ActnMan, Vcl.ActnMenus, Vcl.PlatformDefaultStyleActnCtrls,
+  dxGDIPlusClasses, dxsChipUpDarkTabs, dxsChipUpRedButton, cxStyles, cxFilter, cxData;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -150,12 +150,15 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
-  PokerClient.Settings, PokerClient.Server.Socket, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Common.Misc, PokerClient.DataModule, PokerClient.Forms.CreateClub,
-  PokerClient.Forms.JoinClub, PokerClient.Server.MessageContainer, PokerClient.Objects.PlayerInfo, PokerClient.Forms.ChangeEMail,
-  PokerClient.Forms.ChangePassword, PokerClient.Forms.ChangeAvatar, PokerClient.Avatars, PokerClient.Forms.PublicClubsList, PokerClient.Protobufs.Objects.ClubCommandReply,
-  PokerClient.Protobufs.Objects.User, PokerClient.Protobufs.Objects.StatusReply, PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Objects.Club, PokerClient.Protobufs.Objects.Game, PokerClient.Protobufs.Objects.TableStatus, PokerClient.Table.Tables, PokerClient.Protobufs.Objects.GetUserParams,
-  PokerClient.DirectX.Core, PokerClient.Common.FormsContainer, PokerClient.Protobufs.Objects.TransferChipsParams, PokerClient.Protobufs.Objects.ChatEvent, PokerClient.Protobufs.Objects.ChatMessage,
+  {$IFDEF DEBUG} {$ENDIF}
+  PokerClient.Server.Socket, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Common.Misc, PokerClient.DataModule,
+  PokerClient.Forms.CreateClub, PokerClient.Forms.JoinClub, PokerClient.Server.MessageContainer, PokerClient.Objects.PlayerInfo,
+  PokerClient.Forms.ChangeEMail, PokerClient.Forms.ChangePassword, PokerClient.Forms.ChangeAvatar,
+  PokerClient.Forms.PublicClubsList, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Protobufs.Objects.User,
+  PokerClient.Protobufs.Objects.StatusReply, PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Objects.Club,
+  PokerClient.Protobufs.Objects.Game, PokerClient.Protobufs.Objects.TableStatus, PokerClient.Table.Tables,
+  PokerClient.Protobufs.Objects.GetUserParams, PokerClient.Common.FormsContainer,
+  PokerClient.Protobufs.Objects.TransferChipsParams,
   PokerClient.Forms.ClubLobby, PokerClient.Protobufs.Objects.UserChangeParams;
 
 

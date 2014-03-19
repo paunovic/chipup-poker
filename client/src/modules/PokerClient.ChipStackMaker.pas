@@ -3,7 +3,7 @@ unit PokerClient.ChipStackMaker;
 interface
 
 uses
-  System.Generics.Collections, AsphyreImages, PokerClient.Helpers.AsphyreImage,
+  System.Generics.Collections, AsphyreImages,
   GR32;
 
 type

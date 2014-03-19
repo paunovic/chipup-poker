@@ -3,8 +3,7 @@ unit PokerClient.Table.Resources;
 interface
 
 uses
-  AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas,
-  GR32, GR32_PNG, GR32_Resamplers, PokerClient.Cards, System.Generics.Collections;
+  AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas, GR32, GR32_Resamplers, PokerClient.Cards;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;

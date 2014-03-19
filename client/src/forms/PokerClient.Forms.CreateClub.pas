@@ -5,8 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
-  cxLookAndFeelPainters, cxContainer, cxEdit, cxLabel, cxTextEdit, Vcl.StdCtrls, cxRadioGroup, Vcl.Menus, cxButtons, Vcl.ActnList,
-   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  cxLookAndFeelPainters, cxContainer, cxEdit, cxLabel, cxTextEdit, Vcl.StdCtrls, cxRadioGroup, cxButtons, Vcl.ActnList,
+   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Vcl.Menus;
 
 type
   TfrmCreateClub = class(TForm)
@@ -42,7 +42,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
-  PokerClient.Server.Socket, PokerClient.Common.Misc, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Server.Validators, PokerClient.DataModule, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Server.MessageContainer, PokerClient.Server.Settings,
+  PokerClient.Server.Socket, PokerClient.Common.Misc, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Server.Validators, PokerClient.Protobufs.Objects.ClubCommandReply, PokerClient.Server.MessageContainer, PokerClient.Server.Settings,
   PokerClient.Server.MessageCallbacks, PokerClient.Common.FormsContainer;
 
 

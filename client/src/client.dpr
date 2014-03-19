@@ -112,6 +112,7 @@ uses
   PokerClient.Protobufs.Objects.TableBoolFlag in 'modules\protobuf\objects\PokerClient.Protobufs.Objects.TableBoolFlag.pas',
   PokerClient.Protobufs.Objects.UserChangeParams in 'modules\protobuf\objects\PokerClient.Protobufs.Objects.UserChangeParams.pas';
 
+
 procedure FocusPokerApp;
 var
   window_handle: THandle;

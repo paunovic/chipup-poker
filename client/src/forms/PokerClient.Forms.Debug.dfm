@@ -43,7 +43,7 @@ object frmDebug: TfrmDebug
         675
         75)
       object btPause: TcxButton
-        Left = 577
+        Left = 5
         Top = 6
         Width = 93
         Height = 31
@@ -62,52 +62,52 @@ object frmDebug: TfrmDebug
         ParentFont = False
       end
       object lbsThreads: TcxLabel
-        Left = 8
+        Left = 544
         Top = 4
         Caption = 'Threads:'
         Transparent = True
       end
       object lbsMemoryUsage: TcxLabel
-        Left = 8
+        Left = 544
         Top = 20
         Caption = 'Memory usage:'
         Transparent = True
       end
       object lbsSocketState: TcxLabel
-        Left = 8
+        Left = 544
         Top = 52
         Caption = 'Socket state:'
         Transparent = True
       end
       object lbsCalbackSets: TcxLabel
-        Left = 8
+        Left = 544
         Top = 36
         Caption = 'Callback sets:'
         Transparent = True
       end
       object lbvThreads: TcxLabel
-        Left = 88
+        Left = 624
         Top = 4
         Caption = '00'
         Style.TextStyle = [fsBold]
         Transparent = True
       end
       object lbvMemoryUsage: TcxLabel
-        Left = 88
+        Left = 624
         Top = 20
         Caption = '00000kb'
         Style.TextStyle = [fsBold]
         Transparent = True
       end
       object lbvCallbackSets: TcxLabel
-        Left = 88
+        Left = 624
         Top = 36
         Caption = '0'
         Style.TextStyle = [fsBold]
         Transparent = True
       end
       object lbvSocketState: TcxLabel
-        Left = 88
+        Left = 624
         Top = 52
         Caption = '0'
         Style.TextStyle = [fsBold]

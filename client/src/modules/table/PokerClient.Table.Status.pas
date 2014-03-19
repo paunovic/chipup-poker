@@ -3,8 +3,8 @@ unit PokerClient.Table.Status;
 interface
 
 uses
-  System.SyncObjs,
-  PokerClient.Protobufs.Objects.TableStatus, PokerClient.Protobufs.Objects.SeatInfo, PokerClient.Protobufs.Objects.TableEvent, System.SysUtils, System.Generics.Collections, System.Generics.Defaults, PokerClient.Cards, PokerClient.Protobufs.Objects.Pot;
+  PokerClient.Protobufs.Objects.TableStatus, PokerClient.Protobufs.Objects.SeatInfo, PokerClient.Protobufs.Objects.TableEvent,
+  System.SysUtils, System.Generics.Collections, System.Generics.Defaults, PokerClient.Cards, PokerClient.Protobufs.Objects.Pot;
 
 type
   TSeatInfo = class

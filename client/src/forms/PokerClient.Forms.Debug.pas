@@ -62,7 +62,7 @@ implementation
 {$R *.dfm}
 
 uses
-  PokerClient.Common.Misc, PokerClient.Server.Socket, PokerClient.DataModule, PokerClient.Server.MessageContainer;
+  PokerClient.Common.Misc, PokerClient.Server.Socket, PokerClient.Server.MessageContainer;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';

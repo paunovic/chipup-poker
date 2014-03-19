@@ -29,8 +29,7 @@ type
 
 implementation
 
-uses
-  pbPublic;
+
 
 
 constructor TProtobufBaseObject.Create;

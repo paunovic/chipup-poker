@@ -21,7 +21,7 @@ function ValidateGameName(const AGameName: String; out AError: String): Boolean;
 implementation
 
 uses
-  Vcl.Controls, System.SysUtils, PokerClient.Server.Settings, PokerClient.Common.Misc, PokerClient.DataModule, PokerClient.Settings;
+  Vcl.Controls, System.SysUtils, PokerClient.Server.Settings, PokerClient.Common.Misc;
 
 function ValidateUsername(const AUsername: String; out AError: String): Boolean;
 begin

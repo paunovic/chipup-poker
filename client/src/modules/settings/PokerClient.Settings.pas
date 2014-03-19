@@ -54,7 +54,7 @@ implementation
 
 uses
   Winapi.Windows, System.SysUtils,
-  PokerClient.Common.Misc, PokerClient.Common.Encryption, PokerClient.DataModule;
+  PokerClient.Common.Misc, PokerClient.Common.Encryption;
 
 
 class procedure TSettings.Initialize;

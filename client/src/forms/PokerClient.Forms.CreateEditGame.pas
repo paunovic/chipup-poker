@@ -5,8 +5,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  Vcl.Samples.Spin, cxSpinEdit, PokerClient.Interfaces.FormParams, PokerClient.Objects.ClubInfo,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, PokerClient.Objects.GameInfo, PokerClient.Interfaces.ModalForm;
+  Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxRadioGroup, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  cxSpinEdit, PokerClient.Interfaces.FormParams, PokerClient.Objects.ClubInfo,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, PokerClient.Objects.GameInfo, PokerClient.Interfaces.ModalForm,
+  Vcl.Menus;
 
 type
   TfrmCreateEditGame = class(TForm, IFormParams, IModalForm)
@@ -59,7 +60,7 @@ implementation
 {$R *.dfm}
 
 uses
-  PokerClient.Server.Socket, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Common.Misc, PokerClient.Server.MessageCallbacks, PokerClient.Server.Validators, PokerClient.Protobufs.Objects.Game, PokerClient.DataModule, PokerClient.Server.MessageContainer, PokerClient.Common.FormsContainer;
+  PokerClient.Server.Socket, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Common.Misc, PokerClient.Server.MessageCallbacks, PokerClient.Server.Validators, PokerClient.Protobufs.Objects.Game, PokerClient.Server.MessageContainer, PokerClient.Common.FormsContainer;
 
 
 

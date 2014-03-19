@@ -3,8 +3,8 @@ unit PokerClient.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections, PokerClient.Protobufs.Objects.Game, PokerClient.Protobufs.Objects.User,
-  cxImage;
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections,
+  PokerClient.Protobufs.Objects.Game, PokerClient.Protobufs.Objects.User, cxImage;
 
 var
   SelfPath          : String;
@@ -39,8 +39,8 @@ type
 implementation
 
 uses
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses,
-  PokerClient.Interfaces.ModalForm, PokerClient.Interfaces.FormParams;
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, PokerClient.Interfaces.ModalForm,
+  PokerClient.Interfaces.FormParams;
 
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;

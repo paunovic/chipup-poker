@@ -9,11 +9,12 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.Generics.Collections,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo,  Vcl.Menus, cxButtons, PokerClient.Table.Status, PokerClient.DirectX.Timer, PokerClient.DirectX.Animation, Vectors2,
-  Vcl.ActnList, cxLabel, PokerClient.Table.Tables, cxTextEdit, dxsChipUpDark, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, dxsChipUpRedButton,
-  cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox, Vectors2px, PokerClient.Protobufs.Objects.TableEvent, System.Types, PokerClient.ChipStackMaker, AsphyreTypes,
-  cxCurrencyEdit, RVStyle, RVScroll, RichView, RVEdit, AsphyreImages, PokerClient.Cards;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo,  PokerClient.Table.Status, PokerClient.DirectX.Timer,
+  PokerClient.DirectX.Animation, Vectors2, Vcl.ActnList, cxLabel, PokerClient.Table.Tables, cxTextEdit, dxsChipUpDark,
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, dxsChipUpRedButton, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
+  Vectors2px, PokerClient.Protobufs.Objects.TableEvent, System.Types, PokerClient.ChipStackMaker, AsphyreTypes, cxCurrencyEdit, RVStyle,
+  RVScroll, RichView, AsphyreImages, PokerClient.Cards;
 
 type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
@@ -255,9 +256,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
-  cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, PokerClient.Server.MessageContainer, PokerClient.Server.Settings, PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Enum.ServerCodes,
-  PokerClient.Protobufs.Objects.ChatEvent, PokerClient.Protobufs.Objects.ChatMessage, PokerClient.Protobufs.Objects.SeatInfo, PokerClient.Table.Resources, NativeConnectors, PokerClient.DirectX.Core, AsphyreFonts, PokerClient.Common.FormsContainer,
-  PokerClient.Server.Socket, PokerClient.Common.Misc, PokerClient.Forms.TableSit, PokerClient.DataModule, PokerClient.Objects.PlayerInfo, PokerClient.Avatars,
+  cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, PokerClient.Server.MessageContainer, PokerClient.Server.Settings,
+  PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Protobufs.Objects.ChatEvent,
+  PokerClient.Protobufs.Objects.ChatMessage, PokerClient.Protobufs.Objects.SeatInfo, PokerClient.Table.Resources,
+  PokerClient.DirectX.Core, AsphyreFonts, PokerClient.Common.FormsContainer, PokerClient.Server.Socket, PokerClient.Common.Misc,
+  PokerClient.Forms.TableSit, PokerClient.DataModule, PokerClient.Objects.PlayerInfo, PokerClient.Avatars,
   PokerClient.Protobufs.Objects.TableStatus, PokerClient.Protobufs.Objects.PotInfo, RVTable, PokerClient.Sounds;
 
 
@@ -1589,20 +1592,6 @@ end;
 
 procedure TfrmTable.Render;
 begin
-  if not NativeAsphyreConnect.Init() then
-    Exit;
-
-  if (Assigned(DXCore.Device)) and
-     (DXCore.Device.IsAtFault()) then
-  begin
-    Close;
-    Exit;
-  end;
-
-  if (not Assigned(DXCore.Device)) or
-     (not DXCore.Device.Connect()) then
-    Exit;
-
   DXCore.Device.Render(FTable.SwapChainIndex, RenderEvent, 0);
 end;
 

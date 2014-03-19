@@ -3,10 +3,10 @@ unit PokerClient.Forms.ChangeAvatar;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ExtCtrls, cxLabel, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg,
-  OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, Vcl.StdCtrls, cxButtons,
+  cxLabel, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg, OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar,
+  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Vcl.Menus;
 
 type
   TfrmChangeAvatar = class(TForm)
@@ -45,7 +45,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
-  superobject, PNGImage, PokerClient.Avatars, PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Objects.SetAvatarReply, PokerClient.Server.MessageContainer,
+  PNGImage, PokerClient.Avatars, PokerClient.Server.MessageCallbacks, PokerClient.Protobufs.Objects.SetAvatarReply, PokerClient.Server.MessageContainer,
   PokerClient.Protobufs.Enum.ServerCodes, PokerClient.Server.Socket, PokerClient.Common.Misc, PokerClient.Common.Encryption, PokerClient.Settings,
   PokerClient.DataModule, PokerClient.Objects.PlayerInfo, PokerClient.Common.FormsContainer;
 

@@ -3,9 +3,9 @@ unit PokerClient.Forms.ChangeEMail;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, Vcl.ActnList,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, Vcl.StdCtrls,
+  cxButtons, cxTextEdit, Vcl.ActnList,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Vcl.Menus;
 
 type
   TfrmChangeEMail = class(TForm)

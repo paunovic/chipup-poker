@@ -4,10 +4,10 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, dxSkinsCore,
-  dxSkinscxPCPainter, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxNavigator, cxSpinEdit, cxTextEdit,
-  Vcl.Menus, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid,
-   Vcl.ExtCtrls, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore,
+  dxSkinscxPCPainter, cxCustomData, cxDataStorage, cxEdit, cxSpinEdit, cxTextEdit,
+  Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid,
+   Vcl.ExtCtrls, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxStyles, cxFilter, cxData, Vcl.Menus;
 
 type
   TfrmPublicClubsList = class(TForm)

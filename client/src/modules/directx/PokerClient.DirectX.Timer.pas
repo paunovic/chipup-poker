@@ -3,7 +3,7 @@ unit PokerClient.DirectX.Timer;
 interface
 
 uses
-  Winapi.Windows, System.Classes, AsphyreImages, PokerClient.DirectX.Animation, Vectors2, AsphyreTiming;
+  Winapi.Windows, System.Classes, PokerClient.DirectX.Animation, Vectors2, AsphyreTiming;
 
 type
   TDXTimer = class(TThread)

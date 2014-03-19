@@ -3,8 +3,8 @@ unit PokerClient.DataModule;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.ExtCtrls, System.Generics.Collections,
-  PokerClient.Objects.PlayerInfo, PokerClient.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, PokerClient.Objects.PlayerInfo,
+  PokerClient.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
   dxSkinsForm;
 
 type

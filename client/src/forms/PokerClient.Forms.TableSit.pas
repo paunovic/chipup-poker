@@ -5,8 +5,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  Vcl.Menus, Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit, cxSpinEdit, cxLabel, Vcl.ActnList, PokerClient.Interfaces.FormParams,
-   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, PokerClient.Table.Tables, PokerClient.Table.Status, PokerClient.Interfaces.ModalForm;
+  Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit, cxSpinEdit, cxLabel, Vcl.ActnList, PokerClient.Interfaces.FormParams,
+   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, PokerClient.Table.Tables, PokerClient.Table.Status, PokerClient.Interfaces.ModalForm,
+  Vcl.Menus;
 
 type
   TfrmTableSit = class(TForm, IFormParams, IModalForm)

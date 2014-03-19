@@ -5,8 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons, Vcl.StdCtrls, Vcl.ActnList, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
-  Vcl.Menus, dxSkinsCore, cxButtons, cxControls, cxContainer, cxEdit, cxLabel, cxTextEdit, dxSkinsForm, dxsChipUpDark, dxsChipUpDarkTabs,
-  dxsChipUpRedButton, PokerClient.Interfaces.ModalForm;
+  dxSkinsCore, cxButtons, cxControls, cxContainer, cxEdit, cxLabel, cxTextEdit, dxSkinsForm, dxsChipUpDark, dxsChipUpDarkTabs,
+  dxsChipUpRedButton, PokerClient.Interfaces.ModalForm, Vcl.Menus;
 
 type
   TfrmForgotPassword = class(TForm, IModalForm)
@@ -36,7 +36,7 @@ implementation
 {$R *.dfm}
 
 uses
-  PokerClient.Server.Socket, PokerClient.Server.Validators, PokerClient.DataModule, PokerClient.Server.Settings, PokerClient.Common.FormsContainer;
+  PokerClient.Server.Socket, PokerClient.Server.Validators, PokerClient.Server.Settings, PokerClient.Common.FormsContainer;
 
 
 procedure TfrmForgotPassword.FormCreate(Sender: TObject);

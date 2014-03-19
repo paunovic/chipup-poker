@@ -43,7 +43,7 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} PokerClient.Forms.Debug, {$ENDIF}
+  {$IFDEF DEBUG} {$ENDIF}
   System.SysUtils, System.Classes;
 
 
