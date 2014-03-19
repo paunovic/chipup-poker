@@ -292,9 +292,6 @@ message TableStatus {
 	required int32 dealer = 4;
 	required int32 current_seat = 5;
 	repeated uint32 bets = 6;
-	optional bytes flop = 7;
-	optional bytes turn = 8;
-	optional bytes river = 9;
 	required bool locked = 11;
 	optional int32 seq = 12;
 	optional uint32 minimum_bet = 13;
@@ -409,6 +406,7 @@ message TableEvent {
 	optional int32 seat = 2;
 	repeated PotInfo pots = 4;
 	repeated uint32 bets = 5;
+	optional bytes cards = 6;
 }
 
 message PutChips {

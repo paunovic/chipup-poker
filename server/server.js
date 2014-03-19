@@ -1969,7 +1969,6 @@ Game.prototype.getNextSeat = function (current,validstates) {
 				return -1;
 			}
 			x++;
-			this.log('trying seat',x,limit);
 			if (x >= this.obj.seats) x = 0;
 			this.lastplayer[x] = null;
 		}
@@ -1995,7 +1994,6 @@ Game.prototype.getPrevSeat = function (current) {
 				return -1;
 			}
 			x--;
-			this.log('trying seat',x,limit);
 			if (x < 0) x = this.obj.seats;
 		}
 		return x;
@@ -2080,6 +2078,7 @@ Game.prototype.doWin = function (cb) {
 	var totalrake = 0;
 	assert.equal(this.Lock.readers,-1);
 	this.state = 'tsWinning';
+	var delay = 1500 + (this.pots.length * 500);
 	function finish() {
 		this.log('cleared seat');
 		this.current_seat = -1;
@@ -2123,7 +2122,7 @@ Game.prototype.doWin = function (cb) {
 					}.bind(this),null,{cont:true},[]);
 				}.bind(this));
 			}.bind(this))
-		}.bind(this),3000);
+		}.bind(this),delay);
 	}
 	var winnerObjects = [];
 	var winnerids = [];
@@ -2201,7 +2200,7 @@ Game.prototype.checkRoundPass = function (cb,events) {
 			if (this.state == 'tsPreFlop') {
 				this.log('flopping');
 				this.addHistory({code:['flop']});
-				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots}));
+				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
 					this.state = 'tsFlop';
@@ -2211,7 +2210,7 @@ Game.prototype.checkRoundPass = function (cb,events) {
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
 				this.addHistory({code:['turn']});
-				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots}));
+				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
 					this.state = 'tsTurn';
@@ -2221,7 +2220,7 @@ Game.prototype.checkRoundPass = function (cb,events) {
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
 				this.addHistory({code:['river']});
-				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots}));
+				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
 					this.state = 'tsRiver';
@@ -2230,6 +2229,7 @@ Game.prototype.checkRoundPass = function (cb,events) {
 				this.roundEnd();
 			} else {
 				//this.broadcastStatus(null);
+				events.push(this.makeEvent('tePostRiver',{bets:this.bets.slice()}));
 				this.moveToPot('post-river',function () {
 					this.log('events callback FIXME %s',new Error().stack);
 					this.calcWinners(cb,events);
@@ -2500,7 +2500,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 	async.parallel([
 		function (cb) {
 			this.updateMongoState(function () {
-				this.log('pot for game updated');
+				//this.log('pot for game updated');
 				cb();
 			}.bind(this));
 		}.bind(this),
@@ -2808,13 +2808,14 @@ Game.prototype.makeEvent = function (event,seat,data) {
 	if (typeof seat == 'number') obj.seat = seat;
 	if (typeof seat == 'object') {
 		if (seat && seat.bets) obj.bets = seat.bets;
+		if (seat && seat.cards) obj.cards = seat.cards;
 //		if (seat && seat.oldpots) obj.oldpots = seat.oldpots;
 	}
 	return obj;
 }
 Game.prototype.broadcastStatus = function (conn,forceunlock,events) {
 	assert(events);
-	this.log('sending table status to all 2, state:%s, trace:%s',this.state,new Error().stack);
+	//this.log('sending table status to all 2, state:%s',this.state);
 	for (var key in this.users) {
 		if (this.users[key] == conn) continue;
 		if (!this.users[key]) continue;
