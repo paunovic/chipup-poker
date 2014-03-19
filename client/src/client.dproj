@@ -104,11 +104,11 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<RcCompile Include="resources\PokerClient.Resources.Fonts.rc">
-				<Form>PokerClient.Resources.Fonts.res</Form>
+			<RcCompile Include="resources\Poker.Resources.Fonts.rc">
+				<Form>Poker.Resources.Fonts.res</Form>
 			</RcCompile>
-			<RcCompile Include="resources\PokerClient.Resources.Sounds.rc">
-				<Form>PokerClient.Resources.Sounds.res</Form>
+			<RcCompile Include="resources\Poker.Resources.Sounds.rc">
+				<Form>Poker.Resources.Sounds.res</Form>
 			</RcCompile>
 			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
 			<DCCReference Include="3rdparty\protobufs\pbInput.pas"/>
@@ -120,129 +120,129 @@
 			<DCCReference Include="skins\ChipUpDarkStyle\dxsChipUpDark.pas"/>
 			<DCCReference Include="skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas"/>
 			<DCCReference Include="skins\ChipUpRedButton\dxsChipUpRedButton.pas"/>
-			<DCCReference Include="PokerClient.DataModule.pas">
+			<DCCReference Include="Poker.DataModule.pas">
 				<Form>dmMain</Form>
 				<DesignClass>TDataModule</DesignClass>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.Main.pas">
+			<DCCReference Include="forms\Poker.Forms.Main.pas">
 				<Form>frmChipUpMain</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.Login.pas">
+			<DCCReference Include="forms\Poker.Forms.Login.pas">
 				<Form>frmLogin</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.CreateAccount.pas">
+			<DCCReference Include="forms\Poker.Forms.CreateAccount.pas">
 				<Form>frmCreateAccount</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.ForgotPassword.pas">
+			<DCCReference Include="forms\Poker.Forms.ForgotPassword.pas">
 				<Form>frmForgotPassword</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.CreateClub.pas">
+			<DCCReference Include="forms\Poker.Forms.CreateClub.pas">
 				<Form>frmCreateClub</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.JoinClub.pas">
+			<DCCReference Include="forms\Poker.Forms.JoinClub.pas">
 				<Form>frmJoinClub</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.ChangeClubDetails.pas">
+			<DCCReference Include="forms\Poker.Forms.ChangeClubDetails.pas">
 				<Form>frmChangeClubDetails</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.GiveChips.pas">
+			<DCCReference Include="forms\Poker.Forms.GiveChips.pas">
 				<Form>frmGiveChips</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.ChangeEMail.pas">
+			<DCCReference Include="forms\Poker.Forms.ChangeEMail.pas">
 				<Form>frmChangeEMail</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.ChangePassword.pas">
+			<DCCReference Include="forms\Poker.Forms.ChangePassword.pas">
 				<Form>frmChangePassword</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.Table.pas">
+			<DCCReference Include="forms\Poker.Forms.Table.pas">
 				<Form>frmTable</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.CreateEditGame.pas">
+			<DCCReference Include="forms\Poker.Forms.CreateEditGame.pas">
 				<Form>frmCreateEditGame</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.Debug.pas">
+			<DCCReference Include="forms\Poker.Forms.Debug.pas">
 				<Form>frmDebug</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.PublicClubsList.pas">
+			<DCCReference Include="forms\Poker.Forms.PublicClubsList.pas">
 				<Form>frmPublicClubsList</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.ChangeAvatar.pas">
+			<DCCReference Include="forms\Poker.Forms.ChangeAvatar.pas">
 				<Form>frmChangeAvatar</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.TableSit.pas">
+			<DCCReference Include="forms\Poker.Forms.TableSit.pas">
 				<Form>frmTableSit</Form>
 			</DCCReference>
-			<DCCReference Include="forms\PokerClient.Forms.ClubLobby.pas">
+			<DCCReference Include="forms\Poker.Forms.ClubLobby.pas">
 				<Form>frmClubLobby</Form>
 			</DCCReference>
-			<DCCReference Include="interfaces\PokerClient.Interfaces.FormParams.pas"/>
-			<DCCReference Include="interfaces\PokerClient.Interfaces.ModalForm.pas"/>
-			<DCCReference Include="helpers\PokerClient.Helpers.AsphyreImage.pas"/>
-			<DCCReference Include="modules\common\PokerClient.Common.Misc.pas"/>
-			<DCCReference Include="modules\common\PokerClient.Common.Encryption.pas"/>
-			<DCCReference Include="modules\common\PokerClient.Common.FormsContainer.pas"/>
-			<DCCReference Include="modules\common\PokerClient.Common.InstanceController.pas"/>
-			<DCCReference Include="modules\settings\PokerClient.HardcodedSettings.pas"/>
-			<DCCReference Include="modules\settings\PokerClient.Settings.pas"/>
-			<DCCReference Include="modules\server\PokerClient.Server.Settings.pas"/>
-			<DCCReference Include="modules\server\PokerClient.Server.Validators.pas"/>
-			<DCCReference Include="modules\server\PokerClient.Server.Socket.pas"/>
-			<DCCReference Include="modules\server\PokerClient.Server.MessageContainer.pas"/>
-			<DCCReference Include="modules\server\PokerClient.Server.MessageCallbacks.pas"/>
-			<DCCReference Include="modules\directx\PokerClient.DirectX.Core.pas"/>
-			<DCCReference Include="modules\directx\PokerClient.DirectX.Timer.pas"/>
-			<DCCReference Include="modules\directx\PokerClient.DirectX.Animation.pas"/>
-			<DCCReference Include="modules\objects\PokerClient.Objects.PlayerInfo.pas"/>
-			<DCCReference Include="modules\objects\PokerClient.Objects.ClubInfo.pas"/>
-			<DCCReference Include="modules\objects\PokerClient.Objects.GameInfo.pas"/>
-			<DCCReference Include="modules\table\PokerClient.Table.Tables.pas"/>
-			<DCCReference Include="modules\table\PokerClient.Table.Status.pas"/>
-			<DCCReference Include="modules\table\PokerClient.Table.Resources.pas"/>
-			<DCCReference Include="modules\PokerClient.Avatars.pas"/>
-			<DCCReference Include="modules\PokerClient.Cards.pas"/>
-			<DCCReference Include="modules\PokerClient.ChipStackMaker.pas"/>
-			<DCCReference Include="modules\PokerClient.Sounds.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Enum.ServerCodes.pas"/>
-			<DCCReference Include="modules\protobuf\PokerClient.Protobufs.Reader.pas"/>
-			<DCCReference Include="modules\protobuf\PokerClient.Protobufs.Objects.Base.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.RpcMessage.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.LoginParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.Club.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.StatusReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.HelloReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.StringSizes.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.RegisterParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ForgotPasswordParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.User.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ListClubsReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.GiveClubOwnershipParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.KickPlayerParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ChangeEMailParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ChangePasswordParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.Game.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.SetAvatarParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.TransferChipsParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ChatMessage.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ChatEvent.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.TableSit.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.TableStatus.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.SeatInfo.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ChangeSuspendState.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.RegisterReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ClubCommandReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.LoginReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.SetAvatarReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.ChangeMailReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.GetUserParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.TableEvent.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.PutChips.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.WinnerData.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.PotInfo.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.PingParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.PingReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.Pot.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.TableBoolFlag.pas"/>
-			<DCCReference Include="modules\protobuf\objects\PokerClient.Protobufs.Objects.UserChangeParams.pas"/>
+			<DCCReference Include="interfaces\Poker.Interfaces.FormParams.pas"/>
+			<DCCReference Include="interfaces\Poker.Interfaces.ModalForm.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.AsphyreImage.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.Misc.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.Encryption.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.FormsContainer.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.InstanceController.pas"/>
+			<DCCReference Include="modules\settings\Poker.HardcodedSettings.pas"/>
+			<DCCReference Include="modules\settings\Poker.Settings.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.Settings.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.Validators.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.Socket.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.MessageContainer.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.MessageCallbacks.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Core.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Timer.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Animation.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.PlayerInfo.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.ClubInfo.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.GameInfo.pas"/>
+			<DCCReference Include="modules\table\Poker.Table.Tables.pas"/>
+			<DCCReference Include="modules\table\Poker.Table.Status.pas"/>
+			<DCCReference Include="modules\table\Poker.Table.Resources.pas"/>
+			<DCCReference Include="modules\Poker.Avatars.pas"/>
+			<DCCReference Include="modules\Poker.Cards.pas"/>
+			<DCCReference Include="modules\Poker.ChipStackMaker.pas"/>
+			<DCCReference Include="modules\Poker.Sounds.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas"/>
+			<DCCReference Include="modules\protobuf\Poker.Protobufs.Reader.pas"/>
+			<DCCReference Include="modules\protobuf\Poker.Protobufs.Objects.Base.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RpcMessage.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.LoginParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Club.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.StatusReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.StringSizes.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RegisterParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ForgotPasswordParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.User.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ListClubsReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GiveClubOwnershipParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.KickPlayerParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChangeEMailParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChangePasswordParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Game.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.SetAvatarParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TransferChipsParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChatMessage.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChatEvent.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableSit.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatus.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.SeatInfo.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChangeSuspendState.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RegisterReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubCommandReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.LoginReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.SetAvatarReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChangeMailReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GetUserParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableEvent.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PutChips.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerData.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PotInfo.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PingParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PingReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -251,7 +251,7 @@
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierPressed</ResourceId>
 			</RcItem>
-			<RcItem Include="resources\PokerClient.Resources.RoomMedia.asvf">
+			<RcItem Include="resources\Poker.Resources.RoomMedia.asvf">
 				<ContainerId>ResourceItem</ContainerId>
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>RoomMedia</ResourceId>
