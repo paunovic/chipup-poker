@@ -381,6 +381,8 @@ message TableEvent {
 		teFlop = 10;
 		teTurn = 11;
 		teRiver = 12;
+		tePostRiver = 13;
+		tePreWin = 14;
 	}
 	message WinnerData {
 		enum CardRankings {
