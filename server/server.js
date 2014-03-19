@@ -1402,9 +1402,15 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.log('got lock %s',temp);
 					game.sitDown(this,params,function (sucess,events) {
 						if (sucess) {
+							game.broadcastStatus(this,true,events); // sendEvent
+							if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
+								var cards = game.flop.cards;
+								if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
+								if (game.state == 'tsRiver') cards = cards.concat(cards,this.river.cards);
+								events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
+							}
 							var status = game.getTableStatus(this,true,events);
 							this.send(codes.srTableSitOk,status,'Poker.TableStatus');
-							game.broadcastStatus(this,true,events); // sendEvent
 						}
 						this.log('releasing lock');
 						release();

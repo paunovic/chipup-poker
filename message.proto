@@ -380,6 +380,7 @@ message TableEvent {
 		teRiver = 12;
 		tePostRiver = 13;
 		tePreWin = 14;
+		teExistingCards = 15;
 	}
 	message WinnerData {
 		enum CardRankings {
