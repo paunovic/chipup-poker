@@ -17,16 +17,19 @@ type
       FN_SEAT = 2;
       FN_POTS = 4;
       FN_BETS = 5;
+      FN_CARDS = 6;
 
     var
       FEvent: TTableEventType;
       FSeat: Integer;
       FPots: TObjectList<TPB_PotInfo>;
       FBets: TArray<UINT32>;
+      FCards: TBytes;
 
     procedure SetEvent(const AValue: TTableEventType);
     procedure SetSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<UINT32>);
+    procedure SetCards(const AValue: TBytes);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -35,6 +38,7 @@ type
     property Seat: Integer read FSeat write SetSeat;
     property Pots: TObjectList<TPB_PotInfo> read FPots write FPots;
     property Bets: TArray<UINT32> read FBets write SetBets;
+    property Cards: TBytes read FCards write SetCards;
   end;
 
 implementation
@@ -77,6 +81,10 @@ begin
         SetLength(FBets, Length(FBets) + 1);
         FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
       end;
+      FN_CARDS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AProtobufReader.readBytes(FCards);
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -101,6 +109,12 @@ begin
   FBets := AValue;
   for C1 := 0 to Length(FBets) - 1 do
     ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
+end;
+
+procedure TPB_TableEvent.SetCards(const AValue: TBytes);
+begin
+  FCards := AValue;
+  ProtobufOutput.writeBytes(FN_CARDS, AValue);
 end;
 
 end.

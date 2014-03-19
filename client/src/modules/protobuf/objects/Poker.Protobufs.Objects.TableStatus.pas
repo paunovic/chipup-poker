@@ -19,9 +19,6 @@ type
       FN_DEALER = 4;
       FN_CURRENT_SEAT = 5;
       FN_BETS = 6;
-      FN_FLOP = 7;
-      FN_TURN = 8;
-      FN_RIVER = 9;
       FN_LOCKED = 11;
       FN_SEQ = 12;
       FN_MINIMUM_BET = 13;
@@ -40,9 +37,6 @@ type
       FDealer: Integer;
       FCurrentSeat: Integer;
       FBets: TArray<UINT32>;
-      FFlop: TBytes;
-      FTurn: TBytes;
-      FRiver: TBytes;
       FLocked: Boolean;
       FSeq: Integer;
       FMinimumBet: UINT32;
@@ -59,9 +53,6 @@ type
     procedure SetDealer(const AValue: Integer);
     procedure SetCurrentSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<UINT32>);
-    procedure SetFlop(const AValue: TBytes);
-    procedure SetTurn(const AValue: TBytes);
-    procedure SetRiver(const AValue: TBytes);
     procedure SetLocked(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
     procedure SetMinimumBet(const AValue: UINT32);
@@ -80,9 +71,6 @@ type
     property Dealer: Integer read FDealer write SetDealer;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
     property Bets: TArray<UINT32> read FBets write SetBets;
-    property Flop: TBytes read FFlop write SetFlop;
-    property Turn: TBytes read FTurn write SetTurn;
-    property River: TBytes read FRiver write SetRiver;
     property Locked: Boolean read FLocked write SetLocked;
     property Seq: Integer read FSeq write SetSeq;
     property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
@@ -152,18 +140,6 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FBets, Length(FBets) + 1);
         FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
-      end;
-      FN_FLOP: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FFlop);
-      end;
-      FN_TURN: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FTurn);
-      end;
-      FN_RIVER: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FRiver);
       end;
       FN_LOCKED: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -241,24 +217,6 @@ begin
   FBets := AValue;
   for C1 := 0 to Length(FBets) - 1 do
     ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
-end;
-
-procedure TPB_TableStatus.SetFlop(const AValue: TBytes);
-begin
-  FFlop := AValue;
-  ProtobufOutput.writeBytes(FN_FLOP, AValue);
-end;
-
-procedure TPB_TableStatus.SetTurn(const AValue: TBytes);
-begin
-  FTurn := AValue;
-  ProtobufOutput.writeBytes(FN_TURN, AValue);
-end;
-
-procedure TPB_TableStatus.SetRiver(const AValue: TBytes);
-begin
-  FRiver := AValue;
-  ProtobufOutput.writeBytes(FN_RIVER, AValue);
 end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
