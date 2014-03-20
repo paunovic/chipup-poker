@@ -1,5 +1,7 @@
 unit Poker.Forms.Debug;
 
+{.$DEFINE SEAT_POSITIONS_CONFIG}
+
 interface
 
 uses
@@ -39,11 +41,16 @@ type
     RVStyle: TRVStyle;
     N1: TMenuItem;
     rvLog: TRichView;
+    btSeatPos: TcxButton;
+    btSet: TcxButton;
+    meSeatPos: TcxMemo;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
     procedure acCopyLogSelectionExecute(Sender: TObject);
     procedure tiAppInfoRefreshTimer(Sender: TObject);
+    procedure btSeatPosClick(Sender: TObject);
+    procedure btSetClick(Sender: TObject);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
@@ -62,6 +69,9 @@ implementation
 {$R *.dfm}
 
 uses
+  {$IFDEF SEAT_POSITIONS_CONFIG}
+  JclExprEval, Poker.Table.Resources,
+  {$ENDIF}
   Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer;
 
 
@@ -172,6 +182,10 @@ begin
 
   Width := Round(Screen.Monitors[0].Width / 2.8);
   Height := Round(Screen.Monitors[0].Height / 2.5);
+
+  {$IFDEF SEAT_POSITIONS_CONFIG}
+  btSeatPos.Visible := TRUE;
+  {$ENDIF}
 end;
 
 procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
@@ -264,6 +278,66 @@ begin
     rvLog.FormatTail;
 end;
 
-end.
 
+procedure TfrmDebug.btSeatPosClick(Sender: TObject);
+begin
+  {$IFDEF SEAT_POSITIONS_CONFIG}
+  meSeatPos.Visible := btSeatPos.Down;
+  if meSeatPos.Visible then
+    meSeatPos.BringToFront;
+  btSet.Visible := btSeatPos.Down;
+  {$ENDIF}
+end;
+
+procedure TfrmDebug.btSetClick(Sender: TObject);
+{$IFDEF SEAT_POSITIONS_CONFIG}
+var
+  C1, C2: Integer;
+  line  : String;
+  tmp   : String;
+  val   : Extended;
+  cpos  : Integer;
+  evaluator: TEvaluator;
+{$ENDIF}
+begin
+  {$IFDEF SEAT_POSITIONS_CONFIG}
+  evaluator := TEvaluator.Create;
+  try
+    evaluator.AddConst('pi', pi);
+
+    for C1 := 2 to 10 do
+    begin
+      line := meSeatPos.Lines[C1 - 2];
+      for C2 := 0 to 9 do
+      begin
+        cpos := Pos(',', line);
+        if cpos = 0 then
+        begin
+          cpos := Pos(')', line);
+          if cpos = 0 then
+            exit;
+        end;
+
+        tmp := Copy(line, 1, cpos - 1);
+        Delete(line, 1, cpos);
+
+        cpos := Pos('(', tmp);
+        if cpos > 0 then
+          Delete(tmp, 1, cpos);
+        cpos := Pos(')', tmp);
+        if cpos > 0 then
+          Delete(tmp, cpos, 1);
+        tmp := Trim(tmp);
+
+        val := evaluator.Evaluate(tmp);
+        TableResources.SEAT_POINTS[C1, C2] := val;
+      end;
+    end;
+  finally
+    evaluator.Free;
+  end;
+  {$ENDIF}
+end;
+
+end.
 

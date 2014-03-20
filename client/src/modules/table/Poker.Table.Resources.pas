@@ -80,15 +80,15 @@ type
   public
     const
       SEAT_POINTS: array[2..10, 0..9] of Double = (
-        (0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2
-        (0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3
-        (-pi/4, pi/4, pi*3/4, pi*5/4, 0, 0, 0, 0, 0, 0), // 4
-        (-pi/6, pi/6, pi/2, pi*5/6, pi*7/6, 0, 0, 0, 0, 0), // 5
-        (-pi/3.5, 0, pi/3, pi-pi/3, pi, pi+pi/3.5, 0, 0, 0, 0), // 6
-        (-pi/4, 0, pi/4, pi/2, pi*3/4, pi, pi*5/4, 0, 0, 0), // 7
-        (-pi/3, -pi/8.5, pi/8.5, pi/2.8, pi-pi/2.8, pi-pi/8.5, pi+pi/8.5, pi*4/3, 0, 0), // 8
-        (-pi/3, -pi/7.5, pi/16, pi/3.5, pi/2, pi-pi/3.5, pi-pi/16, pi+pi/7.5, pi*4/3, 0), // 9
-        (-pi/3, -pi/6.9, pi/64, pi/5.1, pi/2.5, pi-pi/2.5, pi-pi/5.1, pi-pi/64, pi+pi/6.9, pi*4/3) // 10
+         (0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2
+         (0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3
+         (-pi/4, pi/4, pi*3/4, pi*5/4, 0, 0, 0, 0, 0, 0), // 4
+         (-pi/5.5, pi/7, pi/2, pi-pi/7, pi+pi/5.5, 0, 0, 0, 0, 0), // 5
+         (-pi/3, 0, pi/2.7, pi-pi/2.7, pi, pi+pi/3, 0, 0, 0, 0), // 6
+         (-pi/4, 0, pi/4, pi/2, pi*3/4, pi, pi*5/4, 0, 0, 0), // 7
+         (-pi/3, -pi/10.4, pi/8, pi/2.3, pi-pi/2.3, pi-pi/8, pi+pi/10.4, pi+pi/3, 0, 0), // 8
+         (-pi/2.7, -pi/10.3, pi/64, pi/3.5, pi/2, pi-pi/3.5, pi-pi/64, pi+pi/10.3, pi+pi/2.7, 0), // 9
+         (-pi/2.7, -pi/7.7, pi/128, pi/6, pi/2.3, pi-pi/2.3, pi-pi/6, pi-pi/128, pi+pi/7.7, pi+pi/2.7) // 10
       );
 
       RAISE_VALUEBOX_WIDTH      = 109;
@@ -100,6 +100,14 @@ type
       RAISE_SLIDER_WIDTH        = 283;
       RAISE_SLIDER_HEIGHT       = 9;
       STANDUP_BUTTON_TRIANGLE_W = 26;
+      SEAT_AVATAR_RADIUS        = 32;
+      SEAT_LEFT_AVATAR_X        = 224;
+      SEAT_RIGHT_AVATAR_X       = 46;
+
+{
+    class var
+      SEAT_POINTS: array[2..10, 0..9] of Extended;
+}
 
     class procedure Initialize(const ADXCanvas: TAsphyreCanvas);
     class procedure Deinitialize;
@@ -234,7 +242,7 @@ begin
   AddDXImage('RaisePresetButtonHot.image', FRaisePresetButtonHotImage);
   AddDXImage('RaisePresetButtonPressed.image', FRaisePresetButtonPressedImage);
   AddDXImage('StandUpButtonNormal.image', FStandUpButtonNormalImage, FStandUpButtonAspectRatio);
-  AddDXImage('StandUpButtonNormal.image', FStandUpButtonPressedImage); // FIXME
+  AddDXImage('StandUpButtonPressed.image', FStandUpButtonPressedImage);
   AddDXImage('PlayNowButtonNormal.image', FPlayNowButtonNormalImage, FPlayNowButtonAspectRatio);
   AddDXImage('PlayNowButtonPressed.image', FPlayNowButtonPressedImage);
 

@@ -143,7 +143,7 @@ type
     FPreviousPots  : TPotInfos;
     FPots          : TPotInfos;
     FTime          : UINT64;
-    FEvents        : TTableEvents;
+//    FEvents        : TTableEvents;
 
   public
     constructor Create;
@@ -172,7 +172,7 @@ type
     property PreviousPots: TPotInfos read FPreviousPots write FPreviousPots;
     property MaximumBet: UINT32 read FMaximumBet;
     property Time: UINT64 read FTime;
-    property Events: TTableEvents read FEvents;
+//    property Events: TTableEvents read FEvents;
   end;
 
 implementation
@@ -247,12 +247,12 @@ begin
   FFlopCards := TCards.Create;
   FTurnCard := TCard.Create;
   FRiverCard := TCard.Create;
-  FEvents := TTableEvents.Create;
+//  FEvents := TTableEvents.Create;
 end;
 
 destructor TTableStatus.Destroy;
 begin
-  FEvents.Free;
+//  FEvents.Free;
   FFlopCards.Free;
   FTurnCard.Free;
   FRiverCard.Free;
@@ -371,7 +371,7 @@ begin
     end;
   end;
 
-  FEvents.Assign(ATableStatusProtobuf.Events);
+//  FEvents.Assign(ATableStatusProtobuf.Events);
 end;
 
 { TSeatInfos }

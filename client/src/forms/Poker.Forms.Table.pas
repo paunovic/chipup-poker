@@ -109,9 +109,9 @@ type
       FTableCenter            : TPoint2;
       FDealerPoint            : TPoint2;
       FTableCenterYOffset     : Single;
-      FSeatSizeMultiplier     : Single;
       FSeatWidth              : Single;
       FSeatHeight             : Single;
+      FSeatResizeRatio        : Single;
       FSeatCardsMaxWidth      : Single;
       FCardWidth              : Single;
       FCardHeight             : Single;
@@ -763,34 +763,33 @@ var
 begin
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
 
-  x := FTableCenter.X + (FTableWidth / 2) * Cos(seat_radians);
-  y := FTableCenter.Y - FTableCenterYOffset + (FTableHeight / 2) * Sin(seat_radians);
+  x := FTableCenter.X + (FTableWidth * 0.9 / 2) * Cos(seat_radians);
+  y := FTableCenter.Y - FTableCenterYOffset + (FTableHeight * 0.9 / 2) * Sin(seat_radians);
 
   pf := PointF(x, y);
 
   case GetTableSector(Point2(x, y)) of
-    tsTopLeft: pf.Offset(-FSeatWidth / 2.3, -FSeatHeight / 4.5);
-    tsLeft: pf.Offset(-FSeatWidth / 2.5, 0);
-    tsBottomLeft: pf.Offset(-FSeatWidth / 2.3, -FSeatHeight / 5);
-    tsBottom: pf.Offset(0, 0);
-    tsBottomRight: pf.Offset(FSeatWidth / 2.3, -FSeatHeight / 5);
-    tsRight: pf.Offset(FSeatWidth / 2.5, 0);
-    tsTopRight: pf.Offset(FSeatWidth / 2.3, -FSeatHeight / 4.5);
-    tsTop: pf.Offset(0, 0);
+    tsTopLeft: pf.Offset(-FSeatWidth / 2, -FSeatHeight / 2);
+    tsLeft: pf.Offset(-FSeatWidth / 2, 0);
+    tsBottomLeft: pf.Offset(-FSeatWidth / 2, FSeatHeight / 2);
+    tsBottom: pf.Offset(0, FSeatHeight / 2);
+    tsBottomRight: pf.Offset(FSeatWidth / 2, FSeatHeight / 2);
+    tsRight: pf.Offset(FSeatWidth / 2, 0);
+    tsTopRight: pf.Offset(FSeatWidth / 2, -FSeatHeight / 2);
+    tsTop: pf.Offset(0, -FSeatHeight / 2);
   end;
 
-  result.x := pf.x;
-  result.y := pf.y;
+  result := Point2(pf.x, pf.y);
 end;
 
 function TfrmTable.GetTableSector(const APoint: TPoint2): TTableSector;
 var
   points: array[0..3] of TPoint2;
 begin
-  points[0] := Point2(FTableCenter.X - FSeatWidth / 2, FTableCenter.Y - FSeatHeight / 2);
-  points[1] := Point2(FTableCenter.X + FSeatWidth / 2, FTableCenter.Y - FSeatHeight / 2);
-  points[2] := Point2(FTableCenter.X - FSeatWidth / 2, FTableCenter.Y + FSeatHeight / 2);
-  points[3] := Point2(FTableCenter.X + FSeatWidth / 2, FTableCenter.Y + FSeatHeight / 2);
+  points[0] := Point2(FTableCenter.X - FSeatWidth / 4, FTableCenter.Y - FSeatHeight / 2.5);
+  points[1] := Point2(FTableCenter.X + FSeatWidth / 4, FTableCenter.Y - FSeatHeight / 2.5);
+  points[2] := Point2(FTableCenter.X - FSeatWidth / 4, FTableCenter.Y + FSeatHeight / 2.5);
+  points[3] := Point2(FTableCenter.X + FSeatWidth / 4, FTableCenter.Y + FSeatHeight / 2.5);
 
   if APoint.X < points[0].X then
   begin
@@ -1078,7 +1077,7 @@ end;
 procedure TfrmTable.ConfigureGUI;
 var
   seat_info: TSeatInfo;
-  sitout : Boolean;
+  sitout   : Boolean;
   foldtoany: Boolean;
   seat_bet : Integer;
   event    : TNotifyEvent;
@@ -1107,7 +1106,7 @@ begin
       psOutOfHand: begin
         sitout := TRUE;
       end;
-      psInHand: begin
+      psInHand, psAllIn: begin
         sitout := TRUE;
         foldtoany := TRUE;
         if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
@@ -1183,15 +1182,12 @@ begin
         else
           FForceFocused := FALSE;
 
-        if (FtableStatus.State in [tsWinning, tsWinning2]) and
+        if (FTableStatus.State in [tsWinning, tsWinning2]) and
            (FTable.SeatIndex = seat_info.SeatIndex) and
            (seat_info.Status in [psInHand, psAllIn]) then
           acShowCards.Enabled := TRUE;
       end;
       psFolded: begin
-        sitout := TRUE;
-      end;
-      psAllIn: begin
         sitout := TRUE;
       end;
     end;
@@ -1489,7 +1485,7 @@ begin
 
           nicks := nicks + Format('%s, ', [nick]);
 
-          animation := DXTimer.AddAnimation(Handle, GetPotPoint(C1), GetBetPoint(pot.WinnerData[C2].Seat), 0.3, FWinningAniDelay + 1.5 + C1 * 0.5);
+          animation := DXTimer.AddAnimation(Handle, GetPotPoint(C1), GetBetPoint(pot.WinnerData[C2].Seat), 0.2, FWinningAniDelay + 1.5 + C1 * 0.5, 0.5);
           animation.Tag := C1;
           animation.TagSingle := chips_val;
           FPotWinAnimations.Add(animation.Id);
@@ -1538,20 +1534,26 @@ begin
       card_index := 0;
       repeat
         iterate := FALSE;
-        for C1 := 0 to FTableStatus.Seats.Count - 1 do
-        begin
-          seat := FTableStatus.Seats[C1];
-          seat.ResetDealtCards;
-          if seat.CardCount > card_index then
+        C1 := FTableStatus.SmallBlindSeat;
+        repeat
+          if FTableStatus.GetSeatInfo(C1, seat) then
           begin
-            seat_point := GetSeatPoint(seat.SeatIndex);
-            animation := DXTimer.AddAnimation(Handle, Point2(FTableCenter.x - FCardWidth / 2, FTableYOffset),
-                                              GetCardPoint(seat, card_index), 0.15, FDealAnimations.Count * 0.05);
-            animation.Tag := seat.SeatIndex;
-            FDealAnimations.Add(animation.Id);
-            iterate := TRUE;
+            seat.ResetDealtCards;
+            if seat.CardCount > card_index then
+            begin
+              seat_point := GetSeatPoint(seat.SeatIndex);
+              animation := DXTimer.AddAnimation(Handle, Point2(FTableCenter.x - FCardWidth / 2, FTableYOffset),
+                                                GetCardPoint(seat, card_index), 0.15, FDealAnimations.Count * 0.05, 0);
+              animation.Tag := seat.SeatIndex;
+              FDealAnimations.Add(animation.Id);
+              iterate := TRUE;
+            end;
           end;
-        end;
+
+          Inc(C1);
+          if C1 >= FTable.Game.Seats then
+            C1 := 0;
+        until C1 = FTableStatus.SmallBlindSeat;
         Inc(card_index);
       until not iterate;
 
@@ -1756,14 +1758,10 @@ begin
   FDealerPoint.X := FTableCenter.X;
   FDealerPoint.Y := FTableYOffset;
 
-  // calculate seat size multiplier
-  FSeatSizeMultiplier := 1 + (10 - FTable.Game.Seats) / 23;
-  if FSeatSizeMultiplier > 1.3 then
-    FSeatSizeMultiplier := 1.3;
-
   // calculate seat size
-  FSeatWidth := TableResources.SeatEmptyLeftImage.Texture[0].Width * FTableResizeRatio * FSeatSizeMultiplier;
+  FSeatWidth := (FDXAreaSize.x - FTableWidth) / 2 + 25 * FTableResizeRatio;
   FSeatHeight := FSeatWidth / TableResources.SeatAspectRatio;
+  FSeatResizeRatio := FSeatWidth / TableResources.SeatEmptyLeftImage.Texture[0].Width;
 
   // calculate card size
   FCardWidth := TableResources.CardBackgroundImage.Texture[0].Width * FTableResizeRatio;
@@ -1923,7 +1921,7 @@ begin
   seat_point := GetSeatPoint(ASeatIndex);
 
   // calculate seat elements positions & dimensions
-  avatar_radius := Round(34 * FTableResizeRatio * FSeatSizeMultiplier);
+  avatar_radius := TableResources.SEAT_AVATAR_RADIUS * FSeatResizeRatio;
   if GetTableSector(seat_point) in [tsLeft, tsTopLeft, tsBottomLeft] then
   begin
     seat_empty_image := TableResources.SeatEmptyLeftImage;
@@ -1931,7 +1929,7 @@ begin
 //    seat_light_image := TableResources.SeatLightLeftImage;
     active_seat_dark_image := TableResources.ActiveSeatDarkLeftImage;
     active_seat_light_image := TableResources.ActiveSeatLightLeftImage;
-    avatar_point := Point2(seat_point.X + FSeatWidth / 2 - 46 * FTableResizeRatio * FSeatSizeMultiplier, seat_point.Y);
+    avatar_point := Point2(seat_point.X - FSeatWidth / 2 + TableResources.SEAT_LEFT_AVATAR_X * FSeatResizeRatio, seat_point.Y);
     seat_text_x_center := seat_point.X - (seat_point.X + FSeatWidth / 2 - avatar_point.X) / 2;
   end
   else
@@ -1941,7 +1939,7 @@ begin
 //    seat_light_image := TableResources.SeatLightRightImage;
     active_seat_dark_image := TableResources.ActiveSeatDarkRightImage;
     active_seat_light_image := TableResources.ActiveSeatLightRightImage;
-    avatar_point := Point2(seat_point.X - FSeatWidth / 2 + 46 * FTableResizeRatio * FSeatSizeMultiplier, seat_point.Y);
+    avatar_point := Point2(seat_point.X - FSeatWidth / 2 + TableResources.SEAT_RIGHT_AVATAR_X * FSeatResizeRatio, seat_point.Y);
     seat_text_x_center := seat_point.X + (avatar_point.X - (seat_point.X - FSeatWidth / 2)) / 2;
   end;
   seat_upper_text_point := Point2(seat_text_x_center, seat_point.Y - FSeatHeight / 4.5);
@@ -2222,7 +2220,7 @@ procedure TfrmTable.RenderTableCards;
       if not AIsAnimated then
       begin
         AAnimationsList.Clear;
-        animation := DXTimer.AddAnimation(Handle, AAnimateFrom, AAnimateTo, 0.15, ADelay); AAnimationsList.Add(animation.Id);
+        animation := DXTimer.AddAnimation(Handle, AAnimateFrom, AAnimateTo, 0.15, ADelay, 0); AAnimationsList.Add(animation.Id);
         AIsAnimated := TRUE;
       end;
 
@@ -2279,13 +2277,13 @@ begin
     begin
       FFlopAnimations.Clear;
 
-      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[0], 0.15, 0.9); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[1], 0.15, 0.9); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[2], 0.15, 0.9); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[0], 0.15, 0.9, 0); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[1], 0.15, 0.9, 0); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, FDealerPoint, card_points_mid[2], 0.15, 0.9, 0); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
 
-      animation := DXTimer.AddAnimation(Handle, card_points_mid[0], card_points_final[0], 0.2, 1.1); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(Handle, card_points_mid[1], card_points_final[1], 0.2, 1.1); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(Handle, card_points_mid[2], card_points_final[2], 0.2, 1.1); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, card_points_mid[0], card_points_final[0], 0.2, 1.1, 0); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, card_points_mid[1], card_points_final[1], 0.2, 1.1, 0); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(Handle, card_points_mid[2], card_points_final[2], 0.2, 1.1, 0); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
 
       FFlopAnimated := TRUE;
     end;
@@ -2620,7 +2618,7 @@ begin
       bet_point := GetBetPoint(C1);
 
       pot_point := GetPotPoint(0);
-      animation := DXTimer.AddAnimation(Handle, bet_point, pot_point, 0.25, 0.4);
+      animation := DXTimer.AddAnimation(Handle, bet_point, pot_point, 0.25, 0.2, 0);
       animation.TagUINT := ABets[C1];
       FBetAnimations.Add(animation.Id);
     end;

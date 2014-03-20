@@ -208,9 +208,9 @@ begin
   if FSocket.State <> TSocketState.wsClosed then
   begin
     {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
-    FSocket.Close;
-    while (Assigned(FSocket)) and (FSocket.State <> wsClosed) do
-      FSocket.ProcessMessages;
+    FSocket.CloseDelayed;
+{    while (Assigned(FSocket)) and (FSocket.State <> wsClosed) do // FIXME
+      FSocket.ProcessMessages;}
   end;
 end;
 
