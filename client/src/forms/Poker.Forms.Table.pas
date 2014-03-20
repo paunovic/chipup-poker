@@ -2436,6 +2436,7 @@ begin
 
         if (animation.Tag < 0) or (animation.Tag >= FTableStatus.Pots.Count) then
         begin
+          // pots changed in meantime, due to too fast play probably
           {$IFDEF DEBUG} DebugLn(Format('Nasty bug - animation.Tag = %d, Length(FTableStatus.Pots) = %d', [animation.Tag, FTableStatus.Pots.Count]), ditException); {$ENDIF}
         end
         else

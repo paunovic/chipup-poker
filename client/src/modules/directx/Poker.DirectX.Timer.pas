@@ -153,7 +153,7 @@ begin
       Inc(FLockCount);
       try
         C1 := 0;
-        while C1 < FAnimations.Count do
+        while (Assigned(FAnimations)) and (C1 < FAnimations.Count) do
         begin
           FAnimations[C1].Animate(FTiming.GetTimeValue);
 
