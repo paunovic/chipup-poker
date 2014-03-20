@@ -42,9 +42,9 @@ end;
 
 procedure TSounds.Play(const ASound: String);
 begin
-  if not PlaySound(PChar(ASound), HInstance, SND_RESOURCE or SND_ASYNC or SND_NODEFAULT) then
+ // if not PlaySound(PChar(ASound), HInstance, SND_RESOURCE or SND_ASYNC or SND_NODEFAULT) then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Failed to play sound [%s] [err: %d]', [ASound, GetLastError]), ditException); {$ENDIF}
+  //  {$IFDEF DEBUG} DebugLn(Format('Failed to play sound [%s] [err: %d]', [ASound, GetLastError]), ditException); {$ENDIF}
   end;
 end;
 

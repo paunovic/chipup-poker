@@ -231,6 +231,8 @@ type
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 
+    procedure TablePlaySound(const ASound: String);
+
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 
     procedure ConfigureGUI;
@@ -583,6 +585,7 @@ end;
 procedure TfrmTable.FormActivate(Sender: TObject);
 begin
   DefocusControl(edChat, FALSE);
+  DefocusControl(seRaiseAmount, FALSE);
 end;
 
 procedure TfrmTable.FormClick(Sender: TObject);
@@ -597,6 +600,9 @@ begin
 
   if edChat.Focused then
     DefocusControl(edChat, FALSE);
+
+  if seRaiseAmount.Focused then
+    DefocusControl(seRaiseAmount, FALSE);
 
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
@@ -764,18 +770,18 @@ begin
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
 
   x := FTableCenter.X + (FTableWidth * 0.9 / 2) * Cos(seat_radians);
-  y := FTableCenter.Y - FTableCenterYOffset + (FTableHeight * 0.9 / 2) * Sin(seat_radians);
+  y := FTableCenter.Y - FTableCenterYOffset + (FTableHeight * 0.9 / 2) * Sin(seat_radians) - 10 * FTableResizeRatio;
 
   pf := PointF(x, y);
 
   case GetTableSector(Point2(x, y)) of
-    tsTopLeft: pf.Offset(-FSeatWidth / 2, -FSeatHeight / 2);
-    tsLeft: pf.Offset(-FSeatWidth / 2, 0);
-    tsBottomLeft: pf.Offset(-FSeatWidth / 2, FSeatHeight / 2);
-    tsBottom: pf.Offset(0, FSeatHeight / 2);
-    tsBottomRight: pf.Offset(FSeatWidth / 2, FSeatHeight / 2);
-    tsRight: pf.Offset(FSeatWidth / 2, 0);
-    tsTopRight: pf.Offset(FSeatWidth / 2, -FSeatHeight / 2);
+    tsTopLeft: pf.Offset(-FSeatWidth / 2.35, -FSeatHeight / 2);
+    tsLeft: pf.Offset(-FSeatWidth / 2.35, 0);
+    tsBottomLeft: pf.Offset(-FSeatWidth / 2.35, FSeatHeight / 2);
+    tsBottom: pf.Offset(0, FSeatHeight / 1.55);
+    tsBottomRight: pf.Offset(FSeatWidth / 2.35, FSeatHeight / 2);
+    tsRight: pf.Offset(FSeatWidth / 2.35, 0);
+    tsTopRight: pf.Offset(FSeatWidth / 2.35, -FSeatHeight / 2);
     tsTop: pf.Offset(0, -FSeatHeight / 2);
   end;
 
@@ -862,7 +868,7 @@ var
   x, y        : Single;
   xr, yr      : Single;
 begin
-  xr := FTableWidth / 1.19;
+  xr := FTableWidth / 1.25;
   yr := FTableHeight / 1.35;
 
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
@@ -879,12 +885,12 @@ var
 begin
   if FTableStatus.Dealer = ASeatIndex then
   begin
-    xr := FTableWidth / 1.45;
+    xr := FTableWidth / 1.51;
     yr := FTableHeight / 1.90;
   end
   else
   begin
-    xr := FTableWidth / 1.2;
+    xr := FTableWidth / 1.26;
     yr := FTableHeight / 1.5;
   end;
 
@@ -1423,15 +1429,16 @@ var
   suffix      : String;
   chips_val   : Single;
   chips_plural: String;
+  cc          : Integer;
 begin
   seat_caption := '';
   case ATableEvent.Event of
     teExistingCards: begin
-      if Length(ATableEvent.Cards) = 3 then
+      if Length(ATableEvent.Cards) >= 3 then
         FTableStatus.FlopCards.Assign(ATableEvent.Cards);
-      if Length(ATableEvent.Cards) = 4 then
+      if Length(ATableEvent.Cards) >= 4 then
         FTableStatus.TurnCard.Assign(ATableEvent.Cards[3]);
-      if Length(ATableEvent.Cards) = 5 then
+      if Length(ATableEvent.Cards) >= 5 then
         FTableStatus.RiverCard.Assign(ATableEvent.Cards[4]);
     end;
 
@@ -1531,6 +1538,7 @@ begin
       FTableStatus.TurnCard.Clear;
       FTableStatus.RiverCard.Clear;
 
+      cc := 0;
       card_index := 0;
       repeat
         iterate := FALSE;
@@ -1545,6 +1553,9 @@ begin
               animation := DXTimer.AddAnimation(Handle, Point2(FTableCenter.x - FCardWidth / 2, FTableYOffset),
                                                 GetCardPoint(seat, card_index), 0.15, FDealAnimations.Count * 0.05, 0);
               animation.Tag := seat.SeatIndex;
+              Inc(cc);
+              if cc mod 2 = 0 then
+                animation.TagUINT := 1;
               FDealAnimations.Add(animation.Id);
               iterate := TRUE;
             end;
@@ -1558,8 +1569,6 @@ begin
       until not iterate;
 
       EnableGameLockTimer(1.5);
-
-      Sounds.Play(Sounds.SOUND_DEALING);
     end;
 
     teCheck: begin
@@ -1567,7 +1576,7 @@ begin
       event := 'CHECK';
       seat_caption := 'Check';
 
-      Sounds.Play(Sounds.SOUND_CHECK);
+      TablePlaySound(Sounds.SOUND_CHECK);
     end;
 
     teCall: begin
@@ -1575,7 +1584,7 @@ begin
       event := 'CALL';
       seat_caption := 'Call';
 
-      Sounds.Play(Sounds.SOUND_PUTCHIPS_SMALL);
+      TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
     end;
 
     teRaise: begin
@@ -1583,7 +1592,7 @@ begin
       event := 'RAISE';
       seat_caption := 'Raise';
 
-      Sounds.Play(Sounds.SOUND_PUTCHIPS_SMALL);
+      TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
     end;
 
     teAllIn: begin
@@ -1591,7 +1600,7 @@ begin
       event := 'ALL-IN';
       seat_caption := 'All-In';
 
-      Sounds.Play(Sounds.SOUND_ALLIN);
+      TablePlaySound(Sounds.SOUND_ALLIN);
     end;
 
     teFlop: begin
@@ -1727,8 +1736,8 @@ const
   TABLE_X_RIGHT       = 64;
   TABLE_Y_TOP         = 66;
   TABLE_Y_BOTTOM      = 133;
-  TABLE_Y_OFFSET      = 10;
-  TABLE_WIDTH_OF_FORM = 0.715;
+  TABLE_Y_OFFSET      = -25;
+  TABLE_WIDTH_OF_FORM = 0.8;
 var
   C1: Integer;
 begin
@@ -1759,7 +1768,7 @@ begin
   FDealerPoint.Y := FTableYOffset;
 
   // calculate seat size
-  FSeatWidth := (FDXAreaSize.x - FTableWidth) / 2 + 25 * FTableResizeRatio;
+  FSeatWidth := (FDXAreaSize.x - FTableWidth) / 1.5;
   FSeatHeight := FSeatWidth / TableResources.SeatAspectRatio;
   FSeatResizeRatio := FSeatWidth / TableResources.SeatEmptyLeftImage.Texture[0].Width;
 
@@ -1768,7 +1777,7 @@ begin
   FCardHeight := FCardWidth / TableResources.CardAspectRatio;
   FCardArtworkWidth := FCardWidth * (0.48 + FTableResizeRatio / 5);
   FCardArtworkHeight := FCardHeight * 0.85;
-  FSeatCardsMaxWidth := FSeatWidth * 0.55;
+  FSeatCardsMaxWidth := FSeatWidth * 0.7;
 
   // calculate dealer size
   FDealerWidth := TableResources.DealerButtonImage.Texture[0].Width * FTableResizeRatio;
@@ -1814,7 +1823,7 @@ begin
   FRaisePresetButtons[High(FRaisePresetButtons)].Point := Point2(FRaiseSliderPoint.x + FRaiseSliderWidth - FRaisePresetButtonWidth,
                                                                  FRaiseSliderPoint.y - FLowerIntfBorder / 2.5 - FRaisePresetButtonHeight);
   for C1 := High(FRaisePresetButtons) - 1 downto Low(FRaisePresetButtons) do
-    FRaisePresetButtons[C1].Point := Point2(FRaisePresetButtons[C1 + 1].Point.x - FLowerIntfBorder / 2.5 - FRaisePresetButtonWidth, FRaisePresetButtons[C1 + 1].Point.y);
+    FRaisePresetButtons[C1].Point := Point2(FRaisePresetButtons[C1 + 1].Point.x - FLowerIntfBorder - FRaisePresetButtonWidth, FRaisePresetButtons[C1 + 1].Point.y);
 
   FStandUpResizeRatio := FTableResizeRatio * 1.5;
   if FStandUpResizeRatio > 1 then
@@ -1835,6 +1844,14 @@ begin
 
   FPlayNowButton.Point.x := rvChat.Left + rvChat.Width + (ClientWidth - (rvChat.Left + rvChat.Width)) / 2 - FPlayNowButtonWidth / 2;
   FPlayNowButton.Point.y := rvChat.Top + (ClientHeight - rvChat.Top) / 2.5 - FPlayNowButtonHeight / 2;
+
+  if seRaiseAmount.Height < 20 then
+    seRaiseAmount.Style.Font.Size := 7
+  else
+    if seRaiseAmount.Height < 24 then
+      seRaiseAmount.Style.Font.Size := 8
+    else
+      seRaiseAmount.Style.Font.Size := 10
 end;
 
 procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
@@ -1854,6 +1871,12 @@ begin
 
   if ASetSpinEditValue then
     seRaiseAmount.Value := val / 100;
+end;
+
+procedure TfrmTable.TablePlaySound(const ASound: String);
+begin
+  if GetForegroundWindow = Handle then
+    Sounds.Play(ASound);
 end;
 
 procedure TfrmTable.RenderEvent(Sender: TObject);
@@ -1974,7 +1997,7 @@ begin
       if seat_info.Caption <> '' then
       begin
         seat_upper_text := seat_info.Caption;
-        seat_upper_text_color := cColor2($FF00A2FF);
+        seat_upper_text_color := cColor2($FFE8A300);
       end
       else
       begin
@@ -2328,7 +2351,14 @@ begin
   for C1 := 0 to FDealAnimations.Count - 1 do
     if (DXTimer.Find(Handle, FDealAnimations[C1], animation)) and
        (animation.Status = asAnimating) then
+    begin
       RenderCard(animation.CurrPoint, nil, 1);
+      if animation.TagUINT = 1 then
+      begin
+        TablePlaySound(Sounds.SOUND_DEALING);
+        animation.TagUINT := 0;
+      end;
+    end;
 end;
 
 procedure TfrmTable.RenderDealerButton;
@@ -2404,10 +2434,15 @@ begin
           animation.TagString := '';
         end;
 
-        if animation.TagSingle * 100 > FTableStatus.Pots[animation.Tag].Value then
-          FTableStatus.Pots[animation.Tag].Value := 0
+        if (animation.Tag < 0) or (animation.Tag >= FTableStatus.Pots.Count) then
+        begin
+          {$IFDEF DEBUG} DebugLn(Format('Nasty bug - animation.Tag = %d, Length(FTableStatus.Pots) = %d', [animation.Tag, FTableStatus.Pots.Count]), ditException); {$ENDIF}
+        end
         else
-          FTableStatus.Pots[animation.Tag].Value := FTableStatus.Pots[animation.Tag].Value - Trunc(animation.TagSingle * 100);
+          if animation.TagSingle * 100 > FTableStatus.Pots[animation.Tag].Value then
+            FTableStatus.Pots[animation.Tag].Value := 0
+          else
+            FTableStatus.Pots[animation.Tag].Value := FTableStatus.Pots[animation.Tag].Value - Trunc(animation.TagSingle * 100);
       end;
   end;
 
