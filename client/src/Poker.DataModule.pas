@@ -69,11 +69,6 @@ begin
   LoadFonts;
 
   TSettings.Initialize;
-
-  {$IFDEF DEBUG}
-  DebugLn(Format('VERSION: %s', [Settings.Hardcoded.VERSION]), ditApplication);
-  {$ENDIF}
-
   TDXCore.Initialize;
   TDXTimer.Initialize;
   TServerSettings.Initialize;

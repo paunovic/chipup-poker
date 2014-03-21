@@ -65,12 +65,18 @@ end;
 
 procedure TfrmUpdater.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  Action := caFree;
+
   if Assigned(HttpClient.RcvdStream) then
     HttpClient.Abort;
 
   FormsContainer.Remove(TfrmUpdater);
-  frmChipUpMain.CloseUpdated;
-  Action := caFree;
+
+  {$IFDEF DEBUG}
+  TfrmDebug.Deinitialize;
+  {$ENDIF}
+
+  frmChipUpMain.Close;
 end;
 
 procedure TfrmUpdater.imgCloseClick(Sender: TObject);

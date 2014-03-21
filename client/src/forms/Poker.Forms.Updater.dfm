@@ -60,7 +60,6 @@ object frmUpdater: TfrmUpdater
     Style.TextStyle = [fsBold]
     Transparent = True
     OnMouseDown = FormMouseDown
-    ExplicitWidth = 279
   end
   object imgHeader: TcxImage
     Left = 5

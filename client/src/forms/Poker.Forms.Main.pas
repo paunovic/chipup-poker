@@ -138,7 +138,6 @@ type
 
   public
     procedure LoginStatus(const AValue: TLoginStatus);
-    procedure CloseUpdated;
   end;
 
 
@@ -278,7 +277,7 @@ begin
     end;
 
   if not found then
-    FormsContainer.RunForm(TfrmClubLobby, nil, [@FSelectedClub], TRUE);
+    FormsContainer.RunForm(TfrmClubLobby, self, [@FSelectedClub], TRUE);
 end;
 
 procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);
@@ -341,12 +340,6 @@ begin
     Exit;
 
   FormsContainer.RunForm(TfrmPublicClubsList, self, [], FALSE);
-end;
-
-procedure TfrmChipUpMain.CloseUpdated;
-begin
-  {$IFDEF DEBUG} TfrmDebug.Deinitialize; {$ENDIF}
-  Close;
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -557,7 +550,7 @@ begin
       Show;
     end;
 
-    lsUpdating: FormsContainer.RunForm(TfrmUpdater, nil, [], FALSE);
+    lsUpdating: FormsContainer.RunForm(TfrmUpdater, self, [], FALSE);
   else
     Close;
   end;
