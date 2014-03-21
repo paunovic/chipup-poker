@@ -16,12 +16,12 @@ function finish(version) {
 	var key = 'abcd';
 	var header = '--'+key+'\r\n'+
 		'Content-Type: application/octed-stream\r\n'+
-		'Content-Disposition: form-data; name="installer"; filename="chipup_poker_install.exe"\r\n'+
+		'Content-Disposition: form-data; name="installer"; filename="install_chipuppoker.exe"\r\n'+
 		'Content-Transfer-Encoding: binary\r\n\r\n';
 	var footer = '\r\n--'+key+'--';
 
 	var textsize = header.length + footer.length;
-	var filesize = fs.statSync('../client/installer/chipup_poker_install.exe').size;
+	var filesize = fs.statSync('../client/installer/install_chipuppoker.exe').size;
 
 	var request = http.request({host:'chipuppoker.com',method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
 		'&debug='+process.argv[2],
@@ -36,7 +36,7 @@ function finish(version) {
 	request.setHeader('Content-Type','multipart/form-data; boundary="'+key+'"');
 	request.write(header);
 	console.log('making stream');
-	fs.createReadStream('../client/installer/chipup_poker_install.exe',{bufferSize: 4*1024})
+	fs.createReadStream('../client/installer/install_chipuppoker.exe',{bufferSize: 4*1024})
 		.on('end',function () {
 			console.log('ending');
 			request.end(footer);
