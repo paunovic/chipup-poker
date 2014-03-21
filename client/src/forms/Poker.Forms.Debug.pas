@@ -52,8 +52,6 @@ type
     procedure btSeatPosClick(Sender: TObject);
     procedure btSetClick(Sender: TObject);
   private
-    FDebugFilePath: String;
-
     procedure ActiveFormChange(Sender: TObject);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -62,8 +60,6 @@ type
     class procedure Deinitialize;
 
     procedure Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
-
-    property DebugFilePath: String read FDebugFilePath;
   end;
 
 procedure DebugLn(const AData: String; const AType: TDebugInfoType);
@@ -84,7 +80,8 @@ function FreeConsole: Boolean; stdcall; external 'kernel32.dll';
 
 var
   frmDebug: TfrmDebug;
-  ConsoleAttached: Boolean;
+  DebugFilePath: String = '';
+  ConsoleAttached: Boolean = FALSE;
 
 
 procedure DebugLn(const AData: String; const AType: TDebugInfoType);
@@ -155,9 +152,12 @@ begin
   if ConsoleAttached then
     WriteLn(output);
 
-  ForceDirectories(ExtractFilePath(frmDebug.DebugFilePath));
-  AssignFile(tfile, frmDebug.DebugFilePath);
-  if FileExists(frmDebug.DebugFilePath) then
+  if DebugFilePath = '' then
+    DebugFilePath := SelfPath + Format('debug\%s.txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now)]);
+
+  ForceDirectories(ExtractFilePath(DebugFilePath));
+  AssignFile(tfile, DebugFilePath);
+  if FileExists(DebugFilePath) then
     Append(tfile)
   else
     Rewrite(tfile);
@@ -200,8 +200,6 @@ begin
 
   Width := Round(Screen.Monitors[0].Width / 2.8);
   Height := Round(Screen.Monitors[0].Height / 2.5);
-
-  FDebugFilePath := SelfPath + Format('debug\%s.txt', [FormatDateTime('dd-mm-yyyy hh:nn:ss', Now)]);
 
   {$IFDEF SEAT_POSITIONS_CONFIG}
   btSeatPos.Visible := TRUE;
