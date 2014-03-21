@@ -361,65 +361,69 @@ var
   index   : Integer;
   C1      : Integer;
 begin
-  if FMouseDownObject <> mdoNone then
-    Exit;
-
   renderit := FALSE;
-  if (acRaise.Enabled) and
-     (IsPointInsideCircle(X, Y, FRaiseSliderButtonPoint.x, FRaiseSliderButtonPoint.y, FRaiseSliderButtonWidth / 2)) then
-    FMouseDownObject := mdoRaiseSliderButton
-  else
+
+  if Button = mbLeft then
   begin
-    if (IsPointInUIButtons(X, Y, FActionButtons, FActionButtonWidth, FActionButtonHeight, index)) and
-       (Assigned(FActionButtons[index].Action)) then
-    begin
-      FMouseDownObject := TMouseDownObject(Integer(mdoActionButton1) + index);
-      for C1 := Low(FActionButtons) to High(FActionButtons) do
-        if C1 = index then
-          FActionButtons[C1].Image := TableResources.ActionButtonPressedImage
-        else
-          FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
-      renderit := TRUE;
-    end
+    if FMouseDownObject <> mdoNone then
+      Exit;
+
+    if (acRaise.Enabled) and
+       (IsPointInsideCircle(X, Y, FRaiseSliderButtonPoint.x, FRaiseSliderButtonPoint.y, FRaiseSliderButtonWidth / 2)) then
+      FMouseDownObject := mdoRaiseSliderButton
     else
-      if (acRaise.Enabled) and
-         (IsPointInUIButtons(X, Y, FRaisePresetButtons, FRaisePresetButtonWidth, FRaisePresetButtonHeight, index)) and
+    begin
+      if (IsPointInUIButtons(X, Y, FActionButtons, FActionButtonWidth, FActionButtonHeight, index)) and
          (Assigned(FActionButtons[index].Action)) then
       begin
-        FMouseDownObject := TMouseDownObject(Integer(mdoRaisePresetButton1) + index);
-        for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+        FMouseDownObject := TMouseDownObject(Integer(mdoActionButton1) + index);
+        for C1 := Low(FActionButtons) to High(FActionButtons) do
           if C1 = index then
-            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonPressedImage
+            FActionButtons[C1].Image := TableResources.ActionButtonPressedImage
           else
-            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
+            FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
         renderit := TRUE;
       end
       else
         if (acRaise.Enabled) and
-           (PtInRect(FRaiseSliderButtonBounds, Point(X, Y))) then
+           (IsPointInUIButtons(X, Y, FRaisePresetButtons, FRaisePresetButtonWidth, FRaisePresetButtonHeight, index)) and
+           (Assigned(FActionButtons[index].Action)) then
         begin
-          SetRaiseSliderValue(RoundToBB(FRaiseMin + ((X - FRaiseSliderButtonBounds.Left) / FRaiseSliderButtonBounds.Width) * (FRaiseMax - FRaiseMin)));
-          FMouseDownObject := mdoRaiseSliderButton;
+          FMouseDownObject := TMouseDownObject(Integer(mdoRaisePresetButton1) + index);
+          for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+            if C1 = index then
+              FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonPressedImage
+            else
+              FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
           renderit := TRUE;
         end
         else
-          if (acStandUp.Enabled) and
-             (IsPointInStandUpButton(X, Y)) then
+          if (acRaise.Enabled) and
+             (PtInRect(FRaiseSliderButtonBounds, Point(X, Y))) then
           begin
-            FStandUpButton.Image := TableResources.StandUpButtonPressedImage;
-            FMouseDownObject := mdoStandUpButton;
+            SetRaiseSliderValue(RoundToBB(FRaiseMin + ((X - FRaiseSliderButtonBounds.Left) / FRaiseSliderButtonBounds.Width) * (FRaiseMax - FRaiseMin)));
+            FMouseDownObject := mdoRaiseSliderButton;
             renderit := TRUE;
           end
           else
-            if (acPlayNow.Enabled) and
-               (PtInRect(Rect(Round(FPlayNowButton.Point.x), Round(FPlayNowButton.Point.y),
-                              Round(FPlayNowButton.Point.x + FPlayNowButtonWidth), Round(FPlayNowButton.Point.y + FPlayNowButtonHeight)),
-                              Point(X, Y))) then
+            if (acStandUp.Enabled) and
+               (IsPointInStandUpButton(X, Y)) then
             begin
-              FPlayNowButton.Image := TableResources.PlayNowButtonPressedImage;
-              FMouseDownObject := mdoPlayNowButton;
+              FStandUpButton.Image := TableResources.StandUpButtonPressedImage;
+              FMouseDownObject := mdoStandUpButton;
               renderit := TRUE;
             end
+            else
+              if (acPlayNow.Enabled) and
+                 (PtInRect(Rect(Round(FPlayNowButton.Point.x), Round(FPlayNowButton.Point.y),
+                                Round(FPlayNowButton.Point.x + FPlayNowButtonWidth), Round(FPlayNowButton.Point.y + FPlayNowButtonHeight)),
+                                Point(X, Y))) then
+              begin
+                FPlayNowButton.Image := TableResources.PlayNowButtonPressedImage;
+                FMouseDownObject := mdoPlayNowButton;
+                renderit := TRUE;
+              end
+    end;
   end;
 
   if renderit then
