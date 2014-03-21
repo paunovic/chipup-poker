@@ -31,7 +31,7 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
                                            // version of app
-                                           VERSION: '0.02c';
+                                           VERSION: '0.05a';
 
                                            // instance mutex name
                                            INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';

@@ -250,6 +250,7 @@ end;
 procedure TfrmLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
 var
   pbhello: TPB_HelloReply;
+  version: String;
 begin
   pbhello := AObject as TPB_HelloReply;
 
@@ -271,7 +272,13 @@ begin
   else
     ServerSocket.Disconnect;
 
-  if pbhello.LatestVersion <> Settings.Hardcoded.VERSION then
+  {$IFDEF DEBUG}
+  version := pbhello.LatestDebugVersion;
+  {$ELSE}
+  version := pbhello.LatestVersion;
+  {$ENDIF}
+
+  if version <> Settings.Hardcoded.VERSION then
   begin
     CurrentStatus := lsUpdating;
     Close;
