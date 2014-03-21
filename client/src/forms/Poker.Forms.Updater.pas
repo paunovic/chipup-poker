@@ -6,17 +6,19 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLabel, cxProgressBar, dxGDIPlusClasses, cxImage, OverbyteIcsWndControl,
-  OverbyteIcsHttpProt;
+  OverbyteIcsHttpProt, Vcl.Menus, Vcl.StdCtrls, cxButtons;
 
 type
   TfrmUpdater = class(TForm)
     pbProgress: TcxProgressBar;
-    imgHeader: TcxImage;
     HttpClient: THttpCli;
+    lbsCaption: TcxLabel;
+    imgHeader: TcxImage;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
     procedure HttpClientDocEnd(Sender: TObject);
+    procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
   private
     FUpdaterFile: String;
   protected
@@ -41,6 +43,17 @@ begin
   HttpClient.GetASync;
 end;
 
+procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+const
+  SC_DRAGMOVE = $F012;
+begin
+  if Button = mbLeft then
+  begin
+    ReleaseCapture;
+    Perform(WM_SYSCOMMAND, SC_DRAGMOVE, 0);
+  end;
+end;
+
 procedure TfrmUpdater.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
@@ -62,6 +75,8 @@ var
   perc: Single;
 begin
   perc := (HttpClient.RcvdCount / HttpClient.ContentLength) * 100;
+  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(perc)]);
+  lbsCaption.Caption := Caption;
   pbProgress.Position := Trunc(perc);
 end;
 
@@ -75,6 +90,5 @@ begin
 
   Close;
 end;
-
 
 end.

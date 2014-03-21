@@ -48,9 +48,24 @@ var
   ApplicationUninstalled: Boolean;
 
 function InitializeSetup(): Boolean;
+var
+  C1    : Integer;
+  silent: Boolean;
 begin
   ExtractTemporaryFile('{#SkinName}');
   LoadVCLStyleS(ExpandConstant('{tmp}\{#SkinName}'));
+
+  silent := FALSE;
+  for C1 := 1 to ParamCount do
+    if CompareText(ParamStr(C1), '/verysilent') = 0 then
+    begin
+      silent := TRUE;
+      Break;
+    end;
+
+  if silent then
+    Sleep(1000);
+
   result := TRUE;
 end;
  

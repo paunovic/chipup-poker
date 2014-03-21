@@ -116,7 +116,7 @@ begin
   {$ENDIF}
 
   if (FUpdaterFile <> '') and (FileExists(FUpdaterFile)) then
-    ShellOpen(PChar(FUpdaterFile), nil, '/verysilent /surpressmsgboxes');
+    ShellOpen(PChar(FUpdaterFile), nil, '/verysilent /surpressmsgboxes /closeapplications');
 end;
 
 procedure TdmMain.OpenCashierLink;
