@@ -41,13 +41,18 @@ uses
 
 procedure TfrmUpdater.FormCreate(Sender: TObject);
 begin
-  FUpdaterFile := AppDataLocalPath + 'install_chipuppoker.exe';
-  DeleteFile(FUpdaterFile);
-
   ImageList.GetImage(0, imgClose.Picture.Bitmap);
   ImageList.GetImage(2, imgMinimize.Picture.Bitmap);
 
+  FUpdaterFile := AppDataLocalPath + 'install_chipuppoker.exe';
+  DeleteFile(FUpdaterFile);
+
+  {$IFDEF DEBUG}
+  HttpClient.URL := Settings.Hardcoded.URL.LATEST_VERSION_DEBUG;
+  {$ELSE}
   HttpClient.URL := Settings.Hardcoded.URL.LATEST_VERSION;
+  {$ENDIF}
+
   HttpClient.RcvdStream := TFileStream.Create(FUpdaterFile, fmCreate or fmOpenWrite);
   HttpClient.GetASync;
 end;
