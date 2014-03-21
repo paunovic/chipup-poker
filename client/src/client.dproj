@@ -243,6 +243,10 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
+			<DCCReference Include="forms\Poker.Forms.Updater.pas">
+				<Form>frmUpdater</Form>
+				<FormType>dfm</FormType>
+			</DCCReference>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

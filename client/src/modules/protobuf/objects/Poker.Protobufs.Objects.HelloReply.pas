@@ -17,6 +17,7 @@ type
       FN_FORGOTEXPIRETIME = 4;
       FN_MAX_PLAY_TIME = 5;
       FN_MAX_TIMEBANK = 6;
+      FN_LATESTVERSION = 7;
 
     var
       FStringSizes: TPB_StringSizes;
@@ -24,12 +25,14 @@ type
       FForgotExpireTime: Integer;
       FMaxPlayTime: Integer;
       FMaxTimebank: Integer;
+      FLatestVersion: String;
 
     procedure SetStringSizes(const AValue: TPB_StringSizes);
     procedure SetChangeExpireTime(const AValue: Integer);
     procedure SetForgotExpireTime(const AValue: Integer);
     procedure SetMaxPlayTime(const AValue: Integer);
     procedure SetMaxTimebank(const AValue: Integer);
+    procedure SetLatestVersion(const AValue: String);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -39,6 +42,7 @@ type
     property ForgotExpireTime: Integer read FForgotExpireTime write SetForgotExpireTime;
     property MaxPlayTime: Integer read FMaxPlayTime write SetMaxPlayTime;
     property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
+    property LatestVersion: String read FLatestVersion write SetLatestVersion;
   end;
 
 implementation
@@ -82,6 +86,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaxTimebank := AProtobufReader.readInt32;
       end;
+      FN_LATESTVERSION: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FLatestVersion := AProtobufReader.readUtf8String;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -115,6 +123,12 @@ procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
 begin
   FMaxTimebank := AValue;
   ProtobufOutput.writeInt32(FN_MAX_TIMEBANK, AValue);
+end;
+
+procedure TPB_HelloReply.SetLatestVersion(const AValue: String);
+begin
+  FLatestVersion := AValue;
+  ProtobufOutput.writeString(FN_LATESTVERSION, AValue);
 end;
 
 end.

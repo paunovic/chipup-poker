@@ -110,8 +110,8 @@ uses
   Poker.Protobufs.Objects.PingReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.PingReply.pas',
   Poker.Protobufs.Objects.Pot in 'modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas',
   Poker.Protobufs.Objects.TableBoolFlag in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas',
-  Poker.Protobufs.Objects.UserChangeParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas';
-
+  Poker.Protobufs.Objects.UserChangeParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas',
+  Poker.Forms.Updater in 'forms\Poker.Forms.Updater.pas' {frmUpdater};
 
 procedure FocusPokerApp;
 var

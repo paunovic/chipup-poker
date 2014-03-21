@@ -10,7 +10,7 @@ uses
   dxGDIPlusClasses, Vcl.Menus;
 
 type
-  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsLoggingIn);
+  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsLoggingIn, lsLoggedIn, lsUpdating);
 
   TfrmLogin = class(TForm)
     alLogin: TActionList;
@@ -38,7 +38,6 @@ type
     procedure tiConnectTimer(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FLoginSuccess: Boolean;
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
 
@@ -59,7 +58,6 @@ type
     procedure CreateParams(var AParams: TCreateParams); override;
   public
     property CurrentStatus: TLoginStatus read FCurrentStatus write SetCurrentStatus;
-    property LoginSuccess: Boolean read FLoginSuccess;
   end;
 
 implementation
@@ -71,7 +69,7 @@ uses
   Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main,
-  Poker.Common.FormsContainer;
+  Poker.Common.FormsContainer, Poker.Forms.Updater;
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
@@ -84,7 +82,6 @@ begin
                   ]);
 
   CurrentStatus := lsIdle;
-  FLoginSuccess := FALSE;
   edPassword.Properties.PasswordChar := Chr($25CF);
   ApplySettings;
 
@@ -100,7 +97,8 @@ end;
 procedure TfrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
-  frmChipUpMain.LoggedIn(FLoginSuccess);
+  FormsContainer.Remove(TfrmLogin);
+  frmChipUpMain.LoginStatus(FCurrentStatus);
 end;
 
 procedure TfrmLogin.CreateParams(var AParams: TCreateParams);
@@ -173,7 +171,7 @@ begin
   case FCurrentStatus of
     lsIdle, lsConnecting: status := 'CONNECTING...';
     lsConnected: status := 'LOGIN';
-    lsLoggingIn: status := 'LOGGING IN...';
+    lsLoggingIn, lsLoggedIn: status := 'LOGGING IN...';
   end;
 
   btLogin.Caption := status;
@@ -272,6 +270,12 @@ begin
   end
   else
     ServerSocket.Disconnect;
+
+  if pbhello.LatestVersion <> Settings.Hardcoded.VERSION then
+  begin
+    CurrentStatus := lsUpdating;
+    Close;
+  end;
 end;
 
 procedure TfrmLogin.CSRLogin(const AMethodId: Integer; const AObject: TObject);
@@ -283,7 +287,7 @@ begin
   case pbreply.Status of
     lrSuccess: begin
       dmMain.SelfInfo.Password := edPassword.Text;
-      FLoginSuccess := TRUE;
+      CurrentStatus := lsLoggedIn;
       ServerSocket.Status;
     end;
     lrInvalid: begin
@@ -304,7 +308,7 @@ var
 begin
   pbstatus := AObject as TPB_StatusReply;
   dmMain.ProcessStatusProtobuf(pbstatus);
-  if FLoginSuccess then
+  if CurrentStatus = lsLoggedIn then
     Close;
 end;
 

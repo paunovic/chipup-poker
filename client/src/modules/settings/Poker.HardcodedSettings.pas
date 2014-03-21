@@ -20,17 +20,18 @@ type
                                 TCP_PING_INTERVAL      : Word;
                                 TCP_PING_TIMEOUT       : Word;
                                 URL                    : record
-                                  TOS          : String;
-                                  CASHIER      : String;
-                                  GET_AVATAR   : String;
-                                  UPLOAD_AVATAR: String;
+                                  TOS           : String;
+                                  CASHIER       : String;
+                                  GET_AVATAR    : String;
+                                  UPLOAD_AVATAR : String;
+                                  LATEST_VERSION: String;
                                 end;
                               end;
   public
     const
       Hardcoded: THardcodedSettingsRec = (
                                            // version of app
-                                           VERSION: '0.01a';
+                                           VERSION: '0.02a';
 
                                            // instance mutex name
                                            INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
@@ -48,10 +49,11 @@ type
 
                                            // urls
                                            URL : (
-                                             TOS          : URL_DOMAIN + '/tos.html';
-                                             CASHIER      : URL_DOMAIN + '/cashier.html';
-                                             GET_AVATAR   : URL_DOMAIN + '/getavatar?id=%s';
-                                             UPLOAD_AVATAR: URL_DOMAIN + '/uploadAvatar';
+                                             TOS           : URL_DOMAIN + '/tos.html';
+                                             CASHIER       : URL_DOMAIN + '/cashier.html';
+                                             GET_AVATAR    : URL_DOMAIN + '/getavatar?id=%s';
+                                             UPLOAD_AVATAR : URL_DOMAIN + '/uploadAvatar';
+                                             LATEST_VERSION: URL_DOMAIN + '/install_chipuppoker.exe';
                                            )
                                          );
   end;

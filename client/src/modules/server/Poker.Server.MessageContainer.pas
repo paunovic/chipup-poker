@@ -142,7 +142,11 @@ begin
   FLock.Acquire;
   try
     Inc(FLockCount);
+
     data_obj := nil;
+    if AMessage.Msg = FServerReplyMsg then
+      data_obj := pointer(AMessage.WParam);
+
     for callback_set in FCallbackSets do
       if (not Assigned(callback_set)) or
          (callback_set.Removed) then
@@ -155,7 +159,6 @@ begin
 
           if (AMessage.Msg = FServerReplyMsg) and (obj is TServerMessageCallback) then
           begin
-            data_obj := pointer(AMessage.WParam);
             callback_servermsg := obj as TServerMessageCallback;
             if Integer(callback_servermsg.Code) = AMessage.LParam then
               callback_servermsg.Callback(AMessage.LParam, data_obj);
@@ -173,11 +176,13 @@ begin
   end;
 end;
 
+
 procedure TMessageContainer.ReceiverWndProc(var AMessage: TMessage);
 var
   C1: Integer;
 begin
-  ProcessMessage(AMessage);
+  if (AMessage.Msg = FServerReplyMsg) or (AMessage.Msg = FSocketStateChangeMsg) then
+    ProcessMessage(AMessage);
 
   if FLockCount = 0 then
   begin

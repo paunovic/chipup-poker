@@ -32,7 +32,7 @@ Name: "{group}\Uninstall"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#ApplicationExe}"; Description: "Launch ChipUP Poker"; Flags: postinstall nowait skipifsilent runascurrentuser
+Filename: "{app}\{#ApplicationExe}"; Description: "Launch ChipUP Poker"; Flags: postinstall nowait runascurrentuser
 
 [Tasks]
 Name: desktopicon; Description: "Create a desktop icon"

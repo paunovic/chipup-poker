@@ -17,8 +17,9 @@ type
       FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
 
     var
-      FSelfInfo: TPlayerInfo;
-      FPlayers : TPlayerInfos;
+      FSelfInfo   : TPlayerInfo;
+      FPlayers    : TPlayerInfos;
+      FUpdaterFile: String;
 
     procedure LoadFonts;
 
@@ -30,8 +31,9 @@ type
     procedure OpenCashierLink;
     procedure OpenTOSLink;
 
-    property SelfInfo: TPlayerInfo read FSelfInfo;
-    property Players : TPlayerInfos read FPlayers;
+    property SelfInfo   : TPlayerInfo read FSelfInfo;
+    property Players    : TPlayerInfos read FPlayers;
+    property UpdaterFile: String read FUpdaterFile write FUpdaterFile;
   end;
 
 var
@@ -67,6 +69,11 @@ begin
   LoadFonts;
 
   TSettings.Initialize;
+
+  {$IFDEF DEBUG}
+  DebugLn(Format('VERSION: %s', [Settings.Hardcoded.VERSION]), ditApplication);
+  {$ENDIF}
+
   TDXCore.Initialize;
   TDXTimer.Initialize;
   TServerSettings.Initialize;
@@ -107,6 +114,9 @@ begin
   {$IFDEF DEBUG}
   TfrmDebug.Deinitialize;
   {$ENDIF}
+
+  if (FUpdaterFile <> '') and (FileExists(FUpdaterFile)) then
+    ShellOpen(PChar(FUpdaterFile), nil, '/verysilent /surpressmsgboxes');
 end;
 
 procedure TdmMain.OpenCashierLink;
