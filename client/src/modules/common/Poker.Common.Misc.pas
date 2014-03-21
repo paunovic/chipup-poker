@@ -464,6 +464,8 @@ begin
 end;
 
 
+
+
 initialization
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   AppDataLocalPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');

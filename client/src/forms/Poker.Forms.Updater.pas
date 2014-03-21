@@ -39,6 +39,7 @@ implementation
 uses
   Poker.Common.Misc, Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule;
 
+
 procedure TfrmUpdater.FormCreate(Sender: TObject);
 begin
   ImageList.GetImage(0, imgClose.Picture.Bitmap);
@@ -76,7 +77,7 @@ begin
   TfrmDebug.Deinitialize;
   {$ENDIF}
 
-  frmChipUpMain.Close;
+  Application.Terminate;
 end;
 
 procedure TfrmUpdater.imgCloseClick(Sender: TObject);
