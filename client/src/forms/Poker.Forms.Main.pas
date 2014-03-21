@@ -194,6 +194,8 @@ begin
   btOpenTournamentLobby.Font.Assign(btHomeGames.Font);
   btCreateClub.Font.Assign(btHomeGames.Font);
   btJoinClub.Font.Assign(btHomeGames.Font);
+
+  EnableWindow(Handle, TRUE);
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);

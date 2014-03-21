@@ -66,6 +66,7 @@ object frmTable: TfrmTable
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Fold to any bet'
+    ParentBackground = False
     ParentFont = False
     Properties.OnChange = cbFoldToAnyBetPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
@@ -83,7 +84,7 @@ object frmTable: TfrmTable
     Transparent = True
     Visible = False
     Height = 17
-    Width = 113
+    Width = 106
   end
   object cbSitOutNextHand: TcxCheckBox
     Left = 251
@@ -91,6 +92,7 @@ object frmTable: TfrmTable
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Sit out next hand'
+    ParentBackground = False
     ParentFont = False
     Properties.OnChange = cbSitOutNextHandPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
@@ -108,7 +110,7 @@ object frmTable: TfrmTable
     Transparent = True
     Visible = False
     Height = 17
-    Width = 113
+    Width = 106
   end
   object cbSitOutNextBB: TcxCheckBox
     Left = 251
@@ -116,6 +118,7 @@ object frmTable: TfrmTable
     Anchors = [akLeft, akBottom]
     AutoSize = False
     Caption = 'Sit out next BB'
+    ParentBackground = False
     ParentFont = False
     Properties.OnChange = cbSitOutNextBBPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
@@ -133,7 +136,7 @@ object frmTable: TfrmTable
     Transparent = True
     Visible = False
     Height = 17
-    Width = 113
+    Width = 106
   end
   object seRaiseAmount: TcxSpinEdit
     Left = 474
@@ -153,7 +156,7 @@ object frmTable: TfrmTable
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
-    Style.Font.Height = -11
+    Style.Font.Height = -13
     Style.Font.Name = 'Sintony'
     Style.Font.Style = []
     Style.Font.Quality = fqAntialiased
@@ -162,7 +165,7 @@ object frmTable: TfrmTable
     TabOrder = 4
     Value = 76950.000000000000000000
     Visible = False
-    Height = 30
+    Height = 28
     Width = 106
   end
   object rvChat: TRichView
@@ -236,10 +239,10 @@ object frmTable: TfrmTable
       Caption = 'MAX'
       OnExecute = acRaiseMaxExecute
     end
-    object acShowLosingCards: TAction
+    object acShowCards: TAction
       Category = 'Game'
       Caption = 'SHOW CARDS'
-      OnExecute = acShowLosingCardsExecute
+      OnExecute = acShowCardsExecute
     end
   end
   object tiActiveFrameBlink: TTimer

@@ -31,7 +31,7 @@ type
     procedure Signal;
     procedure Shutdown;
 
-    function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single): TDXAnimation;
+    function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single): TDXAnimation;
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
 
@@ -80,11 +80,11 @@ begin
   inherited;
 end;
 
-function TDXTimer.AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single): TDXAnimation;
+function TDXTimer.AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single): TDXAnimation;
 var
   animation: TDXAnimation;
 begin
-  animation := TDXAnimation.Create(AHandle, FNextId, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay);
+  animation := TDXAnimation.Create(AHandle, FNextId, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay, AEndDelay);
   Inc(FNextId);
   FAnimations.Add(animation);
   result := animation;
@@ -153,7 +153,7 @@ begin
       Inc(FLockCount);
       try
         C1 := 0;
-        while C1 < FAnimations.Count do
+        while (Assigned(FAnimations)) and (C1 < FAnimations.Count) do
         begin
           FAnimations[C1].Animate(FTiming.GetTimeValue);
 

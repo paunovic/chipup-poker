@@ -14,6 +14,7 @@ type
   private
     FStartTime   : Double;
     FAniStartTime: Double;
+    FAniEndTime  : Double;
     FEndTime     : Double;
     FHandle      : THandle;
     FId          : Integer;
@@ -32,7 +33,7 @@ type
     FTagString   : String;
 
   public
-    constructor Create(const AHandle: THandle; const AID: Integer; const AAnimationMsg: UINT; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
+    constructor Create(const AHandle: THandle; const AID: Integer; const AAnimationMsg: UINT; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single);
     destructor Destroy; override;
 
     procedure Animate(const ACurrentTime: Double);
@@ -57,11 +58,12 @@ type
 implementation
 
 
-constructor TDXAnimation.Create(const AHandle: THandle; const AID: Integer; const AAnimationMsg: UINT; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay: Single);
+constructor TDXAnimation.Create(const AHandle: THandle; const AID: Integer; const AAnimationMsg: UINT; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single);
 begin
   FStartTime := AStartTime;
   FAniStartTime := AStartTime + AStartDelay * 1000;
-  FEndTime := FAniStartTime + ASpeed * 1000;
+  FAniEndTime := FAniStartTime + ASpeed * 1000;
+  FEndTime := FAniEndTime + AEndDelay * 1000;
   FHandle := AHandle;
   FAnimationMsg := AAnimationMsg;
   FID := AID;
@@ -90,9 +92,9 @@ begin
 
   if FStatus = asAnimating then
   begin
-    if FEndTime - FAniStartTime > 0 then
+    if FAniEndTime - FAniStartTime > 0 then
     begin
-      FProgress := (ACurrentTime - FAniStartTime) / (FEndTime - FAniStartTime);
+      FProgress := (ACurrentTime - FAniStartTime) / (FAniEndTime - FAniStartTime);
       if FProgress < 0 then
         FProgress := 0;
     end
@@ -106,7 +108,10 @@ begin
     begin
       FCurrPoint := FEndPoint;
       FProgress := 1;
-      FStatus := asDone;
+
+      if (FEndTime <= FAniEndTime) or
+         ((ACurrentTime - FAniEndTime) / (FEndTime - FAniEndTime) >= 1) then
+        FStatus := asDone;
     end;
   end;
 

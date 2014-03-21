@@ -2,7 +2,7 @@ object frmDebug: TfrmDebug
   Left = 0
   Top = 0
   Caption = 'Debug'
-  ClientHeight = 378
+  ClientHeight = 379
   ClientWidth = 675
   Color = clWindow
   Ctl3D = False
@@ -20,15 +20,52 @@ object frmDebug: TfrmDebug
     Left = 0
     Top = 0
     Width = 675
-    Height = 378
+    Height = 379
     Align = alClient
     BevelOuter = bvNone
     Ctl3D = False
     ParentCtl3D = False
     TabOrder = 0
+    object meSeatPos: TcxMemo
+      Left = 0
+      Top = 0
+      Align = alClient
+      Lines.Strings = (
+        '(0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2'
+        '(0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3'
+        '(-pi/4, pi/4, pi*3/4, pi*5/4, 0, 0, 0, 0, 0, 0), // 4'
+        '(-pi/5.5, pi/7, pi/2, pi-pi/7, pi+pi/5.5, 0, 0, 0, 0, 0), // 5'
+        '(-pi/3, 0, pi/2.7, pi-pi/2.7, pi, pi+pi/3, 0, 0, 0, 0), // 6'
+        '(-pi/4, 0, pi/4, pi/2, pi*3/4, pi, pi*5/4, 0, 0, 0), // 7'
+        
+          '(-pi/3, -pi/10.4, pi/8, pi/2.3, pi-pi/2.3, pi-pi/8, pi+pi/10.4, ' +
+          'pi+pi/3, 0, 0), // 8'
+        
+          '(-pi/2.7, -pi/10.3, pi/64, pi/3.5, pi/2, pi-pi/3.5, pi-pi/64, pi' +
+          '+pi/10.3, pi+pi/2.7, 0), // 9'
+        
+          '(-pi/2.7, -pi/7.7, pi/128, pi/6, pi/2.3, pi-pi/2.3, pi-pi/6, pi-' +
+          'pi/128, pi+pi/7.7, pi+pi/2.7) // 10')
+      ParentFont = False
+      Properties.WordWrap = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -12
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      TabOrder = 2
+      Visible = False
+      Height = 304
+      Width = 675
+    end
     object paInfo: TPanel
       Left = 0
-      Top = 303
+      Top = 304
       Width = 675
       Height = 75
       Align = alBottom
@@ -47,7 +84,6 @@ object frmDebug: TfrmDebug
         Top = 6
         Width = 93
         Height = 31
-        Anchors = [akTop, akRight]
         Caption = 'PAUSE'
         Colors.PressedText = clRed
         SpeedButtonOptions.GroupIndex = 1
@@ -64,30 +100,35 @@ object frmDebug: TfrmDebug
       object lbsThreads: TcxLabel
         Left = 544
         Top = 4
+        Anchors = [akTop, akRight]
         Caption = 'Threads:'
         Transparent = True
       end
       object lbsMemoryUsage: TcxLabel
         Left = 544
         Top = 20
+        Anchors = [akTop, akRight]
         Caption = 'Memory usage:'
         Transparent = True
       end
       object lbsSocketState: TcxLabel
         Left = 544
         Top = 52
+        Anchors = [akTop, akRight]
         Caption = 'Socket state:'
         Transparent = True
       end
       object lbsCalbackSets: TcxLabel
         Left = 544
         Top = 36
+        Anchors = [akTop, akRight]
         Caption = 'Callback sets:'
         Transparent = True
       end
       object lbvThreads: TcxLabel
         Left = 624
         Top = 4
+        Anchors = [akTop, akRight]
         Caption = '00'
         Style.TextStyle = [fsBold]
         Transparent = True
@@ -95,6 +136,7 @@ object frmDebug: TfrmDebug
       object lbvMemoryUsage: TcxLabel
         Left = 624
         Top = 20
+        Anchors = [akTop, akRight]
         Caption = '00000kb'
         Style.TextStyle = [fsBold]
         Transparent = True
@@ -102,6 +144,7 @@ object frmDebug: TfrmDebug
       object lbvCallbackSets: TcxLabel
         Left = 624
         Top = 36
+        Anchors = [akTop, akRight]
         Caption = '0'
         Style.TextStyle = [fsBold]
         Transparent = True
@@ -109,16 +152,55 @@ object frmDebug: TfrmDebug
       object lbvSocketState: TcxLabel
         Left = 624
         Top = 52
+        Anchors = [akTop, akRight]
         Caption = '0'
         Style.TextStyle = [fsBold]
         Transparent = True
+      end
+      object btSeatPos: TcxButton
+        Left = 104
+        Top = 6
+        Width = 93
+        Height = 31
+        Caption = 'SEAT POS'
+        Colors.PressedText = clRed
+        SpeedButtonOptions.GroupIndex = 2
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        TabOrder = 9
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+        OnClick = btSeatPosClick
+      end
+      object btSet: TcxButton
+        Left = 104
+        Top = 39
+        Width = 93
+        Height = 31
+        Caption = 'SET'
+        Colors.PressedText = clRed
+        SpeedButtonOptions.CanBeFocused = False
+        TabOrder = 10
+        Visible = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+        OnClick = btSetClick
       end
     end
     object rvLog: TRichView
       Left = 0
       Top = 0
       Width = 675
-      Height = 303
+      Height = 304
       Align = alClient
       TabOrder = 1
       BorderStyle = bsNone
