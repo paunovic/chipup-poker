@@ -20,6 +20,7 @@ message HelloReply {
 	required int32 max_play_time = 5;
 	required int32 max_timebank = 6 [ default = 60000 ];
 	required string latestVersion = 7;
+	required string latestDebugVersion = 8;
 }
 
 message LoginParams {
