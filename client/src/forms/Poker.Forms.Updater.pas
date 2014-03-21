@@ -84,13 +84,10 @@ begin
 end;
 
 procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
-var
-  perc: Single;
 begin
-  perc := (HttpClient.RcvdCount / HttpClient.ContentLength) * 100;
-  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(perc)]);
+  pbProgress.Position := (HttpClient.RcvdCount / HttpClient.ContentLength) * 100;
+  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(pbProgress.Position)]);
   lbsCaption.Caption := Caption;
-  pbProgress.Position := Trunc(perc);
 end;
 
 procedure TfrmUpdater.HttpClientDocEnd(Sender: TObject);

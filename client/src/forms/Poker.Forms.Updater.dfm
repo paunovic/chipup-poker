@@ -26,14 +26,16 @@ object frmUpdater: TfrmUpdater
   object pbProgress: TcxProgressBar
     Left = 8
     Top = 28
-    Anchors = [akLeft, akRight, akBottom]
+    Anchors = [akLeft, akTop, akRight]
     AutoSize = False
     ParentColor = False
+    Properties.AnimationSpeed = 0
     Properties.BarStyle = cxbsGradient
-    Properties.BeginColor = 179
-    Properties.EndColor = 4227327
+    Properties.BeginColor = 202
+    Properties.EndColor = clRed
     Properties.PeakValue = 100.000000000000000000
     Properties.ShowText = False
+    Properties.ShowTextStyle = cxtsText
     Style.Color = 3881787
     Style.Edges = []
     Style.LookAndFeel.SkinName = ''
