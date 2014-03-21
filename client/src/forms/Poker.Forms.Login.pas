@@ -278,7 +278,7 @@ begin
   version := pbhello.LatestVersion;
   {$ENDIF}
 
-  if version = Settings.Hardcoded.VERSION then
+  if version <> Settings.Hardcoded.VERSION then
   begin
     CurrentStatus := lsUpdating;
     Close;
