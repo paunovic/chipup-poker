@@ -1,0 +1,12 @@
+extends base
+block content
+  table(border=1)
+    tr
+      th name
+      th version
+      th revision
+      th compile type
+      th size
+      th control
+    each val in installers
+      include installer_row.jade

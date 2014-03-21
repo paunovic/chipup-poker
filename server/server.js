@@ -276,7 +276,13 @@ app.get("/getavatar",function (req,res) {
 	});
 });
 app.get("/install_chipuppoker.exe",function (req,res) {
-	res.sendfile('/home/buildbotcheckout/release/install_chipuppoker.exe');
+	Config.findOne({_id:'installerid'},function (err,row) {
+		assert.ifError(err);
+		Installers.findOne({_id:row.value},function (err,row) {
+			log('sending installer %j',row);
+			res.sendfile('installers/'+row.name);
+		});
+	});
 });
 app.get('/game',function (req,res) {
 	var start = Date.now();
@@ -289,15 +295,80 @@ app.get('/game',function (req,res) {
 		});
 	});
 });
+app.get('/user',function (req,res) {
+	var start = Date.now();
+	allUsers.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
+		allClubs.find({members:new ObjectID(req.query.id)}).toArray(function (err,clubs) {
+			var self = activeUsers[row._id];
+			var obj = {user:row,clubs:clubs,start:start,online:self,util:util}
+			res.render('user',obj);
+		});
+	});
+});
 app.post('/eval',function (req,res) {
 	var state = req.body;
 	console.log(state);
-	console.log(state.cards1);
 	var fakegame = { flop:{cards:state.flop}, turn:{cards:state.turn}, river:{cards:state.river}};
 	var fakeusers = [{seat:0,hand:state.cards1},{seat:1,hand:state.cards2}];
 	var result = dag.rankHands(fakegame,fakeusers);
 	res.send(JSON.stringify(result));
 });
+app.post('/newVersion',function (req,res) {
+	console.log('query',req.query);
+	var name = req.files.installer.path.split('/')[1]
+	console.log(name);
+	fs.rename(req.files.installer.path,'installers/'+name,function (err) {
+		assert.ifError(err);
+		Installers.insert({name:name,version:req.query.version,revision:req.query.revision,debug:req.query.debug,size:req.files.installer.size},function (err,row) {
+			assert.ifError(err);
+			log('new version recorded: %j',row);
+			if (req.query.debug == 'release') {
+				//Config.update({_id:'installerid'},{$set:{value:row[0]._id}},function(err,res) {
+				//	assert.ifError(err);
+				//});
+				//sharedconfig.latestVersion = row[0].version;
+			}
+		});
+		res.send('OK');
+	});
+});
+app.get('/installers',installers_func);
+app.post('/installers',installers_func);
+function installers_func(req,res) {
+	var start = Date.now();
+	if (req.body.delete) {
+		Installers.findOne({_id:new ObjectID(req.body.delete)},function (err,row) {
+			if (row) {
+				fs.unlink('installers/'+row.name,function (err) {
+					console.log('installer deleted');
+				});
+			}
+			Installers.remove({_id:new ObjectID(req.body.delete)},function () {});
+			finish1();
+		});
+	} else finish1();
+	function finish1() {
+		if (req.body.setpublic) {
+			Installers.findOne({_id:new ObjectID(req.body.setpublic)},function (err,row) {
+				assert.ifError(err);
+				if (row) {
+					Config.update({_id:'installerid'},{$set:{value:new ObjectID(req.body.setpublic)}},function(err,res) {
+						assert.ifError(err);
+						sharedconfig.latestVersion = row.version;
+						finish2();
+					});
+				} else finish2();
+			});
+		} else finish2();
+		function finish2() {
+			Installers.find({}).toArray(function(err,data) {
+				Config.findOne({_id:'installerid'},function (err,row) {
+					res.render('installers',{installers:data,start:start,pubver:row.value});
+				});
+			});
+		}
+	}
+};
 app.use(express.static('files'));
 function goOnline() {
 	app.listen(3000);
@@ -306,7 +377,7 @@ function goOnline() {
 	cactiServer.listen(1246);
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -329,6 +400,8 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	allCounters = db.collection('counters');
 	bugs = db.collection('bugs');
 	handHistory = db.collection('handHistory');
+	Installers = db.collection('installers');
+	Config = db.collection('config');
 
 	bugsView.setup(app,bugs,allUsers,db);
 
@@ -338,6 +411,17 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	allClubs.createIndex("name",{unique:true},function (err,res) {});
 	handHistory.ensureIndex({seq:1},function (err,res){});
 	handHistory.ensureIndex({gameid:1},function (err,res){});
+
+	Config.insert({_id:'installerid',value:''},function (err,res){
+		Config.findOne({_id:'installerid'},function (err,row) {
+			assert.ifError(err);
+			Installers.findOne({_id:row.value},function (err,row) {
+				if (row) {
+					sharedconfig.latestVersion = row.version;
+				}
+			});
+		});
+	});
 
 	allCounters.insert({_id:"club",seq:1},function (err,res) {});
 	allGames.find({gameState:{$exists:true}}).toArray(function (err,badgames) { // FIXME, check state
