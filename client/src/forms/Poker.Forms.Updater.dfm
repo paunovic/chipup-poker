@@ -491,6 +491,7 @@ object frmUpdater: TfrmUpdater
   end
   object tiClose: TTimer
     Enabled = False
+    Interval = 100
     OnTimer = tiCloseTimer
     Left = 144
     Top = 4

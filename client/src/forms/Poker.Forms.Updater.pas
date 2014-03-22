@@ -80,9 +80,10 @@ begin
     (HttpClient.RcvdStream as TFileStream).Free;
     HttpClient.RcvdStream := nil;
 
+    HttpClient.OnDocData := nil;
+    HttpClient.OnRequestDone := nil;
     HttpClient.Abort;
   end;
-
 
   FormsContainer.Remove(TfrmUpdater);
 
@@ -90,7 +91,7 @@ begin
   TfrmDebug.Deinitialize;
   {$ENDIF}
 
-  Application.Terminate;
+  frmChipUpMain.Close;
 end;
 
 procedure TfrmUpdater.imgCloseClick(Sender: TObject);
