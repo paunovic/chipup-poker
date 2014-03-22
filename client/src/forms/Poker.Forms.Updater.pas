@@ -69,7 +69,12 @@ begin
   Action := caFree;
 
   if Assigned(HttpClient.RcvdStream) then
+  begin
+    HttpClient.RcvdStream.Free;
+    HttpClient.RcvdStream := nil;
+
     HttpClient.Abort;
+  end;
 
   FormsContainer.Remove(TfrmUpdater);
 
@@ -99,11 +104,14 @@ end;
 
 procedure TfrmUpdater.HttpClientDocEnd(Sender: TObject);
 begin
-  if HttpClient.ContentLength = HttpClient.RcvdStream.Size then
-    dmMain.UpdaterFile := FUpdaterFile;
+  if Assigned(HttpClient.RcvdStream) then
+  begin
+    if HttpClient.ContentLength = HttpClient.RcvdStream.Size then
+      dmMain.UpdaterFile := FUpdaterFile;
 
-  HttpClient.RcvdStream.Free;
-  HttpClient.RcvdStream := nil;
+    HttpClient.RcvdStream.Free;
+    HttpClient.RcvdStream := nil;
+  end;
 
   Close;
 end;
