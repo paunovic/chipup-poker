@@ -70,7 +70,8 @@ begin
 
   if Assigned(HttpClient.RcvdStream) then
   begin
-    HttpClient.RcvdStream.Free;
+    FlushFileBuffers((HttpClient.RcvdStream as TFileStream).Handle);
+    (HttpClient.RcvdStream as TFileStream).Free;
     HttpClient.RcvdStream := nil;
 
     HttpClient.Abort;
@@ -111,8 +112,7 @@ end;
 procedure TfrmUpdater.HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 begin
   if (ErrCode = 0) and
-     (Assigned(HttpClient.RcvdStream)) and
-     (HttpClient.ContentLength = HttpClient.RcvdStream.Size) then
+     (Assigned(HttpClient.RcvdStream)) then
     dmMain.UpdaterFile := FUpdaterFile;
 
   Close;
