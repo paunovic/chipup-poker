@@ -28,6 +28,7 @@ type
     lbsPassword: TcxLabel;
     tiConnect: TTimer;
     imgHeader: TcxImage;
+    tiLoginTimeout: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure acLoginExecute(Sender: TObject);
     procedure acShowCreateAccountFormExecute(Sender: TObject);
@@ -37,6 +38,7 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure tiConnectTimer(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure tiLoginTimeoutTimer(Sender: TObject);
   private
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
@@ -213,6 +215,12 @@ begin
   end;
 end;
 
+procedure TfrmLogin.tiLoginTimeoutTimer(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
+  tiLoginTimeout.Enabled := FALSE;
+end;
+
 procedure TfrmLogin.EnableGUI(const AEnable: Boolean);
 begin
   acLogin.Enabled := AEnable;
@@ -234,6 +242,7 @@ procedure TfrmLogin.acLoginExecute(Sender: TObject);
 begin
   CurrentStatus := lsLoggingIn;
   EnableGUI(FALSE);
+  tiLoginTimeout.Enabled := TRUE;
   ServerSocket.Login(edLogin.Text, edPassword.Text);
 end;
 
