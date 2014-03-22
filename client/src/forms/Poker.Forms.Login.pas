@@ -88,6 +88,8 @@ begin
   ApplySettings;
 
   EnableGUI(ServerSocket.IsConnected);
+
+  Caption := Caption + ' ' + Settings.Hardcoded.VERSION;
 end;
 
 procedure TfrmLogin.FormDestroy(Sender: TObject);
@@ -286,6 +288,8 @@ begin
   {$ELSE}
   version := pbhello.LatestVersion;
   {$ENDIF}
+
+  Caption := Caption + ' (latest: ' + version + ')';
 
   if version <> Settings.Hardcoded.VERSION then
   begin

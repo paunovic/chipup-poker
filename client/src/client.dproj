@@ -84,7 +84,6 @@
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUpPoker;LegalCopyright=Marko Paunovic, paunovic@gmail.com;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUp Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_ExeOutput>..\bin\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_MapFile>3</DCC_MapFile>
-			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
 		</PropertyGroup>
@@ -304,6 +303,22 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\BaseBBoxD16.bpl">File C:\Windows\system32\BaseBBoxD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\HTTPBBoxCliD16.bpl">File C:\Windows\system32\HTTPBBoxCliD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\XMLBBoxD16.bpl">File C:\Windows\system32\XMLBBoxD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\SSLBBoxCliD16.bpl">File C:\Windows\system32\SSLBBoxCliD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\DAVBBoxCliD16.bpl">File C:\Windows\system32\DAVBBoxCliD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\HTTPBBoxSrvD16.bpl">File C:\Windows\system32\HTTPBBoxSrvD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\SSLBBoxSrvD16.bpl">File C:\Windows\system32\SSLBBoxSrvD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\FTPSBBoxCliD16.bpl">File C:\Windows\system32\FTPSBBoxCliD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\MIMEBBoxD16.bpl">File C:\Windows\system32\MIMEBBoxD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\LDAPBBoxD16.bpl">File C:\Windows\system32\LDAPBBoxD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\ZIPBBoxD16.bpl">File C:\Windows\system32\ZIPBBoxD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\XMLBBoxSecD16.bpl">File C:\Windows\system32\XMLBBoxSecD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\PGPBBoxD16.bpl">File C:\Windows\system32\PGPBBoxD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\SSHBBoxCliD16.bpl">File C:\Windows\system32\SSHBBoxCliD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\PKIBBoxD16.bpl">File C:\Windows\system32\PKIBBoxD16.bpl not found</Excluded_Packages>
+						<Excluded_Packages Name="C:\Windows\system32\SSHBBoxSrvD16.bpl">File C:\Windows\system32\SSHBBoxSrvD16.bpl not found</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>
