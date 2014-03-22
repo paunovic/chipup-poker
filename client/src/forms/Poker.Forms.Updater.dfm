@@ -256,7 +256,7 @@ object frmUpdater: TfrmUpdater
     Options = []
     Timeout = 30
     OnDocData = HttpClientDocData
-    OnDocEnd = HttpClientDocEnd
+    OnRequestDone = HttpClientRequestDone
     SocksAuthentication = socksNoAuthentication
     SocketFamily = sfIPv4
     Left = 88
