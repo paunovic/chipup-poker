@@ -213,6 +213,7 @@ type
     function RoundToBB(const AValue: Single): UINT32;
 
     procedure AnimateBets(const ABets: TArray<UINT32>);
+    procedure AnimateBlinds;
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -1549,6 +1550,8 @@ begin
       FTableStatus.TurnCard.Clear;
       FTableStatus.RiverCard.Clear;
 
+      AnimateBlinds;
+
       cc := 0;
       card_index := 0;
       repeat
@@ -1562,7 +1565,7 @@ begin
             begin
               seat_point := GetSeatPoint(seat.SeatIndex);
               animation := DXTimer.AddAnimation(Handle, Point2(FTableCenter.x - FCardWidth / 2, FTableYOffset),
-                                                GetCardPoint(seat, card_index), 0.15, FDealAnimations.Count * 0.05, 0);
+                                                GetCardPoint(seat, card_index), 0.15, 1.5 + FDealAnimations.Count * 0.05, 0);
               animation.Tag := seat.SeatIndex;
               Inc(cc);
               if cc mod 2 = 0 then
@@ -1579,7 +1582,7 @@ begin
         Inc(card_index);
       until not iterate;
 
-      EnableGameLockTimer(1.5);
+      EnableGameLockTimer(1.5 + FDealAnimations.Count * 0.05);
     end;
 
     teCheck: begin
@@ -2399,8 +2402,20 @@ begin
     for C1 := 0 to FBetAnimations.Count - 1 do
       if DXTimer.Find(Handle, FBetAnimations[C1], animation) then
       begin
-        chips_stack := FChipStackMaker.MakeStack(Trunc(animation.TagUINT / 100));
-        RenderChipStack(animation.CurrPoint, chips_stack);
+        if (animation.Tag = 1) or (animation.Status = asAnimating) then
+        begin
+          chips_stack := FChipStackMaker.MakeStack(Trunc(animation.TagUINT / 100));
+          RenderChipStack(animation.CurrPoint, chips_stack);
+
+          if animation.Tag = 0 then
+            RenderValue(animation.CurrPoint, animation.TagUINT / 100, clWhite2, FALSE);
+
+          if animation.TagSingle = 1 then
+          begin
+            animation.TagSingle := 0;
+            Sounds.Play(Sounds.SOUND_PUTCHIPS_SMALL);
+          end;
+        end;
       end;
   end
   else
@@ -2666,9 +2681,32 @@ begin
 
       pot_point := GetPotPoint(0);
       animation := DXTimer.AddAnimation(Handle, bet_point, pot_point, 0.25, 0.2, 0);
+      animation.Tag := 1;
       animation.TagUINT := ABets[C1];
       FBetAnimations.Add(animation.Id);
     end;
+end;
+
+procedure TfrmTable.AnimateBlinds;
+var
+  bet_point: TPoint2;
+  animation: TDXAnimation;
+begin
+  if (FTableStatus.SmallBlindSeat < 0) or (FTableStatus.SmallBlindSeat > Length(FTableStatus.Bets) - 1) or
+     (FTableStatus.BigBlindSeat < 0) or (FTableStatus.BigBlindSeat > Length(FTableStatus.Bets) - 1) then
+    Exit;
+
+  bet_point := GetBetPoint(FTableStatus.SmallBlindSeat);
+  animation := DXTimer.AddAnimation(Handle, bet_point, bet_point, 0.1, 0.1, 0.9);
+  animation.TagUINT := FTableStatus.Bets[FTableStatus.SmallBlindSeat];
+  animation.TagSingle := 1;
+  FBetAnimations.Add(animation.Id);
+
+  bet_point := GetBetPoint(FTableStatus.BigBlindSeat);
+  animation := DXTimer.AddAnimation(Handle, bet_point, bet_point, 0.1, 0.5, 0.5);
+  animation.TagUINT := FTableStatus.Bets[FTableStatus.BigBlindSeat];
+  animation.TagSingle := 1;
+  FBetAnimations.Add(animation.Id);
 end;
 
 procedure TfrmTable.AnimationCallback(const AAnimationPointer: pointer);

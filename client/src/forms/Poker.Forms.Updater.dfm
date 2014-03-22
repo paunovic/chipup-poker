@@ -31,7 +31,7 @@ object frmUpdater: TfrmUpdater
     ParentColor = False
     Properties.AnimationSpeed = 0
     Properties.BarStyle = cxbsGradient
-    Properties.BeginColor = 202
+    Properties.BeginColor = 147
     Properties.EndColor = clRed
     Properties.PeakValue = 100.000000000000000000
     Properties.ShowText = False
