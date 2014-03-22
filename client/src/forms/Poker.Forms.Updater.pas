@@ -103,9 +103,8 @@ begin
   lbsCaption.Caption := Caption;
 
   {$IFDEF DEBUG}
-  if (HttpClient.RcvdCount mod 1024 = 0) or
-     (HttpClient.RcvdCount = HttpClient.ContentLength) then
-    DebugLn(Format('Downloading %d/%d bytes...', [HttpClient.RcvdCount, HttpClient.ContentLength]), ditNetInc);
+  if Trunc(pbProgress.Position) mod 10 = 0 then
+    DebugLn(Format('Downloading %d/%d bytes [%d%%]...', [HttpClient.RcvdCount, HttpClient.ContentLength, Trunc(pbProgress.Position)]), ditNetInc);
   {$ENDIF}
 end;
 
