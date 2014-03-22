@@ -18,7 +18,7 @@ function finish(version) {
 		'Content-Type: application/octed-stream\r\n'+
 		'Content-Disposition: form-data; name="installer"; filename="install_chipuppoker.exe"\r\n'+
 		'Content-Transfer-Encoding: binary\r\n\r\n';
-	var middle = '--'+key+'\r\n'+
+	var middle = '--'+key+'--\r\n'+
 		'Content-Type: application/octed-stream\r\n'+
 		'Content-Disposition: form-data; name="client"; filename="client.exe"\r\n'+
 		'Content-Transfer-Encoding: binary\r\n\r\n';
