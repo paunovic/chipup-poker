@@ -20,11 +20,11 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
-    procedure HttpClientDocEnd(Sender: TObject);
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure imgCloseClick(Sender: TObject);
     procedure imgMinimizeClick(Sender: TObject);
+    procedure HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
   private
     FUpdaterFile: String;
   protected
@@ -103,28 +103,19 @@ begin
   lbsCaption.Caption := Caption;
 
   {$IFDEF DEBUG}
-  if (HttpClient.RcvdCount mod 1024 = 0) or
-     (HttpClient.RcvdCount = HttpClient.ContentLength) then
-    DebugLn(Format('Downloading %d/%d bytes...', [HttpClient.RcvdCount, HttpClient.ContentLength]), ditNetInc);
+  if Trunc(pbProgress.Position) mod 10 = 0 then
+    DebugLn(Format('Downloading %d/%d bytes [%d%%]...', [HttpClient.RcvdCount, HttpClient.ContentLength, Trunc(pbProgress.Position)]), ditNetInc);
   {$ENDIF}
 end;
 
-procedure TfrmUpdater.HttpClientDocEnd(Sender: TObject);
+procedure TfrmUpdater.HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 begin
-  if Assigned(HttpClient.RcvdStream) then
-  begin
-    if HttpClient.ContentLength = HttpClient.RcvdStream.Size then
-      dmMain.UpdaterFile := FUpdaterFile;
+  if (ErrCode = 0) and
+     (Assigned(HttpClient.RcvdStream)) and
+     (HttpClient.ContentLength = HttpClient.RcvdStream.Size) then
+    dmMain.UpdaterFile := FUpdaterFile;
 
-    FlushFileBuffers((HttpClient.RcvdStream as TFileStream).Handle);
-
-    (HttpClient.RcvdStream as TFileStream).Free;
-    HttpClient.RcvdStream := nil;
-
-    Close;
-  end
-  else
-    Close;
+  Close;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
