@@ -149,6 +149,7 @@ object frmTable: TfrmTable
     Properties.ImmediatePost = True
     Properties.SpinButtons.Visible = False
     Properties.UseDisplayFormatWhenEditing = True
+    Properties.UseLeftAlignmentOnEditing = False
     Properties.ValueType = vtFloat
     Properties.OnChange = seRaiseAmountPropertiesChange
     Style.BorderStyle = ebsNone

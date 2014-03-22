@@ -96,6 +96,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acResendVerificationMailExecute(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
   private
     FSelectedClub : Integer;
     FSelectedGame : TBytes;
@@ -192,6 +193,11 @@ begin
   btJoinClub.Font.Assign(btHomeGames.Font);
 
   EnableWindow(Handle, TRUE);
+end;
+
+procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
+begin
+  LoadImageFromResource(imgCashier, 'CashierNormal');
 end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);

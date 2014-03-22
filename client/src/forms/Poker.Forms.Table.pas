@@ -236,6 +236,7 @@ type
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 
     procedure ConfigureGUI;
+    procedure DefocusControls;
 
     procedure AnimationCallback(const AAnimationPointer: pointer);
 
@@ -362,6 +363,8 @@ var
   C1      : Integer;
 begin
   renderit := FALSE;
+
+  DefocusControls;
 
   if Button = mbLeft then
   begin
@@ -588,8 +591,7 @@ end;
 
 procedure TfrmTable.FormActivate(Sender: TObject);
 begin
-  DefocusControl(edChat, FALSE);
-  DefocusControl(seRaiseAmount, FALSE);
+  DefocusControls;
 end;
 
 procedure TfrmTable.FormClick(Sender: TObject);
@@ -602,11 +604,7 @@ var
 begin
   client_cursor_pos := ScreenToClient(Mouse.CursorPos);
 
-  if edChat.Focused then
-    DefocusControl(edChat, FALSE);
-
-  if seRaiseAmount.Focused then
-    DefocusControl(seRaiseAmount, FALSE);
+  DefocusControls;
 
   for C1 := 0 to FTable.Game.Seats - 1 do
   begin
@@ -649,7 +647,7 @@ begin
     Height := hround;
 
   rvChat.Height := ClientHeight div 7;
-  rvChat.Width := ClientWidth div 3;
+  rvChat.Width := Round(ClientWidth / 3.15);
   rvChat.Top := ClientHeight - FLowerIntfBorder - rvChat.Height;
   rvChat.Left := FLowerIntfBorder;
 
@@ -1414,6 +1412,15 @@ begin
   Render;
 end;
 
+procedure TfrmTable.DefocusControls;
+begin
+  if edChat.Focused then
+    DefocusControl(edChat, FALSE);
+
+  if seRaiseAmount.Focused then
+    DefocusControl(seRaiseAmount, FALSE);
+end;
+
 procedure TfrmTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 var
   event       : String;
@@ -1849,11 +1856,11 @@ begin
   FPlayNowButton.Point.x := rvChat.Left + rvChat.Width + (ClientWidth - (rvChat.Left + rvChat.Width)) / 2 - FPlayNowButtonWidth / 2;
   FPlayNowButton.Point.y := rvChat.Top + (ClientHeight - rvChat.Top) / 2.5 - FPlayNowButtonHeight / 2;
 
-  if seRaiseAmount.Height < 20 then
+  if seRaiseAmount.Height < 19 then
     seRaiseAmount.Style.Font.Size := 7
   else
-    if seRaiseAmount.Height < 24 then
-      seRaiseAmount.Style.Font.Size := 8
+    if seRaiseAmount.Height < 22 then
+      seRaiseAmount.Style.Font.Size := 9
     else
       seRaiseAmount.Style.Font.Size := 10
 end;

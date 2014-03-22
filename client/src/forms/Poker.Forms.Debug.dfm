@@ -98,35 +98,35 @@ object frmDebug: TfrmDebug
         ParentFont = False
       end
       object lbsThreads: TcxLabel
-        Left = 544
+        Left = 538
         Top = 4
         Anchors = [akTop, akRight]
         Caption = 'Threads:'
         Transparent = True
       end
       object lbsMemoryUsage: TcxLabel
-        Left = 544
+        Left = 538
         Top = 20
         Anchors = [akTop, akRight]
         Caption = 'Memory usage:'
         Transparent = True
       end
       object lbsSocketState: TcxLabel
-        Left = 544
+        Left = 538
         Top = 52
         Anchors = [akTop, akRight]
         Caption = 'Socket state:'
         Transparent = True
       end
       object lbsCalbackSets: TcxLabel
-        Left = 544
+        Left = 538
         Top = 36
         Anchors = [akTop, akRight]
         Caption = 'Callback sets:'
         Transparent = True
       end
       object lbvThreads: TcxLabel
-        Left = 624
+        Left = 618
         Top = 4
         Anchors = [akTop, akRight]
         Caption = '00'
@@ -134,15 +134,15 @@ object frmDebug: TfrmDebug
         Transparent = True
       end
       object lbvMemoryUsage: TcxLabel
-        Left = 624
+        Left = 618
         Top = 20
         Anchors = [akTop, akRight]
-        Caption = '00000kb'
+        Caption = '000000kb'
         Style.TextStyle = [fsBold]
         Transparent = True
       end
       object lbvCallbackSets: TcxLabel
-        Left = 624
+        Left = 618
         Top = 36
         Anchors = [akTop, akRight]
         Caption = '0'
@@ -150,7 +150,7 @@ object frmDebug: TfrmDebug
         Transparent = True
       end
       object lbvSocketState: TcxLabel
-        Left = 624
+        Left = 618
         Top = 52
         Anchors = [akTop, akRight]
         Caption = '0'

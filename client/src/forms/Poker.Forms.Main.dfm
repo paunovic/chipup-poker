@@ -20,6 +20,7 @@ object frmChipUpMain: TfrmChipUpMain
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnDeactivate = FormDeactivate
   DesignSize = (
     860
     574)
