@@ -18,14 +18,19 @@ function finish(version) {
 		'Content-Type: application/octed-stream\r\n'+
 		'Content-Disposition: form-data; name="installer"; filename="install_chipuppoker.exe"\r\n'+
 		'Content-Transfer-Encoding: binary\r\n\r\n';
+	var middle = '--'+key+'\r\n'+
+		'Content-Type: application/octed-stream\r\n'+
+		'Content-Disposition: form-data; name="client"; filename="client.exe"\r\n'+
+		'Content-Transfer-Encoding: binary\r\n\r\n';
 	var footer = '\r\n--'+key+'--';
 
-	var textsize = header.length + footer.length;
-	var filesize = fs.statSync('../client/installer/install_chipuppoker.exe').size;
+	var textsize = header.length + middle.length + footer.length;
+	var filesize1 = fs.statSync('../client/installer/install_chipuppoker.exe').size;
+	var filesize2 = fs.statSync('../client/src/client.exe').size;
 
 	var request = http.request({host:'chipuppoker.com',method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
 		'&debug='+process.argv[2],
-		headers:{'Content-Length':textsize+filesize}
+		headers:{'Content-Length':textsize+filesize1+filesize2}
 	},function (res) {
 		console.log('done?');
 		res.on('data',function (chunk) {
@@ -38,8 +43,13 @@ function finish(version) {
 	console.log('making stream');
 	fs.createReadStream('../client/installer/install_chipuppoker.exe',{bufferSize: 4*1024})
 		.on('end',function () {
-			console.log('ending');
-			request.end(footer);
+			request.write(middle);
+			fs.createReadStream('../client/src/client.exe',{bufferSize: 4*1024})
+				.on('end',function () {
+					console.log('ending');
+					request.end(footer);
+				})
+				.pipe(request,{end:false});
 		})
 		.pipe(request,{end:false});
 }
