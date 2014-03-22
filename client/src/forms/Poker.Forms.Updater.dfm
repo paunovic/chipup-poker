@@ -243,7 +243,7 @@ object frmUpdater: TfrmUpdater
     ProxyPort = '80'
     Agent = 'Mozilla/4.0 (compatible; ICS)'
     Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
-    NoCache = False
+    NoCache = True
     ContentTypePost = 'application/x-www-form-urlencoded'
     MultiThreaded = False
     RequestVer = '1.0'

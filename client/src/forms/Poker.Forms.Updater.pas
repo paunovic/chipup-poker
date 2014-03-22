@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLabel, cxProgressBar, dxGDIPlusClasses, cxImage, OverbyteIcsWndControl,
-  OverbyteIcsHttpProt, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ImgList, Vcl.Buttons;
+  OverbyteIcsHttpProt, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ImgList, Vcl.Buttons, Vcl.ExtCtrls;
 
 type
   TfrmUpdater = class(TForm)
@@ -76,6 +76,7 @@ begin
     HttpClient.Abort;
   end;
 
+
   FormsContainer.Remove(TfrmUpdater);
 
   {$IFDEF DEBUG}
@@ -100,6 +101,12 @@ begin
   pbProgress.Position := (HttpClient.RcvdCount / HttpClient.ContentLength) * 100;
   Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(pbProgress.Position)]);
   lbsCaption.Caption := Caption;
+
+  {$IFDEF DEBUG}
+  if (HttpClient.RcvdCount mod 1024 = 0) or
+     (HttpClient.RcvdCount = HttpClient.ContentLength) then
+    DebugLn(Format('Downloading %d/%d bytes...', [HttpClient.RcvdCount, HttpClient.ContentLength]), ditNetInc);
+  {$ENDIF}
 end;
 
 procedure TfrmUpdater.HttpClientDocEnd(Sender: TObject);
@@ -109,11 +116,15 @@ begin
     if HttpClient.ContentLength = HttpClient.RcvdStream.Size then
       dmMain.UpdaterFile := FUpdaterFile;
 
-    HttpClient.RcvdStream.Free;
-    HttpClient.RcvdStream := nil;
-  end;
+    FlushFileBuffers((HttpClient.RcvdStream as TFileStream).Handle);
 
-  Close;
+    (HttpClient.RcvdStream as TFileStream).Free;
+    HttpClient.RcvdStream := nil;
+
+    Close;
+  end
+  else
+    Close;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
