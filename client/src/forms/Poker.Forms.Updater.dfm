@@ -489,4 +489,10 @@ object frmUpdater: TfrmUpdater
           0000000000000000000000000000000000000000000000000000}
       end>
   end
+  object tiClose: TTimer
+    Enabled = False
+    OnTimer = tiCloseTimer
+    Left = 144
+    Top = 4
+  end
 end

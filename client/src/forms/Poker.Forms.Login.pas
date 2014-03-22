@@ -287,7 +287,8 @@ begin
   version := pbhello.LatestVersion;
   {$ENDIF}
 
-  if version <> Settings.Hardcoded.VERSION then
+  if (version <> Settings.Hardcoded.VERSION) and
+     (Settings.Hardcoded.REVISION <> 'manual') then
   begin
     CurrentStatus := lsUpdating;
     Close;

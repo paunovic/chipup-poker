@@ -17,6 +17,7 @@ type
     imgClose: TcxImage;
     ImageList: TcxImageList;
     imgMinimize: TcxImage;
+    tiClose: TTimer;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
@@ -25,6 +26,7 @@ type
     procedure imgCloseClick(Sender: TObject);
     procedure imgMinimizeClick(Sender: TObject);
     procedure HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
+    procedure tiCloseTimer(Sender: TObject);
   private
     FUpdaterFile: String;
     {$IFDEF DEBUG}
@@ -101,6 +103,11 @@ begin
   WindowState := wsMinimized;
 end;
 
+procedure TfrmUpdater.tiCloseTimer(Sender: TObject);
+begin
+  Close;
+end;
+
 procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
 var
   percint: Integer;
@@ -126,7 +133,7 @@ begin
      (Assigned(HttpClient.RcvdStream)) then
     dmMain.UpdaterFile := FUpdaterFile;
 
-  Close;
+  tiClose.Enabled := TRUE;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
