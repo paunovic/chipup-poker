@@ -43,6 +43,7 @@ uses
   Poker.Forms.ChangeAvatar in 'forms\Poker.Forms.ChangeAvatar.pas' {frmChangeAvatar},
   Poker.Forms.TableSit in 'forms\Poker.Forms.TableSit.pas' {frmTableSit},
   Poker.Forms.ClubLobby in 'forms\Poker.Forms.ClubLobby.pas' {frmClubLobby},
+  Poker.Forms.Updater in 'forms\Poker.Forms.Updater.pas' {frmUpdater},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -110,8 +111,7 @@ uses
   Poker.Protobufs.Objects.PingReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.PingReply.pas',
   Poker.Protobufs.Objects.Pot in 'modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas',
   Poker.Protobufs.Objects.TableBoolFlag in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas',
-  Poker.Protobufs.Objects.UserChangeParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas',
-  Poker.Forms.Updater in 'forms\Poker.Forms.Updater.pas' {frmUpdater};
+  Poker.Protobufs.Objects.UserChangeParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas';
 
 procedure FocusPokerApp;
 var

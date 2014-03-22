@@ -175,6 +175,9 @@
 			<DCCReference Include="forms\Poker.Forms.ClubLobby.pas">
 				<Form>frmClubLobby</Form>
 			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Updater.pas">
+				<Form>frmUpdater</Form>
+			</DCCReference>
 			<DCCReference Include="interfaces\Poker.Interfaces.FormParams.pas"/>
 			<DCCReference Include="interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.AsphyreImage.pas"/>
@@ -243,10 +246,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
-			<DCCReference Include="forms\Poker.Forms.Updater.pas">
-				<Form>frmUpdater</Form>
-				<FormType>dfm</FormType>
-			</DCCReference>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
