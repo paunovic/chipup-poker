@@ -27,6 +27,9 @@ type
     procedure HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
   private
     FUpdaterFile: String;
+    {$IFDEF DEBUG}
+    FLastPerc   : Integer;
+    {$ENDIF}
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
@@ -49,6 +52,7 @@ begin
   DeleteFile(FUpdaterFile);
 
   {$IFDEF DEBUG}
+  FLastPerc := -1;
   HttpClient.URL := Settings.Hardcoded.URL.LATEST_VERSION_DEBUG;
   {$ELSE}
   HttpClient.URL := Settings.Hardcoded.URL.LATEST_VERSION;
@@ -98,14 +102,21 @@ begin
 end;
 
 procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
+var
+  percint: Integer;
 begin
   pbProgress.Position := (HttpClient.RcvdCount / HttpClient.ContentLength) * 100;
-  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(pbProgress.Position)]);
+  percint := Trunc(pbProgress.Position);
+  Caption := Format('ChipUP Poker - Updating [%d%%]', [percint]);
   lbsCaption.Caption := Caption;
 
   {$IFDEF DEBUG}
-  if Trunc(pbProgress.Position) mod 10 = 0 then
+  if (percint mod 10 = 0) and
+     (percint <> FLastPerc) then
+  begin
     DebugLn(Format('Downloading %d/%d bytes [%d%%]...', [HttpClient.RcvdCount, HttpClient.ContentLength, Trunc(pbProgress.Position)]), ditNetInc);
+    FLastPerc := percint;
+  end;
   {$ENDIF}
 end;
 
