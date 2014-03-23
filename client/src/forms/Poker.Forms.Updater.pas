@@ -17,7 +17,6 @@ type
     imgClose: TcxImage;
     ImageList: TcxImageList;
     imgMinimize: TcxImage;
-    tiClose: TTimer;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
@@ -26,12 +25,15 @@ type
     procedure imgCloseClick(Sender: TObject);
     procedure imgMinimizeClick(Sender: TObject);
     procedure HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
-    procedure tiCloseTimer(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
-    FUpdaterFile: String;
+    FUpdaterFile  : String;
+    FQuitMsgPosted: Boolean;
     {$IFDEF DEBUG}
-    FLastPerc   : Integer;
+    FLastPerc     : Integer;
     {$ENDIF}
+
+    procedure PostQuitMessage;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
@@ -64,6 +66,12 @@ begin
   HttpClient.GetASync;
 end;
 
+procedure TfrmUpdater.FormDestroy(Sender: TObject);
+begin
+  FormsContainer.Remove(self);
+  PostQuitMessage;
+end;
+
 procedure TfrmUpdater.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
@@ -71,27 +79,21 @@ begin
 end;
 
 procedure TfrmUpdater.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+  obj: TObject;
 begin
-  Action := caFree;
-
   if Assigned(HttpClient.RcvdStream) then
   begin
-    FlushFileBuffers((HttpClient.RcvdStream as TFileStream).Handle);
-    (HttpClient.RcvdStream as TFileStream).Free;
+    obj := HttpClient.RcvdStream;
     HttpClient.RcvdStream := nil;
+    (obj as TFileStream).Free;
 
     HttpClient.OnDocData := nil;
     HttpClient.OnRequestDone := nil;
     HttpClient.Abort;
   end;
 
-  FormsContainer.Remove(TfrmUpdater);
-
-  {$IFDEF DEBUG}
-  TfrmDebug.Deinitialize;
-  {$ENDIF}
-
-  frmChipUpMain.Close;
+  Action := caFree;
 end;
 
 procedure TfrmUpdater.imgCloseClick(Sender: TObject);
@@ -104,9 +106,13 @@ begin
   WindowState := wsMinimized;
 end;
 
-procedure TfrmUpdater.tiCloseTimer(Sender: TObject);
+procedure TfrmUpdater.PostQuitMessage;
 begin
-  Close;
+  if not FQuitMsgPosted then
+  begin
+    PostMessage(frmChipUpMain.Handle, WM_QUIT, 0, 0);
+    FQuitMsgPosted := TRUE;
+  end;
 end;
 
 procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
@@ -134,7 +140,7 @@ begin
      (Assigned(HttpClient.RcvdStream)) then
     dmMain.UpdaterFile := FUpdaterFile;
 
-  tiClose.Enabled := TRUE;
+  Close;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);

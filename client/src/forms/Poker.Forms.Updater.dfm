@@ -16,6 +16,7 @@ object frmUpdater: TfrmUpdater
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnMouseDown = FormMouseDown
   OnMouseMove = FormMouseMove
   DesignSize = (
@@ -488,12 +489,5 @@ object frmUpdater: TfrmUpdater
           0000000000000000000000000000000000000000000000000000000000000000
           0000000000000000000000000000000000000000000000000000}
       end>
-  end
-  object tiClose: TTimer
-    Enabled = False
-    Interval = 100
-    OnTimer = tiCloseTimer
-    Left = 144
-    Top = 4
   end
 end

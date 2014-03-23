@@ -263,6 +263,20 @@ var
 begin
   pbhello := AObject as TPB_HelloReply;
 
+  {$IFDEF DEBUG}
+  version := pbhello.LatestDebugVersion;
+  {$ELSE}
+  version := pbhello.LatestVersion;
+  {$ENDIF}
+
+  if (version <> Settings.Hardcoded.VERSION) and
+     (Settings.Hardcoded.REVISION <> 'manual') then
+  begin
+    CurrentStatus := lsUpdating;
+    Close;
+    Exit;
+  end;
+
   ServerSettings.ParseHelloMessage(pbhello);
 
   if ServerSettings.StringLengths.EMail > ServerSettings.StringLengths.Username then
@@ -280,19 +294,6 @@ begin
   end
   else
     ServerSocket.Disconnect;
-
-  {$IFDEF DEBUG}
-  version := pbhello.LatestDebugVersion;
-  {$ELSE}
-  version := pbhello.LatestVersion;
-  {$ENDIF}
-
-  if (version <> Settings.Hardcoded.VERSION) and
-     (Settings.Hardcoded.REVISION <> 'manual') then
-  begin
-    CurrentStatus := lsUpdating;
-    Close;
-  end;
 end;
 
 procedure TfrmLogin.CSRLogin(const AMethodId: Integer; const AObject: TObject);

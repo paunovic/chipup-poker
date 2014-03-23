@@ -109,7 +109,7 @@ begin
   while FItems.Count > 0 do
   begin
     FItems[0].Close;
-    FItems[0].Free;
+    FItems.Delete(0);
   end;
 end;
 

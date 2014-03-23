@@ -133,7 +133,6 @@ type
 
     function GetSelectedGame(var AGame: TGameInfo): Boolean;
     function GetSelectedClub(var AClub: TClubInfo): Boolean;
-
   protected
     procedure DoCreate; override;
 
