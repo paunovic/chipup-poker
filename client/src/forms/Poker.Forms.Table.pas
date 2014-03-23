@@ -1442,12 +1442,18 @@ var
   chips_val   : Single;
   chips_plural: String;
   cc          : Integer;
+  flop        : TBytes;
 begin
   seat_caption := '';
   case ATableEvent.Event of
     teExistingCards: begin
       if Length(ATableEvent.Cards) >= 3 then
-        FTableStatus.FlopCards.Assign(ATableEvent.Cards);
+      begin
+        SetLength(flop, 3);
+        for C1 := 0 to 2 do
+          flop[C1] := ATableEvent.Cards[C1];
+        FTableStatus.FlopCards.Assign(flop);
+      end;
       if Length(ATableEvent.Cards) >= 4 then
         FTableStatus.TurnCard.Assign(ATableEvent.Cards[3]);
       if Length(ATableEvent.Cards) >= 5 then
