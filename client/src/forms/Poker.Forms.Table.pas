@@ -1462,7 +1462,10 @@ begin
 
     teSit: event := 'SIT';
 
-    teStandUp: event := 'STAND UP';
+    teStandUp: begin
+      // fixme: animate bet > pot here
+      event := 'STAND UP';
+    end;
 
     tePostRiver: begin
       event := 'POST RIVER';
@@ -2413,7 +2416,7 @@ begin
           if animation.TagSingle = 1 then
           begin
             animation.TagSingle := 0;
-            Sounds.Play(Sounds.SOUND_PUTCHIPS_SMALL);
+            TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
           end;
         end;
       end;
