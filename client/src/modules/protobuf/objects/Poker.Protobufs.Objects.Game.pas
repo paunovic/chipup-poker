@@ -34,8 +34,8 @@ type
       FClubseq: Integer;
       FGameType: TGameType;
       FGameLimit: TGameLimit;
-      FSmallBlind: Integer;
-      FBigBlind: Integer;
+      FSmallBlind: UINT32;
+      FBigBlind: UINT32;
       FSeats: Integer;
       FSitting: Integer;
       FBuyinMin: Integer;
@@ -47,8 +47,8 @@ type
     procedure SetClubseq(const AValue: Integer);
     procedure SetGameType(const AValue: TGameType);
     procedure SetGameLimit(const AValue: TGameLimit);
-    procedure SetSmallBlind(const AValue: Integer);
-    procedure SetBigBlind(const AValue: Integer);
+    procedure SetSmallBlind(const AValue: UINT32);
+    procedure SetBigBlind(const AValue: UINT32);
     procedure SetSeats(const AValue: Integer);
     procedure SetSitting(const AValue: Integer);
     procedure SetBuyinMin(const AValue: Integer);
@@ -63,8 +63,8 @@ type
     property Clubseq: Integer read FClubseq write SetClubseq;
     property GameType: TGameType read FGameType write SetGameType;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
-    property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
-    property BigBlind: Integer read FBigBlind write SetBigBlind;
+    property SmallBlind: UINT32 read FSmallBlind write SetSmallBlind;
+    property BigBlind: UINT32 read FBigBlind write SetBigBlind;
     property Seats: Integer read FSeats write SetSeats;
     property Sitting: Integer read FSitting write SetSitting;
     property BuyinMin: Integer read FBuyinMin write SetBuyinMin;
@@ -115,11 +115,11 @@ begin
       end;
       FN_SMALL_BLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSmallBlind := AProtobufReader.readInt32;
+        FSmallBlind := AProtobufReader.readUInt32;
       end;
       FN_BIG_BLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FBigBlind := AProtobufReader.readInt32;
+        FBigBlind := AProtobufReader.readUInt32;
       end;
       FN_SEATS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -178,16 +178,16 @@ begin
   ProtobufOutput.writeInt32(FN_GAME_LIMIT, Integer(AValue));
 end;
 
-procedure TPB_Game.SetSmallBlind(const AValue: Integer);
+procedure TPB_Game.SetSmallBlind(const AValue: UINT32);
 begin
   FSmallBlind := AValue;
-  ProtobufOutput.writeInt32(FN_SMALL_BLIND, AValue);
+  ProtobufOutput.writeUInt32(FN_SMALL_BLIND, AValue);
 end;
 
-procedure TPB_Game.SetBigBlind(const AValue: Integer);
+procedure TPB_Game.SetBigBlind(const AValue: UINT32);
 begin
   FBigBlind := AValue;
-  ProtobufOutput.writeInt32(FN_BIG_BLIND, AValue);
+  ProtobufOutput.writeUInt32(FN_BIG_BLIND, AValue);
 end;
 
 procedure TPB_Game.SetSeats(const AValue: Integer);

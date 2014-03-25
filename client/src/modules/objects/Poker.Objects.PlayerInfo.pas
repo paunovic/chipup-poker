@@ -13,7 +13,7 @@ type
     FNick    : String;
     FEMail   : String;
     FPassword: String;
-    FBalance : Integer;
+    FBalance : UINT32;
     FAuthed  : Boolean;
     FAvatarId: TBytes;
     FClubs   : TClubsInfo;
@@ -30,7 +30,7 @@ type
     property Nick    : String read FNick write FNick;
     property Password: String read FPassword write FPassword;
     property EMail   : String read FEMail write FEMail;
-    property Balance : Integer read FBalance write FBalance;
+    property Balance : UINT32 read FBalance write FBalance;
     property Authed  : Boolean read FAuthed write FAuthed;
     property AvatarId: TBytes read FAvatarId write FAvatarId;
     property Clubs   : TClubsInfo read FClubs;
@@ -38,7 +38,7 @@ type
 
   TPlayerInfos = class(TObjectList<TPlayerInfo>)
   public
-    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer; const AAvatarId: TBytes): TPlayerInfo; overload;
+    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: UINT32; const AAvatarId: TBytes): TPlayerInfo; overload;
     function AddPlayer(const AUser: TPB_User): TPlayerInfo; overload;
     function FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
     procedure LoadFromUsersProtobuf(const AUsers: TPB_Users);
@@ -100,7 +100,7 @@ end;
 
 { TPlayerInfos }
 
-function TPlayerInfos.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: Integer; const AAvatarId: TBytes): TPlayerInfo;
+function TPlayerInfos.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: UINT32; const AAvatarId: TBytes): TPlayerInfo;
 var
   player: TPlayerInfo;
 begin

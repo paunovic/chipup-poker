@@ -9,7 +9,7 @@ uses
   cxGridCustomTableView, cxGridTableView, cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons,
   OverbyteIcsWSocket, Poker.Objects.ClubInfo, cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo,
   cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ActnMan, Vcl.ActnMenus, Vcl.PlatformDefaultStyleActnCtrls,
-  dxGDIPlusClasses, dxsChipUpDarkTabs, dxsChipUpRedButton, cxStyles, cxFilter, cxData;
+  dxGDIPlusClasses, dxsChipUpDarkTabs, dxsChipUpRedButton, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -126,6 +126,7 @@ type
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 
     function ConfirmToCloseTables: Boolean;
+    function ProcessClubObject(const AClub: TPB_Club): TClubInfo;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
@@ -153,7 +154,7 @@ uses
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
   Poker.Forms.PublicClubsList, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus,
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Forms.Debug;
 
@@ -578,46 +579,72 @@ begin
   end;
 end;
 
-procedure TfrmChipUpMain.CSRClubCommand(const AMethodId: Integer; const AObject: TObject);
+function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club): TClubInfo;
 var
-  pbreply    : TPB_ClubCommandReply;
   C1         : Integer;
   club       : TClubInfo;
   player     : TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
 begin
+  club := dmMain.SelfInfo.Clubs.AddClub(AClub);
+
+  SetLength(query_users, 0);
+  if not dmMain.Players.FindPlayerById(AClub.Owner, player) then
+  begin
+    SetLength(query_users, 1);
+    query_users[0] := AClub.Owner;
+  end;
+  for C1 := 0 to Length(AClub.Members) - 1 do
+    if not dmMain.Players.FindPlayerById(AClub.Members[C1], player) then
+    begin
+      SetLength(query_users, Length(query_users) + 1);
+      query_users[Length(query_users) - 1] := AClub.Members[C1];
+    end;
+  if Length(query_users) > 0 then
+  begin
+    SetLength(empty_array, 0);
+    for C1 := 0 to Length(query_users) - 1 do
+      dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
+
+    ServerSocket.GetUserInfos(query_users);
+  end;
+
+  if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
+  begin
+    dmMain.SelfInfo.Clubs.Remove(club);
+    club := nil;
+  end;
+
+  result := club;
+end;
+
+procedure TfrmChipUpMain.CSRClubCommand(const AMethodId: Integer; const AObject: TObject);
+var
+  pbreply: TPB_ClubCommandReply;
+  club   : TClubInfo;
+begin
   pbreply := AObject as TPB_ClubCommandReply;
 
   case pbreply.Status of
     csSuccess: begin
-      club := dmMain.SelfInfo.Clubs.AddClub(pbreply.Club);
-      club.Games.UpdateFromProtobufObjects(pbreply.Games);
-
-      SetLength(query_users, 0);
-      if not dmMain.Players.FindPlayerById(pbreply.Club.Owner, player) then
-      begin
-        SetLength(query_users, 1);
-        query_users[0] := pbreply.Club.Owner;
-      end;
-      for C1 := 0 to Length(pbreply.Club.Members) - 1 do
-        if not dmMain.Players.FindPlayerById(pbreply.Club.Members[C1], player) then
-        begin
-          SetLength(query_users, Length(query_users) + 1);
-          query_users[Length(query_users) - 1] := pbreply.Club.Members[C1];
-        end;
-      if Length(query_users) > 0 then
-      begin
-        SetLength(empty_array, 0);
-        for C1 := 0 to Length(query_users) - 1 do
-          dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
-
-        ServerSocket.GetUserInfos(query_users);
-      end;
-
-      ConfigureGUI;
+      club := ProcessClubObject(pbreply.Club);
+      if Assigned(club) then
+        club.Games.UpdateFromProtobufObjects(pbreply.Games);
+       ConfigureGUI;
     end;
   end;
+end;
+
+procedure TfrmChipUpMain.CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
+var
+  pbclub: TPB_Club;
+begin
+  pbclub := AObject as TPB_Club;
+
+  ProcessClubObject(pbclub);
+
+  ConfigureGUI;
 end;
 
 procedure TfrmChipUpMain.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
@@ -635,22 +662,29 @@ procedure TfrmChipUpMain.CSRETransferChipsOk(const AMethodId: Integer; const AOb
 var
   pbreply    : TPB_TransferChipsParams;
   player_info: TPlayerInfo;
-  multiplier : Integer;
 begin
   pbreply := AObject as TPB_TransferChipsParams;
 
   if AMethodId = Integer(seTransferChips) then
-    multiplier := 1
+  begin
+    dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount;
+
+    if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+      player_info.Balance := player_info.Balance + pbreply.ChipAmount;
+
+    if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+      player_info.Balance := player_info.Balance - pbreply.ChipAmount;
+  end
   else
-    multiplier := -1;
+  begin
+    dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
 
-  dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount * multiplier;
+    if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+      player_info.Balance := player_info.Balance - pbreply.ChipAmount;
 
-  if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
-    player_info.Balance := player_info.Balance + pbreply.ChipAmount * multiplier;
-
-  if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
-    player_info.Balance := player_info.Balance - pbreply.ChipAmount * multiplier;
+    if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+      player_info.Balance := player_info.Balance + pbreply.ChipAmount;
+  end;
 end;
 
 procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);
@@ -755,21 +789,6 @@ begin
   if (dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club)) and
      (club.Games.FindGame(pbgame.MongoId, game)) then
     club.Games.Remove(game);
-
-  ConfigureGUI;
-end;
-
-procedure TfrmChipUpMain.CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
-var
-  pbclub: TPB_Club;
-  club  : TClubInfo;
-begin
-  pbclub := AObject as TPB_Club;
-
-  club := dmMain.SelfInfo.Clubs.AddClub(pbclub);
-
-  if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
-    dmMain.SelfInfo.Clubs.Remove(club);
 
   ConfigureGUI;
 end;

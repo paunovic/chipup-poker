@@ -3,7 +3,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Change Avatar'
-  ClientHeight = 255
+  ClientHeight = 240
   ClientWidth = 226
   Color = clBlack
   Ctl3D = False
@@ -21,7 +21,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   OnKeyPress = FormKeyPress
   DesignSize = (
     226
-    255)
+    240)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsInfo: TcxLabel
@@ -32,9 +32,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     Margins.Right = 10
     Align = alTop
     AutoSize = False
-    Caption = 
-      'Maximum allowed size of avatar is 100kb. Maximum dimensions are ' +
-      '150x150px.'
+    Caption = 'Maximum allowed size of avatar is 1Mb.'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
@@ -47,13 +45,13 @@ object frmChangeAvatar: TfrmChangeAvatar
     Properties.Alignment.Vert = taVCenter
     Properties.WordWrap = True
     Transparent = True
-    Height = 43
+    Height = 32
     Width = 206
-    AnchorY = 25
+    AnchorY = 19
   end
   object btChange: TcxButton
     Left = 17
-    Top = 218
+    Top = 203
     Width = 93
     Height = 27
     Action = acChange
@@ -66,10 +64,11 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 218
   end
   object btCancel: TcxButton
     Left = 116
-    Top = 218
+    Top = 203
     Width = 93
     Height = 27
     Action = acClose
@@ -82,10 +81,11 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 218
   end
   object imgAvatar: TcxImage
     Left = 38
-    Top = 53
+    Top = 41
     Properties.PopupMenuLayout.MenuItems = []
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
@@ -109,5 +109,43 @@ object frmChangeAvatar: TfrmChangeAvatar
     Filter = 'Picture Files (*.jpg, *.png, *.bmp)|*.jpg;*.png;*.bmp'
     Left = 28
     Top = 124
+  end
+  object SslHttp: TSslHttpCli
+    LocalAddr = '0.0.0.0'
+    ProxyPort = '80'
+    Agent = 'Mozilla/4.0 (compatible; ICS)'
+    Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
+    Connection = 'Keep-Alive'
+    NoCache = False
+    ContentTypePost = 'application/x-www-form-urlencoded'
+    MultiThreaded = False
+    RequestVer = '1.1'
+    FollowRelocation = True
+    LocationChangeMaxCount = 5
+    ServerAuth = httpAuthNone
+    ProxyAuth = httpAuthNone
+    BandwidthLimit = 0
+    BandwidthSampling = 1000
+    Options = []
+    Timeout = 30
+    SocksAuthentication = socksNoAuthentication
+    SocketFamily = sfIPv4
+    SslContext = SslContext
+    Left = 60
+    Top = 40
+  end
+  object SslContext: TSslContext
+    SslVerifyPeer = False
+    SslVerifyDepth = 9
+    SslVerifyFlags = []
+    SslOptions = []
+    SslVerifyPeerModes = [SslVerifyMode_PEER]
+    SslSessionCacheModes = []
+    SslCipherList = 'ALL:!ADH:RC4+RSA:+SSLv2:@STRENGTH'
+    SslVersionMethod = sslV23
+    SslSessionTimeout = 0
+    SslSessionCacheSize = 20480
+    Left = 124
+    Top = 40
   end
 end

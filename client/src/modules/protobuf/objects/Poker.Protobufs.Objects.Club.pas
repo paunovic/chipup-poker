@@ -37,7 +37,7 @@ type
       FHasPassword: Boolean;
       FMemberCount: Integer;
       FSuspendedMembers: TArray<TBytes>;
-      FRake: Integer;
+      FRake: UINT32;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetChips(const AValue: UINT32);
@@ -50,7 +50,7 @@ type
     procedure SetHasPassword(const AValue: Boolean);
     procedure SetMemberCount(const AValue: Integer);
     procedure SetSuspendedMembers(const AValue: TArray<TBytes>);
-    procedure SetRake(const AValue: Integer);
+    procedure SetRake(const AValue: UINT32);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -66,7 +66,7 @@ type
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
     property MemberCount: Integer read FMemberCount write SetMemberCount;
     property SuspendedMembers: TArray<TBytes> read FSuspendedMembers write SetSuspendedMembers;
-    property Rake: Integer read FRake write SetRake;
+    property Rake: UINT32 read FRake write SetRake;
   end;
 
 implementation
@@ -135,7 +135,7 @@ begin
       end;
       FN_RAKE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FRake := AProtobufReader.readInt32;
+        FRake := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -214,10 +214,10 @@ begin
     ProtobufOutput.writeBytes(FN_SUSPENDED_MEMBERS, AValue[C1]);
 end;
 
-procedure TPB_Club.SetRake(const AValue: Integer);
+procedure TPB_Club.SetRake(const AValue: UINT32);
 begin
   FRake := AValue;
-  ProtobufOutput.writeInt32(FN_RAKE, AValue);
+  ProtobufOutput.writeUInt32(FN_RAKE, AValue);
 end;
 
 end.
