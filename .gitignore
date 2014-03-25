@@ -5,3 +5,4 @@ cpp-protobuf-generator/output
 *.local
 *.fbpInf
 *.identcache
+message.desc
