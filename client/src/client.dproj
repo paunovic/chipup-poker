@@ -162,9 +162,6 @@
 			<DCCReference Include="forms\Poker.Forms.Debug.pas">
 				<Form>frmDebug</Form>
 			</DCCReference>
-			<DCCReference Include="forms\Poker.Forms.PublicClubsList.pas">
-				<Form>frmPublicClubsList</Form>
-			</DCCReference>
 			<DCCReference Include="forms\Poker.Forms.ChangeAvatar.pas">
 				<Form>frmChangeAvatar</Form>
 			</DCCReference>

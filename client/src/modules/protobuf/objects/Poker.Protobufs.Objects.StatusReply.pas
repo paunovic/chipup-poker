@@ -16,12 +16,14 @@ type
       FN_USERS = 2;
       FN_SELF = 3;
       FN_GAMES = 4;
+      FN_PUBLIC_CLUBS = 5;
 
     var
       FClubs: TObjectList<TPB_Club>;
       FUsers: TObjectList<TPB_User>;
       FSelf: TPB_User;
       FGames: TObjectList<TPB_Game>;
+      FPublicClubs: TObjectList<TPB_Club>;
 
     procedure SetSelf(const AValue: TPB_User);
   public
@@ -32,6 +34,7 @@ type
     property Users: TObjectList<TPB_User> read FUsers write FUsers;
     property Self: TPB_User read FSelf write SetSelf;
     property Games: TObjectList<TPB_Game> read FGames write FGames;
+    property PublicClubs: TObjectList<TPB_Club> read FPublicClubs write FPublicClubs;
   end;
 
 implementation
@@ -49,6 +52,8 @@ begin
   if Assigned(FSelf) then FSelf.Free;
   if Assigned(FGames) then
     FGames.Free;
+  if Assigned(FPublicClubs) then
+    FPublicClubs.Free;
   inherited;
 end;
 procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -63,6 +68,9 @@ begin
 
   if not Assigned(FGames) then
     FGames := TObjectList<TPB_Game>.Create;
+
+  if not Assigned(FPublicClubs) then
+    FPublicClubs := TObjectList<TPB_Club>.Create;
 
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -85,6 +93,10 @@ begin
       FN_GAMES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
+      FN_PUBLIC_CLUBS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPublicClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);

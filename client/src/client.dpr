@@ -39,7 +39,6 @@ uses
   Poker.Forms.Table in 'forms\Poker.Forms.Table.pas' {frmTable},
   Poker.Forms.CreateEditGame in 'forms\Poker.Forms.CreateEditGame.pas' {frmCreateEditGame},
   Poker.Forms.Debug in 'forms\Poker.Forms.Debug.pas' {frmDebug},
-  Poker.Forms.PublicClubsList in 'forms\Poker.Forms.PublicClubsList.pas' {frmPublicClubsList},
   Poker.Forms.ChangeAvatar in 'forms\Poker.Forms.ChangeAvatar.pas' {frmChangeAvatar},
   Poker.Forms.TableSit in 'forms\Poker.Forms.TableSit.pas' {frmTableSit},
   Poker.Forms.ClubLobby in 'forms\Poker.Forms.ClubLobby.pas' {frmClubLobby},

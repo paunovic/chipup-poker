@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
-  dxSkinsForm;
+  dxSkinsForm, Poker.Objects.ClubInfo;
 
 type
   TdmMain = class(TDataModule)
@@ -19,6 +19,7 @@ type
     var
       FSelfInfo   : TPlayerInfo;
       FPlayers    : TPlayerInfos;
+      FPublicClubs: TClubsInfo;
       FUpdaterFile: String;
 
     procedure LoadFonts;
@@ -32,6 +33,7 @@ type
     procedure OpenTOSLink;
 
     property SelfInfo   : TPlayerInfo read FSelfInfo;
+    property PublicClubs: TClubsInfo read FPublicClubs;
     property Players    : TPlayerInfos read FPlayers;
     property UpdaterFile: String read FUpdaterFile write FUpdaterFile;
   end;
@@ -78,6 +80,7 @@ begin
   TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
   TSounds.Initialize;
 
+  FPublicClubs := TClubsInfo.Create;
   FSelfInfo := TPlayerInfo.Create;
   FPlayers := TPlayerInfos.Create;
 
@@ -90,6 +93,7 @@ begin
 
   FPlayers.Free;
   FSelfInfo.Free;
+  FPublicClubs.Free;
 
   if ServerSocket.IsConnected then
     ServerSocket.Disconnect;
@@ -125,9 +129,16 @@ begin
 end;
 
 procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
+var
+  C1: Integer;
 begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
   Avatars.AddAvatar(FSelfInfo.AvatarId);
+
+  FPublicClubs.Clear;
+  for C1 := 0 to AStatusProtobuf.PublicClubs.Count - 1 do
+    FPublicClubs.AddClub(AStatusProtobuf.PublicClubs[C1]);
+
   FPlayers.LoadFromUsersProtobuf(AStatusProtobuf.Users);
 end;
 
