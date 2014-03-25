@@ -100,6 +100,7 @@ message StatusReply {
 	repeated User users = 2;
 	required User self = 3;
 	repeated Game games = 4;
+	repeated Club public_clubs = 5;
 }
 
 message GetDeckReply {
