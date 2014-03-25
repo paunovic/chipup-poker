@@ -58,7 +58,7 @@ message Club {
 	optional bool has_password = 10;
 	optional int32 member_count = 11;
 	repeated bytes suspended_members = 12;
-	optional int32 rake = 13;
+	optional uint32 rake = 13;
 }
 
 message User {
@@ -87,8 +87,8 @@ message Game {
 	optional int32 clubseq = 4;
 	optional GameType game_type = 5;
 	optional GameLimit game_limit = 6;
-	optional int32 small_blind = 7;
-	optional int32 big_blind = 8;
+	optional uint32 small_blind = 7;
+	optional uint32 big_blind = 8;
 	optional int32 seats = 9;
 	optional int32 sitting = 10;
 	optional int32 buyin_min = 11;
@@ -122,7 +122,7 @@ message GiveClubOwnershipParams {
 
 message TransferChipsParams {
 	required bytes player_mongo_id = 2;
-	required int32 chip_amount = 3;
+	required uint32 chip_amount = 3;
 }
 
 message ChangeEMailParams {
@@ -298,8 +298,8 @@ message TableStatus {
 	optional int32 seq = 12;
 	optional uint32 minimum_bet = 13;
 	optional uint32 maximum_limit = 14;
-	optional int32 small_blind = 15;
-	optional int32 big_blind = 16;
+	optional uint32 small_blind = 15;
+	optional uint32 big_blind = 16;
 	optional uint32 handid = 17;
 	optional uint64 time = 18;
 	repeated TableEvent events = 19;
