@@ -12,12 +12,12 @@ type
     FClubId    : Int64;
     FCreatorId : TBytes;
     FName      : String;
-    FSmallBlind: Integer;
-    FBigBlind  : Integer;
+    FSmallBlind: UINT32;
+    FBigBlind  : UINT32;
     FGameType  : TGameType;
     FGameLimit : TGameLimit;
-    FMinBuyin  : Integer;
-    FMaxBuyin  : Integer;
+    FMinBuyin  : UINT32;
+    FMaxBuyin  : UINT32;
     FSeats     : Integer;
     FSitting   : Integer;
 
@@ -34,14 +34,14 @@ type
     property ClubId         : Int64 read FClubId write FClubId;
     property CreatorId      : TBytes read FCreatorId write FCreatorId;
     property Name           : String read FName write FName;
-    property SmallBlind     : Integer read FSmallBlind write FSmallBlind;
-    property BigBlind       : Integer read FBigBlind write FBigBlind;
+    property SmallBlind     : UINT32 read FSmallBlind write FSmallBlind;
+    property BigBlind       : UINT32 read FBigBlind write FBigBlind;
     property GameType       : TGameType read FGameType write FGameType;
     property GameTypeStr    : String read GetGameTypeStr;
     property GameTypeStrFull: String read GetGameTypeStrFull;
     property Limit          : TGameLimit read FGameLimit write FGameLimit;
-    property MinBuyin       : Integer read FMinBuyin write FMinBuyin;
-    property MaxBuyin       : Integer read FMaxBuyin write FMaxBuyin;
+    property MinBuyin       : UINT32 read FMinBuyin write FMinBuyin;
+    property MaxBuyin       : UINT32 read FMaxBuyin write FMaxBuyin;
     property Seats          : Integer read FSeats write FSeats;
     property Sitting        : Integer read FSitting write FSitting;
   end;

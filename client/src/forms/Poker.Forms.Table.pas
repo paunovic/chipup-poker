@@ -1088,7 +1088,8 @@ var
   seat_info: TSeatInfo;
   sitout   : Boolean;
   foldtoany: Boolean;
-  seat_bet : Integer;
+  seat_bet : UINT32
+  ;
   event    : TNotifyEvent;
   C1       : Integer;
   nofocus  : Boolean;
@@ -1675,7 +1676,7 @@ end;
 procedure TfrmTable.acCallExecute(Sender: TObject);
 var
   seat_info  : TSeatInfo;
-  seat_bet   : Integer;
+  seat_bet   : UINT32;
   call_amount: Integer;
 begin
   Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
@@ -1740,10 +1741,14 @@ procedure TfrmTable.acRaisePotExecute(Sender: TObject);
 var
   C1         : Integer;
   raise_value: UINT32;
+  seat_bet   : UINT32;
 begin
-  raise_value := 0;
-  for C1 := 0 to FTableStatus.Pots.Count - 1 do
-    raise_value := raise_value + FTableStatus.Pots[C1].Value;
+  seat_bet := FTableStatus.GetBet(FTable.SeatIndex);
+
+  raise_value := FTableStatus.MinimumBet - seat_bet;
+  for C1 := Low(FTableStatus.Bets) to High(FTableStatus.Bets) do
+    raise_value := raise_value + FTableStatus.Bets[C1];
+  raise_value := raise_value + FTableStatus.MinimumBet;
 
   SetRaiseSliderValue(raise_value);
 end;
@@ -2753,6 +2758,7 @@ begin
     end;
   end;
 end;
+
 
 
 

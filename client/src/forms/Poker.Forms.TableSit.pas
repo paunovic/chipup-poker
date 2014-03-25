@@ -187,7 +187,7 @@ begin
     if not FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
       err := 'Invalid seat index'
     else
-      if seBuyin.Value * 100 > FTable.Game.MaxBuyin * FTable.Game.BigBlind - seat_info.Chips  then
+      if seBuyin.Value * 100 > FTable.Game.MaxBuyin * FTable.Game.BigBlind - seat_info.Chips then
         err := Format('Maximum buy-in for this table is %d', [(FTable.Game.MaxBuyin * FTable.Game.BigBlind) div 100]);
 
     if err = '' then
