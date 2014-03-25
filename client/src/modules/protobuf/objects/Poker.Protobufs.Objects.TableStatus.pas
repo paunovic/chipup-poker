@@ -41,8 +41,8 @@ type
       FSeq: Integer;
       FMinimumBet: UINT32;
       FMaximumLimit: UINT32;
-      FSmallBlind: Integer;
-      FBigBlind: Integer;
+      FSmallBlind: UINT32;
+      FBigBlind: UINT32;
       FHandid: UINT32;
       FTime: UInt64;
       FEvents: TObjectList<TPB_TableEvent>;
@@ -57,8 +57,8 @@ type
     procedure SetSeq(const AValue: Integer);
     procedure SetMinimumBet(const AValue: UINT32);
     procedure SetMaximumLimit(const AValue: UINT32);
-    procedure SetSmallBlind(const AValue: Integer);
-    procedure SetBigBlind(const AValue: Integer);
+    procedure SetSmallBlind(const AValue: UINT32);
+    procedure SetBigBlind(const AValue: UINT32);
     procedure SetHandid(const AValue: UINT32);
     procedure SetTime(const AValue: UInt64);
   public
@@ -75,8 +75,8 @@ type
     property Seq: Integer read FSeq write SetSeq;
     property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
     property MaximumLimit: UINT32 read FMaximumLimit write SetMaximumLimit;
-    property SmallBlind: Integer read FSmallBlind write SetSmallBlind;
-    property BigBlind: Integer read FBigBlind write SetBigBlind;
+    property SmallBlind: UINT32 read FSmallBlind write SetSmallBlind;
+    property BigBlind: UINT32 read FBigBlind write SetBigBlind;
     property Handid: UINT32 read FHandid write SetHandid;
     property Time: UInt64 read FTime write SetTime;
     property Events: TObjectList<TPB_TableEvent> read FEvents write FEvents;
@@ -159,11 +159,11 @@ begin
       end;
       FN_SMALL_BLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSmallBlind := AProtobufReader.readInt32;
+        FSmallBlind := AProtobufReader.readUInt32;
       end;
       FN_BIG_BLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FBigBlind := AProtobufReader.readInt32;
+        FBigBlind := AProtobufReader.readUInt32;
       end;
       FN_HANDID: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -243,16 +243,16 @@ begin
   ProtobufOutput.writeUInt32(FN_MAXIMUM_LIMIT, AValue);
 end;
 
-procedure TPB_TableStatus.SetSmallBlind(const AValue: Integer);
+procedure TPB_TableStatus.SetSmallBlind(const AValue: UINT32);
 begin
   FSmallBlind := AValue;
-  ProtobufOutput.writeInt32(FN_SMALL_BLIND, AValue);
+  ProtobufOutput.writeUInt32(FN_SMALL_BLIND, AValue);
 end;
 
-procedure TPB_TableStatus.SetBigBlind(const AValue: Integer);
+procedure TPB_TableStatus.SetBigBlind(const AValue: UINT32);
 begin
   FBigBlind := AValue;
-  ProtobufOutput.writeInt32(FN_BIG_BLIND, AValue);
+  ProtobufOutput.writeUInt32(FN_BIG_BLIND, AValue);
 end;
 
 procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
