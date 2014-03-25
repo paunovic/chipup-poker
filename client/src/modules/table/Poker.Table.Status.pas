@@ -12,7 +12,7 @@ type
   private
     FSeatIndex: Integer;
     FPlayerMongoId: TBytes;
-    FChips: Integer;
+    FChips: UINT32;
     FCardCount: Integer;
     FCards: TCards;
     FDealtCards: Integer;
@@ -33,7 +33,7 @@ type
 
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
-    property Chips: Integer read FChips;
+    property Chips: UINT32 read FChips;
     property CardCount: Integer read FCardCount;
     property Cards: TCards read FCards;
     property Status: TPlayerStatus read FStatus;
@@ -137,7 +137,7 @@ type
     FSmallBlindSeat: Integer;
     FBigBlindSeat  : Integer;
     FLocked        : Boolean;
-    FMinimumBet    : Integer;
+    FMinimumBet    : UINT32;
     FHandId        : UINT32;
     FMaximumBet    : UINT32;
     FPreviousPots  : TPotInfos;
@@ -149,7 +149,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function GetBet(const ASeatIndex: Integer): Integer;
+    function GetBet(const ASeatIndex: Integer): UINT32;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus); overload;
@@ -160,7 +160,7 @@ type
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TArray<UINT32> read FBets write FBets;
     property PreviousBets: TArray<UINT32> read FPreviousBets write FPreviousBets;
-    property MinimumBet: Integer read FMinimumBet;
+    property MinimumBet: UINT32 read FMinimumBet;
     property FlopCards: TCards read FFlopCards;
     property TurnCard: TCard read FTurnCard;
     property RiverCard: TCard read FRiverCard;
@@ -263,7 +263,7 @@ begin
   inherited;
 end;
 
-function TTableStatus.GetBet(const ASeatIndex: Integer): Integer;
+function TTableStatus.GetBet(const ASeatIndex: Integer): UINT32;
 begin
   if (ASeatIndex < Low(FBets)) or
      (ASeatIndex > High(FBets)) then
