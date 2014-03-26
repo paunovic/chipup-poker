@@ -203,6 +203,7 @@ enum ServerCodes {
     srReinstatePlayerOk = 50;
 	srTableAddonOk = 51;
 	srTableAddonOverLimit = 52;
+	srRetrieveHandHistoryData = 53;
 
     seChat = 200;
     seSecondaryLoginDetected = 201;
@@ -252,6 +253,7 @@ enum ServerCodes {
 	scResendVerificationMail = 534;
 	scShowLosingCards = 535;
 	seUserChange = 536;
+	scRetrieveHandHistoryData = 537;
 }
 
 service Server {
@@ -445,4 +447,16 @@ message HandHistory {
 	repeated PlayerHandHistory players = 4;
 	required bytes tablecards = 5;
 	required uint32 endtime = 6;
+}
+message RetrieveHandHistoryData {
+	required uint32 clubseq = 1;
+	required uint32 startid = 2;
+	required uint32 endid = 3;
+}
+message RetrieveHandHistoryReply {
+	message HistoryReference {
+		required bytes _id = 1;
+		required uint32 seq = 2;
+	}
+	repeated HistoryReference rows = 1;
 }
