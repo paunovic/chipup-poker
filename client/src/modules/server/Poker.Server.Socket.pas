@@ -74,7 +74,6 @@ type
     procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure DeleteGame(const AGameId: TBytes);
     procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
-    procedure ListPublicClubs;
     procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
     procedure LeaveTable(const AGameId: TBytes);
@@ -806,11 +805,6 @@ begin
   finally
     protobuf.Free;
   end;
-end;
-
-procedure TServerSocket.ListPublicClubs;
-begin
-  SendProtobuf(scListPublicClubs, nil);
 end;
 
 procedure TServerSocket.SendTableChatLine(const AGameId: TBytes; const ALine: String);

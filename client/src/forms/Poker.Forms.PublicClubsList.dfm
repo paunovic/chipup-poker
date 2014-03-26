@@ -17,7 +17,6 @@ object frmPublicClubsList: TfrmPublicClubsList
   Position = poOwnerFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
-  OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
   DesignSize = (
@@ -118,12 +117,10 @@ object frmPublicClubsList: TfrmPublicClubsList
     Top = 140
     object acRefresh: TAction
       Caption = 'Refresh List'
-      OnExecute = acRefreshExecute
     end
     object acJoinClub: TAction
       Caption = 'Join Club'
       Enabled = False
-      OnExecute = acJoinClubExecute
     end
   end
   object tiRefreshActionEnabler: TTimer

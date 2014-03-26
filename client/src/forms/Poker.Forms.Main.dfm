@@ -1,8 +1,8 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  ClientHeight = 574
-  ClientWidth = 860
+  ClientHeight = 679
+  ClientWidth = 993
   Color = clBlack
   Constraints.MinHeight = 600
   Constraints.MinWidth = 800
@@ -22,8 +22,8 @@ object frmChipUpMain: TfrmChipUpMain
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
   DesignSize = (
-    860
-    574)
+    993
+    679)
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
@@ -3542,7 +3542,7 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
   end
   object imgCashier: TcxImage
-    Left = 684
+    Left = 817
     Top = 9
     Anchors = [akTop, akRight]
     Properties.PopupMenuLayout.MenuItems = []
@@ -3560,32 +3560,35 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
     OnMouseDown = imgCashierMouseDown
     OnMouseUp = imgCashierMouseUp
+    ExplicitLeft = 684
     Height = 140
     Width = 140
   end
   object paMain: TPanel
     Left = 0
     Top = 140
-    Width = 860
-    Height = 434
+    Width = 993
+    Height = 539
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     Color = clBlack
     ParentBackground = False
     TabOrder = 2
+    ExplicitWidth = 860
     DesignSize = (
-      860
-      434)
+      993
+      539)
     object gridTournaments: TcxGrid
       Left = 6
       Top = 47
-      Width = 848
-      Height = 380
+      Width = 981
+      Height = 485
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 0
       Visible = False
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      ExplicitWidth = 848
       object gridTournamentsTable: TcxGridTableView
         OnCellDblClick = gridJoinedClubsTableCellDblClick
         OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
@@ -3643,11 +3646,10 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object btOpenClubLobby: TcxButton
       Left = 6
-      Top = 395
+      Top = 253
       Width = 281
       Height = 32
       Action = acOpenClubLobby
-      Anchors = [akLeft, akBottom]
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 1
@@ -3661,11 +3663,12 @@ object frmChipUpMain: TfrmChipUpMain
     object gridGames: TcxGrid
       Left = 290
       Top = 47
-      Width = 564
-      Height = 380
+      Width = 697
+      Height = 485
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 2
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      ExplicitWidth = 564
       object gridGamesTable: TcxGridTableView
         OnCellDblClick = gridGamesTableCellDblClick
         OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3746,8 +3749,7 @@ object frmChipUpMain: TfrmChipUpMain
       Left = 6
       Top = 47
       Width = 281
-      Height = 345
-      Anchors = [akLeft, akTop, akBottom]
+      Height = 203
       TabOrder = 3
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       object gridJoinedClubsTable: TcxGridTableView
@@ -3835,7 +3837,7 @@ object frmChipUpMain: TfrmChipUpMain
     object btPrijatnaPunina: TcxButton
       Left = 290
       Top = 12
-      Width = 271
+      Width = 405
       Height = 32
       Anchors = [akLeft, akTop, akRight]
       Enabled = False
@@ -3848,9 +3850,10 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
+      ExplicitWidth = 272
     end
     object btOpenTournamentLobby: TcxButton
-      Left = 564
+      Left = 697
       Top = 12
       Width = 290
       Height = 32
@@ -3866,9 +3869,10 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
+      ExplicitLeft = 564
     end
     object btCreateClub: TcxButton
-      Left = 564
+      Left = 697
       Top = 12
       Width = 144
       Height = 32
@@ -3883,9 +3887,10 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
+      ExplicitLeft = 564
     end
     object btJoinClub: TcxButton
-      Left = 711
+      Left = 844
       Top = 12
       Width = 143
       Height = 32
@@ -3900,6 +3905,96 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
+      ExplicitLeft = 711
+    end
+    object btJoinPublicClub: TcxButton
+      Left = 6
+      Top = 500
+      Width = 281
+      Height = 32
+      Action = acJoinSelectedPublicClub
+      Anchors = [akLeft, akBottom]
+      Caption = 'JOIN THIS CLUB'
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      TabOrder = 10
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object btPublicClubs: TcxButton
+      Left = 6
+      Top = 290
+      Width = 281
+      Height = 32
+      Action = acShowHomeGamesLayout
+      Caption = 'PUBLIC CLUBS'
+      Colors.PressedText = 15461355
+      LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+      SpeedButtonOptions.GroupIndex = 2
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.Down = True
+      TabOrder = 11
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = []
+      ParentFont = False
+    end
+  end
+  object gridClubs: TcxGrid
+    Left = 6
+    Top = 462
+    Width = 281
+    Height = 175
+    Anchors = [akLeft, akTop, akBottom]
+    TabOrder = 3
+    LookAndFeel.SkinName = 'ChipUpDarkStyle'
+    object gridClubsTable: TcxGridTableView
+      OnFocusedRecordChanged = gridClubsTableFocusedRecordChanged
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsCustomize.ColumnFiltering = False
+      OptionsCustomize.ColumnGrouping = False
+      OptionsCustomize.ColumnHidingOnGrouping = False
+      OptionsCustomize.ColumnMoving = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsView.NoDataToDisplayInfoText = ' '
+      OptionsView.ColumnAutoWidth = True
+      OptionsView.GroupByBox = False
+      object gridClubsId: TcxGridColumn
+        Caption = 'Club ID'
+        PropertiesClassName = 'TcxSpinEditProperties'
+        HeaderAlignmentHorz = taCenter
+        Width = 41
+      end
+      object gridClubsName: TcxGridColumn
+        Caption = 'Club name'
+        PropertiesClassName = 'TcxTextEditProperties'
+        HeaderAlignmentHorz = taCenter
+        Options.Editing = False
+        SortIndex = 0
+        SortOrder = soDescending
+        Width = 125
+      end
+      object gridClubsPlayers: TcxGridColumn
+        Caption = 'Players'
+        PropertiesClassName = 'TcxSpinEditProperties'
+        Properties.Alignment.Horz = taCenter
+        HeaderAlignmentHorz = taCenter
+        Width = 42
+      end
+    end
+    object gridClubsLevel: TcxGridLevel
+      GridView = gridClubsTable
     end
   end
   object ActionManager: TActionManager
@@ -3946,11 +4041,6 @@ object frmChipUpMain: TfrmChipUpMain
             Caption = '&Account'
           end
           item
-            Items = <
-              item
-                Action = acShowPublicClubsListForm
-                Caption = '&Search Public Clubs...'
-              end>
             Caption = '&Clubs'
           end>
       end
@@ -4004,11 +4094,6 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'CREATE CLUB'
       OnExecute = acShowCreateClubFormExecute
     end
-    object acShowPublicClubsListForm: TAction
-      Category = 'Clubs'
-      Caption = 'Search Public Clubs...'
-      OnExecute = acShowPublicClubsListFormExecute
-    end
     object acShowJoinClubForm: TAction
       Caption = 'JOIN CLUB'
       OnExecute = acShowJoinClubFormExecute
@@ -4039,6 +4124,11 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Resend Verification Mail'
       OnExecute = acResendVerificationMailExecute
     end
+    object acJoinSelectedPublicClub: TAction
+      Category = 'Clubs'
+      Caption = 'JOIN CLUB'
+      OnExecute = acJoinSelectedPublicClubExecute
+    end
   end
   object MainMenu: TMainMenu
     Left = 472
@@ -4067,11 +4157,11 @@ object frmChipUpMain: TfrmChipUpMain
         Action = acLogout
       end
     end
-    object Clubs1: TMenuItem
-      Caption = 'Clubs'
-      object SearchPublicClubs1: TMenuItem
-        Action = acShowPublicClubsListForm
-      end
-    end
+  end
+  object tiPublicClubRefresh: TTimer
+    Enabled = False
+    Interval = 30000
+    Left = 328
+    Top = 228
   end
 end

@@ -19,19 +19,16 @@ type
     acShowChangePasswordForm: TAction;
     acShowChangeAvatarForm: TAction;
     acShowCreateClubForm: TAction;
-    acShowPublicClubsListForm: TAction;
     acShowJoinClubForm: TAction;
     acShowGameTableForm: TAction;
     acOpenClubLobby: TAction;
     MainMenu: TMainMenu;
     Account1: TMenuItem;
-    Clubs1: TMenuItem;
     ChangeEmailAddress1: TMenuItem;
     ChangePassword1: TMenuItem;
     ChangeAvatar1: TMenuItem;
     N1: TMenuItem;
     Logout1: TMenuItem;
-    SearchPublicClubs1: TMenuItem;
     acShowTournamentLayout: TAction;
     acShowHomeGamesLayout: TAction;
     imgCashier: TcxImage;
@@ -73,6 +70,16 @@ type
     Resendverificationmail1: TMenuItem;
     N2: TMenuItem;
     acResendVerificationMail: TAction;
+    gridClubs: TcxGrid;
+    gridClubsTable: TcxGridTableView;
+    gridClubsId: TcxGridColumn;
+    gridClubsName: TcxGridColumn;
+    gridClubsPlayers: TcxGridColumn;
+    gridClubsLevel: TcxGridLevel;
+    btJoinPublicClub: TcxButton;
+    acJoinSelectedPublicClub: TAction;
+    tiPublicClubRefresh: TTimer;
+    btPublicClubs: TcxButton;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -87,7 +94,6 @@ type
     procedure acShowGameTableFormExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure acOpenClubLobbyExecute(Sender: TObject);
-    procedure acShowPublicClubsListFormExecute(Sender: TObject);
     procedure acShowHomeGamesLayoutExecute(Sender: TObject);
     procedure acShowTournamentLayoutExecute(Sender: TObject);
     procedure imgCashierMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -97,15 +103,19 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acResendVerificationMailExecute(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
+    procedure acJoinSelectedPublicClubExecute(Sender: TObject);
+    procedure gridClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
   private
-    FSelectedClub : Integer;
-    FSelectedGame : TBytes;
-    FCallbacksId  : Integer;
+    FSelectedClub: Integer;
+    FSelectedGame: TBytes;
+    FCallbacksId: Integer;
+    FSelectedPublicClubId: Integer;
 
     procedure ShowLoginForm;
 
     procedure DoLogout;
     procedure UpdateClublist;
+    procedure UpdatePublicClublist;
     procedure UpdateGamelist;
 
     procedure CSRLeaveClub(const AMethodId: Integer; const AObject: TObject);
@@ -124,6 +134,7 @@ type
     procedure CSREGameDelete(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRListClubs(const AMethodId: Integer; const AObject: TObject);
 
     function ConfirmToCloseTables: Boolean;
     function ProcessClubObject(const AClub: TPB_Club): TClubInfo;
@@ -153,8 +164,8 @@ uses
   {$IFDEF DEBUG} {$ENDIF}
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
-  Poker.Forms.PublicClubsList, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Forms.Debug;
 
@@ -186,6 +197,7 @@ begin
   btHomeGames.Font.Style := [];
   btHomeGames.Font.Size := 8;
 
+  btJoinClub.Font.Assign(btHomeGames.Font);
   btTournaments.Font.Assign(btHomeGames.Font);
   btOpenClubLobby.Font.Assign(btHomeGames.Font);
   btOpenTournamentLobby.Font.Assign(btHomeGames.Font);
@@ -214,6 +226,7 @@ begin
   dmMain.SelfInfo.Flush;
   dmMain.Players.Clear;
   Tables.ClearWithoutNotification;
+  tiPublicClubRefresh.Enabled := FALSE;
 end;
 
 procedure TfrmChipUpMain.ShowLoginForm;
@@ -245,6 +258,22 @@ var
   club: TClubInfo;
 begin
   result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
+end;
+
+procedure TfrmChipUpMain.acJoinSelectedPublicClubExecute(Sender: TObject);
+var
+  club: TClubInfo;
+begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
+  if dmMain.PublicClubs.FindClub(FSelectedPublicClubId, club) then
+  begin
+    if club.IsPrivate then
+      FormsContainer.RunForm(TfrmJoinClub, self, [@FSelectedPublicClubId], FALSE)
+    else
+      ServerSocket.JoinClub(FSelectedPublicClubId, '');
+  end;
 end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
@@ -340,14 +369,6 @@ begin
   FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
 end;
 
-procedure TfrmChipUpMain.acShowPublicClubsListFormExecute(Sender: TObject);
-begin
-  if not dmMain.CheckAuthed then
-    Exit;
-
-  FormsContainer.RunForm(TfrmPublicClubsList, self, [], FALSE);
-end;
-
 procedure TfrmChipUpMain.ConfigureGUI;
 var
   cpt: String;
@@ -363,6 +384,7 @@ begin
   acOpenClubLobby.Enabled := FSelectedClub <> -1;
   UpdateClublist;
   UpdateGamelist;
+  UpdatePublicClublist;
 end;
 
 function TfrmChipUpMain.ConfirmToCloseTables: Boolean;
@@ -434,9 +456,48 @@ begin
   end;
 end;
 
+procedure TfrmChipUpMain.UpdatePublicClublist;
+var
+  rcount: Integer;
+  club  : TClubInfo;
+  c     : TcxGridDataController;
+begin
+  c := gridClubsTable.DataController;
+
+  c.BeginFullUpdate;
+  try
+    rcount := 0;
+    c.SetRecordCount(0);
+
+    for club in dmMain.PublicClubs do
+    begin
+      Inc(rcount);
+      c.SetRecordCount(rcount);
+      c.SetValue(rcount - 1, gridClubsId.Index, club.Id);
+      c.SetValue(rcount - 1, gridClubsName.Index, club.Name);
+      c.SetValue(rcount - 1, gridClubsPlayers.Index, Length(club.Players));
+    end;
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
 procedure TfrmChipUpMain.gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acOpenClubLobby.Execute;
+end;
+
+procedure TfrmChipUpMain.gridClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+var
+  recIndex: Integer;
+begin
+  recIndex := gridClubsTable.DataController.GetFocusedRecordIndex;
+  if recIndex = -1 then
+    FSelectedPublicClubId := -1
+  else
+    FSelectedPublicClubId := gridClubsTable.DataController.GetValue(recIndex, gridClubsId.Index);
+
+  acJoinSelectedPublicClub.Enabled := FSelectedPublicClubId <> -1;
 end;
 
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -547,11 +608,14 @@ begin
                           TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
                           TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                           TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
-                          TServerMessageCallback.Create(seUserChange, CSEUserChange)
+                          TServerMessageCallback.Create(seUserChange, CSEUserChange),
+                          TServerMessageCallback.Create(srListClubs, CSRListClubs)
                       ]);
 
       FSelectedClub := -1;
+      FSelectedPublicClubId := -1;
       SetLength(FSelectedGame, 0);
+      tiPublicClubRefresh.Enabled := TRUE;
       ConfigureGUI;
       Show;
     end;
@@ -565,18 +629,20 @@ end;
 procedure TfrmChipUpMain.CSRLeaveClub(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_ClubCommandReply;
-  index  : Integer;
 begin
   pbreply := AObject as TPB_ClubCommandReply;
 
   case pbreply.Status of
     csSuccess: begin
-      index := dmMain.SelfInfo.Clubs.IndexOf(pbreply.Club.Seq);
-      if index <> -1 then
-        dmMain.SelfInfo.Clubs.Delete(index);
+      ProcessClubObject(pbreply.Club);
       ConfigureGUI;
     end;
   end;
+end;
+
+procedure TfrmChipUpMain.CSRListClubs(const AMethodId: Integer; const AObject: TObject);
+begin
+
 end;
 
 function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club): TClubInfo;
@@ -612,8 +678,22 @@ begin
 
   if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
   begin
-    dmMain.SelfInfo.Clubs.Remove(club);
-    club := nil;
+    if not club.IsPrivate then
+    begin
+      dmMain.PublicClubs.Add(club);
+      dmMain.SelfInfo.Clubs.Extract(club);
+    end
+    else
+    begin
+      dmMain.SelfInfo.Clubs.Remove(club);
+      club := nil;
+    end;
+  end
+  else
+  begin
+    C1 := dmMain.PublicClubs.IndexOf(club.Id);
+    if C1 <> -1 then
+      dmMain.PublicClubs.Delete(C1);
   end;
 
   result := club;
@@ -820,5 +900,6 @@ begin
 
   ConfigureGUI;
 end;
+
 
 end.
