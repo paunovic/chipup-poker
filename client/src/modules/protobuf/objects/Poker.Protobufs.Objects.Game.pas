@@ -44,7 +44,7 @@ type
       FBuyinMin: Integer;
       FBuyinMax: Integer;
       FState: TGameState;
-      FClosetime: UINT32;
+      FClosetime: UInt64;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetCreatorMongoId(const AValue: TBytes);
@@ -59,7 +59,7 @@ type
     procedure SetBuyinMin(const AValue: Integer);
     procedure SetBuyinMax(const AValue: Integer);
     procedure SetState(const AValue: TGameState);
-    procedure SetClosetime(const AValue: UINT32);
+    procedure SetClosetime(const AValue: UInt64);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -77,7 +77,7 @@ type
     property BuyinMin: Integer read FBuyinMin write SetBuyinMin;
     property BuyinMax: Integer read FBuyinMax write SetBuyinMax;
     property State: TGameState read FState write SetState;
-    property Closetime: UINT32 read FClosetime write SetClosetime;
+    property Closetime: UInt64 read FClosetime write SetClosetime;
   end;
 
 implementation
@@ -152,7 +152,7 @@ begin
       end;
       FN_CLOSETIME: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClosetime := AProtobufReader.readUInt32;
+        FClosetime := AProtobufReader.readInt64;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -237,10 +237,10 @@ begin
   ProtobufOutput.writeInt32(FN_STATE, Integer(AValue));
 end;
 
-procedure TPB_Game.SetClosetime(const AValue: UINT32);
+procedure TPB_Game.SetClosetime(const AValue: UInt64);
 begin
   FClosetime := AValue;
-  ProtobufOutput.writeUInt32(FN_CLOSETIME, AValue);
+  ProtobufOutput.WriteInt64(FN_CLOSETIME, AValue);
 end;
 
 end.

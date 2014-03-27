@@ -174,6 +174,9 @@
 			<DCCReference Include="forms\Poker.Forms.Updater.pas">
 				<Form>frmUpdater</Form>
 			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.CloseTable.pas">
+				<Form>frmCloseTable</Form>
+			</DCCReference>
 			<DCCReference Include="interfaces\Poker.Interfaces.FormParams.pas"/>
 			<DCCReference Include="interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.AsphyreImage.pas"/>
@@ -247,11 +250,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HistoryReference.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
-			<DCCReference Include="..\..\cpp-protobuf-generator\output\Poker.Protobufs.Objects.CloseGameData.pas"/>
-			<DCCReference Include="forms\Poker.Forms.CloseTable.pas">
-				<Form>frmCloseTable</Form>
-				<FormType>dfm</FormType>
-			</DCCReference>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
