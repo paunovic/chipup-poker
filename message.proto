@@ -100,6 +100,7 @@ message Game {
 	optional int32 buyin_min = 11;
 	optional int32 buyin_max = 12;
 	optional GameState state = 13;
+	optional uint32 closetime = 14;
 }
 
 message StatusReply {
