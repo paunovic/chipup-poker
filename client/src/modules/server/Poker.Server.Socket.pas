@@ -91,6 +91,7 @@ type
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
+    procedure RetrieveHandHistoryData(const AClubSeq, AStartHand, AEndHand: Int64);
 
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
@@ -110,7 +111,7 @@ uses
   Poker.Protobufs.Objects.ListClubsReply, Poker.Protobufs.Objects.TransferChipsParams, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.KickPlayerParams, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
   Poker.Protobufs.Objects.GiveClubOwnershipParams, Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams,
   Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
-  Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams;
+  Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.RetrieveHandHistoryData;
 
 var
   FConnectThreadId: DWORD;
@@ -1016,6 +1017,20 @@ begin
   end;
 end;
 
+procedure TServerSocket.RetrieveHandHistoryData(const AClubSeq, AStartHand, AEndHand: Int64);
+var
+  protobuf: TPB_RetrieveHandHistoryData;
+begin
+  protobuf := TPB_RetrieveHandHistoryData.Create;
+  try
+    protobuf.Clubseq := AClubSeq;
+    protobuf.Startid := AStartHand;
+    protobuf.Endid := AEndHand;
+    SendProtobuf(scRetrieveHandHistoryData, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
 
 
 end.

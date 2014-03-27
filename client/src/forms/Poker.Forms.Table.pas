@@ -14,7 +14,7 @@ uses
   Poker.DirectX.Animation, Vectors2, Vcl.ActnList, cxLabel, Poker.Table.Tables, cxTextEdit, dxsChipUpDark,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.ActnMan, dxsChipUpDarkTabs, dxsChipUpRedButton, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
   Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, Poker.ChipStackMaker, AsphyreTypes, cxCurrencyEdit, RVStyle,
-  RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls;
+  RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls, AsphyreFonts;
 
 type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
@@ -123,6 +123,8 @@ type
       FDealerHeight           : Single;
       FTimebarWidth           : Single;
       FTimebarHeight          : Single;
+      FSeatActionFrameWidth   : Single;
+      FSeatActionFrameHeight  : Single;
       FLowerIntfBorder        : Integer;
       FRaiseSliderWidth       : Single;
       FRaiseSliderHeight      : Single;
@@ -232,6 +234,8 @@ type
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 
+    procedure RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
+
     procedure TablePlaySound(const ASound: String);
 
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
@@ -259,7 +263,7 @@ uses
   cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, Poker.Server.MessageContainer, Poker.Server.Settings,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
-  Poker.DirectX.Core, AsphyreFonts, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
+  Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Avatars,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.PotInfo, RVTable, Poker.Sounds;
 
@@ -1464,7 +1468,7 @@ begin
     teFold: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'FOLD';
-      seat_caption := 'Fold';
+      seat_caption := 'FOLD';
     end;
 
     teSit: event := 'SIT';
@@ -1598,7 +1602,7 @@ begin
     teCheck: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'CHECK';
-      seat_caption := 'Check';
+      seat_caption := 'CHECK';
 
       TablePlaySound(Sounds.SOUND_CHECK);
     end;
@@ -1606,7 +1610,7 @@ begin
     teCall: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'CALL';
-      seat_caption := 'Call';
+      seat_caption := 'CALL';
 
       TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
     end;
@@ -1614,7 +1618,7 @@ begin
     teRaise: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'RAISE';
-      seat_caption := 'Raise';
+      seat_caption := 'RAISE';
 
       TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
     end;
@@ -1622,7 +1626,7 @@ begin
     teAllIn: begin
       tiActiveFrameBlink.Enabled := FALSE;
       event := 'ALL-IN';
-      seat_caption := 'All-In';
+      seat_caption := 'ALL-IN';
 
       TablePlaySound(Sounds.SOUND_ALLIN);
     end;
@@ -1816,8 +1820,12 @@ begin
   FChipHeight := FChipWidth / TableResources.ChipAspectRatio;
 
   // calculate timebar/timebank size
-  FTimebarWidth := TableResources.TimebarImage.Texture[0].Width * FTableResizeRatio;
+  FTimebarWidth := TableResources.TimebarImage.Texture[0].Width * FSeatResizeRatio;
   FTimebarHeight := FTimebarWidth / TableResources.TimebarAspectRatio;
+
+  // calculate seat frame size
+  FSeatActionFrameWidth := TableResources.SeatActionFrame.Texture[0].Width * FSeatResizeRatio;
+  FSeatActionFrameHeight := FSeatActionFrameWidth / TableResources.SeatActionFrameAspectRatio;
 
   // calculate lower interface sizes
   FLowerIntfBorder := Round(10 * FTableResizeRatio);
@@ -1943,6 +1951,35 @@ begin
     RenderSeat(C1);
 end;
 
+procedure TfrmTable.RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
+var
+  index : Integer;
+  font  : TAsphyreFont;
+  lb, hb: Integer;
+begin
+  lb := AMinIndex - ALowBound;
+  hb := AMaxIndex - ALowBound;
+  index := hb;
+  font := AFonts[index];
+  font.Kerning := AKerning;
+  font.Scale := 1;
+  while ((font.TextHeight(AText) > AMaxHeight) or
+         (font.TextWidth(AText) > AMaxWidth)) do
+  begin
+    if index > lb then
+    begin
+      Dec(index);
+      font := AFonts[index];
+      font.Kerning := AKerning;
+      font.Scale := 1;
+    end
+    else
+      font.Scale := font.Scale - 0.01;
+  end;
+
+  font.TextMidF(AMidPoint, AText, AColor);
+end;
+
 procedure TfrmTable.RenderSeat(const ASeatIndex: Integer);
 var
   seat_point             : TPoint2;
@@ -1956,23 +1993,28 @@ var
   active_seat_light_image: TAsphyreImage;
   avatar                 : TAvatar;
   avatar_point           : TPoint2;
-  avatar_radius          : Single;
+  avatar_width           : Single;
+  avatar_height          : Single;
   seat_upper_text        : String;
   seat_lower_text        : String;
+  seat_action_text       : String;
   seat_upper_text_color  : TColor2;
   seat_lower_text_color  : TColor2;
-  seat_font              : TAsphyreFont;
+  seat_action_text_color : TColor2;
   seat_upper_text_point  : TPoint2;
   seat_lower_text_point  : TPoint2;
   seat_text_x_center     : Single;
   card_point             : TPoint2;
+  seat_action_frame_point: TPoint2;
   C1                     : Integer;
 begin
   // get seat point
   seat_point := GetSeatPoint(ASeatIndex);
 
   // calculate seat elements positions & dimensions
-  avatar_radius := TableResources.SEAT_AVATAR_RADIUS * FSeatResizeRatio;
+  avatar_width := TableResources.SEAT_AVATAR_WIDTH * FSeatResizeRatio;
+  avatar_height := TTableResources.SEAT_AVATAR_HEIGHT * FSeatResizeRatio;
+
   if GetTableSector(seat_point) in [tsLeft, tsTopLeft, tsBottomLeft] then
   begin
     seat_empty_image := TableResources.SeatEmptyLeftImage;
@@ -1981,7 +2023,7 @@ begin
     active_seat_dark_image := TableResources.ActiveSeatDarkLeftImage;
     active_seat_light_image := TableResources.ActiveSeatLightLeftImage;
     avatar_point := Point2(seat_point.X - FSeatWidth / 2 + TableResources.SEAT_LEFT_AVATAR_X * FSeatResizeRatio, seat_point.Y);
-    seat_text_x_center := seat_point.X - (seat_point.X + FSeatWidth / 2 - avatar_point.X) / 2;
+    seat_text_x_center := seat_point.X - (seat_point.X + FSeatWidth / 2 - avatar_point.X) / 2 - 10 * FSeatResizeRatio;
   end
   else
   begin
@@ -1991,10 +2033,11 @@ begin
     active_seat_dark_image := TableResources.ActiveSeatDarkRightImage;
     active_seat_light_image := TableResources.ActiveSeatLightRightImage;
     avatar_point := Point2(seat_point.X - FSeatWidth / 2 + TableResources.SEAT_RIGHT_AVATAR_X * FSeatResizeRatio, seat_point.Y);
-    seat_text_x_center := seat_point.X + (avatar_point.X - (seat_point.X - FSeatWidth / 2)) / 2;
+    seat_text_x_center := seat_point.X + (avatar_point.X - (seat_point.X - FSeatWidth / 2) - 10 * FSeatResizeRatio);
   end;
   seat_upper_text_point := Point2(seat_text_x_center, seat_point.Y - FSeatHeight / 4.5);
   seat_lower_text_point := Point2(seat_text_x_center, seat_point.Y + FSeatHeight / 5);
+  seat_action_frame_point := Point2(seat_point.x, seat_point.Y + FSeatHeight / 2 + FSeatActionFrameHeight / 2);
 
   // seat taken and its not in psStandingUp state
   if (FTableStatus.GetSeatInfo(ASeatIndex, seat_info)) and
@@ -2022,16 +2065,8 @@ begin
       avatar := Avatars.AddAvatar(player_info.AvatarId);
 
       // set seat upper text
-      if seat_info.Caption <> '' then
-      begin
-        seat_upper_text := seat_info.Caption;
-        seat_upper_text_color := cColor2($FFE8A300);
-      end
-      else
-      begin
-        seat_upper_text := player_info.Nick;
-        seat_upper_text_color := cColor2($FFCCCCCC);
-      end;
+      seat_upper_text := player_info.Nick;
+      seat_upper_text_color := cColor2($FFCCCCCC);
     end
     else
     begin
@@ -2048,6 +2083,14 @@ begin
     else
       seat_lower_text := FloatToStr(seat_info.Chips / 100);
     seat_lower_text_color := cColor2($FF8DC63F);
+
+    // set seat action
+    seat_action_text := '';
+    if seat_info.Caption <> '' then
+    begin
+      seat_action_text := seat_info.Caption;
+      seat_action_text_color := cColor2($FF999999);
+    end;
 
     // render seat cards
     if (FTableStatus.State <> tsIdle) and
@@ -2067,11 +2110,7 @@ begin
     if avatar.DXImage.TextureCount > 0 then
     begin
       DXCore.Canvas.UseImage(avatar.DXImage, TexFull4);
-      DXCore.Canvas.TexMap(
-        pBounds4(avatar_point.X - avatar_radius,
-                 avatar_point.Y - avatar_radius,
-                 avatar_radius * 2,
-                 avatar_radius * 2), clWhite4);
+      DXCore.Canvas.TexMap(pBounds4(avatar_point.X - avatar_width / 2, avatar_point.Y - avatar_height / 2, avatar_width, avatar_height), clWhite4);
     end;
 
     // render seat
@@ -2079,46 +2118,24 @@ begin
     DXCore.Canvas.TexMap(pBounds4(seat_point.X - FSeatWidth / 2, seat_point.Y - FSeatHeight / 2, FSeatWidth, FSeatHeight), clWhite4);
 
     // render upper seat text
-    C1 := High(TableResources.BarmenoFonts);
-    seat_font := TableResources.BarmenoFonts[C1];
-    seat_font.Kerning := 0;
-    seat_font.Scale := 1;
-    while ((seat_font.TextHeight(seat_upper_text) > FSeatHeight * 0.36) or
-           (seat_font.TextWidth(seat_upper_text) > FSeatWidth * 0.75)) do
-    begin
-      if C1 > Low(TableResources.BarmenoFonts) then
-      begin
-        Dec(C1);
-        seat_font := TableResources.BarmenoFonts[C1];
-        seat_font.Kerning := 0;
-        seat_font.Scale := 1;
-      end
-      else
-        seat_font.Scale := seat_font.Scale - 0.01;
-    end;
-
-    seat_font.TextMidF(seat_upper_text_point, seat_upper_text, seat_upper_text_color);
+    RenderScaleFont(seat_upper_text, seat_upper_text_color, seat_upper_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
+                    Low(TableResources.BarmenoFonts), 16, 0, FSeatHeight * 0.36, FSeatWidth * 0.75);
 
     // render lower seat text
-    C1 := High(TableResources.BarmenoFonts);
-    seat_font := TableResources.BarmenoFonts[C1];
-    seat_font.Kerning := 0;
-    seat_font.Scale := 1;
-    while ((seat_font.TextHeight(seat_lower_text) > FSeatHeight * 0.32) or
-           (seat_font.TextWidth(seat_lower_text) > FSeatWidth * 0.75)) do
-    begin
-      if C1 > Low(TableResources.BarmenoFonts) then
-      begin
-        Dec(C1);
-        seat_font := TableResources.BarmenoFonts[C1];
-        seat_font.Kerning := 0;
-        seat_font.Scale := 1;
-      end
-      else
-        seat_font.Scale := seat_font.Scale - 0.01;
-    end;
+    RenderScaleFont(seat_lower_text, seat_lower_text_color, seat_lower_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
+                    Low(TableResources.BarmenoFonts), High(TableResources.BarmenoFonts), 0, FSeatHeight * 0.37, FSeatWidth * 0.75);
 
-    seat_font.TextMidF(seat_lower_text_point, seat_lower_text, seat_lower_text_color);
+    if seat_action_text <> '' then
+    begin
+      // render seat action frame
+      DXCore.Canvas.UseImage(TableResources.SeatActionFrame, TexFull4);
+      DXCore.Canvas.TexMap(pBounds4(seat_action_frame_point.X - FSeatActionFrameWidth / 2,
+           seat_action_frame_point.Y - FSeatActionFrameHeight / 2, FSeatActionFrameWidth, FSeatActionFrameHeight), clWhite4);
+
+      // render seat action text
+      RenderScaleFont(seat_action_text, seat_action_text_color, seat_action_frame_point, TableResources.SintonyFonts, Low(TableResources.SintonyFonts),
+                      12, 16, 1, FSeatActionFrameHeight * 0.8, FSeatActionFrameWidth * 0.9);
+    end;
   end
   else
   begin
@@ -2599,6 +2616,7 @@ var
   red_quad: TPoint4;
   C1      : Integer;
   button  : TUIButton;
+  font    : TAsphyreFont;
 begin
   if acRaise.Enabled then
   begin
@@ -2629,15 +2647,13 @@ begin
       DXCore.Canvas.UseImage(button.Image, TexFull4);
       DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FRaisePresetButtonWidth, FRaisePresetButtonHeight), clWhite4);
 
-      TableResources.Sintony_19px.Kerning := 0;
-
+      font := TableResources.SintonyFonts[High(TableResources.SintonyFonts)];
+      font.Kerning := 0;
       if Integer(FMouseDownObject) - Integer(mdoRaisePresetButton1) = C1 then
-        TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.65
+        font.Scale := FTableResizeRatio * 0.65
       else
-        TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.75;
-
-      TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FRaisePresetButtonWidth / 2, button.Point.y + FRaisePresetButtonHeight / 2),
-                                           button.Action.Caption, cColor2($FFAAAAAA));
+        font.Scale := FTableResizeRatio * 0.75;
+      font.TextMidF(Point2(button.Point.x + FRaisePresetButtonWidth / 2, button.Point.y + FRaisePresetButtonHeight / 2), button.Action.Caption, cColor2($FFAAAAAA));
     end;
   end;
 
@@ -2651,15 +2667,13 @@ begin
     DXCore.Canvas.UseImage(button.Image, TexFull4);
     DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FActionButtonWidth, FActionButtonHeight), clWhite4);
 
-    TableResources.Sintony_19px.Kerning := 0;
-
+    font := TableResources.SintonyFonts[High(TableResources.SintonyFonts)];
+    font.Kerning := 0;
     if Integer(FMouseDownObject) - Integer(mdoActionButton1) = C1 then
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.80
+      font.Scale := FTableResizeRatio * 0.80
     else
-      TableResources.Sintony_19px.Scale := FTableResizeRatio * 0.90;
-
-    TableResources.Sintony_19px.TextMidF(Point2(button.Point.x + FActionButtonWidth / 2, button.Point.y + FActionButtonHeight / 2),
-                                         button.Action.Caption, clWhite2);
+      font.Scale := FTableResizeRatio * 0.90;
+    font.TextMidF(Point2(button.Point.x + FActionButtonWidth / 2, button.Point.y + FActionButtonHeight / 2), button.Action.Caption, clWhite2);
   end;
 
   // render standup button

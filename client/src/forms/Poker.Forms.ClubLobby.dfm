@@ -2810,7 +2810,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsClubHome
+    Properties.ActivePage = tsTables
     Properties.HideTabs = True
     ClientRectBottom = 364
     ClientRectRight = 594
@@ -3055,8 +3055,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         594
         364)
@@ -3066,8 +3064,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 578
-        ExplicitHeight = 355
         DesignSize = (
           580
           357)
@@ -3084,10 +3080,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = 16
-          ExplicitWidth = 572
-          ExplicitHeight = 21
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3169,7 +3161,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 171
         end
         object btDeleteGame: TcxButton
           Left = 216
@@ -3186,7 +3177,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 171
         end
         object btEditGame: TcxButton
           Left = 112
@@ -3203,7 +3193,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 171
         end
       end
     end

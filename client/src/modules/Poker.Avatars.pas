@@ -202,62 +202,13 @@ end;
 
 procedure TAvatar.MakeDXImage;
 var
-  C1, C2, cx, cy, radius, x1, y1, x2, y2: Integer;
-  bmp, tmpb                             : TBitmap32;
-  mstream                               : TMemoryStream;
+  mstream: TMemoryStream;
 begin
   mstream := TMemoryStream.Create;
   try
-    bmp := TBitmap32.Create;
-    try
-      bmp.Assign(FImage);
-      cx := bmp.Width div 2;
-      cy := bmp.Height div 2;
-      if cx < cy then
-        radius := cx
-      else
-        radius := cy;
-
-      x1 := bmp.Width; y1 := bmp.Height;
-      x2 := 0; y2 := 0;
-      for C1 := 0 to bmp.Width - 1 do
-      begin
-        for C2 := 0 to bmp.Height - 1 do
-        begin
-          if not IsPointInsideCircle(C1, C2, cx, cy, radius) then
-            bmp.PixelPtr[C1, C2]^ := $00000000
-          else
-          begin
-            if C1 < x1 then
-              x1 := C1;
-            if C2 < y1 then
-              y1 := C2;
-
-            if C1 > x2 then
-              x2 := C1;
-            if C2 > y2 then
-              y2 := C2;
-          end;
-        end;
-      end;
-
-      tmpb := TBitmap32.Create;
-      try
-        tmpb.SetSize(x2 - x1, y2 - y1);
-        tmpb.Canvas.CopyRect(tmpb.BoundsRect, bmp.Canvas, Rect(x1, y1, x2, y2));
-        bmp.Assign(tmpb);
-      finally
-        tmpb.Free;
-      end;
-
-      bmp.DrawMode := dmBlend;
-      bmp.SaveToStream(mstream, TRUE);
-
-      mstream.Position := 0;
-      FDXImage.LoadFromStream('.bmp', mstream);
-    finally
-      bmp.Free;
-    end;
+    FImage.SaveToStream(mstream);
+    mstream.Position := 0;
+    FDXImage.LoadFromStream('.jpg', mstream);
   finally
     mstream.Free;
   end;

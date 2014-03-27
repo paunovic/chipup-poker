@@ -12,6 +12,7 @@ type
   private
     type
       TBarmenoFonts = array[12..19] of TAsphyreFont;
+      TSintonyFonts = array[12..19] of TAsphyreFont;
 
     var
       FDXImages: TAsphyreImages;
@@ -54,10 +55,11 @@ type
       FStandUpButtonPressedImage: TAsphyreImage;
       FPlayNowButtonNormalImage: TAsphyreImage;
       FPlayNowButtonPressedImage: TAsphyreImage;
+      FSeatActionFrame: TAsphyreImage;
 
       FBarmenoFonts: TBarmenoFonts;
       FCardCharactersFont_19px: TAsphyreFont;
-      FSintony_19px: TAsphyreFont;
+      FSintonyFonts: TSintonyFonts;
 
       FTableAspectRatio: Single;
       FSeatAspectRatio: Single;
@@ -72,6 +74,7 @@ type
       FRaisePresetButtonAspectRatio: Single;
       FStandUpButtonAspectRatio: Single;
       FPlayNowButtonAspectRatio: Single;
+      FSeatActionFrameAspectRatio: Single;
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -101,9 +104,10 @@ type
       RAISE_SLIDER_WIDTH        = 283;
       RAISE_SLIDER_HEIGHT       = 9;
       STANDUP_BUTTON_TRIANGLE_W = 26;
-      SEAT_AVATAR_RADIUS        = 32;
-      SEAT_LEFT_AVATAR_X        = 224;
-      SEAT_RIGHT_AVATAR_X       = 46;
+      SEAT_AVATAR_WIDTH         = 66;
+      SEAT_AVATAR_HEIGHT        = 66;
+      SEAT_LEFT_AVATAR_X        = 199;
+      SEAT_RIGHT_AVATAR_X       = 43;
 
             {
     class var
@@ -155,10 +159,11 @@ type
     property StandUpButtonPressedImage: TAsphyreImage read FStandUpButtonPressedImage;
     property PlayNowButtonNormalImage: TAsphyreImage read FPlayNowButtonNormalImage;
     property PlayNowButtonPressedImage: TAsphyreImage read FPlayNowButtonPressedImage;
+    property SeatActionFrame: TAsphyreImage read FSeatActionFrame;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
-    property Sintony_19px: TAsphyreFont read FSintony_19px;
+    property SintonyFonts: TSintonyFonts read FSintonyFonts;
 
     property TableAspectRatio: Single read FTableAspectRatio;
     property SeatAspectRatio: Single read FSeatAspectRatio;
@@ -173,6 +178,7 @@ type
     property RaisePresetButtonAspectRatio: Single read FRaisePresetButtonAspectRatio;
     property StandUpButtonAspectRatio: Single read FStandUpButtonAspectRatio;
     property PlayNowButtonAspectRatio: Single read FPlayNowButtonAspectRatio;
+    property SeatActionFrameAspectRatio: Single read FSeatActionFrameAspectRatio;
   end;
 
 var
@@ -246,6 +252,7 @@ begin
   AddDXImage('StandUpButtonPressed.image', FStandUpButtonPressedImage);
   AddDXImage('PlayNowButtonNormal.image', FPlayNowButtonNormalImage, FPlayNowButtonAspectRatio);
   AddDXImage('PlayNowButtonPressed.image', FPlayNowButtonPressedImage);
+  AddDXImage('SeatActionFrame.image', FSeatActionFrame, FSeatActionFrameAspectRatio);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
@@ -263,7 +270,8 @@ begin
   FDXFonts.Images := FDXImages;
 
   AddDXFont('CardCharacters_19px', FCardCharactersFont_19px);
-  AddDXFont('Sintony_19px', FSintony_19px);
+  for C1 := Low(FSintonyFonts) to High(FSintonyFonts) do
+    AddDXFont(Format('Sintony_%dpx', [C1]), FSintonyFonts[C1]);
   for C1 := Low(FBarmenoFonts) to High(FBarmenoFonts) do
     AddDXFont(Format('Barmeno_%dpx', [C1]), FBarmenoFonts[C1]);
 end;

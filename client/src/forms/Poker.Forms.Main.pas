@@ -772,6 +772,9 @@ begin
   btCreateClub.Show;
   btJoinClub.Show;
   btOpenTournamentLobby.Hide;
+  btJoinPublicClub.Show;
+  gridClubs.Show;
+  btPublicClubs.Show;
   gridTournaments.Hide;
   gridJoinedClubs.Show;
   gridGames.Show;
@@ -783,6 +786,9 @@ begin
   btCreateClub.Hide;
   btJoinClub.Hide;
   btOpenTournamentLobby.Show;
+  btJoinPublicClub.Hide;
+  btPublicClubs.Hide;
+  gridClubs.Hide;
   gridTournaments.Show;
   gridJoinedClubs.Hide;
   gridGames.Hide;

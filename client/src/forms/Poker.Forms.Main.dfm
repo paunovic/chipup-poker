@@ -3560,7 +3560,6 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
     OnMouseDown = imgCashierMouseDown
     OnMouseUp = imgCashierMouseUp
-    ExplicitLeft = 684
     Height = 140
     Width = 140
   end
@@ -3575,7 +3574,6 @@ object frmChipUpMain: TfrmChipUpMain
     Color = clBlack
     ParentBackground = False
     TabOrder = 2
-    ExplicitWidth = 860
     DesignSize = (
       993
       539)
@@ -3588,7 +3586,6 @@ object frmChipUpMain: TfrmChipUpMain
       TabOrder = 0
       Visible = False
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      ExplicitWidth = 848
       object gridTournamentsTable: TcxGridTableView
         OnCellDblClick = gridJoinedClubsTableCellDblClick
         OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
@@ -3668,7 +3665,6 @@ object frmChipUpMain: TfrmChipUpMain
       Anchors = [akLeft, akTop, akRight, akBottom]
       TabOrder = 2
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      ExplicitWidth = 564
       object gridGamesTable: TcxGridTableView
         OnCellDblClick = gridGamesTableCellDblClick
         OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3850,7 +3846,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitWidth = 272
     end
     object btOpenTournamentLobby: TcxButton
       Left = 697
@@ -3869,7 +3864,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 564
     end
     object btCreateClub: TcxButton
       Left = 697
@@ -3887,7 +3881,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 564
     end
     object btJoinClub: TcxButton
       Left = 844
@@ -3905,7 +3898,6 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Name = 'Sintony'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 711
     end
     object btJoinPublicClub: TcxButton
       Left = 6
