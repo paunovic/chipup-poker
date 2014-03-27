@@ -85,6 +85,7 @@ message Game {
 		gsActive = 1;
 		gsClosing = 2;
 		gsClosed = 3;
+		gsEmpty = 4;
 	}
 	optional bytes _id = 1;
 	optional bytes creator_mongo_id = 2;
