@@ -3699,42 +3699,46 @@ object frmChipUpMain: TfrmChipUpMain
           Options.Editing = False
           SortIndex = 0
           SortOrder = soDescending
-          Width = 183
+          Width = 203
         end
         object gridGamesType: TcxGridColumn
           Caption = 'Type'
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.Alignment.Horz = taCenter
           HeaderAlignmentHorz = taCenter
-          Width = 86
+          Width = 96
         end
         object gridGamesBlinds: TcxGridColumn
           Caption = 'Stakes'
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.Alignment.Horz = taCenter
           HeaderAlignmentHorz = taCenter
-          Width = 60
+          Width = 66
         end
         object gridGamesBuyinLimits: TcxGridColumn
           Caption = 'Buy-in Limits'
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.Alignment.Horz = taCenter
           HeaderAlignmentHorz = taCenter
-          Width = 91
+          Width = 101
         end
         object gridGamesPlayers: TcxGridColumn
           Caption = 'Players'
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.Alignment.Horz = taCenter
           HeaderAlignmentHorz = taCenter
-          Width = 75
+          Width = 84
         end
         object gridGamesStatus: TcxGridColumn
           Caption = 'Status'
           PropertiesClassName = 'TcxTextEditProperties'
           Properties.Alignment.Horz = taCenter
           HeaderAlignmentHorz = taCenter
-          Width = 67
+          Width = 25
+        end
+        object gridGamesTableColumn1: TcxGridColumn
+          PropertiesClassName = 'TcxTextEditProperties'
+          Width = 120
         end
       end
       object gridGamesLevel: TcxGridLevel

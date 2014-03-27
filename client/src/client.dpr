@@ -115,7 +115,9 @@ uses
   Poker.Protobufs.Objects.RetrieveHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.RetrieveHandHistoryReply.pas',
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.HistoryReference in 'modules\protobuf\objects\Poker.Protobufs.Objects.HistoryReference.pas',
-  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas';
+  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
+  Poker.Protobufs.Objects.CloseGameData in '..\..\cpp-protobuf-generator\output\Poker.Protobufs.Objects.CloseGameData.pas',
+  Poker.Forms.CloseTable in 'forms\Poker.Forms.CloseTable.pas' {frmCloseTable};
 
 procedure FocusPokerApp;
 var

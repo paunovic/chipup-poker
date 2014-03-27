@@ -80,6 +80,7 @@ type
     acJoinSelectedPublicClub: TAction;
     tiPublicClubRefresh: TTimer;
     btPublicClubs: TcxButton;
+    gridGamesTableColumn1: TcxGridColumn;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -424,9 +425,11 @@ end;
 procedure TfrmChipUpMain.UpdateGamelist;
 var
   C1  : Integer;
+  C2: Integer;
   game: TGameInfo;
   c   : TcxGridDataController;
   club: TClubInfo;
+  tmp :String;
 begin
   c := gridGamesTable.DataController;
   c.BeginFullUpdate;
@@ -449,7 +452,13 @@ begin
       c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
       c.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
-      c.SetValue(C1, gridGamesStatus.Index, 'unknown');
+      c.SetValue(C1, gridGamesStatus.Index, game.StateAsStr);
+
+      tmp := '';
+      for C2 := Low(game.MongoId) to High(game.MongoId) do
+        tmp := tmp + InttOHex(game.MongoId[C2], 2);
+      c.SetValue(C1, gridGamesTableColumn1.Index, tmp);
+
     end;
   finally
     c.EndFullUpdate;
@@ -604,7 +613,6 @@ begin
                           TServerMessageCallback.Create(seGameChange, CSREGameOperation),
                           TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                           TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
-                          TServerMessageCallback.Create(srDeleteGameOk, CSREGameDelete),
                           TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
                           TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                           TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
@@ -879,7 +887,7 @@ begin
     for C1 := 0 to Tables.Count - 1 do
       if Tables[C1].Game = game then
       begin
-        Tables.Remove(Tables[C1]);
+        Tables.Delete(C1);
         Break;
       end;
 
