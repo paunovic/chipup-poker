@@ -81,6 +81,11 @@ message Game {
 		gtHoldem = 0;
 		gtOmaha = 1;
 	}
+	enum GameState {
+		gsActive = 1;
+		gsClosing = 2;
+		gsClosed = 3;
+	}
 	optional bytes _id = 1;
 	optional bytes creator_mongo_id = 2;
 	optional string gamename = 3;
@@ -93,6 +98,7 @@ message Game {
 	optional int32 sitting = 10;
 	optional int32 buyin_min = 11;
 	optional int32 buyin_max = 12;
+	optional GameState state = 13;
 }
 
 message StatusReply {
@@ -459,4 +465,8 @@ message RetrieveHandHistoryReply {
 		required uint32 seq = 2;
 	}
 	repeated HistoryReference rows = 1;
+}
+message CloseGameData {
+	required bytes gameid = 1;
+	optional uint32 timestamp = 2 [ default=0 ];
 }
