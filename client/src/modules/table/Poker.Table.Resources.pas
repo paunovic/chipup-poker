@@ -55,7 +55,11 @@ type
       FStandUpButtonPressedImage: TAsphyreImage;
       FPlayNowButtonNormalImage: TAsphyreImage;
       FPlayNowButtonPressedImage: TAsphyreImage;
-      FSeatActionFrame: TAsphyreImage;
+      FSeatActionCheck: TAsphyreImage;
+      FSeatActionCall: TAsphyreImage;
+      FSeatActionFold: TAsphyreImage;
+      FSeatActionRaise: TAsphyreImage;
+      FSeatActionDisconnected: TAsphyreImage;
 
       FBarmenoFonts: TBarmenoFonts;
       FCardCharactersFont_19px: TAsphyreFont;
@@ -159,7 +163,11 @@ type
     property StandUpButtonPressedImage: TAsphyreImage read FStandUpButtonPressedImage;
     property PlayNowButtonNormalImage: TAsphyreImage read FPlayNowButtonNormalImage;
     property PlayNowButtonPressedImage: TAsphyreImage read FPlayNowButtonPressedImage;
-    property SeatActionFrame: TAsphyreImage read FSeatActionFrame;
+    property SeatActionCheck: TAsphyreImage read FSeatActionCheck;
+    property SeatActionCall: TAsphyreImage read FSeatActionCall;
+    property SeatActionFold: TAsphyreImage read FSeatActionFold;
+    property SeatActionRaise: TAsphyreImage read FSeatActionRaise;
+    property SeatActionDisconnected: TAsphyreImage read FSeatActionDisconnected;
 
     property BarmenoFonts: TBarmenoFonts read FBarmenoFonts;
     property CardCharactersFont_19px: TAsphyreFont read FCardCharactersFont_19px;
@@ -252,7 +260,11 @@ begin
   AddDXImage('StandUpButtonPressed.image', FStandUpButtonPressedImage);
   AddDXImage('PlayNowButtonNormal.image', FPlayNowButtonNormalImage, FPlayNowButtonAspectRatio);
   AddDXImage('PlayNowButtonPressed.image', FPlayNowButtonPressedImage);
-  AddDXImage('SeatActionFrame.image', FSeatActionFrame, FSeatActionFrameAspectRatio);
+  AddDXImage('ActionCall.image', FSeatActionCall, FSeatActionFrameAspectRatio);
+  AddDXImage('ActionCheck.image', FSeatActionCheck);
+  AddDXImage('ActionDisconnected.image', FSeatActionDisconnected);
+  AddDXImage('ActionFold.image', FSeatActionFold);
+  AddDXImage('ActionRaise.image', FSeatActionRaise);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do

@@ -72,7 +72,7 @@ type
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
     procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
-    procedure DeleteGame(const AGameId: TBytes);
+    procedure CloseGame(const AGameId: TBytes; const AAfter: Integer);
     procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
@@ -774,14 +774,14 @@ begin
   end;
 end;
 
-procedure TServerSocket.DeleteGame(const AGameId: TBytes);
+procedure TServerSocket.CloseGame(const AGameId: TBytes; const AAfter: Integer);
 var
   protobuf: TPB_Game;
 begin
   protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AGameId;
-    SendProtobuf(scDeleteGame, protobuf);
+    SendProtobuf(scCloseGame, protobuf);
   finally
     protobuf.Free;
   end;

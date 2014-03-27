@@ -3081,7 +3081,6 @@ object frmClubLobby: TfrmClubLobby
           BorderStyle = cxcbsNone
           TabOrder = 0
           object gridGamesTable: TcxGridTableView
-            OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
@@ -3162,12 +3161,12 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
-        object btDeleteGame: TcxButton
-          Left = 216
+        object btCloseTable: TcxButton
+          Left = 112
           Top = 167
           Width = 98
           Height = 28
-          Action = acDeleteGame
+          Action = acCloseTable
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 2
@@ -3179,20 +3178,23 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btEditGame: TcxButton
-          Left = 112
+          Left = 216
           Top = 167
           Width = 98
           Height = 28
-          Action = acShowEditGameForm
           Anchors = [akLeft, akBottom]
+          Caption = 'Edit Table...'
+          Enabled = False
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 3
+          Visible = False
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          OnClick = acShowEditGameFormExecute
         end
       end
     end
@@ -3244,15 +3246,10 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Create a Table...'
       OnExecute = acShowCreateGameFormExecute
     end
-    object acDeleteGame: TAction
-      Caption = 'Delete Table'
+    object acCloseTable: TAction
+      Caption = 'Close Table...'
       Enabled = False
-      OnExecute = acDeleteGameExecute
-    end
-    object acShowEditGameForm: TAction
-      Caption = 'Edit Table...'
-      Enabled = False
-      OnExecute = acShowEditGameFormExecute
+      OnExecute = acCloseTableExecute
     end
     object acSuspendPlayer: TAction
       Caption = 'Suspend'

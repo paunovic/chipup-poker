@@ -235,7 +235,7 @@ enum ServerCodes {
     scChangePassword = 516;
     scSetAvatar = 517;
     scCreateGame = 518;
-    scDeleteGame = 519;
+    scCloseGame = 519;
     scEditGame = 520;
     scTableJoin = 521;
     scTableLeave = 522;

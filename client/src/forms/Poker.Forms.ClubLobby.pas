@@ -39,8 +39,7 @@ type
     acCloseClub: TAction;
     acGiveChips: TAction;
     acShowCreateGameForm: TAction;
-    acDeleteGame: TAction;
-    acShowEditGameForm: TAction;
+    acCloseTable: TAction;
     btChangeClubDetails: TcxButton;
     gridPlayersListStatus: TcxGridColumn;
     Bevel1: TdxBevel;
@@ -55,7 +54,7 @@ type
     gridGamesSeats: TcxGridColumn;
     gridGamesLevel: TcxGridLevel;
     btNewGame: TcxButton;
-    btDeleteGame: TcxButton;
+    btCloseTable: TcxButton;
     btEditGame: TcxButton;
     acSuspendPlayer: TAction;
     acReinstatePlayer: TAction;
@@ -78,13 +77,12 @@ type
     procedure acShowClubChangeDetailsFormExecute(Sender: TObject);
     procedure gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure acShowCreateGameFormExecute(Sender: TObject);
-    procedure acDeleteGameExecute(Sender: TObject);
+    procedure acCloseTableExecute(Sender: TObject);
     procedure acShowEditGameFormExecute(Sender: TObject);
     procedure acSuspendPlayerExecute(Sender: TObject);
     procedure acReinstatePlayerExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure acLeaveClubExecute(Sender: TObject);
-    procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure tiUpdateClubDetailsTimer(Sender: TObject);
     procedure seClubRakePropertiesChange(Sender: TObject);
@@ -171,7 +169,7 @@ begin
   btSuspendUnsuspend.Top := btGiveChips.Top - btGiveChips.Height - 5;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
-  btDeleteGame.Top := btNewGame.Top;
+  btCloseTable.Top := btNewGame.Top;
 end;
 
 procedure TfrmClubLobby.FormDestroy(Sender: TObject);
@@ -236,10 +234,10 @@ begin
     acReinstatePlayer.Enabled := acGiveChips.Enabled;
     btNewGame.Visible := admin_visible;
     acShowCreateGameForm.Enabled := admin_visible;
-    btDeleteGame.Visible := admin_visible;
-    acDeleteGame.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
-    btEditGame.Visible := admin_visible;
-    acShowEditGameForm.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
+    btCloseTable.Visible := admin_visible;
+    acCloseTable.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
+//    btEditGame.Visible := admin_visible;
+//    acShowEditGameForm.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
     acLeaveClub.Enabled := not admin_visible;
@@ -277,11 +275,6 @@ begin
   pcTabs.ActivePage := tsClubHome;
 end;
 
-procedure TfrmClubLobby.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-begin
-  acShowEditGameForm.Execute;
-end;
-
 procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex       : Integer;
@@ -298,8 +291,8 @@ begin
     FSelectedGameId := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
 
   actions_enabled := (Length(FSelectedGameId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
-  acDeleteGame.Enabled := actions_enabled;
-  acShowEditGameForm.Enabled := actions_enabled;
+  acCloseTable.Enabled := actions_enabled;
+//  acShowEditGameForm.Enabled := actions_enabled;
 end;
 
 procedure TfrmClubLobby.gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
@@ -570,9 +563,9 @@ begin
   ServerSocket.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, FALSE);
 end;
 
-procedure TfrmClubLobby.acDeleteGameExecute(Sender: TObject);
+procedure TfrmClubLobby.acCloseTableExecute(Sender: TObject);
 begin
-  ServerSocket.DeleteGame(FSelectedGameId);
+  ServerSocket.CloseGame(FSelectedGameId, 1);
 end;
 
 procedure TfrmClubLobby.CSRStatus(const AMethodId: Integer; const AObject: TObject);

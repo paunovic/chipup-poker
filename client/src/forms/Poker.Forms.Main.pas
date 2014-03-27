@@ -869,12 +869,22 @@ var
   pbgame: TPB_Game;
   club  : TClubInfo;
   game  : TGameInfo;
+  C1    : Integer;
 begin
   pbgame := AObject as TPB_Game;
 
   if (dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club)) and
      (club.Games.FindGame(pbgame.MongoId, game)) then
+  begin
+    for C1 := 0 to Tables.Count - 1 do
+      if Tables[C1].Game = game then
+      begin
+        Tables.Remove(Tables[C1]);
+        Break;
+      end;
+
     club.Games.Remove(game);
+  end;
 
   ConfigureGUI;
 end;

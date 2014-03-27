@@ -68,7 +68,7 @@ type
     scChangePassword = 516,
     scSetAvatar = 517,
     scCreateGame = 518,
-    scDeleteGame = 519,
+    scCloseGame = 519,
     scEditGame = 520,
     scTableJoin = 521,
     scTableLeave = 522,
@@ -181,7 +181,7 @@ begin
     scChangePassword: result := 'scChangePassword';
     scSetAvatar: result := 'scSetAvatar';
     scCreateGame: result := 'scCreateGame';
-    scDeleteGame: result := 'scDeleteGame';
+    scCloseGame: result := 'scCloseGame';
     scEditGame: result := 'scEditGame';
     scTableJoin: result := 'scTableJoin';
     scTableLeave: result := 'scTableLeave';

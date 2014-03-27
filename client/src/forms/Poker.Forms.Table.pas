@@ -112,6 +112,7 @@ type
       FSeatWidth              : Single;
       FSeatHeight             : Single;
       FSeatResizeRatio        : Single;
+      FSeatActionResizeRatio  : Single;
       FSeatCardsMaxWidth      : Single;
       FCardWidth              : Single;
       FCardHeight             : Single;
@@ -346,6 +347,8 @@ procedure TfrmTable.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
 
+  DXTimer.RemoveAnimations(Handle);
+
   FDealAnimations.Free;
   FFlopAnimations.Free;
   FTurnAnimations.Free;
@@ -354,8 +357,6 @@ begin
   FPotWinAnimations.Free;
 
   FEventBuffer.Free;
-
-  DXTimer.RemoveAnimations(Handle);
 
   FChipStackMaker.Free;
   FTableStatus.Free;
@@ -1213,7 +1214,7 @@ begin
      (not tiGameLock.Enabled) then
   begin
     tiActiveFrameBlink.Tag := 1;
-    tiActiveFrameBlink.Enabled := TRUE;
+//    tiActiveFrameBlink.Enabled := TRUE;
   end;
 
   if sitout then
@@ -1803,6 +1804,7 @@ begin
   FSeatWidth := (FDXAreaSize.x - FTableWidth) / 1.5;
   FSeatHeight := FSeatWidth / TableResources.SeatAspectRatio;
   FSeatResizeRatio := FSeatWidth / TableResources.SeatEmptyLeftImage.Texture[0].Width;
+  FSeatActionResizeRatio := FSeatResizeRatio * 1.1;
 
   // calculate card size
   FCardWidth := TableResources.CardBackgroundImage.Texture[0].Width * FTableResizeRatio;
@@ -1820,11 +1822,11 @@ begin
   FChipHeight := FChipWidth / TableResources.ChipAspectRatio;
 
   // calculate timebar/timebank size
-  FTimebarWidth := TableResources.TimebarImage.Texture[0].Width * FSeatResizeRatio;
+  FTimebarWidth := TableResources.TimebarImage.Texture[0].Width * FSeatActionResizeRatio;
   FTimebarHeight := FTimebarWidth / TableResources.TimebarAspectRatio;
 
   // calculate seat frame size
-  FSeatActionFrameWidth := TableResources.SeatActionFrame.Texture[0].Width * FSeatResizeRatio;
+  FSeatActionFrameWidth := TableResources.SeatActionCheck.Texture[0].Width * FSeatActionResizeRatio;
   FSeatActionFrameHeight := FSeatActionFrameWidth / TableResources.SeatActionFrameAspectRatio;
 
   // calculate lower interface sizes
@@ -1988,6 +1990,7 @@ var
   seat_image             : TAsphyreImage;
   seat_empty_image       : TAsphyreImage;
   seat_dark_image        : TAsphyreImage;
+  action_image           : TAsphyreImage;
 //  seat_light_image       : TAsphyreImage;
   active_seat_dark_image : TAsphyreImage;
   active_seat_light_image: TAsphyreImage;
@@ -1997,10 +2000,8 @@ var
   avatar_height          : Single;
   seat_upper_text        : String;
   seat_lower_text        : String;
-  seat_action_text       : String;
   seat_upper_text_color  : TColor2;
   seat_lower_text_color  : TColor2;
-  seat_action_text_color : TColor2;
   seat_upper_text_point  : TPoint2;
   seat_lower_text_point  : TPoint2;
   seat_text_x_center     : Single;
@@ -2037,7 +2038,7 @@ begin
   end;
   seat_upper_text_point := Point2(seat_text_x_center, seat_point.Y - FSeatHeight / 4.5);
   seat_lower_text_point := Point2(seat_text_x_center, seat_point.Y + FSeatHeight / 5);
-  seat_action_frame_point := Point2(seat_point.x, seat_point.Y + FSeatHeight / 2 + FSeatActionFrameHeight / 2);
+  seat_action_frame_point := Point2(seat_point.x, seat_point.Y + FSeatHeight / 2 + FSeatActionFrameHeight / 2.5);
 
   // seat taken and its not in psStandingUp state
   if (FTableStatus.GetSeatInfo(ASeatIndex, seat_info)) and
@@ -2085,12 +2086,17 @@ begin
     seat_lower_text_color := cColor2($FF8DC63F);
 
     // set seat action
-    seat_action_text := '';
-    if seat_info.Caption <> '' then
-    begin
-      seat_action_text := seat_info.Caption;
-      seat_action_text_color := cColor2($FF999999);
-    end;
+    action_image := nil;
+    if seat_info.Caption = 'CALL' then
+      action_image := TableResources.SeatActionCall;
+    if seat_info.Caption = 'CHECK' then
+      action_image := TableResources.SeatActionCheck;
+    if seat_info.Caption = 'RAISE' then
+      action_image := TableResources.SeatActionRaise;
+    if seat_info.Caption = 'FOLD' then
+      action_image := TableResources.SeatActionFold;
+    if seat_info.Caption = 'DISCONNECTED' then
+      action_image := TableResources.SeatActionDisconnected;
 
     // render seat cards
     if (FTableStatus.State <> tsIdle) and
@@ -2125,16 +2131,18 @@ begin
     RenderScaleFont(seat_lower_text, seat_lower_text_color, seat_lower_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
                     Low(TableResources.BarmenoFonts), High(TableResources.BarmenoFonts), 0, FSeatHeight * 0.37, FSeatWidth * 0.75);
 
-    if seat_action_text <> '' then
+    // render seat action frame/text
+    if Assigned(action_image) then
     begin
       // render seat action frame
-      DXCore.Canvas.UseImage(TableResources.SeatActionFrame, TexFull4);
+      DXCore.Canvas.UseImage(action_image, TexFull4);
       DXCore.Canvas.TexMap(pBounds4(seat_action_frame_point.X - FSeatActionFrameWidth / 2,
            seat_action_frame_point.Y - FSeatActionFrameHeight / 2, FSeatActionFrameWidth, FSeatActionFrameHeight), clWhite4);
-
+{
       // render seat action text
       RenderScaleFont(seat_action_text, seat_action_text_color, seat_action_frame_point, TableResources.SintonyFonts, Low(TableResources.SintonyFonts),
-                      12, 16, 1, FSeatActionFrameHeight * 0.8, FSeatActionFrameWidth * 0.9);
+                      10, 16, 2, FSeatActionFrameHeight * 0.75, FSeatActionFrameWidth * 0.9);
+}
     end;
   end
   else
