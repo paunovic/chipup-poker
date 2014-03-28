@@ -52,7 +52,10 @@ end;
 destructor TPB_PotInfo.Destroy;
 begin
   if Assigned(FWinnerData) then
+  begin
+    FWinnerData.OnNotify := nil;
     FreeAndNil(FWinnerData);
+  end;
   inherited;
 end;
 

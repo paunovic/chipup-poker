@@ -61,7 +61,10 @@ end;
 destructor TPB_TableEvent.Destroy;
 begin
   if Assigned(FPots) then
+  begin
+    FPots.OnNotify := nil;
     FreeAndNil(FPots);
+  end;
   inherited;
 end;
 

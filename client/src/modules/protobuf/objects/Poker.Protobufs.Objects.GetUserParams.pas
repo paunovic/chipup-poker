@@ -48,7 +48,10 @@ end;
 destructor TPB_GetUserParams.Destroy;
 begin
   if Assigned(FUsers) then
+  begin
+    FUsers.OnNotify := nil;
     FreeAndNil(FUsers);
+  end;
   inherited;
 end;
 

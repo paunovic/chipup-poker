@@ -66,14 +66,27 @@ end;
 destructor TPB_StatusReply.Destroy;
 begin
   if Assigned(FClubs) then
+  begin
+    FClubs.OnNotify := nil;
     FreeAndNil(FClubs);
+  end;
   if Assigned(FUsers) then
+  begin
+    FUsers.OnNotify := nil;
     FreeAndNil(FUsers);
-  if Assigned(FSelf) then FreeAndNil(FSelf);
+  end;
+  if Assigned(FSelf) then
+    FreeAndNil(FSelf);
   if Assigned(FGames) then
+  begin
+    FGames.OnNotify := nil;
     FreeAndNil(FGames);
+  end;
   if Assigned(FPublicClubs) then
+  begin
+    FPublicClubs.OnNotify := nil;
     FreeAndNil(FPublicClubs);
+  end;
   inherited;
 end;
 

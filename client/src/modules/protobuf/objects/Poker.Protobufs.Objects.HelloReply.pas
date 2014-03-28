@@ -59,7 +59,8 @@ uses
 
 destructor TPB_HelloReply.Destroy;
 begin
-  if Assigned(FStringSizes) then FreeAndNil(FStringSizes);
+  if Assigned(FStringSizes) then
+    FreeAndNil(FStringSizes);
   inherited;
 end;
 

@@ -44,7 +44,8 @@ uses
 
 destructor TPB_ChatEvent.Destroy;
 begin
-  if Assigned(FMsg) then FreeAndNil(FMsg);
+  if Assigned(FMsg) then
+    FreeAndNil(FMsg);
   inherited;
 end;
 

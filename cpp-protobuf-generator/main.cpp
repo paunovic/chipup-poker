@@ -488,9 +488,17 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				const FieldDescriptor *field = message->field(j);
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
-						printer.Print("  if Assigned($name$) then FreeAndNil($name$);\n","name",PrivateFieldName(field));
+						printer.Print(
+							"  if Assigned($name$) then\n"
+							"    FreeAndNil($name$);\n","name",PrivateFieldName(field));
 					} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						printer.Print("  if Assigned($name$) then\n    FreeAndNil($name$);\n","name",PrivateFieldName(field));
+						printer.Print(
+							"  if Assigned($name$) then\n"
+							"  begin\n"
+							"    $name$.OnNotify := nil;\n"
+							"    FreeAndNil($name$);\n"
+							"  end;\n"
+							,"name",PrivateFieldName(field));
 					} else if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
 						printer.Print("  if Assigned($name$) then FreeAndNil($name$);\n","name",PrivateFieldName(field));
 					}

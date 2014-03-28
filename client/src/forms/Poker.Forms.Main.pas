@@ -418,6 +418,7 @@ begin
     end;
   finally
     clubs.Free;
+    cmd.Free;
   end;
 end;
 

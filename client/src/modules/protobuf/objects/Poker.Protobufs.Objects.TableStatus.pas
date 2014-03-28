@@ -109,11 +109,20 @@ end;
 destructor TPB_TableStatus.Destroy;
 begin
   if Assigned(FSeats) then
+  begin
+    FSeats.OnNotify := nil;
     FreeAndNil(FSeats);
+  end;
   if Assigned(FEvents) then
+  begin
+    FEvents.OnNotify := nil;
     FreeAndNil(FEvents);
+  end;
   if Assigned(FPots) then
+  begin
+    FPots.OnNotify := nil;
     FreeAndNil(FPots);
+  end;
   inherited;
 end;
 

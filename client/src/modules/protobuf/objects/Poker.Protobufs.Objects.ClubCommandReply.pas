@@ -54,7 +54,10 @@ destructor TPB_ClubCommandReply.Destroy;
 begin
   if Assigned(FClub) then FreeAndNil(FClub);
   if Assigned(FGames) then
+  begin
+    FGames.OnNotify := nil;
     FreeAndNil(FGames);
+  end;
   inherited;
 end;
 

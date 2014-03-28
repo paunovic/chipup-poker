@@ -44,7 +44,10 @@ end;
 destructor TPB_FetchHandHistory.Destroy;
 begin
   if Assigned(FClubs) then
+  begin
+    FClubs.OnNotify := nil;
     FreeAndNil(FClubs);
+  end;
   inherited;
 end;
 
