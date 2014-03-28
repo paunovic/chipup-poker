@@ -3736,10 +3736,6 @@ object frmChipUpMain: TfrmChipUpMain
           HeaderAlignmentHorz = taCenter
           Width = 25
         end
-        object gridGamesTableColumn1: TcxGridColumn
-          PropertiesClassName = 'TcxTextEditProperties'
-          Width = 120
-        end
       end
       object gridGamesLevel: TcxGridLevel
         GridView = gridGamesTable

@@ -80,7 +80,6 @@ type
     acJoinSelectedPublicClub: TAction;
     tiPublicClubRefresh: TTimer;
     btPublicClubs: TcxButton;
-    gridGamesTableColumn1: TcxGridColumn;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -425,11 +424,9 @@ end;
 procedure TfrmChipUpMain.UpdateGamelist;
 var
   C1  : Integer;
-  C2: Integer;
   game: TGameInfo;
   c   : TcxGridDataController;
   club: TClubInfo;
-  tmp :String;
 begin
   c := gridGamesTable.DataController;
   c.BeginFullUpdate;
@@ -453,12 +450,6 @@ begin
       c.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
       c.SetValue(C1, gridGamesStatus.Index, game.StateAsStr);
-
-      tmp := '';
-      for C2 := Low(game.MongoId) to High(game.MongoId) do
-        tmp := tmp + InttOHex(game.MongoId[C2], 2);
-      c.SetValue(C1, gridGamesTableColumn1.Index, tmp);
-
     end;
   finally
     c.EndFullUpdate;

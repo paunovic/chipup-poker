@@ -3,7 +3,7 @@ unit Poker.Table.Resources;
 interface
 
 uses
-  AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas, GR32, GR32_Resamplers, Poker.Cards;
+  Winapi.Windows, AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas, Poker.Cards;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
@@ -195,7 +195,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils;
 
 
 
