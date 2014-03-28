@@ -59,6 +59,7 @@ message Club {
 	optional int32 member_count = 11;
 	repeated bytes suspended_members = 12;
 	optional uint32 rake = 13;
+	optional uint32 lasthandid = 14;
 }
 
 message User {
