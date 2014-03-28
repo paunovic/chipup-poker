@@ -169,6 +169,9 @@ destructor TServerSocket.Destroy;
 begin
   {$IFDEF DEBUG} DebugLn('TServerSocket.Destroy', ditSocket); {$ENDIF}
 
+  if IsConnected then
+    Disconnect;
+
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
   FSocket.Free;

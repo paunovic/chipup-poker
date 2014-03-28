@@ -171,7 +171,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core,
-  Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.FetchHandHistory;
+  Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.FetchHandHistory, Poker.Settings, Poker.HandDownloader;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -382,15 +382,17 @@ var
   cmd        : TPB_FetchHandHistory;
 begin
   clubs := TObjectList<TClubInfo>.Create(FALSE);
-  cmd := TPB_FetchHandHistory.Create;
   try
     for club in dmMain.SelfInfo.Clubs do
       if CompareBytes(club.OwnerId, dmMain.SelfInfo.Id) then
         clubs.Add(club);
 
-    if clubs.Count > 0 then
-    begin
+      if clubs.Count = 0 then
+        Exit;
+
       if Database.Connect then
+      try
+        cmd := TPB_FetchHandHistory.Create;
         try
           for club in clubs do
           begin
@@ -405,20 +407,19 @@ begin
           end;
 
           if cmd.Clubs.Count > 0 then
-          begin
             ServerSocket.FetchHandHistory(cmd);
-          end;
         finally
-          Database.Disconnect;
+          cmd.Free;
         end
+      finally
+        Database.Disconnect;
+      end
       else
       begin
         {$IFDEF DEBUG} DebugLn('Failed to connect to database (CheckHandIds)!', ditException); {$ENDIF}
       end;
-    end;
   finally
     clubs.Free;
-    cmd.Free;
   end;
 end;
 
@@ -977,7 +978,7 @@ var
 begin
   pbhanddata := AObject as TPB_FetchHandReply;
 
-  DebugLn('UUID: ' + pbhanddata.Uuid, ditException);
+  HandDownloader.Download(Format(Settings.Hardcoded.URL.FETCH_HANDS, [pbhanddata.Uuid]));
 end;
 
 

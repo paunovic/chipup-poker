@@ -116,7 +116,8 @@ uses
   Poker.Protobufs.Objects.CloseGameData in 'modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas',
   Poker.Protobufs.Objects.ClubQuery in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubQuery.pas',
   Poker.Protobufs.Objects.FetchHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas',
-  Poker.Protobufs.Objects.FetchHandReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas';
+  Poker.Protobufs.Objects.FetchHandReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas',
+  Poker.HandDownloader in 'modules\Poker.HandDownloader.pas';
 
 procedure FocusPokerApp;
 var

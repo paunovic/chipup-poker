@@ -28,6 +28,7 @@ type
                                   UPLOAD_AVATAR       : String;
                                   LATEST_VERSION      : String;
                                   LATEST_VERSION_DEBUG: String;
+                                  FETCH_HANDS         : String;
                                 end;
                               end;
   public
@@ -60,6 +61,7 @@ type
                                              UPLOAD_AVATAR       : URL_DOMAIN + '/uploadAvatar';
                                              LATEST_VERSION      : URL_DOMAIN + '/install_chipuppoker.exe';
                                              LATEST_VERSION_DEBUG: URL_DOMAIN + '/debug_install_chipuppoker.exe';
+                                             FETCH_HANDS         : URL_DOMAIN + '/fetchhands?uuid=%s';
                                            )
                                          );
   end;

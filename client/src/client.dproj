@@ -250,6 +250,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubQuery.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas"/>
+			<DCCReference Include="modules\Poker.HandDownloader.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

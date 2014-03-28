@@ -51,7 +51,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
-  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables;
+  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HandDownloader;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -78,8 +78,9 @@ begin
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
   TAvatars.Initialize(AppDataRoamingPath + TSettings.Hardcoded.AVATARS_SUBDIR);
-  TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+  THandDownloader.Initialize;
   TSounds.Initialize;
+  TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
 
   FPublicClubs := TClubsInfo.Create;
   FSelfInfo := TPlayerInfo.Create;
@@ -96,11 +97,9 @@ begin
   FSelfInfo.Free;
   FPublicClubs.Free;
 
-  if ServerSocket.IsConnected then
-    ServerSocket.Disconnect;
   TServerSocket.Deinitialize;
-
   TSounds.Deinitialize;
+  THandDownloader.Deinitialize;
   TAvatars.Deinitialize;
   TFormsContainer.Deinitialize;
   TMessageContainer.Deinitialize;
