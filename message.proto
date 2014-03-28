@@ -112,10 +112,6 @@ message StatusReply {
 	repeated Club public_clubs = 5;
 }
 
-message GetDeckReply {
-	required string deck = 1;
-}
-
 message ListClubsReply {
 	repeated Club clubs = 1;
 }
@@ -459,18 +455,7 @@ message HandHistory {
 	required bytes tablecards = 5;
 	required uint32 endtime = 6;
 }
-message RetrieveHandHistoryData {
-	required uint32 clubseq = 1;
-	required uint32 startid = 2;
-	required uint32 endid = 3;
-}
-message RetrieveHandHistoryReply {
-	message HistoryReference {
-		required bytes _id = 1;
-		required uint32 seq = 2;
-	}
-	repeated HistoryReference rows = 1;
-}
+
 message CloseGameData {
 	required bytes gameid = 1;
 	optional uint32 timestamp = 2 [ default=0 ];
