@@ -213,6 +213,7 @@ enum ServerCodes {
 	srTableAddonOk = 51;
 	srTableAddonOverLimit = 52;
 	srRetrieveHandHistoryData = 53;
+	srFetchHandData = 54;
 
     seChat = 200;
     seSecondaryLoginDetected = 201;
@@ -481,4 +482,6 @@ message FetchHandHistory {
 	}
 	repeated ClubQuery clubs = 1;
 }
-
+message FetchHandReply {
+	required string uuid = 1;
+}
