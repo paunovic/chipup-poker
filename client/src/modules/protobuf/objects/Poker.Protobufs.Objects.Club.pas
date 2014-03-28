@@ -54,6 +54,7 @@ type
     procedure SetSuspendedMembers(const AValue: TArray<TBytes>);
     procedure SetRake(const AValue: UINT32);
     procedure SetLasthandid(const AValue: UINT32);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -79,10 +80,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_Club.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_Club.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -150,6 +153,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_Club.SetMongoId(const AValue: TBytes);
 begin
   FId := AValue;

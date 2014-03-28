@@ -17,11 +17,16 @@ type
     var
       FClubs: TObjectList<TPB_Club>;
 
+    procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Clubs: TObjectList<TPB_Club> read FClubs write FClubs;
+    property Clubs: TObjectList<TPB_Club> read FClubs;
   end;
 
 implementation
@@ -30,19 +35,23 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_ListClubsReply.InitObjects;
+begin
+  FClubs := TObjectList<TPB_Club>.Create;
+  FClubs.OnNotify := ClubsNotifyEvent;
+end;
+
 destructor TPB_ListClubsReply.Destroy;
 begin
   if Assigned(FClubs) then
-    FClubs.Free;
+    FreeAndNil(FClubs);
   inherited;
 end;
+
 procedure TPB_ListClubsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FClubs) then
-    FClubs := TObjectList<TPB_Club>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -56,4 +65,13 @@ begin
     end;
   end;
 end;
+
+procedure TPB_ListClubsReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_CLUBS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
 end.

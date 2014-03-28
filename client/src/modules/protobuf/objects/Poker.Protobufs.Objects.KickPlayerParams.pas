@@ -21,6 +21,7 @@ type
 
     procedure SetClubSeq(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -35,10 +36,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_KickPlayerParams.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_KickPlayerParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -60,6 +63,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_KickPlayerParams.SetClubSeq(const AValue: Integer);
 begin
   FClubSeq := AValue;

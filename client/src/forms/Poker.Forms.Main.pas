@@ -171,7 +171,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core,
-  Poker.Protobufs.Objects.FetchHandReply;
+  Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.FetchHandHistory;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -379,9 +379,10 @@ var
   clubs      : TObjectList<TClubInfo>;
   local_lhi  : UINT32;
   clubquery  : TPB_ClubQuery;
-  clubqueries: TObjectList<TPB_ClubQuery>;
+  cmd        : TPB_FetchHandHistory;
 begin
   clubs := TObjectList<TClubInfo>.Create(FALSE);
+  cmd := TPB_FetchHandHistory.Create;
   try
     for club in dmMain.SelfInfo.Clubs do
       if CompareBytes(club.OwnerId, dmMain.SelfInfo.Id) then
@@ -391,28 +392,21 @@ begin
     begin
       if Database.Connect then
         try
-          clubqueries := TObjectList<TPB_ClubQuery>.Create;
-          try
-            for club in clubs do
+          for club in clubs do
+          begin
+            local_lhi := Database.LastHandId(club.MongoId);
+            if local_lhi <> club.LastHandId then
             begin
-              local_lhi := Database.LastHandId(club.MongoId);
-              if local_lhi <> club.LastHandId then
-              begin
-                clubquery := TPB_ClubQuery.Create;
-                clubquery.Clubid := club.MongoId;
-                clubquery.Lasthandid := local_lhi;
-                clubqueries.Add(clubquery);
-              end;
+              clubquery := TPB_ClubQuery.Create;
+              clubquery.Clubid := club.MongoId;
+              clubquery.Lasthandid := local_lhi;
+              cmd.Clubs.Add(clubquery);
             end;
+          end;
 
-            if clubqueries.Count > 0 then
-            begin
-              ServerSocket.FetchHandHistory(clubqueries);
-              clubqueries := nil;
-            end;
-          finally
-            if Assigned(clubqueries) then
-              clubqueries.Free;
+          if cmd.Clubs.Count > 0 then
+          begin
+            ServerSocket.FetchHandHistory(cmd);
           end;
         finally
           Database.Disconnect;

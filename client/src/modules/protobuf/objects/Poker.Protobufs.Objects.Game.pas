@@ -60,6 +60,7 @@ type
     procedure SetBuyinMax(const AValue: Integer);
     procedure SetState(const AValue: TGameState);
     procedure SetClosetime(const AValue: UInt64);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -86,10 +87,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_Game.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_Game.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -159,6 +162,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_Game.SetMongoId(const AValue: TBytes);
 begin
   FId := AValue;

@@ -19,6 +19,7 @@ type
       FStatus: TRegisterStatus;
 
     procedure SetStatus(const AValue: TRegisterStatus);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -32,10 +33,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_RegisterReply.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_RegisterReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -53,6 +56,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_RegisterReply.SetStatus(const AValue: TRegisterStatus);
 begin
   FStatus := AValue;

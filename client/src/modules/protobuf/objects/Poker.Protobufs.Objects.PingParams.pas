@@ -18,6 +18,7 @@ type
       FUptime: UINT32;
 
     procedure SetUptime(const AValue: UINT32);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -31,10 +32,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_PingParams.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_PingParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -52,6 +55,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_PingParams.SetUptime(const AValue: UINT32);
 begin
   FUptime := AValue;

@@ -36,6 +36,7 @@ type
     procedure SetMaxTimebank(const AValue: Integer);
     procedure SetLatestVersion(const AValue: String);
     procedure SetLatestDebugVersion(const AValue: String);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -55,11 +56,13 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_HelloReply.Destroy;
 begin
-  if Assigned(FStringSizes) then FStringSizes.Free;
+  if Assigned(FStringSizes) then FreeAndNil(FStringSizes);
   inherited;
 end;
+
 procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -103,6 +106,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_HelloReply.SetStringSizes(const AValue: TPB_StringSizes);
 begin
   FStringSizes := AValue;

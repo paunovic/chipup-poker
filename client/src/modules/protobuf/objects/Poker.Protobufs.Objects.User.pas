@@ -33,6 +33,7 @@ type
     procedure SetEmail(const AValue: String);
     procedure SetAuthed(const AValue: Boolean);
     procedure SetChips(const AValue: UINT32);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -51,10 +52,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_User.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_User.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -92,6 +95,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_User.SetMongoId(const AValue: TBytes);
 begin
   FId := AValue;

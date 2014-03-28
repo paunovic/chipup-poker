@@ -18,6 +18,7 @@ type
       FNewMail: String;
 
     procedure SetNewMail(const AValue: String);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -31,10 +32,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_ChangeEMailParams.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_ChangeEMailParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -52,6 +55,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_ChangeEMailParams.SetNewMail(const AValue: String);
 begin
   FNewMail := AValue;

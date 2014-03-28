@@ -22,6 +22,7 @@ type
 
     procedure SetSeat(const AValue: Integer);
     procedure SetMsg(const AValue: String);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -36,10 +37,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_WinnerData.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_WinnerData.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -61,6 +64,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_WinnerData.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;

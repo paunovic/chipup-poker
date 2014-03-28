@@ -24,13 +24,18 @@ type
 
     procedure SetStatus(const AValue: TClubStatus);
     procedure SetClub(const AValue: TPB_Club);
+    procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Status: TClubStatus read FStatus write SetStatus;
     property Club: TPB_Club read FClub write SetClub;
-    property Games: TObjectList<TPB_Game> read FGames write FGames;
+    property Games: TObjectList<TPB_Game> read FGames;
   end;
 
 implementation
@@ -39,20 +44,24 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_ClubCommandReply.InitObjects;
+begin
+  FGames := TObjectList<TPB_Game>.Create;
+  FGames.OnNotify := GamesNotifyEvent;
+end;
+
 destructor TPB_ClubCommandReply.Destroy;
 begin
-  if Assigned(FClub) then FClub.Free;
+  if Assigned(FClub) then FreeAndNil(FClub);
   if Assigned(FGames) then
-    FGames.Free;
+    FreeAndNil(FGames);
   inherited;
 end;
+
 procedure TPB_ClubCommandReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FGames) then
-    FGames := TObjectList<TPB_Game>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -76,6 +85,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_ClubCommandReply.SetStatus(const AValue: TClubStatus);
 begin
   FStatus := AValue;
@@ -86,6 +96,14 @@ procedure TPB_ClubCommandReply.SetClub(const AValue: TPB_Club);
 begin
   FClub := AValue;
   ProtobufOutput.writeMessage(FN_CLUB, AValue.ProtobufOutput);
+end;
+
+procedure TPB_ClubCommandReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_GAMES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

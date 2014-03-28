@@ -18,6 +18,7 @@ type
       FAvatarId: TBytes;
 
     procedure SetAvatarId(const AValue: TBytes);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -31,10 +32,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_SetAvatarParams.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -52,6 +55,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_SetAvatarParams.SetAvatarId(const AValue: TBytes);
 begin
   FAvatarId := AValue;

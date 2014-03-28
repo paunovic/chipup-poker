@@ -30,13 +30,18 @@ type
     procedure SetSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<UINT32>);
     procedure SetCards(const AValue: TBytes);
+    procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_PotInfo; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Event: TTableEventType read FEvent write SetEvent;
     property Seat: Integer read FSeat write SetSeat;
-    property Pots: TObjectList<TPB_PotInfo> read FPots write FPots;
+    property Pots: TObjectList<TPB_PotInfo> read FPots;
     property Bets: TArray<UINT32> read FBets write SetBets;
     property Cards: TBytes read FCards write SetCards;
   end;
@@ -47,19 +52,23 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_TableEvent.InitObjects;
+begin
+  FPots := TObjectList<TPB_PotInfo>.Create;
+  FPots.OnNotify := PotsNotifyEvent;
+end;
+
 destructor TPB_TableEvent.Destroy;
 begin
   if Assigned(FPots) then
-    FPots.Free;
+    FreeAndNil(FPots);
   inherited;
 end;
+
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FPots) then
-    FPots := TObjectList<TPB_PotInfo>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -90,6 +99,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_TableEvent.SetEvent(const AValue: TTableEventType);
 begin
   FEvent := AValue;
@@ -100,6 +110,14 @@ procedure TPB_TableEvent.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
   ProtobufOutput.writeInt32(FN_SEAT, AValue);
+end;
+
+procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_PotInfo; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 procedure TPB_TableEvent.SetBets(const AValue: TArray<UINT32>);

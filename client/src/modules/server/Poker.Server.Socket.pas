@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubQuery, OverbyteIcsWndControl,
   System.Generics.Collections, OverbyteIcsWSocket, Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.FetchHandHistory;
 
 type
   TServerSocket = class
@@ -92,7 +92,7 @@ type
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
-    procedure FetchHandHistory(const AClubQueries: TObjectList<TPB_ClubQuery>);
+    procedure FetchHandHistory(const protobuf: TPB_FetchHandHistory);
 
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
@@ -118,7 +118,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
-  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.FetchHandHistory, Poker.Protobufs.Objects.FetchHandReply;
+  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.FetchHandReply;
 
 var
   FConnectThreadId: DWORD;
@@ -1026,17 +1026,9 @@ begin
   end;
 end;
 
-procedure TServerSocket.FetchHandHistory(const AClubQueries: TObjectList<TPB_ClubQuery>);
-var
-  protobuf: TPB_FetchHandHistory;
+procedure TServerSocket.FetchHandHistory(const protobuf: TPB_FetchHandHistory);
 begin
-  protobuf := TPB_FetchHandHistory.Create;
-  try
-    protobuf.Clubs := AClubQueries;
-    SendProtobuf(scFetchHandHistory, protobuf);
-  finally
-    protobuf.Free;
-  end;
+  SendProtobuf(scFetchHandHistory, protobuf);
 end;
 
 

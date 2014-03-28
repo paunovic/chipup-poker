@@ -26,15 +26,23 @@ type
       FPublicClubs: TObjectList<TPB_Club>;
 
     procedure SetSelf(const AValue: TPB_User);
+    procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+    procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+    procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
+    procedure PublicClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Clubs: TObjectList<TPB_Club> read FClubs write FClubs;
-    property Users: TObjectList<TPB_User> read FUsers write FUsers;
+    property Clubs: TObjectList<TPB_Club> read FClubs;
+    property Users: TObjectList<TPB_User> read FUsers;
     property Self: TPB_User read FSelf write SetSelf;
-    property Games: TObjectList<TPB_Game> read FGames write FGames;
-    property PublicClubs: TObjectList<TPB_Club> read FPublicClubs write FPublicClubs;
+    property Games: TObjectList<TPB_Game> read FGames;
+    property PublicClubs: TObjectList<TPB_Club> read FPublicClubs;
   end;
 
 implementation
@@ -43,35 +51,36 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_StatusReply.InitObjects;
+begin
+  FClubs := TObjectList<TPB_Club>.Create;
+  FClubs.OnNotify := ClubsNotifyEvent;
+  FUsers := TObjectList<TPB_User>.Create;
+  FUsers.OnNotify := UsersNotifyEvent;
+  FGames := TObjectList<TPB_Game>.Create;
+  FGames.OnNotify := GamesNotifyEvent;
+  FPublicClubs := TObjectList<TPB_Club>.Create;
+  FPublicClubs.OnNotify := PublicClubsNotifyEvent;
+end;
+
 destructor TPB_StatusReply.Destroy;
 begin
   if Assigned(FClubs) then
-    FClubs.Free;
+    FreeAndNil(FClubs);
   if Assigned(FUsers) then
-    FUsers.Free;
-  if Assigned(FSelf) then FSelf.Free;
+    FreeAndNil(FUsers);
+  if Assigned(FSelf) then FreeAndNil(FSelf);
   if Assigned(FGames) then
-    FGames.Free;
+    FreeAndNil(FGames);
   if Assigned(FPublicClubs) then
-    FPublicClubs.Free;
+    FreeAndNil(FPublicClubs);
   inherited;
 end;
+
 procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FClubs) then
-    FClubs := TObjectList<TPB_Club>.Create;
-
-  if not Assigned(FUsers) then
-    FUsers := TObjectList<TPB_User>.Create;
-
-  if not Assigned(FGames) then
-    FGames := TObjectList<TPB_Game>.Create;
-
-  if not Assigned(FPublicClubs) then
-    FPublicClubs := TObjectList<TPB_Club>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -103,10 +112,43 @@ begin
     end;
   end;
 end;
+
+procedure TPB_StatusReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_CLUBS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_StatusReply.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_USERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
 procedure TPB_StatusReply.SetSelf(const AValue: TPB_User);
 begin
   FSelf := AValue;
   ProtobufOutput.writeMessage(FN_SELF, AValue.ProtobufOutput);
+end;
+
+procedure TPB_StatusReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_GAMES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_StatusReply.PublicClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_PUBLIC_CLUBS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

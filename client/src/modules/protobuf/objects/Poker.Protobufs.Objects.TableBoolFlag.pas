@@ -21,6 +21,7 @@ type
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetFlag(const AValue: Boolean);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -35,10 +36,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_TableBoolFlag.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_TableBoolFlag.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -60,6 +63,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
 begin
   FTableMongoId := AValue;

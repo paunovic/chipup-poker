@@ -18,6 +18,7 @@ type
       FNewPassword: String;
 
     procedure SetNewPassword(const AValue: String);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -31,10 +32,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_ChangePasswordParams.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_ChangePasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -52,6 +55,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);
 begin
   FNewPassword := AValue;

@@ -24,6 +24,7 @@ type
     procedure SetMethodId(const AValue: Integer);
     procedure SetDataSize(const AValue: Integer);
     procedure SetToken(const AValue: Integer);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -39,10 +40,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_RpcMessage.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_RpcMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -68,6 +71,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_RpcMessage.SetMethodId(const AValue: Integer);
 begin
   FMethodId := AValue;

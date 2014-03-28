@@ -21,6 +21,7 @@ type
 
     procedure SetGameid(const AValue: TBytes);
     procedure SetTimestamp(const AValue: UINT32);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -35,10 +36,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_CloseGameData.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_CloseGameData.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -60,6 +63,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_CloseGameData.SetGameid(const AValue: TBytes);
 begin
   FGameid := AValue;

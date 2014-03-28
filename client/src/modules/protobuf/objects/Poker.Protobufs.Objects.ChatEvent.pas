@@ -25,6 +25,7 @@ type
     procedure SetEvent(const AValue: TEventType);
     procedure SetMsg(const AValue: TPB_ChatMessage);
     procedure SetTableId(const AValue: TBytes);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -40,11 +41,13 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_ChatEvent.Destroy;
 begin
-  if Assigned(FMsg) then FMsg.Free;
+  if Assigned(FMsg) then FreeAndNil(FMsg);
   inherited;
 end;
+
 procedure TPB_ChatEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -72,6 +75,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_ChatEvent.SetEvent(const AValue: TEventType);
 begin
   FEvent := AValue;
