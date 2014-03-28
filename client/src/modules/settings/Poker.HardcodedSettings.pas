@@ -16,6 +16,7 @@ type
                                 SETTINGS_FILENAME      : String;
                                 SETTINGS_ENCRYPTION_KEY: String;
                                 AVATARS_SUBDIR         : String;
+                                DATABASE_FILENAME      : String;
                                 TCP_SERVER_ADDRESS     : String;
                                 TCP_SERVER_PORT        : Word;
                                 TCP_PING_INTERVAL      : Word;
@@ -43,6 +44,7 @@ type
                                            SETTINGS_FILENAME: 'settings.dat';
                                            SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
                                            AVATARS_SUBDIR: 'avatars';
+                                           DATABASE_FILENAME: 'database.sqlite';
 
                                            // socket server
                                            TCP_SERVER_ADDRESS: 'server.chipuppoker.com';

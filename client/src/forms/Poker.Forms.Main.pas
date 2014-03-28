@@ -135,9 +135,11 @@ type
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRListClubs(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRFetchHandData(const AMethodId: Integer; const AObject: TObject);
 
     function ConfirmToCloseTables: Boolean;
     function ProcessClubObject(const AClub: TPB_Club): TClubInfo;
+    procedure CheckHandIds;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
@@ -161,13 +163,15 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} {$ENDIF}
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  System.Generics.Collections, Poker.Protobufs.Objects.ClubQuery,
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
-  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Forms.Debug;
+  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core,
+  Poker.Protobufs.Objects.FetchHandReply;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -367,6 +371,60 @@ begin
     Exit;
 
   FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
+end;
+
+procedure TfrmChipUpMain.CheckHandIds;
+var
+  club       : TClubInfo;
+  clubs      : TObjectList<TClubInfo>;
+  local_lhi  : UINT32;
+  clubquery  : TPB_ClubQuery;
+  clubqueries: TObjectList<TPB_ClubQuery>;
+begin
+  clubs := TObjectList<TClubInfo>.Create(FALSE);
+  try
+    for club in dmMain.SelfInfo.Clubs do
+      if CompareBytes(club.OwnerId, dmMain.SelfInfo.Id) then
+        clubs.Add(club);
+
+    if clubs.Count > 0 then
+    begin
+      if Database.Connect then
+        try
+          clubqueries := TObjectList<TPB_ClubQuery>.Create;
+          try
+            for club in clubs do
+            begin
+              local_lhi := Database.LastHandId(club.MongoId);
+              if local_lhi <> club.LastHandId then
+              begin
+                clubquery := TPB_ClubQuery.Create;
+                clubquery.Clubid := club.MongoId;
+                clubquery.Lasthandid := local_lhi;
+                clubqueries.Add(clubquery);
+              end;
+            end;
+
+            if clubqueries.Count > 0 then
+            begin
+              ServerSocket.FetchHandHistory(clubqueries);
+              clubqueries := nil;
+            end;
+          finally
+            if Assigned(clubqueries) then
+              clubqueries.Free;
+          end;
+        finally
+          Database.Disconnect;
+        end
+      else
+      begin
+        {$IFDEF DEBUG} DebugLn('Failed to connect to database (CheckHandIds)!', ditException); {$ENDIF}
+      end;
+    end;
+  finally
+    clubs.Free;
+  end;
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -608,13 +666,15 @@ begin
                           TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                           TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                          TServerMessageCallback.Create(srListClubs, CSRListClubs)
+                          TServerMessageCallback.Create(srListClubs, CSRListClubs),
+                          TServerMessageCallback.Create(srFetchHandData, CSRFetchHandData)
                       ]);
 
       FSelectedClub := -1;
       FSelectedPublicClubId := -1;
       SetLength(FSelectedGame, 0);
       tiPublicClubRefresh.Enabled := TRUE;
+      CheckHandIds;
       ConfigureGUI;
       Show;
     end;
@@ -914,6 +974,15 @@ begin
   table.Game.UpdateFromTableStatus(pbtstatus);
 
   ConfigureGUI;
+end;
+
+procedure TfrmChipUpMain.CSRFetchHandData(const AMethodId: Integer; const AObject: TObject);
+var
+  pbhanddata: TPB_FetchHandReply;
+begin
+  pbhanddata := AObject as TPB_FetchHandReply;
+
+  DebugLn('UUID: ' + pbhanddata.Uuid, ditException);
 end;
 
 

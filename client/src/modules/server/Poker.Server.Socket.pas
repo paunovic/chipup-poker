@@ -3,8 +3,9 @@ unit Poker.Server.Socket;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils,
-  OverbyteIcsWndControl, OverbyteIcsWSocket, Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game;
+  Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubQuery, OverbyteIcsWndControl,
+  System.Generics.Collections, OverbyteIcsWSocket, Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game;
 
 type
   TServerSocket = class
@@ -91,7 +92,7 @@ type
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
-    procedure RetrieveHandHistoryData(const AClubSeq, AStartHand, AEndHand: Int64);
+    procedure FetchHandHistory(const AClubQueries: TObjectList<TPB_ClubQuery>);
 
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
@@ -107,12 +108,17 @@ implementation
 uses
   Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer,
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ChangeEMailParams, Poker.Protobufs.Objects.ForgotPasswordParams,
-  Poker.Protobufs.Objects.ListClubsReply, Poker.Protobufs.Objects.TransferChipsParams, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.KickPlayerParams, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
-  Poker.Protobufs.Objects.GiveClubOwnershipParams, Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams,
-  Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
-  Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.RetrieveHandHistoryData,
-  Poker.Protobufs.Objects.CloseGameData;
+  Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply,
+  Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ChangeEMailParams,
+  Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply, Poker.Protobufs.Objects.TransferChipsParams,
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.KickPlayerParams,
+  Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply, Poker.Protobufs.Objects.GiveClubOwnershipParams,
+  Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
+  Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
+  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
+  Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
+  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.FetchHandHistory, Poker.Protobufs.Objects.FetchHandReply;
 
 var
   FConnectThreadId: DWORD;
@@ -484,6 +490,7 @@ begin
     seGameCreate,
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
+    srFetchHandData: ADataObject := TPB_FetchHandReply.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
@@ -1019,20 +1026,19 @@ begin
   end;
 end;
 
-procedure TServerSocket.RetrieveHandHistoryData(const AClubSeq, AStartHand, AEndHand: Int64);
+procedure TServerSocket.FetchHandHistory(const AClubQueries: TObjectList<TPB_ClubQuery>);
 var
-  protobuf: TPB_RetrieveHandHistoryData;
+  protobuf: TPB_FetchHandHistory;
 begin
-  protobuf := TPB_RetrieveHandHistoryData.Create;
+  protobuf := TPB_FetchHandHistory.Create;
   try
-    protobuf.Clubseq := AClubSeq;
-    protobuf.Startid := AStartHand;
-    protobuf.Endid := AEndHand;
-    SendProtobuf(scRetrieveHandHistoryData, protobuf);
+    protobuf.Clubs := AClubQueries;
+    SendProtobuf(scFetchHandHistory, protobuf);
   finally
     protobuf.Free;
   end;
 end;
+
 
 
 end.

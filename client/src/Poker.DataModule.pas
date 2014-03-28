@@ -50,7 +50,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
-  Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer,
+  Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables;
 
 
@@ -71,6 +71,7 @@ begin
   LoadFonts;
 
   TSettings.Initialize;
+  TDatabase.Initialize(AppDataRoamingPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TDXCore.Initialize;
   TDXTimer.Initialize;
   TServerSettings.Initialize;
@@ -108,6 +109,7 @@ begin
     TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
+  TDatabase.Deinitialize;
   TSettings.Deinitialize;
 
   {$IFDEF DEBUG}
