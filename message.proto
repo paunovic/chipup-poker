@@ -440,7 +440,10 @@ message UserChangeParams {
 	repeated User users = 1;
 }
 
-message ShortHandHistoryReply {
+message FetchHandHistoryReply {
+	repeated ClubHandHistoryReply reply = 1;
+}
+message ClubHandHistoryReply {
 	required bytes clubid = 1;
 	required bytes gameid = 2;
 	repeated HandHistory rows = 3;
