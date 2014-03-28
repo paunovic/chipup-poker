@@ -263,6 +263,7 @@ enum ServerCodes {
 	scShowLosingCards = 535;
 	seUserChange = 536;
 	scRetrieveHandHistoryData = 537;
+	scFetchHandHistory = 538;
 }
 
 service Server {
@@ -473,3 +474,11 @@ message CloseGameData {
 	required bytes gameid = 1;
 	optional uint32 timestamp = 2 [ default=0 ];
 }
+message FetchHandHistory {
+	message ClubQuery {
+		required bytes clubid = 1;
+		required uint32 lasthandid = 2;
+	}
+	repeated ClubQuery clubs = 1;
+}
+
