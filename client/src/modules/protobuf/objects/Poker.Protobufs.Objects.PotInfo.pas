@@ -23,13 +23,18 @@ type
 
     procedure SetSum(const AValue: UINT32);
     procedure SetSeats(const AValue: TArray<UINT32>);
+    procedure WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Sum: UINT32 read FSum write SetSum;
     property Seats: TArray<UINT32> read FSeats write SetSeats;
-    property WinnerData: TObjectList<TPB_WinnerData> read FWinnerData write FWinnerData;
+    property WinnerData: TObjectList<TPB_WinnerData> read FWinnerData;
   end;
 
 implementation
@@ -38,19 +43,26 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_PotInfo.InitObjects;
+begin
+  FWinnerData := TObjectList<TPB_WinnerData>.Create;
+  FWinnerData.OnNotify := WinnerDataNotifyEvent;
+end;
+
 destructor TPB_PotInfo.Destroy;
 begin
   if Assigned(FWinnerData) then
-    FWinnerData.Free;
+  begin
+    FWinnerData.OnNotify := nil;
+    FreeAndNil(FWinnerData);
+  end;
   inherited;
 end;
+
 procedure TPB_PotInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FWinnerData) then
-    FWinnerData := TObjectList<TPB_WinnerData>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -73,6 +85,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_PotInfo.SetSum(const AValue: UINT32);
 begin
   FSum := AValue;
@@ -86,6 +99,14 @@ begin
   FSeats := AValue;
   for C1 := 0 to Length(FSeats) - 1 do
     ProtobufOutput.writeUInt32(FN_SEATS, AValue[C1]);
+end;
+
+procedure TPB_PotInfo.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_WINNERDATA,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

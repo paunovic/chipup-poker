@@ -20,12 +20,17 @@ type
       FUsers: TObjectList<TPB_User>;
 
     procedure SetUserMongoIds(const AValue: TArray<TBytes>);
+    procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property UserMongoIds: TArray<TBytes> read FUserMongoIds write SetUserMongoIds;
-    property Users: TObjectList<TPB_User> read FUsers write FUsers;
+    property Users: TObjectList<TPB_User> read FUsers;
   end;
 
 implementation
@@ -34,19 +39,26 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_GetUserParams.InitObjects;
+begin
+  FUsers := TObjectList<TPB_User>.Create;
+  FUsers.OnNotify := UsersNotifyEvent;
+end;
+
 destructor TPB_GetUserParams.Destroy;
 begin
   if Assigned(FUsers) then
-    FUsers.Free;
+  begin
+    FUsers.OnNotify := nil;
+    FreeAndNil(FUsers);
+  end;
   inherited;
 end;
+
 procedure TPB_GetUserParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FUsers) then
-    FUsers := TObjectList<TPB_User>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -65,6 +77,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_GetUserParams.SetUserMongoIds(const AValue: TArray<TBytes>);
 var
   C1: Integer;
@@ -72,6 +85,14 @@ begin
   FUserMongoIds := AValue;
   for C1 := 0 to Length(FUserMongoIds) - 1 do
     ProtobufOutput.writeBytes(FN_USER_MONGO_IDS, AValue[C1]);
+end;
+
+procedure TPB_GetUserParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_USERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

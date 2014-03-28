@@ -204,6 +204,7 @@
 			<DCCReference Include="modules\Poker.Cards.pas"/>
 			<DCCReference Include="modules\Poker.ChipStackMaker.pas"/>
 			<DCCReference Include="modules\Poker.Sounds.pas"/>
+			<DCCReference Include="modules\database\Poker.Database.Core.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas"/>
 			<DCCReference Include="modules\protobuf\Poker.Protobufs.Reader.pas"/>
 			<DCCReference Include="modules\protobuf\Poker.Protobufs.Objects.Base.pas"/>
@@ -245,12 +246,11 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RetrieveHandHistoryData.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RetrieveHandHistoryReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HistoryReference.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubQuery.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas"/>
+			<DCCReference Include="modules\Poker.HandDownloader.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

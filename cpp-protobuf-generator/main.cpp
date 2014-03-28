@@ -188,14 +188,30 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 	map<string,string> vars;
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
-		if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) continue;
 		const string type = getDelphiType(field);
 		if (type.empty()) continue;
-		vars["type"] = type;
+
 		vars["name"] = PropertyName(field);
 		vars["message"] = message->name();
-		vars["pname"] = PrivateFieldName(field);
 		vars["enum"] = EnumName(field);
+
+		if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) {
+			const Descriptor *subtype = field->message_type();
+			vars["subtype"] = subtype->name();
+			printer->Print(vars,
+				"procedure TPB_$message$.$name$NotifyEvent(Sender: TObject; const Item: TPB_$subtype$; Action: TCollectionNotification);\n"
+				"begin\n"
+				"  Assert(Action = cnAdded);\n"
+				"  ProtobufOutput.writeTag($enum$,WIRETYPE_LENGTH_DELIMITED);\n"
+				"  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);\n"
+				"  Item.ProtobufOutput.writeTo(ProtobufOutput);\n"
+				"end;\n"
+				"\n"
+				);
+			continue;
+		}
+		vars["type"] = type;
+		vars["pname"] = PrivateFieldName(field);
 		writter = "";
 		if (typeinfo[field->type()]) writter = typeinfo[field->type()]->writter;
 		else if (field->type() == FieldDescriptor::TYPE_ENUM) writter = "writeInt32";
@@ -244,6 +260,8 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 	}
 }
 	void GenerateMessage(const FileDescriptor* file, const Descriptor *message, GeneratorContext* generator_context) const {
+		bool needsInit = false;
+
 			scoped_ptr<io::ZeroCopyOutputStream> output(generator_context->Open("Poker.Protobufs.Objects." + message->name() + ".pas"));
 			io::Printer printer(output.get(), '$');
 			printer.Print(
@@ -265,6 +283,9 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				for (int j=0; j<message->field_count(); j++) {
 					const FieldDescriptor *field = message->field(j);
 					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+						if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+							needsInit = true;
+						}
 						const Descriptor *subtype = field->message_type();
 						string type = subtype->name();
 						bool addit = true;
@@ -347,28 +368,33 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 					}
 				}
 			}
+			printer.Print("\n");
+			GenerateSettersDec(message,&printer);
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
-				if (field->type() == FieldDescriptor::TYPE_BYTES) {
-					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
-//						printer.Print(
-//							"      function Get$name$_hex: String;\n"
-//							"      function Get$name$_base64: String;\n"
-//							,"name",field->camelcase_name());
+				if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+						const Descriptor *subtype = field->message_type();
+						printer.Print(
+							"    procedure $name$NotifyEvent(Sender: TObject; const Item: TPB_$subname$; Action: TCollectionNotification);\n"
+							,"name",PropertyName(field)
+							,"pname",PrivateFieldName(field)
+							,"subname",subtype->name());
 					}
 				}
 			}
-			printer.Print("\n");
-			GenerateSettersDec(message,&printer);
-			printer.Print(
+			if (needsInit) {
+				printer.Print(
+					"\n"
+					"  protected\n"
+					"    procedure InitObjects; override;\n");
+			}
+			printer.Print("\n"
 //				"    procedure Read(const AStream: TStream);\n"
 //				"    procedure Write: TProtoBufOutput;\n"
 				"  public\n"
-//				"    constructor Create("
 				);
-//			CreateArguments(&printer,message);
 			printer.Print(
-//				"); overload;\n"
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
 				"\n");
@@ -393,7 +419,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						vars["subname"] = subtype->name();
 						vars["type"] = getDelphiType(field);
-						printer.Print(vars,"    property $name$: $type$ read $pname$ write $pname$;\n");
+						printer.Print(vars,"    property $name$: $type$ read $pname$;\n");
 					} else {
 						printer.Print(
 							"    property $name$: TPB_$subname$ read $pname$ write Set$name$;\n"
@@ -414,15 +440,26 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				"uses\n"
 				"  pbPublic, Poker.Common.Misc;\n"
 				"\n"
-				"\n"
-//				"constructor TPB_$name$.Create("
-				,"name",message->name());
-/*			CreateArguments(&printer,message);
-			printer.Print(");\nbegin\n");
-			for (int j=0; j<message->field_count(); j++) {
-				const FieldDescriptor *field = message->field(j);
-				if (field->type() == FieldDescriptor::TYPE_BYTES) {
-					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
+				"\n");
+			if (needsInit) {
+				printer.Print(
+					"procedure TPB_$name$.InitObjects;\n"
+					"begin\n"
+					,"name",message->name());
+				for (int j=0; j<message->field_count(); j++) {
+					const FieldDescriptor *field = message->field(j);
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+							const Descriptor *subtype = field->message_type(); 
+							printer.Print(
+								"  $pname$ := TObjectList<TPB_$subname$>.Create;\n"
+								"  $pname$.OnNotify := $name$NotifyEvent;\n"
+								,"name",PropertyName(field)
+								,"pname",PrivateFieldName(field)
+								,"subname",subtype->name());
+						}
+					}
+/*				if (field->type() == FieldDescriptor::TYPE_BYTES) {
 						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_INT32) {
@@ -437,10 +474,12 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
 						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
 					}
+				}*/
 				}
-			}*/
+				printer.Print("end;\n");
+			}
 			printer.Print(
-//				"end;\n"
+				"\n"
 //				"{ TPBR_$name$ }\n"
 				"destructor TPB_$name$.Destroy;\n"
 				"begin\n"
@@ -449,23 +488,32 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				const FieldDescriptor *field = message->field(j);
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
-						printer.Print("  if Assigned($name$) then $name$.Free;\n","name",PrivateFieldName(field));
+						printer.Print(
+							"  if Assigned($name$) then\n"
+							"    FreeAndNil($name$);\n","name",PrivateFieldName(field));
 					} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						printer.Print("  if Assigned($name$) then\n    $name$.Free;\n","name",PrivateFieldName(field));
+						printer.Print(
+							"  if Assigned($name$) then\n"
+							"  begin\n"
+							"    $name$.OnNotify := nil;\n"
+							"    FreeAndNil($name$);\n"
+							"  end;\n"
+							,"name",PrivateFieldName(field));
 					} else if (field->label() == FieldDescriptor::LABEL_OPTIONAL) {
-						printer.Print("  if Assigned($name$) then $name$.Free;\n","name",PrivateFieldName(field));
+						printer.Print("  if Assigned($name$) then FreeAndNil($name$);\n","name",PrivateFieldName(field));
 					}
 				}
 			}
 			printer.Print(
 				"  inherited;\n"
 				"end;\n"
+				"\n"
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
 				"var\n"
 				"  tag,field_number,wire_type,endpos : Integer;\n"
 				"begin\n",
 				"name",message->name());
-			for (int j=0; j<message->field_count(); j++) {
+/*			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
@@ -477,7 +525,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							,"subname",getDelphiType(field));
 					}
 				}
-			}
+			}*/
 			printer.Print(
 				"  endpos := AProtobufReader.getPos + ASize;\n"
 				"  while (AProtobufReader.getPos < endpos) and\n"
@@ -605,7 +653,8 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				"    end;\n"
 //				"    tag := AProtobufReader.readTag;\n"
 				"  end;\n"
-				"end;\n");
+				"end;\n"
+				"\n");
 			/*FIXME for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				string name = field->name();

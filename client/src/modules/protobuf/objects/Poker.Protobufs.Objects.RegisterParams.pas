@@ -24,6 +24,7 @@ type
     procedure SetEmail(const AValue: String);
     procedure SetPassword(const AValue: String);
     procedure SetDisplayName(const AValue: String);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -39,10 +40,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_RegisterParams.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_RegisterParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -68,6 +71,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_RegisterParams.SetEmail(const AValue: String);
 begin
   FEmail := AValue;

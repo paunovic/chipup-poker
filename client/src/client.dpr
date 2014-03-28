@@ -71,6 +71,7 @@ uses
   Poker.Cards in 'modules\Poker.Cards.pas',
   Poker.ChipStackMaker in 'modules\Poker.ChipStackMaker.pas',
   Poker.Sounds in 'modules\Poker.Sounds.pas',
+  Poker.Database.Core in 'modules\database\Poker.Database.Core.pas',
   Poker.Protobufs.Enum.ServerCodes in 'modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas',
   Poker.Protobufs.Reader in 'modules\protobuf\Poker.Protobufs.Reader.pas',
   Poker.Protobufs.Objects.Base in 'modules\protobuf\Poker.Protobufs.Objects.Base.pas',
@@ -112,12 +113,11 @@ uses
   Poker.Protobufs.Objects.Pot in 'modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas',
   Poker.Protobufs.Objects.TableBoolFlag in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas',
   Poker.Protobufs.Objects.UserChangeParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas',
-  Poker.Protobufs.Objects.RetrieveHandHistoryData in 'modules\protobuf\objects\Poker.Protobufs.Objects.RetrieveHandHistoryData.pas',
-  Poker.Protobufs.Objects.RetrieveHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.RetrieveHandHistoryReply.pas',
-  Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
-  Poker.Protobufs.Objects.HistoryReference in 'modules\protobuf\objects\Poker.Protobufs.Objects.HistoryReference.pas',
-  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
-  Poker.Protobufs.Objects.CloseGameData in 'modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas';
+  Poker.Protobufs.Objects.CloseGameData in 'modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas',
+  Poker.Protobufs.Objects.ClubQuery in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubQuery.pas',
+  Poker.Protobufs.Objects.FetchHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas',
+  Poker.Protobufs.Objects.FetchHandReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas',
+  Poker.HandDownloader in 'modules\Poker.HandDownloader.pas';
 
 procedure FocusPokerApp;
 var

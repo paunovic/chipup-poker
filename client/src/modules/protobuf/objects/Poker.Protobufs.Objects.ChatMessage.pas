@@ -25,6 +25,7 @@ type
     procedure SetMongoId(const AValue: TBytes);
     procedure SetUsername(const AValue: String);
     procedure SetMsg(const AValue: String);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -40,10 +41,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_ChatMessage.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_ChatMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -69,6 +72,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
 begin
   FId := AValue;

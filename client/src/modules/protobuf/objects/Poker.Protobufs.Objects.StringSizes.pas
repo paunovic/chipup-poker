@@ -33,6 +33,7 @@ type
     procedure SetInvcode(const AValue: Integer);
     procedure SetUsername(const AValue: Integer);
     procedure SetGamename(const AValue: Integer);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -51,10 +52,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_StringSizes.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_StringSizes.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -92,6 +95,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_StringSizes.SetEmail(const AValue: Integer);
 begin
   FEmail := AValue;

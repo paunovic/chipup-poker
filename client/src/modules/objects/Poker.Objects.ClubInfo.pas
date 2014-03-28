@@ -20,9 +20,9 @@ type
     FSuspendedPlayers: TArray<TBytes>;
     FGames           : TGamesInfo;
     FRake            : Integer;
+    FLastHandId      : UINT32;
   public
     constructor Create(const AProtobufObject: TPB_Club); overload;
-    constructor Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String; const ARake: Integer); overload;
     destructor Destroy; override;
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
@@ -42,6 +42,7 @@ type
     property SuspendedPlayers: TArray<TBytes> read FSuspendedPlayers;
     property Games           : TGamesInfo read FGames;
     property Rake            : Integer read FRake;
+    property LastHandId      : UINT32 read FLastHandId;
   end;
 
   TClubsInfo = class(TObjectList<TClubInfo>)
@@ -62,19 +63,6 @@ constructor TClubInfo.Create(const AProtobufObject: TPB_Club);
 begin
   FGames := TGamesInfo.Create;
   UpdateFromProtobufObject(AProtobufObject);
-end;
-
-constructor TClubInfo.Create(const AMongoId, AOwnerId: TBytes; const AId: Integer; const AName: String; const ABalance: Integer; const APrivate: Boolean; const AInvCode: String; const ARake: Integer);
-begin
-  FId := AId;
-  FMongoId := AMongoId;
-  FOwnerId := AOwnerId;
-  FName := AName;
-  FInvCode := AInvCode;
-  FBalance := ABalance;
-  FPrivate := APrivate;
-  FGames := TGamesInfo.Create;
-  FRake := ARake;
 end;
 
 destructor TClubInfo.Destroy;
@@ -128,6 +116,7 @@ begin
   for C1 := 0 to Length(AProtobufObject.SuspendedMembers) - 1 do
     AddPlayer(AProtobufObject.SuspendedMembers[C1], TRUE);
   FRake := AProtobufObject.Rake;
+  FLastHandId := AProtobufObject.Lasthandid;
 end;
 
 procedure TClubInfo.AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);

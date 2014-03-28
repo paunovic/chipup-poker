@@ -61,12 +61,19 @@ type
     procedure SetBigBlind(const AValue: UINT32);
     procedure SetHandid(const AValue: UINT32);
     procedure SetTime(const AValue: UInt64);
+    procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
+    procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
+    procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
-    property Seats: TObjectList<TPB_SeatInfo> read FSeats write FSeats;
+    property Seats: TObjectList<TPB_SeatInfo> read FSeats;
     property State: TTableState read FState write SetState;
     property Dealer: Integer read FDealer write SetDealer;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
@@ -79,8 +86,8 @@ type
     property BigBlind: UINT32 read FBigBlind write SetBigBlind;
     property Handid: UINT32 read FHandid write SetHandid;
     property Time: UInt64 read FTime write SetTime;
-    property Events: TObjectList<TPB_TableEvent> read FEvents write FEvents;
-    property Pots: TObjectList<TPB_Pot> read FPots write FPots;
+    property Events: TObjectList<TPB_TableEvent> read FEvents;
+    property Pots: TObjectList<TPB_Pot> read FPots;
   end;
 
 implementation
@@ -89,29 +96,40 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_TableStatus.InitObjects;
+begin
+  FSeats := TObjectList<TPB_SeatInfo>.Create;
+  FSeats.OnNotify := SeatsNotifyEvent;
+  FEvents := TObjectList<TPB_TableEvent>.Create;
+  FEvents.OnNotify := EventsNotifyEvent;
+  FPots := TObjectList<TPB_Pot>.Create;
+  FPots.OnNotify := PotsNotifyEvent;
+end;
+
 destructor TPB_TableStatus.Destroy;
 begin
   if Assigned(FSeats) then
-    FSeats.Free;
+  begin
+    FSeats.OnNotify := nil;
+    FreeAndNil(FSeats);
+  end;
   if Assigned(FEvents) then
-    FEvents.Free;
+  begin
+    FEvents.OnNotify := nil;
+    FreeAndNil(FEvents);
+  end;
   if Assigned(FPots) then
-    FPots.Free;
+  begin
+    FPots.OnNotify := nil;
+    FreeAndNil(FPots);
+  end;
   inherited;
 end;
+
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FSeats) then
-    FSeats := TObjectList<TPB_SeatInfo>.Create;
-
-  if not Assigned(FEvents) then
-    FEvents := TObjectList<TPB_TableEvent>.Create;
-
-  if not Assigned(FPots) then
-    FPots := TObjectList<TPB_Pot>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -186,10 +204,19 @@ begin
     end;
   end;
 end;
+
 procedure TPB_TableStatus.SetTableMongoId(const AValue: TBytes);
 begin
   FTableMongoId := AValue;
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
+end;
+
+procedure TPB_TableStatus.SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_SEATS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 procedure TPB_TableStatus.SetState(const AValue: TTableState);
@@ -265,6 +292,22 @@ procedure TPB_TableStatus.SetTime(const AValue: UInt64);
 begin
   FTime := AValue;
   ProtobufOutput.WriteInt64(FN_TIME, AValue);
+end;
+
+procedure TPB_TableStatus.EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_EVENTS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatus.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

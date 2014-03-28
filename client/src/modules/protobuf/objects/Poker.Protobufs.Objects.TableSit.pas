@@ -24,6 +24,7 @@ type
     procedure SetGameId(const AValue: TBytes);
     procedure SetSeatIndex(const AValue: Integer);
     procedure SetChips(const AValue: UINT32);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -39,10 +40,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_TableSit.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_TableSit.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -68,6 +71,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_TableSit.SetGameId(const AValue: TBytes);
 begin
   FGameId := AValue;

@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes, System.SysUtils, AsphyreImages,
-  OverbyteIcsHttpProt;
+  OverbyteIcsHttpProt, OverbyteIcsWSocket;
 
 type
   TAvatar = class
@@ -94,9 +94,9 @@ end;
 
 procedure TAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 var
-  http: THTTPCli;
+  http: TSslHttpCli;
 begin
-  http := Sender as THTTPCli;
+  http := Sender as TSslHttpCli;
 
   {$IFDEF DEBUG} DebugLn(Format('GET avatar done: %s', [http.URL]), ditNetInc); {$ENDIF}
 
@@ -110,22 +110,26 @@ begin
     (http.RcvdStream as TMemoryStream).Free;
   end;
 
+  http.SslContext.DeInitContext;
+  http.SslContext.Free;
   http.Free;
 end;
 
 procedure TAvatar.Refresh;
 var
-  http: THTTPCli;
+  http: TSslHttpCli;
 begin
   {$IFDEF DEBUG} DebugLn(Format('GET avatar: %s...', [FIdAsString]), ditNetOut); {$ENDIF}
 
-  http := THTTPCli.Create(nil);
+  http := TSslHttpCli.Create(nil);
+  http.SslContext := TSslContext.Create(nil);
   http.Connection := 'Keep-Alive';
   http.BandwidthLimit := 0;
   http.RequestVer := '1.1';
   http.RcvdStream := TMemoryStream.Create;
   http.URL := Format(Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   http.OnRequestDone := HTTPRequestDone;
+  http.SslContext.InitContext;
   http.GetAsync;
 end;
 

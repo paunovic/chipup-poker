@@ -13,6 +13,9 @@ type
 
     function GetProtobufOutputSize: Word;
 
+  protected
+    procedure InitObjects; virtual;
+
   public
     constructor Create; overload;
     constructor Create(const APointer: pointer; const ASize: Integer); overload;
@@ -34,6 +37,7 @@ implementation
 
 constructor TProtobufBaseObject.Create;
 begin
+  InitObjects;
   FProtobufOutput := TProtobufOutput.Create;
 end;
 
@@ -41,6 +45,7 @@ constructor TProtobufBaseObject.Create(const APointer: pointer; const ASize: Int
 var
   protobuf_reader: TProtobufReader;
 begin
+  InitObjects;
   FProtobufOutput := TProtobufOutput.Create;
 
   protobuf_reader := TProtobufReader.Create(APointer, ASize);
@@ -53,6 +58,7 @@ end;
 
 constructor TProtobufBaseObject.Create(const AProtobufReader: TProtobufReader; const ASize: Integer);
 begin
+  InitObjects;
   FProtobufOutput := TProtobufOutput.Create;
 
   LoadFromProtobufReader(AProtobufReader, ASize);
@@ -73,5 +79,8 @@ begin
   result := FProtobufOutput.getSerializedSize;
 end;
 
+procedure TProtobufBaseObject.InitObjects;
+begin
+end;
 
 end.

@@ -19,6 +19,7 @@ type
       FStatus: TLoginStatus;
 
     procedure SetStatus(const AValue: TLoginStatus);
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -32,10 +33,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
 destructor TPB_LoginReply.Destroy;
 begin
   inherited;
 end;
+
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
@@ -53,6 +56,7 @@ begin
     end;
   end;
 end;
+
 procedure TPB_LoginReply.SetStatus(const AValue: TLoginStatus);
 begin
   FStatus := AValue;

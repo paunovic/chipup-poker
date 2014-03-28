@@ -17,11 +17,16 @@ type
     var
       FUsers: TObjectList<TPB_User>;
 
+    procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Users: TObjectList<TPB_User> read FUsers write FUsers;
+    property Users: TObjectList<TPB_User> read FUsers;
   end;
 
 implementation
@@ -30,19 +35,26 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_UserChangeParams.InitObjects;
+begin
+  FUsers := TObjectList<TPB_User>.Create;
+  FUsers.OnNotify := UsersNotifyEvent;
+end;
+
 destructor TPB_UserChangeParams.Destroy;
 begin
   if Assigned(FUsers) then
-    FUsers.Free;
+  begin
+    FUsers.OnNotify := nil;
+    FreeAndNil(FUsers);
+  end;
   inherited;
 end;
+
 procedure TPB_UserChangeParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
 begin
-  if not Assigned(FUsers) then
-    FUsers := TObjectList<TPB_User>.Create;
-
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
@@ -56,4 +68,13 @@ begin
     end;
   end;
 end;
+
+procedure TPB_UserChangeParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_USERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
 end.

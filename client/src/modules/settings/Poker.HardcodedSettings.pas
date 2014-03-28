@@ -16,6 +16,7 @@ type
                                 SETTINGS_FILENAME      : String;
                                 SETTINGS_ENCRYPTION_KEY: String;
                                 AVATARS_SUBDIR         : String;
+                                DATABASE_FILENAME      : String;
                                 TCP_SERVER_ADDRESS     : String;
                                 TCP_SERVER_PORT        : Word;
                                 TCP_PING_INTERVAL      : Word;
@@ -27,6 +28,7 @@ type
                                   UPLOAD_AVATAR       : String;
                                   LATEST_VERSION      : String;
                                   LATEST_VERSION_DEBUG: String;
+                                  FETCH_HANDS         : String;
                                 end;
                               end;
   public
@@ -43,6 +45,7 @@ type
                                            SETTINGS_FILENAME: 'settings.dat';
                                            SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
                                            AVATARS_SUBDIR: 'avatars';
+                                           DATABASE_FILENAME: 'database.sqlite';
 
                                            // socket server
                                            TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
@@ -58,6 +61,7 @@ type
                                              UPLOAD_AVATAR       : URL_DOMAIN + '/uploadAvatar';
                                              LATEST_VERSION      : URL_DOMAIN + '/install_chipuppoker.exe';
                                              LATEST_VERSION_DEBUG: URL_DOMAIN + '/debug_install_chipuppoker.exe';
+                                             FETCH_HANDS         : URL_DOMAIN + '/fetchhands?uuid=%s';
                                            )
                                          );
   end;
