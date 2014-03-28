@@ -72,7 +72,7 @@ type
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
     procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
-    procedure CloseGame(const AGameId: TBytes; const AAfter: Integer);
+    procedure CloseGame(const AGameId: TBytes; const ASeconds: UINT32);
     procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
@@ -111,7 +111,8 @@ uses
   Poker.Protobufs.Objects.ListClubsReply, Poker.Protobufs.Objects.TransferChipsParams, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.KickPlayerParams, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
   Poker.Protobufs.Objects.GiveClubOwnershipParams, Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams,
   Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
-  Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.RetrieveHandHistoryData;
+  Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.RetrieveHandHistoryData,
+  Poker.Protobufs.Objects.CloseGameData;
 
 var
   FConnectThreadId: DWORD;
@@ -774,13 +775,14 @@ begin
   end;
 end;
 
-procedure TServerSocket.CloseGame(const AGameId: TBytes; const AAfter: Integer);
+procedure TServerSocket.CloseGame(const AGameId: TBytes; const ASeconds: UINT32);
 var
-  protobuf: TPB_Game;
+  protobuf: TPB_CloseGameData;
 begin
-  protobuf := TPB_Game.Create;
+  protobuf := TPB_CloseGameData.Create;
   try
-    protobuf.MongoId := AGameId;
+    protobuf.Gameid := AGameId;
+    protobuf.Timestamp := ASeconds;
     SendProtobuf(scCloseGame, protobuf);
   finally
     protobuf.Free;

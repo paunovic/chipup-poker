@@ -2926,12 +2926,13 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 324
-          Height = 252
+          Height = 335
           Align = alTop
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          LookAndFeel.SkinName = 'ChipUpDarkStyle'
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3073,13 +3074,14 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 576
-          Height = 17
+          Height = 335
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          LookAndFeel.SkinName = 'ChipUpDarkStyle'
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3140,6 +3142,12 @@ object frmClubLobby: TfrmClubLobby
               HeaderAlignmentHorz = taCenter
               Width = 78
             end
+            object gridGamesTableStatus: TcxGridColumn
+              Caption = 'Status'
+              PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
+              HeaderAlignmentHorz = taCenter
+            end
           end
           object gridGamesLevel: TcxGridLevel
             GridView = gridGamesTable
@@ -3147,7 +3155,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 167
+          Top = 319
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -3163,7 +3171,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 167
+          Top = 319
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -3178,8 +3186,8 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btEditGame: TcxButton
-          Left = 216
-          Top = 167
+          Left = 48
+          Top = 255
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]

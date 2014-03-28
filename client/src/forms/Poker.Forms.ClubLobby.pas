@@ -8,7 +8,7 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, cxButtons, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
-   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
+  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
   cxData;
 
 type
@@ -67,6 +67,7 @@ type
     seClubRake: TcxSpinEdit;
     tiUpdateClubDetails: TTimer;
     acUpdateClubDetails: TAction;
+    gridGamesTableStatus: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -131,7 +132,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo, Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply, Poker.Common.FormsContainer;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply, Poker.Common.FormsContainer, Poker.Forms.CloseTable;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -279,7 +280,8 @@ procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGrid
 var
   recIndex       : Integer;
   club           : TClubInfo;
-  actions_enabled: Boolean;
+  game           : TGameInfo;
+  close_table_act: Boolean;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
@@ -290,8 +292,10 @@ begin
   else
     FSelectedGameId := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
 
-  actions_enabled := (Length(FSelectedGameId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
-  acCloseTable.Enabled := actions_enabled;
+  close_table_act := (Length(FSelectedGameId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and
+                     (club.Games.FindGame(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
+
+  acCloseTable.Enabled := close_table_act;
 //  acShowEditGameForm.Enabled := actions_enabled;
 end;
 
@@ -429,6 +433,7 @@ begin
       gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
       gridGamesTable.DataController.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       gridGamesTable.DataController.SetValue(C1, gridGamesSeats.Index, game.Seats);
+      gridGamesTable.DataController.SetValue(C1, gridGamesTableStatus.Index, game.StateAsStr);
     end;
   finally
     gridGamesTable.DataController.EndFullUpdate;
@@ -564,8 +569,13 @@ begin
 end;
 
 procedure TfrmClubLobby.acCloseTableExecute(Sender: TObject);
+var
+  club: TClubInfo;
+  game: TGameInfo;
 begin
-  ServerSocket.CloseGame(FSelectedGameId, 1);
+  if (dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) and
+     (club.Games.FindGame(FSelectedGameId, game)) then
+    FormsContainer.Add(RunModalForm(TfrmCloseTable, self, [game], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.CSRStatus(const AMethodId: Integer; const AObject: TObject);

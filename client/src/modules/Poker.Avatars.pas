@@ -3,7 +3,7 @@ unit Poker.Avatars;
 interface
 
 uses
-  Winapi.Windows, Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes, System.SysUtils, AsphyreImages, GR32,
+  Winapi.Windows, Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes, System.SysUtils, AsphyreImages,
   OverbyteIcsHttpProt;
 
 type
@@ -64,7 +64,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  AsphyreBitmaps, GR32_Backends, AsphyreBMP, Poker.Helpers.AsphyreImage, Poker.Common.Misc,
+  AsphyreBitmaps, AsphyreBMP, Poker.Helpers.AsphyreImage, Poker.Common.Misc,
   Poker.Settings;
 
 

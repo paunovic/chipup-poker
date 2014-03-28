@@ -43,6 +43,7 @@ uses
   Poker.Forms.TableSit in 'forms\Poker.Forms.TableSit.pas' {frmTableSit},
   Poker.Forms.ClubLobby in 'forms\Poker.Forms.ClubLobby.pas' {frmClubLobby},
   Poker.Forms.Updater in 'forms\Poker.Forms.Updater.pas' {frmUpdater},
+  Poker.Forms.CloseTable in 'forms\Poker.Forms.CloseTable.pas' {frmCloseTable},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -115,7 +116,8 @@ uses
   Poker.Protobufs.Objects.RetrieveHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.RetrieveHandHistoryReply.pas',
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.HistoryReference in 'modules\protobuf\objects\Poker.Protobufs.Objects.HistoryReference.pas',
-  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas';
+  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
+  Poker.Protobufs.Objects.CloseGameData in 'modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas';
 
 procedure FocusPokerApp;
 var

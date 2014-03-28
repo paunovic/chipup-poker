@@ -144,6 +144,7 @@ type
       FPlayNowButtonWidth     : Single;
       FPlayNowButtonHeight    : Single;
       FPlayNowResizeRatio     : Single;
+      FClosingTime            : DWORD;
 
       FActionButtonWidth      : Single;
       FActionButtonHeight     : Single;
@@ -196,6 +197,7 @@ type
     procedure RenderSeats;
     procedure RenderSeat(const ASeatIndex: Integer);
     procedure RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single);
+    procedure RenderClosingText;
     procedure RenderTableCards;
     procedure RenderDealingCardsAni;
     procedure RenderDealerButton;
@@ -231,9 +233,12 @@ type
     function GetBetPoint(const ASeatIndex: Integer): TPoint2;
     function GetPotPoint(const APotIndex: Integer): TPoint2;
 
+    procedure UpdateClosingTime;
+
     procedure CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
+    procedure CSEGameChange(const AMethodId: Integer; const AObject: TObject);
 
     procedure RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
 
@@ -265,7 +270,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
-  Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Avatars,
+  Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Avatars, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.PotInfo, RVTable, Poker.Sounds;
 
 
@@ -296,7 +301,8 @@ begin
                       TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
                       TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
                       TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
-                      TServerMessageCallback.Create(seUserChange, CSEUserChange)
+                      TServerMessageCallback.Create(seUserChange, CSEUserChange),
+                      TServerMessageCallback.Create(seGameChange, CSEGameChange)
                   ]);
 
   FFlopAnimations := TList<Integer>.Create;
@@ -612,25 +618,26 @@ begin
 
   DefocusControls;
 
-  for C1 := 0 to FTable.Game.Seats - 1 do
-  begin
-    seat_point := GetSeatPoint(C1);
-    seat_rect := TRectF.Create(seat_point.X - FSeatWidth / 2, seat_point.Y - FSeatHeight / 2, seat_point.X + FSeatWidth / 2, seat_point.Y + FSeatHeight / 2);
-    if (client_cursor_pos.X >= seat_rect.Left) and (client_cursor_pos.X <= seat_rect.Right) and
-       (client_cursor_pos.Y >= seat_rect.Top) and (client_cursor_pos.Y <= seat_rect.Bottom) then
+  if FTable.Game.State <> gsClosed then
+    for C1 := 0 to FTable.Game.Seats - 1 do
     begin
-      if ((not FTable.IsSitting) and
-          (not FTableStatus.IsSeatTaken(C1))) or
-         ((FTable.IsSitting) and
-          (FTable.SeatIndex = C1) and
-          (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
-          (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded])) then
+      seat_point := GetSeatPoint(C1);
+      seat_rect := TRectF.Create(seat_point.X - FSeatWidth / 2, seat_point.Y - FSeatHeight / 2, seat_point.X + FSeatWidth / 2, seat_point.Y + FSeatHeight / 2);
+      if (client_cursor_pos.X >= seat_rect.Left) and (client_cursor_pos.X <= seat_rect.Right) and
+         (client_cursor_pos.Y >= seat_rect.Top) and (client_cursor_pos.Y <= seat_rect.Bottom) then
       begin
-        FormsContainer.Add(RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1], ModalFormClose));
-        Break;
+        if ((not FTable.IsSitting) and
+            (not FTableStatus.IsSeatTaken(C1))) or
+           ((FTable.IsSitting) and
+            (FTable.SeatIndex = C1) and
+            (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
+            (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded])) then
+        begin
+          FormsContainer.Add(RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1], ModalFormClose));
+          Break;
+        end;
       end;
     end;
-  end;
 end;
 
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -778,7 +785,7 @@ begin
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
 
   x := FTableCenter.X + (FTableWidth * 0.9 / 2) * Cos(seat_radians);
-  y := FTableCenter.Y - FTableCenterYOffset + (FTableHeight * 0.9 / 2) * Sin(seat_radians) - 10 * FTableResizeRatio;
+  y := FTableCenter.Y - FTableCenterYOffset + (FTableHeight * 0.95 / 2) * Sin(seat_radians) - 8 * FTableResizeRatio;
 
   pf := PointF(x, y);
 
@@ -877,7 +884,7 @@ var
   xr, yr      : Single;
 begin
   xr := FTableWidth / 1.25;
-  yr := FTableHeight / 1.35;
+  yr := FTableHeight / 1.45;
 
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
   x := FTableCenter.X + (xr / 2) * Cos(seat_radians);
@@ -894,17 +901,17 @@ begin
   if FTableStatus.Dealer = ASeatIndex then
   begin
     xr := FTableWidth / 1.51;
-    yr := FTableHeight / 1.90;
+    yr := FTableHeight / 2;
   end
   else
   begin
     xr := FTableWidth / 1.26;
-    yr := FTableHeight / 1.5;
+    yr := FTableHeight / 1.45;
   end;
 
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
   x := FTableCenter.X + (xr / 2) * Cos(seat_radians);
-  y := FTableCenter.Y - FTableCenterYOffset + (yr / 2) * Sin(seat_radians) - 27 * FTableResizeRatio;
+  y := FTableCenter.Y - FTableCenterYOffset + (yr / 2) * Sin(seat_radians) - 40 * FTableResizeRatio;
   result := Point2(x, y);
 end;
 
@@ -1055,6 +1062,31 @@ procedure TfrmTable.cbSitOutNextHandPropertiesChange(Sender: TObject);
 begin
   tiSitOutNextHand.Enabled := FALSE;
   tiSitOutNextHand.Enabled := TRUE;
+end;
+
+procedure TfrmTable.UpdateClosingTime;
+var
+  gtc: DWORD;
+  ct : DWORD;
+begin
+  if FTable.Game.State = gsClosing then
+  begin
+    gtc := GetTickCount;
+    ct := FTable.Game.ClosingTime - ServerSocket.TimeOffset;
+    if gtc > ct then
+      FClosingTime := 0
+    else
+      FClosingTime := ct - gtc;
+  end
+  else
+    FClosingTime := 0;
+end;
+
+procedure TfrmTable.CSEGameChange(const AMethodId: Integer; const AObject: TObject);
+begin
+  UpdateClosingTime;
+  ConfigureGUI;
+  Render;
 end;
 
 procedure TfrmTable.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
@@ -1769,7 +1801,7 @@ const
   TABLE_X_RIGHT       = 64;
   TABLE_Y_TOP         = 66;
   TABLE_Y_BOTTOM      = 133;
-  TABLE_Y_OFFSET      = -25;
+  TABLE_Y_OFFSET      = -20;
   TABLE_WIDTH_OF_FORM = 0.8;
 var
   C1: Integer;
@@ -1802,6 +1834,9 @@ begin
 
   // calculate seat size
   FSeatWidth := (FDXAreaSize.x - FTableWidth) / 1.5;
+  if FTable.Game.Seats = 10 then
+    FSeatWidth := FSeatWidth * 0.85;
+
   FSeatHeight := FSeatWidth / TableResources.SeatAspectRatio;
   FSeatResizeRatio := FSeatWidth / TableResources.SeatEmptyLeftImage.Texture[0].Width;
   FSeatActionResizeRatio := FSeatResizeRatio * 1.1;
@@ -1811,7 +1846,7 @@ begin
   FCardHeight := FCardWidth / TableResources.CardAspectRatio;
   FCardArtworkWidth := FCardWidth * (0.48 + FTableResizeRatio / 5);
   FCardArtworkHeight := FCardHeight * 0.85;
-  FSeatCardsMaxWidth := FSeatWidth * 0.7;
+  FSeatCardsMaxWidth := FSeatWidth * 0.8;
 
   // calculate dealer size
   FDealerWidth := TableResources.DealerButtonImage.Texture[0].Width * FTableResizeRatio;
@@ -1923,6 +1958,7 @@ begin
 
   RenderBackground;
   RenderTable;
+  RenderClosingText;
   RenderTableCards;
   RenderDealerButton;
   RenderDealingCardsAni;
@@ -1965,8 +2001,8 @@ begin
   font := AFonts[index];
   font.Kerning := AKerning;
   font.Scale := 1;
-  while ((font.TextHeight(AText) > AMaxHeight) or
-         (font.TextWidth(AText) > AMaxWidth)) do
+  while ((AMaxHeight <> 0) and (font.TextHeight(AText) > AMaxHeight)) or
+        ((AMaxWidth <> 0) and (font.TextWidth(AText) > AMaxWidth)) do
   begin
     if index > lb then
     begin
@@ -2575,6 +2611,38 @@ begin
     DXCore.Canvas.UseImage(AChipStack.Images[C1], TexFull4);
     DXCore.Canvas.TexMap(pBounds4(APoint.X - FChipWidth / 2,
         APoint.Y - C1 * 5 * FTableResizeRatio, FChipWidth, FChipHeight), clWhite4);
+  end;
+end;
+
+procedure TfrmTable.RenderClosingText;
+var
+  mins       : Integer;
+  minute_text: String;
+  txt        : String;
+begin
+  case FTable.Game.State of
+    gsClosing: begin
+      UpdateClosingTime;
+
+      if FClosingTime = 0 then
+        txt := 'Table is closing after curent hand'
+      else
+      begin
+        mins := FClosingTime div 60000;
+        if mins = 1 then
+          minute_text := 'minute'
+        else
+          minute_text := 'minutes';
+        txt := Format('Table is closing in %d %s', [mins, minute_text]);
+      end;
+
+      RenderScaleFont(txt, clWhite2, Point2(FTableCenter.x, FTableCenter.Y + FCardHeight / 3), TableResources.SintonyFonts,
+                      Low(TableResources.SintonyFonts), 12, 16, 2, 8 + 8 * FTableResizeRatio, 0);
+    end;
+
+    gsClosed: RenderScaleFont('Table is closed', clWhite2, Point2(FTableCenter.x, FTableCenter.Y + FCardHeight / 3), TableResources.SintonyFonts,
+                        Low(TableResources.SintonyFonts), 12, 16, 2, 8 + 8 * FTableResizeRatio, 0);
+
   end;
 end;
 

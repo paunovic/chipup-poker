@@ -11,6 +11,7 @@ uses
 type
   TGameLimit = (glNoLimit = 0,glPotLimit = 1,glFixedLimit = 2);
   TGameType = (gtHoldem = 0,gtOmaha = 1);
+  TGameState = (gsActive = 1,gsClosing = 2,gsClosed = 3,gsEmpty = 4);
   TPB_Game = class(TProtobufBaseObject)
   private
     const
@@ -26,6 +27,8 @@ type
       FN_SITTING = 10;
       FN_BUYIN_MIN = 11;
       FN_BUYIN_MAX = 12;
+      FN_STATE = 13;
+      FN_CLOSETIME = 14;
 
     var
       FId: TBytes;
@@ -40,6 +43,8 @@ type
       FSitting: Integer;
       FBuyinMin: Integer;
       FBuyinMax: Integer;
+      FState: TGameState;
+      FClosetime: UInt64;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetCreatorMongoId(const AValue: TBytes);
@@ -53,6 +58,8 @@ type
     procedure SetSitting(const AValue: Integer);
     procedure SetBuyinMin(const AValue: Integer);
     procedure SetBuyinMax(const AValue: Integer);
+    procedure SetState(const AValue: TGameState);
+    procedure SetClosetime(const AValue: UInt64);
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
@@ -69,6 +76,8 @@ type
     property Sitting: Integer read FSitting write SetSitting;
     property BuyinMin: Integer read FBuyinMin write SetBuyinMin;
     property BuyinMax: Integer read FBuyinMax write SetBuyinMax;
+    property State: TGameState read FState write SetState;
+    property Closetime: UInt64 read FClosetime write SetClosetime;
   end;
 
 implementation
@@ -136,6 +145,14 @@ begin
       FN_BUYIN_MAX: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBuyinMax := AProtobufReader.readInt32;
+      end;
+      FN_STATE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FState := TGameState(AProtobufReader.readEnum);
+      end;
+      FN_CLOSETIME: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FClosetime := AProtobufReader.readInt64;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -212,6 +229,18 @@ procedure TPB_Game.SetBuyinMax(const AValue: Integer);
 begin
   FBuyinMax := AValue;
   ProtobufOutput.writeInt32(FN_BUYIN_MAX, AValue);
+end;
+
+procedure TPB_Game.SetState(const AValue: TGameState);
+begin
+  FState := AValue;
+  ProtobufOutput.writeInt32(FN_STATE, Integer(AValue));
+end;
+
+procedure TPB_Game.SetClosetime(const AValue: UInt64);
+begin
+  FClosetime := AValue;
+  ProtobufOutput.WriteInt64(FN_CLOSETIME, AValue);
 end;
 
 end.

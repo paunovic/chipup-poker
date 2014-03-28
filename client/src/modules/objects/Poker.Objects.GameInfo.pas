@@ -3,26 +3,29 @@ unit Poker.Objects.GameInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Common.Misc;
+  Winapi.Windows, System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Common.Misc;
 
 type
   TGameInfo = class
   private
-    FMongoId   : TBytes;
-    FClubId    : Int64;
-    FCreatorId : TBytes;
-    FName      : String;
-    FSmallBlind: UINT32;
-    FBigBlind  : UINT32;
-    FGameType  : TGameType;
-    FGameLimit : TGameLimit;
-    FMinBuyin  : UINT32;
-    FMaxBuyin  : UINT32;
-    FSeats     : Integer;
-    FSitting   : Integer;
+    FMongoId    : TBytes;
+    FClubId     : Int64;
+    FCreatorId  : TBytes;
+    FName       : String;
+    FSmallBlind : UINT32;
+    FBigBlind   : UINT32;
+    FGameType   : TGameType;
+    FGameLimit  : TGameLimit;
+    FMinBuyin   : UINT32;
+    FMaxBuyin   : UINT32;
+    FSeats      : Integer;
+    FSitting    : Integer;
+    FState      : TGameState;
+    FClosingTime: DWORD;
 
     function GetGameTypeStr: String;
     function GetGameTypeStrFull: String;
+    function GetStateStr: String;
 
   public
     constructor Create(const AProtobufObject: TPB_Game); overload;
@@ -44,6 +47,9 @@ type
     property MaxBuyin       : UINT32 read FMaxBuyin write FMaxBuyin;
     property Seats          : Integer read FSeats write FSeats;
     property Sitting        : Integer read FSitting write FSitting;
+    property State          : TGameState read FState write FState;
+    property StateAsStr     : String read GetStateStr;
+    property ClosingTime    : DWORD read FClosingTime write FClosingTime;
   end;
 
   TGamesInfo = class(TObjectList<TGameInfo>)
@@ -56,6 +62,11 @@ type
   end;
 
 implementation
+
+{$IFDEF DEBUG}
+uses
+  Poker.Forms.Debug;
+{$ENDIF}
 
 constructor TGameInfo.Create(const AProtobufObject: TPB_Game);
 begin
@@ -76,6 +87,8 @@ begin
   FMaxBuyin := AProtobufObject.BuyinMax;
   FSeats := AProtobufObject.Seats;
   FSitting := AProtobufObject.Sitting;
+  FState := AProtobufObject.State;
+  FClosingTime := AProtobufObject.Closetime;
 end;
 
 procedure TGameInfo.UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
@@ -107,12 +120,29 @@ begin
 end;
 
 
+function TGameInfo.GetStateStr: String;
+begin
+  case FState of
+    gsActive: result := 'Active';
+    gsClosing: result := 'Closing';
+    gsClosed: result := 'Closed';
+    gsEmpty: result := 'Empty';
+  else
+    result := 'Unknown';
+  end;
+end;
+
 { TGamesInfo }
 
 function TGamesInfo.AddGame(const AProtobufObject: TPB_Game): TGameInfo;
 var
   index: Integer;
 begin
+  {$IFDEF DEBUG}
+  if Length(AProtobufObject.MongoId) = 0 then
+    DebugLn(Format('Game [%s] mongo id is empty!', [AProtobufObject.Gamename]), ditException);
+  {$ENDIF}
+
   index := IndexOf(AProtobufObject.MongoId);
   if index = -1 then
     index := Add(TGameInfo.Create(AProtobufObject))

@@ -449,7 +449,7 @@ begin
       c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
       c.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
-      c.SetValue(C1, gridGamesStatus.Index, 'unknown');
+      c.SetValue(C1, gridGamesStatus.Index, game.StateAsStr);
     end;
   finally
     c.EndFullUpdate;
@@ -604,7 +604,6 @@ begin
                           TServerMessageCallback.Create(seGameChange, CSREGameOperation),
                           TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                           TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
-                          TServerMessageCallback.Create(srDeleteGameOk, CSREGameDelete),
                           TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
                           TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                           TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
@@ -879,7 +878,7 @@ begin
     for C1 := 0 to Tables.Count - 1 do
       if Tables[C1].Game = game then
       begin
-        Tables.Remove(Tables[C1]);
+        Tables.Delete(C1);
         Break;
       end;
 
