@@ -201,11 +201,11 @@ begin
   FId := AValue;
 
   FIdAsString := '';
-  for C1 := 0 to Length(AValue) - 1 do
-    FIdAsString := FIdAsString + IntToHex(AValue[C1], 2);
-  if FIdAsString = '' then
+  if Length(AValue) = 1 then
     FIdAsString := 'default'
   else
+    for C1 := 0 to Length(AValue) - 1 do
+      FIdAsString := FIdAsString + IntToHex(AValue[C1], 2);
     FIdAsString := LowerCase(FIdAsString);
 end;
 
