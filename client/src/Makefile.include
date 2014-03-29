@@ -15,7 +15,7 @@ CFLAGS+="-UC:\Poker\AsphyreSphinx304\Source\Delphi"
 CFLAGS+="-UC:\Poker\AsphyreSphinx304\Source\Providers"
 CFLAGS+="-UC:\Poker\AsphyreSphinx304\Source\Headers"
 CFLAGS+="-UC:\Poker\RichView v13.12.1 FS\1-TrichView"
-CFLAGS+=-OC:/Poker/mORMot/SQLite3 -UC:/Poker/mORMot -UC:/Poker/mORMot/SQLite3
+CFLAGS+=-OC:/Poker/mORMot/SQLite3 -UC:/Poker/mORMot -UC:/Poker/mORMot/SQLite3 -IC:/Poker/mORMot
 GCC=dcc32
 
 %.dcu: %.pas
