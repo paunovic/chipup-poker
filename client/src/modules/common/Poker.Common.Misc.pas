@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.User, cxImage;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.User, cxImage, Vcl.Imaging.JPEG;
 
 var
   SelfPath          : String;
@@ -27,10 +27,12 @@ function GetWorkingSetSize: DWORD;
 function EncodeURL(const ASrc: String): String;
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
+procedure LoadJPGFromResource(const AImage: TJPEGImage; const AResourceName: String);
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
 function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
+function ReverseDWORD(dw: Cardinal): Cardinal;
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -458,11 +460,27 @@ begin
   end;
 end;
 
+procedure LoadJPGFromResource(const AImage: TJPEGImage; const AResourceName: String);
+var
+  rstream: TResourceStream;
+begin
+  rstream := TResourceStream.Create(HInstance, AResourceName, RT_RCDATA);
+  try
+    AImage.LoadFromStream(rstream);
+  finally
+    rstream.Free;
+  end;
+end;
+
 function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 begin
   result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) < ARadius * ARadius;
 end;
 
+function ReverseDWORD(dw: Cardinal): Cardinal;
+asm
+  bswap eax
+end;
 
 
 

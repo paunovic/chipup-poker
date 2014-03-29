@@ -164,7 +164,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.Generics.Collections, Poker.Protobufs.Objects.ClubQuery,
+  System.Generics.Collections, Poker.Protobufs.Objects.GameQuery, SynDBSQLite3,
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
@@ -376,10 +376,12 @@ end;
 procedure TfrmChipUpMain.CheckHandIds;
 var
   club       : TClubInfo;
+  game       : TGameInfo;
   clubs      : TObjectList<TClubInfo>;
   local_lhi  : UINT32;
-  clubquery  : TPB_ClubQuery;
+  gamequery  : TPB_GameQuery;
   cmd        : TPB_FetchHandHistory;
+  conn       : TSQLDBSQLite3ConnectionProperties;
 begin
   clubs := TObjectList<TClubInfo>.Create(FALSE);
   try
@@ -390,33 +392,32 @@ begin
       if clubs.Count = 0 then
         Exit;
 
-      if Database.Connect then
+      conn := Database.NewConnection;
       try
         cmd := TPB_FetchHandHistory.Create;
         try
           for club in clubs do
           begin
-            local_lhi := Database.LastHandId(club.MongoId);
-            if local_lhi <> club.LastHandId then
+            for game in club.Games do
             begin
-              clubquery := TPB_ClubQuery.Create;
-              clubquery.Clubid := club.MongoId;
-              clubquery.Lasthandid := local_lhi;
-              cmd.Clubs.Add(clubquery);
+              local_lhi := Database.LastHandId(conn, game.MongoId);
+              if local_lhi <> game.LastHandId then
+              begin
+                gamequery := TPB_GameQuery.Create;
+                gamequery.Gameid := game.MongoId;
+                gamequery.Lasthandid := local_lhi;
+                cmd.Games.Add(gamequery);
+              end;
             end;
           end;
 
-          if cmd.Clubs.Count > 0 then
+          if cmd.Games.Count > 0 then
             ServerSocket.FetchHandHistory(cmd);
         finally
           cmd.Free;
         end
       finally
-        Database.Disconnect;
-      end
-      else
-      begin
-        {$IFDEF DEBUG} DebugLn('Failed to connect to database (CheckHandIds)!', ditException); {$ENDIF}
+        conn.Free;
       end;
   finally
     clubs.Free;

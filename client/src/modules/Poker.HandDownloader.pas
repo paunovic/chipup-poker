@@ -8,8 +8,9 @@ uses
 type
   THandDownloader = class
   private
-    FProgress: Single;
-    FHTTP    : TSslHttpCli;
+    FProgress   : Single;
+    FHTTP       : TSslHttpCli;
+    FDownloading: Boolean;
 
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure HTTPDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
@@ -23,6 +24,7 @@ type
     procedure Download(const AURL: String);
 
     property Progress: Single read FProgress;
+    property Downloading: Boolean read FDownloading;
   end;
 
 var
@@ -31,8 +33,9 @@ var
 implementation
 
 uses
-  System.SysUtils, System.Classes, Poker.Database.Core, Poker.Protobufs.Objects.FetchHandHistoryReply,
-  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.HandHistory;
+  Winapi.Windows, System.SysUtils, System.Classes, Poker.Database.Core, Poker.Protobufs.Objects.FetchHandHistoryReply, SynDBSQLite3,
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.HandHistory, Poker.Common.Misc;
+
 
 
 class procedure THandDownloader.Initialize;
@@ -48,6 +51,8 @@ end;
 
 constructor THandDownloader.Create;
 begin
+  FDownloading := FALSE;
+
   FHTTP := TSslHttpCli.Create(nil);
   FHTTP.SslContext := TSslContext.Create(nil);
   FHTTP.Connection := 'Keep-Alive';
@@ -60,7 +65,7 @@ end;
 
 destructor THandDownloader.Destroy;
 begin
-  if Assigned(FHTTP.RcvdStream) then
+  if FDownloading then
   begin
     FHTTP.Abort;
     FHTTP.RcvdStream.Free;
@@ -75,7 +80,7 @@ end;
 
 procedure THandDownloader.Download(const AURL: String);
 begin
-  Assert(not Assigned(FHTTP.RcvdStream));
+  FDownloading := TRUE;
 
   FHTTP.RcvdStream := TMemoryStream.Create;
   FHTTP.URL := AURL;
@@ -87,31 +92,57 @@ var
   fetch_hh_reply: TPB_FetchHandHistoryReply;
   club_hh_reply : TPB_ClubHandHistoryReply;
   hh            : TPB_HandHistory;
+  conn          : TSQLDBSQLite3ConnectionProperties;
+  timestamp     : UINT32;
+  mstream       : TMemoryStream;
 begin
   if ErrCode = 0 then
   begin
-    if Database.Connect then
+    conn := Database.NewConnection;
     try
-      FHTTP.RcvdStream.Position := 0;
-      fetch_hh_reply := TPB_FetchHandHistoryReply.Create((FHTTP.RcvdStream as TMemoryStream).Memory, FHTTP.RcvdStream.Size);
+      conn.ThreadSafeConnection.Connect;
+      if conn.ThreadSafeConnection.Connected then
       try
-        for club_hh_reply in fetch_hh_reply.Reply do
-        begin
-          for hh in club_hh_reply.Rows do
-          begin
+        conn.ThreadSafeConnection.StartTransaction;
+        try
+          mstream := TMemoryStream.Create;
+          try
+            FHTTP.RcvdStream.Position := 0;
+            fetch_hh_reply := TPB_FetchHandHistoryReply.Create((FHTTP.RcvdStream as TMemoryStream).Memory, FHTTP.RcvdStream.Size);
+            try
+              for club_hh_reply in fetch_hh_reply.Reply do
+              begin
+                for hh in club_hh_reply.Rows do
+                begin
+                  timestamp := ReverseDWORD(PDWORD(@hh.MongoId[0])^);
 
+                  mstream.Clear;
+                  hh.ProtobufOutput.SaveToStream(mstream);
+
+                  Database.InsertHand(conn, hh.Seq, club_hh_reply.Clubid, club_hh_reply.Gameid, timestamp, mstream);
+                end;
+              end;
+            finally
+              fetch_hh_reply.Free;
+            end;
+          finally
+            mstream.Free;
           end;
+        finally
+          conn.ThreadSafeConnection.Commit;
         end;
       finally
-        fetch_hh_reply.Free;
+        conn.ThreadSafeConnection.Disconnect;
       end;
     finally
-      Database.Disconnect;
+      conn.Free;
     end;
   end;
 
   FHTTP.RcvdStream.Free;
   FHTTP.RcvdStream := nil;
+
+  FDownloading := FALSE;
 end;
 
 procedure THandDownloader.HTTPDocData(Sender: TObject; Buffer: Pointer; Len: Integer);

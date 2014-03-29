@@ -9,7 +9,7 @@ uses
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
-  cxData;
+  cxData, cxProgressBar;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -70,6 +70,9 @@ type
     gridGamesTableStatus: TcxGridColumn;
     btStats: TcxButton;
     tsStats: TcxTabSheet;
+    pbHandsDownload: TcxProgressBar;
+    lbsDownloadingHandData: TcxLabel;
+    tiHandDownloadRefresh: TTimer;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -92,6 +95,7 @@ type
     procedure acUpdateClubDetailsExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btStatsClick(Sender: TObject);
+    procedure tiHandDownloadRefreshTimer(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -99,6 +103,7 @@ type
     FSelectedGameId: TBytes;
 
     procedure ConfigureGUI;
+    procedure HandsDownloading(const AValue: Boolean);
 
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
@@ -134,8 +139,9 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo, Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply, Poker.Common.FormsContainer, Poker.Forms.CloseTable;
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
+  Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.HandDownloader;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -224,9 +230,15 @@ begin
 
     btStats.Visible := admin_visible;
     if btStats.Visible then
-      btPrijatnaPunina.Left := btStats.Left + btStats.Width + (btTables.Left - btClubHome.Left - btClubHome.Width)
+    begin
+      btPrijatnaPunina.Left := btStats.Left + btStats.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
+      HandsDownloading(HandDownloader.Downloading);
+    end
     else
+    begin
       btPrijatnaPunina.Left := btTables.Left + btTables.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
+      tiHandDownloadRefresh.Enabled := FALSE;
+    end;
     btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 2;
 
     btChangeClubDetails.Visible := admin_visible;
@@ -356,6 +368,22 @@ begin
   end;
 end;
 
+procedure TfrmClubLobby.HandsDownloading(const AValue: Boolean);
+begin
+  if not AValue then
+  begin
+    tiHandDownloadRefresh.Enabled := FALSE;
+    lbsDownloadingHandData.Visible := FALSE;
+    pbHandsDownload.Visible := FALSE;
+  end
+  else
+  begin
+    pbHandsDownload.Visible := TRUE;
+    lbsDownloadingHandData.Visible := TRUE;
+    tiHandDownloadRefresh.Enabled := TRUE;
+  end;
+end;
+
 procedure TfrmClubLobby.ModalFormClose(ASender: TObject);
 begin
   EnableWindow(Handle, TRUE);
@@ -453,6 +481,13 @@ begin
   finally
     gridGamesTable.DataController.EndFullUpdate;
   end;
+end;
+
+procedure TfrmClubLobby.tiHandDownloadRefreshTimer(Sender: TObject);
+begin
+  pbHandsDownload.Position := HandDownloader.Progress;
+  if not HandDownloader.Downloading then
+    HandsDownloading(FALSE);
 end;
 
 procedure TfrmClubLobby.tiUpdateClubDetailsTimer(Sender: TObject);

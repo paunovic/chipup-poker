@@ -77,7 +77,7 @@ begin
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
-  TAvatars.Initialize(AppDataRoamingPath + TSettings.Hardcoded.AVATARS_SUBDIR);
+  TAvatars.Initialize;
   THandDownloader.Initialize;
   TSounds.Initialize;
   TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
@@ -134,7 +134,7 @@ var
   C1: Integer;
 begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
-  Avatars.AddAvatar(FSelfInfo.AvatarId);
+  Avatars.Add(FSelfInfo.AvatarId, nil);
 
   FPublicClubs.Clear;
   for C1 := 0 to AStatusProtobuf.PublicClubs.Count - 1 do

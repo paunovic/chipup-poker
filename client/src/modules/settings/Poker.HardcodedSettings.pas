@@ -15,7 +15,6 @@ type
                                 INSTANCE_MUTEX_NAME    : String;
                                 SETTINGS_FILENAME      : String;
                                 SETTINGS_ENCRYPTION_KEY: String;
-                                AVATARS_SUBDIR         : String;
                                 DATABASE_FILENAME      : String;
                                 TCP_SERVER_ADDRESS     : String;
                                 TCP_SERVER_PORT        : Word;
@@ -44,7 +43,6 @@ type
                                            // filenames
                                            SETTINGS_FILENAME: 'settings.dat';
                                            SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
-                                           AVATARS_SUBDIR: 'avatars';
                                            DATABASE_FILENAME: 'database.sqlite';
 
                                            // socket server
