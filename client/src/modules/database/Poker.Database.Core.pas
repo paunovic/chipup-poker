@@ -10,7 +10,6 @@ type
   private
     FDatabasePath: RawUTF8;
 
-    function IsolateAvatarId(const AId: TBytes): TBytes;
     procedure CreateTables(const AConnection: TSQLDBSQLite3ConnectionProperties);
 
   public
@@ -130,30 +129,14 @@ begin
   end;
 end;
 
-function TDatabase.IsolateAvatarId(const AId: TBytes): TBytes;
-var
-  bytes: TBytes;
-begin
-  if Length(AId) > 0 then
-    Exit(AId)
-  else
-  begin
-    SetLength(bytes, 1);
-    bytes[0] := 255;
-    Exit(bytes);
-  end;
-end;
-
 procedure TDatabase.InsertAvatar(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream);
 var
   query: TSQLDBStatement;
-  id   : TBytes;
 begin
   query := AConnection.NewThreadSafeStatement;
   try
     query.Prepare('INSERT OR REPLACE INTO avatars (id, data) VALUES (?, ?)', FALSE);
-    id := IsolateAvatarId(AId);
-    query.BindBlob(1, @id[0], Length(id) * SizeOf(Byte));
+    query.BindBlob(1, @AId[0], Length(AId) * SizeOf(Byte));
     query.BindBlob(2, AData.Memory, AData.Size);
     query.ExecutePrepared;
   finally
@@ -165,14 +148,12 @@ function TDatabase.RetrieveAvatarData(const AConnection: TSQLDBSQLite3Connection
 var
   query: TSQLDBStatement;
   rbs  : RawByteString;
-  id   : TBytes;
 begin
   result := FALSE;
   query := AConnection.NewThreadSafeStatement;
   try
-    query.Prepare('SELECT id, data FROM avatars WHERE id = ?', FALSE);
-    id := IsolateAvatarId(AId);
-    query.BindBlob(1, @id[0], Length(id) * SizeOf(Byte));
+    query.Prepare('SELECT id, data FROM avatars WHERE id = ?', TRUE);
+    query.BindBlob(1, @AId[0], Length(AId) * SizeOf(Byte));
     query.ExecutePrepared;
     if query.Step then
     begin

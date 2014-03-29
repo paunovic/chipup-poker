@@ -73,10 +73,9 @@ begin
 
   SetId(AId);
 
+  FImage := TJPEGImage.Create;
   if Assigned(AImage) then
-    FImage := AImage
-  else
-    FImage := TJPEGImage.Create;
+    FImage.Assign(AImage);
 
   FImage.OnChange := ImageChanged;
 end;
@@ -204,9 +203,11 @@ begin
   if Length(AValue) = 1 then
     FIdAsString := 'default'
   else
+  begin
     for C1 := 0 to Length(AValue) - 1 do
       FIdAsString := FIdAsString + IntToHex(AValue[C1], 2);
     FIdAsString := LowerCase(FIdAsString);
+  end;
 end;
 
 
@@ -248,7 +249,8 @@ end;
 
 function TAvatars.Add(const AId: TBytes; const AImage: TJPEGImage): TAvatar;
 var
-  avatar: TAvatar;
+  avatar : TAvatar;
+  mstream: TMemoryStream;
 begin
   if Find(AId, avatar) then
   begin
@@ -263,10 +265,22 @@ begin
     avatar := TAvatar.Create(AId, AImage);
     if not Assigned(AImage) then
     begin
-      avatar.Image.Assign(FRetrievingImage);
+      // this works
+      mstream := TMemoryStream.Create;
+      try
+        FRetrievingImage.SaveToStream(mstream);
+        mstream.Position := 0;
+        avatar.Image.LoadFromStream(mstream);
+      finally
+        mstream.Free;
+      end;
+//      avatar.Image.Assign(FRetrievingImage); // <<<< this doesnt work
+
       if not avatar.Retrieve then
         avatar.Download;
-    end;
+    end
+    else
+      avatar.Save;
     inherited Add(avatar);
   end;
 
