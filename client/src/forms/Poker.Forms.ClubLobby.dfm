@@ -2810,7 +2810,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsTables
+    Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
     ClientRectBottom = 364
     ClientRectRight = 594
@@ -3206,11 +3206,15 @@ object frmClubLobby: TfrmClubLobby
         end
       end
     end
+    object tsStats: TcxTabSheet
+      Caption = 'tsStats'
+      ImageIndex = 2
+    end
   end
   object btPrijatnaPunina: TcxButton
-    Left = 260
+    Left = 386
     Top = 138
-    Width = 326
+    Width = 199
     Height = 31
     Anchors = [akLeft, akTop, akRight]
     Enabled = False
@@ -3223,6 +3227,25 @@ object frmClubLobby: TfrmClubLobby
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+  end
+  object btStats: TcxButton
+    Left = 260
+    Top = 138
+    Width = 124
+    Height = 31
+    Caption = 'STATISTICS'
+    Colors.PressedText = 15461355
+    LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+    SpeedButtonOptions.GroupIndex = 1
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 7
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Sintony'
+    Font.Style = [fsBold]
+    ParentFont = False
+    OnClick = btStatsClick
   end
   object alManageClubs: TActionList
     Left = 48

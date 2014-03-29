@@ -68,6 +68,8 @@ type
     tiUpdateClubDetails: TTimer;
     acUpdateClubDetails: TAction;
     gridGamesTableStatus: TcxGridColumn;
+    btStats: TcxButton;
+    tsStats: TcxTabSheet;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -89,6 +91,7 @@ type
     procedure seClubRakePropertiesChange(Sender: TObject);
     procedure acUpdateClubDetailsExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure btStatsClick(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -219,6 +222,13 @@ begin
 
     admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
 
+    btStats.Visible := admin_visible;
+    if btStats.Visible then
+      btPrijatnaPunina.Left := btStats.Left + btStats.Width + (btTables.Left - btClubHome.Left - btClubHome.Width)
+    else
+      btPrijatnaPunina.Left := btTables.Left + btTables.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
+    btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 2;
+
     btChangeClubDetails.Visible := admin_visible;
     acShowClubChangeDetailsForm.Enabled := admin_visible;
     acUpdateClubDetails.Enabled := admin_visible;
@@ -274,6 +284,11 @@ end;
 procedure TfrmClubLobby.btClubHomeClick(Sender: TObject);
 begin
   pcTabs.ActivePage := tsClubHome;
+end;
+
+procedure TfrmClubLobby.btStatsClick(Sender: TObject);
+begin
+  pcTabs.ACtivePage := tsStats;
 end;
 
 procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);

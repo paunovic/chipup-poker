@@ -83,7 +83,7 @@ procedure TDatabase.CreateTables;
 begin
   if Connect then
     try
-      ExecuteNoResult('CREATE TABLE IF NOT EXISTS hands (id INTEGER PRIMARY KEY, clubid BLOB, gameid BLOB, data TEXT)', []);
+      ExecuteNoResult('CREATE TABLE IF NOT EXISTS hands (id INTEGER PRIMARY KEY, clubid BLOB, gameid BLOB, timestamp INTEGER, data BLOB)', []);
     finally
       Disconnect;
     end;

@@ -31,7 +31,8 @@ var
 implementation
 
 uses
-  System.SysUtils, System.Classes, Poker.Database.Core;
+  System.SysUtils, System.Classes, Poker.Database.Core, Poker.Protobufs.Objects.FetchHandHistoryReply,
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.HandHistory;
 
 
 class procedure THandDownloader.Initialize;
@@ -59,6 +60,12 @@ end;
 
 destructor THandDownloader.Destroy;
 begin
+  if Assigned(FHTTP.RcvdStream) then
+  begin
+    FHTTP.Abort;
+    FHTTP.RcvdStream.Free;
+  end;
+
   FHTTP.SslContext.DeInitContext;
   FHTTP.SslContext.Free;
   FHTTP.Free;
@@ -77,13 +84,30 @@ end;
 
 procedure THandDownloader.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 var
-  C1: Integer;
+  fetch_hh_reply: TPB_FetchHandHistoryReply;
+  club_hh_reply : TPB_ClubHandHistoryReply;
+  hh            : TPB_HandHistory;
 begin
-  if Database.Connect then
-  try
+  if ErrCode = 0 then
+  begin
+    if Database.Connect then
+    try
+      FHTTP.RcvdStream.Position := 0;
+      fetch_hh_reply := TPB_FetchHandHistoryReply.Create((FHTTP.RcvdStream as TMemoryStream).Memory, FHTTP.RcvdStream.Size);
+      try
+        for club_hh_reply in fetch_hh_reply.Reply do
+        begin
+          for hh in club_hh_reply.Rows do
+          begin
 
-  finally
-    Database.Disconnect;
+          end;
+        end;
+      finally
+        fetch_hh_reply.Free;
+      end;
+    finally
+      Database.Disconnect;
+    end;
   end;
 
   FHTTP.RcvdStream.Free;
