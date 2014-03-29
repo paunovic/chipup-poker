@@ -72,12 +72,12 @@ begin
 
   TSettings.Initialize;
   TDatabase.Initialize(AppDataRoamingPath + TSettings.Hardcoded.DATABASE_FILENAME);
+  TAvatars.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
-  TAvatars.Initialize;
   THandDownloader.Initialize;
   TSounds.Initialize;
   TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
@@ -100,7 +100,6 @@ begin
   TServerSocket.Deinitialize;
   TSounds.Deinitialize;
   THandDownloader.Deinitialize;
-  TAvatars.Deinitialize;
   TFormsContainer.Deinitialize;
   TMessageContainer.Deinitialize;
   FreeAndNil(ServerSettings);
@@ -108,6 +107,7 @@ begin
     TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
+  TAvatars.Deinitialize;
   TDatabase.Deinitialize;
   TSettings.Deinitialize;
 

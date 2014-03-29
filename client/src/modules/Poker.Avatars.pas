@@ -21,7 +21,7 @@ type
 
   protected
     procedure Download;
-    procedure Retrieve;
+    function Retrieve: Boolean;
     procedure Save;
 
   public
@@ -76,10 +76,7 @@ begin
   if Assigned(AImage) then
     FImage := AImage
   else
-  begin
     FImage := TJPEGImage.Create;
-    Retrieve;
-  end;
 
   FImage.OnChange := ImageChanged;
 end;
@@ -88,6 +85,7 @@ destructor TAvatar.Destroy;
 begin
   if Assigned(FHTTP) then
   begin
+    FHTTP.OnRequestDone := nil;
     FHTTP.Abort;
     FreeAndNil(FHTTP);
   end;
@@ -103,13 +101,19 @@ begin
   {$IFDEF DEBUG} DebugLn(Format('GET avatar done: %s', [FHTTP.URL]), ditNetInc); {$ENDIF}
 
   if Assigned(FHTTP.SendStream) then
+  begin
     FHTTP.SendStream.Free;
+    FHTTP.SendStream := nil;
+  end;
 
   if (ErrCode = 0) and (Assigned(FHTTP.RcvdStream)) then
   begin
     FHTTP.RcvdStream.Position := 0;
     FImage.LoadFromStream(FHTTP.RcvdStream);
     Save;
+
+    FHTTP.RcvdStream.Free;
+    FHTTP.RcvdStream := nil;
   end;
 
   FHTTP.SslContext.DeInitContext;
@@ -134,7 +138,7 @@ begin
   FHTTP.GetAsync;
 end;
 
-procedure TAvatar.Retrieve;
+function TAvatar.Retrieve: Boolean;
 var
   conn: TSQLDBSQLite3ConnectionProperties;
   mstream: TMemoryStream;
@@ -143,7 +147,8 @@ begin
   try
     mstream := TMemoryStream.Create;
     try
-      if Database.RetrieveAvatarData(conn, FId, mstream) then
+      result := Database.RetrieveAvatarData(conn, FId, mstream);
+      if result then
       begin
         mstream.Position := 0;
         FImage.LoadFromStream(mstream);
@@ -220,10 +225,10 @@ end;
 
 constructor TAvatars.Create;
 begin
-  inherited Create;
-
   FRetrievingImage := TJPEGImage.Create;
   LoadJPGFromResource(FRetrievingImage, 'RetrievingAvatar');
+
+  inherited Create;
 end;
 
 destructor TAvatars.Destroy;
@@ -245,25 +250,25 @@ function TAvatars.Add(const AId: TBytes; const AImage: TJPEGImage): TAvatar;
 var
   avatar: TAvatar;
 begin
-  if not Find(AId, avatar) then
-  begin
-    avatar := TAvatar.Create(AId, AImage);
-    if not Assigned(AImage) then
-    begin
-      avatar.Image.Assign(FRetrievingImage);
-      avatar.Download;
-    end;
-  end
-  else
+  if Find(AId, avatar) then
   begin
     if Assigned(AImage) then
     begin
       avatar.Image.Assign(AImage);
       avatar.Save;
     end;
+  end
+  else
+  begin
+    avatar := TAvatar.Create(AId, AImage);
+    if not Assigned(AImage) then
+    begin
+      avatar.Image.Assign(FRetrievingImage);
+      if not avatar.Retrieve then
+        avatar.Download;
+    end;
+    inherited Add(avatar);
   end;
-
-  inherited Add(avatar);
 
   result := avatar;
 end;
