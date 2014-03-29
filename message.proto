@@ -464,11 +464,11 @@ message CloseGameData {
 	optional uint32 timestamp = 2 [ default=0 ];
 }
 message FetchHandHistory {
-	message ClubQuery {
-		required bytes clubid = 1;
+	message GameQuery {
+		required bytes gameid = 1;
 		required uint32 lasthandid = 2;
 	}
-	repeated ClubQuery clubs = 1;
+	repeated GameQuery games = 1;
 }
 message FetchHandReply {
 	required string uuid = 1;
