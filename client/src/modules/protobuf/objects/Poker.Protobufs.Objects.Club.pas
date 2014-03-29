@@ -24,7 +24,6 @@ type
       FN_MEMBER_COUNT = 11;
       FN_SUSPENDED_MEMBERS = 12;
       FN_RAKE = 13;
-      FN_LASTHANDID = 14;
 
     var
       FId: TBytes;
@@ -39,7 +38,6 @@ type
       FMemberCount: Integer;
       FSuspendedMembers: TArray<TBytes>;
       FRake: UINT32;
-      FLasthandid: UINT32;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetChips(const AValue: UINT32);
@@ -53,7 +51,6 @@ type
     procedure SetMemberCount(const AValue: Integer);
     procedure SetSuspendedMembers(const AValue: TArray<TBytes>);
     procedure SetRake(const AValue: UINT32);
-    procedure SetLasthandid(const AValue: UINT32);
 
   public
     destructor Destroy; override;
@@ -71,7 +68,6 @@ type
     property MemberCount: Integer read FMemberCount write SetMemberCount;
     property SuspendedMembers: TArray<TBytes> read FSuspendedMembers write SetSuspendedMembers;
     property Rake: UINT32 read FRake write SetRake;
-    property Lasthandid: UINT32 read FLasthandid write SetLasthandid;
   end;
 
 implementation
@@ -143,10 +139,6 @@ begin
       FN_RAKE: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRake := AProtobufReader.readUInt32;
-      end;
-      FN_LASTHANDID: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FLasthandid := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -230,12 +222,6 @@ procedure TPB_Club.SetRake(const AValue: UINT32);
 begin
   FRake := AValue;
   ProtobufOutput.writeUInt32(FN_RAKE, AValue);
-end;
-
-procedure TPB_Club.SetLasthandid(const AValue: UINT32);
-begin
-  FLasthandid := AValue;
-  ProtobufOutput.writeUInt32(FN_LASTHANDID, AValue);
 end;
 
 end.
