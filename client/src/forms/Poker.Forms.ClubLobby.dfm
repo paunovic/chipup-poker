@@ -3356,9 +3356,7 @@ object frmClubLobby: TfrmClubLobby
           OptionsCustomize.ColumnMoving = False
           OptionsData.Deleting = False
           OptionsData.DeletingConfirmation = False
-          OptionsData.Editing = False
           OptionsData.Inserting = False
-          OptionsSelection.CellSelect = False
           OptionsView.NoDataToDisplayInfoText = ' '
           OptionsView.ColumnAutoWidth = True
           OptionsView.GroupByBox = False
@@ -3372,6 +3370,7 @@ object frmClubLobby: TfrmClubLobby
             Caption = 'Table'
             PropertiesClassName = 'TcxTextEditProperties'
             HeaderAlignmentHorz = taCenter
+            Options.Editing = False
             Width = 224
           end
         end

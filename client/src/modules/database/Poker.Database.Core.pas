@@ -164,7 +164,7 @@ begin
     query.ExecutePrepared;
     if query.Step then
     begin
-      rbs := query.ColumnBlob('data');
+      rbs := query.ColumnBlob(0);
       AData.Clear;
       AData.WriteBuffer(rbs[1], Length(rbs));
       result := TRUE;
@@ -205,7 +205,7 @@ begin
     query.Prepare('SELECT DISTINCT gameid FROM hands WHERE clubid = ?', TRUE);
     query.BindBlob(1, @AClubId[0], Length(AClubId) * SizeOf(Byte));
     query.ExecutePrepared;
-    if query.Step then
+    while query.Step do
       ATables.Add(query.ColumnBlob(0));
   finally
     query.Free;
