@@ -443,6 +443,18 @@ message ClubHandHistoryReply {
 	required bytes clubid = 1;
 	required bytes gameid = 2;
 	repeated HandHistory rows = 3;
+	repeated GameEventHistory events = 4;
+}
+message GameEventHistory {
+	enum geType {
+		geCashin = 1;
+		geCashout = 2;
+		geOpened = 3;
+	}
+	required geType type = 1;
+	required uint32 timestamp = 2;
+	optional bytes userid = 3;
+	optional int32 change = 4;
 }
 message HandHistory {
 	message PlayerHandHistory {
