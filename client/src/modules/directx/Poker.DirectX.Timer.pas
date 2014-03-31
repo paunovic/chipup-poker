@@ -203,6 +203,7 @@ begin
       ResetEvent(FSignalEvent);
       WaitForSingleObject(FSignalEvent, INFINITE);
     end;
+    Sleep(1);
   end;
 end;
 

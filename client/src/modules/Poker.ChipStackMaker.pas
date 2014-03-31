@@ -87,12 +87,21 @@ begin
   FChipCount := c1k + c500 + c100 + c25 + c5 + ccount;
   SetLength(FImages, FChipCount);
   chip_index := 0;
+
+  AddImages(ccount, chip_index, TableResources.Chip1Image);
+  AddImages(c5, chip_index, TableResources.Chip5Image);
+  AddImages(c25, chip_index, TableResources.Chip25Image);
+  AddImages(c100, chip_index, TableResources.Chip100Image);
+  AddImages(c500, chip_index, TableResources.Chip500Image);
+  AddImages(c1k, chip_index, TableResources.Chip1000Image);
+{
   AddImages(c1k, chip_index, TableResources.Chip1000Image);
   AddImages(c500, chip_index, TableResources.Chip500Image);
   AddImages(c100, chip_index, TableResources.Chip100Image);
   AddImages(c25, chip_index, TableResources.Chip25Image);
   AddImages(c5, chip_index, TableResources.Chip5Image);
   AddImages(ccount, chip_index, TableResources.Chip1Image);
+}
 end;
 
 { TChipsStacks }

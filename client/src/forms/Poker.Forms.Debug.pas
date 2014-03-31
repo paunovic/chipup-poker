@@ -9,7 +9,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxTextEdit, cxMemo, cxCheckBox, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList,
   Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLabel, RVScroll, RichView, RVStyle, RVTable,
-  CRVData;
+  CRVData, dxBevel;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm);
@@ -29,7 +29,6 @@ type
     pmiLogSave: TMenuItem;
     pmiLogClear: TMenuItem;
     N2: TMenuItem;
-    btPause: TcxButton;
     lbsThreads: TcxLabel;
     lbsMemoryUsage: TcxLabel;
     lbsSocketState: TcxLabel;
@@ -44,6 +43,8 @@ type
     btSeatPos: TcxButton;
     btSet: TcxButton;
     meSeatPos: TcxMemo;
+    btPause: TcxButton;
+    dxBevel1: TdxBevel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -72,7 +73,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIG}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer;
+  Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -207,11 +208,28 @@ begin
 end;
 
 procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
+var
+  tmp: String;
 begin
   lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
   lbvMemoryUsage.Caption := Format('%dkb', [GetWorkingSetSize div 1024]);
   lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
-  lbvSocketState.Caption := Format('%d', [Integer(ServerSocket.Socket.State)]);
+
+  case ServerSocket.Socket.State of
+    wsInvalidState: tmp := 'InvalidState';
+    wsOpened: tmp := 'Opened';
+    wsBound: tmp := 'Bound';
+    wsConnecting: tmp := 'Connecting';
+    wsSocksConnected: tmp := 'SocksConnected';
+    wsConnected: tmp := 'Connected';
+    wsAccepting: tmp := 'Accepting';
+    wsListening: tmp := 'Listening';
+    wsClosed: tmp := 'Closed';
+  else
+    tmp := 'Unknown';
+  end;
+
+  lbvSocketState.Caption := Format('%s', [tmp]);
 end;
 
 procedure TfrmDebug.CreateParams(var AParams: TCreateParams);

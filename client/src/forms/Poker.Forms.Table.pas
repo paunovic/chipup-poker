@@ -82,7 +82,7 @@ type
     procedure edChatEnter(Sender: TObject);
   private
     const
-      FORM_ASPECT_RATIO = 1.4505494505494505494505494505495;
+      FORM_ASPECT_RATIO = 1.35;
       CARD_OPEN_PERC    = 0.55;
       CARD_HIDDEN_PERC  = 0.35;
 
@@ -1423,7 +1423,7 @@ begin
   if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
     tb := seat.Timebank;
 
-  DebugLn(Format('D: %d; TS: %d; CS: %d; TIME: %d; TB: %d; SEQ:%d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
+  DebugLn(Format('D: %d; TS: %d; CS: %d; TIME: %d; TB: %d; SEQ: %d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
   {$ENDIF}
 
   FTurnAniDelay := 0;
@@ -1838,7 +1838,7 @@ begin
     FSeatWidth := FSeatWidth * 0.85;
 
   FSeatHeight := FSeatWidth / TableResources.SeatAspectRatio;
-  FSeatResizeRatio := FSeatWidth / TableResources.SeatEmptyLeftImage.Texture[0].Width;
+  FSeatResizeRatio := FSeatWidth / TableResources.SeatLeftImage.Texture[0].Width;
   FSeatActionResizeRatio := FSeatResizeRatio * 1.1;
 
   // calculate card size
@@ -2025,11 +2025,10 @@ var
   player_info            : TPlayerInfo;
   seat_image             : TAsphyreImage;
   seat_empty_image       : TAsphyreImage;
-  seat_dark_image        : TAsphyreImage;
+  seat_inactive_image    : TAsphyreImage;
+  seat_active_image      : TAsphyreImage;
   action_image           : TAsphyreImage;
 //  seat_light_image       : TAsphyreImage;
-  active_seat_dark_image : TAsphyreImage;
-  active_seat_light_image: TAsphyreImage;
   avatar                 : TAvatar;
   avatar_point           : TPoint2;
   avatar_width           : Single;
@@ -2054,27 +2053,25 @@ begin
 
   if GetTableSector(seat_point) in [tsLeft, tsTopLeft, tsBottomLeft] then
   begin
-    seat_empty_image := TableResources.SeatEmptyLeftImage;
-    seat_dark_image := TableResources.SeatDarkLeftImage;
-//    seat_light_image := TableResources.SeatLightLeftImage;
-    active_seat_dark_image := TableResources.ActiveSeatDarkLeftImage;
-    active_seat_light_image := TableResources.ActiveSeatLightLeftImage;
+    seat_empty_image := TableResources.SeatLeftEmptyImage;
+    seat_inactive_image := TableResources.SeatLeftImage;
+    seat_active_image := TableResources.SeatLeftActiveImage;
+
     avatar_point := Point2(seat_point.X - FSeatWidth / 2 + TableResources.SEAT_LEFT_AVATAR_X * FSeatResizeRatio, seat_point.Y);
     seat_text_x_center := seat_point.X - (seat_point.X + FSeatWidth / 2 - avatar_point.X) / 2 - 10 * FSeatResizeRatio;
   end
   else
   begin
-    seat_empty_image := TableResources.SeatEmptyRightImage;
-    seat_dark_image := TableResources.SeatDarkRightImage;
-//    seat_light_image := TableResources.SeatLightRightImage;
-    active_seat_dark_image := TableResources.ActiveSeatDarkRightImage;
-    active_seat_light_image := TableResources.ActiveSeatLightRightImage;
+    seat_empty_image := TableResources.SeatRightEmptyImage;
+    seat_inactive_image := TableResources.SeatRightImage;
+    seat_active_image := TableResources.SeatRightActiveImage;
+
     avatar_point := Point2(seat_point.X - FSeatWidth / 2 + TableResources.SEAT_RIGHT_AVATAR_X * FSeatResizeRatio, seat_point.Y);
     seat_text_x_center := seat_point.X + (avatar_point.X - (seat_point.X - FSeatWidth / 2) - 10 * FSeatResizeRatio);
   end;
   seat_upper_text_point := Point2(seat_text_x_center, seat_point.Y - FSeatHeight / 4.5);
   seat_lower_text_point := Point2(seat_text_x_center, seat_point.Y + FSeatHeight / 5);
-  seat_action_frame_point := Point2(seat_point.x, seat_point.Y + FSeatHeight / 2 + FSeatActionFrameHeight / 2.5);
+  seat_action_frame_point := Point2(seat_point.x, seat_point.Y + FSeatHeight / 2 + FSeatActionFrameHeight / 2.15);
 
   // seat taken and its not in psStandingUp state
   if (FTableStatus.GetSeatInfo(ASeatIndex, seat_info)) and
@@ -2088,13 +2085,14 @@ begin
        (not FTableStatus.Locked) and
        (not tiGameLock.Enabled) then
     begin
-      if tiActiveFrameBlink.Tag = 1 then
+{      if tiActiveFrameBlink.Tag = 1 then
         seat_image := active_seat_light_image
       else
-        seat_image := active_seat_dark_image;
+        seat_image := active_seat_dark_image;}
+      seat_image := seat_active_image;
     end
     else
-      seat_image := seat_dark_image;
+      seat_image := seat_inactive_image;
 
     if Assigned(player_info) then
     begin
