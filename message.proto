@@ -446,12 +446,12 @@ message ClubHandHistoryReply {
 	repeated GameEventHistory events = 4;
 }
 message GameEventHistory {
-	enum geType {
+	enum GameEventType {
 		geCashin = 1;
 		geCashout = 2;
 		geOpened = 3;
 	}
-	required geType type = 1;
+	required GameEventType eventtype = 1;
 	required uint32 timestamp = 2;
 	optional bytes userid = 3;
 	optional int32 change = 4;
