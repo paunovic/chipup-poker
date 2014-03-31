@@ -20,7 +20,6 @@ type
     FSuspendedPlayers: TArray<TBytes>;
     FGames           : TGamesInfo;
     FRake            : Integer;
-    FLastHandId      : UINT32;
   public
     constructor Create(const AProtobufObject: TPB_Club); overload;
     destructor Destroy; override;
@@ -42,7 +41,6 @@ type
     property SuspendedPlayers: TArray<TBytes> read FSuspendedPlayers;
     property Games           : TGamesInfo read FGames;
     property Rake            : Integer read FRake;
-    property LastHandId      : UINT32 read FLastHandId;
   end;
 
   TClubsInfo = class(TObjectList<TClubInfo>)
@@ -116,7 +114,6 @@ begin
   for C1 := 0 to Length(AProtobufObject.SuspendedMembers) - 1 do
     AddPlayer(AProtobufObject.SuspendedMembers[C1], TRUE);
   FRake := AProtobufObject.Rake;
-  FLastHandId := AProtobufObject.Lasthandid;
 end;
 
 procedure TClubInfo.AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);

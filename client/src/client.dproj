@@ -247,7 +247,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubQuery.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas"/>
 			<DCCReference Include="modules\Poker.HandDownloader.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas"/>
@@ -255,6 +254,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -267,6 +267,10 @@
 				<ContainerId>ResourceItem</ContainerId>
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>RoomMedia</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\avatar\RetrievingAvatar.jpg">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>RetrievingAvatar</ResourceId>
 			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

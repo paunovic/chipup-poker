@@ -8,7 +8,6 @@ uses
 type
   TProtobufBaseObject = class
   private
-    FModifiedFields: TList<Integer>;
     FProtobufOutput: TProtoBufOutput;
 
     function GetProtobufOutputSize: Word;
@@ -46,7 +45,9 @@ var
   protobuf_reader: TProtobufReader;
 begin
   InitObjects;
+
   FProtobufOutput := TProtobufOutput.Create;
+  FProtobufOutput.writeRawData(APointer, ASize);
 
   protobuf_reader := TProtobufReader.Create(APointer, ASize);
   try
@@ -59,16 +60,15 @@ end;
 constructor TProtobufBaseObject.Create(const AProtobufReader: TProtobufReader; const ASize: Integer);
 begin
   InitObjects;
+
   FProtobufOutput := TProtobufOutput.Create;
+  FProtobufOutput.writeRawData(PAnsiChar(Integer(AProtobufReader.Buffer) + AProtobufReader.BufferPos), ASize);
 
   LoadFromProtobufReader(AProtobufReader, ASize);
 end;
 
 destructor TProtobufBaseObject.Destroy;
 begin
-  if Assigned(FModifiedFields) then
-    FModifiedFields.Free;
-
   FProtobufOutput.Free;
 
   inherited;

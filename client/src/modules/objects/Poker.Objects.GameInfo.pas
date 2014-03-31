@@ -22,6 +22,7 @@ type
     FSitting    : Integer;
     FState      : TGameState;
     FClosingTime: DWORD;
+    FLastHandId : UINT32;
 
     function GetGameTypeStr: String;
     function GetGameTypeStrFull: String;
@@ -50,6 +51,8 @@ type
     property State          : TGameState read FState write FState;
     property StateAsStr     : String read GetStateStr;
     property ClosingTime    : DWORD read FClosingTime write FClosingTime;
+    property LastHandId     : UINT32 read FLastHandId;
+
   end;
 
   TGamesInfo = class(TObjectList<TGameInfo>)
@@ -89,6 +92,7 @@ begin
   FSitting := AProtobufObject.Sitting;
   FState := AProtobufObject.State;
   FClosingTime := AProtobufObject.Closetime;
+  FLastHandId := AProtobufObject.Lasthandid;
 end;
 
 procedure TGameInfo.UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);

@@ -2099,7 +2099,7 @@ begin
     if Assigned(player_info) then
     begin
       // set avatar
-      avatar := Avatars.AddAvatar(player_info.AvatarId);
+      avatar := Avatars.Add(player_info.AvatarId, nil);
 
       // set seat upper text
       seat_upper_text := player_info.Nick;

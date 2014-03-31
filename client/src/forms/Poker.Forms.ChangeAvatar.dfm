@@ -64,7 +64,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 218
   end
   object btCancel: TcxButton
     Left = 116
@@ -81,7 +80,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 218
   end
   object imgAvatar: TcxImage
     Left = 38
@@ -89,6 +87,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     Properties.PopupMenuLayout.MenuItems = []
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
+    Style.BorderColor = 3487029
     TabOrder = 3
     Height = 150
     Width = 150

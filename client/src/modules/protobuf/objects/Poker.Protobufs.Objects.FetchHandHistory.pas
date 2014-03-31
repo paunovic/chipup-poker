@@ -6,18 +6,18 @@ unit Poker.Protobufs.Objects.FetchHandHistory;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.ClubQuery;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.GameQuery;
 
 type
   TPB_FetchHandHistory = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBS = 1;
+      FN_GAMES = 1;
 
     var
-      FClubs: TObjectList<TPB_ClubQuery>;
+      FGames: TObjectList<TPB_GameQuery>;
 
-    procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_ClubQuery; Action: TCollectionNotification);
+    procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_GameQuery; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -26,7 +26,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Clubs: TObjectList<TPB_ClubQuery> read FClubs;
+    property Games: TObjectList<TPB_GameQuery> read FGames;
   end;
 
 implementation
@@ -37,16 +37,16 @@ uses
 
 procedure TPB_FetchHandHistory.InitObjects;
 begin
-  FClubs := TObjectList<TPB_ClubQuery>.Create;
-  FClubs.OnNotify := ClubsNotifyEvent;
+  FGames := TObjectList<TPB_GameQuery>.Create;
+  FGames.OnNotify := GamesNotifyEvent;
 end;
 
 destructor TPB_FetchHandHistory.Destroy;
 begin
-  if Assigned(FClubs) then
+  if Assigned(FGames) then
   begin
-    FClubs.OnNotify := nil;
-    FreeAndNil(FClubs);
+    FGames.OnNotify := nil;
+    FreeAndNil(FGames);
   end;
   inherited;
 end;
@@ -59,9 +59,9 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUBS: begin
+      FN_GAMES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubs.Add(TPB_ClubQuery.Create(AProtobufReader,AProtobufReader.readInt32));
+        FGames.Add(TPB_GameQuery.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -69,10 +69,10 @@ begin
   end;
 end;
 
-procedure TPB_FetchHandHistory.ClubsNotifyEvent(Sender: TObject; const Item: TPB_ClubQuery; Action: TCollectionNotification);
+procedure TPB_FetchHandHistory.GamesNotifyEvent(Sender: TObject; const Item: TPB_GameQuery; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_CLUBS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(FN_GAMES,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

@@ -15,6 +15,8 @@ type
     function GetNext(out ATag, AWireType, AFieldNumber: Integer): Boolean;
     procedure readBytes(var ABytes: TBytes);
 
+    property Buffer: PAnsiChar read FBuffer;
+    property BufferPos: Integer read FPos;
     property Size: Integer read FSize;
   end;
 

@@ -114,14 +114,14 @@ uses
   Poker.Protobufs.Objects.TableBoolFlag in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas',
   Poker.Protobufs.Objects.UserChangeParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas',
   Poker.Protobufs.Objects.CloseGameData in 'modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas',
-  Poker.Protobufs.Objects.ClubQuery in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubQuery.pas',
   Poker.Protobufs.Objects.FetchHandReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas',
   Poker.HandDownloader in 'modules\Poker.HandDownloader.pas',
   Poker.Protobufs.Objects.FetchHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas',
   Poker.Protobufs.Objects.FetchHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistoryReply.pas',
   Poker.Protobufs.Objects.ClubHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas',
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
-  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas';
+  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
+  Poker.Protobufs.Objects.GameQuery in 'modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas';
 
 procedure FocusPokerApp;
 var

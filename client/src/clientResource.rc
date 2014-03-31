@@ -1,3 +1,4 @@
 CashierNormal RCDATA "resources\\cashier\\Normal.png"
 CashierPressed RCDATA "resources\\cashier\\Pressed.png"
 RoomMedia RCDATA "resources\\Poker.Resources.RoomMedia.asvf"
+RetrievingAvatar RCDATA "resources\\avatar\\RetrievingAvatar.jpg"

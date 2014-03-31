@@ -31,13 +31,14 @@ type
   // Reads and decodes protocol message fields.
   TProtoBufInput = class
   private
-    FBuffer: PAnsiChar;
-    FPos: integer;
     FLen: integer;
     FSizeLimit: integer;
     FRecursionDepth: integer;
     FLastTag: integer;
     FOwnObject: boolean;
+  protected
+    FPos: integer;
+    FBuffer: PAnsiChar;
   public
     constructor Create; overload;
     constructor Create(buf: PAnsiChar; len: integer; aOwnsObjects: Boolean=false); overload;
