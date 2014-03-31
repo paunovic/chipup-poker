@@ -395,6 +395,7 @@ begin
     pbHandsDownload.Visible := FALSE;
     gridTables.Visible := TRUE;
     gridStats.Visible := TRUE;
+    UpdateGamesList;
   end
   else
   begin
