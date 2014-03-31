@@ -102,11 +102,11 @@ begin
   result := 0;
   query := AConnection.NewThreadSafeStatement;
   try
-    query.Prepare('SELECT MAX(id) as "maxid" FROM hands WHERE gameid = ?', TRUE);
+    query.Prepare('SELECT MAX(id) FROM hands WHERE gameid = ?', TRUE);
     query.BindBlob(1, @AGameId[0], Length(AGameId) * SizeOf(Byte));
     query.ExecutePrepared;
     if query.Step then
-      result := query.ColumnInt('maxid');
+      result := query.ColumnInt(0);
   finally
     query.Free;
   end;
