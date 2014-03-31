@@ -9,7 +9,7 @@ uses
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
-  cxData, cxProgressBar;
+  cxData, cxProgressBar, cxCheckListBox, cxCheckBox;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -73,6 +73,21 @@ type
     pbHandsDownload: TcxProgressBar;
     lbsDownloadingHandData: TcxLabel;
     tiHandDownloadRefresh: TTimer;
+    gridStats: TcxGrid;
+    cxGridTableView1: TcxGridTableView;
+    cxGridLevel1: TcxGridLevel;
+    gridTables: TcxGrid;
+    gridTablesTable: TcxGridTableView;
+    gridTablesLevel: TcxGridLevel;
+    cxGridTableView1Column1: TcxGridColumn;
+    cxGridTableView1Column2: TcxGridColumn;
+    cxGridTableView1Column3: TcxGridColumn;
+    cxGridTableView1Column4: TcxGridColumn;
+    cxGridTableView1Column5: TcxGridColumn;
+    cxGridTableView1Column6: TcxGridColumn;
+    cxGridTableView1Column7: TcxGridColumn;
+    gridTablesEnabled: TcxGridColumn;
+    gridTablesName: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);

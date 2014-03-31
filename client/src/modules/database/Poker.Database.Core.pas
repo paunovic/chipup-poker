@@ -3,7 +3,7 @@ unit Poker.Database.Core;
 interface
 
 uses
-  System.SysUtils, System.Classes, SynCommons, SynDB, SynDBSQLite3;
+  System.SysUtils, System.Classes, SynSQLite3Static, SynCommons, SynDB, SynDBSQLite3;
 
 type
   TDatabase = class
@@ -37,7 +37,7 @@ var
 implementation
 
 uses
-  Poker.Common.Misc, SQLite3Commons;
+  Poker.Common.Misc;
 
 
 class procedure TDatabase.Initialize(const ADatabasePath: String);
@@ -58,7 +58,7 @@ begin
 
   conn := NewConnection;
   try
-    CreateTables(conn);;
+    CreateTables(conn);
   finally
     conn.Free;
   end;
@@ -66,7 +66,6 @@ end;
 
 destructor TDatabase.Destroy;
 begin
-
   inherited;
 end;
 
@@ -87,6 +86,8 @@ end;
 
 procedure TDatabase.CreateTables(const AConnection: TSQLDBSQLite3ConnectionProperties);
 begin
+  ExecuteNoResult(AConnection, 'PRAGMA page_size = 4096');
+
   ExecuteNoResult(AConnection, 'CREATE TABLE IF NOT EXISTS hands (id INTEGER PRIMARY KEY, clubid BLOB, gameid BLOB, timestamp INTEGER, data BLOB)');
   ExecuteNoResult(AConnection, 'CREATE INDEX IF NOT EXISTS gameid_idx ON hands(gameid)');
 
@@ -152,7 +153,7 @@ begin
   result := FALSE;
   query := AConnection.NewThreadSafeStatement;
   try
-    query.Prepare('SELECT id, data FROM avatars WHERE id = ?', TRUE);
+    query.Prepare('SELECT data FROM avatars WHERE id = ?', TRUE);
     query.BindBlob(1, @AId[0], Length(AId) * SizeOf(Byte));
     query.ExecutePrepared;
     if query.Step then
@@ -166,7 +167,6 @@ begin
     query.Free;
   end;
 end;
-
 
 
 end.
