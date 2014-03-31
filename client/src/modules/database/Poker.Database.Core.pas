@@ -3,7 +3,8 @@ unit Poker.Database.Core;
 interface
 
 uses
-  System.SysUtils, System.Classes, SynSQLite3Static, SynCommons, SynDB, SynDBSQLite3;
+  System.SysUtils, System.Classes, SynSQLite3Static, SynCommons, SynDB, SynDBSQLite3, Poker.Protobufs.Objects.Game,
+  System.Generics.Collections;
 
 type
   TDatabase = class
@@ -27,8 +28,12 @@ type
     function LastHandId(const AConnection: TSQLDBSQLite3ConnectionProperties; const AGameId: TBytes): UINT32;
     procedure InsertHand(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: UINT32; const AClubId, AGameId: TBytes; const ATimestamp: UINT32; const AData: TMemoryStream);
 
+    procedure InsertTable(const AConnection: TSQLDBSQLite3ConnectionProperties; const AGame: TPB_Game);
+
     procedure InsertAvatar(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream);
     function RetrieveAvatarData(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream): Boolean;
+
+    procedure RetrieveTableList(const AConnection: TSQLDBSQLite3ConnectionProperties; const AClubId: TBytes; const ATables: TList<RawByteString>);
   end;
 
 var
@@ -90,6 +95,7 @@ begin
 
   ExecuteNoResult(AConnection, 'CREATE TABLE IF NOT EXISTS hands (id INTEGER PRIMARY KEY, clubid BLOB, gameid BLOB, timestamp INTEGER, data BLOB)');
   ExecuteNoResult(AConnection, 'CREATE INDEX IF NOT EXISTS gameid_idx ON hands(gameid)');
+  ExecuteNoResult(AConnection, 'CREATE INDEX IF NOT EXISTS clubid_idx ON hands(clubid)');
 
   ExecuteNoResult(AConnection, 'CREATE TABLE IF NOT EXISTS avatars (id BLOB, data BLOB)');
   ExecuteNoResult(AConnection, 'CREATE UNIQUE INDEX IF NOT EXISTS id_idx ON avatars(id)');
@@ -168,5 +174,42 @@ begin
   end;
 end;
 
+procedure TDatabase.InsertTable(const AConnection: TSQLDBSQLite3ConnectionProperties; const AGame: TPB_Game);
+var
+  query  : TSQLDBStatement;
+  mstream: TMemoryStream;
+begin
+  query := AConnection.NewThreadSafeStatement;
+  try
+    query.Prepare('INSERT OR REPLACE INTO tables (id, data) VALUES (?, ?)', FALSE);
+    query.BindBlob(1, @AGame.MongoId[0], Length(AGame.MongoId) * SizeOf(Byte));
+    mstream := TMemoryStream.Create;
+    try
+      AGame.ProtobufOutput.SaveToStream(mstream);
+      query.BindBlob(2, mstream.Memory, mstream.Size);
+      query.ExecutePrepared;
+    finally
+      mstream.Free;
+    end;
+  finally
+    query.Free;
+  end;
+end;
+
+procedure TDatabase.RetrieveTableList(const AConnection: TSQLDBSQLite3ConnectionProperties; const AClubId: TBytes; const ATables: TList<RawByteString>);
+var
+  query: TSQLDBStatement;
+begin
+  query := AConnection.NewThreadSafeStatement;
+  try
+    query.Prepare('SELECT DISTINCT gameid FROM hands WHERE clubid = ?', TRUE);
+    query.BindBlob(1, @AClubId[0], Length(AClubId) * SizeOf(Byte));
+    query.ExecutePrepared;
+    if query.Step then
+      ATables.Add(query.ColumnBlob(0));
+  finally
+    query.Free;
+  end;
+end;
 
 end.

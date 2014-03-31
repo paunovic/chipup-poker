@@ -5,6 +5,7 @@ interface
 uses
   Winapi.Windows, System.Classes, System.SysUtils;
 
+
 function SHA256Stream(const AStream: TStream): RawByteString;
 function SHA256Bytes(const ABytes: TBytes): RawByteString;
 function SHA256String(const AString: String): RawByteString;

@@ -122,6 +122,7 @@ type
 
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
+    procedure UpdateTablesStatsList;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -153,10 +154,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  SynDBSQLite3, System.Generics.Collections,
   Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.HandDownloader;
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.HandDownloader, Poker.Database.Core;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -248,6 +250,7 @@ begin
     begin
       btPrijatnaPunina.Left := btStats.Left + btStats.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
       HandsDownloading(HandDownloader.Downloading);
+      UpdateTablesStatsList;
     end
     else
     begin
@@ -390,12 +393,16 @@ begin
     tiHandDownloadRefresh.Enabled := FALSE;
     lbsDownloadingHandData.Visible := FALSE;
     pbHandsDownload.Visible := FALSE;
+    gridTables.Visible := TRUE;
+    gridStats.Visible := TRUE;
   end
   else
   begin
     pbHandsDownload.Visible := TRUE;
     lbsDownloadingHandData.Visible := TRUE;
     tiHandDownloadRefresh.Enabled := TRUE;
+    gridTables.Visible := FALSE;
+    gridStats.Visible := FALSE;
   end;
 end;
 
@@ -464,37 +471,90 @@ begin
   end;
 end;
 
-procedure TfrmClubLobby.UpdateGamesList;
+procedure TfrmClubLobby.UpdateTablesStatsList;
 var
-  C1  : Integer;
-  game: TGameInfo;
-  club: TClubInfo;
+  game  : TGameInfo;
+  club  : TClubInfo;
+  c     : TcxGridDataController;
+  recidx: Integer;
+  conn  : TSQLDBSQLite3ConnectionProperties;
+  tables: TList<RawByteString>;
+  rbs   : RawByteString;
+  table : RawByteString;
 begin
-  gridGamesTable.DataController.BeginFullUpdate;
+  c := gridTablesTable.DataController;
+  c.BeginFullUpdate;
   try
-    gridGamesTable.DataController.SetRecordCount(0);
+    c.SetRecordCount(0);
 
     if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
-    begin
-      gridGamesTable.DataController.SetRecordCount(0);
       Exit;
-    end;
 
-    gridGamesTable.DataController.SetRecordCount(club.Games.Count);
+    conn := Database.NewConnection;
+    try
+      tables := TList<RawByteString>.Create;
+      try
+        Database.RetrieveTableList(conn, club.MongoId, tables);
+        for table in tables do
+        begin
+          for game in club.Games do
+          begin
+            SetLength(rbs, Length(game.Mongoid));
+            Move(game.MongoId[0], rbs[1], Length(game.MongoId));
+            if table = rbs then
+            begin
+              recidx := c.AppendRecord;
+              c.SetValue(recidx, gridTablesName.Index, game.Name);
+              Break;
+            end;
+          end;
+        end;
+      finally
+        tables.Free;
+      end;
+    finally
+      conn.Free;
+    end;
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
+procedure TfrmClubLobby.UpdateGamesList;
+var
+  C1    : Integer;
+  game  : TGameInfo;
+  club  : TClubInfo;
+  c     : TcxGridDataController;
+  recidx: Integer;
+begin
+  c := gridGamesTable.DataController;
+  c.BeginFullUpdate;
+  try
+    c.SetRecordCount(0);
+
+    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+      Exit;
+
     for C1 := 0 to club.Games.Count - 1 do
     begin
       game := club.Games[C1];
 
-      gridGamesTable.DataController.SetValue(C1, gridGamesId.Index, game.MongoId);
-      gridGamesTable.DataController.SetValue(C1, gridGamesName.Index, game.Name);
-      gridGamesTable.DataController.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
-      gridGamesTable.DataController.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
-      gridGamesTable.DataController.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
-      gridGamesTable.DataController.SetValue(C1, gridGamesSeats.Index, game.Seats);
-      gridGamesTable.DataController.SetValue(C1, gridGamesTableStatus.Index, game.StateAsStr);
+      if game.State = gsClosed then
+        Continue;
+
+      recidx := c.AppendRecord;
+
+      c.SetValue(recidx, gridGamesId.Index, game.MongoId);
+      c.SetValue(recidx, gridGamesName.Index, game.Name);
+      c.SetValue(recidx, gridGamesType.Index, game.GameTypeStrFull);
+      c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
+      c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
+      c.SetValue(recidx, gridGamesSeats.Index, game.Seats);
+      c.SetValue(recidx, gridGamesTableStatus.Index, game.StateAsStr);
     end;
   finally
-    gridGamesTable.DataController.EndFullUpdate;
+    c.EndFullUpdate;
   end;
 end;
 

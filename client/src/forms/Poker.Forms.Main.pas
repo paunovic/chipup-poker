@@ -478,33 +478,34 @@ end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
 var
-  C1  : Integer;
-  game: TGameInfo;
-  c   : TcxGridDataController;
-  club: TClubInfo;
+  C1    : Integer;
+  game  : TGameInfo;
+  c     : TcxGridDataController;
+  club  : TClubInfo;
+  recidx: Integer;
 begin
   c := gridGamesTable.DataController;
   c.BeginFullUpdate;
   try
+    c.SetRecordCount(0);
     if not GetSelectedClub(club) then
-    begin
-      c.SetRecordCount(0);
       Exit;
-    end
-    else
-      c.SetRecordCount(club.Games.Count);
 
     for C1 := 0 to club.Games.Count - 1 do
     begin
       game := club.Games[C1];
+      if game.State = gsClosed then
+        Continue;
 
-      c.SetValue(C1, gridGamesId.Index, game.MongoId);
-      c.SetValue(C1, gridGamesName.Index, game.Name);
-      c.SetValue(C1, gridGamesType.Index, game.GameTypeStrFull);
-      c.SetValue(C1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
-      c.SetValue(C1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
-      c.SetValue(C1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
-      c.SetValue(C1, gridGamesStatus.Index, game.StateAsStr);
+      recidx := c.AppendRecord;
+
+      c.SetValue(recidx, gridGamesId.Index, game.MongoId);
+      c.SetValue(recidx, gridGamesName.Index, game.Name);
+      c.SetValue(recidx, gridGamesType.Index, game.GameTypeStrFull);
+      c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
+      c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
+      c.SetValue(recidx, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
+      c.SetValue(recidx, gridGamesStatus.Index, game.StateAsStr);
     end;
   finally
     c.EndFullUpdate;
