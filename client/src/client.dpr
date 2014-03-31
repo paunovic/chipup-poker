@@ -121,7 +121,8 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas',
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
-  Poker.Protobufs.Objects.GameQuery in 'modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas';
+  Poker.Protobufs.Objects.GameQuery in 'modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas',
+  Poker.Protobufs.Objects.GameEventHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.GameEventHistory.pas';
 
 procedure FocusPokerApp;
 var

@@ -18,6 +18,7 @@ type
       FN_PLAYERS = 4;
       FN_TABLECARDS = 5;
       FN_ENDTIME = 6;
+      FN_BALANCE_CHANGES = 7;
 
     var
       FId: TBytes;
@@ -26,12 +27,14 @@ type
       FPlayers: TObjectList<TPB_PlayerHandHistory>;
       FTablecards: TBytes;
       FEndtime: UINT32;
+      FBalanceChanges: TArray<Integer>;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetSeq(const AValue: UINT32);
     procedure SetTotalrake(const AValue: UINT32);
     procedure SetTablecards(const AValue: TBytes);
     procedure SetEndtime(const AValue: UINT32);
+    procedure SetBalanceChanges(const AValue: TArray<Integer>);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
 
   protected
@@ -47,6 +50,7 @@ type
     property Players: TObjectList<TPB_PlayerHandHistory> read FPlayers;
     property Tablecards: TBytes read FTablecards write SetTablecards;
     property Endtime: UINT32 read FEndtime write SetEndtime;
+    property BalanceChanges: TArray<Integer> read FBalanceChanges write SetBalanceChanges;
   end;
 
 implementation
@@ -103,6 +107,11 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEndtime := AProtobufReader.readUInt32;
       end;
+      FN_BALANCE_CHANGES: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        SetLength(FBalanceChanges, Length(FBalanceChanges) + 1);
+        FBalanceChanges[Length(FBalanceChanges)-1] := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -145,6 +154,15 @@ procedure TPB_HandHistory.SetEndtime(const AValue: UINT32);
 begin
   FEndtime := AValue;
   ProtobufOutput.writeUInt32(FN_ENDTIME, AValue);
+end;
+
+procedure TPB_HandHistory.SetBalanceChanges(const AValue: TArray<Integer>);
+var
+  C1: Integer;
+begin
+  FBalanceChanges := AValue;
+  for C1 := 0 to Length(FBalanceChanges) - 1 do
+    ProtobufOutput.writeInt32(FN_BALANCE_CHANGES, AValue[C1]);
 end;
 
 end.

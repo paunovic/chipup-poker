@@ -265,6 +265,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameEventHistory.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
