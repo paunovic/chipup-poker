@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ClubHandHistoryReply;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.HandHistory;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.HandHistory,Poker.Protobufs.Objects.GameEventHistory;
 
 type
   TPB_ClubHandHistoryReply = class(TProtobufBaseObject)
@@ -15,15 +15,18 @@ type
       FN_CLUBID = 1;
       FN_GAMEID = 2;
       FN_ROWS = 3;
+      FN_EVENTS = 4;
 
     var
       FClubid: TBytes;
       FGameid: TBytes;
       FRows: TObjectList<TPB_HandHistory>;
+      FEvents: TObjectList<TPB_GameEventHistory>;
 
     procedure SetClubid(const AValue: TBytes);
     procedure SetGameid(const AValue: TBytes);
     procedure RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
+    procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_GameEventHistory; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -35,6 +38,7 @@ type
     property Clubid: TBytes read FClubid write SetClubid;
     property Gameid: TBytes read FGameid write SetGameid;
     property Rows: TObjectList<TPB_HandHistory> read FRows;
+    property Events: TObjectList<TPB_GameEventHistory> read FEvents;
   end;
 
 implementation
@@ -47,6 +51,8 @@ procedure TPB_ClubHandHistoryReply.InitObjects;
 begin
   FRows := TObjectList<TPB_HandHistory>.Create;
   FRows.OnNotify := RowsNotifyEvent;
+  FEvents := TObjectList<TPB_GameEventHistory>.Create;
+  FEvents.OnNotify := EventsNotifyEvent;
 end;
 
 destructor TPB_ClubHandHistoryReply.Destroy;
@@ -55,6 +61,11 @@ begin
   begin
     FRows.OnNotify := nil;
     FreeAndNil(FRows);
+  end;
+  if Assigned(FEvents) then
+  begin
+    FEvents.OnNotify := nil;
+    FreeAndNil(FEvents);
   end;
   inherited;
 end;
@@ -79,6 +90,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FRows.Add(TPB_HandHistory.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
+      FN_EVENTS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FEvents.Add(TPB_GameEventHistory.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -101,6 +116,14 @@ procedure TPB_ClubHandHistoryReply.RowsNotifyEvent(Sender: TObject; const Item: 
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(FN_ROWS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_ClubHandHistoryReply.EventsNotifyEvent(Sender: TObject; const Item: TPB_GameEventHistory; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_EVENTS,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

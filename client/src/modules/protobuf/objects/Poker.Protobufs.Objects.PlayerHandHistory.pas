@@ -13,18 +13,15 @@ type
   private
     const
       FN__ID = 1;
-      FN_BALANCE = 2;
-      FN_SEAT = 3;
-      FN_CARDS = 4;
+      FN_SEAT = 2;
+      FN_CARDS = 3;
 
     var
       FId: TBytes;
-      FBalance: Integer;
       FSeat: UINT32;
       FCards: TArray<TBytes>;
 
     procedure SetMongoId(const AValue: TBytes);
-    procedure SetBalance(const AValue: Integer);
     procedure SetSeat(const AValue: UINT32);
     procedure SetCards(const AValue: TArray<TBytes>);
 
@@ -33,7 +30,6 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property MongoId: TBytes read FId write SetMongoId;
-    property Balance: Integer read FBalance write SetBalance;
     property Seat: UINT32 read FSeat write SetSeat;
     property Cards: TArray<TBytes> read FCards write SetCards;
   end;
@@ -62,10 +58,6 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
       end;
-      FN_BALANCE: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FBalance := AProtobufReader.readInt32;
-      end;
       FN_SEAT: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readUInt32;
@@ -85,12 +77,6 @@ procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
 begin
   FId := AValue;
   ProtobufOutput.writeBytes(FN__ID, AValue);
-end;
-
-procedure TPB_PlayerHandHistory.SetBalance(const AValue: Integer);
-begin
-  FBalance := AValue;
-  ProtobufOutput.writeInt32(FN_BALANCE, AValue);
 end;
 
 procedure TPB_PlayerHandHistory.SetSeat(const AValue: UINT32);

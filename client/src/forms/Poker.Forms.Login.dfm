@@ -3190,7 +3190,7 @@ object frmLogin: TfrmLogin
     Width = 129
   end
   object btLogin: TcxButton
-    Left = 136
+    Left = 138
     Top = 288
     Width = 174
     Height = 30
@@ -3290,6 +3290,22 @@ object frmLogin: TfrmLogin
     ParentFont = False
     Transparent = True
   end
+  object btForceUpdate: TcxButton
+    Left = 330
+    Top = 222
+    Width = 174
+    Height = 30
+    Action = acUpdate
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 10
+    Visible = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+  end
   object alLogin: TActionList
     Left = 28
     Top = 16
@@ -3307,6 +3323,10 @@ object frmLogin: TfrmLogin
       Caption = 'FORGOT PASSWORD'
       Enabled = False
       OnExecute = acShowForgotPasswordFormExecute
+    end
+    object acUpdate: TAction
+      Caption = 'Force Update'
+      OnExecute = acUpdateExecute
     end
   end
   object tiConnect: TTimer
