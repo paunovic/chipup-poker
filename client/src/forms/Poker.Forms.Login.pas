@@ -29,6 +29,8 @@ type
     tiConnect: TTimer;
     imgHeader: TcxImage;
     tiLoginTimeout: TTimer;
+    btForceUpdate: TcxButton;
+    acUpdate: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acLoginExecute(Sender: TObject);
     procedure acShowCreateAccountFormExecute(Sender: TObject);
@@ -39,6 +41,7 @@ type
     procedure tiConnectTimer(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure tiLoginTimeoutTimer(Sender: TObject);
+    procedure acUpdateExecute(Sender: TObject);
   private
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
@@ -86,6 +89,10 @@ begin
   CurrentStatus := lsIdle;
   edPassword.Properties.PasswordChar := Chr($25CF);
   ApplySettings;
+
+  {$IFDEF DEBUG}
+  btForceUpdate.Visible := TRUE;
+  {$ENDIF}
 
   EnableGUI(ServerSocket.IsConnected);
 end;
@@ -238,6 +245,13 @@ begin
   end;
 end;
 
+procedure TfrmLogin.acUpdateExecute(Sender: TObject);
+begin
+  CurrentStatus := lsUpdating;
+  Close;
+  Exit;
+end;
+
 procedure TfrmLogin.acLoginExecute(Sender: TObject);
 begin
   CurrentStatus := lsLoggingIn;
@@ -271,11 +285,7 @@ begin
 
   if (version <> Settings.Hardcoded.VERSION) and
      (Settings.Hardcoded.REVISION <> 'manual') then
-  begin
-    CurrentStatus := lsUpdating;
-    Close;
-    Exit;
-  end;
+    acUpdate.Execute;
 
   ServerSettings.ParseHelloMessage(pbhello);
 
