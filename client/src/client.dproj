@@ -187,6 +187,9 @@
 			<DCCReference Include="forms\Poker.Forms.CloseTable.pas">
 				<Form>frmCloseTable</Form>
 			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ImageCrop.pas">
+				<Form>frmImageCrop</Form>
+			</DCCReference>
 			<DCCReference Include="interfaces\Poker.Interfaces.FormParams.pas"/>
 			<DCCReference Include="interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.AsphyreImage.pas"/>

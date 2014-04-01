@@ -33,6 +33,7 @@ type
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
 
+    procedure CloseModalCallback(Sender: TObject);
     procedure CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
 
     procedure UploadAvatar;
@@ -49,7 +50,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   PNGImage, Poker.Avatars, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
   Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
-  Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Common.FormsContainer;
+  Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Common.FormsContainer, Poker.Forms.ImageCrop;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
@@ -155,12 +156,8 @@ end;
 
 procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);
 var
-  ms     : TMemoryStream;
-  fname  : String;
-  picture: TPicture;
-  bmp    : TBitmap;
-  error  : String;
-  sha256 : RawByteString;
+  fname: String;
+  error: String;
 begin
   if not OpenDialog.Execute(Handle) then
     Exit;
@@ -170,46 +167,55 @@ begin
   if not FileExists(fname) then
     error := 'File doesn''t exist';
 
-  if GetFileSize(fname) > 1024 * 1024 then
-    error := 'File size is too big (must be below 1Mb)';
+  if GetFileSize(fname) > 5 * 1024 * 1024 then
+    error := 'File size is too big (must be below 5Mb)';
 
   if error = '' then
-  begin
-    picture := TPicture.Create;
-    try
-      picture.LoadFromFile(fname);
+    FormsContainer.Add(RunModalForm(TfrmImageCrop, self, [@fname], CloseModalCallback))
+  else
+    MessageDlg(error, mtError, [mbOK], 0);
+end;
 
-      bmp := TBitmap.Create;
+procedure TfrmChangeAvatar.CloseModalCallback(Sender: TObject);
+var
+  bmp: TBitmap;
+  sha256: RawByteString;
+  mstream: TMemoryStream;
+begin
+  if (Sender is TfrmImageCrop) and
+     ((Sender as TfrmImageCrop).ModalResult = mrOk) then
+  begin
+    bmp := TBitmap.Create;
+    try
+      mstream := TMemoryStream.Create;
       try
-        bmp.SetSize(picture.Width, picture.Height);
-        bmp.Canvas.Draw(0, 0, picture.Graphic);
+        (Sender as TfrmImageCrop).SelectionBitmap.SaveToStream(mstream, TRUE);
+        mstream.Position := 0;
+        bmp.LoadFromStream(mstream);
         FAvatarJPG.Assign(bmp);
       finally
-        bmp.Free;
+        mstream.Free;
       end;
     finally
-      picture.Free;
+      bmp.Free;
     end;
-  end;
 
-  if error = '' then
-  begin
     acChange.Enabled := FALSE;
     FAvatarChanged := TRUE;
-    ms := TMemoryStream.Create;
+    mstream := TMemoryStream.Create;
     try
-      FAvatarJPG.SaveToStream(ms);
-      ms.Position := 0;
-      sha256 := SHA256Stream(ms);
+      FAvatarJPG.SaveToStream(mstream);
+      mstream.Position := 0;
+      sha256 := SHA256Stream(mstream);
       SetLength(FAvatarId, Length(sha256));
       Move(sha256[1], FAvatarId[0], Length(sha256));
     finally
-      ms.Free;
+      mstream.Free;
     end;
     ServerSocket.SetAvatar(FAvatarId);
-  end
-  else
-    MessageDlg(error, mtError, [mbOK], 0);
+  end;
+
+  EnableWindow(Handle, TRUE);
 end;
 
 procedure TfrmChangeAvatar.CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);

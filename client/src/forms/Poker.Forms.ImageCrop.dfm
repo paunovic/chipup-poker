@@ -1,0 +1,97 @@
+object frmImageCrop: TfrmImageCrop
+  Left = 0
+  Top = 0
+  BorderStyle = bsDialog
+  Caption = 'Crop Avatar'
+  ClientHeight = 478
+  ClientWidth = 645
+  Color = clBtnFace
+  Constraints.MinHeight = 250
+  Constraints.MinWidth = 250
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnPaint = FormPaint
+  DesignSize = (
+    645
+    478)
+  PixelsPerInch = 96
+  TextHeight = 13
+  object btOK: TcxButton
+    Left = 445
+    Top = 443
+    Width = 93
+    Height = 27
+    Action = acOK
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 0
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitLeft = 387
+    ExplicitTop = 402
+  end
+  object btCancel: TcxButton
+    Left = 544
+    Top = 443
+    Width = 93
+    Height = 27
+    Action = acCancel
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 1
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+    ExplicitLeft = 486
+    ExplicitTop = 402
+  end
+  object PaintBox: TPaintBox32
+    AlignWithMargins = True
+    Left = 5
+    Top = 5
+    Width = 635
+    Height = 429
+    Cursor = crCross
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 44
+    Align = alClient
+    RepaintMode = rmOptimizer
+    TabOrder = 2
+    OnMouseDown = PaintBoxMouseDown
+    OnMouseMove = PaintBoxMouseMove
+    OnMouseUp = PaintBoxMouseUp
+    ExplicitLeft = 2
+    ExplicitTop = 0
+    ExplicitWidth = 599
+    ExplicitHeight = 427
+  end
+  object ActionList: TActionList
+    Left = 48
+    Top = 232
+    object acOK: TAction
+      Caption = 'OK'
+      OnExecute = acOKExecute
+    end
+    object acCancel: TAction
+      Caption = 'Cancel'
+      OnExecute = acCancelExecute
+    end
+  end
+end
