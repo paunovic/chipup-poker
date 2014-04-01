@@ -25,6 +25,7 @@ var codes = require('./ServerCodes');
 var dag = require('./dag/build/Release/dag');
 var omaha = require('./omaha/build/Release/omaha');
 var bugsView = require('./bugs');
+var profiler = require('./profiler');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
@@ -449,7 +450,7 @@ function goOnline() {
 	cactiServer.listen(1246);
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -480,6 +481,11 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
 		assert.ok(collection instanceof Collection);
 		FetchQueue = collection;
+	});
+	db.createCollection('PokerProfile',{capped:true,size:256 * 1024},function (err,collection) {
+		assert.ok(collection instanceof Collection);
+		PokerProfile = collection;
+		profiler.setup(PokerProfile);
 	});
 
 	bugsView.setup(app,bugs,allUsers,db);
