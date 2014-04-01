@@ -4,6 +4,7 @@ var net = require('net');
 var tls = require('tls');
 var fs = require('fs');
 var MongoClient = require('mongodb').MongoClient;
+var Collection = require('mongodb').Collection;
 var ObjectID = require('mongodb').ObjectID
 //var Reader = require('./reader').reader;
 var express = require('express');
@@ -73,7 +74,7 @@ app.get('/confirm',function (req,res) {
 			var conn = activeUsers[user._id];
 			if (!conn) return;
 			allUsers.findOne({_id:user._id},function (err,self) {
-				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self,'Poker.User'));
+				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
 			});
 		});
 	});
@@ -256,7 +257,7 @@ app.get("/getavatar",function (req,res) {
 	var id = req.query.id;
 	log('getting avatar %j %d %s',req.query,id.length,id);
 	if (id == 'default') {
-		fs.readFile('../client/design/avatar/Default Avatar.jpg',function (err,data) {
+		fs.readFile('resources/default_avatar.jpg',function (err,data) {
 			if (err) throw err;
 			res.send(data);
 		});
@@ -284,9 +285,18 @@ app.get("/install_chipuppoker.exe",function (req,res) {
 		});
 	});
 });
+app.get("/debug_install_chipuppoker.exe",function (req,res) {
+	Config.findOne({_id:'debuginstallerid'},function (err,row) {
+		assert.ifError(err);
+		Installers.findOne({_id:row.value},function (err,row) {
+			log('sending debug installer %j',row);
+			res.sendfile('installers/'+row.name);
+		});
+	});
+});
 app.get('/game',function (req,res) {
 	var start = Date.now();
-	handHistory.find({gameid:new ObjectID(req.query.id)}).toArray(function (err,hands) {
+	handHistory.find({gameid:new ObjectID(req.query.id)}).limit(1000).sort({_id:-1}).toArray(function (err,hands) {
 		Game.getGame(new ObjectID(req.query.id),function (err,game) {
 			game.Lock.writeLock(function (release) {
 				res.render('game',{game:game,hands:hands,start:start});
@@ -315,21 +325,20 @@ app.post('/eval',function (req,res) {
 });
 app.post('/newVersion',function (req,res) {
 	console.log('query',req.query);
-	var name = req.files.installer.path.split('/')[1]
-	console.log(name);
-	fs.rename(req.files.installer.path,'installers/'+name,function (err) {
+	console.log('files',req.files);
+	var name1 = req.files.installer.path.split('/')[1]
+	var clientname = req.files.client.path.split('/')[1]
+	console.log(name1);
+	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 		assert.ifError(err);
-		Installers.insert({name:name,version:req.query.version,revision:req.query.revision,debug:req.query.debug,size:req.files.installer.size},function (err,row) {
+		fs.rename(req.files.client.path,'installers/'+clientname,function (err) {
 			assert.ifError(err);
-			log('new version recorded: %j',row);
-			if (req.query.debug == 'release') {
-				//Config.update({_id:'installerid'},{$set:{value:row[0]._id}},function(err,res) {
-				//	assert.ifError(err);
-				//});
-				//sharedconfig.latestVersion = row[0].version;
-			}
+			Installers.insert({name:name1,clientname:clientname,version:req.query.version,revision:req.query.revision,debug:req.query.debug,size:req.files.installer.size},function (err,row) {
+				assert.ifError(err);
+				log('new version recorded: %j',row);
+				res.send('OK');
+			});
 		});
-		res.send('OK');
 	});
 });
 app.get('/installers',installers_func);
@@ -341,6 +350,9 @@ function installers_func(req,res) {
 			if (row) {
 				fs.unlink('installers/'+row.name,function (err) {
 					console.log('installer deleted');
+					fs.unlink('installers/'+row.clientname,function (err) {
+						console.log('client deleted');
+					});
 				});
 			}
 			Installers.remove({_id:new ObjectID(req.body.delete)},function () {});
@@ -352,24 +364,84 @@ function installers_func(req,res) {
 			Installers.findOne({_id:new ObjectID(req.body.setpublic)},function (err,row) {
 				assert.ifError(err);
 				if (row) {
-					Config.update({_id:'installerid'},{$set:{value:new ObjectID(req.body.setpublic)}},function(err,res) {
-						assert.ifError(err);
-						sharedconfig.latestVersion = row.version;
-						finish2();
-					});
+					if (row.debug == 'release') {
+						Config.update({_id:'installerid'},{$set:{value:new ObjectID(req.body.setpublic)}},function(err,res) {
+							assert.ifError(err);
+							sharedconfig.latestVersion = row.version;
+							finish2();
+						});
+					} else {
+						Config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(req.body.setpublic)}},function(err,res) {
+							assert.ifError(err);
+							sharedconfig.latestDebugVersion = row.version;
+							finish2();
+						});
+					}
 				} else finish2();
 			});
 		} else finish2();
 		function finish2() {
 			Installers.find({}).toArray(function(err,data) {
 				Config.findOne({_id:'installerid'},function (err,row) {
-					res.render('installers',{installers:data,start:start,pubver:row.value});
+					Config.findOne({_id:'debuginstallerid'},function (err,row2) {
+						res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value});
+					});
 				});
 			});
 		}
 	}
 };
+app.get('/fetchhands',function (req,res) {
+	// new Buffer(g._id.toString(),'hex')
+	FetchQueue.findOne({querycode:req.query.uuid},function (err,query) {
+		assert.ifError(err);
+		console.log(query.query);
+		console.log('query size %d',JSON.stringify(query).length);
+		var test = { reply:[] };
+		var reqs = query.query.games;
+		async.each(reqs,function (req,cb) {
+			console.log('finding all history in game %j',req.gameid.buffer);
+			handHistory.find({gameid:toMongoId(req.gameid.buffer),seq:{$gt:req.lasthandid}},{seq:1,totalrake:1,players:1,cards:1,endtime:1,balance_changes:1}).toArray(function (res,hands) {
+				var start = Date.now();
+				assert.ifError(err);
+				for (var x=0; x<hands.length; x++) {
+					var row = hands[x];
+					if (!row.balance_changes) {
+						console.log('balance_changes missing on hh %s',row._id);
+						hands[x] = null;
+						continue;
+					}
+					if (!row.totalrake) {
+						console.log('totalrake missing on hh %s',row._id);
+						hands[x] = null;
+						continue;
+					}
+					row._id = row._id.id;
+					row.tablecards = [];
+				}
+				var end = Date.now();
+				log('did %d hands in %dms',hands.length,end-start);
+				allGames.findOne({_id:toMongoId(req.gameid.buffer)},{clubid:1},function (err,game) {
+					assert.ifError(err);
+					GameEvents.find({gameid:game._id}).toArray(function (err,events) {
+						var start = Date.now();
+						test.reply.push({clubid: game.clubid.id, gameid: req.gameid.buffer, rows:hands, events:events});
+						var end = Date.now();
+						log('did %d events in %dms',events.length,end-start);
+						cb();
+					});
+				});
+			});
+		},function done() {
+			//console.log(test.reply);
+			var out = pb.Serialize(test,'Poker.FetchHandHistoryReply');
+			res.writeHead(200,{'Content-Length': out.length});
+			res.end(out);
+		});
+	});
+});
 app.use(express.static('files'));
+app.use('/rawinstallers',express.static('installers'));
 function goOnline() {
 	app.listen(3000);
 	secureServer.listen(12346);
@@ -377,7 +449,7 @@ function goOnline() {
 	cactiServer.listen(1246);
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -386,6 +458,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	conn = db;
 	process.on('uncaughtException',function (err) {
 		console.log(err);
+		console.log(err.stack);
 		db.collection('serverErrors').insert({error:err.toString(),trace:err.stack.split('\n').slice(1).join('\n').trim()},function (err) {
 			if (err) console.log(err);
 			process.exit(-1);
@@ -402,6 +475,12 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	handHistory = db.collection('handHistory');
 	Installers = db.collection('installers');
 	Config = db.collection('config');
+	GameEvents = db.collection('GameEvents');
+
+	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
+		assert.ok(collection instanceof Collection);
+		FetchQueue = collection;
+	});
 
 	bugsView.setup(app,bugs,allUsers,db);
 
@@ -413,12 +492,21 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	handHistory.ensureIndex({gameid:1},function (err,res){});
 
 	Config.insert({_id:'installerid',value:''},function (err,res){
-		Config.findOne({_id:'installerid'},function (err,row) {
-			assert.ifError(err);
-			Installers.findOne({_id:row.value},function (err,row) {
-				if (row) {
-					sharedconfig.latestVersion = row.version;
-				}
+		Config.insert({_id:'debuginstallerid',value:''},function (err,res){
+			Config.findOne({_id:'installerid'},function (err,row) {
+				Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
+					assert.ifError(err);
+					Installers.findOne({_id:row.value},function (err,row) {
+						if (row) {
+							sharedconfig.latestVersion = row.version;
+						}
+					});
+					Installers.findOne({_id:debugrow.value},function (err,row) {
+						if (row) {
+							sharedconfig.latestDebugVersion = row.version;
+						}
+					});
+				});
 			});
 		});
 	});
@@ -514,7 +602,6 @@ function ClientSocket(socket) {
 		delete activeUsers[this.userid];
 		Game.handleDisconnect(this,'closed');
 	}.bind(this));
-	//this.socket.write("abc\ndef\nghi\n");
 	this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
 	this.reader = new protoreader(socket,this);
 	socket.on('error',function(err) {
@@ -682,6 +769,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.doLogin(row,params.password);
 				} else {
 					allUsers.findOne({displayname:params.username},function (err,row) {
+						assert.ifError(err);
 						if (!row) {
 							this.send(codes.srLoginReply,{status:'lrInvalid'},'Poker.LoginReply');
 							return;
@@ -810,6 +898,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					status.users = users;
 					allUsers.findOne({_id:this.userid},function(err,self) {
 						status.self = makeUserProtobuf(self);
+						// FIXME, hide closed games, send them in a second array for just the owner
 						allGames.find({clubid:{$in:clubids}}).toArray(function (err,games) {
 							if (err) {
 								this.reply(0,"internal error");
@@ -821,8 +910,21 @@ ClientSocket.prototype.handle = function (code,args) {
 							//this.log('games list',games);
 							status.games = games;
 							//this.reply(codes.SR_STATUS,JSON.stringify(status));
-							this.send(codes.srStatus,status,'Poker.StatusReply');
-							//this.log('status reply:',status);
+							allClubs.find({is_private:false,members:{$ne:this.userid},owner:{$ne:this.userid}},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
+								for (var x=0; x<arr.length; x++) {
+									if (arr[x].members) {
+										arr[x].member_count = arr[x].members.length + 1;
+										delete arr[x].members;
+									} else arr[x].member_count = 1;
+									arr[x]._id = new Buffer(arr[x]._id.toString(),'hex');
+									if (arr[x].password && (arr[x].password.length > 0)) arr[x].has_password = true;
+									else arr[x].has_password = false;
+									delete arr[x].password;
+								}
+								status.public_clubs = arr;
+								this.send(codes.srStatus,status,'Poker.StatusReply');
+								//this.log('status reply:',status);
+							}.bind(this));
 						}.bind(this));
 					}.bind(this));
 				}.bind(this));
@@ -838,7 +940,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;*/
 		case codes.scListPublicClubs:
-			allClubs.find({is_private:false},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
+			allClubs.find({is_private:false,members:{$ne:this.userid},owner:{$ne:this.userid}},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
 				for (var x=0; x<arr.length; x++) {
 					if (arr[x].members) {
 						arr[x].member_count = arr[x].members.length + 1;
@@ -1000,7 +1102,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					if (res == 0) this.send(codes.srLeaveClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 					else {
 						allClubs.findOne({seq:clubid},function cb(err,row) {
-							var userlist = [ ];
+							var userlist = [ row.owner ];
 							var out = makeClubProtobuf(row,userlist);
 							this.send(codes.srLeaveClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 							this.log('userlist to inform:',userlist);
@@ -1200,6 +1302,7 @@ ClientSocket.prototype.handle = function (code,args) {
 								var out = [];
 								for (var i=0; i<rows.length;i++) {
 									if (!containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
+									if (!rows[i].members) continue;
 									for (var j=0; j<rows[i].members.length; j++) {
 										if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
 									}
@@ -1299,8 +1402,10 @@ ClientSocket.prototype.handle = function (code,args) {
 								var out = [];
 								for (var i=0; i<rows.length;i++) {
 									if (!containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
-									for (var j=0; j<rows[i].members.length; j++) {
-										if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
+									if (rows[i].members) {
+										for (var j=0; j<rows[i].members.length; j++) {
+											if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
+										}
 									}
 								}
 								allUsers.findOne({_id:this.userid},function (err,self) {
@@ -1340,6 +1445,10 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.reply(0,"club not found");
 					return;
 				}
+				if (!compareObjectID(club.owner,this.userid)) {
+					this.reply(0,'your not owner');
+					return;
+				}
 				doc.clubid = club._id;
 				allGames.insert(doc,function (err,game) {
 					if (err) {
@@ -1358,32 +1467,32 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.scDeleteGame:
-			var params = pb.Parse(args,'Poker.Game');
-			var id = new toMongoId(params._id);
-			allGames.findOne({_id:id},function (err,game) {
+		case codes.scCloseGame:
+			var params = pb.Parse(args,'Poker.CloseGameData');
+			var id = new toMongoId(params.gameid);
+			this.log('closing game: %j',params);
+			allGames.findOne({_id:id},function (err,gamerow) {
 				if (err) {
 					this.reply(0,"internal error");
 					return;
 				}
-				if (!game) {
+				if (!gamerow) {
 					this.reply(0,"game not found");
 					return;
 				}
-				allGames.remove({_id:id},function (err,ret) {
-					if (err) {
-						this.reply(0,"internal error");
-						return;
-					}
-					this.log('removed',err,ret);
-					if (activeGames[id]) delete activeGames[id];
-					allClubs.findOne({_id:game.clubid},function (err,club) {
-						var g = makeGameProtobuf(game);
-						this.send(codes.srDeleteGameOk,g,'Poker.Game');
-						for (var x=0; x<club.members.length; x++) {
-							var conn = activeUsers[club.members[x]];
-							if (!conn) continue;
-							conn.send(codes.seGameDelete,g,'Poker.Game');
+				Game.getGame(id,function (err,game) {
+					game.Lock.writeLock(function (release) {
+						if (params.timestamp > 0) {
+							game.closeTimer = setTimeout(function () {
+								game.Lock.writeLock(function (release2) {
+									game.doClose(this,release2,gamerow);
+								}.bind(this));
+							}.bind(this),params.timestamp * 1000);
+							game.closeTime = Date.now() + (params.timestamp * 1000);
+							game.state2 = 'gsClosing';
+							clubBroadcastGameState(gamerow.clubid,JSON.parse(JSON.stringify(gamerow)),release);
+						} else {
+							game.doClose(this,release,gamerow);
 						}
 					}.bind(this));
 				}.bind(this));
@@ -1437,21 +1546,39 @@ ClientSocket.prototype.handle = function (code,args) {
 			var id = new toMongoId(params._id);
 			this.log('table join',id);
 			Game.getGame(id,function (err,game) {
-				this.log('game info',game.obj.clubid);
-				allClubs.findOne({_id:game.obj.clubid},function (err,club) {
-					if (club.suspended) {
-						for (var x=0; x<club.suspended.length; x++) {
-							console.log(club.suspended[x],this.userid);
-							if (compareObjectID(club.suspended[x],this.userid)) {
-								this.reply(0,'your suspended in that club'); // FIXME
-								return;
+				if (!game) {
+					this.reply(0,'invalid gameid');
+					return;
+				}
+				game.Lock.writeLock(function (release) {
+					this.log('game info',game.obj.clubid);
+					allClubs.findOne({_id:game.obj.clubid},function (err,club) {
+						if (club.suspended) {
+							for (var x=0; x<club.suspended.length; x++) {
+								console.log(club.suspended[x],this.userid);
+								if (compareObjectID(club.suspended[x],this.userid)) {
+									this.reply(0,'your suspended in that club'); // FIXME
+									release();
+									return;
+								}
 							}
 						}
-					}
-					if (!compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid))) {
-						this.log('i am not a member');
-						this.reply(0,'your not a member of that club'); // FIXME
-					} else if (game.join(this)) this.send(codes.seTableStatus,game.getTableStatus(this,false,[]),'Poker.TableStatus');
+						if (!compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid))) {
+							this.log('i am not a member');
+							this.reply(0,'your not a member of that club'); // FIXME
+							release();
+						} else if (game.join(this)) {
+							var events = [];
+							if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
+								var cards = game.flop.cards;
+								if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
+								if (game.state == 'tsRiver') cards = cards.concat(cards,game.river.cards);
+								events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
+							}
+							this.send(codes.seTableStatus,game.getTableStatus(this,true,events),'Poker.TableStatus');
+							release();
+						}
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1460,7 +1587,9 @@ ClientSocket.prototype.handle = function (code,args) {
 			var id = new toMongoId(params._id);
 			delete params._id;
 			Game.getGame(id,function (err,game) {
-				game.leave(this,'protocol');
+				if (!game) {
+					this.reply(0,'invalid gameid');
+				} else game.leave(this,'protocol');
 			}.bind(this));
 			break;
 		case codes.scTableSit:
@@ -1468,6 +1597,10 @@ ClientSocket.prototype.handle = function (code,args) {
 			var id = new toMongoId(params.game_id);
 			delete params.game_id;
 			Game.getGame(id,function (err,game) {
+				if (!game) {
+					this.reply(0,'invalid gameid');
+					return;
+				}
 				var min = game.obj.buyin_min * game.obj.big_blind;
 				var max = game.obj.buyin_max * game.obj.big_blind;
 				if ((params.chips > max) || (params.chips < min)) {
@@ -1487,12 +1620,6 @@ ClientSocket.prototype.handle = function (code,args) {
 					game.sitDown(this,params,function (sucess,events) {
 						if (sucess) {
 							game.broadcastStatus(this,true,events); // sendEvent
-							if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
-								var cards = game.flop.cards;
-								if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
-								if (game.state == 'tsRiver') cards = cards.concat(cards,this.river.cards);
-								events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
-							}
 							var status = game.getTableStatus(this,true,events);
 							this.send(codes.srTableSitOk,status,'Poker.TableStatus');
 						}
@@ -1591,10 +1718,10 @@ ClientSocket.prototype.handle = function (code,args) {
 					} else if (seating && seating.status == 'psInHand') {
 						game.fold(x,function (events,offset) {
 							assert(events);
-							game.broadcastStatus(null,true,events);
 							if (game.current_seat >= 0) {
 								game.startTimer(game.current_seat,offset);
 							}
+							game.broadcastStatus(null,true,events);
 							release();
 						}.bind(this));
 					} else {
@@ -1654,6 +1781,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.send(codes.srTableAddonOverLimit,game.getTableStatus(this),'Poker.TableStatus');
 					return;
 				}
+				assert.equal(this.state,2);
 				game.AddOn(this,params.chips);
 			}.bind(this));
 			break;
@@ -1679,7 +1807,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						return;
 					}
 					game.members[seatIdx].status = 'psOutOfHand';
-					if (game.state == 'tsIdle') game.stateMachine(finish,null,{silent:true},[]);
+					if (game.state == 'tsIdle') game.stateMachine(finish,null,{silent:true},[],0);
 					else finish([]);
 					function finish(events) { // teDeal
 						game.broadcastStatus(null,true,events);
@@ -1750,6 +1878,24 @@ ClientSocket.prototype.handle = function (code,args) {
 					release();
 				}.bind(this));
 			}.bind(this));
+			break;
+		case codes.scRetrieveHandHistoryData:
+			var params = pb.Parse(args,'Poker.RetrieveHandHistoryData');
+			handHistory.find({seq:{ $gt:params.startid, $lt:params.endid }},{seq:1}).toArray(function (err,rows) {
+				this.send(codes.srRetrieveHandHistoryData,{rows:rows},'Poker.RetrieveHandHistoryReply');
+			}.bind(this));
+			break;
+		case codes.scFetchHandHistory:
+			var params = pb.Parse(args,'Poker.FetchHandHistory');
+			// FIXME, verify he has access to these games
+			console.log(args,params);
+			var doc = { query:params, querycode:  uuid.v4() };
+			FetchQueue.insert(doc,function (err,row) {
+				assert.ifError(err);
+				console.log(row);
+				this.send(codes.srFetchHandData,{uuid:doc.querycode},'Poker.FetchHandReply');
+			}.bind(this));
+			break;
 		}
 	}
 }
@@ -1772,15 +1918,25 @@ function makeClubProtobuf(c,userlist) {
 	return c;
 }
 function makeGameProtobuf(g) {
-	// FIXME game, include number of people sitting
+	assert.equal(g._id.toString().length,24);
 	var gameobj = activeGames[g._id];
-	if (gameobj) g.sitting = gameobj.sittingCount();
+	if (gameobj) {
+		g.sitting = gameobj.sittingCount();
+		g.state = gameobj.state2;
+		if (g.state == 'gsClosing') g.closetime = gameobj.closeTime;
+	} else if (g.state2) {
+		g.state = g.state2;
+	} else {
+		g.state = 'gsEmpty';
+	}
 	g._id = new Buffer(g._id.toString(),'hex');
+	assert(g._id.length > 0);
 	g.creator_mongo_id = new Buffer(g.creator_mongo_id.toString(),'hex');
 	return g;
 }
 function makeUserProtobuf(u) {
 	if (u.avatar) u.avatar = new Buffer(u.avatar,'base64');
+	else u.avatar = new Buffer([33]);
 	u._id = new Buffer(u._id.toString(),'hex');
 	return u;
 }
@@ -1818,6 +1974,65 @@ function Game(obj) {
 	this.Lock = new ReadWriteLock();
 	this.omaha = this.obj.game_type == 'gtOmaha';
 	this.lastplayer = [];
+	this.autoDelete = false;
+
+	if (obj.state2) this.state2 = obj.state2;
+	else this.state2 = 'gsActive';
+}
+Game.prototype.doClose = function (conn,cb,gamerow) {
+	if (this.state == 'tsIdle') this.close(this,cb);
+	else {
+		this.autoDelete = true;
+		this.state2 = 'gsClosing';
+		clubBroadcastGameState(gamerow.clubid,gamerow,cb);
+	}
+}
+function clubBroadcastGameState(clubid,gamerow,cb) {
+	allClubs.findOne({_id:clubid},function (err,club) {
+		var g = makeGameProtobuf(gamerow);
+		var conn = activeUsers[club.owner];
+		if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
+		for (var x=0; x<club.members.length; x++) {
+			conn = activeUsers[club.members[x]];
+			if (!conn) continue;
+			conn.send(codes.seGameChange,g,'Poker.Game');
+		}
+		cb();
+	}.bind(this));
+}
+Game.prototype.close = function(conn,cb) {
+	allGames.update({_id:this.id},{$set:{state2:'gsClosed'}},function (err,ret) {
+		if (err) {
+			conn.reply(0,"internal error");
+			return;
+		}
+		this.state2 = 'gsClosed';
+		this.log('closed game %s %d',err,ret);
+		
+		var count = 0;
+		for (var key in this.users) {
+			count++;
+			console.log('key:%s count:%d',key,count);
+		}
+		if (count == 0) {
+			this.log('self-deleting');
+			delete activeGames[this.id];
+			this.doDelete();
+		} else {
+			this.deleteTimer = setTimeout(this.doDelete.bind(this),5 * 60 * 1000);
+			var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+			allClubs.findOne({_id:this.obj.clubid},function (err,club) {
+				var conn2 = activeUsers[club.owner];
+				if (conn2) conn2.send(codes.seGameChange,g,'Poker.Game');
+				for (var x=0; x<club.members.length; x++) {
+					conn2 = activeUsers[club.members[x]];
+					if (!conn2) continue;
+					conn2.send(codes.seGameChange,g,'Poker.Game');
+				}
+				cb();
+			}.bind(this));
+		}
+	}.bind(this));
 }
 Game.prototype.getLimit = function (seat) {
 	if (typeof this.bets[seat] != 'number') this.bets[seat] = 0;
@@ -1845,20 +2060,22 @@ Game.prototype.log = function log(format) {
 		out = [ util.format.apply(util,out) ]
 	}
 	out.unshift(this.handid);
-	process.send({type:'game',name:this.obj.gamename,ts:new Date().toString(),objects:out});
+	process.send({type:'game',name:this.obj.gamename +','+this.state2,ts:new Date().toString(),objects:out});
 }
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);
 	allUsers.findOne({_id:conn.userid},function (err,self) {
+		assert.equal(conn.state,2);
 		if ((conn.boughtin + chips) > self.chips) {
-			conn.send(codes.srTableSitNoChips,this.getTableStatus(conn),'Poker.TableStatus');
+			conn.send(codes.srTableSitNoChips,this.getTableStatus(conn,false,[]),'Poker.TableStatus');
 			return;
 		}
 		conn.boughtin += chips;
+		this.logEvent('geCashin',conn.userid,chips);
 		this.members[seat].chips += chips;
-		var status = this.getTableStatus(conn);
+		var status = this.getTableStatus(conn,false,[]);
 		conn.send(codes.srTableAddonOk,status,'Poker.TableStatus');
-		this.broadcastStatus(conn);
+		this.broadcastStatus(conn,null,[]);
 	}.bind(this));
 }
 Game.prototype.edited = function edited(params) {
@@ -1873,6 +2090,7 @@ Game.prototype.edited = function edited(params) {
 	this.omaha = this.obj.game_type == 'gtOmaha';
 }
 Game.prototype.join = function join(conn) {
+	assert.equal(this.Lock.readers,-1);
 	this.users[conn.userid] = conn;
 	return true;
 }
@@ -1900,6 +2118,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				return;
 			}
 			this.members[params.seat_index] = { hand: new Hand(), status:'psOutOfPlay', chips:params.chips, seat:params.seat_index, sitOutNextRound:false };
+			this.logEvent('geCashin',conn.userid,params.chips);
 			if (!this.timebanks[conn.userid]) this.timebanks[conn.userid] = sharedconfig.max_timebank * 1000;
 			this.seats[params.seat_index] = { conn:conn, userid:conn.userid };
 			conn.boughtin += params.chips;
@@ -1912,6 +2131,8 @@ Game.prototype.sitDown = function (conn,params,cb) {
 			// FIXME json performance hack
 			allClubs.findOne({_id:this.obj.clubid},function (err,club) {
 				var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+				var conn2 = activeUsers[club.owner];
+				if (conn2) conn2.send(codes.seGameChange,g,'Poker.Game');
 				if (!club.members) return cb(true,events);
 				for (var x=0; x<club.members.length; x++) {
 					var conn2 = activeUsers[club.members[x]];
@@ -1928,10 +2149,12 @@ Game.prototype.deal = function deal(cb,config) {
 	var players = 0;
 	getNextSequence('handHistory',function (seq) {
 		this.handid = seq;
+		allGames.update({_id:this.id},{$set:{lasthandid:seq}},function (err,res){});
 		this.history = {moves:[],players:[],cards:[]};
 		hands = seq;
 		if (this.dealer == -1) this.nextDealer();
 		this.bets = [];
+		this.balance_changes = [];
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
 			if (this.members[x].status == 'psOutOfPlay') continue;
@@ -1960,9 +2183,10 @@ Game.prototype.deal = function deal(cb,config) {
 				}
 			}
 			this.members[x].status = 'psInHand';
-			this.history.players[x] = this.seats[x].userid;
+			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards };
 			this.history.cards[x+3] = this.members[x].hand.prettyPrint();
 			this.members[x].muck = true;
+			this.balance_changes[x] = 0;
 		}
 
 		this.pots = [ new Pot(this) ];
@@ -2013,7 +2237,10 @@ Game.prototype.deal = function deal(cb,config) {
 			this.log('hand made:%j',row);
 			//this.broadcastStatus(null,null,[this.makeEvent('teDealing')]);
 			//setTimeout(function () {
-				this.startTimer(this.current_seat,players*100); // FIXME, run this later
+			var cards;
+			if (this.omaha) cards = 4;
+			else cards = 2;
+			this.startTimer(this.current_seat,1500 + (players*50*cards)); // FIXME, run this later
 			//this.stateMachine(function () {
 				cb([this.makeEvent('teDealing')]);
 			//}.bind(this));
@@ -2143,7 +2370,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 				this.moveToPot('fold1',function () {
 					priv.conn.log('done moving to pot 2');
 					//this.doWin([lastseat],cb1);
-					this.calcWinners(finish2.bind(this),[this.makeEvent('teFold',seat)]);
+					this.calcWinners(finish2.bind(this),[this.makeEvent('teFold',seat)],0);
 					//this.sendEvent('teWinning',[lastseat]);
 					//this.log('MOVE WIN DEFAULT '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
 					//assert(0);
@@ -2153,7 +2380,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 			this.keycount--;
 			if (seat == this.current_seat) {
 				priv.conn.log('and i was active');
-				this.stateMachine(finish.bind(this),null,null,[this.makeEvent('teFold',seat)]);
+				this.stateMachine(finish.bind(this),null,null,[this.makeEvent('teFold',seat)],0);
 			} else finish.call(this,[this.makeEvent('teFold',seat)],0);
 			function finish(events,offset) {
 				assert(events);
@@ -2164,11 +2391,13 @@ Game.prototype.fold = function fold(seat,cb1) {
 		break;
 	}
 }
-Game.prototype.doWin = function (cb) {
+Game.prototype.doWin = function (cb,extradelay) {
 	var totalrake = 0;
 	assert.equal(this.Lock.readers,-1);
+	assert.equal(typeof extradelay,'number');
 	this.state = 'tsWinning';
-	var delay = 1500 + (this.pots.length * 500);
+	var delay = 1500 + (this.pots.length * 500) + extradelay;
+	this.log('delay is %d',delay);
 	function finish() {
 		this.log('cleared seat');
 		this.current_seat = -1;
@@ -2209,7 +2438,7 @@ Game.prototype.doWin = function (cb) {
 						this.log('bcast 1');
 						this.broadcastStatus(null,true,events); // teDeal
 						release();
-					}.bind(this),null,{cont:true},[]);
+					}.bind(this),null,{cont:true},[],0);
 				}.bind(this));
 			}.bind(this))
 		}.bind(this),delay);
@@ -2242,6 +2471,7 @@ Game.prototype.doWin = function (cb) {
 	}
 	this.log('initialrake:%d totalrake:%d',rake,totalrake);
 	assert.equal(typeof totalrake,'number');
+	this.history.totalrake = totalrake;
 	this.log('wins',wins,winnerids);
 	var stack = new Error().stack;
 
@@ -2252,6 +2482,7 @@ Game.prototype.doWin = function (cb) {
 		var seat = winnerObj.seat;
 		var userid = this.seats[seat].userid;
 		var gain = wins[seat];
+		this.balance_changes[seat] += gain;
 		allUsers.update({_id:userid},{$inc:{chips:gain}},function (err,res) {
 				assert(!err,err);
 				assert.equal(res,1);
@@ -2269,9 +2500,10 @@ Game.prototype.doWin = function (cb) {
 			}.bind(this));
 		}.bind(this));
 }
-Game.prototype.checkRoundPass = function (cb,events) {
+Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 	assert.equal(this.Lock.readers,-1);
 	assert(events);
+	assert.equal(typeof extradelay,'number');
 	this.log('key seat count is:'+this.keycount+' current:'+this.current_seat);
 	if (this.keycount <= 0) {
 		var min = -1;
@@ -2294,7 +2526,8 @@ Game.prototype.checkRoundPass = function (cb,events) {
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
 					this.state = 'tsFlop';
-					cb.call(this,events,1500);
+					this.log('flop adding to %d',extradelay);
+					cb.call(this,events,1500+extradelay);
 				}.bind(this));
 				this.roundEnd();
 			} else if (this.state == 'tsFlop') {
@@ -2304,7 +2537,8 @@ Game.prototype.checkRoundPass = function (cb,events) {
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
 					this.state = 'tsTurn';
-					cb.call(this,events,1500);
+					this.log('turn adding to %d',extradelay);
+					cb.call(this,events,1500+extradelay);
 				}.bind(this));
 				this.roundEnd();
 			} else if (this.state == 'tsTurn') {
@@ -2314,119 +2548,28 @@ Game.prototype.checkRoundPass = function (cb,events) {
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
 					this.state = 'tsRiver';
-					cb.call(this,events,1500);
+					this.log('river adding to %d',extradelay);
+					cb.call(this,events,1500+extradelay);
 				}.bind(this));
 				this.roundEnd();
 			} else {
 				//this.broadcastStatus(null);
 				events.push(this.makeEvent('tePostRiver',{bets:this.bets.slice()}));
 				this.moveToPot('post-river',function () {
+					//events.push(this.makeEvent('tePreWin',{pots:this.pots}));
 					this.log('events callback FIXME %s',new Error().stack);
-					this.calcWinners(cb,events);
+					this.calcWinners(cb,events,extradelay);
 				}.bind(this));
 			}
 		} else cb(events,0);
 	} else cb(events,0);
 }
-Game.prototype.calcWinners = function (cb,events) {
+Game.prototype.calcWinners = function (cb,events,extradelay) {
 	assert(events);
+	assert.equal(typeof extradelay,'number');
 	var potdata = [];
 	var logmsg = [];
 	var winnercount = 0;
-	if (false) {
-		// loop over each pot and figure out which batches of hands to eval
-		var pots = [];
-		var tbl = this.flop.prettyPrint(true)+' '+this.turn.prettyPrint(true)+' '+this.river.prettyPrint(true);
-		for (var x=0; x<this.pots.length; x++) {
-			if (this.pots[x].value == 0) continue;
-			var hands = [];
-			var cards = [];
-			this.log('x%d',x);
-			for (var y=0; y<this.pots[x].members.length; y++) {
-				var z = this.pots[x].members[y];
-				this.log('x%d y%d z%d',x,y,z);
-				if (!this.members[z]) continue;
-				if (['psInHand','psAllIn'].indexOf(this.members[z].status) == -1) continue;
-				hands.push({seat:z,hand:this.members[z].hand.cards});
-				cards.push(this.members[z].hand.prettyPrint(true));
-			}
-			this.log('pot in:%j',this.pots[x]);
-			assert(hands.length);
-			var cmd = "./pokenum -o -t "+cards.join(' - ')+' -- '+tbl;
-			pots[x] = { hands:hands,cmd:cmd };
-		}
-		this.log(pots);
-		if ((pots.length == 1) && (pots[0].hands.length == 1)) {
-			forcewin = pots[0].hands[0].seat;
-			for (var x=0; x<this.pots.length; x++) {
-				var pot = this.pots[x];
-				var winners = [ forcewin ];
-				if (pot.value == 0) continue;
-				potdata[x] = { sum:pot.value, seats:pot.members, WinnerData:[] };
-				this.log('this pot',x,pot);
-				
-				logmsg.push(this.seats[forcewin].conn.nick+' '+this.seats[forcewin].userid);
-				potdata[x].WinnerData.push({seat:forcewin,msg:'default'});
-				if (!winnercount) winnercount = 1;
-				
-				this.log('winners of pot #'+potid,winners);
-				pot.winners = winners;
-			}
-			finish1.call(this);
-		} else {
-			var potid = 0;
-			async.eachSeries(pots,function evalPot(pot,cb2){
-				this.log('need to eval:%j',pot);
-				if (false) {
-				var pokenum = child_process.exec(pot.cmd,{cwd:'./poker-eval-138.0/examples'},function (error,stdout,stderr) {
-					var winners = [];
-					this.log('cmd:'+pot.cmd);
-					this.log('reply:'+stdout);
-					var parts = stdout.trim().split(' ');
-					assert(parts.length > 0);
-					parts.splice(0,2);
-					this.log(parts);
-					for (var x=0; x<parts.length; x++) {
-						if (parts[x] == '1.000000') {
-							winners.push(pot.hands[x].seat);
-						} else if (parts[x] == '0.500000') {
-							winners.push(pot.hands[x].seat);
-						} else if (parts[x] == '0.000000') {
-						} else assert(0);
-					}
-					potdata[potid] = { sum:pot.value, seats:pot.members, WinnerData:[] };
-					logmsg.push(this.seats[winners[0]].conn.nick+' '+this.seats[winners[0]].userid);
-					potdata[potid].WinnerData.push({seat:winners[0],msg:'omaha way 1'});
-					this.log('winners of pot #'+potid,winners);
-					this.pots[potid].winners = winners;
-					potid++;
-					cb2();
-				}.bind(this));
-				} else {
-				for (var x=0; x<pots.length; x++) {
-					var output = omaha.rankHands(this,pots[x].hands);
-					this.log('pot %j resulted in %j',pots[x],output);
-					var winners = [];
-					var windata = [];
-					for (var y=0; y<output.winners.length; y++) {
-						if (output.winners[y] == 1) {
-							winners.push(pots[x].hands[y].seat);
-							windata.push({seat:pots[x].hands[y].seat,msg:'omaha way 2'});
-							this.members[pots[x].hands[y].seat].muck = false;
-						}
-					}
-					potdata[x] = { sum: this.pots[x].value, seats:this.pots[x].members, WinnerData:windata };
-					this.log('winners of pot #'+x,winners);
-					this.pots[x].winners = winners;
-					if (winners.length > winnercount) winnercount = winners.length;
-				}
-				}
-				cb2();
-			}.bind(this),function done() {
-				finish1.call(this);
-			}.bind(this));
-		}
-	} else {
 		var potid = 0;
 		var hands = [];
 		for (var x=0; x<this.members.length; x++) {
@@ -2493,7 +2636,6 @@ Game.prototype.calcWinners = function (cb,events) {
 		cb1();
 	}.bind(this));
 		finish1.call(this);
-	}
 	
 	function finish1() {
 		events.push(this.makeEvent('teWinning',null,potdata));
@@ -2502,7 +2644,7 @@ Game.prototype.calcWinners = function (cb,events) {
 			this.saveHistory(function () {
 				cb(events,0);
 			});
-		}.bind(this));
+		}.bind(this),extradelay);
 		this.log('MOVE WIN END '+logmsg.join(','));
 	}
 }
@@ -2616,6 +2758,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				priv.conn.log('removing chips userid:%s idx:%d bets:%j',priv.userid,idx,betsToRemove);
 				assert(priv.userid);
 				assert.equal(typeof betsToRemove[idx],'number');
+				this.balance_changes[idx] -= betsToRemove[idx];
 				allUsers.update({_id:priv.userid},
 					{ $inc:{chips:-betsToRemove[idx]}},function (err,res) {
 						assert(!err);
@@ -2669,12 +2812,12 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	if (chips > maxbet) { // cheater!
 		conn.error('cheater, going over pot limit '+chips+' '+maxbet);
 		conn.destroy();
-		cb();
+		cb([],0);
 		return;
 	} else if (chips < oldbet) { // cheater!
 		conn.error('cheater detected, lowering bet '+chips+','+oldbet);
 		conn.destroy();
-		cb([]);
+		cb([],0);
 		return;
 	} else if (this.members[seat].chips == increase) {
 		this.members[seat].status = 'psAllIn';
@@ -2682,7 +2825,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	} else if (chips < this.minBet) { // cheater!
 		conn.error('cheater detected, betting low '+chips+','+this.minBet);
 		conn.destroy();
-		cb([]);
+		cb([],0);
 		return;
 	} else if (chips > this.minBet) {
 		event = 'teRaise';
@@ -2708,7 +2851,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 		this.stateMachine(function (events,offset) {
 			assert.equal(typeof offset,'number');
 			cb(events,offset);
-		}.bind(this),null,null,[this.makeEvent(event,seat)]);
+		}.bind(this),null,null,[this.makeEvent(event,seat)],0);
 	}.bind(this));
 }
 Game.prototype.saveHistory = function (cb) {
@@ -2716,6 +2859,9 @@ Game.prototype.saveHistory = function (cb) {
 	if (this.history.potdata) {
 		updates['$set'].potdata = this.history.potdata;
 		updates['$set'].winnercount = this.history.winnercount;
+		updates['$set'].balance_changes = this.balance_changes;
+		updates['$set'].totalrake = this.history.totalrake;
+		updates['$set'].endtime = Math.floor(Date.now()/1000);
 	}
 	handHistory.update({seq:this.handid},updates,function (err,res) {
 		assert.equal(res,1);
@@ -2733,7 +2879,7 @@ Game.prototype.nextDealer = function () {
 	var limit = 100;
 	this.dealer++;
 	while (limit-- > 0) { // FIXME
-		this.log('dealer loop',limit,this.dealer);
+		//this.log('dealer loop',limit,this.dealer);
 		if (limit-- < 0) break;
 		if (this.dealer >= this.obj.seats) this.dealer = 0;
 		if (!this.members[this.dealer]) { this.dealer++; continue; }
@@ -2760,9 +2906,10 @@ Game.prototype.checkDelayedLeave = function () {
 		}
 	}
 }
-Game.prototype.stateMachine = function stateMachine(cb,conn,config,events) {
+Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extradelay) {
 	assert.equal(this.Lock.readers,-1);
 	assert(events);
+	assert.equal(typeof extradelay,'number');
 	this.log('state machine: %s events:%j',this.state,events);
 	this.checkDelayedLeave();
 	switch (this.state) {
@@ -2785,6 +2932,12 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events) {
 		this.current_seat = -1;
 		this.nextDealer();
 	case 'tsIdle':
+		if (this.autoDelete) {
+			this.close(conn,function () {
+				cb(events);
+			});
+			return;
+		}
 		var havechips = 0;
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
@@ -2792,6 +2945,10 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events) {
 			if (this.members[x].chips > 0) {
 				this.log('sm found one',x,this.members[x].status,this.members[x].chips);
 				havechips++;
+			} else if (this.members[x].chips == 0) {
+				this.members[x].status = 'psOutOfPlay';
+				this.lastplayer[x] = this.seats[x].userid;
+				continue;
 			}
 		}
 		if (this.dealer == -1) this.nextDealer();
@@ -2853,13 +3010,14 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events) {
 			this.keycount--;
 			var last = this.current_seat;
 			this.current_seat = this.getNextSeat(this.current_seat);
-			this.checkRoundPass(function (events) {
-				this.log('player '+last+' skipped, doing state again, FIXME %j',events);
-				return this.stateMachine(cb,null,null,events);
-			}.bind(this),events);
+			this.checkRoundPass(function (events,extradelay) {
+				assert.equal(typeof extradelay,'number');
+				this.log('player '+last+' skipped, doing state again, FIXME %d',events);
+				return this.stateMachine(cb,null,null,events,extradelay);
+			}.bind(this),events,extradelay);
 			return;
 		}
-		this.checkRoundPass(finish.bind(this),events);
+		this.checkRoundPass(finish.bind(this),events,0);
 		function finish(events,offset) {
 			assert(events);
 			assert.equal(typeof offset,'number');
@@ -2869,7 +3027,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events) {
 				if (this.members[this.current_seat].chips == 0) {
 					this.ranOut = true;
 					this.log('skipping');
-					return this.stateMachine(cb,null,null,events);
+					return this.stateMachine(cb,null,null,events,extradelay);
 				}
 				if (this.ranOut && (this.inHandCount() == 2)) {
 					this.log('somebody ran out, auto finishing');
@@ -2918,6 +3076,9 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	assert(self);
 	assert(events);
 	assert(self.nick);
+	if ((['tsIdle','tsDealing','tsWinning','tsWinning2'].indexOf(this.state) == -1)) {
+		assert(this.timer,util.inspect(this));
+	}
 	var tableStatus = {table_mongo_id:new Buffer(this.id.toString(),'hex'),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
@@ -2992,6 +3153,7 @@ Game.prototype.standUp = function (conn,cb1) {
 	var seatObj = this.members[seatIdx];
 	var folded = false;
 	conn.log('standing up seat:%d bet:%d status:%j locked:%d',seatIdx,this.bets[seatIdx],seatObj,this.Lock.readers);
+	this.logEvent('geCashout',conn.userid,seatObj.chips);
 	conn.boughtin -= seatObj.chips;
 	
 	this.members[seatIdx] = null;
@@ -3069,9 +3231,11 @@ Game.prototype.standUp = function (conn,cb1) {
 			// FIXME json performance hack
 			allClubs.findOne({_id:this.obj.clubid},function (err,club) {
 				conn.log('b');
+				var conn2 = activeUsers[club.owner];
+				var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+				if (conn2) conn2.send(codes.seGameChange,g,'Poker.Game');
 				if (!club.members) return cb1(folded,events);
 				conn.log('c');
-				var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
 				for (var x=0; x<club.members.length; x++) {
 					var conn2 = activeUsers[club.members[x]];
 					if (!conn2) continue;
@@ -3093,15 +3257,45 @@ Game.prototype.leave = function leave(conn,reason) {
 		conn.log('leave idx %d %s',seatIdx,reason);
 		if (seatIdx != undefined) {
 			this.standUp(conn,function (folded,events) {
-					conn.log('releasing lock events:%j');
+					conn.log('releasing lock events:%j',events);
+					if (folded && (this.current_seat >= 0)) this.startTimer(this.current_seat,0);
 					this.broadcastStatus(null,true,events);
-					release();
+					finish.call(this);
 				}.bind(this));
-		} else release();
+		} else finish.call(this);
+		function finish() {
+			var count = 0;
+			for (var key in this.users) {
+				count++;
+				console.log('key:%s count:%d',key,count);
+			}
+			if (count == 0) {
+				this.log('self-deleting');
+				delete activeGames[this.id];
+				if (this.state2 == 'gsClosed') {
+					clearTimeout(this.deleteTimer);
+					this.doDelete();
+				}
+			}
+			release();
+		}
+	}.bind(this));
+}
+Game.prototype.doDelete = function () {
+	allClubs.findOne({_id:this.obj.clubid},function (err,club) {
+		var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+		var conn = activeUsers[club.owner];
+		if (conn) conn.send(codes.seGameDelete,g,'Poker.Game');
+		if (club.members) {
+			for (var x=0; x<club.members.length; x++) {
+				conn = activeUsers[club.members[x]];
+				if (!conn) continue;
+				conn.send(codes.seGameDelete,g,'Poker.Game');
+			}
+		}
 	}.bind(this));
 }
 Game.prototype.startTimer = function startTimer(seat,offset) {
-	return;
 	assert.equal(typeof offset,'number');
 	this.stopTimer(seat);
 	this.log('starting timer for seat %d in state %s',seat,this.state);
@@ -3121,7 +3315,7 @@ Game.prototype.startTimer = function startTimer(seat,offset) {
 				this.log('folded %j',events);
 				this.broadcastStatus(null,true,events);
 				release();
-				if (this.current_seat >= 0) this.startTimer(this.current_seat);
+				if (this.current_seat >= 0) this.startTimer(this.current_seat,0); /// FIXME?
 			}.bind(this));
 		}.bind(this));
 	}.bind(this),(sharedconfig.max_play_time*1000) + this.timebanks[this.seats[seat].userid] + offset);
@@ -3145,10 +3339,19 @@ Game.handleDisconnect = function handleDisconnect(conn,reason) {
 		if (game.users[conn.userid]) game.leave(conn,'disconnect');
 	}
 }
+Game.prototype.logEvent = function (type,userid,change) {
+	var doc = {eventtype:type};
+	if (userid) doc.userid = userid;
+	if (change) doc.change = change;
+	GameEvents.insert(doc,function (){});
+}
 Game.getGame = function getgame(id,cb) {
 	if (!activeGames[id]) {
 		allGames.findOne({_id:id},function (err,obj) {
+			if (!obj) return cb();
 			var game = new Game(obj);
+			game.logEvent('geOpened');
+			// FIXME, concurrent calls, grab a lock here
 			game.deck = new Deck();
 			game.deck.shuffle(function shuffled(){
 				//this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
@@ -3156,6 +3359,17 @@ Game.getGame = function getgame(id,cb) {
 					game.rake = club.rake;
 					if (!game.rake) game.rake = 5;
 					game.testmode = club.testmode;
+					var g = makeGameProtobuf(JSON.parse(JSON.stringify(obj)));
+					var conn = activeUsers[club.owner];
+					if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
+
+					if (club.members) {
+						for (var x=0; x<club.members.length; x++) {
+							conn = activeUsers[club.members[x]];
+							if (!conn) continue;
+							conn.send(codes.seGameChange,g,'Poker.Game');
+						}
+					}
 					cb(null,game);
 				});
 			}.bind(this));
