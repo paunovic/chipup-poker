@@ -65,7 +65,7 @@ begin
   FAvatarJPG := TJPEGImage.Create;
 
   avatar := Avatars.Add(dmMain.SelfInfo.AvatarId, nil);
-  imgAvatar.Picture.Assign(avatar.Image);
+  imgAvatar.Picture.Assign(avatar.GetImage);
 end;
 
 procedure TfrmChangeAvatar.FormDestroy(Sender: TObject);
@@ -226,7 +226,7 @@ begin
       avatar := Avatars.Add(dmMain.SelfInfo.AvatarId, FAvatarJPG);
       if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
         player_info.AvatarId := dmMain.SelfInfo.AvatarId;
-      imgAvatar.Picture.Assign(avatar.Image);
+      imgAvatar.Picture.Assign(avatar.GetImage);
 
       FAvatarChanged := FALSE;
       acChange.Enabled := TRUE;

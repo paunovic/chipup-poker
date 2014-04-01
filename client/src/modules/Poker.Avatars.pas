@@ -28,9 +28,13 @@ type
     constructor Create(const AId: TBytes; const AImage: TJPEGImage);
     destructor Destroy; override;
 
+    procedure SetImage(const AImage: TJPEGImage); overload;
+    procedure SetImage(const AStream: TStream); overload;
+
+    function GetImage: TJPEGImage;
+
     property Id: TBytes read FId;
     property IdAsString: String read FIdAsString;
-    property Image: TJPEGImage read FImage;
     property DXImage: TAsphyreImage read FDXImage;
   end;
 
@@ -75,7 +79,7 @@ begin
 
   FImage := TJPEGImage.Create;
   if Assigned(AImage) then
-    FImage.Assign(AImage);
+    SetImage(AImage);
 
   FImage.OnChange := ImageChanged;
 end;
@@ -109,6 +113,7 @@ begin
   begin
     FHTTP.RcvdStream.Position := 0;
     FImage.LoadFromStream(FHTTP.RcvdStream);
+    ImageChanged(FImage);
     Save;
 
     FHTTP.RcvdStream.Free;
@@ -135,6 +140,11 @@ begin
   FHTTP.OnRequestDone := HTTPRequestDone;
   FHTTP.SslContext.InitContext;
   FHTTP.GetAsync;
+end;
+
+function TAvatar.GetImage: TJPEGImage;
+begin
+  result := FImage;
 end;
 
 function TAvatar.Retrieve: Boolean;
@@ -210,7 +220,17 @@ begin
   end;
 end;
 
+procedure TAvatar.SetImage(const AStream: TStream);
+begin
+  FImage.LoadFromStream(AStream);
+  ImageChanged(FImage);
+end;
 
+procedure TAvatar.SetImage(const AImage: TJPEGImage);
+begin
+  FImage.Assign(AImage);
+  ImageChanged(FImage);
+end;
 
 { TAvatars }
 
@@ -249,14 +269,13 @@ end;
 
 function TAvatars.Add(const AId: TBytes; const AImage: TJPEGImage): TAvatar;
 var
-  avatar : TAvatar;
-  mstream: TMemoryStream;
+  avatar: TAvatar;
 begin
   if Find(AId, avatar) then
   begin
     if Assigned(AImage) then
     begin
-      avatar.Image.Assign(AImage);
+      avatar.SetImage(AImage);
       avatar.Save;
     end;
   end
@@ -265,17 +284,7 @@ begin
     avatar := TAvatar.Create(AId, AImage);
     if not Assigned(AImage) then
     begin
-      // this works
-      mstream := TMemoryStream.Create;
-      try
-        FRetrievingImage.SaveToStream(mstream);
-        mstream.Position := 0;
-        avatar.Image.LoadFromStream(mstream);
-      finally
-        mstream.Free;
-      end;
-//      avatar.Image.Assign(FRetrievingImage); // <<<< this doesnt work
-
+      avatar.SetImage(FRetrievingImage);
       if not avatar.Retrieve then
         avatar.Download;
     end
