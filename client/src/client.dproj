@@ -269,6 +269,10 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameEventHistory.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.QueryTableStats.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReplies.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

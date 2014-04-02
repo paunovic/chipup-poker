@@ -123,7 +123,11 @@ uses
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.GameQuery in 'modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas',
-  Poker.Protobufs.Objects.GameEventHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.GameEventHistory.pas';
+  Poker.Protobufs.Objects.GameEventHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.GameEventHistory.pas',
+  Poker.Protobufs.Objects.QueryTableStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.QueryTableStats.pas',
+  Poker.Protobufs.Objects.TableStatsReplies in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReplies.pas',
+  Poker.Protobufs.Objects.TableStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReply.pas',
+  Poker.Protobufs.Objects.TablePlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas';
 
 procedure FocusPokerApp;
 var
