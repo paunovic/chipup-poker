@@ -41,6 +41,7 @@ type
     srTableAddonOverLimit = 52,
     srRetrieveHandHistoryData = 53,
     srFetchHandData = 54,
+    srTableStatsReply = 55,
     seChat = 200,
     seSecondaryLoginDetected = 201,
     seAccountConfirmed = 202,
@@ -88,7 +89,8 @@ type
     scShowLosingCards = 535,
     seUserChange = 536,
     scRetrieveHandHistoryData = 537,
-    scFetchHandHistory = 538
+    scFetchHandHistory = 538,
+    scQueryTableStats = 539
   );
 
 {$IFDEF DEBUG}
@@ -156,6 +158,7 @@ begin
     srTableAddonOverLimit: result := 'srTableAddonOverLimit';
     srRetrieveHandHistoryData: result := 'srRetrieveHandHistoryData';
     srFetchHandData: result := 'srFetchHandData';
+    srTableStatsReply: result := 'srTableStatsReply';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -204,6 +207,7 @@ begin
     seUserChange: result := 'seUserChange';
     scRetrieveHandHistoryData: result := 'scRetrieveHandHistoryData';
     scFetchHandHistory: result := 'scFetchHandHistory';
+    scQueryTableStats: result := 'scQueryTableStats';
   end;
 end;
 {$ENDIF DEBUG}

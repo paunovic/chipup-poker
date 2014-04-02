@@ -93,6 +93,7 @@ type
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
     procedure FetchHandHistory(const protobuf: TPB_FetchHandHistory);
+    procedure QueryTableStats(const ATables: array of TBytes);
 
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
@@ -118,7 +119,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
-  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.FetchHandReply;
+  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.QueryTableStats;
 
 var
   FConnectThreadId: DWORD;
@@ -1032,6 +1033,24 @@ end;
 procedure TServerSocket.FetchHandHistory(const protobuf: TPB_FetchHandHistory);
 begin
   SendProtobuf(scFetchHandHistory, protobuf);
+end;
+
+procedure TServerSocket.QueryTableStats(const ATables: array of TBytes);
+var
+  protobuf: TPB_QueryTableStats;
+  gameids: TArray<TBytes>;
+  C1: Integer;
+begin
+  protobuf := TPB_QueryTableStats.Create;
+  try
+    SetLength(gameids, Length(ATables));
+    for C1 := Low(ATables) to High(ATables) do
+      gameids[C1] := ATables[C1];
+    protobuf.Gameid := gameids;
+    SendProtobuf(scQueryTableStats, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 

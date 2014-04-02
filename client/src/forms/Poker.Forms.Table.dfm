@@ -180,6 +180,15 @@ object frmTable: TfrmTable
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyle
   end
+  object Button1: TButton
+    Left = 8
+    Top = 8
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 6
+    OnClick = Button1Click
+  end
   object ActionManager: TActionManager
     Left = 56
     Top = 104
