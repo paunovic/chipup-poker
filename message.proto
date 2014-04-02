@@ -485,3 +485,26 @@ message FetchHandHistory {
 message FetchHandReply {
 	required string uuid = 1;
 }
+
+message QueryTableStats {
+	repeated bytes gameid = 1;
+}
+
+message TableStatsReplies {
+	repeated TableStatsReply reply = 1;
+}
+
+message TableStatsReply {
+	required bytes gameid = 1;
+	repeated TablePlayerStats playerstats = 2;
+}
+
+message TablePlayerStats {
+	required bytes userid = 1;
+	required string name = 2;
+	required uint32 balance = 3;
+	repeated uint32 buyins = 4;
+	repeated uint32 cashouts = 5;
+	required uint32 rakecontrib = 6;
+	required uint32 hoursplayed = 7;
+}
