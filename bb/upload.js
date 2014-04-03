@@ -13,8 +13,8 @@ child.exec('git rev-parse HEAD',function (err,stdout,stderr) {
 });
 
 function finish(version) {
-	doUpload('internal.chipuppoker.com');
-	doUpload('chipuppoker.com');
+	doUpload(version,'internal.chipuppoker.com');
+	doUpload(version,'chipuppoker.com');
 }
 function doUpload(version,host) {
 	var key = 'abcd';
