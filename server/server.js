@@ -1602,7 +1602,13 @@ ClientSocket.prototype.handle = function (code,args) {
 								if (game.state == 'tsRiver') cards = cards.concat(cards,game.river.cards);
 								events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
 							}
-							this.send(codes.seTableStatus,game.getTableStatus(this,true,events),'Poker.TableStatus');
+							var status = game.getTableStatus(this,true,events);
+							this.send(codes.seTableStatus,status,'Poker.TableStatus');
+		var t1 = pb.Serialize(status,'Poker.TableStatus');
+		console.log(t1);
+		var t2 = pb.Parse(t1,'Poker.TableStatus');
+		console.log(t2);
+		assert.equal(t2.table_mongo_id.length,12);
 							release();
 						}
 					}.bind(this));
@@ -3171,7 +3177,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	/*if ((['tsIdle','tsDealing','tsWinning','tsWinning2'].indexOf(this.state) == -1)) {
 		assert(this.timer,util.inspect(this));
 	}*/
-	var tableStatus = {table_mongo_id:this.id.id,seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
+	var tableStatus = {table_mongo_id: new Buffer(this.id.id,'binary'),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
 	if (this.pots) {
