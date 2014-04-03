@@ -1,0 +1,22 @@
+extends base
+block content
+  table(border=1)
+    tr
+      th tag
+      th avg
+      th hits
+    each row in rows
+      tr
+        td=row._id
+        td=row.avg
+        td=row.hits
+  table(border=1)
+    tr
+      th tag
+      th time
+      th when
+    each row in rawlist
+      tr
+        td=row.tag
+        td=row.time
+        td=row._id.getTimestamp()
