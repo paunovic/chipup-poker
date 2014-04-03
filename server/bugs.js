@@ -1,4 +1,7 @@
 var ObjectID = require('mongodb').ObjectID;
+var fs = require('fs');
+var assert = require('assert');
+
 if (require.main === module) {
 	var express = require('express');
 	var MongoClient = require('mongodb').MongoClient;
@@ -16,6 +19,7 @@ if (require.main === module) {
 	});
 }
 function setup(app,bugs,users,db) {
+	var PokerProfile = db.collection('PokerProfile');
 	app.set('view engine','jade');
 	app.get('/bugs',function (req,res) {
 		var start = Date.now();
@@ -40,14 +44,6 @@ function setup(app,bugs,users,db) {
 				if (data[x].chips) sum += data[x].chips;
 			}
 			res.render('users',{users:data,start:start,sum:sum});
-		});
-	});
-	app.get('/user',function (req,res) {
-		var start = Date.now();
-		users.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
-			db.collection('clubs').find({members:new ObjectID(req.query.id)}).toArray(function (err,clubs) {
-				res.render('user',{user:row,clubs:clubs,start:start});
-			});
 		});
 	});
 	app.get('/bug',function (req,res) {
@@ -87,6 +83,14 @@ function setup(app,bugs,users,db) {
 		var start = Date.now();
 		db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
 			res.render('profile',{rows:rows,start:start});
+		});
+	});
+	app.get('/profile',function (req,res) {
+		var start = Date.now();
+		PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
+			PokerProfile.find({time:{$gt:2000}}).toArray(function (err,list) {
+				res.render('profile2',{rows:rows,start:start,rawlist:list});
+			});
 		});
 	});
 }
