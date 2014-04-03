@@ -417,7 +417,7 @@ app.get('/fetchhands',function (req,res) {
 						hands[x] = null;
 						continue;
 					}
-					row._id = row._id.id;
+					row._id = fromMongoId(row._id);
 					row.tablecards = [];
 				}
 				var end = Date.now();
@@ -427,7 +427,7 @@ app.get('/fetchhands',function (req,res) {
 					assert.ifError(err);
 					GameEvents.find({gameid:game._id}).toArray(function (err,events) {
 						var start = Date.now();
-						var obj = {clubid: game.clubid.id, gameid: req.gameid.buffer, rows:hands, events:events};
+						var obj = {clubid: fromMongoId(game.clubid), gameid: req.gameid.buffer, rows:hands, events:events};
 
 						var token2 = profiler.start('fetchhands-inner2');
 						var out = pb.Serialize({reply:[obj]},'Poker.FetchHandHistoryReply');
@@ -718,6 +718,9 @@ if (false) {
 }
 function toMongoId(buf) {
 	return new ObjectID(buf.toString('hex'));
+}
+function fromMongoId(id) {
+	return new Buffer(id.id);
 }
 function compareObjectID(a,b) {
 	if (!b) return false;
@@ -1953,16 +1956,16 @@ ClientSocket.prototype.handle = function (code,args) {
 				for (var i=0; i<stats.length; i++) {
 					var gameidhex = stats[i].gameid.toString();
 					if (!games[gameidhex]) {
-						games[gameidhex] = {gameid: stats[i].gameid.id, playerstats:[]};
+						games[gameidhex] = {gameid: fromMongoId(stats[i].gameid), playerstats:[]};
 						out.push(games[gameidhex]);
 					}
 					if (!containsObjectID(players,stats[i].userid)) players.push(stats[i].userid);
-					stats[i].userid = stats[i].userid.id;
+					stats[i].userid = fromMongoId(stats[i].userid);
 					games[gameidhex].playerstats.push(stats[i]);
 				}
 				allUsers.find({_id:{$in:players}},{displayname:1}).toArray(function (err,playersOut) {
 					for (var i=0; i<playersOut.length; i++) {
-						playersOut[i]._id = playersOut[i]._id.id;
+						playersOut[i]._id = fromMongoId(playersOut[i]._id);
 					}
 					this.send(codes.srTableStatsReply,{reply:out, players:playersOut},'Poker.TableStatsReplies');
 				}.bind(this));
@@ -3177,7 +3180,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	/*if ((['tsIdle','tsDealing','tsWinning','tsWinning2'].indexOf(this.state) == -1)) {
 		assert(this.timer,util.inspect(this));
 	}*/
-	var tableStatus = {table_mongo_id: new Buffer(this.id.id,'binary'),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
+	var tableStatus = {table_mongo_id: fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
 	if (this.pots) {
@@ -3192,7 +3195,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
 		var timebank = this.timebanks[priv.userid];
 		if (timebank < 0) timebank = 0;
-		var obj = {seat:x, player_mongo_id:priv.userid.id, chips:seat.chips, status:seat.status, timebank:timebank}
+		var obj = {seat:x, player_mongo_id:fromMongoId((priv.userid), chips:seat.chips, status:seat.status, timebank:timebank}
 		var showcards = false;
 		if (this.testmode) showcards = true;
 		if (priv.conn === self) showcards = true;
