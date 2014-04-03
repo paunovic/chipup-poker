@@ -16,7 +16,7 @@ function finish(version) {
 	doUpload('internal.chipuppoker.com');
 	doUpload('chipuppoker.com');
 }
-function doUpload(version,host)
+function doUpload(version,host) {
 	var key = 'abcd';
 	var header = '--'+key+'\r\n'+
 		'Content-Type: application/octed-stream\r\n'+
