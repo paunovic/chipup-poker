@@ -41,6 +41,9 @@ function doUpload(version,host) {
 			console.log('body:'+chunk);
 		});
 	});
+	request.on('error',function (err) {
+		console.log('unable to upload to %s due to %j',host,err);
+	});
 	console.log('doing post');
 	request.setHeader('Content-Type','multipart/form-data; boundary="'+key+'"');
 	request.write(header);
