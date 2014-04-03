@@ -720,7 +720,7 @@ function toMongoId(buf) {
 	return new ObjectID(buf.toString('hex'));
 }
 function fromMongoId(id) {
-	return new Buffer(id.id);
+	return new Buffer(id.id,'binary');
 }
 function compareObjectID(a,b) {
 	if (!b) return false;
