@@ -3195,7 +3195,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
 		var timebank = this.timebanks[priv.userid];
 		if (timebank < 0) timebank = 0;
-		var obj = {seat:x, player_mongo_id:fromMongoId((priv.userid), chips:seat.chips, status:seat.status, timebank:timebank}
+		var obj = {seat:x, player_mongo_id:fromMongoId(priv.userid), chips:seat.chips, status:seat.status, timebank:timebank}
 		var showcards = false;
 		if (this.testmode) showcards = true;
 		if (priv.conn === self) showcards = true;
