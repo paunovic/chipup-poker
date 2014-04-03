@@ -23,10 +23,22 @@ block content
         td=pot.value/100
   table(border=1)
     tr
+      th seat
+      th state
+    each seat,idx in game.members
+      tr
+        td=idx
+        td=JSON.stringify(seat)
+  table(border=1)
+    tr
       th started
       th hand#
+      th rake
+      th endtime
     each hand in hands
       tr
         td=hand._id.getTimestamp()
         td
           a(href="/hand?id="+hand._id)=hand.seq
+        td=hand.totalrake ? hand.totalrake/100 : ''
+        td=hand.endtime
