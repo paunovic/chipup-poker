@@ -13,6 +13,10 @@ child.exec('git rev-parse HEAD',function (err,stdout,stderr) {
 });
 
 function finish(version) {
+	doUpload('internal.chipuppoker.com');
+	doUpload('chipuppoker.com');
+}
+function doUpload(version,host)
 	var key = 'abcd';
 	var header = '--'+key+'\r\n'+
 		'Content-Type: application/octed-stream\r\n'+
@@ -28,7 +32,7 @@ function finish(version) {
 	var filesize1 = fs.statSync('../client/installer/install_chipuppoker.exe').size;
 	var filesize2 = fs.statSync('../client/src/client.exe').size;
 
-	var request = http.request({host:'chipuppoker.com',method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
+	var request = http.request({host:host,method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
 		'&debug='+process.argv[2],
 		headers:{'Content-Length':textsize+filesize1+filesize2}
 	},function (res) {
