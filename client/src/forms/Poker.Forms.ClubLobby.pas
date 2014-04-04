@@ -70,22 +70,19 @@ type
     gridGamesTableStatus: TcxGridColumn;
     btStats: TcxButton;
     tsStats: TcxTabSheet;
-    pbHandsDownload: TcxProgressBar;
-    lbsDownloadingHandData: TcxLabel;
-    tiHandDownloadRefresh: TTimer;
     gridStats: TcxGrid;
-    cxGridTableView1: TcxGridTableView;
-    cxGridLevel1: TcxGridLevel;
+    gridStatsTable: TcxGridTableView;
+    gridStatsLevel: TcxGridLevel;
     gridTables: TcxGrid;
     gridTablesTable: TcxGridTableView;
     gridTablesLevel: TcxGridLevel;
-    cxGridTableView1Column1: TcxGridColumn;
-    cxGridTableView1Column2: TcxGridColumn;
-    cxGridTableView1Column3: TcxGridColumn;
-    cxGridTableView1Column4: TcxGridColumn;
-    cxGridTableView1Column5: TcxGridColumn;
-    cxGridTableView1Column6: TcxGridColumn;
-    cxGridTableView1Column7: TcxGridColumn;
+    gridStatsTableColumn1: TcxGridColumn;
+    gridStatsTableColumn2: TcxGridColumn;
+    gridStatsTableColumn3: TcxGridColumn;
+    gridStatsTableColumn4: TcxGridColumn;
+    gridStatsTableColumn5: TcxGridColumn;
+    gridStatsTableColumn6: TcxGridColumn;
+    gridStatsTableColumn7: TcxGridColumn;
     gridTablesEnabled: TcxGridColumn;
     gridTablesName: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
@@ -110,7 +107,6 @@ type
     procedure acUpdateClubDetailsExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btStatsClick(Sender: TObject);
-    procedure tiHandDownloadRefreshTimer(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -118,7 +114,6 @@ type
     FSelectedGameId: TBytes;
 
     procedure ConfigureGUI;
-    procedure HandsDownloading(const AValue: Boolean);
 
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
@@ -158,7 +153,7 @@ uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.HandDownloader, Poker.Database.Core;
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -249,14 +244,11 @@ begin
     if btStats.Visible then
     begin
       btPrijatnaPunina.Left := btStats.Left + btStats.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
-      HandsDownloading(HandDownloader.Downloading);
       UpdateTablesStatsList;
     end
     else
-    begin
       btPrijatnaPunina.Left := btTables.Left + btTables.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
-      tiHandDownloadRefresh.Enabled := FALSE;
-    end;
+
     btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 2;
 
     btChangeClubDetails.Visible := admin_visible;
@@ -383,27 +375,6 @@ begin
   begin
     acSuspendPlayer.Enabled := FALSE;
     acReinstatePlayer.Enabled := FALSE;
-  end;
-end;
-
-procedure TfrmClubLobby.HandsDownloading(const AValue: Boolean);
-begin
-  if not AValue then
-  begin
-    tiHandDownloadRefresh.Enabled := FALSE;
-    lbsDownloadingHandData.Visible := FALSE;
-    pbHandsDownload.Visible := FALSE;
-    gridTables.Visible := TRUE;
-    gridStats.Visible := TRUE;
-    UpdateGamesList;
-  end
-  else
-  begin
-    pbHandsDownload.Visible := TRUE;
-    lbsDownloadingHandData.Visible := TRUE;
-    tiHandDownloadRefresh.Enabled := TRUE;
-    gridTables.Visible := FALSE;
-    gridStats.Visible := FALSE;
   end;
 end;
 
@@ -557,13 +528,6 @@ begin
   finally
     c.EndFullUpdate;
   end;
-end;
-
-procedure TfrmClubLobby.tiHandDownloadRefreshTimer(Sender: TObject);
-begin
-  pbHandsDownload.Position := HandDownloader.Progress;
-  if not HandDownloader.Downloading then
-    HandsDownloading(FALSE);
 end;
 
 procedure TfrmClubLobby.tiUpdateClubDetailsTimer(Sender: TObject);

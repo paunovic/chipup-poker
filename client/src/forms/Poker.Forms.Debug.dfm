@@ -60,7 +60,6 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       TabOrder = 2
       Visible = False
-      ExplicitHeight = 304
       Height = 303
       Width = 675
     end
@@ -335,8 +334,6 @@ object frmDebug: TfrmDebug
       BorderStyle = bsNone
       DoInPaletteMode = rvpaCreateCopies
       Style = RVStyle
-      ExplicitLeft = -24
-      ExplicitHeight = 304
     end
   end
   object alDebug: TActionList

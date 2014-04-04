@@ -2,6 +2,8 @@ unit Poker.Table.Resources;
 
 interface
 
+{$I defines.inc}
+
 uses
   Winapi.Windows, AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas, Poker.Cards;
 
@@ -82,6 +84,7 @@ type
 
   public
     const
+      {$IFNDEF SEAT_POSITIONS_CONFIGURATOR}
       SEAT_POINTS: array[2..10, 0..9] of Double = (
          (0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2
          (0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3
@@ -93,6 +96,7 @@ type
          (-pi/2.8, -pi/12, pi/16, pi/2.89, pi/2, pi-pi/2.89, pi-pi/15, pi+pi/12, pi+pi/2.8, 0), // 9
          (-pi/2.6, -pi/6, pi/64, pi/4.8, pi/2.3, pi-pi/2.3, pi-pi/4.8, pi-pi/64, pi+pi/6, pi+pi/2.6) // 10
       );
+      {$ENDIF}
 
       RAISE_VALUEBOX_WIDTH      = 109;
       RAISE_VALUEBOX_HEIGHT     = 18;
@@ -108,10 +112,10 @@ type
       SEAT_LEFT_AVATAR_X        = 199;
       SEAT_RIGHT_AVATAR_X       = 43;
 
-                   {
+    {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
     class var
       SEAT_POINTS: array[2..10, 0..9] of Extended;
-                      }
+    {$ENDIF}
 
     class procedure Initialize(const ADXCanvas: TAsphyreCanvas);
     class procedure Deinitialize;

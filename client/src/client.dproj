@@ -261,7 +261,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas"/>
-			<DCCReference Include="modules\Poker.HandDownloader.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistoryReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas"/>
@@ -290,6 +289,7 @@
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>RetrievingAvatar</ResourceId>
 			</RcItem>
+			<None Include="defines.inc"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

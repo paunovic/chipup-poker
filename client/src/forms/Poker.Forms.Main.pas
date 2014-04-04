@@ -5,11 +5,11 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.AppEvnts, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
-  cxLookAndFeelPainters, dxSkinscxPCPainter, cxCustomData, cxDataStorage, cxEdit, cxGridCustomView,
-  cxGridCustomTableView, cxGridTableView, cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons,
-  OverbyteIcsWSocket, Poker.Objects.ClubInfo, cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo,
-  cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ActnMan, Vcl.ActnMenus, Vcl.PlatformDefaultStyleActnCtrls,
-  dxGDIPlusClasses, dxsChipUpDarkTabs, dxsChipUpRedButton, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club;
+  cxLookAndFeelPainters, dxSkinscxPCPainter, cxCustomData, cxDataStorage, cxEdit, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
+  cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo,
+  cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ActnMan, Vcl.ActnMenus,
+  Vcl.PlatformDefaultStyleActnCtrls, dxsChipUpDarkTabs, dxsChipUpRedButton, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club,
+  dxGDIPlusClasses;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -135,11 +135,9 @@ type
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRListClubs(const AMethodId: Integer; const AObject: TObject);
-    procedure CSRFetchHandData(const AMethodId: Integer; const AObject: TObject);
 
     function ConfirmToCloseTables: Boolean;
     function ProcessClubObject(const AClub: TPB_Club): TClubInfo;
-    procedure CheckHandIds;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
@@ -171,7 +169,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core,
-  Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.FetchHandHistory, Poker.Settings, Poker.HandDownloader;
+  Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.FetchHandHistory, Poker.Settings;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -371,57 +369,6 @@ begin
     Exit;
 
   FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
-end;
-
-procedure TfrmChipUpMain.CheckHandIds;
-var
-  club       : TClubInfo;
-  game       : TGameInfo;
-  clubs      : TObjectList<TClubInfo>;
-  local_lhi  : UINT32;
-  gamequery  : TPB_GameQuery;
-  cmd        : TPB_FetchHandHistory;
-  conn       : TSQLDBSQLite3ConnectionProperties;
-begin
-  clubs := TObjectList<TClubInfo>.Create(FALSE);
-  try
-    for club in dmMain.SelfInfo.Clubs do
-      if CompareBytes(club.OwnerId, dmMain.SelfInfo.Id) then
-        clubs.Add(club);
-
-      if clubs.Count = 0 then
-        Exit;
-
-      conn := Database.NewConnection;
-      try
-        cmd := TPB_FetchHandHistory.Create;
-        try
-          for club in clubs do
-          begin
-            for game in club.Games do
-            begin
-              local_lhi := Database.LastHandId(conn, game.MongoId);
-              if local_lhi <> game.LastHandId then
-              begin
-                gamequery := TPB_GameQuery.Create;
-                gamequery.Gameid := game.MongoId;
-                gamequery.Lasthandid := local_lhi;
-                cmd.Games.Add(gamequery);
-              end;
-            end;
-          end;
-
-          if cmd.Games.Count > 0 then
-            ServerSocket.FetchHandHistory(cmd);
-        finally
-          cmd.Free;
-        end
-      finally
-        conn.Free;
-      end;
-  finally
-    clubs.Free;
-  end;
 end;
 
 procedure TfrmChipUpMain.ConfigureGUI;
@@ -664,15 +611,14 @@ begin
                           TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                           TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                          TServerMessageCallback.Create(srListClubs, CSRListClubs),
-                          TServerMessageCallback.Create(srFetchHandData, CSRFetchHandData)
+                          TServerMessageCallback.Create(srListClubs, CSRListClubs)
                       ]);
 
       FSelectedClub := -1;
       FSelectedPublicClubId := -1;
       SetLength(FSelectedGame, 0);
       tiPublicClubRefresh.Enabled := TRUE;
-      CheckHandIds;
+      ServerSocket.QueryTableStats([]); // empty array - query all table stats
       ConfigureGUI;
       Show;
     end;
@@ -973,15 +919,5 @@ begin
 
   ConfigureGUI;
 end;
-
-procedure TfrmChipUpMain.CSRFetchHandData(const AMethodId: Integer; const AObject: TObject);
-var
-  pbhanddata: TPB_FetchHandReply;
-begin
-  pbhanddata := AObject as TPB_FetchHandReply;
-
-  HandDownloader.Download(Format(Settings.Hardcoded.URL.FETCH_HANDS, [pbhanddata.Uuid]));
-end;
-
 
 end.

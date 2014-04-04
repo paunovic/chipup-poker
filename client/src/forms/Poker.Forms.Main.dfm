@@ -3833,7 +3833,7 @@ object frmChipUpMain: TfrmChipUpMain
     object btPrijatnaPunina: TcxButton
       Left = 290
       Top = 12
-      Width = 405
+      Width = 404
       Height = 32
       Anchors = [akLeft, akTop, akRight]
       Enabled = False

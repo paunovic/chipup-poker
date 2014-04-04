@@ -2,6 +2,8 @@ unit Poker.HardcodedSettings;
 
 interface
 
+{$I defines.inc}
+
 const
   URL_DOMAIN = 'http://chipuppoker.com';
 
@@ -17,6 +19,9 @@ type
                                 SETTINGS_ENCRYPTION_KEY: String;
                                 DATABASE_FILENAME      : String;
                                 TCP_SERVER_ADDRESS     : String;
+                                {$IFDEF DEV_BUILD}
+                                TCP_DEV_SERVER_ADDRESS : String;
+                                {$ENDIF}
                                 TCP_SERVER_PORT        : Word;
                                 TCP_PING_INTERVAL      : Word;
                                 TCP_PING_TIMEOUT       : Word;
@@ -47,6 +52,9 @@ type
 
                                            // socket server
                                            TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
+                                           {$IFDEF DEV_BUILD}
+                                           TCP_DEV_SERVER_ADDRESS: 'dev-server.chipuppoker.com';
+                                           {$ENDIF}
                                            TCP_SERVER_PORT: 12346;
                                            TCP_PING_INTERVAL: 60; // in seconds
                                            TCP_PING_TIMEOUT: 15; // in seconds

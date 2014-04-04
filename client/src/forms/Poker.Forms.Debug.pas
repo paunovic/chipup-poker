@@ -1,6 +1,6 @@
 unit Poker.Forms.Debug;
 
-{.$DEFINE SEAT_POSITIONS_CONFIG}
+{$I defines.inc}
 
 interface
 
@@ -70,7 +70,7 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF SEAT_POSITIONS_CONFIG}
+  {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
   Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
@@ -202,7 +202,7 @@ begin
   Width := Round(Screen.Monitors[0].Width / 2.8);
   Height := Round(Screen.Monitors[0].Height / 2.5);
 
-  {$IFDEF SEAT_POSITIONS_CONFIG}
+  {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
   {$ENDIF}
 end;
@@ -317,7 +317,7 @@ end;
 
 procedure TfrmDebug.btSeatPosClick(Sender: TObject);
 begin
-  {$IFDEF SEAT_POSITIONS_CONFIG}
+  {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   meSeatPos.Visible := btSeatPos.Down;
   if meSeatPos.Visible then
     meSeatPos.BringToFront;
@@ -326,7 +326,7 @@ begin
 end;
 
 procedure TfrmDebug.btSetClick(Sender: TObject);
-{$IFDEF SEAT_POSITIONS_CONFIG}
+{$IFDEF SEAT_POSITIONS_CONFIGURATOR}
 var
   C1, C2: Integer;
   line  : String;
@@ -336,7 +336,7 @@ var
   evaluator: TEvaluator;
 {$ENDIF}
 begin
-  {$IFDEF SEAT_POSITIONS_CONFIG}
+  {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   evaluator := TEvaluator.Create;
   try
     evaluator.AddConst('pi', pi);
