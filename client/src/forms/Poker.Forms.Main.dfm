@@ -4059,8 +4059,8 @@ object frmChipUpMain: TfrmChipUpMain
             Caption = '&Account'
           end>
       end>
-    Left = 404
-    Top = 230
+    Left = 412
+    Top = 228
     StyleName = 'Platform Default'
     object acLogout: TAction
       Category = 'Account'
@@ -4123,8 +4123,8 @@ object frmChipUpMain: TfrmChipUpMain
     end
   end
   object MainMenu: TMainMenu
-    Left = 472
-    Top = 230
+    Left = 474
+    Top = 228
     object Account1: TMenuItem
       Caption = 'Account'
       object ChangeEmailAddress1: TMenuItem
