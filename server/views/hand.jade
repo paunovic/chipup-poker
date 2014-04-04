@@ -2,7 +2,7 @@ extends base
 block content
   script.
     var raw=!{JSON.stringify(hand)};
-  p='rake:'+hand.rake+'%'
+  p='rake:'+hand.rake+'%' + (hand.totalrake ? '=='+hand.totalrake/100 : '')
   a(href='/game?id='+hand.gameid) parent game
   table(border=1)
     tr
@@ -24,11 +24,14 @@ block content
     tr
       th seat#
       th player mongoid
+      th balance
     each player,idx in hand.players
       if player
         tr
           td=idx
-          td=player
+          td
+            a(href="/user?id="+player)=player
+          td=hand.balances ? hand.balances[idx]/100 : ''
   table(border=1)
     tr
       th move#

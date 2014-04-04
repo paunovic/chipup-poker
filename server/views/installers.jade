@@ -1,12 +1,26 @@
 extends base
 block content
+  p Release builds:
   table(border=1)
     tr
-      th name
+      th ts
+      th links
       th version
       th revision
-      th compile type
       th size
       th control
     each val in installers
-      include installer_row.jade
+      if val.debug == 'release'
+        include installer_row.jade
+  p Debug builds:
+  table(border=1)
+    tr
+      th ts
+      th links
+      th version
+      th revision
+      th size
+      th control
+    each val in installers
+      if val.debug == 'debug'
+        include installer_row.jade

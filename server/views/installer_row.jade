@@ -1,12 +1,17 @@
 tr
-  td=val.name
+  td=val._id.getTimestamp()
+  td
+    a(href="/rawinstallers/"+val.name) installer
+    | &nbsp;&nbsp;
+    a(href="/rawinstallers/"+val.clientname) client
   td=val.version
   td=val.revision
-  td=val.debug
   td=Math.round(val.size/1024/1024)+'MB'
   td
-    if (pubver.toString() == val._id.toString())
+    if (val.debug == 'release') && (pubver.toString() == val._id.toString())
       | Public Version
+    else if (val.debug == 'debug') && (debugver.toString() == val._id.toString())
+      | Debug Version
     else
       form(method="post")
         input(name="setpublic",value=val._id,type="hidden")
