@@ -1,26 +1,30 @@
 extends base
 block content
-  p Release builds:
-  table(border=1)
-    tr
-      th ts
-      th links
-      th version
-      th revision
-      th size
-      th control
-    each val in installers
-      if val.debug == 'release'
-        include installer_row.jade
-  p Debug builds:
-  table(border=1)
-    tr
-      th ts
-      th links
-      th version
-      th revision
-      th size
-      th control
-    each val in installers
-      if val.debug == 'debug'
-        include installer_row.jade
+  form(method="post")
+    p Release builds:
+    table(border=1)
+      tr
+        th ts
+        th links
+        th version
+        th revision
+        th size
+        th activate
+        th status/delete
+      each val in installers
+        if val.debug == 'release'
+          include installer_row.jade
+    p Debug builds:
+    table(border=1)
+      tr
+        th ts
+        th links
+        th version
+        th revision
+        th size
+        th activate
+        th status/delete
+      each val in installers
+        if val.debug == 'debug'
+          include installer_row.jade
+    input(type="submit",value="Apply")

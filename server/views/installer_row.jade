@@ -8,14 +8,11 @@ tr
   td=val.revision
   td=Math.round(val.size/1024/1024)+'MB'
   td
+    input(type="radio",name="activate_"+val.debug,value=val._id)
+  td
     if (val.debug == 'release') && (pubver.toString() == val._id.toString())
       | Public Version
     else if (val.debug == 'debug') && (debugver.toString() == val._id.toString())
       | Debug Version
     else
-      form(method="post")
-        input(name="setpublic",value=val._id,type="hidden")
-        input(type="submit",value="Activate")
-      form(method="post")
-        input(name="delete",value=val._id,type="hidden")
-        input(type="submit",value="Delete")
+      input(type="checkbox",name="delete_"+val._id)

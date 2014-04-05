@@ -345,50 +345,73 @@ app.get('/installers',installers_func);
 app.post('/installers',installers_func);
 function installers_func(req,res) {
 	var start = Date.now();
-	if (req.body.delete) {
-		Installers.findOne({_id:new ObjectID(req.body.delete)},function (err,row) {
-			if (row) {
-				fs.unlink('installers/'+row.name,function (err) {
-					console.log('installer deleted');
-					fs.unlink('installers/'+row.clientname,function (err) {
-						console.log('client deleted');
+	console.log(req.body);
+	function makeDeleter(id) {
+		return function (cb) {
+			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
+				if (row) {
+					fs.unlink('installers/'+row.name,function (err) {
+						console.log('installer deleted');
+						fs.unlink('installers/'+row.clientname,function (err) {
+							console.log('client deleted');
+						});
 					});
-				});
-			}
-			Installers.remove({_id:new ObjectID(req.body.delete)},function () {});
-			finish1();
-		});
-	} else finish1();
-	function finish1() {
-		if (req.body.setpublic) {
-			Installers.findOne({_id:new ObjectID(req.body.setpublic)},function (err,row) {
+				}
+				Installers.remove({_id:new ObjectID(id)},function () {});
+				cb();
+			});
+		};
+	}
+	function makeActivator(id) {
+		return function (cb) {
+			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
 				assert.ifError(err);
 				if (row) {
 					if (row.debug == 'release') {
-						Config.update({_id:'installerid'},{$set:{value:new ObjectID(req.body.setpublic)}},function(err,res) {
+						Config.update({_id:'installerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
 							assert.ifError(err);
 							sharedconfig.latestVersion = row.version;
-							finish2();
+							cb();
 						});
 					} else {
-						Config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(req.body.setpublic)}},function(err,res) {
+						Config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
 							assert.ifError(err);
 							sharedconfig.latestDebugVersion = row.version;
-							finish2();
+							cb();
 						});
 					}
-				} else finish2();
-			});
-		} else finish2();
-		function finish2() {
-			Installers.find({}).toArray(function(err,data) {
-				Config.findOne({_id:'installerid'},function (err,row) {
-					Config.findOne({_id:'debuginstallerid'},function (err,row2) {
-						res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value});
-					});
-				});
+				} else cb();
 			});
 		}
+	}
+	var jobs = [];
+	if (req.body.activate_release) {
+		jobs.push(makeActivator(req.body.activate_release));
+	}
+	if (req.body.activate_debug) {
+		jobs.push(makeActivator(req.body.activate_debug));
+	}
+	for (var key in req.body) {
+		var res2 = /^delete_(.*)$/.exec(key);
+		if (res2) {
+			console.log(res2);
+			jobs.push(makeDeleter(res2[1]));
+		}
+	}
+	console.log(jobs);
+	if (jobs.length == 0) finish2();
+	else {
+		console.log('running jobs');
+		async.parallel(jobs,finish2);
+	}
+	function finish2() {
+		Installers.find({}).toArray(function(err,data) {
+			Config.findOne({_id:'installerid'},function (err,row) {
+				Config.findOne({_id:'debuginstallerid'},function (err,row2) {
+					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value});
+				});
+			});
+		});
 	}
 };
 app.get('/fetchhands',function (req,res) {
