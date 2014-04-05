@@ -296,18 +296,10 @@ end;
 
 function TProtoBufInput.readRawVarint32: integer;
 var
-  tmp: shortint;
-  shift: integer;
+  tmp: int64;
 begin
-  shift := -7;
-  result := 0;
-  repeat
-    Inc(shift, 7);
-    // for negative numbers number value may be to 10 byte
-    Assert(shift < 64, ProtoBufException + 'malformed Varint');
-    tmp := readRawByte;
-    result := result or ((tmp and $7f) shl shift);
-  until tmp >= 0;
+  tmp := readRawVarint64;
+  result := tmp;
 end;
 
 function TProtoBufInput.readRawVarint64: int64;
