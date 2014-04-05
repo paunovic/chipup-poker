@@ -488,7 +488,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		assert.ok(collection instanceof Collection);
 		FetchQueue = collection;
 	});
-	db.createCollection('PokerProfile',{capped:true,size:1024 * 1024},function (err,collection) {
+	db.createCollection('PokerProfile',{capped:true,size:1024 * 1024*10},function (err,collection) {
 		assert.ok(collection instanceof Collection);
 		PokerProfile = collection;
 		profiler.setup(PokerProfile);
@@ -2934,7 +2934,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 		event = 'teCall';
 	}
 	this.log('MOVE '+event+' '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
-	this.addHistory({seat:seat,bet:chips,code:[event],trace: new Error().stack});
+	this.addHistory({seat:seat,bet:chips,code:[event]});
 	this.keycount--;
 
 	if (increase > this.members[seat].chips) {

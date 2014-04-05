@@ -1,6 +1,6 @@
 extends base
 block content
-  table(border=1)
+  table(border=1,class='sortable')
     tr
       th collections
       th objects
@@ -11,23 +11,30 @@ block content
       th indexes
       th index size
       th file size
+      th free
     tr
       td=dbstats.collections
       td=dbstats.objects
       td=Math.round(dbstats.avgObjSize,0)
       td=Math.round(dbstats.dataSize/1024/1024,0)+'MB'
-      td=Math.round(dbstats.storageSize/1024/1024,0)+"MB"
+      td(sorttable_customkey=dbstats.storageSize)=Math.round(dbstats.storageSize/1024/1024,0)+"MB"
       td=dbstats.numExtents
       td=dbstats.indexes
-      td=Math.round(dbstats.indexSize/1024/1024,0)+'MB'
+      td(sorttable_customkey=dbstats.indexSize)=Math.round(dbstats.indexSize/1024/1024,0)+'MB'
       td=Math.round(dbstats.fileSize/1024/1024,0)+'MB'
+      td(sorttable_customkey=(dbstats.fileSize-dbstats.storageSize), class=((dbstats.fileSize-dbstats.storageSize)/1024/1024 < 2000 ? 'warning' : ''))=Math.round((dbstats.fileSize-dbstats.storageSize)/1024/1024,0)+'MB'
     each row in stats
       tr
         td=row.ns.split('.')[1]
         td=row.count
         td=Math.round(row.avgObjSize,0)
         td=Math.round(row.size/1024/1024,0)+'MB'
-        td=Math.round(row.storageSize/1024/1024,0)+'MB'
+        td(sorttable_customkey=row.storageSize)=Math.round(row.storageSize/1024/1024,0)+'MB'
         td=row.numExtents
         td=row.nindexes
-        td=Math.round(row.totalIndexSize/1024,0)+'KB'
+        td(sorttable_customkey=row.totalIndexSize)=Math.round(row.totalIndexSize/1024,0)+'KB'
+        td 
+        td(sorttable_customkey=(row.storageSize-row.size), class=((row.storageSize-row.size)/1024/1024 > 10 ? 'warning' : ''))=Math.round((row.storageSize-row.size)/1024/1024,0)+'MB'
+  p if there is a large free on a collection, maintaince must be done on the collection, db.runCommand({compact:'handHistory'})
+  p a large free on the 1st is somewhat wasted space, but it will be recycled internally
+  p='if '+Math.round((dbstats.fileSize-dbstats.storageSize)/1024/1024,0)+'MB runs low, cleanup may need to be done to save space'
