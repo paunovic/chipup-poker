@@ -148,7 +148,10 @@ begin
   {$IFDEF DEBUG}  DebugLn(Format('Uploading avatar to server [size: %d]', [SslHttp.SendStream.Size]), ditNetOut);  {$ENDIF}
 
   SslHttp.SendStream.Position := 0;
-  SslHttp.URL := Settings.Hardcoded.URL.UPLOAD_AVATAR;
+  if Settings.DeveloperMode then
+    SslHttp.URL := Settings.Hardcoded.URL.UPLOAD_AVATAR_DEV
+  else
+    SslHttp.URL := Settings.Hardcoded.URL.UPLOAD_AVATAR;
   SslHttp.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
   SslHttp.OnRequestDone := HTTPRequestDone;
   SslHttp.PostASync;

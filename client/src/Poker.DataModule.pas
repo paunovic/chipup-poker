@@ -82,11 +82,10 @@ begin
   TFormsContainer.Initialize;
   TSounds.Initialize;
 
-  {$IFDEF DEBUG}
-  TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-  {$ELSE}
-  TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-  {$ENDIF}
+  if Settings.DeveloperMode then
+    TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT)
+  else
+    TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
 
   FPublicClubs := TClubsInfo.Create;
   FSelfInfo := TPlayerInfo.Create;

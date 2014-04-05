@@ -13,6 +13,7 @@ type
       JSON_PASSWORD          = 'password';
       JSON_REMEMBER_LOGIN    = 'remember_login';
       JSON_REMEMBER_PASSWORD = 'remember_password';
+      JSON_DEVELOPER_MODE    = 'devmode';
 
     function GetLogin: String;
     procedure SetLogin(const AValue: String);
@@ -22,6 +23,8 @@ type
     procedure SetRememberLogin(const AValue: Boolean);
     function GetRememberPassword: Boolean;
     procedure SetRememberPassword(const AValue: Boolean);
+    function GetDeveloperMode: Boolean;
+    procedure SetDeveloperMode(const AValue: Boolean);
 
     var
       FJSON        : ISuperObject;
@@ -44,6 +47,7 @@ type
     property Password        : String read GetPassword write SetPassword;
     property RememberLogin   : Boolean read GetRememberLogin write SetRememberLogin;
     property RememberPassword: Boolean read GetRememberPassword write SetRememberPassword;
+    property DeveloperMode   : Boolean read GetDeveloperMode write SetDeveloperMode;
   end;
 
 var
@@ -143,6 +147,11 @@ begin
   result := FJSON.B[JSON_REMEMBER_PASSWORD];
 end;
 
+function TSettings.GetDeveloperMode: Boolean;
+begin
+  result := FJSON.B[JSON_DEVELOPER_MODE];
+end;
+
 procedure TSettings.SetLogin(const AValue: String);
 begin
   FJSON.S[JSON_LOGIN] := AValue;
@@ -162,6 +171,12 @@ procedure TSettings.SetRememberPassword(const AValue: Boolean);
 begin
   FJSON.B[JSON_REMEMBER_PASSWORD] := AValue;
 end;
+
+procedure TSettings.SetDeveloperMode(const AValue: Boolean);
+begin
+  FJSON.B[JSON_DEVELOPER_MODE] := AValue;
+end;
+
 
 end.
 

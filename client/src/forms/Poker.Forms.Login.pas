@@ -59,9 +59,7 @@ type
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
-    {$IFDEF DEBUG}
     procedure ServerComboboxChange(Sender: TObject);
-    {$ENDIF}
 
     procedure EnableGUI(const AEnable: Boolean);
     procedure SetCurrentStatus(const AValue: TLoginStatus);
@@ -84,10 +82,8 @@ uses
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
-{$IFDEF DEBUG}
 var
   cb: TcxComboBox;
-{$ENDIF}
 begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
@@ -104,20 +100,21 @@ begin
   btForceUpdate.Visible := TRUE;
   {$ENDIF}
 
-  {$IFDEF DEBUG}
-  cb := TcxComboBox.Create(self);
-  cb.Parent := self;
-  cb.Style.LookAndFeel.SkinName := edLogin.Style.LookAndFeel.SkinName;
-  cb.Width := btLogin.Width;
-  cb.Top := btLogin.Top + btLogin.Height + 4;
-  cb.Left := btLogin.Left;
-  cb.Properties.DropDownListStyle := lsFixedList;
-  cb.Properties.Items.Clear;
-  cb.Properties.Items.Add('Official Server');
-  cb.Properties.Items.Add('Dev Server');
-  cb.ItemIndex := 1;
-  cb.Properties.OnChange := ServerComboboxChange;
-  {$ENDIF}
+  if Settings.DeveloperMode then
+  begin
+    cb := TcxComboBox.Create(self);
+    cb.Parent := self;
+    cb.Style.LookAndFeel.SkinName := edLogin.Style.LookAndFeel.SkinName;
+    cb.Width := btLogin.Width;
+    cb.Top := btLogin.Top + btLogin.Height + 4;
+    cb.Left := btLogin.Left;
+    cb.Properties.DropDownListStyle := lsFixedList;
+    cb.Properties.Items.Clear;
+    cb.Properties.Items.Add('Official Server');
+    cb.Properties.Items.Add('Dev Server');
+    cb.ItemIndex := 1;
+    cb.Properties.OnChange := ServerComboboxChange;
+  end;
 
   EnableGUI(ServerSocket.IsConnected);
 end;
@@ -196,7 +193,6 @@ begin
     Settings.Password := '';
 end;
 
-{$IFDEF DEBUG}
 procedure TfrmLogin.ServerComboboxChange(Sender: TObject);
 var
   server: String;
@@ -209,7 +205,6 @@ begin
   TServerSocket.Deinitialize;
   TServerSocket.Initialize(server, Settings.Hardcoded.TCP_SERVER_PORT);
 end;
-{$ENDIF}
 
 procedure TfrmLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var
