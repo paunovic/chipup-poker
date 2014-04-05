@@ -512,8 +512,8 @@ begin
     begin
       game := club.Games[C1];
 
-{      if game.State = gsClosed then
-        Continue;}
+      if game.State = gsClosed then
+        Continue;
 
       recidx := c.AppendRecord;
 

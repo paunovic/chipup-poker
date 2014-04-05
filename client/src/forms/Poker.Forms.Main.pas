@@ -442,8 +442,9 @@ begin
     for C1 := 0 to club.Games.Count - 1 do
     begin
       game := club.Games[C1];
-{      if game.State = gsClosed then
-        Continue;}
+
+      if game.State = gsClosed then
+        Continue;
 
       recidx := c.AppendRecord;
 
@@ -935,6 +936,7 @@ begin
     for C2 := 0 to pb.Reply[C1].Playerstats.Count - 1 do
     begin
       b := pb.Reply[C1].Playerstats[C2].Balance;
+      b := pb.Reply[C1].Playerstats[C2].Secondsplayed;
     end;
   end;
 end;

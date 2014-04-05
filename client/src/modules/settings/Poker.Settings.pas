@@ -14,6 +14,7 @@ type
       JSON_REMEMBER_LOGIN    = 'remember_login';
       JSON_REMEMBER_PASSWORD = 'remember_password';
       JSON_DEVELOPER_MODE    = 'devmode';
+      JSON_SERVER_INDEX      = 'serverindex';
 
     function GetLogin: String;
     procedure SetLogin(const AValue: String);
@@ -25,6 +26,8 @@ type
     procedure SetRememberPassword(const AValue: Boolean);
     function GetDeveloperMode: Boolean;
     procedure SetDeveloperMode(const AValue: Boolean);
+    function GetServerIndex: Integer;
+    procedure SetServerIndex(const AValue: Integer);
 
     var
       FJSON        : ISuperObject;
@@ -49,6 +52,7 @@ type
     property RememberLogin   : Boolean read GetRememberLogin write SetRememberLogin;
     property RememberPassword: Boolean read GetRememberPassword write SetRememberPassword;
     property DeveloperMode   : Boolean read GetDeveloperMode write SetDeveloperMode;
+    property ServerIndex     : Integer read GetServerIndex write SetServerIndex;
 
     property DomainURL: String read FDomainURL write FDomainURL;
   end;
@@ -149,6 +153,11 @@ begin
   result := FJSON.B[JSON_REMEMBER_PASSWORD];
 end;
 
+function TSettings.GetServerIndex: Integer;
+begin
+  result := FJSON.I[JSON_SERVER_INDEX];
+end;
+
 function TSettings.GetDeveloperMode: Boolean;
 begin
   result := FJSON.B[JSON_DEVELOPER_MODE];
@@ -172,6 +181,11 @@ end;
 procedure TSettings.SetRememberPassword(const AValue: Boolean);
 begin
   FJSON.B[JSON_REMEMBER_PASSWORD] := AValue;
+end;
+
+procedure TSettings.SetServerIndex(const AValue: Integer);
+begin
+  FJSON.I[JSON_SERVER_INDEX] := AValue;
 end;
 
 procedure TSettings.SetDeveloperMode(const AValue: Boolean);

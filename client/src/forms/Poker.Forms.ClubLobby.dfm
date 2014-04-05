@@ -2539,10 +2539,6 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitLeft = 1
-      ExplicitTop = 1
-      ExplicitWidth = 785
-      ExplicitHeight = 482
       DesignSize = (
         787
         484)
@@ -2552,7 +2548,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
-        ExplicitHeight = 475
         DesignSize = (
           250
           477)
@@ -2643,8 +2638,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
-        ExplicitWidth = 519
-        ExplicitHeight = 475
         DesignSize = (
           521
           477)
@@ -2799,8 +2792,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 771
-        ExplicitHeight = 475
         DesignSize = (
           773
           477)

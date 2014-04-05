@@ -112,10 +112,7 @@ begin
     cb.Properties.Items.Clear;
     cb.Properties.Items.Add('Official Server');
     cb.Properties.Items.Add('Dev Server');
-    if ServerSocket.Server = TSettings.Hardcoded.TCP_SERVER_ADDRESS then
-      cb.ItemIndex := 0
-    else
-      cb.ItemIndex := 1;
+    cb.ItemIndex := Settings.ServerIndex;
     cb.Properties.OnChange := ServerComboboxChange;
   end;
 
@@ -210,6 +207,8 @@ begin
       Settings.DomainURL := DEV_URL_DOMAIN;
     end;
   end;
+
+  Settings.ServerIndex := (Sender as TcxComboBox).ItemIndex;
 
   TServerSocket.Deinitialize;
   TServerSocket.Initialize(server, Settings.Hardcoded.TCP_SERVER_PORT);

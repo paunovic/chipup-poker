@@ -82,7 +82,8 @@ begin
   TFormsContainer.Initialize;
   TSounds.Initialize;
 
-  if Settings.DeveloperMode then
+  if (Settings.DeveloperMode) and
+     (Settings.ServerIndex = 1) then
   begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
     Settings.DomainURL := DEV_URL_DOMAIN;

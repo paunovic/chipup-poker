@@ -17,7 +17,7 @@ type
       FN_BUYINS = 4;
       FN_CASHOUTS = 5;
       FN_RAKECONTRIB = 6;
-      FN_HOURSPLAYED = 7;
+      FN_SECONDSPLAYED = 7;
 
     var
       FUserid: TBytes;
@@ -25,14 +25,14 @@ type
       FBuyins: TArray<UINT32>;
       FCashouts: TArray<UINT32>;
       FRakecontrib: UINT32;
-      FHoursplayed: UINT32;
+      FSecondsplayed: UINT32;
 
     procedure SetUserid(const AValue: TBytes);
     procedure SetBalance(const AValue: Integer);
     procedure SetBuyins(const AValue: TArray<UINT32>);
     procedure SetCashouts(const AValue: TArray<UINT32>);
     procedure SetRakecontrib(const AValue: UINT32);
-    procedure SetHoursplayed(const AValue: UINT32);
+    procedure SetSecondsplayed(const AValue: UINT32);
 
   public
     destructor Destroy; override;
@@ -43,7 +43,7 @@ type
     property Buyins: TArray<UINT32> read FBuyins write SetBuyins;
     property Cashouts: TArray<UINT32> read FCashouts write SetCashouts;
     property Rakecontrib: UINT32 read FRakecontrib write SetRakecontrib;
-    property Hoursplayed: UINT32 read FHoursplayed write SetHoursplayed;
+    property Secondsplayed: UINT32 read FSecondsplayed write SetSecondsplayed;
   end;
 
 implementation
@@ -88,9 +88,9 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRakecontrib := AProtobufReader.readUInt32;
       end;
-      FN_HOURSPLAYED: begin
+      FN_SECONDSPLAYED: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FHoursplayed := AProtobufReader.readUInt32;
+        FSecondsplayed := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -134,10 +134,10 @@ begin
   ProtobufOutput.writeUInt32(FN_RAKECONTRIB, AValue);
 end;
 
-procedure TPB_TablePlayerStats.SetHoursplayed(const AValue: UINT32);
+procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UINT32);
 begin
-  FHoursplayed := AValue;
-  ProtobufOutput.writeUInt32(FN_HOURSPLAYED, AValue);
+  FSecondsplayed := AValue;
+  ProtobufOutput.writeUInt32(FN_SECONDSPLAYED, AValue);
 end;
 
 end.
