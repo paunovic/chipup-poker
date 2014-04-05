@@ -1967,34 +1967,58 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scQueryTableStats:
-			var params = pb.Parse(args,'Poker.QueryTableStats');
-			var ids = [];
-			for (var i=0; i<params.gameid.length; i++) {
-				ids.push(toMongoId(params.gameid[i]));
-			}
-			allStats.find({gameid:{$in:ids}}).toArray(function (err,stats) {
-				assert.ifError(err);
-				var games = {};
-				var out = [];
-				var players = [];
-				for (var i=0; i<stats.length; i++) {
-					var gameidhex = stats[i].gameid.toString();
-					if (!games[gameidhex]) {
-						games[gameidhex] = {gameid: fromMongoId(stats[i].gameid), playerstats:[]};
-						out.push(games[gameidhex]);
-					}
-					if (!containsObjectID(players,stats[i].userid)) players.push(stats[i].userid);
-					stats[i].userid = fromMongoId(stats[i].userid);
-					games[gameidhex].playerstats.push(stats[i]);
-				}
-				allUsers.find({_id:{$in:players}},{displayname:1}).toArray(function (err,playersOut) {
-					for (var i=0; i<playersOut.length; i++) {
-						playersOut[i]._id = fromMongoId(playersOut[i]._id);
-					}
-					this.send(codes.srTableStatsReply,{reply:out, players:playersOut},'Poker.TableStatsReplies');
-				}.bind(this));
-			}.bind(this));
+			handlers[codes.scQueryTableStats].call(this,args); // FIXME
+			break;
 		}
+	}
+}
+var handlers = {};
+handlers[codes.scQueryTableStats] = function (args) {
+	var params = pb.Parse(args,'Poker.QueryTableStats');
+	var ids = [];
+	if (params.gameid.length == 0) {
+		log('building list from owned clubs');
+		allClubs.find({owner:this.userid}).toArray(function (err,clubs) {
+			assert.ifError(err);
+			var clublist = [];
+			for (var i=0; i<clubs.length; i++) clublist.push(clubs[i]._id);
+			allGames.find({clubid:{$in:clublist}}).toArray(function (err,games) {
+				assert.ifError(err);
+				for (var i=0; i<games.length; i++) ids.push(games[i]._id);
+				step2.call(this);
+			}.bind(this));
+		}.bind(this));
+	} else {
+		log('using list passed in');
+		for (var i=0; i<params.gameid.length; i++) {
+			ids.push(toMongoId(params.gameid[i]));
+		}
+		step2.call(this);
+	}
+	function step2() {
+		console.log(ids);
+		allStats.find({gameid:{$in:ids}}).toArray(function (err,stats) {
+			assert.ifError(err);
+			var games = {};
+			var out = [];
+			var players = [];
+			for (var i=0; i<stats.length; i++) {
+				var gameidhex = stats[i].gameid.toString();
+				if (!games[gameidhex]) {
+					games[gameidhex] = {gameid: fromMongoId(stats[i].gameid), playerstats:[]};
+					out.push(games[gameidhex]);
+				}
+				if (!containsObjectID(players,stats[i].userid)) players.push(stats[i].userid);
+				stats[i].userid = fromMongoId(stats[i].userid);
+				games[gameidhex].playerstats.push(stats[i]);
+			}
+			allUsers.find({_id:{$in:players}},{displayname:1}).toArray(function (err,playersOut) {
+				for (var i=0; i<playersOut.length; i++) {
+					playersOut[i]._id = fromMongoId(playersOut[i]._id);
+				}
+				this.send(codes.srTableStatsReply,{reply:out, players:playersOut},'Poker.TableStatsReplies');
+			}.bind(this));
+		}.bind(this));
 	}
 }
 function makeClubProtobuf(c,userlist) {
@@ -2158,7 +2182,7 @@ Game.prototype.log = function log(format) {
 		out = [ util.format.apply(util,out) ]
 	}
 	out.unshift(this.handid);
-	process.send({type:'game',name:this.obj.gamename +','+this.state2,ts:new Date().toString(),objects:out});
+	process.send({type:'game',name:this.obj.gamename,ts:new Date().toString(),objects:out});
 }
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);
@@ -2781,8 +2805,8 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 		this.doWin(function () {
 			this.saveHistory(function () {
 				for (var x=0; x<this.balance_changes.length; x++) {
+					if (!this.seats[x]) continue;
 					if (this.balance_changes[x] != 0) {
-						break;
 						// FIXME
 						var doc = { gameid:this.obj._id,userid:this.seats[x].userid, balance:this.balance_changes[x] };
 						var mods = { $inc:{balance:this.balance_changes[x]}};
