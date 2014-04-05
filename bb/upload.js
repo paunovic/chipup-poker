@@ -13,8 +13,9 @@ child.exec('git rev-parse HEAD',function (err,stdout,stderr) {
 });
 
 function finish(version) {
-	doUpload(version,'internal.chipuppoker.com');
-	doUpload(version,'chipuppoker.com');
+	doUpload(version,'master.chipuppoker.com');
+	doUpload(version,'dev-server.chipuppoker.com');
+	doUpload(version,'poker.angeldsis.com');
 }
 function doUpload(version,host) {
 	var key = 'abcd';
@@ -36,9 +37,9 @@ function doUpload(version,host) {
 		'&debug='+process.argv[2],
 		headers:{'Content-Length':textsize+filesize1+filesize2}
 	},function (res) {
-		console.log('done?');
+		console.log('%s reply',host);
 		res.on('data',function (chunk) {
-			console.log('body:'+chunk);
+			console.log('%s body:%s',host,chunk);
 		});
 	});
 	request.on('error',function (err) {
@@ -53,7 +54,7 @@ function doUpload(version,host) {
 			request.write(middle);
 			fs.createReadStream('../client/src/client.exe',{bufferSize: 4*1024})
 				.on('end',function () {
-					console.log('ending');
+					console.log('%s ending',host);
 					request.end(footer);
 				})
 				.pipe(request,{end:false});

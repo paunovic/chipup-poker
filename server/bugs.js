@@ -1,6 +1,7 @@
 var ObjectID = require('mongodb').ObjectID;
 var fs = require('fs');
 var assert = require('assert');
+var async = require('async');
 
 if (require.main === module) {
 	var express = require('express');
@@ -90,6 +91,32 @@ function setup(app,bugs,users,db) {
 		PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
 			PokerProfile.find({time:{$gt:2000}}).toArray(function (err,list) {
 				res.render('profile2',{rows:rows,start:start,rawlist:list});
+			});
+		});
+	});
+	app.get('/disk',function (req,res) {
+		var start = Date.now();
+		db.stats(function (err,stats) {
+			db.collectionNames(function (err,names) {
+				var out = [];
+				var input = [];
+				for (var x=0; x<names.length; x++) {
+					input.push(names[x].name);
+				}
+				input.sort();
+				async.eachLimit(input,1,function (item,cb) {
+					db.collection(item.split('.')[1]).stats(function (err,stats) {
+						if (!stats) {
+							console.log('name:%s stats:',item,stats);
+							cb();
+							return;
+						}
+						out.push(stats);
+						cb();
+					});
+				},function done(err) {
+					res.render('disk',{dbstats:stats,start:start,stats:out});
+				});
 			});
 		});
 	});
