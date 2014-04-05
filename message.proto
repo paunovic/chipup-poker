@@ -500,7 +500,7 @@ message TableStatsReply {
 
 message TablePlayerStats {
 	required bytes userid = 1;
-	required uint32 balance = 3;
+	required int32 balance = 3;
 	repeated uint32 buyins = 4;
 	repeated uint32 cashouts = 5;
 	optional uint32 rakecontrib = 6;
