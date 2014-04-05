@@ -13,8 +13,9 @@ child.exec('git rev-parse HEAD',function (err,stdout,stderr) {
 });
 
 function finish(version) {
-	doUpload(version,'internal.chipuppoker.com');
-	doUpload(version,'chipuppoker.com');
+	doUpload(version,'master.chipuppoker.com');
+	doUpload(version,'dev-server.chipuppoker.com');
+	doUpload(version,'c2d.localnet');
 }
 function doUpload(version,host) {
 	var key = 'abcd';
