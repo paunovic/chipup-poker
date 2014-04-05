@@ -30,8 +30,8 @@ block content
         tr
           td=idx
           td
-            a(href="/user?id="+player)=player
-          td=hand.balances ? hand.balances[idx]/100 : ''
+            a(href="/user?id="+player._id)=player._id
+          td=hand.balance_changes ? hand.balance_changes[idx]/100 : ''
   table(border=1)
     tr
       th move#
