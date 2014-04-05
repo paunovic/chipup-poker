@@ -21,14 +21,14 @@ type
 
     var
       FUserid: TBytes;
-      FBalance: UINT32;
+      FBalance: Integer;
       FBuyins: TArray<UINT32>;
       FCashouts: TArray<UINT32>;
       FRakecontrib: UINT32;
       FHoursplayed: UINT32;
 
     procedure SetUserid(const AValue: TBytes);
-    procedure SetBalance(const AValue: UINT32);
+    procedure SetBalance(const AValue: Integer);
     procedure SetBuyins(const AValue: TArray<UINT32>);
     procedure SetCashouts(const AValue: TArray<UINT32>);
     procedure SetRakecontrib(const AValue: UINT32);
@@ -39,7 +39,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Userid: TBytes read FUserid write SetUserid;
-    property Balance: UINT32 read FBalance write SetBalance;
+    property Balance: Integer read FBalance write SetBalance;
     property Buyins: TArray<UINT32> read FBuyins write SetBuyins;
     property Cashouts: TArray<UINT32> read FCashouts write SetCashouts;
     property Rakecontrib: UINT32 read FRakecontrib write SetRakecontrib;
@@ -72,7 +72,7 @@ begin
       end;
       FN_BALANCE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FBalance := AProtobufReader.readUInt32;
+        FBalance := AProtobufReader.readInt32;
       end;
       FN_BUYINS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -104,10 +104,10 @@ begin
   ProtobufOutput.writeBytes(FN_USERID, AValue);
 end;
 
-procedure TPB_TablePlayerStats.SetBalance(const AValue: UINT32);
+procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
 begin
   FBalance := AValue;
-  ProtobufOutput.writeUInt32(FN_BALANCE, AValue);
+  ProtobufOutput.writeInt32(FN_BALANCE, AValue);
 end;
 
 procedure TPB_TablePlayerStats.SetBuyins(const AValue: TArray<UINT32>);

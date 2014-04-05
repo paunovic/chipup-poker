@@ -135,6 +135,7 @@ type
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRListClubs(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
 
     function ConfirmToCloseTables: Boolean;
     function ProcessClubObject(const AClub: TPB_Club): TClubInfo;
@@ -168,7 +169,8 @@ uses
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
-  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings;
+  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
+  Poker.Protobufs.Objects.TableStatsReplies;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -610,7 +612,8 @@ begin
                           TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                           TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                          TServerMessageCallback.Create(srListClubs, CSRListClubs)
+                          TServerMessageCallback.Create(srListClubs, CSRListClubs),
+                          TServerMessageCallback.Create(srTableStatsReply, CSRTableStats)
                       ]);
 
       FSelectedClub := -1;
@@ -918,5 +921,23 @@ begin
 
   ConfigureGUI;
 end;
+
+procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);
+var
+  pb: TPB_TableStatsReplies;
+  C1, C2: Integer;
+  b: Int32;
+begin
+  pb := AObject as TPB_TableStatsReplies;
+
+  for C1 := 0 to pb.Reply.Count - 1 do
+  begin
+    for C2 := 0 to pb.Reply[C1].Playerstats.Count - 1 do
+    begin
+      b := pb.Reply[C1].Playerstats[C2].Balance;
+    end;
+  end;
+end;
+
 
 end.
