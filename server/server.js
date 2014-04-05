@@ -1607,11 +1607,6 @@ ClientSocket.prototype.handle = function (code,args) {
 							}
 							var status = game.getTableStatus(this,true,events);
 							this.send(codes.seTableStatus,status,'Poker.TableStatus');
-		var t1 = pb.Serialize(status,'Poker.TableStatus');
-		console.log(t1);
-		var t2 = pb.Parse(t1,'Poker.TableStatus');
-		console.log(t2);
-		assert.equal(t2.table_mongo_id.length,12);
 							release();
 						}
 					}.bind(this));
