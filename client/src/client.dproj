@@ -260,14 +260,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistory.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.FetchHandHistoryReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameEventHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.QueryTableStats.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReplies.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReply.pas"/>

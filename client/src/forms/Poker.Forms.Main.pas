@@ -168,8 +168,7 @@ uses
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
-  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core,
-  Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.FetchHandHistory, Poker.Settings;
+  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -441,8 +440,8 @@ begin
     for C1 := 0 to club.Games.Count - 1 do
     begin
       game := club.Games[C1];
-      if game.State = gsClosed then
-        Continue;
+{      if game.State = gsClosed then
+        Continue;}
 
       recidx := c.AppendRecord;
 

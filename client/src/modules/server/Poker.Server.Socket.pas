@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl,
   System.Generics.Collections, OverbyteIcsWSocket, Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.FetchHandHistory;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game;
 
 type
   TServerSocket = class
@@ -119,7 +119,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
-  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.FetchHandReply, Poker.Protobufs.Objects.QueryTableStats;
+  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies;
 
 var
   FConnectThreadId: DWORD;
@@ -494,7 +494,7 @@ begin
     seGameCreate,
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
-    srFetchHandData: ADataObject := TPB_FetchHandReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srTableStatsReply: ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}

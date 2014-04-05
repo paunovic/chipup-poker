@@ -39,9 +39,7 @@ type
     srReinstatePlayerOk = 50,
     srTableAddonOk = 51,
     srTableAddonOverLimit = 52,
-    srRetrieveHandHistoryData = 53,
-    srFetchHandData = 54,
-    srTableStatsReply = 55,
+    srTableStatsReply = 53,
     seChat = 200,
     seSecondaryLoginDetected = 201,
     seAccountConfirmed = 202,
@@ -88,9 +86,7 @@ type
     scResendVerificationMail = 534,
     scShowLosingCards = 535,
     seUserChange = 536,
-    scRetrieveHandHistoryData = 537,
-    scFetchHandHistory = 538,
-    scQueryTableStats = 539
+    scQueryTableStats = 537
   );
 
 {$IFDEF DEBUG}
@@ -156,8 +152,6 @@ begin
     srReinstatePlayerOk: result := 'srReinstatePlayerOk';
     srTableAddonOk: result := 'srTableAddonOk';
     srTableAddonOverLimit: result := 'srTableAddonOverLimit';
-    srRetrieveHandHistoryData: result := 'srRetrieveHandHistoryData';
-    srFetchHandData: result := 'srFetchHandData';
     srTableStatsReply: result := 'srTableStatsReply';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
@@ -205,8 +199,6 @@ begin
     scResendVerificationMail: result := 'scResendVerificationMail';
     scShowLosingCards: result := 'scShowLosingCards';
     seUserChange: result := 'seUserChange';
-    scRetrieveHandHistoryData: result := 'scRetrieveHandHistoryData';
-    scFetchHandHistory: result := 'scFetchHandHistory';
     scQueryTableStats: result := 'scQueryTableStats';
   end;
 end;
