@@ -2,6 +2,8 @@ unit Poker.DataModule;
 
 interface
 
+{$I defines.inc}
+
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
@@ -51,7 +53,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
-  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HandDownloader;
+  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -78,9 +80,13 @@ begin
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
-  THandDownloader.Initialize;
   TSounds.Initialize;
+
+  {$IFDEF DEV_BUILD}
+  TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+  {$ELSE}
   TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+  {$ENDIF}
 
   FPublicClubs := TClubsInfo.Create;
   FSelfInfo := TPlayerInfo.Create;
@@ -99,7 +105,6 @@ begin
 
   TServerSocket.Deinitialize;
   TSounds.Deinitialize;
-  THandDownloader.Deinitialize;
   TFormsContainer.Deinitialize;
   TMessageContainer.Deinitialize;
   FreeAndNil(ServerSettings);

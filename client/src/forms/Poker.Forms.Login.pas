@@ -2,12 +2,14 @@ unit Poker.Forms.Login;
 
 interface
 
+{$I defines.inc}
+
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls,
   cxButtons, cxCheckBox, OverbyteIcsWSocket,  dxsChipUpDark, dxsChipUpDarkTabs, cxImage, dxsChipUpRedButton,
-  dxGDIPlusClasses, Vcl.Menus;
+  dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsLoggingIn, lsLoggedIn, lsUpdating);
@@ -57,6 +59,10 @@ type
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
+    {$IFDEF DEV_BUILD}
+    procedure ServerComboboxChange(Sender: TObject);
+    {$ENDIF}
+
     procedure EnableGUI(const AEnable: Boolean);
     procedure SetCurrentStatus(const AValue: TLoginStatus);
   protected
@@ -78,6 +84,10 @@ uses
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
+{$IFDEF DEV_BUILD}
+var
+  cb: TcxComboBox;
+{$ENDIF}
 begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
@@ -92,6 +102,21 @@ begin
 
   {$IFDEF DEBUG}
   btForceUpdate.Visible := TRUE;
+  {$ENDIF}
+
+  {$IFDEF DEV_BUILD}
+  cb := TcxComboBox.Create(self);
+  cb.Parent := self;
+  cb.Style.LookAndFeel.SkinName := edLogin.Style.LookAndFeel.SkinName;
+  cb.Width := btLogin.Width;
+  cb.Top := btLogin.Top + btLogin.Height + 4;
+  cb.Left := btLogin.Left;
+  cb.Properties.DropDownListStyle := lsFixedList;
+  cb.Properties.Items.Clear;
+  cb.Properties.Items.Add('Official Server');
+  cb.Properties.Items.Add('Dev Server');
+  cb.ItemIndex := 1;
+  cb.Properties.OnChange := ServerComboboxChange;
   {$ENDIF}
 
   EnableGUI(ServerSocket.IsConnected);
@@ -170,6 +195,21 @@ begin
   else
     Settings.Password := '';
 end;
+
+{$IFDEF DEV_BUILD}
+procedure TfrmLogin.ServerComboboxChange(Sender: TObject);
+var
+  server: String;
+begin
+  case (Sender as TcxComboBox).ItemIndex of
+    0: server := Settings.Hardcoded.TCP_SERVER_ADDRESS;
+    1: server := Settings.Hardcoded.TCP_DEV_SERVER_ADDRESS;
+  end;
+
+  TServerSocket.Deinitialize;
+  TServerSocket.Initialize(server, Settings.Hardcoded.TCP_SERVER_PORT);
+end;
+{$ENDIF}
 
 procedure TfrmLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var

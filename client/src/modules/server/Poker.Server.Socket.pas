@@ -92,7 +92,6 @@ type
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
-    procedure FetchHandHistory(const protobuf: TPB_FetchHandHistory);
     procedure QueryTableStats(const ATables: array of TBytes);
 
     property Socket: TSslWSocket read FSocket;
@@ -1028,11 +1027,6 @@ begin
   finally
     protobuf.Free;
   end;
-end;
-
-procedure TServerSocket.FetchHandHistory(const protobuf: TPB_FetchHandHistory);
-begin
-  SendProtobuf(scFetchHandHistory, protobuf);
 end;
 
 procedure TServerSocket.QueryTableStats(const ATables: array of TBytes);

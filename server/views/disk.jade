@@ -1,0 +1,33 @@
+extends base
+block content
+  table(border=1)
+    tr
+      th collections
+      th objects
+      th avg object size
+      th datasize
+      th storagesize
+      th extents
+      th indexes
+      th index size
+      th file size
+    tr
+      td=dbstats.collections
+      td=dbstats.objects
+      td=Math.round(dbstats.avgObjSize,0)
+      td=Math.round(dbstats.dataSize/1024/1024,0)+'MB'
+      td=Math.round(dbstats.storageSize/1024/1024,0)+"MB"
+      td=dbstats.numExtents
+      td=dbstats.indexes
+      td=Math.round(dbstats.indexSize/1024/1024,0)+'MB'
+      td=Math.round(dbstats.fileSize/1024/1024,0)+'MB'
+    each row in stats
+      tr
+        td=row.ns.split('.')[1]
+        td=row.count
+        td=Math.round(row.avgObjSize,0)
+        td=Math.round(row.size/1024/1024,0)+'MB'
+        td=Math.round(row.storageSize/1024/1024,0)+'MB'
+        td=row.numExtents
+        td=row.nindexes
+        td=Math.round(row.totalIndexSize/1024,0)+'KB'
