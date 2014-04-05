@@ -53,7 +53,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
-  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables;
+  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -72,8 +72,8 @@ begin
 
   LoadFonts;
 
-  TSettings.Initialize;
-  TDatabase.Initialize(AppDataRoamingPath + TSettings.Hardcoded.DATABASE_FILENAME);
+  TSettings.Initialize(AppDataLocalPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  TDatabase.Initialize(AppDataLocalPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatars.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
@@ -83,9 +83,15 @@ begin
   TSounds.Initialize;
 
   if Settings.DeveloperMode then
-    TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT)
+  begin
+    TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+    Settings.DomainURL := DEV_URL_DOMAIN;
+  end
   else
+  begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+    Settings.DomainURL := URL_DOMAIN;
+  end;
 
   FPublicClubs := TClubsInfo.Create;
   FSelfInfo := TPlayerInfo.Create;

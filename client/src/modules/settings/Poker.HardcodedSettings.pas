@@ -6,7 +6,7 @@ interface
 
 const
   URL_DOMAIN = 'http://chipuppoker.com';
-  DEV_URL_DOMAIN = 'http://dev-server.chippuppoker.com';
+  DEV_URL_DOMAIN = 'http://dev-server.chipuppoker.com';
 
 type
   THardcodedSettings = class
@@ -27,10 +27,6 @@ type
         URL: record
           TOS: String;
           CASHIER: String;
-          GET_AVATAR_DEV: String;
-          UPLOAD_AVATAR_DEV: String;
-          LATEST_VERSION_DEV: String;
-          LATEST_VERSION_DEBUG_DEV: String;
           GET_AVATAR: String;
           UPLOAD_AVATAR: String;
           LATEST_VERSION: String;
@@ -41,7 +37,7 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0042';
+        VERSION: '0.01a.0043';
         REVISION: {$I revision.inc};
 
         // instance mutex name
@@ -64,15 +60,10 @@ type
           TOS: URL_DOMAIN + '/tos.html';
           CASHIER: URL_DOMAIN + '/cashier.html';
 
-          GET_AVATAR_DEV: DEV_URL_DOMAIN + '/getavatar?id=%s';
-          UPLOAD_AVATAR_DEV: DEV_URL_DOMAIN + '/uploadAvatar';
-          LATEST_VERSION_DEV: DEV_URL_DOMAIN + '/install_chipuppoker.exe';
-          LATEST_VERSION_DEBUG_DEV: DEV_URL_DOMAIN + '/debug_install_chipuppoker.exe';
-
-          GET_AVATAR: URL_DOMAIN + '/getavatar?id=%s';
-          UPLOAD_AVATAR: URL_DOMAIN + '/uploadAvatar';
-          LATEST_VERSION: URL_DOMAIN + '/install_chipuppoker.exe';
-          LATEST_VERSION_DEBUG: URL_DOMAIN + '/debug_install_chipuppoker.exe';
+          GET_AVATAR: '/getavatar?id=%s';
+          UPLOAD_AVATAR: '/uploadAvatar';
+          LATEST_VERSION: '/install_chipuppoker.exe';
+          LATEST_VERSION_DEBUG: '/debug_install_chipuppoker.exe';
         )
       );
   end;

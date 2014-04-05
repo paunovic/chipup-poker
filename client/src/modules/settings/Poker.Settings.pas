@@ -29,12 +29,13 @@ type
     var
       FJSON        : ISuperObject;
       FSettingsFile: String;
+      FDomainURL   : String;
 
   public
     constructor Create(const ASettingsFile: String);
     destructor Destroy; override;
 
-    class procedure Initialize;
+    class procedure Initialize(const APath: String);
     class procedure Deinitialize;
 
     function Load: Boolean;
@@ -48,6 +49,8 @@ type
     property RememberLogin   : Boolean read GetRememberLogin write SetRememberLogin;
     property RememberPassword: Boolean read GetRememberPassword write SetRememberPassword;
     property DeveloperMode   : Boolean read GetDeveloperMode write SetDeveloperMode;
+
+    property DomainURL: String read FDomainURL write FDomainURL;
   end;
 
 var
@@ -61,9 +64,9 @@ uses
   Poker.Common.Misc, Poker.Common.Encryption;
 
 
-class procedure TSettings.Initialize;
+class procedure TSettings.Initialize(const APath: String);
 begin
-  Settings := TSettings.Create(AppDataLocalPath + THardcodedSettings.Hardcoded.SETTINGS_FILENAME);
+  Settings := TSettings.Create(APath);
   Settings.Load;
 end;
 
@@ -126,7 +129,6 @@ begin
 end;
 
 
-
 function TSettings.GetLogin: String;
 begin
   result := FJSON.S[JSON_LOGIN];
@@ -176,7 +178,6 @@ procedure TSettings.SetDeveloperMode(const AValue: Boolean);
 begin
   FJSON.B[JSON_DEVELOPER_MODE] := AValue;
 end;
-
 
 end.
 

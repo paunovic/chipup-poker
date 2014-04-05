@@ -78,7 +78,7 @@ uses
   Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main,
-  Poker.Common.FormsContainer, Poker.Forms.Updater;
+  Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings;
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
@@ -112,7 +112,10 @@ begin
     cb.Properties.Items.Clear;
     cb.Properties.Items.Add('Official Server');
     cb.Properties.Items.Add('Dev Server');
-    cb.ItemIndex := 1;
+    if ServerSocket.Server = TSettings.Hardcoded.TCP_SERVER_ADDRESS then
+      cb.ItemIndex := 0
+    else
+      cb.ItemIndex := 1;
     cb.Properties.OnChange := ServerComboboxChange;
   end;
 
@@ -198,8 +201,14 @@ var
   server: String;
 begin
   case (Sender as TcxComboBox).ItemIndex of
-    0: server := Settings.Hardcoded.TCP_SERVER_ADDRESS;
-    1: server := Settings.Hardcoded.TCP_DEV_SERVER_ADDRESS;
+    0: begin
+      server := Settings.Hardcoded.TCP_SERVER_ADDRESS;
+      Settings.DomainURL := URL_DOMAIN;
+    end;
+    1: begin
+      server := Settings.Hardcoded.TCP_DEV_SERVER_ADDRESS;
+      Settings.DomainURL := DEV_URL_DOMAIN;
+    end;
   end;
 
   TServerSocket.Deinitialize;

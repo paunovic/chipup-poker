@@ -237,7 +237,7 @@ begin
   DoLogout;
   Hide;
   MessageContainer.RemoveCallbacks(FCallbacksId);
-  FormsContainer.RunForm(TfrmLogin, self, [], FALSE)
+  FormsContainer.RunForm(TfrmLogin, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);

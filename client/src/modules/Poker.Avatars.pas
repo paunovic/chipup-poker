@@ -109,12 +109,15 @@ begin
     FHTTP.SendStream := nil;
   end;
 
-  if (ErrCode = 0) and (Assigned(FHTTP.RcvdStream)) then
+  if Assigned(FHTTP.RcvdStream) then
   begin
-    FHTTP.RcvdStream.Position := 0;
-    FImage.LoadFromStream(FHTTP.RcvdStream);
-    ImageChanged(FImage);
-    Save;
+    if ErrCode = 0 then
+    begin
+      FHTTP.RcvdStream.Position := 0;
+      FImage.LoadFromStream(FHTTP.RcvdStream);
+      ImageChanged(FImage);
+      Save;
+    end;
 
     FHTTP.RcvdStream.Free;
     FHTTP.RcvdStream := nil;
@@ -136,10 +139,7 @@ begin
   FHTTP.BandwidthLimit := 0;
   FHTTP.RequestVer := '1.1';
   FHTTP.RcvdStream := TMemoryStream.Create;
-  if Settings.DeveloperMode then
-    FHTTP.URL := Format(Settings.Hardcoded.URL.GET_AVATAR_DEV, [EncodeURL(String(FIdAsString))])
-  else
-    FHTTP.URL := Format(Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
+  FHTTP.URL := Format(Settings.DomainURL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   FHTTP.OnRequestDone := HTTPRequestDone;
   FHTTP.SslContext.InitContext;
   FHTTP.GetAsync;

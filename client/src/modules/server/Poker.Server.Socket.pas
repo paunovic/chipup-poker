@@ -94,6 +94,7 @@ type
     procedure ShowCards(const AGameId: TBytes);
     procedure QueryTableStats(const ATables: array of TBytes);
 
+    property Server: String read FServer;
     property Socket: TSslWSocket read FSocket;
     property Latency: Integer read FLatency;
     property ServerTime: UINT64 read FServerTime;

@@ -57,9 +57,9 @@ begin
 
   {$IFDEF DEBUG}
   FLastPerc := -1;
-  HttpClient.URL := Settings.Hardcoded.URL.LATEST_VERSION_DEBUG;
+  HttpClient.URL := Settings.DomainURL + Settings.Hardcoded.URL.LATEST_VERSION_DEBUG;
   {$ELSE}
-  HttpClient.URL := Settings.Hardcoded.URL.LATEST_VERSION;
+  HttpClient.URL := Settings.DomainURL + Settings.Hardcoded.URL.LATEST_VERSION;
   {$ENDIF}
 
   HttpClient.RcvdStream := TFileStream.Create(FUpdaterFile, fmCreate or fmOpenWrite);
