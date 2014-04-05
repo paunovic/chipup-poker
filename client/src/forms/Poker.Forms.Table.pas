@@ -1248,7 +1248,7 @@ begin
      (not tiGameLock.Enabled) then
   begin
     tiActiveFrameBlink.Tag := 1;
-//    tiActiveFrameBlink.Enabled := TRUE;
+    tiActiveFrameBlink.Enabled := TRUE;
   end;
 
   if sitout then
