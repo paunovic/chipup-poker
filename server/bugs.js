@@ -99,10 +99,15 @@ function setup(app,bugs,users,db) {
 		db.stats(function (err,stats) {
 			db.collectionNames(function (err,names) {
 				var out = [];
-				async.each(names,function (item,cb) {
-					db.collection(item.name.split('.')[1]).stats(function (err,stats) {
+				var input = [];
+				for (var x=0; x<names.length; x++) {
+					input.push(names[x].name);
+				}
+				input.sort();
+				async.eachLimit(input,1,function (item,cb) {
+					db.collection(item.split('.')[1]).stats(function (err,stats) {
 						if (!stats) {
-							console.log('name:%s stats:',item.name,stats);
+							console.log('name:%s stats:',item,stats);
 							cb();
 							return;
 						}
