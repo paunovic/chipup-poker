@@ -6,7 +6,7 @@ interface
 
 const
   URL_DOMAIN = 'http://chipuppoker.com';
-  {$IFDEF DEV_BUILD}
+  {$IFDEF DEBUG}
   DEV_URL_DOMAIN = 'http://dev-server.chippuppoker.com';
   {$ENDIF}
 
@@ -22,7 +22,7 @@ type
         SETTINGS_ENCRYPTION_KEY: String;
         DATABASE_FILENAME: String;
         TCP_SERVER_ADDRESS: String;
-        {$IFDEF DEV_BUILD}
+        {$IFDEF DEBUG}
         TCP_DEV_SERVER_ADDRESS: String;
         {$ENDIF}
         TCP_SERVER_PORT: Word;
@@ -42,7 +42,7 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0040';
+        VERSION: '0.01a.0041';
         REVISION: {$I revision.inc};
 
         // instance mutex name
@@ -55,7 +55,7 @@ type
 
         // socket server
         TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
-        {$IFDEF DEV_BUILD}
+        {$IFDEF DEBUG}
         TCP_DEV_SERVER_ADDRESS: 'dev-server.chipuppoker.com';
         {$ENDIF}
         TCP_SERVER_PORT: 12346;
@@ -67,7 +67,7 @@ type
           TOS: URL_DOMAIN + '/tos.html';
           CASHIER: URL_DOMAIN + '/cashier.html';
 
-          {$IFDEF DEV_BUILD}
+          {$IFDEF DEBUG}
           GET_AVATAR: DEV_URL_DOMAIN + '/getavatar?id=%s';
           UPLOAD_AVATAR: DEV_URL_DOMAIN + '/uploadAvatar';
 

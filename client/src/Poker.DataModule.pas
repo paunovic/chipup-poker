@@ -82,7 +82,7 @@ begin
   TFormsContainer.Initialize;
   TSounds.Initialize;
 
-  {$IFDEF DEV_BUILD}
+  {$IFDEF DEBUG}
   TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
   {$ELSE}
   TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);

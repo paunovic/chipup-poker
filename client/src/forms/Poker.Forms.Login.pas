@@ -59,7 +59,7 @@ type
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
-    {$IFDEF DEV_BUILD}
+    {$IFDEF DEBUG}
     procedure ServerComboboxChange(Sender: TObject);
     {$ENDIF}
 
@@ -84,7 +84,7 @@ uses
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
-{$IFDEF DEV_BUILD}
+{$IFDEF DEBUG}
 var
   cb: TcxComboBox;
 {$ENDIF}
@@ -104,7 +104,7 @@ begin
   btForceUpdate.Visible := TRUE;
   {$ENDIF}
 
-  {$IFDEF DEV_BUILD}
+  {$IFDEF DEBUG}
   cb := TcxComboBox.Create(self);
   cb.Parent := self;
   cb.Style.LookAndFeel.SkinName := edLogin.Style.LookAndFeel.SkinName;
@@ -196,7 +196,7 @@ begin
     Settings.Password := '';
 end;
 
-{$IFDEF DEV_BUILD}
+{$IFDEF DEBUG}
 procedure TfrmLogin.ServerComboboxChange(Sender: TObject);
 var
   server: String;
