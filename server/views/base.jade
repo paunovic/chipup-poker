@@ -2,9 +2,13 @@ doctype html
 html
   head
     block header
+    script(src='sorttable.js')
     style.
       form {
         display: inline;
+      }
+      .warning {
+        background:red;
       }
   body
     include header
