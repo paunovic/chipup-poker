@@ -208,9 +208,7 @@ enum ServerCodes {
     srReinstatePlayerOk = 50;
 	srTableAddonOk = 51;
 	srTableAddonOverLimit = 52;
-	srRetrieveHandHistoryData = 53;
-	srFetchHandData = 54;
-	srTableStatsReply = 55;
+	srTableStatsReply = 53;
 
     seChat = 200;
     seSecondaryLoginDetected = 201;
@@ -260,9 +258,7 @@ enum ServerCodes {
 	scResendVerificationMail = 534;
 	scShowLosingCards = 535;
 	seUserChange = 536;
-	scRetrieveHandHistoryData = 537;
-	scFetchHandHistory = 538;
-	scQueryTableStats = 539;
+	scQueryTableStats = 537;
 }
 
 service Server {
