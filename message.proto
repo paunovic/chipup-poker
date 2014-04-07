@@ -494,8 +494,9 @@ message TableStatsReplies {
 }
 
 message TableStatsReply {
-	required bytes gameid = 1;
-	repeated TablePlayerStats playerstats = 2;
+	required bytes clubid = 1;
+	required bytes gameid = 2;
+	repeated TablePlayerStats playerstats = 3;
 }
 
 message TablePlayerStats {
