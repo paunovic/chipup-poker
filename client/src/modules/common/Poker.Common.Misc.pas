@@ -33,6 +33,7 @@ function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
 function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 function ReverseDWORD(dw: Cardinal): Cardinal;
+function SecondsToTimeStr(ASeconds: DWORD): String;
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -480,6 +481,22 @@ end;
 function ReverseDWORD(dw: Cardinal): Cardinal;
 asm
   bswap eax
+end;
+
+function SecondsToTimeStr(ASeconds: DWORD): String;
+var
+  s, m, h: DWORD;
+begin
+  h := ASeconds div 3600;
+  ASeconds := ASeconds mod 3600;
+
+  m := ASeconds div 60;
+  s := ASeconds mod 60;
+
+  if h = 0 then
+    result := Format('%.2dm %.2ds', [m, s])
+  else
+    result := Format('%.2dh %.2dm %.2ds', [h, m, s]);
 end;
 
 

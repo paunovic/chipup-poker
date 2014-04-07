@@ -111,12 +111,17 @@ begin
 
   if Assigned(FHTTP.RcvdStream) then
   begin
-    if ErrCode = 0 then
+    if (ErrCode = 0) and
+       (FHTTP.StatusCode = 200) then
     begin
       FHTTP.RcvdStream.Position := 0;
-      FImage.LoadFromStream(FHTTP.RcvdStream);
-      ImageChanged(FImage);
-      Save;
+      if IsJPEGStream(FHTTP.RcvdStream) then
+      begin
+        FHTTP.RcvdStream.Position := 0;
+        FImage.LoadFromStream(FHTTP.RcvdStream);
+        ImageChanged(FImage);
+        Save;
+      end;
     end;
 
     FHTTP.RcvdStream.Free;

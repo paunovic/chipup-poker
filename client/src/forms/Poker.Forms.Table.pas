@@ -1543,7 +1543,7 @@ begin
         begin
           if FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat) then
           begin
-            if dmMain.Players.FindPlayerById(seat.PlayerMongoId, player) then
+            if Players.FindPlayerById(seat.PlayerMongoId, player) then
               nick := player.Nick
             else
               nick := Format('Seat #%d', [seat.SeatIndex]);
@@ -2080,7 +2080,7 @@ begin
      (seat_info.Status <> psStandingUp) then
   begin
     // find player info
-    dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
+    Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
 
     // set seat image that we should render
     if (FTableStatus.CurrentSeat = seat_info.SeatIndex) and

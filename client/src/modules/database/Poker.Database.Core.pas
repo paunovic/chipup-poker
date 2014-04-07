@@ -3,8 +3,7 @@ unit Poker.Database.Core;
 interface
 
 uses
-  System.SysUtils, System.Classes, SynSQLite3Static, SynCommons, SynDB, SynDBSQLite3, Poker.Protobufs.Objects.Game,
-  System.Generics.Collections;
+  System.SysUtils, System.Classes, SynSQLite3Static, SynCommons, SynDB, SynDBSQLite3, System.Generics.Collections;
 
 type
   TDatabase = class
@@ -25,15 +24,8 @@ type
     function Execute(const AConnection: TSQLDBSQLite3ConnectionProperties; const AQuery: String): ISQLDBRows;
     procedure ExecuteNoResult(const AConnection: TSQLDBSQLite3ConnectionProperties; const AQuery: String);
 
-    function LastHandId(const AConnection: TSQLDBSQLite3ConnectionProperties; const AGameId: TBytes): UINT32;
-    procedure InsertHand(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: UINT32; const AClubId, AGameId: TBytes; const ATimestamp: UINT32; const AData: TMemoryStream);
-
-    procedure InsertTable(const AConnection: TSQLDBSQLite3ConnectionProperties; const AGame: TPB_Game);
-
     procedure InsertAvatar(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream);
     function RetrieveAvatarData(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream): Boolean;
-
-    procedure RetrieveTableList(const AConnection: TSQLDBSQLite3ConnectionProperties; const AClubId: TBytes; const ATables: TList<RawByteString>);
   end;
 
 var
@@ -101,41 +93,6 @@ begin
   ExecuteNoResult(AConnection, 'CREATE UNIQUE INDEX IF NOT EXISTS id_idx ON avatars(id)');
 end;
 
-function TDatabase.LastHandId(const AConnection: TSQLDBSQLite3ConnectionProperties; const AGameId: TBytes): UINT32;
-var
-  query: TSQLDBStatement;
-begin
-  result := 0;
-  query := AConnection.NewThreadSafeStatement;
-  try
-    query.Prepare('SELECT MAX(id) FROM hands WHERE gameid = ?', TRUE);
-    query.BindBlob(1, @AGameId[0], Length(AGameId) * SizeOf(Byte));
-    query.ExecutePrepared;
-    if query.Step then
-      result := query.ColumnInt(0);
-  finally
-    query.Free;
-  end;
-end;
-
-procedure TDatabase.InsertHand(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: UINT32; const AClubId, AGameId: TBytes; const ATimestamp: UINT32; const AData: TMemoryStream);
-var
-  query: TSQLDBStatement;
-begin
-  query := AConnection.NewThreadSafeStatement;
-  try
-    query.Prepare('INSERT OR REPLACE INTO hands (id, clubid, gameid, timestamp, data) VALUES (?, ?, ?, ?, ?)', FALSE);
-    query.Bind(1, AId);
-    query.BindBlob(2, @AClubId[0], Length(AClubId) * SizeOf(Byte));
-    query.BindBlob(3, @AGameId[0], Length(AGameId) * SizeOf(Byte));
-    query.Bind(4, ATimestamp);
-    query.BindBlob(5, AData.Memory, AData.Size);
-    query.ExecutePrepared;
-  finally
-    query.Free;
-  end;
-end;
-
 procedure TDatabase.InsertAvatar(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream);
 var
   query: TSQLDBStatement;
@@ -169,44 +126,6 @@ begin
       AData.WriteBuffer(rbs[1], Length(rbs));
       result := TRUE;
     end;
-  finally
-    query.Free;
-  end;
-end;
-
-procedure TDatabase.InsertTable(const AConnection: TSQLDBSQLite3ConnectionProperties; const AGame: TPB_Game);
-var
-  query  : TSQLDBStatement;
-  mstream: TMemoryStream;
-begin
-  query := AConnection.NewThreadSafeStatement;
-  try
-    query.Prepare('INSERT OR REPLACE INTO tables (id, data) VALUES (?, ?)', FALSE);
-    query.BindBlob(1, @AGame.MongoId[0], Length(AGame.MongoId) * SizeOf(Byte));
-    mstream := TMemoryStream.Create;
-    try
-      AGame.ProtobufOutput.SaveToStream(mstream);
-      query.BindBlob(2, mstream.Memory, mstream.Size);
-      query.ExecutePrepared;
-    finally
-      mstream.Free;
-    end;
-  finally
-    query.Free;
-  end;
-end;
-
-procedure TDatabase.RetrieveTableList(const AConnection: TSQLDBSQLite3ConnectionProperties; const AClubId: TBytes; const ATables: TList<RawByteString>);
-var
-  query: TSQLDBStatement;
-begin
-  query := AConnection.NewThreadSafeStatement;
-  try
-    query.Prepare('SELECT DISTINCT gameid FROM hands WHERE clubid = ?', TRUE);
-    query.BindBlob(1, @AClubId[0], Length(AClubId) * SizeOf(Byte));
-    query.ExecutePrepared;
-    while query.Step do
-      ATables.Add(query.ColumnBlob(0));
   finally
     query.Free;
   end;

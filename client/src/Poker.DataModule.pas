@@ -7,11 +7,12 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
-  dxSkinsForm, Poker.Objects.ClubInfo;
+  dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip, dxCustomHint, cxHint;
 
 type
   TdmMain = class(TDataModule)
     SkinController: TdxSkinController;
+    HintController: TcxHintStyleController;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
@@ -20,7 +21,6 @@ type
 
     var
       FSelfInfo   : TPlayerInfo;
-      FPlayers    : TPlayerInfos;
       FPublicClubs: TClubsInfo;
       FUpdaterFile: String;
 
@@ -36,7 +36,6 @@ type
 
     property SelfInfo   : TPlayerInfo read FSelfInfo;
     property PublicClubs: TClubsInfo read FPublicClubs;
-    property Players    : TPlayerInfos read FPlayers;
     property UpdaterFile: String read FUpdaterFile write FUpdaterFile;
   end;
 
@@ -53,7 +52,8 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
-  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings;
+  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
+  Poker.Stats.Table;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -81,6 +81,7 @@ begin
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
   TSounds.Initialize;
+  TTablesStats.Initialize;
 
   if (Settings.DeveloperMode) and
      (Settings.ServerIndex = 1) then
@@ -96,20 +97,21 @@ begin
 
   FPublicClubs := TClubsInfo.Create;
   FSelfInfo := TPlayerInfo.Create;
-  FPlayers := TPlayerInfos.Create;
 
+  TPlayers.Initialize;
   TTables.Initialize;
 end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
   TTables.Deinitialize;
+  TPlayers.Deinitialize;
 
-  FPlayers.Free;
   FSelfInfo.Free;
   FPublicClubs.Free;
 
   TServerSocket.Deinitialize;
+  TTablesStats.Deinitialize;
   TSounds.Deinitialize;
   TFormsContainer.Deinitialize;
   TMessageContainer.Deinitialize;
@@ -151,7 +153,7 @@ begin
   for C1 := 0 to AStatusProtobuf.PublicClubs.Count - 1 do
     FPublicClubs.AddClub(AStatusProtobuf.PublicClubs[C1]);
 
-  FPlayers.LoadFromUsersProtobuf(AStatusProtobuf.Users);
+  Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
 end;
 
 procedure TdmMain.LoadFonts;

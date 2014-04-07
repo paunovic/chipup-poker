@@ -9,7 +9,7 @@ uses
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
-  cxData, cxProgressBar, cxCheckListBox, cxCheckBox;
+  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -76,15 +76,17 @@ type
     gridTables: TcxGrid;
     gridTablesTable: TcxGridTableView;
     gridTablesLevel: TcxGridLevel;
-    gridStatsTableColumn1: TcxGridColumn;
-    gridStatsTableColumn2: TcxGridColumn;
-    gridStatsTableColumn3: TcxGridColumn;
-    gridStatsTableColumn4: TcxGridColumn;
-    gridStatsTableColumn5: TcxGridColumn;
-    gridStatsTableColumn6: TcxGridColumn;
-    gridStatsTableColumn7: TcxGridColumn;
+    gridStatsTablePlayerName: TcxGridColumn;
+    gridStatsTableBalance: TcxGridColumn;
+    gridStatsTableBuyins: TcxGridColumn;
+    gridStatsTableCashouts: TcxGridColumn;
+    gridStatsTableRake: TcxGridColumn;
+    gridStatsTableChipsInPlay: TcxGridColumn;
+    gridStatsTableTimePlayed: TcxGridColumn;
     gridTablesEnabled: TcxGridColumn;
     gridTablesName: TcxGridColumn;
+    gridTablesTableId: TcxGridColumn;
+    gridStatsTablePlayerId: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -107,17 +109,23 @@ type
     procedure acUpdateClubDetailsExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btStatsClick(Sender: TObject);
+    procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;  ANewItemRecordFocusingChanged: Boolean);
+    procedure gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean;
+      var AHintTextRect: TRect);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
     FSelectedPlayerId: TBytes;
     FSelectedGameId: TBytes;
+    FSelectedStatsTableId: TBytes;
 
     procedure ConfigureGUI;
 
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
     procedure UpdateTablesStatsList;
+    procedure UpdatePlayersStatsList;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -153,7 +161,7 @@ uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core;
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -233,7 +241,7 @@ begin
     lbsHeader.Caption := club.Name;
 
     manager := '';
-    if dmMain.Players.FindPlayerById(club.OwnerId, player) then
+    if Players.FindPlayerById(club.OwnerId, player) then
       manager := player.Nick;
 
     lbsSubheader.Caption := Format('Club Manager: %s           Members: %d           Club ID: %d', [manager, Length(club.Players), club.Id]);
@@ -378,6 +386,70 @@ begin
   end;
 end;
 
+procedure TfrmClubLobby.gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean;
+  var AHintTextRect: TRect);
+var
+  C1: Integer;
+  tablestats: TTableStats;
+  player: TPlayerStats;
+  playerid: TBytes;
+  arr: TArray<UINT32>;
+begin
+  AHintText := '';
+
+  if not TablesStats.Find(FSelectedStatsTableId, tablestats) then
+    Exit;
+
+  playerid := ARecord.Values[gridStatsTablePlayerId.Index];
+
+  for player in tablestats.Players do
+    if CompareBytes(player.UserId, playerid) then
+    begin
+      if ACellViewInfo.Item.Index = gridStatsTableBuyins.Index then
+        arr := player.Buyins
+      else
+        if ACellViewInfo.Item.Index = gridStatsTableCashouts.Index then
+          arr := player.Cashouts
+        else
+          Break;
+
+      if Length(arr) <= 1 then
+        Break;
+
+      for C1 := Low(arr) to High(arr) do
+      begin
+        AHintText := AHintText + FloatToStr(arr[C1] / 100);
+        if C1 < High(arr) then
+          AHintText := AHintText + #10;
+      end;
+      AIsHintMultiLine := TRUE;
+      Break;
+    end;
+end;
+
+procedure TfrmClubLobby.gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+var
+  recIndex: Integer;
+  club: TClubInfo;
+  C1: Integer;
+begin
+  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    Exit;
+
+  recIndex := gridTablesTable.DataController.GetFocusedRecordIndex;
+  if recIndex = -1 then
+    SetLength(FSelectedStatsTableId, 0)
+  else
+    FSelectedStatsTableId := gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index);
+
+  for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
+    if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
+      Exit;
+
+  UpdatePlayersStatsList;
+end;
+
 procedure TfrmClubLobby.ModalFormClose(ASender: TObject);
 begin
   EnableWindow(Handle, TRUE);
@@ -404,7 +476,7 @@ var
     player: TPlayerInfo;
     status: String;
   begin
-    if not dmMain.Players.FindPlayerById(AId, player) then
+    if not Players.FindPlayerById(AId, player) then
       Exit;
 
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, player.Id);
@@ -445,14 +517,12 @@ end;
 
 procedure TfrmClubLobby.UpdateTablesStatsList;
 var
-  game  : TGameInfo;
-  club  : TClubInfo;
-  c     : TcxGridDataController;
+  game: TGameInfo;
+  club: TClubInfo;
+  c: TcxGridDataController;
   recidx: Integer;
-  conn  : TSQLDBSQLite3ConnectionProperties;
-  tables: TList<RawByteString>;
-  rbs   : RawByteString;
-  table : RawByteString;
+  tablestats: TTableStats;
+  tmp: String;
 begin
   c := gridTablesTable.DataController;
   c.BeginFullUpdate;
@@ -462,30 +532,60 @@ begin
     if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
       Exit;
 
-    conn := Database.NewConnection;
-    try
-      tables := TList<RawByteString>.Create;
-      try
-        Database.RetrieveTableList(conn, club.MongoId, tables);
-        for table in tables do
-        begin
-          for game in club.Games do
-          begin
-            SetLength(rbs, Length(game.Mongoid));
-            Move(game.MongoId[0], rbs[1], Length(game.MongoId));
-            if table = rbs then
-            begin
-              recidx := c.AppendRecord;
-              c.SetValue(recidx, gridTablesName.Index, game.Name);
-              Break;
-            end;
-          end;
-        end;
-      finally
-        tables.Free;
+    for tablestats in TablesStats do
+      if CompareBytes(tablestats.ClubId, club.MongoId) then
+      begin
+        if club.Games.FindGame(tablestats.GameId, game) then
+          tmp := game.Name
+        else
+          tmp := 'UNKNOWN';
+
+        recidx := c.AppendRecord;
+        c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId);
+        c.SetValue(recidx, gridTablesName.Index, tmp);
       end;
-    finally
-      conn.Free;
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
+procedure TfrmClubLobby.UpdatePlayersStatsList;
+var
+  club: TClubInfo;
+  c: TcxGridDataController;
+  recidx: Integer;
+  tablestats: TTableStats;
+  playerstats: TPlayerStats;
+  player: TPlayerInfo;
+  tmp: String;
+begin
+  c := gridStatsTable.DataController;
+  c.BeginFullUpdate;
+  try
+    c.SetRecordCount(0);
+
+    if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+       (not TablesStats.Find(FSelectedStatsTableId, tablestats)) then
+      Exit;
+
+    for playerstats in tablestats.Players do
+    begin
+      recidx := c.AppendRecord;
+
+      if Players.FindPlayerById(playerstats.UserId, player) then
+        tmp := player.Nick
+      else
+        tmp := 'Unknown';
+      c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
+
+      c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId);
+      c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
+      c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.BuyinsTotal / 100);
+      c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.CashoutsTotal / 100);
+      c.SetValue(recidx, gridStatsTableRake.Index, playerstats.RakeContrib / 100);
+      c.SetValue(recidx, gridStatsTableChipsInPlay.Index, 0);
+
+      c.SetValue(recidx, gridStatsTableTimePlayed.Index, SecondsToTimeStr(playerstats.SecondsPlayed));
     end;
   finally
     c.EndFullUpdate;
@@ -554,7 +654,7 @@ var
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not dmMain.Players.FindPlayerById(FSelectedPlayerId, player)) then
+     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
     Exit;
 
   FormsContainer.Add(RunModalForm(TfrmGiveChips, self, [club, player], ModalFormClose));
@@ -566,7 +666,7 @@ var
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not dmMain.Players.FindPlayerById(FSelectedPlayerId, player)) then
+     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Are you sure you want to give club ownership to %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
@@ -585,7 +685,7 @@ var
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not dmMain.Players.FindPlayerById(FSelectedPlayerId, player)) then
+     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Are you sure you want to remove %s from the club?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then

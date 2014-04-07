@@ -12,13 +12,16 @@ type
   TPB_TableStatsReply = class(TProtobufBaseObject)
   private
     const
-      FN_GAMEID = 1;
-      FN_PLAYERSTATS = 2;
+      FN_CLUBID = 1;
+      FN_GAMEID = 2;
+      FN_PLAYERSTATS = 3;
 
     var
+      FClubid: TBytes;
       FGameid: TBytes;
       FPlayerstats: TObjectList<TPB_TablePlayerStats>;
 
+    procedure SetClubid(const AValue: TBytes);
     procedure SetGameid(const AValue: TBytes);
     procedure PlayerstatsNotifyEvent(Sender: TObject; const Item: TPB_TablePlayerStats; Action: TCollectionNotification);
 
@@ -29,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    property Clubid: TBytes read FClubid write SetClubid;
     property Gameid: TBytes read FGameid write SetGameid;
     property Playerstats: TObjectList<TPB_TablePlayerStats> read FPlayerstats;
   end;
@@ -63,6 +67,10 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
+      FN_CLUBID: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        AProtobufReader.readBytes(FClubid);
+      end;
       FN_GAMEID: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameid);
@@ -75,6 +83,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_TableStatsReply.SetClubid(const AValue: TBytes);
+begin
+  FClubid := AValue;
+  ProtobufOutput.writeBytes(FN_CLUBID, AValue);
 end;
 
 procedure TPB_TableStatsReply.SetGameid(const AValue: TBytes);
