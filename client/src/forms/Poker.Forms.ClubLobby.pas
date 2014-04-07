@@ -87,6 +87,7 @@ type
     gridTablesName: TcxGridColumn;
     gridTablesTableId: TcxGridColumn;
     gridStatsTablePlayerId: TcxGridColumn;
+    gridTablesStatus: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -543,6 +544,7 @@ begin
         recidx := c.AppendRecord;
         c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId);
         c.SetValue(recidx, gridTablesName.Index, tmp);
+        c.SetValue(recidx, gridTablesStatus.Index, game.StateAsStr);
       end;
   finally
     c.EndFullUpdate;

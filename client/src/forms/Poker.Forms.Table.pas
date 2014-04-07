@@ -46,7 +46,6 @@ type
     RVStyle: TRVStyle;
     rvChat: TRichView;
     tiGameLock: TTimer;
-    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -81,7 +80,6 @@ type
     procedure tiGameLockTimer(Sender: TObject);
     procedure edChatExit(Sender: TObject);
     procedure edChatEnter(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -2847,11 +2845,6 @@ begin
       FDealAnimations.Remove(animation.Id);
     end;
   end;
-end;
-
-procedure TfrmTable.Button1Click(Sender: TObject);
-begin
-  ServerSocket.QueryTableStats([FTable.Game.MongoId]);
 end;
 
 end.
