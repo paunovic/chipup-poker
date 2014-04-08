@@ -170,7 +170,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
-  Poker.Protobufs.Objects.TableStatsReplies;
+  Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -227,7 +227,7 @@ begin
   gridJoinedClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
-  dmMain.Players.Clear;
+  Players.Clear;
   Tables.ClearWithoutNotification;
   tiPublicClubRefresh.Enabled := FALSE;
 end;
@@ -662,13 +662,13 @@ begin
   club := dmMain.SelfInfo.Clubs.AddClub(AClub);
 
   SetLength(query_users, 0);
-  if not dmMain.Players.FindPlayerById(AClub.Owner, player) then
+  if not Players.FindPlayerById(AClub.Owner, player) then
   begin
     SetLength(query_users, 1);
     query_users[0] := AClub.Owner;
   end;
   for C1 := 0 to Length(AClub.Members) - 1 do
-    if not dmMain.Players.FindPlayerById(AClub.Members[C1], player) then
+    if not Players.FindPlayerById(AClub.Members[C1], player) then
     begin
       SetLength(query_users, Length(query_users) + 1);
       query_users[Length(query_users) - 1] := AClub.Members[C1];
@@ -677,7 +677,7 @@ begin
   begin
     SetLength(empty_array, 0);
     for C1 := 0 to Length(query_users) - 1 do
-      dmMain.Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
+      Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
 
     ServerSocket.GetUserInfos(query_users);
   end;
@@ -741,7 +741,7 @@ begin
   pbreply := AObject as TPB_GetUserParams;
 
   for user in pbreply.Users do
-    dmMain.Players.AddPlayer(user);
+    Players.AddPlayer(user);
 end;
 
 procedure TfrmChipUpMain.CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
@@ -755,20 +755,20 @@ begin
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount;
 
-    if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+    if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
       player_info.Balance := player_info.Balance + pbreply.ChipAmount;
 
-    if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+    if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance - pbreply.ChipAmount;
   end
   else
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
 
-    if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+    if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
       player_info.Balance := player_info.Balance - pbreply.ChipAmount;
 
-    if dmMain.Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+    if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance + pbreply.ChipAmount;
   end;
 end;
@@ -814,7 +814,7 @@ begin
   pbusers := AObject as TPB_UserChangeParams;
 
   for pbuser in pbusers.Users do
-    dmMain.Players.AddPlayer(pbuser);
+    Players.AddPlayer(pbuser);
 end;
 
 procedure TfrmChipUpMain.CSRStatus(const AMethodId: Integer; const AObject: TObject);
@@ -926,19 +926,28 @@ end;
 procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);
 var
   pb: TPB_TableStatsReplies;
-  C1, C2: Integer;
-  b: Int32;
+  tablepb: TPB_TableStatsReply;
+  tablestats: TTableStats;
+  player: TPB_User;
+  playerinfo: TPlayerInfo;
 begin
   pb := AObject as TPB_TableStatsReplies;
 
-  for C1 := 0 to pb.Reply.Count - 1 do
-  begin
-    for C2 := 0 to pb.Reply[C1].Playerstats.Count - 1 do
+  for player in pb.Players do
+    if Players.FindPlayerById(player.MongoId, playerinfo) then
+      playerinfo.Nick := player.Displayname
+    else
+      Players.AddPlayer(player);
+
+  for tablepb in pb.Reply do
+    if TablesStats.Find(tablepb.Gameid, tablestats) then
+      tablestats.Assign(tablepb)
+    else
     begin
-      b := pb.Reply[C1].Playerstats[C2].Balance;
-      b := pb.Reply[C1].Playerstats[C2].Secondsplayed;
+      tablestats := TTableStats.Create;
+      tablestats.Assign(tablepb);
+      TablesStats.Add(tablestats);
     end;
-  end;
 end;
 
 

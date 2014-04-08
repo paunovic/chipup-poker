@@ -46,7 +46,6 @@ type
     RVStyle: TRVStyle;
     rvChat: TRichView;
     tiGameLock: TTimer;
-    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -81,7 +80,6 @@ type
     procedure tiGameLockTimer(Sender: TObject);
     procedure edChatExit(Sender: TObject);
     procedure edChatEnter(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -1543,7 +1541,7 @@ begin
         begin
           if FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat) then
           begin
-            if dmMain.Players.FindPlayerById(seat.PlayerMongoId, player) then
+            if Players.FindPlayerById(seat.PlayerMongoId, player) then
               nick := player.Nick
             else
               nick := Format('Seat #%d', [seat.SeatIndex]);
@@ -2080,7 +2078,7 @@ begin
      (seat_info.Status <> psStandingUp) then
   begin
     // find player info
-    dmMain.Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
+    Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
 
     // set seat image that we should render
     if (FTableStatus.CurrentSeat = seat_info.SeatIndex) and
@@ -2847,11 +2845,6 @@ begin
       FDealAnimations.Remove(animation.Id);
     end;
   end;
-end;
-
-procedure TfrmTable.Button1Click(Sender: TObject);
-begin
-  ServerSocket.QueryTableStats([FTable.Game.MongoId]);
 end;
 
 end.

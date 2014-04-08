@@ -230,7 +230,7 @@ begin
     saSuccess: begin
       dmMain.SelfInfo.AvatarId := FAvatarId;
       avatar := Avatars.Add(dmMain.SelfInfo.AvatarId, FAvatarJPG);
-      if dmMain.Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+      if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
         player_info.AvatarId := dmMain.SelfInfo.AvatarId;
       imgAvatar.Picture.Assign(avatar.GetImage);
 

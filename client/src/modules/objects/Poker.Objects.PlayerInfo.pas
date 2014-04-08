@@ -36,13 +36,19 @@ type
     property Clubs   : TClubsInfo read FClubs;
   end;
 
-  TPlayerInfos = class(TObjectList<TPlayerInfo>)
+  TPlayers = class(TObjectList<TPlayerInfo>)
   public
+    class procedure Initialize;
+    class procedure Deinitialize;
+
     function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: UINT32; const AAvatarId: TBytes): TPlayerInfo; overload;
     function AddPlayer(const AUser: TPB_User): TPlayerInfo; overload;
     function FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
     procedure LoadFromUsersProtobuf(const AUsers: TPB_Users);
   end;
+
+var
+  Players: TPlayers;
 
 implementation
 
@@ -100,7 +106,17 @@ end;
 
 { TPlayerInfos }
 
-function TPlayerInfos.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: UINT32; const AAvatarId: TBytes): TPlayerInfo;
+class procedure TPlayers.Initialize;
+begin
+  Players := TPlayers.Create;
+end;
+
+class procedure TPlayers.Deinitialize;
+begin
+  FreeAndNil(Players);
+end;
+
+function TPlayers.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: UINT32; const AAvatarId: TBytes): TPlayerInfo;
 var
   player: TPlayerInfo;
 begin
@@ -118,12 +134,12 @@ begin
   result := player;
 end;
 
-function TPlayerInfos.AddPlayer(const AUser: TPB_User): TPlayerInfo;
+function TPlayers.AddPlayer(const AUser: TPB_User): TPlayerInfo;
 begin
   result := AddPlayer(AUser.MongoId, AUser.Displayname, AUser.Email, AUser.Chips, AUser.Avatar);
 end;
 
-function TPlayerInfos.FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
+function TPlayers.FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
 var
   player: TPlayerInfo;
   a1len : Integer;
@@ -138,7 +154,7 @@ begin
   Exit(FALSE);
 end;
 
-procedure TPlayerInfos.LoadFromUsersProtobuf(const AUsers: TPB_Users);
+procedure TPlayers.LoadFromUsersProtobuf(const AUsers: TPB_Users);
 var
   user: TPB_User;
 begin

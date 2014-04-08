@@ -119,7 +119,9 @@ uses
   Poker.Protobufs.Objects.QueryTableStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.QueryTableStats.pas',
   Poker.Protobufs.Objects.TableStatsReplies in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReplies.pas',
   Poker.Protobufs.Objects.TableStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReply.pas',
-  Poker.Protobufs.Objects.TablePlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas';
+  Poker.Protobufs.Objects.TablePlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas',
+  Poker.Stats.Table in 'modules\stats\Poker.Stats.Table.pas',
+  Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas';
 
 procedure FocusPokerApp;
 var

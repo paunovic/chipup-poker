@@ -5,7 +5,7 @@ object frmClubLobby: TfrmClubLobby
   BorderStyle = bsSingle
   Caption = 'Lobby'
   ClientHeight = 654
-  ClientWidth = 787
+  ClientWidth = 813
   Color = clBlack
   Constraints.MinHeight = 410
   Constraints.MinWidth = 589
@@ -21,7 +21,7 @@ object frmClubLobby: TfrmClubLobby
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   DesignSize = (
-    787
+    813
     654)
   PixelsPerInch = 96
   TextHeight = 14
@@ -2458,8 +2458,8 @@ object frmClubLobby: TfrmClubLobby
     Properties.Alignment.Vert = taVCenter
     Transparent = True
     Height = 107
-    Width = 787
-    AnchorX = 394
+    Width = 813
+    AnchorX = 407
     AnchorY = 59
   end
   object lbsSubheader: TcxLabel
@@ -2480,8 +2480,8 @@ object frmClubLobby: TfrmClubLobby
     Properties.Alignment.Vert = taVCenter
     Transparent = True
     Height = 24
-    Width = 787
-    AnchorX = 394
+    Width = 813
+    AnchorX = 407
     AnchorY = 124
   end
   object btClubHome: TcxButton
@@ -2526,7 +2526,7 @@ object frmClubLobby: TfrmClubLobby
   object pcTabs: TcxPageControl
     Left = 0
     Top = 170
-    Width = 787
+    Width = 813
     Height = 484
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
@@ -2534,13 +2534,13 @@ object frmClubLobby: TfrmClubLobby
     Properties.ActivePage = tsStats
     Properties.HideTabs = True
     ClientRectBottom = 484
-    ClientRectRight = 787
+    ClientRectRight = 813
     ClientRectTop = 0
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
       DesignSize = (
-        787
+        813
         484)
       object gbClubSettings: TcxGroupBox
         Left = 7
@@ -2639,14 +2639,14 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Members'
         TabOrder = 1
         DesignSize = (
-          521
+          547
           477)
         Height = 477
-        Width = 521
+        Width = 547
         object gridPlayersList: TcxGrid
           Left = 2
           Top = 19
-          Width = 517
+          Width = 543
           Height = 335
           Align = alTop
           BevelInner = bvNone
@@ -2710,7 +2710,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 274
+          Top = 268
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -2723,11 +2723,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 280
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 274
+          Top = 268
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -2740,11 +2739,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 280
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 274
+          Top = 268
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -2757,11 +2755,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 280
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 240
+          Top = 234
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -2774,17 +2771,14 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 246
         end
       end
     end
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
-        787
+        813
         484)
       object gbTables: TcxGroupBox
         Left = 7
@@ -2793,15 +2787,15 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Tables'
         TabOrder = 0
         DesignSize = (
-          773
+          799
           477)
         Height = 477
-        Width = 773
+        Width = 799
         object gridGames: TcxGrid
           Left = 2
           Top = 19
-          Width = 769
-          Height = 443
+          Width = 795
+          Height = 437
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -2809,7 +2803,6 @@ object frmClubLobby: TfrmClubLobby
           BorderStyle = cxcbsNone
           TabOrder = 0
           LookAndFeel.SkinName = 'ChipUpDarkStyle'
-          ExplicitHeight = 449
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2883,7 +2876,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 427
+          Top = 421
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2896,11 +2889,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 433
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 427
+          Top = 421
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2913,11 +2905,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 433
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 363
+          Top = 357
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]
@@ -2933,7 +2924,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
           OnClick = acShowEditGameFormExecute
-          ExplicitTop = 369
         end
       end
     end
@@ -2941,12 +2931,12 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'tsStats'
       ImageIndex = 2
       DesignSize = (
-        787
+        813
         484)
       object gridStats: TcxGrid
         Left = 260
         Top = 2
-        Width = 519
+        Width = 545
         Height = 472
         Anchors = [akLeft, akTop, akRight]
         BevelInner = bvNone
@@ -2971,40 +2961,66 @@ object frmClubLobby: TfrmClubLobby
           OptionsView.NoDataToDisplayInfoText = ' '
           OptionsView.ColumnAutoWidth = True
           OptionsView.GroupByBox = False
-          object gridStatsTableColumn1: TcxGridColumn
+          object gridStatsTablePlayerId: TcxGridColumn
+            DataBinding.ValueType = 'Variant'
+            PropertiesClassName = 'TcxBlobEditProperties'
+            Properties.BlobEditKind = bekMemo
+            Visible = False
+          end
+          object gridStatsTablePlayerName: TcxGridColumn
             Caption = 'Player'
+            PropertiesClassName = 'TcxTextEditProperties'
             HeaderAlignmentHorz = taCenter
-            Width = 117
+            Width = 118
           end
-          object gridStatsTableColumn2: TcxGridColumn
+          object gridStatsTableBalance: TcxGridColumn
             Caption = 'Balance'
+            DataBinding.ValueType = 'Float'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.ValueType = vtFloat
             HeaderAlignmentHorz = taCenter
-            Width = 65
+            Width = 67
           end
-          object gridStatsTableColumn3: TcxGridColumn
+          object gridStatsTableBuyins: TcxGridColumn
             Caption = 'Buy-Ins'
-            HeaderAlignmentHorz = taCenter
-            Width = 64
-          end
-          object gridStatsTableColumn4: TcxGridColumn
-            Caption = 'Cash-Outs'
+            DataBinding.ValueType = 'Float'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.ValueType = vtFloat
+            OnGetCellHint = gridStatsTableBuyinsGetCellHint
             HeaderAlignmentHorz = taCenter
             Width = 65
           end
-          object gridStatsTableColumn5: TcxGridColumn
+          object gridStatsTableCashouts: TcxGridColumn
+            Caption = 'Cash-Outs'
+            DataBinding.ValueType = 'Float'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.ValueType = vtFloat
+            OnGetCellHint = gridStatsTableBuyinsGetCellHint
+            HeaderAlignmentHorz = taCenter
+            Width = 67
+          end
+          object gridStatsTableRake: TcxGridColumn
             Caption = 'Rake'
+            DataBinding.ValueType = 'Float'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.ValueType = vtFloat
             HeaderAlignmentHorz = taCenter
-            Width = 66
+            Width = 62
           end
-          object gridStatsTableColumn6: TcxGridColumn
+          object gridStatsTableChipsInPlay: TcxGridColumn
             Caption = 'Chips in Play'
+            DataBinding.ValueType = 'Float'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.ValueType = vtFloat
             HeaderAlignmentHorz = taCenter
-            Width = 72
+            Width = 77
           end
-          object gridStatsTableColumn7: TcxGridColumn
+          object gridStatsTableTimePlayed: TcxGridColumn
             Caption = 'Time Played'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taCenter
             HeaderAlignmentHorz = taCenter
-            Width = 69
+            Width = 89
           end
         end
         object gridStatsLevel: TcxGridLevel
@@ -3022,7 +3038,7 @@ object frmClubLobby: TfrmClubLobby
         TabOrder = 1
         LookAndFeel.SkinName = 'ChipUpDarkStyle'
         object gridTablesTable: TcxGridTableView
-          OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
+          OnFocusedRecordChanged = gridTablesTableFocusedRecordChanged
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
@@ -3036,18 +3052,35 @@ object frmClubLobby: TfrmClubLobby
           OptionsView.NoDataToDisplayInfoText = ' '
           OptionsView.ColumnAutoWidth = True
           OptionsView.GroupByBox = False
+          object gridTablesTableId: TcxGridColumn
+            DataBinding.ValueType = 'Variant'
+            PropertiesClassName = 'TcxBlobEditProperties'
+            Properties.BlobEditKind = bekMemo
+            Visible = False
+          end
           object gridTablesEnabled: TcxGridColumn
             PropertiesClassName = 'TcxCheckBoxProperties'
             Properties.ImmediatePost = True
             Properties.NullStyle = nssUnchecked
-            Width = 25
+            Width = 20
           end
           object gridTablesName: TcxGridColumn
             Caption = 'Table'
             PropertiesClassName = 'TcxTextEditProperties'
             HeaderAlignmentHorz = taCenter
             Options.Editing = False
-            Width = 224
+            Width = 153
+          end
+          object gridTablesStatus: TcxGridColumn
+            Caption = 'Status'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.ReadOnly = False
+            HeaderAlignmentHorz = taCenter
+            Options.Editing = False
+            SortIndex = 0
+            SortOrder = soAscending
+            Width = 75
           end
         end
         object gridTablesLevel: TcxGridLevel
@@ -3059,7 +3092,7 @@ object frmClubLobby: TfrmClubLobby
   object btPrijatnaPunina: TcxButton
     Left = 386
     Top = 138
-    Width = 392
+    Width = 418
     Height = 31
     Anchors = [akLeft, akTop, akRight]
     Enabled = False
