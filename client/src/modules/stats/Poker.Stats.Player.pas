@@ -23,7 +23,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Assign(const AProtobuf: TPB_TablePlayerStats);
+    procedure Assign(const AProtobuf: TPB_TablePlayerStats); overload;
+    procedure Assign(const APlayerStats: TPlayerStats); overload;
+    procedure Merge(const APlayerStats: TPlayerStats);
 
     property UserId: TBytes read FUserId;
     property Balance: Integer read FBalance;
@@ -36,6 +38,9 @@ type
   end;
 
 implementation
+
+uses
+  Poker.Common.Misc;
 
 { TPlayerStats }
 
@@ -68,6 +73,15 @@ begin
     Inc(result, val);
 end;
 
+procedure TPlayerStats.Merge(const APlayerStats: TPlayerStats);
+begin
+  Inc(FBalance, APlayerStats.Balance);
+  AppendArray(FBuyins, APlayerStats.Buyins);
+  AppendArray(FCashouts, APlayerStats.Cashouts);
+  Inc(FRakeContrib, APlayerStats.RakeContrib);
+  Inc(FSecondsPlayed, APlayerStats.SecondsPlayed);
+end;
+
 procedure TPlayerStats.Assign(const AProtobuf: TPB_TablePlayerStats);
 begin
   FUserId := AProtobuf.Userid;
@@ -77,6 +91,17 @@ begin
   FRakeContrib := AProtobuf.Rakecontrib;
   FSecondsPlayed := AProtobuf.Secondsplayed;
 end;
+
+procedure TPlayerStats.Assign(const APlayerStats: TPlayerStats);
+begin
+  FUserId := APlayerStats.Userid;
+  FBalance := APlayerStats.Balance;
+  FBuyins := APlayerStats.Buyins;
+  FCashouts := APlayerStats.Cashouts;
+  FRakeContrib := APlayerStats.Rakecontrib;
+  FSecondsPlayed := APlayerStats.Secondsplayed;
+end;
+
 
 
 end.

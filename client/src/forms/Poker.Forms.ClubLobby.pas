@@ -9,7 +9,7 @@ uses
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
-  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint;
+  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint, cxCalendar;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -88,6 +88,10 @@ type
     gridTablesTableId: TcxGridColumn;
     gridStatsTablePlayerId: TcxGridColumn;
     gridTablesStatus: TcxGridColumn;
+    pmTablesStats: TPopupMenu;
+    UnselectAll1: TMenuItem;
+    acTablesStatsUnselectAll: TAction;
+    gridTablesDate: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -114,6 +118,8 @@ type
     procedure gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
       ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean;
       var AHintTextRect: TRect);
+    procedure acTablesStatsUnselectAllExecute(Sender: TObject);
+    procedure gridTablesEnabledPropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -143,6 +149,7 @@ type
     procedure CSROwnerGiveawayInvalidClubId(const AMethodId: Integer; const AObject: TObject);
     procedure CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
     procedure CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
 
   protected
   public
@@ -162,7 +169,7 @@ uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player;
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -190,7 +197,8 @@ begin
                       TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
                       TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
                       TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation),
-                      TServerMessageCallback.Create(seUserChange, CSEUserChange)
+                      TServerMessageCallback.Create(seUserChange, CSEUserChange),
+                      TServerMessageCallback.Create(srTableStatsReply, CSRTableStatsReply)
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
@@ -253,12 +261,14 @@ begin
     if btStats.Visible then
     begin
       btPrijatnaPunina.Left := btStats.Left + btStats.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
-      UpdateTablesStatsList;
+      btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 2;
     end
     else
+    begin
+      ClientWidth := 600;
       btPrijatnaPunina.Left := btTables.Left + btTables.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
-
-    btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 2;
+      btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 8;
+    end;
 
     btChangeClubDetails.Visible := admin_visible;
     acShowClubChangeDetailsForm.Enabled := admin_visible;
@@ -304,6 +314,12 @@ begin
 
     UpdatePlayerlist;
     UpdateGamesList;
+
+    if btStats.Visible then
+    begin
+      UpdateTablesStatsList;
+      UpdatePlayersStatsList;
+    end;
   end;
 end;
 
@@ -429,11 +445,15 @@ begin
     end;
 end;
 
+procedure TfrmClubLobby.gridTablesEnabledPropertiesChange(Sender: TObject);
+begin
+  UpdatePlayersStatsList;
+end;
+
 procedure TfrmClubLobby.gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
   club: TClubInfo;
-  C1: Integer;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
@@ -443,10 +463,6 @@ begin
     SetLength(FSelectedStatsTableId, 0)
   else
     FSelectedStatsTableId := gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index);
-
-  for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
-    if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
-      Exit;
 
   UpdatePlayersStatsList;
 end;
@@ -514,6 +530,7 @@ begin
   finally
     gridPlayersListTable.DataController.EndFullUpdate;
   end;
+  gridPlayersListTable.DataController.Refresh;
 end;
 
 procedure TfrmClubLobby.UpdateTablesStatsList;
@@ -545,10 +562,12 @@ begin
         c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId);
         c.SetValue(recidx, gridTablesName.Index, tmp);
         c.SetValue(recidx, gridTablesStatus.Index, game.StateAsStr);
+        c.SetValue(recidx, gridTablesDate.Index, MongoIdToDateTime(game.MongoId));
       end;
   finally
     c.EndFullUpdate;
   end;
+  c.Refresh;
 end;
 
 procedure TfrmClubLobby.UpdatePlayersStatsList;
@@ -558,40 +577,98 @@ var
   recidx: Integer;
   tablestats: TTableStats;
   playerstats: TPlayerStats;
+  playerstats_new: TPlayerStats;
   player: TPlayerInfo;
   tmp: String;
+  datetim: TDateTime;
+  selectedids: TList<TBytes>;
+  tablestatslist: TObjectList<TTableStats>;
+  finalstats: TObjectList<TPlayerStats>;
+  selectedid: TBytes;
+  C1: Integer;
+  found: Boolean;
 begin
   c := gridStatsTable.DataController;
   c.BeginFullUpdate;
   try
     c.SetRecordCount(0);
 
-    if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-       (not TablesStats.Find(FSelectedStatsTableId, tablestats)) then
+    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
       Exit;
 
-    for playerstats in tablestats.Players do
-    begin
-      recidx := c.AppendRecord;
+    selectedids := TList<TBytes>.Create;
+    try
+      for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
+        if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
+          selectedids.Add(gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index));
 
-      if Players.FindPlayerById(playerstats.UserId, player) then
-        tmp := player.Nick
-      else
-        tmp := 'Unknown';
-      c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
+      tablestatslist := TObjectList<TTableStats>.Create(FALSE);
+      try
+        if selectedids.Count = 0 then
+        begin
+          if TablesStats.Find(FSelectedStatsTableId, tablestats) then
+            tablestatslist.Add(tablestats);
+        end
+        else
+          for selectedid in selectedids do
+            if TablesStats.Find(selectedid, tablestats) then
+              tablestatslist.Add(tablestats);
 
-      c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId);
-      c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
-      c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.BuyinsTotal / 100);
-      c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.CashoutsTotal / 100);
-      c.SetValue(recidx, gridStatsTableRake.Index, playerstats.RakeContrib / 100);
-      c.SetValue(recidx, gridStatsTableChipsInPlay.Index, 0);
+        finalstats := TObjectList<TPlayerStats>.Create;
+        try
+          for tablestats in tablestatslist do
+            for playerstats in tablestats.Players do
+            begin
+              found := FALSE;
+              for C1 := 0 to finalstats.Count - 1 do
+                if CompareBytes(finalstats[C1].UserId, playerstats.UserId) then
+                begin
+                  finalstats[C1].Merge(playerstats);
+                  found := TRUE;
+                  Break;
+                end;
 
-      c.SetValue(recidx, gridStatsTableTimePlayed.Index, SecondsToTimeStr(playerstats.SecondsPlayed));
+              if not found then
+              begin
+                playerstats_new := TPlayerStats.Create;
+                playerstats_new.Assign(playerstats);
+                finalstats.Add(playerstats_new);
+              end;
+            end;
+
+          for playerstats in finalstats do
+          begin
+            recidx := c.AppendRecord;
+
+            if Players.FindPlayerById(playerstats.UserId, player) then
+              tmp := player.Nick
+            else
+              tmp := 'Unknown';
+            c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
+
+            c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId);
+            c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
+            c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.BuyinsTotal / 100);
+            c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.CashoutsTotal / 100);
+            c.SetValue(recidx, gridStatsTableRake.Index, playerstats.RakeContrib / 100);
+            c.SetValue(recidx, gridStatsTableChipsInPlay.Index, 0);
+            datetim := SecondsToTime(playerstats.SecondsPlayed);
+            ReplaceDate(datetim, Date);
+            c.SetValue(recidx, gridStatsTableTimePlayed.Index, datetim);
+          end;
+        finally
+          finalstats.Free;
+        end;
+      finally
+        tablestatslist.Free;
+      end;
+    finally
+      selectedids.Free;
     end;
   finally
     c.EndFullUpdate;
   end;
+  c.Refresh;
 end;
 
 procedure TfrmClubLobby.UpdateGamesList;
@@ -630,6 +707,7 @@ begin
   finally
     c.EndFullUpdate;
   end;
+  c.Refresh;
 end;
 
 procedure TfrmClubLobby.tiUpdateClubDetailsTimer(Sender: TObject);
@@ -740,6 +818,21 @@ begin
   ServerSocket.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
 end;
 
+procedure TfrmClubLobby.acTablesStatsUnselectAllExecute(Sender: TObject);
+var
+  C1: Integer;
+begin
+  gridTablesTable.DataController.BeginFullUpdate;
+  try
+    for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
+      gridTablesTable.DataController.SetValue(C1, gridTablesEnabled.Index, FALSE);
+    UpdatePlayersStatsList;
+  finally
+    gridTablesTable.DataController.EndFullUpdate;
+  end;
+  gridTablesTable.DataController.Refresh;
+end;
+
 procedure TfrmClubLobby.acUpdateClubDetailsExecute(Sender: TObject);
 var
   club: TClubInfo;
@@ -771,6 +864,11 @@ begin
 end;
 
 procedure TfrmClubLobby.CSRStatus(const AMethodId: Integer; const AObject: TObject);
+begin
+  ConfigureGUI;
+end;
+
+procedure TfrmClubLobby.CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
 begin
   ConfigureGUI;
 end;

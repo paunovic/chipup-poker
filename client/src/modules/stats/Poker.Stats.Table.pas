@@ -61,6 +61,8 @@ var
 begin
   FClubId := AProtobuf.Clubid;
   FGameId := AProtobuf.Gameid;
+
+  FPlayers.Clear;
   for pbplayer in AProtobuf.Playerstats do
   begin
     player := TPlayerStats.Create;

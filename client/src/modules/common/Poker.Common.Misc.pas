@@ -34,6 +34,9 @@ procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: Str
 function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 function ReverseDWORD(dw: Cardinal): Cardinal;
 function SecondsToTimeStr(ASeconds: DWORD): String;
+function SecondsToTime(ASeconds: DWORD): TTime;
+function MongoIdToDateTime(const AMongoId: TBytes): TDateTime;
+procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -43,7 +46,7 @@ implementation
 
 uses
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
-  Poker.Interfaces.FormParams;
+  Poker.Interfaces.FormParams, System.DateUtils;
 
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
@@ -499,7 +502,41 @@ begin
     result := Format('%.2dh %.2dm %.2ds', [h, m, s]);
 end;
 
+function MongoIdToDateTime(const AMongoId: TBytes): TDateTime;
+var
+  unix_timestamp: UINT;
+begin
+  if Length(AMongoId) < 4 then
+    Exit(0);
+  unix_timestamp := ReverseDWORD(PUINT(@AMongoId[0])^);
+ result := (unix_timestamp / 86400) + 25569;
+end;
 
+function SecondsToTime(ASeconds: DWORD): TTime;
+var
+  s, m, h: Integer;
+begin
+  h := ASeconds div 3600;
+  ASeconds := ASeconds mod 3600;
+  m := ASeconds div 60;
+  s := ASeconds mod 60;
+  h := h mod 24; // prevent H from going above 23. this is kinda dirty fix, since function will be able to encode only max one day of seconds
+
+  result := EncodeTime(h, m, s, 0)
+end;
+
+procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
+var
+  a1len, a2len: Integer;
+begin
+  a2len := Length(AArray);
+  if a2len = 0 then
+    Exit;
+  a1len := Length(AAppendTo);
+
+  SetLength(AAppendTo, a1len + a2len);
+  Move(AArray[0], AAppendTo[a1len], a2len * SizeOf(UINT32));
+end;
 
 initialization
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));

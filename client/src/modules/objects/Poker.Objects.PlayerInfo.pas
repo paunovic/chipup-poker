@@ -142,11 +142,9 @@ end;
 function TPlayers.FindPlayerById(const AId: TBytes; var APlayerInfo: TPlayerInfo): Boolean;
 var
   player: TPlayerInfo;
-  a1len : Integer;
 begin
-  a1len := Length(AId);
   for player in self.ToArray do
-    if CompareBytes(AId, player.Id, a1len) then
+    if CompareBytes(AId, player.Id) then
     begin
       APlayerInfo := player;
       Exit(TRUE);

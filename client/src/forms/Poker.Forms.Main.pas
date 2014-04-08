@@ -422,6 +422,7 @@ begin
   finally
     gridJoinedClubsTable.DataController.EndFullUpdate;
   end;
+  gridJoinedClubsTable.DataController.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
@@ -459,6 +460,7 @@ begin
   finally
     c.EndFullUpdate;
   end;
+  c.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdatePublicClublist;
@@ -485,6 +487,7 @@ begin
   finally
     c.EndFullUpdate;
   end;
+  c.Refresh;
 end;
 
 procedure TfrmChipUpMain.gridJoinedClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -889,7 +892,7 @@ begin
         Break;
       end;
 
-    club.Games.Remove(game);
+    club.Games.AddGame(pbgame);
   end;
 
   ConfigureGUI;
