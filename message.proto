@@ -283,6 +283,7 @@ message TableSit {
 message Pot {
 	required uint32 value = 1;
 	repeated uint32 members = 2;
+	optional uint32 rake = 3;
 }
 
 message TableStatus {
