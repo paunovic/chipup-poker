@@ -986,15 +986,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		/*case codes.CMD_GETDECK:
-			console.log(args);
-			var deck = new Deck();
-			deck.shuffle(function shuffled(){
-				console.log(deck);
-				console.log(deck.prettyPrint());
-				this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
-			}.bind(this));
-			break;*/
 		case codes.scListPublicClubs:
 			allClubs.find({is_private:false,members:{$ne:this.userid},owner:{$ne:this.userid}},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
 				for (var x=0; x<arr.length; x++) {
@@ -1778,43 +1769,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.scPutChips:
-			var params = pb.Parse(args,'Poker.PutChips');
-			var id = toMongoId(params.table_mongo_id);
-			delete params.table_mongo_id;
-			this.log('putChips %j',params);
-			var token2 = profiler.start('putChips-inner3');
-			var token6 = profiler.start('putChips-inner6'); // includes writeLock callback if its unlocked
-			Game.getGame(id,function (err,game) {
-				this.log('getting lock');
-				game.Lock.writeLock(function (release) {
-					token2.stop();
-					var token5 = profiler.start('putChips-inner5');
-					var seat = game.findSeat(this);
-					if (seat != game.current_seat) {
-						this.reply(0,'putchips while not active player');
-						console.log('putChips fail 2');
-						release();
-						return;
-					}
-					game.putChips(this,params.chip_amount,function (events,offset){
-						assert(game.members[seat].chips >= 0);
-						if (['tsWinning'].indexOf(game.state) == -1) {
-							game.startTimer(game.current_seat,offset);
-						}
-						var token4 = profiler.start('putChips-inner4-2');
-						game.broadcastStatus(null,true,events);
-						token4.stop();
-						token.stop();
-						release();
-						this.log('unlocked');
-						game.checkDelayedLeave();
-					}.bind(this));
-					token5.stop();
-				}.bind(this));
-			}.bind(this));
-			token6.stop();
-			break;
 		case codes.scTableAddOn:
 			var params = pb.Parse(args,'Poker.TableSit');
 			if (params.chips < 1) {
@@ -1892,57 +1846,94 @@ ClientSocket.prototype.handle = function (code,args) {
 				game.members[seatIdx].sitOutNextRound = params.flag;
 			}.bind(this));
 			break;
-		case codes.scTableSitOutNextBB:
-			var params = pb.Parse(args,'Poker.TableBoolFlag');
-			var id = toMongoId(params.table_mongo_id);
-			Game.getGame(id,function (err,game) {
-				var seatIdx = game.findSeat(this);
-				if (seatIdx === undefined) {
-					this.reply(0,'your not sitting');
-					return;
-				}
-				if (['psInHand','psAllIn','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
-					this.reply(0,'you cant sitout if your out of play');
-					return;
-				}
-				game.members[seatIdx].sitOutBB = params.flag;
-			}.bind(this));
-			break;
-		case codes.scResendVerificationMail:
-			allUsers.findOne({_id:this.userid},function (err,row) {
-				if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,function () {},function () {},function () {});
-			}.bind(this));
-			break;
-		case codes.scShowLosingCards:
-			var params = pb.Parse(args,'Poker.Game');
-			var id = toMongoId(params._id);
-			Game.getGame(id,function (err,game) {
-				game.Lock.writeLock(function (release) {
-					if (game.state != 'tsWinning') {
-						this.reply(0,'the game isnt over yet');
-						this.log('state was %s',game.state);
-						release();
-						return;
-					}
-					var seatIdx = game.findSeat(this);
-					if (seatIdx === undefined) {
-						this.reply(0,'your not sitting');
-						release();
-						return;
-					}
-					game.members[seatIdx].muck = false;
-					game.broadcastStatus(this,true,[]);
-					release();
-				}.bind(this));
-			}.bind(this));
-			break;
 		default:
-			if (handlers[code]) handlers[code].call(this,args);
+			if (handlers[code]) handlers[code].call(this,args,token);
 			else this.log('unknown opcode %d/%s',code,codes.revers[code]);
 		}
 	}
 }
 var handlers = {};
+handlers[codes.scPutChips] = function (args,token) {
+	var params = pb.Parse(args,'Poker.PutChips');
+	var id = toMongoId(params.table_mongo_id);
+	delete params.table_mongo_id;
+	this.log('putChips %j',params);
+	var token2 = profiler.start('putChips-inner3');
+	var token6 = profiler.start('putChips-inner6'); // includes writeLock callback if its unlocked
+	Game.getGame(id,function (err,game) {
+		this.log('getting lock');
+		game.Lock.writeLock(function (release) {
+			token2.stop();
+			var token5 = profiler.start('putChips-inner5');
+			var seat = game.findSeat(this);
+			if (seat != game.current_seat) {
+				this.reply(0,'putchips while not active player');
+				console.log('putChips fail 2');
+				release();
+				return;
+			}
+			game.putChips(this,params.chip_amount,function (events,offset){
+				assert(game.members[seat].chips >= 0);
+				if (['tsWinning'].indexOf(game.state) == -1) {
+					game.startTimer(game.current_seat,offset);
+				}
+				var token4 = profiler.start('putChips-inner4-2');
+				game.broadcastStatus(null,true,events);
+				token4.stop();
+				token.stop();
+				release();
+				this.log('unlocked');
+				game.checkDelayedLeave();
+			}.bind(this));
+			token5.stop();
+		}.bind(this));
+	}.bind(this));
+	token6.stop();
+}
+handlers[codes.scTableSitOutNextBB] = function () {
+	var params = pb.Parse(args,'Poker.TableBoolFlag');
+	var id = toMongoId(params.table_mongo_id);
+	Game.getGame(id,function (err,game) {
+		var seatIdx = game.findSeat(this);
+		if (seatIdx === undefined) {
+			this.reply(0,'your not sitting');
+			return;
+		}
+		if (['psInHand','psAllIn','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
+			this.reply(0,'you cant sitout if your out of play');
+			return;
+		}
+		game.members[seatIdx].sitOutBB = params.flag;
+	}.bind(this));
+}
+handlers[codes.scResendVerificationMail] = function () {
+	allUsers.findOne({_id:this.userid},function (err,row) {
+		if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,function () {},function () {},function () {});
+	}.bind(this));
+}
+handlers[codes.scShowLosingCards] = function (args) {
+	var params = pb.Parse(args,'Poker.Game');
+	var id = toMongoId(params._id);
+	Game.getGame(id,function (err,game) {
+		game.Lock.writeLock(function (release) {
+			if (game.state != 'tsWinning') {
+				this.reply(0,'the game isnt over yet');
+				this.log('state was %s',game.state);
+				release();
+				return;
+			}
+			var seatIdx = game.findSeat(this);
+			if (seatIdx === undefined) {
+				this.reply(0,'your not sitting');
+				release();
+				return;
+			}
+			game.members[seatIdx].muck = false;
+			game.broadcastStatus(this,true,[]);
+			release();
+		}.bind(this));
+	}.bind(this));
+}
 handlers[codes.scRetrieveHandHistoryData] = function (args) {
 	var params = pb.Parse(args,'Poker.RetrieveHandHistoryData');
 	handHistory.find({seq:{ $gt:params.startid, $lt:params.endid }},{seq:1}).toArray(function (err,rows) {
