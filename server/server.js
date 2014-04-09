@@ -1936,30 +1936,30 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.scRetrieveHandHistoryData:
-			var params = pb.Parse(args,'Poker.RetrieveHandHistoryData');
-			handHistory.find({seq:{ $gt:params.startid, $lt:params.endid }},{seq:1}).toArray(function (err,rows) {
-				this.send(codes.srRetrieveHandHistoryData,{rows:rows},'Poker.RetrieveHandHistoryReply');
-			}.bind(this));
-			break;
-		case codes.scFetchHandHistory:
-			var params = pb.Parse(args,'Poker.FetchHandHistory');
-			// FIXME, verify he has access to these games
-			console.log(args,params);
-			var doc = { query:params, querycode:  uuid.v4() };
-			FetchQueue.insert(doc,function (err,row) {
-				assert.ifError(err);
-				console.log(row);
-				this.send(codes.srFetchHandData,{uuid:doc.querycode},'Poker.FetchHandReply');
-			}.bind(this));
-			break;
-		case codes.scQueryTableStats:
-			handlers[codes.scQueryTableStats].call(this,args); // FIXME
-			break;
+		default:
+			if (handlers[code]) handlers[code].call(this,args);
+			else this.log('unknown opcode %d/%s',code,codes.revers[code]);
 		}
 	}
 }
 var handlers = {};
+handlers[codes.scRetrieveHandHistoryData] = function (args) {
+	var params = pb.Parse(args,'Poker.RetrieveHandHistoryData');
+	handHistory.find({seq:{ $gt:params.startid, $lt:params.endid }},{seq:1}).toArray(function (err,rows) {
+		this.send(codes.srRetrieveHandHistoryData,{rows:rows},'Poker.RetrieveHandHistoryReply');
+	}.bind(this));
+}
+handlers[codes.scFetchHandHistory] = function (args) {
+	var params = pb.Parse(args,'Poker.FetchHandHistory');
+	// FIXME, verify he has access to these games
+	console.log(args,params);
+	var doc = { query:params, querycode:  uuid.v4() };
+	FetchQueue.insert(doc,function (err,row) {
+		assert.ifError(err);
+		console.log(row);
+		this.send(codes.srFetchHandData,{uuid:doc.querycode},'Poker.FetchHandReply');
+	}.bind(this));
+}
 handlers[codes.scQueryTableStats] = function (args) {
 	var params = pb.Parse(args,'Poker.QueryTableStats');
 	var ids = [];
