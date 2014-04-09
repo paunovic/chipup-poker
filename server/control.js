@@ -8,7 +8,7 @@ var protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
 
 var pb = new p(fs.readFileSync("../message.desc"));
-protoreader.init(pb,codes);
+protoreader.init(pb,codes,[codes.GlobalMsgEvent]);
 
 var socket = new Client('127.0.0.1',45508);
 function Client(ip,port) {
