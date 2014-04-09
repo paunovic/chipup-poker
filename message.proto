@@ -312,6 +312,7 @@ message TableStatus {
 	optional uint64 time = 18;
 	repeated TableEvent events = 19;
 	repeated Pot pots = 20;
+	optional uint32 rake_percent = 21;
 }
 
 message SeatInfo {
@@ -408,7 +409,7 @@ message TableEvent {
 		required int32 seat = 3;
 		required string msg = 4;
 	}
-	message PotInfo {
+	message WinnerPotInfo {
 		required uint32 sum = 1;
 		repeated uint32 seats = 2;
 		repeated WinnerData WinnerData = 3;
@@ -416,7 +417,7 @@ message TableEvent {
 	}
 	required TableEventType event = 1;
 	optional int32 seat = 2;
-	repeated PotInfo pots = 4;
+	repeated WinnerPotInfo pots = 4;
 	repeated uint32 bets = 5;
 	optional bytes cards = 6;
 }
