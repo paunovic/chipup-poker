@@ -18,14 +18,14 @@ SmtpConnection.prototype.sendMail = function verify(email,body,callback) {
 		console.log('cb2',err,ret);
 		// ret[0].exchange
 		var state = 0;
-		var socket = net.createConnection({host:'c2d.local',port:25});
+		var socket = net.createConnection({host:'127.0.0.1',port:25});
 		var reader = new Reader(socket,function handleLine(line) {
 			console.log('line is',line);
 			var parts = line.split(' ');
 			var code = parseInt(parts[0]);
 			switch (code) {
 			case 220:
-				socket.write("MAIL FROM:clever@angeldsis.com\r\n");
+				socket.write("MAIL FROM:service@chipuppoker.com\r\n");
 				break;
 			case 250:
 				if (state == 0) {
