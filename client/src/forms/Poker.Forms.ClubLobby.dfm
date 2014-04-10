@@ -2457,7 +2457,6 @@ object frmClubLobby: TfrmClubLobby
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Transparent = True
-    ExplicitWidth = 886
     Height = 107
     Width = 896
     AnchorX = 448
@@ -2480,7 +2479,6 @@ object frmClubLobby: TfrmClubLobby
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Transparent = True
-    ExplicitWidth = 886
     Height = 24
     Width = 896
     AnchorX = 448
@@ -2535,14 +2533,12 @@ object frmClubLobby: TfrmClubLobby
     TabOrder = 2
     Properties.ActivePage = tsStats
     Properties.HideTabs = True
-    ExplicitWidth = 886
     ClientRectBottom = 484
     ClientRectRight = 896
     ClientRectTop = 0
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitWidth = 886
       DesignSize = (
         896
         484)
@@ -2642,7 +2638,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
-        ExplicitWidth = 620
         DesignSize = (
           630
           477)
@@ -2782,7 +2777,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 886
       DesignSize = (
         896
         484)
@@ -2792,7 +2786,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 872
         DesignSize = (
           882
           477)
@@ -2937,7 +2930,6 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 886
       DesignSize = (
         896
         484)
@@ -2952,7 +2944,6 @@ object frmClubLobby: TfrmClubLobby
         BorderStyle = cxcbsNone
         TabOrder = 0
         LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        ExplicitWidth = 558
         object gridStatsTable: TcxGridTableView
           OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2967,8 +2958,9 @@ object frmClubLobby: TfrmClubLobby
           OptionsData.Editing = False
           OptionsData.Inserting = False
           OptionsSelection.CellSelect = False
-          OptionsView.NoDataToDisplayInfoText = 'No stats available for this table'
+          OptionsView.NoDataToDisplayInfoText = 'No stats available for this table(s)'
           OptionsView.ColumnAutoWidth = True
+          OptionsView.GridLines = glVertical
           OptionsView.GroupByBox = False
           object gridStatsTablePlayerId: TcxGridColumn
             DataBinding.ValueType = 'Variant'
@@ -2991,6 +2983,7 @@ object frmClubLobby: TfrmClubLobby
             Properties.Alignment.Horz = taRightJustify
             Properties.ValueType = vtFloat
             HeaderAlignmentHorz = taCenter
+            Styles.OnGetContentStyle = gridStatsTableBalanceStylesGetContentStyle
             Width = 67
           end
           object gridStatsTableBuyins: TcxGridColumn
@@ -3056,6 +3049,7 @@ object frmClubLobby: TfrmClubLobby
         LookAndFeel.SkinName = 'ChipUpDarkStyle'
         object gridTablesTable: TcxGridTableView
           PopupMenu = pmTablesStats
+          OnDblClick = gridTablesTableDblClick
           OnFocusedRecordChanged = gridTablesTableFocusedRecordChanged
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
@@ -3067,9 +3061,12 @@ object frmClubLobby: TfrmClubLobby
           OptionsData.Deleting = False
           OptionsData.DeletingConfirmation = False
           OptionsData.Inserting = False
-          OptionsView.NoDataToDisplayInfoText = ' '
+          OptionsView.NoDataToDisplayInfoText = 'No tables available for this club'
           OptionsView.ColumnAutoWidth = True
+          OptionsView.GridLines = glVertical
           OptionsView.GroupByBox = False
+          Styles.Selection = styleTableRowSelected
+          Styles.OnGetContentStyle = gridTablesTableStylesGetContentStyle
           object gridTablesTableId: TcxGridColumn
             DataBinding.ValueType = 'Variant'
             PropertiesClassName = 'TcxBlobEditProperties'
@@ -3077,6 +3074,7 @@ object frmClubLobby: TfrmClubLobby
             Visible = False
           end
           object gridTablesEnabled: TcxGridColumn
+            DataBinding.ValueType = 'Boolean'
             PropertiesClassName = 'TcxCheckBoxProperties'
             Properties.ImmediatePost = True
             Properties.NullStyle = nssUnchecked
@@ -3097,6 +3095,7 @@ object frmClubLobby: TfrmClubLobby
             Properties.ReadOnly = False
             HeaderAlignmentHorz = taCenter
             Options.Editing = False
+            Styles.OnGetContentStyle = gridTablesStatusStylesGetContentStyle
             Width = 73
           end
           object gridTablesDate: TcxGridColumn
@@ -3110,6 +3109,10 @@ object frmClubLobby: TfrmClubLobby
             SortIndex = 0
             SortOrder = soDescending
             Width = 91
+          end
+          object gridTablesStatusInt: TcxGridColumn
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Visible = False
           end
         end
         object gridTablesLevel: TcxGridLevel
@@ -3134,7 +3137,6 @@ object frmClubLobby: TfrmClubLobby
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitWidth = 491
   end
   object btStats: TcxButton
     Left = 260
@@ -3212,6 +3214,10 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Unselect All'
       OnExecute = acTablesStatsUnselectAllExecute
     end
+    object acTablesStatsSelectAll: TAction
+      Caption = 'Select All'
+      OnExecute = acTablesStatsSelectAllExecute
+    end
   end
   object tiUpdateClubDetails: TTimer
     Enabled = False
@@ -3223,8 +3229,40 @@ object frmClubLobby: TfrmClubLobby
   object pmTablesStats: TPopupMenu
     Left = 140
     Top = 404
+    object SelectAll1: TMenuItem
+      Action = acTablesStatsSelectAll
+    end
     object UnselectAll1: TMenuItem
       Action = acTablesStatsUnselectAll
+    end
+  end
+  object StatsStyleRepo: TcxStyleRepository
+    Left = 224
+    Top = 404
+    PixelsPerInch = 96
+    object styleBalancePositive: TcxStyle
+      AssignedValues = [svColor]
+      Color = 28416
+    end
+    object styleBalanceNegative: TcxStyle
+      AssignedValues = [svColor]
+      Color = clMaroon
+    end
+    object styleTableActive: TcxStyle
+      AssignedValues = [svColor]
+      Color = 28416
+    end
+    object styleTableClosing: TcxStyle
+      AssignedValues = [svColor]
+      Color = 28416
+    end
+    object styleTableClosed: TcxStyle
+      AssignedValues = [svColor]
+      Color = clMaroon
+    end
+    object styleTableRowSelected: TcxStyle
+      AssignedValues = [svColor]
+      Color = 5329233
     end
   end
 end

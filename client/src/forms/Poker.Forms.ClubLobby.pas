@@ -92,6 +92,16 @@ type
     UnselectAll1: TMenuItem;
     acTablesStatsUnselectAll: TAction;
     gridTablesDate: TcxGridColumn;
+    StatsStyleRepo: TcxStyleRepository;
+    styleBalancePositive: TcxStyle;
+    styleBalanceNegative: TcxStyle;
+    styleTableActive: TcxStyle;
+    gridTablesStatusInt: TcxGridColumn;
+    styleTableClosing: TcxStyle;
+    styleTableClosed: TcxStyle;
+    styleTableRowSelected: TcxStyle;
+    acTablesStatsSelectAll: TAction;
+    SelectAll1: TMenuItem;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -120,6 +130,14 @@ type
       var AHintTextRect: TRect);
     procedure acTablesStatsUnselectAllExecute(Sender: TObject);
     procedure gridTablesEnabledPropertiesChange(Sender: TObject);
+    procedure gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+    procedure gridTablesTableDblClick(Sender: TObject);
+    procedure acTablesStatsSelectAllExecute(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -152,6 +170,8 @@ type
     procedure CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
 
   protected
+    procedure CreateParams(var AParams: TCreateParams); override;
+
   public
     procedure SetParams(const AParams: array of pointer);
 
@@ -323,6 +343,14 @@ begin
   end;
 end;
 
+procedure TfrmClubLobby.CreateParams(var AParams: TCreateParams);
+begin
+  inherited;
+
+  AParams.ExStyle := AParams.ExStyle or WS_EX_APPWINDOW;
+  AParams.WndParent := 0;
+end;
+
 procedure TfrmClubLobby.btTablesClick(Sender: TObject);
 begin
   pcTabs.ActivePage := tsTables;
@@ -403,6 +431,19 @@ begin
   end;
 end;
 
+procedure TfrmClubLobby.gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+var
+  value: Variant;
+begin
+  value := ARecord.Values[AItem.Index];
+  if value > 0 then
+    AStyle := styleBalancePositive
+  else
+    if value < 0 then
+      AStyle := styleBalanceNegative;
+end;
+
 procedure TfrmClubLobby.gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
   ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean;
   var AHintTextRect: TRect);
@@ -450,6 +491,39 @@ begin
   UpdatePlayersStatsList;
 end;
 
+procedure TfrmClubLobby.gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+var
+  value: Variant;
+begin
+  value := ARecord.Values[gridTablesStatusInt.Index];
+  case value of
+    Integer(gsEmpty): AStyle := styleTableActive;
+    Integer(gsActive): AStyle := styleTableActive;
+    Integer(gsClosing): AStyle := styleTableClosing;
+    Integer(gsClosed): AStyle := styleTableClosed;
+  end;
+
+end;
+
+procedure TfrmClubLobby.gridTablesTableDblClick(Sender: TObject);
+var
+  c: TcxDataController;
+  value: Boolean;
+begin
+  c := gridTablesTable.DataController;
+  c.BeginFullUpdate;
+  try
+    value := FALSE;
+    if c.GetValue(c.FocusedRecordIndex, gridTablesEnabled.Index) = TRUE then
+      value := TRUE;
+    c.SetValue(c.FocusedRecordIndex, gridTablesEnabled.Index, not value);
+    UpdatePlayersStatsList;
+  finally
+    c.EndFullUpdate;
+  end;
+end;
+
 procedure TfrmClubLobby.gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
@@ -465,6 +539,13 @@ begin
     FSelectedStatsTableId := gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index);
 
   UpdatePlayersStatsList;
+end;
+
+procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+begin
+  if ARecord.Values[gridTablesEnabled.Index] = TRUE then
+    AStyle := styleTableRowSelected;
 end;
 
 procedure TfrmClubLobby.ModalFormClose(ASender: TObject);
@@ -563,6 +644,7 @@ begin
         c.SetValue(recidx, gridTablesName.Index, tmp);
         c.SetValue(recidx, gridTablesStatus.Index, game.StateAsStr);
         c.SetValue(recidx, gridTablesDate.Index, MongoIdToDateTime(game.MongoId));
+        c.SetValue(recidx, gridTablesStatusInt.Index, Integer(game.State));
       end;
   finally
     c.EndFullUpdate;
@@ -651,7 +733,7 @@ begin
             c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.BuyinsTotal / 100);
             c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.CashoutsTotal / 100);
             c.SetValue(recidx, gridStatsTableRake.Index, playerstats.RakeContrib / 100);
-            c.SetValue(recidx, gridStatsTableChipsInPlay.Index, 0);
+            c.SetValue(recidx, gridStatsTableChipsInPlay.Index, playerstats.ChipsInPlay / 100);
             datetim := SecondsToTime(playerstats.SecondsPlayed);
             ReplaceDate(datetim, Date);
             c.SetValue(recidx, gridStatsTableTimePlayed.Index, datetim);
@@ -816,6 +898,21 @@ begin
     Exit;
 
   ServerSocket.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
+end;
+
+procedure TfrmClubLobby.acTablesStatsSelectAllExecute(Sender: TObject);
+var
+  C1: Integer;
+begin
+  gridTablesTable.DataController.BeginFullUpdate;
+  try
+    for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
+      gridTablesTable.DataController.SetValue(C1, gridTablesEnabled.Index, TRUE);
+    UpdatePlayersStatsList;
+  finally
+    gridTablesTable.DataController.EndFullUpdate;
+  end;
+  gridTablesTable.DataController.Refresh;
 end;
 
 procedure TfrmClubLobby.acTablesStatsUnselectAllExecute(Sender: TObject);

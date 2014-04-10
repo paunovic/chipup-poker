@@ -127,10 +127,10 @@ end;
 function TGameInfo.GetStateStr: String;
 begin
   case FState of
-    gsActive: result := 'Active';
+    gsActive: result := 'Open';
     gsClosing: result := 'Closing';
     gsClosed: result := 'Closed';
-    gsEmpty: result := 'Empty';
+    gsEmpty: result := 'Open';
   else
     result := 'Unknown';
   end;

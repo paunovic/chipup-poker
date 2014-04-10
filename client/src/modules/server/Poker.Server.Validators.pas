@@ -73,10 +73,10 @@ function ValidateClubCode(const AClubCode: String; out AError: String): Boolean;
 begin
   AError := '';
   if (Length(AClubCode) > ServerSettings.StringLengths.ClubInvCode) then
-    AError := Format('Club invitation code can''t be longer than %d characters', [ServerSettings.StringLengths.ClubInvCode])
+    AError := Format('Club password can''t be longer than %d characters', [ServerSettings.StringLengths.ClubInvCode])
   else
     if not IsValidString(AClubCode, CLUBCODE_ALLOWED_CHARS) then
-      AError := 'Invalid characters in club invitation code';
+      AError := 'Invalid characters in club password';
 
   result := AError = '';
 end;
@@ -89,7 +89,7 @@ begin
 
   if AClubCode = '' then
   begin
-    AError := 'Private clubs must have invitation code';
+    AError := 'Private clubs must have password';
     Exit(FALSE);
   end;
 

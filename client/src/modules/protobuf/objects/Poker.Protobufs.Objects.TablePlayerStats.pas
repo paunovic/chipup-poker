@@ -18,6 +18,7 @@ type
       FN_CASHOUTS = 5;
       FN_RAKECONTRIB = 6;
       FN_SECONDSPLAYED = 7;
+      FN_CHIPSINPLAY = 8;
 
     var
       FUserid: TBytes;
@@ -26,6 +27,7 @@ type
       FCashouts: TArray<UINT32>;
       FRakecontrib: UINT32;
       FSecondsplayed: UINT32;
+      FChipsinplay: UINT32;
 
     procedure SetUserid(const AValue: TBytes);
     procedure SetBalance(const AValue: Integer);
@@ -33,6 +35,7 @@ type
     procedure SetCashouts(const AValue: TArray<UINT32>);
     procedure SetRakecontrib(const AValue: UINT32);
     procedure SetSecondsplayed(const AValue: UINT32);
+    procedure SetChipsinplay(const AValue: UINT32);
 
   public
     destructor Destroy; override;
@@ -44,6 +47,7 @@ type
     property Cashouts: TArray<UINT32> read FCashouts write SetCashouts;
     property Rakecontrib: UINT32 read FRakecontrib write SetRakecontrib;
     property Secondsplayed: UINT32 read FSecondsplayed write SetSecondsplayed;
+    property Chipsinplay: UINT32 read FChipsinplay write SetChipsinplay;
   end;
 
 implementation
@@ -92,6 +96,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSecondsplayed := AProtobufReader.readUInt32;
       end;
+      FN_CHIPSINPLAY: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FChipsinplay := AProtobufReader.readUInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -138,6 +146,12 @@ procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UINT32);
 begin
   FSecondsplayed := AValue;
   ProtobufOutput.writeUInt32(FN_SECONDSPLAYED, AValue);
+end;
+
+procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UINT32);
+begin
+  FChipsinplay := AValue;
+  ProtobufOutput.writeUInt32(FN_CHIPSINPLAY, AValue);
 end;
 
 end.

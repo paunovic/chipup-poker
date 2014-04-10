@@ -15,6 +15,7 @@ type
     FCashouts: TArray<UINT32>;
     FRakeContrib: UINT32;
     FSecondsPlayed: UINT32;
+    FChipsInPlay: UINT32;
 
     function GetBuyinsTotal: UINT32;
     function GetCashoutsTotal: UINT32;
@@ -35,6 +36,7 @@ type
     property SecondsPlayed: UINT32 read FSecondsPlayed;
     property CashoutsTotal: UINT32 read GetCashoutsTotal;
     property BuyinsTotal: UINT32 read GetBuyinsTotal;
+    property ChipsInPlay: UINT32 read FChipsInPlay;
   end;
 
 implementation
@@ -80,6 +82,7 @@ begin
   AppendArray(FCashouts, APlayerStats.Cashouts);
   Inc(FRakeContrib, APlayerStats.RakeContrib);
   Inc(FSecondsPlayed, APlayerStats.SecondsPlayed);
+  Inc(FChipsInPlay, APlayerStats.ChipsInPlay);
 end;
 
 procedure TPlayerStats.Assign(const AProtobuf: TPB_TablePlayerStats);
@@ -90,6 +93,7 @@ begin
   FCashouts := AProtobuf.Cashouts;
   FRakeContrib := AProtobuf.Rakecontrib;
   FSecondsPlayed := AProtobuf.Secondsplayed;
+  FChipsInPlay := AProtobuf.Chipsinplay;
 end;
 
 procedure TPlayerStats.Assign(const APlayerStats: TPlayerStats);
@@ -100,6 +104,7 @@ begin
   FCashouts := APlayerStats.Cashouts;
   FRakeContrib := APlayerStats.Rakecontrib;
   FSecondsPlayed := APlayerStats.Secondsplayed;
+  FChipsInPlay := APlayerStats.Chipsinplay;
 end;
 
 
