@@ -786,9 +786,10 @@ ClientSocket.prototype.handle = function (code,args) {
 		token.tag = 'handle-'+codes.reverse[code];
 	}
 	if (code == codes.scLogout) {
-		Game.handleDisconnect(this,'logout');
-		this.logout();
-		this.send(codes.srLogout);
+		Game.handleDisconnect(this,'logout',function () {
+			this.logout();
+			this.send(codes.srLogout);
+		}.bind(this));
 		return;
 	} else if (code == codes.scPing) {
 		var params = pb.Parse(args,'Poker.PingParams');
@@ -1620,7 +1621,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			Game.getGame(id,function (err,game) {
 				if (!game) {
 					this.reply(0,'invalid gameid');
-				} else game.leave(this,'protocol');
+				} else game.leave(this,'protocol',function () {});
 			}.bind(this));
 			break;
 		case codes.scTableSit:
@@ -1663,6 +1664,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scTableStandUp:
 			var params = pb.Parse(args,'Poker.Game');
 			var id = toMongoId(params._id);
+			var once = true;
 			Game.getGame(id,function (err,game) {
 				game.Lock.writeLock(function (release) {
 					var x = game.findSeat(this);
@@ -1673,6 +1675,8 @@ ClientSocket.prototype.handle = function (code,args) {
 						return;
 					}
 					game.standUp(this,function (folded,events,offset) {
+						assert(once);
+						once = false;
 						this.log('2events are %j',events);
 						if (folded && (game.current_seat >= 0)) {
 							game.startTimer(game.current_seat,offset);
@@ -1817,7 +1821,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						return;
 					}
 					game.members[seatIdx].status = 'psOutOfHand';
-					game.members[seatIdx].sitTime = Date.now();
+					//game.members[seatIdx].sitTime = Date.now();
 					if (game.state == 'tsIdle') game.stateMachine(finish,null,{silent:true},[],0);
 					else finish([]);
 					function finish(events) { // teDeal
@@ -1986,6 +1990,19 @@ handlers[codes.scQueryTableStats] = function (args) {
 					out.push(games[gameidhex]);
 				}
 				if (!containsObjectID(players,stats[i].userid)) players.push(stats[i].userid);
+				this.log('a');
+				if (activeGames[gameidhex]) {
+				this.log('b');
+					if (activeUsers[stats[i].userid]) {
+				this.log('c');
+						var conn = activeUsers[stats[i].userid];
+						var seatIdx = activeGames[gameidhex].findSeat(conn);
+						if (typeof seatIdx == 'number') {
+							this.log('d %s',util.inspect(activeGames[gameidhex].members[seatIdx]));
+							stats[i].chipsinplay = activeGames[gameidhex].members[seatIdx].chips;
+						}
+					}
+				}
 				stats[i].userid = fromMongoId(stats[i].userid);
 				games[gameidhex].playerstats.push(stats[i]);
 			}
@@ -2267,21 +2284,28 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 		assert.ifError(err);
 		if (!row) {
 			log('inserting %j',doc);
-			allStats.insert(doc,finish);
+			allStats.insert(doc,finish.bind(this));
 		} else {
 			log('updating');
-			allStats.update({_id:row._id},mods,finish);
+			allStats.update({_id:row._id},mods,finish.bind(this));
 		}
 		function finish(err) {
 			assert.ifError(err);
 			log('done updating stats');
-			cb();
+			this.club.handOver(this,function () {
+				cb();
+			});
 		}
-	});
+	}.bind(this));
 }
-Game.prototype.updateLeaveStats = function (seatIdx,force) {
-	if (!force && (this.state == 'tsIdle')) return;
+Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
+	if (!this.members[seatIdx].sitTime) {
+		if (cb) cb();
+		return;
+	}
 	var time = (Date.now() - this.members[seatIdx].sitTime) / 1000;
+	this.log('time is:%s',time);
+	assert(time > 0.01);
 	var doc = { gameid:this.obj._id,userid:this.seats[seatIdx].userid, secondsplayed:time };
 	var mods = { $inc:{secondsplayed:time}};
 	var key = {gameid:this.obj._id,userid:this.seats[seatIdx].userid};
@@ -2297,6 +2321,7 @@ Game.prototype.updateLeaveStats = function (seatIdx,force) {
 		function finish(err) {
 			assert.ifError(err);
 			log('done updating stats');
+			if (cb) cb();
 		}
 	});
 }
@@ -2570,9 +2595,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 		this.log('cleared seat');
 		this.current_seat = -1;
 		this.log('main cb');
-		this.club.handOver(this,function () {
-			cb(rakestats);
-		});
+		cb(rakestats);
 
 		setTimeout(function () {
 			this.Lock.writeLock(function (release) {
@@ -2765,20 +2788,24 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 		cb(events,0);
 	}
 }
-Game.prototype.postWinSaveStats = function (rakestats) {
-	function hack(mods,key) {
-		log('updating stats %j',mods);
-		allStats.update(key,mods,function () {
-		});
-	}
+Game.prototype.postWinSaveStats = function (rakestats,cb) {
+	var jobs = [];
 	this.log('rake info: %j, balances:%j',rakestats,this.balance_changes);
 	for (var x=0; x<this.balance_changes.length; x++) {
 		if (!this.balance_changes[x]) continue;
 		if (this.balance_changes[x] != 0) {
 			var mods = { $inc:{balance:this.balance_changes[x], rakecontrib:rakestats[x].rake}};
-			hack.call(this,mods,{gameid:this.obj._id,userid:rakestats[x].userid});
+			var key = {gameid:this.obj._id,userid:rakestats[x].userid};
+			var job = {mods:mods, key:key};
+			jobs.push(job);
 		}
 	}
+	async.each(jobs,function hack(job,cb2) {
+		log('updating stats %j',job);
+		allStats.update(job.key,job.mods,function () {
+			cb2();
+		});
+	},cb);
 }
 Game.prototype.calcWinners = function (cb,events,extradelay) {
 	assert(events);
@@ -2858,8 +2885,11 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 		this.addHistory({code:['win1'],potdata:potdata},winnercount);
 		this.doWin(function (rakestats) {
 			this.saveHistory(function () {
-				this.postWinSaveStats(rakestats);
-				cb(events,0);
+				this.postWinSaveStats(rakestats,function () {
+					//this.club.handOver(this,function () {
+						cb(events,0);
+					//});
+				}.bind(this));
 			}.bind(this));
 		}.bind(this),extradelay);
 		this.log('MOVE WIN END '+logmsg.join(','));
@@ -3131,7 +3161,6 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 	assert.equal(typeof extradelay,'number');
 	this.log('state machine: %s events:%j',this.state,events);
 	this.checkDelayedLeave();
-	var wasidle = true;
 	switch (this.state) {
 	case 'tsWinning':
 		cb(events,0); // FIXME
@@ -3151,7 +3180,21 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		this.checkDelayedLeave();
 		this.current_seat = -1;
 		this.nextDealer();
-		wasidle = false;
+		var jobs = [];
+		for (var x=0; x<this.members.length; x++) {
+			if (!this.members[x]) continue;
+			if (this.members[x].status == 'psOutOfPlay') continue;
+			this.log('found %d %s %d',x,this.members[x].status,this.members[x].sitTime);
+			jobs.push(x);
+		}
+		async.each(jobs,function (seatIdx,cb2) {
+			this.updateLeaveStats(seatIdx,true,cb2);
+		}.bind(this),function () {
+			this.club.handOver(this,function () {
+				this.stateMachine(cb,conn,config,events,extradelay);
+			}.bind(this));
+		}.bind(this));
+		break;
 	case 'tsIdle':
 		if (this.autoDelete) {
 			this.close(conn,function () {
@@ -3164,9 +3207,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			if (!this.members[x]) continue;
 			if (this.members[x].status == 'psOutOfPlay') continue;
 			if (this.members[x].chips > 0) {
-				if (wasidle) {
-					this.members[x].sitTime = Date.now();
-				}
+				this.members[x].sitTime = Date.now();
 				this.log('sm found one',x,this.members[x].status,this.members[x].chips);
 				havechips++;
 			} else if (this.members[x].chips == 0) {
@@ -3199,14 +3240,6 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			}
 			this.deal(cb,config);
 		} else {
-			if (!wasidle) {
-				for (var x=0; x<this.members.length; x++) {
-					if (!this.members[x]) continue;
-					if (this.members[x].status == 'psOutOfPlay') continue;
-					this.log('found %d %s %d',x,this.members[x].status,this.members[x].sitTime);
-					this.updateLeaveStats(x,true);
-				}
-			}
 			finish1.call(this);
 		}
 		function finish1() {
@@ -3389,9 +3422,12 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 	var mods = { $push:{cashouts:buyin}};
 	var key = {gameid:this.obj._id,userid:userid};
 	log('updating %s %s',key.gameid,key.userid);
-	allStats.update(key,mods,cb);
+	allStats.update(key,mods,function () {
+		this.club.handOver(this,function () {
+			cb();
+		});
+	}.bind(this));
 	log('done updating stats');
-	cb();
 }
 Game.prototype.standUp = function (conn,cb1) {
 	assert.equal(this.Lock.readers,-1);
@@ -3477,17 +3513,18 @@ Game.prototype.standUp = function (conn,cb1) {
 			conn.log('a');
 			// FIXME json performance hack
 			allClubs.findOne({_id:this.obj.clubid},function (err,club) {
-				conn.log('b');
+				conn.log('b %j',club);
 				var conn2 = activeUsers[club.owner];
 				var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
 				if (conn2) conn2.send(codes.seGameChange,g,'Poker.Game');
-				if (!club.members) return cb1(folded,events);
-				conn.log('c');
-				for (var x=0; x<club.members.length; x++) {
-					var conn2 = activeUsers[club.members[x]];
-					if (!conn2) continue;
-					if (conn2 === conn) continue;
-					conn2.send(codes.seGameChange,g,'Poker.Game');
+				if (club.members) {
+					conn.log('c');
+					for (var x=0; x<club.members.length; x++) {
+						var conn2 = activeUsers[club.members[x]];
+						if (!conn2) continue;
+						if (conn2 === conn) continue;
+						conn2.send(codes.seGameChange,g,'Poker.Game');
+					}
 				}
 				conn.log('d');
 				this.updateCashOut(conn.userid,seatObj.chips,function () {
@@ -3497,7 +3534,7 @@ Game.prototype.standUp = function (conn,cb1) {
 		}
 	}
 }
-Game.prototype.leave = function leave(conn,reason) {
+Game.prototype.leave = function leave(conn,reason,cb1) {
 	conn.log('getting lock:%s',this.Lock.trace);
 	delete this.users[conn.userid];
 	this.Lock.writeLock(function (release) {
@@ -3526,6 +3563,7 @@ Game.prototype.leave = function leave(conn,reason) {
 					this.doDelete();
 				}
 			}
+			cb1();
 			release();
 		}
 	}.bind(this));
@@ -3582,12 +3620,16 @@ Game.prototype.stopTimer = function stopTimer(seat) {
 	}
 	this.timer = null;
 }
-Game.handleDisconnect = function handleDisconnect(conn,reason) {
+Game.handleDisconnect = function handleDisconnect(conn,reason,cb1) {
 	conn.log('handling disconnect:%s',reason);
+	var jobs = [];
 	for (key in activeGames) {
 		var game = activeGames[key];
-		if (game.users[conn.userid]) game.leave(conn,'disconnect');
+		if (game.users[conn.userid]) jobs.push(game);
 	}
+	async.each(jobs,function (game,cb2) {
+		game.leave(conn,'disconnect',cb2);
+	},cb1);
 }
 Game.prototype.logEvent = function (type,userid,change) {
 	var doc = {eventtype:type};
