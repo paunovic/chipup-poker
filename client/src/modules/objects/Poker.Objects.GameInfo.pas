@@ -123,7 +123,6 @@ begin
   end;
 end;
 
-
 function TGameInfo.GetStateStr: String;
 begin
   case FState of

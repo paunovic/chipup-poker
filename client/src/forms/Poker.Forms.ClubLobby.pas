@@ -497,13 +497,15 @@ var
   value: Variant;
 begin
   value := ARecord.Values[gridTablesStatusInt.Index];
+  if VarIsNull(value) then
+    Exit;
+
   case value of
     Integer(gsEmpty): AStyle := styleTableActive;
     Integer(gsActive): AStyle := styleTableActive;
     Integer(gsClosing): AStyle := styleTableClosing;
     Integer(gsClosed): AStyle := styleTableClosed;
   end;
-
 end;
 
 procedure TfrmClubLobby.gridTablesTableDblClick(Sender: TObject);
@@ -642,9 +644,13 @@ begin
         recidx := c.AppendRecord;
         c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId);
         c.SetValue(recidx, gridTablesName.Index, tmp);
-        c.SetValue(recidx, gridTablesStatus.Index, game.StateAsStr);
-        c.SetValue(recidx, gridTablesDate.Index, MongoIdToDateTime(game.MongoId));
-        c.SetValue(recidx, gridTablesStatusInt.Index, Integer(game.State));
+
+        if Assigned(game) then
+        begin
+          c.SetValue(recidx, gridTablesStatus.Index, game.StateAsStr);
+          c.SetValue(recidx, gridTablesDate.Index, MongoIdToDateTime(game.MongoId));
+          c.SetValue(recidx, gridTablesStatusInt.Index, Integer(game.State));
+        end;
       end;
   finally
     c.EndFullUpdate;

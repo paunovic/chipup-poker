@@ -228,6 +228,7 @@ begin
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   Players.Clear;
+  TablesStats.Clear;
   Tables.ClearWithoutNotification;
   tiPublicClubRefresh.Enabled := FALSE;
 end;
