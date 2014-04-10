@@ -1,0 +1,3 @@
+#!/bin/bash
+protoc common.proto backend.proto message.proto -o message.desc
+node server/rebuild.js
