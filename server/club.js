@@ -38,6 +38,13 @@ Club.prototype.handOver = function (gameObj,cb) {
 					out.push(games[gameidhex]);
 				}
 				if (!containsObjectID(players,stats[i].userid)) players.push(stats[i].userid);
+				if (activeUsers[stats[i].userid]) {
+					var conn = activeUsers[stats[i].userid];
+					var seatIdx = gameObj.findSeat(conn);
+					if (typeof seatIdx == 'number') {
+						stats[i].chipsinplay = gameObj.members[seatIdx].chips;
+					}
+				}
 				stats[i].userid = fromMongoId(stats[i].userid);
 				games[gameidhex].playerstats.push(stats[i]);
 			}
