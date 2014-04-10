@@ -149,7 +149,7 @@ app.get("/passwordreset",function (req,res) {
 				res.send("password changed, new password sent to your email");
 				var test = new SmtpConnection();
 				var message = 'your new password is: '+newpassword;
-				test.sendMail(user.email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\n'+message,function cb(err,ret) {
+				test.sendMail(user.email,'From: service@chipuppoker.com\r\nSubject: test\r\n\r\n'+message,function cb(err,ret) {
 					console.log('cb',err,ret);
 					if (err) {
 						console.log('password reset email error',err);
@@ -761,7 +761,7 @@ function containsObjectID(list,id) {
 function sendAuthEmail(userid,authcode,email,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
 	var link = domain+'confirm?code='+authcode;
-	test.sendMail(email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
+	test.sendMail(email,'From: service@chipuppoker.com\r\nSubject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
 		console.log('cb',err,ret);
 		if (err) {
 			if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
@@ -909,7 +909,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				allUsers.update({_id:row._id},{$set:doc},function (err,res) {
 					var test = new SmtpConnection();
 					var link = domain+'passwordreset?code='+doc.forgotcode;
-					test.sendMail(row.email,'From: clever@angeldsis.com\r\nSubject: test\r\n\r\nClick here to reset your password: '+link,function cb(err,ret) {
+					test.sendMail(row.email,'From: service@chipuppoker.com\r\nSubject: test\r\n\r\nClick here to reset your password: '+link,function cb(err,ret) {
 						console.log('cb',err,ret);
 						token.stop();
 						if (err) {
@@ -2050,11 +2050,15 @@ function Pot(game) {
 	this.value = 0;
 	this.members = []
 	this.trueMembers = []
+	this.trueUsers = [];
 }
 Pot.prototype.add = function (bet,seat,game) {
 	this.value += bet;
 
-	if (this.trueMembers.indexOf(seat) == -1) this.trueMembers.push(seat);
+	if (this.trueMembers.indexOf(seat) == -1) {
+		this.trueMembers.push(seat);
+		this.trueUsers.push(game.seats[seat].userid);
+	}
 
 	if (this.members.indexOf(seat) != -1) return;
 	var pub = game.members[seat];
@@ -2506,7 +2510,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 			//priv.conn.log('folding seat %d, pots:%j',seat,this.pots[x].members);
 			var idx = this.pots[x].members.indexOf(seat);
 			if (idx != -1) {
-				priv.conn.log(this.pots,idx,seat);
+				priv.conn.log('pots:%j idx:%d seat:%d',this.pots,idx,seat);
 				this.pots[x].members.splice(idx,1);
 			}
 		}
@@ -2555,6 +2559,8 @@ Game.prototype.fold = function fold(seat,cb1) {
 }
 Game.prototype.doWin = function (cb,extradelay) {
 	var totalrake = 0;
+	var rakestats = [];
+
 	assert.equal(this.Lock.readers,-1);
 	assert.equal(typeof extradelay,'number');
 	this.state = 'tsWinning';
@@ -2564,7 +2570,9 @@ Game.prototype.doWin = function (cb,extradelay) {
 		this.log('cleared seat');
 		this.current_seat = -1;
 		this.log('main cb');
-		this.club.handOver(this,cb);
+		this.club.handOver(this,function () {
+			cb(rakestats);
+		});
 
 		setTimeout(function () {
 			this.Lock.writeLock(function (release) {
@@ -2616,12 +2624,26 @@ Game.prototype.doWin = function (cb,extradelay) {
 	for (var y=0; y<this.pots.length; y++) {
 		var pot = this.pots[y];
 		if (pot.value == 0) continue;
+
+		// redo
 		var rake = pot.value * (this.rake / 100);
+		var rakesplit = Math.round(rake / pot.trueMembers.length);
+		rake = rakesplit * pot.trueMembers.length;
+		pot.rake = rake;
+		this.history.potdata[y].rake = rake;
+		var split = ((pot.value-rake)/pot.winners.length);
+		// </redo>
+		//var rake = pot.value * (this.rake / 100);
 		this.log('splitting pot#%d',y)
-		var split = Math.round((pot.value-rake) / pot.winners.length);
-		rake = pot.value - (split * pot.winners.length);
+		//var split = Math.round((pot.value-rake) / pot.winners.length);
+		//rake = pot.value - (split * pot.winners.length);
 		totalrake += rake;
-		console.log('rake:%d pot:%j',rake,pot);
+		//var rakesplit = rake/pot.trueMembers.length;
+		this.log('rake:%d/%d pot:%j split:%d',rake,rakesplit,pot,split);
+		for (var x=0; x<pot.trueMembers.length; x++) {
+			if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit;
+			else rakestats[pot.trueMembers[x]] = { rake:rakesplit, userid: pot.trueUsers[x] };
+		}
 		for (var x=0; x<pot.winners.length; x++) {
 			var priv = this.seats[pot.winners[x]];
 			if (winnerObjects.indexOf(this.members[pot.winners[x]]) == -1) {
@@ -2634,7 +2656,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 		}
 		this.log('pot#%d initialrake:%d totalrake:%d',y,rake,totalrake);
 	}
-	this.log('initialrake:%d totalrake:%d',rake,totalrake);
+	this.log('initialrake:%d totalrake:%d pots:%j',rake,totalrake,this.pots);
 	assert.equal(typeof totalrake,'number');
 	this.history.totalrake = totalrake;
 	this.log('wins',wins,winnerids);
@@ -2743,6 +2765,21 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 		cb(events,0);
 	}
 }
+Game.prototype.postWinSaveStats = function (rakestats) {
+	function hack(mods,key) {
+		log('updating stats %j',mods);
+		allStats.update(key,mods,function () {
+		});
+	}
+	this.log('rake info: %j, balances:%j',rakestats,this.balance_changes);
+	for (var x=0; x<this.balance_changes.length; x++) {
+		if (!this.balance_changes[x]) continue;
+		if (this.balance_changes[x] != 0) {
+			var mods = { $inc:{balance:this.balance_changes[x], rakecontrib:rakestats[x].rake}};
+			hack.call(this,mods,{gameid:this.obj._id,userid:rakestats[x].userid});
+		}
+	}
+}
 Game.prototype.calcWinners = function (cb,events,extradelay) {
 	assert(events);
 	assert.equal(typeof extradelay,'number');
@@ -2819,33 +2856,9 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 	function finish1() {
 		events.push(this.makeEvent('teWinning',null,potdata));
 		this.addHistory({code:['win1'],potdata:potdata},winnercount);
-		function hack(doc,mods,key) {
-			allStats.findOne(key,function (err,row) {
-				assert.ifError(err);
-				if (!row) {
-					log('inserting %j',doc);
-					allStats.insert(doc,finish);
-				} else {
-					log('updating');
-					allStats.update({_id:row._id},mods,finish);
-				}
-				function finish(err) {
-					assert.ifError(err);
-					log('done updating stats');
-				}
-			});
-		}
-		this.doWin(function () {
+		this.doWin(function (rakestats) {
 			this.saveHistory(function () {
-				for (var x=0; x<this.balance_changes.length; x++) {
-					if (!this.seats[x]) continue;
-					if (this.balance_changes[x] != 0) {
-						// FIXME
-						var doc = { gameid:this.obj._id,userid:this.seats[x].userid, balance:this.balance_changes[x] };
-						var mods = { $inc:{balance:this.balance_changes[x]}};
-						hack.call(this,doc,mods,{gameid:this.obj._id,userid:this.seats[x].userid});
-					}
-				}
+				this.postWinSaveStats(rakestats);
 				cb(events,0);
 			}.bind(this));
 		}.bind(this),extradelay);
@@ -3304,7 +3317,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	/*if ((['tsIdle','tsDealing','tsWinning','tsWinning2'].indexOf(this.state) == -1)) {
 		assert(this.timer,util.inspect(this));
 	}*/
-	var tableStatus = {table_mongo_id: fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
+	var tableStatus = {rake_percent:this.rake, table_mongo_id: fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
 	if (this.pots) {
@@ -3336,7 +3349,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	if (['tsFlop','tsTurning','tsTurn','tsRiverTime','tsRiver'].indexOf(this.state) != -1) tableStatus.flop = new Buffer(this.flop.cards);
 	if (['tsTurn','tsRiverTime','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = new Buffer(this.turn.cards);
 	if (this.state == 'tsRiver') tableStatus.river = new Buffer(this.river.cards);
-	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
+	this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	return tableStatus;
 }
 Game.prototype.sittingCount = function () {
