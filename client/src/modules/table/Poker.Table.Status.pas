@@ -5,7 +5,7 @@ interface
 uses
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent,
   System.SysUtils, System.Generics.Collections, System.Generics.Defaults, Poker.Cards, Poker.Protobufs.Objects.Pot,
-  Poker.Protobufs.Objects.PotInfo, Poker.Protobufs.Objects.WinnerData;
+  Poker.Protobufs.Objects.WinnerPotInfo, Poker.Protobufs.Objects.WinnerData;
 
 type
   TSeatInfo = class
@@ -75,27 +75,31 @@ type
   TPotInfo = class
   private
     FValue: UINT32;
+    FRake: UINT32;
     FMembers: TArray<UINT32>;
     FWinnerData: TWinnerDataList;
+    function GetValueWithoutRake: UINT32;
   public
     constructor Create;
     destructor Destroy; override;
 
-    procedure Assign(const APotProtobuf: TPB_Pot); overload;
-    procedure Assign(const APot: TPotInfo); overload;
-    procedure Assign(const APot: TPB_PotInfo); overload;
+    procedure Assign(const APotProtobuf: TPB_Pot; const ARakePercent: UINT32); overload;
+    procedure Assign(const APotInfo: TPotInfo; const ARakePercent: UINT32); overload;
+    procedure Assign(const AWinnerPotInfo: TPB_WinnerPotInfo); overload;
 
     property Value: UINT32 read FValue write FValue;
+    property Rake: UINT32 read FRake write FRake;
     property Members: TArray<UINT32> read FMembers;
     property WinnerData: TWinnerDataList read FWinnerData;
+    property ValueWithoutRake: UINT32 read GetValueWithoutRake;
   end;
 
   TPotInfos = class(TObjectList<TPotInfo>)
   private
   public
-    procedure Assign(const APots: TObjectList<TPB_Pot>); overload;
-    procedure Assign(const APots: TPotInfos); overload;
-    procedure Assign(const APots: TObjectList<TPB_PotInfo>); overload;
+    procedure Assign(const APots: TObjectList<TPB_Pot>; const ARakePercent: UINT32); overload;
+    procedure Assign(const APots: TPotInfos; const ARakePercent: UINT32); overload;
+    procedure Assign(const APots: TObjectList<TPB_WinnerPotInfo>); overload;
   end;
 
   TTableEvent = class
@@ -136,6 +140,7 @@ type
     FRiverCard     : TCard;
     FSmallBlindSeat: Integer;
     FBigBlindSeat  : Integer;
+    FRakePercent   : UINT32;
     FLocked        : Boolean;
     FMinimumBet    : UINT32;
     FHandId        : UINT32;
@@ -317,8 +322,9 @@ begin
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
   FMaximumBet := ATableStatusProtobuf.MaximumLimit;
-  FPreviousPots.Assign(FPots);
-  FPots.Assign(ATableStatusProtobuf.Pots);
+  FRakePercent := ATableStatusProtobuf.RakePercent;
+  FPreviousPots.Assign(FPots, FRakePercent);
+  FPots.Assign(ATableStatusProtobuf.Pots, FRakePercent);
 
   if Assigned(ATableStatusProtobuf.Seats) then
   begin
@@ -418,31 +424,42 @@ begin
   inherited;
 end;
 
-procedure TPotInfo.Assign(const APotProtobuf: TPB_Pot);
+function TPotInfo.GetValueWithoutRake: UINT32;
+begin
+  if FRake >= FValue then
+    result := 0
+  else
+    result := FValue - FRake;
+end;
+
+procedure TPotInfo.Assign(const APotProtobuf: TPB_Pot; const ARakePercent: UINT32);
 begin
   FValue := APotProtobuf.Value;
+  FRake := Round(FValue * (ARakePercent / 100));
   FMembers := APotProtobuf.Members;
   FWinnerData.Clear;
 end;
 
 
-procedure TPotInfo.Assign(const APot: TPotInfo);
+procedure TPotInfo.Assign(const APotInfo: TPotInfo; const ARakePercent: UINT32);
 begin
-  FValue := APot.Value;
-  FMembers := APot.Members;
-  FWinnerData.Assign(APot.WinnerData);
+  FValue := APotInfo.Value;
+  FRake := Round(FValue * (ARakePercent / 100));
+  FMembers := APotInfo.Members;
+  FWinnerData.Assign(APotInfo.WinnerData);
 end;
 
-procedure TPotInfo.Assign(const APot: TPB_PotInfo);
+procedure TPotInfo.Assign(const AWinnerPotInfo: TPB_WinnerPotInfo);
 begin
-  FValue := APot.Sum;
-  FMembers := APot.Seats;
-  FWinnerData.Assign(APot.WinnerData);
+  FValue := AWinnerPotInfo.Sum;
+  FRake := AWinnerPotInfo.Rake;
+  FMembers := AWinnerPotInfo.Seats;
+  FWinnerData.Assign(AWinnerPotInfo.WinnerData);
 end;
 
 { TPotInfos }
 
-procedure TPotInfos.Assign(const APots: TObjectList<TPB_Pot>);
+procedure TPotInfos.Assign(const APots: TObjectList<TPB_Pot>; const ARakePercent: UINT32);
 var
   pot: TPotInfo;
   C1 : Integer;
@@ -452,12 +469,12 @@ begin
   for C1 := 0 to APots.Count - 1 do
   begin
     pot := TPotInfo.Create;
-    pot.Assign(APots[C1]);
+    pot.Assign(APots[C1], ARakePercent);
     Add(pot);
   end;
 end;
 
-procedure TPotInfos.Assign(const APots: TPotInfos);
+procedure TPotInfos.Assign(const APots: TPotInfos; const ARakePercent: UINT32);
 var
   pot: TPotInfo;
   C1 : Integer;
@@ -467,12 +484,12 @@ begin
   for C1 := 0 to APots.Count - 1 do
   begin
     pot := TPotInfo.Create;
-    pot.Assign(APots[C1]);
+    pot.Assign(APots[C1], ARakePercent);
     Add(pot);
   end;
 end;
 
-procedure TPotInfos.Assign(const APots: TObjectList<TPB_PotInfo>);
+procedure TPotInfos.Assign(const APots: TObjectList<TPB_WinnerPotInfo>);
 var
   pot: TPotInfo;
   C1 : Integer;

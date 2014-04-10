@@ -26,6 +26,7 @@ object frmTable: TfrmTable
   OnMouseUp = FormMouseUp
   OnPaint = FormPaint
   OnResize = FormResize
+  OnShow = FormShow
   DesignSize = (
     792
     524)

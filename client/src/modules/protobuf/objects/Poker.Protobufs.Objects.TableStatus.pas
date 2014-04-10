@@ -29,6 +29,7 @@ type
       FN_TIME = 18;
       FN_EVENTS = 19;
       FN_POTS = 20;
+      FN_RAKE_PERCENT = 21;
 
     var
       FTableMongoId: TBytes;
@@ -47,6 +48,7 @@ type
       FTime: UInt64;
       FEvents: TObjectList<TPB_TableEvent>;
       FPots: TObjectList<TPB_Pot>;
+      FRakePercent: UINT32;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -61,6 +63,7 @@ type
     procedure SetBigBlind(const AValue: UINT32);
     procedure SetHandid(const AValue: UINT32);
     procedure SetTime(const AValue: UInt64);
+    procedure SetRakePercent(const AValue: UINT32);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -88,6 +91,7 @@ type
     property Time: UInt64 read FTime write SetTime;
     property Events: TObjectList<TPB_TableEvent> read FEvents;
     property Pots: TObjectList<TPB_Pot> read FPots;
+    property RakePercent: UINT32 read FRakePercent write SetRakePercent;
   end;
 
 implementation
@@ -199,6 +203,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
+      FN_RAKE_PERCENT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FRakePercent := AProtobufReader.readUInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -308,6 +316,12 @@ begin
   ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatus.SetRakePercent(const AValue: UINT32);
+begin
+  FRakePercent := AValue;
+  ProtobufOutput.writeUInt32(FN_RAKE_PERCENT, AValue);
 end;
 
 end.

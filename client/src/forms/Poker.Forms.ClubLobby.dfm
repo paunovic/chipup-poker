@@ -3088,7 +3088,7 @@ object frmClubLobby: TfrmClubLobby
             PropertiesClassName = 'TcxTextEditProperties'
             HeaderAlignmentHorz = taCenter
             Options.Editing = False
-            Width = 122
+            Width = 119
           end
           object gridTablesStatus: TcxGridColumn
             Caption = 'Status'
@@ -3097,7 +3097,7 @@ object frmClubLobby: TfrmClubLobby
             Properties.ReadOnly = False
             HeaderAlignmentHorz = taCenter
             Options.Editing = False
-            Width = 75
+            Width = 73
           end
           object gridTablesDate: TcxGridColumn
             Caption = 'Date'
@@ -3109,7 +3109,7 @@ object frmClubLobby: TfrmClubLobby
             Options.Editing = False
             SortIndex = 0
             SortOrder = soDescending
-            Width = 86
+            Width = 91
           end
         end
         object gridTablesLevel: TcxGridLevel
