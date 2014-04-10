@@ -902,11 +902,18 @@ procedure TfrmChipUpMain.CSREGameOperation(const AMethodId: Integer; const AObje
 var
   pbgame: TPB_Game;
   club  : TClubInfo;
+  game  : TGameInfo;
 begin
   pbgame := AObject as TPB_Game;
 
   if dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
-    club.Games.AddGame(pbgame);
+  begin
+    game := club.Games.AddGame(pbgame);
+
+    if (Assigned(game)) and
+       (AMethodId = Integer(srCreateGameOk)) then
+      Tables.AddTable(club, game);
+  end;
 
   ConfigureGUI;
 end;

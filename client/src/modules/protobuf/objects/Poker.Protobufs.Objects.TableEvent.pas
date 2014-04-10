@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableEvent;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.PotInfo;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.WinnerPotInfo;
 
 type
   TTableEventType = (teFold = 1,teSit = 2,teStandUp = 3,teWinning = 4,teDealing = 5,teCheck = 6,teCall = 7,teRaise = 8,teAllIn = 9,teFlop = 10,teTurn = 11,teRiver = 12,tePostRiver = 13,tePreWin = 14,teExistingCards = 15);
@@ -22,7 +22,7 @@ type
     var
       FEvent: TTableEventType;
       FSeat: Integer;
-      FPots: TObjectList<TPB_PotInfo>;
+      FPots: TObjectList<TPB_WinnerPotInfo>;
       FBets: TArray<UINT32>;
       FCards: TBytes;
 
@@ -30,7 +30,7 @@ type
     procedure SetSeat(const AValue: Integer);
     procedure SetBets(const AValue: TArray<UINT32>);
     procedure SetCards(const AValue: TBytes);
-    procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_PotInfo; Action: TCollectionNotification);
+    procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -41,7 +41,7 @@ type
 
     property Event: TTableEventType read FEvent write SetEvent;
     property Seat: Integer read FSeat write SetSeat;
-    property Pots: TObjectList<TPB_PotInfo> read FPots;
+    property Pots: TObjectList<TPB_WinnerPotInfo> read FPots;
     property Bets: TArray<UINT32> read FBets write SetBets;
     property Cards: TBytes read FCards write SetCards;
   end;
@@ -54,7 +54,7 @@ uses
 
 procedure TPB_TableEvent.InitObjects;
 begin
-  FPots := TObjectList<TPB_PotInfo>.Create;
+  FPots := TObjectList<TPB_WinnerPotInfo>.Create;
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
@@ -86,7 +86,7 @@ begin
       end;
       FN_POTS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPots.Add(TPB_PotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        FPots.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
       FN_BETS: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -115,7 +115,7 @@ begin
   ProtobufOutput.writeInt32(FN_SEAT, AValue);
 end;
 
-procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_PotInfo; Action: TCollectionNotification);
+procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);

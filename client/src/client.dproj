@@ -253,7 +253,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableEvent.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PutChips.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerData.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PotInfo.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerPotInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PingParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PingReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas"/>

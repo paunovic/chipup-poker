@@ -25,11 +25,11 @@ object frmCreateClub: TfrmCreateClub
   PixelsPerInch = 96
   TextHeight = 14
   object edClubName: TcxTextEdit
-    Left = 100
+    Left = 103
     Top = 14
     Properties.MaxLength = 64
     TabOrder = 0
-    Width = 269
+    Width = 266
   end
   object lbsClubName: TcxLabel
     Left = 18
@@ -46,16 +46,16 @@ object frmCreateClub: TfrmCreateClub
     Transparent = True
   end
   object edClubCode: TcxTextEdit
-    Left = 100
+    Left = 103
     Top = 41
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 269
+    Width = 266
   end
   object lbsInvCode: TcxLabel
     Left = 18
     Top = 42
-    Caption = 'Invitation code:'
+    Caption = 'Club password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText

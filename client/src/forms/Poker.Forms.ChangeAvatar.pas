@@ -10,7 +10,6 @@ uses
 
 type
   TfrmChangeAvatar = class(TForm)
-    lbsInfo: TcxLabel;
     btChange: TcxButton;
     btCancel: TcxButton;
     alChangeAvatar: TActionList;

@@ -108,7 +108,7 @@ uses
   Poker.Protobufs.Objects.TableEvent in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableEvent.pas',
   Poker.Protobufs.Objects.PutChips in 'modules\protobuf\objects\Poker.Protobufs.Objects.PutChips.pas',
   Poker.Protobufs.Objects.WinnerData in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerData.pas',
-  Poker.Protobufs.Objects.PotInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.PotInfo.pas',
+  Poker.Protobufs.Objects.WinnerPotInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerPotInfo.pas',
   Poker.Protobufs.Objects.PingParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PingParams.pas',
   Poker.Protobufs.Objects.PingReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.PingReply.pas',
   Poker.Protobufs.Objects.Pot in 'modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas',

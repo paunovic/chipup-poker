@@ -80,6 +80,7 @@ type
     procedure tiGameLockTimer(Sender: TObject);
     procedure edChatExit(Sender: TObject);
     procedure edChatEnter(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -271,7 +272,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Avatars, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.PotInfo, RVTable, Poker.Sounds;
+  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -687,6 +688,11 @@ begin
   seRaiseAmount.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaiseSliderResizeRatio);
   seRaiseAmount.Left := Round(FRaiseSliderPoint.x + TableResources.RAISE_VALUEBOX_X * FRaiseSliderResizeRatio);
   seRaiseAmount.Top := Round(FRaiseSliderPoint.y + TableResources.RAISE_VALUEBOX_Y * FRaiseSliderResizeRatio);
+end;
+
+procedure TfrmTable.FormShow(Sender: TObject);
+begin
+  Render;
 end;
 
 procedure TfrmTable.WMSizing(var AMessage: TMessage);
@@ -1462,12 +1468,14 @@ end;
 
 procedure TfrmTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 var
+  {$IFDEF DEBUG}
   event       : String;
+  {$ENDIF}
   seat_caption: String;
   seat        : TSeatInfo;
   seat_point  : TPoint2;
   seat_index  : Integer;
-  pot         : TPB_PotInfo;
+  pot         : TPB_WinnerPotInfo;
   player      : TPlayerInfo;
   C1, C2      : Integer;
   card_index  : Integer;
@@ -1500,19 +1508,29 @@ begin
 
     teFold: begin
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'FOLD';
+      {$ENDIF}
       seat_caption := 'FOLD';
     end;
 
-    teSit: event := 'SIT';
+    teSit: begin
+      {$IFDEF DEBUG}
+      event := 'SIT';
+      {$ENDIF}
+    end;
 
     teStandUp: begin
       // fixme: animate bet > pot here
+      {$IFDEF DEBUG}
       event := 'STAND UP';
+      {$ENDIF}
     end;
 
     tePostRiver: begin
+      {$IFDEF DEBUG}
       event := 'POST RIVER';
+      {$ENDIF}
 
       FTableStatus.PreviousBets := ATableEvent.Bets;
     end;
@@ -1520,7 +1538,9 @@ begin
     teWinning: begin
       EnableGameLockTimer(2 + ATableEvent.Pots.Count * 0.5);
 
+      {$IFDEF DEBUG}
       event := 'WINNING';
+      {$ENDIF}
 
       FTableStatus.Pots.Assign(ATableEvent.Pots);
 
@@ -1533,7 +1553,7 @@ begin
         if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
           Continue;
 
-        chips_val := (pot.Sum / 100) / pot.WinnerData.Count;
+        chips_val := ((pot.Sum - pot.Rake) / 100) / pot.WinnerData.Count;
 
         nicks := '';
         animation := nil;
@@ -1578,7 +1598,9 @@ begin
     end;
 
     teDealing: begin
+      {$IFDEF DEBUG}
       event := 'DEALING';
+      {$ENDIF}
 
       FFlopAnimations.Clear;
       FTurnAnimations.Clear;
@@ -1634,7 +1656,9 @@ begin
 
     teCheck: begin
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'CHECK';
+      {$ENDIF}
       seat_caption := 'CHECK';
 
       TablePlaySound(Sounds.SOUND_CHECK);
@@ -1642,7 +1666,9 @@ begin
 
     teCall: begin
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'CALL';
+      {$ENDIF}
       seat_caption := 'CALL';
 
       TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
@@ -1650,7 +1676,9 @@ begin
 
     teRaise: begin
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'RAISE';
+      {$ENDIF}
       seat_caption := 'RAISE';
 
       TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
@@ -1658,7 +1686,9 @@ begin
 
     teAllIn: begin
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'ALL-IN';
+      {$ENDIF}
       seat_caption := 'ALL-IN';
 
       TablePlaySound(Sounds.SOUND_ALLIN);
@@ -1668,7 +1698,9 @@ begin
       FTableStatus.FlopCards.Assign(ATableEvent.Cards);
 
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'FLOP';
+      {$ENDIF}
       EnableGameLockTimer(1.5);
       AnimateBets(ATableEvent.Bets);
     end;
@@ -1677,7 +1709,9 @@ begin
       FTableStatus.TurnCard.Assign(ATableEvent.Cards);
 
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'TURN';
+      {$ENDIF}
       EnableGameLockTimer(FTurnAniDelay + 1.5);
       AnimateBets(ATableEvent.Bets);
     end;
@@ -1686,7 +1720,9 @@ begin
       FTableStatus.RiverCard.Assign(ATableEvent.Cards);
 
       tiActiveFrameBlink.Enabled := FALSE;
+      {$IFDEF DEBUG}
       event := 'RIVER';
+      {$ENDIF}
       EnableGameLockTimer(FRiverAniDelay + 1.5);
       AnimateBets(ATableEvent.Bets);
     end;
@@ -2539,7 +2575,7 @@ begin
           {$IFDEF DEBUG} DebugLn(Format('Nasty bug - animation.Tag = %d, Length(FTableStatus.Pots) = %d', [animation.Tag, FTableStatus.Pots.Count]), ditException); {$ENDIF}
         end
         else
-          if animation.TagSingle * 100 > FTableStatus.Pots[animation.Tag].Value then
+          if animation.TagSingle * 100 > FTableStatus.Pots[animation.Tag].ValueWithoutRake then
             FTableStatus.Pots[animation.Tag].Value := 0
           else
             FTableStatus.Pots[animation.Tag].Value := FTableStatus.Pots[animation.Tag].Value - Trunc(animation.TagSingle * 100);
@@ -2551,7 +2587,7 @@ begin
 
   for C1 := 0 to pots.Count - 1 do
   begin
-    pot := pots[C1].Value / 100;
+    pot := pots[C1].ValueWithoutRake / 100;
     if pot = 0 then
       Continue;
 
