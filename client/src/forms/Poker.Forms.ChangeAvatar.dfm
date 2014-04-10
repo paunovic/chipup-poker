@@ -3,7 +3,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Change Avatar'
-  ClientHeight = 240
+  ClientHeight = 219
   ClientWidth = 226
   Color = clBlack
   Ctl3D = False
@@ -21,40 +21,32 @@ object frmChangeAvatar: TfrmChangeAvatar
   OnKeyPress = FormKeyPress
   DesignSize = (
     226
-    240)
+    219)
   PixelsPerInch = 96
   TextHeight = 14
-  object lbsInfo: TcxLabel
-    AlignWithMargins = True
-    Left = 10
-    Top = 3
-    Margins.Left = 10
-    Margins.Right = 10
-    Align = alTop
-    AutoSize = False
-    Caption = 'Maximum allowed size of avatar is 1Mb.'
-    ParentFont = False
-    Style.Font.Charset = ANSI_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = [fsBold]
-    Style.TextStyle = []
-    Style.IsFontAssigned = True
-    Properties.Alignment.Horz = taLeftJustify
-    Properties.Alignment.Vert = taVCenter
-    Properties.WordWrap = True
-    Transparent = True
-    Height = 32
-    Width = 206
-    AnchorY = 19
-  end
   object btChange: TcxButton
     Left = 17
-    Top = 203
+    Top = 182
     Width = 93
     Height = 27
     Action = acChange
+    Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
+    TabOrder = 0
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ExplicitTop = 203
+  end
+  object btCancel: TcxButton
+    Left = 116
+    Top = 182
+    Width = 93
+    Height = 27
+    Action = acClose
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 1
@@ -62,33 +54,18 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Arial'
-    Font.Style = [fsBold]
-    ParentFont = False
-  end
-  object btCancel: TcxButton
-    Left = 116
-    Top = 203
-    Width = 93
-    Height = 27
-    Action = acClose
-    Anchors = [akRight, akBottom]
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 2
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 203
   end
   object imgAvatar: TcxImage
     Left = 38
-    Top = 41
+    Top = 19
     Properties.PopupMenuLayout.MenuItems = []
     Properties.ReadOnly = True
     Properties.ShowFocusRect = False
     Style.BorderColor = 3487029
-    TabOrder = 3
+    TabOrder = 2
     Height = 150
     Width = 150
   end
