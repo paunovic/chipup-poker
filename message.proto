@@ -508,4 +508,5 @@ message TablePlayerStats {
 	repeated uint32 cashouts = 5;
 	optional uint32 rakecontrib = 6;
 	optional uint32 secondsplayed = 7;
+	optional uint32 chipsinplay = 8;
 }
