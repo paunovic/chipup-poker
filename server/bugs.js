@@ -21,6 +21,7 @@ if (require.main === module) {
 }
 function setup(app,bugs,users,db) {
 	var PokerProfile = db.collection('PokerProfile');
+	app.use('/secure',express.basicAuth('username','aSheyoo9'));
 	app.set('view engine','jade');
 	app.get('/bugs',function (req,res) {
 		var start = Date.now();
@@ -118,6 +119,12 @@ function setup(app,bugs,users,db) {
 					res.render('disk',{dbstats:stats,start:start,stats:out});
 				});
 			});
+		});
+	});
+	app.get('/secure/billing',function (req,res) {
+		var start = Date.now();
+		db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) {
+			res.render('billing',{billing:rows,start:start});
 		});
 	});
 }

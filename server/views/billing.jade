@@ -1,0 +1,24 @@
+extends base
+block content
+  table(border=1)
+    tr
+      th month
+      th ProductCode
+      th UsageType
+      th ItemDescription
+      th UsageQuantity
+      th CostBeforeTax
+      th TotalCost
+      th service
+      th name
+    each row in billing
+      tr
+        td=row.year+'-'+row.month
+        td=row.ProductCode
+        td=row.UsageType
+        td=row.ItemDescription
+        td=row.UsageQuantity
+        td=row.CostBeforeTax
+        td=row.TotalCost
+        td=row['user:service']
+        td=row['user:Name']
