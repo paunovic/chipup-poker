@@ -14,9 +14,6 @@ type
     lbsClubName: TcxLabel;
     edClubCode: TcxTextEdit;
     lbsInvCode: TcxLabel;
-    lbsClubType: TcxLabel;
-    rbPrivate: TcxRadioButton;
-    rbPublic: TcxRadioButton;
     alCreateClub: TActionList;
     acOK: TAction;
     btOK: TcxButton;
@@ -95,10 +92,7 @@ begin
     edClubName.SetFocus
   else
     if not ValidateClubCode(edClubCode.Text, error) then
-      edClubCode.SetFocus
-    else
-      if not ValidatePrivateClubCode(rbPrivate.Checked, edClubCode.Text, error) then
-        edClubCode.SetFocus;
+      edClubCode.SetFocus;
 
   if error <> '' then
   begin
@@ -107,7 +101,7 @@ begin
   end;
 
   acOK.Enabled := FALSE;
-  ServerSocket.CreateClub(edClubName.Text, edClubCode.Text, rbPrivate.Checked, 5);
+  ServerSocket.CreateClub(edClubName.Text, edClubCode.Text, 5);
 end;
 
 

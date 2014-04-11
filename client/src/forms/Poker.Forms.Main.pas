@@ -687,16 +687,8 @@ begin
 
     if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
     begin
-      if not club.IsPrivate then
-      begin
-        dmMain.PublicClubs.Add(club);
-        dmMain.SelfInfo.Clubs.Extract(club);
-      end
-      else
-      begin
-        dmMain.SelfInfo.Clubs.Remove(club);
-        club := nil;
-      end;
+      dmMain.SelfInfo.Clubs.Remove(club);
+      club := nil;
     end
     else
     begin
@@ -966,20 +958,3 @@ end;
 
 
 end.
-
-procedure TfrmChipUpMain.acJoinSelectedPublicClubExecute(Sender: TObject);
-var
-  club: TClubInfo;
-begin
-  if not dmMain.CheckAuthed then
-    Exit;
-
-  if dmMain.PublicClubs.FindClub(FSelectedPublicClubId, club) then
-  begin
-    if club.IsPrivate then
-      FormsContainer.RunForm(TfrmJoinClub, self, [@FSelectedPublicClubId], FALSE)
-    else
-      ServerSocket.JoinClub(FSelectedPublicClubId, '');
-  end;
-end;
-

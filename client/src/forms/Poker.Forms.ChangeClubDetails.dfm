@@ -3,7 +3,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Change Club Details'
-  ClientHeight = 132
+  ClientHeight = 103
   ClientWidth = 393
   Color = clBlack
   Ctl3D = False
@@ -21,44 +21,9 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   OnKeyPress = FormKeyPress
   DesignSize = (
     393
-    132)
+    103)
   PixelsPerInch = 96
   TextHeight = 14
-  object lbsClubType: TcxLabel
-    Left = 12
-    Top = 65
-    Caption = 'Club type:'
-    ParentFont = False
-    Style.Font.Charset = ANSI_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = [fsBold]
-    Style.TextStyle = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object rbPrivate: TcxRadioButton
-    Left = 94
-    Top = 66
-    Width = 61
-    Height = 17
-    Caption = 'Private'
-    Checked = True
-    TabOrder = 2
-    TabStop = True
-    Transparent = True
-  end
-  object rbPublic: TcxRadioButton
-    Left = 161
-    Top = 67
-    Width = 61
-    Height = 17
-    Caption = 'Public'
-    TabOrder = 3
-    TabStop = True
-    Transparent = True
-  end
   object lbsClubName: TcxLabel
     Left = 12
     Top = 12
@@ -74,19 +39,19 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Transparent = True
   end
   object edClubName: TcxTextEdit
-    Left = 94
+    Left = 98
     Top = 11
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 64
     Properties.ReadOnly = False
     TabOrder = 0
-    Width = 288
+    Width = 284
   end
   object lbsInvitationCode: TcxLabel
     Left = 12
     Top = 38
-    Caption = 'Invitation code:'
+    Caption = 'Club password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
@@ -98,45 +63,47 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Transparent = True
   end
   object edInvitationCode: TcxTextEdit
-    Left = 94
+    Left = 98
     Top = 37
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 288
+    Width = 284
   end
   object btOK: TcxButton
     Left = 190
-    Top = 96
+    Top = 67
     Width = 93
     Height = 27
     Action = acOK
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 7
+    TabOrder = 4
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 96
   end
   object btCancel: TcxButton
     Left = 289
-    Top = 96
+    Top = 67
     Width = 93
     Height = 27
     Action = acCancel
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 8
+    TabOrder = 5
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 96
   end
   object acChangeClubDetails: TActionList
     Left = 52
