@@ -21,7 +21,6 @@ type
 
     var
       FSelfInfo   : TPlayerInfo;
-      FPublicClubs: TClubsInfo;
       FUpdaterFile: String;
 
     procedure LoadFonts;
@@ -35,7 +34,6 @@ type
     procedure OpenTOSLink;
 
     property SelfInfo   : TPlayerInfo read FSelfInfo;
-    property PublicClubs: TClubsInfo read FPublicClubs;
     property UpdaterFile: String read FUpdaterFile write FUpdaterFile;
   end;
 
@@ -95,7 +93,6 @@ begin
     Settings.DomainURL := URL_DOMAIN;
   end;
 
-  FPublicClubs := TClubsInfo.Create;
   FSelfInfo := TPlayerInfo.Create;
 
   TPlayers.Initialize;
@@ -108,7 +105,6 @@ begin
   TPlayers.Deinitialize;
 
   FSelfInfo.Free;
-  FPublicClubs.Free;
 
   TServerSocket.Deinitialize;
   TTablesStats.Deinitialize;
@@ -143,22 +139,9 @@ begin
 end;
 
 procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
-var
-  C1: Integer;
-  pbgame: TPB_Game;
-  club: TClubInfo;
 begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
   Avatars.Add(FSelfInfo.AvatarId, nil);
-
-  FPublicClubs.Clear;
-  for C1 := 0 to AStatusProtobuf.PublicClubs.Count - 1 do
-    FPublicClubs.AddClub(AStatusProtobuf.PublicClubs[C1]);
-
-  for pbgame in AStatusProtobuf.Games do
-    if FPublicClubs.FindClub(pbgame.ClubSeq, club) then
-      club.Games.AddGame(pbgame);
-
   Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
 end;
 
@@ -180,3 +163,4 @@ begin
 end;
 
 end.
+

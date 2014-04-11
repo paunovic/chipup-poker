@@ -19,8 +19,9 @@ type
     FSuspendedPlayers: TArray<TBytes>;
     FGames           : TGamesInfo;
     FRake            : Integer;
+    FPrivate         : Boolean;
   public
-    constructor Create(const AProtobufObject: TPB_Club); overload;
+    constructor Create(const AProtobufObject: TPB_Club);
     destructor Destroy; override;
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
@@ -39,6 +40,7 @@ type
     property SuspendedPlayers: TArray<TBytes> read FSuspendedPlayers;
     property Games           : TGamesInfo read FGames;
     property Rake            : Integer read FRake;
+    property IsPrivate       : Boolean read FPrivate write FPrivate;
   end;
 
   TClubsInfo = class(TObjectList<TClubInfo>)
@@ -111,6 +113,7 @@ begin
   for C1 := 0 to Length(AProtobufObject.SuspendedMembers) - 1 do
     AddPlayer(AProtobufObject.SuspendedMembers[C1], TRUE);
   FRake := AProtobufObject.Rake;
+  FPrivate := AProtobufObject.IsPrivate;
 end;
 
 procedure TClubInfo.AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);
