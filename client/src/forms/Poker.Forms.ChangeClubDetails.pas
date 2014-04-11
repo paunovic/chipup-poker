@@ -10,9 +10,6 @@ uses
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)
-    lbsClubType: TcxLabel;
-    rbPrivate: TcxRadioButton;
-    rbPublic: TcxRadioButton;
     lbsClubName: TcxLabel;
     edClubName: TcxTextEdit;
     lbsInvitationCode: TcxLabel;
@@ -97,8 +94,6 @@ begin
 
   edClubName.Text := FClub.Name;
   edInvitationCode.Text := FClub.InvCode;
-  rbPrivate.Checked := FClub.IsPrivate;
-  rbPublic.Checked := not rbPrivate.Checked;
 end;
 
 procedure TfrmChangeClubDetails.acCancelExecute(Sender: TObject);
@@ -115,10 +110,7 @@ begin
     edClubName.SetFocus
   else
     if not ValidateClubCode(edInvitationCode.Text, error) then
-      edInvitationCode.SetFocus
-    else
-      if not ValidatePrivateClubCode(rbPrivate.Checked, edInvitationCode.Text, error) then
-        edInvitationCode.SetFocus;
+      edInvitationCode.SetFocus;
 
   if error <> '' then
   begin
@@ -127,7 +119,7 @@ begin
   end;
 
   acOK.Enabled := FALSE;
-  ServerSocket.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rbPrivate.Checked, FClub.Rake);
+  ServerSocket.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, FClub.Rake);
 end;
 
 procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);

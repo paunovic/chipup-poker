@@ -15,7 +15,6 @@ function ValidatePassword(const APassword: String; out AError: String): Boolean;
 function ValidateEMail(const AEMail: String; out AError: String): Boolean;
 function ValidateClubName(const AClubName: String; out AError: String): Boolean;
 function ValidateClubCode(const AClubCode: String; out AError: String): Boolean;
-function ValidatePrivateClubCode(const APrivate: Boolean; const AClubCode: String; out AError: String): Boolean;
 function ValidateGameName(const AGameName: String; out AError: String): Boolean;
 
 implementation
@@ -79,21 +78,6 @@ begin
       AError := 'Invalid characters in club password';
 
   result := AError = '';
-end;
-
-
-function ValidatePrivateClubCode(const APrivate: Boolean; const AClubCode: String; out AError: String): Boolean;
-begin
-  if not APrivate then
-    Exit(TRUE);
-
-  if AClubCode = '' then
-  begin
-    AError := 'Private clubs must have password';
-    Exit(FALSE);
-  end;
-
-  Exit(TRUE);
 end;
 
 function ValidateGameName(const AGameName: String; out AError: String): Boolean;

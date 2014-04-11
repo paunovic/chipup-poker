@@ -15,7 +15,6 @@ type
     FName            : String;
     FInvCode         : String;
     FBalance         : Integer;
-    FPrivate         : Boolean;
     FPlayers         : TArray<TBytes>;
     FSuspendedPlayers: TArray<TBytes>;
     FGames           : TGamesInfo;
@@ -36,7 +35,6 @@ type
     property Name            : String read FName;
     property InvCode         : String read FInvCode;
     property Balance         : Integer read FBalance;
-    property IsPrivate       : Boolean read FPrivate;
     property Players         : TArray<TBytes> read FPlayers;
     property SuspendedPlayers: TArray<TBytes> read FSuspendedPlayers;
     property Games           : TGamesInfo read FGames;
@@ -104,7 +102,6 @@ begin
   FId := AProtobufObject.Seq;
   FName := AProtobufObject.Name;
   FBalance := AProtobufObject.Chips;
-  FPrivate := AProtobufObject.IsPrivate;
   FInvCode := AProtobufObject.Password;
   SetLength(FPlayers, 0);
   SetLength(FSuspendedPlayers, 0);

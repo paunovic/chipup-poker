@@ -3,7 +3,7 @@ object frmCreateClub: TfrmCreateClub
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Create Club'
-  ClientHeight = 141
+  ClientHeight = 112
   ClientWidth = 386
   Color = clBlack
   Ctl3D = False
@@ -21,7 +21,7 @@ object frmCreateClub: TfrmCreateClub
   OnKeyPress = FormKeyPress
   DesignSize = (
     386
-    141)
+    112)
   PixelsPerInch = 96
   TextHeight = 14
   object edClubName: TcxTextEdit
@@ -66,72 +66,39 @@ object frmCreateClub: TfrmCreateClub
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object lbsClubType: TcxLabel
-    Left = 18
-    Top = 69
-    Caption = 'Type:'
-    ParentFont = False
-    Style.Font.Charset = ANSI_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = [fsBold]
-    Style.TextStyle = []
-    Style.IsFontAssigned = True
-    Transparent = True
-  end
-  object rbPrivate: TcxRadioButton
-    Left = 100
-    Top = 71
-    Width = 61
-    Height = 17
-    Caption = 'Private'
-    Checked = True
-    TabOrder = 2
-    TabStop = True
-    Transparent = True
-  end
-  object rbPublic: TcxRadioButton
-    Left = 167
-    Top = 71
-    Width = 61
-    Height = 17
-    Caption = 'Public'
-    TabOrder = 3
-    TabStop = True
-    Transparent = True
-  end
   object btOK: TcxButton
     Left = 177
-    Top = 101
+    Top = 72
     Width = 93
     Height = 27
     Action = acOK
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 7
+    TabOrder = 4
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 101
   end
   object btCancel: TcxButton
     Left = 276
-    Top = 101
+    Top = 72
     Width = 93
     Height = 27
     Action = acCancel
     Anchors = [akRight, akBottom]
     SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 8
+    TabOrder = 5
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 101
   end
   object alCreateClub: TActionList
     Left = 24

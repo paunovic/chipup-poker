@@ -943,7 +943,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  ServerSocket.ChangeClubDetails(club.Id, club.Name, club.InvCode, club.IsPrivate, seClubRake.Value);
+  ServerSocket.ChangeClubDetails(club.Id, club.Name, club.InvCode, seClubRake.Value);
 end;
 
 procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);
