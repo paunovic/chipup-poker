@@ -40,17 +40,17 @@ object frmJoinClub: TfrmJoinClub
     Transparent = True
   end
   object edClubCode: TcxTextEdit
-    Left = 98
+    Left = 102
     Top = 44
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 179
+    Width = 175
   end
   object lbsInvCode: TcxLabel
     Left = 18
     Top = 45
-    Caption = 'Invitation code:'
+    Caption = 'Club password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
@@ -62,7 +62,7 @@ object frmJoinClub: TfrmJoinClub
     Transparent = True
   end
   object edClubID: TcxSpinEdit
-    Left = 98
+    Left = 102
     Top = 17
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxValue = 999999999.000000000000000000
@@ -72,7 +72,7 @@ object frmJoinClub: TfrmJoinClub
     Properties.OnChange = edClubIDPropertiesChange
     TabOrder = 0
     Value = 1
-    Width = 179
+    Width = 175
   end
   object btOK: TcxButton
     Left = 85

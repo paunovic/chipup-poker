@@ -95,12 +95,9 @@ begin
   for C1 := 0 to AStatusReply.Clubs.Count - 1 do
     FClubs.AddClub(AStatusReply.Clubs[C1]);
 
-  for C1 := 0 to AStatusReply.Games.Count - 1 do
-  begin
-    pbgame := AStatusReply.Games[C1];
+  for pbgame in AStatusReply.Games do
     if FClubs.FindClub(pbgame.ClubSeq, club) then
       club.Games.AddGame(pbgame);
-  end;
 end;
 
 

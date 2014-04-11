@@ -4,7 +4,7 @@ object frmClubLobby: TfrmClubLobby
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Lobby'
-  ClientHeight = 654
+  ClientHeight = 614
   ClientWidth = 896
   Color = clBlack
   Constraints.MinHeight = 410
@@ -22,7 +22,7 @@ object frmClubLobby: TfrmClubLobby
   OnDestroy = FormDestroy
   DesignSize = (
     896
-    654)
+    614)
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
@@ -2527,31 +2527,34 @@ object frmClubLobby: TfrmClubLobby
     Left = 0
     Top = 170
     Width = 896
-    Height = 484
+    Height = 444
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsStats
+    Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
-    ClientRectBottom = 484
+    ExplicitHeight = 484
+    ClientRectBottom = 444
     ClientRectRight = 896
     ClientRectTop = 0
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
+      ExplicitHeight = 484
       DesignSize = (
         896
-        484)
+        444)
       object gbClubSettings: TcxGroupBox
         Left = 7
         Top = 0
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
+        ExplicitHeight = 477
         DesignSize = (
           250
-          477)
-        Height = 477
+          437)
+        Height = 437
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
@@ -2638,10 +2641,11 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
+        ExplicitHeight = 477
         DesignSize = (
           630
-          477)
-        Height = 477
+          437)
+        Height = 437
         Width = 630
         object gridPlayersList: TcxGrid
           Left = 2
@@ -2710,7 +2714,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 268
+          Top = 228
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -2723,10 +2727,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 265
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 268
+          Top = 228
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -2739,10 +2744,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 265
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 268
+          Top = 228
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -2755,10 +2761,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 265
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 234
+          Top = 194
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -2771,31 +2778,34 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 231
         end
       end
     end
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitHeight = 484
       DesignSize = (
         896
-        484)
+        444)
       object gbTables: TcxGroupBox
         Left = 7
         Top = 0
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
+        ExplicitHeight = 477
         DesignSize = (
           882
-          477)
-        Height = 477
+          437)
+        Height = 437
         Width = 882
         object gridGames: TcxGrid
           Left = 2
           Top = 19
           Width = 878
-          Height = 437
+          Height = 397
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -2803,6 +2813,7 @@ object frmClubLobby: TfrmClubLobby
           BorderStyle = cxcbsNone
           TabOrder = 0
           LookAndFeel.SkinName = 'ChipUpDarkStyle'
+          ExplicitHeight = 434
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2876,7 +2887,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 421
+          Top = 381
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2889,10 +2900,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 418
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 421
+          Top = 381
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2905,10 +2917,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 418
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 357
+          Top = 317
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]
@@ -2924,26 +2937,29 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
           OnClick = acShowEditGameFormExecute
+          ExplicitTop = 354
         end
       end
     end
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
+      ExplicitHeight = 484
       DesignSize = (
         896
-        484)
+        444)
       object gridStats: TcxGrid
         Left = 320
         Top = 2
         Width = 568
-        Height = 472
-        Anchors = [akLeft, akTop, akRight]
+        Height = 435
+        Anchors = [akLeft, akTop, akBottom]
         BevelInner = bvNone
         BevelOuter = bvNone
         BorderStyle = cxcbsNone
         TabOrder = 0
         LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        ExplicitHeight = 472
         object gridStatsTable: TcxGridTableView
           OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3041,12 +3057,14 @@ object frmClubLobby: TfrmClubLobby
         Left = 8
         Top = 2
         Width = 308
-        Height = 472
+        Height = 435
+        Anchors = [akLeft, akTop, akBottom]
         BevelInner = bvNone
         BevelOuter = bvNone
         BorderStyle = cxcbsNone
         TabOrder = 1
         LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        ExplicitHeight = 472
         object gridTablesTable: TcxGridTableView
           PopupMenu = pmTablesStats
           OnDblClick = gridTablesTableDblClick

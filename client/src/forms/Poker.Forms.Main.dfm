@@ -1,11 +1,11 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  ClientHeight = 679
-  ClientWidth = 993
+  ClientHeight = 554
+  ClientWidth = 793
   Color = clBlack
-  Constraints.MinHeight = 600
-  Constraints.MinWidth = 800
+  Constraints.MinHeight = 550
+  Constraints.MinWidth = 600
   Ctl3D = False
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -21,13 +21,14 @@ object frmChipUpMain: TfrmChipUpMain
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
+  OnResize = FormResize
   DesignSize = (
-    993
-    679)
+    793
+    554)
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
-    Left = 8
+    Left = -9
     Top = -2
     AutoSize = True
     Picture.Data = {
@@ -3542,8 +3543,8 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
   end
   object imgCashier: TcxImage
-    Left = 817
-    Top = 9
+    Left = 638
+    Top = 4
     Anchors = [akTop, akRight]
     Properties.PopupMenuLayout.MenuItems = []
     Properties.Proportional = False
@@ -3566,8 +3567,8 @@ object frmChipUpMain: TfrmChipUpMain
   object paMain: TPanel
     Left = 0
     Top = 140
-    Width = 993
-    Height = 539
+    Width = 793
+    Height = 414
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
@@ -3575,81 +3576,18 @@ object frmChipUpMain: TfrmChipUpMain
     ParentBackground = False
     TabOrder = 2
     DesignSize = (
-      993
-      539)
-    object gridTournaments: TcxGrid
-      Left = 6
-      Top = 47
-      Width = 981
-      Height = 485
-      Anchors = [akLeft, akTop, akRight, akBottom]
-      TabOrder = 0
-      Visible = False
-      LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      object gridTournamentsTable: TcxGridTableView
-        OnCellDblClick = gridJoinedClubsTableCellDblClick
-        OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
-        DataController.Summary.DefaultGroupSummaryItems = <>
-        DataController.Summary.FooterSummaryItems = <>
-        DataController.Summary.SummaryGroups = <>
-        OptionsCustomize.ColumnFiltering = False
-        OptionsCustomize.ColumnGrouping = False
-        OptionsCustomize.ColumnHidingOnGrouping = False
-        OptionsCustomize.ColumnMoving = False
-        OptionsData.Deleting = False
-        OptionsData.DeletingConfirmation = False
-        OptionsData.Editing = False
-        OptionsData.Inserting = False
-        OptionsSelection.CellSelect = False
-        OptionsView.NoDataToDisplayInfoText = ' '
-        OptionsView.ColumnAutoWidth = True
-        OptionsView.GroupByBox = False
-        object cxGridColumn2: TcxGridColumn
-          Caption = 'Tournament'
-          PropertiesClassName = 'TcxTextEditProperties'
-          HeaderAlignmentHorz = taCenter
-          Options.Editing = False
-          SortIndex = 0
-          SortOrder = soDescending
-          Width = 161
-        end
-        object gridTournamentsTableColumn4: TcxGridColumn
-          Caption = 'Game Type'
-          HeaderAlignmentHorz = taCenter
-        end
-        object gridTournamentsTableColumn3: TcxGridColumn
-          Caption = 'Buyin'
-          HeaderAlignmentHorz = taCenter
-        end
-        object gridTournamentsTableColumn1: TcxGridColumn
-          Caption = 'Structure'
-          HeaderAlignmentHorz = taCenter
-        end
-        object gridTournamentsTableColumn2: TcxGridColumn
-          Caption = 'Players'
-          HeaderAlignmentHorz = taCenter
-        end
-        object cxGridColumn3: TcxGridColumn
-          Caption = 'Status'
-          PropertiesClassName = 'TcxTextEditProperties'
-          Properties.Alignment.Horz = taCenter
-          HeaderAlignmentHorz = taCenter
-          Width = 62
-        end
-      end
-      object gridTournamentsLevel: TcxGridLevel
-        GridView = gridTournamentsTable
-      end
-    end
+      793
+      414)
     object btOpenClubLobby: TcxButton
-      Left = 6
-      Top = 253
-      Width = 281
-      Height = 32
+      Left = 13
+      Top = 216
+      Width = 143
+      Height = 34
       Action = acOpenClubLobby
+      Anchors = [akLeft, akBottom]
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 1
+      TabOrder = 0
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -3658,12 +3596,12 @@ object frmChipUpMain: TfrmChipUpMain
       ParentFont = False
     end
     object gridGames: TcxGrid
-      Left = 290
-      Top = 47
-      Width = 697
-      Height = 485
-      Anchors = [akLeft, akTop, akRight, akBottom]
-      TabOrder = 2
+      Left = 159
+      Top = 254
+      Width = 621
+      Height = 150
+      Anchors = [akLeft, akRight, akBottom]
+      TabOrder = 1
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       object gridGamesTable: TcxGridTableView
         OnCellDblClick = gridGamesTableCellDblClick
@@ -3741,16 +3679,18 @@ object frmChipUpMain: TfrmChipUpMain
         GridView = gridGamesTable
       end
     end
-    object gridJoinedClubs: TcxGrid
-      Left = 6
-      Top = 47
-      Width = 281
-      Height = 203
-      TabOrder = 3
+    object gridMyHomeGames: TcxGrid
+      Left = 159
+      Top = 32
+      Width = 309
+      Height = 218
+      Anchors = [akLeft, akTop, akBottom]
+      TabOrder = 2
+      OnEnter = gridMyHomeGamesEnter
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      object gridJoinedClubsTable: TcxGridTableView
-        OnCellDblClick = gridJoinedClubsTableCellDblClick
-        OnFocusedRecordChanged = gridJoinedClubsTableFocusedRecordChanged
+      object gridMyHomeGamesTable: TcxGridTableView
+        OnCellDblClick = gridMyHomeGamesTableCellDblClick
+        OnFocusedRecordChanged = gridMyHomeGamesTableFocusedRecordChanged
         DataController.Summary.DefaultGroupSummaryItems = <>
         DataController.Summary.FooterSummaryItems = <>
         DataController.Summary.SummaryGroups = <>
@@ -3789,21 +3729,49 @@ object frmChipUpMain: TfrmChipUpMain
           Width = 62
         end
       end
-      object gridJoinedClubsLevel: TcxGridLevel
-        GridView = gridJoinedClubsTable
+      object gridMyHomeGamesLevel: TcxGridLevel
+        GridView = gridMyHomeGamesTable
       end
     end
     object btTournaments: TcxButton
-      Left = 148
-      Top = 12
-      Width = 139
-      Height = 32
+      Left = 13
+      Top = 90
+      Width = 143
+      Height = 56
       Action = acShowTournamentLayout
       Colors.PressedText = 15461355
       LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+      OptionsImage.Glyph.Data = {
+        46030000424D460300000000000036000000280000000E0000000E0000000100
+        2000000000001003000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000000000000000000000040C
+        1C1E000000000000000000000000000000000000000000000000040C1C1E0000
+        00000000000000000000000000000000000000000000153E949C1A4EBCC60B20
+        4D5100000000000000000C24555A1B51C2CC1338868D00000000000000000000
+        00000000000000000000000000001031757B2265F2FF2265F2FF1D56CDD81E58
+        D3DE2265F2FF2265F2FF0E2B666C000000000000000000000000000000000000
+        0000000000000C25585D2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265
+        F2FF0A1F4A4E0000000000000000000000000000000000000000000000000A1E
+        474B2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF081736390000
+        000000000000000000000000000000000000040B1A1B1E59D6E12265F2FF2265
+        F2FF2265F2FF2265F2FF2265F2FF2265F2FF1C54CAD503081415000000000000
+        000000000000030814151C54CAD52265F2FF2265F2FF2265F2FF2265F2FF2265
+        F2FF2265F2FF2265F2FF2265F2FF1B51C2CC02060E0F00000000000000001338
+        868D2060E7F32265F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265
+        F2FF2265F2FF205FE4F01132787E00000000000000000000000000000000050E
+        22240B2150541F5BDBE72265F2FF2265F2FF1E58D3DE0B204D51040D1F210000
+        0000000000000000000000000000000000000000000000000000000000000E2A
+        64692265F2FF2265F2FF0C24555A000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000103031D56CDD81B50
+        BFC9000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000A1E474B0818393C000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000}
       SpeedButtonOptions.GroupIndex = 1
       SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 4
+      TabOrder = 3
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -3812,17 +3780,45 @@ object frmChipUpMain: TfrmChipUpMain
       ParentFont = False
     end
     object btHomeGames: TcxButton
-      Left = 6
-      Top = 12
-      Width = 139
-      Height = 32
+      Left = 13
+      Top = 32
+      Width = 143
+      Height = 56
       Action = acShowHomeGamesLayout
       Colors.PressedText = 15461355
       LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+      OptionsImage.Glyph.Data = {
+        46030000424D460300000000000036000000280000000E0000000E0000000100
+        2000000000001003000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000040B1A1B1846A8B10F2C696F040B1A1B000000000000
+        000000000000000000000000000002050B0C0B204D511744A2AB0A1E474B0000
+        00000000000012347D842265F2FF2265F2FF1A4DB9C3102E6F750611282A0C22
+        53571745A5AE2161E9F62265F2FF1B51C2CC0000000000000000000000000205
+        0B0C1F5DDEEA2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265
+        F2FF2265F2FF091A3F42000000000000000000000000000000000E2A64692265
+        F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF2265F2FF1847ABB40000
+        000000000000000000000000000000000000010206061D57D0DB2265F2FF2265
+        F2FF2265F2FF2265F2FF2265F2FF2264EFFC06132E3000000000000000000000
+        00000000000000000000000000000C2253572265F2FF2265F2FF2265F2FF2265
+        F2FF2265F2FF16409AA200000000000000000000000000000000000000000000
+        000000000000000000001B50BFC92265F2FF2265F2FF2265F2FF2163ECF9040C
+        1C1E000000000000000000000000000000000000000000000000000000000000
+        00000818393C2265F2FF2265F2FF2265F2FF1237838A00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000001847
+        ABB42265F2FF205EE1ED02071112000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000006122B2D2264EFFC1030
+        7278000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000011337A8101040909000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000}
       SpeedButtonOptions.GroupIndex = 1
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.Down = True
-      TabOrder = 5
+      TabOrder = 4
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -3830,34 +3826,16 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Style = []
       ParentFont = False
     end
-    object btPrijatnaPunina: TcxButton
-      Left = 290
-      Top = 12
-      Width = 404
-      Height = 32
-      Anchors = [akLeft, akTop, akRight]
-      Enabled = False
-      LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 6
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -12
-      Font.Name = 'Arial'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object btOpenTournamentLobby: TcxButton
-      Left = 697
-      Top = 12
-      Width = 290
-      Height = 32
-      Anchors = [akTop, akRight]
-      Caption = 'OPEN TOURNAMENT LOBBY'
+    object btCreateClub: TcxButton
+      Left = 13
+      Top = 290
+      Width = 143
+      Height = 34
+      Action = acShowCreateClubForm
+      Anchors = [akLeft, akBottom]
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 7
-      Visible = False
+      TabOrder = 5
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -3865,13 +3843,53 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object btCreateClub: TcxButton
-      Left = 697
-      Top = 12
-      Width = 144
+    object btJoinClub: TcxButton
+      Left = 13
+      Top = 327
+      Width = 143
+      Height = 34
+      Action = acShowJoinClubForm
+      Anchors = [akLeft, akBottom]
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      SpeedButtonOptions.CanBeFocused = False
+      TabOrder = 6
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object btMyHomeGames: TcxButton
+      Left = 159
+      Top = 0
+      Width = 309
       Height = 32
-      Action = acShowCreateClubForm
-      Anchors = [akTop, akRight]
+      Action = acShowHomeGamesLayout
+      Caption = 'MY HOME GAMES'
+      Colors.DefaultText = 539056881
+      Colors.NormalText = 539056881
+      Colors.HotText = 539056881
+      Colors.PressedText = 539056881
+      LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+      SpeedButtonOptions.GroupIndex = 2
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.Down = True
+      TabOrder = 7
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = []
+      ParentFont = False
+    end
+    object btOpenTable: TcxButton
+      Left = 13
+      Top = 253
+      Width = 143
+      Height = 34
+      Action = acShowGameTableForm
+      Anchors = [akLeft, akBottom]
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       SpeedButtonOptions.CanBeFocused = False
       TabOrder = 8
@@ -3882,53 +3900,43 @@ object frmChipUpMain: TfrmChipUpMain
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object btJoinClub: TcxButton
-      Left = 844
-      Top = 12
-      Width = 143
-      Height = 32
-      Action = acShowJoinClubForm
-      Anchors = [akTop, akRight]
-      LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 9
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Sintony'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object btJoinPublicClub: TcxButton
-      Left = 6
-      Top = 500
-      Width = 281
-      Height = 32
-      Action = acJoinSelectedPublicClub
-      Anchors = [akLeft, akBottom]
-      Caption = 'JOIN THIS CLUB'
-      LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      TabOrder = 10
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Sintony'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object btPublicClubs: TcxButton
-      Left = 6
-      Top = 290
-      Width = 281
+    object btPublicHomeGames: TcxButton
+      Left = 471
+      Top = 0
+      Width = 309
       Height = 32
       Action = acShowHomeGamesLayout
-      Caption = 'PUBLIC CLUBS'
-      Colors.PressedText = 15461355
+      Caption = 'PUBLIC HOME GAMES'
+      Colors.DefaultText = 539056881
+      Colors.NormalText = 539056881
+      Colors.HotText = 539056881
+      Colors.PressedText = 539056881
       LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
-      SpeedButtonOptions.GroupIndex = 2
+      SpeedButtonOptions.GroupIndex = 3
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.Down = True
-      TabOrder = 11
+      TabOrder = 9
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Sintony'
+      Font.Style = []
+      ParentFont = False
+    end
+    object btFiller1: TcxButton
+      Left = 13
+      Top = 0
+      Width = 143
+      Height = 32
+      Colors.DefaultText = 539056881
+      Colors.NormalText = 539056881
+      Colors.HotText = 539056881
+      Colors.PressedText = 539056881
+      LookAndFeel.SkinName = 'ChipUpDarkTabsStyle'
+      SpeedButtonOptions.GroupIndex = 4
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.Down = True
+      TabOrder = 10
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -3937,16 +3945,17 @@ object frmChipUpMain: TfrmChipUpMain
       ParentFont = False
     end
   end
-  object gridClubs: TcxGrid
-    Left = 6
-    Top = 462
-    Width = 281
-    Height = 175
+  object gridPublicHomeGames: TcxGrid
+    Left = 471
+    Top = 172
+    Width = 309
+    Height = 218
     Anchors = [akLeft, akTop, akBottom]
     TabOrder = 3
+    OnEnter = gridPublicHomeGamesEnter
     LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    object gridClubsTable: TcxGridTableView
-      OnFocusedRecordChanged = gridClubsTableFocusedRecordChanged
+    object gridPublicHomeGamesTable: TcxGridTableView
+      OnFocusedRecordChanged = gridPublicHomeGamesTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
@@ -3985,8 +3994,8 @@ object frmChipUpMain: TfrmChipUpMain
         Width = 42
       end
     end
-    object gridClubsLevel: TcxGridLevel
-      GridView = gridClubsTable
+    object gridPublicHomeGamesLevel: TcxGridLevel
+      GridView = gridPublicHomeGamesTable
     end
   end
   object ActionManager: TActionManager
@@ -4083,15 +4092,16 @@ object frmChipUpMain: TfrmChipUpMain
       OnExecute = acShowChangeAvatarFormExecute
     end
     object acShowCreateClubForm: TAction
-      Caption = 'CREATE CLUB'
+      Caption = 'CREATE CLUB...'
       OnExecute = acShowCreateClubFormExecute
     end
     object acShowJoinClubForm: TAction
-      Caption = 'JOIN CLUB'
+      Caption = 'JOIN CLUB...'
       OnExecute = acShowJoinClubFormExecute
     end
     object acShowGameTableForm: TAction
-      Caption = 'Open Table'
+      Caption = 'OPEN TABLE'
+      Enabled = False
       OnExecute = acShowGameTableFormExecute
     end
     object acOpenClubLobby: TAction
@@ -4115,11 +4125,6 @@ object frmChipUpMain: TfrmChipUpMain
       Category = 'Account'
       Caption = 'Resend Verification Mail'
       OnExecute = acResendVerificationMailExecute
-    end
-    object acJoinSelectedPublicClub: TAction
-      Category = 'Clubs'
-      Caption = 'JOIN CLUB'
-      OnExecute = acJoinSelectedPublicClubExecute
     end
   end
   object MainMenu: TMainMenu
@@ -4149,11 +4154,5 @@ object frmChipUpMain: TfrmChipUpMain
         Action = acLogout
       end
     end
-  end
-  object tiPublicClubRefresh: TTimer
-    Enabled = False
-    Interval = 30000
-    Left = 328
-    Top = 228
   end
 end

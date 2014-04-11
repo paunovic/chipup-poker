@@ -584,7 +584,7 @@ var
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance / 100);
 
     if CompareBytes(player.Id, club.OwnerId) then
-      status := 'Owner'
+      status := 'Manager'
     else
     begin
       status := 'Member';
@@ -1070,7 +1070,7 @@ begin
   if FClubId <> pbclub.Seq then
     Exit;
 
-  MessageDlg('You are not owner of this club', mtError, [mbOk], 0);
+  MessageDlg('You are not manager of this club', mtError, [mbOk], 0);
 end;
 
 procedure TfrmClubLobby.CSREClubOperation(const AMethodId: Integer; const AObject: TObject);

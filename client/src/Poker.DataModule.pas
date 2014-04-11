@@ -53,7 +53,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table;
+  Poker.Stats.Table, Poker.Protobufs.Objects.Game;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -145,6 +145,8 @@ end;
 procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
 var
   C1: Integer;
+  pbgame: TPB_Game;
+  club: TClubInfo;
 begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
   Avatars.Add(FSelfInfo.AvatarId, nil);
@@ -152,6 +154,10 @@ begin
   FPublicClubs.Clear;
   for C1 := 0 to AStatusProtobuf.PublicClubs.Count - 1 do
     FPublicClubs.AddClub(AStatusProtobuf.PublicClubs[C1]);
+
+  for pbgame in AStatusProtobuf.Games do
+    if FPublicClubs.FindClub(pbgame.ClubSeq, club) then
+      club.Games.AddGame(pbgame);
 
   Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
 end;
