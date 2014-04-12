@@ -16,20 +16,17 @@ type
       FN_USERS = 2;
       FN_SELF = 3;
       FN_GAMES = 4;
-      FN_PUBLIC_CLUBS = 5;
 
     var
       FClubs: TObjectList<TPB_Club>;
       FUsers: TObjectList<TPB_User>;
       FSelf: TPB_User;
       FGames: TObjectList<TPB_Game>;
-      FPublicClubs: TObjectList<TPB_Club>;
 
     procedure SetSelf(const AValue: TPB_User);
     procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
-    procedure PublicClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -42,7 +39,6 @@ type
     property Users: TObjectList<TPB_User> read FUsers;
     property Self: TPB_User read FSelf write SetSelf;
     property Games: TObjectList<TPB_Game> read FGames;
-    property PublicClubs: TObjectList<TPB_Club> read FPublicClubs;
   end;
 
 implementation
@@ -59,8 +55,6 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
   FGames := TObjectList<TPB_Game>.Create;
   FGames.OnNotify := GamesNotifyEvent;
-  FPublicClubs := TObjectList<TPB_Club>.Create;
-  FPublicClubs.OnNotify := PublicClubsNotifyEvent;
 end;
 
 destructor TPB_StatusReply.Destroy;
@@ -81,11 +75,6 @@ begin
   begin
     FGames.OnNotify := nil;
     FreeAndNil(FGames);
-  end;
-  if Assigned(FPublicClubs) then
-  begin
-    FPublicClubs.OnNotify := nil;
-    FreeAndNil(FPublicClubs);
   end;
   inherited;
 end;
@@ -115,10 +104,6 @@ begin
       FN_GAMES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
-      end;
-      FN_PUBLIC_CLUBS: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPublicClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -152,14 +137,6 @@ procedure TPB_StatusReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(FN_GAMES,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
-end;
-
-procedure TPB_StatusReply.PublicClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
-begin
-  Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_PUBLIC_CLUBS,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

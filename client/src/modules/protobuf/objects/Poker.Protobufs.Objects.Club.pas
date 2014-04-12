@@ -17,6 +17,7 @@ type
       FN_NAME = 4;
       FN_OWNER = 5;
       FN_PASSWORD = 6;
+      FN_IS_PRIVATE = 7;
       FN_SEQ = 8;
       FN_MEMBERS = 9;
       FN_HAS_PASSWORD = 10;
@@ -30,6 +31,7 @@ type
       FName: String;
       FOwner: TBytes;
       FPassword: String;
+      FIsPrivate: Boolean;
       FSeq: Integer;
       FMembers: TArray<TBytes>;
       FHasPassword: Boolean;
@@ -42,6 +44,7 @@ type
     procedure SetName(const AValue: String);
     procedure SetOwner(const AValue: TBytes);
     procedure SetPassword(const AValue: String);
+    procedure SetIsPrivate(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
     procedure SetMembers(const AValue: TArray<TBytes>);
     procedure SetHasPassword(const AValue: Boolean);
@@ -58,6 +61,7 @@ type
     property Name: String read FName write SetName;
     property Owner: TBytes read FOwner write SetOwner;
     property Password: String read FPassword write SetPassword;
+    property IsPrivate: Boolean read FIsPrivate write SetIsPrivate;
     property Seq: Integer read FSeq write SetSeq;
     property Members: TArray<TBytes> read FMembers write SetMembers;
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
@@ -105,6 +109,10 @@ begin
       FN_PASSWORD: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
+      end;
+      FN_IS_PRIVATE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FIsPrivate := AProtobufReader.readBoolean;
       end;
       FN_SEQ: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -166,6 +174,12 @@ procedure TPB_Club.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
   ProtobufOutput.writeString(FN_PASSWORD, AValue);
+end;
+
+procedure TPB_Club.SetIsPrivate(const AValue: Boolean);
+begin
+  FIsPrivate := AValue;
+  ProtobufOutput.writeBoolean(FN_IS_PRIVATE, AValue);
 end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);

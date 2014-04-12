@@ -251,8 +251,7 @@ end;
 
 function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
 begin
-  result := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, AClub)) or
-            (dmMain.PublicClubs.FindClub(FSelectedClub, AClub));
+  result := dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, AClub);
 end;
 
 function TfrmChipUpMain.GetSelectedGame(var AGame: TGameInfo): Boolean;
@@ -382,26 +381,27 @@ end;
 
 procedure TfrmChipUpMain.UpdateClublist;
 var
-  C1    : Integer;
   club  : TClubInfo;
   status: String;
+  recidx: Integer;
 begin
   gridMyHomeGamesTable.DataController.BeginFullUpdate;
   try
-    gridMyHomeGamesTable.DataController.SetRecordCount(dmMain.SelfInfo.Clubs.Count);
-    for C1 := 0 to dmMain.SelfInfo.Clubs.Count - 1 do
-    begin
-      club := dmMain.SelfInfo.Clubs[C1];
+    gridMyHomeGamesTable.DataController.SetRecordCount(0);
+    for club in dmMain.SelfInfo.Clubs do
+      if club.IsPrivate then
+      begin
+        recidx := gridMyHomeGamesTable.DataController.AppendRecord;
 
-      gridMyHomeGamesTable.DataController.SetValue(C1, gridJoinedClubsId.Index, club.Id);
-      gridMyHomeGamesTable.DataController.SetValue(C1, gridJoinedClubsClubName.Index, club.Name);
+        gridMyHomeGamesTable.DataController.SetValue(recidx, gridJoinedClubsId.Index, club.Id);
+        gridMyHomeGamesTable.DataController.SetValue(recidx, gridJoinedClubsClubName.Index, club.Name);
 
-      if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
-        status := 'Manager'
-      else
-        status := 'Member';
-      gridMyHomeGamesTable.DataController.SetValue(C1, gridJoinedClubsStatus.Index, status);
-    end;
+        if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
+          status := 'Manager'
+        else
+          status := 'Member';
+        gridMyHomeGamesTable.DataController.SetValue(recidx, gridJoinedClubsStatus.Index, status);
+      end;
   finally
     gridMyHomeGamesTable.DataController.EndFullUpdate;
   end;
@@ -459,14 +459,15 @@ begin
     rcount := 0;
     c.SetRecordCount(0);
 
-    for club in dmMain.PublicClubs do
-    begin
-      Inc(rcount);
-      c.SetRecordCount(rcount);
-      c.SetValue(rcount - 1, gridClubsId.Index, club.Id);
-      c.SetValue(rcount - 1, gridClubsName.Index, club.Name);
-      c.SetValue(rcount - 1, gridClubsPlayers.Index, Length(club.Players));
-    end;
+    for club in dmMain.SelfInfo.Clubs do
+      if not club.IsPrivate then
+      begin
+        Inc(rcount);
+        c.SetRecordCount(rcount);
+        c.SetValue(rcount - 1, gridClubsId.Index, club.Id);
+        c.SetValue(rcount - 1, gridClubsName.Index, club.Name);
+        c.SetValue(rcount - 1, gridClubsPlayers.Index, Length(club.Players));
+      end;
   finally
     c.EndFullUpdate;
   end;
@@ -492,6 +493,7 @@ procedure TfrmChipUpMain.gridPublicHomeGamesTableFocusedRecordChanged(Sender: Tc
 var
   recIndex: Integer;
   club_id: Integer;
+  club: TclubInfo;
 begin
   recIndex := gridPublicHomeGamesTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
@@ -501,7 +503,7 @@ begin
   end;
 
   club_id := gridPublicHomeGamesTable.DataController.GetValue(recIndex, gridClubsId.Index);
-  if dmMain.PublicClubs.IndexOf(club_id) = -1 then
+  if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
     FSelectedClub := -1
   else
   begin
@@ -509,6 +511,9 @@ begin
     SetLength(FSelectedGame, 0);
     gridGamesTable.DataController.FocusedRecordIndex := -1;
   end;
+
+  acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
+                             (club.IsPrivate);
 
   UpdateGamelist;
 end;
@@ -692,9 +697,9 @@ begin
     end
     else
     begin
-      C1 := dmMain.PublicClubs.IndexOf(club.Id);
-      if C1 <> -1 then
-        dmMain.PublicClubs.Delete(C1);
+//      C1 := dmMain.PublicClubs.IndexOf(club.Id); FIXME
+//      if C1 <> -1 then
+//        dmMain.PublicClubs.Delete(C1);
     end;
   end
   else
@@ -861,10 +866,8 @@ begin
   pbclub := AObject as TPB_Club;
 
   index := dmMain.SelfInfo.Clubs.IndexOf(pbclub.Seq);
-  if index = -1 then
-    Exit;
-
-  dmMain.SelfInfo.Clubs.Delete(index);
+  if index <> -1 then
+    dmMain.SelfInfo.Clubs.Delete(index);
 
   ConfigureGUI;
 end;
