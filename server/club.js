@@ -2,6 +2,9 @@ var allClubs,activeUsers,allStats,allUsers,allGames;
 
 var assert = require('assert');
 
+var makeGameProtobuf = require('./game').makeGameProtobuf;
+var profiler = require('./profiler');
+
 
 module.exports = Club;
 function Club(obj) {
@@ -10,14 +13,27 @@ function Club(obj) {
 	this.obj = obj
 }
 Club.activeClubsSeq = [];
+Club.activeClubsId = {};
 Club.getClubBySeq = function (seq,cb) {
 	if (!Club.activeClubsSeq[seq]) {
 		allClubs.findOne({seq:seq},function (err,obj) {
 			Club.activeClubsSeq[seq] = new Club(obj);
+			Club.activeClubsId[obj._id] = Club.activeClubsSeq[seq];
 			cb(null,Club.activeClubsSeq[seq]);
 		}.bind(this));
 	} else {
 		cb(null,Club.activeClubsSeq[seq]);
+	}
+}
+Club.getClubById = function (id,cb) {
+	if (!Club.activeClubsId[id]) {
+		allClubs.findOne({_id:id},function (err,obj) {
+			Club.activeClubsSeq[obj.seq] = new Club(obj);
+			Club.activeClubsId[obj._id] = Club.activeClubsSeq[obj.seq];
+			cb(null,Club.activeClubsSeq[obj.seq]);
+		}.bind(this));
+	} else {
+		cb(null,Club.activeClubsId[id]);
 	}
 }
 Club.prototype.isOwner = function (user) {
@@ -63,6 +79,46 @@ Club.prototype.handOver = function (gameObj,cb) {
 		cb();
 	}
 }
+Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
+	var token = profiler.start('seGameChanged');
+	// FIXME, cache object
+	// FIXME, cache the protobuf
+	allClubs.findOne({_id:this.clubid},function (err,club) {
+		var g = makeGameProtobuf(gamerow);
+		if (club.is_private) {
+			var conn = activeUsers[club.owner];
+			if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
+			if (club.members) {
+				for (var x=0; x<club.members.length; x++) {
+					conn = activeUsers[club.members[x]];
+					if (!conn) continue;
+					if (conn === exclude) continue;
+					conn.send(codes.seGameChange,g,'Poker.Game');
+				}
+			}
+		} else {
+			for (var x in activeUsers) {
+				activeUsers[x].send(codes.seGameChange,g,'Poker.Game');
+			}
+		}
+		token.stop();
+		cb();
+	}.bind(this));
+}
+Club.prototype.goPublic = function (cb) {
+	allClubs.update({_id:this.clubid},{$set:{is_private:false}},function (err) {
+		assert.ifError(err);
+		allClubs.findOne({_id:this.clubid},function (err,clubObj) {
+			assert.ifError(err);
+			var c = Club.makeClubProtobuf(JSON.parse(JSON.stringify(clubObj)));
+			this.obj = clubObj;
+			for (var key in activeUsers) {
+				activeUsers[key].send(codes.seClubChange,c,'Poker.Club');
+			}
+		}.bind(this));
+	}.bind(this));
+	cb('dummy');
+}
 Club.init = function (db,activeUsersIn) {
 	allClubs = db.collection('clubs');
 	activeUsers = activeUsersIn;
@@ -86,4 +142,22 @@ function containsObjectID(list,id) {
 		if (compareObjectID(id,list[x])) return true;
 	}
 	return false;
+}
+Club.makeClubProtobuf = function makeClubProtobuf(c,userlist) {
+	if (c.members) {
+		for (y=0; y<c.members.length; y++) {
+			if (userlist && (userlist.indexOf(c.members[y]) == -1)) userlist.push(c.members[y]);
+			c.members[y] = new Buffer(c.members[y].toString(),'hex');
+		}
+	}
+	if (c.suspended) {
+		c.suspended_members = [];
+		for (y=0; y<c.suspended.length; y++) {
+			c.suspended_members[y] = new Buffer(c.suspended[y].toString(),'hex');
+		}
+		delete c.suspended;
+	}
+	c._id = new Buffer(c._id.toString(),'hex');
+	c.owner = new Buffer(c.owner.toString(),'hex');
+	return c;
 }
