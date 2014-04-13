@@ -123,6 +123,10 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
+      if (not Assigned(pbreply.Club)) or
+         (pbreply.Club.Seq <> edClubID.Value) then
+        Exit;
+
       MessageDlg('Successfully joined', mtInformation, [mbOK], 0);
       Close;
     end;

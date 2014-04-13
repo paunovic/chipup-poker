@@ -3955,6 +3955,7 @@ object frmChipUpMain: TfrmChipUpMain
     OnEnter = gridPublicHomeGamesEnter
     LookAndFeel.SkinName = 'ChipUpDarkStyle'
     object gridPublicHomeGamesTable: TcxGridTableView
+      OnCellDblClick = gridPublicHomeGamesTableCellDblClick
       OnFocusedRecordChanged = gridPublicHomeGamesTableFocusedRecordChanged
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
@@ -3985,13 +3986,6 @@ object frmChipUpMain: TfrmChipUpMain
         SortIndex = 0
         SortOrder = soDescending
         Width = 125
-      end
-      object gridClubsPlayers: TcxGridColumn
-        Caption = 'Players'
-        PropertiesClassName = 'TcxSpinEditProperties'
-        Properties.Alignment.Horz = taCenter
-        HeaderAlignmentHorz = taCenter
-        Width = 42
       end
     end
     object gridPublicHomeGamesLevel: TcxGridLevel

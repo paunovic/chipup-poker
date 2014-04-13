@@ -570,20 +570,29 @@ end;
 procedure TfrmClubLobby.UpdatePlayerlist;
 var
   club: TClubInfo;
+  query_players: TArray<TBytes>;
 
   procedure AddPlayerToGrid(const ARowIndex: Integer; AId: TBytes);
   var
     player: TPlayerInfo;
     status: String;
   begin
-    if not Players.FindPlayerById(AId, player) then
-      Exit;
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AId);
+    if Players.FindPlayerById(AId, player) then
+    begin
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick);
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance / 100);
+    end
+    else
+    begin
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, 'Unknown');
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, 0);
 
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, player.Id);
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick);
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance / 100);
+      SetLength(query_players, Length(query_players) + 1);
+      query_players[Length(query_players) - 1] := AId;
+    end;
 
-    if CompareBytes(player.Id, club.OwnerId) then
+    if CompareBytes(AId, club.OwnerId) then
       status := 'Manager'
     else
     begin
@@ -607,9 +616,13 @@ begin
       Exit;
     end;
 
+    SetLength(query_players, 0);
     gridPlayersListTable.DataController.SetRecordCount(Length(club.Players));
     for C1 := 0 to Length(club.Players) - 1 do
       AddPlayerToGrid(C1, club.Players[C1]);
+
+    if Length(query_players) > 0 then
+      ServerSocket.GetUserInfos(query_players);
   finally
     gridPlayersListTable.DataController.EndFullUpdate;
   end;
@@ -1101,7 +1114,7 @@ end;
 
 procedure TfrmClubLobby.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
 begin
-  UpdatePlayerlist;
+  ConfigureGUI;
 end;
 
 end.

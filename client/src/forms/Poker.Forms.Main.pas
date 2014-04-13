@@ -63,7 +63,6 @@ type
     gridPublicHomeGamesTable: TcxGridTableView;
     gridClubsId: TcxGridColumn;
     gridClubsName: TcxGridColumn;
-    gridClubsPlayers: TcxGridColumn;
     gridPublicHomeGamesLevel: TcxGridLevel;
     btMyHomeGames: TcxButton;
     btOpenTable: TcxButton;
@@ -96,6 +95,8 @@ type
     procedure FormResize(Sender: TObject);
     procedure gridPublicHomeGamesEnter(Sender: TObject);
     procedure gridMyHomeGamesEnter(Sender: TObject);
+    procedure gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -466,7 +467,6 @@ begin
         c.SetRecordCount(rcount);
         c.SetValue(rcount - 1, gridClubsId.Index, club.Id);
         c.SetValue(rcount - 1, gridClubsName.Index, club.Name);
-        c.SetValue(rcount - 1, gridClubsPlayers.Index, Length(club.Players));
       end;
   finally
     c.EndFullUpdate;
@@ -487,6 +487,12 @@ end;
 procedure TfrmChipUpMain.gridPublicHomeGamesEnter(Sender: TObject);
 begin
   gridMyHomeGamesTable.DataController.FocusedRecordIndex := -1;
+end;
+
+procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+  AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  acOpenClubLobby.Execute;
 end;
 
 procedure TfrmChipUpMain.gridPublicHomeGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
@@ -513,7 +519,7 @@ begin
   end;
 
   acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
-                             (club.IsPrivate);
+                             (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
 
   UpdateGamelist;
 end;
@@ -690,16 +696,11 @@ begin
       ServerSocket.GetUserInfos(query_users);
     end;
 
-    if not club.IsPlayerInTheClub(dmMain.SelfInfo.Id) then
+    if (not club.IsPlayerInTheClub(dmMain.SelfInfo.Id)) and
+       (club.IsPrivate) then
     begin
       dmMain.SelfInfo.Clubs.Remove(club);
       club := nil;
-    end
-    else
-    begin
-//      C1 := dmMain.PublicClubs.IndexOf(club.Id); FIXME
-//      if C1 <> -1 then
-//        dmMain.PublicClubs.Delete(C1);
     end;
   end
   else
