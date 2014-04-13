@@ -4,6 +4,9 @@ var assert = require('assert');
 var async = require('async');
 var express = require('express');
 
+var deck = require('./deck');
+
+
 if (require.main === module) {
 	var MongoClient = require('mongodb').MongoClient;
 	MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
@@ -19,9 +22,20 @@ if (require.main === module) {
 		console.log('up');
 	});
 }
-function setup(app,bugs,users,db) {
+function setup(app,bugs,allUsers,db) {
+	app.use('/secure/',express.basicAuth(function mongoAuth(username,password,callback) {
+		console.log('checking auth %s/%s',username,password);
+		db.collection('admin').findOne({username:username},function (err,adminRow) {
+			console.log('adminRow:%j',adminRow);
+			// FIXME, add salt
+			if (adminRow.password == password) {
+				callback(null,true);
+				return;
+			}
+			callback(null,false);
+		});
+	}));
 	var PokerProfile = db.collection('PokerProfile');
-	app.use('/secure',express.basicAuth('username','aSheyoo9'));
 	app.set('view engine','jade');
 	app.get('/bugs',function (req,res) {
 		var start = Date.now();
@@ -61,13 +75,13 @@ function setup(app,bugs,users,db) {
 			res.send(row.ScreenShot.buffer);
 		});
 	});
-	app.get('/clubs',function (req,res) {
+	app.get('/secure/clubs',function (req,res) {
 		var start = Date.now();
 		db.collection('clubs').find({}).toArray(function (err,data) {
 			res.render('clubs',{clubs:data,start:start});
 		});
 	});
-	app.get('/club',function (req,res) {
+	app.get('/secure/club',function (req,res) {
 		var start = Date.now();
 		db.collection('clubs').findOne({_id:new ObjectID(req.query.id)},function (err,club) {
 			db.collection('games').find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
