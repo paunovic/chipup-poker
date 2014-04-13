@@ -47,11 +47,14 @@ type
   private
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
+    FServerComboBox: TcxComboBox;
 
     procedure ApplySettings;
     procedure SaveSettings;
 
     procedure ModalFormClose(Sender: TObject);
+
+    procedure CreateServerCombobox;
 
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
     procedure CSRStatusReply(const AMethodId: Integer; const AObject: TObject);
@@ -78,12 +81,10 @@ uses
   Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main,
-  Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings;
+  Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption;
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
-var
-  cb: TcxComboBox;
 begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
@@ -101,20 +102,7 @@ begin
   {$ENDIF}
 
   if Settings.DeveloperMode then
-  begin
-    cb := TcxComboBox.Create(self);
-    cb.Parent := self;
-    cb.Style.LookAndFeel.SkinName := edLogin.Style.LookAndFeel.SkinName;
-    cb.Width := btLogin.Width;
-    cb.Top := btLogin.Top + btLogin.Height + 4;
-    cb.Left := btLogin.Left;
-    cb.Properties.DropDownListStyle := lsFixedList;
-    cb.Properties.Items.Clear;
-    cb.Properties.Items.Add('Official Server');
-    cb.Properties.Items.Add('Dev Server');
-    cb.ItemIndex := Settings.ServerIndex;
-    cb.Properties.OnChange := ServerComboboxChange;
-  end;
+    CreateServerCombobox;
 
   EnableGUI(ServerSocket.IsConnected);
 end;
@@ -136,6 +124,22 @@ procedure TfrmLogin.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
   AParams.ExStyle := AParams.ExStyle or WS_EX_APPWINDOW;
+end;
+
+procedure TfrmLogin.CreateServerCombobox;
+begin
+  FServerComboBox := TcxComboBox.Create(self);
+  FServerComboBox.Parent := self;
+  FServerComboBox.Style.LookAndFeel.SkinName := edLogin.Style.LookAndFeel.SkinName;
+  FServerComboBox.Width := btLogin.Width;
+  FServerComboBox.Top := btLogin.Top + btLogin.Height + 4;
+  FServerComboBox.Left := btLogin.Left;
+  FServerComboBox.Properties.DropDownListStyle := lsFixedList;
+  FServerComboBox.Properties.Items.Clear;
+  FServerComboBox.Properties.Items.Add('Official Server');
+  FServerComboBox.Properties.Items.Add('Dev Server');
+  FServerComboBox.ItemIndex := Settings.ServerIndex;
+  FServerComboBox.Properties.OnChange := ServerComboboxChange;
 end;
 
 procedure TfrmLogin.FormShow(Sender: TObject);
@@ -297,6 +301,18 @@ end;
 
 procedure TfrmLogin.acLoginExecute(Sender: TObject);
 begin
+  if SHA256String(edLogin.Text) = '1ÕŒ²ƒ{¹ú†ßãi£œq7wP9†Ór2?Û~î2' then // devmodeon!
+  begin
+    Settings.DeveloperMode := not Settings.DeveloperMode;
+    if Settings.DeveloperMode then
+      CreateServerCombobox
+    else
+      FreeAndNil(FServerComboBox);
+    edLogin.Clear;
+    edLogin.SetFocus;
+    Exit;
+  end;
+
   CurrentStatus := lsLoggingIn;
   EnableGUI(FALSE);
   tiLoginTimeout.Enabled := TRUE;

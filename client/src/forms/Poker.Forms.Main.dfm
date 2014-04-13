@@ -3975,6 +3975,7 @@ object frmChipUpMain: TfrmChipUpMain
       object gridClubsId: TcxGridColumn
         Caption = 'Club ID'
         PropertiesClassName = 'TcxSpinEditProperties'
+        Visible = False
         HeaderAlignmentHorz = taCenter
         Width = 41
       end
