@@ -20,6 +20,7 @@ type
       FN_CARDS = 5;
       FN_STATUS = 6;
       FN_TIMEBANK = 7;
+      FN_CARDS_VISIBLE = 8;
 
     var
       FSeat: Integer;
@@ -29,6 +30,7 @@ type
       FCards: TBytes;
       FStatus: TPlayerStatus;
       FTimebank: UINT32;
+      FCardsVisible: Boolean;
 
     procedure SetSeat(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
@@ -37,6 +39,7 @@ type
     procedure SetCards(const AValue: TBytes);
     procedure SetStatus(const AValue: TPlayerStatus);
     procedure SetTimebank(const AValue: UINT32);
+    procedure SetCardsVisible(const AValue: Boolean);
 
   public
     destructor Destroy; override;
@@ -49,6 +52,7 @@ type
     property Cards: TBytes read FCards write SetCards;
     property Status: TPlayerStatus read FStatus write SetStatus;
     property Timebank: UINT32 read FTimebank write SetTimebank;
+    property CardsVisible: Boolean read FCardsVisible write SetCardsVisible;
   end;
 
 implementation
@@ -99,6 +103,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTimebank := AProtobufReader.readUInt32;
       end;
+      FN_CARDS_VISIBLE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCardsVisible := AProtobufReader.readBoolean;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -145,6 +153,12 @@ procedure TPB_SeatInfo.SetTimebank(const AValue: UINT32);
 begin
   FTimebank := AValue;
   ProtobufOutput.writeUInt32(FN_TIMEBANK, AValue);
+end;
+
+procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
+begin
+  FCardsVisible := AValue;
+  ProtobufOutput.writeBoolean(FN_CARDS_VISIBLE, AValue);
 end;
 
 end.

@@ -155,38 +155,38 @@ type
       FStandUpButton          : TUIButton;
       FPlayNowButton          : TUIButton;
 
-      FDXAreaSize        : TPoint2px;
+      FDXAreaSize      : TPoint2px;
 
-      FTable             : TTable;
-      FTableStatus       : TTableStatus;
-      FChipStackMaker    : TChipStackMaker;
+      FTable           : TTable;
+      FTableStatus     : TTableStatus;
+      FChipStackMaker  : TChipStackMaker;
 
-      FGoalTime          : UINT32;
-      FCurrentPlaytime   : Integer;
+      FGoalTime        : UINT32;
+      FCurrentPlaytime : Integer;
 
-      FFlopAnimations    : TList<Integer>;
-      FFlopAnimated      : Boolean;
-      FTurnAnimations    : TList<Integer>;
-      FTurnAnimated      : Boolean;
-      FRiverAnimations   : TList<Integer>;
-      FRiverAnimated     : Boolean;
-      FDealAnimations    : TList<Integer>;
-      FBetAnimations     : TList<Integer>;
-      FPotWinAnimations  : TList<Integer>;
+      FFlopAnimations  : TList<Integer>;
+      FFlopAnimated    : Boolean;
+      FTurnAnimations  : TList<Integer>;
+      FTurnAnimated    : Boolean;
+      FRiverAnimations : TList<Integer>;
+      FRiverAnimated   : Boolean;
+      FDealAnimations  : TList<Integer>;
+      FBetAnimations   : TList<Integer>;
+      FPotWinAnimations: TList<Integer>;
 
-      FTurnAniDelay      : Single;
-      FRiverAniDelay     : Single;
-      FWinningAniDelay   : Single;
+      FTurnAniDelay    : Single;
+      FRiverAniDelay   : Single;
+      FWinningAniDelay : Single;
 
-      FMouseDownObject   : TMouseDownObject;
+      FMouseDownObject : TMouseDownObject;
 
-      FRaiseMin          : UINT32;
-      FRaiseMax          : UINT32;
-      FRaiseValue        : UINT32;
+      FRaiseMin        : UINT32;
+      FRaiseMax        : UINT32;
+      FRaiseValue      : UINT32;
 
-      FForceFocused      : Boolean;
+      FForceFocused    : Boolean;
 
-      FEventBuffer       : TObjectList<TPB_TableEvent>;
+      FEventBuffer     : TObjectList<TPB_TableEvent>;
 
     procedure SetDXObjectSizes;
     procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
@@ -259,6 +259,8 @@ type
 
   public
     constructor Create(const ATable: TTable); reintroduce;
+
+    property TableStatus: TTableStatus read FTableStatus;
   end;
 
 implementation
@@ -272,7 +274,8 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Avatars, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds;
+  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds,
+  Poker.Protobufs.Objects.WinnerData;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -287,7 +290,7 @@ begin
   FTable := ATable;
 
   OnResize := nil;
-  ClientWidth := Round(Screen.Monitors[0].Width / 2.3);
+  ClientWidth := Round(Screen.Monitors[0].Width / 2.5);
   ClientHeight := Round(ClientWidth / FORM_ASPECT_RATIO);
   OnResize := FormResize;
 end;
@@ -1143,7 +1146,6 @@ begin
   acCheck.Enabled := FALSE;
   acRaise.Enabled := FALSE;
   acPlayNow.Enabled := FALSE;
-  acShowCards.Enabled := FALSE;
   sitout := FALSE;
   foldtoany := FALSE;
 
@@ -1234,11 +1236,6 @@ begin
         end
         else
           FForceFocused := FALSE;
-
-        if (FTableStatus.State in [tsWinning, tsWinning2]) and
-           (FTable.SeatIndex = seat_info.SeatIndex) and
-           (seat_info.Status in [psInHand, psAllIn]) then
-          acShowCards.Enabled := TRUE;
       end;
       psFolded: begin
         sitout := TRUE;
@@ -1343,8 +1340,12 @@ procedure TfrmTable.tiSeatClearCaptionTimer(Sender: TObject);
 var
   seat: TSeatInfo;
 begin
-  if FTableStatus.GetSeatInfo(tiSeatCaptionClear.Tag, seat) then
+  if (FTableStatus.GetSeatInfo(tiSeatCaptionClear.Tag, seat)) and
+     (seat.Caption <> '') then
+  begin
     seat.Caption := '';
+    Render;
+  end;
 
   tiSeatCaptionClear.Enabled := FALSE;
 end;
@@ -1416,6 +1417,9 @@ begin
     FGoalTime := FTableStatus.Time - ServerSocket.TimeOffset
   else
     FGoalTime := 0;
+
+  if not (FTableStatus.State in [tsWinning, tsWinning2]) then
+    acShowCards.Enabled := FALSE;
 
   {$IFDEF DEBUG}
   tmp := '';
@@ -1594,6 +1598,10 @@ begin
 
         Assert(Assigned(animation));
         animation.TagString := Format('%s won %s chip%s %s%s', [nicks, FormatFloat('0.##', chips_val), chips_plural, suffix, winmsg]);
+
+        acShowCards.Enabled := (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat)) and
+                               (seat.Status in [psInHand, psAllIn]) and
+                               (not seat.CardsVisible);
       end;
     end;
 
@@ -1601,6 +1609,8 @@ begin
       {$IFDEF DEBUG}
       event := 'DEALING';
       {$ENDIF}
+
+      acShowCards.Enabled := FALSE;
 
       FFlopAnimations.Clear;
       FTurnAnimations.Clear;
@@ -1735,6 +1745,8 @@ begin
     if FTableStatus.GetSeatInfo(seat_index, seat) then
     begin
       seat.Caption := seat_caption;
+      if tiSeatCaptionClear.Enabled then
+        tiSeatCaptionClear.OnTimer(tiSeatCaptionClear);
       tiSeatCaptionClear.Enabled := FALSE;
       tiSeatCaptionClear.Tag := seat.SeatIndex;
       tiSeatCaptionClear.Enabled := TRUE;

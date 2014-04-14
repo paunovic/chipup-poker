@@ -76,11 +76,7 @@ object frmTable: TfrmTable
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
-    Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     TabOrder = 1
     Transparent = True
     Visible = False
@@ -102,11 +98,7 @@ object frmTable: TfrmTable
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
-    Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     TabOrder = 2
     Transparent = True
     Visible = False
@@ -128,11 +120,7 @@ object frmTable: TfrmTable
     Style.Font.Name = 'Arial'
     Style.Font.Style = []
     Style.HotTrack = False
-    Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     TabOrder = 3
     Transparent = True
     Visible = False
@@ -244,6 +232,7 @@ object frmTable: TfrmTable
     object acShowCards: TAction
       Category = 'Game'
       Caption = 'SHOW CARDS'
+      Enabled = False
       OnExecute = acShowCardsExecute
     end
   end

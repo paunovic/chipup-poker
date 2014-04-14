@@ -119,8 +119,8 @@ var
   buyin: Double;
 begin
   buyin := ABuyin;
-  if buyin > dmMain.SelfInfo.Balance then
-    buyin := dmMain.SelfInfo.Balance;
+  if buyin > dmMain.AvailableBalance then
+    buyin := dmMain.AvailableBalance;
   seBuyin.Value := Trunc(buyin / 100);
 end;
 
@@ -141,7 +141,7 @@ begin
     [
       FTable.Game.Name, Trunc(FTable.Game.SmallBlind / 100), Trunc(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull,
       Trunc((FTable.Game.MinBuyin * FTable.Game.BigBlind) / 100), Trunc((FTable.Game.MaxBuyin * FTable.Game.BigBlind) / 100),
-      dmMain.SelfInfo.Balance / 100 {FIXME: AVAIL BALANCE}
+      dmMain.AvailableBalance / 100
     ]);
 
   buyin := FTable.Game.MinBuyin * FTable.Game.BigBlind;

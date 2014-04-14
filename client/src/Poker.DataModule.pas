@@ -18,6 +18,7 @@ type
   private
     const
       FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
+    function GetAvailableBalance: UINT32;
 
     var
       FSelfInfo   : TPlayerInfo;
@@ -33,7 +34,8 @@ type
     procedure OpenCashierLink;
     procedure OpenTOSLink;
 
-    property SelfInfo   : TPlayerInfo read FSelfInfo;
+    property SelfInfo: TPlayerInfo read FSelfInfo;
+    property AvailableBalance: UINT32 read GetAvailableBalance;
     property UpdaterFile: String read FUpdaterFile write FUpdaterFile;
   end;
 
@@ -51,7 +53,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Protobufs.Objects.Game;
+  Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -161,6 +163,27 @@ begin
     end;
   end;
 end;
+
+function TdmMain.GetAvailableBalance: UINT32;
+var
+  table: TTable;
+  tstatus: TTableStatus;
+  seat: TSeatInfo;
+begin
+  result := FSelfInfo.Balance;
+  for table in Tables do
+    if Assigned(table.Form) then
+    begin
+      tstatus := (table.Form as TfrmTable).TableStatus;
+      for seat in tstatus.Seats do
+        if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
+        begin
+          Assert(seat.Chips <= result);
+          Dec(result, seat.Chips)
+        end;
+    end;
+end;
+
 
 end.
 

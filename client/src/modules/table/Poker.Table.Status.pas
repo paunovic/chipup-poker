@@ -19,6 +19,7 @@ type
     FStatus: TPlayerStatus;
     FCaption: String;
     FTimebank: UINT32;
+    FCardsVisible: Boolean;
 
     function GetStatusStr: String;
   public
@@ -41,6 +42,7 @@ type
     property Caption: String read FCaption write FCaption;
     property Timebank: UINT32 read FTimeBank;
     property DealtCards: Integer read FDealtCards;
+    property CardsVisible: Boolean read FCardsVisible;
   end;
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
@@ -208,6 +210,7 @@ begin
   FCards.Assign(ASeatInfoProtobuf.Cards);
   FStatus := ASeatInfoProtobuf.Status;
   FTimeBank := ASeatInfoProtobuf.Timebank;
+  FCardsVisible := ASeatInfoProtobuf.CardsVisible;
 end;
 
 

@@ -221,7 +221,7 @@ end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
 begin
-  btMyHomeGames.Width := (tsHomeGames.Width - btMyHomeGames.Left - 13 - 3) div 2;
+  btMyHomeGames.Width := (tsHomeGames.Width - btMyHomeGames.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
   btPublicHomeGames.Left := btMyHomeGames.Left + btMyHomeGames.Width + 3;
   btPublicHomeGames.Width := btMyHomeGames.Width;
   gridMyHomeGames.Left := btMyHomeGames.Left;
