@@ -330,6 +330,7 @@ message SeatInfo {
 	optional bytes cards = 5;
 	required PlayerStatus status = 6;
 	required uint32 timebank = 7;
+	required boolean cards_visible = 8;
 }
 message ChangeSuspendState {
 	required bytes club_mongo_id = 1;
