@@ -311,7 +311,7 @@ app.get("/debug_install_chipuppoker.exe",function (req,res) {
 		});
 	});
 });
-app.get('/game',function (req,res) {
+app.get('/secure/game',function (req,res) {
 	var start = Date.now();
 	handHistory.find({gameid:new ObjectID(req.query.id)}).limit(1000).sort({_id:-1}).toArray(function (err,hands) {
 		Game.getGame(new ObjectID(req.query.id),function (err,game) {
@@ -322,7 +322,7 @@ app.get('/game',function (req,res) {
 		});
 	});
 });
-app.get('/user',function (req,res) {
+app.get('/secure/user',function (req,res) {
 	var start = Date.now();
 	allUsers.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
 		allClubs.find({members:new ObjectID(req.query.id)}).toArray(function (err,clubs) {
@@ -340,26 +340,27 @@ app.post('/eval',function (req,res) {
 	var result = dag.rankHands(fakegame,fakeusers);
 	res.send(JSON.stringify(result));
 });
-app.post('/newVersion',function (req,res) {
-	console.log('query',req.query);
-	console.log('files',req.files);
-	var name1 = req.files.installer.path.split('/')[1]
-	var clientname = req.files.client.path.split('/')[1]
-	console.log(name1);
-	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
-		assert.ifError(err);
-		fs.rename(req.files.client.path,'installers/'+clientname,function (err) {
+	app.post('/newVersion',function (req,res) {
+		// FIXME, add basicAuth
+		console.log('query',req.query);
+		console.log('files',req.files);
+		var name1 = req.files.installer.path.split('/')[1]
+		var clientname = req.files.client.path.split('/')[1]
+		console.log(name1);
+		fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 			assert.ifError(err);
-			Installers.insert({name:name1,clientname:clientname,version:req.query.version,revision:req.query.revision,debug:req.query.debug,size:req.files.installer.size},function (err,row) {
+			fs.rename(req.files.client.path,'installers/'+clientname,function (err) {
 				assert.ifError(err);
-				log('new version recorded: %j',row);
-				res.send('OK');
+				Installers.insert({name:name1,clientname:clientname,version:req.query.version,revision:req.query.revision,debug:req.query.debug,size:req.files.installer.size},function (err,row) {
+					assert.ifError(err);
+					log('new version recorded: %j',row);
+					res.send('OK');
+				});
 			});
 		});
 	});
-});
-app.get('/installers',installers_func);
-app.post('/installers',installers_func);
+app.get('/secure/installers',installers_func);
+app.post('/secure/installers',installers_func);
 function installers_func(req,res) {
 	var start = Date.now();
 	console.log(req.body);
@@ -944,7 +945,7 @@ ClientSocket.prototype.handle = function (code,args) {
 	case 2: // in the main lobby
 		switch (code) {
 		case codes.scStatus:
-			var query = {$or:[{owner:this.userid},{members:this.userid}]};
+			var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false} ]};
 			// owner should see password
 			// all need to see name, _id, seq, private, chips, and members
 			allClubs.find(query).toArray(function(err,clubs) {
@@ -964,8 +965,9 @@ ClientSocket.prototype.handle = function (code,args) {
 					clubids.push(c._id);
 					clubs[x] = makeClubProtobuf(clubs[x],userlist);
 				}
-				allClubs.find({is_private:false,members:{$ne:this.userid},owner:{$ne:this.userid}},{seq:1,name:1,members:1,password:1,is_private:1}).toArray(function (err,arr) {
+/*				allClubs.find({is_private:false,members:{$ne:this.userid},owner:{$ne:this.userid}},{seq:1,name:1,members:1,password:1,is_private:1}).toArray(function (err,arr) {
 					for (var x=0; x<arr.length; x++) {
+						if (userlist.indexOf(arr[x].owner) == -1) userlist.push(arr[x].owner);
 						if (arr[x].members) {
 							arr[x].member_count = arr[x].members.length + 1;
 							delete arr[x].members;
@@ -976,9 +978,9 @@ ClientSocket.prototype.handle = function (code,args) {
 						else arr[x].has_password = false;
 						delete arr[x].password;
 						status.clubs.push(arr[x]);
-						console.log('game#%d == %j',x,arr[x]);
-					}
+					}*/
 					//status.public_clubs = arr;
+					this.log('getting users %j',userlist);
 					allUsers.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""}).toArray(function(err,users) {
 						for (var x=0; x<users.length; x++) {
 							users[x] = makeUserProtobuf(users[x]);
@@ -1003,7 +1005,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							}.bind(this));
 						}.bind(this));
 					}.bind(this));
-				}.bind(this));
+//				}.bind(this));
 			}.bind(this));
 			break;
 		case codes.scListPublicClubs:
@@ -1080,6 +1082,9 @@ ClientSocket.prototype.handle = function (code,args) {
 				}
 				if (item.is_private && (pw != item.password)) {
 					this.send(codes.srJoinClubReply,{status:'csBadPassword'},'Poker.ClubCommandReply');
+					return;
+				} else if (!item.is_private) {
+					this.send(codes.srJoinClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 					return;
 				}
 				allClubs.update({_id:item._id},
@@ -1705,7 +1710,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.scSuspendPlayer:
 			var params = pb.Parse(args,'Poker.ChangeSuspendState');
-			this.log(params);
+			this.log('params:%j',params);
 			var clubid = toMongoId(params.club_mongo_id);
 			var playerid = toMongoId(params.player_mongo_id);
 			var broadcast = function broadcast(code) {
@@ -2037,8 +2042,8 @@ handlers[codes.scQueryTableStats] = function (args) {
 		}.bind(this));
 	}
 }
-function makeClubProtobuf(c) { // FIXME, clean up references
-	return Club.makeClubProtobuf(c);
+function makeClubProtobuf(c,userlist) { // FIXME, clean up references
+	return Club.makeClubProtobuf(c,userlist);
 }
 function makeUserProtobuf(u) {
 	if (u.avatar) u.avatar = new Buffer(u.avatar,'base64');

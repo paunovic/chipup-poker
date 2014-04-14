@@ -86,20 +86,28 @@ Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 	allClubs.findOne({_id:this.clubid},function (err,club) {
 		var g = makeGameProtobuf(gamerow);
 		if (club.is_private) {
+			token.tag += 'a';
 			var conn = activeUsers[club.owner];
 			if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
 			if (club.members) {
+				var count = 0;
 				for (var x=0; x<club.members.length; x++) {
 					conn = activeUsers[club.members[x]];
 					if (!conn) continue;
 					if (conn === exclude) continue;
 					conn.send(codes.seGameChange,g,'Poker.Game');
+					count++;
 				}
+				token.tag += '.'+count;
 			}
 		} else {
+			token.tag += 'b';
+			var count = 0;
 			for (var x in activeUsers) {
 				activeUsers[x].send(codes.seGameChange,g,'Poker.Game');
+				count++;
 			}
+			token.tag += '.'+count;
 		}
 		token.stop();
 		cb();
@@ -112,9 +120,16 @@ Club.prototype.goPublic = function (cb) {
 			assert.ifError(err);
 			var c = Club.makeClubProtobuf(JSON.parse(JSON.stringify(clubObj)));
 			this.obj = clubObj;
-			for (var key in activeUsers) {
-				activeUsers[key].send(codes.seClubChange,c,'Poker.Club');
-			}
+			allGames.find({clubid:this.clubid}).toArray(function (err,games) {
+				assert.ifError(err);
+				for (var x=0; x<games.length; x++) {
+					games[x] = makeGameProtobuf(games[x]);
+				}
+				var joininfo = {status:'csSuccess',club:c,games:games};
+				for (var key in activeUsers) {
+					activeUsers[key].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
+				}
+			}.bind(this));
 		}.bind(this));
 	}.bind(this));
 	cb('dummy');

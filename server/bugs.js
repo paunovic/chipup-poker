@@ -22,7 +22,7 @@ if (require.main === module) {
 		console.log('up');
 	});
 }
-function setup(app,bugs,allUsers,db) {
+function setup(app,bugs,users,db) {
 	app.use('/secure/',express.basicAuth(function mongoAuth(username,password,callback) {
 		console.log('checking auth %s/%s',username,password);
 		db.collection('admin').findOne({username:username},function (err,adminRow) {
@@ -37,13 +37,13 @@ function setup(app,bugs,allUsers,db) {
 	}));
 	var PokerProfile = db.collection('PokerProfile');
 	app.set('view engine','jade');
-	app.get('/bugs',function (req,res) {
+	app.get('/secure/bugs',function (req,res) {
 		var start = Date.now();
 		bugs.find({}).toArray(function (err,data) {
 			res.render('bugs',{bugs:data,start:start});
 		});
 	});
-	app.get('/serverBugs',function (req,res) {
+	app.get('/secure/serverBugs',function (req,res) {
 		var start = Date.now();
 		if (req.query.delete) {
 			db.collection('serverErrors').remove({_id:new ObjectID(req.query.delete)},function () {});
@@ -52,7 +52,7 @@ function setup(app,bugs,allUsers,db) {
 			res.render('serverErrors',{rows:data,start:start});
 		});
 	});
-	app.get('/users',function (req,res) {
+	app.get('/secure/users',function (req,res) {
 		var start = Date.now();
 		users.find({}).toArray(function (err,data) {
 			var sum = 0;
@@ -89,19 +89,19 @@ function setup(app,bugs,allUsers,db) {
 			});
 		});
 	});
-	app.get('/hand',function (req,res) {
+	app.get('/secure/hand',function (req,res) {
 		var start = Date.now();
 		db.collection('handHistory').findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
 			res.render('hand',{hand:hand,start:start});
 		});
 	});
-	app.get('/performance',function (req,res) {
+	app.get('/secure/performance',function (req,res) {
 		var start = Date.now();
 		db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
 			res.render('profile',{rows:rows,start:start});
 		});
 	});
-	app.get('/profile',function (req,res) {
+	app.get('/secure/profile',function (req,res) {
 		var start = Date.now();
 		PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
 			PokerProfile.find({time:{$gt:2000}}).toArray(function (err,list) {
@@ -109,7 +109,7 @@ function setup(app,bugs,allUsers,db) {
 			});
 		});
 	});
-	app.get('/disk',function (req,res) {
+	app.get('/secure/disk',function (req,res) {
 		var start = Date.now();
 		db.stats(function (err,stats) {
 			db.collectionNames(function (err,names) {

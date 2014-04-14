@@ -1,9 +1,9 @@
-extends base
+extends secure
 block content
   script.
     var raw=!{JSON.stringify(hand)};
   p='rake:'+hand.rake+'%' + (hand.totalrake ? '=='+hand.totalrake/100 : '')
-  a(href='/game?id='+hand.gameid) parent game
+  a(href='/secure/game?id='+hand.gameid) parent game
   table(border=1)
     tr
       th location
@@ -30,7 +30,7 @@ block content
         tr
           td=idx
           td
-            a(href="/user?id="+player._id)=player._id
+            a(href="/secure/user?id="+player._id)=player._id
           td=hand.balance_changes ? hand.balance_changes[idx]/100 : ''
   table(border=1)
     tr

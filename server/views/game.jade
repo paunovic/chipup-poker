@@ -1,7 +1,7 @@
-extends base
+extends secure
 block content
   p
-    a(href='/club?id='+game.obj.clubid) parent club
+    a(href='/secure/club?id='+game.obj.clubid) parent club
   table(border=1)
     tr
       th rake rate
@@ -39,6 +39,6 @@ block content
       tr
         td=hand._id.getTimestamp()
         td
-          a(href="/hand?id="+hand._id)=hand.seq
+          a(href="/secure/hand?id="+hand._id)=hand.seq
         td=hand.totalrake ? hand.totalrake/100 : ''
         td=hand.endtime
