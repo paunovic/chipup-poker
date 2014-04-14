@@ -7,9 +7,9 @@ uses
   Vcl.ExtCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.AppEvnts, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
   cxLookAndFeelPainters, dxSkinscxPCPainter, cxCustomData, cxDataStorage, cxEdit, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo,
-  cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, dxsChipUpDark, Vcl.ActnMan, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, dxsChipUpDarkTabs, dxsChipUpRedButton, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club,
-  dxGDIPlusClasses;
+  cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, Vcl.ActnMan, Vcl.ActnMenus,
+  Vcl.PlatformDefaultStyleActnCtrls, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club,
+  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPCdxBarPopupMenu, cxPC;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -35,39 +35,44 @@ type
     acOpenCashier: TAction;
     imgHeader: TcxImage;
     paMain: TPanel;
-    btOpenClubLobby: TcxButton;
-    gridGames: TcxGrid;
-    gridGamesTable: TcxGridTableView;
-    gridGamesId: TcxGridColumn;
-    gridGamesName: TcxGridColumn;
-    gridGamesType: TcxGridColumn;
-    gridGamesBlinds: TcxGridColumn;
-    gridGamesPlayers: TcxGridColumn;
-    gridGamesStatus: TcxGridColumn;
-    gridGamesLevel: TcxGridLevel;
+    btTournaments: TcxButton;
+    btHomeGames: TcxButton;
+    Resendverificationmail1: TMenuItem;
+    N2: TMenuItem;
+    acResendVerificationMail: TAction;
+    btFiller1: TcxButton;
+    pcTabs: TcxPageControl;
+    tsHomeGames: TcxTabSheet;
+    tsTournaments: TcxTabSheet;
+    gridPublicHomeGames: TcxGrid;
+    gridPublicHomeGamesTable: TcxGridTableView;
+    gridClubsId: TcxGridColumn;
+    gridClubsName: TcxGridColumn;
+    gridPublicHomeGamesLevel: TcxGridLevel;
     gridMyHomeGames: TcxGrid;
     gridMyHomeGamesTable: TcxGridTableView;
     gridJoinedClubsId: TcxGridColumn;
     gridJoinedClubsClubName: TcxGridColumn;
     gridJoinedClubsStatus: TcxGridColumn;
     gridMyHomeGamesLevel: TcxGridLevel;
-    btTournaments: TcxButton;
-    btHomeGames: TcxButton;
+    btMyHomeGames: TcxButton;
+    btPublicHomeGames: TcxButton;
+    gridGames: TcxGrid;
+    gridGamesTable: TcxGridTableView;
+    gridGamesId: TcxGridColumn;
+    gridGamesName: TcxGridColumn;
+    gridGamesType: TcxGridColumn;
+    gridGamesBlinds: TcxGridColumn;
+    gridGamesBuyinLimits: TcxGridColumn;
+    gridGamesPlayers: TcxGridColumn;
+    gridGamesStatus: TcxGridColumn;
+    gridGamesLevel: TcxGridLevel;
+    btOpenClubLobby: TcxButton;
+    btOpenTable: TcxButton;
     btCreateClub: TcxButton;
     btJoinClub: TcxButton;
-    gridGamesBuyinLimits: TcxGridColumn;
-    Resendverificationmail1: TMenuItem;
-    N2: TMenuItem;
-    acResendVerificationMail: TAction;
-    gridPublicHomeGames: TcxGrid;
-    gridPublicHomeGamesTable: TcxGridTableView;
-    gridClubsId: TcxGridColumn;
-    gridClubsName: TcxGridColumn;
-    gridPublicHomeGamesLevel: TcxGridLevel;
-    btMyHomeGames: TcxButton;
-    btOpenTable: TcxButton;
-    btPublicHomeGames: TcxButton;
-    btFiller1: TcxButton;
+    btTournamentsHeader: TcxButton;
+    lbsTournamentsComingSoon: TcxLabel;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -95,8 +100,8 @@ type
     procedure FormResize(Sender: TObject);
     procedure gridPublicHomeGamesEnter(Sender: TObject);
     procedure gridMyHomeGamesEnter(Sender: TObject);
-    procedure gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure pcTabsChange(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -108,6 +113,8 @@ type
     procedure UpdateClublist;
     procedure UpdatePublicClublist;
     procedure UpdateGamelist;
+
+    procedure ShowTournamentLayout(const AShow: Boolean);
 
     procedure CSRLeaveClub(const AMethodId: Integer; const AObject: TObject);
     procedure CSRClubCommand(const AMethodId: Integer; const AObject: TObject);
@@ -196,6 +203,8 @@ begin
   btCreateClub.Font.Assign(btHomeGames.Font);
   btJoinClub.Font.Assign(btHomeGames.Font);
 
+  pcTabs.ActivePage := tsHomeGames;
+
   EnableWindow(Handle, TRUE);
 end;
 
@@ -212,12 +221,16 @@ end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
 begin
-  btMyHomeGames.Width := (paMain.Width - btMyHomeGames.Left - 13 - 2) div 2;
-  btPublicHomeGames.Width := btMyHomeGames.Width;
+  btMyHomeGames.Width := (tsHomeGames.Width - btMyHomeGames.Left - 13 - 3) div 2;
   btPublicHomeGames.Left := btMyHomeGames.Left + btMyHomeGames.Width + 3;
+  btPublicHomeGames.Width := btMyHomeGames.Width;
+  gridMyHomeGames.Left := btMyHomeGames.Left;
   gridMyHomeGames.Width := btMyHomeGames.Width;
   gridPublicHomeGames.Left := btPublicHomeGames.Left;
   gridPublicHomeGames.Width := btPublicHomeGames.Width;
+  gridGames.Width := btPublicHomeGames.Left + btPublicHomeGames.Width - btMyHomeGames.Left;
+  btTournamentsHeader.Left := btMyHomeGames.Left;
+  btTournamentsHeader.Width := btMyHomeGames.Width + 3 + btPublicHomeGames.Width;
 end;
 
 procedure TfrmChipUpMain.DoLogout;
@@ -238,6 +251,19 @@ begin
   Hide;
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.RunForm(TfrmLogin, self, [], FALSE);
+end;
+
+procedure TfrmChipUpMain.ShowTournamentLayout(const AShow: Boolean);
+begin
+  btCreateClub.Visible := not AShow;
+  btJoinClub.Visible := not AShow;
+  gridMyHomeGames.Visible := not AShow;
+  gridPublicHomeGames.Visible := not AShow;
+  btMyHomeGames.Visible := not AShow;
+  btOpenTable.Visible := not AShow;
+  btPublicHomeGames.Visible := not AShow;
+  gridGames.Visible := not AShow;
+  btOpenClubLobby.Visible := not AShow;
 end;
 
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);
@@ -650,6 +676,14 @@ begin
   end;
 end;
 
+procedure TfrmChipUpMain.pcTabsChange(Sender: TObject);
+begin
+  if pcTabs.ActivePage = tsHomeGames then
+    ShowTournamentLayout(FALSE);
+  if pcTabs.ActivePage = tsTournaments then
+    ShowTournamentLayout(TRUE);
+end;
+
 procedure TfrmChipUpMain.CSRLeaveClub(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_ClubCommandReply;
@@ -782,28 +816,12 @@ end;
 
 procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);
 begin
-  btCreateClub.Show;
-  btJoinClub.Show;
-  gridMyHomeGames.Show;
-  gridPublicHomeGames.Show;
-  btMyHomeGames.Show;
-  btOpenTable.Show;
-  btPublicHomeGames.Show;
-  gridGames.Show;
-  btOpenClubLobby.Show;
+  pcTabs.ActivePage := tsHomeGames;
 end;
 
 procedure TfrmChipUpMain.acShowTournamentLayoutExecute(Sender: TObject);
 begin
-  btCreateClub.Hide;
-  btJoinClub.Hide;
-  btMyHomeGames.Hide;
-  btPublicHomeGames.Hide;
-  btOpenTable.Hide;
-  gridMyHomeGames.Hide;
-  gridPublicHomeGames.Hide;
-  gridGames.Hide;
-  btOpenClubLobby.Hide;
+  pcTabs.ActivePage := tsTournaments;
 end;
 
 procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);

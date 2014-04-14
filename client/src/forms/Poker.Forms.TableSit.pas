@@ -6,8 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   Vcl.StdCtrls, cxButtons, cxTextEdit, cxMaskEdit, cxSpinEdit, cxLabel, Vcl.ActnList, Poker.Interfaces.FormParams,
-   dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Poker.Table.Tables, Poker.Table.Status, Poker.Interfaces.ModalForm,
-  Vcl.Menus;
+  Poker.Table.Tables, Poker.Table.Status, Poker.Interfaces.ModalForm,
+  Vcl.Menus, ChipUpPokerDarkSkin;
 
 type
   TfrmTableSit = class(TForm, IFormParams, IModalForm)

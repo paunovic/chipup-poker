@@ -8,8 +8,8 @@ uses
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, cxButtons, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
-  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
-  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint, cxCalendar;
+  dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
+  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint, cxCalendar, ChipUpPokerDarkSkin;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -102,6 +102,7 @@ type
     styleTableRowSelected: TcxStyle;
     acTablesStatsSelectAll: TAction;
     SelectAll1: TMenuItem;
+    gridTablesHands: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -189,7 +190,8 @@ uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils;
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
+  Poker.Protobufs.Objects.TableStatsReplies;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -277,19 +279,6 @@ begin
 
     admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
 
-    btStats.Visible := admin_visible;
-    if btStats.Visible then
-    begin
-      btPrijatnaPunina.Left := btStats.Left + btStats.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
-      btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 2;
-    end
-    else
-    begin
-      ClientWidth := 600;
-      btPrijatnaPunina.Left := btTables.Left + btTables.Width + (btTables.Left - btClubHome.Left - btClubHome.Width);
-      btPrijatnaPunina.Width := pcTabs.Width - btPrijatnaPunina.Left - 8;
-    end;
-
     btChangeClubDetails.Visible := admin_visible;
     acShowClubChangeDetailsForm.Enabled := admin_visible;
     acUpdateClubDetails.Enabled := admin_visible;
@@ -335,7 +324,8 @@ begin
     UpdatePlayerlist;
     UpdateGamesList;
 
-    if btStats.Visible then
+    btStats.Enabled := admin_visible;
+    if btStats.Enabled then
     begin
       UpdateTablesStatsList;
       UpdatePlayersStatsList;
@@ -657,6 +647,7 @@ begin
         recidx := c.AppendRecord;
         c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId);
         c.SetValue(recidx, gridTablesName.Index, tmp);
+//        c.SetValue(recidx, gridTablesHands.Index, tablestats.HandCount); // EXPOSE HANDS HERE FIXME
 
         if Assigned(game) then
         begin
@@ -985,8 +976,22 @@ begin
 end;
 
 procedure TfrmClubLobby.CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
+var
+  pbreply: TPB_TableStatsReplies;
+  C1: Integer;
+  club: TClubInfo;
 begin
-  ConfigureGUI;
+  pbreply := AObject as TPB_TableStatsReplies;
+
+  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    Exit;
+
+  for C1 := 0 to pbreply.Reply.Count - 1 do
+    if CompareBytes(club.Mongoid, pbreply.Reply[C1].Clubid) then
+    begin
+      ConfigureGUI;
+      Exit;
+    end;
 end;
 
 procedure TfrmClubLobby.CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);

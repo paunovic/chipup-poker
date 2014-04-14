@@ -5,7 +5,7 @@ object dmMain: TdmMain
   Height = 354
   Width = 453
   object SkinController: TdxSkinController
-    SkinName = 'ChipUpDarkStyle'
+    SkinName = 'ChipUpPokerDarkStyle'
     Left = 32
     Top = 20
   end
@@ -21,6 +21,7 @@ object dmMain: TdmMain
     HintStyle.Font.Height = -11
     HintStyle.Font.Name = 'Tahoma'
     HintStyle.Font.Style = []
+    LookAndFeel.SkinName = 'ChipUpPokerDarkStyle'
     Left = 116
     Top = 20
   end

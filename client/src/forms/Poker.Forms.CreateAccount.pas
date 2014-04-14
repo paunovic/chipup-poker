@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
   cxContainer, cxEdit, dxSkinsCore, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList,
-  dxSkinsForm,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Poker.Interfaces.ModalForm, Vcl.Menus;
+  dxSkinsForm,  Poker.Interfaces.ModalForm, Vcl.Menus, ChipUpPokerDarkSkin;
 
 type
   TfrmCreateAccount = class(TForm, IModalForm)

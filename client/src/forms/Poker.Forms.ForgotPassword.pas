@@ -5,8 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons, Vcl.StdCtrls, Vcl.ActnList, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
-  dxSkinsCore, cxButtons, cxControls, cxContainer, cxEdit, cxLabel, cxTextEdit, dxSkinsForm, dxsChipUpDark, dxsChipUpDarkTabs,
-  dxsChipUpRedButton, Poker.Interfaces.ModalForm, Vcl.Menus;
+  dxSkinsCore, cxButtons, cxControls, cxContainer, cxEdit, cxLabel, cxTextEdit, dxSkinsForm, Poker.Interfaces.ModalForm, Vcl.Menus,
+  ChipUpPokerDarkSkin;
 
 type
   TfrmForgotPassword = class(TForm, IModalForm)

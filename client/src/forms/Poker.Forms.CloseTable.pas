@@ -5,8 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Poker.Objects.GameInfo, cxGraphics,
-  cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Vcl.ActnList,
-  Vcl.StdCtrls, cxButtons;
+  cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, Vcl.ActnList, Vcl.StdCtrls, cxButtons, ChipUpPokerDarkSkin;
 
 type
   TfrmCloseTable = class(TForm, IFormParams, IModalForm)

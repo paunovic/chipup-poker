@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxTextEdit, cxLabel, Vcl.StdCtrls, cxButtons, Vcl.ActnList,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Vcl.Menus;
+  cxTextEdit, cxLabel, Vcl.StdCtrls, cxButtons, Vcl.ActnList, Vcl.Menus, ChipUpPokerDarkSkin;
 
 type
   TfrmChangePassword = class(TForm)

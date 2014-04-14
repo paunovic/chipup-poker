@@ -92,10 +92,6 @@ object frmDebug: TfrmDebug
         Top = 4
         Anchors = [akTop, akRight]
         Caption = 'Threads:'
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object lbsMemoryUsage: TcxLabel
@@ -103,10 +99,6 @@ object frmDebug: TfrmDebug
         Top = 20
         Anchors = [akTop, akRight]
         Caption = 'Memory usage:'
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object lbsSocketState: TcxLabel
@@ -114,10 +106,6 @@ object frmDebug: TfrmDebug
         Top = 52
         Anchors = [akTop, akRight]
         Caption = 'Socket state:'
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object lbsCalbackSets: TcxLabel
@@ -125,10 +113,6 @@ object frmDebug: TfrmDebug
         Top = 36
         Anchors = [akTop, akRight]
         Caption = 'Callback sets:'
-        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object lbvThreads: TcxLabel
@@ -190,7 +174,6 @@ object frmDebug: TfrmDebug
         Height = 31
         Caption = 'SEAT POS'
         Colors.PressedText = clRed
-        LookAndFeel.SkinName = 'ChipUpDarkStyle'
         SpeedButtonOptions.GroupIndex = 2
         SpeedButtonOptions.CanBeFocused = False
         SpeedButtonOptions.AllowAllUp = True
@@ -211,7 +194,6 @@ object frmDebug: TfrmDebug
         Height = 31
         Caption = 'SET'
         Colors.PressedText = clRed
-        LookAndFeel.SkinName = 'ChipUpDarkStyle'
         SpeedButtonOptions.CanBeFocused = False
         TabOrder = 9
         Visible = False
@@ -231,7 +213,6 @@ object frmDebug: TfrmDebug
         Hint = 'Pause'
         Anchors = [akTop, akRight]
         Colors.PressedText = clRed
-        LookAndFeel.SkinName = 'ChipUpDarkStyle'
         OptionsImage.Glyph.Data = {
           36090000424D3609000000000000360000002800000018000000180000000100
           2000000000000009000000000000000000000000000000000000000000000000

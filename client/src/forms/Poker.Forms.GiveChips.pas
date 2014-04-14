@@ -6,8 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxTextEdit, cxLabel, cxMaskEdit, cxSpinEdit, Vcl.StdCtrls, cxButtons, Vcl.ActnList, Poker.Objects.ClubInfo,
-  Poker.Objects.PlayerInfo, Poker.Interfaces.FormParams,  dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Poker.Interfaces.ModalForm,
-  Vcl.Menus;
+  Poker.Objects.PlayerInfo, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
+  Vcl.Menus, ChipUpPokerDarkSkin;
 
 type
   TfrmGiveChips = class(TForm, IFormParams, IModalForm)

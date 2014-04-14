@@ -6,8 +6,8 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
-  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, cxLookAndFeels,
-  dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip, dxCustomHint, cxHint;
+  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, cxLookAndFeels, dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip,
+  dxCustomHint, cxHint, ChipUpPokerDarkSkin;
 
 type
   TdmMain = class(TDataModule)

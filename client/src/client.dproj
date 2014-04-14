@@ -126,9 +126,7 @@
 			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
 			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
-			<DCCReference Include="skins\ChipUpDarkStyle\dxsChipUpDark.pas"/>
-			<DCCReference Include="skins\ChipUpDarkTabs\dxsChipUpDarkTabs.pas"/>
-			<DCCReference Include="skins\ChipUpRedButton\dxsChipUpRedButton.pas"/>
+			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
 			<DCCReference Include="Poker.DataModule.pas">
 				<Form>dmMain</Form>
 				<DesignClass>TDataModule</DesignClass>

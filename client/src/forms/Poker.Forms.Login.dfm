@@ -3167,7 +3167,7 @@ object frmLogin: TfrmLogin
   end
   object cbRememberLogin: TcxCheckBox
     Left = 134
-    Top = 223
+    Top = 217
     Caption = 'Remember login'
     ParentFont = False
     Style.Font.Charset = DEFAULT_CHARSET
@@ -3182,7 +3182,7 @@ object frmLogin: TfrmLogin
   end
   object cbRememberPassword: TcxCheckBox
     Left = 134
-    Top = 245
+    Top = 239
     Caption = 'Remember password'
     ParentFont = False
     TabOrder = 3
@@ -3198,7 +3198,7 @@ object frmLogin: TfrmLogin
     Caption = 'CONNECTING...'
     Colors.NormalText = clWhite
     Colors.DisabledText = clGray
-    LookAndFeel.SkinName = 'ChipUpRedButton'
+    LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_LoginButton'
     SpeedButtonOptions.CanBeFocused = False
     TabOrder = 4
     Font.Charset = DEFAULT_CHARSET

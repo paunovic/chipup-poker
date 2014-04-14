@@ -5,8 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, cxGraphics, cxLookAndFeels,
-  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, dxsChipUpDark, dxsChipUpDarkTabs, dxsChipUpRedButton, Vcl.ActnList, Vcl.StdCtrls, cxButtons,
-  Vcl.ExtCtrls, GR32_Image, GR32, GR32_backends, GR32_Resamplers;
+  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, Vcl.ActnList, Vcl.StdCtrls, cxButtons,
+  Vcl.ExtCtrls, GR32_Image, GR32, GR32_backends, GR32_Resamplers, ChipUpPokerDarkSkin;
 
 const
    PixelCountMax = 32768;

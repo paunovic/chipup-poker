@@ -1,0 +1,3295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dxSkin Version="1.04" Name="ChipUpPokerDarkStyle_ClubLobbyTabs" Parent="Darkroom">
+<Details>
+<SkinGroupName Value="Standard Skins"/>
+<DisplayName Value="ChipUpPokerDarkStyle_ClubLobbyTabs"/>
+<SkinIcon Name="16x16" Value="SkinIcon16x16.png"/>
+<SkinIcon Name="48x48" Value="SkinIcon48x48.png"/>
+</Details>
+<AdditionalProperties>
+<Colors/>
+<Properties/>
+</AdditionalProperties>
+<ControlParts Name="Bars">
+<Properties/>
+<Part Name="Bar" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="3" Right="2" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="1" Right="0" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BarCustomize">
+<Properties/>
+<MinSize Width="19" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="1" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BarCustomizeVertical">
+<Properties/>
+<MinSize Width="10" Height="19"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="0" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BarDragGrip">
+<Properties/>
+<MinSize Width="13" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="1" Right="0" Bottom="4"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BarDragGripVertical">
+<Properties/>
+<MinSize Width="10" Height="13"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="4" Right="4" Bottom="0"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BarSeparator">
+<Properties/>
+<MinSize Width="9" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Tile" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="5" Right="0" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BarSeparatorVertical">
+<Properties/>
+<MinSize Width="10" Height="9"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Tile" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="0" Right="5" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BarVertical" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="-1" Right="4" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FloatBar" Color="2960685" TextColor="9605778">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="0" Thin="0"/>
+<Top Color="0" Thin="0"/>
+<Right Color="0" Thin="0"/>
+<Bottom Color="0" Thin="0"/>
+</Borders>
+<Content Left="4" Top="4" Right="4" Bottom="4"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="1" Right="0" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ItemSeparator" Color="2960685" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="0" Thin="0"/>
+<Top Color="0" Thin="0"/>
+<Right Color="0" Thin="0"/>
+<Bottom Color="0" Thin="0"/>
+</Borders>
+<Content Left="4" Top="4" Right="4" Bottom="4"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="0" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LinkSelected" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1414" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="11" Top="11" Right="12" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1414" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LinkStatic">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="17" Right="2" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="MainMenuCustomize" Color="2960685">
+<Properties/>
+<MinSize Width="15" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="-6" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="MainMenuDrag" Color="2960685">
+<Properties/>
+<MinSize Width="13" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="-1" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="MDIButtonClose">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="MDIButtonMinimize">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="-1" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="MDIButtonRestore">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupMenu" Color="10395294" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="0" Thin="1"/>
+<Top Color="0" Thin="1"/>
+<Right Color="0" Thin="1"/>
+<Bottom Color="0" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="-5" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupMenuCheck" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="9" Right="9" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupMenuDropDownButtonArrow">
+<Properties/>
+<MinSize Width="1" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="2" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="2" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupMenuDropDownButtonLabel">
+<Properties/>
+<MinSize Width="1" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="2" Right="0" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="2" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="2" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="2" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupMenuExpandButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupMenuLinkSelected">
+<Properties/>
+<MinSize Width="1" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="2" Right="0" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="10" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="10" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupMenuSeparator">
+<Properties/>
+<MinSize Width="10" Height="3"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Tile" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScreenTipSeparator">
+<Properties/>
+<MinSize Width="1" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="0"/>
+<Top Color="8421504" Thin="0"/>
+<Right Color="536870911" Thin="0"/>
+<Bottom Color="16777215" Thin="0"/>
+</Borders>
+<Content Left="0" Top="3" Right="0" Bottom="4"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Common">
+<Properties/>
+<Part Name="AlertWindow" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="8" Right="6" Bottom="6"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="1" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AlertWindowButton" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="3" Right="3" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1414" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1414" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AlertWindowButtonGlyphs" ImageCount="6">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="9" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AlertWindowCaption" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="3" Right="2" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AlertWindowNavigationPanelButton" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="3" Right="2" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Button" TextColor="11842740">
+<Properties/>
+<MinSize Width="16" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="159" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="11" Right="2" Bottom="2"/>
+<File Name="Button_Image.png"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="159" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupExpandButton" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanel" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="1" Right="1" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelBottom" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="1" Right="1" Bottom="0"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelCaptionBottom" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="11" Top="3" Right="11" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="2" Right="1" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelCaptionLeft" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="11" Right="3" Bottom="11"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelCaptionRight" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="11" Right="3" Bottom="11"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="1" Right="2" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelCaptionTop" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="11" Top="3" Right="11" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelLeft" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="1" Right="1" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelRight" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="1" Right="0" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupPanelTop" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="0" Right="1" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Header" Color="3618615" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="3" Right="3" Bottom="4"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="5" Right="4" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="HeaderSpecial" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="0" Right="6" Bottom="0"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="5" Right="5" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScrollButton" ImageCount="4" Color="2960685">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScrollContentHorz" Color="2960685">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScrollContentVert" Color="2960685">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScrollThumbHorz">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="7" Right="5" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScrollThumbVert">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="7" Top="5" Right="5" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SizeGrip">
+<Properties/>
+<MinSize Width="16" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SortShape" ImageCount="4">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Splitter">
+<Properties/>
+<MinSize Width="7" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SplitterHorz">
+<Properties/>
+<MinSize Width="0" Height="7"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Docking">
+<Properties/>
+<Part Name="DockWindowBorder" Color="3289650" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="7" Top="3" Right="7" Bottom="7"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="0" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DockWindowButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="3" Right="3" Bottom="3"/>
+<Image Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DockWindowButtonGlyphs" ImageCount="8">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DockWindowCaption" Color="2960685" TextColor="14474460">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="6" Right="4" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="17" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="15" Right="3" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="17" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabButtonHorz" ImageCount="4">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabButtonVert" ImageCount="4">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabHeader" TextColor="16777215">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="4" Right="6" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="12" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabHeaderAutoHideBar" ImageCount="2" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="3" Right="3" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="9" Top="9" Right="8" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabHeaderBackground" Color="3289650">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="12" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabHeaderCloseButton">
+<Properties/>
+<MinSize Width="14" Height="14"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabHeaderLine">
+<Properties/>
+<MinSize Width="10" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="0" Right="5" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Editors">
+<Properties/>
+<Part Name="BreadcrumbEditButton" TextColor="11842740">
+<Properties/>
+<MinSize Width="16" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="2" Right="4" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="0" Right="1" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BreadcrumbEditButtonsAreaSeparator" Color="2697513">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="-29" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BreadcrumbEditDropDownButton" TextColor="11842740">
+<Properties/>
+<MinSize Width="16" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="1" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BreadcrumbEditNodeButton" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="47" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="1" Right="11" Bottom="8"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BreadcrumbEditNodeSplitButtonLeft">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="47" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="9" Right="11" Bottom="8"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BreadcrumbEditNodeSplitButtonRight">
+<Properties/>
+<MinSize Width="0" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="NoResize" States="47" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BreadcrumbEditProgressChunk">
+<Properties/>
+<MinSize Width="6" Height="12"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="2" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Checkbox" ImageCount="3">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ClockFace" TextColor="4605510">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ClockGlass">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="CloseButton">
+<Properties/>
+<MinSize Width="16" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ComboButtonGlyph" ImageCount="4">
+<Properties/>
+<MinSize Width="16" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="EditorButton" TextColor="11842740">
+<Properties/>
+<MinSize Width="16" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GalleryGroup" TextColor="2302755">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="5" Right="3" Bottom="4"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="0" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GalleryItem" TextColor="2302755">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="3" Right="3" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LabelLine">
+<Properties/>
+<MinSize Width="2" Height="2"/>
+<Borders>
+<Left Color="536870911" Thin="0"/>
+<Top Color="15257790" Thin="0"/>
+<Right Color="536870911" Thin="0"/>
+<Bottom Color="16777215" Thin="0"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="0" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LabelLineVert">
+<Properties/>
+<MinSize Width="2" Height="2"/>
+<Borders>
+<Left Color="15257790" Thin="0"/>
+<Top Color="536870911" Thin="0"/>
+<Right Color="16777215" Thin="0"/>
+<Bottom Color="536870911" Thin="0"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="2" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Navigator" ImageCount="16">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="NavigatorButton" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="3" Right="2" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="NavigatorVert" ImageCount="6">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ProgressBorder" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ProgressBorderVert" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="2" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ProgressChunk">
+<Properties/>
+<MinSize Width="6" Height="12"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="2" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ProgressChunkVert">
+<Properties/>
+<MinSize Width="12" Height="4"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="1" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="RadioButton" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SpinDownGlyph" ImageCount="4">
+<Properties/>
+<MinSize Width="16" Height="8"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SpinLeftGlyph" ImageCount="4">
+<Properties/>
+<MinSize Width="8" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SpinRightGlyph" ImageCount="4">
+<Properties/>
+<MinSize Width="8" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SpinUpGlyph" ImageCount="4">
+<Properties/>
+<MinSize Width="16" Height="8"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarThumb">
+<Properties/>
+<MinSize Width="11" Height="15"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarThumbBoth">
+<Properties/>
+<MinSize Width="11" Height="15"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarThumbUp">
+<Properties/>
+<MinSize Width="11" Height="15"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarThumbVert">
+<Properties/>
+<MinSize Width="11" Height="15"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarThumbVertBoth">
+<Properties/>
+<MinSize Width="11" Height="15"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarThumbVertUp">
+<Properties/>
+<MinSize Width="11" Height="15"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarTrack" ImageCount="4">
+<Properties/>
+<MinSize Width="10" Height="2"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="4" Right="6" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TrackBarTrackVert" ImageCount="4">
+<Properties/>
+<MinSize Width="10" Height="2"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="6" Right="3" Bottom="6"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Form">
+<Properties/>
+<Part Name="FormButtonClose">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormButtonHelp">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormButtonMaximize">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormButtonMinimize">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormButtonRestore">
+<Properties/>
+<MinSize Width="20" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormCaption" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="5" Right="5" Bottom="5"/>
+<Image Layout="Vertical" Stretch="Stretch" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="6" Right="5" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormContent" Color="0" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormFrameBottom">
+<Properties/>
+<MinSize Width="0" Height="6"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="2" Right="5" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormFrameLeft">
+<Properties/>
+<MinSize Width="6" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="0" Right="2" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormFrameRight">
+<Properties/>
+<MinSize Width="6" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="0" Right="2" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SmallFormButtonClose">
+<Properties/>
+<MinSize Width="16" Height="16"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="527" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SmallFormCaption">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="3" Right="3" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="6" Right="5" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="528" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Grid">
+<Properties/>
+<Part Name="FilterButton">
+<Properties/>
+<MinSize Width="15" Height="17"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FilterButtonActive">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FooterCell" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="3" Right="6" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="2" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FooterPanel" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="2" Right="1" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="2" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GridFilterPanel" Color="5987163" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="3" Right="0" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="2" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GridGroupPanel" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="4342338" Thin="0"/>
+<Top Color="4342338" Thin="0"/>
+<Right Color="4342338" Thin="0"/>
+<Bottom Color="4342338" Thin="0"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="IndicatorImages" ImageCount="10">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewItem" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecord" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="1" Right="1" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordBottom" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="1" Right="1" Bottom="0"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordCaptionBottom" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="11" Top="3" Right="11" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="2" Right="1" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordCaptionLeft" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="11" Right="3" Bottom="11"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordCaptionRight" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="11" Right="3" Bottom="11"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="1" Right="2" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordCaptionTop" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="11" Top="3" Right="11" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="529" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordExpandButton" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordLeft" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="1" Right="1" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordRight" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="1" Right="0" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LayoutViewRecordTop" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="0" Right="1" Bottom="1"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PlusMinus" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SmartFilterButton">
+<Properties/>
+<MinSize Width="11" Height="11"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="151" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="151" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="NavBar">
+<Properties/>
+<Part Name="Background" Color="5263440">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="4" Right="4" Bottom="4"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="5" Right="5" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupCloseButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupHeader" TextColor="14474460">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="7" Top="6" Right="6" Bottom="6"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="0" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupOpenButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="NavPane">
+<Properties/>
+<Part Name="Caption" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="10" Top="5" Right="7" Bottom="5"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="CollapseButton">
+<Properties/>
+<MinSize Width="19" Height="19"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="CollapsedGroupClient" Color="5263440" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="1" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ExpandButton">
+<Properties/>
+<MinSize Width="19" Height="19"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupButton" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="4" Right="4" Bottom="4"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="8" Top="4" Right="8" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupButtonSelected" TextColor="14474460">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="12" Top="6" Right="12" Bottom="6"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="1" Right="6" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="GroupClient" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="1" Right="5" Bottom="2"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="5" Right="10" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Item" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ItemSelected" TextColor="16777215">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="OverflowPanel">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="11" Right="4" Bottom="2"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="10" Right="6" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="OverflowPanelExpandItem">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="3" Right="0" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="OverflowPanelItem" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="7" Top="7" Right="7" Bottom="7"/>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupBorder">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="5" Right="5" Bottom="5"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="6" Right="6" Bottom="6"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="PopupSizeGrip">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScrollDownButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ScrollUpButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Splitter">
+<Properties/>
+<MinSize Width="0" Height="11"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="PageControl">
+<Properties/>
+<Part Name="TabButtonHorz" ImageCount="4" Color="2960685">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabButtonVert" ImageCount="4" Color="2960685">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabHeader" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="4" Right="6" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="9" Top="9" Right="10" Bottom="9"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="31" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabHeaderCloseButton">
+<Properties/>
+<MinSize Width="14" Height="14"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabPane" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="4" Right="4" Bottom="4"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="5263440" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="4" Right="4" Bottom="4"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="PrintingSystem">
+<Properties/>
+<Part Name="PageBorder">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="18" Top="15" Right="18" Bottom="26"/>
+<Image Layout="Vertical" Stretch="Stretch" States="17" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="18" Top="15" Right="18" Bottom="26"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="17" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Ribbon">
+<Properties/>
+<Part Name="AppMenuBackground">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="24" Right="5" Bottom="0"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="0" Right="6" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppMenuBackgroundBottom">
+<Properties/>
+<MinSize Width="10" Height="6"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="2" Right="6" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppMenuBackgroundTop">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="4" Right="6" Bottom="4"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppMenuExtraPaneButton" TextColor="12500670">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="259" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="11" Right="11" Bottom="10"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppMenuExtraPanePinButtonGlyph" ImageCount="2">
+<Properties/>
+<MinSize Width="30" Height="20"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BackstageViewMenuBackground">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="2" Right="0" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="8" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BackstageViewMenuButton" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="12" Top="6" Right="12" Bottom="6"/>
+<Image Layout="Vertical" Stretch="Stretch" States="519" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="11" Right="3" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="519" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BackstageViewTabHeader" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="15" Top="12" Right="25" Bottom="12"/>
+<Image Layout="Vertical" Stretch="Stretch" States="903" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="11" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="519" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="BackstageViewTabHeaderArrow">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Button" TextColor="1644825">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="11" Right="11" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ButtonArrow">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ButtonGroupButton">
+<Properties/>
+<MinSize Width="22" Height="22"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="3" Right="3" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="10" Right="11" Bottom="11"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ButtonGroupSeparator">
+<Properties/>
+<MinSize Width="2" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ButtonGroupSplitButtonLeft">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="3" Right="3" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="10" Right="11" Bottom="11"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ButtonGroupSplitButtonRight">
+<Properties/>
+<MinSize Width="0" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="0" Right="4" Bottom="0"/>
+<Image Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="10" Right="10" Bottom="11"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ContextualTabHeader">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="10" Top="3" Right="10" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="13" Top="9" Right="16" Bottom="9"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ContextualTabLabel" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="8" Right="1" Bottom="0"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="17" Right="3" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ContextualTabLabelOnGlass" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="7" Top="4" Right="7" Bottom="0"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="0" Right="1" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="ContextualTabPanel">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="3" Right="0" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="1" Right="4" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DialogFrameBottom" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DialogFrameLeft" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="4" Right="0" Bottom="4"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DialogFrameRight" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="4" Right="0" Bottom="4"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DropDownGalleryGroupHeader" TextColor="2302755">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="6" Top="5" Right="3" Bottom="4"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="0" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="DropDownGallerySizeGrip" ImageCount="3">
+<Properties/>
+<MinSize Width="5" Height="5"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormAppButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="9" Top="9" Right="9" Bottom="9"/>
+<Image Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormAppButton2010" TextColor="11842740">
+<Properties/>
+<MinSize Width="56" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="14" Top="4" Right="14" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="13" Top="9" Right="16" Bottom="9"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormCaption" ImageCount="2" TextColor="16777215">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="2" Right="0" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="6" Top="5" Right="6" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormFrameBottom" ImageCount="2">
+<Properties/>
+<MinSize Width="6" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="1" Right="0" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormFrameLeft" ImageCount="2">
+<Properties/>
+<MinSize Width="6" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="0" Right="0" Bottom="6"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="FormFrameRight" ImageCount="2">
+<Properties/>
+<MinSize Width="6" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="5" Bottom="6"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="InRibbonGalleryButtonDown">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="InRibbonGalleryButtonDropDown">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="InRibbonGalleryButtonUp">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="15" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="InRibbonGalleryPane">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="1" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="KeyTip" TextColor="16777215">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="3" Top="1" Right="2" Bottom="2"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LargeButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LargeSplitButtonBottom">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="1"/>
+<Image Layout="Vertical" Stretch="Stretch" States="183" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="LargeSplitButtonTop">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="1"/>
+<Image Layout="Vertical" Stretch="Stretch" States="183" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="MinimizeButtonGlyph" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="QATButtonGlyph">
+<Properties/>
+<MinSize Width="12" Height="12"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="QATCustomizeButton" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="QATOverflow" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SplitButtonLeft">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="183" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="11" Right="11" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="SplitButtonRight">
+<Properties/>
+<MinSize Width="0" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="NoResize" States="183" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="StatusBarBackground" ImageCount="2" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="7" Top="1" Right="6" Bottom="6"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="7" Top="0" Right="6" Bottom="27"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="StatusBarButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="8" Top="3" Right="8" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="11" Right="11" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1415" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="StatusBarSeparator">
+<Properties/>
+<MinSize Width="7" Height="1"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="4" Bottom="18"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Tab" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="10" Top="3" Right="10" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="13" Top="9" Right="16" Bottom="9"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="55" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabBackground" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="0" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabBackgroundOnGlass">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="2" Right="2" Bottom="2"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="0" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroup">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="4" Top="2" Right="7" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="3" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroupButton">
+<Properties/>
+<MinSize Width="17" Height="13"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroupCaption" TextColor="4605510">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="3" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroupCollapsed">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="1" Right="1" Bottom="1"/>
+<Image Layout="Vertical" Stretch="Stretch" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="5" Right="5" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="7" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroupCollapsedBox">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="5" Top="5" Right="5" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroupItemsSeparator">
+<Properties/>
+<MinSize Width="9" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="5" Right="0" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroupLeftScrollButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabGroupRightScrollButton">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TabPanel">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="0" Top="3" Right="0" Bottom="3"/>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="4" Top="1" Right="4" Bottom="5"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="Scheduler">
+<Properties/>
+<Part Name="AllDayArea">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="14265997" Thin="0"/>
+<Top Color="14265997" Thin="0"/>
+<Right Color="14265997" Thin="0"/>
+<Bottom Color="14265997" Thin="0"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AllDayAreaSelected">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="8421504" Thin="0"/>
+<Top Color="8421504" Thin="0"/>
+<Right Color="8421504" Thin="0"/>
+<Bottom Color="8421504" Thin="0"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Appointment" TextColor="0">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppointmentBottomShadow">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppointmentMask" ImageCount="2">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="3" Top="3" Right="3" Bottom="3"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppointmentRightBorder" TextColor="11842740">
+<Properties/>
+<MinSize Width="5" Height="10"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="3" Right="5" Bottom="3"/>
+<Image Layout="Vertical" Stretch="Stretch" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="2" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="3" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="AppointmentRightShadow">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="CurrentTimeIndicator" ImageCount="2">
+<Properties/>
+<MinSize Width="10" Height="11"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="0" Right="45" Bottom="0"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Group" ImageCount="2">
+<Properties/>
+<MinSize Width="35" Height="30"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="9" Top="5" Right="9" Bottom="9"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="Milestone">
+<Properties/>
+<MinSize Width="15" Height="15"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="MoreButton" ImageCount="4" TextColor="16777215">
+<Properties/>
+<MinSize Width="12" Height="12"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="NavButtonNext" TextColor="2960685">
+<Properties/>
+<MinSize Width="22" Height="22"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="1" Top="0" Right="4" Bottom="0"/>
+<Image Layout="Vertical" Stretch="Stretch" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="10" Top="10" Right="11" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="NavButtonNextArrow" TextColor="16777215">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="NavButtonPrev" TextColor="11842740">
+<Properties/>
+<MinSize Width="22" Height="22"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="2" Top="0" Right="3" Bottom="0"/>
+<Image Layout="Vertical" Stretch="Stretch" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="12" Top="10" Right="9" Bottom="10"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="NavButtonPrevArrow" TextColor="16777215">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Vertical" Stretch="NoResize" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+<Glyph Layout="Vertical" Stretch="NoResize" States="11" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TimeGridHeader" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="5" Right="5" Bottom="5"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="1" Top="12" Right="1" Bottom="1"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+<Part Name="TimeGridHeaderSelected" TextColor="14474460">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Content Left="5" Top="5" Right="5" Bottom="5"/>
+<Image Layout="Vertical" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="2" Top="12" Right="2" Bottom="2"/>
+</Image>
+<Glyph Layout="Vertical" Stretch="NoResize" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+<ControlParts Name="TileControl">
+<Properties/>
+</ControlParts>
+<ControlParts Name="VerticalGrid">
+<Properties/>
+<Part Name="RowHeader" Color="3947580" TextColor="11842740">
+<Properties/>
+<MinSize Width="0" Height="0"/>
+<Borders>
+<Left Color="536870911" Thin="1"/>
+<Top Color="536870911" Thin="1"/>
+<Right Color="536870911" Thin="1"/>
+<Bottom Color="536870911" Thin="1"/>
+</Borders>
+<Image Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal">
+<Margins Left="0" Top="-1" Right="0" Bottom="0"/>
+</Image>
+<Glyph Layout="Horizontal" Stretch="Stretch" States="1" GradientBeginColor="536870911" GradientEndColor="536870911" GradientMode="Horizontal"/>
+</Part>
+</ControlParts>
+</dxSkin>
