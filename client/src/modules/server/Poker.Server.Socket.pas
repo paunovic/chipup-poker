@@ -31,6 +31,7 @@ type
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
     procedure SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; PeerCert: TX509Base; var Disconnect: Boolean);
+    procedure SocketSslVerifyPeer(Sender: TObject; var Ok: Integer; Cert: TX509Base);
     procedure SocketChangeState(Sender: TObject; OldState, NewState: TSocketState);
     procedure SocketDataAvailable(Sender: TObject; Error: Word);
     procedure SocketError(Sender: TObject);
@@ -119,7 +120,8 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
-  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies;
+  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
+  Poker.Server.SSLCerts;
 
 var
   FConnectThreadId: DWORD;
@@ -163,7 +165,14 @@ begin
 
   FSocket := TSslWSocket.Create(nil);
   FSocket.SslContext := TSslContext.Create(nil);
+  FSocket.SslContext.SslVerifyPeer := TRUE;
+  FSocket.SslContext.SslVerifyDepth := 1;
+  FSocket.SslContext.SslVerifyFlags := [sslX509_V_FLAG_CRL_CHECK_ALL];
+  FSocket.SslContext.SslVerifyPeerModes := [SslVerifyMode_FAIL_IF_NO_PEER_CERT];
+  FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT];
+  FSocket.SslContext.SslVersionMethod := sslV3;
   FSocket.SslContext.InitContext;
+  FSocket.SslContext.TrustCert(SSLCert_Server);
 end;
 
 destructor TServerSocket.Destroy;
@@ -196,6 +205,7 @@ begin
   FSocket.OnError := SocketError;
   FSocket.OnSessionConnected := SocketSessionConnected;
   FSocket.OnSessionClosed := SocketSessionClosed;
+  FSocket.OnSslVerifyPeer := SocketSslVerifyPeer;
   FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
 
   ResetPingTimer;
@@ -229,7 +239,7 @@ procedure TServerSocket.SocketSessionConnected(Sender: TObject; ErrCode: Word);
 begin
   if ErrCode = 0 then
   begin
-    {$IFDEF DEBUG} DebugLn('Connected. Starting SSL handshake...', ditSocket); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn('Starting SSL handshake...', ditSocket); {$ENDIF}
     FSocket.StartSslHandshake;
   end
   else
@@ -260,6 +270,11 @@ begin
     FSocket.LastError := ErrCode;
     SocketError(Sender);
   end;
+end;
+
+procedure TServerSocket.SocketSslVerifyPeer(Sender: TObject; var Ok: Integer; Cert: TX509Base);
+begin
+  {$IFDEF DEBUG} DebugLn(Format('SSL verify peer result: %d', [Ok]), ditSocket); {$ENDIF}
 end;
 
 procedure TServerSocket.SocketDataAvailable(Sender: TObject; Error: Word);

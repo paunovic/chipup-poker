@@ -265,6 +265,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas"/>
 			<DCCReference Include="modules\stats\Poker.Stats.Table.pas"/>
 			<DCCReference Include="modules\stats\Poker.Stats.Player.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.SSLCerts.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -283,6 +284,11 @@
 				<ResourceId>RetrievingAvatar</ResourceId>
 			</RcItem>
 			<None Include="defines.inc"/>
+			<RcItem Include="resources\ssl_certs\ServerCert.pem">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>ServerCert</ResourceId>
+			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

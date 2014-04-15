@@ -9,7 +9,7 @@ uses
   cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo,
   cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, Vcl.ActnMan, Vcl.ActnMenus,
   Vcl.PlatformDefaultStyleActnCtrls, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club,
-  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPCdxBarPopupMenu, cxPC;
+  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPCdxBarPopupMenu, cxPC, Datasnap.DSHTTP;
 
 type
   TfrmChipUpMain = class(TForm)
