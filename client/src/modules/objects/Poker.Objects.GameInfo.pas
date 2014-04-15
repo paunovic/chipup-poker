@@ -106,15 +106,15 @@ begin
   case FGameType of
     gtHoldem: result := 'Holdem';
     gtOmaha: result := 'Omaha';
+    gtRotationNLHPLO: result := 'Rotation NLH/PLO';
   end;
 end;
 
 function TGameInfo.GetGameTypeStrFull: String;
 begin
-  case FGameType of
-    gtHoldem: result := 'Holdem';
-    gtOmaha: result := 'Omaha';
-  end;
+  result := GetGameTypeStr;
+  if FGameType = gtRotationNLHPLO then
+    Exit;
 
   case FGameLimit of
     glNoLimit: result := 'NL ' + result;

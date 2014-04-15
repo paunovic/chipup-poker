@@ -96,8 +96,10 @@ object frmCreateEditGame: TfrmCreateEditGame
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
       'Hold'#39'em'
-      'Omaha')
+      'Omaha'
+      'Rotation (NLH/PLO)')
     Properties.ReadOnly = False
+    Properties.OnChange = cbGameTypePropertiesChange
     TabOrder = 1
     Text = 'Hold'#39'em'
     Width = 273
@@ -156,8 +158,7 @@ object frmCreateEditGame: TfrmCreateEditGame
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
       'No Limit'
-      'Pot Limit'
-      'No Limit/Pot Limit')
+      'Pot Limit')
     TabOrder = 2
     Text = 'No Limit'
     Width = 273

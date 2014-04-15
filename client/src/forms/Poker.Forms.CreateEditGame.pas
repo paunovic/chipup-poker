@@ -38,6 +38,7 @@ type
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure cbGameTypePropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
     FFormType: Integer;
@@ -196,6 +197,11 @@ begin
 
   if err <> '' then
     MessageDlg(err, mtError, [mbOK], 0);
+end;
+
+procedure TfrmCreateEditGame.cbGameTypePropertiesChange(Sender: TObject);
+begin
+  cbLimit.Enabled := cbGameType.ItemIndex <> Integer(gtRotationNLHPLO);
 end;
 
 procedure TfrmCreateEditGame.CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);

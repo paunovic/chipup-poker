@@ -187,6 +187,7 @@ type
       FForceFocused    : Boolean;
 
       FEventBuffer     : TObjectList<TPB_TableEvent>;
+      FTimeImage       : TAsphyreImage;
 
     procedure SetDXObjectSizes;
     procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
@@ -1134,12 +1135,14 @@ var
   seat_info: TSeatInfo;
   sitout   : Boolean;
   foldtoany: Boolean;
-  seat_bet : UINT32
-  ;
+  seat_bet : UINT32;
+  raise_en : Boolean;
   event    : TNotifyEvent;
   C1       : Integer;
   nofocus  : Boolean;
 begin
+  raise_en := acRaise.Enabled;
+
   acStandUp.Enabled := FALSE;
   acFold.Enabled := FALSE;
   acCall.Enabled := FALSE;
@@ -1186,7 +1189,7 @@ begin
 
                 if seat_info.Chips + seat_bet > FTableStatus.MinimumBet then
                 begin
-                  acRaise.Caption := 'RAISE';
+                  acRaise.Caption := Format('RAISE (%s)', [FormatFloat('0.##', FRaiseValue / 100)]);
                   acRaise.Enabled := TRUE;
                 end;
 
@@ -1199,7 +1202,7 @@ begin
               else
               begin
                 acCheck.Enabled := TRUE;
-                acRaise.Caption := 'BET';
+                acRaise.Caption := Format('BET (%s)', [FormatFloat('0.##', FRaiseValue / 100)]);
                 acRaise.Enabled := TRUE;
 
                 if cbFoldToAnyBet.Checked then
@@ -1227,6 +1230,7 @@ begin
                   SetForegroundWindow(Handle);
                   SetFocus;
                   FForceFocused := TRUE;
+                  TablePlaySound(Sounds.SOUND_TIMEBAR);
                 end;
               end;
             end;
@@ -1327,9 +1331,11 @@ begin
     FRaisePresetButtons[2].Action := acRaisePot;
     FRaisePresetButtons[3].Action := acRaiseMax;
 
-    seRaiseAmount.Properties.MaxValue := FRaiseMax / 100;
+    if not raise_en then
+      FRaiseValue := FRaiseMin;
 
-    SetRaiseSliderValue(FRaiseMin);
+    seRaiseAmount.Properties.MaxValue := FRaiseValue / 100;
+    SetRaiseSliderValue(FRaiseValue);
   end
   else
     for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
@@ -1831,8 +1837,10 @@ begin
   seat_bet := FTableStatus.GetBet(FTable.SeatIndex);
 
   raise_value := FTableStatus.MinimumBet - seat_bet;
+  for C1 := 0 to FTableStatus.Pots.Count - 1 do
+    Inc(raise_value, FTableStatus.Pots[C1].ValueWithoutRake);
   for C1 := Low(FTableStatus.Bets) to High(FTableStatus.Bets) do
-    raise_value := raise_value + FTableStatus.Bets[C1];
+    Inc(raise_value, FTableStatus.Bets[C1]);
   raise_value := raise_value + FTableStatus.MinimumBet;
 
   SetRaiseSliderValue(raise_value);
@@ -1978,7 +1986,10 @@ end;
 procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE);
 var
   val: UINT32;
+  oldval: UINT32;
 begin
+  oldval := FRaiseValue;
+
   val := AValue;
   if val > FRaiseMax then
     val := FRaiseMax
@@ -1992,6 +2003,12 @@ begin
 
   if ASetSpinEditValue then
     seRaiseAmount.Value := val / 100;
+
+  if FRaiseValue <> oldval then
+  begin
+    ConfigureGUI;
+    Render;
+  end;
 end;
 
 procedure TfrmTable.TablePlaySound(const ASound: String);
@@ -2696,7 +2713,6 @@ procedure TfrmTable.RenderTimebar;
 var
   seat        : TSeatInfo;
   seat_point  : TPoint2;
-  time_image  : TAsphyreImage;
   time_percent: Single;
 begin
   if (FTableStatus.Locked) or
@@ -2713,20 +2729,24 @@ begin
 
     if FCurrentPlaytime > 0 then
     begin
-      time_image := TableResources.TimebarImage;
+      FTimeImage := TableResources.TimebarImage;
       time_percent := (FCurrentPlaytime / (ServerSettings.Playtime * 1000)) * 1.5;
     end
     else
     begin
       // using timebank..
-      time_image := TableResources.TimebankImage;
+      if (FTimeImage <> TableResources.TimebankImage) and
+         (FTableStatus.CurrentSeat = FTable.SeatIndex) then
+        TablePlaySound(Sounds.SOUND_TIMEBANK);
+
+      FTimeImage := TableResources.TimebankImage;
       time_percent := (Integer(seat.Timebank) + FCurrentPlaytime) / (ServerSettings.Timebank * 1000);
     end;
 
     if time_percent > 1 then
       time_percent := 1;
 
-    DXCore.Canvas.UseImagePx(time_image, pBounds4(0, 0, time_percent * time_image.Texture[0].Width, time_image.Texture[0].Height));
+    DXCore.Canvas.UseImagePx(FTimeImage, pBounds4(0, 0, time_percent * FTimeImage.Texture[0].Width, FTimeImage.Texture[0].Height));
     DXCore.Canvas.TexMap(pBounds4(seat_point.X - FTimebarWidth / 2,
        seat_point.Y + FSeatHeight / 2 - 3 * FTableResizeRatio, FTimebarWidth * time_percent, FTimebarHeight),
        clWhite4);

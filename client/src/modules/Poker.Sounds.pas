@@ -11,6 +11,8 @@ type
       SOUND_CHECK          = 'Check';
       SOUND_PUTCHIPS_SMALL = 'PutChipsSmall';
       SOUND_ALLIN          = 'AllIn';
+      SOUND_TIMEBAR        = 'Timebar';
+      SOUND_TIMEBANK       = 'Timebank';
 
     class procedure Initialize;
     class procedure Deinitialize;

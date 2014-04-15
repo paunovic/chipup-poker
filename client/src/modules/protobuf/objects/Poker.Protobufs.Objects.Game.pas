@@ -10,7 +10,7 @@ uses
 
 type
   TGameLimit = (glNoLimit = 0,glPotLimit = 1,glFixedLimit = 2);
-  TGameType = (gtHoldem = 0,gtOmaha = 1);
+  TGameType = (gtHoldem = 0,gtOmaha = 1,gtRotationNLHPLO = 2);
   TGameState = (gsActive = 1,gsClosing = 2,gsClosed = 3,gsEmpty = 4);
   TPB_Game = class(TProtobufBaseObject)
   private
