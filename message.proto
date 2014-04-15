@@ -80,6 +80,7 @@ message Game {
 	enum GameType {
 		gtHoldem = 0;
 		gtOmaha = 1;
+		gtRotationNLHPLO = 2;
 	}
 	enum GameState {
 		gsActive = 1;
