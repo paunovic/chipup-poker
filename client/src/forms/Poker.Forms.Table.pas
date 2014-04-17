@@ -12,7 +12,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo,  Poker.Table.Status, Poker.DirectX.Timer,
   Poker.DirectX.Animation, Vectors2, Vcl.ActnList, cxLabel, Poker.Table.Tables, cxTextEdit, Vcl.PlatformDefaultStyleActnCtrls,
-  Vcl.ActnMan, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox,
+  Vcl.ActnMan, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
   Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, Poker.ChipStackMaker, AsphyreTypes, cxCurrencyEdit, RVStyle,
   RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls, AsphyreFonts, ChipUpPokerDarkSkin;
 
@@ -261,6 +261,8 @@ type
   public
     constructor Create(const ATable: TTable); reintroduce;
 
+    procedure Reconnected(const ATableStatus: TPB_TableStatus);
+
     property TableStatus: TTableStatus read FTableStatus;
   end;
 
@@ -275,8 +277,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Avatars, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds,
-  Poker.Protobufs.Objects.WinnerData;
+  Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -1484,7 +1485,6 @@ var
   seat_caption: String;
   seat        : TSeatInfo;
   seat_point  : TPoint2;
-  seat_index  : Integer;
   pot         : TPB_WinnerPotInfo;
   player      : TPlayerInfo;
   C1, C2      : Integer;
@@ -1742,13 +1742,21 @@ begin
       EnableGameLockTimer(FRiverAniDelay + 1.5);
       AnimateBets(ATableEvent.Bets);
     end;
+
+    teDisconnect: begin
+      {$IFDEF DEBUG}
+      event := 'DISCONNECTED';
+      {$ENDIF}
+{
+      if FTableStatus.GetSeatInfo(ATableEvent.Seat, seat) then
+        seat_caption := 'DISCONNECTED';}
+    end;
   end;
 
   if seat_caption <> '' then
   begin
     FTableStatus.Seats.ClearCaptions;
-    seat_index := ATableEvent.Seat;
-    if FTableStatus.GetSeatInfo(seat_index, seat) then
+    if FTableStatus.GetSeatInfo(ATableEvent.Seat, seat) then
     begin
       seat.Caption := seat_caption;
       if tiSeatCaptionClear.Enabled then
@@ -1844,6 +1852,11 @@ begin
   raise_value := raise_value + FTableStatus.MinimumBet;
 
   SetRaiseSliderValue(raise_value);
+end;
+
+procedure TfrmTable.Reconnected(const ATableStatus: TPB_TableStatus);
+begin
+  CSRETableStatus(0, ATableStatus);
 end;
 
 procedure TfrmTable.Render;
@@ -2138,9 +2151,8 @@ begin
   seat_lower_text_point := Point2(seat_text_x_center, seat_point.Y + FSeatHeight / 5);
   seat_action_frame_point := Point2(seat_point.x, seat_point.Y + FSeatHeight / 2 + FSeatActionFrameHeight / 2.15);
 
-  // seat taken and its not in psStandingUp state
-  if (FTableStatus.GetSeatInfo(ASeatIndex, seat_info)) and
-     (seat_info.Status <> psStandingUp) then
+  // seat taken
+  if FTableStatus.GetSeatInfo(ASeatIndex, seat_info) then
   begin
     // find player info
     Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
@@ -2178,11 +2190,20 @@ begin
     end;
 
     // set seat lower text
-    if seat_info.Status = psOutOfPlay then
-      seat_lower_text := 'Sitting Out'
+    if seat_info.Disconnected then
+    begin
+      seat_lower_text := 'Disconnected';
+      seat_lower_text_color := cColor2($FFFF3535);
+    end
     else
-      seat_lower_text := FloatToStr(seat_info.Chips / 100);
-    seat_lower_text_color := cColor2($FF8DC63F);
+    begin
+      case seat_info.Status of
+        psOutOfPlay: seat_lower_text := 'Sitting Out';
+      else
+        seat_lower_text := FloatToStr(seat_info.Chips / 100);
+      end;
+      seat_lower_text_color := cColor2($FF8DC63F);
+    end;
 
     // set seat action
     action_image := nil;
@@ -2228,7 +2249,7 @@ begin
 
     // render lower seat text
     RenderScaleFont(seat_lower_text, seat_lower_text_color, seat_lower_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
-                    Low(TableResources.BarmenoFonts), High(TableResources.BarmenoFonts), 0, FSeatHeight * 0.37, FSeatWidth * 0.75);
+                    Low(TableResources.BarmenoFonts), High(TableResources.BarmenoFonts), 0, FSeatHeight * 0.37, FSeatWidth * 0.55);
 
     // render seat action frame/text
     if Assigned(action_image) then

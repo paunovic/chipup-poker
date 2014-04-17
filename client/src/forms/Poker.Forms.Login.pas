@@ -56,7 +56,6 @@ type
     procedure CreateServerCombobox;
 
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
-    procedure CSRStatusReply(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
@@ -88,8 +87,7 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
                      TServerMessageCallback.Create(srHello, CSRHello),
-                     TServerMessageCallback.Create(srLoginReply, CSRLogin),
-                     TServerMessageCallback.Create(srStatus, CSRStatusReply)
+                     TServerMessageCallback.Create(srLoginReply, CSRLogin)
                   ]);
 
   CurrentStatus := lsIdle;
@@ -370,11 +368,13 @@ var
 begin
   pbreply := AObject as TPB_LoginReply;
 
-  case pbreply.Status of
+  case pbreply.LoginStatus of
     lrSuccess: begin
       dmMain.SelfInfo.Password := edPassword.Text;
+      dmMain.ProcessStatusProtobuf(pbreply.Status);
+      dmMain.ProcessReconnectedTables(pbreply.ReconnectTables);
       CurrentStatus := lsLoggedIn;
-      ServerSocket.Status;
+      Close;
     end;
     lrInvalid: begin
       CurrentStatus := lsConnected;
@@ -386,16 +386,6 @@ begin
     {$IFDEF DEBUG} DebugLn(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
     edLogin.SetFocus;
   end;
-end;
-
-procedure TfrmLogin.CSRStatusReply(const AMethodId: Integer; const AObject: TObject);
-var
-  pbstatus: TPB_StatusReply;
-begin
-  pbstatus := AObject as TPB_StatusReply;
-  dmMain.ProcessStatusProtobuf(pbstatus);
-  if CurrentStatus = lsLoggedIn then
-    Close;
 end;
 
 end.

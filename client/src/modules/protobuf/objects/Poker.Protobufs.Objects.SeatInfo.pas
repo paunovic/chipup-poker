@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
-  TPlayerStatus = (psOutOfPlay = 1,psOutOfHand = 2,psInHand = 3,psFolded = 4,psAllIn = 5,psStandingUp = 6);
+  TPlayerStatus = (psOutOfPlay = 1,psOutOfHand = 2,psInHand = 3,psFolded = 4,psAllIn = 5);
   TPB_SeatInfo = class(TProtobufBaseObject)
   private
     const
@@ -21,6 +21,7 @@ type
       FN_STATUS = 6;
       FN_TIMEBANK = 7;
       FN_CARDS_VISIBLE = 8;
+      FN_DISCONNECTED = 9;
 
     var
       FSeat: Integer;
@@ -31,6 +32,7 @@ type
       FStatus: TPlayerStatus;
       FTimebank: UINT32;
       FCardsVisible: Boolean;
+      FDisconnected: Boolean;
 
     procedure SetSeat(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
@@ -40,6 +42,7 @@ type
     procedure SetStatus(const AValue: TPlayerStatus);
     procedure SetTimebank(const AValue: UINT32);
     procedure SetCardsVisible(const AValue: Boolean);
+    procedure SetDisconnected(const AValue: Boolean);
 
   public
     destructor Destroy; override;
@@ -53,6 +56,7 @@ type
     property Status: TPlayerStatus read FStatus write SetStatus;
     property Timebank: UINT32 read FTimebank write SetTimebank;
     property CardsVisible: Boolean read FCardsVisible write SetCardsVisible;
+    property Disconnected: Boolean read FDisconnected write SetDisconnected;
   end;
 
 implementation
@@ -107,6 +111,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCardsVisible := AProtobufReader.readBoolean;
       end;
+      FN_DISCONNECTED: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FDisconnected := AProtobufReader.readBoolean;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -159,6 +167,12 @@ procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
 begin
   FCardsVisible := AValue;
   ProtobufOutput.writeBoolean(FN_CARDS_VISIBLE, AValue);
+end;
+
+procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
+begin
+  FDisconnected := AValue;
+  ProtobufOutput.writeBoolean(FN_DISCONNECTED, AValue);
 end;
 
 end.

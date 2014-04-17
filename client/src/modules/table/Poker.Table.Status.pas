@@ -20,8 +20,7 @@ type
     FCaption: String;
     FTimebank: UINT32;
     FCardsVisible: Boolean;
-
-    function GetStatusStr: String;
+    FDisconnected: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -38,11 +37,11 @@ type
     property CardCount: Integer read FCardCount;
     property Cards: TCards read FCards;
     property Status: TPlayerStatus read FStatus;
-    property StatusAsStr: String read GetStatusStr;
     property Caption: String read FCaption write FCaption;
     property Timebank: UINT32 read FTimeBank;
     property DealtCards: Integer read FDealtCards;
     property CardsVisible: Boolean read FCardsVisible;
+    property Disconnected: Boolean read FDisconnected;
   end;
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
@@ -211,19 +210,7 @@ begin
   FStatus := ASeatInfoProtobuf.Status;
   FTimeBank := ASeatInfoProtobuf.Timebank;
   FCardsVisible := ASeatInfoProtobuf.CardsVisible;
-end;
-
-
-function TSeatInfo.GetStatusStr: String;
-begin
-  case FStatus of
-    psOutOfPlay: result := 'OutOfPlay';
-    psOutOfHand: result := 'OutOfHand';
-    psInHand: result := 'InHand';
-    psFolded: result := 'Folded';
-    psAllIn: result := 'AllIn';
-    psStandingUp: result := 'StandingUp';
-  end;
+  FDisconnected := ASeatInfoProtobuf.Disconnected;
 end;
 
 procedure TSeatInfo.IncDealtCards;

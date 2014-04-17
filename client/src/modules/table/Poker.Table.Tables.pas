@@ -3,7 +3,7 @@ unit Poker.Table.Tables;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.GameInfo,
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.GameInfo, Poker.Protobufs.Objects.TableStatus,
   Poker.Objects.ClubInfo, Vcl.Forms;
 
 type
@@ -22,6 +22,8 @@ type
     procedure NotifyClose;
     function IsSitting: Boolean;
 
+    procedure BringToFront;
+
     property Game          : TGameInfo read FGame;
     property Club          : TClubInfo read FClub;
     property Form          : TForm read FForm;
@@ -38,7 +40,7 @@ type
 
     constructor Create;
 
-    function AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
+    function AddTable(const AClub: TClubInfo; const AGame: TGameInfo): TTable;
     procedure NotifyClose(const AGameId: TBytes);
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
@@ -53,8 +55,9 @@ var
 implementation
 
 uses
-  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Vectors2px;
+  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Vectors2px, Poker.DataModule;
 
+{ TTable }
 
 constructor TTable.Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
 var
@@ -88,6 +91,15 @@ begin
   Tables.NotifyClose(FGame.MongoId);
 end;
 
+procedure TTable.BringToFront;
+begin
+  if IsIconic(FForm.Handle) then
+    ShowWindow(FForm.Handle, SW_RESTORE);
+  FForm.BringToFront;
+end;
+
+
+{ TTables }
 
 class procedure TTables.Initialize;
 begin
@@ -105,7 +117,8 @@ begin
   FNotifyServer := TRUE;
 end;
 
-function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo): Boolean;
+
+function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo): TTable;
 var
   table: TTable;
   sci  : Integer;
@@ -114,19 +127,16 @@ begin
   begin
     sci := DXCore.GetFreeSwapChain;
     if sci = -1 then
-      Exit(FALSE);
+      Exit(nil);
 
     table := TTable.Create(AClub, AGame, sci);
     table.Form.Show;
     Add(table);
   end
   else
-  begin
-    if IsIconic(table.Form.Handle) then
-      ShowWindow(table.Form.Handle, SW_RESTORE);
-    table.Form.BringToFront;
-  end;
-  result := TRUE;
+    table.BringToFront;
+
+  result := table;
 end;
 
 procedure TTables.NotifyClose(const AGameId: TBytes);
