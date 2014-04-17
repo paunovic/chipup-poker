@@ -323,7 +323,6 @@ message SeatInfo {
 		psInHand = 3;
 		psFolded = 4;
 		psAllIn = 5;
-		psDisconnected = 6;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2;
@@ -333,6 +332,7 @@ message SeatInfo {
 	required PlayerStatus status = 6;
 	required uint32 timebank = 7;
 	required bool cards_visible = 8;
+	required bool disconnected = 9;
 }
 message ChangeSuspendState {
 	required bytes club_mongo_id = 1;
