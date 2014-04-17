@@ -43,7 +43,8 @@ message LoginReply {
 		lrSuccess = 0;
 		lrInvalid = 1;
 	}
-	required LoginStatus status = 1;
+	required LoginStatus login_status = 1;
+	optional StatusReply status = 2;
 }
 
 message Club {
