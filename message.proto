@@ -323,7 +323,7 @@ message SeatInfo {
 		psInHand = 3;
 		psFolded = 4;
 		psAllIn = 5;
-		psStandingUp = 6;
+		psDisconnected = 6;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2;
