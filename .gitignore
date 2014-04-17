@@ -5,3 +5,8 @@ cpp-protobuf-generator/output
 *.local
 *.fbpInf
 *.identcache
+server/dag/handeval/*
+server/dag/build/*
+icsv8w/*
+server/node_modules/*
+server/poker-eval-138.0/*

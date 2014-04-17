@@ -1,4 +1,5 @@
 #!/usr/bin/node
+"use strict";
 // http://docs.mongodb.org/manual/reference/operator/update/positional/
 var net = require('net');
 var tls = require('tls');
@@ -2196,6 +2197,11 @@ Game.prototype.join = function join(conn) {
 	return true;
 }
 Game.prototype.sitDown = function (conn,params,cb) {
+	function finish() {
+		this.club.seGameChanged(JSON.parse(JSON.stringify(this.obj)),function () {
+			cb(true,events);
+		},conn);
+	}
 	assert.equal(this.Lock.readers,-1);
 	assert(conn.userid);
 	var events = [];
@@ -2229,11 +2235,6 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				finish.call(this);
 			}.bind(this));
 		}.bind(this));
-		function finish() {
-			this.club.seGameChanged(JSON.parse(JSON.stringify(this.obj)),function () {
-				cb(true,events);
-			},conn);
-		}
 	}
 }
 Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
@@ -2472,6 +2473,11 @@ Game.prototype.fold = function fold(seat,cb1) {
 	var seatObj = this.members[seat];
 	var priv = this.seats[seat];
 	this.log('fold',seat,this.state);
+	function finish(events,offset) {
+		assert(events);
+		assert.equal(typeof offset,'number');
+		finish2.call(this,events,offset);
+	}
 	function finish2(events,offset) {
 		assert.equal(typeof offset,'number');
 		var token2 = profiler.start('fold-inner1.2');
@@ -2532,11 +2538,6 @@ Game.prototype.fold = function fold(seat,cb1) {
 				token.tag += 'c';
 				token.stop();
 				finish.call(this,[this.makeEvent('teFold',seat)],0);
-			}
-			function finish(events,offset) {
-				assert(events);
-				assert.equal(typeof offset,'number');
-				finish2.call(this,events,offset);
 			}
 		}
 		break;
@@ -3116,6 +3117,30 @@ Game.prototype.checkDelayedLeave = function () {
 	}
 }
 Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extradelay) {
+	function finish1() {
+		if (config && config.silent) {
+		} else this.broadcastStatus(conn,null,events);
+		cb(events);
+	}
+	function finish(events,offset) {
+		assert(events);
+		assert.equal(typeof offset,'number');
+		this.log('sm finish %j %s',events,new Error().stack);
+		if (this.state != 'tsWinning') {
+			this.current_seat = this.getNextSeat(this.current_seat);
+			if (this.members[this.current_seat].chips == 0) {
+				this.ranOut = true;
+				this.log('skipping');
+				return this.stateMachine(cb,null,null,events,extradelay);
+			}
+			if (this.ranOut && (this.inHandCount() == 2)) {
+				this.log('somebody ran out, auto finishing');
+				return this.stateMachine(cb);
+			}
+		}
+		//this.broadcastStatus(null);
+		cb(events,offset);
+	}
 	assert.equal(this.Lock.readers,-1);
 	assert(events);
 	assert.equal(typeof extradelay,'number');
@@ -3202,11 +3227,6 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		} else {
 			finish1.call(this);
 		}
-		function finish1() {
-			if (config && config.silent) {
-			} else this.broadcastStatus(conn,null,events);
-			cb(events);
-		}
 		break;
 	case 'tsPreFlop':
 	case 'tsFlop':
@@ -3247,25 +3267,6 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			return;
 		}
 		this.checkRoundPass(finish.bind(this),events,0);
-		function finish(events,offset) {
-			assert(events);
-			assert.equal(typeof offset,'number');
-			this.log('sm finish %j %s',events,new Error().stack);
-			if (this.state != 'tsWinning') {
-				this.current_seat = this.getNextSeat(this.current_seat);
-				if (this.members[this.current_seat].chips == 0) {
-					this.ranOut = true;
-					this.log('skipping');
-					return this.stateMachine(cb,null,null,events,extradelay);
-				}
-				if (this.ranOut && (this.inHandCount() == 2)) {
-					this.log('somebody ran out, auto finishing');
-					return this.stateMachine(cb);
-				}
-			}
-			//this.broadcastStatus(null);
-			cb(events,offset);
-		}
 	}
 }
 Game.prototype.canCheck = function (seatIdx) {
