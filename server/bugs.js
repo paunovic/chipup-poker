@@ -27,10 +27,12 @@ function setup(app,bugs,users,db) {
 		console.log('checking auth %s/%s',username,password);
 		db.collection('admin').findOne({username:username},function (err,adminRow) {
 			console.log('adminRow:%j',adminRow);
-			// FIXME, add salt
-			if (adminRow.password == password) {
-				callback(null,true);
-				return;
+			if (adminRow) {
+				// FIXME, add salt
+				if (adminRow.password == password) {
+					callback(null,true);
+					return;
+				}
 			}
 			callback(null,false);
 		});
@@ -75,6 +77,9 @@ function setup(app,bugs,users,db) {
 			res.send(row.ScreenShot.buffer);
 		});
 	});
+	app.get('/secure/',function (req,res) {
+		res.render('secure_index');
+	});
 	app.get('/secure/clubs',function (req,res) {
 		var start = Date.now();
 		db.collection('clubs').find({}).toArray(function (err,data) {
@@ -84,8 +89,20 @@ function setup(app,bugs,users,db) {
 	app.get('/secure/club',function (req,res) {
 		var start = Date.now();
 		db.collection('clubs').findOne({_id:new ObjectID(req.query.id)},function (err,club) {
+			var userids = [ club.owner ];
+			if (club.members) {
+				for (var x=0; x<club.members.length; x++) {
+					userids.push(club.members[x]);
+				}
+			}
 			db.collection('games').find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
-				res.render('club',{club:club,games:games,start:start});
+				users.find({_id:{$in:userids}}).toArray(function (err,users) {
+					var usermap = {};
+					for (var x=0; x<users.length; x++) {
+						usermap[users[x]._id] = users[x];
+					}
+					res.render('club',{club:club,games:games,start:start,users:usermap});
+				});
 			});
 		});
 	});

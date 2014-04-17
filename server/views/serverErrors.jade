@@ -9,7 +9,7 @@ block content
       tr
         td
           span=row._id.getTimestamp()
-          a(href="/serverBugs?delete="+row._id) X
+          a(href="/secure/serverBugs?delete="+row._id) X
         td=row.error
         td
           pre=row.trace

@@ -1,11 +1,15 @@
 extends secure
 block content
+  script.
+    var raw=!{JSON.stringify(user)};
   p="player is "+(online ?"on":"off")+"line"
   table(border=1)
     tr
       th name
+      th chips
     tr
       td=user.displayname
+      td=user.chips
   table(border=1)
     tr
       th club name
