@@ -6,25 +6,36 @@ unit Poker.Protobufs.Objects.LoginReply;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.StatusReply,Poker.Protobufs.Objects.TableStatus;
 
 type
   TLoginStatus = (lrSuccess = 0,lrInvalid = 1);
   TPB_LoginReply = class(TProtobufBaseObject)
   private
     const
-      FN_STATUS = 1;
+      FN_LOGIN_STATUS = 1;
+      FN_STATUS = 2;
+      FN_RECONNECT_TABLES = 3;
 
     var
-      FStatus: TLoginStatus;
+      FLoginStatus: TLoginStatus;
+      FStatus: TPB_StatusReply;
+      FReconnectTables: TObjectList<TPB_TableStatus>;
 
-    procedure SetStatus(const AValue: TLoginStatus);
+    procedure SetLoginStatus(const AValue: TLoginStatus);
+    procedure SetStatus(const AValue: TPB_StatusReply);
+    procedure ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
-    property Status: TLoginStatus read FStatus write SetStatus;
+    property LoginStatus: TLoginStatus read FLoginStatus write SetLoginStatus;
+    property Status: TPB_StatusReply read FStatus write SetStatus;
+    property ReconnectTables: TObjectList<TPB_TableStatus> read FReconnectTables;
   end;
 
 implementation
@@ -33,9 +44,20 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_LoginReply.InitObjects;
+begin
+  FReconnectTables := TObjectList<TPB_TableStatus>.Create;
+  FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
+end;
 
 destructor TPB_LoginReply.Destroy;
 begin
+  if Assigned(FStatus) then FreeAndNil(FStatus);
+  if Assigned(FReconnectTables) then
+  begin
+    FReconnectTables.OnNotify := nil;
+    FreeAndNil(FReconnectTables);
+  end;
   inherited;
 end;
 
@@ -47,9 +69,19 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_STATUS: begin
+      FN_LOGIN_STATUS: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FStatus := TLoginStatus(AProtobufReader.readEnum);
+        FLoginStatus := TLoginStatus(AProtobufReader.readEnum);
+      end;
+      FN_STATUS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FStatus) then
+          FStatus := TPB_StatusReply.Create;
+        FStatus.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+      end;
+      FN_RECONNECT_TABLES: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -57,10 +89,24 @@ begin
   end;
 end;
 
-procedure TPB_LoginReply.SetStatus(const AValue: TLoginStatus);
+procedure TPB_LoginReply.SetLoginStatus(const AValue: TLoginStatus);
+begin
+  FLoginStatus := AValue;
+  ProtobufOutput.writeInt32(FN_LOGIN_STATUS, Integer(AValue));
+end;
+
+procedure TPB_LoginReply.SetStatus(const AValue: TPB_StatusReply);
 begin
   FStatus := AValue;
-  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
+  ProtobufOutput.writeMessage(FN_STATUS, AValue.ProtobufOutput);
+end;
+
+procedure TPB_LoginReply.ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_RECONNECT_TABLES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

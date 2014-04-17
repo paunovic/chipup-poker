@@ -119,7 +119,8 @@ uses
   Poker.Protobufs.Objects.TableStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReply.pas',
   Poker.Protobufs.Objects.TablePlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas',
   Poker.Stats.Table in 'modules\stats\Poker.Stats.Table.pas',
-  Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas';
+  Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
+  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas';
 
 procedure FocusPokerApp;
 var

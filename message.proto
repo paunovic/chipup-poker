@@ -43,7 +43,9 @@ message LoginReply {
 		lrSuccess = 0;
 		lrInvalid = 1;
 	}
-	required LoginStatus status = 1;
+	required LoginStatus login_status = 1;
+	optional StatusReply status = 2;
+	repeated TableStatus reconnect_tables = 3;
 }
 
 message Club {
@@ -322,7 +324,6 @@ message SeatInfo {
 		psInHand = 3;
 		psFolded = 4;
 		psAllIn = 5;
-		psStandingUp = 6;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2;
@@ -332,6 +333,7 @@ message SeatInfo {
 	required PlayerStatus status = 6;
 	required uint32 timebank = 7;
 	required bool cards_visible = 8;
+	required bool disconnected = 9;
 }
 message ChangeSuspendState {
 	required bytes club_mongo_id = 1;
@@ -393,6 +395,7 @@ message TableEvent {
 		tePostRiver = 13;
 		tePreWin = 14;
 		teExistingCards = 15;
+		teDisconnect = 16;
 	}
 	message WinnerData {
 		enum CardRankings {

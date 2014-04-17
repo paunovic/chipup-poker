@@ -627,6 +627,8 @@ begin
 end;
 
 procedure TfrmChipUpMain.LoginStatus(const AValue: TLoginStatus);
+var
+  table: TTable;
 begin
   case AValue of
     lsLoggedIn: begin
@@ -665,9 +667,11 @@ begin
 
       FSelectedClub := -1;
       SetLength(FSelectedGame, 0);
-      ServerSocket.QueryTableStats([]); // empty array - query all table stats
       ConfigureGUI;
       Show;
+      if Tables.Count > 0 then
+        for table in Tables do
+          table.BringToFront;
     end;
 
     lsUpdating: FormsContainer.RunForm(TfrmUpdater, self, [], FALSE);

@@ -7,7 +7,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, cxLookAndFeels, dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip,
-  dxCustomHint, cxHint, ChipUpPokerDarkSkin;
+  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus;
 
 type
   TdmMain = class(TDataModule)
@@ -28,6 +28,7 @@ type
 
   public
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
+    procedure ProcessReconnectedTables(const AReconnectedTables: TObjectList<TPB_TableStatus>);
 
     function CheckAuthed: Boolean;
 
@@ -53,7 +54,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status;
+  Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -145,6 +146,31 @@ begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
   Avatars.Add(FSelfInfo.AvatarId, nil);
   Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
+end;
+
+procedure TdmMain.ProcessReconnectedTables(const AReconnectedTables: TObjectList<TPB_TableStatus>);
+var
+  club: TclubInfo;
+  game: TGameInfo;
+  table: TTable;
+  tstatus: TPB_TableStatus;
+begin
+  for tstatus in AReconnectedTables do
+  begin
+    table := nil;
+    if not Tables.FindTable(tstatus.TableMongoId, table) then
+      for club in FSelfInfo.Clubs do
+        if club.Games.FindGame(tstatus.TableMongoId, game) then
+        begin
+          table := Tables.AddTable(club, game);
+          Break;
+        end;
+
+    if not Assigned(table) then
+      Continue;
+
+    (table.Form as TfrmTable).Reconnected(tstatus);
+  end;
 end;
 
 procedure TdmMain.LoadFonts;
