@@ -261,6 +261,7 @@ enum ServerCodes {
 	scShowLosingCards = 535;
 	seUserChange = 536;
 	scQueryTableStats = 537;
+	scContactUs = 538;
 }
 
 service Server {
@@ -513,4 +514,13 @@ message TablePlayerStats {
 	optional uint32 rakecontrib = 6;
 	optional uint32 secondsplayed = 7;
 	optional uint32 chipsinplay = 8;
+}
+message ContactMessage {
+	enum ContactReason {
+		cmSupport = 0;
+		cmBugReport = 1;
+		cmOther = 2;
+	}
+	required ContactReason reason = 1;
+	required string message = 2;
 }
