@@ -2082,6 +2082,16 @@ handlers[codes.scQueryTableStats] = function (args) {
 		}.bind(this));
 	}
 }
+handlers[codes.scContactUs] = function (args,token) {
+	var params = pb.Parse(args,'Poker.ContactMessage');
+	this.log('raw args:%s parsed:%j',args,params);
+	var doc = {userid:this.userid, message:params.message, reason:params.reason, closed:false};
+	conn.collection('contacts').insert(doc,function (err,row) {
+		this.log('obj:%j',row);
+		this.send(codes.srContactUsOk);
+		token.stop();
+	}.bind(this));
+}
 function makeClubProtobuf(c,userlist) { // FIXME, clean up references
 	return Club.makeClubProtobuf(c,userlist);
 }

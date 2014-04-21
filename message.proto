@@ -211,6 +211,7 @@ enum ServerCodes {
 	srTableAddonOk = 51;
 	srTableAddonOverLimit = 52;
 	srTableStatsReply = 53;
+	srContactUsOk = 54;
 
     seChat = 200;
     seSecondaryLoginDetected = 201;
