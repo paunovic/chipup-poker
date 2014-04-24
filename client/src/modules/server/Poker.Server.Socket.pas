@@ -340,7 +340,6 @@ begin
       else
         DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
       {$ENDIF}
-      ResetPingTimer;
 
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
@@ -387,21 +386,15 @@ end;
 procedure TServerSocket.ResetPingTimer;
 begin
   FTimerIdPing := SetTimer(0, FTimerIdPing, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, @TimerProc);
-
-  {$IFDEF DEBUG} DebugLn(Format('ResetPingTimer() [%d]', [FTimerIdPing]), ditSpecial); {$ENDIF}
 end;
 
 procedure TServerSocket.ResetPingTimeoutTimer;
 begin
   FTimerIdPingTimeout := SetTimer(0, FTimerIdPingTimeout, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, @TimerProc);
-
-  {$IFDEF DEBUG} DebugLn(Format('ResetPingTimeoutTimer() [%d]', [FTimerIdPingTimeout]), ditSpecial); {$ENDIF}
 end;
 
 procedure TServerSocket.KillPingTimer;
 begin
-  {$IFDEF DEBUG} DebugLn(Format('KillPingTimer() [%d]', [FTimerIdPing]), ditSpecial); {$ENDIF}
-
   if FTimerIdPing = 0 then
     Exit;
 
@@ -411,8 +404,6 @@ end;
 
 procedure TServerSocket.KillPingTimeoutTimer;
 begin
-  {$IFDEF DEBUG} DebugLn(Format('KillPingTimeoutTimer() [%d]', [FTimerIdPingTimeout]), ditSpecial); {$ENDIF}
-
   if FTimerIdPingTimeout = 0 then
     Exit;
 
@@ -944,8 +935,6 @@ end;
 
 procedure TServerSocket.ProcessTimer(const ATimerId: UINT_PTR);
 begin
-  {$IFDEF DEBUG} DebugLn(Format('ProcessTimer(%d)', [ATimerId]), ditSpecial); {$ENDIF}
-
   if ATimerId = FTimerIdPing then
   begin
     Ping;

@@ -11,7 +11,7 @@ uses
   Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, ChipUpPokerDarkSkin;
 
 type
-  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditSpecial);
+  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditUnknown);
   TDebugInfoTypes = set of TDebugInfoType;
 
   TfrmDebug = class(TForm)
@@ -36,7 +36,7 @@ type
     lbvMemoryUsage: TcxLabel;
     lbvCallbackSets: TcxLabel;
     lbvSocketState: TcxLabel;
-    RVStyle: TRVStyle;
+    RVStyles: TRVStyle;
     N1: TMenuItem;
     rvLog: TRichView;
     btSeatPos: TcxButton;
@@ -99,52 +99,47 @@ begin
     ditException: begin
       type_str := 'EXCP';
       tstyle := 1;
-      dstyle := 8;
+      dstyle := 7;
     end;
     ditApplication: begin
       type_str := 'APPL';
       tstyle := 2;
-      dstyle := 9;
+      dstyle := 8;
     end;
     ditSocketInc: begin
       type_str := 'SINC';
       tstyle := 3;
-      dstyle := 10;
+      dstyle := 9;
     end;
     ditSocketOut: begin
       type_str := 'SOUT';
       tstyle := 3;
-      dstyle := 10;
+      dstyle := 9;
     end;
     ditSocket: begin
       type_str := 'SOCK';
       tstyle := 3;
-      dstyle := 10;
+      dstyle := 9;
     end;
     ditNetInc: begin
       type_str := 'NINC';
       tstyle := 4;
-      dstyle := 110;
+      dstyle := 10;
     end;
     ditNetOut: begin
       type_str := 'NOUT';
       tstyle := 4;
-      dstyle := 11;
+      dstyle := 10;
     end;
     ditForm: begin
       type_str := 'FORM';
       tstyle := 5;
-      dstyle := 12;
-    end;
-    ditSpecial: begin
-      type_str := 'SPEC';
-      tstyle := 7;
-      dstyle := 14;
+      dstyle := 11;
     end;
   else
     type_str := 'UNKN';
     tstyle := 6;
-    dstyle := 13;
+    dstyle := 12;
   end;
 
   if Assigned(frmDebug) then

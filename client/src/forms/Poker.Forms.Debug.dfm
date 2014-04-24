@@ -314,7 +314,7 @@ object frmDebug: TfrmDebug
       TabOrder = 1
       BorderStyle = bsNone
       DoInPaletteMode = rvpaCreateCopies
-      Style = RVStyle
+      Style = RVStyles
     end
   end
   object alDebug: TActionList
@@ -363,7 +363,7 @@ object frmDebug: TfrmDebug
     Left = 68
     Top = 88
   end
-  object RVStyle: TRVStyle
+  object RVStyles: TRVStyle
     TextStyles = <
       item
         StyleName = 'Time'
@@ -422,14 +422,6 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Special'
-        FontName = 'Consolas'
-        Size = 8
-        Style = [fsBold]
-        Color = clSkyBlue
-        Unicode = True
-      end
-      item
         StyleName = 'Data: Exception'
         FontName = 'Consolas'
         Size = 8
@@ -475,14 +467,6 @@ object frmDebug: TfrmDebug
         Size = 8
         Style = [fsBold]
         Color = clYellow
-        Unicode = True
-      end
-      item
-        StyleName = 'Data: Special'
-        FontName = 'Consolas'
-        Size = 8
-        Style = [fsBold]
-        Color = clSkyBlue
         Unicode = True
       end>
     ParaStyles = <
