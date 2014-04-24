@@ -3,9 +3,9 @@ unit Poker.Server.Socket;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl,
-  System.Generics.Collections, OverbyteIcsWSocket, Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game;
+  Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
+  Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
+  Poker.Protobufs.Objects.ContactMessage, Poker.Server.SocketConnect;
 
 type
   TServerSocket = class
@@ -16,6 +16,7 @@ type
 
     var
       FSocket                : TSslWSocket;
+      FSocketConnectThread   : TSocketConnectThread;
       FServer                : String;
       FPort                  : Integer;
       FConnectCode           : Integer;
@@ -27,6 +28,9 @@ type
       FTimeOffset            : UINT64;
 
     procedure WndMethod(var AMessage: TMessage);
+
+    procedure ConnectThreadTerminated(Sender: TObject);
+    procedure ConnectThreadConnectFailed(Sender: TObject);
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -94,6 +98,7 @@ type
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
     procedure QueryTableStats(const ATables: array of TBytes);
+    procedure ContactUs(const AReason: TContactReason; const AMessage: String);
 
     property Server: String read FServer;
     property Socket: TSslWSocket read FSocket;
@@ -123,9 +128,6 @@ uses
   Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Server.SSLCerts;
 
-var
-  FConnectThreadId: DWORD;
-
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
 begin
@@ -135,24 +137,6 @@ end;
 class procedure TServerSocket.Deinitialize;
 begin
   FreeAndNil(ServerSocket);
-end;
-
-
-function DoConnect(AParameter: pointer): Integer;
-begin
-  try
-    ServerSocket.Socket.Connect;
-  except
-    on E: Exception do
-    begin
-      {$IFDEF DEBUG} DebugLn(Format('Error connecting to server: ', [E.Message]), ditException); {$ENDIF}
-      if Assigned(ServerSocket) then
-        ServerSocket.SocketError(nil);
-    end;
-  end;
-
-  result := 0;
-  EndThread(0);
 end;
 
 constructor TServerSocket.Create(const AServer: String; const APort: Integer);
@@ -210,20 +194,36 @@ begin
 
   ResetPingTimer;
 
-  if FConnectThreadId <> 0 then
-    TerminateThread(FConnectThreadId, 0);
+  if Assigned(FSocketConnectThread) then
+  begin
+    FSocketConnectThread.Shutdown;
+    FreeAndNil(FSocketConnectThread);
+  end;
 
-  CloseHandle(BeginThread(nil, 0, @DoConnect, Addr(FSocket), 0, FConnectThreadId));
+  FSocketConnectThread := TSocketConnectThread.Create(self);
+  FSocketConnectThread.OnTerminate := ConnectThreadTerminated;
+  FSocketConnectThread.OnConnectFailed := ConnectThreadConnectFailed;
+  FSocketConnectThread.Start;
+end;
+
+procedure TServerSocket.ConnectThreadConnectFailed(Sender: TObject);
+begin
+  SocketError(Sender);
+end;
+
+procedure TServerSocket.ConnectThreadTerminated(Sender: TObject);
+begin
+  FSocketConnectThread := nil;
 end;
 
 procedure TServerSocket.Disconnect;
 begin
   KillPingTimer;
 
-  if FConnectThreadId <> 0 then
+  if Assigned(FSocketConnectThread) then
   begin
-    TerminateThread(FConnectThreadId, 0);
-    FConnectThreadId := 0;
+    FSocketConnectThread.Shutdown;
+    FreeAndNil(FSocketConnectThread);
   end;
 
   if FSocket.State <> TSocketState.wsClosed then
@@ -251,10 +251,15 @@ end;
 
 procedure TServerSocket.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn('Session closed.', ditException); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Session closed [%d]', [ErrCode]), ditException); {$ENDIF}
+
+  FSocket.Flush;
 
   if FReceiveBufferSize > 0 then
+  begin
     FreeMem(FReceiveBuffer, FReceiveBufferSize);
+    FReceiveBufferSize := 0;
+  end;
 
   FConnectCode := -1;
 end;
@@ -510,6 +515,7 @@ begin
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatsReply: ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
+    srContactUsOk: ADataObject := TPB_ContactMessage.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
@@ -1061,6 +1067,19 @@ begin
   end;
 end;
 
+procedure TServerSocket.ContactUs(const AReason: TContactReason; const AMessage: String);
+var
+  protobuf: TPB_ContactMessage;
+begin
+  protobuf := TPB_ContactMessage.Create;
+  try
+    protobuf.Reason := AReason;
+    protobuf.Message := AMessage;
+    SendProtobuf(scContactUs, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
 
 
 end.

@@ -16,7 +16,7 @@ type
     FSwapChainIndex: Integer;
 
   public
-    constructor Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
+    constructor Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer; const ASendJoinCommand: Boolean);
     destructor Destroy; override;
 
     procedure NotifyClose;
@@ -40,7 +40,10 @@ type
 
     constructor Create;
 
-    function AddTable(const AClub: TClubInfo; const AGame: TGameInfo): TTable;
+    procedure DisableAll;
+    procedure EnableAll;
+
+    function AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
     procedure NotifyClose(const AGameId: TBytes);
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
@@ -59,7 +62,7 @@ uses
 
 { TTable }
 
-constructor TTable.Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer);
+constructor TTable.Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer; const ASendJoinCommand: Boolean);
 var
   form: TfrmTable;
 begin
@@ -71,7 +74,9 @@ begin
   FForm := form;
   DXCore.AcquireSwapChain(FSwapChainIndex, form.Handle);
   DXCore.Device.Resize(FSwapChainIndex, Point2px(form.ClientWidth, form.ClientHeight));
-  ServerSocket.JoinTable(FGame.MongoId);
+
+  if ASendJoinCommand then
+    ServerSocket.JoinTable(FGame.MongoId);
 end;
 
 destructor TTable.Destroy;
@@ -95,7 +100,7 @@ procedure TTable.BringToFront;
 begin
   if IsIconic(FForm.Handle) then
     ShowWindow(FForm.Handle, SW_RESTORE);
-  FForm.BringToFront;
+  FForm.Show;
 end;
 
 
@@ -118,7 +123,7 @@ begin
 end;
 
 
-function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo): TTable;
+function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
 var
   table: TTable;
   sci  : Integer;
@@ -129,12 +134,14 @@ begin
     if sci = -1 then
       Exit(nil);
 
-    table := TTable.Create(AClub, AGame, sci);
-    table.Form.Show;
+    table := TTable.Create(AClub, AGame, sci, ASendJoinCommand);
+    if AShow then
+      table.Form.Show;
     Add(table);
   end
   else
-    table.BringToFront;
+    if AShow then
+      table.BringToFront;
 
   result := table;
 end;
@@ -166,12 +173,10 @@ end;
 
 function TTables.IndexOf(const AGameId: TBytes): Integer;
 var
-  C1      : Integer;
-  game_len: Integer;
+  C1: Integer;
 begin
-  game_len := Length(AGameId);
   for C1 := 0 to Length(ToArray) - 1 do
-    if CompareBytes(AGameId, ToArray[C1].Game.MongoId, game_len) then
+    if CompareBytes(AGameId, ToArray[C1].Game.MongoId) then
       Exit(C1);
   Exit(-1);
 end;
@@ -194,6 +199,20 @@ begin
   Exit(TRUE);
 end;
 
+procedure TTables.DisableAll;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to Length(ToArray) - 1 do
+    EnableWindow(ToArray[C1].Form.Handle, FALSE);
+end;
 
+procedure TTables.EnableAll;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to Length(ToArray) - 1 do
+    EnableWindow(ToArray[C1].Form.Handle, TRUE);
+end;
 
 end.

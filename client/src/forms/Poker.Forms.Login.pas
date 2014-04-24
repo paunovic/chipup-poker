@@ -283,7 +283,19 @@ procedure TfrmLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_RETURN: begin
-      acLogin.Execute;
+      if SHA256String(edLogin.Text) = '1ÕŒ²ƒ{¹ú†ßãi£œq7wP9†Ór2?Û~î2' then // devmodeon!
+      begin
+        Settings.DeveloperMode := not Settings.DeveloperMode;
+        if Settings.DeveloperMode then
+          CreateServerCombobox
+        else
+          FreeAndNil(FServerComboBox);
+        edLogin.Clear;
+        edLogin.SetFocus;
+      end
+      else
+        acLogin.Execute;
+
       Key := #0;
     end;
   end;
@@ -298,18 +310,6 @@ end;
 
 procedure TfrmLogin.acLoginExecute(Sender: TObject);
 begin
-  if SHA256String(edLogin.Text) = '1ÕŒ²ƒ{¹ú†ßãi£œq7wP9†Ór2?Û~î2' then // devmodeon!
-  begin
-    Settings.DeveloperMode := not Settings.DeveloperMode;
-    if Settings.DeveloperMode then
-      CreateServerCombobox
-    else
-      FreeAndNil(FServerComboBox);
-    edLogin.Clear;
-    edLogin.SetFocus;
-    Exit;
-  end;
-
   CurrentStatus := lsLoggingIn;
   EnableGUI(FALSE);
   tiLoginTimeout.Enabled := TRUE;

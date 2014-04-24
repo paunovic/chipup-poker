@@ -18,12 +18,12 @@ type
   private
     const
       FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
-    function GetAvailableBalance: UINT32;
 
     var
       FSelfInfo   : TPlayerInfo;
       FUpdaterFile: String;
 
+    function GetAvailableBalance: UINT32;
     procedure LoadFonts;
 
   public
@@ -54,7 +54,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo;
+  Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -162,7 +162,7 @@ begin
       for club in FSelfInfo.Clubs do
         if club.Games.FindGame(tstatus.TableMongoId, game) then
         begin
-          table := Tables.AddTable(club, game);
+          table := Tables.AddTable(club, game, FALSE, FALSE);
           Break;
         end;
 
@@ -209,7 +209,6 @@ begin
         end;
     end;
 end;
-
 
 end.
 

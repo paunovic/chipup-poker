@@ -40,6 +40,7 @@ type
     srTableAddonOk = 51,
     srTableAddonOverLimit = 52,
     srTableStatsReply = 53,
+    srContactUsOk = 54,
     seChat = 200,
     seSecondaryLoginDetected = 201,
     seAccountConfirmed = 202,
@@ -86,7 +87,8 @@ type
     scResendVerificationMail = 534,
     scShowLosingCards = 535,
     seUserChange = 536,
-    scQueryTableStats = 537
+    scQueryTableStats = 537,
+    scContactUs = 538
   );
 
 {$IFDEF DEBUG}
@@ -153,6 +155,7 @@ begin
     srTableAddonOk: result := 'srTableAddonOk';
     srTableAddonOverLimit: result := 'srTableAddonOverLimit';
     srTableStatsReply: result := 'srTableStatsReply';
+    srContactUsOk: result := 'srContactUsOk';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -200,6 +203,7 @@ begin
     scShowLosingCards: result := 'scShowLosingCards';
     seUserChange: result := 'seUserChange';
     scQueryTableStats: result := 'scQueryTableStats';
+    scContactUs: result := 'scContactUs';
   end;
 end;
 {$ENDIF DEBUG}

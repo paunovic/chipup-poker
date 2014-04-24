@@ -305,12 +305,17 @@ begin
     Cells[0, 2].AddFmt('%s', [AData], ADataStyle, 2);
   end;
 
-  rvLog.AddItem('', table);
+  rvLog.Canvas.Lock;
+  try
+    rvLog.AddItem('', table);
 
-  if rvLog.VScrollPos < rvLog.VScrollMax then
-    rvLog.Format
-  else
-    rvLog.FormatTail;
+    if rvLog.VScrollPos < rvLog.VScrollMax then
+      rvLog.Format
+    else
+      rvLog.FormatTail;
+  finally
+    rvLog.Canvas.Unlock;
+  end;
 end;
 
 

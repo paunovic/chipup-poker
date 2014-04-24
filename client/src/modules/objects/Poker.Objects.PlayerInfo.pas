@@ -74,6 +74,7 @@ end;
 procedure TPlayerInfo.Flush;
 begin
   SetLength(FId, 0);
+
   FNick := '';
   FClubs.Clear;
 end;

@@ -9,7 +9,8 @@ uses
   cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
   cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
   dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
-  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint, cxCalendar, ChipUpPokerDarkSkin;
+  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint, cxCalendar, ChipUpPokerDarkSkin,
+  cxNavigator;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)

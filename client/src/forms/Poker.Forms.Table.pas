@@ -1028,33 +1028,42 @@ begin
     Exit;
 
   ServerSocket.TableStandUp(FTable.Game.MongoId);
-  acStandUp.Enabled := FALSE;
 end;
 
 procedure TfrmTable.AddDealerChatMessage(const AMessage: String);
 begin
   CheckChatScrollbackLimit;
 
-  rvChat.AddNL('Dealer: ', 2, 0);
-  rvChat.AddNL(AMessage, 3, -1);
+  rvChat.Canvas.Lock;
+  try
+    rvChat.AddNL('Dealer: ', 2, 0);
+    rvChat.AddNL(AMessage, 3, -1);
 
-  if rvChat.VScrollPos < rvChat.VScrollMax then
-    rvChat.Format
-  else
-    rvChat.FormatTail;
+    if rvChat.VScrollPos < rvChat.VScrollMax then
+      rvChat.Format
+    else
+      rvChat.FormatTail;
+  finally
+    rvChat.Canvas.Unlock;
+  end;
 end;
 
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
 begin
   CheckChatScrollbackLimit;
 
-  rvChat.AddNL(Format('%s: ', [AUser]), 0, 0);
-  rvChat.AddNL(AMessage, 1, -1);
+  rvChat.Canvas.Lock;
+  try
+    rvChat.AddNL(Format('%s: ', [AUser]), 0, 0);
+    rvChat.AddNL(AMessage, 1, -1);
 
-  if rvChat.VScrollPos < rvChat.VScrollMax then
-    rvChat.Format
-  else
-    rvChat.FormatTail;
+    if rvChat.VScrollPos < rvChat.VScrollMax then
+      rvChat.Format
+    else
+      rvChat.FormatTail;
+  finally
+    rvChat.Canvas.Unlock;
+  end;
 end;
 
 procedure TfrmTable.cbFoldToAnyBetPropertiesChange(Sender: TObject);
@@ -1503,6 +1512,10 @@ begin
   seat_caption := '';
   case ATableEvent.Event of
     teExistingCards: begin
+      {$IFDEF DEBUG}
+      event := 'EXISTING CARDS';
+      {$ENDIF}
+
       if Length(ATableEvent.Cards) >= 3 then
       begin
         SetLength(flop, 3);
@@ -1519,21 +1532,21 @@ begin
     teFold: begin
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'FOLD';
+      event := Format('FOLD [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
       seat_caption := 'FOLD';
     end;
 
     teSit: begin
       {$IFDEF DEBUG}
-      event := 'SIT';
+      event := Format('SIT [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
     end;
 
     teStandUp: begin
       // fixme: animate bet > pot here
       {$IFDEF DEBUG}
-      event := 'STAND UP';
+      event := Format('STAND UP [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
     end;
 
@@ -1673,7 +1686,7 @@ begin
     teCheck: begin
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'CHECK';
+      event := Format('CHECK [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
       seat_caption := 'CHECK';
 
@@ -1683,7 +1696,7 @@ begin
     teCall: begin
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'CALL';
+      event := Format('CALL [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
       seat_caption := 'CALL';
 
@@ -1693,7 +1706,7 @@ begin
     teRaise: begin
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'RAISE';
+      event := Format('RAISE [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
       seat_caption := 'RAISE';
 
@@ -1703,7 +1716,7 @@ begin
     teAllIn: begin
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'ALL-IN';
+      event := Format('ALL-IN [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
       seat_caption := 'ALL-IN';
 
@@ -1715,7 +1728,7 @@ begin
 
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'FLOP';
+      event := Format('FLOP [%s]', [FTableStatus.FlopCards.AsString]);
       {$ENDIF}
       EnableGameLockTimer(1.5);
       AnimateBets(ATableEvent.Bets);
@@ -1726,7 +1739,7 @@ begin
 
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'TURN';
+      event := Format('TURN [%s]', [FTableStatus.TurnCard.AsString]);
       {$ENDIF}
       EnableGameLockTimer(FTurnAniDelay + 1.5);
       AnimateBets(ATableEvent.Bets);
@@ -1737,7 +1750,7 @@ begin
 
       tiActiveFrameBlink.Enabled := FALSE;
       {$IFDEF DEBUG}
-      event := 'RIVER';
+      event := Format('RIVER [%s]', [FTableStatus.RiverCard.AsString]);
       {$ENDIF}
       EnableGameLockTimer(FRiverAniDelay + 1.5);
       AnimateBets(ATableEvent.Bets);
@@ -1745,7 +1758,7 @@ begin
 
     teDisconnect: begin
       {$IFDEF DEBUG}
-      event := 'DISCONNECTED';
+      event := Format('DISCONNECTED [%d]', [ATableEvent.Seat]);
       {$ENDIF}
 {
       if FTableStatus.GetSeatInfo(ATableEvent.Seat, seat) then
@@ -1768,7 +1781,7 @@ begin
   end;
 
   {$IFDEF DEBUG}
-  DebugLn('Event received: ' + event, ditApplication);
+  DebugLn('EVENT: ' + event, ditApplication);
   {$ENDIF}
 end;
 
@@ -1915,7 +1928,7 @@ begin
   FCardHeight := FCardWidth / TableResources.CardAspectRatio;
   FCardArtworkWidth := FCardWidth * (0.48 + FTableResizeRatio / 5);
   FCardArtworkHeight := FCardHeight * 0.85;
-  FSeatCardsMaxWidth := FSeatWidth * 0.8;
+  FSeatCardsMaxWidth := FSeatWidth * 0.65;
 
   // calculate dealer size
   FDealerWidth := TableResources.DealerButtonImage.Texture[0].Width * FTableResizeRatio;
@@ -2767,10 +2780,13 @@ begin
     if time_percent > 1 then
       time_percent := 1;
 
-    DXCore.Canvas.UseImagePx(FTimeImage, pBounds4(0, 0, time_percent * FTimeImage.Texture[0].Width, FTimeImage.Texture[0].Height));
-    DXCore.Canvas.TexMap(pBounds4(seat_point.X - FTimebarWidth / 2,
-       seat_point.Y + FSeatHeight / 2 - 3 * FTableResizeRatio, FTimebarWidth * time_percent, FTimebarHeight),
-       clWhite4);
+    if time_percent > 0 then
+    begin
+      DXCore.Canvas.UseImagePx(FTimeImage, pBounds4(0, 0, time_percent * FTimeImage.Texture[0].Width, FTimeImage.Texture[0].Height));
+      DXCore.Canvas.TexMap(pBounds4(seat_point.X - FTimebarWidth / 2,
+         seat_point.Y + FSeatHeight / 2 - 3 * FTableResizeRatio, FTimebarWidth * time_percent, FTimebarHeight),
+         clWhite4);
+    end;
   end;
 end;
 

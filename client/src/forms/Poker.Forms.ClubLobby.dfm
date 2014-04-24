@@ -2531,16 +2531,15 @@ object frmClubLobby: TfrmClubLobby
     TabOrder = 2
     Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
-    ClientRectBottom = 441
-    ClientRectLeft = 1
-    ClientRectRight = 893
-    ClientRectTop = 1
+    ClientRectBottom = 442
+    ClientRectRight = 894
+    ClientRectTop = 0
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
       DesignSize = (
-        892
-        440)
+        894
+        442)
       object gbClubSettings: TcxGroupBox
         Left = 7
         Top = 0
@@ -2549,8 +2548,8 @@ object frmClubLobby: TfrmClubLobby
         TabOrder = 0
         DesignSize = (
           250
-          427)
-        Height = 433
+          435)
+        Height = 435
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
@@ -2636,14 +2635,14 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Members'
         TabOrder = 1
         DesignSize = (
-          626
-          427)
-        Height = 433
-        Width = 626
+          628
+          435)
+        Height = 435
+        Width = 628
         object gridPlayersList: TcxGrid
-          Left = 3
-          Top = 16
-          Width = 620
+          Left = 2
+          Top = 19
+          Width = 624
           Height = 335
           Align = alTop
           BevelInner = bvNone
@@ -2706,7 +2705,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveChips: TcxButton
           Left = 8
-          Top = 206
+          Top = 208
           Width = 98
           Height = 28
           Action = acGiveChips
@@ -2722,7 +2721,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 112
-          Top = 206
+          Top = 208
           Width = 98
           Height = 28
           Action = acGiveOwnership
@@ -2738,7 +2737,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
-          Top = 206
+          Top = 208
           Width = 98
           Height = 28
           Action = acRemovePlayer
@@ -2754,7 +2753,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 172
+          Top = 174
           Width = 98
           Height = 28
           Action = acSuspendPlayer
@@ -2773,9 +2772,11 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
-        892
-        440)
+        894
+        442)
       object gbTables: TcxGroupBox
         Left = 7
         Top = 0
@@ -2783,21 +2784,25 @@ object frmClubLobby: TfrmClubLobby
         Caption = 'Tables'
         TabOrder = 0
         DesignSize = (
-          878
-          427)
-        Height = 433
-        Width = 878
+          880
+          435)
+        Height = 435
+        Width = 880
         object gridGames: TcxGrid
-          Left = 3
-          Top = 16
-          Width = 872
-          Height = 375
+          Left = 2
+          Top = 19
+          Width = 876
+          Height = 377
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          ExplicitLeft = 3
+          ExplicitTop = 16
+          ExplicitWidth = 872
+          ExplicitHeight = 375
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2871,7 +2876,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 359
+          Top = 361
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2884,10 +2889,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 359
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 359
+          Top = 361
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2900,10 +2906,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 359
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 295
+          Top = 297
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]
@@ -2919,25 +2926,30 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
           OnClick = acShowEditGameFormExecute
+          ExplicitTop = 295
         end
       end
     end
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
-        892
-        440)
+        894
+        442)
       object gridStats: TcxGrid
         Left = 348
         Top = 2
-        Width = 536
-        Height = 430
+        Width = 538
+        Height = 432
         Anchors = [akLeft, akTop, akRight, akBottom]
         BevelInner = bvNone
         BevelOuter = bvNone
         BorderStyle = cxcbsNone
         TabOrder = 0
+        ExplicitWidth = 536
+        ExplicitHeight = 430
         object gridStatsTable: TcxGridTableView
           OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3035,12 +3047,13 @@ object frmClubLobby: TfrmClubLobby
         Left = 8
         Top = 2
         Width = 336
-        Height = 430
+        Height = 432
         Anchors = [akLeft, akTop, akBottom]
         BevelInner = bvNone
         BevelOuter = bvNone
         BorderStyle = cxcbsNone
         TabOrder = 1
+        ExplicitHeight = 430
         object gridTablesTable: TcxGridTableView
           PopupMenu = pmTablesStats
           OnDblClick = gridTablesTableDblClick

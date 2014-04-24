@@ -43,6 +43,8 @@ uses
   Poker.Forms.Updater in 'forms\Poker.Forms.Updater.pas' {frmUpdater},
   Poker.Forms.CloseTable in 'forms\Poker.Forms.CloseTable.pas' {frmCloseTable},
   Poker.Forms.ImageCrop in 'forms\Poker.Forms.ImageCrop.pas' {frmImageCrop},
+  Poker.Forms.ContactUs in 'forms\Poker.Forms.ContactUs.pas' {frmContactUs},
+  Poker.Forms.Reconnect in 'forms\Poker.Forms.Reconnect.pas' {frmReconnect},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -120,7 +122,10 @@ uses
   Poker.Protobufs.Objects.TablePlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas',
   Poker.Stats.Table in 'modules\stats\Poker.Stats.Table.pas',
   Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
-  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas';
+  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
+  Poker.Protobufs.Objects.ContactMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.ContactMessage.pas',
+  Poker.Server.SocketConnect in 'modules\server\Poker.Server.SocketConnect.pas';
+
 
 procedure FocusPokerApp;
 var
@@ -130,6 +135,7 @@ begin
   if window_handle <> 0 then
     SetForegroundWindow(window_handle);
 end;
+
 
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}

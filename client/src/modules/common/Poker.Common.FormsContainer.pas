@@ -10,12 +10,18 @@ type
   TFormsContainer = class
   private
     FItems: TForms;
+    FStates: TList<Boolean>;
   public
     class procedure Initialize;
     class procedure Deinitialize;
 
     constructor Create;
     destructor Destroy; override;
+
+    procedure DisableAll;
+
+    procedure SaveState;
+    procedure ResetState;
 
     procedure Add(const AForm: TForm);
     procedure Close(const AFormClass: TFormClass);
@@ -34,7 +40,7 @@ var
 implementation
 
 uses
-  Poker.Common.Misc, System.SysUtils;
+  Winapi.Windows, Poker.Common.Misc, System.SysUtils;
 
 
 
@@ -52,10 +58,12 @@ end;
 constructor TFormsContainer.Create;
 begin
   FItems := TForms.Create(FALSE);
+  FStates := TList<Boolean>.Create;
 end;
 
 destructor TFormsContainer.Destroy;
 begin
+  FStates.Free;
   FItems.Free;
 
   inherited;
@@ -67,8 +75,14 @@ begin
 end;
 
 procedure TFormsContainer.Remove(const AForm: TForm);
+var
+  index: Integer;
 begin
-  FItems.Remove(AForm);
+  index := FItems.IndexOf(AForm);
+  if index = -1 then
+    Exit;
+
+  FItems.Delete(index);
 end;
 
 procedure TFormsContainer.Remove(const AFormClass: TFormClass);
@@ -98,7 +112,7 @@ var
 begin
   while Find(AFormClass, form) do
   begin
-    FItems.Remove(form);
+    Remove(form);
     form.Close;
     form.Free;
   end;
@@ -108,8 +122,8 @@ procedure TFormsContainer.CloseAllForms;
 begin
   while FItems.Count > 0 do
   begin
-    FItems[0].Close;
-    FItems.Delete(0);
+    FItems[FItems.Count - 1].Close;
+    FItems.Delete(FItems.Count - 1);
   end;
 end;
 
@@ -131,6 +145,30 @@ begin
   end;
 end;
 
+procedure TFormsContainer.DisableAll;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to FItems.Count - 1 do
+    EnableWindow(FItems[C1].Handle, FALSE);
+end;
+
+procedure TFormsContainer.ResetState;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to FStates.Count - 1 do
+    EnableWindow(FItems[C1].Handle, FStates[C1]);
+end;
+
+procedure TFormsContainer.SaveState;
+var
+  C1: Integer;
+begin
+  FStates.Clear;
+  for C1 := 0 to FItems.Count - 1 do
+    FStates.Add(IsWindowEnabled(FItems[C1].Handle));
+end;
 
 end.
 

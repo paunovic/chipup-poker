@@ -3699,7 +3699,7 @@ object frmChipUpMain: TfrmChipUpMain
           Top = 1
           Width = 311
           Height = 32
-          Caption = 'HOME GAMES'
+          Caption = 'MY HOME GAMES'
           Colors.DefaultText = 539056881
           Colors.NormalText = 539056881
           Colors.HotText = 539056881
@@ -4137,8 +4137,8 @@ object frmChipUpMain: TfrmChipUpMain
             Caption = '&Account'
           end>
       end>
-    Left = 412
-    Top = 228
+    Left = 484
+    Top = 28
     StyleName = 'Platform Default'
     object acLogout: TAction
       Category = 'Account'
@@ -4195,10 +4195,15 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Resend Verification Mail'
       OnExecute = acResendVerificationMailExecute
     end
+    object acShowContactUsForm: TAction
+      Category = 'Help'
+      Caption = 'Contact Us'
+      OnExecute = acShowContactUsFormExecute
+    end
   end
   object MainMenu: TMainMenu
-    Left = 474
-    Top = 228
+    Left = 394
+    Top = 28
     object Account1: TMenuItem
       Caption = 'Account'
       object ChangeEmailAddress1: TMenuItem
@@ -4219,9 +4224,26 @@ object frmChipUpMain: TfrmChipUpMain
       object N1: TMenuItem
         Caption = '-'
       end
+      object Disconnect1: TMenuItem
+        Caption = 'Disconnect'
+        OnClick = Disconnect1Click
+      end
       object Logout1: TMenuItem
         Action = acLogout
       end
     end
+    object Help1: TMenuItem
+      Caption = 'Help'
+      object ContactUs1: TMenuItem
+        Action = acShowContactUsForm
+      end
+    end
+  end
+  object tiBringToFront: TTimer
+    Enabled = False
+    Interval = 100
+    OnTimer = tiBringToFrontTimer
+    Left = 576
+    Top = 24
   end
 end

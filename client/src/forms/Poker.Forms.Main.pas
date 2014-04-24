@@ -9,7 +9,7 @@ uses
   cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo,
   cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, Vcl.ActnMan, Vcl.ActnMenus,
   Vcl.PlatformDefaultStyleActnCtrls, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club,
-  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPCdxBarPopupMenu, cxPC;
+  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPCdxBarPopupMenu, cxPC, cxNavigator;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -73,6 +73,11 @@ type
     btJoinClub: TcxButton;
     btTournamentsHeader: TcxButton;
     lbsTournamentsComingSoon: TcxLabel;
+    tiBringToFront: TTimer;
+    Help1: TMenuItem;
+    ContactUs1: TMenuItem;
+    acShowContactUsForm: TAction;
+    Disconnect1: TMenuItem;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -102,10 +107,15 @@ type
     procedure gridMyHomeGamesEnter(Sender: TObject);
     procedure gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure pcTabsChange(Sender: TObject);
+    procedure tiBringToFrontTimer(Sender: TObject);
+    procedure acShowContactUsFormExecute(Sender: TObject);
+    procedure Disconnect1Click(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
     FCallbacksId: Integer;
+
+    procedure ModalFormClose(ASender: TObject);
 
     procedure ShowLoginForm;
 
@@ -167,26 +177,20 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
-  Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply;
+  Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
+  Poker.Forms.ContactUs, Poker.Forms.Reconnect;
 
+
+procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
+end;
 
 procedure TfrmChipUpMain.DoCreate;
 begin
   inherited;
 
   ShowLoginForm;
-end;
-
-procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  Action := caFree;
-end;
-
-procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-begin
-  CanClose := ConfirmToCloseTables;
-  if CanClose then
-    Tables.ClearWithoutNotification;
 end;
 
 procedure TfrmChipUpMain.FormCreate(Sender: TObject);
@@ -208,15 +212,30 @@ begin
   EnableWindow(Handle, TRUE);
 end;
 
-procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
-begin
-  LoadImageFromResource(imgCashier, 'CashierNormal');
-end;
-
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   FormsContainer.CloseAllForms;
   MessageContainer.RemoveCallbacks(FCallbacksId);
+end;
+
+procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+end;
+
+procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := ConfirmToCloseTables;
+  if CanClose then
+  begin
+    ServerSocket.Logout;
+    Tables.ClearWithoutNotification;
+  end;
+end;
+
+procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
+begin
+  LoadImageFromResource(imgCashier, 'CashierNormal');
 end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
@@ -267,13 +286,41 @@ begin
 end;
 
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);
+var
+  reconnect_form: TfrmReconnect;
 begin
   case ANewState of
-    wsClosed: begin
-      ServerSocket.Disconnect;
-      ShowLoginForm;
+    wsClosed: begin // handle disconnection here (try to reconnect)
+      // save form states and disable them
+      FormsContainer.SaveState;
+      FormsContainer.DisableAll;
+
+      // disable all tables
+      Tables.DisableAll;
+
+      // disable main form (its not in forms container)
+      EnableWindow(Handle, FALSE);
+
+      // open reconection form
+      reconnect_form := FormsContainer.RunForm(TfrmReconnect, nil, [], FALSE) as TfrmReconnect;
+      reconnect_form.SetCloseCallback(ModalFormClose);
     end;
   end;
+end;
+
+procedure TfrmChipUpMain.tiBringToFrontTimer(Sender: TObject);
+var
+  table: TTable;
+begin
+  if IsIconic(Handle) then
+    ShowWindow(Handle, SW_RESTORE);
+  Show;
+
+  if Tables.Count > 0 then
+    for table in Tables do
+      table.BringToFront;
+
+  tiBringToFront.Enabled := FALSE;
 end;
 
 function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
@@ -348,6 +395,11 @@ begin
   FormsContainer.RunForm(TfrmChangePassword, self, [], FALSE);
 end;
 
+procedure TfrmChipUpMain.acShowContactUsFormExecute(Sender: TObject);
+begin
+  FormsContainer.RunForm(TfrmContactUs, self, [], FALSE);
+end;
+
 procedure TfrmChipUpMain.acShowCreateClubFormExecute(Sender: TObject);
 begin
   if not dmMain.CheckAuthed then
@@ -370,7 +422,7 @@ begin
   if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
     MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
-    Tables.AddTable(club, game);
+    Tables.AddTable(club, game, TRUE, TRUE);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -503,6 +555,7 @@ end;
 procedure TfrmChipUpMain.gridMyHomeGamesEnter(Sender: TObject);
 begin
   gridPublicHomeGamesTable.DataController.FocusedRecordIndex := -1;
+  UpdateGameList;
 end;
 
 procedure TfrmChipUpMain.gridMyHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -513,6 +566,7 @@ end;
 procedure TfrmChipUpMain.gridPublicHomeGamesEnter(Sender: TObject);
 begin
   gridMyHomeGamesTable.DataController.FocusedRecordIndex := -1;
+  UpdateGameList;
 end;
 
 procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
@@ -627,8 +681,6 @@ begin
 end;
 
 procedure TfrmChipUpMain.LoginStatus(const AValue: TLoginStatus);
-var
-  table: TTable;
 begin
   case AValue of
     lsLoggedIn: begin
@@ -669,15 +721,28 @@ begin
       SetLength(FSelectedGame, 0);
       ConfigureGUI;
       Show;
-      if Tables.Count > 0 then
-        for table in Tables do
-          table.BringToFront;
+      tiBringToFront.Enabled := TRUE;
     end;
 
     lsUpdating: FormsContainer.RunForm(TfrmUpdater, self, [], FALSE);
   else
     Close;
   end;
+end;
+
+procedure TfrmChipUpMain.ModalFormClose(ASender: TObject);
+begin
+  if ASender is TfrmReconnect then
+  begin
+    case (ASender as TfrmReconnect).CurrentStatus of
+      rsLoggedIn: ;
+    else
+      FormsContainer.Items.Extract(ASender as TForm);
+      ShowLoginForm;
+    end;
+  end;
+
+  EnableWindow(Handle, TRUE);
 end;
 
 procedure TfrmChipUpMain.pcTabsChange(Sender: TObject);
@@ -934,7 +999,7 @@ begin
 
     if (Assigned(game)) and
        (AMethodId = Integer(srCreateGameOk)) then
-      Tables.AddTable(club, game);
+      Tables.AddTable(club, game, TRUE, TRUE);
   end;
 
   ConfigureGUI;
