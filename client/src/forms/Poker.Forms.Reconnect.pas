@@ -181,6 +181,7 @@ begin
       FCurrentStatus := rsLoggedIn;
       FormsContainer.ResetState;
       Tables.EnableAll;
+      ServerSocket.Ping;
       Close;
     end;
     lrInvalid: begin

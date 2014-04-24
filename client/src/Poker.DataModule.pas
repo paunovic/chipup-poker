@@ -154,7 +154,23 @@ var
   game: TGameInfo;
   table: TTable;
   tstatus: TPB_TableStatus;
+  exists: Boolean;
+  C1: Integer;
 begin
+  for C1 := Tables.Count - 1 downto 0 do
+  begin
+    exists := FALSE;
+    for tstatus in AReconnectedTables do
+      if CompareBytes(tstatus.TableMongoId, Tables[C1].Game.MongoId) then
+      begin
+        exists := TRUE;
+        Break;
+      end;
+
+    if not exists then
+      Tables.Delete(C1);
+  end;
+
   for tstatus in AReconnectedTables do
   begin
     table := nil;

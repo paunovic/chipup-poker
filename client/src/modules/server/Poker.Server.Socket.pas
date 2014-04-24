@@ -219,6 +219,7 @@ end;
 procedure TServerSocket.Disconnect;
 begin
   KillPingTimer;
+  KillPingTimeoutTimer;
 
   if Assigned(FSocketConnectThread) then
   begin
@@ -262,6 +263,9 @@ begin
   end;
 
   FConnectCode := -1;
+
+  KillPingTimer;
+  KillPingTimeoutTimer;
 end;
 
 procedure TServerSocket.SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; PeerCert: TX509Base; var Disconnect: Boolean);
