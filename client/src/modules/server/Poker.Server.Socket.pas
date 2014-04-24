@@ -10,24 +10,18 @@ uses
 type
   TServerSocket = class
   private
-    const
-      TIMER_ID_PING         = 1;
-      TIMER_ID_PING_TIMEOUT = 2;
-
-    var
-      FSocket                : TSslWSocket;
-      FSocketConnectThread   : TSocketConnectThread;
-      FServer                : String;
-      FPort                  : Integer;
-      FConnectCode           : Integer;
-      FReceiveBuffer         : PAnsiChar;
-      FReceiveBufferSize     : Integer;
-      FInternalMessageHandler: HWND;
-      FLatency               : Integer;
-      FServerTime            : UINT64;
-      FTimeOffset            : UINT64;
-
-    procedure WndMethod(var AMessage: TMessage);
+    FSocket                : TSslWSocket;
+    FSocketConnectThread   : TSocketConnectThread;
+    FServer                : String;
+    FPort                  : Integer;
+    FConnectCode           : Integer;
+    FReceiveBuffer         : PAnsiChar;
+    FReceiveBufferSize     : Integer;
+    FLatency               : Integer;
+    FServerTime            : UINT64;
+    FTimeOffset            : UINT64;
+    FTimerIdPing           : UINT_PTR;
+    FTimerIdPingTimeout    : UINT_PTR;
 
     procedure ConnectThreadTerminated(Sender: TObject);
     procedure ConnectThreadConnectFailed(Sender: TObject);
@@ -60,6 +54,7 @@ type
 
     procedure SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
     procedure SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
+    procedure ProcessTimer(const ATimerId: UINT_PTR);
 
     procedure Login(const ALogin, APass: String);
     procedure Logout;
@@ -129,6 +124,15 @@ uses
   Poker.Server.SSLCerts;
 
 
+procedure TimerProc(HWND: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
+begin
+  if not Assigned(ServerSocket) then
+    Exit;
+
+  ServerSocket.ProcessTimer(idEvent);
+end;
+
+
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
 begin
   ServerSocket := TServerSocket.Create(AServer, APort);
@@ -144,8 +148,6 @@ begin
   FConnectCode := -1;
   FServer := AServer;
   FPort := APort;
-
-  FInternalMessageHandler := AllocateHWnd(WndMethod);
 
   FSocket := TSslWSocket.Create(nil);
   FSocket.SslContext := TSslContext.Create(nil);
@@ -169,8 +171,6 @@ begin
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
   FSocket.Free;
-
-  DeallocateHWnd(FInternalMessageHandler);
 
   inherited;
 end;
@@ -384,41 +384,24 @@ end;
 
 procedure TServerSocket.ResetPingTimer;
 begin
-  SetTimer(FInternalMessageHandler, TIMER_ID_PING, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, nil);
+  FTimerIdPing := SetTimer(0, FTimerIdPing, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, @TimerProc);
 end;
 
 procedure TServerSocket.ResetPingTimeoutTimer;
 begin
-  SetTimer(FInternalMessageHandler, TIMER_ID_PING_TIMEOUT, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, nil);
+  FTimerIdPingTimeout := SetTimer(0, FTimerIdPingTimeout, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, @TimerProc);
 end;
 
 procedure TServerSocket.KillPingTimer;
 begin
-  KillTimer(FInternalMessageHandler, TIMER_ID_PING);
+  KillTimer(0, FTimerIdPing);
+  FTimerIdPing := 0;
 end;
 
 procedure TServerSocket.KillPingTimeoutTimer;
 begin
-  KillTimer(FInternalMessageHandler, TIMER_ID_PING_TIMEOUT);
-end;
-
-procedure TServerSocket.WndMethod(var AMessage: TMessage);
-begin
-  case AMessage.Msg of
-    WM_TIMER: case AMessage.WParam of
-                TIMER_ID_PING: begin
-                  Ping;
-                  KillPingTimer;
-                  ResetPingTimeoutTimer;
-                end;
-
-                TIMER_ID_PING_TIMEOUT: begin
-                  {$IFDEF DEBUG} DebugLn('Ping timeout', ditException); {$ENDIF}
-                  KillPingTimeoutTimer;
-                  Disconnect;
-                end;
-              end;
-  end;
+  KillTimer(0, FTimerIdPingTimeout);
+  FTimerIdPingTimeout := 0;
 end;
 
 function TServerSocket.IsConnected: Boolean;
@@ -940,6 +923,23 @@ begin
     SendProtobuf(scPing, protobuf);
   finally
     protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.ProcessTimer(const ATimerId: UINT_PTR);
+begin
+  if ATimerId = FTimerIdPing then
+  begin
+    Ping;
+    KillPingTimer;
+    ResetPingTimeoutTimer;
+  end;
+
+  if ATimerId = FTimerIdPingTimeout then
+  begin
+    {$IFDEF DEBUG} DebugLn('Ping timeout', ditException); {$ENDIF}
+    KillPingTimeoutTimer;
+    Disconnect;
   end;
 end;
 

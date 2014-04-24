@@ -157,6 +157,7 @@ var
   exists: Boolean;
   C1: Integer;
 begin
+  // first, close all tables that dont exist in reconnected tables array
   for C1 := Tables.Count - 1 downto 0 do
   begin
     exists := FALSE;
@@ -171,6 +172,7 @@ begin
       Tables.Delete(C1);
   end;
 
+  // restore reconnected table states
   for tstatus in AReconnectedTables do
   begin
     table := nil;

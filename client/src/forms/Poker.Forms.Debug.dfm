@@ -90,35 +90,35 @@ object frmDebug: TfrmDebug
       object lbsThreads: TcxLabel
         Left = 45
         Top = 4
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = 'Threads:'
         Transparent = True
       end
       object lbsMemoryUsage: TcxLabel
         Left = 45
         Top = 20
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = 'Memory usage:'
         Transparent = True
       end
       object lbsSocketState: TcxLabel
         Left = 45
         Top = 52
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = 'Socket state:'
         Transparent = True
       end
       object lbsCalbackSets: TcxLabel
         Left = 45
         Top = 36
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = 'Callback sets:'
         Transparent = True
       end
       object lbvThreads: TcxLabel
         Left = 125
         Top = 4
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = '00'
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
@@ -131,7 +131,7 @@ object frmDebug: TfrmDebug
       object lbvMemoryUsage: TcxLabel
         Left = 125
         Top = 20
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = '000000kb'
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
@@ -144,7 +144,7 @@ object frmDebug: TfrmDebug
       object lbvCallbackSets: TcxLabel
         Left = 125
         Top = 36
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = '0'
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
@@ -157,7 +157,7 @@ object frmDebug: TfrmDebug
       object lbvSocketState: TcxLabel
         Left = 125
         Top = 52
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Caption = '0'
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
@@ -211,7 +211,7 @@ object frmDebug: TfrmDebug
         Width = 30
         Height = 29
         Hint = 'Pause'
-        Anchors = [akTop, akRight]
+        Anchors = [akLeft, akBottom]
         Colors.PressedText = clRed
         OptionsImage.Glyph.Data = {
           36090000424D3609000000000000360000002800000018000000180000000100
