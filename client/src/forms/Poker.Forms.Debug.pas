@@ -11,7 +11,7 @@ uses
   Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, ChipUpPokerDarkSkin;
 
 type
-  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm);
+  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditSpecial);
   TDebugInfoTypes = set of TDebugInfoType;
 
   TfrmDebug = class(TForm)
@@ -99,47 +99,52 @@ begin
     ditException: begin
       type_str := 'EXCP';
       tstyle := 1;
-      dstyle := 7;
+      dstyle := 8;
     end;
     ditApplication: begin
       type_str := 'APPL';
       tstyle := 2;
-      dstyle := 8;
+      dstyle := 9;
     end;
     ditSocketInc: begin
       type_str := 'SINC';
       tstyle := 3;
-      dstyle := 9;
+      dstyle := 10;
     end;
     ditSocketOut: begin
       type_str := 'SOUT';
       tstyle := 3;
-      dstyle := 9;
+      dstyle := 10;
     end;
     ditSocket: begin
       type_str := 'SOCK';
       tstyle := 3;
-      dstyle := 9;
+      dstyle := 10;
     end;
     ditNetInc: begin
       type_str := 'NINC';
       tstyle := 4;
-      dstyle := 10;
+      dstyle := 110;
     end;
     ditNetOut: begin
       type_str := 'NOUT';
       tstyle := 4;
-      dstyle := 10;
+      dstyle := 11;
     end;
     ditForm: begin
       type_str := 'FORM';
       tstyle := 5;
-      dstyle := 11;
-    end
+      dstyle := 12;
+    end;
+    ditSpecial: begin
+      type_str := 'SPEC';
+      tstyle := 7;
+      dstyle := 14;
+    end;
   else
     type_str := 'UNKN';
     tstyle := 6;
-    dstyle := 12;
+    dstyle := 13;
   end;
 
   if Assigned(frmDebug) then

@@ -126,10 +126,8 @@ uses
 
 procedure TimerProc(HWND: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
 begin
-  if not Assigned(ServerSocket) then
-    Exit;
-
-  ServerSocket.ProcessTimer(idEvent);
+  if Assigned(ServerSocket) then
+    ServerSocket.ProcessTimer(idEvent);
 end;
 
 
@@ -148,6 +146,9 @@ begin
   FConnectCode := -1;
   FServer := AServer;
   FPort := APort;
+
+  FTimerIdPing := 0;
+  FTimerIdPingTimeout := 0;
 
   FSocket := TSslWSocket.Create(nil);
   FSocket.SslContext := TSslContext.Create(nil);
@@ -193,6 +194,7 @@ begin
   FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
 
   ResetPingTimer;
+  KillPingTimeoutTimer;
 
   if Assigned(FSocketConnectThread) then
   begin
@@ -385,21 +387,35 @@ end;
 procedure TServerSocket.ResetPingTimer;
 begin
   FTimerIdPing := SetTimer(0, FTimerIdPing, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, @TimerProc);
+
+  {$IFDEF DEBUG} DebugLn(Format('ResetPingTimer() [%d]', [FTimerIdPing]), ditSpecial); {$ENDIF}
 end;
 
 procedure TServerSocket.ResetPingTimeoutTimer;
 begin
   FTimerIdPingTimeout := SetTimer(0, FTimerIdPingTimeout, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, @TimerProc);
+
+  {$IFDEF DEBUG} DebugLn(Format('ResetPingTimeoutTimer() [%d]', [FTimerIdPingTimeout]), ditSpecial); {$ENDIF}
 end;
 
 procedure TServerSocket.KillPingTimer;
 begin
+  {$IFDEF DEBUG} DebugLn(Format('KillPingTimer() [%d]', [FTimerIdPing]), ditSpecial); {$ENDIF}
+
+  if FTimerIdPing = 0 then
+    Exit;
+
   KillTimer(0, FTimerIdPing);
   FTimerIdPing := 0;
 end;
 
 procedure TServerSocket.KillPingTimeoutTimer;
 begin
+  {$IFDEF DEBUG} DebugLn(Format('KillPingTimeoutTimer() [%d]', [FTimerIdPingTimeout]), ditSpecial); {$ENDIF}
+
+  if FTimerIdPingTimeout = 0 then
+    Exit;
+
   KillTimer(0, FTimerIdPingTimeout);
   FTimerIdPingTimeout := 0;
 end;
@@ -548,7 +564,7 @@ begin
   try
     rpc_message.Methodid := Integer(AMethodId);
     if Assigned(AProtobuf) then
-      rpc_message.Datasize := AProtobuf.ProtobufOutputSize;
+      rpc_message.DataSize := AProtobuf.ProtobufOutputSize;
     mstream := TMemoryStream.Create;
     try
       rpcsize := rpc_message.ProtobufOutputSize;
@@ -928,6 +944,8 @@ end;
 
 procedure TServerSocket.ProcessTimer(const ATimerId: UINT_PTR);
 begin
+  {$IFDEF DEBUG} DebugLn(Format('ProcessTimer(%d)', [ATimerId]), ditSpecial); {$ENDIF}
+
   if ATimerId = FTimerIdPing then
   begin
     Ping;

@@ -422,6 +422,14 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
+        StyleName = 'Type: Special'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clSkyBlue
+        Unicode = True
+      end
+      item
         StyleName = 'Data: Exception'
         FontName = 'Consolas'
         Size = 8
@@ -467,6 +475,14 @@ object frmDebug: TfrmDebug
         Size = 8
         Style = [fsBold]
         Color = clYellow
+        Unicode = True
+      end
+      item
+        StyleName = 'Data: Special'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clSkyBlue
         Unicode = True
       end>
     ParaStyles = <
