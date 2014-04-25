@@ -505,6 +505,7 @@ message TableStatsReply {
 	required bytes clubid = 1;
 	required bytes gameid = 2;
 	repeated TablePlayerStats playerstats = 3;
+	optional uint32 hands = 4;
 }
 
 message TablePlayerStats {
