@@ -111,7 +111,7 @@ function startImHub() {
 			break;
 		case 'conn':
 			var display = [ msg.ts,msg.nick+':' ];
-			var log = [ msg.ts,msg.nick ];
+			var log = [ msg.ts,msg.nick,msg.connid ];
 			//console.log(msg.ts,msg.nick,util.inspect(msg.objects,{colors:true}));
 			for (var x=0; x<msg.objects.length; x++) {
 				display.push(util.inspect(msg.objects[x],{colors:true}));
