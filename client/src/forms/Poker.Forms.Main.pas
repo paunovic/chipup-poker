@@ -78,6 +78,14 @@ type
     ContactUs1: TMenuItem;
     acShowContactUsForm: TAction;
     Disconnect1: TMenuItem;
+    TermsofService1: TMenuItem;
+    acTermsAndConditions: TAction;
+    acShowAboutForm: TAction;
+    N3: TMenuItem;
+    AboutChipUPPoker1: TMenuItem;
+    Options1: TMenuItem;
+    Sounds1: TMenuItem;
+    acSoundsOnOff: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -110,6 +118,8 @@ type
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure Disconnect1Click(Sender: TObject);
+    procedure acTermsAndConditionsExecute(Sender: TObject);
+    procedure acSoundsOnOffExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -436,6 +446,7 @@ end;
 procedure TfrmChipUpMain.ConfigureGUI;
 var
   cpt: String;
+  club: TClubInfo;
 begin
   cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
@@ -445,7 +456,11 @@ begin
 
   Resendverificationmail1.Visible := not dmMain.SelfInfo.Authed;
 
-  acOpenClubLobby.Enabled := FSelectedClub <> -1;
+  acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
+                             (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
+
+  Sounds1.Checked := Settings.Sounds;
+
   UpdateClublist;
   UpdateGamelist;
   UpdatePublicClublist;
@@ -555,18 +570,16 @@ end;
 procedure TfrmChipUpMain.gridMyHomeGamesEnter(Sender: TObject);
 begin
   gridPublicHomeGamesTable.DataController.FocusedRecordIndex := -1;
-  UpdateGameList;
-end;
-
-procedure TfrmChipUpMain.gridMyHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-begin
-  acOpenClubLobby.Execute;
 end;
 
 procedure TfrmChipUpMain.gridPublicHomeGamesEnter(Sender: TObject);
 begin
   gridMyHomeGamesTable.DataController.FocusedRecordIndex := -1;
-  UpdateGameList;
+end;
+
+procedure TfrmChipUpMain.gridMyHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  acOpenClubLobby.Execute;
 end;
 
 procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
@@ -583,19 +596,18 @@ var
 begin
   recIndex := gridPublicHomeGamesTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
-  begin
-    FSelectedClub := -1;
-    Exit;
-  end;
-
-  club_id := gridPublicHomeGamesTable.DataController.GetValue(recIndex, gridClubsId.Index);
-  if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
     FSelectedClub := -1
   else
   begin
-    FSelectedClub := club_id;
-    SetLength(FSelectedGame, 0);
-    gridGamesTable.DataController.FocusedRecordIndex := -1;
+    club_id := gridPublicHomeGamesTable.DataController.GetValue(recIndex, gridClubsId.Index);
+    if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
+      FSelectedClub := -1
+    else
+    begin
+      FSelectedClub := club_id;
+      SetLength(FSelectedGame, 0);
+      gridGamesTable.DataController.FocusedRecordIndex := -1;
+    end;
   end;
 
   acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
@@ -612,26 +624,28 @@ end;
 procedure TfrmChipUpMain.gridMyHomeGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  club_id : Int64;
+  club_id: Int64;
+  club: TClubInfo;
 begin
   recIndex := gridMyHomeGamesTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
-  begin
-    FSelectedClub := -1;
-    Exit;
-  end;
-
-  club_id := gridMyHomeGamesTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
-  if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
     FSelectedClub := -1
   else
   begin
-    FSelectedClub := club_id;
-    SetLength(FSelectedGame, 0);
-    gridGamesTable.DataController.FocusedRecordIndex := -1;
+    club_id := gridMyHomeGamesTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
+    if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
+      FSelectedClub := -1
+    else
+    begin
+      FSelectedClub := club_id;
+      SetLength(FSelectedGame, 0);
+      gridGamesTable.DataController.FocusedRecordIndex := -1;
+    end;
   end;
 
-  acOpenClubLobby.Enabled := FSelectedClub <> -1;
+  acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
+                             (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
+
   UpdateGamelist;
 end;
 
@@ -644,19 +658,15 @@ begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
   if (recIndex = -1) or
      (not GetSelectedClub(club)) then
-  begin
-    SetLength(FSelectedGame, 0);
-    Exit;
-  end;
-
-  game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
-  if club.Games.IndexOf(game_id) = -1 then
-  begin
-    SetLength(FSelectedGame, 0);
-    Exit;
-  end
+    SetLength(FSelectedGame, 0)
   else
-    FSelectedGame := game_id;
+  begin
+    game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+    if club.Games.IndexOf(game_id) = -1 then
+      SetLength(FSelectedGame, 0)
+    else
+      FSelectedGame := game_id;
+  end;
 
   acShowGameTableForm.Enabled := Length(FSelectedGame) > 0;
 end;
@@ -891,6 +901,17 @@ end;
 procedure TfrmChipUpMain.acShowTournamentLayoutExecute(Sender: TObject);
 begin
   pcTabs.ActivePage := tsTournaments;
+end;
+
+procedure TfrmChipUpMain.acSoundsOnOffExecute(Sender: TObject);
+begin
+  Settings.Sounds := not Settings.Sounds;
+  Sounds1.Checked := Settings.Sounds;
+end;
+
+procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);
+begin
+  dmMain.OpenTACLink;
 end;
 
 procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);

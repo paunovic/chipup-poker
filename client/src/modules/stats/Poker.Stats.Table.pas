@@ -11,6 +11,7 @@ type
   private
     FClubId: TBytes;
     FGameId: TBytes;
+    FHands: UINT32;
     FPlayers: TObjectList<TPlayerStats>;
 
   public
@@ -21,6 +22,7 @@ type
 
     property ClubId: TBytes read FClubId;
     property GameId: TBytes read FGameId;
+    property Hands: UINT32 read FHands;
     property Players: TObjectList<TPlayerStats> read FPlayers;
   end;
 
@@ -61,6 +63,7 @@ var
 begin
   FClubId := AProtobuf.Clubid;
   FGameId := AProtobuf.Gameid;
+  FHands := AProtobuf.Hands;
 
   FPlayers.Clear;
   for pbplayer in AProtobuf.Playerstats do

@@ -22,6 +22,8 @@ type
     procedure NotifyClose;
     function IsSitting: Boolean;
 
+    function ReassignObjects(const AGameId: TBytes): Boolean;
+
     procedure BringToFront;
 
     property Game          : TGameInfo read FGame;
@@ -103,6 +105,21 @@ begin
   FForm.Show;
 end;
 
+function TTable.ReassignObjects(const AGameId: TBytes): Boolean;
+var
+  club: TClubInfo;
+  game: TGameInfo;
+begin
+  for club in dmMain.SelfInfo.Clubs do
+    for game in club.Games do
+      if CompareBytes(game.MongoId, AGameId) then
+      begin
+        FClub := club;
+        FGame := game;
+        Exit(TRUE);
+      end;
+  Exit(FALSE);
+end;
 
 { TTables }
 

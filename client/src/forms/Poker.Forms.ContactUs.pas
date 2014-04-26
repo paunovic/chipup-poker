@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMaskEdit,
   cxDropDownEdit, cxTextEdit, cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons,
-  cxMemo, Vcl.ActnList;
+  cxMemo, Vcl.ActnList, ChipUpPokerDarkSkin;
 
 type
   TfrmContactUs = class(TForm)
@@ -82,7 +82,7 @@ end;
 
 procedure TfrmContactUs.CSRContactUsOk(const AMethodId: Integer; const AObject: TObject);
 begin
-  MessageDlg('Message successfully sent. We will contact you back via E-Mail address associated to this account.',
+  MessageDlg('Message successfully sent. If needed, we will contact you back via E-Mail address associated to this account.',
      mtInformation, [mbOK], 0);
   Close;
 end;

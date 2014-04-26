@@ -18,8 +18,6 @@ type
   public
     constructor Create(const AServerSocket: TObject);
 
-    procedure Shutdown;
-
     property OnConnectFailed: TNotifyEvent read FOnConnectFailed write FOnConnectFailed;
   end;
 
@@ -56,12 +54,6 @@ begin
         Synchronize(syncConnectFailed);
     end;
   end;
-end;
-
-procedure TSocketConnectThread.Shutdown;
-begin
-  Terminate;
-  WaitFor;
 end;
 
 procedure TSocketConnectThread.syncConnectFailed;

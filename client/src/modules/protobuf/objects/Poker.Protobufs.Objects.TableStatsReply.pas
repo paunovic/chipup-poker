@@ -15,14 +15,17 @@ type
       FN_CLUBID = 1;
       FN_GAMEID = 2;
       FN_PLAYERSTATS = 3;
+      FN_HANDS = 4;
 
     var
       FClubid: TBytes;
       FGameid: TBytes;
       FPlayerstats: TObjectList<TPB_TablePlayerStats>;
+      FHands: UINT32;
 
     procedure SetClubid(const AValue: TBytes);
     procedure SetGameid(const AValue: TBytes);
+    procedure SetHands(const AValue: UINT32);
     procedure PlayerstatsNotifyEvent(Sender: TObject; const Item: TPB_TablePlayerStats; Action: TCollectionNotification);
 
   protected
@@ -35,6 +38,7 @@ type
     property Clubid: TBytes read FClubid write SetClubid;
     property Gameid: TBytes read FGameid write SetGameid;
     property Playerstats: TObjectList<TPB_TablePlayerStats> read FPlayerstats;
+    property Hands: UINT32 read FHands write SetHands;
   end;
 
 implementation
@@ -79,6 +83,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
+      FN_HANDS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FHands := AProtobufReader.readUInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -103,6 +111,12 @@ begin
   ProtobufOutput.writeTag(FN_PLAYERSTATS,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatsReply.SetHands(const AValue: UINT32);
+begin
+  FHands := AValue;
+  ProtobufOutput.writeUInt32(FN_HANDS, AValue);
 end;
 
 end.

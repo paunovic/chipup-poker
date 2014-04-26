@@ -4200,6 +4200,20 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Contact Us'
       OnExecute = acShowContactUsFormExecute
     end
+    object acTermsAndConditions: TAction
+      Category = 'Help'
+      Caption = 'Terms && Conditions'
+      OnExecute = acTermsAndConditionsExecute
+    end
+    object acShowAboutForm: TAction
+      Category = 'Help'
+      Caption = 'About'
+    end
+    object acSoundsOnOff: TAction
+      Category = 'Options'
+      Caption = 'Sounds'
+      OnExecute = acSoundsOnOffExecute
+    end
   end
   object MainMenu: TMainMenu
     Left = 394
@@ -4232,10 +4246,25 @@ object frmChipUpMain: TfrmChipUpMain
         Action = acLogout
       end
     end
+    object Options1: TMenuItem
+      Caption = 'Options'
+      object Sounds1: TMenuItem
+        Action = acSoundsOnOff
+      end
+    end
     object Help1: TMenuItem
       Caption = 'Help'
       object ContactUs1: TMenuItem
         Action = acShowContactUsForm
+      end
+      object TermsofService1: TMenuItem
+        Action = acTermsAndConditions
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object AboutChipUPPoker1: TMenuItem
+        Caption = 'About ChipUP Poker...'
       end
     end
   end

@@ -31,6 +31,7 @@ object frmReconnect: TfrmReconnect
     Style.Font.Name = 'Tahoma'
     Style.Font.Style = []
     Style.LookAndFeel.SkinName = 'ChipUpPokerDarkStyle'
+    Style.TextColor = clWhite
     Style.TextStyle = [fsBold]
     Style.IsFontAssigned = True
     StyleDisabled.LookAndFeel.SkinName = 'ChipUpPokerDarkStyle'
@@ -52,7 +53,7 @@ object frmReconnect: TfrmReconnect
     Properties.AnimationPath = cxapPingPong
     Properties.AnimationSpeed = 4
     Properties.BarStyle = cxbsAnimation
-    Properties.BeginColor = 11980
+    Properties.BeginColor = 591228
     Properties.PeakValue = 100.000000000000000000
     Properties.ShowText = False
     Properties.ShowTextStyle = cxtsText

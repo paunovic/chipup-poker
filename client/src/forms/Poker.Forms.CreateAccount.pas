@@ -23,10 +23,10 @@ type
     lbsPassword: TcxLabel;
     lbsConfirmPassword: TcxLabel;
     lbsUsername: TcxLabel;
-    lbTOS: TcxLabel;
+    lbsTAC: TcxLabel;
     procedure acSignUpExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure lbTOSClick(Sender: TObject);
+    procedure lbsTACClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -172,9 +172,9 @@ begin
   acSignUp.Enabled := TRUE;
 end;
 
-procedure TfrmCreateAccount.lbTOSClick(Sender: TObject);
+procedure TfrmCreateAccount.lbsTACClick(Sender: TObject);
 begin
-  dmMain.OpenTOSLink;
+  dmMain.OpenTACLink;
 end;
 
 procedure TfrmCreateAccount.SetCloseCallback(const ACallback: TNotifyEvent);

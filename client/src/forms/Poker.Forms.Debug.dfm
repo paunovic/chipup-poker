@@ -1,7 +1,7 @@
 object frmDebug: TfrmDebug
   Left = 0
   Top = 0
-  Caption = 'Debug'
+  Caption = 'ChipUP Poker - Debug'
   ClientHeight = 379
   ClientWidth = 675
   Color = clWindow
@@ -87,91 +87,160 @@ object frmDebug: TfrmDebug
         LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Shape = dxbsLineCenteredHorz
       end
+      object dxBevel2: TdxBevel
+        Left = 191
+        Top = 6
+        Width = 19
+        Height = 65
+        LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Shape = dxbsLineCenteredHorz
+      end
       object lbsThreads: TcxLabel
-        Left = 45
+        Left = 46
         Top = 4
         Anchors = [akLeft, akBottom]
         Caption = 'Threads:'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = [fsBold]
+        Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         Transparent = True
       end
       object lbsMemoryUsage: TcxLabel
-        Left = 45
+        Left = 46
         Top = 20
         Anchors = [akLeft, akBottom]
         Caption = 'Memory usage:'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = [fsBold]
+        Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         Transparent = True
       end
       object lbsSocketState: TcxLabel
-        Left = 45
-        Top = 52
+        Left = 204
+        Top = 4
         Anchors = [akLeft, akBottom]
         Caption = 'Socket state:'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = [fsBold]
+        Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         Transparent = True
       end
       object lbsCalbackSets: TcxLabel
-        Left = 45
+        Left = 46
         Top = 36
         Anchors = [akLeft, akBottom]
         Caption = 'Callback sets:'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = [fsBold]
+        Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         Transparent = True
       end
       object lbvThreads: TcxLabel
-        Left = 125
+        Left = 135
         Top = 4
         Anchors = [akLeft, akBottom]
-        Caption = '00'
+        Caption = 'Unknown'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = []
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object lbvMemoryUsage: TcxLabel
-        Left = 125
+        Left = 135
         Top = 20
         Anchors = [akLeft, akBottom]
-        Caption = '000000kb'
+        Caption = 'Unknown'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = []
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object lbvCallbackSets: TcxLabel
-        Left = 125
+        Left = 135
         Top = 36
         Anchors = [akLeft, akBottom]
-        Caption = '0'
+        Caption = 'Unknown'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = []
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object lbvSocketState: TcxLabel
-        Left = 125
-        Top = 52
+        Left = 287
+        Top = 4
         Anchors = [akLeft, akBottom]
-        Caption = '0'
+        Caption = 'Unknown'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = []
         Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Style.TextColor = clWhite
         Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
         StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
         Transparent = True
       end
       object btSeatPos: TcxButton
-        Left = 203
+        Left = 571
         Top = 6
         Width = 93
         Height = 31
+        Anchors = [akRight, akBottom]
         Caption = 'SEAT POS'
         Colors.PressedText = clRed
         SpeedButtonOptions.GroupIndex = 2
@@ -188,10 +257,11 @@ object frmDebug: TfrmDebug
         OnClick = btSeatPosClick
       end
       object btSet: TcxButton
-        Left = 203
+        Left = 571
         Top = 39
         Width = 93
         Height = 31
+        Anchors = [akRight, akBottom]
         Caption = 'SET'
         Colors.PressedText = clRed
         SpeedButtonOptions.CanBeFocused = False
@@ -206,7 +276,7 @@ object frmDebug: TfrmDebug
         OnClick = btSetClick
       end
       object btPause: TcxButton
-        Left = 2
+        Left = 5
         Top = 5
         Width = 30
         Height = 29
@@ -302,6 +372,41 @@ object frmDebug: TfrmDebug
         Font.Name = 'Arial'
         Font.Style = [fsBold]
         ParentFont = False
+      end
+      object lbsLatency: TcxLabel
+        Left = 204
+        Top = 20
+        Anchors = [akLeft, akBottom]
+        Caption = 'Latency:'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = [fsBold]
+        Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
+        Transparent = True
+      end
+      object lbvLatency: TcxLabel
+        Left = 287
+        Top = 20
+        Anchors = [akLeft, akBottom]
+        Caption = 'Unknown'
+        ParentFont = False
+        Style.Font.Charset = DEFAULT_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -11
+        Style.Font.Name = 'Consolas'
+        Style.Font.Style = []
+        Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Style.TextColor = clWhite
+        Style.TextStyle = [fsBold]
+        Style.IsFontAssigned = True
+        StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+        Transparent = True
       end
     end
     object rvLog: TRichView
