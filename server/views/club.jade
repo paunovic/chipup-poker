@@ -11,10 +11,11 @@ block content
     tr
       td
         a(href="/secure/user?id="+club.owner)=users[club.owner].displayname
-    each member in club.members
-      tr
-        td
-          a(href="/secure/user?id="+member)=users[member].displayname
+    if club.members
+      each member in club.members
+        tr
+          td
+            a(href="/secure/user?id="+member)=users[member].displayname
   table(border=1)
     tr
       th name

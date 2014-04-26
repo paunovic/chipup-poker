@@ -42,6 +42,7 @@ Club.prototype.isOwner = function (user) {
 Club.prototype.handOver = function (gameObj,cb) {
 	if (activeUsers[this.obj.owner]) {
 		console.log('owner is online');
+		// FIXME, add hands
 		allStats.find({gameid:gameObj.id}).toArray(function (err,stats) {
 			assert.ifError(err);
 			var games = {};
