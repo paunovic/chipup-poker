@@ -3744,7 +3744,7 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		conn.log('leave idx %d',seatIdx);
 		if (seatIdx != undefined) {
 			this.members[seatIdx].disconnected = true;
-			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx),5 * 60 * 1000);
+			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,conn.userid),5 * 60 * 1000);
 			var fakeconn = {log:ClientSocket.prototype.log,userid:this.seats[seatIdx].userid, nick:this.seats[seatIdx].conn.nick};
 			this.seats[seatIdx].conn = fakeconn;
 			var events = [];
@@ -3754,9 +3754,14 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		} else finish.call(this);
 	}.bind(this));
 }
-Game.prototype.eject = function (seatIdx) {
+Game.prototype.eject = function (seatIdx,userid) {
 	this.Lock.writeLock(function (release) {
 		this.standUp(this.seats[seatIdx].conn,function (folded,events,offset) {
+			for (var x=0; x<this.reconnect.length; x++) {
+				if (compareObjectID(userid,this.reconnect[x])) {
+					this.reconnect.splice(x,1);
+				}
+			}
 			this.broadcastStatus(null,true,events);
 			release();
 		}.bind(this),seatIdx);
