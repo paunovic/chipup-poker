@@ -292,10 +292,15 @@
 				<ResourceId>RetrievingAvatar</ResourceId>
 			</RcItem>
 			<None Include="defines.inc"/>
-			<RcItem Include="resources\ssl_certs\ServerCert.pem">
+			<RcItem Include="resources\ssl_certs\DevServerCertificate.pem">
 				<ContainerId>ResourceItem</ContainerId>
 				<ResourceType>RCDATA</ResourceType>
-				<ResourceId>ServerCert</ResourceId>
+				<ResourceId>DevServerCertificate</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\ssl_certs\OfficialServerCertificate.pem">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>OfficialServerCertificate</ResourceId>
 			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

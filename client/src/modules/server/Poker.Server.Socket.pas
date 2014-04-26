@@ -163,7 +163,8 @@ begin
   FSocket.SslContext.SslSessionCacheModes := [sslSESS_CACHE_CLIENT];
   FSocket.SslContext.SslVersionMethod := sslV3;
   FSocket.SslContext.InitContext;
-  FSocket.SslContext.TrustCert(SSLCert_Server);
+  FSocket.SslContext.TrustCert(SSLCert_DevServer);
+  FSocket.SslContext.TrustCert(SSLCert_OfficialServer);
 end;
 
 destructor TServerSocket.Destroy;

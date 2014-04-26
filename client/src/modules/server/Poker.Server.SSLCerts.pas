@@ -11,7 +11,8 @@ type
   end;
 
 var
-  SSLCert_Server: TSSLCert;
+  SSLCert_OfficialServer: TSSLCert;
+  SSLCert_DevServer: TSSLCert;
 
 implementation
 
@@ -41,10 +42,14 @@ begin
 end;
 
 initialization
-  SSLCert_Server := TSSLCert.Create(nil);
-  SSLCert_Server.LoadFromResource('ServerCert');
+  SSLCert_OfficialServer := TSSLCert.Create(nil);
+  SSLCert_OfficialServer.LoadFromResource('OfficialServerCertificate');
+
+  SSLCert_DevServer := TSSLCert.Create(nil);
+  SSLCert_DevServer.LoadFromResource('DevServerCertificate');
 
 finalization
-  FreeAndNil(SSLCert_Server);
+  FreeAndNil(SSLCert_DevServer);
+  FreeAndNil(SSLCert_OfficialServer);
 
 end.

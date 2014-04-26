@@ -126,7 +126,6 @@ uses
   Poker.Protobufs.Objects.ContactMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.ContactMessage.pas',
   Poker.Server.SocketConnect in 'modules\server\Poker.Server.SocketConnect.pas';
 
-
 procedure FocusPokerApp;
 var
   window_handle: THandle;
