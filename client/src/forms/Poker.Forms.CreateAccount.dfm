@@ -145,7 +145,7 @@ object frmCreateAccount: TfrmCreateAccount
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object lbTOS: TcxLabel
+  object lbsTAC: TcxLabel
     Left = 90
     Top = 153
     Cursor = crHandPoint
@@ -163,7 +163,7 @@ object frmCreateAccount: TfrmCreateAccount
     StyleFocused.LookAndFeel.NativeStyle = True
     StyleHot.LookAndFeel.NativeStyle = True
     Transparent = True
-    OnClick = lbTOSClick
+    OnClick = lbsTACClick
   end
   object alCreateAccount: TActionList
     Left = 44

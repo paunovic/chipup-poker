@@ -20,6 +20,7 @@ type
     FLatency               : Integer;
     FServerTime            : UINT64;
     FTimeOffset            : UINT64;
+    FTimerIdInactivityPing : UINT_PTR;
     FTimerIdPing           : UINT_PTR;
     FTimerIdPingTimeout    : UINT_PTR;
 
@@ -34,11 +35,13 @@ type
     procedure SocketDataAvailable(Sender: TObject; Error: Word);
     procedure SocketError(Sender: TObject);
 
+    procedure FreeReceiveBuffer;
     function ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
 
     procedure ResetPingTimeoutTimer;
     procedure ResetPingTimer;
-    procedure KillPingTimer;
+    procedure ResetInactivityPingTimer;
+    procedure KillPingTimers;
     procedure KillPingTimeoutTimer;
 
   public
@@ -148,6 +151,7 @@ begin
   FPort := APort;
 
   FTimerIdPing := 0;
+  FTimerIdInactivityPing := 0;
   FTimerIdPingTimeout := 0;
 
   FSocket := TSslWSocket.Create(nil);
@@ -180,7 +184,8 @@ procedure TServerSocket.Connect;
 begin
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
-  FReceiveBufferSize := 0;
+  FreeReceiveBuffer;
+
   FSocket.Addr := FServer;
   FSocket.Port := IntToStr(FPort);
   FSocket.TimeoutConnect := 10000;
@@ -193,13 +198,13 @@ begin
   FSocket.OnSslVerifyPeer := SocketSslVerifyPeer;
   FSocket.OnSslHandshakeDone := SocketSslHandshakeDone;
 
-  ResetPingTimer;
+  KillPingTimers;
   KillPingTimeoutTimer;
 
   if Assigned(FSocketConnectThread) then
   begin
-    FSocketConnectThread.Shutdown;
-    FreeAndNil(FSocketConnectThread);
+    FSocketConnectThread.Terminate;
+    FSocketConnectThread := nil;
   end;
 
   FSocketConnectThread := TSocketConnectThread.Create(self);
@@ -220,13 +225,13 @@ end;
 
 procedure TServerSocket.Disconnect;
 begin
-  KillPingTimer;
+  KillPingTimers;
   KillPingTimeoutTimer;
 
   if Assigned(FSocketConnectThread) then
   begin
-    FSocketConnectThread.Shutdown;
-    FreeAndNil(FSocketConnectThread);
+    FSocketConnectThread.Terminate;
+    FSocketConnectThread := nil;
   end;
 
   if FSocket.State <> TSocketState.wsClosed then
@@ -236,6 +241,8 @@ begin
 {    while (Assigned(FSocket)) and (FSocket.State <> wsClosed) do // FIXME
       FSocket.ProcessMessages;}
   end;
+
+  FreeReceiveBuffer;
 end;
 
 procedure TServerSocket.SocketSessionConnected(Sender: TObject; ErrCode: Word);
@@ -258,15 +265,10 @@ begin
 
   FSocket.Flush;
 
-  if FReceiveBufferSize > 0 then
-  begin
-    FreeMem(FReceiveBuffer, FReceiveBufferSize);
-    FReceiveBufferSize := 0;
-  end;
-
+  FreeReceiveBuffer;
   FConnectCode := -1;
 
-  KillPingTimer;
+  KillPingTimers;
   KillPingTimeoutTimer;
 end;
 
@@ -275,6 +277,8 @@ begin
   if ErrCode = 0 then
   begin
     {$IFDEF DEBUG} DebugLn('SSL handshake completed successfully', ditSocket); {$ENDIF}
+    ResetInactivityPingTimer;
+    ResetPingTimer;
   end
   else
   begin
@@ -334,13 +338,13 @@ begin
 
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
+      ResetInactivityPingTimer;
       {$IFDEF DEBUG}
       if rpc_message.DataSize = 0 then
         DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), ditSocketInc)
       else
         DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
       {$ENDIF}
-
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
 
@@ -388,27 +392,25 @@ begin
   FTimerIdPing := SetTimer(0, FTimerIdPing, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, @TimerProc);
 end;
 
+procedure TServerSocket.ResetInactivityPingTimer;
+begin
+  FTimerIdInactivityPing := SetTimer(0, FTimerIdInactivityPing, Settings.Hardcoded.TCP_INACTIVITY_PING_INTERVAL * 1000, @TimerProc);
+end;
+
 procedure TServerSocket.ResetPingTimeoutTimer;
 begin
   FTimerIdPingTimeout := SetTimer(0, FTimerIdPingTimeout, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, @TimerProc);
 end;
 
-procedure TServerSocket.KillPingTimer;
+procedure TServerSocket.KillPingTimers;
 begin
-  if FTimerIdPing = 0 then
-    Exit;
-
-  KillTimer(0, FTimerIdPing);
-  FTimerIdPing := 0;
+  KillWindowsTimer(FTimerIdPing);
+  KillWindowsTimer(FTimerIdInactivityPing);
 end;
 
 procedure TServerSocket.KillPingTimeoutTimer;
 begin
-  if FTimerIdPingTimeout = 0 then
-    Exit;
-
-  KillTimer(0, FTimerIdPingTimeout);
-  FTimerIdPingTimeout := 0;
+  KillWindowsTimer(FTimerIdPingTimeout);
 end;
 
 function TServerSocket.IsConnected: Boolean;
@@ -483,11 +485,6 @@ begin
       FLatency := gtc - (ADataObject as TPB_PingReply).Uptime;
       FServerTime := (ADataObject as TPB_PingReply).Servertime + FLatency div 2;
       FTimeOffset := FServerTime - gtc;
-
-      {$IFDEF DEBUG}
-      DebugLn(Format('LATENCY: %dms', [FLatency]), ditApplication);
-      {$ENDIF}
-
       KillPingTimeoutTimer;
       ResetPingTimer;
     end;
@@ -618,6 +615,16 @@ begin
     SendProtobuf(scForgotPassword, protobuf);
   finally
     protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.FreeReceiveBuffer;
+begin
+  if FReceiveBufferSize > 0 then
+  begin
+    FreeMem(FReceiveBuffer, FReceiveBufferSize);
+    FReceiveBufferSize := 0;
+    FReceiveBuffer := nil;
   end;
 end;
 
@@ -935,17 +942,17 @@ end;
 
 procedure TServerSocket.ProcessTimer(const ATimerId: UINT_PTR);
 begin
-  if ATimerId = FTimerIdPing then
+  if (ATimerId = FTimerIdPing) or
+     (ATimerId = FTimerIdInactivityPing) then
   begin
     Ping;
-    KillPingTimer;
+    KillPingTimers;
     ResetPingTimeoutTimer;
   end;
 
   if ATimerId = FTimerIdPingTimeout then
   begin
     {$IFDEF DEBUG} DebugLn('Ping timeout', ditException); {$ENDIF}
-    KillPingTimeoutTimer;
     Disconnect;
   end;
 end;

@@ -33,7 +33,7 @@ type
     function CheckAuthed: Boolean;
 
     procedure OpenCashierLink;
-    procedure OpenTOSLink;
+    procedure OpenTACLink;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
@@ -136,9 +136,9 @@ begin
   ShellOpen(PChar(Settings.Hardcoded.URL.CASHIER));
 end;
 
-procedure TdmMain.OpenTOSLink;
+procedure TdmMain.OpenTACLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.URL.TOS));
+  ShellOpen(PChar(Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
 end;
 
 procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);

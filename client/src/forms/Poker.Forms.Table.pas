@@ -275,7 +275,7 @@ uses
   cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, Poker.Server.MessageContainer, Poker.Server.Settings,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
-  Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
+  Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Avatars, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData;
 
@@ -352,7 +352,7 @@ begin
   rvChat.ClearAll;
   rvChat.Format;
 
-  Caption := Format('%s - %s (%d/%d %s)', [FTable.Club.Name, FTable.Game.Name, Round(FTable.Game.SmallBlind / 100), Round(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull]);
+  Caption := Format('%s (%d/%d %s) - %s', [FTable.Game.Name, Round(FTable.Game.SmallBlind / 100), Round(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
 end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
@@ -1199,7 +1199,7 @@ begin
 
                 if seat_info.Chips + seat_bet > FTableStatus.MinimumBet then
                 begin
-                  acRaise.Caption := Format('RAISE (%s)', [FormatFloat('0.##', FRaiseValue / 100)]);
+                  acRaise.Tag := 0;
                   acRaise.Enabled := TRUE;
                 end;
 
@@ -1211,8 +1211,8 @@ begin
               end
               else
               begin
+                acRaise.Tag := 1;
                 acCheck.Enabled := TRUE;
-                acRaise.Caption := Format('BET (%s)', [FormatFloat('0.##', FRaiseValue / 100)]);
                 acRaise.Enabled := TRUE;
 
                 if cbFoldToAnyBet.Checked then
@@ -1240,6 +1240,7 @@ begin
                   SetForegroundWindow(Handle);
                   SetFocus;
                   FForceFocused := TRUE;
+                  DefocusControls;
                   TablePlaySound(Sounds.SOUND_TIMEBAR);
                 end;
               end;
@@ -1346,6 +1347,11 @@ begin
 
     seRaiseAmount.Properties.MaxValue := FRaiseValue / 100;
     SetRaiseSliderValue(FRaiseValue);
+
+    case acRaise.Tag of
+      0: acRaise.Caption := Format('RAISE (%s)', [FormatFloat('0.##', FRaiseValue / 100)]);
+      1: acRaise.Caption := Format('BET (%s)', [FormatFloat('0.##', FRaiseValue / 100)]);
+    end;
   end
   else
     for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
@@ -1781,7 +1787,7 @@ begin
   end;
 
   {$IFDEF DEBUG}
-  DebugLn('EVENT: ' + event, ditApplication);
+  DebugLn('Event: ' + event, ditApplication);
   {$ENDIF}
 end;
 
@@ -2039,7 +2045,8 @@ end;
 
 procedure TfrmTable.TablePlaySound(const ASound: String);
 begin
-  if GetForegroundWindow = Handle then
+  if (GetForegroundWindow = Handle) and
+     (Settings.Sounds) then
     Sounds.Play(ASound);
 end;
 

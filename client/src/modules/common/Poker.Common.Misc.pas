@@ -37,6 +37,7 @@ function SecondsToTimeStr(ASeconds: DWORD): String;
 function SecondsToTime(ASeconds: DWORD): TTime;
 function MongoIdToDateTime(const AMongoId: TBytes): TDateTime;
 procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
+function KillWindowsTimer(var ATimerId: UINT_PTR): Boolean;
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -536,6 +537,16 @@ begin
 
   SetLength(AAppendTo, a1len + a2len);
   Move(AArray[0], AAppendTo[a1len], a2len * SizeOf(UINT32));
+end;
+
+function KillWindowsTimer(var ATimerId: UINT_PTR): Boolean;
+begin
+  if ATimerId = 0 then
+    Exit(FALSE);
+
+  KillTimer(0, ATimerId);
+  ATimerId := 0;
+  Exit(TRUE);
 end;
 
 initialization

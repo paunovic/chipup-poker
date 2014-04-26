@@ -15,6 +15,7 @@ type
       JSON_REMEMBER_PASSWORD = 'remember_password';
       JSON_DEVELOPER_MODE    = 'devmode';
       JSON_SERVER_INDEX      = 'serverindex';
+      JSON_SOUNDS            = 'sounds';
 
     function GetLogin: String;
     procedure SetLogin(const AValue: String);
@@ -28,6 +29,8 @@ type
     procedure SetDeveloperMode(const AValue: Boolean);
     function GetServerIndex: Integer;
     procedure SetServerIndex(const AValue: Integer);
+    function GetSounds: Boolean;
+    procedure SetSounds(const AValue: Boolean);
 
     var
       FJSON        : ISuperObject;
@@ -53,6 +56,7 @@ type
     property RememberPassword: Boolean read GetRememberPassword write SetRememberPassword;
     property DeveloperMode   : Boolean read GetDeveloperMode write SetDeveloperMode;
     property ServerIndex     : Integer read GetServerIndex write SetServerIndex;
+    property Sounds          : Boolean read GetSounds write SetSounds;
 
     property DomainURL: String read FDomainURL write FDomainURL;
   end;
@@ -158,6 +162,13 @@ begin
   result := FJSON.I[JSON_SERVER_INDEX];
 end;
 
+function TSettings.GetSounds: Boolean;
+begin
+  if not Assigned(FJSON.O[JSON_SOUNDS]) then
+    SetSounds(TRUE);
+  result := FJSON.B[JSON_SOUNDS];
+end;
+
 function TSettings.GetDeveloperMode: Boolean;
 begin
   result := FJSON.B[JSON_DEVELOPER_MODE];
@@ -186,6 +197,11 @@ end;
 procedure TSettings.SetServerIndex(const AValue: Integer);
 begin
   FJSON.I[JSON_SERVER_INDEX] := AValue;
+end;
+
+procedure TSettings.SetSounds(const AValue: Boolean);
+begin
+  FJSON.B[JSON_SOUNDS] := AValue;
 end;
 
 procedure TSettings.SetDeveloperMode(const AValue: Boolean);

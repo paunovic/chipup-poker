@@ -23,9 +23,10 @@ type
         TCP_DEV_SERVER_ADDRESS: String;
         TCP_SERVER_PORT: Word;
         TCP_PING_INTERVAL: Word;
+        TCP_INACTIVITY_PING_INTERVAL: Word;
         TCP_PING_TIMEOUT: Word;
         URL: record
-          TOS: String;
+          TERMS_AND_CONDITIONS: String;
           CASHIER: String;
           GET_AVATAR: String;
           UPLOAD_AVATAR: String;
@@ -52,12 +53,13 @@ type
         TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
         TCP_DEV_SERVER_ADDRESS: 'dev-server.chipuppoker.com';
         TCP_SERVER_PORT: 12346;
-        TCP_PING_INTERVAL: 60; // in seconds
+        TCP_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
+        TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity
         TCP_PING_TIMEOUT: 15; // in seconds
 
         // urls
         URL : (
-          TOS: URL_DOMAIN + '/tos.html';
+          TERMS_AND_CONDITIONS: URL_DOMAIN + '/termsandconditions.html';
           CASHIER: URL_DOMAIN + '/cashier.html';
 
           GET_AVATAR: '/getavatar?id=%s';

@@ -44,6 +44,9 @@ type
     meSeatPos: TcxMemo;
     btPause: TcxButton;
     dxBevel1: TdxBevel;
+    lbsLatency: TcxLabel;
+    lbvLatency: TcxLabel;
+    dxBevel2: TdxBevel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -208,27 +211,57 @@ end;
 
 procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
 var
-  tmp: String;
+  server_socket_connected: Boolean;
+  server_socket_state: String;
+  server_socket_state_color: TColor;
 begin
   lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
-  lbvMemoryUsage.Caption := Format('%dkb', [GetWorkingSetSize div 1024]);
+  lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
   lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
 
+  server_socket_connected := FALSE;
+  server_socket_state_color := clWhite;
   case ServerSocket.Socket.State of
-    wsInvalidState: tmp := 'InvalidState';
-    wsOpened: tmp := 'Opened';
-    wsBound: tmp := 'Bound';
-    wsConnecting: tmp := 'Connecting';
-    wsSocksConnected: tmp := 'SocksConnected';
-    wsConnected: tmp := 'Connected';
-    wsAccepting: tmp := 'Accepting';
-    wsListening: tmp := 'Listening';
-    wsClosed: tmp := 'Closed';
+    wsInvalidState: server_socket_state := 'InvalidState';
+    wsOpened: server_socket_state := 'Opened';
+    wsBound: server_socket_state := 'Bound';
+    wsConnecting: server_socket_state := 'Connecting';
+    wsSocksConnected: server_socket_state := 'SocksConnected';
+    wsConnected: begin
+      server_socket_connected := TRUE;
+      server_socket_state := 'Connected';
+      server_socket_state_color := clLime;
+    end;
+    wsAccepting: server_socket_state := 'Accepting';
+    wsListening: server_socket_state := 'Listening';
+    wsClosed: begin
+      server_socket_state := 'Closed';
+      server_socket_state_color := clRed;
+    end;
   else
-    tmp := 'Unknown';
+    server_socket_state := 'Unknown';
   end;
 
-  lbvSocketState.Caption := Format('%s', [tmp]);
+  lbvSocketState.Caption := server_socket_state;
+  lbvSocketState.Style.TextColor := server_socket_state_color;
+
+  if (server_socket_connected) and
+     (ServerSocket.Latency > 0) then
+  begin
+    lbvLatency.Caption := Format('%dms', [ServerSocket.Latency]);
+    if ServerSocket.Latency < 100 then
+      lbvLatency.Style.TextColor := clLime
+    else
+      if ServerSocket.Latency < 500 then
+        lbvLatency.Style.TextColor := clYellow
+      else
+        lbvLatency.Style.TextColor := clRed;
+  end
+  else
+  begin
+    lbvLatency.Caption := 'Unknown';
+    lbvLatency.Style.TextColor := clWhite;
+  end;
 end;
 
 procedure TfrmDebug.CreateParams(var AParams: TCreateParams);

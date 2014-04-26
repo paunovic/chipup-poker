@@ -365,13 +365,15 @@ var
   close_table_act: Boolean;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
-    Exit;
-
-  recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
-  if recIndex = -1 then
     SetLength(FSelectedGameId, 0)
   else
-    FSelectedGameId := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+  begin
+    recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
+    if recIndex = -1 then
+      SetLength(FSelectedGameId, 0)
+    else
+      FSelectedGameId := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+  end;
 
   close_table_act := (Length(FSelectedGameId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and
                      (club.Games.FindGame(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
@@ -387,13 +389,15 @@ var
   club          : TClubInfo;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
-    Exit;
-
-  recIndex := gridPlayersListTable.DataController.GetFocusedRecordIndex;
-  if recIndex = -1 then
     SetLength(FSelectedPlayerId, 0)
   else
-    FSelectedPlayerId := gridPlayersListTable.DataController.GetValue(recIndex, gridPlayersListId.Index);
+  begin
+    recIndex := gridPlayersListTable.DataController.GetFocusedRecordIndex;
+    if recIndex = -1 then
+      SetLength(FSelectedPlayerId, 0)
+    else
+      FSelectedPlayerId := gridPlayersListTable.DataController.GetValue(recIndex, gridPlayersListId.Index);
+  end;
 
   action_enabled := (Length(FSelectedPlayerId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
   acRemovePlayer.Enabled := action_enabled;
@@ -523,13 +527,15 @@ var
   club: TClubInfo;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
-    Exit;
-
-  recIndex := gridTablesTable.DataController.GetFocusedRecordIndex;
-  if recIndex = -1 then
     SetLength(FSelectedStatsTableId, 0)
   else
-    FSelectedStatsTableId := gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index);
+  begin
+    recIndex := gridTablesTable.DataController.GetFocusedRecordIndex;
+    if recIndex = -1 then
+      SetLength(FSelectedStatsTableId, 0)
+    else
+      FSelectedStatsTableId := gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index);
+  end;
 
   UpdatePlayersStatsList;
 end;
@@ -647,8 +653,8 @@ begin
 
         recidx := c.AppendRecord;
         c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId);
+        c.SetValue(recidx, gridTablesHands.Index, tablestats.Hands);
         c.SetValue(recidx, gridTablesName.Index, tmp);
-//        c.SetValue(recidx, gridTablesHands.Index, tablestats.HandCount); // EXPOSE HANDS HERE FIXME
 
         if Assigned(game) then
         begin

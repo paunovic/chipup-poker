@@ -49,7 +49,6 @@ object frmContactUs: TfrmContactUs
     Properties.ReadOnly = False
     TabOrder = 3
     Text = 'Support'
-    ExplicitWidth = 369
     Width = 336
   end
   object lbsType: TcxLabel

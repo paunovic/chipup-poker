@@ -55,8 +55,7 @@ implementation
 uses
   System.Classes, PNGImage,
   {$IFDEF DEBUG} {$ENDIF}
-  Poker.Objects.GameInfo,
-  Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
+  Poker.Objects.GameInfo, Poker.Table.Tables, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
 
 
 constructor TPlayerInfo.Create;
@@ -81,9 +80,11 @@ end;
 
 procedure TPlayerInfo.LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 var
-  club  : TClubInfo;
+  club: TClubInfo;
   pbgame: TPB_Game;
-  C1    : Integer;
+  C1: Integer;
+  tables_ids: TList<TBytes>;
+  tables_close: TObjectList<TTable>;
 begin
   FId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
@@ -92,13 +93,34 @@ begin
   FAvatarId := AStatusReply.Self.Avatar;
   FBalance := AStatusReply.Self.Chips;
 
-  FClubs.Clear;
-  for C1 := 0 to AStatusReply.Clubs.Count - 1 do
-    FClubs.AddClub(AStatusReply.Clubs[C1]);
+  tables_ids := TList<TBytes>.Create;
+  try
+    for C1 := 0 to Tables.Count - 1 do
+      tables_ids.Add(Tables.Items[C1].Game.MongoId);
 
-  for pbgame in AStatusReply.Games do
-    if FClubs.FindClub(pbgame.ClubSeq, club) then
-      club.Games.AddGame(pbgame);
+    FClubs.Clear;
+    for C1 := 0 to AStatusReply.Clubs.Count - 1 do
+      FClubs.AddClub(AStatusReply.Clubs[C1]);
+
+    for pbgame in AStatusReply.Games do
+      if FClubs.FindClub(pbgame.ClubSeq, club) then
+        club.Games.AddGame(pbgame);
+
+
+    tables_close := TObjectList<TTable>.Create(FALSE);
+    try
+      for C1 := 0 to tables_ids.Count - 1 do
+        if not Tables.Items[C1].ReassignObjects(tables_ids[C1]) then
+          tables_close.Add(Tables.Items[C1]);
+
+      for C1 := 0 to tables_close.Count - 1 do
+        Tables.Remove(tables_close[C1]);
+    finally
+      tables_close.Free;
+    end;
+  finally
+    tables_ids.Free;
+  end;
 end;
 
 
