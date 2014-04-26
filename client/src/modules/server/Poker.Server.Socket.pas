@@ -184,6 +184,9 @@ procedure TServerSocket.Connect;
 begin
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
+  if Assigned(FSocketConnectThread) then
+    Exit;
+
   FreeReceiveBuffer;
 
   FSocket.Addr := FServer;
@@ -200,12 +203,6 @@ begin
 
   KillPingTimers;
   KillPingTimeoutTimer;
-
-  if Assigned(FSocketConnectThread) then
-  begin
-    FSocketConnectThread.Terminate;
-    FSocketConnectThread := nil;
-  end;
 
   FSocketConnectThread := TSocketConnectThread.Create(self);
   FSocketConnectThread.OnTerminate := ConnectThreadTerminated;
@@ -230,6 +227,8 @@ begin
 
   if Assigned(FSocketConnectThread) then
   begin
+    FSocketConnectThread.OnConnectFailed := nil;
+    FSocketConnectThread.OnTerminate := nil;
     FSocketConnectThread.Terminate;
     FSocketConnectThread := nil;
   end;
@@ -237,6 +236,7 @@ begin
   if FSocket.State <> TSocketState.wsClosed then
   begin
     {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
+    FSocket.Flush;
     FSocket.CloseDelayed;
 {    while (Assigned(FSocket)) and (FSocket.State <> wsClosed) do // FIXME
       FSocket.ProcessMessages;}
@@ -263,7 +263,8 @@ procedure TServerSocket.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
   {$IFDEF DEBUG} DebugLn(Format('Session closed [%d]', [ErrCode]), ditException); {$ENDIF}
 
-  FSocket.Flush;
+  if FSocket.State = wsConnected then
+    Disconnect;
 
   FreeReceiveBuffer;
   FConnectCode := -1;
@@ -363,7 +364,10 @@ begin
     wsInvalidState: ;
     wsOpened: ;
     wsBound: ;
-    wsConnecting: ;
+    wsConnecting: begin
+      if not Assigned(FSocketConnectThread) then
+        Disconnect;
+    end;
     wsSocksConnected: ;
     wsConnected: ;
     wsAccepting: ;
