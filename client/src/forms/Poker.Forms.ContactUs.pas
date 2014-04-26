@@ -82,8 +82,7 @@ end;
 
 procedure TfrmContactUs.CSRContactUsOk(const AMethodId: Integer; const AObject: TObject);
 begin
-  MessageDlg('Message successfully sent. If needed, we will contact you back via E-Mail address associated to this account.',
-     mtInformation, [mbOK], 0);
+  MessageDlg('Ticket successfully created. Please check your inbox for more details.',  mtInformation, [mbOK], 0);
   Close;
 end;
 

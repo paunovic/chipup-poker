@@ -77,7 +77,6 @@ type
     Help1: TMenuItem;
     ContactUs1: TMenuItem;
     acShowContactUsForm: TAction;
-    Disconnect1: TMenuItem;
     TermsofService1: TMenuItem;
     acTermsAndConditions: TAction;
     acShowAboutForm: TAction;
@@ -117,7 +116,6 @@ type
     procedure pcTabsChange(Sender: TObject);
     procedure tiBringToFrontTimer(Sender: TObject);
     procedure acShowContactUsFormExecute(Sender: TObject);
-    procedure Disconnect1Click(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
   private
@@ -190,11 +188,6 @@ uses
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Forms.ContactUs, Poker.Forms.Reconnect;
 
-
-procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
-begin
-  ServerSocket.Disconnect;
-end;
 
 procedure TfrmChipUpMain.DoCreate;
 begin
