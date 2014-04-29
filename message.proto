@@ -487,9 +487,10 @@ message TablePlayerStats {
 
 message ContactMessage {
 	enum ContactReason {
-		cmSupport = 0;
-		cmBugReport = 1;
-		cmOther = 2;
+		cmQuestions = 0;
+		cmSuggestions = 1;
+		cmBugReport = 2;
+		cmOther = 3;
 	}
 	required ContactReason reason = 1;
 	required string message = 2;
