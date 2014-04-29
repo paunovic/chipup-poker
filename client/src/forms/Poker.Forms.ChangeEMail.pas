@@ -54,7 +54,7 @@ begin
                            'Confirmation link will expire in %d hours.', [Round(ServerSettings.EmailConfirmationExpiration / 3600)]);
 
   edCurrentMail.Text := dmMain.SelfInfo.EMail;
-  edNewMail.Properties.MaxLength := ServerSettings.StringLengths.EMail;
+  edNewMail.Properties.MaxLength := ServerSettings.MaxStringLengths.EMail;
 end;
 
 procedure TfrmChangeEMail.FormDestroy(Sender: TObject);

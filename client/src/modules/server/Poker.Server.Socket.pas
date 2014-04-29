@@ -63,7 +63,6 @@ type
     procedure Logout;
     procedure CreateAccount(const AUsername, APassword, AEMail: String);
     procedure ForgotPassword(const AEMail: String);
-    procedure Status;
     procedure CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
     procedure JoinClub(const AId: Int64; const ACode: String);
     procedure LeaveClub(const AId: Int64);
@@ -97,6 +96,8 @@ type
     procedure ShowCards(const AGameId: TBytes);
     procedure QueryTableStats(const ATables: array of TBytes);
     procedure ContactUs(const AReason: TContactReason; const AMessage: String);
+
+    procedure CrashServer(const ATestNo: Integer);
 
     property Server: String read FServer;
     property Socket: TSslWSocket read FSocket;
@@ -633,11 +634,6 @@ begin
   end;
 end;
 
-procedure TServerSocket.Status;
-begin
-  SendProtobuf(scStatus, nil);
-end;
-
 procedure TServerSocket.CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
 var
   protobuf: TPB_Club;
@@ -840,7 +836,7 @@ begin
     protobuf.BuyinMin := ABuyinMin;
     protobuf.BuyinMax := ABuyinMax;
     protobuf.Seats := ASeats;
-    SendProtobuf(scEditGame, protobuf);
+//    SendProtobuf(scEditGame, protobuf);
   finally
     protobuf.Free;
   end;
@@ -1104,5 +1100,133 @@ begin
   end;
 end;
 
+procedure TServerSocket.CrashServer(const ATestNo: Integer);
+const
+  CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!@#$%^&*()_+-=][{}\";:/.,<>?';
+type
+  TProtoClass = TPB_ContactMessage;
+  TMalformedProtoClass = TPB_ForgotPasswordParams;
+const
+  COMMAND = scContactUs;
+var
+  protobuf: TProtoClass;
+  malformedproto: TMalformedProtoClass;
+  tmp: String;
+  C1: Integer;
+  b: TBytes;
+  bb: TArray<TBytes>;
+begin
+  case ATestNo of
+    1: begin
+      SendProtobuf(COMMAND, nil);
+    end;
+    2: begin
+      protobuf := TProtoClass.Create;
+      try
+        SendProtobuf(COMMAND, protobuf);
+      finally
+        protobuf.Free;
+      end;
+    end;
+    3: begin
+      protobuf := TProtoClass.Create;
+      try
+        SetLength(b, 0);
+        SetLength(bb, 0);
+        protobuf.Message := '';
+        SendProtobuf(COMMAND, protobuf);
+      finally
+        protobuf.Free;
+      end;
+    end;
+    4: begin
+      protobuf := TProtoClass.Create;
+      try
+        tmp := '';
+        SetLength(b, 4000);
+        for C1 := Low(b) to High(b) do
+          b[C1] := Random(256);
+        for C1 := 1 to 100000 do
+          tmp := tmp + CHARS[Random(Length(CHARS)) + 1];
+          SetLength(bb, 1);
+          bb[0] := b;
+        protobuf.Message := tmp;
+        SendProtobuf(COMMAND, protobuf);
+      finally
+        protobuf.Free;
+      end;
+    end;
+    5: begin
+      malformedproto := TMalformedProtoClass.Create;
+      try
+        tmp := '';
+        for C1 := 1 to 1 do
+          tmp := tmp + 'a';
+        malformedproto.Email := 'asdasd';
+        SendProtobuf(COMMAND, malformedproto);
+      finally
+        malformedproto.Free;
+      end;
+    end;
+  end;
+end;
+
+
 
 end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+scLogout
+scLogin
+scRegister
+scForgotPassword
+scCreateClub
+scJoinClub
+scKickPlayer
+scLeaveClub
+scGiveClubOwnership
+scChangeClubDetails
+scDeleteClub
+scTransferChips
+scChangeEMail
+scChangePassword
+scSetAvatar
+scCreateGame
+scCloseGame
+seChat
+scTableJoin
+scTableLeave
+scTableSit
+scTableStandUp
+scSuspendPlayer
+scGetPlayers
+scFold
+scTableAddOn
+scTablePlayNow
+scTableSitOutNextHand
+scTableSitOutNextBB
+scPutChips
+scResendVerificationMail
+scShowLosingCards
+
+    scPing = 525,
+    scContactUs = 538
+

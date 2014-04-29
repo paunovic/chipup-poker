@@ -5,7 +5,7 @@ interface
 {$I defines.inc}
 
 const
-  URL_DOMAIN = 'http://chipuppoker.com';
+  URL_DOMAIN = 'http://www.chipuppoker.com';
   DEV_URL_DOMAIN = 'http://dev-server.chipuppoker.com';
 
 type

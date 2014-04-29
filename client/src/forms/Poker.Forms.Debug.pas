@@ -59,6 +59,11 @@ type
     btPause: TcxButton;
     lbsLatency: TcxLabel;
     lbvLatency: TcxLabel;
+    Button3: TButton;
+    Button4: TButton;
+    Button2: TButton;
+    Button1: TButton;
+    Button5: TButton;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -66,6 +71,7 @@ type
     procedure tiAppInfoRefreshTimer(Sender: TObject);
     procedure btSeatPosClick(Sender: TObject);
     procedure btSetClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
@@ -417,6 +423,11 @@ begin
     evaluator.Free;
   end;
   {$ENDIF}
+end;
+
+procedure TfrmDebug.Button1Click(Sender: TObject);
+begin
+  ServerSocket.CrashServer((Sender as TButton).Tag);
 end;
 
 { TMemoLog }

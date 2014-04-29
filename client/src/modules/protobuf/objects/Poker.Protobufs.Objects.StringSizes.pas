@@ -18,6 +18,7 @@ type
       FN_INVCODE = 4;
       FN_USERNAME = 5;
       FN_GAMENAME = 6;
+      FN_CONTACTMESSAGE = 7;
 
     var
       FEmail: Integer;
@@ -26,6 +27,7 @@ type
       FInvcode: Integer;
       FUsername: Integer;
       FGamename: Integer;
+      FContactMessage: Integer;
 
     procedure SetEmail(const AValue: Integer);
     procedure SetPassword(const AValue: Integer);
@@ -33,6 +35,7 @@ type
     procedure SetInvcode(const AValue: Integer);
     procedure SetUsername(const AValue: Integer);
     procedure SetGamename(const AValue: Integer);
+    procedure SetContactMessage(const AValue: Integer);
 
   public
     destructor Destroy; override;
@@ -44,6 +47,7 @@ type
     property Invcode: Integer read FInvcode write SetInvcode;
     property Username: Integer read FUsername write SetUsername;
     property Gamename: Integer read FGamename write SetGamename;
+    property ContactMessage: Integer read FContactMessage write SetContactMessage;
   end;
 
 implementation
@@ -90,6 +94,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGamename := AProtobufReader.readInt32;
       end;
+      FN_CONTACTMESSAGE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FContactMessage := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -130,6 +138,12 @@ procedure TPB_StringSizes.SetGamename(const AValue: Integer);
 begin
   FGamename := AValue;
   ProtobufOutput.writeInt32(FN_GAMENAME, AValue);
+end;
+
+procedure TPB_StringSizes.SetContactMessage(const AValue: Integer);
+begin
+  FContactMessage := AValue;
+  ProtobufOutput.writeInt32(FN_CONTACTMESSAGE, AValue);
 end;
 
 end.

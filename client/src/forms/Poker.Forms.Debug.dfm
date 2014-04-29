@@ -50,7 +50,6 @@ object frmDebug: TfrmDebug
     StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     TabOrder = 0
     Visible = False
-    ExplicitTop = 4
     Height = 303
     Width = 675
   end
@@ -65,7 +64,6 @@ object frmDebug: TfrmDebug
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
-    ExplicitTop = 8
   end
   object paInfo: TPanel
     Left = 0
@@ -80,6 +78,8 @@ object frmDebug: TfrmDebug
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 2
+    ExplicitLeft = 24
+    ExplicitTop = 299
     DesignSize = (
       675
       76)
@@ -411,6 +411,56 @@ object frmDebug: TfrmDebug
       StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
+    end
+    object Button3: TButton
+      Tag = 4
+      Left = 412
+      Top = 43
+      Width = 68
+      Height = 25
+      Caption = 'Test 4'
+      TabOrder = 13
+      OnClick = Button1Click
+    end
+    object Button4: TButton
+      Tag = 3
+      Left = 344
+      Top = 43
+      Width = 68
+      Height = 25
+      Caption = 'Test 3'
+      TabOrder = 14
+      OnClick = Button1Click
+    end
+    object Button2: TButton
+      Tag = 2
+      Left = 276
+      Top = 43
+      Width = 68
+      Height = 25
+      Caption = 'Test 2'
+      TabOrder = 15
+      OnClick = Button1Click
+    end
+    object Button1: TButton
+      Tag = 1
+      Left = 208
+      Top = 43
+      Width = 68
+      Height = 25
+      Caption = 'Test 1'
+      TabOrder = 16
+      OnClick = Button1Click
+    end
+    object Button5: TButton
+      Tag = 5
+      Left = 480
+      Top = 43
+      Width = 68
+      Height = 25
+      Caption = 'Test 5'
+      TabOrder = 17
+      OnClick = Button1Click
     end
   end
   object alDebug: TActionList

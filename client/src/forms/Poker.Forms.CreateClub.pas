@@ -49,8 +49,8 @@ begin
                       TServerMessageCallback.Create(srCreateClubReply, CSRCreateClub)
                   ]);
 
-  edClubName.Properties.MaxLength := ServerSettings.StringLengths.ClubName;
-  edClubCode.Properties.MaxLength := ServerSettings.StringLengths.ClubInvCode;
+  edClubName.Properties.MaxLength := ServerSettings.MaxStringLengths.ClubName;
+  edClubCode.Properties.MaxLength := ServerSettings.MaxStringLengths.ClubInvCode;
 end;
 
 procedure TfrmCreateClub.FormDestroy(Sender: TObject);

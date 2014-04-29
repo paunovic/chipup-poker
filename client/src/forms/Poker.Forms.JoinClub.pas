@@ -58,7 +58,7 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(srJoinClubReply, CSRJoinClub)
                   ]);
-  edClubCode.Properties.MaxLength := ServerSettings.StringLengths.ClubInvCode;
+  edClubCode.Properties.MaxLength := ServerSettings.MaxStringLengths.ClubInvCode;
 end;
 
 procedure TfrmJoinClub.FormDestroy(Sender: TObject);

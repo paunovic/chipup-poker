@@ -58,10 +58,10 @@ begin
                       TServerMessageCallback.Create(srRegisterReply, CSRRegisterReply)
                   ]);
 
-  edEMail.Properties.MaxLength := ServerSettings.StringLengths.EMail;
-  edPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
-  edConfirmPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
-  edUsername.Properties.MaxLength := ServerSettings.StringLengths.Username;
+  edEMail.Properties.MaxLength := ServerSettings.MaxStringLengths.EMail;
+  edPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
+  edConfirmPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
+  edUsername.Properties.MaxLength := ServerSettings.MaxStringLengths.Username;
 
   edPassword.Properties.PasswordChar := Chr($25CF);
   edConfirmPassword.Properties.PasswordChar := Chr($25CF);

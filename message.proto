@@ -4,6 +4,94 @@ option optimize_for = LITE_RUNTIME;
 
 import "common.proto";
 
+enum ServerCodes {
+	srNotImplemented = 0;
+	srHello = 1;
+	srLoginReply = 2;
+	srRegisterReply = 3;
+	srCreateClubReply = 4;
+	srJoinClubReply = 5;
+	srLeaveClubReply = 6;
+	srChangeClubDetailsReply = 7;
+	srLogout = 8;
+	srListClubs = 9;
+	srStatus = 10;
+	srKickPlayerReply = 11;
+	srSetAvatarReply = 12;
+	srChangeMailReply = 13;
+	srGetPlayers = 14;
+	srTableSitNoChips = 15;
+    srOwnershipGiveAwayNotOwner = 16;
+    srOwnershipGiveAwayInvalidPlayerId = 17;
+    srOwnershipGiveAwayInvalidClubId = 18;
+    srOwnershipGiveAwayOk = 19;
+    srClubDisbandOk = 20;
+    srTransferChipsOk = 21;
+	srTransferChipsInvalidAmount = 22;
+    srChangePasswordOk = 23;
+    srCreateGameOk = 24;
+    srDeleteGameOk = 25;
+    srEditGameOk = 26;
+    srTableSitOk = 27;
+    srTableSitSeatTaken = 28;
+    srTableStandUpOk = 29;
+	srPong = 30;
+    srSuspendPlayerOk = 31;
+    srReinstatePlayerOk = 32;
+	srTableAddonOk = 33;
+	srTableAddonOverLimit = 34;
+	srTableStatsReply = 35;
+	srContactUsOk = 36;
+	
+    seChat = 50;
+    seSecondaryLoginDetected = 51;
+    seAccountConfirmed = 52;
+    seClubChange = 53;
+    seClubDeleted = 54;
+	seGameChange = 55;
+	seGameCreate = 56;
+	seGameDelete = 57;
+	seTableStatus = 58;
+	seTransferChips = 59;
+
+    scLogin = 70;
+    scStatus = 71;
+    scRegister = 72;
+    scForgotPassword = 73;
+    scLogout = 74;
+    scCreateClub = 75;
+    scJoinClub = 76;
+    scKickPlayer = 77;
+    scLeaveClub = 78;
+    scGiveClubOwnership = 79;
+    scChangeClubDetails = 80;
+    scDeleteClub = 81;
+    scTransferChips = 82;
+    scChangeEmail = 83;
+    scChangePassword = 84;
+    scSetAvatar = 85;
+    scCreateGame = 86;
+    scCloseGame = 87;
+    scTableJoin = 88;
+    scTableLeave = 89;
+    scTableSit = 90;
+    scTableStandUp = 91;
+	scPing = 92;
+    scSuspendPlayer = 93;
+    scGetPlayers = 94;
+	scFold = 95;
+	scPutChips = 96;
+	scTableAddOn = 97;
+	scTablePlayNow = 98;
+	scTableSitOutNextHand = 99;
+	scTableSitOutNextBB = 100;
+	scResendVerificationMail = 101;
+	scShowLosingCards = 102;
+	seUserChange = 103;
+	scQueryTableStats = 104;
+	scContactUs = 105;
+}
+
 message StringSizes {
 	required int32 email = 1;
 	required int32 password = 2;
@@ -171,102 +259,6 @@ message ChatMessage {
 	optional int64 timestamp = 4;
 }
 
-enum ServerCodes {
-	srNotImplemented = 0;
-	srHello = 1;
-	srLoginReply = 2;
-	srRegisterReply = 3;
-	srCreateClubReply = 4;
-	srJoinClubReply = 5;
-	srLeaveClubReply = 6;
-	srChangeClubDetailsReply = 7;
-	srLogout = 8;
-	srListClubs = 9;
-	srStatus = 10;
-	srKickPlayerReply = 11;
-	srSetAvatarReply = 12;
-	srChangeMailReply = 13;
-	srGetPlayers = 14;
-	srTableSitNoChips = 15;
-
-    srOwnershipGiveAwayNotOwner = 24;
-    srOwnershipGiveAwayInvalidPlayerId = 25;
-    srOwnershipGiveAwayInvalidClubId = 26;
-    srOwnershipGiveAwayOk = 27;
-
-    srClubDisbandOk = 30;
-	
-    srTransferChipsOk = 31;
-	srTransferChipsInvalidAmount = 32;
-
-    srChangePasswordOk = 38;
-
-    srCreateGameOk = 42;
-    srDeleteGameOk = 43;
-    srEditGameOk = 44;
-    srTableSitOk = 45;
-    srTableSitSeatTaken = 46;
-    srTableStandUpOk = 47;
-	srPong = 48;
-    srSuspendPlayerOk = 49;
-    srReinstatePlayerOk = 50;
-	srTableAddonOk = 51;
-	srTableAddonOverLimit = 52;
-	srTableStatsReply = 53;
-	srContactUsOk = 54;
-
-    seChat = 200;
-    seSecondaryLoginDetected = 201;
-    seAccountConfirmed = 202;
-    seClubChange = 203;
-    seClubDeleted = 204;
-	seGameChange = 205;
-	seGameCreate = 206;
-	seGameDelete = 207;
-
-	seTableStatus = 209;
-	seTransferChips = 210;
-
-    scLogin = 501;
-    scStatus = 502;
-    scRegister = 503;
-    scForgotPassword = 504;
-    scLogout = 505;
-    scListPublicClubs = 506;
-    scCreateClub = 507;
-    scJoinClub = 508;
-    scKickPlayer = 509;
-    scLeaveClub = 510;
-    scGiveClubOwnership = 511;
-    scChangeClubDetails = 512;
-    scDeleteClub = 513;
-    scTransferChips = 514;
-    scChangeEmail = 515;
-    scChangePassword = 516;
-    scSetAvatar = 517;
-    scCreateGame = 518;
-    scCloseGame = 519;
-    scEditGame = 520;
-    scTableJoin = 521;
-    scTableLeave = 522;
-    scTableSit = 523;
-    scTableStandUp = 524;
-	scPing = 525;
-    scSuspendPlayer = 526;
-    scGetPlayers = 527;
-	scFold = 528;
-	scPutChips = 529;
-	scTableAddOn = 530;
-	scTablePlayNow = 531;
-	scTableSitOutNextHand = 532;
-	scTableSitOutNextBB = 533;
-	scResendVerificationMail = 534;
-	scShowLosingCards = 535;
-	seUserChange = 536;
-	scQueryTableStats = 537;
-	scContactUs = 538;
-}
-
 service Server {
 	rpc Login (LoginParams) returns (LoginReply);
 }
@@ -339,11 +331,13 @@ message SeatInfo {
 	required bool cards_visible = 8;
 	required bool disconnected = 9;
 }
+
 message ChangeSuspendState {
 	required bytes club_mongo_id = 1;
 	required bytes player_mongo_id = 3;
 	required bool suspended = 2;
 }
+
 message RegisterReply {
 	enum RegisterStatus {
 		regSuccess = 0;
@@ -354,6 +348,7 @@ message RegisterReply {
 	}
 	required RegisterStatus status = 1;
 }
+
 message ClubCommandReply {
 	enum ClubStatus {
 		csSuccess = 0;
@@ -369,6 +364,7 @@ message ClubCommandReply {
 	optional Club club = 2;
 	repeated Game games = 3;
 }
+
 message ChangeMailReply {
 	enum ChangeMailStatus {
 		cmSuccess = 0;
@@ -377,6 +373,7 @@ message ChangeMailReply {
 	}
 	required ChangeMailStatus status = 1;
 }
+
 message GetUserParams {
 	repeated bytes user_mongo_ids = 1;
 	repeated User users = 2;
@@ -444,45 +441,11 @@ message UserChangeParams {
 	repeated User users = 1;
 }
 
-message FetchHandHistoryReply {
-	repeated ClubHandHistoryReply reply = 1;
-}
-message ClubHandHistoryReply {
-	required bytes clubid = 1;
-	required bytes gameid = 2;
-	repeated HandHistory rows = 3;
-	repeated GameEventHistory events = 4;
-}
-message GameEventHistory {
-	enum GameEventType {
-		geCashin = 1;
-		geCashout = 2;
-		geOpened = 3;
-	}
-	required GameEventType eventtype = 1;
-	required uint32 timestamp = 2;
-	optional bytes userid = 3;
-	optional int32 change = 4;
-}
-message HandHistory {
-	message PlayerHandHistory {
-		required bytes _id = 1;
-		required uint32 seat = 2;
-		repeated bytes cards = 3;
-	}
-	required bytes _id = 1;
-	required uint32 seq = 2;
-	required uint32 totalrake = 3;
-	repeated PlayerHandHistory players = 4;
-	required bytes tablecards = 5;
-	required uint32 endtime = 6;
-	repeated int32 balance_changes = 7;
-}
-
 message CloseGameData {
 	required bytes gameid = 1;
 	optional uint32 timestamp = 2 [ default=0 ];
 }
+
 message FetchHandHistory {
 	message GameQuery {
 		required bytes gameid = 1;
@@ -490,6 +453,7 @@ message FetchHandHistory {
 	}
 	repeated GameQuery games = 1;
 }
+
 message FetchHandReply {
 	required string uuid = 1;
 }
@@ -520,6 +484,7 @@ message TablePlayerStats {
 	optional uint32 chipsinplay = 8;
 	optional uint32 hands = 9;
 }
+
 message ContactMessage {
 	enum ContactReason {
 		cmSupport = 0;

@@ -2537,10 +2537,6 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
-      ExplicitLeft = 1
-      ExplicitTop = 1
-      ExplicitWidth = 892
-      ExplicitHeight = 440
       DesignSize = (
         894
         442)
@@ -2550,7 +2546,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
-        ExplicitHeight = 433
         DesignSize = (
           250
           435)
@@ -2639,8 +2634,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
-        ExplicitWidth = 626
-        ExplicitHeight = 433
         DesignSize = (
           628
           435)
@@ -2786,8 +2779,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2797,8 +2788,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 878
-        ExplicitHeight = 433
         DesignSize = (
           880
           435)
@@ -3111,6 +3100,7 @@ object frmClubLobby: TfrmClubLobby
             PropertiesClassName = 'TcxSpinEditProperties'
             Properties.Alignment.Horz = taCenter
             HeaderAlignmentHorz = taCenter
+            Options.Editing = False
           end
           object gridTablesStatus: TcxGridColumn
             Caption = 'Status'

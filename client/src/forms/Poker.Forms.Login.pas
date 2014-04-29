@@ -339,18 +339,18 @@ begin
   version := pbhello.LatestVersion;
   {$ENDIF}
 
-  if (version <> Settings.Hardcoded.VERSION) and
+  if (Settings.Hardcoded.VERSION <> version) and
      (Settings.Hardcoded.REVISION <> 'manual') then
     acUpdate.Execute;
 
   ServerSettings.ParseHelloMessage(pbhello);
 
-  if ServerSettings.StringLengths.EMail > ServerSettings.StringLengths.Username then
-    edLogin.Properties.MaxLength := ServerSettings.StringLengths.EMail
+  if ServerSettings.MaxStringLengths.EMail > ServerSettings.MaxStringLengths.Username then
+    edLogin.Properties.MaxLength := ServerSettings.MaxStringLengths.EMail
   else
-    edLogin.Properties.MaxLength := ServerSettings.StringLengths.Username;
+    edLogin.Properties.MaxLength := ServerSettings.MaxStringLengths.Username;
 
-  edPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
+  edPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
 
   EnableGUI(ServerSocket.IsConnected);
   if ServerSocket.IsConnected then

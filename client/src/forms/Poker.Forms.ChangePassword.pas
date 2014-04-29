@@ -48,9 +48,9 @@ begin
                       TServerMessageCallback.Create(srChangePasswordOk, CSRChangePasswordOk)
                    ]);
 
-  edNewPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
-  edCurrentPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
-  edConfirmPassword.Properties.MaxLength := ServerSettings.StringLengths.Password;
+  edNewPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
+  edCurrentPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
+  edConfirmPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
 end;
 
 procedure TfrmChangePassword.FormDestroy(Sender: TObject);

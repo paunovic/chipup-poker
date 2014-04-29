@@ -13,6 +13,7 @@ type
     ClubName   : Integer;
     ClubInvCode: Integer;
     GameName   : Integer;
+    ContactMessage: Integer;
   end;
 
   TServerSettings = class
@@ -20,7 +21,8 @@ type
     FEmailConfirmationExpiration: Integer;
     FPlaytime                   : Integer;
     FTimebank                   : Integer;
-    FStringLengths              : TStringLengths;
+    FMinStringLengths           : TStringLengths;
+    FMaxStringLengths           : TStringLengths;
 
   public
     class procedure Initialize;
@@ -31,7 +33,8 @@ type
     property EmailConfirmationExpiration: Integer read FEmailConfirmationExpiration;
     property Playtime: Integer read FPlaytime;
     property Timebank: Integer read FTimebank;
-    property StringLengths: TStringLengths read FStringLengths;
+    property MinStringLengths: TStringLengths read FMinStringLengths;
+    property MaxStringLengths: TStringLengths read FMaxStringLengths;
 
   end;
 
@@ -59,12 +62,21 @@ begin
   FPlaytime := AHelloReply.MaxPlayTime;
   FTimebank := AHelloReply.MaxTimebank;
 
-  FStringLengths.EMail := AHelloReply.StringSizes.EMail;
-  FStringLengths.Username := AHelloReply.StringSizes.Username;
-  FStringLengths.Password := AHelloReply.StringSizes.Password;
-  FStringLengths.ClubName := AHelloReply.StringSizes.ClubName;
-  FStringLengths.ClubInvCode := AHelloReply.StringSizes.InvCode;
-  FStringLengths.GameName := AHelloReply.StringSizes.GameName;
+  FMinStringLengths.EMail := AHelloReply.MinSizes.EMail;
+  FMinStringLengths.Username := AHelloReply.MinSizes.Username;
+  FMinStringLengths.Password := AHelloReply.MinSizes.Password;
+  FMinStringLengths.ClubName := AHelloReply.MinSizes.ClubName;
+  FMinStringLengths.ClubInvCode := AHelloReply.MinSizes.InvCode;
+  FMinStringLengths.GameName := AHelloReply.MinSizes.GameName;
+  FMinStringLengths.ContactMessage := AHelloReply.MinSizes.ContactMessage;
+
+  FMaxStringLengths.EMail := AHelloReply.StringSizes.EMail;
+  FMaxStringLengths.Username := AHelloReply.StringSizes.Username;
+  FMaxStringLengths.Password := AHelloReply.StringSizes.Password;
+  FMaxStringLengths.ClubName := AHelloReply.StringSizes.ClubName;
+  FMaxStringLengths.ClubInvCode := AHelloReply.StringSizes.InvCode;
+  FMaxStringLengths.GameName := AHelloReply.StringSizes.GameName;
+  FMaxStringLengths.ContactMessage := AHelloReply.StringSizes.ContactMessage;
 end;
 
 end.

@@ -42,7 +42,7 @@ implementation
 
 uses
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Protobufs.Objects.ContactMessage,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Server.Validators, Poker.Server.Settings;
 
 
 procedure TfrmContactUs.FormCreate(Sender: TObject);
@@ -50,6 +50,8 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TServerMessageCallback.Create(srContactUsOk, CSRContactUsOk)
   ]);
+
+  meMessage.Properties.MaxLength := ServerSettings.MaxStringLengths.ContactMessage;
 end;
 
 procedure TfrmContactUs.FormDestroy(Sender: TObject);
@@ -59,7 +61,19 @@ begin
 end;
 
 procedure TfrmContactUs.acSendExecute(Sender: TObject);
+var
+  error: String;
 begin
+  if not ValidateContactMessage(meMessage.Text, error) then
+    meMessage.SetFocus;
+
+  if error <> '' then
+  begin
+    MessageDlg(error, mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  acSend.Enabled := FALSE;
   ServerSocket.ContactUs(TContactReason(cbType.ItemIndex), meMessage.Text);
 end;
 

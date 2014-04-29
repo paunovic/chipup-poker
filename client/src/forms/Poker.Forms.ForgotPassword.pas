@@ -41,7 +41,7 @@ uses
 
 procedure TfrmForgotPassword.FormCreate(Sender: TObject);
 begin
-  edEMail.Properties.MaxLength := ServerSettings.StringLengths.Password;
+  edEMail.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
 end;
 
 procedure TfrmForgotPassword.FormDestroy(Sender: TObject);
