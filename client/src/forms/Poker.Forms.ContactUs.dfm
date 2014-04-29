@@ -25,7 +25,7 @@ object frmContactUs: TfrmContactUs
   TextHeight = 13
   object lbsMessage: TcxLabel
     Left = 14
-    Top = 41
+    Top = 38
     Caption = 'Message:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -43,12 +43,13 @@ object frmContactUs: TfrmContactUs
     Anchors = [akLeft, akTop, akRight]
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
-      'Support'
+      'Questions'
+      'Suggestions'
       'Bug Report'
       'Other')
     Properties.ReadOnly = False
     TabOrder = 3
-    Text = 'Support'
+    Text = 'Questions'
     Width = 336
   end
   object lbsType: TcxLabel
@@ -67,7 +68,7 @@ object frmContactUs: TfrmContactUs
   end
   object meMessage: TcxMemo
     Left = 77
-    Top = 41
+    Top = 40
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     Height = 211

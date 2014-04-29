@@ -23,6 +23,7 @@ implementation
 uses
   Vcl.Controls, System.SysUtils, Poker.Server.Settings, Poker.Common.Misc;
 
+
 function ValidateUsername(const AUsername: String; out AError: String): Boolean;
 begin
   AError := '';
@@ -73,7 +74,7 @@ function ValidateClubCode(const AClubCode: String; out AError: String): Boolean;
 begin
   AError := '';
   if (Length(AClubCode) < ServerSettings.MinStringLengths.ClubInvCode) or (Length(AClubCode) > ServerSettings.MaxStringLengths.ClubInvCode) then
-    AError := Format('Club password must be between %d and d characters', [ServerSettings.MinStringLengths.ClubInvCode, ServerSettings.MaxStringLengths.ClubInvCode])
+    AError := Format('Club password must be between %d and %d characters', [ServerSettings.MinStringLengths.ClubInvCode, ServerSettings.MaxStringLengths.ClubInvCode])
   else
     if not IsValidString(AClubCode, CLUBCODE_ALLOWED_CHARS) then
       AError := 'Invalid characters in club password';

@@ -8,7 +8,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxTextEdit, cxMemo, cxCheckBox, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync,
-  Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, ChipUpPokerDarkSkin;
+  Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, ChipUpPokerDarkSkin, cxGroupBox,
+  cxMaskEdit, cxSpinEdit, Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Enum.ServerCodes;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditUnknown);
@@ -59,11 +60,21 @@ type
     btPause: TcxButton;
     lbsLatency: TcxLabel;
     lbvLatency: TcxLabel;
-    Button3: TButton;
-    Button4: TButton;
-    Button2: TButton;
-    Button1: TButton;
-    Button5: TButton;
+    gbServerTests: TcxGroupBox;
+    btServerTest1: TcxButton;
+    btServerTest2: TcxButton;
+    btServerTest4: TcxButton;
+    btServerTest3: TcxButton;
+    btServerTest5: TcxButton;
+    btServerTest6: TcxButton;
+    btServerTest7: TcxButton;
+    acServerTest1: TAction;
+    acServerTest7: TAction;
+    acServerTest2: TAction;
+    acServerTest3: TAction;
+    acServerTest4: TAction;
+    acServerTest5: TAction;
+    acServerTest6: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -72,7 +83,17 @@ type
     procedure btSeatPosClick(Sender: TObject);
     procedure btSetClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure acServerTest1Execute(Sender: TObject);
+    procedure acServerTest2Execute(Sender: TObject);
+    procedure acServerTest3Execute(Sender: TObject);
+    procedure acServerTest4Execute(Sender: TObject);
   private
+    type
+      TServerTestProtobuf = TPB_LoginParams;
+
+    const
+      SERVERTEST_COMMAND = scLogin;
+
     procedure ActiveFormChange(Sender: TObject);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -93,7 +114,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
+  Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket, Poker.Protobufs.Objects.PingParams;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -451,6 +472,50 @@ end;
 procedure TDebugFormLog.DoNotify;
 begin
   frmDebug.Add(FTime, FType, FData, FTypeStyle, FDataStyle);
+end;
+
+procedure TfrmDebug.acServerTest1Execute(Sender: TObject);
+begin
+  ServerSocket.SendProtobuf(SERVERTEST_COMMAND, nil);
+end;
+
+procedure TfrmDebug.acServerTest2Execute(Sender: TObject);
+var
+  protobuf: TServerTestProtobuf;
+begin
+  protobuf := TServerTestProtobuf.Create;
+  try
+    ServerSocket.SendProtobuf(SERVERTEST_COMMAND, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TfrmDebug.acServerTest3Execute(Sender: TObject);
+var
+  protobuf: TPB_PingParams;
+begin
+  protobuf := TPB_PingParams.Create;
+  try
+    protobuf.Uptime := Random(MaxInt);
+    ServerSocket.SendProtobuf(SERVERTEST_COMMAND, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TfrmDebug.acServerTest4Execute(Sender: TObject);
+var
+  protobuf: TPB_LoginParams;
+begin
+  protobuf := TPB_LoginParams.Create;
+  try
+    protobuf.Username := 'abcdefghijklmn';
+    protobuf.Password := '';
+    ServerSocket.SendProtobuf(SERVERTEST_COMMAND, protobuf);
+  finally
+    protobuf.Free;
+  end;
 end;
 
 end.

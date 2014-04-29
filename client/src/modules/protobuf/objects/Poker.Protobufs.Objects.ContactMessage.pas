@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
-  TContactReason = (cmSupport = 0,cmBugReport = 1,cmOther = 2);
+  TContactReason = (cmQuestions = 0,cmSuggestions = 1,cmBugReport = 2,cmOther = 3);
   TPB_ContactMessage = class(TProtobufBaseObject)
   private
     const

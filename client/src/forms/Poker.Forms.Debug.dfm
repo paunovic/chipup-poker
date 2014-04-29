@@ -78,8 +78,6 @@ object frmDebug: TfrmDebug
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 2
-    ExplicitLeft = 24
-    ExplicitTop = 299
     DesignSize = (
       675
       76)
@@ -412,55 +410,153 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
     end
-    object Button3: TButton
-      Tag = 4
-      Left = 412
-      Top = 43
-      Width = 68
-      Height = 25
-      Caption = 'Test 4'
+    object gbServerTests: TcxGroupBox
+      Left = 497
+      Top = 8
+      Caption = ' Server Tests '
       TabOrder = 13
-      OnClick = Button1Click
-    end
-    object Button4: TButton
-      Tag = 3
-      Left = 344
-      Top = 43
-      Width = 68
-      Height = 25
-      Caption = 'Test 3'
-      TabOrder = 14
-      OnClick = Button1Click
-    end
-    object Button2: TButton
-      Tag = 2
-      Left = 276
-      Top = 43
-      Width = 68
-      Height = 25
-      Caption = 'Test 2'
-      TabOrder = 15
-      OnClick = Button1Click
-    end
-    object Button1: TButton
-      Tag = 1
-      Left = 208
-      Top = 43
-      Width = 68
-      Height = 25
-      Caption = 'Test 1'
-      TabOrder = 16
-      OnClick = Button1Click
-    end
-    object Button5: TButton
-      Tag = 5
-      Left = 480
-      Top = 43
-      Width = 68
-      Height = 25
-      Caption = 'Test 5'
-      TabOrder = 17
-      OnClick = Button1Click
+      Height = 59
+      Width = 173
+      object btServerTest1: TcxButton
+        Left = 9
+        Top = 22
+        Width = 23
+        Height = 21
+        Action = acServerTest1
+        Colors.PressedText = clWhite
+        ParentShowHint = False
+        ShowHint = True
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        SpeedButtonOptions.Flat = True
+        TabOrder = 0
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object btServerTest2: TcxButton
+        Left = 31
+        Top = 22
+        Width = 23
+        Height = 21
+        Action = acServerTest2
+        Colors.PressedText = clWhite
+        ParentShowHint = False
+        ShowHint = True
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        SpeedButtonOptions.Flat = True
+        TabOrder = 1
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object btServerTest4: TcxButton
+        Left = 75
+        Top = 22
+        Width = 23
+        Height = 21
+        Action = acServerTest4
+        Colors.PressedText = clWhite
+        ParentShowHint = False
+        ShowHint = True
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        SpeedButtonOptions.Flat = True
+        TabOrder = 2
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object btServerTest3: TcxButton
+        Left = 53
+        Top = 22
+        Width = 23
+        Height = 21
+        Action = acServerTest3
+        Colors.PressedText = clWhite
+        ParentShowHint = False
+        ShowHint = True
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        SpeedButtonOptions.Flat = True
+        TabOrder = 3
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object btServerTest5: TcxButton
+        Left = 97
+        Top = 22
+        Width = 23
+        Height = 21
+        Action = acServerTest5
+        Colors.PressedText = clWhite
+        ParentShowHint = False
+        ShowHint = True
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        SpeedButtonOptions.Flat = True
+        TabOrder = 4
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object btServerTest6: TcxButton
+        Left = 119
+        Top = 22
+        Width = 23
+        Height = 21
+        Action = acServerTest6
+        Colors.PressedText = clWhite
+        ParentShowHint = False
+        ShowHint = True
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        SpeedButtonOptions.Flat = True
+        TabOrder = 5
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object btServerTest7: TcxButton
+        Left = 141
+        Top = 22
+        Width = 23
+        Height = 21
+        Action = acServerTest7
+        Colors.PressedText = clWhite
+        ParentShowHint = False
+        ShowHint = True
+        SpeedButtonOptions.CanBeFocused = False
+        SpeedButtonOptions.AllowAllUp = True
+        SpeedButtonOptions.Flat = True
+        TabOrder = 6
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
     end
   end
   object alDebug: TActionList
@@ -477,6 +573,31 @@ object frmDebug: TfrmDebug
     object acCopyLogSelection: TAction
       Caption = 'Copy'
       OnExecute = acCopyLogSelectionExecute
+    end
+    object acServerTest1: TAction
+      Caption = '1'
+      OnExecute = acServerTest1Execute
+    end
+    object acServerTest2: TAction
+      Caption = '2'
+      OnExecute = acServerTest2Execute
+    end
+    object acServerTest3: TAction
+      Caption = '3'
+      OnExecute = acServerTest3Execute
+    end
+    object acServerTest4: TAction
+      Caption = '4'
+      OnExecute = acServerTest4Execute
+    end
+    object acServerTest5: TAction
+      Caption = '5'
+    end
+    object acServerTest6: TAction
+      Caption = '6'
+    end
+    object acServerTest7: TAction
+      Caption = '7'
     end
   end
   object SaveDialog: TSaveDialog

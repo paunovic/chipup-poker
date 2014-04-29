@@ -58,6 +58,9 @@ type
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
 
+    procedure EnterDeveloperMode;
+    procedure LeaveDeveloperMode;
+
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
     procedure ServerComboboxChange(Sender: TObject);
@@ -99,7 +102,7 @@ begin
   {$ENDIF}
 
   if Settings.DeveloperMode then
-    CreateServerCombobox;
+    EnterDeveloperMode;
 
   EnableGUI(ServerSocket.IsConnected);
 end;
@@ -279,6 +282,18 @@ begin
   acShowForgotPasswordForm.Enabled := AEnable;
 end;
 
+procedure TfrmLogin.EnterDeveloperMode;
+begin
+  CreateServerCombobox;
+  Caption := Format('Welcome to ChipUP Poker (%s)', [Settings.Hardcoded.VERSION]);
+end;
+
+procedure TfrmLogin.LeaveDeveloperMode;
+begin
+  FreeAndNil(FServerComboBox);
+  Caption := 'Welcome to ChipUP Poker';
+end;
+
 procedure TfrmLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
@@ -287,9 +302,9 @@ begin
       begin
         Settings.DeveloperMode := not Settings.DeveloperMode;
         if Settings.DeveloperMode then
-          CreateServerCombobox
+          EnterDeveloperMode
         else
-          FreeAndNil(FServerComboBox);
+          LeaveDeveloperMode;
         edLogin.Clear;
         edLogin.SetFocus;
       end
