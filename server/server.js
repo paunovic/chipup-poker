@@ -35,7 +35,7 @@ var Hand = deck.Hand;
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
-protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent]);
+protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong]);
 
 dag.init();
 
@@ -43,13 +43,21 @@ dag.init();
 var hands = 0;
 
 var domain = "http://chipuppoker.com/";
-var sharedconfig = {stringSizes:{},max_play_time:20,max_timebank:30};
-sharedconfig.stringSizes.email = 200
-sharedconfig.stringSizes.password = 32
-sharedconfig.stringSizes.clubname = 64
-sharedconfig.stringSizes.invcode = 32
+var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:20,max_timebank:30};
+sharedconfig.minSizes.email = 6;
+sharedconfig.stringSizes.email = 200;
+sharedconfig.minSizes.password = 6;
+sharedconfig.stringSizes.password = 32;
+sharedconfig.minSizes.clubname = 5;
+sharedconfig.stringSizes.clubname = 64;
+sharedconfig.minSizes.invcode = 3;
+sharedconfig.stringSizes.invcode = 32;
+sharedconfig.minSizes.username = 3;
 sharedconfig.stringSizes.username = 20;
+sharedconfig.minSizes.gamename = 3;
 sharedconfig.stringSizes.gamename = 32;
+sharedconfig.minSizes.ContactMessage = 10;
+sharedconfig.stringSizes.ContactMessage = 1000;
 sharedconfig.ChangeExpireTime = 3600 * 24;
 sharedconfig.ForgotExpireTime = 3600;
 
@@ -862,29 +870,45 @@ ClientSocket.prototype.handle = function (code,args) {
 	clearTimeout(this.idleTimer);
 	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
 	var token = profiler.start('handle-default');
-	if ([codes.scLogin].indexOf(code) == -1) {
+	if (args && (args.length > (10*1024))) {
+		this.log('rejecting code %d with arg size %d',code,args.length);
+		this.error('packet too large');
+	}
+	if ([codes.scLogin,codes.scPing].indexOf(code) == -1) {
 		this.log('handle %s',codes.reverse[code]);
 	}
 	if (codes.reverse[code]) {
 		token.tag = 'handle-'+codes.reverse[code];
 	}
 	if (code == codes.scLogout) {
-		Game.handleDisconnect(this,'logout',function () {
-			this.logout();
-			this.send(codes.srLogout);
-		}.bind(this));
+		if (this.state == 2) {
+			Game.handleDisconnect(this,'logout',function () {
+				this.logout();
+				this.send(codes.srLogout);
+			}.bind(this));
+		}
 		return;
 	} else if (code == codes.scPing) {
-		var params = pb.Parse(args,'Poker.PingParams');
-		params.servertime = Date.now();
-		this.send(codes.srPong,params,'Poker.PingReply');
+		try {
+			var params = pb.Parse(args,'Poker.PingParams');
+			params.servertime = Date.now();
+			this.send(codes.srPong,params,'Poker.PingReply');
+		} catch (e) {
+			this.error(e);
+		}
 		return;
 	}
 	switch (this.state) {
 	case 1: // need to login
 		switch (code) {
 		case codes.scLogin:
-			var params = pb.Parse(args,'Poker.LoginParams');
+			if (args.length > 1000) return this.error('message too big');
+			try {
+				var params = pb.Parse(args,'Poker.LoginParams');
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			allUsers.findOne({email:params.username},function (err,row) {
 				assert.ifError(err);
 				if (row) {
@@ -917,7 +941,12 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scRegister:
-			var params = pb.Parse(args,'Poker.RegisterParams');
+			try {
+				var params = pb.Parse(args,'Poker.RegisterParams');
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			console.log('register params',params);
 			var doc = {email:params.email, displayname:params.displayName, tokens:100, authed:false };
 			doc.authcode = uuid.v4();
@@ -926,11 +955,13 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
-			if (doc.email.length > sharedconfig.stringSizes.email) {
+			if ((doc.email.length > sharedconfig.stringSizes.email) || (doc.email.length < sharedconfig.minSizes.email)) {
+				this.log('email out of bounds');
 				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
-			if (doc.displayname.length > sharedconfig.stringSizes.username) {
+			if ((doc.displayname.length > sharedconfig.stringSizes.username) || (doc.displayname.length < sharedconfig.minSizes.username)) {
+				this.log('display name out of bounds');
 				this.send(codes.srRegisterReply,{status:'regInvalidName'},'Poker.RegisterReply');
 				return;
 			}
@@ -980,8 +1011,14 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scForgotPassword:
-			var params = pb.Parse(args,'Poker.ForgotPasswordParams');
-			console.log('forgot args',params);
+			if (args.length > 1024) return this.error('forgot cmd too long');
+			try {
+				var params = pb.Parse(args,'Poker.ForgotPasswordParams');
+			} catch (e) {
+				this.error(e);
+				return;
+			}
+			this.log('forgot args:%j',params);
 			var email = params.email;
 			var doc = {};
 			doc.forgotcode = uuid.v4();
@@ -989,6 +1026,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			allUsers.findOne({email:email},function (err,row) {
 				if (!row) {
 					//this.reply(codes.SR_FORGOT_PASSWORD_OK,"invalid");
+					return;
 				}
 				allUsers.update({_id:row._id},{$set:doc},function (err,res) {
 					var test = new SmtpConnection();
@@ -1009,7 +1047,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		break;
 	case 2: // in the main lobby
 		switch (code) {
-		case codes.scListPublicClubs:
+		/*case codes.scListPublicClubs:
 			allClubs.find({is_private:false,members:{$ne:this.userid},owner:{$ne:this.userid}},{seq:1,name:1,members:1,password:1}).toArray(function (err,arr) {
 				for (var x=0; x<arr.length; x++) {
 					if (arr[x].members) {
@@ -1024,14 +1062,14 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.send(codes.srListClubs,{clubs:arr},'Poker.ListClubsReply');
 				//this.reply(codes.SR_LIST_CLUBS,JSON.stringify(arr));
 			}.bind(this));
-			break;
+			break;*/
 		case codes.scCreateClub:
 			var params = pb.Parse(args,'Poker.Club');
-			if (params.name.length > sharedconfig.stringSizes.clubname) {
+			if (!params.name || ((params.name.length > sharedconfig.stringSizes.clubname) || (params.name.length < sharedconfig.minSizes.clubname))) {
 				this.send(codes.srCreateClubReply,{status:'csInvalidName'},'Poker.ClubCommandReply');
 				return;
 			}
-			if (params.password && (params.password.length > sharedconfig.stringSizes.invcode)) {
+			if (params.password && ((params.password.length > sharedconfig.stringSizes.invcode) || (params.password.length < sharedconfig.minSizes.invcode))) {
 				this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
 				return;
 			}
@@ -1115,12 +1153,13 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.scKickPlayer:
 			// FIXME, update Club object
-			var params = pb.Parse(args,'Poker.KickPlayerParams');
-			var clubid = params.club_seq;
-			var userid = toMongoId(params.player_mongo_id);
-			this.log('kicking',clubid,userid);
-			// FIXME, code 023 kicking somebody not in the club
-			allClubs.findOne({seq:clubid},function (err,club) {
+			try {
+				var params = pb.Parse(args,'Poker.KickPlayerParams');
+				var clubid = params.club_seq;
+				var userid = toMongoId(params.player_mongo_id);
+				this.log('kicking',clubid,userid);
+				// FIXME, code 023 kicking somebody not in the club
+				allClubs.findOne({seq:clubid},function (err,club) {
 				if (!club.owner.equals(this.userid)) {
 					this.reply("000","your not owner");
 					this.log('attempted to kick while not owner');
@@ -1144,9 +1183,13 @@ ClientSocket.prototype.handle = function (code,args) {
 							}
 						}.bind(this));
 					}.bind(this));
-			}.bind(this));
+				}.bind(this));
+			} catch (e) {
+				this.error(e);
+			}
 			break;
 		case codes.scLeaveClub:
+			try {
 			// FIXME, update Club object
 			var params = pb.Parse(args,'Poker.Club');
 			var clubid = params.seq;
@@ -1168,11 +1211,19 @@ ClientSocket.prototype.handle = function (code,args) {
 						}.bind(this));
 					}
 				}.bind(this));
+			} catch (e) {
+				this.error(e);
+			}
 			break;
 		case codes.scGiveClubOwnership:
-			var params = pb.Parse(args,'Poker.GiveClubOwnershipParams');
-			var clubseq = params.club_seq;
-			var newowner = toMongoId(params.player_mongo_id);
+			try {
+				var params = pb.Parse(args,'Poker.GiveClubOwnershipParams');
+				var clubseq = params.club_seq;
+				var newowner = toMongoId(params.player_mongo_id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			this.log('giving ownership away',clubseq,newowner);
 			allClubs.findOne({seq:clubseq},function (err,club) {
 				if (!club) {
@@ -1233,7 +1284,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				if (params.name) {
 					doit = true;
 					mods.$set.name = params.name;
-					if (params.name.length > sharedconfig.stringSizes.clubname) {
+					if ((params.name.length > sharedconfig.stringSizes.clubname) || (params.name.length < sharedconfig.minSizes.clubname)) {
 						this.reply("000","name too long");
 						return;
 					}
@@ -1313,8 +1364,13 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scTransferChips:
-			var params = pb.Parse(args,'Poker.TransferChipsParams');
-			var userid = toMongoId(params.player_mongo_id);
+			try {
+				var params = pb.Parse(args,'Poker.TransferChipsParams');
+				var userid = toMongoId(params.player_mongo_id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			var chips = params.chip_amount;
 			this.log('transfering chips',userid,chips);
 			allUsers.findOne({_id:this.userid},function (err,self) {
@@ -1375,10 +1431,19 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scChangeEmail:
-			var params = pb.Parse(args,'Poker.ChangeEMailParams');
+			try {
+				var params = pb.Parse(args,'Poker.ChangeEMailParams');
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			var newemail = params.new_mail;
+			if ((newemail.length > sharedconfig.stringSizes.email) || (newemail.length < sharedconfig.minSizes.email)) {
+				this.reply(0,'invalid email');
+				return;
+			}
 			if (newemail.indexOf('@') < 1) {
-				console.log('email invalid',doc.email.indexOf('@'),doc.email);
+				console.log('email invalid',newemail.indexOf('@'),newemail);
 				this.reply(0,'invalid email');
 				return;
 			}
@@ -1408,8 +1473,13 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scChangePassword:
-			var params = pb.Parse(args,'Poker.ChangePasswordParams');
-			if (params.new_password.length > sharedconfig.stringSizes.password) {
+			try {
+				var params = pb.Parse(args,'Poker.ChangePasswordParams');
+			} catch (e) {
+				this.error(e);
+				return;
+			}
+			if ((params.new_password.length > sharedconfig.stringSizes.password) || (params.new_password.length < sharedconfig.minSizes.password)) {
 				this.reply(0,'password too long');
 				return;
 			}
@@ -1430,7 +1500,12 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scSetAvatar:
-			var params = pb.Parse(args,'Poker.SetAvatarParams');
+			try {
+				var params = pb.Parse(args,'Poker.SetAvatarParams');
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			var id = params.avatar_id.toString('base64');
 			delete params.avatar_id;
 			this.log('changing avatar',id);
@@ -1474,17 +1549,22 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scCreateGame:
-			var params = pb.Parse(args,'Poker.Game');
-			var clubseq = params.clubseq;
-			var game_type = params.game_type;
-			var game_limit = params.game_limit;
-			var small_blind = params.small_blind;
-			var big_blind = params.big_blind;
-			var seats = params.seats;
-			var gamename = params.gamename;
-			if (checkGameParams(small_blind,big_blind,gamename,seats,game_type,game_limit,params.buyin_min,params.buyin_max)) {
-				this.log('invalid create game:%j',params);
-				this.reply(0,"invalid params");
+			try {
+				var params = pb.Parse(args,'Poker.Game');
+				var clubseq = params.clubseq;
+				var game_type = params.game_type;
+				var game_limit = params.game_limit;
+				var small_blind = params.small_blind;
+				var big_blind = params.big_blind;
+				var seats = params.seats;
+				var gamename = params.gamename;
+				if (checkGameParams(small_blind,big_blind,gamename,seats,game_type,game_limit,params.buyin_min,params.buyin_max)) {
+					this.log('invalid create game:%j',params);
+					this.reply(0,"invalid params");
+					return;
+				}
+			} catch (e) {
+				this.error(e);
 				return;
 			}
 			var doc = {game_type:game_type, small_blind:small_blind, big_blind:big_blind, seats:seats, creator_mongo_id:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
@@ -1520,8 +1600,13 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scCloseGame:
-			var params = pb.Parse(args,'Poker.CloseGameData');
-			var id = new toMongoId(params.gameid);
+			try {
+				var params = pb.Parse(args,'Poker.CloseGameData');
+				var id = new toMongoId(params.gameid);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			this.log('closing game: %j',params);
 			allGames.findOne({_id:id},function (err,gamerow) {
 				if (err) {
@@ -1550,7 +1635,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.scEditGame:
+		/*case codes.scEditGame:
 			var params = pb.Parse(args,'Poker.Game');
 			this.log('edit game',params);
 			var id = new toMongoId(params._id);
@@ -1588,14 +1673,23 @@ ClientSocket.prototype.handle = function (code,args) {
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
-			break;
+			break;*/
 		case codes.seChat:
-			var event = pb.Parse(args,'Poker.ChatEvent');
-			this.handleChatEvent(event,Date.now());
+			try {
+				var event = pb.Parse(args,'Poker.ChatEvent');
+				this.handleChatEvent(event,Date.now());
+			} catch (e) {
+				this.error(e);
+			}
 			break;
 		case codes.scTableJoin:
 			var params = pb.Parse(args,'Poker.Game');
-			var id = new toMongoId(params._id);
+			try {
+				var id = new toMongoId(params._id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			this.log('table join',id);
 			Game.getGame(id,function (err,game) {
 				if (!game) {
@@ -1637,7 +1731,12 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.scTableLeave:
 			var params = pb.Parse(args,'Poker.Game');
-			var id = new toMongoId(params._id);
+			try {
+				var id = new toMongoId(params._id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			delete params._id;
 			Game.getGame(id,function (err,game) {
 				if (!game) {
@@ -1646,8 +1745,13 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scTableSit:
-			var params = pb.Parse(args,'Poker.TableSit');
-			var id = new toMongoId(params.game_id);
+			try {
+				var params = pb.Parse(args,'Poker.TableSit');
+				var id = new toMongoId(params.game_id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			delete params.game_id;
 			Game.getGame(id,function (err,game) {
 				if (!game) {
@@ -1685,9 +1789,15 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.scTableStandUp:
 			var params = pb.Parse(args,'Poker.Game');
-			var id = toMongoId(params._id);
+			try {
+				var id = toMongoId(params._id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			var once = true;
 			Game.getGame(id,function (err,game) {
+				if (!game) return;
 				game.Lock.writeLock(function (release) {
 					var x = game.findSeat(this);
 					var seating = game.members[x];
@@ -1711,10 +1821,15 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scSuspendPlayer:
-			var params = pb.Parse(args,'Poker.ChangeSuspendState');
-			this.log('params:%j',params);
-			var clubid = toMongoId(params.club_mongo_id);
-			var playerid = toMongoId(params.player_mongo_id);
+			try {
+				var params = pb.Parse(args,'Poker.ChangeSuspendState');
+				this.log('params:%j',params);
+				var clubid = toMongoId(params.club_mongo_id);
+				var playerid = toMongoId(params.player_mongo_id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			var broadcast = function broadcast(code) {
 				allClubs.findOne({_id:clubid},function cb(err,row) {
 					var userlist = [ ];
@@ -1727,29 +1842,40 @@ ClientSocket.prototype.handle = function (code,args) {
 					}
 				}.bind(this));
 			}.bind(this);
-			if (params.suspended) {
-				allClubs.update({_id:clubid},
-					{ $addToSet: { suspended: playerid} },
-					function (err,res) {
-						this.log('suspend push',err,res);
-						broadcast(codes.srSuspendPlayerOk);
-					}.bind(this)
-				);
-			} else {
-				allClubs.update({_id:clubid},
-					{ $pull:{suspended:playerid}},
-					function (err,res) {
-						this.log('suspend pull',err,res);
+			allClubs.findOne({_id:clubid},function (err,club) {
+				if (!compareObjectID(club.owner,this.userid)) {
+					this.log('your not owner');
+					return;
+				}
+				if (params.suspended) {
+					allClubs.update({_id:clubid},
+						{ $addToSet: { suspended: playerid} },
+						function (err,res) {
+							this.log('suspend push',err,res);
+							broadcast(codes.srSuspendPlayerOk);
+						}.bind(this)
+					);
+				} else {
+					allClubs.update({_id:clubid},
+						{ $pull:{suspended:playerid}},
+						function (err,res) {
+							this.log('suspend pull',err,res);
 						broadcast(codes.srReinstatePlayerOk);
-					}.bind(this)
-				);
-			}
+						}.bind(this)
+					);
+				}
+			}.bind(this));
 			break;
 		case codes.scGetPlayers:
-			var params = pb.Parse(args,'Poker.GetUserParams');
-			this.log('getting players: %j',params);
-			for (var x=0; x<params.user_mongo_ids.length; x++) {
-				params.user_mongo_ids[x] = toMongoId(params.user_mongo_ids[x]);
+			try {
+				var params = pb.Parse(args,'Poker.GetUserParams');
+				this.log('getting players: %j',params);
+				for (var x=0; x<params.user_mongo_ids.length; x++) {
+					params.user_mongo_ids[x] = toMongoId(params.user_mongo_ids[x]);
+				}
+			} catch (e) {
+				this.error(e);
+				return;
 			}
 			allUsers.find({_id:{$in:params.user_mongo_ids}}).toArray(function (err,users) {
 				this.log(params.user_mongo_ids,users);
@@ -1762,9 +1888,15 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		case codes.scFold:
 			var token2 = profiler.start('fold-inner4');
-			var params = pb.Parse(args,'Poker.Game');
-			var id = toMongoId(params._id);
+			try {
+				var params = pb.Parse(args,'Poker.Game');
+				var id = toMongoId(params._id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			Game.getGame(id,function (err,game) {
+				if (!game) return;
 				game.Lock.writeLock(function (release) {
 					var x = game.findSeat(this);
 					var seating = game.members[x];
@@ -1796,12 +1928,17 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scTableAddOn:
-			var params = pb.Parse(args,'Poker.TableSit');
-			if (params.chips < 1) {
-				this.reply(0,'you cant buyout');
+			try {
+				var params = pb.Parse(args,'Poker.TableSit');
+				if (params.chips < 1) {
+					this.reply(0,'you cant buyout');
+					return;
+				}
+				var id = new toMongoId(params.game_id);
+			} catch (e) {
+				this.error(e);
 				return;
 			}
-			var id = new toMongoId(params.game_id);
 			delete params.game_id;
 			Game.getGame(id,function (err,game) {
 				var seatIdx = game.findSeat(this);
@@ -1822,9 +1959,15 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scTablePlayNow:
-			var params = pb.Parse(args,'Poker.Game');
-			var id = toMongoId(params._id);
+			try {
+				var params = pb.Parse(args,'Poker.Game');
+				var id = toMongoId(params._id);
+			} catch (e) {
+				this.error(e);
+				return;
+			}
 			Game.getGame(id,function (err,game) {
+				if (!game) return;
 				game.Lock.writeLock(function (release) {
 					var seatIdx = game.findSeat(this);
 					if (seatIdx === undefined) {
@@ -1858,17 +2001,17 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;
 		default:
 			if (handlers[code]) handlers[code].call(this,args,token);
-			else this.log('unknown opcode %d/%s',code,codes.revers[code]);
+			else this.log('unknown opcode %d/%s',code,codes.reverse[code]);
 		}
 	}
 }
 var handlers = {};
-handlers[codes.scStatus] = function(args,token) {
+/*handlers[codes.scStatus] = function(args,token) {
 	this.getStatusPacket(function (status) {
 		this.send(codes.srStatus,status,'Poker.StatusReply');
 		token.stop();
 	}.bind(this));
-}
+}*/
 ClientSocket.prototype.getStatusPacket = function (maincb) {
 	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false} ]};
 	// owner should see password
@@ -1933,9 +2076,15 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 	}.bind(this));
 }
 handlers[codes.scTableSitOutNextHand] = function (args,token) {
-	var params = pb.Parse(args,'Poker.TableBoolFlag');
-	var id = toMongoId(params.table_mongo_id);
+	try {
+		var params = pb.Parse(args,'Poker.TableBoolFlag');
+		var id = toMongoId(params.table_mongo_id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
 	Game.getGame(id,function (err,game) {
+		if (!game) return;
 		game.Lock.writeLock(function (release) {
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === undefined) {
@@ -1963,13 +2112,19 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 	}.bind(this));
 }
 handlers[codes.scPutChips] = function (args,token) {
-	var params = pb.Parse(args,'Poker.PutChips');
-	var id = toMongoId(params.table_mongo_id);
+	try {
+		var params = pb.Parse(args,'Poker.PutChips');
+		var id = toMongoId(params.table_mongo_id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
 	delete params.table_mongo_id;
 	this.log('putChips %j',params);
 	var token2 = profiler.start('putChips-inner3');
 	var token6 = profiler.start('putChips-inner6'); // includes writeLock callback if its unlocked
 	Game.getGame(id,function (err,game) {
+		if (!game) return;
 		this.log('getting lock');
 		game.Lock.writeLock(function (release) {
 			token2.stop();
@@ -2000,9 +2155,15 @@ handlers[codes.scPutChips] = function (args,token) {
 	token6.stop();
 }
 handlers[codes.scTableSitOutNextBB] = function (args) {
-	var params = pb.Parse(args,'Poker.TableBoolFlag');
-	var id = toMongoId(params.table_mongo_id);
+	try {
+		var params = pb.Parse(args,'Poker.TableBoolFlag');
+		var id = toMongoId(params.table_mongo_id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
 	Game.getGame(id,function (err,game) {
+		if (!game) return;
 		var seatIdx = game.findSeat(this);
 		if (seatIdx === undefined) {
 			this.reply(0,'your not sitting');
@@ -2021,9 +2182,15 @@ handlers[codes.scResendVerificationMail] = function () {
 	}.bind(this));
 }
 handlers[codes.scShowLosingCards] = function (args) {
-	var params = pb.Parse(args,'Poker.Game');
-	var id = toMongoId(params._id);
+	try {
+		var params = pb.Parse(args,'Poker.Game');
+		var id = toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
 	Game.getGame(id,function (err,game) {
+		if (!game) return;
 		game.Lock.writeLock(function (release) {
 			if (game.state != 'tsWinning') {
 				this.reply(0,'the game isnt over yet');
@@ -2043,7 +2210,7 @@ handlers[codes.scShowLosingCards] = function (args) {
 		}.bind(this));
 	}.bind(this));
 }
-handlers[codes.scRetrieveHandHistoryData] = function (args) {
+/*handlers[codes.scRetrieveHandHistoryData] = function (args) {
 	var params = pb.Parse(args,'Poker.RetrieveHandHistoryData');
 	handHistory.find({seq:{ $gt:params.startid, $lt:params.endid }},{seq:1}).toArray(function (err,rows) {
 		this.send(codes.srRetrieveHandHistoryData,{rows:rows},'Poker.RetrieveHandHistoryReply');
@@ -2059,7 +2226,7 @@ handlers[codes.scFetchHandHistory] = function (args) {
 		console.log(row);
 		this.send(codes.srFetchHandData,{uuid:doc.querycode},'Poker.FetchHandReply');
 	}.bind(this));
-}
+}*/
 handlers[codes.scQueryTableStats] = function (args) {
 	var params = pb.Parse(args,'Poker.QueryTableStats');
 	var ids = [];
@@ -2077,8 +2244,13 @@ handlers[codes.scQueryTableStats] = function (args) {
 		}.bind(this));
 	} else {
 		log('using list passed in');
-		for (var i=0; i<params.gameid.length; i++) {
-			ids.push(toMongoId(params.gameid[i]));
+		try {
+			for (var i=0; i<params.gameid.length; i++) {
+				ids.push(toMongoId(params.gameid[i]));
+			}
+		} catch (e) {
+			this.error(e);
+			return;
 		}
 		step2.call(this);
 	}
@@ -2127,7 +2299,15 @@ handlers[codes.scQueryTableStats] = function (args) {
 	}
 }
 handlers[codes.scContactUs] = function (args,token) {
-	var params = pb.Parse(args,'Poker.ContactMessage');
+	try {
+		var params = pb.Parse(args,'Poker.ContactMessage');
+		if ((params.message.length < sharedconfig.minSizes.ContactMessage) || (params.message.length > sharedconfig.stringSizes.ContactMessage)) {
+			return;
+		}
+	} catch (e) {
+		this.error(e);
+		return;
+	}
 	this.log('raw args:%s parsed:%j',args,params);
 	var doc = {userid:this.userid, message:params.message, reason:params.reason, closed:false};
 	conn.collection('contacts').insert(doc,function (err,row) {

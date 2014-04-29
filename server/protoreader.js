@@ -17,7 +17,7 @@ function protoreader(socket,handler) {
 			console.log('header not in buffer yet',headersize);
 			return false;
 		}
-		console.log('\nheader size:',headersize,this.buffer);
+		//console.log('\nheader size:',headersize,this.buffer);
 		if (headersize > 0) {
 			var header = this.buffer.slice(2,2+headersize);
 			try {
@@ -51,7 +51,7 @@ function protoreader(socket,handler) {
 		}
 		else this.buffer = chunk;
 		while ((this.buffer.length > 0) && process_packet.call(this)) { }
-		if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
+		//if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
 	}.bind(this));
 }
 protoreader.init = function init(input,mapping,hiddenin) {
