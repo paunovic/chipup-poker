@@ -29,6 +29,7 @@ var profiler = require('./profiler');
 var Club = require('./club');
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
+var omaha2 = require('./dag2/omaha');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
@@ -3097,7 +3098,9 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 		}
 		this.log('hands: %j',hands[0]);
 		var forcewin = -1;
-		if (hands.length > 1) {
+		if (this.omaha) {
+			var result = omaha2.doEval(this.flop,this.turn,this.river,hands);
+		} else if (hands.length > 1) {
 			var result = dag.rankHands(this,hands);
 			this.log('dag results:',result);
 		} else {
