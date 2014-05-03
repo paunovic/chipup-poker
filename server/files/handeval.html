@@ -1,0 +1,99 @@
+<html>
+<head>
+<script>
+function parseCards(str) {
+	var out = [];
+	for (var x=0; x<str.length; x+=2) {
+		var a = str[x].toUpperCase();
+		var b = str[x+1];
+		if (!b) return -1;
+		var card;
+		if (a == 'T') card = 8;
+		else if (a == 'J') card = 9;
+		else if (a == 'Q') card = 10;
+		else if (a == 'K') card = 11;
+		else if (a == 'A') card = 12;
+		else if (a == '1') card = 12;
+		else if (a == parseInt(a)) card = parseInt(a) - 2;
+		else return -1;
+		
+		var suit = ['H','S','C','D'].indexOf(b.toUpperCase());
+		if (suit < 0) return -1;
+		var value = (card * 4) + suit;
+		console.log(a+b+'=='+value);
+		out.push(value);
+	}
+	return out;
+}
+var state = {"cards1":[0,4],"cards2":[8,12],"flop":[16,20,24],"turn":[28],"river":[32]};
+function checkcards(id) {
+	var input = document.getElementById(id);
+	var res = parseCards(input.value);
+	if (res == -1) {
+		input.style.background = 'red';
+	} else {
+		input.style.background = '';
+		console.log('card:'+res);
+		state[id] = res;
+		if (!state.cards1) return;
+		if (!state.cards2) return;
+		if (!state.flop) return;
+		if (!state.turn) return;
+		if (!state.river) return;
+		evalhand();
+	}
+}
+function evalhand() {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST','/eval',true);
+	xhr.setRequestHeader("Content-Type","application/json");
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState == 4) {
+			console.log(xhr.responseText);
+			document.getElementById('reply').textContent = xhr.responseText;
+			var res = JSON.parse(xhr.responseText);
+			var result = document.getElementById('result');
+			var a = res.outputs[0].id;
+			var b = res.outputs[1].id;
+			if (a < b) {
+				result.textContent = 'Result: player 1 wins';
+			} else if (a == b) {
+				result.textContent = 'Result: tie';
+			} else result.textContent = 'Result: player 2 wins';
+			for (var x=0; x<2; x++) {
+				delete res.outputs[x].hand;
+				delete res.outputs[x].seat;
+			}
+			document.getElementById('raw1').textContent = JSON.stringify(res.outputs[0]);
+			document.getElementById('raw2').textContent = JSON.stringify(res.outputs[1]);
+		}
+	}
+	xhr.send(JSON.stringify(state));
+}
+</script>
+</head>
+<body onload="checkcards('cards1');evalhand();">
+
+<div id="player1">
+Player 1 cards: <input type="text" id="cards1" onkeyup="checkcards('cards1')" value="2h3h"/>
+<span id="raw1"/>
+</div>
+<div id="player2">
+Player 2 cards: <input type="text" id="cards2" onkeyup="checkcards('cards2')" value="4h5h"/>
+<span id="raw2"/>
+</div>
+
+<br/>
+
+<div>
+Table: <input type="text" id="flop" onkeyup="checkcards('flop')" size="6" value="6h7h8h"/>
+<input type="text" id="turn" onkeyup="checkcards('turn')" size="2" value="9h"/>
+<input type="text" id="river" onkeyup="checkcards('river')" size="4" value="Th"/>
+</div>
+
+<div>
+
+<div id="result"></div>
+<div>Raw reply:<pre id="reply"/></div>
+</body>
+</html>

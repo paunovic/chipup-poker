@@ -29,6 +29,7 @@ var profiler = require('./profiler');
 var Club = require('./club');
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
+var omaha2 = require('./dag2/omaha');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
@@ -43,7 +44,7 @@ dag.init();
 var hands = 0;
 
 var domain = "http://chipuppoker.com/";
-var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:20,max_timebank:30};
+var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:15,max_timebank:30};
 sharedconfig.minSizes.email = 6;
 sharedconfig.stringSizes.email = 200;
 sharedconfig.minSizes.password = 6;
@@ -350,6 +351,13 @@ app.post('/eval',function (req,res) {
 	var result = dag.rankHands(fakegame,fakeusers);
 	res.send(JSON.stringify(result));
 });
+	app.post('/contactPost',function (req,res) {
+		console.log(req.body);
+		RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function () {
+			res.writeHead(302,{Location:'http://testing.chipuppoker.com/contact.html?success=true'}); // FIXME
+			res.end();
+		});
+	});
 	app.post('/newVersion',function (req,res) {
 		// FIXME, add basicAuth
 		console.log('query',req.query);
@@ -2312,7 +2320,7 @@ handlers[codes.scContactUs] = function (args,token) {
 	var doc = {userid:this.userid, message:params.message, reason:params.reason, closed:false};
 	conn.collection('contacts').insert(doc,function (err,row) {
 		this.log('obj:%j',row);
-		var types = {cmSupport:'Support',cmBugReport:'Bugs',cmOther:'Other'};
+		var types = {cmQuestions:'Questions',cmSuggestions:'Suggestions',cmOther:'Other',cmBugReport:'Bugs'};
 		var queue = types[params.reason];
 		RT.postTicket(queue,this.email,params.message);
 		this.send(codes.srContactUsOk);
@@ -3097,7 +3105,9 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 		}
 		this.log('hands: %j',hands[0]);
 		var forcewin = -1;
-		if (hands.length > 1) {
+		if (this.omaha) {
+			var result = omaha2.doEval(this.flop,this.turn,this.river,hands);
+		} else if (hands.length > 1) {
 			var result = dag.rankHands(this,hands);
 			this.log('dag results:',result);
 		} else {
@@ -3369,7 +3379,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	if (increase > this.members[seat].chips) {
 		conn.error('cheater detected, overbetting '+chips+','+increase+','+this.members[seat].chips);
 		conn.destroy();
-		cb();
+		cb([],0);
 		return;
 	}
 	conn.log('eating bets:'+JSON.stringify(this.bets)+' increase:'+increase+' chips:'+chips+' seat:'+seat);
