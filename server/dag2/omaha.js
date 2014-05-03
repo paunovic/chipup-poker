@@ -149,4 +149,5 @@ function doEval(flop,turn,river,hands) {
 	}
 	var end = Date.now();
 	console.log('runtime %d',end-start);
+	return {outputs:hands};
 }
