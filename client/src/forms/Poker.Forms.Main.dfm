@@ -3595,8 +3595,8 @@ object frmChipUpMain: TfrmChipUpMain
           793
           410)
         object gridPublicHomeGames: TcxGrid
-          Left = 470
-          Top = 33
+          Left = 152
+          Top = 34
           Width = 312
           Height = 200
           Anchors = [akLeft, akTop, akBottom]
@@ -3641,61 +3641,8 @@ object frmChipUpMain: TfrmChipUpMain
             GridView = gridPublicHomeGamesTable
           end
         end
-        object gridMyHomeGames: TcxGrid
-          Left = 155
-          Top = 33
-          Width = 312
-          Height = 200
-          Anchors = [akLeft, akTop, akBottom]
-          TabOrder = 1
-          OnEnter = gridMyHomeGamesEnter
-          object gridMyHomeGamesTable: TcxGridTableView
-            OnCellDblClick = gridMyHomeGamesTableCellDblClick
-            OnFocusedRecordChanged = gridMyHomeGamesTableFocusedRecordChanged
-            DataController.Summary.DefaultGroupSummaryItems = <>
-            DataController.Summary.FooterSummaryItems = <>
-            DataController.Summary.SummaryGroups = <>
-            OptionsCustomize.ColumnFiltering = False
-            OptionsCustomize.ColumnGrouping = False
-            OptionsCustomize.ColumnHidingOnGrouping = False
-            OptionsCustomize.ColumnMoving = False
-            OptionsData.Deleting = False
-            OptionsData.DeletingConfirmation = False
-            OptionsData.Editing = False
-            OptionsData.Inserting = False
-            OptionsSelection.CellSelect = False
-            OptionsView.NoDataToDisplayInfoText = ' '
-            OptionsView.ColumnAutoWidth = True
-            OptionsView.GroupByBox = False
-            object gridJoinedClubsId: TcxGridColumn
-              Caption = 'Club ID'
-              PropertiesClassName = 'TcxSpinEditProperties'
-              HeaderAlignmentHorz = taCenter
-              Width = 65
-            end
-            object gridJoinedClubsClubName: TcxGridColumn
-              Caption = 'Club name'
-              PropertiesClassName = 'TcxTextEditProperties'
-              HeaderAlignmentHorz = taCenter
-              Options.Editing = False
-              Width = 161
-            end
-            object gridJoinedClubsStatus: TcxGridColumn
-              Caption = 'Status'
-              PropertiesClassName = 'TcxTextEditProperties'
-              Properties.Alignment.Horz = taCenter
-              HeaderAlignmentHorz = taCenter
-              SortIndex = 0
-              SortOrder = soAscending
-              Width = 62
-            end
-          end
-          object gridMyHomeGamesLevel: TcxGridLevel
-            GridView = gridMyHomeGamesTable
-          end
-        end
         object btMyHomeGames: TcxButton
-          Left = 155
+          Left = 470
           Top = 1
           Width = 311
           Height = 32
@@ -3708,7 +3655,7 @@ object frmChipUpMain: TfrmChipUpMain
           SpeedButtonOptions.GroupIndex = 2
           SpeedButtonOptions.CanBeFocused = False
           SpeedButtonOptions.Down = True
-          TabOrder = 2
+          TabOrder = 1
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3718,7 +3665,7 @@ object frmChipUpMain: TfrmChipUpMain
           OnClick = acShowHomeGamesLayoutExecute
         end
         object btPublicHomeGames: TcxButton
-          Left = 470
+          Left = 155
           Top = 1
           Width = 311
           Height = 32
@@ -3731,7 +3678,7 @@ object frmChipUpMain: TfrmChipUpMain
           SpeedButtonOptions.GroupIndex = 3
           SpeedButtonOptions.CanBeFocused = False
           SpeedButtonOptions.Down = True
-          TabOrder = 3
+          TabOrder = 2
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3746,7 +3693,7 @@ object frmChipUpMain: TfrmChipUpMain
           Width = 627
           Height = 163
           Anchors = [akLeft, akRight, akBottom]
-          TabOrder = 4
+          TabOrder = 3
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3834,7 +3781,7 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 18
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 5
+          TabOrder = 4
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3853,7 +3800,7 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 18
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 6
+          TabOrder = 5
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3872,7 +3819,7 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 18
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 7
+          TabOrder = 6
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3891,13 +3838,66 @@ object frmChipUpMain: TfrmChipUpMain
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
           OptionsImage.Margin = 18
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 8
+          TabOrder = 7
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+        end
+        object gridMyHomeGames: TcxGrid
+          Left = 470
+          Top = 34
+          Width = 312
+          Height = 200
+          Anchors = [akLeft, akTop, akBottom]
+          TabOrder = 8
+          OnEnter = gridMyHomeGamesEnter
+          object gridMyHomeGamesTable: TcxGridTableView
+            OnCellDblClick = gridMyHomeGamesTableCellDblClick
+            OnFocusedRecordChanged = gridMyHomeGamesTableFocusedRecordChanged
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            OptionsCustomize.ColumnFiltering = False
+            OptionsCustomize.ColumnGrouping = False
+            OptionsCustomize.ColumnHidingOnGrouping = False
+            OptionsCustomize.ColumnMoving = False
+            OptionsData.Deleting = False
+            OptionsData.DeletingConfirmation = False
+            OptionsData.Editing = False
+            OptionsData.Inserting = False
+            OptionsSelection.CellSelect = False
+            OptionsView.NoDataToDisplayInfoText = ' '
+            OptionsView.ColumnAutoWidth = True
+            OptionsView.GroupByBox = False
+            object gridJoinedClubsId: TcxGridColumn
+              Caption = 'Club ID'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              HeaderAlignmentHorz = taCenter
+              Width = 65
+            end
+            object gridJoinedClubsClubName: TcxGridColumn
+              Caption = 'Club name'
+              PropertiesClassName = 'TcxTextEditProperties'
+              HeaderAlignmentHorz = taCenter
+              Options.Editing = False
+              Width = 161
+            end
+            object gridJoinedClubsStatus: TcxGridColumn
+              Caption = 'Status'
+              PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
+              HeaderAlignmentHorz = taCenter
+              SortIndex = 0
+              SortOrder = soAscending
+              Width = 62
+            end
+          end
+          object gridMyHomeGamesLevel: TcxGridLevel
+            GridView = gridMyHomeGamesTable
+          end
         end
       end
       object tsTournaments: TcxTabSheet

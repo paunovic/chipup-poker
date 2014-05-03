@@ -2465,7 +2465,7 @@ object frmClubLobby: TfrmClubLobby
     Top = 112
     Align = alTop
     AutoSize = False
-    Caption = 'Club Manager: mpaunovic    Members: 27   Club ID: 12'
+    Caption = 'Manager: mpaunovic    Members: 27   Club ID: 12'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
     Style.Font.Color = clWindowText
@@ -2649,9 +2649,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = 16
-          ExplicitWidth = 620
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2721,7 +2718,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 200
         end
         object btGiveOwnership: TcxButton
           Left = 112
@@ -2738,7 +2734,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 200
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 216
@@ -2755,7 +2750,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 200
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
@@ -2772,7 +2766,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 166
         end
       end
     end
@@ -2804,10 +2797,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = 16
-          ExplicitWidth = 872
-          ExplicitHeight = 375
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2894,7 +2883,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 359
         end
         object btCloseTable: TcxButton
           Left = 112
@@ -2911,7 +2899,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 359
         end
         object btEditGame: TcxButton
           Left = 48
@@ -2931,7 +2918,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
           OnClick = acShowEditGameFormExecute
-          ExplicitTop = 295
         end
       end
     end
@@ -2941,109 +2927,6 @@ object frmClubLobby: TfrmClubLobby
       DesignSize = (
         894
         442)
-      object gridStats: TcxGrid
-        Left = 348
-        Top = 2
-        Width = 538
-        Height = 432
-        Anchors = [akLeft, akTop, akRight, akBottom]
-        BevelInner = bvNone
-        BevelOuter = bvNone
-        BorderStyle = cxcbsNone
-        TabOrder = 0
-        object gridStatsTable: TcxGridTableView
-          OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsCustomize.ColumnFiltering = False
-          OptionsCustomize.ColumnGrouping = False
-          OptionsCustomize.ColumnHidingOnGrouping = False
-          OptionsCustomize.ColumnMoving = False
-          OptionsData.Deleting = False
-          OptionsData.DeletingConfirmation = False
-          OptionsData.Editing = False
-          OptionsData.Inserting = False
-          OptionsSelection.CellSelect = False
-          OptionsView.NoDataToDisplayInfoText = 'No stats available for this table(s)'
-          OptionsView.ColumnAutoWidth = True
-          OptionsView.GridLines = glVertical
-          OptionsView.GroupByBox = False
-          object gridStatsTablePlayerId: TcxGridColumn
-            DataBinding.ValueType = 'Variant'
-            PropertiesClassName = 'TcxBlobEditProperties'
-            Properties.BlobEditKind = bekMemo
-            Visible = False
-          end
-          object gridStatsTablePlayerName: TcxGridColumn
-            Caption = 'Player'
-            PropertiesClassName = 'TcxTextEditProperties'
-            HeaderAlignmentHorz = taCenter
-            SortIndex = 0
-            SortOrder = soAscending
-            Width = 118
-          end
-          object gridStatsTableBalance: TcxGridColumn
-            Caption = 'Balance'
-            DataBinding.ValueType = 'Float'
-            PropertiesClassName = 'TcxSpinEditProperties'
-            Properties.Alignment.Horz = taRightJustify
-            Properties.ValueType = vtFloat
-            HeaderAlignmentHorz = taCenter
-            Styles.OnGetContentStyle = gridStatsTableBalanceStylesGetContentStyle
-            Width = 67
-          end
-          object gridStatsTableBuyins: TcxGridColumn
-            Caption = 'Buy-Ins'
-            DataBinding.ValueType = 'Float'
-            PropertiesClassName = 'TcxSpinEditProperties'
-            Properties.Alignment.Horz = taRightJustify
-            Properties.ValueType = vtFloat
-            OnGetCellHint = gridStatsTableBuyinsGetCellHint
-            HeaderAlignmentHorz = taCenter
-            Width = 65
-          end
-          object gridStatsTableCashouts: TcxGridColumn
-            Caption = 'Cash-Outs'
-            DataBinding.ValueType = 'Float'
-            PropertiesClassName = 'TcxSpinEditProperties'
-            Properties.Alignment.Horz = taRightJustify
-            Properties.ValueType = vtFloat
-            OnGetCellHint = gridStatsTableBuyinsGetCellHint
-            HeaderAlignmentHorz = taCenter
-            Width = 67
-          end
-          object gridStatsTableRake: TcxGridColumn
-            Caption = 'Rake'
-            DataBinding.ValueType = 'Float'
-            PropertiesClassName = 'TcxSpinEditProperties'
-            Properties.Alignment.Horz = taRightJustify
-            Properties.ValueType = vtFloat
-            HeaderAlignmentHorz = taCenter
-            Width = 62
-          end
-          object gridStatsTableChipsInPlay: TcxGridColumn
-            Caption = 'Chips in Play'
-            DataBinding.ValueType = 'Float'
-            PropertiesClassName = 'TcxSpinEditProperties'
-            Properties.Alignment.Horz = taRightJustify
-            Properties.ValueType = vtFloat
-            HeaderAlignmentHorz = taCenter
-            Width = 77
-          end
-          object gridStatsTableTimePlayed: TcxGridColumn
-            Caption = 'Time Played'
-            PropertiesClassName = 'TcxTimeEditProperties'
-            Properties.Alignment.Horz = taCenter
-            Properties.SpinButtons.Visible = False
-            HeaderAlignmentHorz = taCenter
-            Width = 89
-          end
-        end
-        object gridStatsLevel: TcxGridLevel
-          GridView = gridStatsTable
-        end
-      end
       object gridTables: TcxGrid
         Left = 8
         Top = 2
@@ -3053,7 +2936,7 @@ object frmClubLobby: TfrmClubLobby
         BevelInner = bvNone
         BevelOuter = bvNone
         BorderStyle = cxcbsNone
-        TabOrder = 1
+        TabOrder = 0
         object gridTablesTable: TcxGridTableView
           PopupMenu = pmTablesStats
           OnDblClick = gridTablesTableDblClick
@@ -3086,31 +2969,7 @@ object frmClubLobby: TfrmClubLobby
             Properties.ImmediatePost = True
             Properties.NullStyle = nssUnchecked
             Properties.OnChange = gridTablesEnabledPropertiesChange
-            Width = 25
-          end
-          object gridTablesName: TcxGridColumn
-            Caption = 'Table'
-            PropertiesClassName = 'TcxTextEditProperties'
-            HeaderAlignmentHorz = taCenter
-            Options.Editing = False
-            Width = 119
-          end
-          object gridTablesHands: TcxGridColumn
-            Caption = 'Hands'
-            PropertiesClassName = 'TcxSpinEditProperties'
-            Properties.Alignment.Horz = taCenter
-            HeaderAlignmentHorz = taCenter
-            Options.Editing = False
-          end
-          object gridTablesStatus: TcxGridColumn
-            Caption = 'Status'
-            PropertiesClassName = 'TcxTextEditProperties'
-            Properties.Alignment.Horz = taCenter
-            Properties.ReadOnly = False
-            HeaderAlignmentHorz = taCenter
-            Options.Editing = False
-            Styles.OnGetContentStyle = gridTablesStatusStylesGetContentStyle
-            Width = 73
+            Width = 23
           end
           object gridTablesDate: TcxGridColumn
             Caption = 'Date'
@@ -3122,7 +2981,32 @@ object frmClubLobby: TfrmClubLobby
             Options.Editing = False
             SortIndex = 0
             SortOrder = soDescending
-            Width = 91
+            Width = 83
+          end
+          object gridTablesName: TcxGridColumn
+            Caption = 'Table'
+            PropertiesClassName = 'TcxTextEditProperties'
+            HeaderAlignmentHorz = taCenter
+            Options.Editing = False
+            Width = 107
+          end
+          object gridTablesHands: TcxGridColumn
+            Caption = 'Hands'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.Alignment.Horz = taCenter
+            HeaderAlignmentHorz = taCenter
+            Options.Editing = False
+            Width = 57
+          end
+          object gridTablesStatus: TcxGridColumn
+            Caption = 'Status'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.ReadOnly = False
+            HeaderAlignmentHorz = taCenter
+            Options.Editing = False
+            Styles.OnGetContentStyle = gridTablesStatusStylesGetContentStyle
+            Width = 66
           end
           object gridTablesStatusInt: TcxGridColumn
             PropertiesClassName = 'TcxSpinEditProperties'
@@ -3131,6 +3015,220 @@ object frmClubLobby: TfrmClubLobby
         end
         object gridTablesLevel: TcxGridLevel
           GridView = gridTablesTable
+        end
+      end
+      object paPlayerStats: TPanel
+        Left = 348
+        Top = 2
+        Width = 538
+        Height = 432
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        BevelOuter = bvNone
+        ShowCaption = False
+        TabOrder = 1
+        object gridStats: TcxGrid
+          Left = 0
+          Top = 0
+          Width = 538
+          Height = 392
+          Align = alClient
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = cxcbsNone
+          TabOrder = 0
+          object gridStatsTable: TcxGridTableView
+            OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            OptionsCustomize.ColumnFiltering = False
+            OptionsCustomize.ColumnGrouping = False
+            OptionsCustomize.ColumnHidingOnGrouping = False
+            OptionsCustomize.ColumnMoving = False
+            OptionsCustomize.ColumnSorting = False
+            OptionsData.Deleting = False
+            OptionsData.DeletingConfirmation = False
+            OptionsData.Editing = False
+            OptionsData.Inserting = False
+            OptionsSelection.CellSelect = False
+            OptionsView.NoDataToDisplayInfoText = 'No stats available for this table(s)'
+            OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
+            OptionsView.GroupByBox = False
+            OnColumnSizeChanged = gridStatsTableColumnSizeChanged
+            object gridStatsTablePlayerId: TcxGridColumn
+              DataBinding.ValueType = 'Variant'
+              PropertiesClassName = 'TcxBlobEditProperties'
+              Properties.BlobEditKind = bekMemo
+              Visible = False
+            end
+            object gridStatsTablePlayerName: TcxGridColumn
+              Caption = 'Player'
+              PropertiesClassName = 'TcxTextEditProperties'
+              HeaderAlignmentHorz = taCenter
+              SortIndex = 0
+              SortOrder = soAscending
+              Width = 118
+            end
+            object gridStatsTableBalance: TcxGridColumn
+              Caption = 'Balance'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Styles.OnGetContentStyle = gridStatsTableBalanceStylesGetContentStyle
+              Width = 67
+            end
+            object gridStatsTableBuyins: TcxGridColumn
+              Caption = 'Buy-Ins'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              OnGetCellHint = gridStatsTableBuyinsGetCellHint
+              HeaderAlignmentHorz = taCenter
+              Width = 65
+            end
+            object gridStatsTableCashouts: TcxGridColumn
+              Caption = 'Cash-Outs'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              OnGetCellHint = gridStatsTableBuyinsGetCellHint
+              HeaderAlignmentHorz = taCenter
+              Width = 67
+            end
+            object gridStatsTableRake: TcxGridColumn
+              Caption = 'Rake'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Width = 62
+            end
+            object gridStatsTableChipsInPlay: TcxGridColumn
+              Caption = 'Chips in Play'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Width = 77
+            end
+            object gridStatsTableTimePlayed: TcxGridColumn
+              Caption = 'Time Played'
+              PropertiesClassName = 'TcxTimeEditProperties'
+              Properties.Alignment.Horz = taCenter
+              Properties.SpinButtons.Visible = False
+              HeaderAlignmentHorz = taCenter
+              Width = 89
+            end
+          end
+          object gridStatsLevel: TcxGridLevel
+            GridView = gridStatsTable
+          end
+        end
+        object gridTotalStats: TcxGrid
+          Left = 0
+          Top = 392
+          Width = 538
+          Height = 40
+          Align = alBottom
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = cxcbsNone
+          TabOrder = 1
+          object gridTotalStatsTable: TcxGridTableView
+            DataController.Summary.DefaultGroupSummaryItems = <>
+            DataController.Summary.FooterSummaryItems = <>
+            DataController.Summary.SummaryGroups = <>
+            OptionsCustomize.ColumnFiltering = False
+            OptionsCustomize.ColumnGrouping = False
+            OptionsCustomize.ColumnHidingOnGrouping = False
+            OptionsCustomize.ColumnMoving = False
+            OptionsData.Deleting = False
+            OptionsData.DeletingConfirmation = False
+            OptionsData.Editing = False
+            OptionsData.Inserting = False
+            OptionsSelection.CellSelect = False
+            OptionsView.ColumnAutoWidth = True
+            OptionsView.GridLines = glVertical
+            OptionsView.GroupByBox = False
+            object gridTotalStatsPlayers: TcxGridColumn
+              Caption = 'Total Players'
+              DataBinding.ValueType = 'Integer'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taCenter
+              HeaderAlignmentHorz = taCenter
+              Width = 118
+            end
+            object gridTotalStatsBalance: TcxGridColumn
+              Caption = 'Balance'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Styles.OnGetContentStyle = gridStatsTableBalanceStylesGetContentStyle
+              Width = 67
+            end
+            object gridTotalStatsBuyins: TcxGridColumn
+              Caption = 'Buy-Ins'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Width = 65
+            end
+            object gridTotalStatsCashouts: TcxGridColumn
+              Caption = 'Cash-Outs'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Width = 67
+            end
+            object gridTotalStatsRake: TcxGridColumn
+              Caption = 'Rake'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Width = 62
+            end
+            object gridTotalStatsChipsInPlay: TcxGridColumn
+              Caption = 'Chips in Play'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              Properties.ValueType = vtFloat
+              HeaderAlignmentHorz = taCenter
+              Width = 77
+            end
+            object gridTotalStatsTimePlayed: TcxGridColumn
+              Caption = 'Time Played'
+              PropertiesClassName = 'TcxTimeEditProperties'
+              Properties.Alignment.Horz = taCenter
+              Properties.SpinButtons.Visible = False
+              HeaderAlignmentHorz = taCenter
+              Width = 89
+            end
+            object gridTotalStatsDummy: TcxGridColumn
+              Visible = False
+              MinWidth = 16
+              Options.HorzSizing = False
+              Width = 16
+            end
+          end
+          object gridTotalStatsLevel: TcxGridLevel
+            GridView = gridTotalStatsTable
+          end
         end
       end
     end

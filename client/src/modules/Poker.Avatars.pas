@@ -14,6 +14,7 @@ type
     FImage: TJPEGImage;
     FDXImage: TAsphyreImage;
     FHTTP: TSslHttpCli;
+    FOnImageChanged: TNotifyEvent;
 
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure SetId(const AValue: TBytes);
@@ -35,12 +36,17 @@ type
 
     property Id: TBytes read FId;
     property IdAsString: String read FIdAsString;
+    property Image: TJPEGImage read FImage;
     property DXImage: TAsphyreImage read FDXImage;
+    property OnImageChanged: TNotifyEvent read FOnImageChanged write FOnImageChanged;
   end;
 
   TAvatars = class(TObjectList<TAvatar>)
   private
     FRetrievingImage: TJPEGImage;
+    FOnAvatarChanged: TNotifyEvent;
+
+    procedure AvatarChangedInternal(Sender: TObject);
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -54,6 +60,7 @@ type
     function IndexOf(const AId: TBytes): Integer;
     function Find(const AId: TBytes; out AAvatar: TAvatar): Boolean;
 
+    property OnAvatarChanged: TNotifyEvent read FOnAvatarChanged write FOnAvatarChanged;
   end;
 
 var
@@ -65,8 +72,6 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   AsphyreBitmaps, AsphyreBMP, Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3,
   Poker.Settings;
-
-
 
 
 { TAvatar }
@@ -119,7 +124,6 @@ begin
       begin
         FHTTP.RcvdStream.Position := 0;
         FImage.LoadFromStream(FHTTP.RcvdStream);
-        ImageChanged(FImage);
         Save;
       end;
     end;
@@ -209,6 +213,9 @@ begin
   finally
     mstream.Free;
   end;
+
+  if Assigned(FOnImageChanged) then
+    FOnImageChanged(self);
 end;
 
 procedure TAvatar.SetId(const AValue: TBytes);
@@ -267,6 +274,12 @@ begin
   inherited;
 end;
 
+procedure TAvatars.AvatarChangedInternal(Sender: TObject);
+begin
+  if Assigned(FOnAvatarChanged) then
+    FOnAvatarChanged(Sender);
+end;
+
 function TAvatars.DefaultAvatar: TAvatar;
 var
   bytes: TBytes;
@@ -289,16 +302,22 @@ begin
   end
   else
   begin
-    avatar := TAvatar.Create(AId, AImage);
+    if Assigned(AImage) then
+      avatar := TAvatar.Create(AId, AImage)
+    else
+      avatar := TAvatar.Create(AId, FRetrievingImage);
+
+    avatar.OnImageChanged := AvatarChangedInternal;
+
+    inherited Add(avatar);
+
     if not Assigned(AImage) then
     begin
-      avatar.SetImage(FRetrievingImage);
       if not avatar.Retrieve then
         avatar.Download;
     end
     else
       avatar.Save;
-    inherited Add(avatar);
   end;
 
   result := avatar;

@@ -31,6 +31,7 @@ type
     procedure PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     FUnselectedBitmap: TBitmap32;
     FBitmap: TBitmap32;
@@ -123,6 +124,14 @@ begin
   FBitmap.Free;
   FSelectionBitmap.Free;
   FormsContainer.Remove(self);
+end;
+
+procedure TfrmImageCrop.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  case Key of
+    vk_RETURN: acOK.Execute;
+    vk_ESCAPE: acCancel.Execute;
+  end;
 end;
 
 procedure TfrmImageCrop.FormClose(Sender: TObject; var Action: TCloseAction);

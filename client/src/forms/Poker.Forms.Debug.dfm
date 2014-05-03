@@ -413,6 +413,7 @@ object frmDebug: TfrmDebug
     object gbServerTests: TcxGroupBox
       Left = 497
       Top = 8
+      Anchors = [akRight, akBottom]
       Caption = ' Server Tests '
       TabOrder = 13
       Height = 59

@@ -155,6 +155,7 @@ object frmTable: TfrmTable
     TabOrder = 4
     Value = 76950.000000000000000000
     Visible = False
+    OnKeyDown = seRaiseAmountKeyDown
     Height = 28
     Width = 106
   end
@@ -448,5 +449,11 @@ object frmTable: TfrmTable
     OnTimer = tiGameLockTimer
     Left = 232
     Top = 104
+  end
+  object tiRender: TTimer
+    Interval = 250
+    OnTimer = tiRenderTimer
+    Left = 316
+    Top = 36
   end
 end

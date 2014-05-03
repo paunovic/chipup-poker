@@ -39,7 +39,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 203
   end
   object btCancel: TcxButton
     Left = 116
@@ -56,7 +55,6 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 203
   end
   object imgAvatar: TcxImage
     Left = 38
