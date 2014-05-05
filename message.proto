@@ -430,6 +430,7 @@ message TableEvent {
 message PutChips {
 	required bytes table_mongo_id = 1;
 	required uint32 chip_amount = 2;
+	required TableStatus.TableState current_state = 3;
 }
 
 message TableBoolFlag {
