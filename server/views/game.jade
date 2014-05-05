@@ -42,3 +42,6 @@ block content
           a(href="/secure/hand?id="+hand._id)=hand.seq
         td=hand.totalrake ? hand.totalrake/100 : ''
         td=hand.endtime
+  div
+    | inspect
+    pre=util.inspect(game)
