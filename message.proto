@@ -496,3 +496,7 @@ message ContactMessage {
 	required ContactReason reason = 1;
 	required string message = 2;
 }
+message BuyinError {
+	required bytes game_id = 1;
+	required uint32 last_cashout = 2;
+}
