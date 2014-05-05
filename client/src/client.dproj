@@ -286,6 +286,7 @@
 			<DCCReference Include="modules\server\Poker.Server.SSLCerts.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ContactMessage.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.SocketConnect.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.BuyinError.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

@@ -52,6 +52,7 @@ type
     procedure CSRTableSitNoChips(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableAddonOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
 
     function GetMaxBuyin: UINT32;
   protected
@@ -69,7 +70,7 @@ implementation
 
 uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
-  Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus;
+  Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
@@ -79,7 +80,8 @@ begin
                       TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken),
                       TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips),
                       TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
-                      TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit)
+                      TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit),
+                      TServerMessageCallback.Create(srTableBuyinLessThanCashout, CSRTableBuyinLessThanCashout)
                   ]);
 end;
 
@@ -296,5 +298,16 @@ begin
   acOK.Enabled := TRUE;
 end;
 
+procedure TfrmTableSit.CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
+var
+  pbbuyinerr: TPB_BuyinError;
+begin
+  pbbuyinerr := AObject as TPB_BuyinError;
+  if not CompareBytes(FTable.Game.MongoId, pbbuyinerr.GameId) then
+    Exit;
+
+  MessageDlg(Format('You must buyin with equal or more chips than your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]), mtWarning, [mbOK], 0);
+  acOK.Enabled := TRUE;
+end;
 
 end.

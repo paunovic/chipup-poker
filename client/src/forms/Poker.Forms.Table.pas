@@ -100,6 +100,7 @@ type
       FORM_ASPECT_RATIO = 1.35;
       CARD_OPEN_PERC    = 0.55;
       CARD_HIDDEN_PERC  = 0.35;
+      CARD_FOLDED_PERC  = 0.55;
 
     type
       TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
@@ -211,7 +212,7 @@ type
     procedure RenderTable;
     procedure RenderSeats;
     procedure RenderSeat(const ASeatIndex: Integer);
-    procedure RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single);
+    procedure RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single; const ATransparency: Byte = 0);
     procedure RenderClosingText;
     procedure RenderTableCards;
     procedure RenderDealingCardsAni;
@@ -234,6 +235,8 @@ type
 
     procedure AnimateBets(const ABets: TArray<UINT32>);
     procedure AnimateBlinds;
+
+    procedure MakeTableCaption;
 
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
@@ -291,7 +294,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData;
+  Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, AbstractCanvas;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -366,7 +369,7 @@ begin
   rvChat.ClearAll;
   rvChat.Format;
 
-  Caption := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
+  MakeTableCaption;
 end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
@@ -466,7 +469,7 @@ end;
 
 procedure TfrmTable.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-  renderit : Boolean;
+  renderit: Boolean;
   index, C1: Integer;
 begin
   renderit := FALSE;
@@ -908,6 +911,26 @@ begin
   Exit(FALSE);
 end;
 
+procedure TfrmTable.MakeTableCaption;
+var
+  cap: String;
+  currentgame: String;
+begin
+  if FTable.Game.GameType = gtRotationNLHPLO then
+  begin
+    case FTableStatus.CurrentGame of
+      cgHoldem: currentgame := 'NLH';
+      cgOmaha: currentgame := 'PLO';
+    end;
+    cap := Format('%s (%s/%s %s - %d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTableStatus.RotationHand, FTable.Game.Seats, currentgame, FTable.Club.Name])
+  end
+  else
+    cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
+
+  if cap <> Caption then
+    Caption := cap;
+end;
+
 procedure TfrmTable.ModalFormClose(Sender: TObject);
 begin
   EnableWindow(Handle, TRUE);
@@ -1275,6 +1298,10 @@ begin
         sitout := TRUE;
       end;
     end;
+
+    acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
+                           (seat_info.Status in [psInHand, psAllIn, psFolded]) and
+                           (not seat_info.CardsVisible);
   end;
 
   if (FTableStatus.CurrentSeat <> -1) and
@@ -1379,6 +1406,8 @@ begin
   else
     for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
       FRaisePresetButtons[C1].Action := nil;
+
+  MakeTableCaption;
 end;
 
 procedure TfrmTable.tiSeatClearCaptionTimer(Sender: TObject);
@@ -1458,13 +1487,13 @@ begin
     end;
   FTable.SeatIndex := seat_index;
 
+  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat) then
+    DebugLn(seat.Cards.AsString, ditUnknown);
+
   if FTableStatus.Time > 0 then
     FGoalTime := FTableStatus.Time - ServerSocket.TimeOffset
   else
     FGoalTime := 0;
-
-  if not (FTableStatus.State in [tsWinning, tsWinning2]) then
-    acShowCards.Enabled := FALSE;
 
   {$IFDEF DEBUG}
   tmp := '';
@@ -1646,10 +1675,6 @@ begin
 
         Assert(Assigned(animation));
         animation.TagString := Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]);
-
-        acShowCards.Enabled := (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat)) and
-                               (seat.Status in [psInHand, psAllIn]) and
-                               (not seat.CardsVisible);
       end;
     end;
 
@@ -1876,7 +1901,6 @@ procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
   ServerSocket.PutChips(FTable.Game.MongoId, FRaiseValue, FTableStatus.State);
 end;
-
 
 procedure TfrmTable.acRaisePotExecute(Sender: TObject);
 var
@@ -2176,6 +2200,8 @@ var
   card_point             : TPoint2;
   seat_action_frame_point: TPoint2;
   C1                     : Integer;
+  mousepoint             : TPoint;
+  mousepointf            : TPointF;
 begin
   // get seat point
   seat_point := GetSeatPoint(ASeatIndex);
@@ -2274,16 +2300,33 @@ begin
       action_image := TableResources.SeatActionDisconnected;
 
     // render seat cards
-    if (FTableStatus.State <> tsIdle) and
-       (seat_info.Status in [psInHand, psAllIn]) then
+    if FTableStatus.State <> tsIdle then
     begin
-      for C1 := 0 to seat_info.DealtCards - 1 do
-      begin
-        card_point := GetCardPoint(seat_info, C1);
-        if (C1 >= 0) and (C1 < seat_info.Cards.Count) then
-          RenderCard(card_point, seat_info.Cards[C1], CARD_OPEN_PERC)
-        else
-          RenderCard(card_point, nil, CARD_HIDDEN_PERC);
+      case seat_info.Status of
+        psInHand, psAllIn: begin
+          for C1 := 0 to seat_info.DealtCards - 1 do
+          begin
+            card_point := GetCardPoint(seat_info, C1);
+            if (C1 >= 0) and (C1 < seat_info.Cards.Count) then
+              RenderCard(card_point, seat_info.Cards[C1], CARD_OPEN_PERC)
+            else
+              RenderCard(card_point, nil, CARD_HIDDEN_PERC);
+          end;
+        end;
+
+        psFolded: begin
+          mousepoint := ScreenToClient(Mouse.CursorPos);
+          mousepointf.X := mousepoint.X;
+          mousepointf.Y := mousepoint.Y;
+          if PtInRect(RectF(seat_point.x - FSeatWidth / 2, seat_point.y - FSeatHeight / 2, seat_point.x + FSeatWidth / 2, seat_point.y + FSeatHeight /2), mousepointf) then
+          begin
+            for C1 := 0 to seat_info.Cards.Count - 1 do
+            begin
+              card_point := GetCardPoint(seat_info, C1);
+              RenderCard(card_point, seat_info.Cards[C1], CARD_FOLDED_PERC, 170)
+            end;
+          end;
+        end;
       end;
     end;
 
@@ -2328,20 +2371,33 @@ begin
   end;
 end;
 
-procedure TfrmTable.RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single);
+procedure TfrmTable.RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single; const ATransparency: Byte = 0);
 var
-  card_artwork     : TAsphyreImage;
-  artwork_points   : TPoint4;
-  card_value_point : TPoint2;
-  card_suit_point  : TPoint2;
-  card_value_text  : String;
-  card_suit_text   : String;
+  card_artwork: TAsphyreImage;
+  artwork_points: TPoint4;
+  card_value_point: TPoint2;
+  card_suit_point: TPoint2;
+  card_value_text: String;
+  card_suit_text: String;
   card_value_extent: TPoint2;
-  card_suit_extent : TPoint2;
-  card_text_width  : Single;
-  text_color       : TColor2;
-  card_font        : TAsphyreFont;
+  card_suit_extent: TPoint2;
+  card_text_width: Single;
+  text_color: TColor2;
+  card_font: TAsphyreFont;
+  color: TColor4;
+  blending_effect: TBlendingEffect;
 begin
+  if ATransparency > 0 then
+  begin
+    color := cAlpha4(ATransparency);
+    blending_effect := beNormal;
+  end
+  else
+  begin
+    color := clWhite4;
+    blending_effect := beNormal;
+  end;
+
   if not Assigned(ACard) then
   begin
     // render card background
@@ -2349,7 +2405,7 @@ begin
       pBounds4(0, 0,
         TableResources.CardBackgroundImage.Texture[0].Width,
         TableResources.CardBackgroundImage.Texture[0].Height * APercentage));
-    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FCardWidth, FCardHeight * APercentage), clWhite4);
+    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FCardWidth, FCardHeight * APercentage), color, blending_effect);
   end
   else
   begin
@@ -2358,7 +2414,8 @@ begin
       pBounds4(0, 0,
         TableResources.CardFrontBackgroundImage.Texture[0].Width,
         TableResources.CardFrontBackgroundImage.Texture[0].Height * APercentage));
-    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FCardWidth, FCardHeight * APercentage), clWhite4);
+
+    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FCardWidth, FCardHeight * APercentage), color, blending_effect);
 
     // render card value & suit
     card_value_text := ACard.ValueAsString(ACard.Value);
@@ -2421,10 +2478,10 @@ begin
       DXCore.Canvas.UseImagePx(card_artwork, pBounds4(0, 0,
           card_artwork.Texture[0].Width,
           card_artwork.Texture[0].Height));
-      DXCore.Canvas.TexMap(artwork_points, clWhite4);
+      DXCore.Canvas.TexMap(artwork_points, color, blending_effect);
 
       // render rectangle frame around artwork
-      DXCore.Canvas.FrameRect(artwork_points, cColor4($FFCFCFCF));
+      DXCore.Canvas.FrameRect(artwork_points, cColorAlpha4($FFCFCFCF, ATransparency), blending_effect);
     end
     else
     begin
@@ -2436,7 +2493,7 @@ begin
 
       card_value_extent := card_font.TextExtent(card_value_text);
       card_value_point := Point2(APoint.x + FCardHeight / 14, APoint.y + FCardHeight / 14);
-      card_font.TextOut(card_value_point, card_value_text, text_color);
+      card_font.TextOut(card_value_point, card_value_text, text_color, ATransparency / 255);
 
       card_font.Scale := FTableResizeRatio * 1.2;
       if card_font.Scale < 0.65 then
@@ -2454,7 +2511,7 @@ begin
         card_suit_point := Point2(APoint.x + FCardWidth - 5 * FTableResizeRatio - card_suit_extent.x, APoint.y + FCardHeight - 5 * FTableResizeRatio - card_suit_extent.y);
       end;
 
-      card_font.TextOut(card_suit_point, card_suit_text, text_color);
+      card_font.TextOut(card_suit_point, card_suit_text, text_color, ATransparency / 255);
     end;
   end;
 end;

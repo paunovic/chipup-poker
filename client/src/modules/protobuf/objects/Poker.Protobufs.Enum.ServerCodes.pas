@@ -86,7 +86,8 @@ type
     scShowLosingCards = 102,
     seUserChange = 103,
     scQueryTableStats = 104,
-    scContactUs = 105
+    scContactUs = 105,
+    srTableBuyinLessThanCashout = 106
   );
 
 {$IFDEF DEBUG}
@@ -200,6 +201,7 @@ begin
     seUserChange: result := 'seUserChange';
     scQueryTableStats: result := 'scQueryTableStats';
     scContactUs: result := 'scContactUs';
+    srTableBuyinLessThanCashout: result := 'srTableBuyinLessThanCashout';
   end;
 end;
 {$ENDIF DEBUG}

@@ -149,6 +149,8 @@ type
     FPreviousPots  : TPotInfos;
     FPots          : TPotInfos;
     FTime          : UINT64;
+    FRotationHand  : UINT32;
+    FCurrentGame   : TCurrentGame;
 //    FEvents        : TTableEvents;
 
   public
@@ -178,6 +180,8 @@ type
     property PreviousPots: TPotInfos read FPreviousPots write FPreviousPots;
     property MaximumBet: UINT32 read FMaximumBet;
     property Time: UINT64 read FTime;
+    property RotationHand: UINT32 read FRotationHand;
+    property CurrentGame: TCurrentGame read FCurrentGame;
 //    property Events: TTableEvents read FEvents;
   end;
 
@@ -315,6 +319,8 @@ begin
   FRakePercent := ATableStatusProtobuf.RakePercent;
   FPreviousPots.Assign(FPots, FRakePercent);
   FPots.Assign(ATableStatusProtobuf.Pots, FRakePercent);
+  FCurrentGame := ATableStatusProtobuf.CurrentGame;
+  FRotationHand := ATableStatusProtobuf.Rotation;
 
   if Assigned(ATableStatusProtobuf.Seats) then
   begin

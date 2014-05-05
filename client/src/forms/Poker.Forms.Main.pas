@@ -437,7 +437,7 @@ begin
   if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
     MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
-    Tables.AddTable(club, game, TRUE, TRUE);
+    Tables.AddTable(club, game, FALSE, TRUE);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -1036,7 +1036,7 @@ begin
 
     if (Assigned(game)) and
        (AMethodId = Integer(srCreateGameOk)) then
-      Tables.AddTable(club, game, TRUE, TRUE);
+      Tables.AddTable(club, game, FALSE, TRUE);
   end;
 
   ConfigureGUI;
@@ -1045,14 +1045,27 @@ end;
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
-  table    : TTable;
+  club: TClubInfo;
+  table: TTable;
+  game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
 
+  table := nil;
   if not Tables.FindTable(pbtstatus.TableMongoId, table) then
-    Exit;
+    for club in dmMain.SelfInfo.Clubs do
+      if club.Games.FindGame(pbtstatus.TableMongoId, game) then
+      begin
+        table := Tables.AddTable(club, game, TRUE, FALSE);
+        Break;
+      end;
 
-  table.Game.UpdateFromTableStatus(pbtstatus);
+  if Assigned(table) then
+  begin
+    table.Game.UpdateFromTableStatus(pbtstatus);
+    if not table.Form.Visible then
+      table.BringToFront;
+  end;
 
   ConfigureGUI;
 end;
