@@ -1,0 +1,7 @@
+extends secure
+block content
+  p enter the message below
+  div
+    form(action='/secure/sendBroadcast',method='post')
+      input(type='text',name='msg')
+      input(type='submit',value='send!')

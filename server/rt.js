@@ -5,9 +5,10 @@ function requestTracker(user,pass) {
 	this.user = user;
 	this.pass = pass;
 }
-requestTracker.prototype.rest = function test(url,args) {
+requestTracker.prototype.rest = function test(url,args,cb) {
 	rest({path:'http://rt.chipuppoker.com:8080/REST/1.0/'+url,headers:{Cookie:this.auth,Referer:'http://rt.chipuppoker.com:8080/REST/1.0/'},entity:args}).then(function(response) {
 		console.log('response: ', response.entity);
+		if (cb) cb();
 	});
 	return;
 }
@@ -32,22 +33,23 @@ requestTracker.prototype.login = function login(cb) {
 		console.log('error',err);
 	});
 }
-requestTracker.prototype.createTicket = function (obj) {
+requestTracker.prototype.createTicket = function (obj,cb) {
 	var out = [];
 	for (var key in obj) {
 		out.push(key+': '+(obj[key].replace('\n','\n ')));
 	}
 	out = out.join('\n');
 	var data = 'content='+escape(out);
-	this.rest('ticket/new',data);
+	this.rest('ticket/new',data,cb);
 }
 //login('root','password');
 
-function postTicket(queue,email,body) {
-	var rt = new requestTracker('node','password');
+function postTicket(queue,email,body,cb) {
+	console.log('email is "%s"',email);
+	var rt = new requestTracker('node','Saeg4ahG');
 	rt.login(function () {
 		console.log('done');
-		rt.createTicket({id:'ticket/new',Queue:queue,Requestor:email,Text:body});
+		rt.createTicket({id:'ticket/new',Queue:queue,Requestor:email,Text:body},cb);
 	});
 }
 module.exports.postTicket = postTicket;

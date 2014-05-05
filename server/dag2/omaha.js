@@ -242,11 +242,16 @@ function doEval(flop,turn,river,hands) {
 	for (var y=0; y<hands.length; y++) {
 		var p = [];
 		var player = hands[y].hand;
-		for (var x=0; x<4; x++) p.push(Math.floor(player[x]/4));
+		var psuits = [0,0,0,0];
+		for (var x=0; x<4; x++) {
+			p.push(Math.floor(player[x]/4));
+			psuits[player[x]%4]++;
+		}
 		console.log('p:%s',format(p));
 		var res = evalHand(tbl,p);
 		for (var suit = 0; suit < 4; suit++) {
 			if (tsuits[suit] < 3) continue;
+			if (psuits[suit] < 2) continue;
 			var res2 = evalHandSuit(tbl,p,suit,tableraw,player);
 			console.log(res2);
 			if (res2 < res) res = res2;
