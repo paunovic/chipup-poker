@@ -90,6 +90,7 @@ enum ServerCodes {
 	seUserChange = 103;
 	scQueryTableStats = 104;
 	scContactUs = 105;
+	srTableBuyinLessThanCashout = 106;
 }
 
 message StringSizes {
