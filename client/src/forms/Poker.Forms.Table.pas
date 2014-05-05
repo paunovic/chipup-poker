@@ -922,7 +922,7 @@ begin
       cgHoldem: currentgame := 'NLH';
       cgOmaha: currentgame := 'PLO';
     end;
-    cap := Format('%s (%s/%s %s - %d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTableStatus.RotationHand, FTable.Game.Seats, currentgame, FTable.Club.Name])
+    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTableStatus.RotationHand, FTable.Game.Seats, currentgame, FTable.Club.Name])
   end
   else
     cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
@@ -1486,9 +1486,6 @@ begin
       Break;
     end;
   FTable.SeatIndex := seat_index;
-
-  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat) then
-    DebugLn(seat.Cards.AsString, ditUnknown);
 
   if FTableStatus.Time > 0 then
     FGoalTime := FTableStatus.Time - ServerSocket.TimeOffset
