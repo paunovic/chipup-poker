@@ -10,7 +10,7 @@ type
   TPlayerStats = class
   private
     FUserId: TBytes;
-    FBalance: Integer;
+    FBalance: UINT32;
     FBuyins: TArray<UINT32>;
     FCashouts: TArray<UINT32>;
     FRakeContrib: UINT32;
@@ -29,7 +29,7 @@ type
     procedure Merge(const APlayerStats: TPlayerStats);
 
     property UserId: TBytes read FUserId;
-    property Balance: Integer read FBalance;
+    property Balance: UINT32 read FBalance;
     property Buyins: TArray<UINT32> read FBuyins;
     property Cashouts: TArray<UINT32> read FCashouts;
     property RakeContrib: UINT32 read FRakeContrib;

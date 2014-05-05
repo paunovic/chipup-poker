@@ -451,29 +451,6 @@ begin
   ServerSocket.CrashServer((Sender as TButton).Tag);
 end;
 
-{ TMemoLog }
-
-class procedure TDebugFormLog.Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
-begin
-  with TDebugFormLog.Create do
-  try
-    FTime := ATime;
-    FType := AType;
-    FData := AData;
-    FTypeStyle := ATypeStyle;
-    FDataStyle := ADataStyle;
-    Notify;
-  except
-    Free;
-    raise;
-  end;
-end;
-
-procedure TDebugFormLog.DoNotify;
-begin
-  frmDebug.Add(FTime, FType, FData, FTypeStyle, FDataStyle);
-end;
-
 procedure TfrmDebug.acServerTest1Execute(Sender: TObject);
 begin
   ServerSocket.SendProtobuf(SERVERTEST_COMMAND, nil);
@@ -516,6 +493,29 @@ begin
   finally
     protobuf.Free;
   end;
+end;
+
+{ TMemoLog }
+
+class procedure TDebugFormLog.Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
+begin
+  with TDebugFormLog.Create do
+  try
+    FTime := ATime;
+    FType := AType;
+    FData := AData;
+    FTypeStyle := ATypeStyle;
+    FDataStyle := ADataStyle;
+    Notify;
+  except
+    Free;
+    raise;
+  end;
+end;
+
+procedure TDebugFormLog.DoNotify;
+begin
+  frmDebug.Add(FTime, FType, FData, FTypeStyle, FDataStyle);
 end;
 
 end.

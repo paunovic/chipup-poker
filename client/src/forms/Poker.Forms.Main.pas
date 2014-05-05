@@ -49,12 +49,6 @@ type
     gridClubsId: TcxGridColumn;
     gridClubsName: TcxGridColumn;
     gridPublicHomeGamesLevel: TcxGridLevel;
-    gridMyHomeGames: TcxGrid;
-    gridMyHomeGamesTable: TcxGridTableView;
-    gridJoinedClubsId: TcxGridColumn;
-    gridJoinedClubsClubName: TcxGridColumn;
-    gridJoinedClubsStatus: TcxGridColumn;
-    gridMyHomeGamesLevel: TcxGridLevel;
     btMyHomeGames: TcxButton;
     btPublicHomeGames: TcxButton;
     gridGames: TcxGrid;
@@ -85,6 +79,12 @@ type
     Options1: TMenuItem;
     Sounds1: TMenuItem;
     acSoundsOnOff: TAction;
+    gridMyHomeGames: TcxGrid;
+    gridMyHomeGamesTable: TcxGridTableView;
+    gridJoinedClubsId: TcxGridColumn;
+    gridJoinedClubsClubName: TcxGridColumn;
+    gridJoinedClubsStatus: TcxGridColumn;
+    gridMyHomeGamesLevel: TcxGridLevel;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -152,6 +152,8 @@ type
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
 
+    procedure AvatarChanged(Sender: TObject);
+
     function ConfirmToCloseTables: Boolean;
     function ProcessClubObject(const AClub: TPB_Club; const ADisbanded: Boolean): TClubInfo;
 
@@ -186,7 +188,7 @@ uses
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Forms.ContactUs, Poker.Forms.Reconnect;
+  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -211,6 +213,8 @@ begin
   btJoinClub.Font.Assign(btHomeGames.Font);
 
   pcTabs.ActivePage := tsHomeGames;
+
+  Avatars.OnAvatarChanged := AvatarChanged;
 
   EnableWindow(Handle, TRUE);
 end;
@@ -243,16 +247,16 @@ end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
 begin
-  btMyHomeGames.Width := (tsHomeGames.Width - btMyHomeGames.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
-  btPublicHomeGames.Left := btMyHomeGames.Left + btMyHomeGames.Width + 3;
-  btPublicHomeGames.Width := btMyHomeGames.Width;
-  gridMyHomeGames.Left := btMyHomeGames.Left;
-  gridMyHomeGames.Width := btMyHomeGames.Width;
+  btPublicHomeGames.Width := (tsHomeGames.Width - btPublicHomeGames.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
+  btMyHomeGames.Left := btPublicHomeGames.Left + btPublicHomeGames.Width + 3;
+  btMyHomeGames.Width := btPublicHomeGames.Width;
   gridPublicHomeGames.Left := btPublicHomeGames.Left;
   gridPublicHomeGames.Width := btPublicHomeGames.Width;
-  gridGames.Width := btPublicHomeGames.Left + btPublicHomeGames.Width - btMyHomeGames.Left;
-  btTournamentsHeader.Left := btMyHomeGames.Left;
-  btTournamentsHeader.Width := btMyHomeGames.Width + 3 + btPublicHomeGames.Width;
+  gridMyHomeGames.Left := btMyHomeGames.Left;
+  gridMyHomeGames.Width := btMyHomeGames.Width;
+  gridGames.Width := btMyHomeGames.Left + btMyHomeGames.Width - btPublicHomeGames.Left;
+  btTournamentsHeader.Left := btPublicHomeGames.Left;
+  btTournamentsHeader.Width := btPublicHomeGames.Width + 3 + btMyHomeGames.Width;
 end;
 
 procedure TfrmChipUpMain.DoLogout;
@@ -905,6 +909,14 @@ end;
 procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);
 begin
   dmMain.OpenTACLink;
+end;
+
+procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);
+var
+  table: TTable;
+begin
+  for table in Tables do
+    table.UpdateAvatars(Sender as TAvatar);
 end;
 
 procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);

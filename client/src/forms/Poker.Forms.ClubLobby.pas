@@ -71,23 +71,12 @@ type
     gridGamesTableStatus: TcxGridColumn;
     btStats: TcxButton;
     tsStats: TcxTabSheet;
-    gridStats: TcxGrid;
-    gridStatsTable: TcxGridTableView;
-    gridStatsLevel: TcxGridLevel;
     gridTables: TcxGrid;
     gridTablesTable: TcxGridTableView;
     gridTablesLevel: TcxGridLevel;
-    gridStatsTablePlayerName: TcxGridColumn;
-    gridStatsTableBalance: TcxGridColumn;
-    gridStatsTableBuyins: TcxGridColumn;
-    gridStatsTableCashouts: TcxGridColumn;
-    gridStatsTableRake: TcxGridColumn;
-    gridStatsTableChipsInPlay: TcxGridColumn;
-    gridStatsTableTimePlayed: TcxGridColumn;
     gridTablesEnabled: TcxGridColumn;
     gridTablesName: TcxGridColumn;
     gridTablesTableId: TcxGridColumn;
-    gridStatsTablePlayerId: TcxGridColumn;
     gridTablesStatus: TcxGridColumn;
     pmTablesStats: TPopupMenu;
     UnselectAll1: TMenuItem;
@@ -104,6 +93,29 @@ type
     acTablesStatsSelectAll: TAction;
     SelectAll1: TMenuItem;
     gridTablesHands: TcxGridColumn;
+    paPlayerStats: TPanel;
+    gridStats: TcxGrid;
+    gridStatsTable: TcxGridTableView;
+    gridStatsTablePlayerId: TcxGridColumn;
+    gridStatsTablePlayerName: TcxGridColumn;
+    gridStatsTableBalance: TcxGridColumn;
+    gridStatsTableBuyins: TcxGridColumn;
+    gridStatsTableCashouts: TcxGridColumn;
+    gridStatsTableRake: TcxGridColumn;
+    gridStatsTableChipsInPlay: TcxGridColumn;
+    gridStatsTableTimePlayed: TcxGridColumn;
+    gridStatsLevel: TcxGridLevel;
+    gridTotalStats: TcxGrid;
+    gridTotalStatsTable: TcxGridTableView;
+    gridTotalStatsPlayers: TcxGridColumn;
+    gridTotalStatsBalance: TcxGridColumn;
+    gridTotalStatsBuyins: TcxGridColumn;
+    gridTotalStatsCashouts: TcxGridColumn;
+    gridTotalStatsRake: TcxGridColumn;
+    gridTotalStatsChipsInPlay: TcxGridColumn;
+    gridTotalStatsTimePlayed: TcxGridColumn;
+    gridTotalStatsLevel: TcxGridLevel;
+    gridTotalStatsDummy: TcxGridColumn;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -140,6 +152,7 @@ type
       AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridTablesTableDblClick(Sender: TObject);
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
+    procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -276,7 +289,7 @@ begin
     if Players.FindPlayerById(club.OwnerId, player) then
       manager := player.Nick;
 
-    lbsSubheader.Caption := Format('Club Manager: %s           Members: %d           Club ID: %d', [manager, Length(club.Players), club.Id]);
+    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, Length(club.Players), club.Id]);
 
     admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
 
@@ -479,6 +492,19 @@ begin
       AIsHintMultiLine := TRUE;
       Break;
     end;
+end;
+
+procedure TfrmClubLobby.gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
+begin
+  gridTotalStatsPlayers.Width := gridStatsTablePlayerName.Width;
+  gridTotalStatsBalance.Width := gridStatsTableBalance.Width;
+  gridTotalStatsBuyins.Width := gridStatsTableBuyins.Width;
+  gridTotalStatsCashouts.Width := gridStatsTableCashouts.Width;
+  gridTotalStatsRake.Width := gridStatsTableRake.Width;
+  gridTotalStatsChipsInPlay.Width := gridStatsTableChipsInPlay.Width;
+  gridTotalStatsTimePlayed.Width := gridStatsTableTimePlayed.Width;
+
+  gridTotalStatsDummy.Visible := gridStatsTable.Site.VScrollBarVisible;
 end;
 
 procedure TfrmClubLobby.gridTablesEnabledPropertiesChange(Sender: TObject);
@@ -686,35 +712,36 @@ var
   selectedid: TBytes;
   C1: Integer;
   found: Boolean;
+  total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay, total_timeplayed: UINT32;
 begin
-  c := gridStatsTable.DataController;
-  c.BeginFullUpdate;
+  finalstats := TObjectList<TPlayerStats>.Create;
   try
-    c.SetRecordCount(0);
-
-    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
-      Exit;
-
-    selectedids := TList<TBytes>.Create;
+    c := gridStatsTable.DataController;
+    c.BeginFullUpdate;
     try
-      for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
-        if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
-          selectedids.Add(gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index));
+      c.SetRecordCount(0);
 
-      tablestatslist := TObjectList<TTableStats>.Create(FALSE);
+      if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+        Exit;
+
+      selectedids := TList<TBytes>.Create;
       try
-        if selectedids.Count = 0 then
-        begin
-          if TablesStats.Find(FSelectedStatsTableId, tablestats) then
-            tablestatslist.Add(tablestats);
-        end
-        else
-          for selectedid in selectedids do
-            if TablesStats.Find(selectedid, tablestats) then
-              tablestatslist.Add(tablestats);
+        for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
+          if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
+            selectedids.Add(gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index));
 
-        finalstats := TObjectList<TPlayerStats>.Create;
+        tablestatslist := TObjectList<TTableStats>.Create(FALSE);
         try
+          if selectedids.Count = 0 then
+          begin
+            if TablesStats.Find(FSelectedStatsTableId, tablestats) then
+              tablestatslist.Add(tablestats);
+          end
+          else
+            for selectedid in selectedids do
+              if TablesStats.Find(selectedid, tablestats) then
+                tablestatslist.Add(tablestats);
+
           for tablestats in tablestatslist do
             for playerstats in tablestats.Players do
             begin
@@ -756,18 +783,54 @@ begin
             c.SetValue(recidx, gridStatsTableTimePlayed.Index, datetim);
           end;
         finally
-          finalstats.Free;
+          tablestatslist.Free;
         end;
       finally
-        tablestatslist.Free;
+        selectedids.Free;
       end;
     finally
-      selectedids.Free;
+      c.EndFullUpdate;
     end;
+    c.Refresh;
+
+    total_balance := 0;
+    total_buyins := 0;
+    total_cashouts := 0;
+    total_rake := 0;
+    total_chipsinplay := 0;
+    total_timeplayed := 0;
+
+    for playerstats in finalstats do
+    begin
+      Inc(total_balance, playerstats.Balance);
+      Inc(total_buyins, playerstats.BuyinsTotal);
+      Inc(total_cashouts, playerstats.CashoutsTotal);
+      Inc(total_rake, playerstats.RakeContrib);
+      Inc(total_chipsinplay, playerstats.ChipsInPlay);
+      Inc(total_timeplayed, playerstats.SecondsPlayed);
+    end;
+
+    c := gridTotalStatsTable.DataController;
+    c.BeginFullUpdate;
+    try
+      c.SetRecordCount(1);
+      c.SetValue(0, gridTotalStatsPlayers.Index, finalstats.Count);
+      c.SetValue(0, gridTotalStatsBalance.Index, total_balance / 100);
+      c.SetValue(0, gridTotalStatsBuyins.Index, total_buyins / 100);
+      c.SetValue(0, gridTotalStatsCashouts.Index, total_cashouts / 100);
+      c.SetValue(0, gridTotalStatsRake.Index, total_rake / 100);
+      c.SetValue(0, gridTotalStatsChipsInPlay.Index, total_chipsinplay / 100);
+
+      datetim := SecondsToTime(total_timeplayed);
+      ReplaceDate(datetim, Date);
+      c.SetValue(0, gridTotalStatsTimePlayed.Index, datetim);
+    finally
+      c.EndFullUpdate;
+    end;
+    c.Refresh;
   finally
-    c.EndFullUpdate;
+    finalstats.Free;
   end;
-  c.Refresh;
 end;
 
 procedure TfrmClubLobby.UpdateGamesList;
