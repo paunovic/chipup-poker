@@ -6,7 +6,8 @@ unit Poker.Protobufs.Objects.PutChips;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  Poker.Protobufs.Objects.TableStatus;
 
 type
   TPB_PutChips = class(TProtobufBaseObject)
@@ -14,13 +15,16 @@ type
     const
       FN_TABLE_MONGO_ID = 1;
       FN_CHIP_AMOUNT = 2;
+      FN_CURRENT_STATE = 3;
 
     var
       FTableMongoId: TBytes;
       FChipAmount: UINT32;
+      FCurrentState: TTableState;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetChipAmount(const AValue: UINT32);
+    procedure SetCurrentState(const AValue: TTableState);
 
   public
     destructor Destroy; override;
@@ -28,6 +32,7 @@ type
 
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
     property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
+    property CurrentState: TTableState read FCurrentState write SetCurrentState;
   end;
 
 implementation
@@ -58,6 +63,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChipAmount := AProtobufReader.readUInt32;
       end;
+      FN_CURRENT_STATE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCurrentState := TTableState(AProtobufReader.readEnum);
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -74,6 +83,12 @@ procedure TPB_PutChips.SetChipAmount(const AValue: UINT32);
 begin
   FChipAmount := AValue;
   ProtobufOutput.writeUInt32(FN_CHIP_AMOUNT, AValue);
+end;
+
+procedure TPB_PutChips.SetCurrentState(const AValue: TTableState);
+begin
+  FCurrentState := AValue;
+  ProtobufOutput.writeInt32(FN_CURRENT_STATE, Integer(AValue));
 end;
 
 end.

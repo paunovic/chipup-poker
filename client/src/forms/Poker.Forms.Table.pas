@@ -204,7 +204,7 @@ type
       FTimeImage       : TAsphyreImage;
 
     procedure SetDXObjectSizes;
-    procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE);
+    procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 
     procedure RenderEvent(Sender: TObject);
     procedure RenderBackground;
@@ -249,8 +249,6 @@ type
     function GetPotPoint(const APotIndex: Integer): TPoint2;
 
     procedure UpdateClosingTime;
-
-    function ChipsToStr(const AValue: UINT32): String;
 
     procedure CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
@@ -368,7 +366,7 @@ begin
   rvChat.ClearAll;
   rvChat.Format;
 
-  Caption := Format('%s (%d/%d %s) - %s', [FTable.Game.Name, Round(FTable.Game.SmallBlind / 100), Round(FTable.Game.BigBlind / 100), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
+  Caption := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
 end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
@@ -1167,15 +1165,6 @@ begin
     rvChat.DeleteParas(0, rvChat.ItemCount - SCROLLBACK_LINES + 1);
 end;
 
-function TfrmTable.ChipsToStr(const AValue: UINT32): String;
-begin
-  result := IntToStr(AValue);
-  if AValue mod 100 = 0 then
-    Delete(result, Length(result) - 1, 2)
-  else
-    Insert('.', result, Length(result) - 1);
-end;
-
 procedure TfrmTable.ConfigureGUI;
 var
   seat_info: TSeatInfo;
@@ -1380,7 +1369,7 @@ begin
       FRaiseValue := FRaiseMin;
 
     seRaiseAmount.Properties.MaxValue := FRaiseValue / 100;
-    SetRaiseSliderValue(FRaiseValue);
+    SetRaiseSliderValue(FRaiseValue, TRUE, TRUE, FALSE);
 
     case acRaise.Tag of
       0: acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)]);
@@ -1838,12 +1827,12 @@ begin
   else
     call_amount := FTableStatus.MinimumBet;
 
-  ServerSocket.PutChips(FTable.Game.MongoId, call_amount);
+  ServerSocket.PutChips(FTable.Game.MongoId, call_amount, FTableStatus.State);
 end;
 
 procedure TfrmTable.acCheckExecute(Sender: TObject);
 begin
-  ServerSocket.PutChips(FTable.Game.MongoId, FTableStatus.GetBet(FTable.SeatIndex));
+  ServerSocket.PutChips(FTable.Game.MongoId, FTableStatus.GetBet(FTable.SeatIndex), FTableStatus.State);
 end;
 
 procedure TfrmTable.acFoldExecute(Sender: TObject);
@@ -1885,7 +1874,7 @@ end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
 begin
-  ServerSocket.PutChips(FTable.Game.MongoId, FRaiseValue);
+  ServerSocket.PutChips(FTable.Game.MongoId, FRaiseValue, FTableStatus.State);
 end;
 
 
@@ -2051,7 +2040,7 @@ begin
       seRaiseAmount.Style.Font.Size := 10
 end;
 
-procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE);
+procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 var
   val: UINT32;
   oldval: UINT32;
@@ -2083,7 +2072,8 @@ begin
 
   if FRaiseValue <> oldval then
   begin
-    ConfigureGUI;
+    if AConfigureGUI then
+      ConfigureGUI;
     Render;
   end;
 end;

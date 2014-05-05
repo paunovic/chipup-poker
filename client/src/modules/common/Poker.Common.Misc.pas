@@ -38,6 +38,7 @@ function SecondsToTime(ASeconds: DWORD): TTime;
 function MongoIdToDateTime(const AMongoId: TBytes): TDateTime;
 procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
 function KillWindowsTimer(var ATimerId: UINT_PTR): Boolean;
+function ChipsToStr(const AValue: UINT32): String;
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -548,6 +549,17 @@ begin
   ATimerId := 0;
   Exit(TRUE);
 end;
+
+function ChipsToStr(const AValue: UINT32): String;
+begin
+  result := IntToStr(AValue);
+  if AValue mod 100 = 0 then
+    Delete(result, Length(result) - 1, 2)
+  else
+    Insert('.', result, Length(result) - 1);
+end;
+
+
 
 initialization
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
