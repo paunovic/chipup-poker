@@ -4263,6 +4263,13 @@ object frmChipUpMain: TfrmChipUpMain
         Caption = 'About ChipUP Poker...'
       end
     end
+    object Developer1: TMenuItem
+      Caption = 'Dev'
+      object Disconnect1: TMenuItem
+        Caption = 'Disconnect'
+        OnClick = Disconnect1Click
+      end
+    end
   end
   object tiBringToFront: TTimer
     Enabled = False

@@ -85,6 +85,8 @@ type
     gridJoinedClubsClubName: TcxGridColumn;
     gridJoinedClubsStatus: TcxGridColumn;
     gridMyHomeGamesLevel: TcxGridLevel;
+    Developer1: TMenuItem;
+    Disconnect1: TMenuItem;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -118,6 +120,7 @@ type
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
+    procedure Disconnect1Click(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -190,6 +193,11 @@ uses
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars;
 
+
+procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
+end;
 
 procedure TfrmChipUpMain.DoCreate;
 begin
@@ -457,6 +465,9 @@ begin
                              (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
 
   Sounds1.Checked := Settings.Sounds;
+
+
+  Developer1.Visible := Settings.DeveloperMode;
 
   UpdateClublist;
   UpdateGamelist;

@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.ContactMessage, Poker.Server.SocketConnect;
+  Poker.Protobufs.Objects.ContactMessage, Poker.Server.SocketConnect, Poker.Protobufs.Objects.TableStatus;
 
 type
   TServerSocket = class
@@ -90,7 +90,7 @@ type
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
     procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
     procedure Fold(const AGameId: TBytes);
-    procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer);
+    procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
@@ -121,7 +121,7 @@ uses
   Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply, Poker.Protobufs.Objects.GiveClubOwnershipParams,
   Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
   Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
@@ -999,7 +999,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.PutChips(const AGameId: TBytes; const AChipAmount: Integer);
+procedure TServerSocket.PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
 var
   protobuf: TPB_PutChips;
 begin
@@ -1007,6 +1007,7 @@ begin
   try
     protobuf.TableMongoId := AGameId;
     protobuf.ChipAmount := AChipAmount;
+    protobuf.CurrentState := ATableState;
     SendProtobuf(scPutChips, protobuf);
   finally
     protobuf.Free;
