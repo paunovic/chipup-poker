@@ -305,7 +305,9 @@ var
   rpc_message: TPB_RpcMessage;
   data_obj   : TObject;
   ptmp       : pointer;
+  start,stop : Integer;
 begin
+  start := GetTickCount;
   if Error <> 0 then
   begin
     FSocket.LastError := Error;
@@ -342,11 +344,12 @@ begin
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       ResetInactivityPingTimer;
+      stop := GetTickCount;
       {$IFDEF DEBUG}
       if rpc_message.DataSize = 0 then
-        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), ditSocketInc)
+        DebugLn(Format('Method: %s parsed in %d', [TranslateServerCode(rpc_message.MethodId),stop-start]), ditSocketInc)
       else
-        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
+        DebugLn(Format('Method: %s; DataSize: %d parsed in %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, stop-start]), ditSocketInc);
       {$ENDIF}
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
