@@ -43,7 +43,7 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} {$ENDIF}
+  {$IFDEF DEBUG} Poker.Forms.Debug, Poker.Protobufs.Enum.ServerCodes, {$ENDIF}
   System.SysUtils, System.Classes;
 
 
@@ -138,6 +138,7 @@ var
   callback_set      : TCallbackSet;
   obj, data_obj     : TObject;
   callback_servermsg: TServerMessageCallback;
+  start,stop,code   : Integer;
 begin
   FLock.Acquire;
   try
@@ -161,7 +162,15 @@ begin
           begin
             callback_servermsg := obj as TServerMessageCallback;
             if Integer(callback_servermsg.Code) = AMessage.LParam then
+            begin
+              start := GetTickCount;
               callback_servermsg.Callback(AMessage.LParam, data_obj);
+              stop := GetTickCount;
+              {$IFDEF DEBUG}
+              code := Integer(callback_servermsg.Code);
+              DebugLn(Format('Method: %s handled in %d', [TranslateServerCode(code),stop-start]), ditSocketInc)
+              {$ENDIF}
+            end;
           end
           else
             if (AMessage.Msg = FSocketStateChangeMsg) and (obj is TSocketStateChangeCallback) then
