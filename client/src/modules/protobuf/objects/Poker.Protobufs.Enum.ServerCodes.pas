@@ -41,6 +41,7 @@ type
     srTableAddonOverLimit = 34,
     srTableStatsReply = 35,
     srContactUsOk = 36,
+    srTableBuyinLessThanCashout = 37,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -86,8 +87,7 @@ type
     scShowLosingCards = 102,
     seUserChange = 103,
     scQueryTableStats = 104,
-    scContactUs = 105,
-    srTableBuyinLessThanCashout = 106
+    scContactUs = 105
   );
 
 {$IFDEF DEBUG}
@@ -155,6 +155,7 @@ begin
     srTableAddonOverLimit: result := 'srTableAddonOverLimit';
     srTableStatsReply: result := 'srTableStatsReply';
     srContactUsOk: result := 'srContactUsOk';
+    srTableBuyinLessThanCashout: result := 'srTableBuyinLessThanCashout';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -201,7 +202,6 @@ begin
     seUserChange: result := 'seUserChange';
     scQueryTableStats: result := 'scQueryTableStats';
     scContactUs: result := 'scContactUs';
-    srTableBuyinLessThanCashout: result := 'srTableBuyinLessThanCashout';
   end;
 end;
 {$ENDIF DEBUG}
