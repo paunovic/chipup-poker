@@ -258,6 +258,7 @@ type
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSEGameChange(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
 
     procedure RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
 
@@ -327,7 +328,8 @@ begin
                       TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
                       TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                      TServerMessageCallback.Create(seGameChange, CSEGameChange)
+                      TServerMessageCallback.Create(seGameChange, CSEGameChange),
+                      TServerMessageCallback.Create(srGetPlayers, CSRGetUsers)
                   ]);
 
   lbsHandStrength.Caption := '';
@@ -1450,14 +1452,17 @@ end;
 
 procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
 var
-  pbtablestatus  : TPB_TableStatus;
-  C1             : Integer;
-  seat_index     : Integer;
+  pbtablestatus: TPB_TableStatus;
+  C1: Integer;
+  seat_index: Integer;
   cardshow_events: Integer;
+  player: TPlayerInfo;
+  query_users: TArray<TBytes>;
+  empty_array: TBytes;
   {$IFDEF DEBUG}
-  tmp          : String;
-  seat         : TSeatInfo;
-  tb           : UINT32;
+  tmp: String;
+  seat: TSeatInfo;
+  tb: UINT32;
   {$ENDIF}
 begin
   pbtablestatus := AObject as TPB_TableStatus;
@@ -1534,6 +1539,28 @@ begin
   for C1 := 0 to pbtablestatus.Events.Count - 1 do
     ProcessTableEvent(pbtablestatus.Events[C1]);
 
+  SetLength(query_users, 0);
+  for seat in FTableStatus.Seats do
+    if not Players.FindPlayerById(seat.PlayerMongoId, player) then
+    begin
+      SetLength(query_users, Length(query_users) + 1);
+      query_users[Length(query_users) - 1] := seat.PlayerMongoId;
+    end;
+
+  if Length(query_users) > 0 then
+  begin
+    SetLength(empty_array, 0);
+    for C1 := 0 to Length(query_users) - 1 do
+      Players.AddPlayer(query_users[C1], 'Retrieving...', '', 0, empty_array);
+    ServerSocket.GetUserInfos(query_users);
+  end;
+
+  ConfigureGUI;
+  Render;
+end;
+
+procedure TfrmTable.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
+begin
   ConfigureGUI;
   Render;
 end;

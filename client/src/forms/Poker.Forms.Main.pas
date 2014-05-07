@@ -791,9 +791,9 @@ end;
 
 function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club; const ADisbanded: Boolean): TClubInfo;
 var
-  C1         : Integer;
-  club       : TClubInfo;
-  player     : TPlayerInfo;
+  C1: Integer;
+  club: TClubInfo;
+  player: TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
 begin
@@ -816,7 +816,7 @@ begin
     begin
       SetLength(empty_array, 0);
       for C1 := 0 to Length(query_users) - 1 do
-        Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
+        Players.AddPlayer(query_users[C1], 'Retrieving...', '', 0, empty_array);
 
       ServerSocket.GetUserInfos(query_users);
     end;
@@ -868,7 +868,7 @@ end;
 procedure TfrmChipUpMain.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_GetUserParams;
-  user   : TPB_User;
+  user: TPB_User;
 begin
   pbreply := AObject as TPB_GetUserParams;
 
