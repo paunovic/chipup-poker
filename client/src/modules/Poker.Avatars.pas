@@ -172,7 +172,12 @@ begin
       if result then
       begin
         mstream.Position := 0;
-        FImage.LoadFromStream(mstream);
+        if IsJPEGStream(mstream) then
+        begin
+          mstream.Position := 0;
+          FImage.LoadFromStream(mstream);
+          Exit(TRUE);
+        end;
       end;
     finally
       mstream.Free;

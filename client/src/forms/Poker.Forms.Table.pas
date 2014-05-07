@@ -2249,7 +2249,8 @@ begin
   if FTableStatus.GetSeatInfo(ASeatIndex, seat_info) then
   begin
     // find player info
-    Players.FindPlayerById(seat_info.PlayerMongoId, player_info);
+    if not Players.FindPlayerById(seat_info.PlayerMongoId, player_info) then
+      player_info := nil;
 
     // set seat image that we should render
     if (FTableStatus.CurrentSeat = seat_info.SeatIndex) and
