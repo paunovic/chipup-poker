@@ -6,11 +6,10 @@ unit Poker.Protobufs.Objects.TableStatus;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.SeatInfo,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.Pot;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.Game,Poker.Protobufs.Objects.SeatInfo,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.Pot;
 
 type
   TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6,tsWinning2 = 7);
-  TCurrentGame = (cgHoldem = 1,cgOmaha = 2);
   TPB_TableStatus = class(TProtobufBaseObject)
   private
     const
@@ -52,7 +51,7 @@ type
       FEvents: TObjectList<TPB_TableEvent>;
       FPots: TObjectList<TPB_Pot>;
       FRakePercent: UINT32;
-      FCurrentGame: TCurrentGame;
+      FCurrentGame: TGameType;
       FRotation: UINT32;
 
     procedure SetTableMongoId(const AValue: TBytes);
@@ -69,7 +68,7 @@ type
     procedure SetHandid(const AValue: UINT32);
     procedure SetTime(const AValue: UInt64);
     procedure SetRakePercent(const AValue: UINT32);
-    procedure SetCurrentGame(const AValue: TCurrentGame);
+    procedure SetCurrentGame(const AValue: TGameType);
     procedure SetRotation(const AValue: UINT32);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
@@ -99,7 +98,7 @@ type
     property Events: TObjectList<TPB_TableEvent> read FEvents;
     property Pots: TObjectList<TPB_Pot> read FPots;
     property RakePercent: UINT32 read FRakePercent write SetRakePercent;
-    property CurrentGame: TCurrentGame read FCurrentGame write SetCurrentGame;
+    property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
     property Rotation: UINT32 read FRotation write SetRotation;
   end;
 
@@ -218,7 +217,7 @@ begin
       end;
       FN_CURRENT_GAME: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FCurrentGame := TCurrentGame(AProtobufReader.readEnum);
+        FCurrentGame := TGameType(AProtobufReader.readEnum);
       end;
       FN_ROTATION: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -341,7 +340,7 @@ begin
   ProtobufOutput.writeUInt32(FN_RAKE_PERCENT, AValue);
 end;
 
-procedure TPB_TableStatus.SetCurrentGame(const AValue: TCurrentGame);
+procedure TPB_TableStatus.SetCurrentGame(const AValue: TGameType);
 begin
   FCurrentGame := AValue;
   ProtobufOutput.writeInt32(FN_CURRENT_GAME, Integer(AValue));
