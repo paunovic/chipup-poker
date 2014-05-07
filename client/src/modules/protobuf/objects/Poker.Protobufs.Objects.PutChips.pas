@@ -6,8 +6,7 @@ unit Poker.Protobufs.Objects.PutChips;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
-  Poker.Protobufs.Objects.TableStatus;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableStatus;
 
 type
   TPB_PutChips = class(TProtobufBaseObject)

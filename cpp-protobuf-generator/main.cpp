@@ -296,6 +296,13 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							types[size] = type;
 							size++;
 						}
+					} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+						const EnumDescriptor *type = field->enum_type();
+						const Descriptor *parent = type->containing_type();
+						if (parent == NULL) {
+						} else if (parent != message) {
+							printer.Print(",Poker.Protobufs.Objects.$name$","name",parent->name());
+						}
 					}
 				}
 				for (int j=0; j<size; j++) {
