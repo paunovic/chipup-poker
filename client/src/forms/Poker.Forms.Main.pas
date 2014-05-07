@@ -49,12 +49,6 @@ type
     gridClubsId: TcxGridColumn;
     gridClubsName: TcxGridColumn;
     gridPublicHomeGamesLevel: TcxGridLevel;
-    gridMyHomeGames: TcxGrid;
-    gridMyHomeGamesTable: TcxGridTableView;
-    gridJoinedClubsId: TcxGridColumn;
-    gridJoinedClubsClubName: TcxGridColumn;
-    gridJoinedClubsStatus: TcxGridColumn;
-    gridMyHomeGamesLevel: TcxGridLevel;
     btMyHomeGames: TcxButton;
     btPublicHomeGames: TcxButton;
     gridGames: TcxGrid;
@@ -85,6 +79,14 @@ type
     Options1: TMenuItem;
     Sounds1: TMenuItem;
     acSoundsOnOff: TAction;
+    gridMyHomeGames: TcxGrid;
+    gridMyHomeGamesTable: TcxGridTableView;
+    gridJoinedClubsId: TcxGridColumn;
+    gridJoinedClubsClubName: TcxGridColumn;
+    gridJoinedClubsStatus: TcxGridColumn;
+    gridMyHomeGamesLevel: TcxGridLevel;
+    Developer1: TMenuItem;
+    Disconnect1: TMenuItem;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -118,6 +120,7 @@ type
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
+    procedure Disconnect1Click(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -151,6 +154,8 @@ type
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
+
+    procedure AvatarChanged(Sender: TObject);
 
     function ConfirmToCloseTables: Boolean;
     function ProcessClubObject(const AClub: TPB_Club; const ADisbanded: Boolean): TClubInfo;
@@ -186,8 +191,13 @@ uses
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Forms.ContactUs, Poker.Forms.Reconnect;
+  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars;
 
+
+procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
+end;
 
 procedure TfrmChipUpMain.DoCreate;
 begin
@@ -211,6 +221,8 @@ begin
   btJoinClub.Font.Assign(btHomeGames.Font);
 
   pcTabs.ActivePage := tsHomeGames;
+
+  Avatars.OnAvatarChanged := AvatarChanged;
 
   EnableWindow(Handle, TRUE);
 end;
@@ -243,16 +255,16 @@ end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
 begin
-  btMyHomeGames.Width := (tsHomeGames.Width - btMyHomeGames.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
-  btPublicHomeGames.Left := btMyHomeGames.Left + btMyHomeGames.Width + 3;
-  btPublicHomeGames.Width := btMyHomeGames.Width;
-  gridMyHomeGames.Left := btMyHomeGames.Left;
-  gridMyHomeGames.Width := btMyHomeGames.Width;
+  btPublicHomeGames.Width := (tsHomeGames.Width - btPublicHomeGames.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
+  btMyHomeGames.Left := btPublicHomeGames.Left + btPublicHomeGames.Width + 3;
+  btMyHomeGames.Width := btPublicHomeGames.Width;
   gridPublicHomeGames.Left := btPublicHomeGames.Left;
   gridPublicHomeGames.Width := btPublicHomeGames.Width;
-  gridGames.Width := btPublicHomeGames.Left + btPublicHomeGames.Width - btMyHomeGames.Left;
-  btTournamentsHeader.Left := btMyHomeGames.Left;
-  btTournamentsHeader.Width := btMyHomeGames.Width + 3 + btPublicHomeGames.Width;
+  gridMyHomeGames.Left := btMyHomeGames.Left;
+  gridMyHomeGames.Width := btMyHomeGames.Width;
+  gridGames.Width := btMyHomeGames.Left + btMyHomeGames.Width - btPublicHomeGames.Left;
+  btTournamentsHeader.Left := btPublicHomeGames.Left;
+  btTournamentsHeader.Width := btPublicHomeGames.Width + 3 + btMyHomeGames.Width;
 end;
 
 procedure TfrmChipUpMain.DoLogout;
@@ -294,19 +306,23 @@ var
 begin
   case ANewState of
     wsClosed: begin // handle disconnection here (try to reconnect)
-      // save form states and disable them
-      FormsContainer.SaveState;
-      FormsContainer.DisableAll;
+      // first, check if reconnect form already exists, if it does, don't recreate it!
+      if not FormsContainer.Contains(TfrmReconnect) then
+      begin
+        // save form states and disable them
+        FormsContainer.SaveState;
+        FormsContainer.DisableAll;
 
-      // disable all tables
-      Tables.DisableAll;
+        // disable all tables
+        Tables.DisableAll;
 
-      // disable main form (its not in forms container)
-      EnableWindow(Handle, FALSE);
+        // disable main form (its not in forms container)
+        EnableWindow(Handle, FALSE);
 
-      // open reconection form
-      reconnect_form := FormsContainer.RunForm(TfrmReconnect, nil, [], FALSE) as TfrmReconnect;
-      reconnect_form.SetCloseCallback(ModalFormClose);
+        // open reconection form
+        reconnect_form := FormsContainer.RunForm(TfrmReconnect, nil, [], FALSE) as TfrmReconnect;
+        reconnect_form.SetCloseCallback(ModalFormClose);
+      end;
     end;
   end;
 end;
@@ -425,7 +441,7 @@ begin
   if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
     MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
-    Tables.AddTable(club, game, TRUE, TRUE);
+    Tables.AddTable(club, game, FALSE, TRUE);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -453,6 +469,9 @@ begin
                              (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
 
   Sounds1.Checked := Settings.Sounds;
+
+
+  Developer1.Visible := Settings.DeveloperMode;
 
   UpdateClublist;
   UpdateGamelist;
@@ -772,9 +791,9 @@ end;
 
 function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club; const ADisbanded: Boolean): TClubInfo;
 var
-  C1         : Integer;
-  club       : TClubInfo;
-  player     : TPlayerInfo;
+  C1: Integer;
+  club: TClubInfo;
+  player: TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
 begin
@@ -797,7 +816,7 @@ begin
     begin
       SetLength(empty_array, 0);
       for C1 := 0 to Length(query_users) - 1 do
-        Players.AddPlayer(query_users[C1], 'Unknown', '', 0, empty_array);
+        Players.AddPlayer(query_users[C1], 'Retrieving...', '', 0, empty_array);
 
       ServerSocket.GetUserInfos(query_users);
     end;
@@ -849,7 +868,7 @@ end;
 procedure TfrmChipUpMain.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_GetUserParams;
-  user   : TPB_User;
+  user: TPB_User;
 begin
   pbreply := AObject as TPB_GetUserParams;
 
@@ -905,6 +924,14 @@ end;
 procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);
 begin
   dmMain.OpenTACLink;
+end;
+
+procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);
+var
+  table: TTable;
+begin
+  for table in Tables do
+    table.UpdateAvatars(Sender as TAvatar);
 end;
 
 procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);
@@ -1013,7 +1040,7 @@ begin
 
     if (Assigned(game)) and
        (AMethodId = Integer(srCreateGameOk)) then
-      Tables.AddTable(club, game, TRUE, TRUE);
+      Tables.AddTable(club, game, FALSE, TRUE);
   end;
 
   ConfigureGUI;
@@ -1022,14 +1049,27 @@ end;
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
-  table    : TTable;
+  club: TClubInfo;
+  table: TTable;
+  game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
 
+  table := nil;
   if not Tables.FindTable(pbtstatus.TableMongoId, table) then
-    Exit;
+    for club in dmMain.SelfInfo.Clubs do
+      if club.Games.FindGame(pbtstatus.TableMongoId, game) then
+      begin
+        table := Tables.AddTable(club, game, TRUE, FALSE);
+        Break;
+      end;
 
-  table.Game.UpdateFromTableStatus(pbtstatus);
+  if Assigned(table) then
+  begin
+    table.Game.UpdateFromTableStatus(pbtstatus);
+    if not table.Form.Visible then
+      table.BringToFront;
+  end;
 
   ConfigureGUI;
 end;

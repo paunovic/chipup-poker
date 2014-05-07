@@ -124,7 +124,9 @@ uses
   Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
   Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
   Poker.Protobufs.Objects.ContactMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.ContactMessage.pas',
-  Poker.Server.SocketConnect in 'modules\server\Poker.Server.SocketConnect.pas';
+  Poker.Server.SocketConnect in 'modules\server\Poker.Server.SocketConnect.pas',
+  Poker.Protobufs.Objects.BuyinError in 'modules\protobuf\objects\Poker.Protobufs.Objects.BuyinError.pas',
+  Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas';
 
 procedure FocusPokerApp;
 var

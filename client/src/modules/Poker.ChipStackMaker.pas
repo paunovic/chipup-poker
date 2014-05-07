@@ -67,7 +67,7 @@ const
 var
   chip_index, ccount, c1k, c500, c100, c25, c5: Integer;
 begin
-  ccount := FValue;
+  ccount := FValue div 100;
 
   c1k := ccount div 1000;
   Dec(ccount, c1k * 1000);

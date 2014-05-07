@@ -3,7 +3,7 @@ object frmTableSit: TfrmTableSit
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Get Chips'
-  ClientHeight = 160
+  ClientHeight = 180
   ClientWidth = 298
   Color = clBlack
   Ctl3D = False
@@ -22,13 +22,13 @@ object frmTableSit: TfrmTableSit
   OnShow = FormShow
   DesignSize = (
     298
-    160)
+    180)
   PixelsPerInch = 96
   TextHeight = 13
-  object lbsBuyinAmount: TcxLabel
+  object lbsChipsAmount: TcxLabel
     AlignWithMargins = True
     Left = 15
-    Top = 94
+    Top = 110
     Margins.Left = 10
     Margins.Right = 10
     Anchors = [akLeft, akBottom]
@@ -39,31 +39,33 @@ object frmTableSit: TfrmTableSit
     Style.Font.Height = -11
     Style.Font.Name = 'Arial'
     Style.Font.Style = [fsBold]
-    Style.TextStyle = []
+    Style.TextStyle = [fsBold]
     Style.IsFontAssigned = True
     Properties.Alignment.Horz = taLeftJustify
     Properties.Alignment.Vert = taVCenter
     Properties.WordWrap = True
     Transparent = True
-    Width = 72
-    AnchorY = 103
+    Width = 84
+    AnchorY = 119
   end
   object seBuyin: TcxSpinEdit
-    Left = 91
-    Top = 93
+    Left = 102
+    Top = 109
     Anchors = [akLeft, akRight, akBottom]
     Properties.MinValue = 1.000000000000000000
     Properties.SpinButtons.Visible = False
     Properties.UseLeftAlignmentOnEditing = False
     Properties.ValueType = vtFloat
     Properties.OnChange = seBuyinPropertiesChange
+    Style.TextColor = clWhite
+    Style.TextStyle = [fsBold]
     TabOrder = 1
     Value = 100.000000000000000000
-    Width = 84
+    Width = 72
   end
   object btOK: TcxButton
     Left = 97
-    Top = 124
+    Top = 144
     Width = 93
     Height = 27
     Action = acOK
@@ -79,7 +81,7 @@ object frmTableSit: TfrmTableSit
   end
   object btCancel: TcxButton
     Left = 196
-    Top = 124
+    Top = 144
     Width = 93
     Height = 27
     Action = acCancel
@@ -93,25 +95,27 @@ object frmTableSit: TfrmTableSit
     Font.Style = []
     ParentFont = False
   end
-  object lbsInfo: TcxLabel
+  object lbvTableName: TcxLabel
     AlignWithMargins = True
     Left = 3
     Top = 6
     Margins.Top = 6
     Align = alTop
-    Anchors = [akLeft, akTop, akRight, akBottom]
     AutoSize = False
+    Caption = 'Table Name'
+    Style.TextColor = clWhite
+    Style.TextStyle = [fsBold]
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Transparent = True
-    Height = 78
+    Height = 22
     Width = 292
     AnchorX = 149
-    AnchorY = 45
+    AnchorY = 17
   end
   object btMin: TcxButton
     Left = 177
-    Top = 94
+    Top = 110
     Width = 55
     Height = 19
     Action = acMin
@@ -127,7 +131,7 @@ object frmTableSit: TfrmTableSit
   end
   object btMax: TcxButton
     Left = 234
-    Top = 94
+    Top = 110
     Width = 55
     Height = 19
     Action = acMax
@@ -141,9 +145,96 @@ object frmTableSit: TfrmTableSit
     Font.Style = []
     ParentFont = False
   end
+  object lbsTableBuyins: TcxLabel
+    AlignWithMargins = True
+    Left = 8
+    Top = 26
+    Margins.Top = 6
+    AutoSize = False
+    Caption = '(min buy-in %.2f, max buyin %.2f)'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Tahoma'
+    Style.Font.Style = []
+    Style.TextStyle = [fsBold]
+    Style.IsFontAssigned = True
+    Properties.Alignment.Horz = taCenter
+    Properties.Alignment.Vert = taVCenter
+    Transparent = True
+    Height = 17
+    Width = 282
+    AnchorX = 149
+    AnchorY = 35
+  end
+  object lbsAvailableBalance: TcxLabel
+    AlignWithMargins = True
+    Left = 15
+    Top = 56
+    Margins.Top = 6
+    Caption = 'Your available balance:'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Tahoma'
+    Style.Font.Style = []
+    Style.TextStyle = [fsBold]
+    Style.IsFontAssigned = True
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.Alignment.Vert = taVCenter
+    Transparent = True
+    AnchorY = 65
+  end
+  object lbvAvailableBalance: TcxLabel
+    AlignWithMargins = True
+    Left = 151
+    Top = 56
+    Margins.Top = 6
+    Caption = '200'
+    Style.TextColor = clWhite
+    Style.TextStyle = [fsBold]
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.Alignment.Vert = taVCenter
+    Transparent = True
+    AnchorY = 65
+  end
+  object lbsMaxBuyin: TcxLabel
+    AlignWithMargins = True
+    Left = 15
+    Top = 75
+    Margins.Top = 6
+    Caption = 'Your maximum buy-in:'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Tahoma'
+    Style.Font.Style = []
+    Style.TextStyle = [fsBold]
+    Style.IsFontAssigned = True
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.Alignment.Vert = taVCenter
+    Transparent = True
+    AnchorY = 84
+  end
+  object lbvMaxBuyin: TcxLabel
+    AlignWithMargins = True
+    Left = 151
+    Top = 75
+    Margins.Top = 6
+    Caption = '200'
+    Style.TextColor = clWhite
+    Style.TextStyle = [fsBold]
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.Alignment.Vert = taVCenter
+    Transparent = True
+    AnchorY = 84
+  end
   object alTableSit: TActionList
-    Left = 44
-    Top = 45
+    Left = 256
+    Top = 9
     object acOK: TAction
       Caption = 'OK'
       Enabled = False

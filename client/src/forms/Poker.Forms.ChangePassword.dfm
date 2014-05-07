@@ -3,7 +3,7 @@ object frmChangePassword: TfrmChangePassword
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Change Password'
-  ClientHeight = 133
+  ClientHeight = 128
   ClientWidth = 301
   Color = clBlack
   Ctl3D = False
@@ -21,12 +21,12 @@ object frmChangePassword: TfrmChangePassword
   OnKeyPress = FormKeyPress
   DesignSize = (
     301
-    133)
+    128)
   PixelsPerInch = 96
   TextHeight = 13
   object lbsCurrentPassword: TcxLabel
     Left = 7
-    Top = 15
+    Top = 12
     Caption = 'Current password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -40,7 +40,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object lbsNewPassword: TcxLabel
     Left = 7
-    Top = 42
+    Top = 39
     Caption = 'New password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -54,7 +54,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object edNewPassword: TcxTextEdit
     Left = 106
-    Top = 41
+    Top = 38
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.EchoMode = eemPassword
@@ -65,7 +65,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object edCurrentPassword: TcxTextEdit
     Left = 106
-    Top = 14
+    Top = 11
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.EchoMode = eemPassword
@@ -76,7 +76,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object lbsConfirmPassword: TcxLabel
     Left = 7
-    Top = 66
+    Top = 63
     Caption = 'Confirm password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -90,7 +90,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object edConfirmPassword: TcxTextEdit
     Left = 106
-    Top = 65
+    Top = 62
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.EchoMode = eemPassword
@@ -101,7 +101,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object btOK: TcxButton
     Left = 101
-    Top = 97
+    Top = 92
     Width = 93
     Height = 27
     Action = acOK
@@ -114,10 +114,11 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 94
   end
   object btCancel: TcxButton
     Left = 200
-    Top = 97
+    Top = 92
     Width = 93
     Height = 27
     Action = acCancel
@@ -130,6 +131,7 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 94
   end
   object alChangePassword: TActionList
     Left = 36

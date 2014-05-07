@@ -13,11 +13,13 @@ object frmImageCrop: TfrmImageCrop
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
   OnPaint = FormPaint
   DesignSize = (
     645
@@ -39,8 +41,6 @@ object frmImageCrop: TfrmImageCrop
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitLeft = 387
-    ExplicitTop = 402
   end
   object btCancel: TcxButton
     Left = 544
@@ -57,8 +57,6 @@ object frmImageCrop: TfrmImageCrop
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 486
-    ExplicitTop = 402
   end
   object PaintBox: TPaintBox32
     AlignWithMargins = True
@@ -77,10 +75,6 @@ object frmImageCrop: TfrmImageCrop
     OnMouseDown = PaintBoxMouseDown
     OnMouseMove = PaintBoxMouseMove
     OnMouseUp = PaintBoxMouseUp
-    ExplicitLeft = 2
-    ExplicitTop = 0
-    ExplicitWidth = 599
-    ExplicitHeight = 427
   end
   object ActionList: TActionList
     Left = 48

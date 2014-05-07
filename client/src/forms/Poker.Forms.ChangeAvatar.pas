@@ -109,7 +109,9 @@ var
 begin
   error := '';
 
-  if SslHttp.RcvdStream.Size > 0 then
+  if (ErrCode = 0) and
+     (SslHttp.StatusCode = 200) and
+     (SslHttp.RcvdStream.Size > 0) then
   begin
     {$IFDEF DEBUG} DebugLn(Format('Avatar received. Size: %d', [SslHttp.RcvdStream.Size]), ditNetInc); {$ENDIF}
     SslHttp.RcvdStream.Position := 0;
@@ -121,7 +123,10 @@ begin
     error := 'Invalid response from server';
 
   if error <> '' then
+  begin
     MessageDlg(error, mtError, [mbOK], 0);
+    acChange.Enabled := TRUE;
+  end;
 end;
 
 procedure TfrmChangeAvatar.acCloseExecute(Sender: TObject);

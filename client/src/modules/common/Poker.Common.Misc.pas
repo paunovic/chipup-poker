@@ -38,6 +38,8 @@ function SecondsToTime(ASeconds: DWORD): TTime;
 function MongoIdToDateTime(const AMongoId: TBytes): TDateTime;
 procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
 function KillWindowsTimer(var ATimerId: UINT_PTR): Boolean;
+function ChipsToStr(const AValue: UINT32): String;
+procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);
 
 type
   TPB_Games = TObjectList<TPB_Game>;
@@ -547,6 +549,58 @@ begin
   KillTimer(0, ATimerId);
   ATimerId := 0;
   Exit(TRUE);
+end;
+
+function ChipsToStr(const AValue: UINT32): String;
+begin
+  result := IntToStr(AValue);
+  if AValue mod 100 = 0 then
+    Delete(result, Length(result) - 1, 2)
+  else
+    Insert('.', result, Length(result) - 1);
+end;
+
+procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);
+var
+  data: TArray<String>;
+
+  procedure AddComb;
+  var
+    C1: Integer;
+  begin
+    SetLength(ACombinations, Length(ACombinations) + 1);
+    ACombinations[Length(ACombinations) - 1] := '';
+    for C1 := Low(data) to High(data) do
+      ACombinations[Length(ACombinations) - 1] := ACombinations[Length(ACombinations) - 1] + data[C1];
+  end;
+
+  procedure GetCombination(const AStart, AEnd, AIndex: Integer);
+  var
+    C1: Integer;
+  begin
+    if AIndex = ALength then
+    begin
+      AddComb;
+      Exit;
+    end;
+
+    for C1 := AStart to AEnd do
+    begin
+      if AEnd - C1 + 1 < ALength - AIndex then
+        Break;
+
+      data[AIndex] := AInput[C1];
+      GetCombination(C1 + 1, AEnd, AIndex + 1);
+    end;
+  end;
+
+begin
+  SetLength(data, ALength);
+  GetCombination(0, Length(AInput) - 1, 0);
+end;
+
+procedure GetOmahaCombinations(const APlayerCards, ATableCards: TArray<String>; out ACombinations: TArray<String>);
+begin
 end;
 
 initialization

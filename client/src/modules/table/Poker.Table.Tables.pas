@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.GameInfo, Poker.Protobufs.Objects.TableStatus,
-  Poker.Objects.ClubInfo, Vcl.Forms;
+  Poker.Objects.ClubInfo, Vcl.Forms, Poker.Avatars;
 
 type
   TTable = class
@@ -21,6 +21,8 @@ type
 
     procedure NotifyClose;
     function IsSitting: Boolean;
+
+    procedure UpdateAvatars(const AAvatar: TAvatar);
 
     function ReassignObjects(const AGameId: TBytes): Boolean;
 
@@ -119,6 +121,11 @@ begin
         Exit(TRUE);
       end;
   Exit(FALSE);
+end;
+
+procedure TTable.UpdateAvatars(const AAvatar: TAvatar);
+begin
+  TTableSyncRender.Render(FForm as TfrmTable);
 end;
 
 { TTables }

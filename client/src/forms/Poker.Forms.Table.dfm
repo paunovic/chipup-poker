@@ -5,7 +5,7 @@ object frmTable: TfrmTable
   Caption = 'Table'
   ClientHeight = 524
   ClientWidth = 792
-  Color = clBtnFace
+  Color = 2170742
   Constraints.MaxHeight = 910
   Constraints.MaxWidth = 1320
   Constraints.MinWidth = 600
@@ -128,8 +128,8 @@ object frmTable: TfrmTable
     Width = 106
   end
   object seRaiseAmount: TcxSpinEdit
-    Left = 474
-    Top = 287
+    Left = 454
+    Top = 435
     Anchors = []
     AutoSize = False
     ParentFont = False
@@ -155,8 +155,9 @@ object frmTable: TfrmTable
     TabOrder = 4
     Value = 76950.000000000000000000
     Visible = False
-    Height = 28
-    Width = 106
+    OnKeyDown = seRaiseAmountKeyDown
+    Height = 22
+    Width = 95
   end
   object rvChat: TRichView
     Left = 16
@@ -168,6 +169,28 @@ object frmTable: TfrmTable
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyle
+  end
+  object lbsHandStrength: TcxLabel
+    Left = 723
+    Top = 416
+    Anchors = [akRight, akBottom]
+    Caption = 'Nine-High'
+    ParentFont = False
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Sintony'
+    Style.Font.Style = []
+    Style.Font.Quality = fqAntialiased
+    Style.LookAndFeel.NativeStyle = False
+    Style.TextColor = 13158600
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.NativeStyle = False
+    StyleFocused.LookAndFeel.NativeStyle = False
+    StyleHot.LookAndFeel.NativeStyle = False
+    Properties.Alignment.Horz = taRightJustify
+    Transparent = True
+    AnchorX = 782
   end
   object ActionManager: TActionManager
     Left = 56
@@ -262,7 +285,7 @@ object frmTable: TfrmTable
     Interval = 500
     OnTimer = tiSitOutNextBBTimer
     Left = 144
-    Top = 100
+    Top = 108
   end
   object RVStyle: TRVStyle
     TextStyles = <
@@ -440,13 +463,19 @@ object frmTable: TfrmTable
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 380
-    Top = 308
+    Left = 312
+    Top = 100
   end
   object tiGameLock: TTimer
     Enabled = False
     OnTimer = tiGameLockTimer
     Left = 232
     Top = 104
+  end
+  object tiRender: TTimer
+    Interval = 500
+    OnTimer = tiRenderTimer
+    Left = 316
+    Top = 32
   end
 end

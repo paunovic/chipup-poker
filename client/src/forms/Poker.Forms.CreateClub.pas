@@ -87,12 +87,12 @@ end;
 procedure TfrmCreateClub.acOKExecute(Sender: TObject);
 var
   error: String;
-begin
+begin           {
   if not ValidateClubName(edClubName.Text, error) then
     edClubName.SetFocus
   else
     if not ValidateClubCode(edClubCode.Text, error) then
-      edClubCode.SetFocus;
+      edClubCode.SetFocus;   }
 
   if error <> '' then
   begin

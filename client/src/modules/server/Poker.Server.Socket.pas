@@ -5,24 +5,24 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.ContactMessage, Poker.Server.SocketConnect;
+  Poker.Protobufs.Objects.ContactMessage, Poker.Server.SocketConnect, Poker.Protobufs.Objects.TableStatus;
 
 type
   TServerSocket = class
   private
-    FSocket                : TSslWSocket;
-    FSocketConnectThread   : TSocketConnectThread;
-    FServer                : String;
-    FPort                  : Integer;
-    FConnectCode           : Integer;
-    FReceiveBuffer         : PAnsiChar;
-    FReceiveBufferSize     : Integer;
-    FLatency               : Integer;
-    FServerTime            : UINT64;
-    FTimeOffset            : UINT64;
-    FTimerIdInactivityPing : UINT_PTR;
-    FTimerIdPing           : UINT_PTR;
-    FTimerIdPingTimeout    : UINT_PTR;
+    FSocket: TSslWSocket;
+    FSocketConnectThread: TSocketConnectThread;
+    FServer: String;
+    FPort: Integer;
+    FConnectCode: Integer;
+    FReceiveBuffer: PAnsiChar;
+    FReceiveBufferSize: Integer;
+    FLatency: Integer;
+    FServerTime: UINT64;
+    FTimeOffset: UINT64;
+    FTimerIdInactivityPing: UINT_PTR;
+    FTimerIdPing: UINT_PTR;
+    FTimerIdPingTimeout: UINT_PTR;
 
     procedure ConnectThreadTerminated(Sender: TObject);
     procedure ConnectThreadConnectFailed(Sender: TObject);
@@ -90,7 +90,7 @@ type
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
     procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
     procedure Fold(const AGameId: TBytes);
-    procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer);
+    procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TBytes);
@@ -121,11 +121,11 @@ uses
   Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply, Poker.Protobufs.Objects.GiveClubOwnershipParams,
   Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
   Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Server.SSLCerts;
+  Poker.Server.SSLCerts, Poker.Protobufs.Objects.BuyinError;
 
 
 procedure TimerProc(HWND: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
@@ -299,12 +299,15 @@ procedure TServerSocket.SocketDataAvailable(Sender: TObject; Error: Word);
 const
   BUFFER_SIZE = 16 * 1024;
 var
-  len        : Integer;
-  rcv_buf    : array[0..BUFFER_SIZE - 1] of AnsiChar;
-  rpc_size   : Word;
+  len: Integer;
+  rcv_buf: array[0..BUFFER_SIZE - 1] of AnsiChar;
+  rpc_size: Word;
   rpc_message: TPB_RpcMessage;
-  data_obj   : TObject;
-  ptmp       : pointer;
+  data_obj: TObject;
+  ptmp: pointer;
+  {$IFDEF DEBUG}
+  dbgtype: TDebugInfoType;
+  {$ENDIF}
 begin
   if Error <> 0 then
   begin
@@ -343,10 +346,15 @@ begin
     begin
       ResetInactivityPingTimer;
       {$IFDEF DEBUG}
-      if rpc_message.DataSize = 0 then
-        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), ditSocketInc)
+      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
+        dbgtype := ditPingPong
       else
-        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
+        dbgtype := ditSocketInc;
+
+      if rpc_message.DataSize = 0 then
+        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), dbgtype)
+      else
+        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), dbgtype);
       {$ENDIF}
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
@@ -513,6 +521,7 @@ begin
     seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatsReply: ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
     srContactUsOk: ADataObject := TPB_ContactMessage.Create(ADataPointer, ARpcMessage.DataSize);
+    srTableBuyinLessThanCashout: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
@@ -522,8 +531,11 @@ end;
 procedure TServerSocket.SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
 var
   rpc_message: TPB_RpcMessage;
-  mstream    : TMemoryStream;
-  rpcsize    : Word;
+  mstream: TMemoryStream;
+  rpcsize: Word;
+  {$IFDEF DEBUG}
+  dbgtype: TDebugInfoType;
+  {$ENDIF}
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
@@ -538,7 +550,13 @@ begin
       if ASize > 0 then
         mstream.Write(AProtobuf, rpc_message.DataSize);
 
-      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), ASize, mstream.Size]), ditSocketOut); {$ENDIF}
+      {$IFDEF DEBUG}
+      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
+        dbgtype := ditPingPong
+      else
+        dbgtype := ditSocketOut;
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), ASize, mstream.Size]), dbgtype);
+      {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -553,6 +571,9 @@ var
   rpc_message: TPB_RpcMessage;
   mstream    : TMemoryStream;
   rpcsize    : Word;
+  {$IFDEF DEBUG}
+  dbgtype: TDebugInfoType;
+  {$ENDIF}
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
@@ -567,7 +588,13 @@ begin
       if rpc_message.Datasize > 0 then
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), ditSocketOut); {$ENDIF}
+      {$IFDEF DEBUG}
+      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
+        dbgtype := ditPingPong
+      else
+        dbgtype := ditSocketOut;
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), dbgtype);
+      {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -999,7 +1026,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.PutChips(const AGameId: TBytes; const AChipAmount: Integer);
+procedure TServerSocket.PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
 var
   protobuf: TPB_PutChips;
 begin
@@ -1007,6 +1034,7 @@ begin
   try
     protobuf.TableMongoId := AGameId;
     protobuf.ChipAmount := AChipAmount;
+    protobuf.CurrentState := ATableState;
     SendProtobuf(scPutChips, protobuf);
   finally
     protobuf.Free;

@@ -139,7 +139,7 @@ begin
       edClubID.SetFocus;
     end;
     csBadPassword: begin
-      MessageDlg('Invalid club code', mtError, [mbOK], 0);
+      MessageDlg('Invalid club password', mtError, [mbOK], 0);
       edClubCode.SetFocus;
     end;
   end;

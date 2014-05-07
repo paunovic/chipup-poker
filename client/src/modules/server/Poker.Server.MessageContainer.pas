@@ -43,7 +43,7 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} {$ENDIF}
+  {$IFDEF DEBUG} Poker.Forms.Debug, Poker.Protobufs.Enum.ServerCodes, {$ENDIF}
   System.SysUtils, System.Classes;
 
 
@@ -135,8 +135,8 @@ end;
 
 procedure TMessageContainer.ProcessMessage(const AMessage: TMessage);
 var
-  callback_set      : TCallbackSet;
-  obj, data_obj     : TObject;
+  callback_set: TCallbackSet;
+  obj, data_obj: TObject;
   callback_servermsg: TServerMessageCallback;
 begin
   FLock.Acquire;
@@ -157,11 +157,12 @@ begin
           if callback_set.Removed then
             Break;
 
-          if (AMessage.Msg = FServerReplyMsg) and (obj is TServerMessageCallback) then
+          if (AMessage.Msg = FServerReplyMsg) and
+             (obj is TServerMessageCallback) then
           begin
             callback_servermsg := obj as TServerMessageCallback;
             if Integer(callback_servermsg.Code) = AMessage.LParam then
-              callback_servermsg.Callback(AMessage.LParam, data_obj);
+              callback_servermsg.Callback(AMessage.LParam, data_obj)
           end
           else
             if (AMessage.Msg = FSocketStateChangeMsg) and (obj is TSocketStateChangeCallback) then
