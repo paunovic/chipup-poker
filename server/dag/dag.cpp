@@ -111,6 +111,8 @@ handeval_eq_class *holdemEval(int a, int b, char *cards) {
 handeval_eq_class *holdemEval(Local<Array> cardlist, char *cards,char *hand) {
 	int a = cardToNumber(cardlist,0);
 	int b = cardToNumber(cardlist,1);
+	hand[0] = a;
+	hand[1] = b;
 	return holdemEval(a,b,cards);
 }
 handeval_eq_class *omahaEval(Local<Array> cardlist, char *cards,char *hand) {

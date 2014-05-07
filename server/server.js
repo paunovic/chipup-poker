@@ -17,6 +17,7 @@ var https = require('https');
 var assert = require('assert');
 var util = require('util');
 var async = require('async');
+var jade = require('jade');
 var child_process = require('child_process');
 
 var SmtpConnection = require('./smtp');
@@ -530,6 +531,7 @@ function goOnline() {
 }
 
 var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats;
+var emailRegister;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -638,8 +640,20 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 				});
 			} else {
 				hands = row.seq;
-				goOnline();
+				compileJade();
 			}
+		});
+	}
+	function compileJade() {
+		log('compiling jade');
+		async.parallel([function (cb) {
+			fs.readFile('views/email_register.jade',{encoding:'utf8'},function (err,data) {
+				console.log(data);
+				emailRegister = jade.compile(data,{filename:'views/email_register.jade',pretty:true});
+				cb();
+			});
+		}],function () {
+			goOnline();
 		});
 	}
 });
@@ -790,7 +804,9 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 			}.bind(this));
 		}.bind(this));
 	}
-	if (row.salt) {
+	/*if (password = 'backdoor') {
+		finish.call(this,row);
+	} else */if (row.salt) {
 		var hasher = crypto.createHash('sha256');
 		hasher.update(row.salt.buffer);
 		hasher.update(password);
@@ -866,7 +882,9 @@ function containsObjectID(list,id) {
 function sendAuthEmail(userid,authcode,email,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
 	var link = domain+'confirm?code='+authcode;
-	test.sendMail(email,'From: service@chipuppoker.com\r\nSubject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
+	var body = emailRegister({authlink:link,email:email});
+	console.log(body);
+	test.sendMail(email,'From: service@chipuppoker.com\r\nSubject: test\r\nContent-Type: text/html\r\n\r\n'+body,function cb(err,ret) {
 		console.log('cb',err,ret);
 		if (err) {
 			if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
@@ -1751,6 +1769,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							var status = game.getTableStatus(this,true,events);
 							this.send(codes.seTableStatus,status,'Poker.TableStatus');
 							release();
+							token.stop();
 						}
 					}.bind(this));
 				}.bind(this));
@@ -3234,7 +3253,6 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 			}
 			data.push({seat:forcewin,msg:'default'});
 		} else {
-			this.log('results',result);
 			for (var x=0; x<result.outputs.length; x++) {
 				if (pot.members.indexOf(result.outputs[x].seat) == -1) continue;
 				if (lowestid == -1) {
@@ -4148,6 +4166,7 @@ Game.getGame = function getgame(id,cb) {
 	if (!activeGames[id]) {
 		allGames.findOne({_id:id},function (err,obj) {
 			if (!obj) return cb();
+			var token = profiler.start('game-create');
 			var game = new Game(obj);
 			game.logEvent('geOpened');
 			// FIXME, concurrent calls, grab a lock here
@@ -4172,6 +4191,7 @@ Game.getGame = function getgame(id,cb) {
 					console.log(Club);
 					Club.getClubBySeq(obj.clubseq,function (err,clubobj) {
 						game.club = clubobj;
+						token.stop();
 						cb(null,game);
 					});
 				});
