@@ -3028,7 +3028,7 @@ end;
 
 procedure TfrmTable.AnimateBets(const ABets: TArray<UINT32>);
 var
-  C1       : UINT32;
+  C1: UINT32;
   bet_point: TPoint2;
   pot_point: TPoint2;
   animation: TDXAnimation;

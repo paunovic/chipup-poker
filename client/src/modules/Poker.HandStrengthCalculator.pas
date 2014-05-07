@@ -20,7 +20,7 @@ type
     class function IsTwoPairs(const ACards: TArray<String>; out AOverCard, AUnderCard, AKicker: String): Boolean;
     class function IsPair(const ACards: TArray<String>; out ACard, AKicker: String): Boolean;
   public
-    class function GetHandStrength(const APlayerCards, ATableCards: String; const AGameType: TGameType; const AShort: Boolean): String;
+    class function GetHandStrength(APlayerCards, ATableCards: String; const AGameType: TGameType; const AShort: Boolean): String;
   end;
 
 
@@ -40,7 +40,6 @@ var
   r1, r2: Char;
   card: String;
 begin
-
   for C1 := 0 to Length(ACards) - 2 do
     for C2 := C1 + 1 to Length(ACards) - 1 do
     begin
@@ -454,13 +453,12 @@ begin
   Exit(TRUE);
 end;
 
-class function THandStrengthCalculator.GetHandStrength(const APlayerCards, ATableCards: String; const AGameType: TGameType; const AShort: Boolean): String;
+class function THandStrengthCalculator.GetHandStrength(APlayerCards, ATableCards: String; const AGameType: TGameType; const AShort: Boolean): String;
 var
   cards: TArray<String>;
   C1, C2, C3: Integer;
   pcardscount, tcardscount: Integer;
   card, kicker, overcard, undercard: String;
-  allcards: String;
   pcombs, tcombs: TArray<String>;
   check_combs: TArray<TArray<String>>;
   best_comb_index: Integer;
@@ -471,33 +469,35 @@ begin
   Assert(Length(ATableCards) mod 2 = 0);
   pcardscount := Length(APlayerCards) div 2;
   tcardscount := Length(ATableCards) div 2;
+  APlayerCards := LowerCase(APlayerCards);
+  ATableCards := LowerCase(ATableCards);
 
   case AGameType of
     gtHoldem: begin
       SetLength(check_combs, 1);
       SetLength(check_combs[0], pcardscount + tcardscount);
       index := 0;
-      for C1 := 1 to Length(APlayerCards) do
+      for C1 := 0 to pcardscount - 1 do
       begin
-        check_combs[0][index] := APlayerCards[C1];
+        check_combs[0][index] := Copy(APlayerCards, C1 * 2 + 1, 2);
         Inc(index);
       end;
-      for C1 := 1 to Length(ATableCards) do
+      for C1 := 0 to tcardscount - 1 do
       begin
-        check_combs[0][index] := ATableCards[C1];
+        check_combs[0][index] := Copy(ATableCards, C1 * 2 + 1, 2);
         Inc(index);
       end;
     end;
 
     gtOmaha: begin
       SetLength(cards, pcardscount);
-      for C1 := 0 to Length(cards) - 1 do
-        cards[C1] := LowerCase(Copy(APlayerCards, C1 * 2 + 1, 2));
+      for C1 := 0 to pcardscount - 1 do
+        cards[C1] := Copy(APlayerCards, C1 * 2 + 1, 2);
       GetAllCombinations(cards, 2, pcombs);
 
       SetLength(cards, tcardscount);
-      for C1 := 0 to Length(cards) - 1 do
-        cards[C1] := LowerCase(Copy(ATableCards, C1 * 2 + 1, 2));
+      for C1 := 0 to tcardscount - 1 do
+        cards[C1] := Copy(ATableCards, C1 * 2 + 1, 2);
       GetAllCombinations(cards, 3, tcombs);
 
       index := 0;
@@ -525,6 +525,7 @@ begin
   end;
 
   best_card := -1;
+  best_kicker := -1;
   best_comb_index := 1000;
   for C1 := Low(check_combs) to High(check_combs) do
   begin
