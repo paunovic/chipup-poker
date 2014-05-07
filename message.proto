@@ -294,10 +294,6 @@ message TableStatus {
 		tsWinning = 6;
 		tsWinning2 = 7;
 	}
-	enum CurrentGame {
-		cgHoldem = 1;
-		cgOmaha = 2;
-	}
 	
 	required bytes table_mongo_id = 1;
 	repeated SeatInfo seats = 2;
@@ -316,7 +312,7 @@ message TableStatus {
 	repeated TableEvent events = 19;
 	repeated Pot pots = 20;
 	optional uint32 rake_percent = 21;
-	optional CurrentGame current_game = 22;
+	optional Game.GameType current_game = 22;
 	optional uint32 rotation = 23;
 }
 
