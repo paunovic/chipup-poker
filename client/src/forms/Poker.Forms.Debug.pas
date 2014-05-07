@@ -12,20 +12,21 @@ uses
   cxMaskEdit, cxSpinEdit, Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game;
 
 type
-  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditUnknown);
+  TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
   TDebugInfoTypes = set of TDebugInfoType;
 
   TDebugFormLog = class(TIdNotify)
   private
+    FType: TDebugInfoType;
     FTime: String;
-    FType: String;
+    FTypeStr: String;
     FData: String;
     FTypeStyle: Integer;
     FDataStyle: Integer;
   protected
     procedure DoNotify; override;
   public
-    class procedure Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
+    class procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
   end;
 
   TfrmDebug = class(TForm)
@@ -75,6 +76,7 @@ type
     acServerTest4: TAction;
     acServerTest5: TAction;
     acServerTest6: TAction;
+    btShowPings: TcxButton;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -101,7 +103,7 @@ type
     class procedure Initialize;
     class procedure Deinitialize;
 
-    procedure Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
+    procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
   end;
 
 procedure DebugLn(const AData: String; const AType: TDebugInfoType);
@@ -178,6 +180,11 @@ begin
       tstyle := 5;
       dstyle := 11;
     end;
+    ditPingPong: begin
+      type_str := 'PING';
+      tstyle := 3;
+      dstyle := 9;
+    end;
   else
     type_str := 'UNKN';
     tstyle := 6;
@@ -185,7 +192,7 @@ begin
   end;
 
   if Assigned(frmDebug) then
-    TDebugFormLog.Add(time_str, type_str, AData, tstyle, dstyle);
+    TDebugFormLog.Add(AType, time_str, type_str, AData, tstyle, dstyle);
 
   output := Format('%s [%s] %s', [time_str, type_str, AData]);
 
@@ -341,13 +348,17 @@ begin
   DebugLn(Format('Active form: %s [%s]', [Screen.ActiveForm.Name, Screen.ActiveForm.Caption]), ditForm);
 end;
 
-procedure TfrmDebug.Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
+procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
 const
   SCROLLBACK_LINES = 250;
 var
   table: TRVTableItemInfo;
 begin
   if btPause.Down then
+    Exit;
+
+  if (AType = ditPingPong) and
+     (not btShowPings.Down) then
     Exit;
 
   if rvLog.ItemCount >= SCROLLBACK_LINES then
@@ -373,7 +384,7 @@ begin
     Cells[0, 2].Clear;
 
     Cells[0, 0].AddFmt('%s', [ATime], 0, 0);
-    Cells[0, 1].AddFmt('%s', [AType], ATypeStyle, 1);
+    Cells[0, 1].AddFmt('%s', [ATypeStr], ATypeStyle, 1);
     Cells[0, 2].AddFmt('%s', [AData], ADataStyle, 2);
   end;
 
@@ -497,12 +508,13 @@ end;
 
 { TMemoLog }
 
-class procedure TDebugFormLog.Add(const ATime, AType, AData: String; const ATypeStyle, ADataStyle: Integer);
+class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
 begin
   with TDebugFormLog.Create do
   try
-    FTime := ATime;
     FType := AType;
+    FTime := ATime;
+    FTypeStr := ATypeStr;
     FData := AData;
     FTypeStyle := ATypeStyle;
     FDataStyle := ADataStyle;
@@ -515,7 +527,7 @@ end;
 
 procedure TDebugFormLog.DoNotify;
 begin
-  frmDebug.Add(FTime, FType, FData, FTypeStyle, FDataStyle);
+  frmDebug.Add(FType, FTime, FTypeStr, FData, FTypeStyle, FDataStyle);
 end;
 
 end.

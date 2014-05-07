@@ -305,6 +305,9 @@ var
   rpc_message: TPB_RpcMessage;
   data_obj: TObject;
   ptmp: pointer;
+  {$IFDEF DEBUG}
+  dbgtype: TDebugInfoType;
+  {$ENDIF}
 begin
   if Error <> 0 then
   begin
@@ -343,10 +346,15 @@ begin
     begin
       ResetInactivityPingTimer;
       {$IFDEF DEBUG}
-      if rpc_message.DataSize = 0 then
-        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), ditSocketInc)
+      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
+        dbgtype := ditPingPong
       else
-        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
+        dbgtype := ditSocketInc;
+
+      if rpc_message.DataSize = 0 then
+        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), dbgtype)
+      else
+        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), dbgtype);
       {$ENDIF}
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
@@ -523,8 +531,11 @@ end;
 procedure TServerSocket.SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
 var
   rpc_message: TPB_RpcMessage;
-  mstream    : TMemoryStream;
-  rpcsize    : Word;
+  mstream: TMemoryStream;
+  rpcsize: Word;
+  {$IFDEF DEBUG}
+  dbgtype: TDebugInfoType;
+  {$ENDIF}
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
@@ -539,7 +550,13 @@ begin
       if ASize > 0 then
         mstream.Write(AProtobuf, rpc_message.DataSize);
 
-      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), ASize, mstream.Size]), ditSocketOut); {$ENDIF}
+      {$IFDEF DEBUG}
+      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
+        dbgtype := ditPingPong
+      else
+        dbgtype := ditSocketOut;
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), ASize, mstream.Size]), dbgtype);
+      {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -554,6 +571,9 @@ var
   rpc_message: TPB_RpcMessage;
   mstream    : TMemoryStream;
   rpcsize    : Word;
+  {$IFDEF DEBUG}
+  dbgtype: TDebugInfoType;
+  {$ENDIF}
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
@@ -568,7 +588,13 @@ begin
       if rpc_message.Datasize > 0 then
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-      {$IFDEF DEBUG} DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), ditSocketOut); {$ENDIF}
+      {$IFDEF DEBUG}
+      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
+        dbgtype := ditPingPong
+      else
+        dbgtype := ditSocketOut;
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), dbgtype);
+      {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
