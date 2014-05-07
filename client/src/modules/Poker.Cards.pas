@@ -113,7 +113,7 @@ begin
     csClub: result := 'c';
     csDiamond: result := 'd';
   else
-    result := 'x';
+    result := '';
   end;
 end;
 
@@ -134,7 +134,7 @@ begin
     cvKing: result :=  'K';
     cvAce: result :=  'A';
   else
-    result :=  'X';
+    result :=  '';
   end;
 end;
 

@@ -30,6 +30,7 @@ type
     function RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean): TForm;
     procedure CloseAllForms;
     function Find(const AFormClass: TFormClass; out AForm: TForm): Boolean;
+    function Contains(const AFormClass: TFormClass): Boolean;
 
     property Items: TForms read FItems;
   end;
@@ -40,6 +41,7 @@ var
 implementation
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.Windows, Poker.Common.Misc, System.SysUtils;
 
 
@@ -103,6 +105,16 @@ begin
       AForm := form;
       Exit(TRUE);
     end;
+  Exit(FALSE);
+end;
+
+function TFormsContainer.Contains(const AFormClass: TFormClass): Boolean;
+var
+  form: TForm;
+begin
+  for form in FItems do
+    if form is AFormClass then
+      Exit(TRUE);
   Exit(FALSE);
 end;
 

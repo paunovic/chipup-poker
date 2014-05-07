@@ -306,19 +306,23 @@ var
 begin
   case ANewState of
     wsClosed: begin // handle disconnection here (try to reconnect)
-      // save form states and disable them
-      FormsContainer.SaveState;
-      FormsContainer.DisableAll;
+      // first, check if reconnect form already exists, if it does, don't recreate it!
+      if not FormsContainer.Contains(TfrmReconnect) then
+      begin
+        // save form states and disable them
+        FormsContainer.SaveState;
+        FormsContainer.DisableAll;
 
-      // disable all tables
-      Tables.DisableAll;
+        // disable all tables
+        Tables.DisableAll;
 
-      // disable main form (its not in forms container)
-      EnableWindow(Handle, FALSE);
+        // disable main form (its not in forms container)
+        EnableWindow(Handle, FALSE);
 
-      // open reconection form
-      reconnect_form := FormsContainer.RunForm(TfrmReconnect, nil, [], FALSE) as TfrmReconnect;
-      reconnect_form.SetCloseCallback(ModalFormClose);
+        // open reconection form
+        reconnect_form := FormsContainer.RunForm(TfrmReconnect, nil, [], FALSE) as TfrmReconnect;
+        reconnect_form.SetCloseCallback(ModalFormClose);
+      end;
     end;
   end;
 end;

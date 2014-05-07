@@ -712,7 +712,7 @@ var
   selectedid: TBytes;
   C1: Integer;
   found: Boolean;
-  total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay, total_timeplayed: UINT32;
+  total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay, total_timeplayed: Int64;
 begin
   finalstats := TObjectList<TPlayerStats>.Create;
   try

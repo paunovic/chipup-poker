@@ -10,12 +10,12 @@ type
   TPlayerStats = class
   private
     FUserId: TBytes;
-    FBalance: UINT32;
+    FBalance: Int64;
     FBuyins: TArray<UINT32>;
     FCashouts: TArray<UINT32>;
-    FRakeContrib: UINT32;
-    FSecondsPlayed: UINT32;
-    FChipsInPlay: UINT32;
+    FRakeContrib: Int64;
+    FSecondsPlayed: Int64;
+    FChipsInPlay: Int64;
 
     function GetBuyinsTotal: UINT32;
     function GetCashoutsTotal: UINT32;
@@ -29,14 +29,14 @@ type
     procedure Merge(const APlayerStats: TPlayerStats);
 
     property UserId: TBytes read FUserId;
-    property Balance: UINT32 read FBalance;
+    property Balance: Int64 read FBalance;
     property Buyins: TArray<UINT32> read FBuyins;
     property Cashouts: TArray<UINT32> read FCashouts;
-    property RakeContrib: UINT32 read FRakeContrib;
-    property SecondsPlayed: UINT32 read FSecondsPlayed;
+    property RakeContrib: Int64 read FRakeContrib;
+    property SecondsPlayed: Int64 read FSecondsPlayed;
     property CashoutsTotal: UINT32 read GetCashoutsTotal;
     property BuyinsTotal: UINT32 read GetBuyinsTotal;
-    property ChipsInPlay: UINT32 read FChipsInPlay;
+    property ChipsInPlay: Int64 read FChipsInPlay;
   end;
 
 implementation

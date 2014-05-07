@@ -4276,6 +4276,6 @@ object frmChipUpMain: TfrmChipUpMain
     Interval = 100
     OnTimer = tiBringToFrontTimer
     Left = 576
-    Top = 24
+    Top = 28
   end
 end

@@ -5,7 +5,7 @@ interface
 uses
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent,
   System.SysUtils, System.Generics.Collections, System.Generics.Defaults, Poker.Cards, Poker.Protobufs.Objects.Pot,
-  Poker.Protobufs.Objects.WinnerPotInfo, Poker.Protobufs.Objects.WinnerData;
+  Poker.Protobufs.Objects.WinnerPotInfo, Poker.Protobufs.Objects.WinnerData, Poker.Protobufs.Objects.Game;
 
 type
   TSeatInfo = class
@@ -150,7 +150,7 @@ type
     FPots          : TPotInfos;
     FTime          : UINT64;
     FRotationHand  : UINT32;
-    FCurrentGame   : TCurrentGame;
+    FCurrentGame   : TGameType;
 //    FEvents        : TTableEvents;
 
   public
@@ -181,7 +181,7 @@ type
     property MaximumBet: UINT32 read FMaximumBet;
     property Time: UINT64 read FTime;
     property RotationHand: UINT32 read FRotationHand;
-    property CurrentGame: TCurrentGame read FCurrentGame;
+    property CurrentGame: TGameType read FCurrentGame;
 //    property Events: TTableEvents read FEvents;
   end;
 

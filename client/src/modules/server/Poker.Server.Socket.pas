@@ -10,19 +10,19 @@ uses
 type
   TServerSocket = class
   private
-    FSocket                : TSslWSocket;
-    FSocketConnectThread   : TSocketConnectThread;
-    FServer                : String;
-    FPort                  : Integer;
-    FConnectCode           : Integer;
-    FReceiveBuffer         : PAnsiChar;
-    FReceiveBufferSize     : Integer;
-    FLatency               : Integer;
-    FServerTime            : UINT64;
-    FTimeOffset            : UINT64;
-    FTimerIdInactivityPing : UINT_PTR;
-    FTimerIdPing           : UINT_PTR;
-    FTimerIdPingTimeout    : UINT_PTR;
+    FSocket: TSslWSocket;
+    FSocketConnectThread: TSocketConnectThread;
+    FServer: String;
+    FPort: Integer;
+    FConnectCode: Integer;
+    FReceiveBuffer: PAnsiChar;
+    FReceiveBufferSize: Integer;
+    FLatency: Integer;
+    FServerTime: UINT64;
+    FTimeOffset: UINT64;
+    FTimerIdInactivityPing: UINT_PTR;
+    FTimerIdPing: UINT_PTR;
+    FTimerIdPingTimeout: UINT_PTR;
 
     procedure ConnectThreadTerminated(Sender: TObject);
     procedure ConnectThreadConnectFailed(Sender: TObject);
@@ -299,15 +299,13 @@ procedure TServerSocket.SocketDataAvailable(Sender: TObject; Error: Word);
 const
   BUFFER_SIZE = 16 * 1024;
 var
-  len        : Integer;
-  rcv_buf    : array[0..BUFFER_SIZE - 1] of AnsiChar;
-  rpc_size   : Word;
+  len: Integer;
+  rcv_buf: array[0..BUFFER_SIZE - 1] of AnsiChar;
+  rpc_size: Word;
   rpc_message: TPB_RpcMessage;
-  data_obj   : TObject;
-  ptmp       : pointer;
-  start,stop : Integer;
+  data_obj: TObject;
+  ptmp: pointer;
 begin
-  start := GetTickCount;
   if Error <> 0 then
   begin
     FSocket.LastError := Error;
@@ -344,12 +342,11 @@ begin
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       ResetInactivityPingTimer;
-      stop := GetTickCount;
       {$IFDEF DEBUG}
       if rpc_message.DataSize = 0 then
-        DebugLn(Format('Method: %s parsed in %d', [TranslateServerCode(rpc_message.MethodId),stop-start]), ditSocketInc)
+        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), ditSocketInc)
       else
-        DebugLn(Format('Method: %s; DataSize: %d parsed in %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, stop-start]), ditSocketInc);
+        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), ditSocketInc);
       {$ENDIF}
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;

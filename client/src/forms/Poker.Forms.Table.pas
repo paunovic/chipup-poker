@@ -58,6 +58,7 @@ type
     rvChat: TRichView;
     tiGameLock: TTimer;
     tiRender: TTimer;
+    lbsHandStrength: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -294,7 +295,8 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, AbstractCanvas;
+  Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, AbstractCanvas,
+  Poker.HandStrengthCalculator;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -327,6 +329,8 @@ begin
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(seGameChange, CSEGameChange)
                   ]);
+
+  lbsHandStrength.Caption := '';
 
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
@@ -674,29 +678,8 @@ begin
 end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
-var
-  hround: Integer;
 begin
-  hround := Round(Width / FORM_ASPECT_RATIO);
-  if Height <> hround then
-    Height := hround;
-
-  rvChat.Height := ClientHeight div 7;
-  rvChat.Width := Round(ClientWidth / 3.15);
-  rvChat.Top := ClientHeight - FLowerIntfBorder - rvChat.Height;
-  rvChat.Left := FLowerIntfBorder;
-
-  edChat.Width := rvChat.Width;
-  edChat.Top := rvChat.Top - edChat.Height;
-  edChat.Left := rvChat.Left;
-
-  cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
-  cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
-  cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
-
-  cbFoldToAnyBet.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder;
-  cbSitOutNextHand.Left := cbFoldToAnyBet.Left;
-  cbSitOutNextBB.Left := cbFoldToAnyBet.Left;
+  ConfigureGUI;
 
   if Assigned(DXCore.Device) then
   begin
@@ -713,6 +696,7 @@ end;
 
 procedure TfrmTable.FormShow(Sender: TObject);
 begin
+  ConfigureGUI;
   Render;
 end;
 
@@ -919,8 +903,8 @@ begin
   if FTable.Game.GameType = gtRotationNLHPLO then
   begin
     case FTableStatus.CurrentGame of
-      cgHoldem: currentgame := 'NLH';
-      cgOmaha: currentgame := 'PLO';
+      gtHoldem: currentgame := 'NLH';
+      gtOmaha: currentgame := 'PLO';
     end;
     cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTableStatus.RotationHand, FTable.Game.Seats, currentgame, FTable.Club.Name])
   end
@@ -1198,7 +1182,29 @@ var
   event    : TNotifyEvent;
   C1       : Integer;
   nofocus  : Boolean;
+  hround: Integer;
 begin
+  hround := Round(Width / FORM_ASPECT_RATIO);
+  if Height <> hround then
+    Height := hround;
+
+  rvChat.Height := ClientHeight div 7;
+  rvChat.Width := Round(ClientWidth / 3.15);
+  rvChat.Top := ClientHeight - FLowerIntfBorder - rvChat.Height;
+  rvChat.Left := FLowerIntfBorder;
+
+  edChat.Width := rvChat.Width;
+  edChat.Top := rvChat.Top - edChat.Height;
+  edChat.Left := rvChat.Left;
+
+  cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
+  cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
+  cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
+
+  cbFoldToAnyBet.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder;
+  cbSitOutNextHand.Left := cbFoldToAnyBet.Left;
+  cbSitOutNextBB.Left := cbFoldToAnyBet.Left;
+
   raise_en := acRaise.Enabled;
 
   acStandUp.Enabled := FALSE;
@@ -1668,7 +1674,17 @@ begin
         if winmsg = 'default' then
           winmsg := ''
         else
-          winmsg := Format('(%s)', [pot.WinnerData[0].Msg]);
+        begin
+          if FTableStatus.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
+          begin
+            winmsg := Format('(%s)', [THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE)]);
+            {$IFDEF DEBUG}
+            DebugLn(Format('Winner hand strength: [internal: %s] [server: %s]', [winmsg, pot.WinnerData[0].Msg]), ditApplication);
+            {$ENDIF}
+          end
+          else
+            winmsg := Format('(%s)', [pot.WinnerData[0].Msg]);
+        end;
 
         Assert(Assigned(animation));
         animation.TagString := Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]);
@@ -2887,9 +2903,10 @@ end;
 procedure TfrmTable.RenderLowerInterface;
 var
   red_quad: TPoint4;
-  C1      : Integer;
-  button  : TUIButton;
-  font    : TAsphyreFont;
+  C1: Integer;
+  button: TUIButton;
+  font: TAsphyreFont;
+  seat_info: TSeatInfo;
 begin
   if acRaise.Enabled then
   begin
@@ -2962,6 +2979,22 @@ begin
     DXCore.Canvas.UseImage(FPlayNowButton.Image, TexFull4);
     DXCore.Canvas.TexMap(pBounds4(FPlayNowButton.Point.x, FPlayNowButton.Point.y, FPlayNowButtonWidth, FPlayNowButtonHeight), clWhite4);
   end;
+
+  // show hand strength
+  if (FTable.SeatIndex <> -1) and
+     (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
+     (seat_info.Status in [psAllIn, psFolded, psInHand]) and
+     (seat_info.CardCount > 0) and
+     (seat_info.DealtCards = seat_info.CardCount) then
+  begin
+    lbsHandStrength.Top := Round(FRaisePresetButtons[High(FRaisePresetButtons)].Point.y - lbsHandStrength.Height - 5);
+    if (FFlopAnimations.Count = 0) and
+       (FTurnAnimations.Count = 0) and
+       (FRiverAnimations.Count = 0) then
+      lbsHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, TRUE)
+  end
+  else
+    lbsHandStrength.Caption := '';
 end;
 
 
