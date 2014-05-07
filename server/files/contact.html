@@ -1,0 +1,65 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChipUp Poker | Welcome</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/foundation.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link href='http://fonts.googleapis.com/css?family=Sintony:400,700&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+    <script src="js/vendor/modernizr.js"></script>
+  </head>
+  <body>
+    
+    <div class="row header">
+      <div class="large-4 small-12 columns">
+        <div class="logo"><a href="index.html"></a></div>
+      </div>  
+        <div class="large-8 small-12 columns">
+         <nav id="main_menu" class="top-bar" data-topbar>
+           <section class="top-bar-section">
+             <ul>
+               <li><a href="index.html">Home</a></li>
+               <li class="active"><a href="contact.html">Contact us</a></li>
+             </ul>
+           </section>
+         </nav>
+      </div>
+    </div>
+    <div class="row inner">
+  		<div class="large-3 medium-12 columns"><h1 class="side_title">Contact</h1></div>
+  		<div class="large-6 medium-12 small-12 columns">
+			<form id="contact_form" name="input" action="http://dev-server.chipuppoker.com/contactPost" method="post">
+			<input type="text" placeholder="Name" name="name" />
+			<input type="text" placeholder="E-Mail" name="email" />
+			<select name="type">
+				<option value="Questions">Questions</option>
+				<option value="Suggestions">Suggestions</option>
+				<option value="Other">Other</option>
+		        </select>
+		        <textarea rows="12" placeholder="Message" name="message"></textarea>
+		        <input class="button" type="submit" value="Send">
+	  		</form>
+  		</div>
+  		<div class="large-3 medium-12 small-12 columns"><img src="img/chip.png"></div>
+    </div>
+	<div class="row">
+		<div class="large-12">
+			<footer>
+				
+			</footer>
+		</div>
+	</div>
+
+
+    
+    <script src="js/vendor/jquery.js"></script>
+    <script src="js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      if (document.location.search.indexOf('success=true') != -1) alert('request sent');
+    </script>
+  </body>
+</html>
