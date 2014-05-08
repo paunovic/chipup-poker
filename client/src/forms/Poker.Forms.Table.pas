@@ -659,7 +659,7 @@ begin
            ((FTable.IsSitting) and
             (FTable.SeatIndex = C1) and
             (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
-            (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded])) then
+            (seat_info.Status in [psOutOfPlay, psOutOfHand])) then
         begin
           FormsContainer.Add(RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1], ModalFormClose));
           Break;
@@ -1053,9 +1053,13 @@ begin
 end;
 
 procedure TfrmTable.acShowCardsExecute(Sender: TObject);
+var
+  seat: TSeatInfo;
 begin
   ServerSocket.ShowCards(FTable.Game.MongoId);
   acShowCards.Enabled := FALSE;
+  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat) then
+    seat.CardsVisible := TRUE;
   ConfigureGUI;
   Render;
 end;
@@ -1274,6 +1278,12 @@ begin
                 acRaise.Tag := 1;
                 acCheck.Enabled := TRUE;
                 acRaise.Enabled := TRUE;
+
+                if cbFoldToAnyBet.Checked then
+                begin
+                  nofocus := TRUE;
+                  acCheck.Execute;
+                end;
               end;
 
               if not nofocus then
@@ -1905,7 +1915,10 @@ end;
 
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
-  ServerSocket.Fold(FTable.Game.MongoId);
+  if acCheck.Enabled then
+    acCheck.Execute
+  else
+    ServerSocket.Fold(FTable.Game.MongoId);
 end;
 
 procedure TfrmTable.acPlayNowExecute(Sender: TObject);
@@ -2359,14 +2372,16 @@ begin
         end;
 
         psFolded: begin
-          if seat_info.CardsVisible then
+          if (seat_info.SeatIndex = FTable.SeatIndex) or
+             (seat_info.CardsVisible) then
           begin
             mousepoint := ScreenToClient(Mouse.CursorPos);
             mousepointf.X := mousepoint.X;
             mousepointf.Y := mousepoint.Y;
 
-            if (seat_info.SeatIndex <> FTable.SeatIndex) or
-               (PtInRect(RectF(seat_point.x - FSeatWidth / 2, seat_point.y - FSeatHeight / 2, seat_point.x + FSeatWidth / 2, seat_point.y + FSeatHeight /2), mousepointf)) then
+            if (seat_info.CardsVisible) or
+               ((seat_info.SeatIndex = FTable.SeatIndex) and
+                (PtInRect(RectF(seat_point.x - FSeatWidth / 2, seat_point.y - FSeatHeight / 2, seat_point.x + FSeatWidth / 2, seat_point.y + FSeatHeight /2), mousepointf))) then
             begin
               for C1 := 0 to seat_info.Cards.Count - 1 do
               begin

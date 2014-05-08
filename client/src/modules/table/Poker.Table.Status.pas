@@ -40,7 +40,7 @@ type
     property Caption: String read FCaption write FCaption;
     property Timebank: UINT32 read FTimeBank;
     property DealtCards: Integer read FDealtCards;
-    property CardsVisible: Boolean read FCardsVisible;
+    property CardsVisible: Boolean read FCardsVisible write FCardsVisible;
     property Disconnected: Boolean read FDisconnected;
   end;
 
