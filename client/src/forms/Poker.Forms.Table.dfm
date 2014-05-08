@@ -5,10 +5,11 @@ object frmTable: TfrmTable
   Caption = 'Table'
   ClientHeight = 524
   ClientWidth = 792
-  Color = 2170742
+  Color = 1315656
   Constraints.MaxHeight = 910
   Constraints.MaxWidth = 1320
   Constraints.MinWidth = 600
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -21

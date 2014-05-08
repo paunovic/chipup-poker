@@ -1,3 +1,5 @@
+//{$APPTYPE CONSOLE}
+
 program client;
 
 {$R 'Poker.Resources.Fonts.res' 'resources\Poker.Resources.Fonts.rc'}
@@ -124,9 +126,9 @@ uses
   Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
   Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
   Poker.Protobufs.Objects.ContactMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.ContactMessage.pas',
-  Poker.Server.SocketConnect in 'modules\server\Poker.Server.SocketConnect.pas',
   Poker.Protobufs.Objects.BuyinError in 'modules\protobuf\objects\Poker.Protobufs.Objects.BuyinError.pas',
-  Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas';
+  Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas',
+  Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout};
 
 procedure FocusPokerApp;
 var
@@ -140,6 +142,10 @@ end;
 
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
+             {
+  Write(THandStrengthCalculator.GetHandStrength('JdTc', 'Jc9sKsKdQc', gtHoldem, FALSE));
+  ReadLn;
+  Exit;         }
 
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then

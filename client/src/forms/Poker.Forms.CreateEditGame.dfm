@@ -4,7 +4,7 @@ object frmCreateEditGame: TfrmCreateEditGame
   BorderStyle = bsDialog
   ClientHeight = 226
   ClientWidth = 376
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

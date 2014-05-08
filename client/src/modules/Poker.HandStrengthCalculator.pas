@@ -1,3 +1,5 @@
+// so ugly it eats little kids
+
 unit Poker.HandStrengthCalculator;
 
 interface
@@ -135,6 +137,9 @@ var
   C1, C2, C3: Integer;
   match: Boolean;
 begin
+  if Length(ACards) < 5 then
+    Exit(FALSE);
+
   for C1 := 1 to Length(SUITS) do
   begin
     for C2 := 1 to Length(CHAIN_STR) do
@@ -165,6 +170,9 @@ var
   card: String;
   C1, si: Integer;
 begin
+  if Length(ACards) < 5 then
+    Exit(FALSE);
+
   for C1 := Low(ACards) to High(ACards) do
   begin
     si := Pos(ACards[C1][2], SUITS);
@@ -190,6 +198,9 @@ var
   C1, p, four_of_a_kind_index: Integer;
   card_count: array[1..13] of Integer;
 begin
+  if Length(ACards) < 4 then
+    Exit(FALSE);
+
   FillChar(card_count, Length(card_count) * SizeOf(Integer), 0);
   for C1 := Low(ACards) to High(ACards) do
   begin
@@ -228,6 +239,9 @@ var
   card_count: array[1..13] of Integer;
   over_card_index, under_card_index: Integer;
 begin
+  if Length(ACards) < 5 then
+    Exit(FALSE);
+
   FillChar(card_count, Length(card_count) * SizeOf(Integer), 0);
   for C1 := Low(ACards) to High(ACards) do
   begin
@@ -247,8 +261,9 @@ begin
     Exit(FALSE);
 
   under_card_index := 0;
-  for C1 := over_card_index - 1 downto Low(card_count) do
-    if card_count[C1] >= 2 then
+  for C1 := High(card_count) downto Low(card_count) do
+    if (card_count[C1] >= 2) and
+       (C1 <> over_card_index) then
     begin
       under_card_index := C1;
       Break;
@@ -268,6 +283,9 @@ var
   suits_count: array[1..4] of Integer;
   suit_index: Integer;
 begin
+  if Length(ACards) < 5 then
+    Exit(FALSE);
+
   FillChar(suits_count, Length(suits_count) * SizeOf(Integer), 0);
   for C1 := Low(ACards) to High(ACards) do
   begin
@@ -298,34 +316,70 @@ end;
 
 class function THandStrengthCalculator.IsStraight(const ACards: TArray<String>; out ACard: String): Boolean;
 var
-  C1, chain: Integer;
-  p1, p2: Integer;
+  custom_cards: TArray<String>;
+  C1: Integer;
+  reduce: Integer;
+  prevcard: Char;
+  chain: Integer;
+  cpos: Integer;
+  prevpos: Integer;
 begin
-  chain := 0;
+  // check if ace is last, and exit immediately, it doesnt make sense for ace to be last, and more importantly,
+  // it would cause dead while loop which copies aces from beginning to end of array
+  if (Length(ACards) < 5) or
+     (ACards[High(ACards)][1] = 'a') then
+    Exit(FALSE);
+
+  // eliminate duplicates
+  reduce := 0;
+  prevcard := ' ';
+  SetLength(custom_cards, Length(ACards));
   for C1 := Low(ACards) to High(ACards) do
-  begin
-    if chain = 0 then
-      chain := 1
-    else
+    if prevcard <> ACards[C1][1] then
     begin
-      p1 := Pos(ACards[C1][1], RANKS);
-      p2 := Pos(ACards[C1 - 1][1], RANKS);
+      custom_cards[C1 - reduce] := ACards[C1];
+      prevcard := ACards[C1][1];
+    end
+    else
+      Inc(reduce);
+  if reduce > 0 then
+    SetLength(custom_cards, Length(custom_cards) - reduce);
 
-      if p1 = p2 - 1 then
-        Inc(chain)
-      else
-        if p1 = p2 then
-        else
-          chain := 1;
+  result := FALSE;
+  chain := 0;
+  prevpos := 0;
+  for C1 := Low(custom_cards) to High(custom_cards) do
+  begin
+    cpos := Pos(custom_cards[C1][1], RANKS);
+    if (cpos = prevpos - 1) or
+       (prevpos = 0) then
+    begin
+      Inc(chain);
+      prevpos := cpos;
 
-      if chain = 5 then
+      if chain >= 5 then
       begin
-        ACard := ACards[C1 - chain + 1];
+        ACard := custom_cards[C1 - 4];
         Exit(TRUE);
       end;
+    end
+    else
+    begin
+      chain := 1;
+      prevpos := cpos;
     end;
   end;
-  Exit(FALSE);
+
+  // special case for straight, where A is low card
+  if (custom_cards[Low(custom_cards)][1] = 'a') and
+     (custom_cards[High(custom_cards)][1] = '2') and
+     (custom_cards[High(custom_cards) - 1][1] = '3') and
+     (custom_cards[High(custom_cards) - 2][1] = '4') and
+     (custom_cards[High(custom_cards) - 3][1] = '5') then
+  begin
+    ACard := custom_cards[High(custom_cards) - 3];
+    result := TRUE;
+  end;
 end;
 
 class function THandStrengthCalculator.IsThreeOfAKind(const ACards: TArray<String>; out ACard, AKicker: String): Boolean;
@@ -334,6 +388,9 @@ var
   card_count: array[1..13] of Integer;
   three_of_a_kind_index: Integer;
 begin
+  if Length(ACards) < 3 then
+    Exit(FALSE);
+
   FillChar(card_count, Length(card_count) * SizeOf(Integer), 0);
   for C1 := Low(ACards) to High(ACards) do
   begin
@@ -371,6 +428,9 @@ var
   card_count: array[1..13] of Integer;
   over_card_index, under_card_index: Integer;
 begin
+  if Length(ACards) < 4 then
+    Exit(FALSE);
+
   FillChar(card_count, Length(card_count) * SizeOf(Integer), 0);
   for C1 := Low(ACards) to High(ACards) do
   begin
@@ -390,8 +450,9 @@ begin
     Exit(FALSE);
 
   under_card_index := 0;
-  for C1 := over_card_index - 1 downto Low(card_count) do
-    if card_count[C1] >= 2 then
+  for C1 := High(card_count) downto Low(card_count) do
+    if (card_count[C1] >= 2) and
+       (C1 <> over_card_index) then
     begin
       under_card_index := C1;
       Break;
@@ -421,6 +482,9 @@ var
   card_count: array[1..13] of Integer;
   card_index: Integer;
 begin
+  if Length(ACards) < 2 then
+    Exit(FALSE);
+
   FillChar(card_count, Length(card_count) * SizeOf(Integer), 0);
   for C1 := Low(ACards) to High(ACards) do
   begin
@@ -463,7 +527,7 @@ var
   check_combs: TArray<TArray<String>>;
   best_comb_index: Integer;
   index, index1: Integer;
-  best_kicker, best_card: Integer;
+  best_kicker, best_undercard, best_card: Integer;
 begin
   Assert(Length(APlayerCards) mod 2 = 0);
   Assert(Length(ATableCards) mod 2 = 0);
@@ -502,23 +566,39 @@ begin
 
       index := 0;
       SetLength(check_combs, Length(pcombs) * Length(tcombs));
-      for C1 := Low(pcombs) to High(pcombs) do
-        for C2 := Low(tcombs) to High(tcombs) do
+      if Length(tcombs) = 0 then // case when there are no table cards (pre-flop omaha)
+      begin
+        SetLength(check_combs, Length(pcombs));
+        for C1 := Low(pcombs) to High(pcombs) do
         begin
-          SetLength(check_combs[index], (Length(pcombs[C1]) + Length(tcombs[C2])) div 2);
+          SetLength(check_combs[index], Length(pcombs[C1]) div 2);
           index1 := 0;
-          for C3 := 0 to Length(pcombs[C1]) div 2 - 1 do
+          for C2 := 0 to Length(pcombs[C1]) div 2 - 1 do
           begin
-            check_combs[index][index1] := Copy(pcombs[C1], C3 * 2 + 1, 2);
-            Inc(index1);
-          end;
-          for C3 := 0 to Length(tcombs[C2]) div 2 - 1 do
-          begin
-            check_combs[index][index1] := Copy(tcombs[C2], C3 * 2 + 1, 2);
+            check_combs[index][index1] := Copy(pcombs[C1], C2 * 2 + 1, 2);
             Inc(index1);
           end;
           Inc(index);
         end;
+      end
+      else
+        for C1 := Low(pcombs) to High(pcombs) do
+          for C2 := Low(tcombs) to High(tcombs) do
+          begin
+            SetLength(check_combs[index], (Length(pcombs[C1]) + Length(tcombs[C2])) div 2);
+            index1 := 0;
+            for C3 := 0 to Length(pcombs[C1]) div 2 - 1 do
+            begin
+              check_combs[index][index1] := Copy(pcombs[C1], C3 * 2 + 1, 2);
+              Inc(index1);
+            end;
+            for C3 := 0 to Length(tcombs[C2]) div 2 - 1 do
+            begin
+              check_combs[index][index1] := Copy(tcombs[C2], C3 * 2 + 1, 2);
+              Inc(index1);
+            end;
+            Inc(index);
+          end;
     end;
   else
     Exit('');
@@ -526,6 +606,7 @@ begin
 
   best_card := -1;
   best_kicker := -1;
+  best_undercard := -1;
   best_comb_index := 1000;
   for C1 := Low(check_combs) to High(check_combs) do
   begin
@@ -536,7 +617,7 @@ begin
       if best_comb_index > 0 then
       begin
         best_comb_index := 0;
-        result := 'Royal flush'
+        result := 'Royal Flush'
       end;
     end
     else
@@ -546,19 +627,30 @@ begin
         begin
           best_comb_index := 1;
           if AShort then
-            result := 'Straight flush'
+            result := 'Straight Flush'
           else
-            result := Format('%s high straight Flush', [ShortCardToLong(card[1])])
+            result := Format('%s high Straight Flush', [ShortCardToLong(card[1])])
         end;
       end
       else
         if IsFourOfAKind(check_combs[C1], card, kicker) then
         begin
-          if best_comb_index > 2 then
+          if best_comb_index >= 2 then
           begin
+            if best_comb_index = 2 then
+            begin
+              if (Pos(card[1], RANKS) < best_card) or
+                 ((Pos(card[1], RANKS) = best_card) and
+                  (Pos(kicker[1], RANKS) < best_kicker)) then
+                Continue;
+            end;
+
+            best_card := Pos(card[1], RANKS);
+            best_kicker := Pos(kicker[1], RANKS);
+
             best_comb_index := 2;
             if AShort then
-              result := 'Four of a kind'
+              result := 'Four of a Kind'
             else
               result := Format('Four %s', [ShortCardToLong(card[1], TRUE)])
           end;
@@ -566,47 +658,85 @@ begin
         else
           if IsFullHouse(check_combs[C1], overcard, undercard) then
           begin
-            if best_comb_index > 3 then
+            if best_comb_index >= 3 then
             begin
+              if best_comb_index = 3 then
+              begin
+                if (Pos(overcard[1], RANKS) < best_card) or
+                   ((Pos(overcard[1], RANKS) = best_card) and
+                    (Pos(undercard[1], RANKS) < best_undercard)) then
+                  Continue;
+              end;
+
+              best_card := Pos(overcard[1], RANKS);
+              best_undercard := Pos(undercard[1], RANKS);
+
               best_comb_index := 3;
               if AShort then
                 result := 'Full House'
               else
-                result := Format('%s full over %s', [ShortCardToLong(overcard[1], TRUE), ShortCardToLong(overcard[2], TRUE)])
+                result := Format('%s Full over %s', [ShortCardToLong(overcard[1], TRUE), ShortCardToLong(undercard[1], TRUE)])
             end;
           end
           else
             if IsFlush(check_combs[C1], card) then
             begin
-              if best_comb_index > 4 then
+              if best_comb_index >= 4 then
               begin
+                if best_comb_index = 4 then
+                begin
+                  if Pos(card[1], RANKS) < best_card then
+                    Continue;
+                end;
+
+                best_card := Pos(card[1], RANKS);
+
                 best_comb_index := 4;
                 if AShort then
                   result := 'Flush'
                 else
-                  result := Format('%s high flush', [ShortCardToLong(card[1])])
+                  result := Format('%s high Flush', [ShortCardToLong(card[1])])
               end;
             end
             else
               if IsStraight(check_combs[C1], card) then
               begin
-                if best_comb_index > 5 then
+                if best_comb_index >= 5 then
                 begin
+                  if best_comb_index = 5 then
+                  begin
+                    if Pos(card[1], RANKS) < best_card then
+                      Continue;
+                  end;
+
+                  best_card := Pos(card[1], RANKS);
+
                   best_comb_index := 5;
                   if AShort then
                     result := 'Straight'
                   else
-                    result := Format('%s high straight', [ShortCardToLong(card[1])])
+                    result := Format('%s high Straight', [ShortCardToLong(card[1])])
                 end;
               end
               else
                 if IsThreeOfAKind(check_combs[C1], card, kicker) then
                 begin
-                  if best_comb_index > 6 then
+                  if best_comb_index >= 6 then
                   begin
+                    if best_comb_index = 6 then
+                    begin
+                      if (Pos(card, RANKS) < best_card) or
+                         ((Pos(card, RANKS) = best_card) and
+                          (Pos(kicker, RANKS) < best_kicker)) then
+                        Continue;
+                    end;
+
+                    best_card := Pos(card, RANKS);
+                    best_kicker := Pos(kicker, RANKS);
+
                     best_comb_index := 6;
                     if AShort then
-                      result := 'Three of a kind'
+                      result := 'Three of a Kind'
                     else
                       result := Format('Three %s', [ShortCardToLong(card[1], TRUE)])
                   end;
@@ -620,18 +750,22 @@ begin
                       begin
                         if (Pos(overcard, RANKS) < best_card) or
                            ((Pos(overcard, RANKS) = best_card) and
+                            (Pos(undercard, RANKS) < best_undercard)) or
+                           ((Pos(overcard, RANKS) = best_card) and
+                            (Pos(undercard, RANKS) = best_undercard) and
                             (Pos(kicker, RANKS) < best_kicker)) then
                           Continue;
                       end;
 
                       best_card := Pos(overcard, RANKS);
+                      best_undercard := Pos(undercard, RANKS);
                       best_kicker := Pos(kicker, RANKS);
 
                       best_comb_index := 7;
                       if AShort then
-                        result := 'Two pairs'
+                        result := 'Two Pairs'
                       else
-                        result := Format('Two pairs, %s and %s with %s kicker', [ShortCardToLong(overcard[1], TRUE), ShortCardToLong(undercard[1], TRUE), ShortCardToLong(kicker[1])])
+                        result := Format('Two Pairs, %s and %s with %s kicker', [ShortCardToLong(overcard[1], TRUE), ShortCardToLong(undercard[1], TRUE), ShortCardToLong(kicker[1])])
                     end;
                   end
                   else
@@ -652,7 +786,7 @@ begin
 
                         best_comb_index := 8;
                         if AShort then
-                          result := 'One pair'
+                          result := 'One Pair'
                         else
                           result := Format('Pair of %s with %s kicker', [ShortCardToLong(card[1], TRUE), ShortCardToLong(kicker[1])])
                       end;

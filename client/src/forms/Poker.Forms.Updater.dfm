@@ -6,7 +6,8 @@ object frmUpdater: TfrmUpdater
   Caption = 'ChipUP Poker - Updating'
   ClientHeight = 50
   ClientWidth = 365
-  Color = clBtnFace
+  Color = clWindow
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

@@ -5,7 +5,7 @@ object frmGiveChips: TfrmGiveChips
   Caption = 'Give Chips To Player'
   ClientHeight = 136
   ClientWidth = 359
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

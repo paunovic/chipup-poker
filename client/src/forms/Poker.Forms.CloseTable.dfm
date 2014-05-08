@@ -5,7 +5,8 @@ object frmCloseTable: TfrmCloseTable
   Caption = 'Close Table'
   ClientHeight = 115
   ClientWidth = 184
-  Color = clBtnFace
+  Color = clWindow
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

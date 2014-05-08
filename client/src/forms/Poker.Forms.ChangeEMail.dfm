@@ -5,7 +5,7 @@ object frmChangeEMail: TfrmChangeEMail
   Caption = 'Change E-mail Address'
   ClientHeight = 174
   ClientWidth = 428
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

@@ -5,7 +5,7 @@ object frmJoinClub: TfrmJoinClub
   Caption = 'Join Club'
   ClientHeight = 114
   ClientWidth = 292
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

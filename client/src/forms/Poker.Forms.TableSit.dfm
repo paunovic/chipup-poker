@@ -5,7 +5,7 @@ object frmTableSit: TfrmTableSit
   Caption = 'Get Chips'
   ClientHeight = 180
   ClientWidth = 298
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

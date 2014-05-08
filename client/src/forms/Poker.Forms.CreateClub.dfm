@@ -5,7 +5,7 @@ object frmCreateClub: TfrmCreateClub
   Caption = 'Create Club'
   ClientHeight = 112
   ClientWidth = 386
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText

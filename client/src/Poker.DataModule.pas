@@ -34,6 +34,7 @@ type
 
     procedure OpenCashierLink;
     procedure OpenTACLink;
+    procedure OpenSiteLink;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
@@ -134,6 +135,11 @@ end;
 procedure TdmMain.OpenCashierLink;
 begin
   ShellOpen(PChar(Settings.Hardcoded.URL.CASHIER));
+end;
+
+procedure TdmMain.OpenSiteLink;
+begin
+  ShellOpen(URL_DOMAIN);
 end;
 
 procedure TdmMain.OpenTACLink;

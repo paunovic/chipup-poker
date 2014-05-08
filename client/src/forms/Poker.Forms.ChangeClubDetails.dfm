@@ -5,7 +5,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
   Caption = 'Change Club Details'
   ClientHeight = 103
   ClientWidth = 393
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -86,7 +86,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 96
   end
   object btCancel: TcxButton
     Left = 289
@@ -103,7 +102,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 96
   end
   object acChangeClubDetails: TActionList
     Left = 52

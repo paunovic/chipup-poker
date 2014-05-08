@@ -6,7 +6,7 @@ object frmLogin: TfrmLogin
   Caption = 'Welcome to ChipUP Poker'
   ClientHeight = 368
   ClientWidth = 558
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText

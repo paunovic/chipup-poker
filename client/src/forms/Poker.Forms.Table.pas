@@ -23,11 +23,11 @@ type
 
   TfrmTable = class;
 
-  TTableSyncRender = class(TIdNotify)
+  TTableSyncRender = class(TIdSync)
   private
     FTable: TfrmTable;
   protected
-    procedure DoNotify; override;
+    procedure DoSynchronize; override;
   public
     class procedure Render(const ATable: TfrmTable);
   end;
@@ -908,7 +908,7 @@ begin
       gtHoldem: currentgame := 'NLH';
       gtOmaha: currentgame := 'PLO';
     end;
-    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTableStatus.RotationHand, FTable.Game.Seats, currentgame, FTable.Club.Name])
+    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, (FTableStatus.RotationHand - 1) mod DWORD(FTable.Game.Seats) + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
   end
   else
     cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
@@ -925,8 +925,8 @@ end;
 function TfrmTable.GetDealerPoint(const ASeatIndex: Integer): TPoint2;
 var
   seat_radians: Double;
-  x, y        : Single;
-  xr, yr      : Single;
+  x, y: Single;
+  xr, yr: Single;
 begin
   xr := FTableWidth / 1.25;
   yr := FTableHeight / 1.45;
@@ -1515,7 +1515,7 @@ begin
   if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
     tb := seat.Timebank;
 
-  DebugLn(Format('D: %d; TS: %d; CS: %d; TIME: %d; TB: %d; SEQ: %d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
+  DebugLn(Format('DLR: %d; TSTATE: %d; CSEAT: %d; TIME: %d; TBANK: %d; SEQ: %d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
   {$ENDIF}
 
   FTurnAniDelay := 0;
@@ -1577,25 +1577,26 @@ end;
 procedure TfrmTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 var
   {$IFDEF DEBUG}
-  event       : String;
+  event: String;
   {$ENDIF}
   seat_caption: String;
-  seat        : TSeatInfo;
-  seat_point  : TPoint2;
-  pot         : TPB_WinnerPotInfo;
-  player      : TPlayerInfo;
-  C1, C2      : Integer;
-  card_index  : Integer;
-  iterate     : Boolean;
-  nick        : String;
-  animation   : TDXAnimation;
-  nicks       : String;
-  winmsg      : String;
-  suffix      : String;
+  seat: TSeatInfo;
+  seat_point: TPoint2;
+  pot: TPB_WinnerPotInfo;
+  player: TPlayerInfo;
+  C1, C2: Integer;
+  card_index: Integer;
+  iterate: Boolean;
+  nick: String;
+  animation: TDXAnimation;
+  nicks: String;
+  winmsg: String;
+  suffix: String;
   total_chips_val: UINT32;
   chips_plural: String;
-  cc          : Integer;
-  flop        : TBytes;
+  cc: Integer;
+  flop: TBytes;
+  tfile: TextFile;
 begin
   seat_caption := '';
   case ATableEvent.Event of
@@ -1704,14 +1705,29 @@ begin
         begin
           if FTableStatus.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
           begin
-            winmsg := Format('(%s)', [THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE)]);
+            winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE);
+
             {$IFDEF DEBUG}
-            DebugLn(Format('Winner hand strength: [internal: %s] [server: %s]', [winmsg, pot.WinnerData[0].Msg]), ditApplication);
+            AssignFile(tfile, 'C:\winning_hands.txt');
+            if FileExists('C:\winning_hands.txt') then
+              Append(tfile)
+            else
+              Rewrite(tfile);
+            try
+              WriteLn(tfile, Format('#%d [%s %s]: %s | %s', [FTableStatus.HandId,
+                   seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString,
+                   pot.WinnerData[0].Msg, winmsg]));
+            finally
+              CloseFile(tfile);
+            end;
             {$ENDIF}
           end
           else
-            winmsg := Format('(%s)', [pot.WinnerData[0].Msg]);
+            winmsg := pot.WinnerData[0].Msg;
         end;
+
+        if winmsg <> '' then
+          winmsg := Format('(%s)', [winmsg]);
 
         Assert(Assigned(animation));
         animation.TagString := Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]);
@@ -3109,7 +3125,7 @@ end;
 
 { TTableSyncRender }
 
-procedure TTableSyncRender.DoNotify;
+procedure TTableSyncRender.DoSynchronize;
 begin
   FTable.RenderSeats;
 end;
@@ -3119,10 +3135,9 @@ begin
   with TTableSyncRender.Create do
   try
     FTable := ATable;
-    Notify;
-  except
+    Synchronize;
+  finally
     Free;
-    raise;
   end;
 end;
 

@@ -5,7 +5,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   Caption = 'Change Avatar'
   ClientHeight = 219
   ClientWidth = 226
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

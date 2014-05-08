@@ -5,13 +5,12 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.ContactMessage, Poker.Server.SocketConnect, Poker.Protobufs.Objects.TableStatus;
+  Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.TableStatus;
 
 type
   TServerSocket = class
   private
     FSocket: TSslWSocket;
-    FSocketConnectThread: TSocketConnectThread;
     FServer: String;
     FPort: Integer;
     FConnectCode: Integer;
@@ -23,9 +22,6 @@ type
     FTimerIdInactivityPing: UINT_PTR;
     FTimerIdPing: UINT_PTR;
     FTimerIdPingTimeout: UINT_PTR;
-
-    procedure ConnectThreadTerminated(Sender: TObject);
-    procedure ConnectThreadConnectFailed(Sender: TObject);
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -156,6 +152,9 @@ begin
   FTimerIdPingTimeout := 0;
 
   FSocket := TSslWSocket.Create(nil);
+  FSocket.TimeoutConnect := 1500;
+  FSocket.TimeoutIdle := 1500;
+  FSocket.TimeoutSampling := 1500;
   FSocket.SslContext := TSslContext.Create(nil);
   FSocket.SslContext.SslVerifyPeer := TRUE;
   FSocket.SslContext.SslVerifyDepth := 1;
@@ -172,8 +171,7 @@ destructor TServerSocket.Destroy;
 begin
   {$IFDEF DEBUG} DebugLn('TServerSocket.Destroy', ditSocket); {$ENDIF}
 
-  if IsConnected then
-    Disconnect;
+  Disconnect;
 
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
@@ -184,10 +182,10 @@ end;
 
 procedure TServerSocket.Connect;
 begin
-  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
-
-  if Assigned(FSocketConnectThread) then
+  if FSocket.State <> wsClosed then
     Exit;
+
+  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
   FreeReceiveBuffer;
 
@@ -206,20 +204,7 @@ begin
   KillPingTimers;
   KillPingTimeoutTimer;
 
-  FSocketConnectThread := TSocketConnectThread.Create(self);
-  FSocketConnectThread.OnTerminate := ConnectThreadTerminated;
-  FSocketConnectThread.OnConnectFailed := ConnectThreadConnectFailed;
-  FSocketConnectThread.Start;
-end;
-
-procedure TServerSocket.ConnectThreadConnectFailed(Sender: TObject);
-begin
-  SocketError(Sender);
-end;
-
-procedure TServerSocket.ConnectThreadTerminated(Sender: TObject);
-begin
-  FSocketConnectThread := nil;
+  FSocket.Connect;
 end;
 
 procedure TServerSocket.Disconnect;
@@ -227,21 +212,11 @@ begin
   KillPingTimers;
   KillPingTimeoutTimer;
 
-  if Assigned(FSocketConnectThread) then
-  begin
-    FSocketConnectThread.OnConnectFailed := nil;
-    FSocketConnectThread.OnTerminate := nil;
-    FSocketConnectThread.Terminate;
-    FSocketConnectThread := nil;
-  end;
-
   if FSocket.State <> TSocketState.wsClosed then
   begin
     {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
     FSocket.Flush;
     FSocket.CloseDelayed;
-{    while (Assigned(FSocket)) and (FSocket.State <> wsClosed) do // FIXME
-      FSocket.ProcessMessages;}
   end;
 
   FreeReceiveBuffer;
@@ -375,8 +350,8 @@ begin
     wsOpened: ;
     wsBound: ;
     wsConnecting: begin
-      if not Assigned(FSocketConnectThread) then
-        Disconnect;
+{      if not Assigned(FSocketConnectThread) then
+        Disconnect;}
     end;
     wsSocksConnected: ;
     wsConnected: ;

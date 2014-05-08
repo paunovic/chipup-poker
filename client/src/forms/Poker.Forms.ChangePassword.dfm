@@ -5,7 +5,7 @@ object frmChangePassword: TfrmChangePassword
   Caption = 'Change Password'
   ClientHeight = 128
   ClientWidth = 301
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -114,7 +114,6 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 94
   end
   object btCancel: TcxButton
     Left = 200
@@ -131,7 +130,6 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 94
   end
   object alChangePassword: TActionList
     Left = 36

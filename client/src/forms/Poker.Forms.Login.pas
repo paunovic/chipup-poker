@@ -285,13 +285,11 @@ end;
 procedure TfrmLogin.EnterDeveloperMode;
 begin
   CreateServerCombobox;
-  Caption := Format('Welcome to ChipUP Poker (%s)', [Settings.Hardcoded.VERSION]);
 end;
 
 procedure TfrmLogin.LeaveDeveloperMode;
 begin
   FreeAndNil(FServerComboBox);
-  Caption := 'Welcome to ChipUP Poker';
 end;
 
 procedure TfrmLogin.FormKeyPress(Sender: TObject; var Key: Char);
@@ -320,7 +318,6 @@ procedure TfrmLogin.acUpdateExecute(Sender: TObject);
 begin
   CurrentStatus := lsUpdating;
   Close;
-  Exit;
 end;
 
 procedure TfrmLogin.acLoginExecute(Sender: TObject);

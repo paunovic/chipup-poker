@@ -121,6 +121,7 @@ type
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
     procedure Disconnect1Click(Sender: TObject);
+    procedure acShowAboutFormExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -191,7 +192,7 @@ uses
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars;
+  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About;
 
 
 procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
@@ -399,6 +400,11 @@ begin
   MessageDlg(Format('Verification mail sent to %s. Please check your inbox.', [dmMain.SelfInfo.EMail]), mtInformation, [mbOK], 0);
 end;
 
+procedure TfrmChipUpMain.acShowAboutFormExecute(Sender: TObject);
+begin
+  FormsContainer.RunForm(TfrmAbout, self, [], FALSE);
+end;
+
 procedure TfrmChipUpMain.acShowChangeAvatarFormExecute(Sender: TObject);
 begin
   FormsContainer.RunForm(TfrmChangeAvatar, self, [], FALSE);
@@ -431,6 +437,7 @@ procedure TfrmChipUpMain.acShowGameTableFormExecute(Sender: TObject);
 var
   game: TGameInfo;
   club: TClubInfo;
+  table: TTable;
 begin
   if not dmMain.CheckAuthed then
     Exit;
@@ -441,7 +448,10 @@ begin
   if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
     MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
-    Tables.AddTable(club, game, FALSE, TRUE);
+    if Tables.FindTable(game.MongoId, table) then
+      table.BringToFront
+    else
+      Tables.AddTable(club, game, FALSE, TRUE);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -1049,27 +1059,15 @@ end;
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
-  club: TClubInfo;
   table: TTable;
-  game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
-
-  table := nil;
   if not Tables.FindTable(pbtstatus.TableMongoId, table) then
-    for club in dmMain.SelfInfo.Clubs do
-      if club.Games.FindGame(pbtstatus.TableMongoId, game) then
-      begin
-        table := Tables.AddTable(club, game, TRUE, FALSE);
-        Break;
-      end;
+    Exit;
 
-  if Assigned(table) then
-  begin
-    table.Game.UpdateFromTableStatus(pbtstatus);
-    if not table.Form.Visible then
-      table.BringToFront;
-  end;
+  table.Game.UpdateFromTableStatus(pbtstatus);
+  if not table.Form.Visible then
+    table.BringToFront;
 
   ConfigureGUI;
 end;

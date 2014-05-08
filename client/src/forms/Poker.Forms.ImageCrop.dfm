@@ -5,9 +5,10 @@ object frmImageCrop: TfrmImageCrop
   Caption = 'Crop Avatar'
   ClientHeight = 478
   ClientWidth = 645
-  Color = clBtnFace
+  Color = clWindow
   Constraints.MinHeight = 250
   Constraints.MinWidth = 250
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

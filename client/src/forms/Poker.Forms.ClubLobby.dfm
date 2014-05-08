@@ -4,7 +4,7 @@ object frmClubLobby: TfrmClubLobby
   Caption = 'Lobby'
   ClientHeight = 612
   ClientWidth = 894
-  Color = clBlack
+  Color = clWindow
   Constraints.MinHeight = 410
   Constraints.MinWidth = 589
   Ctl3D = False
@@ -2772,6 +2772,8 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)

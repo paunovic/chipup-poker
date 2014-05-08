@@ -6,7 +6,7 @@ object frmCreateAccount: TfrmCreateAccount
   Caption = 'Create New Account'
   ClientHeight = 239
   ClientWidth = 336
-  Color = clBlack
+  Color = clWindow
   Ctl3D = False
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText

@@ -5,7 +5,8 @@ object frmContactUs: TfrmContactUs
   Caption = 'Contact Us'
   ClientHeight = 298
   ClientWidth = 433
-  Color = clBtnFace
+  Color = clWindow
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
