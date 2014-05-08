@@ -987,6 +987,8 @@ begin
   dmMain.SelfInfo.AvatarId := pbuser.Avatar;
   dmMain.SelfInfo.Authed := pbuser.Authed;
 
+  dmMain.UpdateSelfInfoInPlayers;
+
   ConfigureGUI;
 end;
 

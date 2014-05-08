@@ -32,6 +32,7 @@ type
       FN_RAKE_PERCENT = 21;
       FN_CURRENT_GAME = 22;
       FN_ROTATION = 23;
+      FN_TOTAL_BALANCE = 24;
 
     var
       FTableMongoId: TBytes;
@@ -53,6 +54,7 @@ type
       FRakePercent: UINT32;
       FCurrentGame: TGameType;
       FRotation: UINT32;
+      FTotalBalance: UINT32;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -70,6 +72,7 @@ type
     procedure SetRakePercent(const AValue: UINT32);
     procedure SetCurrentGame(const AValue: TGameType);
     procedure SetRotation(const AValue: UINT32);
+    procedure SetTotalBalance(const AValue: UINT32);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -100,6 +103,7 @@ type
     property RakePercent: UINT32 read FRakePercent write SetRakePercent;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
     property Rotation: UINT32 read FRotation write SetRotation;
+    property TotalBalance: UINT32 read FTotalBalance write SetTotalBalance;
   end;
 
 implementation
@@ -222,6 +226,10 @@ begin
       FN_ROTATION: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRotation := AProtobufReader.readUInt32;
+      end;
+      FN_TOTAL_BALANCE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FTotalBalance := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -350,6 +358,12 @@ procedure TPB_TableStatus.SetRotation(const AValue: UINT32);
 begin
   FRotation := AValue;
   ProtobufOutput.writeUInt32(FN_ROTATION, AValue);
+end;
+
+procedure TPB_TableStatus.SetTotalBalance(const AValue: UINT32);
+begin
+  FTotalBalance := AValue;
+  ProtobufOutput.writeUInt32(FN_TOTAL_BALANCE, AValue);
 end;
 
 end.

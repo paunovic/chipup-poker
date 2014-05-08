@@ -70,7 +70,8 @@ implementation
 
 uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
-  Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError;
+  Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
+  Poker.Protobufs.Objects.Game;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
@@ -200,7 +201,7 @@ end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);
 var
-  err      : String;
+  err: String;
   seat_info: TSeatInfo;
 begin
   if FTable.SeatIndex = -1 then
@@ -209,7 +210,10 @@ begin
       err := Format('Maximum %s for this table is %s', [FBuyinPhrase,ChipsToStr(FTable.Game.MaxBuyin * FTable.Game.BigBlind)])
     else
       if seBuyin.Value * 100 < FTable.Game.MinBuyin * FTable.Game.BigBlind then
-        err := Format('Minimum %s for this table is %s', [FBuyinPhrase, ChipsToStr(FTable.Game.MinBuyin * FTable.Game.BigBlind)]);
+        err := Format('Minimum %s for this table is %s', [FBuyinPhrase, ChipsToStr(FTable.Game.MinBuyin * FTable.Game.BigBlind)])
+      else
+        if FTable.Game.State = gsClosed then
+          err := 'Table is closed';
 
     if err = '' then
       ServerSocket.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100))

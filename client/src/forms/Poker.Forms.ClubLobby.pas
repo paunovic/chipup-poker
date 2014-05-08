@@ -183,6 +183,7 @@ type
     procedure CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
     procedure CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
+    procedure CSETableStatus(const AMethodId: Integer; const AObject: TObject);
 
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -234,7 +235,8 @@ begin
                       TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
                       TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                      TServerMessageCallback.Create(srTableStatsReply, CSRTableStatsReply)
+                      TServerMessageCallback.Create(srTableStatsReply, CSRTableStatsReply),
+                      TServerMessageCallback.Create(seTableStatus, CSETableStatus)
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
@@ -274,9 +276,9 @@ end;
 
 procedure TfrmClubLobby.ConfigureGUI;
 var
-  club         : TClubInfo;
-  player       : TPlayerInfo;
-  manager      : String;
+  club: TClubInfo;
+  player: TPlayerInfo;
+  manager: String;
   admin_visible: Boolean;
 begin
   if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
@@ -1065,6 +1067,11 @@ begin
 end;
 
 procedure TfrmClubLobby.CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
+begin
+  ConfigureGUI;
+end;
+
+procedure TfrmClubLobby.CSETableStatus(const AMethodId: Integer; const AObject: TObject);
 begin
   ConfigureGUI;
 end;

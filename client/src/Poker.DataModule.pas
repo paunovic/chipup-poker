@@ -20,7 +20,7 @@ type
       FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
 
     var
-      FSelfInfo   : TPlayerInfo;
+      FSelfInfo: TPlayerInfo;
       FUpdaterFile: String;
 
     function GetAvailableBalance: UINT32;
@@ -35,6 +35,7 @@ type
     procedure OpenCashierLink;
     procedure OpenTACLink;
     procedure OpenSiteLink;
+    procedure UpdateSelfInfoInPlayers;
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
@@ -152,6 +153,12 @@ begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
   Avatars.Add(FSelfInfo.AvatarId, nil);
   Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
+  UpdateSelfInfoInPlayers
+end;
+
+procedure TdmMain.UpdateSelfInfoInPlayers;
+begin
+  Players.AddPlayer(FSelfInfo.Id, FSelfInfo.Nick, FSelfInfo.EMail, FSelfInfo.Balance, FSelfInfo.AvatarId);
 end;
 
 procedure TdmMain.ProcessReconnectedTables(const AReconnectedTables: TObjectList<TPB_TableStatus>);

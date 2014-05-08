@@ -314,7 +314,7 @@ message TableStatus {
 	optional uint32 rake_percent = 21;
 	optional Game.GameType current_game = 22;
 	optional uint32 rotation = 23;
-	optional uint32 total_balance = 24;
+	required uint32 total_balance = 24;
 }
 
 message SeatInfo {

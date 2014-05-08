@@ -1559,6 +1559,9 @@ begin
     ServerSocket.GetUserInfos(query_users);
   end;
 
+  dmMain.SelfInfo.Balance := pbtablestatus.TotalBalance;
+  dmMain.UpdateSelfInfoInPlayers;
+
   ConfigureGUI;
   Render;
 end;
@@ -2863,12 +2866,11 @@ begin
         txt := 'Table is closing after curent hand'
       else
       begin
-        mins := FClosingTime div 60000;
+        mins := FClosingTime div 60000 + 1;
         if mins = 1 then
-          minute_text := 'minute'
+          txt := Format('Table is closing in less than a minute', [mins, minute_text])
         else
-          minute_text := 'minutes';
-        txt := Format('Table is closing in %d %s', [mins, minute_text]);
+          txt := Format('Table is closing in %d minutes', [mins]);
       end;
 
       RenderScaleFont(txt, clWhite2, Point2(FTableCenter.x, FTableCenter.Y + FCardHeight / 3), TableResources.SintonyFonts,
