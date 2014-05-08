@@ -1915,7 +1915,8 @@ end;
 
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
-  if acCheck.Enabled then
+  if (acCheck.Enabled) and
+     (Settings.FoldChecks) then
     acCheck.Execute
   else
     ServerSocket.Fold(FTable.Game.MongoId);

@@ -184,8 +184,7 @@ begin
   lbsMaxBuyin.Caption := Format('Your maximum %s:', [FBuyinPhrase]);
   lbvMaxBuyin.Caption := Format('%s', [ChipsToStr(GetMaxBuyin)]);
 
-  default_buyin := FTable.Game.MinBuyin * FTable.Game.BigBlind;
-  default_buyin := default_buyin + Round((FTable.Game.MaxBuyin * FTable.Game.BigBlind - FTable.Game.MinBuyin * FTable.Game.BigBlind) * 0.75);
+  default_buyin := FTable.Game.BigBlind * 50;
   default_buyin := (default_buyin div 10) * 10;
   SetBuyin(default_buyin);
 end;
