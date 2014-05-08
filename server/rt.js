@@ -6,18 +6,21 @@ function requestTracker(user,pass) {
 	this.pass = pass;
 }
 requestTracker.prototype.rest = function test(url,args,cb) {
-	rest({path:'http://rt.chipuppoker.com:8080/REST/1.0/'+url,headers:{Cookie:this.auth,Referer:'http://rt.chipuppoker.com:8080/REST/1.0/'},entity:args}).then(function(response) {
+	rest({path:'http://rt.chipuppoker.com/REST/1.0/'+url,headers:{Cookie:this.auth,Referer:'http://rt.chipuppoker.com/REST/1.0/'},entity:args}).then(function(response) {
 		console.log('response: ', response.entity);
 		if (cb) cb();
 	});
 	return;
 }
 requestTracker.prototype.login = function login(cb) {
-	var req = http.request({hostname:'rt.chipuppoker.com',port:8080,method:'POST',
+	var postbody = new Buffer("user="+this.user+"&pass="+this.pass);
+	var req = http.request({hostname:'rt.chipuppoker.com',method:'POST',path:'/NoAuth/Login.html',
 		headers:{
-		'Content-Type': 'application/x-www-form-urlencoded'
+		'Content-Type': 'application/x-www-form-urlencoded',
+		'Content-Length':postbody.length
 		}
 	},function (req) {
+		req.setEncoding('utf8');
 		req.on('data',function (data) {
 			//console.log('data',data);
 		});
@@ -27,7 +30,7 @@ requestTracker.prototype.login = function login(cb) {
 			cb();
 		}.bind(this));
 	}.bind(this));
-	req.write("user="+this.user+"&pass="+this.pass);
+	req.write(postbody);
 	req.end();
 	req.on('error',function (err) {
 		console.log('error',err);
@@ -40,6 +43,7 @@ requestTracker.prototype.createTicket = function (obj,cb) {
 	}
 	out = out.join('\n');
 	var data = 'content='+escape(out);
+	console.log(data);
 	this.rest('ticket/new',data,cb);
 }
 //login('root','password');
