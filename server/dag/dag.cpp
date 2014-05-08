@@ -88,6 +88,7 @@ Handle<Value> RankHands(const Arguments& args) {
 			rank = omahaEval(cardlist,cards,handcards);
 		} else {
 			ThrowException(Exception::TypeError(String::New("a user can only have 2 or 4 cards")));
+			return scope.Close(Undefined());
 		}
 		assert(rank);
 
