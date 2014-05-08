@@ -39,12 +39,12 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    FCallbacksId  : Integer;
-    FTable        : TTable;
-    FTableStatus  : TTableStatus;
-    FSeatIndex    : Integer;
+    FCallbacksId: Integer;
+    FTable: TTable;
+    FTableStatus: TTableStatus;
+    FSeatIndex: Integer;
     FCloseCallback: TNotifyEvent;
-    FBuyinPhrase  : String;
+    FBuyinPhrase: String;
 
     procedure SetBuyin(const ABuyin: UINT32);
     procedure CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);

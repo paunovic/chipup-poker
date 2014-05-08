@@ -199,9 +199,9 @@ end;
 
 procedure TdmMain.LoadFonts;
 var
-  rs         : TResourceStream;
+  rs: TResourceStream;
   nbFontAdded: DWORD;
-  C1         : Integer;
+  C1: Integer;
 begin
   for C1 := Low(FONTLIST) to High(FONTLIST) do
   begin

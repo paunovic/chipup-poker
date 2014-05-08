@@ -901,6 +901,7 @@ procedure TfrmTable.MakeTableCaption;
 var
   cap: String;
   currentgame: String;
+  rot_index: Integer;
 begin
   if FTable.Game.GameType = gtRotationNLHPLO then
   begin
@@ -908,7 +909,10 @@ begin
       gtHoldem: currentgame := 'NLH';
       gtOmaha: currentgame := 'PLO';
     end;
-    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, (FTableStatus.RotationHand - 1) mod DWORD(FTable.Game.Seats) + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
+    rot_index := FTableStatus.RotationHand;
+    if rot_index = 0 then
+      rot_index := 1;
+    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, (rot_index - 1) mod FTable.Game.Seats + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
   end
   else
     cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
@@ -1459,9 +1463,9 @@ var
   player: TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
+  seat: TSeatInfo;
   {$IFDEF DEBUG}
   tmp: String;
-  seat: TSeatInfo;
   tb: UINT32;
   {$ENDIF}
 begin
@@ -1596,7 +1600,6 @@ var
   chips_plural: String;
   cc: Integer;
   flop: TBytes;
-  tfile: TextFile;
 begin
   seat_caption := '';
   case ATableEvent.Event of
@@ -1702,29 +1705,10 @@ begin
         if winmsg = 'default' then
           winmsg := ''
         else
-        begin
           if FTableStatus.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
-          begin
-            winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE);
-
-            {$IFDEF DEBUG}
-            AssignFile(tfile, 'C:\winning_hands.txt');
-            if FileExists('C:\winning_hands.txt') then
-              Append(tfile)
-            else
-              Rewrite(tfile);
-            try
-              WriteLn(tfile, Format('#%d [%s %s]: %s | %s', [FTableStatus.HandId,
-                   seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString,
-                   pot.WinnerData[0].Msg, winmsg]));
-            finally
-              CloseFile(tfile);
-            end;
-            {$ENDIF}
-          end
+            winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE)
           else
             winmsg := pot.WinnerData[0].Msg;
-        end;
 
         if winmsg <> '' then
           winmsg := Format('(%s)', [winmsg]);
