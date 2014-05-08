@@ -2656,7 +2656,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				var last = this.lastCashout[conn.userid];
 				var timediff = Date.now() - last.when;
 				conn.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
-				if (timediff < (1 * 60 * 1000)) {
+				if (timediff < (30 * 60 * 1000)) {
 					if (params.chips < last.chips && true) {
 						conn.send(codes.srTableBuyinLessThanCashout,{game_id:fromMongoId(this.id),last_cashout:last.chips},'Poker.BuyinError');
 						cb(false,events);
