@@ -496,7 +496,8 @@ begin
     seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatsReply: ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
     srContactUsOk: ADataObject := TPB_ContactMessage.Create(ADataPointer, ARpcMessage.DataSize);
-    srTableBuyinLessThanCashout: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
+    srTableBuyinLessThanCashout,
+    srInvalidTableBuyin: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}

@@ -53,6 +53,7 @@ type
     procedure CSRTableAddonOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTableInvalidBuyin(const AMethodId: Integer; const AObject: TObject);
 
     function GetMaxBuyin: UINT32;
   protected
@@ -82,7 +83,8 @@ begin
                       TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips),
                       TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
                       TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit),
-                      TServerMessageCallback.Create(srTableBuyinLessThanCashout, CSRTableBuyinLessThanCashout)
+                      TServerMessageCallback.Create(srTableBuyinLessThanCashout, CSRTableBuyinLessThanCashout),
+                      TServerMessageCallback.Create(srInvalidTableBuyin, CSRTableInvalidBuyin)
                   ]);
 end;
 
@@ -116,9 +118,14 @@ begin
   else
     seat_chips := 0;
 
-  result := FTable.Game.MaxBuyin * FTable.Game.BigBlind - seat_chips;
-  if result > dmMain.AvailableBalance then
-    result := dmMain.AvailableBalance;
+  if seat_chips > FTable.Game.MaxBuyin * FTable.Game.BigBlind then
+    result := 0
+  else
+  begin
+    result := FTable.Game.MaxBuyin * FTable.Game.BigBlind - seat_chips;
+    if result > dmMain.AvailableBalance then
+      result := dmMain.AvailableBalance;
+  end;
 end;
 
 procedure TfrmTableSit.seBuyinPropertiesChange(Sender: TObject);
@@ -206,14 +213,8 @@ var
 begin
   if FTable.SeatIndex = -1 then
   begin
-    if seBuyin.Value * 100 > FTable.Game.MaxBuyin * FTable.Game.BigBlind then
-      err := Format('Maximum %s for this table is %s', [FBuyinPhrase,ChipsToStr(FTable.Game.MaxBuyin * FTable.Game.BigBlind)])
-    else
-      if seBuyin.Value * 100 < FTable.Game.MinBuyin * FTable.Game.BigBlind then
-        err := Format('Minimum %s for this table is %s', [FBuyinPhrase, ChipsToStr(FTable.Game.MinBuyin * FTable.Game.BigBlind)])
-      else
-        if FTable.Game.State = gsClosed then
-          err := 'Table is closed';
+    if FTable.Game.State = gsClosed then
+      err := 'Table is closed';
 
     if err = '' then
       ServerSocket.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100))
@@ -310,7 +311,24 @@ begin
   if not CompareBytes(FTable.Game.MongoId, pbbuyinerr.GameId) then
     Exit;
 
-  MessageDlg(Format('You must buyin with equal or more chips than your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]), mtWarning, [mbOK], 0);
+  if pbbuyinerr.LastCashout > FTable.Game.MaxBuyin * FTable.Game.BigBlind then
+    MessageDlg(Format('You must buyin with equal amount of chips as your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]), mtWarning, [mbOK], 0)
+  else
+    MessageDlg(Format('You must buyin with equal or more chips than your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]), mtWarning, [mbOK], 0);
+
+  acOK.Enabled := TRUE;
+end;
+
+procedure TfrmTableSit.CSRTableInvalidBuyin(const AMethodId: Integer; const AObject: TObject);
+var
+  pbbuyinerr: TPB_BuyinError;
+begin
+  pbbuyinerr := AObject as TPB_BuyinError;
+  if not CompareBytes(FTable.Game.MongoId, pbbuyinerr.GameId) then
+    Exit;
+
+  MessageDlg('Invalid buy-in amount', mtWarning, [mbOK], 0);
+
   acOK.Enabled := TRUE;
 end;
 

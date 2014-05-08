@@ -896,23 +896,16 @@ begin
   if AMethodId = Integer(seTransferChips) then
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount;
-
-    if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
-      player_info.Balance := player_info.Balance + pbreply.ChipAmount;
-
     if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance - pbreply.ChipAmount;
   end
   else
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
-
-    if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
-      player_info.Balance := player_info.Balance - pbreply.ChipAmount;
-
     if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance + pbreply.ChipAmount;
   end;
+  dmMain.UpdateSelfInfoInPlayers;
 end;
 
 procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);
