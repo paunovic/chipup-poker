@@ -62,6 +62,7 @@ sharedconfig.minSizes.ContactMessage = 10;
 sharedconfig.stringSizes.ContactMessage = 1000;
 sharedconfig.ChangeExpireTime = 3600 * 24;
 sharedconfig.ForgotExpireTime = 3600;
+var badConfLink = "Invalid confirmation link.";
 
 var activeUsers = {};
 var activeGames = {};
@@ -81,17 +82,17 @@ function setup3(db) {
 			return;
 		}
 	if (req.query.code.length != 36) {
-		res.send("error, code not long enough");
+		res.send(badConfLink);
 		return;
 	}
 	allUsers.findOne({authcode:req.query.code},function (err,user) {
 		if (!user) {
-			res.send("error, auth code used or invalid");
+			res.send(badConfLink);
 			return;
 		}
 		allUsers.update({_id:user._id},{$set:{authed:true},$unset:{authcode:""}},function (err,result) {
 			console.log('email confirm time',user);
-			res.send("account activated");
+			res.send("E-Mail address successfully verified.");
 			var conn = activeUsers[user._id];
 			if (!conn) return;
 			allUsers.findOne({_id:user._id},function (err,self) {
@@ -114,12 +115,12 @@ app.get('/confirmchange',function (req,res) {
 		return;
 	}
 	if (req.query.code.length != 36) {
-		res.send("error, code not long enough");
+		res.send(badConfLink);
 		return;
 	}
 	allUsers.findOne({changecode:req.query.code},function (err,user) {
 		if (!user) {
-			res.send("error, auth code used or invalid");
+			res.send(badConfLink);
 			return;
 		}
 		var age = Date.now() - user.changetime;
@@ -132,7 +133,7 @@ app.get('/confirmchange',function (req,res) {
 		}
 		allUsers.update({_id:user._id},{$set:{email:user.newemail,authed:true},$unset:{newemail:"",changecode:"",authcode:""}},function (err,result) {
 			console.log('email change time',user);
-			res.send("email address changed");
+			res.send("E-Mail address successfully changed.");
 			var conn = activeUsers[user._id];
 			if (!conn) return;
 			allUsers.findOne({_id:user._id},function (err,self) {
@@ -147,19 +148,19 @@ app.get("/passwordreset",function (req,res) {
 		return;
 	}
 	if (req.query.code.length != 36) {
-		res.send("error, code not long enough");
+		res.send(badConfLink);
 		return;
 	}
 	allUsers.findOne({forgotcode:req.query.code},function (err,user) {
 		if (!user) {
-			res.send("error, auth code used or invalid");
+			res.send(badConfLink);
 			return;
 		}
 		var age = Date.now() - user.forgottime;
 		console.log('reset code age',age);
 		if (age > (sharedconfig.ForgotExpireTime*1000)) {
 			allUsers.update({_id:user._id},{$unset:{forgotcode:"",forgottime:""}},function (err,updated) {
-				res.send("error, change code expired");
+				res.send("Password reset link expired.");
 			}.bind(this));
 			return;
 		}
@@ -171,10 +172,10 @@ app.get("/passwordreset",function (req,res) {
 			var hash = hasher.digest();
 			allUsers.update({_id:user._id},{$set:{password:hash,salt:salt},$unset:{forgotcode:"",forgottime:""}},function (err,result) {
 				console.log('password change time',user);
-				res.send("password changed, new password sent to your email");
+				res.send("Password changed, new password sent to your E-Mail.");
 				var test = new SmtpConnection();
-				var message = 'your new password is: '+newpassword;
-				test.sendMail(user.email,'From: service@chipuppoker.com\r\nSubject: test\r\n\r\n'+message,function cb(err,ret) {
+				var message = emailChange2({password:newpassword});
+				test.sendMail(user.email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+user.displayname+'<'+user.email+'>\r\nContent-Type: text/html\r\nSubject: New Password Issued\r\n\r\n'+message,function cb(err,ret) {
 					console.log('cb',err,ret);
 					if (err) {
 						console.log('password reset email error',err);
@@ -531,7 +532,7 @@ function goOnline() {
 }
 
 var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats;
-var emailRegister;
+var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
@@ -648,8 +649,17 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		log('compiling jade');
 		async.parallel([function (cb) {
 			fs.readFile('views/email_register.jade',{encoding:'utf8'},function (err,data) {
-				console.log(data);
 				emailRegister = jade.compile(data,{filename:'views/email_register.jade',pretty:true});
+				cb();
+			});
+		},function (cb) {
+			fs.readFile('views/password_change1.jade',{encoding:'utf8'},function (err,data) {
+				emailChange1 = jade.compile(data,{filename:'views/password_change1.jade',pretty:true});
+				cb();
+			});
+		},function (cb) {
+			fs.readFile('views/password_change2.jade',{encoding:'utf8'},function (err,data) {
+				emailChange2 = jade.compile(data,{filename:'views/password_change2.jade',pretty:true});
 				cb();
 			});
 		}],function () {
@@ -740,6 +750,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 		this.userid = row._id;
 		this.nick = row.displayname;
 		this.email = row.email;
+		this.chips = row.chips;
 		this.log('sucessfully logged in');
 		activeUsers[row._id] = this;
 		this.getStatusPacket(function (status) {
@@ -829,12 +840,14 @@ ClientSocket.prototype.logout = function () {
 	this.state = 1;
 	this.userid = null;
 	this.nick = null;
+	delete this.chips;
 }
 ClientSocket.prototype.eject = function () {
 	Game.handleDisconnect(this,'eject');
 	this.state = 1;
 	this.userid = null;
 	this.nick = null;
+	delete this.chips;
 	this.send(codes.seSecondaryLoginDetected);
 }
 ClientSocket.prototype.log = function log(format) {
@@ -879,12 +892,12 @@ function containsObjectID(list,id) {
 	}
 	return false;
 }
-function sendAuthEmail(userid,authcode,email,fail1,fail2,sucess) {
+function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
 	var link = domain+'confirm?code='+authcode;
 	var body = emailRegister({authlink:link,email:email});
 	console.log(body);
-	test.sendMail(email,'From: service@chipuppoker.com\r\nSubject: test\r\nContent-Type: text/html\r\n\r\n'+body,function cb(err,ret) {
+	test.sendMail(email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+displayname+'<'+email+'>\r\nSubject: E-Mail Verification\r\nContent-Type: text/html\r\n\r\n'+body,function cb(err,ret) {
 		console.log('cb',err,ret);
 		if (err) {
 			if (['ENODATA','ENOTFOUND'].indexOf(err.code) != -1) {
@@ -1030,7 +1043,7 @@ ClientSocket.prototype.handle = function (code,args) {
 										console.log('error 1',err);
 										process.exit(1);
 									}
-									sendAuthEmail(result._id,doc.authcode,doc.email, function fail1() {
+									sendAuthEmail(result._id,doc.authcode,doc.email,doc.displayname, function fail1() {
 										this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 										allUsers.remove({_id:result[0]._id},function (err,res) {
 											this.log('delete done',err,res,result);
@@ -1069,7 +1082,8 @@ ClientSocket.prototype.handle = function (code,args) {
 				allUsers.update({_id:row._id},{$set:doc},function (err,res) {
 					var test = new SmtpConnection();
 					var link = domain+'passwordreset?code='+doc.forgotcode;
-					test.sendMail(row.email,'From: service@chipuppoker.com\r\nSubject: test\r\n\r\nClick here to reset your password: '+link,function cb(err,ret) {
+					var body = emailChange1({authlink:link});
+					test.sendMail(row.email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+row.displayname+'<'+email+'>\r\nContent-Type: text/html\r\nSubject: Password Reset Confirmation\r\n\r\n'+body,function cb(err,ret) {
 						console.log('cb',err,ret);
 						token.stop();
 						if (err) {
@@ -1505,7 +1519,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					}
 					var test = new SmtpConnection();
 					var link = domain+'confirmchange?code='+authcode;
-					test.sendMail(newemail,'Subject: test\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
+					test.sendMail(newemail,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+newemail+'\r\nSubject: E-Mail Change Verification\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
 						console.log('cb',err,ret);
 						if (err) {
 							this.send(codes.srChangeMailReply,{status:'cmInvalidEmail'},'Poker.ChangeMailReply');
@@ -1634,11 +1648,26 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.log('inserted',game[0]);
 					var g = makeGameProtobuf(game[0]);
 					this.send(codes.srCreateGameOk,g,'Poker.Game');
-					if (!club.members) return;
-					for (var x=0; x<club.members.length; x++) {
-						var conn = activeUsers[club.members[x]];
-						if (!conn) continue;
-						conn.send(codes.seGameCreate,g,'Poker.Game');
+					if (club.is_private) {
+						if (!club.members) {
+							token.tag += '-empty';
+							token.stop();
+							return;
+						}
+						token.tag += '-private';
+						for (var x=0; x<club.members.length; x++) {
+							var conn = activeUsers[club.members[x]];
+							if (!conn) continue;
+							conn.send(codes.seGameCreate,g,'Poker.Game');
+						}
+						token.stop();
+					} else {
+						token.tag += '-public';
+						for (var key in activeUsers) {
+							if (key === this) continue;
+							activeUsers[key].send(codes.seGameCreate,g,'Poker.Game');
+						}
+						token.stop();
 					}
 				}.bind(this));
 			}.bind(this));
@@ -2265,7 +2294,7 @@ handlers[codes.scTableSitOutNextBB] = function (args) {
 }
 handlers[codes.scResendVerificationMail] = function () {
 	allUsers.findOne({_id:this.userid},function (err,row) {
-		if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,function () {},function () {},function () {});
+		if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,row.displayname,function () {},function () {},function () {});
 	}.bind(this));
 }
 handlers[codes.scShowLosingCards] = function (args) {
@@ -2462,8 +2491,12 @@ function Game(obj) {
 	this.lastCashout = {};
 
 	if (this.obj.game_type == 'gtRotationNLHPLO') {
-		// FIXME, restore game_limit and omaha properly
-		this.game_limit = 'glNoLimit';
+		this.omaha = this.rotation > this.obj.seats;
+		if (this.omaha) {
+			this.game_limit = 'glNoLimit';
+		} else {
+			this.game_limit = 'glPotLimit';
+		}
 	} else {
 		this.game_limit = this.obj.game_limit;
 	}
@@ -2622,9 +2655,9 @@ Game.prototype.sitDown = function (conn,params,cb) {
 			if (this.lastCashout[conn.userid]) {
 				var last = this.lastCashout[conn.userid];
 				var timediff = Date.now() - last.when;
-				this.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
+				conn.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
 				if (timediff < (1 * 60 * 1000)) {
-					if (params.chips < last.chips) {
+					if (params.chips < last.chips && true) {
 						conn.send(codes.srTableBuyinLessThanCashout,{game_id:fromMongoId(this.id),last_cashout:last.chips},'Poker.BuyinError');
 						cb(false,events);
 						return;
@@ -2696,17 +2729,18 @@ Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
 Game.prototype.deal = function deal(cb,config,emptyseat) {
 	var players = 0;
 	//this.log(' pre rotation:%d omaha:%s limit:%s',this.rotation,this.omaha,this.game_limit);
-	if (this.rotation == this.obj.seats) {
-		if (this.obj.game_type == 'gtRotationNLHPLO') {
-			if (this.omaha) {
-				this.omaha = false;
-				this.game_limit = 'glNoLimit';
-			} else {
-				this.omaha = true;
-				this.game_limit = 'glPotLimit';
-			}
+	if (this.obj.game_type == 'gtRotationNLHPLO') {
+		if (this.rotation == this.obj.seats) {
+			this.omaha = true;
+		} else if (this.rotation == (this.obj.seats*2)) {
+			this.omaha = false;
+			this.rotation = 0;
 		}
-		this.rotation = 0;
+		if (this.omaha) {
+			this.game_limit = 'glNoLimit';
+		} else {
+			this.game_limit = 'glPotLimit';
+		}
 	}
 	this.rotation++;
 	//this.log('post rotation:%d omaha:%s limit:%s',this.rotation,this.omaha,this.game_limit);
@@ -2756,7 +2790,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			}
 			this.members[x].status = 'psInHand';
 			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards };
-			this.history.cards[x+3] = this.members[x].hand.prettyPrint();
+			this.history.cards[x+3] = this.members[x].hand.prettyPrint(true);
 			this.members[x].muck = true;
 			this.balance_changes[x] = 0;
 		}
@@ -2800,9 +2834,9 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.deck.draw(3,this.flop);
 		this.deck.draw(1,this.turn);
 		this.deck.draw(1,this.river);
-		this.history.cards[0] = this.flop.prettyPrint();
-		this.history.cards[1] = this.turn.prettyPrint();
-		this.history.cards[2] = this.river.prettyPrint();
+		this.history.cards[0] = this.flop.prettyPrint(true);
+		this.history.cards[1] = this.turn.prettyPrint(true);
+		this.history.cards[2] = this.river.prettyPrint(true);
 		this.log('bcast 2');
 		
 		handHistory.insert({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,cards:this.history.cards,rake:this.rake},function (err,row) {
@@ -3085,7 +3119,10 @@ Game.prototype.doWin = function (cb,extradelay) {
 				assert(!err,err);
 				assert.equal(res,1);
 				this.log('seat #'+seat+' gained '+gain);
-				if (this.seats[seat].conn) this.seats[seat].conn.boughtin += gain;
+				if (this.seats[seat].conn) {
+					this.seats[seat].conn.boughtin += gain;
+					this.seats[seat].conn.chips += gain;
+				}
 				if (winnerObj) winnerObj.chips += gain;
 				cb2();
 			}.bind(this));
@@ -3420,7 +3457,10 @@ Game.prototype.moveToPot = function (reason,cb1) {
 						assert(!err);
 						assert(res == 1);
 						this.log('lost chips',job.seat,betsToRemove[job.seat]);
-						if (priv.conn) priv.conn.boughtin -= betsToRemove[job.seat];
+						if (priv.conn) {
+							priv.conn.boughtin -= betsToRemove[job.seat];
+							priv.conn.chips -= betsToRemove[job.seat];
+						}
 						betsToRemove[job.seat] = 0;
 						// debug to detect desync
 						// usage: set buyin on a table with EVERYTHING on every user
@@ -3864,8 +3904,9 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	if (['tsFlop','tsTurning','tsTurn','tsRiverTime','tsRiver'].indexOf(this.state) != -1) tableStatus.flop = new Buffer(this.flop.cards);
 	if (['tsTurn','tsRiverTime','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = new Buffer(this.turn.cards);
 	if (this.state == 'tsRiver') tableStatus.river = new Buffer(this.river.cards);
-	tableStatus.current_game = this.omaha ? "cgOmaha" : "cgHoldem";
+	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
 	tableStatus.rotation = this.rotation;
+	tableStatus.total_balance = self.chips;
 	this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	return tableStatus;
 }
@@ -4030,11 +4071,15 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 				console.log('key:%s count:%d',key,count);
 			}
 			if (count == 0) {
-				this.log('self-deleting');
-				delete activeGames[this.id];
-				if (this.state2 == 'gsClosed') {
-					clearTimeout(this.deleteTimer);
-					this.doDelete();
+				if (this.state2 == 'gsClosing') {
+					this.log('staying alive!');
+				} else {
+					this.log('self-deleting');
+					delete activeGames[this.id];
+					if (this.state2 == 'gsClosed') {
+						clearTimeout(this.deleteTimer);
+						this.doDelete();
+					}
 				}
 			}
 			cb1();
@@ -4087,11 +4132,17 @@ Game.prototype.doDelete = function () {
 		g.state = 'gsClosed';
 		var conn = activeUsers[club.owner];
 		if (conn) conn.send(codes.seGameDelete,g,'Poker.Game');
-		if (club.members) {
-			for (var x=0; x<club.members.length; x++) {
-				conn = activeUsers[club.members[x]];
-				if (!conn) continue;
-				conn.send(codes.seGameDelete,g,'Poker.Game');
+		if (club.is_private) {
+			if (club.members) {
+				for (var x=0; x<club.members.length; x++) {
+					conn = activeUsers[club.members[x]];
+					if (!conn) continue;
+					conn.send(codes.seGameDelete,g,'Poker.Game');
+				}
+			}
+		} else {
+			for (var key in activeUsers) {
+				activeUsers[key].send(codes.seGameDelete,g,'Poker.Game');
 			}
 		}
 	}.bind(this));

@@ -14,7 +14,7 @@ for (var x=0; x<raweqc.length; x++) {
 	if (eqcindex[obj.cards]) {
 		console.log('collision %j %j',eqcindex[obj.cards],obj);
 	}
-	if ([0,1,2,4,7].indexOf(obj.type) != -1) {
+	if ([0,1,2,3,4,6,7].indexOf(obj.type) != -1) {
 		eqcindex[obj.cards] = obj;
 	}
 	if ([5,8].indexOf(obj.type) != -1) {
