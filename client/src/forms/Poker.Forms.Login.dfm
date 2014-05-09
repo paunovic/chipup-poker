@@ -3290,22 +3290,6 @@ object frmLogin: TfrmLogin
     ParentFont = False
     Transparent = True
   end
-  object btForceUpdate: TcxButton
-    Left = 330
-    Top = 222
-    Width = 174
-    Height = 30
-    Action = acUpdate
-    SpeedButtonOptions.CanBeFocused = False
-    TabOrder = 10
-    Visible = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -12
-    Font.Name = 'Arial'
-    Font.Style = []
-    ParentFont = False
-  end
   object alLogin: TActionList
     Left = 28
     Top = 16

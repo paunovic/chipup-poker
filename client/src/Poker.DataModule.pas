@@ -22,6 +22,7 @@ type
     var
       FSelfInfo: TPlayerInfo;
       FUpdaterFile: String;
+      FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -37,10 +38,12 @@ type
     procedure OpenSiteLink;
     procedure UpdateSelfInfoInPlayers;
     procedure GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+    procedure StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
     property UpdaterFile: String read FUpdaterFile write FUpdaterFile;
+    property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
 var
@@ -155,6 +158,24 @@ begin
   Avatars.Add(FSelfInfo.AvatarId, nil);
   Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
   UpdateSelfInfoInPlayers
+end;
+
+procedure TdmMain.StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+var
+  ufi: TPB_UpdateFileInfo;
+  C1: Integer;
+begin
+  FUpdateFiles.Clear;
+
+  for C1 := 0 to AFiles.Count - 1 do
+  begin
+    ufi := TPB_UpdateFileInfo.Create;
+    ufi.Path := AFiles[C1].Path;
+    ufi.Hash := AFiles[C1].Hash;
+    ufi.Url := AFiles[C1].Url;
+    ufi.FileType := AFiles[C1].FileType;
+    AFiles.Add(ufi);
+  end;
 end;
 
 procedure TdmMain.UpdateSelfInfoInPlayers;

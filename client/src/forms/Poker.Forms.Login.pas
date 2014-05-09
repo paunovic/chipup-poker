@@ -30,7 +30,6 @@ type
     tiConnect: TTimer;
     imgHeader: TcxImage;
     tiLoginTimeout: TTimer;
-    btForceUpdate: TcxButton;
     acUpdate: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acLoginExecute(Sender: TObject);
@@ -100,10 +99,6 @@ begin
   CurrentStatus := lsIdle;
   edPassword.Properties.PasswordChar := Chr($25CF);
   ApplySettings;
-
-  {$IFDEF DEBUG}
-  btForceUpdate.Visible := TRUE;
-  {$ENDIF}
 
   if Settings.DeveloperMode then
     EnterDeveloperMode;
@@ -373,7 +368,7 @@ var
   version: String;
 begin
   pbhello := AObject as TPB_HelloReply;
-
+(*
   {$IFDEF DEBUG}
   version := pbhello.LatestDebugVersion;
   {$ELSE}
@@ -383,14 +378,18 @@ begin
   if (Settings.Hardcoded.VERSION <> version) and
      (Settings.Hardcoded.REVISION <> 'manual') then
     acUpdate.Execute;
+*)
+  if pbhello.UpdateFiles.Count > 0 then
+  begin
+    dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
+    acUpdate.Execute;
+  end;
 
   ServerSettings.ParseHelloMessage(pbhello);
-
   if ServerSettings.MaxStringLengths.EMail > ServerSettings.MaxStringLengths.Username then
     edLogin.Properties.MaxLength := ServerSettings.MaxStringLengths.EMail
   else
     edLogin.Properties.MaxLength := ServerSettings.MaxStringLengths.Username;
-
   edPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
 
   if ServerSocket.IsConnected then
