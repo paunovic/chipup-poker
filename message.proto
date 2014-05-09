@@ -129,7 +129,8 @@ message UpdateFileInfo {
 	}
 	required string path = 1;
 	optional bytes hash = 2;
-	optional UpdateFileType type = 3;
+	optional string url = 3;
+	optional UpdateFileType file_type = 4;
 }
 
 message LoginParams {
