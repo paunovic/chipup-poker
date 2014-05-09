@@ -234,7 +234,7 @@ type
 
     function RoundToBB(const AValue: Single): UINT32;
 
-    procedure AnimateBets(const ABets: TArray<UINT32>);
+    function AnimateBets(const ABets: TArray<UINT32>): Boolean;
     procedure AnimateBlinds;
 
     procedure MakeTableCaption;
@@ -1185,13 +1185,14 @@ end;
 procedure TfrmTable.ConfigureGUI;
 var
   seat_info: TSeatInfo;
-  sitout   : Boolean;
+  sitout: Boolean;
   foldtoany: Boolean;
-  seat_bet : UINT32;
-  raise_en : Boolean;
-  event    : TNotifyEvent;
-  C1       : Integer;
-  nofocus  : Boolean;
+  seat_bet: UINT32;
+  raise_en: Boolean;
+  event: TNotifyEvent;
+  C1: Integer;
+  nofocus: Boolean;
+  fgwin: HWND;
   hround: Integer;
 begin
   hround := Round(Width / FORM_ASPECT_RATIO);
@@ -1288,8 +1289,9 @@ begin
 
               if not nofocus then
               begin
+                fgwin := GetForegroundWindow;
                 for C1 := 0 to Tables.Count - 1 do
-                  if tables[C1].Form.Focused then
+                  if tables[C1].Form.Handle = fgwin then
                   begin
                     nofocus := TRUE;
                     Break;
@@ -1322,7 +1324,7 @@ begin
     end;
 
     acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
-                           (seat_info.Status in [psInHand, psAllIn, psFolded]) and
+                           (seat_info.CanShow) and
                            (not seat_info.CardsVisible);
   end;
 
@@ -1474,7 +1476,6 @@ var
   query_users: TArray<TBytes>;
   empty_array: TBytes;
   seat: TSeatInfo;
-  cards_visible: Boolean;
   {$IFDEF DEBUG}
   tmp: String;
   tb: UINT32;
@@ -1521,15 +1522,11 @@ begin
   {$IFDEF DEBUG}
   tmp := BoolToStr(pbtablestatus.Locked, TRUE);
   tb := 0;
-  cards_visible := FALSE;
   if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
-  begin
     tb := seat.Timebank;
-    cards_visible := seat.CardsVisible;
-  end;
 
-  DebugLn(Format('DB: %d; TS: %d; CS: %d; CV: %s TM: %d; TB: %d; SEQ: %d; LD: %s',
-    [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, BoolToStr(cards_visible, TRUE), FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
+  DebugLn(Format('DB: %d; TS: %d; CS: %d; M: %d; TB: %d; SEQ: %d; LD: %s',
+    [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
   {$ENDIF}
 
   FTurnAniDelay := 0;
@@ -1672,7 +1669,8 @@ begin
 
       FTableStatus.Pots.Assign(ATableEvent.Pots);
 
-      AnimateBets(FTableStatus.PreviousBets);
+      if AnimateBets(FTableStatus.PreviousBets) then
+        TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
 
       for C1 := 0 to ATableEvent.Pots.Count - 1 do
       begin
@@ -1826,8 +1824,6 @@ begin
       event := Format('ALL-IN [#%d]', [ATableEvent.Seat]);
       {$ENDIF}
       seat_caption := 'ALL-IN';
-
-      TablePlaySound(Sounds.SOUND_ALLIN);
     end;
 
     teFlop: begin
@@ -1838,7 +1834,8 @@ begin
       event := Format('FLOP [%s]', [FTableStatus.FlopCards.AsString]);
       {$ENDIF}
       EnableGameLockTimer(1.5);
-      AnimateBets(ATableEvent.Bets);
+      if AnimateBets(ATableEvent.Bets) then
+        TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
 
     teTurn: begin
@@ -1849,7 +1846,8 @@ begin
       event := Format('TURN [%s]', [FTableStatus.TurnCard.AsString]);
       {$ENDIF}
       EnableGameLockTimer(FTurnAniDelay + 1.5);
-      AnimateBets(ATableEvent.Bets);
+      if AnimateBets(ATableEvent.Bets) then
+        TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
 
     teRiver: begin
@@ -1860,7 +1858,8 @@ begin
       event := Format('RIVER [%s]', [FTableStatus.RiverCard.AsString]);
       {$ENDIF}
       EnableGameLockTimer(FRiverAniDelay + 1.5);
-      AnimateBets(ATableEvent.Bets);
+      if AnimateBets(ATableEvent.Bets) then
+        TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
 
     teDisconnect: begin
@@ -3049,13 +3048,14 @@ begin
 end;
 
 
-procedure TfrmTable.AnimateBets(const ABets: TArray<UINT32>);
+function TfrmTable.AnimateBets(const ABets: TArray<UINT32>): Boolean;
 var
   C1: UINT32;
   bet_point: TPoint2;
   pot_point: TPoint2;
   animation: TDXAnimation;
 begin
+  result := FALSE;
   if Length(ABets) = 0 then
     Exit;
 
@@ -3069,6 +3069,7 @@ begin
       animation.Tag := 1;
       animation.TagUINT := ABets[C1];
       FBetAnimations.Add(animation.Id);
+      result := TRUE;
     end;
 end;
 

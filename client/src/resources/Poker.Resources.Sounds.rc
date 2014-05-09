@@ -1,6 +1,6 @@
 Dealing WAVE "sounds\\Dealing.wav"
 Check WAVE "sounds\\Check.wav"
-AllIn WAVE "sounds\\AllIn.wav"
+MoveChips WAVE "sounds\\MoveChips.wav"
 PutChipsSmall WAVE "sounds\\PutChipsSmall.wav"
 Timebar WAVE "sounds\\Timebar.wav"
 Timebank WAVE "sounds\\Timebank.wav"

@@ -1,5 +1,3 @@
-//{$APPTYPE CONSOLE}
-
 program client;
 
 {$R 'Poker.Resources.Fonts.res' 'resources\Poker.Resources.Fonts.rc'}
@@ -142,10 +140,6 @@ end;
 
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
-             {
-  Write(THandStrengthCalculator.GetHandStrength('JdTc', 'Jc9sKsKdQc', gtHoldem, FALSE));
-  ReadLn;
-  Exit;         }
 
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then

@@ -10,7 +10,7 @@ type
       SOUND_DEALING        = 'Dealing';
       SOUND_CHECK          = 'Check';
       SOUND_PUTCHIPS_SMALL = 'PutChipsSmall';
-      SOUND_ALLIN          = 'AllIn';
+      SOUND_MOVE_CHIPS     = 'MoveChips';
       SOUND_TIMEBAR        = 'Timebar';
       SOUND_TIMEBANK       = 'Timebank';
 

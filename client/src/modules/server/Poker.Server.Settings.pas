@@ -7,22 +7,22 @@ uses
 
 type
   TStringLengths = record
-    EMail      : Integer;
-    Username   : Integer;
-    Password   : Integer;
-    ClubName   : Integer;
+    EMail: Integer;
+    Username: Integer;
+    Password: Integer;
+    ClubName: Integer;
     ClubInvCode: Integer;
-    GameName   : Integer;
+    GameName: Integer;
     ContactMessage: Integer;
   end;
 
   TServerSettings = class
   private
     FEmailConfirmationExpiration: Integer;
-    FPlaytime                   : Integer;
-    FTimebank                   : Integer;
-    FMinStringLengths           : TStringLengths;
-    FMaxStringLengths           : TStringLengths;
+    FPlaytime: Integer;
+    FTimebank: Integer;
+    FMinStringLengths: TStringLengths;
+    FMaxStringLengths: TStringLengths;
 
   public
     class procedure Initialize;

@@ -1066,7 +1066,7 @@ begin
   protobuf := TPB_Game.Create;
   try
     protobuf.MongoId := AGameId;
-    SendProtobuf(scShowLosingCards, protobuf);
+    SendProtobuf(scShowCards, protobuf);
   finally
     protobuf.Free;
   end;

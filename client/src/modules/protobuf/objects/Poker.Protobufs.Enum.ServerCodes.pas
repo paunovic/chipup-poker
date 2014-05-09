@@ -85,7 +85,7 @@ type
     scTableSitOutNextHand = 99,
     scTableSitOutNextBB = 100,
     scResendVerificationMail = 101,
-    scShowLosingCards = 102,
+    scShowCards = 102,
     seUserChange = 103,
     scQueryTableStats = 104,
     scContactUs = 105
@@ -200,7 +200,7 @@ begin
     scTableSitOutNextHand: result := 'scTableSitOutNextHand';
     scTableSitOutNextBB: result := 'scTableSitOutNextBB';
     scResendVerificationMail: result := 'scResendVerificationMail';
-    scShowLosingCards: result := 'scShowLosingCards';
+    scShowCards: result := 'scShowCards';
     seUserChange: result := 'seUserChange';
     scQueryTableStats: result := 'scQueryTableStats';
     scContactUs: result := 'scContactUs';

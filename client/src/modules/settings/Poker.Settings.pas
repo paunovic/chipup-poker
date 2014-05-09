@@ -36,9 +36,9 @@ type
     procedure SetFoldChecks(const AValue: Boolean);
 
     var
-      FJSON        : ISuperObject;
+      FJSON: ISuperObject;
       FSettingsFile: String;
-      FDomainURL   : String;
+      FDomainURL: String;
 
   public
     constructor Create(const ASettingsFile: String);

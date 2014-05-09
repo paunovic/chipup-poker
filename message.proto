@@ -92,6 +92,7 @@ enum ServerCodes {
 	seUserChange = 103;
 	scQueryTableStats = 104;
 	scContactUs = 105;
+	scHello = 106;
 }
 
 message StringSizes {
@@ -113,6 +114,22 @@ message HelloReply {
 	required string latestVersion = 7;
 	required string latestDebugVersion = 8;
 	required StringSizes minSizes = 9;
+	repeated UpdateFileInfo update_files = 10;
+}
+
+message HelloParams {
+	required bool debug = 1;
+	repeated UpdateFileInfo files = 2;
+}
+
+message UpdateFileInfo {
+	enum UpdateFileType {
+		ufFull = 1;
+		ufDiff = 2;
+	}
+	required string path = 1;
+	optional bytes hash = 2;
+	optional UpdateFileType type = 3;
 }
 
 message LoginParams {

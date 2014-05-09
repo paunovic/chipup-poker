@@ -22,6 +22,7 @@ type
       FN_TIMEBANK = 7;
       FN_CARDS_VISIBLE = 8;
       FN_DISCONNECTED = 9;
+      FN_CAN_SHOW = 10;
 
     var
       FSeat: Integer;
@@ -33,6 +34,7 @@ type
       FTimebank: UINT32;
       FCardsVisible: Boolean;
       FDisconnected: Boolean;
+      FCanShow: Boolean;
 
     procedure SetSeat(const AValue: Integer);
     procedure SetPlayerMongoId(const AValue: TBytes);
@@ -43,6 +45,7 @@ type
     procedure SetTimebank(const AValue: UINT32);
     procedure SetCardsVisible(const AValue: Boolean);
     procedure SetDisconnected(const AValue: Boolean);
+    procedure SetCanShow(const AValue: Boolean);
 
   public
     destructor Destroy; override;
@@ -57,6 +60,7 @@ type
     property Timebank: UINT32 read FTimebank write SetTimebank;
     property CardsVisible: Boolean read FCardsVisible write SetCardsVisible;
     property Disconnected: Boolean read FDisconnected write SetDisconnected;
+    property CanShow: Boolean read FCanShow write SetCanShow;
   end;
 
 implementation
@@ -114,6 +118,10 @@ begin
       FN_DISCONNECTED: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDisconnected := AProtobufReader.readBoolean;
+      end;
+      FN_CAN_SHOW: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCanShow := AProtobufReader.readBoolean;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -173,6 +181,12 @@ procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
 begin
   FDisconnected := AValue;
   ProtobufOutput.writeBoolean(FN_DISCONNECTED, AValue);
+end;
+
+procedure TPB_SeatInfo.SetCanShow(const AValue: Boolean);
+begin
+  FCanShow := AValue;
+  ProtobufOutput.writeBoolean(FN_CAN_SHOW, AValue);
 end;
 
 end.

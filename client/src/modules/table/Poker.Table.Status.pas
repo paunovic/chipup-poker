@@ -20,6 +20,7 @@ type
     FCaption: String;
     FTimebank: UINT32;
     FCardsVisible: Boolean;
+    FCanShow: Boolean;
     FDisconnected: Boolean;
   public
     constructor Create;
@@ -42,6 +43,7 @@ type
     property DealtCards: Integer read FDealtCards;
     property CardsVisible: Boolean read FCardsVisible write FCardsVisible;
     property Disconnected: Boolean read FDisconnected;
+    property CanShow: Boolean read FCanShow;
   end;
 
   TSeatInfos = class(TObjectList<TSeatInfo>)
@@ -215,6 +217,7 @@ begin
   FTimeBank := ASeatInfoProtobuf.Timebank;
   FCardsVisible := ASeatInfoProtobuf.CardsVisible;
   FDisconnected := ASeatInfoProtobuf.Disconnected;
+  FCanShow := ASeatInfoProtobuf.CanShow;
 end;
 
 procedure TSeatInfo.IncDealtCards;

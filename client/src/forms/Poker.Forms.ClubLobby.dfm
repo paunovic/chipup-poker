@@ -2772,8 +2772,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -3174,7 +3172,6 @@ object frmClubLobby: TfrmClubLobby
               Properties.Alignment.Horz = taRightJustify
               Properties.ValueType = vtFloat
               HeaderAlignmentHorz = taCenter
-              Styles.OnGetContentStyle = gridStatsTableBalanceStylesGetContentStyle
               Width = 67
             end
             object gridTotalStatsBuyins: TcxGridColumn
@@ -3371,8 +3368,6 @@ object frmClubLobby: TfrmClubLobby
       Color = 28416
     end
     object styleTableClosed: TcxStyle
-      AssignedValues = [svColor]
-      Color = clMaroon
     end
     object styleTableRowSelected: TcxStyle
       AssignedValues = [svColor]
