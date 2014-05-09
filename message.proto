@@ -88,7 +88,7 @@ enum ServerCodes {
 	scTableSitOutNextHand = 99;
 	scTableSitOutNextBB = 100;
 	scResendVerificationMail = 101;
-	scShowLosingCards = 102;
+	scShowCards = 102;
 	seUserChange = 103;
 	scQueryTableStats = 104;
 	scContactUs = 105;
@@ -335,6 +335,7 @@ message SeatInfo {
 	required uint32 timebank = 7;
 	required bool cards_visible = 8;
 	required bool disconnected = 9;
+	optional bool can_show = 10;
 }
 
 message ChangeSuspendState {
