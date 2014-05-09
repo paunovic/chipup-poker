@@ -7,7 +7,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, cxLookAndFeels, dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip,
-  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus;
+  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
   TdmMain = class(TDataModule)
@@ -36,6 +36,7 @@ type
     procedure OpenTACLink;
     procedure OpenSiteLink;
     procedure UpdateSelfInfoInPlayers;
+    procedure GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
@@ -54,7 +55,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
-  Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core,
+  Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
   Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect;
 
@@ -239,6 +240,37 @@ begin
           Dec(result, seat.Chips)
         end;
     end;
+end;
+
+procedure TdmMain.GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+const
+  FILES_COUNT = 5;
+  FILES: array[0..FILES_COUNT - 1] of String = ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf');
+var
+  pb_ufi: TPB_UpdateFileInfo;
+  C1: Integer;
+  fullpath: String;
+  hash: RawByteString;
+  hash_bytes: TBytes;
+begin
+  for C1 := Low(FILES) to High(FILES) do
+  begin
+    pb_ufi := TPB_UpdateFileInfo.Create;
+    pb_ufi.Path := FILES[C1];
+    fullpath := SelfPath + pb_ufi.Path;
+    SetLength(hash_bytes, 0);
+    if FileExists(fullpath) then
+    begin
+      hash := SHA256File(FILES[C1]);
+      if Length(hash) > 0 then
+      begin
+        SetLength(hash_bytes, Length(hash));
+        Move(hash[1], hash_bytes[0], Length(hash));
+      end;
+    end;
+    pb_ufi.Hash := hash_bytes;
+    AFiles.Add(pb_ufi);
+  end;
 end;
 
 end.

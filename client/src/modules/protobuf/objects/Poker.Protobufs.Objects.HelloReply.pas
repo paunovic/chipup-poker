@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HelloReply;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.StringSizes;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.StringSizes,Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
   TPB_HelloReply = class(TProtobufBaseObject)
@@ -20,6 +20,7 @@ type
       FN_LATESTVERSION = 7;
       FN_LATESTDEBUGVERSION = 8;
       FN_MINSIZES = 9;
+      FN_UPDATE_FILES = 10;
 
     var
       FStringSizes: TPB_StringSizes;
@@ -30,6 +31,7 @@ type
       FLatestVersion: String;
       FLatestDebugVersion: String;
       FMinSizes: TPB_StringSizes;
+      FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
 
     procedure SetStringSizes(const AValue: TPB_StringSizes);
     procedure SetChangeExpireTime(const AValue: Integer);
@@ -39,6 +41,10 @@ type
     procedure SetLatestVersion(const AValue: String);
     procedure SetLatestDebugVersion(const AValue: String);
     procedure SetMinSizes(const AValue: TPB_StringSizes);
+    procedure UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
 
   public
     destructor Destroy; override;
@@ -52,6 +58,7 @@ type
     property LatestVersion: String read FLatestVersion write SetLatestVersion;
     property LatestDebugVersion: String read FLatestDebugVersion write SetLatestDebugVersion;
     property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
+    property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
 implementation
@@ -60,6 +67,11 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_HelloReply.InitObjects;
+begin
+  FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
+  FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
+end;
 
 destructor TPB_HelloReply.Destroy;
 begin
@@ -67,6 +79,11 @@ begin
     FreeAndNil(FStringSizes);
   if Assigned(FMinSizes) then
     FreeAndNil(FMinSizes);
+  if Assigned(FUpdateFiles) then
+  begin
+    FUpdateFiles.OnNotify := nil;
+    FreeAndNil(FUpdateFiles);
+  end;
   inherited;
 end;
 
@@ -113,6 +130,10 @@ begin
         if not Assigned(FMinSizes) then
           FMinSizes := TPB_StringSizes.Create;
         FMinSizes.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+      end;
+      FN_UPDATE_FILES: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -166,6 +187,14 @@ procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);
 begin
   FMinSizes := AValue;
   ProtobufOutput.writeMessage(FN_MINSIZES, AValue.ProtobufOutput);
+end;
+
+procedure TPB_HelloReply.UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_UPDATE_FILES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

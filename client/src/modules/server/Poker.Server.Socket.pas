@@ -5,7 +5,8 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.TableStatus;
+  Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.HelloParams,
+  Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
   TServerSocket = class
@@ -22,6 +23,7 @@ type
     FTimerIdInactivityPing: UINT_PTR;
     FTimerIdPing: UINT_PTR;
     FTimerIdPingTimeout: UINT_PTR;
+    FSSLHandshakeDone: Boolean;
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -92,8 +94,7 @@ type
     procedure ShowCards(const AGameId: TBytes);
     procedure QueryTableStats(const ATables: array of TBytes);
     procedure ContactUs(const AReason: TContactReason; const AMessage: String);
-
-    procedure CrashServer(const ATestNo: Integer);
+    procedure Hello(const AFiles: TObjectList<TPB_UpdateFileInfo>);
 
     property Server: String read FServer;
     property Socket: TSslWSocket read FSocket;
@@ -246,6 +247,8 @@ begin
   FreeReceiveBuffer;
   FConnectCode := -1;
 
+  FSSLHandshakeDone := FALSE;
+
   KillPingTimers;
   KillPingTimeoutTimer;
 end;
@@ -255,11 +258,13 @@ begin
   if ErrCode = 0 then
   begin
     {$IFDEF DEBUG} DebugLn('SSL handshake completed successfully', ditSocket); {$ENDIF}
+    FSSLHandshakeDone := TRUE;
     ResetInactivityPingTimer;
     ResetPingTimer;
   end
   else
   begin
+    FSSLHandshakeDone := FALSE;
     FSocket.LastError := ErrCode;
     SocketError(Sender);
   end;
@@ -404,7 +409,7 @@ end;
 
 function TServerSocket.IsConnected: Boolean;
 begin
-  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FConnectCode = Integer(srHello));
+  result := (Assigned(FSocket)) and (FSocket.State = wsConnected) and (FSSLHandshakeDone);
 end;
 
 function TServerSocket.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
@@ -1104,77 +1109,23 @@ begin
   end;
 end;
 
-procedure TServerSocket.CrashServer(const ATestNo: Integer);
-const
-  CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890~`!@#$%^&*()_+-=][{}\";:/.,<>?';
-type
-  TProtoClass = TPB_ContactMessage;
-  TMalformedProtoClass = TPB_ForgotPasswordParams;
-const
-  COMMAND = scContactUs;
+procedure TServerSocket.Hello(const AFiles: TObjectList<TPB_UpdateFileInfo>);
 var
-  protobuf: TProtoClass;
-  malformedproto: TMalformedProtoClass;
-  tmp: String;
-  C1: Integer;
-  b: TBytes;
-  bb: TArray<TBytes>;
+  protobuf: TPB_HelloParams;
 begin
-  case ATestNo of
-    1: begin
-      SendProtobuf(COMMAND, nil);
-    end;
-    2: begin
-      protobuf := TProtoClass.Create;
-      try
-        SendProtobuf(COMMAND, protobuf);
-      finally
-        protobuf.Free;
-      end;
-    end;
-    3: begin
-      protobuf := TProtoClass.Create;
-      try
-        SetLength(b, 0);
-        SetLength(bb, 0);
-        protobuf.Message := '';
-        SendProtobuf(COMMAND, protobuf);
-      finally
-        protobuf.Free;
-      end;
-    end;
-    4: begin
-      protobuf := TProtoClass.Create;
-      try
-        tmp := '';
-        SetLength(b, 4000);
-        for C1 := Low(b) to High(b) do
-          b[C1] := Random(256);
-        for C1 := 1 to 100000 do
-          tmp := tmp + CHARS[Random(Length(CHARS)) + 1];
-          SetLength(bb, 1);
-          bb[0] := b;
-        protobuf.Message := tmp;
-        SendProtobuf(COMMAND, protobuf);
-      finally
-        protobuf.Free;
-      end;
-    end;
-    5: begin
-      malformedproto := TMalformedProtoClass.Create;
-      try
-        tmp := '';
-        for C1 := 1 to 1 do
-          tmp := tmp + 'a';
-        malformedproto.Email := 'asdasd';
-        SendProtobuf(COMMAND, malformedproto);
-      finally
-        malformedproto.Free;
-      end;
-    end;
+  protobuf := TPB_HelloParams.Create;
+  try
+    {$IFDEF DEBUG}
+    protobuf.Debug := TRUE;
+    {$ELSE}
+    protobuf.Debug := FALSE;
+    {$ENDIF}
+    protobuf.Files.AddRange(AFiles);
+    SendProtobuf(scHello, protobuf);
+  finally
+    protobuf.Free;
   end;
 end;
-
 
 
 end.

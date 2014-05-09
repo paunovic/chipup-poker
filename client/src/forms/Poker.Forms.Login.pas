@@ -7,11 +7,11 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls,
-  cxButtons, cxCheckBox, OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin;
+  cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
+  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin;
 
 type
-  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsLoggingIn, lsLoggedIn, lsUpdating);
+  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
 
   TfrmLogin = class(TForm)
     alLogin: TActionList;
@@ -67,6 +67,8 @@ type
 
     procedure EnableGUI(const AEnable: Boolean);
     procedure SetCurrentStatus(const AValue: TLoginStatus);
+
+    procedure HelloServer;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
@@ -79,10 +81,12 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  System.Generics.Collections,
   Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
-  Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main,
-  Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption;
+  Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
+  Poker.Forms.Main, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption,
+  Poker.Protobufs.Objects.UpdateFileInfo;
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
@@ -104,7 +108,7 @@ begin
   if Settings.DeveloperMode then
     EnterDeveloperMode;
 
-  EnableGUI(ServerSocket.IsConnected);
+  EnableGUI(FCurrentStatus = lsHelloOk);
 end;
 
 procedure TfrmLogin.FormDestroy(Sender: TObject);
@@ -150,6 +154,21 @@ begin
       ServerSocket.Connect;
     end;
     wsConnected: CurrentStatus := lsConnected;
+  end;
+end;
+
+procedure TfrmLogin.HelloServer;
+var
+  files: TObjectList<TPB_UpdateFileInfo>;
+begin
+  CurrentStatus := lsHelloing;
+
+  files := TObjectList<TPB_UpdateFileInfo>.Create(FALSE);
+  try
+    dmMain.GetUpdateFilesList(files);
+    ServerSocket.Hello(files);
+  finally
+    files.Free;
   end;
 end;
 
@@ -225,8 +244,10 @@ begin
   FCurrentStatus := AValue;
 
   case FCurrentStatus of
-    lsIdle, lsConnecting: status := 'CONNECTING...';
-    lsConnected: status := 'LOGIN';
+    lsIdle, lsConnecting: status := 'CONNECTING..';
+    lsConnected: status := 'CONNECTING...';
+    lsHelloing: status := 'CONNECTING...';
+    lsHelloOk: status := 'LOGIN';
     lsLoggingIn, lsLoggedIn: status := 'LOGGING IN...';
   end;
 
@@ -239,15 +260,16 @@ begin
     wsOpened,
     wsBound,
     wsConnecting: begin
+      tiConnect.Interval := 1000;
       CurrentStatus := lsConnecting;
       EnableGUI(FALSE);
     end;
     wsConnected: begin
-      if ServerSocket.IsConnected then
-        CurrentStatus := lsConnected;
-      EnableGUI(ServerSocket.IsConnected);
+      CurrentStatus := lsConnected;
+      tiConnect.Interval := 100;
     end;
     wsClosed: begin
+      tiConnect.Interval := 1000;
       FormsContainer.Close(TfrmForgotPassword);
       FormsContainer.Close(TfrmCreateAccount);
       CurrentStatus := lsIdle;
@@ -266,6 +288,13 @@ begin
   begin
     CurrentStatus := lsConnecting;
     ServerSocket.Connect;
+  end;
+
+  if (ServerSocket.IsConnected) and
+     (FCurrentStatus = lsConnected) then
+  begin
+    HelloServer;
+    tiConnect.Interval := 2000;
   end;
 end;
 
@@ -364,10 +393,10 @@ begin
 
   edPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.Password;
 
-  EnableGUI(ServerSocket.IsConnected);
   if ServerSocket.IsConnected then
   begin
-    CurrentStatus := lsConnected;
+    CurrentStatus := lsHelloOk;
+    EnableGUI(TRUE);
     ServerSocket.Ping;
   end
   else

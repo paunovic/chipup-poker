@@ -80,7 +80,6 @@ uses
   Poker.Protobufs.Objects.LoginParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.LoginParams.pas',
   Poker.Protobufs.Objects.Club in 'modules\protobuf\objects\Poker.Protobufs.Objects.Club.pas',
   Poker.Protobufs.Objects.StatusReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.StatusReply.pas',
-  Poker.Protobufs.Objects.HelloReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas',
   Poker.Protobufs.Objects.StringSizes in 'modules\protobuf\objects\Poker.Protobufs.Objects.StringSizes.pas',
   Poker.Protobufs.Objects.RegisterParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.RegisterParams.pas',
   Poker.Protobufs.Objects.ForgotPasswordParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.ForgotPasswordParams.pas',
@@ -126,7 +125,10 @@ uses
   Poker.Protobufs.Objects.ContactMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.ContactMessage.pas',
   Poker.Protobufs.Objects.BuyinError in 'modules\protobuf\objects\Poker.Protobufs.Objects.BuyinError.pas',
   Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas',
-  Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout};
+  Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout},
+  Poker.Protobufs.Objects.UpdateFileInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas',
+  Poker.Protobufs.Objects.HelloReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas',
+  Poker.Protobufs.Objects.HelloParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas';
 
 procedure FocusPokerApp;
 var

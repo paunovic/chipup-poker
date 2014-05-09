@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>client.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
@@ -241,7 +241,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.LoginParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Club.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.StatusReply.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.StringSizes.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RegisterParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ForgotPasswordParams.pas"/>
@@ -291,6 +290,9 @@
 				<Form>frmAbout</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

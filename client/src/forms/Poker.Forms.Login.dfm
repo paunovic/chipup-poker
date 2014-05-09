@@ -3338,7 +3338,7 @@ object frmLogin: TfrmLogin
     Enabled = False
     Interval = 10000
     OnTimer = tiLoginTimeoutTimer
-    Left = 120
-    Top = 16
+    Left = 152
+    Top = 12
   end
 end

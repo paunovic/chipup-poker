@@ -9,6 +9,7 @@ uses
 function SHA256Stream(const AStream: TStream): RawByteString;
 function SHA256Bytes(const ABytes: TBytes): RawByteString;
 function SHA256String(const AString: String): RawByteString;
+function SHA256File(const AFile: String): RawByteString;
 function AES256EncryptStream(const AInStream: TStream; const AOutStream: TStream; const APassword: String): Boolean; overload;
 function AES256EncryptStream(const AStream: TMemoryStream; const AKey: String): Boolean; overload;
 function AES256DecryptStream(const AInStream: TStream; const AOutStream: TStream; const APassword: String): Boolean; overload;
@@ -56,6 +57,20 @@ begin
   SetLength(bytes, Length(AString) * 2);
   Move(AString[1], bytes[0], Length(bytes));
   result := SHA256Bytes(bytes);
+end;
+
+function SHA256File(const AFile: String): RawByteString;
+var
+  hash: THash_SHA256;
+begin
+  hash := THash_SHA256.Create;
+  try
+    hash.Init;
+    result := hash.CalcFile(AFile);
+    hash.Done;
+  finally
+    hash.Free;
+  end;
 end;
 
 function AES256EncryptStream(const AInStream: TStream; const AOutStream: TStream; const APassword: String): Boolean;

@@ -88,7 +88,8 @@ type
     scShowCards = 102,
     seUserChange = 103,
     scQueryTableStats = 104,
-    scContactUs = 105
+    scContactUs = 105,
+    scHello = 106
   );
 
 {$IFDEF DEBUG}
@@ -204,6 +205,7 @@ begin
     seUserChange: result := 'seUserChange';
     scQueryTableStats: result := 'scQueryTableStats';
     scContactUs: result := 'scContactUs';
+    scHello: result := 'scHello';
   end;
 end;
 {$ENDIF DEBUG}
