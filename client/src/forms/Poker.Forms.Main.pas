@@ -77,7 +77,7 @@ type
     N3: TMenuItem;
     AboutChipUPPoker1: TMenuItem;
     Options1: TMenuItem;
-    Sounds1: TMenuItem;
+    miSounds: TMenuItem;
     acSoundsOnOff: TAction;
     gridMyHomeGames: TcxGrid;
     gridMyHomeGamesTable: TcxGridTableView;
@@ -87,6 +87,9 @@ type
     gridMyHomeGamesLevel: TcxGridLevel;
     Developer1: TMenuItem;
     Disconnect1: TMenuItem;
+    N4: TMenuItem;
+    miCheckOnFold: TMenuItem;
+    acFoldChecks: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -122,6 +125,7 @@ type
     procedure acSoundsOnOffExecute(Sender: TObject);
     procedure Disconnect1Click(Sender: TObject);
     procedure acShowAboutFormExecute(Sender: TObject);
+    procedure acFoldChecksExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -355,6 +359,12 @@ begin
   result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
 end;
 
+procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
+begin
+  Settings.FoldChecks := not Settings.FoldChecks;
+  miCheckOnFold.Checked := Settings.FoldChecks
+end;
+
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
   if not ConfirmToCloseTables then
@@ -478,8 +488,8 @@ begin
   acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
                              (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
 
-  Sounds1.Checked := Settings.Sounds;
-
+  miSounds.Checked := Settings.Sounds;
+  miCheckOnFold.Checked := Settings.FoldChecks;
 
   Developer1.Visible := Settings.DeveloperMode;
 
@@ -896,23 +906,16 @@ begin
   if AMethodId = Integer(seTransferChips) then
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount;
-
-    if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
-      player_info.Balance := player_info.Balance + pbreply.ChipAmount;
-
     if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance - pbreply.ChipAmount;
   end
   else
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
-
-    if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
-      player_info.Balance := player_info.Balance - pbreply.ChipAmount;
-
     if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance + pbreply.ChipAmount;
   end;
+  dmMain.UpdateSelfInfoInPlayers;
 end;
 
 procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);
@@ -928,7 +931,7 @@ end;
 procedure TfrmChipUpMain.acSoundsOnOffExecute(Sender: TObject);
 begin
   Settings.Sounds := not Settings.Sounds;
-  Sounds1.Checked := Settings.Sounds;
+  miSounds.Checked := Settings.Sounds;
 end;
 
 procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);

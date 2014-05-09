@@ -16,6 +16,7 @@ type
       JSON_DEVELOPER_MODE    = 'devmode';
       JSON_SERVER_INDEX      = 'serverindex';
       JSON_SOUNDS            = 'sounds';
+      JSON_FOLD_CHECKS       = 'fold_checks';
 
     function GetLogin: String;
     procedure SetLogin(const AValue: String);
@@ -31,6 +32,8 @@ type
     procedure SetServerIndex(const AValue: Integer);
     function GetSounds: Boolean;
     procedure SetSounds(const AValue: Boolean);
+    function GetFoldChecks: Boolean;
+    procedure SetFoldChecks(const AValue: Boolean);
 
     var
       FJSON        : ISuperObject;
@@ -50,13 +53,14 @@ type
     property JSON        : ISuperObject read FJSON;
     property SettingsFile: String read FSettingsFile;
 
-    property Login           : String read GetLogin write SetLogin;
-    property Password        : String read GetPassword write SetPassword;
-    property RememberLogin   : Boolean read GetRememberLogin write SetRememberLogin;
+    property Login: String read GetLogin write SetLogin;
+    property Password: String read GetPassword write SetPassword;
+    property RememberLogin: Boolean read GetRememberLogin write SetRememberLogin;
     property RememberPassword: Boolean read GetRememberPassword write SetRememberPassword;
-    property DeveloperMode   : Boolean read GetDeveloperMode write SetDeveloperMode;
-    property ServerIndex     : Integer read GetServerIndex write SetServerIndex;
-    property Sounds          : Boolean read GetSounds write SetSounds;
+    property DeveloperMode: Boolean read GetDeveloperMode write SetDeveloperMode;
+    property ServerIndex: Integer read GetServerIndex write SetServerIndex;
+    property Sounds: Boolean read GetSounds write SetSounds;
+    property FoldChecks: Boolean read GetFoldChecks write SetFoldChecks;
 
     property DomainURL: String read FDomainURL write FDomainURL;
   end;
@@ -174,6 +178,11 @@ begin
   result := FJSON.B[JSON_DEVELOPER_MODE];
 end;
 
+function TSettings.GetFoldChecks: Boolean;
+begin
+  result := FJSON.B[JSON_FOLD_CHECKS];
+end;
+
 procedure TSettings.SetLogin(const AValue: String);
 begin
   FJSON.S[JSON_LOGIN] := AValue;
@@ -207,6 +216,11 @@ end;
 procedure TSettings.SetDeveloperMode(const AValue: Boolean);
 begin
   FJSON.B[JSON_DEVELOPER_MODE] := AValue;
+end;
+
+procedure TSettings.SetFoldChecks(const AValue: Boolean);
+begin
+  FJSON.B[JSON_FOLD_CHECKS] := AValue;
 end;
 
 end.

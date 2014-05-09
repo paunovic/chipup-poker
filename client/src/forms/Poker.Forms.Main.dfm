@@ -3903,10 +3903,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
-        ExplicitLeft = 1
-        ExplicitTop = 1
-        ExplicitWidth = 791
-        ExplicitHeight = 408
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1
@@ -4219,6 +4215,11 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Sounds'
       OnExecute = acSoundsOnOffExecute
     end
+    object acFoldChecks: TAction
+      Category = 'Options'
+      Caption = 'Check on fold, whenever possible'
+      OnExecute = acFoldChecksExecute
+    end
   end
   object MainMenu: TMainMenu
     Left = 394
@@ -4249,8 +4250,15 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object Options1: TMenuItem
       Caption = 'Options'
-      object Sounds1: TMenuItem
+      object miSounds: TMenuItem
         Action = acSoundsOnOff
+      end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object miCheckOnFold: TMenuItem
+        Action = acFoldChecks
+        GroupIndex = 1
       end
     end
     object Help1: TMenuItem

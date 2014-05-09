@@ -659,7 +659,7 @@ begin
            ((FTable.IsSitting) and
             (FTable.SeatIndex = C1) and
             (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) and
-            (seat_info.Status in [psOutOfPlay, psOutOfHand, psFolded])) then
+            (seat_info.Status in [psOutOfPlay, psOutOfHand])) then
         begin
           FormsContainer.Add(RunModalForm(TfrmTableSit, self, [FTable, FTableStatus, @C1], ModalFormClose));
           Break;
@@ -1053,9 +1053,13 @@ begin
 end;
 
 procedure TfrmTable.acShowCardsExecute(Sender: TObject);
+var
+  seat: TSeatInfo;
 begin
   ServerSocket.ShowCards(FTable.Game.MongoId);
   acShowCards.Enabled := FALSE;
+  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat) then
+    seat.CardsVisible := TRUE;
   ConfigureGUI;
   Render;
 end;
@@ -1274,6 +1278,12 @@ begin
                 acRaise.Tag := 1;
                 acCheck.Enabled := TRUE;
                 acRaise.Enabled := TRUE;
+
+                if cbFoldToAnyBet.Checked then
+                begin
+                  nofocus := TRUE;
+                  acCheck.Execute;
+                end;
               end;
 
               if not nofocus then
@@ -1464,6 +1474,7 @@ var
   query_users: TArray<TBytes>;
   empty_array: TBytes;
   seat: TSeatInfo;
+  cards_visible: Boolean;
   {$IFDEF DEBUG}
   tmp: String;
   tb: UINT32;
@@ -1508,18 +1519,17 @@ begin
     FGoalTime := 0;
 
   {$IFDEF DEBUG}
-  tmp := '';
-  if pbtablestatus.Locked then
-  begin
-    tmp := 'YES';
-  end
-  else tmp := 'NO';
-
+  tmp := BoolToStr(pbtablestatus.Locked, TRUE);
   tb := 0;
+  cards_visible := FALSE;
   if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
+  begin
     tb := seat.Timebank;
+    cards_visible := seat.CardsVisible;
+  end;
 
-  DebugLn(Format('DLR: %d; TSTATE: %d; CSEAT: %d; TIME: %d; TBANK: %d; SEQ: %d; LOCKED: %s', [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
+  DebugLn(Format('DB: %d; TS: %d; CS: %d; CV: %s TM: %d; TB: %d; SEQ: %d; LD: %s',
+    [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, BoolToStr(cards_visible, TRUE), FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
   {$ENDIF}
 
   FTurnAniDelay := 0;
@@ -1905,7 +1915,11 @@ end;
 
 procedure TfrmTable.acFoldExecute(Sender: TObject);
 begin
-  ServerSocket.Fold(FTable.Game.MongoId);
+  if (acCheck.Enabled) and
+     (Settings.FoldChecks) then
+    acCheck.Execute
+  else
+    ServerSocket.Fold(FTable.Game.MongoId);
 end;
 
 procedure TfrmTable.acPlayNowExecute(Sender: TObject);
@@ -2359,15 +2373,22 @@ begin
         end;
 
         psFolded: begin
-          mousepoint := ScreenToClient(Mouse.CursorPos);
-          mousepointf.X := mousepoint.X;
-          mousepointf.Y := mousepoint.Y;
-          if PtInRect(RectF(seat_point.x - FSeatWidth / 2, seat_point.y - FSeatHeight / 2, seat_point.x + FSeatWidth / 2, seat_point.y + FSeatHeight /2), mousepointf) then
+          if (seat_info.SeatIndex = FTable.SeatIndex) or
+             (seat_info.CardsVisible) then
           begin
-            for C1 := 0 to seat_info.Cards.Count - 1 do
+            mousepoint := ScreenToClient(Mouse.CursorPos);
+            mousepointf.X := mousepoint.X;
+            mousepointf.Y := mousepoint.Y;
+
+            if (seat_info.CardsVisible) or
+               ((seat_info.SeatIndex = FTable.SeatIndex) and
+                (PtInRect(RectF(seat_point.x - FSeatWidth / 2, seat_point.y - FSeatHeight / 2, seat_point.x + FSeatWidth / 2, seat_point.y + FSeatHeight /2), mousepointf))) then
             begin
-              card_point := GetCardPoint(seat_info, C1);
-              RenderCard(card_point, seat_info.Cards[C1], CARD_FOLDED_PERC, 170)
+              for C1 := 0 to seat_info.Cards.Count - 1 do
+              begin
+                card_point := GetCardPoint(seat_info, C1);
+                RenderCard(card_point, seat_info.Cards[C1], CARD_FOLDED_PERC, 170)
+              end;
             end;
           end;
         end;
