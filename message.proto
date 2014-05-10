@@ -106,15 +106,13 @@ message StringSizes {
 }
 
 message HelloReply {
-	required StringSizes stringSizes = 2;
-	required int32 ChangeExpireTime = 3;
-	required int32 ForgotExpireTime = 4;
-	required int32 max_play_time = 5;
-	required int32 max_timebank = 6 [ default = 60000 ];
-	required string latestVersion = 7;
-	required string latestDebugVersion = 8;
-	required StringSizes minSizes = 9;
-	repeated UpdateFileInfo update_files = 10;
+	required StringSizes stringSizes = 1;
+	required int32 ChangeExpireTime = 2;
+	required int32 ForgotExpireTime = 3;
+	required int32 max_play_time = 4;
+	required int32 max_timebank = 5 [ default = 60000 ];
+	required StringSizes minSizes = 6;
+	repeated UpdateFileInfo update_files = 7;
 }
 
 message HelloParams {
