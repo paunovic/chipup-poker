@@ -21,8 +21,8 @@ type
 
     var
       FSelfInfo: TPlayerInfo;
-      FUpdaterFile: String;
       FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
+      FUpdaterBatchFile: String;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -39,10 +39,10 @@ type
     procedure UpdateSelfInfoInPlayers;
     procedure GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
     procedure StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+    procedure SetUpdaterBatchFile(const AFile: String);
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
-    property UpdaterFile: String read FUpdaterFile write FUpdaterFile;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
@@ -106,10 +106,14 @@ begin
 
   TPlayers.Initialize;
   TTables.Initialize;
+
+  FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
 end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
+  FUpdateFiles.Free;
+
   TTables.Deinitialize;
   TPlayers.Deinitialize;
 
@@ -133,8 +137,8 @@ begin
   TfrmDebug.Deinitialize;
   {$ENDIF}
 
-  if (FUpdaterFile <> '') and (FileExists(FUpdaterFile)) then
-    ShellOpen(PChar(FUpdaterFile), nil, '/verysilent /surpressmsgboxes /closeapplications');
+  if (FUpdaterBatchFile <> '') and (FileExists(FUpdaterBatchFile)) then
+    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TdmMain.OpenCashierLink;
@@ -160,13 +164,17 @@ begin
   UpdateSelfInfoInPlayers
 end;
 
+procedure TdmMain.SetUpdaterBatchFile(const AFile: String);
+begin
+  FUpdaterBatchFile := AFile;
+end;
+
 procedure TdmMain.StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
 var
   ufi: TPB_UpdateFileInfo;
   C1: Integer;
 begin
   FUpdateFiles.Clear;
-
   for C1 := 0 to AFiles.Count - 1 do
   begin
     ufi := TPB_UpdateFileInfo.Create;
@@ -174,7 +182,8 @@ begin
     ufi.Hash := AFiles[C1].Hash;
     ufi.Url := AFiles[C1].Url;
     ufi.FileType := AFiles[C1].FileType;
-    AFiles.Add(ufi);
+    ufi.FileSize := AFiles[C1].FileSize;
+    FUpdateFiles.Add(ufi);
   end;
 end;
 

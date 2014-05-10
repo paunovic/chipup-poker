@@ -365,20 +365,9 @@ end;
 procedure TfrmLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
 var
   pbhello: TPB_HelloReply;
-  version: String;
 begin
   pbhello := AObject as TPB_HelloReply;
-(*
-  {$IFDEF DEBUG}
-  version := pbhello.LatestDebugVersion;
-  {$ELSE}
-  version := pbhello.LatestVersion;
-  {$ENDIF}
 
-  if (Settings.Hardcoded.VERSION <> version) and
-     (Settings.Hardcoded.REVISION <> 'manual') then
-    acUpdate.Execute;
-*)
   if pbhello.UpdateFiles.Count > 0 then
   begin
     dmMain.StoreUpdateFiles(pbhello.UpdateFiles);

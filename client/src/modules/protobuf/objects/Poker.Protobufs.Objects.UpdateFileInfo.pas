@@ -17,17 +17,20 @@ type
       FN_HASH = 2;
       FN_URL = 3;
       FN_FILE_TYPE = 4;
+      FN_FILE_SIZE = 5;
 
     var
       FPath: String;
       FHash: TBytes;
       FUrl: String;
       FFileType: TUpdateFileType;
+      FFileSize: UINT32;
 
     procedure SetPath(const AValue: String);
     procedure SetHash(const AValue: TBytes);
     procedure SetUrl(const AValue: String);
     procedure SetFileType(const AValue: TUpdateFileType);
+    procedure SetFileSize(const AValue: UINT32);
 
   public
     destructor Destroy; override;
@@ -37,6 +40,7 @@ type
     property Hash: TBytes read FHash write SetHash;
     property Url: String read FUrl write SetUrl;
     property FileType: TUpdateFileType read FFileType write SetFileType;
+    property FileSize: UINT32 read FFileSize write SetFileSize;
   end;
 
 implementation
@@ -75,6 +79,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FFileType := TUpdateFileType(AProtobufReader.readEnum);
       end;
+      FN_FILE_SIZE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FFileSize := AProtobufReader.readUInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -103,6 +111,12 @@ procedure TPB_UpdateFileInfo.SetFileType(const AValue: TUpdateFileType);
 begin
   FFileType := AValue;
   ProtobufOutput.writeInt32(FN_FILE_TYPE, Integer(AValue));
+end;
+
+procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UINT32);
+begin
+  FFileSize := AValue;
+  ProtobufOutput.writeUInt32(FN_FILE_SIZE, AValue);
 end;
 
 end.

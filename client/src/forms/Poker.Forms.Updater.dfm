@@ -255,7 +255,7 @@ object frmUpdater: TfrmUpdater
     ProxyAuth = httpAuthNone
     BandwidthLimit = 10000
     BandwidthSampling = 1000
-    Options = []
+    Options = [httpoEnableContentCoding]
     Timeout = 30
     OnDocData = HttpClientDocData
     OnRequestDone = HttpClientRequestDone

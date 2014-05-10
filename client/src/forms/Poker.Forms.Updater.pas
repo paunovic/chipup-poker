@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxLabel, cxProgressBar, dxGDIPlusClasses, cxImage, OverbyteIcsWndControl,
+  cxLabel, cxProgressBar, dxGDIPlusClasses, cxImage, OverbyteIcsWndControl, OverbyteIcsHttpCCodZlib,
   OverbyteIcsHttpProt, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ImgList, Vcl.Buttons, Vcl.ExtCtrls, ChipUpPokerDarkSkin;
 
 type
@@ -27,13 +27,18 @@ type
     procedure HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure FormDestroy(Sender: TObject);
   private
-    FUpdaterFile  : String;
+    FUpdateFileIndex: Integer;
+    FUpdateDir: String;
     FQuitMsgPosted: Boolean;
-    {$IFDEF DEBUG}
-    FLastPerc     : Integer;
-    {$ENDIF}
+    FTotalSize: UINT32;
+    FDownloadedSize: UINT32;
+    FCurrentDownloadedSize: UINT32;
 
     procedure PostQuitMessage;
+    function DownloadNextFile: Boolean;
+    function StoreDownloadedFile: Boolean;
+    function MakeBatchUpdater(out ABatchFile: String): Boolean;
+    procedure ShowFailedToUpdateMessage;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
@@ -44,30 +49,38 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.Misc, Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule;
+  Poker.Common.Misc, Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule,
+  Poker.Protobufs.Objects.UpdateFileInfo;
 
 
 procedure TfrmUpdater.FormCreate(Sender: TObject);
+var
+  ufi: TPB_UpdateFileInfo;
 begin
   ImageList.GetImage(0, imgClose.Picture.Bitmap);
   ImageList.GetImage(2, imgMinimize.Picture.Bitmap);
 
-  FUpdaterFile := AppDataLocalPath + 'install_chipuppoker.exe';
-  DeleteFile(FUpdaterFile);
+  FUpdateFileIndex := -1;
+  HttpClient.RcvdStream := TMemoryStream.Create;
 
-  {$IFDEF DEBUG}
-  FLastPerc := -1;
-  HttpClient.URL := Settings.DomainURL + Settings.Hardcoded.URL.LATEST_VERSION_DEBUG;
-  {$ELSE}
-  HttpClient.URL := Settings.DomainURL + Settings.Hardcoded.URL.LATEST_VERSION;
-  {$ENDIF}
+  FUpdateDir := IncludeTrailingPathDelimiter(AppDataLocalPath + IncludeTrailingPathDelimiter('update'));
 
-  HttpClient.RcvdStream := TFileStream.Create(FUpdaterFile, fmCreate or fmOpenWrite);
-  HttpClient.GetASync;
+  FTotalSize := 0;
+  FCurrentDownloadedSize := 0;
+  for ufi in dmMain.UpdateFiles do
+    Inc(FTotalSize, ufi.FileSize);
+
+  DownloadNextFile;
 end;
 
 procedure TfrmUpdater.FormDestroy(Sender: TObject);
+var
+  obj: TObject;
 begin
+  obj := HttpClient.RcvdStream;
+  HttpClient.RcvdStream := nil;
+  (obj as TMemoryStream).Free;
+
   FormsContainer.Remove(self);
   PostQuitMessage;
 end;
@@ -79,19 +92,11 @@ begin
 end;
 
 procedure TfrmUpdater.FormClose(Sender: TObject; var Action: TCloseAction);
-var
-  obj: TObject;
 begin
-  if Assigned(HttpClient.RcvdStream) then
-  begin
-    obj := HttpClient.RcvdStream;
-    HttpClient.RcvdStream := nil;
-    (obj as TFileStream).Free;
-
-    HttpClient.OnDocData := nil;
-    HttpClient.OnRequestDone := nil;
-    HttpClient.Abort;
-  end;
+  HttpClient.OnDocData := nil;
+  HttpClient.OnRequestDone := nil;
+  HttpClient.ContentCodingHnd.Enabled := FALSE;
+  HttpClient.Abort;
 
   Action := caFree;
 end;
@@ -115,32 +120,135 @@ begin
   end;
 end;
 
-procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
+function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Boolean;
 var
-  percint: Integer;
+  ufi: TPB_UpdateFileInfo;
+  newfile: String;
+  oldfile: String;
+  batch: TStringList;
+  res: Boolean;
 begin
-  pbProgress.Position := (HttpClient.RcvdCount / HttpClient.ContentLength) * 100;
-  percint := Trunc(pbProgress.Position);
-  Caption := Format('ChipUP Poker - Updating [%d%%]', [percint]);
-  lbsCaption.Caption := Caption;
+  batch := TStringList.Create;
+  try
+    batch.Add('PING 127.0.0.1 -n 2');
+    for ufi in dmMain.UpdateFiles do
+    begin
+      newfile := FUpdateDir + ufi.Path;
+      if not FileExists(newfile) then
+        Exit(FALSE);
 
-  {$IFDEF DEBUG}
-  if (percint mod 10 = 0) and
-     (percint <> FLastPerc) then
-  begin
-    DebugLn(Format('Downloading %d/%d bytes [%d%%]...', [HttpClient.RcvdCount, HttpClient.ContentLength, Trunc(pbProgress.Position)]), ditNetInc);
-    FLastPerc := percint;
+      oldfile := SelfPath + ufi.Path;
+
+      ForceDirectories(ExtractFilePath(oldfile));
+
+      case ufi.FileType of
+        ufFull: batch.Add(Format('COPY /Y "%s" "%s"', [newfile, oldfile]));
+        ufDiff: batch.Add(Format('bspatch.exe "%s" "%s" "%s"', [oldfile, oldfile, newfile]));
+      end;
+    end;
+    batch.Add(Format('START "" "%s"', [ParamStr(0)]));
+    batch.Add(Format('RMDIR /S /Q "%s"', [FUpdateDir]));
+    ABatchFile := FUpdateDir + 'updater.bat';
+
+    DeleteFile(ABatchFile);
+    if FileExists(ABatchFile) then
+    begin
+      {$IFDEF DEBUG} DebugLn('Error while deleting old batch file', ditApplication); {$ENDIF}
+      Exit(FALSE);
+    end;
+
+    batch.SaveToFile(ABatchFile);
+    res := FileExists(ABatchFile);
+    {$IFDEF DEBUG}
+    if res then
+      DebugLn('Batch file saved', ditApplication)
+    else
+      DebugLn('Error while saving batch file', ditException);
+    {$ENDIF}
+    Exit(res);
+  finally
+    batch.Free;
   end;
+end;
+
+procedure TfrmUpdater.ShowFailedToUpdateMessage;
+begin
+  MessageDlg('Update failed. Please reinstall the application.', mtError, [mbOK], 0);
+end;
+
+function TfrmUpdater.StoreDownloadedFile: Boolean;
+var
+  fname: String;
+  res: Boolean;
+begin
+  fname := FUpdateDir + dmMain.UpdateFiles[FUpdateFileIndex].Path;
+  ForceDirectories(ExtractFilePath(fname));
+  DeleteFile(fname);
+  if FileExists(fname) then
+  begin
+    {$IFDEF DEBUG} DebugLn(Format('Error while storing file [%d/%d]: cannot delete old file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication); {$ENDIF}
+    Exit(FALSE);
+  end;
+  (HttpClient.RcvdStream as TMemoryStream).SaveToFile(fname);
+  res := FileExists(fname);
+  {$IFDEF DEBUG}
+  if res then
+    DebugLn(Format('File [%d/%d] saved', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication)
+  else
+    DebugLn(Format('Error while storing file [%d/%d]: cannot save file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication);
   {$ENDIF}
+  Exit(res);
+end;
+
+function TfrmUpdater.DownloadNextFile: Boolean;
+begin
+  (HttpClient.RcvdStream as TMemoryStream).Clear;
+  Inc(FDownloadedSize, FCurrentDownloadedSize);
+  FCurrentDownloadedSize := 0;
+  Inc(FUpdateFileIndex);
+  if FUpdateFileIndex > dmMain.UpdateFiles.Count - 1 then
+    Exit(FALSE)
+  else
+  begin
+    HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
+    {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%.2fMB] %s',
+      [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
+    HttpClient.GetASync;
+    Exit(TRUE);
+  end;
+end;
+
+procedure TfrmUpdater.HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
+begin
+  FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
+
+  pbProgress.Position := ((FDownloadedSize + FCurrentDownloadedSize) / FTotalSize) * 100;
+  Caption := Format('ChipUP Poker - Updating [%d%%, %2.fMB]', [Trunc(pbProgress.Position), (FDownloadedSize + FCurrentDownloadedSize) / 1024 / 1024]);
+  lbsCaption.Caption := Caption;
 end;
 
 procedure TfrmUpdater.HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
+var
+  batch_file: String;
 begin
   if (ErrCode = 0) and
      (Assigned(HttpClient.RcvdStream)) then
-    dmMain.UpdaterFile := FUpdaterFile;
+  begin
+    if not StoreDownloadedFile then
+    begin
+      ShowFailedToUpdateMessage;
+      Close;
+    end;
 
-  Close;
+    if not DownloadNextFile then // no more files to download
+    begin
+      if MakeBatchUpdater(batch_file) then
+        dmMain.SetUpdaterBatchFile(batch_file)
+      else
+        ShowFailedToUpdateMessage;
+      Close;
+    end;
+  end;
 end;
 
 procedure TfrmUpdater.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -157,7 +265,7 @@ end;
 procedure TfrmUpdater.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   img_close, img_min: Integer;
-  cpos              : TPoint;
+  cpos: TPoint;
 begin
   cpos := ScreenToClient(Mouse.CursorPos);
 
@@ -176,6 +284,7 @@ begin
     ImageList.GetImage(img_close, imgClose.Picture.Bitmap);
     imgClose.Tag := img_close;
   end;
+
   if imgMinimize.Tag <> img_min then
   begin
     ImageList.GetImage(img_min, imgMinimize.Picture.Bitmap);

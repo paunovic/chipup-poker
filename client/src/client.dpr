@@ -22,6 +22,7 @@ uses
   StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
   FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
   dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
+  OverbyteIcsHttpProt in '3rdparty\icsv8\OverbyteIcsHttpProt.pas',
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
   Poker.Forms.Main in 'forms\Poker.Forms.Main.pas' {frmChipUpMain},

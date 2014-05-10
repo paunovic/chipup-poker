@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>client.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
@@ -138,6 +138,7 @@
 			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
 			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
+			<DCCReference Include="3rdparty\icsv8\OverbyteIcsHttpProt.pas"/>
 			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
 			<DCCReference Include="Poker.DataModule.pas">
 				<Form>dmMain</Form>
@@ -288,7 +289,6 @@
 			<DCCReference Include="modules\Poker.HandStrengthCalculator.pas"/>
 			<DCCReference Include="forms\Poker.Forms.About.pas">
 				<Form>frmAbout</Form>
-				<FormType>dfm</FormType>
 			</DCCReference>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas"/>

@@ -7,9 +7,8 @@ uses
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.User, cxImage, Vcl.Imaging.JPEG;
 
 var
-  SelfPath          : String;
-  AppDataLocalPath  : String;
-  AppDataRoamingPath: String;
+  SelfPath: String;
+  AppDataLocalPath: String;
 
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
@@ -606,9 +605,7 @@ end;
 initialization
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   AppDataLocalPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
-  AppDataRoamingPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_APPDATA)) + 'ChipUP Poker');
   ForceDirectories(AppDataLocalPath);
-  ForceDirectories(AppDataRoamingPath);
 
 finalization
 
