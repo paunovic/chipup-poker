@@ -124,6 +124,7 @@ message UpdateFileInfo {
 	enum UpdateFileType {
 		ufFull = 1;
 		ufDiff = 2;
+		ufRemove = 3;
 	}
 	required string path = 1;
 	optional bytes hash = 2;
