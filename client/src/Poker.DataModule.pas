@@ -284,9 +284,9 @@ end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
 const
-  FILES_COUNT = 6;
+  FILES_COUNT = 7;
   FILES: array[0..FILES_COUNT - 1] of String = ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf',
-     'bspatch.exe');
+     'bspatch.exe', 'sqlite3.dll');
 var
   pb_ufi: TPB_UpdateFileInfo;
   C1: Integer;
