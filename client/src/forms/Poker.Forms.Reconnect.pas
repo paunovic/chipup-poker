@@ -148,15 +148,8 @@ end;
 procedure TfrmReconnect.CSRHello(const AMethodId: Integer; const AObject: TObject);
 var
   pbhello: TPB_HelloReply;
-  version: String;
 begin
   pbhello := AObject as TPB_HelloReply;
-
-  {$IFDEF DEBUG}
-  version := pbhello.LatestDebugVersion;
-  {$ELSE}
-  version := pbhello.LatestVersion;
-  {$ENDIF}
 
   ServerSettings.ParseHelloMessage(pbhello);
 

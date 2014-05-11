@@ -26,6 +26,7 @@ type
     procedure imgMinimizeClick(Sender: TObject);
     procedure HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FUpdateFileIndex: Integer;
     FUpdateDir: String;
@@ -33,12 +34,13 @@ type
     FTotalSize: UINT32;
     FDownloadedSize: UINT32;
     FCurrentDownloadedSize: UINT32;
+    FFullInstaller: Boolean;
 
     procedure PostQuitMessage;
-    function DownloadNextFile: Boolean;
+    function ProcessNextFile: Boolean;
     function StoreDownloadedFile: Boolean;
     function MakeBatchUpdater(out ABatchFile: String): Boolean;
-    procedure ShowFailedToUpdateMessage;
+    procedure DownloadFullInstaller;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
@@ -69,8 +71,6 @@ begin
   FCurrentDownloadedSize := 0;
   for ufi in dmMain.UpdateFiles do
     Inc(FTotalSize, ufi.FileSize);
-
-  DownloadNextFile;
 end;
 
 procedure TfrmUpdater.FormDestroy(Sender: TObject);
@@ -120,6 +120,14 @@ begin
   end;
 end;
 
+procedure TfrmUpdater.DownloadFullInstaller;
+begin
+  FFullInstaller := TRUE;
+  (HttpClient.RcvdStream as TMemoryStream).Clear;
+  HttpClient.URL := Settings.DomainURL + Settings.Hardcoded.URL.LATEST_VERSION;
+  HttpClient.GetASync;
+end;
+
 function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Boolean;
 var
   ufi: TPB_UpdateFileInfo;
@@ -133,17 +141,22 @@ begin
     batch.Add('PING 127.0.0.1 -n 2');
     for ufi in dmMain.UpdateFiles do
     begin
-      newfile := FUpdateDir + ufi.Path;
-      if not FileExists(newfile) then
-        Exit(FALSE);
-
-      oldfile := SelfPath + ufi.Path;
-
-      ForceDirectories(ExtractFilePath(oldfile));
-
       case ufi.FileType of
-        ufFull: batch.Add(Format('COPY /Y "%s" "%s"', [newfile, oldfile]));
-        ufDiff: batch.Add(Format('bspatch.exe "%s" "%s" "%s"', [oldfile, oldfile, newfile]));
+        ufRemove: batch.Add(Format('DEL /S /Q "%s"', [SelfPath + ufi.Path]));
+        ufFull, ufDiff: begin
+          newfile := FUpdateDir + ufi.Path;
+          if not FileExists(newfile) then
+            Exit(FALSE);
+
+          oldfile := SelfPath + ufi.Path;
+
+          ForceDirectories(ExtractFilePath(oldfile));
+
+          case ufi.FileType of
+            ufFull: batch.Add(Format('COPY /Y "%s" "%s"', [newfile, oldfile]));
+            ufDiff: batch.Add(Format('bspatch.exe "%s" "%s" "%s"', [oldfile, oldfile, newfile]));
+          end;
+        end;
       end;
     end;
     batch.Add(Format('START "" "%s"', [ParamStr(0)]));
@@ -157,6 +170,7 @@ begin
       Exit(FALSE);
     end;
 
+    ForceDirectories(ExtractFilePath(ABatchFile));
     batch.SaveToFile(ABatchFile);
     res := FileExists(ABatchFile);
     {$IFDEF DEBUG}
@@ -169,11 +183,6 @@ begin
   finally
     batch.Free;
   end;
-end;
-
-procedure TfrmUpdater.ShowFailedToUpdateMessage;
-begin
-  MessageDlg('Update failed. Please reinstall the application.', mtError, [mbOK], 0);
 end;
 
 function TfrmUpdater.StoreDownloadedFile: Boolean;
@@ -200,21 +209,36 @@ begin
   Exit(res);
 end;
 
-function TfrmUpdater.DownloadNextFile: Boolean;
+function TfrmUpdater.ProcessNextFile: Boolean;
+var
+  batch_file: String;
 begin
   (HttpClient.RcvdStream as TMemoryStream).Clear;
   Inc(FDownloadedSize, FCurrentDownloadedSize);
   FCurrentDownloadedSize := 0;
   Inc(FUpdateFileIndex);
   if FUpdateFileIndex > dmMain.UpdateFiles.Count - 1 then
-    Exit(FALSE)
+  begin
+    if MakeBatchUpdater(batch_file) then
+    begin
+      Close;
+      dmMain.SetUpdaterBatchFile(batch_file)
+    end
+    else
+      DownloadFullInstaller;
+    Exit(FALSE);
+  end
   else
   begin
-    HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
-    {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%.2fMB] %s',
-      [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
-    HttpClient.GetASync;
-    Exit(TRUE);
+    case dmMain.UpdateFiles[FUpdateFileIndex].FileType of
+      ufRemove: result := ProcessNextFile;
+    else
+      HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
+      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%.2fMB] %s',
+        [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
+      HttpClient.GetASync;
+      Exit(TRUE);
+    end;
   end;
 end;
 
@@ -228,26 +252,25 @@ begin
 end;
 
 procedure TfrmUpdater.HttpClientRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
-var
-  batch_file: String;
 begin
   if (ErrCode = 0) and
      (Assigned(HttpClient.RcvdStream)) then
   begin
-    if not StoreDownloadedFile then
+    if FFullInstaller then
     begin
-      ShowFailedToUpdateMessage;
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(AppDataLocalPath + 'install_chipuppoker.exe');
+      dmMain.SetUpdaterInstaller(AppDataLocalPath + 'install_chipuppoker.exe');
       Close;
+      Exit;
     end;
 
-    if not DownloadNextFile then // no more files to download
+    if not StoreDownloadedFile then
     begin
-      if MakeBatchUpdater(batch_file) then
-        dmMain.SetUpdaterBatchFile(batch_file)
-      else
-        ShowFailedToUpdateMessage;
-      Close;
+      DownloadFullInstaller;
+      Exit;
     end;
+
+    ProcessNextFile;
   end;
 end;
 
@@ -290,6 +313,11 @@ begin
     ImageList.GetImage(img_min, imgMinimize.Picture.Bitmap);
     imgMinimize.Tag := img_min;
   end;
+end;
+
+procedure TfrmUpdater.FormShow(Sender: TObject);
+begin
+  ProcessNextFile;
 end;
 
 end.

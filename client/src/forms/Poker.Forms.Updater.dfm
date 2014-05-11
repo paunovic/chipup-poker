@@ -20,6 +20,7 @@ object frmUpdater: TfrmUpdater
   OnDestroy = FormDestroy
   OnMouseDown = FormMouseDown
   OnMouseMove = FormMouseMove
+  OnShow = FormShow
   DesignSize = (
     365
     50)

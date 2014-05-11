@@ -43,6 +43,7 @@ type
     srContactUsOk = 36,
     srTableBuyinLessThanCashout = 37,
     srInvalidTableBuyin = 38,
+    srBuildingDiff = 39,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -159,6 +160,7 @@ begin
     srContactUsOk: result := 'srContactUsOk';
     srTableBuyinLessThanCashout: result := 'srTableBuyinLessThanCashout';
     srInvalidTableBuyin: result := 'srInvalidTableBuyin';
+    srBuildingDiff: result := 'srBuildingDiff';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';

@@ -11,7 +11,7 @@ uses
   OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin;
 
 type
-  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
+  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsPreparingUpdate, lsLoggingIn, lsLoggedIn, lsUpdating);
 
   TfrmLogin = class(TForm)
     alLogin: TActionList;
@@ -56,6 +56,7 @@ type
 
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRBuildingDiff(const AMethodId: Integer; const AObject: TObject);
 
     procedure EnterDeveloperMode;
     procedure LeaveDeveloperMode;
@@ -93,7 +94,9 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
                      TServerMessageCallback.Create(srHello, CSRHello),
-                     TServerMessageCallback.Create(srLoginReply, CSRLogin)
+                     TServerMessageCallback.Create(srLoginReply, CSRLogin),
+                     TServerMessageCallback.Create(srBuildingDiff, CSRBuildingDiff)
+
                   ]);
 
   CurrentStatus := lsIdle;
@@ -239,11 +242,10 @@ begin
   FCurrentStatus := AValue;
 
   case FCurrentStatus of
-    lsIdle, lsConnecting: status := 'CONNECTING..';
-    lsConnected: status := 'CONNECTING...';
-    lsHelloing: status := 'CONNECTING...';
+    lsIdle, lsConnecting, lsConnected, lsHelloing: status := 'CONNECTING...';
     lsHelloOk: status := 'LOGIN';
     lsLoggingIn, lsLoggedIn: status := 'LOGGING IN...';
+    lsPreparingUpdate: status := 'PREPARING  UPDATE...';
   end;
 
   btLogin.Caption := status;
@@ -360,6 +362,11 @@ end;
 procedure TfrmLogin.acShowForgotPasswordFormExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmForgotPassword, self, [], ModalFormClose));
+end;
+
+procedure TfrmLogin.CSRBuildingDiff(const AMethodId: Integer; const AObject: TObject);
+begin
+  CurrentStatus := lsPreparingUpdate;
 end;
 
 procedure TfrmLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
