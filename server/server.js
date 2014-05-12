@@ -494,9 +494,6 @@ function installers_func(req,res) {
 				if (row) {
 					fs.unlink('installers/'+row.name,function (err) {
 						console.log('installer deleted');
-						fs.unlink('installers/'+row.clientname,function (err) {
-							console.log('client deleted');
-						});
 					});
 				}
 				Installers.remove({_id:new ObjectID(id)},function () {});
@@ -508,7 +505,8 @@ function installers_func(req,res) {
 		return function (cb) {
 			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
 				function finish() {
-					unpackInstaller(row,cb);
+					if (config.diffserver) unpackInstaller(row,cb);
+					else cb();
 				}
 				assert.ifError(err);
 				if (row) {
@@ -545,7 +543,7 @@ function installers_func(req,res) {
 			jobs.push(makeDeleter(res2[1]));
 		}
 	}
-	console.log(jobs);
+	console.log('jobs: %j', jobs);
 	if (jobs.length == 0) finish2();
 	else {
 		console.log('running jobs');
@@ -625,10 +623,14 @@ app.get('/fetchhands',function (req,res) {
 });
 	app.post('/sync/newVersion',function (req,res) {
 		console.log(req.body);
-		req.body._id = new ObjectID(req.body._id);
-		conn.collection('installers').save(req.body,function (err,reply) {
+		req.body.installer._id = new ObjectID(req.body.installer._id);
+		conn.collection('installers').save(req.body.installer,function (err,reply) {
 			console.log(err,reply);
-			res.end('OK');
+			async.each(req.body.sizes,function (row,cb) {
+				conn.collection('objectSizes').save(row,cb);
+			},function () {
+				res.end('OK');
+			});
 		});
 	});
 	app.use(express.static('files'));
@@ -1091,7 +1093,7 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 					return cb();
 				}
 				if (clientFile.hash != targetFile) {
-					console.log(clientFile);
+					console.log('clientFile:%j',clientFile);
 					console.log('need to patch %s',clientFile.path);
 					conn.collection('diffs').findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
@@ -1100,9 +1102,12 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 							toUpdate.push(UFI);
 							cb();
 						} else {
-							fs.stat('unpacked/objects/'+targetFile,function (err,stat) {
-								if (stat) {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:staticdomain+'unpacked/objects/'+targetFile,file_size:stat.size});
+							conn.collection('objectSizes').findOne({_id:targetFile},function (err,sizeRow) {
+								assert.ifError(err);
+								if (sizeRow) {
+									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:staticdomain+'unpacked/objects/'+targetFile,file_size:sizeRow.size});
+								} else {
+									log('cant find original of %s',clientFile.path);
 								}
 								cb();
 							});
@@ -1122,8 +1127,19 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 	}.bind(this));
 }
 function makeDiff(sourcehash,desthash,path) {
+	if (!config.diffserver) {
+		console.log('need to ask diff server for %s',path);
+		var body = new Buffer(JSON.stringify({sourcehash:sourcehash,desthash:desthash,path:path}));
+		var req = http.request({host:'dev-server.chipuppoker.com',method:'POST',path:'/sync/makeDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
+		req.on('data',function (chunk) {
+			console.log('chunk');
+		});
+		req.write(body);
+		req.end();
+		return;
+	}
 	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
-		console.log(localCopy);
+		console.log('localCopy:%j',localCopy);
 		if (localCopy) {
 			bsdiffLock.writeLock(function (release) {
 				conn.collection('diffs').findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
