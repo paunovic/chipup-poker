@@ -554,19 +554,21 @@ function installers_func(req,res) {
 	}
 	var latestVersion = '';
 	var latestMsg = '';
-	jobs.push(function (cb) {
-		fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
-			latestVersion = body.trim();
-			var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
-			child.stdout.setEncoding('utf8');
-			child.stdout.on('data',function (data) {
-				latestMsg += data;
-			});
-			child.on('close',function () {
-				cb();
+	if (config.diffserver) {
+		jobs.push(function (cb) {
+			fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
+				latestVersion = body.trim();
+				var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
+				child.stdout.setEncoding('utf8');
+				child.stdout.on('data',function (data) {
+					latestMsg += data;
+				});
+				child.on('close',function () {
+					cb();
+				});
 			});
 		});
-	});
+	}
 	console.log('jobs: %j', jobs);
 	if (jobs.length == 0) finish2();
 	else {
