@@ -127,7 +127,7 @@ function setup3(db) {
 		assert(fs.statSync('./upload'));
 		app.use(express.bodyParser({uploadDir:'./upload'}));
 	});
-	app.use('/sync/',expesss.basicAuth('sync','password'));
+	app.use('/sync/',express.basicAuth('sync','password'));
 	bugsView.setup(app,bugs,allUsers,db);
 	app.get('/confirm',function (req,res) {
 		if (!req.query.code) {
@@ -606,7 +606,11 @@ app.get('/fetchhands',function (req,res) {
 });
 	app.post('/sync/newVersion',function (req,res) {
 		console.log(req.body);
-		res.end('OK');
+		req.body._id = new ObjectID(req.body._id);
+		conn.collection('installers').save(req.body,function (err,reply) {
+			console.log(err,reply);
+			res.end('OK');
+		});
 	});
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
