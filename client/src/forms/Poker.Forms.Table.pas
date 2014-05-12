@@ -1003,10 +1003,10 @@ begin
   bottomy := Round(FTableCenter.Y + FCardHeight + FTableResizeRatio * 16);
   case APotIndex of
     0: result := Point2(FTableCenter.X, topy);
-    1: result := Point2(FTableCenter.X + 40, topy);
-    2: result := Point2(FTableCenter.X - 40, topy);
-    3: result := Point2(FTableCenter.X - 40, bottomy);
-    4: result := Point2(FTableCenter.X + 40, bottomy);
+    1: result := Point2(FTableCenter.X + 60, topy);
+    2: result := Point2(FTableCenter.X - 60, topy);
+    3: result := Point2(FTableCenter.X - 60, bottomy);
+    4: result := Point2(FTableCenter.X + 60, bottomy);
   else
     result := Point2(-1, -1);
   end;
@@ -1408,13 +1408,24 @@ begin
   begin
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
-    FRaiseMin := FTableStatus.MinimumBet + FTable.Game.BigBlind;
-    FRaiseMax := FTableStatus.MaximumBet;
+    FRaiseMin := FTableStatus.MinimumRaise;
+    FRaiseMax := FTableStatus.MaximumRaise;
 
-    FRaisePresetButtons[0].Action := acRaiseMin;
-    FRaisePresetButtons[1].Action := acRaise3BB;
-    FRaisePresetButtons[2].Action := acRaisePot;
-    FRaisePresetButtons[3].Action := acRaiseMax;
+    // if game is pot limit, we dont have to show MAX button, since POT = MAX
+    if FTableStatus.CurrentLimit = glPotLimit then
+    begin
+      FRaisePresetButtons[0].Action := nil;
+      FRaisePresetButtons[1].Action := acRaiseMin;
+      FRaisePresetButtons[2].Action := acRaise3BB;
+      FRaisePresetButtons[3].Action := acRaisePot;
+    end
+    else
+    begin
+      FRaisePresetButtons[0].Action := acRaiseMin;
+      FRaisePresetButtons[1].Action := acRaise3BB;
+      FRaisePresetButtons[2].Action := acRaisePot;
+      FRaisePresetButtons[3].Action := acRaiseMax;
+    end;
 
     if not raise_en then
       FRaiseValue := FRaiseMin;

@@ -247,7 +247,7 @@ begin
   FCurrentDownloadedSize := Round(HttpClient.RcvdCount / HttpClient.ContentLength * dmMain.UpdateFiles[FUpdateFileIndex].FileSize);
 
   pbProgress.Position := ((FDownloadedSize + FCurrentDownloadedSize) / FTotalSize) * 100;
-  Caption := Format('ChipUP Poker - Updating [%d%%, %2.fMB]', [Trunc(pbProgress.Position), (FDownloadedSize + FCurrentDownloadedSize) / 1024 / 1024]);
+  Caption := Format('ChipUP Poker - Updating [%d%%]', [Trunc(pbProgress.Position)]);
   lbsCaption.Caption := Caption;
 end;
 

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableStatus;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.Game,Poker.Protobufs.Objects.SeatInfo,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.Pot;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.SeatInfo,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.Pot,Poker.Protobufs.Objects.Game;
 
 type
   TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6,tsWinning2 = 7);
@@ -22,7 +22,7 @@ type
       FN_LOCKED = 11;
       FN_SEQ = 12;
       FN_MINIMUM_BET = 13;
-      FN_MAXIMUM_LIMIT = 14;
+      FN_MAXIMUM_RAISE = 14;
       FN_SMALL_BLIND = 15;
       FN_BIG_BLIND = 16;
       FN_HANDID = 17;
@@ -33,6 +33,8 @@ type
       FN_CURRENT_GAME = 22;
       FN_ROTATION = 23;
       FN_TOTAL_BALANCE = 24;
+      FN_GAME_LIMIT = 25;
+      FN_MINIMUM_RAISE = 26;
 
     var
       FTableMongoId: TBytes;
@@ -44,7 +46,7 @@ type
       FLocked: Boolean;
       FSeq: Integer;
       FMinimumBet: UINT32;
-      FMaximumLimit: UINT32;
+      FMaximumRaise: UINT32;
       FSmallBlind: UINT32;
       FBigBlind: UINT32;
       FHandid: UINT32;
@@ -55,6 +57,8 @@ type
       FCurrentGame: TGameType;
       FRotation: UINT32;
       FTotalBalance: UINT32;
+      FGameLimit: TGameLimit;
+      FMinimumRaise: UINT32;
 
     procedure SetTableMongoId(const AValue: TBytes);
     procedure SetState(const AValue: TTableState);
@@ -64,7 +68,7 @@ type
     procedure SetLocked(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
     procedure SetMinimumBet(const AValue: UINT32);
-    procedure SetMaximumLimit(const AValue: UINT32);
+    procedure SetMaximumRaise(const AValue: UINT32);
     procedure SetSmallBlind(const AValue: UINT32);
     procedure SetBigBlind(const AValue: UINT32);
     procedure SetHandid(const AValue: UINT32);
@@ -73,6 +77,8 @@ type
     procedure SetCurrentGame(const AValue: TGameType);
     procedure SetRotation(const AValue: UINT32);
     procedure SetTotalBalance(const AValue: UINT32);
+    procedure SetGameLimit(const AValue: TGameLimit);
+    procedure SetMinimumRaise(const AValue: UINT32);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -93,7 +99,7 @@ type
     property Locked: Boolean read FLocked write SetLocked;
     property Seq: Integer read FSeq write SetSeq;
     property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
-    property MaximumLimit: UINT32 read FMaximumLimit write SetMaximumLimit;
+    property MaximumRaise: UINT32 read FMaximumRaise write SetMaximumRaise;
     property SmallBlind: UINT32 read FSmallBlind write SetSmallBlind;
     property BigBlind: UINT32 read FBigBlind write SetBigBlind;
     property Handid: UINT32 read FHandid write SetHandid;
@@ -104,6 +110,8 @@ type
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
     property Rotation: UINT32 read FRotation write SetRotation;
     property TotalBalance: UINT32 read FTotalBalance write SetTotalBalance;
+    property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
+    property MinimumRaise: UINT32 read FMinimumRaise write SetMinimumRaise;
   end;
 
 implementation
@@ -187,9 +195,9 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMinimumBet := AProtobufReader.readUInt32;
       end;
-      FN_MAXIMUM_LIMIT: begin
+      FN_MAXIMUM_RAISE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FMaximumLimit := AProtobufReader.readUInt32;
+        FMaximumRaise := AProtobufReader.readUInt32;
       end;
       FN_SMALL_BLIND: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -230,6 +238,14 @@ begin
       FN_TOTAL_BALANCE: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTotalBalance := AProtobufReader.readUInt32;
+      end;
+      FN_GAME_LIMIT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FGameLimit := TGameLimit(AProtobufReader.readEnum);
+      end;
+      FN_MINIMUM_RAISE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FMinimumRaise := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -296,10 +312,10 @@ begin
   ProtobufOutput.writeUInt32(FN_MINIMUM_BET, AValue);
 end;
 
-procedure TPB_TableStatus.SetMaximumLimit(const AValue: UINT32);
+procedure TPB_TableStatus.SetMaximumRaise(const AValue: UINT32);
 begin
-  FMaximumLimit := AValue;
-  ProtobufOutput.writeUInt32(FN_MAXIMUM_LIMIT, AValue);
+  FMaximumRaise := AValue;
+  ProtobufOutput.writeUInt32(FN_MAXIMUM_RAISE, AValue);
 end;
 
 procedure TPB_TableStatus.SetSmallBlind(const AValue: UINT32);
@@ -364,6 +380,18 @@ procedure TPB_TableStatus.SetTotalBalance(const AValue: UINT32);
 begin
   FTotalBalance := AValue;
   ProtobufOutput.writeUInt32(FN_TOTAL_BALANCE, AValue);
+end;
+
+procedure TPB_TableStatus.SetGameLimit(const AValue: TGameLimit);
+begin
+  FGameLimit := AValue;
+  ProtobufOutput.writeInt32(FN_GAME_LIMIT, Integer(AValue));
+end;
+
+procedure TPB_TableStatus.SetMinimumRaise(const AValue: UINT32);
+begin
+  FMinimumRaise := AValue;
+  ProtobufOutput.writeUInt32(FN_MINIMUM_RAISE, AValue);
 end;
 
 end.
