@@ -646,6 +646,13 @@ app.get('/fetchhands',function (req,res) {
 		makeDiff(t.sourcehash,t.desthash,t.path);
 		res.end('STARTED');
 	});
+	app.post('/sync/newDiff',function (req,res) {
+		var doc = req.body;
+		doc._id = new ObjectID(doc._id);
+		conn.collection('diffs').save(doc,function (err,rows) {
+			res.end('OK');
+		});
+	});
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
 	/*app.use('/diffs',express.static('diffs'));
