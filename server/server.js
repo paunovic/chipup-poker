@@ -19,6 +19,7 @@ var util = require('util');
 var async = require('async');
 var jade = require('jade');
 var child_process = require('child_process');
+var http = require('http');
 
 var SmtpConnection = require('./smtp');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
@@ -31,6 +32,7 @@ var Club = require('./club');
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
+var config = require('./config');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
@@ -44,7 +46,8 @@ dag.init();
 // stats
 var hands = 0;
 
-var domain = "http://chipuppoker.com/";
+var domain = "http://"+config.hostname+'/';
+var staticdomain = "http://"+config.staticserver+'/';
 var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:15,max_timebank:30};
 sharedconfig.minSizes.email = 6;
 sharedconfig.stringSizes.email = 200;
@@ -72,6 +75,16 @@ var logger = require('morgan');
 var bsdiffLock = new ReadWriteLock();
 app.use(logger());
 function unpackInstaller(row,cb1) {
+	function updateLive(doc,cb) {
+		var body = new Buffer(JSON.stringify(doc));
+		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
+		req.on('data',function (chunk) {
+			console.log(chunk);
+		});
+		req.write(body);
+		req.end();
+		cb();
+	}
 	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+row._id+'/','-e','installers/'+row.name],{stdio:'inherit'});
 	unpacker.on('close',function (code) {
 		if (code != 0) {
@@ -80,7 +93,9 @@ function unpackInstaller(row,cb1) {
 		}
 		assert.equal(code,0);
 		fs.readdir('unpacked/'+row._id+'/app/',function (err,files) {
-			var doc = {_id:row._id, version:row.version, hashes:{}}
+			var key = {_id:row._id};
+			var hashes = {};
+			var mods = { $set:{hashes:hashes}};
 			async.each(files,function hashFile(filename,cb2) {
 				var hasher = crypto.createHash('sha256');
 				var client = fs.createReadStream('unpacked/'+row._id+'/app/'+filename);
@@ -91,7 +106,7 @@ function unpackInstaller(row,cb1) {
 					var hash = hasher.digest('hex');
 					console.log('hash of %s is %s',filename,hash);
 					var key = filename.replace('.','_');
-					doc.hashes[key] = hash;
+					hashes[key] = hash;
 					copyFile('unpacked/'+row._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
 						fs.unlink('unpacked/'+row._id+'/app/'+filename,function () {
 							cb2();
@@ -99,13 +114,17 @@ function unpackInstaller(row,cb1) {
 					});
 				});
 			},function () {
-				conn.collection('activatedVersions').save(doc,function (err,newdoc) {
+				conn.collection('installers').update(key,mods,function (err,newdoc) {
 					assert.ifError(err);
 					if (err) console.log(err);
 					console.log('inserted %j',newdoc);
 					fs.rmdir('unpacked/'+row._id+'/app/',function () {
 						fs.rmdir('unpacked/'+row._id,function () {
-							cb1(true);
+							conn.collection('installers').findOne(key,function (err,doc) {
+								updateLive(doc,function () {
+									cb1(true);
+								});
+							});
 						});
 					});
 				});
@@ -127,7 +146,7 @@ function setup3(db) {
 		assert(fs.statSync('./upload'));
 		app.use(express.bodyParser({uploadDir:'./upload'}));
 	});
-	app.use('/sync/',expesss.basicAuth('sync','password'));
+	app.use('/sync/',express.basicAuth('sync','password'));
 	bugsView.setup(app,bugs,allUsers,db);
 	app.get('/confirm',function (req,res) {
 		if (!req.query.code) {
@@ -1043,7 +1062,7 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
 	Config.findOne({_id:key1},function (err,row2) {
-		conn.collection('activatedVersions').findOne({_id:row2.value},function (err,targetVersion) {
+		conn.collection('installers').findOne({_id:row2.value},function (err,targetVersion) {
 			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
