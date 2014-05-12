@@ -127,6 +127,7 @@ function setup3(db) {
 		assert(fs.statSync('./upload'));
 		app.use(express.bodyParser({uploadDir:'./upload'}));
 	});
+	app.use('/sync/',expesss.basicAuth('sync','password'));
 	bugsView.setup(app,bugs,allUsers,db);
 	app.get('/confirm',function (req,res) {
 		if (!req.query.code) {
@@ -434,7 +435,9 @@ app.post('/eval',function (req,res) {
 				log('new version recorded: %j',row);
 				unpackInstaller(row[0],function (success) {
 					if (success) {
-						Config.update({_id:'installerid'},{$set:{value:row[0]._id}},function(err,res2) {
+						if (debug == 'debug') var key1 = 'debuginstallerid';
+						else var key1 = 'installerid';
+						Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
 							assert.ifError(err);
 						});
 						res.send('OK');
@@ -601,6 +604,10 @@ app.get('/fetchhands',function (req,res) {
 		});
 	});
 });
+	app.post('/sync/newVersion',function (req,res) {
+		console.log(req.body);
+		res.end('OK');
+	});
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
 	/*app.use('/diffs',express.static('diffs'));
@@ -1030,167 +1037,9 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 	}
 	if (params.debug) {
 		// FIXME
-		this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
-		return;
+		//this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
+		//return;
 	}
-	/*
-			var keyhash = null;
-			for (var x=0; x<params.files.length; x++) {
-				var file = params.files[x];
-				if (file.path = 'chipuppoker.exe') {
-					keyhash = file.hash.toString('hex');
-					break;
-				}
-			}
-			conn.collection('activatedVersions').findOne({'hashes.chipuppoker_exe':keyhash},function (err,row) {
-				function compareHashes(row,oldrow) {
-					assert(row);
-					// oldrow: hashes of what client currently has, with id
-					// row: hashes of what i should have
-					// params, actual hashes from client
-					var toUpdate = [];
-					var checked = {};
-					for (var x=0; x<params.files.length; x++) {
-						var file = params.files[x];
-						var key = file.path.replace('.','_');
-						checked[key] = true;
-						if ((file.hash.length > 0) && (!row.hashes[key])) {
-							toUpdate.push({file_type:'ufRemove',path:file.path});
-						} else if (row.hashes[key] != file.hash.toString('hex')) { // client doesnt match required version of this file
-							if (file.hash.toString('hex') == oldrow.hashes[key]) { // client matches old ver, can diff
-								var changeObj = {file_type:'ufDiff',path:file.path,original:'unpacked/'+oldrow._id+'/app/'+file.path,newfile:'unpacked/'+row._id+'/app/'+file.path,sourcehash:oldrow.hashes[key], desthash:row.hashes[key]};
-								toUpdate.push(changeObj);
-								assert(changeObj.desthash);
-							} else {
-								toUpdate.push({file_type:'ufFull',path:key,original:'unpacked/'+oldrow._id+'/app/'+file.path});
-							}
-						}
-					}
-					for (var key in row.hashes) {
-						if (!checked[key]) {
-							console.log('file %s is missing',key);
-							toUpdate.push({file_type:'ufFull',path:key});
-						}
-					}
-					return toUpdate;
-				}
-				//log('found %j %j',err,row);
-				if (row == null) {
-					log('params in %j',params);
-					if (params.debug) var key1 = 'debuginstallerid';
-					else var key1 = 'installerid';
-					Config.findOne({_id:key1},function (err,row2) {
-						conn.collection('activatedVersions').findOne({_id:row2.value},function (err,row3) {
-							log('row3 is %j',row3);
-							var filesToSend = [];
-							for (var key in row3.hashes) {
-								var file = key.replace('_','.');
-								var UFI = {path:file, url:'unpacked/'+row3._id+'/app/'+file, file_type:'ufFull'};
-								filesToSend.push(UFI);
-							}
-							async.each(filesToSend,function addSize(entry,cb) {
-								fs.stat(entry.url,function (err,stats) {
-									if (stats) {
-										entry.url = staticdomain+entry.url;
-										entry.file_size = stats.size;
-									}
-									cb();
-								});
-							},function () {
-								var msg = JSON.parse(JSON.stringify(sharedconfig));
-								msg.update_files = filesToSend;
-								//this.send(codes.srHello,msg,'Poker.HelloReply');
-							}.bind(this));
-						}.bind(this));
-					}.bind(this));
-				} else {
-					if (params.debug) var key1 = 'debuginstallerid';
-					else var key1 = 'installerid';
-					Config.findOne({_id:key1},function (err,row2) {
-						function checkAndUpdate(changes) {
-							if (changes.length > 0) {
-								var filesToSend = [];
-								this.log('need to send an update: %j',changes);
-								async.each(changes,function makeChange(changeObj,cb) {
-									log('change obj is: %j',changeObj);
-									if (changeObj.file_type == 'ufDiff') {
-										assert(changeObj.desthash);
-										var outfile = 'diffs/'+changeObj.sourcehash+'-'+changeObj.desthash+'.diff';
-										bsdiffLock.writeLock(function (release) {
-											fs.stat(outfile,function (err,stats) {
-												if (err && err.code == 'ENOENT') {
-													bsdiff(changeObj.original,changeObj.newfile,outfile,function (err,stats) {
-														if (err && err.code == 'ENOENT') {
-															var UFI = {path:changeObj.path.replace('_','.'), url:changeObj.newfile, file_type:'ufFull'};
-															fs.stat(UFI.url,function (err,stats) {
-																log('stated new file %j %j',err,changeObj);
-																if (stats) {
-																	UFI.url = staticdomain+UFI.url;
-																	UFI.file_size = stats.size;
-																	filesToSend.push(UFI);
-																}
-																release();
-																cb(); // FIXME
-															});
-															return;
-														}
-														assert.ifError(err);
-														var UFI = { path: changeObj.path, url:staticdomain+outfile, file_type:'ufDiff', file_size:stats.size };
-														filesToSend.push(UFI);
-														release();
-														cb();
-													});
-												} else {// reuse old diff
-													var UFI = { path: changeObj.path, url:staticdomain+outfile, file_type:'ufDiff', file_size:stats.size };
-													filesToSend.push(UFI);
-													release();
-													cb();
-												}
-											});
-										});
-									} else if (changeObj.file_type == 'ufFull') {
-										var UFI = {path:changeObj.path.replace('_','.'), url:'unpacked/'+row2._id+'/app/'+changeObj.path.replace('_','.'), file_type:'ufFull'};
-										fs.stat(UFI.url,function (err,stats) {
-											log('statted new file err:%j changeobj:%j ufi:%j',err,changeObj,UFI);
-											if (stats) {
-												UFI.url = staticdomain+UFI.url;
-												UFI.file_size = stats.size;
-												filesToSend.push(UFI);
-											}
-											cb(); // FIXME
-										});
-									} else if (changeObj.file_type == 'ufRemove') {
-										filesToSend.push(changeObj);
-										cb();
-									}
-								},function done() {
-									log('made diffs %j',filesToSend);
-									var msg = JSON.parse(JSON.stringify(sharedconfig));
-									msg.update_files = filesToSend;
-									//this.send(codes.srHello,msg,'Poker.HelloReply');
-								}.bind(this));
-								this.send(codes.srBuildingDiff);
-							} else {
-								this.log('all good');
-								//this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
-							}
-						}
-						assert.ifError(err);
-						//log('active installer: %j',row2);
-						if (compareObjectID(row2.value,row._id)) { // client has active version running
-							var toUpdate = compareHashes(row,row);
-							checkAndUpdate.call(this,toUpdate);
-						} else { // client has an old version running
-							console.log('client has old %s %s',row2.value,row._id);
-							conn.collection('activatedVersions').findOne({_id:row2.value},function (err,row3) {
-								var toUpdate = compareHashes(row3,row);
-								checkAndUpdate.call(this,toUpdate);
-							}.bind(this));
-						}
-					}.bind(this));
-				}
-			}.bind(this));
-	*/		
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
 	Config.findOne({_id:key1},function (err,row2) {
@@ -1221,52 +1070,20 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 				if (clientFile.hash != targetFile) {
 					console.log(clientFile);
 					console.log('need to patch %s',clientFile.path);
-					fs.stat("unpacked/objects/"+clientFile.hash,function (err,localCopy) {
-						console.log(localCopy);
-						if (localCopy && clientFile.hash) {
-							var outfile = 'diffs/'+clientFile.hash+'-'+targetFile+'.diff';
-							this.send(codes.srBuildingDiff);
-							bsdiffLock.writeLock(function (release) {
-								fs.stat(outfile,function (err,stats) {
-									if (err && err.code == 'ENOENT') {
-										bsdiff("unpacked/objects/"+clientFile.hash,"unpacked/objects/"+targetFile,outfile,function (err,stats) {
-											if (err && err.code == 'ENOENT') {
-												// diff generation failed
-												var UFI = {path:clientFile.path, url:staticdomain+"unpacked/objects/"+targetFile, file_type:'ufFull'};
-												fs.stat(UFI.url,function (err,stats) {
-													log('stated new file %j',err);
-													if (stats) {
-														UFI.url = staticdomain+UFI.url;
-														UFI.file_size = stats.size;
-														toUpdate.push(UFI);
-													}
-													release();
-													cb(); // FIXME
-												});
-												return;
-											}
-											assert.ifError(err);
-											var UFI = { path: clientFile.path, url:staticdomain+outfile, file_type:'ufDiff', file_size:stats.size };
-											toUpdate.push(UFI);
-											release();
-											cb();
-										});
-									} else {// reuse old diff
-										var UFI = { path: clientFile.path, url:staticdomain+outfile, file_type:'ufDiff', file_size:stats.size };
-										toUpdate.push(UFI);
-										release();
-										cb();
-									}
-								});
-							});
+					conn.collection('diffs').findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
+						assert.ifError(err);
+						if (diffRow) {
+							var UFI = { path: clientFile.path, url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
+							toUpdate.push(UFI);
+							cb();
 						} else {
-							// cant find client file on server, cant generate diff
 							fs.stat('unpacked/objects/'+targetFile,function (err,stat) {
 								if (stat) {
 									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:staticdomain+'unpacked/objects/'+targetFile,file_size:stat.size});
 								}
 								cb();
 							});
+							if (clientFile.hash) makeDiff(clientFile.hash,targetFile,clientFile.path);
 						}
 					}.bind(this));
 				} else {
@@ -1280,6 +1097,29 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
+}
+function makeDiff(sourcehash,desthash,path) {
+	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
+		console.log(localCopy);
+		if (localCopy) {
+			bsdiffLock.writeLock(function (release) {
+				conn.collection('diffs').findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
+					assert.ifError(err);
+					if (diffRow) return release();
+					log('making diff for %s',path);
+					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
+					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
+						assert.ifError(err);
+						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:staticdomain+outfile };
+						console.log(doc);
+						conn.collection('diffs').save(doc,function () {
+							release();
+						});
+					});
+				});
+			});
+		}
+	});
 }
 ClientSocket.prototype.handle = function (code,args) {
 	clearTimeout(this.idleTimer);
