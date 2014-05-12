@@ -53,5 +53,5 @@ block content
      input(type="submit",value="upload")
   div(style="border: 1px solid red")
     | buildbot controls
-    pre=latestMsg
-    input(type="button",value="build!",onclick="buildRevision('" +revision+ "')")
+    pre(id="lastMsg")=latestMsg
+    input(id="buildButton",type="button",value="build!",onclick="buildRevision('" +revision+ "')")

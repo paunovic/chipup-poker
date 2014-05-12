@@ -157,7 +157,7 @@ function setup3(db) {
 		assert(fs.statSync('./upload'));
 		app.use(express.bodyParser({uploadDir:'./upload'}));
 	});
-	app.use('/sync/',express.basicAuth('sync','password'));
+	app.use('/sync/',express.basicAuth('sync','password')); // FIXME
 	bugsView.setup(app,bugs,allUsers,db);
 	app.get('/confirm',function (req,res) {
 		if (!req.query.code) {
@@ -679,6 +679,21 @@ app.get('/fetchhands',function (req,res) {
 		doc._id = new ObjectID(doc._id);
 		conn.collection('diffs').save(doc,function (err,rows) {
 			res.end('OK');
+		});
+	});
+	app.get('/sync/gitHook',function (req,res) {
+		res.end();
+		fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
+			var latestVersion = body.trim();
+			var latestMsg = '';
+			var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
+			child.stdout.setEncoding('utf8');
+			child.stdout.on('data',function (data) {
+				latestMsg += data;
+			});
+			child.on('close',function () {
+				io.sockets.emit('new_revision',{hash:latestVersion,msg:latestMsg});
+			});
 		});
 	});
 	app.use(express.static('files'));

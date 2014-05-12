@@ -35,3 +35,8 @@ socket.on('new_installer',function (obj) {
 	statusDelete.name = 'delete_'+obj._id;
 	row.insertCell(-1).appendChild(statusDelete);
 });
+socket.on('new_revision',function (obj) {
+	console.log(obj);
+	document.getElementById('lastMsg').textContent = obj.msg;
+	document.getElementById('buildButton').onclick = 'buildRevision("'+obj.hash+'")';
+});
