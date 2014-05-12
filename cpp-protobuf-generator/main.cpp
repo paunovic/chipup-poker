@@ -301,7 +301,15 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 						const Descriptor *parent = type->containing_type();
 						if (parent == NULL) {
 						} else if (parent != message) {
-							printer.Print(",Poker.Protobufs.Objects.$name$","name",parent->name());
+							string type = parent->name();
+							bool addit = true;
+							for (int x=0; x<size; x++) {
+								if (types[x] == type) addit = false;
+							}
+							if (addit) {
+								types[size] = type;
+								size++;
+							}
 						}
 					}
 				}
