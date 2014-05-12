@@ -84,7 +84,7 @@ object frmDebug: TfrmDebug
       675
       76)
     object dxBevel1: TdxBevel
-      Left = 33
+      Left = 73
       Top = 6
       Width = 19
       Height = 65
@@ -92,7 +92,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object dxBevel2: TdxBevel
-      Left = 191
+      Left = 231
       Top = 6
       Width = 19
       Height = 65
@@ -100,7 +100,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 46
+      Left = 86
       Top = 4
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
@@ -115,7 +115,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 46
+      Left = 86
       Top = 20
       Anchors = [akLeft, akBottom]
       Caption = 'Memory usage:'
@@ -130,7 +130,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsSocketState: TcxLabel
-      Left = 204
+      Left = 244
       Top = 4
       Anchors = [akLeft, akBottom]
       Caption = 'Socket state:'
@@ -145,7 +145,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsCalbackSets: TcxLabel
-      Left = 46
+      Left = 86
       Top = 36
       Anchors = [akLeft, akBottom]
       Caption = 'Callback sets:'
@@ -160,7 +160,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 135
+      Left = 175
       Top = 4
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
@@ -180,7 +180,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 135
+      Left = 175
       Top = 20
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
@@ -200,7 +200,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvCallbackSets: TcxLabel
-      Left = 135
+      Left = 175
       Top = 36
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
@@ -220,7 +220,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSocketState: TcxLabel
-      Left = 287
+      Left = 327
       Top = 4
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
@@ -380,7 +380,7 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object lbsLatency: TcxLabel
-      Left = 204
+      Left = 244
       Top = 20
       Anchors = [akLeft, akBottom]
       Caption = 'Latency:'
@@ -395,7 +395,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvLatency: TcxLabel
-      Left = 287
+      Left = 327
       Top = 20
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
@@ -472,6 +472,64 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object btRunAnotherInstance: TcxButton
+      Left = 41
+      Top = 5
+      Width = 30
+      Height = 29
+      Hint = 'Run another instance'
+      Anchors = [akLeft, akBottom]
+      Colors.PressedText = clRed
+      OptionsImage.Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000010101014848485EA6A6A6DDAAAA
+        AAE2A7A7A7DEA7A7A7DEA9A9A9E2585858720000000000000000000000000000
+        0000000000000000000000000000000000000B0B0B0E929292AFD1D1D1FFD1D1
+        D1FFD1D1D1FFD1D1D1FFD1D1D1FFB7B7B7DF0000000000000000000000000000
+        00000000000000000000020202021616161E292929388D8D8DAED1D1D1FFD0D0
+        D0FFD0D0D0FFD0D0D0FFD0D0D0FFB3B3B3DC0000000000000000000000000000
+        000000000000000000002222222AA0A0A0CF929292BE8A8A8AABD1D1D1FFD0D0
+        D0FFD0D0D0FFD0D0D0FFD0D0D0FFB3B3B3DB0000000000000000000000000000
+        0000000000000000000043434352D3D3D3FF989898B88B8B8BABD0D0D0FFD0D0
+        D0FFD0D0D0FFD0D0D0FFD0D0D0FFB2B2B2DA0000000000000000000000000000
+        0000111111174242425B5454546CD1D1D1FE949494B5909090B0D1D1D1FFD1D1
+        D1FFD1D1D1FFD0D0D0FFD0D0D0FFBBBBBBE50000000000000000000000000000
+        000075757594C0C0C0F57A7A7A99D0D0D0FE8C8C8CAC76767691C4C4C4F2C0C0
+        C0EDC0C0C0ECC6C6C6F4CCCCCCFAADADADD40000000000000000000000000000
+        0000B2B2B2D9C5C5C5EF7C7C7C97CECECEFC9F9F9FC57C7C7CA1AFAFAFE6AAAA
+        AADEB1B1B1E767676785414141503232323D0000000000000000000000000000
+        0000AAAAAAD0C1C1C1ED7B7B7B97D1D1D1FECDCDCDFBC5C5C5F5C9C9C9FDC9C9
+        C9FDCBCBCBFF4848485A00000000000000000000000000000000000000000000
+        0000AAAAAAD0C0C0C0EB61616178ACACACD6BFBFBFECBEBEBEEABCBCBCE8C1C1
+        C1EBC6C6C6F14444445300000000000000000000000000000000000000000000
+        0000A8A8A8CEC9C9C9F58E8E8EB4A7A7A7DCB1B1B1E9B7B7B7F08A8A8AB63131
+        313D212121280A0A0A0C00000000000000000000000000000000000000000000
+        0000AFAFAFD6D0D0D0FFCDCDCDFCCDCDCDFECECECEFECFCFCFFF9E9E9EC31717
+        171C000000000000000000000000000000000000000000000000000000000000
+        000075757590AFAFAFD6ADADADD4ADADADD4AEAEAED5B6B6B6DF7C7C7C971111
+        1114000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000}
+      ParentShowHint = False
+      ShowHint = True
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      SpeedButtonOptions.Flat = True
+      SpeedButtonOptions.Transparent = True
+      TabOrder = 14
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+      OnClick = btRunAnotherInstanceClick
+    end
   end
   object alDebug: TActionList
     Left = 72
@@ -487,6 +545,9 @@ object frmDebug: TfrmDebug
     object acCopyLogSelection: TAction
       Caption = 'Copy'
       OnExecute = acCopyLogSelectionExecute
+    end
+    object acRunNewInstance: TAction
+      Caption = 'acRunNewInstance'
     end
   end
   object SaveDialog: TSaveDialog

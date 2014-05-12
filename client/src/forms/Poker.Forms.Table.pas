@@ -1408,13 +1408,24 @@ begin
   begin
     Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
 
-    FRaiseMin := FTableStatus.MinimumBet + FTable.Game.BigBlind;
-    FRaiseMax := FTableStatus.MaximumBet;
+    FRaiseMin := FTableStatus.MinimumRaise;
+    FRaiseMax := FTableStatus.MaximumRaise;
 
-    FRaisePresetButtons[0].Action := acRaiseMin;
-    FRaisePresetButtons[1].Action := acRaise3BB;
-    FRaisePresetButtons[2].Action := acRaisePot;
-    FRaisePresetButtons[3].Action := acRaiseMax;
+    // if game is pot limit, we dont have to show MAX button, since POT = MAX
+    if FTableStatus.CurrentLimit = glPotLimit then
+    begin
+      FRaisePresetButtons[0].Action := nil;
+      FRaisePresetButtons[1].Action := acRaiseMin;
+      FRaisePresetButtons[2].Action := acRaise3BB;
+      FRaisePresetButtons[3].Action := acRaisePot;
+    end
+    else
+    begin
+      FRaisePresetButtons[0].Action := acRaiseMin;
+      FRaisePresetButtons[1].Action := acRaise3BB;
+      FRaisePresetButtons[2].Action := acRaisePot;
+      FRaisePresetButtons[3].Action := acRaiseMax;
+    end;
 
     if not raise_en then
       FRaiseValue := FRaiseMin;

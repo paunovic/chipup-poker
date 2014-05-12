@@ -147,12 +147,14 @@ type
     FLocked        : Boolean;
     FMinimumBet    : UINT32;
     FHandId        : UINT32;
-    FMaximumBet    : UINT32;
+    FMaximumRaise  : UINT32;
     FPreviousPots  : TPotInfos;
     FPots          : TPotInfos;
     FTime          : UINT64;
     FRotationHand  : UINT32;
     FCurrentGame   : TGameType;
+    FCurrentLimit  : TGameLimit;
+    FMinimumRaise  : UINT32;
 //    FEvents        : TTableEvents;
 
   public
@@ -180,10 +182,12 @@ type
     property HandId: UINT32 read FHandId;
     property Pots: TPotInfos read FPots write FPots;
     property PreviousPots: TPotInfos read FPreviousPots write FPreviousPots;
-    property MaximumBet: UINT32 read FMaximumBet;
+    property MaximumRaise: UINT32 read FMaximumRaise;
     property Time: UINT64 read FTime;
     property RotationHand: UINT32 read FRotationHand;
     property CurrentGame: TGameType read FCurrentGame;
+    property CurrentLimit: TGameLimit read FCurrentLimit;
+    property MinimumRaise: UINT32 read FMinimumRaise;
 //    property Events: TTableEvents read FEvents;
   end;
 
@@ -318,12 +322,14 @@ begin
   FPreviousBets := FBets;
   FBets := ATableStatusProtobuf.Bets;
   FLocked := ATableStatusProtobuf.Locked;
-  FMaximumBet := ATableStatusProtobuf.MaximumLimit;
+  FMaximumRaise := ATableStatusProtobuf.MaximumRaise;
   FRakePercent := ATableStatusProtobuf.RakePercent;
   FPreviousPots.Assign(FPots, FRakePercent);
   FPots.Assign(ATableStatusProtobuf.Pots, FRakePercent);
   FCurrentGame := ATableStatusProtobuf.CurrentGame;
   FRotationHand := ATableStatusProtobuf.Rotation;
+  FCurrentLimit := ATableStatusProtobuf.GameLimit;
+  FMinimumRaise := ATableStatusProtobuf.MinimumRaise;
 
   if Assigned(ATableStatusProtobuf.Seats) then
   begin

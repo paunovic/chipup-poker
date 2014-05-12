@@ -62,6 +62,8 @@ type
     lbsLatency: TcxLabel;
     lbvLatency: TcxLabel;
     btShowPings: TcxButton;
+    btRunAnotherInstance: TcxButton;
+    acRunNewInstance: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -69,6 +71,7 @@ type
     procedure tiAppInfoRefreshTimer(Sender: TObject);
     procedure btSeatPosClick(Sender: TObject);
     procedure btSetClick(Sender: TObject);
+    procedure btRunAnotherInstanceClick(Sender: TObject);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
@@ -90,6 +93,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
+  Poker.Common.InstanceController,
   Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
 
 
@@ -372,6 +376,12 @@ begin
     rvLog.FormatTail;
 end;
 
+
+procedure TfrmDebug.btRunAnotherInstanceClick(Sender: TObject);
+begin
+  TInstanceController.UnregisterInstance;
+  ShellOpen(PChar(ParamStr(0)));
+end;
 
 procedure TfrmDebug.btSeatPosClick(Sender: TObject);
 begin

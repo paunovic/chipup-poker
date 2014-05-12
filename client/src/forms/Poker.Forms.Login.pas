@@ -44,6 +44,7 @@ type
     procedure acUpdateExecute(Sender: TObject);
   private
     FCurrentStatus: TLoginStatus;
+    FDiffDots: Integer;
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
 
@@ -238,6 +239,7 @@ end;
 procedure TfrmLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var
   status: String;
+  C1: Integer;
 begin
   FCurrentStatus := AValue;
 
@@ -245,7 +247,11 @@ begin
     lsIdle, lsConnecting, lsConnected, lsHelloing: status := 'CONNECTING...';
     lsHelloOk: status := 'LOGIN';
     lsLoggingIn, lsLoggedIn: status := 'LOGGING IN...';
-    lsPreparingUpdate: status := 'PREPARING  UPDATE...';
+    lsPreparingUpdate: begin
+      status := 'PREPARING UPDATE';
+      for C1 := 1 to FDiffDots do
+        status := status + '.';
+    end;
   end;
 
   btLogin.Caption := status;
@@ -288,10 +294,18 @@ begin
   end;
 
   if (ServerSocket.IsConnected) and
-     (FCurrentStatus = lsConnected) then
+     (CurrentStatus = lsConnected) then
   begin
     HelloServer;
     tiConnect.Interval := 2000;
+  end;
+
+  if CurrentStatus = lsPreparingUpdate then
+  begin
+    Inc(FDiffDots);
+    if FDiffDots > 3 then
+      FDiffDots := 1;
+    CurrentStatus := lsPreparingUpdate;
   end;
 end;
 
@@ -366,6 +380,7 @@ end;
 
 procedure TfrmLogin.CSRBuildingDiff(const AMethodId: Integer; const AObject: TObject);
 begin
+  FDiffDots := 1;
   CurrentStatus := lsPreparingUpdate;
 end;
 

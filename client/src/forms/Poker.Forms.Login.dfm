@@ -3315,7 +3315,7 @@ object frmLogin: TfrmLogin
   end
   object tiConnect: TTimer
     OnTimer = tiConnectTimer
-    Left = 72
+    Left = 84
     Top = 16
   end
   object tiLoginTimeout: TTimer
@@ -3323,6 +3323,6 @@ object frmLogin: TfrmLogin
     Interval = 10000
     OnTimer = tiLoginTimeoutTimer
     Left = 152
-    Top = 12
+    Top = 16
   end
 end
