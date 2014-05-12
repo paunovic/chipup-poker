@@ -324,7 +324,7 @@ message TableStatus {
 	required bool locked = 11;
 	optional int32 seq = 12;
 	optional uint32 minimum_bet = 13;
-	optional uint32 maximum_limit = 14;
+	optional uint32 maximum_raise = 14;
 	optional uint32 small_blind = 15;
 	optional uint32 big_blind = 16;
 	optional uint32 handid = 17;
