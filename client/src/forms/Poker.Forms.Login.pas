@@ -11,7 +11,7 @@ uses
   OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin;
 
 type
-  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsPreparingUpdate, lsLoggingIn, lsLoggedIn, lsUpdating);
+  TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
 
   TfrmLogin = class(TForm)
     alLogin: TActionList;
@@ -44,7 +44,6 @@ type
     procedure acUpdateExecute(Sender: TObject);
   private
     FCurrentStatus: TLoginStatus;
-    FDiffDots: Integer;
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
 
@@ -57,7 +56,6 @@ type
 
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
-    procedure CSRBuildingDiff(const AMethodId: Integer; const AObject: TObject);
 
     procedure EnterDeveloperMode;
     procedure LeaveDeveloperMode;
@@ -95,8 +93,7 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
                      TServerMessageCallback.Create(srHello, CSRHello),
-                     TServerMessageCallback.Create(srLoginReply, CSRLogin),
-                     TServerMessageCallback.Create(srBuildingDiff, CSRBuildingDiff)
+                     TServerMessageCallback.Create(srLoginReply, CSRLogin)
 
                   ]);
 
@@ -239,7 +236,6 @@ end;
 procedure TfrmLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var
   status: String;
-  C1: Integer;
 begin
   FCurrentStatus := AValue;
 
@@ -247,11 +243,6 @@ begin
     lsIdle, lsConnecting, lsConnected, lsHelloing: status := 'CONNECTING...';
     lsHelloOk: status := 'LOGIN';
     lsLoggingIn, lsLoggedIn: status := 'LOGGING IN...';
-    lsPreparingUpdate: begin
-      status := 'PREPARING UPDATE';
-      for C1 := 1 to FDiffDots do
-        status := status + '.';
-    end;
   end;
 
   btLogin.Caption := status;
@@ -298,14 +289,6 @@ begin
   begin
     HelloServer;
     tiConnect.Interval := 2000;
-  end;
-
-  if CurrentStatus = lsPreparingUpdate then
-  begin
-    Inc(FDiffDots);
-    if FDiffDots > 3 then
-      FDiffDots := 1;
-    CurrentStatus := lsPreparingUpdate;
   end;
 end;
 
@@ -376,12 +359,6 @@ end;
 procedure TfrmLogin.acShowForgotPasswordFormExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmForgotPassword, self, [], ModalFormClose));
-end;
-
-procedure TfrmLogin.CSRBuildingDiff(const AMethodId: Integer; const AObject: TObject);
-begin
-  FDiffDots := 1;
-  CurrentStatus := lsPreparingUpdate;
 end;
 
 procedure TfrmLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
