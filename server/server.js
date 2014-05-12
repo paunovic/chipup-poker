@@ -33,6 +33,7 @@ var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
 var config = require('./config');
+var buildbot = require('./buildbot');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
@@ -71,6 +72,8 @@ var activeUsers = {};
 var activeGames = {};
 
 var app = express();
+var httpServer = http.createServer(app);
+var io = require('socket.io').listen(httpServer);
 var logger = require('morgan');
 var bsdiffLock = new ReadWriteLock();
 app.use(logger());
@@ -467,6 +470,8 @@ app.post('/eval',function (req,res) {
 						//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
 						//	assert.ifError(err);
 						//});
+						row[0].ts = row[0]._id.getTimestamp().toString();
+						io.sockets.emit('new_installer',row[0]);
 						res.send('OK');
 					} else {
 						res.send('error');
@@ -551,6 +556,21 @@ function installers_func(req,res) {
 			jobs.push(makeDeleter(res2[1]));
 		}
 	}
+	var latestVersion = '';
+	var latestMsg = '';
+	jobs.push(function (cb) {
+		fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
+			latestVersion = body.trim();
+			var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
+			child.stdout.setEncoding('utf8');
+			child.stdout.on('data',function (data) {
+				latestMsg += data;
+			});
+			child.on('close',function () {
+				cb();
+			});
+		});
+	});
 	console.log('jobs: %j', jobs);
 	if (jobs.length == 0) finish2();
 	else {
@@ -568,7 +588,7 @@ function installers_func(req,res) {
 					}
 				}
 				Config.findOne({_id:'debuginstallerid'},function (err,row2) {
-					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist});
+					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg});
 				});
 			});
 		});
@@ -646,6 +666,14 @@ app.get('/fetchhands',function (req,res) {
 		makeDiff(t.sourcehash,t.desthash,t.path);
 		res.end('STARTED');
 	});
+	app.post('/secure/buildbot',function (req,res) {
+		console.log(req.body);
+		buildbot.doLogin(function () {
+			buildbot.forceBuild('debug-win32',req.body.revision);
+			buildbot.forceBuild('release-win32',req.body.revision);
+			res.end(JSON.stringify('OK'));
+		});
+	});
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
 	/*app.use('/diffs',express.static('diffs'));
@@ -659,7 +687,7 @@ app.get('/fetchhands',function (req,res) {
 	});*/
 }
 function goOnline() {
-	app.listen(3000);
+	httpServer.listen(3000);
 	secureServer.listen(12346);
 	server.listen(12345);
 	cactiServer.listen(1246);
@@ -1140,6 +1168,15 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 	}.bind(this));
 }
 function makeDiff(sourcehash,desthash,path) {
+	function pushDiff(doc) {
+		var body = new Buffer(JSON.stringify(doc));
+		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
+		req.on('data',function (chunk) {
+			console.log(chunk);
+		});
+		req.write(body);
+		req.end();
+	}
 	if (!config.diffserver) {
 		console.log('need to ask diff server for %s',path);
 		var body = new Buffer(JSON.stringify({sourcehash:sourcehash,desthash:desthash,path:path}));
@@ -1157,7 +1194,10 @@ function makeDiff(sourcehash,desthash,path) {
 			bsdiffLock.writeLock(function (release) {
 				conn.collection('diffs').findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
 					assert.ifError(err);
-					if (diffRow) return release();
+					if (diffRow) {
+						pushDiff(diffRow);
+						return release();
+					}
 					log('making diff for %s',path);
 					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
 					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
@@ -1165,13 +1205,7 @@ function makeDiff(sourcehash,desthash,path) {
 						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:staticdomain+outfile };
 						console.log(doc);
 						conn.collection('diffs').save(doc,function () {
-							var body = new Buffer(JSON.stringify(doc));
-							var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
-							req.on('data',function (chunk) {
-								console.log(chunk);
-							});
-							req.write(body);
-							req.end();
+							pushDiff(doc);
 							release();
 						});
 					});
