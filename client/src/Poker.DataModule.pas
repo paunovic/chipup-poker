@@ -23,6 +23,7 @@ type
       FSelfInfo: TPlayerInfo;
       FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
       FUpdaterBatchFile: String;
+      FUpdaterInstallerFile: String;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -40,6 +41,7 @@ type
     procedure GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
     procedure StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
     procedure SetUpdaterBatchFile(const AFile: String);
+    procedure SetUpdaterInstaller(const AFile: String);
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
@@ -137,8 +139,11 @@ begin
   TfrmDebug.Deinitialize;
   {$ENDIF}
 
+  if (FUpdaterInstallerFile <> '') and (FileExists(FUpdaterInstallerFile)) then
+    ShellOpen(PChar(FUpdaterInstallerFile), nil, '/verysilent /surpressmsgboxes /closeapplications');
+
   if (FUpdaterBatchFile <> '') and (FileExists(FUpdaterBatchFile)) then
-    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_SHOWNORMAL);
+    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_HIDE);
 end;
 
 procedure TdmMain.OpenCashierLink;
@@ -167,6 +172,11 @@ end;
 procedure TdmMain.SetUpdaterBatchFile(const AFile: String);
 begin
   FUpdaterBatchFile := AFile;
+end;
+
+procedure TdmMain.SetUpdaterInstaller(const AFile: String);
+begin
+  FUpdaterInstallerFile := AFile;
 end;
 
 procedure TdmMain.StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
@@ -274,8 +284,9 @@ end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
 const
-  FILES_COUNT = 5;
-  FILES: array[0..FILES_COUNT - 1] of String = ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf');
+  FILES_COUNT = 7;
+  FILES: array[0..FILES_COUNT - 1] of String = ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf',
+     'bspatch.exe', 'sqlite3.dll');
 var
   pb_ufi: TPB_UpdateFileInfo;
   C1: Integer;

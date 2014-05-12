@@ -14,7 +14,6 @@ type
     type
       THardcodedSettingsRec = record
         VERSION: String;
-        REVISION: String;
         INSTANCE_MUTEX_NAME: String;
         SETTINGS_FILENAME: String;
         SETTINGS_ENCRYPTION_KEY: String;
@@ -31,15 +30,13 @@ type
           GET_AVATAR: String;
           UPLOAD_AVATAR: String;
           LATEST_VERSION: String;
-          LATEST_VERSION_DEBUG: String;
         end;
       end;
   public
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0080';
-        REVISION: {$I revision.inc};
+        VERSION: '0.01a.0101';
 
         // instance mutex name
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
@@ -61,12 +58,10 @@ type
         URL : (
           TERMS_AND_CONDITIONS: URL_DOMAIN + '/termsandconditions.html';
           CASHIER: URL_DOMAIN + '/cashier.html';
-
           GET_AVATAR: '/getavatar?id=%s';
           UPLOAD_AVATAR: '/uploadAvatar';
           LATEST_VERSION: '/install_chipuppoker.exe';
-          LATEST_VERSION_DEBUG: '/debug_install_chipuppoker.exe';
-        )
+        );
       );
   end;
 

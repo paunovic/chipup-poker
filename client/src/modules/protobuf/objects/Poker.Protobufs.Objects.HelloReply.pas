@@ -12,15 +12,13 @@ type
   TPB_HelloReply = class(TProtobufBaseObject)
   private
     const
-      FN_STRINGSIZES = 2;
-      FN_CHANGEEXPIRETIME = 3;
-      FN_FORGOTEXPIRETIME = 4;
-      FN_MAX_PLAY_TIME = 5;
-      FN_MAX_TIMEBANK = 6;
-      FN_LATESTVERSION = 7;
-      FN_LATESTDEBUGVERSION = 8;
-      FN_MINSIZES = 9;
-      FN_UPDATE_FILES = 10;
+      FN_STRINGSIZES = 1;
+      FN_CHANGEEXPIRETIME = 2;
+      FN_FORGOTEXPIRETIME = 3;
+      FN_MAX_PLAY_TIME = 4;
+      FN_MAX_TIMEBANK = 5;
+      FN_MINSIZES = 6;
+      FN_UPDATE_FILES = 7;
 
     var
       FStringSizes: TPB_StringSizes;
@@ -28,8 +26,6 @@ type
       FForgotExpireTime: Integer;
       FMaxPlayTime: Integer;
       FMaxTimebank: Integer;
-      FLatestVersion: String;
-      FLatestDebugVersion: String;
       FMinSizes: TPB_StringSizes;
       FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
 
@@ -38,8 +34,6 @@ type
     procedure SetForgotExpireTime(const AValue: Integer);
     procedure SetMaxPlayTime(const AValue: Integer);
     procedure SetMaxTimebank(const AValue: Integer);
-    procedure SetLatestVersion(const AValue: String);
-    procedure SetLatestDebugVersion(const AValue: String);
     procedure SetMinSizes(const AValue: TPB_StringSizes);
     procedure UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 
@@ -55,8 +49,6 @@ type
     property ForgotExpireTime: Integer read FForgotExpireTime write SetForgotExpireTime;
     property MaxPlayTime: Integer read FMaxPlayTime write SetMaxPlayTime;
     property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
-    property LatestVersion: String read FLatestVersion write SetLatestVersion;
-    property LatestDebugVersion: String read FLatestDebugVersion write SetLatestDebugVersion;
     property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
@@ -117,14 +109,6 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaxTimebank := AProtobufReader.readInt32;
       end;
-      FN_LATESTVERSION: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FLatestVersion := AProtobufReader.readUtf8String;
-      end;
-      FN_LATESTDEBUGVERSION: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FLatestDebugVersion := AProtobufReader.readUtf8String;
-      end;
       FN_MINSIZES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FMinSizes) then
@@ -169,18 +153,6 @@ procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
 begin
   FMaxTimebank := AValue;
   ProtobufOutput.writeInt32(FN_MAX_TIMEBANK, AValue);
-end;
-
-procedure TPB_HelloReply.SetLatestVersion(const AValue: String);
-begin
-  FLatestVersion := AValue;
-  ProtobufOutput.writeString(FN_LATESTVERSION, AValue);
-end;
-
-procedure TPB_HelloReply.SetLatestDebugVersion(const AValue: String);
-begin
-  FLatestDebugVersion := AValue;
-  ProtobufOutput.writeString(FN_LATESTDEBUGVERSION, AValue);
 end;
 
 procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);

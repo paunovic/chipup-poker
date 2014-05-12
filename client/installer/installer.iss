@@ -23,6 +23,7 @@ WizardSmallImageFile=installer_images\installer-2.bmp
 Source: "skins\VclStylesInno.dll"; DestDir: {app}; Flags: uninsneveruninstall ignoreversion
 Source: "skins\{#SkinName}"; DestDir: {app}; Flags: ignoreversion
 
+Source: "root_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "client_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ssl_libs\*.*"; DestDir: "{app}"; Flags: ignoreversion
 
