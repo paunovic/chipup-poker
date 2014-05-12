@@ -517,23 +517,19 @@ function installers_func(req,res) {
 	function makeActivator(id) {
 		return function (cb) {
 			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
-				function finish() {
-					if (config.diffserver) unpackInstaller(row,cb);
-					else cb();
-				}
 				assert.ifError(err);
 				if (row) {
 					if (row.debug == 'release') {
 						Config.update({_id:'installerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
 							assert.ifError(err);
 							sharedconfig.latestVersion = row.version;
-							finish();
+							cb();
 						});
 					} else {
 						Config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
 							assert.ifError(err);
 							sharedconfig.latestDebugVersion = row.version;
-							finish();
+							cb();
 						});
 					}
 				} else cb();
@@ -588,7 +584,7 @@ function installers_func(req,res) {
 					}
 				}
 				Config.findOne({_id:'debuginstallerid'},function (err,row2) {
-					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg});
+					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 				});
 			});
 		});

@@ -31,27 +31,30 @@ block content
         each val in installers
           if val.debug == 'debug'
             include installer_row.jade
+      input(type="button",onclick="masscheck()",value="checkEverything")
+      br
       input(type="submit",value="Apply")
   div
     div='version:'+activeRelease.version
     div='revision:'+activeRelease.revision
     div='size:'+(activeRelease.size/1024/1024)+'MB'
     a(href="/rawinstallers/"+activeRelease.name) raw installer
-  div(style="border: 1px solid red")
-    form(method="post",action="/secure/newVersion",enctype="multipart/form-data")
-     div
-       | installer:
-       input(type="file",name="installer")
-     div
-       | version:
-       input(type="text",name="version")
-     div
-       | git revision:
-       input(type="text",name="revision")
-     input(type="hidden",name="debug",value="release")
-     p always set to release mode
-     input(type="submit",value="upload")
-  div(style="border: 1px solid red")
-    | buildbot controls
-    pre(id="lastMsg")=latestMsg
-    input(id="buildButton",type="button",value="build!",onclick="buildRevision('" +revision+ "')")
+  if diffserver
+    div(style="border: 1px solid red")
+      form(method="post",action="/secure/newVersion",enctype="multipart/form-data")
+       div
+         | installer:
+         input(type="file",name="installer")
+       div
+         | version:
+         input(type="text",name="version")
+       div
+         | git revision:
+         input(type="text",name="revision")
+       input(type="hidden",name="debug",value="release")
+       p always set to release mode
+       input(type="submit",value="upload")
+    div(style="border: 1px solid red")
+      | buildbot controls
+      pre(id="lastMsg")=latestMsg
+      input(id="buildButton",type="button",value="build!",onclick="buildRevision('" +revision+ "')")

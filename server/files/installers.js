@@ -38,5 +38,12 @@ socket.on('new_installer',function (obj) {
 socket.on('new_revision',function (obj) {
 	console.log(obj);
 	document.getElementById('lastMsg').textContent = obj.msg;
-	document.getElementById('buildButton').onclick = 'buildRevision("'+obj.hash+'")';
+	document.getElementById('buildButton').onclick = function () {
+		buildRevision(obj.hash);
+	}
 });
+function masscheck() {
+	var list = document.querySelectorAll('.deleteCheckbox');
+	console.log(list);
+	for (var x=0; x<list.length; x++) list[x].checked = true;
+}
