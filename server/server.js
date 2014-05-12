@@ -75,8 +75,8 @@ var logger = require('morgan');
 var bsdiffLock = new ReadWriteLock();
 app.use(logger());
 function unpackInstaller(row,cb1) {
-	function updateLive(doc,cb) {
-		var body = new Buffer(JSON.stringify(doc));
+	function updateLive(doc,sizes,cb) {
+		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
 		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
 		req.on('data',function (chunk) {
 			console.log(chunk);
@@ -95,17 +95,21 @@ function unpackInstaller(row,cb1) {
 		fs.readdir('unpacked/'+row._id+'/app/',function (err,files) {
 			var key = {_id:row._id};
 			var hashes = {};
+			var sizes = [];
 			var mods = { $set:{hashes:hashes}};
 			async.each(files,function hashFile(filename,cb2) {
 				var hasher = crypto.createHash('sha256');
 				var client = fs.createReadStream('unpacked/'+row._id+'/app/'+filename);
+				var size = 0;
 				client.on('data',function (data) {
 					hasher.update(data);
+					size += data.length;
 				});
 				client.on('end',function () {
 					var hash = hasher.digest('hex');
 					console.log('hash of %s is %s',filename,hash);
 					var key = filename.replace('.','_');
+					sizes.push({_id:hash, size:size});
 					hashes[key] = hash;
 					copyFile('unpacked/'+row._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
 						fs.unlink('unpacked/'+row._id+'/app/'+filename,function () {
@@ -121,8 +125,12 @@ function unpackInstaller(row,cb1) {
 					fs.rmdir('unpacked/'+row._id+'/app/',function () {
 						fs.rmdir('unpacked/'+row._id,function () {
 							conn.collection('installers').findOne(key,function (err,doc) {
-								updateLive(doc,function () {
-									cb1(true);
+								async.each(sizes,function (row,cb) {
+									conn.collection('objectSizes').save(row,cb);
+								},function () {
+									updateLive(doc,sizes,function () {
+										cb1(true);
+									});
 								});
 							});
 						});
@@ -456,9 +464,9 @@ app.post('/eval',function (req,res) {
 					if (success) {
 						if (debug == 'debug') var key1 = 'debuginstallerid';
 						else var key1 = 'installerid';
-						Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
-							assert.ifError(err);
-						});
+						//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
+						//	assert.ifError(err);
+						//});
 						res.send('OK');
 					} else {
 						res.send('error');
@@ -632,6 +640,11 @@ app.get('/fetchhands',function (req,res) {
 				res.end('OK');
 			});
 		});
+	});
+	app.post('/sync/makeDiff',function (req,res) {
+		var t = req.body;
+		makeDiff(t.sourcehash,t.desthash,t.path);
+		res.end('STARTED');
 	});
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
@@ -1152,6 +1165,13 @@ function makeDiff(sourcehash,desthash,path) {
 						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:staticdomain+outfile };
 						console.log(doc);
 						conn.collection('diffs').save(doc,function () {
+							var body = new Buffer(JSON.stringify(doc));
+							var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
+							req.on('data',function (chunk) {
+								console.log(chunk);
+							});
+							req.write(body);
+							req.end();
 							release();
 						});
 					});
