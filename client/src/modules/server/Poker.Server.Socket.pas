@@ -503,7 +503,6 @@ begin
     srContactUsOk: ADataObject := TPB_ContactMessage.Create(ADataPointer, ARpcMessage.DataSize);
     srTableBuyinLessThanCashout,
     srInvalidTableBuyin: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
-    srBuildingDiff: ;
   else
     result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}

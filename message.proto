@@ -44,7 +44,6 @@ enum ServerCodes {
 	srContactUsOk = 36;
 	srTableBuyinLessThanCashout = 37;
 	srInvalidTableBuyin = 38;
-	srBuildingDiff = 39;
 
     seChat = 50;
     seSecondaryLoginDetected = 51;
