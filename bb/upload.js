@@ -14,8 +14,8 @@ child.exec('git rev-parse HEAD',function (err,stdout,stderr) {
 
 function finish(version) {
 	doUpload(version,'master.chipuppoker.com');
-	doUpload(version,'dev-server.chipuppoker.com');
-	doUpload(version,'poker.angeldsis.com');
+	//doUpload(version,'dev-server.chipuppoker.com');
+	//doUpload(version,'poker.angeldsis.com');
 }
 function doUpload(version,host) {
 	var key = 'abcd';
@@ -23,19 +23,14 @@ function doUpload(version,host) {
 		'Content-Type: application/octed-stream\r\n'+
 		'Content-Disposition: form-data; name="installer"; filename="install_chipuppoker.exe"\r\n'+
 		'Content-Transfer-Encoding: binary\r\n\r\n';
-	var middle = '\r\n--'+key+'\r\n'+
-		'Content-Type: application/octed-stream\r\n'+
-		'Content-Disposition: form-data; name="client"; filename="client.exe"\r\n'+
-		'Content-Transfer-Encoding: binary\r\n\r\n';
 	var footer = '\r\n--'+key+'--';
 
-	var textsize = header.length + middle.length + footer.length;
+	var textsize = header.length + footer.length;
 	var filesize1 = fs.statSync('../client/installer/install_chipuppoker.exe').size;
-	var filesize2 = fs.statSync('../client/src/client.exe').size;
 
 	var request = http.request({host:host,method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
 		'&debug='+process.argv[2],
-		headers:{'Content-Length':textsize+filesize1+filesize2}
+		headers:{'Content-Length':textsize+filesize1}
 	},function (res) {
 		console.log('%s reply',host);
 		res.on('data',function (chunk) {
@@ -51,13 +46,8 @@ function doUpload(version,host) {
 	console.log('making stream');
 	fs.createReadStream('../client/installer/install_chipuppoker.exe',{bufferSize: 4*1024})
 		.on('end',function () {
-			request.write(middle);
-			fs.createReadStream('../client/src/client.exe',{bufferSize: 4*1024})
-				.on('end',function () {
-					console.log('%s ending',host);
-					request.end(footer);
-				})
-				.pipe(request,{end:false});
+			console.log('%s ending',host);
+			request.end(footer);
 		})
 		.pipe(request,{end:false});
 }
