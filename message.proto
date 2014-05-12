@@ -336,6 +336,7 @@ message TableStatus {
 	optional uint32 rotation = 23;
 	required uint32 total_balance = 24;
 	optional Game.GameLimit game_limit = 25;
+	optional uint32 minimum_raise = 26;
 }
 
 message SeatInfo {
