@@ -1003,10 +1003,10 @@ begin
   bottomy := Round(FTableCenter.Y + FCardHeight + FTableResizeRatio * 16);
   case APotIndex of
     0: result := Point2(FTableCenter.X, topy);
-    1: result := Point2(FTableCenter.X + 40, topy);
-    2: result := Point2(FTableCenter.X - 40, topy);
-    3: result := Point2(FTableCenter.X - 40, bottomy);
-    4: result := Point2(FTableCenter.X + 40, bottomy);
+    1: result := Point2(FTableCenter.X + 60, topy);
+    2: result := Point2(FTableCenter.X - 60, topy);
+    3: result := Point2(FTableCenter.X - 60, bottomy);
+    4: result := Point2(FTableCenter.X + 60, bottomy);
   else
     result := Point2(-1, -1);
   end;
