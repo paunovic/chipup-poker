@@ -625,7 +625,11 @@ app.get('/fetchhands',function (req,res) {
 });
 	app.post('/sync/newVersion',function (req,res) {
 		console.log(req.body);
-		res.end('OK');
+		req.body._id = new ObjectID(req.body._id);
+		conn.collection('installers').save(req.body,function (err,reply) {
+			console.log(err,reply);
+			res.end('OK');
+		});
 	});
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
