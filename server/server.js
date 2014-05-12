@@ -69,12 +69,65 @@ var activeGames = {};
 
 var app = express();
 var logger = require('morgan');
+var bsdiffLock = new ReadWriteLock();
 app.use(logger());
+function unpackInstaller(row,cb1) {
+	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+row._id+'/','-e','installers/'+row.name],{stdio:'inherit'});
+	unpacker.on('close',function (code) {
+		if (code != 0) {
+			cb1(false);
+			return;
+		}
+		assert.equal(code,0);
+		fs.readdir('unpacked/'+row._id+'/app/',function (err,files) {
+			var doc = {_id:row._id, version:row.version, hashes:{}}
+			async.each(files,function hashFile(filename,cb2) {
+				var hasher = crypto.createHash('sha256');
+				var client = fs.createReadStream('unpacked/'+row._id+'/app/'+filename);
+				client.on('data',function (data) {
+					hasher.update(data);
+				});
+				client.on('end',function () {
+					var hash = hasher.digest('hex');
+					console.log('hash of %s is %s',filename,hash);
+					var key = filename.replace('.','_');
+					doc.hashes[key] = hash;
+					copyFile('unpacked/'+row._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
+						fs.unlink('unpacked/'+row._id+'/app/'+filename,function () {
+							cb2();
+						});
+					});
+				});
+			},function () {
+				conn.collection('activatedVersions').save(doc,function (err,newdoc) {
+					assert.ifError(err);
+					if (err) console.log(err);
+					console.log('inserted %j',newdoc);
+					fs.rmdir('unpacked/'+row._id+'/app/',function () {
+						fs.rmdir('unpacked/'+row._id,function () {
+							cb1(true);
+						});
+					});
+				});
+			});
+		});
+	});
+}
+function bsdiff(oldfile,newfile,diff,cb) {
+	console.log('diffing %s and %s into %s',oldfile,newfile,diff);
+	var differ = child_process.spawn('bsdiff',[oldfile,newfile,diff],{stdio:'inherit'});
+	differ.on('close',function () {
+		fs.stat(diff,function (err,stats) {
+			cb(err,stats);
+		});
+	});
+}
 function setup3(db) {
 	app.configure(function () {
 		assert(fs.statSync('./upload'));
 		app.use(express.bodyParser({uploadDir:'./upload'}));
 	});
+	app.use('/sync/',expesss.basicAuth('sync','password'));
 	bugsView.setup(app,bugs,allUsers,db);
 	app.get('/confirm',function (req,res) {
 		if (!req.query.code) {
@@ -360,25 +413,43 @@ app.post('/eval',function (req,res) {
 			res.end();
 		});
 	});
-	app.post('/newVersion',function (req,res) {
+	function newVersion(req,res) {
 		// FIXME, add basicAuth
 		console.log('query',req.query);
 		console.log('files',req.files);
-		var name1 = req.files.installer.path.split('/')[1]
-		var clientname = req.files.client.path.split('/')[1]
+		var name1 = req.files.installer.path.split('/')[1];
 		console.log(name1);
+		var version = req.query.version;
+		if (!version) version = req.body.version;
+
+		var revision = req.query.revision;
+		if (!revision) revision = req.body.revision;
+
+		var debug = req.query.debug;
+		if (!debug) debug = req.body.debug;
+
 		fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 			assert.ifError(err);
-			fs.rename(req.files.client.path,'installers/'+clientname,function (err) {
+			Installers.insert({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size},function (err,row) {
 				assert.ifError(err);
-				Installers.insert({name:name1,clientname:clientname,version:req.query.version,revision:req.query.revision,debug:req.query.debug,size:req.files.installer.size},function (err,row) {
-					assert.ifError(err);
-					log('new version recorded: %j',row);
-					res.send('OK');
+				log('new version recorded: %j',row);
+				unpackInstaller(row[0],function (success) {
+					if (success) {
+						if (debug == 'debug') var key1 = 'debuginstallerid';
+						else var key1 = 'installerid';
+						Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
+							assert.ifError(err);
+						});
+						res.send('OK');
+					} else {
+						res.send('error');
+					}
 				});
 			});
 		});
-	});
+	}
+	app.post('/newVersion',newVersion);
+	app.post('/secure/newVersion',newVersion);
 	app.get('/secure/broadcast',function (req,res) {
 		res.render('broadcast',{start:Date.now()});
 	});
@@ -396,6 +467,8 @@ app.post('/secure/installers',installers_func);
 function installers_func(req,res) {
 	var start = Date.now();
 	console.log(req.body);
+	var showlist = true;
+	if (req.query.showlist) showlist = true;
 	function makeDeleter(id) {
 		return function (cb) {
 			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
@@ -415,19 +488,22 @@ function installers_func(req,res) {
 	function makeActivator(id) {
 		return function (cb) {
 			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
+				function finish() {
+					unpackInstaller(row,cb);
+				}
 				assert.ifError(err);
 				if (row) {
 					if (row.debug == 'release') {
 						Config.update({_id:'installerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
 							assert.ifError(err);
 							sharedconfig.latestVersion = row.version;
-							cb();
+							finish();
 						});
 					} else {
 						Config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
 							assert.ifError(err);
 							sharedconfig.latestDebugVersion = row.version;
-							cb();
+							finish();
 						});
 					}
 				} else cb();
@@ -459,8 +535,15 @@ function installers_func(req,res) {
 	function finish2() {
 		Installers.find({}).toArray(function(err,data) {
 			Config.findOne({_id:'installerid'},function (err,row) {
+				var activeRelease;
+				for (var x=0; x<data.length; x++) {
+					if (data[x]._id.toString() == row.value.toString()) {
+						console.log(data[x]);
+						activeRelease = data[x];
+					}
+				}
 				Config.findOne({_id:'debuginstallerid'},function (err,row2) {
-					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value});
+					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist});
 				});
 			});
 		});
@@ -521,14 +604,28 @@ app.get('/fetchhands',function (req,res) {
 		});
 	});
 });
-app.use(express.static('files'));
-app.use('/rawinstallers',express.static('installers'));
+	app.post('/sync/newVersion',function (req,res) {
+		console.log(req.body);
+		res.end('OK');
+	});
+	app.use(express.static('files'));
+	app.use('/rawinstallers',express.static('installers'));
+	/*app.use('/diffs',express.static('diffs'));
+	
+	var compressor = express.compress({threshold:10,filter:function () { return true; }});
+	var staticFolder = express.static('unpacked')
+	app.use('/unpacked',function custom(req,res,next) {
+		compressor(req,res,function () {
+			staticFolder(req,res,next);
+		});
+	});*/
 }
 function goOnline() {
 	app.listen(3000);
 	secureServer.listen(12346);
 	server.listen(12345);
 	cactiServer.listen(1246);
+	log('server up');
 }
 
 var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats;
@@ -714,8 +811,10 @@ function ClientSocket(socket) {
 		delete activeUsers[this.userid];
 		Game.handleDisconnect(this,'closed');
 	}.bind(this));
-	this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
 	this.reader = new protoreader(socket,this);
+	this.oldTimer = setTimeout(function () {
+		this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
+	}.bind(this),5000);
 	socket.on('error',function(err) {
 		clearTimeout(this.idleTimer);
 		this.state = -2;
@@ -799,6 +898,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					this.log('game state is %s',game.game.state);
 					var events = [];
 					if (game.seat) {
+						this.log('found seat, clearing disconnected');
 						clearTimeout(game.game.members[game.seat].disconnectTimer);
 						game.game.members[game.seat].disconnected = false;
 						game.game.seats[game.seat].conn = this;
@@ -892,6 +992,16 @@ function containsObjectID(list,id) {
 	}
 	return false;
 }
+function copyFile(source,dest,cb) {
+	fs.stat(dest,function (err,stat) {
+		if (stat) return cb();
+
+		var input = fs.createReadStream(source);
+		var output = fs.createWriteStream(dest);
+		input.pipe(output);
+		input.on('end',cb);
+	});
+}
 function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
 	var link = domain+'confirm?code='+authcode;
@@ -916,6 +1026,100 @@ function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
 ClientSocket.prototype.goneIdle = function () {
 	this.log('idle timeout');
 	this.error('ping timeout');
+}
+ClientSocket.prototype.doHelloProcessing = function(args) {
+	clearTimeout(this.oldTimer);
+	try {
+		var params = pb.Parse(args,'Poker.HelloParams');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	if (params.debug) {
+		// FIXME
+		//this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
+		//return;
+	}
+	if (params.debug) var key1 = 'debuginstallerid';
+	else var key1 = 'installerid';
+	Config.findOne({_id:key1},function (err,row2) {
+		conn.collection('activatedVersions').findOne({_id:row2.value},function (err,targetVersion) {
+			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+			var toUpdate = [];
+			var checked = {};
+			for (var x=0; x<params.files.length; x++) {
+				var clientFile = params.files[x];
+				clientFile.key = clientFile.path.replace('.','_');
+				checked[clientFile.key] = true;
+			}
+			// FIXME add logic to find missing items
+			for (var key in targetVersion.hashes) {
+				if (!checked[key]) {
+					console.log('file %s is missing',key);
+					var fake = { path:key.replace('_','.'), hash:'', key:key };
+					params.files.push(fake);
+				}
+			}
+			async.each(params.files,function checkFile(clientFile,cb) {
+				clientFile.hash = clientFile.hash.toString('hex');
+				var targetFile = targetVersion.hashes[clientFile.key];
+				if (!targetFile) {
+					toUpdate.push({file_type:'ufRemove',path:clientFile.path});
+					return cb();
+				}
+				if (clientFile.hash != targetFile) {
+					console.log(clientFile);
+					console.log('need to patch %s',clientFile.path);
+					conn.collection('diffs').findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
+						assert.ifError(err);
+						if (diffRow) {
+							var UFI = { path: clientFile.path, url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
+							toUpdate.push(UFI);
+							cb();
+						} else {
+							fs.stat('unpacked/objects/'+targetFile,function (err,stat) {
+								if (stat) {
+									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:staticdomain+'unpacked/objects/'+targetFile,file_size:stat.size});
+								}
+								cb();
+							});
+							if (clientFile.hash) makeDiff(clientFile.hash,targetFile,clientFile.path);
+						}
+					}.bind(this));
+				} else {
+					cb();
+				}
+			}.bind(this),function () {
+				console.log('toUpdate:%j',toUpdate);
+				var msg = JSON.parse(JSON.stringify(sharedconfig));
+				msg.update_files = toUpdate;
+				this.send(codes.srHello,msg,'Poker.HelloReply');
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
+}
+function makeDiff(sourcehash,desthash,path) {
+	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
+		console.log(localCopy);
+		if (localCopy) {
+			bsdiffLock.writeLock(function (release) {
+				conn.collection('diffs').findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
+					assert.ifError(err);
+					if (diffRow) return release();
+					log('making diff for %s',path);
+					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
+					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
+						assert.ifError(err);
+						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:staticdomain+outfile };
+						console.log(doc);
+						conn.collection('diffs').save(doc,function () {
+							release();
+						});
+					});
+				});
+			});
+		}
+	});
 }
 ClientSocket.prototype.handle = function (code,args) {
 	clearTimeout(this.idleTimer);
@@ -1095,6 +1299,8 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
+		case codes.scHello:
+			this.doHelloProcessing(args);
 		}
 		break;
 	case 2: // in the main lobby
@@ -2298,7 +2504,7 @@ handlers[codes.scResendVerificationMail] = function () {
 		if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,row.displayname,function () {},function () {},function () {});
 	}.bind(this));
 }
-handlers[codes.scShowLosingCards] = function (args) {
+handlers[codes.scShowCards] = function (args) {
 	try {
 		var params = pb.Parse(args,'Poker.Game');
 		var id = toMongoId(params._id);
@@ -2321,8 +2527,10 @@ handlers[codes.scShowLosingCards] = function (args) {
 				release();
 				return;
 			}
-			game.members[seatIdx].muck = false;
-			game.broadcastStatus(this,true,[]);
+			if (game.members[seatIdx].can_show) {
+				game.members[seatIdx].muck = false;
+				game.broadcastStatus(this,true,[]);
+			}
 			release();
 		}.bind(this));
 	}.bind(this));
@@ -2483,6 +2691,7 @@ function Game(obj) {
 	this.bets = [];
 	this.pots = [ new Pot(this) ];
 	this.minBet = 0;
+	this.minimum_raise = 0;
 	this.log('pots initialized to zero');
 	this.Lock = new ReadWriteLock();
 	this.omaha = this.obj.game_type == 'gtOmaha';
@@ -2564,6 +2773,7 @@ Game.prototype.close = function(conn,cb) {
 	}.bind(this));
 }
 Game.prototype.getLimit = function (seat) {
+	this.log('getLimit type %s',this.game_limit);
 	if (typeof this.bets[seat] != 'number') this.bets[seat] = 0;
 	var oldbet = this.bets[seat];
 	if (this.game_limit == 'glNoLimit') {
@@ -2580,7 +2790,7 @@ Game.prototype.getLimit = function (seat) {
 	}
 	var pottotal = pot + (this.minBet - oldbet);
 	var maxbet = pottotal + this.minBet;
-	//this.log('pot:%d pottotal:%d maxbet:%d oldbet:%d',pot,pottotal,maxbet,oldbet);
+	this.log('pot:%d pottotal:%d maxbet:%d oldbet:%d',pot,pottotal,maxbet,oldbet);
 	return maxbet;
 }
 Game.prototype.log = function log(format) {
@@ -2795,17 +3005,20 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			if (this.members[x].status == 'psOutOfHand') {
 				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
 				if (!compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
-					if (this.members[x].chips <= this.obj.big_blind) {
-						this.addHistory({seat:x,bet:this.members[x].chips,code:['forced','BB','AllIn']});
-						this.setBet(x,this.members[x].chips);
-						this.members[x].status = 'psAllIn';
-					} else {
-						this.setBet(x,this.obj.big_blind);
-						this.addHistory({seat:x,bet:this.obj.big_blind,code:['forced','BB']});
+					if (!this.headsup) {
+						if (this.members[x].chips <= this.obj.big_blind) {
+							this.addHistory({seat:x,bet:this.members[x].chips,code:['forced','BB','AllIn']});
+							this.setBet(x,this.members[x].chips);
+							this.members[x].status = 'psAllIn';
+						} else {
+							this.setBet(x,this.obj.big_blind);
+							this.addHistory({seat:x,bet:this.obj.big_blind,code:['forced','BB']});
+						}
 					}
 				}
 			}
 			this.members[x].status = 'psInHand';
+			this.members[x].can_show = true;
 			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards };
 			this.history.cards[x+3] = this.members[x].hand.prettyPrint(true);
 			this.members[x].muck = true;
@@ -2844,6 +3057,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		
 		this.state = 'tsPreFlop';
 		this.rake = 0;
+		this.minimum_raise = this.obj.big_blind * 2;
 		this.roundEnd();
 		this.ranOut = false;
 		this.flop = new Hand();
@@ -2873,6 +3087,12 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		}.bind(this));
 	}.bind(this));
 }
+Game.prototype.clearCanShow = function () {
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		if (this.members[x].status == 'psFolded') this.members[x].can_show = false;
+	}
+}
 Game.prototype.addHistory = function (obj,winnercount) {
 	if (obj.code[0] == 'win1') {
 		this.history.potdata = obj.potdata;
@@ -2884,7 +3104,11 @@ Game.prototype.setBet = function (seat,bet) {
 	var oldbet = this.bets[seat];
 	this.bets[seat] = bet;
 	this.members[seat].chips -= (bet - oldbet);
-	if (bet > this.minBet) this.minBet = bet;
+	if (bet > this.minBet) {
+		this.minimum_raise = bet - this.minBet;
+		this.log('min raise %d',this.minimum_raise);
+		this.minBet = bet;
+	}
 }
 Game.prototype.eatChips = function (seat,chips,cb) {
 	this.pots[0].value += chips;
@@ -2955,6 +3179,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 	var seatObj = this.members[seat];
 	var priv = this.seats[seat];
 	this.log('fold',seat,this.state);
+	this.clearCanShow();
 	function finish(events,offset) {
 		assert(events);
 		assert.equal(typeof offset,'number');
@@ -3524,6 +3749,8 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	var oldbet = this.bets[seat];
 	var maxbet = this.getLimit(seat);
 
+	this.clearCanShow();
+
 	if (chips > maxbet) { // cheater!
 		conn.error('cheater, going over pot limit '+chips+' '+maxbet);
 		conn.destroy();
@@ -3543,6 +3770,12 @@ Game.prototype.putChips = function (conn,chips,cb) {
 		cb([],0);
 		return;
 	} else if (chips > this.minBet) {
+		if ((chips - this.minBet) < this.minimum_raise) {
+			conn.error(util.format('cheater detected, not meeting min raise, chips:%d minBet:%d minRaise:%d',chips,this.minBet,this.minimum_raise));
+			conn.destroy();
+			cb([],0);
+			return;
+		}
 		event = 'teRaise';
 	} else if (this.bets[seat] == chips) { // check
 		event = 'teCheck';
@@ -3882,7 +4115,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	/*if ((['tsIdle','tsDealing','tsWinning','tsWinning2'].indexOf(this.state) == -1)) {
 		assert(this.timer,util.inspect(this));
 	}*/
-	var tableStatus = {rake_percent:this.rake, table_mongo_id: fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
+	var tableStatus = {rake_percent:this.rake, table_mongo_id: fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet, minimum_raise:this.minBet + this.minimum_raise,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
 	if (this.pots) {
@@ -3903,12 +4136,16 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if ((['tsWinning','tsWinning2'].indexOf(this.state) != -1) && !seat.muck) showcards = true;
 
 		obj.cards_visible = showcards;
+		obj.can_show = this.members[x].can_show;
 
 		if (priv.conn === self) showcards = true;
 		if (showcards) {
 			obj.cards = new Buffer(seat.hand.cards);
 		}
-		if (priv.conn == self) tableStatus.maximum_limit = this.getLimit(x);
+		if (priv.conn == self) {
+			tableStatus.maximum_raise = this.getLimit(x);
+			if (tableStatus.minimum_raise > seat.chips) tableStatus.minimum_raise = seat.chips;
+		}
 		obj.card_count = seat.hand.cards.length;
 		if (this.state == 'tsIdle') assert.equal(obj.card_count,0);
 		else {
@@ -3924,6 +4161,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	if (['tsTurn','tsRiverTime','tsRiver'].indexOf(this.state) != -1) tableStatus.turn = new Buffer(this.turn.cards);
 	if (this.state == 'tsRiver') tableStatus.river = new Buffer(this.river.cards);
 	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
+	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
 	tableStatus.total_balance = self.chips;
 	assert.equal(typeof self.chips,'number');
@@ -3949,6 +4187,9 @@ Game.prototype.inHandCount = function () {
 	return count;
 }
 Game.prototype.roundEnd = function () {
+	if (this.state == 'tsPreFlop') {
+		this.minimum_raise = this.obj.big_blind;
+	}
 	var havechips = 0;
 	for (var x=0; x<this.members.length; x++) {
 		if (!this.members[x]) continue;

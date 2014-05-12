@@ -10,6 +10,8 @@ var codes = require('./BackendFunctions');
 var pb = new p(fs.readFileSync("../message.desc"));
 protoreader.init(pb,codes,[codes.GlobalMsgEvent]);
 
+var autoRestart = false;
+
 var socket = new Client('127.0.0.1',45508);
 function Client(ip,port) {
 	this.socket = net.connect(port,ip,function (){});
@@ -45,6 +47,8 @@ Client.prototype.handle = function (code,data) {
 		var msg = pb.Parse(data,'Backend.GlobalMsg');
 		console.log('global message'.green,util.inspect(msg,{colors:true}));
 		break;
+	case codes.Starting:
+		if (autoRestart) process.exit();
 	default:
 		this.log(codes.reverse[code],data);
 	}
@@ -102,3 +106,9 @@ var mainmenu = { start:function () {
 	process.exit();
 }};
 doMenu(mainmenu);
+if (process.argv.length > 2) {
+	if (process.argv[2] == 'restart') {
+		autoRestart = true;
+		socket.reply(codes.RestartServer);
+	}
+}

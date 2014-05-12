@@ -71,7 +71,11 @@ Club.prototype.handOver = function (gameObj,cb) {
 				}
 				var gameidhex = gameObj.id.toString();
 				games[gameidhex].clubid = fromMongoId(this.clubid);
-				activeUsers[this.obj.owner].send(codes.srTableStatsReply,{reply:out, players:playersOut},'Poker.TableStatsReplies');
+				if (activeUsers[this.obj.owner]) {
+					activeUsers[this.obj.owner].send(codes.srTableStatsReply,{reply:out, players:playersOut},'Poker.TableStatsReplies');
+				} else {
+					console.log('owner disconnected while fetching stats');
+				}
 				cb();
 			}.bind(this));
 		}.bind(this));
