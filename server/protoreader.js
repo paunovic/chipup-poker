@@ -84,7 +84,7 @@ protoreader.reply = function reply(code,message,type) {
 	}
 	//console.log('header out:',header);
 	//console.log(object);
-	if ([codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange,codes.srHello,codes.PerGameMsgEvent].indexOf(code) != -1) {
+	if ([codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange,codes.PerGameMsgEvent].indexOf(code) != -1) {
 	} else if (hidden && hidden.indexOf(code) != -1) {
 	} else if (code == 100) this.log('sent '+datasize+' bytes for code '+code,message);
 	else this.log('sent %d bytes for code %s',datasize,codes.reverse[code]);
