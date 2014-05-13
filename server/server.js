@@ -66,7 +66,7 @@ sharedconfig.minSizes.ContactMessage = 10;
 sharedconfig.stringSizes.ContactMessage = 1000;
 sharedconfig.ChangeExpireTime = 3600 * 24;
 sharedconfig.ForgotExpireTime = 3600;
-function initConfig() 
+function initConfig() {
 	var regex = {};
 	regex.email = '^[a-zA-Z0-9\\.]+@[a-zA-Z0-9\\.]+$';
 	regex.username = '^[a-zA-Z0-9 _-]+$';
