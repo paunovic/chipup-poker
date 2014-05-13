@@ -294,6 +294,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -322,7 +323,6 @@
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>OfficialServerCertificate</ResourceId>
 			</RcItem>
-			<None Include="revision.inc"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -466,9 +466,9 @@
 							<Operation>1</Operation>
 						</Platform>
 					</DeployClass>
+					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 					<ProjectRoot Name="$(PROJECTNAME).app" Platform="OSX32"/>
 					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win64"/>
-					<ProjectRoot Name="$(PROJECTNAME)" Platform="Win32"/>
 				</Deployment>
 				<Platforms>
 					<Platform value="Win64">True</Platform>

@@ -13,7 +13,7 @@ function ValidateContactMessage(const AMessage: String; out AError: String): Boo
 implementation
 
 uses
-  Vcl.Controls, System.SysUtils, Poker.Server.Settings, Poker.Common.Misc;
+  Vcl.Controls, System.SysUtils, Poker.Server.Settings, Poker.Common.Misc, System.RegularExpressions;
 
 
 function ValidateUsername(const AUsername: String; out AError: String): Boolean;
@@ -22,7 +22,7 @@ begin
   if (Length(AUsername) < ServerSettings.MinStringLengths.Username) or (Length(AUsername) > ServerSettings.MaxStringLengths.Username) then
     AError := Format('Username length must be between %d and %d characters', [ServerSettings.MinStringLengths.Username, ServerSettings.MaxStringLengths.Username])
   else
-    if not IsValidString(AUsername, ServerSettings.ValidChars.Username) then
+    if not TRegEx.IsMatch(AUsername, ServerSettings.ValidCharsRegex.Username) then
       AError := 'Invalid characters in username';
 
   result := AError = '';
@@ -34,7 +34,7 @@ begin
   if (Length(APassword) < ServerSettings.MinStringLengths.Password) or (Length(APassword) > ServerSettings.MaxStringLengths.Password) then
     AError := Format('Password length must be between %d and %d characters', [ServerSettings.MinStringLengths.Password, ServerSettings.MaxStringLengths.Password])
   else
-    if not IsValidString(APassword, ServerSettings.ValidChars.Password) then
+    if not TRegEx.IsMatch(APassword, ServerSettings.ValidCharsRegex.Password) then
       AError := 'Invalid characters in password';
 
   result := AError = '';
@@ -56,7 +56,7 @@ begin
   if (Length(AClubName) < ServerSettings.MinStringLengths.ClubName) or (Length(AClubName) > ServerSettings.MaxStringLengths.ClubName) then
     AError := Format('Club name length must be between %d and %d characters', [ServerSettings.MinStringLengths.ClubName, ServerSettings.MaxStringLengths.ClubName])
   else
-    if not IsValidString(AClubName, ServerSettings.ValidChars.ClubName) then
+    if not TRegEx.IsMatch(AClubName, ServerSettings.ValidCharsRegex.ClubName) then
       AError := 'Invalid characters in club name';
 
   result := AError = '';
@@ -68,7 +68,7 @@ begin
   if (Length(AClubPassword) < ServerSettings.MinStringLengths.ClubInvCode) or (Length(AClubPassword) > ServerSettings.MaxStringLengths.ClubInvCode) then
     AError := Format('Club password must be between %d and %d characters', [ServerSettings.MinStringLengths.ClubInvCode, ServerSettings.MaxStringLengths.ClubInvCode])
   else
-    if not IsValidString(AClubPassword, ServerSettings.ValidChars.ClubPassword) then
+    if not TRegEx.IsMatch(AClubPassword, ServerSettings.ValidCharsRegex.ClubPassword) then
       AError := 'Invalid characters in club password';
 
   result := AError = '';
@@ -79,7 +79,7 @@ begin
   if (Length(AGameName) < ServerSettings.MinStringLengths.GameName) or (Length(AGameName) > ServerSettings.MaxStringLengths.GameName) then
     AError := Format('Table name length must be between %d and %d characters', [ServerSettings.MinStringLengths.GameName, ServerSettings.MaxStringLengths.GameName])
   else
-    if not IsValidString(AGameName, ServerSettings.ValidChars.GameName) then
+    if not TRegEx.IsMatch(AGameName, ServerSettings.ValidCharsRegex.GameName) then
       AError := 'Invalid characters in table name';
 
   result := AError = '';

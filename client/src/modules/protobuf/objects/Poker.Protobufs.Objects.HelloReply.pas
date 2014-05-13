@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HelloReply;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.StringSizes,Poker.Protobufs.Objects.UpdateFileInfo;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.StringSizes,Poker.Protobufs.Objects.UpdateFileInfo,Poker.Protobufs.Objects.ValidCharsRegex;
 
 type
   TPB_HelloReply = class(TProtobufBaseObject)
@@ -19,6 +19,7 @@ type
       FN_MAX_TIMEBANK = 5;
       FN_MINSIZES = 6;
       FN_UPDATE_FILES = 7;
+      FN_VALID_CHARS_REGEX = 8;
 
     var
       FStringSizes: TPB_StringSizes;
@@ -28,6 +29,7 @@ type
       FMaxTimebank: Integer;
       FMinSizes: TPB_StringSizes;
       FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
+      FValidCharsRegex: TPB_ValidCharsRegex;
 
     procedure SetStringSizes(const AValue: TPB_StringSizes);
     procedure SetChangeExpireTime(const AValue: Integer);
@@ -35,6 +37,7 @@ type
     procedure SetMaxPlayTime(const AValue: Integer);
     procedure SetMaxTimebank(const AValue: Integer);
     procedure SetMinSizes(const AValue: TPB_StringSizes);
+    procedure SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
     procedure UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 
   protected
@@ -51,6 +54,7 @@ type
     property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
     property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
+    property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
   end;
 
 implementation
@@ -76,6 +80,8 @@ begin
     FUpdateFiles.OnNotify := nil;
     FreeAndNil(FUpdateFiles);
   end;
+  if Assigned(FValidCharsRegex) then
+    FreeAndNil(FValidCharsRegex);
   inherited;
 end;
 
@@ -118,6 +124,12 @@ begin
       FN_UPDATE_FILES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
+      FN_VALID_CHARS_REGEX: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FValidCharsRegex) then
+          FValidCharsRegex := TPB_ValidCharsRegex.Create;
+        FValidCharsRegex.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -167,6 +179,12 @@ begin
   ProtobufOutput.writeTag(FN_UPDATE_FILES,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_HelloReply.SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
+begin
+  FValidCharsRegex := AValue;
+  ProtobufOutput.writeMessage(FN_VALID_CHARS_REGEX, AValue.ProtobufOutput);
 end;
 
 end.

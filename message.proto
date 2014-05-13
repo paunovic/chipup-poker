@@ -122,7 +122,7 @@ message HelloReply {
 	required int32 max_timebank = 5 [ default = 60000 ];
 	required StringSizes minSizes = 6;
 	repeated UpdateFileInfo update_files = 7;
-	required int32 ValidCharsRegex = 8;
+	required ValidCharsRegex valid_chars_regex = 8;
 }
 
 message HelloParams {
