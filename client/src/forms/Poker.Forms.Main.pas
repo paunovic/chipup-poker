@@ -90,6 +90,7 @@ type
     N4: TMenuItem;
     miCheckOnFold: TMenuItem;
     acFoldChecks: TAction;
+    Gameplay1: TMenuItem;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);

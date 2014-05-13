@@ -293,12 +293,13 @@ var
   fullpath: String;
   hash: RawByteString;
   hash_bytes: TBytes;
+  client_path: String;
 begin
   for C1 := Low(FILES) to High(FILES) do
   begin
     pb_ufi := TPB_UpdateFileInfo.Create;
     pb_ufi.Path := FILES[C1];
-    fullpath := SelfPath + pb_ufi.Path;
+    fullpath := client_path + pb_ufi.Path;
     SetLength(hash_bytes, 0);
     if FileExists(fullpath) then
     begin
