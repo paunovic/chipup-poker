@@ -109,7 +109,7 @@ begin
   if not ValidateClubName(edClubName.Text, error) then
     edClubName.SetFocus
   else
-    if not ValidateClubCode(edInvitationCode.Text, error) then
+    if not ValidateClubPassword(edInvitationCode.Text, error) then
       edInvitationCode.SetFocus;
 
   if error <> '' then

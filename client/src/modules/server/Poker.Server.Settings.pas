@@ -16,6 +16,15 @@ type
     ContactMessage: Integer;
   end;
 
+  TValidChars = record
+    EMail: String;
+    Username: String;
+    Password: String;
+    ClubName: String;
+    ClubPassword: String;
+    GameName: String;
+  end;
+
   TServerSettings = class
   private
     FEmailConfirmationExpiration: Integer;
@@ -23,6 +32,7 @@ type
     FTimebank: Integer;
     FMinStringLengths: TStringLengths;
     FMaxStringLengths: TStringLengths;
+    FValidChars: TValidChars;
 
   public
     class procedure Initialize;
@@ -35,7 +45,7 @@ type
     property Timebank: Integer read FTimebank;
     property MinStringLengths: TStringLengths read FMinStringLengths;
     property MaxStringLengths: TStringLengths read FMaxStringLengths;
-
+    property ValidChars: TValidChars read FValidChars;
   end;
 
 var

@@ -42,16 +42,8 @@ implementation
 
 uses
   Poker.Server.Socket, Poker.Common.Misc, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Server.Settings,
-  Poker.Common.FormsContainer;
+  Poker.Common.FormsContainer, Poker.Server.Validators;
 
-
-procedure TfrmJoinClub.edClubIDPropertiesChange(Sender: TObject);
-begin
-  if edClubID.Value > edClubID.Properties.MaxValue then
-    edClubID.Value := edClubID.Properties.MaxValue;
-  if edClubID.Value < 1 then
-    edClubID.Value := 1;
-end;
 
 procedure TfrmJoinClub.FormCreate(Sender: TObject);
 begin
@@ -104,13 +96,33 @@ begin
   end;
 end;
 
+procedure TfrmJoinClub.edClubIDPropertiesChange(Sender: TObject);
+begin
+  if edClubID.Value > edClubID.Properties.MaxValue then
+    edClubID.Value := edClubID.Properties.MaxValue;
+  if edClubID.Value < 1 then
+    edClubID.Value := 1;
+end;
+
 procedure TfrmJoinClub.acCancelExecute(Sender: TObject);
 begin
   Close;
 end;
 
 procedure TfrmJoinClub.acOkExecute(Sender: TObject);
+var
+  error: String;
 begin
+  error := '';
+  if not ValidateClubPassword(edClubCode.Text, error) then
+    edClubCode.SetFocus;
+
+  if error <> '' then
+  begin
+    MessageDlg(error, mtError, [mbOK], 0);
+    Exit;
+  end;
+
   acOK.Enabled := FALSE;
   ServerSocket.JoinClub(edClubID.Value, edClubCode.Text);
 end;
