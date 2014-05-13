@@ -66,6 +66,17 @@ sharedconfig.minSizes.ContactMessage = 10;
 sharedconfig.stringSizes.ContactMessage = 1000;
 sharedconfig.ChangeExpireTime = 3600 * 24;
 sharedconfig.ForgotExpireTime = 3600;
+function initConfig() 
+	var regex = {};
+	regex.email = '^[a-zA-Z0-9\\.]+@[a-zA-Z0-9\\.]+$';
+	regex.username = '^[a-zA-Z0-9 _-]+$';
+	regex.password = '^[a-zA-Z0-9_!@#$%^&*()+=~`-]+$';
+	regex.clubname = "^[a-zA-Z0-9!()[]{}@#$%&*+=/\\'-]+$";
+	regex.clubpassword = '^[a-zA-Z0-9]+$';
+	regex.gamename = "^[a-zA-Z0-9!()[]{}@#$%&*+=/\\'-]+$";
+	sharedconfig.valid_chars_regex = regex;
+}
+initConfig();
 var badConfLink = "Invalid confirmation link.";
 
 var activeUsers = {};
@@ -574,7 +585,7 @@ function installers_func(req,res) {
 		async.parallel(jobs,finish2);
 	}
 	function finish2() {
-		Installers.find({}).toArray(function(err,data) {
+		Installers.find({}).sort({_id:1}).toArray(function(err,data) {
 			Config.findOne({_id:'installerid'},function (err,row) {
 				var activeRelease;
 				for (var x=0; x<data.length; x++) {
