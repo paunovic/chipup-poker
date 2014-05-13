@@ -14,6 +14,7 @@ type
     type
       THardcodedSettingsRec = record
         VERSION: String;
+        REVISION: String;
         INSTANCE_MUTEX_NAME: String;
         SETTINGS_FILENAME: String;
         SETTINGS_ENCRYPTION_KEY: String;
@@ -36,7 +37,8 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0105';
+        VERSION: '0.01a.0107';
+        REVISION: {$I revision.inc};
 
         // instance mutex name
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';

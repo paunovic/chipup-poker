@@ -100,8 +100,8 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 86
-      Top = 4
+      Left = 246
+      Top = 6
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
       ParentFont = False
@@ -115,8 +115,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 86
-      Top = 20
+      Left = 246
+      Top = 22
       Anchors = [akLeft, akBottom]
       Caption = 'Memory usage:'
       ParentFont = False
@@ -130,8 +130,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsSocketState: TcxLabel
-      Left = 244
-      Top = 4
+      Left = 88
+      Top = 6
       Anchors = [akLeft, akBottom]
       Caption = 'Socket state:'
       ParentFont = False
@@ -145,8 +145,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsCalbackSets: TcxLabel
-      Left = 86
-      Top = 36
+      Left = 246
+      Top = 38
       Anchors = [akLeft, akBottom]
       Caption = 'Callback sets:'
       ParentFont = False
@@ -160,8 +160,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 175
-      Top = 4
+      Left = 335
+      Top = 6
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -180,8 +180,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 175
-      Top = 20
+      Left = 335
+      Top = 22
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -200,8 +200,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvCallbackSets: TcxLabel
-      Left = 175
-      Top = 36
+      Left = 335
+      Top = 38
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -220,8 +220,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSocketState: TcxLabel
-      Left = 327
-      Top = 4
+      Left = 171
+      Top = 6
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -380,8 +380,8 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object lbsLatency: TcxLabel
-      Left = 244
-      Top = 20
+      Left = 88
+      Top = 22
       Anchors = [akLeft, akBottom]
       Caption = 'Latency:'
       ParentFont = False
@@ -395,8 +395,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvLatency: TcxLabel
-      Left = 327
-      Top = 20
+      Left = 171
+      Top = 22
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False

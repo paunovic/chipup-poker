@@ -129,7 +129,8 @@ uses
   Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout},
   Poker.Protobufs.Objects.UpdateFileInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas',
   Poker.Protobufs.Objects.HelloReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas',
-  Poker.Protobufs.Objects.HelloParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas';
+  Poker.Protobufs.Objects.HelloParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas',
+  Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas';
 
 procedure FocusPokerApp;
 var

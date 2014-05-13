@@ -367,10 +367,17 @@ var
 begin
   pbhello := AObject as TPB_HelloReply;
 
-  if pbhello.UpdateFiles.Count > 0 then
+  if Settings.Hardcoded.REVISION = 'manual' then
   begin
-    dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
-    acUpdate.Execute;
+    // TODO, change the root dir so it updates the 'wrong' copy of the game
+  end
+  else
+  begin
+    if pbhello.UpdateFiles.Count > 0 then
+    begin
+      dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
+      acUpdate.Execute;
+    end;
   end;
 
   ServerSettings.ParseHelloMessage(pbhello);

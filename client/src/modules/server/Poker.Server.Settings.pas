@@ -16,6 +16,15 @@ type
     ContactMessage: Integer;
   end;
 
+  TValidCharsRegex = record
+    EMail: String;
+    Username: String;
+    Password: String;
+    ClubName: String;
+    ClubPassword: String;
+    GameName: String;
+  end;
+
   TServerSettings = class
   private
     FEmailConfirmationExpiration: Integer;
@@ -23,6 +32,7 @@ type
     FTimebank: Integer;
     FMinStringLengths: TStringLengths;
     FMaxStringLengths: TStringLengths;
+    FValidCharsRegex: TValidCharsRegex;
 
   public
     class procedure Initialize;
@@ -35,7 +45,7 @@ type
     property Timebank: Integer read FTimebank;
     property MinStringLengths: TStringLengths read FMinStringLengths;
     property MaxStringLengths: TStringLengths read FMaxStringLengths;
-
+    property ValidCharsRegex: TValidCharsRegex read FValidCharsRegex;
   end;
 
 var
@@ -77,6 +87,13 @@ begin
   FMaxStringLengths.ClubInvCode := AHelloReply.StringSizes.InvCode;
   FMaxStringLengths.GameName := AHelloReply.StringSizes.GameName;
   FMaxStringLengths.ContactMessage := AHelloReply.StringSizes.ContactMessage;
+
+  FValidCharsRegex.EMail := AHelloReply.ValidCharsRegex.EMail;
+  FValidCharsRegex.Username := AHelloReply.ValidCharsRegex.Username;
+  FValidCharsRegex.Password := AHelloReply.ValidCharsRegex.Password;
+  FValidCharsRegex.ClubName := AHelloReply.ValidCharsRegex.Clubname;
+  FValidCharsRegex.ClubPassword := AHelloReply.ValidCharsRegex.Clubpassword;
+  FValidCharsRegex.GameName := AHelloReply.ValidCharsRegex.Gamename;
 end;
 
 end.

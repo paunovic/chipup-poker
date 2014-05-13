@@ -105,6 +105,15 @@ message StringSizes {
 	required int32 ContactMessage = 7;
 }
 
+message ValidCharsRegex {
+    required string email = 1;
+    required string username = 2;
+    required string password = 3;
+    required string clubname = 4;
+    required string clubpassword = 5;
+    required string gamename = 6;
+}
+
 message HelloReply {
 	required StringSizes stringSizes = 1;
 	required int32 ChangeExpireTime = 2;
@@ -113,6 +122,7 @@ message HelloReply {
 	required int32 max_timebank = 5 [ default = 60000 ];
 	required StringSizes minSizes = 6;
 	repeated UpdateFileInfo update_files = 7;
+	required ValidCharsRegex valid_chars_regex = 8;
 }
 
 message HelloParams {
