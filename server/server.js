@@ -66,15 +66,22 @@ sharedconfig.minSizes.ContactMessage = 10;
 sharedconfig.stringSizes.ContactMessage = 1000;
 sharedconfig.ChangeExpireTime = 3600 * 24;
 sharedconfig.ForgotExpireTime = 3600;
+var regexLimits;
 function initConfig() {
 	var regex = {};
-	regex.email = '^[a-zA-Z0-9\\.]+@[a-zA-Z0-9\\.]+$';
-	regex.username = '^[a-zA-Z0-9 _-]+$';
-	regex.password = '^[a-zA-Z0-9_!@#$%^&*()+=~`-]+$';
-	regex.clubname = "^[a-zA-Z0-9!()[]{}@#$%&*+=/\\'-]+$";
-	regex.clubpassword = '^[a-zA-Z0-9]+$';
-	regex.gamename = "^[a-zA-Z0-9!()[]{}@#$%&*+=/\\'-]+$";
+	regex.email = '^[a-zA-Z0-9\\.+]+@[a-zA-Z0-9\\.]+$';
+	regex.username = '^[a-zA-Z0-9 _\\.-]{3,20}$';
+	regex.password = '^[a-zA-Z0-9_\\!@#$%^&*\\(\\)+=~`\\.-]{6,32}$';
+	regex.clubname = "^[a-zA-Z0-9!()\\[\\]{}@#$%&*+=/\\'-]{5,64}$";
+	regex.clubpassword = '^[a-zA-Z0-9]{3,32}$';
+	regex.gamename = "^[a-zA-Z0-9!()\\[\\]{}@#$%&*+=/\\'-]{3,32}$";
 	sharedconfig.valid_chars_regex = regex;
+	var regex2 = {};
+	for (var key in regex) {
+		console.log(key);
+		regex2[key] = new RegExp(regex[key]);
+	}
+	regexLimits = regex2;
 }
 initConfig();
 var badConfLink = "Invalid confirmation link.";
@@ -91,7 +98,7 @@ app.use(logger());
 function unpackInstaller(row,cb1) {
 	function updateLive(doc,sizes,cb) {
 		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
-		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
+		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
 		req.on('data',function (chunk) {
 			console.log(chunk);
 		});
@@ -168,7 +175,7 @@ function setup3(db) {
 		assert(fs.statSync('./upload'));
 		app.use(express.bodyParser({uploadDir:'./upload'}));
 	});
-	app.use('/sync/',express.basicAuth('sync','password')); // FIXME
+	app.use('/sync/',express.basicAuth('sync',config.syncpassword));
 	bugsView.setup(app,bugs,allUsers,db);
 	app.get('/confirm',function (req,res) {
 		if (!req.query.code) {
@@ -1201,7 +1208,7 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 function makeDiff(sourcehash,desthash,path) {
 	function pushDiff(doc) {
 		var body = new Buffer(JSON.stringify(doc));
-		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
+		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
 		req.on('data',function (chunk) {
 			console.log(chunk);
 		});
@@ -1211,7 +1218,7 @@ function makeDiff(sourcehash,desthash,path) {
 	if (!config.diffserver) {
 		console.log('need to ask diff server for %s',path);
 		var body = new Buffer(JSON.stringify({sourcehash:sourcehash,desthash:desthash,path:path}));
-		var req = http.request({host:'dev-server.chipuppoker.com',method:'POST',path:'/sync/makeDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:password'});
+		var req = http.request({host:'dev-server.chipuppoker.com',method:'POST',path:'/sync/makeDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
 		req.on('data',function (chunk) {
 			console.log('chunk');
 		});
@@ -1329,8 +1336,8 @@ ClientSocket.prototype.handle = function (code,args) {
 			console.log('register params',params);
 			var doc = {email:params.email, displayname:params.displayName, tokens:100, authed:false, chips:0 };
 			doc.authcode = uuid.v4();
-			if (doc.email.indexOf('@') < 1) {
-				console.log('email invalid',doc.email.indexOf('@'),doc.email);
+			if (!regexLimits.email.exec(doc.email)) {
+				console.log('email invalid',doc.email);
 				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
@@ -1339,12 +1346,12 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
-			if ((doc.displayname.length > sharedconfig.stringSizes.username) || (doc.displayname.length < sharedconfig.minSizes.username)) {
+			if (!regexLimits.username.exec(doc.displayname)) {
 				this.log('display name out of bounds');
 				this.send(codes.srRegisterReply,{status:'regInvalidName'},'Poker.RegisterReply');
 				return;
 			}
-			if (params.password.length > sharedconfig.stringSizes.password) {
+			if (!regexLimits.password.exec(params.password)) {
 				this.reply(0,"password too long");
 				return;
 			}
@@ -1447,14 +1454,14 @@ ClientSocket.prototype.handle = function (code,args) {
 			break;*/
 		case codes.scCreateClub:
 			var params = pb.Parse(args,'Poker.Club');
-			if (!params.name || ((params.name.length > sharedconfig.stringSizes.clubname) || (params.name.length < sharedconfig.minSizes.clubname))) {
+			if (!regexLimits.clubname.exec(params.name)) {
 				this.send(codes.srCreateClubReply,{status:'csInvalidName'},'Poker.ClubCommandReply');
 				return;
 			}
 			if (!params.password) {
 				this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
 				return;
-			} else if (params.password && ((params.password.length > sharedconfig.stringSizes.invcode) || (params.password.length < sharedconfig.minSizes.invcode))) {
+			} else if (!regexLimits.clubpassword.exec(params.password)) {
 				this.send(codes.srCreateClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
 				return;
 			}
@@ -1506,7 +1513,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					}
 				}
 				if (item.is_private && (pw != item.password)) {
-					this.send(codes.srJoinClubReply,{status:'csBadPassword'},'Poker.ClubCommandReply');
+					this.send(codes.srJoinClubReply,{status:'csInvalidPassword'},'Poker.ClubCommandReply');
 					return;
 				} else if (!item.is_private) {
 					console.log('not private',item);
@@ -1834,7 +1841,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.reply(0,'invalid email');
 				return;
 			}
-			if (newemail.indexOf('@') < 1) {
+			if (!regexLimits.email.exec(newemail)) {
 				console.log('email invalid',newemail.indexOf('@'),newemail);
 				this.reply(0,'invalid email');
 				return;
@@ -1871,17 +1878,15 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.error(e);
 				return;
 			}
-			if ((params.new_password.length > sharedconfig.stringSizes.password) || (params.new_password.length < sharedconfig.minSizes.password)) {
+			if (!regexLimits.password.exec(params.new_password)) {
 				this.reply(0,'password too long');
 				return;
 			}
 			deck.getRandom(16,function (salt) {
-				this.log('salt',salt);
 				var hasher = crypto.createHash('sha256');
 				hasher.update(salt);
 				hasher.update(params.new_password);
 				var hash = hasher.digest();
-				this.log('pw hash is',hash);
 				allUsers.update({_id:this.userid},{$set:{password:hash,salt:salt}},function (err,res) {
 					if (err) {
 						this.reply("000","internal error");
@@ -4680,11 +4685,14 @@ setTimebankTimer();
 function checkGameParams(smallblind,bigblind,gamename,seats,game_type,game_limit,buyin_min,buyin_max) {
 	if (smallblind < 1) return true;
 	if (smallblind > bigblind) return true;
-	if (gamename.length < 3) return true;
-	if (gamename.length >= sharedconfig.stringSizes.gamename) return true;
+	if (!regexLimits.gamename.exec(gamename)) return true;
 	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
 	if (5 > buyin_min) {
 		log('min too low',buyin_min);
+		return true;
+	}
+	if (buyin_max < buyin_min) {
+		log('max too low');
 		return true;
 	}
 	if (10 > buyin_max) {
