@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.Club,Poker.Protobufs.Objects.Game;
 
 type
-  TClubStatus = (csSuccess = 0,csInvalidName = 1,csInvalidPassword = 2,csNameExists = 3,csInvalidClubId = 4,csAlreadyMember = 5,csBadPassword = 6,csInvalidPlayerId = 7);
+  TClubStatus = (csSuccess = 0,csInvalidName = 1,csInvalidPassword = 2,csNameExists = 3,csInvalidClubId = 4,csAlreadyMember = 5,csInvalidPlayerId = 6);
   TPB_ClubCommandReply = class(TProtobufBaseObject)
   private
     const

@@ -41,6 +41,7 @@ implementation
 {$R *.dfm}
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.Socket, Poker.Common.Misc, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Server.Settings,
   Poker.Common.FormsContainer, Poker.Server.Validators;
 
@@ -150,10 +151,12 @@ begin
       MessageDlg('You are already member of this club', mtInformation, [mbOK], 0);
       edClubID.SetFocus;
     end;
-    csBadPassword: begin
+    csInvalidPassword: begin
       MessageDlg('Invalid club password', mtError, [mbOK], 0);
       edClubCode.SetFocus;
     end;
+  else
+    {$IFDEF DEBUG} DebugLn(Format('CSRJoinClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 
   acOK.Enabled := TRUE;

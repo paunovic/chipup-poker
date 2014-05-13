@@ -3,13 +3,7 @@ unit Poker.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.User, cxImage, Vcl.Imaging.JPEG;
-
-var
-  SelfPath: String;
-  AppDataLocalPath: String;
-
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections, cxImage, Vcl.Imaging.JPEG;
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = nil; const AParams: PChar = nil; const ADirectory: PChar = nil;
@@ -40,15 +34,11 @@ function KillWindowsTimer(var ATimerId: UINT_PTR): Boolean;
 function ChipsToStr(const AValue: UINT32): String;
 procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);
 
-type
-  TPB_Games = TObjectList<TPB_Game>;
-  TPB_Users = TObjectList<TPB_User>;
-
 implementation
 
 uses
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
-  Poker.Interfaces.FormParams, System.DateUtils;
+  System.ZLib, Winapi.PsApi, System.DateUtils, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
+  Poker.Interfaces.FormParams;
 
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
@@ -597,17 +587,6 @@ begin
   SetLength(data, ALength);
   GetCombination(0, Length(AInput) - 1, 0);
 end;
-
-procedure GetOmahaCombinations(const APlayerCards, ATableCards: TArray<String>; out ACombinations: TArray<String>);
-begin
-end;
-
-initialization
-  SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
-  AppDataLocalPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
-  ForceDirectories(AppDataLocalPath);
-
-finalization
 
 
 end.

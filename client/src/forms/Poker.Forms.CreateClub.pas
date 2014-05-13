@@ -124,8 +124,8 @@ begin
       MessageDlg('Club name already exists', mtError, [mbOK], 0);
       edClubName.SetFocus;
     end;
-    csBadPassword: begin
-      MessageDlg('Invalid club code', mtError, [mbOK], 0);
+    csInvalidPassword: begin
+      MessageDlg('Invalid club password', mtError, [mbOK], 0);
       edClubCode.SetFocus;
     end;
   else

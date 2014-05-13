@@ -48,8 +48,12 @@ type
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
+
 var
   dmMain: TdmMain;
+
+  SelfPath: String;
+  AppDataLocalPath: String;
 
 implementation
 
@@ -59,10 +63,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  Winapi.ShlObj,
   Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect;
+  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -75,6 +80,10 @@ end;
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 begin
+  SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
+  AppDataLocalPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
+  ForceDirectories(AppDataLocalPath);
+
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
   {$ENDIF}

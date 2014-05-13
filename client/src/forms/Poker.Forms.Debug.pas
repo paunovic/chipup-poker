@@ -91,9 +91,9 @@ implementation
 
 uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
-  JclExprEval, Poker.Table.Resources,
+  JclExprEval, Poker.Table.Resources, Poker.DataModule,
   {$ENDIF}
-  Poker.Common.InstanceController,
+  Poker.Common.InstanceController, Poker.DataModule,
   Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
 
 
