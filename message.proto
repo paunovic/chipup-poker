@@ -393,8 +393,7 @@ message ClubCommandReply {
 		csNameExists = 3;
 		csInvalidClubId = 4;
 		csAlreadyMember = 5;
-		csBadPassword = 6;
-		csInvalidPlayerId = 7;
+		csInvalidPlayerId = 6;
 	}
 	required ClubStatus status = 1;
 	optional Club club = 2;
