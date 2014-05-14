@@ -25,6 +25,7 @@ type
         TCP_PING_INTERVAL: Word;
         TCP_INACTIVITY_PING_INTERVAL: Word;
         TCP_PING_TIMEOUT: Word;
+        UPDATE_FILES: array[0..6] of String;
         URL: record
           TERMS_AND_CONDITIONS: String;
           CASHIER: String;
@@ -37,7 +38,7 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0108';
+        VERSION: '0.01a.0109';
         REVISION: {$I revision.inc};
 
         // instance mutex name
@@ -55,6 +56,10 @@ type
         TCP_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
         TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity
         TCP_PING_TIMEOUT: 15; // in seconds
+
+        // check these files for update
+        UPDATE_FILES: ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf',
+           'bspatch.exe', 'sqlite3.dll');
 
         // urls
         URL : (

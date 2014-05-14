@@ -292,27 +292,23 @@ begin
 end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
-const
-  FILES_COUNT = 7;
-  FILES: array[0..FILES_COUNT - 1] of String = ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf',
-     'bspatch.exe', 'sqlite3.dll');
 var
   pb_ufi: TPB_UpdateFileInfo;
-  C1: Integer;
   fullpath: String;
   hash: RawByteString;
   hash_bytes: TBytes;
   client_path: String;
+  update_file: String;
 begin
-  for C1 := Low(FILES) to High(FILES) do
+  for update_file in Settings.Hardcoded.UPDATE_FILES do
   begin
     pb_ufi := TPB_UpdateFileInfo.Create;
-    pb_ufi.Path := FILES[C1];
+    pb_ufi.Path := update_file;
     fullpath := client_path + pb_ufi.Path;
     SetLength(hash_bytes, 0);
     if FileExists(fullpath) then
     begin
-      hash := SHA256File(FILES[C1]);
+      hash := SHA256File(fullpath);
       if Length(hash) > 0 then
       begin
         SetLength(hash_bytes, Length(hash));
