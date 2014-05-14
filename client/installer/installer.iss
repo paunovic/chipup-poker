@@ -11,17 +11,17 @@ AppName={#ApplicationName}
 AppVerName={#ApplicationName}
 AppPublisher={#ApplicationPublisher}
 AppPublisherURL={#ApplicationPublisherURL}
-DefaultDirName={code:DefaultAppDataFolder}
+DefaultDirName={code:AppInstallPath}
 DefaultGroupName={#ApplicationName}
 UninstallFilesDir={app}\uninstall
 UninstallDisplayName={#ApplicationName}
-Compression=lzma2                                                                                 
 SolidCompression=yes
 OutputDir=.\
 DisableDirPage=yes
 OutputBaseFilename={#InstallerFilename}
 UninstallDisplayIcon={app}\{#ApplicationExe}
 DisableProgramGroupPage=yes
+DisableReadyPage=yes
 AppMutex={#ApplicationInstanceMutex}
 WizardImageFile=installer_images\installer-1.bmp
 WizardSmallImageFile=installer_images\installer-2.bmp
@@ -34,17 +34,26 @@ Source: "client_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ssl_libs\*.*"; DestDir: "{app}"; Flags: ignoreversion
    
 [Icons]
-Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"
-Name: "{group}\Uninstall"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Tasks: desktopicon
+Name: "{code:StartMenuPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"; Tasks: startmenu
+Name: "{code:StartMenuPath}\{#ApplicationName}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"; Tasks: startmenu
+Name: "{code:StartMenuPath}\{#ApplicationName}\Uninstall"; Filename: "{uninstallexe}"; Tasks: startmenu
+Name: "{code:QuickLaunchPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Tasks: quicklaunch
+Name: "{code:DesktopIconPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#ApplicationExe}"; Description: "Launch {#ApplicationName}"; Flags: postinstall nowait runascurrentuser
 
 [Tasks]
-Name: commondir; Description: "&All users"; GroupDescription: "Install For:"; Flags: exclusive
-Name: localdir; Description: "&Current user"; GroupDescription: "Install For:"; Flags: exclusive unchecked
-Name: desktopicon; Description: "Create a &desktop icon"
+Name: install_allusers; Description: "&All users"; GroupDescription: "Install for:"; Flags: exclusive
+Name: install_currentuser; Description: "&Current user"; GroupDescription: "Install for:"; Flags: exclusive unchecked
+Name: desktopicon; Description: "&Desktop shortcut"; GroupDescription: "Shortcuts:"
+Name: quicklaunch; Description: "&Quick launch shortcut"; GroupDescription: "Shortcuts:"
+Name: startmenu; Description: "&Start menu shortcut"; GroupDescription: "Shortcuts:"
+
+[Messages]
+WizardSelectTasks=Select Tasks
+SelectTasksDesc=Which tasks should be performed?
+SelectTasksLabel2=Select the tasks you would like Setup to perform while installing [name], then click Install.
 
 [Code]
 procedure LoadVCLStyleS(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall setuponly';
@@ -73,7 +82,7 @@ end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
-  WizardForm.DirEdit.Text := ExpandConstant('{code:DefaultAppDataFolder}');
+  WizardForm.DirEdit.Text := ExpandConstant('{code:AppInstallPath}');
 end;
  
 procedure DeinitializeSetup();
@@ -120,11 +129,46 @@ begin
   end;
 end;
 
-function DefaultAppDataFolder(Param: String): String;
+procedure CurPageChanged(CurPageID: Integer);
 begin
-  if (WizardInitialized) and
-     (IsTaskSelected('localdir')) then
-    result := ExpandConstant('{localappdata}\Programs\{#ApplicationName}')
+  if CurPageID = wpSelectTasks then
+    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
+end;
+
+function IsCurrentUserInstall: Boolean;
+begin
+  result := (WizardInitialized) and
+            (IsTaskSelected('install_currentuser')); 
+end;
+
+function AppInstallPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userpf}\{#ApplicationName}')
   else
     result := ExpandConstant('{commonappdata}\Programs\{#ApplicationName}');
+end;
+
+function DesktopIconPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userdesktop}')
+  else
+    result := ExpandConstant('{commondesktop}');
+end;
+
+function StartMenuPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userprograms}')
+  else
+    result := ExpandConstant('{commonprograms}');
+end;
+
+function QuickLaunchPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userappdata}\Microsoft\Internet Explorer\Quick Launch')
+  else
+    result := ExpandConstant('{commonappdata}\Microsoft\Internet Explorer\Quick Launch')
 end;

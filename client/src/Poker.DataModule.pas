@@ -53,7 +53,7 @@ var
   dmMain: TdmMain;
 
   SelfPath: String;
-  AppDataLocalPath: String;
+  AppDataPath: String;
 
 implementation
 
@@ -79,10 +79,19 @@ begin
 end;
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
+var
+  common, local: String;
 begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
-  AppDataLocalPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(GetSpecialFolderPath(CSIDL_LOCAL_APPDATA)) + 'ChipUP Poker');
-  ForceDirectories(AppDataLocalPath);
+  local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
+  common := GetSpecialFolderPath(CSIDL_COMMON_APPDATA);
+  if Pos(LowerCase(common), LowerCase(SelfPath)) > 0 then
+    AppDataPath := common
+  else
+    AppDataPath := local;
+  AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AppDataPath) + 'ChipUP Poker');
+
+  ForceDirectories(AppDataPath);
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
@@ -90,8 +99,8 @@ begin
 
   LoadFonts;
 
-  TSettings.Initialize(AppDataLocalPath + TSettings.Hardcoded.SETTINGS_FILENAME);
-  TDatabase.Initialize(AppDataLocalPath + TSettings.Hardcoded.DATABASE_FILENAME);
+  TSettings.Initialize(AppDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  TDatabase.Initialize(AppDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatars.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;

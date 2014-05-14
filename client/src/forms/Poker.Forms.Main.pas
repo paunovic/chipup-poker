@@ -381,8 +381,8 @@ end;
 
 procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
 var
-  club : TClubInfo;
-  form : TForm;
+  club: TClubInfo;
+  form: TForm;
   found: Boolean;
 begin
   if not dmMain.CheckAuthed then
@@ -508,7 +508,7 @@ end;
 
 procedure TfrmChipUpMain.UpdateClublist;
 var
-  club  : TClubInfo;
+  club: TClubInfo;
   status: String;
   recidx: Integer;
 begin
@@ -537,10 +537,10 @@ end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
 var
-  C1    : Integer;
-  game  : TGameInfo;
-  c     : TcxGridDataController;
-  club  : TClubInfo;
+  C1: Integer;
+  game: TGameInfo;
+  c: TcxGridDataController;
+  club: TClubInfo;
   recidx: Integer;
 begin
   c := gridGamesTable.DataController;
@@ -576,8 +576,8 @@ end;
 procedure TfrmChipUpMain.UpdatePublicClublist;
 var
   rcount: Integer;
-  club  : TClubInfo;
-  c     : TcxGridDataController;
+  club: TClubInfo;
+  c: TcxGridDataController;
 begin
   c := gridPublicHomeGamesTable.DataController;
 
@@ -685,8 +685,8 @@ end;
 procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  game_id : TBytes;
-  club    : TClubInfo;
+  game_id: TBytes;
+  club: TClubInfo;
 begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
   if (recIndex = -1) or
@@ -861,7 +861,7 @@ end;
 procedure TfrmChipUpMain.CSRClubCommand(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_ClubCommandReply;
-  club   : TClubInfo;
+  club: TClubInfo;
 begin
   pbreply := AObject as TPB_ClubCommandReply;
 
@@ -899,7 +899,7 @@ end;
 
 procedure TfrmChipUpMain.CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
 var
-  pbreply    : TPB_TransferChipsParams;
+  pbreply: TPB_TransferChipsParams;
   player_info: TPlayerInfo;
 begin
   pbreply := AObject as TPB_TransferChipsParams;
@@ -956,7 +956,7 @@ end;
 procedure TfrmChipUpMain.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 var
   pbusers: TPB_UserChangeParams;
-  pbuser : TPB_user;
+  pbuser: TPB_user;
 begin
   pbusers := AObject as TPB_UserChangeParams;
 
@@ -1020,9 +1020,9 @@ end;
 procedure TfrmChipUpMain.CSREGameDelete(const AMethodId: Integer; const AObject: TObject);
 var
   pbgame: TPB_Game;
-  club  : TClubInfo;
-  game  : TGameInfo;
-  C1    : Integer;
+  club: TClubInfo;
+  game: TGameInfo;
+  C1: Integer;
 begin
   pbgame := AObject as TPB_Game;
 
@@ -1045,8 +1045,8 @@ end;
 procedure TfrmChipUpMain.CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
 var
   pbgame: TPB_Game;
-  club  : TClubInfo;
-  game  : TGameInfo;
+  club: TClubInfo;
+  game: TGameInfo;
 begin
   pbgame := AObject as TPB_Game;
 

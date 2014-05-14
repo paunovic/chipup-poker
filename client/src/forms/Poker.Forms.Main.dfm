@@ -3561,7 +3561,6 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
     OnMouseDown = imgCashierMouseDown
     OnMouseUp = imgCashierMouseUp
-    ExplicitLeft = 643
     Height = 140
     Width = 140
   end
@@ -3576,7 +3575,6 @@ object frmChipUpMain: TfrmChipUpMain
     Color = clBlack
     ParentBackground = False
     TabOrder = 2
-    ExplicitWidth = 793
     object pcTabs: TcxPageControl
       Left = 0
       Top = 0
@@ -3587,30 +3585,23 @@ object frmChipUpMain: TfrmChipUpMain
       Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ExplicitWidth = 793
-      ClientRectBottom = 409
-      ClientRectLeft = 1
-      ClientRectRight = 793
-      ClientRectTop = 1
+      ClientRectBottom = 410
+      ClientRectRight = 794
+      ClientRectTop = 0
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 793
-        ExplicitHeight = 410
         DesignSize = (
-          792
-          408)
+          794
+          410)
         object gridPublicHomeGames: TcxGrid
           Left = 152
           Top = 34
           Width = 312
-          Height = 198
+          Height = 200
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicHomeGamesEnter
-          ExplicitHeight = 200
           object gridPublicHomeGamesTable: TcxGridTableView
             OnCellDblClick = gridPublicHomeGamesTableCellDblClick
             OnFocusedRecordChanged = gridPublicHomeGamesTableFocusedRecordChanged
@@ -3698,13 +3689,11 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object gridGames: TcxGrid
           Left = 155
-          Top = 234
-          Width = 626
+          Top = 236
+          Width = 628
           Height = 163
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
-          ExplicitTop = 236
-          ExplicitWidth = 627
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3783,7 +3772,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 252
+          Top = 254
           Width = 143
           Height = 34
           Margin = 18
@@ -3799,11 +3788,10 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 254
         end
         object btOpenTable: TcxButton
           Left = 10
-          Top = 289
+          Top = 291
           Width = 143
           Height = 34
           Margin = 18
@@ -3819,11 +3807,10 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 291
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 326
+          Top = 328
           Width = 143
           Height = 34
           Margin = 18
@@ -3839,11 +3826,10 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 328
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 363
+          Top = 365
           Width = 143
           Height = 34
           Margin = 18
@@ -3859,17 +3845,15 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 365
         end
         object gridMyHomeGames: TcxGrid
           Left = 470
           Top = 34
           Width = 312
-          Height = 198
+          Height = 200
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 8
           OnEnter = gridMyHomeGamesEnter
-          ExplicitHeight = 200
           object gridMyHomeGamesTable: TcxGridTableView
             OnCellDblClick = gridMyHomeGamesTableCellDblClick
             OnFocusedRecordChanged = gridMyHomeGamesTableFocusedRecordChanged

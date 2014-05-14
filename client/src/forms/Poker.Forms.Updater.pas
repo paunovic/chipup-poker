@@ -65,7 +65,7 @@ begin
   FUpdateFileIndex := -1;
   HttpClient.RcvdStream := TMemoryStream.Create;
 
-  FUpdateDir := IncludeTrailingPathDelimiter(AppDataLocalPath + IncludeTrailingPathDelimiter('update'));
+  FUpdateDir := IncludeTrailingPathDelimiter(AppDataPath + IncludeTrailingPathDelimiter('update'));
 
   FTotalSize := 0;
   FCurrentDownloadedSize := 0;
@@ -258,8 +258,8 @@ begin
   begin
     if FFullInstaller then
     begin
-      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(AppDataLocalPath + 'install_chipuppoker.exe');
-      dmMain.SetUpdaterInstaller(AppDataLocalPath + 'install_chipuppoker.exe');
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(AppDataPath + 'install_chipuppoker.exe');
+      dmMain.SetUpdaterInstaller(AppDataPath + 'install_chipuppoker.exe');
       Close;
       Exit;
     end;
