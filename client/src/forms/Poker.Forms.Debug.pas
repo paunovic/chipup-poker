@@ -180,7 +180,7 @@ begin
     WriteLn(output);
 
   if DebugFilePath = '' then
-    DebugFilePath := SelfPath + Format('debug\[%d] %s.txt', [GetCurrentProcessId, FormatDateTime('dd-mm-yyyy hh-nn-ss', Now)]);
+    DebugFilePath := SelfPath + Format('debug\%s [%d].txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), GetCurrentProcessId]);
 
   ForceDirectories(ExtractFilePath(DebugFilePath));
   AssignFile(tfile, DebugFilePath);

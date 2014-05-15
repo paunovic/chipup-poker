@@ -40,7 +40,7 @@ type
     FImageX, FImageY: Integer;
     FCloseCallback: TNotifyEvent;
     FInitialX, FInitialY: Integer;
-    FMouseDown: Integer;
+    FMouseDown: TCursor;
 
     procedure SetSelectionRect(const AX1, AY1, AX2, AY2: Integer);
 
@@ -299,11 +299,9 @@ begin
     FInitialX := X;
     FInitialY := Y;
 
-    if PaintBox.Cursor = crSizeAll then
-      FMouseDown := 2
-    else
+    FMouseDown := PaintBox.Cursor;
+    if FMouseDown = crCross then
     begin
-      FMouseDown := 1;
       SetSelectionRect(FInitialX, FInitialY, FInitialX, FInitialY);
     end;
   end;
@@ -312,18 +310,14 @@ end;
 procedure TfrmImageCrop.PaintBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
   bx, by: Integer;
+  rect_inner: TRect;
 begin
-  if PtInRect(FSelectionRect, Point(X, Y)) then
-    PaintBox.Cursor := crSizeAll
-  else
-    PaintBox.Cursor := crCross;
-
   case FMouseDown of
-    1: begin
+    crCross: begin
       SetSelectionRect(FInitialX, FInitialY, X, Y);
     end;
 
-    2: begin
+    crSizeAll: begin
       bx := FSelectionRect.Left + (X - FInitialX);
       by := FSelectionRect.Top + (Y - FInitialY);
       if bx < FImageX then
@@ -339,6 +333,13 @@ begin
       FInitialX := X;
       FInitialY := Y;
     end;
+  else
+    rect_inner := FSelectionRect;
+    rect_inner.Inflate(-8, -8);
+    if PtInRect(FSelectionRect, Point(X, Y)) then
+      PaintBox.Cursor := crSizeAll
+    else
+      PaintBox.Cursor := crCross;
   end;
 end;
 

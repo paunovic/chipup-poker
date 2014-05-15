@@ -8,7 +8,7 @@ uses
   cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, cxLabel, cxProgressBar;
 
 type
-  TReconnectionStatus = (rsIdle, rsConnecting, rsConnected, rsLoggingIn, rsLoggedIn, rsInvalidCredentials);
+  TReconnectionStatus = (rsIdle, rsConnecting, rsConnected, rsHelloing, rsHelloOk, rsLoggingIn, rsLoggedIn, rsInvalidCredentials);
 
   TfrmReconnect = class(TForm, IModalForm)
     tiReconnectTimer: TTimer;
@@ -32,6 +32,8 @@ type
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
 
+    procedure HelloServer;
+
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
     procedure SetStatusMessage;
 
@@ -54,7 +56,8 @@ implementation
 uses
   Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket, Poker.DataModule,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Settings,
-  Poker.Forms.Debug, Poker.Table.Tables, Poker.Forms.Main;
+  Poker.Forms.Debug, Poker.Table.Tables, Poker.Forms.Main, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections,
+  Poker.Settings;
 
 { TfrmReconnect }
 
@@ -98,6 +101,19 @@ begin
   FCloseCallback := ACallback;
 end;
 
+procedure TfrmReconnect.HelloServer;
+var
+  files: TObjectList<TPB_UpdateFileInfo>;
+begin
+  files := TObjectList<TPB_UpdateFileInfo>.Create(FALSE);
+  try
+    dmMain.GetUpdateFilesList(files);
+    ServerSocket.Hello(files);
+  finally
+    files.Free;
+  end;
+end;
+
 procedure TfrmReconnect.SetStatusMessage;
 var
   tmp: String;
@@ -121,6 +137,10 @@ begin
     ServerSocket.Connect;
   end;
 
+  if (CurrentStatus = rsConnected) and
+     (ServerSocket.IsConnected) then
+    HelloServer;
+
   if FDots = 3 then
     FDots := 0;
   Inc(FDots);
@@ -136,7 +156,10 @@ begin
       FCurrentStatus := rsConnecting;
       pbReconnecting.Properties.BeginColor := RED_COLOR;
     end;
-    wsConnected: pbReconnecting.Properties.BeginColor := GREEN_COLOR;
+    wsConnected: begin
+      pbReconnecting.Properties.BeginColor := GREEN_COLOR;
+      FCurrentStatus := rsConnected;
+    end;
     wsClosed: begin
       FCurrentStatus := rsIdle;
       ServerSocket.Disconnect;
@@ -155,7 +178,7 @@ begin
 
   if ServerSocket.IsConnected then
   begin
-    FCurrentStatus := rsConnected;
+    FCurrentStatus := rsLoggingIn;
     ServerSocket.Login(dmMain.SelfInfo.Nick, dmMain.SelfInfo.Password);
   end
   else

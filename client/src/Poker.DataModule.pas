@@ -252,7 +252,7 @@ begin
       for club in FSelfInfo.Clubs do
         if club.Games.FindGame(tstatus.TableMongoId, game) then
         begin
-          table := Tables.AddTable(club, game, FALSE, FALSE);
+          table := Tables.AddTable(club, game, TRUE, FALSE);
           Break;
         end;
 
