@@ -38,7 +38,7 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0110';
+        VERSION: '0.01a.0111';
         REVISION: {$I revision.inc};
 
         // instance mutex name

@@ -130,7 +130,8 @@ uses
   Poker.Protobufs.Objects.UpdateFileInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas',
   Poker.Protobufs.Objects.HelloReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas',
   Poker.Protobufs.Objects.HelloParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas',
-  Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas';
+  Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas',
+  Poker.Forms.SystemTrayPopup in 'forms\Poker.Forms.SystemTrayPopup.pas' {frmSystemTrayPopup};
 
 procedure FocusPokerApp;
 var

@@ -33,6 +33,8 @@ procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32
 function KillWindowsTimer(var ATimerId: UINT_PTR): Boolean;
 function ChipsToStr(const AValue: UINT32): String;
 procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);
+function GetTaskbarHeight: Integer;
+
 
 implementation
 
@@ -586,6 +588,21 @@ var
 begin
   SetLength(data, ALength);
   GetCombination(0, Length(AInput) - 1, 0);
+end;
+
+function GetTaskbarHeight: Integer;
+var
+  taskbar_hwnd: HWND;
+  taskbar_rect: TRect;
+begin
+  taskbar_hwnd := FindWindow('Shell_TrayWnd', '');
+  if taskbar_hwnd = 0 then
+    Exit(0)
+  else
+  begin
+    GetWindowRect(taskbar_hwnd, taskbar_rect);
+    Exit(taskbar_rect.Height);
+  end;
 end;
 
 

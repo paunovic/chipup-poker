@@ -85,7 +85,7 @@ uses
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
   Poker.Forms.Main, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption,
-  Poker.Protobufs.Objects.UpdateFileInfo;
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Forms.SystemTrayPopup;
 
 
 procedure TfrmLogin.FormCreate(Sender: TObject);

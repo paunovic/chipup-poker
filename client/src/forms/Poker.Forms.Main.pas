@@ -197,7 +197,8 @@ uses
   Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent;
+  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
+  Poker.Forms.SystemTrayPopup;
 
 
 procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
@@ -1002,9 +1003,7 @@ var
 begin
   chatEvent := AObject as TPB_ChatEvent;
   if chatEvent.Event = ceServerMessage then
-  begin
-    MessageDlg(chatEvent.Msg.Msg, mtInformation, mbYesNo, 0);
-  end;
+    TfrmSystemTrayPopup.ShowPopup(chatEvent.Msg.Msg);
 end;
 
 procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject: TObject);

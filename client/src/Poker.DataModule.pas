@@ -7,12 +7,14 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, cxLookAndFeels, dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip,
-  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo;
+  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo, Vcl.ImgList,
+  Vcl.Controls, cxGraphics;
 
 type
   TdmMain = class(TDataModule)
     SkinController: TdxSkinController;
     HintController: TcxHintStyleController;
+    il20px: TcxImageList;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
@@ -64,10 +66,10 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.ShlObj,
-  Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
+  Vcl.Graphics, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect;
+  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -133,6 +135,8 @@ end;
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
   FUpdateFiles.Free;
+
+  TfrmSystemTrayPopup.DestroyIfExists;
 
   TTables.Deinitialize;
   TPlayers.Deinitialize;
