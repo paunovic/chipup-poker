@@ -11,12 +11,12 @@ type
   TfrmSystemTrayPopup = class(TForm)
     imgClose: TcxImage;
     imgHeader: TcxImage;
-    lbsCaption: TcxLabel;
+    lbsMessage: TcxLabel;
     tiAlphaBlend: TTimer;
     tiClosePopup: TTimer;
     Bevel1: TdxBevel;
     tiCursorCheck: TTimer;
-    cxLabel1: TcxLabel;
+    lbsCaption: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure tiAlphaBlendTimer(Sender: TObject);
     procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -158,7 +158,7 @@ var
   maxwidth: Integer;
   minwidth: Integer;
 begin
-  lbwidth := lbsCaption.Canvas.TextWidth(lbsCaption.Caption);
+  lbwidth := lbsMessage.Canvas.TextWidth(lbsMessage.Caption);
   minwidth := Screen.Width div 8; // min width is 1/8 of screen width
   maxwidth := Screen.Width div 4; // max width is 1/6 of screen width
 
@@ -178,7 +178,7 @@ procedure TfrmSystemTrayPopup.SetPopupText(const AValue: String);
 begin
   tiClosePopup.Enabled := FALSE;
   FPopupText := AValue;
-  lbsCaption.Caption := FPopupText;
+  lbsMessage.Caption := FPopupText;
   SetFormSize;
   FAlphaBlendStep := 15;
   tiAlphaBlend.Enabled := TRUE;

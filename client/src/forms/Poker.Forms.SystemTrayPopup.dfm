@@ -33,29 +33,6 @@ object frmSystemTrayPopup: TfrmSystemTrayPopup
     Anchors = [akLeft, akTop, akRight]
     Shape = dxbsLineCenteredVert
   end
-  object imgClose: TcxImage
-    Left = 247
-    Top = 3
-    Anchors = [akTop, akRight]
-    Properties.PopupMenuLayout.MenuItems = []
-    Properties.Proportional = False
-    Properties.ReadOnly = True
-    Properties.ShowFocusRect = False
-    Style.BorderStyle = ebsNone
-    Style.Edges = []
-    Style.HotTrack = False
-    Style.LookAndFeel.SkinName = ''
-    StyleDisabled.LookAndFeel.SkinName = ''
-    StyleFocused.LookAndFeel.SkinName = ''
-    StyleHot.LookAndFeel.SkinName = ''
-    TabOrder = 0
-    Transparent = True
-    Visible = False
-    OnClick = imgCloseClick
-    OnMouseMove = FormMouseMove
-    Height = 20
-    Width = 20
-  end
   object imgHeader: TcxImage
     Left = 5
     Top = 3
@@ -641,7 +618,7 @@ object frmSystemTrayPopup: TfrmSystemTrayPopup
     Transparent = True
     OnMouseMove = FormMouseMove
   end
-  object lbsCaption: TcxLabel
+  object lbsMessage: TcxLabel
     AlignWithMargins = True
     Left = 5
     Top = 28
@@ -665,19 +642,43 @@ object frmSystemTrayPopup: TfrmSystemTrayPopup
     AnchorX = 135
     AnchorY = 42
   end
-  object cxLabel1: TcxLabel
+  object lbsCaption: TcxLabel
     AlignWithMargins = True
     Left = 31
     Top = 5
     Margins.Left = 31
     Margins.Top = 5
-    Margins.Right = 50
+    Margins.Right = 10
     Margins.Bottom = 0
     Align = alTop
     Caption = 'ChipUP Poker'
     Style.TextColor = 9079434
     Style.TextStyle = [fsBold]
     Transparent = True
+    ExplicitWidth = 189
+  end
+  object imgClose: TcxImage
+    Left = 247
+    Top = 3
+    Anchors = [akTop, akRight]
+    Properties.PopupMenuLayout.MenuItems = []
+    Properties.Proportional = False
+    Properties.ReadOnly = True
+    Properties.ShowFocusRect = False
+    Style.BorderStyle = ebsNone
+    Style.Edges = []
+    Style.HotTrack = False
+    Style.LookAndFeel.SkinName = ''
+    StyleDisabled.LookAndFeel.SkinName = ''
+    StyleFocused.LookAndFeel.SkinName = ''
+    StyleHot.LookAndFeel.SkinName = ''
+    TabOrder = 0
+    Transparent = True
+    Visible = False
+    OnClick = imgCloseClick
+    OnMouseMove = FormMouseMove
+    Height = 20
+    Width = 20
   end
   object tiAlphaBlend: TTimer
     Enabled = False
