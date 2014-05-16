@@ -3,7 +3,8 @@ unit Poker.Objects.GameInfo;
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Common.Misc;
+  Winapi.Windows, System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus,
+  Poker.Common.Misc;
 
 type
   TGameInfo = class
@@ -54,6 +55,8 @@ type
     property LastHandId     : UINT32 read FLastHandId;
 
   end;
+
+  TPB_Games = TObjectList<TPB_Game>;
 
   TGamesInfo = class(TObjectList<TGameInfo>)
   public

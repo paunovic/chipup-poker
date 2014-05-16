@@ -91,9 +91,9 @@ implementation
 
 uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
-  JclExprEval, Poker.Table.Resources,
+  JclExprEval, Poker.Table.Resources, Poker.DataModule,
   {$ENDIF}
-  Poker.Common.InstanceController,
+  Poker.Common.InstanceController, Poker.DataModule,
   Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
 
 
@@ -180,8 +180,10 @@ begin
     WriteLn(output);
 
   if DebugFilePath = '' then
-    DebugFilePath := SelfPath + Format('debug\[%d] %s.txt', [GetCurrentProcessId, FormatDateTime('dd-mm-yyyy hh-nn-ss', Now)]);
+    DebugFilePath := SelfPath + Format('debug\%s [%d].txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), GetCurrentProcessId]);
 
+  if ConsoleAttached then
+    WriteLn(DebugFilePath);
   ForceDirectories(ExtractFilePath(DebugFilePath));
   AssignFile(tfile, DebugFilePath);
   if FileExists(DebugFilePath) then

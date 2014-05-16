@@ -112,6 +112,7 @@ object frmForgotPassword: TfrmForgotPassword
     Top = 8
     object acOK: TAction
       Caption = 'OK'
+      Enabled = False
       OnExecute = acOKExecute
     end
     object acCancel: TAction

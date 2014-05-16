@@ -1,42 +1,59 @@
 #define ApplicationName "ChipUP Poker"
 #define ApplicationExe "chipuppoker.exe"
+#define ApplicationPublisher "ChipUP Poker"
+#define ApplicationPublisherURL "http://www.chipuppoker.com"
+#define ApplicationInstanceMutex "CHIPUPINSTANCEMUTEX"
+#define InstallerFilename "install_chipuppoker"
 #define SkinName "Carbon.vsf"
 
-[Setup]
+[Setup]                                                                               
 AppName={#ApplicationName}
 AppVerName={#ApplicationName}
-DefaultDirName={pf}\{#ApplicationName}
+AppPublisher={#ApplicationPublisher}
+AppPublisherURL={#ApplicationPublisherURL}
+DefaultDirName={code:AppInstallPath}
 DefaultGroupName={#ApplicationName}
 UninstallFilesDir={app}\uninstall
 UninstallDisplayName={#ApplicationName}
-Compression=lzma2                                                                                 
 SolidCompression=yes
 OutputDir=.\
-OutputBaseFilename=install_chipuppoker
+DisableDirPage=yes
+OutputBaseFilename={#InstallerFilename}
 UninstallDisplayIcon={app}\{#ApplicationExe}
 DisableProgramGroupPage=yes
-AppMutex=CHIPUPINSTANCEMUTEX
+DisableReadyPage=yes
+AppMutex={#ApplicationInstanceMutex}
 WizardImageFile=installer_images\installer-1.bmp
 WizardSmallImageFile=installer_images\installer-2.bmp
 
 [Files]
-Source: "skins\VclStylesInno.dll"; DestDir: {app}; Flags: uninsneveruninstall ignoreversion
-Source: "skins\{#SkinName}"; DestDir: {app}; Flags: ignoreversion
-
+Source: "skins\VclStylesInno.dll"; DestDir: "{app}"; Flags: uninsneveruninstall ignoreversion
+Source: "skins\{#SkinName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "root_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "client_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ssl_libs\*.*"; DestDir: "{app}"; Flags: ignoreversion
-
+   
 [Icons]
-Name: "{group}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"
-Name: "{group}\Uninstall"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Tasks: desktopicon
+Name: "{code:StartMenuPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"; Tasks: startmenu
+Name: "{code:StartMenuPath}\{#ApplicationName}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"; Tasks: startmenu
+Name: "{code:StartMenuPath}\{#ApplicationName}\Uninstall"; Filename: "{uninstallexe}"; Tasks: startmenu
+Name: "{code:QuickLaunchPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Tasks: quicklaunch
+Name: "{code:DesktopIconPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#ApplicationExe}"; Description: "Launch ChipUP Poker"; Flags: postinstall nowait runascurrentuser
+Filename: "{app}\{#ApplicationExe}"; Description: "Launch {#ApplicationName}"; Flags: postinstall nowait runascurrentuser
 
 [Tasks]
-Name: desktopicon; Description: "Create a desktop icon"
+Name: install_allusers; Description: "&All users"; GroupDescription: "Install for:"; Flags: exclusive
+Name: install_currentuser; Description: "&Current user"; GroupDescription: "Install for:"; Flags: exclusive unchecked
+Name: desktopicon; Description: "&Desktop shortcut"; GroupDescription: "Shortcuts:"
+Name: quicklaunch; Description: "&Quick launch shortcut"; GroupDescription: "Shortcuts:"
+Name: startmenu; Description: "&Start menu shortcut"; GroupDescription: "Shortcuts:"
+
+[Messages]
+WizardSelectTasks=Select Tasks
+SelectTasksDesc=Which tasks should be performed?
+SelectTasksLabel2=Select the tasks you would like Setup to perform while installing [name], then click Install.
 
 [Code]
 procedure LoadVCLStyleS(VClStyleFile: String); external 'LoadVCLStyleW@files:VclStylesInno.dll stdcall setuponly';
@@ -47,27 +64,25 @@ procedure UnLoadVCLStylesU; external 'UnLoadVCLStyles@{app}\VclStylesInno.dll st
 
 var
   ApplicationUninstalled: Boolean;
+  WizardInitialized: Boolean;
 
 function InitializeSetup(): Boolean;
 var
-  C1    : Integer;
-  silent: Boolean;
+  C1: Integer;
 begin
   ExtractTemporaryFile('{#SkinName}');
   LoadVCLStyleS(ExpandConstant('{tmp}\{#SkinName}'));
-
-  silent := FALSE;
-  for C1 := 1 to ParamCount do
-    if CompareText(ParamStr(C1), '/verysilent') = 0 then
-    begin
-      silent := TRUE;
-      Break;
-    end;
-
-  if silent then
-    Sleep(1000);
-
   result := TRUE;
+end;
+
+procedure InitializeWizard();
+begin
+  WizardInitialized := TRUE;
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  WizardForm.DirEdit.Text := ExpandConstant('{code:AppInstallPath}');
 end;
  
 procedure DeinitializeSetup();
@@ -107,9 +122,53 @@ begin
       mres := MsgBox('Do you want to delete user data?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2)
       if mres = IDYES then
       begin   
-        DelTree(ExpandConstant('{localappdata}\ChipUP Poker'), TRUE, TRUE, TRUE);
-        DelTree(ExpandConstant('{userappdata}\ChipUP Poker'), TRUE, TRUE, TRUE);
+        DelTree(ExpandConstant('{localappdata}\{#ApplicationName}'), TRUE, TRUE, TRUE);
+        DelTree(ExpandConstant('{userappdata}\{#ApplicationName}'), TRUE, TRUE, TRUE);
       end;
     end;  
   end;
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = wpSelectTasks then
+    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
+end;
+
+function IsCurrentUserInstall: Boolean;
+begin
+  result := (WizardInitialized) and
+            (IsTaskSelected('install_currentuser')); 
+end;
+
+function AppInstallPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userpf}\{#ApplicationName}')
+  else
+    result := ExpandConstant('{commonappdata}\Programs\{#ApplicationName}');
+end;
+
+function DesktopIconPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userdesktop}')
+  else
+    result := ExpandConstant('{commondesktop}');
+end;
+
+function StartMenuPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userprograms}')
+  else
+    result := ExpandConstant('{commonprograms}');
+end;
+
+function QuickLaunchPath(Param: String): String;
+begin
+  if IsCurrentUserInstall then
+    result := ExpandConstant('{userappdata}\Microsoft\Internet Explorer\Quick Launch')
+  else
+    result := ExpandConstant('{commonappdata}\Microsoft\Internet Explorer\Quick Launch')
 end;

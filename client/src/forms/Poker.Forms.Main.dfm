@@ -3561,7 +3561,6 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
     OnMouseDown = imgCashierMouseDown
     OnMouseUp = imgCashierMouseUp
-    ExplicitLeft = 643
     Height = 140
     Width = 140
   end
@@ -3576,7 +3575,6 @@ object frmChipUpMain: TfrmChipUpMain
     Color = clBlack
     ParentBackground = False
     TabOrder = 2
-    ExplicitWidth = 793
     object pcTabs: TcxPageControl
       Left = 0
       Top = 0
@@ -3587,7 +3585,6 @@ object frmChipUpMain: TfrmChipUpMain
       Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ExplicitWidth = 793
       ClientRectBottom = 409
       ClientRectLeft = 1
       ClientRectRight = 793
@@ -3597,7 +3594,7 @@ object frmChipUpMain: TfrmChipUpMain
         ImageIndex = 0
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 793
+        ExplicitWidth = 794
         ExplicitHeight = 410
         DesignSize = (
           792
@@ -3704,7 +3701,7 @@ object frmChipUpMain: TfrmChipUpMain
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
           ExplicitTop = 236
-          ExplicitWidth = 627
+          ExplicitWidth = 628
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3919,6 +3916,10 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 794
+        ExplicitHeight = 410
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1

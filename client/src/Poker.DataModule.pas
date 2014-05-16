@@ -7,12 +7,14 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, cxLookAndFeels, dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip,
-  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo;
+  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo, Vcl.ImgList,
+  Vcl.Controls, cxGraphics;
 
 type
   TdmMain = class(TDataModule)
     SkinController: TdxSkinController;
     HintController: TcxHintStyleController;
+    il20px: TcxImageList;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
@@ -48,8 +50,12 @@ type
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
+
 var
   dmMain: TdmMain;
+
+  SelfPath: String;
+  AppDataPath: String;
 
 implementation
 
@@ -59,10 +65,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Vcl.Graphics, Vcl.Controls, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
+  Winapi.ShlObj,
+  Vcl.Graphics, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Protobufs.Objects.Game, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect;
+  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -74,15 +81,28 @@ begin
 end;
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
+var
+  common, local: String;
 begin
+  SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
+  local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
+  common := GetSpecialFolderPath(CSIDL_COMMON_APPDATA);
+  if Pos(LowerCase(common), LowerCase(SelfPath)) > 0 then
+    AppDataPath := common
+  else
+    AppDataPath := local;
+  AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AppDataPath) + 'ChipUP Poker');
+
+  ForceDirectories(AppDataPath);
+
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
   {$ENDIF}
 
   LoadFonts;
 
-  TSettings.Initialize(AppDataLocalPath + TSettings.Hardcoded.SETTINGS_FILENAME);
-  TDatabase.Initialize(AppDataLocalPath + TSettings.Hardcoded.DATABASE_FILENAME);
+  TSettings.Initialize(AppDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
+  TDatabase.Initialize(AppDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
   TAvatars.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
@@ -115,6 +135,8 @@ end;
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
   FUpdateFiles.Free;
+
+  TfrmSystemTrayPopup.DestroyIfExists;
 
   TTables.Deinitialize;
   TPlayers.Deinitialize;
@@ -234,7 +256,7 @@ begin
       for club in FSelfInfo.Clubs do
         if club.Games.FindGame(tstatus.TableMongoId, game) then
         begin
-          table := Tables.AddTable(club, game, FALSE, FALSE);
+          table := Tables.AddTable(club, game, TRUE, FALSE);
           Break;
         end;
 
@@ -283,27 +305,23 @@ begin
 end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
-const
-  FILES_COUNT = 7;
-  FILES: array[0..FILES_COUNT - 1] of String = ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf',
-     'bspatch.exe', 'sqlite3.dll');
 var
   pb_ufi: TPB_UpdateFileInfo;
-  C1: Integer;
   fullpath: String;
   hash: RawByteString;
   hash_bytes: TBytes;
   client_path: String;
+  update_file: String;
 begin
-  for C1 := Low(FILES) to High(FILES) do
+  for update_file in Settings.Hardcoded.UPDATE_FILES do
   begin
     pb_ufi := TPB_UpdateFileInfo.Create;
-    pb_ufi.Path := FILES[C1];
+    pb_ufi.Path := update_file;
     fullpath := client_path + pb_ufi.Path;
     SetLength(hash_bytes, 0);
     if FileExists(fullpath) then
     begin
-      hash := SHA256File(FILES[C1]);
+      hash := SHA256File(fullpath);
       if Length(hash) > 0 then
       begin
         SetLength(hash_bytes, Length(hash));

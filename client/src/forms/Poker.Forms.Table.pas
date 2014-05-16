@@ -1950,8 +1950,14 @@ begin
 end;
 
 procedure TfrmTable.acRaise3BBExecute(Sender: TObject);
+var
+  val: UINT32;
 begin
-  SetRaiseSliderValue(FTable.Game.BigBlind * 3);
+  val := FTableStatus.MinimumBet;
+  if val = 0 then
+    val := FTable.Game.BigBlind;
+
+  SetRaiseSliderValue(val * 3);
 end;
 
 procedure TfrmTable.acRaiseMaxExecute(Sender: TObject);

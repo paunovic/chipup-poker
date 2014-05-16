@@ -3,8 +3,8 @@ unit Poker.Objects.PlayerInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils,
-  Poker.Objects.ClubInfo, Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.User, Poker.Common.Misc;
+  System.Generics.Collections, System.SysUtils, Poker.Objects.ClubInfo, Poker.Protobufs.Objects.StatusReply,
+  Poker.Protobufs.Objects.User;
 
 type
   TPlayerInfo = class
@@ -36,6 +36,8 @@ type
     property Clubs   : TClubsInfo read FClubs;
   end;
 
+  TPB_Users = TObjectList<TPB_User>;
+
   TPlayers = class(TObjectList<TPlayerInfo>)
   public
     class procedure Initialize;
@@ -55,7 +57,7 @@ implementation
 uses
   System.Classes, PNGImage,
   {$IFDEF DEBUG} {$ENDIF}
-  Poker.Objects.GameInfo, Poker.Table.Tables, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
+  Poker.Objects.GameInfo, Poker.Table.Tables, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc;
 
 
 constructor TPlayerInfo.Create;

@@ -46,6 +46,7 @@ uses
   Poker.Forms.ImageCrop in 'forms\Poker.Forms.ImageCrop.pas' {frmImageCrop},
   Poker.Forms.ContactUs in 'forms\Poker.Forms.ContactUs.pas' {frmContactUs},
   Poker.Forms.Reconnect in 'forms\Poker.Forms.Reconnect.pas' {frmReconnect},
+  Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -126,11 +127,11 @@ uses
   Poker.Protobufs.Objects.ContactMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.ContactMessage.pas',
   Poker.Protobufs.Objects.BuyinError in 'modules\protobuf\objects\Poker.Protobufs.Objects.BuyinError.pas',
   Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas',
-  Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout},
   Poker.Protobufs.Objects.UpdateFileInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.UpdateFileInfo.pas',
   Poker.Protobufs.Objects.HelloReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas',
   Poker.Protobufs.Objects.HelloParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas',
-  Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas';
+  Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas',
+  Poker.Forms.SystemTrayPopup in 'forms\Poker.Forms.SystemTrayPopup.pas' {frmSystemTrayPopup};
 
 procedure FocusPokerApp;
 var

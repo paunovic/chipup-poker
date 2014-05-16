@@ -15,7 +15,6 @@ type
     lbsCaption: TcxLabel;
     imgHeader: TcxImage;
     imgClose: TcxImage;
-    ImageList: TcxImageList;
     imgMinimize: TcxImage;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -59,13 +58,13 @@ procedure TfrmUpdater.FormCreate(Sender: TObject);
 var
   ufi: TPB_UpdateFileInfo;
 begin
-  ImageList.GetImage(0, imgClose.Picture.Bitmap);
-  ImageList.GetImage(2, imgMinimize.Picture.Bitmap);
+  dmMain.il20px.GetImage(0, imgClose.Picture.Bitmap);
+  dmMain.il20px.GetImage(2, imgMinimize.Picture.Bitmap);
 
   FUpdateFileIndex := -1;
   HttpClient.RcvdStream := TMemoryStream.Create;
 
-  FUpdateDir := IncludeTrailingPathDelimiter(AppDataLocalPath + IncludeTrailingPathDelimiter('update'));
+  FUpdateDir := IncludeTrailingPathDelimiter(AppDataPath + IncludeTrailingPathDelimiter('update'));
 
   FTotalSize := 0;
   FCurrentDownloadedSize := 0;
@@ -258,8 +257,8 @@ begin
   begin
     if FFullInstaller then
     begin
-      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(AppDataLocalPath + 'install_chipuppoker.exe');
-      dmMain.SetUpdaterInstaller(AppDataLocalPath + 'install_chipuppoker.exe');
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(AppDataPath + 'install_chipuppoker.exe');
+      dmMain.SetUpdaterInstaller(AppDataPath + 'install_chipuppoker.exe');
       Close;
       Exit;
     end;
@@ -304,13 +303,13 @@ begin
 
   if imgClose.Tag <> img_close then
   begin
-    ImageList.GetImage(img_close, imgClose.Picture.Bitmap);
+    dmMain.il20px.GetImage(img_close, imgClose.Picture.Bitmap);
     imgClose.Tag := img_close;
   end;
 
   if imgMinimize.Tag <> img_min then
   begin
-    ImageList.GetImage(img_min, imgMinimize.Picture.Bitmap);
+    dmMain.il20px.GetImage(img_min, imgMinimize.Picture.Bitmap);
     imgMinimize.Tag := img_min;
   end;
 end;
