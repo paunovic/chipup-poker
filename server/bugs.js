@@ -23,7 +23,7 @@ if (require.main === module) {
 	});
 }
 function setup(app,bugs,users,db) {
-	app.use('/secure/',express.basicAuth(function mongoAuth(username,password,callback) {
+	/*app.use('/secure/',express.basicAuth(function mongoAuth(username,password,callback) {
 		console.log('checking auth %s/%s',username,password);
 		db.collection('admin').findOne({username:username},function (err,adminRow) {
 			console.log('adminRow:%j',adminRow);
@@ -36,7 +36,19 @@ function setup(app,bugs,users,db) {
 			}
 			callback(null,false);
 		});
-	}));
+	}));*/
+	app.use('/secure/',function (req,res,next) {
+		if (req.session.authed) return next();
+		if (req.url == '/login') {
+			return next(); // allow the login page
+		} else {
+			// FIXME, save url and redirect
+			console.log(req.url);
+			console.log(req.originalUrl);
+			res.writeHead(302,{Location:'/secure/login'});
+			res.end('you must first login');
+		}
+	});
 	var PokerProfile = db.collection('PokerProfile');
 	app.set('view engine','jade');
 	app.get('/secure/bugs',function (req,res) {
@@ -79,6 +91,32 @@ function setup(app,bugs,users,db) {
 	});
 	app.get('/secure/',function (req,res) {
 		res.render('secure_index');
+	});
+	app.get('/secure/login',function (req,res) {
+		res.render('secure_login');
+	});
+	app.get('/secure/logout',function (req,res) {
+		req.session.destroy(function (err) {
+			res.end('you are logged out');
+		});
+	});
+	app.post('/secure/login',function (req,res) {
+		var username = req.body.username;
+		var password = req.body.password;
+		console.log('checking auth %s/%s',username,password);
+		db.collection('admin').findOne({username:username},function (err,adminRow) {
+			console.log('adminRow:%j',adminRow);
+			if (adminRow) {
+				// FIXME, add salt
+				if (adminRow.password == password) {
+					req.session.authed = true;
+					res.writeHead(302,{Location:'/secure/'});
+					res.end('sucess');
+					return;
+				}
+			}
+			res.end('fail');
+		});
 	});
 	app.get('/secure/clubs',function (req,res) {
 		var start = Date.now();

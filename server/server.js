@@ -34,6 +34,7 @@ var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var buildbot = require('./buildbot');
+var MongoStore = require('./mongoStore');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
@@ -90,8 +91,29 @@ var activeUsers = {};
 var activeGames = {};
 
 var app = express();
+var sessionStore;
 var httpServer = http.createServer(app);
 var io = require('socket.io').listen(httpServer);
+io.set('authorization',function (handshakeData,callback) {
+	var test = require('./node_modules/express/node_modules/connect');
+	var cookieModule = require('./node_modules/express/node_modules/cookie');
+	if (handshakeData.headers.cookie) {
+		var cookies = cookieModule.parse(handshakeData.headers.cookie);
+		var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
+	}
+	if (parsed && parsed.poker) {
+		sessionStore.get(parsed.poker,function (err,session) {
+			if (session.authed) {
+				callback(null,true);
+			} else {
+				callback(null,false);
+			}
+		});
+	} else {
+		log('unauthorized ip: %s',ip);
+		callback(null,false);
+	}
+});
 var logger = require('morgan');
 var bsdiffLock = new ReadWriteLock();
 app.use(logger());
@@ -587,6 +609,13 @@ function installers_func(req,res) {
 			});
 		});
 	}
+	var user_stats;
+	jobs.push(function (cb) {
+		allUsers.aggregate({$group:{_id:'$currentVersion',hits:{$sum:1}}},function (err,rows) {
+			user_stats = rows;
+			cb();
+		});
+	});
 	console.log('jobs: %j', jobs);
 	if (jobs.length == 0) finish2();
 	else {
@@ -601,6 +630,12 @@ function installers_func(req,res) {
 					if (data[x]._id.toString() == row.value.toString()) {
 						console.log(data[x]);
 						activeRelease = data[x];
+					}
+					for (var y=0; y<user_stats.length; y++) {
+						if (compareObjectID(data[x]._id,user_stats[y]._id)) {
+							data[x].used_by = user_stats[y].hits;
+							console.log(data[x]);
+						}
 					}
 				}
 				Config.findOne({_id:'debuginstallerid'},function (err,row2) {
@@ -732,7 +767,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats,gameState;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -763,6 +798,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	Config = db.collection('config');
 	GameEvents = db.collection('GameEvents');
 	allStats = db.collection('allStats');
+	gameState = db.collection('gameState');
 
 	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
 		assert.ok(collection instanceof Collection);
@@ -773,6 +809,10 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		PokerProfile = collection;
 		profiler.setup(PokerProfile);
 	});
+
+	sessionStore = new MongoStore(db,'sessions');
+	app.use(express.cookieParser());
+	app.use(express.session({secret:'ahQu6eey',key:'poker',store:sessionStore}));
 
 	setup3(db);
 
@@ -804,12 +844,27 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	});
 
 	allCounters.insert({_id:"club",seq:1},function (err,res) {});
-	allGames.find({gameState:{$exists:true}}).toArray(function (err,badgames) { // FIXME, check state
+	gameState.find({}).toArray(function (err,badgames) { // FIXME, check state
 		console.log(badgames);
 		if (badgames.length > 0) {
 			log('%d bad games found, recovering',badgames.length);
 			async.each(badgames,function (game,cb) {
-				allGames.update({_id:game._id},{$unset:{gameState:0}},cb)
+				//gameState.remove({_id:game._id},cb)
+				console.log('game is',game);
+				Game.getGame(game._id,function (err,gameObj) {
+					assert.ifError(err);
+					gameObj.reconnect = game.users;
+					for (var x=0; x<game.members.length; x++) {
+						var item = game.members[x];
+						console.log(item);
+						var pubSeat = { disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed };
+						var privSeat = {log:ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'};
+						pubSeat.hand.cards = item.hand.cards;
+						gameObj.members[item.seat] = pubSeat;
+						gameObj.seats[item.seat] = privSeat;
+					}
+					cb();
+				});
 			},checkCorruptChips);
 		} else {
 			checkCorruptChips();
@@ -838,7 +893,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			if (!row) {
 				getNextSequence('handHistory',function(seq) {
 					hands = seq;
-					goOnline();
+					compileJade();
 				});
 			} else {
 				hands = row.seq;
@@ -917,6 +972,7 @@ function ClientSocket(socket) {
 	}.bind(this));
 	this.reader = new protoreader(socket,this);
 	this.oldTimer = setTimeout(function () {
+		this.log('hello timeout, sending it');
 		this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
 	}.bind(this),5000);
 	socket.on('error',function(err) {
@@ -945,6 +1001,13 @@ function bufferMatch(a,b) {
 }
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	function finish(row) {
+		if (this.currentVersion) {
+			allUsers.update({_id:row._id},{$set:{currentVersion:this.currentVersion}},function () {
+				finish2.call(this,row);
+			}.bind(this));
+		} else finish2.call(this,row);
+	}
+	function finish2(row) {
 		var oldconn = activeUsers[row._id];
 		if (oldconn) {
 			oldconn.eject();
@@ -966,7 +1029,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					if (!game.seats[seatIdx]) continue;
 					if (compareObjectID(game.seats[seatIdx].userid,row._id)) {
 						if (game.members[seatIdx].disconnected) {
-							toResume.push({game:game,seat:seatIdx});
+							toResume.push({game:game,seat:seatIdx,seated:true});
 							added = true;
 							break;
 						}
@@ -980,6 +1043,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					}
 				}
 			}
+			this.log('resuming %d games',toResume.length);
 			var statuses = [];
 			async.each(toResume,function resumer(game,cb) {
 				game.game.Lock.writeLock(function (release) {
@@ -1000,8 +1064,9 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					}
 					game.game.users[row._id] = this;
 					this.log('game state is %s',game.game.state);
+					this.log('game obj is %s',util.inspect(game));
 					var events = [];
-					if (game.seat) {
+					if (game.seated) {
 						this.log('found seat, clearing disconnected');
 						clearTimeout(game.game.members[game.seat].disconnectTimer);
 						game.game.members[game.seat].disconnected = false;
@@ -1012,6 +1077,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					} else finish2.call(this,[]);
 				}.bind(this));
 			}.bind(this),function done() {
+				console.log(statuses);
 				this.send(codes.srLoginReply,{login_status:'lrSuccess',status:status,reconnect_tables:statuses},'Poker.LoginReply');
 				// FIXME< embed in the same message
 				handlers[codes.scQueryTableStats].call(this,new Buffer(0));
@@ -1198,6 +1264,9 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 				}
 			}.bind(this),function () {
 				console.log('toUpdate:%j',toUpdate);
+				if (toUpdate.length == 0) {
+					this.currentVersion = targetVersion._id;
+				}
 				var msg = JSON.parse(JSON.stringify(sharedconfig));
 				msg.update_files = toUpdate;
 				this.send(codes.srHello,msg,'Poker.HelloReply');
@@ -2126,18 +2195,20 @@ ClientSocket.prototype.handle = function (code,args) {
 							this.log('i am not a member');
 							this.reply(0,'your not a member of that club'); // FIXME, bots rely on this error
 							release();
-						} else if (game.join(this)) {
-							var events = [];
-							if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
-								var cards = game.flop.cards;
-								if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
-								if (game.state == 'tsRiver') cards = cards.concat(game.river.cards);
-								events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
-							}
-							var status = game.getTableStatus(this,true,events);
-							this.send(codes.seTableStatus,status,'Poker.TableStatus');
-							release();
-							token.stop();
+						} else {
+							game.join(this,function () {
+								var events = [];
+								if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
+									var cards = game.flop.cards;
+									if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
+									if (game.state == 'tsRiver') cards = cards.concat(game.river.cards);
+									events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
+								}
+								var status = game.getTableStatus(this,true,events);
+								this.send(codes.seTableStatus,status,'Poker.TableStatus');
+								release();
+								token.stop();
+							}.bind(this));
 						}
 					}.bind(this));
 				}.bind(this));
@@ -2434,11 +2505,13 @@ ClientSocket.prototype.handle = function (code,args) {
 						}
 					} else finish([]);
 					function finish(events) { // teDeal
-						game.broadcastStatus(null,true,events);
-						release();
-						if (game.state == 'tsPreFlop') {
+						game.updateMongoState({},{members:true},function () {
+							game.broadcastStatus(null,true,events);
+							release();
+						});
+						//if (game.state == 'tsPreFlop') {
 							// FIXME game.startTimer(game.current_seat);
-						}
+						//}
 					}
 				}.bind(this));
 			}.bind(this));
@@ -2959,16 +3032,18 @@ Game.prototype.edited = function edited(params) {
 	this.obj.game_type = params.game_type;
 	this.omaha = this.obj.game_type == 'gtOmaha';
 }
-Game.prototype.join = function join(conn) {
+Game.prototype.join = function join(conn,cb) {
 	assert.equal(this.Lock.readers,-1);
 	this.users[conn.userid] = conn;
-	return true;
+	this.updateMongoState({},{users:true},cb);
 }
 Game.prototype.sitDown = function (conn,params,cb) {
 	function finish() {
 		this.club.seGameChanged(JSON.parse(JSON.stringify(this.obj)),function () {
-			cb(true,events);
-		},conn);
+			this.updateMongoState({},{members:true},function () {
+				cb(true,events);
+			});
+		}.bind(this),conn);
 	}
 	assert.equal(this.Lock.readers,-1);
 	assert(conn.userid);
@@ -3209,7 +3284,9 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			else cards = 2;
 			this.startTimer(this.current_seat,1500 + (players*50*cards)); // FIXME, run this later
 			//this.stateMachine(function () {
+			this.updateMongoState({},{},function () {
 				cb([this.makeEvent('teDealing')]);
+			}.bind(this));
 			//}.bind(this));
 			//}.bind(this),
 			//players * 100);
@@ -3319,7 +3396,10 @@ Game.prototype.fold = function fold(seat,cb1) {
 		var token2 = profiler.start('fold-inner1.2');
 		this.saveHistory(function () {
 			token2.stop();
-			cb1.bind(this,events,offset)(); // FIXME
+			// FIXME, update members like sitDown
+			this.updateMongoState({},{},function () {
+				cb1.call(this,events,offset);
+			}.bind(this));
 		}.bind(this));
 	}
 	switch (this.state) {
@@ -3798,7 +3878,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 	token1.stop();
 	async.parallel([
 		function (cb) {
-			this.updateMongoState(function () {
+			this.updateMongoState({},{},function () {
 				//this.log('pot for game updated');
 				cb();
 			}.bind(this));
@@ -3857,8 +3937,36 @@ Game.prototype.moveToPot = function (reason,cb1) {
 			cb1();
 		}.bind(this));
 }
-Game.prototype.updateMongoState = function (cb) {
-	allGames.update({_id:this.obj._id}, {$set:{gameState:{pots:this.pots}}},function (err,res) {
+Game.prototype.updateMongoState = function (obj,options,cb) {
+	if (!obj) obj = {};
+	if (!obj.$set) obj.$set = {};
+	obj.$set.pots = this.pots;
+	obj.$set.current_seat = this.current_seat;
+	obj.$set.state = this.state;
+	obj.$set.flop = this.flop;
+	obj.$set.turn = this.turn;
+	obj.$set.river = this.river;
+	if (options.members) {
+		var memberList = [];
+		var keys = ['hand','status','chips','seat','sitOutNextRound','SittingOutRoundsCount','handsPlayed'];
+		for (var x=0; x<this.members.length; x++) {
+			var input = this.members[x];
+			if (!input) continue;
+			var out = {userid:this.seats[x].userid};
+			for (var y=0; y<keys.length; y++) {
+				var key = keys[y];
+				out[key] = input[key];
+			}
+			memberList.push(out);
+		}
+		obj.$set.members = memberList;
+	}
+	if (options.users) {
+		var U = [];
+		for (var key in this.users) U.push(this.users[key].userid);
+		obj.$set.users = U;
+	}
+	conn.collection('gameState').update({_id:this.obj._id}, obj,function (err,res) {
 		assert(res == 1);
 		cb();
 	}.bind(this));
@@ -3927,7 +4035,9 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	//this.saveHistory(function () {
 		this.stateMachine(function (events,offset) {
 			assert.equal(typeof offset,'number');
-			cb(events,offset);
+			this.updateMongoState({},{},function () {
+				cb(events,offset);
+			});
 		}.bind(this),null,null,[this.makeEvent(event,seat)],0);
 	//}.bind(this));
 }
@@ -4472,8 +4582,10 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 					}
 				}
 			}
-			cb1();
-			release();
+			this.updateMongoState({},{users:true},function () {
+				cb1();
+				release();
+			});
 		}
 	}.bind(this));
 }
@@ -4630,11 +4742,12 @@ Game.getGame = function getgame(id,cb) {
 							conn.send(codes.seGameChange,g,'Poker.Game');
 						}
 					}
-					console.log(Club);
 					Club.getClubBySeq(obj.clubseq,function (err,clubobj) {
 						game.club = clubobj;
 						token.stop();
-						cb(null,game);
+						gameState.insert({_id:game.id},function () {
+							cb(null,game);
+						});
 					});
 				});
 			}.bind(this));
