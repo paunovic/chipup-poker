@@ -32,6 +32,8 @@ type
     procedure SetPopupText(const AValue: String);
     procedure SetFormSize;
     procedure ClosePopup;
+  protected
+    procedure CreateParams(var AParams: TCreateParams); override;
   public
     class procedure ShowPopup(const AText: String);
     class procedure DestroyIfExists;
@@ -48,7 +50,6 @@ uses
 
 var
   frmSystemTrayPopup: TfrmSystemTrayPopup;
-
 
 
 class procedure TfrmSystemTrayPopup.ShowPopup(const AText: String);
@@ -72,6 +73,14 @@ begin
   frmSystemTrayPopup := nil;
 end;
 
+procedure TfrmSystemTrayPopup.CreateParams(var AParams: TCreateParams);
+begin
+  inherited;
+
+  AParams.ExStyle := AParams.ExStyle or WS_EX_TOOLWINDOW or WS_EX_NOACTIVATE;
+  AParams.WndParent := 0;
+end;
+
 class procedure TfrmSystemTrayPopup.DestroyIfExists;
 begin
   if Assigned(frmSystemTrayPopup) then
@@ -93,7 +102,6 @@ end;
 procedure TfrmSystemTrayPopup.tiAlphaBlendTimer(Sender: TObject);
 begin
   if FAlphaBlendStep > 0 then
-  begin
     if AlphaBlendValue + FAlphaBlendStep > 255 then
     begin
       AlphaBlendValue := 255;
@@ -102,11 +110,9 @@ begin
       tiClosePopup.Enabled := TRUE;
     end
     else
-      AlphaBlendValue := AlphaBlendValue + FAlphaBlendStep;
-  end
+      AlphaBlendValue := AlphaBlendValue + FAlphaBlendStep
   else
     if FAlphaBlendStep < 0 then
-    begin
       if AlphaBlendValue + FAlphaBlendStep < 0 then
       begin
         AlphaBlendValue := 0;
@@ -115,7 +121,6 @@ begin
       end
       else
         AlphaBlendValue := AlphaBlendValue + FAlphaBlendStep;
-    end;
 end;
 
 procedure TfrmSystemTrayPopup.tiClosePopupTimer(Sender: TObject);
