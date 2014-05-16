@@ -15,6 +15,7 @@ block content
           th size
           th activate
           th status/delete
+          th used by
         each val in installers
           if val.debug == 'release'
             include installer_row.jade
@@ -28,6 +29,7 @@ block content
           th size
           th activate
           th status/delete
+          th used by
         each val in installers
           if val.debug == 'debug'
             include installer_row.jade
