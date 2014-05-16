@@ -182,6 +182,8 @@ begin
   if DebugFilePath = '' then
     DebugFilePath := SelfPath + Format('debug\%s [%d].txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), GetCurrentProcessId]);
 
+  if ConsoleAttached then
+    WriteLn(DebugFilePath);
   ForceDirectories(ExtractFilePath(DebugFilePath));
   AssignFile(tfile, DebugFilePath);
   if FileExists(DebugFilePath) then
