@@ -190,9 +190,10 @@ type
       FBetAnimations   : TList<Integer>;
       FPotWinAnimations: TList<Integer>;
 
-      FTurnAniDelay    : Single;
-      FRiverAniDelay   : Single;
-      FWinningAniDelay : Single;
+      FWinningFlopAniDelay : Single;
+      FWinningTurnAniDelay : Single;
+      FWinningRiverAniDelay: Single;
+      FWinningAniDelay     : Single;
 
       FMouseDownObject : TMouseDownObject;
 
@@ -1262,7 +1263,8 @@ begin
                   acCall.Caption := Format('CALL (%s)', [ChipsToStr(FTableStatus.MinimumBet - seat_bet)]);
                 acCall.Enabled := TRUE;
 
-                if seat_info.Chips + seat_bet > FTableStatus.MinimumBet then
+                if (seat_info.Chips + seat_bet > FTableStatus.MinimumBet) and
+                   (FTableStatus.MinimumBet < FTableStatus.MinimumRaise) then
                 begin
                   acRaise.Tag := 0;
                   acRaise.Enabled := TRUE;
@@ -1482,11 +1484,11 @@ var
   pbtablestatus: TPB_TableStatus;
   C1: Integer;
   seat_index: Integer;
-  cardshow_events: Integer;
   player: TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
   seat: TSeatInfo;
+  winning: Boolean;
   {$IFDEF DEBUG}
   tmp: String;
   tb: UINT32;
@@ -1540,23 +1542,29 @@ begin
     [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
   {$ENDIF}
 
-  FTurnAniDelay := 0;
-  FRiverAniDelay := 0;
+  FWinningFlopAniDelay := 0;
+  FWinningTurnAniDelay := 0;
+  FWinningRiverAniDelay := 0;
   FWinningAniDelay := 0;
 
-  cardshow_events := 0;
+  winning := FALSE;
   for C1 := 0 to pbtablestatus.Events.Count - 1 do
-    if pbtablestatus.Events[C1].Event in [teFlop, teTurn, teRiver, teWinning] then
-      Inc(cardshow_events);
+    if pbtablestatus.Events[C1].Event = teWinning then
+    begin
+      winning := TRUE;
+      Break;
+    end;
 
-  if cardshow_events > 1 then
-    FTurnAniDelay := 2;
-
-  if cardshow_events > 2 then
-    FRiverAniDelay := 3.25;
-
-  if cardshow_events > 3 then
-    FWinningAniDelay := 4.25;
+  if winning then
+  begin
+    for C1 := 0 to pbtablestatus.Events.Count - 1 do
+      case pbtablestatus.Events[C1].Event of
+        teFlop: FWinningFlopAniDelay := 0.2;
+        teTurn: FWinningTurnAniDelay := FWinningFlopAniDelay + 1;
+        teRiver: FWinningRiverAniDelay := FWinningFlopAniDelay + FWinningTurnAniDelay + 1;
+        teWinning: FWinningAniDelay := FWinningFlopAniDelay + FWinningTurnAniDelay + FWinningRiverAniDelay + 0.2;
+      end;
+  end;
 
   for C1 := 0 to pbtablestatus.Events.Count - 1 do
     ProcessTableEvent(pbtablestatus.Events[C1]);
@@ -1844,7 +1852,7 @@ begin
       {$IFDEF DEBUG}
       event := Format('FLOP [%s]', [FTableStatus.FlopCards.AsString]);
       {$ENDIF}
-      EnableGameLockTimer(1.5);
+      EnableGameLockTimer(1.5 + FWinningFlopAniDelay);
       if AnimateBets(ATableEvent.Bets) then
         TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
@@ -1856,7 +1864,7 @@ begin
       {$IFDEF DEBUG}
       event := Format('TURN [%s]', [FTableStatus.TurnCard.AsString]);
       {$ENDIF}
-      EnableGameLockTimer(FTurnAniDelay + 1.5);
+      EnableGameLockTimer(1.5 + FWinningTurnAniDelay);
       if AnimateBets(ATableEvent.Bets) then
         TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
@@ -1868,7 +1876,7 @@ begin
       {$IFDEF DEBUG}
       event := Format('RIVER [%s]', [FTableStatus.RiverCard.AsString]);
       {$ENDIF}
-      EnableGameLockTimer(FRiverAniDelay + 1.5);
+      EnableGameLockTimer(1.5 + FWinningRiverAniDelay);
       if AnimateBets(ATableEvent.Bets) then
         TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
@@ -2162,7 +2170,10 @@ begin
 
   FRaiseValue := val;
 
-  FRaiseSliderPosition := (val - FRaiseMin) / (FRaiseMax - FRaiseMin);
+  if FRaiseMax - FRaiseMin = 0 then
+    FRaiseSliderPosition := 1
+  else
+    FRaiseSliderPosition := (val - FRaiseMin) / (FRaiseMax - FRaiseMin);
 
   if ASetSpinEditValue then
     seRaiseAmount.Value := val / 100;
@@ -2705,8 +2716,8 @@ begin
       end;
   end;
 
-  RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FDealerPoint, card_points_final[3], 0.75 + FTurnAniDelay);
-  RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FDealerPoint, card_points_final[4], 0.75 + FRiverAniDelay);
+  RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FDealerPoint, card_points_final[3], 0.75 + FWinningTurnAniDelay);
+  RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FDealerPoint, card_points_final[4], 0.75 + FWinningRiverAniDelay);
 end;
 
 procedure TfrmTable.RenderDealingCardsAni;

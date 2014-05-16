@@ -58,6 +58,7 @@ object frmReconnect: TfrmReconnect
     Properties.PeakValue = 100.000000000000000000
     Properties.ShowText = False
     Properties.ShowTextStyle = cxtsText
+    Style.Edges = []
     Style.LookAndFeel.SkinName = ''
     StyleDisabled.LookAndFeel.SkinName = ''
     StyleFocused.LookAndFeel.SkinName = ''

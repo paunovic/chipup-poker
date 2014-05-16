@@ -39,6 +39,7 @@ object frmUpdater: TfrmUpdater
     Properties.PeakValue = 100.000000000000000000
     Properties.ShowText = False
     Properties.ShowTextStyle = cxtsText
+    Style.BorderStyle = ebsNone
     Style.Color = 3881787
     Style.Edges = []
     Style.LookAndFeel.SkinName = ''

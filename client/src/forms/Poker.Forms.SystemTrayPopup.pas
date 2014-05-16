@@ -46,7 +46,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Common.Misc;
+  Poker.DataModule, Poker.Common.Misc, System.StrUtils;
 
 var
   frmSystemTrayPopup: TfrmSystemTrayPopup;
@@ -160,21 +160,34 @@ procedure TfrmSystemTrayPopup.SetFormSize;
 var
   lbwidth: Integer;
   fwidth: Integer;
-  maxwidth: Integer;
+  fheight: Integer;
   minwidth: Integer;
+  lines: Integer;
+  sl: TStringList;
+  C1: Integer;
 begin
-  lbwidth := lbsMessage.Canvas.TextWidth(lbsMessage.Caption);
   minwidth := Screen.Width div 8; // min width is 1/8 of screen width
-  maxwidth := Screen.Width div 4; // max width is 1/6 of screen width
 
-  fwidth := lbwidth + 80;
-  if fwidth < minwidth then
-    fwidth := minwidth
-  else
-    if fwidth > maxwidth then
-      fwidth := maxwidth;
+  sl := TStringList.Create;
+  try
+    sl.Text := FPopupText;
+    lines := sl.Count;
+
+    fheight := lines * lbsMessage.Canvas.TextHeight(lbsMessage.Caption) + 45;
+
+    fwidth := minwidth;
+    for C1 := 0 to sl.Count - 1 do
+    begin
+      lbwidth := lbsMessage.Canvas.TextWidth(sl[C1]);
+      if lbwidth + 80 > fwidth then
+        fwidth := lbwidth + 80;
+    end;
+  finally
+    sl.Free;
+  end;
 
   Width := fwidth;
+  Height := fheight;
   Left := Screen.Width - Width - 5;
   Top := Screen.Height - GetTaskbarHeight - Height - 3;
 end;
