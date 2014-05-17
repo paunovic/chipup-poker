@@ -518,6 +518,7 @@ var
   club: TClubInfo;
   status: String;
   recidx: Integer;
+  member: TClubMemberInfo;
 begin
   gridMyHomeGamesTable.DataController.BeginFullUpdate;
   try
@@ -533,7 +534,15 @@ begin
         if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
           status := 'Manager'
         else
-          status := 'Member';
+          if club.GetMemberInfo(dmMain.SelfInfo.id, member) then
+          begin
+            if member.Suspended then
+              status := 'Suspended'
+            else
+              status := 'Member';
+          end
+          else
+            status := 'Unknown';
         gridMyHomeGamesTable.DataController.SetValue(recidx, gridJoinedClubsStatus.Index, status);
       end;
   finally
