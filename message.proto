@@ -172,7 +172,7 @@ message ClubMember {
 	required bytes _id = 1;
 	optional bool suspended = 2;
 	optional uint32 balance_limit = 3;
-	optional int64 club_balance = 4;
+	optional int32 club_balance = 4;
 }
 
 message Club {
