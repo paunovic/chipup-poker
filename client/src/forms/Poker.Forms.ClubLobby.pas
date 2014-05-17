@@ -156,6 +156,7 @@ type
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
+    procedure seDefaultPlayerLimitPropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -341,6 +342,9 @@ begin
     seClubRake.Properties.OnChange := nil;
     seClubRake.Value := club.Rake;
     seClubRake.Properties.OnChange := seClubRakePropertiesChange;
+    seDefaultPlayerLimit.Properties.OnChange := nil;
+    seDefaultPlayerLimit.Value := club.DefaultBalanceLimit / 100;
+    seDefaultPlayerLimit.Properties.OnChange := seDefaultPlayerLimitPropertiesChange;
     if admin_visible then
     begin
       gridPlayersList.Align := alTop;
@@ -585,6 +589,15 @@ begin
   rt := StringReplace(seClubRake.Text, '%', '', [rfReplaceAll]);
   if (TryStrToInt(rt, rake)) and
      (rake >= 1) and (rake <= 10) then
+    tiUpdateClubDetails.Enabled := TRUE;
+end;
+
+procedure TfrmClubLobby.seDefaultPlayerLimitPropertiesChange(Sender: TObject);
+var
+  limit: Integer;
+begin
+  tiUpdateClubDetails.Enabled := FALSE;
+  if TryStrToInt(seDefaultPlayerLimit.Text, limit) then
     tiUpdateClubDetails.Enabled := TRUE;
 end;
 
@@ -1001,11 +1014,18 @@ end;
 procedure TfrmClubLobby.acUpdateClubDetailsExecute(Sender: TObject);
 var
   club: TClubInfo;
+  rake, limit: Integer;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  ServerSocket.ChangeClubDetails(club.Id, club.Name, club.InvCode, seClubRake.Value);
+  rake := StrToIntDef(StringReplace(seClubRake.Text, '%', '', [rfReplaceAll]), -1);
+  limit := StrToIntDef(seDefaultPlayerLimit.Text, -1);
+
+  if (rake < 1) or (rake > 10) or (limit < 1) then
+    Exit;
+
+  ServerSocket.ChangeClubDetails(club.Id, club.Name, club.InvCode, rake, limit * 100);
 end;
 
 procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);

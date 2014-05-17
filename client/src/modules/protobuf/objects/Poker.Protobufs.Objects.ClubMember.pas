@@ -21,12 +21,12 @@ type
       FId: TBytes;
       FSuspended: Boolean;
       FBalanceLimit: UINT32;
-      FClubBalance: UINT32;
+      FClubBalance: Integer;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetSuspended(const AValue: Boolean);
     procedure SetBalanceLimit(const AValue: UINT32);
-    procedure SetClubBalance(const AValue: UINT32);
+    procedure SetClubBalance(const AValue: Integer);
 
   public
     destructor Destroy; override;
@@ -35,7 +35,7 @@ type
     property MongoId: TBytes read FId write SetMongoId;
     property Suspended: Boolean read FSuspended write SetSuspended;
     property BalanceLimit: UINT32 read FBalanceLimit write SetBalanceLimit;
-    property ClubBalance: UINT32 read FClubBalance write SetClubBalance;
+    property ClubBalance: Integer read FClubBalance write SetClubBalance;
   end;
 
 implementation
@@ -72,7 +72,7 @@ begin
       end;
       FN_CLUB_BALANCE: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClubBalance := AProtobufReader.readUInt32;
+        FClubBalance := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -98,10 +98,10 @@ begin
   ProtobufOutput.writeUInt32(FN_BALANCE_LIMIT, AValue);
 end;
 
-procedure TPB_ClubMember.SetClubBalance(const AValue: UINT32);
+procedure TPB_ClubMember.SetClubBalance(const AValue: Integer);
 begin
   FClubBalance := AValue;
-  ProtobufOutput.writeUInt32(FN_CLUB_BALANCE, AValue);
+  ProtobufOutput.writeInt32(FN_CLUB_BALANCE, AValue);
 end;
 
 end.

@@ -66,7 +66,7 @@ type
     procedure LeaveClub(const AId: Int64);
     procedure KickPlayer(const AClubId: Int64; const APlayerId: TBytes);
     procedure GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
-    procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer);
+    procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32);
     procedure DisbandClub(const AClubId: Int64);
     procedure TransferChips(const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
@@ -712,7 +712,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer);
+procedure TServerSocket.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32);
 var
   protobuf: TPB_Club;
 begin
@@ -722,6 +722,7 @@ begin
     protobuf.Name := AClubName;
     protobuf.Password := AClubCode;
     protobuf.Rake := AClubRake;
+    protobuf.DefaultBalanceLimit := ADefaultPlayerLimit;
     SendProtobuf(scChangeClubDetails, protobuf);
   finally
     protobuf.Free;

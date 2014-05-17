@@ -12,14 +12,14 @@ type
     FMongoId: TBytes;
     FSuspended: Boolean;
     FBalanceLimit: UINT32;
-    FClubBalance: UINT32;
+    FClubBalance: Int32;
   public
     constructor Create(const AClubMemberProtobuf: TPB_ClubMember);
 
     property MongoId: TBytes read FMongoId;
     property Suspended: Boolean read FSuspended;
     property BalanceLimit: UINT32 read FBalanceLimit;
-    property ClubBalance: UINT32 read FClubBalance;
+    property ClubBalance: Int32 read FClubBalance;
   end;
 
   TClubInfo = class

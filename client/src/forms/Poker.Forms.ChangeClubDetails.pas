@@ -119,7 +119,7 @@ begin
   end;
 
   acOK.Enabled := FALSE;
-  ServerSocket.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, FClub.Rake);
+  ServerSocket.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, FClub.Rake, FClub.DefaultBalanceLimit);
 end;
 
 procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
