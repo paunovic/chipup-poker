@@ -299,6 +299,7 @@
 				<Form>frmSystemTrayPopup</Form>
 				<FormType>dfm</FormType>
 			</DCCReference>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

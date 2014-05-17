@@ -450,6 +450,7 @@ var
   game: TGameInfo;
   club: TClubInfo;
   table: TTable;
+  member: TClubMemberInfo;
 begin
   if not dmMain.CheckAuthed then
     Exit;
@@ -457,7 +458,12 @@ begin
   if (not GetSelectedClub(club)) or (not GetSelectedGame(game)) then
     Exit;
 
-  if club.IsSuspendedPlayer(dmMain.SelfInfo.Id) then
+  member := nil;
+  if (club.IsPrivate) and (not club.GetMemberInfo(dmMain.SelfInfo.Id, member)) then
+    Exit;
+
+  if (Assigned(member)) and
+     (member.Suspended) then
     MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
     if Tables.FindTable(game.MongoId, table) then
@@ -677,8 +683,7 @@ begin
     end;
   end;
 
-  acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
-                             (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
+  acOpenClubLobby.Enabled := dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club);
 
   UpdateGamelist;
 end;
@@ -818,6 +823,7 @@ var
   player: TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
+  member: TClubMemberInfo;
 begin
   if not ADisbanded then
   begin
@@ -828,11 +834,11 @@ begin
       SetLength(query_users, 1);
       query_users[0] := AClub.Owner;
     end;
-    for C1 := 0 to Length(AClub.Members) - 1 do
-      if not Players.FindPlayerById(AClub.Members[C1], player) then
+    for C1 := 0 to AClub.Members.Count - 1 do
+      if not Players.FindPlayerById(AClub.Members[C1].MongoId, player) then
       begin
         SetLength(query_users, Length(query_users) + 1);
-        query_users[Length(query_users) - 1] := AClub.Members[C1];
+        query_users[Length(query_users) - 1] := AClub.Members[C1].MongoId;
       end;
     if Length(query_users) > 0 then
     begin
@@ -843,7 +849,7 @@ begin
       ServerSocket.GetUserInfos(query_users);
     end;
 
-    if (not club.IsPlayerInTheClub(dmMain.SelfInfo.Id)) and
+    if (not club.GetMemberInfo(dmMain.SelfInfo.Id, member)) and
        (club.IsPrivate) then
     begin
       dmMain.SelfInfo.Clubs.Remove(club);

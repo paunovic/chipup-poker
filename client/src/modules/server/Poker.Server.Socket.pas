@@ -94,7 +94,7 @@ type
     procedure ShowCards(const AGameId: TBytes);
     procedure QueryTableStats(const ATables: array of TBytes);
     procedure ContactUs(const AReason: TContactReason; const AMessage: String);
-    procedure Hello(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+    procedure Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
 
     property Server: String read FServer;
     property Socket: TSslWSocket read FSocket;
@@ -334,7 +334,7 @@ begin
       if rpc_message.DataSize = 0 then
         DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), dbgtype)
       else
-        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), dbgtype);
+        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), dbgtype, EnumerateProperties(data_obj));
       {$ENDIF}
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
@@ -574,7 +574,7 @@ begin
         dbgtype := ditPingPong
       else
         dbgtype := ditSocketOut;
-      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), dbgtype);
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), dbgtype, EnumerateProperties(AProtobuf));
       {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
@@ -1109,17 +1109,13 @@ begin
   end;
 end;
 
-procedure TServerSocket.Hello(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+procedure TServerSocket.Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
 var
   protobuf: TPB_HelloParams;
 begin
   protobuf := TPB_HelloParams.Create;
   try
-    {$IFDEF DEBUG}
-    protobuf.Debug := TRUE;
-    {$ELSE}
-    protobuf.Debug := FALSE;
-    {$ENDIF}
+    protobuf.Debug := ADebug;
     protobuf.Files.AddRange(AFiles);
     SendProtobuf(scHello, protobuf);
   finally

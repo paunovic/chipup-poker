@@ -76,7 +76,7 @@ object frmTableSit: TfrmTableSit
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Arial'
-    Font.Style = [fsBold]
+    Font.Style = []
     ParentFont = False
   end
   object btCancel: TcxButton

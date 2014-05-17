@@ -2529,7 +2529,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsStats
+    Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2541,7 +2541,7 @@ object frmClubLobby: TfrmClubLobby
         894
         442)
       object gbClubSettings: TcxGroupBox
-        Left = 7
+        Left = 5
         Top = 0
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
@@ -2553,14 +2553,14 @@ object frmClubLobby: TfrmClubLobby
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
-          Top = 95
+          Top = 139
           Width = 225
           Height = 1
           Anchors = [akLeft, akTop, akRight]
         end
         object btCloseClub: TcxButton
           Left = 10
-          Top = 103
+          Top = 147
           Width = 231
           Height = 28
           Action = acCloseClub
@@ -2576,7 +2576,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btChangeClubDetails: TcxButton
           Left = 10
-          Top = 59
+          Top = 103
           Width = 231
           Height = 28
           Action = acShowClubChangeDetailsForm
@@ -2626,6 +2626,31 @@ object frmClubLobby: TfrmClubLobby
           TabOrder = 0
           Value = 1
           Width = 56
+        end
+        object cxLabel1: TcxLabel
+          Left = 10
+          Top = 52
+          Caption = 'Default negative balance limit for new players'
+          Transparent = True
+        end
+        object cxSpinEdit1: TcxSpinEdit
+          Left = 128
+          Top = 70
+          Properties.AssignedValues.DisplayFormat = True
+          Properties.AssignedValues.MaxValue = True
+          Properties.AssignedValues.MinValue = True
+          Properties.CanEdit = False
+          Properties.UseDisplayFormatWhenEditing = True
+          Properties.OnChange = seClubRakePropertiesChange
+          TabOrder = 6
+          Value = -1000
+          Width = 56
+        end
+        object cxLabel2: TcxLabel
+          Left = 10
+          Top = 71
+          Caption = '(set to 0 for unlimited):'
+          Transparent = True
         end
       end
       object gbPlayers: TcxGroupBox
@@ -2683,7 +2708,7 @@ object frmClubLobby: TfrmClubLobby
               Width = 179
             end
             object gridPlayersListBalance: TcxGridColumn
-              Caption = 'Balance'
+              Caption = 'Total Balance'
               DataBinding.ValueType = 'Float'
               PropertiesClassName = 'TcxSpinEditProperties'
               Properties.Alignment.Horz = taRightJustify
@@ -2698,6 +2723,16 @@ object frmClubLobby: TfrmClubLobby
               HeaderAlignmentHorz = taCenter
               Width = 66
             end
+            object gridPlayersListClubBalance: TcxGridColumn
+              Caption = 'Club Balance'
+              HeaderAlignmentHorz = taCenter
+            end
+            object gridPlayersListLimit: TcxGridColumn
+              Caption = 'Balance Limit'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taCenter
+              HeaderAlignmentHorz = taCenter
+            end
           end
           object gridPlayersListLevel: TcxGridLevel
             GridView = gridPlayersListTable
@@ -2706,8 +2741,8 @@ object frmClubLobby: TfrmClubLobby
         object btGiveChips: TcxButton
           Left = 8
           Top = 202
-          Width = 98
-          Height = 28
+          Width = 113
+          Height = 26
           Action = acGiveChips
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
@@ -2720,10 +2755,10 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btGiveOwnership: TcxButton
-          Left = 112
+          Left = 127
           Top = 202
-          Width = 98
-          Height = 28
+          Width = 113
+          Height = 26
           Action = acGiveOwnership
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
@@ -2736,10 +2771,10 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btRemovePlayerFromClub: TcxButton
-          Left = 216
+          Left = 246
           Top = 202
-          Width = 98
-          Height = 28
+          Width = 113
+          Height = 26
           Action = acRemovePlayer
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
@@ -2753,13 +2788,29 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 168
-          Width = 98
-          Height = 28
+          Top = 170
+          Width = 113
+          Height = 26
           Action = acSuspendPlayer
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 4
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
+        object btResetClubBalance: TcxButton
+          Left = 127
+          Top = 170
+          Width = 113
+          Height = 26
+          Action = acResetClubBalance
+          Anchors = [akLeft, akBottom]
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 5
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3269,8 +3320,8 @@ object frmClubLobby: TfrmClubLobby
     OnClick = btStatsClick
   end
   object alManageClubs: TActionList
-    Left = 48
-    Top = 72
+    Left = 64
+    Top = 468
     object acRemovePlayer: TAction
       Caption = 'Remove'
       Enabled = False
@@ -3329,13 +3380,18 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Select All'
       OnExecute = acTablesStatsSelectAllExecute
     end
+    object acResetClubBalance: TAction
+      Caption = 'Reset Club Balance'
+      Enabled = False
+      OnExecute = acResetClubBalanceExecute
+    end
   end
   object tiUpdateClubDetails: TTimer
     Enabled = False
     Interval = 500
     OnTimer = tiUpdateClubDetailsTimer
-    Left = 120
-    Top = 72
+    Left = 156
+    Top = 492
   end
   object pmTablesStats: TPopupMenu
     Left = 140

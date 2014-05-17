@@ -37,7 +37,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Arial'
-    Font.Style = [fsBold]
+    Font.Style = []
     ParentFont = False
   end
   object btCancel: TcxButton
@@ -66,6 +66,29 @@ object frmChangeAvatar: TfrmChangeAvatar
     TabOrder = 2
     Height = 150
     Width = 150
+  end
+  object pbUpload: TcxProgressBar
+    Left = 17
+    Top = 172
+    AutoSize = False
+    Position = 100.000000000000000000
+    Properties.AnimationPath = cxapPingPong
+    Properties.AnimationSpeed = 4
+    Properties.BarStyle = cxbsGradient
+    Properties.BeginColor = clGreen
+    Properties.EndColor = 3260672
+    Properties.PeakValue = 100.000000000000000000
+    Properties.ShowText = False
+    Properties.ShowTextStyle = cxtsText
+    Style.Edges = []
+    Style.LookAndFeel.SkinName = ''
+    StyleDisabled.LookAndFeel.SkinName = ''
+    StyleFocused.LookAndFeel.SkinName = ''
+    StyleHot.LookAndFeel.SkinName = ''
+    TabOrder = 3
+    Visible = False
+    Height = 8
+    Width = 192
   end
   object alChangeAvatar: TActionList
     Left = 104
@@ -102,6 +125,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     BandwidthSampling = 1000
     Options = []
     Timeout = 30
+    OnSendData = SslHttpSendData
     SocksAuthentication = socksNoAuthentication
     SocketFamily = sfIPv4
     SslContext = SslContext

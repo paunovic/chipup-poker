@@ -3,8 +3,8 @@ object frmJoinClub: TfrmJoinClub
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Join Club'
-  ClientHeight = 114
-  ClientWidth = 292
+  ClientHeight = 110
+  ClientWidth = 248
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -21,13 +21,13 @@ object frmJoinClub: TfrmJoinClub
   OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
   DesignSize = (
-    292
-    114)
+    248
+    110)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsClubID: TcxLabel
-    Left = 18
-    Top = 18
+    Left = 11
+    Top = 11
     Caption = 'Club ID:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -40,16 +40,16 @@ object frmJoinClub: TfrmJoinClub
     Transparent = True
   end
   object edClubCode: TcxTextEdit
-    Left = 102
-    Top = 44
+    Left = 95
+    Top = 37
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 175
+    Width = 143
   end
   object lbsInvCode: TcxLabel
-    Left = 18
-    Top = 45
+    Left = 11
+    Top = 38
     Caption = 'Club password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -62,8 +62,8 @@ object frmJoinClub: TfrmJoinClub
     Transparent = True
   end
   object edClubID: TcxSpinEdit
-    Left = 102
-    Top = 17
+    Left = 95
+    Top = 10
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxValue = 999999999.000000000000000000
     Properties.MinValue = 1.000000000000000000
@@ -72,11 +72,11 @@ object frmJoinClub: TfrmJoinClub
     Properties.OnChange = edClubIDPropertiesChange
     TabOrder = 0
     Value = 1
-    Width = 175
+    Width = 143
   end
   object btOK: TcxButton
-    Left = 85
-    Top = 76
+    Left = 46
+    Top = 72
     Width = 93
     Height = 27
     Action = acOk
@@ -87,12 +87,12 @@ object frmJoinClub: TfrmJoinClub
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Arial'
-    Font.Style = [fsBold]
+    Font.Style = []
     ParentFont = False
   end
   object btCancel: TcxButton
-    Left = 184
-    Top = 76
+    Left = 145
+    Top = 72
     Width = 93
     Height = 27
     Action = acCancel

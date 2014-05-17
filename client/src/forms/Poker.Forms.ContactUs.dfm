@@ -44,13 +44,13 @@ object frmContactUs: TfrmContactUs
     Anchors = [akLeft, akTop, akRight]
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
-      'Questions'
-      'Suggestions'
+      'Question'
+      'Suggestion'
       'Bug Report'
       'Other')
     Properties.ReadOnly = False
     TabOrder = 3
-    Text = 'Questions'
+    Text = 'Question'
     Width = 336
   end
   object lbsType: TcxLabel

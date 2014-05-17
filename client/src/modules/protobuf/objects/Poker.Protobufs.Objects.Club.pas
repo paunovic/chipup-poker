@@ -6,68 +6,63 @@ unit Poker.Protobufs.Objects.Club;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.ClubMember;
 
 type
   TPB_Club = class(TProtobufBaseObject)
   private
     const
       FN__ID = 1;
-      FN_CHIPS = 2;
-      FN_NAME = 4;
-      FN_OWNER = 5;
-      FN_PASSWORD = 6;
-      FN_IS_PRIVATE = 7;
-      FN_SEQ = 8;
-      FN_MEMBERS = 9;
-      FN_HAS_PASSWORD = 10;
-      FN_MEMBER_COUNT = 11;
-      FN_SUSPENDED_MEMBERS = 12;
-      FN_RAKE = 13;
+      FN_MEMBERS = 2;
+      FN_NAME = 3;
+      FN_OWNER = 4;
+      FN_PASSWORD = 5;
+      FN_IS_PRIVATE = 6;
+      FN_SEQ = 7;
+      FN_HAS_PASSWORD = 8;
+      FN_RAKE = 9;
+      FN_DEFAULT_BALANCE_LIMIT = 10;
 
     var
       FId: TBytes;
-      FChips: UINT32;
+      FMembers: TObjectList<TPB_ClubMember>;
       FName: String;
       FOwner: TBytes;
       FPassword: String;
       FIsPrivate: Boolean;
       FSeq: Integer;
-      FMembers: TArray<TBytes>;
       FHasPassword: Boolean;
-      FMemberCount: Integer;
-      FSuspendedMembers: TArray<TBytes>;
       FRake: UINT32;
+      FDefaultBalanceLimit: UINT32;
 
     procedure SetMongoId(const AValue: TBytes);
-    procedure SetChips(const AValue: UINT32);
     procedure SetName(const AValue: String);
     procedure SetOwner(const AValue: TBytes);
     procedure SetPassword(const AValue: String);
     procedure SetIsPrivate(const AValue: Boolean);
     procedure SetSeq(const AValue: Integer);
-    procedure SetMembers(const AValue: TArray<TBytes>);
     procedure SetHasPassword(const AValue: Boolean);
-    procedure SetMemberCount(const AValue: Integer);
-    procedure SetSuspendedMembers(const AValue: TArray<TBytes>);
     procedure SetRake(const AValue: UINT32);
+    procedure SetDefaultBalanceLimit(const AValue: UINT32);
+    procedure MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property MongoId: TBytes read FId write SetMongoId;
-    property Chips: UINT32 read FChips write SetChips;
+    property Members: TObjectList<TPB_ClubMember> read FMembers;
     property Name: String read FName write SetName;
     property Owner: TBytes read FOwner write SetOwner;
     property Password: String read FPassword write SetPassword;
     property IsPrivate: Boolean read FIsPrivate write SetIsPrivate;
     property Seq: Integer read FSeq write SetSeq;
-    property Members: TArray<TBytes> read FMembers write SetMembers;
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
-    property MemberCount: Integer read FMemberCount write SetMemberCount;
-    property SuspendedMembers: TArray<TBytes> read FSuspendedMembers write SetSuspendedMembers;
     property Rake: UINT32 read FRake write SetRake;
+    property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
   end;
 
 implementation
@@ -76,9 +71,19 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_Club.InitObjects;
+begin
+  FMembers := TObjectList<TPB_ClubMember>.Create;
+  FMembers.OnNotify := MembersNotifyEvent;
+end;
 
 destructor TPB_Club.Destroy;
 begin
+  if Assigned(FMembers) then
+  begin
+    FMembers.OnNotify := nil;
+    FreeAndNil(FMembers);
+  end;
   inherited;
 end;
 
@@ -94,9 +99,9 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
       end;
-      FN_CHIPS: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FChips := AProtobufReader.readUInt32;
+      FN_MEMBERS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FMembers.Add(TPB_ClubMember.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
       FN_NAME: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -118,27 +123,17 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readInt32;
       end;
-      FN_MEMBERS: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetLength(FMembers, Length(FMembers) + 1);
-        AProtobufReader.readBytes(FMembers[Length(FMembers)-1]);
-      end;
       FN_HAS_PASSWORD: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHasPassword := AProtobufReader.readBoolean;
       end;
-      FN_MEMBER_COUNT: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FMemberCount := AProtobufReader.readInt32;
-      end;
-      FN_SUSPENDED_MEMBERS: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetLength(FSuspendedMembers, Length(FSuspendedMembers) + 1);
-        AProtobufReader.readBytes(FSuspendedMembers[Length(FSuspendedMembers)-1]);
-      end;
       FN_RAKE: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRake := AProtobufReader.readUInt32;
+      end;
+      FN_DEFAULT_BALANCE_LIMIT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FDefaultBalanceLimit := AProtobufReader.readUInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -152,10 +147,12 @@ begin
   ProtobufOutput.writeBytes(FN__ID, AValue);
 end;
 
-procedure TPB_Club.SetChips(const AValue: UINT32);
+procedure TPB_Club.MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
 begin
-  FChips := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_MEMBERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 procedure TPB_Club.SetName(const AValue: String);
@@ -188,40 +185,22 @@ begin
   ProtobufOutput.writeInt32(FN_SEQ, AValue);
 end;
 
-procedure TPB_Club.SetMembers(const AValue: TArray<TBytes>);
-var
-  C1: Integer;
-begin
-  FMembers := AValue;
-  for C1 := 0 to Length(FMembers) - 1 do
-    ProtobufOutput.writeBytes(FN_MEMBERS, AValue[C1]);
-end;
-
 procedure TPB_Club.SetHasPassword(const AValue: Boolean);
 begin
   FHasPassword := AValue;
   ProtobufOutput.writeBoolean(FN_HAS_PASSWORD, AValue);
 end;
 
-procedure TPB_Club.SetMemberCount(const AValue: Integer);
-begin
-  FMemberCount := AValue;
-  ProtobufOutput.writeInt32(FN_MEMBER_COUNT, AValue);
-end;
-
-procedure TPB_Club.SetSuspendedMembers(const AValue: TArray<TBytes>);
-var
-  C1: Integer;
-begin
-  FSuspendedMembers := AValue;
-  for C1 := 0 to Length(FSuspendedMembers) - 1 do
-    ProtobufOutput.writeBytes(FN_SUSPENDED_MEMBERS, AValue[C1]);
-end;
-
 procedure TPB_Club.SetRake(const AValue: UINT32);
 begin
   FRake := AValue;
   ProtobufOutput.writeUInt32(FN_RAKE, AValue);
+end;
+
+procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UINT32);
+begin
+  FDefaultBalanceLimit := AValue;
+  ProtobufOutput.writeUInt32(FN_DEFAULT_BALANCE_LIMIT, AValue);
 end;
 
 end.

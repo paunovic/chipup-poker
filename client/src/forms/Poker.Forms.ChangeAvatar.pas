@@ -19,6 +19,7 @@ type
     OpenDialog: TOpenDialog;
     SslHttp: TSslHttpCli;
     SslContext: TSslContext;
+    pbUpload: TcxProgressBar;
     procedure acCloseExecute(Sender: TObject);
     procedure acChangeExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -26,6 +27,7 @@ type
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure SslHttpSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
   private
     FCallbacksId: Integer;
     FAvatarId : TBytes;
@@ -129,6 +131,11 @@ begin
   end;
 end;
 
+procedure TfrmChangeAvatar.SslHttpSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
+begin
+  pbUpload.Position := (SslHttp.SentCount / SslHttp.SendStream.Size) * 100;
+end;
+
 procedure TfrmChangeAvatar.acCloseExecute(Sender: TObject);
 begin
   Close;
@@ -137,7 +144,7 @@ end;
 procedure TfrmChangeAvatar.UploadAvatar;
 var
   boundary: AnsiString;
-  buf     : AnsiString;
+  buf: AnsiString;
 begin
   if not Assigned(SslHttp.SendStream) then
     SslHttp.SendStream := TMemoryStream.Create;
@@ -189,6 +196,9 @@ begin
   if (Sender is TfrmImageCrop) and
      ((Sender as TfrmImageCrop).ModalResult = mrOk) then
   begin
+    acChange.Enabled := FALSE;
+    FAvatarChanged := TRUE;
+
     bmp := TBitmap.Create;
     try
       mstream := TMemoryStream.Create;
@@ -204,8 +214,6 @@ begin
       bmp.Free;
     end;
 
-    acChange.Enabled := FALSE;
-    FAvatarChanged := TRUE;
     mstream := TMemoryStream.Create;
     try
       FAvatarJPG.SaveToStream(mstream);
@@ -240,10 +248,15 @@ begin
 
       FAvatarChanged := FALSE;
       acChange.Enabled := TRUE;
+      pbUpload.Visible := FALSE;
     end;
     saNotFound: begin
       if FAvatarChanged then
-        UploadAvatar
+      begin
+        pbUpload.Position := 0;
+        pbUpload.Visible := TRUE;
+        UploadAvatar;
+      end
       else
       begin
         FAvatarChanged := FALSE;

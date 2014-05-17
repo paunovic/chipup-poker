@@ -116,6 +116,13 @@ type
     gridTotalStatsTimePlayed: TcxGridColumn;
     gridTotalStatsLevel: TcxGridLevel;
     gridTotalStatsDummy: TcxGridColumn;
+    gridPlayersListLimit: TcxGridColumn;
+    gridPlayersListClubBalance: TcxGridColumn;
+    cxLabel1: TcxLabel;
+    cxSpinEdit1: TcxSpinEdit;
+    cxLabel2: TcxLabel;
+    btResetClubBalance: TcxButton;
+    acResetClubBalance: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -153,6 +160,7 @@ type
     procedure gridTablesTableDblClick(Sender: TObject);
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
+    procedure acResetClubBalanceExecute(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -244,6 +252,7 @@ begin
   btGiveOwnership.Top := btGiveChips.Top;
   btRemovePlayerFromClub.Top := btGiveChips.Top;
   btSuspendUnsuspend.Top := btGiveChips.Top - btGiveChips.Height - 5;
+  btResetClubBalance.Top := btSuspendUnsuspend.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
   btCloseTable.Top := btNewGame.Top;
@@ -291,7 +300,7 @@ begin
     if Players.FindPlayerById(club.OwnerId, player) then
       manager := player.Nick;
 
-    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, Length(club.Players), club.Id]);
+    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
 
     admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
 
@@ -301,7 +310,9 @@ begin
     btCloseClub.Visible := admin_visible;
     acCloseClub.Enabled := admin_visible;
     btGiveChips.Visible := admin_visible;
-    acGiveChips.Enabled := (admin_visible) and (Length(FSelectedPlayerId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
+    acGiveChips.Enabled := (admin_visible) and (Length(FSelectedPlayerId) > 0) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
+    btResetClubBalance.Visible := admin_visible;
+    acResetClubBalance.Enabled := (admin_visible) and (Length(FSelectedPlayerId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
     btGiveOwnership.Visible := admin_visible;
     acGiveOwnership.Enabled := acGiveChips.Enabled;
     btRemovePlayerFromClub.Visible := admin_visible;
@@ -346,6 +357,9 @@ begin
       UpdateTablesStatsList;
       UpdatePlayersStatsList;
     end;
+
+    gridPlayersListLimit.Visible := admin_visible;
+    gridPlayersListClubBalance.Visible := admin_visible;
   end;
 end;
 
@@ -399,9 +413,10 @@ end;
 
 procedure TfrmClubLobby.gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
-  recIndex      : Integer;
+  recIndex: Integer;
   action_enabled: Boolean;
-  club          : TClubInfo;
+  club: TClubInfo;
+  member: TClubMemberInfo;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     SetLength(FSelectedPlayerId, 0)
@@ -414,14 +429,16 @@ begin
       FSelectedPlayerId := gridPlayersListTable.DataController.GetValue(recIndex, gridPlayersListId.Index);
   end;
 
-  action_enabled := (Length(FSelectedPlayerId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
-  acRemovePlayer.Enabled := action_enabled;
-  acGiveOwnership.Enabled := action_enabled;
-  acGiveChips.Enabled := action_enabled;
+  action_enabled := (Length(FSelectedPlayerId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and (club.GetMemberInfo(FSelectedPlayerId, member));
+
+  acResetClubBalance.Enabled := action_enabled;
+  acRemovePlayer.Enabled := (action_enabled) and (not CompareBytes(club.OwnerId, member.MongoId));
+  acGiveOwnership.Enabled := acRemovePlayer.Enabled;
+  acGiveChips.Enabled := acRemovePlayer.Enabled;
 
   if action_enabled then
   begin
-    if club.IsSuspendedPlayer(FSelectedPlayerId) then
+    if member.Suspended then
     begin
       btSuspendUnsuspend.Action := acReinstatePlayer;
       acSuspendPlayer.Enabled := FALSE;
@@ -597,13 +614,13 @@ var
   club: TClubInfo;
   query_players: TArray<TBytes>;
 
-  procedure AddPlayerToGrid(const ARowIndex: Integer; AId: TBytes);
+  procedure AddPlayerToGrid(const ARowIndex: Integer; AMember: TClubMemberInfo);
   var
     player: TPlayerInfo;
     status: String;
   begin
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AId);
-    if Players.FindPlayerById(AId, player) then
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId);
+    if Players.FindPlayerById(AMember.MongoId, player) then
     begin
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick);
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance / 100);
@@ -614,16 +631,17 @@ var
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, 0);
 
       SetLength(query_players, Length(query_players) + 1);
-      query_players[Length(query_players) - 1] := AId;
+      query_players[Length(query_players) - 1] := AMember.MongoId;
     end;
 
-    if CompareBytes(AId, club.OwnerId) then
+    if CompareBytes(AMember.MongoId, club.OwnerId) then
       status := 'Manager'
     else
     begin
-      status := 'Member';
-      if club.IsSuspendedPlayer(AId) then
-        status := 'Suspended';
+      if AMember.Suspended then
+        status := 'Suspended'
+      else
+        status := 'Member';
     end;
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListStatus.Index, status);
   end;
@@ -642,9 +660,9 @@ begin
     end;
 
     SetLength(query_players, 0);
-    gridPlayersListTable.DataController.SetRecordCount(Length(club.Players));
-    for C1 := 0 to Length(club.Players) - 1 do
-      AddPlayerToGrid(C1, club.Players[C1]);
+    gridPlayersListTable.DataController.SetRecordCount(club.Members.Count);
+    for C1 := 0 to club.Members.Count - 1 do
+      AddPlayerToGrid(C1, club.Members[C1]);
 
     if Length(query_players) > 0 then
       ServerSocket.GetUserInfos(query_players);
@@ -934,6 +952,11 @@ begin
 
   if MessageDlg(Format('Are you sure you want to remove %s from the club?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
     ServerSocket.KickPlayer(club.Id, player.Id);
+end;
+
+procedure TfrmClubLobby.acResetClubBalanceExecute(Sender: TObject);
+begin
+//
 end;
 
 procedure TfrmClubLobby.acShowClubChangeDetailsFormExecute(Sender: TObject);

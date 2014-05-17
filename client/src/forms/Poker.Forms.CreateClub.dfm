@@ -4,7 +4,7 @@ object frmCreateClub: TfrmCreateClub
   BorderStyle = bsDialog
   Caption = 'Create Club'
   ClientHeight = 112
-  ClientWidth = 386
+  ClientWidth = 296
   Color = clWindow
   Ctl3D = False
   Font.Charset = ANSI_CHARSET
@@ -20,20 +20,22 @@ object frmCreateClub: TfrmCreateClub
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   DesignSize = (
-    386
+    296
     112)
   PixelsPerInch = 96
   TextHeight = 14
   object edClubName: TcxTextEdit
-    Left = 103
-    Top = 14
+    Left = 98
+    Top = 10
+    Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 64
     TabOrder = 0
-    Width = 266
+    ExplicitWidth = 278
+    Width = 187
   end
   object lbsClubName: TcxLabel
-    Left = 18
-    Top = 15
+    Left = 13
+    Top = 11
     Caption = 'Club name:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -46,15 +48,17 @@ object frmCreateClub: TfrmCreateClub
     Transparent = True
   end
   object edClubCode: TcxTextEdit
-    Left = 103
-    Top = 41
+    Left = 98
+    Top = 37
+    Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 266
+    ExplicitWidth = 278
+    Width = 187
   end
   object lbsInvCode: TcxLabel
-    Left = 18
-    Top = 42
+    Left = 13
+    Top = 38
     Caption = 'Club password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -67,7 +71,7 @@ object frmCreateClub: TfrmCreateClub
     Transparent = True
   end
   object btOK: TcxButton
-    Left = 177
+    Left = 93
     Top = 72
     Width = 93
     Height = 27
@@ -79,11 +83,12 @@ object frmCreateClub: TfrmCreateClub
     Font.Color = clWindowText
     Font.Height = -12
     Font.Name = 'Arial'
-    Font.Style = [fsBold]
+    Font.Style = []
     ParentFont = False
+    ExplicitLeft = 184
   end
   object btCancel: TcxButton
-    Left = 276
+    Left = 192
     Top = 72
     Width = 93
     Height = 27
@@ -97,10 +102,10 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitLeft = 283
   end
   object alCreateClub: TActionList
-    Left = 24
-    Top = 4
+    Left = 19
     object acOK: TAction
       Caption = 'OK'
       OnExecute = acOKExecute

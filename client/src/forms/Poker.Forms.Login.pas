@@ -162,7 +162,11 @@ begin
   files := TObjectList<TPB_UpdateFileInfo>.Create(FALSE);
   try
     dmMain.GetUpdateFilesList(files);
-    ServerSocket.Hello(files);
+    {$IFDEF DEBUG}
+    ServerSocket.Hello(FALSE, files); // FIXME
+    {$ELSE}
+    ServerSocket.Hello(FALSE, files);
+    {$ENDIF};
   finally
     files.Free;
   end;

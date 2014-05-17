@@ -84,7 +84,7 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Arial'
-    Font.Style = [fsBold]
+    Font.Style = []
     ParentFont = False
   end
   object btCancel: TcxButton

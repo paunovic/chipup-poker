@@ -21,12 +21,13 @@ type
     FTime: String;
     FTypeStr: String;
     FData: String;
+    FSubData: String;
     FTypeStyle: Integer;
     FDataStyle: Integer;
   protected
     procedure DoSynchronize; override;
   public
-    class procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
+    class procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
   end;
 
   TfrmDebug = class(TForm)
@@ -80,10 +81,10 @@ type
     class procedure Initialize;
     class procedure Deinitialize;
 
-    procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
+    procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
   end;
 
-procedure DebugLn(const AData: String; const AType: TDebugInfoType);
+procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
 
 implementation
 
@@ -106,14 +107,15 @@ var
   ConsoleAttached: Boolean = FALSE;
 
 
-procedure DebugLn(const AData: String; const AType: TDebugInfoType);
+procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
 var
   time_str: String;
   type_str: String;
-  tstyle  : Integer;
-  dstyle  : Integer;
-  output  : String;
-  tfile   : TextFile;
+  tstyle: Integer;
+  dstyle: Integer;
+  output: String;
+  fstream: TFileStream;
+  fwriter: TStreamWriter;
 begin
   time_str := FormatDateTime('hh:nn:ss:zzz', Now);
 
@@ -170,7 +172,7 @@ begin
   end;
 
   if Assigned(frmDebug) then
-    TDebugFormLog.Add(AType, time_str, type_str, AData, tstyle, dstyle);
+    TDebugFormLog.Add(AType, time_str, type_str, AData, ASubData, tstyle, dstyle);
 
   output := Format('%s [%s] %s', [time_str, type_str, AData]);
 
@@ -179,21 +181,25 @@ begin
   if ConsoleAttached then
     WriteLn(output);
 
+  // do NOT use SelfPath variable here, because this function can be called before SelfPath is initialized!
   if DebugFilePath = '' then
-    DebugFilePath := SelfPath + Format('debug\%s [%d].txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), GetCurrentProcessId]);
+    DebugFilePath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + Format('debug\%s [%d].txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), GetCurrentProcessId]);
 
-  if ConsoleAttached then
-    WriteLn(DebugFilePath);
   ForceDirectories(ExtractFilePath(DebugFilePath));
-  AssignFile(tfile, DebugFilePath);
-  if FileExists(DebugFilePath) then
-    Append(tfile)
+  if not FileExists(DebugFilePath) then
+    fstream := TFileStream.Create(DebugFilePath, fmCreate or fmShareDenyNone)
   else
-    Rewrite(tfile);
+    fstream := TFileStream.Create(DebugFilePath, fmOpenWrite or fmShareDenyNone);
   try
-    WriteLn(tfile, output);
+    fstream.Seek(0, soFromEnd);
+    fwriter := TStreamWriter.Create(fstream);
+    try
+      fwriter.WriteLine(output);
+    finally
+      fwriter.Free;
+    end;
   finally
-    CloseFile(tfile);
+    fstream.Free;
   end;
 end;
 
@@ -330,7 +336,7 @@ begin
   DebugLn(Format('Active form: %s [%s]', [Screen.ActiveForm.Name, Screen.ActiveForm.Caption]), ditForm);
 end;
 
-procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
+procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
 const
   SCROLLBACK_LINES = 250;
 var
@@ -376,6 +382,9 @@ begin
     rvLog.Format
   else
     rvLog.FormatTail;
+
+  if ASubData <> '' then
+    Add(AType, ATime, ATypeStr, ASubData, '', 6, 12);
 end;
 
 
@@ -448,7 +457,7 @@ end;
 
 { TMemoLog }
 
-class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData: String; const ATypeStyle, ADataStyle: Integer);
+class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
 var
   dfl: TDebugFormLog;
 begin
@@ -458,6 +467,7 @@ begin
     dfl.FTime := ATime;
     dfl.FTypeStr := ATypeStr;
     dfl.FData := AData;
+    dfl.FSubData := ASubData;
     dfl.FTypeStyle := ATypeStyle;
     dfl.FDataStyle := ADataStyle;
     dfl.Synchronize;
@@ -468,7 +478,7 @@ end;
 
 procedure TDebugFormLog.DoSynchronize;
 begin
-  frmDebug.Add(FType, FTime, FTypeStr, FData, FTypeStyle, FDataStyle);
+  frmDebug.Add(FType, FTime, FTypeStr, FData, FSubData, FTypeStyle, FDataStyle);
 end;
 
 end.

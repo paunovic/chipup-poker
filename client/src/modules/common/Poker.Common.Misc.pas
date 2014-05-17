@@ -34,11 +34,15 @@ function KillWindowsTimer(var ATimerId: UINT_PTR): Boolean;
 function ChipsToStr(const AValue: UINT32): String;
 procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);
 function GetTaskbarHeight: Integer;
-
+function BytesToHex(const ABytes: TBytes): String;
+{$IFDEF DEBUG}
+function EnumerateProperties(const AObject: TObject): String;
+{$ENDIF}
 
 implementation
 
 uses
+  {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
   System.ZLib, Winapi.PsApi, System.DateUtils, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
   Poker.Interfaces.FormParams;
 
@@ -605,6 +609,137 @@ begin
   end;
 end;
 
+function BytesToHex(const ABytes: TBytes): String;
+var
+  C1: Integer;
+begin
+  result := '';
+  for C1 := Low(ABytes) to High(ABytes) do
+    result := result + IntToHex(ABytes[C1], 2);
+  result := LowerCase(result);
+end;
+
+{$IFDEF DEBUG}
+function EnumerateProperties(const AObject: TObject): String;
+var
+  rt: TRttiType;
+  prop: TRttiProperty;
+  value, value2: TValue;
+  valstr: String;
+  propstr: String;
+  fullstr: String;
+  bres: Boolean;
+  meth: TRttiMethod;
+  bytes: TBytes;
+  bytes_arr: TArray<TBytes>;
+  uints: TArray<UINT32>;
+  C1: Integer;
+begin
+  if not Assigned(AObject) then
+    Exit('');
+
+  rt := TRttiContext.Create.GetType(AObject.ClassType);
+
+  fullstr := '';
+  for prop in rt.GetDeclaredProperties do
+  begin
+    value := prop.GetValue(AObject);
+    valstr := '';
+    case prop.PropertyType.TypeKind of
+      // auto-handled
+      tkInteger,
+      tkInt64,
+      tkFloat: ;
+
+      tkString,
+      tkChar,
+      tkWChar,
+      tkLString,
+      tkWString,
+      tkUString: valstr := QuotedStr(value.AsString);
+
+      tkEnumeration: begin
+        valstr := 'ENUM';
+        if value.TryAsType<Boolean>(bres) then
+          valstr := BoolToStr(bres, TRUE)
+        else
+        begin
+          valstr := GetEnumName(value.TypeInfo, prop.GetValue(AObject).AsOrdinal);
+        end;
+      end;
+
+      tkClass: begin
+        // check if property is TList or any of its descendants
+        meth := prop.PropertyType.GetMethod('ToArray');
+        if Assigned(meth) then
+        begin
+          value2 := meth.Invoke(value, []);
+          Assert(value2.IsArray);
+          for C1 := 0 to value2.GetArrayLength - 1 do
+            valstr := valstr + Format('(%s), ', [EnumerateProperties(value2.GetArrayElement(C1).AsObject)]);
+          if valstr <> '' then
+            Delete(valstr, Length(valstr) - 1, 2);
+          valstr := Format('[%s]', [valstr]);
+        end
+        else
+          valstr := Format('[%s]', [EnumerateProperties(value.AsObject)]);
+      end;
+
+      tkDynArray: begin
+        if value.TryAsType<TBytes>(bytes) then
+          valstr := BytesToHex(bytes)
+        else
+          if value.TryAsType<TArray<TBytes>>(bytes_arr) then
+          begin
+            valstr := '';
+            for C1 := Low(bytes_arr) to High(bytes_arr) do
+              valstr := valstr + QuotedStr(BytesToHex(bytes_arr[C1])) + ', ';
+            if valstr <> '' then
+              Delete(valstr, Length(valstr) - 1, 2);
+            valstr := Format('(%s)', [valstr]);
+          end
+          else
+            if value.TryAsType<TArray<UINT32>>(uints) then
+            begin
+              valstr := '';
+              for C1 := Low(uints) to High(uints) do
+                valstr := valstr + IntToStr(uints[C1]) + ', ';
+              if valstr <> '' then
+                Delete(valstr, Length(valstr) - 1, 2);
+              valstr := Format('(%s)', [valstr]);
+            end;
+
+        if valstr = '' then
+          valstr := '()';
+      end;
+
+      tkUnknown: ;
+      tkSet: ;
+      tkMethod: ;
+      tkVariant: ;
+      tkArray: ;
+      tkRecord: ;
+      tkInterface: ;
+      tkClassRef: ;
+      tkPointer: ;
+      tkProcedure: ;
+    end;
+
+    if valstr = '' then
+      propstr := Format('%s: %s', [prop.Name, value.AsVariant])
+    else
+      propstr := Format('%s: %s', [prop.Name, valstr]);
+    fullstr := fullstr + propstr + '; ';
+  end;
+
+  if fullstr <> '' then
+    Delete(fullstr, Length(fullstr) - 1, 2);
+
+  result := fullstr;
+end;
+{$ENDIF}
+
 
 end.
+
 

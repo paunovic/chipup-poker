@@ -53,7 +53,6 @@ type
 
 var
   dmMain: TdmMain;
-
   SelfPath: String;
   AppDataPath: String;
 

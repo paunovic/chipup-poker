@@ -3,44 +3,56 @@ unit Poker.Objects.ClubInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Objects.GameInfo, Poker.Protobufs.Objects.Club;
+  System.Generics.Collections, System.SysUtils, Poker.Objects.GameInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubMember;
 
 
 type
+  TClubMemberInfo = class
+  private
+    FMongoId: TBytes;
+    FSuspended: Boolean;
+    FBalanceLimit: UINT32;
+    FClubBalance: UINT32;
+  public
+    constructor Create(const AClubMemberProtobuf: TPB_ClubMember);
+
+    property MongoId: TBytes read FMongoId;
+    property Suspended: Boolean read FSuspended;
+    property BalanceLimit: UINT32 read FBalanceLimit;
+    property ClubBalance: UINT32 read FClubBalance;
+  end;
+
   TClubInfo = class
   private
-    FId              : Integer;
-    FMongoId         : TBytes;
-    FOwnerId         : TBytes;
-    FName            : String;
-    FInvCode         : String;
-    FBalance         : Integer;
-    FPlayers         : TArray<TBytes>;
-    FSuspendedPlayers: TArray<TBytes>;
-    FGames           : TGamesInfo;
-    FRake            : Integer;
-    FPrivate         : Boolean;
+    FId: Integer;
+    FMongoId: TBytes;
+    FOwnerId: TBytes;
+    FName: String;
+    FInvCode: String;
+    FMembers: TObjectList<TClubMemberInfo>;
+    FGames: TGamesInfo;
+    FRake: Integer;
+    FPrivate: Boolean;
+    FDefaultBalanceLimit: UINT32;
   public
     constructor Create(const AProtobufObject: TPB_Club);
     destructor Destroy; override;
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
 
-    procedure AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);
-    function IsSuspendedPlayer(const AMongoId: TBytes): Boolean;
-    function IsPlayerInTheClub(const AMongoId: TBytes): Boolean;
+    procedure AddMember(const AClubMemberInfo: TPB_ClubMember);
+    function GetMemberInfo(const AMongoId: TBytes; out AMemberInfo: TClubMemberInfo): Boolean;
 
-    property Id              : Integer read FId;
-    property MongoId         : TBytes read FMongoId;
-    property OwnerId         : TBytes read FOwnerId;
-    property Name            : String read FName;
-    property InvCode         : String read FInvCode;
-    property Balance         : Integer read FBalance;
-    property Players         : TArray<TBytes> read FPlayers;
-    property SuspendedPlayers: TArray<TBytes> read FSuspendedPlayers;
-    property Games           : TGamesInfo read FGames;
-    property Rake            : Integer read FRake;
-    property IsPrivate       : Boolean read FPrivate write FPrivate;
+    property Id: Integer read FId;
+    property MongoId: TBytes read FMongoId;
+    property OwnerId: TBytes read FOwnerId;
+    property Name: String read FName;
+    property InvCode: String read FInvCode;
+    property Members: TObjectList<TClubMemberInfo> read FMembers;
+    property Games: TGamesInfo read FGames;
+    property Rake: Integer read FRake;
+    property IsPrivate: Boolean read FPrivate write FPrivate;
+    property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit;
   end;
 
   TClubsInfo = class(TObjectList<TClubInfo>)
@@ -59,6 +71,7 @@ uses
 
 constructor TClubInfo.Create(const AProtobufObject: TPB_Club);
 begin
+  FMembers := TObjectList<TClubMemberInfo>.Create;
   FGames := TGamesInfo.Create;
   UpdateFromProtobufObject(AProtobufObject);
 end;
@@ -66,68 +79,47 @@ end;
 destructor TClubInfo.Destroy;
 begin
   FGames.Free;
+  FMembers.Free;
 
   inherited;
 end;
 
-function TClubInfo.IsPlayerInTheClub(const AMongoId: TBytes): Boolean;
+function TClubInfo.GetMemberInfo(const AMongoId: TBytes; out AMemberInfo: TClubMemberInfo): Boolean;
 var
-  C1, a1len: Integer;
+  member: TClubMemberInfo;
 begin
-  a1len := Length(AMongoId);
-  for C1 := 0 to Length(FPlayers) - 1 do
-    if CompareBytes(AMongoId, FPlayers[C1], a1len) then
+  for member in FMembers do
+    if CompareBytes(AMongoId, member.MongoId) then
+    begin
+      AMemberInfo := member;
       Exit(TRUE);
-  for C1 := 0 to Length(FSuspendedPlayers) - 1 do
-    if CompareBytes(AMongoId, FSuspendedPlayers[C1], a1len) then
-      Exit(TRUE);
-  Exit(FALSE);
-end;
-
-function TClubInfo.IsSuspendedPlayer(const AMongoId: TBytes): Boolean;
-var
-  C1, a1len: Integer;
-begin
-  a1len := Length(AMongoId);
-  for C1 := 0 to Length(FSuspendedPlayers) - 1 do
-    if CompareBytes(AMongoId, FSuspendedPlayers[C1], a1len) then
-      Exit(TRUE);
+    end;
   Exit(FALSE);
 end;
 
 procedure TClubInfo.UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
 var
-  C1: Integer;
+  member: TPB_ClubMember;
 begin
   FMongoId := AProtobufObject.MongoId;
   FOwnerId := AProtobufObject.Owner;
   FId := AProtobufObject.Seq;
   FName := AProtobufObject.Name;
-  FBalance := AProtobufObject.Chips;
   FInvCode := AProtobufObject.Password;
-  SetLength(FPlayers, 0);
-  SetLength(FSuspendedPlayers, 0);
-  AddPlayer(AProtobufObject.Owner, FALSE);
-  for C1 := 0 to Length(AProtobufObject.Members) - 1 do
-    AddPlayer(AProtobufObject.Members[C1], FALSE);
-  for C1 := 0 to Length(AProtobufObject.SuspendedMembers) - 1 do
-    AddPlayer(AProtobufObject.SuspendedMembers[C1], TRUE);
+  FMembers.Clear;
+  for member in AProtobufObject.Members do
+    AddMember(member);
   FRake := AProtobufObject.Rake;
   FPrivate := AProtobufObject.IsPrivate;
+  FDefaultBalanceLimit := AProtobufObject.DefaultBalanceLimit;
 end;
 
-procedure TClubInfo.AddPlayer(const AMongoId: TBytes; const ASuspended: Boolean);
+procedure TClubInfo.AddMember(const AClubMemberInfo: TPB_ClubMember);
+var
+  cmi: TClubMemberInfo;
 begin
-  if not ASuspended then
-  begin
-    SetLength(FPlayers, Length(FPlayers) + 1);
-    FPlayers[Length(FPlayers) - 1] := AMongoId;
-  end
-  else
-  begin
-    SetLength(FSuspendedPlayers, Length(FSuspendedPlayers) + 1);
-    FSuspendedPlayers[Length(FSuspendedPlayers) - 1] := AMongoId;
-  end;
+  cmi := TClubMemberInfo.Create(AClubMemberInfo);
+  FMembers.Add(cmi);
 end;
 
 
@@ -169,6 +161,16 @@ begin
       Exit(C1);
 
   Exit(-1);
+end;
+
+{ TClubMemberInfo }
+
+constructor TClubMemberInfo.Create(const AClubMemberProtobuf: TPB_ClubMember);
+begin
+  FMongoId := AClubMemberProtobuf.MongoId;
+  FSuspended := AClubMemberProtobuf.Suspended;
+  FBalanceLimit := AClubMemberProtobuf.BalanceLimit;
+  FClubBalance := AClubMemberProtobuf.ClubBalance;
 end;
 
 end.

@@ -23,6 +23,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
   public
   end;
@@ -53,6 +54,15 @@ begin
   Action := caFree;
 end;
 
+
+procedure TfrmAbout.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = vk_ESCAPE then
+  begin
+    ModalResult := mrClose;
+    Close;
+  end;
+end;
 
 procedure TfrmAbout.acOKExecute(Sender: TObject);
 begin

@@ -168,19 +168,24 @@ message LoginReply {
 	repeated TableStatus reconnect_tables = 3;
 }
 
+message ClubMember {
+	required bytes _id = 1;
+	optional bool suspended = 2;
+	optional uint32 balance_limit = 3;
+	optional uint32 club_balance = 4;
+}
+
 message Club {
 	optional bytes _id = 1;
-	optional uint32 chips = 2;
-	optional string name = 4;
-	optional bytes owner = 5;
-	optional string password = 6;
-	optional bool is_private = 7;
-	optional int32 seq = 8;
-	repeated bytes members = 9;
-	optional bool has_password = 10;
-	optional int32 member_count = 11;
-	repeated bytes suspended_members = 12;
-	optional uint32 rake = 13;
+	repeated ClubMember members = 2;
+	optional string name = 3;
+	optional bytes owner = 4;
+	optional string password = 5;
+	optional bool is_private = 6;
+	optional int32 seq = 7;
+	optional bool has_password = 8;
+	optional uint32 rake = 9;
+	optional uint32 default_balance_limit = 10;
 }
 
 message User {
