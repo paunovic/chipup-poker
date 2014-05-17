@@ -2541,7 +2541,7 @@ object frmClubLobby: TfrmClubLobby
         894
         442)
       object gbClubSettings: TcxGroupBox
-        Left = 5
+        Left = 8
         Top = 0
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
@@ -2553,14 +2553,14 @@ object frmClubLobby: TfrmClubLobby
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
-          Top = 139
+          Top = 121
           Width = 225
           Height = 1
           Anchors = [akLeft, akTop, akRight]
         end
         object btCloseClub: TcxButton
           Left = 10
-          Top = 147
+          Top = 129
           Width = 231
           Height = 28
           Action = acCloseClub
@@ -2576,7 +2576,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btChangeClubDetails: TcxButton
           Left = 10
-          Top = 103
+          Top = 85
           Width = 231
           Height = 28
           Action = acShowClubChangeDetailsForm
@@ -2615,7 +2615,7 @@ object frmClubLobby: TfrmClubLobby
           Transparent = True
         end
         object seClubRake: TcxSpinEdit
-          Left = 68
+          Left = 110
           Top = 24
           Properties.CanEdit = False
           Properties.DisplayFormat = '#%'
@@ -2627,30 +2627,23 @@ object frmClubLobby: TfrmClubLobby
           Value = 1
           Width = 56
         end
-        object cxLabel1: TcxLabel
+        object lbsDefaultPlayerLimit: TcxLabel
           Left = 10
-          Top = 52
-          Caption = 'Default negative balance limit for new players'
+          Top = 53
+          Caption = 'Default player limit:'
           Transparent = True
         end
-        object cxSpinEdit1: TcxSpinEdit
-          Left = 128
-          Top = 70
+        object seDefaultPlayerLimit: TcxSpinEdit
+          Left = 110
+          Top = 52
           Properties.AssignedValues.DisplayFormat = True
           Properties.AssignedValues.MaxValue = True
           Properties.AssignedValues.MinValue = True
           Properties.CanEdit = False
           Properties.UseDisplayFormatWhenEditing = True
-          Properties.OnChange = seClubRakePropertiesChange
           TabOrder = 6
-          Value = -1000
+          Value = 1000
           Width = 56
-        end
-        object cxLabel2: TcxLabel
-          Left = 10
-          Top = 71
-          Caption = '(set to 0 for unlimited):'
-          Transparent = True
         end
       end
       object gbPlayers: TcxGroupBox
@@ -2674,6 +2667,8 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          ExplicitLeft = 3
+          ExplicitTop = 24
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2708,13 +2703,18 @@ object frmClubLobby: TfrmClubLobby
               Width = 179
             end
             object gridPlayersListBalance: TcxGridColumn
-              Caption = 'Total Balance'
+              Caption = 'Balance'
               DataBinding.ValueType = 'Float'
               PropertiesClassName = 'TcxSpinEditProperties'
               Properties.Alignment.Horz = taRightJustify
-              Properties.ValueType = vtFloat
               HeaderAlignmentHorz = taCenter
-              Width = 71
+            end
+            object gridPlayersListLimit: TcxGridColumn
+              Caption = 'Limit'
+              DataBinding.ValueType = 'Float'
+              PropertiesClassName = 'TcxSpinEditProperties'
+              Properties.Alignment.Horz = taRightJustify
+              HeaderAlignmentHorz = taCenter
             end
             object gridPlayersListStatus: TcxGridColumn
               Caption = 'Status'
@@ -2723,27 +2723,17 @@ object frmClubLobby: TfrmClubLobby
               HeaderAlignmentHorz = taCenter
               Width = 66
             end
-            object gridPlayersListClubBalance: TcxGridColumn
-              Caption = 'Club Balance'
-              HeaderAlignmentHorz = taCenter
-            end
-            object gridPlayersListLimit: TcxGridColumn
-              Caption = 'Balance Limit'
-              PropertiesClassName = 'TcxSpinEditProperties'
-              Properties.Alignment.Horz = taCenter
-              HeaderAlignmentHorz = taCenter
-            end
           end
           object gridPlayersListLevel: TcxGridLevel
             GridView = gridPlayersListTable
           end
         end
-        object btGiveChips: TcxButton
-          Left = 8
-          Top = 202
+        object btGiveOwnership: TcxButton
+          Left = 127
+          Top = 170
           Width = 113
           Height = 26
-          Action = acGiveChips
+          Action = acGiveOwnership
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 1
@@ -2754,31 +2744,15 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
-        object btGiveOwnership: TcxButton
-          Left = 127
-          Top = 202
-          Width = 113
-          Height = 26
-          Action = acGiveOwnership
-          Anchors = [akLeft, akBottom]
-          SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 2
-          Font.Charset = ANSI_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Arial'
-          Font.Style = []
-          ParentFont = False
-        end
         object btRemovePlayerFromClub: TcxButton
           Left = 246
-          Top = 202
+          Top = 170
           Width = 113
           Height = 26
           Action = acRemovePlayer
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 3
+          TabOrder = 2
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -2794,7 +2768,7 @@ object frmClubLobby: TfrmClubLobby
           Action = acSuspendPlayer
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 4
+          TabOrder = 3
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -2802,15 +2776,15 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
-        object btResetClubBalance: TcxButton
-          Left = 127
+        object btResetBalance: TcxButton
+          Left = 365
           Top = 170
           Width = 113
           Height = 26
-          Action = acResetClubBalance
+          Action = acResetBalance
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 5
+          TabOrder = 4
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -3340,11 +3314,6 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Close Club...'
       OnExecute = acCloseClubExecute
     end
-    object acGiveChips: TAction
-      Caption = 'Give Chips...'
-      Enabled = False
-      OnExecute = acGiveChipsExecute
-    end
     object acShowCreateGameForm: TAction
       Caption = 'Create a Table...'
       OnExecute = acShowCreateGameFormExecute
@@ -3380,10 +3349,10 @@ object frmClubLobby: TfrmClubLobby
       Caption = 'Select All'
       OnExecute = acTablesStatsSelectAllExecute
     end
-    object acResetClubBalance: TAction
-      Caption = 'Reset Club Balance'
+    object acResetBalance: TAction
+      Caption = 'Reset Balance'
       Enabled = False
-      OnExecute = acResetClubBalanceExecute
+      OnExecute = acResetBalanceExecute
     end
   end
   object tiUpdateClubDetails: TTimer

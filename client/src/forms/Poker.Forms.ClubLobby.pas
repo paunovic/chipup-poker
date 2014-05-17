@@ -28,9 +28,7 @@ type
     gridPlayersListTable: TcxGridTableView;
     gridPlayersListId: TcxGridColumn;
     gridPlayersListName: TcxGridColumn;
-    gridPlayersListBalance: TcxGridColumn;
     gridPlayersListLevel: TcxGridLevel;
-    btGiveChips: TcxButton;
     btGiveOwnership: TcxButton;
     btRemovePlayerFromClub: TcxButton;
     alManageClubs: TActionList;
@@ -38,7 +36,6 @@ type
     acGiveOwnership: TAction;
     acShowClubChangeDetailsForm: TAction;
     acCloseClub: TAction;
-    acGiveChips: TAction;
     acShowCreateGameForm: TAction;
     acCloseTable: TAction;
     btChangeClubDetails: TcxButton;
@@ -117,17 +114,15 @@ type
     gridTotalStatsLevel: TcxGridLevel;
     gridTotalStatsDummy: TcxGridColumn;
     gridPlayersListLimit: TcxGridColumn;
-    gridPlayersListClubBalance: TcxGridColumn;
-    cxLabel1: TcxLabel;
-    cxSpinEdit1: TcxSpinEdit;
-    cxLabel2: TcxLabel;
-    btResetClubBalance: TcxButton;
-    acResetClubBalance: TAction;
+    gridPlayersListBalance: TcxGridColumn;
+    lbsDefaultPlayerLimit: TcxLabel;
+    seDefaultPlayerLimit: TcxSpinEdit;
+    btResetBalance: TcxButton;
+    acResetBalance: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
     procedure gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
-    procedure acGiveChipsExecute(Sender: TObject);
     procedure acGiveOwnershipExecute(Sender: TObject);
     procedure acRemovePlayerExecute(Sender: TObject);
     procedure acShowClubChangeDetailsFormExecute(Sender: TObject);
@@ -160,7 +155,7 @@ type
     procedure gridTablesTableDblClick(Sender: TObject);
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
-    procedure acResetClubBalanceExecute(Sender: TObject);
+    procedure acResetBalanceExecute(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -168,7 +163,7 @@ type
     FSelectedGameId: TBytes;
     FSelectedStatsTableId: TBytes;
 
-    procedure ConfigureGUI;
+    procedure ConfigureGUI(const AUpdateLists: Boolean = TRUE);
 
     procedure UpdatePlayerlist;
     procedure UpdateGamesList;
@@ -248,11 +243,10 @@ begin
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
-  btGiveChips.Top := gbPlayers.Height - btGiveChips.Height - 13;
-  btGiveOwnership.Top := btGiveChips.Top;
-  btRemovePlayerFromClub.Top := btGiveChips.Top;
-  btSuspendUnsuspend.Top := btGiveChips.Top - btGiveChips.Height - 5;
-  btResetClubBalance.Top := btSuspendUnsuspend.Top;
+  btGiveOwnership.Top := gbPlayers.Height - btGiveOwnership.Height - 13;
+  btRemovePlayerFromClub.Top := btGiveOwnership.Top;
+  btSuspendUnsuspend.Top := btGiveOwnership.Top;
+  btResetBalance.Top := btGiveOwnership.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
   btCloseTable.Top := btNewGame.Top;
@@ -283,12 +277,13 @@ begin
   ConfigureGUI;
 end;
 
-procedure TfrmClubLobby.ConfigureGUI;
+procedure TfrmClubLobby.ConfigureGUI(const AUpdateLists: Boolean = TRUE);
 var
   club: TClubInfo;
   player: TPlayerInfo;
   manager: String;
   admin_visible: Boolean;
+  member: TClubMemberInfo;
 begin
   if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
   begin
@@ -304,22 +299,34 @@ begin
 
     admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
 
+    if not club.GetMemberInfo(FSelectedPlayerId, member) then
+      member := nil;
+
+    gridPlayersListLimit.Visible := admin_visible;
+    gridPlayersListBalance.Visible := admin_visible;
+    lbsDefaultPlayerLimit.Visible := admin_visible;
+    seDefaultPlayerLimit.Visible := admin_visible;
     btChangeClubDetails.Visible := admin_visible;
     acShowClubChangeDetailsForm.Enabled := admin_visible;
     acUpdateClubDetails.Enabled := admin_visible;
     btCloseClub.Visible := admin_visible;
     acCloseClub.Enabled := admin_visible;
-    btGiveChips.Visible := admin_visible;
-    acGiveChips.Enabled := (admin_visible) and (Length(FSelectedPlayerId) > 0) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
-    btResetClubBalance.Visible := admin_visible;
-    acResetClubBalance.Enabled := (admin_visible) and (Length(FSelectedPlayerId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
+    btResetBalance.Visible := admin_visible;
+    acResetBalance.Enabled := (admin_visible) and (Assigned(member));
     btGiveOwnership.Visible := admin_visible;
-    acGiveOwnership.Enabled := acGiveChips.Enabled;
+    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
     btRemovePlayerFromClub.Visible := admin_visible;
-    acRemovePlayer.Enabled := acGiveChips.Enabled;
+    acRemovePlayer.Enabled := acGiveOwnership.Enabled;
     btSuspendUnsuspend.Visible := admin_visible;
-    acSuspendPlayer.Enabled := acGiveChips.Enabled;
-    acReinstatePlayer.Enabled := acGiveChips.Enabled;
+    if btSuspendUnsuspend.Visible then
+    begin
+      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
+      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
+      if acReinstatePlayer.Enabled then
+        btSuspendUnsuspend.Action := acReinstatePlayer
+      else
+        btSuspendUnsuspend.Action := acSuspendPlayer;
+    end;
     btNewGame.Visible := admin_visible;
     acShowCreateGameForm.Enabled := admin_visible;
     btCloseTable.Visible := admin_visible;
@@ -348,18 +355,18 @@ begin
       gridGames.Align := alClient;
     end;
 
-    UpdatePlayerlist;
-    UpdateGamesList;
-
     btStats.Enabled := admin_visible;
-    if btStats.Enabled then
-    begin
-      UpdateTablesStatsList;
-      UpdatePlayersStatsList;
-    end;
 
-    gridPlayersListLimit.Visible := admin_visible;
-    gridPlayersListClubBalance.Visible := admin_visible;
+    if AUpdateLists then
+    begin
+      UpdatePlayerlist;
+      UpdateGamesList;
+      if btStats.Enabled then
+      begin
+        UpdateTablesStatsList;
+        UpdatePlayersStatsList;
+      end;
+    end;
   end;
 end;
 
@@ -414,9 +421,7 @@ end;
 procedure TfrmClubLobby.gridPlayersListTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  action_enabled: Boolean;
   club: TClubInfo;
-  member: TClubMemberInfo;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     SetLength(FSelectedPlayerId, 0)
@@ -429,33 +434,7 @@ begin
       FSelectedPlayerId := gridPlayersListTable.DataController.GetValue(recIndex, gridPlayersListId.Index);
   end;
 
-  action_enabled := (Length(FSelectedPlayerId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and (club.GetMemberInfo(FSelectedPlayerId, member));
-
-  acResetClubBalance.Enabled := action_enabled;
-  acRemovePlayer.Enabled := (action_enabled) and (not CompareBytes(club.OwnerId, member.MongoId));
-  acGiveOwnership.Enabled := acRemovePlayer.Enabled;
-  acGiveChips.Enabled := acRemovePlayer.Enabled;
-
-  if action_enabled then
-  begin
-    if member.Suspended then
-    begin
-      btSuspendUnsuspend.Action := acReinstatePlayer;
-      acSuspendPlayer.Enabled := FALSE;
-      acReinstatePlayer.Enabled := TRUE;
-    end
-    else
-    begin
-      btSuspendUnsuspend.Action := acSuspendPlayer;
-      acReinstatePlayer.Enabled := FALSE;
-      acSuspendPlayer.Enabled := TRUE;
-    end;
-  end
-  else
-  begin
-    acSuspendPlayer.Enabled := FALSE;
-    acReinstatePlayer.Enabled := FALSE;
-  end;
+  ConfigureGUI(FALSE);
 end;
 
 procedure TfrmClubLobby.gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
@@ -621,28 +600,24 @@ var
   begin
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId);
     if Players.FindPlayerById(AMember.MongoId, player) then
-    begin
-      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick);
-      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, player.Balance / 100);
-    end
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick)
     else
     begin
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, 'Unknown');
-      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, 0);
-
       SetLength(query_players, Length(query_players) + 1);
       query_players[Length(query_players) - 1] := AMember.MongoId;
     end;
 
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, -AMember.BalanceLimit / 100);
+
     if CompareBytes(AMember.MongoId, club.OwnerId) then
       status := 'Manager'
     else
-    begin
       if AMember.Suspended then
         status := 'Suspended'
       else
         status := 'Member';
-    end;
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListStatus.Index, status);
   end;
 
@@ -910,18 +885,6 @@ begin
     ServerSocket.DisbandClub(club.Id);
 end;
 
-procedure TfrmClubLobby.acGiveChipsExecute(Sender: TObject);
-var
-  club  : TClubInfo;
-  player: TPlayerInfo;
-begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
-    Exit;
-
-  FormsContainer.Add(RunModalForm(TfrmGiveChips, self, [club, player], ModalFormClose));
-end;
-
 procedure TfrmClubLobby.acGiveOwnershipExecute(Sender: TObject);
 var
   club  : TClubInfo;
@@ -954,7 +917,7 @@ begin
     ServerSocket.KickPlayer(club.Id, player.Id);
 end;
 
-procedure TfrmClubLobby.acResetClubBalanceExecute(Sender: TObject);
+procedure TfrmClubLobby.acResetBalanceExecute(Sender: TObject);
 begin
 //
 end;
