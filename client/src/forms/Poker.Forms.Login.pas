@@ -163,7 +163,7 @@ begin
   try
     dmMain.GetUpdateFilesList(files);
     {$IFDEF DEBUG}
-    ServerSocket.Hello(FALSE, files); // FIXME
+    ServerSocket.Hello(TRUE, files);
     {$ELSE}
     ServerSocket.Hello(FALSE, files);
     {$ENDIF};

@@ -644,12 +644,12 @@ begin
   for prop in rt.GetDeclaredProperties do
   begin
     value := prop.GetValue(AObject);
-    valstr := '';
+    valstr := '?';
     case prop.PropertyType.TypeKind of
       // auto-handled
       tkInteger,
       tkInt64,
-      tkFloat: ;
+      tkFloat: valstr := value.AsVariant;
 
       tkString,
       tkChar,
@@ -708,9 +708,6 @@ begin
                 Delete(valstr, Length(valstr) - 1, 2);
               valstr := Format('(%s)', [valstr]);
             end;
-
-        if valstr = '' then
-          valstr := '()';
       end;
 
       tkUnknown: ;
@@ -725,10 +722,7 @@ begin
       tkProcedure: ;
     end;
 
-    if valstr = '' then
-      propstr := Format('%s: %s', [prop.Name, value.AsVariant])
-    else
-      propstr := Format('%s: %s', [prop.Name, valstr]);
+    propstr := Format('%s: %s', [prop.Name, valstr]);
     fullstr := fullstr + propstr + '; ';
   end;
 

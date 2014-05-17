@@ -2638,12 +2638,13 @@ object frmClubLobby: TfrmClubLobby
           Top = 52
           Properties.AssignedValues.DisplayFormat = True
           Properties.AssignedValues.MaxValue = True
-          Properties.AssignedValues.MinValue = True
           Properties.CanEdit = False
+          Properties.MinValue = 1.000000000000000000
           Properties.UseDisplayFormatWhenEditing = True
+          Properties.OnChange = seDefaultPlayerLimitPropertiesChange
           TabOrder = 6
           Value = 1000
-          Width = 56
+          Width = 95
         end
       end
       object gbPlayers: TcxGroupBox
@@ -2955,7 +2956,7 @@ object frmClubLobby: TfrmClubLobby
       object gridTables: TcxGrid
         Left = 8
         Top = 2
-        Width = 336
+        Width = 337
         Height = 432
         Anchors = [akLeft, akTop, akBottom]
         BevelInner = bvNone
