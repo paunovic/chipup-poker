@@ -173,6 +173,7 @@ message ClubMember {
 	optional bool suspended = 2;
 	optional uint32 balance_limit = 3;
 	optional int32 club_balance = 4;
+	optional bool unlimited_limit = 5;
 }
 
 message Club {
