@@ -526,6 +526,7 @@ message TablePlayerStats {
 	optional uint32 secondsplayed = 7;
 	optional uint32 chipsinplay = 8;
 	optional uint32 hands = 9;
+	optional int32 club_balance = 10;
 }
 
 message ContactMessage {
