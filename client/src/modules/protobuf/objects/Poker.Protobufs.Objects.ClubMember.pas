@@ -16,17 +16,20 @@ type
       FN_SUSPENDED = 2;
       FN_BALANCE_LIMIT = 3;
       FN_CLUB_BALANCE = 4;
+      FN_UNLIMITED_LIMIT = 5;
 
     var
       FId: TBytes;
       FSuspended: Boolean;
       FBalanceLimit: UINT32;
       FClubBalance: Integer;
+      FUnlimitedLimit: Boolean;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetSuspended(const AValue: Boolean);
     procedure SetBalanceLimit(const AValue: UINT32);
     procedure SetClubBalance(const AValue: Integer);
+    procedure SetUnlimitedLimit(const AValue: Boolean);
 
   public
     destructor Destroy; override;
@@ -36,6 +39,7 @@ type
     property Suspended: Boolean read FSuspended write SetSuspended;
     property BalanceLimit: UINT32 read FBalanceLimit write SetBalanceLimit;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
+    property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
   end;
 
 implementation
@@ -74,6 +78,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubBalance := AProtobufReader.readInt32;
       end;
+      FN_UNLIMITED_LIMIT: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FUnlimitedLimit := AProtobufReader.readBoolean;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -102,6 +110,12 @@ procedure TPB_ClubMember.SetClubBalance(const AValue: Integer);
 begin
   FClubBalance := AValue;
   ProtobufOutput.writeInt32(FN_CLUB_BALANCE, AValue);
+end;
+
+procedure TPB_ClubMember.SetUnlimitedLimit(const AValue: Boolean);
+begin
+  FUnlimitedLimit := AValue;
+  ProtobufOutput.writeBoolean(FN_UNLIMITED_LIMIT, AValue);
 end;
 
 end.

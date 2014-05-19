@@ -9,14 +9,14 @@ uses
 type
   TPlayerInfo = class
   private
-    FId      : TBytes;
-    FNick    : String;
-    FEMail   : String;
+    FId: TBytes;
+    FNick: String;
+    FEMail: String;
     FPassword: String;
-    FBalance : UINT32;
-    FAuthed  : Boolean;
+    FBalance: UINT32;
+    FAuthed: Boolean;
     FAvatarId: TBytes;
-    FClubs   : TClubsInfo;
+    FClubs: TClubsInfo;
 
   public
     constructor Create;

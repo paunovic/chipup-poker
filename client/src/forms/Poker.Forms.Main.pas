@@ -9,7 +9,7 @@ uses
   cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo,
   cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, Vcl.ActnMan, Vcl.ActnMenus,
   Vcl.PlatformDefaultStyleActnCtrls, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club,
-  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPCdxBarPopupMenu, cxPC, cxNavigator;
+  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPC, cxPCdxBarPopupMenu;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -867,6 +867,7 @@ begin
   end
   else
   begin
+    Tables.CloseTablesForClub(AClub.MongoId);
     if dmMain.SelfInfo.Clubs.FindClub(AClub.Seq, club) then
       dmMain.SelfInfo.Clubs.Remove(club);
   end;
@@ -1028,6 +1029,7 @@ var
 begin
   pbclub := AObject as TPB_Club;
 
+  Tables.CloseTablesForClub(pbclub.MongoId);
   index := dmMain.SelfInfo.Clubs.IndexOf(pbclub.Seq);
   if index <> -1 then
     dmMain.SelfInfo.Clubs.Delete(index);
@@ -1103,6 +1105,7 @@ var
   tablestats: TTableStats;
   player: TPB_User;
   playerinfo: TPlayerInfo;
+  club: TClubInfo;
 begin
   pb := AObject as TPB_TableStatsReplies;
 
@@ -1113,6 +1116,7 @@ begin
       Players.AddPlayer(player);
 
   for tablepb in pb.Reply do
+  begin
     if TablesStats.Find(tablepb.Gameid, tablestats) then
       tablestats.Assign(tablepb)
     else
@@ -1121,6 +1125,10 @@ begin
       tablestats.Assign(tablepb);
       TablesStats.Add(tablestats);
     end;
+
+    if dmMain.SelfInfo.Clubs.FindClub(tablepb.Clubid, club) then
+      club.UpdateFromTableStats(tablepb.Playerstats);
+  end;
 end;
 
 

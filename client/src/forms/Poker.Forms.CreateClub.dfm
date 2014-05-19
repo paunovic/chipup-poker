@@ -1,7 +1,8 @@
 object frmCreateClub: TfrmCreateClub
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Create Club'
   ClientHeight = 112
   ClientWidth = 296

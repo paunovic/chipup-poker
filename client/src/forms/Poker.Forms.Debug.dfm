@@ -692,7 +692,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = 15395562
+        Color = 13750737
         Unicode = True
       end>
     ParaStyles = <

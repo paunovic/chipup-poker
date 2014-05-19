@@ -1,7 +1,8 @@
 object frmImageCrop: TfrmImageCrop
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Crop Avatar'
   ClientHeight = 478
   ClientWidth = 645

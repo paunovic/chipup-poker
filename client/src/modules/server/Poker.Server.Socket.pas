@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.HelloParams,
-  Poker.Protobufs.Objects.UpdateFileInfo;
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Server.SocketConnectThread;
 
 type
   TServerSocket = class
@@ -24,6 +24,7 @@ type
     FTimerIdPing: UINT_PTR;
     FTimerIdPingTimeout: UINT_PTR;
     FSSLHandshakeDone: Boolean;
+    FSocketConnectThread: TServerSocketConnectThread;
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -32,6 +33,7 @@ type
     procedure SocketChangeState(Sender: TObject; OldState, NewState: TSocketState);
     procedure SocketDataAvailable(Sender: TObject; Error: Word);
     procedure SocketError(Sender: TObject);
+    procedure SocketConnectThreadTerminate(Sender: TObject);
 
     procedure FreeReceiveBuffer;
     function ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
@@ -66,7 +68,7 @@ type
     procedure LeaveClub(const AId: Int64);
     procedure KickPlayer(const AClubId: Int64; const APlayerId: TBytes);
     procedure GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
-    procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32);
+    procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
     procedure DisbandClub(const AClubId: Int64);
     procedure TransferChips(const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
@@ -131,7 +133,6 @@ begin
     ServerSocket.ProcessTimer(idEvent);
 end;
 
-
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
 begin
   ServerSocket := TServerSocket.Create(AServer, APort);
@@ -183,7 +184,8 @@ end;
 
 procedure TServerSocket.Connect;
 begin
-  if FSocket.State <> wsClosed then
+  if (FSocket.State <> wsClosed) or
+     (Assigned(FSocketConnectThread)) then
     Exit;
 
   {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
@@ -205,7 +207,10 @@ begin
   KillPingTimers;
   KillPingTimeoutTimer;
 
-  FSocket.Connect;
+  FSocketConnectThread := TServerSocketConnectThread.Create(FSocket);
+  FSocketConnectThread.FreeOnTerminate := TRUE;
+  FSocketConnectThread.OnTerminate := SocketConnectThreadTerminate;
+  FSocketConnectThread.Start;
 end;
 
 procedure TServerSocket.Disconnect;
@@ -368,6 +373,11 @@ begin
   PostMessage(MessageContainer.ReceiverWnd, MessageContainer.SocketStateChangeMsg, WPARAM(OldState), LPARAM(NewState));
 end;
 
+
+procedure TServerSocket.SocketConnectThreadTerminate(Sender: TObject);
+begin
+  FSocketConnectThread := nil;
+end;
 
 procedure TServerSocket.SocketError(Sender: TObject);
 begin
@@ -712,7 +722,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32);
+procedure TServerSocket.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
 var
   protobuf: TPB_Club;
 begin
@@ -723,6 +733,7 @@ begin
     protobuf.Password := AClubCode;
     protobuf.Rake := AClubRake;
     protobuf.DefaultBalanceLimit := ADefaultPlayerLimit;
+    protobuf.UnlimitedDefaultBalance := AUnlimitedDefaultBalance;
     SendProtobuf(scChangeClubDetails, protobuf);
   finally
     protobuf.Free;

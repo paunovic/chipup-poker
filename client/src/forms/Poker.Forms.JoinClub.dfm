@@ -1,7 +1,8 @@
 object frmJoinClub: TfrmJoinClub
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Join Club'
   ClientHeight = 110
   ClientWidth = 248

@@ -91,7 +91,7 @@ begin
     edCurrentPassword.SetFocus;
   end
   else
-    if not ValidatePassword(edNewPassword.Text, error) then
+    if not ValidateUserPassword(edNewPassword.Text, error) then
       edNewPassword.SetFocus
     else
       if edNewPassword.Text <> edConfirmPassword.Text then

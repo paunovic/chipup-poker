@@ -47,6 +47,8 @@ uses
   Poker.Forms.ContactUs in 'forms\Poker.Forms.ContactUs.pas' {frmContactUs},
   Poker.Forms.Reconnect in 'forms\Poker.Forms.Reconnect.pas' {frmReconnect},
   Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout},
+  Poker.Forms.SystemTrayPopup in 'forms\Poker.Forms.SystemTrayPopup.pas' {frmSystemTrayPopup},
+  Poker.Forms.CloseClubConfirmation in 'forms\Poker.Forms.CloseClubConfirmation.pas' {frmCloseClubConfirmation},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -131,8 +133,8 @@ uses
   Poker.Protobufs.Objects.HelloReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloReply.pas',
   Poker.Protobufs.Objects.HelloParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas',
   Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas',
-  Poker.Forms.SystemTrayPopup in 'forms\Poker.Forms.SystemTrayPopup.pas' {frmSystemTrayPopup},
-  Poker.Protobufs.Objects.ClubMember in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas';
+  Poker.Protobufs.Objects.ClubMember in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas',
+  Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas';
 
 procedure FocusPokerApp;
 var
@@ -153,7 +155,6 @@ begin
     FocusPokerApp;
     Exit;
   end;
-
   TInstanceController.RegisterInstance;
 
   Application.Initialize;

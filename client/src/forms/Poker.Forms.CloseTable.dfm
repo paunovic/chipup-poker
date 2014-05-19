@@ -1,7 +1,8 @@
 object frmCloseTable: TfrmCloseTable
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Close Table'
   ClientHeight = 115
   ClientWidth = 184

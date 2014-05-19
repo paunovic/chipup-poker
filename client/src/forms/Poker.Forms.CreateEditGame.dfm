@@ -1,7 +1,8 @@
 object frmCreateEditGame: TfrmCreateEditGame
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   ClientHeight = 226
   ClientWidth = 376
   Color = clWindow

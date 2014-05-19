@@ -2553,20 +2553,20 @@ object frmClubLobby: TfrmClubLobby
         Width = 250
         object Bevel1: TdxBevel
           Left = 13
-          Top = 121
+          Top = 61
           Width = 225
           Height = 1
           Anchors = [akLeft, akTop, akRight]
         end
         object btCloseClub: TcxButton
           Left = 10
-          Top = 129
+          Top = 69
           Width = 231
           Height = 28
           Action = acCloseClub
           Anchors = [akLeft, akTop, akRight]
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 1
+          TabOrder = 0
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -2576,14 +2576,14 @@ object frmClubLobby: TfrmClubLobby
         end
         object btChangeClubDetails: TcxButton
           Left = 10
-          Top = 85
+          Top = 25
           Width = 231
           Height = 28
           Action = acShowClubChangeDetailsForm
           Anchors = [akLeft, akTop, akRight]
           Caption = 'Change club details...'
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 2
+          TabOrder = 1
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -2599,7 +2599,7 @@ object frmClubLobby: TfrmClubLobby
           Action = acLeaveClub
           Anchors = [akLeft, akTop, akRight]
           SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 3
+          TabOrder = 2
           Visible = False
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -2607,46 +2607,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-        end
-        object lbsClubRake: TcxLabel
-          Left = 10
-          Top = 25
-          Caption = 'Club rake:'
-          Transparent = True
-        end
-        object seClubRake: TcxSpinEdit
-          Left = 123
-          Top = 24
-          Properties.CanEdit = False
-          Properties.DisplayFormat = '#%'
-          Properties.MaxValue = 10.000000000000000000
-          Properties.MinValue = 1.000000000000000000
-          Properties.UseDisplayFormatWhenEditing = True
-          Properties.OnChange = seClubRakePropertiesChange
-          TabOrder = 0
-          Value = 1
-          Width = 56
-        end
-        object seDefaultPlayerLimit: TcxSpinEdit
-          Left = 123
-          Top = 52
-          Enabled = False
-          Properties.MinValue = 1.000000000000000000
-          Properties.UseDisplayFormatWhenEditing = True
-          Properties.OnChange = seDefaultPlayerLimitPropertiesChange
-          TabOrder = 5
-          Value = 1000
-          Width = 95
-        end
-        object cbDefaultPlayerLimit: TcxCheckBox
-          Left = 6
-          Top = 52
-          Caption = 'Default player limit:'
-          Properties.ImmediatePost = True
-          Properties.OnChange = cbDefaultPlayerLimitPropertiesChange
-          TabOrder = 6
-          Transparent = True
-          Width = 113
         end
       end
       object gbPlayers: TcxGroupBox
@@ -2798,6 +2758,8 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2950,6 +2912,8 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -3340,7 +3304,6 @@ object frmClubLobby: TfrmClubLobby
     end
     object acUpdateClubDetails: TAction
       Caption = 'acUpdateClubDetails'
-      OnExecute = acUpdateClubDetailsExecute
     end
     object acTablesStatsUnselectAll: TAction
       Caption = 'Unselect All'

@@ -1,7 +1,8 @@
 object frmChangeAvatar: TfrmChangeAvatar
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Change Avatar'
   ClientHeight = 219
   ClientWidth = 226

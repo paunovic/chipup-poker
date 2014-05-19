@@ -2,7 +2,7 @@ object frmReconnect: TfrmReconnect
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsDialog
+  BorderStyle = bsSingle
   Caption = 'Reconnecting'
   ClientHeight = 64
   ClientWidth = 275

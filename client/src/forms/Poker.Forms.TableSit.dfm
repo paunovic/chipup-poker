@@ -1,7 +1,8 @@
 object frmTableSit: TfrmTableSit
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Get Chips'
   ClientHeight = 180
   ClientWidth = 298
@@ -52,6 +53,7 @@ object frmTableSit: TfrmTableSit
     Left = 102
     Top = 109
     Anchors = [akLeft, akRight, akBottom]
+    Properties.MaxValue = 99999999.000000000000000000
     Properties.MinValue = 1.000000000000000000
     Properties.SpinButtons.Visible = False
     Properties.UseLeftAlignmentOnEditing = False

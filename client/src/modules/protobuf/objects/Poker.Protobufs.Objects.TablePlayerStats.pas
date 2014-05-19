@@ -20,6 +20,7 @@ type
       FN_SECONDSPLAYED = 7;
       FN_CHIPSINPLAY = 8;
       FN_HANDS = 9;
+      FN_CLUB_BALANCE = 10;
 
     var
       FUserid: TBytes;
@@ -30,6 +31,7 @@ type
       FSecondsplayed: UINT32;
       FChipsinplay: UINT32;
       FHands: UINT32;
+      FClubBalance: Integer;
 
     procedure SetUserid(const AValue: TBytes);
     procedure SetBalance(const AValue: Integer);
@@ -39,6 +41,7 @@ type
     procedure SetSecondsplayed(const AValue: UINT32);
     procedure SetChipsinplay(const AValue: UINT32);
     procedure SetHands(const AValue: UINT32);
+    procedure SetClubBalance(const AValue: Integer);
 
   public
     destructor Destroy; override;
@@ -52,6 +55,7 @@ type
     property Secondsplayed: UINT32 read FSecondsplayed write SetSecondsplayed;
     property Chipsinplay: UINT32 read FChipsinplay write SetChipsinplay;
     property Hands: UINT32 read FHands write SetHands;
+    property ClubBalance: Integer read FClubBalance write SetClubBalance;
   end;
 
 implementation
@@ -107,6 +111,10 @@ begin
       FN_HANDS: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHands := AProtobufReader.readUInt32;
+      end;
+      FN_CLUB_BALANCE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FClubBalance := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -166,6 +174,12 @@ procedure TPB_TablePlayerStats.SetHands(const AValue: UINT32);
 begin
   FHands := AValue;
   ProtobufOutput.writeUInt32(FN_HANDS, AValue);
+end;
+
+procedure TPB_TablePlayerStats.SetClubBalance(const AValue: Integer);
+begin
+  FClubBalance := AValue;
+  ProtobufOutput.writeInt32(FN_CLUB_BALANCE, AValue);
 end;
 
 end.

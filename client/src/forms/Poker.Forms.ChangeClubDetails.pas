@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, Vcl.StdCtrls, cxRadioGroup, cxLabel,
   cxTextEdit, cxButtons, Poker.Objects.ClubInfo, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Vcl.Menus,
-  ChipUpPokerDarkSkin;
+  ChipUpPokerDarkSkin, cxMaskEdit, cxSpinEdit, cxCheckBox;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)
@@ -19,12 +19,17 @@ type
     btOK: TcxButton;
     btCancel: TcxButton;
     acCancel: TAction;
+    cbDefaultPlayerLimit: TcxCheckBox;
+    seLimit: TcxSpinEdit;
+    seRake: TcxSpinEdit;
+    lbsClubRake: TcxLabel;
     procedure acOKExecute(Sender: TObject);
     procedure acCancelExecute(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
+    procedure cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClub: TClubInfo;
@@ -94,6 +99,9 @@ begin
 
   edClubName.Text := FClub.Name;
   edInvitationCode.Text := FClub.InvCode;
+  seRake.Value := FClub.Rake;
+  seLimit.Value := FClub.DefaultBalanceLimit / 100;
+  cbDefaultPlayerLimit.Checked := not FClub.UnlimitedDefaultBalance;
 end;
 
 procedure TfrmChangeClubDetails.acCancelExecute(Sender: TObject);
@@ -105,12 +113,29 @@ end;
 procedure TfrmChangeClubDetails.acOKExecute(Sender: TObject);
 var
   error: String;
+  rake: Integer;
+  limit: Single;
+  limituint: UINT32;
 begin
   if not ValidateClubName(edClubName.Text, error) then
     edClubName.SetFocus
   else
     if not ValidateClubPassword(edInvitationCode.Text, error) then
-      edInvitationCode.SetFocus;
+      edInvitationCode.SetFocus
+    else
+      if (not TryStrToInt(StringReplace(seRake.Text, '%', '', [rfReplaceAll]), rake)) or
+         (rake < 1) or (rake > 10) then
+      begin
+        error := 'Invalid rake';
+        seRake.SetFocus;
+      end
+      else
+        if (not TryStrToFloat(seLimit.Text, limit)) or
+           (limit < 1) then
+        begin
+          error := 'Invalid player limit';
+          seLimit.SetFocus;
+        end;
 
   if error <> '' then
   begin
@@ -118,8 +143,15 @@ begin
     Exit;
   end;
 
+  limituint := Trunc(limit * 100);
+
   acOK.Enabled := FALSE;
-  ServerSocket.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, FClub.Rake, FClub.DefaultBalanceLimit);
+  ServerSocket.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rake, limituint, not cbDefaultPlayerLimit.Checked);
+end;
+
+procedure TfrmChangeClubDetails.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
+begin
+  seLimit.Enabled := cbDefaultPlayerLimit.Checked;
 end;
 
 procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);

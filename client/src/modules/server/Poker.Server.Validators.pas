@@ -3,7 +3,7 @@ unit Poker.Server.Validators;
 interface
 
 function ValidateUsername(const AUsername: String; out AError: String): Boolean;
-function ValidatePassword(const APassword: String; out AError: String): Boolean;
+function ValidateUserPassword(const APassword: String; out AError: String): Boolean;
 function ValidateEMail(const AEMail: String; out AError: String): Boolean;
 function ValidateClubName(const AClubName: String; out AError: String): Boolean;
 function ValidateClubPassword(const AClubPassword: String; out AError: String): Boolean;
@@ -28,7 +28,7 @@ begin
   result := AError = '';
 end;
 
-function ValidatePassword(const APassword: String; out AError: String): Boolean;
+function ValidateUserPassword(const APassword: String; out AError: String): Boolean;
 begin
   AError := '';
   if (Length(APassword) < ServerSettings.MinStringLengths.Password) or (Length(APassword) > ServerSettings.MaxStringLengths.Password) then

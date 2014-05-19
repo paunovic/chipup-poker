@@ -6,7 +6,7 @@ type
   TInstanceController = class
   private
     class var
-      FMutexName  : String;
+      FMutexName: String;
       FMutexHandle: THandle;
 
   public
@@ -20,8 +20,8 @@ type
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.SysUtils;
+  {$IFDEF DEBUG} Poker.Forms.Debug, System.SysUtils, {$ENDIF}
+  Winapi.Windows;
 
 class function TInstanceController.IsAlphaInstance: Boolean;
 var

@@ -22,6 +22,7 @@ type
       FN_HAS_PASSWORD = 8;
       FN_RAKE = 9;
       FN_DEFAULT_BALANCE_LIMIT = 10;
+      FN_UNLIMITED_DEFAULT_BALANCE = 11;
 
     var
       FId: TBytes;
@@ -34,6 +35,7 @@ type
       FHasPassword: Boolean;
       FRake: UINT32;
       FDefaultBalanceLimit: UINT32;
+      FUnlimitedDefaultBalance: Boolean;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetName(const AValue: String);
@@ -44,6 +46,7 @@ type
     procedure SetHasPassword(const AValue: Boolean);
     procedure SetRake(const AValue: UINT32);
     procedure SetDefaultBalanceLimit(const AValue: UINT32);
+    procedure SetUnlimitedDefaultBalance(const AValue: Boolean);
     procedure MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
 
   protected
@@ -63,6 +66,7 @@ type
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
     property Rake: UINT32 read FRake write SetRake;
     property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
+    property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;
   end;
 
 implementation
@@ -135,6 +139,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDefaultBalanceLimit := AProtobufReader.readUInt32;
       end;
+      FN_UNLIMITED_DEFAULT_BALANCE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FUnlimitedDefaultBalance := AProtobufReader.readBoolean;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -201,6 +209,12 @@ procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UINT32);
 begin
   FDefaultBalanceLimit := AValue;
   ProtobufOutput.writeUInt32(FN_DEFAULT_BALANCE_LIMIT, AValue);
+end;
+
+procedure TPB_Club.SetUnlimitedDefaultBalance(const AValue: Boolean);
+begin
+  FUnlimitedDefaultBalance := AValue;
+  ProtobufOutput.writeBoolean(FN_UNLIMITED_DEFAULT_BALANCE, AValue);
 end;
 
 end.

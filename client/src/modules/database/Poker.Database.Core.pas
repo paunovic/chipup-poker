@@ -113,7 +113,7 @@ end;
 function TDatabase.RetrieveAvatarData(const AConnection: TSQLDBSQLite3ConnectionProperties; const AId: TBytes; const AData: TMemoryStream): Boolean;
 var
   query: TSQLDBStatement;
-  rbs  : RawByteString;
+  rbs: RawByteString;
 begin
   result := FALSE;
   query := AConnection.NewThreadSafeStatement;

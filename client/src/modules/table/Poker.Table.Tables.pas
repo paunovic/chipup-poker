@@ -52,6 +52,7 @@ type
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
     function FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;
+    procedure CloseTablesForClub(const AClubId: TBytes);
     procedure ClearWithoutNotification;
   end;
 
@@ -210,6 +211,18 @@ begin
   FNotifyServer := FALSE;
   Clear;
   FNotifyServer := TRUE;
+end;
+
+procedure TTables.CloseTablesForClub(const AClubId: TBytes);
+var
+  C1: Integer;
+begin
+ for C1 := Length(ToArray) - 1 downto 0 do
+   if CompareBytes(ToArray[C1].Club.MongoId, AClubId)  then
+   begin
+     Delete(C1);
+     Break;
+   end;
 end;
 
 function TTables.FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;

@@ -1,7 +1,7 @@
 object frmContactUs: TfrmContactUs
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu, biMinimize]
+  BorderIcons = [biSystemMenu]
   Caption = 'Contact Us'
   ClientHeight = 298
   ClientWidth = 433

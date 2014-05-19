@@ -1,7 +1,8 @@
 object frmChangePassword: TfrmChangePassword
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Change Password'
   ClientHeight = 128
   ClientWidth = 301

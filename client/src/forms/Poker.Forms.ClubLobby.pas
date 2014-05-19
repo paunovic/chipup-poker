@@ -61,8 +61,6 @@ type
     imgHeader: TcxImage;
     btPrijatnaPunina: TcxButton;
     gridGamesBuyinLimits: TcxGridColumn;
-    lbsClubRake: TcxLabel;
-    seClubRake: TcxSpinEdit;
     tiUpdateClubDetails: TTimer;
     acUpdateClubDetails: TAction;
     gridGamesTableStatus: TcxGridColumn;
@@ -115,10 +113,8 @@ type
     gridTotalStatsDummy: TcxGridColumn;
     gridPlayersListLimit: TcxGridColumn;
     gridPlayersListBalance: TcxGridColumn;
-    seDefaultPlayerLimit: TcxSpinEdit;
     btResetBalance: TcxButton;
     acResetBalance: TAction;
-    cbDefaultPlayerLimit: TcxCheckBox;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -136,8 +132,6 @@ type
     procedure acLeaveClubExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure tiUpdateClubDetailsTimer(Sender: TObject);
-    procedure seClubRakePropertiesChange(Sender: TObject);
-    procedure acUpdateClubDetailsExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure btStatsClick(Sender: TObject);
     procedure gridTablesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;  ANewItemRecordFocusingChanged: Boolean);
@@ -156,8 +150,6 @@ type
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
-    procedure seDefaultPlayerLimitPropertiesChange(Sender: TObject);
-    procedure cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -211,7 +203,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
-  Poker.Protobufs.Objects.TableStatsReplies;
+  Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -306,8 +298,6 @@ begin
 
     gridPlayersListLimit.Visible := admin_visible;
     gridPlayersListBalance.Visible := admin_visible;
-    cbDefaultPlayerLimit.Visible := admin_visible;
-    seDefaultPlayerLimit.Visible := admin_visible;
     btChangeClubDetails.Visible := admin_visible;
     acShowClubChangeDetailsForm.Enabled := admin_visible;
     acUpdateClubDetails.Enabled := admin_visible;
@@ -338,14 +328,6 @@ begin
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
     acLeaveClub.Enabled := not admin_visible;
-    lbsClubRake.Visible := admin_visible;
-    seClubRake.Visible := admin_visible;
-    seClubRake.Properties.OnChange := nil;
-    seClubRake.Value := club.Rake;
-    seClubRake.Properties.OnChange := seClubRakePropertiesChange;
-    seDefaultPlayerLimit.Properties.OnChange := nil;
-    seDefaultPlayerLimit.Value := club.DefaultBalanceLimit / 100;
-    seDefaultPlayerLimit.Properties.OnChange := seDefaultPlayerLimitPropertiesChange;
     if admin_visible then
     begin
       gridPlayersList.Align := alTop;
@@ -386,11 +368,6 @@ end;
 procedure TfrmClubLobby.btTablesClick(Sender: TObject);
 begin
   pcTabs.ActivePage := tsTables;
-end;
-
-procedure TfrmClubLobby.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
-begin
-  seDefaultPlayerLimit.Enabled := cbDefaultPlayerLimit.Checked;
 end;
 
 procedure TfrmClubLobby.btClubHomeClick(Sender: TObject);
@@ -583,28 +560,13 @@ end;
 
 procedure TfrmClubLobby.ModalFormClose(ASender: TObject);
 begin
+  if ASender is TfrmCloseClubConfirmation then
+  begin
+    if (ASender as TfrmCloseClubConfirmation).ModalResult = mrOk then
+      ServerSocket.DisbandClub(FClubId);
+  end;
+
   EnableWindow(Handle, TRUE);
-end;
-
-procedure TfrmClubLobby.seClubRakePropertiesChange(Sender: TObject);
-var
-  rake: Integer;
-  rt  : String;
-begin
-  tiUpdateClubDetails.Enabled := FALSE;
-  rt := StringReplace(seClubRake.Text, '%', '', [rfReplaceAll]);
-  if (TryStrToInt(rt, rake)) and
-     (rake >= 1) and (rake <= 10) then
-    tiUpdateClubDetails.Enabled := TRUE;
-end;
-
-procedure TfrmClubLobby.seDefaultPlayerLimitPropertiesChange(Sender: TObject);
-var
-  limit: Integer;
-begin
-  tiUpdateClubDetails.Enabled := FALSE;
-  if TryStrToInt(seDefaultPlayerLimit.Text, limit) then
-    tiUpdateClubDetails.Enabled := TRUE;
 end;
 
 procedure TfrmClubLobby.UpdatePlayerlist;
@@ -627,7 +589,7 @@ var
       query_players[Length(query_players) - 1] := AMember.MongoId;
     end;
 
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
+      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, -AMember.BalanceLimit / 100);
 
     if CompareBytes(AMember.MongoId, club.OwnerId) then
@@ -896,12 +858,19 @@ end;
 procedure TfrmClubLobby.acCloseClubExecute(Sender: TObject);
 var
   club: TClubInfo;
+  game: TGameInfo;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
     Exit;
 
-  if MessageDlg('Are you sure you want to disband the club?', mtConfirmation, mbYesNo, 0) = mrYes then
-    ServerSocket.DisbandClub(club.Id);
+  for game in club.Games do
+    if game.State <> gsClosed then
+    begin
+      MessageDlg('There are active tables in the club. Before closing the club, please close all active tables first', mtError, [mbOK], 0);
+      Exit;
+    end;
+
+  FormsContainer.Add(RunModalForm(TfrmCloseClubConfirmation, self, [club], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.acGiveOwnershipExecute(Sender: TObject);
@@ -1025,23 +994,6 @@ begin
     gridTablesTable.DataController.EndFullUpdate;
   end;
   gridTablesTable.DataController.Refresh;
-end;
-
-procedure TfrmClubLobby.acUpdateClubDetailsExecute(Sender: TObject);
-var
-  club: TClubInfo;
-  rake, limit: Integer;
-begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
-    Exit;
-
-  rake := StrToIntDef(StringReplace(seClubRake.Text, '%', '', [rfReplaceAll]), -1);
-  limit := StrToIntDef(seDefaultPlayerLimit.Text, -1);
-
-  if (rake < 1) or (rake > 10) or (limit < 1) then
-    Exit;
-
-  ServerSocket.ChangeClubDetails(club.Id, club.Name, club.InvCode, rake, limit * 100);
 end;
 
 procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);

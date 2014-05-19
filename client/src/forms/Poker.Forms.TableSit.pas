@@ -209,34 +209,44 @@ procedure TfrmTableSit.acOKExecute(Sender: TObject);
 var
   err: String;
   seat_info: TSeatInfo;
+  buyin: Single;
 begin
-  if FTable.SeatIndex = -1 then
+  if not TryStrToFloat(seBuyin.Text, buyin) then
   begin
-    if FTable.Game.State = gsClosed then
-      err := 'Table is closed';
-
-    if err = '' then
-      ServerSocket.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100))
-    else
-      seBuyin.SelectAll;
+    err := 'Invalid buyin';
+    seBuyin.SelectAll;
   end
   else
-  begin
-    if not FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
-      err := 'Invalid seat index'
-    else
-      if seBuyin.Value * 100 > GetMaxBuyin then
-      begin
-        err := Format('Maximum %s for this table is %s', [FBuyinPhrase, ChipsToStr(GetMaxBuyin)]);
-        seBuyin.SelectAll;
-      end;
-
-    if err = '' then
-      ServerSocket.TableAddOn(FTable.Game.MongoId, Trunc(seBuyin.Value * 100));
-  end;
+    if (buyin > seBuyin.Properties.MaxValue) or
+       (buyin * 100 > GetMaxBuyin) then
+    begin
+      err := Format('Maximum %s for this table is %s', [FBuyinPhrase, ChipsToStr(GetMaxBuyin)]);
+      seBuyin.SelectAll;
+    end;
 
   if err = '' then
+  begin
+    if FTable.SeatIndex = -1 then
+    begin
+      if FTable.Game.State = gsClosed then
+        err := 'Table is closed';
+
+      if err = '' then
+        ServerSocket.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100))
+      else
+        seBuyin.SelectAll;
+    end
+    else
+    begin
+      if not FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+        err := 'Invalid seat index';
+
+      if err = '' then
+        ServerSocket.TableAddOn(FTable.Game.MongoId, Trunc(buyin * 100));
+    end;
+
     acOK.Enabled := FALSE
+  end
   else
     MessageDlg(err, mtError, [mbOK], 0);
 end;

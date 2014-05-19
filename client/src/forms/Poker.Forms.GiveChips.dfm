@@ -1,7 +1,8 @@
 object frmGiveChips: TfrmGiveChips
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Give Chips To Player'
   ClientHeight = 136
   ClientWidth = 359

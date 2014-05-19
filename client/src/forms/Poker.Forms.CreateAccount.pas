@@ -105,7 +105,7 @@ begin
   if not ValidateEMail(edEmail.Text, error) then
     edEmail.SetFocus
   else
-    if not ValidatePassword(edPassword.Text, error) then
+    if not ValidateUserPassword(edPassword.Text, error) then
       edPassword.SetFocus
     else
       if edPassword.Text <> edConfirmPassword.Text then

@@ -3,7 +3,8 @@ unit Poker.Objects.ClubInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Objects.GameInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubMember;
+  System.Generics.Collections, System.SysUtils, Poker.Objects.GameInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubMember,
+  Poker.Protobufs.Objects.TablePlayerStats;
 
 
 type
@@ -19,7 +20,7 @@ type
     property MongoId: TBytes read FMongoId;
     property Suspended: Boolean read FSuspended;
     property BalanceLimit: UINT32 read FBalanceLimit;
-    property ClubBalance: Int32 read FClubBalance;
+    property ClubBalance: Int32 read FClubBalance write FClubBalance;
   end;
 
   TClubInfo = class
@@ -34,11 +35,13 @@ type
     FRake: Integer;
     FPrivate: Boolean;
     FDefaultBalanceLimit: UINT32;
+    FUnlimitedDefaultBalance: Boolean;
   public
     constructor Create(const AProtobufObject: TPB_Club);
     destructor Destroy; override;
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
+    procedure UpdateFromTableStats(const ATableStatsPlayers: TObjectList<TPB_TablePlayerStats>);
 
     procedure AddMember(const AClubMemberInfo: TPB_ClubMember);
     function GetMemberInfo(const AMongoId: TBytes; out AMemberInfo: TClubMemberInfo): Boolean;
@@ -53,12 +56,14 @@ type
     property Rake: Integer read FRake;
     property IsPrivate: Boolean read FPrivate write FPrivate;
     property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit;
+    property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance;
   end;
 
   TClubsInfo = class(TObjectList<TClubInfo>)
   public
     function AddClub(const AProtobufObject: TPB_Club): TClubInfo;
-    function FindClub(const AId: Integer; var AClubInfo: TClubInfo): Boolean;
+    function FindClub(const AId: Integer; var AClubInfo: TClubInfo): Boolean; overload;
+    function FindClub(const AMongoId: TBytes; var AClubInfo: TClubInfo): Boolean; overload;
     function IndexOf(const AId: Integer): Integer;
   end;
 
@@ -112,6 +117,17 @@ begin
   FRake := AProtobufObject.Rake;
   FPrivate := AProtobufObject.IsPrivate;
   FDefaultBalanceLimit := AProtobufObject.DefaultBalanceLimit;
+  FUnlimitedDefaultBalance := AProtobufObject.UnlimitedDefaultBalance;
+end;
+
+procedure TClubInfo.UpdateFromTableStats(const ATableStatsPlayers: TObjectList<TPB_TablePlayerStats>);
+var
+  playertps: TPB_TablePlayerStats;
+  member: TClubMemberInfo;
+begin
+  for playertps in ATableStatsPlayers do
+    if GetMemberInfo(playertps.Userid, member) then
+      member.ClubBalance := playertps.ClubBalance;
 end;
 
 procedure TClubInfo.AddMember(const AClubMemberInfo: TPB_ClubMember);
@@ -144,6 +160,20 @@ var
 begin
   for clubinfo in self.ToArray do
     if clubinfo.Id = AId then
+    begin
+      AClubInfo := clubinfo;
+      Exit(TRUE);
+    end;
+
+  Exit(FALSE);
+end;
+
+function TClubsInfo.FindClub(const AMongoId: TBytes; var AClubInfo: TClubInfo): Boolean;
+var
+  clubinfo: TClubInfo;
+begin
+  for clubinfo in self.ToArray do
+    if CompareBytes(clubinfo.MongoId, AMongoId) then
     begin
       AClubInfo := clubinfo;
       Exit(TRUE);

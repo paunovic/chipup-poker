@@ -805,8 +805,8 @@ end;
 function TfrmTable.GetSeatPoint(const ASeatIndex: Integer): TPoint2;
 var
   seat_radians: Double;
-  x, y        : Single;
-  pf          : TPointF;
+  x, y: Single;
+  pf: TPointF;
 begin
   seat_radians := TTableResources.SEAT_POINTS[FTable.Game.Seats, ASeatIndex];
 

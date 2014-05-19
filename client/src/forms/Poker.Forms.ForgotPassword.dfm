@@ -1,7 +1,8 @@
 object frmForgotPassword: TfrmForgotPassword
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Forgot password'
   ClientHeight = 131
   ClientWidth = 305
