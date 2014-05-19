@@ -646,7 +646,6 @@ begin
     value := prop.GetValue(AObject);
     valstr := '?';
     case prop.PropertyType.TypeKind of
-      // auto-handled
       tkInteger,
       tkInt64,
       tkFloat: valstr := value.AsVariant;
@@ -673,6 +672,7 @@ begin
         meth := prop.PropertyType.GetMethod('ToArray');
         if Assigned(meth) then
         begin
+          valstr := '';
           value2 := meth.Invoke(value, []);
           Assert(value2.IsArray);
           for C1 := 0 to value2.GetArrayLength - 1 do

@@ -2615,7 +2615,7 @@ object frmClubLobby: TfrmClubLobby
           Transparent = True
         end
         object seClubRake: TcxSpinEdit
-          Left = 110
+          Left = 123
           Top = 24
           Properties.CanEdit = False
           Properties.DisplayFormat = '#%'
@@ -2627,24 +2627,26 @@ object frmClubLobby: TfrmClubLobby
           Value = 1
           Width = 56
         end
-        object lbsDefaultPlayerLimit: TcxLabel
-          Left = 10
-          Top = 53
-          Caption = 'Default player limit:'
-          Transparent = True
-        end
         object seDefaultPlayerLimit: TcxSpinEdit
-          Left = 110
+          Left = 123
           Top = 52
-          Properties.AssignedValues.DisplayFormat = True
-          Properties.AssignedValues.MaxValue = True
-          Properties.CanEdit = False
+          Enabled = False
           Properties.MinValue = 1.000000000000000000
           Properties.UseDisplayFormatWhenEditing = True
           Properties.OnChange = seDefaultPlayerLimitPropertiesChange
-          TabOrder = 6
+          TabOrder = 5
           Value = 1000
           Width = 95
+        end
+        object cbDefaultPlayerLimit: TcxCheckBox
+          Left = 6
+          Top = 52
+          Caption = 'Default player limit:'
+          Properties.ImmediatePost = True
+          Properties.OnChange = cbDefaultPlayerLimitPropertiesChange
+          TabOrder = 6
+          Transparent = True
+          Width = 113
         end
       end
       object gbPlayers: TcxGroupBox
@@ -2668,8 +2670,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 3
-          ExplicitTop = 24
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -3374,7 +3374,7 @@ object frmClubLobby: TfrmClubLobby
     end
   end
   object StatsStyleRepo: TcxStyleRepository
-    Left = 224
+    Left = 60
     Top = 404
     PixelsPerInch = 96
     object styleBalancePositive: TcxStyle

@@ -1,4 +1,4 @@
-unit Poker.Forms.Debug;
+﻿unit Poker.Forms.Debug;
 
 {$I defines.inc}
 
@@ -73,6 +73,7 @@ type
     procedure btSeatPosClick(Sender: TObject);
     procedure btSetClick(Sender: TObject);
     procedure btRunAnotherInstanceClick(Sender: TObject);
+    procedure rvLogRVMouseUp(Sender: TCustomRichView; Button: TMouseButton; Shift: TShiftState; ItemNo, X, Y: Integer);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
@@ -94,7 +95,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources, Poker.DataModule,
   {$ENDIF}
-  Poker.Common.InstanceController, Poker.DataModule,
+  Poker.Common.InstanceController, Poker.DataModule, RVItem,
   Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
 
 
@@ -221,7 +222,6 @@ begin
   if ConsoleAttached then
     FreeConsole;
 end;
-
 
 procedure TfrmDebug.FormCreate(Sender: TObject);
 begin
@@ -352,7 +352,7 @@ begin
   if rvLog.ItemCount >= SCROLLBACK_LINES then
     rvLog.DeleteParas(0, rvLog.ItemCount - SCROLLBACK_LINES + 1);
 
-  table := TRVTableItemInfo.CreateEx(1, 3, rvLog.RVData);
+  table := TRVTableItemInfo.CreateEx(1, 4, rvLog.RVData);
   with table do
   begin
     BorderWidth := 0;
@@ -365,28 +365,89 @@ begin
     Options := [rvtoRTFAllowAutofit];
 
     Cells[0, 0].BestWidth := 75;
-    Cells[0, 1].BestWidth := 50;
+    Cells[0, 1].BestWidth := 40;
+    Cells[0, 2].BestWidth := 10;
 
     Cells[0, 0].Clear;
     Cells[0, 1].Clear;
     Cells[0, 2].Clear;
+    Cells[0, 3].Clear;
 
     Cells[0, 0].AddFmt('%s', [ATime], 0, 0);
     Cells[0, 1].AddFmt('%s', [ATypeStr], ATypeStyle, 1);
-    Cells[0, 2].AddFmt('%s', [AData], ADataStyle, 2);
+    if ASubData <> '' then
+      Cells[0, 2].AddFmt('►', [], 13, 1)
+    else
+      Cells[0, 2].AddFmt('', [], 13, 1);
+    Cells[0, 3].AddFmt('%s', [AData], ADataStyle, 2);
   end;
-
   rvLog.AddItem('', table);
+
+  if ASubData <> '' then
+  begin
+    table.Tag := 'E';
+    table := TRVTableItemInfo.CreateEx(1, 4, rvLog.RVData);
+    with table do
+    begin
+      BorderWidth := 0;
+      CellVPadding := 0;
+      CellBorderWidth := 0;
+      CellVSpacing := 0;
+      BorderVSpacing := 0;
+      Color := clNone;
+      BestWidth := 0;
+      Options := [rvtoRTFAllowAutofit];
+
+      Cells[0, 0].BestWidth := 75;
+      Cells[0, 1].BestWidth := 40;
+      Cells[0, 2].BestWidth := 10;
+
+      Cells[0, 0].Clear;
+      Cells[0, 1].Clear;
+      Cells[0, 2].Clear;
+      Cells[0, 3].Clear;
+
+      Cells[0, 0].AddFmt('', [], 0, 0);
+      Cells[0, 1].AddFmt('', [], 0, 0);
+      Cells[0, 2].AddFmt('', [], 0, 0);
+      Cells[0, 3].AddFmt('%s', [ASubData], 13, 2);
+    end;
+    rvLog.AddItem('', table);
+    rvLog.SetItemExtraIntProperty(rvLog.ItemCount - 1, rvepHidden, 1);
+  end;
 
   if rvLog.VScrollPos < rvLog.VScrollMax then
     rvLog.Format
   else
     rvLog.FormatTail;
-
-  if ASubData <> '' then
-    Add(AType, ATime, ATypeStr, ASubData, '', 6, 12);
 end;
 
+procedure TfrmDebug.rvLogRVMouseUp(Sender: TCustomRichView; Button: TMouseButton; Shift: TShiftState; ItemNo, X, Y: Integer);
+var
+  is_hidden: Integer;
+  rvtag: TRVTag;
+  table: TRVTableItemInfo;
+begin
+  if ItemNo = -1 then
+    Exit;
+
+  if Button <> mbLeft then
+    Exit;
+
+  rvtag := rvLog.GetItemTag(ItemNo);
+  if rvtag = 'E' then // row is expandable
+  begin
+    rvLog.GetItemExtraIntProperty(ItemNo + 1, rvepHidden, is_hidden);
+    is_hidden := Abs(is_hidden - 1);
+    rvLog.SetItemExtraIntProperty(ItemNo + 1, rvepHidden, is_hidden);
+    table := rvLog.GetItem(ItemNo) as TRVTableItemInfo;
+    if is_hidden = 0 then
+      table.Cells[0, 2].SetItemText(0, '▼')
+    else
+      table.Cells[0, 2].SetItemText(0, '►');
+    rvLog.Format;
+  end;
+end;
 
 procedure TfrmDebug.btRunAnotherInstanceClick(Sender: TObject);
 begin

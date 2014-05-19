@@ -30,7 +30,6 @@ object frmCreateClub: TfrmCreateClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 64
     TabOrder = 0
-    ExplicitWidth = 278
     Width = 187
   end
   object lbsClubName: TcxLabel
@@ -53,7 +52,6 @@ object frmCreateClub: TfrmCreateClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    ExplicitWidth = 278
     Width = 187
   end
   object lbsInvCode: TcxLabel
@@ -85,7 +83,6 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 184
   end
   object btCancel: TcxButton
     Left = 192
@@ -102,7 +99,6 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 283
   end
   object alCreateClub: TActionList
     Left = 19

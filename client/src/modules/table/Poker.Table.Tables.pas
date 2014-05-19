@@ -9,10 +9,10 @@ uses
 type
   TTable = class
   private
-    FForm          : TForm;
-    FSeatIndex     : Integer;
-    FGame          : TGameInfo;
-    FClub          : TClubInfo;
+    FForm: TForm;
+    FSeatIndex: Integer;
+    FGame: TGameInfo;
+    FClub: TClubInfo;
     FSwapChainIndex: Integer;
 
   public

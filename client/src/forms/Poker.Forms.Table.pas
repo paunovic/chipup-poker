@@ -1130,13 +1130,14 @@ end;
 procedure TfrmTable.UpdateClosingTime;
 var
   gtc: DWORD;
-  ct : DWORD;
+  ct: DWORD;
 begin
   if FTable.Game.State = gsClosing then
   begin
     gtc := GetTickCount;
     ct := FTable.Game.ClosingTime - ServerSocket.TimeOffset;
-    if gtc > ct then
+    if (FTable.Game.ClosingTime = 0) or
+       (gtc > ct) then
       FClosingTime := 0
     else
       FClosingTime := ct - gtc;
@@ -1160,7 +1161,7 @@ end;
 
 procedure TfrmTable.CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
 var
-  chat_event  : TPB_ChatEvent;
+  chat_event: TPB_ChatEvent;
   chat_message: TPB_ChatMessage;
 begin
   chat_event := AObject as TPB_ChatEvent;
@@ -2902,9 +2903,9 @@ end;
 
 procedure TfrmTable.RenderClosingText;
 var
-  mins       : Integer;
+  mins: Integer;
   minute_text: String;
-  txt        : String;
+  txt: String;
 begin
   case FTable.Game.State of
     gsClosing: begin

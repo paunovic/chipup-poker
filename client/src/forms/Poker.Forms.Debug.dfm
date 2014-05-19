@@ -66,6 +66,7 @@ object frmDebug: TfrmDebug
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
+    OnRVMouseUp = rvLogRVMouseUp
   end
   object paInfo: TPanel
     Left = 0
@@ -684,6 +685,14 @@ object frmDebug: TfrmDebug
         Size = 8
         Style = [fsBold]
         Color = clYellow
+        Unicode = True
+      end
+      item
+        StyleName = 'Subdata'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = 15395562
         Unicode = True
       end>
     ParaStyles = <

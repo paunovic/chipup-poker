@@ -115,10 +115,10 @@ type
     gridTotalStatsDummy: TcxGridColumn;
     gridPlayersListLimit: TcxGridColumn;
     gridPlayersListBalance: TcxGridColumn;
-    lbsDefaultPlayerLimit: TcxLabel;
     seDefaultPlayerLimit: TcxSpinEdit;
     btResetBalance: TcxButton;
     acResetBalance: TAction;
+    cbDefaultPlayerLimit: TcxCheckBox;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -157,6 +157,7 @@ type
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
     procedure seDefaultPlayerLimitPropertiesChange(Sender: TObject);
+    procedure cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -305,7 +306,7 @@ begin
 
     gridPlayersListLimit.Visible := admin_visible;
     gridPlayersListBalance.Visible := admin_visible;
-    lbsDefaultPlayerLimit.Visible := admin_visible;
+    cbDefaultPlayerLimit.Visible := admin_visible;
     seDefaultPlayerLimit.Visible := admin_visible;
     btChangeClubDetails.Visible := admin_visible;
     acShowClubChangeDetailsForm.Enabled := admin_visible;
@@ -385,6 +386,11 @@ end;
 procedure TfrmClubLobby.btTablesClick(Sender: TObject);
 begin
   pcTabs.ActivePage := tsTables;
+end;
+
+procedure TfrmClubLobby.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
+begin
+  seDefaultPlayerLimit.Enabled := cbDefaultPlayerLimit.Checked;
 end;
 
 procedure TfrmClubLobby.btClubHomeClick(Sender: TObject);
@@ -931,8 +937,18 @@ begin
 end;
 
 procedure TfrmClubLobby.acResetBalanceExecute(Sender: TObject);
+var
+  club: TclubInfo;
+  player: TPlayerInfo;
 begin
-//
+  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
+    Exit;
+
+  if MessageDlg(Format('Reset balance for player %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
+  begin
+   // FIXME
+  end;
 end;
 
 procedure TfrmClubLobby.acShowClubChangeDetailsFormExecute(Sender: TObject);
