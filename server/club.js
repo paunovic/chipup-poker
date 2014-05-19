@@ -1,40 +1,57 @@
-var allClubs,activeUsers,allStats,allUsers,allGames;
+"use strict";
+var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances;
 
 var assert = require('assert');
+var ObjectID = require('mongodb').ObjectID;
 
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var profiler = require('./profiler');
+var ReadWriteLock = require('./lock');
 
+var getLock = new ReadWriteLock();
 
 module.exports = Club;
 function Club(obj) {
 	if (!(this instanceof Club)) return new Club(clubid);
 	this.clubid = obj._id;
 	this.obj = obj
+	this.balance = {};
+}
+Club.prototype.refresh = function (obj) {
+	assert(compareObjectID(this.clubid,obj._id));
+	this.obj = obj;
 }
 Club.activeClubsSeq = [];
 Club.activeClubsId = {};
 Club.getClubBySeq = function (seq,cb) {
-	if (!Club.activeClubsSeq[seq]) {
-		allClubs.findOne({seq:seq},function (err,obj) {
-			Club.activeClubsSeq[seq] = new Club(obj);
-			Club.activeClubsId[obj._id] = Club.activeClubsSeq[seq];
+	getLock.writeLock(function (release) {
+		if (!Club.activeClubsSeq[seq]) {
+			allClubs.findOne({seq:seq},function (err,obj) {
+				Club.activeClubsSeq[seq] = new Club(obj);
+				Club.activeClubsId[obj._id] = Club.activeClubsSeq[seq];
+				release();
+				cb(null,Club.activeClubsSeq[seq]);
+			}.bind(this));
+		} else {
+			release();
 			cb(null,Club.activeClubsSeq[seq]);
-		}.bind(this));
-	} else {
-		cb(null,Club.activeClubsSeq[seq]);
-	}
+		}
+	}.bind(this));
 }
 Club.getClubById = function (id,cb) {
-	if (!Club.activeClubsId[id]) {
-		allClubs.findOne({_id:id},function (err,obj) {
-			Club.activeClubsSeq[obj.seq] = new Club(obj);
-			Club.activeClubsId[obj._id] = Club.activeClubsSeq[obj.seq];
-			cb(null,Club.activeClubsSeq[obj.seq]);
-		}.bind(this));
-	} else {
-		cb(null,Club.activeClubsId[id]);
-	}
+	getLock.writeLock(function (release) {
+		if (!Club.activeClubsId[id]) {
+			allClubs.findOne({_id:id},function (err,obj) {
+				Club.activeClubsSeq[obj.seq] = new Club(obj);
+				Club.activeClubsId[obj._id] = Club.activeClubsSeq[obj.seq];
+				release();
+				cb(null,Club.activeClubsSeq[obj.seq]);
+			}.bind(this));
+		} else {
+			release();
+			cb(null,Club.activeClubsId[id]);
+		}
+	}.bind(this));
 }
 Club.prototype.isOwner = function (user) {
 	return this.obj.owner.equals(user);
@@ -80,7 +97,6 @@ Club.prototype.handOver = function (gameObj,cb) {
 			}.bind(this));
 		}.bind(this));
 	} else {
-		console.log('owner offline');
 		cb();
 	}
 }
@@ -89,6 +105,8 @@ Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 	// FIXME, cache object
 	// FIXME, cache the protobuf
 	allClubs.findOne({_id:this.clubid},function (err,club) {
+		assert.ifError(err);
+		assert(club);
 		var g = makeGameProtobuf(gamerow);
 		if (club.is_private) {
 			token.tag += 'a';
@@ -139,12 +157,36 @@ Club.prototype.goPublic = function (cb) {
 	}.bind(this));
 	cb('dummy');
 }
+Club.prototype.updateLimitPostWin = function (change,userid,callback) {
+	clubBalances.update({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,rows) {
+		if (rows == 1) return callback();
+		clubBalances.insert({clubid:this.clubid, userid:userid, balance:change, balance_limit:this.obj.default_balance_limit},callback);
+	}.bind(this));
+}
+Club.prototype.buyin = function (userid,chips) {
+	if (!this.balance[userid]) this.balance[userid] = -chips;
+	else this.balance[userid] -= chips;
+	console.log(this.balance);
+}
+Club.prototype.cashout = function (userid,chips) {
+	this.balance[userid] += chips;
+	console.log(this.balance);
+}
+Club.prototype.getPotentialLosses = function (userid,cb) {
+	clubBalances.findOne({clubid:this.clubid, userid:userid},function (err,row) {
+		assert.ifError(err);
+		if (!row && !this.balance[userid]) return cb(0);
+		if (!this.balance[userid]) return cb(row.balance);
+		cb(this.balance[userid] + row.balance);
+	}.bind(this));
+}
 Club.init = function (db,activeUsersIn) {
 	allClubs = db.collection('clubs');
 	activeUsers = activeUsersIn;
 	allStats = db.collection('allStats');
 	allUsers = db.collection('users');
 	allGames = db.collection('games');
+	clubBalances = db.collection('clubBalances');
 }
 // FIXME, their own file
 function toMongoId(buf) {
@@ -163,20 +205,32 @@ function containsObjectID(list,id) {
 	}
 	return false;
 }
-Club.makeClubProtobuf = function makeClubProtobuf(c,userlist) {
-	if (c.members) {
-		for (y=0; y<c.members.length; y++) {
-			if (userlist && (userlist.indexOf(c.members[y]) == -1)) userlist.push(c.members[y]);
-			c.members[y] = new Buffer(c.members[y].toString(),'hex');
+Club.makeClubProtobuf = function makeClubProtobuf(c,userlist,stats,self) {
+	assert(stats);
+	if (stats.length > 1) assert(self);
+	if (!c.members) c.members = [];
+	c.members.push(c.owner);
+	var out = [];
+	for (var y=0; y<c.members.length; y++) {
+		if (userlist && (userlist.indexOf(c.members[y]) == -1)) userlist.push(c.members[y]);
+		var suspended = false;
+		if (c.suspended) {
+			if (containsObjectID(c.suspended,c.members[y])) suspended = true;
 		}
-	}
-	if (c.suspended) {
-		c.suspended_members = [];
-		for (y=0; y<c.suspended.length; y++) {
-			c.suspended_members[y] = new Buffer(c.suspended[y].toString(),'hex');
+		var obj = {_id:fromMongoId(c.members[y]), suspended:suspended, balance_limit:0, club_balance: 0};
+		for (var a=0; a<stats.length; a++) {
+			if (compareObjectID(stats[a].clubid,c._id)) {
+				if (compareObjectID(stats[a].userid,c.members[y])) {
+					obj.club_balance = stats[a].balance;
+					if (self.balance[c.members[y]]) obj.club_balance += self.balance[c.members[y]];
+					obj.balance_limit = stats[a].balance_limit;
+				}
+			}
 		}
-		delete c.suspended;
+		out.push(obj);
 	}
+	c.members = out;
+	delete c.suspended;
 	c._id = new Buffer(c._id.toString(),'hex');
 	c.owner = new Buffer(c.owner.toString(),'hex');
 	return c;
