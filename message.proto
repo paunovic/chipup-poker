@@ -500,7 +500,7 @@ message CloseGameData {
 		cgtFifteenMinutes = 3;
 	}
 	required bytes gameid = 1;
-	optional CloseGameData timestamp = 2;
+	required CloseGameData timestamp = 2;
 }
 
 message FetchHandHistory {
