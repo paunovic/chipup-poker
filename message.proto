@@ -44,6 +44,7 @@ enum ServerCodes {
 	srContactUsOk = 36;
 	srTableBuyinLessThanCashout = 37;
 	srInvalidTableBuyin = 38;
+	srPlayerLimitOk = 39;
 
     seChat = 50;
     seSecondaryLoginDetected = 51;
@@ -93,6 +94,7 @@ enum ServerCodes {
 	scShowCards = 103;
 	scQueryTableStats = 104;
 	scContactUs = 105;
+	scSetPlayerLimit = 106;
 }
 
 message StringSizes {
@@ -556,4 +558,10 @@ message ContactMessage {
 message BuyinError {
 	required bytes game_id = 1;
 	required uint32 last_cashout = 2;
+}
+message PlayerLimitParams {
+	required bytes clubid = 1;
+	required bytes userid = 2;
+	required int32 limit = 3;
+	required bool unlimited = 4;
 }
