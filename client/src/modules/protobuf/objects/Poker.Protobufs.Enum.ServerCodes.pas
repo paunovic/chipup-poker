@@ -54,42 +54,42 @@ type
     seTableStatus = 58,
     seTransferChips = 59,
     seUserChange = 60,
-    scLogin = 70,
-    scStatus = 71,
-    scRegister = 72,
-    scForgotPassword = 73,
-    scLogout = 74,
-    scCreateClub = 75,
-    scJoinClub = 76,
-    scKickPlayer = 77,
-    scLeaveClub = 78,
-    scGiveClubOwnership = 79,
-    scChangeClubDetails = 80,
-    scDeleteClub = 81,
-    scTransferChips = 82,
-    scChangeEmail = 83,
-    scChangePassword = 84,
-    scSetAvatar = 85,
-    scCreateGame = 86,
-    scCloseGame = 87,
-    scTableJoin = 88,
-    scTableLeave = 89,
-    scTableSit = 90,
-    scTableStandUp = 91,
-    scPing = 92,
-    scSuspendPlayer = 93,
-    scGetPlayers = 94,
-    scFold = 95,
-    scPutChips = 96,
-    scTableAddOn = 97,
-    scTablePlayNow = 98,
-    scTableSitOutNextHand = 99,
-    scTableSitOutNextBB = 100,
-    scResendVerificationMail = 101,
-    scShowCards = 102,
-    scQueryTableStats = 103,
-    scContactUs = 104,
-    scHello = 105
+    scHello = 70,
+    scLogin = 71,
+    scStatus = 72,
+    scRegister = 73,
+    scForgotPassword = 74,
+    scLogout = 75,
+    scCreateClub = 76,
+    scJoinClub = 77,
+    scKickPlayer = 78,
+    scLeaveClub = 79,
+    scGiveClubOwnership = 80,
+    scChangeClubDetails = 81,
+    scDeleteClub = 82,
+    scTransferChips = 83,
+    scChangeEmail = 84,
+    scChangePassword = 85,
+    scSetAvatar = 86,
+    scCreateGame = 87,
+    scCloseGame = 88,
+    scTableJoin = 89,
+    scTableLeave = 90,
+    scTableSit = 91,
+    scTableStandUp = 92,
+    scPing = 93,
+    scSuspendPlayer = 94,
+    scGetPlayers = 95,
+    scFold = 96,
+    scPutChips = 97,
+    scTableAddOn = 98,
+    scTablePlayNow = 99,
+    scTableSitOutNextHand = 100,
+    scTableSitOutNextBB = 101,
+    scResendVerificationMail = 102,
+    scShowCards = 103,
+    scQueryTableStats = 104,
+    scContactUs = 105
   );
 
 {$IFDEF DEBUG}
@@ -170,6 +170,7 @@ begin
     seTableStatus: result := 'seTableStatus';
     seTransferChips: result := 'seTransferChips';
     seUserChange: result := 'seUserChange';
+    scHello: result := 'scHello';
     scLogin: result := 'scLogin';
     scStatus: result := 'scStatus';
     scRegister: result := 'scRegister';
@@ -205,7 +206,6 @@ begin
     scShowCards: result := 'scShowCards';
     scQueryTableStats: result := 'scQueryTableStats';
     scContactUs: result := 'scContactUs';
-    scHello: result := 'scHello';
   end;
 end;
 {$ENDIF DEBUG}
