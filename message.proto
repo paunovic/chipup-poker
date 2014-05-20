@@ -46,6 +46,7 @@ enum ServerCodes {
 	srInvalidTableBuyin = 38;
 	srPlayerLimitOk = 39;
 	srResetPlayerBalanceOk = 40;
+	srClubBalanceReached = 41;
 
     seChat = 50;
     seSecondaryLoginDetected = 51;
