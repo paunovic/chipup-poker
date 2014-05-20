@@ -562,6 +562,6 @@ message BuyinError {
 message PlayerLimitParams {
 	required bytes clubid = 1;
 	required bytes userid = 2;
-	required int32 limit = 3;
+	required uint32 limit = 3;
 	required bool unlimited = 4;
 }
