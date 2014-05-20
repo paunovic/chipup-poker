@@ -52,7 +52,6 @@ object frmDebug: TfrmDebug
     StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     TabOrder = 0
     Visible = False
-    ExplicitHeight = 303
     Height = 309
     Width = 675
   end

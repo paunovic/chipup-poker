@@ -337,7 +337,9 @@ end;
 
 procedure TfrmDebug.acServerCrashTestExecute(Sender: TObject);
 begin
+  {$IFDEF DEBUG}
   ServerSocket.CrashTest;
+  {$ENDIF}
 end;
 
 procedure TfrmDebug.ActiveFormChange(Sender: TObject);
