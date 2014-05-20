@@ -212,18 +212,18 @@ message Game {
 		gtRotationNLHPLO = 2;
 	}
 	enum GameState {
-		gsActive = 1;
-		gsClosing = 2;
-		gsClosed = 3;
-		gsEmpty = 4;
+		gsActive = 0;
+		gsClosing = 1;
+		gsClosed = 2;
+		gsEmpty = 3;
 	}
 	
 	enum GameBlinds {
-		gb1x2 = 1;
-		gb5x5 = 2;
-		gb5x10 = 3;
-		gb10x25 = 4;
-		gb25x50 = 5;
+		gb1x2 = 0;
+		gb5x5 = 1;
+		gb5x10 = 2;
+		gb10x25 = 3;
+		gb25x50 = 4;
 		gb50x100 = 6;
 	}
 	
@@ -282,8 +282,8 @@ message SetAvatarParams {
 }
 message SetAvatarReply {
 	enum SetAvatarStatus {
-		saSuccess = 1;
-		saNotFound = 2;
+		saSuccess = 0;
+		saNotFound = 1;
 	}
 	required SetAvatarStatus status = 1;
 }
@@ -331,13 +331,13 @@ message Pot {
 
 message TableStatus {
 	enum TableState {
-		tsIdle = 1;
-		tsPreFlop = 2;
-		tsFlop = 3;
-		tsTurn = 4;
-		tsRiver = 5;
-		tsWinning = 6;
-		tsWinning2 = 7;
+		tsIdle = 0;
+		tsPreFlop = 1;
+		tsFlop = 2;
+		tsTurn = 3;
+		tsRiver = 4;
+		tsWinning = 5;
+		tsWinning2 = 6;
 	}
 	
 	required bytes table_mongo_id = 1;
@@ -366,11 +366,11 @@ message TableStatus {
 
 message SeatInfo {
 	enum PlayerStatus {
-		psOutOfPlay = 1;
-		psOutOfHand = 2;
-		psInHand = 3;
-		psFolded = 4;
-		psAllIn = 5;
+		psOutOfPlay = 0;
+		psOutOfHand = 1;
+		psInHand = 2;
+		psFolded = 3;
+		psAllIn = 4;
 	}
 	required int32 seat = 1;
 	required bytes player_mongo_id = 2;
@@ -432,35 +432,35 @@ message GetUserParams {
 
 message TableEvent {
 	enum TableEventType {
-		teFold = 1;
-		teSit = 2;
-		teStandUp = 3;
-		teWinning = 4;
-		teDealing = 5;
-		teCheck = 6;
-		teCall = 7;
-		teRaise = 8;
-		teAllIn = 9;
-		teFlop = 10;
-		teTurn = 11;
-		teRiver = 12;
-		tePostRiver = 13;
-		tePreWin = 14;
-		teExistingCards = 15;
-		teDisconnect = 16;
+		teFold = 0;
+		teSit = 1;
+		teStandUp = 2;
+		teWinning = 3;
+		teDealing = 4;
+		teCheck = 5;
+		teCall = 6;
+		teRaise = 7;
+		teAllIn = 8;
+		teFlop = 9;
+		teTurn = 10;
+		teRiver = 11;
+		tePostRiver = 12;
+		tePreWin = 13;
+		teExistingCards = 14;
+		teDisconnect = 15;
 	}
 	message WinnerData {
 		enum CardRankings {
-			crRoyalFlush = 1;
-			crStraightFlush = 2;
-			cr4OfKind = 3;
-			crFullHouse = 4;
-			crFlush = 5;
-			crStraight = 6;
-			crThreeOfKind = 7;
-			crTwoPair = 8;
-			crOnePair = 9;
-			crHighCard = 10;
+			crRoyalFlush = 0;
+			crStraightFlush = 1;
+			cr4OfKind = 2;
+			crFullHouse = 3;
+			crFlush = 4;
+			crStraight = 5;
+			crThreeOfKind = 6;
+			crTwoPair = 7;
+			crOnePair = 8;
+			crHighCard = 9;
 		}
 		required int32 seat = 3;
 		required string msg = 4;
@@ -495,9 +495,9 @@ message UserChangeParams {
 
 message CloseGameData {
 	enum CloseGameTime {
-		cgtCurrentHand = 1;
-		cgtFiveMinutes = 2;
-		cgtFifteenMinutes = 3;
+		cgtCurrentHand = 0;
+		cgtFiveMinutes = 1;
+		cgtFifteenMinutes = 2;
 	}
 	required bytes gameid = 1;
 	required CloseGameTime timestamp = 2;
