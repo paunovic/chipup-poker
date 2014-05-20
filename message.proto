@@ -217,14 +217,23 @@ message Game {
 		gsClosed = 3;
 		gsEmpty = 4;
 	}
+	
+	enum GameBlinds {
+		gb1x2 = 1;
+		gb5x5 = 2;
+		gb5x10 = 3;
+		gb10x25 = 4;
+		gb25x50 = 5;
+		gb50x100 = 6;
+	}
+	
 	optional bytes _id = 1;
 	optional bytes creator_mongo_id = 2;
 	optional string gamename = 3;
 	optional int32 clubseq = 4;
 	optional GameType game_type = 5;
 	optional GameLimit game_limit = 6;
-	optional uint32 small_blind = 7;
-	optional uint32 big_blind = 8;
+	optional GameBlinds blinds = 7;
 	optional int32 seats = 9;
 	optional int32 sitting = 10;
 	optional int32 buyin_min = 11;
