@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
-  TUpdateFileType = (ufFull = 1,ufDiff = 2,ufRemove = 3);
+  TUpdateFileType = (ufFull = 0,ufDiff = 1,ufRemove = 2);
   TPB_UpdateFileInfo = class(TProtobufBaseObject)
   private
     const
