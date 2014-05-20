@@ -95,6 +95,7 @@ enum ServerCodes {
 	scQueryTableStats = 104;
 	scContactUs = 105;
 	scSetPlayerLimit = 106;
+	scResetPlayerBalance = 107;
 }
 
 message StringSizes {
