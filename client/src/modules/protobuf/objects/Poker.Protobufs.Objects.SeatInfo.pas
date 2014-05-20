@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
-  TPlayerStatus = (psOutOfPlay = 1,psOutOfHand = 2,psInHand = 3,psFolded = 4,psAllIn = 5);
+  TPlayerStatus = (psOutOfPlay = 0,psOutOfHand = 1,psInHand = 2,psFolded = 3,psAllIn = 4);
   TPB_SeatInfo = class(TProtobufBaseObject)
   private
     const

@@ -16,6 +16,7 @@ object frmReconnect: TfrmReconnect
   OldCreateOrder = False
   Position = poMainFormCenter
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96

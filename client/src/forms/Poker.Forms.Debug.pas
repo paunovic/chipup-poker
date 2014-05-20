@@ -65,6 +65,8 @@ type
     btShowPings: TcxButton;
     btRunAnotherInstance: TcxButton;
     acRunNewInstance: TAction;
+    btServerTest: TcxButton;
+    acServerCrashTest: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -72,8 +74,10 @@ type
     procedure tiAppInfoRefreshTimer(Sender: TObject);
     procedure btSeatPosClick(Sender: TObject);
     procedure btSetClick(Sender: TObject);
-    procedure btRunAnotherInstanceClick(Sender: TObject);
     procedure rvLogRVMouseUp(Sender: TCustomRichView; Button: TMouseButton; Shift: TShiftState; ItemNo, X, Y: Integer);
+    procedure btTestClick(Sender: TObject);
+    procedure acServerCrashTestExecute(Sender: TObject);
+    procedure acRunNewInstanceExecute(Sender: TObject);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
@@ -316,6 +320,12 @@ begin
   rvLog.CopyText;
 end;
 
+procedure TfrmDebug.acRunNewInstanceExecute(Sender: TObject);
+begin
+  TInstanceController.UnregisterInstance;
+  ShellOpen(PChar(ParamStr(0)));
+end;
+
 procedure TfrmDebug.acSaveLogExecute(Sender: TObject);
 begin
   if SaveDialog.Execute(Handle) then
@@ -323,6 +333,11 @@ begin
       1: rvLog.SaveRTF(ChangeFileExt(SaveDialog.FileName, '.rtf'), FALSE);
       2: rvLog.SaveText(ChangeFileExt(SaveDialog.FileName, '.txt'), 0);
     end;
+end;
+
+procedure TfrmDebug.acServerCrashTestExecute(Sender: TObject);
+begin
+  ServerSocket.CrashTest;
 end;
 
 procedure TfrmDebug.ActiveFormChange(Sender: TObject);
@@ -449,12 +464,6 @@ begin
   end;
 end;
 
-procedure TfrmDebug.btRunAnotherInstanceClick(Sender: TObject);
-begin
-  TInstanceController.UnregisterInstance;
-  ShellOpen(PChar(ParamStr(0)));
-end;
-
 procedure TfrmDebug.btSeatPosClick(Sender: TObject);
 begin
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
@@ -515,6 +524,10 @@ begin
   {$ENDIF}
 end;
 
+
+procedure TfrmDebug.btTestClick(Sender: TObject);
+begin
+end;
 
 { TMemoLog }
 

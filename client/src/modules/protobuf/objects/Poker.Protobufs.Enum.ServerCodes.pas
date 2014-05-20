@@ -53,6 +53,7 @@ type
     seGameDelete = 57,
     seTableStatus = 58,
     seTransferChips = 59,
+    seUserChange = 60,
     scLogin = 70,
     scStatus = 71,
     scRegister = 72,
@@ -86,10 +87,9 @@ type
     scTableSitOutNextBB = 100,
     scResendVerificationMail = 101,
     scShowCards = 102,
-    seUserChange = 103,
-    scQueryTableStats = 104,
-    scContactUs = 105,
-    scHello = 106
+    scQueryTableStats = 103,
+    scContactUs = 104,
+    scHello = 105
   );
 
 {$IFDEF DEBUG}
@@ -169,6 +169,7 @@ begin
     seGameDelete: result := 'seGameDelete';
     seTableStatus: result := 'seTableStatus';
     seTransferChips: result := 'seTransferChips';
+    seUserChange: result := 'seUserChange';
     scLogin: result := 'scLogin';
     scStatus: result := 'scStatus';
     scRegister: result := 'scRegister';
@@ -202,7 +203,6 @@ begin
     scTableSitOutNextBB: result := 'scTableSitOutNextBB';
     scResendVerificationMail: result := 'scResendVerificationMail';
     scShowCards: result := 'scShowCards';
-    seUserChange: result := 'seUserChange';
     scQueryTableStats: result := 'scQueryTableStats';
     scContactUs: result := 'scContactUs';
     scHello: result := 'scHello';

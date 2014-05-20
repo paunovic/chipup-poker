@@ -1245,6 +1245,7 @@ begin
   sitout := FALSE;
   foldtoany := FALSE;
 
+  seat_info := nil;
   if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
   begin
     acStandUp.Enabled := TRUE;
@@ -1341,11 +1342,13 @@ begin
         sitout := TRUE;
       end;
     end;
-
-    acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
-                           (seat_info.CanShow) and
-                           (not seat_info.CardsVisible);
   end;
+
+  acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
+                         (Assigned(seat_info)) and
+                         (seat_info.CanShow) and
+                         (not seat_info.CardsVisible);
+
 
   if (FTableStatus.CurrentSeat <> -1) and
      (not tiActiveFrameBlink.Enabled) and
@@ -1482,7 +1485,7 @@ function TfrmTable.ConfirmLeaveTable: Boolean;
 begin
   result := TRUE;
   if FTable.IsSitting then
-    result := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
+    result := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and get you up from the seat.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 function TfrmTable.ConfirmStandUp: Boolean;
@@ -1493,7 +1496,7 @@ begin
   if (FTable.IsSitting) and
      (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat)) and
      (seat.Status in [psInHand, psFolded, psAllIn]) then
-    result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that are in the pot.', mtWarning, mbYesNo, 0) = mrYes;
+    result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that you commited to current pot.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TObject);

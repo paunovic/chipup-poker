@@ -187,7 +187,7 @@ begin
   FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
   Avatars.Add(FSelfInfo.AvatarId, nil);
   Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
-  UpdateSelfInfoInPlayers
+  UpdateSelfInfoInPlayers;
 end;
 
 procedure TdmMain.SetUpdaterBatchFile(const AFile: String);

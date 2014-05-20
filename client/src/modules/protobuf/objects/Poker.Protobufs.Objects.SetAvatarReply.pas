@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
-  TSetAvatarStatus = (saSuccess = 1,saNotFound = 2);
+  TSetAvatarStatus = (saSuccess = 0,saNotFound = 1);
   TPB_SetAvatarReply = class(TProtobufBaseObject)
   private
     const

@@ -11,6 +11,9 @@ type
   private
     FForm: TForm;
     FSeatIndex: Integer;
+    FGameId: TBytes;
+    FClubId: TBytes;
+    FClubSeq: Integer;
     FGame: TGameInfo;
     FClub: TClubInfo;
     FSwapChainIndex: Integer;
@@ -24,14 +27,18 @@ type
 
     procedure UpdateAvatars(const AAvatar: TAvatar);
 
-    function ReassignObjects(const AGameId: TBytes): Boolean;
+    function ReassignObjects(const AGameId: TBytes): Boolean; overload;
+    procedure ReassignObjects(const AClub: TClubInfo; const AGame: TGameInfo); overload;
 
     procedure BringToFront;
 
-    property Game          : TGameInfo read FGame;
-    property Club          : TClubInfo read FClub;
-    property Form          : TForm read FForm;
-    property SeatIndex     : Integer read FSeatIndex write FSeatIndex;
+    property Game: TGameInfo read FGame;
+    property Club: TClubInfo read FClub;
+    property GameId: TBytes read FGameId;
+    property ClubId: TBytes read FClubId;
+    property ClubSeq: Integer read FClubSeq;
+    property Form: TForm read FForm;
+    property SeatIndex: Integer read FSeatIndex write FSeatIndex;
     property SwapChainIndex: Integer read FSwapChainIndex;
   end;
 
@@ -46,6 +53,8 @@ type
 
     procedure DisableAll;
     procedure EnableAll;
+
+    procedure ReassignObjects;
 
     function AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
     procedure NotifyClose(const AGameId: TBytes);
@@ -72,6 +81,9 @@ var
   form: TfrmTable;
 begin
   FSeatIndex := -1;
+  FGameId := AGame.MongoId;
+  FClubId := AClub.MongoId;
+  FClubSeq := AClub.Id;
   FGame := AGame;
   FClub := AClub;
   FSwapChainIndex := ASwapChainIndex;
@@ -106,6 +118,12 @@ begin
   if IsIconic(FForm.Handle) then
     ShowWindow(FForm.Handle, SW_RESTORE);
   FForm.Show;
+end;
+
+procedure TTable.ReassignObjects(const AClub: TClubInfo; const AGame: TGameInfo);
+begin
+  FClub := AClub;
+  FGame := AGame;
 end;
 
 function TTable.ReassignObjects(const AGameId: TBytes): Boolean;
@@ -151,7 +169,7 @@ end;
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
 var
   table: TTable;
-  sci  : Integer;
+  sci: Integer;
 begin
   if not FindTable(AGame.MongoId, table) then
   begin
@@ -184,6 +202,18 @@ begin
       Delete(C1);
       Exit;
     end;
+end;
+
+procedure TTables.ReassignObjects;
+var
+  table: TTable;
+  club: TClubInfo;
+  game: TGameInfo;
+begin
+  for table in ToArray do
+    if (dmMain.SelfInfo.Clubs.FindClub(table.ClubSeq, club)) and
+       (club.Games.FindGame(table.GameId, game)) then
+      table.ReassignObjects(game.MongoId)
 end;
 
 function TTables.SittingCount: Integer;

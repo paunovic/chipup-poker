@@ -9,6 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
+  TCloseGameTime = (cgtCurrentHand = 0,cgtFiveMinutes = 1,cgtFifteenMinutes = 2);
   TPB_CloseGameData = class(TProtobufBaseObject)
   private
     const
@@ -17,17 +18,17 @@ type
 
     var
       FGameid: TBytes;
-      FTimestamp: UINT32;
+      FTimestamp: TCloseGameTime;
 
     procedure SetGameid(const AValue: TBytes);
-    procedure SetTimestamp(const AValue: UINT32);
+    procedure SetTimestamp(const AValue: TCloseGameTime);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Gameid: TBytes read FGameid write SetGameid;
-    property Timestamp: UINT32 read FTimestamp write SetTimestamp;
+    property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
   end;
 
 implementation
@@ -56,7 +57,7 @@ begin
       end;
       FN_TIMESTAMP: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FTimestamp := AProtobufReader.readUInt32;
+        FTimestamp := TCloseGameTime(AProtobufReader.readEnum);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -70,10 +71,10 @@ begin
   ProtobufOutput.writeBytes(FN_GAMEID, AValue);
 end;
 
-procedure TPB_CloseGameData.SetTimestamp(const AValue: UINT32);
+procedure TPB_CloseGameData.SetTimestamp(const AValue: TCloseGameTime);
 begin
   FTimestamp := AValue;
-  ProtobufOutput.writeUInt32(FN_TIMESTAMP, AValue);
+  ProtobufOutput.writeInt32(FN_TIMESTAMP, Integer(AValue));
 end;
 
 end.

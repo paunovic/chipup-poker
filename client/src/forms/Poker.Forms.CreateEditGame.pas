@@ -161,7 +161,7 @@ end;
 procedure TfrmCreateEditGame.acOKExecute(Sender: TObject);
 var
   sb, bb: Integer;
-  err   : String;
+  err: String;
 begin
   if not GetBlinds(cbBlinds.Text, sb, bb) then
     Exit;
@@ -188,8 +188,8 @@ begin
         begin
           acOK.Enabled := FALSE;
           case FFormType of
-            0: ServerSocket.CreateGame(FClub.Id, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), sb * 100, bb * 100, seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
-            1: ServerSocket.EditGame(FGame.MongoId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), sb * 100, bb * 100, seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+            0: ServerSocket.CreateGame(FClub.Id, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
+//            1: ServerSocket.EditGame(FGame.MongoId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
           else
             Assert(FALSE, 'Invalid FFormType');
           end;

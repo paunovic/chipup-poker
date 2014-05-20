@@ -15,6 +15,7 @@ type
     FName       : String;
     FSmallBlind : UINT32;
     FBigBlind   : UINT32;
+    FBlinds     : TGameBlinds;
     FGameType   : TGameType;
     FGameLimit  : TGameLimit;
     FMinBuyin   : UINT32;
@@ -39,8 +40,9 @@ type
     property ClubId         : Int64 read FClubId write FClubId;
     property CreatorId      : TBytes read FCreatorId write FCreatorId;
     property Name           : String read FName write FName;
-    property SmallBlind     : UINT32 read FSmallBlind write FSmallBlind;
-    property BigBlind       : UINT32 read FBigBlind write FBigBlind;
+    property Blinds         : TGameBlinds read FBlinds;
+    property SmallBlind     : UINT32 read FSmallBlind;
+    property BigBlind       : UINT32 read FBigBlind;
     property GameType       : TGameType read FGameType write FGameType;
     property GameTypeStr    : String read GetGameTypeStr;
     property GameTypeStrFull: String read GetGameTypeStrFull;
@@ -85,8 +87,35 @@ begin
   FCreatorId := AProtobufObject.CreatorMongoId;
   FClubId := AProtobufObject.Clubseq;
   FName := AProtobufObject.Gamename;
-  FSmallBlind := AProtobufObject.SmallBlind;
-  FBigBlind := AProtobufObject.BigBlind;
+  FBlinds := AProtobufObject.Blinds;
+  case FBlinds of
+    gb1x2: begin
+      FSmallBlind := 1;
+      FBigBlind := 2;
+    end;
+    gb5x5: begin
+      FSmallBlind := 5;
+      FBigBlind := 5;
+    end;
+    gb5x10: begin
+      FSmallBlind := 5;
+      FBigBlind := 10;
+    end;
+    gb10x25: begin
+      FSmallBlind := 10;
+      FBigBlind := 25;
+    end;
+    gb25x50: begin
+      FSmallBlind := 25;
+      FBigBlind := 50;
+    end;
+    gb50x100: begin
+      FSmallBlind := 50;
+      FBigBlind := 100;
+    end;
+  end;
+  FSmallBlind := FSmallBlind * 100;
+  FBigBlind := FBigBlind * 100;
   FGameType := TGameType(AProtobufObject.GameType);
   FGameLimit := TGameLimit(AProtobufObject.GameLimit);
   FMinBuyin := AProtobufObject.BuyinMin;

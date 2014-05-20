@@ -2,7 +2,7 @@ object frmDebug: TfrmDebug
   Left = 0
   Top = 0
   Caption = 'ChipUP Poker - Debug'
-  ClientHeight = 379
+  ClientHeight = 380
   ClientWidth = 675
   Color = clWindow
   Ctl3D = False
@@ -52,14 +52,15 @@ object frmDebug: TfrmDebug
     StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     TabOrder = 0
     Visible = False
-    Height = 303
+    ExplicitHeight = 303
+    Height = 309
     Width = 675
   end
   object rvLog: TRichView
     Left = 0
     Top = 0
     Width = 675
-    Height = 303
+    Height = 309
     Align = alClient
     PopupMenu = pmLog
     TabOrder = 1
@@ -67,12 +68,13 @@ object frmDebug: TfrmDebug
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
+    ExplicitHeight = 303
   end
   object paInfo: TPanel
     Left = 0
-    Top = 303
+    Top = 309
     Width = 675
-    Height = 76
+    Height = 71
     Align = alBottom
     BevelOuter = bvNone
     Ctl3D = False
@@ -83,26 +85,26 @@ object frmDebug: TfrmDebug
     TabOrder = 2
     DesignSize = (
       675
-      76)
+      71)
     object dxBevel1: TdxBevel
-      Left = 73
+      Left = 68
       Top = 6
       Width = 19
-      Height = 65
+      Height = 60
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Shape = dxbsLineCenteredHorz
     end
     object dxBevel2: TdxBevel
-      Left = 231
+      Left = 226
       Top = 6
       Width = 19
-      Height = 65
+      Height = 60
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 246
-      Top = 6
+      Left = 241
+      Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
       ParentFont = False
@@ -116,8 +118,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 246
-      Top = 22
+      Left = 241
+      Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Memory usage:'
       ParentFont = False
@@ -131,8 +133,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsSocketState: TcxLabel
-      Left = 88
-      Top = 6
+      Left = 83
+      Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Socket state:'
       ParentFont = False
@@ -146,8 +148,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsCalbackSets: TcxLabel
-      Left = 246
-      Top = 38
+      Left = 241
+      Top = 35
       Anchors = [akLeft, akBottom]
       Caption = 'Callback sets:'
       ParentFont = False
@@ -161,8 +163,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 335
-      Top = 6
+      Left = 330
+      Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -181,8 +183,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 335
-      Top = 22
+      Left = 330
+      Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -201,8 +203,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvCallbackSets: TcxLabel
-      Left = 335
-      Top = 38
+      Left = 330
+      Top = 35
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -221,8 +223,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSocketState: TcxLabel
-      Left = 171
-      Top = 6
+      Left = 166
+      Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -242,7 +244,7 @@ object frmDebug: TfrmDebug
     end
     object btSeatPos: TcxButton
       Left = 571
-      Top = 6
+      Top = 1
       Width = 93
       Height = 31
       Anchors = [akRight, akBottom]
@@ -262,10 +264,11 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
       OnClick = btSeatPosClick
+      ExplicitTop = 6
     end
     object btSet: TcxButton
       Left = 571
-      Top = 39
+      Top = 34
       Width = 93
       Height = 31
       Anchors = [akRight, akBottom]
@@ -281,10 +284,11 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
       OnClick = btSetClick
+      ExplicitTop = 39
     end
     object btPause: TcxButton
       Left = 5
-      Top = 5
+      Top = 6
       Width = 30
       Height = 29
       Hint = 'Pause logging'
@@ -381,8 +385,8 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object lbsLatency: TcxLabel
-      Left = 88
-      Top = 22
+      Left = 83
+      Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Latency:'
       ParentFont = False
@@ -396,8 +400,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvLatency: TcxLabel
-      Left = 171
-      Top = 22
+      Left = 166
+      Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Unknown'
       ParentFont = False
@@ -417,7 +421,7 @@ object frmDebug: TfrmDebug
     end
     object btShowPings: TcxButton
       Left = 5
-      Top = 40
+      Top = 38
       Width = 30
       Height = 29
       Hint = 'Show pings'
@@ -474,11 +478,11 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object btRunAnotherInstance: TcxButton
-      Left = 41
-      Top = 5
+      Left = 38
+      Top = 6
       Width = 30
       Height = 29
-      Hint = 'Run another instance'
+      Action = acRunNewInstance
       Anchors = [akLeft, akBottom]
       Colors.PressedText = clRed
       OptionsImage.Glyph.Data = {
@@ -529,7 +533,63 @@ object frmDebug: TfrmDebug
       Font.Name = 'Arial'
       Font.Style = [fsBold]
       ParentFont = False
-      OnClick = btRunAnotherInstanceClick
+    end
+    object btServerTest: TcxButton
+      Left = 38
+      Top = 38
+      Width = 30
+      Height = 29
+      Action = acServerCrashTest
+      Anchors = [akLeft, akBottom]
+      Colors.PressedText = clRed
+      OptionsImage.Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000000000000000000000000000000000000000000000000
+        000001010101070707090707070A070707090101010100000000000000000000
+        0000000000000000000001010101070707090707070A07070709000000000000
+        000000000000010101020D0D0D120F0F0F140D0D0D1201010102000000000000
+        0000000000000000000000000000010101020D0D0D120707070A000000001717
+        171C8080809FA1A1A1C77E7E7E9C38383847848484A6A4A4A4CD8080809F1C1C
+        1C236B6B6B859E9E9EC39E9E9EC45656566B04040405070707090F0F0F13BCBC
+        BCE7D0D0D0FFD0D0D0FFD0D0D0FFCFCFCFFFCECECEFFD8D8D8FFD8D8D8FFCFCF
+        CFFFD0D0D0FFD0D0D0FFD0D0D0FFCFCFCFFF888888A7020202026E6E6E86D1D1
+        D1FFD1D1D1FFD1D1D1FFD1D1D1FFD1D1D1FFD1D1D1FF5555555A3E3E3E42CFCF
+        CFFFD0D0D0FFD1D1D1FFD1D1D1FFD1D1D1FFD1D1D1FF42424250989898B8D2D2
+        D2FFD2D2D2FFD2D2D2FFD2D2D2FFD2D2D2FFD2D2D2FFD9D9D9FFCDCDCDF3D0D0
+        D0FFD0D0D0FFD2D2D2FFD2D2D2FFD2D2D2FFD2D2D2FF878787A48C8C8CA9D2D2
+        D2FFD3D3D3FFD3D3D3FFD3D3D3FFD3D3D3FFD3D3D3FF7070707D4343434BD1D1
+        D1FFD1D1D1FFD1D1D1FFD3D3D3FFD3D3D3FFD3D3D3FF9D9D9DBE47474756D3D3
+        D3FFD3D3D3FFD4D4D4FFD4D4D4FFD4D4D4FFD4D4D4FF3A3A3A3F1C1C1C1ED4D4
+        D4FFD2D2D2FFD2D2D2FFD2D2D2FFD4D4D4FFD4D4D4FF868686A0020202028282
+        829CD4D4D4FFD3D3D3FFD5D5D5FFD6D6D6FFD6D6D6FF2D2D2D301B1B1B1DD6D6
+        D6FFD5D5D5FFD3D3D3FFD3D3D3FFD3D3D3FFD5D5D5FF3C3C3C48000000000101
+        010145454554D4D4D4FFD4D4D4FFD7D7D7FFD7D7D7FF202020210E0E0E0FD7D7
+        D7FFD7D7D7FFD7D7D7FFD4D4D4FFD4D4D4FF8B8B8BA702020202000000000000
+        00000E0E0E11D2D2D2FBD5D5D5FFD5D5D5FFD8D8D8FF151515150F0F0F0FD8D8
+        D8FFD8D8D8FFD8D8D8FFD8D8D8FF6767677D1111111607070709000000000000
+        0000000000006D6D6D80D7D7D7FFD6D6D6FFD4D4D4FCE4E4E4FFE5E5E5FFD9D9
+        D9FFD9D9D9FFD9D9D9FFD2D2D2F7060606080D0D0D120707070A000000000000
+        000000000000000000002525252C3B3B3B485D5D5D70D8D8D8FFDADADAFFDBDB
+        DBFFDBDBDBFFDBDBDBFF75757588000000000101010207070709000000000000
+        0000000000000000000000000000010101020D0D0D1251515160A1A1A1BDB0B0
+        B0CC9D9D9DB65454546103030303000000000000000001010101000000000000
+        00000000000000000000000000000000000001010101070707090707070A0707
+        0709010101010000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000}
+      ParentShowHint = False
+      ShowHint = True
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      SpeedButtonOptions.Flat = True
+      SpeedButtonOptions.Transparent = True
+      TabOrder = 15
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
     end
   end
   object alDebug: TActionList
@@ -548,7 +608,12 @@ object frmDebug: TfrmDebug
       OnExecute = acCopyLogSelectionExecute
     end
     object acRunNewInstance: TAction
-      Caption = 'acRunNewInstance'
+      Hint = 'Run new instance'
+      OnExecute = acRunNewInstanceExecute
+    end
+    object acServerCrashTest: TAction
+      Hint = 'Server crash test'
+      OnExecute = acServerCrashTestExecute
     end
   end
   object SaveDialog: TSaveDialog

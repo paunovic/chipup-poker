@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.HelloParams,
-  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Server.SocketConnectThread;
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Server.SocketConnectThread, Poker.Protobufs.Objects.CloseGameData;
 
 type
   TServerSocket = class
@@ -74,9 +74,9 @@ type
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
-    procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
-    procedure CloseGame(const AGameId: TBytes; const ASeconds: UINT32);
-    procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
+    procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+    procedure CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
+    procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
     procedure LeaveTable(const AGameId: TBytes);
@@ -97,6 +97,10 @@ type
     procedure QueryTableStats(const ATables: array of TBytes);
     procedure ContactUs(const AReason: TContactReason; const AMessage: String);
     procedure Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
+
+    {$IFDEF DEBUG}
+    procedure CrashTest;
+    {$ENDIF}
 
     property Server: String read FServer;
     property Socket: TSslWSocket read FSocket;
@@ -123,7 +127,7 @@ uses
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
-  Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
+  Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Server.SSLCerts, Poker.Protobufs.Objects.BuyinError;
 
 
@@ -806,7 +810,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
+procedure TServerSocket.CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
@@ -816,8 +820,7 @@ begin
     protobuf.Clubseq := AClubId;
     protobuf.GameType := AGameType;
     protobuf.GameLimit := AGameLimit;
-    protobuf.SmallBlind := ASmallBlind;
-    protobuf.BigBlind := ABigBlind;
+    protobuf.Blinds := ABlinds;
     protobuf.BuyinMin := ABuyinMin;
     protobuf.BuyinMax := ABuyinMax;
     protobuf.Seats := ASeats;
@@ -827,21 +830,21 @@ begin
   end;
 end;
 
-procedure TServerSocket.CloseGame(const AGameId: TBytes; const ASeconds: UINT32);
+procedure TServerSocket.CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
 var
   protobuf: TPB_CloseGameData;
 begin
   protobuf := TPB_CloseGameData.Create;
   try
     protobuf.Gameid := AGameId;
-    protobuf.Timestamp := ASeconds;
+    protobuf.Timestamp := ATimestamp;
     SendProtobuf(scCloseGame, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TServerSocket.EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ASmallBlind, ABigBlind, ABuyinMin, ABuyinMax, ASeats: Integer);
+procedure TServerSocket.EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
@@ -851,8 +854,7 @@ begin
     protobuf.Gamename := AGameName;
     protobuf.GameType := AGameType;
     protobuf.GameLimit := AGameLimit;
-    protobuf.SmallBlind := ASmallBlind;
-    protobuf.BigBlind := ABigBlind;
+    protobuf.Blinds := ABlinds;
     protobuf.BuyinMin := ABuyinMin;
     protobuf.BuyinMax := ABuyinMax;
     protobuf.Seats := ASeats;
@@ -1135,8 +1137,45 @@ begin
   end;
 end;
 
+procedure StringToBytes(const AString: String; var ABytes: TBytes);
+var
+  C1: Integer;
+begin
+  Assert(Length(AString) mod 2 = 0);
+  SetLength(ABytes, Length(AString) div 2);
+  for C1 := 0 to Length(AString) div 2 - 1 do
+    ABytes[C1] := StrToInt('$' + Copy(AString, C1 * 2 + 1, 2));
+end;
+
+{$IFDEF DEBUG}
+procedure TServerSocket.CrashTest;
+var
+  pb: TPB_PutChips;
+  tmp: String;
+  bytes: TBytes;
+  bytes1: TBytes;{
+  bytesx2: TArray<TBytes>;   }
+begin
+  SetLength(tmp, 100);
+  SetLength(bytes, 100);
+  FillChar(tmp[1], Length(tmp) * SizeOf(Char), 65);
+  FillChar(bytes[0], Length(bytes) * SizeOf(Byte), 66);
+  StringToBytes('537b8d035cf269e45c796eb4', bytes);
+//  StringToBytes('533da6a40427a9b03915560d', bytes1);
+  pb := TPB_PutChips.Create;
+  try
+    pb.TableMongoId := bytes;
+    pb.ChipAmount := 1000;
+    pb.CurrentState := tsWinning;
+    SendProtobuf(scPutChips, pb);
+  finally
+    pb.Free;
+  end;
+end;
+{$ENDIF}
 
 end.
+
 
 
 

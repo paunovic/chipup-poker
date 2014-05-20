@@ -18,6 +18,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure tiReconnectTimerTimer(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   private
     const
       RED_COLOR = $00002ECC;
@@ -96,6 +97,11 @@ begin
     FCloseCallback(self);
 end;
 
+procedure TfrmReconnect.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := not (FCurrentStatus in [rsLoggingIn]);
+end;
+
 procedure TfrmReconnect.SetCloseCallback(const ACallback: TNotifyEvent);
 begin
   FCloseCallback := ACallback;
@@ -105,6 +111,7 @@ procedure TfrmReconnect.HelloServer;
 var
   files: TObjectList<TPB_UpdateFileInfo>;
 begin
+  FCurrentStatus := rsHelloing;
   files := TObjectList<TPB_UpdateFileInfo>.Create(FALSE);
   try
     dmMain.GetUpdateFilesList(files);
@@ -177,6 +184,8 @@ var
   pbhello: TPB_HelloReply;
 begin
   pbhello := AObject as TPB_HelloReply;
+
+  FCurrentStatus := rsHelloOk;
 
   ServerSettings.ParseHelloMessage(pbhello);
 

@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.SeatInfo,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.Pot,Poker.Protobufs.Objects.Game;
 
 type
-  TTableState = (tsIdle = 1,tsPreFlop = 2,tsFlop = 3,tsTurn = 4,tsRiver = 5,tsWinning = 6,tsWinning2 = 7);
+  TTableState = (tsIdle = 0,tsPreFlop = 1,tsFlop = 2,tsTurn = 3,tsRiver = 4,tsWinning = 5,tsWinning2 = 6);
   TPB_TableStatus = class(TProtobufBaseObject)
   private
     const

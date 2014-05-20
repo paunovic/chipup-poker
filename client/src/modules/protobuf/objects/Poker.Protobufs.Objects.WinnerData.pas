@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
-  TCardRankings = (crRoyalFlush = 1,crStraightFlush = 2,cr4OfKind = 3,crFullHouse = 4,crFlush = 5,crStraight = 6,crThreeOfKind = 7,crTwoPair = 8,crOnePair = 9,crHighCard = 10);
+  TCardRankings = (crRoyalFlush = 0,crStraightFlush = 1,cr4OfKind = 2,crFullHouse = 3,crFlush = 4,crStraight = 5,crThreeOfKind = 6,crTwoPair = 7,crOnePair = 8,crHighCard = 9);
   TPB_WinnerData = class(TProtobufBaseObject)
   private
     const

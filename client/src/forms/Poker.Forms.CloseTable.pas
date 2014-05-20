@@ -38,7 +38,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket;
+  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Protobufs.Objects.CloseGameData;
 
 
 procedure TfrmCloseTable.FormDestroy(Sender: TObject);
@@ -66,19 +66,19 @@ end;
 
 procedure TfrmCloseTable.acCloseAfter15MinsExecute(Sender: TObject);
 begin
-  ServerSocket.CloseGame(FGame.MongoId, 15 * 60);
+  ServerSocket.CloseGame(FGame.MongoId, cgtFifteenMinutes);
   Close;
 end;
 
 procedure TfrmCloseTable.acCloseAfter5MinsExecute(Sender: TObject);
 begin
-  ServerSocket.CloseGame(FGame.MongoId, 5 * 60);
+  ServerSocket.CloseGame(FGame.MongoId, cgtFiveMinutes);
   Close;
 end;
 
 procedure TfrmCloseTable.acCloseAfterCurrentHandExecute(Sender: TObject);
 begin
-  ServerSocket.CloseGame(FGame.MongoId, 0);
+  ServerSocket.CloseGame(FGame.MongoId, cgtCurrentHand);
   Close;
 end;
 

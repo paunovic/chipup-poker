@@ -164,7 +164,7 @@ type
     procedure AvatarChanged(Sender: TObject);
 
     function ConfirmToCloseTables: Boolean;
-    function ProcessClubObject(const AClub: TPB_Club; const ADisbanded: Boolean): TClubInfo;
+    function ProcessClubObject(const AClub: TPB_Club; const AMethodId: Integer): TClubInfo;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
 
@@ -819,13 +819,13 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
-      ProcessClubObject(pbreply.Club, FALSE);
+      ProcessClubObject(pbreply.Club, AMethodId);
       ConfigureGUI;
     end;
   end;
 end;
 
-function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club; const ADisbanded: Boolean): TClubInfo;
+function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club; const AMethodId: Integer): TClubInfo;
 var
   C1: Integer;
   club: TClubInfo;
@@ -834,7 +834,7 @@ var
   empty_array: TBytes;
   member: TClubMemberInfo;
 begin
-  if not ADisbanded then
+  if AMethodId <> Integer(srClubDisbandOk) then
   begin
     club := dmMain.SelfInfo.Clubs.AddClub(AClub);
     SetLength(query_users, 0);
@@ -858,9 +858,11 @@ begin
       ServerSocket.GetUserInfos(query_users);
     end;
 
+    // we got kicked.. or club got deleted
     if (not club.GetMemberInfo(dmMain.SelfInfo.Id, member)) and
        (club.IsPrivate) then
     begin
+      Tables.CloseTablesForClub(club.MongoId);
       dmMain.SelfInfo.Clubs.Remove(club);
       club := nil;
     end;
@@ -884,10 +886,14 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
-      club := ProcessClubObject(pbreply.Club, AMethodId = Integer(srClubDisbandOk));
-      if Assigned(club) then
+      club := ProcessClubObject(pbreply.Club, AMethodId);
+
+      if (AMethodId in [Integer(srJoinClubReply), Integer(srChangeClubDetailsReply)]) and
+         (Assigned(club)) then
         club.Games.UpdateFromProtobufObjects(pbreply.Games);
-       ConfigureGUI;
+
+      Tables.ReassignObjects;
+      ConfigureGUI;
     end;
   end;
 end;
@@ -898,7 +904,7 @@ var
 begin
   pbclub := AObject as TPB_Club;
 
-  ProcessClubObject(pbclub, AMethodId = Integer(srClubDisbandOk));
+  ProcessClubObject(pbclub, AMethodId);
 
   ConfigureGUI;
 end;
