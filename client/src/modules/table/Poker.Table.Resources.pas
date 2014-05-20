@@ -86,15 +86,15 @@ type
     const
       {$IFNDEF SEAT_POSITIONS_CONFIGURATOR}
       SEAT_POINTS: array[2..10, 0..9] of Double = (
-         (0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2
-         (0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3
-         (-pi/4, pi/4, pi*3/4, pi*5/4, 0, 0, 0, 0, 0, 0), // 4
-         (-pi/5.5, pi/7, pi/2, pi-pi/7, pi+pi/5.5, 0, 0, 0, 0, 0), // 5
-         (-pi/3, 0, pi/2.7, pi-pi/2.7, pi, pi+pi/3, 0, 0, 0, 0), // 6
-         (-pi/4, 0, pi/4, pi/2, pi*3/4, pi, pi*5/4, 0, 0, 0), // 7
-         (-pi/3.4, -pi/13.5, pi/6.8, pi/2.3, pi-pi/2.3, pi-pi/6.8, pi+pi/13.5, pi+pi/3.4, 0, 0), // 8
-         (-pi/2.8, -pi/12, pi/16, pi/2.89, pi/2, pi-pi/2.89, pi-pi/15, pi+pi/12, pi+pi/2.8, 0), // 9
-         (-pi/2.6, -pi/6, pi/64, pi/4.8, pi/2.3, pi-pi/2.3, pi-pi/4.8, pi-pi/64, pi+pi/6, pi+pi/2.6) // 10
+        (0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2
+        (0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3
+        (-pi/4, pi/4, pi*3/4, pi*5/4, 0, 0, 0, 0, 0, 0), // 4
+        (-pi/5.5, pi/7, pi/2, pi-pi/7, pi+pi/5.5, 0, 0, 0, 0, 0), // 5
+        (-pi/3.5, pi/48, pi/2.7, pi-pi/2.7, pi+pi/48, pi+pi/3.5, 0, 0, 0, 0), // 6
+        (-pi/4, 0, pi/4, pi/2, pi*3/4, pi, pi*5/4, 0, 0, 0), // 7
+        (-pi/3.25, -pi/13, pi/6.5, pi/2.3, pi-pi/2.3, pi-pi/6.5, pi+pi/13, pi+pi/3.25, 0, 0), // 8
+        (-pi/2.65, -pi/9, pi/24, pi/3, pi/2, pi-pi/3, pi-pi/24, pi+pi/9, pi+pi/2.65, 0), // 9
+        (-pi/2.65, -pi/6, pi/80, pi/5, pi/2.25, pi-pi/2.25, pi-pi/5, pi-pi/80, pi+pi/6, pi+pi/2.65) // 10
       );
       {$ENDIF}
 

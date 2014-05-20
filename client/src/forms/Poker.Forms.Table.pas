@@ -227,6 +227,8 @@ type
     procedure RenderLowerInterface;
 
     procedure EnableGameLockTimer(const ASeconds: Single);
+    procedure SetMaxConstraints;
+    procedure DisableMaxConstraints;
 
     procedure AddUserChatMessage(const AUser, AMessage: String);
     procedure AddDealerChatMessage(const AMessage: String);
@@ -276,6 +278,7 @@ type
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure WMSizing(var AMessage: TMessage); message WM_SIZING;
     procedure WndProc(var AMessage: TMessage); override;
+    procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
 
   public
     constructor Create(const ATable: TTable); reintroduce;
@@ -367,8 +370,7 @@ begin
   FTableStatus := TTableStatus.Create;
   FChipStackMaker := TChipStackMaker.Create;
 
-  Constraints.MaxHeight := 910 + (Height - ClientHeight);
-  Constraints.MaxWidth := Round(Constraints.MaxHeight * FORM_ASPECT_RATIO);
+  SetMaxConstraints;
 
   Constraints.MinWidth := 600;
   Constraints.MinHeight := Round(Constraints.MinWidth / FORM_ASPECT_RATIO);
@@ -707,11 +709,22 @@ procedure TfrmTable.WMSizing(var AMessage: TMessage);
 begin
   inherited;
 
-  case AMessage.wParam of
-    WMSZ_LEFT, WMSZ_RIGHT, WMSZ_BOTTOMLEFT: with PRect(AMessage.LParam)^ do Bottom := Top + Round((Right - Left) / FORM_ASPECT_RATIO);
-    WMSZ_TOP, WMSZ_BOTTOM, WMSZ_TOPRIGHT, WMSZ_BOTTOMRIGHT: with PRect(AMessage.LParam)^ do Right := Left + Round((Bottom - Top) * FORM_ASPECT_RATIO);
-    WMSZ_TOPLEFT: with PRect(AMessage.LParam)^ do Top := Bottom - Round((Right - Left) / FORM_ASPECT_RATIO);
+  if WindowState <> wsMaximized then
+    case AMessage.wParam of
+      WMSZ_LEFT, WMSZ_RIGHT, WMSZ_BOTTOMLEFT: with PRect(AMessage.LParam)^ do Bottom := Top + Round((Right - Left) / FORM_ASPECT_RATIO);
+      WMSZ_TOP, WMSZ_BOTTOM, WMSZ_TOPRIGHT, WMSZ_BOTTOMRIGHT: with PRect(AMessage.LParam)^ do Right := Left + Round((Bottom - Top) * FORM_ASPECT_RATIO);
+      WMSZ_TOPLEFT: with PRect(AMessage.LParam)^ do Top := Bottom - Round((Right - Left) / FORM_ASPECT_RATIO);
+    end;
+end;
+
+procedure TfrmTable.WMSysCommand(var Msg: TWMSysCommand);
+begin
+  case Msg.CmdType of
+    SC_RESTORE: SetMaxConstraints;
+    SC_MAXIMIZE: DisableMaxConstraints;
   end;
+
+  inherited;
 end;
 
 procedure TfrmTable.WndProc(var AMessage: TMessage);
@@ -1197,9 +1210,12 @@ var
   fgwin: HWND;
   hround: Integer;
 begin
-  hround := Round(Width / FORM_ASPECT_RATIO);
-  if Height <> hround then
-    Height := hround;
+  if WindowState <> wsMaximized then
+  begin
+    hround := Round(Width / FORM_ASPECT_RATIO);
+    if Height <> hround then
+      Height := hround;
+  end;
 
   rvChat.Height := ClientHeight div 7;
   rvChat.Width := Round(ClientWidth / 3.15);
@@ -2014,17 +2030,17 @@ end;
 
 procedure TfrmTable.SetDXObjectSizes;
 const
-  TABLE_X_LEFT        = 64;
-  TABLE_X_RIGHT       = 64;
-  TABLE_Y_TOP         = 66;
-  TABLE_Y_BOTTOM      = 133;
-  TABLE_Y_OFFSET      = -20;
-  TABLE_WIDTH_OF_FORM = 0.8;
+  TABLE_X_LEFT         = 64;
+  TABLE_X_RIGHT        = 64;
+  TABLE_Y_TOP          = 66;
+  TABLE_Y_BOTTOM       = 133;
+  TABLE_Y_OFFSET       = -20;
+  TABLE_HEIGHT_OF_FORM = 0.715;
 var
   C1: Integer;
 begin
   // calculate table resize ratio
-  FTableResizeRatio := (FDXAreaSize.x * TABLE_WIDTH_OF_FORM) / TableResources.TableImage.Texture[0].Width;
+  FTableResizeRatio := (FDXAreaSize.y * TABLE_HEIGHT_OF_FORM) / TableResources.TableImage.Texture[0].Height;
 
   // calculate raw dimensions, the ones that include table shadow
   FRawTableWidth := TableResources.TableImage.Texture[0].Width * FTableResizeRatio;
@@ -2050,11 +2066,11 @@ begin
   FDealerPoint.Y := FTableYOffset;
 
   // calculate seat size
-  FSeatWidth := (FDXAreaSize.x - FTableWidth) / 1.5;
+  FSeatHeight := (FDXAreaSize.y - FTableHeight) / 5.2;
   if FTable.Game.Seats = 10 then
-    FSeatWidth := FSeatWidth * 0.85;
+    FSeatHeight := FSeatHeight * 0.85;
 
-  FSeatHeight := FSeatWidth / TableResources.SeatAspectRatio;
+  FSeatWidth := FSeatHeight * TableResources.SeatAspectRatio;
   FSeatResizeRatio := FSeatWidth / TableResources.SeatLeftImage.Texture[0].Width;
   FSeatActionResizeRatio := FSeatResizeRatio * 1.1;
 
@@ -2145,6 +2161,19 @@ begin
     else
       seRaiseAmount.Style.Font.Size := 10
 end;
+
+procedure TfrmTable.SetMaxConstraints;
+begin
+  Constraints.MaxHeight := 910 + (Height - ClientHeight);
+  Constraints.MaxWidth := Round(Constraints.MaxHeight * FORM_ASPECT_RATIO);
+end;
+
+procedure TfrmTable.DisableMaxConstraints;
+begin
+  Constraints.MaxHeight := 0;
+  Constraints.MaxWidth := 0;
+end;
+
 
 procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 var

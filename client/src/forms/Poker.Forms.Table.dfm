@@ -1,7 +1,6 @@
 object frmTable: TfrmTable
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Table'
   ClientHeight = 524
   ClientWidth = 792
@@ -172,26 +171,29 @@ object frmTable: TfrmTable
     Style = RVStyle
   end
   object lbsHandStrength: TcxLabel
-    Left = 723
+    Left = 695
     Top = 416
     Anchors = [akRight, akBottom]
-    Caption = 'Nine-High'
+    Caption = 'Hand Strength'
     ParentFont = False
+    Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
     Style.Font.Height = -11
     Style.Font.Name = 'Sintony'
     Style.Font.Style = []
     Style.Font.Quality = fqAntialiased
-    Style.LookAndFeel.NativeStyle = False
+    Style.LookAndFeel.NativeStyle = True
     Style.TextColor = 13158600
+    Style.TextStyle = []
+    Style.TransparentBorder = True
     Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.NativeStyle = False
-    StyleFocused.LookAndFeel.NativeStyle = False
-    StyleHot.LookAndFeel.NativeStyle = False
+    StyleDisabled.LookAndFeel.NativeStyle = True
+    StyleFocused.LookAndFeel.NativeStyle = True
+    StyleHot.LookAndFeel.NativeStyle = True
     Properties.Alignment.Horz = taRightJustify
     Transparent = True
-    AnchorX = 782
+    AnchorX = 776
   end
   object ActionManager: TActionManager
     Left = 56

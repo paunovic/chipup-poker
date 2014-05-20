@@ -1,7 +1,8 @@
 object frmChangeEMail: TfrmChangeEMail
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Change E-mail Address'
   ClientHeight = 174
   ClientWidth = 428
