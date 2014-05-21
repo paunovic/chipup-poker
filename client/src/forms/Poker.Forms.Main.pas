@@ -198,7 +198,7 @@ uses
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Forms.SystemTrayPopup;
+  Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember;
 
 
 procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
@@ -827,36 +827,38 @@ end;
 
 function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club; const AMethodId: Integer): TClubInfo;
 var
-  C1: Integer;
   club: TClubInfo;
   player: TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
   member: TClubMemberInfo;
+  memberpb: TPB_ClubMember;
 begin
   if AMethodId <> Integer(srClubDisbandOk) then
   begin
     club := dmMain.SelfInfo.Clubs.AddClub(AClub);
     SetLength(query_users, 0);
+    SetLength(empty_array, 0);
+
     if not Players.FindPlayerById(AClub.Owner, player) then
     begin
       SetLength(query_users, 1);
       query_users[0] := AClub.Owner;
+      Players.AddPlayer(AClub.Owner, 'Retrieving...', '', 0, empty_array);
     end;
-    for C1 := 0 to AClub.Members.Count - 1 do
-      if not Players.FindPlayerById(AClub.Members[C1].MongoId, player) then
+
+    for memberpb in AClub.Members do
+      if (not Players.FindPlayerById(memberpb.MongoId, player)) or
+         (player.Nick = '') or
+         (Length(player.AvatarId) = 0) then
       begin
         SetLength(query_users, Length(query_users) + 1);
-        query_users[Length(query_users) - 1] := AClub.Members[C1].MongoId;
+        query_users[Length(query_users) - 1] := memberpb.MongoId;
+        Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', 0, empty_array);
       end;
-    if Length(query_users) > 0 then
-    begin
-      SetLength(empty_array, 0);
-      for C1 := 0 to Length(query_users) - 1 do
-        Players.AddPlayer(query_users[C1], 'Retrieving...', '', 0, empty_array);
 
+    if Length(query_users) > 0 then
       ServerSocket.GetUserInfos(query_users);
-    end;
 
     // we got kicked.. or club got deleted
     if (not club.GetMemberInfo(dmMain.SelfInfo.Id, member)) and
@@ -1112,14 +1114,25 @@ var
   player: TPB_User;
   playerinfo: TPlayerInfo;
   club: TClubInfo;
+  query_users: TArray<TBytes>;
+  empty_array: TBytes;
 begin
   pb := AObject as TPB_TableStatsReplies;
 
+  SetLength(empty_array, 0);
+  SetLength(query_users, 0);
   for player in pb.Players do
     if Players.FindPlayerById(player.MongoId, playerinfo) then
       playerinfo.Nick := player.Displayname
     else
-      Players.AddPlayer(player);
+    begin
+      SetLength(query_users, Length(query_users) + 1);
+      query_users[Length(query_users) - 1] := player.MongoId;
+      Players.AddPlayer(player.MongoId, 'Retrieving...', '', 0, empty_array);
+    end;
+
+  if Length(query_users) <> 0 then
+    ServerSocket.GetUserInfos(query_users);
 
   for tablepb in pb.Reply do
   begin

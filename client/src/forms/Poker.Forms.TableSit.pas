@@ -54,6 +54,7 @@ type
     procedure CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableInvalidBuyin(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRClubBalanceReached(const AMethodId: Integer; const AObject: TObject);
 
     function GetMaxBuyin: UINT32;
   protected
@@ -84,7 +85,8 @@ begin
                       TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
                       TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit),
                       TServerMessageCallback.Create(srTableBuyinLessThanCashout, CSRTableBuyinLessThanCashout),
-                      TServerMessageCallback.Create(srInvalidTableBuyin, CSRTableInvalidBuyin)
+                      TServerMessageCallback.Create(srInvalidTableBuyin, CSRTableInvalidBuyin),
+                      TServerMessageCallback.Create(srClubBalanceReached, CSRClubBalanceReached)
                   ]);
 end;
 
@@ -311,6 +313,19 @@ begin
   MessageDlg('You can''t add-on over maximum table buy-in limit', mtWarning, [mbOK], 0);
   acOK.Enabled := TRUE;
 end;
+
+procedure TfrmTableSit.CSRClubBalanceReached(const AMethodId: Integer; const AObject: TObject);
+var
+  pbstatus: TPB_TableStatus;
+begin
+  pbstatus := AObject as TPB_TableStatus;
+  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+    Exit;
+
+  MessageDlg('You reached your balance limit for this club', mtWarning, [mbOK], 0);
+  acOK.Enabled := TRUE;
+end;
+
 
 procedure TfrmTableSit.CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
 var

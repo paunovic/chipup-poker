@@ -8,9 +8,9 @@ uses
 type
   TDXCore = class
   private
-    FDevice     : TAsphyreDevice;
-    FCanvas     : TAsphyreCanvas;
-    FFonts      : TAsphyreFonts;
+    FDevice: TAsphyreDevice;
+    FCanvas: TAsphyreCanvas;
+    FFonts: TAsphyreFonts;
     FDummyWindow: HWND;
   public
     class procedure Initialize;
@@ -56,7 +56,7 @@ var
 begin
   FDummyWindow := AllocateHwnd(nil);
 
-  Factory.UseProvider(idDirectx9);
+  Factory.UseProvider(idDirectX9);
 
   FDevice := Factory.CreateDevice;
   FCanvas := Factory.CreateCanvas;

@@ -4,7 +4,7 @@ object frmContactUs: TfrmContactUs
   BorderIcons = [biSystemMenu]
   Caption = 'Contact Us'
   ClientHeight = 298
-  ClientWidth = 433
+  ClientWidth = 430
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object frmContactUs: TfrmContactUs
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   DesignSize = (
-    433
+    430
     298)
   PixelsPerInch = 96
   TextHeight = 13
@@ -51,7 +51,7 @@ object frmContactUs: TfrmContactUs
     Properties.ReadOnly = False
     TabOrder = 3
     Text = 'Question'
-    Width = 336
+    Width = 340
   end
   object lbsType: TcxLabel
     Left = 14
@@ -73,10 +73,10 @@ object frmContactUs: TfrmContactUs
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     Height = 211
-    Width = 336
+    Width = 340
   end
   object btSend: TcxButton
-    Left = 221
+    Left = 225
     Top = 261
     Width = 93
     Height = 27
@@ -92,7 +92,7 @@ object frmContactUs: TfrmContactUs
     ParentFont = False
   end
   object btCancel: TcxButton
-    Left = 320
+    Left = 324
     Top = 261
     Width = 93
     Height = 27

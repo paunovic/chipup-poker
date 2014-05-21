@@ -97,6 +97,8 @@ type
     procedure QueryTableStats(const ATables: array of TBytes);
     procedure ContactUs(const AReason: TContactReason; const AMessage: String);
     procedure Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
+    procedure SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
+    procedure ResetPlayerBalance(const AClubId, AMemberId: TBytes);
 
     {$IFDEF DEBUG}
     procedure CrashTest;
@@ -128,7 +130,7 @@ uses
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
   Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Server.SSLCerts, Poker.Protobufs.Objects.BuyinError;
+  Poker.Server.SSLCerts, Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams;
 
 
 procedure TimerProc(HWND: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
@@ -465,6 +467,8 @@ begin
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ADataObject := TPB_User.Create(ADataPointer, ARpcMessage.DataSize);
     srTransferChipsInvalidAmount: ;
+    srPlayerLimitOk,
+    srResetPlayerBalanceOk: ADataObject := TPB_PlayerLimitParams.Create(ADataPointer, ARpcMessage.DataSize);
 
     seTransferChips,
     srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);
@@ -486,6 +490,7 @@ begin
     srTableSitOk,
     srTableSitSeatTaken,
     srTableAddonOk,
+    srClubBalanceReached,
     srTableStandUpOk: ADataObject := TPB_TableStatus.Create(ADataPointer, ARpcMessage.DataSize);
     srPong: begin
       gtc := GetTickCount;
@@ -1147,10 +1152,42 @@ begin
     ABytes[C1] := StrToInt('$' + Copy(AString, C1 * 2 + 1, 2));
 end;
 
+procedure TServerSocket.SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
+var
+  protobuf: TPB_PlayerLimitParams;
+begin
+  protobuf := TPB_PlayerLimitParams.Create;
+  try
+    protobuf.Clubid := AClubId;
+    protobuf.Userid := AMemberId;
+    protobuf.Limit := ALimit;
+    protobuf.Unlimited := AUnlimited;
+    SendProtobuf(scSetPlayerLimit, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.ResetPlayerBalance(const AClubId, AMemberId: TBytes);
+var
+  protobuf: TPB_PlayerLimitParams;
+begin
+  protobuf := TPB_PlayerLimitParams.Create;
+  try
+    protobuf.Clubid := AClubId;
+    protobuf.Userid := AMemberId;
+    protobuf.Limit := 0;
+    protobuf.Unlimited := FALSE;
+    SendProtobuf(scResetPlayerBalance, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 {$IFDEF DEBUG}
 procedure TServerSocket.CrashTest;
 var
-  pb: TPB_PutChips;
+  pb: TPB_PlayerLimitParams;
   tmp: String;
   bytes: TBytes;
   bytes1: TBytes;{
@@ -1160,14 +1197,14 @@ begin
   SetLength(bytes, 100);
   FillChar(tmp[1], Length(tmp) * SizeOf(Char), 65);
   FillChar(bytes[0], Length(bytes) * SizeOf(Byte), 66);
-  StringToBytes('537b8d035cf269e45c796eb4', bytes);
+  StringToBytes('537badf134a82b1763f7aee8', bytes);
 //  StringToBytes('533da6a40427a9b03915560d', bytes1);
-  pb := TPB_PutChips.Create;
+  pb := TPB_PlayerLimitParams.Create;
   try
-    pb.TableMongoId := bytes;
-    pb.ChipAmount := 1000;
-    pb.CurrentState := tsWinning;
-    SendProtobuf(scPutChips, pb);
+    pb.Clubid := bytes;
+    pb.Limit := 0;
+    pb.Unlimited := TRUE;
+    SendProtobuf(scSetPlayerLimit, pb);
   finally
     pb.Free;
   end;

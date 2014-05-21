@@ -36,6 +36,7 @@ type
     FCloseCallback: TNotifyEvent;
 
     procedure CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
+
   protected
   public
     procedure SetParams(const AParams: array of pointer);
@@ -49,8 +50,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer,
-  Poker.Common.FormsContainer;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
@@ -159,6 +160,8 @@ var
   pbreply: TPB_ClubCommandReply;
 begin
   pbreply := AObject as TPB_ClubCommandReply;
+  if not CompareBytes(pbreply.Club.MongoId, FClub.MongoId) then
+    Exit;
 
   case pbreply.Status of
     csSuccess: begin

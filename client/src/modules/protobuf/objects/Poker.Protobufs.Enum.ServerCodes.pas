@@ -43,6 +43,9 @@ type
     srContactUsOk = 36,
     srTableBuyinLessThanCashout = 37,
     srInvalidTableBuyin = 38,
+    srPlayerLimitOk = 39,
+    srResetPlayerBalanceOk = 40,
+    srClubBalanceReached = 41,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -89,7 +92,9 @@ type
     scResendVerificationMail = 102,
     scShowCards = 103,
     scQueryTableStats = 104,
-    scContactUs = 105
+    scContactUs = 105,
+    scSetPlayerLimit = 106,
+    scResetPlayerBalance = 107
   );
 
 {$IFDEF DEBUG}
@@ -159,6 +164,9 @@ begin
     srContactUsOk: result := 'srContactUsOk';
     srTableBuyinLessThanCashout: result := 'srTableBuyinLessThanCashout';
     srInvalidTableBuyin: result := 'srInvalidTableBuyin';
+    srPlayerLimitOk: result := 'srPlayerLimitOk';
+    srResetPlayerBalanceOk: result := 'srResetPlayerBalanceOk';
+    srClubBalanceReached: result := 'srClubBalanceReached';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -206,6 +214,8 @@ begin
     scShowCards: result := 'scShowCards';
     scQueryTableStats: result := 'scQueryTableStats';
     scContactUs: result := 'scContactUs';
+    scSetPlayerLimit: result := 'scSetPlayerLimit';
+    scResetPlayerBalance: result := 'scResetPlayerBalance';
   end;
 end;
 {$ENDIF DEBUG}

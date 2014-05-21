@@ -4,7 +4,7 @@ object frmChangePassword: TfrmChangePassword
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Change Password'
-  ClientHeight = 128
+  ClientHeight = 126
   ClientWidth = 301
   Color = clWindow
   Ctl3D = False
@@ -22,7 +22,7 @@ object frmChangePassword: TfrmChangePassword
   OnKeyPress = FormKeyPress
   DesignSize = (
     301
-    128)
+    126)
   PixelsPerInch = 96
   TextHeight = 13
   object lbsCurrentPassword: TcxLabel
@@ -41,7 +41,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object lbsNewPassword: TcxLabel
     Left = 7
-    Top = 39
+    Top = 37
     Caption = 'New password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -55,7 +55,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object edNewPassword: TcxTextEdit
     Left = 106
-    Top = 38
+    Top = 36
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.EchoMode = eemPassword
@@ -77,7 +77,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object lbsConfirmPassword: TcxLabel
     Left = 7
-    Top = 63
+    Top = 61
     Caption = 'Confirm password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -91,7 +91,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object edConfirmPassword: TcxTextEdit
     Left = 106
-    Top = 62
+    Top = 60
     Anchors = [akLeft, akTop, akRight]
     Properties.Alignment.Horz = taLeftJustify
     Properties.EchoMode = eemPassword
@@ -102,7 +102,7 @@ object frmChangePassword: TfrmChangePassword
   end
   object btOK: TcxButton
     Left = 101
-    Top = 92
+    Top = 90
     Width = 93
     Height = 27
     Action = acOK
@@ -115,10 +115,11 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 92
   end
   object btCancel: TcxButton
     Left = 200
-    Top = 92
+    Top = 90
     Width = 93
     Height = 27
     Action = acCancel
@@ -131,6 +132,7 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 92
   end
   object alChangePassword: TActionList
     Left = 36
