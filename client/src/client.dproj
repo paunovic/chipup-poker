@@ -303,6 +303,11 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.SocketConnectThread.pas"/>
+			<DCCReference Include="forms\Poker.Forms.ClubMemberOptions.pas">
+				<Form>frmClubMemberOptions</Form>
+				<FormType>dfm</FormType>
+			</DCCReference>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

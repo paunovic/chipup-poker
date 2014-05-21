@@ -87,7 +87,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 67
   end
   object btCancel: TcxButton
     Left = 289
@@ -104,7 +103,6 @@ object frmChangeClubDetails: TfrmChangeClubDetails
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 67
   end
   object cbDefaultPlayerLimit: TcxCheckBox
     Left = 10

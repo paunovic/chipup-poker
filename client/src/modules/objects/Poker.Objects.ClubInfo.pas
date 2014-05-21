@@ -14,6 +14,7 @@ type
     FSuspended: Boolean;
     FBalanceLimit: UINT32;
     FClubBalance: Int32;
+    FUnlimitedLimit: Boolean;
   public
     constructor Create(const AClubMemberProtobuf: TPB_ClubMember);
 
@@ -21,6 +22,7 @@ type
     property Suspended: Boolean read FSuspended;
     property BalanceLimit: UINT32 read FBalanceLimit;
     property ClubBalance: Int32 read FClubBalance write FClubBalance;
+    property UnlimitedLimit: Boolean read FUnlimitedLimit;
   end;
 
   TClubInfo = class
@@ -42,6 +44,8 @@ type
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
     procedure UpdateFromTableStats(const ATableStatsPlayers: TObjectList<TPB_TablePlayerStats>);
+    procedure UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
+    procedure ResetMemberBalance(const AMemberId: TBytes);
 
     procedure AddMember(const AClubMemberInfo: TPB_ClubMember);
     function GetMemberInfo(const AMongoId: TBytes; out AMemberInfo: TClubMemberInfo): Boolean;
@@ -130,6 +134,25 @@ begin
       member.ClubBalance := playertps.ClubBalance;
 end;
 
+procedure TClubInfo.UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
+var
+  member: TClubMemberInfo;
+begin
+  if GetMemberInfo(AMemberId, member) then
+  begin
+    member.FBalanceLimit := ALimit;
+    member.FUnlimitedLimit := AUnlimited;
+  end;
+end;
+
+procedure TClubInfo.ResetMemberBalance(const AMemberId: TBytes);
+var
+  member: TClubMemberInfo;
+begin
+  if GetMemberInfo(AMemberId, member) then
+    member.FClubBalance := 0;
+end;
+
 procedure TClubInfo.AddMember(const AClubMemberInfo: TPB_ClubMember);
 var
   cmi: TClubMemberInfo;
@@ -201,6 +224,7 @@ begin
   FSuspended := AClubMemberProtobuf.Suspended;
   FBalanceLimit := AClubMemberProtobuf.BalanceLimit;
   FClubBalance := AClubMemberProtobuf.ClubBalance;
+  FUnlimitedLimit := AClubMemberProtobuf.UnlimitedLimit;
 end;
 
 end.

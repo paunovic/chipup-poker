@@ -134,7 +134,9 @@ uses
   Poker.Protobufs.Objects.HelloParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.HelloParams.pas',
   Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas',
   Poker.Protobufs.Objects.ClubMember in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas',
-  Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas';
+  Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas',
+  Poker.Forms.ClubMemberOptions in 'forms\Poker.Forms.ClubMemberOptions.pas' {frmClubMemberOptions},
+  Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas';
 
 procedure FocusPokerApp;
 var

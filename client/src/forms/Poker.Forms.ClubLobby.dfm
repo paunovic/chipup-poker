@@ -2624,7 +2624,7 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 624
-          Height = 335
+          Height = 377
           Align = alTop
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -2690,9 +2690,9 @@ object frmClubLobby: TfrmClubLobby
           end
         end
         object btGiveOwnership: TcxButton
-          Left = 127
-          Top = 170
-          Width = 113
+          Left = 115
+          Top = 402
+          Width = 101
           Height = 26
           Action = acGiveOwnership
           Anchors = [akLeft, akBottom]
@@ -2706,9 +2706,9 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btRemovePlayerFromClub: TcxButton
-          Left = 246
-          Top = 170
-          Width = 113
+          Left = 222
+          Top = 402
+          Width = 101
           Height = 26
           Action = acRemovePlayer
           Anchors = [akLeft, akBottom]
@@ -2723,8 +2723,8 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 170
-          Width = 113
+          Top = 402
+          Width = 101
           Height = 26
           Action = acSuspendPlayer
           Anchors = [akLeft, akBottom]
@@ -2738,9 +2738,9 @@ object frmClubLobby: TfrmClubLobby
           ParentFont = False
         end
         object btResetBalance: TcxButton
-          Left = 365
-          Top = 170
-          Width = 113
+          Left = 436
+          Top = 402
+          Width = 101
           Height = 26
           Action = acResetBalance
           Anchors = [akLeft, akBottom]
@@ -2753,13 +2753,27 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
         end
+        object btSetLimit: TcxButton
+          Left = 329
+          Top = 402
+          Width = 101
+          Height = 26
+          Action = acSetLimit
+          Anchors = [akLeft, akBottom]
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 5
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Arial'
+          Font.Style = []
+          ParentFont = False
+        end
       end
     end
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2912,8 +2926,6 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -3318,13 +3330,18 @@ object frmClubLobby: TfrmClubLobby
       Enabled = False
       OnExecute = acResetBalanceExecute
     end
+    object acSetLimit: TAction
+      Caption = 'Set Limit'
+      Enabled = False
+      OnExecute = acSetLimitExecute
+    end
   end
   object tiUpdateClubDetails: TTimer
     Enabled = False
     Interval = 500
     OnTimer = tiUpdateClubDetailsTimer
-    Left = 156
-    Top = 492
+    Left = 160
+    Top = 472
   end
   object pmTablesStats: TPopupMenu
     Left = 140

@@ -115,6 +115,8 @@ type
     gridPlayersListBalance: TcxGridColumn;
     btResetBalance: TcxButton;
     acResetBalance: TAction;
+    btSetLimit: TcxButton;
+    acSetLimit: TAction;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -150,6 +152,7 @@ type
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
+    procedure acSetLimitExecute(Sender: TObject);
   private
     FCallbacksId: Integer;
     FClubId: Integer;
@@ -173,7 +176,7 @@ type
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
     procedure CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
-
+    procedure CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSROwnerGiveawayNotOwner(const AMethodId: Integer; const AObject: TObject);
     procedure CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer; const AObject: TObject);
     procedure CSROwnerGiveawayInvalidClubId(const AMethodId: Integer; const AObject: TObject);
@@ -181,6 +184,7 @@ type
     procedure CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
     procedure CSETableStatus(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRResetPlayerBalanceOk(const AMethodId: Integer; const AObject: TObject);
 
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -203,7 +207,8 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
-  Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation;
+  Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions,
+  Poker.Protobufs.Objects.PlayerLimitParams;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -233,7 +238,10 @@ begin
                       TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStatsReply),
-                      TServerMessageCallback.Create(seTableStatus, CSETableStatus)
+                      TServerMessageCallback.Create(seTableStatus, CSETableStatus),
+                      TServerMessageCallback.Create(srPlayerLimitOk, CSRPlayerLimitOk),
+                      TServerMessageCallback.Create(srResetPlayerBalanceOk, CSRResetPlayerBalanceOk)
+
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
@@ -241,6 +249,7 @@ begin
   btRemovePlayerFromClub.Top := btGiveOwnership.Top;
   btSuspendUnsuspend.Top := btGiveOwnership.Top;
   btResetBalance.Top := btGiveOwnership.Top;
+  btSetLimit.Top := btGiveOwnership.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
   btEditGame.Top := btNewGame.Top;
   btCloseTable.Top := btNewGame.Top;
@@ -304,7 +313,9 @@ begin
     btCloseClub.Visible := admin_visible;
     acCloseClub.Enabled := admin_visible;
     btResetBalance.Visible := admin_visible;
+    btSetLimit.Visible := admin_visible;
     acResetBalance.Enabled := (admin_visible) and (Assigned(member));
+    acSetLimit.Enabled := (admin_visible) and (Assigned(member));
     btGiveOwnership.Visible := admin_visible;
     acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
     btRemovePlayerFromClub.Visible := admin_visible;
@@ -566,6 +577,14 @@ begin
       ServerSocket.DisbandClub(FClubId);
   end;
 
+  if ASender is TfrmClubMemberOptions then
+  begin
+//    if (ASender as TfrmClubMemberOptions).ModalResult = mrOk then
+//      ServerSocket. FIXME
+
+  end;
+
+
   EnableWindow(Handle, TRUE);
 end;
 
@@ -589,7 +608,7 @@ var
       query_players[Length(query_players) - 1] := AMember.MongoId;
     end;
 
-      gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, -AMember.BalanceLimit / 100);
 
     if CompareBytes(AMember.MongoId, club.OwnerId) then
@@ -915,9 +934,19 @@ begin
     Exit;
 
   if MessageDlg(Format('Reset balance for player %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
-  begin
-   // FIXME
-  end;
+    ServerSocket.ResetPlayerBalance(club.MongoId, player.Id);
+end;
+
+procedure TfrmClubLobby.acSetLimitExecute(Sender: TObject);
+var
+  club: TClubInfo;
+  member: TClubMemberInfo;
+begin
+  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+     (not club.GetMemberInfo(FSelectedPlayerId, member)) then
+    Exit;
+
+  FormsContainer.Add(RunModalForm(TfrmClubMemberOptions, self, [club, FSelectedPlayerId], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.acShowClubChangeDetailsFormExecute(Sender: TObject);
@@ -1060,7 +1089,6 @@ var
   pbreply: TPB_ClubCommandReply;
 begin
   pbreply := AObject as TPB_ClubCommandReply;
-
   if pbreply.Club.Seq <> FClubId then
     Exit;
 
@@ -1077,7 +1105,6 @@ var
   pbreply: TPB_ClubCommandReply;
 begin
   pbreply := AObject as TPB_ClubCommandReply;
-
   if pbreply.Club.Seq <> FClubId then
     Exit;
 
@@ -1094,7 +1121,6 @@ var
   pbreply: TPB_ClubCommandReply;
 begin
   pbreply := AObject as TPB_ClubCommandReply;
-
   if pbreply.Club.Seq <> FClubId then
     Exit;
 
@@ -1111,7 +1137,6 @@ var
   pbclub: TPB_Club;
 begin
   pbclub := AObject as TPB_Club;
-
   if FClubId <> pbclub.Seq then
     Exit;
 
@@ -1123,7 +1148,6 @@ var
   pbclub: TPB_Club;
 begin
   pbclub := AObject as TPB_Club;
-
   if FClubId <> pbclub.Seq then
     Exit;
 
@@ -1135,20 +1159,50 @@ var
   pbclub: TPB_Club;
 begin
   pbclub := AObject as TPB_Club;
-
   if FClubId <> pbclub.Seq then
     Exit;
 
   MessageDlg('You are not manager of this club', mtError, [mbOk], 0);
 end;
 
+procedure TfrmClubLobby.CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);
+var
+  pbreply: TPB_PlayerLimitParams;
+  club: TClubInfo;
+begin
+  pbreply := AObject as TPB_PlayerLimitParams;
+
+  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+     (not CompareBytes(club.MongoId, pbreply.Clubid)) then
+    Exit;
+
+  club.UpdateMember(pbreply.Userid, pbreply.Limit, pbreply.Unlimited);
+
+  ConfigureGUI;
+end;
+
+procedure TfrmClubLobby.CSRResetPlayerBalanceOk(const AMethodId: Integer; const AObject: TObject);
+var
+  pbreply: TPB_PlayerLimitParams;
+  club: TClubInfo;
+begin
+  pbreply := AObject as TPB_PlayerLimitParams;
+
+  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+     (not CompareBytes(club.MongoId, pbreply.Clubid)) then
+    Exit;
+
+  club.ResetMemberBalance(pbreply.Userid);
+
+  ConfigureGUI;
+end;
+
 procedure TfrmClubLobby.CSREClubOperation(const AMethodId: Integer; const AObject: TObject);
 var
   pbclub: TPB_Club;
-  club  : TClubInfo;
+  club: TClubInfo;
 begin
   pbclub := AObject as TPB_Club;
-
   if FClubId <> pbclub.Seq then
     Exit;
 
