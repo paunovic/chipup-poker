@@ -527,6 +527,7 @@ message QueryTableStats {
 message TableStatsReplies {
 	repeated TableStatsReply reply = 1;
 	repeated User players = 2;
+	repeated ClubStatsReply club_stats = 3;
 }
 
 message TableStatsReply {
@@ -545,7 +546,16 @@ message TablePlayerStats {
 	optional uint32 secondsplayed = 7;
 	optional uint32 chipsinplay = 8;
 	optional uint32 hands = 9;
-	optional int32 club_balance = 10;
+}
+
+message ClubStatsReply {
+	required bytes clubid = 1;
+	repeated ClubPlayerStats player_stats = 2;
+}
+
+message ClubPlayerStats {
+	required bytes userid = 1;
+	required int32 club_balance = 2;
 }
 
 message ContactMessage {
