@@ -21,7 +21,7 @@ type
   TServerMessageCallbackMethod = procedure(const AMethodId: Integer; const AObject: TObject) of object;
   TServerMessageCallback = class
   private
-    FCode    : TServerCodes;
+    FCode: TServerCodes;
     FCallback: TServerMessageCallbackMethod;
 
   public

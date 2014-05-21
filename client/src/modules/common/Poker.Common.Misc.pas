@@ -38,6 +38,7 @@ function BytesToHex(const ABytes: TBytes): String;
 {$IFDEF DEBUG}
 function EnumerateProperties(const AObject: TObject): String;
 {$ENDIF}
+function IsDirectoryWriteable(const APath: String): Boolean;
 
 implementation
 
@@ -732,6 +733,21 @@ begin
   result := fullstr;
 end;
 {$ENDIF}
+
+function IsDirectoryWriteable(const APath: String): Boolean;
+var
+  fname: String;
+  fhandle: THandle;
+begin
+  fname := IncludeTrailingPathDelimiter(APath) + 'isdirwrtchk.tmp';
+  fhandle := CreateFile(PChar(fname), GENERIC_READ or GENERIC_WRITE, 0, nil, CREATE_NEW, FILE_ATTRIBUTE_TEMPORARY or FILE_FLAG_DELETE_ON_CLOSE, 0);
+  result := fhandle <> INVALID_HANDLE_VALUE;
+  if result then
+  begin
+    CloseHandle(fhandle);
+    DeleteFile(fname);
+  end;
+end;
 
 
 end.

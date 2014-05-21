@@ -136,7 +136,9 @@ uses
   Poker.Protobufs.Objects.ClubMember in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas',
   Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas',
   Poker.Forms.ClubMemberOptions in 'forms\Poker.Forms.ClubMemberOptions.pas' {frmClubMemberOptions},
-  Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas';
+  Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas',
+  Poker.Protobufs.Objects.ClubPlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas',
+  Poker.Protobufs.Objects.ClubStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas';
 
 procedure FocusPokerApp;
 var

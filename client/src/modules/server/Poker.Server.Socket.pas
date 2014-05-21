@@ -44,6 +44,10 @@ type
     procedure KillPingTimers;
     procedure KillPingTimeoutTimer;
 
+    {$IFDEF DEBUG}
+    procedure DebugRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
+    {$ENDIF}
+
   public
     class procedure Initialize(const AServer: String; const APort: Integer);
     class procedure Deinitialize;
@@ -76,7 +80,6 @@ type
     procedure SetAvatar(const AAvatarId: TBytes);
     procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
-    procedure EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
     procedure LeaveTable(const AGameId: TBytes);
@@ -286,19 +289,36 @@ begin
   {$IFDEF DEBUG} DebugLn(Format('SSL verify peer result: %d', [Ok]), ditSocket); {$ENDIF}
 end;
 
+{$IFDEF DEBUG}
+procedure TServerSocket.DebugRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
+var
+  dbgtype: TDebugInfoType;
+begin
+  if ARpcMessage.MethodId in [Integer(scPing), Integer(srPong)] then
+    dbgtype := ditPingPong
+  else
+    dbgtype := ditSocketInc;
+
+  if ARpcMessage.DataSize = 0 then
+    DebugLn(Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
+  else
+    if AStreamSize = 0 then
+      DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, EnumerateProperties(ADataObject))
+    else
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, EnumerateProperties(ADataObject));
+end;
+{$ENDIF}
+
 procedure TServerSocket.SocketDataAvailable(Sender: TObject; Error: Word);
 const
   BUFFER_SIZE = 16 * 1024;
 var
   len: Integer;
-  rcv_buf: array[0..BUFFER_SIZE - 1] of AnsiChar;
+  rcv_buf: TArray<AnsiChar>;
   rpc_size: Word;
   rpc_message: TPB_RpcMessage;
   data_obj: TObject;
   ptmp: pointer;
-  {$IFDEF DEBUG}
-  dbgtype: TDebugInfoType;
-  {$ENDIF}
 begin
   if Error <> 0 then
   begin
@@ -307,6 +327,8 @@ begin
     Exit;
   end;
 
+  SetLength(rcv_buf, BUFFER_SIZE);
+  FillChar(rcv_buf[0], BUFFER_SIZE, 0);
   len := FSocket.Receive(@rcv_buf[0], FSocket.RcvdCount);
 
   if len < 0 then
@@ -318,7 +340,7 @@ begin
   begin
     Inc(FReceiveBufferSize, len);
     ReallocMem(FReceiveBuffer, FReceiveBufferSize);
-    Move(rcv_buf, FReceiveBuffer[FReceiveBufferSize - len], len);
+    Move(rcv_buf[0], FReceiveBuffer[FReceiveBufferSize - len], len);
   end;
 
   if FReceiveBufferSize = 0 then
@@ -337,15 +359,7 @@ begin
     begin
       ResetInactivityPingTimer;
       {$IFDEF DEBUG}
-      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
-        dbgtype := ditPingPong
-      else
-        dbgtype := ditSocketInc;
-
-      if rpc_message.DataSize = 0 then
-        DebugLn(Format('Method: %s', [TranslateServerCode(rpc_message.MethodId)]), dbgtype)
-      else
-        DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize]), dbgtype, EnumerateProperties(data_obj));
+      DebugRpcMessage(rpc_message, data_obj);
       {$ENDIF}
       PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
@@ -430,10 +444,10 @@ end;
 
 function TServerSocket.ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
 var
-  err     : String;
-  sc      : TServerCodes;
+  err: String;
+  sc: TServerCodes;
   valid_sc: Boolean;
-  gtc     : DWORD;
+  gtc: DWORD;
 begin
   if FConnectCode = -1 then
     FConnectCode := ARpcMessage.MethodId;
@@ -458,7 +472,7 @@ begin
   case TServerCodes(ARpcMessage.MethodId) of
     srNotImplemented: begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
-      {$IFDEF DEBUG} DebugLn(Format('Received NOT_IMPLEMENTED MethodId: %s', [err]), ditException); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(Format('Received not implemented MethodId: %s', [err]), ditException); {$ENDIF}
     end;
     srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;
@@ -533,9 +547,6 @@ var
   rpc_message: TPB_RpcMessage;
   mstream: TMemoryStream;
   rpcsize: Word;
-  {$IFDEF DEBUG}
-  dbgtype: TDebugInfoType;
-  {$ENDIF}
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
@@ -551,11 +562,7 @@ begin
         mstream.Write(AProtobuf, rpc_message.DataSize);
 
       {$IFDEF DEBUG}
-      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
-        dbgtype := ditPingPong
-      else
-        dbgtype := ditSocketOut;
-      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), ASize, mstream.Size]), dbgtype);
+      DebugRpcMessage(rpc_message, nil, mstream.Size);
       {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
@@ -569,11 +576,8 @@ end;
 procedure TServerSocket.SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
 var
   rpc_message: TPB_RpcMessage;
-  mstream    : TMemoryStream;
-  rpcsize    : Word;
-  {$IFDEF DEBUG}
-  dbgtype: TDebugInfoType;
-  {$ENDIF}
+  mstream: TMemoryStream;
+  rpcsize: Word;
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
@@ -589,11 +593,7 @@ begin
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
       {$IFDEF DEBUG}
-      if rpc_message.MethodId in [Integer(scPing), Integer(srPong)] then
-        dbgtype := ditPingPong
-      else
-        dbgtype := ditSocketOut;
-      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(rpc_message.MethodId), rpc_message.DataSize, mstream.Size]), dbgtype, EnumerateProperties(AProtobuf));
+      DebugRpcMessage(rpc_message, nil, mstream.Size);
       {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
@@ -844,26 +844,6 @@ begin
     protobuf.Gameid := AGameId;
     protobuf.Timestamp := ATimestamp;
     SendProtobuf(scCloseGame, protobuf);
-  finally
-    protobuf.Free;
-  end;
-end;
-
-procedure TServerSocket.EditGame(const AGameId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
-var
-  protobuf: TPB_Game;
-begin
-  protobuf := TPB_Game.Create;
-  try
-    protobuf.MongoId := AGameId;
-    protobuf.Gamename := AGameName;
-    protobuf.GameType := AGameType;
-    protobuf.GameLimit := AGameLimit;
-    protobuf.Blinds := ABlinds;
-    protobuf.BuyinMin := ABuyinMin;
-    protobuf.BuyinMax := ABuyinMax;
-    protobuf.Seats := ASeats;
-//    SendProtobuf(scEditGame, protobuf);
   finally
     protobuf.Free;
   end;
@@ -1190,7 +1170,7 @@ var
   pb: TPB_PlayerLimitParams;
   tmp: String;
   bytes: TBytes;
-  bytes1: TBytes;{
+{  bytes1: TBytes;
   bytesx2: TArray<TBytes>;   }
 begin
   SetLength(tmp, 100);

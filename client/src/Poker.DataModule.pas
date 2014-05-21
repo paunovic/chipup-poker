@@ -86,7 +86,8 @@ begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
   common := GetSpecialFolderPath(CSIDL_COMMON_APPDATA);
-  if Pos(LowerCase(common), LowerCase(SelfPath)) > 0 then
+  if (Pos(LowerCase(common), LowerCase(SelfPath)) > 0) and
+     (IsDirectoryWriteable(common)) then
     AppDataPath := common
   else
     AppDataPath := local;

@@ -9,12 +9,12 @@ uses
 type
   TMessageContainer = class
   private
-    FReceiverWnd         : HWND;
-    FServerReplyMsg      : UINT;
+    FReceiverWnd: HWND;
+    FServerReplyMsg: UINT;
     FSocketStateChangeMsg: UINT;
-    FCallbackSets        : TObjectList<TCallbackSet>;
-    FLock                : TCriticalSection;
-    FLockCount           : Integer;
+    FCallbackSets: TObjectList<TCallbackSet>;
+    FLock: TCriticalSection;
+    FLockCount: Integer;
 
     procedure ReceiverWndProc(var AMessage: TMessage);
     procedure ProcessMessage(const AMessage: TMessage);
@@ -90,8 +90,8 @@ end;
 function TMessageContainer.AddCallbacks(const ACallbacks: array of TObject): Integer;
 var
   callback_set: TCallbackSet;
-  id          : Integer;
-  found       : Boolean;
+  id: Integer;
+  found : Boolean;
 begin
   FLock.Acquire;
   try
