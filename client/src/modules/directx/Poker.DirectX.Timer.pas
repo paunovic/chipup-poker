@@ -3,20 +3,21 @@ unit Poker.DirectX.Timer;
 interface
 
 uses
-  Winapi.Windows, System.Classes, Poker.DirectX.Animation, Vectors2, AsphyreTiming;
+  Winapi.Windows, System.Classes, Poker.DirectX.Animation, Vectors2, AsphyreTiming, System.SyncObjs;
 
 type
   TDXTimer = class(TThread)
   private
-    FAnimations   : TDXAnimations;
-    FSignalEvent  : THandle;
+    FAnimations: TDXAnimations;
+    FSignalEvent: TEvent;
     FMsg_Animation: UINT;
-    FTiming       : TAsphyreTiming;
-    FLastUpdate   : Double;
-    FLockCount    : Integer;
-    FNextId       : Integer;
+    FTiming: TAsphyreTiming;
+    FLastUpdate: Double;
+    FLockCount: Integer;
+    FNextId: Integer;
 
     procedure Process;
+    procedure Shutdown;
 
   protected
     procedure Execute; override;
@@ -27,9 +28,6 @@ type
 
     constructor Create;
     destructor Destroy; override;
-
-    procedure Signal;
-    procedure Shutdown;
 
     function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single): TDXAnimation;
     procedure RemoveAnimations(const AHandle: THandle);
@@ -63,9 +61,9 @@ end;
 constructor TDXTimer.Create;
 begin
   FNextId := 0;
-  FSignalEvent := CreateEvent(nil, FALSE, FALSE, nil);
+  FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
-  FMsg_Animation := RegisterWindowMessage('DXTANMSG');
+  FMsg_Animation := RegisterWindowMessage('CUPDXTANMSG');
   FAnimations := TDXAnimations.Create;
 
   inherited Create(TRUE);
@@ -75,7 +73,7 @@ destructor TDXTimer.Destroy;
 begin
   FAnimations.Free;
   FTiming.Free;
-  CloseHandle(FSignalEvent);
+  FreeAndNil(FSignalEvent);
 
   inherited;
 end;
@@ -88,7 +86,7 @@ begin
   Inc(FNextId);
   FAnimations.Add(animation);
   result := animation;
-  Signal;
+  FSignalEvent.SetEvent;
 end;
 
 procedure TDXTimer.RemoveAnimations(const AHandle: THandle);
@@ -128,13 +126,8 @@ end;
 procedure TDXTimer.Shutdown;
 begin
   Terminate;
-  Signal;
+  FSignalEvent.SetEvent;
   WaitFor;
-end;
-
-procedure TDXTimer.Signal;
-begin
-  SetEvent(FSignalEvent);
 end;
 
 procedure TDXTimer.Process;
@@ -200,10 +193,10 @@ begin
     if FAnimations.Count = 0 then
     begin
       FNextId := 0;
-      ResetEvent(FSignalEvent);
-      WaitForSingleObject(FSignalEvent, INFINITE);
-    end;
-    Sleep(1);
+      FSignalEvent.WaitFor;
+    end
+    else
+      Sleep(1);
   end;
 end;
 

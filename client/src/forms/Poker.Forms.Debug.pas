@@ -13,7 +13,6 @@ uses
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
-  TDebugInfoTypes = set of TDebugInfoType;
 
   TDebugFormLog = class(TIdSync)
   private
@@ -58,7 +57,6 @@ type
     lbvCallbackSets: TcxLabel;
     lbvSocketState: TcxLabel;
     btSeatPos: TcxButton;
-    btSet: TcxButton;
     btPause: TcxButton;
     lbsLatency: TcxLabel;
     lbvLatency: TcxLabel;
@@ -73,11 +71,10 @@ type
     procedure acCopyLogSelectionExecute(Sender: TObject);
     procedure tiAppInfoRefreshTimer(Sender: TObject);
     procedure btSeatPosClick(Sender: TObject);
-    procedure btSetClick(Sender: TObject);
     procedure rvLogRVMouseUp(Sender: TCustomRichView; Button: TMouseButton; Shift: TShiftState; ItemNo, X, Y: Integer);
-    procedure btTestClick(Sender: TObject);
     procedure acServerCrashTestExecute(Sender: TObject);
     procedure acRunNewInstanceExecute(Sender: TObject);
+    procedure meSeatPosPropertiesChange(Sender: TObject);
   private
     procedure ActiveFormChange(Sender: TObject);
   protected
@@ -226,6 +223,7 @@ begin
   if ConsoleAttached then
     FreeConsole;
 end;
+
 
 procedure TfrmDebug.FormCreate(Sender: TObject);
 begin
@@ -472,11 +470,10 @@ begin
   meSeatPos.Visible := btSeatPos.Down;
   if meSeatPos.Visible then
     meSeatPos.BringToFront;
-  btSet.Visible := btSeatPos.Down;
   {$ENDIF}
 end;
 
-procedure TfrmDebug.btSetClick(Sender: TObject);
+procedure TfrmDebug.meSeatPosPropertiesChange(Sender: TObject);
 {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
 var
   C1, C2: Integer;
@@ -492,43 +489,42 @@ begin
   try
     evaluator.AddConst('pi', pi);
 
-    for C1 := 2 to 10 do
-    begin
-      line := meSeatPos.Lines[C1 - 2];
-      for C2 := 0 to 9 do
+    try
+      for C1 := 2 to 10 do
       begin
-        cpos := Pos(',', line);
-        if cpos = 0 then
+        line := meSeatPos.Lines[C1 - 2];
+        for C2 := 0 to 9 do
         begin
-          cpos := Pos(')', line);
+          cpos := Pos(',', line);
           if cpos = 0 then
-            exit;
+          begin
+            cpos := Pos(')', line);
+            if cpos = 0 then
+              exit;
+          end;
+
+          tmp := Copy(line, 1, cpos - 1);
+          Delete(line, 1, cpos);
+
+          cpos := Pos('(', tmp);
+          if cpos > 0 then
+            Delete(tmp, 1, cpos);
+          cpos := Pos(')', tmp);
+          if cpos > 0 then
+            Delete(tmp, cpos, 1);
+          tmp := Trim(tmp);
+
+          val := evaluator.Evaluate(tmp);
+          TableResources.SEAT_POINTS[C1, C2] := val;
         end;
-
-        tmp := Copy(line, 1, cpos - 1);
-        Delete(line, 1, cpos);
-
-        cpos := Pos('(', tmp);
-        if cpos > 0 then
-          Delete(tmp, 1, cpos);
-        cpos := Pos(')', tmp);
-        if cpos > 0 then
-          Delete(tmp, cpos, 1);
-        tmp := Trim(tmp);
-
-        val := evaluator.Evaluate(tmp);
-        TableResources.SEAT_POINTS[C1, C2] := val;
       end;
+    except
+      on E: Exception do;
     end;
   finally
     evaluator.Free;
   end;
   {$ENDIF}
-end;
-
-
-procedure TfrmDebug.btTestClick(Sender: TObject);
-begin
 end;
 
 { TMemoLog }

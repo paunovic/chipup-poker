@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableStatsReplies;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableStatsReply,Poker.Protobufs.Objects.User;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableStatsReply,Poker.Protobufs.Objects.User,Poker.Protobufs.Objects.ClubStatsReply;
 
 type
   TPB_TableStatsReplies = class(TProtobufBaseObject)
@@ -14,13 +14,16 @@ type
     const
       FN_REPLY = 1;
       FN_PLAYERS = 2;
+      FN_CLUB_STATS = 3;
 
     var
       FReply: TObjectList<TPB_TableStatsReply>;
       FPlayers: TObjectList<TPB_User>;
+      FClubStats: TObjectList<TPB_ClubStatsReply>;
 
     procedure ReplyNotifyEvent(Sender: TObject; const Item: TPB_TableStatsReply; Action: TCollectionNotification);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+    procedure ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -31,6 +34,7 @@ type
 
     property Reply: TObjectList<TPB_TableStatsReply> read FReply;
     property Players: TObjectList<TPB_User> read FPlayers;
+    property ClubStats: TObjectList<TPB_ClubStatsReply> read FClubStats;
   end;
 
 implementation
@@ -45,6 +49,8 @@ begin
   FReply.OnNotify := ReplyNotifyEvent;
   FPlayers := TObjectList<TPB_User>.Create;
   FPlayers.OnNotify := PlayersNotifyEvent;
+  FClubStats := TObjectList<TPB_ClubStatsReply>.Create;
+  FClubStats.OnNotify := ClubStatsNotifyEvent;
 end;
 
 destructor TPB_TableStatsReplies.Destroy;
@@ -58,6 +64,11 @@ begin
   begin
     FPlayers.OnNotify := nil;
     FreeAndNil(FPlayers);
+  end;
+  if Assigned(FClubStats) then
+  begin
+    FClubStats.OnNotify := nil;
+    FreeAndNil(FClubStats);
   end;
   inherited;
 end;
@@ -78,6 +89,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
+      FN_CLUB_STATS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -96,6 +111,14 @@ procedure TPB_TableStatsReplies.PlayersNotifyEvent(Sender: TObject; const Item: 
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(FN_PLAYERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatsReplies.ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_CLUB_STATS,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

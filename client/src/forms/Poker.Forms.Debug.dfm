@@ -27,29 +27,28 @@ object frmDebug: TfrmDebug
       '(0, pi/2, pi, 0, 0, 0, 0, 0, 0, 0), // 3'
       '(-pi/4, pi/4, pi*3/4, pi*5/4, 0, 0, 0, 0, 0, 0), // 4'
       '(-pi/5.5, pi/7, pi/2, pi-pi/7, pi+pi/5.5, 0, 0, 0, 0, 0), // 5'
-      '(-pi/3, 0, pi/2.7, pi-pi/2.7, pi, pi+pi/3, 0, 0, 0, 0), // 6'
+      
+        '(-pi/3.5, pi/48, pi/2.7, pi-pi/2.7, pi+pi/48, pi+pi/3.5, 0, 0, 0' +
+        ', 0), // 6'
       '(-pi/4, 0, pi/4, pi/2, pi*3/4, pi, pi*5/4, 0, 0, 0), // 7'
       
-        '(-pi/3, -pi/10.4, pi/8, pi/2.3, pi-pi/2.3, pi-pi/8, pi+pi/10.4, ' +
-        'pi+pi/3, 0, 0), // 8'
+        '(-pi/3.25, -pi/13, pi/6.5, pi/2.3, pi-pi/2.3, pi-pi/6.5, pi+pi/1' +
+        '3, pi+pi/3.25, 0, 0), // 8'
       
-        '(-pi/2.7, -pi/10.3, pi/64, pi/3.5, pi/2, pi-pi/3.5, pi-pi/64, pi' +
-        '+pi/10.3, pi+pi/2.7, 0), // 9'
+        '(-pi/2.65, -pi/9, pi/24, pi/3, pi/2, pi-pi/3, pi-pi/24, pi+pi/9,' +
+        ' pi+pi/2.65, 0), // 9'
       
-        '(-pi/2.7, -pi/7.7, pi/128, pi/6, pi/2.3, pi-pi/2.3, pi-pi/6, pi-' +
-        'pi/128, pi+pi/7.7, pi+pi/2.7) // 10')
+        '(-pi/2.65, -pi/6, pi/80, pi/5, pi/2.25, pi-pi/2.25, pi-pi/5, pi-' +
+        'pi/80, pi+pi/6, pi+pi/2.65) // 10')
     ParentFont = False
     Properties.WordWrap = False
+    Properties.OnChange = meSeatPosPropertiesChange
     Style.Font.Charset = DEFAULT_CHARSET
     Style.Font.Color = clWindowText
     Style.Font.Height = -12
     Style.Font.Name = 'Consolas'
     Style.Font.Style = []
-    Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-    StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
     TabOrder = 0
     Visible = False
     Height = 309
@@ -67,7 +66,6 @@ object frmDebug: TfrmDebug
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
-    ExplicitHeight = 303
   end
   object paInfo: TPanel
     Left = 0
@@ -242,17 +240,16 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object btSeatPos: TcxButton
-      Left = 571
-      Top = 1
-      Width = 93
+      Left = 599
+      Top = 6
+      Width = 70
       Height = 31
       Anchors = [akRight, akBottom]
       Caption = 'SEAT POS'
       Colors.PressedText = clRed
-      SpeedButtonOptions.GroupIndex = 2
+      SpeedButtonOptions.GroupIndex = 3
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
-      SpeedButtonOptions.Flat = True
       SpeedButtonOptions.Transparent = True
       TabOrder = 8
       Visible = False
@@ -263,27 +260,6 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
       OnClick = btSeatPosClick
-      ExplicitTop = 6
-    end
-    object btSet: TcxButton
-      Left = 571
-      Top = 34
-      Width = 93
-      Height = 31
-      Anchors = [akRight, akBottom]
-      Caption = 'SET'
-      Colors.PressedText = clRed
-      SpeedButtonOptions.CanBeFocused = False
-      TabOrder = 9
-      Visible = False
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Arial'
-      Font.Style = [fsBold]
-      ParentFont = False
-      OnClick = btSetClick
-      ExplicitTop = 39
     end
     object btPause: TcxButton
       Left = 5
@@ -375,7 +351,7 @@ object frmDebug: TfrmDebug
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Flat = True
       SpeedButtonOptions.Transparent = True
-      TabOrder = 10
+      TabOrder = 9
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -468,7 +444,7 @@ object frmDebug: TfrmDebug
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Flat = True
       SpeedButtonOptions.Transparent = True
-      TabOrder = 13
+      TabOrder = 12
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -525,7 +501,7 @@ object frmDebug: TfrmDebug
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Flat = True
       SpeedButtonOptions.Transparent = True
-      TabOrder = 14
+      TabOrder = 13
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
@@ -582,7 +558,7 @@ object frmDebug: TfrmDebug
       SpeedButtonOptions.AllowAllUp = True
       SpeedButtonOptions.Flat = True
       SpeedButtonOptions.Transparent = True
-      TabOrder = 15
+      TabOrder = 14
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11

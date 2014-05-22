@@ -131,6 +131,7 @@ type
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
     FCallbacksId: Integer;
+    FShuttingDown: Boolean;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -174,6 +175,8 @@ type
     function GetSelectedClub(var AClub: TClubInfo): Boolean;
   protected
     procedure DoCreate; override;
+    procedure WMQueryEndSession(var AMessage: TWMQueryEndSession); message WM_QUERYENDSESSION;
+    procedure WMEndSession(var AMessage: TWMEndSession); message WM_ENDSESSION;
 
   public
     procedure LoginStatus(const AValue: TLoginStatus);
@@ -198,7 +201,7 @@ uses
   Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember;
+  Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply;
 
 
 procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
@@ -247,7 +250,8 @@ end;
 
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := ConfirmToCloseTables;
+  CanClose := (FShuttingDown) or
+              (ConfirmToCloseTables);
   if CanClose then
   begin
     ServerSocket.Logout;
@@ -614,6 +618,18 @@ begin
     c.EndFullUpdate;
   end;
   c.Refresh;
+end;
+
+procedure TfrmChipUpMain.WMEndSession(var AMessage: TWMEndSession);
+begin
+  FShuttingDown := AMessage.EndSession;
+  inherited;
+end;
+
+procedure TfrmChipUpMain.WMQueryEndSession(var AMessage: TWMQueryEndSession);
+begin
+  FShuttingDown := TRUE;
+  inherited;
 end;
 
 procedure TfrmChipUpMain.gridMyHomeGamesEnter(Sender: TObject);
@@ -1116,6 +1132,7 @@ var
   club: TClubInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
+  clubstats: TPB_ClubStatsReply;
 begin
   pb := AObject as TPB_TableStatsReplies;
 
@@ -1134,6 +1151,10 @@ begin
   if Length(query_users) <> 0 then
     ServerSocket.GetUserInfos(query_users);
 
+  for clubstats in pb.ClubStats do
+    if dmMain.SelfInfo.Clubs.FindClub(clubstats.Clubid, club) then
+      club.UpdateFromClubStats(clubstats);
+
   for tablepb in pb.Reply do
   begin
     if TablesStats.Find(tablepb.Gameid, tablestats) then
@@ -1144,9 +1165,6 @@ begin
       tablestats.Assign(tablepb);
       TablesStats.Add(tablestats);
     end;
-
-    if dmMain.SelfInfo.Clubs.FindClub(tablepb.Clubid, club) then
-      club.UpdateFromTableStats(tablepb.Playerstats);
   end;
 end;
 

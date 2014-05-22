@@ -4,7 +4,7 @@ interface
 
 uses
   System.Generics.Collections, System.SysUtils, Poker.Objects.GameInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubMember,
-  Poker.Protobufs.Objects.TablePlayerStats;
+  Poker.Protobufs.Objects.ClubStatsReply, Poker.Protobufs.Objects.ClubPlayerStats;
 
 
 type
@@ -43,7 +43,7 @@ type
     destructor Destroy; override;
 
     procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
-    procedure UpdateFromTableStats(const ATableStatsPlayers: TObjectList<TPB_TablePlayerStats>);
+    procedure UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
     procedure UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetMemberBalance(const AMemberId: TBytes);
 
@@ -124,14 +124,14 @@ begin
   FUnlimitedDefaultBalance := AProtobufObject.UnlimitedDefaultBalance;
 end;
 
-procedure TClubInfo.UpdateFromTableStats(const ATableStatsPlayers: TObjectList<TPB_TablePlayerStats>);
+procedure TClubInfo.UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
 var
-  playertps: TPB_TablePlayerStats;
+  playerstats: TPB_ClubPlayerStats;
   member: TClubMemberInfo;
 begin
-  for playertps in ATableStatsPlayers do
-    if GetMemberInfo(playertps.Userid, member) then
-      member.ClubBalance := playertps.ClubBalance;
+  for playerstats in AClubStats.PlayerStats do
+    if GetMemberInfo(playerstats.Userid, member) then
+      member.ClubBalance := playerstats.ClubBalance;
 end;
 
 procedure TClubInfo.UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);

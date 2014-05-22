@@ -579,11 +579,8 @@ begin
 
   if ASender is TfrmClubMemberOptions then
   begin
-//    if (ASender as TfrmClubMemberOptions).ModalResult = mrOk then
-//      ServerSocket. FIXME
-
+  //
   end;
-
 
   EnableWindow(Handle, TRUE);
 end;
