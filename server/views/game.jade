@@ -28,7 +28,7 @@ block content
     each seat,idx in game.members
       tr
         td=idx
-        td=JSON.stringify(seat)
+        td=util.inspect(seat)
   table(border=1)
     tr
       th started
@@ -45,3 +45,4 @@ block content
   div
     | inspect
     pre=util.inspect(game)
+    pre=util.inspect(game.history.moves)

@@ -101,7 +101,7 @@ function startImHub() {
 	//im_hub.stderr.on('data',readStdErr);
 	//process.stdin.pipe(im_hub.stdin);
 	if (process.platform == 'linux') {
-		setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
+		//setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
 	}
 	im_hub.on('message',function (msg) {
 		buffer.push(msg);

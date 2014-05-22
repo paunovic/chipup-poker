@@ -34,14 +34,15 @@ function doLogin(cb) {
 	var req = http.request({host:'buildbot.chipuppoker.com',method:'POST',path:'/login',headers:{'Content-Length':body.length,'Content-Type':'application/x-www-form-urlencoded'}},function (reply) {
 		console.log(reply.headers);
 		console.log(reply.statusCode);
+		req.on('data',function (chunk) {
+			console.log(chunk);
+		});
 		var cookies = reply.headers['set-cookie'];
+		if (!cookies) return;
 		for (var x=0; x<cookies.length; x++) {
 			var c = cookies[x].split(';')[0].split('=');
 			globalCookies[c[0]] = c[1];
 		}
-		req.on('data',function (chunk) {
-			console.log(chunk);
-		});
 		cb();
 	});
 	req.write(body);
