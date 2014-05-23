@@ -196,6 +196,7 @@ module.exports = function ReadWriteLock() {
 					callback.call(options.scope, release);
 				}
 			});
+			console.log('lock contention, %s didnt release',lock.trace);
 			if (options.hasOwnProperty('timeout')) {
 				var timeoutCallback = null;
 				if (options.hasOwnProperty('timeoutCallback')) {
