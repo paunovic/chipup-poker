@@ -593,7 +593,7 @@ begin
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
       {$IFDEF DEBUG}
-      DebugRpcMessage(rpc_message, nil, mstream.Size);
+      DebugRpcMessage(rpc_message, AProtobuf, mstream.Size);
       {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally

@@ -6,7 +6,8 @@ object frmClubMemberOptions: TfrmClubMemberOptions
   Caption = 'Set Player Limit'
   ClientHeight = 77
   ClientWidth = 228
-  Color = clBtnFace
+  Color = clWindow
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -37,8 +38,6 @@ object frmClubMemberOptions: TfrmClubMemberOptions
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 166
-    ExplicitTop = 144
   end
   object btCancel: TcxButton
     Left = 123
@@ -55,8 +54,6 @@ object frmClubMemberOptions: TfrmClubMemberOptions
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 265
-    ExplicitTop = 144
   end
   object seLimit: TcxSpinEdit
     Left = 46

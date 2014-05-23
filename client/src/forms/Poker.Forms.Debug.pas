@@ -60,11 +60,11 @@ type
     btPause: TcxButton;
     lbsLatency: TcxLabel;
     lbvLatency: TcxLabel;
-    btShowPings: TcxButton;
     btRunAnotherInstance: TcxButton;
     acRunNewInstance: TAction;
     btServerTest: TcxButton;
     acServerCrashTest: TAction;
+    pmiShowPings: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -257,31 +257,40 @@ begin
 
   server_socket_connected := FALSE;
   server_socket_state_color := clWhite;
-  case ServerSocket.Socket.State of
-    wsInvalidState: server_socket_state := 'InvalidState';
-    wsOpened: server_socket_state := 'Opened';
-    wsBound: server_socket_state := 'Bound';
-    wsConnecting: server_socket_state := 'Connecting';
-    wsSocksConnected: server_socket_state := 'SocksConnected';
-    wsConnected: begin
-      server_socket_connected := TRUE;
-      server_socket_state := 'Connected';
-      server_socket_state_color := clLime;
+  if Assigned(ServerSocket) then
+  begin
+    case ServerSocket.Socket.State of
+      wsInvalidState: server_socket_state := 'InvalidState';
+      wsOpened: server_socket_state := 'Opened';
+      wsBound: server_socket_state := 'Bound';
+      wsConnecting: server_socket_state := 'Connecting';
+      wsSocksConnected: server_socket_state := 'SocksConnected';
+      wsConnected: begin
+        server_socket_connected := TRUE;
+        server_socket_state := 'Connected';
+        server_socket_state_color := clLime;
+      end;
+      wsAccepting: server_socket_state := 'Accepting';
+      wsListening: server_socket_state := 'Listening';
+      wsClosed: begin
+        server_socket_state := 'Closed';
+        server_socket_state_color := clRed;
+      end;
+    else
+      server_socket_state := 'Unknown';
     end;
-    wsAccepting: server_socket_state := 'Accepting';
-    wsListening: server_socket_state := 'Listening';
-    wsClosed: begin
-      server_socket_state := 'Closed';
-      server_socket_state_color := clRed;
-    end;
+  end
   else
-    server_socket_state := 'Unknown';
+  begin
+    server_socket_state := 'Unassigned';
+    server_socket_state_color := clRed;
   end;
 
   lbvSocketState.Caption := server_socket_state;
   lbvSocketState.Style.TextColor := server_socket_state_color;
 
   if (server_socket_connected) and
+     (Assigned(ServerSocket)) and
      (ServerSocket.Latency > 0) then
   begin
     lbvLatency.Caption := Format('%dms', [ServerSocket.Latency]);
@@ -356,12 +365,14 @@ const
   SCROLLBACK_LINES = 250;
 var
   table: TRVTableItemInfo;
+  sl: TStringList;
+  C1: Integer;
 begin
   if btPause.Down then
     Exit;
 
   if (AType = ditPingPong) and
-     (not btShowPings.Down) then
+     (not pmiShowPings.Checked) then
     Exit;
 
   if rvLog.ItemCount >= SCROLLBACK_LINES then
@@ -425,7 +436,14 @@ begin
       Cells[0, 0].AddFmt('', [], 0, 0);
       Cells[0, 1].AddFmt('', [], 0, 0);
       Cells[0, 2].AddFmt('', [], 0, 0);
-      Cells[0, 3].AddFmt('%s', [ASubData], 13, 2);
+      sl := TStringList.Create;
+      try
+        Split(#10, ASubData, sl);
+        for C1 := 0 to sl.Count - 1 do
+          Cells[0, 3].AddFmt('%s', [sl[C1]], 13, 2);
+      finally
+        sl.Free;
+      end;
     end;
     rvLog.AddItem('', table);
     rvLog.SetItemExtraIntProperty(rvLog.ItemCount - 1, rvepHidden, 1);

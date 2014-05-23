@@ -294,7 +294,7 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  {$IFDEF DEBUG} Poker.Forms.Debug, System.Rtti, System.TypInfo, {$ENDIF}
   cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, Poker.Server.MessageContainer, Poker.Server.Settings,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
@@ -1245,6 +1245,7 @@ begin
   sitout := FALSE;
   foldtoany := FALSE;
 
+  seat_bet := 0;
   seat_info := nil;
   if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
   begin
@@ -1254,19 +1255,26 @@ begin
     case seat_info.Status of
       psOutOfPlay: begin
         acPlayNow.Enabled := TRUE;
+        sitout := FALSE;
+        foldtoany := FALSE;
       end;
       psOutOfHand: begin
         sitout := TRUE;
+        foldtoany := FALSE;
       end;
       psInHand, psAllIn: begin
         sitout := TRUE;
-        foldtoany := TRUE;
+        if (seat_info.Status = psInHand) and
+           (FTableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
+          foldtoany := TRUE;
         if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
            (not FTableStatus.Locked) and
            (not tiGameLock.Enabled) then
         begin
           case FTableStatus.State of
-            tsIdle: ;
+            tsIdle: begin
+              foldtoany := FALSE;
+            end;
             tsPreFlop,
             tsFlop,
             tsTurn,
@@ -1275,13 +1283,13 @@ begin
               acFold.Enabled := TRUE;
               if seat_bet < FTableStatus.MinimumBet then
               begin
-                if seat_info.Chips + seat_bet <= FTableStatus.MinimumBet then
+                if seat_info.Chips <= FTableStatus.MinimumBet then
                   acCall.Caption := 'CALL (ALL-IN)'
                 else
                   acCall.Caption := Format('CALL (%s)', [ChipsToStr(FTableStatus.MinimumBet - seat_bet)]);
                 acCall.Enabled := TRUE;
 
-                if (seat_info.Chips + seat_bet > FTableStatus.MinimumBet) and
+                if (seat_info.Chips > FTableStatus.MinimumBet) and
                    (FTableStatus.MinimumBet < FTableStatus.MinimumRaise) then
                 begin
                   acRaise.Tag := 0;
@@ -1326,13 +1334,14 @@ begin
                   SetForegroundWindow(Handle);
                   SetFocus;
                   FForceFocused := TRUE;
-                  DefocusControls;
+                  if not edChat.Focused then
+                    seRaiseAmount.SetFocus;
                   TablePlaySound(Sounds.SOUND_TIMEBAR);
                 end;
               end;
             end;
             tsWinning,
-            tsWinning2: ;
+            tsWinning2: foldtoany := FALSE;
           end;
         end
         else
@@ -1340,6 +1349,7 @@ begin
       end;
       psFolded: begin
         sitout := TRUE;
+        foldtoany := FALSE;
       end;
     end;
   end;
@@ -1359,15 +1369,25 @@ begin
     tiActiveFrameBlink.Enabled := TRUE;
   end;
 
+  if not cbFoldToAnyBet.Visible then
+  begin
+    event := cbFoldToAnyBet.Properties.OnChange;
+    cbFoldToAnyBet.Properties.OnChange := nil;
+    cbFoldToAnyBet.Checked := FALSE;
+    cbFoldToAnyBet.Properties.OnChange := event;
+  end;
+
   if sitout then
   begin
-    if not cbFoldToAnyBet.Visible then
+    cbFoldToAnyBet.Visible := sitout;
+    if cbFoldToAnyBet.Visible then
     begin
-      event := cbFoldToAnyBet.Properties.OnChange;
-      cbFoldToAnyBet.Properties.OnChange := nil;
+      cbFoldToAnyBet.Enabled := foldtoany;
+      if not cbFoldToAnyBet.Enabled then
+        cbFoldToAnyBet.Checked := FALSE;
+    end
+    else
       cbFoldToAnyBet.Checked := FALSE;
-      cbFoldToAnyBet.Properties.OnChange := event;
-    end;
 
     if not cbSitOutNextHand.Visible then
     begin
@@ -1375,7 +1395,9 @@ begin
       cbSitOutNextHand.Properties.OnChange := nil;
       cbSitOutNextHand.Checked := FALSE;
       cbSitOutNextHand.Properties.OnChange := event;
-    end;
+    end
+    else
+      cbSitOutNextHand.Checked := FALSE;
 
     if not cbSitOutNextBB.Visible then
     begin
@@ -1383,17 +1405,12 @@ begin
       cbSitOutNextBB.Properties.OnChange := nil;
       cbSitOutNextBB.Checked := FALSE;
       cbSitOutNextBB.Properties.OnChange := event;
-    end;
+    end
+    else
+      cbSitOutNextBB.Checked := FALSE;
   end;
 
   cbFoldToAnyBet.Visible := sitout;
-  if cbFoldToAnyBet.Visible then
-  begin
-    cbFoldToAnyBet.Enabled := foldtoany;
-    if not cbFoldToAnyBet.Enabled then
-      cbFoldToAnyBet.Checked := FALSE;
-  end;
-
   cbSitOutNextHand.Visible := sitout;
   cbSitOutNextBB.Visible := sitout;
 
@@ -1452,12 +1469,21 @@ begin
     if not raise_en then
       FRaiseValue := FRaiseMin;
 
-    seRaiseAmount.Properties.MaxValue := FRaiseValue / 100;
     SetRaiseSliderValue(FRaiseValue, TRUE, TRUE, FALSE);
 
     case acRaise.Tag of
-      0: acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)]);
-      1: acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
+      0: begin
+        if FRaiseValue = seat_info.Chips + seat_bet then
+           acRaise.Caption := 'RAISE (ALL-IN)'
+        else
+           acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)])
+      end;
+      1: begin
+        if FRaiseValue = seat_info.Chips then
+          acRaise.Caption := 'BET (ALL-IN)'
+        else
+          acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
+      end;
     end;
   end
   else
@@ -1509,9 +1535,15 @@ var
   empty_array: TBytes;
   seat: TSeatInfo;
   winning: Boolean;
+  pbevent: TPB_TableEvent;
   {$IFDEF DEBUG}
+  events: String;
   tmp: String;
   tb: UINT32;
+  tstatusdbg: String;
+  csdbg: String;
+  seatdbg: TSeatInfo;
+  playerdbg: TPlayerInfo;
   {$ENDIF}
 begin
   pbtablestatus := AObject as TPB_TableStatus;
@@ -1551,16 +1583,6 @@ begin
     FGoalTime := FTableStatus.Time - ServerSocket.TimeOffset
   else
     FGoalTime := 0;
-
-  {$IFDEF DEBUG}
-  tmp := BoolToStr(pbtablestatus.Locked, TRUE);
-  tb := 0;
-  if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
-    tb := seat.Timebank;
-
-  DebugLn(Format('DB: %d; TS: %d; CS: %d; M: %d; TB: %d; SEQ: %d; LD: %s',
-    [FTableStatus.Dealer, Integer(FTableStatus.State), FTableStatus.CurrentSeat, FTableStatus.Time, tb, pbtablestatus.Seq, tmp]), ditApplication);
-  {$ENDIF}
 
   FWinningFlopAniDelay := 0;
   FWinningTurnAniDelay := 0;
@@ -1608,6 +1630,64 @@ begin
   dmMain.SelfInfo.Balance := pbtablestatus.TotalBalance;
   dmMain.UpdateSelfInfoInPlayers;
 
+  {$IFDEF DEBUG}
+  tmp := GetEnumName(TypeInfo(TTableState), Integer(FTableStatus.State));
+  if pbtablestatus.Locked then
+    tmp := tmp + ', LOCKED';
+  seatdbg := nil;
+  playerdbg := nil;
+  tb := 0;
+  csdbg := IntToStr(FTableStatus.CurrentSeat);
+  if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seatdbg) then
+  begin
+    if Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg) then
+      csdbg := csdbg + ' - ' + playerdbg.Nick;
+    tb := seatdbg.Timebank;
+  end;
+
+  tstatusdbg := Format('[#%d] %s, D: %d, E: %d | #%s, %.2fs/%.2fs',
+    [pbtablestatus.Seq, tmp, FTableStatus.Dealer, pbtablestatus.Events.Count, csdbg, FTableStatus.Time / 100, tb / 100]);
+
+  events := '';
+  for C1 := 0 to pbtablestatus.Events.Count - 1 do
+  begin
+    pbevent := pbtablestatus.Events[C1];
+    if events <> '' then
+      events := events + #10;
+
+    seatdbg := nil;
+    playerdbg := nil;
+    if FTableStatus.GetSeatInfo(pbevent.Seat, seatdbg) then
+      Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg);
+
+    case pbevent.Event of
+      teFold: if Assigned(seatdbg) then
+        events := events + Format('FOLD [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTableStatus.Bets[seatdbg.SeatIndex]), ChipsToStr(seatdbg.Chips)])
+      else
+        events := events + Format('FOLD [#%d]', [pbevent.Seat]);
+      teSit: events := events + Format('SIT [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTableStatus.Bets[seatdbg.SeatIndex]), ChipsToStr(seatdbg.Chips)]);
+      teStandUp: events := events + Format('STAND UP [#%d]', [pbevent.Seat]);
+      teWinning: events := events + 'WINNING';
+      teDealing: events := events + 'DEALING';
+      teCheck: events := events + Format('CHECK [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTableStatus.Bets[seatdbg.SeatIndex]), ChipsToStr(seatdbg.Chips)]);
+      teCall: events := events + Format('CALL [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTableStatus.Bets[seatdbg.SeatIndex]), ChipsToStr(seatdbg.Chips)]);
+      teRaise: events := events + Format('RAISE [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTableStatus.Bets[seatdbg.SeatIndex]), ChipsToStr(seatdbg.Chips)]);
+      teAllIn: events := events + Format('ALL-IN [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTableStatus.Bets[seatdbg.SeatIndex]), ChipsToStr(seatdbg.Chips)]);
+      teFlop: events := events + Format('FLOP [%s]', [FTableStatus.FlopCards.AsString]);
+      teTurn: events := events + Format('TURN [%s]', [FTableStatus.TurnCard.AsString]);
+      teRiver: events := events + Format('RIVER [%s]', [FTableStatus.RiverCard.AsString]);
+      tePostRiver: events := events + 'POST RIVER';
+      tePreWin: events := events + 'PRE WIN';
+      teExistingCards: events := events + Format('EXISTING CARDS [%s]', [TCards.BytesToString(pbevent.Cards)]);
+      teDisconnect: events := events + Format('DISCONNECTED [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTableStatus.Bets[seatdbg.SeatIndex]), ChipsToStr(seatdbg.Chips)]);
+    else
+      events := events + Format('UNHANDLED EVENT RECEIVED: %s', [GetEnumName(TypeInfo(TTableEventType), Integer(pbevent.Event))]);
+    end;
+  end;
+
+  DebugLn(tstatusdbg, ditApplication, events);
+  {$ENDIF}
+
   ConfigureGUI;
   Render;
 end;
@@ -1629,9 +1709,6 @@ end;
 
 procedure TfrmTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
 var
-  {$IFDEF DEBUG}
-  event: String;
-  {$ENDIF}
   seat_caption: String;
   seat: TSeatInfo;
   seat_point: TPoint2;
@@ -1653,10 +1730,6 @@ begin
   seat_caption := '';
   case ATableEvent.Event of
     teExistingCards: begin
-      {$IFDEF DEBUG}
-      event := 'EXISTING CARDS';
-      {$ENDIF}
-
       if Length(ATableEvent.Cards) >= 3 then
       begin
         SetLength(flop, 3);
@@ -1672,39 +1745,22 @@ begin
 
     teFold: begin
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('FOLD [#%d]', [ATableEvent.Seat]);
-      {$ENDIF}
       seat_caption := 'FOLD';
     end;
 
     teSit: begin
-      {$IFDEF DEBUG}
-      event := Format('SIT [#%d]', [ATableEvent.Seat]);
-      {$ENDIF}
     end;
 
     teStandUp: begin
       // fixme: animate bet > pot here
-      {$IFDEF DEBUG}
-      event := Format('STAND UP [#%d]', [ATableEvent.Seat]);
-      {$ENDIF}
     end;
 
     tePostRiver: begin
-      {$IFDEF DEBUG}
-      event := 'POST RIVER';
-      {$ENDIF}
-
       FTableStatus.PreviousBets := ATableEvent.Bets;
     end;
 
     teWinning: begin
       EnableGameLockTimer(2 + ATableEvent.Pots.Count * 0.5);
-
-      {$IFDEF DEBUG}
-      event := 'WINNING';
-      {$ENDIF}
 
       FTableStatus.Pots.Assign(ATableEvent.Pots);
 
@@ -1769,10 +1825,6 @@ begin
     end;
 
     teDealing: begin
-      {$IFDEF DEBUG}
-      event := 'DEALING';
-      {$ENDIF}
-
       acShowCards.Enabled := FALSE;
 
       FFlopAnimations.Clear;
@@ -1829,9 +1881,6 @@ begin
 
     teCheck: begin
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('CHECK [#%d]', [ATableEvent.Seat]);
-      {$ENDIF}
       seat_caption := 'CHECK';
 
       TablePlaySound(Sounds.SOUND_CHECK);
@@ -1839,9 +1888,6 @@ begin
 
     teCall: begin
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('CALL [#%d]', [ATableEvent.Seat]);
-      {$ENDIF}
       seat_caption := 'CALL';
 
       TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
@@ -1849,9 +1895,6 @@ begin
 
     teRaise: begin
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('RAISE [#%d]', [ATableEvent.Seat]);
-      {$ENDIF}
       seat_caption := 'RAISE';
 
       TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
@@ -1859,9 +1902,6 @@ begin
 
     teAllIn: begin
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('ALL-IN [#%d]', [ATableEvent.Seat]);
-      {$ENDIF}
       seat_caption := 'ALL-IN';
     end;
 
@@ -1869,9 +1909,6 @@ begin
       FTableStatus.FlopCards.Assign(ATableEvent.Cards);
 
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('FLOP [%s]', [FTableStatus.FlopCards.AsString]);
-      {$ENDIF}
       EnableGameLockTimer(1.5 + FWinningFlopAniDelay);
       if AnimateBets(ATableEvent.Bets) then
         TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
@@ -1881,9 +1918,6 @@ begin
       FTableStatus.TurnCard.Assign(ATableEvent.Cards);
 
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('TURN [%s]', [FTableStatus.TurnCard.AsString]);
-      {$ENDIF}
       EnableGameLockTimer(1.5 + FWinningTurnAniDelay);
       if AnimateBets(ATableEvent.Bets) then
         TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
@@ -1893,18 +1927,12 @@ begin
       FTableStatus.RiverCard.Assign(ATableEvent.Cards);
 
       tiActiveFrameBlink.Enabled := FALSE;
-      {$IFDEF DEBUG}
-      event := Format('RIVER [%s]', [FTableStatus.RiverCard.AsString]);
-      {$ENDIF}
       EnableGameLockTimer(1.5 + FWinningRiverAniDelay);
       if AnimateBets(ATableEvent.Bets) then
         TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
     end;
 
     teDisconnect: begin
-      {$IFDEF DEBUG}
-      event := Format('DISCONNECTED [%d]', [ATableEvent.Seat]);
-      {$ENDIF}
 {
       if FTableStatus.GetSeatInfo(ATableEvent.Seat, seat) then
         seat_caption := 'DISCONNECTED';}
@@ -1924,10 +1952,6 @@ begin
       tiSeatCaptionClear.Enabled := TRUE;
     end;
   end;
-
-  {$IFDEF DEBUG}
-  DebugLn('Event: ' + event, ditApplication);
-  {$ENDIF}
 end;
 
 procedure TfrmTable.acCallExecute(Sender: TObject);
@@ -2177,7 +2201,6 @@ begin
   Constraints.MaxWidth := 0;
 end;
 
-
 procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 var
   val: UINT32;
@@ -2399,7 +2422,10 @@ begin
       case seat_info.Status of
         psOutOfPlay: seat_lower_text := 'Sitting Out';
       else
-        seat_lower_text := ChipsToStr(seat_info.Chips);
+        if FWinningAniDelay > 0 then
+          seat_lower_text := ChipsToStr(seat_info.PreviousChips)
+        else
+          seat_lower_text := ChipsToStr(seat_info.Chips);
       end;
       seat_lower_text_color := cColor2($FF8DC63F);
     end;
@@ -2830,12 +2856,12 @@ end;
 
 procedure TfrmTable.RenderPots;
 var
-  C1         : Integer;
-  pot        : UINT32;
+  C1: Integer;
+  pot: UINT32;
   chips_stack: TChipsStack;
-  pot_point  : TPoint2;
-  animation  : TDXAnimation;
-  pots       : TPotInfos;
+  pot_point: TPoint2;
+  animation: TDXAnimation;
+  pots: TPotInfos;
 begin
   pots := FTableStatus.Pots;
 
@@ -2915,7 +2941,7 @@ end;
 
 function TfrmTable.RoundToBB(const AValue: Single): UINT32;
 begin
-  result := Trunc(AValue / FTable.Game.BigBlind) * FTable.Game.BigBlind;
+  result := Round(AValue / FTable.Game.BigBlind) * FTable.Game.BigBlind;
 end;
 
 procedure TfrmTable.RenderChipStack(const APoint: TPoint2; const AChipStack: TChipsStack);

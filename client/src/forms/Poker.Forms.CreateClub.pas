@@ -113,7 +113,7 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
-      MessageDlg('Club created successfully!', mtInformation, [mbOK], 0);
+      MessageDlg(Format('Club created successfully!'#10'You can invite your friends to play in your club by providing them your club ID (%d) and password.', [pbreply.Club.Seq]), mtInformation, [mbOK], 0);
       Close;
     end;
     csInvalidName: begin

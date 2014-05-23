@@ -40,7 +40,7 @@ type
       FTimebarImage: TAsphyreImage;
       FTimebankImage: TAsphyreImage;
       FCardFrontBackgroundImage: TAsphyreImage;
-      FCardArtworksImages: array of TAsphyreImage;
+      FCardArtworksImages: TArray<TAsphyreImage>;
       FRaiseSliderBackgroundImage: TAsphyreImage;
       FRaiseSliderButtonImage: TAsphyreImage;
       FActionButtonNormalImage: TAsphyreImage;

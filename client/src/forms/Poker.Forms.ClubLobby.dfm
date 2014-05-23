@@ -2672,8 +2672,7 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridPlayersListLimit: TcxGridColumn
               Caption = 'Limit'
-              DataBinding.ValueType = 'Float'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taRightJustify
               HeaderAlignmentHorz = taCenter
             end
@@ -2774,8 +2773,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2928,8 +2925,6 @@ object frmClubLobby: TfrmClubLobby
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)

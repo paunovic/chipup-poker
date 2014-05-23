@@ -18,6 +18,19 @@ type
       JSON_SOUNDS            = 'sounds';
       JSON_FOLD_CHECKS       = 'fold_checks';
 
+      JSON_DEFAULT_LOGIN             = '';
+      JSON_DEFAULT_PASSWORD          = '';
+      JSON_DEFAULT_REMEMBER_LOGIN    = TRUE;
+      JSON_DEFAULT_REMEMBER_PASSWORD = FALSE;
+      JSON_DEFAULT_DEVELOPER_MODE    = FALSE;
+      JSON_DEFAULT_SERVER_INDEX      = 0;
+      JSON_DEFAULT_SOUNDS            = TRUE;
+      JSON_DEFAULT_FOLD_CHECKS       = FALSE;
+
+    function GetJSONString(const AField, ADefaultValue: String): String;
+    function GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
+    function GetJSONBool(const AField: String; const ADefaultValue: Boolean): Boolean;
+
     function GetLogin: String;
     procedure SetLogin(const AValue: String);
     function GetPassword: String;
@@ -50,7 +63,6 @@ type
     function Load: Boolean;
     procedure Save;
 
-    property JSON        : ISuperObject read FJSON;
     property SettingsFile: String read FSettingsFile;
 
     property Login: String read GetLogin write SetLogin;
@@ -140,47 +152,81 @@ begin
   end;
 end;
 
+////////////////////////////////////////////////////////////////////////////////////
+
+function TSettings.GetJSONString(const AField, ADefaultValue: String): String;
+var
+  o: ISuperObject;
+begin
+  o := FJSON.O[AField];
+  if not Assigned(o) then
+    result := ADefaultValue
+  else
+    result := o.AsString;
+end;
+
+function TSettings.GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
+var
+  o: ISuperObject;
+begin
+  o := FJSON.O[AField];
+  if not Assigned(o) then
+    result := ADefaultValue
+  else
+    result := o.AsInteger;
+end;
+
+function TSettings.GetJSONBool(const AField: String; const ADefaultValue: Boolean): Boolean;
+var
+  o: ISuperObject;
+begin
+  o := FJSON.O[AField];
+  if not Assigned(o) then
+    result := ADefaultValue
+  else
+    result := o.AsBoolean;
+end;
+
+////////////////////////////////////////////////////////////////////////////////////
 
 function TSettings.GetLogin: String;
 begin
-  result := FJSON.S[JSON_LOGIN];
+  result := GetJSONString(JSON_LOGIN, JSON_DEFAULT_LOGIN);
 end;
 
 function TSettings.GetPassword: String;
 begin
-  result := FJSON.S[JSON_PASSWORD];
+  result := GetJSONString(JSON_PASSWORD, JSON_DEFAULT_PASSWORD);
 end;
 
 function TSettings.GetRememberLogin: Boolean;
 begin
-  result := FJSON.B[JSON_REMEMBER_LOGIN];
+  result := GetJSONBool(JSON_REMEMBER_LOGIN, JSON_DEFAULT_REMEMBER_LOGIN);
 end;
 
 function TSettings.GetRememberPassword: Boolean;
 begin
-  result := FJSON.B[JSON_REMEMBER_PASSWORD];
+  result := GetJSONBool(JSON_REMEMBER_PASSWORD, JSON_DEFAULT_REMEMBER_PASSWORD);
 end;
 
 function TSettings.GetServerIndex: Integer;
 begin
-  result := FJSON.I[JSON_SERVER_INDEX];
+  result := GetJSONInt(JSON_SERVER_INDEX, JSON_DEFAULT_SERVER_INDEX);
 end;
 
 function TSettings.GetSounds: Boolean;
 begin
-  if not Assigned(FJSON.O[JSON_SOUNDS]) then
-    SetSounds(TRUE);
-  result := FJSON.B[JSON_SOUNDS];
+  result := GetJSONBool(JSON_SOUNDS, JSON_DEFAULT_SOUNDS);
 end;
 
 function TSettings.GetDeveloperMode: Boolean;
 begin
-  result := FJSON.B[JSON_DEVELOPER_MODE];
+  result := GetJSONBool(JSON_DEVELOPER_MODE, JSON_DEFAULT_DEVELOPER_MODE);
 end;
 
 function TSettings.GetFoldChecks: Boolean;
 begin
-  result := FJSON.B[JSON_FOLD_CHECKS];
+  result := GetJSONBool(JSON_FOLD_CHECKS, JSON_DEFAULT_FOLD_CHECKS);
 end;
 
 procedure TSettings.SetLogin(const AValue: String);
