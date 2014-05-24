@@ -160,7 +160,7 @@ begin
       end;
     end;
     batch.Add(Format('START "" "%s"', [ParamStr(0)]));
-//    batch.Add(Format('RMDIR /S /Q "%s"', [FUpdateDir]));
+    batch.Add(Format('RMDIR /S /Q "%s"', [FUpdateDir]));
     ABatchFile := FUpdateDir + 'updater.bat';
 
     DeleteFile(ABatchFile);
