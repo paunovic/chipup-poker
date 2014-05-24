@@ -488,11 +488,11 @@ begin
          (Assigned(FActionButtons[index].Action)) then
       begin
         for C1 := Low(FActionButtons) to High(FActionButtons) do
-       {   if C1 = index then
-            FActionButtons[C1].Image := TableResources.ActionButtonHotImage
-          else     }
+          if FActionButtons[C1].Image <> TableResources.ActionButtonNormalImage then
+          begin
             FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
-        renderit := TRUE;
+            renderit := TRUE;
+          end;
       end
       else
         for C1 := Low(FActionButtons) to High(FActionButtons) do
@@ -507,11 +507,11 @@ begin
          (Assigned(FRaisePresetButtons[index].Action)) then
       begin
         for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
-       {   if C1 = index then
-            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonHotImage
-          else   }
+          if FRaisePresetButtons[C1].Image <> TableResources.RaisePresetButtonNormalImage then
+          begin
             FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
-        renderit := TRUE;
+            renderit := TRUE;
+          end;
       end
       else
         for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
@@ -525,7 +525,7 @@ begin
          (IsPointInStandUpButton(X, Y)) then
       begin
 //        FStandUpButton.Image := TableResources.StandUpButtonPressedImage;
-        renderit := TRUE;
+//        renderit := TRUE;
       end
       else
         if FStandUpButton.Image <> TableResources.StandUpButtonNormalImage then
@@ -539,7 +539,7 @@ begin
                         Round(FPlayNowButton.Point.x + FPlayNowButtonWidth), Round(FPlayNowButton.Point.y + FPlayNowButtonHeight)),
                         Point(X, Y))) then
       begin
-        renderit := TRUE;
+//        renderit := TRUE;
       end
       else
         if FPlayNowButton.Image <> TableResources.PlayNowButtonNormalImage then
@@ -684,14 +684,14 @@ end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
 begin
-  ConfigureGUI;
-
   if Assigned(DXCore.Device) then
   begin
     FDXAreaSize := Point2px(ClientWidth, ClientHeight);
     DXCore.Device.Resize(FTable.SwapChainIndex, FDXAreaSize);
     Render;
   end;
+
+  ConfigureGUI;
 
   seRaiseAmount.Width := Round(TableResources.RAISE_VALUEBOX_WIDTH * FRaiseSliderResizeRatio);
   seRaiseAmount.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaiseSliderResizeRatio);
@@ -1334,7 +1334,8 @@ begin
                   SetForegroundWindow(Handle);
                   SetFocus;
                   FForceFocused := TRUE;
-                  if not edChat.Focused then
+                  if (not edChat.Focused) and
+                     (seRaiseAmount.Visible) then
                     seRaiseAmount.SetFocus;
                   TablePlaySound(Sounds.SOUND_TIMEBAR);
                 end;
@@ -1395,9 +1396,7 @@ begin
       cbSitOutNextHand.Properties.OnChange := nil;
       cbSitOutNextHand.Checked := FALSE;
       cbSitOutNextHand.Properties.OnChange := event;
-    end
-    else
-      cbSitOutNextHand.Checked := FALSE;
+    end;
 
     if not cbSitOutNextBB.Visible then
     begin
@@ -1405,9 +1404,7 @@ begin
       cbSitOutNextBB.Properties.OnChange := nil;
       cbSitOutNextBB.Checked := FALSE;
       cbSitOutNextBB.Properties.OnChange := event;
-    end
-    else
-      cbSitOutNextBB.Checked := FALSE;
+    end;
   end;
 
   cbFoldToAnyBet.Visible := sitout;
