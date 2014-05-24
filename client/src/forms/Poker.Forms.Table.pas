@@ -1358,7 +1358,8 @@ begin
   acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
                          (Assigned(seat_info)) and
                          (seat_info.CanShow) and
-                         (not seat_info.CardsVisible);
+                         (not seat_info.CardsVisible) and
+                         (seat_info.Status in [psFolded, psAllIn, psInHand]);
 
 
   if (FTableStatus.CurrentSeat <> -1) and
@@ -1848,6 +1849,8 @@ begin
       repeat
         iterate := FALSE;
         C1 := FTableStatus.SmallBlindSeat;
+        if C1 < 0 then
+          Break;
         repeat
           if FTableStatus.GetSeatInfo(C1, seat) then
           begin
@@ -2314,31 +2317,31 @@ end;
 
 procedure TfrmTable.RenderSeat(const ASeatIndex: Integer);
 var
-  seat_point             : TPoint2;
-  seat_info              : TSeatInfo;
-  player_info            : TPlayerInfo;
-  seat_image             : TAsphyreImage;
-  seat_empty_image       : TAsphyreImage;
-  seat_inactive_image    : TAsphyreImage;
-  seat_active_image      : TAsphyreImage;
-  action_image           : TAsphyreImage;
+  seat_point: TPoint2;
+  seat_info: TSeatInfo;
+  player_info: TPlayerInfo;
+  seat_image: TAsphyreImage;
+  seat_empty_image: TAsphyreImage;
+  seat_inactive_image: TAsphyreImage;
+  seat_active_image: TAsphyreImage;
+  action_image: TAsphyreImage;
 //  seat_light_image       : TAsphyreImage;
-  avatar                 : TAvatar;
-  avatar_point           : TPoint2;
-  avatar_width           : Single;
-  avatar_height          : Single;
-  seat_upper_text        : String;
-  seat_lower_text        : String;
-  seat_upper_text_color  : TColor2;
-  seat_lower_text_color  : TColor2;
-  seat_upper_text_point  : TPoint2;
-  seat_lower_text_point  : TPoint2;
-  seat_text_x_center     : Single;
-  card_point             : TPoint2;
+  avatar: TAvatar;
+  avatar_point: TPoint2;
+  avatar_width: Single;
+  avatar_height: Single;
+  seat_upper_text: String;
+  seat_lower_text: String;
+  seat_upper_text_color: TColor2;
+  seat_lower_text_color: TColor2;
+  seat_upper_text_point: TPoint2;
+  seat_lower_text_point: TPoint2;
+  seat_text_x_center: Single;
+  card_point: TPoint2;
   seat_action_frame_point: TPoint2;
-  C1                     : Integer;
-  mousepoint             : TPoint;
-  mousepointf            : TPointF;
+  C1: Integer;
+  mousepoint: TPoint;
+  mousepointf: TPointF;
 begin
   // get seat point
   seat_point := GetSeatPoint(ASeatIndex);

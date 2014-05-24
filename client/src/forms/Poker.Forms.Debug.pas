@@ -330,7 +330,7 @@ end;
 procedure TfrmDebug.acRunNewInstanceExecute(Sender: TObject);
 begin
   TInstanceController.UnregisterInstance;
-  ShellOpen(PChar(ParamStr(0)));
+  ShellOpen(PChar(ParamStr(0)), nil, PChar(ParamStr(1)));
 end;
 
 procedure TfrmDebug.acSaveLogExecute(Sender: TObject);
