@@ -30,9 +30,7 @@ PrivilegesRequired=none
 [Files]
 Source: "skins\VclStylesInno.dll"; DestDir: "{app}"; Flags: uninsneveruninstall ignoreversion
 Source: "skins\{#SkinName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "root_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
-Source: "client_files\*.*"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ssl_libs\*.*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "files\*.*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
    
 [Icons]
 Name: "{code:StartMenuPath}\{#ApplicationName}"; Filename: "{app}\{#ApplicationExe}"; WorkingDir: "{app}"; Tasks: startmenu
@@ -132,8 +130,9 @@ end;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin
-  if CurPageID = wpSelectTasks then
-    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
+  case CurPageID of
+    wpSelectTasks: WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall);
+  end;
 end;
 
 function IsCurrentUserInstall: Boolean;

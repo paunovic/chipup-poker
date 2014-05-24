@@ -191,7 +191,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils, Poker.DataModule, Poker.Settings;
 
 
 
@@ -212,11 +212,10 @@ var
   CCV: TCardValue;
   CCS: TCardSuit;
 begin
-  ArchiveTypeAccess := ataResource;
-
+  ArchiveTypeAccess := ataAnyFile;
   FDXMediaFile := TAsphyreArchive.Create;
   FDXMediaFile.OpenMode := aomReadOnly;
-  FDXMediaFile.FileName := 'RoomMedia';
+  FDXMediaFile.FileName := SelfPath + Settings.Hardcoded.RESOURCES.DIRECTORY + Settings.Hardcoded.RESOURCES.DIRECTX_MEDIA;
 
   FDXImages := TAsphyreImages.Create;
 
@@ -314,8 +313,13 @@ var
   id: Integer;
 begin
   FDXImages.AddFromArchive(Format('%s.image', [AName]), FDXMediaFile);
-  id := FDXFonts.Insert(Format('RoomMedia | %s.xml', [AName]), Format('%s.image', [AName]));
-  AReceiver := FDXFonts[id];
+  id := FDXFonts.Insert(Format('\%s%s | %s.xml', [Settings.Hardcoded.RESOURCES.DIRECTORY, Settings.Hardcoded.RESOURCES.DIRECTX_MEDIA, AName]), Format('%s.image', [AName]));
+  if id <> -1 then
+    AReceiver := FDXFonts[id]
+  else
+  begin
+    {$IFDEF DEBUG} DebugLn(Format('Failed to insert DX font resource: %s', [AName]), ditException); {$ENDIF}
+  end;
 end;
 
 

@@ -1,4 +1,4 @@
-object frmLogin: TfrmLogin
+object frmChipUpLogin: TfrmChipUpLogin
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]

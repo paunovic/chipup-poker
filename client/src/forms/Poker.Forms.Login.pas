@@ -13,7 +13,7 @@ uses
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
 
-  TfrmLogin = class(TForm)
+  TfrmChipUpLogin = class(TForm)
     alLogin: TActionList;
     acLogin: TAction;
     acShowCreateAccountForm: TAction;
@@ -85,10 +85,10 @@ uses
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
   Poker.Forms.Main, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption,
-  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Forms.SystemTrayPopup;
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Forms.SystemTrayPopup, Poker.CommandLineParamProcesser;
 
 
-procedure TfrmLogin.FormCreate(Sender: TObject);
+procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
 begin
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
@@ -107,26 +107,26 @@ begin
   EnableGUI(FCurrentStatus = lsHelloOk);
 end;
 
-procedure TfrmLogin.FormDestroy(Sender: TObject);
+procedure TfrmChipUpLogin.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   SaveSettings;
 end;
 
-procedure TfrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TfrmChipUpLogin.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
-  FormsContainer.Remove(TfrmLogin);
+  FormsContainer.Remove(TfrmChipUpLogin);
   frmChipUpMain.LoginStatus(FCurrentStatus);
 end;
 
-procedure TfrmLogin.CreateParams(var AParams: TCreateParams);
+procedure TfrmChipUpLogin.CreateParams(var AParams: TCreateParams);
 begin
   inherited;
   AParams.ExStyle := AParams.ExStyle or WS_EX_APPWINDOW;
 end;
 
-procedure TfrmLogin.CreateServerCombobox;
+procedure TfrmChipUpLogin.CreateServerCombobox;
 begin
   FServerComboBox := TcxComboBox.Create(self);
   FServerComboBox.Parent := self;
@@ -142,7 +142,7 @@ begin
   FServerComboBox.Properties.OnChange := ServerComboboxChange;
 end;
 
-procedure TfrmLogin.FormShow(Sender: TObject);
+procedure TfrmChipUpLogin.FormShow(Sender: TObject);
 begin
   case ServerSocket.Socket.State of
     wsClosed: begin
@@ -153,7 +153,7 @@ begin
   end;
 end;
 
-procedure TfrmLogin.HelloServer;
+procedure TfrmChipUpLogin.HelloServer;
 var
   files: TObjectList<TPB_UpdateFileInfo>;
 begin
@@ -172,7 +172,7 @@ begin
   end;
 end;
 
-procedure TfrmLogin.ModalFormClose(Sender: TObject);
+procedure TfrmChipUpLogin.ModalFormClose(Sender: TObject);
 begin
   if (Sender is TfrmCreateAccount) and
      ((Sender as TfrmCreateAccount).ModalResult = mrOk) then
@@ -188,7 +188,7 @@ begin
   EnableWindow(Handle, TRUE);
 end;
 
-procedure TfrmLogin.ApplySettings;
+procedure TfrmChipUpLogin.ApplySettings;
 begin
   cbRememberLogin.Checked := Settings.RememberLogin;
   cbRememberPassword.Checked := Settings.RememberPassword;
@@ -200,7 +200,7 @@ begin
     edPassword.Text := Settings.Password;
 end;
 
-procedure TfrmLogin.SaveSettings;
+procedure TfrmChipUpLogin.SaveSettings;
 begin
   Settings.RememberLogin := cbRememberLogin.Checked;
   Settings.RememberPassword := cbRememberPassword.Checked;
@@ -216,7 +216,7 @@ begin
     Settings.Password := '';
 end;
 
-procedure TfrmLogin.ServerComboboxChange(Sender: TObject);
+procedure TfrmChipUpLogin.ServerComboboxChange(Sender: TObject);
 var
   server: String;
 begin
@@ -237,7 +237,7 @@ begin
   TServerSocket.Initialize(server, Settings.Hardcoded.TCP_SERVER_PORT);
 end;
 
-procedure TfrmLogin.SetCurrentStatus(const AValue: TLoginStatus);
+procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);
 var
   status: String;
 begin
@@ -252,7 +252,7 @@ begin
   btLogin.Caption := status;
 end;
 
-procedure TfrmLogin.SocketStateChange(const AOldState, ANewState: TSocketState);
+procedure TfrmChipUpLogin.SocketStateChange(const AOldState, ANewState: TSocketState);
 begin
   case ANewState of
     wsOpened,
@@ -277,7 +277,7 @@ begin
   end;
 end;
 
-procedure TfrmLogin.tiConnectTimer(Sender: TObject);
+procedure TfrmChipUpLogin.tiConnectTimer(Sender: TObject);
 begin
   if ServerSocket.Socket.State = wsClosed then
     FCurrentStatus := lsIdle;
@@ -296,30 +296,30 @@ begin
   end;
 end;
 
-procedure TfrmLogin.tiLoginTimeoutTimer(Sender: TObject);
+procedure TfrmChipUpLogin.tiLoginTimeoutTimer(Sender: TObject);
 begin
   ServerSocket.Disconnect;
   tiLoginTimeout.Enabled := FALSE;
 end;
 
-procedure TfrmLogin.EnableGUI(const AEnable: Boolean);
+procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
 begin
   acLogin.Enabled := AEnable;
   acShowCreateAccountForm.Enabled := AEnable;
   acShowForgotPasswordForm.Enabled := AEnable;
 end;
 
-procedure TfrmLogin.EnterDeveloperMode;
+procedure TfrmChipUpLogin.EnterDeveloperMode;
 begin
   CreateServerCombobox;
 end;
 
-procedure TfrmLogin.LeaveDeveloperMode;
+procedure TfrmChipUpLogin.LeaveDeveloperMode;
 begin
   FreeAndNil(FServerComboBox);
 end;
 
-procedure TfrmLogin.FormKeyPress(Sender: TObject; var Key: Char);
+procedure TfrmChipUpLogin.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_RETURN: begin
@@ -341,13 +341,13 @@ begin
   end;
 end;
 
-procedure TfrmLogin.acUpdateExecute(Sender: TObject);
+procedure TfrmChipUpLogin.acUpdateExecute(Sender: TObject);
 begin
   CurrentStatus := lsUpdating;
   Close;
 end;
 
-procedure TfrmLogin.acLoginExecute(Sender: TObject);
+procedure TfrmChipUpLogin.acLoginExecute(Sender: TObject);
 begin
   CurrentStatus := lsLoggingIn;
   EnableGUI(FALSE);
@@ -355,27 +355,23 @@ begin
   ServerSocket.Login(edLogin.Text, edPassword.Text);
 end;
 
-procedure TfrmLogin.acShowCreateAccountFormExecute(Sender: TObject);
+procedure TfrmChipUpLogin.acShowCreateAccountFormExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmCreateAccount, self, [], ModalFormClose));
 end;
 
-procedure TfrmLogin.acShowForgotPasswordFormExecute(Sender: TObject);
+procedure TfrmChipUpLogin.acShowForgotPasswordFormExecute(Sender: TObject);
 begin
   FormsContainer.Add(RunModalForm(TfrmForgotPassword, self, [], ModalFormClose));
 end;
 
-procedure TfrmLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
+procedure TfrmChipUpLogin.CSRHello(const AMethodId: Integer; const AObject: TObject);
 var
   pbhello: TPB_HelloReply;
 begin
   pbhello := AObject as TPB_HelloReply;
 
-  if Settings.Hardcoded.REVISION = 'manual' then
-  begin
-    // TODO, change the root dir so it updates the 'wrong' copy of the game
-  end
-  else
+  if not TCommandLineParamProcesser.NoUpdateFlag then
   begin
     if pbhello.UpdateFiles.Count > 0 then
     begin
@@ -401,7 +397,7 @@ begin
     ServerSocket.Disconnect;
 end;
 
-procedure TfrmLogin.CSRLogin(const AMethodId: Integer; const AObject: TObject);
+procedure TfrmChipUpLogin.CSRLogin(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_LoginReply;
 begin

@@ -1535,8 +1535,8 @@ var
   empty_array: TBytes;
   seat: TSeatInfo;
   winning: Boolean;
-  pbevent: TPB_TableEvent;
   {$IFDEF DEBUG}
+  pbevent: TPB_TableEvent;
   events: String;
   tmp: String;
   tb: UINT32;

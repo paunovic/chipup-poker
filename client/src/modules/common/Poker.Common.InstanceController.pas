@@ -36,7 +36,7 @@ begin
   else
     result := TRUE;
 
-  {$IFDEF DEBUG} DebugLn(Format('IsAlphaInstance: %s', [BoolToStr(result, TRUE)]), ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('Alpha instance: %s', [BoolToStr(result, TRUE)]), ditApplication); {$ENDIF}
 end;
 
 class procedure TInstanceController.RegisterInstance;
