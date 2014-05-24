@@ -19,7 +19,7 @@ client.exe: client.dpr client.dres
 	${GCC} ${CFLAGS} -gd client.dpr -q ${FLAGS}
 	"c:\Program Files\madCollection\madExcept\Tools\madExceptPatch.exe" client.exe
 	"C:\Poker\StripReloc\StripReloc.exe" client.exe
-	copy /y client.exe ..\installer\client_files\chipuppoker.exe
+	copy /y client.exe ..\installer\files\chipuppoker.exe
 
 release-upload:
 	c:/poker/bb/git/bin/scp client.exe buildbotcheckout@c2d.localnet:/home/buildbotcheckout/release
