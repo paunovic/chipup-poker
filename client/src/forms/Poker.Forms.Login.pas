@@ -371,7 +371,7 @@ var
 begin
   pbhello := AObject as TPB_HelloReply;
 
-//  if not TCommandLineParamProcesser.NoUpdateFlag then
+  if not TCommandLineParamProcesser.NoUpdateFlag then
   begin
     if pbhello.UpdateFiles.Count > 0 then
     begin
