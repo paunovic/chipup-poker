@@ -47,6 +47,7 @@ enum ServerCodes {
 	srPlayerLimitOk = 39;
 	srResetPlayerBalanceOk = 40;
 	srClubBalanceReached = 41;
+	srHandHistoryMsg = 42;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -577,4 +578,42 @@ message PlayerLimitParams {
 	required bytes userid = 2;
 	required uint32 limit = 3;
 	required bool unlimited = 4;
+}
+message ClubHandHistoryReply {
+	required bytes clubid = 1;
+	required bytes gameid = 2;
+	repeated HandHistory rows = 3;
+	//repeated GameEventHistory events = 4;
+}
+message HandHistory {
+	message PlayerHandHistory {
+		required bytes _id = 1;
+		required uint32 seat = 2;
+		repeated bytes cards = 3;
+		required uint32 chips = 4;
+	}
+	message MoveRow {
+		repeated string code = 1;
+		optional uint32 bet = 2;
+		optional uint32 seat = 3;
+		optional PotDataRow potdata = 4;
+	}
+	message PotDataRow {
+		repeated WinnerRow WinnerData = 1;
+		required uint32 rake = 2;
+		repeated uint32 seats = 3;
+		required uint32 sum = 4;
+	}
+	message WinnerRow {
+		required string msg = 1;
+		required uint32 seat = 2;
+	}
+	required bytes _id = 1;
+	required uint32 seq = 2;
+	required uint32 totalrake = 3;
+	repeated PlayerHandHistory players = 4;
+	required bytes tablecards = 5;
+	required uint32 endtime = 6;
+	repeated int32 balance_changes = 7;
+	repeated MoveRow moves = 8;
 }

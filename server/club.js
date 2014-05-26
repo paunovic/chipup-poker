@@ -58,8 +58,7 @@ Club.getClubById = function (id,cb) {
 Club.prototype.isOwner = function (user) {
 	return this.obj.owner.equals(user);
 }
-Club.prototype.handOver = function (gameObj,cb) {
-	// FIXME, unity with the stats sent at login
+Club.prototype.handOver = function (gameObj,cb,handid) {
 	if (activeUsers[this.obj.owner]) {
 		console.log('owner is online');
 		var data = {};
@@ -69,7 +68,6 @@ Club.prototype.handOver = function (gameObj,cb) {
 			for (var x=0; x<games.length; x++) gamelist.push(games[x]._id);
 			this.getTableStatsPacket(gamelist,data,function () {
 				Club.finishTableStatsPacket(data,function (packet) {
-					console.log('packet:%j',packet);
 					if (activeUsers[this.obj.owner]) {
 						activeUsers[this.obj.owner].send(codes.srTableStatsReply,packet,'Poker.TableStatsReplies');
 					} else {
@@ -79,6 +77,21 @@ Club.prototype.handOver = function (gameObj,cb) {
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
+
+		if (handid) {
+			allGames.findOne({_id:gameObj.id},function (err,gameRow) {
+				assert.ifError(err);
+				handHistory.findOne({seq:handid},function (err,historyRow) {
+					assert.ifError(err);
+					var obj = {clubid:fromMongoId(this.clubid), gameid:fromMongoId(gameObj.id), rows:[historyRow] };
+					if (activeUsers[this.obj.owner]) {
+						activeUsers[this.obj.owner].send(codes.srHandHistoryMsg,obj,'Poker.ClubHandHistoryReply');
+					} else {
+						console.log('owner disconnected while fetching stats');
+					}
+				}.bind(this));
+			}.bind(this));
+		}
 	} else {
 		cb();
 	}
@@ -124,7 +137,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 				}
 				stats[i].club_balance = -1;
 				stats[i].userid = fromMongoId(stats[i].userid);
-				console.log(stats[i]);
+				//console.log('stats i',stats[i]);
 				games[gameidhex].playerstats.push(stats[i]);
 			}
 			cb();
@@ -151,6 +164,10 @@ Club.finishTableStatsPacket = function (data,cb) {
 				assert.ifError(err);
 				//console.log('current user:%s, all stats: %j',stats[i].userid,balances);
 				for (var j=0; j<balances.length; j++) {
+					if (!balances[j].userid) {
+						console.log('wtf2',balances[j]);
+						continue;
+					}
 					//if (compareObjectID(stats[i].userid,balances[j].userid)) {
 						var inplay = 0;
 						if (data.playerData[balances[j].userid]) inplay = data.playerData[balances[j].userid].chipsinplay;
@@ -238,17 +255,18 @@ Club.prototype.updateLimitPostWin = function (change,userid,callback) {
 Club.prototype.buyin = function (userid,chips) {
 	if (!this.balance[userid]) this.balance[userid] = -chips;
 	else this.balance[userid] -= chips;
-	console.log(this.balance);
+	console.log('buyin balance',this.balance);
 }
 Club.prototype.cashout = function (userid,chips) {
 	this.balance[userid] += chips;
-	console.log(this.balance);
+	console.log('cashout balance',this.balance);
 }
 Club.prototype.getPotentialLosses = function (userid,cb) {
 	clubBalances.findOne({clubid:this.clubid, userid:userid},function (err,row) {
 		assert.ifError(err);
 		if (!row && !this.balance[userid]) return cb(0);
 		if (!this.balance[userid]) return cb(row.balance,row.unlimited_limit,row.balance_limit);
+		if (!row) return cb(this.balance[userid],this.obj.unlimited_default_balance,this.obj.default_balance_limit);
 		console.log('row:%j',row);
 		cb(this.balance[userid] + row.balance,row.unlimited_limit,row.balance_limit);
 	}.bind(this));
@@ -309,6 +327,10 @@ Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
 		var obj = {_id:fromMongoId(memberList[y]), suspended:suspended, balance_limit:0, club_balance: 0};
 		for (var a=0; a<stats.length; a++) {
 			if (compareObjectID(stats[a].clubid,input._id)) {
+				if (stats[a].userid == null) {
+					console.log('wtf1',stats[a]);
+					continue;
+				}
 				if (compareObjectID(stats[a].userid,memberList[y])) {
 					obj.club_balance = stats[a].balance;
 					if (self.balance[memberList[y]]) obj.club_balance += self.balance[memberList[y]];
