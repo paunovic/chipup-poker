@@ -41,7 +41,6 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.Windows, Poker.Common.Misc, System.SysUtils;
 
 

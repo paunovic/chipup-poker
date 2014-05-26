@@ -12,6 +12,7 @@ type
   private
     FSeatIndex: Integer;
     FPlayerMongoId: TBytes;
+    FPreviousChips: UINT32;
     FChips: UINT32;
     FCardCount: Integer;
     FCards: TCards;
@@ -34,6 +35,7 @@ type
 
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
+    property PreviousChips: UINT32 read FPreviousChips;
     property Chips: UINT32 read FChips;
     property CardCount: Integer read FCardCount;
     property Cards: TCards read FCards;
@@ -214,6 +216,7 @@ procedure TSeatInfo.Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
 begin
   FSeatIndex := ASeatInfoProtobuf.Seat;
   FPlayerMongoId := ASeatInfoProtobuf.PlayerMongoId;
+  FPreviousChips := FChips;
   FChips := ASeatInfoProtobuf.Chips;
   FCardCount := ASeatInfoProtobuf.CardCount;
   FCards.Assign(ASeatInfoProtobuf.Cards);

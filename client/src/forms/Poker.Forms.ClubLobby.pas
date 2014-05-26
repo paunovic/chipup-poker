@@ -577,11 +577,6 @@ begin
       ServerSocket.DisbandClub(FClubId);
   end;
 
-  if ASender is TfrmClubMemberOptions then
-  begin
-  //
-  end;
-
   EnableWindow(Handle, TRUE);
 end;
 
@@ -606,7 +601,12 @@ var
     end;
 
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListBalance.Index, AMember.ClubBalance / 100);
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, -AMember.BalanceLimit / 100);
+
+    if AMember.UnlimitedLimit then
+      status := 'Unlimited'
+    else
+      status := '-' + ChipsToStr(AMember.BalanceLimit);
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, status);
 
     if CompareBytes(AMember.MongoId, club.OwnerId) then
       status := 'Manager'

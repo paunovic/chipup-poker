@@ -25,7 +25,14 @@ type
         TCP_PING_INTERVAL: Word;
         TCP_INACTIVITY_PING_INTERVAL: Word;
         TCP_PING_TIMEOUT: Word;
-        UPDATE_FILES: array[0..6] of String;
+
+        RESOURCES: record
+          DIRECTORY: String;
+          DIRECTX_MEDIA: String;
+        end;
+
+        UPDATE_FILES: array[0..7] of String;
+
         URL: record
           TERMS_AND_CONDITIONS: String;
           CASHIER: String;
@@ -38,7 +45,7 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0123';
+        VERSION: '0.01a.0129';
         REVISION: {$I revision.inc};
 
         // instance mutex name
@@ -57,12 +64,18 @@ type
         TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity
         TCP_PING_TIMEOUT: 15; // in seconds
 
+        // resources
+        RESOURCES: (
+          DIRECTORY: 'resources\';
+          DIRECTX_MEDIA: 'dxmedia.dat';
+        );
+
         // check these files for update
         UPDATE_FILES: ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf',
-           'bspatch.exe', 'sqlite3.dll');
+           'bspatch.exe', 'sqlite3.dll', 'resources\dxmedia.dat');
 
         // urls
-        URL : (
+        URL: (
           TERMS_AND_CONDITIONS: URL_DOMAIN + '/termsandconditions.html';
           CASHIER: URL_DOMAIN + '/cashier.html';
           GET_AVATAR: '/getavatar?id=%s';

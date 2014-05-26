@@ -217,14 +217,7 @@ begin
   begin
     err := 'Invalid buyin';
     seBuyin.SelectAll;
-  end
-  else
-    if (buyin > seBuyin.Properties.MaxValue) or
-       (buyin * 100 > GetMaxBuyin) then
-    begin
-      err := Format('Maximum %s for this table is %s', [FBuyinPhrase, ChipsToStr(GetMaxBuyin)]);
-      seBuyin.SelectAll;
-    end;
+  end;
 
   if err = '' then
   begin
@@ -234,7 +227,7 @@ begin
         err := 'Table is closed';
 
       if err = '' then
-        ServerSocket.TableSit(FTable.Game.MongoId, FSeatIndex, Trunc(seBuyin.Value * 100))
+        ServerSocket.TableSit(FTable.Game.MongoId, FSeatIndex, Round(seBuyin.Value * 100))
       else
         seBuyin.SelectAll;
     end
@@ -244,7 +237,7 @@ begin
         err := 'Invalid seat index';
 
       if err = '' then
-        ServerSocket.TableAddOn(FTable.Game.MongoId, Trunc(buyin * 100));
+        ServerSocket.TableAddOn(FTable.Game.MongoId, Round(buyin * 100));
     end;
 
     acOK.Enabled := FALSE

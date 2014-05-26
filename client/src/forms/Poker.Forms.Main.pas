@@ -295,7 +295,7 @@ begin
   DoLogout;
   Hide;
   MessageContainer.RemoveCallbacks(FCallbacksId);
-  FormsContainer.RunForm(TfrmLogin, self, [], FALSE);
+  FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.ShowTournamentLayout(const AShow: Boolean);

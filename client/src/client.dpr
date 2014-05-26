@@ -26,7 +26,7 @@ uses
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
   Poker.Forms.Main in 'forms\Poker.Forms.Main.pas' {frmChipUpMain},
-  Poker.Forms.Login in 'forms\Poker.Forms.Login.pas' {frmLogin},
+  Poker.Forms.Login in 'forms\Poker.Forms.Login.pas' {frmChipUpLogin},
   Poker.Forms.CreateAccount in 'forms\Poker.Forms.CreateAccount.pas' {frmCreateAccount},
   Poker.Forms.ForgotPassword in 'forms\Poker.Forms.ForgotPassword.pas' {frmForgotPassword},
   Poker.Forms.CreateClub in 'forms\Poker.Forms.CreateClub.pas' {frmCreateClub},
@@ -138,7 +138,8 @@ uses
   Poker.Forms.ClubMemberOptions in 'forms\Poker.Forms.ClubMemberOptions.pas' {frmClubMemberOptions},
   Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas',
   Poker.Protobufs.Objects.ClubPlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas',
-  Poker.Protobufs.Objects.ClubStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas';
+  Poker.Protobufs.Objects.ClubStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas',
+  Poker.CommandLineParamProcesser in 'modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas';
 
 procedure FocusPokerApp;
 var
@@ -146,12 +147,15 @@ var
 begin
   window_handle := FindWindow('TfrmChipUpMain', nil);
   if window_handle <> 0 then
+    window_handle := FindWindow('TfrmChipUpLogin', nil);
+  if window_handle <> 0 then
     SetForegroundWindow(window_handle);
 end;
 
-
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
+
+  TCommandLineParamProcesser.ParseParams;
 
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then

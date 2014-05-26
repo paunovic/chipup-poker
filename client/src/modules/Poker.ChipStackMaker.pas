@@ -6,7 +6,7 @@ uses
   System.Generics.Collections, AsphyreImages;
 
 type
-  TChipImages = array of TAsphyreImage;
+  TChipImages = TArray<TAsphyreImage>;
 
   TChipsStack = class
   private

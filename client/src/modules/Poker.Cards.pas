@@ -45,6 +45,8 @@ type
 
     procedure Assign(const ABytes: TBytes);
 
+    class function BytesToString(const ACards: TBytes): String;
+
     property AsString: String read GetAsString;
   end;
 
@@ -173,6 +175,23 @@ begin
   result := '';
   for C1 := Low(ToArray) to High(ToArray) do
     result := result + ToArray[C1].AsString;
+end;
+
+class function TCards.BytesToString(const ACards: TBytes): String;
+var
+  C1: Integer;
+  card: TCard;
+begin
+  result := '';
+  for C1 := Low(ACards) to High(ACards) do
+  begin
+    card := TCard.Create(ACards[C1]);
+    try
+      result := result + card.AsString;
+    finally
+      card.Free;
+    end;
+  end;
 end;
 
 end.

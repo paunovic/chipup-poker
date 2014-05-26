@@ -95,9 +95,9 @@
 			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
+			<Debugger_RunParams>-noupdate</Debugger_RunParams>
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUpPoker;LegalCopyright=Marko Paunovic, paunovic@gmail.com;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUp Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_ExeOutput>..\bin\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_MapFile>3</DCC_MapFile>
@@ -117,6 +117,7 @@
 			<DCC_MapFile>3</DCC_MapFile>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+			<Debugger_RunParams>-noupdate</Debugger_RunParams>
 			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 			<DCC_LocalDebugSymbols>true</DCC_LocalDebugSymbols>
 			<DCC_DebugInformation>true</DCC_DebugInformation>
@@ -149,7 +150,7 @@
 				<Form>frmChipUpMain</Form>
 			</DCCReference>
 			<DCCReference Include="forms\Poker.Forms.Login.pas">
-				<Form>frmLogin</Form>
+				<Form>frmChipUpLogin</Form>
 			</DCCReference>
 			<DCCReference Include="forms\Poker.Forms.CreateAccount.pas">
 				<Form>frmCreateAccount</Form>
@@ -310,6 +311,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas"/>
+			<DCCReference Include="modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -317,11 +319,6 @@
 			<RcItem Include="resources\cashier\Pressed.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierPressed</ResourceId>
-			</RcItem>
-			<RcItem Include="resources\Poker.Resources.RoomMedia.asvf">
-				<ContainerId>ResourceItem</ContainerId>
-				<ResourceType>RCDATA</ResourceType>
-				<ResourceId>RoomMedia</ResourceId>
 			</RcItem>
 			<RcItem Include="resources\avatar\RetrievingAvatar.jpg">
 				<ResourceType>RCDATA</ResourceType>
@@ -384,9 +381,9 @@
 					</VersionInfoKeys>
 					<Excluded_Packages>
 						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\TeeChart 2014 for RAD XE2\Delphi16.win32\Bin\DclTree2D16Tee9.bpl">TeeTree 2 Components</Excluded_Packages>
-						<Excluded_Packages Name="C:\Users\reiser\Documents\DevExpress VCL\Library\Delphi16\dcldxPSDBTeeChartD16.bpl">ExpressPrinting System ReportLink for DBTeeChart by Developer Express Inc.</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Users\reiser\Documents\DevExpress VCL\Library\Delphi16\dcldxPSDBTeeChartD16.bpl">ExpressPrinting System ReportLink for DBTeeChart by Developer Express Inc.</Excluded_Packages>
 					</Excluded_Packages>
 					<Source>
 						<Source Name="MainSource">client.dpr</Source>

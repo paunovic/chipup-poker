@@ -165,7 +165,7 @@ begin
     ShellOpen(PChar(FUpdaterInstallerFile), nil, '/verysilent /surpressmsgboxes /closeapplications');
 
   if (FUpdaterBatchFile <> '') and (FileExists(FUpdaterBatchFile)) then
-    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_HIDE);
+    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TdmMain.OpenCashierLink;
@@ -329,6 +329,7 @@ begin
       end;
     end;
     pb_ufi.Hash := hash_bytes;
+    pb_ufi.Path := StringReplace(pb_ufi.Path, '\', '/', [rfReplaceAll]);
     AFiles.Add(pb_ufi);
   end;
 end;

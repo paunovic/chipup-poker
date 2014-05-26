@@ -130,6 +130,7 @@ end;
 function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Boolean;
 var
   ufi: TPB_UpdateFileInfo;
+  ufipath: String;
   newfile: String;
   oldfile: String;
   batch: TStringList;
@@ -140,15 +141,15 @@ begin
     batch.Add('PING 127.0.0.1 -n 2');
     for ufi in dmMain.UpdateFiles do
     begin
+      ufipath := StringReplace(ufi.Path, '/', '\', [rfReplaceAll]);
       case ufi.FileType of
-        ufRemove: batch.Add(Format('DEL /S /Q "%s"', [SelfPath + ufi.Path]));
+        ufRemove: batch.Add(Format('DEL /S /Q "%s"', [SelfPath + ufipath]));
         ufFull, ufDiff: begin
-          newfile := FUpdateDir + ufi.Path;
+          newfile := FUpdateDir + ufipath;
           if not FileExists(newfile) then
             Exit(FALSE);
 
-          oldfile := SelfPath + ufi.Path;
-
+          oldfile := SelfPath + ufipath;
           ForceDirectories(ExtractFilePath(oldfile));
 
           case ufi.FileType of
@@ -190,6 +191,7 @@ var
   res: Boolean;
 begin
   fname := FUpdateDir + dmMain.UpdateFiles[FUpdateFileIndex].Path;
+  fname := StringReplace(fname, '/', '\', [rfReplaceAll]);
   ForceDirectories(ExtractFilePath(fname));
   DeleteFile(fname);
   if FileExists(fname) then
