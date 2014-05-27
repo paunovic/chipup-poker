@@ -591,6 +591,7 @@ message HandHistory {
 		required uint32 seat = 2;
 		required bytes cards = 3;
 		required uint32 chips = 4;
+		required string nick = 5;
 	}
 	message MoveRow {
 		repeated string code = 1;
