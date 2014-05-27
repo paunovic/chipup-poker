@@ -454,6 +454,9 @@ message TableEvent {
 		tePreWin = 13;
 		teExistingCards = 14;
 		teDisconnect = 15;
+		teSB = 16;
+		teBB = 17;
+		teForced = 18;
 	}
 	message WinnerData {
 		enum CardRankings {
@@ -594,9 +597,9 @@ message HandHistory {
 		required string nick = 5;
 	}
 	message MoveRow {
-		repeated string code = 1;
+		repeated TableEvent.TableEventType code = 1;
 		optional uint32 bet = 2;
-		optional uint32 seat = 3;
+		optional int32 seat = 3;
 		optional PotDataRow potdata = 4;
 	}
 	message PotDataRow {
