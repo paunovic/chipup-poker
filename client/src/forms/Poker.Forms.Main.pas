@@ -161,6 +161,7 @@ type
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -195,13 +196,13 @@ uses
   System.Generics.Collections, Poker.Protobufs.Objects.GameQuery, SynDBSQLite3,
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
-  Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
-  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
-  Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply;
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply, Poker.Table.Tables,
+  Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater,
+  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
+  Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
+  Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core;
 
 
 procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
@@ -788,7 +789,8 @@ begin
                           TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
                           TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                          TServerMessageCallback.Create(srTableStatsReply, CSRTableStats)
+                          TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
+                          TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
                       ]);
 
       FSelectedClub := -1;
@@ -1167,6 +1169,15 @@ begin
     end;
   end;
 end;
+
+procedure TfrmChipUpMain.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
+var
+  pb: TPB_ClubHandHistoryReply;
+begin
+  pb := AObject as TPB_ClubHandHistoryReply;
+  HandHistory.Add(pb);
+end;
+
 
 
 end.

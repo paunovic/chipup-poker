@@ -68,7 +68,8 @@ uses
   Vcl.Graphics, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup;
+  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup,
+  Poker.HandHistory.Core;
 
 
 function TdmMain.CheckAuthed: Boolean;
@@ -111,6 +112,7 @@ begin
   TFormsContainer.Initialize;
   TSounds.Initialize;
   TTablesStats.Initialize;
+  THandHistory.Initialize;
 
   if (Settings.DeveloperMode) and
      (Settings.ServerIndex = 1) then
@@ -144,6 +146,7 @@ begin
   FSelfInfo.Free;
 
   TServerSocket.Deinitialize;
+  THandHistory.Deinitialize;
   TTablesStats.Deinitialize;
   TSounds.Deinitialize;
   TFormsContainer.Deinitialize;

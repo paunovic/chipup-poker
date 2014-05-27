@@ -290,7 +290,7 @@ var
 begin
   if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
   begin
-    Caption := Format('%s Lobby', [club.Name]);
+    Caption := Format('%s lobby', [club.Name]);
 
     lbsHeader.Caption := club.Name;
 
