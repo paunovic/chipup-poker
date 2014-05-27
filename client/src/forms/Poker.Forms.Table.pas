@@ -59,6 +59,7 @@ type
     tiGameLock: TTimer;
     tiRender: TTimer;
     lbsHandStrength: TcxLabel;
+    lbvHandHistory: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -96,6 +97,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure tiRenderTimer(Sender: TObject);
     procedure seRaiseAmountKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure lbvHandHistoryClick(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -301,7 +303,7 @@ uses
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, AbstractCanvas,
-  Poker.HandStrengthCalculator;
+  Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -909,6 +911,11 @@ begin
       Exit(TRUE);
     end;
   Exit(FALSE);
+end;
+
+procedure TfrmTable.lbvHandHistoryClick(Sender: TObject);
+begin
+  FormsContainer.RunForm(TfrmHandHistory, nil, [], FALSE);
 end;
 
 procedure TfrmTable.MakeTableCaption;

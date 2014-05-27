@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.WinnerPotInfo;
 
 type
-  TTableEventType = (teFold = 0,teSit = 1,teStandUp = 2,teWinning = 3,teDealing = 4,teCheck = 5,teCall = 6,teRaise = 7,teAllIn = 8,teFlop = 9,teTurn = 10,teRiver = 11,tePostRiver = 12,tePreWin = 13,teExistingCards = 14,teDisconnect = 15);
+  TTableEventType = (teFold = 0,teSit = 1,teStandUp = 2,teWinning = 3,teDealing = 4,teCheck = 5,teCall = 6,teRaise = 7,teAllIn = 8,teFlop = 9,teTurn = 10,teRiver = 11,tePostRiver = 12,tePreWin = 13,teExistingCards = 14,teDisconnect = 15,teSB = 16,teBB = 17,teForced = 18);
   TPB_TableEvent = class(TProtobufBaseObject)
   private
     const

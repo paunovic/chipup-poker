@@ -3585,25 +3585,29 @@ object frmChipUpMain: TfrmChipUpMain
       Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ClientRectBottom = 410
-      ClientRectRight = 794
-      ClientRectTop = 0
+      ClientRectBottom = 409
+      ClientRectLeft = 1
+      ClientRectRight = 793
+      ClientRectTop = 1
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 794
+        ExplicitHeight = 410
         DesignSize = (
-          794
-          410)
+          792
+          408)
         object gridPublicHomeGames: TcxGrid
           Left = 152
           Top = 34
           Width = 312
-          Height = 200
+          Height = 198
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicHomeGamesEnter
+          ExplicitHeight = 200
           object gridPublicHomeGamesTable: TcxGridTableView
             OnCellDblClick = gridPublicHomeGamesTableCellDblClick
             OnFocusedRecordChanged = gridPublicHomeGamesTableFocusedRecordChanged
@@ -3691,11 +3695,13 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object gridGames: TcxGrid
           Left = 155
-          Top = 237
-          Width = 628
+          Top = 235
+          Width = 626
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
+          ExplicitTop = 237
+          ExplicitWidth = 628
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3774,7 +3780,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 254
+          Top = 252
           Width = 143
           Height = 34
           Margin = 18
@@ -3790,10 +3796,11 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 254
         end
         object btOpenTable: TcxButton
           Left = 10
-          Top = 291
+          Top = 289
           Width = 143
           Height = 34
           Margin = 18
@@ -3809,10 +3816,11 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 291
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 328
+          Top = 326
           Width = 143
           Height = 34
           Margin = 18
@@ -3828,10 +3836,11 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 328
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 365
+          Top = 363
           Width = 143
           Height = 34
           Margin = 18
@@ -3847,15 +3856,17 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 365
         end
         object gridMyHomeGames: TcxGrid
           Left = 470
           Top = 34
           Width = 312
-          Height = 200
+          Height = 198
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 8
           OnEnter = gridMyHomeGamesEnter
+          ExplicitHeight = 200
           object gridMyHomeGamesTable: TcxGridTableView
             OnCellDblClick = gridMyHomeGamesTableCellDblClick
             OnFocusedRecordChanged = gridMyHomeGamesTableFocusedRecordChanged
@@ -3905,6 +3916,10 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 794
+        ExplicitHeight = 410
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1

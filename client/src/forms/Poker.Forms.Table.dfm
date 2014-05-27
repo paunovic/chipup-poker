@@ -195,6 +195,37 @@ object frmTable: TfrmTable
     Transparent = True
     AnchorX = 776
   end
+  object lbvHandHistory: TcxLabel
+    Left = 8
+    Top = 6
+    Cursor = crHandPoint
+    Caption = 'Hand #21819823'
+    ParentFont = False
+    Style.Edges = []
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -9
+    Style.Font.Name = 'Sintony'
+    Style.Font.Style = [fsBold]
+    Style.Font.Quality = fqAntialiased
+    Style.HotTrack = True
+    Style.LookAndFeel.NativeStyle = True
+    Style.LookAndFeel.SkinName = ''
+    Style.TextColor = 13158600
+    Style.TextStyle = []
+    Style.TransparentBorder = True
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.NativeStyle = True
+    StyleDisabled.LookAndFeel.SkinName = ''
+    StyleFocused.LookAndFeel.NativeStyle = True
+    StyleFocused.LookAndFeel.SkinName = ''
+    StyleHot.LookAndFeel.NativeStyle = True
+    StyleHot.LookAndFeel.SkinName = ''
+    StyleHot.TextColor = 27903
+    Properties.Alignment.Horz = taLeftJustify
+    Transparent = True
+    OnClick = lbvHandHistoryClick
+  end
   object ActionManager: TActionManager
     Left = 56
     Top = 104

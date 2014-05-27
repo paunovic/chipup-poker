@@ -312,6 +312,20 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas"/>
 			<DCCReference Include="modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PotDataRow.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas"/>
+			<DCCReference Include="forms\Poker.Forms.HandHistory.pas">
+				<Form>frmHandHistory</Form>
+				<FormType>dfm</FormType>
+			</DCCReference>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.HandHistoryItem.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Players.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Moves.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

@@ -139,7 +139,18 @@ uses
   Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas',
   Poker.Protobufs.Objects.ClubPlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas',
   Poker.Protobufs.Objects.ClubStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas',
-  Poker.CommandLineParamProcesser in 'modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas';
+  Poker.CommandLineParamProcesser in 'modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas',
+  Poker.Protobufs.Objects.ClubHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas',
+  Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
+  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
+  Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
+  Poker.Protobufs.Objects.PotDataRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.PotDataRow.pas',
+  Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas',
+  Poker.Forms.HandHistory in 'forms\Poker.Forms.HandHistory.pas' {frmHandHistory},
+  Poker.HandHistory.Core in 'modules\hand_history\Poker.HandHistory.Core.pas',
+  Poker.HandHistory.HandHistoryItem in 'modules\hand_history\Poker.HandHistory.HandHistoryItem.pas',
+  Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
+  Poker.HandHistory.Moves in 'modules\hand_history\Poker.HandHistory.Moves.pas';
 
 procedure FocusPokerApp;
 var
