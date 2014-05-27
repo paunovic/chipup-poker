@@ -59,6 +59,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
+      FN_CODE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        SetLength(FCode,Length(FCode)+1);
+        FCode[Length(FCode)-1] := TTableEventType(AProtobufReader.readEnum);
+      end;
       FN_BET: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBet := AProtobufReader.readUInt32;
