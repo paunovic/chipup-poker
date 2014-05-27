@@ -616,7 +616,7 @@ message HandHistory {
 	required uint32 seq = 2;
 	required uint32 totalrake = 3;
 	repeated PlayerHandHistory players = 4;
-	repeated string cards = 5;
+	repeated bytes cards = 5;
 	required uint32 endtime = 6;
 	repeated int32 balance_changes = 7;
 	repeated MoveRow moves = 8;
