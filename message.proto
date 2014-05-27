@@ -589,7 +589,7 @@ message HandHistory {
 	message PlayerHandHistory {
 		required bytes _id = 1;
 		required uint32 seat = 2;
-		repeated bytes cards = 3;
+		required bytes cards = 3;
 		required uint32 chips = 4;
 	}
 	message MoveRow {
