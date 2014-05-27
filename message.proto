@@ -620,4 +620,5 @@ message HandHistory {
 	required uint32 endtime = 6;
 	repeated int32 balance_changes = 7;
 	repeated MoveRow moves = 8;
+	required uint32 dealer = 9;
 }
