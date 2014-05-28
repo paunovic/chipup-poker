@@ -595,6 +595,7 @@ message HandHistory {
 		required bytes cards = 3;
 		required uint32 chips = 4;
 		required string nick = 5;
+		required bool muck = 6;
 	}
 	message MoveRow {
 		repeated TableEvent.TableEventType code = 1;
