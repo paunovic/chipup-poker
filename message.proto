@@ -612,4 +612,5 @@ message HandHistory {
 	repeated int32 balance_changes = 7;
 	repeated MoveRow moves = 8;
 	required uint32 dealer = 9;
+	optional Game game = 10;
 }
