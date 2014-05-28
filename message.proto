@@ -332,7 +332,7 @@ message TableSit {
 
 message Pot {
 	required uint32 value = 1;
-	repeated uint32 members = 2;
+	repeated int32 members = 2;
 }
 
 message TableStatus {
