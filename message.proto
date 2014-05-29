@@ -613,4 +613,5 @@ message HandHistory {
 	repeated MoveRow moves = 8;
 	required uint32 dealer = 9;
 	optional Game game = 10;
+	optional Game.GameType current_game = 11;
 }
