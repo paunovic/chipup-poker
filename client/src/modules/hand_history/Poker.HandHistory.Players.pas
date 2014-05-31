@@ -11,8 +11,10 @@ type
     FMongoId: TBytes;
     FSeat: Integer;
     FCards: TBytes;
+    FCardsStr: String;
     FChips: UINT32;
     FNick: String;
+    FMucked: Boolean;
   public
     constructor Create(const AProtobuf: TPB_PlayerHandHistory);
     destructor Destroy; override;
@@ -20,8 +22,10 @@ type
     property MongoId: TBytes read FMongoId;
     property Seat: Integer read FSeat;
     property Cards: TBytes read FCards;
+    property CardsStr: String read FCardsStr;
     property Chips: UINT32 read FChips;
     property Nick: String read FNick;
+    property Mucked: Boolean read FMucked;
   end;
 
   TPlayerHandHistories = class(TObjectList<TPlayerHandHistory>)
@@ -31,6 +35,9 @@ type
 
 implementation
 
+uses
+  Poker.Cards;
+
 { TPlayerHandHistory }
 
 constructor TPlayerHandHistory.Create(const AProtobuf: TPB_PlayerHandHistory);
@@ -38,8 +45,10 @@ begin
   FMongoId := AProtobuf.MongoId;
   FSeat := AProtobuf.Seat;
   FCards := AProtobuf.Cards;
+  FCardsStr := TCards.BytesToString(FCards);
   FChips := AProtobuf.Chips;
   FNick := AProtobuf.Nick;
+  FMucked := AProtobuf.Muck;
 end;
 
 destructor TPlayerHandHistory.Destroy;

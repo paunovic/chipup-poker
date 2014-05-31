@@ -17,29 +17,33 @@ type
       FN_CARDS = 3;
       FN_CHIPS = 4;
       FN_NICK = 5;
+      FN_MUCK = 6;
 
     var
       FId: TBytes;
-      FSeat: UINT32;
+      FSeat: Integer;
       FCards: TBytes;
       FChips: UINT32;
       FNick: String;
+      FMuck: Boolean;
 
     procedure SetMongoId(const AValue: TBytes);
-    procedure SetSeat(const AValue: UINT32);
+    procedure SetSeat(const AValue: Integer);
     procedure SetCards(const AValue: TBytes);
     procedure SetChips(const AValue: UINT32);
     procedure SetNick(const AValue: String);
+    procedure SetMuck(const AValue: Boolean);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property MongoId: TBytes read FId write SetMongoId;
-    property Seat: UINT32 read FSeat write SetSeat;
+    property Seat: Integer read FSeat write SetSeat;
     property Cards: TBytes read FCards write SetCards;
     property Chips: UINT32 read FChips write SetChips;
     property Nick: String read FNick write SetNick;
+    property Muck: Boolean read FMuck write SetMuck;
   end;
 
 implementation
@@ -68,7 +72,7 @@ begin
       end;
       FN_SEAT: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FSeat := AProtobufReader.readUInt32;
+        FSeat := AProtobufReader.readInt32;
       end;
       FN_CARDS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -82,6 +86,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FNick := AProtobufReader.readUtf8String;
       end;
+      FN_MUCK: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FMuck := AProtobufReader.readBoolean;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -94,10 +102,10 @@ begin
   ProtobufOutput.writeBytes(FN__ID, AValue);
 end;
 
-procedure TPB_PlayerHandHistory.SetSeat(const AValue: UINT32);
+procedure TPB_PlayerHandHistory.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
-  ProtobufOutput.writeUInt32(FN_SEAT, AValue);
+  ProtobufOutput.writeInt32(FN_SEAT, AValue);
 end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
@@ -116,6 +124,12 @@ procedure TPB_PlayerHandHistory.SetNick(const AValue: String);
 begin
   FNick := AValue;
   ProtobufOutput.writeString(FN_NICK, AValue);
+end;
+
+procedure TPB_PlayerHandHistory.SetMuck(const AValue: Boolean);
+begin
+  FMuck := AValue;
+  ProtobufOutput.writeBoolean(FN_MUCK, AValue);
 end;
 
 end.

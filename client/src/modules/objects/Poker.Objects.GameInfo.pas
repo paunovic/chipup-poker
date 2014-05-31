@@ -26,15 +26,17 @@ type
     FClosingTime: DWORD;
     FLastHandId : UINT32;
 
-    function GetGameTypeStr: String;
-    function GetGameTypeStrFull: String;
     function GetStateStr: String;
 
   public
-    constructor Create(const AProtobufObject: TPB_Game); overload;
-
-    procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Game);
+    procedure Assign(const AProtobufObject: TPB_Game); overload;
+    procedure Assign(const AGameInfo: TGameInfo); overload;
     procedure UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
+
+    class procedure BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
+    class function GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
+
+    function AsString(const AShort: Boolean): String;
 
     property MongoId        : TBytes read FMongoId write FMongoId;
     property ClubId         : Int64 read FClubId write FClubId;
@@ -44,8 +46,6 @@ type
     property SmallBlind     : UINT32 read FSmallBlind;
     property BigBlind       : UINT32 read FBigBlind;
     property GameType       : TGameType read FGameType write FGameType;
-    property GameTypeStr    : String read GetGameTypeStr;
-    property GameTypeStrFull: String read GetGameTypeStrFull;
     property Limit          : TGameLimit read FGameLimit write FGameLimit;
     property MinBuyin       : UINT32 read FMinBuyin write FMinBuyin;
     property MaxBuyin       : UINT32 read FMaxBuyin write FMaxBuyin;
@@ -76,44 +76,14 @@ uses
   Poker.Forms.Debug;
 {$ENDIF}
 
-constructor TGameInfo.Create(const AProtobufObject: TPB_Game);
-begin
-  UpdateFromProtobufObject(AProtobufObject);
-end;
-
-procedure TGameInfo.UpdateFromProtobufObject(const AProtobufObject: TPB_Game);
+procedure TGameInfo.Assign(const AProtobufObject: TPB_Game);
 begin
   FMongoId := AProtobufObject.MongoId;
   FCreatorId := AProtobufObject.CreatorMongoId;
   FClubId := AProtobufObject.Clubseq;
   FName := AProtobufObject.Gamename;
   FBlinds := AProtobufObject.Blinds;
-  case FBlinds of
-    gb1x2: begin
-      FSmallBlind := 1;
-      FBigBlind := 2;
-    end;
-    gb5x5: begin
-      FSmallBlind := 5;
-      FBigBlind := 5;
-    end;
-    gb5x10: begin
-      FSmallBlind := 5;
-      FBigBlind := 10;
-    end;
-    gb10x25: begin
-      FSmallBlind := 10;
-      FBigBlind := 25;
-    end;
-    gb25x50: begin
-      FSmallBlind := 25;
-      FBigBlind := 50;
-    end;
-    gb50x100: begin
-      FSmallBlind := 50;
-      FBigBlind := 100;
-    end;
-  end;
+  BlindsEnumToInts(FBlinds, FSmallBlind, FBigBlind);
   FSmallBlind := FSmallBlind * 100;
   FBigBlind := FBigBlind * 100;
   FGameType := TGameType(AProtobufObject.GameType);
@@ -127,32 +97,96 @@ begin
   FLastHandId := AProtobufObject.Lasthandid;
 end;
 
-procedure TGameInfo.UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
+procedure TGameInfo.Assign(const AGameInfo: TGameInfo);
 begin
-  FMongoId := ATableStatus.TableMongoId;
-  FSitting := ATableStatus.Seats.Count;
+  FMongoId := AGameInfo.MongoId;
+  FCreatorId := AGameInfo.CreatorId;
+  FClubId := AGameInfo.ClubId;
+  FName := AGameInfo.Name;
+  FBlinds := AGameInfo.Blinds;
+  FSmallBlind := AGameInfo.SmallBlind;
+  FBigBlind := AGameInfo.BigBlind;
+  FGameType := AGameInfo.GameType;
+  FGameLimit := AGameInfo.Limit;
+  FMinBuyin := AGameInfo.MinBuyin;
+  FMaxBuyin := AGameInfo.MaxBuyin;
+  FSeats := AGameInfo.Seats;
+  FSitting := AGameInfo.Sitting;
+  FState := AGameInfo.State;
+  FClosingTime := AGameInfo.ClosingTime;
+  FLastHandId := AGameInfo.LastHandId;
 end;
 
-function TGameInfo.GetGameTypeStr: String;
+class procedure TGameInfo.BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
 begin
-  case FGameType of
-    gtHoldem: result := 'Holdem';
-    gtOmaha: result := 'Omaha';
+  case ABlinds of
+    gb1x2: begin
+      ASmallBlind := 1;
+      ABigBlind := 2;
+    end;
+    gb5x5: begin
+      ASmallBlind := 5;
+      ABigBlind := 5;
+    end;
+    gb5x10: begin
+      ASmallBlind := 5;
+      ABigBlind := 10;
+    end;
+    gb10x25: begin
+      ASmallBlind := 10;
+      ABigBlind := 25;
+    end;
+    gb25x50: begin
+      ASmallBlind := 25;
+      ABigBlind := 50;
+    end;
+    gb50x100: begin
+      ASmallBlind := 50;
+      ABigBlind := 100;
+    end;
+  end;
+end;
+
+function TGameInfo.AsString(const AShort: Boolean): String;
+begin
+  result := GameTypeToStr(FGameType, FGameLimit, AShort);
+end;
+
+class function TGameInfo.GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
+begin
+  result := '';
+  case AGameLimit of
+    glNoLimit: if AShort then
+      result := 'NL'
+    else
+      result := 'No Limit';
+    glFixedLimit: if AShort then
+      result := 'FL'
+    else
+      result := 'Fixed Limit';
+    glPotLimit: if AShort then
+      result := 'PL'
+    else
+      result := 'Pot Limit';
+  end;
+
+  case AGameType of
+    gtHoldem: if AShort then
+      result := result + 'H'
+    else
+      result := result + ' Hold''em';
+    gtOmaha: if AShort then
+      result := result + 'O'
+    else
+      result := result + ' Omaha';
     gtRotationNLHPLO: result := 'Rotation NLH/PLO';
   end;
 end;
 
-function TGameInfo.GetGameTypeStrFull: String;
+procedure TGameInfo.UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
 begin
-  result := GetGameTypeStr;
-  if FGameType = gtRotationNLHPLO then
-    Exit;
-
-  case FGameLimit of
-    glNoLimit: result := 'NL ' + result;
-    glFixedLimit: result := 'FL ' + result;
-    glPotLimit: result := 'PL ' + result;
-  end;
+  FMongoId := ATableStatus.TableMongoId;
+  FSitting := ATableStatus.Seats.Count;
 end;
 
 function TGameInfo.GetStateStr: String;
@@ -172,6 +206,7 @@ end;
 function TGamesInfo.AddGame(const AProtobufObject: TPB_Game): TGameInfo;
 var
   index: Integer;
+  game: TGameInfo;
 begin
   {$IFDEF DEBUG}
   if Length(AProtobufObject.MongoId) = 0 then
@@ -180,9 +215,13 @@ begin
 
   index := IndexOf(AProtobufObject.MongoId);
   if index = -1 then
-    index := Add(TGameInfo.Create(AProtobufObject))
+  begin
+    game := TGameInfo.Create;
+    game.Assign(AProtobufObject);
+    index := Add(game);
+  end
   else
-    Items[index].UpdateFromProtobufObject(AProtobufObject);
+    Items[index].Assign(AProtobufObject);
   result := Items[index];
 end;
 

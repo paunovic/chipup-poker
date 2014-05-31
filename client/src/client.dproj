@@ -95,9 +95,9 @@
 			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 			<Debugger_RunParams>-noupdate</Debugger_RunParams>
-			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUpPoker;LegalCopyright=Marko Paunovic, paunovic@gmail.com;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUp Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 			<DCC_ExeOutput>..\bin\$(Platform)\$(Config)</DCC_ExeOutput>
 			<DCC_MapFile>3</DCC_MapFile>
@@ -218,6 +218,12 @@
 			<DCCReference Include="forms\Poker.Forms.CloseClubConfirmation.pas">
 				<Form>frmCloseClubConfirmation</Form>
 			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.HandHistory.pas">
+				<Form>frmHandHistory</Form>
+			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.ClubMemberOptions.pas">
+				<Form>frmClubMemberOptions</Form>
+			</DCCReference>
 			<DCCReference Include="interfaces\Poker.Interfaces.FormParams.pas"/>
 			<DCCReference Include="interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.AsphyreImage.pas"/>
@@ -304,10 +310,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.SocketConnectThread.pas"/>
-			<DCCReference Include="forms\Poker.Forms.ClubMemberOptions.pas">
-				<Form>frmClubMemberOptions</Form>
-				<FormType>dfm</FormType>
-			</DCCReference>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas"/>
@@ -316,12 +318,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PotDataRow.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas"/>
-			<DCCReference Include="forms\Poker.Forms.HandHistory.pas">
-				<Form>frmHandHistory</Form>
-				<FormType>dfm</FormType>
-			</DCCReference>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.HandHistoryItem.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Players.pas"/>
@@ -394,10 +391,11 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
+						<Excluded_Packages Name="c:\Program Files (x86)\Steema Software\TeeChart 2014 for RAD XE2\Delphi16.ios\Bin\DclFMITeePro916.bpl">TeeChart Pro 2014 for FireMonkey iOS Components</Excluded_Packages>
 						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\TeeChart 2014 for RAD XE2\Delphi16.win32\Bin\DclTree2D16Tee9.bpl">TeeTree 2 Components</Excluded_Packages>
+						<Excluded_Packages Name="C:\Users\reiser\Documents\DevExpress VCL\Library\Delphi16\dcldxPSDBTeeChartD16.bpl">ExpressPrinting System ReportLink for DBTeeChart by Developer Express Inc.</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-						<Excluded_Packages Name="C:\Users\reiser\Documents\DevExpress VCL\Library\Delphi16\dcldxPSDBTeeChartD16.bpl">ExpressPrinting System ReportLink for DBTeeChart by Developer Express Inc.</Excluded_Packages>
 					</Excluded_Packages>
 					<Source>
 						<Source Name="MainSource">client.dpr</Source>

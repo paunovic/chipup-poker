@@ -170,7 +170,7 @@ object frmTable: TfrmTable
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyle
   end
-  object lbsHandStrength: TcxLabel
+  object lbvHandStrength: TcxLabel
     Left = 695
     Top = 416
     Anchors = [akRight, akBottom]
@@ -199,7 +199,7 @@ object frmTable: TfrmTable
     Left = 8
     Top = 6
     Cursor = crHandPoint
-    Caption = 'Hand #21819823'
+    Caption = 'Previous Hand (#21819823)'
     ParentFont = False
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
@@ -291,6 +291,10 @@ object frmTable: TfrmTable
       Caption = 'SHOW CARDS'
       Enabled = False
       OnExecute = acShowCardsExecute
+    end
+    object acHandHistory: TAction
+      Caption = 'acHandHistory'
+      OnExecute = acHandHistoryExecute
     end
   end
   object tiActiveFrameBlink: TTimer

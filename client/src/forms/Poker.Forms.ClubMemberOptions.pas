@@ -37,9 +37,6 @@ type
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
-var
-  frmClubMemberOptions: TfrmClubMemberOptions;
-
 implementation
 
 {$R *.dfm}

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.MoveRow;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.PotDataRow;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.WinnerPotInfo;
 
 type
   TPB_MoveRow = class(TProtobufBaseObject)
@@ -21,12 +21,15 @@ type
       FCode: TArray<TTableEventType>;
       FBet: UINT32;
       FSeat: Integer;
-      FPotdata: TPB_PotDataRow;
+      FPotdata: TObjectList<TPB_WinnerPotInfo>;
 
     procedure SetCode(const AValue: TArray<TTableEventType>);
     procedure SetBet(const AValue: UINT32);
     procedure SetSeat(const AValue: Integer);
-    procedure SetPotdata(const AValue: TPB_PotDataRow);
+    procedure PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
 
   public
     destructor Destroy; override;
@@ -35,7 +38,7 @@ type
     property Code: TArray<TTableEventType> read FCode write SetCode;
     property Bet: UINT32 read FBet write SetBet;
     property Seat: Integer read FSeat write SetSeat;
-    property Potdata: TPB_PotDataRow read FPotdata write SetPotdata;
+    property Potdata: TObjectList<TPB_WinnerPotInfo> read FPotdata;
   end;
 
 implementation
@@ -44,10 +47,19 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_MoveRow.InitObjects;
+begin
+  FPotdata := TObjectList<TPB_WinnerPotInfo>.Create;
+  FPotdata.OnNotify := PotdataNotifyEvent;
+end;
 
 destructor TPB_MoveRow.Destroy;
 begin
-  if Assigned(FPotdata) then FreeAndNil(FPotdata);
+  if Assigned(FPotdata) then
+  begin
+    FPotdata.OnNotify := nil;
+    FreeAndNil(FPotdata);
+  end;
   inherited;
 end;
 
@@ -74,9 +86,7 @@ begin
       end;
       FN_POTDATA: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(FPotdata) then
-          FPotdata := TPB_PotDataRow.Create;
-        FPotdata.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FPotdata.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
     else
       AProtobufReader.skipField(tag);
@@ -105,10 +115,12 @@ begin
   ProtobufOutput.writeInt32(FN_SEAT, AValue);
 end;
 
-procedure TPB_MoveRow.SetPotdata(const AValue: TPB_PotDataRow);
+procedure TPB_MoveRow.PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
 begin
-  FPotdata := AValue;
-  ProtobufOutput.writeMessage(FN_POTDATA, AValue.ProtobufOutput);
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_POTDATA,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
 end.

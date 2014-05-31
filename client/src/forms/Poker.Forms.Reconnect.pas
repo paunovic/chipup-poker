@@ -47,9 +47,6 @@ type
     property CurrentStatus: TReconnectionStatus read FCurrentStatus;
   end;
 
-var
-  frmReconnect: TfrmReconnect;
-
 implementation
 
 {$R *.dfm}

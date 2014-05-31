@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HandHistory;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.PlayerHandHistory,Poker.Protobufs.Objects.MoveRow;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.PlayerHandHistory,Poker.Protobufs.Objects.MoveRow,Poker.Protobufs.Objects.Game;
 
 type
   TPB_HandHistory = class(TProtobufBaseObject)
@@ -16,27 +16,36 @@ type
       FN_SEQ = 2;
       FN_TOTALRAKE = 3;
       FN_PLAYERS = 4;
-      FN_TABLECARDS = 5;
+      FN_CARDS = 5;
       FN_ENDTIME = 6;
       FN_BALANCE_CHANGES = 7;
       FN_MOVES = 8;
+      FN_DEALER = 9;
+      FN_GAME = 10;
+      FN_CURRENT_GAME = 11;
 
     var
       FId: TBytes;
       FSeq: UINT32;
       FTotalrake: UINT32;
       FPlayers: TObjectList<TPB_PlayerHandHistory>;
-      FTablecards: TBytes;
+      FCards: TBytes;
       FEndtime: UINT32;
       FBalanceChanges: TArray<Integer>;
       FMoves: TObjectList<TPB_MoveRow>;
+      FDealer: UINT32;
+      FGame: TPB_Game;
+      FCurrentGame: TGameType;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetSeq(const AValue: UINT32);
     procedure SetTotalrake(const AValue: UINT32);
-    procedure SetTablecards(const AValue: TBytes);
+    procedure SetCards(const AValue: TBytes);
     procedure SetEndtime(const AValue: UINT32);
     procedure SetBalanceChanges(const AValue: TArray<Integer>);
+    procedure SetDealer(const AValue: UINT32);
+    procedure SetGame(const AValue: TPB_Game);
+    procedure SetCurrentGame(const AValue: TGameType);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
     procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
 
@@ -51,10 +60,13 @@ type
     property Seq: UINT32 read FSeq write SetSeq;
     property Totalrake: UINT32 read FTotalrake write SetTotalrake;
     property Players: TObjectList<TPB_PlayerHandHistory> read FPlayers;
-    property Tablecards: TBytes read FTablecards write SetTablecards;
+    property Cards: TBytes read FCards write SetCards;
     property Endtime: UINT32 read FEndtime write SetEndtime;
     property BalanceChanges: TArray<Integer> read FBalanceChanges write SetBalanceChanges;
     property Moves: TObjectList<TPB_MoveRow> read FMoves;
+    property Dealer: UINT32 read FDealer write SetDealer;
+    property Game: TPB_Game read FGame write SetGame;
+    property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
   end;
 
 implementation
@@ -83,6 +95,7 @@ begin
     FMoves.OnNotify := nil;
     FreeAndNil(FMoves);
   end;
+  if Assigned(FGame) then FreeAndNil(FGame);
   inherited;
 end;
 
@@ -110,9 +123,9 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayers.Add(TPB_PlayerHandHistory.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_TABLECARDS: begin
+      FN_CARDS: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FTablecards);
+        AProtobufReader.readBytes(FCards);
       end;
       FN_ENDTIME: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -126,6 +139,20 @@ begin
       FN_MOVES: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMoves.Add(TPB_MoveRow.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
+      FN_DEALER: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FDealer := AProtobufReader.readUInt32;
+      end;
+      FN_GAME: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FGame) then
+          FGame := TPB_Game.Create;
+        FGame.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+      end;
+      FN_CURRENT_GAME: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FCurrentGame := TGameType(AProtobufReader.readEnum);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -159,10 +186,10 @@ begin
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
-procedure TPB_HandHistory.SetTablecards(const AValue: TBytes);
+procedure TPB_HandHistory.SetCards(const AValue: TBytes);
 begin
-  FTablecards := AValue;
-  ProtobufOutput.writeBytes(FN_TABLECARDS, AValue);
+  FCards := AValue;
+  ProtobufOutput.writeBytes(FN_CARDS, AValue);
 end;
 
 procedure TPB_HandHistory.SetEndtime(const AValue: UINT32);
@@ -186,6 +213,24 @@ begin
   ProtobufOutput.writeTag(FN_MOVES,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_HandHistory.SetDealer(const AValue: UINT32);
+begin
+  FDealer := AValue;
+  ProtobufOutput.writeUInt32(FN_DEALER, AValue);
+end;
+
+procedure TPB_HandHistory.SetGame(const AValue: TPB_Game);
+begin
+  FGame := AValue;
+  ProtobufOutput.writeMessage(FN_GAME, AValue.ProtobufOutput);
+end;
+
+procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
+begin
+  FCurrentGame := AValue;
+  ProtobufOutput.writeInt32(FN_CURRENT_GAME, Integer(AValue));
 end;
 
 end.

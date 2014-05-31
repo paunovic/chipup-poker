@@ -3,7 +3,7 @@ unit Poker.HandHistory.Moves;
 interface
 
 uses
-  System.Generics.Collections, Poker.Protobufs.Objects.MoveRow, Poker.Protobufs.Objects.TableEvent;
+  System.Generics.Collections, Poker.Protobufs.Objects.MoveRow, Poker.Protobufs.Objects.TableEvent, Poker.Table.Status;
 
 type
   THandHistoryMove = class
@@ -11,14 +11,17 @@ type
     FEvents: TArray<TTableEventType>;
     FSeat: Integer;
     FBet: UINT32;
+    FWinnerPots: TPotInfos;
   public
     constructor Create(const AProtobuf: TPB_MoveRow);
+    destructor Destroy; override;
 
     function ContainsEvent(const AEvent: TTableEventType): Boolean;
 
     property Events: TArray<TTableEventType> read FEvents;
     property Seat: Integer read FSeat;
     property Bet: UINT32 read FBet;
+    property WinnerPots: TPotInfos read FWinnerPots;
   end;
 
   THandHistoryMoves = TObjectList<THandHistoryMove>;
@@ -32,6 +35,14 @@ begin
   FEvents := AProtobuf.Code;
   FSeat := AProtobuf.Seat;
   FBet := AProtobuf.Bet;
+  FWinnerPots := TPotInfos.Create;
+  FWinnerPots.Assign(AProtobuf.Potdata);
+end;
+
+destructor THandHistoryMove.Destroy;
+begin
+  FWinnerPots.Free;
+  inherited;
 end;
 
 function THandHistoryMove.ContainsEvent(const AEvent: TTableEventType): Boolean;

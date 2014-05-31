@@ -30,9 +30,6 @@ type
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
-var
-  frmCloseTable: TfrmCloseTable;
-
 implementation
 
 {$R *.dfm}

@@ -3585,29 +3585,23 @@ object frmChipUpMain: TfrmChipUpMain
       Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ClientRectBottom = 409
-      ClientRectLeft = 1
-      ClientRectRight = 793
-      ClientRectTop = 1
+      ClientRectBottom = 410
+      ClientRectRight = 794
+      ClientRectTop = 0
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 794
-        ExplicitHeight = 410
         DesignSize = (
-          792
-          408)
+          794
+          410)
         object gridPublicHomeGames: TcxGrid
           Left = 152
           Top = 34
           Width = 312
-          Height = 198
+          Height = 200
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicHomeGamesEnter
-          ExplicitHeight = 200
           object gridPublicHomeGamesTable: TcxGridTableView
             OnCellDblClick = gridPublicHomeGamesTableCellDblClick
             OnFocusedRecordChanged = gridPublicHomeGamesTableFocusedRecordChanged
@@ -3695,13 +3689,11 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object gridGames: TcxGrid
           Left = 155
-          Top = 235
-          Width = 626
+          Top = 237
+          Width = 628
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
-          ExplicitTop = 237
-          ExplicitWidth = 628
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3780,7 +3772,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 252
+          Top = 254
           Width = 143
           Height = 34
           Margin = 18
@@ -3796,11 +3788,10 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 254
         end
         object btOpenTable: TcxButton
           Left = 10
-          Top = 289
+          Top = 291
           Width = 143
           Height = 34
           Margin = 18
@@ -3816,11 +3807,10 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 291
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 326
+          Top = 328
           Width = 143
           Height = 34
           Margin = 18
@@ -3836,11 +3826,10 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 328
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 363
+          Top = 365
           Width = 143
           Height = 34
           Margin = 18
@@ -3856,17 +3845,15 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
-          ExplicitTop = 365
         end
         object gridMyHomeGames: TcxGrid
           Left = 470
           Top = 34
           Width = 312
-          Height = 198
+          Height = 200
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 8
           OnEnter = gridMyHomeGamesEnter
-          ExplicitHeight = 200
           object gridMyHomeGamesTable: TcxGridTableView
             OnCellDblClick = gridMyHomeGamesTableCellDblClick
             OnFocusedRecordChanged = gridMyHomeGamesTableFocusedRecordChanged
@@ -3916,10 +3903,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 794
-        ExplicitHeight = 410
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1
@@ -4237,43 +4220,48 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Check on fold, whenever possible'
       OnExecute = acFoldChecksExecute
     end
+    object acHandHistory: TAction
+      Category = 'Options'
+      Caption = 'Hand History'
+      OnExecute = acHandHistoryExecute
+    end
   end
   object MainMenu: TMainMenu
     Left = 394
     Top = 28
-    object Account1: TMenuItem
+    object miAccount: TMenuItem
       Caption = 'Account'
-      object ChangeEmailAddress1: TMenuItem
+      object miChangeEMail: TMenuItem
         Action = acShowChangeEMailForm
       end
-      object ChangePassword1: TMenuItem
+      object miChangePassword: TMenuItem
         Action = acShowChangePasswordForm
       end
-      object ChangeAvatar1: TMenuItem
+      object miChangeAvatar: TMenuItem
         Action = acShowChangeAvatarForm
       end
-      object N2: TMenuItem
+      object misAccount1: TMenuItem
         Caption = '-'
       end
-      object Resendverificationmail1: TMenuItem
+      object miResendVerificationMail: TMenuItem
         Action = acResendVerificationMail
       end
-      object N1: TMenuItem
+      object misAccount2: TMenuItem
         Caption = '-'
       end
-      object Logout1: TMenuItem
+      object miLogout: TMenuItem
         Action = acLogout
       end
     end
-    object Options1: TMenuItem
+    object miOptions: TMenuItem
       Caption = 'Options'
       object miSounds: TMenuItem
         Action = acSoundsOnOff
       end
-      object N4: TMenuItem
+      object misOptions1: TMenuItem
         Caption = '-'
       end
-      object Gameplay1: TMenuItem
+      object miGameplay: TMenuItem
         Caption = 'Gameplay'
         GroupIndex = 1
         object miCheckOnFold: TMenuItem
@@ -4281,27 +4269,35 @@ object frmChipUpMain: TfrmChipUpMain
           GroupIndex = 1
         end
       end
+      object misOptions2: TMenuItem
+        Caption = '-'
+        GroupIndex = 1
+      end
+      object miHandHistory: TMenuItem
+        Action = acHandHistory
+        GroupIndex = 1
+      end
     end
-    object Help1: TMenuItem
+    object miHelp: TMenuItem
       Caption = 'Help'
-      object ContactUs1: TMenuItem
+      object miContactUs: TMenuItem
         Action = acShowContactUsForm
       end
-      object TermsofService1: TMenuItem
+      object miTermsAndConditions: TMenuItem
         Action = acTermsAndConditions
       end
-      object N3: TMenuItem
+      object misHelp1: TMenuItem
         Caption = '-'
       end
-      object AboutChipUPPoker1: TMenuItem
+      object miAbout: TMenuItem
         Action = acShowAboutForm
       end
     end
-    object Developer1: TMenuItem
+    object miDev: TMenuItem
       Caption = 'Dev'
-      object Disconnect1: TMenuItem
+      object miDisconnect: TMenuItem
         Caption = 'Disconnect'
-        OnClick = Disconnect1Click
+        OnClick = miDisconnectClick
       end
     end
   end

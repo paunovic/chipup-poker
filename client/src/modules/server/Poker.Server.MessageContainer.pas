@@ -14,7 +14,6 @@ type
     FSocketStateChangeMsg: UINT;
     FCallbackSets: TObjectList<TCallbackSet>;
     FLock: TCriticalSection;
-    FLockCount: Integer;
 
     procedure ReceiverWndProc(var AMessage: TMessage);
     procedure ProcessMessage(const AMessage: TMessage);
@@ -27,7 +26,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function AddCallbacks(const ACallbacks: array of TObject): Integer;
+    function AddCallbacks(const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
     procedure RemoveCallbacks(var AId: Integer);
 
     property CallbackSetsCount: Integer read GetCallbackSetsCount;
@@ -61,7 +60,6 @@ end;
 constructor TMessageContainer.Create;
 begin
   FLock := TCriticalSection.Create;
-  FLockCount := 0;
 
   FServerReplyMsg := RegisterWindowMessage('CUPMCSRMSG');
   FSocketStateChangeMsg := RegisterWindowMessage('CUPMCSSCMMSG');
@@ -87,13 +85,13 @@ begin
   result := FCallbackSets.Count;
 end;
 
-function TMessageContainer.AddCallbacks(const ACallbacks: array of TObject): Integer;
+function TMessageContainer.AddCallbacks(const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
 var
   callback_set: TCallbackSet;
   id: Integer;
   found : Boolean;
 begin
-  FLock.Acquire;
+  FLock.Enter;
   try
     id := 0;
     repeat
@@ -108,10 +106,13 @@ begin
     until not found;
 
     callback_set := TCallbackSet.Create(id, ACallbacks);
-    FCallbackSets.Add(callback_set);
+    if not APriority then
+      FCallbackSets.Add(callback_set)
+    else
+      FCallbackSets.Insert(0, callback_set);
     result := id;
   finally
-    FLock.Release;
+    FLock.Leave;
   end;
 end;
 
@@ -119,7 +120,7 @@ procedure TMessageContainer.RemoveCallbacks(var AId: Integer);
 var
   callback: TCallbackSet;
 begin
-  FLock.Acquire;
+  FLock.Enter;
   try
     for callback in FCallbackSets do
       if callback.Id = AId then
@@ -129,7 +130,7 @@ begin
       end;
     AId := -1;
   finally
-    FLock.Release;
+    FLock.Leave;
   end;
 end;
 
@@ -139,19 +140,15 @@ var
   obj, data_obj: TObject;
   callback_servermsg: TServerMessageCallback;
 begin
-  FLock.Acquire;
+  FLock.Enter;
   try
-    Inc(FLockCount);
-
     data_obj := nil;
     if AMessage.Msg = FServerReplyMsg then
       data_obj := pointer(AMessage.WParam);
 
     for callback_set in FCallbackSets do
-      if (not Assigned(callback_set)) or
-         (callback_set.Removed) then
-        Continue
-      else
+      if (Assigned(callback_set)) and
+         (not callback_set.Removed) then
         for obj in callback_set do
         begin
           if callback_set.Removed then
@@ -171,9 +168,8 @@ begin
 
     if Assigned(data_obj) then
       data_obj.Free;
-    Dec(FLockCount);
   finally
-    FLock.Release;
+    FLock.Leave;
   end;
 end;
 
@@ -185,14 +181,16 @@ begin
   if (AMessage.Msg = FServerReplyMsg) or (AMessage.Msg = FSocketStateChangeMsg) then
     ProcessMessage(AMessage);
 
-  if FLockCount = 0 then
-  begin
+  FLock.Enter;
+  try
     C1 := 0;
     while C1 < FCallbackSets.Count do
       if FCallbackSets[C1].Removed then
         FCallbackSets.Delete(C1)
       else
         Inc(C1);
+  finally
+    FLock.Leave;
   end;
 end;
 

@@ -12,9 +12,9 @@ uses
 
 type
   TdmMain = class(TDataModule)
+    il20px: TcxImageList;
     SkinController: TdxSkinController;
     HintController: TcxHintStyleController;
-    il20px: TcxImageList;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
@@ -72,14 +72,6 @@ uses
   Poker.HandHistory.Core;
 
 
-function TdmMain.CheckAuthed: Boolean;
-begin
-  result := FSelfInfo.Authed;
-
-  if not result then
-    MessageDlg('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.', mtWarning, [mbOK], 0);
-end;
-
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 var
   common, local: String;
@@ -136,22 +128,19 @@ end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
-  FUpdateFiles.Free;
-
+  // deinit objects
+  FreeAndNil(FUpdateFiles);
+  TFormsContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
-
   TTables.Deinitialize;
   TPlayers.Deinitialize;
-
   FSelfInfo.Free;
-
   TServerSocket.Deinitialize;
   THandHistory.Deinitialize;
   TTablesStats.Deinitialize;
   TSounds.Deinitialize;
-  TFormsContainer.Deinitialize;
   TMessageContainer.Deinitialize;
-  FreeAndNil(ServerSettings);
+  TServerSettings.Deinitialize;
   if Assigned(TableResources) then
     TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
@@ -169,6 +158,14 @@ begin
 
   if (FUpdaterBatchFile <> '') and (FileExists(FUpdaterBatchFile)) then
     ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_SHOWNORMAL);
+end;
+
+function TdmMain.CheckAuthed: Boolean;
+begin
+  result := FSelfInfo.Authed;
+
+  if not result then
+    MessageDlg('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.', mtWarning, [mbOK], 0);
 end;
 
 procedure TdmMain.OpenCashierLink;

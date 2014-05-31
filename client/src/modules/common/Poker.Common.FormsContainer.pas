@@ -44,7 +44,6 @@ uses
   Winapi.Windows, Poker.Common.Misc, System.SysUtils;
 
 
-
 class procedure TFormsContainer.Initialize;
 begin
   FormsContainer := TFormsContainer.Create;
@@ -125,17 +124,16 @@ begin
   begin
     Remove(form);
     form.Close;
-    form.Free;
   end;
 end;
 
 procedure TFormsContainer.CloseAllForms;
+var
+  C1: Integer;
 begin
-  while FItems.Count > 0 do
-  begin
-    FItems[FItems.Count - 1].Close;
-    FItems.Delete(FItems.Count - 1);
-  end;
+  for C1 := 0 to FItems.Count - 1 do
+    FItems[C1].Close;
+  FItems.Clear;
 end;
 
 function TFormsContainer.RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean): TForm;

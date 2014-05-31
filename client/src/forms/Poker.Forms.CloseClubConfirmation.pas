@@ -35,9 +35,6 @@ type
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
-var
-  frmCloseClubConfirmation: TfrmCloseClubConfirmation;
-
 implementation
 
 {$R *.dfm}
@@ -89,7 +86,7 @@ end;
 
 procedure TfrmCloseClubConfirmation.acConfirmExecute(Sender: TObject);
 begin
-  if edPassword.Text = FClub.InvCode then
+  if edPassword.Text = FClub.Password then
   begin
     ModalResult := mrOk;
     Close;
