@@ -1,6 +1,6 @@
 include Makefile.include
 
-GIT_HASH := $(shell c:\Poker\bb\git\bin\git rev-parse HEAD)
+GIT_HASH := $(shell git rev-parse HEAD)
 
 release: all
 debug: all
