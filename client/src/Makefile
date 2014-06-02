@@ -17,7 +17,7 @@ client.dres: clientResource.rc resources/cashier/Normal.png resources/cashier/Pr
 client.exe: client.dpr client.dres
 	echo '${GIT_HASH}' > revision.inc
 	${GCC} ${CFLAGS} -gd client.dpr -q ${FLAGS}
-	"c:\Program Files\madCollection\madExcept\Tools\madExceptPatch.exe" client.exe
+	"c:\Program Files (x86)\madCollection\madExcept\Tools\madExceptPatch.exe" client.exe
 	"C:\Poker\StripReloc\StripReloc.exe" client.exe
 	copy /y client.exe ..\installer\files\chipuppoker.exe
 
