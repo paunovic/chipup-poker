@@ -1,5 +1,5 @@
-CFLAGS="-UC:\Program Files\DevExpress VCL\ExpressEditors Library\Sources"
-CFLAGS+="-UC:\Program Files\DevExpress VCL\Library\Delphi16"
+CFLAGS="-UE:\Program Files\DevExpress VCL\ExpressEditors Library\Sources"
+CFLAGS+="-UE:\Program Files\DevExpress VCL\Library\RS16"
 CFLAGS+=-AComObj=System.Win.ComObj -NSWinapi -NSSystem -NSVcl -Uforms -NSData -NSVcl.Imaging -NSSystem.Win
 CFLAGS+=-Umodules/playerinfo -Umodules/clubinfo -Umodules/gameinfo -Umodules/protobuf/objects
 CFLAGS+=-U3rdparty/protobufs -Umodules/protobuf -Umodules/server_settings -Umodules/tables -UC:/poker/syngdiplus
