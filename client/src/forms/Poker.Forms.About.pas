@@ -28,9 +28,6 @@ type
   public
   end;
 
-var
-  frmAbout: TfrmAbout;
-
 implementation
 
 {$R *.dfm}

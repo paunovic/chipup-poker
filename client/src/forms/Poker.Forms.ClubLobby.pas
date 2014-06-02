@@ -259,6 +259,8 @@ procedure TfrmClubLobby.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
+
+  OutputDebugString('CLUB LOBBY DESTROY');
 end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -290,7 +292,7 @@ var
 begin
   if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
   begin
-    Caption := Format('%s Lobby', [club.Name]);
+    Caption := Format('%s lobby', [club.Name]);
 
     lbsHeader.Caption := club.Name;
 
@@ -677,7 +679,7 @@ begin
         if Assigned(game) then
         begin
           c.SetValue(recidx, gridTablesStatus.Index, game.StateAsStr);
-          c.SetValue(recidx, gridTablesDate.Index, MongoIdToDateTime(game.MongoId));
+          c.SetValue(recidx, gridTablesDate.Index, TTimeZone.Local.ToLocalTime(MongoIdToDateTime(game.MongoId)));
           c.SetValue(recidx, gridTablesStatusInt.Index, Integer(game.State));
         end;
       end;
@@ -852,7 +854,7 @@ begin
 
       c.SetValue(recidx, gridGamesId.Index, game.MongoId);
       c.SetValue(recidx, gridGamesName.Index, game.Name);
-      c.SetValue(recidx, gridGamesType.Index, game.GameTypeStrFull);
+      c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
       c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
       c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       c.SetValue(recidx, gridGamesSeats.Index, game.Seats);

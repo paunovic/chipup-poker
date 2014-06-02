@@ -81,7 +81,7 @@ type
   private
     FValue: UINT32;
     FRake: UINT32;
-    FMembers: TArray<UINT32>;
+    FMembers: TArray<Integer>;
     FWinnerData: TWinnerDataList;
     function GetValueWithoutRake: UINT32;
   public
@@ -94,7 +94,7 @@ type
 
     property Value: UINT32 read FValue write FValue;
     property Rake: UINT32 read FRake write FRake;
-    property Members: TArray<UINT32> read FMembers;
+    property Members: TArray<Integer> read FMembers;
     property WinnerData: TWinnerDataList read FWinnerData;
     property ValueWithoutRake: UINT32 read GetValueWithoutRake;
   end;

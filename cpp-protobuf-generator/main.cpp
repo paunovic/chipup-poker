@@ -612,6 +612,17 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							,"name",EnumName(field)
 							,"pname",PrivateFieldName(field)
 							,"subname",type->name());
+					} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						const EnumDescriptor *type = field->enum_type();
+						printer.Print(
+							"      $name$: begin\n"
+							"        Assert(wire_type = WIRETYPE_VARINT);\n"
+							"        SetLength($pname$,Length($pname$)+1);\n"
+							"        $pname$[Length($pname$)-1] := T$subname$(AProtobufReader.readEnum);\n"
+							"      end;\n"
+							,"name",EnumName(field)
+							,"pname",PrivateFieldName(field)
+							,"subname",type->name());
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
 					if (field->label() != FieldDescriptor::LABEL_REPEATED) {

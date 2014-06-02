@@ -16,7 +16,8 @@ type
     FClubBalance: Int32;
     FUnlimitedLimit: Boolean;
   public
-    constructor Create(const AClubMemberProtobuf: TPB_ClubMember);
+    constructor Create(const AClubMemberProtobuf: TPB_ClubMember); overload;
+    constructor Create(const AClubMemberInfo: TClubMemberInfo); overload;
 
     property MongoId: TBytes read FMongoId;
     property Suspended: Boolean read FSuspended;
@@ -31,7 +32,7 @@ type
     FMongoId: TBytes;
     FOwnerId: TBytes;
     FName: String;
-    FInvCode: String;
+    FPassword: String;
     FMembers: TObjectList<TClubMemberInfo>;
     FGames: TGamesInfo;
     FRake: Integer;
@@ -39,22 +40,24 @@ type
     FDefaultBalanceLimit: UINT32;
     FUnlimitedDefaultBalance: Boolean;
   public
-    constructor Create(const AProtobufObject: TPB_Club);
+    constructor Create;
     destructor Destroy; override;
 
-    procedure UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
+    procedure Assign(const AProtobufObject: TPB_Club); overload;
+    procedure Assign(const AClubInfo: TClubInfo); overload;
     procedure UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
     procedure UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetMemberBalance(const AMemberId: TBytes);
 
-    procedure AddMember(const AClubMemberInfo: TPB_ClubMember);
+    procedure AddMember(const AClubMemberInfo: TPB_ClubMember); overload;
+    procedure AddMember(const AClubMemberInfo: TClubMemberInfo); overload;
     function GetMemberInfo(const AMongoId: TBytes; out AMemberInfo: TClubMemberInfo): Boolean;
 
     property Id: Integer read FId;
     property MongoId: TBytes read FMongoId;
     property OwnerId: TBytes read FOwnerId;
     property Name: String read FName;
-    property InvCode: String read FInvCode;
+    property Password: String read FPassword;
     property Members: TObjectList<TClubMemberInfo> read FMembers;
     property Games: TGamesInfo read FGames;
     property Rake: Integer read FRake;
@@ -78,11 +81,10 @@ uses
 
 { TClubInfo }
 
-constructor TClubInfo.Create(const AProtobufObject: TPB_Club);
+constructor TClubInfo.Create;
 begin
   FMembers := TObjectList<TClubMemberInfo>.Create;
   FGames := TGamesInfo.Create;
-  UpdateFromProtobufObject(AProtobufObject);
 end;
 
 destructor TClubInfo.Destroy;
@@ -106,7 +108,7 @@ begin
   Exit(FALSE);
 end;
 
-procedure TClubInfo.UpdateFromProtobufObject(const AProtobufObject: TPB_Club);
+procedure TClubInfo.Assign(const AProtobufObject: TPB_Club);
 var
   member: TPB_ClubMember;
 begin
@@ -114,7 +116,7 @@ begin
   FOwnerId := AProtobufObject.Owner;
   FId := AProtobufObject.Seq;
   FName := AProtobufObject.Name;
-  FInvCode := AProtobufObject.Password;
+  FPassword := AProtobufObject.Password;
   FMembers.Clear;
   for member in AProtobufObject.Members do
     AddMember(member);
@@ -122,6 +124,24 @@ begin
   FPrivate := AProtobufObject.IsPrivate;
   FDefaultBalanceLimit := AProtobufObject.DefaultBalanceLimit;
   FUnlimitedDefaultBalance := AProtobufObject.UnlimitedDefaultBalance;
+end;
+
+procedure TClubInfo.Assign(const AClubInfo: TClubInfo);
+var
+  member: TClubMemberInfo;
+begin
+  FMongoId := AClubInfo.MongoId;
+  FOwnerId := AClubInfo.OwnerId;
+  FId := AClubInfo.Id;
+  FName := AClubInfo.Name;
+  FPassword := AClubInfo.Password;
+  FMembers.Clear;
+  for member in AClubInfo.Members do
+    AddMember(member);
+  FRake := AClubInfo.Rake;
+  FPrivate := AClubInfo.IsPrivate;
+  FDefaultBalanceLimit := AClubInfo.DefaultBalanceLimit;
+  FUnlimitedDefaultBalance := AClubInfo.UnlimitedDefaultBalance;
 end;
 
 procedure TClubInfo.UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
@@ -161,18 +181,32 @@ begin
   FMembers.Add(cmi);
 end;
 
+procedure TClubInfo.AddMember(const AClubMemberInfo: TClubMemberInfo);
+var
+  cmi: TClubMemberInfo;
+begin
+  cmi := TClubMemberInfo.Create(AClubMemberInfo);
+  FMembers.Add(cmi);
+end;
+
+
 
 { TPlayerClubsInfo }
 
 function TClubsInfo.AddClub(const AProtobufObject: TPB_Club): TClubInfo;
 var
   index: Integer;
+  club: TClubInfo;
 begin
   index := IndexOf(AProtobufObject.Seq);
   if index = -1 then
-    index := Add(TClubInfo.Create(AProtobufObject))
+  begin
+    club := TClubInfo.Create;
+    club.Assign(AProtobufObject);
+    index := Add(club)
+  end
   else
-    Items[index].UpdateFromProtobufObject(AProtobufObject);
+    Items[index].Assign(AProtobufObject);
 
   result := Items[index];
 end;
@@ -225,6 +259,15 @@ begin
   FBalanceLimit := AClubMemberProtobuf.BalanceLimit;
   FClubBalance := AClubMemberProtobuf.ClubBalance;
   FUnlimitedLimit := AClubMemberProtobuf.UnlimitedLimit;
+end;
+
+constructor TClubMemberInfo.Create(const AClubMemberInfo: TClubMemberInfo);
+begin
+  FMongoId := AClubMemberInfo.MongoId;
+  FSuspended := AClubMemberInfo.Suspended;
+  FBalanceLimit := AClubMemberInfo.BalanceLimit;
+  FClubBalance := AClubMemberInfo.ClubBalance;
+  FUnlimitedLimit := AClubMemberInfo.UnlimitedLimit;
 end;
 
 end.

@@ -49,6 +49,8 @@ uses
   Poker.Forms.About in 'forms\Poker.Forms.About.pas' {frmAbout},
   Poker.Forms.SystemTrayPopup in 'forms\Poker.Forms.SystemTrayPopup.pas' {frmSystemTrayPopup},
   Poker.Forms.CloseClubConfirmation in 'forms\Poker.Forms.CloseClubConfirmation.pas' {frmCloseClubConfirmation},
+  Poker.Forms.HandHistory in 'forms\Poker.Forms.HandHistory.pas' {frmHandHistory},
+  Poker.Forms.ClubMemberOptions in 'forms\Poker.Forms.ClubMemberOptions.pas' {frmClubMemberOptions},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -135,11 +137,21 @@ uses
   Poker.Protobufs.Objects.ValidCharsRegex in 'modules\protobuf\objects\Poker.Protobufs.Objects.ValidCharsRegex.pas',
   Poker.Protobufs.Objects.ClubMember in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubMember.pas',
   Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas',
-  Poker.Forms.ClubMemberOptions in 'forms\Poker.Forms.ClubMemberOptions.pas' {frmClubMemberOptions},
   Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas',
   Poker.Protobufs.Objects.ClubPlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas',
   Poker.Protobufs.Objects.ClubStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas',
-  Poker.CommandLineParamProcesser in 'modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas';
+  Poker.CommandLineParamProcesser in 'modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas',
+  Poker.Protobufs.Objects.ClubHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas',
+  Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
+  Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
+  Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
+  Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas',
+  Poker.HandHistory.Core in 'modules\hand_history\Poker.HandHistory.Core.pas',
+  Poker.HandHistory.HandHistoryItem in 'modules\hand_history\Poker.HandHistory.HandHistoryItem.pas',
+  Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
+  Poker.HandHistory.Moves in 'modules\hand_history\Poker.HandHistory.Moves.pas',
+  Vcl.Themes,
+  Vcl.Styles;
 
 procedure FocusPokerApp;
 var

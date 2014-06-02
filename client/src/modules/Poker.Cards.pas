@@ -30,6 +30,7 @@ type
     class function GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String; overload;
     class function SuitAsString(const ASuit: TCardSuit): String;
     class function ValueAsString(const AValue: TCardValue): String;
+    class function ByteToString(const AByte: Byte): String;
 
     property Value: TCardValue read FValue;
     property Suit: TCardSuit read FSuit;
@@ -45,7 +46,7 @@ type
 
     procedure Assign(const ABytes: TBytes);
 
-    class function BytesToString(const ACards: TBytes): String;
+    class function BytesToString(const ACards: TBytes; const ADelimiter: String = ''; const ALength: Integer = 0): String;
 
     property AsString: String read GetAsString;
   end;
@@ -145,6 +146,18 @@ begin
   result := GetAsString(FValue, FSuit);
 end;
 
+class function TCard.ByteToString(const AByte: Byte): String;
+var
+  card: TCard;
+begin
+  card := TCard.Create(AByte);
+  try
+    result := card.AsString;
+  finally
+    card.Free;
+  end;
+end;
+
 { TCards }
 
 constructor TCards.Create;
@@ -177,21 +190,30 @@ begin
     result := result + ToArray[C1].AsString;
 end;
 
-class function TCards.BytesToString(const ACards: TBytes): String;
+class function TCards.BytesToString(const ACards: TBytes; const ADelimiter: String = ''; const ALength: Integer = 0): String;
 var
   C1: Integer;
   card: TCard;
+  size: Integer;
 begin
   result := '';
-  for C1 := Low(ACards) to High(ACards) do
+  size := ALength;
+  if ALength = 0 then
+    size := Length(ACards);
+
+  for C1 := 0 to size - 1 do
   begin
     card := TCard.Create(ACards[C1]);
     try
-      result := result + card.AsString;
+      result := result + card.AsString + ADelimiter;
     finally
       card.Free;
     end;
   end;
+
+  if (result <> '') and
+     (ADelimiter <> '') then
+    System.Delete(result, Length(result) - Length(ADelimiter) + 1, Length(ADelimiter));
 end;
 
 end.

@@ -12,9 +12,9 @@ uses
 
 type
   TdmMain = class(TDataModule)
+    il20px: TcxImageList;
     SkinController: TdxSkinController;
     HintController: TcxHintStyleController;
-    il20px: TcxImageList;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
   private
@@ -68,16 +68,9 @@ uses
   Vcl.Graphics, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup;
+  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup,
+  Poker.HandHistory.Core;
 
-
-function TdmMain.CheckAuthed: Boolean;
-begin
-  result := FSelfInfo.Authed;
-
-  if not result then
-    MessageDlg('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.', mtWarning, [mbOK], 0);
-end;
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 var
@@ -111,6 +104,7 @@ begin
   TFormsContainer.Initialize;
   TSounds.Initialize;
   TTablesStats.Initialize;
+  THandHistory.Initialize;
 
   if (Settings.DeveloperMode) and
      (Settings.ServerIndex = 1) then
@@ -134,21 +128,19 @@ end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
-  FUpdateFiles.Free;
-
+  // deinit objects
+  FreeAndNil(FUpdateFiles);
+  TFormsContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
-
   TTables.Deinitialize;
   TPlayers.Deinitialize;
-
   FSelfInfo.Free;
-
   TServerSocket.Deinitialize;
+  THandHistory.Deinitialize;
   TTablesStats.Deinitialize;
   TSounds.Deinitialize;
-  TFormsContainer.Deinitialize;
   TMessageContainer.Deinitialize;
-  FreeAndNil(ServerSettings);
+  TServerSettings.Deinitialize;
   if Assigned(TableResources) then
     TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
@@ -165,7 +157,15 @@ begin
     ShellOpen(PChar(FUpdaterInstallerFile), nil, '/verysilent /surpressmsgboxes /closeapplications');
 
   if (FUpdaterBatchFile <> '') and (FileExists(FUpdaterBatchFile)) then
-    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_HIDE);
+    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_SHOWNORMAL);
+end;
+
+function TdmMain.CheckAuthed: Boolean;
+begin
+  result := FSelfInfo.Authed;
+
+  if not result then
+    MessageDlg('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.', mtWarning, [mbOK], 0);
 end;
 
 procedure TdmMain.OpenCashierLink;
@@ -329,6 +329,7 @@ begin
       end;
     end;
     pb_ufi.Hash := hash_bytes;
+    pb_ufi.Path := StringReplace(pb_ufi.Path, '\', '/', [rfReplaceAll]);
     AFiles.Add(pb_ufi);
   end;
 end;

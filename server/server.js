@@ -79,7 +79,6 @@ function initConfig() {
 	sharedconfig.valid_chars_regex = regex;
 	var regex2 = {};
 	for (var key in regex) {
-		console.log(key);
 		regex2[key] = new RegExp(regex[key]);
 	}
 	regexLimits = regex2;
@@ -129,6 +128,78 @@ function unpackInstaller(row,cb1) {
 		req.end();
 		cb();
 	}
+	function hashFiles(files) {
+		var key = {_id:row._id};
+		var hashes = {};
+		var sizes = [];
+		var mods = { $set:{hashes:hashes}};
+		async.each(files,function hashFile(filename,cb2) {
+			var hasher = crypto.createHash('sha256');
+			var client = fs.createReadStream('unpacked/'+row._id+'/app/'+filename);
+			var size = 0;
+			client.on('data',function (data) {
+				hasher.update(data);
+				size += data.length;
+			});
+			client.on('end',function () {
+				var hash = hasher.digest('hex');
+				console.log('hash of %s is %s',filename,hash);
+				var key = filename.replace('.','_');
+				sizes.push({_id:hash, size:size});
+				hashes[key] = hash;
+				copyFile('unpacked/'+row._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
+					fs.unlink('unpacked/'+row._id+'/app/'+filename,function () {
+						cb2();
+					});
+				});
+			});
+		},function () {
+			conn.collection('installers').update(key,mods,function (err,newdoc) {
+				assert.ifError(err);
+				if (err) console.log(err);
+				console.log('inserted %j',newdoc);
+				fs.rmdir('unpacked/'+row._id+'/app/',function () {
+					fs.rmdir('unpacked/'+row._id,function () {
+						conn.collection('installers').findOne(key,function (err,doc) {
+							async.each(sizes,function (row,cb) {
+								conn.collection('objectSizes').save(row,cb);
+							},function () {
+								updateLive(doc,sizes,function () {
+									cb1(true);
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	}
+	function recurse_dir(path,prefix,cb4) {
+		var items = [];
+		fs.readdir(prefix+path,function (err,files) {
+			console.log('checked path %s %s',prefix,path);
+			assert.ifError(err);
+			async.each(files,function checkItem(filename,cb3) {
+				fs.stat(prefix+path+filename,function (err,stats) {
+					assert.ifError(err);
+					console.log('stats:%j',stats);
+					if (stats.isDirectory()) {
+						recurse_dir(filename+'/',prefix,function (err,items2) {
+							console.log('2nd level %j',items2);
+							assert.ifError(err);
+							items = items.concat(items2);
+							cb3();
+						});
+					} else if (stats.isFile()) {
+						items.push(path+filename);
+						cb3();
+					}
+				});
+			},function () {
+				cb4(null,items);
+			});
+		});
+	}
 	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+row._id+'/','-e','installers/'+row.name],{stdio:'inherit'});
 	unpacker.on('close',function (code) {
 		if (code != 0) {
@@ -136,51 +207,10 @@ function unpackInstaller(row,cb1) {
 			return;
 		}
 		assert.equal(code,0);
-		fs.readdir('unpacked/'+row._id+'/app/',function (err,files) {
-			var key = {_id:row._id};
-			var hashes = {};
-			var sizes = [];
-			var mods = { $set:{hashes:hashes}};
-			async.each(files,function hashFile(filename,cb2) {
-				var hasher = crypto.createHash('sha256');
-				var client = fs.createReadStream('unpacked/'+row._id+'/app/'+filename);
-				var size = 0;
-				client.on('data',function (data) {
-					hasher.update(data);
-					size += data.length;
-				});
-				client.on('end',function () {
-					var hash = hasher.digest('hex');
-					console.log('hash of %s is %s',filename,hash);
-					var key = filename.replace('.','_');
-					sizes.push({_id:hash, size:size});
-					hashes[key] = hash;
-					copyFile('unpacked/'+row._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
-						fs.unlink('unpacked/'+row._id+'/app/'+filename,function () {
-							cb2();
-						});
-					});
-				});
-			},function () {
-				conn.collection('installers').update(key,mods,function (err,newdoc) {
-					assert.ifError(err);
-					if (err) console.log(err);
-					console.log('inserted %j',newdoc);
-					fs.rmdir('unpacked/'+row._id+'/app/',function () {
-						fs.rmdir('unpacked/'+row._id,function () {
-							conn.collection('installers').findOne(key,function (err,doc) {
-								async.each(sizes,function (row,cb) {
-									conn.collection('objectSizes').save(row,cb);
-								},function () {
-									updateLive(doc,sizes,function () {
-										cb1(true);
-									});
-								});
-							});
-						});
-					});
-				});
-			});
+		recurse_dir('','unpacked/'+row._id+'/app/',function (err,files) {
+			assert.ifError(err);
+			console.log('all files:%j',files);
+			hashFiles(files);
 		});
 	});
 }
@@ -774,7 +804,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats,gameState,clubBalances;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats,gameState,clubBalances,debugLogs;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -816,6 +846,10 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		assert.ok(collection instanceof Collection);
 		PokerProfile = collection;
 		profiler.setup(PokerProfile);
+	});
+	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) {
+		assert.ok(collection instanceof Collection);
+		debugLogs = collection;
 	});
 
 	sessionStore = new MongoStore(db,'sessions');
@@ -868,6 +902,11 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 					log('bad game %j',game);
 					if (!gameObj) {
 						log('game is missing!');
+						cb();
+						return;
+					}
+					if (!game.state) {
+						log('state is missing');
 						cb();
 						return;
 					}
@@ -984,6 +1023,7 @@ function log(format) {
 		out = [ util.format.apply(util,out) ]
 	}
 	process.send({type:'global',ts:new Date().toString(),msg:out.join(' ')});
+	if (debugLogs) debugLogs.insert({type:'global',msg:out.join(' ')},function () {});
 }
 function getNextSequence(name,cb) {
 	allCounters.findAndModify({_id:name},[],
@@ -1135,6 +1175,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					} else finish2.call(this,[]);
 				}.bind(this));
 			}.bind(this),function done() {
+				console.log(statuses);
 				this.send(codes.srLoginReply,{login_status:'lrSuccess',status:status,reconnect_tables:statuses},'Poker.LoginReply');
 				// FIXME< embed in the same message
 				handlers[codes.scQueryTableStats].call(this,new Buffer(0));
@@ -1183,6 +1224,7 @@ ClientSocket.prototype.log = function log(format) {
 		out = [ util.format.apply(util,out) ]
 	}
 	process.send({type:'conn',nick:this.nick,connid:this.connid,ts:new Date().toString(),objects:out});
+	debugLogs.insert({type:'conn',nick:this.nick,connid:this.connid,objects:out},function (){});
 }
 ClientSocket.prototype.reply = function reply(code,message,type) {
 	var obj;
@@ -1300,14 +1342,14 @@ ClientSocket.prototype.doHelloProcessing = function(args) {
 					conn.collection('diffs').findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
 						if (diffRow) {
-							var UFI = { path: clientFile.path, url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
+							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
 							toUpdate.push(UFI);
 							cb();
 						} else {
 							conn.collection('objectSizes').findOne({_id:targetFile},function (err,sizeRow) {
 								assert.ifError(err);
 								if (sizeRow) {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path,url:staticdomain+'unpacked/objects/'+targetFile,file_size:sizeRow.size});
+									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:staticdomain+'unpacked/objects/'+targetFile,file_size:sizeRow.size});
 								} else {
 									log('cant find original of %s',clientFile.path);
 								}
@@ -1338,6 +1380,9 @@ function makeDiff(sourcehash,desthash,path) {
 		req.on('data',function (chunk) {
 			console.log(chunk);
 		});
+		req.on('error',function (err) {
+			console.log('http error sending diff:',err);
+		});
 		req.write(body);
 		req.end();
 	}
@@ -1355,7 +1400,7 @@ function makeDiff(sourcehash,desthash,path) {
 	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
 		console.log('localCopy:%j',localCopy);
 		if (localCopy) {
-			bsdiffLock.writeLock(function (release) {
+			bsdiffLock.writeLock(function bsdiffLocked(release) {
 				conn.collection('diffs').findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
 					assert.ifError(err);
 					if (diffRow) {
@@ -2767,7 +2812,7 @@ handlers[codes.scQueryTableStats] = function (args) {
 		},function () {
 			if (data.players) {
 				Club.finishTableStatsPacket(data,function (packet) {
-					console.log('packet:%j',packet);
+					//console.log('packet:%j',packet);
 					this.send(codes.srTableStatsReply,packet,'Poker.TableStatsReplies');
 				}.bind(this));
 			}
@@ -3268,6 +3313,9 @@ Game.prototype.log = function log(format) {
 	}
 	out.unshift(this.handid);
 	process.send({type:'game',name:this.obj.gamename,ts:new Date().toString(),objects:out});
+	var obj = {type:'game',gameid:this.obj._id,name:this.obj.gamename,objects:out}
+	if (this.club) obj.clubid = this.club.clubid;
+	debugLogs.insert(obj,function (){});
 }
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);
@@ -3366,7 +3414,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					var timediff = Date.now() - last.when;
 					conn.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
 					if (timediff < (30 * 60 * 1000)) {
-						if (params.chips < last.chips && true) {
+						if (params.chips < last.chips && false) {
 							conn.send(codes.srTableBuyinLessThanCashout,{game_id:fromMongoId(this.id),last_cashout:last.chips},'Poker.BuyinError');
 							cb(false,events);
 							return;
@@ -3456,10 +3504,20 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		allGames.update({_id:this.id},{$set:{lasthandid:seq, rotation:this.rotation}},function (err,res){});
 		this.history = {moves:[],players:[],cards:[]};
 		hands = seq;
-		//if (this.dealer == -1)
+		var oldDealer = this.dealer;
 		this.nextDealer();
 		this.bets = [];
 		this.balance_changes = [];
+
+		var canplay = 0;
+		for (var x=0; x<this.members.length; x++) {
+			if (!this.members[x]) continue;
+			if (['psInHand','psOutOfHand'].indexOf(this.members[x].status) != -1) canplay++;
+		}
+
+		var sb = this.getNextSeat(oldDealer);
+		var bb = this.getNextSeat(sb);
+		if (bb < oldDealer) bb += this.obj.seats;
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
 			if (this.members[x].status == 'psOutOfPlay') {
@@ -3474,6 +3532,28 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				this.updateLeaveStats(x);
 				this.lastplayer[x] = this.seats[x].userid;
 				continue;
+			}
+			if (canplay < 3) { // for 2 player games, just allow all
+			} else if (bb == -1) { // initial round
+			} else if (sb == -1) {
+			} else if (this.members[x].status == 'psInHand') {
+			} else if ((oldDealer < bb) && (bb < x)) { // you are after BB
+				this.log('XXX %d is after bb:%d',x,bb);
+/*			} else if (x == oldDealer) {
+				this.log('XXX %d is dealer %d %d',x,sb,bb);
+				this.nextDealer();
+				sb = this.getNextSeat(this.dealer);
+				bb = this.getNextSeat(sb);
+				if (bb < this.dealer) bb += this.obj.seats;
+				continue;*/
+			} else if ((oldDealer < x) && (x < bb)) {
+				this.log('XXX %d is between %d-%d',x,oldDealer,bb);
+				if (x == this.dealer) {
+					this.nextDealer();
+				}
+				continue;
+			} else {
+				this.log('XXX dealer:%d x:%d(%s) sb:%d bb:%d',oldDealer,x,this.members[x].status,sb,bb);
 			}
 			this.members[x].SittingOutRoundsCount = 0;
 			if (this.omaha) {
@@ -3500,7 +3580,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			}
 			this.members[x].status = 'psInHand';
 			this.members[x].can_show = true;
-			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards };
+			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips };
 			this.history.cards[x+3] = this.members[x].hand.prettyPrint(true);
 			this.members[x].muck = true;
 			this.balance_changes[x] = 0;
@@ -3780,8 +3860,10 @@ Game.prototype.doWin = function (cb,extradelay) {
 					this.state = 'tsWinning2';
 					//this.broadcastStatus(null);
 					this.stateMachine(function (events) {
-						this.broadcastStatus(null,true,events); // teDeal
-						release();
+						this.updateMongoState({},{members:true},function () {
+							this.broadcastStatus(null,true,events); // teDeal
+							release();
+						}.bind(this));
 					}.bind(this),null,{cont:true},[],0);
 				}.bind(this));
 			}.bind(this))
@@ -3799,8 +3881,9 @@ Game.prototype.doWin = function (cb,extradelay) {
 		if (pot.value == 0) continue;
 
 		// redo
-		var rake = pot.value * (this.rake / 100);
-		var rakesplit = Math.round(rake / pot.trueMembers.length);
+		var rake = Math.round(pot.value * (this.rake / 100));
+		assert(pot.trueMembers.length > 0);
+		var rakesplit = rake / pot.trueMembers.length;
 		rake = rakesplit * pot.trueMembers.length;
 		pot.rake = rake;
 		this.history.potdata[y].rake = rake;
@@ -3812,6 +3895,9 @@ Game.prototype.doWin = function (cb,extradelay) {
 		//rake = pot.value - (split * pot.winners.length);
 		totalrake += rake;
 		//var rakesplit = rake/pot.trueMembers.length;
+		assert(!isNaN(rake));
+		assert(!isNaN(rakesplit));
+		assert(!isNaN(split));
 		this.log('rake:%d/%d pot:%j split:%d',rake,rakesplit,pot,split);
 		for (var x=0; x<pot.trueMembers.length; x++) {
 			if (rakestats[pot.trueMembers[x]]) rakestats[pot.trueMembers[x]].rake += rakesplit;
@@ -4266,6 +4352,7 @@ Game.prototype.updateMongoState = function (obj,options,cb) {
 		obj.$set.users = U;
 	}
 	conn.collection('gameState').update({_id:this.obj._id}, obj,function (err,res) {
+		this.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
 		assert(res == 1);
 		cb();
 	}.bind(this));
@@ -4467,7 +4554,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		}.bind(this),function () {
 			this.club.handOver(this,function () {
 				this.stateMachine(cb,conn,config,events,extradelay);
-			}.bind(this));
+			}.bind(this),this.handid);
 		}.bind(this));
 		break;
 	case 'tsIdle':

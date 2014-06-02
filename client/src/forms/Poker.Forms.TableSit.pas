@@ -63,9 +63,6 @@ type
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
   end;
 
-var
-  frmTableSit: TfrmTableSit;
-
 implementation
 
 {$R *.dfm}
@@ -174,7 +171,7 @@ begin
   FTableStatus := AParams[1];
   FSeatIndex := PInteger(AParams[2])^;
 
-  lbvTableName.Caption := Format('%s (%s/%s %s)', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull]);
+  lbvTableName.Caption := Format('%s (%s/%s %s)', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(FALSE)]);
   lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(FTable.Game.MinBuyin * FTable.Game.BigBlind),
       ChipsToStr(FTable.Game.MaxBuyin * FTable.Game.BigBlind)]);
   lbvAvailableBalance.Caption := Format('%s', [ChipsToStr(dmMain.AvailableBalance)]);

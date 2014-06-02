@@ -51,9 +51,6 @@ type
     property SelectionBitmap: TBitmap32 read FSelectionBitmap;
   end;
 
-var
-  frmImageCrop: TfrmImageCrop;
-
 implementation
 
 uses

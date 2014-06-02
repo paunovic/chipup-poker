@@ -330,7 +330,7 @@ end;
 procedure TfrmDebug.acRunNewInstanceExecute(Sender: TObject);
 begin
   TInstanceController.UnregisterInstance;
-  ShellOpen(PChar(ParamStr(0)));
+  ShellOpen(PChar(ParamStr(0)), nil, PChar(ParamStr(1)));
 end;
 
 procedure TfrmDebug.acSaveLogExecute(Sender: TObject);
@@ -402,7 +402,7 @@ begin
     Cells[0, 0].AddFmt('%s', [ATime], 0, 0);
     Cells[0, 1].AddFmt('%s', [ATypeStr], ATypeStyle, 1);
     if ASubData <> '' then
-      Cells[0, 2].AddFmt('►', [], 13, 1)
+      Cells[0, 2].AddFmt('+', [], 13, 1)
     else
       Cells[0, 2].AddFmt('', [], 13, 1);
     Cells[0, 3].AddFmt('%s', [AData], ADataStyle, 2);
@@ -475,9 +475,9 @@ begin
     rvLog.SetItemExtraIntProperty(ItemNo + 1, rvepHidden, is_hidden);
     table := rvLog.GetItem(ItemNo) as TRVTableItemInfo;
     if is_hidden = 0 then
-      table.Cells[0, 2].SetItemText(0, '▼')
+      table.Cells[0, 2].SetItemText(0, '-')
     else
-      table.Cells[0, 2].SetItemText(0, '►');
+      table.Cells[0, 2].SetItemText(0, '+');
     rvLog.Format;
   end;
 end;

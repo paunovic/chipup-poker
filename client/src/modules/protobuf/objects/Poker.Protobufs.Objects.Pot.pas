@@ -17,17 +17,17 @@ type
 
     var
       FValue: UINT32;
-      FMembers: TArray<UINT32>;
+      FMembers: TArray<Integer>;
 
     procedure SetValue(const AValue: UINT32);
-    procedure SetMembers(const AValue: TArray<UINT32>);
+    procedure SetMembers(const AValue: TArray<Integer>);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Value: UINT32 read FValue write SetValue;
-    property Members: TArray<UINT32> read FMembers write SetMembers;
+    property Members: TArray<Integer> read FMembers write SetMembers;
   end;
 
 implementation
@@ -57,7 +57,7 @@ begin
       FN_MEMBERS: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FMembers, Length(FMembers) + 1);
-        FMembers[Length(FMembers)-1] := AProtobufReader.readUInt32;
+        FMembers[Length(FMembers)-1] := AProtobufReader.readInt32;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -71,13 +71,13 @@ begin
   ProtobufOutput.writeUInt32(FN_VALUE, AValue);
 end;
 
-procedure TPB_Pot.SetMembers(const AValue: TArray<UINT32>);
+procedure TPB_Pot.SetMembers(const AValue: TArray<Integer>);
 var
   C1: Integer;
 begin
   FMembers := AValue;
   for C1 := 0 to Length(FMembers) - 1 do
-    ProtobufOutput.writeUInt32(FN_MEMBERS, AValue[C1]);
+    ProtobufOutput.writeInt32(FN_MEMBERS, AValue[C1]);
 end;
 
 end.

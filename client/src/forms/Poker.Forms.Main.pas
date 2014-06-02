@@ -8,8 +8,8 @@ uses
   cxLookAndFeelPainters, dxSkinscxPCPainter, cxCustomData, cxDataStorage, cxEdit, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
   cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo,
   cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, Vcl.ActnMan, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club,
-  dxGDIPlusClasses, ChipUpPokerDarkSkin, cxPC, cxPCdxBarPopupMenu;
+  Vcl.PlatformDefaultStyleActnCtrls, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club, dxGDIPlusClasses, ChipUpPokerDarkSkin,
+  cxPC, cxPCdxBarPopupMenu, dxScreenTip, dxCustomHint, cxHint;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -23,12 +23,12 @@ type
     acShowGameTableForm: TAction;
     acOpenClubLobby: TAction;
     MainMenu: TMainMenu;
-    Account1: TMenuItem;
-    ChangeEmailAddress1: TMenuItem;
-    ChangePassword1: TMenuItem;
-    ChangeAvatar1: TMenuItem;
-    N1: TMenuItem;
-    Logout1: TMenuItem;
+    miAccount: TMenuItem;
+    miChangeEMail: TMenuItem;
+    miChangePassword: TMenuItem;
+    miChangeAvatar: TMenuItem;
+    misAccount2: TMenuItem;
+    miLogout: TMenuItem;
     acShowTournamentLayout: TAction;
     acShowHomeGamesLayout: TAction;
     imgCashier: TcxImage;
@@ -37,8 +37,8 @@ type
     paMain: TPanel;
     btTournaments: TcxButton;
     btHomeGames: TcxButton;
-    Resendverificationmail1: TMenuItem;
-    N2: TMenuItem;
+    miResendVerificationMail: TMenuItem;
+    misAccount1: TMenuItem;
     acResendVerificationMail: TAction;
     btFiller1: TcxButton;
     pcTabs: TcxPageControl;
@@ -68,15 +68,15 @@ type
     btTournamentsHeader: TcxButton;
     lbsTournamentsComingSoon: TcxLabel;
     tiBringToFront: TTimer;
-    Help1: TMenuItem;
-    ContactUs1: TMenuItem;
+    miHelp: TMenuItem;
+    miContactUs: TMenuItem;
     acShowContactUsForm: TAction;
-    TermsofService1: TMenuItem;
+    miTermsAndConditions: TMenuItem;
     acTermsAndConditions: TAction;
     acShowAboutForm: TAction;
-    N3: TMenuItem;
-    AboutChipUPPoker1: TMenuItem;
-    Options1: TMenuItem;
+    misHelp1: TMenuItem;
+    miAbout: TMenuItem;
+    miOptions: TMenuItem;
     miSounds: TMenuItem;
     acSoundsOnOff: TAction;
     gridMyHomeGames: TcxGrid;
@@ -85,12 +85,15 @@ type
     gridJoinedClubsClubName: TcxGridColumn;
     gridJoinedClubsStatus: TcxGridColumn;
     gridMyHomeGamesLevel: TcxGridLevel;
-    Developer1: TMenuItem;
-    Disconnect1: TMenuItem;
-    N4: TMenuItem;
+    miDev: TMenuItem;
+    miDisconnect: TMenuItem;
+    misOptions1: TMenuItem;
     miCheckOnFold: TMenuItem;
     acFoldChecks: TAction;
-    Gameplay1: TMenuItem;
+    miGameplay: TMenuItem;
+    misOptions2: TMenuItem;
+    miHandHistory: TMenuItem;
+    acHandHistory: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -124,9 +127,10 @@ type
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
-    procedure Disconnect1Click(Sender: TObject);
+    procedure miDisconnectClick(Sender: TObject);
     procedure acShowAboutFormExecute(Sender: TObject);
     procedure acFoldChecksExecute(Sender: TObject);
+    procedure acHandHistoryExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -161,6 +165,7 @@ type
     procedure CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -195,16 +200,16 @@ uses
   System.Generics.Collections, Poker.Protobufs.Objects.GameQuery, SynDBSQLite3,
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply,
-  Poker.Table.Tables, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams,
-  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings,
-  Poker.Protobufs.Objects.TableStatsReplies, Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply;
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply, Poker.Table.Tables,
+  Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater,
+  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
+  Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
+  Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory;
 
 
-procedure TfrmChipUpMain.Disconnect1Click(Sender: TObject);
+procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
 begin
   ServerSocket.Disconnect;
 end;
@@ -231,6 +236,7 @@ begin
   btJoinClub.Font.Assign(btHomeGames.Font);
 
   pcTabs.ActivePage := tsHomeGames;
+  FCallbacksId := -1;
 
   Avatars.OnAvatarChanged := AvatarChanged;
 
@@ -295,6 +301,7 @@ begin
   DoLogout;
   Hide;
   MessageContainer.RemoveCallbacks(FCallbacksId);
+  FCallbacksId := -1;
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
 end;
 
@@ -331,7 +338,7 @@ begin
         EnableWindow(Handle, FALSE);
 
         // open reconection form
-        reconnect_form := FormsContainer.RunForm(TfrmReconnect, nil, [], FALSE) as TfrmReconnect;
+        reconnect_form := FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect;
         reconnect_form.SetCloseCallback(ModalFormClose);
       end;
     end;
@@ -369,6 +376,11 @@ procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
 begin
   Settings.FoldChecks := not Settings.FoldChecks;
   miCheckOnFold.Checked := Settings.FoldChecks
+end;
+
+procedure TfrmChipUpMain.acHandHistoryExecute(Sender: TObject);
+begin
+  FormsContainer.RunForm(TfrmHandHistory, self, [nil], FALSE);
 end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
@@ -495,7 +507,7 @@ begin
   if cpt <> Caption then
     Caption := cpt;
 
-  Resendverificationmail1.Visible := not dmMain.SelfInfo.Authed;
+  miResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
 
   acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
                              (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
@@ -503,7 +515,7 @@ begin
   miSounds.Checked := Settings.Sounds;
   miCheckOnFold.Checked := Settings.FoldChecks;
 
-  Developer1.Visible := Settings.DeveloperMode;
+  miDev.Visible := Settings.DeveloperMode;
 
   UpdateClublist;
   UpdateGamelist;
@@ -581,7 +593,7 @@ begin
 
       c.SetValue(recidx, gridGamesId.Index, game.MongoId);
       c.SetValue(recidx, gridGamesName.Index, game.Name);
-      c.SetValue(recidx, gridGamesType.Index, game.GameTypeStrFull);
+      c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
       c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
       c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
       c.SetValue(recidx, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
@@ -758,44 +770,48 @@ procedure TfrmChipUpMain.LoginStatus(const AValue: TLoginStatus);
 begin
   case AValue of
     lsLoggedIn: begin
-      FCallbacksId := MessageContainer.AddCallbacks([
-                          TSocketStateChangeCallback.Create(SocketStateChange),
-                          TServerMessageCallback.Create(srStatus, CSRStatus),
-                          TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                          TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubCommand),
-                          TServerMessageCallback.Create(srCreateClubReply, CSRClubCommand),
-                          TServerMessageCallback.Create(srJoinClubReply, CSRClubCommand),
-                          TServerMessageCallback.Create(srKickPlayerReply, CSRClubCommand),
-                          TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
-                          TServerMessageCallback.Create(srLogout, CSRLogout),
-                          TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
-                          TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                          TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                          TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
-                          TServerMessageCallback.Create(seChat, CSEChatEvent),
-                          TServerMessageCallback.Create(seAccountConfirmed, CSEAccountConfirmed),
-                          TServerMessageCallback.Create(seClubChange, CSREClubOperation),
-                          TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
-                          TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
-                          TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
-                          TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
-                          TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
-                          TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
-                          TServerMessageCallback.Create(seGameChange, CSREGameOperation),
-                          TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
-                          TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
-                          TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
-                          TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
-                          TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
-                          TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                          TServerMessageCallback.Create(srTableStatsReply, CSRTableStats)
-                      ]);
+      if FCallbacksId = -1 then
+      begin
+        FCallbacksId := MessageContainer.AddCallbacks([
+                            TSocketStateChangeCallback.Create(SocketStateChange),
+                            TServerMessageCallback.Create(srStatus, CSRStatus),
+                            TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
+                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srCreateClubReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srJoinClubReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srKickPlayerReply, CSRClubCommand),
+                            TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
+                            TServerMessageCallback.Create(srLogout, CSRLogout),
+                            TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
+                            TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
+                            TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
+                            TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
+                            TServerMessageCallback.Create(seChat, CSEChatEvent),
+                            TServerMessageCallback.Create(seAccountConfirmed, CSEAccountConfirmed),
+                            TServerMessageCallback.Create(seClubChange, CSREClubOperation),
+                            TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
+                            TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
+                            TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
+                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
+                            TServerMessageCallback.Create(seGameChange, CSREGameOperation),
+                            TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
+                            TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
+                            TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
+                            TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
+                            TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
+                            TServerMessageCallback.Create(seUserChange, CSEUserChange),
+                            TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
+                            TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
+                        ], TRUE);
 
-      FSelectedClub := -1;
-      SetLength(FSelectedGame, 0);
-      ConfigureGUI;
-      Show;
-      tiBringToFront.Enabled := TRUE;
+        FSelectedClub := -1;
+        SetLength(FSelectedGame, 0);
+        ConfigureGUI;
+        Show;
+        tiBringToFront.Enabled := TRUE;
+      end;
     end;
 
     lsUpdating: FormsContainer.RunForm(TfrmUpdater, self, [], FALSE);
@@ -1167,6 +1183,15 @@ begin
     end;
   end;
 end;
+
+procedure TfrmChipUpMain.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
+var
+  pb: TPB_ClubHandHistoryReply;
+begin
+  pb := AObject as TPB_ClubHandHistoryReply;
+  HandHistory.Add(pb);
+end;
+
 
 
 end.

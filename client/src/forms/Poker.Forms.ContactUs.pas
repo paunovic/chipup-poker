@@ -33,9 +33,6 @@ type
   public
   end;
 
-var
-  frmContactUs: TfrmContactUs;
-
 implementation
 
 {$R *.dfm}

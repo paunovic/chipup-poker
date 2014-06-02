@@ -46,6 +46,7 @@ type
     srPlayerLimitOk = 39,
     srResetPlayerBalanceOk = 40,
     srClubBalanceReached = 41,
+    srHandHistoryMsg = 42,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -167,6 +168,7 @@ begin
     srPlayerLimitOk: result := 'srPlayerLimitOk';
     srResetPlayerBalanceOk: result := 'srResetPlayerBalanceOk';
     srClubBalanceReached: result := 'srClubBalanceReached';
+    srHandHistoryMsg: result := 'srHandHistoryMsg';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';

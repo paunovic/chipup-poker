@@ -3591,8 +3591,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
           794
           410)
@@ -4222,43 +4220,48 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Check on fold, whenever possible'
       OnExecute = acFoldChecksExecute
     end
+    object acHandHistory: TAction
+      Category = 'Options'
+      Caption = 'Hand History'
+      OnExecute = acHandHistoryExecute
+    end
   end
   object MainMenu: TMainMenu
     Left = 394
     Top = 28
-    object Account1: TMenuItem
+    object miAccount: TMenuItem
       Caption = 'Account'
-      object ChangeEmailAddress1: TMenuItem
+      object miChangeEMail: TMenuItem
         Action = acShowChangeEMailForm
       end
-      object ChangePassword1: TMenuItem
+      object miChangePassword: TMenuItem
         Action = acShowChangePasswordForm
       end
-      object ChangeAvatar1: TMenuItem
+      object miChangeAvatar: TMenuItem
         Action = acShowChangeAvatarForm
       end
-      object N2: TMenuItem
+      object misAccount1: TMenuItem
         Caption = '-'
       end
-      object Resendverificationmail1: TMenuItem
+      object miResendVerificationMail: TMenuItem
         Action = acResendVerificationMail
       end
-      object N1: TMenuItem
+      object misAccount2: TMenuItem
         Caption = '-'
       end
-      object Logout1: TMenuItem
+      object miLogout: TMenuItem
         Action = acLogout
       end
     end
-    object Options1: TMenuItem
+    object miOptions: TMenuItem
       Caption = 'Options'
       object miSounds: TMenuItem
         Action = acSoundsOnOff
       end
-      object N4: TMenuItem
+      object misOptions1: TMenuItem
         Caption = '-'
       end
-      object Gameplay1: TMenuItem
+      object miGameplay: TMenuItem
         Caption = 'Gameplay'
         GroupIndex = 1
         object miCheckOnFold: TMenuItem
@@ -4266,27 +4269,35 @@ object frmChipUpMain: TfrmChipUpMain
           GroupIndex = 1
         end
       end
+      object misOptions2: TMenuItem
+        Caption = '-'
+        GroupIndex = 1
+      end
+      object miHandHistory: TMenuItem
+        Action = acHandHistory
+        GroupIndex = 1
+      end
     end
-    object Help1: TMenuItem
+    object miHelp: TMenuItem
       Caption = 'Help'
-      object ContactUs1: TMenuItem
+      object miContactUs: TMenuItem
         Action = acShowContactUsForm
       end
-      object TermsofService1: TMenuItem
+      object miTermsAndConditions: TMenuItem
         Action = acTermsAndConditions
       end
-      object N3: TMenuItem
+      object misHelp1: TMenuItem
         Caption = '-'
       end
-      object AboutChipUPPoker1: TMenuItem
+      object miAbout: TMenuItem
         Action = acShowAboutForm
       end
     end
-    object Developer1: TMenuItem
+    object miDev: TMenuItem
       Caption = 'Dev'
-      object Disconnect1: TMenuItem
+      object miDisconnect: TMenuItem
         Caption = 'Disconnect'
-        OnClick = Disconnect1Click
+        OnClick = miDisconnectClick
       end
     end
   end

@@ -25,6 +25,7 @@ type
         TCP_PING_INTERVAL: Word;
         TCP_INACTIVITY_PING_INTERVAL: Word;
         TCP_PING_TIMEOUT: Word;
+        HAND_HISTORY_HAND_LIMIT_PER_TABLE: Word;
 
         RESOURCES: record
           DIRECTORY: String;
@@ -45,7 +46,7 @@ type
     const
       Hardcoded: THardcodedSettingsRec = (
         // version of app
-        VERSION: '0.01a.0126';
+        VERSION: '0.01a.0130';
         REVISION: {$I revision.inc};
 
         // instance mutex name
@@ -63,6 +64,8 @@ type
         TCP_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
         TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity
         TCP_PING_TIMEOUT: 15; // in seconds
+
+        HAND_HISTORY_HAND_LIMIT_PER_TABLE: 1000; // 1000 hands per table
 
         // resources
         RESOURCES: (

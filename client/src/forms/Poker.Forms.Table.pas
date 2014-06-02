@@ -58,7 +58,9 @@ type
     rvChat: TRichView;
     tiGameLock: TTimer;
     tiRender: TTimer;
-    lbsHandStrength: TcxLabel;
+    lbvHandStrength: TcxLabel;
+    lbvHandHistory: TcxLabel;
+    acHandHistory: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -96,6 +98,8 @@ type
     procedure FormShow(Sender: TObject);
     procedure tiRenderTimer(Sender: TObject);
     procedure seRaiseAmountKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure acHandHistoryExecute(Sender: TObject);
+    procedure lbvHandHistoryClick(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -163,48 +167,47 @@ type
       FPlayNowResizeRatio     : Single;
       FClosingTime            : DWORD;
 
-      FActionButtonWidth      : Single;
-      FActionButtonHeight     : Single;
+      FActionButtonWidth: Single;
+      FActionButtonHeight: Single;
 
-      FActionButtons          : TArray<TUIButton>;
-      FRaisePresetButtons     : TArray<TUIButton>;
-      FStandUpButton          : TUIButton;
-      FPlayNowButton          : TUIButton;
+      FActionButtons: TArray<TUIButton>;
+      FRaisePresetButtons: TArray<TUIButton>;
+      FStandUpButton: TUIButton;
+      FPlayNowButton: TUIButton;
 
-      FDXAreaSize      : TPoint2px;
+      FDXAreaSize: TPoint2px;
 
-      FTable           : TTable;
-      FTableStatus     : TTableStatus;
-      FChipStackMaker  : TChipStackMaker;
+      FTable: TTable;
+      FTableStatus: TTableStatus;
+      FChipStackMaker: TChipStackMaker;
 
-      FGoalTime        : UINT32;
-      FCurrentPlaytime : Integer;
+      FGoalTime: UINT32;
+      FCurrentPlaytime: Integer;
 
-      FFlopAnimations  : TList<Integer>;
-      FFlopAnimated    : Boolean;
-      FTurnAnimations  : TList<Integer>;
-      FTurnAnimated    : Boolean;
-      FRiverAnimations : TList<Integer>;
-      FRiverAnimated   : Boolean;
-      FDealAnimations  : TList<Integer>;
-      FBetAnimations   : TList<Integer>;
+      FFlopAnimations: TList<Integer>;
+      FFlopAnimated: Boolean;
+      FTurnAnimations: TList<Integer>;
+      FTurnAnimated: Boolean;
+      FRiverAnimations: TList<Integer>;
+      FRiverAnimated: Boolean;
+      FDealAnimations: TList<Integer>;
+      FBetAnimations: TList<Integer>;
       FPotWinAnimations: TList<Integer>;
 
-      FWinningFlopAniDelay : Single;
-      FWinningTurnAniDelay : Single;
+      FWinningFlopAniDelay: Single;
+      FWinningTurnAniDelay: Single;
       FWinningRiverAniDelay: Single;
-      FWinningAniDelay     : Single;
+      FWinningAniDelay: Single;
 
-      FMouseDownObject : TMouseDownObject;
+      FMouseDownObject: TMouseDownObject;
 
-      FRaiseMin        : UINT32;
-      FRaiseMax        : UINT32;
-      FRaiseValue      : UINT32;
+      FRaiseMin: UINT32;
+      FRaiseMax: UINT32;
+      FRaiseValue: UINT32;
 
-      FForceFocused    : Boolean;
+      FForceFocused: Boolean;
 
-      FEventBuffer     : TObjectList<TPB_TableEvent>;
-      FTimeImage       : TAsphyreImage;
+      FTimeImage: TAsphyreImage;
 
     procedure SetDXObjectSizes;
     procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
@@ -262,6 +265,7 @@ type
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSEGameChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
 
     procedure RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
 
@@ -301,7 +305,7 @@ uses
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, AbstractCanvas,
-  Poker.HandStrengthCalculator;
+  Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core, Poker.HandHistory.HandHistoryItem;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -333,10 +337,12 @@ begin
                       TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(seGameChange, CSEGameChange),
-                      TServerMessageCallback.Create(srGetPlayers, CSRGetUsers)
+                      TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
+                      TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
                   ]);
 
-  lbsHandStrength.Caption := '';
+  lbvHandStrength.Caption := '';
+  lbvHandHistory.Caption := '';
 
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
@@ -355,8 +361,6 @@ begin
   SetLength(FRaisePresetButtons, 4);
   FStandUpButton.Action := acStandUp;
   FPlayNowButton.Action := acPlayNow;
-
-  FEventBuffer := TObjectList<TPB_TableEvent>.Create;
 
   for C1 := Low(FActionButtons) to High(FActionButtons) do
     FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
@@ -394,8 +398,6 @@ begin
   FBetAnimations.Free;
   FPotWinAnimations.Free;
 
-  FEventBuffer.Free;
-
   FChipStackMaker.Free;
   FTableStatus.Free;
 end;
@@ -403,8 +405,8 @@ end;
 procedure TfrmTable.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var
   renderit: Boolean;
-  index   : Integer;
-  C1      : Integer;
+  index: Integer;
+  C1: Integer;
 begin
   renderit := FALSE;
 
@@ -488,11 +490,11 @@ begin
          (Assigned(FActionButtons[index].Action)) then
       begin
         for C1 := Low(FActionButtons) to High(FActionButtons) do
-       {   if C1 = index then
-            FActionButtons[C1].Image := TableResources.ActionButtonHotImage
-          else     }
+          if FActionButtons[C1].Image <> TableResources.ActionButtonNormalImage then
+          begin
             FActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
-        renderit := TRUE;
+            renderit := TRUE;
+          end;
       end
       else
         for C1 := Low(FActionButtons) to High(FActionButtons) do
@@ -507,11 +509,11 @@ begin
          (Assigned(FRaisePresetButtons[index].Action)) then
       begin
         for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
-       {   if C1 = index then
-            FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonHotImage
-          else   }
+          if FRaisePresetButtons[C1].Image <> TableResources.RaisePresetButtonNormalImage then
+          begin
             FRaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
-        renderit := TRUE;
+            renderit := TRUE;
+          end;
       end
       else
         for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
@@ -525,7 +527,7 @@ begin
          (IsPointInStandUpButton(X, Y)) then
       begin
 //        FStandUpButton.Image := TableResources.StandUpButtonPressedImage;
-        renderit := TRUE;
+//        renderit := TRUE;
       end
       else
         if FStandUpButton.Image <> TableResources.StandUpButtonNormalImage then
@@ -539,7 +541,7 @@ begin
                         Round(FPlayNowButton.Point.x + FPlayNowButtonWidth), Round(FPlayNowButton.Point.y + FPlayNowButtonHeight)),
                         Point(X, Y))) then
       begin
-        renderit := TRUE;
+//        renderit := TRUE;
       end
       else
         if FPlayNowButton.Image <> TableResources.PlayNowButtonNormalImage then
@@ -684,14 +686,14 @@ end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
 begin
-  ConfigureGUI;
-
   if Assigned(DXCore.Device) then
   begin
     FDXAreaSize := Point2px(ClientWidth, ClientHeight);
     DXCore.Device.Resize(FTable.SwapChainIndex, FDXAreaSize);
     Render;
   end;
+
+  ConfigureGUI;
 
   seRaiseAmount.Width := Round(TableResources.RAISE_VALUEBOX_WIDTH * FRaiseSliderResizeRatio);
   seRaiseAmount.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaiseSliderResizeRatio);
@@ -911,6 +913,11 @@ begin
   Exit(FALSE);
 end;
 
+procedure TfrmTable.lbvHandHistoryClick(Sender: TObject);
+begin
+  acHandHistory.Execute;
+end;
+
 procedure TfrmTable.MakeTableCaption;
 var
   cap: String;
@@ -926,10 +933,10 @@ begin
     rot_index := FTableStatus.RotationHand;
     if rot_index = 0 then
       rot_index := 1;
-    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, (rot_index - 1) mod FTable.Game.Seats + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
+    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), (rot_index - 1) mod FTable.Game.Seats + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
   end
   else
-    cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.GameTypeStrFull, FTable.Club.Name]);
+    cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), FTable.Club.Name]);
 
   if cap <> Caption then
     Caption := cap;
@@ -1199,6 +1206,7 @@ end;
 
 procedure TfrmTable.ConfigureGUI;
 var
+  hhi: THandHistoryItem;
   seat_info: TSeatInfo;
   sitout: Boolean;
   foldtoany: Boolean;
@@ -1334,7 +1342,8 @@ begin
                   SetForegroundWindow(Handle);
                   SetFocus;
                   FForceFocused := TRUE;
-                  if not edChat.Focused then
+                  if (not edChat.Focused) and
+                     (seRaiseAmount.Visible) then
                     seRaiseAmount.SetFocus;
                   TablePlaySound(Sounds.SOUND_TIMEBAR);
                 end;
@@ -1357,7 +1366,8 @@ begin
   acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
                          (Assigned(seat_info)) and
                          (seat_info.CanShow) and
-                         (not seat_info.CardsVisible);
+                         (not seat_info.CardsVisible) and
+                         (seat_info.Status in [psFolded, psAllIn, psInHand]);
 
 
   if (FTableStatus.CurrentSeat <> -1) and
@@ -1395,9 +1405,7 @@ begin
       cbSitOutNextHand.Properties.OnChange := nil;
       cbSitOutNextHand.Checked := FALSE;
       cbSitOutNextHand.Properties.OnChange := event;
-    end
-    else
-      cbSitOutNextHand.Checked := FALSE;
+    end;
 
     if not cbSitOutNextBB.Visible then
     begin
@@ -1405,9 +1413,7 @@ begin
       cbSitOutNextBB.Properties.OnChange := nil;
       cbSitOutNextBB.Checked := FALSE;
       cbSitOutNextBB.Properties.OnChange := event;
-    end
-    else
-      cbSitOutNextBB.Checked := FALSE;
+    end;
   end;
 
   cbFoldToAnyBet.Visible := sitout;
@@ -1489,6 +1495,14 @@ begin
   else
     for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
       FRaisePresetButtons[C1].Action := nil;
+
+  if not HandHistory.FindLastHandForClub(FTable.ClubId, hhi) then
+    lbvHandHistory.Visible := FALSE
+  else
+  begin
+    lbvHandHistory.Caption := Format('Previous Hand (#%d)', [hhi.HandId]);
+    lbvHandHistory.Visible := TRUE;
+  end;
 
   MakeTableCaption;
 end;
@@ -1851,6 +1865,8 @@ begin
       repeat
         iterate := FALSE;
         C1 := FTableStatus.SmallBlindSeat;
+        if C1 < 0 then
+          Break;
         repeat
           if FTableStatus.GetSeatInfo(C1, seat) then
           begin
@@ -2317,31 +2333,31 @@ end;
 
 procedure TfrmTable.RenderSeat(const ASeatIndex: Integer);
 var
-  seat_point             : TPoint2;
-  seat_info              : TSeatInfo;
-  player_info            : TPlayerInfo;
-  seat_image             : TAsphyreImage;
-  seat_empty_image       : TAsphyreImage;
-  seat_inactive_image    : TAsphyreImage;
-  seat_active_image      : TAsphyreImage;
-  action_image           : TAsphyreImage;
+  seat_point: TPoint2;
+  seat_info: TSeatInfo;
+  player_info: TPlayerInfo;
+  seat_image: TAsphyreImage;
+  seat_empty_image: TAsphyreImage;
+  seat_inactive_image: TAsphyreImage;
+  seat_active_image: TAsphyreImage;
+  action_image: TAsphyreImage;
 //  seat_light_image       : TAsphyreImage;
-  avatar                 : TAvatar;
-  avatar_point           : TPoint2;
-  avatar_width           : Single;
-  avatar_height          : Single;
-  seat_upper_text        : String;
-  seat_lower_text        : String;
-  seat_upper_text_color  : TColor2;
-  seat_lower_text_color  : TColor2;
-  seat_upper_text_point  : TPoint2;
-  seat_lower_text_point  : TPoint2;
-  seat_text_x_center     : Single;
-  card_point             : TPoint2;
+  avatar: TAvatar;
+  avatar_point: TPoint2;
+  avatar_width: Single;
+  avatar_height: Single;
+  seat_upper_text: String;
+  seat_lower_text: String;
+  seat_upper_text_color: TColor2;
+  seat_lower_text_color: TColor2;
+  seat_upper_text_point: TPoint2;
+  seat_lower_text_point: TPoint2;
+  seat_text_x_center: Single;
+  card_point: TPoint2;
   seat_action_frame_point: TPoint2;
-  C1                     : Integer;
-  mousepoint             : TPoint;
-  mousepointf            : TPointF;
+  C1: Integer;
+  mousepoint: TPoint;
+  mousepointf: TPointF;
 begin
   // get seat point
   seat_point := GetSeatPoint(ASeatIndex);
@@ -3124,14 +3140,14 @@ begin
      (seat_info.CardCount > 0) and
      (seat_info.DealtCards = seat_info.CardCount) then
   begin
-    lbsHandStrength.Top := Round(FRaisePresetButtons[High(FRaisePresetButtons)].Point.y - lbsHandStrength.Height - 5);
+    lbvHandStrength.Top := Round(FRaisePresetButtons[High(FRaisePresetButtons)].Point.y - lbvHandStrength.Height - 5);
     if (FFlopAnimations.Count = 0) and
        (FTurnAnimations.Count = 0) and
        (FRiverAnimations.Count = 0) then
-      lbsHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, TRUE)
+      lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, TRUE)
   end
   else
-    lbsHandStrength.Caption := '';
+    lbvHandStrength.Caption := '';
 end;
 
 
@@ -3217,6 +3233,26 @@ begin
     end;
   end;
 end;
+
+procedure TfrmTable.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
+begin
+  ConfigureGUI;
+end;
+
+procedure TfrmTable.acHandHistoryExecute(Sender: TObject);
+var
+  hhi: THandHistoryItem;
+  handid: UINT32;
+begin
+  if not HandHistory.FindLastHandForClub(FTable.ClubId, hhi) then
+    handid := 0
+  else
+    handid := hhi.HandId;
+
+  FormsContainer.RunForm(TfrmHandHistory, nil, [@handid], FALSE);
+end;
+
+
 
 { TTableSyncRender }
 

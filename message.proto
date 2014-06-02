@@ -47,6 +47,7 @@ enum ServerCodes {
 	srPlayerLimitOk = 39;
 	srResetPlayerBalanceOk = 40;
 	srClubBalanceReached = 41;
+	srHandHistoryMsg = 42;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -331,7 +332,7 @@ message TableSit {
 
 message Pot {
 	required uint32 value = 1;
-	repeated uint32 members = 2;
+	repeated int32 members = 2;
 }
 
 message TableStatus {
@@ -453,6 +454,9 @@ message TableEvent {
 		tePreWin = 13;
 		teExistingCards = 14;
 		teDisconnect = 15;
+		teSB = 16;
+		teBB = 17;
+		teForced = 18;
 	}
 	message WinnerData {
 		enum CardRankings {
@@ -472,7 +476,7 @@ message TableEvent {
 	}
 	message WinnerPotInfo {
 		required uint32 sum = 1;
-		repeated uint32 seats = 2;
+		repeated int32 seats = 2;
 		repeated WinnerData WinnerData = 3;
 		optional uint32 rake = 4;
 	}
@@ -577,4 +581,37 @@ message PlayerLimitParams {
 	required bytes userid = 2;
 	required uint32 limit = 3;
 	required bool unlimited = 4;
+}
+message ClubHandHistoryReply {
+	required bytes clubid = 1;
+	required bytes gameid = 2;
+	repeated HandHistory rows = 3;
+	//repeated GameEventHistory events = 4;
+}
+message HandHistory {
+	message PlayerHandHistory {
+		required bytes _id = 1;
+		required int32 seat = 2;
+		required bytes cards = 3;
+		required uint32 chips = 4;
+		required string nick = 5;
+		required bool muck = 6;
+	}
+	message MoveRow {
+		repeated TableEvent.TableEventType code = 1;
+		optional uint32 bet = 2;
+		optional int32 seat = 3;
+		repeated TableEvent.WinnerPotInfo potdata = 4;
+	}
+	required bytes _id = 1;
+	required uint32 seq = 2;
+	required uint32 totalrake = 3;
+	repeated PlayerHandHistory players = 4;
+	required bytes cards = 5;
+	required uint32 endtime = 6;
+	repeated int32 balance_changes = 7;
+	repeated MoveRow moves = 8;
+	required uint32 dealer = 9;
+	optional Game game = 10;
+	optional Game.GameType current_game = 11;
 }

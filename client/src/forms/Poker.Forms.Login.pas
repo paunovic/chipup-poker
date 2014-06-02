@@ -94,7 +94,6 @@ begin
                      TSocketStateChangeCallback.Create(SocketStateChange),
                      TServerMessageCallback.Create(srHello, CSRHello),
                      TServerMessageCallback.Create(srLoginReply, CSRLogin)
-
                   ]);
 
   CurrentStatus := lsIdle;

@@ -45,4 +45,5 @@ block content
   div
     | inspect
     pre=util.inspect(game)
-    pre=util.inspect(game.history.moves)
+    if game.history
+      pre=util.inspect(game.history.moves)

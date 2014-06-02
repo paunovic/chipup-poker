@@ -1,373 +1,125 @@
-object frmTable: TfrmTable
+object frmHandHistory: TfrmHandHistory
   Left = 0
   Top = 0
-  Caption = 'Table'
-  ClientHeight = 524
-  ClientWidth = 792
-  Color = 1315656
-  Constraints.MaxHeight = 910
-  Constraints.MaxWidth = 1320
-  Constraints.MinWidth = 600
+  Caption = 'Hand History'
+  ClientHeight = 586
+  ClientWidth = 582
+  Color = clWindow
   Ctl3D = False
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -21
-  Font.Name = 'Sintony'
-  Font.Style = [fsBold]
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
-  OnActivate = FormActivate
-  OnClick = FormClick
+  Position = poMainFormCenter
   OnClose = FormClose
-  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnMouseDown = FormMouseDown
-  OnMouseMove = FormMouseMove
-  OnMouseUp = FormMouseUp
-  OnPaint = FormPaint
-  OnResize = FormResize
-  OnShow = FormShow
+  OnKeyDown = FormKeyDown
   DesignSize = (
-    792
-    524)
+    582
+    586)
   PixelsPerInch = 96
-  TextHeight = 27
-  object edChat: TcxTextEdit
-    Left = 16
-    Top = 427
-    Margins.Left = 1
-    Margins.Top = 0
-    Margins.Right = 0
-    Margins.Bottom = 0
-    Anchors = [akLeft, akBottom]
-    AutoSize = False
-    ParentFont = False
-    Style.BorderStyle = ebsNone
-    Style.Color = 2500134
-    Style.Edges = []
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = []
-    Style.TextColor = clGray
-    Style.TransparentBorder = False
-    Style.IsFontAssigned = True
-    TabOrder = 0
-    Text = 'Click here to chat...'
-    OnEnter = edChatEnter
-    OnExit = edChatExit
-    OnKeyPress = edChatKeyPress
-    Height = 18
-    Width = 213
-  end
-  object cbFoldToAnyBet: TcxCheckBox
-    Left = 251
-    Top = 435
-    Anchors = [akLeft, akBottom]
-    AutoSize = False
-    Caption = 'Fold to any bet'
-    ParentBackground = False
-    ParentFont = False
-    Properties.OnChange = cbFoldToAnyBetPropertiesChange
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = 14
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = []
-    Style.HotTrack = False
-    Style.IsFontAssigned = True
-    TabOrder = 1
-    Transparent = True
-    Visible = False
-    Height = 17
-    Width = 106
-  end
-  object cbSitOutNextHand: TcxCheckBox
-    Left = 251
-    Top = 453
-    Anchors = [akLeft, akBottom]
-    AutoSize = False
-    Caption = 'Sit out next hand'
-    ParentBackground = False
-    ParentFont = False
-    Properties.OnChange = cbSitOutNextHandPropertiesChange
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = 14
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = []
-    Style.HotTrack = False
-    Style.IsFontAssigned = True
-    TabOrder = 2
-    Transparent = True
-    Visible = False
-    Height = 17
-    Width = 106
-  end
-  object cbSitOutNextBB: TcxCheckBox
-    Left = 251
-    Top = 470
-    Anchors = [akLeft, akBottom]
-    AutoSize = False
-    Caption = 'Sit out next BB'
-    ParentBackground = False
-    ParentFont = False
-    Properties.OnChange = cbSitOutNextBBPropertiesChange
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = 14
-    Style.Font.Name = 'Arial'
-    Style.Font.Style = []
-    Style.HotTrack = False
-    Style.IsFontAssigned = True
-    TabOrder = 3
-    Transparent = True
-    Visible = False
-    Height = 17
-    Width = 106
-  end
-  object seRaiseAmount: TcxSpinEdit
-    Left = 454
-    Top = 435
-    Anchors = []
-    AutoSize = False
-    ParentFont = False
-    Properties.Alignment.Horz = taCenter
-    Properties.Alignment.Vert = taVCenter
+  TextHeight = 13
+  object cbTable: TcxComboBox
+    Left = 51
+    Top = 10
+    Anchors = [akLeft, akTop, akRight]
+    Properties.DropDownListStyle = lsFixedList
     Properties.ImmediatePost = True
-    Properties.SpinButtons.Visible = False
-    Properties.UseDisplayFormatWhenEditing = True
-    Properties.UseLeftAlignmentOnEditing = False
-    Properties.ValueType = vtFloat
-    Properties.OnChange = seRaiseAmountPropertiesChange
-    Style.BorderStyle = ebsNone
-    Style.Color = clBlack
-    Style.Edges = []
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -13
-    Style.Font.Name = 'Sintony'
-    Style.Font.Style = []
-    Style.Font.Quality = fqAntialiased
-    Style.TextColor = clRed
-    Style.IsFontAssigned = True
-    TabOrder = 4
-    Value = 76950.000000000000000000
-    Visible = False
-    OnKeyDown = seRaiseAmountKeyDown
-    Height = 22
-    Width = 95
+    Properties.OnChange = cbTablePropertiesChange
+    TabOrder = 1
+    ExplicitWidth = 405
+    Width = 520
   end
-  object rvChat: TRichView
-    Left = 16
-    Top = 446
-    Width = 213
-    Height = 70
-    Color = 4539717
-    TabOrder = 5
-    BorderStyle = bsNone
-    DoInPaletteMode = rvpaCreateCopies
-    Style = RVStyle
+  object lbsTable: TcxLabel
+    Left = 11
+    Top = 12
+    Caption = 'Table:'
+    Transparent = True
   end
-  object lbvHandStrength: TcxLabel
-    Left = 695
-    Top = 416
+  object btCancel: TcxButton
+    Left = 478
+    Top = 549
+    Width = 93
+    Height = 27
+    Action = acClose
     Anchors = [akRight, akBottom]
-    Caption = 'Hand Strength'
+    TabOrder = 0
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = []
     ParentFont = False
-    Style.Edges = []
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Sintony'
-    Style.Font.Style = []
-    Style.Font.Quality = fqAntialiased
-    Style.LookAndFeel.NativeStyle = True
-    Style.TextColor = 13158600
-    Style.TextStyle = []
-    Style.TransparentBorder = True
-    Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.NativeStyle = True
-    StyleFocused.LookAndFeel.NativeStyle = True
-    StyleHot.LookAndFeel.NativeStyle = True
-    Properties.Alignment.Horz = taRightJustify
-    Transparent = True
-    AnchorX = 776
+    ExplicitLeft = 363
   end
-  object lbvHandHistory: TcxLabel
-    Left = 8
-    Top = 6
-    Cursor = crHandPoint
-    Caption = 'Previous Hand (#21819823)'
-    ParentFont = False
-    Style.Edges = []
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -9
-    Style.Font.Name = 'Sintony'
-    Style.Font.Style = [fsBold]
-    Style.Font.Quality = fqAntialiased
-    Style.HotTrack = True
-    Style.LookAndFeel.NativeStyle = True
-    Style.LookAndFeel.SkinName = ''
-    Style.TextColor = 13158600
-    Style.TextStyle = []
-    Style.TransparentBorder = True
-    Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.NativeStyle = True
-    StyleDisabled.LookAndFeel.SkinName = ''
-    StyleFocused.LookAndFeel.NativeStyle = True
-    StyleFocused.LookAndFeel.SkinName = ''
-    StyleHot.LookAndFeel.NativeStyle = True
-    StyleHot.LookAndFeel.SkinName = ''
-    StyleHot.TextColor = 27903
-    Properties.Alignment.Horz = taLeftJustify
-    Transparent = True
-    OnClick = lbvHandHistoryClick
+  object cbHand: TcxComboBox
+    Left = 51
+    Top = 35
+    Anchors = [akLeft, akTop, akRight]
+    Properties.DropDownListStyle = lsFixedList
+    Properties.DropDownRows = 16
+    Properties.ImmediatePost = True
+    Properties.OnChange = cbHandPropertiesChange
+    TabOrder = 2
+    ExplicitWidth = 405
+    Width = 520
   end
-  object ActionManager: TActionManager
-    Left = 56
+  object lbsHand: TcxLabel
+    Left = 11
+    Top = 36
+    Caption = 'Hand:'
+    Transparent = True
+  end
+  object rvHandHistory: TRichView
+    Left = 14
+    Top = 62
+    Width = 557
+    Height = 477
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    Color = 4210752
+    TabOrder = 5
+    DoInPaletteMode = rvpaCreateCopies
+    Options = [rvoAllowSelection, rvoScrollToEnd, rvoShowPageBreaks, rvoTagsArePChars, rvoAutoCopyText, rvoAutoCopyRVF, rvoAutoCopyImage, rvoAutoCopyRTF, rvoFormatInvalidate, rvoDblClickSelectsWord, rvoRClickDeselects]
+    RTFReadProperties.TextStyleMode = rvrsAddIfNeeded
+    RTFReadProperties.ParaStyleMode = rvrsAddIfNeeded
+    RVFOptions = [rvfoSavePicturesBody, rvfoSaveControlsBody, rvfoSaveBinary, rvfoSaveBack, rvfoLoadBack, rvfoSaveTextStyles, rvfoSaveParaStyles, rvfoSaveLayout, rvfoLoadLayout, rvfoSaveDocProperties, rvfoLoadDocProperties]
+    Style = RVStyle
+    WordWrap = False
+    ExplicitWidth = 442
+  end
+  object alHandHistory: TActionList
+    Left = 64
     Top = 104
-    StyleName = 'Platform Default'
-    object acStandUp: TAction
-      Category = 'Game'
-      Caption = 'STAND UP'
-      Enabled = False
-      OnExecute = acStandUpExecute
+    object acClose: TAction
+      Caption = 'Close'
+      OnExecute = acCloseExecute
     end
-    object acFold: TAction
-      Category = 'Game'
-      Caption = 'FOLD'
-      Enabled = False
-      OnExecute = acFoldExecute
-    end
-    object acCall: TAction
-      Category = 'Game'
-      Caption = 'CALL'
-      Enabled = False
-      OnExecute = acCallExecute
-    end
-    object acCheck: TAction
-      Category = 'Game'
-      Caption = 'CHECK'
-      Enabled = False
-      OnExecute = acCheckExecute
-    end
-    object acRaise: TAction
-      Category = 'Game'
-      Caption = 'RAISE'
-      Enabled = False
-      OnExecute = acRaiseExecute
-    end
-    object acPlayNow: TAction
-      Category = 'Game'
-      Caption = 'PLAY NOW'
-      Enabled = False
-      OnExecute = acPlayNowExecute
-    end
-    object acRaiseMin: TAction
-      Category = 'Game'
-      Caption = 'MIN'
-      OnExecute = acRaiseMinExecute
-    end
-    object acRaise3BB: TAction
-      Category = 'Game'
-      Caption = '3BB'
-      OnExecute = acRaise3BBExecute
-    end
-    object acRaisePot: TAction
-      Category = 'Game'
-      Caption = 'POT'
-      OnExecute = acRaisePotExecute
-    end
-    object acRaiseMax: TAction
-      Category = 'Game'
-      Caption = 'MAX'
-      OnExecute = acRaiseMaxExecute
-    end
-    object acShowCards: TAction
-      Category = 'Game'
-      Caption = 'SHOW CARDS'
-      Enabled = False
-      OnExecute = acShowCardsExecute
-    end
-    object acHandHistory: TAction
-      Caption = 'acHandHistory'
-      OnExecute = acHandHistoryExecute
-    end
-  end
-  object tiActiveFrameBlink: TTimer
-    Enabled = False
-    Interval = 750
-    OnTimer = tiActiveFrameBlinkTimer
-    Left = 56
-    Top = 32
-  end
-  object tiSitOutNextHand: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tiSitOutNextHandTimer
-    Left = 144
-    Top = 32
-  end
-  object tiSeatCaptionClear: TTimer
-    Enabled = False
-    Interval = 1800
-    OnTimer = tiSeatClearCaptionTimer
-    Left = 236
-    Top = 32
-  end
-  object tiSitOutNextBB: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tiSitOutNextBBTimer
-    Left = 144
-    Top = 108
   end
   object RVStyle: TRVStyle
     TextStyles = <
       item
-        StyleName = 'User'
-        FontName = 'Arial'
-        Size = 8
-        Color = 14803425
-        Unicode = True
-      end
-      item
         StyleName = 'Normal text'
         FontName = 'Arial'
-        Size = 8
+        Size = 9
         Color = clSilver
-        Unicode = True
-      end
-      item
-        StyleName = 'Dealer'
-        FontName = 'Arial'
-        Size = 8
-        Color = clLime
-        Unicode = True
-      end
-      item
-        StyleName = 'Dealer Text'
-        FontName = 'Arial'
-        Size = 8
-        Color = 11075496
         Unicode = True
       end>
     ParaStyles = <
       item
-        StyleName = 'User'
-        Options = [rvpaoReadOnly]
+        StyleName = 'Paragraph Style'
         Tabs = <>
       end
       item
-        StyleName = 'Message'
-        Options = [rvpaoReadOnly]
+        StyleName = 'Centered'
+        Alignment = rvaCenter
         Tabs = <>
       end>
     ListStyles = <>
-    Color = clBlack
     InvalidPicture.Data = {
       07544269746D617036100000424D361000000000000036000000280000002000
       0000200000000100200000000000001000000000000000000000000000000000
@@ -501,19 +253,7 @@ object frmTable: TfrmTable
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 312
-    Top = 100
-  end
-  object tiGameLock: TTimer
-    Enabled = False
-    OnTimer = tiGameLockTimer
-    Left = 232
-    Top = 104
-  end
-  object tiRender: TTimer
-    Interval = 500
-    OnTimer = tiRenderTimer
-    Left = 316
-    Top = 32
+    Left = 60
+    Top = 172
   end
 end

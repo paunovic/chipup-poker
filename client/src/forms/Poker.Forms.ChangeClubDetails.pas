@@ -99,7 +99,7 @@ begin
   FClub := AParams[0];
 
   edClubName.Text := FClub.Name;
-  edInvitationCode.Text := FClub.InvCode;
+  edInvitationCode.Text := FClub.Password;
   seRake.Value := FClub.Rake;
   seLimit.Value := FClub.DefaultBalanceLimit / 100;
   cbDefaultPlayerLimit.Checked := not FClub.UnlimitedDefaultBalance;

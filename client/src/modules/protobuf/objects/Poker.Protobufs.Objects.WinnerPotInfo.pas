@@ -19,12 +19,12 @@ type
 
     var
       FSum: UINT32;
-      FSeats: TArray<UINT32>;
+      FSeats: TArray<Integer>;
       FWinnerData: TObjectList<TPB_WinnerData>;
       FRake: UINT32;
 
     procedure SetSum(const AValue: UINT32);
-    procedure SetSeats(const AValue: TArray<UINT32>);
+    procedure SetSeats(const AValue: TArray<Integer>);
     procedure SetRake(const AValue: UINT32);
     procedure WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 
@@ -36,7 +36,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
     property Sum: UINT32 read FSum write SetSum;
-    property Seats: TArray<UINT32> read FSeats write SetSeats;
+    property Seats: TArray<Integer> read FSeats write SetSeats;
     property WinnerData: TObjectList<TPB_WinnerData> read FWinnerData;
     property Rake: UINT32 read FRake write SetRake;
   end;
@@ -78,7 +78,7 @@ begin
       FN_SEATS: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FSeats, Length(FSeats) + 1);
-        FSeats[Length(FSeats)-1] := AProtobufReader.readUInt32;
+        FSeats[Length(FSeats)-1] := AProtobufReader.readInt32;
       end;
       FN_WINNERDATA: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -100,13 +100,13 @@ begin
   ProtobufOutput.writeUInt32(FN_SUM, AValue);
 end;
 
-procedure TPB_WinnerPotInfo.SetSeats(const AValue: TArray<UINT32>);
+procedure TPB_WinnerPotInfo.SetSeats(const AValue: TArray<Integer>);
 var
   C1: Integer;
 begin
   FSeats := AValue;
   for C1 := 0 to Length(FSeats) - 1 do
-    ProtobufOutput.writeUInt32(FN_SEATS, AValue[C1]);
+    ProtobufOutput.writeInt32(FN_SEATS, AValue[C1]);
 end;
 
 procedure TPB_WinnerPotInfo.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
