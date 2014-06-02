@@ -1,0 +1,1 @@
+"c:\Program Files (x86)\FinalBuilder 7\FBCMD.exe" /Pmake_installer.fbp7 /VDEBUG=1
