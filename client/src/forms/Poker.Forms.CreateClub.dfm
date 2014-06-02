@@ -4,8 +4,8 @@ object frmCreateClub: TfrmCreateClub
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Create Club'
-  ClientHeight = 112
-  ClientWidth = 296
+  ClientHeight = 104
+  ClientWidth = 294
   Color = clWindow
   Ctl3D = False
   Font.Charset = ANSI_CHARSET
@@ -21,8 +21,8 @@ object frmCreateClub: TfrmCreateClub
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   DesignSize = (
-    296
-    112)
+    294
+    104)
   PixelsPerInch = 96
   TextHeight = 14
   object edClubName: TcxTextEdit
@@ -31,7 +31,8 @@ object frmCreateClub: TfrmCreateClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 64
     TabOrder = 0
-    Width = 187
+    ExplicitWidth = 187
+    Width = 185
   end
   object lbsClubName: TcxLabel
     Left = 13
@@ -53,7 +54,8 @@ object frmCreateClub: TfrmCreateClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 187
+    ExplicitWidth = 187
+    Width = 185
   end
   object lbsInvCode: TcxLabel
     Left = 13
@@ -70,8 +72,8 @@ object frmCreateClub: TfrmCreateClub
     Transparent = True
   end
   object btOK: TcxButton
-    Left = 93
-    Top = 72
+    Left = 91
+    Top = 68
     Width = 93
     Height = 27
     Action = acOK
@@ -84,10 +86,11 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitLeft = 93
   end
   object btCancel: TcxButton
-    Left = 192
-    Top = 72
+    Left = 190
+    Top = 68
     Width = 93
     Height = 27
     Action = acCancel
@@ -100,6 +103,7 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitLeft = 192
   end
   object alCreateClub: TActionList
     Left = 19

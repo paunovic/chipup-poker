@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   ChipUpPokerDarkSkin, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxMemo, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList,
-  Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle;
+  Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle, Vcl.ExtCtrls;
 
 type
   TTableItem = class
@@ -42,6 +42,9 @@ type
     lbsHand: TcxLabel;
     rvHandHistory: TRichView;
     RVStyle: TRVStyle;
+    btCopyToClipboard: TcxButton;
+    acCopyToClipboard: TAction;
+    tiCopyHideTimer: TTimer;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure acCloseExecute(Sender: TObject);
@@ -49,6 +52,8 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure cbTablePropertiesChange(Sender: TObject);
     procedure cbHandPropertiesChange(Sender: TObject);
+    procedure acCopyToClipboardExecute(Sender: TObject);
+    procedure tiCopyHideTimerTimer(Sender: TObject);
   private
     FSelectedHandId: UINT;
     FCallbacksId: Integer;
@@ -77,6 +82,62 @@ uses
   Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.HandHistoryItem, Poker.Objects.ClubInfo, Poker.Objects.GameInfo,
   Poker.DataModule, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes;
 
+{ TTableItem }
+
+constructor TTableItem.Create(const AClubId, AGameId: TBytes);
+begin
+  FClubId := AClubId;
+  FGameId := AGameId;
+
+  FHands := TList<UINT>.Create;
+end;
+
+destructor TTableItem.Destroy;
+begin
+  FHands.Free;
+  inherited;
+end;
+
+function TTableItem.Matches(const ATableItem: TTableItem): Boolean;
+begin
+  result := (CompareBytes(ATableItem.ClubId, FClubId)) and
+            (CompareBytes(ATableItem.GameId, FGameId));
+end;
+
+procedure TTableItem.UpdateHands;
+var
+  hhi: THandHistoryItem;
+begin
+  FHands.Clear;
+  for hhi in HandHistory.Items do
+    if CompareBytes(hhi.GameId, FGameId) then
+      FHands.Add(hhi.HandId);
+end;
+
+{ TTableItems }
+
+function TTableItems.ContainsGameId(const AGameId: TBytes): Boolean;
+var
+  item: TTableItem;
+begin
+  for item in ToArray do
+    if CompareBytes(item.GameId, AGameId) then
+      Exit(TRUE);
+  Exit(FALSE);
+end;
+
+function TTableItems.IndexOfGameId(const AGameId: TBytes): Integer;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to Length(ToArray) - 1 do
+    if CompareBytes(ToArray[C1].GameId, AGameId) then
+      Exit(C1);
+  Exit(-1);
+end;
+
+
+{ TfrmHandHistory }
 
 procedure TfrmHandHistory.FormCreate(Sender: TObject);
 begin
@@ -402,6 +463,13 @@ begin
   rvHandHistory.ScrollTo(0);
 end;
 
+procedure TfrmHandHistory.tiCopyHideTimerTimer(Sender: TObject);
+begin
+  btCopyToClipboard.Caption := acCopyToClipboard.Caption;
+  acCopyToClipboard.Enabled := TRUE;
+  tiCopyHideTimer.Enabled := FALSE;
+end;
+
 procedure TfrmHandHistory.cbHandPropertiesChange(Sender: TObject);
 var
   hand_id: UINT;
@@ -418,60 +486,13 @@ begin
   RefreshHandList;
 end;
 
-
-
-{ TTableItem }
-
-constructor TTableItem.Create(const AClubId, AGameId: TBytes);
+procedure TfrmHandHistory.acCopyToClipboardExecute(Sender: TObject);
 begin
-  FClubId := AClubId;
-  FGameId := AGameId;
-
-  FHands := TList<UINT>.Create;
-end;
-
-destructor TTableItem.Destroy;
-begin
-  FHands.Free;
-  inherited;
-end;
-
-function TTableItem.Matches(const ATableItem: TTableItem): Boolean;
-begin
-  result := (CompareBytes(ATableItem.ClubId, FClubId)) and
-            (CompareBytes(ATableItem.GameId, FGameId));
-end;
-
-procedure TTableItem.UpdateHands;
-var
-  hhi: THandHistoryItem;
-begin
-  FHands.Clear;
-  for hhi in HandHistory.Items do
-    if CompareBytes(hhi.GameId, FGameId) then
-      FHands.Add(hhi.HandId);
-end;
-
-{ TTableItems }
-
-function TTableItems.ContainsGameId(const AGameId: TBytes): Boolean;
-var
-  item: TTableItem;
-begin
-  for item in ToArray do
-    if CompareBytes(item.GameId, AGameId) then
-      Exit(TRUE);
-  Exit(FALSE);
-end;
-
-function TTableItems.IndexOfGameId(const AGameId: TBytes): Integer;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to Length(ToArray) - 1 do
-    if CompareBytes(ToArray[C1].GameId, AGameId) then
-      Exit(C1);
-  Exit(-1);
+  rvHandHistory.SelectAll;
+  rvHandHistory.CopyText;
+  acCopyToClipboard.Enabled := FALSE;
+  btCopyToClipboard.Caption := 'COPIED';
+  tiCopyHideTimer.Enabled := TRUE;
 end;
 
 end.

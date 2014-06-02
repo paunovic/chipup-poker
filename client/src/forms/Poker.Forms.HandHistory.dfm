@@ -31,6 +31,7 @@ object frmHandHistory: TfrmHandHistory
     Properties.DropDownListStyle = lsFixedList
     Properties.ImmediatePost = True
     Properties.OnChange = cbTablePropertiesChange
+    Style.TextColor = clWhite
     TabOrder = 1
     ExplicitWidth = 405
     Width = 520
@@ -65,6 +66,7 @@ object frmHandHistory: TfrmHandHistory
     Properties.DropDownRows = 16
     Properties.ImmediatePost = True
     Properties.OnChange = cbHandPropertiesChange
+    Style.TextColor = clWhite
     TabOrder = 2
     ExplicitWidth = 405
     Width = 520
@@ -76,21 +78,35 @@ object frmHandHistory: TfrmHandHistory
     Transparent = True
   end
   object rvHandHistory: TRichView
-    Left = 14
+    Left = 12
     Top = 62
-    Width = 557
+    Width = 559
     Height = 477
     Anchors = [akLeft, akTop, akRight, akBottom]
     Color = 4210752
     TabOrder = 5
     DoInPaletteMode = rvpaCreateCopies
-    Options = [rvoAllowSelection, rvoScrollToEnd, rvoShowPageBreaks, rvoTagsArePChars, rvoAutoCopyText, rvoAutoCopyRVF, rvoAutoCopyImage, rvoAutoCopyRTF, rvoFormatInvalidate, rvoDblClickSelectsWord, rvoRClickDeselects]
+    Options = [rvoAllowSelection, rvoScrollToEnd, rvoShowPageBreaks, rvoTagsArePChars, rvoAutoCopyUnicodeText, rvoAutoCopyRVF, rvoAutoCopyImage, rvoAutoCopyRTF, rvoFormatInvalidate, rvoDblClickSelectsWord, rvoRClickDeselects, rvoFastFormatting]
     RTFReadProperties.TextStyleMode = rvrsAddIfNeeded
     RTFReadProperties.ParaStyleMode = rvrsAddIfNeeded
     RVFOptions = [rvfoSavePicturesBody, rvfoSaveControlsBody, rvfoSaveBinary, rvfoSaveBack, rvfoLoadBack, rvfoSaveTextStyles, rvfoSaveParaStyles, rvfoSaveLayout, rvfoLoadLayout, rvfoSaveDocProperties, rvfoLoadDocProperties]
     Style = RVStyle
     WordWrap = False
-    ExplicitWidth = 442
+  end
+  object btCopyToClipboard: TcxButton
+    Left = 12
+    Top = 549
+    Width = 103
+    Height = 27
+    Action = acCopyToClipboard
+    Anchors = [akRight, akBottom]
+    TabOrder = 6
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
   end
   object alHandHistory: TActionList
     Left = 64
@@ -98,6 +114,10 @@ object frmHandHistory: TfrmHandHistory
     object acClose: TAction
       Caption = 'Close'
       OnExecute = acCloseExecute
+    end
+    object acCopyToClipboard: TAction
+      Caption = 'Copy to clipboard'
+      OnExecute = acCopyToClipboardExecute
     end
   end
   object RVStyle: TRVStyle
@@ -254,6 +274,13 @@ object frmHandHistory: TfrmHandHistory
       8000}
     StyleTemplates = <>
     Left = 60
+    Top = 172
+  end
+  object tiCopyHideTimer: TTimer
+    Enabled = False
+    Interval = 2000
+    OnTimer = tiCopyHideTimerTimer
+    Left = 132
     Top = 172
   end
 end

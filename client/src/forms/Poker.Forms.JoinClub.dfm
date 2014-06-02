@@ -4,8 +4,8 @@ object frmJoinClub: TfrmJoinClub
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Join Club'
-  ClientHeight = 110
-  ClientWidth = 248
+  ClientHeight = 104
+  ClientWidth = 294
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -22,8 +22,8 @@ object frmJoinClub: TfrmJoinClub
   OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
   DesignSize = (
-    248
-    110)
+    294
+    104)
   PixelsPerInch = 96
   TextHeight = 14
   object lbsClubID: TcxLabel
@@ -46,7 +46,8 @@ object frmJoinClub: TfrmJoinClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    Width = 143
+    ExplicitWidth = 143
+    Width = 189
   end
   object lbsInvCode: TcxLabel
     Left = 11
@@ -73,11 +74,12 @@ object frmJoinClub: TfrmJoinClub
     Properties.OnChange = edClubIDPropertiesChange
     TabOrder = 0
     Value = 1
-    Width = 143
+    ExplicitWidth = 143
+    Width = 189
   end
   object btOK: TcxButton
-    Left = 46
-    Top = 72
+    Left = 92
+    Top = 68
     Width = 93
     Height = 27
     Action = acOk
@@ -92,8 +94,8 @@ object frmJoinClub: TfrmJoinClub
     ParentFont = False
   end
   object btCancel: TcxButton
-    Left = 145
-    Top = 72
+    Left = 191
+    Top = 68
     Width = 93
     Height = 27
     Action = acCancel

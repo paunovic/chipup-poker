@@ -1,9 +1,8 @@
 {*_* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 Author:       François PIETTE
-MODIFIED !
 Creation:     November 23, 1997
-Version:      8.01
+Version:      8.06
 Description:  THttpCli is an implementation for the HTTP protocol
               RFC 1945 (V1.0), and some of RFC 2068 (V1.1)
 Credit:       This component was based on a freeware from by Andreas
@@ -477,7 +476,19 @@ Feb 17, 2012 V7.25 Arno added NTLMv2 and NTLMv2 session security (basics),
 May 2012 - V8.00 - Arno added FireMonkey cross platform support with POSIX/MacOS
                    also IPv6 support, include files now in sub-directory
 Dec 15, 2012 V8.01 Arno fixed missing port number in both Host header and property
-             Location. 
+             Location.
+Mar 18, 2013 V8.02 - Angus added LocalAddr6 for IPv6
+             Note: SocketFamily must be set to sfAny, sfIPv6 or sfAnyIPv6 to
+                   allow a host name to resolve to an IPv6 address.
+Apr 22, 2013 V8.03 Arno fixed an AV in THttpCli that raised when Abort
+             was called, i.e. from OnDocData event handler and SSL enabled.
+Jul 11, 2013 V8.04 - Angus changed default Agent to 'Mozilla/4.0' removing
+                        (compatible; ICS) which upset some servers
+Oct 10, 2013 V8.05 - Arno fixed a relocation bug with URL "https://yahoo.com" by
+             removing port "443" from the Host-header, otherwise relocation
+             header returned by the server had that port appended as well even
+             though the new location was simple HTTP.
+Apr 19, 2014 V8.06 Angus added PATCH method, thanks to RTT <pdfe@sapo.pt>
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *}
 {$IFNDEF ICS_INCLUDE_MODE}
@@ -534,7 +545,7 @@ uses
   {$IFDEF FMX}
     FMX.Forms,
   {$ELSE}
-    Vcl.Forms,
+    Forms,
   {$ENDIF}
 {$ENDIF}
 { You must define USE_SSL so that SSL code is included in the component.   }
@@ -565,8 +576,8 @@ uses
     OverbyteIcsTypes, OverbyteIcsUtils;
 
 const
-    HttpCliVersion       = 801;
-    CopyRight : String   = ' THttpCli (c) 1997-2012 F. Piette V8.01 ';
+    HttpCliVersion       = 806;
+    CopyRight : String   = ' THttpCli (c) 1997-2014 F. Piette V8.06 ';
     DefaultProxyPort     = '80';
     //HTTP_RCV_BUF_SIZE    = 8193;
     //HTTP_SND_BUF_SIZE    = 8193;
@@ -598,7 +609,7 @@ type
 
     THttpEncoding    = (encUUEncode, encBase64, encMime);
     THttpRequest     = (httpABORT, httpGET, httpPOST, httpPUT,
-                        httpHEAD, httpDELETE, httpCLOSE);
+                        httpHEAD, httpDELETE, httpCLOSE, httpPATCH);
     THttpState       = (httpReady,         httpNotConnected, httpConnected,
                         httpDnsLookup,     httpDnsLookupDone,
                         httpWaitingHeader, httpWaitingBody,  httpBodyReceived,
@@ -655,6 +666,7 @@ type
         //FWindowHandle         : HWND;
         FState                : THttpState;
         FLocalAddr            : String;
+        FLocalAddr6           : String; { V8.02 IPv6 address for local interface to use }
         FHostName             : String;
         FTargetHost           : String;
         FTargetPort           : String;
@@ -918,6 +930,7 @@ type
         procedure   Get;        { Synchronous blocking Get         }
         procedure   Post;       { Synchronous blocking Post        }
         procedure   Put;        { Synchronous blocking Put         }
+        procedure   Patch;      { Synchronous blocking Patch V8.06 }
         procedure   Head;       { Synchronous blocking Head        }
         procedure   Del;        { Synchronous blocking Delete      }
         procedure   Close;      { Synchronous blocking Close       }
@@ -925,6 +938,7 @@ type
         procedure   GetASync;   { Asynchronous, non-blocking Get   }
         procedure   PostASync;  { Asynchronous, non-blocking Post  }
         procedure   PutASync;   { Asynchronous, non-blocking Put   }
+        procedure   PatchAsync; { Asynchronous, non-blocking Patch V8.06 }
         procedure   HeadASync;  { Asynchronous, non-blocking Head  }
         procedure   DelASync;   { Asynchronous, non-blocking Delete}
         procedure   CloseAsync; { Asynchronous, non-blocking Close }
@@ -976,6 +990,8 @@ type
                                                      write FURL;
         property LocalAddr       : String            read  FLocalAddr   {bb}
                                                      write FLocalAddr;  {bb}
+        property LocalAddr6      : String            read  FLocalAddr6
+                                                     write FLocalAddr6; { V8.02 }
         property Proxy           : String            read  FProxy
                                                      write FProxy;
         property ProxyPort       : String            read  FProxyPort
@@ -1366,12 +1382,13 @@ begin
     FContentPost                   := 'application/x-www-form-urlencoded';
     FAccept                        := 'image/gif, image/x-xbitmap, ' +
                                       'image/jpeg, image/pjpeg, */*';
-    FAgent                         := 'Mozilla/4.0 (compatible; ICS)';
+    FAgent                         := 'Mozilla/4.0'; { V8.04 removed (compatible; ICS) which upset some servers  }
     FDoAuthor                      := TStringlist.Create;
     FRcvdHeader                    := TStringList.Create;
     FReqStream                     := TMemoryStream.Create;
     FState                         := httpReady;
-    FLocalAddr                     := '0.0.0.0';
+    FLocalAddr                     := ICS_ANY_HOST_V4;
+    FLocalAddr6                    := ICS_ANY_HOST_V6;  { V8.02 }
     FFollowRelocation              := TRUE;      {TT 29 sept 2003}
 {$IFDEF UseContentCoding}
     FContentCodingHnd              := THttpContCodHandler.Create(@FRcvdStream,
@@ -1395,7 +1412,7 @@ begin
     FLocationChangeMaxCount        := 5;  {  V1.90 }
     FLocationChangeCurCount        := 0;  {  V1.90 }
     FTimeOut                       := 30;
-    FSocketFamily                  := DefaultSocketFamily;
+    FSocketFamily                  := DefaultSocketFamily;   { V8.00 }
 end;
 
 
@@ -2100,6 +2117,7 @@ begin
     FDnsResult := '';
     StateChange(httpDnsLookup);
     FCtrlSocket.LocalAddr := FLocalAddr; {bb}
+    FCtrlSocket.LocalAddr6 := FLocalAddr6;  { V8.02 }
     try
         FCtrlSocket.SocketFamily := FSocketFamily;
         { The setter of TCustomWSocket.Addr sets the correct internal     }
@@ -2123,6 +2141,7 @@ procedure THttpCli.DoBeforeConnect;
 begin
     FCtrlSocket.Addr                := FDnsResult;
     FCtrlSocket.LocalAddr           := FLocalAddr; {bb}
+    FCtrlSocket.LocalAddr6          := FLocalAddr6;  { V8.02 }
     FCtrlSocket.Port                := FPort;
     FCtrlSocket.Proto               := 'tcp';
     FCtrlSocket.SocksServer         := FSocksServer;
@@ -2311,6 +2330,24 @@ begin
                     SocketDataSent(FCtrlSocket, 0);
                 {$ENDIF}
                 end;
+            httpPATCH:  { V8.06 } 
+                begin
+                    SendRequest('PATCH', FRequestVer);
+                {$IFDEF UseNTLMAuthentication}
+                    if not ((FAuthNTLMState = ntlmMsg1) or
+                            (FProxyAuthNTLMState = ntlmMsg1)) then begin
+                        TriggerSendBegin;
+                        FAllowedToSend := TRUE;
+                        FDelaySetReady := FALSE;     
+                        SocketDataSent(FCtrlSocket, 0);
+                    end;
+                {$ELSE}
+                    TriggerSendBegin;
+                    FAllowedToSend := TRUE;
+                    FDelaySetReady := FALSE;    
+                    SocketDataSent(FCtrlSocket, 0);
+                {$ENDIF}
+                end;
             httpDELETE:
                 begin
                     SendRequest('DELETE', FRequestVer);
@@ -2404,7 +2441,7 @@ begin
             if (FContentCodingHnd.HeaderText <> '') and (FRequestType <> httpHEAD) then
                 Headers.Add('Accept-Encoding: ' + FContentCodingHnd.HeaderText);
         {$ENDIF}
-            if ((FRequestType = httpPOST) or (FRequestType = httpPUT)) and
+            if (FRequestType in [httpPOST, httpPUT, httpPATCH]) and   { V8.06 } 
                (FContentPost <> '') then
                 Headers.Add('Content-Type: ' + FContentPost);
             {if ((method = 'PUT') or (method = 'POST')) and (FContentPost <> '') then
@@ -2412,7 +2449,7 @@ begin
         end;
         if FAgent <> '' then
             Headers.Add('User-Agent: ' + FAgent);
-        if (FTargetPort = '80') or (FTargetPort = '') then    {Maurizio}
+        if (FTargetPort = '80') or (FTargetPort = '443') or (FTargetPort = '') then { V8.05 }
             Headers.Add('Host: ' + FTargetHost)
         else
             Headers.Add('Host: ' + FTargetHost + ':' + FTargetPort);
@@ -2423,7 +2460,7 @@ begin
         if (Method = 'CONNECT') then                                   // <= 12/29/05 AG
             Headers.Add('Content-Length: 0')                           // <= 12/29/05 AG}
         else begin  { V7.05 begin }
-            if (FRequestType = httpPOST) or (FRequestType = httpPUT) then begin
+            if FRequestType in [httpPOST, httpPUT, httpPATCH] then begin   { V8.06 } 
             {$IFDEF UseNTLMAuthentication}
                 if (FAuthNTLMState = ntlmMsg1) or
                    (FProxyAuthNTLMState = ntlmMsg1) then
@@ -2631,7 +2668,7 @@ begin
                 {$IFDEF UseContentCoding}
 //                  FContentCodingHnd.WriteBuffer(P, K);
                     FContentCodingHnd.WriteBuffer(@FReceiveBuffer[P], K);   // FP 09/09/06
-                    TriggerDocData(@FReceiveBuffer[P], K);
+                    TriggerDocData(@FReceiveBuffer[P], K); // ADDED BY MARKO PAUNOVIC
                 {$ELSE}
                     if Assigned(FRcvdStream) then
                         FRcvdStream.WriteBuffer(FReceiveBuffer[P], K);
@@ -2702,7 +2739,7 @@ begin
 {$IFDEF UseContentCoding}
 //          FContentCodingHnd.WriteBuffer(FBodyData, FBodyDataLen);
             FContentCodingHnd.WriteBuffer(@FReceiveBuffer[FBodyData], FBodyDataLen); // FP 09/09/06
-            TriggerDocData(@FReceiveBuffer[FBodyData], FBodyDataLen);
+            TriggerDocData(@FReceiveBuffer[FBodyData], FBodyDataLen); // ADDED BY MARKO PAUNOVIC
 {$ELSE}
             if Assigned(FRcvdStream) then
                 FRcvdStream.WriteBuffer(FReceiveBuffer[FBodyData], FBodyDataLen);
@@ -2927,7 +2964,9 @@ begin
             FReceiveLen := FReceiveLen - FBodyDataLen;
             { Move remaining data to start of buffer. 17/01/2004 }
             if FReceiveLen > 0 then
-                MoveTBytes(FReceiveBuffer, FBodyDataLen, 0, FReceiveLen + 1);
+                MoveTBytes(FReceiveBuffer, FBodyDataLen, 0, FReceiveLen + 1)
+            else if FReceiveLen < 0 then  { V8.03 }
+                FReceiveLen := 0;         { V8.03 }
         end;
         if not Assigned(FNext) then begin
             { End of document }
@@ -2990,7 +3029,7 @@ begin
         if Field = 'location' then begin { Change the URL ! }
             if Copy(Data, 1, 2) = '//' then         { V7.22 }
                 Data := FProtocol + ':' + Data;     { V7.22 }
-            if FRequestType = httpPUT then begin
+            if FRequestType in [httpPUT, httpPATCH] then begin   { V8.06 } 
                  { Location just tell us where the document has been stored }
                  FLocation := Data;
             end
@@ -3254,11 +3293,11 @@ begin
     if (Rq <> httpCLOSE) and (FState <> httpReady) then
         raise EHttpException.Create('HTTP component ' + Name + ' is busy', httperrBusy);
 
-    if ((Rq = httpPOST) or (Rq = httpPUT)) and
+    if (Rq in [httpPOST, httpPUT, httpPATCH]) and    { V8.06 } 
        (not Assigned(FSendStream)
        { or (FSendStream.Position = FSendStream.Size)}   { Removed 21/03/05 }
        ) then
-        raise EHttpException.Create('HTTP component has nothing to post or put',
+        raise EHttpException.Create('HTTP component has nothing to post, put or patch',
                                     httpErrNoData);
 
     if Rq = httpCLOSE then begin
@@ -4481,6 +4520,23 @@ begin
                 SocketDataSent(FCtrlSocket, 0);
 {$ENDIF}
             end;
+        httpPATCH:    { V8.06 } 
+            begin
+                SendRequest('PATCH', FRequestVer);
+{$IFDEF UseNTLMAuthentication}
+                if not ((FAuthNTLMState = ntlmMsg1) or (FProxyAuthNTLMState = ntlmMsg1)) then begin
+                TriggerSendBegin;
+                FAllowedToSend := TRUE;
+                FDelaySetReady := FALSE;    
+                SocketDataSent(FCtrlSocket, 0);
+            end;
+{$ELSE}
+                TriggerSendBegin;
+                FAllowedToSend := TRUE;
+                FDelaySetReady := FALSE;    
+                SocketDataSent(FCtrlSocket, 0);
+{$ENDIF}
+            end;
         httpDELETE:
             begin
                 SendRequest('DELETE', FRequestVer);
@@ -4576,6 +4632,14 @@ end;
 
 
 {* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *}
+{ This will start the Patch process and wait until terminated (blocking)      }
+procedure THttpCli.Patch;   { V8.06 } 
+begin
+    FLocationChangeCurCount := 0 ;  
+    DoRequestSync(httpPatch);
+end;
+
+{* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *}
 { This will start the Close process and wait until terminated (blocking)    }
 procedure THttpCli.Close;
 begin
@@ -4627,6 +4691,13 @@ begin
     DoRequestASync(httpPUT);
 end;
 
+{* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *}
+{ This will start the patch process and returns immediately (non blocking)    }
+procedure THttpCli.PatchAsync;   { V8.06 } 
+begin
+    FLocationChangeCurCount := 0 ;  
+    DoRequestASync(httpPatch);
+end;
 
 {* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *}
 { This will start the close process and returns immediately (non blocking)  }
