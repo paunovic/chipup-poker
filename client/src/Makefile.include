@@ -2,7 +2,7 @@ CFLAGS="-UE:\Program Files\DevExpress VCL\ExpressEditors Library\Sources"
 CFLAGS+="-UE:\Program Files\DevExpress VCL\Library\RS16"
 CFLAGS+=-AComObj=System.Win.ComObj -NSWinapi -NSSystem -NSVcl -Uforms -NSData -NSVcl.Imaging -NSSystem.Win
 CFLAGS+=-Umodules/playerinfo -Umodules/clubinfo -Umodules/gameinfo -Umodules/protobuf/objects
-CFLAGS+=-U3rdparty/protobufs -Umodules/protobuf -Umodules/server_settings -Umodules/tables -UC:/poker/syngdiplus
+CFLAGS+=-U3rdparty/protobufs -Umodules/protobuf -Umodules/server_settings -Umodules/tables -UE:/poker/syngdiplus
 CFLAGS+=-Umodules/avatars -UE:/Poker/icsv8w/Source -Umodules/encryption -UC:/Poker/Dec/Part_I
 CFLAGS+=-Umodules/socketclient -Umodules/settings -UC:/Poker/SuperObject -Umodules/message_container
 CFLAGS+=-UC:\Poker\Graphics32 "-UC:\Program Files (x86)\madCollection\madExcept\BDS9\win32"
