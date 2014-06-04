@@ -3,6 +3,7 @@ var fs = require('fs');
 var assert = require('assert');
 var async = require('async');
 var express = require('express');
+var crypto = require('crypto');
 
 var deck = require('./deck');
 
@@ -23,28 +24,12 @@ if (require.main === module) {
 	});
 }
 function setup(app,bugs,users,db) {
-	/*app.use('/secure/',express.basicAuth(function mongoAuth(username,password,callback) {
-		console.log('checking auth %s/%s',username,password);
-		db.collection('admin').findOne({username:username},function (err,adminRow) {
-			console.log('adminRow:%j',adminRow);
-			if (adminRow) {
-				// FIXME, add salt
-				if (adminRow.password == password) {
-					callback(null,true);
-					return;
-				}
-			}
-			callback(null,false);
-		});
-	}));*/
 	app.use('/secure/',function (req,res,next) {
 		if (req.session.authed) return next();
 		if (req.url == '/login') {
 			return next(); // allow the login page
 		} else {
-			// FIXME, save url and redirect
-			console.log(req.url);
-			console.log(req.originalUrl);
+			req.session.lastUrl = req.originalUrl;
 			res.writeHead(302,{Location:'/secure/login'});
 			res.end('you must first login');
 		}
@@ -97,7 +82,8 @@ function setup(app,bugs,users,db) {
 	});
 	app.get('/secure/logout',function (req,res) {
 		req.session.destroy(function (err) {
-			res.end('you are logged out');
+			res.writeHead(302,{Location:'/secure/login'});
+			res.end('sucess');
 		});
 	});
 	app.post('/secure/login',function (req,res) {
@@ -107,15 +93,61 @@ function setup(app,bugs,users,db) {
 		db.collection('admin').findOne({username:username},function (err,adminRow) {
 			console.log('adminRow:%j',adminRow);
 			if (adminRow) {
-				// FIXME, add salt
-				if (adminRow.password == password) {
-					req.session.authed = true;
-					res.writeHead(302,{Location:'/secure/'});
-					res.end('sucess');
-					return;
+				if (!adminRow.salt) {
+					if (adminRow.password == password) {
+						req.session.authed = true;
+						req.session.username = adminRow.username;
+						res.writeHead(302,{Location:'/secure/changePassword'});
+						res.end('sucess');
+						return;
+					}
+				} else {
+					var hasher = crypto.createHash('sha256');
+					hasher.update(adminRow.salt.buffer);
+					hasher.update(password);
+					var hash = hasher.digest();
+					if (hash.toString('hex') == adminRow.password.buffer.toString('hex')) {
+						req.session.authed = true;
+						req.session.username = adminRow.username;
+						if (req.session.lastUrl) {
+							res.writeHead(302,{Location:req.session.lastUrl});
+						} else {
+							res.writeHead(302,{Location:'/secure/'});
+						}
+						res.end('sucess');
+						return;
+					} else {
+						res.end('no match');
+						return;
+					}
 				}
 			}
 			res.end('fail');
+		});
+	});
+	app.get('/secure/changePassword',function (req,res) {
+		res.render('changePassword');
+	});
+	app.post('/secure/changePassword',function (req,res) {
+		console.log(req.body);
+		if (req.body.password != req.body.repeatPassword) {
+			res.end('passwords dont match');
+			return;
+		}
+		deck.getRandom(16,function (salt) {
+			var hasher = crypto.createHash('sha256');
+			hasher.update(salt);
+			hasher.update(req.body.password);
+			var hash = hasher.digest();
+			db.collection('admin').update({username:req.session.username},{$set:{password:hash, salt:salt }},function (err,rows) {
+				assert.ifError(err);
+				if (req.session.lastUrl) {
+					res.writeHead(302,{Location:req.session.lastUrl});
+				} else {
+					res.writeHead(302,{Location:'/secure/'});
+				}
+				res.end('done');
+			});
 		});
 	});
 	app.get('/secure/clubs',function (req,res) {

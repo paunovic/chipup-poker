@@ -592,7 +592,7 @@ message HandHistory {
 	message PlayerHandHistory {
 		required bytes _id = 1;
 		required int32 seat = 2;
-		required bytes cards = 3;
+		optional bytes cards = 3;
 		required uint32 chips = 4;
 		required string nick = 5;
 		required bool muck = 6;

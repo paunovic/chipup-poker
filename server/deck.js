@@ -101,7 +101,7 @@ Deck.prototype.shuffle = function shuffle(callback) {
 	}.bind(this);
 	recurse();
 }
-// FIXME, use the same logic as the DAG, dont shuffle
+// TODO, use the same logic as the DAG, dont shuffle
 Deck.prototype.draw = function (count,hand) {
 	//console.log('before:'+this.prettyPrint());
 	var out = this.cards.splice(0,count);

@@ -11,4 +11,4 @@ block content
         td
           a(href='/secure/user?id='+val._id)=val.displayname
         td=val.chips
-  div=sum/100
+  div=Math.round(sum/100)

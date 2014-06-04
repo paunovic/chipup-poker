@@ -1,0 +1,31 @@
+extend secure
+block content
+  table(border=1)
+    tr
+      th TEST API?
+      th transaction type
+      th from
+      th item number
+      th subscription date
+      th sub id
+      th subject
+      th payment date
+      th payment type
+      th payment status
+      th fee
+      th gross
+    each row in rows
+      tr
+        td=row.params.test_ipn
+        td=row.params.txn_type
+        td=row.params.first_name+' '+row.params.last_name+'<'+row.params.payer_email+'>'
+        td=row.params.item_number
+        td=row.params.subscr_date
+        td=row.params.subscr_id
+        td=row.params.transaction_subject
+        td=row.params.payment_date
+        td=row.params.payment_type
+        td=row.params.payment_status
+        td=row.params.mc_fee
+        td=row.params.mc_gross
+        td=JSON.stringify(row)
