@@ -1,12 +1,14 @@
 "use strict";
-var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances,activeGames;
+var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
+var async = require('async');
 
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var profiler = require('./profiler');
 var ReadWriteLock = require('./lock');
+var myutils = require('./myutils');
 
 var getLock = new ReadWriteLock();
 
@@ -59,7 +61,6 @@ Club.prototype.isOwner = function (user) {
 	return this.obj.owner.equals(user);
 }
 Club.prototype.handOver = function (gameObj,cb,handid) {
-	if (activeUsers[this.obj.owner]) {
 		console.log('owner is online');
 		var data = {};
 		allGames.find({clubid:this.clubid},{_id:1}).toArray(function (err,games) {
@@ -83,22 +84,53 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 				assert.ifError(err);
 				handHistory.findOne({seq:handid},function (err,historyRow) {
 					assert.ifError(err);
-					var obj = {clubid:fromMongoId(this.clubid), gameid:fromMongoId(gameObj.id), rows:[historyRow] };
-					if (activeUsers[this.obj.owner]) {
-						activeUsers[this.obj.owner].send(codes.srHandHistoryMsg,obj,'Poker.ClubHandHistoryReply');
-					} else {
-						console.log('owner disconnected while fetching stats');
+					console.log('raw history row:%j',historyRow);
+					var savedCards = [];
+					var keyid = 0;
+					async.each(historyRow.players,function (player,cb) {
+						if (!player) return cb();
+						allUsers.findOne({_id:player._id},function (err,playerRow) {
+							player.keyid = keyid++;
+							player.nick = playerRow.displayname;
+
+							savedCards[player.keyid] = new Buffer(player.cards);
+							player.origid = player._id;
+							player._id = myutils.fromMongoId(player._id);
+
+							if (!player.muck) player.cards = new Buffer(player.cards);
+							else delete player.cards;
+							cb();
+						});
+					},function () {
+						historyRow._id = myutils.fromMongoId(historyRow._id);
+						historyRow.cards = new Buffer(historyRow.cards);
+						var obj = {clubid:myutils.fromMongoId(this.clubid), gameid:myutils.fromMongoId(gameObj.id), rows:[historyRow] };
+					for (var x in gameObj.users) {
+						for (var y=0; y<obj.rows[0].players.length; y++) {
+							if (obj.rows[0].players[y]) {
+								var key2 = obj.rows[0].players[y].keyid;
+								if (obj.rows[0].players[y].rehide) {
+									delete obj.rows[0].players[y].cards;
+									obj.rows[0].players[y].rehide = false;
+								}
+								if (obj.rows[0].players[y].cards) continue;
+								if (savedCards[key2]) {
+									if (compareObjectID(obj.rows[0].players[y].origid,x)) {
+										obj.rows[0].players[y].cards = savedCards[key2];
+										obj.rows[0].players[y].rehide = true;
+									}
+								}
+							}
+						}
+						gameObj.users[x].send(codes.srHandHistoryMsg,obj,'Poker.ClubHandHistoryReply');
 					}
+					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 		}
-	} else {
-		cb();
-	}
 }
 Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	// FIXME, add hands
-	// FIXME, add the ability to loop and get all games
 	if (!data.games) data.games = {};
 	var games = data.games;
 	if (!data.out) data.out = [];
@@ -119,7 +151,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 			for (var i=0; i<stats.length; i++) {
 				var gameidhex = stats[i].gameid.toString();
 				if (!games[gameidhex]) {
-					games[gameidhex] = {gameid: fromMongoId(stats[i].gameid), playerstats:[]};
+					games[gameidhex] = {gameid: myutils.fromMongoId(stats[i].gameid), playerstats:[]};
 					out.push(games[gameidhex]);
 				}
 				if (!containsObjectID(players,stats[i].userid)) players.push(stats[i].userid);
@@ -136,7 +168,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 					}
 				}
 				stats[i].club_balance = -1;
-				stats[i].userid = fromMongoId(stats[i].userid);
+				stats[i].userid = myutils.fromMongoId(stats[i].userid);
 				//console.log('stats i',stats[i]);
 				games[gameidhex].playerstats.push(stats[i]);
 			}
@@ -147,15 +179,15 @@ Club.finishTableStatsPacket = function (data,cb) {
 	allUsers.find({_id:{$in:data.players}},{displayname:1}).toArray(function (err,playersOut) {
 		assert.ifError(err);
 		for (var i=0; i<playersOut.length; i++) {
-			playersOut[i]._id = fromMongoId(playersOut[i]._id);
+			playersOut[i]._id = myutils.fromMongoId(playersOut[i]._id);
 		}
 		allGames.find({_id:{$in:data.gamelist}}).toArray(function (err,rawgames) {
 			for (var i=0; i<rawgames.length; i++) {
 				var gameidhex = rawgames[i]._id.toString();
 				if (data.games[gameidhex]) {
-					data.games[gameidhex].clubid = fromMongoId(rawgames[i].clubid);
+					data.games[gameidhex].clubid = myutils.fromMongoId(rawgames[i].clubid);
 					data.games[gameidhex].hands = rawgames[i].hands;
-				} else data.out.push({ clubid:fromMongoId(rawgames[i].clubid), gameid:fromMongoId(rawgames[i]._id), hands:rawgames[i].hands });
+				} else data.out.push({ clubid:myutils.fromMongoId(rawgames[i].clubid), gameid:myutils.fromMongoId(rawgames[i]._id), hands:rawgames[i].hands });
 			}
 			var clubobj = {};
 			var clubarr = [];
@@ -173,11 +205,11 @@ Club.finishTableStatsPacket = function (data,cb) {
 						if (data.playerData[balances[j].userid]) inplay = data.playerData[balances[j].userid].chipsinplay;
 						var club_balance = balances[j].balance - inplay
 						if (!clubobj[balances[j].clubid]) {
-							var obj = { clubid:fromMongoId(balances[j].clubid), player_stats:[] };
+							var obj = { clubid:myutils.fromMongoId(balances[j].clubid), player_stats:[] };
 							clubobj[balances[j].clubid] = obj;
 							clubarr.push(obj);
 						}
-						var player_obj = { userid:fromMongoId(balances[j].userid), club_balance: club_balance };
+						var player_obj = { userid:myutils.fromMongoId(balances[j].userid), club_balance: club_balance };
 						clubobj[balances[j].clubid].player_stats.push(player_obj);
 					//}
 				}
@@ -189,13 +221,13 @@ Club.finishTableStatsPacket = function (data,cb) {
 Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 	var token = profiler.start('seGameChanged');
 	// FIXME, cache object
-	// FIXME, cache the protobuf
 	allClubs.findOne({_id:this.clubid},function (err,club) {
 		assert.ifError(err);
 		if (!club) {
 			cb();
 			return;
 		}
+		this.refresh(club);
 		var g = makeGameProtobuf(gamerow);
 		if (club.is_private) {
 			token.tag += 'a';
@@ -203,11 +235,12 @@ Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 			if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
 			if (club.members) {
 				var count = 0;
+				var rawmsg = pb.Serialize(g,'Poker.Game');
 				for (var x=0; x<club.members.length; x++) {
 					conn = activeUsers[club.members[x]];
 					if (!conn) continue;
 					if (conn === exclude) continue;
-					conn.send(codes.seGameChange,g,'Poker.Game');
+					conn.send(codes.seGameChange,rawmsg,'raw');
 					count++;
 				}
 				token.tag += '.'+count;
@@ -215,8 +248,9 @@ Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 		} else {
 			token.tag += 'b';
 			var count = 0;
+			var rawmsg = pb.Serialize(g,'Poker.Game');
 			for (var x in activeUsers) {
-				activeUsers[x].send(codes.seGameChange,g,'Poker.Game');
+				activeUsers[x].send(codes.seGameChange,rawmsg,'raw');
 				count++;
 			}
 			token.tag += '.'+count;
@@ -293,13 +327,7 @@ Club.init = function (db,activeUsersIn,activeGamesIn) {
 	allUsers = db.collection('users');
 	allGames = db.collection('games');
 	clubBalances = db.collection('clubBalances');
-}
-// FIXME, their own file
-function toMongoId(buf) {
-	return new ObjectID(buf.toString('hex'));
-}
-function fromMongoId(id) {
-	return new Buffer(id.id,'binary');
+	handHistory = db.collection('handHistory');
 }
 function compareObjectID(a,b) {
 	if (!b) return false;
@@ -324,7 +352,7 @@ Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
 		if (input.suspended) {
 			if (containsObjectID(input.suspended,memberList[y])) suspended = true;
 		}
-		var obj = {_id:fromMongoId(memberList[y]), suspended:suspended, balance_limit:0, club_balance: 0};
+		var obj = {_id:myutils.fromMongoId(memberList[y]), suspended:suspended, balance_limit:0, club_balance: 0};
 		for (var a=0; a<stats.length; a++) {
 			if (compareObjectID(stats[a].clubid,input._id)) {
 				if (stats[a].userid == null) {
