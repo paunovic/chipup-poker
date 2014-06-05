@@ -1,5 +1,5 @@
 "use strict";
-var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory;
+var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory,pb;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
@@ -61,6 +61,7 @@ Club.prototype.isOwner = function (user) {
 	return this.obj.owner.equals(user);
 }
 Club.prototype.handOver = function (gameObj,cb,handid) {
+	if (activeUsers[this.obj.owner]) {
 		console.log('owner is online');
 		var data = {};
 		allGames.find({clubid:this.clubid},{_id:1}).toArray(function (err,games) {
@@ -78,13 +79,13 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
+	}
 
 		if (handid) {
 			allGames.findOne({_id:gameObj.id},function (err,gameRow) {
 				assert.ifError(err);
 				handHistory.findOne({seq:handid},function (err,historyRow) {
 					assert.ifError(err);
-					console.log('raw history row:%j',historyRow);
 					var savedCards = [];
 					var keyid = 0;
 					async.each(historyRow.players,function (player,cb) {
@@ -289,7 +290,7 @@ Club.prototype.updateLimitPostWin = function (change,userid,callback) {
 Club.prototype.buyin = function (userid,chips) {
 	if (!this.balance[userid]) this.balance[userid] = -chips;
 	else this.balance[userid] -= chips;
-	console.log('buyin balance',this.balance);
+	//console.log('buyin balance',this.balance);
 }
 Club.prototype.cashout = function (userid,chips) {
 	this.balance[userid] += chips;
@@ -319,7 +320,7 @@ Club.prototype.resetPlayerLimit = function (userid,cb) {
 		else cb(true);
 	}.bind(this));
 }
-Club.init = function (db,activeUsersIn,activeGamesIn) {
+Club.init = function (db,activeUsersIn,activeGamesIn,pbIN) {
 	allClubs = db.collection('clubs');
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
@@ -328,6 +329,7 @@ Club.init = function (db,activeUsersIn,activeGamesIn) {
 	allGames = db.collection('games');
 	clubBalances = db.collection('clubBalances');
 	handHistory = db.collection('handHistory');
+	pb = pbIN;
 }
 function compareObjectID(a,b) {
 	if (!b) return false;

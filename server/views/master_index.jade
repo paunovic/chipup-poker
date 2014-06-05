@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    script(src="/socket.io/socket.io.js")
+    script(src="http://dev-static.chipuppoker.com/control.js")
+    style.
+      .ts { padding: 5px; }
+      .nick { padding: 2px; }
+      .connid { padding: 2px; }
+      .msg { padding: 2px; border: 1px solid green; display: inline; }
+      .typeGame { background: lightblue; }
+  body
+    div
+      input(value="start",type="button",onclick="start()")
+      input(value="stop",type="button",onclick="stop()")
+      input(value="restart",type="button",onclick="restart()")
+      input(type="checkbox",checked,id="autoScroll")
+      | auto scroll
+    div
+      | blacklist:
+      input(type="text",id="blacklist",onkeyup="updatefilter()")
+    div(id="debug",style="border:1px solid red; height: 500px; overflow-y: scroll")

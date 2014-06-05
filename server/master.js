@@ -3,9 +3,14 @@ var p = require("node-protobuf").Protobuf;
 var net = require('net');
 var colors = require('colors');
 var util = require('util');
+var express = require('express');
+var http = require('http');
+var MongoClient = require('mongodb').MongoClient
+var crypto = require('crypto');
 
 var protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
+var MongoStore = require('./mongoStore');
 
 var pb = new p(fs.readFileSync("../message.desc"));
 protoreader.init(pb,codes);
@@ -18,6 +23,105 @@ var server = net.createServer(function (socket) {
 	var handler = new Client(socket);
 });
 var cactiServer = require('net').createServer(stats_server);
+var app = express();
+var masterServer = http.createServer(app);
+var io = require('socket.io').listen(masterServer,{log:false});
+var sessionStore;
+var restarting = false;
+
+MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+	sessionStore = new MongoStore(db,'master_sessions');
+	app.set('view engine','jade');
+	app.use(express.bodyParser({uploadDir:'./upload'}));
+	app.use(express.cookieParser());
+	app.use(express.session({secret:'ahQu6eey',key:'master',store:sessionStore,cookie:{maxAge:60 * 60 * 1000}})); // 1 hour
+	app.post('/',function (req,res) {
+		var username = req.body.username;
+		var password = req.body.password;
+		console.log('checking auth %s/%s',username,password);
+		db.collection('admin').findOne({username:username},function (err,adminRow) {
+			console.log('adminRow:%j',adminRow);
+			if (adminRow) {
+				if (!adminRow.salt) {
+					if (adminRow.password == password) {
+						req.session.authed = true;
+						req.session.username = adminRow.username;
+						res.end('sucess');
+						return;
+					}
+				} else {
+					var hasher = crypto.createHash('sha256');
+					hasher.update(adminRow.salt.buffer);
+					hasher.update(password);
+					var hash = hasher.digest();
+					if (hash.toString('hex') == adminRow.password.buffer.toString('hex')) {
+						req.session.authed = true;
+						req.session.username = adminRow.username;
+						res.writeHead(302,{Location:'/'});
+						res.end('sucess');
+						return;
+					} else {
+						res.end('no match');
+						return;
+					}
+				}
+			}
+			res.end('fail');
+		});
+	});
+	app.get('/',function (req,res) {
+		console.log(req.session);
+		if (req.session.authed) {
+			res.render('master_index');
+		} else {
+			res.render('master_login');
+		}
+	});
+	masterServer.listen(8080);
+	startImHub();
+});
+io.set('authorization',function (handshakeData,callback) {
+	var test = require('./node_modules/express/node_modules/connect');
+	var cookieModule = require('./node_modules/express/node_modules/cookie');
+	if (handshakeData.headers.cookie) {
+		var cookies = cookieModule.parse(handshakeData.headers.cookie);
+		var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
+	}
+	if (parsed && parsed.master) {
+		sessionStore.get(parsed.master,function (err,session) {
+			callback(null,session.authed);
+		});
+	}
+});
+io.on('connection',function (socket) {
+	socket.on('start',function () {
+		if (im_hub) {
+			console.log('server already up');
+		} else if (restarting) {
+		} else {
+			autoRestart = true;
+			startImHub();
+		}
+	});
+	socket.on('stop',function () {
+		console.log('stop time?');
+		if (im_hub) {
+			autoRestart = false;
+			im_hub.kill();
+		} else {
+			console.log('server already down');
+		}
+	});
+	socket.on('restart',function () {
+		autoRestart = true;
+		if (im_hub) {
+			im_hub.kill();
+		} else if (restarting) {
+		} else {
+			startImHub();
+		}
+	});
+});
 function Client(sockin) {
 	this.socket = sockin;
 	this.reader = new protoreader(this.socket,this);
@@ -54,6 +158,7 @@ Client.prototype.handle = function (code,data) {
 	case codes.StartServer:
 		if (im_hub) {
 			console.log('server already up');
+		} else if (restarting) {
 		} else {
 			autoRestart = true;
 			startImHub();
@@ -71,6 +176,7 @@ Client.prototype.handle = function (code,data) {
 		autoRestart = true;
 		if (im_hub) {
 			im_hub.kill();
+		} else if (restarting) {
 		} else {
 			startImHub();
 		}
@@ -91,6 +197,7 @@ function getLog(name) {
 	return logs[name];
 }
 function startImHub() {
+	restarting = false;
 	for (var x=0; x<clients.length; x++) {
 		clients[x].reply(codes.Starting);
 	}
@@ -104,6 +211,7 @@ function startImHub() {
 		//setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
 	}
 	im_hub.on('message',function (msg) {
+		io.sockets.emit('message',msg);
 		buffer.push(msg);
 		switch (msg.type) {
 		case 'control':
@@ -118,7 +226,7 @@ function startImHub() {
 				msg.objects[x]= JSON.stringify(msg.objects[x]);
 				log.push(msg.objects[x]);
 			}
-			console.log.apply(console,display);
+			//console.log.apply(console,display);
 			for (var x=0; x<clients.length; x++) {
 				clients[x].reply(codes.PerClientMsgEvent,msg,'Backend.PerClientMsg');
 			}
@@ -133,11 +241,13 @@ function startImHub() {
 				log.push(msg.objects[x]);
 			}
 			//console.log(msg.ts,msg.name+':',util.inspect(msg.objects,{colors:true}));
-			console.log.apply(console,display);
+			//console.log.apply(console,display);
 			for (var x=0; x<clients.length; x++) {
 				clients[x].reply(codes.PerGameMsgEvent,msg,'Backend.PerGameMsg');
 			}
 			getLog('game_'+msg.name).write(log.join(',')+'\n');
+			break;
+		case 'global':
 			break;
 		default:
 			var string = msg.msg;
@@ -180,13 +290,13 @@ function restartImHub(code) {
 		console.log('restarting...');
 	//db.doQuery('INSERT INTO im_hub_crashes (buffer,code) VALUES (?,?)',[fulllog,code]);
 	//db.db.end();
+		restarting = true;
 		setTimeout(startImHub,1000);
 	} else {
 		console.log('leaving server down');
 	}
 	buffer = [];
 }
-startImHub();
 function cactiStats() {
 	var mem = process.memoryUsage();
 	var data = { };
