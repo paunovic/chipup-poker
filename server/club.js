@@ -79,7 +79,7 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
-	}
+	} else cb();
 
 		if (handid) {
 			allGames.findOne({_id:gameObj.id},function (err,gameRow) {

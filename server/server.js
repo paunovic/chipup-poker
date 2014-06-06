@@ -2329,7 +2329,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							},null,{silent:true},[],0);
 						} else {
 							token.stop();
-							release([]);
+							release();
 						}
 					}.bind(this));
 				}.bind(this));
@@ -3400,7 +3400,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 	} else {
 		allUsers.findOne({_id:conn.userid},function (err,userinfo) {
 			conn.log('state:%d %s',conn.state,conn.userid);
-			conn.log('self:',userinfo,'boughtin:',conn.boughtin,'chips:',userinfo.chips);
+			conn.log('self:%j boughtin:%d chips:%d',userinfo,conn.boughtin,userinfo.chips);
 			if ((userinfo.chips === undefined) || (params.chips > (userinfo.chips - conn.boughtin))) {
 				conn.send(codes.srTableSitNoChips,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
 				cb(false,events);
