@@ -1,13 +1,23 @@
 var assert = require('assert');
+var util = require('util');
+var async = require('async');
 
-var activeGames,allGames;
+var activeGames,allGames,debugLogs,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
+var dag = require('./dag/build/Release/dag');
 var getGameLock = new ReadWriteLock();
 
 module.exports.makeGameProtobuf = makeGameProtobuf;
 module.exports.Game = Game;
+
+var Pot = require('./pot').Pot;
+var deck = require('./deck');
+var Deck = deck.Deck;
+var Hand = deck.Hand;
+var Club = require('./club');
+var myutils = require('./myutils');
 
 function makeGameProtobuf(g) {
 	assert.equal(g._id.toString().length,24);
@@ -90,9 +100,20 @@ function Game(obj) {
 	if (obj.state2) this.state2 = obj.state2;
 	else this.state2 = 'gsActive';
 }
-Game.init = function (db,input) {
+Game.init = function (db,input,activeUsersIN,debugLogsIN,sharedconfigIN,getNextSequenceIN,logIN) {
 	allGames = db.collection('games');
 	activeGames = input;
+	activeUsers = activeUsersIN;
+	debugLogs = debugLogsIN;
+	GameEvents = db.collection('GameEvents');
+	allClubs = db.collection('clubs');
+	gameState = db.collection('gameState');
+	allUsers = db.collection('users');
+	sharedconfig = sharedconfigIN;
+	allStats = db.collection('allStats');
+	getNextSequence = getNextSequenceIN; // FIXME
+	handHistory = db.collection('handHistory');
+	log = logIN; // FIXME
 }
 Game.prototype.doClose = function (conn,cb,gamerow) {
 	if (this.state == 'tsIdle') this.close(this,cb);
@@ -449,7 +470,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true };
 			if (this.members[x].status == 'psOutOfHand') {
 				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
-				if (!compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
+				if (!myutils.compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
 					if (!this.headsup) {
 						if (this.members[x].chips <= this.obj.big_blind) {
 							this.addHistory({seat:x,bet:this.members[x].chips,code:['teForced','teBB','teAllIn']});
@@ -1233,7 +1254,7 @@ Game.prototype.updateMongoState = function (obj,options,cb) {
 		for (var key in this.users) U.push(this.users[key].userid);
 		obj.$set.users = U;
 	}
-	conn.collection('gameState').update({_id:this.obj._id}, obj,function (err,res) {
+	gameState.update({_id:this.obj._id}, obj,function (err,res) {
 		this.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
 		assert(res == 1);
 		cb();
@@ -1630,7 +1651,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	/*if ((['tsIdle','tsDealing','tsWinning','tsWinning2'].indexOf(this.state) == -1)) {
 		assert(this.timer,util.inspect(this));
 	}*/
-	var tableStatus = {rake_percent:this.rake, table_mongo_id: fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet, minimum_raise:this.minBet + this.minimum_raise,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
+	var tableStatus = {rake_percent:this.rake, table_mongo_id: myutils.fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet, minimum_raise:this.minBet + this.minimum_raise,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
 	if (this.pots) {
@@ -1645,7 +1666,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
 		var timebank = this.timebanks[priv.userid];
 		if (timebank < 0) timebank = 0;
-		var obj = {seat:x, player_mongo_id:fromMongoId(priv.userid), chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected};
+		var obj = {seat:x, player_mongo_id:myutils.fromMongoId(priv.userid), chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected};
 		var showcards = false;
 		if (this.testmode) showcards = true;
 		if ((['tsWinning','tsWinning2'].indexOf(this.state) != -1) && !seat.muck) showcards = true;
@@ -1924,7 +1945,7 @@ Game.prototype.eject = function (seatIdx,userid) {
 	this.Lock.writeLock(function (release) {
 		this.standUp(this.seats[seatIdx].conn,function (folded,events,offset) {
 			for (var x=0; x<this.reconnect.length; x++) {
-				if (compareObjectID(userid,this.reconnect[x])) {
+				if (myutils.compareObjectID(userid,this.reconnect[x])) {
 					this.reconnect.splice(x,1);
 				}
 			}
@@ -2057,6 +2078,7 @@ Game.getGame = function getgame(id,cb) {
 								conn.send(codes.seGameChange,g,'Poker.Game');
 							}
 						}
+						console.log(Club);
 						Club.getClubBySeq(obj.clubseq,function (err,clubobj) {
 							game.club = clubobj;
 							gameState.insert({_id:game.id},function () {

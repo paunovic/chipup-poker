@@ -28,7 +28,8 @@ var codes = require('./ServerCodes');
 var dag = require('./dag/build/Release/dag');
 var bugsView = require('./bugs');
 var profiler = require('./profiler');
-var Club = require('./club');
+var club = require('./club');
+var Club = club.Club;
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
@@ -36,10 +37,10 @@ var config = require('./config');
 var buildbot = require('./buildbot');
 var MongoStore = require('./mongoStore');
 
-var Deck = deck.Deck;
 var Hand = deck.Hand;
 var Game = require('./game').Game;
 var Pot = require('./pot').Pot;
+var myutils = require('./myutils');
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
@@ -677,7 +678,7 @@ function installers_func(req,res) {
 						activeRelease = data[x];
 					}
 					for (var y=0; y<user_stats.length; y++) {
-						if (compareObjectID(data[x]._id,user_stats[y]._id)) {
+						if (myutils.compareObjectID(data[x]._id,user_stats[y]._id)) {
 							data[x].used_by = user_stats[y].hits;
 							console.log(data[x]);
 						}
@@ -812,7 +813,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,allStats,gameState,clubBalances,debugLogs;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,debugLogs;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -820,8 +821,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		process.exit(1);
 	}
 	conn = db;
-	Club.init(db,activeUsers,activeGames,pb);
-	Game.init(db,activeGames);
+	club.init(db,activeUsers,activeGames,pb);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
 		console.log(err.stack);
@@ -842,7 +842,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	Installers = db.collection('installers');
 	Config = db.collection('config');
 	GameEvents = db.collection('GameEvents');
-	allStats = db.collection('allStats');
 	gameState = db.collection('gameState');
 	clubBalances = db.collection('clubBalances');
 
@@ -858,6 +857,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) {
 		assert.ok(collection instanceof Collection);
 		debugLogs = collection;
+		Game.init(db,activeGames,activeUsers,debugLogs,sharedconfig,getNextSequence,log);
 	});
 
 	sessionStore = new MongoStore(db,'sessions');
@@ -1132,7 +1132,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				var game = activeGames[key];
 				for (var seatIdx = 0; seatIdx < game.seats.length; seatIdx++) {
 					if (!game.seats[seatIdx]) continue;
-					if (compareObjectID(game.seats[seatIdx].userid,row._id)) {
+					if (myutils.compareObjectID(game.seats[seatIdx].userid,row._id)) {
 						if (game.members[seatIdx].disconnected) {
 							toResume.push({game:game,seat:seatIdx,seated:true});
 							added = true;
@@ -1143,7 +1143,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				if (added) continue;
 				if (game.reconnect) {
 					for (var x=0; x<game.reconnect.length; x++) {
-						if (compareObjectID(row._id,game.reconnect[x])) {
+						if (myutils.compareObjectID(row._id,game.reconnect[x])) {
 							game.reconnect.splice(x,1);
 							toResume.push({game:game});
 						}
@@ -1259,15 +1259,9 @@ function toMongoId(buf) {
 function fromMongoId(id) {
 	return new Buffer(id.id,'binary');
 }
-function compareObjectID(a,b) {
-	if (!b) return false;
-	var astr = a.toString();
-	var bstr = b.toString();
-	return astr == bstr;
-}
 function containsObjectID(list,id) {
 	for (var x=0; x<list.length; x++) {
-		if (compareObjectID(id,list[x])) return true;
+		if (myutils.compareObjectID(id,list[x])) return true;
 	}
 	return false;
 }
@@ -1917,8 +1911,8 @@ ClientSocket.prototype.handle = function (code,args) {
 									assert.ifError(err);
 									var proto = pb.Serialize({users:[makeUserProtobuf(rows[0]),makeUserProtobuf(rows[1])]},'Poker.UserChangeParams');
 									for (var i=0; i<out.length; i++) {
-										if (compareObjectID(this.userid,out[i])) continue;
-										if (compareObjectID(userid,out[i])) continue;
+										if (myutils.compareObjectID(this.userid,out[i])) continue;
+										if (myutils.compareObjectID(userid,out[i])) continue;
 										var dest = activeUsers[out[i]];
 										if (dest) dest.send(codes.seUserChange,proto,'raw');
 									}
@@ -2036,7 +2030,7 @@ ClientSocket.prototype.handle = function (code,args) {
 									assert.ifError(err);
 									var proto = pb.Serialize({users:[makeUserProtobuf(self)]},'Poker.UserChangeParams');
 									for (var i=0; i<out.length; i++) {
-										if (compareObjectID(this.userid,out[i])) continue;
+										if (myutils.compareObjectID(this.userid,out[i])) continue;
 										var dest = activeUsers[out[i]];
 										if (dest) dest.send(codes.seUserChange,proto,'raw');
 									}
@@ -2074,7 +2068,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.reply(0,"club not found");
 					return;
 				}
-				if (!compareObjectID(club.owner,this.userid)) {
+				if (!myutils.compareObjectID(club.owner,this.userid)) {
 					this.reply(0,'your not owner');
 					return;
 				}
@@ -2233,7 +2227,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						if (club.suspended) {
 							for (var x=0; x<club.suspended.length; x++) {
 								console.log(club.suspended[x],this.userid);
-								if (compareObjectID(club.suspended[x],this.userid)) {
+								if (myutils.compareObjectID(club.suspended[x],this.userid)) {
 									this.reply(0,'your suspended in that club'); // FIXME
 									release();
 									return;
@@ -2241,7 +2235,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							}
 						}
 						console.log(club);
-						if (!compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid)) && club.is_private) {
+						if (!myutils.compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid)) && club.is_private) {
 							this.log('i am not a member');
 							this.reply(0,'your not a member of that club'); // FIXME, bots rely on this error
 							release();
@@ -2422,7 +2416,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					this.reply(0,'club not found');
 					return;
 				}
-				if (!compareObjectID(club.owner,this.userid)) {
+				if (!myutils.compareObjectID(club.owner,this.userid)) {
 					this.log('your not owner');
 					return;
 				}

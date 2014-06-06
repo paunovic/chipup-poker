@@ -12,7 +12,7 @@ var myutils = require('./myutils');
 
 var getLock = new ReadWriteLock();
 
-module.exports = Club;
+module.exports.Club = Club;
 function Club(obj) {
 	if (!(this instanceof Club)) return new Club(clubid);
 	this.clubid = obj._id;
@@ -25,7 +25,7 @@ Club.prototype.refresh = function (obj) {
 }
 Club.activeClubsSeq = [];
 Club.activeClubsId = {};
-Club.getClubBySeq = function (seq,cb) {
+module.exports.getClubBySeq = function (seq,cb) {
 	getLock.writeLock(function (release) {
 		if (!Club.activeClubsSeq[seq]) {
 			allClubs.findOne({seq:seq},function (err,obj) {
@@ -320,7 +320,7 @@ Club.prototype.resetPlayerLimit = function (userid,cb) {
 		else cb(true);
 	}.bind(this));
 }
-Club.init = function (db,activeUsersIn,activeGamesIn,pbIN) {
+module.exports.init = function (db,activeUsersIn,activeGamesIn,pbIN) {
 	allClubs = db.collection('clubs');
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
