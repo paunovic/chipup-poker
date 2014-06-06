@@ -1,11 +1,13 @@
 var assert = require('assert');
 
-var activeGames;
+var activeGames,allGames;
+
+var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
+var profiler = require('./profiler');
+var getGameLock = new ReadWriteLock();
 
 module.exports.makeGameProtobuf = makeGameProtobuf;
-module.exports.init = function (input) {
-	activeGames = input;
-}
+module.exports.Game = Game;
 
 function makeGameProtobuf(g) {
 	assert.equal(g._id.toString().length,24);
@@ -87,6 +89,10 @@ function Game(obj) {
 
 	if (obj.state2) this.state2 = obj.state2;
 	else this.state2 = 'gsActive';
+}
+Game.init = function (db,input) {
+	allGames = db.collection('games');
+	activeGames = input;
 }
 Game.prototype.doClose = function (conn,cb,gamerow) {
 	if (this.state == 'tsIdle') this.close(this,cb);

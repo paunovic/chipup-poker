@@ -38,6 +38,7 @@ var MongoStore = require('./mongoStore');
 
 var Deck = deck.Deck;
 var Hand = deck.Hand;
+var Game = require('./game').Game;
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
@@ -115,7 +116,6 @@ io.set('authorization',function (handshakeData,callback) {
 });
 var logger = require('morgan');
 var bsdiffLock = new ReadWriteLock();
-var getGameLock = new ReadWriteLock();
 app.use(logger());
 function unpackInstaller(row,cb1) {
 	function updateLive(doc,sizes,cb) {
@@ -820,7 +820,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	}
 	conn = db;
 	Club.init(db,activeUsers,activeGames,pb);
-	require('./game').init(activeGames);
+	Game.init(db,activeGames);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
 		console.log(err.stack);
