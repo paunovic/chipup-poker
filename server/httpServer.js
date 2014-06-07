@@ -1,3 +1,4 @@
+"use strict";
 var express = require('express');
 var fs = require('fs');
 var assert = require('assert');
@@ -33,7 +34,7 @@ function Server(db,activeUsersIN) {
 	var app = express();
 	this.httpServer = http.createServer(app);
 	this.db = db;
-	var io = require('socket.io').listen(this.httpServer,{log:false});
+	this.IO = require('socket.io').listen(this.httpServer,{log:false});
 	var logger = require('morgan');
 	app.use(logger());
 	this.activeUsers = activeUsersIN;
@@ -50,7 +51,7 @@ function Server(db,activeUsersIN) {
 	this.avatars = db.collection('avatars');
 
 	this.sessionStore = new MongoStore(db,'sessions');
-	io.set('authorization',this.socketAuth.bind(this));
+	this.IO.set('authorization',this.socketAuth.bind(this));
 	app.use(express.cookieParser());
 	app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
 	app.configure(function () {
@@ -307,21 +308,7 @@ function Server(db,activeUsersIN) {
 			res.end('OK');
 		});
 	});
-	app.get('/sync/gitHook',function (req,res) {
-		res.end();
-		fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
-			var latestVersion = body.trim();
-			var latestMsg = '';
-			var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
-			child.stdout.setEncoding('utf8');
-			child.stdout.on('data',function (data) {
-				latestMsg += data;
-			});
-			child.on('close',function () {
-				io.sockets.emit('new_revision',{hash:latestVersion,msg:latestMsg});
-			});
-		});
-	});
+	app.get('/sync/gitHook',this.gitHook.bind(this));
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
 }
@@ -890,6 +877,21 @@ Server.prototype.uploadAvatar = function (req,res) {
 					fs.unlink(req.files.avatar.path);
 				});
 			}
+		}.bind(this));
+	}.bind(this));
+}
+Server.prototype.gitHook = function (req,res) {
+	res.end();
+	fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
+		var latestVersion = body.trim();
+		var latestMsg = '';
+		var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
+		child.stdout.setEncoding('utf8');
+		child.stdout.on('data',function (data) {
+			latestMsg += data;
+		});
+		child.on('close',function () {
+			this.IO.sockets.emit('new_revision',{hash:latestVersion,msg:latestMsg});
 		}.bind(this));
 	}.bind(this));
 }
