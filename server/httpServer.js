@@ -31,6 +31,7 @@ function initHttpServer(db,activeUsers,sharedconfigIN,logIN) {
 function Server(db,activeUsersIN) {
 	var app = express();
 	this.httpServer = http.createServer(app);
+	this.db = db;
 	var io = require('socket.io').listen(this.httpServer,{log:false});
 	var logger = require('morgan');
 	app.use(logger());
@@ -47,26 +48,7 @@ function Server(db,activeUsersIN) {
 	this.config = db.collection('config');
 
 	this.sessionStore = new MongoStore(db,'sessions');
-	io.set('authorization',function (handshakeData,callback) {
-		var test = require('./node_modules/express/node_modules/connect');
-		var cookieModule = require('./node_modules/express/node_modules/cookie');
-		if (handshakeData.headers.cookie) {
-			var cookies = cookieModule.parse(handshakeData.headers.cookie);
-			var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
-		}
-		if (parsed && parsed.poker) {
-			this.sessionStore.get(parsed.poker,function (err,session) {
-				if (session.authed) {
-					callback(null,true);
-				} else {
-					callback(null,false);
-				}
-			});
-		} else {
-			log('unauthorized ip: %s',ip);
-			callback(null,false);
-		}
-	}.bind(this));
+	io.set('authorization',this.socketAuth.bind(this));
 	app.use(express.cookieParser());
 	app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
 	app.configure(function () {
@@ -74,16 +56,7 @@ function Server(db,activeUsersIN) {
 		app.use(express.bodyParser({uploadDir:'./upload'}));
 	});
 	app.use('/sync/',express.basicAuth('sync',config.syncpassword));
-	app.use('/secure/',function (req,res,next) {
-		if (req.session.authed) return next();
-		if (req.url == '/login') {
-			return next(); // allow the login page
-		} else {
-			req.session.lastUrl = req.originalUrl;
-			res.writeHead(302,{Location:'/secure/login'});
-			res.end('you must first login');
-		}
-	});
+	app.use('/secure/',this.isSecureAuthed);
 	app.set('view engine','jade');
 	app.get('/secure/',this.secureIndex.bind(this));
 
@@ -141,63 +114,14 @@ function Server(db,activeUsersIN) {
 			});
 		});
 	});
-	app.get('/secure/disk',function (req,res) {
-		var start = Date.now();
-		db.stats(function (err,stats) {
-			db.collectionNames(function (err,names) {
-				var out = [];
-				var input = [];
-				for (var x=0; x<names.length; x++) {
-					input.push(names[x].name);
-				}
-				input.sort();
-				async.eachLimit(input,1,function (item,cb) {
-					db.collection(item.split('.')[1]).stats(function (err,stats) {
-						if (!stats) {
-							console.log('name:%s stats:',item,stats);
-							cb();
-							return;
-						}
-						out.push(stats);
-						cb();
-					});
-				},function done(err) {
-					res.render('disk',{dbstats:stats,start:start,stats:out});
-				});
-			});
-		});
-	});
+	app.get('/secure/disk',this.getDisk.bind(this);
 	app.get('/secure/billing',function (req,res) {
 		var start = Date.now();
 		db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) {
 			res.render('billing',{billing:rows,start:start});
 		});
 	});
-	app.get('/confirm',function (req,res) {
-		if (!req.query.code) {
-			res.send("error, code missing");
-			return;
-		}
-		if (req.query.code.length != 36) {
-			res.send(badConfLink);
-			return;
-		}
-		allUsers.findOne({authcode:req.query.code},function (err,user) {
-			if (!user) {
-				res.send(badConfLink);
-				return;
-			}
-			allUsers.update({_id:user._id},{$set:{authed:true},$unset:{authcode:""}},function (err,result) {
-				console.log('email confirm time',user);
-				res.send("E-Mail address successfully verified.");
-				var conn = activeUsers[user._id];
-				if (!conn) return;
-				allUsers.findOne({_id:user._id},function (err,self) {
-					conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
-				});
-			});
-		});
-	});
+	app.get('/confirm',this.confirmAccount.bind(this));
 	app.post('/secure/club_public',function (req,res) {
 		Club.getClubById(new ObjectID(req.body.clubid),function (err,clubObj) {
 			assert.ifError(err);
@@ -206,83 +130,8 @@ function Server(db,activeUsersIN) {
 			});
 		});
 	});
-	app.get('/confirmchange',function (req,res) {
-		if (!req.query.code) {
-			res.send("error, code missing");
-			return;
-		}
-		if (req.query.code.length != 36) {
-			res.send(badConfLink);
-			return;
-		}
-		allUsers.findOne({changecode:req.query.code},function (err,user) {
-			if (!user) {
-				res.send(badConfLink);
-				return;
-			}
-			var age = Date.now() - user.changetime;
-			console.log('code age',age);
-			if (age > (sharedconfig.ChangeExpireTime*1000)) {
-				allUsers.update({_id:user._id},{$unset:{changecode:"",changetime:""}},function (err,updated) {
-					res.send("error, change code expired");
-				}.bind(this));
-				return;
-			}
-			allUsers.update({_id:user._id},{$set:{email:user.newemail,authed:true},$unset:{newemail:"",changecode:"",authcode:""}},function (err,result) {
-				console.log('email change time',user);
-				res.send("E-Mail address successfully changed.");
-				var conn = activeUsers[user._id];
-				if (!conn) return;
-				allUsers.findOne({_id:user._id},function (err,self) {
-					conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
-				});
-			});
-		});
-	});
-	app.get("/passwordreset",function (req,res) {
-		if (!req.query.code) {
-			res.send("error, code missing");
-			return;
-		}
-		if (req.query.code.length != 36) {
-			res.send(badConfLink);
-			return;
-		}
-		allUsers.findOne({forgotcode:req.query.code},function (err,user) {
-			if (!user) {
-				res.send(badConfLink);
-				return;
-			}
-			var age = Date.now() - user.forgottime;
-			console.log('reset code age',age);
-			if (age > (sharedconfig.ForgotExpireTime*1000)) {
-				allUsers.update({_id:user._id},{$unset:{forgotcode:"",forgottime:""}},function (err,updated) {
-					res.send("Password reset link expired.");
-				}.bind(this));
-				return;
-			}
-			var newpassword = generatePassword();
-			deck.getRandom(16,function (salt) {
-				var hasher = crypto.createHash('sha256');
-				hasher.update(salt);
-				hasher.update(newpassword);
-				var hash = hasher.digest();
-				allUsers.update({_id:user._id},{$set:{password:hash,salt:salt},$unset:{forgotcode:"",forgottime:""}},function (err,result) {
-					console.log('password change time',user);
-					res.send("Password changed, new password sent to your E-Mail.");
-					var test = new SmtpConnection();
-					var message = emailChange2({password:newpassword});
-					test.sendMail(user.email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+user.displayname+'<'+user.email+'>\r\nContent-Type: text/html\r\nSubject: New Password Issued\r\n\r\n'+message,function cb(err,ret) {
-						console.log('cb',err,ret);
-						if (err) {
-							console.log('password reset email error',err);
-							return;
-						}
-					});
-				});
-			});
-		});
-	});
+	app.get('/confirmchange',this.confirmChange.bind(this));
+	app.get("/passwordreset",this.passwordReset.bind(this));
 	app.post("/uploadAvatar",function (req,res) {
 		console.log('files',req.headers);
 		console.log('version',req.httpVersionMajor,req.httpVersionMinor);
@@ -365,32 +214,10 @@ function Server(db,activeUsersIN) {
 			res.render('paypal_secure',{rows:rows});
 		})
 	});
-app.post('/error_upload',function (req,res) {
-	// fields are req.body.MailFrom MailSubject MailBody
-	var body = req.body;
-	var doc = { MailFrom:body.MailFrom, MailSubject:body.MailSubject, MailBody:body.MailBody };
-	async.parallel([function (cb1) {
-		fs.readFile(req.files.ScreenShot.path,function (err,data) {
-			doc.ScreenShot = data;
-			fs.unlink(req.files.ScreenShot.path);
-			cb1();
-		});
-		},function (cb2) {
-		fs.readFile(req.files.BugReport.path,{encoding:'utf8'},function (err,data) {
-			doc.BugReport = data;
-			fs.unlink(req.files.BugReport.path);
-			cb2();
-		});
-		}],function done() {
-			bugs.insert(doc,function (err,result) {
-				console.log(result);
-				res.send(200);
-			});
-		});
-});
-app.get("/test",function (req,res) {
-	res.send("<form method='post' action='/image_upload' enctype='multipart/form-data'><input type='file' name='avatar'><input type='submit'></form>");
-});
+	app.post('/error_upload',this,errorUpload.bind(this));
+	app.get("/test",function (req,res) {
+		res.send("<form method='post' action='/image_upload' enctype='multipart/form-data'><input type='file' name='avatar'><input type='submit'></form>");
+	});
 app.get("/getavatar",function (req,res) {
 	var id = req.query.id;
 	log('getting avatar %j %d %s',req.query,id.length,id);
@@ -874,7 +701,188 @@ Server.prototype.installers_func = function (req,res) {
 			}.bind(this));
 		}.bind(this));
 	}
-};
+}
 Server.prototype.goOnline = function () {
 	this.httpServer.listen(3000);
+}
+Server.prototype.socketAuth = function (handshakeData,callback) {
+	var test = require('./node_modules/express/node_modules/connect');
+	var cookieModule = require('./node_modules/express/node_modules/cookie');
+	if (handshakeData.headers.cookie) {
+		var cookies = cookieModule.parse(handshakeData.headers.cookie);
+		var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
+	}
+	if (parsed && parsed.poker) {
+		this.sessionStore.get(parsed.poker,function (err,session) {
+			if (session.authed) {
+				callback(null,true);
+			} else {
+				callback(null,false);
+			}
+		});
+	} else {
+		log('unauthorized ip: %s',ip);
+		callback(null,false);
+	}
+}
+Server.prototype.isSecureAuthed = function (req,res,next) {
+	if (req.session.authed) return next();
+	if (req.url == '/login') {
+		return next(); // allow the login page
+	} else {
+		req.session.lastUrl = req.originalUrl;
+		res.writeHead(302,{Location:'/secure/login'});
+		res.end('you must first login');
+	}
+}
+Server.prototype.getDisk = function (req,res) {
+	var start = Date.now();
+	this.db.stats(function (err,stats) {
+		this.db.collectionNames(function (err,names) {
+			var out = [];
+			var input = [];
+			for (var x=0; x<names.length; x++) {
+				input.push(names[x].name);
+			}
+			input.sort();
+			async.eachLimit(input,1,function (item,cb) {
+				this.db.collection(item.split('.')[1]).stats(function (err,stats) {
+					if (!stats) {
+						console.log('name:%s stats:',item,stats);
+						cb();
+						return;
+					}
+					out.push(stats);
+					cb();
+				});
+			}.bind(this),function done(err) {
+				res.render('disk',{dbstats:stats,start:start,stats:out});
+			});
+		}.bind(this));
+	}.bind(this));
+}
+Server.prototype.confirmAccount = function (req,res) {
+	if (!req.query.code) {
+		res.send("error, code missing");
+		return;
+	}
+	if (req.query.code.length != 36) {
+		res.send(badConfLink);
+		return;
+	}
+	this.users.findOne({authcode:req.query.code},function (err,user) {
+		if (!user) {
+			res.send(badConfLink);
+			return;
+		}
+		this.users.update({_id:user._id},{$set:{authed:true},$unset:{authcode:""}},function (err,result) {
+			console.log('email confirm time',user);
+			res.send("E-Mail address successfully verified.");
+			var conn = activeUsers[user._id];
+			if (!conn) return;
+			this.users.findOne({_id:user._id},function (err,self) {
+				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
+			});
+		}.bind(this));
+	}.bind(this));
+}
+Server.prototype.confirmChange = function (req,res) {
+	if (!req.query.code) {
+		res.send("error, code missing");
+		return;
+	}
+	if (req.query.code.length != 36) {
+		res.send(badConfLink);
+		return;
+	}
+	this.users.findOne({changecode:req.query.code},function (err,user) {
+		if (!user) {
+			res.send(badConfLink);
+			return;
+		}
+		var age = Date.now() - user.changetime;
+		console.log('code age',age);
+		if (age > (sharedconfig.ChangeExpireTime*1000)) {
+			this.users.update({_id:user._id},{$unset:{changecode:"",changetime:""}},function (err,updated) {
+				res.send("error, change code expired");
+			}.bind(this));
+			return;
+		}
+		this.users.update({_id:user._id},{$set:{email:user.newemail,authed:true},$unset:{newemail:"",changecode:"",authcode:""}},function (err,result) {
+			console.log('email change time',user);
+			res.send("E-Mail address successfully changed.");
+			var conn = activeUsers[user._id];
+			if (!conn) return;
+			this.users.findOne({_id:user._id},function (err,self) {
+				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
+			});
+		}.bind(this));
+	}.bind(this));
+}
+Server.prototype.passwordReset = function (req,res) {
+	if (!req.query.code) {
+		res.send("error, code missing");
+		return;
+	}
+	if (req.query.code.length != 36) {
+		res.send(badConfLink);
+		return;
+	}
+	this.users.findOne({forgotcode:req.query.code},function (err,user) {
+		if (!user) {
+			res.send(badConfLink);
+			return;
+		}
+		var age = Date.now() - user.forgottime;
+		console.log('reset code age',age);
+		if (age > (sharedconfig.ForgotExpireTime*1000)) {
+			this.users.update({_id:user._id},{$unset:{forgotcode:"",forgottime:""}},function (err,updated) {
+				res.send("Password reset link expired.");
+			}.bind(this));
+			return;
+		}
+		var newpassword = generatePassword();
+		deck.getRandom(16,function (salt) {
+			var hasher = crypto.createHash('sha256');
+			hasher.update(salt);
+			hasher.update(newpassword);
+			var hash = hasher.digest();
+			this.users.update({_id:user._id},{$set:{password:hash,salt:salt},$unset:{forgotcode:"",forgottime:""}},function (err,result) {
+				console.log('password change time',user);
+				res.send("Password changed, new password sent to your E-Mail.");
+				var test = new SmtpConnection();
+				var message = emailChange2({password:newpassword});
+				test.sendMail(user.email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+user.displayname+'<'+user.email+'>\r\nContent-Type: text/html\r\nSubject: New Password Issued\r\n\r\n'+message,function cb(err,ret) {
+					console.log('cb',err,ret);
+					if (err) {
+						console.log('password reset email error',err);
+						return;
+					}
+				});
+			});
+		}.bind(this));
+	}.bind(this));
+}
+Server.prototype.errorUpload = function (req,res) {
+	// fields are req.body.MailFrom MailSubject MailBody
+	var body = req.body;
+	var doc = { MailFrom:body.MailFrom, MailSubject:body.MailSubject, MailBody:body.MailBody };
+	async.parallel([function (cb1) {
+		fs.readFile(req.files.ScreenShot.path,function (err,data) {
+			doc.ScreenShot = data;
+			fs.unlink(req.files.ScreenShot.path);
+			cb1();
+		});
+		},function (cb2) {
+		fs.readFile(req.files.BugReport.path,{encoding:'utf8'},function (err,data) {
+			doc.BugReport = data;
+			fs.unlink(req.files.BugReport.path);
+			cb2();
+		});
+		}],function done() {
+			this.bugs.insert(doc,function (err,result) {
+				console.log(result);
+				res.send(200);
+			});
+		}.bind(this));
 }
