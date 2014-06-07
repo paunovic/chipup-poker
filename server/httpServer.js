@@ -7,6 +7,7 @@ var crypto = require('crypto');
 var async = require('async');
 var child_process = require('child_process');
 var http = require('http');
+var https = require('https');
 
 var config = require('./config');
 var MongoStore = require('./mongoStore');
@@ -45,6 +46,7 @@ function Server(db,activeUsersIN) {
 	this.admin = db.collection('admin');
 	this.installers = db.collection('installers');
 	this.config = db.collection('config');
+	this.avatars = db.collection('avatars');
 
 	this.sessionStore = new MongoStore(db,'sessions');
 	io.set('authorization',function (handshakeData,callback) {
@@ -190,14 +192,14 @@ function Server(db,activeUsersIN) {
 			allUsers.update({_id:user._id},{$set:{authed:true},$unset:{authcode:""}},function (err,result) {
 				console.log('email confirm time',user);
 				res.send("E-Mail address successfully verified.");
-				var conn = activeUsers[user._id];
+				var conn = this.activeUsers[user._id];
 				if (!conn) return;
 				allUsers.findOne({_id:user._id},function (err,self) {
 					conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
 				});
-			});
-		});
-	});
+			}.bind(this));
+		}).bind(this);
+	}.bind(this));
 	app.post('/secure/club_public',function (req,res) {
 		Club.getClubById(new ObjectID(req.body.clubid),function (err,clubObj) {
 			assert.ifError(err);
@@ -231,14 +233,14 @@ function Server(db,activeUsersIN) {
 			allUsers.update({_id:user._id},{$set:{email:user.newemail,authed:true},$unset:{newemail:"",changecode:"",authcode:""}},function (err,result) {
 				console.log('email change time',user);
 				res.send("E-Mail address successfully changed.");
-				var conn = activeUsers[user._id];
+				var conn = this.activeUsers[user._id];
 				if (!conn) return;
 				allUsers.findOne({_id:user._id},function (err,self) {
 					conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
 				});
-			});
-		});
-	});
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
 	app.get("/passwordreset",function (req,res) {
 		if (!req.query.code) {
 			res.send("error, code missing");
@@ -291,7 +293,7 @@ function Server(db,activeUsersIN) {
 			var hasher = crypto.createHash('sha256');
 			hasher.update(data);
 			var hash = hasher.digest('base64');
-			avatars.findOne({_id:hash},function (err,row) {
+			this.avatars.findOne({_id:hash},function (err,row) {
 				if (err) {
 					console.log('error',err);
 					res.send(JSON.stringify({error:err}));
@@ -315,8 +317,8 @@ function Server(db,activeUsersIN) {
 					});
 				}
 			});
-		});
-	});
+		}.bind(this));
+	}.bind(this));
 	app.post('/paypal_callback',function (req,res) {
 		if (req.body.test_ipn) var host = 'www.sandbox.paypal.com';
 		else var host = 'www.paypal.com';
@@ -492,12 +494,12 @@ app.post('/eval',function (req,res) {
 	app.post('/secure/sendBroadcast',function (req,res) {
 		console.log(req.body);
 		var ev = {event:'ceServerMessage',msg:{msg:req.body.msg}};
-		for (var key in activeUsers) {
-			activeUsers[key].send(codes.seChat,ev,'Poker.ChatEvent');
+		for (var key in this.activeUsers) {
+			this.activeUsers[key].send(codes.seChat,ev,'Poker.ChatEvent');
 		}
 		res.writeHead(302,{Location:'/secure/broadcast?success=true'}); // FIXME
 		res.end();
-	});
+	}.bind(this));
 app.get('/fetchhands',function (req,res) {
 	var token = profiler.start('fetchhands-outer');
 	// new Buffer(g._id.toString(),'hex')
