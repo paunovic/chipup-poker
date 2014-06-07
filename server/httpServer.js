@@ -116,7 +116,7 @@ function Server(db,activeUsersIN) {
 			});
 		});
 	});
-	app.get('/secure/disk',this.getDisk.bind(this);
+	app.get('/secure/disk',this.getDisk.bind(this));
 	app.get('/secure/billing',function (req,res) {
 		var start = Date.now();
 		db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) {
