@@ -231,7 +231,7 @@ Server.prototype.addSecure = function (app) {
 }
 Server.prototype.addSync = function (app) {
 	app.get('/sync/gitHook',this.gitHook.bind(this));
-	app.post('/sync/newVersion',this.syncNewVersion);
+	app.post('/sync/newVersion',this.syncNewVersion.bind(this));
 	app.post('/sync/newDiff',this.syncNewDiff.bind(this));
 }
 Server.prototype.getHand = function (req,res) {
