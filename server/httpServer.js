@@ -134,40 +134,6 @@ function Server(db,activeUsersIN) {
 	});
 	app.get('/confirmchange',this.confirmChange.bind(this));
 	app.get("/passwordreset",this.passwordReset.bind(this));
-	app.post("/uploadAvatar",function (req,res) {
-		console.log('files',req.headers);
-		console.log('version',req.httpVersionMajor,req.httpVersionMinor);
-		fs.readFile(req.files.avatar.path,function (err,data) {
-			var extension = req.files.avatar.originalFilename.split('.').pop();
-			var hasher = crypto.createHash('sha256');
-			hasher.update(data);
-			var hash = hasher.digest('base64');
-			this.avatars.findOne({_id:hash},function (err,row) {
-				if (err) {
-					console.log('error',err);
-					res.send(JSON.stringify({error:err}));
-					return;
-				}
-				if (row) {
-					var out = new Buffer(hash,'base64');
-					console.log('sending dup id',out);
-					res.send(200,out);
-				} else {
-					avatars.insert({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension},function (err,row) {
-						if (err) {
-							console.log('error',err);
-							res.send(JSON.stringify(err));
-							return;
-						}
-						var out = new Buffer(row[0]._id,'base64');
-						console.log('sending unique id',out);
-						res.send(200,out);
-						fs.unlink(req.files.avatar.path);
-					});
-				}
-			});
-		}.bind(this));
-	}.bind(this));
 	app.post('/paypal_callback',function (req,res) {
 		if (req.body.test_ipn) var host = 'www.sandbox.paypal.com';
 		else var host = 'www.paypal.com';
@@ -220,55 +186,36 @@ function Server(db,activeUsersIN) {
 	app.get("/test",function (req,res) {
 		res.send("<form method='post' action='/image_upload' enctype='multipart/form-data'><input type='file' name='avatar'><input type='submit'></form>");
 	});
-app.get("/getavatar",function (req,res) {
-	var id = req.query.id;
-	log('getting avatar %j %d %s',req.query,id.length,id);
-	if (id == 'default') {
-		fs.readFile('resources/default_avatar.jpg',function (err,data) {
-			if (err) throw err;
-			res.send(data);
-		});
-		return;
-	}
-	var raw = new Buffer(id,'hex');
-	var base64 = raw.toString('base64');
-	avatars.findOne({_id:base64},function (err,row) {
-		if (!row) {
-			res.send(404);
-			return;
-		}
-		var filename = req.query.id+"."+row.ext;
-		console.log(filename);
-		res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
-		res.send(row.image.buffer);
+	
+	app.get("/getavatar",this.getAvatar.bind(this));
+	app.post("/uploadAvatar",this.uploadAvatar.bind(this));
+
+	app.get("/install_chipuppoker.exe",function (req,res) {
+		this.config.findOne({_id:'installerid'},function (err,row) {
+			assert.ifError(err);
+			this.installers.findOne({_id:row.value},function (err,row) {
+				log('sending installer %j',row);
+				res.sendfile('installers/'+row.name);
+			});
+		}.bind(this));
+	}.bind(this));
+	app.get("/debug_install_chipuppoker.exe",function (req,res) {
+		this.config.findOne({_id:'debuginstallerid'},function (err,row) {
+			assert.ifError(err);
+			this.installers.findOne({_id:row.value},function (err,row) {
+				log('sending debug installer %j',row);
+				res.sendfile('installers/'+row.name);
+			});
+		}.bind(this));
+	}.bind(this));
+	app.post('/eval',function (req,res) {
+		var state = req.body;
+		console.log(state);
+		var fakegame = { flop:{cards:state.flop}, turn:{cards:state.turn}, river:{cards:state.river}};
+		var fakeusers = [{seat:0,hand:state.cards1},{seat:1,hand:state.cards2}];
+		var result = dag.rankHands(fakegame,fakeusers);
+		res.send(JSON.stringify(result));
 	});
-});
-app.get("/install_chipuppoker.exe",function (req,res) {
-	this.config.findOne({_id:'installerid'},function (err,row) {
-		assert.ifError(err);
-		this.installers.findOne({_id:row.value},function (err,row) {
-			log('sending installer %j',row);
-			res.sendfile('installers/'+row.name);
-		});
-	}.bind(this));
-}.bind(this));
-app.get("/debug_install_chipuppoker.exe",function (req,res) {
-	this.config.findOne({_id:'debuginstallerid'},function (err,row) {
-		assert.ifError(err);
-		this.installers.findOne({_id:row.value},function (err,row) {
-			log('sending debug installer %j',row);
-			res.sendfile('installers/'+row.name);
-		});
-	}.bind(this));
-}.bind(this));
-app.post('/eval',function (req,res) {
-	var state = req.body;
-	console.log(state);
-	var fakegame = { flop:{cards:state.flop}, turn:{cards:state.turn}, river:{cards:state.river}};
-	var fakeusers = [{seat:0,hand:state.cards1},{seat:1,hand:state.cards2}];
-	var result = dag.rankHands(fakegame,fakeusers);
-	res.send(JSON.stringify(result));
-});
 	app.post('/contactPost',function (req,res) {
 		console.log(req.body);
 		RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function () {
@@ -327,61 +274,7 @@ app.post('/eval',function (req,res) {
 		res.writeHead(302,{Location:'/secure/broadcast?success=true'}); // FIXME
 		res.end();
 	}.bind(this));
-app.get('/fetchhands',function (req,res) {
-	var token = profiler.start('fetchhands-outer');
-	// new Buffer(g._id.toString(),'hex')
-	FetchQueue.findOne({querycode:req.query.uuid},function (err,query) {
-		assert.ifError(err);
-		console.log(query.query);
-		console.log('query size %d',JSON.stringify(query).length);
-		var reqs = query.query.games;
-		async.each(reqs,function (req,cb) {
-			console.log('finding all history in game %j',req.gameid.buffer);
-			handHistory.find({gameid:toMongoId(req.gameid.buffer),seq:{$gt:req.lasthandid}},{seq:1,totalrake:1,players:1,cards:1,endtime:1,balance_changes:1}).toArray(function (res2,hands) {
-				var token2 = profiler.start('fetchhands-inner1');
-				var start = Date.now();
-				assert.ifError(err);
-				for (var x=0; x<hands.length; x++) {
-					var row = hands[x];
-					if (!row.balance_changes) {
-						console.log('balance_changes missing on hh %s',row._id);
-						hands[x] = null;
-						continue;
-					}
-					if (!row.totalrake) {
-						console.log('totalrake missing on hh %s',row._id);
-						hands[x] = null;
-						continue;
-					}
-					row._id = fromMongoId(row._id);
-					row.tablecards = [];
-				}
-				var end = Date.now();
-				token2.stop();
-				log('did %d hands in %dms',hands.length,end-start);
-				allGames.findOne({_id:toMongoId(req.gameid.buffer)},{clubid:1},function (err,game) {
-					assert.ifError(err);
-					GameEvents.find({gameid:game._id}).toArray(function (err,events) {
-						var start = Date.now();
-						var obj = {clubid: fromMongoId(game.clubid), gameid: req.gameid.buffer, rows:hands, events:events};
-
-						var token2 = profiler.start('fetchhands-inner2');
-						var out = pb.Serialize({reply:[obj]},'Poker.FetchHandHistoryReply');
-						var end = Date.now();
-						log('serialized in %dms',end-start);
-						token2.stop();
-						res.write(out);
-						cb();
-					});
-				});
-			});
-		},function done() {
-			//res.writeHead(200,{'Content-Length': out.length});
-			res.end();
-			token.stop();
-		});
-	});
-});
+	app.get('/fetchhands',this.fetchHands.bind(this));
 	app.post('/sync/newVersion',function (req,res) {
 		console.log(req.body);
 		req.body.installer._id = new ObjectID(req.body.installer._id);
@@ -887,4 +780,116 @@ Server.prototype.errorUpload = function (req,res) {
 				res.send(200);
 			});
 		}.bind(this));
+}
+Server.prototype.fetchHands = function (req,res) {
+	var token = profiler.start('fetchhands-outer');
+	// new Buffer(g._id.toString(),'hex')
+	FetchQueue.findOne({querycode:req.query.uuid},function (err,query) {
+		assert.ifError(err);
+		console.log(query.query);
+		console.log('query size %d',JSON.stringify(query).length);
+		var reqs = query.query.games;
+		async.each(reqs,function (req,cb) {
+			console.log('finding all history in game %j',req.gameid.buffer);
+			handHistory.find({gameid:toMongoId(req.gameid.buffer),seq:{$gt:req.lasthandid}},{seq:1,totalrake:1,players:1,cards:1,endtime:1,balance_changes:1}).toArray(function (res2,hands) {
+				var token2 = profiler.start('fetchhands-inner1');
+				var start = Date.now();
+				assert.ifError(err);
+				for (var x=0; x<hands.length; x++) {
+					var row = hands[x];
+					if (!row.balance_changes) {
+						console.log('balance_changes missing on hh %s',row._id);
+						hands[x] = null;
+						continue;
+					}
+					if (!row.totalrake) {
+						console.log('totalrake missing on hh %s',row._id);
+						hands[x] = null;
+						continue;
+					}
+					row._id = fromMongoId(row._id);
+					row.tablecards = [];
+				}
+				var end = Date.now();
+				token2.stop();
+				log('did %d hands in %dms',hands.length,end-start);
+				allGames.findOne({_id:toMongoId(req.gameid.buffer)},{clubid:1},function (err,game) {
+					assert.ifError(err);
+					GameEvents.find({gameid:game._id}).toArray(function (err,events) {
+						var start = Date.now();
+						var obj = {clubid: fromMongoId(game.clubid), gameid: req.gameid.buffer, rows:hands, events:events};
+
+						var token2 = profiler.start('fetchhands-inner2');
+						var out = pb.Serialize({reply:[obj]},'Poker.FetchHandHistoryReply');
+						var end = Date.now();
+						log('serialized in %dms',end-start);
+						token2.stop();
+						res.write(out);
+						cb();
+					});
+				});
+			});
+		},function done() {
+			//res.writeHead(200,{'Content-Length': out.length});
+			res.end();
+			token.stop();
+		});
+	});
+}
+Server.prototype.getAvatar = function (req,res) {
+	var id = req.query.id;
+	log('getting avatar %j %d %s',req.query,id.length,id);
+	if (id == 'default') {
+		fs.readFile('resources/default_avatar.jpg',function (err,data) {
+			if (err) throw err;
+			res.send(data);
+		});
+		return;
+	}
+	var raw = new Buffer(id,'hex');
+	var base64 = raw.toString('base64');
+	this.avatars.findOne({_id:base64},function (err,row) {
+		if (!row) {
+			res.send(404);
+			return;
+		}
+		var filename = req.query.id+"."+row.ext;
+		console.log(filename);
+		res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
+		res.send(row.image.buffer);
+	});
+}
+Server.prototype.uploadAvatar = function (req,res) {
+	console.log('files',req.headers);
+	console.log('version',req.httpVersionMajor,req.httpVersionMinor);
+	fs.readFile(req.files.avatar.path,function (err,data) {
+		var extension = req.files.avatar.originalFilename.split('.').pop();
+		var hasher = crypto.createHash('sha256');
+		hasher.update(data);
+		var hash = hasher.digest('base64');
+		this.avatars.findOne({_id:hash},function (err,row) {
+			if (err) {
+				console.log('error',err);
+				res.send(JSON.stringify({error:err}));
+				return;
+			}
+			if (row) {
+				var out = new Buffer(hash,'base64');
+				console.log('sending dup id',out);
+				res.send(200,out);
+			} else {
+				this.avatars.insert({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension},function (err,row) {
+					if (err) {
+						console.log('error',err);
+						res.send(JSON.stringify(err));
+						return;
+					}
+					var out = new Buffer(row[0]._id,'base64');
+					console.log('sending unique id',out);
+					res.send(200,out);
+					fs.unlink(req.files.avatar.path);
+				});
+			}
+		}.bind(this));
+	}.bind(this));
 }
