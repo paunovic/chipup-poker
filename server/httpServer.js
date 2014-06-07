@@ -216,7 +216,7 @@ function Server(db,activeUsersIN) {
 			res.render('paypal_secure',{rows:rows});
 		})
 	});
-	app.post('/error_upload',this,errorUpload.bind(this));
+	app.post('/error_upload',this.errorUpload.bind(this));
 	app.get("/test",function (req,res) {
 		res.send("<form method='post' action='/image_upload' enctype='multipart/form-data'><input type='file' name='avatar'><input type='submit'></form>");
 	});
