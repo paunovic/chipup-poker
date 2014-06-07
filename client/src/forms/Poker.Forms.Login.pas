@@ -9,7 +9,7 @@ uses
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
   OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin,
-  Poker.Protobufs.Objects.TableStatus, System.Generics.Collections;
+  Poker.Protobufs.Objects.TableStatus, System.Generics.Collections, Poker.Common.AlphaBlendThread;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
@@ -47,6 +47,7 @@ type
     FCurrentStatus: TLoginStatus;
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
+    FAlphaBlendThread: TAlphaBlendThread;
 
     procedure ApplySettings;
     procedure SaveSettings;
@@ -83,7 +84,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket, Poker.Common.AlphaBlendThread,
+  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
   Poker.Forms.Main, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption,
@@ -114,6 +115,8 @@ procedure TfrmChipUpLogin.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   SaveSettings;
+
+  TAlphaBlendThread.FreeAlpaBlendThread(FAlphaBlendThread);
 end;
 
 procedure TfrmChipUpLogin.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -155,7 +158,7 @@ begin
     wsConnected: CurrentStatus := lsConnected;
   end;
 
-  TAlphaBlendThread.Create(AlphaBlendValue, 255, 0.1, 0.15, AlphaBlendThreadNotify);
+  TAlphaBlendThread.CreateAlphaBlendThread(FAlphaBlendThread, AlphaBlendValue, 255, 0.1, 0.15, AlphaBlendThreadNotify);
 end;
 
 procedure TfrmChipUpLogin.HelloServer;
@@ -418,7 +421,7 @@ begin
       dmMain.SelfInfo.Password := edPassword.Text;
       dmMain.ProcessLoginReply(pbreply);
       CurrentStatus := lsLoggedIn;
-      Close;
+      TAlphaBlendThread.CreateAlphaBlendThread(FAlphaBlendThread, AlphaBlendValue, 0, 0, 0.1, AlphaBlendThreadNotify);
     end;
     lrInvalid: begin
       CurrentStatus := lsConnected;
@@ -440,6 +443,12 @@ begin
   AlphaBlendValue := abthread.CurrentValue;
   if not Visible then
     Show;
+
+  if abthread.Done then
+  begin
+    if AlphaBlendValue = 0 then
+      Close;
+  end;
 end;
 
 

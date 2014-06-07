@@ -21,6 +21,9 @@ type
   protected
     procedure Execute; override;
   public
+    class procedure CreateAlphaBlendThread(var AAlphaBlendThread: TAlphaBlendThread; const AFrom, ATo: Integer; const ADelay, ATimeInterval: Single; const AOnNotify: TNotifyEvent);
+    class procedure FreeAlpaBlendThread(var AAlphaBlendThread: TAlphaBlendThread);
+
     constructor Create(const AFrom, ATo: Integer; const ADelay, ATimeInterval: Single; const AOnNotify: TNotifyEvent);
 
     property CurrentValue: Integer read FCurrentValue;
@@ -30,13 +33,29 @@ type
 implementation
 
 uses
-  Winapi.Windows;
+  Winapi.Windows, System.SysUtils;
 
 { TAlphaBlendThread }
 
+
+class procedure TAlphaBlendThread.CreateAlphaBlendThread(var AAlphaBlendThread: TAlphaBlendThread; const AFrom, ATo: Integer; const ADelay, ATimeInterval: Single; const AOnNotify: TNotifyEvent);
+begin
+  TAlphaBlendThread.FreeAlpaBlendThread(AAlphaBlendThread);
+  AAlphaBlendThread := TAlphaBlendThread.Create(AFrom, ATo, ADelay, ATimeInterval, AOnNotify);
+end;
+
+class procedure TAlphaBlendThread.FreeAlpaBlendThread(var AAlphaBlendThread: TAlphaBlendThread);
+begin
+  if Assigned(AAlphaBlendThread) then
+  begin
+    AAlphaBlendThread.Terminate;
+    AAlphaBlendThread.WaitFor;
+    FreeAndNil(AAlphaBlendThread);
+  end;
+end;
+
 constructor TAlphaBlendThread.Create(const AFrom, ATo: Integer; const ADelay, ATimeInterval: Single; const AOnNotify: TNotifyEvent);
 begin
-  FreeOnTerminate := TRUE;
   FDone := FALSE;
   FFrom := AFrom;
   FTo := ATo;
