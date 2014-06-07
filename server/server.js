@@ -34,6 +34,7 @@ var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
 var config = require('./config');
+var differ = require('./differ');
 
 var Hand = deck.Hand;
 var Game = require('./game').Game;
@@ -91,18 +92,6 @@ var activeUsers = {};
 var activeGames = {};
 
 var internalHttpServer;
-var bsdiffLock = new ReadWriteLock();
-function bsdiff(oldfile,newfile,diff,cb) {
-	var token = profiler.start('bsdiff');
-	console.log('diffing %s and %s into %s',oldfile,newfile,diff);
-	var differ = child_process.spawn('bsdiff',[oldfile,newfile,diff],{stdio:'inherit'});
-	differ.on('close',function () {
-		fs.stat(diff,function (err,stats) {
-			token.stop();
-			cb(err,stats);
-		});
-	});
-}
 /*function setup3(db) {
 	/*app.use('/diffs',express.static('diffs'));
 	
@@ -122,7 +111,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,debugLogs;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,debugLogs,diffs;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -153,6 +142,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	GameEvents = db.collection('GameEvents');
 	gameState = db.collection('gameState');
 	clubBalances = db.collection('clubBalances');
+	diffs = db.collection('diffs');
 
 	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
 		assert.ok(collection instanceof Collection);
@@ -632,7 +622,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 				if (clientFile.hash != targetFile) {
 					console.log('clientFile:%j',clientFile);
 					console.log('need to patch %s',clientFile.path);
-					conn.collection('diffs').findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
+					diffs.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
 						if (diffRow) {
 							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
@@ -648,7 +638,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 								}
 								cb();
 							});
-							if (clientFile.hash) makeDiff(clientFile.hash,targetFile,clientFile.path);
+							if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path,diffs);
 						}
 					}.bind(this));
 				} else {
@@ -666,56 +656,6 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
-}
-function makeDiff(sourcehash,desthash,path) {
-	function pushDiff(doc) {
-		var body = new Buffer(JSON.stringify(doc));
-		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
-		req.on('data',function (chunk) {
-			console.log(chunk);
-		});
-		req.on('error',function (err) {
-			console.log('http error sending diff:',err);
-		});
-		req.write(body);
-		req.end();
-	}
-	if (!config.diffserver) {
-		console.log('need to ask diff server for %s',path);
-		var body = new Buffer(JSON.stringify({sourcehash:sourcehash,desthash:desthash,path:path}));
-		var req = http.request({host:'dev-server.chipuppoker.com',method:'POST',path:'/sync/makeDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
-		req.on('data',function (chunk) {
-			console.log('chunk');
-		});
-		req.write(body);
-		req.end();
-		return;
-	}
-	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
-		console.log('localCopy:%j',localCopy);
-		if (localCopy) {
-			bsdiffLock.writeLock(function bsdiffLocked(release) {
-				conn.collection('diffs').findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
-					assert.ifError(err);
-					if (diffRow) {
-						pushDiff(diffRow);
-						return release();
-					}
-					log('making diff for %s',path);
-					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
-					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
-						assert.ifError(err);
-						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:staticdomain+outfile };
-						console.log(doc);
-						conn.collection('diffs').save(doc,function () {
-							pushDiff(doc);
-							release();
-						});
-					});
-				});
-			});
-		}
-	});
 }
 ClientSocket.prototype.handle = function (code,args) {
 	clearTimeout(this.idleTimer);

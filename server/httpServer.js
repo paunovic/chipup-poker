@@ -18,6 +18,7 @@ var deck = require('./deck');
 var myutils = require('./myutils');
 var buildbot = require('./buildbot');
 var installer = require('./installer');
+var differ = require('./differ');
 
 module.exports.initHttpServer = initHttpServer;
 
@@ -49,6 +50,9 @@ function Server(db,activeUsersIN) {
 	this.installers = db.collection('installers');
 	this.config = db.collection('config');
 	this.avatars = db.collection('avatars');
+	this.objectSizes = db.collection('objectSizes');
+	this.IPN_hits = db.collection('IPN_hits');
+	this.diffs = db.collection('diffs');
 
 	this.sessionStore = new MongoStore(db,'sessions');
 	this.IO.set('authorization',this.socketAuth.bind(this));
@@ -69,19 +73,7 @@ function Server(db,activeUsersIN) {
 	app.post('/secure/login',this.secureLoginPost.bind(this));
 	app.post('/secure/changePassword',this.secureChangePasswordPost.bind(this));
 
-	app.get('/secure/bugs',this.bugList.bind(this));
-	app.get('/secure/bug',this.getBug.bind(this));
-	app.get('/secure/screenshot',this.getScreenshot.bind(this));
-	app.get('/secure/serverBugs',this.ServerBugsList.bind(this));
-	app.get('/secure/users',this.userList.bind(this));
-	app.get('/secure/user',this.getUser.bind(this));
-	app.get('/secure/clubs',this.getClubs.bind(this));
-	app.get('/secure/club',this.getClub.bind(this));
-	app.get('/secure/game',this.getGame.bind(this));
-	app.get('/secure/hand',this.getHand.bind(this));
-
-	app.get('/secure/installers',this.installers_func.bind(this));
-	app.post('/secure/installers',this.installers_func.bind(this));
+	this.addSecure(app);
 
 	app.get('/secure/reports',function (req,res) {
 		if (req.query.close) {
@@ -117,7 +109,6 @@ function Server(db,activeUsersIN) {
 			});
 		});
 	});
-	app.get('/secure/disk',this.getDisk.bind(this));
 	app.get('/secure/billing',function (req,res) {
 		var start = Date.now();
 		db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) {
@@ -135,53 +126,9 @@ function Server(db,activeUsersIN) {
 	});
 	app.get('/confirmchange',this.confirmChange.bind(this));
 	app.get("/passwordreset",this.passwordReset.bind(this));
-	app.post('/paypal_callback',function (req,res) {
-		if (req.body.test_ipn) var host = 'www.sandbox.paypal.com';
-		else var host = 'www.paypal.com';
-		var raw_post = [];
-		for (var key in req.body) {
-			raw_post.push(key+'='+escape(req.body[key]));
-		}
-		raw_post.push('cmd=_notify-validate');
-		raw_post = raw_post.join('&');
-		var req2 = https.request({
-			hostname:host,
-			port:443,
-			path:'/cgi-bin/webscr',
-			method:'POST',
-			headers:{
-				'Content-length':raw_post.length
-			}},function (res2) {
-				res2.setEncoding('utf8');
-				var buffer = '';
-				res2.on('data',function (chunk) {
-					buffer += chunk;
-				});
-				res2.on('end',function () {
-					if ((res2.statusCode == 200) && (buffer.trim() == 'VERIFIED')) {
-						console.log('all good');
-						console.log(req.body);
-						db.collection('IPN_hits').insert({reply:buffer.trim(),params:req.body},function (err,doc) {
-							assert.ifError(err);
-							res.send(200,'');
-						});
-					} else {
-						res.send(500,'problem verifying data');
-						console.log('error, reply:',buffer);
-						console.log(res2.statusCode,res2.headers);
-					}
-				});
-			});
-		req2.write(raw_post);
-		req2.end();
-	});
+	app.post('/paypal_callback',this.paypalCallback.bind(this));
 	app.get('/paypal',function (req,res) {
 		res.render('paypal');
-	});
-	app.get('/secure/paypal',function (req,res) {
-		db.collection('IPN_hits').find().toArray(function (err,rows) {
-			res.render('paypal_secure',{rows:rows});
-		})
 	});
 	app.post('/error_upload',this.errorUpload.bind(this));
 	app.get("/test",function (req,res) {
@@ -224,45 +171,7 @@ function Server(db,activeUsersIN) {
 			res.end();
 		});
 	});
-	function newVersion(req,res) {
-		// FIXME, add basicAuth
-		console.log('query',req.query);
-		console.log('files',req.files);
-		var name1 = req.files.installer.path.split('/')[1];
-		console.log(name1);
-		var version = req.query.version;
-		if (!version) version = req.body.version;
-
-		var revision = req.query.revision;
-		if (!revision) revision = req.body.revision;
-
-		var debug = req.query.debug;
-		if (!debug) debug = req.body.debug;
-
-		fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
-			assert.ifError(err);
-			this.installers.insert({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size},function (err,row) {
-				assert.ifError(err);
-				log('new version recorded: %j',row);
-				installer.unpackInstaller(io,row[0],db.collection('installers'),db.collection('objectSizes'),function (success) {
-					if (success) {
-						if (debug == 'debug') var key1 = 'debuginstallerid';
-						else var key1 = 'installerid';
-						//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
-						//	assert.ifError(err);
-						//});
-						row[0].ts = row[0]._id.getTimestamp().toString();
-						io.sockets.emit('new_installer',row[0]);
-						res.send('OK');
-					} else {
-						res.send('error');
-					}
-				});
-			});
-		}.bind(this));
-	}
-	app.post('/newVersion',newVersion.bind(this));
-	app.post('/secure/newVersion',newVersion.bind(this));
+	app.post('/newVersion',this.newVersion.bind(this));
 	app.get('/secure/broadcast',function (req,res) {
 		res.render('broadcast',{start:Date.now()});
 	});
@@ -276,23 +185,7 @@ function Server(db,activeUsersIN) {
 		res.end();
 	}.bind(this));
 	app.get('/fetchhands',this.fetchHands.bind(this));
-	app.post('/sync/newVersion',function (req,res) {
-		console.log(req.body);
-		req.body.installer._id = new ObjectID(req.body.installer._id);
-		conn.collection('installers').save(req.body.installer,function (err,reply) {
-			console.log(err,reply);
-			async.each(req.body.sizes,function (row,cb) {
-				conn.collection('objectSizes').save(row,cb);
-			},function () {
-				res.end('OK');
-			});
-		});
-	});
-	app.post('/sync/makeDiff',function (req,res) {
-		var t = req.body;
-		makeDiff(t.sourcehash,t.desthash,t.path);
-		res.end('STARTED');
-	});
+	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
 	app.post('/secure/buildbot',function (req,res) {
 		console.log(req.body);
 		buildbot.doLogin(function () {
@@ -301,16 +194,45 @@ function Server(db,activeUsersIN) {
 			res.end(JSON.stringify('OK'));
 		});
 	});
-	app.post('/sync/newDiff',function (req,res) {
-		var doc = req.body;
-		doc._id = new ObjectID(doc._id);
-		conn.collection('diffs').save(doc,function (err,rows) {
-			res.end('OK');
-		});
-	});
-	app.get('/sync/gitHook',this.gitHook.bind(this));
+	this.addSync(app);
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
+}
+Server.prototype.syncMakeDiff = function (req,res) {
+	var t = req.body;
+	differ.makeDiff(t.sourcehash,t.desthash,t.path,this.diffs);
+	res.end('STARTED');
+}
+Server.prototype.syncNewDiff = function (req,res) {
+	var doc = req.body;
+	doc._id = new ObjectID(doc._id);
+	this.diffs.save(doc,function (err,rows) {
+		res.end('OK');
+	});
+}
+Server.prototype.addSecure = function (app) {
+	app.get('/secure/bugs',this.bugList.bind(this));
+	app.get('/secure/bug',this.getBug.bind(this));
+	app.get('/secure/screenshot',this.getScreenshot.bind(this));
+	app.get('/secure/serverBugs',this.ServerBugsList.bind(this));
+	app.get('/secure/users',this.userList.bind(this));
+	app.get('/secure/user',this.getUser.bind(this));
+	app.get('/secure/clubs',this.getClubs.bind(this));
+	app.get('/secure/club',this.getClub.bind(this));
+	app.get('/secure/game',this.getGame.bind(this));
+	app.get('/secure/hand',this.getHand.bind(this));
+
+	app.get('/secure/installers',this.installers_func.bind(this));
+	app.post('/secure/installers',this.installers_func.bind(this));
+
+	app.get('/secure/paypal',this.paypalLog.bind(this));
+	app.post('/secure/newVersion',this.newVersion.bind(this));
+	app.get('/secure/disk',this.getDisk.bind(this));
+}
+Server.prototype.addSync = function (app) {
+	app.get('/sync/gitHook',this.gitHook.bind(this));
+	app.post('/sync/newVersion',this.syncNewVersion);
+	app.post('/sync/newDiff',this.syncNewDiff.bind(this));
 }
 Server.prototype.getHand = function (req,res) {
 	var start = Date.now();
@@ -894,4 +816,98 @@ Server.prototype.gitHook = function (req,res) {
 			this.IO.sockets.emit('new_revision',{hash:latestVersion,msg:latestMsg});
 		}.bind(this));
 	}.bind(this));
+}
+Server.prototype.newVersion = function newVersion(req,res) {
+	// FIXME, add basicAuth
+	console.log('query',req.query);
+	console.log('files',req.files);
+	var name1 = req.files.installer.path.split('/')[1];
+	console.log(name1);
+	var version = req.query.version;
+	if (!version) version = req.body.version;
+
+	var revision = req.query.revision;
+	if (!revision) revision = req.body.revision;
+
+	var debug = req.query.debug;
+	if (!debug) debug = req.body.debug;
+
+	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
+		assert.ifError(err);
+		this.installers.insert({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size},function (err,row) {
+			assert.ifError(err);
+			log('new version recorded: %j',row);
+			installer.unpackInstaller(this.IO,row[0],this.installers,this.objectSizes,function (success) {
+				if (success) {
+					if (debug == 'debug') var key1 = 'debuginstallerid';
+					else var key1 = 'installerid';
+					//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
+					//	assert.ifError(err);
+					//});
+					row[0].ts = row[0]._id.getTimestamp().toString();
+					this.IO.sockets.emit('new_installer',row[0]);
+					res.send('OK');
+				} else {
+					res.send('error');
+				}
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
+}
+Server.prototype.syncNewVersion = function (req,res) {
+	console.log(req.body);
+	req.body.installer._id = new ObjectID(req.body.installer._id);
+	this.installers.save(req.body.installer,function (err,reply) {
+		console.log(err,reply);
+		async.each(req.body.sizes,function (row,cb) {
+			this.objectSizes.save(row,cb);
+		}.bind(this),function () {
+			res.end('OK');
+		});
+	}.bind(this));
+}
+Server.prototype.paypalCallback = function (req,res) {
+	if (req.body.test_ipn) var host = 'www.sandbox.paypal.com';
+	else var host = 'www.paypal.com';
+	var raw_post = [];
+	for (var key in req.body) {
+		raw_post.push(key+'='+escape(req.body[key]));
+	}
+	raw_post.push('cmd=_notify-validate');
+	raw_post = raw_post.join('&');
+	var req2 = https.request({
+		hostname:host,
+		port:443,
+		path:'/cgi-bin/webscr',
+		method:'POST',
+		headers:{
+			'Content-length':raw_post.length
+		}},function (res2) {
+			res2.setEncoding('utf8');
+			var buffer = '';
+			res2.on('data',function (chunk) {
+				buffer += chunk;
+			});
+			res2.on('end',function () {
+				if ((res2.statusCode == 200) && (buffer.trim() == 'VERIFIED')) {
+					console.log('all good');
+					console.log(req.body);
+					this.IPN_hits.insert({reply:buffer.trim(),params:req.body},function (err,doc) {
+						assert.ifError(err);
+						res.send(200,'');
+					});
+				} else {
+					res.send(500,'problem verifying data');
+					console.log('error, reply:',buffer);
+					console.log(res2.statusCode,res2.headers);
+				}
+			}.bind(this));
+		}.bind(this));
+	req2.write(raw_post);
+	req2.end();
+}
+Server.prototype.paypalLog = function (req,res) {
+	this.IPN_hits.find().toArray(function (err,rows) {
+		res.render('paypal_secure',{rows:rows});
+	});
 }
