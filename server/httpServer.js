@@ -4,21 +4,36 @@ var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
 var util = require('util');
 var crypto = require('crypto');
+var async = require('async');
+var child_process = require('child_process');
+var http = require('http');
 
 var config = require('./config');
 var MongoStore = require('./mongoStore');
 
 var Game = require('./game').Game;
 var deck = require('./deck');
+var myutils = require('./myutils');
+var buildbot = require('./buildbot');
+var installer = require('./installer');
 
 module.exports.initHttpServer = initHttpServer;
 
-function initHttpServer(db,app,activeUsers) {
-	var server = new Server(db,app,activeUsers);
+var sharedconfig,log;
+
+function initHttpServer(db,activeUsers,sharedconfigIN,logIN) {
+	sharedconfig = sharedconfigIN;
+	log = logIN;
+	var server = new Server(db,activeUsers);
 	return server;
 }
 
-function Server(db,app,activeUsersIN) {
+function Server(db,activeUsersIN) {
+	var app = express();
+	this.httpServer = http.createServer(app);
+	var io = require('socket.io').listen(this.httpServer,{log:false});
+	var logger = require('morgan');
+	app.use(logger());
 	this.activeUsers = activeUsersIN;
 	var PokerProfile = db.collection('PokerProfile');
 	this.bugs = db.collection('bugs');
@@ -28,8 +43,30 @@ function Server(db,app,activeUsersIN) {
 	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
 	this.admin = db.collection('admin');
+	this.installers = db.collection('installers');
+	this.config = db.collection('config');
 
 	this.sessionStore = new MongoStore(db,'sessions');
+	io.set('authorization',function (handshakeData,callback) {
+		var test = require('./node_modules/express/node_modules/connect');
+		var cookieModule = require('./node_modules/express/node_modules/cookie');
+		if (handshakeData.headers.cookie) {
+			var cookies = cookieModule.parse(handshakeData.headers.cookie);
+			var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
+		}
+		if (parsed && parsed.poker) {
+			this.sessionStore.get(parsed.poker,function (err,session) {
+				if (session.authed) {
+					callback(null,true);
+				} else {
+					callback(null,false);
+				}
+			});
+		} else {
+			log('unauthorized ip: %s',ip);
+			callback(null,false);
+		}
+	}.bind(this));
 	app.use(express.cookieParser());
 	app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
 	app.configure(function () {
@@ -67,6 +104,9 @@ function Server(db,app,activeUsersIN) {
 	app.get('/secure/game',this.getGame.bind(this));
 	app.get('/secure/hand',this.getHand.bind(this));
 
+	app.get('/secure/installers',this.installers_func.bind(this));
+	app.post('/secure/installers',this.installers_func.bind(this));
+
 	app.get('/secure/reports',function (req,res) {
 		if (req.query.close) {
 			db.collection('contacts').update({_id:new ObjectID(req.query.close)},{$set:{closed:true}},function (err) {
@@ -78,15 +118,15 @@ function Server(db,app,activeUsersIN) {
 			for (var x=0; x<reports.length; x++) {
 				userids.push(reports[x].userid);
 			}
-			users.find({_id:{$in:userids}}).toArray(function (err,users) {
+			this.users.find({_id:{$in:userids}}).toArray(function (err,users) {
 				var usermap = {};
 				for (var x=0; x<users.length; x++) {
 					usermap[users[x]._id] = users[x];
 				}
 				res.render('reports',{reports:reports,users:usermap});
 			});
-		});
-	});
+		}.bind(this));
+	}.bind(this));
 	app.get('/secure/performance',function (req,res) {
 		var start = Date.now();
 		db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
@@ -375,23 +415,23 @@ app.get("/getavatar",function (req,res) {
 	});
 });
 app.get("/install_chipuppoker.exe",function (req,res) {
-	Config.findOne({_id:'installerid'},function (err,row) {
+	this.config.findOne({_id:'installerid'},function (err,row) {
 		assert.ifError(err);
-		Installers.findOne({_id:row.value},function (err,row) {
+		this.installers.findOne({_id:row.value},function (err,row) {
 			log('sending installer %j',row);
 			res.sendfile('installers/'+row.name);
 		});
-	});
-});
+	}.bind(this));
+}.bind(this));
 app.get("/debug_install_chipuppoker.exe",function (req,res) {
-	Config.findOne({_id:'debuginstallerid'},function (err,row) {
+	this.config.findOne({_id:'debuginstallerid'},function (err,row) {
 		assert.ifError(err);
-		Installers.findOne({_id:row.value},function (err,row) {
+		this.installers.findOne({_id:row.value},function (err,row) {
 			log('sending debug installer %j',row);
 			res.sendfile('installers/'+row.name);
 		});
-	});
-});
+	}.bind(this));
+}.bind(this));
 app.post('/eval',function (req,res) {
 	var state = req.body;
 	console.log(state);
@@ -424,10 +464,10 @@ app.post('/eval',function (req,res) {
 
 		fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 			assert.ifError(err);
-			Installers.insert({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size},function (err,row) {
+			this.installers.insert({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size},function (err,row) {
 				assert.ifError(err);
 				log('new version recorded: %j',row);
-				unpackInstaller(row[0],function (success) {
+				installer.unpackInstaller(io,row[0],db.collection('installers'),db.collection('objectSizes'),function (success) {
 					if (success) {
 						if (debug == 'debug') var key1 = 'debuginstallerid';
 						else var key1 = 'installerid';
@@ -442,10 +482,10 @@ app.post('/eval',function (req,res) {
 					}
 				});
 			});
-		});
+		}.bind(this));
 	}
-	app.post('/newVersion',newVersion);
-	app.post('/secure/newVersion',newVersion);
+	app.post('/newVersion',newVersion.bind(this));
+	app.post('/secure/newVersion',newVersion.bind(this));
 	app.get('/secure/broadcast',function (req,res) {
 		res.render('broadcast',{start:Date.now()});
 	});
@@ -458,117 +498,6 @@ app.post('/eval',function (req,res) {
 		res.writeHead(302,{Location:'/secure/broadcast?success=true'}); // FIXME
 		res.end();
 	});
-app.get('/secure/installers',installers_func);
-app.post('/secure/installers',installers_func);
-function installers_func(req,res) {
-	var start = Date.now();
-	console.log(req.body);
-	var showlist = true;
-	if (req.query.showlist) showlist = true;
-	function makeDeleter(id) {
-		return function (cb) {
-			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
-				if (row) {
-					fs.unlink('installers/'+row.name,function (err) {
-						console.log('installer deleted');
-					});
-				}
-				Installers.remove({_id:new ObjectID(id)},function () {});
-				cb();
-			});
-		};
-	}
-	function makeActivator(id) {
-		return function (cb) {
-			Installers.findOne({_id:new ObjectID(id)},function (err,row) {
-				assert.ifError(err);
-				if (row) {
-					if (row.debug == 'release') {
-						Config.update({_id:'installerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
-							assert.ifError(err);
-							sharedconfig.latestVersion = row.version;
-							cb();
-						});
-					} else {
-						Config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
-							assert.ifError(err);
-							sharedconfig.latestDebugVersion = row.version;
-							cb();
-						});
-					}
-				} else cb();
-			});
-		}
-	}
-	var jobs = [];
-	if (req.body) {
-		if (req.body.activate_release) {
-			jobs.push(makeActivator(req.body.activate_release));
-		}
-		if (req.body.activate_debug) {
-			jobs.push(makeActivator(req.body.activate_debug));
-		}
-	}
-	for (var key in req.body) {
-		var res2 = /^delete_(.*)$/.exec(key);
-		if (res2) {
-			console.log(res2);
-			jobs.push(makeDeleter(res2[1]));
-		}
-	}
-	var latestVersion = '';
-	var latestMsg = '';
-	if (config.diffserver) {
-		jobs.push(function (cb) {
-			fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
-				latestVersion = body.trim();
-				var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
-				child.stdout.setEncoding('utf8');
-				child.stdout.on('data',function (data) {
-					latestMsg += data;
-				});
-				child.on('close',function () {
-					cb();
-				});
-			});
-		});
-	}
-	var user_stats;
-	jobs.push(function (cb) {
-		allUsers.aggregate({$group:{_id:'$currentVersion',hits:{$sum:1}}},function (err,rows) {
-			user_stats = rows;
-			cb();
-		});
-	});
-	console.log('jobs: %j', jobs);
-	if (jobs.length == 0) finish2();
-	else {
-		console.log('running jobs');
-		async.parallel(jobs,finish2);
-	}
-	function finish2() {
-		Installers.find({}).sort({_id:1}).toArray(function(err,data) {
-			Config.findOne({_id:'installerid'},function (err,row) {
-				var activeRelease;
-				for (var x=0; x<data.length; x++) {
-					if (data[x]._id.toString() == row.value.toString()) {
-						console.log(data[x]);
-						activeRelease = data[x];
-					}
-					for (var y=0; y<user_stats.length; y++) {
-						if (myutils.compareObjectID(data[x]._id,user_stats[y]._id)) {
-							data[x].used_by = user_stats[y].hits;
-							console.log(data[x]);
-						}
-					}
-				}
-				Config.findOne({_id:'debuginstallerid'},function (err,row2) {
-					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
-				});
-			});
-		});
-	}
-};
 app.get('/fetchhands',function (req,res) {
 	var token = profiler.start('fetchhands-outer');
 	// new Buffer(g._id.toString(),'hex')
@@ -839,4 +768,113 @@ Server.prototype.getUser = function (req,res) {
 			res.render('user',obj);
 		}.bind(this));
 	}.bind(this));
+}
+Server.prototype.installers_func = function (req,res) {
+	var start = Date.now();
+	console.log(req.body);
+	var showlist = true;
+	if (req.query.showlist) showlist = true;
+	function makeDeleter(id) {
+		return function (cb) {
+			this.installers.findOne({_id:new ObjectID(id)},function (err,row) {
+				if (row) {
+					fs.unlink('installers/'+row.name,function (err) {
+						console.log('installer deleted');
+					});
+				}
+				this.installers.remove({_id:new ObjectID(id)},function () {});
+				cb();
+			}.bind(this));
+		}.bind(this);
+	}
+	function makeActivator(id) {
+		return function (cb) {
+			this.installers.findOne({_id:new ObjectID(id)},function (err,row) {
+				assert.ifError(err);
+				if (row) {
+					if (row.debug == 'release') {
+						this.config.update({_id:'installerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
+							assert.ifError(err);
+							sharedconfig.latestVersion = row.version;
+							cb();
+						});
+					} else {
+						this.config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
+							assert.ifError(err);
+							sharedconfig.latestDebugVersion = row.version;
+							cb();
+						});
+					}
+				} else cb();
+			}.bind(this));
+		}.bind(this)
+	}
+	var jobs = [];
+	if (req.body) {
+		if (req.body.activate_release) {
+			jobs.push(makeActivator.call(this,req.body.activate_release));
+		}
+		if (req.body.activate_debug) {
+			jobs.push(makeActivator.call(this,req.body.activate_debug));
+		}
+	}
+	for (var key in req.body) {
+		var res2 = /^delete_(.*)$/.exec(key);
+		if (res2) {
+			console.log(res2);
+			jobs.push(makeDeleter.call(this,res2[1]));
+		}
+	}
+	var latestVersion = '';
+	var latestMsg = '';
+	if (config.diffserver) {
+		jobs.push(function (cb) {
+			fs.readFile('/home/poker/gits/poker.git/refs/heads/master',{encoding:'utf8'},function (err,body) {
+				latestVersion = body.trim();
+				var child = child_process.spawn('git',['log','-1',latestVersion],{cwd:'/home/poker/gits/poker.git/',stdio:['pipe','pipe','pipe']});
+				child.stdout.setEncoding('utf8');
+				child.stdout.on('data',function (data) {
+					latestMsg += data;
+				});
+				child.on('close',function () {
+					cb();
+				});
+			});
+		});
+	}
+	var user_stats;
+	jobs.push(function (cb) {
+		this.users.aggregate({$group:{_id:'$currentVersion',hits:{$sum:1}}},function (err,rows) {
+			user_stats = rows;
+			cb();
+		});
+	}.bind(this));
+	console.log('jobs: %j', jobs);
+	console.log('running jobs');
+	async.parallel(jobs,finish2.bind(this));
+	function finish2() {
+		this.installers.find({}).sort({_id:1}).toArray(function(err,data) {
+			this.config.findOne({_id:'installerid'},function (err,row) {
+				var activeRelease;
+				for (var x=0; x<data.length; x++) {
+					if (data[x]._id.toString() == row.value.toString()) {
+						console.log(data[x]);
+						activeRelease = data[x];
+					}
+					for (var y=0; y<user_stats.length; y++) {
+						if (myutils.compareObjectID(data[x]._id,user_stats[y]._id)) {
+							data[x].used_by = user_stats[y].hits;
+							console.log(data[x]);
+						}
+					}
+				}
+				this.config.findOne({_id:'debuginstallerid'},function (err,row2) {
+					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
+				});
+			}.bind(this));
+		}.bind(this));
+	}
+};
+Server.prototype.goOnline = function () {
+	this.httpServer.listen(3000);
 }

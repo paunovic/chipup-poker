@@ -34,7 +34,6 @@ var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
 var config = require('./config');
-var buildbot = require('./buildbot');
 
 var Hand = deck.Hand;
 var Game = require('./game').Game;
@@ -91,130 +90,8 @@ var badConfLink = "Invalid confirmation link.";
 var activeUsers = {};
 var activeGames = {};
 
-var app = express();
 var internalHttpServer;
-var httpServer = http.createServer(app);
-var io = require('socket.io').listen(httpServer);
-io.set('authorization',function (handshakeData,callback) {
-	var test = require('./node_modules/express/node_modules/connect');
-	var cookieModule = require('./node_modules/express/node_modules/cookie');
-	if (handshakeData.headers.cookie) {
-		var cookies = cookieModule.parse(handshakeData.headers.cookie);
-		var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
-	}
-	if (parsed && parsed.poker) {
-		internalHttpServer.sessionStore.get(parsed.poker,function (err,session) {
-			if (session.authed) {
-				callback(null,true);
-			} else {
-				callback(null,false);
-			}
-		});
-	} else {
-		log('unauthorized ip: %s',ip);
-		callback(null,false);
-	}
-});
-var logger = require('morgan');
 var bsdiffLock = new ReadWriteLock();
-app.use(logger());
-function unpackInstaller(row,cb1) {
-	function updateLive(doc,sizes,cb) {
-		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
-		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
-		req.on('data',function (chunk) {
-			console.log(chunk);
-		});
-		req.write(body);
-		req.end();
-		cb();
-	}
-	function hashFiles(files) {
-		var key = {_id:row._id};
-		var hashes = {};
-		var sizes = [];
-		var mods = { $set:{hashes:hashes}};
-		async.each(files,function hashFile(filename,cb2) {
-			var hasher = crypto.createHash('sha256');
-			var client = fs.createReadStream('unpacked/'+row._id+'/app/'+filename);
-			var size = 0;
-			client.on('data',function (data) {
-				hasher.update(data);
-				size += data.length;
-			});
-			client.on('end',function () {
-				var hash = hasher.digest('hex');
-				console.log('hash of %s is %s',filename,hash);
-				var key = filename.replace('.','_');
-				sizes.push({_id:hash, size:size});
-				hashes[key] = hash;
-				copyFile('unpacked/'+row._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
-					fs.unlink('unpacked/'+row._id+'/app/'+filename,function () {
-						cb2();
-					});
-				});
-			});
-		},function () {
-			conn.collection('installers').update(key,mods,function (err,newdoc) {
-				assert.ifError(err);
-				if (err) console.log(err);
-				console.log('inserted %j',newdoc);
-				fs.rmdir('unpacked/'+row._id+'/app/',function () {
-					fs.rmdir('unpacked/'+row._id,function () {
-						conn.collection('installers').findOne(key,function (err,doc) {
-							async.each(sizes,function (row,cb) {
-								conn.collection('objectSizes').save(row,cb);
-							},function () {
-								updateLive(doc,sizes,function () {
-									cb1(true);
-								});
-							});
-						});
-					});
-				});
-			});
-		});
-	}
-	function recurse_dir(path,prefix,cb4) {
-		var items = [];
-		fs.readdir(prefix+path,function (err,files) {
-			console.log('checked path %s %s',prefix,path);
-			assert.ifError(err);
-			async.each(files,function checkItem(filename,cb3) {
-				fs.stat(prefix+path+filename,function (err,stats) {
-					assert.ifError(err);
-					console.log('stats:%j',stats);
-					if (stats.isDirectory()) {
-						recurse_dir(filename+'/',prefix,function (err,items2) {
-							console.log('2nd level %j',items2);
-							assert.ifError(err);
-							items = items.concat(items2);
-							cb3();
-						});
-					} else if (stats.isFile()) {
-						items.push(path+filename);
-						cb3();
-					}
-				});
-			},function () {
-				cb4(null,items);
-			});
-		});
-	}
-	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+row._id+'/','-e','installers/'+row.name],{stdio:'inherit'});
-	unpacker.on('close',function (code) {
-		if (code != 0) {
-			cb1(false);
-			return;
-		}
-		assert.equal(code,0);
-		recurse_dir('','unpacked/'+row._id+'/app/',function (err,files) {
-			assert.ifError(err);
-			console.log('all files:%j',files);
-			hashFiles(files);
-		});
-	});
-}
 function bsdiff(oldfile,newfile,diff,cb) {
 	var token = profiler.start('bsdiff');
 	console.log('diffing %s and %s into %s',oldfile,newfile,diff);
@@ -238,7 +115,7 @@ function bsdiff(oldfile,newfile,diff,cb) {
 	});*
 }*/
 function goOnline() {
-	httpServer.listen(3000);
+	internalHttpServer.goOnline();
 	secureServer.listen(12346);
 	server.listen(12345);
 	cactiServer.listen(1246);
@@ -292,7 +169,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		Game.init(db,activeGames,activeUsers,debugLogs,sharedconfig,getNextSequence,log,ClientSocket);
 	});
 
-	internalHttpServer = require('./httpServer').initHttpServer(db,app,activeUsers);
+	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log);
 
 	allUsers.createIndex("email",{unique:true}, function (err,res) {});
 	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
@@ -692,16 +569,6 @@ function containsObjectID(list,id) {
 		if (myutils.compareObjectID(id,list[x])) return true;
 	}
 	return false;
-}
-function copyFile(source,dest,cb) {
-	fs.stat(dest,function (err,stat) {
-		if (stat) return cb();
-
-		var input = fs.createReadStream(source);
-		var output = fs.createWriteStream(dest);
-		input.pipe(output);
-		input.on('end',cb);
-	});
 }
 function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
