@@ -47,12 +47,11 @@ function makeDiff(sourcehash,desthash,path,diffs) {
 						pushDiff(diffRow);
 						return release();
 					}
-					log('making diff for %s',path);
+					console.log('making diff for %s',path);
 					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
 					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
 						assert.ifError(err);
-						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:staticdomain+outfile };
-						console.log(doc);
+						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'http://'+config.staticserver+'/'+outfile };
 						diffs.save(doc,function () {
 							pushDiff(doc);
 							release();

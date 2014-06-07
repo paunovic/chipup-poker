@@ -51,7 +51,6 @@ dag.init();
 var hands = 0;
 
 var domain = "http://"+config.hostname+'/';
-var staticdomain = "http://"+config.staticserver+'/';
 var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:15,max_timebank:30};
 sharedconfig.minSizes.email = 6;
 sharedconfig.stringSizes.email = 200;
@@ -632,7 +631,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 							conn.collection('objectSizes').findOne({_id:targetFile},function (err,sizeRow) {
 								assert.ifError(err);
 								if (sizeRow) {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:staticdomain+'unpacked/objects/'+targetFile,file_size:sizeRow.size});
+									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'http://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
 								} else {
 									log('cant find original of %s',clientFile.path);
 								}
