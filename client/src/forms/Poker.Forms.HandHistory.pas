@@ -9,29 +9,6 @@ uses
   Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle, Vcl.ExtCtrls;
 
 type
-  TTableItem = class
-  private
-    FClubId: TBytes;
-    FGameId: TBytes;
-    FHands: TList<UINT>;
-  public
-    constructor Create(const AClubId, AGameId: TBytes);
-    destructor Destroy; override;
-
-    function Matches(const ATableItem: TTableItem): Boolean;
-    procedure UpdateHands;
-
-    property ClubId: TBytes read FClubId;
-    property GameId: TBytes read FGameId;
-    property Hands: TList<UINT> read FHands;
-  end;
-
-  TTableItems = class(TObjectList<TTableItem>)
-  public
-    function ContainsGameId(const AGameId: TBytes): Boolean;
-    function IndexOfGameId(const AGameId: TBytes): Integer;
-  end;
-
   TfrmHandHistory = class(TForm, IFormParams)
     cbTable: TcxComboBox;
     lbsTable: TcxLabel;
@@ -45,6 +22,8 @@ type
     btCopyToClipboard: TcxButton;
     acCopyToClipboard: TAction;
     tiCopyHideTimer: TTimer;
+    btReplayHand: TcxButton;
+    acReplayHand: TAction;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure acCloseExecute(Sender: TObject);
@@ -55,9 +34,9 @@ type
     procedure acCopyToClipboardExecute(Sender: TObject);
     procedure tiCopyHideTimerTimer(Sender: TObject);
   private
+    FSelectedTableId: TBytes;
     FSelectedHandId: UINT;
     FCallbacksId: Integer;
-    FTables: TTableItems;
 
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
 
@@ -65,13 +44,14 @@ type
     procedure AddRVLine(const ALine: String; const AParaStyle: Integer);
     procedure AddRVPart(const AString: String; const AStyleNo, AParaNo: Integer);
     function GetStyleNo(const ACommandChar: Char; const AColor: TColor; const AStyleNo: Integer): Integer;
-    procedure SelectTableFromHandId;
     procedure RefreshTableList;
     procedure RefreshHandList;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
     procedure SetParams(const AParams: array of pointer);
+
+    procedure SetSelectedHandId(const AGameId: TBytes; const AHandId: UINT);
   end;
 
 implementation
@@ -82,78 +62,21 @@ uses
   Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.HandHistoryItem, Poker.Objects.ClubInfo, Poker.Objects.GameInfo,
   Poker.DataModule, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes;
 
-{ TTableItem }
-
-constructor TTableItem.Create(const AClubId, AGameId: TBytes);
-begin
-  FClubId := AClubId;
-  FGameId := AGameId;
-
-  FHands := TList<UINT>.Create;
-end;
-
-destructor TTableItem.Destroy;
-begin
-  FHands.Free;
-  inherited;
-end;
-
-function TTableItem.Matches(const ATableItem: TTableItem): Boolean;
-begin
-  result := (CompareBytes(ATableItem.ClubId, FClubId)) and
-            (CompareBytes(ATableItem.GameId, FGameId));
-end;
-
-procedure TTableItem.UpdateHands;
-var
-  hhi: THandHistoryItem;
-begin
-  FHands.Clear;
-  for hhi in HandHistory.Items do
-    if CompareBytes(hhi.GameId, FGameId) then
-      FHands.Add(hhi.HandId);
-end;
-
-{ TTableItems }
-
-function TTableItems.ContainsGameId(const AGameId: TBytes): Boolean;
-var
-  item: TTableItem;
-begin
-  for item in ToArray do
-    if CompareBytes(item.GameId, AGameId) then
-      Exit(TRUE);
-  Exit(FALSE);
-end;
-
-function TTableItems.IndexOfGameId(const AGameId: TBytes): Integer;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to Length(ToArray) - 1 do
-    if CompareBytes(ToArray[C1].GameId, AGameId) then
-      Exit(C1);
-  Exit(-1);
-end;
-
-
 { TfrmHandHistory }
 
 procedure TfrmHandHistory.FormCreate(Sender: TObject);
 begin
-  FTables := TTableItems.Create;
-
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
                   ]);
 
+  FSelectedHandId := 0;
   FSelectedHandId := 0;
 end;
 
 procedure TfrmHandHistory.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
-  FTables.Free;
   FormsContainer.Remove(self);
 end;
 
@@ -182,27 +105,26 @@ begin
   Close;
 end;
 
-procedure TfrmHandHistory.SelectTableFromHandId;
+procedure TfrmHandHistory.SetParams(const AParams: array of pointer);
 var
-  hhi: THandHistoryItem;
-  item_index: Integer;
+  game: TGameInfo;
+  handid: UINT;
 begin
-  if HandHistory.Find(FSelectedHandId, hhi) then
+  if not Assigned(AParams[0]) then
+    SetSelectedHandId(nil, 0)
+  else
   begin
-    item_index := FTables.IndexOfGameId(hhi.GameId);
-    cbTable.ItemIndex := item_index;
+    game := AParams[0];
+    handid := PUINT(AParams[1])^;
+    SetSelectedHandId(game.MongoId, handid);
   end;
 end;
 
-procedure TfrmHandHistory.SetParams(const AParams: array of pointer);
+procedure TfrmHandHistory.SetSelectedHandId(const AGameId: TBytes; const AHandId: UINT);
 begin
-  if not Assigned(AParams[0]) then
-    FSelectedHandId := 0
-  else
-    FSelectedHandId := PUINT(AParams[0])^;
-
+  FSelectedTableId := AGameId;
+  FSelectedHandId := AHandId;
   RefreshTableList;
-  SelectTableFromHandId;
   ShowHand;
 end;
 
@@ -306,126 +228,82 @@ begin
   rvHandHistory.FormatTail;
 end;
 
-procedure TfrmHandHistory.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
+procedure TfrmHandHistory.RefreshTableList;
+var
+  C1: Integer;
+  item_index: Integer;
+  table_name: String;
 begin
-  RefreshTableList;
-  SelectTableFromHandId;
-  RefreshHandList;
+  item_index := -1;
+  cbTable.Properties.BeginUpdate;
+  try
+    for C1 := 0 to HandHistory.Items.Count - 1 do
+    begin
+      table_name := Format('%s (%d-max) - %s', [HandHistory.Items[C1].Game.Name, HandHistory.Items[C1].Game.Seats, HandHistory.Items[C1].Club.Name]);
+      if C1 >= cbTable.Properties.Items.Count then
+        cbTable.Properties.Items.Add(table_name)
+      else
+        if cbTable.Properties.Items[C1] <> table_name then
+          cbTable.Properties.Items[C1] := table_name;
+      if CompareBytes(FSelectedTableId, HandHistory.Items[C1].FGameId) then
+        item_index := C1;
+    end;
+
+    while cbTable.Properties.Items.Count > HandHistory.Items.Count do
+      cbTable.Properties.Items.Delete(cbTable.Properties.Items.Count - 1);
+
+    cbTable.ItemIndex := item_index;
+  finally
+    cbTable.Properties.EndUpdate(TRUE);
+  end;
 end;
 
 procedure TfrmHandHistory.RefreshHandList;
 var
-  C1: Integer;
-  table_item: TTableItem;
-  hand_name: String;
+  hhis: THandHistoryItems;
   hhi: THandHistoryItem;
+  hand_name: String;
+  C1: Integer;
+  item_index: Integer;
 begin
-  if cbTable.ItemIndex = -1 then
+  if not HandHistory.FindGame(FSelectedTableId, hhis) then
   begin
     cbHand.ItemIndex := -1;
     cbHand.Properties.Items.Clear;
     Exit;
   end;
 
-  table_item := FTables.Items[cbTable.ItemIndex];
-  for C1 := 0 to table_item.Hands.Count - 1 do
-    if HandHistory.Find(table_item.Hands[C1], hhi) then
+  item_index := -1;
+  cbHand.Properties.BeginUpdate;
+  try
+    for C1 := 0 to hhis.Count - 1 do
     begin
-      hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.Game.Limit, FALSE),
-         ChipsToStr(hhi.Game.SmallBlind), ChipsToStr(hhi.Game.BigBlind), hhi.StartTimeStr]);
+      hhi := hhis[C1];
+
+      hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhis.Game.Limit, FALSE),
+         ChipsToStr(hhis.Game.SmallBlind), ChipsToStr(hhis.Game.BigBlind), hhi.StartTimeStr]);
 
       if C1 >= cbHand.Properties.Items.Count then
         cbHand.Properties.Items.Add(hand_name)
       else
         if cbHand.Properties.Items[C1] <> hand_name then
           cbHand.Properties.Items[C1] := hand_name;
+
+      if hhi.HandId = FSelectedHandId then
+        item_index := C1;
     end;
 
-  while cbHand.Properties.Items.Count > table_item.Hands.Count do
-    cbHand.Properties.Items.Delete(cbHand.Properties.Items.Count - 1);
+    while cbHand.Properties.Items.Count > hhis.Count do
+      cbHand.Properties.Items.Delete(cbHand.Properties.Items.Count - 1);
 
-  if (cbHand.ItemIndex = -1) and
-     (cbHand.Properties.Items.Count > 0) then
-    cbHand.ItemIndex := cbHand.Properties.Items.Count - 1;
-end;
+    if (item_index = -1) and
+       (cbHand.Properties.Items.Count > 0) then
+      item_index := cbHand.Properties.Items.Count - 1;
 
-procedure TfrmHandHistory.RefreshTableList;
-var
-  hhi: THandHistoryItem;
-  tables: TTableItems;
-  C1, C2: Integer;
-  selected_game: TBytes;
-  table_name: String;
-  club: TClubInfo;
-  game: TGameInfo;
-begin
-  // save selected table combobox
-  SetLength(selected_game, 0);
-  if cbTable.ItemIndex > -1 then
-    selected_game := FTables[cbTable.ItemIndex].GameId;
-
-  tables := TTableItems.Create;
-  try
-    // populate new list with tables
-    for hhi in HandHistory.Items do
-      if not tables.ContainsGameId(hhi.GameId) then
-        tables.Add(TTableItem.Create(hhi.ClubId, hhi.GameId));
-
-    // start comparing elements in both lists, break once mismatch is found
-    C1 := 0;
-    while (C1 < FTables.Count) and
-          (C1 < tables.Count) and
-          (FTables[C1].Matches(tables[C1])) do
-    begin
-      FTables[C1].UpdateHands;
-      Inc(C1);
-    end;
-
-    // if there are leftover elements that have to be processed
-    if C1 < tables.Count then
-    begin
-      // delete leftover elements in real list first
-      if C1 < FTables.Count then
-        FTables.DeleteRange(C1, FTables.Count - C1);
-
-      // add new leftover elements to real list
-      for C2 := C1 to tables.Count - 1 do
-      begin
-        FTables.Add(TTableItem.Create(tables[C2].ClubId, tables[C2].GameId));
-        FTables.Last.UpdateHands;
-      end;
-
-      // add tables to combobox
-      for C2 := C1 to FTables.Count - 1 do
-      begin
-        table_name := 'Unknown Table';
-        club := nil;
-        game := nil;
-        for hhi in HandHistory.Items do
-          if CompareBytes(hhi.GameId, FTables[C1].GameId) then
-          begin
-            club := hhi.Club;
-            game := hhi.Game;
-            Break;
-          end;
-
-        if (Assigned(club)) and (Assigned(Game)) then
-          table_name := Format('%s (%d-max) - %s', [game.Name, game.Seats, club.Name]);
-
-        if C2 >= cbTable.Properties.Items.Count then
-          cbTable.Properties.Items.Add(table_name)
-        else
-          if cbTable.Properties.Items[C2] <> table_name then
-            cbTable.Properties.Items[C2] := table_name;
-      end;
-    end;
+    cbHand.ItemIndex := item_index;
   finally
-    tables.Free;
+    cbHand.Properties.EndUpdate(TRUE);
   end;
-
-  // restore selected table combobox item index
-  if Length(selected_game) > 0 then
-    cbTable.ItemIndex := FTables.IndexOfGameId(selected_game);
 end;
 
 procedure TfrmHandHistory.ShowHand;
@@ -434,10 +312,16 @@ var
   C1: Integer;
   hand_id: UINT;
   item_index: Integer;
+  hhis: THandHistoryItems;
 begin
   rvHandHistory.ClearAll;
-  if not HandHistory.Find(FSelectedHandId, hhi) then
+  if (not HandHistory.FindGame(FSelectedTableId, hhis)) or
+     (not hhis.FindHand(FSelectedHandId, hhi)) then
+  begin
+    acCopyToClipboard.Enabled := FALSE;
+    acReplayHand.Enabled := FALSE;
     Exit;
+  end;
 
   // select appropriate hand in combobox
   item_index := cbHand.Properties.Items.Count - 1;
@@ -461,6 +345,9 @@ begin
       AddRVLine(hhi.RVLines[C1], 0);
 
   rvHandHistory.ScrollTo(0);
+
+  acCopyToClipboard.Enabled := TRUE;
+  acReplayHand.Enabled := TRUE;
 end;
 
 procedure TfrmHandHistory.tiCopyHideTimerTimer(Sender: TObject);
@@ -474,15 +361,22 @@ procedure TfrmHandHistory.cbHandPropertiesChange(Sender: TObject);
 var
   hand_id: UINT;
 begin
-  hand_id := 0;
-  if cbHand.ItemIndex > -1 then
+  if cbHand.ItemIndex = -1 then
+    hand_id := 0
+  else
     hand_id := StrToIntDef(Copy(cbHand.Properties.Items[cbHand.ItemIndex], 2, Pos(':', cbHand.Properties.Items[cbHand.ItemIndex]) - 2), 0);
+
   FSelectedHandId := hand_id;
   ShowHand;
 end;
 
 procedure TfrmHandHistory.cbTablePropertiesChange(Sender: TObject);
 begin
+  if cbTable.ItemIndex = -1 then
+    SetLength(FSelectedTableId, 0)
+  else
+    FSelectedTableId := HandHistory.Items[cbTable.ItemIndex].FGameId;
+
   RefreshHandList;
 end;
 
@@ -494,5 +388,12 @@ begin
   btCopyToClipboard.Caption := 'COPIED';
   tiCopyHideTimer.Enabled := TRUE;
 end;
+
+procedure TfrmHandHistory.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
+begin
+  RefreshTableList;
+  RefreshHandList;
+end;
+
 
 end.

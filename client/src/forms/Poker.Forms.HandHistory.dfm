@@ -3,7 +3,7 @@ object frmHandHistory: TfrmHandHistory
   Top = 0
   Caption = 'Hand History'
   ClientHeight = 586
-  ClientWidth = 582
+  ClientWidth = 535
   Color = clWindow
   Ctl3D = False
   DoubleBuffered = True
@@ -20,7 +20,7 @@ object frmHandHistory: TfrmHandHistory
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   DesignSize = (
-    582
+    535
     586)
   PixelsPerInch = 96
   TextHeight = 13
@@ -33,8 +33,7 @@ object frmHandHistory: TfrmHandHistory
     Properties.OnChange = cbTablePropertiesChange
     Style.TextColor = clWhite
     TabOrder = 1
-    ExplicitWidth = 405
-    Width = 520
+    Width = 473
   end
   object lbsTable: TcxLabel
     Left = 11
@@ -43,7 +42,7 @@ object frmHandHistory: TfrmHandHistory
     Transparent = True
   end
   object btCancel: TcxButton
-    Left = 478
+    Left = 431
     Top = 549
     Width = 93
     Height = 27
@@ -56,7 +55,6 @@ object frmHandHistory: TfrmHandHistory
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 363
   end
   object cbHand: TcxComboBox
     Left = 51
@@ -68,8 +66,7 @@ object frmHandHistory: TfrmHandHistory
     Properties.OnChange = cbHandPropertiesChange
     Style.TextColor = clWhite
     TabOrder = 2
-    ExplicitWidth = 405
-    Width = 520
+    Width = 473
   end
   object lbsHand: TcxLabel
     Left = 11
@@ -80,7 +77,7 @@ object frmHandHistory: TfrmHandHistory
   object rvHandHistory: TRichView
     Left = 12
     Top = 62
-    Width = 559
+    Width = 512
     Height = 477
     Anchors = [akLeft, akTop, akRight, akBottom]
     Color = 4210752
@@ -99,8 +96,23 @@ object frmHandHistory: TfrmHandHistory
     Width = 103
     Height = 27
     Action = acCopyToClipboard
-    Anchors = [akRight, akBottom]
+    Anchors = [akLeft, akBottom]
     TabOrder = 6
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Arial'
+    Font.Style = []
+    ParentFont = False
+  end
+  object btReplayHand: TcxButton
+    Left = 121
+    Top = 549
+    Width = 103
+    Height = 27
+    Action = acReplayHand
+    Anchors = [akLeft, akBottom]
+    TabOrder = 7
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -117,7 +129,12 @@ object frmHandHistory: TfrmHandHistory
     end
     object acCopyToClipboard: TAction
       Caption = 'Copy to clipboard'
+      Enabled = False
       OnExecute = acCopyToClipboardExecute
+    end
+    object acReplayHand: TAction
+      Caption = 'Replay this hand'
+      Enabled = False
     end
   end
   object RVStyle: TRVStyle

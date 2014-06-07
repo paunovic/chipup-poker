@@ -1,13 +1,16 @@
 object frmChipUpLogin: TfrmChipUpLogin
   Left = 0
   Top = 0
+  AlphaBlend = True
+  AlphaBlendValue = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Welcome to ChipUP Poker'
-  ClientHeight = 368
+  ClientHeight = 371
   ClientWidth = 558
-  Color = clWindow
+  Color = clBlack
   Ctl3D = False
+  DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -23,9 +26,12 @@ object frmChipUpLogin: TfrmChipUpLogin
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 14
-  object imgHeader: TcxImage
-    Left = -4
-    Top = -2
+  object imgBackground: TImage
+    Left = 0
+    Top = 0
+    Width = 558
+    Height = 371
+    Align = alClient
     Picture.Data = {
       0B546478504E47496D61676589504E470D0A1A0A0000000D494844520000022E
       00000173080600000019B2826B0000000467414D410000B18E7CFB5193000000
@@ -3149,21 +3155,10 @@ object frmChipUpLogin: TfrmChipUpLogin
       5904000018515904000018515904000018515904000018515904000018515904
       000018515904000018CC2FD3FF00C7961E0010C52F1D0000000049454E44AE42
       6082}
-    Properties.PopupMenuLayout.MenuItems = []
-    Properties.Proportional = False
-    Properties.ReadOnly = True
-    Properties.ShowFocusRect = False
-    Style.BorderStyle = ebsNone
-    Style.Edges = []
-    Style.HotTrack = False
-    Style.LookAndFeel.SkinName = ''
-    StyleDisabled.LookAndFeel.SkinName = ''
-    StyleFocused.LookAndFeel.SkinName = ''
-    StyleHot.LookAndFeel.SkinName = ''
-    TabOrder = 9
-    Transparent = True
-    Height = 375
-    Width = 562
+    ExplicitLeft = 416
+    ExplicitTop = 196
+    ExplicitWidth = 105
+    ExplicitHeight = 105
   end
   object cbRememberLogin: TcxCheckBox
     Left = 134

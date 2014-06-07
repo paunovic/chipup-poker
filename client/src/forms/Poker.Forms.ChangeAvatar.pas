@@ -126,6 +126,7 @@ begin
 
   if error <> '' then
   begin
+    pbUpload.Visible := FALSE;
     MessageDlg(error, mtError, [mbOK], 0);
     acChange.Enabled := TRUE;
   end;

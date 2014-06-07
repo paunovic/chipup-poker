@@ -55,7 +55,7 @@ var
 class procedure TfrmSystemTrayPopup.ShowPopup(const AText: String);
 begin
   if not Assigned(frmSystemTrayPopup) then
-    frmSystemTrayPopup := RunForm(TfrmSystemTrayPopup, nil, []) as TfrmSystemTrayPopup;
+    frmSystemTrayPopup := RunForm(TfrmSystemTrayPopup, nil, [], TRUE) as TfrmSystemTrayPopup;
   frmSystemTrayPopup.PopupText := AText;
 end;
 

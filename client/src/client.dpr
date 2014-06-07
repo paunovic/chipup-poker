@@ -23,6 +23,7 @@ uses
   FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
   dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
   OverbyteIcsHttpProt in '3rdparty\icsv8\OverbyteIcsHttpProt.pas',
+  DX9Canvas in '3rdparty\AsphyreSphinx\DX9Canvas.pas',
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
   Poker.Forms.Main in 'forms\Poker.Forms.Main.pas' {frmChipUpMain},
@@ -58,6 +59,8 @@ uses
   Poker.Common.Encryption in 'modules\common\Poker.Common.Encryption.pas',
   Poker.Common.FormsContainer in 'modules\common\Poker.Common.FormsContainer.pas',
   Poker.Common.InstanceController in 'modules\common\Poker.Common.InstanceController.pas',
+  Poker.Common.AlphaBlendThread in 'modules\common\Poker.Common.AlphaBlendThread.pas',
+  Poker.Common.CommandLineParamProcesser in 'modules\common\Poker.Common.CommandLineParamProcesser.pas',
   Poker.HardcodedSettings in 'modules\settings\Poker.HardcodedSettings.pas',
   Poker.Settings in 'modules\settings\Poker.Settings.pas',
   Poker.Server.Settings in 'modules\server\Poker.Server.Settings.pas',
@@ -140,7 +143,6 @@ uses
   Poker.Protobufs.Objects.PlayerLimitParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerLimitParams.pas',
   Poker.Protobufs.Objects.ClubPlayerStats in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubPlayerStats.pas',
   Poker.Protobufs.Objects.ClubStatsReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubStatsReply.pas',
-  Poker.CommandLineParamProcesser in 'modules\cmdline_param_processer\Poker.CommandLineParamProcesser.pas',
   Poker.Protobufs.Objects.ClubHandHistoryReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas',
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
@@ -150,8 +152,7 @@ uses
   Poker.HandHistory.HandHistoryItem in 'modules\hand_history\Poker.HandHistory.HandHistoryItem.pas',
   Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
   Poker.HandHistory.Moves in 'modules\hand_history\Poker.HandHistory.Moves.pas',
-  Vcl.Themes,
-  Vcl.Styles;
+  Poker.WindowMessages in 'modules\Poker.WindowMessages.pas';
 
 procedure FocusPokerApp;
 var

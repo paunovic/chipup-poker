@@ -1,4 +1,4 @@
-unit Poker.CommandLineParamProcesser;
+unit Poker.Common.CommandLineParamProcesser;
 
 interface
 

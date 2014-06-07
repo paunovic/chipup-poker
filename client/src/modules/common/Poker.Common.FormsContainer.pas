@@ -27,7 +27,7 @@ type
     procedure Close(const AFormClass: TFormClass);
     procedure Remove(const AForm: TForm); overload;
     procedure Remove(const AFormClass: TFormClass); overload;
-    function RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean): TForm;
+    function RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean; const AShow: Boolean = TRUE): TForm;
     procedure CloseAllForms;
     function Find(const AFormClass: TFormClass; out AForm: TForm): Boolean;
     function Contains(const AFormClass: TFormClass): Boolean;
@@ -136,7 +136,7 @@ begin
   FItems.Clear;
 end;
 
-function TFormsContainer.RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean): TForm;
+function TFormsContainer.RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean; const AShow: Boolean = TRUE): TForm;
 var
   form: TForm;
 begin
@@ -148,7 +148,7 @@ begin
   end
   else
   begin
-    form := Poker.Common.Misc.RunForm(AFormClass, AOwner, AParams);
+    form := Poker.Common.Misc.RunForm(AFormClass, AOwner, AParams, AShow);
     Add(form);
     result := form;
   end;
