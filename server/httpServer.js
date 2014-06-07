@@ -7,6 +7,7 @@ var crypto = require('crypto');
 var async = require('async');
 var child_process = require('child_process');
 var http = require('http');
+var https = require('https');
 
 var config = require('./config');
 var MongoStore = require('./mongoStore');
@@ -46,6 +47,7 @@ function Server(db,activeUsersIN) {
 	this.admin = db.collection('admin');
 	this.installers = db.collection('installers');
 	this.config = db.collection('config');
+	this.avatars = db.collection('avatars');
 
 	this.sessionStore = new MongoStore(db,'sessions');
 	io.set('authorization',this.socketAuth.bind(this));
@@ -140,7 +142,7 @@ function Server(db,activeUsersIN) {
 			var hasher = crypto.createHash('sha256');
 			hasher.update(data);
 			var hash = hasher.digest('base64');
-			avatars.findOne({_id:hash},function (err,row) {
+			this.avatars.findOne({_id:hash},function (err,row) {
 				if (err) {
 					console.log('error',err);
 					res.send(JSON.stringify({error:err}));
@@ -164,8 +166,8 @@ function Server(db,activeUsersIN) {
 					});
 				}
 			});
-		});
-	});
+		}.bind(this));
+	}.bind(this));
 	app.post('/paypal_callback',function (req,res) {
 		if (req.body.test_ipn) var host = 'www.sandbox.paypal.com';
 		else var host = 'www.paypal.com';
@@ -319,12 +321,12 @@ app.post('/eval',function (req,res) {
 	app.post('/secure/sendBroadcast',function (req,res) {
 		console.log(req.body);
 		var ev = {event:'ceServerMessage',msg:{msg:req.body.msg}};
-		for (var key in activeUsers) {
-			activeUsers[key].send(codes.seChat,ev,'Poker.ChatEvent');
+		for (var key in this.activeUsers) {
+			this.activeUsers[key].send(codes.seChat,ev,'Poker.ChatEvent');
 		}
 		res.writeHead(302,{Location:'/secure/broadcast?success=true'}); // FIXME
 		res.end();
-	});
+	}.bind(this));
 app.get('/fetchhands',function (req,res) {
 	var token = profiler.start('fetchhands-outer');
 	// new Buffer(g._id.toString(),'hex')
