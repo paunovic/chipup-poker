@@ -67,7 +67,6 @@ type
     btJoinClub: TcxButton;
     btTournamentsHeader: TcxButton;
     lbsTournamentsComingSoon: TcxLabel;
-    tiBringToFront: TTimer;
     miHelp: TMenuItem;
     miContactUs: TMenuItem;
     acShowContactUsForm: TAction;
@@ -123,7 +122,6 @@ type
     procedure gridMyHomeGamesEnter(Sender: TObject);
     procedure gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure pcTabsChange(Sender: TObject);
-    procedure tiBringToFrontTimer(Sender: TObject);
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
@@ -173,7 +171,6 @@ type
     function ProcessClubObject(const AClub: TPB_Club; const AMethodId: Integer): TClubInfo;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
-
     procedure ConfigureGUI;
 
     function GetSelectedGame(var AGame: TGameInfo): Boolean;
@@ -261,7 +258,7 @@ begin
   if CanClose then
   begin
     ServerSocket.Logout;
-    Tables.ClearWithoutNotification;
+    Tables.Clear;
   end;
 end;
 
@@ -292,7 +289,7 @@ begin
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
-  Tables.ClearWithoutNotification;
+  Tables.Clear;
 end;
 
 procedure TfrmChipUpMain.ShowLoginForm;
@@ -301,7 +298,6 @@ begin
   DoLogout;
   Hide;
   MessageContainer.RemoveCallbacks(FCallbacksId);
-  FCallbacksId := -1;
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
 end;
 
@@ -345,21 +341,6 @@ begin
   end;
 end;
 
-procedure TfrmChipUpMain.tiBringToFrontTimer(Sender: TObject);
-var
-  table: TTable;
-begin
-  if IsIconic(Handle) then
-    ShowWindow(Handle, SW_RESTORE);
-  Show;
-
-  if Tables.Count > 0 then
-    for table in Tables do
-      table.BringToFront;
-
-  tiBringToFront.Enabled := FALSE;
-end;
-
 function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
 begin
   result := dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, AClub);
@@ -380,7 +361,7 @@ end;
 
 procedure TfrmChipUpMain.acHandHistoryExecute(Sender: TObject);
 begin
-  FormsContainer.RunForm(TfrmHandHistory, self, [nil], FALSE);
+  FormsContainer.RunForm(TfrmHandHistory, self, [nil, nil], FALSE);
 end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
@@ -499,7 +480,6 @@ end;
 procedure TfrmChipUpMain.ConfigureGUI;
 var
   cpt: String;
-  club: TClubInfo;
 begin
   cpt := Format('ChipUP Poker - %s', [dmMain.SelfInfo.Nick]);
   if not dmMain.SelfInfo.Authed then
@@ -508,9 +488,6 @@ begin
     Caption := cpt;
 
   miResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
-
-  acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
-                             (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
 
   miSounds.Checked := Settings.Sounds;
   miCheckOnFold.Checked := Settings.FoldChecks;
@@ -810,7 +787,7 @@ begin
         SetLength(FSelectedGame, 0);
         ConfigureGUI;
         Show;
-        tiBringToFront.Enabled := TRUE;
+        dmMain.ProcessReconnectedTables;
       end;
     end;
 
@@ -1191,7 +1168,5 @@ begin
   pb := AObject as TPB_ClubHandHistoryReply;
   HandHistory.Add(pb);
 end;
-
-
 
 end.

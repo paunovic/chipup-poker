@@ -203,8 +203,8 @@ begin
 
   case pbreply.LoginStatus of
     lrSuccess: begin
-      dmMain.ProcessStatusProtobuf(pbreply.Status);
-      dmMain.ProcessReconnectedTables(pbreply.ReconnectTables);
+      dmMain.ProcessLoginReply(pbreply);
+      dmMain.ProcessReconnectedTables;
       FCurrentStatus := rsLoggedIn;
       FormsContainer.ResetState;
       Tables.EnableAll;

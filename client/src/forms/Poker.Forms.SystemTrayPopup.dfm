@@ -636,7 +636,6 @@ object frmSystemTrayPopup: TfrmSystemTrayPopup
     Properties.Alignment.Vert = taVCenter
     Transparent = True
     OnMouseMove = FormMouseMove
-    ExplicitTop = 27
     Height = 27
     Width = 260
     AnchorX = 135
@@ -655,7 +654,6 @@ object frmSystemTrayPopup: TfrmSystemTrayPopup
     Style.TextColor = 9079434
     Style.TextStyle = [fsBold]
     Transparent = True
-    ExplicitWidth = 189
   end
   object imgClose: TcxImage
     Left = 247

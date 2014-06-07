@@ -1,7 +1,7 @@
 unit Poker.Forms.Table;
 
 {
-  ISSUES:
+  NOTES:
     - teSit happens before player receives TableStatus. Means, if any processing is done in teSit, there would be no info for new player in seat
 }
 
@@ -14,7 +14,7 @@ uses
   Poker.DirectX.Animation, Vectors2, Vcl.ActnList, cxLabel, Poker.Table.Tables, cxTextEdit, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.ActnMan, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox, Poker.Protobufs.Objects.TableStatus, Poker.Avatars,
   Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, Poker.ChipStackMaker, AsphyreTypes, cxCurrencyEdit, RVStyle,
-  RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls, AsphyreFonts, ChipUpPokerDarkSkin, IdSync;
+  RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls, AsphyreFonts, ChipUpPokerDarkSkin, IdSync, Poker.HandHistory.HandHistoryItem;
 
 type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
@@ -117,55 +117,55 @@ type
       end;
 
     var
-      FCallbacksId            : Integer;
-      FTableResizeRatio       : Single;
-      FRawTableWidth          : Single;
-      FRawTableHeight         : Single;
-      FRawTableXOffset        : Single;
-      FRawTableYOffset        : Single;
-      FTableWidth             : Single;
-      FTableHeight            : Single;
-      FTableXOffset           : Single;
-      FTableYOffset           : Single;
-      FTableCenter            : TPoint2;
-      FDealerPoint            : TPoint2;
-      FTableCenterYOffset     : Single;
-      FSeatWidth              : Single;
-      FSeatHeight             : Single;
-      FSeatResizeRatio        : Single;
-      FSeatActionResizeRatio  : Single;
-      FSeatCardsMaxWidth      : Single;
-      FCardWidth              : Single;
-      FCardHeight             : Single;
-      FCardArtworkWidth       : Single;
-      FCardArtworkHeight      : Single;
-      FChipWidth              : Single;
-      FChipHeight             : Single;
-      FDealerWidth            : Single;
-      FDealerHeight           : Single;
-      FTimebarWidth           : Single;
-      FTimebarHeight          : Single;
-      FSeatActionFrameWidth   : Single;
-      FSeatActionFrameHeight  : Single;
-      FLowerIntfBorder        : Integer;
-      FRaiseSliderWidth       : Single;
-      FRaiseSliderHeight      : Single;
-      FRaiseSliderPoint       : TPoint2;
-      FRaiseSliderResizeRatio : Single;
+      FCallbacksId: Integer;
+      FTableResizeRatio: Single;
+      FRawTableWidth: Single;
+      FRawTableHeight: Single;
+      FRawTableXOffset: Single;
+      FRawTableYOffset: Single;
+      FTableWidth: Single;
+      FTableHeight: Single;
+      FTableXOffset: Single;
+      FTableYOffset: Single;
+      FTableCenter: TPoint2;
+      FDealerPoint: TPoint2;
+      FTableCenterYOffset: Single;
+      FSeatWidth: Single;
+      FSeatHeight: Single;
+      FSeatResizeRatio: Single;
+      FSeatActionResizeRatio: Single;
+      FSeatCardsMaxWidth: Single;
+      FCardWidth: Single;
+      FCardHeight: Single;
+      FCardArtworkWidth: Single;
+      FCardArtworkHeight: Single;
+      FChipWidth: Single;
+      FChipHeight: Single;
+      FDealerWidth: Single;
+      FDealerHeight: Single;
+      FTimebarWidth: Single;
+      FTimebarHeight: Single;
+      FSeatActionFrameWidth: Single;
+      FSeatActionFrameHeight: Single;
+      FLowerIntfBorder: Integer;
+      FRaiseSliderWidth: Single;
+      FRaiseSliderHeight: Single;
+      FRaiseSliderPoint: TPoint2;
+      FRaiseSliderResizeRatio: Single;
       FRaiseSliderButtonBounds: TRect;
-      FRaiseSliderButtonPoint : TPoint2;
-      FRaiseSliderButtonWidth : Single;
+      FRaiseSliderButtonPoint: TPoint2;
+      FRaiseSliderButtonWidth: Single;
       FRaiseSliderButtonHeight: Single;
-      FRaiseSliderPosition    : Single;
-      FRaisePresetButtonWidth : Single;
+      FRaiseSliderPosition: Single;
+      FRaisePresetButtonWidth: Single;
       FRaisePresetButtonHeight: Single;
-      FStandUpButtonWidth     : Single;
-      FStandUpButtonHeight    : Single;
-      FStandUpResizeRatio     : Single;
-      FPlayNowButtonWidth     : Single;
-      FPlayNowButtonHeight    : Single;
-      FPlayNowResizeRatio     : Single;
-      FClosingTime            : DWORD;
+      FStandUpButtonWidth: Single;
+      FStandUpButtonHeight: Single;
+      FStandUpResizeRatio: Single;
+      FPlayNowButtonWidth: Single;
+      FPlayNowButtonHeight: Single;
+      FPlayNowResizeRatio: Single;
+      FClosingTime: DWORD;
 
       FActionButtonWidth: Single;
       FActionButtonHeight: Single;
@@ -259,6 +259,7 @@ type
     function GetPotPoint(const APotIndex: Integer): TPoint2;
 
     procedure UpdateClosingTime;
+    function GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
 
     procedure CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
@@ -301,11 +302,11 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, System.Rtti, System.TypInfo, {$ENDIF}
   cxClasses, System.Math, AsphyreBitmaps, AsphyreJPG, Poker.Server.MessageContainer, Poker.Server.Settings,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources,
+  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources, Poker.WindowMessages,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
-  Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game,
+  Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game, Poker.Objects.GameInfo,
   Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, AbstractCanvas,
-  Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core, Poker.HandHistory.HandHistoryItem;
+  Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -329,17 +330,27 @@ procedure TfrmTable.FormCreate(Sender: TObject);
 var
   C1: Integer;
 begin
-  FCallbacksId := MessageContainer.AddCallbacks([
-                      TServerMessageCallback.Create(seChat, CSRChatEvent),
-                      TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
-                      TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
-                      TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
-                      TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
-                      TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                      TServerMessageCallback.Create(seGameChange, CSEGameChange),
-                      TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
-                      TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
-                  ]);
+  if FTable.TableType = ttLiveGame then
+  begin
+    FCallbacksId := MessageContainer.AddCallbacks([
+                        TServerMessageCallback.Create(seChat, CSRChatEvent),
+                        TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
+                        TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
+                        TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
+                        TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
+                        TServerMessageCallback.Create(seUserChange, CSEUserChange),
+                        TServerMessageCallback.Create(seGameChange, CSEGameChange),
+                        TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
+                        TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
+                    ]);
+  end
+  else
+  begin
+    rvChat.Visible := FALSE;
+    edChat.Visible := FALSE;
+    lbvHandHistory.Visible := FALSE;
+    lbvHandStrength.Visible := FALSE;
+  end;
 
   lbvHandStrength.Caption := '';
   lbvHandHistory.Caption := '';
@@ -387,7 +398,8 @@ end;
 
 procedure TfrmTable.FormDestroy(Sender: TObject);
 begin
-  MessageContainer.RemoveCallbacks(FCallbacksId);
+  if FTable.TableType = ttLiveGame then
+    MessageContainer.RemoveCallbacks(FCallbacksId);
 
   DXTimer.RemoveAnimations(Handle);
 
@@ -651,7 +663,8 @@ begin
 
   DefocusControls;
 
-  if FTable.Game.State <> gsClosed then
+  if (FTable.TableType = ttLiveGame) and
+     (FTable.Game.State <> gsClosed) then
     for C1 := 0 to FTable.Game.Seats - 1 do
     begin
       seat_point := GetSeatPoint(C1);
@@ -675,7 +688,7 @@ end;
 
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FTable.NotifyClose;
+  FTable.NotifyClose(FTable.TableType = ttLiveGame);
   FTable := nil;
 end;
 
@@ -720,10 +733,13 @@ begin
 end;
 
 procedure TfrmTable.WMSysCommand(var Msg: TWMSysCommand);
+const
+  SC_MAXIMIZE2 = $F032;
 begin
   case Msg.CmdType of
     SC_RESTORE: SetMaxConstraints;
-    SC_MAXIMIZE: DisableMaxConstraints;
+    SC_MAXIMIZE,
+    SC_MAXIMIZE2: DisableMaxConstraints;
   end;
 
   inherited;
@@ -736,7 +752,7 @@ begin
      (AMessage.WParam = SC_KEYMENU) then
     Exit;
 
-  if AMessage.Msg = DXTimer.AnimationMessage then
+  if AMessage.Msg = WM_DIRECTX_ANIMATION then
     AnimationCallback(pointer(AMessage.WParam));
 
   inherited;
@@ -923,20 +939,34 @@ var
   cap: String;
   currentgame: String;
   rot_index: Integer;
+  hhi: THandHistoryItem;
 begin
-  if FTable.Game.GameType = gtRotationNLHPLO then
+  if FTable.TableType = ttLiveGame then
   begin
-    case FTableStatus.CurrentGame of
-      gtHoldem: currentgame := 'NLH';
-      gtOmaha: currentgame := 'PLO';
-    end;
-    rot_index := FTableStatus.RotationHand;
-    if rot_index = 0 then
-      rot_index := 1;
-    cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), (rot_index - 1) mod FTable.Game.Seats + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
+    if FTable.Game.GameType = gtRotationNLHPLO then
+    begin
+      case FTableStatus.CurrentGame of
+        gtHoldem: currentgame := 'NLH';
+        gtOmaha: currentgame := 'PLO';
+      end;
+      rot_index := FTableStatus.RotationHand;
+      if rot_index = 0 then
+        rot_index := 1;
+      cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), (rot_index - 1) mod FTable.Game.Seats + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
+    end
+    else
+      cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), FTable.Club.Name]);
   end
   else
-    cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), FTable.Club.Name]);
+  begin
+    if GetHandHistoryItem(hhi) then
+    begin
+      cap := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.Limit, FALSE),
+               ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
+    end
+    else
+      cap := 'Unknown hand';
+  end;
 
   if cap <> Caption then
     Caption := cap;
@@ -962,11 +992,23 @@ begin
   result := Point2(x, y);
 end;
 
+function TfrmTable.GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
+var
+  hhis: THandHistoryItems;
+begin
+  if (FTable.TableType <> ttHandPlayback) or
+     (not HandHistory.FindGame(FTable.GameId, hhis)) or
+     (not hhis.FindHand(FTable.HandId, AHandHistoryItem)) then
+    Exit(FALSE);
+
+  Exit(TRUE);
+end;
+
 function TfrmTable.GetBetPoint(const ASeatIndex: Integer): TPoint2;
 var
   seat_radians: Double;
-  x, y        : Single;
-  xr, yr      : Single;
+  x, y: Single;
+  xr, yr: Single;
 begin
   if FTableStatus.Dealer = ASeatIndex then
   begin
@@ -985,14 +1027,13 @@ begin
   result := Point2(x, y);
 end;
 
-
 function TfrmTable.GetCardPoint(const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
 var
-  seat_point         : TPoint2;
-  cards_width        : Single;
+  seat_point: TPoint2;
+  cards_width: Single;
   cards_overlap_width: Single;
-  cards_starting_x   : Single;
-  perc               : Single;
+  cards_starting_x: Single;
+  perc: Single;
 begin
   seat_point := GetSeatPoint(ASeatInfo.SeatIndex);
   cards_width := ASeatInfo.CardCount * FCardWidth;
@@ -1206,7 +1247,7 @@ end;
 
 procedure TfrmTable.ConfigureGUI;
 var
-  hhi: THandHistoryItem;
+  hhis: THandHistoryItems;
   seat_info: TSeatInfo;
   sitout: Boolean;
   foldtoany: Boolean;
@@ -1225,283 +1266,286 @@ begin
       Height := hround;
   end;
 
-  rvChat.Height := ClientHeight div 7;
-  rvChat.Width := Round(ClientWidth / 3.15);
-  rvChat.Top := ClientHeight - FLowerIntfBorder - rvChat.Height;
-  rvChat.Left := FLowerIntfBorder;
-
-  edChat.Width := rvChat.Width;
-  edChat.Top := rvChat.Top - edChat.Height;
-  edChat.Left := rvChat.Left;
-
-  cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
-  cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
-  cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
-
-  cbFoldToAnyBet.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder;
-  cbSitOutNextHand.Left := cbFoldToAnyBet.Left;
-  cbSitOutNextBB.Left := cbFoldToAnyBet.Left;
-
-  raise_en := acRaise.Enabled;
-
-  acStandUp.Enabled := FALSE;
-  acFold.Enabled := FALSE;
-  acCall.Enabled := FALSE;
-  acCheck.Enabled := FALSE;
-  acRaise.Enabled := FALSE;
-  acPlayNow.Enabled := FALSE;
-  sitout := FALSE;
-  foldtoany := FALSE;
-
-  seat_bet := 0;
-  seat_info := nil;
-  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+  if FTable.TableType = ttLiveGame then
   begin
-    acStandUp.Enabled := TRUE;
-    seat_bet := FTableStatus.GetBet(FTable.SeatIndex);
+    rvChat.Height := ClientHeight div 7;
+    rvChat.Width := Round(ClientWidth / 3.15);
+    rvChat.Top := ClientHeight - FLowerIntfBorder - rvChat.Height;
+    rvChat.Left := FLowerIntfBorder;
 
-    case seat_info.Status of
-      psOutOfPlay: begin
-        acPlayNow.Enabled := TRUE;
-        sitout := FALSE;
-        foldtoany := FALSE;
-      end;
-      psOutOfHand: begin
-        sitout := TRUE;
-        foldtoany := FALSE;
-      end;
-      psInHand, psAllIn: begin
-        sitout := TRUE;
-        if (seat_info.Status = psInHand) and
-           (FTableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
-          foldtoany := TRUE;
-        if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
-           (not FTableStatus.Locked) and
-           (not tiGameLock.Enabled) then
-        begin
-          case FTableStatus.State of
-            tsIdle: begin
-              foldtoany := FALSE;
-            end;
-            tsPreFlop,
-            tsFlop,
-            tsTurn,
-            tsRiver: begin
-              nofocus := FALSE;
-              acFold.Enabled := TRUE;
-              if seat_bet < FTableStatus.MinimumBet then
-              begin
-                if seat_info.Chips <= FTableStatus.MinimumBet then
-                  acCall.Caption := 'CALL (ALL-IN)'
-                else
-                  acCall.Caption := Format('CALL (%s)', [ChipsToStr(FTableStatus.MinimumBet - seat_bet)]);
-                acCall.Enabled := TRUE;
+    edChat.Width := rvChat.Width;
+    edChat.Top := rvChat.Top - edChat.Height;
+    edChat.Left := rvChat.Left;
 
-                if (seat_info.Chips > FTableStatus.MinimumBet) and
-                   (FTableStatus.MinimumBet < FTableStatus.MinimumRaise) then
-                begin
-                  acRaise.Tag := 0;
-                  acRaise.Enabled := TRUE;
-                end;
+    cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
+    cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
+    cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
 
-                if cbFoldToAnyBet.Checked then
-                begin
-                  nofocus := TRUE;
-                  acFold.Execute;
-                end;
-              end
-              else
-              begin
-                acRaise.Tag := 1;
-                acCheck.Enabled := TRUE;
-                acRaise.Enabled := TRUE;
+    cbFoldToAnyBet.Left := rvChat.Left + rvChat.Width + FLowerIntfBorder;
+    cbSitOutNextHand.Left := cbFoldToAnyBet.Left;
+    cbSitOutNextBB.Left := cbFoldToAnyBet.Left;
 
-                if cbFoldToAnyBet.Checked then
-                begin
-                  nofocus := TRUE;
-                  acCheck.Execute;
-                end;
+    raise_en := acRaise.Enabled;
+
+    acStandUp.Enabled := FALSE;
+    acFold.Enabled := FALSE;
+    acCall.Enabled := FALSE;
+    acCheck.Enabled := FALSE;
+    acRaise.Enabled := FALSE;
+    acPlayNow.Enabled := FALSE;
+    sitout := FALSE;
+    foldtoany := FALSE;
+
+    seat_bet := 0;
+    seat_info := nil;
+    if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+    begin
+      acStandUp.Enabled := TRUE;
+      seat_bet := FTableStatus.GetBet(FTable.SeatIndex);
+
+      case seat_info.Status of
+        psOutOfPlay: begin
+          acPlayNow.Enabled := TRUE;
+          sitout := FALSE;
+          foldtoany := FALSE;
+        end;
+        psOutOfHand: begin
+          sitout := TRUE;
+          foldtoany := FALSE;
+        end;
+        psInHand, psAllIn: begin
+          sitout := TRUE;
+          if (seat_info.Status = psInHand) and
+             (FTableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
+            foldtoany := TRUE;
+          if (FTableStatus.CurrentSeat = FTable.SeatIndex) and
+             (not FTableStatus.Locked) and
+             (not tiGameLock.Enabled) then
+          begin
+            case FTableStatus.State of
+              tsIdle: begin
+                foldtoany := FALSE;
               end;
+              tsPreFlop,
+              tsFlop,
+              tsTurn,
+              tsRiver: begin
+                nofocus := FALSE;
+                acFold.Enabled := TRUE;
+                if seat_bet < FTableStatus.MinimumBet then
+                begin
+                  if seat_info.Chips <= FTableStatus.MinimumBet then
+                    acCall.Caption := 'CALL (ALL-IN)'
+                  else
+                    acCall.Caption := Format('CALL (%s)', [ChipsToStr(FTableStatus.MinimumBet - seat_bet)]);
+                  acCall.Enabled := TRUE;
 
-              if not nofocus then
-              begin
-                fgwin := GetForegroundWindow;
-                for C1 := 0 to Tables.Count - 1 do
-                  if tables[C1].Form.Handle = fgwin then
+                  if (seat_info.Chips > FTableStatus.MinimumBet) and
+                     (FTableStatus.MinimumBet < FTableStatus.MinimumRaise) then
                   begin
-                    nofocus := TRUE;
-                    Break;
+                    acRaise.Tag := 0;
+                    acRaise.Enabled := TRUE;
                   end;
 
-                if (not nofocus) and
-                   (not FForceFocused) then
+                  if cbFoldToAnyBet.Checked then
+                  begin
+                    nofocus := TRUE;
+                    acFold.Execute;
+                  end;
+                end
+                else
                 begin
-                  if IsIconic(Handle) then
-                    ShowWindow(Handle, SW_RESTORE);
-                  BringToFront;
-                  SetForegroundWindow(Handle);
-                  SetFocus;
-                  FForceFocused := TRUE;
-                  if (not edChat.Focused) and
-                     (seRaiseAmount.Visible) then
-                    seRaiseAmount.SetFocus;
-                  TablePlaySound(Sounds.SOUND_TIMEBAR);
+                  acRaise.Tag := 1;
+                  acCheck.Enabled := TRUE;
+                  acRaise.Enabled := TRUE;
+
+                  if cbFoldToAnyBet.Checked then
+                  begin
+                    nofocus := TRUE;
+                    acCheck.Execute;
+                  end;
+                end;
+
+                if not nofocus then
+                begin
+                  fgwin := GetForegroundWindow;
+                  for C1 := 0 to Tables.Count - 1 do
+                    if tables[C1].Form.Handle = fgwin then
+                    begin
+                      nofocus := TRUE;
+                      Break;
+                    end;
+
+                  if (not nofocus) and
+                     (not FForceFocused) then
+                  begin
+                    if IsIconic(Handle) then
+                      ShowWindow(Handle, SW_RESTORE);
+                    BringToFront;
+                    SetForegroundWindow(Handle);
+                    SetFocus;
+                    FForceFocused := TRUE;
+                    if (not edChat.Focused) and
+                       (seRaiseAmount.Visible) then
+                      seRaiseAmount.SetFocus;
+                    TablePlaySound(Sounds.SOUND_TIMEBAR);
+                  end;
                 end;
               end;
+              tsWinning,
+              tsWinning2: foldtoany := FALSE;
             end;
-            tsWinning,
-            tsWinning2: foldtoany := FALSE;
-          end;
-        end
-        else
-          FForceFocused := FALSE;
-      end;
-      psFolded: begin
-        sitout := TRUE;
-        foldtoany := FALSE;
+          end
+          else
+            FForceFocused := FALSE;
+        end;
+        psFolded: begin
+          sitout := TRUE;
+          foldtoany := FALSE;
+        end;
       end;
     end;
-  end;
 
-  acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
-                         (Assigned(seat_info)) and
-                         (seat_info.CanShow) and
-                         (not seat_info.CardsVisible) and
-                         (seat_info.Status in [psFolded, psAllIn, psInHand]);
+    acShowCards.Enabled := (FTableStatus.State in [tsWinning, tsWinning2]) and
+                           (Assigned(seat_info)) and
+                           (seat_info.CanShow) and
+                           (not seat_info.CardsVisible) and
+                           (seat_info.Status in [psFolded, psAllIn, psInHand]);
 
-
-  if (FTableStatus.CurrentSeat <> -1) and
-     (not tiActiveFrameBlink.Enabled) and
-     (not FTableStatus.Locked) and
-     (not tiGameLock.Enabled) then
-  begin
-    tiActiveFrameBlink.Tag := 1;
-    tiActiveFrameBlink.Enabled := TRUE;
-  end;
-
-  if not cbFoldToAnyBet.Visible then
-  begin
-    event := cbFoldToAnyBet.Properties.OnChange;
-    cbFoldToAnyBet.Properties.OnChange := nil;
-    cbFoldToAnyBet.Checked := FALSE;
-    cbFoldToAnyBet.Properties.OnChange := event;
-  end;
-
-  if sitout then
-  begin
-    cbFoldToAnyBet.Visible := sitout;
-    if cbFoldToAnyBet.Visible then
+    if not cbFoldToAnyBet.Visible then
     begin
-      cbFoldToAnyBet.Enabled := foldtoany;
-      if not cbFoldToAnyBet.Enabled then
-        cbFoldToAnyBet.Checked := FALSE;
-    end
-    else
+      event := cbFoldToAnyBet.Properties.OnChange;
+      cbFoldToAnyBet.Properties.OnChange := nil;
       cbFoldToAnyBet.Checked := FALSE;
-
-    if not cbSitOutNextHand.Visible then
-    begin
-      event := cbSitOutNextHand.Properties.OnChange;
-      cbSitOutNextHand.Properties.OnChange := nil;
-      cbSitOutNextHand.Checked := FALSE;
-      cbSitOutNextHand.Properties.OnChange := event;
+      cbFoldToAnyBet.Properties.OnChange := event;
     end;
 
-    if not cbSitOutNextBB.Visible then
+    if sitout then
     begin
-      event := cbSitOutNextBB.Properties.OnChange;
-      cbSitOutNextBB.Properties.OnChange := nil;
-      cbSitOutNextBB.Checked := FALSE;
-      cbSitOutNextBB.Properties.OnChange := event;
+      cbFoldToAnyBet.Visible := sitout;
+      if cbFoldToAnyBet.Visible then
+      begin
+        cbFoldToAnyBet.Enabled := foldtoany;
+        if not cbFoldToAnyBet.Enabled then
+          cbFoldToAnyBet.Checked := FALSE;
+      end
+      else
+        cbFoldToAnyBet.Checked := FALSE;
+
+      if not cbSitOutNextHand.Visible then
+      begin
+        event := cbSitOutNextHand.Properties.OnChange;
+        cbSitOutNextHand.Properties.OnChange := nil;
+        cbSitOutNextHand.Checked := FALSE;
+        cbSitOutNextHand.Properties.OnChange := event;
+      end;
+
+      if not cbSitOutNextBB.Visible then
+      begin
+        event := cbSitOutNextBB.Properties.OnChange;
+        cbSitOutNextBB.Properties.OnChange := nil;
+        cbSitOutNextBB.Checked := FALSE;
+        cbSitOutNextBB.Properties.OnChange := event;
+      end;
     end;
-  end;
 
-  cbFoldToAnyBet.Visible := sitout;
-  cbSitOutNextHand.Visible := sitout;
-  cbSitOutNextBB.Visible := sitout;
+    cbFoldToAnyBet.Visible := sitout;
+    cbSitOutNextHand.Visible := sitout;
+    cbSitOutNextBB.Visible := sitout;
 
-  if acFold.Enabled then
-    FActionButtons[0].Action := acFold
-  else
-    if acShowCards.Enabled then
-      FActionButtons[0].Action := acShowCards
+    if acFold.Enabled then
+      FActionButtons[0].Action := acFold
     else
-      FActionButtons[0].Action := nil;
+      if acShowCards.Enabled then
+        FActionButtons[0].Action := acShowCards
+      else
+        FActionButtons[0].Action := nil;
 
-  if (acCall.Enabled) or (acCheck.Enabled) then
-  begin
-    if acCall.Enabled then
-      FActionButtons[1].Action := acCall
-    else
-      FActionButtons[1].Action := acCheck;
-  end
-  else
-    FActionButtons[1].Action := nil;
-
-  if acRaise.Enabled then
-    FActionButtons[2].Action := acRaise
-  else
-    FActionButtons[2].Action := nil;
-
-  seRaiseAmount.Visible := acRaise.Enabled;
-  acRaiseMin.Enabled := acRaise.Enabled;
-  acRaise3BB.Enabled := acRaise.Enabled;
-  acRaisePot.Enabled := acRaise.Enabled;
-  acRaiseMax.Enabled := acRaise.Enabled;
-
-  if acRaise.Enabled then
-  begin
-    Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
-
-    FRaiseMin := FTableStatus.MinimumRaise;
-    FRaiseMax := FTableStatus.MaximumRaise;
-
-    // if game is pot limit, we dont have to show MAX button, since POT = MAX
-    if FTableStatus.CurrentLimit = glPotLimit then
+    if (acCall.Enabled) or (acCheck.Enabled) then
     begin
-      FRaisePresetButtons[0].Action := nil;
-      FRaisePresetButtons[1].Action := acRaiseMin;
-      FRaisePresetButtons[2].Action := acRaise3BB;
-      FRaisePresetButtons[3].Action := acRaisePot;
+      if acCall.Enabled then
+        FActionButtons[1].Action := acCall
+      else
+        FActionButtons[1].Action := acCheck;
     end
     else
+      FActionButtons[1].Action := nil;
+
+    if acRaise.Enabled then
+      FActionButtons[2].Action := acRaise
+    else
+      FActionButtons[2].Action := nil;
+
+    seRaiseAmount.Visible := acRaise.Enabled;
+    acRaiseMin.Enabled := acRaise.Enabled;
+    acRaise3BB.Enabled := acRaise.Enabled;
+    acRaisePot.Enabled := acRaise.Enabled;
+    acRaiseMax.Enabled := acRaise.Enabled;
+
+    if acRaise.Enabled then
     begin
-      FRaisePresetButtons[0].Action := acRaiseMin;
-      FRaisePresetButtons[1].Action := acRaise3BB;
-      FRaisePresetButtons[2].Action := acRaisePot;
-      FRaisePresetButtons[3].Action := acRaiseMax;
+      Assert(FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info));
+
+      FRaiseMin := FTableStatus.MinimumRaise;
+      FRaiseMax := FTableStatus.MaximumRaise;
+
+      // if game is pot limit, we dont have to show MAX button, since POT = MAX
+      if FTableStatus.CurrentLimit = glPotLimit then
+      begin
+        FRaisePresetButtons[0].Action := nil;
+        FRaisePresetButtons[1].Action := acRaiseMin;
+        FRaisePresetButtons[2].Action := acRaise3BB;
+        FRaisePresetButtons[3].Action := acRaisePot;
+      end
+      else
+      begin
+        FRaisePresetButtons[0].Action := acRaiseMin;
+        FRaisePresetButtons[1].Action := acRaise3BB;
+        FRaisePresetButtons[2].Action := acRaisePot;
+        FRaisePresetButtons[3].Action := acRaiseMax;
+      end;
+
+      if not raise_en then
+        FRaiseValue := FRaiseMin;
+
+      SetRaiseSliderValue(FRaiseValue, TRUE, TRUE, FALSE);
+
+      case acRaise.Tag of
+        0: begin
+          if FRaiseValue = seat_info.Chips + seat_bet then
+             acRaise.Caption := 'RAISE (ALL-IN)'
+          else
+             acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)])
+        end;
+        1: begin
+          if FRaiseValue = seat_info.Chips then
+            acRaise.Caption := 'BET (ALL-IN)'
+          else
+            acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
+        end;
+      end;
+    end
+    else
+      for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
+        FRaisePresetButtons[C1].Action := nil;
+
+    if (FTableStatus.CurrentSeat <> -1) and
+       (not tiActiveFrameBlink.Enabled) and
+       (not FTableStatus.Locked) and
+       (not tiGameLock.Enabled) then
+    begin
+      tiActiveFrameBlink.Tag := 1;
+      tiActiveFrameBlink.Enabled := TRUE;
     end;
 
-    if not raise_en then
-      FRaiseValue := FRaiseMin;
-
-    SetRaiseSliderValue(FRaiseValue, TRUE, TRUE, FALSE);
-
-    case acRaise.Tag of
-      0: begin
-        if FRaiseValue = seat_info.Chips + seat_bet then
-           acRaise.Caption := 'RAISE (ALL-IN)'
-        else
-           acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)])
-      end;
-      1: begin
-        if FRaiseValue = seat_info.Chips then
-          acRaise.Caption := 'BET (ALL-IN)'
-        else
-          acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
-      end;
+    if (not HandHistory.FindGame(FTable.GameId, hhis)) or
+       (hhis.LastHandId = 0) then
+      lbvHandHistory.Visible := FALSE
+    else
+    begin
+      lbvHandHistory.Caption := Format('Previous Hand (#%d)', [hhis.LastHandId]);
+      lbvHandHistory.Visible := TRUE;
     end;
-  end
-  else
-    for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
-      FRaisePresetButtons[C1].Action := nil;
-
-  if not HandHistory.FindLastHandForClub(FTable.ClubId, hhi) then
-    lbvHandHistory.Visible := FALSE
-  else
-  begin
-    lbvHandHistory.Caption := Format('Previous Hand (#%d)', [hhi.HandId]);
-    lbvHandHistory.Visible := TRUE;
   end;
 
   MakeTableCaption;
@@ -1524,7 +1568,8 @@ end;
 function TfrmTable.ConfirmLeaveTable: Boolean;
 begin
   result := TRUE;
-  if FTable.IsSitting then
+  if (FTable.TableType = ttLiveGame) and
+     (FTable.IsSitting) then
     result := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and get you up from the seat.', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
@@ -1533,7 +1578,8 @@ var
   seat: TSeatInfo;
 begin
   result := TRUE;
-  if (FTable.IsSitting) and
+  if (FTable.TableType = ttLiveGame) and
+     (FTable.IsSitting) and
      (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat)) and
      (seat.Status in [psInHand, psFolded, psAllIn]) then
     result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that you commited to current pot.', mtWarning, mbYesNo, 0) = mrYes;
@@ -3241,15 +3287,22 @@ end;
 
 procedure TfrmTable.acHandHistoryExecute(Sender: TObject);
 var
-  hhi: THandHistoryItem;
+  form: TForm;
   handid: UINT32;
+  hhis: THandHistoryItems;
 begin
-  if not HandHistory.FindLastHandForClub(FTable.ClubId, hhi) then
+  if not HandHistory.FindGame(FTable.GameId, hhis) then
     handid := 0
   else
-    handid := hhi.HandId;
+    handid := hhis.LastHandId;
 
-  FormsContainer.RunForm(TfrmHandHistory, nil, [@handid], FALSE);
+  if FormsContainer.Find(TfrmHandHistory, form) then
+  begin
+    (form as TfrmHandHistory).SetSelectedHandId(FTable.Game.MongoId, handid);
+    form.SetFocus;
+  end
+  else
+    FormsContainer.RunForm(TfrmHandHistory, frmChipUpMain, [FTable.Game, @handid], FALSE)
 end;
 
 

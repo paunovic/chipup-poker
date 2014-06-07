@@ -3,7 +3,7 @@ unit Poker.DirectX.Core;
 interface
 
 uses
-  Winapi.Windows, AsphyreFonts, AbstractDevices, AbstractCanvas;
+  Winapi.Windows, AsphyreFonts, AbstractDevices, AbstractCanvas, DX9Canvas;
 
 type
   TDXCore = class
@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers;
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, AsphyreD3D9;
 
 
 class procedure TDXCore.Initialize;
@@ -57,7 +57,6 @@ begin
   FDummyWindow := AllocateHwnd(nil);
 
   Factory.UseProvider(idDirectX9);
-
   FDevice := Factory.CreateDevice;
   FCanvas := Factory.CreateCanvas;
   FFonts := TAsphyreFonts.Create;
@@ -108,6 +107,5 @@ procedure TDXCore.ReleaseSwapChain(const AIndex: Integer);
 begin
   FDevice.SwapChains.Items[AIndex]^.WindowHandle := FDummyWindow;
 end;
-
 
 end.

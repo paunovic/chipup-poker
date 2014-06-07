@@ -10,7 +10,6 @@ type
   private
     FAnimations: TDXAnimations;
     FSignalEvent: TEvent;
-    FMsg_Animation: UINT;
     FTiming: TAsphyreTiming;
     FLastUpdate: Double;
     FLockCount: Integer;
@@ -32,8 +31,6 @@ type
     function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single): TDXAnimation;
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
-
-    property AnimationMessage: UINT read FMsg_Animation;
   end;
 
 var
@@ -42,7 +39,7 @@ var
 implementation
 
 uses
-  System.SysUtils, System.Generics.Collections;
+  System.SysUtils, System.Generics.Collections, Poker.WindowMessages;
 
 
 class procedure TDXTimer.Initialize;
@@ -63,7 +60,6 @@ begin
   FNextId := 0;
   FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
-  FMsg_Animation := RegisterWindowMessage('CUPDXTANMSG');
   FAnimations := TDXAnimations.Create;
 
   inherited Create(TRUE);
@@ -82,7 +78,7 @@ function TDXTimer.AddAnimation(const AHandle: THandle; const AStartPoint, AEndPo
 var
   animation: TDXAnimation;
 begin
-  animation := TDXAnimation.Create(AHandle, FNextId, FMsg_Animation, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay, AEndDelay);
+  animation := TDXAnimation.Create(AHandle, FNextId, WM_DIRECTX_ANIMATION, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay, AEndDelay);
   Inc(FNextId);
   FAnimations.Add(animation);
   result := animation;
@@ -170,11 +166,11 @@ begin
       end;
 
       for C1 := 0 to callbacks_must.Count - 1 do
-        PostMessage(callbacks_must[C1], FMsg_Animation, 0, 0);
+        PostMessage(callbacks_must[C1], WM_DIRECTX_ANIMATION, 0, 0);
       if FTiming.GetTimeValue - FLastUpdate > UPDATE_INTERVAL then
       begin
         for C1 := 0 to callbacks.Count - 1 do
-          PostMessage(callbacks[C1], FMsg_Animation, 0, 0);
+          PostMessage(callbacks[C1], WM_DIRECTX_ANIMATION, 0, 0);
         FLastUpdate := FTiming.GetTimeValue;
       end;
     finally

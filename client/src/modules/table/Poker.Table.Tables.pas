@@ -4,25 +4,30 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.GameInfo, Poker.Protobufs.Objects.TableStatus,
-  Poker.Objects.ClubInfo, Vcl.Forms, Poker.Avatars;
+  Poker.Objects.ClubInfo, Vcl.Forms, Poker.Avatars, Poker.HandHistory.HandHistoryItem;
 
 type
+  TTableType = (ttLiveGame, ttHandPlayback);
+
   TTable = class
   private
+    FTableType: TTableType;
     FForm: TForm;
     FSeatIndex: Integer;
     FGameId: TBytes;
     FClubId: TBytes;
+    FHandId: UINT;
     FClubSeq: Integer;
     FGame: TGameInfo;
     FClub: TClubInfo;
     FSwapChainIndex: Integer;
 
   public
-    constructor Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer; const ASendJoinCommand: Boolean);
+    constructor Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer; const ASendJoinCommand: Boolean); overload;
+    constructor Create(const AGameId: TBytes; const AHandId: UINT; const ASwapChainIndex: Integer); overload;
     destructor Destroy; override;
 
-    procedure NotifyClose;
+    procedure NotifyClose(const ANotifyServer: Boolean);
     function IsSitting: Boolean;
 
     procedure UpdateAvatars(const AAvatar: TAvatar);
@@ -37,14 +42,14 @@ type
     property GameId: TBytes read FGameId;
     property ClubId: TBytes read FClubId;
     property ClubSeq: Integer read FClubSeq;
+    property HandId: UINT read FHandId;
     property Form: TForm read FForm;
     property SeatIndex: Integer read FSeatIndex write FSeatIndex;
     property SwapChainIndex: Integer read FSwapChainIndex;
+    property TableType: TTableType read FTableType;
   end;
 
   TTables = class(TObjectList<TTable>)
-  var
-    FNotifyServer: Boolean;
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -57,12 +62,12 @@ type
     procedure ReassignObjects;
 
     function AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
-    procedure NotifyClose(const AGameId: TBytes);
+    function AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
+    procedure NotifyClose(const AGameId: TBytes; const ANotifyServer: Boolean);
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
     function FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;
     procedure CloseTablesForClub(const AClubId: TBytes);
-    procedure ClearWithoutNotification;
   end;
 
 var
@@ -80,6 +85,7 @@ constructor TTable.Create(const AClub: TClubInfo; const AGame: TGameInfo; const 
 var
   form: TfrmTable;
 begin
+  FTableType := ttLiveGame;
   FSeatIndex := -1;
   FGameId := AGame.MongoId;
   FClubId := AClub.MongoId;
@@ -96,10 +102,24 @@ begin
     ServerSocket.JoinTable(FGame.MongoId);
 end;
 
+constructor TTable.Create(const AGameId: TBytes; const AHandId: UINT; const ASwapChainIndex: Integer);
+var
+  form: TfrmTable;
+begin
+  FTableType := ttHandPlayback;
+  FSeatIndex := -1;
+  FSwapChainIndex := ASwapChainIndex;
+  FGameId := AGameId;
+  FHandId := AHandId;
+  form := TfrmTable.Create(self);
+  FForm := form;
+  DXCore.AcquireSwapChain(FSwapChainIndex, form.Handle);
+  DXCore.Device.Resize(FSwapChainIndex, Point2px(form.ClientWidth, form.ClientHeight));
+end;
+
 destructor TTable.Destroy;
 begin
   FForm.Free;
-
   inherited;
 end;
 
@@ -108,9 +128,9 @@ begin
   result := FSeatIndex <> -1;
 end;
 
-procedure TTable.NotifyClose;
+procedure TTable.NotifyClose(const ANotifyServer: Boolean);
 begin
-  Tables.NotifyClose(FGame.MongoId);
+  Tables.NotifyClose(FGame.MongoId, ANotifyServer);
 end;
 
 procedure TTable.BringToFront;
@@ -162,9 +182,7 @@ end;
 constructor TTables.Create;
 begin
   inherited Create;
-  FNotifyServer := TRUE;
 end;
-
 
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
 var
@@ -189,14 +207,32 @@ begin
   result := table;
 end;
 
-procedure TTables.NotifyClose(const AGameId: TBytes);
+function TTables.AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
+var
+  table: TTable;
+  sci: Integer;
+begin
+  sci := DXCore.GetFreeSwapChain;
+  if sci = -1 then
+    Exit(nil);
+
+  table := TTable.Create(AGameId, AHandId, sci);
+  table.Form.Show;
+  Add(table);
+  table.BringToFront;
+
+  result := table;
+end;
+
+
+procedure TTables.NotifyClose(const AGameId: TBytes; const ANotifyServer: Boolean);
 var
   C1: Integer;
 begin
   for C1 := 0 to Length(ToArray) - 1 do
     if ToArray[C1].Game.MongoId = AGameId then
     begin
-      if FNotifyServer then
+      if ANotifyServer then
         ServerSocket.LeaveTable(AGameId);
       DXCore.ReleaseSwapChain(ToArray[C1].SwapChainIndex);
       Delete(C1);
@@ -234,13 +270,6 @@ begin
     if CompareBytes(AGameId, ToArray[C1].Game.MongoId) then
       Exit(C1);
   Exit(-1);
-end;
-
-procedure TTables.ClearWithoutNotification;
-begin
-  FNotifyServer := FALSE;
-  Clear;
-  FNotifyServer := TRUE;
 end;
 
 procedure TTables.CloseTablesForClub(const AClubId: TBytes);

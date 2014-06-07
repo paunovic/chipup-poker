@@ -8,7 +8,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
-  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin;
+  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin,
+  Poker.Protobufs.Objects.TableStatus, System.Generics.Collections;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
@@ -28,9 +29,9 @@ type
     lbsLogin: TcxLabel;
     lbsPassword: TcxLabel;
     tiConnect: TTimer;
-    imgHeader: TcxImage;
     tiLoginTimeout: TTimer;
     acUpdate: TAction;
+    imgBackground: TImage;
     procedure FormCreate(Sender: TObject);
     procedure acLoginExecute(Sender: TObject);
     procedure acShowCreateAccountFormExecute(Sender: TObject);
@@ -66,10 +67,12 @@ type
 
     procedure EnableGUI(const AEnable: Boolean);
     procedure SetCurrentStatus(const AValue: TLoginStatus);
+    procedure AlphaBlendThreadNotify(Sender: TObject);
 
     procedure HelloServer;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
+    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
   public
     property CurrentStatus: TLoginStatus read FCurrentStatus write SetCurrentStatus;
   end;
@@ -80,16 +83,17 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.Generics.Collections,
-  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
+  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket, Poker.Common.AlphaBlendThread,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
   Poker.Forms.Main, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption,
-  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Forms.SystemTrayPopup, Poker.CommandLineParamProcesser;
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Forms.SystemTrayPopup, Poker.Common.CommandLineParamProcesser;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
 begin
+  AlphaBlendValue := 0;
+
   FCallbacksId := MessageContainer.AddCallbacks([
                      TSocketStateChangeCallback.Create(SocketStateChange),
                      TServerMessageCallback.Create(srHello, CSRHello),
@@ -150,6 +154,8 @@ begin
     end;
     wsConnected: CurrentStatus := lsConnected;
   end;
+
+  TAlphaBlendThread.Create(AlphaBlendValue, 255, 0.1, 0.15, AlphaBlendThreadNotify);
 end;
 
 procedure TfrmChipUpLogin.HelloServer;
@@ -301,6 +307,11 @@ begin
   tiLoginTimeout.Enabled := FALSE;
 end;
 
+procedure TfrmChipUpLogin.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+begin
+  Message.Result := 0;
+end;
+
 procedure TfrmChipUpLogin.EnableGUI(const AEnable: Boolean);
 begin
   acLogin.Enabled := AEnable;
@@ -405,8 +416,7 @@ begin
   case pbreply.LoginStatus of
     lrSuccess: begin
       dmMain.SelfInfo.Password := edPassword.Text;
-      dmMain.ProcessStatusProtobuf(pbreply.Status);
-      dmMain.ProcessReconnectedTables(pbreply.ReconnectTables);
+      dmMain.ProcessLoginReply(pbreply);
       CurrentStatus := lsLoggedIn;
       Close;
     end;
@@ -421,5 +431,16 @@ begin
     edLogin.SetFocus;
   end;
 end;
+
+procedure TfrmChipUpLogin.AlphaBlendThreadNotify(Sender: TObject);
+var
+  abthread: TAlphaBlendThread;
+begin
+  abthread := Sender as TAlphaBlendThread;
+  AlphaBlendValue := abthread.CurrentValue;
+  if not Visible then
+    Show;
+end;
+
 
 end.

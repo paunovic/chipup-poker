@@ -3,12 +3,14 @@ unit Poker.HandHistory.Core;
 interface
 
 uses
-  System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.HandHistoryItem;
+  System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.HandHistoryItem,
+  System.Generics.Collections, System.SyncObjs;
 
 type
   THandHistory = class
   private
-    FItems: THandHistoryItems;
+    FItems: TObjectList<THandHistoryItems>;
+    FLock: TCriticalSection;
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -16,13 +18,11 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function IndexOf(const AHandId: UINT32): Integer;
-    function Find(const AHandId: UINT32; out AHandHistoryItem: THandHistoryItem): Boolean;
-    function FindLastHandForClub(const AClubId: TBytes; out AHandHistoryItem: THandHistoryItem): Boolean;
+    function FindGame(const AGameId: TBytes; out AHandHistoryItems: THandHistoryItems): Boolean;
 
-    procedure Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply);
+    function Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply): Boolean;
 
-    property Items: THandHistoryItems read FItems;
+    property Items: TObjectList<THandHistoryItems> read FItems;
   end;
 
 var
@@ -47,75 +47,60 @@ end;
 
 constructor THandHistory.Create;
 begin
-  FItems := THandHistoryItems.Create;
+  FLock := TCriticalSection.Create;
+  FItems := TObjectList<THandHistoryItems>.Create;
 end;
 
 destructor THandHistory.Destroy;
 begin
   FItems.Free;
+  FLock.Free;
   inherited;
 end;
 
-procedure THandHistory.Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply);
+function THandHistory.Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply): Boolean;
 var
   pbhh: TPB_HandHistory;
-  index: Integer;
-  handcount: Integer;
+  hhis: THandHistoryItems;
+  hhi: THandHistoryItem;
 begin
-  for pbhh in AClubHandHistoryInfo.Rows do
+  if not FindGame(AClubHandHistoryInfo.Gameid, hhis) then
   begin
-    index := IndexOf(pbhh.Seq);
-    if index = -1 then
-    begin
-      // dont let hand count per table to go over max limit
-      handcount := FItems.HandCountForTable(AClubHandHistoryInfo.Gameid);
-      if handcount >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE then
-        FItems.DeleteFirstHandsForTable(AClubHandHistoryInfo.Gameid, handcount - Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE + 1);
+    FLock.Enter;
+    try
+      FItems.Add(THandHistoryItems.Create(AClubHandHistoryInfo.Clubid, AClubHandHistoryInfo.Gameid));
+    finally
+      FLock.Leave;
+    end;
 
-      // add new hand history item
-      FItems.Add(THandHistoryItem.Create(AClubHandHistoryInfo.Clubid, AClubHandHistoryInfo.Gameid, pbhh));
-    end
-    else
-      FItems[index].Assign(AClubHandHistoryInfo.Clubid, AClubHandHistoryInfo.Gameid, pbhh);
+    if not FindGame(AClubHandHistoryInfo.Gameid, hhis) then
+      Exit(FALSE);
   end;
-end;
 
-function THandHistory.IndexOf(const AHandId: UINT32): Integer;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to FItems.Count - 1 do
-    if FItems[C1].HandId = AHandId then
-      Exit(C1);
-  Exit(-1);
-end;
-
-function THandHistory.Find(const AHandId: UINT32; out AHandHistoryItem: THandHistoryItem): Boolean;
-var
-  index: Integer;
-begin
-  index := IndexOf(AHandId);
-  if index = -1 then
-    Exit(FALSE);
-  AHandHistoryItem := FItems[index];
+  for pbhh in AClubHandHistoryInfo.Rows do
+    if not hhis.FindHand(pbhh.Seq, hhi) then
+      hhis.AddHand(pbhh)
+    else
+      hhi.Assign(pbhh);
   Exit(TRUE);
 end;
 
-function THandHistory.FindLastHandForClub(const AClubId: TBytes; out AHandHistoryItem: THandHistoryItem): Boolean;
+function THandHistory.FindGame(const AGameId: TBytes; out AHandHistoryItems: THandHistoryItems): Boolean;
 var
   C1: Integer;
-  maxid: UINT32;
 begin
-  maxid := 0;
-  AHandHistoryItem := nil;
-  for C1 := 0 to FItems.Count - 1 do
-    if (CompareBytes(FItems[C1].Clubid, AClubId)) and
-       (FItems[C1].HandId > maxid) then
-    begin
-      AHandHistoryItem := FItems[C1];
-      maxid := FItems[C1].HandId;
-    end;
-  Exit(Assigned(AHandHistoryItem));
+  FLock.Enter;
+  try
+    for C1 := 0 to FItems.Count - 1 do
+      if CompareBytes(FItems[C1].FGameId, AGameId) then
+      begin
+        AHandHistoryItems := FItems[C1];
+        Exit(TRUE);
+      end;
+    Exit(FALSE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 end.

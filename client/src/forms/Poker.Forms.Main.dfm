@@ -4301,11 +4301,4 @@ object frmChipUpMain: TfrmChipUpMain
       end
     end
   end
-  object tiBringToFront: TTimer
-    Enabled = False
-    Interval = 100
-    OnTimer = tiBringToFrontTimer
-    Left = 576
-    Top = 28
-  end
 end

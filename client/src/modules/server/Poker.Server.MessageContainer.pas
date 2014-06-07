@@ -10,8 +10,6 @@ type
   TMessageContainer = class
   private
     FReceiverWnd: HWND;
-    FServerReplyMsg: UINT;
-    FSocketStateChangeMsg: UINT;
     FCallbackSets: TObjectList<TCallbackSet>;
     FLock: TCriticalSection;
 
@@ -31,8 +29,6 @@ type
 
     property CallbackSetsCount: Integer read GetCallbackSetsCount;
     property ReceiverWnd: HWND read FReceiverWnd;
-    property ServerReplyMsg: UINT read FServerReplyMsg;
-    property SocketStateChangeMsg: UINT read FSocketStateChangeMsg;
   end;
 
 var
@@ -43,7 +39,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, Poker.Protobufs.Enum.ServerCodes, {$ENDIF}
-  System.SysUtils, System.Classes;
+  System.SysUtils, System.Classes, Poker.WindowMessages;
 
 
 class procedure TMessageContainer.Initialize;
@@ -60,9 +56,6 @@ end;
 constructor TMessageContainer.Create;
 begin
   FLock := TCriticalSection.Create;
-
-  FServerReplyMsg := RegisterWindowMessage('CUPMCSRMSG');
-  FSocketStateChangeMsg := RegisterWindowMessage('CUPMCSSCMMSG');
 
   FReceiverWnd := AllocateHwnd(ReceiverWndProc);
 
@@ -89,7 +82,7 @@ function TMessageContainer.AddCallbacks(const ACallbacks: array of TObject; cons
 var
   callback_set: TCallbackSet;
   id: Integer;
-  found : Boolean;
+  found: Boolean;
 begin
   FLock.Enter;
   try
@@ -139,22 +132,19 @@ var
   callback_set: TCallbackSet;
   obj, data_obj: TObject;
   callback_servermsg: TServerMessageCallback;
+  C1: Integer;
 begin
+  data_obj := nil;
+  if AMessage.Msg = WM_SOCKET_SERVER_REPLY then
+    data_obj := pointer(AMessage.WParam);
+
   FLock.Enter;
   try
-    data_obj := nil;
-    if AMessage.Msg = FServerReplyMsg then
-      data_obj := pointer(AMessage.WParam);
-
     for callback_set in FCallbackSets do
       if (Assigned(callback_set)) and
          (not callback_set.Removed) then
         for obj in callback_set do
-        begin
-          if callback_set.Removed then
-            Break;
-
-          if (AMessage.Msg = FServerReplyMsg) and
+          if (AMessage.Msg = WM_SOCKET_SERVER_REPLY) and
              (obj is TServerMessageCallback) then
           begin
             callback_servermsg := obj as TServerMessageCallback;
@@ -162,36 +152,30 @@ begin
               callback_servermsg.Callback(AMessage.LParam, data_obj)
           end
           else
-            if (AMessage.Msg = FSocketStateChangeMsg) and (obj is TSocketStateChangeCallback) then
+            if (AMessage.Msg = WM_SOCKET_STATE_CHANGE) and
+               (obj is TSocketStateChangeCallback) then
               (obj as TSocketStateChangeCallback).Callback(TSocketState(AMessage.WParam), TSocketState(AMessage.LParam));
-        end;
 
-    if Assigned(data_obj) then
-      data_obj.Free;
-  finally
-    FLock.Leave;
-  end;
-end;
-
-
-procedure TMessageContainer.ReceiverWndProc(var AMessage: TMessage);
-var
-  C1: Integer;
-begin
-  if (AMessage.Msg = FServerReplyMsg) or (AMessage.Msg = FSocketStateChangeMsg) then
-    ProcessMessage(AMessage);
-
-  FLock.Enter;
-  try
-    C1 := 0;
-    while C1 < FCallbackSets.Count do
+    C1 := FCallbackSets.Count - 1;
+    while (C1 >= 0) and
+          (C1 < FCallbackSets.Count) do
       if FCallbackSets[C1].Removed then
         FCallbackSets.Delete(C1)
       else
-        Inc(C1);
+        Dec(C1);
   finally
     FLock.Leave;
   end;
+
+  if Assigned(data_obj) then
+    data_obj.Free;
+end;
+
+procedure TMessageContainer.ReceiverWndProc(var AMessage: TMessage);
+begin
+  if (AMessage.Msg = WM_SOCKET_SERVER_REPLY) or
+     (AMessage.Msg = WM_SOCKET_STATE_CHANGE) then
+    ProcessMessage(AMessage);
 end;
 
 

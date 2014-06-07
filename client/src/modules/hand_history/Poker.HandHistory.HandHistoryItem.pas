@@ -3,10 +3,12 @@ unit Poker.HandHistory.HandHistoryItem;
 interface
 
 uses
-  System.SysUtils, Poker.Protobufs.Objects.HandHistory, System.Generics.Collections, System.Classes, Poker.HandHistory.Players,
-  Poker.HandHistory.Moves, Poker.Objects.GameInfo, Poker.Objects.ClubInfo, Poker.Protobufs.Objects.Game;
+  Winapi.Windows, System.SysUtils, Poker.Protobufs.Objects.HandHistory, System.Generics.Collections, System.Classes, System.SyncObjs,
+  Poker.HandHistory.Players, Poker.HandHistory.Moves, Poker.Objects.GameInfo, Poker.Objects.ClubInfo, Poker.Protobufs.Objects.Game;
 
 type
+  THandHistoryItems = class;
+
   THandHistoryItem = class
   public
     type
@@ -29,7 +31,7 @@ type
 
     const
       RV_TAGS: TRichViewTags = (
-        HeaderNormal: '\i\c999999';
+        HeaderNormal: '\i\cCCCCCC';
         HandId: '\i\b\cFFFFFF';
         GameType: '\i\b\cFFC000';
         GameTime: '\i\b\cFFFF99';
@@ -63,10 +65,7 @@ type
       );
 
   private
-    FClubId: TBytes;
-    FGameId: TBytes;
-    FClub: TClubInfo;
-    FGame: TGameInfo;
+    FParentItems: THandHistoryItems;
     FMongoId: TBytes;
     FHandId: UINT32;
     FRake: UINT32;
@@ -87,69 +86,72 @@ type
     procedure MakeLines;
 
   public
-    constructor Create(const AClubId, AGameId: TBytes; const AHandHistory: TPB_HandHistory);
+    constructor Create(const AParent: THandHistoryItems; const AHandHistory: TPB_HandHistory);
     destructor Destroy; override;
 
-    procedure Assign(const AClubId, AGameId: TBytes; const AHandHistory: TPB_HandHistory);
+    procedure Assign(const AHandHistory: TPB_HandHistory);
 
     property MongoId: TBytes read FMongoId;
-    property ClubId: TBytes read FClubId;
-    property GameId: TBytes read FGameId;
     property HandId: UINT32 read FHandId;
-    property Club: TClubInfo read FClub;
-    property Game: TGameInfo read FGame;
     property CurrentGame: TGameType read FCurrentGame;
     property StartTimeStr: String read FStartTimeStr;
+    property ParentItems: THandHistoryItems read FParentItems;
 
     property Lines: TStringList read FLines;
     property RVLines: TStringList read FRVLines;
   end;
 
   THandHistoryItems = class(TObjectList<THandHistoryItem>)
+  var
+    FGameId: TBytes;
+    FClubId: TBytes;
+    FGame: TGameInfo;
+    FClub: TClubInfo;
+    FLock: TCriticalSection;
   public
-    function HandCountForTable(const ATableId: TBytes): Integer;
-    procedure DeleteFirstHandsForTable(const ATableId: TBytes; const ACount: Integer);
+    constructor Create(const AClubId, AGameId: TBytes);
+    destructor Destroy; override;
+
+    procedure AddHand(const AHandHistory: TPB_HandHistory);
+    function FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
+    function LastHandId: UINT;
+
+    property Club: TClubInfo read FClub;
+    property Game: TGameInfo read FGame;
   end;
 
 implementation
 
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
-  Poker.Cards, Poker.Common.Misc, Poker.Table.Status, Poker.HandStrengthCalculator, System.DateUtils;
+  Poker.Cards, Poker.Common.Misc, Poker.Table.Status, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings;
 
 { THandHistoryItem }
 
-constructor THandHistoryItem.Create(const AClubId, AGameId: TBytes; const AHandHistory: TPB_HandHistory);
+constructor THandHistoryItem.Create(const AParent: THandHistoryItems; const AHandHistory: TPB_HandHistory);
 begin
+  FParentItems := AParent;
   FPlayers := TPlayerHandHistories.Create;
   FMoves := THandHistoryMoves.Create;
-  FClub := TClubInfo.Create;
-  FGame := TGameInfo.Create;
   FLines := TStringList.Create;
   FRVLines := TStringList.Create;
-  Assign(AClubId, AGameId, AHandHistory);
+  Assign(AHandHistory);
 end;
 
 destructor THandHistoryItem.Destroy;
 begin
   FLines.Free;
   FRVLines.Free;
-  FGame.Free;
-  FClub.Free;
   FMoves.Free;
   FPlayers.Free;
   inherited;
 end;
 
-procedure THandHistoryItem.Assign(const AClubId, AGameId: TBytes; const AHandHistory: TPB_HandHistory);
+procedure THandHistoryItem.Assign(const AHandHistory: TPB_HandHistory);
 var
   phh: TPB_PlayerHandHistory;
   mhh: TPB_MoveRow;
-  club: TClubInfo;
-  game: TGameInfo;
 begin
-  FClubId := AClubId;
-  FGameId := AGameId;
   FMongoId := AHandHistory.MongoId;
   FHandId := AHandHistory.Seq;
   FRake := AHandHistory.Totalrake;
@@ -170,29 +172,6 @@ begin
   FMoves.Clear;
   for mhh in AHandHistory.Moves do
     FMoves.Add(THandHistoryMove.Create(mhh));
-
-  club := nil;
-  game := nil;
-
-  // try to copy Club and Game from internal lists (if found)
-  if dmMain.SelfInfo.Clubs.FindClub(AClubId, club) then
-  begin
-    FClub.Assign(club);
-    if club.Games.FindGame(AGameId, game) then
-      FGame.Assign(game);
-  end;
-
-  // check if objects are found, and if not, try to copy them from server proto
-  // fixme
-  if not Assigned(club) then
-  begin
-
-  end;
-
-  if not Assigned(game) then
-  begin
-
-  end;
 
   MakeLines;
 end;
@@ -221,13 +200,13 @@ begin
 
   // basic info
   ALines.Add(Format('%sHand %s#%d%s: %s%s (%s/%s)%s - %s%s', [
-      ATags.HeaderNormal, ATags.HandId, FHandId, ATags.HeaderNormal, ATags.GameType, TGameInfo.GameTypeToStr(FCurrentGame, FGame.Limit, FALSE),
-      ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind), ATags.HeaderNormal, ATags.GameTime, FStartTimeStr
+      ATags.HeaderNormal, ATags.HandId, FHandId, ATags.HeaderNormal, ATags.GameType, TGameInfo.GameTypeToStr(FCurrentGame, FParentItems.Game.Limit, FALSE),
+      ChipsToStr(FParentItems.Game.SmallBlind), ChipsToStr(FParentItems.Game.BigBlind), ATags.HeaderNormal, ATags.GameTime, FStartTimeStr
   ]));
 
-  ALines.Add(Format('%sTable ''%s%s''%s (%s%d-max%s) - %s%s', [
-      ATags.HeaderNormal, ATags.TableName, FGame.Name, ATags.HeaderNormal, ATags.TableMaxSeats, FGame.Seats, ATags.HeaderNormal,
-      ATags.ClubName, FClub.Name
+  ALines.Add(Format('%sTable ''%s%s%s'' (%s%d-max%s) - %s%s', [
+      ATags.HeaderNormal, ATags.TableName, FParentItems.Game.Name, ATags.HeaderNormal, ATags.TableMaxSeats, FParentItems.Game.Seats, ATags.HeaderNormal,
+      ATags.ClubName, FParentItems.Club.Name
   ]));
 
   ALines.Add('');
@@ -343,7 +322,7 @@ begin
       ALines.Add(Format('%sTable cards [%s%s%s]', [ATags.NormalText, ATags.Cards, TCards.BytesToString(FCards, ' '), ATags.NormalText]));
 
       // calculate each player winning amount
-      SetLength(seat_winnings, FGame.Seats);
+      SetLength(seat_winnings, FParentItems.Game.Seats);
       FillChar(seat_winnings[0], Length(seat_winnings) * SizeOf(UINT32), 0);
       for pot in move.WinnerPots do
         for C1 := 0 to pot.WinnerData.Count - 1 do
@@ -352,25 +331,33 @@ begin
       // show summary
       for C1 := 0 to FPlayers.Count - 1 do
       begin
+        player := FPlayers[C1];
         player_line := Format('%sSeat %s%d%s: %s%s%s ', [
-            ATags.NormalText, ATags.SeatIndex, FPlayers[C1].Seat, ATags.NormalText, ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText
+            ATags.NormalText, ATags.SeatIndex, player.Seat, ATags.NormalText, ATags.PlayerNick, player.Nick, ATags.NormalText
         ]);
 
-        if FPlayers[C1].Mucked then
-          player_line := player_line + 'mucked'
-        else
+        hand_strength := '';
+        if Length(player.Cards) > 0 then
         begin
-          hand_strength := THandStrengthCalculator.GetHandStrength(FPlayers[C1].CardsStr, FTableCardsStr, FCurrentGame, FALSE);
-          player_line := player_line + Format('[%s%s%s]', [ATags.Cards, TCards.BytesToString(FPlayers[C1].Cards, ' '), ATags.NormalText]);
+          hand_strength := THandStrengthCalculator.GetHandStrength(player.CardsStr, FTableCardsStr, FCurrentGame, FALSE);
+          player_line := player_line + Format('[%s%s%s] ', [ATags.Cards, TCards.BytesToString(player.Cards, ' '), ATags.NormalText]);
         end;
 
-        if seat_winnings[FPlayers[C1].Seat] > 0 then
-          if FPlayers[C1].Mucked then
-            player_line := player_line + Format(' and won %s%s%s', [ATags.Chips, ChipsToStr(seat_winnings[FPlayers[C1].Seat]), ATags.NormalText])
-          else
-            player_line := player_line + Format(' won %s%s%s with %s%s', [
-                ATags.Chips, ChipsToStr(seat_winnings[FPlayers[C1].Seat]), ATags.NormalText, ATags.HandStrength, hand_strength
-            ]);
+        if player.Mucked then
+          player_line := player_line + 'mucked ';
+
+        if seat_winnings[player.Seat] > 0 then
+        begin
+          if player.Mucked then
+            player_line := player_line + 'and ';
+
+          player_line := player_line + Format('won %s%s%s', [ATags.Chips, ChipsToStr(seat_winnings[player.Seat]), ATags.NormalText]);
+
+          if hand_strength <> '' then
+            player_line := player_line + Format(' with %s%s', [ATags.HandStrength, hand_strength]);
+        end;
+
+        player_line := TrimRight(player_line);
 
         ALines.Add(player_line);
       end;
@@ -380,33 +367,102 @@ end;
 
 { THandHistoryItems }
 
-function THandHistoryItems.HandCountForTable(const ATableId: TBytes): Integer;
+constructor THandHistoryItems.Create(const AClubId, AGameId: TBytes);
+var
+  club: TClubInfo;
+  game: TGameInfo;
+begin
+  FLock := TCriticalSection.Create;
+
+  FClubId := AClubId;
+  FGameId := AGameId;
+  FClub := TClubInfo.Create;
+  FGame := TGameInfo.Create;
+
+  // try to copy Club and Game from internal lists (if found)
+  if dmMain.SelfInfo.Clubs.FindClub(AClubId, club) then
+  begin
+    FClub.Assign(club);
+    if club.Games.FindGame(AGameId, game) then
+      FGame.Assign(game);
+  end;
+
+  // check if objects are found, and if not, try to copy them from server proto
+  // fixme
+  if not Assigned(club) then
+  begin
+
+  end;
+
+  if not Assigned(game) then
+  begin
+
+  end;
+
+  inherited Create;
+end;
+
+destructor THandHistoryItems.Destroy;
+begin
+  FGame.Free;
+  FClub.Free;
+
+  FLock.Free;
+
+  inherited;
+end;
+
+procedure THandHistoryItems.AddHand(const AHandHistory: TPB_HandHistory);
 var
   hhi: THandHistoryItem;
 begin
-  result := 0;
-  for hhi in ToArray do
-    if Comparebytes(ATableId, hhi.GameId) then
-      Inc(result);
+  FLock.Enter;
+  try
+    for hhi in ToArray do
+      if hhi.HandId = AHandHistory.Seq then
+      begin
+        hhi.Assign(AHandHistory);
+        Exit;
+      end;
+
+    while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
+      Delete(0);
+
+    Add(THandHistoryItem.Create(self, AHandHistory));
+  finally
+    FLock.Leave;
+  end;
 end;
 
-procedure THandHistoryItems.DeleteFirstHandsForTable(const ATableId: TBytes; const ACount: Integer);
+function THandHistoryItems.FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
 var
-  C1: Integer;
-  deleted: Integer;
+  hhi: THandHistoryItem;
 begin
-  C1 := 0;
-  deleted := 0;
-  while (C1 < Length(ToArray)) and
-        (deleted < ACount) do
-    if CompareBytes(ToArray[C1].GameId, ATableId) then
-    begin
-      Delete(C1);
-      Inc(deleted)
-    end
-    else
-      Inc(C1);
+  FLock.Enter;
+  try
+    for hhi in ToArray do
+      if hhi.HandId = AHandId then
+      begin
+        AHandHistoryItem := hhi;
+        Exit(TRUE);
+      end;
+    Exit(FALSE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
+function THandHistoryItems.LastHandId: UINT;
+begin
+  FLock.Enter;
+  try
+    if Count = 0 then
+      Exit(0)
+    else
+      result := Last.HandId;
+  finally
+    FLock.Leave;
+  end;
+end;
 
 end.

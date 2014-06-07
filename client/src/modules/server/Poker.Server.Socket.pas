@@ -129,7 +129,7 @@ uses
   Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply, Poker.Protobufs.Objects.GiveClubOwnershipParams,
   Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit,
+  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.WindowMessages,
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
   Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply,
@@ -358,10 +358,8 @@ begin
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       ResetInactivityPingTimer;
-      {$IFDEF DEBUG}
-      DebugRpcMessage(rpc_message, data_obj);
-      {$ENDIF}
-      PostMessage(MessageContainer.ReceiverWnd, MessageContainer.ServerReplyMsg, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
+      {$IFDEF DEBUG} DebugRpcMessage(rpc_message, data_obj); {$ENDIF}
+      PostMessage(MessageContainer.ReceiverWnd, WM_SOCKET_SERVER_REPLY, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
 
     ptmp := pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
@@ -390,7 +388,7 @@ begin
     wsClosed: ;
   end;
 
-  PostMessage(MessageContainer.ReceiverWnd, MessageContainer.SocketStateChangeMsg, WPARAM(OldState), LPARAM(NewState));
+  PostMessage(MessageContainer.ReceiverWnd, WM_SOCKET_STATE_CHANGE, WPARAM(OldState), LPARAM(NewState));
 end;
 
 
@@ -562,9 +560,7 @@ begin
       if ASize > 0 then
         mstream.Write(AProtobuf, rpc_message.DataSize);
 
-      {$IFDEF DEBUG}
-      DebugRpcMessage(rpc_message, nil, mstream.Size);
-      {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(rpc_message, nil, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -593,9 +589,7 @@ begin
       if rpc_message.Datasize > 0 then
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-      {$IFDEF DEBUG}
-      DebugRpcMessage(rpc_message, AProtobuf, mstream.Size);
-      {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(rpc_message, AProtobuf, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;

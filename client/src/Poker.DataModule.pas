@@ -5,10 +5,10 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
   Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, cxLookAndFeels, dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip,
   dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo, Vcl.ImgList,
-  Vcl.Controls, cxGraphics;
+  Vcl.Controls, cxGraphics, Poker.Protobufs.Objects.LoginReply;
 
 type
   TdmMain = class(TDataModule)
@@ -26,13 +26,15 @@ type
       FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
       FUpdaterBatchFile: String;
       FUpdaterInstallerFile: String;
+      FReconnectedTables: TObjectList<TPB_TableStatus>;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
 
   public
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
-    procedure ProcessReconnectedTables(const AReconnectedTables: TObjectList<TPB_TableStatus>);
+    procedure ProcessReconnectedTables;
+    procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
 
     function CheckAuthed: Boolean;
 
@@ -65,7 +67,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.ShlObj,
-  Vcl.Graphics, Vcl.Dialogs, Winapi.Messages, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
+  Vcl.Graphics, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
   Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup,
@@ -124,12 +126,15 @@ begin
   TTables.Initialize;
 
   FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
+  FReconnectedTables := TObjectList<TPB_TableStatus>.Create;
 end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
   // deinit objects
   FreeAndNil(FUpdateFiles);
+  FreeAndNil(FReconnectedTables);
+
   TFormsContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
   TTables.Deinitialize;
@@ -157,7 +162,7 @@ begin
     ShellOpen(PChar(FUpdaterInstallerFile), nil, '/verysilent /surpressmsgboxes /closeapplications');
 
   if (FUpdaterBatchFile <> '') and (FileExists(FUpdaterBatchFile)) then
-    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_SHOWNORMAL);
+    ShellOpen(PChar(FUpdaterBatchFile), nil, nil, nil, SW_HIDE);
 end;
 
 function TdmMain.CheckAuthed: Boolean;
@@ -224,7 +229,30 @@ begin
   Players.AddPlayer(FSelfInfo.Id, FSelfInfo.Nick, FSelfInfo.EMail, FSelfInfo.Balance, FSelfInfo.AvatarId);
 end;
 
-procedure TdmMain.ProcessReconnectedTables(const AReconnectedTables: TObjectList<TPB_TableStatus>);
+procedure TdmMain.ProcessLoginReply(const ALoginReply: TPB_LoginReply);
+var
+  mstream: TMemoryStream;
+  C1: Integer;
+  pbts: TPB_TableStatus;
+begin
+  ProcessStatusProtobuf(ALoginReply.Status);
+
+  FReconnectedTables.Clear;
+  mstream := TMemoryStream.Create;
+  try
+    for C1 := 0 to ALoginReply.ReconnectTables.Count - 1 do
+    begin
+      mstream.Clear;
+      ALoginReply.ReconnectTables[C1].ProtobufOutput.SaveToStream(mstream);
+      pbts := TPB_TableStatus.Create(mstream.Memory, mstream.Size);
+      FReconnectedTables.Add(pbts);
+    end;
+  finally
+    mstream.Free;
+  end;
+end;
+
+procedure TdmMain.ProcessReconnectedTables;
 var
   club: TclubInfo;
   game: TGameInfo;
@@ -237,7 +265,7 @@ begin
   for C1 := Tables.Count - 1 downto 0 do
   begin
     exists := FALSE;
-    for tstatus in AReconnectedTables do
+    for tstatus in FReconnectedTables do
       if CompareBytes(tstatus.TableMongoId, Tables[C1].Game.MongoId) then
       begin
         exists := TRUE;
@@ -249,7 +277,7 @@ begin
   end;
 
   // restore reconnected table states
-  for tstatus in AReconnectedTables do
+  for tstatus in FReconnectedTables do
   begin
     table := nil;
     if not Tables.FindTable(tstatus.TableMongoId, table) then
