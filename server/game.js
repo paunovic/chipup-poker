@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,allGames,debugLogs,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log;
+var activeGames,allGames,debugLogs,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -100,7 +100,7 @@ function Game(obj) {
 	if (obj.state2) this.state2 = obj.state2;
 	else this.state2 = 'gsActive';
 }
-Game.init = function (db,input,activeUsersIN,debugLogsIN,sharedconfigIN,getNextSequenceIN,logIN) {
+Game.init = function (db,input,activeUsersIN,debugLogsIN,sharedconfigIN,getNextSequenceIN,logIN,ClientSocketIN) {
 	allGames = db.collection('games');
 	activeGames = input;
 	activeUsers = activeUsersIN;
@@ -114,6 +114,7 @@ Game.init = function (db,input,activeUsersIN,debugLogsIN,sharedconfigIN,getNextS
 	getNextSequence = getNextSequenceIN; // FIXME
 	handHistory = db.collection('handHistory');
 	log = logIN; // FIXME
+	ClientSocket = ClientSocketIN;
 }
 Game.prototype.doClose = function (conn,cb,gamerow) {
 	if (this.state == 'tsIdle') this.close(this,cb);
@@ -315,7 +316,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					conn.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
 					if (timediff < (30 * 60 * 1000)) {
 						if (params.chips < last.chips && false) {
-							conn.send(codes.srTableBuyinLessThanCashout,{game_id:fromMongoId(this.id),last_cashout:last.chips},'Poker.BuyinError');
+							conn.send(codes.srTableBuyinLessThanCashout,{game_id:myutils.fromMongoId(this.id),last_cashout:last.chips},'Poker.BuyinError');
 							cb(false,events);
 							return;
 						}
@@ -326,7 +327,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				if (obeymax) {
 					conn.log('checking that %d is between %d and %d',params.chips,min,max);
 					if ((params.chips > max) || (params.chips < min)) {
-						conn.send(codes.srInvalidTableBuyin,{game_id:fromMongoId(this.id),last_cashout:lastcashout},'Poker.BuyinError');
+						conn.send(codes.srInvalidTableBuyin,{game_id:myutils.fromMongoId(this.id),last_cashout:lastcashout},'Poker.BuyinError');
 						conn.log('buyin:%d min:%d max:%d',params.chips,min,max);
 						cb(false,events);
 						return;

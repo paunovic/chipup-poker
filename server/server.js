@@ -35,7 +35,6 @@ var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var buildbot = require('./buildbot');
-var MongoStore = require('./mongoStore');
 
 var Hand = deck.Hand;
 var Game = require('./game').Game;
@@ -93,7 +92,7 @@ var activeUsers = {};
 var activeGames = {};
 
 var app = express();
-var sessionStore;
+var internalHttpServer;
 var httpServer = http.createServer(app);
 var io = require('socket.io').listen(httpServer);
 io.set('authorization',function (handshakeData,callback) {
@@ -104,7 +103,7 @@ io.set('authorization',function (handshakeData,callback) {
 		var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
 	}
 	if (parsed && parsed.poker) {
-		sessionStore.get(parsed.poker,function (err,session) {
+		internalHttpServer.sessionStore.get(parsed.poker,function (err,session) {
 			if (session.authed) {
 				callback(null,true);
 			} else {
@@ -228,11 +227,6 @@ function bsdiff(oldfile,newfile,diff,cb) {
 	});
 }
 function setup3(db) {
-	app.configure(function () {
-		assert(fs.statSync('./upload'));
-		app.use(express.bodyParser({uploadDir:'./upload'}));
-	});
-	app.use('/sync/',express.basicAuth('sync',config.syncpassword));
 	bugsView.setup(app,bugs,allUsers,db);
 	app.get('/confirm',function (req,res) {
 		if (!req.query.code) {
@@ -490,27 +484,6 @@ app.get("/debug_install_chipuppoker.exe",function (req,res) {
 		Installers.findOne({_id:row.value},function (err,row) {
 			log('sending debug installer %j',row);
 			res.sendfile('installers/'+row.name);
-		});
-	});
-});
-app.get('/secure/game',function (req,res) {
-	var start = Date.now();
-	handHistory.find({gameid:new ObjectID(req.query.id)}).limit(1000).sort({_id:-1}).toArray(function (err,hands) {
-		Game.getGame(new ObjectID(req.query.id),function (err,game) {
-			game.Lock.writeLock(function (release) {
-				res.render('game',{game:game,hands:hands,start:start,util:util});
-				release();
-			});
-		});
-	});
-});
-app.get('/secure/user',function (req,res) {
-	var start = Date.now();
-	allUsers.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
-		allClubs.find({$or:[ {members:new ObjectID(req.query.id)}, {owner:new ObjectID(req.query.id)} ]}).toArray(function (err,clubs) {
-			var self = activeUsers[row._id];
-			var obj = {user:row,clubs:clubs,start:start,online:self,util:util}
-			res.render('user',obj);
 		});
 	});
 });
@@ -857,12 +830,10 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) {
 		assert.ok(collection instanceof Collection);
 		debugLogs = collection;
-		Game.init(db,activeGames,activeUsers,debugLogs,sharedconfig,getNextSequence,log);
+		Game.init(db,activeGames,activeUsers,debugLogs,sharedconfig,getNextSequence,log,ClientSocket);
 	});
 
-	sessionStore = new MongoStore(db,'sessions');
-	app.use(express.cookieParser());
-	app.use(express.session({secret:'ahQu6eey',key:'poker',store:sessionStore}));
+	internalHttpServer = require('./httpServer').initHttpServer(db,app,activeUsers);
 
 	setup3(db);
 
