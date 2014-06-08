@@ -135,6 +135,7 @@ object frmHandHistory: TfrmHandHistory
     object acReplayHand: TAction
       Caption = 'Replay this hand'
       Enabled = False
+      OnExecute = acReplayHandExecute
     end
   end
   object RVStyle: TRVStyle

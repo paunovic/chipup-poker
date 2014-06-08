@@ -3,160 +3,34 @@ unit Poker.Table.Status;
 interface
 
 uses
-  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent,
-  System.SysUtils, System.Generics.Collections, System.Generics.Defaults, Poker.Cards, Poker.Protobufs.Objects.Pot,
-  Poker.Protobufs.Objects.WinnerPotInfo, Poker.Protobufs.Objects.WinnerData, Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Objects.PotInfo, Poker.Objects.SeatInfo;
 
 type
-  TSeatInfo = class
-  private
-    FSeatIndex: Integer;
-    FPlayerMongoId: TBytes;
-    FPreviousChips: UINT32;
-    FChips: UINT32;
-    FCardCount: Integer;
-    FCards: TCards;
-    FDealtCards: Integer;
-    FStatus: TPlayerStatus;
-    FCaption: String;
-    FTimebank: UINT32;
-    FCardsVisible: Boolean;
-    FCanShow: Boolean;
-    FDisconnected: Boolean;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
-
-    procedure ResetDealtCards;
-    procedure IncDealtCards;
-    procedure FillDealtCards;
-
-    property SeatIndex: Integer read FSeatIndex;
-    property PlayerMongoId: TBytes read FPlayerMongoId;
-    property PreviousChips: UINT32 read FPreviousChips;
-    property Chips: UINT32 read FChips;
-    property CardCount: Integer read FCardCount;
-    property Cards: TCards read FCards;
-    property Status: TPlayerStatus read FStatus;
-    property Caption: String read FCaption write FCaption;
-    property Timebank: UINT32 read FTimeBank;
-    property DealtCards: Integer read FDealtCards;
-    property CardsVisible: Boolean read FCardsVisible write FCardsVisible;
-    property Disconnected: Boolean read FDisconnected;
-    property CanShow: Boolean read FCanShow;
-  end;
-
-  TSeatInfos = class(TObjectList<TSeatInfo>)
-  private
-  public
-    procedure ClearCaptions;
-
-    procedure Sort; reintroduce;
-  end;
-
-  TWinnerData = class
-  private
-    FSeat: Integer;
-    FMsg : String;
-  public
-    constructor Create(const APBWinnerData: TPB_WinnerData); overload;
-    constructor Create(const AWinnerData: TWinnerData); overload;
-
-    procedure Assign(const APBWinnerData: TPB_WinnerData); overload;
-    procedure Assign(const AWinnerData: TWinnerData); overload;
-
-    property Seat: Integer read FSeat;
-    property Msg: String read FMsg;
-  end;
-
-  TWinnerDataList = class(TObjectList<TWinnerData>)
-  public
-    procedure Assign(const AWinnerData: TObjectList<TPB_WinnerData>); overload;
-    procedure Assign(const AWinnerData: TWinnerDataList); overload;
-  end;
-
-  TPotInfo = class
-  private
-    FValue: UINT32;
-    FRake: UINT32;
-    FMembers: TArray<Integer>;
-    FWinnerData: TWinnerDataList;
-    function GetValueWithoutRake: UINT32;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    procedure Assign(const APotProtobuf: TPB_Pot; const ARakePercent: UINT32); overload;
-    procedure Assign(const APotInfo: TPotInfo; const ARakePercent: UINT32); overload;
-    procedure Assign(const AWinnerPotInfo: TPB_WinnerPotInfo); overload;
-
-    property Value: UINT32 read FValue write FValue;
-    property Rake: UINT32 read FRake write FRake;
-    property Members: TArray<Integer> read FMembers;
-    property WinnerData: TWinnerDataList read FWinnerData;
-    property ValueWithoutRake: UINT32 read GetValueWithoutRake;
-  end;
-
-  TPotInfos = class(TObjectList<TPotInfo>)
-  private
-  public
-    procedure Assign(const APots: TObjectList<TPB_Pot>; const ARakePercent: UINT32); overload;
-    procedure Assign(const APots: TPotInfos; const ARakePercent: UINT32); overload;
-    procedure Assign(const APots: TObjectList<TPB_WinnerPotInfo>); overload;
-  end;
-
-  TTableEvent = class
-  private
-    FEvent: TTableEventType;
-    FSeat: Integer;
-    FPots: TPotInfos;
-    FBets: TArray<UINT32>;
-    FCards: TBytes;
-  public
-    constructor Create(const APBTableEvent: TPB_TableEvent);
-    destructor Destroy; override;
-
-    procedure Assign(const APBTableEvent: TPB_TableEvent);
-
-    property Event: TTableEventType read FEvent;
-    property Seat: Integer read FSeat;
-    property Pots: TPotInfos read FPots;
-    property Bets: TArray<UINT32> read FBets;
-    property Cards: TBytes read FCards;
-  end;
-
-  TTableEvents = class(TObjectList<TTableEvent>)
-  public
-    procedure Assign(const AEvents: TObjectList<TPB_TableEvent>);
-  end;
-
   TTableStatus = class
   private
-    FState         : TTableState;
-    FDealer        : Integer;
-    FCurrentSeat   : Integer;
-    FSeatInfos     : TSeatInfos;
-    FBets          : TArray<UINT32>;
-    FPreviousBets  : TArray<UINT32>;
-    FFlopCards     : TCards;
-    FTurnCard      : TCard;
-    FRiverCard     : TCard;
+    FState: TTableState;
+    FDealer: Integer;
+    FCurrentSeat: Integer;
+    FSeatInfos: TSeatInfos;
+    FBets: TArray<UINT32>;
+    FPreviousBets: TArray<UINT32>;
+    FFlopCards: TCards;
+    FTurnCard: TCard;
+    FRiverCard: TCard;
     FSmallBlindSeat: Integer;
-    FBigBlindSeat  : Integer;
-    FRakePercent   : UINT32;
-    FLocked        : Boolean;
-    FMinimumBet    : UINT32;
-    FHandId        : UINT32;
-    FMaximumRaise  : UINT32;
-    FPreviousPots  : TPotInfos;
-    FPots          : TPotInfos;
-    FTime          : UINT64;
-    FRotationHand  : UINT32;
-    FCurrentGame   : TGameType;
-    FCurrentLimit  : TGameLimit;
-    FMinimumRaise  : UINT32;
+    FBigBlindSeat: Integer;
+    FRakePercent: UINT32;
+    FLocked: Boolean;
+    FMinimumBet: UINT32;
+    FHandId: UINT32;
+    FMaximumRaise: UINT32;
+    FPreviousPots: TPotInfos;
+    FPots: TPotInfos;
+    FTime: UINT64;
+    FRotationHand: UINT32;
+    FCurrentGame: TGameType;
+    FCurrentLimit: TGameLimit;
+    FMinimumRaise: UINT32;
 //    FEvents        : TTableEvents;
 
   public
@@ -197,51 +71,6 @@ implementation
 
 uses
   Poker.Common.Misc;
-
-{ TSeatInfo }
-
-constructor TSeatInfo.Create;
-begin
-  FCards := TCards.Create;
-end;
-
-destructor TSeatInfo.Destroy;
-begin
-  FCards.Free;
-
-  inherited;
-end;
-
-procedure TSeatInfo.Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
-begin
-  FSeatIndex := ASeatInfoProtobuf.Seat;
-  FPlayerMongoId := ASeatInfoProtobuf.PlayerMongoId;
-  FPreviousChips := FChips;
-  FChips := ASeatInfoProtobuf.Chips;
-  FCardCount := ASeatInfoProtobuf.CardCount;
-  FCards.Assign(ASeatInfoProtobuf.Cards);
-  FStatus := ASeatInfoProtobuf.Status;
-  FTimeBank := ASeatInfoProtobuf.Timebank;
-  FCardsVisible := ASeatInfoProtobuf.CardsVisible;
-  FDisconnected := ASeatInfoProtobuf.Disconnected;
-  FCanShow := ASeatInfoProtobuf.CanShow;
-end;
-
-procedure TSeatInfo.IncDealtCards;
-begin
-  Inc(FDealtCards);
-end;
-
-procedure TSeatInfo.ResetDealtCards;
-begin
-  FDealtCards := 0;
-end;
-
-procedure TSeatInfo.FillDealtCards;
-begin
-  FDealtCards := FCardCount;
-end;
-
 
 { TTableStatus }
 
@@ -388,213 +217,7 @@ begin
 //  FEvents.Assign(ATableStatusProtobuf.Events);
 end;
 
-{ TSeatInfos }
-
-procedure TSeatInfos.Sort;
-var
-  comparer  : IComparer<TSeatInfo>;
-  comparison: TComparison<TSeatInfo>;
-begin
-  comparison := function(const ASeatInfo1, ASeatInfo2: TSeatInfo): Integer
-  begin
-    if ASeatInfo1.SeatIndex < ASeatInfo2.SeatIndex then
-      result := -1
-    else
-      if ASeatInfo1.SeatIndex > ASeatInfo2.SeatIndex then
-        result := 1
-      else
-        result := 0;
-  end;
-
-  comparer := TComparer<TSeatInfo>.Construct(comparison);
-  inherited Sort(comparer);
-end;
-
-procedure TSeatInfos.ClearCaptions;
-var
-  C1: Integer;
-begin
-  for C1 := Low(ToArray) to High(ToArray) do
-    ToArray[C1].Caption := '';
-end;
-
-{ TPotInfo }
-
-constructor TPotInfo.Create;
-begin
-  FWinnerData := TWinnerDataList.Create;
-end;
-
-destructor TPotInfo.Destroy;
-begin
-  FWinnerData.Free;
-
-  inherited;
-end;
-
-function TPotInfo.GetValueWithoutRake: UINT32;
-begin
-  if FRake >= FValue then
-    result := 0
-  else
-    result := FValue - FRake;
-end;
-
-procedure TPotInfo.Assign(const APotProtobuf: TPB_Pot; const ARakePercent: UINT32);
-begin
-  FValue := APotProtobuf.Value;
-  FRake := Round(FValue * (ARakePercent / 100));
-  FMembers := APotProtobuf.Members;
-  FWinnerData.Clear;
-end;
 
 
-procedure TPotInfo.Assign(const APotInfo: TPotInfo; const ARakePercent: UINT32);
-begin
-  FValue := APotInfo.Value;
-  FRake := Round(FValue * (ARakePercent / 100));
-  FMembers := APotInfo.Members;
-  FWinnerData.Assign(APotInfo.WinnerData);
-end;
-
-procedure TPotInfo.Assign(const AWinnerPotInfo: TPB_WinnerPotInfo);
-begin
-  FValue := AWinnerPotInfo.Sum;
-  FRake := AWinnerPotInfo.Rake;
-  FMembers := AWinnerPotInfo.Seats;
-  FWinnerData.Assign(AWinnerPotInfo.WinnerData);
-end;
-
-{ TPotInfos }
-
-procedure TPotInfos.Assign(const APots: TObjectList<TPB_Pot>; const ARakePercent: UINT32);
-var
-  pot: TPotInfo;
-  C1 : Integer;
-begin
-  Clear;
-
-  for C1 := 0 to APots.Count - 1 do
-  begin
-    pot := TPotInfo.Create;
-    pot.Assign(APots[C1], ARakePercent);
-    Add(pot);
-  end;
-end;
-
-procedure TPotInfos.Assign(const APots: TPotInfos; const ARakePercent: UINT32);
-var
-  pot: TPotInfo;
-  C1 : Integer;
-begin
-  Clear;
-
-  for C1 := 0 to APots.Count - 1 do
-  begin
-    pot := TPotInfo.Create;
-    pot.Assign(APots[C1], ARakePercent);
-    Add(pot);
-  end;
-end;
-
-procedure TPotInfos.Assign(const APots: TObjectList<TPB_WinnerPotInfo>);
-var
-  pot: TPotInfo;
-  C1 : Integer;
-begin
-  Clear;
-
-  for C1 := 0 to APots.Count - 1 do
-  begin
-    pot := TPotInfo.Create;
-    pot.Assign(APots[C1]);
-    Add(pot);
-  end;
-end;
-
-{ TTableEvent }
-
-constructor TTableEvent.Create(const APBTableEvent: TPB_TableEvent);
-begin
-  FPots := TPotInfos.Create;
-  Assign(APBTableEvent);
-end;
-
-destructor TTableEvent.Destroy;
-begin
-  FPots.Free;
-  inherited;
-end;
-
-procedure TTableEvent.Assign(const APBTableEvent: TPB_TableEvent);
-begin
-  FEvent := APBTableEvent.Event;
-  FSeat := APBTableEvent.Seat;
-  FBets := APBTableEvent.Bets;
-  FPots.Assign(APBTableEvent.Pots);
-  FCards := APBTableEvent.Cards;
-end;
-
-
-{ TWinnerData }
-
-constructor TWinnerData.Create(const APBWinnerData: TPB_WinnerData);
-begin
-  Assign(APBWinnerData);
-end;
-
-constructor TWinnerData.Create(const AWinnerData: TWinnerData);
-begin
-  Assign(AWinnerData);
-end;
-
-
-procedure TWinnerData.Assign(const APBWinnerData: TPB_WinnerData);
-begin
-  FSeat := APBWinnerData.Seat;
-  FMsg := APBWinnerData.Msg;
-end;
-
-procedure TWinnerData.Assign(const AWinnerData: TWinnerData);
-begin
-  FSeat := AWinnerData.Seat;
-  FMsg := AWinnerData.Msg;
-end;
-
-
-
-{ TWinnerDataList }
-
-procedure TWinnerDataList.Assign(const AWinnerData: TObjectList<TPB_WinnerData>);
-var
-  C1: Integer;
-begin
-  Clear;
-  for C1 := 0 to AWinnerData.Count - 1 do
-    Add(TWinnerData.Create(AWinnerData[C1]));
-end;
-
-procedure TWinnerDataList.Assign(const AWinnerData: TWinnerDataList);
-var
-  C1: Integer;
-begin
-  Clear;
-  for C1 := 0 to AWinnerData.Count - 1 do
-    Add(TWinnerData.Create(AWinnerData[C1]));
-end;
-
-{ TTableEvents }
-
-procedure TTableEvents.Assign(const AEvents: TObjectList<TPB_TableEvent>);
-var
-  C1: Integer;
-begin
-  Clear;
-  if not Assigned(AEvents) then
-    Exit;
-
-  for C1 := 0 to AEvents.Count - 1 do
-    Add(TTableEvent.Create(AEvents[C1]));
-end;
 
 end.

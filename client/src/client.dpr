@@ -149,10 +149,15 @@ uses
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
   Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas',
   Poker.HandHistory.Core in 'modules\hand_history\Poker.HandHistory.Core.pas',
-  Poker.HandHistory.HandHistoryItem in 'modules\hand_history\Poker.HandHistory.HandHistoryItem.pas',
+  Poker.HandHistory.Items in 'modules\hand_history\Poker.HandHistory.Items.pas',
   Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
   Poker.HandHistory.Moves in 'modules\hand_history\Poker.HandHistory.Moves.pas',
-  Poker.WindowMessages in 'modules\Poker.WindowMessages.pas';
+  Poker.WindowMessages in 'modules\Poker.WindowMessages.pas',
+  Poker.Objects.SeatInfo in 'modules\objects\Poker.Objects.SeatInfo.pas',
+  Poker.Objects.PotInfo in 'modules\objects\Poker.Objects.PotInfo.pas',
+  Poker.Objects.WinnerData in 'modules\objects\Poker.Objects.WinnerData.pas',
+  Poker.Objects.TableEvent in 'modules\objects\Poker.Objects.TableEvent.pas',
+  Poker.HandHistory.Playback in 'modules\hand_history\Poker.HandHistory.Playback.pas';
 
 procedure FocusPokerApp;
 var

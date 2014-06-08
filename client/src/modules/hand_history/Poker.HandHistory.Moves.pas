@@ -3,7 +3,7 @@ unit Poker.HandHistory.Moves;
 interface
 
 uses
-  System.Generics.Collections, Poker.Protobufs.Objects.MoveRow, Poker.Protobufs.Objects.TableEvent, Poker.Table.Status;
+  System.Generics.Collections, Poker.Protobufs.Objects.MoveRow, Poker.Protobufs.Objects.TableEvent, Poker.Objects.PotInfo;
 
 type
   THandHistoryMove = class

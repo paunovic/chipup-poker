@@ -9,12 +9,13 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.Generics.Collections,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls, cxGraphics, cxControls, cxLookAndFeels, Poker.Objects.SeatInfo,
   cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMemo,  Poker.Table.Status, Poker.DirectX.Timer,
   Poker.DirectX.Animation, Vectors2, Vcl.ActnList, cxLabel, Poker.Table.Tables, cxTextEdit, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.ActnMan, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox, Poker.Protobufs.Objects.TableStatus, Poker.Avatars,
   Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, Poker.ChipStackMaker, AsphyreTypes, cxCurrencyEdit, RVStyle,
-  RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls, AsphyreFonts, ChipUpPokerDarkSkin, IdSync, Poker.HandHistory.HandHistoryItem;
+  RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls, AsphyreFonts, ChipUpPokerDarkSkin, IdSync,
+  Poker.HandHistory.Items, Poker.HandHistory.Playback;
 
 type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
@@ -208,6 +209,7 @@ type
       FForceFocused: Boolean;
 
       FTimeImage: TAsphyreImage;
+      FHandHistoryPlayback: THandHistoryPlayback;
 
     procedure SetDXObjectSizes;
     procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
@@ -286,9 +288,9 @@ type
     procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
 
   public
-    constructor Create(const ATable: TTable); reintroduce;
+    constructor Create(const ATable: TTable; const AHandHistoryItems: THandHistoryItems = nil; const AHandHistoryItem: THandHistoryItem = nil); reintroduce;
 
-    procedure Reconnected(const ATableStatus: TPB_TableStatus);
+    procedure SetTableStatus(const ATableStatus: TPB_TableStatus);
     procedure Render;
 
     property TableStatus: TTableStatus read FTableStatus;
@@ -306,19 +308,21 @@ uses
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
   Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game, Poker.Objects.GameInfo,
   Poker.Protobufs.Objects.WinnerPotInfo, RVTable, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, AbstractCanvas,
-  Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core;
+  Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core, Poker.Objects.PotInfo;
 
 
-constructor TfrmTable.Create(const ATable: TTable);
+constructor TfrmTable.Create(const ATable: TTable; const AHandHistoryItems: THandHistoryItems = nil; const AHandHistoryItem: THandHistoryItem = nil);
 begin
   if not Assigned(TableResources) then
     TTableResources.Initialize(DXCore.Canvas);
 
-  inherited Create(nil);
-
-  ActionManager.State := asSuspended;
+  if ((Assigned(AHandHistoryItems)) and
+      (Assigned(AHandHistoryItem))) then
+    FHandHistoryPlayback := THandHistoryPlayback.Create(AHandHistoryItems, AHandHistoryItem);
 
   FTable := ATable;
+
+  inherited Create(nil);
 
   OnResize := nil;
   ClientWidth := Round(Screen.Monitors[0].Width / 2.5);
@@ -326,10 +330,14 @@ begin
   OnResize := FormResize;
 end;
 
+
+
 procedure TfrmTable.FormCreate(Sender: TObject);
 var
   C1: Integer;
 begin
+  ActionManager.State := asSuspended;
+
   if FTable.TableType = ttLiveGame then
   begin
     FCallbacksId := MessageContainer.AddCallbacks([
@@ -412,6 +420,9 @@ begin
 
   FChipStackMaker.Free;
   FTableStatus.Free;
+
+  if Assigned(FHandHistoryPlayback) then
+    FHandHistoryPlayback.Free;
 end;
 
 procedure TfrmTable.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -688,7 +699,7 @@ end;
 
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FTable.NotifyClose(FTable.TableType = ttLiveGame);
+  FTable.NotifyClose;
   FTable := nil;
 end;
 
@@ -2107,7 +2118,7 @@ begin
   SetRaiseSliderValue(raise_value);
 end;
 
-procedure TfrmTable.Reconnected(const ATableStatus: TPB_TableStatus);
+procedure TfrmTable.SetTableStatus(const ATableStatus: TPB_TableStatus);
 begin
   CSRETableStatus(0, ATableStatus);
 end;
@@ -2119,11 +2130,11 @@ end;
 
 procedure TfrmTable.SetDXObjectSizes;
 const
-  TABLE_X_LEFT         = 64;
-  TABLE_X_RIGHT        = 64;
-  TABLE_Y_TOP          = 66;
-  TABLE_Y_BOTTOM       = 133;
-  TABLE_Y_OFFSET       = -20;
+  TABLE_X_LEFT = 64;
+  TABLE_X_RIGHT = 64;
+  TABLE_Y_TOP = 66;
+  TABLE_Y_BOTTOM = 133;
+  TABLE_Y_OFFSET = -20;
   TABLE_HEIGHT_OF_FORM = 0.715;
 var
   C1: Integer;

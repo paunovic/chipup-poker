@@ -322,7 +322,6 @@ begin
   end;
 end;
 
-
 function TTableResources.GetCardArtwork(const ACard: TCard): TAsphyreImage;
 var
   valueint, suitint: Integer;

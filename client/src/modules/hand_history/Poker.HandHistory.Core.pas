@@ -3,7 +3,7 @@ unit Poker.HandHistory.Core;
 interface
 
 uses
-  System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.HandHistoryItem,
+  System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Items,
   System.Generics.Collections, System.SyncObjs;
 
 type
