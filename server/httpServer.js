@@ -75,26 +75,6 @@ function Server(db,activeUsersIN) {
 
 	this.addSecure(app);
 
-	app.get('/secure/reports',function (req,res) {
-		if (req.query.close) {
-			db.collection('contacts').update({_id:new ObjectID(req.query.close)},{$set:{closed:true}},function (err) {
-				console.log(err);
-			});
-		}
-		db.collection('contacts').find({closed:false}).toArray(function (err,reports) {
-			var userids = [];
-			for (var x=0; x<reports.length; x++) {
-				userids.push(reports[x].userid);
-			}
-			this.users.find({_id:{$in:userids}}).toArray(function (err,users) {
-				var usermap = {};
-				for (var x=0; x<users.length; x++) {
-					usermap[users[x]._id] = users[x];
-				}
-				res.render('reports',{reports:reports,users:usermap});
-			});
-		}.bind(this));
-	}.bind(this));
 	app.get('/secure/performance',function (req,res) {
 		var start = Date.now();
 		db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {

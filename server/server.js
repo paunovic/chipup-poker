@@ -2073,15 +2073,11 @@ handlers[codes.scContactUs] = function (args,token) {
 		return;
 	}
 	this.log('raw args:%s parsed:%j',args,params);
-	var doc = {userid:this.userid, message:params.message, reason:params.reason, closed:false};
-	conn.collection('contacts').insert(doc,function (err,row) {
-		this.log('obj:%j',row);
-		var types = {cmQuestions:'Questions',cmSuggestions:'Suggestions',cmOther:'Other',cmBugReport:'Bugs'};
-		var queue = types[params.reason];
-		RT.postTicket(queue,this.email,params.message);
-		this.send(codes.srContactUsOk);
-		token.stop();
-	}.bind(this));
+	var types = {cmQuestions:'Questions',cmSuggestions:'Suggestions',cmOther:'Other',cmBugReport:'Bugs'};
+	var queue = types[params.reason];
+	RT.postTicket(queue,this.email,params.message);
+	this.send(codes.srContactUsOk);
+	token.stop();
 }
 handlers[codes.scTablePlayNow] = function (args,token) {
 	try {
