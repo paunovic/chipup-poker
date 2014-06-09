@@ -15,6 +15,9 @@ function unpackInstaller(io,row,installers,objectSizes,cb1) {
 		req.on('data',function (chunk) {
 			console.log(chunk);
 		});
+		req.on('error',function (err) {
+			console.log('http error sending new version:',err);
+		});
 		req.write(body);
 		req.end();
 		cb();

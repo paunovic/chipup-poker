@@ -33,6 +33,9 @@ function makeDiff(sourcehash,desthash,path,diffs) {
 		req.on('data',function (chunk) {
 			console.log('chunk');
 		});
+		req.on('error',function (err) {
+			console.log('http error asking for diff:',err);
+		});
 		req.write(body);
 		req.end();
 		return;
