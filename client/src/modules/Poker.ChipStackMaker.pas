@@ -10,9 +10,9 @@ type
 
   TChipsStack = class
   private
-    FValue    : UINT32;
+    FValue: UINT32;
     FChipCount: Integer;
-    FImages   : TChipImages;
+    FImages: TChipImages;
 
     procedure MakeImages;
 

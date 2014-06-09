@@ -37,7 +37,6 @@ uses
 
 { TAlphaBlendThread }
 
-
 class procedure TAlphaBlendThread.CreateAlphaBlendThread(var AAlphaBlendThread: TAlphaBlendThread; const AFrom, ATo: Integer; const ADelay, ATimeInterval: Single; const AOnNotify: TNotifyEvent);
 begin
   TAlphaBlendThread.FreeAlpaBlendThread(AAlphaBlendThread);

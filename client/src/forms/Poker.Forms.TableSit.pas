@@ -70,7 +70,7 @@ implementation
 uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
-  Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.Game, Poker.Objects.SeatInfo;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);

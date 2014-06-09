@@ -1,9 +1,9 @@
-unit Poker.HandHistory.HandHistoryItem;
+unit Poker.HandHistory.Items;
 
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, Poker.Protobufs.Objects.HandHistory, System.Generics.Collections, System.Classes, System.SyncObjs,
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, System.SyncObjs, Poker.Protobufs.Objects.HandHistory,
   Poker.HandHistory.Players, Poker.HandHistory.Moves, Poker.Objects.GameInfo, Poker.Objects.ClubInfo, Poker.Protobufs.Objects.Game;
 
 type
@@ -91,11 +91,19 @@ type
 
     procedure Assign(const AHandHistory: TPB_HandHistory);
 
+    property ParentItems: THandHistoryItems read FParentItems;
     property MongoId: TBytes read FMongoId;
     property HandId: UINT32 read FHandId;
-    property CurrentGame: TGameType read FCurrentGame;
+    property Rake: UINT32 read FRake;
+    property Players: TPlayerHandHistories read FPlayers;
+    property Cards: TBytes read FCards;
+    property TableCardsStr: String read FTableCardsStr;
+    property StartTime: TDateTime read FStartTime;
     property StartTimeStr: String read FStartTimeStr;
-    property ParentItems: THandHistoryItems read FParentItems;
+    property EndTime: TDateTime read FEndTime;
+    property BalanceChanges: TArray<Integer> read FBalanceChanges;
+    property Moves: THandHistoryMoves read FMoves;
+    property CurrentGame: TGameType read FCurrentGame;
 
     property Lines: TStringList read FLines;
     property RVLines: TStringList read FRVLines;
@@ -124,7 +132,8 @@ implementation
 
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
-  Poker.Cards, Poker.Common.Misc, Poker.Table.Status, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings;
+  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Objects.SeatInfo,
+  Poker.Objects.PotInfo;
 
 { THandHistoryItem }
 

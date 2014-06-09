@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>client.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
@@ -322,10 +322,15 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
-			<DCCReference Include="modules\hand_history\Poker.HandHistory.HandHistoryItem.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Items.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Players.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Moves.pas"/>
 			<DCCReference Include="modules\Poker.WindowMessages.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.SeatInfo.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.PotInfo.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.WinnerData.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.TableEvent.pas"/>
+			<DCCReference Include="modules\hand_history\Poker.HandHistory.Playback.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

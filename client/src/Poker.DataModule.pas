@@ -71,7 +71,7 @@ uses
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
   Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup,
-  Poker.HandHistory.Core;
+  Poker.HandHistory.Core, Poker.Objects.SeatInfo;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -291,7 +291,7 @@ begin
     if not Assigned(table) then
       Continue;
 
-    (table.Form as TfrmTable).Reconnected(tstatus);
+    (table.Form as TfrmTable).SetTableStatus(tstatus);
   end;
 end;
 

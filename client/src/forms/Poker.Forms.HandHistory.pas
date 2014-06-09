@@ -33,6 +33,7 @@ type
     procedure cbHandPropertiesChange(Sender: TObject);
     procedure acCopyToClipboardExecute(Sender: TObject);
     procedure tiCopyHideTimerTimer(Sender: TObject);
+    procedure acReplayHandExecute(Sender: TObject);
   private
     FSelectedTableId: TBytes;
     FSelectedHandId: UINT;
@@ -59,8 +60,9 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.HandHistoryItem, Poker.Objects.ClubInfo, Poker.Objects.GameInfo,
-  Poker.DataModule, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes;
+  Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.Items, Poker.Objects.ClubInfo, Poker.Objects.GameInfo,
+  Poker.DataModule, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes,
+  Poker.Table.Tables;
 
 { TfrmHandHistory }
 
@@ -387,6 +389,11 @@ begin
   acCopyToClipboard.Enabled := FALSE;
   btCopyToClipboard.Caption := 'COPIED';
   tiCopyHideTimer.Enabled := TRUE;
+end;
+
+procedure TfrmHandHistory.acReplayHandExecute(Sender: TObject);
+begin
+  Tables.AddHandPlaybackTable(FSelectedTableId, FSelectedHandId);
 end;
 
 procedure TfrmHandHistory.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
