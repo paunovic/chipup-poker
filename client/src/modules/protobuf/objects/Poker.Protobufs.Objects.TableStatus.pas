@@ -289,7 +289,9 @@ procedure TPB_TableStatus.SetBets(const AValue: TArray<UINT32>);
 var
   C1: Integer;
 begin
-  FBets := AValue;
+  SetLength(FBets,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FBets[C1] := AValue[C1];
   for C1 := 0 to Length(FBets) - 1 do
     ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
 end;

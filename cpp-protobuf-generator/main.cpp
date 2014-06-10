@@ -244,7 +244,9 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 					"var\n"
 					"  C1: Integer;\n"
 					"begin\n"
-					"  $pname$ := AValue;\n"
+					"  SetLength($pname$,Length(AValue));\n"
+					"  for C1 := 0 to Length(AValue) - 1 do\n"
+					"    $pname$[C1] := AValue[C1];\n"
 					"  for C1 := 0 to Length($pname$) - 1 do\n"
 					"    ProtobufOutput.$writter$($enum$, $input$);\n"
 					"end;\n\n");
