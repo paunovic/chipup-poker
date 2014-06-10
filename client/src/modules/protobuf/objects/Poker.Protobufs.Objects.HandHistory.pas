@@ -23,6 +23,7 @@ type
       FN_DEALER = 9;
       FN_GAME = 10;
       FN_CURRENT_GAME = 11;
+      FN_RAKE = 12;
 
     var
       FId: TBytes;
@@ -36,6 +37,7 @@ type
       FDealer: UINT32;
       FGame: TPB_Game;
       FCurrentGame: TGameType;
+      FRake: Integer;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetSeq(const AValue: UINT32);
@@ -46,6 +48,7 @@ type
     procedure SetDealer(const AValue: UINT32);
     procedure SetGame(const AValue: TPB_Game);
     procedure SetCurrentGame(const AValue: TGameType);
+    procedure SetRake(const AValue: Integer);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
     procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
 
@@ -67,6 +70,7 @@ type
     property Dealer: UINT32 read FDealer write SetDealer;
     property Game: TPB_Game read FGame write SetGame;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
+    property Rake: Integer read FRake write SetRake;
   end;
 
 implementation
@@ -154,6 +158,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentGame := TGameType(AProtobufReader.readEnum);
       end;
+      FN_RAKE: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FRake := AProtobufReader.readInt32;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -161,8 +169,12 @@ begin
 end;
 
 procedure TPB_HandHistory.SetMongoId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FId := AValue;
+  SetLength(FId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN__ID, AValue);
 end;
 
@@ -187,8 +199,12 @@ begin
 end;
 
 procedure TPB_HandHistory.SetCards(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FCards := AValue;
+  SetLength(FCards,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FCards[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_CARDS, AValue);
 end;
 
@@ -202,7 +218,9 @@ procedure TPB_HandHistory.SetBalanceChanges(const AValue: TArray<Integer>);
 var
   C1: Integer;
 begin
-  FBalanceChanges := AValue;
+  SetLength(FBalanceChanges,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FBalanceChanges[C1] := AValue[C1];
   for C1 := 0 to Length(FBalanceChanges) - 1 do
     ProtobufOutput.writeInt32(FN_BALANCE_CHANGES, AValue[C1]);
 end;
@@ -231,6 +249,12 @@ procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
 begin
   FCurrentGame := AValue;
   ProtobufOutput.writeInt32(FN_CURRENT_GAME, Integer(AValue));
+end;
+
+procedure TPB_HandHistory.SetRake(const AValue: Integer);
+begin
+  FRake := AValue;
+  ProtobufOutput.writeInt32(FN_RAKE, AValue);
 end;
 
 end.

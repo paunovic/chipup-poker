@@ -614,4 +614,5 @@ message HandHistory {
 	required uint32 dealer = 9;
 	optional Game game = 10;
 	optional Game.GameType current_game = 11;
+	required int32 rake = 12;
 }
