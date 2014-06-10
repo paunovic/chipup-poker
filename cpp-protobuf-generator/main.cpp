@@ -250,6 +250,17 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 					"  for C1 := 0 to Length($pname$) - 1 do\n"
 					"    ProtobufOutput.$writter$($enum$, $input$);\n"
 					"end;\n\n");
+			} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
+				printer->Print(vars,
+					"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
+					"var\n"
+					"  C1: Integer;\n"
+					"begin\n"
+					"  SetLength($pname$,Length(AValue));\n"
+					"  for C1 := 0 to Length(AValue) - 1 do\n"
+					"    $pname$[C1] := AValue[C1];\n"
+					"  ProtobufOutput.$writter$($enum$, $input$);\n"
+					"end;\n\n");
 			} else {
 				printer->Print(vars,
 					"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
