@@ -19,6 +19,7 @@ var myutils = require('./myutils');
 var buildbot = require('./buildbot');
 var installer = require('./installer');
 var differ = require('./differ');
+var RT = require('./rt');
 
 module.exports.initHttpServer = initHttpServer;
 
@@ -144,13 +145,7 @@ function Server(db,activeUsersIN) {
 		var result = dag.rankHands(fakegame,fakeusers);
 		res.send(JSON.stringify(result));
 	});
-	app.post('/contactPost',function (req,res) {
-		console.log(req.body);
-		RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function () {
-			res.writeHead(302,{Location:'http://testing.chipuppoker.com/contact.html?success=true'}); // FIXME
-			res.end();
-		});
-	});
+	app.post('/contactPost',this.contactPost);
 	app.post('/newVersion',this.newVersion.bind(this));
 	app.get('/secure/broadcast',function (req,res) {
 		res.render('broadcast',{start:Date.now()});
@@ -393,6 +388,7 @@ Server.prototype.installers_func = function (req,res) {
 						console.log('installer deleted');
 					});
 				}
+				// FIXME, delete the raw objects if they are unused
 				this.installers.remove({_id:new ObjectID(id)},function () {});
 				cb();
 			}.bind(this));
@@ -889,5 +885,12 @@ Server.prototype.paypalCallback = function (req,res) {
 Server.prototype.paypalLog = function (req,res) {
 	this.IPN_hits.find().toArray(function (err,rows) {
 		res.render('paypal_secure',{rows:rows});
+	});
+}
+Server.prototype.contactPost = function (req,res) {
+	console.log(req.body);
+	RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function () {
+		res.writeHead(302,{Location:'http://testing.chipuppoker.com/contact.html?success=true'}); // FIXME
+		res.end();
 	});
 }
