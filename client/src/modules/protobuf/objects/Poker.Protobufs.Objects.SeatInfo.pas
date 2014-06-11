@@ -71,6 +71,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_SeatInfo);
 
     // LABEL TYPE Seat = 1;
     function has_Seat: Boolean;
@@ -147,6 +148,7 @@ begin
       kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
+        set_has_Seat;
       end;
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -159,6 +161,7 @@ begin
       kCardCountFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCardCount := AProtobufReader.readInt32;
+        set_has_CardCount;
       end;
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -188,6 +191,30 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_SeatInfo.MergeFrom(const from: TPB_SeatInfo);
+begin
+  if (from.has_Seat) then
+    SetSeat(from.Seat);
+  if (from.has_PlayerMongoId) then
+    SetPlayerMongoId(from.PlayerMongoId);
+  if (from.has_Chips) then
+    SetChips(from.Chips);
+  if (from.has_CardCount) then
+    SetCardCount(from.CardCount);
+  if (from.has_Cards) then
+    SetCards(from.Cards);
+  if (from.has_Status) then
+    SetStatus(from.Status);
+  if (from.has_Timebank) then
+    SetTimebank(from.Timebank);
+  if (from.has_CardsVisible) then
+    SetCardsVisible(from.CardsVisible);
+  if (from.has_Disconnected) then
+    SetDisconnected(from.Disconnected);
+  if (from.has_CanShow) then
+    SetCanShow(from.CanShow);
 end;
 
 procedure TPB_SeatInfo.clear_Seat;

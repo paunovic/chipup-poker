@@ -25,6 +25,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_PingParams);
 
     // LABEL TYPE Uptime = 1;
     function has_Uptime: Boolean;
@@ -61,6 +62,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_PingParams.MergeFrom(const from: TPB_PingParams);
+begin
+  if (from.has_Uptime) then
+    SetUptime(from.Uptime);
 end;
 
 procedure TPB_PingParams.clear_Uptime;

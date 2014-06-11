@@ -34,6 +34,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ClubStatsReply);
 
     // LABEL TYPE Clubid = 1;
     function has_Clubid: Boolean;
@@ -94,6 +95,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ClubStatsReply.MergeFrom(const from: TPB_ClubStatsReply);
+begin
+  if (from.has_Clubid) then
+    SetClubid(from.Clubid);
 end;
 
 procedure TPB_ClubStatsReply.clear_Clubid;

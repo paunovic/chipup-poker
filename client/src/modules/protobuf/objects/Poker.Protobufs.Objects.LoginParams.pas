@@ -30,6 +30,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_LoginParams);
 
     // LABEL TYPE Username = 1;
     function has_Username: Boolean;
@@ -75,6 +76,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_LoginParams.MergeFrom(const from: TPB_LoginParams);
+begin
+  if (from.has_Username) then
+    SetUsername(from.Username);
+  if (from.has_Password) then
+    SetPassword(from.Password);
 end;
 
 procedure TPB_LoginParams.clear_Username;

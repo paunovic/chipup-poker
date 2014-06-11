@@ -40,6 +40,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ClubCommandReply);
 
     // LABEL TYPE Status = 1;
     function has_Status: Boolean;
@@ -112,6 +113,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ClubCommandReply.MergeFrom(const from: TPB_ClubCommandReply);
+begin
+  if (from.has_Status) then
+    SetStatus(from.Status);
+  if (from.has_Club) then
+    Club.MergeFrom(from.Club);
 end;
 
 procedure TPB_ClubCommandReply.clear_Status;

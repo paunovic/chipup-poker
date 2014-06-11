@@ -31,6 +31,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ContactMessage);
 
     // LABEL TYPE Reason = 1;
     function has_Reason: Boolean;
@@ -76,6 +77,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ContactMessage.MergeFrom(const from: TPB_ContactMessage);
+begin
+  if (from.has_Reason) then
+    SetReason(from.Reason);
+  if (from.has_Message) then
+    SetMessage(from.Message);
 end;
 
 procedure TPB_ContactMessage.clear_Reason;

@@ -30,6 +30,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_Pot);
 
     // LABEL TYPE Value = 1;
     function has_Value: Boolean;
@@ -76,6 +77,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_Pot.MergeFrom(const from: TPB_Pot);
+begin
+  if (from.has_Value) then
+    SetValue(from.Value);
 end;
 
 procedure TPB_Pot.clear_Value;

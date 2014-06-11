@@ -30,6 +30,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_TableBoolFlag);
 
     // LABEL TYPE TableMongoId = 1;
     function has_TableMongoId: Boolean;
@@ -75,6 +76,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_TableBoolFlag.MergeFrom(const from: TPB_TableBoolFlag);
+begin
+  if (from.has_TableMongoId) then
+    SetTableMongoId(from.TableMongoId);
+  if (from.has_Flag) then
+    SetFlag(from.Flag);
 end;
 
 procedure TPB_TableBoolFlag.clear_TableMongoId;

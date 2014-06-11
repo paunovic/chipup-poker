@@ -50,6 +50,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ValidCharsRegex);
 
     // LABEL TYPE Email = 1;
     function has_Email: Boolean;
@@ -131,6 +132,22 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ValidCharsRegex.MergeFrom(const from: TPB_ValidCharsRegex);
+begin
+  if (from.has_Email) then
+    SetEmail(from.Email);
+  if (from.has_Username) then
+    SetUsername(from.Username);
+  if (from.has_Password) then
+    SetPassword(from.Password);
+  if (from.has_Clubname) then
+    SetClubname(from.Clubname);
+  if (from.has_Clubpassword) then
+    SetClubpassword(from.Clubpassword);
+  if (from.has_Gamename) then
+    SetGamename(from.Gamename);
 end;
 
 procedure TPB_ValidCharsRegex.clear_Email;

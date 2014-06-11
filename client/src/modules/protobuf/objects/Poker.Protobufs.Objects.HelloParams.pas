@@ -34,6 +34,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_HelloParams);
 
     // LABEL TYPE Debug = 1;
     function has_Debug: Boolean;
@@ -94,6 +95,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_HelloParams.MergeFrom(const from: TPB_HelloParams);
+begin
+  if (from.has_Debug) then
+    SetDebug(from.Debug);
 end;
 
 procedure TPB_HelloParams.clear_Debug;

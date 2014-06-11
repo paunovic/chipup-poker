@@ -40,6 +40,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_PlayerLimitParams);
 
     // LABEL TYPE Clubid = 1;
     function has_Clubid: Boolean;
@@ -103,6 +104,18 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_PlayerLimitParams.MergeFrom(const from: TPB_PlayerLimitParams);
+begin
+  if (from.has_Clubid) then
+    SetClubid(from.Clubid);
+  if (from.has_Userid) then
+    SetUserid(from.Userid);
+  if (from.has_Limit) then
+    SetLimit(from.Limit);
+  if (from.has_Unlimited) then
+    SetUnlimited(from.Unlimited);
 end;
 
 procedure TPB_PlayerLimitParams.clear_Clubid;

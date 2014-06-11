@@ -44,6 +44,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_WinnerPotInfo);
 
     // LABEL TYPE Sum = 1;
     function has_Sum: Boolean;
@@ -123,6 +124,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_WinnerPotInfo.MergeFrom(const from: TPB_WinnerPotInfo);
+begin
+  if (from.has_Sum) then
+    SetSum(from.Sum);
+  if (from.has_Rake) then
+    SetRake(from.Rake);
 end;
 
 procedure TPB_WinnerPotInfo.clear_Sum;

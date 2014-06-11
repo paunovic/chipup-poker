@@ -40,6 +40,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ChatMessage);
 
     // LABEL TYPE MongoId = 1;
     function has_MongoId: Boolean;
@@ -103,6 +104,18 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ChatMessage.MergeFrom(const from: TPB_ChatMessage);
+begin
+  if (from.has_MongoId) then
+    SetMongoId(from.MongoId);
+  if (from.has_Username) then
+    SetUsername(from.Username);
+  if (from.has_Msg) then
+    SetMsg(from.Msg);
+  if (from.has_Timestamp) then
+    SetTimestamp(from.Timestamp);
 end;
 
 procedure TPB_ChatMessage.clear_MongoId;

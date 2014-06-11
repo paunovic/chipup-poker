@@ -30,6 +30,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_KickPlayerParams);
 
     // LABEL TYPE ClubSeq = 1;
     function has_ClubSeq: Boolean;
@@ -66,6 +67,7 @@ begin
       kClubSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubSeq := AProtobufReader.readInt32;
+        set_has_ClubSeq;
       end;
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -75,6 +77,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_KickPlayerParams.MergeFrom(const from: TPB_KickPlayerParams);
+begin
+  if (from.has_ClubSeq) then
+    SetClubSeq(from.ClubSeq);
+  if (from.has_PlayerMongoId) then
+    SetPlayerMongoId(from.PlayerMongoId);
 end;
 
 procedure TPB_KickPlayerParams.clear_ClubSeq;

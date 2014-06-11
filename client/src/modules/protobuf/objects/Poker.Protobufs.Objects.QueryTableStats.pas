@@ -25,6 +25,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_QueryTableStats);
 
     // LABEL TYPE Gameid = 1;
     function has_Gameid: Boolean;
@@ -62,6 +63,10 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_QueryTableStats.MergeFrom(const from: TPB_QueryTableStats);
+begin
 end;
 
 procedure TPB_QueryTableStats.clear_Gameid;

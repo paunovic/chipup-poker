@@ -30,6 +30,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_BuyinError);
 
     // LABEL TYPE GameId = 1;
     function has_GameId: Boolean;
@@ -75,6 +76,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_BuyinError.MergeFrom(const from: TPB_BuyinError);
+begin
+  if (from.has_GameId) then
+    SetGameId(from.GameId);
+  if (from.has_LastCashout) then
+    SetLastCashout(from.LastCashout);
 end;
 
 procedure TPB_BuyinError.clear_GameId;

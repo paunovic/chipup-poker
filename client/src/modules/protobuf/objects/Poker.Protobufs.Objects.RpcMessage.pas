@@ -35,6 +35,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_RpcMessage);
 
     // LABEL TYPE MethodId = 1;
     function has_MethodId: Boolean;
@@ -76,19 +77,32 @@ begin
       kMethodIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMethodId := AProtobufReader.readInt32;
+        set_has_MethodId;
       end;
       kDataSizeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDataSize := AProtobufReader.readInt32;
+        set_has_DataSize;
       end;
       kTokenFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FToken := AProtobufReader.readInt32;
+        set_has_Token;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_RpcMessage.MergeFrom(const from: TPB_RpcMessage);
+begin
+  if (from.has_MethodId) then
+    SetMethodId(from.MethodId);
+  if (from.has_DataSize) then
+    SetDataSize(from.DataSize);
+  if (from.has_Token) then
+    SetToken(from.Token);
 end;
 
 procedure TPB_RpcMessage.clear_MethodId;

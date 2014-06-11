@@ -84,6 +84,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_HandHistory);
 
     // LABEL TYPE MongoId = 1;
     function has_MongoId: Boolean;
@@ -240,11 +241,34 @@ begin
       kRakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRake := AProtobufReader.readInt32;
+        set_has_Rake;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_HandHistory.MergeFrom(const from: TPB_HandHistory);
+begin
+  if (from.has_MongoId) then
+    SetMongoId(from.MongoId);
+  if (from.has_Seq) then
+    SetSeq(from.Seq);
+  if (from.has_Totalrake) then
+    SetTotalrake(from.Totalrake);
+  if (from.has_Cards) then
+    SetCards(from.Cards);
+  if (from.has_Endtime) then
+    SetEndtime(from.Endtime);
+  if (from.has_Dealer) then
+    SetDealer(from.Dealer);
+  if (from.has_Game) then
+    Game.MergeFrom(from.Game);
+  if (from.has_CurrentGame) then
+    SetCurrentGame(from.CurrentGame);
+  if (from.has_Rake) then
+    SetRake(from.Rake);
 end;
 
 procedure TPB_HandHistory.clear_MongoId;

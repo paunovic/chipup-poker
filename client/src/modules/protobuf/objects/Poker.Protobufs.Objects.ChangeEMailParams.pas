@@ -25,6 +25,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ChangeEMailParams);
 
     // LABEL TYPE NewMail = 1;
     function has_NewMail: Boolean;
@@ -61,6 +62,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ChangeEMailParams.MergeFrom(const from: TPB_ChangeEMailParams);
+begin
+  if (from.has_NewMail) then
+    SetNewMail(from.NewMail);
 end;
 
 procedure TPB_ChangeEMailParams.clear_NewMail;

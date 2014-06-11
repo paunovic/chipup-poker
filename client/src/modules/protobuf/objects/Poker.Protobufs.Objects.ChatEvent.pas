@@ -36,6 +36,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ChatEvent);
 
     // LABEL TYPE Event = 1;
     function has_Event: Boolean;
@@ -94,6 +95,16 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ChatEvent.MergeFrom(const from: TPB_ChatEvent);
+begin
+  if (from.has_Event) then
+    SetEvent(from.Event);
+  if (from.has_Msg) then
+    Msg.MergeFrom(from.Msg);
+  if (from.has_TableId) then
+    SetTableId(from.TableId);
 end;
 
 procedure TPB_ChatEvent.clear_Event;

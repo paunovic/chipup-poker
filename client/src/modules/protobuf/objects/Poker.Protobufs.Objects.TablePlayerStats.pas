@@ -60,6 +60,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_TablePlayerStats);
 
     // LABEL TYPE Userid = 1;
     function has_Userid: Boolean;
@@ -130,6 +131,7 @@ begin
       kBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBalance := AProtobufReader.readInt32;
+        set_has_Balance;
       end;
       kBuyinsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -161,6 +163,22 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_TablePlayerStats.MergeFrom(const from: TPB_TablePlayerStats);
+begin
+  if (from.has_Userid) then
+    SetUserid(from.Userid);
+  if (from.has_Balance) then
+    SetBalance(from.Balance);
+  if (from.has_Rakecontrib) then
+    SetRakecontrib(from.Rakecontrib);
+  if (from.has_Secondsplayed) then
+    SetSecondsplayed(from.Secondsplayed);
+  if (from.has_Chipsinplay) then
+    SetChipsinplay(from.Chipsinplay);
+  if (from.has_Hands) then
+    SetHands(from.Hands);
 end;
 
 procedure TPB_TablePlayerStats.clear_Userid;

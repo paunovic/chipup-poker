@@ -26,6 +26,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_SetAvatarReply);
 
     // LABEL TYPE Status = 1;
     function has_Status: Boolean;
@@ -62,6 +63,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_SetAvatarReply.MergeFrom(const from: TPB_SetAvatarReply);
+begin
+  if (from.has_Status) then
+    SetStatus(from.Status);
 end;
 
 procedure TPB_SetAvatarReply.clear_Status;

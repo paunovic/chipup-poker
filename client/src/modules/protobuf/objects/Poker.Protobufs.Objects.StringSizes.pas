@@ -55,6 +55,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_StringSizes);
 
     // LABEL TYPE Email = 1;
     function has_Email: Boolean;
@@ -116,35 +117,60 @@ begin
       kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEmail := AProtobufReader.readInt32;
+        set_has_Email;
       end;
       kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FPassword := AProtobufReader.readInt32;
+        set_has_Password;
       end;
       kClubnameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubname := AProtobufReader.readInt32;
+        set_has_Clubname;
       end;
       kInvcodeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FInvcode := AProtobufReader.readInt32;
+        set_has_Invcode;
       end;
       kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUsername := AProtobufReader.readInt32;
+        set_has_Username;
       end;
       kGamenameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGamename := AProtobufReader.readInt32;
+        set_has_Gamename;
       end;
       kContactMessageFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FContactMessage := AProtobufReader.readInt32;
+        set_has_ContactMessage;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_StringSizes.MergeFrom(const from: TPB_StringSizes);
+begin
+  if (from.has_Email) then
+    SetEmail(from.Email);
+  if (from.has_Password) then
+    SetPassword(from.Password);
+  if (from.has_Clubname) then
+    SetClubname(from.Clubname);
+  if (from.has_Invcode) then
+    SetInvcode(from.Invcode);
+  if (from.has_Username) then
+    SetUsername(from.Username);
+  if (from.has_Gamename) then
+    SetGamename(from.Gamename);
+  if (from.has_ContactMessage) then
+    SetContactMessage(from.ContactMessage);
 end;
 
 procedure TPB_StringSizes.clear_Email;

@@ -35,6 +35,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ChangeSuspendState);
 
     // LABEL TYPE ClubMongoId = 1;
     function has_ClubMongoId: Boolean;
@@ -89,6 +90,16 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ChangeSuspendState.MergeFrom(const from: TPB_ChangeSuspendState);
+begin
+  if (from.has_ClubMongoId) then
+    SetClubMongoId(from.ClubMongoId);
+  if (from.has_PlayerMongoId) then
+    SetPlayerMongoId(from.PlayerMongoId);
+  if (from.has_Suspended) then
+    SetSuspended(from.Suspended);
 end;
 
 procedure TPB_ChangeSuspendState.clear_ClubMongoId;

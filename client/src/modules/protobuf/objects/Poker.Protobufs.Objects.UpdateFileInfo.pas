@@ -46,6 +46,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_UpdateFileInfo);
 
     // LABEL TYPE Path = 1;
     function has_Path: Boolean;
@@ -118,6 +119,20 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_UpdateFileInfo.MergeFrom(const from: TPB_UpdateFileInfo);
+begin
+  if (from.has_Path) then
+    SetPath(from.Path);
+  if (from.has_Hash) then
+    SetHash(from.Hash);
+  if (from.has_Url) then
+    SetUrl(from.Url);
+  if (from.has_FileType) then
+    SetFileType(from.FileType);
+  if (from.has_FileSize) then
+    SetFileSize(from.FileSize);
 end;
 
 procedure TPB_UpdateFileInfo.clear_Path;

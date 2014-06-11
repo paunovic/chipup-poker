@@ -568,7 +568,9 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			printer.Print(
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
-				"\n");
+				"    procedure MergeFrom(const from: TPB_$name$);\n"
+				"\n",
+				"name",message->name());
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				map<string,string> vars;
@@ -759,8 +761,10 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							"      $name$: begin\n"
 							"        Assert(wire_type = WIRETYPE_VARINT);\n"
 							"        $pname$ := AProtobufReader.readInt32;\n"
+							"        set_has_$propname$;\n"
 							"      end;\n","name",EnumName(field)
-							,"pname",PrivateFieldName(field));
+							,"pname",PrivateFieldName(field)
+							,"propname",PropertyName(field));
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					const Descriptor *subtype = field->message_type(); 
@@ -865,6 +869,29 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				"  end;\n"
 				"end;\n"
 				"\n");
+			printer.Print(
+				"procedure TPB_$name$.MergeFrom(const from: TPB_$name$);\n"
+				"begin\n"
+				,"name",message->name()
+			);
+			for (int j=0; j<message->field_count(); j++) {
+				const FieldDescriptor *field = message->field(j);
+				if ((field->label() == FieldDescriptor::LABEL_REQUIRED) ||
+					(field->label() == FieldDescriptor::LABEL_OPTIONAL)) {
+					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+						printer.Print(
+							"  if (from.has_$name$) then\n"
+							"    $name$.MergeFrom(from.$name$);\n"
+							,"name",PropertyName(field));
+					} else {
+						printer.Print(
+							"  if (from.has_$name$) then\n"
+							"    Set$name$(from.$name$);\n"
+							,"name",PropertyName(field));
+					}
+				}
+			}
+			printer.Print("end;\n\n");
 			/*FIXME for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				string name = field->name();

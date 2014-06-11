@@ -34,6 +34,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_GetUserParams);
 
     // LABEL TYPE UserMongoIds = 1;
     function has_UserMongoIds: Boolean;
@@ -95,6 +96,10 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_GetUserParams.MergeFrom(const from: TPB_GetUserParams);
+begin
 end;
 
 procedure TPB_GetUserParams.clear_UserMongoIds;

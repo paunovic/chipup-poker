@@ -30,6 +30,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ClubPlayerStats);
 
     // LABEL TYPE Userid = 1;
     function has_Userid: Boolean;
@@ -70,11 +71,20 @@ begin
       kClubBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubBalance := AProtobufReader.readInt32;
+        set_has_ClubBalance;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ClubPlayerStats.MergeFrom(const from: TPB_ClubPlayerStats);
+begin
+  if (from.has_Userid) then
+    SetUserid(from.Userid);
+  if (from.has_ClubBalance) then
+    SetClubBalance(from.ClubBalance);
 end;
 
 procedure TPB_ClubPlayerStats.clear_Userid;

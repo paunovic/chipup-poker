@@ -31,6 +31,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_CloseGameData);
 
     // LABEL TYPE Gameid = 1;
     function has_Gameid: Boolean;
@@ -76,6 +77,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_CloseGameData.MergeFrom(const from: TPB_CloseGameData);
+begin
+  if (from.has_Gameid) then
+    SetGameid(from.Gameid);
+  if (from.has_Timestamp) then
+    SetTimestamp(from.Timestamp);
 end;
 
 procedure TPB_CloseGameData.clear_Gameid;

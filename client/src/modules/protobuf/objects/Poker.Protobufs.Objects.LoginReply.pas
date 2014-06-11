@@ -40,6 +40,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_LoginReply);
 
     // LABEL TYPE LoginStatus = 1;
     function has_LoginStatus: Boolean;
@@ -112,6 +113,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_LoginReply.MergeFrom(const from: TPB_LoginReply);
+begin
+  if (from.has_LoginStatus) then
+    SetLoginStatus(from.LoginStatus);
+  if (from.has_Status) then
+    Status.MergeFrom(from.Status);
 end;
 
 procedure TPB_LoginReply.clear_LoginStatus;

@@ -94,6 +94,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_Game);
 
     // LABEL TYPE MongoId = 1;
     function has_MongoId: Boolean;
@@ -202,6 +203,7 @@ begin
       kClubseqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubseq := AProtobufReader.readInt32;
+        set_has_Clubseq;
       end;
       kGameTypeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -218,18 +220,22 @@ begin
       kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeats := AProtobufReader.readInt32;
+        set_has_Seats;
       end;
       kSittingFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSitting := AProtobufReader.readInt32;
+        set_has_Sitting;
       end;
       kBuyinMinFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBuyinMin := AProtobufReader.readInt32;
+        set_has_BuyinMin;
       end;
       kBuyinMaxFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBuyinMax := AProtobufReader.readInt32;
+        set_has_BuyinMax;
       end;
       kStateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -247,6 +253,38 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_Game.MergeFrom(const from: TPB_Game);
+begin
+  if (from.has_MongoId) then
+    SetMongoId(from.MongoId);
+  if (from.has_CreatorMongoId) then
+    SetCreatorMongoId(from.CreatorMongoId);
+  if (from.has_Gamename) then
+    SetGamename(from.Gamename);
+  if (from.has_Clubseq) then
+    SetClubseq(from.Clubseq);
+  if (from.has_GameType) then
+    SetGameType(from.GameType);
+  if (from.has_GameLimit) then
+    SetGameLimit(from.GameLimit);
+  if (from.has_Blinds) then
+    SetBlinds(from.Blinds);
+  if (from.has_Seats) then
+    SetSeats(from.Seats);
+  if (from.has_Sitting) then
+    SetSitting(from.Sitting);
+  if (from.has_BuyinMin) then
+    SetBuyinMin(from.BuyinMin);
+  if (from.has_BuyinMax) then
+    SetBuyinMax(from.BuyinMax);
+  if (from.has_State) then
+    SetState(from.State);
+  if (from.has_Closetime) then
+    SetClosetime(from.Closetime);
+  if (from.has_Lasthandid) then
+    SetLasthandid(from.Lasthandid);
 end;
 
 procedure TPB_Game.clear_MongoId;

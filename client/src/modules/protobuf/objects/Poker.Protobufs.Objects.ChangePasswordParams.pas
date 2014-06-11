@@ -25,6 +25,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ChangePasswordParams);
 
     // LABEL TYPE NewPassword = 1;
     function has_NewPassword: Boolean;
@@ -61,6 +62,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ChangePasswordParams.MergeFrom(const from: TPB_ChangePasswordParams);
+begin
+  if (from.has_NewPassword) then
+    SetNewPassword(from.NewPassword);
 end;
 
 procedure TPB_ChangePasswordParams.clear_NewPassword;

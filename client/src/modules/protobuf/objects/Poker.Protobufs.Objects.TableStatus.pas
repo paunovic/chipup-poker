@@ -135,6 +135,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_TableStatus);
 
     // LABEL TYPE TableMongoId = 1;
     function has_TableMongoId: Boolean;
@@ -312,10 +313,12 @@ begin
       kDealerFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDealer := AProtobufReader.readInt32;
+        set_has_Dealer;
       end;
       kCurrentSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentSeat := AProtobufReader.readInt32;
+        set_has_CurrentSeat;
       end;
       kBetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -329,6 +332,7 @@ begin
       kSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readInt32;
+        set_has_Seq;
       end;
       kMinimumBetFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -390,6 +394,46 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_TableStatus.MergeFrom(const from: TPB_TableStatus);
+begin
+  if (from.has_TableMongoId) then
+    SetTableMongoId(from.TableMongoId);
+  if (from.has_State) then
+    SetState(from.State);
+  if (from.has_Dealer) then
+    SetDealer(from.Dealer);
+  if (from.has_CurrentSeat) then
+    SetCurrentSeat(from.CurrentSeat);
+  if (from.has_Locked) then
+    SetLocked(from.Locked);
+  if (from.has_Seq) then
+    SetSeq(from.Seq);
+  if (from.has_MinimumBet) then
+    SetMinimumBet(from.MinimumBet);
+  if (from.has_MaximumRaise) then
+    SetMaximumRaise(from.MaximumRaise);
+  if (from.has_SmallBlind) then
+    SetSmallBlind(from.SmallBlind);
+  if (from.has_BigBlind) then
+    SetBigBlind(from.BigBlind);
+  if (from.has_Handid) then
+    SetHandid(from.Handid);
+  if (from.has_Time) then
+    SetTime(from.Time);
+  if (from.has_RakePercent) then
+    SetRakePercent(from.RakePercent);
+  if (from.has_CurrentGame) then
+    SetCurrentGame(from.CurrentGame);
+  if (from.has_Rotation) then
+    SetRotation(from.Rotation);
+  if (from.has_TotalBalance) then
+    SetTotalBalance(from.TotalBalance);
+  if (from.has_GameLimit) then
+    SetGameLimit(from.GameLimit);
+  if (from.has_MinimumRaise) then
+    SetMinimumRaise(from.MinimumRaise);
 end;
 
 procedure TPB_TableStatus.clear_TableMongoId;

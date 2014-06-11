@@ -39,6 +39,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_TableStatsReplies);
 
     // LABEL TYPE Reply = 1;
     function has_Reply: Boolean;
@@ -122,6 +123,10 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_TableStatsReplies.MergeFrom(const from: TPB_TableStatsReplies);
+begin
 end;
 
 procedure TPB_TableStatsReplies.clear_Reply;

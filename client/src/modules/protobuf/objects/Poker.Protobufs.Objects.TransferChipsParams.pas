@@ -30,6 +30,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_TransferChipsParams);
 
     // LABEL TYPE PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
@@ -75,6 +76,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_TransferChipsParams.MergeFrom(const from: TPB_TransferChipsParams);
+begin
+  if (from.has_PlayerMongoId) then
+    SetPlayerMongoId(from.PlayerMongoId);
+  if (from.has_ChipAmount) then
+    SetChipAmount(from.ChipAmount);
 end;
 
 procedure TPB_TransferChipsParams.clear_PlayerMongoId;

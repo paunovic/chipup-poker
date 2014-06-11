@@ -79,6 +79,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_Club);
 
     // LABEL TYPE MongoId = 1;
     function has_MongoId: Boolean;
@@ -199,6 +200,7 @@ begin
       kSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readInt32;
+        set_has_Seq;
       end;
       kHasPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -220,6 +222,30 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_Club.MergeFrom(const from: TPB_Club);
+begin
+  if (from.has_MongoId) then
+    SetMongoId(from.MongoId);
+  if (from.has_Name) then
+    SetName(from.Name);
+  if (from.has_Owner) then
+    SetOwner(from.Owner);
+  if (from.has_Password) then
+    SetPassword(from.Password);
+  if (from.has_IsPrivate) then
+    SetIsPrivate(from.IsPrivate);
+  if (from.has_Seq) then
+    SetSeq(from.Seq);
+  if (from.has_HasPassword) then
+    SetHasPassword(from.HasPassword);
+  if (from.has_Rake) then
+    SetRake(from.Rake);
+  if (from.has_DefaultBalanceLimit) then
+    SetDefaultBalanceLimit(from.DefaultBalanceLimit);
+  if (from.has_UnlimitedDefaultBalance) then
+    SetUnlimitedDefaultBalance(from.UnlimitedDefaultBalance);
 end;
 
 procedure TPB_Club.clear_MongoId;

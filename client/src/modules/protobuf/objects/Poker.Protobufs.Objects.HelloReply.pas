@@ -64,6 +64,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_HelloReply);
 
     // LABEL TYPE StringSizes = 1;
     function has_StringSizes: Boolean;
@@ -157,18 +158,22 @@ begin
       kChangeExpireTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChangeExpireTime := AProtobufReader.readInt32;
+        set_has_ChangeExpireTime;
       end;
       kForgotExpireTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FForgotExpireTime := AProtobufReader.readInt32;
+        set_has_ForgotExpireTime;
       end;
       kMaxPlayTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaxPlayTime := AProtobufReader.readInt32;
+        set_has_MaxPlayTime;
       end;
       kMaxTimebankFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaxTimebank := AProtobufReader.readInt32;
+        set_has_MaxTimebank;
       end;
       kMinSizesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -190,6 +195,24 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_HelloReply.MergeFrom(const from: TPB_HelloReply);
+begin
+  if (from.has_StringSizes) then
+    StringSizes.MergeFrom(from.StringSizes);
+  if (from.has_ChangeExpireTime) then
+    SetChangeExpireTime(from.ChangeExpireTime);
+  if (from.has_ForgotExpireTime) then
+    SetForgotExpireTime(from.ForgotExpireTime);
+  if (from.has_MaxPlayTime) then
+    SetMaxPlayTime(from.MaxPlayTime);
+  if (from.has_MaxTimebank) then
+    SetMaxTimebank(from.MaxTimebank);
+  if (from.has_MinSizes) then
+    MinSizes.MergeFrom(from.MinSizes);
+  if (from.has_ValidCharsRegex) then
+    ValidCharsRegex.MergeFrom(from.ValidCharsRegex);
 end;
 
 procedure TPB_HelloReply.clear_StringSizes;

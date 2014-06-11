@@ -25,6 +25,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_SetAvatarParams);
 
     // LABEL TYPE AvatarId = 1;
     function has_AvatarId: Boolean;
@@ -61,6 +62,12 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_SetAvatarParams.MergeFrom(const from: TPB_SetAvatarParams);
+begin
+  if (from.has_AvatarId) then
+    SetAvatarId(from.AvatarId);
 end;
 
 procedure TPB_SetAvatarParams.clear_AvatarId;

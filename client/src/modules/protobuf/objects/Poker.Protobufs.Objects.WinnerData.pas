@@ -31,6 +31,7 @@ type
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_WinnerData);
 
     // LABEL TYPE Seat = 3;
     function has_Seat: Boolean;
@@ -67,6 +68,7 @@ begin
       kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
+        set_has_Seat;
       end;
       kMsgFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -76,6 +78,14 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_WinnerData.MergeFrom(const from: TPB_WinnerData);
+begin
+  if (from.has_Seat) then
+    SetSeat(from.Seat);
+  if (from.has_Msg) then
+    SetMsg(from.Msg);
 end;
 
 procedure TPB_WinnerData.clear_Seat;
