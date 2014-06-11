@@ -29,9 +29,12 @@ public:
 		switch (type) {
 		case FieldDescriptor::TYPE_MESSAGE:
 			// FIXME
+			defaultdefault = "nil";
+			writter = "writeMessage";
 			break;
 		case FieldDescriptor::TYPE_ENUM:
 			// FIXME
+			writter = "writeInt32";
 			break;
 		}
 	}
@@ -74,6 +77,14 @@ public:
 		} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
 			TypeInfo copy = *this;
 			copy.setEnum(field);
+			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+				copy.delphiName = "TArray<"+copy.delphiName+">";
+			}
+			return copy;
+		}
+		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+			TypeInfo copy = *this;
+			copy.delphiName = "TArray<"+copy.delphiName+">";
 			return copy;
 		}
 		return *this; // FIXME, enum, message
@@ -92,6 +103,7 @@ private:
 	void setEnum(const FieldDescriptor *field) {
 		const EnumDescriptor *subtype = field->enum_type();
 		delphiName = "T" + subtype->name();
+		defaultdefault = delphiName+"(0)";
 	}
 	string delphiName;
 	string writter;
@@ -291,7 +303,8 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 		if (!typeinfo[field->type()]) cerr << "cant get new type for " << field->name() << field->type() << endl;
 		assert(typeinfo[field->type()]);
 		TypeInfo thisType = typeinfo[field->type()]->getInstance(field);
-		if (field->type() == FieldDescriptor::TYPE_BYTES) {
+		if ((field->type() == FieldDescriptor::TYPE_BYTES) ||
+			((field->type() == FieldDescriptor::TYPE_ENUM) &&(field->label() == FieldDescriptor::LABEL_REPEATED)) ) {
 			printer->Print(vars,
 			"procedure TPB_$message$.clear_$name$;\n"
 			"begin\n"
@@ -308,7 +321,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			"end;\n\n"
 			);
 		} else if (typeinfo[field->type()]) {
-			vars["default"] = typeinfo[field->type()]->getDefault();
+			vars["default"] = thisType.getDefault();
 			printer->Print(vars,
 			"procedure TPB_$message$.clear_$name$;\n"
 			"begin\n"
@@ -353,11 +366,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 		}
 		vars["type"] = type;
 		writter = "";
-		if (typeinfo[field->type()]) writter = typeinfo[field->type()]->getWritter();
-		else if (field->type() == FieldDescriptor::TYPE_ENUM) writter = "writeInt32";
-		else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-			writter = "writeMessage";
-		}
+		writter = thisType.getWritter();
 		
 		if (field->type() == FieldDescriptor::TYPE_ENUM) {
 			vars["input"] = "Integer(AValue)";
