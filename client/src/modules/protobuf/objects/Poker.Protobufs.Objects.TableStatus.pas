@@ -85,6 +85,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -122,11 +123,16 @@ uses
 
 procedure TPB_TableStatus.InitObjects;
 begin
+  inherited;
   FSeats := TObjectList<TPB_SeatInfo>.Create;
-  FSeats.OnNotify := SeatsNotifyEvent;
   FEvents := TObjectList<TPB_TableEvent>.Create;
-  FEvents.OnNotify := EventsNotifyEvent;
   FPots := TObjectList<TPB_Pot>.Create;
+end;
+procedure TPB_TableStatus.HookNotifiers;
+begin
+  inherited;
+  FSeats.OnNotify := SeatsNotifyEvent;
+  FEvents.OnNotify := EventsNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
@@ -254,8 +260,12 @@ begin
 end;
 
 procedure TPB_TableStatus.SetTableMongoId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FTableMongoId := AValue;
+  SetLength(FTableMongoId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FTableMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
 end;
 

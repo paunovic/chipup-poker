@@ -415,7 +415,8 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				printer.Print(
 					"\n"
 					"  protected\n"
-					"    procedure InitObjects; override;\n");
+					"    procedure InitObjects; override;\n"
+					"    procedure HookNotifiers; override;\n");
 			}
 			printer.Print("\n"
 //				"    procedure Read(const AStream: TStream);\n"
@@ -473,6 +474,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				printer.Print(
 					"procedure TPB_$name$.InitObjects;\n"
 					"begin\n"
+					"  inherited;\n"
 					,"name",message->name());
 				for (int j=0; j<message->field_count(); j++) {
 					const FieldDescriptor *field = message->field(j);
@@ -481,13 +483,12 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							const Descriptor *subtype = field->message_type(); 
 							printer.Print(
 								"  $pname$ := TObjectList<TPB_$subname$>.Create;\n"
-								"  $pname$.OnNotify := $name$NotifyEvent;\n"
 								,"name",PropertyName(field)
 								,"pname",PrivateFieldName(field)
 								,"subname",subtype->name());
 						}
 					}
-/*				if (field->type() == FieldDescriptor::TYPE_BYTES) {
+				/*if (field->type() == FieldDescriptor::TYPE_BYTES) {
 						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_INT32) {
@@ -503,6 +504,25 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 						printer.Print("  F$name$ := A$name$;\n","name",PrivateFieldName(field));
 					}
 				}*/
+				}
+				printer.Print("end;\n");
+				printer.Print(
+					"procedure TPB_$name$.HookNotifiers;\n"
+					"begin\n"
+					"  inherited;\n"
+					,"name",message->name());
+				for (int j=0; j<message->field_count(); j++) {
+					const FieldDescriptor *field = message->field(j);
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+							const Descriptor *subtype = field->message_type(); 
+							printer.Print(
+								"  $pname$.OnNotify := $name$NotifyEvent;\n"
+								,"name",PropertyName(field)
+								,"pname",PrivateFieldName(field)
+								,"subname",subtype->name());
+						}
+					}
 				}
 				printer.Print("end;\n");
 			}
