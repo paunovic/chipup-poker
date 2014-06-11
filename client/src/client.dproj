@@ -141,7 +141,6 @@
 			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
 			<DCCReference Include="3rdparty\devexpress\dxGDIPlusAPI.pas"/>
 			<DCCReference Include="3rdparty\icsv8\OverbyteIcsHttpProt.pas"/>
-			<DCCReference Include="3rdparty\AsphyreSphinx\DX9Canvas.pas"/>
 			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
 			<DCCReference Include="Poker.DataModule.pas">
 				<Form>dmMain</Form>
@@ -331,6 +330,7 @@
 			<DCCReference Include="modules\objects\Poker.Objects.WinnerData.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.TableEvent.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Playback.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.DX9Canvas.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

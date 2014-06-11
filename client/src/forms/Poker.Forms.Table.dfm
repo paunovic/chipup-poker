@@ -304,6 +304,7 @@ object frmTable: TfrmTable
     Left = 272
     Top = 449
     AutoSize = False
+    ParentColor = False
     Properties.BarStyle = cxbsGradient
     Properties.BeginColor = clGreen
     Properties.EndColor = clLime
@@ -311,6 +312,7 @@ object frmTable: TfrmTable
     Properties.ShowText = False
     Style.BorderColor = 17920
     Style.BorderStyle = ebsSingle
+    Style.Color = clBlack
     Style.LookAndFeel.NativeStyle = True
     Style.TransparentBorder = True
     StyleDisabled.LookAndFeel.NativeStyle = True
@@ -319,7 +321,6 @@ object frmTable: TfrmTable
     StyleHot.BorderStyle = ebsSingle
     StyleHot.LookAndFeel.NativeStyle = True
     TabOrder = 11
-    Transparent = True
     Visible = False
     Height = 9
     Width = 257

@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, AsphyreD3D9;
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, AsphyreD3D9, Poker.Helpers.DX9Canvas;
 
 
 class procedure TDXCore.Initialize;
@@ -68,7 +68,11 @@ begin
   for C1 := 0 to 32 do
     FDevice.SwapChains.Add(FDummyWindow, Point2px(1, 1));
 
-  if not FDevice.Connect then
+  if FDevice.Connect then
+  begin
+    (FCanvas as TDX9Canvas).ImproveQuality;
+  end
+  else
   begin
     {$IFDEF DEBUG} DebugLn('Failed to connect to DX device!', ditException); {$ENDIF}
   end;

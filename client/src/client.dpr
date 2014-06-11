@@ -23,7 +23,6 @@ uses
   FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
   dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
   OverbyteIcsHttpProt in '3rdparty\icsv8\OverbyteIcsHttpProt.pas',
-  DX9Canvas in '3rdparty\AsphyreSphinx\DX9Canvas.pas',
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
   Poker.Forms.Main in 'forms\Poker.Forms.Main.pas' {frmChipUpMain},
@@ -157,7 +156,8 @@ uses
   Poker.Objects.PotInfo in 'modules\objects\Poker.Objects.PotInfo.pas',
   Poker.Objects.WinnerData in 'modules\objects\Poker.Objects.WinnerData.pas',
   Poker.Objects.TableEvent in 'modules\objects\Poker.Objects.TableEvent.pas',
-  Poker.HandHistory.Playback in 'modules\hand_history\Poker.HandHistory.Playback.pas';
+  Poker.HandHistory.Playback in 'modules\hand_history\Poker.HandHistory.Playback.pas',
+  Poker.Helpers.DX9Canvas in 'helpers\Poker.Helpers.DX9Canvas.pas';
 
 procedure FocusPokerApp;
 var
