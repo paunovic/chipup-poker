@@ -331,6 +331,9 @@
 			<DCCReference Include="modules\objects\Poker.Objects.TableEvent.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Playback.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.DX9Canvas.pas"/>
+			<DCCReference Include="forms\Poker.Forms.LayeredForm.pas">
+				<Form>frmLayered</Form>
+			</DCCReference>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -353,6 +356,10 @@
 				<ContainerId>ResourceItem</ContainerId>
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>OfficialServerCertificate</ResourceId>
+			</RcItem>
+			<RcItem Include="resources\about_form\About.png">
+				<ResourceType>RCDATA</ResourceType>
+				<ResourceId>AboutBackground</ResourceId>
 			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>

@@ -4217,7 +4217,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acFoldChecks: TAction
       Category = 'Options'
-      Caption = 'Check on fold, whenever possible'
+      Caption = 'Check instead fold, whenever possible'
       OnExecute = acFoldChecksExecute
     end
     object acHandHistory: TAction

@@ -5,26 +5,27 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxControls, cxContainer, cxEdit, dxGDIPlusClasses, cxImage, cxLabel;
+  Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxControls, cxContainer, cxEdit, dxGDIPlusClasses, cxImage, cxLabel, Vcl.ExtCtrls,
+  Poker.Forms.LayeredForm;
 
 type
   TfrmAbout = class(TForm)
-    btOK: TcxButton;
-    ActionList: TActionList;
-    acOK: TAction;
-    imgHeader: TcxImage;
     lbsClientVersion: TcxLabel;
     lbvClientVersion: TcxLabel;
     lbsCopyright: TcxLabel;
-    imgChip: TcxImage;
     lbsURL: TcxLabel;
-    procedure acOKExecute(Sender: TObject);
     procedure lbsURLClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormDeactivate(Sender: TObject);
+    procedure FormHide(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
+    FLayeredForm: TfrmLayered;
+  protected
+    procedure WMMove(var AMessage: TMessage); message WM_MOVE;
   public
   end;
 
@@ -33,24 +34,39 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Settings, Poker.Common.FormsContainer;
-
+  Poker.DataModule, Poker.Settings, Poker.Common.FormsContainer, PNGImage, Poker.Forms.Debug, Poker.Common.Misc;
 
 procedure TfrmAbout.FormCreate(Sender: TObject);
 begin
   lbvClientVersion.Caption := Settings.Hardcoded.VERSION;
+  FLayeredForm := TfrmLayered.Create(self, 'AboutBackground');
 end;
 
 procedure TfrmAbout.FormDestroy(Sender: TObject);
 begin
+  FLayeredForm.Free;
   FormsContainer.Remove(self);
+end;
+
+
+procedure TfrmAbout.FormHide(Sender: TObject);
+begin
+  FLayeredForm.Hide;
+end;
+
+procedure TfrmAbout.FormDeactivate(Sender: TObject);
+begin
+  if Screen.ActiveForm <> FLayeredForm then
+  begin
+    ModalResult := mrOk;
+    Close;
+  end;
 end;
 
 procedure TfrmAbout.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
 end;
-
 
 procedure TfrmAbout.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
@@ -61,15 +77,28 @@ begin
   end;
 end;
 
-procedure TfrmAbout.acOKExecute(Sender: TObject);
+procedure TfrmAbout.FormShow(Sender: TObject);
 begin
-  ModalResult := mrOk;
-  Close;
+  RoundControl(self, 15);
+
+  if Assigned(FLayeredForm) then
+  begin
+    FLayeredForm.UpdatePosition;
+    FLayeredForm.Show;
+  end;
 end;
 
 procedure TfrmAbout.lbsURLClick(Sender: TObject);
 begin
   dmMain.OpenSiteLink;
+end;
+
+procedure TfrmAbout.WMMove(var AMessage: TMessage);
+begin
+  if Assigned(FLayeredForm) then
+    FLayeredForm.UpdatePosition;
+
+  inherited;
 end;
 
 end.

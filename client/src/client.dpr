@@ -157,7 +157,8 @@ uses
   Poker.Objects.WinnerData in 'modules\objects\Poker.Objects.WinnerData.pas',
   Poker.Objects.TableEvent in 'modules\objects\Poker.Objects.TableEvent.pas',
   Poker.HandHistory.Playback in 'modules\hand_history\Poker.HandHistory.Playback.pas',
-  Poker.Helpers.DX9Canvas in 'helpers\Poker.Helpers.DX9Canvas.pas';
+  Poker.Helpers.DX9Canvas in 'helpers\Poker.Helpers.DX9Canvas.pas',
+  Poker.Forms.LayeredForm in 'forms\Poker.Forms.LayeredForm.pas' {frmLayered};
 
 procedure FocusPokerApp;
 var
@@ -187,6 +188,7 @@ begin
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TdmMain, dmMain);
   Application.CreateForm(TfrmChipUpMain, frmChipUpMain);
+  Application.CreateForm(TfrmLayered, frmLayered);
   Application.Run;
 
   TInstanceController.UnregisterInstance;

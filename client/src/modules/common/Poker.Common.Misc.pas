@@ -3,7 +3,8 @@ unit Poker.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections, cxImage, Vcl.Imaging.JPEG;
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections, cxImage, Vcl.Imaging.JPEG,
+  Vcl.Controls;
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = nil; const AParams: PChar = nil; const ADirectory: PChar = nil;
@@ -39,6 +40,7 @@ function BytesToHex(const ABytes: TBytes): String;
 function EnumerateProperties(const AObject: TObject): String;
 {$ENDIF}
 function IsDirectoryWriteable(const APath: String): Boolean;
+procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
 
 implementation
 
@@ -760,6 +762,13 @@ begin
     CloseHandle(fhandle);
     DeleteFile(fname);
   end;
+end;
+
+procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
+begin
+  SetWindowRgn(AControl.Handle,
+               CreateRoundRectRgn(0, 0, AControl.ClientWidth, AControl.ClientHeight, AAmount, AAmount),
+               TRUE);
 end;
 
 

@@ -11,7 +11,6 @@ type
     procedure ImproveQuality;
   end;
 
-
 implementation
 
 { TDX9CanvasHelper }

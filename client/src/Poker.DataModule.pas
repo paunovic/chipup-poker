@@ -17,6 +17,7 @@ type
     HintController: TcxHintStyleController;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
+    procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
   private
     const
       FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
@@ -71,7 +72,7 @@ uses
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
   Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup,
-  Poker.HandHistory.Core, Poker.Objects.SeatInfo;
+  Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -204,6 +205,14 @@ end;
 procedure TdmMain.SetUpdaterInstaller(const AFile: String);
 begin
   FUpdaterInstallerFile := AFile;
+end;
+
+procedure TdmMain.SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
+begin
+  if AForm is TfrmAbout then
+    UseSkin := FALSE
+  else
+    UseSkin := TRUE;
 end;
 
 procedure TdmMain.StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);

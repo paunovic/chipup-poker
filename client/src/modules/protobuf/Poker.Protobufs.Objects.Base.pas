@@ -24,7 +24,6 @@ type
 
     destructor Destroy; override;
 
-
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); virtual; abstract;
 
     property ProtobufOutput: TProtoBufOutput read FProtobufOutput;

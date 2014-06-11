@@ -2,8 +2,8 @@ object dmMain: TdmMain
   OldCreateOrder = False
   OnCreate = DataModuleCreate
   OnDestroy = DataModuleDestroy
-  Height = 354
-  Width = 453
+  Height = 324
+  Width = 438
   object il20px: TcxImageList
     Height = 20
     Width = 20
@@ -233,6 +233,7 @@ object dmMain: TdmMain
   end
   object SkinController: TdxSkinController
     SkinName = 'ChipUpPokerDarkStyle'
+    OnSkinForm = SkinControllerSkinForm
     Left = 32
     Top = 12
   end
