@@ -65,8 +65,12 @@ begin
 end;
 
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FUserid := AValue;
+  SetLength(FUserid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FUserid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_USERID, AValue);
 end;
 

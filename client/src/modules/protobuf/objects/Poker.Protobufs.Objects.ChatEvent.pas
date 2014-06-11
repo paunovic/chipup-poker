@@ -90,8 +90,12 @@ begin
 end;
 
 procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FTableId := AValue;
+  SetLength(FTableId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FTableId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_TABLE_ID, AValue);
 end;
 

@@ -57,8 +57,12 @@ begin
 end;
 
 procedure TPB_SetAvatarParams.SetAvatarId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FAvatarId := AValue;
+  SetLength(FAvatarId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FAvatarId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_AVATAR_ID, AValue);
 end;
 

@@ -636,6 +636,7 @@ var
   bytes: TBytes;
   bytes_arr: TArray<TBytes>;
   uints: TArray<UINT32>;
+  ints: TArray<Integer>;
   C1: Integer;
 begin
   if not Assigned(AObject) then
@@ -710,7 +711,17 @@ begin
               if valstr <> '' then
                 Delete(valstr, Length(valstr) - 1, 2);
               valstr := Format('(%s)', [valstr]);
-            end;
+            end
+            else
+              if value.TryAsType<TArray<Integer>>(ints) then
+              begin
+                valstr := '';
+                for C1 := Low(uints) to High(uints) do
+                  valstr := valstr + IntToStr(ints[C1]) + ', ';
+                if valstr <> '' then
+                  Delete(valstr, Length(valstr) - 1, 2);
+                valstr := Format('(%s)', [valstr]);
+              end;
       end;
 
       tkUnknown: ;

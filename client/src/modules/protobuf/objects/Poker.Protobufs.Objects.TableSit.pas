@@ -73,8 +73,12 @@ begin
 end;
 
 procedure TPB_TableSit.SetGameId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FGameId := AValue;
+  SetLength(FGameId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FGameId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_GAME_ID, AValue);
 end;
 

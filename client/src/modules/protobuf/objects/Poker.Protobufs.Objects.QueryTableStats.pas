@@ -61,7 +61,9 @@ procedure TPB_QueryTableStats.SetGameid(const AValue: TArray<TBytes>);
 var
   C1: Integer;
 begin
-  FGameid := AValue;
+  SetLength(FGameid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FGameid[C1] := AValue[C1];
   for C1 := 0 to Length(FGameid) - 1 do
     ProtobufOutput.writeBytes(FN_GAMEID, AValue[C1]);
 end;

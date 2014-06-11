@@ -96,8 +96,12 @@ begin
 end;
 
 procedure TPB_UpdateFileInfo.SetHash(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FHash := AValue;
+  SetLength(FHash,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FHash[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_HASH, AValue);
 end;
 

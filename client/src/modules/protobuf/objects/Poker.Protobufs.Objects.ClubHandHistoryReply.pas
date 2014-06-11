@@ -27,6 +27,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -45,7 +46,12 @@ uses
 
 procedure TPB_ClubHandHistoryReply.InitObjects;
 begin
+  inherited;
   FRows := TObjectList<TPB_HandHistory>.Create;
+end;
+procedure TPB_ClubHandHistoryReply.HookNotifiers;
+begin
+  inherited;
   FRows.OnNotify := RowsNotifyEvent;
 end;
 
@@ -86,14 +92,22 @@ begin
 end;
 
 procedure TPB_ClubHandHistoryReply.SetClubid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FClubid := AValue;
+  SetLength(FClubid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FClubid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_CLUBID, AValue);
 end;
 
 procedure TPB_ClubHandHistoryReply.SetGameid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FGameid := AValue;
+  SetLength(FGameid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FGameid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_GAMEID, AValue);
 end;
 

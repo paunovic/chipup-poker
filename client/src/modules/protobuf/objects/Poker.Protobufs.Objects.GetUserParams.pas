@@ -24,6 +24,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -41,7 +42,12 @@ uses
 
 procedure TPB_GetUserParams.InitObjects;
 begin
+  inherited;
   FUsers := TObjectList<TPB_User>.Create;
+end;
+procedure TPB_GetUserParams.HookNotifiers;
+begin
+  inherited;
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 
@@ -82,7 +88,9 @@ procedure TPB_GetUserParams.SetUserMongoIds(const AValue: TArray<TBytes>);
 var
   C1: Integer;
 begin
-  FUserMongoIds := AValue;
+  SetLength(FUserMongoIds,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FUserMongoIds[C1] := AValue[C1];
   for C1 := 0 to Length(FUserMongoIds) - 1 do
     ProtobufOutput.writeBytes(FN_USER_MONGO_IDS, AValue[C1]);
 end;

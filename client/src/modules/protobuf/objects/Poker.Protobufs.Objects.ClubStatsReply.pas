@@ -24,6 +24,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -41,7 +42,12 @@ uses
 
 procedure TPB_ClubStatsReply.InitObjects;
 begin
+  inherited;
   FPlayerStats := TObjectList<TPB_ClubPlayerStats>.Create;
+end;
+procedure TPB_ClubStatsReply.HookNotifiers;
+begin
+  inherited;
   FPlayerStats.OnNotify := PlayerStatsNotifyEvent;
 end;
 
@@ -78,8 +84,12 @@ begin
 end;
 
 procedure TPB_ClubStatsReply.SetClubid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FClubid := AValue;
+  SetLength(FClubid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FClubid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_CLUBID, AValue);
 end;
 

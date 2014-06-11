@@ -51,6 +51,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -77,7 +78,12 @@ uses
 
 procedure TPB_Club.InitObjects;
 begin
+  inherited;
   FMembers := TObjectList<TPB_ClubMember>.Create;
+end;
+procedure TPB_Club.HookNotifiers;
+begin
+  inherited;
   FMembers.OnNotify := MembersNotifyEvent;
 end;
 
@@ -150,8 +156,12 @@ begin
 end;
 
 procedure TPB_Club.SetMongoId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FId := AValue;
+  SetLength(FId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN__ID, AValue);
 end;
 
@@ -170,8 +180,12 @@ begin
 end;
 
 procedure TPB_Club.SetOwner(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FOwner := AValue;
+  SetLength(FOwner,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FOwner[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_OWNER, AValue);
 end;
 

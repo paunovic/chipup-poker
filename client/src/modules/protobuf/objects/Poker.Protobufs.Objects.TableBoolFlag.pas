@@ -65,8 +65,12 @@ begin
 end;
 
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FTableMongoId := AValue;
+  SetLength(FTableMongoId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FTableMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
 end;
 

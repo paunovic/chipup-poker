@@ -24,6 +24,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -41,7 +42,12 @@ uses
 
 procedure TPB_HelloParams.InitObjects;
 begin
+  inherited;
   FFiles := TObjectList<TPB_UpdateFileInfo>.Create;
+end;
+procedure TPB_HelloParams.HookNotifiers;
+begin
+  inherited;
   FFiles.OnNotify := FilesNotifyEvent;
 end;
 

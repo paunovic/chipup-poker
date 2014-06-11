@@ -424,8 +424,8 @@ begin
       TAlphaBlendThread.CreateAlphaBlendThread(FAlphaBlendThread, AlphaBlendValue, 0, 0, 0.1, AlphaBlendThreadNotify);
     end;
     lrInvalid: begin
-      CurrentStatus := lsConnected;
       MessageDlg('Invalid login/password', mtError, [mbOK], 0);
+      CurrentStatus := lsHelloOk;
       EnableGUI(TRUE);
       edLogin.SetFocus;
     end;

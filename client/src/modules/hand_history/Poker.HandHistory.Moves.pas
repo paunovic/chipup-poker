@@ -12,6 +12,7 @@ type
     FSeat: Integer;
     FBet: UINT32;
     FWinnerPots: TPotInfos;
+    FPots: TPotInfos;
   public
     constructor Create(const AProtobuf: TPB_MoveRow);
     destructor Destroy; override;
@@ -22,6 +23,7 @@ type
     property Seat: Integer read FSeat;
     property Bet: UINT32 read FBet;
     property WinnerPots: TPotInfos read FWinnerPots;
+    property Pots: TPotInfos read FPots;
   end;
 
   THandHistoryMoves = TObjectList<THandHistoryMove>;
@@ -37,10 +39,13 @@ begin
   FBet := AProtobuf.Bet;
   FWinnerPots := TPotInfos.Create;
   FWinnerPots.Assign(AProtobuf.Potdata);
+  FPots := TPotInfos.Create;
+  FPots.Assign(AProtobuf.Pots, 0);
 end;
 
 destructor THandHistoryMove.Destroy;
 begin
+  FPots.Free;
   FWinnerPots.Free;
   inherited;
 end;

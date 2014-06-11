@@ -34,6 +34,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -54,7 +55,12 @@ uses
 
 procedure TPB_TableEvent.InitObjects;
 begin
+  inherited;
   FPots := TObjectList<TPB_WinnerPotInfo>.Create;
+end;
+procedure TPB_TableEvent.HookNotifiers;
+begin
+  inherited;
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
@@ -127,14 +133,20 @@ procedure TPB_TableEvent.SetBets(const AValue: TArray<UINT32>);
 var
   C1: Integer;
 begin
-  FBets := AValue;
+  SetLength(FBets,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FBets[C1] := AValue[C1];
   for C1 := 0 to Length(FBets) - 1 do
     ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
 end;
 
 procedure TPB_TableEvent.SetCards(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FCards := AValue;
+  SetLength(FCards,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FCards[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_CARDS, AValue);
 end;
 

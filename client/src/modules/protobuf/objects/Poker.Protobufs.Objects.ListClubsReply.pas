@@ -21,6 +21,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -37,7 +38,12 @@ uses
 
 procedure TPB_ListClubsReply.InitObjects;
 begin
+  inherited;
   FClubs := TObjectList<TPB_Club>.Create;
+end;
+procedure TPB_ListClubsReply.HookNotifiers;
+begin
+  inherited;
   FClubs.OnNotify := ClubsNotifyEvent;
 end;
 

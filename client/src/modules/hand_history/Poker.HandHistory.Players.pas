@@ -3,7 +3,7 @@ unit Poker.HandHistory.Players;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Protobufs.Objects.PlayerHandHistory;
+  System.SysUtils, System.Generics.Collections, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.SeatInfo;
 
 type
   TPlayerHandHistory = class
@@ -15,6 +15,7 @@ type
     FChips: UINT32;
     FNick: String;
     FMucked: Boolean;
+    FStatus: TPlayerStatus;
   public
     constructor Create(const AProtobuf: TPB_PlayerHandHistory);
     destructor Destroy; override;
@@ -26,6 +27,7 @@ type
     property Chips: UINT32 read FChips;
     property Nick: String read FNick;
     property Mucked: Boolean read FMucked;
+    property Status: TPlayerStatus read FStatus;
   end;
 
   TPlayerHandHistories = class(TObjectList<TPlayerHandHistory>)
@@ -49,6 +51,7 @@ begin
   FChips := AProtobuf.Chips;
   FNick := AProtobuf.Nick;
   FMucked := AProtobuf.Muck;
+  FStatus := AProtobuf.Status;
 end;
 
 destructor TPlayerHandHistory.Destroy;

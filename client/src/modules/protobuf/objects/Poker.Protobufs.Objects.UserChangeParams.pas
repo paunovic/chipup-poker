@@ -21,6 +21,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -37,7 +38,12 @@ uses
 
 procedure TPB_UserChangeParams.InitObjects;
 begin
+  inherited;
   FUsers := TObjectList<TPB_User>.Create;
+end;
+procedure TPB_UserChangeParams.HookNotifiers;
+begin
+  inherited;
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 

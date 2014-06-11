@@ -4,7 +4,7 @@ object frmReconnect: TfrmReconnect
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Reconnecting'
-  ClientHeight = 64
+  ClientHeight = 61
   ClientWidth = 275
   Color = clWindow
   Ctl3D = False
@@ -65,7 +65,7 @@ object frmReconnect: TfrmReconnect
     StyleFocused.LookAndFeel.SkinName = ''
     StyleHot.LookAndFeel.SkinName = ''
     TabOrder = 1
-    Height = 14
+    Height = 11
     Width = 259
   end
   object tiReconnectTimer: TTimer

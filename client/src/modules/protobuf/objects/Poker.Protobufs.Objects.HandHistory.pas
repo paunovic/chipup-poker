@@ -54,6 +54,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -81,9 +82,14 @@ uses
 
 procedure TPB_HandHistory.InitObjects;
 begin
+  inherited;
   FPlayers := TObjectList<TPB_PlayerHandHistory>.Create;
-  FPlayers.OnNotify := PlayersNotifyEvent;
   FMoves := TObjectList<TPB_MoveRow>.Create;
+end;
+procedure TPB_HandHistory.HookNotifiers;
+begin
+  inherited;
+  FPlayers.OnNotify := PlayersNotifyEvent;
   FMoves.OnNotify := MovesNotifyEvent;
 end;
 

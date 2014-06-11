@@ -14,6 +14,7 @@ type
 
   protected
     procedure InitObjects; virtual;
+    procedure HookNotifiers; virtual;
 
   public
     constructor Create; overload;
@@ -48,13 +49,14 @@ begin
 
   FProtobufOutput := TProtobufOutput.Create;
   FProtobufOutput.writeRawData(APointer, ASize);
-
   protobuf_reader := TProtobufReader.Create(APointer, ASize);
   try
     LoadFromProtobufReader(protobuf_reader, ASize);
   finally
     protobuf_reader.Free;
   end;
+
+  HookNotifiers;
 end;
 
 constructor TProtobufBaseObject.Create(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -63,9 +65,11 @@ begin
 
   FProtobufOutput := TProtobufOutput.Create;
   FProtobufOutput.writeRawData(PAnsiChar(Integer(AProtobufReader.Buffer) + AProtobufReader.BufferPos), ASize);
-
   LoadFromProtobufReader(AProtobufReader, ASize);
+
+  HookNotifiers;
 end;
+
 
 destructor TProtobufBaseObject.Destroy;
 begin
@@ -79,8 +83,15 @@ begin
   result := FProtobufOutput.getSerializedSize;
 end;
 
+procedure TProtobufBaseObject.HookNotifiers;
+begin
+//
+end;
+
 procedure TProtobufBaseObject.InitObjects;
 begin
+//
 end;
+
 
 end.

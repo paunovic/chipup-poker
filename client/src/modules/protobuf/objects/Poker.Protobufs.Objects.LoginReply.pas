@@ -28,6 +28,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -46,7 +47,12 @@ uses
 
 procedure TPB_LoginReply.InitObjects;
 begin
+  inherited;
   FReconnectTables := TObjectList<TPB_TableStatus>.Create;
+end;
+procedure TPB_LoginReply.HookNotifiers;
+begin
+  inherited;
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
 end;
 

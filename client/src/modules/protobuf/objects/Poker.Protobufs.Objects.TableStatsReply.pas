@@ -30,6 +30,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -49,7 +50,12 @@ uses
 
 procedure TPB_TableStatsReply.InitObjects;
 begin
+  inherited;
   FPlayerstats := TObjectList<TPB_TablePlayerStats>.Create;
+end;
+procedure TPB_TableStatsReply.HookNotifiers;
+begin
+  inherited;
   FPlayerstats.OnNotify := PlayerstatsNotifyEvent;
 end;
 
@@ -94,14 +100,22 @@ begin
 end;
 
 procedure TPB_TableStatsReply.SetClubid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FClubid := AValue;
+  SetLength(FClubid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FClubid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_CLUBID, AValue);
 end;
 
 procedure TPB_TableStatsReply.SetGameid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FGameid := AValue;
+  SetLength(FGameid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FGameid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_GAMEID, AValue);
 end;
 

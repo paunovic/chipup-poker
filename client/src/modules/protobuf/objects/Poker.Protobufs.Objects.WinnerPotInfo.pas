@@ -30,6 +30,7 @@ type
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -49,7 +50,12 @@ uses
 
 procedure TPB_WinnerPotInfo.InitObjects;
 begin
+  inherited;
   FWinnerData := TObjectList<TPB_WinnerData>.Create;
+end;
+procedure TPB_WinnerPotInfo.HookNotifiers;
+begin
+  inherited;
   FWinnerData.OnNotify := WinnerDataNotifyEvent;
 end;
 
@@ -104,7 +110,9 @@ procedure TPB_WinnerPotInfo.SetSeats(const AValue: TArray<Integer>);
 var
   C1: Integer;
 begin
-  FSeats := AValue;
+  SetLength(FSeats,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FSeats[C1] := AValue[C1];
   for C1 := 0 to Length(FSeats) - 1 do
     ProtobufOutput.writeInt32(FN_SEATS, AValue[C1]);
 end;

@@ -71,8 +71,12 @@ begin
 end;
 
 procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FPlayerMongoId := AValue;
+  SetLength(FPlayerMongoId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FPlayerMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_PLAYER_MONGO_ID, AValue);
 end;
 

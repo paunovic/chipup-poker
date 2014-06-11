@@ -15,7 +15,7 @@ uses
   Vcl.ActnMan, cxMaskEdit, cxSpinEdit, cxTrackBar, cxCheckBox, Poker.Protobufs.Objects.TableStatus, Poker.Avatars,
   Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, Poker.ChipStackMaker, AsphyreTypes, cxCurrencyEdit, RVStyle,
   RVScroll, RichView, AsphyreImages, Poker.Cards, Vcl.StdCtrls, AsphyreFonts, ChipUpPokerDarkSkin, IdSync,
-  Poker.HandHistory.Items, Poker.HandHistory.Playback;
+  Poker.HandHistory.Items, Poker.HandHistory.Playback, Vcl.Menus, Vcl.ImgList, cxButtons, cxProgressBar;
 
 type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
@@ -62,6 +62,16 @@ type
     lbvHandStrength: TcxLabel;
     lbvHandHistory: TcxLabel;
     acHandHistory: TAction;
+    tiHandPlayback: TTimer;
+    btPlayPause: TcxButton;
+    il48px: TImageList;
+    acHandPlaybackPlay: TAction;
+    acHandPlaybackPause: TAction;
+    btStepForward: TcxButton;
+    btStepBackwards: TcxButton;
+    pbHandPlaybackProgress: TcxProgressBar;
+    acHandPlaybackStepForward: TAction;
+    acHandPlaybackStepBackwards: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -101,6 +111,11 @@ type
     procedure seRaiseAmountKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure acHandHistoryExecute(Sender: TObject);
     procedure lbvHandHistoryClick(Sender: TObject);
+    procedure tiHandPlaybackTimer(Sender: TObject);
+    procedure acHandPlaybackPlayExecute(Sender: TObject);
+    procedure acHandPlaybackPauseExecute(Sender: TObject);
+    procedure acHandPlaybackStepForwardExecute(Sender: TObject);
+    procedure acHandPlaybackStepBackwardsExecute(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -167,6 +182,7 @@ type
       FPlayNowButtonHeight: Single;
       FPlayNowResizeRatio: Single;
       FClosingTime: DWORD;
+      FDrawColor: TColor4;
 
       FActionButtonWidth: Single;
       FActionButtonHeight: Single;
@@ -351,6 +367,7 @@ begin
                         TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
                         TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
                     ]);
+    FDrawColor := clWhite4;
   end
   else
   begin
@@ -358,6 +375,13 @@ begin
     edChat.Visible := FALSE;
     lbvHandHistory.Visible := FALSE;
     lbvHandStrength.Visible := FALSE;
+    pbHandPlaybackProgress.Properties.Min := 0;
+    pbHandPlaybackProgress.Properties.Max := FHandHistoryPlayback.States.Count - 1;
+    pbHandPlaybackProgress.Visible := TRUE;
+    btPlayPause.Visible := TRUE;
+    btStepForward.Visible := TRUE;
+    btStepBackwards.Visible := TRUE;
+    FDrawColor := cAlpha4(150);
   end;
 
   lbvHandStrength.Caption := '';
@@ -727,8 +751,16 @@ end;
 
 procedure TfrmTable.FormShow(Sender: TObject);
 begin
-  ConfigureGUI;
-  Render;
+  if FTable.TableType = ttHandPlayback then
+  begin
+    SetTableStatus(FHandHistoryPlayback.CurrentState);
+    tiHandPlayback.Enabled := TRUE;
+  end
+  else
+  begin
+    ConfigureGUI;
+    Render;
+  end;
 end;
 
 procedure TfrmTable.WMSizing(var AMessage: TMessage);
@@ -814,6 +846,22 @@ begin
   tiGameLock.Enabled := FALSE;
   ConfigureGUI;
   Render;
+end;
+
+procedure TfrmTable.tiHandPlaybackTimer(Sender: TObject);
+begin
+  SetTableStatus(FHandHistoryPlayback.NextState);
+
+  if tiGameLock.Enabled then
+    tiHandPlayback.Interval := tiGameLock.Interval
+  else
+    tiHandPlayback.Interval := 1000;
+
+  if FHandHistoryPlayback.CurrentStateIndex = FHandHistoryPlayback.States.Count - 1 then
+  begin
+    tiHandPlayback.Enabled := FALSE;
+    btPlayPause.Action := acHandPlaybackPlay;
+  end;
 end;
 
 procedure TfrmTable.tiRenderTimer(Sender: TObject);
@@ -1060,7 +1108,8 @@ begin
     cards_starting_x := seat_point.X - (ASeatInfo.CardCount * (FCardWidth + cards_overlap_width) - 1) / 2;
   end;
 
-  if (ACardIndex >= 0) and (ACardIndex < ASeatInfo.Cards.Count) then
+  if ((ACardIndex >= 0) and (ACardIndex < ASeatInfo.Cards.Count)) and
+     (ASeatInfo.CardsVisible) then
     perc := CARD_OPEN_PERC
   else
     perc := CARD_HIDDEN_PERC;
@@ -1557,6 +1606,17 @@ begin
       lbvHandHistory.Caption := Format('Previous Hand (#%d)', [hhis.LastHandId]);
       lbvHandHistory.Visible := TRUE;
     end;
+  end
+  else // ttHandPlayback
+  begin
+    pbHandPlaybackProgress.Left := Round(ClientWidth / 2 - pbHandPlaybackProgress.Width / 2);
+    pbHandPlaybackProgress.Top := Round(ClientHeight * 0.825);
+    btPlayPause.Left := Round(pbHandPlaybackProgress.Left + pbHandPlaybackProgress.Width / 2 - btPlayPause.Width / 2);
+    btPlayPause.Top := pbHandPlaybackProgress.Top + pbHandPlaybackProgress.Height + 3;
+    btStepBackwards.Top := btPlayPause.Top;
+    btStepForward.Top := btPlayPause.Top;
+    btStepBackwards.Left := btPlayPause.Left - 3 - btStepBackwards.Width;
+    btStepForward.Left := btPlayPause.Left + btPlayPause.Width + 3;
   end;
 
   MakeTableCaption;
@@ -2102,9 +2162,9 @@ end;
 
 procedure TfrmTable.acRaisePotExecute(Sender: TObject);
 var
-  C1         : Integer;
+  C1: Integer;
   raise_value: UINT32;
-  seat_bet   : UINT32;
+  seat_bet: UINT32;
 begin
   seat_bet := FTableStatus.GetBet(FTable.SeatIndex);
 
@@ -2121,6 +2181,8 @@ end;
 procedure TfrmTable.SetTableStatus(const ATableStatus: TPB_TableStatus);
 begin
   CSRETableStatus(0, ATableStatus);
+  if FTable.TableType = ttHandPlayback then
+    pbHandPlaybackProgress.Position := FHandHistoryPlayback.CurrentStateIndex;
 end;
 
 procedure TfrmTable.Render;
@@ -2342,13 +2404,13 @@ end;
 procedure TfrmTable.RenderBackground;
 begin
   DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4);
-  DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), clWhite4);
+  DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), FDrawColor);
 end;
 
 procedure TfrmTable.RenderTable;
 begin
   DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4);
-  DXCore.Canvas.TexMap(pBounds4(FRawTableXOffset, FRawTableYOffset, FRawTableWidth, FRawTableHeight), clWhite4);
+  DXCore.Canvas.TexMap(pBounds4(FRawTableXOffset, FRawTableYOffset, FRawTableWidth, FRawTableHeight), FDrawColor);
 end;
 
 procedure TfrmTable.RenderSeats;
@@ -2524,7 +2586,8 @@ begin
           for C1 := 0 to seat_info.DealtCards - 1 do
           begin
             card_point := GetCardPoint(seat_info, C1);
-            if (C1 >= 0) and (C1 < seat_info.Cards.Count) then
+            if ((C1 >= 0) and (C1 < seat_info.Cards.Count)) and
+               (seat_info.CardsVisible) then
               RenderCard(card_point, seat_info.Cards[C1], CARD_OPEN_PERC)
             else
               RenderCard(card_point, nil, CARD_HIDDEN_PERC);
@@ -2803,7 +2866,8 @@ begin
 //  card_points_mid[3].x := card_points_final[3].x + FCardWidth / 2;
 //  card_points_mid[4].x := card_points_final[4].x + FCardWidth / 2;
 
-  if FTableStatus.FlopCards.Count > 0 then
+  if (FTableStatus.FlopCards.Count > 0) and
+     (FTableStatus.State >= tsFlop) then
   begin
     if not FFlopAnimated then
     begin
@@ -2848,8 +2912,11 @@ begin
       end;
   end;
 
-  RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FDealerPoint, card_points_final[3], 0.75 + FWinningTurnAniDelay);
-  RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FDealerPoint, card_points_final[4], 0.75 + FWinningRiverAniDelay);
+  if FTableStatus.State >= tsTurn then
+    RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FDealerPoint, card_points_final[3], 0.75 + FWinningTurnAniDelay);
+
+  if FTableStatus.State >= tsRiver then
+    RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FDealerPoint, card_points_final[4], 0.75 + FWinningRiverAniDelay);
 end;
 
 procedure TfrmTable.RenderDealingCardsAni;
@@ -2936,8 +3003,6 @@ var
   animation: TDXAnimation;
   pots: TPotInfos;
 begin
-  pots := FTableStatus.Pots;
-
   if FPotWinAnimations.Count > 0 then
   begin
     for C1 := 0 to FPotWinAnimations.Count - 1 do
@@ -2966,7 +3031,9 @@ begin
       end;
   end;
 
-  if FBetAnimations.Count > 0 then
+  if FBetAnimations.Count = 0 then
+    pots := FTableStatus.Pots
+  else
     pots := FTableStatus.PreviousPots;
 
   for C1 := 0 to pots.Count - 1 do
@@ -3316,7 +3383,36 @@ begin
     FormsContainer.RunForm(TfrmHandHistory, frmChipUpMain, [FTable.Game, @handid], FALSE)
 end;
 
+procedure TfrmTable.acHandPlaybackPauseExecute(Sender: TObject);
+begin
+  tiHandPlayback.Enabled := FALSE;
+  btPlayPause.Action := acHandPlaybackPlay;
+end;
 
+procedure TfrmTable.acHandPlaybackPlayExecute(Sender: TObject);
+begin
+  tiHandPlayback.Enabled := TRUE;
+  if FHandHistoryPlayback.CurrentStateIndex = FHandHistoryPlayback.States.Count - 1 then
+  begin
+    FHandHistoryPlayback.CurrentStateIndex := 0;
+    SetTableStatus(FHandHistoryPlayback.CurrentState);
+  end;
+  btPlayPause.Action := acHandPlaybackPause;
+end;
+
+procedure TfrmTable.acHandPlaybackStepBackwardsExecute(Sender: TObject);
+begin
+  acHandPlaybackPause.Execute;
+  if FHandHistoryPlayback.CurrentStateIndex > 0 then
+    SetTableStatus(FHandHistoryPlayback.PrevState);
+end;
+
+procedure TfrmTable.acHandPlaybackStepForwardExecute(Sender: TObject);
+begin
+  acHandPlaybackPause.Execute;
+  if FHandHistoryPlayback.CurrentStateIndex < FHandHistoryPlayback.States.Count - 1 then
+    SetTableStatus(FHandHistoryPlayback.NextState);
+end;
 
 { TTableSyncRender }
 

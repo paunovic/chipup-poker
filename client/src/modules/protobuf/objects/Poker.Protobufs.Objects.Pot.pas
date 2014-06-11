@@ -75,7 +75,9 @@ procedure TPB_Pot.SetMembers(const AValue: TArray<Integer>);
 var
   C1: Integer;
 begin
-  FMembers := AValue;
+  SetLength(FMembers,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FMembers[C1] := AValue[C1];
   for C1 := 0 to Length(FMembers) - 1 do
     ProtobufOutput.writeInt32(FN_MEMBERS, AValue[C1]);
 end;

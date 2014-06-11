@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.MoveRow;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.WinnerPotInfo;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.WinnerPotInfo,Poker.Protobufs.Objects.Pot;
 
 type
   TPB_MoveRow = class(TProtobufBaseObject)
@@ -16,20 +16,24 @@ type
       FN_BET = 2;
       FN_SEAT = 3;
       FN_POTDATA = 4;
+      FN_POTS = 5;
 
     var
       FCode: TArray<TTableEventType>;
       FBet: UINT32;
       FSeat: Integer;
       FPotdata: TObjectList<TPB_WinnerPotInfo>;
+      FPots: TObjectList<TPB_Pot>;
 
     procedure SetCode(const AValue: TArray<TTableEventType>);
     procedure SetBet(const AValue: UINT32);
     procedure SetSeat(const AValue: Integer);
     procedure PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
+    procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     destructor Destroy; override;
@@ -39,6 +43,7 @@ type
     property Bet: UINT32 read FBet write SetBet;
     property Seat: Integer read FSeat write SetSeat;
     property Potdata: TObjectList<TPB_WinnerPotInfo> read FPotdata;
+    property Pots: TObjectList<TPB_Pot> read FPots;
   end;
 
 implementation
@@ -49,8 +54,15 @@ uses
 
 procedure TPB_MoveRow.InitObjects;
 begin
+  inherited;
   FPotdata := TObjectList<TPB_WinnerPotInfo>.Create;
+  FPots := TObjectList<TPB_Pot>.Create;
+end;
+procedure TPB_MoveRow.HookNotifiers;
+begin
+  inherited;
   FPotdata.OnNotify := PotdataNotifyEvent;
+  FPots.OnNotify := PotsNotifyEvent;
 end;
 
 destructor TPB_MoveRow.Destroy;
@@ -59,6 +71,11 @@ begin
   begin
     FPotdata.OnNotify := nil;
     FreeAndNil(FPotdata);
+  end;
+  if Assigned(FPots) then
+  begin
+    FPots.OnNotify := nil;
+    FreeAndNil(FPots);
   end;
   inherited;
 end;
@@ -88,6 +105,10 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPotdata.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
+      FN_POTS: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -98,7 +119,9 @@ procedure TPB_MoveRow.SetCode(const AValue: TArray<TTableEventType>);
 var
   C1: Integer;
 begin
-  FCode := AValue;
+  SetLength(FCode,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FCode[C1] := AValue[C1];
   for C1 := 0 to Length(FCode) - 1 do
     ProtobufOutput.writeInt32(FN_CODE, Integer(AValue));
 end;
@@ -119,6 +142,14 @@ procedure TPB_MoveRow.PotdataNotifyEvent(Sender: TObject; const Item: TPB_Winner
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(FN_POTDATA,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_MoveRow.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

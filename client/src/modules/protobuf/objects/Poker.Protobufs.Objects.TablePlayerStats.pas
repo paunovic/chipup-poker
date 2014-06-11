@@ -115,8 +115,12 @@ begin
 end;
 
 procedure TPB_TablePlayerStats.SetUserid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FUserid := AValue;
+  SetLength(FUserid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FUserid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_USERID, AValue);
 end;
 
@@ -130,7 +134,9 @@ procedure TPB_TablePlayerStats.SetBuyins(const AValue: TArray<UINT32>);
 var
   C1: Integer;
 begin
-  FBuyins := AValue;
+  SetLength(FBuyins,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FBuyins[C1] := AValue[C1];
   for C1 := 0 to Length(FBuyins) - 1 do
     ProtobufOutput.writeUInt32(FN_BUYINS, AValue[C1]);
 end;
@@ -139,7 +145,9 @@ procedure TPB_TablePlayerStats.SetCashouts(const AValue: TArray<UINT32>);
 var
   C1: Integer;
 begin
-  FCashouts := AValue;
+  SetLength(FCashouts,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FCashouts[C1] := AValue[C1];
   for C1 := 0 to Length(FCashouts) - 1 do
     ProtobufOutput.writeUInt32(FN_CASHOUTS, AValue[C1]);
 end;

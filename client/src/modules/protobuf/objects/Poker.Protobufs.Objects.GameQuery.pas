@@ -65,8 +65,12 @@ begin
 end;
 
 procedure TPB_GameQuery.SetGameid(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FGameid := AValue;
+  SetLength(FGameid,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FGameid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_GAMEID, AValue);
 end;
 

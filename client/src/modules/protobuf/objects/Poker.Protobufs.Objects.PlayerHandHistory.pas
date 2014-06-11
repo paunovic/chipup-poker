@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.PlayerHandHistory;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.SeatInfo;
 
 type
   TPB_PlayerHandHistory = class(TProtobufBaseObject)
@@ -18,6 +18,7 @@ type
       FN_CHIPS = 4;
       FN_NICK = 5;
       FN_MUCK = 6;
+      FN_STATUS = 7;
 
     var
       FId: TBytes;
@@ -26,6 +27,7 @@ type
       FChips: UINT32;
       FNick: String;
       FMuck: Boolean;
+      FStatus: TPlayerStatus;
 
     procedure SetMongoId(const AValue: TBytes);
     procedure SetSeat(const AValue: Integer);
@@ -33,6 +35,7 @@ type
     procedure SetChips(const AValue: UINT32);
     procedure SetNick(const AValue: String);
     procedure SetMuck(const AValue: Boolean);
+    procedure SetStatus(const AValue: TPlayerStatus);
 
   public
     destructor Destroy; override;
@@ -44,6 +47,7 @@ type
     property Chips: UINT32 read FChips write SetChips;
     property Nick: String read FNick write SetNick;
     property Muck: Boolean read FMuck write SetMuck;
+    property Status: TPlayerStatus read FStatus write SetStatus;
   end;
 
 implementation
@@ -90,6 +94,10 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMuck := AProtobufReader.readBoolean;
       end;
+      FN_STATUS: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FStatus := TPlayerStatus(AProtobufReader.readEnum);
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -97,8 +105,12 @@ begin
 end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FId := AValue;
+  SetLength(FId,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN__ID, AValue);
 end;
 
@@ -109,8 +121,12 @@ begin
 end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
+var
+  C1: Integer;
 begin
-  FCards := AValue;
+  SetLength(FCards,Length(AValue));
+  for C1 := 0 to Length(AValue) - 1 do
+    FCards[C1] := AValue[C1];
   ProtobufOutput.writeBytes(FN_CARDS, AValue);
 end;
 
@@ -130,6 +146,12 @@ procedure TPB_PlayerHandHistory.SetMuck(const AValue: Boolean);
 begin
   FMuck := AValue;
   ProtobufOutput.writeBoolean(FN_MUCK, AValue);
+end;
+
+procedure TPB_PlayerHandHistory.SetStatus(const AValue: TPlayerStatus);
+begin
+  FStatus := AValue;
+  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
 end;
 
 end.

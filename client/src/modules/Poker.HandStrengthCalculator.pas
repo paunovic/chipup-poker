@@ -788,7 +788,7 @@ begin
                         if AShort then
                           result := 'One Pair'
                         else
-                          result := Format('Pair of %s with %s kicker', [ShortCardToLong(card[1], TRUE), ShortCardToLong(kicker[1])])
+                          result := Format('Pair of %s with %s kicker', [ShortCardToLong(card[1], TRUE), ShortCardToLong(kicker[1])]) // FIXME, bug here? cards or kicker empty?
                       end;
                     end
                     else

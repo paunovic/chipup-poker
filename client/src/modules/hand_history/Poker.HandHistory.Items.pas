@@ -68,7 +68,8 @@ type
     FParentItems: THandHistoryItems;
     FMongoId: TBytes;
     FHandId: UINT32;
-    FRake: UINT32;
+    FRake: Integer;
+    FTotalRake: UINT32;
     FPlayers: TPlayerHandHistories;
     FCards: TBytes;
     FTableCardsStr: String;
@@ -94,7 +95,8 @@ type
     property ParentItems: THandHistoryItems read FParentItems;
     property MongoId: TBytes read FMongoId;
     property HandId: UINT32 read FHandId;
-    property Rake: UINT32 read FRake;
+    property Rake: Integer read FRake;
+    property TotalRake: UINT32 read FTotalRake;
     property Players: TPlayerHandHistories read FPlayers;
     property Cards: TBytes read FCards;
     property TableCardsStr: String read FTableCardsStr;
@@ -103,6 +105,7 @@ type
     property EndTime: TDateTime read FEndTime;
     property BalanceChanges: TArray<Integer> read FBalanceChanges;
     property Moves: THandHistoryMoves read FMoves;
+    property DealerIndex: Integer read FDealerIndex;
     property CurrentGame: TGameType read FCurrentGame;
 
     property Lines: TStringList read FLines;
@@ -163,7 +166,8 @@ var
 begin
   FMongoId := AHandHistory.MongoId;
   FHandId := AHandHistory.Seq;
-  FRake := AHandHistory.Totalrake;
+  FRake := AHandHistory.Rake;
+  FTotalRake := AHandHistory.Totalrake;
   SetLength(FCards, Length(AHandHistory.Cards));
   Move(AHandHistory.Cards[0], FCards[0], Length(AHandHistory.Cards) * SizeOf(Byte));
   FTableCardsStr := TCards.BytesToString(FCards);
@@ -221,7 +225,6 @@ begin
   ALines.Add('');
 
   // seats info
-  // we increment seats by one here, so they dont start from zero!
   for C1 := 0 to FPlayers.Count - 1 do
   begin
     line := '%sSeat %s%d%s: %s%s%s (%s%s%s chips';
