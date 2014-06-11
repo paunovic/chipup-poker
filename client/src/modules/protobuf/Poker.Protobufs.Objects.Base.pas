@@ -24,6 +24,7 @@ type
 
     destructor Destroy; override;
 
+
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); virtual; abstract;
 
     property ProtobufOutput: TProtoBufOutput read FProtobufOutput;
@@ -34,12 +35,11 @@ type
 implementation
 
 
-
-
 constructor TProtobufBaseObject.Create;
 begin
   InitObjects;
   FProtobufOutput := TProtobufOutput.Create;
+  HookNotifiers;
 end;
 
 constructor TProtobufBaseObject.Create(const APointer: pointer; const ASize: Integer);
@@ -47,7 +47,6 @@ var
   protobuf_reader: TProtobufReader;
 begin
   InitObjects;
-  HookNotifiers;
 
   FProtobufOutput := TProtobufOutput.Create;
   FProtobufOutput.writeRawData(APointer, ASize);
@@ -57,16 +56,19 @@ begin
   finally
     protobuf_reader.Free;
   end;
+
+  HookNotifiers;
 end;
 
 constructor TProtobufBaseObject.Create(const AProtobufReader: TProtobufReader; const ASize: Integer);
 begin
   InitObjects;
-  HookNotifiers;
 
   FProtobufOutput := TProtobufOutput.Create;
   FProtobufOutput.writeRawData(PAnsiChar(Integer(AProtobufReader.Buffer) + AProtobufReader.BufferPos), ASize);
   LoadFromProtobufReader(AProtobufReader, ASize);
+
+  HookNotifiers;
 end;
 
 constructor TProtobufBaseObject.Create(const AStream: TMemoryStream);
