@@ -192,7 +192,7 @@ Club.finishTableStatsPacket = function (data,cb) {
 			}
 			var clubobj = {};
 			var clubarr = [];
-			console.log('getting club balances %j',data.playerData);
+			//console.log('getting club balances %j',data.playerData);
 			clubBalances.find({clubid:{$in:data.clubList}}).toArray(function (err,balances) {
 				assert.ifError(err);
 				//console.log('current user:%s, all stats: %j',stats[i].userid,balances);
@@ -376,4 +376,15 @@ Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
 	c._id = new Buffer(input._id.toString(),'hex');
 	c.owner = new Buffer(input.owner.toString(),'hex');
 	return c;
+}
+Club.prototype.log = function log(format) {
+	var out = Array.prototype.slice.call(arguments);
+	if (format.indexOf('%') != -1) {
+		out = [ util.format.apply(util,out) ]
+	}
+	out.unshift(this.handid);
+	process.send({type:'club',name:this.obj.gamename,ts:new Date().toString(),objects:out});
+	var obj = {type:'club',name:this.obj.gamename,objects:out}
+	obj.clubid = this.obj.clubid;
+	debugLogs.insert(obj,function (){});
 }

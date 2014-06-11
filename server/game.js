@@ -412,7 +412,9 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.nextDealer();
 		this.bets = [];
 		this.balance_changes = [];
-		this.addHistory({code:['teDealing']});
+		this.addHistory({code:['teDealing'],seat:-1});
+
+		var todo = [];
 
 		var canplay = 0;
 		for (var x=0; x<this.members.length; x++) {
@@ -429,6 +431,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				if (!emptyseat) this.members[x].SittingOutRoundsCount++;
 				else this.members[x].SittingOutRoundsCount = 0;
 				this.log('seat %d has sat out %d rounds',x,this.members[x].SittingOutRoundsCount);
+				this.history.players[x] = { _id:this.seats[x].userid, seat:x, chips:this.members[x].chips, status:this.members[x].status };
 				continue;
 			}
 			if (this.members[x].disconnected) continue;
@@ -444,7 +447,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			} else if (this.members[x].status == 'psInHand') {
 			} else if ((oldDealer < bb) && (bb < x)) { // you are after BB
 				this.log('XXX %d is after bb:%d',x,bb);
-/*			} else if (x == oldDealer) {
+			/*} else if (x == oldDealer) {
 				this.log('XXX %d is dealer %d %d',x,sb,bb);
 				this.nextDealer();
 				sb = this.getNextSeat(this.dealer);
@@ -468,19 +471,12 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			players++;
 			this.bets[x] = 0;
 			this.members[x].handsPlayed++;
-			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true };
+			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true, status:this.members[x].status };
 			if (this.members[x].status == 'psOutOfHand') {
 				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
 				if (!myutils.compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
 					if (!this.headsup) {
-						if (this.members[x].chips <= this.obj.big_blind) {
-							this.addHistory({seat:x,bet:this.members[x].chips,code:['teForced','teBB','teAllIn']});
-							this.setBet(x,this.members[x].chips);
-							this.members[x].status = 'psAllIn';
-						} else {
-							this.setBet(x,this.obj.big_blind);
-							this.addHistory({seat:x,bet:this.obj.big_blind,code:['teForced','teBB']});
-						}
+						todo[x] = 'forcedBB';
 					}
 				}
 			}
@@ -496,29 +492,45 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 
 		this.small_blind = this.current_seat = this.getNextSeat(this.current_seat);
 		if (this.headsup) this.small_blind = this.current_seat = this.getNextSeat(this.current_seat);
-		if (this.bets[this.current_seat] == 0) {
-			if (this.members[this.current_seat].chips <= this.obj.small_blind) {
-				this.addHistory({seat:this.current_seat,bet:this.members[this.current_seat].chips,code:['teSB','teAllIn']});
-				this.setBet(this.current_seat,this.members[this.current_seat].chips);
-				this.members[this.current_seat].status = 'psAllIn';
-			} else {
-				this.setBet(this.current_seat,this.obj.small_blind);
-				this.addHistory({seat:this.current_seat,bet:this.obj.small_blind,code:['teSB']});
-			}
-		}
+		if (!todo[this.current_seat]) todo[this.current_seat] = 'SB';
 		
 		this.big_blind = this.current_seat = this.getNextSeat(this.current_seat,null,true);
-		if (this.bets[this.current_seat] == 0) {
-			if (this.members[this.current_seat].chips <= this.obj.big_blind) {
-				this.addHistory({seat:this.current_seat,bet:this.members[this.current_seat].chips,code:['teBB','teAllIn']});
-				this.setBet(this.current_seat,this.members[this.current_seat].chips);
-				this.members[this.current_seat].status = 'psAllIn';
-			} else {
-				this.setBet(this.current_seat,this.obj.big_blind);
-				this.addHistory({seat:this.current_seat,bet:this.obj.big_blind,code:['teBB']});
+		if (!todo[this.current_seat]) todo[this.current_seat] = 'BB';
+
+		this.current_seat = this.getNextSeat(this.current_seat);
+
+		for (var seat = this.dealer, passed=0; passed < this.obj.seats; seat++, passed++) {
+			seat = seat % this.obj.seats;
+			console.log('seat:%d passed:%d todo:%s',seat,passed,todo[seat]);
+			if (todo[seat] == 'forcedBB') {
+				if (this.members[seat].chips <= this.obj.big_blind) {
+					this.addHistory({seat:seat,bet:this.members[seat].chips,code:['teForced','teBB','teAllIn']});
+					this.setBet(seat,this.members[seat].chips);
+					this.members[seat].status = 'psAllIn';
+				} else {
+					this.setBet(seat,this.obj.big_blind);
+					this.addHistory({seat:seat,bet:this.obj.big_blind,code:['teForced','teBB']});
+				}
+			} else if (todo[seat] == 'SB') {
+				if (this.members[seat].chips <= this.obj.small_blind) {
+					this.addHistory({seat:seat,bet:this.members[seat].chips,code:['teSB','teAllIn']});
+					this.setBet(seat,this.members[seat].chips);
+					this.members[seat].status = 'psAllIn';
+				} else {
+					this.setBet(seat,this.obj.small_blind);
+					this.addHistory({seat:seat,bet:this.obj.small_blind,code:['teSB']});
+				}
+			} else if (todo[seat] == 'BB') {
+				if (this.members[seat].chips <= this.obj.big_blind) {
+					this.addHistory({seat:seat,bet:this.members[seat].chips,code:['teBB','teAllIn']});
+					this.setBet(seat,this.members[seat].chips);
+					this.members[seat].status = 'psAllIn';
+				} else {
+					this.setBet(seat,this.obj.big_blind);
+					this.addHistory({seat:seat,bet:this.obj.big_blind,code:['teBB']});
+				}
 			}
 		}
-		this.current_seat = this.getNextSeat(this.current_seat);
 		
 		this.state = 'tsPreFlop';
 		this.rake = 0;
@@ -683,6 +695,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 			}
 		}
 		if (seatObj) seatObj.status = 'psFolded';
+		this.history.players[seat].status = 'psFolded';
 		this.addHistory({seat:seat,code:['teFold']});
 		var inhandcount = this.inHandCount();
 		if (inhandcount == 0) {
@@ -878,7 +891,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 			if (this.state == 'tsPreFlop') {
 				this.rake = this.real_rake;
 				this.log('flopping');
-				this.addHistory({code:['teFlop']});
+				this.addHistory({code:['teFlop'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
@@ -891,7 +904,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.roundEnd();
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
-				this.addHistory({code:['teTurn']});
+				this.addHistory({code:['teTurn'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
@@ -904,7 +917,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.roundEnd();
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
-				this.addHistory({code:['teRiver']});
+				this.addHistory({code:['teRiver'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
@@ -1062,7 +1075,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 	
 	function finish1() {
 		events.push(this.makeEvent('teWinning',null,potdata));
-		this.addHistory({code:['teWinning'],potdata:potdata},winnercount);
+		this.addHistory({code:['teWinning'],potdata:potdata,seat:-1},winnercount);
 		this.doWin(function (rakestats) {
 			this.postWinSaveStats(rakestats,function () {
 				cb(events,0);
@@ -1257,6 +1270,7 @@ Game.prototype.updateMongoState = function (obj,options,cb) {
 	}
 	gameState.update({_id:this.obj._id}, obj,function (err,res) {
 		this.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
+		if (res != 1) console.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
 		assert(res == 1);
 		cb();
 	}.bind(this));

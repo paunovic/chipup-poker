@@ -596,12 +596,14 @@ message HandHistory {
 		required uint32 chips = 4;
 		required string nick = 5;
 		required bool muck = 6;
+		required SeatInfo.PlayerStatus status = 7;
 	}
 	message MoveRow {
 		repeated TableEvent.TableEventType code = 1;
 		optional uint32 bet = 2;
 		optional int32 seat = 3;
 		repeated TableEvent.WinnerPotInfo potdata = 4;
+		repeated Pot pots = 5;
 	}
 	required bytes _id = 1;
 	required uint32 seq = 2;

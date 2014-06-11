@@ -20,14 +20,16 @@ var buildbot = require('./buildbot');
 var installer = require('./installer');
 var differ = require('./differ');
 var RT = require('./rt');
+var models = require('./db').models;
 
 module.exports.initHttpServer = initHttpServer;
 
-var sharedconfig,log;
+var sharedconfig,log,makeUserProtobuf;
 
-function initHttpServer(db,activeUsers,sharedconfigIN,logIN) {
+function initHttpServer(db,activeUsers,sharedconfigIN,logIN,makeUserProtobufIN) {
 	sharedconfig = sharedconfigIN;
 	log = logIN;
+	makeUserProtobuf = makeUserProtobufIN;
 	var server = new Server(db,activeUsers);
 	return server;
 }
@@ -43,13 +45,10 @@ function Server(db,activeUsersIN) {
 	var PokerProfile = db.collection('PokerProfile');
 	this.bugs = db.collection('bugs');
 	this.serverErrors = db.collection('serverErrors');
-	this.users = db.collection('users');
 	this.clubs = db.collection('clubs');
 	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
-	this.admin = db.collection('admin');
 	this.installers = db.collection('installers');
-	this.config = db.collection('config');
 	this.avatars = db.collection('avatars');
 	this.objectSizes = db.collection('objectSizes');
 	this.IPN_hits = db.collection('IPN_hits');
@@ -120,7 +119,7 @@ function Server(db,activeUsersIN) {
 	app.post("/uploadAvatar",this.uploadAvatar.bind(this));
 
 	app.get("/install_chipuppoker.exe",function (req,res) {
-		this.config.findOne({_id:'installerid'},function (err,row) {
+		models.Config.findOne({_id:'installerid'},function (err,row) {
 			assert.ifError(err);
 			this.installers.findOne({_id:row.value},function (err,row) {
 				log('sending installer %j',row);
@@ -129,7 +128,7 @@ function Server(db,activeUsersIN) {
 		}.bind(this));
 	}.bind(this));
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
-		this.config.findOne({_id:'debuginstallerid'},function (err,row) {
+		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
 			assert.ifError(err);
 			this.installers.findOne({_id:row.value},function (err,row) {
 				log('sending debug installer %j',row);
@@ -226,13 +225,18 @@ Server.prototype.secureChangePasswordPost = function (req,res) {
 		hasher.update(salt);
 		hasher.update(req.body.password);
 		var hash = hasher.digest();
-		this.admin.update({username:req.session.username},{$set:{password:hash, salt:salt }},function (err,rows) {
+		models.Admin.findOne({username:req.session.username},function (err,instance) {
 			assert.ifError(err);
-			if (req.session.lastUrl) {
-				res.writeHead(302,{Location:req.session.lastUrl});
-			} else {
-				res.writeHead(302,{Location:'/secure/'});
-			}
+			instance.password = hash;
+			instance.salt = salt;
+			instance.save(function (err) {
+				assert.ifError(err);
+				if (req.session.lastUrl) {
+					res.writeHead(302,{Location:req.session.lastUrl});
+				} else {
+					res.writeHead(302,{Location:'/secure/'});
+				}
+			});
 			res.end('done');
 		});
 	}.bind(this));
@@ -241,7 +245,7 @@ Server.prototype.secureLoginPost = function (req,res) {
 	var username = req.body.username;
 	var password = req.body.password;
 	console.log('checking auth %s/%s',username,password);
-	this.admin.findOne({username:username},function (err,adminRow) {
+	models.Admin.findOne({username:username},function (err,adminRow) {
 		console.log('adminRow:%j',adminRow);
 		if (adminRow) {
 			if (!adminRow.salt) {
@@ -297,7 +301,8 @@ Server.prototype.getClub = function (req,res) {
 			}
 		}
 		this.games.find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
-			this.users.find({_id:{$in:userids}}).toArray(function (err,users) {
+			// FIXME
+			models.UserModel.collection.find({_id:{$in:userids}}).toArray(function (err,users) {
 				var usermap = {};
 				for (var x=0; x<users.length; x++) {
 					usermap[users[x]._id] = users[x];
@@ -357,7 +362,7 @@ Server.prototype.ServerBugsList = function (req,res) {
 }
 Server.prototype.userList = function (req,res) {
 	var start = Date.now();
-	this.users.find({}).toArray(function (err,data) {
+	models.UserModel.find({},function (err,data) {
 		var sum = 0;
 		for (var x=0; x<data.length; x++) {
 			if (data[x].chips) sum += data[x].chips;
@@ -367,7 +372,7 @@ Server.prototype.userList = function (req,res) {
 }
 Server.prototype.getUser = function (req,res) {
 	var start = Date.now();
-	this.users.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
+	models.UserModel.findById(req.query.id,function (err,row) {
 		this.clubs.find({$or:[ {members:new ObjectID(req.query.id)}, {owner:new ObjectID(req.query.id)} ]}).toArray(function (err,clubs) {
 			var self = this.activeUsers[row._id];
 			var obj = {user:row,clubs:clubs,start:start,online:self,util:util}
@@ -400,16 +405,24 @@ Server.prototype.installers_func = function (req,res) {
 				assert.ifError(err);
 				if (row) {
 					if (row.debug == 'release') {
-						this.config.update({_id:'installerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
+						models.Config.findOne({_id:'installerid'},function (err,entry) {
 							assert.ifError(err);
-							sharedconfig.latestVersion = row.version;
-							cb();
+							entry.value = new ObjectID(id);
+							entry.save(function (err) {
+								assert.ifError(err);
+								sharedconfig.latestVersion = row.version;
+								cb();
+							});
 						});
 					} else {
-						this.config.update({_id:'debuginstallerid'},{$set:{value:new ObjectID(id)}},function(err,res) {
+						models.Config.findOne({_id:'debuginstallerid'},function (err,entry) {
 							assert.ifError(err);
-							sharedconfig.latestDebugVersion = row.version;
-							cb();
+							entry.value = new ObjectID(id);
+							entry.save(function (err) {
+								assert.ifError(err);
+								sharedconfig.latestDebugVersion = row.version;
+								cb();
+							});
 						});
 					}
 				} else cb();
@@ -451,7 +464,7 @@ Server.prototype.installers_func = function (req,res) {
 	}
 	var user_stats;
 	jobs.push(function (cb) {
-		this.users.aggregate({$group:{_id:'$currentVersion',hits:{$sum:1}}},function (err,rows) {
+		models.UserModel.collection.aggregate({$group:{_id:'$currentVersion',hits:{$sum:1}}},function (err,rows) {
 			user_stats = rows;
 			cb();
 		});
@@ -461,7 +474,7 @@ Server.prototype.installers_func = function (req,res) {
 	async.parallel(jobs,finish2.bind(this));
 	function finish2() {
 		this.installers.find({}).sort({_id:1}).toArray(function(err,data) {
-			this.config.findOne({_id:'installerid'},function (err,row) {
+			models.Config.findOne({_id:'installerid'},function (err,row) {
 				var activeRelease;
 				for (var x=0; x<data.length; x++) {
 					if (data[x]._id.toString() == row.value.toString()) {
@@ -475,7 +488,7 @@ Server.prototype.installers_func = function (req,res) {
 						}
 					}
 				}
-				this.config.findOne({_id:'debuginstallerid'},function (err,row2) {
+				models.Config.findOne({_id:'debuginstallerid'},function (err,row2) {
 					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 				});
 			}.bind(this));
@@ -550,17 +563,21 @@ Server.prototype.confirmAccount = function (req,res) {
 		res.send(badConfLink);
 		return;
 	}
-	this.users.findOne({authcode:req.query.code},function (err,user) {
+	models.UserModel.findOne({authcode:req.query.code},function (err,user) {
 		if (!user) {
 			res.send(badConfLink);
 			return;
 		}
-		this.users.update({_id:user._id},{$set:{authed:true},$unset:{authcode:""}},function (err,result) {
+		user.authed = true;
+		delete user.authcode;
+		user.save(function (err) {
+			assert.ifError(err);
 			console.log('email confirm time',user);
 			res.send("E-Mail address successfully verified.");
-			var conn = activeUsers[user._id];
+			var conn = this.activeUsers[user._id];
 			if (!conn) return;
-			this.users.findOne({_id:user._id},function (err,self) {
+			// FIXME
+			models.UserModel.collection.findOne({_id:user._id},function (err,self) {
 				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
 			});
 		}.bind(this));
@@ -575,7 +592,7 @@ Server.prototype.confirmChange = function (req,res) {
 		res.send(badConfLink);
 		return;
 	}
-	this.users.findOne({changecode:req.query.code},function (err,user) {
+	models.UserModel.findOne({changecode:req.query.code},function (err,user) {
 		if (!user) {
 			res.send(badConfLink);
 			return;
@@ -583,17 +600,27 @@ Server.prototype.confirmChange = function (req,res) {
 		var age = Date.now() - user.changetime;
 		console.log('code age',age);
 		if (age > (sharedconfig.ChangeExpireTime*1000)) {
-			this.users.update({_id:user._id},{$unset:{changecode:"",changetime:""}},function (err,updated) {
+			delete user.changecode;
+			delete user.changetime;
+			user.save(function (err) {
+				assert.ifError(err);
 				res.send("error, change code expired");
 			}.bind(this));
 			return;
 		}
-		this.users.update({_id:user._id},{$set:{email:user.newemail,authed:true},$unset:{newemail:"",changecode:"",authcode:""}},function (err,result) {
+		user.email = user.newemail;
+		user.authed = true;
+		delete user.newemail;
+		delete user.changecode;
+		delete user.authcode;
+		user.save(function (err) {
+			assert.ifError(err);
 			console.log('email change time',user);
 			res.send("E-Mail address successfully changed.");
-			var conn = activeUsers[user._id];
+			var conn = this.activeUsers[user._id];
 			if (!conn) return;
-			this.users.findOne({_id:user._id},function (err,self) {
+			// FIXME
+			models.UserModel.collection.findOne({_id:user._id},function (err,self) {
 				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
 			});
 		}.bind(this));
@@ -608,7 +635,7 @@ Server.prototype.passwordReset = function (req,res) {
 		res.send(badConfLink);
 		return;
 	}
-	this.users.findOne({forgotcode:req.query.code},function (err,user) {
+	models.UserModel.findOne({forgotcode:req.query.code},function (err,user) {
 		if (!user) {
 			res.send(badConfLink);
 			return;
@@ -616,7 +643,10 @@ Server.prototype.passwordReset = function (req,res) {
 		var age = Date.now() - user.forgottime;
 		console.log('reset code age',age);
 		if (age > (sharedconfig.ForgotExpireTime*1000)) {
-			this.users.update({_id:user._id},{$unset:{forgotcode:"",forgottime:""}},function (err,updated) {
+			delete user.forgotcode;
+			delete user.forgottime;
+			user.save(function (err) {
+				assert.ifError(err);
 				res.send("Password reset link expired.");
 			}.bind(this));
 			return;
@@ -627,7 +657,12 @@ Server.prototype.passwordReset = function (req,res) {
 			hasher.update(salt);
 			hasher.update(newpassword);
 			var hash = hasher.digest();
-			this.users.update({_id:user._id},{$set:{password:hash,salt:salt},$unset:{forgotcode:"",forgottime:""}},function (err,result) {
+			user.password = hash;
+			user.salt = salt;
+			delete user.forgotcode;
+			delete user.forgottime;
+			user.save(function (err) {
+				asser.ifError(err);
 				console.log('password change time',user);
 				res.send("Password changed, new password sent to your E-Mail.");
 				var test = new SmtpConnection();

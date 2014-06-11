@@ -35,6 +35,7 @@ var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var differ = require('./differ');
+var mdb = require('./db');
 
 var Hand = deck.Hand;
 var Game = require('./game').Game;
@@ -158,7 +159,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		Game.init(db,activeGames,activeUsers,debugLogs,sharedconfig,getNextSequence,log,ClientSocket);
 	});
 
-	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log);
+	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log,makeUserProtobuf);
 
 	allUsers.createIndex("email",{unique:true}, function (err,res) {});
 	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
@@ -400,7 +401,9 @@ function bufferMatch(a,b) {
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	function finish(row) {
 		if (this.currentVersion) {
-			allUsers.update({_id:row._id},{$set:{currentVersion:this.currentVersion}},function () {
+			row.currentVersion = this.currentVersion;
+			row.save(function (err) {
+				assert.ifError(err);
 				finish2.call(this,row);
 			}.bind(this));
 		} else finish2.call(this,row);
@@ -489,10 +492,10 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 		finish.call(this,row);
 	} else */if (row.salt) {
 		var hasher = crypto.createHash('sha256');
-		hasher.update(row.salt.buffer);
+		hasher.update(row.salt);
 		hasher.update(password);
 		var hash = hasher.digest();
-		if (bufferMatch(hash,row.password.buffer)) {
+		if (bufferMatch(hash,row.password)) {
 			finish.call(this,row);
 		} else {
 			this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
@@ -596,7 +599,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 	else var key1 = 'installerid';
 	Config.findOne({_id:key1},function (err,row2) {
 		conn.collection('installers').findOne({_id:row2.value},function (err,targetVersion) {
-			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+			this.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
 			for (var x=0; x<params.files.length; x++) {
@@ -619,8 +622,8 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 					return cb();
 				}
 				if (clientFile.hash != targetFile) {
-					console.log('clientFile:%j',clientFile);
-					console.log('need to patch %s',clientFile.path);
+					this.log('clientFile:%j',clientFile);
+					this.log('need to patch %s',clientFile.path);
 					diffs.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
 						if (diffRow) {
@@ -644,7 +647,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 					cb();
 				}
 			}.bind(this),function () {
-				console.log('toUpdate:%j',toUpdate);
+				this.log('toUpdate:%j',toUpdate);
 				if (toUpdate.length == 0) {
 					this.currentVersion = targetVersion._id;
 				}
@@ -699,14 +702,17 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.error(e);
 				return;
 			}
-			allUsers.findOne({email:params.username},function (err,row) {
+			mdb.models.UserModel.findOne({email:params.username},function (err,row) {
 				assert.ifError(err);
 				if (row) {
 					if (row.changecode) {
 						var age = Date.now() - row.changetime;
 						console.log('code age',age);
 						if (age > (sharedconfig.changeexpire*1000)) {
-							allUsers.update({_id:row._id},{$unset:{changecode:"",changetime:""}},function (err,updated) {
+							delete row.changecode;
+							delete row.changetime;
+							row.save(function (err) {
+								assert.ifError(err);
 								this.doLogin(row,params.password,token);
 							}.bind(this));
 							return;
@@ -718,7 +724,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					}
 					this.doLogin(row,params.password,token);
 				} else {
-					allUsers.findOne({displayname:params.username},function (err,row) {
+					mdb.models.UserModel.findOne({displayname:params.username},function (err,row) {
 						assert.ifError(err);
 						if (!row) {
 							this.send(codes.srLoginReply,{login_status:'lrInvalid'},'Poker.LoginReply');
@@ -738,8 +744,14 @@ ClientSocket.prototype.handle = function (code,args) {
 				return;
 			}
 			console.log('register params',params);
+			var newuser = new mdb.models.UserModel();
+			newuser.email = params.email;
+			newuser.displayname = params.displayName;
+			newuser.authed = false;
+			newuser.chips = 0;
 			var doc = {email:params.email, displayname:params.displayName, tokens:100, authed:false, chips:0 };
 			doc.authcode = uuid.v4();
+			newuser.authcode = doc.authcode;
 			if (!regexLimits.email.exec(doc.email)) {
 				console.log('email invalid',doc.email);
 				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
@@ -766,26 +778,28 @@ ClientSocket.prototype.handle = function (code,args) {
 				var hash = hasher.digest();
 				doc.password = hash;
 				doc.salt = salt;
+				newuser.password = hash;
+				newuser.salt = salt;
 				// FIXME, case insensitive
-				allUsers.findOne({email:params.email},function (err,row) {
+				mdb.models.UserModel.findOne({email:params.email},function (err,row) {
 					if (row) {
-						console.log('found it',row);
-						console.log('error, dup!');
+						this.log('found it',row);
+						this.log('error, dup!');
 						this.send(codes.srRegisterReply,{status:'regDuplicateEmail'},'Poker.RegisterReply');
 					} else {
-						allUsers.findOne({displayname:params.displayName},function (err,row) {
+						mdb.models.UserModel.findOne({displayname:params.displayName},function (err,row) {
 							if (row) {
 							this.send(codes.srRegisterReply,{status:'regDupUsername'},'Poker.RegisterReply');
 							} else {
-								allUsers.insert(doc,function(err,result) {
+								newuser.save(function (err) {
 									if (err) {
 										console.log('error 1',err);
 										process.exit(1);
 									}
-									sendAuthEmail(result._id,doc.authcode,doc.email,doc.displayname, function fail1() {
+									sendAuthEmail(newuser._id,doc.authcode,doc.email,doc.displayname, function fail1() {
 										this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
-										allUsers.remove({_id:result[0]._id},function (err,res) {
-											this.log('delete done',err,res,result);
+										newuser.remove(function (err,res) {
+											this.log('delete done',err,res,newuser);
 										}.bind(this));
 									}.bind(this),function fail1() {
 										this.reply(0,"internal error");
@@ -813,12 +827,15 @@ ClientSocket.prototype.handle = function (code,args) {
 			var doc = {};
 			doc.forgotcode = uuid.v4();
 			doc.forgottime = Date.now();
-			allUsers.findOne({email:email},function (err,row) {
+			mdb.models.UserModel.findOne({email:email},function (err,row) {
 				if (!row) {
 					//this.reply(codes.SR_FORGOT_PASSWORD_OK,"invalid");
 					return;
 				}
-				allUsers.update({_id:row._id},{$set:doc},function (err,res) {
+				row.forgotcode = doc.forgotcode;
+				row.forgottime = doc.forgottime;
+				row.save(function (err,res) {
+					assert.ifError(err);
 					var test = new SmtpConnection();
 					var link = domain+'passwordreset?code='+doc.forgotcode;
 					var body = emailChange1({authlink:link});
@@ -1173,27 +1190,33 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.reply(0,'invalid email');
 				return;
 			}
-			allUsers.findOne({email:newemail},function (err,dup) {
+			mdb.models.UserModel.findOne({email:newemail},function (err,dup) {
 				if (dup) {
 					this.send(codes.srChangeMailReply,{status:'cmDuplicateMail'},'Poker.ChangeMailReply');
 					return;
 				}
 				var authcode = uuid.v4();
-				allUsers.update({_id:this.userid},{$set:{newemail:newemail, changecode:authcode, changetime: Date.now()}},function (err,res) {
-					if (err) {
-						console.log('email change error',err);
-						this.reply("000","internal error");
-						return;
-					}
-					var test = new SmtpConnection();
-					var link = domain+'confirmchange?code='+authcode;
-					test.sendMail(newemail,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+newemail+'\r\nSubject: E-Mail Change Verification\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
-						console.log('cb',err,ret);
+				mdb.models.UserModel.findById(this.userid,function (err,self) {
+					self.newemail = newemail;
+					self.changecode = authcode;
+					self.changetime = Date.now();
+					self.save(function (err) {
+						assert.ifError(err);
 						if (err) {
-							this.send(codes.srChangeMailReply,{status:'cmInvalidEmail'},'Poker.ChangeMailReply');
+							console.log('email change error',err);
+							this.reply("000","internal error");
 							return;
 						}
-						this.send(codes.srChangeMailReply,{status:'cmSuccess'},'Poker.ChangeMailReply');
+						var test = new SmtpConnection();
+						var link = domain+'confirmchange?code='+authcode;
+						test.sendMail(newemail,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+newemail+'\r\nSubject: E-Mail Change Verification\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
+							console.log('cb',err,ret);
+							if (err) {
+								this.send(codes.srChangeMailReply,{status:'cmInvalidEmail'},'Poker.ChangeMailReply');
+								return;
+							}
+							this.send(codes.srChangeMailReply,{status:'cmSuccess'},'Poker.ChangeMailReply');
+						}.bind(this));
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
@@ -2010,7 +2033,7 @@ handlers[codes.scFetchHandHistory] = function (args) {
 }*/
 handlers[codes.scQueryTableStats] = function (args,token) {
 	var params = pb.Parse(args,'Poker.QueryTableStats');
-	console.log('params:%j',params);
+	this.log('params:%j',params);
 	var ids = [];
 	var clublist = [];
 	var list2 = {};
