@@ -38,16 +38,53 @@ type
       FGame: TPB_Game;
       FCurrentGame: TGameType;
       FRake: Integer;
+      _has_bits_: Integer;
 
+    function has_MongoId: Boolean;
+    procedure set_MongoId;
+    procedure clear_MongoId;
     procedure SetMongoId(const AValue: TBytes);
+    function has_Seq: Boolean;
+    procedure set_Seq;
+    procedure clear_Seq;
     procedure SetSeq(const AValue: UINT32);
+    function has_Totalrake: Boolean;
+    procedure set_Totalrake;
+    procedure clear_Totalrake;
     procedure SetTotalrake(const AValue: UINT32);
+    function has_Players: Boolean;
+    procedure set_Players;
+    procedure clear_Players;
+    function has_Cards: Boolean;
+    procedure set_Cards;
+    procedure clear_Cards;
     procedure SetCards(const AValue: TBytes);
+    function has_Endtime: Boolean;
+    procedure set_Endtime;
+    procedure clear_Endtime;
     procedure SetEndtime(const AValue: UINT32);
+    function has_BalanceChanges: Boolean;
+    procedure set_BalanceChanges;
+    procedure clear_BalanceChanges;
     procedure SetBalanceChanges(const AValue: TArray<Integer>);
+    function has_Moves: Boolean;
+    procedure set_Moves;
+    procedure clear_Moves;
+    function has_Dealer: Boolean;
+    procedure set_Dealer;
+    procedure clear_Dealer;
     procedure SetDealer(const AValue: UINT32);
+    function has_Game: Boolean;
+    procedure set_Game;
+    procedure clear_Game;
     procedure SetGame(const AValue: TPB_Game);
+    function has_CurrentGame: Boolean;
+    procedure set_CurrentGame;
+    procedure clear_CurrentGame;
     procedure SetCurrentGame(const AValue: TGameType);
+    function has_Rake: Boolean;
+    procedure set_Rake;
+    procedure clear_Rake;
     procedure SetRake(const AValue: Integer);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
     procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
@@ -174,6 +211,21 @@ begin
   end;
 end;
 
+function TPB_HandHistory.has_MongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_HandHistory.set_MongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_HandHistory.clear_MongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_HandHistory.SetMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -184,10 +236,40 @@ begin
   ProtobufOutput.writeBytes(FN__ID, AValue);
 end;
 
+function TPB_HandHistory.has_Seq: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_HandHistory.set_Seq;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_HandHistory.clear_Seq;
+begin
+  _has_bits_ := _has_bits_ xor 2;
+end;
+
 procedure TPB_HandHistory.SetSeq(const AValue: UINT32);
 begin
   FSeq := AValue;
   ProtobufOutput.writeUInt32(FN_SEQ, AValue);
+end;
+
+function TPB_HandHistory.has_Totalrake: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_HandHistory.set_Totalrake;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_HandHistory.clear_Totalrake;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_HandHistory.SetTotalrake(const AValue: UINT32);
@@ -196,12 +278,42 @@ begin
   ProtobufOutput.writeUInt32(FN_TOTALRAKE, AValue);
 end;
 
+function TPB_HandHistory.has_Players: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_HandHistory.set_Players;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_HandHistory.clear_Players;
+begin
+  _has_bits_ := _has_bits_ xor 8;
+end;
+
 procedure TPB_HandHistory.PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(FN_PLAYERS,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+function TPB_HandHistory.has_Cards: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_HandHistory.set_Cards;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_HandHistory.clear_Cards;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_HandHistory.SetCards(const AValue: TBytes);
@@ -214,10 +326,40 @@ begin
   ProtobufOutput.writeBytes(FN_CARDS, AValue);
 end;
 
+function TPB_HandHistory.has_Endtime: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_HandHistory.set_Endtime;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_HandHistory.clear_Endtime;
+begin
+  _has_bits_ := _has_bits_ xor 32;
+end;
+
 procedure TPB_HandHistory.SetEndtime(const AValue: UINT32);
 begin
   FEndtime := AValue;
   ProtobufOutput.writeUInt32(FN_ENDTIME, AValue);
+end;
+
+function TPB_HandHistory.has_BalanceChanges: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_HandHistory.set_BalanceChanges;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_HandHistory.clear_BalanceChanges;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_HandHistory.SetBalanceChanges(const AValue: TArray<Integer>);
@@ -231,6 +373,21 @@ begin
     ProtobufOutput.writeInt32(FN_BALANCE_CHANGES, AValue[C1]);
 end;
 
+function TPB_HandHistory.has_Moves: Boolean;
+begin
+  Result := (_has_bits_ and 128) > 0;
+end;
+
+procedure TPB_HandHistory.set_Moves;
+begin
+  _has_bits_ := _has_bits_ or 128;
+end;
+
+procedure TPB_HandHistory.clear_Moves;
+begin
+  _has_bits_ := _has_bits_ xor 128;
+end;
+
 procedure TPB_HandHistory.MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
@@ -239,10 +396,40 @@ begin
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;
 
+function TPB_HandHistory.has_Dealer: Boolean;
+begin
+  Result := (_has_bits_ and 256) > 0;
+end;
+
+procedure TPB_HandHistory.set_Dealer;
+begin
+  _has_bits_ := _has_bits_ or 256;
+end;
+
+procedure TPB_HandHistory.clear_Dealer;
+begin
+  _has_bits_ := _has_bits_ xor 256;
+end;
+
 procedure TPB_HandHistory.SetDealer(const AValue: UINT32);
 begin
   FDealer := AValue;
   ProtobufOutput.writeUInt32(FN_DEALER, AValue);
+end;
+
+function TPB_HandHistory.has_Game: Boolean;
+begin
+  Result := (_has_bits_ and 512) > 0;
+end;
+
+procedure TPB_HandHistory.set_Game;
+begin
+  _has_bits_ := _has_bits_ or 512;
+end;
+
+procedure TPB_HandHistory.clear_Game;
+begin
+  _has_bits_ := _has_bits_ xor 512;
 end;
 
 procedure TPB_HandHistory.SetGame(const AValue: TPB_Game);
@@ -251,10 +438,40 @@ begin
   ProtobufOutput.writeMessage(FN_GAME, AValue.ProtobufOutput);
 end;
 
+function TPB_HandHistory.has_CurrentGame: Boolean;
+begin
+  Result := (_has_bits_ and 1024) > 0;
+end;
+
+procedure TPB_HandHistory.set_CurrentGame;
+begin
+  _has_bits_ := _has_bits_ or 1024;
+end;
+
+procedure TPB_HandHistory.clear_CurrentGame;
+begin
+  _has_bits_ := _has_bits_ xor 1024;
+end;
+
 procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
 begin
   FCurrentGame := AValue;
   ProtobufOutput.writeInt32(FN_CURRENT_GAME, Integer(AValue));
+end;
+
+function TPB_HandHistory.has_Rake: Boolean;
+begin
+  Result := (_has_bits_ and 2048) > 0;
+end;
+
+procedure TPB_HandHistory.set_Rake;
+begin
+  _has_bits_ := _has_bits_ or 2048;
+end;
+
+procedure TPB_HandHistory.clear_Rake;
+begin
+  _has_bits_ := _has_bits_ xor 2048;
 end;
 
 procedure TPB_HandHistory.SetRake(const AValue: Integer);

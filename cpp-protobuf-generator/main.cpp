@@ -175,24 +175,49 @@ class BaseGenerator : public CodeGenerator {
 void GenerateSettersDec(const Descriptor *message, io::Printer *printer) const {
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
+		printer->Print(
+				"    function has_$name$: Boolean;\n"
+				"    procedure set_$name$;\n"
+				"    procedure clear_$name$;\n"
+				,"name",PropertyName(field));
 		if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) continue;
 		const string type = getDelphiType(field);
 		
 		if (!type.empty()) {
-			printer->Print("    procedure Set$name$(const AValue: $type$);\n","name",PropertyName(field),"type",type);
+			printer->Print(
+				"    procedure Set$name$(const AValue: $type$);\n"
+				,"name",PropertyName(field),"type",type);
 		}
 	}
 }
 void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const {
 	string writter;
 	map<string,string> vars;
+	char hack[10];
 	for (int j=0; j<message->field_count(); j++) {
 		const FieldDescriptor *field = message->field(j);
 		const string type = getDelphiType(field);
+		assert(field->number() < 30);
+		snprintf(hack,10,"%d",1 << (field->number()-1));
+		vars["bit"] = hack;
+		vars["message"] = message->name();
+		vars["name"] = PropertyName(field);
+		printer->Print(vars,
+			"function TPB_$message$.has_$name$: Boolean;\n"
+			"begin\n"
+			"  Result := (_has_bits_ and $bit$) > 0;\n"
+			"end;\n\n"
+			"procedure TPB_$message$.set_$name$;\n"
+			"begin\n"
+			"  _has_bits_ := _has_bits_ or $bit$;\n"
+			"end;\n\n"
+			"procedure TPB_$message$.clear_$name$;\n"
+			"begin\n"
+			"  _has_bits_ := _has_bits_ xor $bit$;\n"
+			"end;\n\n"
+			);
 		if (type.empty()) continue;
 
-		vars["name"] = PropertyName(field);
-		vars["message"] = message->name();
 		vars["enum"] = EnumName(field);
 
 		if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) {
@@ -396,7 +421,9 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 					}
 				}
 			}
-			printer.Print("\n");
+			printer.Print(
+				"      _has_bits_: Integer;\n"
+				"\n");
 			GenerateSettersDec(message,&printer);
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
