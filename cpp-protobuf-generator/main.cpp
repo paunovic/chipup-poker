@@ -40,8 +40,8 @@ public:
 	string getReader() { return reader; }
 	string getWireType() { return wiretype; }
 	string getDelphiName() { return delphiName; }
-	void printPrivateVariable(io::Printer *printer) {
-		if (field->type() == FieldDescriptor::TYPE_BYTES) {
+	void printPrivateVariable(io::Printer *printer,const FieldDescriptor *field) {
+		if (this->type == FieldDescriptor::TYPE_BYTES) {
 			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 				printer->Print(
 					"      $name$: TArray<TBytes>;\n"
@@ -49,10 +49,9 @@ public:
 			} else {
 				printer->Print(
 					"      $name$: TBytes;\n"
-//							"      F$name$_size: Integer;\n"
 					,"name",PrivateFieldName(field));
 			}
-		} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+		} else if (this->type == FieldDescriptor::TYPE_ENUM) {
 			//if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
 			const EnumDescriptor *type = field->enum_type();
 			printer->Print(
@@ -60,7 +59,10 @@ public:
 				,"name",PrivateFieldName(field)
 				,"subname",type->name());
 		} else {
-			assert(0);
+			printer->Print(
+				"      $pname$: $type$;\n",
+				"pname",PrivateFieldName(field),
+				"type",delphiName);
 		}
 	}
 	
@@ -69,12 +71,17 @@ public:
 			TypeInfo copy = *this;
 			copy.setType(field);
 			return copy;
+		} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+			TypeInfo copy = *this;
+			copy.setEnum(field);
+			return copy;
 		}
 		return *this; // FIXME, enum, message
 	}
 private:
 	void setType(const FieldDescriptor *field) {
-		 this->field = field;
+		this->field = field;
+		this->type = field->type();
 		const Descriptor *subtype = field->message_type();
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 			delphiName = "TObjectList<TPB_"+subtype->name()+">";
@@ -82,12 +89,17 @@ private:
 			delphiName = "TPB_"+subtype->name();
 		}
 	}
+	void setEnum(const FieldDescriptor *field) {
+		const EnumDescriptor *subtype = field->enum_type();
+		delphiName = "T" + subtype->name();
+	}
 	string delphiName;
 	string writter;
 	string reader;
 	string wiretype;
 	string defaultdefault;
 	const FieldDescriptor *field;
+	FieldDescriptor::Type type;
 };
 TypeInfo *typeinfo[18];
 // taken from cpp_helpers.cc in protobuf
@@ -505,7 +517,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				if (!typeinfo[field->type()]) cerr << "cant get new type for " << field->name() << field->type() << endl;
 				assert(typeinfo[field->type()]);
 				TypeInfo instance = typeinfo[field->type()]->getInstance(field);
-				instance.printPrivateVariable(&printer);
+				instance.printPrivateVariable(&printer,field);
 			}
 			printer.Print(
 				"      _has_bits_: Integer;\n"
