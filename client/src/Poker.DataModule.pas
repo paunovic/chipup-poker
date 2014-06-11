@@ -244,7 +244,9 @@ begin
     begin
       mstream.Clear;
       ALoginReply.ReconnectTables[C1].ProtobufOutput.SaveToStream(mstream);
-      pbts := TPB_TableStatus.Create(mstream.Memory, mstream.Size);
+      DebugLn(EnumerateProperties(ALoginReply.ReconnectTables[C1]), ditUnknown);
+      pbts := TPB_TableStatus.Create(mstream);
+      DebugLn(EnumerateProperties(pbts), ditUnknown);
       FReconnectedTables.Add(pbts);
     end;
   finally
