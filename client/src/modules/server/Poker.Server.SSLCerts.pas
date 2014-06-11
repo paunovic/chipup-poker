@@ -26,6 +26,7 @@ var
   bio: PBio;
   rstream: TResourceStream;
 begin
+  // FIXME, catch the error about libeay32.dll being missing and handle it better
   InitializeSsl;
 
   rstream := TResourceStream.Create(HInstance, AResourceName, RT_RCDATA);
