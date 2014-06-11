@@ -12,17 +12,17 @@ type
   TPB_Club = class(TProtobufBaseObject)
   private
     const
-      FN__ID = 1;
-      FN_MEMBERS = 2;
-      FN_NAME = 3;
-      FN_OWNER = 4;
-      FN_PASSWORD = 5;
-      FN_IS_PRIVATE = 6;
-      FN_SEQ = 7;
-      FN_HAS_PASSWORD = 8;
-      FN_RAKE = 9;
-      FN_DEFAULT_BALANCE_LIMIT = 10;
-      FN_UNLIMITED_DEFAULT_BALANCE = 11;
+      kIdFieldNumber = 1;
+      kMembersFieldNumber = 2;
+      kNameFieldNumber = 3;
+      kOwnerFieldNumber = 4;
+      kPasswordFieldNumber = 5;
+      kIsPrivateFieldNumber = 6;
+      kSeqFieldNumber = 7;
+      kHasPasswordFieldNumber = 8;
+      kRakeFieldNumber = 9;
+      kDefaultBalanceLimitFieldNumber = 10;
+      kUnlimitedDefaultBalanceFieldNumber = 11;
 
     var
       FId: TBytes;
@@ -36,16 +36,39 @@ type
       FRake: UINT32;
       FDefaultBalanceLimit: UINT32;
       FUnlimitedDefaultBalance: Boolean;
+      _has_bits_: Integer;
 
+    procedure set_has_MongoId;
+    procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TBytes);
+    procedure set_has_Members;
+    procedure clear_has_Members;
+    procedure set_has_Name;
+    procedure clear_has_Name;
     procedure SetName(const AValue: String);
+    procedure set_has_Owner;
+    procedure clear_has_Owner;
     procedure SetOwner(const AValue: TBytes);
+    procedure set_has_Password;
+    procedure clear_has_Password;
     procedure SetPassword(const AValue: String);
+    procedure set_has_IsPrivate;
+    procedure clear_has_IsPrivate;
     procedure SetIsPrivate(const AValue: Boolean);
+    procedure set_has_Seq;
+    procedure clear_has_Seq;
     procedure SetSeq(const AValue: Integer);
+    procedure set_has_HasPassword;
+    procedure clear_has_HasPassword;
     procedure SetHasPassword(const AValue: Boolean);
+    procedure set_has_Rake;
+    procedure clear_has_Rake;
     procedure SetRake(const AValue: UINT32);
+    procedure set_has_DefaultBalanceLimit;
+    procedure clear_has_DefaultBalanceLimit;
     procedure SetDefaultBalanceLimit(const AValue: UINT32);
+    procedure set_has_UnlimitedDefaultBalance;
+    procedure clear_has_UnlimitedDefaultBalance;
     procedure SetUnlimitedDefaultBalance(const AValue: Boolean);
     procedure MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
 
@@ -57,17 +80,61 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE MongoId = 1;
+    function has_MongoId: Boolean;
+    procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
+
+    // LABEL TYPE Members = 2;
+    function has_Members: Boolean;
+    procedure clear_Members;
     property Members: TObjectList<TPB_ClubMember> read FMembers;
+
+    // LABEL TYPE Name = 3;
+    function has_Name: Boolean;
+    procedure clear_Name;
     property Name: String read FName write SetName;
+
+    // LABEL TYPE Owner = 4;
+    function has_Owner: Boolean;
+    procedure clear_Owner;
     property Owner: TBytes read FOwner write SetOwner;
+
+    // LABEL TYPE Password = 5;
+    function has_Password: Boolean;
+    procedure clear_Password;
     property Password: String read FPassword write SetPassword;
+
+    // LABEL TYPE IsPrivate = 6;
+    function has_IsPrivate: Boolean;
+    procedure clear_IsPrivate;
     property IsPrivate: Boolean read FIsPrivate write SetIsPrivate;
+
+    // LABEL TYPE Seq = 7;
+    function has_Seq: Boolean;
+    procedure clear_Seq;
     property Seq: Integer read FSeq write SetSeq;
+
+    // LABEL TYPE HasPassword = 8;
+    function has_HasPassword: Boolean;
+    procedure clear_HasPassword;
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
+
+    // LABEL TYPE Rake = 9;
+    function has_Rake: Boolean;
+    procedure clear_Rake;
     property Rake: UINT32 read FRake write SetRake;
+
+    // LABEL TYPE DefaultBalanceLimit = 10;
+    function has_DefaultBalanceLimit: Boolean;
+    procedure clear_DefaultBalanceLimit;
     property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
+
+    // LABEL TYPE UnlimitedDefaultBalance = 11;
+    function has_UnlimitedDefaultBalance: Boolean;
+    procedure clear_UnlimitedDefaultBalance;
     property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;
+
   end;
 
 implementation
@@ -105,47 +172,47 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN__ID: begin
+      kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
       end;
-      FN_MEMBERS: begin
+      kMembersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMembers.Add(TPB_ClubMember.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_NAME: begin
+      kNameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FName := AProtobufReader.readUtf8String;
       end;
-      FN_OWNER: begin
+      kOwnerFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FOwner);
       end;
-      FN_PASSWORD: begin
+      kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
       end;
-      FN_IS_PRIVATE: begin
+      kIsPrivateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FIsPrivate := AProtobufReader.readBoolean;
       end;
-      FN_SEQ: begin
+      kSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readInt32;
       end;
-      FN_HAS_PASSWORD: begin
+      kHasPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHasPassword := AProtobufReader.readBoolean;
       end;
-      FN_RAKE: begin
+      kRakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRake := AProtobufReader.readUInt32;
       end;
-      FN_DEFAULT_BALANCE_LIMIT: begin
+      kDefaultBalanceLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDefaultBalanceLimit := AProtobufReader.readUInt32;
       end;
-      FN_UNLIMITED_DEFAULT_BALANCE: begin
+      kUnlimitedDefaultBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUnlimitedDefaultBalance := AProtobufReader.readBoolean;
       end;
@@ -155,6 +222,27 @@ begin
   end;
 end;
 
+procedure TPB_Club.clear_MongoId;
+begin
+  SetLength(FId,0);
+  clear_has_MongoId;
+end;
+
+function TPB_Club.has_MongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_Club.set_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_Club.clear_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_Club.SetMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -162,21 +250,85 @@ begin
   SetLength(FId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN__ID, AValue);
+  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+end;
+
+procedure TPB_Club.clear_Members;
+begin
+  FMembers.Clear;
+  clear_has_Members;
+end;
+
+function TPB_Club.has_Members: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_Club.set_has_Members;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_Club.clear_has_Members;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_Club.MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_MEMBERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kMembersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_Club.clear_Name;
+begin
+  FName := '';
+  clear_has_Name;
+end;
+
+function TPB_Club.has_Name: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_Club.set_has_Name;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_Club.clear_has_Name;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_Club.SetName(const AValue: String);
 begin
   FName := AValue;
-  ProtobufOutput.writeString(FN_NAME, AValue);
+  ProtobufOutput.writeString(kNameFieldNumber, AValue);
+  set_has_Name;
+end;
+
+procedure TPB_Club.clear_Owner;
+begin
+  SetLength(FOwner,0);
+  clear_has_Owner;
+end;
+
+function TPB_Club.has_Owner: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_Club.set_has_Owner;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_Club.clear_has_Owner;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_Club.SetOwner(const AValue: TBytes);
@@ -186,49 +338,203 @@ begin
   SetLength(FOwner,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FOwner[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_OWNER, AValue);
+  ProtobufOutput.writeBytes(kOwnerFieldNumber, AValue);
+end;
+
+procedure TPB_Club.clear_Password;
+begin
+  FPassword := '';
+  clear_has_Password;
+end;
+
+function TPB_Club.has_Password: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_Club.set_has_Password;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_Club.clear_has_Password;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_Club.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
-  ProtobufOutput.writeString(FN_PASSWORD, AValue);
+  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  set_has_Password;
+end;
+
+procedure TPB_Club.clear_IsPrivate;
+begin
+  FIsPrivate := false;
+  clear_has_IsPrivate;
+end;
+
+function TPB_Club.has_IsPrivate: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_Club.set_has_IsPrivate;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_Club.clear_has_IsPrivate;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_Club.SetIsPrivate(const AValue: Boolean);
 begin
   FIsPrivate := AValue;
-  ProtobufOutput.writeBoolean(FN_IS_PRIVATE, AValue);
+  ProtobufOutput.writeBoolean(kIsPrivateFieldNumber, AValue);
+  set_has_IsPrivate;
+end;
+
+procedure TPB_Club.clear_Seq;
+begin
+  FSeq := 0;
+  clear_has_Seq;
+end;
+
+function TPB_Club.has_Seq: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_Club.set_has_Seq;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_Club.clear_has_Seq;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);
 begin
   FSeq := AValue;
-  ProtobufOutput.writeInt32(FN_SEQ, AValue);
+  ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
+  set_has_Seq;
+end;
+
+procedure TPB_Club.clear_HasPassword;
+begin
+  FHasPassword := false;
+  clear_has_HasPassword;
+end;
+
+function TPB_Club.has_HasPassword: Boolean;
+begin
+  Result := (_has_bits_ and 128) > 0;
+end;
+
+procedure TPB_Club.set_has_HasPassword;
+begin
+  _has_bits_ := _has_bits_ or 128;
+end;
+
+procedure TPB_Club.clear_has_HasPassword;
+begin
+  _has_bits_ := _has_bits_ xor 128;
 end;
 
 procedure TPB_Club.SetHasPassword(const AValue: Boolean);
 begin
   FHasPassword := AValue;
-  ProtobufOutput.writeBoolean(FN_HAS_PASSWORD, AValue);
+  ProtobufOutput.writeBoolean(kHasPasswordFieldNumber, AValue);
+  set_has_HasPassword;
+end;
+
+procedure TPB_Club.clear_Rake;
+begin
+  FRake := 0;
+  clear_has_Rake;
+end;
+
+function TPB_Club.has_Rake: Boolean;
+begin
+  Result := (_has_bits_ and 256) > 0;
+end;
+
+procedure TPB_Club.set_has_Rake;
+begin
+  _has_bits_ := _has_bits_ or 256;
+end;
+
+procedure TPB_Club.clear_has_Rake;
+begin
+  _has_bits_ := _has_bits_ xor 256;
 end;
 
 procedure TPB_Club.SetRake(const AValue: UINT32);
 begin
   FRake := AValue;
-  ProtobufOutput.writeUInt32(FN_RAKE, AValue);
+  ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
+  set_has_Rake;
+end;
+
+procedure TPB_Club.clear_DefaultBalanceLimit;
+begin
+  FDefaultBalanceLimit := 0;
+  clear_has_DefaultBalanceLimit;
+end;
+
+function TPB_Club.has_DefaultBalanceLimit: Boolean;
+begin
+  Result := (_has_bits_ and 512) > 0;
+end;
+
+procedure TPB_Club.set_has_DefaultBalanceLimit;
+begin
+  _has_bits_ := _has_bits_ or 512;
+end;
+
+procedure TPB_Club.clear_has_DefaultBalanceLimit;
+begin
+  _has_bits_ := _has_bits_ xor 512;
 end;
 
 procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UINT32);
 begin
   FDefaultBalanceLimit := AValue;
-  ProtobufOutput.writeUInt32(FN_DEFAULT_BALANCE_LIMIT, AValue);
+  ProtobufOutput.writeUInt32(kDefaultBalanceLimitFieldNumber, AValue);
+  set_has_DefaultBalanceLimit;
+end;
+
+procedure TPB_Club.clear_UnlimitedDefaultBalance;
+begin
+  FUnlimitedDefaultBalance := false;
+  clear_has_UnlimitedDefaultBalance;
+end;
+
+function TPB_Club.has_UnlimitedDefaultBalance: Boolean;
+begin
+  Result := (_has_bits_ and 1024) > 0;
+end;
+
+procedure TPB_Club.set_has_UnlimitedDefaultBalance;
+begin
+  _has_bits_ := _has_bits_ or 1024;
+end;
+
+procedure TPB_Club.clear_has_UnlimitedDefaultBalance;
+begin
+  _has_bits_ := _has_bits_ xor 1024;
 end;
 
 procedure TPB_Club.SetUnlimitedDefaultBalance(const AValue: Boolean);
 begin
   FUnlimitedDefaultBalance := AValue;
-  ProtobufOutput.writeBoolean(FN_UNLIMITED_DEFAULT_BALANCE, AValue);
+  ProtobufOutput.writeBoolean(kUnlimitedDefaultBalanceFieldNumber, AValue);
+  set_has_UnlimitedDefaultBalance;
 end;
 
 end.

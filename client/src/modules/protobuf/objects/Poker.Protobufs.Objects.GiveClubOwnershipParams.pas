@@ -12,22 +12,35 @@ type
   TPB_GiveClubOwnershipParams = class(TProtobufBaseObject)
   private
     const
-      FN_CLUB_SEQ = 1;
-      FN_PLAYER_MONGO_ID = 2;
+      kClubSeqFieldNumber = 1;
+      kPlayerMongoIdFieldNumber = 2;
 
     var
       FClubSeq: Integer;
       FPlayerMongoId: TBytes;
+      _has_bits_: Integer;
 
+    procedure set_has_ClubSeq;
+    procedure clear_has_ClubSeq;
     procedure SetClubSeq(const AValue: Integer);
+    procedure set_has_PlayerMongoId;
+    procedure clear_has_PlayerMongoId;
     procedure SetPlayerMongoId(const AValue: TBytes);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE ClubSeq = 1;
+    function has_ClubSeq: Boolean;
+    procedure clear_ClubSeq;
     property ClubSeq: Integer read FClubSeq write SetClubSeq;
+
+    // LABEL TYPE PlayerMongoId = 2;
+    function has_PlayerMongoId: Boolean;
+    procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+
   end;
 
 implementation
@@ -50,11 +63,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUB_SEQ: begin
+      kClubSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubSeq := AProtobufReader.readInt32;
       end;
-      FN_PLAYER_MONGO_ID: begin
+      kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
       end;
@@ -64,10 +77,53 @@ begin
   end;
 end;
 
+procedure TPB_GiveClubOwnershipParams.clear_ClubSeq;
+begin
+  FClubSeq := 0;
+  clear_has_ClubSeq;
+end;
+
+function TPB_GiveClubOwnershipParams.has_ClubSeq: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_GiveClubOwnershipParams.set_has_ClubSeq;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_GiveClubOwnershipParams.clear_has_ClubSeq;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_GiveClubOwnershipParams.SetClubSeq(const AValue: Integer);
 begin
   FClubSeq := AValue;
-  ProtobufOutput.writeInt32(FN_CLUB_SEQ, AValue);
+  ProtobufOutput.writeInt32(kClubSeqFieldNumber, AValue);
+  set_has_ClubSeq;
+end;
+
+procedure TPB_GiveClubOwnershipParams.clear_PlayerMongoId;
+begin
+  SetLength(FPlayerMongoId,0);
+  clear_has_PlayerMongoId;
+end;
+
+function TPB_GiveClubOwnershipParams.has_PlayerMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_GiveClubOwnershipParams.set_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_GiveClubOwnershipParams.clear_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_GiveClubOwnershipParams.SetPlayerMongoId(const AValue: TBytes);
@@ -77,7 +133,7 @@ begin
   SetLength(FPlayerMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_PLAYER_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
 end;
 
 end.

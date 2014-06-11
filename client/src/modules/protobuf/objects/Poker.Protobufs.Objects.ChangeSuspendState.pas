@@ -12,26 +12,45 @@ type
   TPB_ChangeSuspendState = class(TProtobufBaseObject)
   private
     const
-      FN_CLUB_MONGO_ID = 1;
-      FN_PLAYER_MONGO_ID = 3;
-      FN_SUSPENDED = 2;
+      kClubMongoIdFieldNumber = 1;
+      kPlayerMongoIdFieldNumber = 3;
+      kSuspendedFieldNumber = 2;
 
     var
       FClubMongoId: TBytes;
       FPlayerMongoId: TBytes;
       FSuspended: Boolean;
+      _has_bits_: Integer;
 
+    procedure set_has_ClubMongoId;
+    procedure clear_has_ClubMongoId;
     procedure SetClubMongoId(const AValue: TBytes);
+    procedure set_has_PlayerMongoId;
+    procedure clear_has_PlayerMongoId;
     procedure SetPlayerMongoId(const AValue: TBytes);
+    procedure set_has_Suspended;
+    procedure clear_has_Suspended;
     procedure SetSuspended(const AValue: Boolean);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE ClubMongoId = 1;
+    function has_ClubMongoId: Boolean;
+    procedure clear_ClubMongoId;
     property ClubMongoId: TBytes read FClubMongoId write SetClubMongoId;
+
+    // LABEL TYPE PlayerMongoId = 3;
+    function has_PlayerMongoId: Boolean;
+    procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+
+    // LABEL TYPE Suspended = 2;
+    function has_Suspended: Boolean;
+    procedure clear_Suspended;
     property Suspended: Boolean read FSuspended write SetSuspended;
+
   end;
 
 implementation
@@ -54,15 +73,15 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUB_MONGO_ID: begin
+      kClubMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubMongoId);
       end;
-      FN_PLAYER_MONGO_ID: begin
+      kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
       end;
-      FN_SUSPENDED: begin
+      kSuspendedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSuspended := AProtobufReader.readBoolean;
       end;
@@ -72,6 +91,27 @@ begin
   end;
 end;
 
+procedure TPB_ChangeSuspendState.clear_ClubMongoId;
+begin
+  SetLength(FClubMongoId,0);
+  clear_has_ClubMongoId;
+end;
+
+function TPB_ChangeSuspendState.has_ClubMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ChangeSuspendState.set_has_ClubMongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ChangeSuspendState.clear_has_ClubMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -79,7 +119,28 @@ begin
   SetLength(FClubMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FClubMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CLUB_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_ChangeSuspendState.clear_PlayerMongoId;
+begin
+  SetLength(FPlayerMongoId,0);
+  clear_has_PlayerMongoId;
+end;
+
+function TPB_ChangeSuspendState.has_PlayerMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_ChangeSuspendState.set_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_ChangeSuspendState.clear_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TBytes);
@@ -89,13 +150,35 @@ begin
   SetLength(FPlayerMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_PLAYER_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_ChangeSuspendState.clear_Suspended;
+begin
+  FSuspended := false;
+  clear_has_Suspended;
+end;
+
+function TPB_ChangeSuspendState.has_Suspended: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ChangeSuspendState.set_has_Suspended;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ChangeSuspendState.clear_has_Suspended;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ChangeSuspendState.SetSuspended(const AValue: Boolean);
 begin
   FSuspended := AValue;
-  ProtobufOutput.writeBoolean(FN_SUSPENDED, AValue);
+  ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
+  set_has_Suspended;
 end;
 
 end.

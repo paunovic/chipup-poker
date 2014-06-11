@@ -12,18 +12,25 @@ type
   TPB_ChangeEMailParams = class(TProtobufBaseObject)
   private
     const
-      FN_NEW_MAIL = 1;
+      kNewMailFieldNumber = 1;
 
     var
       FNewMail: String;
+      _has_bits_: Integer;
 
+    procedure set_has_NewMail;
+    procedure clear_has_NewMail;
     procedure SetNewMail(const AValue: String);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE NewMail = 1;
+    function has_NewMail: Boolean;
+    procedure clear_NewMail;
     property NewMail: String read FNewMail write SetNewMail;
+
   end;
 
 implementation
@@ -46,7 +53,7 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_NEW_MAIL: begin
+      kNewMailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FNewMail := AProtobufReader.readUtf8String;
       end;
@@ -56,10 +63,32 @@ begin
   end;
 end;
 
+procedure TPB_ChangeEMailParams.clear_NewMail;
+begin
+  FNewMail := '';
+  clear_has_NewMail;
+end;
+
+function TPB_ChangeEMailParams.has_NewMail: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ChangeEMailParams.set_has_NewMail;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ChangeEMailParams.clear_has_NewMail;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ChangeEMailParams.SetNewMail(const AValue: String);
 begin
   FNewMail := AValue;
-  ProtobufOutput.writeString(FN_NEW_MAIL, AValue);
+  ProtobufOutput.writeString(kNewMailFieldNumber, AValue);
+  set_has_NewMail;
 end;
 
 end.

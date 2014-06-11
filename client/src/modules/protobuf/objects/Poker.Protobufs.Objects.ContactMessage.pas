@@ -13,22 +13,35 @@ type
   TPB_ContactMessage = class(TProtobufBaseObject)
   private
     const
-      FN_REASON = 1;
-      FN_MESSAGE = 2;
+      kReasonFieldNumber = 1;
+      kMessageFieldNumber = 2;
 
     var
       FReason: TContactReason;
       FMessage: String;
+      _has_bits_: Integer;
 
+    procedure set_has_Reason;
+    procedure clear_has_Reason;
     procedure SetReason(const AValue: TContactReason);
+    procedure set_has_Message;
+    procedure clear_has_Message;
     procedure SetMessage(const AValue: String);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Reason = 1;
+    function has_Reason: Boolean;
+    procedure clear_Reason;
     property Reason: TContactReason read FReason write SetReason;
+
+    // LABEL TYPE Message = 2;
+    function has_Message: Boolean;
+    procedure clear_Message;
     property Message: String read FMessage write SetMessage;
+
   end;
 
 implementation
@@ -51,11 +64,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_REASON: begin
+      kReasonFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FReason := TContactReason(AProtobufReader.readEnum);
       end;
-      FN_MESSAGE: begin
+      kMessageFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMessage := AProtobufReader.readUtf8String;
       end;
@@ -65,16 +78,60 @@ begin
   end;
 end;
 
+procedure TPB_ContactMessage.clear_Reason;
+begin
+  FReason := TContactReason(0);
+  clear_has_Reason;
+end;
+
+function TPB_ContactMessage.has_Reason: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ContactMessage.set_has_Reason;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ContactMessage.clear_has_Reason;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ContactMessage.SetReason(const AValue: TContactReason);
 begin
   FReason := AValue;
-  ProtobufOutput.writeInt32(FN_REASON, Integer(AValue));
+  ProtobufOutput.writeInt32(kReasonFieldNumber, Integer(AValue));
+  set_has_Reason;
+end;
+
+procedure TPB_ContactMessage.clear_Message;
+begin
+  FMessage := '';
+  clear_has_Message;
+end;
+
+function TPB_ContactMessage.has_Message: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ContactMessage.set_has_Message;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ContactMessage.clear_has_Message;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ContactMessage.SetMessage(const AValue: String);
 begin
   FMessage := AValue;
-  ProtobufOutput.writeString(FN_MESSAGE, AValue);
+  ProtobufOutput.writeString(kMessageFieldNumber, AValue);
+  set_has_Message;
 end;
 
 end.

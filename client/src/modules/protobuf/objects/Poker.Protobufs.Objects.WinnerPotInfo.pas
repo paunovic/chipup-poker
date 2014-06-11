@@ -12,19 +12,28 @@ type
   TPB_WinnerPotInfo = class(TProtobufBaseObject)
   private
     const
-      FN_SUM = 1;
-      FN_SEATS = 2;
-      FN_WINNERDATA = 3;
-      FN_RAKE = 4;
+      kSumFieldNumber = 1;
+      kSeatsFieldNumber = 2;
+      kWinnerDataFieldNumber = 3;
+      kRakeFieldNumber = 4;
 
     var
       FSum: UINT32;
       FSeats: TArray<Integer>;
       FWinnerData: TObjectList<TPB_WinnerData>;
       FRake: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_Sum;
+    procedure clear_has_Sum;
     procedure SetSum(const AValue: UINT32);
+    procedure set_has_Seats;
+    procedure clear_has_Seats;
     procedure SetSeats(const AValue: TArray<Integer>);
+    procedure set_has_WinnerData;
+    procedure clear_has_WinnerData;
+    procedure set_has_Rake;
+    procedure clear_has_Rake;
     procedure SetRake(const AValue: UINT32);
     procedure WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 
@@ -36,10 +45,26 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Sum = 1;
+    function has_Sum: Boolean;
+    procedure clear_Sum;
     property Sum: UINT32 read FSum write SetSum;
+
+    // LABEL TYPE Seats = 2;
+    function has_Seats: Boolean;
+    procedure clear_Seats;
     property Seats: TArray<Integer> read FSeats write SetSeats;
+
+    // LABEL TYPE WinnerData = 3;
+    function has_WinnerData: Boolean;
+    procedure clear_WinnerData;
     property WinnerData: TObjectList<TPB_WinnerData> read FWinnerData;
+
+    // LABEL TYPE Rake = 4;
+    function has_Rake: Boolean;
+    procedure clear_Rake;
     property Rake: UINT32 read FRake write SetRake;
+
   end;
 
 implementation
@@ -77,20 +102,20 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_SUM: begin
+      kSumFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSum := AProtobufReader.readUInt32;
       end;
-      FN_SEATS: begin
+      kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FSeats, Length(FSeats) + 1);
         FSeats[Length(FSeats)-1] := AProtobufReader.readInt32;
       end;
-      FN_WINNERDATA: begin
+      kWinnerDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_RAKE: begin
+      kRakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRake := AProtobufReader.readUInt32;
       end;
@@ -100,10 +125,53 @@ begin
   end;
 end;
 
+procedure TPB_WinnerPotInfo.clear_Sum;
+begin
+  FSum := 0;
+  clear_has_Sum;
+end;
+
+function TPB_WinnerPotInfo.has_Sum: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_WinnerPotInfo.set_has_Sum;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_WinnerPotInfo.clear_has_Sum;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_WinnerPotInfo.SetSum(const AValue: UINT32);
 begin
   FSum := AValue;
-  ProtobufOutput.writeUInt32(FN_SUM, AValue);
+  ProtobufOutput.writeUInt32(kSumFieldNumber, AValue);
+  set_has_Sum;
+end;
+
+procedure TPB_WinnerPotInfo.clear_Seats;
+begin
+  FSeats := 0;
+  clear_has_Seats;
+end;
+
+function TPB_WinnerPotInfo.has_Seats: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_WinnerPotInfo.set_has_Seats;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_WinnerPotInfo.clear_has_Seats;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_WinnerPotInfo.SetSeats(const AValue: TArray<Integer>);
@@ -114,21 +182,64 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FSeats[C1] := AValue[C1];
   for C1 := 0 to Length(FSeats) - 1 do
-    ProtobufOutput.writeInt32(FN_SEATS, AValue[C1]);
+    ProtobufOutput.writeInt32(kSeatsFieldNumber, AValue[C1]);
+end;
+
+procedure TPB_WinnerPotInfo.clear_WinnerData;
+begin
+  FWinnerData.Clear;
+  clear_has_WinnerData;
+end;
+
+function TPB_WinnerPotInfo.has_WinnerData: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_WinnerPotInfo.set_has_WinnerData;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_WinnerPotInfo.clear_has_WinnerData;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_WinnerPotInfo.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_WINNERDATA,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kWinnerDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_WinnerPotInfo.clear_Rake;
+begin
+  FRake := 0;
+  clear_has_Rake;
+end;
+
+function TPB_WinnerPotInfo.has_Rake: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_WinnerPotInfo.set_has_Rake;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_WinnerPotInfo.clear_has_Rake;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_WinnerPotInfo.SetRake(const AValue: UINT32);
 begin
   FRake := AValue;
-  ProtobufOutput.writeUInt32(FN_RAKE, AValue);
+  ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
+  set_has_Rake;
 end;
 
 end.

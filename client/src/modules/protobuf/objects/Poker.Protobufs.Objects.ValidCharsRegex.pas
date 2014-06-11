@@ -12,12 +12,12 @@ type
   TPB_ValidCharsRegex = class(TProtobufBaseObject)
   private
     const
-      FN_EMAIL = 1;
-      FN_USERNAME = 2;
-      FN_PASSWORD = 3;
-      FN_CLUBNAME = 4;
-      FN_CLUBPASSWORD = 5;
-      FN_GAMENAME = 6;
+      kEmailFieldNumber = 1;
+      kUsernameFieldNumber = 2;
+      kPasswordFieldNumber = 3;
+      kClubnameFieldNumber = 4;
+      kClubpasswordFieldNumber = 5;
+      kGamenameFieldNumber = 6;
 
     var
       FEmail: String;
@@ -26,24 +26,61 @@ type
       FClubname: String;
       FClubpassword: String;
       FGamename: String;
+      _has_bits_: Integer;
 
+    procedure set_has_Email;
+    procedure clear_has_Email;
     procedure SetEmail(const AValue: String);
+    procedure set_has_Username;
+    procedure clear_has_Username;
     procedure SetUsername(const AValue: String);
+    procedure set_has_Password;
+    procedure clear_has_Password;
     procedure SetPassword(const AValue: String);
+    procedure set_has_Clubname;
+    procedure clear_has_Clubname;
     procedure SetClubname(const AValue: String);
+    procedure set_has_Clubpassword;
+    procedure clear_has_Clubpassword;
     procedure SetClubpassword(const AValue: String);
+    procedure set_has_Gamename;
+    procedure clear_has_Gamename;
     procedure SetGamename(const AValue: String);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Email = 1;
+    function has_Email: Boolean;
+    procedure clear_Email;
     property Email: String read FEmail write SetEmail;
+
+    // LABEL TYPE Username = 2;
+    function has_Username: Boolean;
+    procedure clear_Username;
     property Username: String read FUsername write SetUsername;
+
+    // LABEL TYPE Password = 3;
+    function has_Password: Boolean;
+    procedure clear_Password;
     property Password: String read FPassword write SetPassword;
+
+    // LABEL TYPE Clubname = 4;
+    function has_Clubname: Boolean;
+    procedure clear_Clubname;
     property Clubname: String read FClubname write SetClubname;
+
+    // LABEL TYPE Clubpassword = 5;
+    function has_Clubpassword: Boolean;
+    procedure clear_Clubpassword;
     property Clubpassword: String read FClubpassword write SetClubpassword;
+
+    // LABEL TYPE Gamename = 6;
+    function has_Gamename: Boolean;
+    procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;
+
   end;
 
 implementation
@@ -66,27 +103,27 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_EMAIL: begin
+      kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
       end;
-      FN_USERNAME: begin
+      kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsername := AProtobufReader.readUtf8String;
       end;
-      FN_PASSWORD: begin
+      kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
       end;
-      FN_CLUBNAME: begin
+      kClubnameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubname := AProtobufReader.readUtf8String;
       end;
-      FN_CLUBPASSWORD: begin
+      kClubpasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubpassword := AProtobufReader.readUtf8String;
       end;
-      FN_GAMENAME: begin
+      kGamenameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGamename := AProtobufReader.readUtf8String;
       end;
@@ -96,40 +133,172 @@ begin
   end;
 end;
 
+procedure TPB_ValidCharsRegex.clear_Email;
+begin
+  FEmail := '';
+  clear_has_Email;
+end;
+
+function TPB_ValidCharsRegex.has_Email: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ValidCharsRegex.set_has_Email;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ValidCharsRegex.clear_has_Email;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ValidCharsRegex.SetEmail(const AValue: String);
 begin
   FEmail := AValue;
-  ProtobufOutput.writeString(FN_EMAIL, AValue);
+  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  set_has_Email;
+end;
+
+procedure TPB_ValidCharsRegex.clear_Username;
+begin
+  FUsername := '';
+  clear_has_Username;
+end;
+
+function TPB_ValidCharsRegex.has_Username: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ValidCharsRegex.set_has_Username;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ValidCharsRegex.clear_has_Username;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ValidCharsRegex.SetUsername(const AValue: String);
 begin
   FUsername := AValue;
-  ProtobufOutput.writeString(FN_USERNAME, AValue);
+  ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
+  set_has_Username;
+end;
+
+procedure TPB_ValidCharsRegex.clear_Password;
+begin
+  FPassword := '';
+  clear_has_Password;
+end;
+
+function TPB_ValidCharsRegex.has_Password: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_ValidCharsRegex.set_has_Password;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_ValidCharsRegex.clear_has_Password;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_ValidCharsRegex.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
-  ProtobufOutput.writeString(FN_PASSWORD, AValue);
+  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  set_has_Password;
+end;
+
+procedure TPB_ValidCharsRegex.clear_Clubname;
+begin
+  FClubname := '';
+  clear_has_Clubname;
+end;
+
+function TPB_ValidCharsRegex.has_Clubname: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_ValidCharsRegex.set_has_Clubname;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_ValidCharsRegex.clear_has_Clubname;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_ValidCharsRegex.SetClubname(const AValue: String);
 begin
   FClubname := AValue;
-  ProtobufOutput.writeString(FN_CLUBNAME, AValue);
+  ProtobufOutput.writeString(kClubnameFieldNumber, AValue);
+  set_has_Clubname;
+end;
+
+procedure TPB_ValidCharsRegex.clear_Clubpassword;
+begin
+  FClubpassword := '';
+  clear_has_Clubpassword;
+end;
+
+function TPB_ValidCharsRegex.has_Clubpassword: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_ValidCharsRegex.set_has_Clubpassword;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_ValidCharsRegex.clear_has_Clubpassword;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_ValidCharsRegex.SetClubpassword(const AValue: String);
 begin
   FClubpassword := AValue;
-  ProtobufOutput.writeString(FN_CLUBPASSWORD, AValue);
+  ProtobufOutput.writeString(kClubpasswordFieldNumber, AValue);
+  set_has_Clubpassword;
+end;
+
+procedure TPB_ValidCharsRegex.clear_Gamename;
+begin
+  FGamename := '';
+  clear_has_Gamename;
+end;
+
+function TPB_ValidCharsRegex.has_Gamename: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_ValidCharsRegex.set_has_Gamename;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_ValidCharsRegex.clear_has_Gamename;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_ValidCharsRegex.SetGamename(const AValue: String);
 begin
   FGamename := AValue;
-  ProtobufOutput.writeString(FN_GAMENAME, AValue);
+  ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
+  set_has_Gamename;
 end;
 
 end.

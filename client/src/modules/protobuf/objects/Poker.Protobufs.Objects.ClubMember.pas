@@ -12,11 +12,11 @@ type
   TPB_ClubMember = class(TProtobufBaseObject)
   private
     const
-      FN__ID = 1;
-      FN_SUSPENDED = 2;
-      FN_BALANCE_LIMIT = 3;
-      FN_CLUB_BALANCE = 4;
-      FN_UNLIMITED_LIMIT = 5;
+      kIdFieldNumber = 1;
+      kSuspendedFieldNumber = 2;
+      kBalanceLimitFieldNumber = 3;
+      kClubBalanceFieldNumber = 4;
+      kUnlimitedLimitFieldNumber = 5;
 
     var
       FId: TBytes;
@@ -24,22 +24,53 @@ type
       FBalanceLimit: UINT32;
       FClubBalance: Integer;
       FUnlimitedLimit: Boolean;
+      _has_bits_: Integer;
 
+    procedure set_has_MongoId;
+    procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TBytes);
+    procedure set_has_Suspended;
+    procedure clear_has_Suspended;
     procedure SetSuspended(const AValue: Boolean);
+    procedure set_has_BalanceLimit;
+    procedure clear_has_BalanceLimit;
     procedure SetBalanceLimit(const AValue: UINT32);
+    procedure set_has_ClubBalance;
+    procedure clear_has_ClubBalance;
     procedure SetClubBalance(const AValue: Integer);
+    procedure set_has_UnlimitedLimit;
+    procedure clear_has_UnlimitedLimit;
     procedure SetUnlimitedLimit(const AValue: Boolean);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE MongoId = 1;
+    function has_MongoId: Boolean;
+    procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
+
+    // LABEL TYPE Suspended = 2;
+    function has_Suspended: Boolean;
+    procedure clear_Suspended;
     property Suspended: Boolean read FSuspended write SetSuspended;
+
+    // LABEL TYPE BalanceLimit = 3;
+    function has_BalanceLimit: Boolean;
+    procedure clear_BalanceLimit;
     property BalanceLimit: UINT32 read FBalanceLimit write SetBalanceLimit;
+
+    // LABEL TYPE ClubBalance = 4;
+    function has_ClubBalance: Boolean;
+    procedure clear_ClubBalance;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
+
+    // LABEL TYPE UnlimitedLimit = 5;
+    function has_UnlimitedLimit: Boolean;
+    procedure clear_UnlimitedLimit;
     property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
+
   end;
 
 implementation
@@ -62,23 +93,23 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN__ID: begin
+      kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
       end;
-      FN_SUSPENDED: begin
+      kSuspendedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSuspended := AProtobufReader.readBoolean;
       end;
-      FN_BALANCE_LIMIT: begin
+      kBalanceLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBalanceLimit := AProtobufReader.readUInt32;
       end;
-      FN_CLUB_BALANCE: begin
+      kClubBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubBalance := AProtobufReader.readInt32;
       end;
-      FN_UNLIMITED_LIMIT: begin
+      kUnlimitedLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUnlimitedLimit := AProtobufReader.readBoolean;
       end;
@@ -88,6 +119,27 @@ begin
   end;
 end;
 
+procedure TPB_ClubMember.clear_MongoId;
+begin
+  SetLength(FId,0);
+  clear_has_MongoId;
+end;
+
+function TPB_ClubMember.has_MongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ClubMember.set_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ClubMember.clear_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ClubMember.SetMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -95,31 +147,119 @@ begin
   SetLength(FId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN__ID, AValue);
+  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+end;
+
+procedure TPB_ClubMember.clear_Suspended;
+begin
+  FSuspended := false;
+  clear_has_Suspended;
+end;
+
+function TPB_ClubMember.has_Suspended: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ClubMember.set_has_Suspended;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ClubMember.clear_has_Suspended;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ClubMember.SetSuspended(const AValue: Boolean);
 begin
   FSuspended := AValue;
-  ProtobufOutput.writeBoolean(FN_SUSPENDED, AValue);
+  ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
+  set_has_Suspended;
+end;
+
+procedure TPB_ClubMember.clear_BalanceLimit;
+begin
+  FBalanceLimit := 0;
+  clear_has_BalanceLimit;
+end;
+
+function TPB_ClubMember.has_BalanceLimit: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_ClubMember.set_has_BalanceLimit;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_ClubMember.clear_has_BalanceLimit;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_ClubMember.SetBalanceLimit(const AValue: UINT32);
 begin
   FBalanceLimit := AValue;
-  ProtobufOutput.writeUInt32(FN_BALANCE_LIMIT, AValue);
+  ProtobufOutput.writeUInt32(kBalanceLimitFieldNumber, AValue);
+  set_has_BalanceLimit;
+end;
+
+procedure TPB_ClubMember.clear_ClubBalance;
+begin
+  FClubBalance := 0;
+  clear_has_ClubBalance;
+end;
+
+function TPB_ClubMember.has_ClubBalance: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_ClubMember.set_has_ClubBalance;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_ClubMember.clear_has_ClubBalance;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_ClubMember.SetClubBalance(const AValue: Integer);
 begin
   FClubBalance := AValue;
-  ProtobufOutput.writeInt32(FN_CLUB_BALANCE, AValue);
+  ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
+  set_has_ClubBalance;
+end;
+
+procedure TPB_ClubMember.clear_UnlimitedLimit;
+begin
+  FUnlimitedLimit := false;
+  clear_has_UnlimitedLimit;
+end;
+
+function TPB_ClubMember.has_UnlimitedLimit: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_ClubMember.set_has_UnlimitedLimit;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_ClubMember.clear_has_UnlimitedLimit;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_ClubMember.SetUnlimitedLimit(const AValue: Boolean);
 begin
   FUnlimitedLimit := AValue;
-  ProtobufOutput.writeBoolean(FN_UNLIMITED_LIMIT, AValue);
+  ProtobufOutput.writeBoolean(kUnlimitedLimitFieldNumber, AValue);
+  set_has_UnlimitedLimit;
 end;
 
 end.

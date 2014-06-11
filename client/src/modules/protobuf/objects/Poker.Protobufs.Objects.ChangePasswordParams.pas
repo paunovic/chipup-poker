@@ -12,18 +12,25 @@ type
   TPB_ChangePasswordParams = class(TProtobufBaseObject)
   private
     const
-      FN_NEW_PASSWORD = 1;
+      kNewPasswordFieldNumber = 1;
 
     var
       FNewPassword: String;
+      _has_bits_: Integer;
 
+    procedure set_has_NewPassword;
+    procedure clear_has_NewPassword;
     procedure SetNewPassword(const AValue: String);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE NewPassword = 1;
+    function has_NewPassword: Boolean;
+    procedure clear_NewPassword;
     property NewPassword: String read FNewPassword write SetNewPassword;
+
   end;
 
 implementation
@@ -46,7 +53,7 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_NEW_PASSWORD: begin
+      kNewPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FNewPassword := AProtobufReader.readUtf8String;
       end;
@@ -56,10 +63,32 @@ begin
   end;
 end;
 
+procedure TPB_ChangePasswordParams.clear_NewPassword;
+begin
+  FNewPassword := '';
+  clear_has_NewPassword;
+end;
+
+function TPB_ChangePasswordParams.has_NewPassword: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ChangePasswordParams.set_has_NewPassword;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ChangePasswordParams.clear_has_NewPassword;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);
 begin
   FNewPassword := AValue;
-  ProtobufOutput.writeString(FN_NEW_PASSWORD, AValue);
+  ProtobufOutput.writeString(kNewPasswordFieldNumber, AValue);
+  set_has_NewPassword;
 end;
 
 end.

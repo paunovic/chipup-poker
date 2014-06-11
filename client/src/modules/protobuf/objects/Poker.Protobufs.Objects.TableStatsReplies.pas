@@ -12,15 +12,22 @@ type
   TPB_TableStatsReplies = class(TProtobufBaseObject)
   private
     const
-      FN_REPLY = 1;
-      FN_PLAYERS = 2;
-      FN_CLUB_STATS = 3;
+      kReplyFieldNumber = 1;
+      kPlayersFieldNumber = 2;
+      kClubStatsFieldNumber = 3;
 
     var
       FReply: TObjectList<TPB_TableStatsReply>;
       FPlayers: TObjectList<TPB_User>;
       FClubStats: TObjectList<TPB_ClubStatsReply>;
+      _has_bits_: Integer;
 
+    procedure set_has_Reply;
+    procedure clear_has_Reply;
+    procedure set_has_Players;
+    procedure clear_has_Players;
+    procedure set_has_ClubStats;
+    procedure clear_has_ClubStats;
     procedure ReplyNotifyEvent(Sender: TObject; const Item: TPB_TableStatsReply; Action: TCollectionNotification);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
     procedure ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);
@@ -33,9 +40,21 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Reply = 1;
+    function has_Reply: Boolean;
+    procedure clear_Reply;
     property Reply: TObjectList<TPB_TableStatsReply> read FReply;
+
+    // LABEL TYPE Players = 2;
+    function has_Players: Boolean;
+    procedure clear_Players;
     property Players: TObjectList<TPB_User> read FPlayers;
+
+    // LABEL TYPE ClubStats = 3;
+    function has_ClubStats: Boolean;
+    procedure clear_ClubStats;
     property ClubStats: TObjectList<TPB_ClubStatsReply> read FClubStats;
+
   end;
 
 implementation
@@ -87,15 +106,15 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_REPLY: begin
+      kReplyFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FReply.Add(TPB_TableStatsReply.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_PLAYERS: begin
+      kPlayersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_CLUB_STATS: begin
+      kClubStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -105,26 +124,89 @@ begin
   end;
 end;
 
+procedure TPB_TableStatsReplies.clear_Reply;
+begin
+  FReply.Clear;
+  clear_has_Reply;
+end;
+
+function TPB_TableStatsReplies.has_Reply: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_TableStatsReplies.set_has_Reply;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_TableStatsReplies.clear_has_Reply;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_TableStatsReplies.ReplyNotifyEvent(Sender: TObject; const Item: TPB_TableStatsReply; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_REPLY,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kReplyFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatsReplies.clear_Players;
+begin
+  FPlayers.Clear;
+  clear_has_Players;
+end;
+
+function TPB_TableStatsReplies.has_Players: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_TableStatsReplies.set_has_Players;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_TableStatsReplies.clear_has_Players;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_TableStatsReplies.PlayersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_PLAYERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatsReplies.clear_ClubStats;
+begin
+  FClubStats.Clear;
+  clear_has_ClubStats;
+end;
+
+function TPB_TableStatsReplies.has_ClubStats: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_TableStatsReplies.set_has_ClubStats;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_TableStatsReplies.clear_has_ClubStats;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_TableStatsReplies.ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_CLUB_STATS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kClubStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

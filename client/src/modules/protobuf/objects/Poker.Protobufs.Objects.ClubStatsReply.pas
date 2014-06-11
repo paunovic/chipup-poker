@@ -12,14 +12,19 @@ type
   TPB_ClubStatsReply = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBID = 1;
-      FN_PLAYER_STATS = 2;
+      kClubidFieldNumber = 1;
+      kPlayerStatsFieldNumber = 2;
 
     var
       FClubid: TBytes;
       FPlayerStats: TObjectList<TPB_ClubPlayerStats>;
+      _has_bits_: Integer;
 
+    procedure set_has_Clubid;
+    procedure clear_has_Clubid;
     procedure SetClubid(const AValue: TBytes);
+    procedure set_has_PlayerStats;
+    procedure clear_has_PlayerStats;
     procedure PlayerStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubPlayerStats; Action: TCollectionNotification);
 
   protected
@@ -30,8 +35,16 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Clubid = 1;
+    function has_Clubid: Boolean;
+    procedure clear_Clubid;
     property Clubid: TBytes read FClubid write SetClubid;
+
+    // LABEL TYPE PlayerStats = 2;
+    function has_PlayerStats: Boolean;
+    procedure clear_PlayerStats;
     property PlayerStats: TObjectList<TPB_ClubPlayerStats> read FPlayerStats;
+
   end;
 
 implementation
@@ -69,11 +82,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUBID: begin
+      kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubid);
       end;
-      FN_PLAYER_STATS: begin
+      kPlayerStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -83,6 +96,27 @@ begin
   end;
 end;
 
+procedure TPB_ClubStatsReply.clear_Clubid;
+begin
+  SetLength(FClubid,0);
+  clear_has_Clubid;
+end;
+
+function TPB_ClubStatsReply.has_Clubid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ClubStatsReply.set_has_Clubid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ClubStatsReply.clear_has_Clubid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ClubStatsReply.SetClubid(const AValue: TBytes);
 var
   C1: Integer;
@@ -90,13 +124,34 @@ begin
   SetLength(FClubid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FClubid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CLUBID, AValue);
+  ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+end;
+
+procedure TPB_ClubStatsReply.clear_PlayerStats;
+begin
+  FPlayerStats.Clear;
+  clear_has_PlayerStats;
+end;
+
+function TPB_ClubStatsReply.has_PlayerStats: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ClubStatsReply.set_has_PlayerStats;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ClubStatsReply.clear_has_PlayerStats;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ClubStatsReply.PlayerStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubPlayerStats; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_PLAYER_STATS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kPlayerStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

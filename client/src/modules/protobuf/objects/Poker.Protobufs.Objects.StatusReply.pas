@@ -12,18 +12,27 @@ type
   TPB_StatusReply = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBS = 1;
-      FN_USERS = 2;
-      FN_SELF = 3;
-      FN_GAMES = 4;
+      kClubsFieldNumber = 1;
+      kUsersFieldNumber = 2;
+      kSelfFieldNumber = 3;
+      kGamesFieldNumber = 4;
 
     var
       FClubs: TObjectList<TPB_Club>;
       FUsers: TObjectList<TPB_User>;
       FSelf: TPB_User;
       FGames: TObjectList<TPB_Game>;
+      _has_bits_: Integer;
 
+    procedure set_has_Clubs;
+    procedure clear_has_Clubs;
+    procedure set_has_Users;
+    procedure clear_has_Users;
+    procedure set_has_Self;
+    procedure clear_has_Self;
     procedure SetSelf(const AValue: TPB_User);
+    procedure set_has_Games;
+    procedure clear_has_Games;
     procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
@@ -36,10 +45,26 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Clubs = 1;
+    function has_Clubs: Boolean;
+    procedure clear_Clubs;
     property Clubs: TObjectList<TPB_Club> read FClubs;
+
+    // LABEL TYPE Users = 2;
+    function has_Users: Boolean;
+    procedure clear_Users;
     property Users: TObjectList<TPB_User> read FUsers;
+
+    // LABEL TYPE Self = 3;
+    function has_Self: Boolean;
+    procedure clear_Self;
     property Self: TPB_User read FSelf write SetSelf;
+
+    // LABEL TYPE Games = 4;
+    function has_Games: Boolean;
+    procedure clear_Games;
     property Games: TObjectList<TPB_Game> read FGames;
+
   end;
 
 implementation
@@ -93,21 +118,21 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUBS: begin
+      kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_USERS: begin
+      kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_SELF: begin
+      kSelfFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FSelf) then
           FSelf := TPB_User.Create;
         FSelf.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
       end;
-      FN_GAMES: begin
+      kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -117,32 +142,117 @@ begin
   end;
 end;
 
+procedure TPB_StatusReply.clear_Clubs;
+begin
+  FClubs.Clear;
+  clear_has_Clubs;
+end;
+
+function TPB_StatusReply.has_Clubs: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_StatusReply.set_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_StatusReply.clear_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_StatusReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_CLUBS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_StatusReply.clear_Users;
+begin
+  FUsers.Clear;
+  clear_has_Users;
+end;
+
+function TPB_StatusReply.has_Users: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_StatusReply.set_has_Users;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_StatusReply.clear_has_Users;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_StatusReply.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_USERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_StatusReply.clear_Self;
+begin
+  FreeAndNil(FSelf);
+  clear_has_Self;
+end;
+
+function TPB_StatusReply.has_Self: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_StatusReply.set_has_Self;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_StatusReply.clear_has_Self;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_StatusReply.SetSelf(const AValue: TPB_User);
 begin
   FSelf := AValue;
-  ProtobufOutput.writeMessage(FN_SELF, AValue.ProtobufOutput);
+  ProtobufOutput.writeMessage(kSelfFieldNumber, AValue.ProtobufOutput);
+  set_has_Self;
+end;
+
+procedure TPB_StatusReply.clear_Games;
+begin
+  FGames.Clear;
+  clear_has_Games;
+end;
+
+function TPB_StatusReply.has_Games: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_StatusReply.set_has_Games;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_StatusReply.clear_has_Games;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_StatusReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_GAMES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

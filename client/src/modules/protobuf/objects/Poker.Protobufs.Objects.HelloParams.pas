@@ -12,14 +12,19 @@ type
   TPB_HelloParams = class(TProtobufBaseObject)
   private
     const
-      FN_DEBUG = 1;
-      FN_FILES = 2;
+      kDebugFieldNumber = 1;
+      kFilesFieldNumber = 2;
 
     var
       FDebug: Boolean;
       FFiles: TObjectList<TPB_UpdateFileInfo>;
+      _has_bits_: Integer;
 
+    procedure set_has_Debug;
+    procedure clear_has_Debug;
     procedure SetDebug(const AValue: Boolean);
+    procedure set_has_Files;
+    procedure clear_has_Files;
     procedure FilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 
   protected
@@ -30,8 +35,16 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Debug = 1;
+    function has_Debug: Boolean;
+    procedure clear_Debug;
     property Debug: Boolean read FDebug write SetDebug;
+
+    // LABEL TYPE Files = 2;
+    function has_Files: Boolean;
+    procedure clear_Files;
     property Files: TObjectList<TPB_UpdateFileInfo> read FFiles;
+
   end;
 
 implementation
@@ -69,11 +82,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_DEBUG: begin
+      kDebugFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDebug := AProtobufReader.readBoolean;
       end;
-      FN_FILES: begin
+      kFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -83,16 +96,59 @@ begin
   end;
 end;
 
+procedure TPB_HelloParams.clear_Debug;
+begin
+  FDebug := false;
+  clear_has_Debug;
+end;
+
+function TPB_HelloParams.has_Debug: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_HelloParams.set_has_Debug;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_HelloParams.clear_has_Debug;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_HelloParams.SetDebug(const AValue: Boolean);
 begin
   FDebug := AValue;
-  ProtobufOutput.writeBoolean(FN_DEBUG, AValue);
+  ProtobufOutput.writeBoolean(kDebugFieldNumber, AValue);
+  set_has_Debug;
+end;
+
+procedure TPB_HelloParams.clear_Files;
+begin
+  FFiles.Clear;
+  clear_has_Files;
+end;
+
+function TPB_HelloParams.has_Files: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_HelloParams.set_has_Files;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_HelloParams.clear_has_Files;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_HelloParams.FilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_FILES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

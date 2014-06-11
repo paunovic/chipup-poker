@@ -12,17 +12,24 @@ type
   TPB_ClubHandHistoryReply = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBID = 1;
-      FN_GAMEID = 2;
-      FN_ROWS = 3;
+      kClubidFieldNumber = 1;
+      kGameidFieldNumber = 2;
+      kRowsFieldNumber = 3;
 
     var
       FClubid: TBytes;
       FGameid: TBytes;
       FRows: TObjectList<TPB_HandHistory>;
+      _has_bits_: Integer;
 
+    procedure set_has_Clubid;
+    procedure clear_has_Clubid;
     procedure SetClubid(const AValue: TBytes);
+    procedure set_has_Gameid;
+    procedure clear_has_Gameid;
     procedure SetGameid(const AValue: TBytes);
+    procedure set_has_Rows;
+    procedure clear_has_Rows;
     procedure RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
 
   protected
@@ -33,9 +40,21 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Clubid = 1;
+    function has_Clubid: Boolean;
+    procedure clear_Clubid;
     property Clubid: TBytes read FClubid write SetClubid;
+
+    // LABEL TYPE Gameid = 2;
+    function has_Gameid: Boolean;
+    procedure clear_Gameid;
     property Gameid: TBytes read FGameid write SetGameid;
+
+    // LABEL TYPE Rows = 3;
+    function has_Rows: Boolean;
+    procedure clear_Rows;
     property Rows: TObjectList<TPB_HandHistory> read FRows;
+
   end;
 
 implementation
@@ -73,15 +92,15 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUBID: begin
+      kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubid);
       end;
-      FN_GAMEID: begin
+      kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameid);
       end;
-      FN_ROWS: begin
+      kRowsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FRows.Add(TPB_HandHistory.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -91,6 +110,27 @@ begin
   end;
 end;
 
+procedure TPB_ClubHandHistoryReply.clear_Clubid;
+begin
+  SetLength(FClubid,0);
+  clear_has_Clubid;
+end;
+
+function TPB_ClubHandHistoryReply.has_Clubid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ClubHandHistoryReply.set_has_Clubid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ClubHandHistoryReply.clear_has_Clubid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ClubHandHistoryReply.SetClubid(const AValue: TBytes);
 var
   C1: Integer;
@@ -98,7 +138,28 @@ begin
   SetLength(FClubid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FClubid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CLUBID, AValue);
+  ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+end;
+
+procedure TPB_ClubHandHistoryReply.clear_Gameid;
+begin
+  SetLength(FGameid,0);
+  clear_has_Gameid;
+end;
+
+function TPB_ClubHandHistoryReply.has_Gameid: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ClubHandHistoryReply.set_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ClubHandHistoryReply.clear_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ClubHandHistoryReply.SetGameid(const AValue: TBytes);
@@ -108,13 +169,34 @@ begin
   SetLength(FGameid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FGameid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_GAMEID, AValue);
+  ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+end;
+
+procedure TPB_ClubHandHistoryReply.clear_Rows;
+begin
+  FRows.Clear;
+  clear_has_Rows;
+end;
+
+function TPB_ClubHandHistoryReply.has_Rows: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_ClubHandHistoryReply.set_has_Rows;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_ClubHandHistoryReply.clear_has_Rows;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_ClubHandHistoryReply.RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_ROWS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kRowsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

@@ -13,16 +13,16 @@ type
   TPB_SeatInfo = class(TProtobufBaseObject)
   private
     const
-      FN_SEAT = 1;
-      FN_PLAYER_MONGO_ID = 2;
-      FN_CHIPS = 3;
-      FN_CARD_COUNT = 4;
-      FN_CARDS = 5;
-      FN_STATUS = 6;
-      FN_TIMEBANK = 7;
-      FN_CARDS_VISIBLE = 8;
-      FN_DISCONNECTED = 9;
-      FN_CAN_SHOW = 10;
+      kSeatFieldNumber = 1;
+      kPlayerMongoIdFieldNumber = 2;
+      kChipsFieldNumber = 3;
+      kCardCountFieldNumber = 4;
+      kCardsFieldNumber = 5;
+      kStatusFieldNumber = 6;
+      kTimebankFieldNumber = 7;
+      kCardsVisibleFieldNumber = 8;
+      kDisconnectedFieldNumber = 9;
+      kCanShowFieldNumber = 10;
 
     var
       FSeat: Integer;
@@ -35,32 +35,93 @@ type
       FCardsVisible: Boolean;
       FDisconnected: Boolean;
       FCanShow: Boolean;
+      _has_bits_: Integer;
 
+    procedure set_has_Seat;
+    procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
+    procedure set_has_PlayerMongoId;
+    procedure clear_has_PlayerMongoId;
     procedure SetPlayerMongoId(const AValue: TBytes);
+    procedure set_has_Chips;
+    procedure clear_has_Chips;
     procedure SetChips(const AValue: UINT32);
+    procedure set_has_CardCount;
+    procedure clear_has_CardCount;
     procedure SetCardCount(const AValue: Integer);
+    procedure set_has_Cards;
+    procedure clear_has_Cards;
     procedure SetCards(const AValue: TBytes);
+    procedure set_has_Status;
+    procedure clear_has_Status;
     procedure SetStatus(const AValue: TPlayerStatus);
+    procedure set_has_Timebank;
+    procedure clear_has_Timebank;
     procedure SetTimebank(const AValue: UINT32);
+    procedure set_has_CardsVisible;
+    procedure clear_has_CardsVisible;
     procedure SetCardsVisible(const AValue: Boolean);
+    procedure set_has_Disconnected;
+    procedure clear_has_Disconnected;
     procedure SetDisconnected(const AValue: Boolean);
+    procedure set_has_CanShow;
+    procedure clear_has_CanShow;
     procedure SetCanShow(const AValue: Boolean);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Seat = 1;
+    function has_Seat: Boolean;
+    procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
+
+    // LABEL TYPE PlayerMongoId = 2;
+    function has_PlayerMongoId: Boolean;
+    procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+
+    // LABEL TYPE Chips = 3;
+    function has_Chips: Boolean;
+    procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;
+
+    // LABEL TYPE CardCount = 4;
+    function has_CardCount: Boolean;
+    procedure clear_CardCount;
     property CardCount: Integer read FCardCount write SetCardCount;
+
+    // LABEL TYPE Cards = 5;
+    function has_Cards: Boolean;
+    procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
+
+    // LABEL TYPE Status = 6;
+    function has_Status: Boolean;
+    procedure clear_Status;
     property Status: TPlayerStatus read FStatus write SetStatus;
+
+    // LABEL TYPE Timebank = 7;
+    function has_Timebank: Boolean;
+    procedure clear_Timebank;
     property Timebank: UINT32 read FTimebank write SetTimebank;
+
+    // LABEL TYPE CardsVisible = 8;
+    function has_CardsVisible: Boolean;
+    procedure clear_CardsVisible;
     property CardsVisible: Boolean read FCardsVisible write SetCardsVisible;
+
+    // LABEL TYPE Disconnected = 9;
+    function has_Disconnected: Boolean;
+    procedure clear_Disconnected;
     property Disconnected: Boolean read FDisconnected write SetDisconnected;
+
+    // LABEL TYPE CanShow = 10;
+    function has_CanShow: Boolean;
+    procedure clear_CanShow;
     property CanShow: Boolean read FCanShow write SetCanShow;
+
   end;
 
 implementation
@@ -83,43 +144,43 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_SEAT: begin
+      kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
       end;
-      FN_PLAYER_MONGO_ID: begin
+      kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
       end;
-      FN_CHIPS: begin
+      kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
       end;
-      FN_CARD_COUNT: begin
+      kCardCountFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCardCount := AProtobufReader.readInt32;
       end;
-      FN_CARDS: begin
+      kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCards);
       end;
-      FN_STATUS: begin
+      kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TPlayerStatus(AProtobufReader.readEnum);
       end;
-      FN_TIMEBANK: begin
+      kTimebankFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTimebank := AProtobufReader.readUInt32;
       end;
-      FN_CARDS_VISIBLE: begin
+      kCardsVisibleFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCardsVisible := AProtobufReader.readBoolean;
       end;
-      FN_DISCONNECTED: begin
+      kDisconnectedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDisconnected := AProtobufReader.readBoolean;
       end;
-      FN_CAN_SHOW: begin
+      kCanShowFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCanShow := AProtobufReader.readBoolean;
       end;
@@ -129,10 +190,53 @@ begin
   end;
 end;
 
+procedure TPB_SeatInfo.clear_Seat;
+begin
+  FSeat := 0;
+  clear_has_Seat;
+end;
+
+function TPB_SeatInfo.has_Seat: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_Seat;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_SeatInfo.clear_has_Seat;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
-  ProtobufOutput.writeInt32(FN_SEAT, AValue);
+  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  set_has_Seat;
+end;
+
+procedure TPB_SeatInfo.clear_PlayerMongoId;
+begin
+  SetLength(FPlayerMongoId,0);
+  clear_has_PlayerMongoId;
+end;
+
+function TPB_SeatInfo.has_PlayerMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_SeatInfo.clear_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TBytes);
@@ -142,19 +246,84 @@ begin
   SetLength(FPlayerMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_PLAYER_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_SeatInfo.clear_Chips;
+begin
+  FChips := 0;
+  clear_has_Chips;
+end;
+
+function TPB_SeatInfo.has_Chips: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_Chips;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_SeatInfo.clear_has_Chips;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_SeatInfo.SetChips(const AValue: UINT32);
 begin
   FChips := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
+  ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
+  set_has_Chips;
+end;
+
+procedure TPB_SeatInfo.clear_CardCount;
+begin
+  FCardCount := 0;
+  clear_has_CardCount;
+end;
+
+function TPB_SeatInfo.has_CardCount: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_CardCount;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_SeatInfo.clear_has_CardCount;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_SeatInfo.SetCardCount(const AValue: Integer);
 begin
   FCardCount := AValue;
-  ProtobufOutput.writeInt32(FN_CARD_COUNT, AValue);
+  ProtobufOutput.writeInt32(kCardCountFieldNumber, AValue);
+  set_has_CardCount;
+end;
+
+procedure TPB_SeatInfo.clear_Cards;
+begin
+  SetLength(FCards,0);
+  clear_has_Cards;
+end;
+
+function TPB_SeatInfo.has_Cards: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_Cards;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_SeatInfo.clear_has_Cards;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_SeatInfo.SetCards(const AValue: TBytes);
@@ -164,37 +333,147 @@ begin
   SetLength(FCards,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FCards[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CARDS, AValue);
+  ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+end;
+
+procedure TPB_SeatInfo.clear_Status;
+begin
+  FStatus := TPlayerStatus(0);
+  clear_has_Status;
+end;
+
+function TPB_SeatInfo.has_Status: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_Status;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_SeatInfo.clear_has_Status;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
 begin
   FStatus := AValue;
-  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
+  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  set_has_Status;
+end;
+
+procedure TPB_SeatInfo.clear_Timebank;
+begin
+  FTimebank := 0;
+  clear_has_Timebank;
+end;
+
+function TPB_SeatInfo.has_Timebank: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_Timebank;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_SeatInfo.clear_has_Timebank;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_SeatInfo.SetTimebank(const AValue: UINT32);
 begin
   FTimebank := AValue;
-  ProtobufOutput.writeUInt32(FN_TIMEBANK, AValue);
+  ProtobufOutput.writeUInt32(kTimebankFieldNumber, AValue);
+  set_has_Timebank;
+end;
+
+procedure TPB_SeatInfo.clear_CardsVisible;
+begin
+  FCardsVisible := false;
+  clear_has_CardsVisible;
+end;
+
+function TPB_SeatInfo.has_CardsVisible: Boolean;
+begin
+  Result := (_has_bits_ and 128) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_CardsVisible;
+begin
+  _has_bits_ := _has_bits_ or 128;
+end;
+
+procedure TPB_SeatInfo.clear_has_CardsVisible;
+begin
+  _has_bits_ := _has_bits_ xor 128;
 end;
 
 procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
 begin
   FCardsVisible := AValue;
-  ProtobufOutput.writeBoolean(FN_CARDS_VISIBLE, AValue);
+  ProtobufOutput.writeBoolean(kCardsVisibleFieldNumber, AValue);
+  set_has_CardsVisible;
+end;
+
+procedure TPB_SeatInfo.clear_Disconnected;
+begin
+  FDisconnected := false;
+  clear_has_Disconnected;
+end;
+
+function TPB_SeatInfo.has_Disconnected: Boolean;
+begin
+  Result := (_has_bits_ and 256) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_Disconnected;
+begin
+  _has_bits_ := _has_bits_ or 256;
+end;
+
+procedure TPB_SeatInfo.clear_has_Disconnected;
+begin
+  _has_bits_ := _has_bits_ xor 256;
 end;
 
 procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
 begin
   FDisconnected := AValue;
-  ProtobufOutput.writeBoolean(FN_DISCONNECTED, AValue);
+  ProtobufOutput.writeBoolean(kDisconnectedFieldNumber, AValue);
+  set_has_Disconnected;
+end;
+
+procedure TPB_SeatInfo.clear_CanShow;
+begin
+  FCanShow := false;
+  clear_has_CanShow;
+end;
+
+function TPB_SeatInfo.has_CanShow: Boolean;
+begin
+  Result := (_has_bits_ and 512) > 0;
+end;
+
+procedure TPB_SeatInfo.set_has_CanShow;
+begin
+  _has_bits_ := _has_bits_ or 512;
+end;
+
+procedure TPB_SeatInfo.clear_has_CanShow;
+begin
+  _has_bits_ := _has_bits_ xor 512;
 end;
 
 procedure TPB_SeatInfo.SetCanShow(const AValue: Boolean);
 begin
   FCanShow := AValue;
-  ProtobufOutput.writeBoolean(FN_CAN_SHOW, AValue);
+  ProtobufOutput.writeBoolean(kCanShowFieldNumber, AValue);
+  set_has_CanShow;
 end;
 
 end.

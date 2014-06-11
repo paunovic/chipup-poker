@@ -13,11 +13,11 @@ type
   TPB_UpdateFileInfo = class(TProtobufBaseObject)
   private
     const
-      FN_PATH = 1;
-      FN_HASH = 2;
-      FN_URL = 3;
-      FN_FILE_TYPE = 4;
-      FN_FILE_SIZE = 5;
+      kPathFieldNumber = 1;
+      kHashFieldNumber = 2;
+      kUrlFieldNumber = 3;
+      kFileTypeFieldNumber = 4;
+      kFileSizeFieldNumber = 5;
 
     var
       FPath: String;
@@ -25,22 +25,53 @@ type
       FUrl: String;
       FFileType: TUpdateFileType;
       FFileSize: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_Path;
+    procedure clear_has_Path;
     procedure SetPath(const AValue: String);
+    procedure set_has_Hash;
+    procedure clear_has_Hash;
     procedure SetHash(const AValue: TBytes);
+    procedure set_has_Url;
+    procedure clear_has_Url;
     procedure SetUrl(const AValue: String);
+    procedure set_has_FileType;
+    procedure clear_has_FileType;
     procedure SetFileType(const AValue: TUpdateFileType);
+    procedure set_has_FileSize;
+    procedure clear_has_FileSize;
     procedure SetFileSize(const AValue: UINT32);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Path = 1;
+    function has_Path: Boolean;
+    procedure clear_Path;
     property Path: String read FPath write SetPath;
+
+    // LABEL TYPE Hash = 2;
+    function has_Hash: Boolean;
+    procedure clear_Hash;
     property Hash: TBytes read FHash write SetHash;
+
+    // LABEL TYPE Url = 3;
+    function has_Url: Boolean;
+    procedure clear_Url;
     property Url: String read FUrl write SetUrl;
+
+    // LABEL TYPE FileType = 4;
+    function has_FileType: Boolean;
+    procedure clear_FileType;
     property FileType: TUpdateFileType read FFileType write SetFileType;
+
+    // LABEL TYPE FileSize = 5;
+    function has_FileSize: Boolean;
+    procedure clear_FileSize;
     property FileSize: UINT32 read FFileSize write SetFileSize;
+
   end;
 
 implementation
@@ -63,23 +94,23 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_PATH: begin
+      kPathFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPath := AProtobufReader.readUtf8String;
       end;
-      FN_HASH: begin
+      kHashFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FHash);
       end;
-      FN_URL: begin
+      kUrlFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUrl := AProtobufReader.readUtf8String;
       end;
-      FN_FILE_TYPE: begin
+      kFileTypeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FFileType := TUpdateFileType(AProtobufReader.readEnum);
       end;
-      FN_FILE_SIZE: begin
+      kFileSizeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FFileSize := AProtobufReader.readUInt32;
       end;
@@ -89,10 +120,53 @@ begin
   end;
 end;
 
+procedure TPB_UpdateFileInfo.clear_Path;
+begin
+  FPath := '';
+  clear_has_Path;
+end;
+
+function TPB_UpdateFileInfo.has_Path: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_UpdateFileInfo.set_has_Path;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_UpdateFileInfo.clear_has_Path;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_UpdateFileInfo.SetPath(const AValue: String);
 begin
   FPath := AValue;
-  ProtobufOutput.writeString(FN_PATH, AValue);
+  ProtobufOutput.writeString(kPathFieldNumber, AValue);
+  set_has_Path;
+end;
+
+procedure TPB_UpdateFileInfo.clear_Hash;
+begin
+  SetLength(FHash,0);
+  clear_has_Hash;
+end;
+
+function TPB_UpdateFileInfo.has_Hash: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_UpdateFileInfo.set_has_Hash;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_UpdateFileInfo.clear_has_Hash;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_UpdateFileInfo.SetHash(const AValue: TBytes);
@@ -102,25 +176,91 @@ begin
   SetLength(FHash,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FHash[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_HASH, AValue);
+  ProtobufOutput.writeBytes(kHashFieldNumber, AValue);
+end;
+
+procedure TPB_UpdateFileInfo.clear_Url;
+begin
+  FUrl := '';
+  clear_has_Url;
+end;
+
+function TPB_UpdateFileInfo.has_Url: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_UpdateFileInfo.set_has_Url;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_UpdateFileInfo.clear_has_Url;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_UpdateFileInfo.SetUrl(const AValue: String);
 begin
   FUrl := AValue;
-  ProtobufOutput.writeString(FN_URL, AValue);
+  ProtobufOutput.writeString(kUrlFieldNumber, AValue);
+  set_has_Url;
+end;
+
+procedure TPB_UpdateFileInfo.clear_FileType;
+begin
+  FFileType := TUpdateFileType(0);
+  clear_has_FileType;
+end;
+
+function TPB_UpdateFileInfo.has_FileType: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_UpdateFileInfo.set_has_FileType;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_UpdateFileInfo.clear_has_FileType;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_UpdateFileInfo.SetFileType(const AValue: TUpdateFileType);
 begin
   FFileType := AValue;
-  ProtobufOutput.writeInt32(FN_FILE_TYPE, Integer(AValue));
+  ProtobufOutput.writeInt32(kFileTypeFieldNumber, Integer(AValue));
+  set_has_FileType;
+end;
+
+procedure TPB_UpdateFileInfo.clear_FileSize;
+begin
+  FFileSize := 0;
+  clear_has_FileSize;
+end;
+
+function TPB_UpdateFileInfo.has_FileSize: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_UpdateFileInfo.set_has_FileSize;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_UpdateFileInfo.clear_has_FileSize;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UINT32);
 begin
   FFileSize := AValue;
-  ProtobufOutput.writeUInt32(FN_FILE_SIZE, AValue);
+  ProtobufOutput.writeUInt32(kFileSizeFieldNumber, AValue);
+  set_has_FileSize;
 end;
 
 end.

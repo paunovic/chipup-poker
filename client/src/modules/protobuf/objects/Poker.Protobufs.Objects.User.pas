@@ -12,12 +12,12 @@ type
   TPB_User = class(TProtobufBaseObject)
   private
     const
-      FN__ID = 1;
-      FN_AVATAR = 2;
-      FN_DISPLAYNAME = 3;
-      FN_EMAIL = 5;
-      FN_AUTHED = 6;
-      FN_CHIPS = 7;
+      kIdFieldNumber = 1;
+      kAvatarFieldNumber = 2;
+      kDisplaynameFieldNumber = 3;
+      kEmailFieldNumber = 5;
+      kAuthedFieldNumber = 6;
+      kChipsFieldNumber = 7;
 
     var
       FId: TBytes;
@@ -26,24 +26,61 @@ type
       FEmail: String;
       FAuthed: Boolean;
       FChips: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_MongoId;
+    procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TBytes);
+    procedure set_has_Avatar;
+    procedure clear_has_Avatar;
     procedure SetAvatar(const AValue: TBytes);
+    procedure set_has_Displayname;
+    procedure clear_has_Displayname;
     procedure SetDisplayname(const AValue: String);
+    procedure set_has_Email;
+    procedure clear_has_Email;
     procedure SetEmail(const AValue: String);
+    procedure set_has_Authed;
+    procedure clear_has_Authed;
     procedure SetAuthed(const AValue: Boolean);
+    procedure set_has_Chips;
+    procedure clear_has_Chips;
     procedure SetChips(const AValue: UINT32);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE MongoId = 1;
+    function has_MongoId: Boolean;
+    procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
+
+    // LABEL TYPE Avatar = 2;
+    function has_Avatar: Boolean;
+    procedure clear_Avatar;
     property Avatar: TBytes read FAvatar write SetAvatar;
+
+    // LABEL TYPE Displayname = 3;
+    function has_Displayname: Boolean;
+    procedure clear_Displayname;
     property Displayname: String read FDisplayname write SetDisplayname;
+
+    // LABEL TYPE Email = 5;
+    function has_Email: Boolean;
+    procedure clear_Email;
     property Email: String read FEmail write SetEmail;
+
+    // LABEL TYPE Authed = 6;
+    function has_Authed: Boolean;
+    procedure clear_Authed;
     property Authed: Boolean read FAuthed write SetAuthed;
+
+    // LABEL TYPE Chips = 7;
+    function has_Chips: Boolean;
+    procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;
+
   end;
 
 implementation
@@ -66,27 +103,27 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN__ID: begin
+      kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
       end;
-      FN_AVATAR: begin
+      kAvatarFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FAvatar);
       end;
-      FN_DISPLAYNAME: begin
+      kDisplaynameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FDisplayname := AProtobufReader.readUtf8String;
       end;
-      FN_EMAIL: begin
+      kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
       end;
-      FN_AUTHED: begin
+      kAuthedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FAuthed := AProtobufReader.readBoolean;
       end;
-      FN_CHIPS: begin
+      kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
       end;
@@ -96,6 +133,27 @@ begin
   end;
 end;
 
+procedure TPB_User.clear_MongoId;
+begin
+  SetLength(FId,0);
+  clear_has_MongoId;
+end;
+
+function TPB_User.has_MongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_User.set_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_User.clear_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_User.SetMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -103,7 +161,28 @@ begin
   SetLength(FId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN__ID, AValue);
+  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+end;
+
+procedure TPB_User.clear_Avatar;
+begin
+  SetLength(FAvatar,0);
+  clear_has_Avatar;
+end;
+
+function TPB_User.has_Avatar: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_User.set_has_Avatar;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_User.clear_has_Avatar;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_User.SetAvatar(const AValue: TBytes);
@@ -113,31 +192,119 @@ begin
   SetLength(FAvatar,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FAvatar[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_AVATAR, AValue);
+  ProtobufOutput.writeBytes(kAvatarFieldNumber, AValue);
+end;
+
+procedure TPB_User.clear_Displayname;
+begin
+  FDisplayname := '';
+  clear_has_Displayname;
+end;
+
+function TPB_User.has_Displayname: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_User.set_has_Displayname;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_User.clear_has_Displayname;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_User.SetDisplayname(const AValue: String);
 begin
   FDisplayname := AValue;
-  ProtobufOutput.writeString(FN_DISPLAYNAME, AValue);
+  ProtobufOutput.writeString(kDisplaynameFieldNumber, AValue);
+  set_has_Displayname;
+end;
+
+procedure TPB_User.clear_Email;
+begin
+  FEmail := '';
+  clear_has_Email;
+end;
+
+function TPB_User.has_Email: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_User.set_has_Email;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_User.clear_has_Email;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_User.SetEmail(const AValue: String);
 begin
   FEmail := AValue;
-  ProtobufOutput.writeString(FN_EMAIL, AValue);
+  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  set_has_Email;
+end;
+
+procedure TPB_User.clear_Authed;
+begin
+  FAuthed := false;
+  clear_has_Authed;
+end;
+
+function TPB_User.has_Authed: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_User.set_has_Authed;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_User.clear_has_Authed;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_User.SetAuthed(const AValue: Boolean);
 begin
   FAuthed := AValue;
-  ProtobufOutput.writeBoolean(FN_AUTHED, AValue);
+  ProtobufOutput.writeBoolean(kAuthedFieldNumber, AValue);
+  set_has_Authed;
+end;
+
+procedure TPB_User.clear_Chips;
+begin
+  FChips := 0;
+  clear_has_Chips;
+end;
+
+function TPB_User.has_Chips: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_User.set_has_Chips;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_User.clear_has_Chips;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_User.SetChips(const AValue: UINT32);
 begin
   FChips := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
+  ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
+  set_has_Chips;
 end;
 
 end.

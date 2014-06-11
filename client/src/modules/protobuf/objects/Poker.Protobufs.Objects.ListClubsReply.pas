@@ -12,11 +12,14 @@ type
   TPB_ListClubsReply = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBS = 1;
+      kClubsFieldNumber = 1;
 
     var
       FClubs: TObjectList<TPB_Club>;
+      _has_bits_: Integer;
 
+    procedure set_has_Clubs;
+    procedure clear_has_Clubs;
     procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 
   protected
@@ -27,7 +30,11 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Clubs = 1;
+    function has_Clubs: Boolean;
+    procedure clear_Clubs;
     property Clubs: TObjectList<TPB_Club> read FClubs;
+
   end;
 
 implementation
@@ -65,7 +72,7 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUBS: begin
+      kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -75,10 +82,31 @@ begin
   end;
 end;
 
+procedure TPB_ListClubsReply.clear_Clubs;
+begin
+  FClubs.Clear;
+  clear_has_Clubs;
+end;
+
+function TPB_ListClubsReply.has_Clubs: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ListClubsReply.set_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ListClubsReply.clear_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ListClubsReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_CLUBS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

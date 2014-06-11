@@ -12,11 +12,14 @@ type
   TPB_UserChangeParams = class(TProtobufBaseObject)
   private
     const
-      FN_USERS = 1;
+      kUsersFieldNumber = 1;
 
     var
       FUsers: TObjectList<TPB_User>;
+      _has_bits_: Integer;
 
+    procedure set_has_Users;
+    procedure clear_has_Users;
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 
   protected
@@ -27,7 +30,11 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Users = 1;
+    function has_Users: Boolean;
+    procedure clear_Users;
     property Users: TObjectList<TPB_User> read FUsers;
+
   end;
 
 implementation
@@ -65,7 +72,7 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_USERS: begin
+      kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -75,10 +82,31 @@ begin
   end;
 end;
 
+procedure TPB_UserChangeParams.clear_Users;
+begin
+  FUsers.Clear;
+  clear_has_Users;
+end;
+
+function TPB_UserChangeParams.has_Users: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_UserChangeParams.set_has_Users;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_UserChangeParams.clear_has_Users;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_UserChangeParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_USERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

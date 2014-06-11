@@ -12,22 +12,35 @@ type
   TPB_LoginParams = class(TProtobufBaseObject)
   private
     const
-      FN_USERNAME = 1;
-      FN_PASSWORD = 2;
+      kUsernameFieldNumber = 1;
+      kPasswordFieldNumber = 2;
 
     var
       FUsername: String;
       FPassword: String;
+      _has_bits_: Integer;
 
+    procedure set_has_Username;
+    procedure clear_has_Username;
     procedure SetUsername(const AValue: String);
+    procedure set_has_Password;
+    procedure clear_has_Password;
     procedure SetPassword(const AValue: String);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Username = 1;
+    function has_Username: Boolean;
+    procedure clear_Username;
     property Username: String read FUsername write SetUsername;
+
+    // LABEL TYPE Password = 2;
+    function has_Password: Boolean;
+    procedure clear_Password;
     property Password: String read FPassword write SetPassword;
+
   end;
 
 implementation
@@ -50,11 +63,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_USERNAME: begin
+      kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsername := AProtobufReader.readUtf8String;
       end;
-      FN_PASSWORD: begin
+      kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
       end;
@@ -64,16 +77,60 @@ begin
   end;
 end;
 
+procedure TPB_LoginParams.clear_Username;
+begin
+  FUsername := '';
+  clear_has_Username;
+end;
+
+function TPB_LoginParams.has_Username: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_LoginParams.set_has_Username;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_LoginParams.clear_has_Username;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_LoginParams.SetUsername(const AValue: String);
 begin
   FUsername := AValue;
-  ProtobufOutput.writeString(FN_USERNAME, AValue);
+  ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
+  set_has_Username;
+end;
+
+procedure TPB_LoginParams.clear_Password;
+begin
+  FPassword := '';
+  clear_has_Password;
+end;
+
+function TPB_LoginParams.has_Password: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_LoginParams.set_has_Password;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_LoginParams.clear_has_Password;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_LoginParams.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
-  ProtobufOutput.writeString(FN_PASSWORD, AValue);
+  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  set_has_Password;
 end;
 
 end.

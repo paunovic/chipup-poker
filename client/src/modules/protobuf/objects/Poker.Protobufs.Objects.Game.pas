@@ -16,20 +16,20 @@ type
   TPB_Game = class(TProtobufBaseObject)
   private
     const
-      FN__ID = 1;
-      FN_CREATOR_MONGO_ID = 2;
-      FN_GAMENAME = 3;
-      FN_CLUBSEQ = 4;
-      FN_GAME_TYPE = 5;
-      FN_GAME_LIMIT = 6;
-      FN_BLINDS = 7;
-      FN_SEATS = 9;
-      FN_SITTING = 10;
-      FN_BUYIN_MIN = 11;
-      FN_BUYIN_MAX = 12;
-      FN_STATE = 13;
-      FN_CLOSETIME = 14;
-      FN_LASTHANDID = 15;
+      kIdFieldNumber = 1;
+      kCreatorMongoIdFieldNumber = 2;
+      kGamenameFieldNumber = 3;
+      kClubseqFieldNumber = 4;
+      kGameTypeFieldNumber = 5;
+      kGameLimitFieldNumber = 6;
+      kBlindsFieldNumber = 7;
+      kSeatsFieldNumber = 9;
+      kSittingFieldNumber = 10;
+      kBuyinMinFieldNumber = 11;
+      kBuyinMaxFieldNumber = 12;
+      kStateFieldNumber = 13;
+      kClosetimeFieldNumber = 14;
+      kLasthandidFieldNumber = 15;
 
     var
       FId: TBytes;
@@ -46,40 +46,125 @@ type
       FState: TGameState;
       FClosetime: UInt64;
       FLasthandid: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_MongoId;
+    procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TBytes);
+    procedure set_has_CreatorMongoId;
+    procedure clear_has_CreatorMongoId;
     procedure SetCreatorMongoId(const AValue: TBytes);
+    procedure set_has_Gamename;
+    procedure clear_has_Gamename;
     procedure SetGamename(const AValue: String);
+    procedure set_has_Clubseq;
+    procedure clear_has_Clubseq;
     procedure SetClubseq(const AValue: Integer);
+    procedure set_has_GameType;
+    procedure clear_has_GameType;
     procedure SetGameType(const AValue: TGameType);
+    procedure set_has_GameLimit;
+    procedure clear_has_GameLimit;
     procedure SetGameLimit(const AValue: TGameLimit);
+    procedure set_has_Blinds;
+    procedure clear_has_Blinds;
     procedure SetBlinds(const AValue: TGameBlinds);
+    procedure set_has_Seats;
+    procedure clear_has_Seats;
     procedure SetSeats(const AValue: Integer);
+    procedure set_has_Sitting;
+    procedure clear_has_Sitting;
     procedure SetSitting(const AValue: Integer);
+    procedure set_has_BuyinMin;
+    procedure clear_has_BuyinMin;
     procedure SetBuyinMin(const AValue: Integer);
+    procedure set_has_BuyinMax;
+    procedure clear_has_BuyinMax;
     procedure SetBuyinMax(const AValue: Integer);
+    procedure set_has_State;
+    procedure clear_has_State;
     procedure SetState(const AValue: TGameState);
+    procedure set_has_Closetime;
+    procedure clear_has_Closetime;
     procedure SetClosetime(const AValue: UInt64);
+    procedure set_has_Lasthandid;
+    procedure clear_has_Lasthandid;
     procedure SetLasthandid(const AValue: UINT32);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE MongoId = 1;
+    function has_MongoId: Boolean;
+    procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
+
+    // LABEL TYPE CreatorMongoId = 2;
+    function has_CreatorMongoId: Boolean;
+    procedure clear_CreatorMongoId;
     property CreatorMongoId: TBytes read FCreatorMongoId write SetCreatorMongoId;
+
+    // LABEL TYPE Gamename = 3;
+    function has_Gamename: Boolean;
+    procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;
+
+    // LABEL TYPE Clubseq = 4;
+    function has_Clubseq: Boolean;
+    procedure clear_Clubseq;
     property Clubseq: Integer read FClubseq write SetClubseq;
+
+    // LABEL TYPE GameType = 5;
+    function has_GameType: Boolean;
+    procedure clear_GameType;
     property GameType: TGameType read FGameType write SetGameType;
+
+    // LABEL TYPE GameLimit = 6;
+    function has_GameLimit: Boolean;
+    procedure clear_GameLimit;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
+
+    // LABEL TYPE Blinds = 7;
+    function has_Blinds: Boolean;
+    procedure clear_Blinds;
     property Blinds: TGameBlinds read FBlinds write SetBlinds;
+
+    // LABEL TYPE Seats = 9;
+    function has_Seats: Boolean;
+    procedure clear_Seats;
     property Seats: Integer read FSeats write SetSeats;
+
+    // LABEL TYPE Sitting = 10;
+    function has_Sitting: Boolean;
+    procedure clear_Sitting;
     property Sitting: Integer read FSitting write SetSitting;
+
+    // LABEL TYPE BuyinMin = 11;
+    function has_BuyinMin: Boolean;
+    procedure clear_BuyinMin;
     property BuyinMin: Integer read FBuyinMin write SetBuyinMin;
+
+    // LABEL TYPE BuyinMax = 12;
+    function has_BuyinMax: Boolean;
+    procedure clear_BuyinMax;
     property BuyinMax: Integer read FBuyinMax write SetBuyinMax;
+
+    // LABEL TYPE State = 13;
+    function has_State: Boolean;
+    procedure clear_State;
     property State: TGameState read FState write SetState;
+
+    // LABEL TYPE Closetime = 14;
+    function has_Closetime: Boolean;
+    procedure clear_Closetime;
     property Closetime: UInt64 read FClosetime write SetClosetime;
+
+    // LABEL TYPE Lasthandid = 15;
+    function has_Lasthandid: Boolean;
+    procedure clear_Lasthandid;
     property Lasthandid: UINT32 read FLasthandid write SetLasthandid;
+
   end;
 
 implementation
@@ -102,59 +187,59 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN__ID: begin
+      kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
       end;
-      FN_CREATOR_MONGO_ID: begin
+      kCreatorMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCreatorMongoId);
       end;
-      FN_GAMENAME: begin
+      kGamenameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGamename := AProtobufReader.readUtf8String;
       end;
-      FN_CLUBSEQ: begin
+      kClubseqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubseq := AProtobufReader.readInt32;
       end;
-      FN_GAME_TYPE: begin
+      kGameTypeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGameType := TGameType(AProtobufReader.readEnum);
       end;
-      FN_GAME_LIMIT: begin
+      kGameLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGameLimit := TGameLimit(AProtobufReader.readEnum);
       end;
-      FN_BLINDS: begin
+      kBlindsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBlinds := TGameBlinds(AProtobufReader.readEnum);
       end;
-      FN_SEATS: begin
+      kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeats := AProtobufReader.readInt32;
       end;
-      FN_SITTING: begin
+      kSittingFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSitting := AProtobufReader.readInt32;
       end;
-      FN_BUYIN_MIN: begin
+      kBuyinMinFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBuyinMin := AProtobufReader.readInt32;
       end;
-      FN_BUYIN_MAX: begin
+      kBuyinMaxFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBuyinMax := AProtobufReader.readInt32;
       end;
-      FN_STATE: begin
+      kStateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FState := TGameState(AProtobufReader.readEnum);
       end;
-      FN_CLOSETIME: begin
+      kClosetimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClosetime := AProtobufReader.readInt64;
       end;
-      FN_LASTHANDID: begin
+      kLasthandidFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLasthandid := AProtobufReader.readUInt32;
       end;
@@ -164,6 +249,27 @@ begin
   end;
 end;
 
+procedure TPB_Game.clear_MongoId;
+begin
+  SetLength(FId,0);
+  clear_has_MongoId;
+end;
+
+function TPB_Game.has_MongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_Game.set_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_Game.clear_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_Game.SetMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -171,7 +277,28 @@ begin
   SetLength(FId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN__ID, AValue);
+  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+end;
+
+procedure TPB_Game.clear_CreatorMongoId;
+begin
+  SetLength(FCreatorMongoId,0);
+  clear_has_CreatorMongoId;
+end;
+
+function TPB_Game.has_CreatorMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_Game.set_has_CreatorMongoId;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_Game.clear_has_CreatorMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_Game.SetCreatorMongoId(const AValue: TBytes);
@@ -181,79 +308,343 @@ begin
   SetLength(FCreatorMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FCreatorMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CREATOR_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kCreatorMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_Game.clear_Gamename;
+begin
+  FGamename := '';
+  clear_has_Gamename;
+end;
+
+function TPB_Game.has_Gamename: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_Game.set_has_Gamename;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_Game.clear_has_Gamename;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_Game.SetGamename(const AValue: String);
 begin
   FGamename := AValue;
-  ProtobufOutput.writeString(FN_GAMENAME, AValue);
+  ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
+  set_has_Gamename;
+end;
+
+procedure TPB_Game.clear_Clubseq;
+begin
+  FClubseq := 0;
+  clear_has_Clubseq;
+end;
+
+function TPB_Game.has_Clubseq: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_Game.set_has_Clubseq;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_Game.clear_has_Clubseq;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_Game.SetClubseq(const AValue: Integer);
 begin
   FClubseq := AValue;
-  ProtobufOutput.writeInt32(FN_CLUBSEQ, AValue);
+  ProtobufOutput.writeInt32(kClubseqFieldNumber, AValue);
+  set_has_Clubseq;
+end;
+
+procedure TPB_Game.clear_GameType;
+begin
+  FGameType := TGameType(0);
+  clear_has_GameType;
+end;
+
+function TPB_Game.has_GameType: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_Game.set_has_GameType;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_Game.clear_has_GameType;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_Game.SetGameType(const AValue: TGameType);
 begin
   FGameType := AValue;
-  ProtobufOutput.writeInt32(FN_GAME_TYPE, Integer(AValue));
+  ProtobufOutput.writeInt32(kGameTypeFieldNumber, Integer(AValue));
+  set_has_GameType;
+end;
+
+procedure TPB_Game.clear_GameLimit;
+begin
+  FGameLimit := TGameLimit(0);
+  clear_has_GameLimit;
+end;
+
+function TPB_Game.has_GameLimit: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_Game.set_has_GameLimit;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_Game.clear_has_GameLimit;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_Game.SetGameLimit(const AValue: TGameLimit);
 begin
   FGameLimit := AValue;
-  ProtobufOutput.writeInt32(FN_GAME_LIMIT, Integer(AValue));
+  ProtobufOutput.writeInt32(kGameLimitFieldNumber, Integer(AValue));
+  set_has_GameLimit;
+end;
+
+procedure TPB_Game.clear_Blinds;
+begin
+  FBlinds := TGameBlinds(0);
+  clear_has_Blinds;
+end;
+
+function TPB_Game.has_Blinds: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_Game.set_has_Blinds;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_Game.clear_has_Blinds;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_Game.SetBlinds(const AValue: TGameBlinds);
 begin
   FBlinds := AValue;
-  ProtobufOutput.writeInt32(FN_BLINDS, Integer(AValue));
+  ProtobufOutput.writeInt32(kBlindsFieldNumber, Integer(AValue));
+  set_has_Blinds;
+end;
+
+procedure TPB_Game.clear_Seats;
+begin
+  FSeats := 0;
+  clear_has_Seats;
+end;
+
+function TPB_Game.has_Seats: Boolean;
+begin
+  Result := (_has_bits_ and 256) > 0;
+end;
+
+procedure TPB_Game.set_has_Seats;
+begin
+  _has_bits_ := _has_bits_ or 256;
+end;
+
+procedure TPB_Game.clear_has_Seats;
+begin
+  _has_bits_ := _has_bits_ xor 256;
 end;
 
 procedure TPB_Game.SetSeats(const AValue: Integer);
 begin
   FSeats := AValue;
-  ProtobufOutput.writeInt32(FN_SEATS, AValue);
+  ProtobufOutput.writeInt32(kSeatsFieldNumber, AValue);
+  set_has_Seats;
+end;
+
+procedure TPB_Game.clear_Sitting;
+begin
+  FSitting := 0;
+  clear_has_Sitting;
+end;
+
+function TPB_Game.has_Sitting: Boolean;
+begin
+  Result := (_has_bits_ and 512) > 0;
+end;
+
+procedure TPB_Game.set_has_Sitting;
+begin
+  _has_bits_ := _has_bits_ or 512;
+end;
+
+procedure TPB_Game.clear_has_Sitting;
+begin
+  _has_bits_ := _has_bits_ xor 512;
 end;
 
 procedure TPB_Game.SetSitting(const AValue: Integer);
 begin
   FSitting := AValue;
-  ProtobufOutput.writeInt32(FN_SITTING, AValue);
+  ProtobufOutput.writeInt32(kSittingFieldNumber, AValue);
+  set_has_Sitting;
+end;
+
+procedure TPB_Game.clear_BuyinMin;
+begin
+  FBuyinMin := 0;
+  clear_has_BuyinMin;
+end;
+
+function TPB_Game.has_BuyinMin: Boolean;
+begin
+  Result := (_has_bits_ and 1024) > 0;
+end;
+
+procedure TPB_Game.set_has_BuyinMin;
+begin
+  _has_bits_ := _has_bits_ or 1024;
+end;
+
+procedure TPB_Game.clear_has_BuyinMin;
+begin
+  _has_bits_ := _has_bits_ xor 1024;
 end;
 
 procedure TPB_Game.SetBuyinMin(const AValue: Integer);
 begin
   FBuyinMin := AValue;
-  ProtobufOutput.writeInt32(FN_BUYIN_MIN, AValue);
+  ProtobufOutput.writeInt32(kBuyinMinFieldNumber, AValue);
+  set_has_BuyinMin;
+end;
+
+procedure TPB_Game.clear_BuyinMax;
+begin
+  FBuyinMax := 0;
+  clear_has_BuyinMax;
+end;
+
+function TPB_Game.has_BuyinMax: Boolean;
+begin
+  Result := (_has_bits_ and 2048) > 0;
+end;
+
+procedure TPB_Game.set_has_BuyinMax;
+begin
+  _has_bits_ := _has_bits_ or 2048;
+end;
+
+procedure TPB_Game.clear_has_BuyinMax;
+begin
+  _has_bits_ := _has_bits_ xor 2048;
 end;
 
 procedure TPB_Game.SetBuyinMax(const AValue: Integer);
 begin
   FBuyinMax := AValue;
-  ProtobufOutput.writeInt32(FN_BUYIN_MAX, AValue);
+  ProtobufOutput.writeInt32(kBuyinMaxFieldNumber, AValue);
+  set_has_BuyinMax;
+end;
+
+procedure TPB_Game.clear_State;
+begin
+  FState := TGameState(0);
+  clear_has_State;
+end;
+
+function TPB_Game.has_State: Boolean;
+begin
+  Result := (_has_bits_ and 4096) > 0;
+end;
+
+procedure TPB_Game.set_has_State;
+begin
+  _has_bits_ := _has_bits_ or 4096;
+end;
+
+procedure TPB_Game.clear_has_State;
+begin
+  _has_bits_ := _has_bits_ xor 4096;
 end;
 
 procedure TPB_Game.SetState(const AValue: TGameState);
 begin
   FState := AValue;
-  ProtobufOutput.writeInt32(FN_STATE, Integer(AValue));
+  ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));
+  set_has_State;
+end;
+
+procedure TPB_Game.clear_Closetime;
+begin
+  FClosetime := 0;
+  clear_has_Closetime;
+end;
+
+function TPB_Game.has_Closetime: Boolean;
+begin
+  Result := (_has_bits_ and 8192) > 0;
+end;
+
+procedure TPB_Game.set_has_Closetime;
+begin
+  _has_bits_ := _has_bits_ or 8192;
+end;
+
+procedure TPB_Game.clear_has_Closetime;
+begin
+  _has_bits_ := _has_bits_ xor 8192;
 end;
 
 procedure TPB_Game.SetClosetime(const AValue: UInt64);
 begin
   FClosetime := AValue;
-  ProtobufOutput.WriteInt64(FN_CLOSETIME, AValue);
+  ProtobufOutput.WriteInt64(kClosetimeFieldNumber, AValue);
+  set_has_Closetime;
+end;
+
+procedure TPB_Game.clear_Lasthandid;
+begin
+  FLasthandid := 0;
+  clear_has_Lasthandid;
+end;
+
+function TPB_Game.has_Lasthandid: Boolean;
+begin
+  Result := (_has_bits_ and 16384) > 0;
+end;
+
+procedure TPB_Game.set_has_Lasthandid;
+begin
+  _has_bits_ := _has_bits_ or 16384;
+end;
+
+procedure TPB_Game.clear_has_Lasthandid;
+begin
+  _has_bits_ := _has_bits_ xor 16384;
 end;
 
 procedure TPB_Game.SetLasthandid(const AValue: UINT32);
 begin
   FLasthandid := AValue;
-  ProtobufOutput.writeUInt32(FN_LASTHANDID, AValue);
+  ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
+  set_has_Lasthandid;
 end;
 
 end.

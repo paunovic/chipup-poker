@@ -12,14 +12,14 @@ type
   TPB_TablePlayerStats = class(TProtobufBaseObject)
   private
     const
-      FN_USERID = 1;
-      FN_BALANCE = 3;
-      FN_BUYINS = 4;
-      FN_CASHOUTS = 5;
-      FN_RAKECONTRIB = 6;
-      FN_SECONDSPLAYED = 7;
-      FN_CHIPSINPLAY = 8;
-      FN_HANDS = 9;
+      kUseridFieldNumber = 1;
+      kBalanceFieldNumber = 3;
+      kBuyinsFieldNumber = 4;
+      kCashoutsFieldNumber = 5;
+      kRakecontribFieldNumber = 6;
+      kSecondsplayedFieldNumber = 7;
+      kChipsinplayFieldNumber = 8;
+      kHandsFieldNumber = 9;
 
     var
       FUserid: TBytes;
@@ -30,28 +30,77 @@ type
       FSecondsplayed: UINT32;
       FChipsinplay: UINT32;
       FHands: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_Userid;
+    procedure clear_has_Userid;
     procedure SetUserid(const AValue: TBytes);
+    procedure set_has_Balance;
+    procedure clear_has_Balance;
     procedure SetBalance(const AValue: Integer);
+    procedure set_has_Buyins;
+    procedure clear_has_Buyins;
     procedure SetBuyins(const AValue: TArray<UINT32>);
+    procedure set_has_Cashouts;
+    procedure clear_has_Cashouts;
     procedure SetCashouts(const AValue: TArray<UINT32>);
+    procedure set_has_Rakecontrib;
+    procedure clear_has_Rakecontrib;
     procedure SetRakecontrib(const AValue: UINT32);
+    procedure set_has_Secondsplayed;
+    procedure clear_has_Secondsplayed;
     procedure SetSecondsplayed(const AValue: UINT32);
+    procedure set_has_Chipsinplay;
+    procedure clear_has_Chipsinplay;
     procedure SetChipsinplay(const AValue: UINT32);
+    procedure set_has_Hands;
+    procedure clear_has_Hands;
     procedure SetHands(const AValue: UINT32);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Userid = 1;
+    function has_Userid: Boolean;
+    procedure clear_Userid;
     property Userid: TBytes read FUserid write SetUserid;
+
+    // LABEL TYPE Balance = 3;
+    function has_Balance: Boolean;
+    procedure clear_Balance;
     property Balance: Integer read FBalance write SetBalance;
+
+    // LABEL TYPE Buyins = 4;
+    function has_Buyins: Boolean;
+    procedure clear_Buyins;
     property Buyins: TArray<UINT32> read FBuyins write SetBuyins;
+
+    // LABEL TYPE Cashouts = 5;
+    function has_Cashouts: Boolean;
+    procedure clear_Cashouts;
     property Cashouts: TArray<UINT32> read FCashouts write SetCashouts;
+
+    // LABEL TYPE Rakecontrib = 6;
+    function has_Rakecontrib: Boolean;
+    procedure clear_Rakecontrib;
     property Rakecontrib: UINT32 read FRakecontrib write SetRakecontrib;
+
+    // LABEL TYPE Secondsplayed = 7;
+    function has_Secondsplayed: Boolean;
+    procedure clear_Secondsplayed;
     property Secondsplayed: UINT32 read FSecondsplayed write SetSecondsplayed;
+
+    // LABEL TYPE Chipsinplay = 8;
+    function has_Chipsinplay: Boolean;
+    procedure clear_Chipsinplay;
     property Chipsinplay: UINT32 read FChipsinplay write SetChipsinplay;
+
+    // LABEL TYPE Hands = 9;
+    function has_Hands: Boolean;
+    procedure clear_Hands;
     property Hands: UINT32 read FHands write SetHands;
+
   end;
 
 implementation
@@ -74,37 +123,37 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_USERID: begin
+      kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FUserid);
       end;
-      FN_BALANCE: begin
+      kBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBalance := AProtobufReader.readInt32;
       end;
-      FN_BUYINS: begin
+      kBuyinsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FBuyins, Length(FBuyins) + 1);
         FBuyins[Length(FBuyins)-1] := AProtobufReader.readUInt32;
       end;
-      FN_CASHOUTS: begin
+      kCashoutsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FCashouts, Length(FCashouts) + 1);
         FCashouts[Length(FCashouts)-1] := AProtobufReader.readUInt32;
       end;
-      FN_RAKECONTRIB: begin
+      kRakecontribFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRakecontrib := AProtobufReader.readUInt32;
       end;
-      FN_SECONDSPLAYED: begin
+      kSecondsplayedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSecondsplayed := AProtobufReader.readUInt32;
       end;
-      FN_CHIPSINPLAY: begin
+      kChipsinplayFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChipsinplay := AProtobufReader.readUInt32;
       end;
-      FN_HANDS: begin
+      kHandsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHands := AProtobufReader.readUInt32;
       end;
@@ -114,6 +163,27 @@ begin
   end;
 end;
 
+procedure TPB_TablePlayerStats.clear_Userid;
+begin
+  SetLength(FUserid,0);
+  clear_has_Userid;
+end;
+
+function TPB_TablePlayerStats.has_Userid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Userid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Userid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_TablePlayerStats.SetUserid(const AValue: TBytes);
 var
   C1: Integer;
@@ -121,13 +191,56 @@ begin
   SetLength(FUserid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FUserid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_USERID, AValue);
+  ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+end;
+
+procedure TPB_TablePlayerStats.clear_Balance;
+begin
+  FBalance := 0;
+  clear_has_Balance;
+end;
+
+function TPB_TablePlayerStats.has_Balance: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Balance;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Balance;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
 begin
   FBalance := AValue;
-  ProtobufOutput.writeInt32(FN_BALANCE, AValue);
+  ProtobufOutput.writeInt32(kBalanceFieldNumber, AValue);
+  set_has_Balance;
+end;
+
+procedure TPB_TablePlayerStats.clear_Buyins;
+begin
+  FBuyins := 0;
+  clear_has_Buyins;
+end;
+
+function TPB_TablePlayerStats.has_Buyins: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Buyins;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Buyins;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_TablePlayerStats.SetBuyins(const AValue: TArray<UINT32>);
@@ -138,7 +251,28 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FBuyins[C1] := AValue[C1];
   for C1 := 0 to Length(FBuyins) - 1 do
-    ProtobufOutput.writeUInt32(FN_BUYINS, AValue[C1]);
+    ProtobufOutput.writeUInt32(kBuyinsFieldNumber, AValue[C1]);
+end;
+
+procedure TPB_TablePlayerStats.clear_Cashouts;
+begin
+  FCashouts := 0;
+  clear_has_Cashouts;
+end;
+
+function TPB_TablePlayerStats.has_Cashouts: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Cashouts;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Cashouts;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_TablePlayerStats.SetCashouts(const AValue: TArray<UINT32>);
@@ -149,31 +283,119 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FCashouts[C1] := AValue[C1];
   for C1 := 0 to Length(FCashouts) - 1 do
-    ProtobufOutput.writeUInt32(FN_CASHOUTS, AValue[C1]);
+    ProtobufOutput.writeUInt32(kCashoutsFieldNumber, AValue[C1]);
+end;
+
+procedure TPB_TablePlayerStats.clear_Rakecontrib;
+begin
+  FRakecontrib := 0;
+  clear_has_Rakecontrib;
+end;
+
+function TPB_TablePlayerStats.has_Rakecontrib: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Rakecontrib;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Rakecontrib;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UINT32);
 begin
   FRakecontrib := AValue;
-  ProtobufOutput.writeUInt32(FN_RAKECONTRIB, AValue);
+  ProtobufOutput.writeUInt32(kRakecontribFieldNumber, AValue);
+  set_has_Rakecontrib;
+end;
+
+procedure TPB_TablePlayerStats.clear_Secondsplayed;
+begin
+  FSecondsplayed := 0;
+  clear_has_Secondsplayed;
+end;
+
+function TPB_TablePlayerStats.has_Secondsplayed: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Secondsplayed;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Secondsplayed;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UINT32);
 begin
   FSecondsplayed := AValue;
-  ProtobufOutput.writeUInt32(FN_SECONDSPLAYED, AValue);
+  ProtobufOutput.writeUInt32(kSecondsplayedFieldNumber, AValue);
+  set_has_Secondsplayed;
+end;
+
+procedure TPB_TablePlayerStats.clear_Chipsinplay;
+begin
+  FChipsinplay := 0;
+  clear_has_Chipsinplay;
+end;
+
+function TPB_TablePlayerStats.has_Chipsinplay: Boolean;
+begin
+  Result := (_has_bits_ and 128) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Chipsinplay;
+begin
+  _has_bits_ := _has_bits_ or 128;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Chipsinplay;
+begin
+  _has_bits_ := _has_bits_ xor 128;
 end;
 
 procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UINT32);
 begin
   FChipsinplay := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIPSINPLAY, AValue);
+  ProtobufOutput.writeUInt32(kChipsinplayFieldNumber, AValue);
+  set_has_Chipsinplay;
+end;
+
+procedure TPB_TablePlayerStats.clear_Hands;
+begin
+  FHands := 0;
+  clear_has_Hands;
+end;
+
+function TPB_TablePlayerStats.has_Hands: Boolean;
+begin
+  Result := (_has_bits_ and 256) > 0;
+end;
+
+procedure TPB_TablePlayerStats.set_has_Hands;
+begin
+  _has_bits_ := _has_bits_ or 256;
+end;
+
+procedure TPB_TablePlayerStats.clear_has_Hands;
+begin
+  _has_bits_ := _has_bits_ xor 256;
 end;
 
 procedure TPB_TablePlayerStats.SetHands(const AValue: UINT32);
 begin
   FHands := AValue;
-  ProtobufOutput.writeUInt32(FN_HANDS, AValue);
+  ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
+  set_has_Hands;
 end;
 
 end.

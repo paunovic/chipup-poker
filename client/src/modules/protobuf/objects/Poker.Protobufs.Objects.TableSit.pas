@@ -12,26 +12,45 @@ type
   TPB_TableSit = class(TProtobufBaseObject)
   private
     const
-      FN_GAME_ID = 1;
-      FN_SEAT_INDEX = 2;
-      FN_CHIPS = 3;
+      kGameIdFieldNumber = 1;
+      kSeatIndexFieldNumber = 2;
+      kChipsFieldNumber = 3;
 
     var
       FGameId: TBytes;
       FSeatIndex: Integer;
       FChips: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_GameId;
+    procedure clear_has_GameId;
     procedure SetGameId(const AValue: TBytes);
+    procedure set_has_SeatIndex;
+    procedure clear_has_SeatIndex;
     procedure SetSeatIndex(const AValue: Integer);
+    procedure set_has_Chips;
+    procedure clear_has_Chips;
     procedure SetChips(const AValue: UINT32);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE GameId = 1;
+    function has_GameId: Boolean;
+    procedure clear_GameId;
     property GameId: TBytes read FGameId write SetGameId;
+
+    // LABEL TYPE SeatIndex = 2;
+    function has_SeatIndex: Boolean;
+    procedure clear_SeatIndex;
     property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
+
+    // LABEL TYPE Chips = 3;
+    function has_Chips: Boolean;
+    procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;
+
   end;
 
 implementation
@@ -54,15 +73,15 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_GAME_ID: begin
+      kGameIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameId);
       end;
-      FN_SEAT_INDEX: begin
+      kSeatIndexFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeatIndex := AProtobufReader.readInt32;
       end;
-      FN_CHIPS: begin
+      kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
       end;
@@ -72,6 +91,27 @@ begin
   end;
 end;
 
+procedure TPB_TableSit.clear_GameId;
+begin
+  SetLength(FGameId,0);
+  clear_has_GameId;
+end;
+
+function TPB_TableSit.has_GameId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_TableSit.set_has_GameId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_TableSit.clear_has_GameId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_TableSit.SetGameId(const AValue: TBytes);
 var
   C1: Integer;
@@ -79,19 +119,63 @@ begin
   SetLength(FGameId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FGameId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_GAME_ID, AValue);
+  ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
+end;
+
+procedure TPB_TableSit.clear_SeatIndex;
+begin
+  FSeatIndex := 0;
+  clear_has_SeatIndex;
+end;
+
+function TPB_TableSit.has_SeatIndex: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_TableSit.set_has_SeatIndex;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_TableSit.clear_has_SeatIndex;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_TableSit.SetSeatIndex(const AValue: Integer);
 begin
   FSeatIndex := AValue;
-  ProtobufOutput.writeInt32(FN_SEAT_INDEX, AValue);
+  ProtobufOutput.writeInt32(kSeatIndexFieldNumber, AValue);
+  set_has_SeatIndex;
+end;
+
+procedure TPB_TableSit.clear_Chips;
+begin
+  FChips := 0;
+  clear_has_Chips;
+end;
+
+function TPB_TableSit.has_Chips: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_TableSit.set_has_Chips;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_TableSit.clear_has_Chips;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_TableSit.SetChips(const AValue: UINT32);
 begin
   FChips := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
+  ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
+  set_has_Chips;
 end;
 
 end.

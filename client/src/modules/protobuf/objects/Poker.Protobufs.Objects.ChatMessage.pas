@@ -12,27 +12,55 @@ type
   TPB_ChatMessage = class(TProtobufBaseObject)
   private
     const
-      FN__ID = 1;
-      FN_USERNAME = 2;
-      FN_MSG = 3;
-      FN_TIMESTAMP = 4;
+      kIdFieldNumber = 1;
+      kUsernameFieldNumber = 2;
+      kMsgFieldNumber = 3;
+      kTimestampFieldNumber = 4;
 
     var
       FId: TBytes;
       FUsername: String;
       FMsg: String;
+      FTimestamp: Int64;
+      _has_bits_: Integer;
 
+    procedure set_has_MongoId;
+    procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TBytes);
+    procedure set_has_Username;
+    procedure clear_has_Username;
     procedure SetUsername(const AValue: String);
+    procedure set_has_Msg;
+    procedure clear_has_Msg;
     procedure SetMsg(const AValue: String);
+    procedure set_has_Timestamp;
+    procedure clear_has_Timestamp;
+    procedure SetTimestamp(const AValue: Int64);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE MongoId = 1;
+    function has_MongoId: Boolean;
+    procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
+
+    // LABEL TYPE Username = 2;
+    function has_Username: Boolean;
+    procedure clear_Username;
     property Username: String read FUsername write SetUsername;
+
+    // LABEL TYPE Msg = 3;
+    function has_Msg: Boolean;
+    procedure clear_Msg;
     property Msg: String read FMsg write SetMsg;
+
+    // LABEL TYPE Timestamp = 4;
+    function has_Timestamp: Boolean;
+    procedure clear_Timestamp;
+    property Timestamp: Int64 read FTimestamp write SetTimestamp;
+
   end;
 
 implementation
@@ -55,22 +83,47 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN__ID: begin
+      kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
       end;
-      FN_USERNAME: begin
+      kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsername := AProtobufReader.readUtf8String;
       end;
-      FN_MSG: begin
+      kMsgFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMsg := AProtobufReader.readUtf8String;
+      end;
+      kTimestampFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FTimestamp := AProtobufReader.readInt64;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ChatMessage.clear_MongoId;
+begin
+  SetLength(FId,0);
+  clear_has_MongoId;
+end;
+
+function TPB_ChatMessage.has_MongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ChatMessage.set_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ChatMessage.clear_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
@@ -80,19 +133,91 @@ begin
   SetLength(FId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN__ID, AValue);
+  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+end;
+
+procedure TPB_ChatMessage.clear_Username;
+begin
+  FUsername := '';
+  clear_has_Username;
+end;
+
+function TPB_ChatMessage.has_Username: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ChatMessage.set_has_Username;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ChatMessage.clear_has_Username;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ChatMessage.SetUsername(const AValue: String);
 begin
   FUsername := AValue;
-  ProtobufOutput.writeString(FN_USERNAME, AValue);
+  ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
+  set_has_Username;
+end;
+
+procedure TPB_ChatMessage.clear_Msg;
+begin
+  FMsg := '';
+  clear_has_Msg;
+end;
+
+function TPB_ChatMessage.has_Msg: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_ChatMessage.set_has_Msg;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_ChatMessage.clear_has_Msg;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_ChatMessage.SetMsg(const AValue: String);
 begin
   FMsg := AValue;
-  ProtobufOutput.writeString(FN_MSG, AValue);
+  ProtobufOutput.writeString(kMsgFieldNumber, AValue);
+  set_has_Msg;
+end;
+
+procedure TPB_ChatMessage.clear_Timestamp;
+begin
+  FTimestamp := 0;
+  clear_has_Timestamp;
+end;
+
+function TPB_ChatMessage.has_Timestamp: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_ChatMessage.set_has_Timestamp;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_ChatMessage.clear_has_Timestamp;
+begin
+  _has_bits_ := _has_bits_ xor 8;
+end;
+
+procedure TPB_ChatMessage.SetTimestamp(const AValue: Int64);
+begin
+  FTimestamp := AValue;
+  ProtobufOutput.WriteInt64(kTimestampFieldNumber, AValue);
+  set_has_Timestamp;
 end;
 
 end.

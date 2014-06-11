@@ -12,22 +12,35 @@ type
   TPB_BuyinError = class(TProtobufBaseObject)
   private
     const
-      FN_GAME_ID = 1;
-      FN_LAST_CASHOUT = 2;
+      kGameIdFieldNumber = 1;
+      kLastCashoutFieldNumber = 2;
 
     var
       FGameId: TBytes;
       FLastCashout: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_GameId;
+    procedure clear_has_GameId;
     procedure SetGameId(const AValue: TBytes);
+    procedure set_has_LastCashout;
+    procedure clear_has_LastCashout;
     procedure SetLastCashout(const AValue: UINT32);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE GameId = 1;
+    function has_GameId: Boolean;
+    procedure clear_GameId;
     property GameId: TBytes read FGameId write SetGameId;
+
+    // LABEL TYPE LastCashout = 2;
+    function has_LastCashout: Boolean;
+    procedure clear_LastCashout;
     property LastCashout: UINT32 read FLastCashout write SetLastCashout;
+
   end;
 
 implementation
@@ -50,11 +63,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_GAME_ID: begin
+      kGameIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameId);
       end;
-      FN_LAST_CASHOUT: begin
+      kLastCashoutFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLastCashout := AProtobufReader.readUInt32;
       end;
@@ -64,6 +77,27 @@ begin
   end;
 end;
 
+procedure TPB_BuyinError.clear_GameId;
+begin
+  SetLength(FGameId,0);
+  clear_has_GameId;
+end;
+
+function TPB_BuyinError.has_GameId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_BuyinError.set_has_GameId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_BuyinError.clear_has_GameId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_BuyinError.SetGameId(const AValue: TBytes);
 var
   C1: Integer;
@@ -71,13 +105,35 @@ begin
   SetLength(FGameId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FGameId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_GAME_ID, AValue);
+  ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
+end;
+
+procedure TPB_BuyinError.clear_LastCashout;
+begin
+  FLastCashout := 0;
+  clear_has_LastCashout;
+end;
+
+function TPB_BuyinError.has_LastCashout: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_BuyinError.set_has_LastCashout;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_BuyinError.clear_has_LastCashout;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_BuyinError.SetLastCashout(const AValue: UINT32);
 begin
   FLastCashout := AValue;
-  ProtobufOutput.writeUInt32(FN_LAST_CASHOUT, AValue);
+  ProtobufOutput.writeUInt32(kLastCashoutFieldNumber, AValue);
+  set_has_LastCashout;
 end;
 
 end.

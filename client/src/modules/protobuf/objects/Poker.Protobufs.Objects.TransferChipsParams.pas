@@ -12,22 +12,35 @@ type
   TPB_TransferChipsParams = class(TProtobufBaseObject)
   private
     const
-      FN_PLAYER_MONGO_ID = 2;
-      FN_CHIP_AMOUNT = 3;
+      kPlayerMongoIdFieldNumber = 2;
+      kChipAmountFieldNumber = 3;
 
     var
       FPlayerMongoId: TBytes;
       FChipAmount: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_PlayerMongoId;
+    procedure clear_has_PlayerMongoId;
     procedure SetPlayerMongoId(const AValue: TBytes);
+    procedure set_has_ChipAmount;
+    procedure clear_has_ChipAmount;
     procedure SetChipAmount(const AValue: UINT32);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE PlayerMongoId = 2;
+    function has_PlayerMongoId: Boolean;
+    procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+
+    // LABEL TYPE ChipAmount = 3;
+    function has_ChipAmount: Boolean;
+    procedure clear_ChipAmount;
     property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
+
   end;
 
 implementation
@@ -50,11 +63,11 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_PLAYER_MONGO_ID: begin
+      kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
       end;
-      FN_CHIP_AMOUNT: begin
+      kChipAmountFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChipAmount := AProtobufReader.readUInt32;
       end;
@@ -64,6 +77,27 @@ begin
   end;
 end;
 
+procedure TPB_TransferChipsParams.clear_PlayerMongoId;
+begin
+  SetLength(FPlayerMongoId,0);
+  clear_has_PlayerMongoId;
+end;
+
+function TPB_TransferChipsParams.has_PlayerMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_TransferChipsParams.set_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_TransferChipsParams.clear_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 2;
+end;
+
 procedure TPB_TransferChipsParams.SetPlayerMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -71,13 +105,35 @@ begin
   SetLength(FPlayerMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_PLAYER_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_TransferChipsParams.clear_ChipAmount;
+begin
+  FChipAmount := 0;
+  clear_has_ChipAmount;
+end;
+
+function TPB_TransferChipsParams.has_ChipAmount: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_TransferChipsParams.set_has_ChipAmount;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_TransferChipsParams.clear_has_ChipAmount;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_TransferChipsParams.SetChipAmount(const AValue: UINT32);
 begin
   FChipAmount := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIP_AMOUNT, AValue);
+  ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
+  set_has_ChipAmount;
 end;
 
 end.

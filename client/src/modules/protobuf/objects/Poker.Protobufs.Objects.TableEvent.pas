@@ -13,11 +13,11 @@ type
   TPB_TableEvent = class(TProtobufBaseObject)
   private
     const
-      FN_EVENT = 1;
-      FN_SEAT = 2;
-      FN_POTS = 4;
-      FN_BETS = 5;
-      FN_CARDS = 6;
+      kEventFieldNumber = 1;
+      kSeatFieldNumber = 2;
+      kPotsFieldNumber = 4;
+      kBetsFieldNumber = 5;
+      kCardsFieldNumber = 6;
 
     var
       FEvent: TTableEventType;
@@ -25,10 +25,21 @@ type
       FPots: TObjectList<TPB_WinnerPotInfo>;
       FBets: TArray<UINT32>;
       FCards: TBytes;
+      _has_bits_: Integer;
 
+    procedure set_has_Event;
+    procedure clear_has_Event;
     procedure SetEvent(const AValue: TTableEventType);
+    procedure set_has_Seat;
+    procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
+    procedure set_has_Pots;
+    procedure clear_has_Pots;
+    procedure set_has_Bets;
+    procedure clear_has_Bets;
     procedure SetBets(const AValue: TArray<UINT32>);
+    procedure set_has_Cards;
+    procedure clear_has_Cards;
     procedure SetCards(const AValue: TBytes);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
 
@@ -40,11 +51,31 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Event = 1;
+    function has_Event: Boolean;
+    procedure clear_Event;
     property Event: TTableEventType read FEvent write SetEvent;
+
+    // LABEL TYPE Seat = 2;
+    function has_Seat: Boolean;
+    procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
+
+    // LABEL TYPE Pots = 4;
+    function has_Pots: Boolean;
+    procedure clear_Pots;
     property Pots: TObjectList<TPB_WinnerPotInfo> read FPots;
+
+    // LABEL TYPE Bets = 5;
+    function has_Bets: Boolean;
+    procedure clear_Bets;
     property Bets: TArray<UINT32> read FBets write SetBets;
+
+    // LABEL TYPE Cards = 6;
+    function has_Cards: Boolean;
+    procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
+
   end;
 
 implementation
@@ -82,24 +113,24 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_EVENT: begin
+      kEventFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEvent := TTableEventType(AProtobufReader.readEnum);
       end;
-      FN_SEAT: begin
+      kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
       end;
-      FN_POTS: begin
+      kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_BETS: begin
+      kBetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FBets, Length(FBets) + 1);
         FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
       end;
-      FN_CARDS: begin
+      kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCards);
       end;
@@ -109,24 +140,110 @@ begin
   end;
 end;
 
+procedure TPB_TableEvent.clear_Event;
+begin
+  FEvent := TTableEventType(0);
+  clear_has_Event;
+end;
+
+function TPB_TableEvent.has_Event: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_TableEvent.set_has_Event;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_TableEvent.clear_has_Event;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_TableEvent.SetEvent(const AValue: TTableEventType);
 begin
   FEvent := AValue;
-  ProtobufOutput.writeInt32(FN_EVENT, Integer(AValue));
+  ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
+  set_has_Event;
+end;
+
+procedure TPB_TableEvent.clear_Seat;
+begin
+  FSeat := 0;
+  clear_has_Seat;
+end;
+
+function TPB_TableEvent.has_Seat: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_TableEvent.set_has_Seat;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_TableEvent.clear_has_Seat;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_TableEvent.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
-  ProtobufOutput.writeInt32(FN_SEAT, AValue);
+  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  set_has_Seat;
+end;
+
+procedure TPB_TableEvent.clear_Pots;
+begin
+  FPots.Clear;
+  clear_has_Pots;
+end;
+
+function TPB_TableEvent.has_Pots: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_TableEvent.set_has_Pots;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_TableEvent.clear_has_Pots;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableEvent.clear_Bets;
+begin
+  FBets := 0;
+  clear_has_Bets;
+end;
+
+function TPB_TableEvent.has_Bets: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_TableEvent.set_has_Bets;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_TableEvent.clear_has_Bets;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_TableEvent.SetBets(const AValue: TArray<UINT32>);
@@ -137,7 +254,28 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FBets[C1] := AValue[C1];
   for C1 := 0 to Length(FBets) - 1 do
-    ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
+    ProtobufOutput.writeUInt32(kBetsFieldNumber, AValue[C1]);
+end;
+
+procedure TPB_TableEvent.clear_Cards;
+begin
+  SetLength(FCards,0);
+  clear_has_Cards;
+end;
+
+function TPB_TableEvent.has_Cards: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_TableEvent.set_has_Cards;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_TableEvent.clear_has_Cards;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_TableEvent.SetCards(const AValue: TBytes);
@@ -147,7 +285,7 @@ begin
   SetLength(FCards,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FCards[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CARDS, AValue);
+  ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
 end;
 
 end.

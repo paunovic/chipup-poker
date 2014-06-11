@@ -320,6 +320,14 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			"  clear_has_$name$;\n"
 			"end;\n\n"
 			);
+		} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+			printer->Print(vars,
+			"procedure TPB_$message$.clear_$name$;\n"
+			"begin\n"
+			"  FreeAndNil($pname$);\n"
+			"  clear_has_$name$;\n"
+			"end;\n\n"
+			);
 		} else if (typeinfo[field->type()]) {
 			vars["default"] = thisType.getDefault();
 			printer->Print(vars,

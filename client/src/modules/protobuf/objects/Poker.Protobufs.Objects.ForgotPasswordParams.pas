@@ -12,18 +12,25 @@ type
   TPB_ForgotPasswordParams = class(TProtobufBaseObject)
   private
     const
-      FN_EMAIL = 1;
+      kEmailFieldNumber = 1;
 
     var
       FEmail: String;
+      _has_bits_: Integer;
 
+    procedure set_has_Email;
+    procedure clear_has_Email;
     procedure SetEmail(const AValue: String);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Email = 1;
+    function has_Email: Boolean;
+    procedure clear_Email;
     property Email: String read FEmail write SetEmail;
+
   end;
 
 implementation
@@ -46,7 +53,7 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_EMAIL: begin
+      kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
       end;
@@ -56,10 +63,32 @@ begin
   end;
 end;
 
+procedure TPB_ForgotPasswordParams.clear_Email;
+begin
+  FEmail := '';
+  clear_has_Email;
+end;
+
+function TPB_ForgotPasswordParams.has_Email: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ForgotPasswordParams.set_has_Email;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ForgotPasswordParams.clear_has_Email;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ForgotPasswordParams.SetEmail(const AValue: String);
 begin
   FEmail := AValue;
-  ProtobufOutput.writeString(FN_EMAIL, AValue);
+  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  set_has_Email;
 end;
 
 end.

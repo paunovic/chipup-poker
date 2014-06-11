@@ -12,11 +12,11 @@ type
   TPB_MoveRow = class(TProtobufBaseObject)
   private
     const
-      FN_CODE = 1;
-      FN_BET = 2;
-      FN_SEAT = 3;
-      FN_POTDATA = 4;
-      FN_POTS = 5;
+      kCodeFieldNumber = 1;
+      kBetFieldNumber = 2;
+      kSeatFieldNumber = 3;
+      kPotdataFieldNumber = 4;
+      kPotsFieldNumber = 5;
 
     var
       FCode: TArray<TTableEventType>;
@@ -24,10 +24,21 @@ type
       FSeat: Integer;
       FPotdata: TObjectList<TPB_WinnerPotInfo>;
       FPots: TObjectList<TPB_Pot>;
+      _has_bits_: Integer;
 
+    procedure set_has_Code;
+    procedure clear_has_Code;
     procedure SetCode(const AValue: TArray<TTableEventType>);
+    procedure set_has_Bet;
+    procedure clear_has_Bet;
     procedure SetBet(const AValue: UINT32);
+    procedure set_has_Seat;
+    procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
+    procedure set_has_Potdata;
+    procedure clear_has_Potdata;
+    procedure set_has_Pots;
+    procedure clear_has_Pots;
     procedure PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 
@@ -39,11 +50,31 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Code = 1;
+    function has_Code: Boolean;
+    procedure clear_Code;
     property Code: TArray<TTableEventType> read FCode write SetCode;
+
+    // LABEL TYPE Bet = 2;
+    function has_Bet: Boolean;
+    procedure clear_Bet;
     property Bet: UINT32 read FBet write SetBet;
+
+    // LABEL TYPE Seat = 3;
+    function has_Seat: Boolean;
+    procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
+
+    // LABEL TYPE Potdata = 4;
+    function has_Potdata: Boolean;
+    procedure clear_Potdata;
     property Potdata: TObjectList<TPB_WinnerPotInfo> read FPotdata;
+
+    // LABEL TYPE Pots = 5;
+    function has_Pots: Boolean;
+    procedure clear_Pots;
     property Pots: TObjectList<TPB_Pot> read FPots;
+
   end;
 
 implementation
@@ -88,24 +119,24 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CODE: begin
+      kCodeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FCode,Length(FCode)+1);
         FCode[Length(FCode)-1] := TTableEventType(AProtobufReader.readEnum);
       end;
-      FN_BET: begin
+      kBetFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBet := AProtobufReader.readUInt32;
       end;
-      FN_SEAT: begin
+      kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
       end;
-      FN_POTDATA: begin
+      kPotdataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPotdata.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_POTS: begin
+      kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
@@ -113,6 +144,27 @@ begin
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_MoveRow.clear_Code;
+begin
+  SetLength(FCode,0);
+  clear_has_Code;
+end;
+
+function TPB_MoveRow.has_Code: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_MoveRow.set_has_Code;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_MoveRow.clear_has_Code;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_MoveRow.SetCode(const AValue: TArray<TTableEventType>);
@@ -123,33 +175,119 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FCode[C1] := AValue[C1];
   for C1 := 0 to Length(FCode) - 1 do
-    ProtobufOutput.writeInt32(FN_CODE, Integer(AValue));
+    ProtobufOutput.writeInt32(kCodeFieldNumber, Integer(AValue));
+end;
+
+procedure TPB_MoveRow.clear_Bet;
+begin
+  FBet := 0;
+  clear_has_Bet;
+end;
+
+function TPB_MoveRow.has_Bet: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_MoveRow.set_has_Bet;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_MoveRow.clear_has_Bet;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_MoveRow.SetBet(const AValue: UINT32);
 begin
   FBet := AValue;
-  ProtobufOutput.writeUInt32(FN_BET, AValue);
+  ProtobufOutput.writeUInt32(kBetFieldNumber, AValue);
+  set_has_Bet;
+end;
+
+procedure TPB_MoveRow.clear_Seat;
+begin
+  FSeat := 0;
+  clear_has_Seat;
+end;
+
+function TPB_MoveRow.has_Seat: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_MoveRow.set_has_Seat;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_MoveRow.clear_has_Seat;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_MoveRow.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
-  ProtobufOutput.writeInt32(FN_SEAT, AValue);
+  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  set_has_Seat;
+end;
+
+procedure TPB_MoveRow.clear_Potdata;
+begin
+  FPotdata.Clear;
+  clear_has_Potdata;
+end;
+
+function TPB_MoveRow.has_Potdata: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_MoveRow.set_has_Potdata;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_MoveRow.clear_has_Potdata;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_MoveRow.PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_POTDATA,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kPotdataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_MoveRow.clear_Pots;
+begin
+  FPots.Clear;
+  clear_has_Pots;
+end;
+
+function TPB_MoveRow.has_Pots: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_MoveRow.set_has_Pots;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_MoveRow.clear_has_Pots;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_MoveRow.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

@@ -13,18 +13,25 @@ type
   TPB_ChangeMailReply = class(TProtobufBaseObject)
   private
     const
-      FN_STATUS = 1;
+      kStatusFieldNumber = 1;
 
     var
       FStatus: TChangeMailStatus;
+      _has_bits_: Integer;
 
+    procedure set_has_Status;
+    procedure clear_has_Status;
     procedure SetStatus(const AValue: TChangeMailStatus);
 
   public
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE Status = 1;
+    function has_Status: Boolean;
+    procedure clear_Status;
     property Status: TChangeMailStatus read FStatus write SetStatus;
+
   end;
 
 implementation
@@ -47,7 +54,7 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_STATUS: begin
+      kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TChangeMailStatus(AProtobufReader.readEnum);
       end;
@@ -57,10 +64,32 @@ begin
   end;
 end;
 
+procedure TPB_ChangeMailReply.clear_Status;
+begin
+  FStatus := TChangeMailStatus(0);
+  clear_has_Status;
+end;
+
+function TPB_ChangeMailReply.has_Status: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ChangeMailReply.set_has_Status;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ChangeMailReply.clear_has_Status;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ChangeMailReply.SetStatus(const AValue: TChangeMailStatus);
 begin
   FStatus := AValue;
-  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
+  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  set_has_Status;
 end;
 
 end.

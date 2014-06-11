@@ -13,28 +13,28 @@ type
   TPB_TableStatus = class(TProtobufBaseObject)
   private
     const
-      FN_TABLE_MONGO_ID = 1;
-      FN_SEATS = 2;
-      FN_STATE = 3;
-      FN_DEALER = 4;
-      FN_CURRENT_SEAT = 5;
-      FN_BETS = 6;
-      FN_LOCKED = 11;
-      FN_SEQ = 12;
-      FN_MINIMUM_BET = 13;
-      FN_MAXIMUM_RAISE = 14;
-      FN_SMALL_BLIND = 15;
-      FN_BIG_BLIND = 16;
-      FN_HANDID = 17;
-      FN_TIME = 18;
-      FN_EVENTS = 19;
-      FN_POTS = 20;
-      FN_RAKE_PERCENT = 21;
-      FN_CURRENT_GAME = 22;
-      FN_ROTATION = 23;
-      FN_TOTAL_BALANCE = 24;
-      FN_GAME_LIMIT = 25;
-      FN_MINIMUM_RAISE = 26;
+      kTableMongoIdFieldNumber = 1;
+      kSeatsFieldNumber = 2;
+      kStateFieldNumber = 3;
+      kDealerFieldNumber = 4;
+      kCurrentSeatFieldNumber = 5;
+      kBetsFieldNumber = 6;
+      kLockedFieldNumber = 11;
+      kSeqFieldNumber = 12;
+      kMinimumBetFieldNumber = 13;
+      kMaximumRaiseFieldNumber = 14;
+      kSmallBlindFieldNumber = 15;
+      kBigBlindFieldNumber = 16;
+      kHandidFieldNumber = 17;
+      kTimeFieldNumber = 18;
+      kEventsFieldNumber = 19;
+      kPotsFieldNumber = 20;
+      kRakePercentFieldNumber = 21;
+      kCurrentGameFieldNumber = 22;
+      kRotationFieldNumber = 23;
+      kTotalBalanceFieldNumber = 24;
+      kGameLimitFieldNumber = 25;
+      kMinimumRaiseFieldNumber = 26;
 
     var
       FTableMongoId: TBytes;
@@ -59,25 +59,70 @@ type
       FTotalBalance: UINT32;
       FGameLimit: TGameLimit;
       FMinimumRaise: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_TableMongoId;
+    procedure clear_has_TableMongoId;
     procedure SetTableMongoId(const AValue: TBytes);
+    procedure set_has_Seats;
+    procedure clear_has_Seats;
+    procedure set_has_State;
+    procedure clear_has_State;
     procedure SetState(const AValue: TTableState);
+    procedure set_has_Dealer;
+    procedure clear_has_Dealer;
     procedure SetDealer(const AValue: Integer);
+    procedure set_has_CurrentSeat;
+    procedure clear_has_CurrentSeat;
     procedure SetCurrentSeat(const AValue: Integer);
+    procedure set_has_Bets;
+    procedure clear_has_Bets;
     procedure SetBets(const AValue: TArray<UINT32>);
+    procedure set_has_Locked;
+    procedure clear_has_Locked;
     procedure SetLocked(const AValue: Boolean);
+    procedure set_has_Seq;
+    procedure clear_has_Seq;
     procedure SetSeq(const AValue: Integer);
+    procedure set_has_MinimumBet;
+    procedure clear_has_MinimumBet;
     procedure SetMinimumBet(const AValue: UINT32);
+    procedure set_has_MaximumRaise;
+    procedure clear_has_MaximumRaise;
     procedure SetMaximumRaise(const AValue: UINT32);
+    procedure set_has_SmallBlind;
+    procedure clear_has_SmallBlind;
     procedure SetSmallBlind(const AValue: UINT32);
+    procedure set_has_BigBlind;
+    procedure clear_has_BigBlind;
     procedure SetBigBlind(const AValue: UINT32);
+    procedure set_has_Handid;
+    procedure clear_has_Handid;
     procedure SetHandid(const AValue: UINT32);
+    procedure set_has_Time;
+    procedure clear_has_Time;
     procedure SetTime(const AValue: UInt64);
+    procedure set_has_Events;
+    procedure clear_has_Events;
+    procedure set_has_Pots;
+    procedure clear_has_Pots;
+    procedure set_has_RakePercent;
+    procedure clear_has_RakePercent;
     procedure SetRakePercent(const AValue: UINT32);
+    procedure set_has_CurrentGame;
+    procedure clear_has_CurrentGame;
     procedure SetCurrentGame(const AValue: TGameType);
+    procedure set_has_Rotation;
+    procedure clear_has_Rotation;
     procedure SetRotation(const AValue: UINT32);
+    procedure set_has_TotalBalance;
+    procedure clear_has_TotalBalance;
     procedure SetTotalBalance(const AValue: UINT32);
+    procedure set_has_GameLimit;
+    procedure clear_has_GameLimit;
     procedure SetGameLimit(const AValue: TGameLimit);
+    procedure set_has_MinimumRaise;
+    procedure clear_has_MinimumRaise;
     procedure SetMinimumRaise(const AValue: UINT32);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
@@ -91,28 +136,116 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
 
+    // LABEL TYPE TableMongoId = 1;
+    function has_TableMongoId: Boolean;
+    procedure clear_TableMongoId;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
+
+    // LABEL TYPE Seats = 2;
+    function has_Seats: Boolean;
+    procedure clear_Seats;
     property Seats: TObjectList<TPB_SeatInfo> read FSeats;
+
+    // LABEL TYPE State = 3;
+    function has_State: Boolean;
+    procedure clear_State;
     property State: TTableState read FState write SetState;
+
+    // LABEL TYPE Dealer = 4;
+    function has_Dealer: Boolean;
+    procedure clear_Dealer;
     property Dealer: Integer read FDealer write SetDealer;
+
+    // LABEL TYPE CurrentSeat = 5;
+    function has_CurrentSeat: Boolean;
+    procedure clear_CurrentSeat;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
+
+    // LABEL TYPE Bets = 6;
+    function has_Bets: Boolean;
+    procedure clear_Bets;
     property Bets: TArray<UINT32> read FBets write SetBets;
+
+    // LABEL TYPE Locked = 11;
+    function has_Locked: Boolean;
+    procedure clear_Locked;
     property Locked: Boolean read FLocked write SetLocked;
+
+    // LABEL TYPE Seq = 12;
+    function has_Seq: Boolean;
+    procedure clear_Seq;
     property Seq: Integer read FSeq write SetSeq;
+
+    // LABEL TYPE MinimumBet = 13;
+    function has_MinimumBet: Boolean;
+    procedure clear_MinimumBet;
     property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
+
+    // LABEL TYPE MaximumRaise = 14;
+    function has_MaximumRaise: Boolean;
+    procedure clear_MaximumRaise;
     property MaximumRaise: UINT32 read FMaximumRaise write SetMaximumRaise;
+
+    // LABEL TYPE SmallBlind = 15;
+    function has_SmallBlind: Boolean;
+    procedure clear_SmallBlind;
     property SmallBlind: UINT32 read FSmallBlind write SetSmallBlind;
+
+    // LABEL TYPE BigBlind = 16;
+    function has_BigBlind: Boolean;
+    procedure clear_BigBlind;
     property BigBlind: UINT32 read FBigBlind write SetBigBlind;
+
+    // LABEL TYPE Handid = 17;
+    function has_Handid: Boolean;
+    procedure clear_Handid;
     property Handid: UINT32 read FHandid write SetHandid;
+
+    // LABEL TYPE Time = 18;
+    function has_Time: Boolean;
+    procedure clear_Time;
     property Time: UInt64 read FTime write SetTime;
+
+    // LABEL TYPE Events = 19;
+    function has_Events: Boolean;
+    procedure clear_Events;
     property Events: TObjectList<TPB_TableEvent> read FEvents;
+
+    // LABEL TYPE Pots = 20;
+    function has_Pots: Boolean;
+    procedure clear_Pots;
     property Pots: TObjectList<TPB_Pot> read FPots;
+
+    // LABEL TYPE RakePercent = 21;
+    function has_RakePercent: Boolean;
+    procedure clear_RakePercent;
     property RakePercent: UINT32 read FRakePercent write SetRakePercent;
+
+    // LABEL TYPE CurrentGame = 22;
+    function has_CurrentGame: Boolean;
+    procedure clear_CurrentGame;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
+
+    // LABEL TYPE Rotation = 23;
+    function has_Rotation: Boolean;
+    procedure clear_Rotation;
     property Rotation: UINT32 read FRotation write SetRotation;
+
+    // LABEL TYPE TotalBalance = 24;
+    function has_TotalBalance: Boolean;
+    procedure clear_TotalBalance;
     property TotalBalance: UINT32 read FTotalBalance write SetTotalBalance;
+
+    // LABEL TYPE GameLimit = 25;
+    function has_GameLimit: Boolean;
+    procedure clear_GameLimit;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
+
+    // LABEL TYPE MinimumRaise = 26;
+    function has_MinimumRaise: Boolean;
+    procedure clear_MinimumRaise;
     property MinimumRaise: UINT32 read FMinimumRaise write SetMinimumRaise;
+
   end;
 
 implementation
@@ -164,92 +297,92 @@ begin
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_TABLE_MONGO_ID: begin
+      kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableMongoId);
       end;
-      FN_SEATS: begin
+      kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FSeats.Add(TPB_SeatInfo.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_STATE: begin
+      kStateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FState := TTableState(AProtobufReader.readEnum);
       end;
-      FN_DEALER: begin
+      kDealerFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDealer := AProtobufReader.readInt32;
       end;
-      FN_CURRENT_SEAT: begin
+      kCurrentSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentSeat := AProtobufReader.readInt32;
       end;
-      FN_BETS: begin
+      kBetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         SetLength(FBets, Length(FBets) + 1);
         FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
       end;
-      FN_LOCKED: begin
+      kLockedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLocked := AProtobufReader.readBoolean;
       end;
-      FN_SEQ: begin
+      kSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readInt32;
       end;
-      FN_MINIMUM_BET: begin
+      kMinimumBetFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMinimumBet := AProtobufReader.readUInt32;
       end;
-      FN_MAXIMUM_RAISE: begin
+      kMaximumRaiseFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaximumRaise := AProtobufReader.readUInt32;
       end;
-      FN_SMALL_BLIND: begin
+      kSmallBlindFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSmallBlind := AProtobufReader.readUInt32;
       end;
-      FN_BIG_BLIND: begin
+      kBigBlindFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBigBlind := AProtobufReader.readUInt32;
       end;
-      FN_HANDID: begin
+      kHandidFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHandid := AProtobufReader.readUInt32;
       end;
-      FN_TIME: begin
+      kTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTime := AProtobufReader.readInt64;
       end;
-      FN_EVENTS: begin
+      kEventsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEvents.Add(TPB_TableEvent.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_POTS: begin
+      kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
       end;
-      FN_RAKE_PERCENT: begin
+      kRakePercentFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRakePercent := AProtobufReader.readUInt32;
       end;
-      FN_CURRENT_GAME: begin
+      kCurrentGameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentGame := TGameType(AProtobufReader.readEnum);
       end;
-      FN_ROTATION: begin
+      kRotationFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRotation := AProtobufReader.readUInt32;
       end;
-      FN_TOTAL_BALANCE: begin
+      kTotalBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTotalBalance := AProtobufReader.readUInt32;
       end;
-      FN_GAME_LIMIT: begin
+      kGameLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGameLimit := TGameLimit(AProtobufReader.readEnum);
       end;
-      FN_MINIMUM_RAISE: begin
+      kMinimumRaiseFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMinimumRaise := AProtobufReader.readUInt32;
       end;
@@ -259,6 +392,27 @@ begin
   end;
 end;
 
+procedure TPB_TableStatus.clear_TableMongoId;
+begin
+  SetLength(FTableMongoId,0);
+  clear_has_TableMongoId;
+end;
+
+function TPB_TableStatus.has_TableMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_TableMongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_TableStatus.clear_has_TableMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_TableStatus.SetTableMongoId(const AValue: TBytes);
 var
   C1: Integer;
@@ -266,33 +420,141 @@ begin
   SetLength(FTableMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FTableMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_TableStatus.clear_Seats;
+begin
+  FSeats.Clear;
+  clear_has_Seats;
+end;
+
+function TPB_TableStatus.has_Seats: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Seats;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_TableStatus.clear_has_Seats;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_TableStatus.SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_SEATS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kSeatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatus.clear_State;
+begin
+  FState := TTableState(0);
+  clear_has_State;
+end;
+
+function TPB_TableStatus.has_State: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_State;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_TableStatus.clear_has_State;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_TableStatus.SetState(const AValue: TTableState);
 begin
   FState := AValue;
-  ProtobufOutput.writeInt32(FN_STATE, Integer(AValue));
+  ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));
+  set_has_State;
+end;
+
+procedure TPB_TableStatus.clear_Dealer;
+begin
+  FDealer := 0;
+  clear_has_Dealer;
+end;
+
+function TPB_TableStatus.has_Dealer: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Dealer;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_TableStatus.clear_has_Dealer;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_TableStatus.SetDealer(const AValue: Integer);
 begin
   FDealer := AValue;
-  ProtobufOutput.writeInt32(FN_DEALER, AValue);
+  ProtobufOutput.writeInt32(kDealerFieldNumber, AValue);
+  set_has_Dealer;
+end;
+
+procedure TPB_TableStatus.clear_CurrentSeat;
+begin
+  FCurrentSeat := 0;
+  clear_has_CurrentSeat;
+end;
+
+function TPB_TableStatus.has_CurrentSeat: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_CurrentSeat;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_TableStatus.clear_has_CurrentSeat;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_TableStatus.SetCurrentSeat(const AValue: Integer);
 begin
   FCurrentSeat := AValue;
-  ProtobufOutput.writeInt32(FN_CURRENT_SEAT, AValue);
+  ProtobufOutput.writeInt32(kCurrentSeatFieldNumber, AValue);
+  set_has_CurrentSeat;
+end;
+
+procedure TPB_TableStatus.clear_Bets;
+begin
+  FBets := 0;
+  clear_has_Bets;
+end;
+
+function TPB_TableStatus.has_Bets: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Bets;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_TableStatus.clear_has_Bets;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_TableStatus.SetBets(const AValue: TArray<UINT32>);
@@ -303,107 +565,457 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FBets[C1] := AValue[C1];
   for C1 := 0 to Length(FBets) - 1 do
-    ProtobufOutput.writeUInt32(FN_BETS, AValue[C1]);
+    ProtobufOutput.writeUInt32(kBetsFieldNumber, AValue[C1]);
+end;
+
+procedure TPB_TableStatus.clear_Locked;
+begin
+  FLocked := false;
+  clear_has_Locked;
+end;
+
+function TPB_TableStatus.has_Locked: Boolean;
+begin
+  Result := (_has_bits_ and 1024) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Locked;
+begin
+  _has_bits_ := _has_bits_ or 1024;
+end;
+
+procedure TPB_TableStatus.clear_has_Locked;
+begin
+  _has_bits_ := _has_bits_ xor 1024;
 end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
 begin
   FLocked := AValue;
-  ProtobufOutput.writeBoolean(FN_LOCKED, AValue);
+  ProtobufOutput.writeBoolean(kLockedFieldNumber, AValue);
+  set_has_Locked;
+end;
+
+procedure TPB_TableStatus.clear_Seq;
+begin
+  FSeq := 0;
+  clear_has_Seq;
+end;
+
+function TPB_TableStatus.has_Seq: Boolean;
+begin
+  Result := (_has_bits_ and 2048) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Seq;
+begin
+  _has_bits_ := _has_bits_ or 2048;
+end;
+
+procedure TPB_TableStatus.clear_has_Seq;
+begin
+  _has_bits_ := _has_bits_ xor 2048;
 end;
 
 procedure TPB_TableStatus.SetSeq(const AValue: Integer);
 begin
   FSeq := AValue;
-  ProtobufOutput.writeInt32(FN_SEQ, AValue);
+  ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
+  set_has_Seq;
+end;
+
+procedure TPB_TableStatus.clear_MinimumBet;
+begin
+  FMinimumBet := 0;
+  clear_has_MinimumBet;
+end;
+
+function TPB_TableStatus.has_MinimumBet: Boolean;
+begin
+  Result := (_has_bits_ and 4096) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_MinimumBet;
+begin
+  _has_bits_ := _has_bits_ or 4096;
+end;
+
+procedure TPB_TableStatus.clear_has_MinimumBet;
+begin
+  _has_bits_ := _has_bits_ xor 4096;
 end;
 
 procedure TPB_TableStatus.SetMinimumBet(const AValue: UINT32);
 begin
   FMinimumBet := AValue;
-  ProtobufOutput.writeUInt32(FN_MINIMUM_BET, AValue);
+  ProtobufOutput.writeUInt32(kMinimumBetFieldNumber, AValue);
+  set_has_MinimumBet;
+end;
+
+procedure TPB_TableStatus.clear_MaximumRaise;
+begin
+  FMaximumRaise := 0;
+  clear_has_MaximumRaise;
+end;
+
+function TPB_TableStatus.has_MaximumRaise: Boolean;
+begin
+  Result := (_has_bits_ and 8192) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_MaximumRaise;
+begin
+  _has_bits_ := _has_bits_ or 8192;
+end;
+
+procedure TPB_TableStatus.clear_has_MaximumRaise;
+begin
+  _has_bits_ := _has_bits_ xor 8192;
 end;
 
 procedure TPB_TableStatus.SetMaximumRaise(const AValue: UINT32);
 begin
   FMaximumRaise := AValue;
-  ProtobufOutput.writeUInt32(FN_MAXIMUM_RAISE, AValue);
+  ProtobufOutput.writeUInt32(kMaximumRaiseFieldNumber, AValue);
+  set_has_MaximumRaise;
+end;
+
+procedure TPB_TableStatus.clear_SmallBlind;
+begin
+  FSmallBlind := 0;
+  clear_has_SmallBlind;
+end;
+
+function TPB_TableStatus.has_SmallBlind: Boolean;
+begin
+  Result := (_has_bits_ and 16384) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_SmallBlind;
+begin
+  _has_bits_ := _has_bits_ or 16384;
+end;
+
+procedure TPB_TableStatus.clear_has_SmallBlind;
+begin
+  _has_bits_ := _has_bits_ xor 16384;
 end;
 
 procedure TPB_TableStatus.SetSmallBlind(const AValue: UINT32);
 begin
   FSmallBlind := AValue;
-  ProtobufOutput.writeUInt32(FN_SMALL_BLIND, AValue);
+  ProtobufOutput.writeUInt32(kSmallBlindFieldNumber, AValue);
+  set_has_SmallBlind;
+end;
+
+procedure TPB_TableStatus.clear_BigBlind;
+begin
+  FBigBlind := 0;
+  clear_has_BigBlind;
+end;
+
+function TPB_TableStatus.has_BigBlind: Boolean;
+begin
+  Result := (_has_bits_ and 32768) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_BigBlind;
+begin
+  _has_bits_ := _has_bits_ or 32768;
+end;
+
+procedure TPB_TableStatus.clear_has_BigBlind;
+begin
+  _has_bits_ := _has_bits_ xor 32768;
 end;
 
 procedure TPB_TableStatus.SetBigBlind(const AValue: UINT32);
 begin
   FBigBlind := AValue;
-  ProtobufOutput.writeUInt32(FN_BIG_BLIND, AValue);
+  ProtobufOutput.writeUInt32(kBigBlindFieldNumber, AValue);
+  set_has_BigBlind;
+end;
+
+procedure TPB_TableStatus.clear_Handid;
+begin
+  FHandid := 0;
+  clear_has_Handid;
+end;
+
+function TPB_TableStatus.has_Handid: Boolean;
+begin
+  Result := (_has_bits_ and 65536) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Handid;
+begin
+  _has_bits_ := _has_bits_ or 65536;
+end;
+
+procedure TPB_TableStatus.clear_has_Handid;
+begin
+  _has_bits_ := _has_bits_ xor 65536;
 end;
 
 procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
 begin
   FHandid := AValue;
-  ProtobufOutput.writeUInt32(FN_HANDID, AValue);
+  ProtobufOutput.writeUInt32(kHandidFieldNumber, AValue);
+  set_has_Handid;
+end;
+
+procedure TPB_TableStatus.clear_Time;
+begin
+  FTime := 0;
+  clear_has_Time;
+end;
+
+function TPB_TableStatus.has_Time: Boolean;
+begin
+  Result := (_has_bits_ and 131072) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Time;
+begin
+  _has_bits_ := _has_bits_ or 131072;
+end;
+
+procedure TPB_TableStatus.clear_has_Time;
+begin
+  _has_bits_ := _has_bits_ xor 131072;
 end;
 
 procedure TPB_TableStatus.SetTime(const AValue: UInt64);
 begin
   FTime := AValue;
-  ProtobufOutput.WriteInt64(FN_TIME, AValue);
+  ProtobufOutput.WriteInt64(kTimeFieldNumber, AValue);
+  set_has_Time;
+end;
+
+procedure TPB_TableStatus.clear_Events;
+begin
+  FEvents.Clear;
+  clear_has_Events;
+end;
+
+function TPB_TableStatus.has_Events: Boolean;
+begin
+  Result := (_has_bits_ and 262144) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Events;
+begin
+  _has_bits_ := _has_bits_ or 262144;
+end;
+
+procedure TPB_TableStatus.clear_has_Events;
+begin
+  _has_bits_ := _has_bits_ xor 262144;
 end;
 
 procedure TPB_TableStatus.EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_EVENTS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kEventsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatus.clear_Pots;
+begin
+  FPots.Clear;
+  clear_has_Pots;
+end;
+
+function TPB_TableStatus.has_Pots: Boolean;
+begin
+  Result := (_has_bits_ and 524288) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Pots;
+begin
+  _has_bits_ := _has_bits_ or 524288;
+end;
+
+procedure TPB_TableStatus.clear_has_Pots;
+begin
+  _has_bits_ := _has_bits_ xor 524288;
 end;
 
 procedure TPB_TableStatus.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_POTS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatus.clear_RakePercent;
+begin
+  FRakePercent := 0;
+  clear_has_RakePercent;
+end;
+
+function TPB_TableStatus.has_RakePercent: Boolean;
+begin
+  Result := (_has_bits_ and 1048576) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_RakePercent;
+begin
+  _has_bits_ := _has_bits_ or 1048576;
+end;
+
+procedure TPB_TableStatus.clear_has_RakePercent;
+begin
+  _has_bits_ := _has_bits_ xor 1048576;
 end;
 
 procedure TPB_TableStatus.SetRakePercent(const AValue: UINT32);
 begin
   FRakePercent := AValue;
-  ProtobufOutput.writeUInt32(FN_RAKE_PERCENT, AValue);
+  ProtobufOutput.writeUInt32(kRakePercentFieldNumber, AValue);
+  set_has_RakePercent;
+end;
+
+procedure TPB_TableStatus.clear_CurrentGame;
+begin
+  FCurrentGame := TGameType(0);
+  clear_has_CurrentGame;
+end;
+
+function TPB_TableStatus.has_CurrentGame: Boolean;
+begin
+  Result := (_has_bits_ and 2097152) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_CurrentGame;
+begin
+  _has_bits_ := _has_bits_ or 2097152;
+end;
+
+procedure TPB_TableStatus.clear_has_CurrentGame;
+begin
+  _has_bits_ := _has_bits_ xor 2097152;
 end;
 
 procedure TPB_TableStatus.SetCurrentGame(const AValue: TGameType);
 begin
   FCurrentGame := AValue;
-  ProtobufOutput.writeInt32(FN_CURRENT_GAME, Integer(AValue));
+  ProtobufOutput.writeInt32(kCurrentGameFieldNumber, Integer(AValue));
+  set_has_CurrentGame;
+end;
+
+procedure TPB_TableStatus.clear_Rotation;
+begin
+  FRotation := 0;
+  clear_has_Rotation;
+end;
+
+function TPB_TableStatus.has_Rotation: Boolean;
+begin
+  Result := (_has_bits_ and 4194304) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_Rotation;
+begin
+  _has_bits_ := _has_bits_ or 4194304;
+end;
+
+procedure TPB_TableStatus.clear_has_Rotation;
+begin
+  _has_bits_ := _has_bits_ xor 4194304;
 end;
 
 procedure TPB_TableStatus.SetRotation(const AValue: UINT32);
 begin
   FRotation := AValue;
-  ProtobufOutput.writeUInt32(FN_ROTATION, AValue);
+  ProtobufOutput.writeUInt32(kRotationFieldNumber, AValue);
+  set_has_Rotation;
+end;
+
+procedure TPB_TableStatus.clear_TotalBalance;
+begin
+  FTotalBalance := 0;
+  clear_has_TotalBalance;
+end;
+
+function TPB_TableStatus.has_TotalBalance: Boolean;
+begin
+  Result := (_has_bits_ and 8388608) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_TotalBalance;
+begin
+  _has_bits_ := _has_bits_ or 8388608;
+end;
+
+procedure TPB_TableStatus.clear_has_TotalBalance;
+begin
+  _has_bits_ := _has_bits_ xor 8388608;
 end;
 
 procedure TPB_TableStatus.SetTotalBalance(const AValue: UINT32);
 begin
   FTotalBalance := AValue;
-  ProtobufOutput.writeUInt32(FN_TOTAL_BALANCE, AValue);
+  ProtobufOutput.writeUInt32(kTotalBalanceFieldNumber, AValue);
+  set_has_TotalBalance;
+end;
+
+procedure TPB_TableStatus.clear_GameLimit;
+begin
+  FGameLimit := TGameLimit(0);
+  clear_has_GameLimit;
+end;
+
+function TPB_TableStatus.has_GameLimit: Boolean;
+begin
+  Result := (_has_bits_ and 16777216) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_GameLimit;
+begin
+  _has_bits_ := _has_bits_ or 16777216;
+end;
+
+procedure TPB_TableStatus.clear_has_GameLimit;
+begin
+  _has_bits_ := _has_bits_ xor 16777216;
 end;
 
 procedure TPB_TableStatus.SetGameLimit(const AValue: TGameLimit);
 begin
   FGameLimit := AValue;
-  ProtobufOutput.writeInt32(FN_GAME_LIMIT, Integer(AValue));
+  ProtobufOutput.writeInt32(kGameLimitFieldNumber, Integer(AValue));
+  set_has_GameLimit;
+end;
+
+procedure TPB_TableStatus.clear_MinimumRaise;
+begin
+  FMinimumRaise := 0;
+  clear_has_MinimumRaise;
+end;
+
+function TPB_TableStatus.has_MinimumRaise: Boolean;
+begin
+  Result := (_has_bits_ and 33554432) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_MinimumRaise;
+begin
+  _has_bits_ := _has_bits_ or 33554432;
+end;
+
+procedure TPB_TableStatus.clear_has_MinimumRaise;
+begin
+  _has_bits_ := _has_bits_ xor 33554432;
 end;
 
 procedure TPB_TableStatus.SetMinimumRaise(const AValue: UINT32);
 begin
   FMinimumRaise := AValue;
-  ProtobufOutput.writeUInt32(FN_MINIMUM_RAISE, AValue);
+  ProtobufOutput.writeUInt32(kMinimumRaiseFieldNumber, AValue);
+  set_has_MinimumRaise;
 end;
 
 end.
