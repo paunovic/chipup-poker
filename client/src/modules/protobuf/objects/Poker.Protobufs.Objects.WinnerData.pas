@@ -81,6 +81,7 @@ begin
       kMsgFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMsg := AProtobufReader.readUtf8String;
+        set_has_Msg;
       end;
     else
       AProtobufReader.skipField(tag);

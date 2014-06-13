@@ -85,6 +85,7 @@ begin
       kGameIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameId);
+        set_has_GameId;
       end;
       kSeatIndexFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -94,6 +95,7 @@ begin
       kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
+        set_has_Chips;
       end;
     else
       AProtobufReader.skipField(tag);

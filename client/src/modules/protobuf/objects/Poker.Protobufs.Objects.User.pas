@@ -115,26 +115,32 @@ begin
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
       kAvatarFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FAvatar);
+        set_has_Avatar;
       end;
       kDisplaynameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FDisplayname := AProtobufReader.readUtf8String;
+        set_has_Displayname;
       end;
       kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
+        set_has_Email;
       end;
       kAuthedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FAuthed := AProtobufReader.readBoolean;
+        set_has_Authed;
       end;
       kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
+        set_has_Chips;
       end;
     else
       AProtobufReader.skipField(tag);

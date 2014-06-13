@@ -75,10 +75,12 @@ begin
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
+        set_has_PlayerMongoId;
       end;
       kChipAmountFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChipAmount := AProtobufReader.readUInt32;
+        set_has_ChipAmount;
       end;
     else
       AProtobufReader.skipField(tag);

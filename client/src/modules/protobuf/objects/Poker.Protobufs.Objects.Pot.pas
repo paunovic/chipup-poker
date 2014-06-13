@@ -94,10 +94,12 @@ begin
       kValueFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FValue := AProtobufReader.readUInt32;
+        set_has_Value;
       end;
       kMembersFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMembers.Add(AProtobufReader.readInt32);
+        set_has_Members;
       end;
     else
       AProtobufReader.skipField(tag);

@@ -106,22 +106,27 @@ begin
       kPathFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPath := AProtobufReader.readUtf8String;
+        set_has_Path;
       end;
       kHashFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FHash);
+        set_has_Hash;
       end;
       kUrlFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUrl := AProtobufReader.readUtf8String;
+        set_has_Url;
       end;
       kFileTypeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FFileType := TUpdateFileType(AProtobufReader.readEnum);
+        set_has_FileType;
       end;
       kFileSizeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FFileSize := AProtobufReader.readUInt32;
+        set_has_FileSize;
       end;
     else
       AProtobufReader.skipField(tag);

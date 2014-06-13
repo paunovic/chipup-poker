@@ -125,6 +125,7 @@ begin
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
       kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -134,22 +135,27 @@ begin
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCards);
+        set_has_Cards;
       end;
       kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
+        set_has_Chips;
       end;
       kNickFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FNick := AProtobufReader.readUtf8String;
+        set_has_Nick;
       end;
       kMuckFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMuck := AProtobufReader.readBoolean;
+        set_has_Muck;
       end;
       kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TPlayerStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
     else
       AProtobufReader.skipField(tag);

@@ -75,10 +75,12 @@ begin
       kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableMongoId);
+        set_has_TableMongoId;
       end;
       kFlagFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FFlag := AProtobufReader.readBoolean;
+        set_has_Flag;
       end;
     else
       AProtobufReader.skipField(tag);

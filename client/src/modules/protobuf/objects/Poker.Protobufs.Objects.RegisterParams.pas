@@ -85,14 +85,17 @@ begin
       kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
+        set_has_Email;
       end;
       kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
+        set_has_Password;
       end;
       kDisplayNameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FDisplayName := AProtobufReader.readUtf8String;
+        set_has_DisplayName;
       end;
     else
       AProtobufReader.skipField(tag);

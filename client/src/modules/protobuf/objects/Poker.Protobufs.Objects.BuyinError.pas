@@ -75,10 +75,12 @@ begin
       kGameIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameId);
+        set_has_GameId;
       end;
       kLastCashoutFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLastCashout := AProtobufReader.readUInt32;
+        set_has_LastCashout;
       end;
     else
       AProtobufReader.skipField(tag);

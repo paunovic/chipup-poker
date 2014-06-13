@@ -94,10 +94,12 @@ begin
       kDebugFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDebug := AProtobufReader.readBoolean;
+        set_has_Debug;
       end;
       kFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Files;
       end;
     else
       AProtobufReader.skipField(tag);

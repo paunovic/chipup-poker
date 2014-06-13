@@ -161,10 +161,12 @@ begin
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
+        set_has_PlayerMongoId;
       end;
       kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
+        set_has_Chips;
       end;
       kCardCountFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -174,26 +176,32 @@ begin
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCards);
+        set_has_Cards;
       end;
       kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TPlayerStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
       kTimebankFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTimebank := AProtobufReader.readUInt32;
+        set_has_Timebank;
       end;
       kCardsVisibleFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCardsVisible := AProtobufReader.readBoolean;
+        set_has_CardsVisible;
       end;
       kDisconnectedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDisconnected := AProtobufReader.readBoolean;
+        set_has_Disconnected;
       end;
       kCanShowFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCanShow := AProtobufReader.readBoolean;
+        set_has_CanShow;
       end;
     else
       AProtobufReader.skipField(tag);

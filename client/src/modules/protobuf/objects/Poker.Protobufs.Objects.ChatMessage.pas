@@ -95,18 +95,22 @@ begin
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
       kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsername := AProtobufReader.readUtf8String;
+        set_has_Username;
       end;
       kMsgFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMsg := AProtobufReader.readUtf8String;
+        set_has_Msg;
       end;
       kTimestampFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTimestamp := AProtobufReader.readInt64;
+        set_has_Timestamp;
       end;
     else
       AProtobufReader.skipField(tag);

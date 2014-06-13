@@ -130,20 +130,24 @@ begin
       kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Clubs;
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Users;
       end;
       kSelfFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FSelf) then
           FSelf := TPB_User.Create;
         FSelf.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Self;
       end;
       kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Games;
       end;
     else
       AProtobufReader.skipField(tag);

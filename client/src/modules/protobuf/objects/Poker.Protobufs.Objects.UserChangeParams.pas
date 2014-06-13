@@ -84,6 +84,7 @@ begin
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Users;
       end;
     else
       AProtobufReader.skipField(tag);

@@ -132,6 +132,7 @@ begin
       kEventFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEvent := TTableEventType(AProtobufReader.readEnum);
+        set_has_Event;
       end;
       kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -141,14 +142,17 @@ begin
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Pots;
       end;
       kBetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBets.Add(AProtobufReader.readUInt32);
+        set_has_Bets;
       end;
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCards);
+        set_has_Cards;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -282,6 +286,7 @@ end;
 procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
 end;
 
 procedure TPB_TableEvent.clear_Cards;

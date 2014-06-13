@@ -85,14 +85,17 @@ begin
       kClubMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubMongoId);
+        set_has_ClubMongoId;
       end;
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
+        set_has_PlayerMongoId;
       end;
       kSuspendedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSuspended := AProtobufReader.readBoolean;
+        set_has_Suspended;
       end;
     else
       AProtobufReader.skipField(tag);

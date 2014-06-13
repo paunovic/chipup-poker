@@ -118,14 +118,17 @@ begin
       kReplyFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FReply.Add(TPB_TableStatsReply.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Reply;
       end;
       kPlayersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Players;
       end;
       kClubStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_ClubStats;
       end;
     else
       AProtobufReader.skipField(tag);

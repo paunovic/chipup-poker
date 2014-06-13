@@ -65,6 +65,7 @@ begin
       kUptimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUptime := AProtobufReader.readUInt32;
+        set_has_Uptime;
       end;
     else
       AProtobufReader.skipField(tag);

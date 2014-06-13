@@ -106,16 +106,19 @@ begin
       kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TClubStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
       kClubFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FClub) then
           FClub := TPB_Club.Create;
         FClub.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Club;
       end;
       kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Games;
       end;
     else
       AProtobufReader.skipField(tag);

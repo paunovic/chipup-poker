@@ -75,10 +75,12 @@ begin
       kUptimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUptime := AProtobufReader.readUInt32;
+        set_has_Uptime;
       end;
       kServertimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FServertime := AProtobufReader.readInt64;
+        set_has_Servertime;
       end;
     else
       AProtobufReader.skipField(tag);

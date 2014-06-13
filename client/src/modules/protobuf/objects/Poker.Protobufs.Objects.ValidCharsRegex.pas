@@ -115,26 +115,32 @@ begin
       kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
+        set_has_Email;
       end;
       kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsername := AProtobufReader.readUtf8String;
+        set_has_Username;
       end;
       kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
+        set_has_Password;
       end;
       kClubnameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubname := AProtobufReader.readUtf8String;
+        set_has_Clubname;
       end;
       kClubpasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubpassword := AProtobufReader.readUtf8String;
+        set_has_Clubpassword;
       end;
       kGamenameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGamename := AProtobufReader.readUtf8String;
+        set_has_Gamename;
       end;
     else
       AProtobufReader.skipField(tag);

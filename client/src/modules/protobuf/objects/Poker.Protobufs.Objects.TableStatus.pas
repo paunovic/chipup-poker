@@ -288,7 +288,7 @@ begin
   end;
   if Assigned(FBets) then
   begin
-//    FBets.OnNotify := nil;
+    FBets.OnNotify := nil;
     FreeAndNil(FBets);
   end;
   if Assigned(FEvents) then
@@ -316,14 +316,17 @@ begin
       kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableMongoId);
+        set_has_TableMongoId;
       end;
       kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FSeats.Add(TPB_SeatInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Seats;
       end;
       kStateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FState := TTableState(AProtobufReader.readEnum);
+        set_has_State;
       end;
       kDealerFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -338,10 +341,12 @@ begin
       kBetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBets.Add(AProtobufReader.readUInt32);
+        set_has_Bets;
       end;
       kLockedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLocked := AProtobufReader.readBoolean;
+        set_has_Locked;
       end;
       kSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -351,58 +356,72 @@ begin
       kMinimumBetFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMinimumBet := AProtobufReader.readUInt32;
+        set_has_MinimumBet;
       end;
       kMaximumRaiseFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaximumRaise := AProtobufReader.readUInt32;
+        set_has_MaximumRaise;
       end;
       kSmallBlindFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSmallBlind := AProtobufReader.readUInt32;
+        set_has_SmallBlind;
       end;
       kBigBlindFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBigBlind := AProtobufReader.readUInt32;
+        set_has_BigBlind;
       end;
       kHandidFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHandid := AProtobufReader.readUInt32;
+        set_has_Handid;
       end;
       kTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTime := AProtobufReader.readInt64;
+        set_has_Time;
       end;
       kEventsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEvents.Add(TPB_TableEvent.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Events;
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Pots;
       end;
       kRakePercentFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRakePercent := AProtobufReader.readUInt32;
+        set_has_RakePercent;
       end;
       kCurrentGameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentGame := TGameType(AProtobufReader.readEnum);
+        set_has_CurrentGame;
       end;
       kRotationFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRotation := AProtobufReader.readUInt32;
+        set_has_Rotation;
       end;
       kTotalBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTotalBalance := AProtobufReader.readUInt32;
+        set_has_TotalBalance;
       end;
       kGameLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGameLimit := TGameLimit(AProtobufReader.readEnum);
+        set_has_GameLimit;
       end;
       kMinimumRaiseFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMinimumRaise := AProtobufReader.readUInt32;
+        set_has_MinimumRaise;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -631,6 +650,7 @@ end;
 procedure TPB_TableStatus.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
 end;
 
 procedure TPB_TableStatus.clear_Locked;

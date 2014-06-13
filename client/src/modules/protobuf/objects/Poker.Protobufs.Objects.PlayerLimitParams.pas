@@ -95,18 +95,22 @@ begin
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubid);
+        set_has_Clubid;
       end;
       kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FUserid);
+        set_has_Userid;
       end;
       kLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLimit := AProtobufReader.readUInt32;
+        set_has_Limit;
       end;
       kUnlimitedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUnlimited := AProtobufReader.readBoolean;
+        set_has_Unlimited;
       end;
     else
       AProtobufReader.skipField(tag);

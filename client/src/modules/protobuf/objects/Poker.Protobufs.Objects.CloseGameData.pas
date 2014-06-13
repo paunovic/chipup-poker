@@ -76,10 +76,12 @@ begin
       kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameid);
+        set_has_Gameid;
       end;
       kTimestampFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTimestamp := TCloseGameTime(AProtobufReader.readEnum);
+        set_has_Timestamp;
       end;
     else
       AProtobufReader.skipField(tag);

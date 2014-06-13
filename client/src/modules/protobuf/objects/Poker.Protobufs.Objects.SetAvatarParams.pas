@@ -65,6 +65,7 @@ begin
       kAvatarIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FAvatarId);
+        set_has_AvatarId;
       end;
     else
       AProtobufReader.skipField(tag);

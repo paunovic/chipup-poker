@@ -142,6 +142,7 @@ begin
       kBetFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBet := AProtobufReader.readUInt32;
+        set_has_Bet;
       end;
       kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -151,10 +152,12 @@ begin
       kPotdataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPotdata.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Potdata;
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Pots;
       end;
     else
       AProtobufReader.skipField(tag);

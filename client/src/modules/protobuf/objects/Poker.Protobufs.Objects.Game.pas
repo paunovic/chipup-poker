@@ -199,14 +199,17 @@ begin
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
       kCreatorMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCreatorMongoId);
+        set_has_CreatorMongoId;
       end;
       kGamenameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGamename := AProtobufReader.readUtf8String;
+        set_has_Gamename;
       end;
       kClubseqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -216,14 +219,17 @@ begin
       kGameTypeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGameType := TGameType(AProtobufReader.readEnum);
+        set_has_GameType;
       end;
       kGameLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGameLimit := TGameLimit(AProtobufReader.readEnum);
+        set_has_GameLimit;
       end;
       kBlindsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBlinds := TGameBlinds(AProtobufReader.readEnum);
+        set_has_Blinds;
       end;
       kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -248,14 +254,17 @@ begin
       kStateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FState := TGameState(AProtobufReader.readEnum);
+        set_has_State;
       end;
       kClosetimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClosetime := AProtobufReader.readInt64;
+        set_has_Closetime;
       end;
       kLasthandidFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLasthandid := AProtobufReader.readUInt32;
+        set_has_Lasthandid;
       end;
     else
       AProtobufReader.skipField(tag);

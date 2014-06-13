@@ -85,14 +85,17 @@ begin
       kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableMongoId);
+        set_has_TableMongoId;
       end;
       kChipAmountFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChipAmount := AProtobufReader.readUInt32;
+        set_has_ChipAmount;
       end;
       kCurrentStateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentState := TTableState(AProtobufReader.readEnum);
+        set_has_CurrentState;
       end;
     else
       AProtobufReader.skipField(tag);

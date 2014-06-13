@@ -209,48 +209,59 @@ begin
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
       kSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeq := AProtobufReader.readUInt32;
+        set_has_Seq;
       end;
       kTotalrakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTotalrake := AProtobufReader.readUInt32;
+        set_has_Totalrake;
       end;
       kPlayersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayers.Add(TPB_PlayerHandHistory.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Players;
       end;
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCards);
+        set_has_Cards;
       end;
       kEndtimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEndtime := AProtobufReader.readUInt32;
+        set_has_Endtime;
       end;
       kBalanceChangesFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBalanceChanges.Add(AProtobufReader.readInt32);
+        set_has_BalanceChanges;
       end;
       kMovesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMoves.Add(TPB_MoveRow.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Moves;
       end;
       kDealerFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDealer := AProtobufReader.readUInt32;
+        set_has_Dealer;
       end;
       kGameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FGame) then
           FGame := TPB_Game.Create;
         FGame.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Game;
       end;
       kCurrentGameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentGame := TGameType(AProtobufReader.readEnum);
+        set_has_CurrentGame;
       end;
       kRakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);

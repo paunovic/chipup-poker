@@ -94,10 +94,12 @@ begin
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubid);
+        set_has_Clubid;
       end;
       kPlayerStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_PlayerStats;
       end;
     else
       AProtobufReader.skipField(tag);

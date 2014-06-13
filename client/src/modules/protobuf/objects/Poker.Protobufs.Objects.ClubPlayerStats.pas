@@ -75,6 +75,7 @@ begin
       kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FUserid);
+        set_has_Userid;
       end;
       kClubBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);

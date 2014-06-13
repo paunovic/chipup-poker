@@ -84,6 +84,7 @@ begin
       kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Clubs;
       end;
     else
       AProtobufReader.skipField(tag);

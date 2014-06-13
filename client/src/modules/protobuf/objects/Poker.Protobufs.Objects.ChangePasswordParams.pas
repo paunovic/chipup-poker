@@ -65,6 +65,7 @@ begin
       kNewPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FNewPassword := AProtobufReader.readUtf8String;
+        set_has_NewPassword;
       end;
     else
       AProtobufReader.skipField(tag);

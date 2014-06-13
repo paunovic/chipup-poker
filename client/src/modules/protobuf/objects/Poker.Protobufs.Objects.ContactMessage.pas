@@ -76,10 +76,12 @@ begin
       kReasonFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FReason := TContactReason(AProtobufReader.readEnum);
+        set_has_Reason;
       end;
       kMessageFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMessage := AProtobufReader.readUtf8String;
+        set_has_Message;
       end;
     else
       AProtobufReader.skipField(tag);

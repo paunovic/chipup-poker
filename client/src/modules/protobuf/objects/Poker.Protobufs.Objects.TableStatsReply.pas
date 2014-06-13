@@ -114,18 +114,22 @@ begin
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubid);
+        set_has_Clubid;
       end;
       kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameid);
+        set_has_Gameid;
       end;
       kPlayerstatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Playerstats;
       end;
       kHandsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHands := AProtobufReader.readUInt32;
+        set_has_Hands;
       end;
     else
       AProtobufReader.skipField(tag);

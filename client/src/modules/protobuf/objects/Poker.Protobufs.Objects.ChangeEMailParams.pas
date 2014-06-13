@@ -65,6 +65,7 @@ begin
       kNewMailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FNewMail := AProtobufReader.readUtf8String;
+        set_has_NewMail;
       end;
     else
       AProtobufReader.skipField(tag);

@@ -65,6 +65,7 @@ begin
       kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
+        set_has_Email;
       end;
     else
       AProtobufReader.skipField(tag);

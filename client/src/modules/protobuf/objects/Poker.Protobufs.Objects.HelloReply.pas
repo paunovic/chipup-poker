@@ -162,6 +162,7 @@ begin
         if not Assigned(FStringSizes) then
           FStringSizes := TPB_StringSizes.Create;
         FStringSizes.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_StringSizes;
       end;
       kChangeExpireTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -188,16 +189,19 @@ begin
         if not Assigned(FMinSizes) then
           FMinSizes := TPB_StringSizes.Create;
         FMinSizes.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_MinSizes;
       end;
       kUpdateFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_UpdateFiles;
       end;
       kValidCharsRegexFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FValidCharsRegex) then
           FValidCharsRegex := TPB_ValidCharsRegex.Create;
         FValidCharsRegex.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_ValidCharsRegex;
       end;
     else
       AProtobufReader.skipField(tag);

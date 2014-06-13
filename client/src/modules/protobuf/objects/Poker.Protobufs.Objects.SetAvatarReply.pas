@@ -66,6 +66,7 @@ begin
       kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TSetAvatarStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
     else
       AProtobufReader.skipField(tag);

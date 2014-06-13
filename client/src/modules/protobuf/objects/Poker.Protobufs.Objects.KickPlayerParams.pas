@@ -80,6 +80,7 @@ begin
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
+        set_has_PlayerMongoId;
       end;
     else
       AProtobufReader.skipField(tag);

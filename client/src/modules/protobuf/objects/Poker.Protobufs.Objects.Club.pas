@@ -184,26 +184,32 @@ begin
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
       kMembersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMembers.Add(TPB_ClubMember.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Members;
       end;
       kNameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FName := AProtobufReader.readUtf8String;
+        set_has_Name;
       end;
       kOwnerFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FOwner);
+        set_has_Owner;
       end;
       kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
+        set_has_Password;
       end;
       kIsPrivateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FIsPrivate := AProtobufReader.readBoolean;
+        set_has_IsPrivate;
       end;
       kSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -213,18 +219,22 @@ begin
       kHasPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHasPassword := AProtobufReader.readBoolean;
+        set_has_HasPassword;
       end;
       kRakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRake := AProtobufReader.readUInt32;
+        set_has_Rake;
       end;
       kDefaultBalanceLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDefaultBalanceLimit := AProtobufReader.readUInt32;
+        set_has_DefaultBalanceLimit;
       end;
       kUnlimitedDefaultBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUnlimitedDefaultBalance := AProtobufReader.readBoolean;
+        set_has_UnlimitedDefaultBalance;
       end;
     else
       AProtobufReader.skipField(tag);

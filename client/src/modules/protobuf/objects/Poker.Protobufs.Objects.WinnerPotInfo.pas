@@ -121,18 +121,22 @@ begin
       kSumFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSum := AProtobufReader.readUInt32;
+        set_has_Sum;
       end;
       kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeats.Add(AProtobufReader.readInt32);
+        set_has_Seats;
       end;
       kWinnerDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_WinnerData;
       end;
       kRakeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRake := AProtobufReader.readUInt32;
+        set_has_Rake;
       end;
     else
       AProtobufReader.skipField(tag);

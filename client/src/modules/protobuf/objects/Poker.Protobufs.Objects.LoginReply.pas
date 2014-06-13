@@ -106,16 +106,19 @@ begin
       kLoginStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLoginStatus := TLoginStatus(AProtobufReader.readEnum);
+        set_has_LoginStatus;
       end;
       kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FStatus) then
           FStatus := TPB_StatusReply.Create;
         FStatus.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Status;
       end;
       kReconnectTablesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_ReconnectTables;
       end;
     else
       AProtobufReader.skipField(tag);

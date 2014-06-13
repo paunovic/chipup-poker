@@ -75,10 +75,12 @@ begin
       kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsername := AProtobufReader.readUtf8String;
+        set_has_Username;
       end;
       kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
+        set_has_Password;
       end;
     else
       AProtobufReader.skipField(tag);

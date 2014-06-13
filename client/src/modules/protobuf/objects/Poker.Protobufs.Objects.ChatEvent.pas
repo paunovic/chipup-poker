@@ -88,16 +88,19 @@ begin
       kEventFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEvent := TEventType(AProtobufReader.readEnum);
+        set_has_Event;
       end;
       kMsgFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FMsg) then
           FMsg := TPB_ChatMessage.Create;
         FMsg.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Msg;
       end;
       kTableIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableId);
+        set_has_TableId;
       end;
     else
       AProtobufReader.skipField(tag);

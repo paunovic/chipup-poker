@@ -105,14 +105,17 @@ begin
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
       kSuspendedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSuspended := AProtobufReader.readBoolean;
+        set_has_Suspended;
       end;
       kBalanceLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBalanceLimit := AProtobufReader.readUInt32;
+        set_has_BalanceLimit;
       end;
       kClubBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -122,6 +125,7 @@ begin
       kUnlimitedLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUnlimitedLimit := AProtobufReader.readBoolean;
+        set_has_UnlimitedLimit;
       end;
     else
       AProtobufReader.skipField(tag);

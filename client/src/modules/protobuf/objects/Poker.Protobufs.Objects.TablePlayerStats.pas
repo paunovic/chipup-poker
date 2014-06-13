@@ -161,6 +161,7 @@ begin
       kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FUserid);
+        set_has_Userid;
       end;
       kBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -170,26 +171,32 @@ begin
       kBuyinsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FBuyins.Add(AProtobufReader.readUInt32);
+        set_has_Buyins;
       end;
       kCashoutsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCashouts.Add(AProtobufReader.readUInt32);
+        set_has_Cashouts;
       end;
       kRakecontribFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FRakecontrib := AProtobufReader.readUInt32;
+        set_has_Rakecontrib;
       end;
       kSecondsplayedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSecondsplayed := AProtobufReader.readUInt32;
+        set_has_Secondsplayed;
       end;
       kChipsinplayFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChipsinplay := AProtobufReader.readUInt32;
+        set_has_Chipsinplay;
       end;
       kHandsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FHands := AProtobufReader.readUInt32;
+        set_has_Hands;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -303,6 +310,7 @@ end;
 procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  ProtobufOutput.writeUInt32(kBuyinsFieldNumber,Item);
 end;
 
 procedure TPB_TablePlayerStats.clear_Cashouts;
@@ -329,6 +337,7 @@ end;
 procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  ProtobufOutput.writeUInt32(kCashoutsFieldNumber,Item);
 end;
 
 procedure TPB_TablePlayerStats.clear_Rakecontrib;
