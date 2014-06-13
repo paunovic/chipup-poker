@@ -95,7 +95,7 @@ private:
 		this->type = field->type();
 		const Descriptor *subtype = field->message_type();
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-			delphiName = "TObjectList<TPB_"+subtype->name()+">";
+			delphiName = "TList<TPB_"+subtype->name()+">";
 		} else {
 			delphiName = "TPB_"+subtype->name();
 		}
@@ -881,8 +881,9 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 						printer.Print(
 							"  if (from.has_$name$) then\n"
-							"    $name$.MergeFrom(from.$name$);\n"
-							,"name",PropertyName(field));
+							"    $pname$.MergeFrom(from.$name$);\n"
+							,"name",PropertyName(field)
+							,"pname",PrivateFieldName(field));
 					} else {
 						printer.Print(
 							"  if (from.has_$name$) then\n"
@@ -977,7 +978,7 @@ const string getDelphiType(const FieldDescriptor *field) const { // FIXME, merge
 	} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 		const Descriptor *subtype = field->message_type();
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-			return "TObjectList<TPB_"+subtype->name()+">";
+			return "TList<TPB_"+subtype->name()+">";
 		} else {
 			return "TPB_"+subtype->name();
 		}
