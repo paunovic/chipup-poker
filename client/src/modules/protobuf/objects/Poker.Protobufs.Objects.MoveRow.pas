@@ -137,6 +137,7 @@ begin
       kCodeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCode.Add(TTableEventType(AProtobufReader.readEnum));
+        set_has_Code;
       end;
       kBetFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);

@@ -31,7 +31,7 @@ public:
 		case FieldDescriptor::TYPE_BOOL:
 			baseDelphiName = delphiName = "Boolean";
 			writter = "writeBoolean";
-			reader = "FIXME";
+			reader = "readBoolean";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "false";
 			break;
@@ -841,9 +841,9 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							"      end;\n");
 					}
 				} else if (field->type() == FieldDescriptor::TYPE_ENUM) {
+					const EnumDescriptor *type = field->enum_type();
+					vars["subname"] = type->name();
 					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
-						const EnumDescriptor *type = field->enum_type();
-						vars["subname"] = type->name();
 						printer.Print(vars,
 							"      $name$: begin\n"
 							"        Assert(wire_type = WIRETYPE_VARINT);\n"
@@ -851,22 +851,10 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							"        set_has_$pubname$;\n"
 							"      end;\n");
 					} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						const EnumDescriptor *type = field->enum_type();
-						printer.Print(
-							"      $name$: begin\n"
-							"        Assert(wire_type = WIRETYPE_VARINT);\n"
-							"        $pname$.Add(T$subname$(AProtobufReader.readEnum));\n"
-							"      end;\n"
-							,"name",EnumName(field)
-							,"pname",PrivateFieldName(field)
-							,"subname",type->name());
-					}
-				} else if (field->type() == FieldDescriptor::TYPE_BOOL) {
-					if (field->label() != FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(vars,
 							"      $name$: begin\n"
 							"        Assert(wire_type = WIRETYPE_VARINT);\n"
-							"        $pname$ := AProtobufReader.readBoolean;\n"
+							"        $pname$.Add(T$subname$(AProtobufReader.readEnum));\n"
 							"        set_has_$pubname$;\n"
 							"      end;\n");
 					}
