@@ -29,12 +29,12 @@ type
     procedure SetSum(const AValue: UINT32);
     procedure set_has_Seats;
     procedure clear_has_Seats;
-    procedure SetSeats(const AValue: TList<Integer>);
     procedure set_has_WinnerData;
     procedure clear_has_WinnerData;
     procedure set_has_Rake;
     procedure clear_has_Rake;
     procedure SetRake(const AValue: UINT32);
+    procedure SeatsNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
     procedure WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 
   protected
@@ -55,7 +55,7 @@ type
     // LABEL TYPE Seats = 2;
     function has_Seats: Boolean;
     procedure clear_Seats;
-    property Seats: TList<Integer> read FSeats write SetSeats;
+    property Seats: TList<Integer> read FSeats;
 
     // LABEL TYPE WinnerData = 3;
     function has_WinnerData: Boolean;
@@ -78,11 +78,13 @@ uses
 procedure TPB_WinnerPotInfo.InitObjects;
 begin
   inherited;
+  FSeats := TList<Integer>.Create;
   FWinnerData := TObjectList<TPB_WinnerData>.Create;
 end;
 procedure TPB_WinnerPotInfo.HookNotifiers;
 begin
   inherited;
+  FSeats.OnNotify := SeatsNotifyEvent;
   FWinnerData.OnNotify := WinnerDataNotifyEvent;
 end;
 
@@ -94,6 +96,11 @@ end;
 
 destructor TPB_WinnerPotInfo.Destroy;
 begin
+  if Assigned(FSeats) then
+  begin
+    FSeats.OnNotify := nil;
+    FreeAndNil(FSeats);
+  end;
   if Assigned(FWinnerData) then
   begin
     FWinnerData.OnNotify := nil;
@@ -197,14 +204,10 @@ begin
   _has_bits_ := _has_bits_ xor 2;
 end;
 
-procedure TPB_WinnerPotInfo.SetSeats(const AValue: TList<Integer>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_WinnerPotInfo.SeatsNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FSeats.Add(AValue[C1]);
-  for C1 := 0 to FSeats.Count - 1 do
-    ProtobufOutput.writeInt32(kSeatsFieldNumber, AValue[C1]);
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeInt32(kSeatsFieldNumber,Item);
 end;
 
 procedure TPB_WinnerPotInfo.clear_WinnerData;

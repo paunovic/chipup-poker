@@ -20,7 +20,7 @@ type
 
     procedure set_has_Gameid;
     procedure clear_has_Gameid;
-    procedure SetGameid(const AValue: TList<TBytes>);
+    procedure GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 
   public
     constructor Create(const AFrom: TPB_QueryTableStats); overload;
@@ -31,7 +31,7 @@ type
     // LABEL TYPE Gameid = 1;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TList<TBytes> read FGameid write SetGameid;
+    property Gameid: TList<TBytes> read FGameid;
 
   end;
 
@@ -50,6 +50,11 @@ end;
 
 destructor TPB_QueryTableStats.Destroy;
 begin
+  if Assigned(FGameid) then
+  begin
+    FGameid.OnNotify := nil;
+    FreeAndNil(FGameid);
+  end;
   inherited;
 end;
 
@@ -102,14 +107,9 @@ begin
   _has_bits_ := _has_bits_ xor 1;
 end;
 
-procedure TPB_QueryTableStats.SetGameid(const AValue: TList<TBytes>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FGameid.Add(AValue[C1]);
-  for C1 := 0 to FGameid.Count - 1 do
-    ProtobufOutput.writeBytes(kGameidFieldNumber, AValue[C1]);
+  Assert(Action = cnAdded);
 end;
 
 end.

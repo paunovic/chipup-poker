@@ -25,7 +25,7 @@ type
     procedure SetValue(const AValue: UINT32);
     procedure set_has_Members;
     procedure clear_has_Members;
-    procedure SetMembers(const AValue: TList<Integer>);
+    procedure MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 
   public
     constructor Create(const AFrom: TPB_Pot); overload;
@@ -41,7 +41,7 @@ type
     // LABEL TYPE Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
-    property Members: TList<Integer> read FMembers write SetMembers;
+    property Members: TList<Integer> read FMembers;
 
   end;
 
@@ -60,6 +60,11 @@ end;
 
 destructor TPB_Pot.Destroy;
 begin
+  if Assigned(FMembers) then
+  begin
+    FMembers.OnNotify := nil;
+    FreeAndNil(FMembers);
+  end;
   inherited;
 end;
 
@@ -145,14 +150,10 @@ begin
   _has_bits_ := _has_bits_ xor 2;
 end;
 
-procedure TPB_Pot.SetMembers(const AValue: TList<Integer>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_Pot.MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FMembers.Add(AValue[C1]);
-  for C1 := 0 to FMembers.Count - 1 do
-    ProtobufOutput.writeInt32(kMembersFieldNumber, AValue[C1]);
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
 end;
 
 end.

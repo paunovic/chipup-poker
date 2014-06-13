@@ -28,7 +28,6 @@ type
 
     procedure set_has_Code;
     procedure clear_has_Code;
-    procedure SetCode(const AValue: TList<TTableEventType>);
     procedure set_has_Bet;
     procedure clear_has_Bet;
     procedure SetBet(const AValue: UINT32);
@@ -39,6 +38,7 @@ type
     procedure clear_has_Potdata;
     procedure set_has_Pots;
     procedure clear_has_Pots;
+    procedure CodeNotifyEvent(Sender: TObject; const Item: TTableEventType; Action: TCollectionNotification);
     procedure PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 
@@ -55,7 +55,7 @@ type
     // LABEL TYPE Code = 1;
     function has_Code: Boolean;
     procedure clear_Code;
-    property Code: TList<TTableEventType> read FCode write SetCode;
+    property Code: TList<TTableEventType> read FCode;
 
     // LABEL TYPE Bet = 2;
     function has_Bet: Boolean;
@@ -88,12 +88,14 @@ uses
 procedure TPB_MoveRow.InitObjects;
 begin
   inherited;
+  FCode := TList<TTableEventType>.Create;
   FPotdata := TObjectList<TPB_WinnerPotInfo>.Create;
   FPots := TObjectList<TPB_Pot>.Create;
 end;
 procedure TPB_MoveRow.HookNotifiers;
 begin
   inherited;
+  FCode.OnNotify := CodeNotifyEvent;
   FPotdata.OnNotify := PotdataNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
 end;
@@ -106,6 +108,11 @@ end;
 
 destructor TPB_MoveRow.Destroy;
 begin
+  if Assigned(FCode) then
+  begin
+    FCode.OnNotify := nil;
+    FreeAndNil(FCode);
+  end;
   if Assigned(FPotdata) then
   begin
     FPotdata.OnNotify := nil;
@@ -194,14 +201,9 @@ begin
   _has_bits_ := _has_bits_ xor 1;
 end;
 
-procedure TPB_MoveRow.SetCode(const AValue: TList<TTableEventType>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_MoveRow.CodeNotifyEvent(Sender: TObject; const Item: TTableEventType; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FCode.Add(AValue[C1]);
-  for C1 := 0 to FCode.Count - 1 do
-    ProtobufOutput.writeInt32(kCodeFieldNumber, Integer(AValue));
+  Assert(Action = cnAdded);
 end;
 
 procedure TPB_MoveRow.clear_Bet;

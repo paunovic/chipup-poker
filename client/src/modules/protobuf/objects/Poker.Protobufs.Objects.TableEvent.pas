@@ -37,11 +37,11 @@ type
     procedure clear_has_Pots;
     procedure set_has_Bets;
     procedure clear_has_Bets;
-    procedure SetBets(const AValue: TList<UINT32>);
     procedure set_has_Cards;
     procedure clear_has_Cards;
     procedure SetCards(const AValue: TBytes);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
+    procedure BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -71,7 +71,7 @@ type
     // LABEL TYPE Bets = 5;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TList<UINT32> read FBets write SetBets;
+    property Bets: TList<UINT32> read FBets;
 
     // LABEL TYPE Cards = 6;
     function has_Cards: Boolean;
@@ -90,11 +90,13 @@ procedure TPB_TableEvent.InitObjects;
 begin
   inherited;
   FPots := TObjectList<TPB_WinnerPotInfo>.Create;
+  FBets := TList<UINT32>.Create;
 end;
 procedure TPB_TableEvent.HookNotifiers;
 begin
   inherited;
   FPots.OnNotify := PotsNotifyEvent;
+  FBets.OnNotify := BetsNotifyEvent;
 end;
 
 constructor TPB_TableEvent.Create(const AFrom: TPB_TableEvent);
@@ -109,6 +111,11 @@ begin
   begin
     FPots.OnNotify := nil;
     FreeAndNil(FPots);
+  end;
+  if Assigned(FBets) then
+  begin
+    FBets.OnNotify := nil;
+    FreeAndNil(FBets);
   end;
   inherited;
 end;
@@ -272,14 +279,9 @@ begin
   _has_bits_ := _has_bits_ xor 16;
 end;
 
-procedure TPB_TableEvent.SetBets(const AValue: TList<UINT32>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FBets.Add(AValue[C1]);
-  for C1 := 0 to FBets.Count - 1 do
-    ProtobufOutput.writeUInt32(kBetsFieldNumber, AValue[C1]);
+  Assert(Action = cnAdded);
 end;
 
 procedure TPB_TableEvent.clear_Cards;

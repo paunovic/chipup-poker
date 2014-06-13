@@ -59,7 +59,6 @@ type
     procedure SetEndtime(const AValue: UINT32);
     procedure set_has_BalanceChanges;
     procedure clear_has_BalanceChanges;
-    procedure SetBalanceChanges(const AValue: TList<Integer>);
     procedure set_has_Moves;
     procedure clear_has_Moves;
     procedure set_has_Dealer;
@@ -75,6 +74,7 @@ type
     procedure clear_has_Rake;
     procedure SetRake(const AValue: Integer);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
+    procedure BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
     procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
 
   protected
@@ -120,7 +120,7 @@ type
     // LABEL TYPE BalanceChanges = 7;
     function has_BalanceChanges: Boolean;
     procedure clear_BalanceChanges;
-    property BalanceChanges: TList<Integer> read FBalanceChanges write SetBalanceChanges;
+    property BalanceChanges: TList<Integer> read FBalanceChanges;
 
     // LABEL TYPE Moves = 8;
     function has_Moves: Boolean;
@@ -159,12 +159,14 @@ procedure TPB_HandHistory.InitObjects;
 begin
   inherited;
   FPlayers := TObjectList<TPB_PlayerHandHistory>.Create;
+  FBalanceChanges := TList<Integer>.Create;
   FMoves := TObjectList<TPB_MoveRow>.Create;
 end;
 procedure TPB_HandHistory.HookNotifiers;
 begin
   inherited;
   FPlayers.OnNotify := PlayersNotifyEvent;
+  FBalanceChanges.OnNotify := BalanceChangesNotifyEvent;
   FMoves.OnNotify := MovesNotifyEvent;
 end;
 
@@ -180,6 +182,11 @@ begin
   begin
     FPlayers.OnNotify := nil;
     FreeAndNil(FPlayers);
+  end;
+  if Assigned(FBalanceChanges) then
+  begin
+    FBalanceChanges.OnNotify := nil;
+    FreeAndNil(FBalanceChanges);
   end;
   if Assigned(FMoves) then
   begin
@@ -484,14 +491,10 @@ begin
   _has_bits_ := _has_bits_ xor 64;
 end;
 
-procedure TPB_HandHistory.SetBalanceChanges(const AValue: TList<Integer>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_HandHistory.BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FBalanceChanges.Add(AValue[C1]);
-  for C1 := 0 to FBalanceChanges.Count - 1 do
-    ProtobufOutput.writeInt32(kBalanceChangesFieldNumber, AValue[C1]);
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeInt32(kBalanceChangesFieldNumber,Item);
 end;
 
 procedure TPB_HandHistory.clear_Moves;

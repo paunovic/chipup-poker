@@ -77,7 +77,6 @@ type
     procedure SetCurrentSeat(const AValue: Integer);
     procedure set_has_Bets;
     procedure clear_has_Bets;
-    procedure SetBets(const AValue: TList<UINT32>);
     procedure set_has_Locked;
     procedure clear_has_Locked;
     procedure SetLocked(const AValue: Boolean);
@@ -125,6 +124,7 @@ type
     procedure clear_has_MinimumRaise;
     procedure SetMinimumRaise(const AValue: UINT32);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
+    procedure BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 
@@ -166,7 +166,7 @@ type
     // LABEL TYPE Bets = 6;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TList<UINT32> read FBets write SetBets;
+    property Bets: TList<UINT32> read FBets;
 
     // LABEL TYPE Locked = 11;
     function has_Locked: Boolean;
@@ -260,6 +260,7 @@ procedure TPB_TableStatus.InitObjects;
 begin
   inherited;
   FSeats := TObjectList<TPB_SeatInfo>.Create;
+  FBets := TList<UINT32>.Create;
   FEvents := TObjectList<TPB_TableEvent>.Create;
   FPots := TObjectList<TPB_Pot>.Create;
 end;
@@ -267,6 +268,7 @@ procedure TPB_TableStatus.HookNotifiers;
 begin
   inherited;
   FSeats.OnNotify := SeatsNotifyEvent;
+  FBets.OnNotify := BetsNotifyEvent;
   FEvents.OnNotify := EventsNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
 end;
@@ -283,6 +285,11 @@ begin
   begin
     FSeats.OnNotify := nil;
     FreeAndNil(FSeats);
+  end;
+  if Assigned(FBets) then
+  begin
+    FBets.OnNotify := nil;
+    FreeAndNil(FBets);
   end;
   if Assigned(FEvents) then
   begin
@@ -621,14 +628,9 @@ begin
   _has_bits_ := _has_bits_ xor 32;
 end;
 
-procedure TPB_TableStatus.SetBets(const AValue: TList<UINT32>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_TableStatus.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FBets.Add(AValue[C1]);
-  for C1 := 0 to FBets.Count - 1 do
-    ProtobufOutput.writeUInt32(kBetsFieldNumber, AValue[C1]);
+  Assert(Action = cnAdded);
 end;
 
 procedure TPB_TableStatus.clear_Locked;

@@ -22,9 +22,9 @@ type
 
     procedure set_has_UserMongoIds;
     procedure clear_has_UserMongoIds;
-    procedure SetUserMongoIds(const AValue: TList<TBytes>);
     procedure set_has_Users;
     procedure clear_has_Users;
+    procedure UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 
   protected
@@ -40,7 +40,7 @@ type
     // LABEL TYPE UserMongoIds = 1;
     function has_UserMongoIds: Boolean;
     procedure clear_UserMongoIds;
-    property UserMongoIds: TList<TBytes> read FUserMongoIds write SetUserMongoIds;
+    property UserMongoIds: TList<TBytes> read FUserMongoIds;
 
     // LABEL TYPE Users = 2;
     function has_Users: Boolean;
@@ -58,11 +58,13 @@ uses
 procedure TPB_GetUserParams.InitObjects;
 begin
   inherited;
+  FUserMongoIds := TList<TBytes>.Create;
   FUsers := TObjectList<TPB_User>.Create;
 end;
 procedure TPB_GetUserParams.HookNotifiers;
 begin
   inherited;
+  FUserMongoIds.OnNotify := UserMongoIdsNotifyEvent;
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 
@@ -74,6 +76,11 @@ end;
 
 destructor TPB_GetUserParams.Destroy;
 begin
+  if Assigned(FUserMongoIds) then
+  begin
+    FUserMongoIds.OnNotify := nil;
+    FreeAndNil(FUserMongoIds);
+  end;
   if Assigned(FUsers) then
   begin
     FUsers.OnNotify := nil;
@@ -138,14 +145,9 @@ begin
   _has_bits_ := _has_bits_ xor 1;
 end;
 
-procedure TPB_GetUserParams.SetUserMongoIds(const AValue: TList<TBytes>); // FIXME, expose the TList and use a hook?
-var
-  C1: Integer;
+procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
-  for C1 := 0 to AValue.Count - 1 do
-    FUserMongoIds.Add(AValue[C1]);
-  for C1 := 0 to FUserMongoIds.Count - 1 do
-    ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber, AValue[C1]);
+  Assert(Action = cnAdded);
 end;
 
 procedure TPB_GetUserParams.clear_Users;
