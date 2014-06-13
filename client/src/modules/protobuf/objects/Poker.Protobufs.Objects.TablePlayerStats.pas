@@ -57,6 +57,10 @@ type
     procedure BuyinsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
     procedure CashoutsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 
+  protected
+    procedure InitObjects; override;
+    procedure HookNotifiers; override;
+
   public
     constructor Create(const AFrom: TPB_TablePlayerStats); overload;
     destructor Destroy; override;
@@ -111,6 +115,18 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_TablePlayerStats.InitObjects;
+begin
+  inherited;
+  FBuyins := TList<UINT32>.Create;
+  FCashouts := TList<UINT32>.Create;
+end;
+procedure TPB_TablePlayerStats.HookNotifiers;
+begin
+  inherited;
+  FBuyins.OnNotify := BuyinsNotifyEvent;
+  FCashouts.OnNotify := CashoutsNotifyEvent;
+end;
 
 constructor TPB_TablePlayerStats.Create(const AFrom: TPB_TablePlayerStats);
 begin

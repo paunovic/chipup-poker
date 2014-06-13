@@ -22,6 +22,10 @@ type
     procedure clear_has_Gameid;
     procedure GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 
+  protected
+    procedure InitObjects; override;
+    procedure HookNotifiers; override;
+
   public
     constructor Create(const AFrom: TPB_QueryTableStats); overload;
     destructor Destroy; override;
@@ -41,6 +45,16 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_QueryTableStats.InitObjects;
+begin
+  inherited;
+  FGameid := TList<TBytes>.Create;
+end;
+procedure TPB_QueryTableStats.HookNotifiers;
+begin
+  inherited;
+  FGameid.OnNotify := GameidNotifyEvent;
+end;
 
 constructor TPB_QueryTableStats.Create(const AFrom: TPB_QueryTableStats);
 begin

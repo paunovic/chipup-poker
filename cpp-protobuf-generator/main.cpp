@@ -473,10 +473,10 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				int size = 0;
 				for (int j=0; j<message->field_count(); j++) {
 					const FieldDescriptor *field = message->field(j);
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						needsInit = true;
+					}
 					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-						if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-							needsInit = true;
-						}
 						const Descriptor *subtype = field->message_type();
 						string type = subtype->name();
 						bool addit = true;

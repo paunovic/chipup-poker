@@ -27,6 +27,10 @@ type
     procedure clear_has_Members;
     procedure MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 
+  protected
+    procedure InitObjects; override;
+    procedure HookNotifiers; override;
+
   public
     constructor Create(const AFrom: TPB_Pot); overload;
     destructor Destroy; override;
@@ -51,6 +55,16 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_Pot.InitObjects;
+begin
+  inherited;
+  FMembers := TList<Integer>.Create;
+end;
+procedure TPB_Pot.HookNotifiers;
+begin
+  inherited;
+  FMembers.OnNotify := MembersNotifyEvent;
+end;
 
 constructor TPB_Pot.Create(const AFrom: TPB_Pot);
 begin
