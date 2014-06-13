@@ -43,6 +43,7 @@ type
     procedure SetUnlimitedLimit(const AValue: Boolean);
 
   public
+    constructor Create(const AFrom: TPB_ClubMember); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubMember);
@@ -81,6 +82,12 @@ uses
 
 
 
+constructor TPB_ClubMember.Create(const AFrom: TPB_ClubMember);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ClubMember.Destroy;
 begin
   inherited;
@@ -89,6 +96,7 @@ end;
 procedure TPB_ClubMember.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

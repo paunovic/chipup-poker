@@ -27,6 +27,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_ListClubsReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ListClubsReply);
@@ -55,6 +56,12 @@ begin
   FClubs.OnNotify := ClubsNotifyEvent;
 end;
 
+constructor TPB_ListClubsReply.Create(const AFrom: TPB_ListClubsReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ListClubsReply.Destroy;
 begin
   if Assigned(FClubs) then
@@ -68,6 +75,7 @@ end;
 procedure TPB_ListClubsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -84,7 +92,11 @@ begin
 end;
 
 procedure TPB_ListClubsReply.MergeFrom(const from: TPB_ListClubsReply);
+var
+  temp0: TPB_Club;
 begin
+  for temp0 in from.Clubs do
+    FClubs.Add(TPB_Club.Create(temp0));
 end;
 
 procedure TPB_ListClubsReply.clear_Clubs;

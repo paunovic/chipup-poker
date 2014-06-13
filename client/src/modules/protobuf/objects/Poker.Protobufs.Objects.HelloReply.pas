@@ -62,6 +62,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_HelloReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloReply);
@@ -125,6 +126,12 @@ begin
   FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
 end;
 
+constructor TPB_HelloReply.Create(const AFrom: TPB_HelloReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_HelloReply.Destroy;
 begin
   if Assigned(FStringSizes) then
@@ -144,6 +151,7 @@ end;
 procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -198,6 +206,8 @@ begin
 end;
 
 procedure TPB_HelloReply.MergeFrom(const from: TPB_HelloReply);
+var
+  temp6: TPB_UpdateFileInfo;
 begin
   if (from.has_StringSizes) then
     FStringSizes.MergeFrom(from.StringSizes);
@@ -211,6 +221,8 @@ begin
     SetMaxTimebank(from.MaxTimebank);
   if (from.has_MinSizes) then
     FMinSizes.MergeFrom(from.MinSizes);
+  for temp6 in from.UpdateFiles do
+    FUpdateFiles.Add(TPB_UpdateFileInfo.Create(temp6));
   if (from.has_ValidCharsRegex) then
     FValidCharsRegex.MergeFrom(from.ValidCharsRegex);
 end;

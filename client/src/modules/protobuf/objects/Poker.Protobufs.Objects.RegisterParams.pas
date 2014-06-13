@@ -33,6 +33,7 @@ type
     procedure SetDisplayName(const AValue: String);
 
   public
+    constructor Create(const AFrom: TPB_RegisterParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterParams);
@@ -61,6 +62,12 @@ uses
 
 
 
+constructor TPB_RegisterParams.Create(const AFrom: TPB_RegisterParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_RegisterParams.Destroy;
 begin
   inherited;
@@ -69,6 +76,7 @@ end;
 procedure TPB_RegisterParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

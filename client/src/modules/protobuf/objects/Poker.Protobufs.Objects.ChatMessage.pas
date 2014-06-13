@@ -38,6 +38,7 @@ type
     procedure SetTimestamp(const AValue: Int64);
 
   public
+    constructor Create(const AFrom: TPB_ChatMessage); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatMessage);
@@ -71,6 +72,12 @@ uses
 
 
 
+constructor TPB_ChatMessage.Create(const AFrom: TPB_ChatMessage);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ChatMessage.Destroy;
 begin
   inherited;
@@ -79,6 +86,7 @@ end;
 procedure TPB_ChatMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

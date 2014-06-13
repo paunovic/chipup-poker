@@ -19,7 +19,7 @@ type
 
     var
       FSum: UINT32;
-      FSeats: TArray<Integer>;
+      FSeats: TList<Integer>;
       FWinnerData: TList<TPB_WinnerData>;
       FRake: UINT32;
       _has_bits_: Integer;
@@ -29,7 +29,7 @@ type
     procedure SetSum(const AValue: UINT32);
     procedure set_has_Seats;
     procedure clear_has_Seats;
-    procedure SetSeats(const AValue: TArray<Integer>);
+    procedure SetSeats(const AValue: TList<Integer>);
     procedure set_has_WinnerData;
     procedure clear_has_WinnerData;
     procedure set_has_Rake;
@@ -42,6 +42,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_WinnerPotInfo); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_WinnerPotInfo);
@@ -54,7 +55,7 @@ type
     // LABEL TYPE Seats = 2;
     function has_Seats: Boolean;
     procedure clear_Seats;
-    property Seats: TArray<Integer> read FSeats write SetSeats;
+    property Seats: TList<Integer> read FSeats write SetSeats;
 
     // LABEL TYPE WinnerData = 3;
     function has_WinnerData: Boolean;
@@ -85,6 +86,12 @@ begin
   FWinnerData.OnNotify := WinnerDataNotifyEvent;
 end;
 
+constructor TPB_WinnerPotInfo.Create(const AFrom: TPB_WinnerPotInfo);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_WinnerPotInfo.Destroy;
 begin
   if Assigned(FWinnerData) then
@@ -98,6 +105,7 @@ end;
 procedure TPB_WinnerPotInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -109,8 +117,7 @@ begin
       end;
       kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FSeats, Length(FSeats) + 1);
-        FSeats[Length(FSeats)-1] := AProtobufReader.readInt32;
+        FSeats.Add(AProtobufReader.readInt32);
       end;
       kWinnerDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -127,9 +134,16 @@ begin
 end;
 
 procedure TPB_WinnerPotInfo.MergeFrom(const from: TPB_WinnerPotInfo);
+var
+  temp1: Integer;
+  temp2: TPB_WinnerData;
 begin
   if (from.has_Sum) then
     SetSum(from.Sum);
+  for temp1 in from.Seats do
+    FSeats.Add(temp1); // FIXME?
+  for temp2 in from.WinnerData do
+    FWinnerData.Add(TPB_WinnerData.Create(temp2));
   if (from.has_Rake) then
     SetRake(from.Rake);
 end;
@@ -164,7 +178,7 @@ end;
 
 procedure TPB_WinnerPotInfo.clear_Seats;
 begin
-  FSeats := 0;
+  FSeats.Clear;
   clear_has_Seats;
 end;
 
@@ -183,14 +197,13 @@ begin
   _has_bits_ := _has_bits_ xor 2;
 end;
 
-procedure TPB_WinnerPotInfo.SetSeats(const AValue: TArray<Integer>);
+procedure TPB_WinnerPotInfo.SetSeats(const AValue: TList<Integer>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FSeats,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FSeats[C1] := AValue[C1];
-  for C1 := 0 to Length(FSeats) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FSeats.Add(AValue[C1]);
+  for C1 := 0 to FSeats.Count - 1 do
     ProtobufOutput.writeInt32(kSeatsFieldNumber, AValue[C1]);
 end;
 

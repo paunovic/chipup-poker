@@ -77,6 +77,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_Club); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Club);
@@ -155,6 +156,12 @@ begin
   FMembers.OnNotify := MembersNotifyEvent;
 end;
 
+constructor TPB_Club.Create(const AFrom: TPB_Club);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_Club.Destroy;
 begin
   if Assigned(FMembers) then
@@ -168,6 +175,7 @@ end;
 procedure TPB_Club.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -225,9 +233,13 @@ begin
 end;
 
 procedure TPB_Club.MergeFrom(const from: TPB_Club);
+var
+  temp1: TPB_ClubMember;
 begin
   if (from.has_MongoId) then
     SetMongoId(from.MongoId);
+  for temp1 in from.Members do
+    FMembers.Add(TPB_ClubMember.Create(temp1));
   if (from.has_Name) then
     SetName(from.Name);
   if (from.has_Owner) then

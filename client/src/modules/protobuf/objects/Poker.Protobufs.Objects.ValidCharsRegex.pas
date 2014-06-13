@@ -48,6 +48,7 @@ type
     procedure SetGamename(const AValue: String);
 
   public
+    constructor Create(const AFrom: TPB_ValidCharsRegex); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ValidCharsRegex);
@@ -91,6 +92,12 @@ uses
 
 
 
+constructor TPB_ValidCharsRegex.Create(const AFrom: TPB_ValidCharsRegex);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ValidCharsRegex.Destroy;
 begin
   inherited;
@@ -99,6 +106,7 @@ end;
 procedure TPB_ValidCharsRegex.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

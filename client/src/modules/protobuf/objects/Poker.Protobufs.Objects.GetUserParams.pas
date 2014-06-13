@@ -16,13 +16,13 @@ type
       kUsersFieldNumber = 2;
 
     var
-      FUserMongoIds: TArray<TBytes>;
+      FUserMongoIds: TList<TBytes>;
       FUsers: TList<TPB_User>;
       _has_bits_: Integer;
 
     procedure set_has_UserMongoIds;
     procedure clear_has_UserMongoIds;
-    procedure SetUserMongoIds(const AValue: TArray<TBytes>);
+    procedure SetUserMongoIds(const AValue: TList<TBytes>);
     procedure set_has_Users;
     procedure clear_has_Users;
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
@@ -32,6 +32,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_GetUserParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GetUserParams);
@@ -39,7 +40,7 @@ type
     // LABEL TYPE UserMongoIds = 1;
     function has_UserMongoIds: Boolean;
     procedure clear_UserMongoIds;
-    property UserMongoIds: TArray<TBytes> read FUserMongoIds write SetUserMongoIds;
+    property UserMongoIds: TList<TBytes> read FUserMongoIds write SetUserMongoIds;
 
     // LABEL TYPE Users = 2;
     function has_Users: Boolean;
@@ -65,6 +66,12 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 
+constructor TPB_GetUserParams.Create(const AFrom: TPB_GetUserParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_GetUserParams.Destroy;
 begin
   if Assigned(FUsers) then
@@ -78,6 +85,7 @@ end;
 procedure TPB_GetUserParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -85,8 +93,8 @@ begin
     case field_number of
       kUserMongoIdsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetLength(FUserMongoIds, Length(FUserMongoIds) + 1);
-        AProtobufReader.readBytes(FUserMongoIds[Length(FUserMongoIds)-1]);
+        AProtobufReader.readBytes(cheating);
+        FUserMongoIds.Add(cheating);
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -99,12 +107,19 @@ begin
 end;
 
 procedure TPB_GetUserParams.MergeFrom(const from: TPB_GetUserParams);
+var
+  temp0: TBytes;
+  temp1: TPB_User;
 begin
+  for temp0 in from.UserMongoIds do
+    FUserMongoIds.Add(temp0); // FIXME?
+  for temp1 in from.Users do
+    FUsers.Add(TPB_User.Create(temp1));
 end;
 
 procedure TPB_GetUserParams.clear_UserMongoIds;
 begin
-  SetLength(FUserMongoIds,0);
+  FUserMongoIds.Clear;
   clear_has_UserMongoIds;
 end;
 
@@ -123,14 +138,13 @@ begin
   _has_bits_ := _has_bits_ xor 1;
 end;
 
-procedure TPB_GetUserParams.SetUserMongoIds(const AValue: TArray<TBytes>);
+procedure TPB_GetUserParams.SetUserMongoIds(const AValue: TList<TBytes>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FUserMongoIds,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FUserMongoIds[C1] := AValue[C1];
-  for C1 := 0 to Length(FUserMongoIds) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FUserMongoIds.Add(AValue[C1]);
+  for C1 := 0 to FUserMongoIds.Count - 1 do
     ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber, AValue[C1]);
 end;
 

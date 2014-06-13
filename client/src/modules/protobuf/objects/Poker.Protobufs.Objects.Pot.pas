@@ -17,7 +17,7 @@ type
 
     var
       FValue: UINT32;
-      FMembers: TArray<Integer>;
+      FMembers: TList<Integer>;
       _has_bits_: Integer;
 
     procedure set_has_Value;
@@ -25,9 +25,10 @@ type
     procedure SetValue(const AValue: UINT32);
     procedure set_has_Members;
     procedure clear_has_Members;
-    procedure SetMembers(const AValue: TArray<Integer>);
+    procedure SetMembers(const AValue: TList<Integer>);
 
   public
+    constructor Create(const AFrom: TPB_Pot); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Pot);
@@ -40,7 +41,7 @@ type
     // LABEL TYPE Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
-    property Members: TArray<Integer> read FMembers write SetMembers;
+    property Members: TList<Integer> read FMembers write SetMembers;
 
   end;
 
@@ -51,6 +52,12 @@ uses
 
 
 
+constructor TPB_Pot.Create(const AFrom: TPB_Pot);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_Pot.Destroy;
 begin
   inherited;
@@ -59,6 +66,7 @@ end;
 procedure TPB_Pot.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -70,8 +78,7 @@ begin
       end;
       kMembersFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FMembers, Length(FMembers) + 1);
-        FMembers[Length(FMembers)-1] := AProtobufReader.readInt32;
+        FMembers.Add(AProtobufReader.readInt32);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -80,9 +87,13 @@ begin
 end;
 
 procedure TPB_Pot.MergeFrom(const from: TPB_Pot);
+var
+  temp1: Integer;
 begin
   if (from.has_Value) then
     SetValue(from.Value);
+  for temp1 in from.Members do
+    FMembers.Add(temp1); // FIXME?
 end;
 
 procedure TPB_Pot.clear_Value;
@@ -115,7 +126,7 @@ end;
 
 procedure TPB_Pot.clear_Members;
 begin
-  FMembers := 0;
+  FMembers.Clear;
   clear_has_Members;
 end;
 
@@ -134,14 +145,13 @@ begin
   _has_bits_ := _has_bits_ xor 2;
 end;
 
-procedure TPB_Pot.SetMembers(const AValue: TArray<Integer>);
+procedure TPB_Pot.SetMembers(const AValue: TList<Integer>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FMembers,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FMembers[C1] := AValue[C1];
-  for C1 := 0 to Length(FMembers) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FMembers.Add(AValue[C1]);
+  for C1 := 0 to FMembers.Count - 1 do
     ProtobufOutput.writeInt32(kMembersFieldNumber, AValue[C1]);
 end;
 

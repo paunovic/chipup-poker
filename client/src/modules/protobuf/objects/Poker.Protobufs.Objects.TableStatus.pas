@@ -42,7 +42,7 @@ type
       FState: TTableState;
       FDealer: Integer;
       FCurrentSeat: Integer;
-      FBets: TArray<UINT32>;
+      FBets: TList<UINT32>;
       FLocked: Boolean;
       FSeq: Integer;
       FMinimumBet: UINT32;
@@ -77,7 +77,7 @@ type
     procedure SetCurrentSeat(const AValue: Integer);
     procedure set_has_Bets;
     procedure clear_has_Bets;
-    procedure SetBets(const AValue: TArray<UINT32>);
+    procedure SetBets(const AValue: TList<UINT32>);
     procedure set_has_Locked;
     procedure clear_has_Locked;
     procedure SetLocked(const AValue: Boolean);
@@ -133,6 +133,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_TableStatus); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatus);
@@ -165,7 +166,7 @@ type
     // LABEL TYPE Bets = 6;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TArray<UINT32> read FBets write SetBets;
+    property Bets: TList<UINT32> read FBets write SetBets;
 
     // LABEL TYPE Locked = 11;
     function has_Locked: Boolean;
@@ -270,6 +271,12 @@ begin
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
+constructor TPB_TableStatus.Create(const AFrom: TPB_TableStatus);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_TableStatus.Destroy;
 begin
   if Assigned(FSeats) then
@@ -293,6 +300,7 @@ end;
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -322,8 +330,7 @@ begin
       end;
       kBetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FBets, Length(FBets) + 1);
-        FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
+        FBets.Add(AProtobufReader.readUInt32);
       end;
       kLockedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -397,15 +404,24 @@ begin
 end;
 
 procedure TPB_TableStatus.MergeFrom(const from: TPB_TableStatus);
+var
+  temp1: TPB_SeatInfo;
+  temp5: UINT32;
+  temp14: TPB_TableEvent;
+  temp15: TPB_Pot;
 begin
   if (from.has_TableMongoId) then
     SetTableMongoId(from.TableMongoId);
+  for temp1 in from.Seats do
+    FSeats.Add(TPB_SeatInfo.Create(temp1));
   if (from.has_State) then
     SetState(from.State);
   if (from.has_Dealer) then
     SetDealer(from.Dealer);
   if (from.has_CurrentSeat) then
     SetCurrentSeat(from.CurrentSeat);
+  for temp5 in from.Bets do
+    FBets.Add(temp5); // FIXME?
   if (from.has_Locked) then
     SetLocked(from.Locked);
   if (from.has_Seq) then
@@ -422,6 +438,10 @@ begin
     SetHandid(from.Handid);
   if (from.has_Time) then
     SetTime(from.Time);
+  for temp14 in from.Events do
+    FEvents.Add(TPB_TableEvent.Create(temp14));
+  for temp15 in from.Pots do
+    FPots.Add(TPB_Pot.Create(temp15));
   if (from.has_RakePercent) then
     SetRakePercent(from.RakePercent);
   if (from.has_CurrentGame) then
@@ -582,7 +602,7 @@ end;
 
 procedure TPB_TableStatus.clear_Bets;
 begin
-  FBets := 0;
+  FBets.Clear;
   clear_has_Bets;
 end;
 
@@ -601,14 +621,13 @@ begin
   _has_bits_ := _has_bits_ xor 32;
 end;
 
-procedure TPB_TableStatus.SetBets(const AValue: TArray<UINT32>);
+procedure TPB_TableStatus.SetBets(const AValue: TList<UINT32>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FBets,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FBets[C1] := AValue[C1];
-  for C1 := 0 to Length(FBets) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FBets.Add(AValue[C1]);
+  for C1 := 0 to FBets.Count - 1 do
     ProtobufOutput.writeUInt32(kBetsFieldNumber, AValue[C1]);
 end;
 

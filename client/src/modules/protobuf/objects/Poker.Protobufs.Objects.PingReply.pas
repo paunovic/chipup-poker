@@ -28,6 +28,7 @@ type
     procedure SetServertime(const AValue: UInt64);
 
   public
+    constructor Create(const AFrom: TPB_PingReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingReply);
@@ -51,6 +52,12 @@ uses
 
 
 
+constructor TPB_PingReply.Create(const AFrom: TPB_PingReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PingReply.Destroy;
 begin
   inherited;
@@ -59,6 +66,7 @@ end;
 procedure TPB_PingReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

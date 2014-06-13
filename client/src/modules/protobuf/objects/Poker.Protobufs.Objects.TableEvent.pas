@@ -23,7 +23,7 @@ type
       FEvent: TTableEventType;
       FSeat: Integer;
       FPots: TList<TPB_WinnerPotInfo>;
-      FBets: TArray<UINT32>;
+      FBets: TList<UINT32>;
       FCards: TBytes;
       _has_bits_: Integer;
 
@@ -37,7 +37,7 @@ type
     procedure clear_has_Pots;
     procedure set_has_Bets;
     procedure clear_has_Bets;
-    procedure SetBets(const AValue: TArray<UINT32>);
+    procedure SetBets(const AValue: TList<UINT32>);
     procedure set_has_Cards;
     procedure clear_has_Cards;
     procedure SetCards(const AValue: TBytes);
@@ -48,6 +48,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_TableEvent); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableEvent);
@@ -70,7 +71,7 @@ type
     // LABEL TYPE Bets = 5;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TArray<UINT32> read FBets write SetBets;
+    property Bets: TList<UINT32> read FBets write SetBets;
 
     // LABEL TYPE Cards = 6;
     function has_Cards: Boolean;
@@ -96,6 +97,12 @@ begin
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
+constructor TPB_TableEvent.Create(const AFrom: TPB_TableEvent);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_TableEvent.Destroy;
 begin
   if Assigned(FPots) then
@@ -109,6 +116,7 @@ end;
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -129,8 +137,7 @@ begin
       end;
       kBetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FBets, Length(FBets) + 1);
-        FBets[Length(FBets)-1] := AProtobufReader.readUInt32;
+        FBets.Add(AProtobufReader.readUInt32);
       end;
       kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -143,11 +150,18 @@ begin
 end;
 
 procedure TPB_TableEvent.MergeFrom(const from: TPB_TableEvent);
+var
+  temp2: TPB_WinnerPotInfo;
+  temp3: UINT32;
 begin
   if (from.has_Event) then
     SetEvent(from.Event);
   if (from.has_Seat) then
     SetSeat(from.Seat);
+  for temp2 in from.Pots do
+    FPots.Add(TPB_WinnerPotInfo.Create(temp2));
+  for temp3 in from.Bets do
+    FBets.Add(temp3); // FIXME?
   if (from.has_Cards) then
     SetCards(from.Cards);
 end;
@@ -239,7 +253,7 @@ end;
 
 procedure TPB_TableEvent.clear_Bets;
 begin
-  FBets := 0;
+  FBets.Clear;
   clear_has_Bets;
 end;
 
@@ -258,14 +272,13 @@ begin
   _has_bits_ := _has_bits_ xor 16;
 end;
 
-procedure TPB_TableEvent.SetBets(const AValue: TArray<UINT32>);
+procedure TPB_TableEvent.SetBets(const AValue: TList<UINT32>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FBets,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FBets[C1] := AValue[C1];
-  for C1 := 0 to Length(FBets) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FBets.Add(AValue[C1]);
+  for C1 := 0 to FBets.Count - 1 do
     ProtobufOutput.writeUInt32(kBetsFieldNumber, AValue[C1]);
 end;
 

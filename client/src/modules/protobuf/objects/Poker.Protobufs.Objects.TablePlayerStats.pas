@@ -24,8 +24,8 @@ type
     var
       FUserid: TBytes;
       FBalance: Integer;
-      FBuyins: TArray<UINT32>;
-      FCashouts: TArray<UINT32>;
+      FBuyins: TList<UINT32>;
+      FCashouts: TList<UINT32>;
       FRakecontrib: UINT32;
       FSecondsplayed: UINT32;
       FChipsinplay: UINT32;
@@ -40,10 +40,10 @@ type
     procedure SetBalance(const AValue: Integer);
     procedure set_has_Buyins;
     procedure clear_has_Buyins;
-    procedure SetBuyins(const AValue: TArray<UINT32>);
+    procedure SetBuyins(const AValue: TList<UINT32>);
     procedure set_has_Cashouts;
     procedure clear_has_Cashouts;
-    procedure SetCashouts(const AValue: TArray<UINT32>);
+    procedure SetCashouts(const AValue: TList<UINT32>);
     procedure set_has_Rakecontrib;
     procedure clear_has_Rakecontrib;
     procedure SetRakecontrib(const AValue: UINT32);
@@ -58,6 +58,7 @@ type
     procedure SetHands(const AValue: UINT32);
 
   public
+    constructor Create(const AFrom: TPB_TablePlayerStats); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TablePlayerStats);
@@ -75,12 +76,12 @@ type
     // LABEL TYPE Buyins = 4;
     function has_Buyins: Boolean;
     procedure clear_Buyins;
-    property Buyins: TArray<UINT32> read FBuyins write SetBuyins;
+    property Buyins: TList<UINT32> read FBuyins write SetBuyins;
 
     // LABEL TYPE Cashouts = 5;
     function has_Cashouts: Boolean;
     procedure clear_Cashouts;
-    property Cashouts: TArray<UINT32> read FCashouts write SetCashouts;
+    property Cashouts: TList<UINT32> read FCashouts write SetCashouts;
 
     // LABEL TYPE Rakecontrib = 6;
     function has_Rakecontrib: Boolean;
@@ -111,6 +112,12 @@ uses
 
 
 
+constructor TPB_TablePlayerStats.Create(const AFrom: TPB_TablePlayerStats);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_TablePlayerStats.Destroy;
 begin
   inherited;
@@ -119,6 +126,7 @@ end;
 procedure TPB_TablePlayerStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -135,13 +143,11 @@ begin
       end;
       kBuyinsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FBuyins, Length(FBuyins) + 1);
-        FBuyins[Length(FBuyins)-1] := AProtobufReader.readUInt32;
+        FBuyins.Add(AProtobufReader.readUInt32);
       end;
       kCashoutsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FCashouts, Length(FCashouts) + 1);
-        FCashouts[Length(FCashouts)-1] := AProtobufReader.readUInt32;
+        FCashouts.Add(AProtobufReader.readUInt32);
       end;
       kRakecontribFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -166,11 +172,18 @@ begin
 end;
 
 procedure TPB_TablePlayerStats.MergeFrom(const from: TPB_TablePlayerStats);
+var
+  temp2: UINT32;
+  temp3: UINT32;
 begin
   if (from.has_Userid) then
     SetUserid(from.Userid);
   if (from.has_Balance) then
     SetBalance(from.Balance);
+  for temp2 in from.Buyins do
+    FBuyins.Add(temp2); // FIXME?
+  for temp3 in from.Cashouts do
+    FCashouts.Add(temp3); // FIXME?
   if (from.has_Rakecontrib) then
     SetRakecontrib(from.Rakecontrib);
   if (from.has_Secondsplayed) then
@@ -242,7 +255,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_Buyins;
 begin
-  FBuyins := 0;
+  FBuyins.Clear;
   clear_has_Buyins;
 end;
 
@@ -261,20 +274,19 @@ begin
   _has_bits_ := _has_bits_ xor 8;
 end;
 
-procedure TPB_TablePlayerStats.SetBuyins(const AValue: TArray<UINT32>);
+procedure TPB_TablePlayerStats.SetBuyins(const AValue: TList<UINT32>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FBuyins,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FBuyins[C1] := AValue[C1];
-  for C1 := 0 to Length(FBuyins) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FBuyins.Add(AValue[C1]);
+  for C1 := 0 to FBuyins.Count - 1 do
     ProtobufOutput.writeUInt32(kBuyinsFieldNumber, AValue[C1]);
 end;
 
 procedure TPB_TablePlayerStats.clear_Cashouts;
 begin
-  FCashouts := 0;
+  FCashouts.Clear;
   clear_has_Cashouts;
 end;
 
@@ -293,14 +305,13 @@ begin
   _has_bits_ := _has_bits_ xor 16;
 end;
 
-procedure TPB_TablePlayerStats.SetCashouts(const AValue: TArray<UINT32>);
+procedure TPB_TablePlayerStats.SetCashouts(const AValue: TList<UINT32>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FCashouts,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FCashouts[C1] := AValue[C1];
-  for C1 := 0 to Length(FCashouts) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FCashouts.Add(AValue[C1]);
+  for C1 := 0 to FCashouts.Count - 1 do
     ProtobufOutput.writeUInt32(kCashoutsFieldNumber, AValue[C1]);
 end;
 

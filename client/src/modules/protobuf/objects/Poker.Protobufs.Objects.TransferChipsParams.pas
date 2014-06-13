@@ -28,6 +28,7 @@ type
     procedure SetChipAmount(const AValue: UINT32);
 
   public
+    constructor Create(const AFrom: TPB_TransferChipsParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TransferChipsParams);
@@ -51,6 +52,12 @@ uses
 
 
 
+constructor TPB_TransferChipsParams.Create(const AFrom: TPB_TransferChipsParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_TransferChipsParams.Destroy;
 begin
   inherited;
@@ -59,6 +66,7 @@ end;
 procedure TPB_TransferChipsParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

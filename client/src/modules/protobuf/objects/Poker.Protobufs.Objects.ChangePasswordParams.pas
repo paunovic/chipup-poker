@@ -23,6 +23,7 @@ type
     procedure SetNewPassword(const AValue: String);
 
   public
+    constructor Create(const AFrom: TPB_ChangePasswordParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangePasswordParams);
@@ -41,6 +42,12 @@ uses
 
 
 
+constructor TPB_ChangePasswordParams.Create(const AFrom: TPB_ChangePasswordParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ChangePasswordParams.Destroy;
 begin
   inherited;
@@ -49,6 +56,7 @@ end;
 procedure TPB_ChangePasswordParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

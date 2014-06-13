@@ -44,6 +44,7 @@ type
     procedure SetFileSize(const AValue: UINT32);
 
   public
+    constructor Create(const AFrom: TPB_UpdateFileInfo); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UpdateFileInfo);
@@ -82,6 +83,12 @@ uses
 
 
 
+constructor TPB_UpdateFileInfo.Create(const AFrom: TPB_UpdateFileInfo);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_UpdateFileInfo.Destroy;
 begin
   inherited;
@@ -90,6 +97,7 @@ end;
 procedure TPB_UpdateFileInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

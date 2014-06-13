@@ -28,6 +28,7 @@ type
     procedure SetPlayerMongoId(const AValue: TBytes);
 
   public
+    constructor Create(const AFrom: TPB_KickPlayerParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_KickPlayerParams);
@@ -51,6 +52,12 @@ uses
 
 
 
+constructor TPB_KickPlayerParams.Create(const AFrom: TPB_KickPlayerParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_KickPlayerParams.Destroy;
 begin
   inherited;
@@ -59,6 +66,7 @@ end;
 procedure TPB_KickPlayerParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

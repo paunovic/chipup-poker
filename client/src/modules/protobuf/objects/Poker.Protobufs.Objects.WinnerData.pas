@@ -29,6 +29,7 @@ type
     procedure SetMsg(const AValue: String);
 
   public
+    constructor Create(const AFrom: TPB_WinnerData); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_WinnerData);
@@ -52,6 +53,12 @@ uses
 
 
 
+constructor TPB_WinnerData.Create(const AFrom: TPB_WinnerData);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_WinnerData.Destroy;
 begin
   inherited;
@@ -60,6 +67,7 @@ end;
 procedure TPB_WinnerData.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

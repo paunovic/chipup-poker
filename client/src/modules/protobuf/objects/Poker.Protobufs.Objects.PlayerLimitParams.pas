@@ -38,6 +38,7 @@ type
     procedure SetUnlimited(const AValue: Boolean);
 
   public
+    constructor Create(const AFrom: TPB_PlayerLimitParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerLimitParams);
@@ -71,6 +72,12 @@ uses
 
 
 
+constructor TPB_PlayerLimitParams.Create(const AFrom: TPB_PlayerLimitParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PlayerLimitParams.Destroy;
 begin
   inherited;
@@ -79,6 +86,7 @@ end;
 procedure TPB_PlayerLimitParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

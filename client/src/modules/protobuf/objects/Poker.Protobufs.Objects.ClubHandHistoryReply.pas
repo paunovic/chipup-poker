@@ -37,6 +37,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_ClubHandHistoryReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubHandHistoryReply);
@@ -75,6 +76,12 @@ begin
   FRows.OnNotify := RowsNotifyEvent;
 end;
 
+constructor TPB_ClubHandHistoryReply.Create(const AFrom: TPB_ClubHandHistoryReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ClubHandHistoryReply.Destroy;
 begin
   if Assigned(FRows) then
@@ -88,6 +95,7 @@ end;
 procedure TPB_ClubHandHistoryReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -112,11 +120,15 @@ begin
 end;
 
 procedure TPB_ClubHandHistoryReply.MergeFrom(const from: TPB_ClubHandHistoryReply);
+var
+  temp2: TPB_HandHistory;
 begin
   if (from.has_Clubid) then
     SetClubid(from.Clubid);
   if (from.has_Gameid) then
     SetGameid(from.Gameid);
+  for temp2 in from.Rows do
+    FRows.Add(TPB_HandHistory.Create(temp2));
 end;
 
 procedure TPB_ClubHandHistoryReply.clear_Clubid;

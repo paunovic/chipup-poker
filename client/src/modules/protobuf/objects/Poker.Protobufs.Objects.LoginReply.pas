@@ -38,6 +38,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_LoginReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginReply);
@@ -76,6 +77,12 @@ begin
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
 end;
 
+constructor TPB_LoginReply.Create(const AFrom: TPB_LoginReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_LoginReply.Destroy;
 begin
   if Assigned(FStatus) then FreeAndNil(FStatus);
@@ -90,6 +97,7 @@ end;
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -116,11 +124,15 @@ begin
 end;
 
 procedure TPB_LoginReply.MergeFrom(const from: TPB_LoginReply);
+var
+  temp2: TPB_TableStatus;
 begin
   if (from.has_LoginStatus) then
     SetLoginStatus(from.LoginStatus);
   if (from.has_Status) then
     FStatus.MergeFrom(from.Status);
+  for temp2 in from.ReconnectTables do
+    FReconnectTables.Add(TPB_TableStatus.Create(temp2));
 end;
 
 procedure TPB_LoginReply.clear_LoginStatus;

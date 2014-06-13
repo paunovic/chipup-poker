@@ -53,6 +53,7 @@ type
     procedure SetStatus(const AValue: TPlayerStatus);
 
   public
+    constructor Create(const AFrom: TPB_PlayerHandHistory); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerHandHistory);
@@ -101,6 +102,12 @@ uses
 
 
 
+constructor TPB_PlayerHandHistory.Create(const AFrom: TPB_PlayerHandHistory);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PlayerHandHistory.Destroy;
 begin
   inherited;
@@ -109,6 +116,7 @@ end;
 procedure TPB_PlayerHandHistory.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

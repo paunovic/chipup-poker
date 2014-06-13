@@ -32,7 +32,7 @@ type
       FPlayers: TList<TPB_PlayerHandHistory>;
       FCards: TBytes;
       FEndtime: UINT32;
-      FBalanceChanges: TArray<Integer>;
+      FBalanceChanges: TList<Integer>;
       FMoves: TList<TPB_MoveRow>;
       FDealer: UINT32;
       FGame: TPB_Game;
@@ -59,7 +59,7 @@ type
     procedure SetEndtime(const AValue: UINT32);
     procedure set_has_BalanceChanges;
     procedure clear_has_BalanceChanges;
-    procedure SetBalanceChanges(const AValue: TArray<Integer>);
+    procedure SetBalanceChanges(const AValue: TList<Integer>);
     procedure set_has_Moves;
     procedure clear_has_Moves;
     procedure set_has_Dealer;
@@ -82,6 +82,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_HandHistory); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HandHistory);
@@ -119,7 +120,7 @@ type
     // LABEL TYPE BalanceChanges = 7;
     function has_BalanceChanges: Boolean;
     procedure clear_BalanceChanges;
-    property BalanceChanges: TArray<Integer> read FBalanceChanges write SetBalanceChanges;
+    property BalanceChanges: TList<Integer> read FBalanceChanges write SetBalanceChanges;
 
     // LABEL TYPE Moves = 8;
     function has_Moves: Boolean;
@@ -167,6 +168,12 @@ begin
   FMoves.OnNotify := MovesNotifyEvent;
 end;
 
+constructor TPB_HandHistory.Create(const AFrom: TPB_HandHistory);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_HandHistory.Destroy;
 begin
   if Assigned(FPlayers) then
@@ -186,6 +193,7 @@ end;
 procedure TPB_HandHistory.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -217,8 +225,7 @@ begin
       end;
       kBalanceChangesFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FBalanceChanges, Length(FBalanceChanges) + 1);
-        FBalanceChanges[Length(FBalanceChanges)-1] := AProtobufReader.readInt32;
+        FBalanceChanges.Add(AProtobufReader.readInt32);
       end;
       kMovesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -250,6 +257,10 @@ begin
 end;
 
 procedure TPB_HandHistory.MergeFrom(const from: TPB_HandHistory);
+var
+  temp3: TPB_PlayerHandHistory;
+  temp6: Integer;
+  temp7: TPB_MoveRow;
 begin
   if (from.has_MongoId) then
     SetMongoId(from.MongoId);
@@ -257,10 +268,16 @@ begin
     SetSeq(from.Seq);
   if (from.has_Totalrake) then
     SetTotalrake(from.Totalrake);
+  for temp3 in from.Players do
+    FPlayers.Add(TPB_PlayerHandHistory.Create(temp3));
   if (from.has_Cards) then
     SetCards(from.Cards);
   if (from.has_Endtime) then
     SetEndtime(from.Endtime);
+  for temp6 in from.BalanceChanges do
+    FBalanceChanges.Add(temp6); // FIXME?
+  for temp7 in from.Moves do
+    FMoves.Add(TPB_MoveRow.Create(temp7));
   if (from.has_Dealer) then
     SetDealer(from.Dealer);
   if (from.has_Game) then
@@ -448,7 +465,7 @@ end;
 
 procedure TPB_HandHistory.clear_BalanceChanges;
 begin
-  FBalanceChanges := 0;
+  FBalanceChanges.Clear;
   clear_has_BalanceChanges;
 end;
 
@@ -467,14 +484,13 @@ begin
   _has_bits_ := _has_bits_ xor 64;
 end;
 
-procedure TPB_HandHistory.SetBalanceChanges(const AValue: TArray<Integer>);
+procedure TPB_HandHistory.SetBalanceChanges(const AValue: TList<Integer>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FBalanceChanges,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FBalanceChanges[C1] := AValue[C1];
-  for C1 := 0 to Length(FBalanceChanges) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FBalanceChanges.Add(AValue[C1]);
+  for C1 := 0 to FBalanceChanges.Count - 1 do
     ProtobufOutput.writeInt32(kBalanceChangesFieldNumber, AValue[C1]);
 end;
 

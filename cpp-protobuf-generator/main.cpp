@@ -20,6 +20,7 @@ class TypeInfo {
 public:
 	TypeInfo(string type, string writter, string reader, string wiretype, string defaultdefault) {
 		this->delphiName = type;
+		baseDelphiName = type;
 		this->writter = writter;
 		this->reader = reader;
 		this->wiretype = wiretype;
@@ -43,11 +44,12 @@ public:
 	string getReader() { return reader; }
 	string getWireType() { return wiretype; }
 	string getDelphiName() { return delphiName; }
+	string getBaseDelphiName() { return baseDelphiName; }
 	void printPrivateVariable(io::Printer *printer,const FieldDescriptor *field) {
 		if (this->type == FieldDescriptor::TYPE_BYTES) {
 			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 				printer->Print(
-					"      $name$: TArray<TBytes>;\n"
+					"      $name$: TList<TBytes>;\n"
 					,"name",PrivateFieldName(field));
 			} else {
 				printer->Print(
@@ -78,13 +80,13 @@ public:
 			TypeInfo copy = *this;
 			copy.setEnum(field);
 			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-				copy.delphiName = "TArray<"+copy.delphiName+">";
+				copy.delphiName = "TList<"+copy.delphiName+">";
 			}
 			return copy;
 		}
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 			TypeInfo copy = *this;
-			copy.delphiName = "TArray<"+copy.delphiName+">";
+			copy.delphiName = "TList<"+copy.delphiName+">";
 			return copy;
 		}
 		return *this; // FIXME, enum, message
@@ -96,16 +98,20 @@ private:
 		const Descriptor *subtype = field->message_type();
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 			delphiName = "TList<TPB_"+subtype->name()+">";
+			baseDelphiName = "TPB_"+subtype->name();
 		} else {
 			delphiName = "TPB_"+subtype->name();
+			baseDelphiName = delphiName;
 		}
 	}
 	void setEnum(const FieldDescriptor *field) {
 		const EnumDescriptor *subtype = field->enum_type();
 		delphiName = "T" + subtype->name();
 		defaultdefault = delphiName+"(0)";
+		baseDelphiName = delphiName;
 	}
 	string delphiName;
+	string baseDelphiName;
 	string writter;
 	string reader;
 	string wiretype;
@@ -303,8 +309,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 		if (!typeinfo[field->type()]) cerr << "cant get new type for " << field->name() << field->type() << endl;
 		assert(typeinfo[field->type()]);
 		TypeInfo thisType = typeinfo[field->type()]->getInstance(field);
-		if ((field->type() == FieldDescriptor::TYPE_BYTES) ||
-			((field->type() == FieldDescriptor::TYPE_ENUM) &&(field->label() == FieldDescriptor::LABEL_REPEATED)) ) {
+		if ((field->type() == FieldDescriptor::TYPE_BYTES) && (field->label() != FieldDescriptor::LABEL_REPEATED)) {
 			printer->Print(vars,
 			"procedure TPB_$message$.clear_$name$;\n"
 			"begin\n"
@@ -312,7 +317,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			"  clear_has_$name$;\n"
 			"end;\n\n"
 			);
-		} else if ((field->type() == FieldDescriptor::TYPE_MESSAGE) && (field->label() == FieldDescriptor::LABEL_REPEATED)) {
+		} else if (/*(field->type() == FieldDescriptor::TYPE_MESSAGE) &&*/ (field->label() == FieldDescriptor::LABEL_REPEATED)) {
 			printer->Print(vars,
 			"procedure TPB_$message$.clear_$name$;\n"
 			"begin\n"
@@ -324,7 +329,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			printer->Print(vars,
 			"procedure TPB_$message$.clear_$name$;\n"
 			"begin\n"
-			"  FreeAndNil($pname$);\n"
+			"  FreeAndNil($pname$);\n" // FIXME?
 			"  clear_has_$name$;\n"
 			"end;\n\n"
 			);
@@ -397,14 +402,13 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			vars["writter"] = writter;
 			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 				printer->Print(vars,
-					"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
+					"procedure TPB_$message$.Set$name$(const AValue: $type$); // FIXME, expose the TList and use a hook?\n"
 					"var\n"
 					"  C1: Integer;\n"
 					"begin\n"
-					"  SetLength($pname$,Length(AValue));\n"
-					"  for C1 := 0 to Length(AValue) - 1 do\n"
-					"    $pname$[C1] := AValue[C1];\n"
-					"  for C1 := 0 to Length($pname$) - 1 do\n"
+					"  for C1 := 0 to AValue.Count - 1 do\n"
+					"    $pname$.Add(AValue[C1]);\n"
+					"  for C1 := 0 to $pname$.Count - 1 do\n"
 					"    ProtobufOutput.$writter$($enum$, $input$);\n"
 					"end;\n\n");
 			} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
@@ -566,6 +570,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				"  public\n"
 				);
 			printer.Print(
+				"    constructor Create(const AFrom: TPB_$name$); overload;\n"
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
 				"    procedure MergeFrom(const from: TPB_$name$);\n"
@@ -682,6 +687,11 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			printer.Print(
 				"\n"
 //				"{ TPBR_$name$ }\n"
+				"constructor TPB_$name$.Create(const AFrom: TPB_$name$);\n"
+				"begin\n"
+				"  inherited Create;\n"
+				"  MergeFrom(AFrom);\n"
+				"end;\n\n"
 				"destructor TPB_$name$.Destroy;\n"
 				"begin\n"
 				,"name",message->name());
@@ -712,6 +722,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
 				"var\n"
 				"  tag,field_number,wire_type,endpos : Integer;\n"
+				"  cheating: TBytes;\n"
 				"begin\n",
 				"name",message->name());
 /*			for (int j=0; j<message->field_count(); j++) {
@@ -752,8 +763,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 						printer.Print(
 							"      $name$: begin\n"
 							"        Assert(wire_type = WIRETYPE_VARINT);\n"
-							"        SetLength($pname$, Length($pname$) + 1);\n"
-							"        $pname$[Length($pname$)-1] := AProtobufReader.readInt32;\n"
+							"        $pname$.Add(AProtobufReader.readInt32);\n"
 							"      end;\n","name",EnumName(field)
 							,"pname",PrivateFieldName(field));
 					} else {
@@ -805,8 +815,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 						printer.Print(
 							"      $name$: begin\n"
 							"        Assert(wire_type = WIRETYPE_VARINT);\n"
-							"        SetLength($pname$,Length($pname$)+1);\n"
-							"        $pname$[Length($pname$)-1] := T$subname$(AProtobufReader.readEnum);\n"
+							"        $pname$.Add(T$subname$(AProtobufReader.readEnum));\n"
 							"      end;\n"
 							,"name",EnumName(field)
 							,"pname",PrivateFieldName(field)
@@ -832,15 +841,14 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 								printer.Print(vars,
 									"      $name$: begin\n"
 									"        Assert(wire_type = $wiretype$);\n"
-									"        SetLength($pname$, Length($pname$) + 1);\n"
-									"        AProtobufReader.$reader$($pname$[Length($pname$)-1]);\n"
+									"        AProtobufReader.$reader$(cheating);\n"
+									"        $pname$.Add(cheating);\n"
 									"      end;\n");
 							} else {
 								printer.Print(vars,
 									"      $name$: begin\n"
 									"        Assert(wire_type = $wiretype$);\n"
-									"        SetLength($pname$, Length($pname$) + 1);\n"
-									"        $pname$[Length($pname$)-1] := AProtobufReader.$reader$;\n"
+									"        $pname$.Add(AProtobufReader.$reader$);\n"
 									"      end;\n");
 							}
 						} else {
@@ -871,9 +879,23 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				"\n");
 			printer.Print(
 				"procedure TPB_$name$.MergeFrom(const from: TPB_$name$);\n"
-				"begin\n"
-				,"name",message->name()
-			);
+				,"name",message->name());
+			bool haveVar = false;
+			for (int j=0; j<message->field_count(); j++) {
+				const FieldDescriptor *field = message->field(j);
+				if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+					//if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+						if (!haveVar) {
+							haveVar = true;
+							printer.Print("var\n");
+						}
+						TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+						snprintf(hack,10,"%d",j);
+						printer.Print("  temp$id$: $type$;\n","id",hack,"type",instance.getBaseDelphiName());
+					//}
+				}
+			}
+			printer.Print("begin\n");
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
 				if ((field->label() == FieldDescriptor::LABEL_REQUIRED) ||
@@ -889,6 +911,25 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 							"  if (from.has_$name$) then\n"
 							"    Set$name$(from.$name$);\n"
 							,"name",PropertyName(field));
+					}
+				} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+					snprintf(hack,10,"%d",j);
+					map<string,string> vars2;
+					TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+					vars2["id"] = hack;
+					vars2["pname"] = PrivateFieldName(field);
+					vars2["type"] = instance.getBaseDelphiName();
+					vars2["name"] = PropertyName(field);
+					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+						printer.Print(vars2,
+							"  for temp$id$ in from.$name$ do\n"
+							"    $pname$.Add($type$.Create(temp$id$));\n"
+							);
+					} else {
+						printer.Print(vars2,
+							"  for temp$id$ in from.$name$ do\n"
+							"    $pname$.Add(temp$id$); // FIXME?\n"
+							);
 					}
 				}
 			}
@@ -984,7 +1025,7 @@ const string getDelphiType(const FieldDescriptor *field) const { // FIXME, merge
 		}
 	} else return "";
 	if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-		return "TArray<"+out+">";
+		return "TList<"+out+">";
 	} else return out;
 }
 };

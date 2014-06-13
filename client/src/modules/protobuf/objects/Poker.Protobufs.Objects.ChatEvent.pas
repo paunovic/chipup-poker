@@ -34,6 +34,7 @@ type
     procedure SetTableId(const AValue: TBytes);
 
   public
+    constructor Create(const AFrom: TPB_ChatEvent); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatEvent);
@@ -62,6 +63,12 @@ uses
 
 
 
+constructor TPB_ChatEvent.Create(const AFrom: TPB_ChatEvent);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ChatEvent.Destroy;
 begin
   if Assigned(FMsg) then
@@ -72,6 +79,7 @@ end;
 procedure TPB_ChatEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

@@ -28,6 +28,7 @@ type
     procedure SetFlag(const AValue: Boolean);
 
   public
+    constructor Create(const AFrom: TPB_TableBoolFlag); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableBoolFlag);
@@ -51,6 +52,12 @@ uses
 
 
 
+constructor TPB_TableBoolFlag.Create(const AFrom: TPB_TableBoolFlag);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_TableBoolFlag.Destroy;
 begin
   inherited;
@@ -59,6 +66,7 @@ end;
 procedure TPB_TableBoolFlag.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

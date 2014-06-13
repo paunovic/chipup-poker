@@ -23,6 +23,7 @@ type
     procedure SetAvatarId(const AValue: TBytes);
 
   public
+    constructor Create(const AFrom: TPB_SetAvatarParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SetAvatarParams);
@@ -41,6 +42,12 @@ uses
 
 
 
+constructor TPB_SetAvatarParams.Create(const AFrom: TPB_SetAvatarParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_SetAvatarParams.Destroy;
 begin
   inherited;
@@ -49,6 +56,7 @@ end;
 procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

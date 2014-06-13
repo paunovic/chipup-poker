@@ -19,7 +19,7 @@ type
       kPotsFieldNumber = 5;
 
     var
-      FCode: TArray<TTableEventType>;
+      FCode: TList<TTableEventType>;
       FBet: UINT32;
       FSeat: Integer;
       FPotdata: TList<TPB_WinnerPotInfo>;
@@ -28,7 +28,7 @@ type
 
     procedure set_has_Code;
     procedure clear_has_Code;
-    procedure SetCode(const AValue: TArray<TTableEventType>);
+    procedure SetCode(const AValue: TList<TTableEventType>);
     procedure set_has_Bet;
     procedure clear_has_Bet;
     procedure SetBet(const AValue: UINT32);
@@ -47,6 +47,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_MoveRow); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_MoveRow);
@@ -54,7 +55,7 @@ type
     // LABEL TYPE Code = 1;
     function has_Code: Boolean;
     procedure clear_Code;
-    property Code: TArray<TTableEventType> read FCode write SetCode;
+    property Code: TList<TTableEventType> read FCode write SetCode;
 
     // LABEL TYPE Bet = 2;
     function has_Bet: Boolean;
@@ -97,6 +98,12 @@ begin
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
+constructor TPB_MoveRow.Create(const AFrom: TPB_MoveRow);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_MoveRow.Destroy;
 begin
   if Assigned(FPotdata) then
@@ -115,6 +122,7 @@ end;
 procedure TPB_MoveRow.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -122,8 +130,7 @@ begin
     case field_number of
       kCodeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FCode,Length(FCode)+1);
-        FCode[Length(FCode)-1] := TTableEventType(AProtobufReader.readEnum);
+        FCode.Add(TTableEventType(AProtobufReader.readEnum));
       end;
       kBetFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -149,16 +156,26 @@ begin
 end;
 
 procedure TPB_MoveRow.MergeFrom(const from: TPB_MoveRow);
+var
+  temp0: TTableEventType;
+  temp3: TPB_WinnerPotInfo;
+  temp4: TPB_Pot;
 begin
+  for temp0 in from.Code do
+    FCode.Add(temp0); // FIXME?
   if (from.has_Bet) then
     SetBet(from.Bet);
   if (from.has_Seat) then
     SetSeat(from.Seat);
+  for temp3 in from.Potdata do
+    FPotdata.Add(TPB_WinnerPotInfo.Create(temp3));
+  for temp4 in from.Pots do
+    FPots.Add(TPB_Pot.Create(temp4));
 end;
 
 procedure TPB_MoveRow.clear_Code;
 begin
-  SetLength(FCode,0);
+  FCode.Clear;
   clear_has_Code;
 end;
 
@@ -177,14 +194,13 @@ begin
   _has_bits_ := _has_bits_ xor 1;
 end;
 
-procedure TPB_MoveRow.SetCode(const AValue: TArray<TTableEventType>);
+procedure TPB_MoveRow.SetCode(const AValue: TList<TTableEventType>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FCode,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FCode[C1] := AValue[C1];
-  for C1 := 0 to Length(FCode) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FCode.Add(AValue[C1]);
+  for C1 := 0 to FCode.Count - 1 do
     ProtobufOutput.writeInt32(kCodeFieldNumber, Integer(AValue));
 end;
 

@@ -15,14 +15,15 @@ type
       kGameidFieldNumber = 1;
 
     var
-      FGameid: TArray<TBytes>;
+      FGameid: TList<TBytes>;
       _has_bits_: Integer;
 
     procedure set_has_Gameid;
     procedure clear_has_Gameid;
-    procedure SetGameid(const AValue: TArray<TBytes>);
+    procedure SetGameid(const AValue: TList<TBytes>);
 
   public
+    constructor Create(const AFrom: TPB_QueryTableStats); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_QueryTableStats);
@@ -30,7 +31,7 @@ type
     // LABEL TYPE Gameid = 1;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TArray<TBytes> read FGameid write SetGameid;
+    property Gameid: TList<TBytes> read FGameid write SetGameid;
 
   end;
 
@@ -41,6 +42,12 @@ uses
 
 
 
+constructor TPB_QueryTableStats.Create(const AFrom: TPB_QueryTableStats);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_QueryTableStats.Destroy;
 begin
   inherited;
@@ -49,6 +56,7 @@ end;
 procedure TPB_QueryTableStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -56,8 +64,8 @@ begin
     case field_number of
       kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetLength(FGameid, Length(FGameid) + 1);
-        AProtobufReader.readBytes(FGameid[Length(FGameid)-1]);
+        AProtobufReader.readBytes(cheating);
+        FGameid.Add(cheating);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -66,12 +74,16 @@ begin
 end;
 
 procedure TPB_QueryTableStats.MergeFrom(const from: TPB_QueryTableStats);
+var
+  temp0: TBytes;
 begin
+  for temp0 in from.Gameid do
+    FGameid.Add(temp0); // FIXME?
 end;
 
 procedure TPB_QueryTableStats.clear_Gameid;
 begin
-  SetLength(FGameid,0);
+  FGameid.Clear;
   clear_has_Gameid;
 end;
 
@@ -90,14 +102,13 @@ begin
   _has_bits_ := _has_bits_ xor 1;
 end;
 
-procedure TPB_QueryTableStats.SetGameid(const AValue: TArray<TBytes>);
+procedure TPB_QueryTableStats.SetGameid(const AValue: TList<TBytes>); // FIXME, expose the TList and use a hook?
 var
   C1: Integer;
 begin
-  SetLength(FGameid,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FGameid[C1] := AValue[C1];
-  for C1 := 0 to Length(FGameid) - 1 do
+  for C1 := 0 to AValue.Count - 1 do
+    FGameid.Add(AValue[C1]);
+  for C1 := 0 to FGameid.Count - 1 do
     ProtobufOutput.writeBytes(kGameidFieldNumber, AValue[C1]);
 end;
 

@@ -27,6 +27,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_UserChangeParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UserChangeParams);
@@ -55,6 +56,12 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 
+constructor TPB_UserChangeParams.Create(const AFrom: TPB_UserChangeParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_UserChangeParams.Destroy;
 begin
   if Assigned(FUsers) then
@@ -68,6 +75,7 @@ end;
 procedure TPB_UserChangeParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -84,7 +92,11 @@ begin
 end;
 
 procedure TPB_UserChangeParams.MergeFrom(const from: TPB_UserChangeParams);
+var
+  temp0: TPB_User;
 begin
+  for temp0 in from.Users do
+    FUsers.Add(TPB_User.Create(temp0));
 end;
 
 procedure TPB_UserChangeParams.clear_Users;

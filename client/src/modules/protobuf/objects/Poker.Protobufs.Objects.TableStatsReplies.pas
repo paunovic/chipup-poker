@@ -37,6 +37,7 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_TableStatsReplies); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatsReplies);
@@ -79,6 +80,12 @@ begin
   FClubStats.OnNotify := ClubStatsNotifyEvent;
 end;
 
+constructor TPB_TableStatsReplies.Create(const AFrom: TPB_TableStatsReplies);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_TableStatsReplies.Destroy;
 begin
   if Assigned(FReply) then
@@ -102,6 +109,7 @@ end;
 procedure TPB_TableStatsReplies.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -126,7 +134,17 @@ begin
 end;
 
 procedure TPB_TableStatsReplies.MergeFrom(const from: TPB_TableStatsReplies);
+var
+  temp0: TPB_TableStatsReply;
+  temp1: TPB_User;
+  temp2: TPB_ClubStatsReply;
 begin
+  for temp0 in from.Reply do
+    FReply.Add(TPB_TableStatsReply.Create(temp0));
+  for temp1 in from.Players do
+    FPlayers.Add(TPB_User.Create(temp1));
+  for temp2 in from.ClubStats do
+    FClubStats.Add(TPB_ClubStatsReply.Create(temp2));
 end;
 
 procedure TPB_TableStatsReplies.clear_Reply;

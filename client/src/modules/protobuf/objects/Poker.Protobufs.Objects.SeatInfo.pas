@@ -69,6 +69,7 @@ type
     procedure SetCanShow(const AValue: Boolean);
 
   public
+    constructor Create(const AFrom: TPB_SeatInfo); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SeatInfo);
@@ -132,6 +133,12 @@ uses
 
 
 
+constructor TPB_SeatInfo.Create(const AFrom: TPB_SeatInfo);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_SeatInfo.Destroy;
 begin
   inherited;
@@ -140,6 +147,7 @@ end;
 procedure TPB_SeatInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and

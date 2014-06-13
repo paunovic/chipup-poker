@@ -23,6 +23,7 @@ type
     procedure SetUptime(const AValue: UINT32);
 
   public
+    constructor Create(const AFrom: TPB_PingParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingParams);
@@ -41,6 +42,12 @@ uses
 
 
 
+constructor TPB_PingParams.Create(const AFrom: TPB_PingParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PingParams.Destroy;
 begin
   inherited;
@@ -49,6 +56,7 @@ end;
 procedure TPB_PingParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
