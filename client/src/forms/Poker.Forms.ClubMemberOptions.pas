@@ -3,10 +3,11 @@ unit Poker.Forms.ClubMemberOptions;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin,
-  cxControls, cxContainer, cxEdit, cxLabel, cxCheckBox, cxTextEdit, cxMaskEdit, cxSpinEdit, Vcl.StdCtrls, cxButtons, Vcl.ActnList,
-  Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Objects.ClubInfo;
+  System.SysUtils, System.Variants, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxLabel, cxCheckBox, cxSpinEdit, cxButtons, Vcl.ActnList,
+  Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Objects.ClubInfo, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
+  Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, Vcl.StdCtrls;
 
 type
   TfrmClubMemberOptions = class(TForm, IFormParams, IModalForm)

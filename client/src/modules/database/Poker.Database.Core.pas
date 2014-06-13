@@ -3,7 +3,7 @@ unit Poker.Database.Core;
 interface
 
 uses
-  System.SysUtils, System.Classes, SynCommons, SynDB, SynSQLite3, SynDBSQLite3, System.Generics.Collections;
+  System.SysUtils, System.Classes, SynCommons, SynDB, SynSQLite3, SynDBSQLite3;
 
 type
   TDatabase = class
@@ -33,8 +33,7 @@ var
 
 implementation
 
-uses
-  Poker.Common.Misc;
+
 
 
 class procedure TDatabase.Initialize(const ADatabasePath: String);

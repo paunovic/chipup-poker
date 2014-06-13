@@ -8,8 +8,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Dialogs,
   Vcl.Controls, Vcl.Forms, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   cxGraphics, dxSkinsForm, Vcl.ExtCtrls, Vcl.ActnList, cxLabel, cxTextEdit, Vcl.StdCtrls, cxButtons, cxCheckBox,
-  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, Vcl.Menus, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin,
-  Poker.Protobufs.Objects.TableStatus, System.Generics.Collections, Poker.Common.AlphaBlendThread;
+  OverbyteIcsWSocket,  cxImage, dxGDIPlusClasses, cxMaskEdit, cxDropDownEdit, ChipUpPokerDarkSkin,
+  System.Generics.Collections, Poker.Common.AlphaBlendThread, Vcl.Menus;
 
 type
   TLoginStatus = (lsIdle, lsConnecting, lsConnected, lsHelloing, lsHelloOk, lsLoggingIn, lsLoggedIn, lsUpdating);
@@ -86,9 +86,9 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
-  Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
-  Poker.Forms.Main, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.HardcodedSettings, Poker.Common.Encryption,
-  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Forms.SystemTrayPopup, Poker.Common.CommandLineParamProcesser;
+  Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
+  Poker.Forms.Main, Poker.Common.FormsContainer, Poker.HardcodedSettings, Poker.Common.Encryption,
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParamProcesser;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);

@@ -29,8 +29,8 @@ type
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Common.Misc, Winapi.Windows, System.SysUtils;
+  {$IFDEF DEBUG} {$ENDIF}
+  Poker.Common.Misc, System.SysUtils;
 
 const
   RANKS = '23456789tjqka';

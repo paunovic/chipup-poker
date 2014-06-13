@@ -3,7 +3,7 @@ unit Poker.Server.Socket;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Classes, System.SysUtils, OverbyteIcsWndControl, System.Generics.Collections, OverbyteIcsWSocket,
+  Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, OverbyteIcsWSocket,
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.UpdateFileInfo, Poker.Server.SocketConnectThread, Poker.Protobufs.Objects.CloseGameData;

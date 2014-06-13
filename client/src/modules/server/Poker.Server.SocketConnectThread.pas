@@ -17,9 +17,6 @@ type
 
 implementation
 
-uses
-  Poker.Forms.Debug;
-
 { TServerSocketConnectThread }
 
 constructor TServerSocketConnectThread.Create(const ASocket: TSslWSocket);

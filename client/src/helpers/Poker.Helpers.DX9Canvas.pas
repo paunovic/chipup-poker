@@ -8,14 +8,14 @@ uses
 type
   TDX9CanvasHelper = class helper for TDX9Canvas
   public
-    procedure ImproveQuality;
+    procedure SetSamplerToCLAMP;
   end;
 
 implementation
 
 { TDX9CanvasHelper }
 
-procedure TDX9CanvasHelper.ImproveQuality;
+procedure TDX9CanvasHelper.SetSamplerToCLAMP;
 begin
   D3D9Device.SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
   D3D9Device.SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);

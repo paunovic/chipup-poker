@@ -3,10 +3,11 @@ unit Poker.Forms.About;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxControls, cxContainer, cxEdit, dxGDIPlusClasses, cxImage, cxLabel, Vcl.ExtCtrls,
-  Poker.Forms.LayeredForm;
+  Winapi.Windows, Winapi.Messages, System.Classes,
+  Vcl.Controls, Vcl.Forms,
+  cxLabel,
+  Poker.Forms.LayeredForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
+  ChipUpPokerDarkSkin;
 
 type
   TfrmAbout = class(TForm)
@@ -34,7 +35,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Settings, Poker.Common.FormsContainer, PNGImage, Poker.Forms.Debug, Poker.Common.Misc;
+  Poker.DataModule, Poker.Settings, Poker.Common.FormsContainer, PNGImage, Poker.Common.Misc;
 
 procedure TfrmAbout.FormCreate(Sender: TObject);
 begin
@@ -95,10 +96,9 @@ end;
 
 procedure TfrmAbout.WMMove(var AMessage: TMessage);
 begin
+  inherited;
   if Assigned(FLayeredForm) then
     FLayeredForm.UpdatePosition;
-
-  inherited;
 end;
 
 end.

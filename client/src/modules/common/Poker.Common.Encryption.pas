@@ -3,7 +3,7 @@ unit Poker.Common.Encryption;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils;
 
 
 function SHA256Stream(const AStream: TStream): RawByteString;

@@ -17,6 +17,8 @@ type
 
     procedure Process;
     procedure Shutdown;
+    procedure SetAnimationsEnabled(const AValue: Boolean);
+    function GetAnimationsEnabled: Boolean;
 
   protected
     procedure Execute; override;
@@ -31,6 +33,8 @@ type
     function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single): TDXAnimation;
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
+
+    property AnimationsEnabled: Boolean read GetAnimationsEnabled write SetAnimationsEnabled;
   end;
 
 var
@@ -39,7 +43,7 @@ var
 implementation
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.WindowMessages;
+  System.SysUtils, System.Generics.Collections, Poker.WindowMessages, Poker.Settings;
 
 
 class procedure TDXTimer.Initialize;
@@ -61,6 +65,7 @@ begin
   FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
   FAnimations := TDXAnimations.Create;
+  FAnimations.AnimationsEnabled := FALSE;
 
   inherited Create(TRUE);
 end;
@@ -78,7 +83,8 @@ function TDXTimer.AddAnimation(const AHandle: THandle; const AStartPoint, AEndPo
 var
   animation: TDXAnimation;
 begin
-  animation := TDXAnimation.Create(AHandle, FNextId, WM_DIRECTX_ANIMATION, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay, AEndDelay);
+  animation := TDXAnimation.Create(AHandle, FNextId, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay, AEndDelay);
+  animation.AnimationEnabled := FAnimations.AnimationsEnabled;
   Inc(FNextId);
   FAnimations.Add(animation);
   result := animation;
@@ -126,13 +132,24 @@ begin
   WaitFor;
 end;
 
+procedure TDXTimer.SetAnimationsEnabled(const AValue: Boolean);
+begin
+  FAnimations.AnimationsEnabled := AValue;
+end;
+
+function TDXTimer.GetAnimationsEnabled: Boolean;
+begin
+  result := FAnimations.AnimationsEnabled;
+end;
+
+
 procedure TDXTimer.Process;
 const
   UPDATE_FPS      = 60;
   UPDATE_INTERVAL = 1000 / UPDATE_FPS;
 var
-  C1            : Integer;
-  callbacks     : TList<THandle>;
+  C1: Integer;
+  callbacks: TList<THandle>;
   callbacks_must: TList<THandle>;
 begin
   callbacks := TList<THandle>.Create;
@@ -167,6 +184,7 @@ begin
 
       for C1 := 0 to callbacks_must.Count - 1 do
         PostMessage(callbacks_must[C1], WM_DIRECTX_ANIMATION, 0, 0);
+
       if FTiming.GetTimeValue - FLastUpdate > UPDATE_INTERVAL then
       begin
         for C1 := 0 to callbacks.Count - 1 do

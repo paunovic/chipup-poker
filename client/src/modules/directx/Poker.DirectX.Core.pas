@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, AsphyreD3D9, Poker.Helpers.DX9Canvas;
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas;
 
 
 class procedure TDXCore.Initialize;
@@ -70,7 +70,7 @@ begin
 
   if FDevice.Connect then
   begin
-    (FCanvas as TDX9Canvas).ImproveQuality;
+    (FCanvas as TDX9Canvas).SetSamplerToCLAMP;
   end
   else
   begin

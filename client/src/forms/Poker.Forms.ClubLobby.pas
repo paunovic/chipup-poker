@@ -3,14 +3,15 @@ unit Poker.Forms.ClubLobby;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Poker.Interfaces.FormParams, Poker.Objects.ClubInfo, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, cxButtons, dxSkinscxPCPainter,
-  cxPCdxBarPopupMenu, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxDataStorage, cxBlobEdit,
-  cxTextEdit, cxSpinEdit, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxClasses, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
-  dxGDIPlusClasses, cxImage, cxMaskEdit, Vcl.ExtCtrls, Vcl.Menus, cxStyles, cxFilter,
-  cxData, cxProgressBar, cxCheckListBox, cxCheckBox, cxTimeEdit, dxScreenTip, dxCustomHint, cxHint, cxCalendar, ChipUpPokerDarkSkin,
-  cxNavigator;
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams, Poker.Objects.ClubInfo, cxControls,
+  cxEdit, cxLabel, cxButtons,
+  cxPC, cxGroupBox, Vcl.ActnList, cxCustomData,
+  cxGridLevel, cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel,
+  cxImage, Vcl.ExtCtrls, Vcl.Menus, cxStyles,
+  cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, dxSkinscxPCPainter,
+  cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
+  Vcl.StdCtrls, dxGDIPlusClasses;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -202,11 +203,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  SynDBSQLite3, System.Generics.Collections,
-  Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.GiveChips, Poker.Forms.ChangeClubDetails,
+  System.Generics.Collections,
+  Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Database.Core, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions,
   Poker.Protobufs.Objects.PlayerLimitParams;
 

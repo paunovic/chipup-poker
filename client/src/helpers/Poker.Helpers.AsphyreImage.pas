@@ -3,7 +3,7 @@ unit Poker.Helpers.AsphyreImage;
 interface
 
 uses
-  System.Classes, AsphyreImages;
+  System.Classes, AsphyreImages, AsphyreJPG;
 
 type
   TAsphyreImageHelper = class helper for TAsphyreImage

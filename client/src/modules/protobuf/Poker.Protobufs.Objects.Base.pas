@@ -3,7 +3,7 @@ unit Poker.Protobufs.Objects.Base;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, pbOutput, Poker.Protobufs.Reader;
+  System.Classes, pbOutput, Poker.Protobufs.Reader;
 
 type
   TProtobufBaseObject = class

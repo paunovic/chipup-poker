@@ -3,10 +3,11 @@ unit Poker.Forms.ChangeClubDetails;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, Vcl.StdCtrls, cxRadioGroup, cxLabel,
-  cxTextEdit, cxButtons, Poker.Objects.ClubInfo, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Vcl.Menus,
-  ChipUpPokerDarkSkin, cxMaskEdit, cxSpinEdit, cxCheckBox;
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxContainer, cxLabel,
+  cxTextEdit, cxButtons, Poker.Objects.ClubInfo, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
+  cxSpinEdit, cxCheckBox, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
+  Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)

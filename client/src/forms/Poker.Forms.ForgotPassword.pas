@@ -3,10 +3,10 @@ unit Poker.Forms.ForgotPassword;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Buttons, Vcl.StdCtrls, Vcl.ActnList, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
-  dxSkinsCore, cxButtons, cxControls, cxContainer, cxEdit, cxLabel, cxTextEdit, dxSkinsForm, Poker.Interfaces.ModalForm, Vcl.Menus,
-  ChipUpPokerDarkSkin;
+  Winapi.Windows, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ActnList,
+  cxButtons, cxLabel, cxTextEdit, Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
+  cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmForgotPassword = class(TForm, IModalForm)

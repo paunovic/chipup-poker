@@ -3,9 +3,10 @@ unit Poker.Forms.ChangeEMail;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxLabel, Vcl.StdCtrls,
-  cxButtons, cxTextEdit, Vcl.ActnList, Vcl.Menus, ChipUpPokerDarkSkin;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxContainer, cxLabel,
+  cxButtons, cxTextEdit, Vcl.ActnList, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore,
+  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmChangeEMail = class(TForm)
@@ -39,7 +40,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ChangeMailReply, Poker.Server.MessageContainer,
+  Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ChangeMailReply, Poker.Server.MessageContainer,
   Poker.Server.Settings, Poker.Common.FormsContainer;
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);

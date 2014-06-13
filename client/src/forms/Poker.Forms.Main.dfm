@@ -4223,7 +4223,13 @@ object frmChipUpMain: TfrmChipUpMain
     object acHandHistory: TAction
       Category = 'Options'
       Caption = 'Hand History'
+      ShortCut = 16456
       OnExecute = acHandHistoryExecute
+    end
+    object acAnimationsEnabled: TAction
+      Category = 'Options'
+      Caption = 'Animations'
+      OnExecute = acAnimationsEnabledExecute
     end
   end
   object MainMenu: TMainMenu
@@ -4266,6 +4272,10 @@ object frmChipUpMain: TfrmChipUpMain
         GroupIndex = 1
         object miCheckOnFold: TMenuItem
           Action = acFoldChecks
+          GroupIndex = 1
+        end
+        object miAnimations: TMenuItem
+          Action = acAnimationsEnabled
           GroupIndex = 1
         end
       end

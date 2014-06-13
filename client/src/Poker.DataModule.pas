@@ -5,10 +5,11 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
-  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsCore, cxLookAndFeels, dxSkinsForm, Poker.Objects.ClubInfo, dxScreenTip,
-  dxCustomHint, cxHint, ChipUpPokerDarkSkin, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo, Vcl.ImgList,
-  Vcl.Controls, cxGraphics, Poker.Protobufs.Objects.LoginReply;
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
+  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsForm, Poker.Objects.ClubInfo,
+  cxHint, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo,
+  cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels, Vcl.ImgList,
+  Vcl.Controls;
 
 type
   TdmMain = class(TDataModule)
@@ -68,10 +69,10 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.ShlObj,
-  Vcl.Graphics, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
+  Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
   Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
   Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.Reconnect, Poker.Forms.SystemTrayPopup,
+  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup,
   Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
 
 
@@ -102,6 +103,7 @@ begin
   TAvatars.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
+  DXTimer.AnimationsEnabled := Settings.Animations;
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;

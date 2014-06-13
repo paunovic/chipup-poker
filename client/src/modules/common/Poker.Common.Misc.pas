@@ -3,7 +3,7 @@ unit Poker.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, System.Generics.Collections, cxImage, Vcl.Imaging.JPEG,
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG,
   Vcl.Controls;
 
 function IsValidString(const AString, AAllowedChars: String): Boolean;
@@ -46,7 +46,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
-  System.ZLib, Winapi.PsApi, System.DateUtils, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
   Poker.Interfaces.FormParams;
 
 

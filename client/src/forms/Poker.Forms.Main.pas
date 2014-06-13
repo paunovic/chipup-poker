@@ -4,12 +4,11 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.ExtCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.Menus, Vcl.AppEvnts, dxSkinsCore, cxLookAndFeels, dxSkinsForm, cxGraphics, cxControls,
-  cxLookAndFeelPainters, dxSkinscxPCPainter, cxCustomData, cxDataStorage, cxEdit, cxGridCustomView, cxGridCustomTableView, cxGridTableView,
-  cxClasses, cxGridLevel, cxGrid, cxTextEdit, cxSpinEdit, cxContainer, cxLabel, cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo,
-  cxMaskEdit, cxDropDownEdit, Poker.Forms.Login, Poker.Objects.GameInfo, cxBlobEdit, cxImage, Vcl.ActnMan, Vcl.ActnMenus,
-  Vcl.PlatformDefaultStyleActnCtrls, cxStyles, cxFilter, cxData, Poker.Protobufs.Objects.Club, dxGDIPlusClasses, ChipUpPokerDarkSkin,
-  cxPC, cxPCdxBarPopupMenu, dxScreenTip, dxCustomHint, cxHint;
+  Vcl.ExtCtrls, Vcl.ActnList, Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel, cxGrid, cxLabel,
+  cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo, Poker.Forms.Login, Poker.Objects.GameInfo, cxImage, Vcl.ActnMan,
+  Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
+  dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -93,6 +92,8 @@ type
     misOptions2: TMenuItem;
     miHandHistory: TMenuItem;
     acHandHistory: TAction;
+    acAnimationsEnabled: TAction;
+    miAnimations: TMenuItem;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -129,6 +130,7 @@ type
     procedure acShowAboutFormExecute(Sender: TObject);
     procedure acFoldChecksExecute(Sender: TObject);
     procedure acHandHistoryExecute(Sender: TObject);
+    procedure acAnimationsEnabledExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -179,7 +181,6 @@ type
     procedure DoCreate; override;
     procedure WMQueryEndSession(var AMessage: TWMQueryEndSession); message WM_QUERYENDSESSION;
     procedure WMEndSession(var AMessage: TWMEndSession); message WM_ENDSESSION;
-
   public
     procedure LoginStatus(const AValue: TLoginStatus);
   end;
@@ -193,14 +194,14 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.Generics.Collections, Poker.Protobufs.Objects.GameQuery, SynDBSQLite3,
+  {$IFDEF DEBUG} {$ENDIF}
+  System.Generics.Collections,
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.ListClubsReply, Poker.Table.Tables,
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Table.Tables, Poker.DirectX.Timer,
   Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater,
-  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Database.Core, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
+  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory;
@@ -353,6 +354,13 @@ begin
   result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
 end;
 
+procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
+begin
+  Settings.Animations := not Settings.Animations;
+  miAnimations.Checked := Settings.Animations;
+  DXTimer.AnimationsEnabled := Settings.Animations;
+end;
+
 procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
 begin
   Settings.FoldChecks := not Settings.FoldChecks;
@@ -491,6 +499,7 @@ begin
 
   miSounds.Checked := Settings.Sounds;
   miCheckOnFold.Checked := Settings.FoldChecks;
+  miAnimations.Checked := Settings.Animations;
 
   miDev.Visible := Settings.DeveloperMode;
 

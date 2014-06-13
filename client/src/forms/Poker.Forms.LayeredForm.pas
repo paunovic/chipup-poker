@@ -3,8 +3,8 @@ unit Poker.Forms.LayeredForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, System.Types,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.PngImage, Vcl.ExtCtrls;
+  Winapi.Windows, System.Classes, System.Types,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Imaging.PngImage;
 
 type
   TfrmLayered = class(TForm)
@@ -43,8 +43,8 @@ procedure TfrmLayered.UpdatePosition;
 begin
   if Assigned(FParentForm) then
   begin
-    Left := FParentForm.Left - (ClientWidth - FParentForm.ClientWidth) div 2;
-    Top := FParentForm.Top - (ClientHeight - FParentForm.ClientHeight) div 2;
+    Left := Round(FParentForm.Left - (ClientWidth - FParentForm.ClientWidth) / 2);
+    Top := Round(FParentForm.Top - (ClientHeight - FParentForm.ClientHeight) / 2);
   end;
 end;
 

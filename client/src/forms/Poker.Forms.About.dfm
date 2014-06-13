@@ -4,8 +4,8 @@ object frmAbout: TfrmAbout
   BorderIcons = [biSystemMenu]
   BorderStyle = bsNone
   Caption = 'ChipUP Poker'
-  ClientHeight = 280
-  ClientWidth = 340
+  ClientHeight = 281
+  ClientWidth = 345
   Color = clFuchsia
   TransparentColor = True
   TransparentColorValue = clFuchsia

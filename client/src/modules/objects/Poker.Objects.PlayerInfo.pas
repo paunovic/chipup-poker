@@ -55,7 +55,7 @@ var
 implementation
 
 uses
-  System.Classes, PNGImage,
+  PNGImage,
   {$IFDEF DEBUG} {$ENDIF}
   Poker.Objects.GameInfo, Poker.Table.Tables, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc;
 

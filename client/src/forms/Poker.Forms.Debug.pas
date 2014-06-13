@@ -5,11 +5,11 @@
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxTextEdit, cxMemo, cxCheckBox, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync,
-  Vcl.ComCtrls, Vcl.AppEvnts, cxSplitter, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, ChipUpPokerDarkSkin, cxGroupBox,
-  cxMaskEdit, cxSpinEdit;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit,
+  cxMemo, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync,
+  cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
+  dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
@@ -96,7 +96,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  Poker.Common.InstanceController, Poker.DataModule, RVItem,
+  Poker.Common.InstanceController, RVItem,
   Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
 
 

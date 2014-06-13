@@ -135,7 +135,7 @@ implementation
 
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
-  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Objects.SeatInfo,
+  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings,
   Poker.Objects.PotInfo;
 
 { THandHistoryItem }

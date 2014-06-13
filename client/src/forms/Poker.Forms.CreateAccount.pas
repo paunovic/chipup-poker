@@ -3,10 +3,11 @@ unit Poker.Forms.CreateAccount;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
-  cxContainer, cxEdit, dxSkinsCore, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList,
-  dxSkinsForm,  Poker.Interfaces.ModalForm, Vcl.Menus, ChipUpPokerDarkSkin;
+  Winapi.Windows, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxContainer, cxLabel, cxButtons, cxCheckBox, cxTextEdit, Vcl.ActnList,
+   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
+  Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmCreateAccount = class(TForm, IModalForm)
@@ -47,7 +48,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Settings, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes,
+  Poker.Settings, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes,
   Poker.DataModule, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.RegisterReply, Poker.Server.MessageContainer,
   Poker.Server.Settings, Poker.Common.FormsContainer;
 

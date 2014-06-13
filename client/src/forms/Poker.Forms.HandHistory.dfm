@@ -48,6 +48,7 @@ object frmHandHistory: TfrmHandHistory
     Height = 27
     Action = acClose
     Anchors = [akRight, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
     TabOrder = 0
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -97,6 +98,7 @@ object frmHandHistory: TfrmHandHistory
     Height = 27
     Action = acCopyToClipboard
     Anchors = [akLeft, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
     TabOrder = 6
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -112,6 +114,7 @@ object frmHandHistory: TfrmHandHistory
     Height = 27
     Action = acReplayHand
     Anchors = [akLeft, akBottom]
+    SpeedButtonOptions.CanBeFocused = False
     TabOrder = 7
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText

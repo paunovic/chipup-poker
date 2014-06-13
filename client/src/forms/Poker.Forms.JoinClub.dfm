@@ -46,7 +46,6 @@ object frmJoinClub: TfrmJoinClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    ExplicitWidth = 143
     Width = 189
   end
   object lbsInvCode: TcxLabel
@@ -74,7 +73,6 @@ object frmJoinClub: TfrmJoinClub
     Properties.OnChange = edClubIDPropertiesChange
     TabOrder = 0
     Value = 1
-    ExplicitWidth = 143
     Width = 189
   end
   object btOK: TcxButton

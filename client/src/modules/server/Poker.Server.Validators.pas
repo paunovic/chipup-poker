@@ -13,7 +13,7 @@ function ValidateContactMessage(const AMessage: String; out AError: String): Boo
 implementation
 
 uses
-  Vcl.Controls, System.SysUtils, Poker.Server.Settings, Poker.Common.Misc, System.RegularExpressions;
+  System.SysUtils, Poker.Server.Settings, System.RegularExpressions;
 
 
 function ValidateUsername(const AUsername: String; out AError: String): Boolean;
