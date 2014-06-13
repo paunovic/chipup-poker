@@ -86,7 +86,6 @@ end;
 procedure TPB_ChatMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
-  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -94,7 +93,7 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FId);
+        FId := AProtobufReader.readBytes;
         set_has_MongoId;
       end;
       kUsernameFieldNumber: begin

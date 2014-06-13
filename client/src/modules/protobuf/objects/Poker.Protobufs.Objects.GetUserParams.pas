@@ -92,7 +92,6 @@ end;
 procedure TPB_GetUserParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
-  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -100,8 +99,8 @@ begin
     case field_number of
       kUserMongoIdsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(cheating);
-        FUserMongoIds.Add(cheating);
+        FUserMongoIds.Add(AProtobufReader.readBytes);
+        set_has_UserMongoIds;
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);

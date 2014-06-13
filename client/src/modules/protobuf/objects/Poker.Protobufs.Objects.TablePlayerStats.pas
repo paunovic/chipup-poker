@@ -152,7 +152,6 @@ end;
 procedure TPB_TablePlayerStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
-  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -160,7 +159,7 @@ begin
     case field_number of
       kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FUserid);
+        FUserid := AProtobufReader.readBytes;
         set_has_Userid;
       end;
       kBalanceFieldNumber: begin

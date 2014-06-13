@@ -56,7 +56,6 @@ end;
 procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
-  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -64,7 +63,7 @@ begin
     case field_number of
       kAvatarIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FAvatarId);
+        FAvatarId := AProtobufReader.readBytes;
         set_has_AvatarId;
       end;
     else

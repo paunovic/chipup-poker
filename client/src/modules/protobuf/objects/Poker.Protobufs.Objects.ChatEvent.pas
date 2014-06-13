@@ -79,7 +79,6 @@ end;
 procedure TPB_ChatEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
-  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -99,7 +98,7 @@ begin
       end;
       kTableIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FTableId);
+        FTableId := AProtobufReader.readBytes;
         set_has_TableId;
       end;
     else

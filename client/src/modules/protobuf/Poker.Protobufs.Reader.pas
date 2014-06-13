@@ -13,7 +13,7 @@ type
   public
     constructor Create(const APointer: pointer; const ASize: DWORD);
     function GetNext(out ATag, AWireType, AFieldNumber: Integer): Boolean;
-    procedure readBytes(var ABytes: TBytes);
+    function readBytes: TBytes;
 
     property Buffer: PAnsiChar read FBuffer;
     property BufferPos: Integer read FPos;
@@ -53,13 +53,13 @@ begin
   Exit(TRUE);
 end;
 
-procedure TProtobufReader.readBytes(var ABytes: TBytes);
+function TProtobufReader.readBytes: TBytes;
 var
   bsize: Integer;
 begin
   bsize := readInt32;
-  SetLength(ABytes, bsize);
-  readRawBytes(ABytes[0], bsize);
+  SetLength(Result, bsize);
+  readRawBytes(Result[0], bsize);
 end;
 
 end.

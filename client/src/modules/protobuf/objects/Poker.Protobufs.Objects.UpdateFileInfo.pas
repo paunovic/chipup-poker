@@ -97,7 +97,6 @@ end;
 procedure TPB_UpdateFileInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
-  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -110,7 +109,7 @@ begin
       end;
       kHashFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FHash);
+        FHash := AProtobufReader.readBytes;
         set_has_Hash;
       end;
       kUrlFieldNumber: begin

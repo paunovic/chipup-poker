@@ -767,7 +767,6 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
 				"var\n"
 				"  tag,field_number,wire_type,endpos : Integer;\n"
-				"  cheating: TBytes;\n"
 				"begin\n",
 				"name",message->name());
 /*			for (int j=0; j<message->field_count(); j++) {
@@ -877,37 +876,19 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 						vars["reader"] = typeinfo[field->type()]->getReader();
 						vars["wiretype"] = typeinfo[field->type()]->getWireType();
 						if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-							if (field->type() == FieldDescriptor::TYPE_BYTES) {
-								printer.Print(vars,
-									"      $name$: begin\n"
-									"        Assert(wire_type = $wiretype$);\n"
-									"        AProtobufReader.$reader$(cheating);\n"
-									"        $pname$.Add(cheating);\n"
-									"      end;\n");
-							} else {
-								printer.Print(vars,
-									"      $name$: begin\n"
-									"        Assert(wire_type = $wiretype$);\n"
-									"        $pname$.Add(AProtobufReader.$reader$);\n"
-									"        set_has_$pubname$;\n"
-									"      end;\n");
-							}
+							printer.Print(vars,
+								"      $name$: begin\n"
+								"        Assert(wire_type = $wiretype$);\n"
+								"        $pname$.Add(AProtobufReader.$reader$);\n"
+								"        set_has_$pubname$;\n"
+								"      end;\n");
 						} else {
-							if (field->type() == FieldDescriptor::TYPE_BYTES) {
-								printer.Print(vars,
-									"      $name$: begin\n"
-									"        Assert(wire_type = $wiretype$);\n"
-									"        AProtobufReader.$reader$($pname$);\n"
-									"        set_has_$pubname$;\n"
-									"      end;\n");
-							} else {
-								printer.Print(vars,
-									"      $name$: begin\n"
-									"        Assert(wire_type = $wiretype$);\n"
-									"        $pname$ := AProtobufReader.$reader$;\n"
-									"        set_has_$pubname$;\n"
-									"      end;\n");
-							}
+							printer.Print(vars,
+								"      $name$: begin\n"
+								"        Assert(wire_type = $wiretype$);\n"
+								"        $pname$ := AProtobufReader.$reader$;\n"
+								"        set_has_$pubname$;\n"
+								"      end;\n");
 						}
 					}
 				}

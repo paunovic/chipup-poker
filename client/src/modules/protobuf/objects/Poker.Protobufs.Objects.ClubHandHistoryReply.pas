@@ -95,7 +95,6 @@ end;
 procedure TPB_ClubHandHistoryReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
-  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
@@ -103,12 +102,12 @@ begin
     case field_number of
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FClubid);
+        FClubid := AProtobufReader.readBytes;
         set_has_Clubid;
       end;
       kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        AProtobufReader.readBytes(FGameid);
+        FGameid := AProtobufReader.readBytes;
         set_has_Gameid;
       end;
       kRowsFieldNumber: begin
