@@ -20,7 +20,7 @@ type
     var
       FClubid: TBytes;
       FGameid: TBytes;
-      FPlayerstats: TObjectList<TPB_TablePlayerStats>;
+      FPlayerstats: TList<TPB_TablePlayerStats>;
       FHands: UINT32;
       _has_bits_: Integer;
 
@@ -59,7 +59,7 @@ type
     // LABEL TYPE Playerstats = 3;
     function has_Playerstats: Boolean;
     procedure clear_Playerstats;
-    property Playerstats: TObjectList<TPB_TablePlayerStats> read FPlayerstats;
+    property Playerstats: TList<TPB_TablePlayerStats> read FPlayerstats;
 
     // LABEL TYPE Hands = 4;
     function has_Hands: Boolean;

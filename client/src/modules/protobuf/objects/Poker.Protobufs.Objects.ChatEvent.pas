@@ -102,7 +102,7 @@ begin
   if (from.has_Event) then
     SetEvent(from.Event);
   if (from.has_Msg) then
-    Msg.MergeFrom(from.Msg);
+    FMsg.MergeFrom(from.Msg);
   if (from.has_TableId) then
     SetTableId(from.TableId);
 end;

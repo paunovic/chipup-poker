@@ -22,8 +22,8 @@ type
       FCode: TArray<TTableEventType>;
       FBet: UINT32;
       FSeat: Integer;
-      FPotdata: TObjectList<TPB_WinnerPotInfo>;
-      FPots: TObjectList<TPB_Pot>;
+      FPotdata: TList<TPB_WinnerPotInfo>;
+      FPots: TList<TPB_Pot>;
       _has_bits_: Integer;
 
     procedure set_has_Code;
@@ -69,12 +69,12 @@ type
     // LABEL TYPE Potdata = 4;
     function has_Potdata: Boolean;
     procedure clear_Potdata;
-    property Potdata: TObjectList<TPB_WinnerPotInfo> read FPotdata;
+    property Potdata: TList<TPB_WinnerPotInfo> read FPotdata;
 
     // LABEL TYPE Pots = 5;
     function has_Pots: Boolean;
     procedure clear_Pots;
-    property Pots: TObjectList<TPB_Pot> read FPots;
+    property Pots: TList<TPB_Pot> read FPots;
 
   end;
 

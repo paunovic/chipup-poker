@@ -15,7 +15,7 @@ type
       kUsersFieldNumber = 1;
 
     var
-      FUsers: TObjectList<TPB_User>;
+      FUsers: TList<TPB_User>;
       _has_bits_: Integer;
 
     procedure set_has_Users;
@@ -34,7 +34,7 @@ type
     // LABEL TYPE Users = 1;
     function has_Users: Boolean;
     procedure clear_Users;
-    property Users: TObjectList<TPB_User> read FUsers;
+    property Users: TList<TPB_User> read FUsers;
 
   end;
 

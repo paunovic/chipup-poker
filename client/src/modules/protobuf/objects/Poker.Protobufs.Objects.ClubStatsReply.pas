@@ -17,7 +17,7 @@ type
 
     var
       FClubid: TBytes;
-      FPlayerStats: TObjectList<TPB_ClubPlayerStats>;
+      FPlayerStats: TList<TPB_ClubPlayerStats>;
       _has_bits_: Integer;
 
     procedure set_has_Clubid;
@@ -44,7 +44,7 @@ type
     // LABEL TYPE PlayerStats = 2;
     function has_PlayerStats: Boolean;
     procedure clear_PlayerStats;
-    property PlayerStats: TObjectList<TPB_ClubPlayerStats> read FPlayerStats;
+    property PlayerStats: TList<TPB_ClubPlayerStats> read FPlayerStats;
 
   end;
 

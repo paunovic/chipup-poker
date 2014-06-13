@@ -17,7 +17,7 @@ type
 
     var
       FDebug: Boolean;
-      FFiles: TObjectList<TPB_UpdateFileInfo>;
+      FFiles: TList<TPB_UpdateFileInfo>;
       _has_bits_: Integer;
 
     procedure set_has_Debug;
@@ -44,7 +44,7 @@ type
     // LABEL TYPE Files = 2;
     function has_Files: Boolean;
     procedure clear_Files;
-    property Files: TObjectList<TPB_UpdateFileInfo> read FFiles;
+    property Files: TList<TPB_UpdateFileInfo> read FFiles;
 
   end;
 

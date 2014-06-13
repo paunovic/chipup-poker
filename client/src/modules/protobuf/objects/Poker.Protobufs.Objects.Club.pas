@@ -26,7 +26,7 @@ type
 
     var
       FId: TBytes;
-      FMembers: TObjectList<TPB_ClubMember>;
+      FMembers: TList<TPB_ClubMember>;
       FName: String;
       FOwner: TBytes;
       FPassword: String;
@@ -89,7 +89,7 @@ type
     // LABEL TYPE Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
-    property Members: TObjectList<TPB_ClubMember> read FMembers;
+    property Members: TList<TPB_ClubMember> read FMembers;
 
     // LABEL TYPE Name = 3;
     function has_Name: Boolean;

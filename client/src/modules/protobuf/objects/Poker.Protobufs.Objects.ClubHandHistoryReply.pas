@@ -19,7 +19,7 @@ type
     var
       FClubid: TBytes;
       FGameid: TBytes;
-      FRows: TObjectList<TPB_HandHistory>;
+      FRows: TList<TPB_HandHistory>;
       _has_bits_: Integer;
 
     procedure set_has_Clubid;
@@ -54,7 +54,7 @@ type
     // LABEL TYPE Rows = 3;
     function has_Rows: Boolean;
     procedure clear_Rows;
-    property Rows: TObjectList<TPB_HandHistory> read FRows;
+    property Rows: TList<TPB_HandHistory> read FRows;
 
   end;
 

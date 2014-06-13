@@ -22,7 +22,7 @@ type
     var
       FEvent: TTableEventType;
       FSeat: Integer;
-      FPots: TObjectList<TPB_WinnerPotInfo>;
+      FPots: TList<TPB_WinnerPotInfo>;
       FBets: TArray<UINT32>;
       FCards: TBytes;
       _has_bits_: Integer;
@@ -65,7 +65,7 @@ type
     // LABEL TYPE Pots = 4;
     function has_Pots: Boolean;
     procedure clear_Pots;
-    property Pots: TObjectList<TPB_WinnerPotInfo> read FPots;
+    property Pots: TList<TPB_WinnerPotInfo> read FPots;
 
     // LABEL TYPE Bets = 5;
     function has_Bets: Boolean;

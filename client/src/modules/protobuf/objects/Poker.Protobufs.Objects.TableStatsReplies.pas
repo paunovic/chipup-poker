@@ -17,9 +17,9 @@ type
       kClubStatsFieldNumber = 3;
 
     var
-      FReply: TObjectList<TPB_TableStatsReply>;
-      FPlayers: TObjectList<TPB_User>;
-      FClubStats: TObjectList<TPB_ClubStatsReply>;
+      FReply: TList<TPB_TableStatsReply>;
+      FPlayers: TList<TPB_User>;
+      FClubStats: TList<TPB_ClubStatsReply>;
       _has_bits_: Integer;
 
     procedure set_has_Reply;
@@ -44,17 +44,17 @@ type
     // LABEL TYPE Reply = 1;
     function has_Reply: Boolean;
     procedure clear_Reply;
-    property Reply: TObjectList<TPB_TableStatsReply> read FReply;
+    property Reply: TList<TPB_TableStatsReply> read FReply;
 
     // LABEL TYPE Players = 2;
     function has_Players: Boolean;
     procedure clear_Players;
-    property Players: TObjectList<TPB_User> read FPlayers;
+    property Players: TList<TPB_User> read FPlayers;
 
     // LABEL TYPE ClubStats = 3;
     function has_ClubStats: Boolean;
     procedure clear_ClubStats;
-    property ClubStats: TObjectList<TPB_ClubStatsReply> read FClubStats;
+    property ClubStats: TList<TPB_ClubStatsReply> read FClubStats;
 
   end;
 

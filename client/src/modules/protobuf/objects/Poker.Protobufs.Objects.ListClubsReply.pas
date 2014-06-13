@@ -15,7 +15,7 @@ type
       kClubsFieldNumber = 1;
 
     var
-      FClubs: TObjectList<TPB_Club>;
+      FClubs: TList<TPB_Club>;
       _has_bits_: Integer;
 
     procedure set_has_Clubs;
@@ -34,7 +34,7 @@ type
     // LABEL TYPE Clubs = 1;
     function has_Clubs: Boolean;
     procedure clear_Clubs;
-    property Clubs: TObjectList<TPB_Club> read FClubs;
+    property Clubs: TList<TPB_Club> read FClubs;
 
   end;
 

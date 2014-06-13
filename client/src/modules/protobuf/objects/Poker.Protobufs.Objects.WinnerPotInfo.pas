@@ -20,7 +20,7 @@ type
     var
       FSum: UINT32;
       FSeats: TArray<Integer>;
-      FWinnerData: TObjectList<TPB_WinnerData>;
+      FWinnerData: TList<TPB_WinnerData>;
       FRake: UINT32;
       _has_bits_: Integer;
 
@@ -59,7 +59,7 @@ type
     // LABEL TYPE WinnerData = 3;
     function has_WinnerData: Boolean;
     procedure clear_WinnerData;
-    property WinnerData: TObjectList<TPB_WinnerData> read FWinnerData;
+    property WinnerData: TList<TPB_WinnerData> read FWinnerData;
 
     // LABEL TYPE Rake = 4;
     function has_Rake: Boolean;

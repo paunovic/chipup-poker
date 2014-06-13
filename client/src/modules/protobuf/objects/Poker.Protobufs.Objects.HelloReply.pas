@@ -28,7 +28,7 @@ type
       FMaxPlayTime: Integer;
       FMaxTimebank: Integer;
       FMinSizes: TPB_StringSizes;
-      FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
+      FUpdateFiles: TList<TPB_UpdateFileInfo>;
       FValidCharsRegex: TPB_ValidCharsRegex;
       _has_bits_: Integer;
 
@@ -99,7 +99,7 @@ type
     // LABEL TYPE UpdateFiles = 7;
     function has_UpdateFiles: Boolean;
     procedure clear_UpdateFiles;
-    property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
+    property UpdateFiles: TList<TPB_UpdateFileInfo> read FUpdateFiles;
 
     // LABEL TYPE ValidCharsRegex = 8;
     function has_ValidCharsRegex: Boolean;
@@ -200,7 +200,7 @@ end;
 procedure TPB_HelloReply.MergeFrom(const from: TPB_HelloReply);
 begin
   if (from.has_StringSizes) then
-    StringSizes.MergeFrom(from.StringSizes);
+    FStringSizes.MergeFrom(from.StringSizes);
   if (from.has_ChangeExpireTime) then
     SetChangeExpireTime(from.ChangeExpireTime);
   if (from.has_ForgotExpireTime) then
@@ -210,9 +210,9 @@ begin
   if (from.has_MaxTimebank) then
     SetMaxTimebank(from.MaxTimebank);
   if (from.has_MinSizes) then
-    MinSizes.MergeFrom(from.MinSizes);
+    FMinSizes.MergeFrom(from.MinSizes);
   if (from.has_ValidCharsRegex) then
-    ValidCharsRegex.MergeFrom(from.ValidCharsRegex);
+    FValidCharsRegex.MergeFrom(from.ValidCharsRegex);
 end;
 
 procedure TPB_HelloReply.clear_StringSizes;

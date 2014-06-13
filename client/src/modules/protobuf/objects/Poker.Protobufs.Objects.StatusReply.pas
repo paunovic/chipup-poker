@@ -18,10 +18,10 @@ type
       kGamesFieldNumber = 4;
 
     var
-      FClubs: TObjectList<TPB_Club>;
-      FUsers: TObjectList<TPB_User>;
+      FClubs: TList<TPB_Club>;
+      FUsers: TList<TPB_User>;
       FSelf: TPB_User;
-      FGames: TObjectList<TPB_Game>;
+      FGames: TList<TPB_Game>;
       _has_bits_: Integer;
 
     procedure set_has_Clubs;
@@ -49,12 +49,12 @@ type
     // LABEL TYPE Clubs = 1;
     function has_Clubs: Boolean;
     procedure clear_Clubs;
-    property Clubs: TObjectList<TPB_Club> read FClubs;
+    property Clubs: TList<TPB_Club> read FClubs;
 
     // LABEL TYPE Users = 2;
     function has_Users: Boolean;
     procedure clear_Users;
-    property Users: TObjectList<TPB_User> read FUsers;
+    property Users: TList<TPB_User> read FUsers;
 
     // LABEL TYPE Self = 3;
     function has_Self: Boolean;
@@ -64,7 +64,7 @@ type
     // LABEL TYPE Games = 4;
     function has_Games: Boolean;
     procedure clear_Games;
-    property Games: TObjectList<TPB_Game> read FGames;
+    property Games: TList<TPB_Game> read FGames;
 
   end;
 
@@ -146,7 +146,7 @@ end;
 procedure TPB_StatusReply.MergeFrom(const from: TPB_StatusReply);
 begin
   if (from.has_Self) then
-    Self.MergeFrom(from.Self);
+    FSelf.MergeFrom(from.Self);
 end;
 
 procedure TPB_StatusReply.clear_Clubs;

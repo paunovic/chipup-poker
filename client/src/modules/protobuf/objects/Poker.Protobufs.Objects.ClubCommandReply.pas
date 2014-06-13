@@ -20,7 +20,7 @@ type
     var
       FStatus: TClubStatus;
       FClub: TPB_Club;
-      FGames: TObjectList<TPB_Game>;
+      FGames: TList<TPB_Game>;
       _has_bits_: Integer;
 
     procedure set_has_Status;
@@ -55,7 +55,7 @@ type
     // LABEL TYPE Games = 3;
     function has_Games: Boolean;
     procedure clear_Games;
-    property Games: TObjectList<TPB_Game> read FGames;
+    property Games: TList<TPB_Game> read FGames;
 
   end;
 
@@ -120,7 +120,7 @@ begin
   if (from.has_Status) then
     SetStatus(from.Status);
   if (from.has_Club) then
-    Club.MergeFrom(from.Club);
+    FClub.MergeFrom(from.Club);
 end;
 
 procedure TPB_ClubCommandReply.clear_Status;

@@ -20,7 +20,7 @@ type
     var
       FLoginStatus: TLoginStatus;
       FStatus: TPB_StatusReply;
-      FReconnectTables: TObjectList<TPB_TableStatus>;
+      FReconnectTables: TList<TPB_TableStatus>;
       _has_bits_: Integer;
 
     procedure set_has_LoginStatus;
@@ -55,7 +55,7 @@ type
     // LABEL TYPE ReconnectTables = 3;
     function has_ReconnectTables: Boolean;
     procedure clear_ReconnectTables;
-    property ReconnectTables: TObjectList<TPB_TableStatus> read FReconnectTables;
+    property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
 
   end;
 
@@ -120,7 +120,7 @@ begin
   if (from.has_LoginStatus) then
     SetLoginStatus(from.LoginStatus);
   if (from.has_Status) then
-    Status.MergeFrom(from.Status);
+    FStatus.MergeFrom(from.Status);
 end;
 
 procedure TPB_LoginReply.clear_LoginStatus;

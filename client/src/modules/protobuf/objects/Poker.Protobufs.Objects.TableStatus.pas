@@ -38,7 +38,7 @@ type
 
     var
       FTableMongoId: TBytes;
-      FSeats: TObjectList<TPB_SeatInfo>;
+      FSeats: TList<TPB_SeatInfo>;
       FState: TTableState;
       FDealer: Integer;
       FCurrentSeat: Integer;
@@ -51,8 +51,8 @@ type
       FBigBlind: UINT32;
       FHandid: UINT32;
       FTime: UInt64;
-      FEvents: TObjectList<TPB_TableEvent>;
-      FPots: TObjectList<TPB_Pot>;
+      FEvents: TList<TPB_TableEvent>;
+      FPots: TList<TPB_Pot>;
       FRakePercent: UINT32;
       FCurrentGame: TGameType;
       FRotation: UINT32;
@@ -145,7 +145,7 @@ type
     // LABEL TYPE Seats = 2;
     function has_Seats: Boolean;
     procedure clear_Seats;
-    property Seats: TObjectList<TPB_SeatInfo> read FSeats;
+    property Seats: TList<TPB_SeatInfo> read FSeats;
 
     // LABEL TYPE State = 3;
     function has_State: Boolean;
@@ -210,12 +210,12 @@ type
     // LABEL TYPE Events = 19;
     function has_Events: Boolean;
     procedure clear_Events;
-    property Events: TObjectList<TPB_TableEvent> read FEvents;
+    property Events: TList<TPB_TableEvent> read FEvents;
 
     // LABEL TYPE Pots = 20;
     function has_Pots: Boolean;
     procedure clear_Pots;
-    property Pots: TObjectList<TPB_Pot> read FPots;
+    property Pots: TList<TPB_Pot> read FPots;
 
     // LABEL TYPE RakePercent = 21;
     function has_RakePercent: Boolean;

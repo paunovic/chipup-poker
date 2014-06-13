@@ -29,11 +29,11 @@ type
       FId: TBytes;
       FSeq: UINT32;
       FTotalrake: UINT32;
-      FPlayers: TObjectList<TPB_PlayerHandHistory>;
+      FPlayers: TList<TPB_PlayerHandHistory>;
       FCards: TBytes;
       FEndtime: UINT32;
       FBalanceChanges: TArray<Integer>;
-      FMoves: TObjectList<TPB_MoveRow>;
+      FMoves: TList<TPB_MoveRow>;
       FDealer: UINT32;
       FGame: TPB_Game;
       FCurrentGame: TGameType;
@@ -104,7 +104,7 @@ type
     // LABEL TYPE Players = 4;
     function has_Players: Boolean;
     procedure clear_Players;
-    property Players: TObjectList<TPB_PlayerHandHistory> read FPlayers;
+    property Players: TList<TPB_PlayerHandHistory> read FPlayers;
 
     // LABEL TYPE Cards = 5;
     function has_Cards: Boolean;
@@ -124,7 +124,7 @@ type
     // LABEL TYPE Moves = 8;
     function has_Moves: Boolean;
     procedure clear_Moves;
-    property Moves: TObjectList<TPB_MoveRow> read FMoves;
+    property Moves: TList<TPB_MoveRow> read FMoves;
 
     // LABEL TYPE Dealer = 9;
     function has_Dealer: Boolean;
@@ -264,7 +264,7 @@ begin
   if (from.has_Dealer) then
     SetDealer(from.Dealer);
   if (from.has_Game) then
-    Game.MergeFrom(from.Game);
+    FGame.MergeFrom(from.Game);
   if (from.has_CurrentGame) then
     SetCurrentGame(from.CurrentGame);
   if (from.has_Rake) then
