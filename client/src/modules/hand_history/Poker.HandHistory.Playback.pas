@@ -122,7 +122,7 @@ begin
           begin
             pbpot := TPB_Pot.Create;
             pbpot.Value := move.Pots[C3].Value;
-            pbpot.Members := move.Pots[C3].Members;
+            pbpot.Members.AddRange(move.Pots[C3].Members);
             pots.Add(pbpot);
           end;
 
@@ -158,7 +158,7 @@ begin
       begin
         pbpot := TPB_Pot.Create;
         pbpot.Value := pots[C2].Value;
-        pbpot.Members := pots[C2].Members;
+        pbpot.Members.AddRange(pots[C2].Members);
         pbtablestatus.Pots.Add(pbpot);
       end;
 
@@ -212,7 +212,7 @@ begin
             winnerdata.Msg := move.WinnerPots[C2].WinnerData[C3].Msg;
             pbwinnerpotinfo.WinnerData.Add(winnerdata);
           end;
-          pbwinnerpotinfo.Seats := move.WinnerPots[C2].Members;
+          pbwinnerpotinfo.Seats.AddRange(move.WinnerPots[C2].Members);
           pbevent.Pots.Add(pbwinnerpotinfo);
         end;
 
