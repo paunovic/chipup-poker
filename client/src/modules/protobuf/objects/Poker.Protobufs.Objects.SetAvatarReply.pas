@@ -13,18 +13,27 @@ type
   TPB_SetAvatarReply = class(TProtobufBaseObject)
   private
     const
-      FN_STATUS = 1;
+      kStatusFieldNumber = 1;
 
     var
       FStatus: TSetAvatarStatus;
+      _has_bits_: Integer;
 
+    procedure set_has_Status;
+    procedure clear_has_Status;
     procedure SetStatus(const AValue: TSetAvatarStatus);
 
   public
+    constructor Create(const AFrom: TPB_SetAvatarReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_SetAvatarReply);
 
+    // LABEL TYPE Status = 1;
+    function has_Status: Boolean;
+    procedure clear_Status;
     property Status: TSetAvatarStatus read FStatus write SetStatus;
+
   end;
 
 implementation
@@ -34,6 +43,12 @@ uses
 
 
 
+constructor TPB_SetAvatarReply.Create(const AFrom: TPB_SetAvatarReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_SetAvatarReply.Destroy;
 begin
   inherited;
@@ -42,14 +57,16 @@ end;
 procedure TPB_SetAvatarReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_STATUS: begin
+      kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TSetAvatarStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -57,10 +74,38 @@ begin
   end;
 end;
 
+procedure TPB_SetAvatarReply.MergeFrom(const from: TPB_SetAvatarReply);
+begin
+  if (from.has_Status) then
+    SetStatus(from.Status);
+end;
+
+procedure TPB_SetAvatarReply.clear_Status;
+begin
+  FStatus := TSetAvatarStatus(0);
+  clear_has_Status;
+end;
+
+function TPB_SetAvatarReply.has_Status: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_SetAvatarReply.set_has_Status;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_SetAvatarReply.clear_has_Status;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_SetAvatarReply.SetStatus(const AValue: TSetAvatarStatus);
 begin
   FStatus := AValue;
-  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
+  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  set_has_Status;
 end;
 
 end.

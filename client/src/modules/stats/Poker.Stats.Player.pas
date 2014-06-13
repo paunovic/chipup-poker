@@ -3,7 +3,7 @@ unit Poker.Stats.Player;
 interface
 
 uses
-  System.SysUtils,
+  System.SysUtils, System.Generics.Collections,
   Poker.Protobufs.Objects.TablePlayerStats;
 
 type
@@ -11,8 +11,8 @@ type
   private
     FUserId: TBytes;
     FBalance: Int64;
-    FBuyins: TArray<UINT32>;
-    FCashouts: TArray<UINT32>;
+    FBuyins: TList<UINT32>;
+    FCashouts: TList<UINT32>;
     FRakeContrib: Int64;
     FSecondsPlayed: Int64;
     FChipsInPlay: Int64;
@@ -30,8 +30,8 @@ type
 
     property UserId: TBytes read FUserId;
     property Balance: Int64 read FBalance;
-    property Buyins: TArray<UINT32> read FBuyins;
-    property Cashouts: TArray<UINT32> read FCashouts;
+    property Buyins: TList<UINT32> read FBuyins;
+    property Cashouts: TList<UINT32> read FCashouts;
     property RakeContrib: Int64 read FRakeContrib;
     property SecondsPlayed: Int64 read FSecondsPlayed;
     property CashoutsTotal: UINT32 read GetCashoutsTotal;
@@ -48,12 +48,14 @@ uses
 
 constructor TPlayerStats.Create;
 begin
-
+  FBuyins := TList<UINT32>.Create;
+  FCashouts := TList<UINT32>.Create;
 end;
 
 destructor TPlayerStats.Destroy;
 begin
-
+  FCashouts.Free;
+  FBuyins.Free;
   inherited;
 end;
 
@@ -78,8 +80,8 @@ end;
 procedure TPlayerStats.Merge(const APlayerStats: TPlayerStats);
 begin
   Inc(FBalance, APlayerStats.Balance);
-  AppendArray(FBuyins, APlayerStats.Buyins);
-  AppendArray(FCashouts, APlayerStats.Cashouts);
+  FBuyins.AddRange(APlayerStats.Buyins);
+  FCashouts.AddRange(APlayerStats.Cashouts);
   Inc(FRakeContrib, APlayerStats.RakeContrib);
   Inc(FSecondsPlayed, APlayerStats.SecondsPlayed);
   Inc(FChipsInPlay, APlayerStats.ChipsInPlay);
@@ -89,8 +91,10 @@ procedure TPlayerStats.Assign(const AProtobuf: TPB_TablePlayerStats);
 begin
   FUserId := AProtobuf.Userid;
   FBalance := AProtobuf.Balance;
-  FBuyins := AProtobuf.Buyins;
-  FCashouts := AProtobuf.Cashouts;
+  FBuyins.Clear;
+  FBuyins.AddRange(AProtobuf.Buyins);
+  FCashouts.Clear;
+  FCashouts.AddRange(AProtobuf.Cashouts);
   FRakeContrib := AProtobuf.Rakecontrib;
   FSecondsPlayed := AProtobuf.Secondsplayed;
   FChipsInPlay := AProtobuf.Chipsinplay;
@@ -100,8 +104,10 @@ procedure TPlayerStats.Assign(const APlayerStats: TPlayerStats);
 begin
   FUserId := APlayerStats.Userid;
   FBalance := APlayerStats.Balance;
-  FBuyins := APlayerStats.Buyins;
-  FCashouts := APlayerStats.Cashouts;
+  FBuyins.Clear;
+  FBuyins.AddRange(APlayerStats.Buyins);
+  FCashouts.Clear;
+  FCashouts.AddRange(APlayerStats.Cashouts);
   FRakeContrib := APlayerStats.Rakecontrib;
   FSecondsPlayed := APlayerStats.Secondsplayed;
   FChipsInPlay := APlayerStats.Chipsinplay;

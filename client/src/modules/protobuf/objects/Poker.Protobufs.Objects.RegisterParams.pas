@@ -12,26 +12,47 @@ type
   TPB_RegisterParams = class(TProtobufBaseObject)
   private
     const
-      FN_EMAIL = 1;
-      FN_PASSWORD = 2;
-      FN_DISPLAYNAME = 3;
+      kEmailFieldNumber = 1;
+      kPasswordFieldNumber = 2;
+      kDisplayNameFieldNumber = 3;
 
     var
       FEmail: String;
       FPassword: String;
       FDisplayName: String;
+      _has_bits_: Integer;
 
+    procedure set_has_Email;
+    procedure clear_has_Email;
     procedure SetEmail(const AValue: String);
+    procedure set_has_Password;
+    procedure clear_has_Password;
     procedure SetPassword(const AValue: String);
+    procedure set_has_DisplayName;
+    procedure clear_has_DisplayName;
     procedure SetDisplayName(const AValue: String);
 
   public
+    constructor Create(const AFrom: TPB_RegisterParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_RegisterParams);
 
+    // LABEL TYPE Email = 1;
+    function has_Email: Boolean;
+    procedure clear_Email;
     property Email: String read FEmail write SetEmail;
+
+    // LABEL TYPE Password = 2;
+    function has_Password: Boolean;
+    procedure clear_Password;
     property Password: String read FPassword write SetPassword;
+
+    // LABEL TYPE DisplayName = 3;
+    function has_DisplayName: Boolean;
+    procedure clear_DisplayName;
     property DisplayName: String read FDisplayName write SetDisplayName;
+
   end;
 
 implementation
@@ -41,6 +62,12 @@ uses
 
 
 
+constructor TPB_RegisterParams.Create(const AFrom: TPB_RegisterParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_RegisterParams.Destroy;
 begin
   inherited;
@@ -49,22 +76,26 @@ end;
 procedure TPB_RegisterParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_EMAIL: begin
+      kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FEmail := AProtobufReader.readUtf8String;
+        set_has_Email;
       end;
-      FN_PASSWORD: begin
+      kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FPassword := AProtobufReader.readUtf8String;
+        set_has_Password;
       end;
-      FN_DISPLAYNAME: begin
+      kDisplayNameFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FDisplayName := AProtobufReader.readUtf8String;
+        set_has_DisplayName;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -72,22 +103,98 @@ begin
   end;
 end;
 
+procedure TPB_RegisterParams.MergeFrom(const from: TPB_RegisterParams);
+begin
+  if (from.has_Email) then
+    SetEmail(from.Email);
+  if (from.has_Password) then
+    SetPassword(from.Password);
+  if (from.has_DisplayName) then
+    SetDisplayName(from.DisplayName);
+end;
+
+procedure TPB_RegisterParams.clear_Email;
+begin
+  FEmail := '';
+  clear_has_Email;
+end;
+
+function TPB_RegisterParams.has_Email: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_RegisterParams.set_has_Email;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_RegisterParams.clear_has_Email;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_RegisterParams.SetEmail(const AValue: String);
 begin
   FEmail := AValue;
-  ProtobufOutput.writeString(FN_EMAIL, AValue);
+  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  set_has_Email;
+end;
+
+procedure TPB_RegisterParams.clear_Password;
+begin
+  FPassword := '';
+  clear_has_Password;
+end;
+
+function TPB_RegisterParams.has_Password: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_RegisterParams.set_has_Password;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_RegisterParams.clear_has_Password;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_RegisterParams.SetPassword(const AValue: String);
 begin
   FPassword := AValue;
-  ProtobufOutput.writeString(FN_PASSWORD, AValue);
+  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  set_has_Password;
+end;
+
+procedure TPB_RegisterParams.clear_DisplayName;
+begin
+  FDisplayName := '';
+  clear_has_DisplayName;
+end;
+
+function TPB_RegisterParams.has_DisplayName: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_RegisterParams.set_has_DisplayName;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_RegisterParams.clear_has_DisplayName;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_RegisterParams.SetDisplayName(const AValue: String);
 begin
   FDisplayName := AValue;
-  ProtobufOutput.writeString(FN_DISPLAYNAME, AValue);
+  ProtobufOutput.writeString(kDisplayNameFieldNumber, AValue);
+  set_has_DisplayName;
 end;
 
 end.

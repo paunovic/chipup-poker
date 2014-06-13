@@ -13,22 +13,37 @@ type
   TPB_WinnerData = class(TProtobufBaseObject)
   private
     const
-      FN_SEAT = 3;
-      FN_MSG = 4;
+      kSeatFieldNumber = 3;
+      kMsgFieldNumber = 4;
 
     var
       FSeat: Integer;
       FMsg: String;
+      _has_bits_: Integer;
 
+    procedure set_has_Seat;
+    procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
+    procedure set_has_Msg;
+    procedure clear_has_Msg;
     procedure SetMsg(const AValue: String);
 
   public
+    constructor Create(const AFrom: TPB_WinnerData); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_WinnerData);
 
+    // LABEL TYPE Seat = 3;
+    function has_Seat: Boolean;
+    procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
+
+    // LABEL TYPE Msg = 4;
+    function has_Msg: Boolean;
+    procedure clear_Msg;
     property Msg: String read FMsg write SetMsg;
+
   end;
 
 implementation
@@ -38,6 +53,12 @@ uses
 
 
 
+constructor TPB_WinnerData.Create(const AFrom: TPB_WinnerData);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_WinnerData.Destroy;
 begin
   inherited;
@@ -46,18 +67,21 @@ end;
 procedure TPB_WinnerData.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_SEAT: begin
+      kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
+        set_has_Seat;
       end;
-      FN_MSG: begin
+      kMsgFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FMsg := AProtobufReader.readUtf8String;
+        set_has_Msg;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -65,16 +89,68 @@ begin
   end;
 end;
 
+procedure TPB_WinnerData.MergeFrom(const from: TPB_WinnerData);
+begin
+  if (from.has_Seat) then
+    SetSeat(from.Seat);
+  if (from.has_Msg) then
+    SetMsg(from.Msg);
+end;
+
+procedure TPB_WinnerData.clear_Seat;
+begin
+  FSeat := 0;
+  clear_has_Seat;
+end;
+
+function TPB_WinnerData.has_Seat: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_WinnerData.set_has_Seat;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_WinnerData.clear_has_Seat;
+begin
+  _has_bits_ := _has_bits_ xor 4;
+end;
+
 procedure TPB_WinnerData.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
-  ProtobufOutput.writeInt32(FN_SEAT, AValue);
+  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  set_has_Seat;
+end;
+
+procedure TPB_WinnerData.clear_Msg;
+begin
+  FMsg := '';
+  clear_has_Msg;
+end;
+
+function TPB_WinnerData.has_Msg: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_WinnerData.set_has_Msg;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_WinnerData.clear_has_Msg;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_WinnerData.SetMsg(const AValue: String);
 begin
   FMsg := AValue;
-  ProtobufOutput.writeString(FN_MSG, AValue);
+  ProtobufOutput.writeString(kMsgFieldNumber, AValue);
+  set_has_Msg;
 end;
 
 end.

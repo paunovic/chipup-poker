@@ -12,22 +12,37 @@ type
   TPB_TableBoolFlag = class(TProtobufBaseObject)
   private
     const
-      FN_TABLE_MONGO_ID = 1;
-      FN_FLAG = 2;
+      kTableMongoIdFieldNumber = 1;
+      kFlagFieldNumber = 2;
 
     var
       FTableMongoId: TBytes;
       FFlag: Boolean;
+      _has_bits_: Integer;
 
+    procedure set_has_TableMongoId;
+    procedure clear_has_TableMongoId;
     procedure SetTableMongoId(const AValue: TBytes);
+    procedure set_has_Flag;
+    procedure clear_has_Flag;
     procedure SetFlag(const AValue: Boolean);
 
   public
+    constructor Create(const AFrom: TPB_TableBoolFlag); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_TableBoolFlag);
 
+    // LABEL TYPE TableMongoId = 1;
+    function has_TableMongoId: Boolean;
+    procedure clear_TableMongoId;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
+
+    // LABEL TYPE Flag = 2;
+    function has_Flag: Boolean;
+    procedure clear_Flag;
     property Flag: Boolean read FFlag write SetFlag;
+
   end;
 
 implementation
@@ -37,6 +52,12 @@ uses
 
 
 
+constructor TPB_TableBoolFlag.Create(const AFrom: TPB_TableBoolFlag);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_TableBoolFlag.Destroy;
 begin
   inherited;
@@ -45,23 +66,55 @@ end;
 procedure TPB_TableBoolFlag.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_TABLE_MONGO_ID: begin
+      kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableMongoId);
+        set_has_TableMongoId;
       end;
-      FN_FLAG: begin
+      kFlagFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FFlag := AProtobufReader.readBoolean;
+        set_has_Flag;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_TableBoolFlag.MergeFrom(const from: TPB_TableBoolFlag);
+begin
+  if (from.has_TableMongoId) then
+    SetTableMongoId(from.TableMongoId);
+  if (from.has_Flag) then
+    SetFlag(from.Flag);
+end;
+
+procedure TPB_TableBoolFlag.clear_TableMongoId;
+begin
+  SetLength(FTableMongoId,0);
+  clear_has_TableMongoId;
+end;
+
+function TPB_TableBoolFlag.has_TableMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_TableBoolFlag.set_has_TableMongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_TableBoolFlag.clear_has_TableMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
@@ -71,13 +124,35 @@ begin
   SetLength(FTableMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FTableMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_TableBoolFlag.clear_Flag;
+begin
+  FFlag := false;
+  clear_has_Flag;
+end;
+
+function TPB_TableBoolFlag.has_Flag: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_TableBoolFlag.set_has_Flag;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_TableBoolFlag.clear_has_Flag;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_TableBoolFlag.SetFlag(const AValue: Boolean);
 begin
   FFlag := AValue;
-  ProtobufOutput.writeBoolean(FN_FLAG, AValue);
+  ProtobufOutput.writeBoolean(kFlagFieldNumber, AValue);
+  set_has_Flag;
 end;
 
 end.

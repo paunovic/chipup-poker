@@ -8,7 +8,8 @@ uses
   cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo, Poker.Forms.Login, Poker.Objects.GameInfo, cxImage, Vcl.ActnMan,
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses,
+  cxNavigator;
 
 type
   TfrmChipUpMain = class(TForm)

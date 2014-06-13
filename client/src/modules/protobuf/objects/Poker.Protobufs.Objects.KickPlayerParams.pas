@@ -12,22 +12,37 @@ type
   TPB_KickPlayerParams = class(TProtobufBaseObject)
   private
     const
-      FN_CLUB_SEQ = 1;
-      FN_PLAYER_MONGO_ID = 2;
+      kClubSeqFieldNumber = 1;
+      kPlayerMongoIdFieldNumber = 2;
 
     var
       FClubSeq: Integer;
       FPlayerMongoId: TBytes;
+      _has_bits_: Integer;
 
+    procedure set_has_ClubSeq;
+    procedure clear_has_ClubSeq;
     procedure SetClubSeq(const AValue: Integer);
+    procedure set_has_PlayerMongoId;
+    procedure clear_has_PlayerMongoId;
     procedure SetPlayerMongoId(const AValue: TBytes);
 
   public
+    constructor Create(const AFrom: TPB_KickPlayerParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_KickPlayerParams);
 
+    // LABEL TYPE ClubSeq = 1;
+    function has_ClubSeq: Boolean;
+    procedure clear_ClubSeq;
     property ClubSeq: Integer read FClubSeq write SetClubSeq;
+
+    // LABEL TYPE PlayerMongoId = 2;
+    function has_PlayerMongoId: Boolean;
+    procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+
   end;
 
 implementation
@@ -37,6 +52,12 @@ uses
 
 
 
+constructor TPB_KickPlayerParams.Create(const AFrom: TPB_KickPlayerParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_KickPlayerParams.Destroy;
 begin
   inherited;
@@ -45,18 +66,21 @@ end;
 procedure TPB_KickPlayerParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUB_SEQ: begin
+      kClubSeqFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubSeq := AProtobufReader.readInt32;
+        set_has_ClubSeq;
       end;
-      FN_PLAYER_MONGO_ID: begin
+      kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FPlayerMongoId);
+        set_has_PlayerMongoId;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -64,10 +88,61 @@ begin
   end;
 end;
 
+procedure TPB_KickPlayerParams.MergeFrom(const from: TPB_KickPlayerParams);
+begin
+  if (from.has_ClubSeq) then
+    SetClubSeq(from.ClubSeq);
+  if (from.has_PlayerMongoId) then
+    SetPlayerMongoId(from.PlayerMongoId);
+end;
+
+procedure TPB_KickPlayerParams.clear_ClubSeq;
+begin
+  FClubSeq := 0;
+  clear_has_ClubSeq;
+end;
+
+function TPB_KickPlayerParams.has_ClubSeq: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_KickPlayerParams.set_has_ClubSeq;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_KickPlayerParams.clear_has_ClubSeq;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_KickPlayerParams.SetClubSeq(const AValue: Integer);
 begin
   FClubSeq := AValue;
-  ProtobufOutput.writeInt32(FN_CLUB_SEQ, AValue);
+  ProtobufOutput.writeInt32(kClubSeqFieldNumber, AValue);
+  set_has_ClubSeq;
+end;
+
+procedure TPB_KickPlayerParams.clear_PlayerMongoId;
+begin
+  SetLength(FPlayerMongoId,0);
+  clear_has_PlayerMongoId;
+end;
+
+function TPB_KickPlayerParams.has_PlayerMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_KickPlayerParams.set_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_KickPlayerParams.clear_has_PlayerMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: TBytes);
@@ -77,7 +152,7 @@ begin
   SetLength(FPlayerMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_PLAYER_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
 end;
 
 end.

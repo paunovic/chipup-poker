@@ -12,13 +12,13 @@ type
   TPB_PlayerHandHistory = class(TProtobufBaseObject)
   private
     const
-      FN__ID = 1;
-      FN_SEAT = 2;
-      FN_CARDS = 3;
-      FN_CHIPS = 4;
-      FN_NICK = 5;
-      FN_MUCK = 6;
-      FN_STATUS = 7;
+      kIdFieldNumber = 1;
+      kSeatFieldNumber = 2;
+      kCardsFieldNumber = 3;
+      kChipsFieldNumber = 4;
+      kNickFieldNumber = 5;
+      kMuckFieldNumber = 6;
+      kStatusFieldNumber = 7;
 
     var
       FId: TBytes;
@@ -28,26 +28,71 @@ type
       FNick: String;
       FMuck: Boolean;
       FStatus: TPlayerStatus;
+      _has_bits_: Integer;
 
+    procedure set_has_MongoId;
+    procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TBytes);
+    procedure set_has_Seat;
+    procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
+    procedure set_has_Cards;
+    procedure clear_has_Cards;
     procedure SetCards(const AValue: TBytes);
+    procedure set_has_Chips;
+    procedure clear_has_Chips;
     procedure SetChips(const AValue: UINT32);
+    procedure set_has_Nick;
+    procedure clear_has_Nick;
     procedure SetNick(const AValue: String);
+    procedure set_has_Muck;
+    procedure clear_has_Muck;
     procedure SetMuck(const AValue: Boolean);
+    procedure set_has_Status;
+    procedure clear_has_Status;
     procedure SetStatus(const AValue: TPlayerStatus);
 
   public
+    constructor Create(const AFrom: TPB_PlayerHandHistory); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_PlayerHandHistory);
 
+    // LABEL TYPE MongoId = 1;
+    function has_MongoId: Boolean;
+    procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
+
+    // LABEL TYPE Seat = 2;
+    function has_Seat: Boolean;
+    procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
+
+    // LABEL TYPE Cards = 3;
+    function has_Cards: Boolean;
+    procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
+
+    // LABEL TYPE Chips = 4;
+    function has_Chips: Boolean;
+    procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;
+
+    // LABEL TYPE Nick = 5;
+    function has_Nick: Boolean;
+    procedure clear_Nick;
     property Nick: String read FNick write SetNick;
+
+    // LABEL TYPE Muck = 6;
+    function has_Muck: Boolean;
+    procedure clear_Muck;
     property Muck: Boolean read FMuck write SetMuck;
+
+    // LABEL TYPE Status = 7;
+    function has_Status: Boolean;
+    procedure clear_Status;
     property Status: TPlayerStatus read FStatus write SetStatus;
+
   end;
 
 implementation
@@ -57,6 +102,12 @@ uses
 
 
 
+constructor TPB_PlayerHandHistory.Create(const AFrom: TPB_PlayerHandHistory);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PlayerHandHistory.Destroy;
 begin
   inherited;
@@ -65,43 +116,90 @@ end;
 procedure TPB_PlayerHandHistory.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN__ID: begin
+      kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FId);
+        set_has_MongoId;
       end;
-      FN_SEAT: begin
+      kSeatFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FSeat := AProtobufReader.readInt32;
+        set_has_Seat;
       end;
-      FN_CARDS: begin
+      kCardsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FCards);
+        set_has_Cards;
       end;
-      FN_CHIPS: begin
+      kChipsFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChips := AProtobufReader.readUInt32;
+        set_has_Chips;
       end;
-      FN_NICK: begin
+      kNickFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FNick := AProtobufReader.readUtf8String;
+        set_has_Nick;
       end;
-      FN_MUCK: begin
+      kMuckFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMuck := AProtobufReader.readBoolean;
+        set_has_Muck;
       end;
-      FN_STATUS: begin
+      kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TPlayerStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_PlayerHandHistory.MergeFrom(const from: TPB_PlayerHandHistory);
+begin
+  if (from.has_MongoId) then
+    SetMongoId(from.MongoId);
+  if (from.has_Seat) then
+    SetSeat(from.Seat);
+  if (from.has_Cards) then
+    SetCards(from.Cards);
+  if (from.has_Chips) then
+    SetChips(from.Chips);
+  if (from.has_Nick) then
+    SetNick(from.Nick);
+  if (from.has_Muck) then
+    SetMuck(from.Muck);
+  if (from.has_Status) then
+    SetStatus(from.Status);
+end;
+
+procedure TPB_PlayerHandHistory.clear_MongoId;
+begin
+  SetLength(FId,0);
+  clear_has_MongoId;
+end;
+
+function TPB_PlayerHandHistory.has_MongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_PlayerHandHistory.set_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_PlayerHandHistory.clear_has_MongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
@@ -111,13 +209,56 @@ begin
   SetLength(FId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN__ID, AValue);
+  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+end;
+
+procedure TPB_PlayerHandHistory.clear_Seat;
+begin
+  FSeat := 0;
+  clear_has_Seat;
+end;
+
+function TPB_PlayerHandHistory.has_Seat: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_PlayerHandHistory.set_has_Seat;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_PlayerHandHistory.clear_has_Seat;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_PlayerHandHistory.SetSeat(const AValue: Integer);
 begin
   FSeat := AValue;
-  ProtobufOutput.writeInt32(FN_SEAT, AValue);
+  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  set_has_Seat;
+end;
+
+procedure TPB_PlayerHandHistory.clear_Cards;
+begin
+  SetLength(FCards,0);
+  clear_has_Cards;
+end;
+
+function TPB_PlayerHandHistory.has_Cards: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_PlayerHandHistory.set_has_Cards;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_PlayerHandHistory.clear_has_Cards;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
@@ -127,31 +268,119 @@ begin
   SetLength(FCards,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FCards[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CARDS, AValue);
+  ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+end;
+
+procedure TPB_PlayerHandHistory.clear_Chips;
+begin
+  FChips := 0;
+  clear_has_Chips;
+end;
+
+function TPB_PlayerHandHistory.has_Chips: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_PlayerHandHistory.set_has_Chips;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_PlayerHandHistory.clear_has_Chips;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_PlayerHandHistory.SetChips(const AValue: UINT32);
 begin
   FChips := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIPS, AValue);
+  ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
+  set_has_Chips;
+end;
+
+procedure TPB_PlayerHandHistory.clear_Nick;
+begin
+  FNick := '';
+  clear_has_Nick;
+end;
+
+function TPB_PlayerHandHistory.has_Nick: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_PlayerHandHistory.set_has_Nick;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_PlayerHandHistory.clear_has_Nick;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_PlayerHandHistory.SetNick(const AValue: String);
 begin
   FNick := AValue;
-  ProtobufOutput.writeString(FN_NICK, AValue);
+  ProtobufOutput.writeString(kNickFieldNumber, AValue);
+  set_has_Nick;
+end;
+
+procedure TPB_PlayerHandHistory.clear_Muck;
+begin
+  FMuck := false;
+  clear_has_Muck;
+end;
+
+function TPB_PlayerHandHistory.has_Muck: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_PlayerHandHistory.set_has_Muck;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_PlayerHandHistory.clear_has_Muck;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_PlayerHandHistory.SetMuck(const AValue: Boolean);
 begin
   FMuck := AValue;
-  ProtobufOutput.writeBoolean(FN_MUCK, AValue);
+  ProtobufOutput.writeBoolean(kMuckFieldNumber, AValue);
+  set_has_Muck;
+end;
+
+procedure TPB_PlayerHandHistory.clear_Status;
+begin
+  FStatus := TPlayerStatus(0);
+  clear_has_Status;
+end;
+
+function TPB_PlayerHandHistory.has_Status: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_PlayerHandHistory.set_has_Status;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_PlayerHandHistory.clear_has_Status;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_PlayerHandHistory.SetStatus(const AValue: TPlayerStatus);
 begin
   FStatus := AValue;
-  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
+  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  set_has_Status;
 end;
 
 end.

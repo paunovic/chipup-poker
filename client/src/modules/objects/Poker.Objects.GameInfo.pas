@@ -58,7 +58,7 @@ type
 
   end;
 
-  TPB_Games = TObjectList<TPB_Game>;
+  TPB_Games = TList<TPB_Game>;
 
   TGamesInfo = class(TObjectList<TGameInfo>)
   public

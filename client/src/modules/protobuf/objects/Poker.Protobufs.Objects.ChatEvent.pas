@@ -13,26 +13,47 @@ type
   TPB_ChatEvent = class(TProtobufBaseObject)
   private
     const
-      FN_EVENT = 1;
-      FN_MSG = 2;
-      FN_TABLE_ID = 3;
+      kEventFieldNumber = 1;
+      kMsgFieldNumber = 2;
+      kTableIdFieldNumber = 3;
 
     var
       FEvent: TEventType;
       FMsg: TPB_ChatMessage;
       FTableId: TBytes;
+      _has_bits_: Integer;
 
+    procedure set_has_Event;
+    procedure clear_has_Event;
     procedure SetEvent(const AValue: TEventType);
+    procedure set_has_Msg;
+    procedure clear_has_Msg;
     procedure SetMsg(const AValue: TPB_ChatMessage);
+    procedure set_has_TableId;
+    procedure clear_has_TableId;
     procedure SetTableId(const AValue: TBytes);
 
   public
+    constructor Create(const AFrom: TPB_ChatEvent); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ChatEvent);
 
+    // LABEL TYPE Event = 1;
+    function has_Event: Boolean;
+    procedure clear_Event;
     property Event: TEventType read FEvent write SetEvent;
+
+    // LABEL TYPE Msg = 2;
+    function has_Msg: Boolean;
+    procedure clear_Msg;
     property Msg: TPB_ChatMessage read FMsg write SetMsg;
+
+    // LABEL TYPE TableId = 3;
+    function has_TableId: Boolean;
+    procedure clear_TableId;
     property TableId: TBytes read FTableId write SetTableId;
+
   end;
 
 implementation
@@ -41,6 +62,12 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+
+constructor TPB_ChatEvent.Create(const AFrom: TPB_ChatEvent);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
 
 destructor TPB_ChatEvent.Destroy;
 begin
@@ -52,24 +79,28 @@ end;
 procedure TPB_ChatEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_EVENT: begin
+      kEventFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEvent := TEventType(AProtobufReader.readEnum);
+        set_has_Event;
       end;
-      FN_MSG: begin
+      kMsgFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FMsg) then
           FMsg := TPB_ChatMessage.Create;
         FMsg.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Msg;
       end;
-      FN_TABLE_ID: begin
+      kTableIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableId);
+        set_has_TableId;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -77,16 +108,91 @@ begin
   end;
 end;
 
+procedure TPB_ChatEvent.MergeFrom(const from: TPB_ChatEvent);
+begin
+  if (from.has_Event) then
+    SetEvent(from.Event);
+  if (from.has_Msg) then
+    FMsg.MergeFrom(from.Msg);
+  if (from.has_TableId) then
+    SetTableId(from.TableId);
+end;
+
+procedure TPB_ChatEvent.clear_Event;
+begin
+  FEvent := TEventType(0);
+  clear_has_Event;
+end;
+
+function TPB_ChatEvent.has_Event: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ChatEvent.set_has_Event;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ChatEvent.clear_has_Event;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ChatEvent.SetEvent(const AValue: TEventType);
 begin
   FEvent := AValue;
-  ProtobufOutput.writeInt32(FN_EVENT, Integer(AValue));
+  ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
+  set_has_Event;
+end;
+
+procedure TPB_ChatEvent.clear_Msg;
+begin
+  FreeAndNil(FMsg);
+  clear_has_Msg;
+end;
+
+function TPB_ChatEvent.has_Msg: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ChatEvent.set_has_Msg;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ChatEvent.clear_has_Msg;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ChatEvent.SetMsg(const AValue: TPB_ChatMessage);
 begin
   FMsg := AValue;
-  ProtobufOutput.writeMessage(FN_MSG, AValue.ProtobufOutput);
+  ProtobufOutput.writeMessage(kMsgFieldNumber, AValue.ProtobufOutput);
+  set_has_Msg;
+end;
+
+procedure TPB_ChatEvent.clear_TableId;
+begin
+  SetLength(FTableId,0);
+  clear_has_TableId;
+end;
+
+function TPB_ChatEvent.has_TableId: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_ChatEvent.set_has_TableId;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_ChatEvent.clear_has_TableId;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);
@@ -96,7 +202,7 @@ begin
   SetLength(FTableId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FTableId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_TABLE_ID, AValue);
+  ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
 end;
 
 end.

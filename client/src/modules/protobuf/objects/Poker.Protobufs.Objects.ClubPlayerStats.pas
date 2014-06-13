@@ -12,22 +12,37 @@ type
   TPB_ClubPlayerStats = class(TProtobufBaseObject)
   private
     const
-      FN_USERID = 1;
-      FN_CLUB_BALANCE = 2;
+      kUseridFieldNumber = 1;
+      kClubBalanceFieldNumber = 2;
 
     var
       FUserid: TBytes;
       FClubBalance: Integer;
+      _has_bits_: Integer;
 
+    procedure set_has_Userid;
+    procedure clear_has_Userid;
     procedure SetUserid(const AValue: TBytes);
+    procedure set_has_ClubBalance;
+    procedure clear_has_ClubBalance;
     procedure SetClubBalance(const AValue: Integer);
 
   public
+    constructor Create(const AFrom: TPB_ClubPlayerStats); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ClubPlayerStats);
 
+    // LABEL TYPE Userid = 1;
+    function has_Userid: Boolean;
+    procedure clear_Userid;
     property Userid: TBytes read FUserid write SetUserid;
+
+    // LABEL TYPE ClubBalance = 2;
+    function has_ClubBalance: Boolean;
+    procedure clear_ClubBalance;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
+
   end;
 
 implementation
@@ -37,6 +52,12 @@ uses
 
 
 
+constructor TPB_ClubPlayerStats.Create(const AFrom: TPB_ClubPlayerStats);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ClubPlayerStats.Destroy;
 begin
   inherited;
@@ -45,23 +66,55 @@ end;
 procedure TPB_ClubPlayerStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_USERID: begin
+      kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FUserid);
+        set_has_Userid;
       end;
-      FN_CLUB_BALANCE: begin
+      kClubBalanceFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubBalance := AProtobufReader.readInt32;
+        set_has_ClubBalance;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_ClubPlayerStats.MergeFrom(const from: TPB_ClubPlayerStats);
+begin
+  if (from.has_Userid) then
+    SetUserid(from.Userid);
+  if (from.has_ClubBalance) then
+    SetClubBalance(from.ClubBalance);
+end;
+
+procedure TPB_ClubPlayerStats.clear_Userid;
+begin
+  SetLength(FUserid,0);
+  clear_has_Userid;
+end;
+
+function TPB_ClubPlayerStats.has_Userid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ClubPlayerStats.set_has_Userid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ClubPlayerStats.clear_has_Userid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TBytes);
@@ -71,13 +124,35 @@ begin
   SetLength(FUserid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FUserid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_USERID, AValue);
+  ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+end;
+
+procedure TPB_ClubPlayerStats.clear_ClubBalance;
+begin
+  FClubBalance := 0;
+  clear_has_ClubBalance;
+end;
+
+function TPB_ClubPlayerStats.has_ClubBalance: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ClubPlayerStats.set_has_ClubBalance;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ClubPlayerStats.clear_has_ClubBalance;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ClubPlayerStats.SetClubBalance(const AValue: Integer);
 begin
   FClubBalance := AValue;
-  ProtobufOutput.writeInt32(FN_CLUB_BALANCE, AValue);
+  ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
+  set_has_ClubBalance;
 end;
 
 end.

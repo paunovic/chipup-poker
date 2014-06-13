@@ -12,30 +12,57 @@ type
   TPB_PlayerLimitParams = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBID = 1;
-      FN_USERID = 2;
-      FN_LIMIT = 3;
-      FN_UNLIMITED = 4;
+      kClubidFieldNumber = 1;
+      kUseridFieldNumber = 2;
+      kLimitFieldNumber = 3;
+      kUnlimitedFieldNumber = 4;
 
     var
       FClubid: TBytes;
       FUserid: TBytes;
       FLimit: UINT32;
       FUnlimited: Boolean;
+      _has_bits_: Integer;
 
+    procedure set_has_Clubid;
+    procedure clear_has_Clubid;
     procedure SetClubid(const AValue: TBytes);
+    procedure set_has_Userid;
+    procedure clear_has_Userid;
     procedure SetUserid(const AValue: TBytes);
+    procedure set_has_Limit;
+    procedure clear_has_Limit;
     procedure SetLimit(const AValue: UINT32);
+    procedure set_has_Unlimited;
+    procedure clear_has_Unlimited;
     procedure SetUnlimited(const AValue: Boolean);
 
   public
+    constructor Create(const AFrom: TPB_PlayerLimitParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_PlayerLimitParams);
 
+    // LABEL TYPE Clubid = 1;
+    function has_Clubid: Boolean;
+    procedure clear_Clubid;
     property Clubid: TBytes read FClubid write SetClubid;
+
+    // LABEL TYPE Userid = 2;
+    function has_Userid: Boolean;
+    procedure clear_Userid;
     property Userid: TBytes read FUserid write SetUserid;
+
+    // LABEL TYPE Limit = 3;
+    function has_Limit: Boolean;
+    procedure clear_Limit;
     property Limit: UINT32 read FLimit write SetLimit;
+
+    // LABEL TYPE Unlimited = 4;
+    function has_Unlimited: Boolean;
+    procedure clear_Unlimited;
     property Unlimited: Boolean read FUnlimited write SetUnlimited;
+
   end;
 
 implementation
@@ -45,6 +72,12 @@ uses
 
 
 
+constructor TPB_PlayerLimitParams.Create(const AFrom: TPB_PlayerLimitParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PlayerLimitParams.Destroy;
 begin
   inherited;
@@ -53,31 +86,69 @@ end;
 procedure TPB_PlayerLimitParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUBID: begin
+      kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FClubid);
+        set_has_Clubid;
       end;
-      FN_USERID: begin
+      kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FUserid);
+        set_has_Userid;
       end;
-      FN_LIMIT: begin
+      kLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLimit := AProtobufReader.readUInt32;
+        set_has_Limit;
       end;
-      FN_UNLIMITED: begin
+      kUnlimitedFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUnlimited := AProtobufReader.readBoolean;
+        set_has_Unlimited;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_PlayerLimitParams.MergeFrom(const from: TPB_PlayerLimitParams);
+begin
+  if (from.has_Clubid) then
+    SetClubid(from.Clubid);
+  if (from.has_Userid) then
+    SetUserid(from.Userid);
+  if (from.has_Limit) then
+    SetLimit(from.Limit);
+  if (from.has_Unlimited) then
+    SetUnlimited(from.Unlimited);
+end;
+
+procedure TPB_PlayerLimitParams.clear_Clubid;
+begin
+  SetLength(FClubid,0);
+  clear_has_Clubid;
+end;
+
+function TPB_PlayerLimitParams.has_Clubid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_PlayerLimitParams.set_has_Clubid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_PlayerLimitParams.clear_has_Clubid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_PlayerLimitParams.SetClubid(const AValue: TBytes);
@@ -87,7 +158,28 @@ begin
   SetLength(FClubid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FClubid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_CLUBID, AValue);
+  ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+end;
+
+procedure TPB_PlayerLimitParams.clear_Userid;
+begin
+  SetLength(FUserid,0);
+  clear_has_Userid;
+end;
+
+function TPB_PlayerLimitParams.has_Userid: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_PlayerLimitParams.set_has_Userid;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_PlayerLimitParams.clear_has_Userid;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_PlayerLimitParams.SetUserid(const AValue: TBytes);
@@ -97,19 +189,63 @@ begin
   SetLength(FUserid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FUserid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_USERID, AValue);
+  ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+end;
+
+procedure TPB_PlayerLimitParams.clear_Limit;
+begin
+  FLimit := 0;
+  clear_has_Limit;
+end;
+
+function TPB_PlayerLimitParams.has_Limit: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_PlayerLimitParams.set_has_Limit;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_PlayerLimitParams.clear_has_Limit;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_PlayerLimitParams.SetLimit(const AValue: UINT32);
 begin
   FLimit := AValue;
-  ProtobufOutput.writeUInt32(FN_LIMIT, AValue);
+  ProtobufOutput.writeUInt32(kLimitFieldNumber, AValue);
+  set_has_Limit;
+end;
+
+procedure TPB_PlayerLimitParams.clear_Unlimited;
+begin
+  FUnlimited := false;
+  clear_has_Unlimited;
+end;
+
+function TPB_PlayerLimitParams.has_Unlimited: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_PlayerLimitParams.set_has_Unlimited;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_PlayerLimitParams.clear_has_Unlimited;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_PlayerLimitParams.SetUnlimited(const AValue: Boolean);
 begin
   FUnlimited := AValue;
-  ProtobufOutput.writeBoolean(FN_UNLIMITED, AValue);
+  ProtobufOutput.writeBoolean(kUnlimitedFieldNumber, AValue);
+  set_has_Unlimited;
 end;
 
 end.

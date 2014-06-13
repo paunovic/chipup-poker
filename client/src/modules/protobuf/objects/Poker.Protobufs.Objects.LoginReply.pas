@@ -13,17 +13,24 @@ type
   TPB_LoginReply = class(TProtobufBaseObject)
   private
     const
-      FN_LOGIN_STATUS = 1;
-      FN_STATUS = 2;
-      FN_RECONNECT_TABLES = 3;
+      kLoginStatusFieldNumber = 1;
+      kStatusFieldNumber = 2;
+      kReconnectTablesFieldNumber = 3;
 
     var
       FLoginStatus: TLoginStatus;
       FStatus: TPB_StatusReply;
-      FReconnectTables: TObjectList<TPB_TableStatus>;
+      FReconnectTables: TList<TPB_TableStatus>;
+      _has_bits_: Integer;
 
+    procedure set_has_LoginStatus;
+    procedure clear_has_LoginStatus;
     procedure SetLoginStatus(const AValue: TLoginStatus);
+    procedure set_has_Status;
+    procedure clear_has_Status;
     procedure SetStatus(const AValue: TPB_StatusReply);
+    procedure set_has_ReconnectTables;
+    procedure clear_has_ReconnectTables;
     procedure ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
 
   protected
@@ -31,12 +38,26 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_LoginReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_LoginReply);
 
+    // LABEL TYPE LoginStatus = 1;
+    function has_LoginStatus: Boolean;
+    procedure clear_LoginStatus;
     property LoginStatus: TLoginStatus read FLoginStatus write SetLoginStatus;
+
+    // LABEL TYPE Status = 2;
+    function has_Status: Boolean;
+    procedure clear_Status;
     property Status: TPB_StatusReply read FStatus write SetStatus;
-    property ReconnectTables: TObjectList<TPB_TableStatus> read FReconnectTables;
+
+    // LABEL TYPE ReconnectTables = 3;
+    function has_ReconnectTables: Boolean;
+    procedure clear_ReconnectTables;
+    property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
+
   end;
 
 implementation
@@ -56,6 +77,12 @@ begin
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
 end;
 
+constructor TPB_LoginReply.Create(const AFrom: TPB_LoginReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_LoginReply.Destroy;
 begin
   if Assigned(FStatus) then FreeAndNil(FStatus);
@@ -70,24 +97,28 @@ end;
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_LOGIN_STATUS: begin
+      kLoginStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLoginStatus := TLoginStatus(AProtobufReader.readEnum);
+        set_has_LoginStatus;
       end;
-      FN_STATUS: begin
+      kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FStatus) then
           FStatus := TPB_StatusReply.Create;
         FStatus.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Status;
       end;
-      FN_RECONNECT_TABLES: begin
+      kReconnectTablesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_ReconnectTables;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -95,22 +126,99 @@ begin
   end;
 end;
 
+procedure TPB_LoginReply.MergeFrom(const from: TPB_LoginReply);
+var
+  temp2: TPB_TableStatus;
+begin
+  if (from.has_LoginStatus) then
+    SetLoginStatus(from.LoginStatus);
+  if (from.has_Status) then
+    FStatus.MergeFrom(from.Status);
+  for temp2 in from.ReconnectTables do
+    FReconnectTables.Add(TPB_TableStatus.Create(temp2));
+end;
+
+procedure TPB_LoginReply.clear_LoginStatus;
+begin
+  FLoginStatus := TLoginStatus(0);
+  clear_has_LoginStatus;
+end;
+
+function TPB_LoginReply.has_LoginStatus: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_LoginStatus;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_LoginReply.clear_has_LoginStatus;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_LoginReply.SetLoginStatus(const AValue: TLoginStatus);
 begin
   FLoginStatus := AValue;
-  ProtobufOutput.writeInt32(FN_LOGIN_STATUS, Integer(AValue));
+  ProtobufOutput.writeInt32(kLoginStatusFieldNumber, Integer(AValue));
+  set_has_LoginStatus;
+end;
+
+procedure TPB_LoginReply.clear_Status;
+begin
+  FreeAndNil(FStatus);
+  clear_has_Status;
+end;
+
+function TPB_LoginReply.has_Status: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_Status;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_LoginReply.clear_has_Status;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_LoginReply.SetStatus(const AValue: TPB_StatusReply);
 begin
   FStatus := AValue;
-  ProtobufOutput.writeMessage(FN_STATUS, AValue.ProtobufOutput);
+  ProtobufOutput.writeMessage(kStatusFieldNumber, AValue.ProtobufOutput);
+  set_has_Status;
+end;
+
+procedure TPB_LoginReply.clear_ReconnectTables;
+begin
+  FReconnectTables.Clear;
+  clear_has_ReconnectTables;
+end;
+
+function TPB_LoginReply.has_ReconnectTables: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_ReconnectTables;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_LoginReply.clear_has_ReconnectTables;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_LoginReply.ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_RECONNECT_TABLES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kReconnectTablesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

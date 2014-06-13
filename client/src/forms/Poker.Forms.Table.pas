@@ -260,7 +260,7 @@ type
 
     function RoundToBB(const AValue: Single): UINT32;
 
-    function AnimateBets(const ABets: TArray<UINT32>): Boolean;
+    function AnimateBets(const ABets: TList<UINT32>): Boolean;
     procedure AnimateBlinds;
 
     procedure MakeTableCaption;
@@ -1889,7 +1889,8 @@ begin
     end;
 
     tePostRiver: begin
-      FTableStatus.PreviousBets := ATableEvent.Bets;
+      FTableStatus.PreviousBets.Clear;
+      FTableStatus.PreviousBets.AddRange(ATableEvent.Bets);
     end;
 
     teWinning: begin
@@ -2173,7 +2174,7 @@ begin
   raise_value := FTableStatus.MinimumBet - seat_bet;
   for C1 := 0 to FTableStatus.Pots.Count - 1 do
     Inc(raise_value, FTableStatus.Pots[C1].ValueWithoutRake);
-  for C1 := Low(FTableStatus.Bets) to High(FTableStatus.Bets) do
+  for C1 := 0 to FTableStatus.Bets.Count - 1 do
     Inc(raise_value, FTableStatus.Bets[C1]);
   raise_value := raise_value + FTableStatus.MinimumBet;
 
@@ -3002,7 +3003,7 @@ begin
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
       if FTableStatus.GetSeatInfo(FTableStatus.Seats[C1].SeatIndex, seat_info) then
       begin
-        if (Length(FTableStatus.Bets) > seat_info.SeatIndex) and
+        if (FTableStatus.Bets.Count > seat_info.SeatIndex) and
            (FTableStatus.Bets[seat_info.SeatIndex] > 0) then
         begin
           chips_point := GetBetPoint(seat_info.SeatIndex);
@@ -3295,7 +3296,7 @@ begin
 end;
 
 
-function TfrmTable.AnimateBets(const ABets: TArray<UINT32>): Boolean;
+function TfrmTable.AnimateBets(const ABets: TList<UINT32>): Boolean;
 var
   C1: UINT32;
   bet_point: TPoint2;
@@ -3303,10 +3304,10 @@ var
   animation: TDXAnimation;
 begin
   result := FALSE;
-  if Length(ABets) = 0 then
+  if ABets.Count = 0 then
     Exit;
 
-  for C1 := Low(ABets) to High(ABets) do
+  for C1 := 0 to ABets.Count - 1 do
     if ABets[C1] > 0 then
     begin
       bet_point := GetBetPoint(C1);
@@ -3325,8 +3326,8 @@ var
   bet_point: TPoint2;
   animation: TDXAnimation;
 begin
-  if (FTableStatus.SmallBlindSeat < 0) or (FTableStatus.SmallBlindSeat > Length(FTableStatus.Bets) - 1) or
-     (FTableStatus.BigBlindSeat < 0) or (FTableStatus.BigBlindSeat > Length(FTableStatus.Bets) - 1) then
+  if (FTableStatus.SmallBlindSeat < 0) or (FTableStatus.SmallBlindSeat > FTableStatus.Bets.Count - 1) or
+     (FTableStatus.BigBlindSeat < 0) or (FTableStatus.BigBlindSeat > FTableStatus.Bets.Count - 1) then
     Exit;
 
   bet_point := GetBetPoint(FTableStatus.SmallBlindSeat);

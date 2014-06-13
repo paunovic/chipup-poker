@@ -12,18 +12,31 @@ type
   TPB_QueryTableStats = class(TProtobufBaseObject)
   private
     const
-      FN_GAMEID = 1;
+      kGameidFieldNumber = 1;
 
     var
-      FGameid: TArray<TBytes>;
+      FGameid: TList<TBytes>;
+      _has_bits_: Integer;
 
-    procedure SetGameid(const AValue: TArray<TBytes>);
+    procedure set_has_Gameid;
+    procedure clear_has_Gameid;
+    procedure GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_QueryTableStats); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_QueryTableStats);
 
-    property Gameid: TArray<TBytes> read FGameid write SetGameid;
+    // LABEL TYPE Gameid = 1;
+    function has_Gameid: Boolean;
+    procedure clear_Gameid;
+    property Gameid: TList<TBytes> read FGameid;
+
   end;
 
 implementation
@@ -32,24 +45,46 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_QueryTableStats.InitObjects;
+begin
+  inherited;
+  FGameid := TList<TBytes>.Create;
+end;
+procedure TPB_QueryTableStats.HookNotifiers;
+begin
+  inherited;
+  FGameid.OnNotify := GameidNotifyEvent;
+end;
+
+constructor TPB_QueryTableStats.Create(const AFrom: TPB_QueryTableStats);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
 
 destructor TPB_QueryTableStats.Destroy;
 begin
+  if Assigned(FGameid) then
+  begin
+    FGameid.OnNotify := nil;
+    FreeAndNil(FGameid);
+  end;
   inherited;
 end;
 
 procedure TPB_QueryTableStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_GAMEID: begin
+      kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetLength(FGameid, Length(FGameid) + 1);
-        AProtobufReader.readBytes(FGameid[Length(FGameid)-1]);
+        AProtobufReader.readBytes(cheating);
+        FGameid.Add(cheating);
       end;
     else
       AProtobufReader.skipField(tag);
@@ -57,15 +92,38 @@ begin
   end;
 end;
 
-procedure TPB_QueryTableStats.SetGameid(const AValue: TArray<TBytes>);
+procedure TPB_QueryTableStats.MergeFrom(const from: TPB_QueryTableStats);
 var
-  C1: Integer;
+  temp0: TBytes;
 begin
-  SetLength(FGameid,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FGameid[C1] := AValue[C1];
-  for C1 := 0 to Length(FGameid) - 1 do
-    ProtobufOutput.writeBytes(FN_GAMEID, AValue[C1]);
+  for temp0 in from.Gameid do
+    FGameid.Add(temp0); // FIXME?
+end;
+
+procedure TPB_QueryTableStats.clear_Gameid;
+begin
+  FGameid.Clear;
+  clear_has_Gameid;
+end;
+
+function TPB_QueryTableStats.has_Gameid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_QueryTableStats.set_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_QueryTableStats.clear_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
+procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
 end;
 
 end.

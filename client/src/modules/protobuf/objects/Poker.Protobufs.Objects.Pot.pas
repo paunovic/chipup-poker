@@ -12,22 +12,41 @@ type
   TPB_Pot = class(TProtobufBaseObject)
   private
     const
-      FN_VALUE = 1;
-      FN_MEMBERS = 2;
+      kValueFieldNumber = 1;
+      kMembersFieldNumber = 2;
 
     var
       FValue: UINT32;
-      FMembers: TArray<Integer>;
+      FMembers: TList<Integer>;
+      _has_bits_: Integer;
 
+    procedure set_has_Value;
+    procedure clear_has_Value;
     procedure SetValue(const AValue: UINT32);
-    procedure SetMembers(const AValue: TArray<Integer>);
+    procedure set_has_Members;
+    procedure clear_has_Members;
+    procedure MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_Pot); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_Pot);
 
+    // LABEL TYPE Value = 1;
+    function has_Value: Boolean;
+    procedure clear_Value;
     property Value: UINT32 read FValue write SetValue;
-    property Members: TArray<Integer> read FMembers write SetMembers;
+
+    // LABEL TYPE Members = 2;
+    function has_Members: Boolean;
+    procedure clear_Members;
+    property Members: TList<Integer> read FMembers;
+
   end;
 
 implementation
@@ -36,28 +55,51 @@ uses
   pbPublic, Poker.Common.Misc;
 
 
+procedure TPB_Pot.InitObjects;
+begin
+  inherited;
+  FMembers := TList<Integer>.Create;
+end;
+procedure TPB_Pot.HookNotifiers;
+begin
+  inherited;
+  FMembers.OnNotify := MembersNotifyEvent;
+end;
+
+constructor TPB_Pot.Create(const AFrom: TPB_Pot);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
 
 destructor TPB_Pot.Destroy;
 begin
+  if Assigned(FMembers) then
+  begin
+    FMembers.OnNotify := nil;
+    FreeAndNil(FMembers);
+  end;
   inherited;
 end;
 
 procedure TPB_Pot.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_VALUE: begin
+      kValueFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FValue := AProtobufReader.readUInt32;
+        set_has_Value;
       end;
-      FN_MEMBERS: begin
+      kMembersFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        SetLength(FMembers, Length(FMembers) + 1);
-        FMembers[Length(FMembers)-1] := AProtobufReader.readInt32;
+        FMembers.Add(AProtobufReader.readInt32);
+        set_has_Members;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -65,21 +107,69 @@ begin
   end;
 end;
 
+procedure TPB_Pot.MergeFrom(const from: TPB_Pot);
+var
+  temp1: Integer;
+begin
+  if (from.has_Value) then
+    SetValue(from.Value);
+  for temp1 in from.Members do
+    FMembers.Add(temp1); // FIXME?
+end;
+
+procedure TPB_Pot.clear_Value;
+begin
+  FValue := 0;
+  clear_has_Value;
+end;
+
+function TPB_Pot.has_Value: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_Pot.set_has_Value;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_Pot.clear_has_Value;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_Pot.SetValue(const AValue: UINT32);
 begin
   FValue := AValue;
-  ProtobufOutput.writeUInt32(FN_VALUE, AValue);
+  ProtobufOutput.writeUInt32(kValueFieldNumber, AValue);
+  set_has_Value;
 end;
 
-procedure TPB_Pot.SetMembers(const AValue: TArray<Integer>);
-var
-  C1: Integer;
+procedure TPB_Pot.clear_Members;
 begin
-  SetLength(FMembers,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FMembers[C1] := AValue[C1];
-  for C1 := 0 to Length(FMembers) - 1 do
-    ProtobufOutput.writeInt32(FN_MEMBERS, AValue[C1]);
+  FMembers.Clear;
+  clear_has_Members;
+end;
+
+function TPB_Pot.has_Members: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_Pot.set_has_Members;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_Pot.clear_has_Members;
+begin
+  _has_bits_ := _has_bits_ xor 2;
+end;
+
+procedure TPB_Pot.MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
 end;
 
 end.

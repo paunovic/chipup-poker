@@ -12,22 +12,37 @@ type
   TPB_GameQuery = class(TProtobufBaseObject)
   private
     const
-      FN_GAMEID = 1;
-      FN_LASTHANDID = 2;
+      kGameidFieldNumber = 1;
+      kLasthandidFieldNumber = 2;
 
     var
       FGameid: TBytes;
       FLasthandid: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_Gameid;
+    procedure clear_has_Gameid;
     procedure SetGameid(const AValue: TBytes);
+    procedure set_has_Lasthandid;
+    procedure clear_has_Lasthandid;
     procedure SetLasthandid(const AValue: UINT32);
 
   public
+    constructor Create(const AFrom: TPB_GameQuery); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_GameQuery);
 
+    // LABEL TYPE Gameid = 1;
+    function has_Gameid: Boolean;
+    procedure clear_Gameid;
     property Gameid: TBytes read FGameid write SetGameid;
+
+    // LABEL TYPE Lasthandid = 2;
+    function has_Lasthandid: Boolean;
+    procedure clear_Lasthandid;
     property Lasthandid: UINT32 read FLasthandid write SetLasthandid;
+
   end;
 
 implementation
@@ -37,6 +52,12 @@ uses
 
 
 
+constructor TPB_GameQuery.Create(const AFrom: TPB_GameQuery);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_GameQuery.Destroy;
 begin
   inherited;
@@ -45,23 +66,55 @@ end;
 procedure TPB_GameQuery.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_GAMEID: begin
+      kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameid);
+        set_has_Gameid;
       end;
-      FN_LASTHANDID: begin
+      kLasthandidFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLasthandid := AProtobufReader.readUInt32;
+        set_has_Lasthandid;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_GameQuery.MergeFrom(const from: TPB_GameQuery);
+begin
+  if (from.has_Gameid) then
+    SetGameid(from.Gameid);
+  if (from.has_Lasthandid) then
+    SetLasthandid(from.Lasthandid);
+end;
+
+procedure TPB_GameQuery.clear_Gameid;
+begin
+  SetLength(FGameid,0);
+  clear_has_Gameid;
+end;
+
+function TPB_GameQuery.has_Gameid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_GameQuery.set_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_GameQuery.clear_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_GameQuery.SetGameid(const AValue: TBytes);
@@ -71,13 +124,35 @@ begin
   SetLength(FGameid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FGameid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_GAMEID, AValue);
+  ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+end;
+
+procedure TPB_GameQuery.clear_Lasthandid;
+begin
+  FLasthandid := 0;
+  clear_has_Lasthandid;
+end;
+
+function TPB_GameQuery.has_Lasthandid: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_GameQuery.set_has_Lasthandid;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_GameQuery.clear_has_Lasthandid;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_GameQuery.SetLasthandid(const AValue: UINT32);
 begin
   FLasthandid := AValue;
-  ProtobufOutput.writeUInt32(FN_LASTHANDID, AValue);
+  ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
+  set_has_Lasthandid;
 end;
 
 end.

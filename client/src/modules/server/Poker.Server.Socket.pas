@@ -91,7 +91,7 @@ type
     procedure TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
     procedure Ping;
     procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
-    procedure GetUserInfos(const AMongoIds: TArray<TBytes>);
+    procedure GetUserInfos(const AMongoIds: array of TBytes);
     procedure Fold(const AGameId: TBytes);
     procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
@@ -975,13 +975,15 @@ begin
   end;
 end;
 
-procedure TServerSocket.GetUserInfos(const AMongoIds: TArray<TBytes>);
+procedure TServerSocket.GetUserInfos(const AMongoIds: array of TBytes);
 var
   protobuf: TPB_GetUserParams;
+  C1: Integer;
 begin
   protobuf := TPB_GetUserParams.Create;
   try
-    protobuf.UserMongoIds := AMongoIds;
+    for C1 := Low(AMongoIds) to High(AMongoIds) do
+      protobuf.UserMongoIds.Add(AMongoIds[C1]);
     SendProtobuf(scGetPlayers, protobuf);
   finally
     protobuf.Free;
@@ -1074,15 +1076,12 @@ end;
 procedure TServerSocket.QueryTableStats(const ATables: array of TBytes);
 var
   protobuf: TPB_QueryTableStats;
-  gameids: TArray<TBytes>;
   C1: Integer;
 begin
   protobuf := TPB_QueryTableStats.Create;
   try
-    SetLength(gameids, Length(ATables));
     for C1 := Low(ATables) to High(ATables) do
-      gameids[C1] := ATables[C1];
-    protobuf.Gameid := gameids;
+      protobuf.Gameid.Add(ATables[C1]);
     SendProtobuf(scQueryTableStats, protobuf);
   finally
     protobuf.Free;

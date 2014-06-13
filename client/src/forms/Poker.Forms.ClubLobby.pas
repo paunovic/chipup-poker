@@ -459,7 +459,7 @@ var
   tablestats: TTableStats;
   player: TPlayerStats;
   playerid: TBytes;
-  arr: TArray<UINT32>;
+  list: TList<UINT32>;
 begin
   AHintText := '';
 
@@ -468,24 +468,26 @@ begin
 
   playerid := ARecord.Values[gridStatsTablePlayerId.Index];
 
+  list := nil;
   for player in tablestats.Players do
     if CompareBytes(player.UserId, playerid) then
     begin
       if ACellViewInfo.Item.Index = gridStatsTableBuyins.Index then
-        arr := player.Buyins
+        list := player.Buyins
       else
         if ACellViewInfo.Item.Index = gridStatsTableCashouts.Index then
-          arr := player.Cashouts
+          list := player.Cashouts
         else
           Break;
 
-      if Length(arr) <= 1 then
+      if (not Assigned(list)) or
+         (list.Count < 2) then
         Break;
 
-      for C1 := Low(arr) to High(arr) do
+      for C1 := 0 to list.Count - 1 do
       begin
-        AHintText := AHintText + FloatToStr(arr[C1] / 100);
-        if C1 < High(arr) then
+        AHintText := AHintText + FloatToStr(list[C1] / 100);
+        if C1 < list.Count - 1 then
           AHintText := AHintText + #10;
       end;
       AIsHintMultiLine := TRUE;

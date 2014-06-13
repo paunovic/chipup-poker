@@ -3,7 +3,7 @@ unit Poker.Table.Status;
 interface
 
 uses
-  Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Objects.PotInfo, Poker.Objects.SeatInfo;
+  System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Objects.PotInfo, Poker.Objects.SeatInfo;
 
 type
   TTableStatus = class
@@ -12,8 +12,8 @@ type
     FDealer: Integer;
     FCurrentSeat: Integer;
     FSeatInfos: TSeatInfos;
-    FBets: TArray<UINT32>;
-    FPreviousBets: TArray<UINT32>;
+    FBets: TList<UINT32>;
+    FPreviousBets: TList<UINT32>;
     FFlopCards: TCards;
     FTurnCard: TCard;
     FRiverCard: TCard;
@@ -46,8 +46,8 @@ type
     property Dealer: Integer read FDealer;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
-    property Bets: TArray<UINT32> read FBets write FBets;
-    property PreviousBets: TArray<UINT32> read FPreviousBets write FPreviousBets;
+    property Bets: TList<UINT32> read FBets write FBets;
+    property PreviousBets: TList<UINT32> read FPreviousBets;
     property MinimumBet: UINT32 read FMinimumBet;
     property FlopCards: TCards read FFlopCards;
     property TurnCard: TCard read FTurnCard;
@@ -57,7 +57,7 @@ type
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
     property Pots: TPotInfos read FPots write FPots;
-    property PreviousPots: TPotInfos read FPreviousPots write FPreviousPots;
+    property PreviousPots: TPotInfos read FPreviousPots;
     property MaximumRaise: UINT32 read FMaximumRaise;
     property Time: UINT64 read FTime;
     property RotationHand: UINT32 read FRotationHand;
@@ -79,6 +79,9 @@ begin
   FCurrentSeat := -1;
   FSeatInfos := TSeatInfos.Create;
 
+  FBets := TList<UINT32>.Create;
+  FPreviousBets := TList<UINT32>.Create;
+
   FPreviousPots := TPotInfos.Create;
   FPots := TPotInfos.Create;
   FFlopCards := TCards.Create;
@@ -89,6 +92,8 @@ end;
 
 destructor TTableStatus.Destroy;
 begin
+  FBets.Free;
+  FPreviousBets.Free;
 //  FEvents.Free;
   FFlopCards.Free;
   FTurnCard.Free;
@@ -102,8 +107,8 @@ end;
 
 function TTableStatus.GetBet(const ASeatIndex: Integer): UINT32;
 begin
-  if (ASeatIndex < Low(FBets)) or
-     (ASeatIndex > High(FBets)) then
+  if (ASeatIndex < 0) or
+     (ASeatIndex > FBets.Count - 1) then
     Exit(0)
   else
     Exit(FBets[ASeatIndex]);
@@ -150,8 +155,10 @@ begin
   FMinimumBet := ATableStatusProtobuf.MinimumBet;
   FHandId := ATableStatusProtobuf.Handid;
   FTime := ATableStatusProtobuf.Time;
-  FPreviousBets := FBets;
-  FBets := ATableStatusProtobuf.Bets;
+  FPreviousBets.Clear;
+  FPreviousBets.AddRange(FBets);
+  FBets.Clear;
+  FBets.AddRange(ATableStatusProtobuf.Bets);
   FLocked := ATableStatusProtobuf.Locked;
   FMaximumRaise := ATableStatusProtobuf.MaximumRaise;
   FRakePercent := ATableStatusProtobuf.RakePercent;

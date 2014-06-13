@@ -12,11 +12,14 @@ type
   TPB_ListClubsReply = class(TProtobufBaseObject)
   private
     const
-      FN_CLUBS = 1;
+      kClubsFieldNumber = 1;
 
     var
-      FClubs: TObjectList<TPB_Club>;
+      FClubs: TList<TPB_Club>;
+      _has_bits_: Integer;
 
+    procedure set_has_Clubs;
+    procedure clear_has_Clubs;
     procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 
   protected
@@ -24,10 +27,16 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_ListClubsReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ListClubsReply);
 
-    property Clubs: TObjectList<TPB_Club> read FClubs;
+    // LABEL TYPE Clubs = 1;
+    function has_Clubs: Boolean;
+    procedure clear_Clubs;
+    property Clubs: TList<TPB_Club> read FClubs;
+
   end;
 
 implementation
@@ -47,6 +56,12 @@ begin
   FClubs.OnNotify := ClubsNotifyEvent;
 end;
 
+constructor TPB_ListClubsReply.Create(const AFrom: TPB_ListClubsReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ListClubsReply.Destroy;
 begin
   if Assigned(FClubs) then
@@ -60,14 +75,16 @@ end;
 procedure TPB_ListClubsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_CLUBS: begin
+      kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Clubs;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -75,10 +92,39 @@ begin
   end;
 end;
 
+procedure TPB_ListClubsReply.MergeFrom(const from: TPB_ListClubsReply);
+var
+  temp0: TPB_Club;
+begin
+  for temp0 in from.Clubs do
+    FClubs.Add(TPB_Club.Create(temp0));
+end;
+
+procedure TPB_ListClubsReply.clear_Clubs;
+begin
+  FClubs.Clear;
+  clear_has_Clubs;
+end;
+
+function TPB_ListClubsReply.has_Clubs: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ListClubsReply.set_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ListClubsReply.clear_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ListClubsReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_CLUBS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

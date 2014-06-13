@@ -12,22 +12,37 @@ type
   TPB_PingReply = class(TProtobufBaseObject)
   private
     const
-      FN_UPTIME = 1;
-      FN_SERVERTIME = 2;
+      kUptimeFieldNumber = 1;
+      kServertimeFieldNumber = 2;
 
     var
       FUptime: UINT32;
       FServertime: UInt64;
+      _has_bits_: Integer;
 
+    procedure set_has_Uptime;
+    procedure clear_has_Uptime;
     procedure SetUptime(const AValue: UINT32);
+    procedure set_has_Servertime;
+    procedure clear_has_Servertime;
     procedure SetServertime(const AValue: UInt64);
 
   public
+    constructor Create(const AFrom: TPB_PingReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_PingReply);
 
+    // LABEL TYPE Uptime = 1;
+    function has_Uptime: Boolean;
+    procedure clear_Uptime;
     property Uptime: UINT32 read FUptime write SetUptime;
+
+    // LABEL TYPE Servertime = 2;
+    function has_Servertime: Boolean;
+    procedure clear_Servertime;
     property Servertime: UInt64 read FServertime write SetServertime;
+
   end;
 
 implementation
@@ -37,6 +52,12 @@ uses
 
 
 
+constructor TPB_PingReply.Create(const AFrom: TPB_PingReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PingReply.Destroy;
 begin
   inherited;
@@ -45,18 +66,21 @@ end;
 procedure TPB_PingReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_UPTIME: begin
+      kUptimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUptime := AProtobufReader.readUInt32;
+        set_has_Uptime;
       end;
-      FN_SERVERTIME: begin
+      kServertimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FServertime := AProtobufReader.readInt64;
+        set_has_Servertime;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -64,16 +88,68 @@ begin
   end;
 end;
 
+procedure TPB_PingReply.MergeFrom(const from: TPB_PingReply);
+begin
+  if (from.has_Uptime) then
+    SetUptime(from.Uptime);
+  if (from.has_Servertime) then
+    SetServertime(from.Servertime);
+end;
+
+procedure TPB_PingReply.clear_Uptime;
+begin
+  FUptime := 0;
+  clear_has_Uptime;
+end;
+
+function TPB_PingReply.has_Uptime: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_PingReply.set_has_Uptime;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_PingReply.clear_has_Uptime;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_PingReply.SetUptime(const AValue: UINT32);
 begin
   FUptime := AValue;
-  ProtobufOutput.writeUInt32(FN_UPTIME, AValue);
+  ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
+  set_has_Uptime;
+end;
+
+procedure TPB_PingReply.clear_Servertime;
+begin
+  FServertime := 0;
+  clear_has_Servertime;
+end;
+
+function TPB_PingReply.has_Servertime: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_PingReply.set_has_Servertime;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_PingReply.clear_has_Servertime;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_PingReply.SetServertime(const AValue: UInt64);
 begin
   FServertime := AValue;
-  ProtobufOutput.WriteInt64(FN_SERVERTIME, AValue);
+  ProtobufOutput.WriteInt64(kServertimeFieldNumber, AValue);
+  set_has_Servertime;
 end;
 
 end.

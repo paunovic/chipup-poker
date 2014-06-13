@@ -12,18 +12,27 @@ type
   TPB_PingParams = class(TProtobufBaseObject)
   private
     const
-      FN_UPTIME = 1;
+      kUptimeFieldNumber = 1;
 
     var
       FUptime: UINT32;
+      _has_bits_: Integer;
 
+    procedure set_has_Uptime;
+    procedure clear_has_Uptime;
     procedure SetUptime(const AValue: UINT32);
 
   public
+    constructor Create(const AFrom: TPB_PingParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_PingParams);
 
+    // LABEL TYPE Uptime = 1;
+    function has_Uptime: Boolean;
+    procedure clear_Uptime;
     property Uptime: UINT32 read FUptime write SetUptime;
+
   end;
 
 implementation
@@ -33,6 +42,12 @@ uses
 
 
 
+constructor TPB_PingParams.Create(const AFrom: TPB_PingParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PingParams.Destroy;
 begin
   inherited;
@@ -41,14 +56,16 @@ end;
 procedure TPB_PingParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_UPTIME: begin
+      kUptimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUptime := AProtobufReader.readUInt32;
+        set_has_Uptime;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -56,10 +73,38 @@ begin
   end;
 end;
 
+procedure TPB_PingParams.MergeFrom(const from: TPB_PingParams);
+begin
+  if (from.has_Uptime) then
+    SetUptime(from.Uptime);
+end;
+
+procedure TPB_PingParams.clear_Uptime;
+begin
+  FUptime := 0;
+  clear_has_Uptime;
+end;
+
+function TPB_PingParams.has_Uptime: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_PingParams.set_has_Uptime;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_PingParams.clear_has_Uptime;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_PingParams.SetUptime(const AValue: UINT32);
 begin
   FUptime := AValue;
-  ProtobufOutput.writeUInt32(FN_UPTIME, AValue);
+  ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
+  set_has_Uptime;
 end;
 
 end.

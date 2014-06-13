@@ -12,13 +12,13 @@ type
   TPB_StringSizes = class(TProtobufBaseObject)
   private
     const
-      FN_EMAIL = 1;
-      FN_PASSWORD = 2;
-      FN_CLUBNAME = 3;
-      FN_INVCODE = 4;
-      FN_USERNAME = 5;
-      FN_GAMENAME = 6;
-      FN_CONTACTMESSAGE = 7;
+      kEmailFieldNumber = 1;
+      kPasswordFieldNumber = 2;
+      kClubnameFieldNumber = 3;
+      kInvcodeFieldNumber = 4;
+      kUsernameFieldNumber = 5;
+      kGamenameFieldNumber = 6;
+      kContactMessageFieldNumber = 7;
 
     var
       FEmail: Integer;
@@ -28,26 +28,71 @@ type
       FUsername: Integer;
       FGamename: Integer;
       FContactMessage: Integer;
+      _has_bits_: Integer;
 
+    procedure set_has_Email;
+    procedure clear_has_Email;
     procedure SetEmail(const AValue: Integer);
+    procedure set_has_Password;
+    procedure clear_has_Password;
     procedure SetPassword(const AValue: Integer);
+    procedure set_has_Clubname;
+    procedure clear_has_Clubname;
     procedure SetClubname(const AValue: Integer);
+    procedure set_has_Invcode;
+    procedure clear_has_Invcode;
     procedure SetInvcode(const AValue: Integer);
+    procedure set_has_Username;
+    procedure clear_has_Username;
     procedure SetUsername(const AValue: Integer);
+    procedure set_has_Gamename;
+    procedure clear_has_Gamename;
     procedure SetGamename(const AValue: Integer);
+    procedure set_has_ContactMessage;
+    procedure clear_has_ContactMessage;
     procedure SetContactMessage(const AValue: Integer);
 
   public
+    constructor Create(const AFrom: TPB_StringSizes); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_StringSizes);
 
+    // LABEL TYPE Email = 1;
+    function has_Email: Boolean;
+    procedure clear_Email;
     property Email: Integer read FEmail write SetEmail;
+
+    // LABEL TYPE Password = 2;
+    function has_Password: Boolean;
+    procedure clear_Password;
     property Password: Integer read FPassword write SetPassword;
+
+    // LABEL TYPE Clubname = 3;
+    function has_Clubname: Boolean;
+    procedure clear_Clubname;
     property Clubname: Integer read FClubname write SetClubname;
+
+    // LABEL TYPE Invcode = 4;
+    function has_Invcode: Boolean;
+    procedure clear_Invcode;
     property Invcode: Integer read FInvcode write SetInvcode;
+
+    // LABEL TYPE Username = 5;
+    function has_Username: Boolean;
+    procedure clear_Username;
     property Username: Integer read FUsername write SetUsername;
+
+    // LABEL TYPE Gamename = 6;
+    function has_Gamename: Boolean;
+    procedure clear_Gamename;
     property Gamename: Integer read FGamename write SetGamename;
+
+    // LABEL TYPE ContactMessage = 7;
+    function has_ContactMessage: Boolean;
+    procedure clear_ContactMessage;
     property ContactMessage: Integer read FContactMessage write SetContactMessage;
+
   end;
 
 implementation
@@ -57,6 +102,12 @@ uses
 
 
 
+constructor TPB_StringSizes.Create(const AFrom: TPB_StringSizes);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_StringSizes.Destroy;
 begin
   inherited;
@@ -65,38 +116,46 @@ end;
 procedure TPB_StringSizes.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_EMAIL: begin
+      kEmailFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FEmail := AProtobufReader.readInt32;
+        set_has_Email;
       end;
-      FN_PASSWORD: begin
+      kPasswordFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FPassword := AProtobufReader.readInt32;
+        set_has_Password;
       end;
-      FN_CLUBNAME: begin
+      kClubnameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FClubname := AProtobufReader.readInt32;
+        set_has_Clubname;
       end;
-      FN_INVCODE: begin
+      kInvcodeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FInvcode := AProtobufReader.readInt32;
+        set_has_Invcode;
       end;
-      FN_USERNAME: begin
+      kUsernameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FUsername := AProtobufReader.readInt32;
+        set_has_Username;
       end;
-      FN_GAMENAME: begin
+      kGamenameFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGamename := AProtobufReader.readInt32;
+        set_has_Gamename;
       end;
-      FN_CONTACTMESSAGE: begin
+      kContactMessageFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FContactMessage := AProtobufReader.readInt32;
+        set_has_ContactMessage;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -104,46 +163,218 @@ begin
   end;
 end;
 
+procedure TPB_StringSizes.MergeFrom(const from: TPB_StringSizes);
+begin
+  if (from.has_Email) then
+    SetEmail(from.Email);
+  if (from.has_Password) then
+    SetPassword(from.Password);
+  if (from.has_Clubname) then
+    SetClubname(from.Clubname);
+  if (from.has_Invcode) then
+    SetInvcode(from.Invcode);
+  if (from.has_Username) then
+    SetUsername(from.Username);
+  if (from.has_Gamename) then
+    SetGamename(from.Gamename);
+  if (from.has_ContactMessage) then
+    SetContactMessage(from.ContactMessage);
+end;
+
+procedure TPB_StringSizes.clear_Email;
+begin
+  FEmail := 0;
+  clear_has_Email;
+end;
+
+function TPB_StringSizes.has_Email: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_StringSizes.set_has_Email;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_StringSizes.clear_has_Email;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_StringSizes.SetEmail(const AValue: Integer);
 begin
   FEmail := AValue;
-  ProtobufOutput.writeInt32(FN_EMAIL, AValue);
+  ProtobufOutput.writeInt32(kEmailFieldNumber, AValue);
+  set_has_Email;
+end;
+
+procedure TPB_StringSizes.clear_Password;
+begin
+  FPassword := 0;
+  clear_has_Password;
+end;
+
+function TPB_StringSizes.has_Password: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_StringSizes.set_has_Password;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_StringSizes.clear_has_Password;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_StringSizes.SetPassword(const AValue: Integer);
 begin
   FPassword := AValue;
-  ProtobufOutput.writeInt32(FN_PASSWORD, AValue);
+  ProtobufOutput.writeInt32(kPasswordFieldNumber, AValue);
+  set_has_Password;
+end;
+
+procedure TPB_StringSizes.clear_Clubname;
+begin
+  FClubname := 0;
+  clear_has_Clubname;
+end;
+
+function TPB_StringSizes.has_Clubname: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_StringSizes.set_has_Clubname;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_StringSizes.clear_has_Clubname;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_StringSizes.SetClubname(const AValue: Integer);
 begin
   FClubname := AValue;
-  ProtobufOutput.writeInt32(FN_CLUBNAME, AValue);
+  ProtobufOutput.writeInt32(kClubnameFieldNumber, AValue);
+  set_has_Clubname;
+end;
+
+procedure TPB_StringSizes.clear_Invcode;
+begin
+  FInvcode := 0;
+  clear_has_Invcode;
+end;
+
+function TPB_StringSizes.has_Invcode: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_StringSizes.set_has_Invcode;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_StringSizes.clear_has_Invcode;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
 begin
   FInvcode := AValue;
-  ProtobufOutput.writeInt32(FN_INVCODE, AValue);
+  ProtobufOutput.writeInt32(kInvcodeFieldNumber, AValue);
+  set_has_Invcode;
+end;
+
+procedure TPB_StringSizes.clear_Username;
+begin
+  FUsername := 0;
+  clear_has_Username;
+end;
+
+function TPB_StringSizes.has_Username: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_StringSizes.set_has_Username;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_StringSizes.clear_has_Username;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_StringSizes.SetUsername(const AValue: Integer);
 begin
   FUsername := AValue;
-  ProtobufOutput.writeInt32(FN_USERNAME, AValue);
+  ProtobufOutput.writeInt32(kUsernameFieldNumber, AValue);
+  set_has_Username;
+end;
+
+procedure TPB_StringSizes.clear_Gamename;
+begin
+  FGamename := 0;
+  clear_has_Gamename;
+end;
+
+function TPB_StringSizes.has_Gamename: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_StringSizes.set_has_Gamename;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_StringSizes.clear_has_Gamename;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_StringSizes.SetGamename(const AValue: Integer);
 begin
   FGamename := AValue;
-  ProtobufOutput.writeInt32(FN_GAMENAME, AValue);
+  ProtobufOutput.writeInt32(kGamenameFieldNumber, AValue);
+  set_has_Gamename;
+end;
+
+procedure TPB_StringSizes.clear_ContactMessage;
+begin
+  FContactMessage := 0;
+  clear_has_ContactMessage;
+end;
+
+function TPB_StringSizes.has_ContactMessage: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_StringSizes.set_has_ContactMessage;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_StringSizes.clear_has_ContactMessage;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_StringSizes.SetContactMessage(const AValue: Integer);
 begin
   FContactMessage := AValue;
-  ProtobufOutput.writeInt32(FN_CONTACTMESSAGE, AValue);
+  ProtobufOutput.writeInt32(kContactMessageFieldNumber, AValue);
+  set_has_ContactMessage;
 end;
 
 end.

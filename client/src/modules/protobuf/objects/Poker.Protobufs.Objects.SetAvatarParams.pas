@@ -12,18 +12,27 @@ type
   TPB_SetAvatarParams = class(TProtobufBaseObject)
   private
     const
-      FN_AVATAR_ID = 1;
+      kAvatarIdFieldNumber = 1;
 
     var
       FAvatarId: TBytes;
+      _has_bits_: Integer;
 
+    procedure set_has_AvatarId;
+    procedure clear_has_AvatarId;
     procedure SetAvatarId(const AValue: TBytes);
 
   public
+    constructor Create(const AFrom: TPB_SetAvatarParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_SetAvatarParams);
 
+    // LABEL TYPE AvatarId = 1;
+    function has_AvatarId: Boolean;
+    procedure clear_AvatarId;
     property AvatarId: TBytes read FAvatarId write SetAvatarId;
+
   end;
 
 implementation
@@ -33,6 +42,12 @@ uses
 
 
 
+constructor TPB_SetAvatarParams.Create(const AFrom: TPB_SetAvatarParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_SetAvatarParams.Destroy;
 begin
   inherited;
@@ -41,19 +56,48 @@ end;
 procedure TPB_SetAvatarParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_AVATAR_ID: begin
+      kAvatarIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FAvatarId);
+        set_has_AvatarId;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_SetAvatarParams.MergeFrom(const from: TPB_SetAvatarParams);
+begin
+  if (from.has_AvatarId) then
+    SetAvatarId(from.AvatarId);
+end;
+
+procedure TPB_SetAvatarParams.clear_AvatarId;
+begin
+  SetLength(FAvatarId,0);
+  clear_has_AvatarId;
+end;
+
+function TPB_SetAvatarParams.has_AvatarId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_SetAvatarParams.set_has_AvatarId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_SetAvatarParams.clear_has_AvatarId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_SetAvatarParams.SetAvatarId(const AValue: TBytes);
@@ -63,7 +107,7 @@ begin
   SetLength(FAvatarId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FAvatarId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_AVATAR_ID, AValue);
+  ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);
 end;
 
 end.

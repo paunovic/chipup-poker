@@ -13,22 +13,37 @@ type
   TPB_CloseGameData = class(TProtobufBaseObject)
   private
     const
-      FN_GAMEID = 1;
-      FN_TIMESTAMP = 2;
+      kGameidFieldNumber = 1;
+      kTimestampFieldNumber = 2;
 
     var
       FGameid: TBytes;
       FTimestamp: TCloseGameTime;
+      _has_bits_: Integer;
 
+    procedure set_has_Gameid;
+    procedure clear_has_Gameid;
     procedure SetGameid(const AValue: TBytes);
+    procedure set_has_Timestamp;
+    procedure clear_has_Timestamp;
     procedure SetTimestamp(const AValue: TCloseGameTime);
 
   public
+    constructor Create(const AFrom: TPB_CloseGameData); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_CloseGameData);
 
+    // LABEL TYPE Gameid = 1;
+    function has_Gameid: Boolean;
+    procedure clear_Gameid;
     property Gameid: TBytes read FGameid write SetGameid;
+
+    // LABEL TYPE Timestamp = 2;
+    function has_Timestamp: Boolean;
+    procedure clear_Timestamp;
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
+
   end;
 
 implementation
@@ -38,6 +53,12 @@ uses
 
 
 
+constructor TPB_CloseGameData.Create(const AFrom: TPB_CloseGameData);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_CloseGameData.Destroy;
 begin
   inherited;
@@ -46,23 +67,55 @@ end;
 procedure TPB_CloseGameData.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_GAMEID: begin
+      kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FGameid);
+        set_has_Gameid;
       end;
-      FN_TIMESTAMP: begin
+      kTimestampFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FTimestamp := TCloseGameTime(AProtobufReader.readEnum);
+        set_has_Timestamp;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_CloseGameData.MergeFrom(const from: TPB_CloseGameData);
+begin
+  if (from.has_Gameid) then
+    SetGameid(from.Gameid);
+  if (from.has_Timestamp) then
+    SetTimestamp(from.Timestamp);
+end;
+
+procedure TPB_CloseGameData.clear_Gameid;
+begin
+  SetLength(FGameid,0);
+  clear_has_Gameid;
+end;
+
+function TPB_CloseGameData.has_Gameid: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_CloseGameData.set_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_CloseGameData.clear_has_Gameid;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_CloseGameData.SetGameid(const AValue: TBytes);
@@ -72,13 +125,35 @@ begin
   SetLength(FGameid,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FGameid[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_GAMEID, AValue);
+  ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+end;
+
+procedure TPB_CloseGameData.clear_Timestamp;
+begin
+  FTimestamp := TCloseGameTime(0);
+  clear_has_Timestamp;
+end;
+
+function TPB_CloseGameData.has_Timestamp: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_CloseGameData.set_has_Timestamp;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_CloseGameData.clear_has_Timestamp;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_CloseGameData.SetTimestamp(const AValue: TCloseGameTime);
 begin
   FTimestamp := AValue;
-  ProtobufOutput.writeInt32(FN_TIMESTAMP, Integer(AValue));
+  ProtobufOutput.writeInt32(kTimestampFieldNumber, Integer(AValue));
+  set_has_Timestamp;
 end;
 
 end.

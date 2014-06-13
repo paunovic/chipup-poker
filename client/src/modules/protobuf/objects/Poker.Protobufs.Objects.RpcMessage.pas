@@ -12,26 +12,47 @@ type
   TPB_RpcMessage = class(TProtobufBaseObject)
   private
     const
-      FN_METHODID = 1;
-      FN_DATASIZE = 2;
-      FN_TOKEN = 3;
+      kMethodIdFieldNumber = 1;
+      kDataSizeFieldNumber = 2;
+      kTokenFieldNumber = 3;
 
     var
       FMethodId: Integer;
       FDataSize: Integer;
       FToken: Integer;
+      _has_bits_: Integer;
 
+    procedure set_has_MethodId;
+    procedure clear_has_MethodId;
     procedure SetMethodId(const AValue: Integer);
+    procedure set_has_DataSize;
+    procedure clear_has_DataSize;
     procedure SetDataSize(const AValue: Integer);
+    procedure set_has_Token;
+    procedure clear_has_Token;
     procedure SetToken(const AValue: Integer);
 
   public
+    constructor Create(const AFrom: TPB_RpcMessage); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_RpcMessage);
 
+    // LABEL TYPE MethodId = 1;
+    function has_MethodId: Boolean;
+    procedure clear_MethodId;
     property MethodId: Integer read FMethodId write SetMethodId;
+
+    // LABEL TYPE DataSize = 2;
+    function has_DataSize: Boolean;
+    procedure clear_DataSize;
     property DataSize: Integer read FDataSize write SetDataSize;
+
+    // LABEL TYPE Token = 3;
+    function has_Token: Boolean;
+    procedure clear_Token;
     property Token: Integer read FToken write SetToken;
+
   end;
 
 implementation
@@ -41,6 +62,12 @@ uses
 
 
 
+constructor TPB_RpcMessage.Create(const AFrom: TPB_RpcMessage);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_RpcMessage.Destroy;
 begin
   inherited;
@@ -49,22 +76,26 @@ end;
 procedure TPB_RpcMessage.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_METHODID: begin
+      kMethodIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMethodId := AProtobufReader.readInt32;
+        set_has_MethodId;
       end;
-      FN_DATASIZE: begin
+      kDataSizeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FDataSize := AProtobufReader.readInt32;
+        set_has_DataSize;
       end;
-      FN_TOKEN: begin
+      kTokenFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FToken := AProtobufReader.readInt32;
+        set_has_Token;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -72,22 +103,98 @@ begin
   end;
 end;
 
+procedure TPB_RpcMessage.MergeFrom(const from: TPB_RpcMessage);
+begin
+  if (from.has_MethodId) then
+    SetMethodId(from.MethodId);
+  if (from.has_DataSize) then
+    SetDataSize(from.DataSize);
+  if (from.has_Token) then
+    SetToken(from.Token);
+end;
+
+procedure TPB_RpcMessage.clear_MethodId;
+begin
+  FMethodId := 0;
+  clear_has_MethodId;
+end;
+
+function TPB_RpcMessage.has_MethodId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_RpcMessage.set_has_MethodId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_RpcMessage.clear_has_MethodId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_RpcMessage.SetMethodId(const AValue: Integer);
 begin
   FMethodId := AValue;
-  ProtobufOutput.writeInt32(FN_METHODID, AValue);
+  ProtobufOutput.writeInt32(kMethodIdFieldNumber, AValue);
+  set_has_MethodId;
+end;
+
+procedure TPB_RpcMessage.clear_DataSize;
+begin
+  FDataSize := 0;
+  clear_has_DataSize;
+end;
+
+function TPB_RpcMessage.has_DataSize: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_RpcMessage.set_has_DataSize;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_RpcMessage.clear_has_DataSize;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_RpcMessage.SetDataSize(const AValue: Integer);
 begin
   FDataSize := AValue;
-  ProtobufOutput.writeInt32(FN_DATASIZE, AValue);
+  ProtobufOutput.writeInt32(kDataSizeFieldNumber, AValue);
+  set_has_DataSize;
+end;
+
+procedure TPB_RpcMessage.clear_Token;
+begin
+  FToken := 0;
+  clear_has_Token;
+end;
+
+function TPB_RpcMessage.has_Token: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_RpcMessage.set_has_Token;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_RpcMessage.clear_has_Token;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_RpcMessage.SetToken(const AValue: Integer);
 begin
   FToken := AValue;
-  ProtobufOutput.writeInt32(FN_TOKEN, AValue);
+  ProtobufOutput.writeInt32(kTokenFieldNumber, AValue);
+  set_has_Token;
 end;
 
 end.

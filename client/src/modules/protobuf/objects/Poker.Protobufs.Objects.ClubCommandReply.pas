@@ -13,17 +13,24 @@ type
   TPB_ClubCommandReply = class(TProtobufBaseObject)
   private
     const
-      FN_STATUS = 1;
-      FN_CLUB = 2;
-      FN_GAMES = 3;
+      kStatusFieldNumber = 1;
+      kClubFieldNumber = 2;
+      kGamesFieldNumber = 3;
 
     var
       FStatus: TClubStatus;
       FClub: TPB_Club;
-      FGames: TObjectList<TPB_Game>;
+      FGames: TList<TPB_Game>;
+      _has_bits_: Integer;
 
+    procedure set_has_Status;
+    procedure clear_has_Status;
     procedure SetStatus(const AValue: TClubStatus);
+    procedure set_has_Club;
+    procedure clear_has_Club;
     procedure SetClub(const AValue: TPB_Club);
+    procedure set_has_Games;
+    procedure clear_has_Games;
     procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
 
   protected
@@ -31,12 +38,26 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_ClubCommandReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_ClubCommandReply);
 
+    // LABEL TYPE Status = 1;
+    function has_Status: Boolean;
+    procedure clear_Status;
     property Status: TClubStatus read FStatus write SetStatus;
+
+    // LABEL TYPE Club = 2;
+    function has_Club: Boolean;
+    procedure clear_Club;
     property Club: TPB_Club read FClub write SetClub;
-    property Games: TObjectList<TPB_Game> read FGames;
+
+    // LABEL TYPE Games = 3;
+    function has_Games: Boolean;
+    procedure clear_Games;
+    property Games: TList<TPB_Game> read FGames;
+
   end;
 
 implementation
@@ -56,6 +77,12 @@ begin
   FGames.OnNotify := GamesNotifyEvent;
 end;
 
+constructor TPB_ClubCommandReply.Create(const AFrom: TPB_ClubCommandReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_ClubCommandReply.Destroy;
 begin
   if Assigned(FClub) then FreeAndNil(FClub);
@@ -70,24 +97,28 @@ end;
 procedure TPB_ClubCommandReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_STATUS: begin
+      kStatusFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FStatus := TClubStatus(AProtobufReader.readEnum);
+        set_has_Status;
       end;
-      FN_CLUB: begin
+      kClubFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FClub) then
           FClub := TPB_Club.Create;
         FClub.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_Club;
       end;
-      FN_GAMES: begin
+      kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Games;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -95,22 +126,99 @@ begin
   end;
 end;
 
+procedure TPB_ClubCommandReply.MergeFrom(const from: TPB_ClubCommandReply);
+var
+  temp2: TPB_Game;
+begin
+  if (from.has_Status) then
+    SetStatus(from.Status);
+  if (from.has_Club) then
+    FClub.MergeFrom(from.Club);
+  for temp2 in from.Games do
+    FGames.Add(TPB_Game.Create(temp2));
+end;
+
+procedure TPB_ClubCommandReply.clear_Status;
+begin
+  FStatus := TClubStatus(0);
+  clear_has_Status;
+end;
+
+function TPB_ClubCommandReply.has_Status: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_ClubCommandReply.set_has_Status;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_ClubCommandReply.clear_has_Status;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_ClubCommandReply.SetStatus(const AValue: TClubStatus);
 begin
   FStatus := AValue;
-  ProtobufOutput.writeInt32(FN_STATUS, Integer(AValue));
+  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  set_has_Status;
+end;
+
+procedure TPB_ClubCommandReply.clear_Club;
+begin
+  FreeAndNil(FClub);
+  clear_has_Club;
+end;
+
+function TPB_ClubCommandReply.has_Club: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_ClubCommandReply.set_has_Club;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_ClubCommandReply.clear_has_Club;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_ClubCommandReply.SetClub(const AValue: TPB_Club);
 begin
   FClub := AValue;
-  ProtobufOutput.writeMessage(FN_CLUB, AValue.ProtobufOutput);
+  ProtobufOutput.writeMessage(kClubFieldNumber, AValue.ProtobufOutput);
+  set_has_Club;
+end;
+
+procedure TPB_ClubCommandReply.clear_Games;
+begin
+  FGames.Clear;
+  clear_has_Games;
+end;
+
+function TPB_ClubCommandReply.has_Games: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_ClubCommandReply.set_has_Games;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_ClubCommandReply.clear_has_Games;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_ClubCommandReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_GAMES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

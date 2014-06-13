@@ -12,26 +12,47 @@ type
   TPB_PutChips = class(TProtobufBaseObject)
   private
     const
-      FN_TABLE_MONGO_ID = 1;
-      FN_CHIP_AMOUNT = 2;
-      FN_CURRENT_STATE = 3;
+      kTableMongoIdFieldNumber = 1;
+      kChipAmountFieldNumber = 2;
+      kCurrentStateFieldNumber = 3;
 
     var
       FTableMongoId: TBytes;
       FChipAmount: UINT32;
       FCurrentState: TTableState;
+      _has_bits_: Integer;
 
+    procedure set_has_TableMongoId;
+    procedure clear_has_TableMongoId;
     procedure SetTableMongoId(const AValue: TBytes);
+    procedure set_has_ChipAmount;
+    procedure clear_has_ChipAmount;
     procedure SetChipAmount(const AValue: UINT32);
+    procedure set_has_CurrentState;
+    procedure clear_has_CurrentState;
     procedure SetCurrentState(const AValue: TTableState);
 
   public
+    constructor Create(const AFrom: TPB_PutChips); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_PutChips);
 
+    // LABEL TYPE TableMongoId = 1;
+    function has_TableMongoId: Boolean;
+    procedure clear_TableMongoId;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
+
+    // LABEL TYPE ChipAmount = 2;
+    function has_ChipAmount: Boolean;
+    procedure clear_ChipAmount;
     property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
+
+    // LABEL TYPE CurrentState = 3;
+    function has_CurrentState: Boolean;
+    procedure clear_CurrentState;
     property CurrentState: TTableState read FCurrentState write SetCurrentState;
+
   end;
 
 implementation
@@ -41,6 +62,12 @@ uses
 
 
 
+constructor TPB_PutChips.Create(const AFrom: TPB_PutChips);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_PutChips.Destroy;
 begin
   inherited;
@@ -49,27 +76,62 @@ end;
 procedure TPB_PutChips.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_TABLE_MONGO_ID: begin
+      kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         AProtobufReader.readBytes(FTableMongoId);
+        set_has_TableMongoId;
       end;
-      FN_CHIP_AMOUNT: begin
+      kChipAmountFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChipAmount := AProtobufReader.readUInt32;
+        set_has_ChipAmount;
       end;
-      FN_CURRENT_STATE: begin
+      kCurrentStateFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FCurrentState := TTableState(AProtobufReader.readEnum);
+        set_has_CurrentState;
       end;
     else
       AProtobufReader.skipField(tag);
     end;
   end;
+end;
+
+procedure TPB_PutChips.MergeFrom(const from: TPB_PutChips);
+begin
+  if (from.has_TableMongoId) then
+    SetTableMongoId(from.TableMongoId);
+  if (from.has_ChipAmount) then
+    SetChipAmount(from.ChipAmount);
+  if (from.has_CurrentState) then
+    SetCurrentState(from.CurrentState);
+end;
+
+procedure TPB_PutChips.clear_TableMongoId;
+begin
+  SetLength(FTableMongoId,0);
+  clear_has_TableMongoId;
+end;
+
+function TPB_PutChips.has_TableMongoId: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_PutChips.set_has_TableMongoId;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_PutChips.clear_has_TableMongoId;
+begin
+  _has_bits_ := _has_bits_ xor 1;
 end;
 
 procedure TPB_PutChips.SetTableMongoId(const AValue: TBytes);
@@ -79,19 +141,63 @@ begin
   SetLength(FTableMongoId,Length(AValue));
   for C1 := 0 to Length(AValue) - 1 do
     FTableMongoId[C1] := AValue[C1];
-  ProtobufOutput.writeBytes(FN_TABLE_MONGO_ID, AValue);
+  ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+end;
+
+procedure TPB_PutChips.clear_ChipAmount;
+begin
+  FChipAmount := 0;
+  clear_has_ChipAmount;
+end;
+
+function TPB_PutChips.has_ChipAmount: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_PutChips.set_has_ChipAmount;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_PutChips.clear_has_ChipAmount;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_PutChips.SetChipAmount(const AValue: UINT32);
 begin
   FChipAmount := AValue;
-  ProtobufOutput.writeUInt32(FN_CHIP_AMOUNT, AValue);
+  ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
+  set_has_ChipAmount;
+end;
+
+procedure TPB_PutChips.clear_CurrentState;
+begin
+  FCurrentState := TTableState(0);
+  clear_has_CurrentState;
+end;
+
+function TPB_PutChips.has_CurrentState: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_PutChips.set_has_CurrentState;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_PutChips.clear_has_CurrentState;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_PutChips.SetCurrentState(const AValue: TTableState);
 begin
   FCurrentState := AValue;
-  ProtobufOutput.writeInt32(FN_CURRENT_STATE, Integer(AValue));
+  ProtobufOutput.writeInt32(kCurrentStateFieldNumber, Integer(AValue));
+  set_has_CurrentState;
 end;
 
 end.

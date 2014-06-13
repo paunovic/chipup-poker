@@ -8,7 +8,7 @@ uses
 type
   THandHistoryMove = class
   private
-    FEvents: TArray<TTableEventType>;
+    FEvents: TList<TTableEventType>;
     FSeat: Integer;
     FBet: UINT32;
     FWinnerPots: TPotInfos;
@@ -19,7 +19,7 @@ type
 
     function ContainsEvent(const AEvent: TTableEventType): Boolean;
 
-    property Events: TArray<TTableEventType> read FEvents;
+    property Events: TList<TTableEventType> read FEvents;
     property Seat: Integer read FSeat;
     property Bet: UINT32 read FBet;
     property WinnerPots: TPotInfos read FWinnerPots;
@@ -34,7 +34,8 @@ implementation
 
 constructor THandHistoryMove.Create(const AProtobuf: TPB_MoveRow);
 begin
-  FEvents := AProtobuf.Code;
+  FEvents := TList<TTableEventType>.Create;
+  FEvents.AddRange(AProtobuf.Code);
   FSeat := AProtobuf.Seat;
   FBet := AProtobuf.Bet;
   FWinnerPots := TPotInfos.Create;
@@ -45,6 +46,7 @@ end;
 
 destructor THandHistoryMove.Destroy;
 begin
+  FEvents.Free;
   FPots.Free;
   FWinnerPots.Free;
   inherited;

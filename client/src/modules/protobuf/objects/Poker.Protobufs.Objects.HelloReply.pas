@@ -12,14 +12,14 @@ type
   TPB_HelloReply = class(TProtobufBaseObject)
   private
     const
-      FN_STRINGSIZES = 1;
-      FN_CHANGEEXPIRETIME = 2;
-      FN_FORGOTEXPIRETIME = 3;
-      FN_MAX_PLAY_TIME = 4;
-      FN_MAX_TIMEBANK = 5;
-      FN_MINSIZES = 6;
-      FN_UPDATE_FILES = 7;
-      FN_VALID_CHARS_REGEX = 8;
+      kStringSizesFieldNumber = 1;
+      kChangeExpireTimeFieldNumber = 2;
+      kForgotExpireTimeFieldNumber = 3;
+      kMaxPlayTimeFieldNumber = 4;
+      kMaxTimebankFieldNumber = 5;
+      kMinSizesFieldNumber = 6;
+      kUpdateFilesFieldNumber = 7;
+      kValidCharsRegexFieldNumber = 8;
 
     var
       FStringSizes: TPB_StringSizes;
@@ -28,15 +28,32 @@ type
       FMaxPlayTime: Integer;
       FMaxTimebank: Integer;
       FMinSizes: TPB_StringSizes;
-      FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
+      FUpdateFiles: TList<TPB_UpdateFileInfo>;
       FValidCharsRegex: TPB_ValidCharsRegex;
+      _has_bits_: Integer;
 
+    procedure set_has_StringSizes;
+    procedure clear_has_StringSizes;
     procedure SetStringSizes(const AValue: TPB_StringSizes);
+    procedure set_has_ChangeExpireTime;
+    procedure clear_has_ChangeExpireTime;
     procedure SetChangeExpireTime(const AValue: Integer);
+    procedure set_has_ForgotExpireTime;
+    procedure clear_has_ForgotExpireTime;
     procedure SetForgotExpireTime(const AValue: Integer);
+    procedure set_has_MaxPlayTime;
+    procedure clear_has_MaxPlayTime;
     procedure SetMaxPlayTime(const AValue: Integer);
+    procedure set_has_MaxTimebank;
+    procedure clear_has_MaxTimebank;
     procedure SetMaxTimebank(const AValue: Integer);
+    procedure set_has_MinSizes;
+    procedure clear_has_MinSizes;
     procedure SetMinSizes(const AValue: TPB_StringSizes);
+    procedure set_has_UpdateFiles;
+    procedure clear_has_UpdateFiles;
+    procedure set_has_ValidCharsRegex;
+    procedure clear_has_ValidCharsRegex;
     procedure SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
     procedure UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 
@@ -45,17 +62,51 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_HelloReply); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_HelloReply);
 
+    // LABEL TYPE StringSizes = 1;
+    function has_StringSizes: Boolean;
+    procedure clear_StringSizes;
     property StringSizes: TPB_StringSizes read FStringSizes write SetStringSizes;
+
+    // LABEL TYPE ChangeExpireTime = 2;
+    function has_ChangeExpireTime: Boolean;
+    procedure clear_ChangeExpireTime;
     property ChangeExpireTime: Integer read FChangeExpireTime write SetChangeExpireTime;
+
+    // LABEL TYPE ForgotExpireTime = 3;
+    function has_ForgotExpireTime: Boolean;
+    procedure clear_ForgotExpireTime;
     property ForgotExpireTime: Integer read FForgotExpireTime write SetForgotExpireTime;
+
+    // LABEL TYPE MaxPlayTime = 4;
+    function has_MaxPlayTime: Boolean;
+    procedure clear_MaxPlayTime;
     property MaxPlayTime: Integer read FMaxPlayTime write SetMaxPlayTime;
+
+    // LABEL TYPE MaxTimebank = 5;
+    function has_MaxTimebank: Boolean;
+    procedure clear_MaxTimebank;
     property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
+
+    // LABEL TYPE MinSizes = 6;
+    function has_MinSizes: Boolean;
+    procedure clear_MinSizes;
     property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
-    property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
+
+    // LABEL TYPE UpdateFiles = 7;
+    function has_UpdateFiles: Boolean;
+    procedure clear_UpdateFiles;
+    property UpdateFiles: TList<TPB_UpdateFileInfo> read FUpdateFiles;
+
+    // LABEL TYPE ValidCharsRegex = 8;
+    function has_ValidCharsRegex: Boolean;
+    procedure clear_ValidCharsRegex;
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
+
   end;
 
 implementation
@@ -73,6 +124,12 @@ procedure TPB_HelloReply.HookNotifiers;
 begin
   inherited;
   FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
+end;
+
+constructor TPB_HelloReply.Create(const AFrom: TPB_HelloReply);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
 end;
 
 destructor TPB_HelloReply.Destroy;
@@ -94,48 +151,57 @@ end;
 procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_STRINGSIZES: begin
+      kStringSizesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FStringSizes) then
           FStringSizes := TPB_StringSizes.Create;
         FStringSizes.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_StringSizes;
       end;
-      FN_CHANGEEXPIRETIME: begin
+      kChangeExpireTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FChangeExpireTime := AProtobufReader.readInt32;
+        set_has_ChangeExpireTime;
       end;
-      FN_FORGOTEXPIRETIME: begin
+      kForgotExpireTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FForgotExpireTime := AProtobufReader.readInt32;
+        set_has_ForgotExpireTime;
       end;
-      FN_MAX_PLAY_TIME: begin
+      kMaxPlayTimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaxPlayTime := AProtobufReader.readInt32;
+        set_has_MaxPlayTime;
       end;
-      FN_MAX_TIMEBANK: begin
+      kMaxTimebankFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FMaxTimebank := AProtobufReader.readInt32;
+        set_has_MaxTimebank;
       end;
-      FN_MINSIZES: begin
+      kMinSizesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FMinSizes) then
           FMinSizes := TPB_StringSizes.Create;
         FMinSizes.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_MinSizes;
       end;
-      FN_UPDATE_FILES: begin
+      kUpdateFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_UpdateFiles;
       end;
-      FN_VALID_CHARS_REGEX: begin
+      kValidCharsRegexFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FValidCharsRegex) then
           FValidCharsRegex := TPB_ValidCharsRegex.Create;
         FValidCharsRegex.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        set_has_ValidCharsRegex;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -143,54 +209,251 @@ begin
   end;
 end;
 
+procedure TPB_HelloReply.MergeFrom(const from: TPB_HelloReply);
+var
+  temp6: TPB_UpdateFileInfo;
+begin
+  if (from.has_StringSizes) then
+    FStringSizes.MergeFrom(from.StringSizes);
+  if (from.has_ChangeExpireTime) then
+    SetChangeExpireTime(from.ChangeExpireTime);
+  if (from.has_ForgotExpireTime) then
+    SetForgotExpireTime(from.ForgotExpireTime);
+  if (from.has_MaxPlayTime) then
+    SetMaxPlayTime(from.MaxPlayTime);
+  if (from.has_MaxTimebank) then
+    SetMaxTimebank(from.MaxTimebank);
+  if (from.has_MinSizes) then
+    FMinSizes.MergeFrom(from.MinSizes);
+  for temp6 in from.UpdateFiles do
+    FUpdateFiles.Add(TPB_UpdateFileInfo.Create(temp6));
+  if (from.has_ValidCharsRegex) then
+    FValidCharsRegex.MergeFrom(from.ValidCharsRegex);
+end;
+
+procedure TPB_HelloReply.clear_StringSizes;
+begin
+  FreeAndNil(FStringSizes);
+  clear_has_StringSizes;
+end;
+
+function TPB_HelloReply.has_StringSizes: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_StringSizes;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_HelloReply.clear_has_StringSizes;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_HelloReply.SetStringSizes(const AValue: TPB_StringSizes);
 begin
   FStringSizes := AValue;
-  ProtobufOutput.writeMessage(FN_STRINGSIZES, AValue.ProtobufOutput);
+  ProtobufOutput.writeMessage(kStringSizesFieldNumber, AValue.ProtobufOutput);
+  set_has_StringSizes;
+end;
+
+procedure TPB_HelloReply.clear_ChangeExpireTime;
+begin
+  FChangeExpireTime := 0;
+  clear_has_ChangeExpireTime;
+end;
+
+function TPB_HelloReply.has_ChangeExpireTime: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_ChangeExpireTime;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_HelloReply.clear_has_ChangeExpireTime;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_HelloReply.SetChangeExpireTime(const AValue: Integer);
 begin
   FChangeExpireTime := AValue;
-  ProtobufOutput.writeInt32(FN_CHANGEEXPIRETIME, AValue);
+  ProtobufOutput.writeInt32(kChangeExpireTimeFieldNumber, AValue);
+  set_has_ChangeExpireTime;
+end;
+
+procedure TPB_HelloReply.clear_ForgotExpireTime;
+begin
+  FForgotExpireTime := 0;
+  clear_has_ForgotExpireTime;
+end;
+
+function TPB_HelloReply.has_ForgotExpireTime: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_ForgotExpireTime;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_HelloReply.clear_has_ForgotExpireTime;
+begin
+  _has_bits_ := _has_bits_ xor 4;
 end;
 
 procedure TPB_HelloReply.SetForgotExpireTime(const AValue: Integer);
 begin
   FForgotExpireTime := AValue;
-  ProtobufOutput.writeInt32(FN_FORGOTEXPIRETIME, AValue);
+  ProtobufOutput.writeInt32(kForgotExpireTimeFieldNumber, AValue);
+  set_has_ForgotExpireTime;
+end;
+
+procedure TPB_HelloReply.clear_MaxPlayTime;
+begin
+  FMaxPlayTime := 0;
+  clear_has_MaxPlayTime;
+end;
+
+function TPB_HelloReply.has_MaxPlayTime: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_MaxPlayTime;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_HelloReply.clear_has_MaxPlayTime;
+begin
+  _has_bits_ := _has_bits_ xor 8;
 end;
 
 procedure TPB_HelloReply.SetMaxPlayTime(const AValue: Integer);
 begin
   FMaxPlayTime := AValue;
-  ProtobufOutput.writeInt32(FN_MAX_PLAY_TIME, AValue);
+  ProtobufOutput.writeInt32(kMaxPlayTimeFieldNumber, AValue);
+  set_has_MaxPlayTime;
+end;
+
+procedure TPB_HelloReply.clear_MaxTimebank;
+begin
+  FMaxTimebank := 0;
+  clear_has_MaxTimebank;
+end;
+
+function TPB_HelloReply.has_MaxTimebank: Boolean;
+begin
+  Result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_MaxTimebank;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_HelloReply.clear_has_MaxTimebank;
+begin
+  _has_bits_ := _has_bits_ xor 16;
 end;
 
 procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
 begin
   FMaxTimebank := AValue;
-  ProtobufOutput.writeInt32(FN_MAX_TIMEBANK, AValue);
+  ProtobufOutput.writeInt32(kMaxTimebankFieldNumber, AValue);
+  set_has_MaxTimebank;
+end;
+
+procedure TPB_HelloReply.clear_MinSizes;
+begin
+  FreeAndNil(FMinSizes);
+  clear_has_MinSizes;
+end;
+
+function TPB_HelloReply.has_MinSizes: Boolean;
+begin
+  Result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_MinSizes;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_HelloReply.clear_has_MinSizes;
+begin
+  _has_bits_ := _has_bits_ xor 32;
 end;
 
 procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);
 begin
   FMinSizes := AValue;
-  ProtobufOutput.writeMessage(FN_MINSIZES, AValue.ProtobufOutput);
+  ProtobufOutput.writeMessage(kMinSizesFieldNumber, AValue.ProtobufOutput);
+  set_has_MinSizes;
+end;
+
+procedure TPB_HelloReply.clear_UpdateFiles;
+begin
+  FUpdateFiles.Clear;
+  clear_has_UpdateFiles;
+end;
+
+function TPB_HelloReply.has_UpdateFiles: Boolean;
+begin
+  Result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_UpdateFiles;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_HelloReply.clear_has_UpdateFiles;
+begin
+  _has_bits_ := _has_bits_ xor 64;
 end;
 
 procedure TPB_HelloReply.UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_UPDATE_FILES,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kUpdateFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_HelloReply.clear_ValidCharsRegex;
+begin
+  FreeAndNil(FValidCharsRegex);
+  clear_has_ValidCharsRegex;
+end;
+
+function TPB_HelloReply.has_ValidCharsRegex: Boolean;
+begin
+  Result := (_has_bits_ and 128) > 0;
+end;
+
+procedure TPB_HelloReply.set_has_ValidCharsRegex;
+begin
+  _has_bits_ := _has_bits_ or 128;
+end;
+
+procedure TPB_HelloReply.clear_has_ValidCharsRegex;
+begin
+  _has_bits_ := _has_bits_ xor 128;
 end;
 
 procedure TPB_HelloReply.SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
 begin
   FValidCharsRegex := AValue;
-  ProtobufOutput.writeMessage(FN_VALID_CHARS_REGEX, AValue.ProtobufOutput);
+  ProtobufOutput.writeMessage(kValidCharsRegexFieldNumber, AValue.ProtobufOutput);
+  set_has_ValidCharsRegex;
 end;
 
 end.

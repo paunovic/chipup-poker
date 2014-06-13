@@ -12,14 +12,19 @@ type
   TPB_GetUserParams = class(TProtobufBaseObject)
   private
     const
-      FN_USER_MONGO_IDS = 1;
-      FN_USERS = 2;
+      kUserMongoIdsFieldNumber = 1;
+      kUsersFieldNumber = 2;
 
     var
-      FUserMongoIds: TArray<TBytes>;
-      FUsers: TObjectList<TPB_User>;
+      FUserMongoIds: TList<TBytes>;
+      FUsers: TList<TPB_User>;
+      _has_bits_: Integer;
 
-    procedure SetUserMongoIds(const AValue: TArray<TBytes>);
+    procedure set_has_UserMongoIds;
+    procedure clear_has_UserMongoIds;
+    procedure set_has_Users;
+    procedure clear_has_Users;
+    procedure UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 
   protected
@@ -27,11 +32,21 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_GetUserParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_GetUserParams);
 
-    property UserMongoIds: TArray<TBytes> read FUserMongoIds write SetUserMongoIds;
-    property Users: TObjectList<TPB_User> read FUsers;
+    // LABEL TYPE UserMongoIds = 1;
+    function has_UserMongoIds: Boolean;
+    procedure clear_UserMongoIds;
+    property UserMongoIds: TList<TBytes> read FUserMongoIds;
+
+    // LABEL TYPE Users = 2;
+    function has_Users: Boolean;
+    procedure clear_Users;
+    property Users: TList<TPB_User> read FUsers;
+
   end;
 
 implementation
@@ -43,16 +58,29 @@ uses
 procedure TPB_GetUserParams.InitObjects;
 begin
   inherited;
+  FUserMongoIds := TList<TBytes>.Create;
   FUsers := TObjectList<TPB_User>.Create;
 end;
 procedure TPB_GetUserParams.HookNotifiers;
 begin
   inherited;
+  FUserMongoIds.OnNotify := UserMongoIdsNotifyEvent;
   FUsers.OnNotify := UsersNotifyEvent;
+end;
+
+constructor TPB_GetUserParams.Create(const AFrom: TPB_GetUserParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
 end;
 
 destructor TPB_GetUserParams.Destroy;
 begin
+  if Assigned(FUserMongoIds) then
+  begin
+    FUserMongoIds.OnNotify := nil;
+    FreeAndNil(FUserMongoIds);
+  end;
   if Assigned(FUsers) then
   begin
     FUsers.OnNotify := nil;
@@ -64,19 +92,21 @@ end;
 procedure TPB_GetUserParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_USER_MONGO_IDS: begin
+      kUserMongoIdsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        SetLength(FUserMongoIds, Length(FUserMongoIds) + 1);
-        AProtobufReader.readBytes(FUserMongoIds[Length(FUserMongoIds)-1]);
+        AProtobufReader.readBytes(cheating);
+        FUserMongoIds.Add(cheating);
       end;
-      FN_USERS: begin
+      kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Users;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -84,21 +114,68 @@ begin
   end;
 end;
 
-procedure TPB_GetUserParams.SetUserMongoIds(const AValue: TArray<TBytes>);
+procedure TPB_GetUserParams.MergeFrom(const from: TPB_GetUserParams);
 var
-  C1: Integer;
+  temp0: TBytes;
+  temp1: TPB_User;
 begin
-  SetLength(FUserMongoIds,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FUserMongoIds[C1] := AValue[C1];
-  for C1 := 0 to Length(FUserMongoIds) - 1 do
-    ProtobufOutput.writeBytes(FN_USER_MONGO_IDS, AValue[C1]);
+  for temp0 in from.UserMongoIds do
+    FUserMongoIds.Add(temp0); // FIXME?
+  for temp1 in from.Users do
+    FUsers.Add(TPB_User.Create(temp1));
+end;
+
+procedure TPB_GetUserParams.clear_UserMongoIds;
+begin
+  FUserMongoIds.Clear;
+  clear_has_UserMongoIds;
+end;
+
+function TPB_GetUserParams.has_UserMongoIds: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_GetUserParams.set_has_UserMongoIds;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_GetUserParams.clear_has_UserMongoIds;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
+procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+end;
+
+procedure TPB_GetUserParams.clear_Users;
+begin
+  FUsers.Clear;
+  clear_has_Users;
+end;
+
+function TPB_GetUserParams.has_Users: Boolean;
+begin
+  Result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_GetUserParams.set_has_Users;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_GetUserParams.clear_has_Users;
+begin
+  _has_bits_ := _has_bits_ xor 2;
 end;
 
 procedure TPB_GetUserParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_USERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

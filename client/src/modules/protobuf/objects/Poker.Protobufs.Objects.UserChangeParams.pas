@@ -12,11 +12,14 @@ type
   TPB_UserChangeParams = class(TProtobufBaseObject)
   private
     const
-      FN_USERS = 1;
+      kUsersFieldNumber = 1;
 
     var
-      FUsers: TObjectList<TPB_User>;
+      FUsers: TList<TPB_User>;
+      _has_bits_: Integer;
 
+    procedure set_has_Users;
+    procedure clear_has_Users;
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 
   protected
@@ -24,10 +27,16 @@ type
     procedure HookNotifiers; override;
 
   public
+    constructor Create(const AFrom: TPB_UserChangeParams); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
+    procedure MergeFrom(const from: TPB_UserChangeParams);
 
-    property Users: TObjectList<TPB_User> read FUsers;
+    // LABEL TYPE Users = 1;
+    function has_Users: Boolean;
+    procedure clear_Users;
+    property Users: TList<TPB_User> read FUsers;
+
   end;
 
 implementation
@@ -47,6 +56,12 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 
+constructor TPB_UserChangeParams.Create(const AFrom: TPB_UserChangeParams);
+begin
+  inherited Create;
+  MergeFrom(AFrom);
+end;
+
 destructor TPB_UserChangeParams.Destroy;
 begin
   if Assigned(FUsers) then
@@ -60,14 +75,16 @@ end;
 procedure TPB_UserChangeParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag,field_number,wire_type,endpos : Integer;
+  cheating: TBytes;
 begin
   endpos := AProtobufReader.getPos + ASize;
   while (AProtobufReader.getPos < endpos) and
         (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin
     case field_number of
-      FN_USERS: begin
+      kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_Users;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -75,10 +92,39 @@ begin
   end;
 end;
 
+procedure TPB_UserChangeParams.MergeFrom(const from: TPB_UserChangeParams);
+var
+  temp0: TPB_User;
+begin
+  for temp0 in from.Users do
+    FUsers.Add(TPB_User.Create(temp0));
+end;
+
+procedure TPB_UserChangeParams.clear_Users;
+begin
+  FUsers.Clear;
+  clear_has_Users;
+end;
+
+function TPB_UserChangeParams.has_Users: Boolean;
+begin
+  Result := (_has_bits_ and 1) > 0;
+end;
+
+procedure TPB_UserChangeParams.set_has_Users;
+begin
+  _has_bits_ := _has_bits_ or 1;
+end;
+
+procedure TPB_UserChangeParams.clear_has_Users;
+begin
+  _has_bits_ := _has_bits_ xor 1;
+end;
+
 procedure TPB_UserChangeParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(FN_USERS,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

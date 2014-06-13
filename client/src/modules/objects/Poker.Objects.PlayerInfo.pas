@@ -36,7 +36,7 @@ type
     property Clubs   : TClubsInfo read FClubs;
   end;
 
-  TPB_Users = TObjectList<TPB_User>;
+  TPB_Users = TList<TPB_User>;
 
   TPlayers = class(TObjectList<TPlayerInfo>)
   public
