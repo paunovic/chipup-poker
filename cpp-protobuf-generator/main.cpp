@@ -28,6 +28,20 @@ public:
 	}
 	TypeInfo(FieldDescriptor::Type type): type(type) {
 		switch (type) {
+		case FieldDescriptor::TYPE_BOOL:
+			baseDelphiName = delphiName = "Boolean";
+			writter = "writeBoolean";
+			reader = "FIXME";
+			wiretype = "WIRETYPE_VARINT";
+			defaultdefault = "false";
+			break;
+		case FieldDescriptor::TYPE_STRING:
+			baseDelphiName = delphiName = "String";
+			writter = "writeString";
+			reader = "readUtf8String";
+			wiretype = "WIRETYPE_LENGTH_DELIMITED";
+			defaultdefault = "''";
+			break;
 		case FieldDescriptor::TYPE_MESSAGE:
 			// FIXME
 			defaultdefault = "nil";
@@ -39,6 +53,13 @@ public:
 			writter = "writeBytes";
 			reader = "readBytes";
 			wiretype = "WIRETYPE_LENGTH_DELIMITED";
+			break;
+		case FieldDescriptor::TYPE_UINT32:
+			baseDelphiName = delphiName = "UINT32";
+			writter = "writeUInt32";
+			reader = "readUInt32";
+			wiretype = "WIRETYPE_VARINT";
+			defaultdefault = "0";
 			break;
 		case FieldDescriptor::TYPE_ENUM:
 			// FIXME
@@ -1055,11 +1076,11 @@ int main(int argc, char *argv[]) {
 	typeinfo[FieldDescriptor::TYPE_INT64] = new TypeInfo("Int64","WriteInt64","readInt64","WIRETYPE_VARINT","0"); // FIXME?
 	typeinfo[FieldDescriptor::TYPE_UINT64] = new TypeInfo("UInt64","WriteInt64","readInt64","WIRETYPE_VARINT","0");
 	typeinfo[FieldDescriptor::TYPE_INT32] = new TypeInfo("Integer","writeInt32","FIXME","WIRETYPE_VARINT","0");
-	typeinfo[FieldDescriptor::TYPE_STRING] = new TypeInfo("String","writeString","readUtf8String","WIRETYPE_LENGTH_DELIMITED","''");
-	typeinfo[FieldDescriptor::TYPE_BOOL] = new TypeInfo("Boolean","writeBoolean","FIXME","WIRETYPE_VARINT","false");
-	typeinfo[FieldDescriptor::TYPE_MESSAGE] = new TypeInfo(FieldDescriptor::TYPE_MESSAGE);
+	typeinfo[FieldDescriptor::TYPE_BOOL] = new TypeInfo(FieldDescriptor::TYPE_BOOL);		// 8
+	typeinfo[FieldDescriptor::TYPE_STRING] = new TypeInfo(FieldDescriptor::TYPE_STRING);	// 9
+	typeinfo[FieldDescriptor::TYPE_MESSAGE] = new TypeInfo(FieldDescriptor::TYPE_MESSAGE);	// 11
 	typeinfo[FieldDescriptor::TYPE_BYTES] = new TypeInfo(FieldDescriptor::TYPE_BYTES);		// 12
-	typeinfo[FieldDescriptor::TYPE_UINT32] = new TypeInfo("UINT32","writeUInt32","readUInt32","WIRETYPE_VARINT","0");	// 13
+	typeinfo[FieldDescriptor::TYPE_UINT32] = new TypeInfo(FieldDescriptor::TYPE_UINT32);	// 13
 	typeinfo[FieldDescriptor::TYPE_ENUM] = new TypeInfo(FieldDescriptor::TYPE_ENUM);		// 14
 	cerr << "self " << argv[0] << " " << argc << "\n";
 	BaseGenerator *gen;
