@@ -47,7 +47,7 @@ type
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
     property Bets: TList<UINT32> read FBets write FBets;
-    property PreviousBets: TList<UINT32> read FPreviousBets write FPreviousBets;
+    property PreviousBets: TList<UINT32> read FPreviousBets;
     property MinimumBet: UINT32 read FMinimumBet;
     property FlopCards: TCards read FFlopCards;
     property TurnCard: TCard read FTurnCard;
@@ -57,7 +57,7 @@ type
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
     property Pots: TPotInfos read FPots write FPots;
-    property PreviousPots: TPotInfos read FPreviousPots write FPreviousPots;
+    property PreviousPots: TPotInfos read FPreviousPots;
     property MaximumRaise: UINT32 read FMaximumRaise;
     property Time: UINT64 read FTime;
     property RotationHand: UINT32 read FRotationHand;

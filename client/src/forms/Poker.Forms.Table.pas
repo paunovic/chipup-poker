@@ -1889,7 +1889,8 @@ begin
     end;
 
     tePostRiver: begin
-      FTableStatus.PreviousBets := ATableEvent.Bets;
+      FTableStatus.PreviousBets.Clear;
+      FTableStatus.PreviousBets.AddRange(ATableEvent.Bets);
     end;
 
     teWinning: begin
