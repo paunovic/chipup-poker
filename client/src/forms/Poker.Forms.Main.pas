@@ -92,8 +92,6 @@ type
     misOptions2: TMenuItem;
     miHandHistory: TMenuItem;
     acHandHistory: TAction;
-    acAnimationsEnabled: TAction;
-    miAnimations: TMenuItem;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -357,7 +355,7 @@ end;
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
 begin
   Settings.Animations := not Settings.Animations;
-  miAnimations.Checked := Settings.Animations;
+//  miAnimations.Checked := Settings.Animations;
   DXTimer.AnimationsEnabled := Settings.Animations;
 end;
 
@@ -499,7 +497,7 @@ begin
 
   miSounds.Checked := Settings.Sounds;
   miCheckOnFold.Checked := Settings.FoldChecks;
-  miAnimations.Checked := Settings.Animations;
+//  miAnimations.Checked := Settings.Animations;
 
   miDev.Visible := Settings.DeveloperMode;
 

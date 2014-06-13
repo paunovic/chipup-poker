@@ -288,7 +288,7 @@ begin
   end;
   if Assigned(FBets) then
   begin
-    FBets.OnNotify := nil;
+//    FBets.OnNotify := nil;
     FreeAndNil(FBets);
   end;
   if Assigned(FEvents) then

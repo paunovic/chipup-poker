@@ -641,7 +641,7 @@ var
 begin
   if not Assigned(AObject) then
     Exit('');
-
+                   {
   rt := TRttiContext.Create.GetType(AObject.ClassType);
 
   fullstr := '';
@@ -742,8 +742,8 @@ begin
 
   if fullstr <> '' then
     Delete(fullstr, Length(fullstr) - 1, 2);
-
-  result := fullstr;
+                           }
+  result := ''; //FIXME: fullstr
 end;
 {$ENDIF}
 
