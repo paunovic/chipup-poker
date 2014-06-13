@@ -155,8 +155,10 @@ begin
   FMinimumBet := ATableStatusProtobuf.MinimumBet;
   FHandId := ATableStatusProtobuf.Handid;
   FTime := ATableStatusProtobuf.Time;
-  FPreviousBets := FBets;
-  FBets := ATableStatusProtobuf.Bets;
+  FPreviousBets.Clear;
+  FPreviousBets.AddRange(FBets);
+  FBets.Clear;
+  FBets.AddRange(ATableStatusProtobuf.Bets);
   FLocked := ATableStatusProtobuf.Locked;
   FMaximumRaise := ATableStatusProtobuf.MaximumRaise;
   FRakePercent := ATableStatusProtobuf.RakePercent;

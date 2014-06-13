@@ -107,7 +107,7 @@ end;
 
 procedure TSeatInfos.Sort;
 var
-  comparer  : IComparer<TSeatInfo>;
+  comparer: IComparer<TSeatInfo>;
   comparison: TComparison<TSeatInfo>;
 begin
   comparison := function(const ASeatInfo1, ASeatInfo2: TSeatInfo): Integer
