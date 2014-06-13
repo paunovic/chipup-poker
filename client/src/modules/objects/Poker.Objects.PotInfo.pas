@@ -31,9 +31,9 @@ type
   TPotInfos = class(TObjectList<TPotInfo>)
   private
   public
-    procedure Assign(const APots: TObjectList<TPB_Pot>; const ARakePercent: UINT32); overload;
+    procedure Assign(const APots: TList<TPB_Pot>; const ARakePercent: UINT32); overload;
     procedure Assign(const APots: TPotInfos; const ARakePercent: UINT32); overload;
-    procedure Assign(const APots: TObjectList<TPB_WinnerPotInfo>); overload;
+    procedure Assign(const APots: TList<TPB_WinnerPotInfo>); overload;
   end;
 
 implementation
@@ -82,12 +82,12 @@ begin
   FValue := AWinnerPotInfo.Sum;
   FRake := AWinnerPotInfo.Rake;
   FMembers := AWinnerPotInfo.Seats;
-  FWinnerData.Assign(AWinnerPotInfo.WinnerData);
+  FWinnerData.Assign(WinnerData);
 end;
 
 { TPotInfos }
 
-procedure TPotInfos.Assign(const APots: TObjectList<TPB_Pot>; const ARakePercent: UINT32);
+procedure TPotInfos.Assign(const APots: TList<TPB_Pot>; const ARakePercent: UINT32);
 var
   pot: TPotInfo;
   C1 : Integer;
@@ -117,7 +117,7 @@ begin
   end;
 end;
 
-procedure TPotInfos.Assign(const APots: TObjectList<TPB_WinnerPotInfo>);
+procedure TPotInfos.Assign(const APots: TList<TPB_WinnerPotInfo>);
 var
   pot: TPotInfo;
   C1 : Integer;

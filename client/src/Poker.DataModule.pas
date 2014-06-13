@@ -42,8 +42,8 @@ type
     procedure OpenTACLink;
     procedure OpenSiteLink;
     procedure UpdateSelfInfoInPlayers;
-    procedure GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
-    procedure StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+    procedure GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);
+    procedure StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
 
@@ -206,7 +206,7 @@ begin
   FUpdaterInstallerFile := AFile;
 end;
 
-procedure TdmMain.StoreUpdateFiles(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+procedure TdmMain.StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
 var
   ufi: TPB_UpdateFileInfo;
   C1: Integer;
@@ -332,7 +332,7 @@ begin
     end;
 end;
 
-procedure TdmMain.GetUpdateFilesList(const AFiles: TObjectList<TPB_UpdateFileInfo>);
+procedure TdmMain.GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);
 var
   pb_ufi: TPB_UpdateFileInfo;
   fullpath: String;
