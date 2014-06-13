@@ -3,11 +3,11 @@ unit Poker.Forms.GiveChips;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxTextEdit, cxLabel, cxMaskEdit, cxSpinEdit, Vcl.StdCtrls, cxButtons, Vcl.ActnList, Poker.Objects.ClubInfo,
-  Poker.Objects.PlayerInfo, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
-  Vcl.Menus, ChipUpPokerDarkSkin;
+  Winapi.Windows, System.Variants, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
+  cxTextEdit, cxLabel, cxSpinEdit, cxButtons, Vcl.ActnList, Poker.Objects.ClubInfo,
+  Poker.Objects.PlayerInfo, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels,
+  cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit;
 
 type
   TfrmGiveChips = class(TForm, IFormParams, IModalForm)
@@ -49,7 +49,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.DataModule, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Common.FormsContainer;
+  Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.DataModule, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Common.FormsContainer;
 
 
 

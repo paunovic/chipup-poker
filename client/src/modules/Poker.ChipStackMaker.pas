@@ -40,7 +40,7 @@ type
 implementation
 
 uses
-  Poker.Table.Resources, Vcl.Graphics;
+  Poker.Table.Resources;
 
 { TChipsStack }
 

@@ -3,7 +3,7 @@ unit Poker.Table.Status;
 interface
 
 uses
-  Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Objects.PotInfo, Poker.Objects.SeatInfo;
+  System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Objects.PotInfo, Poker.Objects.SeatInfo;
 
 type
   TTableStatus = class
@@ -12,8 +12,8 @@ type
     FDealer: Integer;
     FCurrentSeat: Integer;
     FSeatInfos: TSeatInfos;
-    FBets: TArray<UINT32>;
-    FPreviousBets: TArray<UINT32>;
+    FBets: TList<UINT32>;
+    FPreviousBets: TList<UINT32>;
     FFlopCards: TCards;
     FTurnCard: TCard;
     FRiverCard: TCard;
@@ -46,8 +46,8 @@ type
     property Dealer: Integer read FDealer;
     property CurrentSeat: Integer read FCurrentSeat;
     property Seats: TSeatInfos read FSeatInfos;
-    property Bets: TArray<UINT32> read FBets write FBets;
-    property PreviousBets: TArray<UINT32> read FPreviousBets write FPreviousBets;
+    property Bets: TList<UINT32> read FBets write FBets;
+    property PreviousBets: TList<UINT32> read FPreviousBets write FPreviousBets;
     property MinimumBet: UINT32 read FMinimumBet;
     property FlopCards: TCards read FFlopCards;
     property TurnCard: TCard read FTurnCard;
@@ -69,8 +69,7 @@ type
 
 implementation
 
-uses
-  Poker.Common.Misc;
+
 
 { TTableStatus }
 
@@ -79,6 +78,9 @@ begin
   FDealer := -1;
   FCurrentSeat := -1;
   FSeatInfos := TSeatInfos.Create;
+
+  FBets := TList<UINT32>.Create;
+  FPreviousBets := TList<UINT32>.Create;
 
   FPreviousPots := TPotInfos.Create;
   FPots := TPotInfos.Create;
@@ -90,6 +92,8 @@ end;
 
 destructor TTableStatus.Destroy;
 begin
+  FBets.Free;
+  FPreviousBets.Free;
 //  FEvents.Free;
   FFlopCards.Free;
   FTurnCard.Free;
@@ -103,8 +107,8 @@ end;
 
 function TTableStatus.GetBet(const ASeatIndex: Integer): UINT32;
 begin
-  if (ASeatIndex < Low(FBets)) or
-     (ASeatIndex > High(FBets)) then
+  if (ASeatIndex < 0) or
+     (ASeatIndex > FBets.Count - 1) then
     Exit(0)
   else
     Exit(FBets[ASeatIndex]);

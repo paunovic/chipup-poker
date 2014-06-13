@@ -3,10 +3,11 @@ unit Poker.Forms.CloseClubConfirmation;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Objects.ClubInfo, cxGraphics,
-  cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.ActnList, Vcl.StdCtrls, cxButtons, cxControls,
-  cxContainer, cxEdit, cxTextEdit, cxLabel;
+  Winapi.Windows, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Objects.ClubInfo,
+  Vcl.ActnList, cxButtons,
+  cxTextEdit, cxLabel, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls,
+  cxContainer, cxEdit, Vcl.StdCtrls;
 
 type
   TfrmCloseClubConfirmation = class(TForm, IFormParams, IModalForm)
@@ -40,7 +41,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.Settings, Poker.Server.Validators;
+  Poker.Common.FormsContainer, Poker.Server.Settings, Poker.Server.Validators;
 
 { TfrmCloseClubConfirmation }
 

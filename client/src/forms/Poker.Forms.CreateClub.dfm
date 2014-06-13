@@ -31,7 +31,6 @@ object frmCreateClub: TfrmCreateClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 64
     TabOrder = 0
-    ExplicitWidth = 187
     Width = 185
   end
   object lbsClubName: TcxLabel
@@ -54,7 +53,6 @@ object frmCreateClub: TfrmCreateClub
     Anchors = [akLeft, akTop, akRight]
     Properties.MaxLength = 32
     TabOrder = 1
-    ExplicitWidth = 187
     Width = 185
   end
   object lbsInvCode: TcxLabel

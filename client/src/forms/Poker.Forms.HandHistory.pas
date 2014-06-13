@@ -3,10 +3,11 @@ unit Poker.Forms.HandHistory;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxMemo, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ActnList,
-  Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle, Vcl.ExtCtrls;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, cxEdit,
+  cxLabel, cxDropDownEdit, cxButtons, Vcl.ActnList,
+  Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle, Vcl.ExtCtrls, cxGraphics, cxControls,
+  cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxTextEdit, cxMaskEdit;
 
 type
   TfrmHandHistory = class(TForm, IFormParams)
@@ -61,7 +62,7 @@ implementation
 
 uses
   Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.Items, Poker.Objects.ClubInfo, Poker.Objects.GameInfo,
-  Poker.DataModule, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes,
+  Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes,
   Poker.Table.Tables;
 
 { TfrmHandHistory }

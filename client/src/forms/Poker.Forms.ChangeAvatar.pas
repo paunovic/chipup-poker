@@ -3,10 +3,11 @@ unit Poker.Forms.ChangeAvatar;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, Vcl.StdCtrls, cxButtons,
-  cxLabel, Vcl.ActnList, cxImage, Vcl.Imaging.jpeg, OverbyteIcsWndControl, OverbyteIcsHttpProt, cxProgressBar,
-  Vcl.Menus, OverbyteIcsWSocket, ChipUpPokerDarkSkin;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxButtons,
+  Vcl.ActnList, cxImage, Vcl.Imaging.jpeg, OverbyteIcsHttpProt, cxProgressBar,
+  OverbyteIcsWSocket, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls,
+  cxContainer, cxEdit, OverbyteIcsWndControl, Vcl.StdCtrls;
 
 type
   TfrmChangeAvatar = class(TForm)

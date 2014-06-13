@@ -3,11 +3,12 @@ unit Poker.Forms.ContactUs;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, cxMaskEdit,
-  cxDropDownEdit, cxTextEdit, cxLabel, Vcl.Menus, Vcl.StdCtrls, cxButtons,
-  cxMemo, Vcl.ActnList, ChipUpPokerDarkSkin;
+  Winapi.Windows, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  cxContainer,
+  cxDropDownEdit, cxTextEdit, cxLabel, cxButtons,
+  cxMemo, Vcl.ActnList, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus,
+  Vcl.StdCtrls, cxMaskEdit;
 
 type
   TfrmContactUs = class(TForm)

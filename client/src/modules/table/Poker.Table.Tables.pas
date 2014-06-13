@@ -3,7 +3,7 @@ unit Poker.Table.Tables;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.GameInfo, Poker.Protobufs.Objects.TableStatus,
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Objects.GameInfo,
   Poker.Objects.ClubInfo, Vcl.Forms, Poker.Avatars, Poker.HandHistory.Items;
 
 type

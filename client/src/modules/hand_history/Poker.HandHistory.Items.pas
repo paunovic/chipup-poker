@@ -76,7 +76,7 @@ type
     FStartTime: TDateTime;
     FStartTimeStr: String;
     FEndTime: TDateTime;
-    FBalanceChanges: TArray<Integer>;
+    FBalanceChanges: TList<Integer>;
     FMoves: THandHistoryMoves;
     FLines: TStringList;
     FRVLines: TStringList;
@@ -103,7 +103,7 @@ type
     property StartTime: TDateTime read FStartTime;
     property StartTimeStr: String read FStartTimeStr;
     property EndTime: TDateTime read FEndTime;
-    property BalanceChanges: TArray<Integer> read FBalanceChanges;
+    property BalanceChanges: TList<Integer> read FBalanceChanges;
     property Moves: THandHistoryMoves read FMoves;
     property DealerIndex: Integer read FDealerIndex;
     property CurrentGame: TGameType read FCurrentGame;
@@ -135,13 +135,14 @@ implementation
 
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
-  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Objects.SeatInfo,
+  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings,
   Poker.Objects.PotInfo;
 
 { THandHistoryItem }
 
 constructor THandHistoryItem.Create(const AParent: THandHistoryItems; const AHandHistory: TPB_HandHistory);
 begin
+  FBalanceChanges := TList<Integer>.Create;;
   FParentItems := AParent;
   FPlayers := TPlayerHandHistories.Create;
   FMoves := THandHistoryMoves.Create;
@@ -152,6 +153,7 @@ end;
 
 destructor THandHistoryItem.Destroy;
 begin
+  FBalanceChanges.Free;
   FLines.Free;
   FRVLines.Free;
   FMoves.Free;
@@ -172,7 +174,8 @@ begin
   Move(AHandHistory.Cards[0], FCards[0], Length(AHandHistory.Cards) * SizeOf(Byte));
   FTableCardsStr := TCards.BytesToString(FCards);
   FEndTime := TTimeZone.Local.ToLocalTime(UnixToDateTime(AHandHistory.Endtime));
-  FBalanceChanges := AHandHistory.BalanceChanges;
+  FBalanceChanges.Clear;
+  FBalanceChanges.AddRange(AHandHistory.BalanceChanges);
   FDealerIndex := AHandHistory.Dealer;
   FCurrentGame := AHandHistory.CurrentGame;
   FStartTime := TTimeZone.Local.ToLocalTime(MongoIdToDateTime(FMongoId));

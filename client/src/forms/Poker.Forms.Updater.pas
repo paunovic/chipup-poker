@@ -3,10 +3,11 @@ unit Poker.Forms.Updater;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxLabel, cxProgressBar, dxGDIPlusClasses, cxImage, OverbyteIcsWndControl, OverbyteIcsHttpCCodZlib,
-  OverbyteIcsHttpProt, Vcl.Menus, Vcl.StdCtrls, cxButtons, Vcl.ImgList, Vcl.Buttons, Vcl.ExtCtrls, ChipUpPokerDarkSkin;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit,
+  cxLabel, cxProgressBar, cxImage,
+  OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
+  OverbyteIcsWndControl, dxGDIPlusClasses;
 
 type
   TfrmUpdater = class(TForm)
@@ -50,7 +51,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.Misc, Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule,
+  Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule,
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 

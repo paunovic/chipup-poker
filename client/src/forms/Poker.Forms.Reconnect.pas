@@ -3,9 +3,10 @@ unit Poker.Forms.Reconnect;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.ModalForm, OverbyteIcsWSocket, Vcl.ExtCtrls, cxGraphics, cxControls,
-  cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, cxLabel, cxProgressBar;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Poker.Interfaces.ModalForm, OverbyteIcsWSocket, Vcl.ExtCtrls,
+  cxLabel, cxProgressBar, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
+  ChipUpPokerDarkSkin;
 
 type
   TReconnectionStatus = (rsIdle, rsConnecting, rsConnected, rsHelloing, rsHelloOk, rsLoggingIn, rsLoggedIn, rsInvalidCredentials);
@@ -54,8 +55,7 @@ implementation
 uses
   Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket, Poker.DataModule,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Settings,
-  Poker.Forms.Debug, Poker.Table.Tables, Poker.Forms.Main, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections,
-  Poker.Settings;
+  Poker.Forms.Debug, Poker.Table.Tables, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections;
 
 { TfrmReconnect }
 

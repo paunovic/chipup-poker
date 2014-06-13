@@ -191,7 +191,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.Classes, System.SysUtils, Poker.DataModule, Poker.Settings;
+  System.SysUtils, Poker.DataModule, Poker.Settings;
 
 
 

@@ -3,9 +3,10 @@ unit Poker.Forms.ChangePassword;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  cxTextEdit, cxLabel, Vcl.StdCtrls, cxButtons, Vcl.ActnList, Vcl.Menus, ChipUpPokerDarkSkin;
+  Winapi.Windows, System.Classes,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
+  cxTextEdit, cxLabel, cxButtons, Vcl.ActnList, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore,
+  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls;
 
 type
   TfrmChangePassword = class(TForm)
@@ -39,7 +40,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer;
+  Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer;
 
 
 procedure TfrmChangePassword.FormCreate(Sender: TObject);

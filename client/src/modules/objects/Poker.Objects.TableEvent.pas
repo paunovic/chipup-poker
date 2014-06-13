@@ -11,7 +11,7 @@ type
     FEvent: TTableEventType;
     FSeat: Integer;
     FPots: TPotInfos;
-    FBets: TArray<UINT32>;
+    FBets: TList<UINT32>;
     FCards: TBytes;
   public
     constructor Create(const APBTableEvent: TPB_TableEvent);
@@ -22,7 +22,7 @@ type
     property Event: TTableEventType read FEvent;
     property Seat: Integer read FSeat;
     property Pots: TPotInfos read FPots;
-    property Bets: TArray<UINT32> read FBets;
+    property Bets: TList<UINT32> read FBets;
     property Cards: TBytes read FCards;
   end;
 
@@ -37,6 +37,7 @@ implementation
 
 constructor TTableEvent.Create(const APBTableEvent: TPB_TableEvent);
 begin
+  FBets := TList<UINT32>.Create;
   FPots := TPotInfos.Create;
   Assign(APBTableEvent);
 end;
@@ -44,6 +45,7 @@ end;
 destructor TTableEvent.Destroy;
 begin
   FPots.Free;
+  FBets.Free;
   inherited;
 end;
 
@@ -51,7 +53,8 @@ procedure TTableEvent.Assign(const APBTableEvent: TPB_TableEvent);
 begin
   FEvent := APBTableEvent.Event;
   FSeat := APBTableEvent.Seat;
-  FBets := APBTableEvent.Bets;
+  FBets.Clear;
+  FBets.AddRange(APBTableEvent.Bets);
   FPots.Assign(APBTableEvent.Pots);
   FCards := APBTableEvent.Cards;
 end;

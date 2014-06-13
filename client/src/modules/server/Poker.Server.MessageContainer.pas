@@ -38,7 +38,7 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, Poker.Protobufs.Enum.ServerCodes, {$ENDIF}
+  {$IFDEF DEBUG} {$ENDIF}
   System.SysUtils, System.Classes, Poker.WindowMessages;
 
 

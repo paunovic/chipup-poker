@@ -3,9 +3,10 @@ unit Poker.Forms.SystemTrayPopup;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, cxImage, cxLabel, dxGDIPlusClasses, Vcl.ExtCtrls, dxBevel;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, cxGraphics, cxControls, cxEdit,
+  cxImage, cxLabel, Vcl.ExtCtrls, dxBevel, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
+  dxGDIPlusClasses;
 
 type
   TfrmSystemTrayPopup = class(TForm)
@@ -46,7 +47,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Common.Misc, System.StrUtils;
+  Poker.DataModule, Poker.Common.Misc;
 
 var
   frmSystemTrayPopup: TfrmSystemTrayPopup;

@@ -31,7 +31,7 @@ var
 implementation
 
 uses
-  Poker.Protobufs.Objects.HandHistory, Poker.Common.Misc, Poker.Settings;
+  Poker.Protobufs.Objects.HandHistory, Poker.Common.Misc;
 
 
 class procedure THandHistory.Initialize;

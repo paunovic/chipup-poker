@@ -147,7 +147,7 @@ begin
                 pbevent.Event := teRiver;
                 pbevent.Cards := Copy(AHandHistoryItem.Cards, 4, 1);
               end;
-          pbevent.Bets := bets;
+          pbevent.Bets.AddRange(bets);
           FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);
           pbtablestatus.Events.Add(pbevent);
         end;
@@ -244,7 +244,9 @@ begin
         pbtablestatus.Seats.Add(pbseat);
       end;
 
-      pbtablestatus.Bets := bets;
+      pbtablestatus.Bets.Clear;
+      for C2 := Low(bets) to High(bets) do
+        pbtablestatus.Bets.Add(bets[C2]);
 
       FStates.Add(pbtablestatus);
     end;

@@ -2537,6 +2537,8 @@ object frmClubLobby: TfrmClubLobby
     object tsClubHome: TcxTabSheet
       Caption = 'tsClubHome'
       ImageIndex = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2546,6 +2548,7 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
+        ExplicitHeight = 433
         DesignSize = (
           250
           435)
@@ -2615,6 +2618,8 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
+        ExplicitWidth = 626
+        ExplicitHeight = 433
         DesignSize = (
           628
           435)
@@ -2690,7 +2695,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 396
+          Top = 390
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2703,10 +2708,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 396
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 396
+          Top = 390
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2719,10 +2725,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 396
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 396
+          Top = 390
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2735,10 +2742,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 396
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 396
+          Top = 390
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2751,10 +2759,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 396
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 396
+          Top = 390
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2767,6 +2776,7 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 396
         end
       end
     end
@@ -2795,7 +2805,7 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 876
-          Height = 365
+          Height = 359
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -2876,7 +2886,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 349
+          Top = 343
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2893,7 +2903,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 349
+          Top = 343
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2910,7 +2920,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 285
+          Top = 279
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]

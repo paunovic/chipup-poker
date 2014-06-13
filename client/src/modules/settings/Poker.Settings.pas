@@ -17,6 +17,7 @@ type
       JSON_SERVER_INDEX      = 'serverindex';
       JSON_SOUNDS            = 'sounds';
       JSON_FOLD_CHECKS       = 'fold_checks';
+      JSON_ANIMATIONS        = 'animations';
 
       JSON_DEFAULT_LOGIN             = '';
       JSON_DEFAULT_PASSWORD          = '';
@@ -26,6 +27,7 @@ type
       JSON_DEFAULT_SERVER_INDEX      = 0;
       JSON_DEFAULT_SOUNDS            = TRUE;
       JSON_DEFAULT_FOLD_CHECKS       = FALSE;
+      JSON_DEFAULT_ANIMATIONS        = TRUE;
 
     function GetJSONString(const AField, ADefaultValue: String): String;
     function GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
@@ -47,6 +49,8 @@ type
     procedure SetSounds(const AValue: Boolean);
     function GetFoldChecks: Boolean;
     procedure SetFoldChecks(const AValue: Boolean);
+    function GetAnimations: Boolean;
+    procedure SetAnimations(const AValue: Boolean);
 
     var
       FJSON: ISuperObject;
@@ -73,6 +77,7 @@ type
     property ServerIndex: Integer read GetServerIndex write SetServerIndex;
     property Sounds: Boolean read GetSounds write SetSounds;
     property FoldChecks: Boolean read GetFoldChecks write SetFoldChecks;
+    property Animations: Boolean read GetAnimations write SetAnimations;
 
     property DomainURL: String read FDomainURL write FDomainURL;
   end;
@@ -84,7 +89,7 @@ var
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils,
+  System.SysUtils,
   Poker.Common.Misc, Poker.Common.Encryption;
 
 
@@ -219,6 +224,11 @@ begin
   result := GetJSONBool(JSON_SOUNDS, JSON_DEFAULT_SOUNDS);
 end;
 
+function TSettings.GetAnimations: Boolean;
+begin
+  result := GetJSONBool(JSON_ANIMATIONS, JSON_DEFAULT_ANIMATIONS);
+end;
+
 function TSettings.GetDeveloperMode: Boolean;
 begin
   result := GetJSONBool(JSON_DEVELOPER_MODE, JSON_DEFAULT_DEVELOPER_MODE);
@@ -257,6 +267,11 @@ end;
 procedure TSettings.SetSounds(const AValue: Boolean);
 begin
   FJSON.B[JSON_SOUNDS] := AValue;
+end;
+
+procedure TSettings.SetAnimations(const AValue: Boolean);
+begin
+  FJSON.B[JSON_ANIMATIONS] := AValue;
 end;
 
 procedure TSettings.SetDeveloperMode(const AValue: Boolean);
