@@ -198,7 +198,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
@@ -229,7 +229,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_has_Seat;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_PlayerHandHistory.SetSeat(const AValue: Integer);
@@ -257,7 +257,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_has_Cards;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
@@ -288,7 +288,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_has_Chips;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_PlayerHandHistory.SetChips(const AValue: UINT32);
@@ -316,7 +316,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_has_Nick;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_PlayerHandHistory.SetNick(const AValue: String);
@@ -344,7 +344,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_has_Muck;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_PlayerHandHistory.SetMuck(const AValue: Boolean);
@@ -372,7 +372,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_has_Status;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_PlayerHandHistory.SetStatus(const AValue: TPlayerStatus);

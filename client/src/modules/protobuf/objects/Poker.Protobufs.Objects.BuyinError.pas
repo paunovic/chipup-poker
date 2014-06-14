@@ -113,7 +113,7 @@ end;
 
 procedure TPB_BuyinError.clear_has_GameId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_BuyinError.SetGameId(const AValue: TBytes);
@@ -144,7 +144,7 @@ end;
 
 procedure TPB_BuyinError.clear_has_LastCashout;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_BuyinError.SetLastCashout(const AValue: UINT32);

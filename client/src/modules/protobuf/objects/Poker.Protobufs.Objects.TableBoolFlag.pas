@@ -113,7 +113,7 @@ end;
 
 procedure TPB_TableBoolFlag.clear_has_TableMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
@@ -144,7 +144,7 @@ end;
 
 procedure TPB_TableBoolFlag.clear_has_Flag;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_TableBoolFlag.SetFlag(const AValue: Boolean);

@@ -167,7 +167,7 @@ end;
 
 procedure TPB_TableStatsReplies.clear_has_Reply;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_TableStatsReplies.ReplyNotifyEvent(Sender: TObject; const Item: TPB_TableStatsReply; Action: TCollectionNotification);
@@ -196,7 +196,7 @@ end;
 
 procedure TPB_TableStatsReplies.clear_has_Players;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_TableStatsReplies.PlayersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
@@ -225,7 +225,7 @@ end;
 
 procedure TPB_TableStatsReplies.clear_has_ClubStats;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_TableStatsReplies.ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);

@@ -113,7 +113,7 @@ end;
 
 procedure TPB_TransferChipsParams.clear_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_TransferChipsParams.SetPlayerMongoId(const AValue: TBytes);
@@ -144,7 +144,7 @@ end;
 
 procedure TPB_TransferChipsParams.clear_has_ChipAmount;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_TransferChipsParams.SetChipAmount(const AValue: UINT32);

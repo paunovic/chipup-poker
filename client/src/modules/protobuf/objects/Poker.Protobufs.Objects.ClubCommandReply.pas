@@ -155,7 +155,7 @@ end;
 
 procedure TPB_ClubCommandReply.clear_has_Status;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ClubCommandReply.SetStatus(const AValue: TClubStatus);
@@ -183,7 +183,7 @@ end;
 
 procedure TPB_ClubCommandReply.clear_has_Club;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ClubCommandReply.SetClub(const AValue: TPB_Club);
@@ -211,7 +211,7 @@ end;
 
 procedure TPB_ClubCommandReply.clear_has_Games;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_ClubCommandReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);

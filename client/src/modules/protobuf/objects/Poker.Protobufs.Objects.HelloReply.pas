@@ -248,7 +248,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_StringSizes;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_HelloReply.SetStringSizes(const AValue: TPB_StringSizes);
@@ -276,7 +276,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_ChangeExpireTime;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_HelloReply.SetChangeExpireTime(const AValue: Integer);
@@ -304,7 +304,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_ForgotExpireTime;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_HelloReply.SetForgotExpireTime(const AValue: Integer);
@@ -332,7 +332,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_MaxPlayTime;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_HelloReply.SetMaxPlayTime(const AValue: Integer);
@@ -360,7 +360,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_MaxTimebank;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
@@ -388,7 +388,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_MinSizes;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);
@@ -416,7 +416,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_UpdateFiles;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_HelloReply.UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
@@ -445,7 +445,7 @@ end;
 
 procedure TPB_HelloReply.clear_has_ValidCharsRegex;
 begin
-  _has_bits_ := _has_bits_ xor 128;
+  _has_bits_ := _has_bits_ and not 128;
 end;
 
 procedure TPB_HelloReply.SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);

@@ -135,7 +135,7 @@ end;
 
 procedure TPB_ChatEvent.clear_has_Event;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ChatEvent.SetEvent(const AValue: TEventType);
@@ -163,7 +163,7 @@ end;
 
 procedure TPB_ChatEvent.clear_has_Msg;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ChatEvent.SetMsg(const AValue: TPB_ChatMessage);
@@ -191,7 +191,7 @@ end;
 
 procedure TPB_ChatEvent.clear_has_TableId;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);

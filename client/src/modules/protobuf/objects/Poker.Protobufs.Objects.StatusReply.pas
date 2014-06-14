@@ -188,7 +188,7 @@ end;
 
 procedure TPB_StatusReply.clear_has_Clubs;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_StatusReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
@@ -217,7 +217,7 @@ end;
 
 procedure TPB_StatusReply.clear_has_Users;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_StatusReply.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
@@ -246,7 +246,7 @@ end;
 
 procedure TPB_StatusReply.clear_has_Self;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_StatusReply.SetSelf(const AValue: TPB_User);
@@ -274,7 +274,7 @@ end;
 
 procedure TPB_StatusReply.clear_has_Games;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_StatusReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);

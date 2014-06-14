@@ -117,7 +117,7 @@ end;
 
 procedure TPB_QueryTableStats.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);

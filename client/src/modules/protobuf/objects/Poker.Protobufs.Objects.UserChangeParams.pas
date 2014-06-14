@@ -117,7 +117,7 @@ end;
 
 procedure TPB_UserChangeParams.clear_has_Users;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_UserChangeParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);

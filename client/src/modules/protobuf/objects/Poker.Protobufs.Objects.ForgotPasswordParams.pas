@@ -96,7 +96,7 @@ end;
 
 procedure TPB_ForgotPasswordParams.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ForgotPasswordParams.SetEmail(const AValue: String);

@@ -287,7 +287,7 @@ end;
 
 procedure TPB_Club.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_Club.SetMongoId(const AValue: TBytes);
@@ -318,7 +318,7 @@ end;
 
 procedure TPB_Club.clear_has_Members;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_Club.MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
@@ -347,7 +347,7 @@ end;
 
 procedure TPB_Club.clear_has_Name;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_Club.SetName(const AValue: String);
@@ -375,7 +375,7 @@ end;
 
 procedure TPB_Club.clear_has_Owner;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_Club.SetOwner(const AValue: TBytes);
@@ -406,7 +406,7 @@ end;
 
 procedure TPB_Club.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_Club.SetPassword(const AValue: String);
@@ -434,7 +434,7 @@ end;
 
 procedure TPB_Club.clear_has_IsPrivate;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_Club.SetIsPrivate(const AValue: Boolean);
@@ -462,7 +462,7 @@ end;
 
 procedure TPB_Club.clear_has_Seq;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);
@@ -490,7 +490,7 @@ end;
 
 procedure TPB_Club.clear_has_HasPassword;
 begin
-  _has_bits_ := _has_bits_ xor 128;
+  _has_bits_ := _has_bits_ and not 128;
 end;
 
 procedure TPB_Club.SetHasPassword(const AValue: Boolean);
@@ -518,7 +518,7 @@ end;
 
 procedure TPB_Club.clear_has_Rake;
 begin
-  _has_bits_ := _has_bits_ xor 256;
+  _has_bits_ := _has_bits_ and not 256;
 end;
 
 procedure TPB_Club.SetRake(const AValue: UINT32);
@@ -546,7 +546,7 @@ end;
 
 procedure TPB_Club.clear_has_DefaultBalanceLimit;
 begin
-  _has_bits_ := _has_bits_ xor 512;
+  _has_bits_ := _has_bits_ and not 512;
 end;
 
 procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UINT32);
@@ -574,7 +574,7 @@ end;
 
 procedure TPB_Club.clear_has_UnlimitedDefaultBalance;
 begin
-  _has_bits_ := _has_bits_ xor 1024;
+  _has_bits_ := _has_bits_ and not 1024;
 end;
 
 procedure TPB_Club.SetUnlimitedDefaultBalance(const AValue: Boolean);

@@ -155,7 +155,7 @@ end;
 
 procedure TPB_LoginReply.clear_has_LoginStatus;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_LoginReply.SetLoginStatus(const AValue: TLoginStatus);
@@ -183,7 +183,7 @@ end;
 
 procedure TPB_LoginReply.clear_has_Status;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_LoginReply.SetStatus(const AValue: TPB_StatusReply);
@@ -211,7 +211,7 @@ end;
 
 procedure TPB_LoginReply.clear_has_ReconnectTables;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_LoginReply.ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);

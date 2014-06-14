@@ -134,7 +134,7 @@ end;
 
 procedure TPB_HelloParams.clear_has_Debug;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_HelloParams.SetDebug(const AValue: Boolean);
@@ -162,7 +162,7 @@ end;
 
 procedure TPB_HelloParams.clear_has_Files;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_HelloParams.FilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);

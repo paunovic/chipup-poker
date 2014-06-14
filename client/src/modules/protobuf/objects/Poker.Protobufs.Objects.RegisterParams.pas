@@ -130,7 +130,7 @@ end;
 
 procedure TPB_RegisterParams.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_RegisterParams.SetEmail(const AValue: String);
@@ -158,7 +158,7 @@ end;
 
 procedure TPB_RegisterParams.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_RegisterParams.SetPassword(const AValue: String);
@@ -186,7 +186,7 @@ end;
 
 procedure TPB_RegisterParams.clear_has_DisplayName;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_RegisterParams.SetDisplayName(const AValue: String);

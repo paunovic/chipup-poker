@@ -164,7 +164,7 @@ end;
 
 procedure TPB_ClubMember.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ClubMember.SetMongoId(const AValue: TBytes);
@@ -195,7 +195,7 @@ end;
 
 procedure TPB_ClubMember.clear_has_Suspended;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ClubMember.SetSuspended(const AValue: Boolean);
@@ -223,7 +223,7 @@ end;
 
 procedure TPB_ClubMember.clear_has_BalanceLimit;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_ClubMember.SetBalanceLimit(const AValue: UINT32);
@@ -251,7 +251,7 @@ end;
 
 procedure TPB_ClubMember.clear_has_ClubBalance;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_ClubMember.SetClubBalance(const AValue: Integer);
@@ -279,7 +279,7 @@ end;
 
 procedure TPB_ClubMember.clear_has_UnlimitedLimit;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_ClubMember.SetUnlimitedLimit(const AValue: Boolean);

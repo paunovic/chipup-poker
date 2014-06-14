@@ -130,7 +130,7 @@ end;
 
 procedure TPB_RpcMessage.clear_has_MethodId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_RpcMessage.SetMethodId(const AValue: Integer);
@@ -158,7 +158,7 @@ end;
 
 procedure TPB_RpcMessage.clear_has_DataSize;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_RpcMessage.SetDataSize(const AValue: Integer);
@@ -186,7 +186,7 @@ end;
 
 procedure TPB_RpcMessage.clear_has_Token;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_RpcMessage.SetToken(const AValue: Integer);

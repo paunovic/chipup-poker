@@ -499,7 +499,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_TableMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_TableStatus.SetTableMongoId(const AValue: TBytes);
@@ -530,7 +530,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Seats;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_TableStatus.SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
@@ -559,7 +559,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_State;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_TableStatus.SetState(const AValue: TTableState);
@@ -587,7 +587,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Dealer;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_TableStatus.SetDealer(const AValue: Integer);
@@ -615,7 +615,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_CurrentSeat;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_TableStatus.SetCurrentSeat(const AValue: Integer);
@@ -643,7 +643,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Bets;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_TableStatus.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
@@ -670,7 +670,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Locked;
 begin
-  _has_bits_ := _has_bits_ xor 1024;
+  _has_bits_ := _has_bits_ and not 1024;
 end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
@@ -698,7 +698,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Seq;
 begin
-  _has_bits_ := _has_bits_ xor 2048;
+  _has_bits_ := _has_bits_ and not 2048;
 end;
 
 procedure TPB_TableStatus.SetSeq(const AValue: Integer);
@@ -726,7 +726,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_MinimumBet;
 begin
-  _has_bits_ := _has_bits_ xor 4096;
+  _has_bits_ := _has_bits_ and not 4096;
 end;
 
 procedure TPB_TableStatus.SetMinimumBet(const AValue: UINT32);
@@ -754,7 +754,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_MaximumRaise;
 begin
-  _has_bits_ := _has_bits_ xor 8192;
+  _has_bits_ := _has_bits_ and not 8192;
 end;
 
 procedure TPB_TableStatus.SetMaximumRaise(const AValue: UINT32);
@@ -782,7 +782,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_SmallBlind;
 begin
-  _has_bits_ := _has_bits_ xor 16384;
+  _has_bits_ := _has_bits_ and not 16384;
 end;
 
 procedure TPB_TableStatus.SetSmallBlind(const AValue: UINT32);
@@ -810,7 +810,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_BigBlind;
 begin
-  _has_bits_ := _has_bits_ xor 32768;
+  _has_bits_ := _has_bits_ and not 32768;
 end;
 
 procedure TPB_TableStatus.SetBigBlind(const AValue: UINT32);
@@ -838,7 +838,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Handid;
 begin
-  _has_bits_ := _has_bits_ xor 65536;
+  _has_bits_ := _has_bits_ and not 65536;
 end;
 
 procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
@@ -866,7 +866,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Time;
 begin
-  _has_bits_ := _has_bits_ xor 131072;
+  _has_bits_ := _has_bits_ and not 131072;
 end;
 
 procedure TPB_TableStatus.SetTime(const AValue: UInt64);
@@ -894,7 +894,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Events;
 begin
-  _has_bits_ := _has_bits_ xor 262144;
+  _has_bits_ := _has_bits_ and not 262144;
 end;
 
 procedure TPB_TableStatus.EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
@@ -923,7 +923,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Pots;
 begin
-  _has_bits_ := _has_bits_ xor 524288;
+  _has_bits_ := _has_bits_ and not 524288;
 end;
 
 procedure TPB_TableStatus.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
@@ -952,7 +952,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_RakePercent;
 begin
-  _has_bits_ := _has_bits_ xor 1048576;
+  _has_bits_ := _has_bits_ and not 1048576;
 end;
 
 procedure TPB_TableStatus.SetRakePercent(const AValue: UINT32);
@@ -980,7 +980,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_CurrentGame;
 begin
-  _has_bits_ := _has_bits_ xor 2097152;
+  _has_bits_ := _has_bits_ and not 2097152;
 end;
 
 procedure TPB_TableStatus.SetCurrentGame(const AValue: TGameType);
@@ -1008,7 +1008,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_Rotation;
 begin
-  _has_bits_ := _has_bits_ xor 4194304;
+  _has_bits_ := _has_bits_ and not 4194304;
 end;
 
 procedure TPB_TableStatus.SetRotation(const AValue: UINT32);
@@ -1036,7 +1036,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_TotalBalance;
 begin
-  _has_bits_ := _has_bits_ xor 8388608;
+  _has_bits_ := _has_bits_ and not 8388608;
 end;
 
 procedure TPB_TableStatus.SetTotalBalance(const AValue: UINT32);
@@ -1064,7 +1064,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_GameLimit;
 begin
-  _has_bits_ := _has_bits_ xor 16777216;
+  _has_bits_ := _has_bits_ and not 16777216;
 end;
 
 procedure TPB_TableStatus.SetGameLimit(const AValue: TGameLimit);
@@ -1092,7 +1092,7 @@ end;
 
 procedure TPB_TableStatus.clear_has_MinimumRaise;
 begin
-  _has_bits_ := _has_bits_ xor 33554432;
+  _has_bits_ := _has_bits_ and not 33554432;
 end;
 
 procedure TPB_TableStatus.SetMinimumRaise(const AValue: UINT32);

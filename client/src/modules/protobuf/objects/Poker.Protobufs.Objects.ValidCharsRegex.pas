@@ -181,7 +181,7 @@ end;
 
 procedure TPB_ValidCharsRegex.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ValidCharsRegex.SetEmail(const AValue: String);
@@ -209,7 +209,7 @@ end;
 
 procedure TPB_ValidCharsRegex.clear_has_Username;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ValidCharsRegex.SetUsername(const AValue: String);
@@ -237,7 +237,7 @@ end;
 
 procedure TPB_ValidCharsRegex.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_ValidCharsRegex.SetPassword(const AValue: String);
@@ -265,7 +265,7 @@ end;
 
 procedure TPB_ValidCharsRegex.clear_has_Clubname;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_ValidCharsRegex.SetClubname(const AValue: String);
@@ -293,7 +293,7 @@ end;
 
 procedure TPB_ValidCharsRegex.clear_has_Clubpassword;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_ValidCharsRegex.SetClubpassword(const AValue: String);
@@ -321,7 +321,7 @@ end;
 
 procedure TPB_ValidCharsRegex.clear_has_Gamename;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_ValidCharsRegex.SetGamename(const AValue: String);

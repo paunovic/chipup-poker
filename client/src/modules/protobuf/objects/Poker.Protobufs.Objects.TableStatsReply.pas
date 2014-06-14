@@ -168,7 +168,7 @@ end;
 
 procedure TPB_TableStatsReply.clear_has_Clubid;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_TableStatsReply.SetClubid(const AValue: TBytes);
@@ -199,7 +199,7 @@ end;
 
 procedure TPB_TableStatsReply.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_TableStatsReply.SetGameid(const AValue: TBytes);
@@ -230,7 +230,7 @@ end;
 
 procedure TPB_TableStatsReply.clear_has_Playerstats;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_TableStatsReply.PlayerstatsNotifyEvent(Sender: TObject; const Item: TPB_TablePlayerStats; Action: TCollectionNotification);
@@ -259,7 +259,7 @@ end;
 
 procedure TPB_TableStatsReply.clear_has_Hands;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_TableStatsReply.SetHands(const AValue: UINT32);

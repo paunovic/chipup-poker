@@ -198,7 +198,7 @@ end;
 
 procedure TPB_StringSizes.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_StringSizes.SetEmail(const AValue: Integer);
@@ -226,7 +226,7 @@ end;
 
 procedure TPB_StringSizes.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_StringSizes.SetPassword(const AValue: Integer);
@@ -254,7 +254,7 @@ end;
 
 procedure TPB_StringSizes.clear_has_Clubname;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_StringSizes.SetClubname(const AValue: Integer);
@@ -282,7 +282,7 @@ end;
 
 procedure TPB_StringSizes.clear_has_Invcode;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
@@ -310,7 +310,7 @@ end;
 
 procedure TPB_StringSizes.clear_has_Username;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_StringSizes.SetUsername(const AValue: Integer);
@@ -338,7 +338,7 @@ end;
 
 procedure TPB_StringSizes.clear_has_Gamename;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_StringSizes.SetGamename(const AValue: Integer);
@@ -366,7 +366,7 @@ end;
 
 procedure TPB_StringSizes.clear_has_ContactMessage;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_StringSizes.SetContactMessage(const AValue: Integer);

@@ -114,7 +114,7 @@ end;
 
 procedure TPB_WinnerData.clear_has_Seat;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_WinnerData.SetSeat(const AValue: Integer);
@@ -142,7 +142,7 @@ end;
 
 procedure TPB_WinnerData.clear_has_Msg;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_WinnerData.SetMsg(const AValue: String);

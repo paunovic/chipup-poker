@@ -176,7 +176,7 @@ end;
 
 procedure TPB_WinnerPotInfo.clear_has_Sum;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_WinnerPotInfo.SetSum(const AValue: UINT32);
@@ -204,7 +204,7 @@ end;
 
 procedure TPB_WinnerPotInfo.clear_has_Seats;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_WinnerPotInfo.SeatsNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
@@ -231,7 +231,7 @@ end;
 
 procedure TPB_WinnerPotInfo.clear_has_WinnerData;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_WinnerPotInfo.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
@@ -260,7 +260,7 @@ end;
 
 procedure TPB_WinnerPotInfo.clear_has_Rake;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_WinnerPotInfo.SetRake(const AValue: UINT32);

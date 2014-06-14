@@ -113,7 +113,7 @@ end;
 
 procedure TPB_PingReply.clear_has_Uptime;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_PingReply.SetUptime(const AValue: UINT32);
@@ -141,7 +141,7 @@ end;
 
 procedure TPB_PingReply.clear_has_Servertime;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_PingReply.SetServertime(const AValue: UInt64);

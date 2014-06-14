@@ -113,7 +113,7 @@ end;
 
 procedure TPB_LoginParams.clear_has_Username;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_LoginParams.SetUsername(const AValue: String);
@@ -141,7 +141,7 @@ end;
 
 procedure TPB_LoginParams.clear_has_Password;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_LoginParams.SetPassword(const AValue: String);

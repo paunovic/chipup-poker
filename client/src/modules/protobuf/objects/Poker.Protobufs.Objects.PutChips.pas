@@ -130,7 +130,7 @@ end;
 
 procedure TPB_PutChips.clear_has_TableMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_PutChips.SetTableMongoId(const AValue: TBytes);
@@ -161,7 +161,7 @@ end;
 
 procedure TPB_PutChips.clear_has_ChipAmount;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_PutChips.SetChipAmount(const AValue: UINT32);
@@ -189,7 +189,7 @@ end;
 
 procedure TPB_PutChips.clear_has_CurrentState;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_PutChips.SetCurrentState(const AValue: TTableState);

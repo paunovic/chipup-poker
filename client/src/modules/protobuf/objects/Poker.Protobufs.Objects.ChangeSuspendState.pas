@@ -130,7 +130,7 @@ end;
 
 procedure TPB_ChangeSuspendState.clear_has_ClubMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TBytes);
@@ -161,7 +161,7 @@ end;
 
 procedure TPB_ChangeSuspendState.clear_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TBytes);
@@ -192,7 +192,7 @@ end;
 
 procedure TPB_ChangeSuspendState.clear_has_Suspended;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ChangeSuspendState.SetSuspended(const AValue: Boolean);

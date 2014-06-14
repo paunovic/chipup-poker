@@ -250,7 +250,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_Seat;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
@@ -278,7 +278,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_PlayerMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TBytes);
@@ -309,7 +309,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_Chips;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_SeatInfo.SetChips(const AValue: UINT32);
@@ -337,7 +337,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_CardCount;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_SeatInfo.SetCardCount(const AValue: Integer);
@@ -365,7 +365,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_Cards;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_SeatInfo.SetCards(const AValue: TBytes);
@@ -396,7 +396,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_Status;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
@@ -424,7 +424,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_Timebank;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_SeatInfo.SetTimebank(const AValue: UINT32);
@@ -452,7 +452,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_CardsVisible;
 begin
-  _has_bits_ := _has_bits_ xor 128;
+  _has_bits_ := _has_bits_ and not 128;
 end;
 
 procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
@@ -480,7 +480,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_Disconnected;
 begin
-  _has_bits_ := _has_bits_ xor 256;
+  _has_bits_ := _has_bits_ and not 256;
 end;
 
 procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
@@ -508,7 +508,7 @@ end;
 
 procedure TPB_SeatInfo.clear_has_CanShow;
 begin
-  _has_bits_ := _has_bits_ xor 512;
+  _has_bits_ := _has_bits_ and not 512;
 end;
 
 procedure TPB_SeatInfo.SetCanShow(const AValue: Boolean);

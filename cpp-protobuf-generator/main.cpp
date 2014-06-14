@@ -415,7 +415,7 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 			"end;\n\n"
 			"procedure TPB_$message$.clear_has_$name$;\n"
 			"begin\n"
-			"  _has_bits_ := _has_bits_ xor $bit$;\n"
+			"  _has_bits_ := _has_bits_ and not $bit$;\n"
 			"end;\n\n"
 			);
 

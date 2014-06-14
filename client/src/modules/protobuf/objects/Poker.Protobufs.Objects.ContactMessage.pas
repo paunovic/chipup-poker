@@ -114,7 +114,7 @@ end;
 
 procedure TPB_ContactMessage.clear_has_Reason;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ContactMessage.SetReason(const AValue: TContactReason);
@@ -142,7 +142,7 @@ end;
 
 procedure TPB_ContactMessage.clear_has_Message;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ContactMessage.SetMessage(const AValue: String);

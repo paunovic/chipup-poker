@@ -113,7 +113,7 @@ end;
 
 procedure TPB_GameQuery.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_GameQuery.SetGameid(const AValue: TBytes);
@@ -144,7 +144,7 @@ end;
 
 procedure TPB_GameQuery.clear_has_Lasthandid;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_GameQuery.SetLasthandid(const AValue: UINT32);

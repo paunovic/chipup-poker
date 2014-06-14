@@ -165,7 +165,7 @@ end;
 
 procedure TPB_UpdateFileInfo.clear_has_Path;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_UpdateFileInfo.SetPath(const AValue: String);
@@ -193,7 +193,7 @@ end;
 
 procedure TPB_UpdateFileInfo.clear_has_Hash;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_UpdateFileInfo.SetHash(const AValue: TBytes);
@@ -224,7 +224,7 @@ end;
 
 procedure TPB_UpdateFileInfo.clear_has_Url;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_UpdateFileInfo.SetUrl(const AValue: String);
@@ -252,7 +252,7 @@ end;
 
 procedure TPB_UpdateFileInfo.clear_has_FileType;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_UpdateFileInfo.SetFileType(const AValue: TUpdateFileType);
@@ -280,7 +280,7 @@ end;
 
 procedure TPB_UpdateFileInfo.clear_has_FileSize;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UINT32);

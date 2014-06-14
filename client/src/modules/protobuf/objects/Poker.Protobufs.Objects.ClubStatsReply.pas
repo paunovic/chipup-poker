@@ -134,7 +134,7 @@ end;
 
 procedure TPB_ClubStatsReply.clear_has_Clubid;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ClubStatsReply.SetClubid(const AValue: TBytes);
@@ -165,7 +165,7 @@ end;
 
 procedure TPB_ClubStatsReply.clear_has_PlayerStats;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ClubStatsReply.PlayerStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubPlayerStats; Action: TCollectionNotification);

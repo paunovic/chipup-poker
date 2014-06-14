@@ -96,7 +96,7 @@ end;
 
 procedure TPB_ChangePasswordParams.clear_has_NewPassword;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);

@@ -321,7 +321,7 @@ end;
 
 procedure TPB_Game.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_Game.SetMongoId(const AValue: TBytes);
@@ -352,7 +352,7 @@ end;
 
 procedure TPB_Game.clear_has_CreatorMongoId;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_Game.SetCreatorMongoId(const AValue: TBytes);
@@ -383,7 +383,7 @@ end;
 
 procedure TPB_Game.clear_has_Gamename;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_Game.SetGamename(const AValue: String);
@@ -411,7 +411,7 @@ end;
 
 procedure TPB_Game.clear_has_Clubseq;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_Game.SetClubseq(const AValue: Integer);
@@ -439,7 +439,7 @@ end;
 
 procedure TPB_Game.clear_has_GameType;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_Game.SetGameType(const AValue: TGameType);
@@ -467,7 +467,7 @@ end;
 
 procedure TPB_Game.clear_has_GameLimit;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_Game.SetGameLimit(const AValue: TGameLimit);
@@ -495,7 +495,7 @@ end;
 
 procedure TPB_Game.clear_has_Blinds;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_Game.SetBlinds(const AValue: TGameBlinds);
@@ -523,7 +523,7 @@ end;
 
 procedure TPB_Game.clear_has_Seats;
 begin
-  _has_bits_ := _has_bits_ xor 256;
+  _has_bits_ := _has_bits_ and not 256;
 end;
 
 procedure TPB_Game.SetSeats(const AValue: Integer);
@@ -551,7 +551,7 @@ end;
 
 procedure TPB_Game.clear_has_Sitting;
 begin
-  _has_bits_ := _has_bits_ xor 512;
+  _has_bits_ := _has_bits_ and not 512;
 end;
 
 procedure TPB_Game.SetSitting(const AValue: Integer);
@@ -579,7 +579,7 @@ end;
 
 procedure TPB_Game.clear_has_BuyinMin;
 begin
-  _has_bits_ := _has_bits_ xor 1024;
+  _has_bits_ := _has_bits_ and not 1024;
 end;
 
 procedure TPB_Game.SetBuyinMin(const AValue: Integer);
@@ -607,7 +607,7 @@ end;
 
 procedure TPB_Game.clear_has_BuyinMax;
 begin
-  _has_bits_ := _has_bits_ xor 2048;
+  _has_bits_ := _has_bits_ and not 2048;
 end;
 
 procedure TPB_Game.SetBuyinMax(const AValue: Integer);
@@ -635,7 +635,7 @@ end;
 
 procedure TPB_Game.clear_has_State;
 begin
-  _has_bits_ := _has_bits_ xor 4096;
+  _has_bits_ := _has_bits_ and not 4096;
 end;
 
 procedure TPB_Game.SetState(const AValue: TGameState);
@@ -663,7 +663,7 @@ end;
 
 procedure TPB_Game.clear_has_Closetime;
 begin
-  _has_bits_ := _has_bits_ xor 8192;
+  _has_bits_ := _has_bits_ and not 8192;
 end;
 
 procedure TPB_Game.SetClosetime(const AValue: UInt64);
@@ -691,7 +691,7 @@ end;
 
 procedure TPB_Game.clear_has_Lasthandid;
 begin
-  _has_bits_ := _has_bits_ xor 16384;
+  _has_bits_ := _has_bits_ and not 16384;
 end;
 
 procedure TPB_Game.SetLasthandid(const AValue: UINT32);

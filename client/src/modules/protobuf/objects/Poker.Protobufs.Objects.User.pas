@@ -181,7 +181,7 @@ end;
 
 procedure TPB_User.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_User.SetMongoId(const AValue: TBytes);
@@ -212,7 +212,7 @@ end;
 
 procedure TPB_User.clear_has_Avatar;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_User.SetAvatar(const AValue: TBytes);
@@ -243,7 +243,7 @@ end;
 
 procedure TPB_User.clear_has_Displayname;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_User.SetDisplayname(const AValue: String);
@@ -271,7 +271,7 @@ end;
 
 procedure TPB_User.clear_has_Email;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_User.SetEmail(const AValue: String);
@@ -299,7 +299,7 @@ end;
 
 procedure TPB_User.clear_has_Authed;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_User.SetAuthed(const AValue: Boolean);
@@ -327,7 +327,7 @@ end;
 
 procedure TPB_User.clear_has_Chips;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_User.SetChips(const AValue: UINT32);

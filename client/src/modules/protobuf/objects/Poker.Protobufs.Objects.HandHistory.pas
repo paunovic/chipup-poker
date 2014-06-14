@@ -323,7 +323,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_MongoId;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_HandHistory.SetMongoId(const AValue: TBytes);
@@ -354,7 +354,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Seq;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_HandHistory.SetSeq(const AValue: UINT32);
@@ -382,7 +382,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Totalrake;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_HandHistory.SetTotalrake(const AValue: UINT32);
@@ -410,7 +410,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Players;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_HandHistory.PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
@@ -439,7 +439,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Cards;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_HandHistory.SetCards(const AValue: TBytes);
@@ -470,7 +470,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Endtime;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_HandHistory.SetEndtime(const AValue: UINT32);
@@ -498,7 +498,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_BalanceChanges;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_HandHistory.BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
@@ -525,7 +525,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Moves;
 begin
-  _has_bits_ := _has_bits_ xor 128;
+  _has_bits_ := _has_bits_ and not 128;
 end;
 
 procedure TPB_HandHistory.MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
@@ -554,7 +554,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Dealer;
 begin
-  _has_bits_ := _has_bits_ xor 256;
+  _has_bits_ := _has_bits_ and not 256;
 end;
 
 procedure TPB_HandHistory.SetDealer(const AValue: UINT32);
@@ -582,7 +582,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Game;
 begin
-  _has_bits_ := _has_bits_ xor 512;
+  _has_bits_ := _has_bits_ and not 512;
 end;
 
 procedure TPB_HandHistory.SetGame(const AValue: TPB_Game);
@@ -610,7 +610,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_CurrentGame;
 begin
-  _has_bits_ := _has_bits_ xor 1024;
+  _has_bits_ := _has_bits_ and not 1024;
 end;
 
 procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
@@ -638,7 +638,7 @@ end;
 
 procedure TPB_HandHistory.clear_has_Rake;
 begin
-  _has_bits_ := _has_bits_ xor 2048;
+  _has_bits_ := _has_bits_ and not 2048;
 end;
 
 procedure TPB_HandHistory.SetRake(const AValue: Integer);

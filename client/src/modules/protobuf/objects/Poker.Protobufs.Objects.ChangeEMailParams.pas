@@ -96,7 +96,7 @@ end;
 
 procedure TPB_ChangeEMailParams.clear_has_NewMail;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ChangeEMailParams.SetNewMail(const AValue: String);

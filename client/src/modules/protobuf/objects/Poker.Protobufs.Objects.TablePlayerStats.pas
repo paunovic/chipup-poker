@@ -244,7 +244,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Userid;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_TablePlayerStats.SetUserid(const AValue: TBytes);
@@ -275,7 +275,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Balance;
 begin
-  _has_bits_ := _has_bits_ xor 4;
+  _has_bits_ := _has_bits_ and not 4;
 end;
 
 procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
@@ -303,7 +303,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Buyins;
 begin
-  _has_bits_ := _has_bits_ xor 8;
+  _has_bits_ := _has_bits_ and not 8;
 end;
 
 procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
@@ -330,7 +330,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Cashouts;
 begin
-  _has_bits_ := _has_bits_ xor 16;
+  _has_bits_ := _has_bits_ and not 16;
 end;
 
 procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
@@ -357,7 +357,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Rakecontrib;
 begin
-  _has_bits_ := _has_bits_ xor 32;
+  _has_bits_ := _has_bits_ and not 32;
 end;
 
 procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UINT32);
@@ -385,7 +385,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Secondsplayed;
 begin
-  _has_bits_ := _has_bits_ xor 64;
+  _has_bits_ := _has_bits_ and not 64;
 end;
 
 procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UINT32);
@@ -413,7 +413,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Chipsinplay;
 begin
-  _has_bits_ := _has_bits_ xor 128;
+  _has_bits_ := _has_bits_ and not 128;
 end;
 
 procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UINT32);
@@ -441,7 +441,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_has_Hands;
 begin
-  _has_bits_ := _has_bits_ xor 256;
+  _has_bits_ := _has_bits_ and not 256;
 end;
 
 procedure TPB_TablePlayerStats.SetHands(const AValue: UINT32);

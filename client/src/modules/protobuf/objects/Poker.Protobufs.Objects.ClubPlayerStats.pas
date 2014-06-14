@@ -113,7 +113,7 @@ end;
 
 procedure TPB_ClubPlayerStats.clear_has_Userid;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TBytes);
@@ -144,7 +144,7 @@ end;
 
 procedure TPB_ClubPlayerStats.clear_has_ClubBalance;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_ClubPlayerStats.SetClubBalance(const AValue: Integer);

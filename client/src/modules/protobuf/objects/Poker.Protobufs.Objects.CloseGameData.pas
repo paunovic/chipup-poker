@@ -114,7 +114,7 @@ end;
 
 procedure TPB_CloseGameData.clear_has_Gameid;
 begin
-  _has_bits_ := _has_bits_ xor 1;
+  _has_bits_ := _has_bits_ and not 1;
 end;
 
 procedure TPB_CloseGameData.SetGameid(const AValue: TBytes);
@@ -145,7 +145,7 @@ end;
 
 procedure TPB_CloseGameData.clear_has_Timestamp;
 begin
-  _has_bits_ := _has_bits_ xor 2;
+  _has_bits_ := _has_bits_ and not 2;
 end;
 
 procedure TPB_CloseGameData.SetTimestamp(const AValue: TCloseGameTime);
