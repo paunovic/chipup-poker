@@ -107,6 +107,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FAvatarId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);
+  set_has_AvatarId;
 end;
 
 end.

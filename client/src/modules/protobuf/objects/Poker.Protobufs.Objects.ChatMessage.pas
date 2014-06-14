@@ -158,6 +158,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  set_has_MongoId;
 end;
 
 procedure TPB_ChatMessage.clear_Username;

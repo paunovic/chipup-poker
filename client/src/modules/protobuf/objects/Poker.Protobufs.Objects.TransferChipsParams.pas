@@ -124,6 +124,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  set_has_PlayerMongoId;
 end;
 
 procedure TPB_TransferChipsParams.clear_ChipAmount;

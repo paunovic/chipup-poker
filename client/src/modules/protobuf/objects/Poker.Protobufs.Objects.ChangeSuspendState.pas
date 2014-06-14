@@ -141,6 +141,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FClubMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
+  set_has_ClubMongoId;
 end;
 
 procedure TPB_ChangeSuspendState.clear_PlayerMongoId;
@@ -172,6 +173,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  set_has_PlayerMongoId;
 end;
 
 procedure TPB_ChangeSuspendState.clear_Suspended;

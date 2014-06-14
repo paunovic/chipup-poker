@@ -150,8 +150,7 @@ var
 begin
   if (from.has_Sum) then
     SetSum(from.Sum);
-  for temp1 in from.Seats do
-    FSeats.Add(temp1); // FIXME?
+  FSeats.AddRange(from.Seats);
   for temp2 in from.WinnerData do
     FWinnerData.Add(TPB_WinnerData.Create(temp2));
   if (from.has_Rake) then

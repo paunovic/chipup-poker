@@ -298,6 +298,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  set_has_MongoId;
 end;
 
 procedure TPB_Club.clear_Members;
@@ -386,6 +387,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FOwner[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kOwnerFieldNumber, AValue);
+  set_has_Owner;
 end;
 
 procedure TPB_Club.clear_Password;

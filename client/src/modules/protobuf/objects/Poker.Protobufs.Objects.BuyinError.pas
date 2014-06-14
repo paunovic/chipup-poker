@@ -124,6 +124,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FGameId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
+  set_has_GameId;
 end;
 
 procedure TPB_BuyinError.clear_LastCashout;

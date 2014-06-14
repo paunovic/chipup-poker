@@ -170,8 +170,7 @@ begin
     SetSeat(from.Seat);
   for temp2 in from.Pots do
     FPots.Add(TPB_WinnerPotInfo.Create(temp2));
-  for temp3 in from.Bets do
-    FBets.Add(temp3); // FIXME?
+  FBets.AddRange(from.Bets);
   if (from.has_Cards) then
     SetCards(from.Cards);
 end;
@@ -317,6 +316,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FCards[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  set_has_Cards;
 end;
 
 end.

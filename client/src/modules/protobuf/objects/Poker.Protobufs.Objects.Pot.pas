@@ -112,8 +112,7 @@ var
 begin
   if (from.has_Value) then
     SetValue(from.Value);
-  for temp1 in from.Members do
-    FMembers.Add(temp1); // FIXME?
+  FMembers.AddRange(from.Members);
 end;
 
 procedure TPB_Pot.clear_Value;

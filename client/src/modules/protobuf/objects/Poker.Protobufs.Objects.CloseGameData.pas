@@ -125,6 +125,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FGameid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+  set_has_Gameid;
 end;
 
 procedure TPB_CloseGameData.clear_Timestamp;
