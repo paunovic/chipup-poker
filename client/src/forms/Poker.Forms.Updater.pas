@@ -124,7 +124,7 @@ procedure TfrmUpdater.DownloadFullInstaller;
 begin
   FFullInstaller := TRUE;
   (HttpClient.RcvdStream as TMemoryStream).Clear;
-  HttpClient.URL := Settings.DomainURL + Settings.Hardcoded.URL.LATEST_VERSION;
+  HttpClient.URL := dmMain.DomainURL + Settings.Hardcoded.URL.LATEST_VERSION;
   HttpClient.GetASync;
 end;
 

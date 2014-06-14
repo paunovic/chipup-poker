@@ -4231,6 +4231,11 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Animations'
       OnExecute = acAnimationsEnabledExecute
     end
+    object acSettings: TAction
+      Category = 'Options'
+      Caption = 'Settings'
+      OnExecute = acSettingsExecute
+    end
   end
   object MainMenu: TMainMenu
     Left = 394
@@ -4270,12 +4275,12 @@ object frmChipUpMain: TfrmChipUpMain
       object miGameplay: TMenuItem
         Caption = 'Gameplay'
         GroupIndex = 1
-        object miCheckOnFold: TMenuItem
-          Action = acFoldChecks
-          GroupIndex = 1
-        end
         object miAnimations: TMenuItem
           Action = acAnimationsEnabled
+          GroupIndex = 1
+        end
+        object miCheckOnFold: TMenuItem
+          Action = acFoldChecks
           GroupIndex = 1
         end
       end
@@ -4286,6 +4291,15 @@ object frmChipUpMain: TfrmChipUpMain
       object miHandHistory: TMenuItem
         Action = acHandHistory
         GroupIndex = 1
+      end
+      object misOptions3: TMenuItem
+        Caption = '-'
+        GroupIndex = 1
+      end
+      object miSettings: TMenuItem
+        Action = acSettings
+        GroupIndex = 1
+        Visible = False
       end
     end
     object miHelp: TMenuItem

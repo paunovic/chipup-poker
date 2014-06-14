@@ -70,7 +70,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3,
+  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule,
   Poker.Settings;
 
 
@@ -148,7 +148,7 @@ begin
   FHTTP.BandwidthLimit := 0;
   FHTTP.RequestVer := '1.1';
   FHTTP.RcvdStream := TMemoryStream.Create;
-  FHTTP.URL := Format(Settings.DomainURL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
+  FHTTP.URL := Format(dmMain.DomainURL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   FHTTP.OnRequestDone := HTTPRequestDone;
   FHTTP.SslContext.InitContext;
   FHTTP.GetAsync;
