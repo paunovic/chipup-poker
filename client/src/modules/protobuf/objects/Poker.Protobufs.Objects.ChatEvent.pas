@@ -39,17 +39,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatEvent);
 
-    // LABEL TYPE Event = 1;
+    // required FIXME Event = 1;
     function has_Event: Boolean;
     procedure clear_Event;
     property Event: TEventType read FEvent write SetEvent;
 
-    // LABEL TYPE Msg = 2;
+    // required FIXME Msg = 2;
     function has_Msg: Boolean;
     procedure clear_Msg;
     property Msg: TPB_ChatMessage read FMsg write SetMsg;
 
-    // LABEL TYPE TableId = 3;
+    // optional bytes TableId = 3;
     function has_TableId: Boolean;
     procedure clear_TableId;
     property TableId: TBytes read FTableId write SetTableId;

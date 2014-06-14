@@ -96,9 +96,28 @@ public:
 	string getBaseDelphiName() { return baseDelphiName; }
 	string PropertyName() { return propertyName; }
 	string PrivateFieldName() { return privateField; }
-	string getLableString() {
+	string getLabelString() {
 		switch (field->label()) {
 		case FieldDescriptor::LABEL_OPTIONAL: return "optional";
+		case FieldDescriptor::LABEL_REQUIRED: return "required";
+		case FieldDescriptor::LABEL_REPEATED: return "repeated";
+		}
+	}
+	string getTypeString() {
+		switch (field->type()) {
+		case FieldDescriptor::TYPE_DOUBLE: return "double";
+		case FieldDescriptor::TYPE_FLOAT: return "float";
+		case FieldDescriptor::TYPE_INT64: return "int64";
+		case FieldDescriptor::TYPE_UINT64: return "uint64";
+		case FieldDescriptor::TYPE_FIXED64: return "fixed64";
+		case FieldDescriptor::TYPE_FIXED32: return "fixed32";
+		case FieldDescriptor::TYPE_BOOL: return "bool";
+		case FieldDescriptor::TYPE_STRING: return "string";
+		case FieldDescriptor::TYPE_MESSAGE: return "FIXME";
+		case FieldDescriptor::TYPE_INT32: return "int32";
+		case FieldDescriptor::TYPE_BYTES: return "bytes";
+		case FieldDescriptor::TYPE_UINT32: return "uint32";
+		case FieldDescriptor::TYPE_ENUM: return "FIXME";
 		}
 	}
 	void printPrivateVariable(io::Printer *printer,const FieldDescriptor *field) {
@@ -630,10 +649,11 @@ void GenerateSettersImpl(const Descriptor *message, io::Printer *printer) const 
 				snprintf(hack,10,"%d",field->number());
 				vars["number"] = hack;
 				vars["type"] = instance.getDelphiName();
-				vars["label"] = instance.getLableString();
+				vars["label"] = instance.getLabelString();
+				vars["typename"] = instance.getTypeString();
 
 				printer.Print(vars,
-					"    // LABEL TYPE $name$ = $number$;\n"
+					"    // $label$ $typename$ $name$ = $number$;\n"
 					"    function has_$name$: Boolean;\n"
 					"    procedure clear_$name$;\n");
 

@@ -38,17 +38,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterParams);
 
-    // LABEL TYPE Email = 1;
+    // required string Email = 1;
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;
 
-    // LABEL TYPE Password = 2;
+    // required string Password = 2;
     function has_Password: Boolean;
     procedure clear_Password;
     property Password: String read FPassword write SetPassword;
 
-    // LABEL TYPE DisplayName = 3;
+    // required string DisplayName = 3;
     function has_DisplayName: Boolean;
     procedure clear_DisplayName;
     property DisplayName: String read FDisplayName write SetDisplayName;

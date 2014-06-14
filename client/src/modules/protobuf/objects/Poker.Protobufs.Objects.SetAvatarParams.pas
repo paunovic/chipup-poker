@@ -28,7 +28,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SetAvatarParams);
 
-    // LABEL TYPE AvatarId = 1;
+    // required bytes AvatarId = 1;
     function has_AvatarId: Boolean;
     procedure clear_AvatarId;
     property AvatarId: TBytes read FAvatarId write SetAvatarId;

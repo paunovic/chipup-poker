@@ -33,12 +33,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TransferChipsParams);
 
-    // LABEL TYPE PlayerMongoId = 2;
+    // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
 
-    // LABEL TYPE ChipAmount = 3;
+    // required uint32 ChipAmount = 3;
     function has_ChipAmount: Boolean;
     procedure clear_ChipAmount;
     property ChipAmount: UINT32 read FChipAmount write SetChipAmount;

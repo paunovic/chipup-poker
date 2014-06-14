@@ -38,17 +38,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RpcMessage);
 
-    // LABEL TYPE MethodId = 1;
+    // required int32 MethodId = 1;
     function has_MethodId: Boolean;
     procedure clear_MethodId;
     property MethodId: Integer read FMethodId write SetMethodId;
 
-    // LABEL TYPE DataSize = 2;
+    // optional int32 DataSize = 2;
     function has_DataSize: Boolean;
     procedure clear_DataSize;
     property DataSize: Integer read FDataSize write SetDataSize;
 
-    // LABEL TYPE Token = 3;
+    // optional int32 Token = 3;
     function has_Token: Boolean;
     procedure clear_Token;
     property Token: Integer read FToken write SetToken;

@@ -33,12 +33,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableBoolFlag);
 
-    // LABEL TYPE TableMongoId = 1;
+    // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
 
-    // LABEL TYPE Flag = 2;
+    // required bool Flag = 2;
     function has_Flag: Boolean;
     procedure clear_Flag;
     property Flag: Boolean read FFlag write SetFlag;

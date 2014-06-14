@@ -48,27 +48,27 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubMember);
 
-    // LABEL TYPE MongoId = 1;
+    // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // LABEL TYPE Suspended = 2;
+    // optional bool Suspended = 2;
     function has_Suspended: Boolean;
     procedure clear_Suspended;
     property Suspended: Boolean read FSuspended write SetSuspended;
 
-    // LABEL TYPE BalanceLimit = 3;
+    // optional uint32 BalanceLimit = 3;
     function has_BalanceLimit: Boolean;
     procedure clear_BalanceLimit;
     property BalanceLimit: UINT32 read FBalanceLimit write SetBalanceLimit;
 
-    // LABEL TYPE ClubBalance = 4;
+    // optional int32 ClubBalance = 4;
     function has_ClubBalance: Boolean;
     procedure clear_ClubBalance;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
 
-    // LABEL TYPE UnlimitedLimit = 5;
+    // optional bool UnlimitedLimit = 5;
     function has_UnlimitedLimit: Boolean;
     procedure clear_UnlimitedLimit;
     property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;

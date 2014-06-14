@@ -28,7 +28,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingParams);
 
-    // LABEL TYPE Uptime = 1;
+    // required uint32 Uptime = 1;
     function has_Uptime: Boolean;
     procedure clear_Uptime;
     property Uptime: UINT32 read FUptime write SetUptime;

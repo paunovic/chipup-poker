@@ -37,12 +37,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Pot);
 
-    // LABEL TYPE Value = 1;
+    // required uint32 Value = 1;
     function has_Value: Boolean;
     procedure clear_Value;
     property Value: UINT32 read FValue write SetValue;
 
-    // LABEL TYPE Members = 2;
+    // repeated int32 Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
     property Members: TList<Integer> read FMembers;

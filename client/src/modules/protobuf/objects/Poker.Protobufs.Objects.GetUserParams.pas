@@ -37,12 +37,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GetUserParams);
 
-    // LABEL TYPE UserMongoIds = 1;
+    // repeated bytes UserMongoIds = 1;
     function has_UserMongoIds: Boolean;
     procedure clear_UserMongoIds;
     property UserMongoIds: TList<TBytes> read FUserMongoIds;
 
-    // LABEL TYPE Users = 2;
+    // repeated FIXME Users = 2;
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;

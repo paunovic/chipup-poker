@@ -53,32 +53,32 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ValidCharsRegex);
 
-    // LABEL TYPE Email = 1;
+    // required string Email = 1;
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;
 
-    // LABEL TYPE Username = 2;
+    // required string Username = 2;
     function has_Username: Boolean;
     procedure clear_Username;
     property Username: String read FUsername write SetUsername;
 
-    // LABEL TYPE Password = 3;
+    // required string Password = 3;
     function has_Password: Boolean;
     procedure clear_Password;
     property Password: String read FPassword write SetPassword;
 
-    // LABEL TYPE Clubname = 4;
+    // required string Clubname = 4;
     function has_Clubname: Boolean;
     procedure clear_Clubname;
     property Clubname: String read FClubname write SetClubname;
 
-    // LABEL TYPE Clubpassword = 5;
+    // required string Clubpassword = 5;
     function has_Clubpassword: Boolean;
     procedure clear_Clubpassword;
     property Clubpassword: String read FClubpassword write SetClubpassword;
 
-    // LABEL TYPE Gamename = 6;
+    // required string Gamename = 6;
     function has_Gamename: Boolean;
     procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;

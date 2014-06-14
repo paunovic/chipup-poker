@@ -38,17 +38,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableSit);
 
-    // LABEL TYPE GameId = 1;
+    // required bytes GameId = 1;
     function has_GameId: Boolean;
     procedure clear_GameId;
     property GameId: TBytes read FGameId write SetGameId;
 
-    // LABEL TYPE SeatIndex = 2;
+    // optional int32 SeatIndex = 2;
     function has_SeatIndex: Boolean;
     procedure clear_SeatIndex;
     property SeatIndex: Integer read FSeatIndex write SetSeatIndex;
 
-    // LABEL TYPE Chips = 3;
+    // required uint32 Chips = 3;
     function has_Chips: Boolean;
     procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;

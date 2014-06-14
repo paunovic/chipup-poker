@@ -33,12 +33,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_KickPlayerParams);
 
-    // LABEL TYPE ClubSeq = 1;
+    // required int32 ClubSeq = 1;
     function has_ClubSeq: Boolean;
     procedure clear_ClubSeq;
     property ClubSeq: Integer read FClubSeq write SetClubSeq;
 
-    // LABEL TYPE PlayerMongoId = 2;
+    // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;

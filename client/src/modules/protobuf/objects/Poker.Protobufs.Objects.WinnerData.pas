@@ -34,12 +34,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_WinnerData);
 
-    // LABEL TYPE Seat = 3;
+    // required int32 Seat = 3;
     function has_Seat: Boolean;
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // LABEL TYPE Msg = 4;
+    // required string Msg = 4;
     function has_Msg: Boolean;
     procedure clear_Msg;
     property Msg: String read FMsg write SetMsg;

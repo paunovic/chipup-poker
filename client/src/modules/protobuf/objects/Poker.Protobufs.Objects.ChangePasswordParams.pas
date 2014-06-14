@@ -28,7 +28,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangePasswordParams);
 
-    // LABEL TYPE NewPassword = 1;
+    // required string NewPassword = 1;
     function has_NewPassword: Boolean;
     procedure clear_NewPassword;
     property NewPassword: String read FNewPassword write SetNewPassword;

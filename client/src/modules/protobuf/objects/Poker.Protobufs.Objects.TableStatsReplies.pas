@@ -42,17 +42,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatsReplies);
 
-    // LABEL TYPE Reply = 1;
+    // repeated FIXME Reply = 1;
     function has_Reply: Boolean;
     procedure clear_Reply;
     property Reply: TList<TPB_TableStatsReply> read FReply;
 
-    // LABEL TYPE Players = 2;
+    // repeated FIXME Players = 2;
     function has_Players: Boolean;
     procedure clear_Players;
     property Players: TList<TPB_User> read FPlayers;
 
-    // LABEL TYPE ClubStats = 3;
+    // repeated FIXME ClubStats = 3;
     function has_ClubStats: Boolean;
     procedure clear_ClubStats;
     property ClubStats: TList<TPB_ClubStatsReply> read FClubStats;

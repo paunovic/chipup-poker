@@ -38,17 +38,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PutChips);
 
-    // LABEL TYPE TableMongoId = 1;
+    // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
 
-    // LABEL TYPE ChipAmount = 2;
+    // required uint32 ChipAmount = 2;
     function has_ChipAmount: Boolean;
     procedure clear_ChipAmount;
     property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
 
-    // LABEL TYPE CurrentState = 3;
+    // required FIXME CurrentState = 3;
     function has_CurrentState: Boolean;
     procedure clear_CurrentState;
     property CurrentState: TTableState read FCurrentState write SetCurrentState;

@@ -67,42 +67,42 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TablePlayerStats);
 
-    // LABEL TYPE Userid = 1;
+    // required bytes Userid = 1;
     function has_Userid: Boolean;
     procedure clear_Userid;
     property Userid: TBytes read FUserid write SetUserid;
 
-    // LABEL TYPE Balance = 3;
+    // optional int32 Balance = 3;
     function has_Balance: Boolean;
     procedure clear_Balance;
     property Balance: Integer read FBalance write SetBalance;
 
-    // LABEL TYPE Buyins = 4;
+    // repeated uint32 Buyins = 4;
     function has_Buyins: Boolean;
     procedure clear_Buyins;
     property Buyins: TList<UINT32> read FBuyins;
 
-    // LABEL TYPE Cashouts = 5;
+    // repeated uint32 Cashouts = 5;
     function has_Cashouts: Boolean;
     procedure clear_Cashouts;
     property Cashouts: TList<UINT32> read FCashouts;
 
-    // LABEL TYPE Rakecontrib = 6;
+    // optional uint32 Rakecontrib = 6;
     function has_Rakecontrib: Boolean;
     procedure clear_Rakecontrib;
     property Rakecontrib: UINT32 read FRakecontrib write SetRakecontrib;
 
-    // LABEL TYPE Secondsplayed = 7;
+    // optional uint32 Secondsplayed = 7;
     function has_Secondsplayed: Boolean;
     procedure clear_Secondsplayed;
     property Secondsplayed: UINT32 read FSecondsplayed write SetSecondsplayed;
 
-    // LABEL TYPE Chipsinplay = 8;
+    // optional uint32 Chipsinplay = 8;
     function has_Chipsinplay: Boolean;
     procedure clear_Chipsinplay;
     property Chipsinplay: UINT32 read FChipsinplay write SetChipsinplay;
 
-    // LABEL TYPE Hands = 9;
+    // optional uint32 Hands = 9;
     function has_Hands: Boolean;
     procedure clear_Hands;
     property Hands: UINT32 read FHands write SetHands;

@@ -29,7 +29,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeMailReply);
 
-    // LABEL TYPE Status = 1;
+    // required FIXME Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TChangeMailStatus read FStatus write SetStatus;

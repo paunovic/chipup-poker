@@ -33,12 +33,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_BuyinError);
 
-    // LABEL TYPE GameId = 1;
+    // required bytes GameId = 1;
     function has_GameId: Boolean;
     procedure clear_GameId;
     property GameId: TBytes read FGameId write SetGameId;
 
-    // LABEL TYPE LastCashout = 2;
+    // required uint32 LastCashout = 2;
     function has_LastCashout: Boolean;
     procedure clear_LastCashout;
     property LastCashout: UINT32 read FLastCashout write SetLastCashout;

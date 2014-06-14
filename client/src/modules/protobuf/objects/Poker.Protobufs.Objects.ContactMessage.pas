@@ -34,12 +34,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ContactMessage);
 
-    // LABEL TYPE Reason = 1;
+    // required FIXME Reason = 1;
     function has_Reason: Boolean;
     procedure clear_Reason;
     property Reason: TContactReason read FReason write SetReason;
 
-    // LABEL TYPE Message = 2;
+    // required string Message = 2;
     function has_Message: Boolean;
     procedure clear_Message;
     property Message: String read FMessage write SetMessage;

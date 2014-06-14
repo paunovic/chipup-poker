@@ -37,12 +37,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloParams);
 
-    // LABEL TYPE Debug = 1;
+    // required bool Debug = 1;
     function has_Debug: Boolean;
     procedure clear_Debug;
     property Debug: Boolean read FDebug write SetDebug;
 
-    // LABEL TYPE Files = 2;
+    // repeated FIXME Files = 2;
     function has_Files: Boolean;
     procedure clear_Files;
     property Files: TList<TPB_UpdateFileInfo> read FFiles;

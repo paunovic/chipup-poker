@@ -87,62 +87,62 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HandHistory);
 
-    // LABEL TYPE MongoId = 1;
+    // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // LABEL TYPE Seq = 2;
+    // required uint32 Seq = 2;
     function has_Seq: Boolean;
     procedure clear_Seq;
     property Seq: UINT32 read FSeq write SetSeq;
 
-    // LABEL TYPE Totalrake = 3;
+    // required uint32 Totalrake = 3;
     function has_Totalrake: Boolean;
     procedure clear_Totalrake;
     property Totalrake: UINT32 read FTotalrake write SetTotalrake;
 
-    // LABEL TYPE Players = 4;
+    // repeated FIXME Players = 4;
     function has_Players: Boolean;
     procedure clear_Players;
     property Players: TList<TPB_PlayerHandHistory> read FPlayers;
 
-    // LABEL TYPE Cards = 5;
+    // required bytes Cards = 5;
     function has_Cards: Boolean;
     procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
 
-    // LABEL TYPE Endtime = 6;
+    // required uint32 Endtime = 6;
     function has_Endtime: Boolean;
     procedure clear_Endtime;
     property Endtime: UINT32 read FEndtime write SetEndtime;
 
-    // LABEL TYPE BalanceChanges = 7;
+    // repeated int32 BalanceChanges = 7;
     function has_BalanceChanges: Boolean;
     procedure clear_BalanceChanges;
     property BalanceChanges: TList<Integer> read FBalanceChanges;
 
-    // LABEL TYPE Moves = 8;
+    // repeated FIXME Moves = 8;
     function has_Moves: Boolean;
     procedure clear_Moves;
     property Moves: TList<TPB_MoveRow> read FMoves;
 
-    // LABEL TYPE Dealer = 9;
+    // required uint32 Dealer = 9;
     function has_Dealer: Boolean;
     procedure clear_Dealer;
     property Dealer: UINT32 read FDealer write SetDealer;
 
-    // LABEL TYPE Game = 10;
+    // optional FIXME Game = 10;
     function has_Game: Boolean;
     procedure clear_Game;
     property Game: TPB_Game read FGame write SetGame;
 
-    // LABEL TYPE CurrentGame = 11;
+    // optional FIXME CurrentGame = 11;
     function has_CurrentGame: Boolean;
     procedure clear_CurrentGame;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
 
-    // LABEL TYPE Rake = 12;
+    // required int32 Rake = 12;
     function has_Rake: Boolean;
     procedure clear_Rake;
     property Rake: Integer read FRake write SetRake;

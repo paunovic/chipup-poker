@@ -58,37 +58,37 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_StringSizes);
 
-    // LABEL TYPE Email = 1;
+    // required int32 Email = 1;
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: Integer read FEmail write SetEmail;
 
-    // LABEL TYPE Password = 2;
+    // required int32 Password = 2;
     function has_Password: Boolean;
     procedure clear_Password;
     property Password: Integer read FPassword write SetPassword;
 
-    // LABEL TYPE Clubname = 3;
+    // required int32 Clubname = 3;
     function has_Clubname: Boolean;
     procedure clear_Clubname;
     property Clubname: Integer read FClubname write SetClubname;
 
-    // LABEL TYPE Invcode = 4;
+    // required int32 Invcode = 4;
     function has_Invcode: Boolean;
     procedure clear_Invcode;
     property Invcode: Integer read FInvcode write SetInvcode;
 
-    // LABEL TYPE Username = 5;
+    // required int32 Username = 5;
     function has_Username: Boolean;
     procedure clear_Username;
     property Username: Integer read FUsername write SetUsername;
 
-    // LABEL TYPE Gamename = 6;
+    // required int32 Gamename = 6;
     function has_Gamename: Boolean;
     procedure clear_Gamename;
     property Gamename: Integer read FGamename write SetGamename;
 
-    // LABEL TYPE ContactMessage = 7;
+    // required int32 ContactMessage = 7;
     function has_ContactMessage: Boolean;
     procedure clear_ContactMessage;
     property ContactMessage: Integer read FContactMessage write SetContactMessage;

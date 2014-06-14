@@ -53,27 +53,27 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableEvent);
 
-    // LABEL TYPE Event = 1;
+    // required FIXME Event = 1;
     function has_Event: Boolean;
     procedure clear_Event;
     property Event: TTableEventType read FEvent write SetEvent;
 
-    // LABEL TYPE Seat = 2;
+    // optional int32 Seat = 2;
     function has_Seat: Boolean;
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // LABEL TYPE Pots = 4;
+    // repeated FIXME Pots = 4;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_WinnerPotInfo> read FPots;
 
-    // LABEL TYPE Bets = 5;
+    // repeated uint32 Bets = 5;
     function has_Bets: Boolean;
     procedure clear_Bets;
     property Bets: TList<UINT32> read FBets;
 
-    // LABEL TYPE Cards = 6;
+    // optional bytes Cards = 6;
     function has_Cards: Boolean;
     procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;

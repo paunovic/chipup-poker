@@ -53,32 +53,32 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_User);
 
-    // LABEL TYPE MongoId = 1;
+    // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // LABEL TYPE Avatar = 2;
+    // optional bytes Avatar = 2;
     function has_Avatar: Boolean;
     procedure clear_Avatar;
     property Avatar: TBytes read FAvatar write SetAvatar;
 
-    // LABEL TYPE Displayname = 3;
+    // required string Displayname = 3;
     function has_Displayname: Boolean;
     procedure clear_Displayname;
     property Displayname: String read FDisplayname write SetDisplayname;
 
-    // LABEL TYPE Email = 5;
+    // optional string Email = 5;
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;
 
-    // LABEL TYPE Authed = 6;
+    // optional bool Authed = 6;
     function has_Authed: Boolean;
     procedure clear_Authed;
     property Authed: Boolean read FAuthed write SetAuthed;
 
-    // LABEL TYPE Chips = 7;
+    // optional uint32 Chips = 7;
     function has_Chips: Boolean;
     procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;

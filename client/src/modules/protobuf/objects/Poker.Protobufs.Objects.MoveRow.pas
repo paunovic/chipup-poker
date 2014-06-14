@@ -52,27 +52,27 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_MoveRow);
 
-    // LABEL TYPE Code = 1;
+    // repeated FIXME Code = 1;
     function has_Code: Boolean;
     procedure clear_Code;
     property Code: TList<TTableEventType> read FCode;
 
-    // LABEL TYPE Bet = 2;
+    // optional uint32 Bet = 2;
     function has_Bet: Boolean;
     procedure clear_Bet;
     property Bet: UINT32 read FBet write SetBet;
 
-    // LABEL TYPE Seat = 3;
+    // optional int32 Seat = 3;
     function has_Seat: Boolean;
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // LABEL TYPE Potdata = 4;
+    // repeated FIXME Potdata = 4;
     function has_Potdata: Boolean;
     procedure clear_Potdata;
     property Potdata: TList<TPB_WinnerPotInfo> read FPotdata;
 
-    // LABEL TYPE Pots = 5;
+    // repeated FIXME Pots = 5;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;

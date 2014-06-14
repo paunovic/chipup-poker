@@ -67,42 +67,42 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloReply);
 
-    // LABEL TYPE StringSizes = 1;
+    // required FIXME StringSizes = 1;
     function has_StringSizes: Boolean;
     procedure clear_StringSizes;
     property StringSizes: TPB_StringSizes read FStringSizes write SetStringSizes;
 
-    // LABEL TYPE ChangeExpireTime = 2;
+    // required int32 ChangeExpireTime = 2;
     function has_ChangeExpireTime: Boolean;
     procedure clear_ChangeExpireTime;
     property ChangeExpireTime: Integer read FChangeExpireTime write SetChangeExpireTime;
 
-    // LABEL TYPE ForgotExpireTime = 3;
+    // required int32 ForgotExpireTime = 3;
     function has_ForgotExpireTime: Boolean;
     procedure clear_ForgotExpireTime;
     property ForgotExpireTime: Integer read FForgotExpireTime write SetForgotExpireTime;
 
-    // LABEL TYPE MaxPlayTime = 4;
+    // required int32 MaxPlayTime = 4;
     function has_MaxPlayTime: Boolean;
     procedure clear_MaxPlayTime;
     property MaxPlayTime: Integer read FMaxPlayTime write SetMaxPlayTime;
 
-    // LABEL TYPE MaxTimebank = 5;
+    // required int32 MaxTimebank = 5;
     function has_MaxTimebank: Boolean;
     procedure clear_MaxTimebank;
     property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
 
-    // LABEL TYPE MinSizes = 6;
+    // required FIXME MinSizes = 6;
     function has_MinSizes: Boolean;
     procedure clear_MinSizes;
     property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
 
-    // LABEL TYPE UpdateFiles = 7;
+    // repeated FIXME UpdateFiles = 7;
     function has_UpdateFiles: Boolean;
     procedure clear_UpdateFiles;
     property UpdateFiles: TList<TPB_UpdateFileInfo> read FUpdateFiles;
 
-    // LABEL TYPE ValidCharsRegex = 8;
+    // required FIXME ValidCharsRegex = 8;
     function has_ValidCharsRegex: Boolean;
     procedure clear_ValidCharsRegex;
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;

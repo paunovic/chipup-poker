@@ -82,57 +82,57 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Club);
 
-    // LABEL TYPE MongoId = 1;
+    // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // LABEL TYPE Members = 2;
+    // repeated FIXME Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
     property Members: TList<TPB_ClubMember> read FMembers;
 
-    // LABEL TYPE Name = 3;
+    // optional string Name = 3;
     function has_Name: Boolean;
     procedure clear_Name;
     property Name: String read FName write SetName;
 
-    // LABEL TYPE Owner = 4;
+    // optional bytes Owner = 4;
     function has_Owner: Boolean;
     procedure clear_Owner;
     property Owner: TBytes read FOwner write SetOwner;
 
-    // LABEL TYPE Password = 5;
+    // optional string Password = 5;
     function has_Password: Boolean;
     procedure clear_Password;
     property Password: String read FPassword write SetPassword;
 
-    // LABEL TYPE IsPrivate = 6;
+    // optional bool IsPrivate = 6;
     function has_IsPrivate: Boolean;
     procedure clear_IsPrivate;
     property IsPrivate: Boolean read FIsPrivate write SetIsPrivate;
 
-    // LABEL TYPE Seq = 7;
+    // optional int32 Seq = 7;
     function has_Seq: Boolean;
     procedure clear_Seq;
     property Seq: Integer read FSeq write SetSeq;
 
-    // LABEL TYPE HasPassword = 8;
+    // optional bool HasPassword = 8;
     function has_HasPassword: Boolean;
     procedure clear_HasPassword;
     property HasPassword: Boolean read FHasPassword write SetHasPassword;
 
-    // LABEL TYPE Rake = 9;
+    // optional uint32 Rake = 9;
     function has_Rake: Boolean;
     procedure clear_Rake;
     property Rake: UINT32 read FRake write SetRake;
 
-    // LABEL TYPE DefaultBalanceLimit = 10;
+    // optional uint32 DefaultBalanceLimit = 10;
     function has_DefaultBalanceLimit: Boolean;
     procedure clear_DefaultBalanceLimit;
     property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
 
-    // LABEL TYPE UnlimitedDefaultBalance = 11;
+    // optional bool UnlimitedDefaultBalance = 11;
     function has_UnlimitedDefaultBalance: Boolean;
     procedure clear_UnlimitedDefaultBalance;
     property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;

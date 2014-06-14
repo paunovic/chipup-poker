@@ -43,17 +43,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginReply);
 
-    // LABEL TYPE LoginStatus = 1;
+    // required FIXME LoginStatus = 1;
     function has_LoginStatus: Boolean;
     procedure clear_LoginStatus;
     property LoginStatus: TLoginStatus read FLoginStatus write SetLoginStatus;
 
-    // LABEL TYPE Status = 2;
+    // optional FIXME Status = 2;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TPB_StatusReply read FStatus write SetStatus;
 
-    // LABEL TYPE ReconnectTables = 3;
+    // repeated FIXME ReconnectTables = 3;
     function has_ReconnectTables: Boolean;
     procedure clear_ReconnectTables;
     property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;

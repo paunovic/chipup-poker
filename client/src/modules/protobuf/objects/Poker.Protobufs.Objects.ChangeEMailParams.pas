@@ -28,7 +28,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeEMailParams);
 
-    // LABEL TYPE NewMail = 1;
+    // required string NewMail = 1;
     function has_NewMail: Boolean;
     procedure clear_NewMail;
     property NewMail: String read FNewMail write SetNewMail;

@@ -47,22 +47,22 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_WinnerPotInfo);
 
-    // LABEL TYPE Sum = 1;
+    // required uint32 Sum = 1;
     function has_Sum: Boolean;
     procedure clear_Sum;
     property Sum: UINT32 read FSum write SetSum;
 
-    // LABEL TYPE Seats = 2;
+    // repeated int32 Seats = 2;
     function has_Seats: Boolean;
     procedure clear_Seats;
     property Seats: TList<Integer> read FSeats;
 
-    // LABEL TYPE WinnerData = 3;
+    // repeated FIXME WinnerData = 3;
     function has_WinnerData: Boolean;
     procedure clear_WinnerData;
     property WinnerData: TList<TPB_WinnerData> read FWinnerData;
 
-    // LABEL TYPE Rake = 4;
+    // optional uint32 Rake = 4;
     function has_Rake: Boolean;
     procedure clear_Rake;
     property Rake: UINT32 read FRake write SetRake;

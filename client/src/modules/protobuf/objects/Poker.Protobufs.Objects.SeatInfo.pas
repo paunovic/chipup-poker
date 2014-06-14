@@ -74,52 +74,52 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SeatInfo);
 
-    // LABEL TYPE Seat = 1;
+    // required int32 Seat = 1;
     function has_Seat: Boolean;
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // LABEL TYPE PlayerMongoId = 2;
+    // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
 
-    // LABEL TYPE Chips = 3;
+    // required uint32 Chips = 3;
     function has_Chips: Boolean;
     procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;
 
-    // LABEL TYPE CardCount = 4;
+    // optional int32 CardCount = 4;
     function has_CardCount: Boolean;
     procedure clear_CardCount;
     property CardCount: Integer read FCardCount write SetCardCount;
 
-    // LABEL TYPE Cards = 5;
+    // optional bytes Cards = 5;
     function has_Cards: Boolean;
     procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
 
-    // LABEL TYPE Status = 6;
+    // required FIXME Status = 6;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TPlayerStatus read FStatus write SetStatus;
 
-    // LABEL TYPE Timebank = 7;
+    // required uint32 Timebank = 7;
     function has_Timebank: Boolean;
     procedure clear_Timebank;
     property Timebank: UINT32 read FTimebank write SetTimebank;
 
-    // LABEL TYPE CardsVisible = 8;
+    // required bool CardsVisible = 8;
     function has_CardsVisible: Boolean;
     procedure clear_CardsVisible;
     property CardsVisible: Boolean read FCardsVisible write SetCardsVisible;
 
-    // LABEL TYPE Disconnected = 9;
+    // required bool Disconnected = 9;
     function has_Disconnected: Boolean;
     procedure clear_Disconnected;
     property Disconnected: Boolean read FDisconnected write SetDisconnected;
 
-    // LABEL TYPE CanShow = 10;
+    // optional bool CanShow = 10;
     function has_CanShow: Boolean;
     procedure clear_CanShow;
     property CanShow: Boolean read FCanShow write SetCanShow;

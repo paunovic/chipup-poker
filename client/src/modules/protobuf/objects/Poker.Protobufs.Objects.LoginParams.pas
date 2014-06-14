@@ -33,12 +33,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginParams);
 
-    // LABEL TYPE Username = 1;
+    // required string Username = 1;
     function has_Username: Boolean;
     procedure clear_Username;
     property Username: String read FUsername write SetUsername;
 
-    // LABEL TYPE Password = 2;
+    // required string Password = 2;
     function has_Password: Boolean;
     procedure clear_Password;
     property Password: String read FPassword write SetPassword;

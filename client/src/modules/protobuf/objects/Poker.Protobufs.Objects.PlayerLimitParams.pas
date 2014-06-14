@@ -43,22 +43,22 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerLimitParams);
 
-    // LABEL TYPE Clubid = 1;
+    // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
     property Clubid: TBytes read FClubid write SetClubid;
 
-    // LABEL TYPE Userid = 2;
+    // required bytes Userid = 2;
     function has_Userid: Boolean;
     procedure clear_Userid;
     property Userid: TBytes read FUserid write SetUserid;
 
-    // LABEL TYPE Limit = 3;
+    // required uint32 Limit = 3;
     function has_Limit: Boolean;
     procedure clear_Limit;
     property Limit: UINT32 read FLimit write SetLimit;
 
-    // LABEL TYPE Unlimited = 4;
+    // required bool Unlimited = 4;
     function has_Unlimited: Boolean;
     procedure clear_Unlimited;
     property Unlimited: Boolean read FUnlimited write SetUnlimited;

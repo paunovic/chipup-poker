@@ -28,7 +28,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ForgotPasswordParams);
 
-    // LABEL TYPE Email = 1;
+    // required string Email = 1;
     function has_Email: Boolean;
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;

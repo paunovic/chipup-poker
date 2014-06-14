@@ -138,112 +138,112 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatus);
 
-    // LABEL TYPE TableMongoId = 1;
+    // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
 
-    // LABEL TYPE Seats = 2;
+    // repeated FIXME Seats = 2;
     function has_Seats: Boolean;
     procedure clear_Seats;
     property Seats: TList<TPB_SeatInfo> read FSeats;
 
-    // LABEL TYPE State = 3;
+    // required FIXME State = 3;
     function has_State: Boolean;
     procedure clear_State;
     property State: TTableState read FState write SetState;
 
-    // LABEL TYPE Dealer = 4;
+    // required int32 Dealer = 4;
     function has_Dealer: Boolean;
     procedure clear_Dealer;
     property Dealer: Integer read FDealer write SetDealer;
 
-    // LABEL TYPE CurrentSeat = 5;
+    // required int32 CurrentSeat = 5;
     function has_CurrentSeat: Boolean;
     procedure clear_CurrentSeat;
     property CurrentSeat: Integer read FCurrentSeat write SetCurrentSeat;
 
-    // LABEL TYPE Bets = 6;
+    // repeated uint32 Bets = 6;
     function has_Bets: Boolean;
     procedure clear_Bets;
     property Bets: TList<UINT32> read FBets;
 
-    // LABEL TYPE Locked = 11;
+    // required bool Locked = 11;
     function has_Locked: Boolean;
     procedure clear_Locked;
     property Locked: Boolean read FLocked write SetLocked;
 
-    // LABEL TYPE Seq = 12;
+    // optional int32 Seq = 12;
     function has_Seq: Boolean;
     procedure clear_Seq;
     property Seq: Integer read FSeq write SetSeq;
 
-    // LABEL TYPE MinimumBet = 13;
+    // optional uint32 MinimumBet = 13;
     function has_MinimumBet: Boolean;
     procedure clear_MinimumBet;
     property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
 
-    // LABEL TYPE MaximumRaise = 14;
+    // optional uint32 MaximumRaise = 14;
     function has_MaximumRaise: Boolean;
     procedure clear_MaximumRaise;
     property MaximumRaise: UINT32 read FMaximumRaise write SetMaximumRaise;
 
-    // LABEL TYPE SmallBlind = 15;
+    // optional uint32 SmallBlind = 15;
     function has_SmallBlind: Boolean;
     procedure clear_SmallBlind;
     property SmallBlind: UINT32 read FSmallBlind write SetSmallBlind;
 
-    // LABEL TYPE BigBlind = 16;
+    // optional uint32 BigBlind = 16;
     function has_BigBlind: Boolean;
     procedure clear_BigBlind;
     property BigBlind: UINT32 read FBigBlind write SetBigBlind;
 
-    // LABEL TYPE Handid = 17;
+    // optional uint32 Handid = 17;
     function has_Handid: Boolean;
     procedure clear_Handid;
     property Handid: UINT32 read FHandid write SetHandid;
 
-    // LABEL TYPE Time = 18;
+    // optional uint64 Time = 18;
     function has_Time: Boolean;
     procedure clear_Time;
     property Time: UInt64 read FTime write SetTime;
 
-    // LABEL TYPE Events = 19;
+    // repeated FIXME Events = 19;
     function has_Events: Boolean;
     procedure clear_Events;
     property Events: TList<TPB_TableEvent> read FEvents;
 
-    // LABEL TYPE Pots = 20;
+    // repeated FIXME Pots = 20;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
 
-    // LABEL TYPE RakePercent = 21;
+    // optional uint32 RakePercent = 21;
     function has_RakePercent: Boolean;
     procedure clear_RakePercent;
     property RakePercent: UINT32 read FRakePercent write SetRakePercent;
 
-    // LABEL TYPE CurrentGame = 22;
+    // optional FIXME CurrentGame = 22;
     function has_CurrentGame: Boolean;
     procedure clear_CurrentGame;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
 
-    // LABEL TYPE Rotation = 23;
+    // optional uint32 Rotation = 23;
     function has_Rotation: Boolean;
     procedure clear_Rotation;
     property Rotation: UINT32 read FRotation write SetRotation;
 
-    // LABEL TYPE TotalBalance = 24;
+    // required uint32 TotalBalance = 24;
     function has_TotalBalance: Boolean;
     procedure clear_TotalBalance;
     property TotalBalance: UINT32 read FTotalBalance write SetTotalBalance;
 
-    // LABEL TYPE GameLimit = 25;
+    // optional FIXME GameLimit = 25;
     function has_GameLimit: Boolean;
     procedure clear_GameLimit;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
 
-    // LABEL TYPE MinimumRaise = 26;
+    // optional uint32 MinimumRaise = 26;
     function has_MinimumRaise: Boolean;
     procedure clear_MinimumRaise;
     property MinimumRaise: UINT32 read FMinimumRaise write SetMinimumRaise;

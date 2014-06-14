@@ -97,72 +97,72 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Game);
 
-    // LABEL TYPE MongoId = 1;
+    // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // LABEL TYPE CreatorMongoId = 2;
+    // optional bytes CreatorMongoId = 2;
     function has_CreatorMongoId: Boolean;
     procedure clear_CreatorMongoId;
     property CreatorMongoId: TBytes read FCreatorMongoId write SetCreatorMongoId;
 
-    // LABEL TYPE Gamename = 3;
+    // optional string Gamename = 3;
     function has_Gamename: Boolean;
     procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;
 
-    // LABEL TYPE Clubseq = 4;
+    // optional int32 Clubseq = 4;
     function has_Clubseq: Boolean;
     procedure clear_Clubseq;
     property Clubseq: Integer read FClubseq write SetClubseq;
 
-    // LABEL TYPE GameType = 5;
+    // optional FIXME GameType = 5;
     function has_GameType: Boolean;
     procedure clear_GameType;
     property GameType: TGameType read FGameType write SetGameType;
 
-    // LABEL TYPE GameLimit = 6;
+    // optional FIXME GameLimit = 6;
     function has_GameLimit: Boolean;
     procedure clear_GameLimit;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
 
-    // LABEL TYPE Blinds = 7;
+    // optional FIXME Blinds = 7;
     function has_Blinds: Boolean;
     procedure clear_Blinds;
     property Blinds: TGameBlinds read FBlinds write SetBlinds;
 
-    // LABEL TYPE Seats = 9;
+    // optional int32 Seats = 9;
     function has_Seats: Boolean;
     procedure clear_Seats;
     property Seats: Integer read FSeats write SetSeats;
 
-    // LABEL TYPE Sitting = 10;
+    // optional int32 Sitting = 10;
     function has_Sitting: Boolean;
     procedure clear_Sitting;
     property Sitting: Integer read FSitting write SetSitting;
 
-    // LABEL TYPE BuyinMin = 11;
+    // optional int32 BuyinMin = 11;
     function has_BuyinMin: Boolean;
     procedure clear_BuyinMin;
     property BuyinMin: Integer read FBuyinMin write SetBuyinMin;
 
-    // LABEL TYPE BuyinMax = 12;
+    // optional int32 BuyinMax = 12;
     function has_BuyinMax: Boolean;
     procedure clear_BuyinMax;
     property BuyinMax: Integer read FBuyinMax write SetBuyinMax;
 
-    // LABEL TYPE State = 13;
+    // optional FIXME State = 13;
     function has_State: Boolean;
     procedure clear_State;
     property State: TGameState read FState write SetState;
 
-    // LABEL TYPE Closetime = 14;
+    // optional uint64 Closetime = 14;
     function has_Closetime: Boolean;
     procedure clear_Closetime;
     property Closetime: UInt64 read FClosetime write SetClosetime;
 
-    // LABEL TYPE Lasthandid = 15;
+    // optional uint32 Lasthandid = 15;
     function has_Lasthandid: Boolean;
     procedure clear_Lasthandid;
     property Lasthandid: UINT32 read FLasthandid write SetLasthandid;

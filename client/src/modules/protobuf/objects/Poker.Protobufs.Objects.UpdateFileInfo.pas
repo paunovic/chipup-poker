@@ -49,27 +49,27 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UpdateFileInfo);
 
-    // LABEL TYPE Path = 1;
+    // required string Path = 1;
     function has_Path: Boolean;
     procedure clear_Path;
     property Path: String read FPath write SetPath;
 
-    // LABEL TYPE Hash = 2;
+    // optional bytes Hash = 2;
     function has_Hash: Boolean;
     procedure clear_Hash;
     property Hash: TBytes read FHash write SetHash;
 
-    // LABEL TYPE Url = 3;
+    // optional string Url = 3;
     function has_Url: Boolean;
     procedure clear_Url;
     property Url: String read FUrl write SetUrl;
 
-    // LABEL TYPE FileType = 4;
+    // optional FIXME FileType = 4;
     function has_FileType: Boolean;
     procedure clear_FileType;
     property FileType: TUpdateFileType read FFileType write SetFileType;
 
-    // LABEL TYPE FileSize = 5;
+    // optional uint32 FileSize = 5;
     function has_FileSize: Boolean;
     procedure clear_FileSize;
     property FileSize: UINT32 read FFileSize write SetFileSize;

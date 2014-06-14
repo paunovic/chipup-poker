@@ -32,7 +32,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_QueryTableStats);
 
-    // LABEL TYPE Gameid = 1;
+    // repeated bytes Gameid = 1;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
     property Gameid: TList<TBytes> read FGameid;

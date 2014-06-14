@@ -32,7 +32,7 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UserChangeParams);
 
-    // LABEL TYPE Users = 1;
+    // repeated FIXME Users = 1;
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;

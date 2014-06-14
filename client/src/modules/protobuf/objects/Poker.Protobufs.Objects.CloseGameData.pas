@@ -34,12 +34,12 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_CloseGameData);
 
-    // LABEL TYPE Gameid = 1;
+    // required bytes Gameid = 1;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
     property Gameid: TBytes read FGameid write SetGameid;
 
-    // LABEL TYPE Timestamp = 2;
+    // required FIXME Timestamp = 2;
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;

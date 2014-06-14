@@ -43,22 +43,22 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatMessage);
 
-    // LABEL TYPE MongoId = 1;
+    // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // LABEL TYPE Username = 2;
+    // optional string Username = 2;
     function has_Username: Boolean;
     procedure clear_Username;
     property Username: String read FUsername write SetUsername;
 
-    // LABEL TYPE Msg = 3;
+    // required string Msg = 3;
     function has_Msg: Boolean;
     procedure clear_Msg;
     property Msg: String read FMsg write SetMsg;
 
-    // LABEL TYPE Timestamp = 4;
+    // optional int64 Timestamp = 4;
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
     property Timestamp: Int64 read FTimestamp write SetTimestamp;

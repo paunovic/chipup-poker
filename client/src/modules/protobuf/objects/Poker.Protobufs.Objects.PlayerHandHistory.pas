@@ -58,37 +58,37 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerHandHistory);
 
-    // LABEL TYPE MongoId = 1;
+    // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // LABEL TYPE Seat = 2;
+    // required int32 Seat = 2;
     function has_Seat: Boolean;
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // LABEL TYPE Cards = 3;
+    // optional bytes Cards = 3;
     function has_Cards: Boolean;
     procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
 
-    // LABEL TYPE Chips = 4;
+    // required uint32 Chips = 4;
     function has_Chips: Boolean;
     procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;
 
-    // LABEL TYPE Nick = 5;
+    // required string Nick = 5;
     function has_Nick: Boolean;
     procedure clear_Nick;
     property Nick: String read FNick write SetNick;
 
-    // LABEL TYPE Muck = 6;
+    // required bool Muck = 6;
     function has_Muck: Boolean;
     procedure clear_Muck;
     property Muck: Boolean read FMuck write SetMuck;
 
-    // LABEL TYPE Status = 7;
+    // required FIXME Status = 7;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TPlayerStatus read FStatus write SetStatus;

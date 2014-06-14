@@ -38,17 +38,17 @@ type
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeSuspendState);
 
-    // LABEL TYPE ClubMongoId = 1;
+    // required bytes ClubMongoId = 1;
     function has_ClubMongoId: Boolean;
     procedure clear_ClubMongoId;
     property ClubMongoId: TBytes read FClubMongoId write SetClubMongoId;
 
-    // LABEL TYPE PlayerMongoId = 3;
+    // required bytes PlayerMongoId = 3;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
 
-    // LABEL TYPE Suspended = 2;
+    // required bool Suspended = 2;
     function has_Suspended: Boolean;
     procedure clear_Suspended;
     property Suspended: Boolean read FSuspended write SetSuspended;
