@@ -927,5 +927,7 @@ int main(int argc, char *argv[]) {
 	else gen = new DelphiGenerator();
 	int ret = google::protobuf::compiler::PluginMain(argc,argv,gen);
 	delete gen;
+
+	for (int i=0; i<FieldDescriptor::MAX_TYPE; i++) if (typeinfo[i]) delete typeinfo[i];
 	return ret;
 }

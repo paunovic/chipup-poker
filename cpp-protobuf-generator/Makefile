@@ -1,4 +1,4 @@
-CXXFLAGS=-Wall
+CXXFLAGS=-Wall -g
 ifeq ($(OS),Windows_NT)
 	LDFLAGS += protobuf.a
 	EXTENSION = .exe
@@ -11,3 +11,4 @@ protoc-gen-delphi${EXTENSION}: main.o
 protoc-gen-pascal${EXTENSION}: protoc-gen-delphi${EXTENSION}
 	cp protoc-gen-delphi${EXTENSION} protoc-gen-pascal${EXTENSION}
 main.o: main.cpp
+	g++ ${CXXFLAGS} -c -o $@ $+
