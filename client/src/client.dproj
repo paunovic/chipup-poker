@@ -511,9 +511,6 @@
 					<Platform value="Win32">True</Platform>
 				</Platforms>
 				<ModelSupport>False</ModelSupport>
-				<UnitTesting>
-					<TestProjectName>D:\projects\ChipUpPoker\client\src\Tests\clientTests.dproj</TestProjectName>
-				</UnitTesting>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
 		</ProjectExtensions>

@@ -8,13 +8,7 @@ uses
   cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo, Poker.Forms.Login, Poker.Objects.GameInfo, cxImage, Vcl.ActnMan,
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses,
-  cxNavigator, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkRoom, dxSkinDarkSide,
-  dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian,
-  dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue,
-  dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver,
-  dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime, dxSkinStardust,
-  dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinsDefaultPainters, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint, dxSkinXmas2008Blue;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses;
 
 type
   TfrmChipUpMain = class(TForm)
