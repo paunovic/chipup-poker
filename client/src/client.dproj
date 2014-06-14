@@ -331,6 +331,10 @@
 			<DCCReference Include="modules\objects\Poker.Objects.WinnerData.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.TableEvent.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.DX9Canvas.pas"/>
+			<DCCReference Include="forms\Poker.Forms.Settings.pas">
+				<Form>frmSettings</Form>
+				<FormType>dfm</FormType>
+			</DCCReference>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

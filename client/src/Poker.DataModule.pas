@@ -29,6 +29,7 @@ type
       FUpdaterBatchFile: String;
       FUpdaterInstallerFile: String;
       FReconnectedTables: TObjectList<TPB_TableStatus>;
+      FDomainURL: String;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -49,6 +50,7 @@ type
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
 
+    property DomainURL: String read FDomainURL write FDomainURL;
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
@@ -115,12 +117,12 @@ begin
      (Settings.ServerIndex = 1) then
   begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    Settings.DomainURL := DEV_URL_DOMAIN;
+    dmMain.DomainURL := DEV_URL_DOMAIN;
   end
   else
   begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    Settings.DomainURL := URL_DOMAIN;
+    dmMain.DomainURL := URL_DOMAIN;
   end;
 
   FSelfInfo := TPlayerInfo.Create;

@@ -18,6 +18,7 @@ type
       JSON_SOUNDS            = 'sounds';
       JSON_FOLD_CHECKS       = 'fold_checks';
       JSON_ANIMATIONS        = 'animations';
+      JSON_CARD_BACKGROUND   = 'card_background';
 
       JSON_DEFAULT_LOGIN             = '';
       JSON_DEFAULT_PASSWORD          = '';
@@ -28,6 +29,7 @@ type
       JSON_DEFAULT_SOUNDS            = TRUE;
       JSON_DEFAULT_FOLD_CHECKS       = FALSE;
       JSON_DEFAULT_ANIMATIONS        = TRUE;
+      JSON_DEFAULT_CARD_BACKGROUND   = 1;
 
     function GetJSONString(const AField, ADefaultValue: String): String;
     function GetJSONInt(const AField: String; const ADefaultValue: Int64): Int64;
@@ -51,11 +53,12 @@ type
     procedure SetFoldChecks(const AValue: Boolean);
     function GetAnimations: Boolean;
     procedure SetAnimations(const AValue: Boolean);
+    function GetCardBackground: Integer;
+    procedure SetCardBackground(const AValue: Integer);
 
     var
       FJSON: ISuperObject;
       FSettingsFile: String;
-      FDomainURL: String;
 
   public
     constructor Create(const ASettingsFile: String);
@@ -78,8 +81,7 @@ type
     property Sounds: Boolean read GetSounds write SetSounds;
     property FoldChecks: Boolean read GetFoldChecks write SetFoldChecks;
     property Animations: Boolean read GetAnimations write SetAnimations;
-
-    property DomainURL: String read FDomainURL write FDomainURL;
+    property CardBackground: Integer read GetCardBackground write SetCardBackground;
   end;
 
 var
@@ -89,8 +91,7 @@ var
 implementation
 
 uses
-  System.SysUtils,
-  Poker.Common.Misc, Poker.Common.Encryption;
+  System.SysUtils, Poker.Common.Misc, Poker.Common.Encryption;
 
 
 class procedure TSettings.Initialize(const APath: String);
@@ -229,6 +230,11 @@ begin
   result := GetJSONBool(JSON_ANIMATIONS, JSON_DEFAULT_ANIMATIONS);
 end;
 
+function TSettings.GetCardBackground: Integer;
+begin
+  result := GetJSONInt(JSON_CARD_BACKGROUND, JSON_DEFAULT_CARD_BACKGROUND);
+end;
+
 function TSettings.GetDeveloperMode: Boolean;
 begin
   result := GetJSONBool(JSON_DEVELOPER_MODE, JSON_DEFAULT_DEVELOPER_MODE);
@@ -272,6 +278,11 @@ end;
 procedure TSettings.SetAnimations(const AValue: Boolean);
 begin
   FJSON.B[JSON_ANIMATIONS] := AValue;
+end;
+
+procedure TSettings.SetCardBackground(const AValue: Integer);
+begin
+  FJSON.I[JSON_CARD_BACKGROUND] := AValue;
 end;
 
 procedure TSettings.SetDeveloperMode(const AValue: Boolean);

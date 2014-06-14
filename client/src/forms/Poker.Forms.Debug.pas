@@ -96,8 +96,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  Poker.Common.InstanceController, RVItem,
-  Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
+  Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';

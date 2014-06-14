@@ -94,6 +94,9 @@ type
     acHandHistory: TAction;
     acAnimationsEnabled: TAction;
     miAnimations: TMenuItem;
+    misOptions3: TMenuItem;
+    miSettings: TMenuItem;
+    acSettings: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -131,6 +134,7 @@ type
     procedure acFoldChecksExecute(Sender: TObject);
     procedure acHandHistoryExecute(Sender: TObject);
     procedure acAnimationsEnabledExecute(Sender: TObject);
+    procedure acSettingsExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -204,7 +208,7 @@ uses
   Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
-  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory;
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings;
 
 
 procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
@@ -359,12 +363,14 @@ begin
   Settings.Animations := not Settings.Animations;
   miAnimations.Checked := Settings.Animations;
   DXTimer.AnimationsEnabled := Settings.Animations;
+  Settings.Save;
 end;
 
 procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
 begin
   Settings.FoldChecks := not Settings.FoldChecks;
-  miCheckOnFold.Checked := Settings.FoldChecks
+  miCheckOnFold.Checked := Settings.FoldChecks;
+  Settings.Save;
 end;
 
 procedure TfrmChipUpMain.acHandHistoryExecute(Sender: TObject);
@@ -415,6 +421,11 @@ procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);
 begin
   ServerSocket.ResendVerificationMail;
   MessageDlg(Format('Verification mail sent to %s. Please check your inbox.', [dmMain.SelfInfo.EMail]), mtInformation, [mbOK], 0);
+end;
+
+procedure TfrmChipUpMain.acSettingsExecute(Sender: TObject);
+begin
+  FormsContainer.RunForm(TfrmSettings, self, [], FALSE);
 end;
 
 procedure TfrmChipUpMain.acShowAboutFormExecute(Sender: TObject);
@@ -976,6 +987,7 @@ procedure TfrmChipUpMain.acSoundsOnOffExecute(Sender: TObject);
 begin
   Settings.Sounds := not Settings.Sounds;
   miSounds.Checked := Settings.Sounds;
+  Settings.Save;
 end;
 
 procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);
