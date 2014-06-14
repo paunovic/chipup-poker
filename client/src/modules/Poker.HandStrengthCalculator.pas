@@ -222,9 +222,12 @@ begin
 
   ACard := RANKS[four_of_a_kind_index];
 
+  AKicker := '';
   for C1 := High(card_count) downto Low(card_count) do
-    if (card_count[C1] > 0) and
-       (C1 <> four_of_a_kind_index) then
+    if ((card_count[C1] > 0) and
+        (C1 <> four_of_a_kind_index)) or
+       ((C1 = four_of_a_kind_index) and
+        (card_count[C1] > 4)) then
     begin
       AKicker := RANKS[C1];
       Break;
@@ -465,9 +468,13 @@ begin
 
   AKicker := '';
   for C1 := High(card_count) downto Low(card_count) do
-    if (card_count[C1] > 0) and
-       (C1 <> over_card_index) and
-       (C1 <> under_card_index) then
+    if ((card_count[C1] > 0) and
+        (C1 <> over_card_index) and
+        (C1 <> under_card_index)) or
+       ((C1 = over_card_index) and
+        (card_count[C1] > 2)) or
+       ((C1 = under_card_index) and
+        (card_count[C1] > 2)) then
     begin
       AKicker := RANKS[C1];
       Break;
@@ -507,8 +514,10 @@ begin
 
   AKicker := '';
   for C1 := High(card_count) downto Low(card_count) do
-    if (card_count[C1] > 0) and
-       (C1 <> card_index) then
+    if ((card_count[C1] > 0) and
+        (C1 <> card_index)) or
+       ((C1 = card_index) and
+        (card_count[C1] > 2)) then
     begin
       AKicker := RANKS[C1];
       Break;

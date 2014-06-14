@@ -9,3 +9,15 @@ server/dag/handeval/*
 server/dag/build/*
 server/node_modules/*
 server/poker-eval-138.0/*
+client/tests/bin
+client/tools
+client/src/resources/**/*.psd
+client/installer/install_chipuppoker.exe
+client/installer/files/chipuppoker.exe
+*.fbl7
+cpp-protobuf-generator/protoc-gen-delphi.exe
+cpp-protobuf-generator/main.o
+cpp-protobuf-generator/Makefile.win
+dev-server-key.ppk
+message.desc
+client/src/client.cfg

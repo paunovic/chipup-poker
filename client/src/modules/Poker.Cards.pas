@@ -13,7 +13,7 @@ type
   TCard = class
   private
     FValue: TCardValue;
-    FSuit : TCardSuit;
+    FSuit: TCardSuit;
 
   public
     constructor Create; overload;
@@ -213,6 +213,7 @@ var
   C1: Integer;
   card: TCard;
   size: Integer;
+  cstr: String;
 begin
   result := '';
   size := ALength;
@@ -223,7 +224,11 @@ begin
   begin
     card := TCard.Create(ACards[C1]);
     try
-      result := result + card.AsString + ADelimiter;
+      cstr := card.AsString;
+      if cstr = '' then
+        Continue;
+
+      result := result + cstr + ADelimiter;
     finally
       card.Free;
     end;

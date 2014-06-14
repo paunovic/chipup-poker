@@ -8,7 +8,6 @@ program client;
 {$I defines.inc}
 
 uses
-  FastMM4 in '3rdparty\FastMM\FastMM4.pas',
   madExcept,
   madLinkDisAsm,
   madListHardware,
@@ -20,8 +19,6 @@ uses
   pbOutput in '3rdparty\protobufs\pbOutput.pas',
   pbPublic in '3rdparty\protobufs\pbPublic.pas',
   StrBuffer in '3rdparty\protobufs\StrBuffer.pas',
-  FastMM4Messages in '3rdparty\FastMM\FastMM4Messages.pas',
-  dxGDIPlusAPI in '3rdparty\devexpress\dxGDIPlusAPI.pas',
   OverbyteIcsHttpProt in '3rdparty\icsv8\OverbyteIcsHttpProt.pas',
   ChipUpPokerDarkSkin in 'skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas',
   Poker.DataModule in 'Poker.DataModule.pas' {dmMain: TDataModule},
