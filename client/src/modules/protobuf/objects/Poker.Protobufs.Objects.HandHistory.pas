@@ -86,6 +86,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HandHistory);
+    function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
@@ -276,7 +277,6 @@ end;
 procedure TPB_HandHistory.MergeFrom(const from: TPB_HandHistory);
 var
   temp3: TPB_PlayerHandHistory;
-  temp6: Integer;
   temp7: TPB_MoveRow;
 begin
   if (from.has_MongoId) then
@@ -302,6 +302,20 @@ begin
     SetCurrentGame(from.CurrentGame);
   if (from.has_Rake) then
     SetRake(from.Rake);
+end;
+
+function TPB_HandHistory.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $937) <> $937) Then Result := False;
+  for temp in Players do
+    if (not temp.IsInitialized) then Result := False;
+  for temp in Moves do
+    if (not temp.IsInitialized) then Result := False;
+  if (has_Game) then
+    if (not FGame.IsInitialized) then Result := False;
 end;
 
 procedure TPB_HandHistory.clear_MongoId;

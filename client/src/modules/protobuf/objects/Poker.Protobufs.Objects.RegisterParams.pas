@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterParams);
+    function IsInitialized: Boolean; override;
 
     // required string Email = 1;
     function has_Email: Boolean;
@@ -110,6 +111,12 @@ begin
     SetPassword(from.Password);
   if (from.has_DisplayName) then
     SetDisplayName(from.DisplayName);
+end;
+
+function TPB_RegisterParams.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $7) <> $7) Then Result := False;
 end;
 
 procedure TPB_RegisterParams.clear_Email;

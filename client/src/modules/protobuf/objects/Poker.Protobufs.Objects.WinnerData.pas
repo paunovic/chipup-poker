@@ -33,6 +33,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_WinnerData);
+    function IsInitialized: Boolean; override;
 
     // required int32 Seat = 3;
     function has_Seat: Boolean;
@@ -94,6 +95,12 @@ begin
     SetSeat(from.Seat);
   if (from.has_Msg) then
     SetMsg(from.Msg);
+end;
+
+function TPB_WinnerData.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $c) <> $c) Then Result := False;
 end;
 
 procedure TPB_WinnerData.clear_Seat;

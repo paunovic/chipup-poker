@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ValidCharsRegex);
+    function IsInitialized: Boolean; override;
 
     // required string Email = 1;
     function has_Email: Boolean;
@@ -161,6 +162,12 @@ begin
     SetClubpassword(from.Clubpassword);
   if (from.has_Gamename) then
     SetGamename(from.Gamename);
+end;
+
+function TPB_ValidCharsRegex.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $3f) <> $3f) Then Result := False;
 end;
 
 procedure TPB_ValidCharsRegex.clear_Email;

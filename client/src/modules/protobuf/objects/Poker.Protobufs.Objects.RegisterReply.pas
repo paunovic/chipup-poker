@@ -28,6 +28,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterReply);
+    function IsInitialized: Boolean; override;
 
     // required FIXME Status = 1;
     function has_Status: Boolean;
@@ -77,6 +78,12 @@ procedure TPB_RegisterReply.MergeFrom(const from: TPB_RegisterReply);
 begin
   if (from.has_Status) then
     SetStatus(from.Status);
+end;
+
+function TPB_RegisterReply.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_RegisterReply.clear_Status;

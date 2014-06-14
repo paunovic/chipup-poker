@@ -36,6 +36,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloParams);
+    function IsInitialized: Boolean; override;
 
     // required bool Debug = 1;
     function has_Debug: Boolean;
@@ -114,6 +115,16 @@ begin
     SetDebug(from.Debug);
   for temp1 in from.Files do
     FFiles.Add(TPB_UpdateFileInfo.Create(temp1));
+end;
+
+function TPB_HelloParams.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
+  for temp in Files do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_HelloParams.clear_Debug;

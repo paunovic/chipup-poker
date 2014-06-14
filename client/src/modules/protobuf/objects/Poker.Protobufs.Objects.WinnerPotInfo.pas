@@ -46,6 +46,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_WinnerPotInfo);
+    function IsInitialized: Boolean; override;
 
     // required uint32 Sum = 1;
     function has_Sum: Boolean;
@@ -145,7 +146,6 @@ end;
 
 procedure TPB_WinnerPotInfo.MergeFrom(const from: TPB_WinnerPotInfo);
 var
-  temp1: Integer;
   temp2: TPB_WinnerData;
 begin
   if (from.has_Sum) then
@@ -155,6 +155,16 @@ begin
     FWinnerData.Add(TPB_WinnerData.Create(temp2));
   if (from.has_Rake) then
     SetRake(from.Rake);
+end;
+
+function TPB_WinnerPotInfo.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
+  for temp in WinnerData do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_WinnerPotInfo.clear_Sum;

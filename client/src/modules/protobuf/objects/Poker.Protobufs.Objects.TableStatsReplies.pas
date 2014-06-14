@@ -41,6 +41,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatsReplies);
+    function IsInitialized: Boolean; override;
 
     // repeated FIXME Reply = 1;
     function has_Reply: Boolean;
@@ -147,6 +148,20 @@ begin
     FPlayers.Add(TPB_User.Create(temp1));
   for temp2 in from.ClubStats do
     FClubStats.Add(TPB_ClubStatsReply.Create(temp2));
+end;
+
+function TPB_TableStatsReplies.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  for temp in Reply do
+    if (not temp.IsInitialized) then Result := False;
+  for temp in Players do
+    if (not temp.IsInitialized) then Result := False;
+  for temp in ClubStats do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_TableStatsReplies.clear_Reply;

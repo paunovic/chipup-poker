@@ -137,6 +137,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatus);
+    function IsInitialized: Boolean; override;
 
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
@@ -431,7 +432,6 @@ end;
 procedure TPB_TableStatus.MergeFrom(const from: TPB_TableStatus);
 var
   temp1: TPB_SeatInfo;
-  temp5: UINT32;
   temp14: TPB_TableEvent;
   temp15: TPB_Pot;
 begin
@@ -478,6 +478,20 @@ begin
     SetGameLimit(from.GameLimit);
   if (from.has_MinimumRaise) then
     SetMinimumRaise(from.MinimumRaise);
+end;
+
+function TPB_TableStatus.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $80041d) <> $80041d) Then Result := False;
+  for temp in Seats do
+    if (not temp.IsInitialized) then Result := False;
+  for temp in Events do
+    if (not temp.IsInitialized) then Result := False;
+  for temp in Pots do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_TableStatus.clear_TableMongoId;

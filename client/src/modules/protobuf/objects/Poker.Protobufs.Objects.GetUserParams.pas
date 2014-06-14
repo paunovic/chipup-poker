@@ -36,6 +36,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GetUserParams);
+    function IsInitialized: Boolean; override;
 
     // repeated bytes UserMongoIds = 1;
     function has_UserMongoIds: Boolean;
@@ -115,12 +116,21 @@ end;
 
 procedure TPB_GetUserParams.MergeFrom(const from: TPB_GetUserParams);
 var
-  temp0: TBytes;
   temp1: TPB_User;
 begin
   FUserMongoIds.AddRange(from.UserMongoIds);
   for temp1 in from.Users do
     FUsers.Add(TPB_User.Create(temp1));
+end;
+
+function TPB_GetUserParams.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  for temp in Users do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_GetUserParams.clear_UserMongoIds;

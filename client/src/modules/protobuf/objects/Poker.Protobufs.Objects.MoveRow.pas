@@ -51,6 +51,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_MoveRow);
+    function IsInitialized: Boolean; override;
 
     // repeated FIXME Code = 1;
     function has_Code: Boolean;
@@ -167,7 +168,6 @@ end;
 
 procedure TPB_MoveRow.MergeFrom(const from: TPB_MoveRow);
 var
-  temp0: TTableEventType;
   temp3: TPB_WinnerPotInfo;
   temp4: TPB_Pot;
 begin
@@ -180,6 +180,18 @@ begin
     FPotdata.Add(TPB_WinnerPotInfo.Create(temp3));
   for temp4 in from.Pots do
     FPots.Add(TPB_Pot.Create(temp4));
+end;
+
+function TPB_MoveRow.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  for temp in Potdata do
+    if (not temp.IsInitialized) then Result := False;
+  for temp in Pots do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_MoveRow.clear_Code;

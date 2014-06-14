@@ -57,6 +57,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_StringSizes);
+    function IsInitialized: Boolean; override;
 
     // required int32 Email = 1;
     function has_Email: Boolean;
@@ -178,6 +179,12 @@ begin
     SetGamename(from.Gamename);
   if (from.has_ContactMessage) then
     SetContactMessage(from.ContactMessage);
+end;
+
+function TPB_StringSizes.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $7f) <> $7f) Then Result := False;
 end;
 
 procedure TPB_StringSizes.clear_Email;

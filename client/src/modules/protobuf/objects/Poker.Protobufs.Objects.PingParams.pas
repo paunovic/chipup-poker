@@ -27,6 +27,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingParams);
+    function IsInitialized: Boolean; override;
 
     // required uint32 Uptime = 1;
     function has_Uptime: Boolean;
@@ -76,6 +77,12 @@ procedure TPB_PingParams.MergeFrom(const from: TPB_PingParams);
 begin
   if (from.has_Uptime) then
     SetUptime(from.Uptime);
+end;
+
+function TPB_PingParams.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_PingParams.clear_Uptime;

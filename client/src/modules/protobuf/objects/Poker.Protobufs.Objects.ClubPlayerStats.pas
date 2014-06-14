@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubPlayerStats);
+    function IsInitialized: Boolean; override;
 
     // required bytes Userid = 1;
     function has_Userid: Boolean;
@@ -93,6 +94,12 @@ begin
     SetUserid(from.Userid);
   if (from.has_ClubBalance) then
     SetClubBalance(from.ClubBalance);
+end;
+
+function TPB_ClubPlayerStats.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $3) <> $3) Then Result := False;
 end;
 
 procedure TPB_ClubPlayerStats.clear_Userid;

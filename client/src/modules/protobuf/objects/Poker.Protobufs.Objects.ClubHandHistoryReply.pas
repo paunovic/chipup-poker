@@ -41,6 +41,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubHandHistoryReply);
+    function IsInitialized: Boolean; override;
 
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
@@ -131,6 +132,16 @@ begin
     SetGameid(from.Gameid);
   for temp2 in from.Rows do
     FRows.Add(TPB_HandHistory.Create(temp2));
+end;
+
+function TPB_ClubHandHistoryReply.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $3) <> $3) Then Result := False;
+  for temp in Rows do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_ClubHandHistoryReply.clear_Clubid;

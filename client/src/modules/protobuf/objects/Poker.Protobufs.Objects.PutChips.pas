@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PutChips);
+    function IsInitialized: Boolean; override;
 
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
@@ -110,6 +111,12 @@ begin
     SetChipAmount(from.ChipAmount);
   if (from.has_CurrentState) then
     SetCurrentState(from.CurrentState);
+end;
+
+function TPB_PutChips.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $7) <> $7) Then Result := False;
 end;
 
 procedure TPB_PutChips.clear_TableMongoId;

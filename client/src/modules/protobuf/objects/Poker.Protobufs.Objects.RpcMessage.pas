@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RpcMessage);
+    function IsInitialized: Boolean; override;
 
     // required int32 MethodId = 1;
     function has_MethodId: Boolean;
@@ -110,6 +111,12 @@ begin
     SetDataSize(from.DataSize);
   if (from.has_Token) then
     SetToken(from.Token);
+end;
+
+function TPB_RpcMessage.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_RpcMessage.clear_MethodId;

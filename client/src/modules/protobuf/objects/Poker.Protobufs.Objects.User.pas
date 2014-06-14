@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_User);
+    function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
@@ -161,6 +162,12 @@ begin
     SetAuthed(from.Authed);
   if (from.has_Chips) then
     SetChips(from.Chips);
+end;
+
+function TPB_User.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $5) <> $5) Then Result := False;
 end;
 
 procedure TPB_User.clear_MongoId;

@@ -31,6 +31,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_QueryTableStats);
+    function IsInitialized: Boolean; override;
 
     // repeated bytes Gameid = 1;
     function has_Gameid: Boolean;
@@ -92,10 +93,14 @@ begin
 end;
 
 procedure TPB_QueryTableStats.MergeFrom(const from: TPB_QueryTableStats);
-var
-  temp0: TBytes;
 begin
   FGameid.AddRange(from.Gameid);
+end;
+
+function TPB_QueryTableStats.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $0) <> $0) Then Result := False;
 end;
 
 procedure TPB_QueryTableStats.clear_Gameid;

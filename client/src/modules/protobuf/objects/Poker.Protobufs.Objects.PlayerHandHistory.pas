@@ -57,6 +57,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerHandHistory);
+    function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
@@ -178,6 +179,12 @@ begin
     SetMuck(from.Muck);
   if (from.has_Status) then
     SetStatus(from.Status);
+end;
+
+function TPB_PlayerHandHistory.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $7b) <> $7b) Then Result := False;
 end;
 
 procedure TPB_PlayerHandHistory.clear_MongoId;

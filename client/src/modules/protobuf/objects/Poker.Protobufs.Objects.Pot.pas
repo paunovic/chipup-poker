@@ -36,6 +36,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Pot);
+    function IsInitialized: Boolean; override;
 
     // required uint32 Value = 1;
     function has_Value: Boolean;
@@ -107,12 +108,16 @@ begin
 end;
 
 procedure TPB_Pot.MergeFrom(const from: TPB_Pot);
-var
-  temp1: Integer;
 begin
   if (from.has_Value) then
     SetValue(from.Value);
   FMembers.AddRange(from.Members);
+end;
+
+function TPB_Pot.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_Pot.clear_Value;

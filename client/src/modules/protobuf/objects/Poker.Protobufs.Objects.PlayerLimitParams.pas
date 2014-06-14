@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerLimitParams);
+    function IsInitialized: Boolean; override;
 
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
@@ -127,6 +128,12 @@ begin
     SetLimit(from.Limit);
   if (from.has_Unlimited) then
     SetUnlimited(from.Unlimited);
+end;
+
+function TPB_PlayerLimitParams.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $f) <> $f) Then Result := False;
 end;
 
 procedure TPB_PlayerLimitParams.clear_Clubid;

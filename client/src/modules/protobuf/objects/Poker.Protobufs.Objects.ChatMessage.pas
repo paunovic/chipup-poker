@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatMessage);
+    function IsInitialized: Boolean; override;
 
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
@@ -127,6 +128,12 @@ begin
     SetMsg(from.Msg);
   if (from.has_Timestamp) then
     SetTimestamp(from.Timestamp);
+end;
+
+function TPB_ChatMessage.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $4) <> $4) Then Result := False;
 end;
 
 procedure TPB_ChatMessage.clear_MongoId;

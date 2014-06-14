@@ -27,6 +27,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SetAvatarParams);
+    function IsInitialized: Boolean; override;
 
     // required bytes AvatarId = 1;
     function has_AvatarId: Boolean;
@@ -76,6 +77,12 @@ procedure TPB_SetAvatarParams.MergeFrom(const from: TPB_SetAvatarParams);
 begin
   if (from.has_AvatarId) then
     SetAvatarId(from.AvatarId);
+end;
+
+function TPB_SetAvatarParams.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_SetAvatarParams.clear_AvatarId;

@@ -48,6 +48,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UpdateFileInfo);
+    function IsInitialized: Boolean; override;
 
     // required string Path = 1;
     function has_Path: Boolean;
@@ -145,6 +146,12 @@ begin
     SetFileType(from.FileType);
   if (from.has_FileSize) then
     SetFileSize(from.FileSize);
+end;
+
+function TPB_UpdateFileInfo.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_UpdateFileInfo.clear_Path;

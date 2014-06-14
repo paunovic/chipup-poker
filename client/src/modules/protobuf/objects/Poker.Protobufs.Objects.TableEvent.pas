@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableEvent);
+    function IsInitialized: Boolean; override;
 
     // required FIXME Event = 1;
     function has_Event: Boolean;
@@ -162,7 +163,6 @@ end;
 procedure TPB_TableEvent.MergeFrom(const from: TPB_TableEvent);
 var
   temp2: TPB_WinnerPotInfo;
-  temp3: UINT32;
 begin
   if (from.has_Event) then
     SetEvent(from.Event);
@@ -173,6 +173,16 @@ begin
   FBets.AddRange(from.Bets);
   if (from.has_Cards) then
     SetCards(from.Cards);
+end;
+
+function TPB_TableEvent.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
+  for temp in Pots do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_TableEvent.clear_Event;

@@ -66,6 +66,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloReply);
+    function IsInitialized: Boolean; override;
 
     // required FIXME StringSizes = 1;
     function has_StringSizes: Boolean;
@@ -228,6 +229,22 @@ begin
     FUpdateFiles.Add(TPB_UpdateFileInfo.Create(temp6));
   if (from.has_ValidCharsRegex) then
     FValidCharsRegex.MergeFrom(from.ValidCharsRegex);
+end;
+
+function TPB_HelloReply.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $bf) <> $bf) Then Result := False;
+  if (has_StringSizes) then
+    if (not FStringSizes.IsInitialized) then Result := False;
+  if (has_MinSizes) then
+    if (not FMinSizes.IsInitialized) then Result := False;
+  for temp in UpdateFiles do
+    if (not temp.IsInitialized) then Result := False;
+  if (has_ValidCharsRegex) then
+    if (not FValidCharsRegex.IsInitialized) then Result := False;
 end;
 
 procedure TPB_HelloReply.clear_StringSizes;

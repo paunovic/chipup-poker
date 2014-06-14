@@ -33,6 +33,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ContactMessage);
+    function IsInitialized: Boolean; override;
 
     // required FIXME Reason = 1;
     function has_Reason: Boolean;
@@ -94,6 +95,12 @@ begin
     SetReason(from.Reason);
   if (from.has_Message) then
     SetMessage(from.Message);
+end;
+
+function TPB_ContactMessage.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $3) <> $3) Then Result := False;
 end;
 
 procedure TPB_ContactMessage.clear_Reason;

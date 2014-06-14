@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableBoolFlag);
+    function IsInitialized: Boolean; override;
 
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
@@ -93,6 +94,12 @@ begin
     SetTableMongoId(from.TableMongoId);
   if (from.has_Flag) then
     SetFlag(from.Flag);
+end;
+
+function TPB_TableBoolFlag.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $3) <> $3) Then Result := False;
 end;
 
 procedure TPB_TableBoolFlag.clear_TableMongoId;

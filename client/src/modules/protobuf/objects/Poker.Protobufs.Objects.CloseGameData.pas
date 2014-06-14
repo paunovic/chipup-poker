@@ -33,6 +33,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_CloseGameData);
+    function IsInitialized: Boolean; override;
 
     // required bytes Gameid = 1;
     function has_Gameid: Boolean;
@@ -94,6 +95,12 @@ begin
     SetGameid(from.Gameid);
   if (from.has_Timestamp) then
     SetTimestamp(from.Timestamp);
+end;
+
+function TPB_CloseGameData.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $3) <> $3) Then Result := False;
 end;
 
 procedure TPB_CloseGameData.clear_Gameid;

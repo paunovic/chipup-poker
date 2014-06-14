@@ -66,6 +66,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TablePlayerStats);
+    function IsInitialized: Boolean; override;
 
     // required bytes Userid = 1;
     function has_Userid: Boolean;
@@ -204,9 +205,6 @@ begin
 end;
 
 procedure TPB_TablePlayerStats.MergeFrom(const from: TPB_TablePlayerStats);
-var
-  temp2: UINT32;
-  temp3: UINT32;
 begin
   if (from.has_Userid) then
     SetUserid(from.Userid);
@@ -222,6 +220,12 @@ begin
     SetChipsinplay(from.Chipsinplay);
   if (from.has_Hands) then
     SetHands(from.Hands);
+end;
+
+function TPB_TablePlayerStats.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_TablePlayerStats.clear_Userid;

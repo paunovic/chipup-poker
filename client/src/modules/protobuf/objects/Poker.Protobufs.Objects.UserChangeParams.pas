@@ -31,6 +31,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UserChangeParams);
+    function IsInitialized: Boolean; override;
 
     // repeated FIXME Users = 1;
     function has_Users: Boolean;
@@ -97,6 +98,16 @@ var
 begin
   for temp0 in from.Users do
     FUsers.Add(TPB_User.Create(temp0));
+end;
+
+function TPB_UserChangeParams.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  for temp in Users do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_UserChangeParams.clear_Users;

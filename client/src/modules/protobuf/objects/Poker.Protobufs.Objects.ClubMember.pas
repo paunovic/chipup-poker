@@ -47,6 +47,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubMember);
+    function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
@@ -144,6 +145,12 @@ begin
     SetClubBalance(from.ClubBalance);
   if (from.has_UnlimitedLimit) then
     SetUnlimitedLimit(from.UnlimitedLimit);
+end;
+
+function TPB_ClubMember.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
 end;
 
 procedure TPB_ClubMember.clear_MongoId;

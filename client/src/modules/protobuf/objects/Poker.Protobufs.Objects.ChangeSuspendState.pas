@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeSuspendState);
+    function IsInitialized: Boolean; override;
 
     // required bytes ClubMongoId = 1;
     function has_ClubMongoId: Boolean;
@@ -110,6 +111,12 @@ begin
     SetPlayerMongoId(from.PlayerMongoId);
   if (from.has_Suspended) then
     SetSuspended(from.Suspended);
+end;
+
+function TPB_ChangeSuspendState.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $7) <> $7) Then Result := False;
 end;
 
 procedure TPB_ChangeSuspendState.clear_ClubMongoId;

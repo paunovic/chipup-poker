@@ -38,6 +38,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatEvent);
+    function IsInitialized: Boolean; override;
 
     // required FIXME Event = 1;
     function has_Event: Boolean;
@@ -115,6 +116,14 @@ begin
     FMsg.MergeFrom(from.Msg);
   if (from.has_TableId) then
     SetTableId(from.TableId);
+end;
+
+function TPB_ChatEvent.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $3) <> $3) Then Result := False;
+  if (has_Msg) then
+    if (not FMsg.IsInitialized) then Result := False;
 end;
 
 procedure TPB_ChatEvent.clear_Event;

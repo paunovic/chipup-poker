@@ -572,6 +572,7 @@ class BaseGenerator : public CodeGenerator {
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
 				"    procedure MergeFrom(const from: TPB_$name$);\n"
+				"    function IsInitialized: Boolean; override;\n"
 				"\n",
 				"name",message->name());
 			for (int j=0; j<message->field_count(); j++) {
@@ -791,7 +792,7 @@ class BaseGenerator : public CodeGenerator {
 			bool haveVar = false;
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
-				if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+				if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) {
 					if (!haveVar) {
 						haveVar = true;
 						printer.Print("var\n");
@@ -834,6 +835,47 @@ class BaseGenerator : public CodeGenerator {
 							);
 					} else {
 						printer.Print(vars2,"  $pname$.AddRange(from.$name$);\n");
+					}
+				}
+			}
+			uint32 mask = 0;
+			bool needtemp = false;
+			for (int j=0; j<message->field_count(); j++) { // FIXME, merge into another loop?
+				const FieldDescriptor *field = message->field(j);
+				if (field->label() == FieldDescriptor::LABEL_REQUIRED) {
+					mask |= 1 << (field->number()-1);
+				}
+				if ((field->label() == FieldDescriptor::LABEL_REPEATED) && (field->type() == FieldDescriptor::TYPE_MESSAGE)) needtemp = true;
+			}
+			snprintf(hack,10,"$%x",mask);
+			printer.Print(
+				"end;\n\n"
+				"function TPB_$name$.IsInitialized: Boolean;\n"
+				,"name",message->name());
+			if (needtemp) {
+				printer.Print("var\n"
+					"  temp: TProtobufBaseObject;\n");
+			}
+			printer.Print("begin\n"
+				"  Result := True;\n"
+				"  if ((_has_bits_ and $mask$) <> $mask$) Then Result := False;\n"
+				,"mask",hack);
+			for (int j=0; j<message->field_count(); j++) {
+				const FieldDescriptor *field = message->field(j);
+				TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+					vars["name"] = instance.PropertyName();
+					vars["pname"] = instance.PrivateFieldName();
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						printer.Print(vars,
+							"  for temp in $name$ do\n"
+							"    if (not temp.IsInitialized) then Result := False;\n"
+							);
+					} else {
+						printer.Print(vars,
+							"  if (has_$name$) then\n"
+							"    if (not $pname$.IsInitialized) then Result := False;\n"
+							);
 					}
 				}
 			}

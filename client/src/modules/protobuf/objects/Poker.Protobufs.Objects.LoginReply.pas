@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginReply);
+    function IsInitialized: Boolean; override;
 
     // required FIXME LoginStatus = 1;
     function has_LoginStatus: Boolean;
@@ -135,6 +136,18 @@ begin
     FStatus.MergeFrom(from.Status);
   for temp2 in from.ReconnectTables do
     FReconnectTables.Add(TPB_TableStatus.Create(temp2));
+end;
+
+function TPB_LoginReply.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
+begin
+  Result := True;
+  if ((_has_bits_ and $1) <> $1) Then Result := False;
+  if (has_Status) then
+    if (not FStatus.IsInitialized) then Result := False;
+  for temp in ReconnectTables do
+    if (not temp.IsInitialized) then Result := False;
 end;
 
 procedure TPB_LoginReply.clear_LoginStatus;

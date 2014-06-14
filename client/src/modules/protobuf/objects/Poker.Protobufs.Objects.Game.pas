@@ -96,6 +96,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Game);
+    function IsInitialized: Boolean; override;
 
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
@@ -301,6 +302,12 @@ begin
     SetClosetime(from.Closetime);
   if (from.has_Lasthandid) then
     SetLasthandid(from.Lasthandid);
+end;
+
+function TPB_Game.IsInitialized: Boolean;
+begin
+  Result := True;
+  if ((_has_bits_ and $0) <> $0) Then Result := False;
 end;
 
 procedure TPB_Game.clear_MongoId;
