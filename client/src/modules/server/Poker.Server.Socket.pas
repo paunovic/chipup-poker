@@ -303,9 +303,9 @@ begin
     DebugLn(Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
   else
     if AStreamSize = 0 then
-      DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, EnumerateProperties(ADataObject))
+      DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, SerializeObject(ADataObject))
     else
-      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, EnumerateProperties(ADataObject));
+      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, SerializeObject(ADataObject));
 end;
 {$ENDIF}
 

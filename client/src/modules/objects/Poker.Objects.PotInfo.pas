@@ -84,7 +84,7 @@ begin
   FValue := AWinnerPotInfo.Sum;
   FRake := AWinnerPotInfo.Rake;
   FMembers.AddRange(AWinnerPotInfo.Seats);
-  FWinnerData.Assign(WinnerData);
+  FWinnerData.Assign(AWinnerPotInfo.WinnerData);
 end;
 
 { TPotInfos }

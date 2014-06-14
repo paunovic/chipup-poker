@@ -278,6 +278,8 @@ type
     function GetBetPoint(const ASeatIndex: Integer): TPoint2;
     function GetPotPoint(const APotIndex: Integer): TPoint2;
 
+    procedure ClearAnimations;
+
     procedure UpdateClosingTime;
     function GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
 
@@ -308,7 +310,7 @@ type
   public
     constructor Create(const ATable: TTable; const AHandHistoryItems: THandHistoryItems = nil; const AHandHistoryItem: THandHistoryItem = nil); reintroduce;
 
-    procedure SetTableStatus(const ATableStatus: TPB_TableStatus);
+    procedure SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
     procedure Render;
 
     property TableStatus: TTableStatus read FTableStatus;
@@ -755,7 +757,7 @@ procedure TfrmTable.FormShow(Sender: TObject);
 begin
   if FTable.TableType = ttHandPlayback then
   begin
-    SetTableStatus(FHandHistoryPlayback.CurrentState);
+    SetTableStatus(FHandHistoryPlayback.CurrentState, FALSE);
     tiHandPlayback.Enabled := TRUE;
   end
   else
@@ -852,7 +854,7 @@ end;
 
 procedure TfrmTable.tiHandPlaybackTimer(Sender: TObject);
 begin
-  SetTableStatus(FHandHistoryPlayback.NextState);
+  SetTableStatus(FHandHistoryPlayback.NextState, TRUE);
 
   if tiGameLock.Enabled then
     tiHandPlayback.Interval := tiGameLock.Interval
@@ -1111,7 +1113,7 @@ begin
   end;
 
   if ((ACardIndex >= 0) and (ACardIndex < ASeatInfo.Cards.Count)) and
-     (ASeatInfo.CardsVisible) then
+     (ASeatInfo.Cards[0].IsKnown) then
     perc := CARD_OPEN_PERC
   else
     perc := CARD_HIDDEN_PERC;
@@ -1305,6 +1307,20 @@ const
 begin
   if rvChat.ItemCount >= SCROLLBACK_LINES then
     rvChat.DeleteParas(0, rvChat.ItemCount - SCROLLBACK_LINES + 1);
+end;
+
+procedure TfrmTable.ClearAnimations;
+begin
+  FFlopAnimations.Clear;
+  FTurnAnimations.Clear;
+  FRiverAnimations.Clear;
+  FDealAnimations.Clear;
+  FBetAnimations.Clear;
+  FPotWinAnimations.Clear;
+
+  FFlopAnimated := FTableStatus.State >= tsFlop;
+  FTurnAnimated := FTableStatus.State >= tsTurn;
+  FRiverAnimated := FTableStatus.State >= tsRiver;
 end;
 
 procedure TfrmTable.ConfigureGUI;
@@ -2181,8 +2197,11 @@ begin
   SetRaiseSliderValue(raise_value);
 end;
 
-procedure TfrmTable.SetTableStatus(const ATableStatus: TPB_TableStatus);
+procedure TfrmTable.SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
 begin
+  if AClearAnimations then
+    ClearAnimations;
+
   CSRETableStatus(0, ATableStatus);
   if FTable.TableType = ttHandPlayback then
     pbHandPlaybackProgress.Position := FHandHistoryPlayback.CurrentStateIndex;
@@ -2590,7 +2609,7 @@ begin
           begin
             card_point := GetCardPoint(seat_info, C1);
             if ((C1 >= 0) and (C1 < seat_info.Cards.Count)) and
-               (seat_info.CardsVisible) then
+               (seat_info.Cards[C1].IsKnown) then
               RenderCard(card_point, seat_info.Cards[C1], CARD_OPEN_PERC)
             else
               RenderCard(card_point, nil, CARD_HIDDEN_PERC);
@@ -2688,7 +2707,8 @@ begin
     blending_effect := beNormal;
   end;
 
-  if not Assigned(ACard) then
+  if (not Assigned(ACard)) or
+     (not ACard.IsKnown) then
   begin
     // render card background
     DXCore.Canvas.UseImagePx(TableResources.CardBackgroundImage,
@@ -3416,7 +3436,7 @@ begin
   if FHandHistoryPlayback.CurrentStateIndex = FHandHistoryPlayback.States.Count - 1 then
   begin
     FHandHistoryPlayback.CurrentStateIndex := 0;
-    SetTableStatus(FHandHistoryPlayback.CurrentState);
+    SetTableStatus(FHandHistoryPlayback.CurrentState, TRUE);
   end;
   btPlayPause.Action := acHandPlaybackPause;
 end;
@@ -3425,14 +3445,14 @@ procedure TfrmTable.acHandPlaybackStepBackwardsExecute(Sender: TObject);
 begin
   acHandPlaybackPause.Execute;
   if FHandHistoryPlayback.CurrentStateIndex > 0 then
-    SetTableStatus(FHandHistoryPlayback.PrevState);
+    SetTableStatus(FHandHistoryPlayback.PrevState, TRUE);
 end;
 
 procedure TfrmTable.acHandPlaybackStepForwardExecute(Sender: TObject);
 begin
   acHandPlaybackPause.Execute;
   if FHandHistoryPlayback.CurrentStateIndex < FHandHistoryPlayback.States.Count - 1 then
-    SetTableStatus(FHandHistoryPlayback.NextState);
+    SetTableStatus(FHandHistoryPlayback.NextState, TRUE);
 end;
 
 { TTableSyncRender }

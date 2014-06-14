@@ -26,6 +26,7 @@ type
     procedure Clear;
 
     function AsString: String;
+    function IsKnown: Boolean;
 
     class function GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String; overload;
     class function SuitAsString(const ASuit: TCardSuit): String;
@@ -80,15 +81,26 @@ end;
 procedure TCard.Assign(const AByte: Byte);
 var
   d, m: Integer;
+  val: TCardValue;
+  sui: TCardSuit;
 begin
   d := AByte div 4;
   m := AByte mod 4;
 
-  Assert(d in [0..12]);
-  FValue := TCardValue(d + 1);
+  if (d in [0..12]) and
+     (m in [0..3]) then
+  begin
+    val := TCardValue(d + 1);
+    sui := TCardSuit(m + 1);
+  end
+  else
+  begin
+    val := cvUnknown;
+    sui := csUnknown;
+  end;
 
-  Assert(m in [0..3]);
-  FSuit := TCardSuit(m + 1);
+  FValue := val;
+  FSuit := sui;
 end;
 
 procedure TCard.Assign(const ABytes: TBytes);
@@ -106,6 +118,12 @@ end;
 class function TCard.GetAsString(const AValue: TCardValue; const ASuit: TCardSuit): String;
 begin
   result := ValueAsString(AValue) + SuitAsString(ASuit);
+end;
+
+function TCard.IsKnown: Boolean;
+begin
+  result := (FValue <> cvUnknown) and
+            (FSuit <> csUnknown);
 end;
 
 class function TCard.SuitAsString(const ASuit: TCardSuit): String;

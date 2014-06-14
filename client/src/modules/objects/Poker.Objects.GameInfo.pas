@@ -38,10 +38,10 @@ type
 
     function AsString(const AShort: Boolean): String;
 
-    property MongoId        : TBytes read FMongoId write FMongoId;
-    property ClubId         : Int64 read FClubId write FClubId;
-    property CreatorId      : TBytes read FCreatorId write FCreatorId;
-    property Name           : String read FName write FName;
+    property MongoId: TBytes read FMongoId write FMongoId;
+    property ClubId: Int64 read FClubId write FClubId;
+    property CreatorId: TBytes read FCreatorId write FCreatorId;
+    property Name: String read FName write FName;
     property Blinds         : TGameBlinds read FBlinds;
     property SmallBlind     : UINT32 read FSmallBlind;
     property BigBlind       : UINT32 read FBigBlind;

@@ -23,7 +23,7 @@ type
 
   TWinnerDataList = class(TObjectList<TWinnerData>)
   public
-    procedure Assign(const AWinnerData: TObjectList<TPB_WinnerData>); overload;
+    procedure Assign(const AWinnerData: TList<TPB_WinnerData>); overload;
     procedure Assign(const AWinnerData: TWinnerDataList); overload;
   end;
 
@@ -59,7 +59,7 @@ end;
 
 { TWinnerDataList }
 
-procedure TWinnerDataList.Assign(const AWinnerData: TObjectList<TPB_WinnerData>);
+procedure TWinnerDataList.Assign(const AWinnerData: TList<TPB_WinnerData>);
 var
   C1: Integer;
 begin

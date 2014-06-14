@@ -12,8 +12,8 @@ type
     FSignalEvent: TEvent;
     FTiming: TAsphyreTiming;
     FLastUpdate: Double;
-    FLockCount: Integer;
     FNextId: Integer;
+    FLocK: TCriticalSection;
 
     procedure Process;
     procedure Shutdown;
@@ -62,6 +62,7 @@ end;
 constructor TDXTimer.Create;
 begin
   FNextId := 0;
+  FLock := TCriticalSection.Create;
   FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
   FAnimations := TDXAnimations.Create;
@@ -75,6 +76,7 @@ begin
   FAnimations.Free;
   FTiming.Free;
   FreeAndNil(FSignalEvent);
+  FreeAndNil(FLock);
 
   inherited;
 end;
@@ -99,13 +101,8 @@ begin
   while C1 < FAnimations.Count do
     if FAnimations[C1].Handle = AHandle then
     begin
-      if FLockCount = 0 then
-        FAnimations.Delete(C1)
-      else
-      begin
-        FAnimations[C1].Removed := TRUE;
-        Inc(C1);
-      end;
+      FAnimations[C1].Removed := TRUE;
+      Inc(C1);
     end
     else
       Inc(C1);
@@ -156,11 +153,17 @@ begin
   try
     callbacks_must := TList<THandle>.Create;
     try
-      Inc(FLockCount);
+      FLock.Enter;
       try
         C1 := 0;
         while (Assigned(FAnimations)) and (C1 < FAnimations.Count) do
         begin
+          if FAnimations[C1].Removed then
+          begin
+            FAnimations.Delete(C1);
+            Continue;
+          end;
+
           FAnimations[C1].Animate(FTiming.GetTimeValue);
 
           if FAnimations[C1].Status = asDone then
@@ -168,18 +171,17 @@ begin
             callbacks.Remove(FAnimations[C1].Handle);
             if callbacks_must.IndexOf(FAnimations[C1].Handle) = -1 then
               callbacks_must.Add(FAnimations[C1].Handle);
-            FAnimations.Delete(C1)
-          end
-          else
-          begin
-            if (callbacks_must.IndexOf(FAnimations[C1].Handle) = -1) and
-               (callbacks.IndexOf(FAnimations[C1].Handle) = -1) then
-              callbacks.Add(FAnimations[C1].Handle);
-            Inc(C1);
+            FAnimations.Delete(C1);
+            Continue;
           end;
+
+          if (callbacks_must.IndexOf(FAnimations[C1].Handle) = -1) and
+             (callbacks.IndexOf(FAnimations[C1].Handle) = -1) then
+            callbacks.Add(FAnimations[C1].Handle);
+          Inc(C1);
         end;
       finally
-        Dec(FLockCount);
+        FLock.Leave;
       end;
 
       for C1 := 0 to callbacks_must.Count - 1 do

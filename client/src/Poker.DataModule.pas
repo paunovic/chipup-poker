@@ -302,7 +302,7 @@ begin
     if not Assigned(table) then
       Continue;
 
-    (table.Form as TfrmTable).SetTableStatus(tstatus);
+    (table.Form as TfrmTable).SetTableStatus(tstatus, FALSE);
   end;
 end;
 
