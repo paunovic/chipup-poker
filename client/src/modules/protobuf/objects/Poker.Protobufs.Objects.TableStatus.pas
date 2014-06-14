@@ -445,8 +445,7 @@ begin
     SetDealer(from.Dealer);
   if (from.has_CurrentSeat) then
     SetCurrentSeat(from.CurrentSeat);
-  for temp5 in from.Bets do
-    FBets.Add(temp5); // FIXME?
+  FBets.AddRange(from.Bets);
   if (from.has_Locked) then
     SetLocked(from.Locked);
   if (from.has_Seq) then
@@ -510,6 +509,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FTableMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+  set_has_TableMongoId;
 end;
 
 procedure TPB_TableStatus.clear_Seats;

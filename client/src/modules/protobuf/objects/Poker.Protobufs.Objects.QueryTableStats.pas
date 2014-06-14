@@ -95,8 +95,7 @@ procedure TPB_QueryTableStats.MergeFrom(const from: TPB_QueryTableStats);
 var
   temp0: TBytes;
 begin
-  for temp0 in from.Gameid do
-    FGameid.Add(temp0); // FIXME?
+  FGameid.AddRange(from.Gameid);
 end;
 
 procedure TPB_QueryTableStats.clear_Gameid;

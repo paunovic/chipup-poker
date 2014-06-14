@@ -289,6 +289,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FPlayerMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  set_has_PlayerMongoId;
 end;
 
 procedure TPB_SeatInfo.clear_Chips;
@@ -376,6 +377,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FCards[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  set_has_Cards;
 end;
 
 procedure TPB_SeatInfo.clear_Status;

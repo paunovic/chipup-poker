@@ -124,6 +124,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FTableMongoId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+  set_has_TableMongoId;
 end;
 
 procedure TPB_TableBoolFlag.clear_Flag;

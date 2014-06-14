@@ -202,6 +202,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FTableId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
+  set_has_TableId;
 end;
 
 end.

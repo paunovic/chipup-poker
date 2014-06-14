@@ -212,10 +212,8 @@ begin
     SetUserid(from.Userid);
   if (from.has_Balance) then
     SetBalance(from.Balance);
-  for temp2 in from.Buyins do
-    FBuyins.Add(temp2); // FIXME?
-  for temp3 in from.Cashouts do
-    FCashouts.Add(temp3); // FIXME?
+  FBuyins.AddRange(from.Buyins);
+  FCashouts.AddRange(from.Cashouts);
   if (from.has_Rakecontrib) then
     SetRakecontrib(from.Rakecontrib);
   if (from.has_Secondsplayed) then
@@ -255,6 +253,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FUserid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+  set_has_Userid;
 end;
 
 procedure TPB_TablePlayerStats.clear_Balance;

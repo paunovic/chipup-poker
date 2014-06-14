@@ -118,8 +118,7 @@ var
   temp0: TBytes;
   temp1: TPB_User;
 begin
-  for temp0 in from.UserMongoIds do
-    FUserMongoIds.Add(temp0); // FIXME?
+  FUserMongoIds.AddRange(from.UserMongoIds);
   for temp1 in from.Users do
     FUsers.Add(TPB_User.Create(temp1));
 end;

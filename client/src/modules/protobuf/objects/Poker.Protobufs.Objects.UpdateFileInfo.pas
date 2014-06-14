@@ -204,6 +204,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FHash[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kHashFieldNumber, AValue);
+  set_has_Hash;
 end;
 
 procedure TPB_UpdateFileInfo.clear_Url;

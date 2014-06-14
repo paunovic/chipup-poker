@@ -145,6 +145,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FClubid[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  set_has_Clubid;
 end;
 
 procedure TPB_ClubStatsReply.clear_PlayerStats;

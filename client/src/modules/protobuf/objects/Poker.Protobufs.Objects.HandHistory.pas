@@ -291,8 +291,7 @@ begin
     SetCards(from.Cards);
   if (from.has_Endtime) then
     SetEndtime(from.Endtime);
-  for temp6 in from.BalanceChanges do
-    FBalanceChanges.Add(temp6); // FIXME?
+  FBalanceChanges.AddRange(from.BalanceChanges);
   for temp7 in from.Moves do
     FMoves.Add(TPB_MoveRow.Create(temp7));
   if (from.has_Dealer) then
@@ -334,6 +333,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FId[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  set_has_MongoId;
 end;
 
 procedure TPB_HandHistory.clear_Seq;
@@ -450,6 +450,7 @@ begin
   for C1 := 0 to Length(AValue) - 1 do
     FCards[C1] := AValue[C1];
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  set_has_Cards;
 end;
 
 procedure TPB_HandHistory.clear_Endtime;

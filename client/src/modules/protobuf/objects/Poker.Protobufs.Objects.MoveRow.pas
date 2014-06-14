@@ -171,8 +171,7 @@ var
   temp3: TPB_WinnerPotInfo;
   temp4: TPB_Pot;
 begin
-  for temp0 in from.Code do
-    FCode.Add(temp0); // FIXME?
+  FCode.AddRange(from.Code);
   if (from.has_Bet) then
     SetBet(from.Bet);
   if (from.has_Seat) then
