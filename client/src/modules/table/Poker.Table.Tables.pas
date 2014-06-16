@@ -3,12 +3,10 @@ unit Poker.Table.Tables;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Objects.GameInfo,
-  Poker.Objects.ClubInfo, Vcl.Forms, Poker.Avatars, Poker.HandHistory.Items;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Objects.GameInfo, Poker.HandHistory.Playback,
+  Poker.Objects.ClubInfo, Vcl.Forms, Poker.Avatars, Poker.HandHistory.Items, Poker.Table.Renderer;
 
 type
-  TTableType = (ttLiveGame, ttHandPlayback);
-
   TTable = class
   private
     FTableType: TTableType;
@@ -20,11 +18,22 @@ type
     FClubSeq: Integer;
     FGame: TGameInfo;
     FClub: TClubInfo;
+    FHandHistoryPlayback: THandHistoryPlayback;
     FSwapChainIndex: Integer;
+    FRenderer: TTableRenderer;
+
+    function AcquireSwapChainElement: Boolean;
 
   public
+    constructor Create;
+
+    procedure SetupLiveTable(const AClub: TClubInfo; const AGame: TGameInfo; const ASendJoinCommand: Boolean);
+    procedure SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
+    procedure SetupSettingsPreviewTable(const AHandle: THandle);
+    {
     constructor Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer; const ASendJoinCommand: Boolean); overload;
     constructor Create(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem; const ASwapChainIndex: Integer); overload;
+    constructor Create(const ASwapChainIndex: Integer; const AHandle: THandle); overload;}
     destructor Destroy; override;
 
     procedure NotifyClose;
@@ -47,6 +56,8 @@ type
     property SeatIndex: Integer read FSeatIndex write FSeatIndex;
     property SwapChainIndex: Integer read FSwapChainIndex;
     property TableType: TTableType read FTableType;
+    property Renderer: TTableRenderer read FRenderer;
+    property HandHistoryPlayback: THandHistoryPlayback read FHandHistoryPlayback;
   end;
 
   TTables = class(TObjectList<TTable>)
@@ -63,6 +74,7 @@ type
 
     function AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
     function AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
+    function AddSettingsPreviewTable(const AHandle: THandle): TTable;
     procedure NotifyClose(const ATable: TTable);
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
@@ -78,11 +90,38 @@ implementation
 
 uses
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
-  Poker.HandHistory.Core;
+  Poker.HandHistory.Core, Poker.Table.Status;
 
 { TTable }
 
-constructor TTable.Create(const AClub: TClubInfo; const AGame: TGameInfo; const ASwapChainIndex: Integer; const ASendJoinCommand: Boolean);
+constructor TTable.Create;
+begin
+end;
+
+destructor TTable.Destroy;
+var
+  ts: TTableStatus;
+begin
+  FreeAndNil(FForm);
+
+  ts := FRenderer.TableStatus;
+  FreeAndNil(FRenderer);
+  FreeAndNil(FHandHistoryPlayback);
+  if FTableType = ttSettingsPreview then
+  begin
+    FClub.Free;
+    ts.Free;
+  end;
+
+  inherited;
+end;
+
+function TTable.AcquireSwapChainElement: Boolean;
+begin
+  result := DXCore.AcquireSwapChainElement(0, FSwapChainIndex);
+end;
+
+procedure TTable.SetupLiveTable(const AClub: TClubInfo; const AGame: TGameInfo; const ASendJoinCommand: Boolean);
 var
   form: TfrmTable;
 begin
@@ -93,37 +132,49 @@ begin
   FClubSeq := AClub.Id;
   FGame := AGame;
   FClub := AClub;
-  FSwapChainIndex := ASwapChainIndex;
   form := TfrmTable.Create(self);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, form.Handle, FGame, ttLiveGame);
   FForm := form;
-  DXCore.AcquireSwapChain(FSwapChainIndex, form.Handle);
-  DXCore.Device.Resize(FSwapChainIndex, Point2px(form.ClientWidth, form.ClientHeight));
-
+  DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
   if ASendJoinCommand then
     ServerSocket.JoinTable(FGame.MongoId);
 end;
 
-constructor TTable.Create(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem; const ASwapChainIndex: Integer);
+procedure TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
 var
   form: TfrmTable;
 begin
   FTableType := ttHandPlayback;
   FSeatIndex := -1;
-  FSwapChainIndex := ASwapChainIndex;
   FGameId := AHandHistoryItems.FGameId;
   FHandId := AHandHistoryItem.HandId;
   FGame := AHandHistoryItems.Game;
   FClub := AHandHistoryItems.Club;
-  form := TfrmTable.Create(self, AHandHistoryItems, AHandHistoryItem);
+  FHandHistoryPlayback := THandHistoryPlayback.Create(AHandHistoryItems, AHandHistoryItem);
+  form := TfrmTable.Create(self);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, form.Handle, FGame, ttHandPlayback);
   FForm := form;
-  DXCore.AcquireSwapChain(FSwapChainIndex, form.Handle);
-  DXCore.Device.Resize(FSwapChainIndex, Point2px(form.ClientWidth, form.ClientHeight));
+  DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
 end;
 
-destructor TTable.Destroy;
+procedure TTable.SetupSettingsPreviewTable(const AHandle: THandle);
+var
+  tablestatus: TTableStatus;
 begin
-  FForm.Free;
-  inherited;
+  FTableType := ttSettingsPreview;
+  FSeatIndex := -1;
+  FClub := TClubInfo.Create;
+  FClub.InitToDemoValues;
+  FGame := TGameInfo.Create;
+  FGame.InitToDemoValues(FClub.Id);
+  FClub.Games.Add(FGame);
+  tablestatus := TTableStatus.Create;
+  tablestatus.InitToDemoValues;
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, AHandle, FGame, ttSettingsPreview);
+  FRenderer.UpdateTableStatus(tablestatus);
+  FRenderer.FlopAnimated := TRUE;
+  DXCore.ModifySwapChainElement(FSwapChainIndex, AHandle);
+  FRenderer.UpdateDXAreaSize;
 end;
 
 function TTable.IsSitting: Boolean;
@@ -190,22 +241,26 @@ end;
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
 var
   table: TTable;
-  sci: Integer;
 begin
-  if not FindTable(AGame.MongoId, table) then
+  if FindTable(AGame.MongoId, table) then
   begin
-    sci := DXCore.GetFreeSwapChain;
-    if sci = -1 then
-      Exit(nil);
-
-    table := TTable.Create(AClub, AGame, sci, ASendJoinCommand);
-    if AShow then
-      table.Form.Show;
-    Add(table);
-  end
-  else
     if AShow then
       table.BringToFront;
+    Exit(table);
+  end;
+
+  table := TTable.Create;
+  if not table.AcquireSwapChainElement then
+  begin
+    FreeAndNil(table);
+    Exit(nil);
+  end;
+
+  Add(table);
+
+  table.SetupLiveTable(AClub, AGame, ASendJoinCommand);
+  if AShow then
+    table.BringToFront;
 
   result := table;
 end;
@@ -213,7 +268,6 @@ end;
 function TTables.AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
 var
   table: TTable;
-  sci: Integer;
   hhis: THandHistoryItems;
   hhi: THandHistoryItem;
 begin
@@ -221,23 +275,43 @@ begin
      (not hhis.FindHand(AHandId, hhi)) then
     Exit(nil);
 
-  sci := DXCore.GetFreeSwapChain;
-  if sci = -1 then
+  table := TTable.Create;
+  if not table.AcquireSwapChainElement then
+  begin
+    FreeAndNil(table);
     Exit(nil);
+  end;
 
-  table := TTable.Create(hhis, hhi, sci);
   Add(table);
+
+  table.SetupHandHistoryTable(hhis, hhi);
   table.BringToFront;
 
   result := table;
 end;
 
+function TTables.AddSettingsPreviewTable(const AHandle: THandle): TTable;
+var
+  table: TTable;
+begin
+  table := TTable.Create;
+  if not table.AcquireSwapChainElement then
+  begin
+    FreeAndNil(table);
+    Exit(nil);
+  end;
+
+  Add(table);
+  table.SetupSettingsPreviewTable(AHandle);
+
+  result := table;
+end;
 
 procedure TTables.NotifyClose(const ATable: TTable);
 begin
   if ATable.TableType = ttLiveGame then
     ServerSocket.LeaveTable(ATable.GameId);
-  DXCore.ReleaseSwapChain(ATable.SwapChainIndex);
+  DXCore.ReleaseSwapChainElement(ATable.SwapChainIndex);
   Remove(ATable);
 end;
 

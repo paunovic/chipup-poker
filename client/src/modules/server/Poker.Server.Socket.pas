@@ -398,8 +398,16 @@ begin
 end;
 
 procedure TServerSocket.SocketError(Sender: TObject);
+{$IFDEF DEBUG}
+var
+  last_err: Integer;
+{$ENDIF}
 begin
-  {$IFDEF DEBUG} DebugLn(Format('Socket error: %s', [WSocketErrorDesc(FSocket.LastError)]), ditException); {$ENDIF}
+  {$IFDEF DEBUG}
+  last_err := FSocket.LastError;
+  if last_err <> WSAEWOULDBLOCK then // ignore WSAEWOULDBLOCK
+    DebugLn(Format('Socket error [%d]: %s', [last_err, WSocketErrorDesc(last_err)]), ditException);
+  {$ENDIF}
 
   case FSocket.State of
     wsConnected: ;

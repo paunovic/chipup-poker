@@ -248,6 +248,7 @@ end;
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   FormsContainer.CloseAllForms;
+  Tables.Clear;
   MessageContainer.RemoveCallbacks(FCallbacksId);
 end;
 
@@ -261,10 +262,7 @@ begin
   CanClose := (FShuttingDown) or
               (ConfirmToCloseTables);
   if CanClose then
-  begin
     ServerSocket.Logout;
-    Tables.Clear;
-  end;
 end;
 
 procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);

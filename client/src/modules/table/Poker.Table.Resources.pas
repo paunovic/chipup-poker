@@ -102,10 +102,10 @@ type
       RAISE_VALUEBOX_HEIGHT     = 18;
       RAISE_VALUEBOX_X          = 14;
       RAISE_VALUEBOX_Y          = 6;
-      RAISE_SLIDER_X            = 140;
-      RAISE_SLIDER_Y            = 9;
-      RAISE_SLIDER_WIDTH        = 283;
-      RAISE_SLIDER_HEIGHT       = 9;
+      RAISE_THUMB_LEFT_OFFSET   = 140;
+      RAISE_THUMB_TOP_OFFSET    = 9;
+      RAISE_THUMB_SLIDER_WIDTH  = 283;
+      RAISE_THUMB_SLIDER_HEIGHT = 9;
       STANDUP_BUTTON_TRIANGLE_W = 26;
       SEAT_AVATAR_WIDTH         = 66;
       SEAT_AVATAR_HEIGHT        = 66;

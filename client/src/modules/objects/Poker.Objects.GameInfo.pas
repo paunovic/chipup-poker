@@ -9,22 +9,22 @@ uses
 type
   TGameInfo = class
   private
-    FMongoId    : TBytes;
-    FClubId     : Int64;
-    FCreatorId  : TBytes;
-    FName       : String;
-    FSmallBlind : UINT32;
-    FBigBlind   : UINT32;
-    FBlinds     : TGameBlinds;
-    FGameType   : TGameType;
-    FGameLimit  : TGameLimit;
-    FMinBuyin   : UINT32;
-    FMaxBuyin   : UINT32;
-    FSeats      : Integer;
-    FSitting    : Integer;
-    FState      : TGameState;
+    FMongoId: TBytes;
+    FClubId: Int64;
+    FCreatorId: TBytes;
+    FName: String;
+    FSmallBlind: UINT32;
+    FBigBlind: UINT32;
+    FBlinds: TGameBlinds;
+    FGameType: TGameType;
+    FGameLimit: TGameLimit;
+    FMinBuyin: UINT32;
+    FMaxBuyin: UINT32;
+    FSeats: Integer;
+    FSitting: Integer;
+    FState: TGameState;
     FClosingTime: DWORD;
-    FLastHandId : UINT32;
+    FLastHandId: UINT32;
 
     function GetStateStr: String;
 
@@ -32,6 +32,7 @@ type
     procedure Assign(const AProtobufObject: TPB_Game); overload;
     procedure Assign(const AGameInfo: TGameInfo); overload;
     procedure UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
+    procedure InitToDemoValues(const AClubId: Int64);
 
     class procedure BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
     class function GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
@@ -42,19 +43,19 @@ type
     property ClubId: Int64 read FClubId write FClubId;
     property CreatorId: TBytes read FCreatorId write FCreatorId;
     property Name: String read FName write FName;
-    property Blinds         : TGameBlinds read FBlinds;
-    property SmallBlind     : UINT32 read FSmallBlind;
-    property BigBlind       : UINT32 read FBigBlind;
-    property GameType       : TGameType read FGameType write FGameType;
-    property Limit          : TGameLimit read FGameLimit write FGameLimit;
-    property MinBuyin       : UINT32 read FMinBuyin write FMinBuyin;
-    property MaxBuyin       : UINT32 read FMaxBuyin write FMaxBuyin;
-    property Seats          : Integer read FSeats write FSeats;
-    property Sitting        : Integer read FSitting write FSitting;
-    property State          : TGameState read FState write FState;
-    property StateAsStr     : String read GetStateStr;
-    property ClosingTime    : DWORD read FClosingTime write FClosingTime;
-    property LastHandId     : UINT32 read FLastHandId;
+    property Blinds: TGameBlinds read FBlinds;
+    property SmallBlind: UINT32 read FSmallBlind;
+    property BigBlind: UINT32 read FBigBlind;
+    property GameType: TGameType read FGameType write FGameType;
+    property Limit: TGameLimit read FGameLimit write FGameLimit;
+    property MinBuyin: UINT32 read FMinBuyin write FMinBuyin;
+    property MaxBuyin: UINT32 read FMaxBuyin write FMaxBuyin;
+    property Seats: Integer read FSeats write FSeats;
+    property Sitting: Integer read FSitting write FSitting;
+    property State: TGameState read FState write FState;
+    property StateAsStr: String read GetStateStr;
+    property ClosingTime: DWORD read FClosingTime write FClosingTime;
+    property LastHandId: UINT32 read FLastHandId;
 
   end;
 
@@ -199,6 +200,26 @@ begin
   else
     result := 'Unknown';
   end;
+end;
+
+procedure TGameInfo.InitToDemoValues(const AClubId: Int64);
+begin
+  SetLength(FMongoId, 0);
+  FClubId := AClubId;
+  SetLength(FCreatorId, 0);
+  FName := '';
+  FSmallBlind := 5;
+  FBigBlind := 5;
+  FBlinds := gb5x10;
+  FGameType := gtHoldem;
+  FGameLimit := glNoLimit;
+  FMinBuyin := 5;
+  FMaxBuyin := 500;
+  FSeats := 6;
+  FSitting := 0;
+  FState := gsActive;
+  FClosingTime := 0;
+  FLastHandId := 0;
 end;
 
 { TGamesInfo }

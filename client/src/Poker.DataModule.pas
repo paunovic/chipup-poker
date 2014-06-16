@@ -106,6 +106,7 @@ begin
   TDXCore.Initialize;
   TDXTimer.Initialize;
   DXTimer.AnimationsEnabled := Settings.Animations;
+  TTableResources.Initialize(DXCore.Canvas);
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
@@ -151,8 +152,7 @@ begin
   TSounds.Deinitialize;
   TMessageContainer.Deinitialize;
   TServerSettings.Deinitialize;
-  if Assigned(TableResources) then
-    TTableResources.Deinitialize;
+  TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
   TAvatars.Deinitialize;

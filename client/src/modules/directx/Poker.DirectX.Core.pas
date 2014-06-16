@@ -19,9 +19,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function GetFreeSwapChain: Integer;
-    procedure AcquireSwapChain(const AIndex: Integer; const AHandle: THandle);
-    procedure ReleaseSwapChain(const AIndex: Integer);
+    function AcquireSwapChainElement(const AHandle: THandle; out AIndex: Integer): Boolean;
+    procedure ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
+    procedure ReleaseSwapChainElement(const AIndex: Integer);
 
     property Device: TAsphyreDevice read FDevice;
     property Canvas: TAsphyreCanvas read FCanvas;
@@ -92,24 +92,33 @@ begin
   inherited;
 end;
 
-function TDXCore.GetFreeSwapChain: Integer;
+function TDXCore.AcquireSwapChainElement(const AHandle: THandle; out AIndex: Integer): Boolean;
 var
   C1: Integer;
 begin
   for C1 := 1 to FDevice.SwapChains.Count - 1 do
    if FDevice.SwapChains[C1].WindowHandle = FDummyWindow then
-     Exit(C1);
-  Exit(-1);
+   begin
+     FDevice.SwapChains.Items[AIndex]^.WindowHandle := AHandle;
+     AIndex := C1;
+     Exit(TRUE);
+     {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired [%d]', [AIndex, AHandle]), ditApplication); {$ENDIF}
+   end;
+
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element not acquired [%d]', [AHandle]), ditException); {$ENDIF}
+  Exit(FALSE);
 end;
 
-procedure TDXCore.AcquireSwapChain(const AIndex: Integer; const AHandle: THandle);
+procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
 begin
-  FDevice.SwapChains.Items[AIndex]^.WindowHandle := AHandle;
+  FDevice.SwapChains.Items[AIndex]^.WindowHandle := ANewHandle;
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d modified [%d]', [AIndex, ANewHandle]), ditApplication); {$ENDIF}
 end;
 
-procedure TDXCore.ReleaseSwapChain(const AIndex: Integer);
+procedure TDXCore.ReleaseSwapChainElement(const AIndex: Integer);
 begin
   FDevice.SwapChains.Items[AIndex]^.WindowHandle := FDummyWindow;
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
 end;
 
 end.

@@ -3,7 +3,8 @@ unit Poker.Table.Status;
 interface
 
 uses
-  System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game, Poker.Objects.PotInfo, Poker.Objects.SeatInfo;
+  Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
+  Poker.Objects.PotInfo, Poker.Objects.SeatInfo, Poker.Objects.GameInfo;
 
 type
   TTableStatus = class
@@ -21,6 +22,7 @@ type
     FBigBlindSeat: Integer;
     FRakePercent: UINT32;
     FLocked: Boolean;
+    FLockTimerEnabled: Boolean;
     FMinimumBet: UINT32;
     FHandId: UINT32;
     FMaximumRaise: UINT32;
@@ -31,6 +33,9 @@ type
     FCurrentGame: TGameType;
     FCurrentLimit: TGameLimit;
     FMinimumRaise: UINT32;
+    FClosingTime: DWORD;
+    FTimebarEndtime: DWORD;
+    FCurrentPlaytime: Int64;
 //    FEvents        : TTableEvents;
 
   public
@@ -40,7 +45,11 @@ type
     function GetBet(const ASeatIndex: Integer): UINT32;
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
-    procedure Assign(const ATableStatusProtobuf: TPB_TableStatus); overload;
+    procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
+    procedure InitToDemoValues;
+
+    procedure UpdateClosingTime(const AGame: TGameInfo);
+    procedure UpdateCurrentPlaytime;
 
     property State: TTableState read FState;
     property Dealer: Integer read FDealer;
@@ -64,12 +73,17 @@ type
     property CurrentGame: TGameType read FCurrentGame;
     property CurrentLimit: TGameLimit read FCurrentLimit;
     property MinimumRaise: UINT32 read FMinimumRaise;
+    property LockTimerEnabled: Boolean read FLockTimerEnabled write FLockTimerEnabled;
+    property ClosingTime: DWORD read FClosingTime;
+    property TimebarEndtime: DWORD read FTimebarEndtime;
+    property CurrentPlaytime: Int64 read FCurrentPlaytime;
 //    property Events: TTableEvents read FEvents;
   end;
 
 implementation
 
-
+uses
+  System.SysUtils, Poker.Server.Socket;
 
 { TTableStatus }
 
@@ -144,7 +158,7 @@ end;
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
 var
   C1, C2: Integer;
-  seat  : TSeatInfo;
+  seat: TSeatInfo;
   delete: Boolean;
 begin
   FState := ATableStatusProtobuf.State;
@@ -168,6 +182,11 @@ begin
   FRotationHand := ATableStatusProtobuf.Rotation;
   FCurrentLimit := ATableStatusProtobuf.GameLimit;
   FMinimumRaise := ATableStatusProtobuf.MinimumRaise;
+
+  if FTime > 0 then
+    FTimebarEndtime := FTime - ServerSocket.TimeOffset
+  else
+    FTimebarEndtime := 0;
 
   if Assigned(ATableStatusProtobuf.Seats) then
   begin
@@ -221,6 +240,82 @@ begin
   end;
 
 //  FEvents.Assign(ATableStatusProtobuf.Events);
+end;
+
+procedure TTableStatus.UpdateClosingTime(const AGame: TGameInfo);
+var
+  gtc: DWORD;
+  ct: DWORD;
+begin
+  if AGame.State = gsClosing then
+  begin
+    gtc := GetTickCount;
+    ct := AGame.ClosingTime - ServerSocket.TimeOffset;
+    if (AGame.ClosingTime = 0) or
+       (gtc > ct) then
+      FClosingTime := 0
+    else
+      FClosingTime := ct - gtc;
+  end
+  else
+    FClosingTime := 0;
+end;
+
+procedure TTableStatus.UpdateCurrentPlaytime;
+begin
+  FCurrentPlaytime := FTimebarEndtime - GetTickCount
+end;
+
+procedure TTableStatus.InitToDemoValues;
+var
+  seatinfo: TSeatInfo;
+begin
+  FState := tsPreFlop;
+  FDealer := 2;
+  FCurrentSeat := 5;
+
+  FSeatInfos.Clear;
+  seatinfo := TSeatInfo.Create;
+  seatinfo.InitToDemoValues(2, 'reiser', 100000, 2);
+  FSeatInfos.Add(seatinfo);
+
+  seatinfo := TSeatInfo.Create;
+  seatinfo.InitToDemoValues(3, 'paunovic', 132100, 2);
+  FSeatInfos.Add(seatinfo);
+
+  seatinfo := TSeatInfo.Create;
+  seatinfo.InitToDemoValues(4, 'marko', 88400, 2);
+  FSeatInfos.Add(seatinfo);
+
+  seatinfo := TSeatInfo.Create;
+  seatinfo.InitToDemoValues(5, 'boban', 111400, 2);
+  FSeatInfos.Add(seatinfo);
+
+  FBets.Clear;
+  FBets.Add(0); FBets.Add(0); FBets.Add(3333); FBets.Add(6666); FBets.Add(18888);
+  FPreviousBets.Clear;
+  FPreviousBets.AddRange(FBets);
+  FFlopCards.Clear;
+  FTurnCard.Clear;
+  FRiverCard.Clear;
+  FSmallBlindSeat := 3;
+  FBigBlindSeat := 4;
+  FRakePercent := 5;
+  FLocked := FALSE;
+  FLockTimerEnabled := FALSE;
+  FMinimumBet := 0;
+  FHandId := 0;
+  FMaximumRaise := 0;
+  FPots.Clear;
+  FPreviousPots.Clear;
+  FTime := 0;
+  FRotationHand := 0;
+  FCurrentGame := gtHoldem;
+  FCurrentLimit := glNoLimit;
+  FMinimumRaise := 0;
+  FClosingTime := 0;
+  FTimebarEndtime := 0;
+  FCurrentPlaytime := 0;
 end;
 
 

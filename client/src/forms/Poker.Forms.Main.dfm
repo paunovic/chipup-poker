@@ -4299,7 +4299,6 @@ object frmChipUpMain: TfrmChipUpMain
       object miSettings: TMenuItem
         Action = acSettings
         GroupIndex = 1
-        Visible = False
       end
     end
     object miHelp: TMenuItem

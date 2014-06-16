@@ -1,0 +1,510 @@
+unit Poker.Table.RenderMetrics;
+
+interface
+
+uses
+  Winapi.Windows, Vectors2px, Vectors2, AsphyreTypes, Poker.Objects.GameInfo, Poker.Objects.SeatInfo, System.Types;
+
+type
+  TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
+
+  TTableRenderMetrics = class
+  private
+    FHandle: THandle;
+    FGame: TGameInfo;
+
+    FTableResizeRatio: Single;
+    FRaiseThumbPosition: Single;
+    FRawTableBounds: TPoint4;
+    FTableWidth: Single;
+    FTableHeight: Single;
+    FTableBounds: TPoint4;
+    FTableCenterYOffset: Single;
+    FTableCenter: TPoint2;
+    FDealerPoint: TPoint2;
+    FSeatWidth: Single;
+    FSeatHeight: Single;
+    FSeatResizeRatio: Single;
+    FSeatActionResizeRatio: Single;
+    FCardWidth: Single;
+    FCardHeight: Single;
+    FCardArtworkWidth: Single;
+    FCardArtworkHeight: Single;
+    FSeatCardsMaxWidth: Single;
+    FChipWidth: Single;
+    FChipHeight: Single;
+    FDealerButtonWidth: Single;
+    FDealerButtonHeight: Single;
+    FTimebarWidth: Single;
+    FTimebarHeight: Single;
+    FSeatActionFrameWidth: Single;
+    FSeatActionFrameHeight: Single;
+    FLowerIntfBorder: Integer;
+    FActionButtonWidth: Single;
+    FActionButtonHeight: Single;
+    FRaisePanelResizeRatio: Single;
+    FRaisePanelBounds: TRectF;
+    FRaiseTrackBounds: TRectF;
+    FRaiseThumbBounds: TRectF;
+    FRaisePresetButtonWidth: Single;
+    FRaisePresetButtonHeight: Single;
+    FStandUpButtonWidth: Single;
+    FStandUpButtonHeight: Single;
+    FStandUpResizeRatio: Single;
+    FPlayNowButtonWidth: Single;
+    FPlayNowButtonHeight: Single;
+    FPlayNowResizeRatio: Single;
+    FRaiseAmountBoxBounds: TRect;
+    FRaiseAmountBoxFontSize: Integer;
+    FChatBoxBounds: TRect;
+    FChatEditBounds: TRect;
+    FCheckboxesLeft: Integer;
+    FHandPlaybackProgress: TRect;
+    FHandPlaybackPlay: TRect;
+    FHandPlaybackBack: TRect;
+    FHandPlaybackForward: TRect;
+
+  public
+    const
+      CARD_OPEN_PERC   = 0.55;
+      CARD_HIDDEN_PERC = 0.35;
+      CARD_FOLDED_PERC = 0.55;
+
+    constructor Create(const AHandle: THandle; const AGame: TGameInfo);
+
+    function GetTableSector(const APoint: TPoint2): TTableSector;
+    function GetSeatPoint(const ASeatIndex: Integer): TPoint2;
+    function GetCardPoint(const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
+    function GetDealerPoint(const ASeatIndex: Integer): TPoint2;
+    function GetBetPoint(const ASeatIndex, ACurrentDealer: Integer): TPoint2;
+    function GetPotPoint(const APotIndex: Integer): TPoint2;
+    function IsPointInStandUpButton(const AX, AY: Integer): Boolean;
+    function IsPointInSeat(const AX, AY: Integer; out ASeatIndex: Integer): Boolean;
+    function IsPointInRaiseThumb(const AX, AY: Integer): Boolean;
+    function IsPointInRaiseTrack(const AX, AY: Integer; out APercentage: Single): Boolean;
+
+    procedure Update(const ADXAreaSize: TPoint2px);
+
+    property TableResizeRatio: Single read FTableResizeRatio;
+    property RawTableBounds: TPoint4 read FRawTableBounds;
+    property TableWidth: Single read FTableWidth;
+    property TableHeight: Single read FTableHeight;
+    property TableBounds: TPoint4 read FTableBounds;
+    property TableCenterYOffset: Single read FTableCenterYOffset;
+    property TableCenter: TPoint2 read FTableCenter;
+    property SeatResizeRatio: Single read FSeatResizeRatio;
+    property SeatWidth: Single read FSeatWidth;
+    property SeatHeight: Single read FSeatHeight;
+    property CardWidth: Single read FCardWidth;
+    property CardHeight: Single read FCardHeight;
+    property SeatCardsMaxWidth: Single read FSeatCardsMaxWidth;
+    property SeatActionFrameWidth: Single read FSeatActionFrameWidth;
+    property SeatActionFrameHeight: Single read FSeatActionFrameHeight;
+    property TimebarWidth: Single read FTimebarWidth;
+    property TimebarHeight: Single read FTimebarHeight;
+    property DealerPoint: TPoint2 read FDealerPoint;
+    property DealerButtonWidth: Single read FDealerButtonWidth;
+    property DealerButtonHeight: Single read FDealerButtonHeight;
+    property ChipWidth: Single read FChipWidth;
+    property ChipHeight: Single read FChipHeight;
+    property ChatBoxBounds: TRect read FChatBoxBounds;
+    property ChatEditBounds: TRect read FChatEditBounds;
+    property CheckboxesLeft: Integer read FCheckboxesLeft;
+    property RaiseAmountBoxBounds: TRect read FRaiseAmountBoxBounds;
+    property RaiseTrackBounds: TRectF read FRaiseTrackBounds;
+    property HandPlaybackProgress: TRect read FHandPlaybackProgress;
+    property HandPlaybackPlay: TRect read FHandPlaybackPlay;
+    property HandPlaybackBack: TRect read FHandPlaybackBack;
+    property HandPlaybackForward: TRect read FHandPlaybackForward;
+  end;
+
+implementation
+
+uses
+  Poker.Table.Resources, Poker.Common.Misc;
+
+{ TTableRenderMetrics }
+
+constructor TTableRenderMetrics.Create(const AHandle: THandle; const AGame: TGameInfo);
+begin
+  FHandle := AHandle;
+  FGame := AGame;
+end;
+
+function TTableRenderMetrics.GetTableSector(const APoint: TPoint2): TTableSector;
+var
+  points: array[0..3] of TPoint2;
+begin
+  points[0] := Point2(TableCenter.X - SeatWidth / 4, TableCenter.Y - SeatHeight / 2.5);
+  points[1] := Point2(TableCenter.X + SeatWidth / 4, TableCenter.Y - SeatHeight / 2.5);
+  points[2] := Point2(TableCenter.X - SeatWidth / 4, TableCenter.Y + SeatHeight / 2.5);
+  points[3] := Point2(TableCenter.X + SeatWidth / 4, TableCenter.Y + SeatHeight / 2.5);
+
+  if APoint.X < points[0].X then
+  begin
+    if APoint.Y < points[0].y then
+      result := tsTopLeft
+    else
+      if APoint.Y > points[2].y then
+        result := tsBottomLeft
+      else
+        result := tsLeft
+  end
+  else
+    if APoint.X > points[1].X then
+    begin
+      if APoint.Y < points[0].y then
+        result := tsTopRight
+      else
+        if APoint.Y > points[2].y then
+          result := tsBottomRight
+        else
+          result := tsRight
+    end
+    else
+      if APoint.Y < points[0].y then
+        result := tsTop
+      else
+        if APoint.Y > points[2].y then
+          result := tsBottom
+        else
+          result := tsMid;
+end;
+
+function TTableRenderMetrics.GetSeatPoint(const ASeatIndex: Integer): TPoint2;
+var
+  seat_radians: Double;
+  x, y: Single;
+  pf: TPointF;
+begin
+  seat_radians := TTableResources.SEAT_POINTS[FGame.Seats, ASeatIndex];
+
+  x := TableCenter.X + (TableWidth * 0.9 / 2) * Cos(seat_radians);
+  y := TableCenter.Y - TableCenterYOffset + (TableHeight * 0.95 / 2) * Sin(seat_radians) - 8 * TableResizeRatio;
+
+  pf := PointF(x, y);
+
+  case GetTableSector(Point2(x, y)) of
+    tsTopLeft: pf.Offset(-SeatWidth / 2.35, -SeatHeight / 2);
+    tsLeft: pf.Offset(-SeatWidth / 2.35, 0);
+    tsBottomLeft: pf.Offset(-SeatWidth / 2.35, SeatHeight / 2);
+    tsBottom: pf.Offset(0, SeatHeight / 1.55);
+    tsBottomRight: pf.Offset(SeatWidth / 2.35, SeatHeight / 2);
+    tsRight: pf.Offset(SeatWidth / 2.35, 0);
+    tsTopRight: pf.Offset(SeatWidth / 2.35, -SeatHeight / 2);
+    tsTop: pf.Offset(0, -SeatHeight / 2);
+  end;
+
+  result := Point2(pf.x, pf.y);
+end;
+
+function TTableRenderMetrics.GetBetPoint(const ASeatIndex, ACurrentDealer: Integer): TPoint2;
+var
+  seat_radians: Double;
+  x, y: Single;
+  xr, yr: Single;
+begin
+  if ACurrentDealer = ASeatIndex then
+  begin
+    xr := TableWidth / 1.51;
+    yr := TableHeight / 2;
+  end
+  else
+  begin
+    xr := TableWidth / 1.26;
+    yr := TableHeight / 1.45;
+  end;
+
+  seat_radians := TTableResources.SEAT_POINTS[FGame.Seats, ASeatIndex];
+  x := TableCenter.X + (xr / 2) * Cos(seat_radians);
+  y := TableCenter.Y - TableCenterYOffset + (yr / 2) * Sin(seat_radians) - 40 * TableResizeRatio;
+  result := Point2(x, y);
+end;
+
+function TTableRenderMetrics.GetCardPoint(const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
+var
+  seat_point: TPoint2;
+  cards_width: Single;
+  cards_overlap_width: Single;
+  cards_starting_x: Single;
+  perc: Single;
+begin
+  seat_point := GetSeatPoint(ASeatInfo.SeatIndex);
+  cards_width := ASeatInfo.CardCount * CardWidth;
+  if (cards_width > SeatCardsMaxWidth) and
+     (ASeatInfo.CardCount > 1) then
+  begin
+    cards_overlap_width := (cards_width - SeatCardsMaxWidth) / (ASeatInfo.CardCount - 1);
+    cards_starting_x := seat_point.X - SeatCardsMaxWidth / 2;
+  end
+  else
+  begin
+    cards_overlap_width := 1;
+    cards_starting_x := seat_point.X - (ASeatInfo.CardCount * (CardWidth + cards_overlap_width) - 1) / 2;
+  end;
+
+  if ((ACardIndex >= 0) and (ACardIndex < ASeatInfo.Cards.Count)) and
+     (ASeatInfo.Cards[0].IsKnown) then
+    perc := CARD_OPEN_PERC
+  else
+    perc := CARD_HIDDEN_PERC;
+
+  result := Point2(cards_starting_x + ACardIndex * (CardWidth - cards_overlap_width), seat_point.Y - SeatHeight / 2 - CardHeight * perc);
+end;
+
+function TTableRenderMetrics.GetDealerPoint(const ASeatIndex: Integer): TPoint2;
+var
+  seat_radians: Double;
+  x, y: Single;
+  xr, yr: Single;
+begin
+  xr := TableWidth / 1.25;
+  yr := TableHeight / 1.45;
+
+  seat_radians := TTableResources.SEAT_POINTS[FGame.Seats, ASeatIndex];
+  x := TableCenter.X + (xr / 2) * Cos(seat_radians);
+  y := TableCenter.Y - TableCenterYOffset + (yr / 2) * Sin(seat_radians) - 17 * TableResizeRatio;
+  result := Point2(x, y);
+end;
+
+function TTableRenderMetrics.GetPotPoint(const APotIndex: Integer): TPoint2;
+var
+  topy, bottomy: Integer;
+begin
+  topy := Round(TableCenter.Y - CardHeight - TableResizeRatio * 10);
+  bottomy := Round(TableCenter.Y + CardHeight + TableResizeRatio * 16);
+  case APotIndex of
+    0: result := Point2(TableCenter.X, topy);
+    1: result := Point2(TableCenter.X + 60, topy);
+    2: result := Point2(TableCenter.X - 60, topy);
+    3: result := Point2(TableCenter.X - 60, bottomy);
+    4: result := Point2(TableCenter.X + 60, bottomy);
+  else
+    result := Point2(-1, -1);
+  end;
+end;
+
+function TTableRenderMetrics.IsPointInRaiseThumb(const AX, AY: Integer): Boolean;
+begin
+  result := IsPointInsideCircle(AX, AY, FRaiseThumbBounds.Left + FRaiseThumbBounds.Width / 2, FRaiseThumbBounds.Top + FRaiseThumbBounds.Height / 2, FRaiseThumbBounds.Width / 2);
+end;
+
+function TTableRenderMetrics.IsPointInRaiseTrack(const AX, AY: Integer; out APercentage: Single): Boolean;
+begin
+  result := PtInRect(FRaiseTrackBounds, PointF(AX, AY));
+  if result then
+    APercentage := (AX - FRaiseTrackBounds.Left) / FRaiseTrackBounds.Width;
+end;
+
+function TTableRenderMetrics.IsPointInSeat(const AX, AY: Integer; out ASeatIndex: Integer): Boolean;
+var
+  C1: Integer;
+  seat_point: TPoint2;
+  seat_rect: TRectF;
+begin
+  for C1 := 0 to FGame.Seats - 1 do
+  begin
+    seat_point := GetSeatPoint(C1);
+    seat_rect := TRectF.Create(seat_point.X - FSeatWidth / 2, seat_point.Y - FSeatHeight / 2, seat_point.X + FSeatWidth / 2, seat_point.Y + FSeatHeight / 2);
+    if (AX >= seat_rect.Left) and (AX <= seat_rect.Right) and
+       (AY >= seat_rect.Top) and (AY <= seat_rect.Bottom) then
+    begin
+      ASeatIndex := C1;
+      Exit(TRUE);
+    end;
+  end;
+  Exit(FALSE);
+end;
+
+function TTableRenderMetrics.IsPointInStandUpButton(const AX, AY: Integer): Boolean;
+begin
+{  if (AY < FStandUpButton.Point.y) or
+     (AY > FStandUpButton.Point.y + FStandupButtonHeight) or
+     (AX > FStandUpButton.Point.x + FStandUpButtonWidth) or
+     (AX < FStandUpButton.Point.x) then
+    Exit(FALSE);
+
+  // triangle test
+  if FStandUpButtonHeight * (AX - FStandUpButton.Point.x) - TableResources.STANDUP_BUTTON_TRIANGLE_W * FTableResizeRatio * (AY - FStandUpButton.Point.y) < 0 then
+    Exit(FALSE);
+
+  Exit(TRUE);} //FIXME
+  Exit(FALSE);
+end;
+
+
+procedure TTableRenderMetrics.Update(const ADXAreaSize: TPoint2px);
+const
+  TABLE_X_LEFT = 64;
+  TABLE_X_RIGHT = 64;
+  TABLE_Y_TOP = 66;
+  TABLE_Y_BOTTOM = 133;
+  TABLE_Y_OFFSET = -20;
+  TABLE_HEIGHT_OF_FORM = 0.715;
+var
+  C1: Integer;
+  w, h: Single;
+  wint, hint: Integer;
+begin
+  // calculate table resize ratio
+  FTableResizeRatio := (ADXAreaSize.y * TABLE_HEIGHT_OF_FORM) / TableResources.TableImage.Texture[0].Height;
+
+  // calculate raw dimensions, the ones that include table shadow
+  w := TableResources.TableImage.Texture[0].Width * FTableResizeRatio;
+  h := TableResources.TableImage.Texture[0].Height * FTableResizeRatio;
+  FRawTableBounds := pBounds4((ADXAreaSize.x - w) / 2, (ADXAreaSize.y - h) / 2 + TABLE_Y_OFFSET * FTableResizeRatio, w, h);
+
+  // now calculate real dimensions of table
+  FTableWidth := (FRawTableBounds[1].X - FRawTableBounds[0].X) - (TABLE_X_LEFT + TABLE_X_RIGHT) * FTableResizeRatio;
+  FTableHeight := (FRawTableBounds[2].Y - FRawTableBounds[0].Y) - (TABLE_Y_TOP + TABLE_Y_BOTTOM) * FTableResizeRatio;
+  FTableBounds := pBounds4(FRawTableBounds[0].X + TABLE_X_LEFT * FTableResizeRatio,
+                           FRawTableBounds[0].Y + TABLE_Y_TOP * FTableResizeRatio,
+                           FTableWidth,
+                           FTableHeight);
+
+  // calculate table center
+  FTableCenterYOffset := -28 * FTableResizeRatio;
+  FTableCenter.X := FTableBounds[0].X + (FTableBounds[1].X - FTableBounds[0].X) / 2;
+  FTableCenter.Y := FTableBounds[0].Y + (FTableBounds[2].Y - FTableBounds[0].Y) / 2 + FTableCenterYOffset;
+
+  // calculate dealer point
+  FDealerPoint.X := FTableCenter.X;
+  FDealerPoint.Y := FTableBounds[0].Y;
+
+  // calculate seat size
+  FSeatHeight := (ADXAreaSize.y - (FTableBounds[2].Y - FTableBounds[0].Y)) / 5.2;
+  if FGame.Seats = 10 then
+    FSeatHeight := FSeatHeight * 0.85;
+
+  FSeatWidth := FSeatHeight * TableResources.SeatAspectRatio;
+  FSeatResizeRatio := FSeatWidth / TableResources.SeatLeftImage.Texture[0].Width;
+  FSeatActionResizeRatio := FSeatResizeRatio * 1.1;
+
+  // calculate card size
+  FCardWidth := TableResources.CardBackgroundImage.Texture[0].Width * FTableResizeRatio;
+  FCardHeight := FCardWidth / TableResources.CardAspectRatio;
+  FCardArtworkWidth := FCardWidth * (0.48 + FTableResizeRatio / 5);
+  FCardArtworkHeight := FCardHeight * 0.85;
+  FSeatCardsMaxWidth := FSeatWidth * 0.65;
+  if FSeatCardsMaxWidth < (FCardWidth * 2) + 2 then
+    FSeatCardsMaxWidth := (FCardWidth * 2) + 2;
+
+  // calculate dealer size
+  FDealerButtonWidth := TableResources.DealerButtonImage.Texture[0].Width * FTableResizeRatio;
+  FDealerButtonHeight := FDealerButtonWidth / TableResources.DealerButtonAspectRatio;
+
+  // calculate chip size
+  FChipWidth := TableResources.Chip1Image.Texture[0].Width * FTableResizeRatio;
+  FChipHeight := FChipWidth / TableResources.ChipAspectRatio;
+
+  // calculate timebar/timebank size
+  FTimebarWidth := TableResources.TimebarImage.Texture[0].Width * FSeatActionResizeRatio;
+  FTimebarHeight := FTimebarWidth / TableResources.TimebarAspectRatio;
+
+  // calculate seat frame size
+  FSeatActionFrameWidth := TableResources.SeatActionCheck.Texture[0].Width * FSeatActionResizeRatio;
+  FSeatActionFrameHeight := FSeatActionFrameWidth / TableResources.SeatActionFrameAspectRatio;
+
+  // calculate lower interface sizes
+  FLowerIntfBorder := Round(10 * FTableResizeRatio);
+
+  FActionButtonWidth := TableResources.ActionButtonNormalImage.Texture[0].Width * FTableResizeRatio;
+  FActionButtonHeight := FActionButtonWidth / TableResources.ActionButtonAspectRatio;
+{
+  FActionButtons[High(FActionButtons)].Point := Point2(ADXAreaSize.x - FLowerIntfBorder * 1.5 - FActionButtonWidth, ADXAreaSize.y - FLowerIntfBorder - FActionButtonHeight);
+  for C1 := High(FActionButtons) - 1 downto Low(FActionButtons) do
+    FActionButtons[C1].Point := Point2(FActionButtons[C1 + 1].Point.x - FLowerIntfBorder * 2 - FActionButtonWidth, FActionButtons[C1 + 1].Point.y);
+
+                                                   }
+
+ {
+    FRaiseSliderResizeRatio: Single;
+    FRaiseSliderBounds: TRect;
+    FRaiseThumbBounds: TRect;
+    FRaiseThumbPosition: Single;
+}
+//  FRaiseSliderWidth := FActionButtons[High(FActionButtons)].Point.x + FActionButtonWidth - FActionButtons[Low(FActionButtons)].Point.x;
+  w := 100; // fixme
+  h := Round(w / TableResources.RaiseSliderAspectRatio);
+  FRaisePanelResizeRatio := w / TableResources.RaiseSliderBackgroundImage.Texture[0].Width;
+
+//  FRaiseSliderPoint := Point2(FActionButtons[Low(FActionButtons)].Point.x, FActionButtons[Low(FActionButtons)].Point.y - FLowerIntfBorder - FRaiseSliderHeight);
+  FRaisePanelBounds := TRectF.Create(PointF(200, 200), w, h);
+//      Round(TableResources.RAISE_SLIDER_X * FRaiseSliderResizeRatio), Round(TableResources.RAISE_SLIDER_Y * FRaiseSliderResizeRatio));
+
+  FRaiseTrackBounds := TRectF.Create(PointF(FRaisePanelBounds.Left + TableResources.RAISE_THUMB_LEFT_OFFSET * FRaisePanelResizeRatio,
+                                            FRaisePanelBounds.Top + TableResources.RAISE_THUMB_TOP_OFFSET * FRaisePanelResizeRatio),
+                                     TableResources.RAISE_THUMB_SLIDER_WIDTH * FRaisePanelResizeRatio,
+                                     TableResources.RAISE_THUMB_SLIDER_HEIGHT * FRaisePanelResizeRatio);
+
+  w := TableResources.RaiseSliderButtonImage.Texture[0].Width * FRaisePanelResizeRatio;
+  h := w * TableResources.RaiseSliderButtonAspectRatio;
+  FRaiseThumbBounds := TRectF.Create(PointF(FRaiseTrackBounds.Left + FRaiseThumbPosition * FRaiseTrackBounds.Width - w / 2,
+                                            FRaiseTrackBounds.Top + FRaiseTrackBounds.Height / 2 - h / 2),
+                                     w, h);
+
+  FRaisePresetButtonWidth := TableResources.RaisePresetButtonNormalImage.Texture[0].Width * FTableResizeRatio;
+  FRaisePresetButtonHeight := FRaisePresetButtonWidth / TableResources.RaisePresetButtonAspectRatio;
+{  FRaisePresetButtons[High(FRaisePresetButtons)].Point := Point2(FRaiseSliderPoint.x + FRaiseSliderWidth - FRaisePresetButtonWidth,
+                                                                 FRaiseSliderPoint.y - FLowerIntfBorder / 2.5 - FRaisePresetButtonHeight);
+  for C1 := High(FRaisePresetButtons) - 1 downto Low(FRaisePresetButtons) do
+    FRaisePresetButtons[C1].Point := Point2(FRaisePresetButtons[C1 + 1].Point.x - FLowerIntfBorder - FRaisePresetButtonWidth, FRaisePresetButtons[C1 + 1].Point.y);
+ }
+  FStandUpResizeRatio := FTableResizeRatio * 1.5;
+  if FStandUpResizeRatio > 1 then
+    FStandUpResizeRatio := 1;
+
+  FStandUpButtonWidth := TableResources.StandUpButtonNormalImage.Texture[0].Width * FStandUpResizeRatio;
+  FStandUpButtonHeight := FStandUpButtonWidth / TableResources.StandUpButtonAspectRatio;
+  {                                      FIXME
+  FStandUpButton.Point.x := ADXAreaSize.x - FStandUpButtonWidth + 1;
+  FStandUpButton.Point.y := -1;
+   }
+  FPlayNowResizeRatio := FTableResizeRatio * 1.38;
+  if FPlayNowResizeRatio > 1 then
+    FPlayNowResizeRatio := 1;
+
+  FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
+  FPlayNowButtonHeight := FPlayNowButtonWidth / TableResources.PlayNowButtonAspectRatio;
+
+                 { FIXME
+  FPlayNowButton.Point.x := rvChat.Left + rvChat.Width + (ADXAreaSize.x - (rvChat.Left + rvChat.Width)) / 2 - FPlayNowButtonWidth / 2;
+  FPlayNowButton.Point.y := rvChat.Top + (ADXAreaSize.y - rvChat.Top) / 2.5 - FPlayNowButtonHeight / 2;
+                  }
+
+  FRaiseAmountBoxBounds.Left := Round(FRaisePanelBounds.Left + TableResources.RAISE_VALUEBOX_X * FRaisePanelResizeRatio);
+  FRaiseAmountBoxBounds.Top := Round(FRaisePanelBounds.Top + TableResources.RAISE_VALUEBOX_Y * FRaisePanelResizeRatio);
+  FRaiseAmountBoxBounds.Width := Round(TableResources.RAISE_VALUEBOX_WIDTH * FRaisePanelResizeRatio);
+  FRaiseAmountBoxBounds.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaisePanelResizeRatio);
+
+  if FRaiseAmountBoxBounds.Height < 19 then
+    FRaiseAmountBoxFontSize := 7
+  else
+    if FRaiseAmountBoxBounds.Height < 22 then
+      FRaiseAmountBoxFontSize := 9
+    else
+      FRaiseAmountBoxFontSize := 10;
+
+  wint := Round(ADXAreaSize.x / 3.15);
+  hint := ADXAreaSize.y div 7;
+  FChatBoxBounds := TRect.Create(Point(FLowerIntfBorder, ADXAreaSize.y - FLowerIntfBorder - hint), wint, hint);
+  FChatEditBounds := TRect.Create(Point(FChatBoxBounds.Left, FChatBoxBounds.Top - 18), FChatBoxBounds.Width, 18);
+  FCheckboxesLeft := FChatBoxBounds.Right + FLowerIntfBorder;
+
+  wint := ADXAreaSize.x div 3;
+  hint := 9;
+
+  FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 2), Round(ADXAreaSize.y * 0.825)), wint, hint);
+
+  wint := 48;
+  hint := 48;
+  FHandPlaybackPlay := TRect.Create(Point(Round(FHandPlaybackProgress.Left + FHandPlaybackProgress.Width / 2 - wint / 2),
+                                          Round(FHandPlaybackProgress.Bottom + 3)), wint, hint);
+  FHandPlaybackBack := FHandPlaybackPlay;
+  FHandPlaybackBack.Offset(-wint - 3, 0);
+
+  FHandPlaybackForward := FHandPlaybackPlay;
+  FHandPlaybackForward.Offset(wint + 3, 0);
+end;
+
+end.

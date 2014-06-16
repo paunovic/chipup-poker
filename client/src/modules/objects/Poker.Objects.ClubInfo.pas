@@ -48,6 +48,7 @@ type
     procedure UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
     procedure UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetMemberBalance(const AMemberId: TBytes);
+    procedure InitToDemoValues;
 
     procedure AddMember(const AClubMemberInfo: TPB_ClubMember); overload;
     procedure AddMember(const AClubMemberInfo: TClubMemberInfo); overload;
@@ -106,6 +107,21 @@ begin
       Exit(TRUE);
     end;
   Exit(FALSE);
+end;
+
+procedure TClubInfo.InitToDemoValues;
+begin
+  FId := 0;
+  SetLength(FMongoId, 0);
+  SetLength(FOwnerId, 0);
+  FName := '';
+  FPassword := '';
+  FMembers.Clear;
+  FGames.Clear;
+  FRake := 5;
+  FPrivate := TRUE;
+  FDefaultBalanceLimit := 1000;
+  FUnlimitedDefaultBalance := TRUE;
 end;
 
 procedure TClubInfo.Assign(const AProtobufObject: TPB_Club);
