@@ -287,12 +287,12 @@ end;
 procedure TfrmChipUpMain.DoLogout;
 begin
   FormsContainer.CloseAllForms;
+  Tables.Clear;
   gridMyHomeGamesTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
-  Tables.Clear;
 end;
 
 procedure TfrmChipUpMain.ShowLoginForm;

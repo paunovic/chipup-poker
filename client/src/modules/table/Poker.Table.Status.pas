@@ -292,7 +292,7 @@ begin
   FSeatInfos.Add(seatinfo);
 
   FBets.Clear;
-  FBets.Add(0); FBets.Add(0); FBets.Add(3333); FBets.Add(6666); FBets.Add(18888);
+  FBets.Add(0); FBets.Add(0); FBets.Add(3573); FBets.Add(7317); FBets.Add(18458);
   FPreviousBets.Clear;
   FPreviousBets.AddRange(FBets);
   FFlopCards.Clear;

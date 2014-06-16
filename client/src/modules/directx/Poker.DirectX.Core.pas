@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas;
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas, Poker.Settings;
 
 
 class procedure TDXCore.Initialize;
@@ -65,7 +65,7 @@ begin
   FCanvas.Antialias := TRUE;
   FCanvas.MipMapping := TRUE;
 
-  for C1 := 0 to 32 do
+  for C1 := 1 to Settings.Hardcoded.DIRECTX_SWAPCHAIN_COUNT + 1 do
     FDevice.SwapChains.Add(FDummyWindow, Point2px(1, 1));
 
   if FDevice.Connect then
@@ -99,10 +99,12 @@ begin
   for C1 := 1 to FDevice.SwapChains.Count - 1 do
    if FDevice.SwapChains[C1].WindowHandle = FDummyWindow then
    begin
-     FDevice.SwapChains.Items[AIndex]^.WindowHandle := AHandle;
+     FDevice.SwapChains[AIndex].WindowHandle := AHandle;
+     FDevice.SwapChains[AIndex].Multisamples := 4;
+     FDevice.SwapChains[AIndex].VSync := TRUE;
      AIndex := C1;
-     Exit(TRUE);
      {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired [%d]', [AIndex, AHandle]), ditApplication); {$ENDIF}
+     Exit(TRUE);
    end;
 
   {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element not acquired [%d]', [AHandle]), ditException); {$ENDIF}
@@ -111,13 +113,17 @@ end;
 
 procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
 begin
-  FDevice.SwapChains.Items[AIndex]^.WindowHandle := ANewHandle;
+  FDevice.SwapChains[AIndex].WindowHandle := ANewHandle;
   {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d modified [%d]', [AIndex, ANewHandle]), ditApplication); {$ENDIF}
 end;
 
 procedure TDXCore.ReleaseSwapChainElement(const AIndex: Integer);
 begin
-  FDevice.SwapChains.Items[AIndex]^.WindowHandle := FDummyWindow;
+  FDevice.SwapChains[AIndex].Width := 1;
+  FDevice.SwapChains[AIndex].Height := 1;
+  FDevice.SwapChains[AIndex].Multisamples := 0;
+  FDevice.SwapChains[AIndex].VSync := FALSE;
+  FDevice.SwapChains[AIndex].WindowHandle := FDummyWindow;
   {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
 end;
 

@@ -1,9 +1,10 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
+  Caption = 't'
   ClientHeight = 554
   ClientWidth = 794
-  Color = clWindow
+  Color = clBlack
   Constraints.MinHeight = 550
   Constraints.MinWidth = 600
   Ctl3D = False
@@ -4234,6 +4235,8 @@ object frmChipUpMain: TfrmChipUpMain
     object acSettings: TAction
       Category = 'Options'
       Caption = 'Settings'
+      ShortCut = 16467
+      Visible = False
       OnExecute = acSettingsExecute
     end
   end

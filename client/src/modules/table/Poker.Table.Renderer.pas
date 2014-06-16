@@ -4,12 +4,23 @@ interface
 
 uses
   System.Classes, System.Generics.Collections, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts, Poker.Table.RenderMetrics,
-  Poker.Objects.GameInfo, Poker.Table.Status, AsphyreImages, Poker.Objects.SeatInfo, Poker.Cards, Poker.ChipStackMaker;
+  Poker.Objects.GameInfo, Poker.Table.Status, AsphyreImages, Poker.Objects.SeatInfo, Poker.Cards, Poker.ChipStackMaker, IdSync;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
   TSoundPlayEvent = procedure(const ASound: String) of object;
   TTableType = (ttLiveGame, ttHandPlayback, ttSettingsPreview);
+
+  TTableRenderer = class;
+
+  TSyncRenderer = class(TIdSync)
+  private
+    FRenderer: TTableRenderer;
+  protected
+    procedure DoSynchronize; override;
+  public
+    class procedure Render(const ARenderer: TTableRenderer);
+  end;
 
   TTableRenderer = class
   private
@@ -169,10 +180,8 @@ end;
 
 procedure TTableRenderer.Render;
 begin
-  if not Assigned(FTableStatus) then
-    Exit;
-
-  DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
+  if Assigned(FTableStatus) then
+    DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
 end;
 
 procedure TTableRenderer.RenderEvent(Sender: TObject);
@@ -1077,6 +1086,24 @@ begin
   FFlopAnimated := FTableStatus.State >= tsFlop;
   FTurnAnimated := FTableStatus.State >= tsTurn;
   FRiverAnimated := FTableStatus.State >= tsRiver;
+end;
+
+{ TTableSyncRender }
+
+procedure TSyncRenderer.DoSynchronize;
+begin
+  FRenderer.Render;
+end;
+
+class procedure TSyncRenderer.Render(const ARenderer: TTableRenderer);
+begin
+  with TSyncRenderer.Create do
+  try
+    FRenderer := ARenderer;
+    Synchronize;
+  finally
+    Free;
+  end;
 end;
 
 

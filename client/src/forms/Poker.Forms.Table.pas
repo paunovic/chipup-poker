@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.Generics.Collections,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, cxContainer, cxEdit, Poker.Table.Status, Poker.DirectX.Animation, Vectors2,
   Vcl.ActnList, cxLabel, Poker.Table.Tables, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
-  Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, AsphyreImages, IdSync,
+  Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, AsphyreImages,
   Poker.HandHistory.Items, cxButtons, cxProgressBar, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
   ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxMaskEdit, dxSkinsCore;
 
@@ -14,17 +14,6 @@ type
   TMouseDownObject = (mdoNone, mdoRaiseSliderButton, mdoActionButton1, mdoActionButton2, mdoActionButton3,
       mdoRaisePresetButton1, mdoRaisePresetButton2, mdoRaisePresetButton3, mdoRaisePresetButton4,
       mdoStandUpButton, mdoPlayNowButton);
-
-  TfrmTable = class;
-
-  TTableSyncRender = class(TIdSync)
-  private
-    FTable: TfrmTable;
-  protected
-    procedure DoSynchronize; override;
-  public
-    class procedure Render(const ATable: TfrmTable);
-  end;
 
   TfrmTable = class(TForm)
     ActionManager: TActionManager;
@@ -350,7 +339,7 @@ end;
 
 procedure TfrmTable.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FTable.NotifyClose;
+  Tables.Remove(FTable);
   FTable := nil;
 end;
 
@@ -2070,24 +2059,6 @@ begin
   acHandPlaybackPause.Execute;
   if FTable.HandHistoryPlayback.CurrentStateIndex < FTable.HandHistoryPlayback.States.Count - 1 then
     SetTableStatus(FTable.HandHistoryPlayback.NextState, TRUE);
-end;
-
-{ TTableSyncRender }
-
-procedure TTableSyncRender.DoSynchronize;
-begin
-  FTable.FTable.Renderer.Render;
-end;
-
-class procedure TTableSyncRender.Render(const ATable: TfrmTable);
-begin
-  with TTableSyncRender.Create do
-  try
-    FTable := ATable;
-    Synchronize;
-  finally
-    Free;
-  end;
 end;
 
 end.

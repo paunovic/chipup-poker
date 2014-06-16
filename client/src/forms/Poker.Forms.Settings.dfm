@@ -4,8 +4,8 @@ object frmSettings: TfrmSettings
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Settings'
-  ClientHeight = 425
-  ClientWidth = 621
+  ClientHeight = 507
+  ClientWidth = 690
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -22,8 +22,8 @@ object frmSettings: TfrmSettings
   OnKeyDown = FormKeyDown
   OnShow = FormShow
   DesignSize = (
-    621
-    425)
+    690
+    507)
   PixelsPerInch = 96
   TextHeight = 13
   object gbLeftPanel: TcxGroupBox
@@ -32,13 +32,13 @@ object frmSettings: TfrmSettings
     Anchors = [akLeft, akTop, akBottom]
     PanelStyle.Active = True
     TabOrder = 0
-    Height = 374
+    Height = 456
     Width = 166
     object lbOptions: TcxListBox
       Left = 2
       Top = 2
       Width = 162
-      Height = 370
+      Height = 452
       Align = alClient
       AutoComplete = False
       ItemHeight = 30
@@ -49,6 +49,7 @@ object frmSettings: TfrmSettings
       Style.TextStyle = [fsBold]
       TabOrder = 0
       OnClick = lbOptionsClick
+      OnDrawItem = lbOptionsDrawItem
       OnMouseDown = lbOptionsMouseDown
     end
   end
@@ -58,36 +59,37 @@ object frmSettings: TfrmSettings
     Anchors = [akLeft, akTop, akRight, akBottom]
     PanelStyle.Active = True
     TabOrder = 1
-    Height = 374
-    Width = 431
+    Height = 456
+    Width = 500
     object pcSettings: TcxPageControl
       Left = 2
       Top = 2
-      Width = 427
-      Height = 370
+      Width = 496
+      Height = 452
       Align = alClient
       TabOrder = 0
       Properties.ActivePage = tsThemes
       Properties.HideTabs = True
       Properties.ShowFrame = True
-      ClientRectBottom = 369
+      ClientRectBottom = 451
       ClientRectLeft = 1
-      ClientRectRight = 426
+      ClientRectRight = 495
       ClientRectTop = 1
       object tsGeneral: TcxTabSheet
         Caption = 'tsGeneral'
         ImageIndex = 0
         ExplicitLeft = 0
         ExplicitTop = 0
-        ExplicitWidth = 422
-        ExplicitHeight = 345
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
       object tsThemes: TcxTabSheet
         Caption = 'tsThemes'
         ImageIndex = 1
+        OnResize = tsThemesResize
         DesignSize = (
-          425
-          368)
+          494
+          450)
         object lbsCardBackground: TcxLabel
           Left = 9
           Top = 10
@@ -124,8 +126,8 @@ object frmSettings: TfrmSettings
     end
   end
   object btOK: TcxButton
-    Left = 419
-    Top = 390
+    Left = 488
+    Top = 472
     Width = 93
     Height = 27
     Action = acOK
@@ -140,8 +142,8 @@ object frmSettings: TfrmSettings
     ParentFont = False
   end
   object btCancel: TcxButton
-    Left = 518
-    Top = 390
+    Left = 587
+    Top = 472
     Width = 93
     Height = 27
     Action = acCancel

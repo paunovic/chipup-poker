@@ -41,6 +41,8 @@ type
     procedure lbOptionsMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
+    procedure lbOptionsDrawItem(AControl: TcxListBox; ACanvas: TcxCanvas; AIndex: Integer; ARect: TRect; AState: TOwnerDrawState);
+    procedure tsThemesResize(Sender: TObject);
   private
     FTableThemePanel: TPaintPanel;
     FTable: TTable;
@@ -55,11 +57,12 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Settings, Poker.Common.FormsContainer, Poker.DataModule, Poker.Forms.Table;
+  Poker.Settings, Poker.Common.FormsContainer, Poker.DataModule, Poker.Forms.Table, cxClasses;
 
 procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
   pcSettings.ActivePageIndex := 0;
+  lbOptions.Selected[0] := TRUE;
   cbCardBackground.ItemIndex := Settings.CardBackground;
 end;
 
@@ -84,7 +87,6 @@ begin
     FTableThemePanel.Parent := tsThemes;
     FTableThemePanel.Caption := '';
     FTableThemePanel.Align := alBottom;
-    FTableThemePanel.Height := Round(tsThemes.Height * 0.8);
     FTableThemePanel.BevelOuter := bvNone;
     FTableThemePanel.Color := clBlack;
     FTable := Tables.AddSettingsPreviewTable(FTableThemePanel.Handle);
@@ -93,7 +95,8 @@ end;
 
 procedure TfrmSettings.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FTable.NotifyClose;
+  Tables.Remove(FTable);
+  FTable := nil;
   Action := caFree;
 end;
 
@@ -109,6 +112,18 @@ end;
 procedure TfrmSettings.lbOptionsClick(Sender: TObject);
 begin
   LeftListboxChanged;
+end;
+
+procedure TfrmSettings.lbOptionsDrawItem(AControl: TcxListBox; ACanvas: TcxCanvas; AIndex: Integer; ARect: TRect; AState: TOwnerDrawState);
+begin
+  if odSelected in AState then
+    ACanvas.Brush.Color := $00000073;
+
+  ACanvas.FillRect(ARect);
+  ACanvas.DrawTexT('  ' + lbOptions.Items[AIndex], ARect, taLeftJustify, vaCenter, FALSE, FALSE);
+
+  if odFocused in AState then
+    ACanvas.DrawFocusRect(ARect);
 end;
 
 procedure TfrmSettings.lbOptionsMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -138,6 +153,15 @@ begin
   if (pcSettings.ActivePage = tsThemes) and
      (Assigned(FTable)) then
     FTable.Renderer.Render;
+end;
+
+procedure TfrmSettings.tsThemesResize(Sender: TObject);
+begin
+  if Assigned(FTableThemePanel) then
+    FTableThemePanel.Height := Round(FTableThemePanel.Width / 1.35);
+
+  if Assigned(FTable) then
+    FTable.Renderer.UpdateDXAreaSize;
 end;
 
 { TPaintPanel }

@@ -296,8 +296,16 @@ end;
 function TAvatars.Add(const AId: TBytes; const AImage: TJPEGImage): TAvatar;
 var
   avatar: TAvatar;
+  id: TBytes;
 begin
-  if Find(AId, avatar) then
+  id := AId;
+  if Length(id) = 0 then
+  begin
+    SetLength(id, 1);
+    id[0] := 33;
+  end;
+
+  if Find(id, avatar) then
   begin
     if Assigned(AImage) then
     begin
@@ -308,9 +316,9 @@ begin
   else
   begin
     if Assigned(AImage) then
-      avatar := TAvatar.Create(AId, AImage)
+      avatar := TAvatar.Create(id, AImage)
     else
-      avatar := TAvatar.Create(AId, FRetrievingImage);
+      avatar := TAvatar.Create(id, FRetrievingImage);
 
     avatar.OnImageChanged := AvatarChangedInternal;
 
