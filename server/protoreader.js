@@ -78,7 +78,9 @@ protoreader.reply = function reply(code,message,type) {
 	header.copy(messageOut,2);
 	if (datasize > 0) args.copy(messageOut,2+header.length);
 	var alldone = this.socket.write(messageOut);
-	if (!alldone) this.log('partial message write %d %s',this.socket.bufferSize,util.inspect({a:this.socket._handle.writeQueueSize,b:this.socket._writableState.length}));
+	if (!alldone) {
+		if (this.socket._handle) this.log('partial message write %d %s',this.socket.bufferSize,util.inspect({a:this.socket._handle.writeQueueSize,b:this.socket._writableState.length}));
+	}
 	if (this.socket._writableState.length > (256 * 1024)) {
 		this.error('sendq overflow');
 	}

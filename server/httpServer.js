@@ -14,6 +14,7 @@ var config = require('./config');
 var MongoStore = require('./mongoStore');
 
 var Game = require('./game').Game;
+var Club = require('./club').Club;
 var deck = require('./deck');
 var myutils = require('./myutils');
 var buildbot = require('./buildbot');
@@ -98,6 +99,10 @@ function Server(db,activeUsersIN) {
 	app.get('/confirm',this.confirmAccount.bind(this));
 	app.post('/secure/club_public',function (req,res) {
 		Club.getClubById(new ObjectID(req.body.clubid),function (err,clubObj) {
+			if (err == 'not found') {
+				res.end('club not found');
+				return;
+			}
 			assert.ifError(err);
 			clubObj.goPublic(function (msg) {
 				res.end(msg);
@@ -242,6 +247,7 @@ Server.prototype.secureChangePasswordPost = function (req,res) {
 	}.bind(this));
 }
 Server.prototype.secureLoginPost = function (req,res) {
+	console.log(req.body);
 	var username = req.body.username;
 	var password = req.body.password;
 	console.log('checking auth %s/%s',username,password);
@@ -258,10 +264,10 @@ Server.prototype.secureLoginPost = function (req,res) {
 				}
 			} else {
 				var hasher = crypto.createHash('sha256');
-				hasher.update(adminRow.salt.buffer);
+				hasher.update(adminRow.salt);
 				hasher.update(password);
 				var hash = hasher.digest();
-				if (hash.toString('hex') == adminRow.password.buffer.toString('hex')) {
+				if (hash.toString('hex') == adminRow.password.toString('hex')) {
 					req.session.authed = true;
 					req.session.username = adminRow.username;
 					if (req.session.lastUrl) {
@@ -702,6 +708,7 @@ Server.prototype.errorUpload = function (req,res) {
 		}.bind(this));
 }
 Server.prototype.fetchHands = function (req,res) {
+	// FIXME
 	var token = profiler.start('fetchhands-outer');
 	// new Buffer(g._id.toString(),'hex')
 	FetchQueue.findOne({querycode:req.query.uuid},function (err,query) {

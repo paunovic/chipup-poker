@@ -381,6 +381,8 @@ function ClientSocket(socket) {
 		Game.handleDisconnect(this,'error');
 		this.logout();
 	}.bind(this));
+	clearTimeout(this.idleTimer);
+	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
 }
 ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
@@ -481,8 +483,9 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					} else finish2.call(this,[]);
 				}.bind(this));
 			}.bind(this),function done() {
-				console.log(statuses);
-				this.send(codes.srLoginReply,{login_status:'lrSuccess',status:status,reconnect_tables:statuses},'Poker.LoginReply');
+				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses};
+				console.log('login reply',obj);
+				this.send(codes.srLoginReply,obj,'Poker.LoginReply');
 				// FIXME, embed in the same message
 				handlers[codes.scQueryTableStats].call(this,new Buffer(0),token);
 			}.bind(this));
@@ -595,11 +598,12 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 		this.error(e);
 		return;
 	}
+	console.log('hello params',params);
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
 	Config.findOne({_id:key1},function (err,row2) {
 		conn.collection('installers').findOne({_id:row2.value},function (err,targetVersion) {
-			this.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
 			for (var x=0; x<params.files.length; x++) {
@@ -622,8 +626,8 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 					return cb();
 				}
 				if (clientFile.hash != targetFile) {
-					this.log('clientFile:%j',clientFile);
-					this.log('need to patch %s',clientFile.path);
+					console.log('clientFile:%j',clientFile);
+					console.log('need to patch %s',clientFile.path);
 					diffs.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
 						if (diffRow) {
@@ -647,7 +651,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 					cb();
 				}
 			}.bind(this),function () {
-				this.log('toUpdate:%j',toUpdate);
+				console.log('toUpdate:%j',toUpdate);
 				if (toUpdate.length == 0) {
 					this.currentVersion = targetVersion._id;
 				}

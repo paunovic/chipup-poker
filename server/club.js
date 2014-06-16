@@ -94,11 +94,13 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 							player.keyid = keyid++;
 							player.nick = playerRow.displayname;
 
-							savedCards[player.keyid] = new Buffer(player.cards);
+							if (player.cards) {
+								savedCards[player.keyid] = new Buffer(player.cards);
+							}
 							player.origid = player._id;
 							player._id = myutils.fromMongoId(player._id);
 
-							if (!player.muck) player.cards = new Buffer(player.cards);
+							if (!player.muck && player.cards) player.cards = new Buffer(player.cards);
 							else delete player.cards;
 							cb();
 						});
@@ -264,18 +266,20 @@ Club.prototype.goPublic = function (cb) {
 	allClubs.update({_id:this.clubid},{$set:{is_private:false}},function (err) {
 		assert.ifError(err);
 		allClubs.findOne({_id:this.clubid},function (err,clubObj) {
-			assert.ifError(err);
-			var c = Club.makeClubProtobuf(JSON.parse(JSON.stringify(clubObj)));
-			this.obj = clubObj;
-			allGames.find({clubid:this.clubid}).toArray(function (err,games) {
+			clubBalances.find({clubid:this.clubid}).toArray(function (err,stats) {
 				assert.ifError(err);
-				for (var x=0; x<games.length; x++) {
-					games[x] = makeGameProtobuf(games[x]);
-				}
-				var joininfo = {status:'csSuccess',club:c,games:games};
-				for (var key in activeUsers) {
-					activeUsers[key].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
-				}
+				var c = Club.makeClubProtobuf(JSON.parse(JSON.stringify(clubObj)),null,stats);
+				this.obj = clubObj;
+				allGames.find({clubid:this.clubid}).toArray(function (err,games) {
+					assert.ifError(err);
+					for (var x=0; x<games.length; x++) {
+						games[x] = makeGameProtobuf(games[x]);
+					}
+					var joininfo = {status:'csSuccess',club:c,games:games};
+					for (var key in activeUsers) {
+						activeUsers[key].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
+					}
+				}.bind(this));
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
@@ -294,7 +298,7 @@ Club.prototype.buyin = function (userid,chips) {
 }
 Club.prototype.cashout = function (userid,chips) {
 	this.balance[userid] += chips;
-	console.log('cashout balance',this.balance);
+	//console.log('cashout balance',this.balance);
 }
 Club.prototype.getPotentialLosses = function (userid,cb) {
 	clubBalances.findOne({clubid:this.clubid, userid:userid},function (err,row) {
@@ -302,7 +306,7 @@ Club.prototype.getPotentialLosses = function (userid,cb) {
 		if (!row && !this.balance[userid]) return cb(0);
 		if (!this.balance[userid]) return cb(row.balance,row.unlimited_limit,row.balance_limit);
 		if (!row) return cb(this.balance[userid],this.obj.unlimited_default_balance,this.obj.default_balance_limit);
-		console.log('row:%j',row);
+		//console.log('gpl row:%j',row);
 		cb(this.balance[userid] + row.balance,row.unlimited_limit,row.balance_limit);
 	}.bind(this));
 }

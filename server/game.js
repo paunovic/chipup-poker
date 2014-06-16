@@ -471,7 +471,6 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			players++;
 			this.bets[x] = 0;
 			this.members[x].handsPlayed++;
-			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true, status:this.members[x].status };
 			if (this.members[x].status == 'psOutOfHand') {
 				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
 				if (!myutils.compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
@@ -481,6 +480,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				}
 			}
 			this.members[x].status = 'psInHand';
+			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true, status:this.members[x].status };
 			this.members[x].can_show = true;
 			this.members[x].muck = true;
 			this.balance_changes[x] = 0;
@@ -501,7 +501,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 
 		for (var seat = this.dealer, passed=0; passed < this.obj.seats; seat++, passed++) {
 			seat = seat % this.obj.seats;
-			console.log('seat:%d passed:%d todo:%s',seat,passed,todo[seat]);
+			//console.log('seat:%d passed:%d todo:%s',seat,passed,todo[seat]);
 			if (todo[seat] == 'forcedBB') {
 				if (this.members[seat].chips <= this.obj.big_blind) {
 					this.addHistory({seat:seat,bet:this.members[seat].chips,code:['teForced','teBB','teAllIn']});
@@ -841,7 +841,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 	var stack = new Error().stack;
 
 	//assert.equal(wins[0],15);
-	console.log('doWin',this.pots,this.members);
+	//this.log('doWin',this.pots,this.members); // the timer breaks JSON stringify
 	this.pots = [ new Pot(this) ];
 	async.eachSeries(winnerObjects,function (winnerObj,cb2) {
 		var seat = winnerObj.seat;
@@ -891,10 +891,10 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 			if (this.state == 'tsPreFlop') {
 				this.rake = this.real_rake;
 				this.log('flopping');
-				this.addHistory({code:['teFlop'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
+					this.addHistory({code:['teFlop'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsFlop';
 					this.log('flop adding to %d',extradelay);
 					token.tag += 'c';
@@ -904,10 +904,10 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.roundEnd();
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
-				this.addHistory({code:['teTurn'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
+					this.addHistory({code:['teTurn'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsTurn';
 					this.log('turn adding to %d',extradelay);
 					token.tag += 'd';
@@ -917,10 +917,10 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.roundEnd();
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
-				this.addHistory({code:['teRiver'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
+					this.addHistory({code:['teRiver'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsRiver';
 					this.log('river adding to %d',extradelay);
 					token.tag += 'e';
@@ -1347,7 +1347,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	//}.bind(this));
 }
 Game.prototype.saveHistory = function (cb) {
-	var updates = {$set:{moves:this.history.moves,deck:this.deck.cards}};
+	var updates = {$set:{moves:this.history.moves,deck:this.deck.cards,rake:this.rake}};
 	if (this.history.potdata) {
 		updates['$set'].potdata = this.history.potdata;
 		updates['$set'].winnercount = this.history.winnercount;
@@ -1700,9 +1700,12 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		obj.card_count = seat.hand.cards.length;
 		if (this.state == 'tsIdle') assert.equal(obj.card_count,0);
 		else {
-			if (['psOutOfPlay','psOutOfHand'].indexOf(seat.status) != -1) {
+			if (['psOutOfPlay','psOutOfHand','psFolded'].indexOf(seat.status) != -1) {
 			} else if (this.omaha) assert.equal(obj.card_count,4);
-			else assert.equal(obj.card_count,2);
+			else {
+				//console.log('card count',seat,obj);
+				assert.equal(obj.card_count,2);
+			}
 		}
 		tableStatus.seats.push(obj);
 	}
@@ -1935,6 +1938,7 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 	}
 	delete this.users[conn.userid];
 	this.reconnect.push(conn.userid);
+	var userid = conn.userid;
 	this.Lock.writeLock(function (release) {
 		function finish() {
 			cb();
@@ -1944,9 +1948,8 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		conn.log('leave idx %d',seatIdx);
 		if (seatIdx >= 0) {
 			this.members[seatIdx].disconnected = true;
-			assert(conn.userid);
-			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,conn.userid),5 * 60 * 1000);
-			var fakeconn = {log:ClientSocket.prototype.log,userid:this.seats[seatIdx].userid, nick:this.seats[seatIdx].conn.nick};
+			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,userid),5 * 60 * 1000);
+			var fakeconn = {log:ClientSocket.prototype.log,userid:userid, nick:this.seats[seatIdx].conn.nick};
 			this.seats[seatIdx].conn = fakeconn;
 			var events = [];
 			events.push(this.makeEvent('teDisconnect',seatIdx));
@@ -1992,7 +1995,6 @@ Game.prototype.doDelete = function () {
 	}.bind(this));
 }
 Game.prototype.startTimer = function startTimer(seat,offset) {
-	return;
 	assert.equal(typeof offset,'number');
 	this.stopTimer(seat);
 	this.log('starting timer for seat %d in state %s',seat,this.state);
