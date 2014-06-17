@@ -532,7 +532,8 @@ ClientSocket.prototype.log = function log(format) {
 		out = [ util.format.apply(util,out) ]
 	}
 	process.send({type:'conn',nick:this.nick,connid:this.connid,ts:new Date().toString(),objects:out});
-	debugLogs.insert({type:'conn',nick:this.nick,connid:this.connid,objects:out},function (){});
+	var obj = new mdb.models.DebugLogs({type:'conn',nick:this.nick,connid:this.connid,objects:out});
+	obj.save(function (){});
 }
 ClientSocket.prototype.reply = function reply(code,message,type) {
 	var obj;
@@ -1283,7 +1284,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scGetPlayers:
 			try {
 				var params = pb.Parse(args,'Poker.GetUserParams');
-				this.log('getting players: %j',params);
+				this.log('getting players: %j',params,args);
 				for (var x=0; x<params.user_mongo_ids.length; x++) {
 					params.user_mongo_ids[x] = toMongoId(params.user_mongo_ids[x]);
 				}

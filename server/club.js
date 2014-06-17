@@ -358,6 +358,7 @@ Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
 			if (containsObjectID(input.suspended,memberList[y])) suspended = true;
 		}
 		var obj = {_id:new Buffer(memberList[y],'hex'), suspended:suspended, balance_limit:0, club_balance: 0};
+		assert.equal(obj._id.length,12);
 		for (var a=0; a<stats.length; a++) {
 			if (compareObjectID(stats[a].clubid,input._id)) {
 				if (stats[a].userid == null) {
