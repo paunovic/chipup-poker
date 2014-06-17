@@ -249,8 +249,8 @@
 			<DCCReference Include="modules\objects\Poker.Objects.PlayerInfo.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.ClubInfo.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.GameInfo.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.TableStatus.pas"/>
 			<DCCReference Include="modules\table\Poker.Table.Tables.pas"/>
-			<DCCReference Include="modules\table\Poker.Table.Status.pas"/>
 			<DCCReference Include="modules\table\Poker.Table.Resources.pas"/>
 			<DCCReference Include="modules\Poker.Avatars.pas"/>
 			<DCCReference Include="modules\Poker.Cards.pas"/>

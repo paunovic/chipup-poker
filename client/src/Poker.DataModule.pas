@@ -70,12 +70,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.ShlObj,
-  Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer,
-  Poker.Server.Socket, Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption,
-  Poker.Server.MessageContainer, Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings,
-  Poker.Stats.Table, Poker.Forms.Table, Poker.Table.Status, Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup,
-  Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
+  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
+  Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer, Poker.Avatars,
+  Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings, Poker.Stats.Table, Poker.Forms.Table,
+  Poker.Objects.TableStatus, Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo,
+  Poker.Forms.About;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);

@@ -4,7 +4,7 @@ interface
 
 uses
   System.Classes, System.Generics.Collections, System.Types, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts, Poker.Table.RenderMetrics,
-  Vcl.ActnList, Poker.Objects.GameInfo, Poker.Table.Status, AsphyreImages, Poker.Objects.SeatInfo, Poker.Cards, Poker.ChipStackMaker,
+  Vcl.ActnList, Poker.Objects.GameInfo, Poker.Objects.TableStatus, AsphyreImages, Poker.Objects.SeatInfo, Poker.Cards, Poker.ChipStackMaker,
   IdSync, Poker.Table.DXButton, Vcl.Controls;
 
 type

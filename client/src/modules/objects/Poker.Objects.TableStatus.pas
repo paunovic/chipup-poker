@@ -1,4 +1,4 @@
-unit Poker.Table.Status;
+unit Poker.Objects.TableStatus;
 
 interface
 
