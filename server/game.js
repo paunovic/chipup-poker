@@ -1268,7 +1268,7 @@ Game.prototype.updateMongoState = function (obj,options,cb) {
 		for (var key in this.users) U.push(this.users[key].userid);
 		obj.$set.users = U;
 	}
-	gameState.update({_id:this.obj._id}, obj,function (err,res) {
+	gameState.update({_id:this.obj._id}, obj,function updateMongoState_cb1(err,res) {
 		this.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
 		if (res != 1) console.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
 		assert(res == 1);
