@@ -3,6 +3,8 @@ var async = require('async');
 var http = require('http');
 var MongoClient = require('mongodb').MongoClient;
 
+var mdb = require('./db');
+
 
 exports.fuzzerLoop = function (test) {
 	var originalMsg = Core.pb.Serialize({debug:true},'Poker.HelloParams');
@@ -184,7 +186,7 @@ exports.club = {
 		var activeGames = {};
 		var club = require('./club');
 		var game = require('./game');
-		test.expect(5);
+		test.expect(7);
 		activeUsers['fake'] = { send: function(code,object,type) {
 			test.ok(true);
 			console.log(code,object,type);
@@ -195,13 +197,21 @@ exports.club = {
 			game.Game.init(db,activeGames,activeUsers,db.collection('debugLogs'),{},null,null,null);
 			db.collection('clubs').findOne(function (err,row) {
 				test.ok(true);
-				club.Club.getClubById(row._id,function (err,clubobj) {
+				db.collection('users').findOne(function (err,userRow) {
+					console.log('userRow',userRow);
 					test.ok(true);
-					console.log('clubobj',clubobj);
-					clubobj.goPublic(function () {
+					db.collection('clubBalances').insert({clubid:row._id,userid:userRow._id,balance:0,balance_limit:0,unlimited_limit:true},function (err) {
 						test.ok(true);
-						test.done();
-						db.close();
+						club.Club.getClubById(row._id,function (err,clubobj) {
+							test.ok(true);
+							console.log('clubobj',clubobj);
+							clubobj.goPublic(function () {
+								test.ok(true);
+								test.done();
+								db.close();
+								mdb.close();
+							});
+						});
 					});
 				});
 			});

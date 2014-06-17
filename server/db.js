@@ -47,6 +47,9 @@ var DebugLogSchema = new Schema({
 },{collection:'debugLogs'});
 models.DebugLogs = mongoose.model('DebugLogs',DebugLogSchema);
 
+module.exports.close = function () {
+	mongoose.disconnect();
+}
 
 if (require.main === module) {
 	models.Admin.find({},function (err,docs) {

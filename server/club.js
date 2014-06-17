@@ -9,6 +9,7 @@ var makeGameProtobuf = require('./game').makeGameProtobuf;
 var profiler = require('./profiler');
 var ReadWriteLock = require('./lock');
 var myutils = require('./myutils');
+var mdb = require('./db');
 
 var getLock = new ReadWriteLock();
 
@@ -268,7 +269,7 @@ Club.prototype.goPublic = function (cb) {
 		allClubs.findOne({_id:this.clubid},function (err,clubObj) {
 			clubBalances.find({clubid:this.clubid}).toArray(function (err,stats) {
 				assert.ifError(err);
-				var c = Club.makeClubProtobuf(JSON.parse(JSON.stringify(clubObj)),null,stats);
+				var c = Club.makeClubProtobuf(JSON.parse(JSON.stringify(clubObj)),null,stats,this);
 				this.obj = clubObj;
 				allGames.find({clubid:this.clubid}).toArray(function (err,games) {
 					assert.ifError(err);
@@ -388,9 +389,9 @@ Club.prototype.log = function log(format) {
 	}
 	out.unshift(this.handid);
 	process.send({type:'club',name:this.obj.gamename,ts:new Date().toString(),objects:out});
-	var obj = {type:'club',name:this.obj.gamename,objects:out}
+	var obj = new mdb.models.DebugLogs({type:'club',name:this.obj.gamename,objects:out});
 	obj.clubid = this.obj.clubid;
-	debugLogs.insert(obj,function (){});
+	obj.save(function () {});
 }
 Club.registerHandlers = function (handlers,pb) {
 handlers[codes.scSuspendPlayer] = function (args,token) {
