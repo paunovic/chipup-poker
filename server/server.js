@@ -111,7 +111,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,debugLogs,diffs;
+var conn,allUsers,allClubs,allCounters,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -120,6 +120,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	}
 	conn = db;
 	club.init(db,activeUsers,activeGames,pb);
+	Game.init(db,activeGames,activeUsers,sharedconfig,getNextSequence,log,ClientSocket);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
 		console.log(err.stack);
@@ -153,10 +154,8 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		PokerProfile = collection;
 		profiler.setup(PokerProfile);
 	});
-	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) {
+	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) { // FIXME, move to mongoose
 		assert.ok(collection instanceof Collection);
-		debugLogs = collection;
-		Game.init(db,activeGames,activeUsers,sharedconfig,getNextSequence,log,ClientSocket);
 	});
 
 	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log,makeUserProtobuf);
@@ -326,7 +325,8 @@ function log(format) {
 		out = [ util.format.apply(util,out) ]
 	}
 	process.send({type:'global',ts:new Date().toString(),msg:out.join(' ')});
-	if (debugLogs) debugLogs.insert({type:'global',msg:out.join(' ')},function () {});
+	var obj = new mdb.models.DebugLogs({type:'global',msg:out.join(' ')});
+	obj.save(function () {});
 }
 function getNextSequence(name,cb) {
 	allCounters.findAndModify({_id:name},[],

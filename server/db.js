@@ -2,7 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
 var assert = require('assert');
 
-mongoose.connect('mongodb://localhost/poker');
+
+var connected = false;
 
 var models = {};
 module.exports.models = models;
@@ -21,20 +22,17 @@ var User = new Schema({
 	changecode:String,
 	changetime:Number
 });
-models.UserModel = mongoose.model('User',User);
 
 var AdminSchema = new Schema({
 	username:String,
 	password:Buffer,
 	salt:Buffer
 },{collection:'admin'});
-models.Admin = mongoose.model('Admin',AdminSchema);
 
 var ConfigSchema = new Schema({
 	_id:String,
 	value:ObjectId
 },{collection:'config'});
-models.Config = mongoose.model('Config',ConfigSchema);
 
 var DebugLogSchema = new Schema({
 	type:String,
@@ -45,10 +43,34 @@ var DebugLogSchema = new Schema({
 	gameid:ObjectId,
 	name:String
 },{collection:'debugLogs'});
-models.DebugLogs = mongoose.model('DebugLogs',DebugLogSchema);
+
+var ClubSchema = new Schema({
+	is_private:Boolean,
+	password:String,
+	name:String,
+	owner:ObjectId,
+	chips:Number,
+	rake:Number,
+	unlimited_default_balance:Boolean,
+	default_balance_limit:Number,
+	members: Array,
+	suspended: Array
+},{collection:'clubs'});
 
 module.exports.close = function () {
+	if (!connected) return;
 	mongoose.disconnect();
+	connected = false;
+}
+module.exports.open = function () {
+	if (connected) return;
+	connected = true;
+	mongoose.connect('mongodb://localhost/poker');
+	models.UserModel = mongoose.model('User',User);
+	models.Admin = mongoose.model('Admin',AdminSchema);
+	models.Config = mongoose.model('Config',ConfigSchema);
+	models.DebugLogs = mongoose.model('DebugLogs',DebugLogSchema);
+	models.Clubs = mongoose.model('Clubs',ClubSchema);
 }
 
 if (require.main === module) {
@@ -57,3 +79,5 @@ if (require.main === module) {
 		console.log(docs);
 	});
 }
+
+module.exports.open();

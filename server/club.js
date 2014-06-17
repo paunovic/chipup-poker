@@ -29,7 +29,7 @@ Club.activeClubsId = {};
 module.exports.getClubBySeq = function (seq,cb) {
 	getLock.writeLock(function (release) {
 		if (!Club.activeClubsSeq[seq]) {
-			allClubs.findOne({seq:seq},function (err,obj) {
+			mdb.models.Clubs.findOne({seq:seq},function (err,obj) {
 				Club.activeClubsSeq[seq] = new Club(obj);
 				Club.activeClubsId[obj._id] = Club.activeClubsSeq[seq];
 				release();
@@ -44,7 +44,7 @@ module.exports.getClubBySeq = function (seq,cb) {
 Club.getClubById = function (id,cb) {
 	getLock.writeLock(function (release) {
 		if (!Club.activeClubsId[id]) {
-			allClubs.findOne({_id:id},function (err,obj) {
+			mdb.models.Clubs.findOne({_id:id},function (err,obj) {
 				assert.ifError(err);
 				if (!obj) return cb('not found');
 				Club.activeClubsSeq[obj.seq] = new Club(obj);
@@ -225,7 +225,7 @@ Club.finishTableStatsPacket = function (data,cb) {
 Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 	var token = profiler.start('seGameChanged');
 	// FIXME, cache object
-	allClubs.findOne({_id:this.clubid},function (err,club) {
+	mdb.models.Clubs.findOne({_id:this.clubid},function (err,club) { // FIXME, get it via a required refresh
 		assert.ifError(err);
 		if (!club) {
 			cb();
@@ -264,24 +264,22 @@ Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 	}.bind(this));
 }
 Club.prototype.goPublic = function (cb) {
-	allClubs.update({_id:this.clubid},{$set:{is_private:false}},function (err) {
+	this.obj.is_private = false;
+	this.obj.save(function (err) {
 		assert.ifError(err);
-		allClubs.findOne({_id:this.clubid},function (err,clubObj) {
-			clubBalances.find({clubid:this.clubid}).toArray(function (err,stats) {
+		clubBalances.find({clubid:this.clubid}).toArray(function (err,stats) {
+			assert.ifError(err);
+			var c = Club.makeClubProtobuf(this.obj,null,stats,this);
+			allGames.find({clubid:this.clubid}).toArray(function (err,games) {
 				assert.ifError(err);
-				var c = Club.makeClubProtobuf(JSON.parse(JSON.stringify(clubObj)),null,stats,this);
-				this.obj = clubObj;
-				allGames.find({clubid:this.clubid}).toArray(function (err,games) {
-					assert.ifError(err);
-					for (var x=0; x<games.length; x++) {
-						games[x] = makeGameProtobuf(games[x]);
-					}
-					var joininfo = {status:'csSuccess',club:c,games:games};
-					for (var key in activeUsers) {
-						activeUsers[key].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
-					}
-					cb('dummy');
-				}.bind(this));
+				for (var x=0; x<games.length; x++) {
+					games[x] = makeGameProtobuf(games[x]);
+				}
+				var joininfo = {status:'csSuccess',club:c,games:games};
+				for (var key in activeUsers) {
+					activeUsers[key].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
+				}
+				cb('dummy');
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
@@ -393,6 +391,25 @@ Club.prototype.log = function log(format) {
 	obj.clubid = this.obj.clubid;
 	obj.save(function () {});
 }
+Club.prototype.setSuspended = function (suspended,playerid,cb) {
+	if (!this.obj.suspended) this.obj.suspended = [];
+	if (suspended) {
+		if (!containsObjectID(this.obj.suspended,playerid)) {
+			this.obj.suspended.push(playerid);
+		}
+	} else {
+		for (var x=0; x<this.obj.members.length; x++) {
+			if (compareObjectID(playerid,this.obj.suspended[x])) {
+				this.obj.suspended.splice(x,1);
+				break;
+			}
+		}
+	}
+	this.obj.save(function (err) {
+		assert.ifError(err);
+		cb(true);
+	});
+}
 Club.registerHandlers = function (handlers,pb) {
 handlers[codes.scSuspendPlayer] = function (args,token) {
 	try {
@@ -405,52 +422,39 @@ handlers[codes.scSuspendPlayer] = function (args,token) {
 		return;
 	}
 	var broadcast = function broadcast(code) {
-		allClubs.findOne({_id:clubid},function cb(err,row) {
-			Club.getClubById(clubid,function (err,clubObj) {
-				clubObj.refresh(row);
-				clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-					var userlist = [ ];
-					var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
-					this.send(code,out,'Poker.Club');
-					this.log('userlist to inform:',userlist);
-					for (var x=0; x<userlist.length; x++) {
-						var user = activeUsers[userlist[x]];
-						if (user) user.send(codes.seClubChange,out,'Poker.Club');
-					}
-				}.bind(this));
+		Club.getClubById(clubid,function (err,clubObj) {
+			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+				var userlist = [ ];
+				var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
+				this.send(code,out,'Poker.Club');
+				this.log('userlist to inform:',userlist);
+				for (var x=0; x<userlist.length; x++) {
+					var user = activeUsers[userlist[x]];
+					if (user) user.send(codes.seClubChange,out,'Poker.Club');
+				}
 			}.bind(this));
 		}.bind(this));
 	}.bind(this);
-	allClubs.findOne({_id:clubid},function (err,club) {
+	Club.getClubById(clubid,function (err,club) {
 		if (!club) {
 			this.reply(0,'club not found');
 			return;
 		}
-		if (!myutils.compareObjectID(club.owner,this.userid)) {
+		if (!club.isOwner(this.userid)) {
 			this.log('your not owner');
 			return;
 		}
-		if (params.suspended) {
-			if (!containsObjectID(club.members,playerid)) {
-				this.reply(0,'player isnt a member');
-				return;
-			}
-			allClubs.update({_id:clubid},
-				{ $addToSet: { suspended: playerid} },
-				function (err,res) {
-					this.log('suspend push',err,res);
-					broadcast(codes.srSuspendPlayerOk);
-				}.bind(this)
-			);
-		} else {
-			allClubs.update({_id:clubid},
-				{ $pull:{suspended:playerid}},
-				function (err,res) {
-					this.log('suspend pull',err,res);
-				broadcast(codes.srReinstatePlayerOk);
-				}.bind(this)
-			);
+		// FIXME, make it a function on Club
+		if (!containsObjectID(this.obj.members,playerid)) {
+			conn.reply(0,'player isnt a member');
+			return;
 		}
+		club.setSuspended(params.suspended,playerid,function (worked) {
+			if (worked) {
+				if (params.suspend) broadcast(codes.srSuspendPlayerOk);
+				else broadcast(codes.srReinstatePlayerOk);
+			}
+		});
 	}.bind(this));
 }
 handlers[codes.scJoinClub] = function (args,token) {

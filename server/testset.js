@@ -189,27 +189,54 @@ exports.club = {
 		test.expect(7);
 		activeUsers['fake'] = { send: function(code,object,type) {
 			test.ok(true);
-			console.log(code,object,type);
 		}};
+		mdb.open();
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			test.ok(true);
 			club.init(db,activeUsers,activeGames,Core.pb);
-			game.Game.init(db,activeGames,activeUsers,db.collection('debugLogs'),{},null,null,null);
+			game.Game.init(db,activeGames,activeUsers,{},null,null,null);
 			db.collection('clubs').findOne(function (err,row) {
 				test.ok(true);
 				db.collection('users').findOne(function (err,userRow) {
-					console.log('userRow',userRow);
+					//console.log('userRow',userRow);
 					test.ok(true);
 					db.collection('clubBalances').insert({clubid:row._id,userid:userRow._id,balance:0,balance_limit:0,unlimited_limit:true},function (err) {
 						test.ok(true);
 						club.Club.getClubById(row._id,function (err,clubobj) {
 							test.ok(true);
-							console.log('clubobj',clubobj);
+							//console.log('clubobj',clubobj);
 							clubobj.goPublic(function () {
 								test.ok(true);
 								test.done();
 								db.close();
 								mdb.close();
+							});
+						});
+					});
+				});
+			});
+		});
+	},suspend: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var club = require('./club');
+		test.expect(5);
+		mdb.open();
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			test.ok(true);
+			club.init(db,activeUsers,activeGames,Core.pb);
+			db.collection('clubs').findOne(function (err,row) {
+				test.ok(true);
+				db.collection('users').findOne({_id:row.members[0]},function (err,userRow) {
+					test.ok(true);
+					club.Club.getClubById(row._id,function (err,clubobj) {
+						test.ok(true);
+						clubobj.setSuspended(true,userRow._id,function () {
+							test.ok(true);
+							clubobj.setSuspended(false,userRow._id,function () {
+								db.close();
+								mdb.close();
+								test.done();
 							});
 						});
 					});
