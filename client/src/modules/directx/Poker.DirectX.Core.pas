@@ -103,18 +103,18 @@ begin
      FDevice.SwapChains[AIndex].Multisamples := 4;
      FDevice.SwapChains[AIndex].VSync := TRUE;
      AIndex := C1;
-     {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired [%d]', [AIndex, AHandle]), ditApplication); {$ENDIF}
+     {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired', [AIndex]), ditApplication); {$ENDIF}
      Exit(TRUE);
    end;
 
-  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element not acquired [%d]', [AHandle]), ditException); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element not acquired', [AHandle]), ditException); {$ENDIF}
   Exit(FALSE);
 end;
 
 procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
 begin
   FDevice.SwapChains[AIndex].WindowHandle := ANewHandle;
-  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d modified [%d]', [AIndex, ANewHandle]), ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
 end;
 
 procedure TDXCore.ReleaseSwapChainElement(const AIndex: Integer);

@@ -132,8 +132,9 @@ begin
   FClubSeq := AClub.Id;
   FGame := AGame;
   FClub := AClub;
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttLiveGame);
   form := TfrmTable.Create(self);
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, form.Handle, FGame, ttLiveGame);
+  FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
   DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
   if ASendJoinCommand then
@@ -152,8 +153,9 @@ begin
   FGame := AHandHistoryItems.Game;
   FClub := AHandHistoryItems.Club;
   FHandHistoryPlayback := THandHistoryPlayback.Create(AHandHistoryItems, AHandHistoryItem);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttHandPlayback);
   form := TfrmTable.Create(self);
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, form.Handle, FGame, ttHandPlayback);
+  FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
   DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
   FRenderer.UpdateDXAreaSize;
@@ -172,7 +174,8 @@ begin
   FClub.Games.Add(FGame);
   tablestatus := TTableStatus.Create;
   tablestatus.InitToDemoValues;
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, AHandle, FGame, ttSettingsPreview);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttSettingsPreview);
+  FRenderer.SetRenderTarget(AHandle);
   FRenderer.UpdateTableStatus(tablestatus);
   FRenderer.FlopAnimated := TRUE;
   DXCore.ModifySwapChainElement(FSwapChainIndex, AHandle);

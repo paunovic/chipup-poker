@@ -1,7 +1,6 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  Caption = 't'
   ClientHeight = 554
   ClientWidth = 794
   Color = clBlack

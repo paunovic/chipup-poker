@@ -36,6 +36,22 @@ type
     FClosingTime: DWORD;
     FTimebarEndtime: DWORD;
     FCurrentPlaytime: Int64;
+
+    FActionStandUp: Boolean;
+    FActionFold: Boolean;
+    FActionCall: Boolean;
+    FActionCheck: Boolean;
+    FActionRaise: Boolean;
+    FActionBet: Boolean;
+    FActionPlayNow: Boolean;
+    FActionSitOut: Boolean;
+    FActionFoldToAny: Boolean;
+    FActionSitOutNextBB: Boolean;
+    FActionShowCards: Boolean;
+
+    FActionCallCaption: String;
+    FActionRaiseCaption: String;
+
 //    FEvents        : TTableEvents;
 
   public
@@ -77,6 +93,22 @@ type
     property ClosingTime: DWORD read FClosingTime;
     property TimebarEndtime: DWORD read FTimebarEndtime;
     property CurrentPlaytime: Int64 read FCurrentPlaytime;
+
+    property ActionStandUp: Boolean read FActionStandUp write FActionStandUp;
+    property ActionFold: Boolean read FActionFold write FActionFold;
+    property ActionCall: Boolean read FActionCall write FActionCall;
+    property ActionCheck: Boolean read FActionCheck write FActionCheck;
+    property ActionRaise: Boolean read FActionRaise write FActionRaise;
+    property ActionBet: Boolean read FActionBet write FActionBet;
+    property ActionPlayNow: Boolean read FActionPlayNow write FActionPlayNow;
+    property ActionSitOut: Boolean read FActionSitOut write FActionSitOut;
+    property ActionFoldToAny: Boolean read FActionFoldToAny write FActionFoldToAny;
+    property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
+    property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
+
+    property ActionCallCaption: String read FActionCallcaption write FActionCallCaption;
+    property ActionRaiseCaption: String read FActionRaiseCaption write FActionRaiseCaption;
+
 //    property Events: TTableEvents read FEvents;
   end;
 
