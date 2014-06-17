@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,allGames,debugLogs,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log,ClientSocket;
+var activeGames,allGames,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -18,6 +18,7 @@ var Deck = deck.Deck;
 var Hand = deck.Hand;
 var Club = require('./club');
 var myutils = require('./myutils');
+var mdb = require('./db');
 
 function makeGameProtobuf(g) {
 	assert.equal(g._id.toString().length,24);
@@ -100,11 +101,10 @@ function Game(obj) {
 	if (obj.state2) this.state2 = obj.state2;
 	else this.state2 = 'gsActive';
 }
-Game.init = function (db,input,activeUsersIN,debugLogsIN,sharedconfigIN,getNextSequenceIN,logIN,ClientSocketIN) {
+Game.init = function (db,input,activeUsersIN,sharedconfigIN,getNextSequenceIN,logIN,ClientSocketIN) {
 	allGames = db.collection('games');
 	activeGames = input;
 	activeUsers = activeUsersIN;
-	debugLogs = debugLogsIN;
 	GameEvents = db.collection('GameEvents');
 	allClubs = db.collection('clubs');
 	gameState = db.collection('gameState');
@@ -214,9 +214,9 @@ Game.prototype.log = function log(format) {
 	}
 	out.unshift(this.handid);
 	process.send({type:'game',name:this.obj.gamename,ts:new Date().toString(),objects:out});
-	var obj = {type:'game',gameid:this.obj._id,name:this.obj.gamename,objects:out}
+	var obj = new mdb.models.DebugLogs({type:'game',gameid:this.obj._id,name:this.obj.gamename,objects:out});
 	if (this.club) obj.clubid = this.club.clubid;
-	debugLogs.insert(obj,function (){});
+	obj.insert(function () {});
 }
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);

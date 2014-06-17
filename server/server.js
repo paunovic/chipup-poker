@@ -156,7 +156,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) {
 		assert.ok(collection instanceof Collection);
 		debugLogs = collection;
-		Game.init(db,activeGames,activeUsers,debugLogs,sharedconfig,getNextSequence,log,ClientSocket);
+		Game.init(db,activeGames,activeUsers,sharedconfig,getNextSequence,log,ClientSocket);
 	});
 
 	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log,makeUserProtobuf);

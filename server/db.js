@@ -36,6 +36,17 @@ var ConfigSchema = new Schema({
 },{collection:'config'});
 models.Config = mongoose.model('Config',ConfigSchema);
 
+var DebugLogSchema = new Schema({
+	type:String,
+	msg:String,
+	nick:String,
+	connid:Number,
+	objects:Array,
+	gameid:ObjectId,
+	name:String
+},{collection:'debugLogs'});
+models.DebugLogs = mongoose.model('DebugLogs',DebugLogSchema);
+
 
 if (require.main === module) {
 	models.Admin.find({},function (err,docs) {
