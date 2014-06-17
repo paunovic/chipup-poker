@@ -1,4 +1,4 @@
-unit Poker.Table.Status;
+unit Poker.Objects.TableStatus;
 
 interface
 
@@ -295,7 +295,7 @@ end;
 
 procedure TTableStatus.UpdateCurrentPlaytime;
 begin
-  FCurrentPlaytime := FTimebarEndtime - GetTickCount
+  FCurrentPlaytime := Int64(FTimebarEndtime) - Int64(GetTickCount);
 end;
 
 procedure TTableStatus.InitToDemoValues;

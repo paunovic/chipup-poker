@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, System.Generics.Collections,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, cxContainer, cxEdit, Poker.Table.Status, Poker.DirectX.Animation, Vectors2,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, cxContainer, cxEdit, Poker.Objects.TableStatus, Poker.DirectX.Animation, Vectors2,
   Vcl.ActnList, cxLabel, Poker.Table.Tables, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
   Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, AsphyreImages, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls,
@@ -105,11 +105,17 @@ type
       FRaiseValue: UINT32;
       FForceFocused: Boolean;
 
+      FDXBFold: Integer;
+      FDXBShowCards: Integer;
+      FDXBCheck: Integer;
+      FDXBCall: Integer;
+      FDXBRaise: Integer;
+      FDXBRaisePresets: array[0..3] of Integer;
+
+    procedure SetRaiseActionCaption;
     procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 
     procedure EnableGameLockTimer(const ASeconds: Single);
-    procedure SetMaxConstraints;
-    procedure DisableMaxConstraints;
 
     procedure AddUserChatMessage(const AUser, AMessage: String);
     procedure AddDealerChatMessage(const AMessage: String);
@@ -119,8 +125,6 @@ type
     procedure RendererSoundPlay(const ASound: String);
     procedure RendererTimebankStarted(Sender: TObject);
     procedure ConfigureActions;
-
-    function RoundToBB(const AValue: Single): UINT32;
 
     function AnimateBets(const ABets: TList<UINT32>): Boolean;
     procedure AnimateBlinds;
@@ -154,7 +158,6 @@ type
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure WMSizing(var AMessage: TMessage); message WM_SIZING;
     procedure WndProc(var AMessage: TMessage); override;
-    procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
 
   public
     constructor Create(const ATable: TTable); reintroduce;
@@ -192,8 +195,6 @@ begin
 end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
-var
-  C1: Integer;
 begin
   ActionManager.State := asSuspended;
 
@@ -227,27 +228,36 @@ begin
     end;
   end;
 
+  FTable.Renderer.UpdateDXAreaSize;
+
   FTable.Renderer.OnDealerChatMessage := RendererDealerChatMessage;
   FTable.Renderer.OnSoundPlay := RendererSoundPlay;
   FTable.Renderer.OnTimebankStarted := RendererTimebankStarted;
 
-  FTable.Renderer.UpdateDXAreaSize;
-
   FTable.Renderer.AddDXButton(acStandUp, @FTable.Renderer.Metrics.StandUpButtonBounds, TableResources.StandUpButtonNormalImage, TableResources.StandUpButtonPressedImage, nil);
   FTable.Renderer.AddDXButton(acPlayNow, @FTable.Renderer.Metrics.PlayNowButtonBounds, TableResources.PlayNowButtonNormalImage, TableResources.PlayNowButtonPressedImage, nil);
 
-  FTable.Renderer.SetRaisePresetButtonsCount(4);
-  FTable.Renderer.SetActionButtonsCount(3);
+  FDXBFold := FTable.Renderer.AddDXButton(acFold, @FTable.Renderer.Metrics.ActionButtonsBounds[0],
+       TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
+  FDXBShowCards := FTable.Renderer.AddDXButton(acShowCards, @FTable.Renderer.Metrics.ActionButtonsBounds[0],
+       TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
+  FDXBCheck := FTable.Renderer.AddDXButton(acCheck, @FTable.Renderer.Metrics.ActionButtonsBounds[1],
+       TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
+  FDXBCall := FTable.Renderer.AddDXButton(acCall, @FTable.Renderer.Metrics.ActionButtonsBounds[1],
+       TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
+  FDXBRaise := FTable.Renderer.AddDXButton(acRaise, @FTable.Renderer.Metrics.ActionButtonsBounds[2],
+       TableResources.ActionButtonNormalImage, TableResources.ActionButtonPressedImage, nil, TRUE, 0.9);
 
-  for C1 := Low(FTable.Renderer.ActionButtons) to High(FTable.Renderer.ActionButtons) do
-    FTable.Renderer.ActionButtons[C1].Image := TableResources.ActionButtonNormalImage;
-
-  for C1 := Low(FTable.Renderer.RaisePresetButtons) to High(FTable.Renderer.RaisePresetButtons) do
-    FTable.Renderer.RaisePresetButtons[C1].Image := TableResources.RaisePresetButtonNormalImage;
+  FDXBRaisePresets[0] := FTable.Renderer.AddDXButton(acRaiseMin, @FTable.Renderer.Metrics.RaisePresetButtonsBounds[0],
+       TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
+  FDXBRaisePresets[1] := FTable.Renderer.AddDXButton(acRaise3BB, @FTable.Renderer.Metrics.RaisePresetButtonsBounds[1],
+       TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
+  FDXBRaisePresets[2] := FTable.Renderer.AddDXButton(acRaisePot, @FTable.Renderer.Metrics.RaisePresetButtonsBounds[2],
+       TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
+  FDXBRaisePresets[3] := FTable.Renderer.AddDXButton(acRaiseMax, @FTable.Renderer.Metrics.RaisePresetButtonsBounds[3],
+       TableResources.RaisePresetButtonNormalImage, TableResources.RaisePresetButtonPressedImage, nil, TRUE, 0.75);
 
   FTableStatus := TTableStatus.Create;
-
-  SetMaxConstraints;
 
   Constraints.MinWidth := 600;
   Constraints.MinHeight := Round(Constraints.MinWidth / FORM_ASPECT_RATIO);
@@ -291,19 +301,6 @@ begin
     end;
 end;
 
-procedure TfrmTable.WMSysCommand(var Msg: TWMSysCommand);
-const
-  SC_MAXIMIZE2 = $F032;
-begin
-  case Msg.CmdType of
-    SC_RESTORE: SetMaxConstraints;
-    SC_MAXIMIZE,
-    SC_MAXIMIZE2: DisableMaxConstraints;
-  end;
-
-  inherited;
-end;
-
 procedure TfrmTable.WndProc(var AMessage: TMessage);
 begin
   // prevent ALT key from switching between forms
@@ -330,7 +327,7 @@ end;
 
 procedure TfrmTable.FormResize(Sender: TObject);
 begin
-  FTable.Renderer.UpdateDXAreaSize;
+  FTable.Renderer.Render;
   ConfigureGUI;
 end;
 
@@ -341,8 +338,6 @@ end;
 
 procedure TfrmTable.FormShow(Sender: TObject);
 begin
-  FTable.Renderer.UpdateDXAreaSize;
-
   if FTable.TableType = ttHandPlayback then
   begin
     SetTableStatus(FTable.HandHistoryPlayback.CurrentState, FALSE);
@@ -351,8 +346,8 @@ begin
   else
   begin
     ConfigureActions;
-    ConfigureGUI;
     FTable.Renderer.Render;
+    ConfigureGUI;
   end;
 end;
 
@@ -412,11 +407,7 @@ begin
   begin
     valuint := Round(val * 100);
     if valuint > FTableStatus.MaximumRaise then
-      valuint := FTableStatus.MaximumRaise
-    else
-      if valuint < FTableStatus.MinimumRaise then
-        valuint := FTableStatus.MinimumRaise;
-
+      valuint := FTableStatus.MaximumRaise;
     SetRaiseSliderValue(valuint, FALSE);
   end;
 end;
@@ -442,8 +433,8 @@ begin
   tiGameLock.Enabled := FALSE;
   FTableStatus.LockTimerEnabled := tiGameLock.Enabled;
   ConfigureActions;
-  ConfigureGUI;
   FTable.Renderer.Render;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.tiHandPlaybackTimer(Sender: TObject);
@@ -634,8 +625,8 @@ begin
   if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat) then
     seat.CardsVisible := TRUE;
   ConfigureActions;
-  ConfigureGUI;
   FTable.Renderer.Render;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.acStandUpExecute(Sender: TObject);
@@ -675,8 +666,8 @@ end;
 procedure TfrmTable.cbFoldToAnyBetPropertiesChange(Sender: TObject);
 begin
   ConfigureActions;
-  ConfigureGUI;
   FTable.Renderer.Render;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.cbSitOutNextBBPropertiesChange(Sender: TObject);
@@ -695,15 +686,15 @@ procedure TfrmTable.CSEGameChange(const AMethodId: Integer; const AObject: TObje
 begin
   FTableStatus.UpdateClosingTime(FTable.Game);
   ConfigureActions;
-  ConfigureGUI;
   FTable.Renderer.Render;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 begin
   ConfigureActions;
-  ConfigureGUI;
   FTable.Renderer.Render;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
@@ -773,6 +764,7 @@ begin
 
       psInHand, psAllIn: begin
         FTableStatus.ActionSitOut := TRUE;
+        FTableStatus.ActionSitOutNextBB := TRUE;
         if (seat_info.Status = psInHand) and
            (FTableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
           FTableStatus.ActionFoldToAny := TRUE;
@@ -808,23 +800,13 @@ begin
                   // if we can call, there is a possibility that we can raise too - we check if we can raise here
                   if (seat_info.Chips > FTableStatus.MinimumBet) and
                      (FTableStatus.MinimumBet < FTableStatus.MinimumRaise) then
-                  begin
                     FTableStatus.ActionRaise := TRUE;
-                    if FRaiseValue = seat_info.Chips + FTableStatus.GetBet(FTable.SeatIndex) then
-                       acRaise.Caption := 'RAISE (ALL-IN)'
-                    else
-                       acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)])
-                  end;
                 end;
               end
               else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
               begin
                 FTableStatus.ActionCheck := TRUE;
                 FTableStatus.ActionBet := TRUE;
-                if FRaiseValue = seat_info.Chips then
-                  acRaise.Caption := 'BET (ALL-IN)'
-                else
-                  acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
 
                 if cbFoldToAnyBet.Checked then
                 begin
@@ -897,19 +879,22 @@ begin
                                   (not seat_info.CardsVisible) and
                                   (seat_info.Status in [psFolded, psAllIn, psInHand]);
 
-
+  // enable actions
   acStandUp.Enabled := FTableStatus.ActionStandUp;
   acFold.Enabled := FTableStatus.ActionFold;
   acCall.Enabled := FTableStatus.ActionCall;
   acCheck.Enabled := FTableStatus.ActionCheck;
   acRaise.Enabled := FTableStatus.ActionRaise;
   acRaise.Enabled := (FTableStatus.ActionBet) or (FTableStatus.ActionRaise);
+  acRaiseMin.Enabled := acRaise.Enabled;
+  acRaise3BB.Enabled := acRaise.Enabled;
+  acRaisePot.Enabled := acRaise.Enabled;
+  acRaiseMax.Enabled := acRaise.Enabled;
   acPlayNow.Enabled := FTableStatus.ActionPlayNow;
 end;
 
 procedure TfrmTable.ConfigureGUI;
 var
-  C1: Integer;
   hround: Integer;
 begin
   if WindowState <> wsMaximized then
@@ -924,6 +909,7 @@ begin
       rvChat.BoundsRect := FTable.Renderer.Metrics.ChatBoxBounds;
       edChat.BoundsRect := FTable.Renderer.Metrics.ChatEditBounds;
       seRaiseAmount.BoundsRect := FTable.Renderer.Metrics.RaiseAmountBoxBounds;
+      seRaiseAmount.Style.Font.Size := FTable.Renderer.Metrics.RaiseAmountBoxFontSize;
 
       cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
       cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
@@ -958,29 +944,6 @@ begin
         cbFoldToAnyBet.Checked := FALSE;
       end;
 
-      if acFold.Enabled then
-        FTable.Renderer.ActionButtons[0].Action := acFold
-      else
-        if acShowCards.Enabled then
-          FTable.Renderer.ActionButtons[0].Action := acShowCards
-        else
-          FTable.Renderer.ActionButtons[0].Action := nil;
-
-      if (acCall.Enabled) or (acCheck.Enabled) then
-      begin
-        if acCall.Enabled then
-          FTable.Renderer.ActionButtons[1].Action := acCall
-        else
-          FTable.Renderer.ActionButtons[1].Action := acCheck;
-      end
-      else
-        FTable.Renderer.ActionButtons[1].Action := nil;
-
-      if acRaise.Enabled then
-        FTable.Renderer.ActionButtons[2].Action := acRaise
-      else
-        FTable.Renderer.ActionButtons[2].Action := nil;
-
       seRaiseAmount.Visible := acRaise.Enabled;
       acRaiseMin.Enabled := acRaise.Enabled;
       acRaise3BB.Enabled := acRaise.Enabled;
@@ -992,24 +955,21 @@ begin
         // if game is pot limit, we dont have to show MAX button, since POT = MAX
         if FTableStatus.CurrentLimit = glPotLimit then
         begin
-          FTable.Renderer.RaisePresetButtons[0].Action := nil;
-          FTable.Renderer.RaisePresetButtons[1].Action := acRaiseMin;
-          FTable.Renderer.RaisePresetButtons[2].Action := acRaise3BB;
-          FTable.Renderer.RaisePresetButtons[3].Action := acRaisePot;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[0]).Action := nil;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaiseMin;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaise3BB;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaisePot;
         end
         else
         begin
-          FTable.Renderer.RaisePresetButtons[0].Action := acRaiseMin;
-          FTable.Renderer.RaisePresetButtons[1].Action := acRaise3BB;
-          FTable.Renderer.RaisePresetButtons[2].Action := acRaisePot;
-          FTable.Renderer.RaisePresetButtons[3].Action := acRaiseMax;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[0]).Action := acRaiseMin;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaise3BB;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[2]).Action := acRaisePot;
+          FTable.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaiseMax;
         end;
 
         SetRaiseSliderValue(FRaiseValue, TRUE, TRUE, FALSE);
-      end
-      else
-        for C1 := Low(FTable.Renderer.RaisePresetButtons) to High(FTable.Renderer.RaisePresetButtons) do
-          FTable.Renderer.RaisePresetButtons[C1].Action := nil;
+      end;
 
       // enable seat blink timer, if it's not enabled already
       if (FTableStatus.CurrentSeat <> -1) and
@@ -1021,7 +981,7 @@ begin
         tiActiveFrameBlink.Enabled := TRUE;
       end;
 
-      lbvHandStrength.Top := Round(FTable.Renderer.RaisePresetButtons[High(FTable.Renderer.RaisePresetButtons)].Bounds[0].y - lbvHandStrength.Height - 5);
+      lbvHandStrength.Top := Round(FTable.Renderer.GetDXButton(FDXBRaisePresets[High(FDXBRaisePresets)]).Bounds[0].y - lbvHandStrength.Height - 5);
       UpdateHandHistoryLabel;
       UpdateHandStrength;
     end;
@@ -1115,10 +1075,6 @@ begin
     if FTableStatus.State in [tsRiver, tsWinning, tsWinning2] then
       FTable.Renderer.RiverAnimated := TRUE;
   end;
-
-  // set our SeatIndex to -1 if we stood up OBSOLETE???? FIXME
-//  if AMethodId = Integer(srTableStandUpOk) then
-//    FTable.SeatIndex := -1;
 
   // iterate through table status seats and find our seat index
   seat_index := -1;
@@ -1240,15 +1196,15 @@ begin
   {$ENDIF}
 
   ConfigureActions;
-  ConfigureGUI;
   FTable.Renderer.Render;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
 begin
   ConfigureActions;
-  ConfigureGUI;
   FTable.Renderer.Render;
+  ConfigureGUI;
 end;
 
 procedure TfrmTable.DefocusControls;
@@ -1602,16 +1558,30 @@ begin
     pbHandPlaybackProgress.Position := FTable.HandHistoryPlayback.CurrentStateIndex;
 end;
 
-procedure TfrmTable.SetMaxConstraints;
+procedure TfrmTable.SetRaiseActionCaption;
+var
+  seat_info: TSeatInfo;
 begin
-  Constraints.MaxHeight := 910 + (Height - ClientHeight);
-  Constraints.MaxWidth := Round(Constraints.MaxHeight * FORM_ASPECT_RATIO);
-end;
-
-procedure TfrmTable.DisableMaxConstraints;
-begin
-  Constraints.MaxHeight := 0;
-  Constraints.MaxWidth := 0;
+  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+  begin
+    if FTableStatus.ActionRaise then
+    begin
+      if FRaiseValue = seat_info.Chips + FTableStatus.GetBet(FTable.SeatIndex) then
+         acRaise.Caption := 'RAISE (ALL-IN)'
+      else
+         acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)])
+    end
+    else
+      if FTableStatus.ActionBet then
+      begin
+        if FRaiseValue = seat_info.Chips then
+          acRaise.Caption := 'BET (ALL-IN)'
+        else
+          acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
+      end
+      else
+        acRaise.Caption := '';
+  end;
 end;
 
 procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
@@ -1634,8 +1604,8 @@ begin
   if val > FTableStatus.MaximumRaise then
     val := FTableStatus.MaximumRaise
   else
-    if val < FTableStatus.MaximumRaise then
-      val := FTableStatus.MaximumRaise;
+    if val < FTableStatus.MinimumRaise then
+      val := FTableStatus.MinimumRaise;
 
   FRaiseValue := val;
 
@@ -1647,11 +1617,13 @@ begin
   if ASetSpinEditValue then
     seRaiseAmount.Value := val / 100;
 
+  SetRaiseActionCaption;
+
   if FRaiseValue <> oldval then
   begin
+    FTable.Renderer.Render;
     if AConfigureGUI then
       ConfigureGUI;
-    FTable.Renderer.Render;
   end;
 end;
 
@@ -1723,11 +1695,6 @@ procedure TfrmTable.RendererTimebankStarted(Sender: TObject);
 begin
   if FTableStatus.CurrentSeat = FTable.SeatIndex then
     TablePlaySound(Sounds.SOUND_TIMEBANK);
-end;
-
-function TfrmTable.RoundToBB(const AValue: Single): UINT32;
-begin
-  result := Round(AValue / FTable.Game.BigBlind) * FTable.Game.BigBlind;
 end;
 
 procedure TfrmTable.AnimationCallback(const AAnimationPointer: pointer);

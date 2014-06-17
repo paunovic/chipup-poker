@@ -83,7 +83,7 @@ implementation
 
 uses
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
-  Poker.HandHistory.Core, Poker.Table.Status;
+  Poker.HandHistory.Core, Poker.Objects.TableStatus;
 
 { TTable }
 
