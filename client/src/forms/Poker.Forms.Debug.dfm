@@ -508,6 +508,41 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
     end
+    object lbsSwapChains: TcxLabel
+      Left = 241
+      Top = 51
+      Anchors = [akLeft, akBottom]
+      Caption = 'Swap chains:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvSwapChains: TcxLabel
+      Left = 330
+      Top = 51
+      Anchors = [akLeft, akBottom]
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+    end
   end
   object alDebug: TActionList
     Left = 72

@@ -46,6 +46,7 @@ type
     constructor Create(const ABytes: TBytes); overload;
 
     procedure Assign(const ABytes: TBytes);
+    function IsKnown: Boolean;
 
     class function BytesToString(const ACards: TBytes; const ADelimiter: String = ''; const ALength: Integer = 0): String;
 
@@ -206,6 +207,16 @@ begin
   result := '';
   for C1 := Low(ToArray) to High(ToArray) do
     result := result + ToArray[C1].AsString;
+end;
+
+function TCards.IsKnown: Boolean;
+var
+  card: TCard;
+begin
+  for card in ToArray do
+    if card.IsKnown then
+      Exit(TRUE);
+  Exit(FALSE);
 end;
 
 class function TCards.BytesToString(const ACards: TBytes; const ADelimiter: String = ''; const ALength: Integer = 0): String;

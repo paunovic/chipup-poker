@@ -16,7 +16,8 @@ type
     FCards: TCards;
     FDealtCards: Integer;
     FStatus: TPlayerStatus;
-    FCaption: String;
+    FUpperCaption: String;
+    FLowerCaption: String;
     FTimebank: UINT32;
     FCardsVisible: Boolean;
     FCanShow: Boolean;
@@ -31,6 +32,8 @@ type
     procedure IncDealtCards;
     procedure FillDealtCards;
 
+    procedure InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer);
+
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
     property PreviousChips: UINT32 read FPreviousChips;
@@ -38,7 +41,8 @@ type
     property CardCount: Integer read FCardCount;
     property Cards: TCards read FCards;
     property Status: TPlayerStatus read FStatus;
-    property Caption: String read FCaption write FCaption;
+    property UpperCaption: String read FUpperCaption write FUpperCaption;
+    property LowerCaption: String read FLowerCaption write FLowerCaption;
     property Timebank: UINT32 read FTimeBank;
     property DealtCards: Integer read FDealtCards;
     property CardsVisible: Boolean read FCardsVisible write FCardsVisible;
@@ -93,6 +97,24 @@ begin
   Inc(FDealtCards);
 end;
 
+procedure TSeatInfo.InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer);
+begin
+  FSeatIndex := ASeatIndex;
+  SetLength(FPlayerMongoId, 0);
+  FChips := AChips;
+  FPreviousChips := AChips;
+  FCards.Clear;
+  FDealtCards := ACardCount;
+  FCardCount := ACardCount;
+  FStatus := psInHand;
+  FUpperCaption := AUpperCaption;
+  FLowerCaption := '';
+  FTimebank := 0;
+  FCardsVisible := FALSE;
+  FCanShow := FALSE;
+  FDisconnected := FALSE;
+end;
+
 procedure TSeatInfo.ResetDealtCards;
 begin
   FDealtCards := 0;
@@ -130,7 +152,10 @@ var
   C1: Integer;
 begin
   for C1 := Low(ToArray) to High(ToArray) do
-    ToArray[C1].Caption := '';
+  begin
+    ToArray[C1].UpperCaption := '';
+    ToArray[C1].LowerCaption := '';
+  end;
 end;
 
 

@@ -595,7 +595,7 @@ message HandHistory {
 		optional bytes cards = 3;
 		required uint32 chips = 4;
 		required string nick = 5;
-		required bool muck = 6;
+		optional bool muck = 6;
 		required SeatInfo.PlayerStatus status = 7;
 	}
 	message MoveRow {

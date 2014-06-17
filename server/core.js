@@ -3,10 +3,10 @@ var fs = require('fs');
 
 var p = require("node-protobuf").Protobuf;
 
-var protoreader = require('.././protoreader');
+var protoreader = require('./protoreader');
 
-var pb = new p(fs.readFileSync("../../message.desc"))
-var codes = require('../ServerCodes');
+var pb = new p(fs.readFileSync("../message.desc"))
+var codes = require('./ServerCodes');
 
 protoreader.init(pb,codes,[codes.scHello]);
 

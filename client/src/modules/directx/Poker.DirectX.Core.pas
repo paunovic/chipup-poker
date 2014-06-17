@@ -19,9 +19,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function GetFreeSwapChain: Integer;
-    procedure AcquireSwapChain(const AIndex: Integer; const AHandle: THandle);
-    procedure ReleaseSwapChain(const AIndex: Integer);
+    function AcquireSwapChainElement(const AHandle: THandle; out AIndex: Integer): Boolean;
+    procedure ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
+    procedure ReleaseSwapChainElement(const AIndex: Integer);
 
     property Device: TAsphyreDevice read FDevice;
     property Canvas: TAsphyreCanvas read FCanvas;
@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas;
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas, Poker.Settings;
 
 
 class procedure TDXCore.Initialize;
@@ -65,7 +65,7 @@ begin
   FCanvas.Antialias := TRUE;
   FCanvas.MipMapping := TRUE;
 
-  for C1 := 0 to 32 do
+  for C1 := 1 to Settings.Hardcoded.DIRECTX_SWAPCHAIN_COUNT + 1 do
     FDevice.SwapChains.Add(FDummyWindow, Point2px(1, 1));
 
   if FDevice.Connect then
@@ -92,24 +92,39 @@ begin
   inherited;
 end;
 
-function TDXCore.GetFreeSwapChain: Integer;
+function TDXCore.AcquireSwapChainElement(const AHandle: THandle; out AIndex: Integer): Boolean;
 var
   C1: Integer;
 begin
   for C1 := 1 to FDevice.SwapChains.Count - 1 do
    if FDevice.SwapChains[C1].WindowHandle = FDummyWindow then
-     Exit(C1);
-  Exit(-1);
+   begin
+     FDevice.SwapChains[AIndex].WindowHandle := AHandle;
+     FDevice.SwapChains[AIndex].Multisamples := 4;
+     FDevice.SwapChains[AIndex].VSync := TRUE;
+     AIndex := C1;
+     {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired', [AIndex]), ditApplication); {$ENDIF}
+     Exit(TRUE);
+   end;
+
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element not acquired', [AHandle]), ditException); {$ENDIF}
+  Exit(FALSE);
 end;
 
-procedure TDXCore.AcquireSwapChain(const AIndex: Integer; const AHandle: THandle);
+procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
 begin
-  FDevice.SwapChains.Items[AIndex]^.WindowHandle := AHandle;
+  FDevice.SwapChains[AIndex].WindowHandle := ANewHandle;
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
 end;
 
-procedure TDXCore.ReleaseSwapChain(const AIndex: Integer);
+procedure TDXCore.ReleaseSwapChainElement(const AIndex: Integer);
 begin
-  FDevice.SwapChains.Items[AIndex]^.WindowHandle := FDummyWindow;
+  FDevice.SwapChains[AIndex].Width := 1;
+  FDevice.SwapChains[AIndex].Height := 1;
+  FDevice.SwapChains[AIndex].Multisamples := 0;
+  FDevice.SwapChains[AIndex].VSync := FALSE;
+  FDevice.SwapChains[AIndex].WindowHandle := FDummyWindow;
+  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
 end;
 
 end.

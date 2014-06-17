@@ -65,6 +65,8 @@ type
     btServerTest: TcxButton;
     acServerCrashTest: TAction;
     pmiShowPings: TMenuItem;
+    lbsSwapChains: TcxLabel;
+    lbvSwapChains: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -96,7 +98,8 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket;
+  Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
+  Poker.DirectX.Core;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -249,6 +252,8 @@ var
   server_socket_connected: Boolean;
   server_socket_state: String;
   server_socket_state_color: TColor;
+  swap_chains_occupied: Integer;
+  C1: Integer;
 begin
   lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
   lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
@@ -306,6 +311,18 @@ begin
     lbvLatency.Caption := 'Unknown';
     lbvLatency.Style.TextColor := clWhite;
   end;
+
+  if (Assigned(DXCore)) and
+     (Assigned(DXCore.Device)) then
+  begin
+    swap_chains_occupied := 0;
+    for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
+      if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
+        Inc(swap_chains_occupied);
+    lbvSwapChains.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
+  end
+  else
+    lbvSwapChains.Caption := 'Unknown';
 end;
 
 procedure TfrmDebug.CreateParams(var AParams: TCreateParams);

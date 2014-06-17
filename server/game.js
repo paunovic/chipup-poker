@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,allGames,debugLogs,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log,ClientSocket;
+var activeGames,allGames,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -18,6 +18,7 @@ var Deck = deck.Deck;
 var Hand = deck.Hand;
 var Club = require('./club');
 var myutils = require('./myutils');
+var mdb = require('./db');
 
 function makeGameProtobuf(g) {
 	assert.equal(g._id.toString().length,24);
@@ -100,11 +101,10 @@ function Game(obj) {
 	if (obj.state2) this.state2 = obj.state2;
 	else this.state2 = 'gsActive';
 }
-Game.init = function (db,input,activeUsersIN,debugLogsIN,sharedconfigIN,getNextSequenceIN,logIN,ClientSocketIN) {
+Game.init = function (db,input,activeUsersIN,sharedconfigIN,getNextSequenceIN,logIN,ClientSocketIN) {
 	allGames = db.collection('games');
 	activeGames = input;
 	activeUsers = activeUsersIN;
-	debugLogs = debugLogsIN;
 	GameEvents = db.collection('GameEvents');
 	allClubs = db.collection('clubs');
 	gameState = db.collection('gameState');
@@ -214,9 +214,9 @@ Game.prototype.log = function log(format) {
 	}
 	out.unshift(this.handid);
 	process.send({type:'game',name:this.obj.gamename,ts:new Date().toString(),objects:out});
-	var obj = {type:'game',gameid:this.obj._id,name:this.obj.gamename,objects:out}
+	var obj = new mdb.models.DebugLogs({type:'game',gameid:this.obj._id,name:this.obj.gamename,objects:out});
 	if (this.club) obj.clubid = this.club.clubid;
-	debugLogs.insert(obj,function (){});
+	obj.save(function () {});
 }
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);
@@ -471,7 +471,6 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			players++;
 			this.bets[x] = 0;
 			this.members[x].handsPlayed++;
-			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true, status:this.members[x].status };
 			if (this.members[x].status == 'psOutOfHand') {
 				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
 				if (!myutils.compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
@@ -481,6 +480,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				}
 			}
 			this.members[x].status = 'psInHand';
+			this.history.players[x] = { _id:this.seats[x].userid, seat:x, cards:this.members[x].hand.cards, chips:this.members[x].chips, muck:true, status:this.members[x].status };
 			this.members[x].can_show = true;
 			this.members[x].muck = true;
 			this.balance_changes[x] = 0;
@@ -501,7 +501,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 
 		for (var seat = this.dealer, passed=0; passed < this.obj.seats; seat++, passed++) {
 			seat = seat % this.obj.seats;
-			console.log('seat:%d passed:%d todo:%s',seat,passed,todo[seat]);
+			//console.log('seat:%d passed:%d todo:%s',seat,passed,todo[seat]);
 			if (todo[seat] == 'forcedBB') {
 				if (this.members[seat].chips <= this.obj.big_blind) {
 					this.addHistory({seat:seat,bet:this.members[seat].chips,code:['teForced','teBB','teAllIn']});
@@ -841,7 +841,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 	var stack = new Error().stack;
 
 	//assert.equal(wins[0],15);
-	console.log('doWin',this.pots,this.members);
+	//this.log('doWin',this.pots,this.members); // the timer breaks JSON stringify
 	this.pots = [ new Pot(this) ];
 	async.eachSeries(winnerObjects,function (winnerObj,cb2) {
 		var seat = winnerObj.seat;
@@ -891,10 +891,10 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 			if (this.state == 'tsPreFlop') {
 				this.rake = this.real_rake;
 				this.log('flopping');
-				this.addHistory({code:['teFlop'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
+					this.addHistory({code:['teFlop'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsFlop';
 					this.log('flop adding to %d',extradelay);
 					token.tag += 'c';
@@ -904,10 +904,10 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.roundEnd();
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
-				this.addHistory({code:['teTurn'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
+					this.addHistory({code:['teTurn'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsTurn';
 					this.log('turn adding to %d',extradelay);
 					token.tag += 'd';
@@ -917,10 +917,10 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.roundEnd();
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
-				this.addHistory({code:['teRiver'],seat:-1,pots:this.pots});
 				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
+					this.addHistory({code:['teRiver'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsRiver';
 					this.log('river adding to %d',extradelay);
 					token.tag += 'e';
@@ -1268,7 +1268,7 @@ Game.prototype.updateMongoState = function (obj,options,cb) {
 		for (var key in this.users) U.push(this.users[key].userid);
 		obj.$set.users = U;
 	}
-	gameState.update({_id:this.obj._id}, obj,function (err,res) {
+	gameState.update({_id:this.obj._id}, obj,function updateMongoState_cb1(err,res) {
 		this.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
 		if (res != 1) console.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
 		assert(res == 1);
@@ -1347,7 +1347,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	//}.bind(this));
 }
 Game.prototype.saveHistory = function (cb) {
-	var updates = {$set:{moves:this.history.moves,deck:this.deck.cards}};
+	var updates = {$set:{moves:this.history.moves,deck:this.deck.cards,rake:this.rake}};
 	if (this.history.potdata) {
 		updates['$set'].potdata = this.history.potdata;
 		updates['$set'].winnercount = this.history.winnercount;
@@ -1700,9 +1700,12 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		obj.card_count = seat.hand.cards.length;
 		if (this.state == 'tsIdle') assert.equal(obj.card_count,0);
 		else {
-			if (['psOutOfPlay','psOutOfHand'].indexOf(seat.status) != -1) {
+			if (['psOutOfPlay','psOutOfHand','psFolded'].indexOf(seat.status) != -1) {
 			} else if (this.omaha) assert.equal(obj.card_count,4);
-			else assert.equal(obj.card_count,2);
+			else {
+				//console.log('card count',seat,obj);
+				assert.equal(obj.card_count,2);
+			}
 		}
 		tableStatus.seats.push(obj);
 	}
@@ -1935,6 +1938,7 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 	}
 	delete this.users[conn.userid];
 	this.reconnect.push(conn.userid);
+	var userid = conn.userid;
 	this.Lock.writeLock(function (release) {
 		function finish() {
 			cb();
@@ -1944,9 +1948,8 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		conn.log('leave idx %d',seatIdx);
 		if (seatIdx >= 0) {
 			this.members[seatIdx].disconnected = true;
-			assert(conn.userid);
-			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,conn.userid),5 * 60 * 1000);
-			var fakeconn = {log:ClientSocket.prototype.log,userid:this.seats[seatIdx].userid, nick:this.seats[seatIdx].conn.nick};
+			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,userid),5 * 60 * 1000);
+			var fakeconn = {log:ClientSocket.prototype.log,userid:userid, nick:this.seats[seatIdx].conn.nick};
 			this.seats[seatIdx].conn = fakeconn;
 			var events = [];
 			events.push(this.makeEvent('teDisconnect',seatIdx));
@@ -1992,7 +1995,6 @@ Game.prototype.doDelete = function () {
 	}.bind(this));
 }
 Game.prototype.startTimer = function startTimer(seat,offset) {
-	return;
 	assert.equal(typeof offset,'number');
 	this.stopTimer(seat);
 	this.log('starting timer for seat %d in state %s',seat,this.state);
@@ -2111,4 +2113,308 @@ Game.getGame = function getgame(id,cb) {
 		}
 	}.bind(this));
 }
-
+Game.registerHandlers = function (handlers,pb) {
+handlers[codes.scCloseGame] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.CloseGameData');
+		var id = new myutils.toMongoId(params.gameid);
+		switch (params.timestamp) {
+		case 'cgtCurrentHand':
+			params.timestamp = 0;
+			break;
+		case 'cgtFiveMinutes':
+			params.timestamp = 5*60;
+			break;
+		case 'cgtFifteenMinutes':
+			params.timestamp = 15*60;
+			break;
+		default:
+			throw 'invalid timestamp';
+		}
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	this.log('closing game: %j',params);
+	allGames.findOne({_id:id},function (err,gamerow) {
+		if (err) {
+			this.reply(0,"internal error");
+			return;
+		}
+		if (!gamerow) {
+			this.reply(0,"game not found");
+			return;
+		}
+		Game.getGame(id,function (err,game) {
+			if (!game.club.isOwner(this.userid)) {
+				this.reply(0,'you dont own that club!');
+				return;
+			}
+			game.Lock.writeLock(function (release) {
+				if (params.timestamp > 0) {
+					game.closeTimer = setTimeout(function () {
+						game.Lock.writeLock(function (release2) {
+							game.doClose(this,release2,gamerow);
+						}.bind(this));
+					}.bind(this),params.timestamp * 1000);
+					game.closeTime = Date.now() + (params.timestamp * 1000);
+					game.state2 = 'gsClosing';
+					clubBroadcastGameState(gamerow.clubid,JSON.parse(JSON.stringify(gamerow)),release);
+				} else {
+					game.closeTime = 0;
+					game.doClose(this,release,gamerow);
+				}
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scCreateGame] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.Game');
+		var clubseq = params.clubseq;
+		var game_type = params.game_type;
+		var game_limit = params.game_limit;
+		var blinds = params.blinds;
+		var seats = params.seats;
+		var gamename = params.gamename;
+		if (checkGameParams(gamename,seats,game_type,game_limit,params.buyin_min,params.buyin_max,blinds)) {
+			this.log('invalid create game:%j',params);
+			this.reply(0,"invalid params");
+			return;
+		}
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	var doc = {game_type:game_type, blinds:blinds, seats:seats, creator_mongo_id:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
+	allClubs.findOne({seq:clubseq},function (err,club) {
+		if (err) {
+			this.reply(0,"internal error");
+			return;
+		}
+		if (!club) {
+			this.reply(0,"club not found");
+			return;
+		}
+		if (!myutils.compareObjectID(club.owner,this.userid)) {
+			this.reply(0,'your not owner');
+			return;
+		}
+		doc.clubid = club._id;
+		allGames.insert(doc,function (err,game) {
+			if (err) {
+				this.reply(0,"internal error");
+				return;
+			}
+			this.log('inserted',game[0]);
+			var g = makeGameProtobuf(game[0]);
+			this.send(codes.srCreateGameOk,g,'Poker.Game');
+			if (club.is_private) {
+				if (!club.members) {
+					token.tag += '-empty';
+					token.stop();
+					return;
+				}
+				token.tag += '-private';
+				for (var x=0; x<club.members.length; x++) {
+					var conn = activeUsers[club.members[x]];
+					if (!conn) continue;
+					conn.send(codes.seGameCreate,g,'Poker.Game');
+				}
+				token.stop();
+			} else {
+				token.tag += '-public';
+				for (var key in activeUsers) {
+					if (key === this) continue;
+					activeUsers[key].send(codes.seGameCreate,g,'Poker.Game');
+				}
+				token.stop();
+			}
+		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scFold] = function (args,token) {
+	var token2 = profiler.start('fold-inner4');
+	try {
+		var params = pb.Parse(args,'Poker.Game');
+		var id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Game.getGame(id,function (err,game) {
+		if (!game) return;
+		game.Lock.writeLock(function (release) {
+			var x = game.findSeat(this);
+			var seating = game.members[x];
+			if (x != game.current_seat) {
+				this.reply(0,'fold while not active player');
+				console.log('fold fail 2');
+				release();
+				return;
+			} else if (seating && seating.status == 'psInHand') {
+				token2.stop(); // 3ms avg
+				var token1 = profiler.start('fold-inner1');
+				game.fold(x,function (events,offset) { // 36ms avg
+					token1.stop();
+					var token3 = profiler.start('fold-inner5');
+					assert(events);
+					if (game.current_seat >= 0) {
+						game.startTimer(game.current_seat,offset);
+					}
+					game.broadcastStatus(null,true,events);
+					token3.stop(); // 17ms avg
+					token.stop(); // 61ms avg
+					release();
+				}.bind(this));
+			} else {
+				this.log('fold error',util.inspect(seating));
+				release();
+			}
+		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scTableSitOutNextHand] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.TableBoolFlag');
+		var id = myutils.toMongoId(params.table_mongo_id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Game.getGame(id,function (err,game) {
+		if (!game) return;
+		game.Lock.writeLock(function (release) {
+			var seatIdx = game.findSeat(this);
+			if (seatIdx === undefined) {
+				this.reply(0,'your not sitting');
+				release();
+				return;
+			}
+			if (['psInHand','psAllIn','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
+				this.reply(0,'you cant sitout if your out of play');
+				release();
+				return;
+			}
+			if ((game.state == 'tsIdle') && (['psInHand','psOutOfHand'].indexOf(game.members[seatIdx].status) != -1)) {
+				game.members[seatIdx].status = 'psOutOfPlay';
+				game.clearDealTimer();
+				game.members[seatIdx].sitOutNextRound = false;
+				game.members[seatIdx].sitOutBB = false;
+				game.updateMongoState({},{members:true},function () {
+					game.broadcastStatus(null,true,[]);
+				});
+			} else if ('psOutOfHand' == game.members[seatIdx].status) {
+				game.members[seatIdx].status = 'psOutOfPlay';
+				game.broadcastStatus(null,true,[]);
+			} else {
+				game.members[seatIdx].sitOutNextRound = params.flag;
+			}
+			token.stop();
+			release();
+		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scPutChips] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.PutChips');
+		var id = myutils.toMongoId(params.table_mongo_id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	delete params.table_mongo_id;
+	this.log('putChips %j',params);
+	var token2 = profiler.start('putChips-inner3');
+	var token6 = profiler.start('putChips-inner6'); // includes writeLock callback if its unlocked
+	Game.getGame(id,function (err,game) {
+		if (!game) return;
+		game.Lock.writeLock(function (release) {
+			token2.stop();
+			if (params.current_state != game.state) {
+				this.reply(0,'state mismatch');
+				release();
+				return;
+			}
+			var token5 = profiler.start('putChips-inner5');
+			var seat = game.findSeat(this);
+			if (seat != game.current_seat) {
+				this.reply(0,'putchips while not active player');
+				console.log('putChips fail 2 %d %d',seat,game.current_seat);
+				release();
+				return;
+			}
+			game.putChips(this,params.chip_amount,function (events,offset){
+				assert(game.members[seat].chips >= 0);
+				if (['tsWinning'].indexOf(game.state) == -1) {
+					game.startTimer(game.current_seat,offset);
+				}
+				var token4 = profiler.start('putChips-inner4-2');
+				game.broadcastStatus(null,true,events);
+				token4.stop();
+				token.stop();
+				release();
+				game.checkDelayedLeave();
+			}.bind(this));
+			token5.stop();
+		}.bind(this));
+	}.bind(this));
+	token6.stop();
+}
+handlers[codes.scTableSitOutNextBB] = function (args) {
+	try {
+		var params = pb.Parse(args,'Poker.TableBoolFlag');
+		var id = myutils.toMongoId(params.table_mongo_id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Game.getGame(id,function (err,game) {
+		if (!game) return;
+		var seatIdx = game.findSeat(this);
+		if (seatIdx === undefined) {
+			this.reply(0,'your not sitting');
+			return;
+		}
+		if (['psInHand','psAllIn','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
+			this.reply(0,'you cant sitout if your out of play');
+			return;
+		}
+		game.members[seatIdx].sitOutBB = params.flag;
+	}.bind(this));
+}
+handlers[codes.scShowCards] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.Game');
+		var id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Game.getGame(id,function (err,game) {
+		if (!game) return;
+		game.Lock.writeLock(function (release) {
+			if (game.state != 'tsWinning') {
+				this.reply(0,'the game isnt over yet');
+				this.log('state was %s',game.state);
+				release();
+				return;
+			}
+			var seatIdx = game.findSeat(this);
+			if (seatIdx === undefined) {
+				this.reply(0,'your not sitting');
+				release();
+				return;
+			}
+			if (game.members[seatIdx].can_show) {
+				game.members[seatIdx].muck = false;
+				game.history.players[seatIdx].muck = false;
+				game.broadcastStatus(this,true,[]);
+				game.members[seatIdx].can_show = false;
+			}
+			token.stop();
+			release();
+		}.bind(this));
+	}.bind(this));
+}
+}

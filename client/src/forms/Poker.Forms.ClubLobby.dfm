@@ -2784,8 +2784,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 878
-        ExplicitHeight = 433
         DesignSize = (
           880
           435)

@@ -49,6 +49,7 @@ uses
   Poker.Forms.HandHistory in 'forms\Poker.Forms.HandHistory.pas' {frmHandHistory},
   Poker.Forms.ClubMemberOptions in 'forms\Poker.Forms.ClubMemberOptions.pas' {frmClubMemberOptions},
   Poker.Forms.LayeredForm in 'forms\Poker.Forms.LayeredForm.pas' {frmLayered},
+  Poker.Forms.Settings in 'forms\Poker.Forms.Settings.pas' {frmSettings},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
@@ -71,8 +72,8 @@ uses
   Poker.Objects.PlayerInfo in 'modules\objects\Poker.Objects.PlayerInfo.pas',
   Poker.Objects.ClubInfo in 'modules\objects\Poker.Objects.ClubInfo.pas',
   Poker.Objects.GameInfo in 'modules\objects\Poker.Objects.GameInfo.pas',
+  Poker.Objects.TableStatus in 'modules\objects\Poker.Objects.TableStatus.pas',
   Poker.Table.Tables in 'modules\table\Poker.Table.Tables.pas',
-  Poker.Table.Status in 'modules\table\Poker.Table.Status.pas',
   Poker.Table.Resources in 'modules\table\Poker.Table.Resources.pas',
   Poker.Avatars in 'modules\Poker.Avatars.pas',
   Poker.Cards in 'modules\Poker.Cards.pas',
@@ -156,7 +157,9 @@ uses
   Poker.Objects.WinnerData in 'modules\objects\Poker.Objects.WinnerData.pas',
   Poker.Objects.TableEvent in 'modules\objects\Poker.Objects.TableEvent.pas',
   Poker.Helpers.DX9Canvas in 'helpers\Poker.Helpers.DX9Canvas.pas',
-  Poker.Forms.Settings in 'forms\Poker.Forms.Settings.pas' {frmSettings};
+  Poker.Table.Renderer in 'modules\table\Poker.Table.Renderer.pas',
+  Poker.Table.RenderMetrics in 'modules\table\Poker.Table.RenderMetrics.pas',
+  Poker.Table.DXButton in 'modules\table\Poker.Table.DXButton.pas';
 
 procedure FocusPokerApp;
 var

@@ -22,10 +22,11 @@ type
         TCP_SERVER_ADDRESS: String;
         TCP_DEV_SERVER_ADDRESS: String;
         TCP_SERVER_PORT: Word;
-        TCP_PING_INTERVAL: Word;
-        TCP_INACTIVITY_PING_INTERVAL: Word;
-        TCP_PING_TIMEOUT: Word;
+        TCP_PING_INTERVAL: Byte;
+        TCP_INACTIVITY_PING_INTERVAL: Byte;
+        TCP_PING_TIMEOUT: Byte;
         HAND_HISTORY_HAND_LIMIT_PER_TABLE: Word;
+        DIRECTX_SWAPCHAIN_COUNT: Byte;
 
         RESOURCES: record
           DIRECTORY: String;
@@ -45,19 +46,15 @@ type
   public
     const
       Hardcoded: THardcodedSettingsRec = (
-        // version of app
         VERSION: '0.01a.0137';
         REVISION: {$I revision.inc};
 
-        // instance mutex name
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
 
-        // filenames
         SETTINGS_FILENAME: 'settings.dat';
         SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
         DATABASE_FILENAME: 'database.sqlite';
 
-        // socket server
         TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
         TCP_DEV_SERVER_ADDRESS: 'dev-server.chipuppoker.com';
         TCP_SERVER_PORT: 12346;
@@ -66,6 +63,7 @@ type
         TCP_PING_TIMEOUT: 15; // in seconds
 
         HAND_HISTORY_HAND_LIMIT_PER_TABLE: 1000; // 1000 hands per table
+        DIRECTX_SWAPCHAIN_COUNT: 64; // directx swapchain count
 
         // resources
         RESOURCES: (

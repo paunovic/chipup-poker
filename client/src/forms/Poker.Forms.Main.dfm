@@ -3,7 +3,7 @@ object frmChipUpMain: TfrmChipUpMain
   Top = 0
   ClientHeight = 554
   ClientWidth = 794
-  Color = clWindow
+  Color = clBlack
   Constraints.MinHeight = 550
   Constraints.MinWidth = 600
   Ctl3D = False
@@ -4234,6 +4234,8 @@ object frmChipUpMain: TfrmChipUpMain
     object acSettings: TAction
       Category = 'Options'
       Caption = 'Settings'
+      ShortCut = 16467
+      Visible = False
       OnExecute = acSettingsExecute
     end
   end
@@ -4299,7 +4301,6 @@ object frmChipUpMain: TfrmChipUpMain
       object miSettings: TMenuItem
         Action = acSettings
         GroupIndex = 1
-        Visible = False
       end
     end
     object miHelp: TMenuItem

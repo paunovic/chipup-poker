@@ -211,11 +211,6 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings;
 
 
-procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
-begin
-  ServerSocket.Disconnect;
-end;
-
 procedure TfrmChipUpMain.DoCreate;
 begin
   inherited;
@@ -248,6 +243,7 @@ end;
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   FormsContainer.CloseAllForms;
+  Tables.Clear;
   MessageContainer.RemoveCallbacks(FCallbacksId);
 end;
 
@@ -261,10 +257,7 @@ begin
   CanClose := (FShuttingDown) or
               (ConfirmToCloseTables);
   if CanClose then
-  begin
     ServerSocket.Logout;
-    Tables.Clear;
-  end;
 end;
 
 procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
@@ -289,12 +282,12 @@ end;
 procedure TfrmChipUpMain.DoLogout;
 begin
   FormsContainer.CloseAllForms;
+  Tables.Clear;
   gridMyHomeGamesTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
-  Tables.Clear;
 end;
 
 procedure TfrmChipUpMain.ShowLoginForm;
@@ -1170,7 +1163,6 @@ begin
       club.UpdateFromClubStats(clubstats);
 
   for tablepb in pb.Reply do
-  begin
     if TablesStats.Find(tablepb.Gameid, tablestats) then
       tablestats.Assign(tablepb)
     else
@@ -1179,7 +1171,6 @@ begin
       tablestats.Assign(tablepb);
       TablesStats.Add(tablestats);
     end;
-  end;
 end;
 
 procedure TfrmChipUpMain.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
@@ -1189,5 +1180,11 @@ begin
   pb := AObject as TPB_ClubHandHistoryReply;
   HandHistory.Add(pb);
 end;
+
+procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
+end;
+
 
 end.

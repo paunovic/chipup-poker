@@ -224,6 +224,9 @@
 			<DCCReference Include="forms\Poker.Forms.LayeredForm.pas">
 				<Form>frmLayered</Form>
 			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Settings.pas">
+				<Form>frmSettings</Form>
+			</DCCReference>
 			<DCCReference Include="interfaces\Poker.Interfaces.FormParams.pas"/>
 			<DCCReference Include="interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.AsphyreImage.pas"/>
@@ -246,8 +249,8 @@
 			<DCCReference Include="modules\objects\Poker.Objects.PlayerInfo.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.ClubInfo.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.GameInfo.pas"/>
+			<DCCReference Include="modules\objects\Poker.Objects.TableStatus.pas"/>
 			<DCCReference Include="modules\table\Poker.Table.Tables.pas"/>
-			<DCCReference Include="modules\table\Poker.Table.Status.pas"/>
 			<DCCReference Include="modules\table\Poker.Table.Resources.pas"/>
 			<DCCReference Include="modules\Poker.Avatars.pas"/>
 			<DCCReference Include="modules\Poker.Cards.pas"/>
@@ -331,10 +334,9 @@
 			<DCCReference Include="modules\objects\Poker.Objects.WinnerData.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.TableEvent.pas"/>
 			<DCCReference Include="helpers\Poker.Helpers.DX9Canvas.pas"/>
-			<DCCReference Include="forms\Poker.Forms.Settings.pas">
-				<Form>frmSettings</Form>
-				<FormType>dfm</FormType>
-			</DCCReference>
+			<DCCReference Include="modules\table\Poker.Table.Renderer.pas"/>
+			<DCCReference Include="modules\table\Poker.Table.RenderMetrics.pas"/>
+			<DCCReference Include="modules\table\Poker.Table.DXButton.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
