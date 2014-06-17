@@ -3,7 +3,7 @@ unit Poker.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG,
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG, AsphyreTypes,
   Vcl.Controls;
 
 {$IFDEF DEBUG}
@@ -41,6 +41,7 @@ function GetTaskbarHeight: Integer;
 function BytesToHex(const ABytes: TBytes): String;
 function IsDirectoryWriteable(const APath: String): Boolean;
 procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
+function PtInBounds(const APoint: TPoint; const ABounds: TPoint4): Boolean;
 
 implementation
 
@@ -648,9 +649,13 @@ end;
 
 procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
 begin
-  SetWindowRgn(AControl.Handle,
-               CreateRoundRectRgn(0, 0, AControl.ClientWidth, AControl.ClientHeight, AAmount, AAmount),
-               TRUE);
+  SetWindowRgn(AControl.Handle, CreateRoundRectRgn(0, 0, AControl.ClientWidth, AControl.ClientHeight, AAmount, AAmount), TRUE);
+end;
+
+function PtInBounds(const APoint: TPoint; const ABounds: TPoint4): Boolean;
+begin
+  result := (APoint.X >= ABounds[0].x) and (APoint.X <= ABounds[1].x) and
+            (APoint.Y >= ABounds[0].y) and (APoint.Y <= ABounds[2].y);
 end;
 
 

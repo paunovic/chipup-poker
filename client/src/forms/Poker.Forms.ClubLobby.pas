@@ -393,9 +393,9 @@ end;
 
 procedure TfrmClubLobby.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
-  recIndex       : Integer;
-  club           : TClubInfo;
-  game           : TGameInfo;
+  recIndex: Integer;
+  club: TClubInfo;
+  game: TGameInfo;
   close_table_act: Boolean;
 begin
   if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
@@ -829,10 +829,10 @@ end;
 
 procedure TfrmClubLobby.UpdateGamesList;
 var
-  C1    : Integer;
-  game  : TGameInfo;
-  club  : TClubInfo;
-  c     : TcxGridDataController;
+  C1: Integer;
+  game: TGameInfo;
+  club: TClubInfo;
+  c: TcxGridDataController;
   recidx: Integer;
 begin
   c := gridGamesTable.DataController;
@@ -893,7 +893,7 @@ end;
 
 procedure TfrmClubLobby.acGiveOwnershipExecute(Sender: TObject);
 var
-  club  : TClubInfo;
+  club: TClubInfo;
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
@@ -912,7 +912,7 @@ end;
 
 procedure TfrmClubLobby.acRemovePlayerExecute(Sender: TObject);
 var
-  club  : TClubInfo;
+  club: TClubInfo;
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
