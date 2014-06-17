@@ -216,7 +216,7 @@ Game.prototype.log = function log(format) {
 	process.send({type:'game',name:this.obj.gamename,ts:new Date().toString(),objects:out});
 	var obj = new mdb.models.DebugLogs({type:'game',gameid:this.obj._id,name:this.obj.gamename,objects:out});
 	if (this.club) obj.clubid = this.club.clubid;
-	obj.insert(function () {});
+	obj.save(function () {});
 }
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);
