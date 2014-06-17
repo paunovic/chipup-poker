@@ -392,13 +392,13 @@ Club.prototype.log = function log(format) {
 	obj.clubid = this.obj.clubid;
 	debugLogs.insert(obj,function (){});
 }
-Club.registerHandlers = function (handlers) {
+Club.registerHandlers = function (handlers,pb) {
 handlers[codes.scSuspendPlayer] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.ChangeSuspendState');
 		this.log('params:%j',params);
-		var clubid = toMongoId(params.club_mongo_id);
-		var playerid = toMongoId(params.player_mongo_id);
+		var clubid = myutils.toMongoId(params.club_mongo_id);
+		var playerid = myutils.toMongoId(params.player_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -520,7 +520,7 @@ handlers[codes.scJoinClub] = function (args,token) {
 handlers[codes.scTransferChips] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.TransferChipsParams');
-		var userid = toMongoId(params.player_mongo_id);
+		var userid = myutils.toMongoId(params.player_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;

@@ -1405,8 +1405,8 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 		}.bind(this));
 	}.bind(this));
 }
-Game.registerHandlers(handlers);
-Club.registerHandlers(handlers);
+Game.registerHandlers(handlers,pb);
+Club.registerHandlers(handlers,pb);
 
 handlers[codes.scResendVerificationMail] = function () {
 	allUsers.findOne({_id:this.userid},function (err,row) {

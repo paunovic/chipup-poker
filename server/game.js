@@ -2113,11 +2113,11 @@ Game.getGame = function getgame(id,cb) {
 		}
 	}.bind(this));
 }
-Game.registerHandlers = function (handlers) {
+Game.registerHandlers = function (handlers,pb) {
 handlers[codes.scCloseGame] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.CloseGameData');
-		var id = new toMongoId(params.gameid);
+		var id = new myutils.toMongoId(params.gameid);
 		switch (params.timestamp) {
 		case 'cgtCurrentHand':
 			params.timestamp = 0;
@@ -2237,7 +2237,7 @@ handlers[codes.scFold] = function (args,token) {
 	var token2 = profiler.start('fold-inner4');
 	try {
 		var params = pb.Parse(args,'Poker.Game');
-		var id = toMongoId(params._id);
+		var id = myutils.toMongoId(params._id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -2277,7 +2277,7 @@ handlers[codes.scFold] = function (args,token) {
 handlers[codes.scTableSitOutNextHand] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.TableBoolFlag');
-		var id = toMongoId(params.table_mongo_id);
+		var id = myutils.toMongoId(params.table_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -2318,7 +2318,7 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 handlers[codes.scPutChips] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.PutChips');
-		var id = toMongoId(params.table_mongo_id);
+		var id = myutils.toMongoId(params.table_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -2364,7 +2364,7 @@ handlers[codes.scPutChips] = function (args,token) {
 handlers[codes.scTableSitOutNextBB] = function (args) {
 	try {
 		var params = pb.Parse(args,'Poker.TableBoolFlag');
-		var id = toMongoId(params.table_mongo_id);
+		var id = myutils.toMongoId(params.table_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -2386,7 +2386,7 @@ handlers[codes.scTableSitOutNextBB] = function (args) {
 handlers[codes.scShowCards] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.Game');
-		var id = toMongoId(params._id);
+		var id = myutils.toMongoId(params._id);
 	} catch (e) {
 		this.error(e);
 		return;
