@@ -25,49 +25,38 @@ type
 
   TTableRenderer = class
   private
-    type
-      TUIButton = record
-        Image: TAsphyreImage;
-        Bounds: TPoint4;
-        Action: TAction;
-      end;
+    FHandle: THandle;
+    FSwapChainIndex: Integer;
+    FDXAreaSize: TPoint2px;
+    FMetrics: TTableRenderMetrics;
+    FGame: TGameInfo;
+    FTableType: TTableType;
+    FTableStatus: TTableStatus;
+    FTimeImage: TasphyreImage;
+    FRaiseThumbPosition: Single;
+    FDrawColor: TColor4;
+    FDXButtons: TObjectList<TDXButton>;
 
-    var
-      FHandle: THandle;
-      FSwapChainIndex: Integer;
-      FDXAreaSize: TPoint2px;
-      FMetrics: TTableRenderMetrics;
-      FGame: TGameInfo;
-      FTableType: TTableType;
-      FTableStatus: TTableStatus;
-      FTimeImage: TasphyreImage;
-      FRaiseThumbPosition: Single;
-      FDrawColor: TColor4;
-      FDXButtons: TObjectList<TDXButton>;
+    FFlopAnimations: TList<Integer>;
+    FFlopAnimated: Boolean;
+    FTurnAnimations: TList<Integer>;
+    FTurnAnimated: Boolean;
+    FRiverAnimations: TList<Integer>;
+    FRiverAnimated: Boolean;
+    FDealAnimations: TList<Integer>;
+    FBetAnimations: TList<Integer>;
+    FPotWinAnimations: TList<Integer>;
 
-      FFlopAnimations: TList<Integer>;
-      FFlopAnimated: Boolean;
-      FTurnAnimations: TList<Integer>;
-      FTurnAnimated: Boolean;
-      FRiverAnimations: TList<Integer>;
-      FRiverAnimated: Boolean;
-      FDealAnimations: TList<Integer>;
-      FBetAnimations: TList<Integer>;
-      FPotWinAnimations: TList<Integer>;
+    FChipStackMaker: TChipStackMaker;
 
-      FChipStackMaker: TChipStackMaker;
+    FWinningFlopAniDelay: Single;
+    FWinningTurnAniDelay: Single;
+    FWinningRiverAniDelay: Single;
+    FWinningAniDelay: Single;
 
-      FWinningFlopAniDelay: Single;
-      FWinningTurnAniDelay: Single;
-      FWinningRiverAniDelay: Single;
-      FWinningAniDelay: Single;
-
-      FOnDealerChatMessage: TDealerChatMessageEvent;
-      FOnSoundPlay: TSoundPlayEvent;
-      FOnTimebankStarted: TNotifyEvent;
-
-      FActionButtons: TArray<TUIButton>;
-      FRaisePresetButtons: TArray<TUIButton>;
+    FOnDealerChatMessage: TDealerChatMessageEvent;
+    FOnSoundPlay: TSoundPlayEvent;
+    FOnTimebankStarted: TNotifyEvent;
 
     procedure RenderEvent(Sender: TObject);
     procedure RenderBackground;
@@ -86,7 +75,7 @@ type
     procedure RenderValue(const APoint: TPoint2; const AValue: UINT32; const AColor: TColor2; const APot: Boolean);
     procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipsStack);
     procedure RenderButtons;
-    procedure RenderLowerInterface;
+    procedure RenderRaisePanel;
 
   public
     constructor Create(const ASwapChainIndex: Integer; const AGame: TGameInfo; const ATableType: TTableType);
@@ -103,8 +92,6 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure MouseMove(Shift: TShiftState; X, Y: Integer);
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-
-    function IsPointInUIButtons(const APoint: TPoint; const AButtons: TArray<TUIButton>; out AIndex: Integer): Boolean;
 
     property Metrics: TTableRenderMetrics read FMetrics;
     property ChipStackMaker: TChipStackMaker read FChipStackMaker;
@@ -132,14 +119,10 @@ type
     property OnSoundPlay: TSoundPlayEvent read FOnSoundPlay write FOnSoundPlay;
     property OnTimebankStarted: TNotifyEvent read FOnTimebankStarted write FOnTimebankStarted;
 
-    procedure SetRaisePresetButtonsCount(const ACount: Integer);
-    procedure SetActionButtonsCount(const ACount: Integer);
-    procedure AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage);
+    function AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage; const ARenderActionCaption: Boolean = FALSE; const AFontScale: Single = 1): Integer;
+    function GetDXButton(const AId: Integer): TDXButton;
 
     property DXButtons: TObjectList<TDXButton> read FDXButtons;
-
-    property RaisePresetButtons: TArray<TUIButton> read FRaisePresetButtons;
-    property ActionButtons: TArray<TUIButton> read FActionButtons;
   end;
 
 implementation
@@ -197,24 +180,20 @@ begin
   inherited;
 end;
 
+function TTableRenderer.GetDXButton(const AId: Integer): TDXButton;
+var
+  button: TDXButton;
+begin
+  for button in FDXButtons do
+    if button.Id = AId then
+      Exit(button);
+  Exit(nil);
+end;
+
 procedure TTableRenderer.SetRenderTarget(const AHandle: THandle);
 begin
   FHandle := AHandle;
   FMetrics.SetRenderHandle(FHandle);
-end;
-
-
-function TTableRenderer.IsPointInUIButtons(const APoint: TPoint; const AButtons: TArray<TUIButton>; out AIndex: Integer): Boolean;
-var
-  C1: Integer;
-begin
-  for C1 := Low(AButtons) to High(AButtons) do
-    if PtInBounds(APoint, AButtons[C1].Bounds) then
-    begin
-      AIndex := C1;
-      Exit(TRUE);
-    end;
-  Exit(FALSE);
 end;
 
 procedure TTableRenderer.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -249,7 +228,7 @@ begin
   Winapi.Windows.GetClientRect(FHandle, rect);
   FDXAreaSize := Point2px(rect.Width, rect.Height);
   DXCore.Device.Resize(FSwapChainIndex, FDXAreaSize);
-  FMetrics.Update(FDXAreaSize);
+  FMetrics.Update(FDXAreaSize, FRaiseThumbPosition);
 end;
 
 procedure TTableRenderer.UpdateTableStatus(const ATableStatus: TTableStatus);
@@ -260,7 +239,10 @@ end;
 procedure TTableRenderer.Render;
 begin
   if Assigned(FTableStatus) then
+  begin
+    UpdateDXAreaSize;
     DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
+  end;
 end;
 
 procedure TTableRenderer.RenderEvent(Sender: TObject);
@@ -275,7 +257,7 @@ begin
   RenderBets;
   RenderPots;
   RenderTimebar;
-  RenderLowerInterface;
+  RenderRaisePanel;
   RenderButtons;
 end;
 
@@ -1058,16 +1040,6 @@ begin
   font.TextMidF(p, text, AColor);
 end;
 
-procedure TTableRenderer.SetActionButtonsCount(const ACount: Integer);
-begin
-  SetLength(FActionButtons, ACount);
-end;
-
-procedure TTableRenderer.SetRaisePresetButtonsCount(const ACount: Integer);
-begin
-  SetLength(FRaisePresetButtons, ACount);
-end;
-
 procedure TTableRenderer.RenderChipStack(const APoint: TPoint2; const AChipStack: TChipsStack);
 var
   C1: Integer;
@@ -1088,90 +1060,63 @@ var
   button: TDXButton;
 begin
   for button in FDXButtons do
-    button.RenderTo(DXCore.Canvas);
+    button.RenderTo(DXCore.Canvas, FMetrics);
 end;
 
-procedure TTableRenderer.RenderLowerInterface;
+procedure TTableRenderer.RenderRaisePanel;
 var
-  red_quad: TPoint4;
-  C1: Integer;
-//  button: TUIButton;
-  font: TAsphyreFont;
-  seat_info: TSeatInfo;
+  red_bounds: TPoint4;
 begin
-  if (FTableStatus.ActionRaise) or (FTableStatus.ActionBet) then
+  if (FTableStatus.ActionRaise) or
+     (FTableStatus.ActionBet) then
   begin
     // render raise slider background
     DXCore.Canvas.UseImage(TableResources.RaiseSliderBackgroundImage, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(FMetrics.RaisePanelBounds.Left, FMetrics.RaisePanelBounds.Top,
-       FMetrics.RaisePanelBounds.Width, FMetrics.RaisePanelBounds.Height), clWhite4);
+    DXCore.Canvas.TexMap(FMetrics.RaisePanelBounds, clWhite4);
 
     // render raise red fill
-{    red_quad := pBounds4(FRaiseSliderButtonBounds.Left + 1.5 * FRaiseSliderResizeRatio,
-                         FRaiseSliderButtonBounds.Top + 1.5 * FRaiseSliderResizeRatio,
-                         FRaiseSliderButtonPoint.x - FRaiseSliderButtonBounds.Left - 1.5 * FRaiseSliderResizeRatio,
-                         FRaiseSliderButtonBounds.Height - 3 * FRaiseSliderResizeRatio);
-    DXCore.Canvas.FillQuad(red_quad, cColor4($FFB40004));
+    red_bounds := pBounds4(FMetrics.RaiseTrackBounds[0].x + 1, FMetrics.RaiseTrackBounds[0].y + 1,
+         FRaiseThumbPosition * (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x - 2),
+         FMetrics.RaiseTrackBounds[2].y - FMetrics.RaiseTrackBounds[0].y - 2);
+    DXCore.Canvas.FillQuad(red_bounds, cColor4($FFB40004));
 
     // render raise thumb
     DXCore.Canvas.UseImage(TableResources.RaiseSliderButtonImage, TexFull4);
-
-    DXCore.Canvas.TexMap(pBounds4(FMetrics.RaiseThumbBounds.Left + FRaiseThumbPosition * FMetrics.RaiseThumbBounds.Width - FMetrics.Raise
-                                  FRaiseSliderButtonPoint.y - FRaiseSliderButtonHeight / 2,
-                                  FRaiseSliderButtonWidth, FRaiseSliderButtonHeight), clWhite4);
-}
-    // render raise preset buttons
-{    for C1 := Low(FRaisePresetButtons) to High(FRaisePresetButtons) do
-    begin
-      button := FRaisePresetButtons[C1];
-      if not Assigned(button.Action) then
-        Continue;
-
-      DXCore.Canvas.UseImage(button.Image, TexFull4);
-      DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FRaisePresetButtonWidth, FRaisePresetButtonHeight), clWhite4);
-
-      font := TableResources.SintonyFonts[High(TableResources.SintonyFonts)];
-      font.Kerning := 0;
-      if Integer(FMouseDownObject) - Integer(mdoRaisePresetButton1) = C1 then
-        font.Scale := FTableResizeRatio * 0.65
-      else
-        font.Scale := FTableResizeRatio * 0.75;
-      font.TextMidF(Point2(button.Point.x + FRaisePresetButtonWidth / 2, button.Point.y + FRaisePresetButtonHeight / 2), button.Action.Caption, cColor2($FFAAAAAA));
-    end;   }
-  end;      {
-
-  // render action buttons
-  for C1 := Low(FActionButtons) to High(FActionButtons) do
-  begin
-    button := FActionButtons[C1];
-    if not Assigned(button.Action) then
-      Continue;
-
-    DXCore.Canvas.UseImage(button.Image, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(button.Point.x, button.Point.y, FActionButtonWidth, FActionButtonHeight), clWhite4);
-
-    font := TableResources.SintonyFonts[High(TableResources.SintonyFonts)];
-    font.Kerning := 0;
-    if Integer(FMouseDownObject) - Integer(mdoActionButton1) = C1 then
-      font.Scale := FTableResizeRatio * 0.80
-    else
-      font.Scale := FTableResizeRatio * 0.90;
-    font.TextMidF(Point2(button.Point.x + FActionButtonWidth / 2, button.Point.y + FActionButtonHeight / 2), button.Action.Caption, clWhite2);
+    DXCore.Canvas.TexMap(FMetrics.RaiseThumbBounds, clWhite4);
   end;
-                 }
 end;
 
-procedure TTableRenderer.AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage);
+function TTableRenderer.AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage; const ARenderActionCaption: Boolean = FALSE; const AFontScale: Single = 1): Integer;
 var
   dxb: TDXButton;
+  id: Integer;
+  id_exists: Boolean;
 begin
+  id := 0;
+  repeat
+    Inc(id);
+    id_exists := FALSE;
+
+    for dxb in FDXButtons do
+      if dxb.Id = id then
+      begin
+        id_exists := TRUE;
+        Break;
+      end;
+  until not id_exists;
+
   dxb := TDXButton.Create;
+  dxb.Id := id;
   dxb.Action := AAction;
   dxb.Bounds := ABounds;
   dxb.ImageNormal := ANormalImage;
   dxb.ImageDown := ADownImage;
   dxb.ImageHot := AHotImage;
+  dxb.RenderActionCaption := ARenderActionCaption;
+  dxb.FontScaleRatio := AFontScale;
   FDXButtons.Add(dxb);
+
+  result := dxb.Id;
 end;
 
 procedure TTableRenderer.ClearAnimations;

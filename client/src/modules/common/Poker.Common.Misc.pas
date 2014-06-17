@@ -42,6 +42,7 @@ function BytesToHex(const ABytes: TBytes): String;
 function IsDirectoryWriteable(const APath: String): Boolean;
 procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
 function PtInBounds(const APoint: TPoint; const ABounds: TPoint4): Boolean;
+function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 
 implementation
 
@@ -54,6 +55,9 @@ uses
 {$IFDEF DEBUG}
 function SerializeObject(const AObject: TObject): String;
 begin
+  if not Assigned(AObject) then
+    Exit('');
+
   TSvSerializer.SerializeObject(AObject, result, sstSuperJson);
 end;
 {$ENDIF}
@@ -657,6 +661,12 @@ begin
   result := (APoint.X >= ABounds[0].x) and (APoint.X <= ABounds[1].x) and
             (APoint.Y >= ABounds[0].y) and (APoint.Y <= ABounds[2].y);
 end;
+
+function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
+begin
+  result := Round(AChips / ABigBlind) * ABigBlind;
+end;
+
 
 
 end.

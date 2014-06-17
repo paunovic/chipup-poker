@@ -5,8 +5,6 @@ object frmTable: TfrmTable
   ClientHeight = 524
   ClientWidth = 792
   Color = 1315656
-  Constraints.MaxHeight = 910
-  Constraints.MaxWidth = 1320
   Constraints.MinWidth = 600
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -630,8 +628,8 @@ object frmTable: TfrmTable
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 312
-    Top = 100
+    Left = 316
+    Top = 104
   end
   object tiGameLock: TTimer
     Enabled = False

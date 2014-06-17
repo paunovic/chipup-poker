@@ -211,11 +211,6 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings;
 
 
-procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
-begin
-  ServerSocket.Disconnect;
-end;
-
 procedure TfrmChipUpMain.DoCreate;
 begin
   inherited;
@@ -1168,7 +1163,6 @@ begin
       club.UpdateFromClubStats(clubstats);
 
   for tablepb in pb.Reply do
-  begin
     if TablesStats.Find(tablepb.Gameid, tablestats) then
       tablestats.Assign(tablepb)
     else
@@ -1177,7 +1171,6 @@ begin
       tablestats.Assign(tablepb);
       TablesStats.Add(tablestats);
     end;
-  end;
 end;
 
 procedure TfrmChipUpMain.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
@@ -1187,5 +1180,11 @@ begin
   pb := AObject as TPB_ClubHandHistoryReply;
   HandHistory.Add(pb);
 end;
+
+procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
+end;
+
 
 end.
