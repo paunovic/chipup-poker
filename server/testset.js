@@ -1,6 +1,8 @@
 var Core = require('./core');
 var async = require('async');
 var http = require('http');
+var MongoClient = require('mongodb').MongoClient;
+
 
 exports.fuzzerLoop = function (test) {
 	var originalMsg = Core.pb.Serialize({debug:true},'Poker.HelloParams');
@@ -174,6 +176,36 @@ exports.testSecure = {
 		});
 		req.write(body);
 		req.end();
+	}
+};
+exports.club = {
+	goPublic: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var club = require('./club');
+		var game = require('./game');
+		test.expect(5);
+		activeUsers['fake'] = { send: function(code,object,type) {
+			test.ok(true);
+			console.log(code,object,type);
+		}};
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			test.ok(true);
+			club.init(db,activeUsers,activeGames,Core.pb);
+			game.Game.init(db,activeGames,activeUsers,db.collection('debugLogs'),{},null,null,null);
+			db.collection('clubs').findOne(function (err,row) {
+				test.ok(true);
+				club.Club.getClubById(row._id,function (err,clubobj) {
+					test.ok(true);
+					console.log('clubobj',clubobj);
+					clubobj.goPublic(function () {
+						test.ok(true);
+						test.done();
+						db.close();
+					});
+				});
+			});
+		});
 	}
 };
 process.on('uncaughtException',function (err) {

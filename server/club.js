@@ -279,11 +279,11 @@ Club.prototype.goPublic = function (cb) {
 					for (var key in activeUsers) {
 						activeUsers[key].send(codes.srJoinClubReply,joininfo,'Poker.ClubCommandReply');
 					}
+					cb('dummy');
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
-	cb('dummy');
 }
 Club.prototype.updateLimitPostWin = function (change,userid,callback) {
 	clubBalances.update({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,rows) {
@@ -358,7 +358,7 @@ Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
 		if (input.suspended) {
 			if (containsObjectID(input.suspended,memberList[y])) suspended = true;
 		}
-		var obj = {_id:myutils.fromMongoId(memberList[y]), suspended:suspended, balance_limit:0, club_balance: 0};
+		var obj = {_id:new Buffer(memberList[y],'hex'), suspended:suspended, balance_limit:0, club_balance: 0};
 		for (var a=0; a<stats.length; a++) {
 			if (compareObjectID(stats[a].clubid,input._id)) {
 				if (stats[a].userid == null) {
