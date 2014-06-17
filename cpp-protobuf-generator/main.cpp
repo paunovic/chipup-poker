@@ -385,7 +385,8 @@ class BaseGenerator : public CodeGenerator {
 						"  ProtobufOutput.writeTag($enum$,$tagtype$);\n"
 						"  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);\n"
 						"  Item.ProtobufOutput.writeTo(ProtobufOutput);\n");
-				} else if ((field->type() == FieldDescriptor::TYPE_INT32) || (field->type() == FieldDescriptor::TYPE_UINT32)) {
+				} else if ((field->type() == FieldDescriptor::TYPE_INT32) || (field->type() == FieldDescriptor::TYPE_UINT32)
+					|| (field->type() == FieldDescriptor::TYPE_BYTES)) {
 					vars["writter"] = instance.getWritter();
 					printer->Print(vars,
 						"  ProtobufOutput.$writter$($enum$,Item);\n");

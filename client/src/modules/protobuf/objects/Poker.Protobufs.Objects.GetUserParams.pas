@@ -157,6 +157,7 @@ end;
 procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber,Item);
 end;
 
 procedure TPB_GetUserParams.clear_Users;

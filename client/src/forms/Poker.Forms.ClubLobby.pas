@@ -636,7 +636,10 @@ begin
     SetLength(query_players, 0);
     gridPlayersListTable.DataController.SetRecordCount(club.Members.Count);
     for C1 := 0 to club.Members.Count - 1 do
+    begin
+      Assert(Length(club.Members[C1].MongoId) = 12);
       AddPlayerToGrid(C1, club.Members[C1]);
+    end;
 
     if Length(query_players) > 0 then
       ServerSocket.GetUserInfos(query_players);
