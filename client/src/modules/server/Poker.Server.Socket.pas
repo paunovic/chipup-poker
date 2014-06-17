@@ -983,7 +983,10 @@ begin
   protobuf := TPB_GetUserParams.Create;
   try
     for C1 := Low(AMongoIds) to High(AMongoIds) do
+    begin
+      Assert(Length(AMongoIds[C1]) = 12);
       protobuf.UserMongoIds.Add(AMongoIds[C1]);
+    end;
     SendProtobuf(scGetPlayers, protobuf);
   finally
     protobuf.Free;
