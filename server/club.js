@@ -426,7 +426,7 @@ handlers[codes.scSuspendPlayer] = function (args,token) {
 		Club.getClubById(clubid,function (err,clubObj) {
 			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
 				var userlist = [ ];
-				var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
+				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
 				this.send(code,out,'Poker.Club');
 				this.log('userlist to inform:',userlist);
 				for (var x=0; x<userlist.length; x++) {
@@ -446,7 +446,7 @@ handlers[codes.scSuspendPlayer] = function (args,token) {
 			return;
 		}
 		// FIXME, make it a function on Club
-		if (!containsObjectID(this.obj.members,playerid)) {
+		if (!containsObjectID(club.obj.members,playerid)) {
 			conn.reply(0,'player isnt a member');
 			return;
 		}
