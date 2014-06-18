@@ -13,6 +13,7 @@ exports.club = {
 		var activeUsers = {};
 		var activeGames = {};
 		var club = require('./club');
+		test.expect(3);
 		mdb.open();
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			club.init(db,activeUsers,activeGames,Core.pb);
@@ -22,9 +23,12 @@ exports.club = {
 				club.Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
 					clubid = clubObj.obj.seq;
 					test.ok(worked);
-					db.close();
-					mdb.close();
-					test.done();
+					club.Club.dupCheck('clubname',function (dup) {
+						test.ok(dup);
+						db.close();
+						mdb.close();
+						test.done();
+					});
 				});
 			});
 		});
@@ -113,6 +117,25 @@ exports.club = {
 							});
 						});
 					});
+				});
+			});
+		});
+	},
+	kick: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var club = require('./club');
+		mdb.open();
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			club.init(db,activeUsers,activeGames,Core.pb);
+			myutils.init(db);
+			club.getClubBySeq(clubid,function (err,clubObj) {
+				test.ok(clubObj);
+				clubObj.KickMember(clubObj.obj.members[0],function () {
+					test.ok(true);
+					db.close();
+					mdb.close();
+					test.done();
 				});
 			});
 		});

@@ -399,7 +399,7 @@ Club.prototype.setSuspended = function (suspended,playerid,cb) {
 			this.obj.suspended.push(playerid);
 		}
 	} else {
-		for (var x=0; x<this.obj.members.length; x++) {
+		for (var x=0; x<this.obj.suspended.length; x++) {
 			if (compareObjectID(playerid,this.obj.suspended[x])) {
 				this.obj.suspended.splice(x,1);
 				break;
@@ -409,6 +409,18 @@ Club.prototype.setSuspended = function (suspended,playerid,cb) {
 	this.obj.save(function (err) {
 		assert.ifError(err);
 		cb(true);
+	});
+}
+Club.prototype.KickMember = function (userid,cb) {
+	for (var x=0; x<this.obj.members.length; x++) {
+		if (compareObjectID(userid,this.obj.members[x])) {
+			this.obj.members.splice(x,1);
+			break;
+		}
+	}
+	this.obj.save(function (err) {
+		assert.ifError(err);
+		cb();
 	});
 }
 Club.prototype.joinClub = function (userid,cb) {
@@ -429,7 +441,7 @@ Club.prototype.deleteClub = function (cb) {
 	}.bind(this));
 }
 Club.dupCheck = function (name,cb) {
-	allClubs.findOne({name:{$regex:new RegExp('^'+name+'$','i')}},function (err,row) {
+	mdb.models.Clubs.findOne({name:{$regex:new RegExp('^'+name+'$','i')}},function (err,row) {
 		if (row) cb(true);
 		else cb(false);
 	});
@@ -485,39 +497,37 @@ handlers[codes.scCreateClub] = function (args,token) {
 	}.bind(this));
 }
 handlers[codes.scDeleteClub] = function (args,token) {
-	function deleteClub(club) {
-		Club.getClubById(club._id,function (err,clubObj) {
-			clubObj.deleteClub(function () {
-				this.log('delete worked',err,res);
-				// FIXME, force end games in this club?
-				clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-					var userlist = [];
-					var out = Club.makeClubProtobuf(club,userlist,stats,clubObj);
-					this.send(codes.srClubDisbandOk,out,'Poker.Club');
-					this.log('userlist to inform:',userlist);
-					for (var x=0; x<userlist.length; x++) {
-						var user = activeUsers[userlist[x]];
-						if (user) user.send(codes.seClubDeleted,out,'Poker.Club');
-					}
-				}.bind(this));
+	function deleteClub(clubObj) {
+		clubObj.deleteClub(function () {
+			this.log('delete worked',err,res);
+			// FIXME, force end games in this club?
+			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+				var userlist = [];
+				var out = Club.makeClubProtobuf(club,userlist,stats,clubObj);
+				this.send(codes.srClubDisbandOk,out,'Poker.Club');
+				this.log('userlist to inform:',userlist);
+				for (var x=0; x<userlist.length; x++) {
+					var user = activeUsers[userlist[x]];
+					if (user) user.send(codes.seClubDeleted,out,'Poker.Club');
+				}
 			}.bind(this));
 		}.bind(this));
 	}
 	var params = pb.Parse(args,'Poker.Club');
 	var clubseq = params.seq;
 	this.log('deleting club',params);
-	allClubs.findOne({seq:clubseq},function (err,club) {
-		if (!club) {
+	Club.activeClubsSeq(clubseq,function (err,clubObj) {
+		if (err == 'not found') {
 			this.log('club not found');
 			this.reply("000","club not found");
 			return;
 		}
-		if (!club.owner.equals(this.userid)) {
+		if (!clubObj.isOwner(this.userid)) {
 			this.log('not owner');
 			this.reply("000","your not owner");
 			return;
 		}
-		allGames.find({clubid:club._id},{state2:1}).toArray(function (err,games) {
+		allGames.find({clubid:clubObj.clubid},{state2:1}).toArray(function (err,games) {
 			for (var x=0; x<games.length; x++) {
 				if (games[x].state2 != 'gsClosed') {
 					this.reply(0,'not all games are closed');
@@ -528,53 +538,45 @@ handlers[codes.scDeleteClub] = function (args,token) {
 					//return;
 				}
 			}
-			deleteClub.call(this,club);
+			deleteClub.call(this,clubObj);
 		}.bind(this));
 	}.bind(this));
 }
 handlers[codes.scKickPlayer] = function (args,token) {
 	function finishKick(club) {
-		allClubs.update({seq:clubid},
-			{ $pull:{members:userid}},
-			function (err,res) {
-				if (res == 0) {
-					this.send(codes.srKickPlayerReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
-					return;
+		club.KickMember(userid,function (res) {
+			if (res == 0) {
+				this.send(codes.srKickPlayerReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
+				return;
+			}
+			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+				var userlist = [ userid ];
+				var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
+				this.send(codes.srKickPlayerReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
+				this.log('userlist to inform:',userlist);
+				this.log('out:%j',out);
+				for (var x=0; x<userlist.length; x++) {
+					var user = activeUsers[userlist[x]];
+					if (user) user.send(codes.seClubChange,out,'Poker.Club');
 				}
-				allClubs.findOne({_id:club._id},function cb(err,row) {
-					Club.getClubById(club._id,function (err,clubObj) {
-						clubObj.refresh(row);
-						clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-							var userlist = [ userid ];
-							var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
-							this.send(codes.srKickPlayerReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
-							this.log('userlist to inform:',userlist);
-							this.log('out:%j',out);
-							for (var x=0; x<userlist.length; x++) {
-								var user = activeUsers[userlist[x]];
-								if (user) user.send(codes.seClubChange,out,'Poker.Club');
-							}
-						}.bind(this));
-					}.bind(this));
-				}.bind(this));
 			}.bind(this));
+		}.bind(this));
 	}
 	// FIXME, update Club object
 	try {
 		var params = pb.Parse(args,'Poker.KickPlayerParams');
-		var clubid = params.club_seq;
 		var userid = toMongoId(params.player_mongo_id);
 		this.log('kicking',clubid,userid);
 		// FIXME, code 023 kicking somebody not in the club
-		allClubs.findOne({seq:clubid},function (err,club) {
-			if (!club.owner.equals(this.userid)) {
+		Club.activeClubsSeq(params.club_seq,function (err,club) {
+			if (!clubObj.isOwner(this.userid)) {
 				this.reply("000","your not owner");
 				this.log('attempted to kick while not owner');
 				return;
 			}
 			var target = activeUsers[userid];
 			if (target) {
-				allGames.find({clubid:club._id}).toArray(function (err,clubGames) {
+				allGames.find({clubid:club.clubid}).toArray(function (err,clubGames) {
 					assert.ifError(err);
 					async.each(clubGames,function checkGame(gameRow,cb) {
 						var gameObj = activeGames[gameRow._id];
