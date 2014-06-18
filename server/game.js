@@ -1972,26 +1972,24 @@ Game.prototype.eject = function (seatIdx,userid) {
 	}.bind(this));
 }
 Game.prototype.doDelete = function () {
-	allClubs.findOne({_id:this.obj.clubid},function (err,club) {
-		assert(club);
-		var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
-		g.state = 'gsClosed';
-		var conn = activeUsers[club.owner];
-		if (conn) conn.send(codes.seGameDelete,g,'Poker.Game');
-		if (club.is_private) {
-			if (club.members) {
-				for (var x=0; x<club.members.length; x++) {
-					conn = activeUsers[club.members[x]];
-					if (!conn) continue;
-					conn.send(codes.seGameDelete,g,'Poker.Game');
-				}
-			}
-		} else {
-			for (var key in activeUsers) {
-				activeUsers[key].send(codes.seGameDelete,g,'Poker.Game');
+	assert(this.club);
+	var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+	g.state = 'gsClosed';
+	var conn = activeUsers[this.club.obj.owner];
+	if (conn) conn.send(codes.seGameDelete,g,'Poker.Game');
+	if (this.club.obj.is_private) {
+		if (this.club.obj.members) {
+			for (var x=0; x<this.club.obj.members.length; x++) {
+				conn = activeUsers[this.club.obj.members[x]];
+				if (!conn) continue;
+				conn.send(codes.seGameDelete,g,'Poker.Game');
 			}
 		}
-	}.bind(this));
+	} else {
+		for (var key in activeUsers) {
+			activeUsers[key].send(codes.seGameDelete,g,'Poker.Game');
+		}
+	}
 }
 Game.prototype.startTimer = function startTimer(seat,offset) {
 	assert.equal(typeof offset,'number');
