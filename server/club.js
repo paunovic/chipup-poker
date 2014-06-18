@@ -665,7 +665,7 @@ handlers[codes.scJoinClub] = function (args,token) {
 			this.send(codes.srJoinClubReply,{status:'csAlreadyMember'},'Poker.ClubCommandReply');
 			return;
 		}
-		if (item.members) { // FIXME, remove once mongoose conversion is done
+		if (clubObj.obj.members) { // FIXME, remove once mongoose conversion is done
 			if (containsObjectID(clubObj.obj.members,this.userid)) {
 				this.log('already a member');
 				this.send(codes.srJoinClubReply,{status:'csAlreadyMember'},'Poker.ClubCommandReply');
