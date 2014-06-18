@@ -649,8 +649,7 @@ begin
   acOpenClubLobby.Execute;
 end;
 
-procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-  AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acOpenClubLobby.Execute;
 end;
@@ -659,7 +658,7 @@ procedure TfrmChipUpMain.gridPublicHomeGamesTableFocusedRecordChanged(Sender: Tc
 var
   recIndex: Integer;
   club_id: Integer;
-  club: TclubInfo;
+  club: TClubInfo;
 begin
   recIndex := gridPublicHomeGamesTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then

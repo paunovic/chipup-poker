@@ -3772,9 +3772,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 254
+          Top = 250
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acOpenClubLobby
           Anchors = [akLeft, akBottom]
@@ -3791,9 +3791,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenTable: TcxButton
           Left = 10
-          Top = 291
+          Top = 288
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acShowGameTableForm
           Anchors = [akLeft, akBottom]
@@ -3810,9 +3810,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 328
+          Top = 326
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acShowCreateClubForm
           Anchors = [akLeft, akBottom]
@@ -3829,9 +3829,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 365
+          Top = 364
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acShowJoinClubForm
           Anchors = [akLeft, akBottom]
@@ -3903,6 +3903,10 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
+        ExplicitLeft = 1
+        ExplicitTop = 1
+        ExplicitWidth = 792
+        ExplicitHeight = 408
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1

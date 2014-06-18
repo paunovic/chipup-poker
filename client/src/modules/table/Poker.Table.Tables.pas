@@ -59,8 +59,6 @@ type
     class procedure Initialize;
     class procedure Deinitialize;
 
-    constructor Create;
-
     procedure DisableAll;
     procedure EnableAll;
 
@@ -198,6 +196,7 @@ procedure TTable.ReassignObjects(const AClub: TClubInfo; const AGame: TGameInfo)
 begin
   FClub := AClub;
   FGame := AGame;
+  FRenderer.Game := FGame;
 end;
 
 function TTable.ReassignObjects(const AGameId: TBytes): Boolean;
@@ -209,8 +208,7 @@ begin
     for game in club.Games do
       if CompareBytes(game.MongoId, AGameId) then
       begin
-        FClub := club;
-        FGame := game;
+        ReassignObjects(club, game);
         Exit(TRUE);
       end;
   Exit(FALSE);
@@ -230,12 +228,7 @@ end;
 
 class procedure TTables.Deinitialize;
 begin
-  Tables.Free;
-end;
-
-constructor TTables.Create;
-begin
-  inherited Create;
+  FreeAndNil(Tables);
 end;
 
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;

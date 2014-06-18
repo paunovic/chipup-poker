@@ -29,7 +29,7 @@ object frmAbout: TfrmAbout
   TextHeight = 13
   object lbsClientVersion: TcxLabel
     Left = 142
-    Top = 173
+    Top = 165
     Caption = 'Client Version:'
     ParentColor = False
     Style.Color = clBlack
@@ -37,7 +37,7 @@ object frmAbout: TfrmAbout
   end
   object lbvClientVersion: TcxLabel
     Left = 216
-    Top = 173
+    Top = 165
     Caption = '0.0'
     ParentColor = False
     Style.Color = clBlack

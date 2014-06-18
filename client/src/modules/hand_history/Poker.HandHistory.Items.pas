@@ -170,8 +170,7 @@ begin
   FHandId := AHandHistory.Seq;
   FRake := AHandHistory.Rake;
   FTotalRake := AHandHistory.Totalrake;
-  SetLength(FCards, Length(AHandHistory.Cards));
-  Move(AHandHistory.Cards[0], FCards[0], Length(AHandHistory.Cards) * SizeOf(Byte));
+  FCards := Copy(AHandHistory.Cards, 0, Length(AHandHistory.Cards));
   FTableCardsStr := TCards.BytesToString(FCards);
   FEndTime := TTimeZone.Local.ToLocalTime(UnixToDateTime(AHandHistory.Endtime));
   FBalanceChanges.Clear;

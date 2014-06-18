@@ -21,7 +21,7 @@ type
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
   private
     const
-      FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
+      FONTLIST: array[0..0] of String = ('SintonyBold');
 
     var
       FSelfInfo: TPlayerInfo;
@@ -29,7 +29,6 @@ type
       FUpdaterBatchFile: String;
       FUpdaterInstallerFile: String;
       FReconnectedTables: TObjectList<TPB_TableStatus>;
-      FDomainURL: String;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -50,7 +49,6 @@ type
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
 
-    property DomainURL: String read FDomainURL write FDomainURL;
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
@@ -61,6 +59,7 @@ var
   dmMain: TdmMain;
   SelfPath: String;
   AppDataPath: String;
+  DomainURL: String;
 
 implementation
 
@@ -117,12 +116,12 @@ begin
      (Settings.ServerIndex = 1) then
   begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    dmMain.DomainURL := DEV_URL_DOMAIN;
+    DomainURL := DEV_URL_DOMAIN;
   end
   else
   begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    dmMain.DomainURL := URL_DOMAIN;
+    DomainURL := URL_DOMAIN;
   end;
 
   FSelfInfo := TPlayerInfo.Create;

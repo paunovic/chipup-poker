@@ -27,6 +27,7 @@ type
         TCP_PING_TIMEOUT: Byte;
         HAND_HISTORY_HAND_LIMIT_PER_TABLE: Word;
         DIRECTX_SWAPCHAIN_COUNT: Byte;
+        TABLE_CHAT_SCROLLBACK_LINES: Word;
 
         RESOURCES: record
           DIRECTORY: String;
@@ -64,6 +65,7 @@ type
 
         HAND_HISTORY_HAND_LIMIT_PER_TABLE: 1000; // 1000 hands per table
         DIRECTX_SWAPCHAIN_COUNT: 64; // directx swapchain count
+        TABLE_CHAT_SCROLLBACK_LINES: 200; // table chat scrollback lines
 
         // resources
         RESOURCES: (

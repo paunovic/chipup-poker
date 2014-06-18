@@ -148,7 +148,7 @@ begin
   FHTTP.BandwidthLimit := 0;
   FHTTP.RequestVer := '1.1';
   FHTTP.RcvdStream := TMemoryStream.Create;
-  FHTTP.URL := Format(dmMain.DomainURL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
+  FHTTP.URL := Format(DomainURL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   FHTTP.OnRequestDone := HTTPRequestDone;
   FHTTP.SslContext.InitContext;
   FHTTP.GetAsync;

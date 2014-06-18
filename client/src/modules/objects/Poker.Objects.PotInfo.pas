@@ -42,6 +42,8 @@ implementation
 
 constructor TPotInfo.Create;
 begin
+  FValue := 0;
+  FRake := 0;
   FWinnerData := TWinnerDataList.Create;
   FMembers := TList<Integer>.Create;
 end;
@@ -56,7 +58,7 @@ end;
 
 function TPotInfo.GetValueWithoutRake: UINT32;
 begin
-  if FRake >= FValue then
+  if FValue <= FRake then
     result := 0
   else
     result := FValue - FRake;

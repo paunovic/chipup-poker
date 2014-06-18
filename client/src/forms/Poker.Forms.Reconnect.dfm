@@ -5,7 +5,7 @@ object frmReconnect: TfrmReconnect
   BorderStyle = bsSingle
   Caption = 'Reconnecting'
   ClientHeight = 61
-  ClientWidth = 275
+  ClientWidth = 304
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -19,6 +19,9 @@ object frmReconnect: TfrmReconnect
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  DesignSize = (
+    304
+    61)
   PixelsPerInch = 96
   TextHeight = 13
   object lbsStatus: TcxLabel
@@ -42,14 +45,16 @@ object frmReconnect: TfrmReconnect
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Transparent = True
+    ExplicitWidth = 275
     Height = 40
-    Width = 275
-    AnchorX = 138
+    Width = 304
+    AnchorX = 152
     AnchorY = 20
   end
   object pbReconnecting: TcxProgressBar
     Left = 8
     Top = 43
+    Anchors = [akLeft, akRight, akBottom]
     AutoSize = False
     Position = 100.000000000000000000
     Properties.AnimationPath = cxapPingPong
@@ -65,8 +70,8 @@ object frmReconnect: TfrmReconnect
     StyleFocused.LookAndFeel.SkinName = ''
     StyleHot.LookAndFeel.SkinName = ''
     TabOrder = 1
-    Height = 11
-    Width = 259
+    Height = 12
+    Width = 288
   end
   object tiReconnectTimer: TTimer
     OnTimer = tiReconnectTimerTimer
