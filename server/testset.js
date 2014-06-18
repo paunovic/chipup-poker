@@ -12,19 +12,23 @@ exports.club = {
 	makeanddelete: function (test) {
 		var activeUsers = {};
 		var activeGames = {};
-		var club = require('./club');
+		var Club = require('./club').Club
+		test.expect(3);
 		mdb.open();
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			club.init(db,activeUsers,activeGames,Core.pb);
+			Club.init(db,activeUsers,activeGames,Core.pb);
 			myutils.init(db);
 			db.collection('users').findOne(function (err,user) {
 				test.ok(user);
-				club.Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
+				Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
 					clubid = clubObj.obj.seq;
 					test.ok(worked);
-					db.close();
-					mdb.close();
-					test.done();
+					Club.dupCheck('clubname',function (dup) {
+						test.ok(dup);
+						db.close();
+						mdb.close();
+						test.done();
+					});
 				});
 			});
 		});
@@ -32,18 +36,19 @@ exports.club = {
 	joinClub: function (test) {
 		var activeUsers = {};
 		var activeGames = {};
-		var club = require('./club');
+		var Club = require('./club').Club;
 		mdb.open();
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			club.init(db,activeUsers,activeGames,Core.pb);
+			Club.init(db,activeUsers,activeGames,Core.pb);
 			myutils.init(db);
 			db.collection('users').find().limit(2).toArray(function (err,users) {
-				club.getClubBySeq(clubid,function (err,clubObj) {
+				Club.getClubBySeq(clubid,function (err,clubObj) {
 					console.log('spot 1',err);
 					test.ok(clubObj);
 					var user2 = users[0];
 					if (clubObj.isOwner(user2._id)) user2 = users[1];
 					clubObj.joinClub(user2._id,function () {
+						console.log(clubObj.obj);
 						db.close();
 						mdb.close();
 						test.done();
@@ -55,7 +60,7 @@ exports.club = {
 	goPublic: function (test) {
 		var activeUsers = {};
 		var activeGames = {};
-		var club = require('./club');
+		var Club = require('./club').Club;
 		var game = require('./game');
 		test.expect(7);
 		activeUsers['fake'] = { send: function(code,object,type) {
@@ -64,7 +69,7 @@ exports.club = {
 		mdb.open();
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			test.ok(true);
-			club.init(db,activeUsers,activeGames,Core.pb);
+			Club.init(db,activeUsers,activeGames,Core.pb);
 			game.Game.init(db,activeGames,activeUsers,{},null,null,null);
 			db.collection('clubs').findOne(function (err,row) {
 				test.ok(true);
@@ -73,7 +78,7 @@ exports.club = {
 					test.ok(true);
 					db.collection('clubBalances').insert({clubid:row._id,userid:userRow._id,balance:0,balance_limit:0,unlimited_limit:true},function (err) {
 						test.ok(true);
-						club.Club.getClubById(row._id,function (err,clubobj) {
+						Club.getClubById(row._id,function (err,clubobj) {
 							test.ok(true);
 							//console.log('clubobj',clubobj);
 							clubobj.goPublic(function () {
@@ -90,19 +95,19 @@ exports.club = {
 	},suspend: function (test) {
 		var activeUsers = {};
 		var activeGames = {};
-		var club = require('./club');
+		var Club = require('./club').Club;
 		test.expect(6);
 		mdb.open();
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			test.ok(true);
-			club.init(db,activeUsers,activeGames,Core.pb);
+			Club.init(db,activeUsers,activeGames,Core.pb);
 			db.collection('clubs').findOne(function (err,row) {
 				test.ok(true);
 				test.ok(row.members.length > 0);
 				if (row.members.length == 0) return test.done();
 				db.collection('users').findOne({_id:row.members[0]},function (err,userRow) {
 					test.ok(true);
-					club.Club.getClubById(row._id,function (err,clubobj) {
+					Club.getClubById(row._id,function (err,clubobj) {
 						test.ok(true);
 						clubobj.setSuspended(true,userRow._id,function () {
 							test.ok(true);
@@ -117,16 +122,35 @@ exports.club = {
 			});
 		});
 	},
+	kick: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var Club = require('./club').Club;
+		mdb.open();
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			Club.init(db,activeUsers,activeGames,Core.pb);
+			myutils.init(db);
+			Club.getClubBySeq(clubid,function (err,clubObj) {
+				test.ok(clubObj);
+				clubObj.Leave(clubObj.obj.members[0],function () {
+					test.ok(true);
+					db.close();
+					mdb.close();
+					test.done();
+				});
+			});
+		});
+	},
 	deleteClub: function (test) {
 		var activeUsers = {};
 		var activeGames = {};
-		var club = require('./club');
+		var Club = require('./club').Club;
 		mdb.open();
 		test.expect(1);
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			club.init(db,activeUsers,activeGames,Core.pb);
+			Club.init(db,activeUsers,activeGames,Core.pb);
 			myutils.init(db);
-			club.getClubBySeq(clubid,function (err,clubObj) {
+			Club.getClubBySeq(clubid,function (err,clubObj) {
 				test.ok(clubObj);
 				console.log(clubObj);
 				clubObj.deleteClub(function () {

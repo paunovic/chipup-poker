@@ -42,7 +42,7 @@ var DebugLogSchema = new Schema({
 	objects:Array,
 	gameid:ObjectId,
 	name:String
-},{collection:'debugLogs'});
+},{collection:'debugLogs',capped:1024 * 1024*32});
 
 var ClubSchema = new Schema({
 	is_private:Boolean,
@@ -53,9 +53,10 @@ var ClubSchema = new Schema({
 	rake:Number,
 	unlimited_default_balance:Boolean,
 	default_balance_limit:Number,
-	members: Array,
-	suspended: Array,
-	seq: Number
+	members: [ObjectId],
+	suspended: [ObjectId],
+	seq: Number,
+	testmode: Boolean
 },{collection:'clubs'});
 
 module.exports.close = function () {

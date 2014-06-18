@@ -154,9 +154,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		PokerProfile = collection;
 		profiler.setup(PokerProfile);
 	});
-	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) { // FIXME, move to mongoose
-		assert.ok(collection instanceof Collection);
-	});
 
 	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log,makeUserProtobuf);
 
