@@ -150,7 +150,7 @@ end;
 
 procedure TPB_ClubStatsReply.SetClubid(const AValue: TBytes);
 begin
-  FClubid := Copy(AValue,0,Length(AValue);
+  FClubid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;

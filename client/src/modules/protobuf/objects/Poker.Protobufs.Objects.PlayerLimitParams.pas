@@ -159,7 +159,7 @@ end;
 
 procedure TPB_PlayerLimitParams.SetClubid(const AValue: TBytes);
 begin
-  FClubid := Copy(AValue,0,Length(AValue);
+  FClubid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;
@@ -187,7 +187,7 @@ end;
 
 procedure TPB_PlayerLimitParams.SetUserid(const AValue: TBytes);
 begin
-  FUserid := Copy(AValue,0,Length(AValue);
+  FUserid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
 end;

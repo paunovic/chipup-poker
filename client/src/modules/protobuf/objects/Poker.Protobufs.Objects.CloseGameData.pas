@@ -126,7 +126,7 @@ end;
 
 procedure TPB_CloseGameData.SetGameid(const AValue: TBytes);
 begin
-  FGameid := Copy(AValue,0,Length(AValue);
+  FGameid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
 end;

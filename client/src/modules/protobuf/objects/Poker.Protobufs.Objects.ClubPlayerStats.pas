@@ -125,7 +125,7 @@ end;
 
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TBytes);
 begin
-  FUserid := Copy(AValue,0,Length(AValue);
+  FUserid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
 end;

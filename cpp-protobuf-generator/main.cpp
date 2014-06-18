@@ -414,7 +414,7 @@ class BaseGenerator : public CodeGenerator {
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				printer->Print(vars,
 					"begin\n"
-					"  $pname$ := Copy($input$,0,Length($input$);\n"
+					"  $pname$ := Copy($input$,0,Length($input$));\n"
 					"  ProtobufOutput.$writter$($enum$, $input$);\n");
 			} else {
 				printer->Print(vars,

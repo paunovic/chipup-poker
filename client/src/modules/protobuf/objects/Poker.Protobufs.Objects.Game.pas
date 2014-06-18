@@ -333,7 +333,7 @@ end;
 
 procedure TPB_Game.SetMongoId(const AValue: TBytes);
 begin
-  FId := Copy(AValue,0,Length(AValue);
+  FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
@@ -361,7 +361,7 @@ end;
 
 procedure TPB_Game.SetCreatorMongoId(const AValue: TBytes);
 begin
-  FCreatorMongoId := Copy(AValue,0,Length(AValue);
+  FCreatorMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCreatorMongoIdFieldNumber, AValue);
   set_has_CreatorMongoId;
 end;

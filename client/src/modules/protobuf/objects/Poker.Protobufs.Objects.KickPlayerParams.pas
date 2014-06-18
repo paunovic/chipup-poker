@@ -153,7 +153,7 @@ end;
 
 procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: TBytes);
 begin
-  FPlayerMongoId := Copy(AValue,0,Length(AValue);
+  FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
 end;

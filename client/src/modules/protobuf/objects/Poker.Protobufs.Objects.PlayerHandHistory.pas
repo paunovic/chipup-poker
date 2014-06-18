@@ -210,7 +210,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
 begin
-  FId := Copy(AValue,0,Length(AValue);
+  FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
@@ -266,7 +266,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
 begin
-  FCards := Copy(AValue,0,Length(AValue);
+  FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
 end;

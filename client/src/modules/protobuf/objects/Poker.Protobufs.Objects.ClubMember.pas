@@ -176,7 +176,7 @@ end;
 
 procedure TPB_ClubMember.SetMongoId(const AValue: TBytes);
 begin
-  FId := Copy(AValue,0,Length(AValue);
+  FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;

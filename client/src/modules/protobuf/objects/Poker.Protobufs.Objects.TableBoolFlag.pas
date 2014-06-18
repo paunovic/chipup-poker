@@ -125,7 +125,7 @@ end;
 
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
 begin
-  FTableMongoId := Copy(AValue,0,Length(AValue);
+  FTableMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
   set_has_TableMongoId;
 end;

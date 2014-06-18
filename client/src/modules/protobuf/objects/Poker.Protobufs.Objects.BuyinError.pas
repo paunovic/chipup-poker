@@ -125,7 +125,7 @@ end;
 
 procedure TPB_BuyinError.SetGameId(const AValue: TBytes);
 begin
-  FGameId := Copy(AValue,0,Length(AValue);
+  FGameId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
   set_has_GameId;
 end;

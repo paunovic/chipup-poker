@@ -108,7 +108,7 @@ end;
 
 procedure TPB_SetAvatarParams.SetAvatarId(const AValue: TBytes);
 begin
-  FAvatarId := Copy(AValue,0,Length(AValue);
+  FAvatarId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);
   set_has_AvatarId;
 end;

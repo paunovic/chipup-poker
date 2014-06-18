@@ -290,7 +290,7 @@ end;
 
 procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TBytes);
 begin
-  FPlayerMongoId := Copy(AValue,0,Length(AValue);
+  FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
 end;
@@ -374,7 +374,7 @@ end;
 
 procedure TPB_SeatInfo.SetCards(const AValue: TBytes);
 begin
-  FCards := Copy(AValue,0,Length(AValue);
+  FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
 end;
