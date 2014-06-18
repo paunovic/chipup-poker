@@ -1,5 +1,5 @@
 "use strict";
-var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory,pb;
+var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory,pb,regexLimits;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
@@ -323,7 +323,7 @@ Club.prototype.resetPlayerLimit = function (userid,cb) {
 		else cb(true);
 	}.bind(this));
 }
-module.exports.init = function (db,activeUsersIn,activeGamesIn,pbIN) {
+module.exports.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
 	allClubs = db.collection('clubs');
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
@@ -333,6 +333,7 @@ module.exports.init = function (db,activeUsersIn,activeGamesIn,pbIN) {
 	clubBalances = db.collection('clubBalances');
 	handHistory = db.collection('handHistory');
 	pb = pbIN;
+	regexLimits = regexLimitsIN;
 }
 function compareObjectID(a,b) {
 	if (!b) return false;
