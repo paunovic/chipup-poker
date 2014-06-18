@@ -1995,7 +1995,7 @@ Game.prototype.startTimer = function startTimer(seat,offset) {
 	this.stopTimer(seat);
 	this.log('starting timer for seat %d in state %s',seat,this.state);
 	//this.log('public: %j',this.members[seat]);
-	this.log('private: %s',util.inspect(this.seats[seat]));
+	//this.log('private: %s',util.inspect(this.seats[seat]));
 	assert(this.members[seat]);
 	this.timer = { time: (sharedconfig.max_play_time*1000) + Date.now() + offset, seat:seat };
 	var priv = this.seats[seat];
@@ -2070,6 +2070,7 @@ Game.getGame = function getgame(id,cb) {
 				game.deck = new Deck();
 				game.deck.shuffle(function shuffled(){
 					//this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
+					console.log(Club);
 					Club.getClubById(obj.clubid,function (err,club) {
 						if (!club) {
 							release();
@@ -2181,7 +2182,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 	}
 	var doc = {game_type:game_type, blinds:blinds, seats:seats, creator_mongo_id:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
 	Club.getClubBySeq(clubseq,function (err,club) {
-		if (err == 'not found' {
+		if (err == 'not found') {
 			this.reply(0,"club not found");
 			return;
 		}

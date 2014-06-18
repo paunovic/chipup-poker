@@ -28,8 +28,7 @@ var codes = require('./ServerCodes');
 var dag = require('./dag/build/Release/dag');
 var bugsView = require('./bugs');
 var profiler = require('./profiler');
-var club = require('./club');
-var Club = club.Club;
+var Club = require('./club').Club;
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
@@ -119,7 +118,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		process.exit(1);
 	}
 	conn = db;
-	club.init(db,activeUsers,activeGames,pb,regexLimits);
+	Club.init(db,activeUsers,activeGames,pb,regexLimits);
 	Game.init(db,activeGames,activeUsers,sharedconfig,log,ClientSocket);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
@@ -1390,7 +1389,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 	}.bind(this));
 }
 Game.registerHandlers(handlers,pb);
-Club.registerHandlers(handlers,pb);
+Club.registerHandlers(handlers,pb,sharedconfig);
 
 handlers[codes.scResendVerificationMail] = function () {
 	allUsers.findOne({_id:this.userid},function (err,row) {

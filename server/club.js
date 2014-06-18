@@ -5,7 +5,10 @@ var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
 var async = require('async');
 
-var makeGameProtobuf = require('./game').makeGameProtobuf;
+function makeGameProtobuf() {
+	var self = require('./game').makeGameProtobuf;
+	return self.apply(this,arguments);
+}
 var profiler = require('./profiler');
 var ReadWriteLock = require('./lock');
 var myutils = require('./myutils');
@@ -456,7 +459,7 @@ Club.createClub = function (name,password,owner,rake,cb) {
 		});
 	});
 }
-Club.registerHandlers = function (handlers,pb) {
+Club.registerHandlers = function (handlers,pb,sharedconfig) {
 handlers[codes.scCreateClub] = function (args,token) {
 	var params = pb.Parse(args,'Poker.Club');
 	if (!regexLimits.clubname.exec(params.name)) {
@@ -542,9 +545,9 @@ handlers[codes.scKickPlayer] = function (args,token) {
 				this.send(codes.srKickPlayerReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 				return;
 			}
-			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+			clubBalances.find({clubid:club.clubid}).toArray(function (err,stats) {
 				var userlist = [ userid ];
-				var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
+				var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
 				this.send(codes.srKickPlayerReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 				this.log('userlist to inform:',userlist);
 				this.log('out:%j',out);
@@ -558,11 +561,11 @@ handlers[codes.scKickPlayer] = function (args,token) {
 	// FIXME, update Club object
 	try {
 		var params = pb.Parse(args,'Poker.KickPlayerParams');
-		var userid = toMongoId(params.player_mongo_id);
-		this.log('kicking',clubid,userid);
+		var userid = myutils.toMongoId(params.player_mongo_id);
+		this.log('kicking',userid);
 		// FIXME, code 023 kicking somebody not in the club
-		Club.activeClubsSeq(params.club_seq,function (err,club) {
-			if (!clubObj.isOwner(this.userid)) {
+		Club.getClubBySeq(params.club_seq,function (err,club) {
+			if (!club.isOwner(this.userid)) {
 				this.reply("000","your not owner");
 				this.log('attempted to kick while not owner');
 				return;
@@ -649,7 +652,7 @@ handlers[codes.scJoinClub] = function (args,token) {
 	var clubseq = params.seq;
 	var pw = params.password;
 	this.log('join1',clubseq,pw);
-	module.exports.getClubBySeq(clubseq,function (err,clubObj) {
+	Club.getClubBySeq(clubseq,function (err,clubObj) {
 		if (err == 'not found') {
 			this.log('club not found');
 			this.send(codes.srJoinClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
@@ -770,7 +773,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 	var params = pb.Parse(args,'Poker.Club');
 	var clubseq = params.seq;
 	this.log('change club details %j',params);
-	module.exports.getClubBySeq(clubseq,function (err,club) {
+	Club.getClubBySeq(clubseq,function (err,club) {
 		if (err == 'not found') {
 			this.reply("000","club not found");
 			return;
@@ -784,17 +787,17 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			return;
 		}
 		if ((params.default_balance_limit < 1) || (!params.default_balance_limit)) return this.reply(0,'invalid default limit');
-		var mods = {$set:{rake:params.rake,unlimited_default_balance:params.unlimited_default_balance}};
 		var doit = false;
 		var autofinish = true;
-		if (club.name == params.name) delete params.name;
+		if (club.obj.name == params.name) delete params.name;
 		if (params.name) {
 			if ((params.name.length > sharedconfig.stringSizes.clubname) || (params.name.length < sharedconfig.minSizes.clubname)) {
 				this.reply("000","name too long");
 				return;
 			}
-			club.dupCheck(params.name,function (dup) {
+			Club.dupCheck(params.name,function (dup) {
 				if (dup) {
+					this.log('dup club name');
 					this.send(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 				} else {
 					club.obj.name = params.name;
@@ -818,16 +821,19 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			return;
 		}
 		function finish() {
+			club.obj.rake = params.rake;
+			club.obj.unlimited_default_balance = params.unlimited_default_balance;
 			club.obj.save(function (err,ret) {
 				this.log('detail update',clubseq,params,err,ret);
 				if (err) {
+					this.log('name collision');
 					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 				} else {
 					var userlist = [ ];
 					allGames.find({clubid:club.clubid}).toArray(function (err,games) {
 						clubBalances.find({clubid:club.clubid}).toArray(function (err,stats) {
 							assert.ifError(err);
-							var out = Club.makeClubProtobuf(club.obj,userlist,stats,clubObj);
+							var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
 							for (var x=0; x<games.length; x++) {
 								games[x] = makeGameProtobuf(games[x]);
 							}
@@ -852,13 +858,13 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			var params = pb.Parse(args,'Poker.Club');
 			var clubid = params.seq;
 			// FIXME, check for owner leaving
-			module.exports.getClubBySeq(params.seq,function (err,club) {
+			Club.getClubBySeq(params.seq,function (err,clubObj) {
 					if (err == 'not found') this.send(codes.srLeaveClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 					else {
-						club.Leave(this.userid,function () {
+						clubObj.Leave(this.userid,function () {
 							clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-								var userlist = [ row.owner ]; // FIXME, send stats
-								var out = Club.makeClubProtobuf(club.obj,userlist,stats,clubObj);
+								var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
+								var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
 								this.send(codes.srLeaveClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
 								this.log('userlist to inform:',userlist);
 								for (var x=0; x<userlist.length; x++) {
