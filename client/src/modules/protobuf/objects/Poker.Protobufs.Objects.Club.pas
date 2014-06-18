@@ -302,12 +302,8 @@ begin
 end;
 
 procedure TPB_Club.SetMongoId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FId[C1] := AValue[C1];
+  FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
@@ -391,12 +387,8 @@ begin
 end;
 
 procedure TPB_Club.SetOwner(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FOwner,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FOwner[C1] := AValue[C1];
+  FOwner := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kOwnerFieldNumber, AValue);
   set_has_Owner;
 end;

@@ -84,7 +84,7 @@ type
     procedure clear_Nick;
     property Nick: String read FNick write SetNick;
 
-    // required bool Muck = 6;
+    // optional bool Muck = 6;
     function has_Muck: Boolean;
     procedure clear_Muck;
     property Muck: Boolean read FMuck write SetMuck;
@@ -184,7 +184,7 @@ end;
 function TPB_PlayerHandHistory.IsInitialized: Boolean;
 begin
   Result := True;
-  if ((_has_bits_ and $7b) <> $7b) Then Result := False;
+  if ((_has_bits_ and $5b) <> $5b) Then Result := False;
 end;
 
 procedure TPB_PlayerHandHistory.clear_MongoId;
@@ -209,12 +209,8 @@ begin
 end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FId[C1] := AValue[C1];
+  FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
@@ -269,12 +265,8 @@ begin
 end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FCards,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FCards[C1] := AValue[C1];
+  FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
 end;

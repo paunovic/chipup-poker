@@ -149,12 +149,8 @@ begin
 end;
 
 procedure TPB_ClubStatsReply.SetClubid(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FClubid,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FClubid[C1] := AValue[C1];
+  FClubid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;

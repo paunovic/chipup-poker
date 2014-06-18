@@ -250,12 +250,8 @@ begin
 end;
 
 procedure TPB_TablePlayerStats.SetUserid(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FUserid,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FUserid[C1] := AValue[C1];
+  FUserid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
 end;

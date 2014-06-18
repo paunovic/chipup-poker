@@ -192,12 +192,8 @@ begin
 end;
 
 procedure TPB_User.SetMongoId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FId[C1] := AValue[C1];
+  FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
@@ -224,12 +220,8 @@ begin
 end;
 
 procedure TPB_User.SetAvatar(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FAvatar,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FAvatar[C1] := AValue[C1];
+  FAvatar := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kAvatarFieldNumber, AValue);
   set_has_Avatar;
 end;

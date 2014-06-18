@@ -401,19 +401,11 @@ class BaseGenerator : public CodeGenerator {
 			if (field->type() == FieldDescriptor::TYPE_ENUM) {
 				vars["input"] = "Integer(AValue)";
 			} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-				if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-					vars["input"] = "AValue[C1].ProtobufOutput";
-				} else {
-					vars["input"] = "AValue.ProtobufOutput";
-				}
+				vars["input"] = "AValue.ProtobufOutput";
 			//} else if (field->type() == FieldDescriptor::TYPE_STRING) {
 			//	vars["input"] = "AnsiString(AValue)"; // FIXME
 			} else {
-				if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-					vars["input"] = "AValue[C1]";
-				} else {
-					vars["input"] = "AValue";
-				}
+				vars["input"] = "AValue";
 			}
 			vars["writter"] = thisType.getWritter();
 			printer->Print(vars,
@@ -421,12 +413,8 @@ class BaseGenerator : public CodeGenerator {
 				);
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				printer->Print(vars,
-					"var\n"
-					"  C1: Integer;\n"
 					"begin\n"
-					"  SetLength($pname$,Length(AValue));\n"
-					"  for C1 := 0 to Length(AValue) - 1 do\n"
-					"    $pname$[C1] := AValue[C1];\n"
+					"  $pname$ := Copy($input$,0,Length($input$));\n"
 					"  ProtobufOutput.$writter$($enum$, $input$);\n");
 			} else {
 				printer->Print(vars,
