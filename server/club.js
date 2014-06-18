@@ -413,21 +413,14 @@ Club.prototype.setSuspended = function (suspended,playerid,cb) {
 	});
 }
 Club.prototype.KickMember = function (userid,cb) {
-	for (var x=0; x<this.obj.members.length; x++) {
-		if (compareObjectID(userid,this.obj.members[x])) {
-			this.obj.members.splice(x,1);
-			break;
-		}
-	}
+	this.obj.members.pull(userid);
 	this.obj.save(function (err) {
 		assert.ifError(err);
 		cb();
 	});
 }
 Club.prototype.joinClub = function (userid,cb) {
-	if (!containsObjectID(this.obj.members,userid)) {
-		this.obj.members.push(userid);
-	}
+	this.obj.members.addToSet(userid);
 	this.obj.save(function (err) {
 		assert.ifError(err);
 		cb();

@@ -48,6 +48,7 @@ exports.club = {
 					var user2 = users[0];
 					if (clubObj.isOwner(user2._id)) user2 = users[1];
 					clubObj.joinClub(user2._id,function () {
+						console.log(clubObj.obj);
 						db.close();
 						mdb.close();
 						test.done();
