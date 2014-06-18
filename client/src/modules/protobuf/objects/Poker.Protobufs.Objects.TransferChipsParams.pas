@@ -124,12 +124,8 @@ begin
 end;
 
 procedure TPB_TransferChipsParams.SetPlayerMongoId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FPlayerMongoId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FPlayerMongoId[C1] := AValue[C1];
+  FPlayerMongoId := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
 end;

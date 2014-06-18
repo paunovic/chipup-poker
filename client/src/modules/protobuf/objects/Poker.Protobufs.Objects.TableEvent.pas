@@ -319,12 +319,8 @@ begin
 end;
 
 procedure TPB_TableEvent.SetCards(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FCards,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FCards[C1] := AValue[C1];
+  FCards := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
 end;

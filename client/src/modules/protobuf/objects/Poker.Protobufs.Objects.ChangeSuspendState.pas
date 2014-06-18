@@ -141,12 +141,8 @@ begin
 end;
 
 procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FClubMongoId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FClubMongoId[C1] := AValue[C1];
+  FClubMongoId := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
   set_has_ClubMongoId;
 end;
@@ -173,12 +169,8 @@ begin
 end;
 
 procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FPlayerMongoId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FPlayerMongoId[C1] := AValue[C1];
+  FPlayerMongoId := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
 end;

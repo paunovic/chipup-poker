@@ -158,12 +158,8 @@ begin
 end;
 
 procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FId[C1] := AValue[C1];
+  FId := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;

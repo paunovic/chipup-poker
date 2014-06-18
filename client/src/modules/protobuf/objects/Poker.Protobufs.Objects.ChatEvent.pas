@@ -204,12 +204,8 @@ begin
 end;
 
 procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FTableId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FTableId[C1] := AValue[C1];
+  FTableId := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
   set_has_TableId;
 end;

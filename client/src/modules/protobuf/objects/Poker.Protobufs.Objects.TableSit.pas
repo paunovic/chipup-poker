@@ -141,12 +141,8 @@ begin
 end;
 
 procedure TPB_TableSit.SetGameId(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FGameId,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FGameId[C1] := AValue[C1];
+  FGameId := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
   set_has_GameId;
 end;

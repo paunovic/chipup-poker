@@ -166,12 +166,8 @@ begin
 end;
 
 procedure TPB_ClubHandHistoryReply.SetClubid(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FClubid,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FClubid[C1] := AValue[C1];
+  FClubid := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;
@@ -198,12 +194,8 @@ begin
 end;
 
 procedure TPB_ClubHandHistoryReply.SetGameid(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FGameid,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FGameid[C1] := AValue[C1];
+  FGameid := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
 end;

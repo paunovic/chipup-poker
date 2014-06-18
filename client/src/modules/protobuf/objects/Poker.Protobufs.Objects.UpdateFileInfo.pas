@@ -204,12 +204,8 @@ begin
 end;
 
 procedure TPB_UpdateFileInfo.SetHash(const AValue: TBytes);
-var
-  C1: Integer;
 begin
-  SetLength(FHash,Length(AValue));
-  for C1 := 0 to Length(AValue) - 1 do
-    FHash[C1] := AValue[C1];
+  FHash := Copy(AValue,0,Length(AValue);
   ProtobufOutput.writeBytes(kHashFieldNumber, AValue);
   set_has_Hash;
 end;
