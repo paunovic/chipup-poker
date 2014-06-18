@@ -4,9 +4,27 @@ var http = require('http');
 var MongoClient = require('mongodb').MongoClient;
 
 var mdb = require('./db');
+var myutils = require('./myutils');
 
 
 exports.club = {
+	makeanddelete: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var club = require('./club');
+		mdb.open();
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			club.init(db,activeUsers,activeGames,Core.pb);
+			myutils.init(db);
+			db.collection('users').findOne(function (err,user) {
+				test.ok(user);
+				club.Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
+					test.ok(worked);
+					test.done();
+				});
+			});
+		});
+	},
 	goPublic: function (test) {
 		var activeUsers = {};
 		var activeGames = {};
@@ -53,6 +71,8 @@ exports.club = {
 			club.init(db,activeUsers,activeGames,Core.pb);
 			db.collection('clubs').findOne(function (err,row) {
 				test.ok(true);
+				test.ok(row.members.length > 0);
+				if (row.members.length == 0) return test.done();
 				db.collection('users').findOne({_id:row.members[0]},function (err,userRow) {
 					test.ok(true);
 					club.Club.getClubById(row._id,function (err,clubobj) {

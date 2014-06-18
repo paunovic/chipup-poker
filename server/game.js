@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,allGames,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,getNextSequence,handHistory,log,ClientSocket;
+var activeGames,allGames,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -101,7 +101,7 @@ function Game(obj) {
 	if (obj.state2) this.state2 = obj.state2;
 	else this.state2 = 'gsActive';
 }
-Game.init = function (db,input,activeUsersIN,sharedconfigIN,getNextSequenceIN,logIN,ClientSocketIN) {
+Game.init = function (db,input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN) {
 	allGames = db.collection('games');
 	activeGames = input;
 	activeUsers = activeUsersIN;
@@ -111,7 +111,6 @@ Game.init = function (db,input,activeUsersIN,sharedconfigIN,getNextSequenceIN,lo
 	allUsers = db.collection('users');
 	sharedconfig = sharedconfigIN;
 	allStats = db.collection('allStats');
-	getNextSequence = getNextSequenceIN; // FIXME
 	handHistory = db.collection('handHistory');
 	log = logIN; // FIXME
 	ClientSocket = ClientSocketIN;
@@ -403,7 +402,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 	}
 	this.rotation++;
 	//this.log('post rotation:%d omaha:%s limit:%s',this.rotation,this.omaha,this.game_limit);
-	getNextSequence('handHistory',function (seq) {
+	myutils.getNextSequence('handHistory',function (seq) {
 		this.handid = seq;
 		allGames.update({_id:this.id},{$set:{lasthandid:seq, rotation:this.rotation}},function (err,res){});
 		this.history = {moves:[],players:[],cards:[]};
