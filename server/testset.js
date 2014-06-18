@@ -6,6 +6,7 @@ var MongoClient = require('mongodb').MongoClient;
 var mdb = require('./db');
 var myutils = require('./myutils');
 
+var clubid;
 
 exports.club = {
 	makeanddelete: function (test) {
@@ -19,8 +20,34 @@ exports.club = {
 			db.collection('users').findOne(function (err,user) {
 				test.ok(user);
 				club.Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
+					clubid = clubObj.obj.seq;
 					test.ok(worked);
+					db.close();
+					mdb.close();
 					test.done();
+				});
+			});
+		});
+	},
+	joinClub: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var club = require('./club');
+		mdb.open();
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			club.init(db,activeUsers,activeGames,Core.pb);
+			myutils.init(db);
+			db.collection('users').find().limit(2).toArray(function (err,users) {
+				club.getClubBySeq(clubid,function (err,clubObj) {
+					console.log('spot 1',err);
+					test.ok(clubObj);
+					var user2 = users[0];
+					if (clubObj.isOwner(user2._id)) user2 = users[1];
+					clubObj.joinClub(user2._id,function () {
+						db.close();
+						mdb.close();
+						test.done();
+					});
 				});
 			});
 		});
@@ -64,7 +91,7 @@ exports.club = {
 		var activeUsers = {};
 		var activeGames = {};
 		var club = require('./club');
-		test.expect(5);
+		test.expect(6);
 		mdb.open();
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			test.ok(true);
@@ -86,6 +113,26 @@ exports.club = {
 							});
 						});
 					});
+				});
+			});
+		});
+	},
+	deleteClub: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var club = require('./club');
+		mdb.open();
+		test.expect(1);
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			club.init(db,activeUsers,activeGames,Core.pb);
+			myutils.init(db);
+			club.getClubBySeq(clubid,function (err,clubObj) {
+				test.ok(clubObj);
+				console.log(clubObj);
+				clubObj.deleteClub(function () {
+					db.close();
+					mdb.close();
+					test.done();
 				});
 			});
 		});
