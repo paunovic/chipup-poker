@@ -54,7 +54,8 @@ var ClubSchema = new Schema({
 	unlimited_default_balance:Boolean,
 	default_balance_limit:Number,
 	members: [ObjectId],
-	suspended: [ObjectId]
+	suspended: [ObjectId],
+	seq: Number
 },{collection:'clubs'});
 
 module.exports.close = function () {

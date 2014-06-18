@@ -119,7 +119,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		process.exit(1);
 	}
 	conn = db;
-	club.init(db,activeUsers,activeGames,pb);
+	club.init(db,activeUsers,activeGames,pb,regexLimits);
 	Game.init(db,activeGames,activeUsers,sharedconfig,log,ClientSocket);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
