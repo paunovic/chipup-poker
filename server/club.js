@@ -1,5 +1,5 @@
 "use strict";
-var allClubs,activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory,pb,regexLimits;
+var activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory,pb,regexLimits;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
@@ -26,7 +26,7 @@ Club.prototype.refresh = function (obj) {
 }
 Club.activeClubsSeq = [];
 Club.activeClubsId = {};
-module.exports.getClubBySeq = function (seq,cb) {
+Club.getClubBySeq = function (seq,cb) {
 	getLock.writeLock(function (release) {
 		if (!Club.activeClubsSeq[seq]) {
 			mdb.models.Clubs.findOne({seq:seq},function (err,obj) {
@@ -323,8 +323,7 @@ Club.prototype.resetPlayerLimit = function (userid,cb) {
 		else cb(true);
 	}.bind(this));
 }
-module.exports.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
-	allClubs = db.collection('clubs');
+Club.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
 	allStats = db.collection('allStats');
@@ -412,7 +411,7 @@ Club.prototype.setSuspended = function (suspended,playerid,cb) {
 		cb(true);
 	});
 }
-Club.prototype.KickMember = function (userid,cb) {
+Club.prototype.Leave = function (userid,cb) {
 	this.obj.members.pull(userid);
 	this.obj.save(function (err) {
 		assert.ifError(err);
@@ -538,7 +537,7 @@ handlers[codes.scDeleteClub] = function (args,token) {
 }
 handlers[codes.scKickPlayer] = function (args,token) {
 	function finishKick(club) {
-		club.KickMember(userid,function (res) {
+		club.Leave(userid,function (res) {
 			if (res == 0) {
 				this.send(codes.srKickPlayerReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 				return;
@@ -853,24 +852,19 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			var params = pb.Parse(args,'Poker.Club');
 			var clubid = params.seq;
 			// FIXME, check for owner leaving
-			allClubs.update({seq:clubid},
-				{ $pull:{members:this.userid}},
-				function (err,res) {
-					if (res == 0) this.send(codes.srLeaveClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
+			module.exports.getClubBySeq(params.seq,function (err,club) {
+					if (err == 'not found') this.send(codes.srLeaveClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 					else {
-						allClubs.findOne({seq:clubid},function cb(err,row) {
-							Club.getClubById(row._id,function (err,clubObj) {
-								clubObj.refresh(row);
-								clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-									var userlist = [ row.owner ]; // FIXME, send stats
-									var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
-									this.send(codes.srLeaveClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
-									this.log('userlist to inform:',userlist);
-									for (var x=0; x<userlist.length; x++) {
-										var user = activeUsers[userlist[x]];
-										if (user) user.send(codes.seClubChange,out,'Poker.Club');
-									}
-								}.bind(this));
+						club.Leave(this.userid,function () {
+							clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+								var userlist = [ row.owner ]; // FIXME, send stats
+								var out = Club.makeClubProtobuf(club.obj,userlist,stats,clubObj);
+								this.send(codes.srLeaveClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
+								this.log('userlist to inform:',userlist);
+								for (var x=0; x<userlist.length; x++) {
+									var user = activeUsers[userlist[x]];
+									if (user) user.send(codes.seClubChange,out,'Poker.Club');
+								}
 							}.bind(this));
 						}.bind(this));
 					}

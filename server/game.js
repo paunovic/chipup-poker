@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,allGames,GameEvents,allClubs,activeUsers,allUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
+var activeGames,allGames,GameEvents,activeUsers,allUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -16,7 +16,7 @@ var Pot = require('./pot').Pot;
 var deck = require('./deck');
 var Deck = deck.Deck;
 var Hand = deck.Hand;
-var Club = require('./club');
+var Club = require('./club').Club;
 var myutils = require('./myutils');
 var mdb = require('./db');
 
@@ -106,7 +106,6 @@ Game.init = function (db,input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN
 	activeGames = input;
 	activeUsers = activeUsersIN;
 	GameEvents = db.collection('GameEvents');
-	allClubs = db.collection('clubs');
 	gameState = db.collection('gameState');
 	allUsers = db.collection('users');
 	sharedconfig = sharedconfigIN;
@@ -2071,35 +2070,32 @@ Game.getGame = function getgame(id,cb) {
 				game.deck = new Deck();
 				game.deck.shuffle(function shuffled(){
 					//this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
-					allClubs.findOne({_id:obj.clubid},function (err,club) {
+					Club.getClubById(obj.clubid,function (err,club) {
 						if (!club) {
 							release();
 							cb('parent club missing');
 							return;
 						}
-						game.real_rake = club.rake;
+						game.real_rake = club.obj.rake;
 						if (!game.real_rake) game.real_rake = 5;
 						game.rake = 0;
-						game.testmode = club.testmode;
+						game.testmode = club.obj.testmode;
 						var g = makeGameProtobuf(JSON.parse(JSON.stringify(obj)));
-						var conn = activeUsers[club.owner];
+						var conn = activeUsers[club.obj.owner];
 						if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
 
-						if (club.members) {
-							for (var x=0; x<club.members.length; x++) {
-								conn = activeUsers[club.members[x]];
+						if (club.obj.members) { // FIXME, remove
+							for (var x=0; x<club.obj.members.length; x++) {
+								conn = activeUsers[club.obj.members[x]];
 								if (!conn) continue;
 								conn.send(codes.seGameChange,g,'Poker.Game');
 							}
 						}
-						console.log(Club);
-						Club.getClubBySeq(obj.clubseq,function (err,clubobj) {
-							game.club = clubobj;
-							gameState.insert({_id:game.id},function () {
-								token.stop();
-								release();
-								cb(null,game);
-							});
+						game.club = club;
+						gameState.insert({_id:game.id},function () {
+							token.stop();
+							release();
+							cb(null,game);
 						});
 					});
 				}.bind(this));
@@ -2184,20 +2180,20 @@ handlers[codes.scCreateGame] = function (args,token) {
 		return;
 	}
 	var doc = {game_type:game_type, blinds:blinds, seats:seats, creator_mongo_id:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
-	allClubs.findOne({seq:clubseq},function (err,club) {
+	Club.getClubBySeq(clubseq,function (err,club) {
+		if (err == 'not found' {
+			this.reply(0,"club not found");
+			return;
+		}
 		if (err) {
 			this.reply(0,"internal error");
 			return;
 		}
-		if (!club) {
-			this.reply(0,"club not found");
-			return;
-		}
-		if (!myutils.compareObjectID(club.owner,this.userid)) {
+		if (!club.isOwner(this.userid)) {
 			this.reply(0,'your not owner');
 			return;
 		}
-		doc.clubid = club._id;
+		doc.clubid = club.clubid;
 		allGames.insert(doc,function (err,game) {
 			if (err) {
 				this.reply(0,"internal error");
@@ -2206,15 +2202,15 @@ handlers[codes.scCreateGame] = function (args,token) {
 			this.log('inserted',game[0]);
 			var g = makeGameProtobuf(game[0]);
 			this.send(codes.srCreateGameOk,g,'Poker.Game');
-			if (club.is_private) {
-				if (!club.members) {
+			if (club.obj.is_private) {
+				if (!club.obj.members) {
 					token.tag += '-empty';
 					token.stop();
 					return;
 				}
 				token.tag += '-private';
-				for (var x=0; x<club.members.length; x++) {
-					var conn = activeUsers[club.members[x]];
+				for (var x=0; x<club.obj.members.length; x++) {
+					var conn = activeUsers[club.obj.members[x]];
 					if (!conn) continue;
 					conn.send(codes.seGameCreate,g,'Poker.Game');
 				}
