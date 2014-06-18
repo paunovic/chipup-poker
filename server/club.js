@@ -749,7 +749,7 @@ handlers[codes.scTransferChips] = function (args,token) {
 					}
 					this.chips -= chips;
 					var list = [ userid, this.userid ];
-					allClubs.find({$or:[{members:{$in:list}},{owner:{$in:list}}]},{owner:1,members:1}).toArray(function (err,rows) {
+					mdb.models.Clubs.find({$or:[{members:{$in:list}},{owner:{$in:list}}]},{owner:1,members:1}).toArray(function (err,rows) {
 						assert.ifError(err);
 						var out = [];
 						for (var i=0; i<rows.length;i++) {
@@ -778,12 +778,12 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 	var params = pb.Parse(args,'Poker.Club');
 	var clubseq = params.seq;
 	this.log('change club details %j',params);
-	allClubs.findOne({seq:clubseq},function (err,club) {
-		if (!club) {
+	module.exports.getClubBySeq(clubseq,function (err,club) {
+		if (err == 'not found') {
 			this.reply("000","club not found");
 			return;
 		}
-		if (!club.owner.equals(this.userid)) {
+		if (!club.isOwner(this.userid)) {
 			this.reply("000","your not owner");
 			return;
 		}
@@ -797,60 +797,56 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 		var autofinish = true;
 		if (club.name == params.name) delete params.name;
 		if (params.name) {
-			doit = true;
-			mods.$set.name = params.name;
 			if ((params.name.length > sharedconfig.stringSizes.clubname) || (params.name.length < sharedconfig.minSizes.clubname)) {
 				this.reply("000","name too long");
 				return;
 			}
-			allClubs.findOne({name:{$regex:new RegExp('^'+params.name+'$','i')}},function (err,row) {
-				if (row) {
+			club.dupCheck(params.name,function (dup) {
+				if (dup) {
 					this.send(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
-				} else finish.call(this);
+				} else {
+					club.obj.name = params.name;
+					finish.call(this);
+				}
 			}.bind(this));
+			doit = true;
 			autofinish = false;
 		}
 		if (regexLimits.clubpassword.exec(params.password) || (params.password == '')) {
 			doit = true;
-			mods.$set.password = params.password;
+			club.obj.password = params.password;
 		} else {
 			this.reply(0,'invalid password');
 			return;
 		}
-		if (params.default_balance_limit != club.default_balance_limit) mods.$set.default_balance_limit = params.default_balance_limit;
+		if (params.default_balance_limit != club.default_balance_limit) club.obj.default_balance_limit = params.default_balance_limit;
 		if (!doit) {
 			this.log('params:%j',params);
 			this.reply("000","no changes found");
 			return;
 		}
 		function finish() {
-			allClubs.update({_id:club._id},mods,function (err,ret) {
-				this.log('detail update',clubseq,params,mods,err,ret);
+			club.obj.save(function (err,ret) {
+				this.log('detail update',clubseq,params,err,ret);
 				if (err) {
 					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 				} else {
-					allClubs.findOne({_id:club._id},function cb(err,row) {
-						var userlist = [ ];
-						allGames.find({clubid:row._id}).toArray(function (err,games) {
-							clubBalances.find({clubid:row._id}).toArray(function (err,stats) {
-								assert.ifError(err);
-								Club.getClubById(row._id,function (err,clubObj) {
-									assert.ifError(err);
-									clubObj.refresh(row);
-									var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
-									for (var x=0; x<games.length; x++) {
-										games[x] = makeGameProtobuf(games[x]);
-									}
+					var userlist = [ ];
+					allGames.find({clubid:club.clubid}).toArray(function (err,games) {
+						clubBalances.find({clubid:club.clubid}).toArray(function (err,stats) {
+							assert.ifError(err);
+							var out = Club.makeClubProtobuf(club.obj,userlist,stats,clubObj);
+							for (var x=0; x<games.length; x++) {
+								games[x] = makeGameProtobuf(games[x]);
+							}
 
-									this.send(codes.srChangeClubDetailsReply,{status:'csSuccess',club:out,games:games},'Poker.ClubCommandReply');
-									this.log('userlist to inform:',userlist);
-									for (var x=0; x<userlist.length; x++) {
-										var user = activeUsers[userlist[x]];
-										if (user) user.send(codes.seClubChange,out,'Poker.Club');
-									}
-									token.stop();
-								}.bind(this));
-							}.bind(this));
+							this.send(codes.srChangeClubDetailsReply,{status:'csSuccess',club:out,games:games},'Poker.ClubCommandReply');
+							this.log('userlist to inform:',userlist);
+							for (var x=0; x<userlist.length; x++) {
+								var user = activeUsers[userlist[x]];
+								if (user) user.send(codes.seClubChange,out,'Poker.Club');
+							}
+							token.stop();
 						}.bind(this));
 					}.bind(this));
 				}
