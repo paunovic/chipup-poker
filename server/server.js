@@ -110,7 +110,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allGames,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
+var conn,allUsers,allGames,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -140,7 +140,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	GameEvents = db.collection('GameEvents');
 	gameState = db.collection('gameState');
 	clubBalances = db.collection('clubBalances');
-	diffs = db.collection('diffs');
 
 	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
 		assert.ok(collection instanceof Collection);
@@ -609,7 +608,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 				if (clientFile.hash != targetFile) {
 					console.log('clientFile:%j',clientFile);
 					console.log('need to patch %s',clientFile.path);
-					diffs.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
+					mdb.models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
 						if (diffRow) {
 							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
@@ -625,7 +624,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 								}
 								cb();
 							});
-							if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path,diffs);
+							if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path);
 						}
 					}.bind(this));
 				} else {

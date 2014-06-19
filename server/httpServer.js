@@ -51,7 +51,6 @@ function Server(db,activeUsersIN) {
 	this.installers = db.collection('installers');
 	this.objectSizes = db.collection('objectSizes');
 	this.IPN_hits = db.collection('IPN_hits');
-	this.diffs = db.collection('diffs');
 
 	this.sessionStore = new MongoStore(db,'sessions');
 	this.IO.set('authorization',this.socketAuth.bind(this));
@@ -177,13 +176,14 @@ function Server(db,activeUsersIN) {
 }
 Server.prototype.syncMakeDiff = function (req,res) {
 	var t = req.body;
-	differ.makeDiff(t.sourcehash,t.desthash,t.path,this.diffs);
+	differ.makeDiff(t.sourcehash,t.desthash,t.path);
 	res.end('STARTED');
 }
 Server.prototype.syncNewDiff = function (req,res) {
 	var doc = req.body;
 	doc._id = new ObjectID(doc._id);
-	this.diffs.save(doc,function (err,rows) {
+	var obj = new models.Diff(doc);
+	obj.save(doc,function (err,rows) {
 		res.end('OK');
 	});
 }

@@ -8,12 +8,13 @@ var child_process = require('child_process');
 var config = require('./config');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
+var models = require('./db').models;
 
 module.exports.makeDiff = makeDiff;
 
 var bsdiffLock = new ReadWriteLock();
 
-function makeDiff(sourcehash,desthash,path,diffs) {
+function makeDiff(sourcehash,desthash,path) {
 	function pushDiff(doc) {
 		var body = new Buffer(JSON.stringify(doc));
 		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
@@ -44,7 +45,7 @@ function makeDiff(sourcehash,desthash,path,diffs) {
 		console.log('localCopy:%j',localCopy);
 		if (localCopy) {
 			bsdiffLock.writeLock(function bsdiffLocked(release) {
-				diffs.findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
+				models.Diff.findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
 					assert.ifError(err);
 					if (diffRow) {
 						pushDiff(diffRow);
@@ -55,7 +56,8 @@ function makeDiff(sourcehash,desthash,path,diffs) {
 					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
 						assert.ifError(err);
 						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'http://'+config.staticserver+'/'+outfile };
-						diffs.save(doc,function () {
+						var obj = new models.Diff(doc);
+						obj.save(doc,function () {
 							pushDiff(doc);
 							release();
 						});

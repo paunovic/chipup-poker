@@ -72,6 +72,12 @@ var BugsSchema = new Schema({
 	ScreenShot:Buffer,
 	BugReport:String
 },{collection:'bugs'});
+var DiffSchema = new Schema({
+	sourcehash:String,
+	desthash:String,
+	size:Number,
+	url:String,
+},{collection:'diffs'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -89,6 +95,7 @@ module.exports.open = function () {
 	models.Clubs = mongoose.model('Clubs',ClubSchema);
 	models.Avatars = mongoose.model('Avatars',AvatarSchema);
 	models.Bugs = mongoose.model('Bugs',BugsSchema);
+	model.Diffs = mongoose.model('Diff',DiffSchema);
 }
 
 if (require.main === module) {
