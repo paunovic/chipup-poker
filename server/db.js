@@ -95,6 +95,10 @@ var ServerErrorSchema = new Schema({
 	error:String,
 	trace:String
 },{collection:'serverErrors'});
+var IPN_HitSchema = new Schema({
+	reply:String,
+	params:Schema.Types.Mixed
+},{collection:'IPN_hits'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -116,6 +120,7 @@ module.exports.open = function () {
 	models.Installer = mongoose.model('Installer',InstallerSchema);
 	models.ObjectSize = mongoose.model('ObjectSize',ObjectSizeSchema);
 	models.ServerError = mongoose.model('ServerError',ServerErrorSchema);
+	models.IPN_Hit = mongoose.model('IPN_Hit',IPN_HitSchema);
 }
 
 if (require.main === module) {

@@ -47,7 +47,6 @@ function Server(db,activeUsersIN) {
 	this.clubs = db.collection('clubs');
 	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
-	this.IPN_hits = db.collection('IPN_hits');
 
 	this.sessionStore = new MongoStore(db,'sessions');
 	this.IO.set('authorization',this.socketAuth.bind(this));
@@ -909,7 +908,7 @@ Server.prototype.paypalCallback = function (req,res) {
 				if ((res2.statusCode == 200) && (buffer.trim() == 'VERIFIED')) {
 					console.log('all good');
 					console.log(req.body);
-					this.IPN_hits.insert({reply:buffer.trim(),params:req.body},function (err,doc) {
+					models.IPN_hit.create({reply:buffer.trim(),params:req.body},function (err,doc) {
 						assert.ifError(err);
 						res.send(200,'');
 					});
@@ -924,7 +923,7 @@ Server.prototype.paypalCallback = function (req,res) {
 	req2.end();
 }
 Server.prototype.paypalLog = function (req,res) {
-	this.IPN_hits.find().toArray(function (err,rows) {
+	models.IPN_hit.find(function (err,rows) {
 		res.render('paypal_secure',{rows:rows});
 	});
 }
