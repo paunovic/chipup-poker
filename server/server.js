@@ -1366,7 +1366,7 @@ handlers[codes.scQueryTableStats] = function (args,token) {
 	var list2 = {};
 	if (params.gameid.length == 0) {
 		log('building list from owned clubs');
-		mdb.modes.Clubs.find({owner:this.userid},function (err,clubs) {
+		mdb.models.Clubs.find({owner:this.userid},function (err,clubs) {
 			assert.ifError(err);
 			for (var i=0; i<clubs.length; i++) clublist.push(clubs[i]._id);
 			allGames.find({clubid:{$in:clublist}}).toArray(function (err,games) {

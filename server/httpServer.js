@@ -787,8 +787,8 @@ Server.prototype.getAvatar = function (req,res) {
 	});
 }
 Server.prototype.uploadAvatar = function (req,res) {
-	console.log('files',req.headers);
-	console.log('version',req.httpVersionMajor,req.httpVersionMinor);
+	//console.log('files',req.headers);
+	//console.log('version',req.httpVersionMajor,req.httpVersionMinor);
 	fs.readFile(req.files.avatar.path,function (err,data) {
 		var extension = req.files.avatar.originalFilename.split('.').pop();
 		var hasher = crypto.createHash('sha256');
@@ -812,7 +812,7 @@ Server.prototype.uploadAvatar = function (req,res) {
 						return;
 					}
 					var out = new Buffer(row[0]._id,'base64');
-					console.log('sending unique id',out);
+					//console.log('sending unique id',out);
 					res.send(200,out);
 					fs.unlink(req.files.avatar.path);
 				});
