@@ -110,7 +110,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allClubs,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
+var conn,allUsers,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -131,7 +131,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	process.send({msg:'connected'});
 
 	allUsers = db.collection('users');
-	allClubs = db.collection('clubs');
+	var allClubs = db.collection('clubs');
 	avatars = db.collection('avatars');
 	allGames = db.collection('games');
 	var allCounters = db.collection('counters');
@@ -159,7 +159,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	allUsers.createIndex("email",{unique:true}, function (err,res) {});
 	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
 
-	allClubs.createIndex("name",{unique:true},function (err,res) {});
+	allClubs.createIndex("name",{unique:true},function (err,res) {}); // FIXME
 	handHistory.ensureIndex({seq:1},function (err,res){});
 	handHistory.ensureIndex({gameid:1},function (err,res){});
 
@@ -959,7 +959,7 @@ ClientSocket.prototype.handle = function (code,args) {
 						return;
 					}
 					this.send(codes.srSetAvatarReply,{status:'saSuccess'},'Poker.SetAvatarReply');
-					allClubs.find({$or:[{members:this.userid},{owner:this.userid}]},{owner:1,members:1}).toArray(function (err,rows) {
+					mdb.models.Clubs.find({$or:[{members:this.userid},{owner:this.userid}]},{owner:1,members:1},function (err,rows) {
 								assert.ifError(err);
 								var out = [];
 								for (var i=0; i<rows.length;i++) {
@@ -1048,7 +1048,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				if (game.state2 == 'gsClosed') return;
 				game.Lock.writeLock(function (release) {
 					this.log('game info',game.obj.clubid);
-					allClubs.findOne({_id:game.obj.clubid},function (err,club) {
+					var club = game.club.obj; // FIXME
 						if (club.suspended) {
 							for (var x=0; x<club.suspended.length; x++) {
 								console.log(club.suspended[x],this.userid);
@@ -1079,7 +1079,6 @@ ClientSocket.prototype.handle = function (code,args) {
 								token.stop();
 							}.bind(this));
 						}
-					}.bind(this));
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1278,7 +1277,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false} ]};
 	// owner should see password
 	// all need to see name, _id, seq, private, chips, and members
-	allClubs.find(query).toArray(function(err,clubs) {
+	mdb.models.Clubs.find(query,function(err,clubs) {
 		var status = {};
 		status.clubs = clubs;
 		var x,y;
@@ -1367,7 +1366,7 @@ handlers[codes.scQueryTableStats] = function (args,token) {
 	var list2 = {};
 	if (params.gameid.length == 0) {
 		log('building list from owned clubs');
-		allClubs.find({owner:this.userid}).toArray(function (err,clubs) {
+		mdb.modes.Clubs.find({owner:this.userid},function (err,clubs) {
 			assert.ifError(err);
 			for (var i=0; i<clubs.length; i++) clublist.push(clubs[i]._id);
 			allGames.find({clubid:{$in:clublist}}).toArray(function (err,games) {
