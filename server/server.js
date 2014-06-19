@@ -164,12 +164,12 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			Config.findOne({_id:'installerid'},function (err,row) {
 				Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
 					assert.ifError(err);
-					mdb.models.Installers.findOne({_id:row.value},function (err,row) {
+					mdb.models.Installer.findOne({_id:row.value},function (err,row) {
 						if (row) {
 							sharedconfig.latestVersion = row.version;
 						}
 					});
-					mdb.models.Installers.findOne({_id:debugrow.value},function (err,row) {
+					mdb.models.Installer.findOne({_id:debugrow.value},function (err,row) {
 						if (row) {
 							sharedconfig.latestDebugVersion = row.version;
 						}
@@ -581,7 +581,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
 	Config.findOne({_id:key1},function (err,row2) {
-		mdb.models.Installers.findOne({_id:row2.value},function (err,targetVersion) {
+		mdb.models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
 			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
@@ -614,7 +614,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 							toUpdate.push(UFI);
 							cb();
 						} else {
-							conn.collection('objectSizes').findOne({_id:targetFile},function (err,sizeRow) {
+							mdb.models.ObjectSize.findOne({_id:targetFile},function (err,sizeRow) {
 								assert.ifError(err);
 								if (sizeRow) {
 									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'http://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});

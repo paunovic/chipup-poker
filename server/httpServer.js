@@ -48,7 +48,6 @@ function Server(db,activeUsersIN) {
 	this.clubs = db.collection('clubs');
 	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
-	this.objectSizes = db.collection('objectSizes');
 	this.IPN_hits = db.collection('IPN_hits');
 
 	this.sessionStore = new MongoStore(db,'sessions');
@@ -122,7 +121,7 @@ function Server(db,activeUsersIN) {
 	app.get("/install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'installerid'},function (err,row) {
 			assert.ifError(err);
-			models.Installers.findOne({_id:row.value},function (err,row) {
+			models.Installer.findOne({_id:row.value},function (err,row) {
 				log('sending installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
@@ -131,7 +130,7 @@ function Server(db,activeUsersIN) {
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
 			assert.ifError(err);
-			models.Installers.findOne({_id:row.value},function (err,row) {
+			models.Installer.findOne({_id:row.value},function (err,row) {
 				log('sending debug installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
@@ -390,7 +389,7 @@ Server.prototype.installers_func = function (req,res) {
 	if (req.query.showlist) showlist = true;
 	function makeDeleter(id) {
 		return function (cb) {
-			models.Installers.findOne({_id:new ObjectID(id)},function (err,row) {
+			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
 				if (row) {
 					fs.unlink('installers/'+row.name,function (err) {
 						console.log('installer deleted');
@@ -404,7 +403,7 @@ Server.prototype.installers_func = function (req,res) {
 	}
 	function makeActivator(id) {
 		return function (cb) {
-			models.Installers.findOne({_id:new ObjectID(id)},function (err,row) {
+			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
 				assert.ifError(err);
 				if (row) {
 					if (row.debug == 'release') {
@@ -476,7 +475,7 @@ Server.prototype.installers_func = function (req,res) {
 	console.log('running jobs');
 	async.parallel(jobs,finish2.bind(this));
 	function finish2() {
-		models.Installers.find({}).sort({_id:1}).toArray(function(err,data) {
+		models.Installer.find({},function(err,data) {
 			models.Config.findOne({_id:'installerid'},function (err,row) {
 				var activeRelease;
 				for (var x=0; x<data.length; x++) {
@@ -495,7 +494,7 @@ Server.prototype.installers_func = function (req,res) {
 					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 				});
 			}.bind(this));
-		}.bind(this));
+		}.bind(this)).sort({_id:1});
 	}
 }
 Server.prototype.goOnline = function () {
@@ -855,7 +854,7 @@ Server.prototype.newVersion = function newVersion(req,res) {
 		obj.save(function (err) {
 			assert.ifError(err);
 			log('new version recorded: %j',obj);
-			installer.unpackInstaller(this.IO,obj,this.objectSizes,function (success) {
+			installer.unpackInstaller(obj,function (success) {
 				if (success) {
 					if (debug == 'debug') var key1 = 'debuginstallerid';
 					else var key1 = 'installerid';
@@ -875,11 +874,11 @@ Server.prototype.newVersion = function newVersion(req,res) {
 Server.prototype.syncNewVersion = function (req,res) {
 	console.log(req.body);
 	req.body.installer._id = new ObjectID(req.body.installer._id);
-	var obj = new models.Installers(req.body.installer);
+	var obj = new models.Installer(req.body.installer);
 	obj.save(function (err,reply) {
 		console.log(err,reply);
 		async.each(req.body.sizes,function (row,cb) {
-			this.objectSizes.save(row,cb);
+			models.ObjectSize.create(row,cb);
 		}.bind(this),function () {
 			res.end('OK');
 		});

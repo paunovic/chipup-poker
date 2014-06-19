@@ -9,7 +9,7 @@ var config = require('./config');
 var models = require('./db').models;
 
 module.exports.unpackInstaller = unpackInstaller;
-function unpackInstaller(io,record,objectSizes,cb1) {
+function unpackInstaller(record,cb1) {
 	function updateLive(doc,sizes,cb) {
 		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
 		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
@@ -54,13 +54,11 @@ function unpackInstaller(io,record,objectSizes,cb1) {
 				console.log('inserted %j',newdoc);
 				fs.rmdir('unpacked/'+record._id+'/app/',function () {
 					fs.rmdir('unpacked/'+record._id,function () {
-						installers.findOne(key,function (err,doc) {
-							async.each(sizes,function (row,cb) {
-								objectSizes.save(row,cb);
-							},function () {
-								updateLive(doc,sizes,function () {
-									cb1(true);
-								});
+						async.each(sizes,function (row,cb) {
+							models.ObjectSize.create(row,cb);
+						},function () {
+							updateLive(record,sizes,function () {
+								cb1(true);
 							});
 						});
 					});

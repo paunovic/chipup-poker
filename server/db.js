@@ -84,8 +84,13 @@ var InstallerSchema = new Schema({
 	revision:String,
 	debug:String,
 	size: Number,
-	hashes: Schema.Types.Mixed
+	hashes: Schema.Types.Mixed,
+	ts:String
 },{collection:'installers'});
+var ObjectSizeSchema = new Schema({
+	_id:String,
+	size:Number
+},{collection:'objectSizes'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -105,6 +110,7 @@ module.exports.open = function () {
 	models.Bugs = mongoose.model('Bugs',BugsSchema);
 	models.Diff = mongoose.model('Diff',DiffSchema);
 	models.Installer = mongoose.model('Installer',InstallerSchema);
+	models.ObjectSize = mongoose.model('ObjectSize',ObjectSizeSchema);
 }
 
 if (require.main === module) {
