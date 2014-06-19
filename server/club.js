@@ -66,7 +66,7 @@ Club.prototype.isOwner = function (user) {
 }
 Club.prototype.handOver = function (gameObj,cb,handid) {
 	if (activeUsers[this.obj.owner]) {
-		console.log('owner is online');
+		//console.log('owner is online');
 		var data = {};
 		allGames.find({clubid:this.clubid},{_id:1}).toArray(function (err,games) {
 			assert.ifError(err);

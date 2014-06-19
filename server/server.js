@@ -943,7 +943,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			var id = params.avatar_id.toString('base64');
 			delete params.avatar_id;
 			this.log('changing avatar',id);
-			mdb.Avatars.findOne({_id:id},function(err,row) {
+			mdb.models.Avatars.findOne({_id:id},function(err,row) {
 				if (err) {
 					this.reply("000","internal error");
 					return;

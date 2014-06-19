@@ -1901,7 +1901,7 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 			var count = 0;
 			for (var key in this.users) {
 				count++;
-				console.log('key:%s count:%d',key,count);
+				//console.log('key:%s count:%d',key,count);
 			}
 			if (count == 0) {
 				if (this.state2 == 'gsClosing') {

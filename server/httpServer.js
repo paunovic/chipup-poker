@@ -774,7 +774,7 @@ Server.prototype.getAvatar = function (req,res) {
 	}
 	var raw = new Buffer(id,'hex');
 	var base64 = raw.toString('base64');
-	mdb.Avatars.findOne({_id:base64},function (err,row) {
+	models.Avatars.findOne({_id:base64},function (err,row) {
 		if (!row) {
 			res.send(404);
 			return;
@@ -782,7 +782,7 @@ Server.prototype.getAvatar = function (req,res) {
 		var filename = req.query.id+"."+row.ext;
 		console.log(filename);
 		res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
-		res.send(row.image.buffer);
+		res.send(row.image);
 	});
 }
 Server.prototype.uploadAvatar = function (req,res) {
@@ -793,7 +793,7 @@ Server.prototype.uploadAvatar = function (req,res) {
 		var hasher = crypto.createHash('sha256');
 		hasher.update(data);
 		var hash = hasher.digest('base64');
-		mdb.Avatars.findOne({_id:hash},function (err,row) {
+		models.Avatars.findOne({_id:hash},function (err,row) {
 			if (err) {
 				console.log('error',err);
 				res.send(JSON.stringify({error:err}));
@@ -804,14 +804,14 @@ Server.prototype.uploadAvatar = function (req,res) {
 				console.log('sending dup id',out);
 				res.send(200,out);
 			} else {
-				var obj = new mdb.models.Avatars({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension});
-				obj.save(function (err,row) {
+				var obj = new models.Avatars({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension});
+				obj.save(function (err) {
 					if (err) {
 						console.log('error',err);
 						res.send(JSON.stringify(err));
 						return;
 					}
-					var out = new Buffer(row[0]._id,'base64');
+					var out = new Buffer(obj._id,'base64');
 					//console.log('sending unique id',out);
 					res.send(200,out);
 					fs.unlink(req.files.avatar.path);

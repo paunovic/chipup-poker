@@ -59,7 +59,7 @@ var ClubSchema = new Schema({
 	testmode: Boolean
 },{collection:'clubs'});
 var AvatarSchema = new Schema({
-	_id: Buffer,
+	_id: String,
 	image: Buffer,
 	size: Number,
 	created: { type: Date, default: Date.now },
