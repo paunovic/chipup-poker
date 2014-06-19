@@ -436,6 +436,14 @@ Club.prototype.deleteClub = function (cb) {
 		cb();
 	}.bind(this));
 }
+Club.prototype.setOwner = function (newowner,cb) {
+	this.joinClub(this.obj.owner,function () {
+		this.obj.owner = newowner;
+		this.Leave(newowner,function () {
+			cb();
+		});
+	}.bind(this));
+}
 Club.dupCheck = function (name,cb) {
 	mdb.models.Clubs.findOne({name:{$regex:new RegExp('^'+name+'$','i')}},function (err,row) {
 		if (row) cb(true);
@@ -878,5 +886,45 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 		} catch (e) {
 			this.error(e);
 		}
+	}
+	handlers[codes.scGiveClubOwnership] = function (args,token) {
+		try {
+			var params = pb.Parse(args,'Poker.GiveClubOwnershipParams');
+			var clubseq = params.club_seq;
+			var newowner = toMongoId(params.player_mongo_id);
+		} catch (e) {
+			this.error(e);
+			return;
+		}
+		this.log('giving ownership away',clubseq,newowner);
+		Club.getClubById(club._id,function (err,clubObj) {
+			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+				if (!club) {
+					this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(club,null,stats,clubObj),'Poker.Club');
+					return;
+				}
+				if (clubObj.isOwner(this.userid)) {
+					if (containsObjectID(clubObj.obj.members,newowner)) {
+						this.log('adding self to members',this.userid);
+						clubObj.setOwner(newowner,function () {
+							var userlist = [ clubObj.obj.owner ];
+							var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
+							this.send(codes.srOwnershipGiveAwayOk,out,'Poker.Club');
+							this.log('i am %s, target is %s',this.userid,newowner);
+							this.log('userlist to inform:',userlist);
+							for (var x=0; x<userlist.length; x++) {
+								var user = activeUsers[userlist[x]];
+								if (user === this) continue;
+								if (user) user.send(codes.seClubChange,out,'Poker.Club');
+							}
+						}.bind(this));
+					} else {
+						this.send(codes.srOwnershipGiveAwayInvalidPlayerId,Club.makeClubProtobuf(club,stats,clubObj),'Poker.Club');
+					}
+				} else {
+					this.send(codes.srOwnershipGiveAwayNotOwner,Club.makeClubProtobuf(club,stats,clubObj),'Poker.Club');
+				}
+			}.bind(this));
+		}.bind(this));
 	}
 }

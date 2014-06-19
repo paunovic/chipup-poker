@@ -860,60 +860,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				//this.reply(codes.SR_LIST_CLUBS,JSON.stringify(arr));
 			}.bind(this));
 			break;*/
-		case codes.scGiveClubOwnership:
-			try {
-				var params = pb.Parse(args,'Poker.GiveClubOwnershipParams');
-				var clubseq = params.club_seq;
-				var newowner = toMongoId(params.player_mongo_id);
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			this.log('giving ownership away',clubseq,newowner);
-			allClubs.findOne({seq:clubseq},function (err,club) {
-				Club.getClubById(club._id,function (err,clubObj) {
-					clubObj.refresh(club);
-					clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-						if (!club) {
-							this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(club,null,stats,clubObj),'Poker.Club');
-							return;
-						}
-						if (club.owner.equals(this.userid)) {
-							if (containsObjectID(club.members,newowner)) {
-								this.log('adding self to members',this.userid);
-								allClubs.update({_id:club._id},
-									{$addToSet:{members:this.userid}},function (err,res) {
-										this.log('result 2',err,res);
-										allClubs.update({_id:club._id},{
-										 $set:{owner:newowner},
-										 $pull:{members:newowner}
-										},function (err,res) {
-											this.log('err:%j res:%d',err,res);
-											allClubs.findOne({_id:club._id},function cb(err,row) {
-												clubObj.refresh(club);
-												var userlist = [ row.owner ];
-												var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
-												this.send(codes.srOwnershipGiveAwayOk,out,'Poker.Club');
-												this.log('i am %s, target is %s',this.userid,newowner);
-												this.log('userlist to inform:',userlist);
-												for (var x=0; x<userlist.length; x++) {
-													var user = activeUsers[userlist[x]];
-													if (user === this) continue;
-													if (user) user.send(codes.seClubChange,out,'Poker.Club');
-												}
-											}.bind(this));
-										}.bind(this));
-								}.bind(this));
-							} else {
-								this.send(codes.srOwnershipGiveAwayInvalidPlayerId,Club.makeClubProtobuf(club,stats,clubObj),'Poker.Club');
-							}
-						} else {
-							this.send(codes.srOwnershipGiveAwayNotOwner,Club.makeClubProtobuf(club,stats,clubObj),'Poker.Club');
-						}
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
 		case codes.scChangeEmail:
 			try {
 				var params = pb.Parse(args,'Poker.ChangeEMailParams');

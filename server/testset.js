@@ -2,6 +2,7 @@ var Core = require('./core');
 var async = require('async');
 var http = require('http');
 var MongoClient = require('mongodb').MongoClient;
+var async = require('async');
 
 var mdb = require('./db');
 var myutils = require('./myutils');
@@ -41,18 +42,27 @@ exports.club = {
 		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			Club.init(db,activeUsers,activeGames,Core.pb);
 			myutils.init(db);
-			db.collection('users').find().limit(2).toArray(function (err,users) {
+			db.collection('users').find().limit(3).toArray(function (err,users) {
 				Club.getClubBySeq(clubid,function (err,clubObj) {
 					console.log('spot 1',err);
 					test.ok(clubObj);
-					var user2 = users[0];
-					if (clubObj.isOwner(user2._id)) user2 = users[1];
-					clubObj.joinClub(user2._id,function () {
-						console.log(clubObj.obj);
-						db.close();
-						mdb.close();
-						test.done();
-					});
+					var out = [];
+					console.log('users:',users);
+					for (var x=0; x<users.length; x++) {
+						if (!clubObj.isOwner(users[x]._id)) out.push(users[x]);
+					}
+					console.log('out:',out);
+					async.eachSeries(out,function (user2,cb) {
+						console.log('user2',user2,typeof user2);
+						clubObj.joinClub(user2._id,function () {
+							cb();
+						});
+					},function () {
+							console.log(clubObj.obj);
+							db.close();
+							mdb.close();
+							test.done();
+					})
 				});
 			});
 		});
@@ -134,6 +144,24 @@ exports.club = {
 				test.ok(clubObj);
 				clubObj.Leave(clubObj.obj.members[0],function () {
 					test.ok(true);
+					db.close();
+					mdb.close();
+					test.done();
+				});
+			});
+		});
+	},
+	changeOwner: function (test) {
+		var activeUsers = {};
+		var activeGames = {};
+		var Club = require('./club').Club;
+		mdb.open();
+		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+			Club.init(db,activeUsers,activeGames,Core.pb);
+			myutils.init(db);
+			Club.getClubBySeq(clubid,function (err,clubObj) {
+				test.ok(clubObj);
+				clubObj.setOwner(clubObj.obj.members[0],function () {
 					db.close();
 					mdb.close();
 					test.done();
