@@ -95,7 +95,7 @@ module.exports.open = function () {
 	models.Clubs = mongoose.model('Clubs',ClubSchema);
 	models.Avatars = mongoose.model('Avatars',AvatarSchema);
 	models.Bugs = mongoose.model('Bugs',BugsSchema);
-	models.Diffs = mongoose.model('Diff',DiffSchema);
+	models.Diff = mongoose.model('Diff',DiffSchema);
 }
 
 if (require.main === module) {

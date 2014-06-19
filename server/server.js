@@ -463,7 +463,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				}.bind(this));
 			}.bind(this),function done() {
 				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses};
-				console.log('login reply',obj);
+				//console.log('login reply',obj);
 				this.send(codes.srLoginReply,obj,'Poker.LoginReply');
 				// FIXME, embed in the same message
 				handlers[codes.scQueryTableStats].call(this,new Buffer(0),token);
