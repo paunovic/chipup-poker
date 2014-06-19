@@ -932,7 +932,7 @@ Server.prototype.paypalLog = function (req,res) {
 Server.prototype.contactPost = function (req,res) {
 	console.log(req.body);
 	RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function () {
-		res.writeHead(302,{Location:'http://testing.chipuppoker.com/contact.html?success=true'}); // FIXME
+		res.writeHead(302,{Location:'/contact.html?success=true'}); // FIXME
 		res.end();
 	});
 }
