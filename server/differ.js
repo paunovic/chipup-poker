@@ -16,10 +16,11 @@ var bsdiffLock = new ReadWriteLock();
 
 function makeDiff(sourcehash,desthash,path) {
 	function pushDiff(doc) {
+		console.log('pushing diff',doc);
 		var body = new Buffer(JSON.stringify(doc));
 		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newDiff',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
 		req.on('data',function (chunk) {
-			console.log(chunk);
+			console.log('chunk',chunk);
 		});
 		req.on('error',function (err) {
 			console.log('http error sending diff:',err);
@@ -57,8 +58,9 @@ function makeDiff(sourcehash,desthash,path) {
 						assert.ifError(err);
 						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'http://'+config.staticserver+'/'+outfile };
 						var obj = new models.Diff(doc);
-						obj.save(doc,function () {
-							pushDiff(doc);
+						obj.save(function () {
+							console.log('about to push diff');
+							pushDiff(obj);
 							release();
 						});
 					});
