@@ -239,8 +239,8 @@ Server.prototype.secureChangePasswordPost = function (req,res) {
 				} else {
 					res.writeHead(302,{Location:'/secure/'});
 				}
+				res.end('done');
 			});
-			res.end('done');
 		});
 	}.bind(this));
 }
@@ -351,7 +351,7 @@ Server.prototype.secureLogout = function (req,res) {
 }
 Server.prototype.bugList = function (req,res) {
 	var start = Date.now();
-	models.Bugs.find({}).toArray(function (err,data) {
+	models.Bugs.find({},function (err,data) {
 		res.render('bugs',{bugs:data,start:start});
 	});
 }
