@@ -44,7 +44,6 @@ function Server(db,activeUsersIN) {
 	app.use(logger());
 	this.activeUsers = activeUsersIN;
 	var PokerProfile = db.collection('PokerProfile');
-	this.bugs = db.collection('bugs');
 	this.serverErrors = db.collection('serverErrors');
 	this.clubs = db.collection('clubs');
 	this.games = db.collection('games');
@@ -328,14 +327,14 @@ Server.prototype.changePassword = function (req,res) {
 }
 Server.prototype.getBug = function (req,res) {
 	var start = Date.now();
-	this.bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
+	models.Bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
 		res.render('bug',{bug:row,start:start});
 	});
 }
 Server.prototype.getScreenshot = function (req,res) {
-	this.bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
+	models.Bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
 		res.set({"Content-Disposition":'filename="'+row._id+'.png"','Content-Type':'image/png'});
-		res.send(row.ScreenShot.buffer);
+		res.send(row.ScreenShot);
 	});
 }
 Server.prototype.secureIndex = function (req,res) {
@@ -352,7 +351,7 @@ Server.prototype.secureLogout = function (req,res) {
 }
 Server.prototype.bugList = function (req,res) {
 	var start = Date.now();
-	this.bugs.find({}).toArray(function (err,data) {
+	models.Bugs.find({}).toArray(function (err,data) {
 		res.render('bugs',{bugs:data,start:start});
 	});
 }
@@ -700,8 +699,9 @@ Server.prototype.errorUpload = function (req,res) {
 			cb2();
 		});
 		}],function done() {
-			this.bugs.insert(doc,function (err,result) {
-				console.log(result);
+			var obj = new models.Bugs(doc);
+			obj.save(function (err) {
+				console.log(err,obj);
 				res.send(200);
 			});
 		}.bind(this));

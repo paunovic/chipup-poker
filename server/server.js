@@ -110,7 +110,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
+var conn,allUsers,allGames,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -134,7 +134,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	var allClubs = db.collection('clubs');
 	allGames = db.collection('games');
 	var allCounters = db.collection('counters');
-	bugs = db.collection('bugs');
 	handHistory = db.collection('handHistory');
 	Installers = db.collection('installers');
 	Config = db.collection('config');

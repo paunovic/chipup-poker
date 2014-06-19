@@ -65,6 +65,13 @@ var AvatarSchema = new Schema({
 	created: { type: Date, default: Date.now },
 	ext: String
 },{collection:'avatars'});
+var BugsSchema = new Schema({
+	MailFrom:String,
+	MailSubject:String,
+	MailBody:String,
+	ScreenShot:Buffer,
+	BugReport:String
+},{collection:'bugs'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -81,6 +88,7 @@ module.exports.open = function () {
 	models.DebugLogs = mongoose.model('DebugLogs',DebugLogSchema);
 	models.Clubs = mongoose.model('Clubs',ClubSchema);
 	models.Avatars = mongoose.model('Avatars',AvatarSchema);
+	models.Bugs = mongoose.model('Bugs',BugsSchema);
 }
 
 if (require.main === module) {
