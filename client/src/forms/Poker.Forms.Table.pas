@@ -212,7 +212,6 @@ begin
                       ]);
     end;
     ttHandPlayback: begin
-      rvChat.Visible := FALSE;
       edChat.Visible := FALSE;
       lbvHandHistory.Visible := FALSE;
       lbvHandStrength.Visible := FALSE;
@@ -352,7 +351,6 @@ end;
 procedure TfrmTable.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 begin
   FTable.Renderer.MouseMove(Shift, X, Y);
-  FTable.Renderer.Render;
 end;
 
 procedure TfrmTable.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -444,8 +442,7 @@ end;
 
 procedure TfrmTable.tiRenderTimer(Sender: TObject);
 begin
-  if not IsIconic(Handle) then
-    FTable.Renderer.Render;
+  FTable.Renderer.Render;
 end;
 
 procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
@@ -723,7 +720,8 @@ begin
   FTableStatus.ActionShowCards := FALSE;
 
   seat_info := nil;
-  if FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+  if (FTable.TableType = ttLiveGame) and
+     (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) then
   begin
     FTableStatus.ActionStandUp := TRUE;
 
@@ -883,9 +881,10 @@ begin
       Height := hround;
   end;
 
+  rvChat.BoundsRect := FTable.Renderer.Metrics.ChatBoxBounds;
+
   case FTable.TableType of
     ttLiveGame: begin
-      rvChat.BoundsRect := FTable.Renderer.Metrics.ChatBoxBounds;
       edChat.BoundsRect := FTable.Renderer.Metrics.ChatEditBounds;
       seRaiseAmount.BoundsRect := FTable.Renderer.Metrics.RaiseAmountBoxBounds;
       seRaiseAmount.Style.Font.Size := FTable.Renderer.Metrics.RaiseAmountBoxFontSize;
@@ -966,6 +965,7 @@ begin
     end;
 
     ttHandPlayback: begin
+      rvChat.Color := $00262626;
       pbHandPlaybackProgress.BoundsRect := FTable.Renderer.Metrics.HandPlaybackProgress;
       btPlayPause.BoundsRect := FTable.Renderer.Metrics.HandPlaybackPlay;
       btStepForward.BoundsRect := FTable.Renderer.Metrics.HandPlaybackForward;

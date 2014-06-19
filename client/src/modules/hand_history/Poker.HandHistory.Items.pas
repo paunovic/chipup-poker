@@ -136,7 +136,7 @@ implementation
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
   Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings,
-  Poker.Objects.PotInfo;
+  Poker.Objects.PotInfo, Poker.Protobufs.Objects.SeatInfo;
 
 { THandHistoryItem }
 
@@ -232,6 +232,10 @@ begin
     line := '%sSeat %s%d%s: %s%s%s (%s%s%s chips';
     if FPlayers[C1].Seat = FDealerIndex then
       line := line + ', dealer';
+    if Players[C1].Status = psOutOfPlay then
+      line := line + ', sitting out';
+    if Players[C1].Status = psOutOfHand then
+      line := line + ', out of hand';
     line := line + ')';
 
     ALines.Add(Format(line, [
@@ -307,13 +311,14 @@ begin
         if FPlayers[C1].Mucked then
           ALines.Add(Format('%s%s%s mucks hand', [ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText]))
         else
-        begin
-          hand_strength := THandStrengthCalculator.GetHandStrength(FPlayers[C1].CardsStr, FTableCardsStr, FCurrentGame, FALSE);
-          ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
-              ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(FPlayers[C1].Cards, ' '),
-              ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
-          ]));
-        end;
+          if FPlayers[C1].Status in [psInHand, psFolded, psAllIn] then
+          begin
+            hand_strength := THandStrengthCalculator.GetHandStrength(FPlayers[C1].CardsStr, FTableCardsStr, FCurrentGame, FALSE);
+            ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
+                ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(FPlayers[C1].Cards, ' '),
+                ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
+            ]));
+          end;
       end;
 
       // summary
@@ -357,8 +362,14 @@ begin
           player_line := player_line + Format('[%s%s%s] ', [ATags.Cards, TCards.BytesToString(player.Cards, ' '), ATags.NormalText]);
         end;
 
-        if player.Mucked then
-          player_line := player_line + 'mucked ';
+        if player.Status = psOutOfPlay then
+          player_line := player_line + 'is sitting out '
+        else
+          if player.Status = psOutOfHand then
+            player_line := player_line + 'is out of hand '
+          else
+            if player.Mucked then
+              player_line := player_line + 'mucked ';
 
         if seat_winnings[player.Seat] > 0 then
         begin

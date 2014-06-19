@@ -80,6 +80,7 @@ var
 implementation
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Objects.TableStatus;
 
@@ -306,6 +307,8 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
+  {$IFDEF DEBUG} DebugLn('Reassigning table objects...', ditApplication); {$ENDIF}
+
   for table in ToArray do
     if (dmMain.SelfInfo.Clubs.FindClub(table.ClubSeq, club)) and
        (club.Games.FindGame(table.GameId, game)) then

@@ -67,6 +67,8 @@ type
     FHandPlaybackBack: TRect;
     FHandPlaybackForward: TRect;
 
+    procedure SetGame(const AValue: TGameInfo);
+
   public
     const
       CARD_OPEN_PERC   = 0.55;
@@ -88,6 +90,7 @@ type
 
     procedure Update(const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
 
+    property Game: TGameInfo read FGame write SetGame;
     property TableResizeRatio: Single read FTableResizeRatio;
     property RawTableBounds: TPoint4 read FRawTableBounds;
     property TableWidth: Single read FTableWidth;
@@ -328,6 +331,11 @@ begin
   Exit(FALSE);
 end;
 
+procedure TTableRenderMetrics.SetGame(const AValue: TGameInfo);
+begin
+  FGame := AValue;
+end;
+
 procedure TTableRenderMetrics.SetRenderHandle(const AHandle: THandle);
 begin
   FHandle := AHandle;
@@ -498,7 +506,7 @@ begin
   // hand playback bounds
   wint := ADXAreaSize.x div 3;
   hint := 9;
-  FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 2), Round(ADXAreaSize.y * 0.825)), wint, hint);
+  FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 2), FChatBoxBounds.Top), wint, hint);
 
   wint := 48;
   hint := 48;

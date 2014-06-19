@@ -77,6 +77,8 @@ type
     procedure RenderButtons;
     procedure RenderRaisePanel;
 
+    procedure SetGame(const AValue: TGameInfo);
+
   public
     constructor Create(const ASwapChainIndex: Integer; const AGame: TGameInfo; const ATableType: TTableType);
     destructor Destroy; override;
@@ -100,7 +102,7 @@ type
     procedure MouseMove(Shift: TShiftState; X, Y: Integer);
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
-    property Game: TGameInfo read FGame write FGame;
+    property Game: TGameInfo read FGame write SetGame;
 
     property Metrics: TTableRenderMetrics read FMetrics;
     property ChipStackMaker: TChipStackMaker read FChipStackMaker;
@@ -199,6 +201,12 @@ begin
   Exit(nil);
 end;
 
+procedure TTableRenderer.SetGame(const AValue: TGameInfo);
+begin
+  FGame := AValue;
+  FMetrics.Game := AValue;
+end;
+
 procedure TTableRenderer.SetRenderTarget(const AHandle: THandle);
 begin
   FHandle := AHandle;
@@ -234,6 +242,12 @@ var
   rect: TRect;
 begin
   Winapi.Windows.GetClientRect(FHandle, rect);
+
+  // dont render if its 0px wide/tall, this causes swapchain element to get destroyed in Asphyre, and black screen after that
+  if (rect.Width = 0) or
+     (rect.Height = 0) then
+    Exit;
+
   FDXAreaSize := Point2px(rect.Width, rect.Height);
   DXCore.Device.Resize(FSwapChainIndex, FDXAreaSize);
   FMetrics.Update(FDXAreaSize, FRaiseThumbPosition);
@@ -246,6 +260,10 @@ end;
 
 procedure TTableRenderer.Render;
 begin
+  // dont render if its minimized
+  if IsIconic(FHandle) then
+    Exit;
+
   UpdateDXAreaSize;
   DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
 end;
@@ -1327,15 +1345,11 @@ begin
     animation := nil;
     for C2 := 0 to pot.WinnerData.Count - 1 do
     begin
-      if FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat) then
-      begin
-        if Players.FindPlayerById(seat.PlayerMongoId, player) then
-          nick := player.Nick
-        else
-          nick := Format('Seat #%d', [seat.SeatIndex]);
-      end
+      if (FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
+         (Players.FindPlayerById(seat.PlayerMongoId, player)) then
+        nick := player.Nick
       else
-        nick := 'Unknown';
+        nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
 
       nicks := nicks + Format('%s, ', [nick]);
 
@@ -1380,13 +1394,15 @@ begin
 end;
 
 class procedure TSyncRenderer.Render(const ARenderer: TTableRenderer);
+var
+  syncr: TSyncRenderer;
 begin
-  with TSyncRenderer.Create do
+  syncr := TSyncRenderer.Create;
   try
-    FRenderer := ARenderer;
-    Synchronize;
+    syncr.FRenderer := ARenderer;
+    syncr.Synchronize;
   finally
-    Free;
+    syncr.Free;
   end;
 end;
 
