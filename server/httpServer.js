@@ -44,7 +44,6 @@ function Server(db,activeUsersIN) {
 	app.use(logger());
 	this.activeUsers = activeUsersIN;
 	var PokerProfile = db.collection('PokerProfile');
-	this.serverErrors = db.collection('serverErrors');
 	this.clubs = db.collection('clubs');
 	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
@@ -356,11 +355,11 @@ Server.prototype.bugList = function (req,res) {
 Server.prototype.ServerBugsList = function (req,res) {
 	var start = Date.now();
 	if (req.query.delete) {
-		this.serverErrors.remove({_id:new ObjectID(req.query.delete)},function () {});
+		modelsServerError.remove({_id:req.query.delete},function () {});
 	}
-	this.serverErrors.find().sort({_id:-1}).toArray(function (err,data) {
+	models.ServerError.find(function (err,data) {
 		res.render('serverErrors',{rows:data,start:start});
-	});
+	}).sort({_id:-1});
 }
 Server.prototype.userList = function (req,res) {
 	var start = Date.now();

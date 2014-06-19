@@ -123,7 +123,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	process.on('uncaughtException',function (err) {
 		console.log(err);
 		console.log(err.stack);
-		db.collection('serverErrors').insert({error:err.toString(),trace:err.stack.split('\n').slice(1).join('\n').trim()},function (err) {
+		mdb.models.ServerError.create({error:err.toString(),trace:err.stack.split('\n').slice(1).join('\n').trim()},function (err) {
 			if (err) console.log(err);
 			process.exit(-1);
 		});

@@ -91,6 +91,10 @@ var ObjectSizeSchema = new Schema({
 	_id:String,
 	size:Number
 },{collection:'objectSizes'});
+var ServerErrorSchema = new Schema({
+	error:String,
+	trace:String
+},{collection:'serverErrors'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -111,6 +115,7 @@ module.exports.open = function () {
 	models.Diff = mongoose.model('Diff',DiffSchema);
 	models.Installer = mongoose.model('Installer',InstallerSchema);
 	models.ObjectSize = mongoose.model('ObjectSize',ObjectSizeSchema);
+	models.ServerError = mongoose.model('ServerError',ServerErrorSchema);
 }
 
 if (require.main === module) {
