@@ -181,9 +181,9 @@ Server.prototype.syncMakeDiff = function (req,res) {
 }
 Server.prototype.syncNewDiff = function (req,res) {
 	var doc = req.body;
-	doc._id = new ObjectID(doc._id);
+	//doc._id = new ObjectID(doc._id);
 	var obj = new models.Diff(doc);
-	obj.save(doc,function (err,rows) {
+	obj.save(function (err,rows) {
 		res.end('OK');
 	});
 }
