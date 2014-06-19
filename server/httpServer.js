@@ -48,7 +48,6 @@ function Server(db,activeUsersIN) {
 	this.clubs = db.collection('clubs');
 	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
-	this.installers = db.collection('installers');
 	this.objectSizes = db.collection('objectSizes');
 	this.IPN_hits = db.collection('IPN_hits');
 
@@ -123,7 +122,7 @@ function Server(db,activeUsersIN) {
 	app.get("/install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'installerid'},function (err,row) {
 			assert.ifError(err);
-			this.installers.findOne({_id:row.value},function (err,row) {
+			models.Installers.findOne({_id:row.value},function (err,row) {
 				log('sending installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
@@ -132,7 +131,7 @@ function Server(db,activeUsersIN) {
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
 			assert.ifError(err);
-			this.installers.findOne({_id:row.value},function (err,row) {
+			models.Installers.findOne({_id:row.value},function (err,row) {
 				log('sending debug installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
@@ -391,21 +390,21 @@ Server.prototype.installers_func = function (req,res) {
 	if (req.query.showlist) showlist = true;
 	function makeDeleter(id) {
 		return function (cb) {
-			this.installers.findOne({_id:new ObjectID(id)},function (err,row) {
+			models.Installers.findOne({_id:new ObjectID(id)},function (err,row) {
 				if (row) {
 					fs.unlink('installers/'+row.name,function (err) {
 						console.log('installer deleted');
 					});
 				}
 				// FIXME, delete the raw objects if they are unused
-				this.installers.remove({_id:new ObjectID(id)},function () {});
+				row.remove(function () {});
 				cb();
 			}.bind(this));
 		}.bind(this);
 	}
 	function makeActivator(id) {
 		return function (cb) {
-			this.installers.findOne({_id:new ObjectID(id)},function (err,row) {
+			models.Installers.findOne({_id:new ObjectID(id)},function (err,row) {
 				assert.ifError(err);
 				if (row) {
 					if (row.debug == 'release') {
@@ -477,7 +476,7 @@ Server.prototype.installers_func = function (req,res) {
 	console.log('running jobs');
 	async.parallel(jobs,finish2.bind(this));
 	function finish2() {
-		this.installers.find({}).sort({_id:1}).toArray(function(err,data) {
+		models.Installers.find({}).sort({_id:1}).toArray(function(err,data) {
 			models.Config.findOne({_id:'installerid'},function (err,row) {
 				var activeRelease;
 				for (var x=0; x<data.length; x++) {
@@ -852,18 +851,19 @@ Server.prototype.newVersion = function newVersion(req,res) {
 
 	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 		assert.ifError(err);
-		this.installers.insert({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size},function (err,row) {
+		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size});
+		obj.save(function (err) {
 			assert.ifError(err);
-			log('new version recorded: %j',row);
-			installer.unpackInstaller(this.IO,row[0],this.installers,this.objectSizes,function (success) {
+			log('new version recorded: %j',obj);
+			installer.unpackInstaller(this.IO,obj,this.objectSizes,function (success) {
 				if (success) {
 					if (debug == 'debug') var key1 = 'debuginstallerid';
 					else var key1 = 'installerid';
 					//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
 					//	assert.ifError(err);
 					//});
-					row[0].ts = row[0]._id.getTimestamp().toString();
-					this.IO.sockets.emit('new_installer',row[0]);
+					obj.ts = obj._id.getTimestamp().toString();
+					this.IO.sockets.emit('new_installer',obj);
 					res.send('OK');
 				} else {
 					res.send('error');
@@ -875,7 +875,8 @@ Server.prototype.newVersion = function newVersion(req,res) {
 Server.prototype.syncNewVersion = function (req,res) {
 	console.log(req.body);
 	req.body.installer._id = new ObjectID(req.body.installer._id);
-	this.installers.save(req.body.installer,function (err,reply) {
+	var obj = new models.Installers(req.body.installer);
+	obj.save(function (err,reply) {
 		console.log(err,reply);
 		async.each(req.body.sizes,function (row,cb) {
 			this.objectSizes.save(row,cb);

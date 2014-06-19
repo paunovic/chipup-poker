@@ -78,6 +78,14 @@ var DiffSchema = new Schema({
 	size:Number,
 	url:String,
 },{collection:'diffs'});
+var InstallerSchema = new Schema({
+	name:String,
+	version:String,
+	revision:String,
+	debug:String,
+	size: Number,
+	hashes: Schema.Types.Mixed
+},{collection:'installers'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -96,6 +104,7 @@ module.exports.open = function () {
 	models.Avatars = mongoose.model('Avatars',AvatarSchema);
 	models.Bugs = mongoose.model('Bugs',BugsSchema);
 	models.Diff = mongoose.model('Diff',DiffSchema);
+	models.Installer = mongoose.model('Installer',InstallerSchema);
 }
 
 if (require.main === module) {
