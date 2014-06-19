@@ -908,7 +908,7 @@ Server.prototype.paypalCallback = function (req,res) {
 				if ((res2.statusCode == 200) && (buffer.trim() == 'VERIFIED')) {
 					console.log('all good');
 					console.log(req.body);
-					models.IPN_hit.create({reply:buffer.trim(),params:req.body},function (err,doc) {
+					models.IPN_Hit.create({reply:buffer.trim(),params:req.body},function (err,doc) {
 						assert.ifError(err);
 						res.send(200,'');
 					});
@@ -923,7 +923,7 @@ Server.prototype.paypalCallback = function (req,res) {
 	req2.end();
 }
 Server.prototype.paypalLog = function (req,res) {
-	models.IPN_hit.find(function (err,rows) {
+	models.IPN_Hit.find(function (err,rows) {
 		res.render('paypal_secure',{rows:rows});
 	});
 }
