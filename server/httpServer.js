@@ -357,9 +357,9 @@ Server.prototype.ServerBugsList = function (req,res) {
 	if (req.query.delete) {
 		modelsServerError.remove({_id:req.query.delete},function () {});
 	}
-	models.ServerError.find(function (err,data) {
+	models.ServerError.find().sort({_id:-1}).exec(function (err,data) {
 		res.render('serverErrors',{rows:data,start:start});
-	}).sort({_id:-1});
+	});
 }
 Server.prototype.userList = function (req,res) {
 	var start = Date.now();
@@ -474,7 +474,7 @@ Server.prototype.installers_func = function (req,res) {
 	console.log('running jobs');
 	async.parallel(jobs,finish2.bind(this));
 	function finish2() {
-		models.Installer.find({},function(err,data) {
+		models.Installer.find().sort({_id:1}).exec(function(err,data) {
 			models.Config.findOne({_id:'installerid'},function (err,row) {
 				var activeRelease;
 				for (var x=0; x<data.length; x++) {
@@ -493,7 +493,7 @@ Server.prototype.installers_func = function (req,res) {
 					res.render('installers',{installers:data,start:start,pubver:row.value,debugver:row2.value,activeRelease:activeRelease,showlist:showlist,revision:latestVersion,latestMsg:latestMsg,diffserver:config.diffserver});
 				});
 			}.bind(this));
-		}.bind(this)).sort({_id:1});
+		}.bind(this));
 	}
 }
 Server.prototype.goOnline = function () {
