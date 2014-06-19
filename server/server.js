@@ -110,7 +110,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
+var conn,allUsers,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -132,7 +132,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 
 	allUsers = db.collection('users');
 	var allClubs = db.collection('clubs');
-	avatars = db.collection('avatars');
 	allGames = db.collection('games');
 	var allCounters = db.collection('counters');
 	bugs = db.collection('bugs');
@@ -944,7 +943,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			var id = params.avatar_id.toString('base64');
 			delete params.avatar_id;
 			this.log('changing avatar',id);
-			avatars.findOne({_id:id},function(err,row) {
+			mdb.Avatars.findOne({_id:id},function(err,row) {
 				if (err) {
 					this.reply("000","internal error");
 					return;

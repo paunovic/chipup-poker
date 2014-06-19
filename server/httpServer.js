@@ -50,7 +50,6 @@ function Server(db,activeUsersIN) {
 	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
 	this.installers = db.collection('installers');
-	this.avatars = db.collection('avatars');
 	this.objectSizes = db.collection('objectSizes');
 	this.IPN_hits = db.collection('IPN_hits');
 	this.diffs = db.collection('diffs');
@@ -775,7 +774,7 @@ Server.prototype.getAvatar = function (req,res) {
 	}
 	var raw = new Buffer(id,'hex');
 	var base64 = raw.toString('base64');
-	this.avatars.findOne({_id:base64},function (err,row) {
+	mdb.Avatars.findOne({_id:base64},function (err,row) {
 		if (!row) {
 			res.send(404);
 			return;
@@ -794,7 +793,7 @@ Server.prototype.uploadAvatar = function (req,res) {
 		var hasher = crypto.createHash('sha256');
 		hasher.update(data);
 		var hash = hasher.digest('base64');
-		this.avatars.findOne({_id:hash},function (err,row) {
+		mdb.Avatars.findOne({_id:hash},function (err,row) {
 			if (err) {
 				console.log('error',err);
 				res.send(JSON.stringify({error:err}));
@@ -805,7 +804,8 @@ Server.prototype.uploadAvatar = function (req,res) {
 				console.log('sending dup id',out);
 				res.send(200,out);
 			} else {
-				this.avatars.insert({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension},function (err,row) {
+				var obj = new mdb.models.Avatars({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension});
+				obj.save(function (err,row) {
 					if (err) {
 						console.log('error',err);
 						res.send(JSON.stringify(err));

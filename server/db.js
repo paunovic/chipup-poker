@@ -58,6 +58,13 @@ var ClubSchema = new Schema({
 	seq: Number,
 	testmode: Boolean
 },{collection:'clubs'});
+var AvatarSchema = new Schema({
+	_id: Buffer,
+	image: Buffer,
+	size: Number,
+	created: { type: Date, default: Date.now },
+	ext: String
+},{collection:'avatars'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -73,6 +80,7 @@ module.exports.open = function () {
 	models.Config = mongoose.model('Config',ConfigSchema);
 	models.DebugLogs = mongoose.model('DebugLogs',DebugLogSchema);
 	models.Clubs = mongoose.model('Clubs',ClubSchema);
+	models.Avatars = mongoose.model('Avatars',AvatarSchema);
 }
 
 if (require.main === module) {
