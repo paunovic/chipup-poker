@@ -891,18 +891,18 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 		try {
 			var params = pb.Parse(args,'Poker.GiveClubOwnershipParams');
 			var clubseq = params.club_seq;
-			var newowner = toMongoId(params.player_mongo_id);
+			var newowner = myutils.toMongoId(params.player_mongo_id);
 		} catch (e) {
 			this.error(e);
 			return;
 		}
 		this.log('giving ownership away',clubseq,newowner);
-		Club.getClubById(club._id,function (err,clubObj) {
+		Club.getClubBySeq(clubseq,function (err,clubObj) {
+			if (err == 'not found') {
+				this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(club,null,stats,clubObj),'Poker.Club');
+				return;
+			}
 			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-				if (!club) {
-					this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(club,null,stats,clubObj),'Poker.Club');
-					return;
-				}
 				if (clubObj.isOwner(this.userid)) {
 					if (containsObjectID(clubObj.obj.members,newowner)) {
 						this.log('adding self to members',this.userid);
