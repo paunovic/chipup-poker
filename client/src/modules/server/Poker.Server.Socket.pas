@@ -541,7 +541,7 @@ begin
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatsReply: ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
-    srContactUsOk: ADataObject := TPB_ContactMessage.Create(ADataPointer, ARpcMessage.DataSize);
+    srContactUsOk: ;
     srTableBuyinLessThanCashout,
     srInvalidTableBuyin: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
     srHandHistoryMsg: ADataObject := TPB_ClubHandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);

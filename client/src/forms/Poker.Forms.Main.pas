@@ -8,7 +8,8 @@ uses
   cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo, Poker.Forms.Login, Poker.Objects.GameInfo, cxImage, Vcl.ActnMan,
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
+  Vcl.ActnColorMaps;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -21,13 +22,6 @@ type
     acShowJoinClubForm: TAction;
     acShowGameTableForm: TAction;
     acOpenClubLobby: TAction;
-    MainMenu: TMainMenu;
-    miAccount: TMenuItem;
-    miChangeEMail: TMenuItem;
-    miChangePassword: TMenuItem;
-    miChangeAvatar: TMenuItem;
-    misAccount2: TMenuItem;
-    miLogout: TMenuItem;
     acShowTournamentLayout: TAction;
     acShowHomeGamesLayout: TAction;
     imgCashier: TcxImage;
@@ -36,8 +30,6 @@ type
     paMain: TPanel;
     btTournaments: TcxButton;
     btHomeGames: TcxButton;
-    miResendVerificationMail: TMenuItem;
-    misAccount1: TMenuItem;
     acResendVerificationMail: TAction;
     btFiller1: TcxButton;
     pcTabs: TcxPageControl;
@@ -66,16 +58,9 @@ type
     btJoinClub: TcxButton;
     btTournamentsHeader: TcxButton;
     lbsTournamentsComingSoon: TcxLabel;
-    miHelp: TMenuItem;
-    miContactUs: TMenuItem;
     acShowContactUsForm: TAction;
-    miTermsAndConditions: TMenuItem;
     acTermsAndConditions: TAction;
     acShowAboutForm: TAction;
-    misHelp1: TMenuItem;
-    miAbout: TMenuItem;
-    miOptions: TMenuItem;
-    miSounds: TMenuItem;
     acSoundsOnOff: TAction;
     gridMyHomeGames: TcxGrid;
     gridMyHomeGamesTable: TcxGridTableView;
@@ -83,20 +68,12 @@ type
     gridJoinedClubsClubName: TcxGridColumn;
     gridJoinedClubsStatus: TcxGridColumn;
     gridMyHomeGamesLevel: TcxGridLevel;
-    miDev: TMenuItem;
-    miDisconnect: TMenuItem;
-    misOptions1: TMenuItem;
-    miCheckOnFold: TMenuItem;
     acFoldChecks: TAction;
-    miGameplay: TMenuItem;
-    misOptions2: TMenuItem;
-    miHandHistory: TMenuItem;
     acHandHistory: TAction;
     acAnimationsEnabled: TAction;
-    miAnimations: TMenuItem;
-    misOptions3: TMenuItem;
-    miSettings: TMenuItem;
     acSettings: TAction;
+    ActionMainMenuBar: TActionMainMenuBar;
+    ActionMainMenuBarColorMap: TStandardColorMap;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -135,6 +112,7 @@ type
     procedure acHandHistoryExecute(Sender: TObject);
     procedure acAnimationsEnabledExecute(Sender: TObject);
     procedure acSettingsExecute(Sender: TObject);
+    procedure miAccountDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -354,7 +332,7 @@ end;
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
 begin
   Settings.Animations := not Settings.Animations;
-  miAnimations.Checked := Settings.Animations;
+  acAnimationsEnabled.Checked := Settings.Animations;
   DXTimer.AnimationsEnabled := Settings.Animations;
   Settings.Save;
 end;
@@ -362,7 +340,7 @@ end;
 procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
 begin
   Settings.FoldChecks := not Settings.FoldChecks;
-  miCheckOnFold.Checked := Settings.FoldChecks;
+  acFoldChecks.Checked := Settings.FoldChecks;
   Settings.Save;
 end;
 
@@ -499,13 +477,13 @@ begin
   if cpt <> Caption then
     Caption := cpt;
 
-  miResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
+  acResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
 
-  miSounds.Checked := Settings.Sounds;
-  miCheckOnFold.Checked := Settings.FoldChecks;
-  miAnimations.Checked := Settings.Animations;
+  acSoundsOnOff.Checked := Settings.Sounds;
+  acFoldChecks.Checked := Settings.FoldChecks;
+  acAnimationsEnabled.Checked := Settings.Animations;
 
-  miDev.Visible := Settings.DeveloperMode;
+//  miDev.Visible := Settings.DeveloperMode;
 
   UpdateClublist;
   UpdateGamelist;
@@ -814,7 +792,7 @@ begin
   if ASender is TfrmReconnect then
   begin
     case (ASender as TfrmReconnect).CurrentStatus of
-      rsLoggedIn: ;
+      rsLoggedIn: ConfigureGUI;
     else
       FormsContainer.Items.Extract(ASender as TForm);
       ShowLoginForm;
@@ -978,7 +956,7 @@ end;
 procedure TfrmChipUpMain.acSoundsOnOffExecute(Sender: TObject);
 begin
   Settings.Sounds := not Settings.Sounds;
-  miSounds.Checked := Settings.Sounds;
+  acSoundsOnOff.Checked := Settings.Sounds;
   Settings.Save;
 end;
 
@@ -1178,6 +1156,22 @@ var
 begin
   pb := AObject as TPB_ClubHandHistoryReply;
   HandHistory.Add(pb);
+end;
+
+procedure TfrmChipUpMain.miAccountDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
+var
+  text: String;
+begin
+  if Selected then
+    ACanvas.Brush.Color := clHighlight
+  else
+    ACanvas.Brush.Color := clBlack;
+  ACanvas.FillRect(ARect);
+
+  text := TMenuItem(Sender).Caption;
+  ACanvas.Font.Color := clWhite;
+  DrawText(ACanvas.Handle, PChar(text), Length(text), ARect, DT_CENTER);
+
 end;
 
 procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
