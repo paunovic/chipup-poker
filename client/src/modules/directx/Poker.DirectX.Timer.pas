@@ -30,7 +30,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single): TDXAnimation;
+    function AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single; const ACanvasSize: TPoint2): TDXAnimation;
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
 
@@ -81,11 +81,11 @@ begin
   inherited;
 end;
 
-function TDXTimer.AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single): TDXAnimation;
+function TDXTimer.AddAnimation(const AHandle: THandle; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single; const ACanvasSize: TPoint2): TDXAnimation;
 var
   animation: TDXAnimation;
 begin
-  animation := TDXAnimation.Create(AHandle, FNextId, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay, AEndDelay);
+  animation := TDXAnimation.Create(AHandle, FNextId, FTiming.GetTimeValue, AStartPoint, AEndPoint, ASpeed, AStartDelay, AEndDelay, ACanvasSize);
   animation.AnimationEnabled := FAnimations.AnimationsEnabled;
   Inc(FNextId);
   FAnimations.Add(animation);

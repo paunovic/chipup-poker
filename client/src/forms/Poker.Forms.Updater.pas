@@ -52,7 +52,7 @@ implementation
 
 uses
   Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule,
-  Poker.Protobufs.Objects.UpdateFileInfo;
+  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.Misc;
 
 
 procedure TfrmUpdater.FormCreate(Sender: TObject);
@@ -65,7 +65,7 @@ begin
   FUpdateFileIndex := -1;
   HttpClient.RcvdStream := TMemoryStream.Create;
 
-  FUpdateDir := IncludeTrailingPathDelimiter(AppDataPath + IncludeTrailingPathDelimiter('update'));
+  FUpdateDir := IncludeTrailingPathDelimiter(TempPath + IncludeTrailingPathDelimiter('chipuppoker_update'));
 
   FTotalSize := 0;
   FCurrentDownloadedSize := 0;
@@ -260,8 +260,8 @@ begin
   begin
     if FFullInstaller then
     begin
-      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(AppDataPath + 'install_chipuppoker.exe');
-      dmMain.SetUpdaterInstaller(AppDataPath + 'install_chipuppoker.exe');
+      (HttpClient.RcvdStream as TMemoryStream).SaveToFile(TempPath + 'install_chipuppoker.exe');
+      dmMain.SetUpdaterInstaller(TempPath + 'install_chipuppoker.exe');
       Close;
       Exit;
     end;

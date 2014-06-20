@@ -776,7 +776,7 @@ procedure TTableRenderer.RenderTableCards;
       if not AIsAnimated then
       begin
         AAnimationsList.Clear;
-        animation := DXTimer.AddAnimation(FHandle, AAnimateFrom, AAnimateTo, 0.15, ADelay, 0); AAnimationsList.Add(animation.Id);
+        animation := DXTimer.AddAnimation(FHandle, AAnimateFrom, AAnimateTo, 0.15, ADelay, 0, FDXAreaSize); AAnimationsList.Add(animation.Id);
         AIsAnimated := TRUE;
       end;
 
@@ -786,7 +786,7 @@ procedure TTableRenderer.RenderTableCards;
           for C1 := 0 to AAnimationsList.Count - 1 do
             if DXTimer.Find(FHandle, AAnimationsList[C1], animation) then
             begin
-              ACurrentCardPoint := animation.CurrPoint;
+              ACurrentCardPoint := animation.GetCurrPoint(FDXAreaSize);
               if animation.Status = asAnimating then
                 AShowCard := 1;
             end;
@@ -838,13 +838,13 @@ begin
     begin
       FFlopAnimations.Clear;
 
-      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[0], 0.15, 0.9, 0); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[1], 0.15, 0.9, 0); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[2], 0.15, 0.9, 0); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[0], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[1], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[2], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
 
-      animation := DXTimer.AddAnimation(FHandle, card_points_mid[0], card_points_final[0], 0.2, 1.1, 0); animation.Tag := 0; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, card_points_mid[1], card_points_final[1], 0.2, 1.1, 0); animation.Tag := 1; FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, card_points_mid[2], card_points_final[2], 0.2, 1.1, 0); animation.Tag := 2; FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(FHandle, card_points_mid[0], card_points_final[0], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(FHandle, card_points_mid[1], card_points_final[1], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
+      animation := DXTimer.AddAnimation(FHandle, card_points_mid[2], card_points_final[2], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
 
       FFlopAnimated := TRUE;
     end;
@@ -856,11 +856,11 @@ begin
           if (DXTimer.Find(FHandle, FFlopAnimations[C1], animation)) and
              (animation.Status = asAnimating) then
           begin
-            card_points_curr[animation.Tag] := animation.CurrPoint;
+            card_points_curr[Integer(animation.Tags[ANITAG_CARD_INDEX])] := animation.GetCurrPoint(FDXAreaSize);
             if FFlopAnimations.Count > 3 then
-              show_cards[animation.Tag] := 0
+              show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 0
             else
-              show_cards[animation.Tag] := 1;
+              show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 1;
           end;
       end
       else
@@ -921,12 +921,12 @@ begin
     if (DXTimer.Find(FHandle, FDealAnimations[C1], animation)) and
        (animation.Status = asAnimating) then
     begin
-      RenderCard(animation.CurrPoint, nil, 1);
-      if animation.TagUINT = 1 then
+      RenderCard(animation.GetCurrPoint(FDXAreaSize), nil, 1);
+      if animation.Tags.ContainsKey(ANITAG_SOUND) then
       begin
         if Assigned(FOnSoundPlay) then
-          FOnSoundPlay(Sounds.SOUND_DEALING);
-        animation.TagUINT := 0;
+          FOnSoundPlay(animation.Tags[ANITAG_SOUND]);
+        animation.Tags.Remove(ANITAG_SOUND);
       end;
     end;
 end;
@@ -948,23 +948,24 @@ begin
     for C2 := 0 to FBetAnimations.Count - 1 do
       if DXTimer.Find(FHandle, FBetAnimations[C2], animation) then
       begin
-        if (animation.TagSingle = 0) or
+        if (not animation.Tags.ContainsKey(ANITAG_BLIND)) or
            (animation.Status = asAnimating) then
         begin
-          chips_stack := FChipStackMaker.MakeStack(animation.TagUINT);
-          RenderChipStack(animation.CurrPoint, chips_stack);
+          chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
+          chips_point := animation.GetCurrPoint(FDXAreaSize);
+          RenderChipStack(chips_point, chips_stack);
 
-          if animation.TagSingle <> 0 then
-            RenderValue(animation.CurrPoint, animation.TagUINT, clWhite2, FALSE);
+          if animation.Tags.ContainsKey(ANITAG_BLIND) then
+            RenderValue(chips_point, animation.Tags[ANITAG_CHIPS], clWhite2, FALSE);
 
-          if animation.TagString <> '' then
+          if animation.Tags.ContainsKey(ANITAG_SOUND) then
           begin
             if Assigned(FOnSoundPlay) then
-              FOnSoundPlay(animation.TagString);
-            animation.TagString := '';
+              FOnSoundPlay(animation.Tags[ANITAG_SOUND]);
+            animation.Tags.Remove(ANITAG_SOUND);
           end;
         end;
-        animated_seats.Add(animation.Tag);
+        animated_seats.Add(animation.Tags[ANITAG_SEAT]);
       end;
 
     for C1 := 0 to FTableStatus.Seats.Count - 1 do
@@ -1009,21 +1010,26 @@ begin
 
     for C2 := 0 to FPotWinAnimations.Count - 1 do
       if (DXTimer.Find(FHandle, FPotWinAnimations[C2], animation)) and
-         (animation.Tag = C1) and
+         (animation.Tags[ANITAG_SEAT] = C1) and
          (animation.Status = asAnimating) then
       begin
-        chips_stack := FChipStackMaker.MakeStack(animation.TagUINT);
-        RenderChipStack(animation.CurrPoint, chips_stack);
+        chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
+        RenderChipStack(animation.GetCurrPoint(FDXAreaSize), chips_stack);
 
-        Dec(pot_value, animation.TagUINT);
+        Dec(pot_value, UINT32(animation.Tags[ANITAG_CHIPS]));
 
-        if animation.TagString <> '' then
+        if animation.Tags.ContainsKey(ANITAG_SOUND) then
         begin
           if Assigned(FOnSoundPlay) then
-            FOnSoundPlay(Sounds.SOUND_MOVE_CHIPS);
+            FOnSoundPlay(animation.Tags[ANITAG_SOUND]);
+          animation.Tags.Remove(ANITAG_SOUND);
+        end;
+
+        if animation.Tags.ContainsKey(ANITAG_WINMSG) then
+        begin
           if Assigned(FOnDealerChatMessage) then
-            FOnDealerChatMessage(animation.TagString);
-          animation.TagString := '';
+            FOnDealerChatMessage(animation.Tags[ANITAG_WINMSG]);
+          animation.Tags.Remove(ANITAG_WINMSG);
         end;
       end;
 
@@ -1212,7 +1218,7 @@ begin
 
     if FDealAnimations.Contains(animation.Id) then
     begin
-      seat_index := animation.Tag;
+      seat_index := animation.Tags[ANITAG_SEAT];
       if (Assigned(FTableStatus)) and
          (FTableStatus.GetSeatInfo(seat_index, seat)) then
         seat.IncDealtCards;
@@ -1240,10 +1246,10 @@ begin
       bet_point := FMetrics.GetBetPoint(C1, FTableStatus.Dealer);
       pot_point := FMetrics.GetPotPoint(0);
 
-      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, 0.25, 0.2, 0);
-      animation.Tag := C1;
-      animation.TagUINT := ABets[C1];
-      animation.TagString := Sounds.SOUND_MOVE_CHIPS;
+      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, 0.25, 0.2, 0, FDXAreaSize);
+      animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
+      animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
+      animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
       FBetAnimations.Add(animation.Id);
 
       result := TRUE;
@@ -1261,19 +1267,19 @@ begin
     Exit;
 
   bet_point := FMetrics.GetBetPoint(FTableStatus.SmallBlindSeat, FTableStatus.Dealer);
-  animation := DXTimer.AddAnimation(ACallback, bet_point, bet_point, 0.1, 0.1, 0.9);
-  animation.Tag := FTableStatus.SmallBlindSeat;
-  animation.TagUINT := FTableStatus.Bets[FTableStatus.SmallBlindSeat];
-  animation.TagSingle := 1;
-  animation.TagString := Sounds.SOUND_PUTCHIPS_SMALL;
+  animation := DXTimer.AddAnimation(ACallback, bet_point, bet_point, 0.1, 0.1, 0.9, FDXAreaSize);
+  animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.SmallBlindSeat);
+  animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.SmallBlindSeat]);
+  animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
+  animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
   FBetAnimations.Add(animation.Id);
 
   bet_point := Metrics.GetBetPoint(FTableStatus.BigBlindSeat, FTableStatus.Dealer);
-  animation := DXTimer.AddAnimation(ACallback, bet_point, bet_point, 0.1, 0.5, 0.5);
-  animation.Tag := FTableStatus.BigBlindSeat;
-  animation.TagUINT := FTableStatus.Bets[FTableStatus.BigBlindSeat];
-  animation.TagSingle := 1;
-  animation.TagString := Sounds.SOUND_PUTCHIPS_SMALL;
+  animation := DXTimer.AddAnimation(ACallback, bet_point, bet_point, 0.1, 0.5, 0.5, FDXAreaSize);
+  animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.BigBlindSeat);
+  animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.BigBlindSeat]);
+  animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
+  animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
   FBetAnimations.Add(animation.Id);
 end;
 
@@ -1302,11 +1308,11 @@ begin
         begin
           seat_point := FMetrics.GetSeatPoint(seat.SeatIndex);
           animation := DXTimer.AddAnimation(ACallback, Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y),
-                                            FMetrics.GetCardPoint(seat, card_index), 0.15, 1.5 + FDealAnimations.Count * 0.05, 0);
-          animation.Tag := seat.SeatIndex;
+                                            FMetrics.GetCardPoint(seat, card_index), 0.15, 1.5 + FDealAnimations.Count * 0.05, 0, FDXAreaSize);
+          animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
           Inc(cc);
           if cc mod 2 = 0 then
-            animation.TagUINT := 1;
+            animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_DEALING);
           FDealAnimations.Add(animation.Id);
           iterate := TRUE;
         end;
@@ -1354,9 +1360,9 @@ begin
       nicks := nicks + Format('%s, ', [nick]);
 
       animation := DXTimer.AddAnimation(ACallback, FMetrics.GetPotPoint(C1),
-           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer), 0.2, WinningAniDelay + 1.5 + C1 * 0.5, 0.5);
-      animation.Tag := C1;
-      animation.TagUINT := total_chips_val div UINT32(pot.WinnerData.Count);
+           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer), 0.2, WinningAniDelay + 1.5 + C1 * 0.5, 0.5, FDXAreaSize);
+      animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
+      animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
       PotWinAnimations.Add(animation.Id);
     end;
     Delete(nicks, Length(nicks) - 1, 2);
@@ -1382,7 +1388,8 @@ begin
       winmsg := Format('(%s)', [winmsg]);
 
     Assert(Assigned(animation));
-    animation.TagString := Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]);
+    animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
+    animation.Tags.AddOrSetValue(ANITAG_WINMSG, Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]));
   end;
 end;
 

@@ -54,7 +54,6 @@ type
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
-
 var
   dmMain: TdmMain;
   SelfPath: String;

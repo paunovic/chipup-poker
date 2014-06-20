@@ -27,8 +27,8 @@ object frmChipUpMain: TfrmChipUpMain
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
-    Left = -17
-    Top = 1
+    Left = -21
+    Top = 3
     AutoSize = True
     Picture.Data = {
       0B546478504E47496D61676589504E470D0A1A0A0000000D4948445200000362
@@ -4087,78 +4087,9 @@ object frmChipUpMain: TfrmChipUpMain
     Shadows = False
     Spacing = 0
     VertMargin = 0
-    ExplicitHeight = 23
   end
   object ActionManager: TActionManager
     ActionBars = <
-      item
-      end
-      item
-        Items = <
-          item
-            Items = <
-              item
-                Caption = '-'
-              end
-              item
-                Action = acLogout
-                Caption = '&Logout'
-              end>
-            Caption = '&Account'
-          end>
-      end
-      item
-        Items = <
-          item
-            Items = <
-              item
-                Action = acShowChangeEMailForm
-                Caption = '&Change E-mail Address...'
-              end
-              item
-                Action = acShowChangePasswordForm
-                Caption = 'C&hange Password...'
-              end
-              item
-                Action = acShowChangeAvatarForm
-                Caption = 'Ch&ange Avatar...'
-              end
-              item
-                Caption = '-'
-              end
-              item
-                Action = acLogout
-                Caption = '&Logout'
-              end>
-            Caption = '&Account'
-          end
-          item
-            Caption = '&Clubs'
-          end>
-      end
-      item
-        Items = <
-          item
-            Items = <
-              item
-                Action = acLogout
-                Caption = '&Logout'
-              end
-              item
-                Action = acShowChangeEMailForm
-                Caption = '&Change E-mail Address...'
-              end
-              item
-                Action = acShowChangePasswordForm
-                Caption = 'C&hange Password...'
-              end
-              item
-                Action = acShowChangeAvatarForm
-                Caption = 'Ch&ange Avatar...'
-              end>
-            Caption = '&Account'
-          end>
-      end
       item
         Items = <
           item
@@ -4248,10 +4179,17 @@ object frmChipUpMain: TfrmChipUpMain
                 Caption = '&About ChipUP Poker...'
               end>
             Caption = '&Help'
+          end
+          item
+            Items = <
+              item
+                Action = acDisconnect
+              end>
+            Caption = '&Dev'
           end>
         ActionBar = ActionMainMenuBar
       end>
-    Left = 476
+    Left = 492
     Top = 48
     StyleName = 'Platform Default'
     object acShowChangeEMailForm: TAction
@@ -4352,9 +4290,14 @@ object frmChipUpMain: TfrmChipUpMain
       Visible = False
       OnExecute = acSettingsExecute
     end
+    object acDisconnect: TAction
+      Category = 'Dev'
+      Caption = 'Disconnect'
+      OnExecute = acDisconnectExecute
+    end
   end
   object ActionMainMenuBarColorMap: TStandardColorMap
-    HighlightColor = 1644825
+    HighlightColor = 3026478
     UnusedColor = 2368548
     BtnFrameColor = 8332
     BtnSelectedColor = 8332

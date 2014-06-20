@@ -74,6 +74,7 @@ type
     acSettings: TAction;
     ActionMainMenuBar: TActionMainMenuBar;
     ActionMainMenuBarColorMap: TStandardColorMap;
+    acDisconnect: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -106,13 +107,13 @@ type
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
-    procedure miDisconnectClick(Sender: TObject);
     procedure acShowAboutFormExecute(Sender: TObject);
     procedure acFoldChecksExecute(Sender: TObject);
     procedure acHandHistoryExecute(Sender: TObject);
     procedure acAnimationsEnabledExecute(Sender: TObject);
     procedure acSettingsExecute(Sender: TObject);
     procedure miAccountDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
+    procedure acDisconnectExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -337,6 +338,11 @@ begin
   Settings.Save;
 end;
 
+procedure TfrmChipUpMain.acDisconnectExecute(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
+end;
+
 procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
 begin
   Settings.FoldChecks := not Settings.FoldChecks;
@@ -483,7 +489,7 @@ begin
   acFoldChecks.Checked := Settings.FoldChecks;
   acAnimationsEnabled.Checked := Settings.Animations;
 
-//  miDev.Visible := Settings.DeveloperMode;
+  ActionManager.ActionBars[0].Items[3].Visible := Settings.DeveloperMode;
 
   UpdateClublist;
   UpdateGamelist;
@@ -1172,11 +1178,6 @@ begin
   ACanvas.Font.Color := clWhite;
   DrawText(ACanvas.Handle, PChar(text), Length(text), ARect, DT_CENTER);
 
-end;
-
-procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
-begin
-  ServerSocket.Disconnect;
 end;
 
 

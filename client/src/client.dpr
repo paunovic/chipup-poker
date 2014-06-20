@@ -161,7 +161,6 @@ uses
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
   Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas';
 
-
 procedure FocusApp;
 var
   window_handle: THandle;
