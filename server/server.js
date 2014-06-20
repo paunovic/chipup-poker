@@ -904,32 +904,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.scChangePassword:
-			try {
-				var params = pb.Parse(args,'Poker.ChangePasswordParams');
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			if (!regexLimits.password.exec(params.new_password)) {
-				this.reply(0,'password too long');
-				return;
-			}
-			deck.getRandom(16,function (salt) {
-				var hasher = crypto.createHash('sha256');
-				hasher.update(salt);
-				hasher.update(params.new_password);
-				var hash = hasher.digest();
-				allUsers.update({_id:this.userid},{$set:{password:hash,salt:salt}},function (err,res) {
-					if (err) {
-						this.reply("000","internal error");
-						return;
-					}
-					this.send(codes.srChangePasswordOk);
-					token.stop();
-				}.bind(this));
-			}.bind(this));
-			break;
 		case codes.scSetAvatar:
 			try {
 				var params = pb.Parse(args,'Poker.SetAvatarParams');
@@ -1331,7 +1305,36 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 }
 Game.registerHandlers(handlers,pb);
 Club.registerHandlers(handlers,pb,sharedconfig);
-
+handlers[codes.scChangePassword] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.ChangePasswordParams');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	if (!regexLimits.password.exec(params.new_password)) {
+		this.reply(0,'password too long');
+		return;
+	}
+	deck.getRandom(16,function (salt) {
+		var hasher = crypto.createHash('sha256');
+		hasher.update(salt);
+		hasher.update(params.new_password);
+		var hash = hasher.digest();
+		mdb.models.UserModel.findOne({_id:this.userid},function (err,self) {
+			self.password = hash;
+			self.salt = salt;
+			self.save(function (err) {
+				if (err) {
+					this.reply("000","internal error");
+					return;
+				}
+				this.send(codes.srChangePasswordOk);
+				token.stop();
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
+}
 handlers[codes.scResendVerificationMail] = function () {
 	allUsers.findOne({_id:this.userid},function (err,row) {
 		if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,row.displayname,function () {},function () {},function () {});
