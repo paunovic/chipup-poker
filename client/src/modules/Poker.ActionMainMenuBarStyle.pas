@@ -3,29 +3,37 @@ unit Poker.ActionMainMenuBarStyle;
 interface
 
 uses
-  System.Types, Vcl.ActnMan, Vcl.ActnMenus, Vcl.XPActnCtrls, Vcl.XPStyleActnCtrls, Vcl.GraphUtil;
+  System.Types, Vcl.ActnMan, Vcl.ActnMenus, Vcl.StdActnMenus, Vcl.StdStyleActnCtrls, Vcl.GraphUtil, Vcl.ActnColorMaps;
 
 type
-  TActionMainMenuBarStyle = class(TXPStyleActionBars)
+  TActionMainMenuBarStyle = class(TStandardStyleActionBars)
   public
     function GetControlClass(ActionBar: TCustomActionBar; AnItem: TActionClientItem): TCustomActionControlClass; override;
   end;
 
-  TActionMainMenuBarMenuStyle = class(TXPStyleMenuitem)
+  TActionMainMenuBarColorMap = class(Vcl.ActnColorMaps.TStandardColorMap)
+  public
+    procedure UpdateColors; override;
+  end;
+
+  TActionMainMenuBarMenuStyle = class(TStandardMenuItem)
   protected
     procedure DrawSeparator(const Offset: Integer); override;
     procedure DrawGlyph(const Location: TPoint); override;
+    procedure DrawBackground(var PaintRect: TRect); override;
   public
     procedure CalcBounds; override;
   end;
 
 var
   ActionMainMenuBarStyle: TActionMainMenuBarStyle;
+  ActionMainMenuBarColorMap: TActionMainMenuBarColorMap;
 
 implementation
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.ActnList, Vcl.Graphics, Vcl.ImgList, System.UITypes;
+
 
 { TActionMainMenuBarStyle }
 
@@ -42,87 +50,34 @@ procedure TActionMainMenuBarMenuStyle.CalcBounds;
 begin
   inherited;
 
-  if not Assigned(ActionClient) then
-    Exit;
-
-  if (ActionClient.HasItems) or
+  if (not Assigned(ActionClient)) or
+     (ActionClient.HasItems) or
      ((ActionClient.Action is TCustomAction) and
       ((ActionClient.Action as TCustomAction).GroupIndex = 0)) then
-    TextBounds.Offset(-16, 0)
+    TextBounds.Offset(-14, 0)
   else
-    TextBounds.Offset(-7, 0);
+    TextBounds.Offset(-3, 0);
 end;
 
 procedure TActionMainMenuBarMenuStyle.DrawGlyph(const Location: TPoint);
-var
-  OldColor, OldBrushColor: TColor;
-  NewLocation: TPoint;
-  FrameRect: TRect;
-  SelBmp: TBitmap;
-  ImageList: TCustomImageList;
 begin
-  if (Assigned(ActionClient) and not ActionClient.HasGlyph) and
-     ((Action is TCustomAction) and TCustomAction(Action).Checked) then
+  if not HasGlyph and IsChecked then
   begin
     Canvas.Pen.Color := ActionBar.ColorMap.FontColor;
-    with Location do
-      DrawCheck(Canvas, Point(X + 5, Y + 2), 2)
-  end
-  else
-  begin
-    if IsChecked then
-    begin
-      FrameRect := System.Types.Rect(Location.X - 1, 1,
-        Location.X + 20, Self.Height - 1);
-      Canvas.Brush.Color := Menu.ColorMap.SelectedColor;
-      Canvas.Pen.Color := ActionBar.ColorMap.BtnFrameColor;
-      Canvas.Rectangle(FrameRect);
-    end;
-    OldColor := Canvas.Brush.Color;
-    if (Selected and Enabled) or (Selected and not MouseSelected) then
-      Canvas.Brush.Color := Menu.ColorMap.SelectedColor
-    else
-      Canvas.Brush.Color := Menu.ColorMap.ShadowColor;
-    NewLocation := Location;
-
-    if (Selected and Enabled and ActionClient.HasGlyph) then
-    begin
-      OldBrushColor := Canvas.Brush.Color;
-      SelBmp := TBitmap.Create;
-      try
-        ImageList := FindImageList(False, ActionClient.ImageIndex);
-        if Assigned(ImageList) then
-        begin
-          Canvas.Brush.Color := GetShadowColor(Menu.ColorMap.SelectedColor);
-          SelBmp.Width := ImageList.Width;
-          SelBmp.Height := ImageList.Width;
-
-          SelBmp.Canvas.FillRect(SelBmp.Canvas.ClipRect);
-
-          if ImageList.ColorDepth = cdDeviceDependent then
-            ImageList.Draw(SelBmp.Canvas, 0, 0, ActionClient.ImageIndex, dsNormal, itMask)
-          else
-            ImageList.Draw( SelBmp.Canvas, 0, 0, ActionClient.ImageIndex);
-
-
-          DrawState(Canvas.Handle, Canvas.Brush.Handle, nil, LPARAM(SelBmp.Handle), 0,
-            NewLocation.X + 3, NewLocation.Y + 2, 0, 0, DST_BITMAP or DSS_MONO);
-        end;
-      finally
-        SelBmp.Free;
-        Canvas.Brush.Color := OldBrushColor;
-      end;
-
-      Inc(NewLocation.X, 1);
-      inherited DrawGlyph(NewLocation);
-    end
-    else begin
-      Inc(NewLocation.X, 2);
-      Inc(NewLocation.Y, 1);
-      inherited DrawGlyph(NewLocation);
-    end;
-    Canvas.Brush.Color := OldColor;
+    DrawCheck(Canvas, Point((TextBounds.Left - 8) div 2, Height div 2), 2);
   end;
+end;
+
+procedure TActionMainMenuBarMenuStyle.DrawBackground(var PaintRect: TRect);
+begin
+  if ActionClient.HasGlyph or IsChecked then
+    PaintRect.Left := PaintRect.Left - 21
+  else
+    PaintRect.Left := PaintRect.Left - 2;
+
+  PaintRect.Width := PaintRect.Width + 2;
+
+  inherited DrawBackground(PaintRect);
 end;
 
 procedure TActionMainMenuBarMenuStyle.DrawSeparator(const Offset: Integer);
@@ -152,11 +107,40 @@ begin
   end;
 end;
 
+{ TActionMainMenuBarColorMap }
+
+procedure TActionMainMenuBarColorMap.UpdateColors;
+begin
+  inherited;
+
+  ShadowColor := clGray;
+  Color := $191919;
+  DisabledFontColor := $4B4B4B;
+  DisabledFontShadow := $191919;
+  FontColor := $C7C7C7;
+  HighlightColor := $2E2E2E;
+  HotColor := $00208C;
+  HotFontColor := clWhite;
+  MenuColor := $191919;
+  FrameTopLeftInner := $191919;
+  FrameTopLeftOuter := $00208C;
+  FrameBottomRightInner := $191919;
+  FrameBottomRightOuter := $00208C;
+  BtnFrameColor := $00208C;
+  BtnSelectedColor := $00208C;
+  BtnSelectedFont := clWhite;
+  SelectedColor := $00208C;
+  SelectedFontColor := clWhite;
+  UnusedColor := $191919;
+end;
+
 initialization
+  ActionMainMenuBarColorMap := TActionMainMenuBarColorMap.Create(nil);
   ActionMainMenuBarStyle := TActionMainMenuBarStyle.Create;
 
 finalization
   FreeAndNil(ActionMainMenuBarStyle);
+  FreeAndNil(ActionMainMenuBarColorMap);
 
 
 end.

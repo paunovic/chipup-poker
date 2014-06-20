@@ -9,7 +9,7 @@ uses
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.ActnColorMaps, Vcl.XPStyleActnCtrls;
+  Vcl.ActnColorMaps, Vcl.StdStyleActnCtrls;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -74,7 +74,6 @@ type
     acSettings: TAction;
     ActionMainMenuBar: TActionMainMenuBar;
     acDisconnect: TAction;
-    ActionMainMenuBarColorMap: TXPColorMap;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -113,13 +112,14 @@ type
     procedure acAnimationsEnabledExecute(Sender: TObject);
     procedure acSettingsExecute(Sender: TObject);
     procedure acDisconnectExecute(Sender: TObject);
+    procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient;
+      var ControlClass: TCustomActionControlClass);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
     FCallbacksId: Integer;
     FShuttingDown: Boolean;
     FActionMainMenuBarFont: TFont;
-    FActionMainMenuBarColormap: TXPColorMap;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -205,12 +205,10 @@ begin
   LoadImageFromResource(imgCashier, 'CashierNormal');
 
   ActionManager.Style := ActionMainMenuBarStyle;
+  ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
 
   FActionMainMenuBarFont := TFont.Create;
   FActionMainMenuBarFont.Assign(ActionMainMenuBar.Font);
-
-  FActionMainMenuBarColormap := TXPColorMap.Create(self);
-  FActionMainMenuBarColormap.Assign(ActionMainMenuBar.ColorMap);
 
   btHomeGames.Font.Name := 'Sintony Bold';
   btHomeGames.Font.Style := [];
@@ -236,7 +234,6 @@ begin
   Tables.Clear;
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FActionMainMenuBarFont.Free;
-  FActionMainMenuBarColormap.Free;
 end;
 
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -637,7 +634,7 @@ begin
   // this reassigns font/colormap to ActionMainMenuBar
   // bug info: http://stackoverflow.com/questions/9577540/tactionmainmenubar-and-tactiontoolbar-lose-settings
   ActionMainMenuBar.Font.Assign(FActionMainMenuBarFont);
-  ActionMainMenuBar.ColorMap.Assign(FActionMainMenuBarColormap);
+  ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
 end;
 
 procedure TfrmChipUpMain.gridMyHomeGamesEnter(Sender: TObject);
@@ -991,6 +988,11 @@ end;
 procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);
 begin
   dmMain.OpenTACLink;
+end;
+
+procedure TfrmChipUpMain.ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
+begin
+  ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
 end;
 
 procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);

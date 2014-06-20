@@ -4075,18 +4075,20 @@ object frmChipUpMain: TfrmChipUpMain
     ActionManager = ActionManager
     AnimateDuration = 50
     AnimationStyle = asFade
-    Color = 1644825
-    ColorMap = ActionMainMenuBarColorMap
+    ColorMap.HighlightColor = clBtnHighlight
+    ColorMap.UnusedColor = 14673125
+    ColorMap.MenuColor = clMenu
     EdgeInner = esNone
     EdgeOuter = esNone
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = 13092807
+    Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
     Shadows = False
     Spacing = 0
     VertMargin = 0
+    OnGetControlClass = ActionMainMenuBarGetControlClass
   end
   object ActionManager: TActionManager
     ActionBars = <
@@ -4190,9 +4192,9 @@ object frmChipUpMain: TfrmChipUpMain
           end>
         ActionBar = ActionMainMenuBar
       end>
-    Left = 456
-    Top = 48
-    StyleName = 'XP Style'
+    Left = 440
+    Top = 56
+    StyleName = 'Standard'
     object acShowChangeEMailForm: TAction
       Category = 'Account'
       Caption = 'Change E-mail Address...'
@@ -4299,28 +4301,5 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Disconnect'
       OnExecute = acDisconnectExecute
     end
-  end
-  object ActionMainMenuBarColorMap: TXPColorMap
-    ShadowColor = clGray
-    Color = 1644825
-    DisabledFontColor = 4934475
-    DisabledFontShadow = 1644825
-    FontColor = 13092807
-    HighlightColor = 3026478
-    HotColor = 8332
-    HotFontColor = clWhite
-    MenuColor = 1644825
-    FrameTopLeftInner = 1644825
-    FrameTopLeftOuter = 8332
-    FrameBottomRightInner = 1644825
-    FrameBottomRightOuter = 8332
-    BtnFrameColor = 8332
-    BtnSelectedColor = 8332
-    BtnSelectedFont = clWhite
-    SelectedColor = 8332
-    SelectedFontColor = clWhite
-    UnusedColor = 2368548
-    Left = 340
-    Top = 48
   end
 end
