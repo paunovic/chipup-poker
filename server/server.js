@@ -110,7 +110,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allGames,handHistory,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
+var conn,allGames,handHistory,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -130,7 +130,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	});
 	process.send({msg:'connected'});
 
-	allUsers = db.collection('users');
+	var allUsers = db.collection('users');
 	var allClubs = db.collection('clubs');
 	allGames = db.collection('games');
 	var allCounters = db.collection('counters');
@@ -260,7 +260,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		}
 	});
 	function checkCorruptChips() {
-		allUsers.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
+		mdb.models.UserModel.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
 			if (badUsers.length > 0) {
 				console.log(badUsers);
 				process.send({type:'control',cmd:'autooff'});
@@ -1128,27 +1128,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.scGetPlayers:
-			try {
-				var params = pb.Parse(args,'Poker.GetUserParams');
-				this.log('getting players: %j',params,args);
-				for (var x=0; x<params.user_mongo_ids.length; x++) {
-					params.user_mongo_ids[x] = toMongoId(params.user_mongo_ids[x]);
-				}
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			allUsers.find({_id:{$in:params.user_mongo_ids}}).toArray(function (err,users) {
-				this.log(params.user_mongo_ids,users);
-				var out = {users:[]};
-				for (var x=0; x<users.length; x++) {
-					out.users[x] = makeUserProtobuf(users[x]);
-				}
-				this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
-				token.stop();
-			}.bind(this));
-			break;
 		case codes.scTableAddOn:
 			try {
 				var params = pb.Parse(args,'Poker.TableSit');
@@ -1226,12 +1205,12 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 				}.bind(this));
 			}.bind(this),function finished() {
 				status.clubs = clubsOut;
-				allUsers.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""}).toArray(function(err,users) {
+				mdb.models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""},function(err,users) {
 					for (var x=0; x<users.length; x++) {
 						users[x] = makeUserProtobuf(users[x]);
 					}
 					status.users = users;
-					allUsers.findOne({_id:this.userid},function(err,self) {
+					mdb.models.UserModel.findOne({_id:this.userid},function(err,self) {
 						status.self = makeUserProtobuf(self);
 						// FIXME, hide closed games, send them in a second array for just the owner
 						allGames.find({clubid:{$in:clubids}}).toArray(function (err,games) {
@@ -1283,6 +1262,27 @@ handlers[codes.scChangePassword] = function (args,token) {
 				token.stop();
 			}.bind(this));
 		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scGetPlayers] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.GetUserParams');
+		this.log('getting players: %j',params,args);
+		for (var x=0; x<params.user_mongo_ids.length; x++) {
+			params.user_mongo_ids[x] = myutils.toMongoId(params.user_mongo_ids[x]);
+		}
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	mdb.models.UserModel.find({_id:{$in:params.user_mongo_ids}},function (err,users) {
+		this.log(params.user_mongo_ids,users);
+		var out = {users:[]};
+		for (var x=0; x<users.length; x++) {
+			out.users[x] = makeUserProtobuf(users[x]);
+		}
+		this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
+		token.stop();
 	}.bind(this));
 }
 handlers[codes.scSetAvatar] = function (args,token) {
