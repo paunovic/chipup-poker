@@ -184,7 +184,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	}.bind(this));
 }
 Club.finishTableStatsPacket = function (data,cb) {
-	models.UserModel.find({_id:{$in:data.players}},function (err,playersOut) {
+	models.UserModel.find({_id:{$in:data.players}}).lean(true).exec(function (err,playersOut) {
 		assert.ifError(err);
 		for (var i=0; i<playersOut.length; i++) {
 			playersOut[i]._id = myutils.fromMongoId(playersOut[i]._id);
@@ -740,7 +740,7 @@ handlers[codes.scTransferChips] = function (args,token) {
 				this.reply(0,"dest not found");
 				return;
 			}
-			source.update({{ $inc:{chips:-chips}},function (err) {
+			source.update({ $inc:{chips:-chips}},function (err) {
 				assert.ifError(err);
 				this.log('step 1',err,res);
 				dest.update({ $inc:{chips:chips}},function (err) {
@@ -777,6 +777,7 @@ handlers[codes.scTransferChips] = function (args,token) {
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
+		}.bind(this));
 	}.bind(this));
 }
 handlers[codes.scChangeClubDetails] = function (args,token) {

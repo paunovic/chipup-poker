@@ -19,6 +19,7 @@ var Hand = deck.Hand;
 var Club = require('./club').Club;
 var myutils = require('./myutils');
 var mdb = require('./db');
+var models = mdb.models;
 
 function makeGameProtobuf(g) {
 	assert.equal(g._id.toString().length,24);
@@ -1194,23 +1195,23 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				assert.equal(typeof betsToRemove[job.seat],'number');
 				this.balance_changes[job.seat] -= betsToRemove[job.seat];
 				models.UserModel.findOneAndUpdate({_id:priv.userid},{ $inc:{chips:-betsToRemove[job.seat]}},function (err,res) {
-						assert(!err);
-						assert(res == 1);
-						this.log('lost chips',job.seat,betsToRemove[job.seat]);
-						if (priv.conn) {
-							priv.conn.boughtin -= betsToRemove[job.seat];
-							priv.conn.chips -= betsToRemove[job.seat];
-						}
-						betsToRemove[job.seat] = 0;
-						// debug to detect desync
-						// usage: set buyin on a table with EVERYTHING on every user
-						//allUsers.findOne({_id:priv.userid},function (err,check) {
-							//priv.conn.log('CHECK global:',check.chips,'table:',item.chips,'boughtin:',priv.conn.boughtin);
-							//assert.equal(check.chips,item.chips);
-							//assert.equal(check.chips,priv.conn.boughtin);
-						cb();
-						//}.bind(this));
-					}.bind(this));
+					assert.ifError(err);
+					assert(res);
+					this.log('lost chips',job.seat,betsToRemove[job.seat]);
+					if (priv.conn) {
+						priv.conn.boughtin -= betsToRemove[job.seat];
+						priv.conn.chips -= betsToRemove[job.seat];
+					}
+					betsToRemove[job.seat] = 0;
+					// debug to detect desync
+					// usage: set buyin on a table with EVERYTHING on every user
+					//allUsers.findOne({_id:priv.userid},function (err,check) {
+					//priv.conn.log('CHECK global:',check.chips,'table:',item.chips,'boughtin:',priv.conn.boughtin);
+					//assert.equal(check.chips,item.chips);
+					//assert.equal(check.chips,priv.conn.boughtin);
+					cb();
+					//}.bind(this));
+				}.bind(this));
 			}.bind(this),function finish(err) {
 				assert.ifError(err);
 				//this.log('remove chips done',betsToRemove);
@@ -1826,19 +1827,17 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 			token9 = profiler.start('standup-step2.3'); // 6.7ms
 			var token8 = profiler.start('standup-inner8');
 			this.pots[0].value += increase;
-			models.UserModel.findOneAndUpdate({_id:priv.userid},
-				{ $inc:{chips:-this.bets[seatObj.seat]}},
-				function (err,res) {
-					assert(!err);
-					assert(res == 1);
-					priv.conn.log('lost chips',increase,this.bets[seatIdx],seatIdx);
-					priv.conn.boughtin -= this.bets[seatIdx];
-					this.bets[seatIdx] = 0;
-					this.seats[seatIdx] = null;
-					this.log('nulled out internal seat');
-					//this.broadcastStatus();
-					token8.stop(); // 5ms
-					finish2.call(this,offset);
+			models.UserModel.findOneAndUpdate({_id:priv.userid},{ $inc:{chips:-this.bets[seatObj.seat]}},function (err,res) {
+				assert.ifError(err);
+				assert(res);
+				priv.conn.log('lost chips',increase,this.bets[seatIdx],seatIdx);
+				priv.conn.boughtin -= this.bets[seatIdx];
+				this.bets[seatIdx] = 0;
+				this.seats[seatIdx] = null;
+				this.log('nulled out internal seat');
+				//this.broadcastStatus();
+				token8.stop(); // 5ms
+				finish2.call(this,offset);
 			}.bind(this));
 		}
 		function finish2(offset) {

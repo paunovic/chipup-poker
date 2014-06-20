@@ -260,7 +260,8 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		}
 	});
 	function checkCorruptChips() {
-		mdb.models.UserModel.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
+		mdb.models.UserModel.collection.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
+			assert.ifError(err);
 			if (badUsers.length > 0) {
 				console.log(badUsers);
 				process.send({type:'control',cmd:'autooff'});
@@ -577,12 +578,12 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 		this.error(e);
 		return;
 	}
-	console.log('hello params',params);
+	//console.log('hello params',params);
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
 	Config.findOne({_id:key1},function (err,row2) {
 		mdb.models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
-			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+			//console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
 			for (var x=0; x<params.files.length; x++) {
@@ -605,8 +606,8 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 					return cb();
 				}
 				if (clientFile.hash != targetFile) {
-					console.log('clientFile:%j',clientFile);
-					console.log('need to patch %s',clientFile.path);
+					//console.log('clientFile:%j',clientFile);
+					//console.log('need to patch %s',clientFile.path);
 					mdb.models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
 						if (diffRow) {
@@ -1208,6 +1209,8 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 				mdb.models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""},function(err,users) {
 					for (var x=0; x<users.length; x++) {
 						users[x] = makeUserProtobuf(users[x]);
+						assert(users[x]._id.length == 12);
+						console.log('test',users[x]);
 					}
 					status.users = users;
 					mdb.models.UserModel.findOne({_id:this.userid},function(err,self) {
@@ -1280,7 +1283,9 @@ handlers[codes.scGetPlayers] = function (args,token) {
 		var out = {users:[]};
 		for (var x=0; x<users.length; x++) {
 			out.users[x] = makeUserProtobuf(users[x]);
+			assert(out.users[x]._id.length == 12);
 		}
+		console.log('getplayers:',out);
 		this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
 		token.stop();
 	}.bind(this));
@@ -1546,6 +1551,7 @@ handlers[codes.scResetPlayerBalance] = function (args,token) {
 	}.bind(this));
 }
 function makeUserProtobuf(u) {
+	var u = JSON.parse(JSON.stringify(u));
 	if (u.avatar) u.avatar = new Buffer(u.avatar,'base64');
 	else u.avatar = new Buffer([33]);
 	u._id = new Buffer(u._id.toString(),'hex');
