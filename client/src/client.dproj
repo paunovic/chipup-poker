@@ -337,6 +337,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas"/>
+			<DCCReference Include="modules\Poker.ActionMainMenuBarStyle.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

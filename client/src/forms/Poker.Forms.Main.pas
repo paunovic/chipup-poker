@@ -9,7 +9,7 @@ uses
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.ActnColorMaps;
+  Vcl.ActnColorMaps, Vcl.XPStyleActnCtrls;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -112,7 +112,6 @@ type
     procedure acHandHistoryExecute(Sender: TObject);
     procedure acAnimationsEnabledExecute(Sender: TObject);
     procedure acSettingsExecute(Sender: TObject);
-    procedure miAccountDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
     procedure acDisconnectExecute(Sender: TObject);
   private
     FSelectedClub: Integer;
@@ -187,7 +186,8 @@ uses
   Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
-  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings;
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
+  Poker.ActionMainMenuBarStyle;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -200,6 +200,8 @@ end;
 procedure TfrmChipUpMain.FormCreate(Sender: TObject);
 begin
   LoadImageFromResource(imgCashier, 'CashierNormal');
+
+  ActionManager.Style := ActionMainMenuBarStyle;
 
   btHomeGames.Font.Name := 'Sintony Bold';
   btHomeGames.Font.Style := [];
@@ -1160,22 +1162,5 @@ begin
   pb := AObject as TPB_ClubHandHistoryReply;
   HandHistory.Add(pb);
 end;
-
-procedure TfrmChipUpMain.miAccountDrawItem(Sender: TObject; ACanvas: TCanvas; ARect: TRect; Selected: Boolean);
-var
-  text: String;
-begin
-  if Selected then
-    ACanvas.Brush.Color := clHighlight
-  else
-    ACanvas.Brush.Color := clBlack;
-  ACanvas.FillRect(ARect);
-
-  text := TMenuItem(Sender).Caption;
-  ACanvas.Font.Color := clWhite;
-  DrawText(ACanvas.Handle, PChar(text), Length(text), ARect, DT_CENTER);
-
-end;
-
 
 end.
