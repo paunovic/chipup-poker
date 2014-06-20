@@ -506,7 +506,7 @@ begin
   // hand playback bounds
   wint := ADXAreaSize.x div 3;
   hint := 9;
-  FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 2), FChatBoxBounds.Top), wint, hint);
+  FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 5), FChatBoxBounds.Top), wint, hint);
 
   wint := 48;
   hint := 48;

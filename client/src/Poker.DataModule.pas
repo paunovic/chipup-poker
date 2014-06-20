@@ -325,21 +325,16 @@ end;
 function TdmMain.GetAvailableBalance: UINT32;
 var
   table: TTable;
-  tstatus: TTableStatus;
   seat: TSeatInfo;
 begin
   result := FSelfInfo.Balance;
   for table in Tables do
-    if Assigned(table.Form) then
-    begin
-      tstatus := (table.Form as TfrmTable).TableStatus;
-      for seat in tstatus.Seats do
-        if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
-        begin
-          Assert(seat.Chips <= result);
-          Dec(result, seat.Chips)
-        end;
-    end;
+    for seat in table.Renderer.TableStatus.Seats do
+      if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
+      begin
+        Assert(seat.Chips <= result);
+        Dec(result, seat.Chips)
+      end;
 end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);

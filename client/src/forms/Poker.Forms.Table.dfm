@@ -637,13 +637,6 @@ object frmTable: TfrmTable
     Left = 236
     Top = 108
   end
-  object tiRender: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tiRenderTimer
-    Left = 316
-    Top = 32
-  end
   object tiHandPlayback: TTimer
     Enabled = False
     OnTimer = tiHandPlaybackTimer

@@ -161,8 +161,6 @@ begin
 end;
 
 procedure TTable.SetupSettingsPreviewTable(const AHandle: THandle);
-var
-  tablestatus: TTableStatus;
 begin
   FTableType := ttSettingsPreview;
   FSeatIndex := -1;
@@ -171,11 +169,9 @@ begin
   FGame := TGameInfo.Create;
   FGame.InitToDemoValues(FClub.Id);
   FClub.Games.Add(FGame);
-  tablestatus := TTableStatus.Create;
-  tablestatus.InitToDemoValues;
   FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttSettingsPreview);
+  FRenderer.TableStatus.InitToDemoValues;
   FRenderer.SetRenderTarget(AHandle);
-  FRenderer.UpdateTableStatus(tablestatus);
   FRenderer.FlopAnimated := TRUE;
   DXCore.ModifySwapChainElement(FSwapChainIndex, AHandle);
   FRenderer.UpdateDXAreaSize;

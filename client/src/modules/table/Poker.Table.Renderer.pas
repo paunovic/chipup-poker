@@ -88,7 +88,6 @@ type
     procedure ClearAnimations;
 
     procedure UpdateDXAreaSize;
-    procedure UpdateTableStatus(const ATableStatus: TTableStatus);
     procedure Render;
 
     function AnimateBets(const ACallback: THandle; ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
@@ -102,11 +101,11 @@ type
     procedure MouseMove(Shift: TShiftState; X, Y: Integer);
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
+    property TableStatus: TTableStatus read FTableStatus;
     property Game: TGameInfo read FGame write SetGame;
 
     property Metrics: TTableRenderMetrics read FMetrics;
     property ChipStackMaker: TChipStackMaker read FChipStackMaker;
-    property TableStatus: TTableStatus read FTableStatus;
 
     property FlopAnimations: TList<Integer> read FFlopAnimations;
     property TurnAnimations: TList<Integer> read FTurnAnimations;
@@ -155,6 +154,7 @@ begin
   FMetrics := TTableRenderMetrics.Create(FGame);
   FChipStackMaker := TChipStackMaker.Create;
   FDXButtons := TObjectList<TDXButton>.Create;
+  FTableStatus := TTableStatus.Create;
 
   if FTableType = ttHandPlayback then
     FDrawColor := cAlpha4(150)
@@ -187,6 +187,7 @@ begin
   FDXButtons.Free;
   FChipStackMaker.Free;
   FMetrics.Free;
+  FreeAndNil(FTableStatus);
 
   inherited;
 end;
@@ -243,7 +244,7 @@ var
 begin
   Winapi.Windows.GetClientRect(FHandle, rect);
 
-  // dont render if its 0px wide/tall, this causes swapchain element to get destroyed in Asphyre, and black screen after that
+  // dont resize if its 0px wide/tall, this causes swap chain element to get destroyed in Asphyre, and black screen after that
   if (rect.Width = 0) or
      (rect.Height = 0) then
     Exit;
@@ -251,11 +252,6 @@ begin
   FDXAreaSize := Point2px(rect.Width, rect.Height);
   DXCore.Device.Resize(FSwapChainIndex, FDXAreaSize);
   FMetrics.Update(FDXAreaSize, FRaiseThumbPosition);
-end;
-
-procedure TTableRenderer.UpdateTableStatus(const ATableStatus: TTableStatus);
-begin
-  FTableStatus := ATableStatus;
 end;
 
 procedure TTableRenderer.Render;
@@ -1011,7 +1007,7 @@ begin
     for C2 := 0 to FPotWinAnimations.Count - 1 do
       if (DXTimer.Find(FHandle, FPotWinAnimations[C2], animation)) and
          (animation.Tags[ANITAG_SEAT] = C1) and
-         (animation.Status = asAnimating) then
+         (animation.Status in [asAnimating, asDone]) then
       begin
         chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
         RenderChipStack(animation.GetCurrPoint(FDXAreaSize), chips_stack);
@@ -1337,6 +1333,7 @@ var
   player: TPlayerInfo;
   suffix, chips_plural: String;
   winmsg: String;
+  winenddelay: Single;
 begin
   for C1 := 0 to APots.Count - 1 do
   begin
@@ -1359,8 +1356,14 @@ begin
 
       nicks := nicks + Format('%s, ', [nick]);
 
+      // 600 seconds to render pot wins if table is in playback mode, otherwise 0.5
+      if FTableType = ttHandPlayback then
+        winenddelay := 600
+      else
+        winenddelay := 0.5;
+
       animation := DXTimer.AddAnimation(ACallback, FMetrics.GetPotPoint(C1),
-           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer), 0.2, WinningAniDelay + 1.5 + C1 * 0.5, 0.5, FDXAreaSize);
+           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer), 0.2, WinningAniDelay + 1.5 + C1 * 0.5, winenddelay, FDXAreaSize);
       animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
       PotWinAnimations.Add(animation.Id);

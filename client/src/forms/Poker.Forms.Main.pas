@@ -327,7 +327,8 @@ function TfrmChipUpMain.GetSelectedGame(var AGame: TGameInfo): Boolean;
 var
   club: TClubInfo;
 begin
-  result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
+  result := (GetSelectedClub(club)) and
+            (club.Games.FindGame(FSelectedGame, AGame));
 end;
 
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
@@ -372,7 +373,6 @@ procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
 var
   club: TClubInfo;
   form: TForm;
-  found: Boolean;
 begin
   if not dmMain.CheckAuthed then
     Exit;
@@ -380,18 +380,15 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
-  found := FALSE;
   for form in FormsContainer.Items do
     if (form is TfrmClubLobby) and
        ((form as TfrmClubLobby).ClubId = FSelectedClub) then
     begin
       form.SetFocus;
-      found := TRUE;
-      Break;
+      Exit;
     end;
 
-  if not found then
-    FormsContainer.RunForm(TfrmClubLobby, self, [@FSelectedClub], TRUE);
+  FormsContainer.RunForm(TfrmClubLobby, self, [@FSelectedClub], TRUE);
 end;
 
 procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);
