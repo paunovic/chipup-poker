@@ -904,56 +904,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				}.bind(this));
 			}.bind(this));
 			break;
-		case codes.scSetAvatar:
-			try {
-				var params = pb.Parse(args,'Poker.SetAvatarParams');
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			var id = params.avatar_id.toString('base64');
-			delete params.avatar_id;
-			this.log('changing avatar',id);
-			mdb.models.Avatars.findOne({_id:id},function(err,row) {
-				if (err) {
-					this.reply("000","internal error");
-					return;
-				}
-				if (!row) {
-					this.send(codes.srSetAvatarReply,{status:'saNotFound'},'Poker.SetAvatarReply');
-					return;
-				}
-				allUsers.update({_id:this.userid},{$set:{avatar:id}},function (err,res) {
-					if (err) {
-						this.reply("000","internal error");
-						return;
-					}
-					this.send(codes.srSetAvatarReply,{status:'saSuccess'},'Poker.SetAvatarReply');
-					mdb.models.Clubs.find({$or:[{members:this.userid},{owner:this.userid}]},{owner:1,members:1},function (err,rows) {
-								assert.ifError(err);
-								var out = [];
-								for (var i=0; i<rows.length;i++) {
-									if (!containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
-									if (rows[i].members) {
-										for (var j=0; j<rows[i].members.length; j++) {
-											if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
-										}
-									}
-								}
-								allUsers.findOne({_id:this.userid},function (err,self) {
-									assert.ifError(err);
-									var proto = pb.Serialize({users:[makeUserProtobuf(self)]},'Poker.UserChangeParams');
-									for (var i=0; i<out.length; i++) {
-										if (myutils.compareObjectID(this.userid,out[i])) continue;
-										var dest = activeUsers[out[i]];
-										if (dest) dest.send(codes.seUserChange,proto,'raw');
-									}
-									token.stop();
-								}.bind(this));
-							}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
 		/*case codes.scEditGame:
 			var params = pb.Parse(args,'Poker.Game');
 			this.log('edit game',params);
@@ -1335,8 +1285,58 @@ handlers[codes.scChangePassword] = function (args,token) {
 		}.bind(this));
 	}.bind(this));
 }
+handlers[codes.scSetAvatar] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.SetAvatarParams');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	var id = params.avatar_id.toString('base64');
+	delete params.avatar_id;
+	this.log('changing avatar',id);
+	mdb.models.Avatars.findOne({_id:id},function(err,row) {
+		if (err) {
+			this.reply("000","internal error");
+			return;
+		}
+		if (!row) {
+			this.send(codes.srSetAvatarReply,{status:'saNotFound'},'Poker.SetAvatarReply');
+			return;
+		}
+		mdb.models.UserModel.findOne({_id:this.userid},function (err,self) {
+			assert.ifError(err);
+			self.avatar = id;
+			self.save(function (err) {
+				if (err) {
+					this.reply("000","internal error");
+					return;
+				}
+				this.send(codes.srSetAvatarReply,{status:'saSuccess'},'Poker.SetAvatarReply');
+				mdb.models.Clubs.find({$or:[{members:this.userid},{owner:this.userid}]},{owner:1,members:1},function (err,rows) {
+					assert.ifError(err);
+					var out = [];
+					for (var i=0; i<rows.length;i++) {
+						if (!containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
+						if (rows[i].members) { // FIXME, remove
+							for (var j=0; j<rows[i].members.length; j++) {
+								if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
+							}
+						}
+					}
+					var proto = pb.Serialize({users:[makeUserProtobuf(self)]},'Poker.UserChangeParams');
+					for (var i=0; i<out.length; i++) {
+						if (myutils.compareObjectID(this.userid,out[i])) continue;
+						var dest = activeUsers[out[i]];
+						if (dest) dest.send(codes.seUserChange,proto,'raw');
+					}
+					token.stop();
+				}.bind(this));
+			}.bind(this));
+	}.bind(this));
+}
 handlers[codes.scResendVerificationMail] = function () {
-	allUsers.findOne({_id:this.userid},function (err,row) {
+	mdb.models.UserModel.findOne({_id:this.userid},function (err,row) {
 		if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,row.displayname,function () {},function () {},function () {});
 	}.bind(this));
 }
