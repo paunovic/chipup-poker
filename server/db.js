@@ -115,7 +115,8 @@ var GameSchema = new Schema({
 	lasthandid:Number,
 	pot:Number,
 	state2:String,
-	gameState:Schema.Types.Mixed
+	gameState:Schema.Types.Mixed,
+	clubid:ObjectId
 },{collection:'games'});
 
 module.exports.close = function () {

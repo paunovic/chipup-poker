@@ -50,7 +50,10 @@ Club.getClubById = function (id,cb) {
 		if (!Club.activeClubsId[id]) {
 			mdb.models.Clubs.findOne({_id:id},function (err,obj) {
 				assert.ifError(err);
-				if (!obj) return cb('not found');
+				if (!obj) {
+					release();
+					return cb('not found');
+				}
 				Club.activeClubsSeq[obj.seq] = new Club(obj);
 				Club.activeClubsId[obj._id] = Club.activeClubsSeq[obj.seq];
 				release();
@@ -776,6 +779,64 @@ handlers[codes.scTransferChips] = function (args,token) {
 					}.bind(this));
 				}.bind(this));
 			}.bind(this));
+		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scSetPlayerLimit] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.PlayerLimitParams');
+		var clubid = toMongoId(params.clubid);
+		var userid = toMongoId(params.userid);
+		//this.log('params:%j',params);
+		if (params.limit < 1) return this.reply(0,'limit too low');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Club.getClubById(clubid,function (err,clubObj) {
+		if (err == 'not found') {
+			this.reply(0,'club not found');
+			return;
+		}
+		assert.ifError(err);
+		assert(clubObj);
+		if (!clubObj.isOwner(this.userid)) {
+			this.reply(0,'your not the owner');
+			return;
+		}
+		clubObj.updateLimit(userid,params.limit,params.unlimited,function (result) {
+			//clubObj.getTableStatsPacket([
+			if (result) this.send(codes.srPlayerLimitOk,args,'raw');
+			else this.reply(0,'player not found');
+			token.stop();
+		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scResetPlayerBalance] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.PlayerLimitParams');
+		var clubid = toMongoId(params.clubid);
+		var userid = toMongoId(params.userid);
+		this.log('params:%j',params);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Club.getClubById(clubid,function (err,clubObj) {
+		if (err == 'not found') {
+			this.reply(0,'club not found');
+			return;
+		}
+		assert.ifError(err);
+		assert(clubObj);
+		if (!clubObj.isOwner(this.userid)) {
+			this.reply(0,'your not the owner');
+			return;
+		}
+		clubObj.resetPlayerLimit(userid,function (result) {
+			if (result) this.send(codes.srResetPlayerBalanceOk,args,'raw');
+			else this.reply(0,'player not found');
+			token.stop();
 		}.bind(this));
 	}.bind(this));
 }

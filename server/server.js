@@ -35,6 +35,7 @@ var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var differ = require('./differ');
 var mdb = require('./db');
+var models = mdb.models;
 
 var Hand = deck.Hand;
 var Game = require('./game').Game;
@@ -123,7 +124,9 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	process.on('uncaughtException',function (err) {
 		console.log(err);
 		console.log(err.stack);
-		mdb.models.ServerError.create({error:err.toString(),trace:err.stack.split('\n').slice(1).join('\n').trim()},function (err) {
+		var trace = '';
+		if (err.stack) trace = err.stack.split('\n').slice(1).join('\n').trim();
+		mdb.models.ServerError.create({error:err.toString(),trace:trace},function (err) {
 			if (err) console.log(err);
 			process.exit(-1);
 		});
@@ -951,214 +954,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.error(e);
 			}
 			break;
-		case codes.scTableJoin:
-			var params = pb.Parse(args,'Poker.Game');
-			try {
-				var id = new toMongoId(params._id);
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			this.log('table join',id);
-			Game.getGame(id,function (err,game) {
-				if (!game) {
-					this.reply(0,'invalid gameid');
-					return;
-				}
-				if (game.state2 == 'gsClosed') return;
-				game.Lock.writeLock(function (release) {
-					this.log('game info',game.obj.clubid);
-					var club = game.club.obj; // FIXME
-						if (club.suspended) {
-							for (var x=0; x<club.suspended.length; x++) {
-								console.log(club.suspended[x],this.userid);
-								if (myutils.compareObjectID(club.suspended[x],this.userid)) {
-									this.reply(0,'your suspended in that club'); // FIXME
-									release();
-									return;
-								}
-							}
-						}
-						console.log(club);
-						if (!myutils.compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid)) && club.is_private) {
-							this.log('i am not a member');
-							this.reply(0,'your not a member of that club'); // FIXME, bots rely on this error
-							release();
-						} else {
-							game.join(this,function () {
-								var events = [];
-								if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
-									var cards = game.flop.cards;
-									if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
-									if (game.state == 'tsRiver') cards = cards.concat(game.river.cards);
-									events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
-								}
-								var status = game.getTableStatus(this,true,events);
-								this.send(codes.seTableStatus,status,'Poker.TableStatus');
-								release();
-								token.stop();
-							}.bind(this));
-						}
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scTableLeave:
-			var params = pb.Parse(args,'Poker.Game');
-			try {
-				var id = new toMongoId(params._id);
-			} catch (e) {
-				return;
-			}
-			delete params._id;
-			Game.getGame(id,function (err,game) {
-				if (!game) {
-					this.reply(0,'invalid gameid');
-				} else {
-					if (!game.users[this.userid]) {
-						this.reply(0,'your not at the table');
-						return;
-					}
-					game.leave(this,'protocol',function () {});
-					token.stop();
-				}
-			}.bind(this));
-			break;
-		case codes.scTableSit:
-			try {
-				var params = pb.Parse(args,'Poker.TableSit');
-				var id = new toMongoId(params.game_id);
-			} catch (e) {
-				this.log('params where %j',params);
-				this.error(e);
-				return;
-			}
-			delete params.game_id;
-			Game.getGame(id,function (err,game) {
-				if (!game) {
-					this.reply(0,'invalid gameid');
-					return;
-				}
-				if (game.state2 == 'gsClosed') return;
-				var temp = this.userid;
-				game.Lock.writeLock(function (release) {
-					if (temp != this.userid) {
-						this.reply(0,'sit error 1');
-						release();
-						return;
-					}
-					if (game.state2 == 'gsClosed') {
-						release();
-						return;
-					}
-					if (!game.users[this.userid]) {
-						this.reply(0,'your not at the table');
-						release();
-						return;
-					}
-					game.sitDown(this,params,function (sucess,events) {
-						if (sucess) {
-							game.broadcastStatus(this,true,events); // sendEvent
-							var status = game.getTableStatus(this,true,events);
-							this.send(codes.srTableSitOk,status,'Poker.TableStatus');
-						}
-						if (game.state == 'tsIdle') {
-							game.stateMachine(function () {
-								token.stop();
-								release();
-							},null,{silent:true},[],0);
-						} else {
-							token.stop();
-							release();
-						}
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scTableStandUp:
-			var params = pb.Parse(args,'Poker.Game');
-			try {
-				var id = toMongoId(params._id);
-			} catch (e) {
-				log('params to scTableStandUp where %j',params);
-				//this.error(e);
-				return;
-			}
-			var once = true;
-			Game.getGame(id,function (err,game) {
-				if (!game) return;
-				game.Lock.writeLock(function (release) {
-					var x = game.findSeat(this);
-					var seating = game.members[x];
-					if (!seating) {
-						this.log('standup error %d',x);
-						release();
-						return;
-					}
-					var token2 = profiler.start('stand-inner1');
-					game.standUp(this,function (folded,events,offset) {
-						assert(once);
-						once = false;
-						this.log('2events are %j',events);
-						if (folded && (game.current_seat >= 0)) {
-							game.startTimer(game.current_seat,offset);
-						}
-						this.send(codes.srTableStandUpOk,game.getTableStatus(this,true,events),'Poker.TableStatus');
-						var havechips = 0;
-						for (var x=0; x<game.members.length; x++) {
-							if (!game.members[x]) {
-								continue;
-							}
-							if (game.members[x].status == 'psOutOfPlay') continue;
-							if (game.members[x].disconnected) continue;
-							if (game.members[x].chips > 0) {
-								game.log('standup found one %d %s %d',x,game.members[x].status,game.members[x].chips);
-								havechips++;
-							}
-						}
-						if (havechips < 2) {
-							clearTimeout(game.dealTimer);
-							game.dealTimer = null;
-							game.log('cleared deal timer');
-						}
-						game.broadcastStatus(this,true,events);
-						token.stop();
-						token2.stop();
-						release();
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scTableAddOn:
-			try {
-				var params = pb.Parse(args,'Poker.TableSit');
-				if (params.chips < 1) {
-					this.reply(0,'you cant buyout');
-					return;
-				}
-				var id = new toMongoId(params.game_id);
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			delete params.game_id;
-			Game.getGame(id,function (err,game) {
-				var seatIdx = game.findSeat(this);
-				if (seatIdx === undefined) {
-					this.reply(0,'your not sitting');
-					return;
-				}
-				if (['psOutOfPlay','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
-					this.reply(0,'your not out of play!');
-					return;
-				}
-				if ((params.chips + game.members[seatIdx].chips) > (game.obj.buyin_max * game.obj.big_blind)) {
-					this.send(codes.srTableAddonOverLimit,game.getTableStatus(this,false,[]),'Poker.TableStatus');
-					return;
-				}
-				assert.equal(this.state,2);
-				game.AddOn(this,params.chips);
-			}.bind(this));
-			break;
 		default:
 			if (handlers[code]) handlers[code].call(this,args,token);
 			else this.log('unknown opcode %d/%s',code,codes.reverse[code]);
@@ -1234,7 +1029,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 		}.bind(this));
 	}.bind(this));
 }
-Game.registerHandlers(handlers,pb);
+Game.registerHandlers(handlers,pb,regexLimits);
 Club.registerHandlers(handlers,pb,sharedconfig);
 handlers[codes.scChangePassword] = function (args,token) {
 	try {
@@ -1433,122 +1228,6 @@ handlers[codes.scContactUs] = function (args,token) {
 	this.send(codes.srContactUsOk);
 	token.stop();
 }
-handlers[codes.scTablePlayNow] = function (args,token) {
-	try {
-		var params = pb.Parse(args,'Poker.Game');
-		var id = toMongoId(params._id);
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Game.getGame(id,function (err,game) {
-		if (!game) return;
-		if (game.state2 == 'gsClosed') return;
-		game.Lock.writeLock(function (release) {
-			var seatIdx = game.findSeat(this);
-			if (seatIdx === undefined) {
-				this.reply(0,'your not sitting');
-				release();
-				return;
-			}
-			if (game.members[seatIdx].chips == 0) {
-				this.reply(0,'you dont have enough chips');
-				release();
-				return;
-			}
-			if (game.members[seatIdx].status != 'psOutOfPlay') {
-				game.members[seatIdx].sitOutNextRound = false;
-				game.members[seatIdx].sitOutBB = false;
-				release();
-				return;
-			}
-			game.members[seatIdx].status = 'psOutOfHand';
-			//game.members[seatIdx].sitTime = Date.now();
-			if (game.state == 'tsIdle') {
-				if (!game.dealTimer) {
-					game.dealTimer = setTimeout(function () {
-						game.Lock.writeLock(function (release) {
-							game.dealTimer = null;
-							game.stateMachine(function (events) {
-								game.broadcastStatus(null,true,events);
-								release();
-							}.bind(this),null,{silent:true},[],0);
-						}.bind(this));
-					}.bind(this),5000);
-					finish([]);
-				} else {
-					game.log('waiting for deal timer');
-					finish([]);
-				}
-			} else finish([]);
-			function finish(events) { // teDeal
-				game.updateMongoState({},{members:true},function () {
-					game.broadcastStatus(null,true,events);
-					token.stop();
-					release();
-				});
-			}
-		}.bind(this));
-	}.bind(this));
-}
-handlers[codes.scSetPlayerLimit] = function (args,token) {
-	try {
-		var params = pb.Parse(args,'Poker.PlayerLimitParams');
-		var clubid = toMongoId(params.clubid);
-		var userid = toMongoId(params.userid);
-		//this.log('params:%j',params);
-		if (params.limit < 1) return this.reply(0,'limit too low');
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Club.getClubById(clubid,function (err,clubObj) {
-		if (err == 'not found') {
-			this.reply(0,'club not found');
-			return;
-		}
-		assert.ifError(err);
-		assert(clubObj);
-		if (!clubObj.isOwner(this.userid)) {
-			this.reply(0,'your not the owner');
-			return;
-		}
-		clubObj.updateLimit(userid,params.limit,params.unlimited,function (result) {
-			//clubObj.getTableStatsPacket([
-			if (result) this.send(codes.srPlayerLimitOk,args,'raw');
-			else this.reply(0,'player not found');
-			token.stop();
-		}.bind(this));
-	}.bind(this));
-}
-handlers[codes.scResetPlayerBalance] = function (args,token) {
-	try {
-		var params = pb.Parse(args,'Poker.PlayerLimitParams');
-		var clubid = toMongoId(params.clubid);
-		var userid = toMongoId(params.userid);
-		this.log('params:%j',params);
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Club.getClubById(clubid,function (err,clubObj) {
-		if (err == 'not found') {
-			this.reply(0,'club not found');
-			return;
-		}
-		assert.ifError(err);
-		assert(clubObj);
-		if (!clubObj.isOwner(this.userid)) {
-			this.reply(0,'your not the owner');
-			return;
-		}
-		clubObj.resetPlayerLimit(userid,function (result) {
-			if (result) this.send(codes.srResetPlayerBalanceOk,args,'raw');
-			else this.reply(0,'player not found');
-			token.stop();
-		}.bind(this));
-	}.bind(this));
-}
 function makeUserProtobuf(u) {
 	var u = JSON.parse(JSON.stringify(u));
 	if (u.avatar) u.avatar = new Buffer(u.avatar,'base64');
@@ -1598,26 +1277,6 @@ function setTimebankTimer() {
 	},target);
 }
 setTimebankTimer();
-function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds) {
-	if (!blinds) return true;
-	if (!game_type) return true;
-	if (!game_limit) return true;
-	if (!regexLimits.gamename.exec(gamename)) return true;
-	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
-	if (5 > buyin_min) {
-		log('min too low',buyin_min);
-		return true;
-	}
-	if (buyin_max < buyin_min) {
-		log('max too low');
-		return true;
-	}
-	if (10 > buyin_max) {
-		log('max too low',buyin_max);
-		return true;
-	}
-	return false;
-}
 ClientSocket.prototype.destroy = function destroy() {
 	this.socket.destroy();
 	clearTimeout(this.idleTimer);

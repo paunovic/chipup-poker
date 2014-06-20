@@ -353,7 +353,7 @@ Server.prototype.bugList = function (req,res) {
 Server.prototype.ServerBugsList = function (req,res) {
 	var start = Date.now();
 	if (req.query.delete) {
-		modelsServerError.remove({_id:req.query.delete},function () {});
+		models.ServerError.remove({_id:req.query.delete},function () {});
 	}
 	models.ServerError.find().sort({_id:-1}).exec(function (err,data) {
 		res.render('serverErrors',{rows:data,start:start});
