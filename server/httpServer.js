@@ -45,7 +45,6 @@ function Server(db,activeUsersIN) {
 	this.activeUsers = activeUsersIN;
 	var PokerProfile = db.collection('PokerProfile');
 	this.clubs = db.collection('clubs');
-	this.games = db.collection('games');
 	this.handHistory = db.collection('handHistory');
 
 	this.sessionStore = new MongoStore(db,'sessions');
@@ -300,7 +299,7 @@ Server.prototype.getClub = function (req,res) {
 				userids.push(club.members[x]);
 			}
 		}
-		this.games.find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
+		models.Games.find({clubid:new ObjectID(req.query.id)},function (err,games) {
 			// FIXME
 			models.UserModel.collection.find({_id:{$in:userids}}).toArray(function (err,users) {
 				var usermap = {};
@@ -735,7 +734,7 @@ Server.prototype.fetchHands = function (req,res) {
 				var end = Date.now();
 				token2.stop();
 				log('did %d hands in %dms',hands.length,end-start);
-				allGames.findOne({_id:toMongoId(req.gameid.buffer)},{clubid:1},function (err,game) {
+				models.Game.findOne({_id:toMongoId(req.gameid.buffer)},{clubid:1},function (err,game) {
 					assert.ifError(err);
 					GameEvents.find({gameid:game._id}).toArray(function (err,events) {
 						var start = Date.now();
