@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,allGames,GameEvents,activeUsers,allUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
+var activeGames,allGames,GameEvents,activeUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -107,7 +107,6 @@ Game.init = function (db,input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN
 	activeUsers = activeUsersIN;
 	GameEvents = db.collection('GameEvents');
 	gameState = db.collection('gameState');
-	allUsers = db.collection('users');
 	sharedconfig = sharedconfigIN;
 	allStats = db.collection('allStats');
 	handHistory = db.collection('handHistory');
@@ -218,7 +217,7 @@ Game.prototype.log = function log(format) {
 }
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);
-	allUsers.findOne({_id:conn.userid},function (err,self) {
+	models.UserModel.findOne({_id:conn.userid},function (err,self) {
 		assert.equal(conn.state,2);
 		if ((conn.boughtin + chips) > self.chips) {
 			conn.send(codes.srTableSitNoChips,this.getTableStatus(conn,false,[]),'Poker.TableStatus');
@@ -286,7 +285,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		conn.send(codes.srTableSitSeatTaken,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
 		cb(false,events);
 	} else {
-		allUsers.findOne({_id:conn.userid},function (err,userinfo) {
+		models.UserModel.findOne({_id:conn.userid},function (err,userinfo) {
 			conn.log('state:%d %s',conn.state,conn.userid);
 			conn.log('self:%j boughtin:%d chips:%d',userinfo,conn.boughtin,userinfo.chips);
 			if ((userinfo.chips === undefined) || (params.chips > (userinfo.chips - conn.boughtin))) {
@@ -589,16 +588,15 @@ Game.prototype.setBet = function (seat,bet) {
 }
 Game.prototype.eatChips = function (seat,chips,cb) {
 	this.pots[0].value += chips;
-	allUsers.update({_id:this.members[seat].conn.userid},
-		{ $inc:{chips:-chips}},function (err,res) {
-			this.members[seat].conn.log('lost chips',err,res,chips);
-			allGames.update({_id:this.obj._id},
-				{$inc:{pot:chips}},function (err,res) {
-					assert(res == 1);
-					this.members[seat].conn.log('pot for game went up to ',this.pots);
-					cb();
-				}.bind(this));
+	models.UserModel.findOneAndUpdate({_id:this.members[seat].conn.userid},{ $inc:{chips:-chips}},function (err) {
+		assert.ifError(err);
+		this.members[seat].conn.log('lost chips',err,res,chips);
+		allGames.update({_id:this.obj._id},{$inc:{pot:chips}},function (err,res) {
+			assert(res == 1);
+			this.members[seat].conn.log('pot for game went up to ',this.pots);
+			cb();
 		}.bind(this));
+	}.bind(this));
 }
 Game.prototype.getNextSeat = function (current,validstates) {
 	if (!validstates) validstates = ['psInHand','psAllIn'];
@@ -846,25 +844,24 @@ Game.prototype.doWin = function (cb,extradelay) {
 		var userid = this.seats[seat].userid;
 		var gain = wins[seat];
 		this.balance_changes[seat] += gain;
-		allUsers.update({_id:userid},{$inc:{chips:gain}},function (err,res) {
-				assert(!err,err);
-				assert.equal(res,1);
-				this.log('seat #'+seat+' gained '+gain);
-				if (this.seats[seat].conn) {
-					this.seats[seat].conn.boughtin += gain;
-					this.seats[seat].conn.chips += gain;
-				}
-				if (winnerObj) winnerObj.chips += gain;
-				cb2();
-			}.bind(this));
-		}.bind(this),function done() {
-			allGames.update({_id:this.obj._id},{$unset:{gameState:0},$inc:{rake:totalrake}},function (err,res) {
-				assert(!err,err);
-				this.obj.rake += totalrake;
-				assert.equal(res,1);
-				finish.call(this);
-			}.bind(this));
+		models.UserModel.findOneAndUpdate({_id:userid},{$inc:{chips:gain}},function (err) {
+			assert.ifError(err);
+			this.log('seat #'+seat+' gained '+gain);
+			if (this.seats[seat].conn) {
+				this.seats[seat].conn.boughtin += gain;
+				this.seats[seat].conn.chips += gain;
+			}
+			if (winnerObj) winnerObj.chips += gain;
+			cb2();
 		}.bind(this));
+	}.bind(this),function done() {
+		allGames.update({_id:this.obj._id},{$unset:{gameState:0},$inc:{rake:totalrake}},function (err,res) {
+			assert(!err,err);
+			this.obj.rake += totalrake;
+			assert.equal(res,1);
+			finish.call(this);
+		}.bind(this));
+	}.bind(this));
 }
 Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 	var token = profiler.start('checkRoundPass');
@@ -1196,8 +1193,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				assert(priv.userid);
 				assert.equal(typeof betsToRemove[job.seat],'number');
 				this.balance_changes[job.seat] -= betsToRemove[job.seat];
-				allUsers.update({_id:priv.userid},
-					{ $inc:{chips:-betsToRemove[job.seat]}},function (err,res) {
+				models.UserModel.findOneAndUpdate({_id:priv.userid},{ $inc:{chips:-betsToRemove[job.seat]}},function (err,res) {
 						assert(!err);
 						assert(res == 1);
 						this.log('lost chips',job.seat,betsToRemove[job.seat]);
@@ -1830,7 +1826,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 			token9 = profiler.start('standup-step2.3'); // 6.7ms
 			var token8 = profiler.start('standup-inner8');
 			this.pots[0].value += increase;
-			allUsers.update({_id:priv.userid},
+			models.UserModel.findOneAndUpdate({_id:priv.userid},
 				{ $inc:{chips:-this.bets[seatObj.seat]}},
 				function (err,res) {
 					assert(!err);

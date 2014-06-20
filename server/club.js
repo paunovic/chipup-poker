@@ -1,5 +1,5 @@
 "use strict";
-var activeUsers,allStats,allUsers,allGames,clubBalances,activeGames,handHistory,pb,regexLimits;
+var activeUsers,allStats,allGames,clubBalances,activeGames,handHistory,pb,regexLimits;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
@@ -13,6 +13,7 @@ var profiler = require('./profiler');
 var ReadWriteLock = require('./lock');
 var myutils = require('./myutils');
 var mdb = require('./db');
+var models = mdb.models;
 
 var getLock = new ReadWriteLock();
 
@@ -94,7 +95,7 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 					var keyid = 0;
 					async.each(historyRow.players,function (player,cb) {
 						if (!player) return cb();
-						allUsers.findOne({_id:player._id},function (err,playerRow) {
+						models.UserModel.findOne({_id:player._id},function (err,playerRow) {
 							player.keyid = keyid++;
 							player.nick = playerRow.displayname;
 
@@ -183,7 +184,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	}.bind(this));
 }
 Club.finishTableStatsPacket = function (data,cb) {
-	allUsers.find({_id:{$in:data.players}},{displayname:1}).toArray(function (err,playersOut) {
+	models.UserModel.find({_id:{$in:data.players}},function (err,playersOut) {
 		assert.ifError(err);
 		for (var i=0; i<playersOut.length; i++) {
 			playersOut[i]._id = myutils.fromMongoId(playersOut[i]._id);
@@ -330,7 +331,6 @@ Club.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
 	allStats = db.collection('allStats');
-	allUsers = db.collection('users');
 	allGames = db.collection('games');
 	clubBalances = db.collection('clubBalances');
 	handHistory = db.collection('handHistory');
@@ -721,12 +721,12 @@ handlers[codes.scTransferChips] = function (args,token) {
 	}
 	var chips = params.chip_amount;
 	this.log('transfering chips',userid,chips);
-	allUsers.findOne({_id:this.userid},function (err,self) {
-		if (!self) {
+	models.UserModel.findOne({_id:this.userid},function (err,source) {
+		if (!source) {
 			this.reply("000","self not found");
 			return;
 		}
-		if (self.chips < chips) {
+		if (source.chips < chips) {
 			this.send(codes.srTransferChipsInvalidAmount);
 			return;
 		}
@@ -734,25 +734,27 @@ handlers[codes.scTransferChips] = function (args,token) {
 			this.reply(codes.srTransferChipsInvalidAmount);
 			return;
 		}
-		allUsers.update({_id:userid},
-			{ $inc:{chips:chips}},
-			function (err,res) {
+		models.UserModel.findOne({_id:userid},function (err,dest) {
+			assert.ifError(err);
+			if (!dest) {
+				this.reply(0,"dest not found");
+				return;
+			}
+			source.update({{ $inc:{chips:-chips}},function (err) {
 				assert.ifError(err);
 				this.log('step 1',err,res);
-				allUsers.update({_id:this.userid},
-				{ $inc:{chips:-chips}},
-				function (err,res) {
+				dest.update({ $inc:{chips:chips}},function (err) {
 					assert.ifError(err);
 					this.log('step 2',err,res);
 					this.send(codes.srTransferChipsOk,args,'raw');
 					var dest = activeUsers[userid];
 					if (dest) {
-						dest.send(codes.seTransferChips,{chip_amount:chips,player_mongo_id:new Buffer(this.userid.toString(),'hex')},'Poker.TransferChipsParams');
+						dest.send(codes.seTransferChips,{chip_amount:chips,player_mongo_id:myutils.fromMongoId(this.userid)},'Poker.TransferChipsParams');
 						dest.chips += chips;
 					}
 					this.chips -= chips;
 					var list = [ userid, this.userid ];
-					mdb.models.Clubs.find({$or:[{members:{$in:list}},{owner:{$in:list}}]},{owner:1,members:1}).toArray(function (err,rows) {
+					models.Clubs.find({$or:[{members:{$in:list}},{owner:{$in:list}}]},{owner:1,members:1}).toArray(function (err,rows) {
 						assert.ifError(err);
 						var out = [];
 						for (var i=0; i<rows.length;i++) {
@@ -762,7 +764,7 @@ handlers[codes.scTransferChips] = function (args,token) {
 								if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
 							}
 						}
-						allUsers.find({_id:{$in:[this.userid,userid]}}).toArray(function (err,rows) {
+						models.UserModel.find({_id:{$in:[this.userid,userid]}},function (err,rows) {
 							assert.ifError(err);
 							var proto = pb.Serialize({users:[makeUserProtobuf(rows[0]),makeUserProtobuf(rows[1])]},'Poker.UserChangeParams');
 							for (var i=0; i<out.length; i++) {
