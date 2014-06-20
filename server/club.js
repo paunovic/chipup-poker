@@ -1,5 +1,5 @@
 "use strict";
-var activeUsers,allStats,clubBalances,activeGames,handHistory,pb,regexLimits;
+var activeUsers,clubBalances,activeGames,handHistory,pb,regexLimits;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
@@ -157,7 +157,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	for (var x=0; x<gamelist.length; x++) {
 		if (!containsObjectID(data.gamelist,gamelist[x])) data.gamelist.push(gamelist[x]);
 	}
-	allStats.find({gameid:{$in:gamelist}}).toArray(function (err,stats) {
+	models.GameStats.find({gameid:{$in:gamelist}},function (err,stats) {
 		assert.ifError(err);
 			for (var i=0; i<stats.length; i++) {
 				var gameidhex = stats[i].gameid.toString();
@@ -333,7 +333,6 @@ Club.prototype.resetPlayerLimit = function (userid,cb) {
 Club.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
-	allStats = db.collection('allStats');
 	clubBalances = db.collection('clubBalances');
 	handHistory = db.collection('handHistory');
 	pb = pbIN;

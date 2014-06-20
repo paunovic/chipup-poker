@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,GameEvents,activeUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
+var activeGames,activeUsers,sharedconfig,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -106,11 +106,8 @@ function Game(obj) {
 Game.init = function (db,input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN) {
 	activeGames = input;
 	activeUsers = activeUsersIN;
-	GameEvents = db.collection('GameEvents');
 	gameState = db.collection('gameState');
 	sharedconfig = sharedconfigIN;
-	allStats = db.collection('allStats');
-	handHistory = db.collection('handHistory');
 	log = logIN; // FIXME
 	ClientSocket = ClientSocketIN;
 }
@@ -344,13 +341,13 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 		$slice:-50
 	}}};
 	var key = {gameid:this.obj._id,userid:this.seats[seatIdx].userid};
-	allStats.findOne(key,function (err,row) {
+	models.GameStats.findOne(key,function (err,row) {
 		assert.ifError(err);
 		if (!row) {
 			log('inserting %j',doc);
-			allStats.insert(doc,finish.bind(this));
+			models.GameStats.create(doc,finish.bind(this));
 		} else {
-			allStats.update({_id:row._id},mods,finish.bind(this));
+			models.GameStats.findOneAndUpdate({_id:row._id},mods,finish.bind(this));
 		}
 		function finish(err) {
 			assert.ifError(err);
@@ -370,13 +367,13 @@ Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
 	var doc = { gameid:this.obj._id,userid:this.seats[seatIdx].userid, secondsplayed:time };
 	var mods = { $inc:{secondsplayed:time}};
 	var key = {gameid:this.obj._id,userid:this.seats[seatIdx].userid};
-	allStats.findOne(key,function (err,row) {
+	models.GameStats.findOne(key,function (err,row) {
 		assert.ifError(err);
 		if (!row) {
 			log('inserting %j',doc);
-			allStats.insert(doc,finish);
+			models.GameStats.create(doc,finish);
 		} else {
-			allStats.update({_id:row._id},mods,finish);
+			models.GameStats.findOneAndUpdate({_id:row._id},mods,finish);
 		}
 		function finish(err) {
 			assert.ifError(err);
@@ -547,7 +544,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.history.cards = this.history.cards.concat(this.river.cards);
 		this.log('bcast 2');
 		
-		handHistory.insert({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,cards:this.history.cards,rake:this.rake,dealer:this.dealer,current_game:this.omaha ? 'gtOmaha' : 'gtHoldem'},function (err,row) {
+		models.HandHistory.create({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,cards:this.history.cards,rake:this.rake,dealer:this.dealer,current_game:this.omaha ? 'gtOmaha' : 'gtHoldem'},function (err,row) {
 			this.log('hand made:%j',row);
 			//this.broadcastStatus(null,null,[this.makeEvent('teDealing')]);
 			//setTimeout(function () {
@@ -960,7 +957,8 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 	async.parallel([function a(cbA) {
 		async.each(jobs,function hack(job,cb2) {
 			log('updating stats %j',job);
-			allStats.update(job.key,job.mods,function () {
+			models.GameStats.findOneAndUpdate(job.key,job.mods,function (err) {
+				assert.ifError(err);
 				this.club.updateLimitPostWin(job.change,job.userid,cb2);
 			}.bind(this));
 		}.bind(this),cbA);
@@ -1354,8 +1352,9 @@ Game.prototype.saveHistory = function (cb) {
 		updates['$set'].players = this.history.players;
 	}
 	// FIXME, re-save players obj at end of round
-	handHistory.update({seq:this.handid},updates,function (err,res) {
-		assert.equal(res,1);
+	// FIXME, reuse mongoose Document
+	models.HandHistory.findOneAndUpdate({seq:this.handid},updates,function (err,res) {
+		assert(res);
 		cb();
 	});
 }
@@ -1761,7 +1760,8 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 	}}};
 	var key = {gameid:this.obj._id,userid:userid};
 	log('updating %s %s',key.gameid,key.userid);
-	allStats.update(key,mods,function () {
+	models.GameStats.findOneAndUpdate(key,mods,function (err) {
+		assert.ifError(err);
 		this.club.handOver(this,function () {
 			cb();
 		});
@@ -2046,10 +2046,11 @@ Game.handleDisconnect = function handleDisconnect(conn,reason,cb1) {
 	},cb1);
 }
 Game.prototype.logEvent = function (type,userid,change) {
+	return;
 	var doc = {eventtype:type};
 	if (userid) doc.userid = userid;
 	if (change) doc.change = change;
-	GameEvents.insert(doc,function (){});
+	//GameEvents.insert(doc,function (){});
 }
 Game.getGame = function getgame(id,cb) {
 	getGameLock.writeLock(function (release) {
@@ -2395,7 +2396,7 @@ handlers[codes.scTableSitOutNextBB] = function (args) {
 handlers[codes.scTablePlayNow] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.Game');
-		var id = toMongoId(params._id);
+		var id = myutils.toMongoId(params._id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -2487,7 +2488,7 @@ handlers[codes.scShowCards] = function (args,token) {
 	handlers[codes.scTableJoin] = function (args,token) {
 		var params = pb.Parse(args,'Poker.Game');
 		try {
-			var id = new toMongoId(params._id);
+			var id = new myutils.toMongoId(params._id);
 		} catch (e) {
 			this.error(e);
 			return;
@@ -2513,7 +2514,7 @@ handlers[codes.scShowCards] = function (args,token) {
 							}
 						}
 					}
-					if (!myutils.compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid)) && club.is_private) {
+					if (!myutils.compareObjectID(this.userid,club.owner) && (!club.members || !myutils.containsObjectID(club.members,this.userid)) && club.is_private) {
 						this.log('i am not a member');
 						this.reply(0,'your not a member of that club'); // FIXME, bots rely on this error
 						release();
@@ -2538,7 +2539,7 @@ handlers[codes.scShowCards] = function (args,token) {
 	handlers[codes.scTableLeave] = function (args,token) {
 		var params = pb.Parse(args,'Poker.Game');
 		try {
-			var id = new toMongoId(params._id);
+			var id = new myutils.toMongoId(params._id);
 		} catch (e) {
 			return;
 		}
@@ -2560,7 +2561,7 @@ handlers[codes.scShowCards] = function (args,token) {
 	handlers[codes.scTableSit] = function (args,token) {
 		try {
 			var params = pb.Parse(args,'Poker.TableSit');
-			var id = new toMongoId(params.game_id);
+			var id = new myutils.toMongoId(params.game_id);
 		} catch (e) {
 			this.log('params where %j',params);
 			this.error(e);
@@ -2612,7 +2613,7 @@ handlers[codes.scShowCards] = function (args,token) {
 	handlers[codes.scTableStandUp] = function (args,token) {
 		var params = pb.Parse(args,'Poker.Game');
 		try {
-			var id = toMongoId(params._id);
+			var id = myutils.toMongoId(params._id);
 		} catch (e) {
 			log('params to scTableStandUp where %j',params);
 			//this.error(e);
@@ -2671,7 +2672,7 @@ handlers[codes.scShowCards] = function (args,token) {
 				this.reply(0,'you cant buyout');
 				return;
 			}
-			var id = new toMongoId(params.game_id);
+			var id = new myutils.toMongoId(params.game_id);
 		} catch (e) {
 			this.error(e);
 			return;

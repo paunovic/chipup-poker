@@ -5,6 +5,7 @@ module.exports.toMongoId = toMongoId;
 module.exports.fromMongoId = fromMongoId;
 module.exports.compareObjectID = compareObjectID;
 module.exports.getNextSequence = getNextSequence;
+module.exports.containsObjectID = containsObjectID;
 var allCounters;
 module.exports.init = function (db) {
 	allCounters = db.collection('counters');
@@ -35,4 +36,10 @@ function getNextSequence(name,cb) {
 			});
 		}
 	});
+}
+function containsObjectID(list,id) {
+	for (var x=0; x<list.length; x++) {
+		if (compareObjectID(id,list[x])) return true;
+	}
+	return false;
 }

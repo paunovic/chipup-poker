@@ -111,7 +111,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,handHistory,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
+var conn,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -136,7 +136,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	var allUsers = db.collection('users');
 	var allClubs = db.collection('clubs');
 	var allCounters = db.collection('counters');
-	handHistory = db.collection('handHistory');
 	Config = db.collection('config');
 	GameEvents = db.collection('GameEvents');
 	gameState = db.collection('gameState');
@@ -156,10 +155,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 
 	allUsers.createIndex("email",{unique:true}, function (err,res) {});
 	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
-
-	allClubs.createIndex("name",{unique:true},function (err,res) {}); // FIXME
-	handHistory.ensureIndex({seq:1},function (err,res){});
-	handHistory.ensureIndex({gameid:1},function (err,res){});
 
 	Config.insert({_id:'installerid',value:''},function (err,res){
 		Config.insert({_id:'debuginstallerid',value:''},function (err,res){
@@ -540,12 +535,6 @@ function toMongoId(buf) {
 }
 function fromMongoId(id) {
 	return new Buffer(id.id,'binary');
-}
-function containsObjectID(list,id) {
-	for (var x=0; x<list.length; x++) {
-		if (myutils.compareObjectID(id,list[x])) return true;
-	}
-	return false;
 }
 function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
@@ -1004,7 +993,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 					for (var x=0; x<users.length; x++) {
 						users[x] = makeUserProtobuf(users[x]);
 						assert(users[x]._id.length == 12);
-						console.log('test',users[x]);
+						//console.log('test',users[x]);
 					}
 					status.users = users;
 					mdb.models.UserModel.findOne({_id:this.userid},function(err,self) {
@@ -1116,10 +1105,10 @@ handlers[codes.scSetAvatar] = function (args,token) {
 					assert.ifError(err);
 					var out = [];
 					for (var i=0; i<rows.length;i++) {
-						if (!containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
+						if (!myutils.containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
 						if (rows[i].members) { // FIXME, remove
 							for (var j=0; j<rows[i].members.length; j++) {
-								if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
+								if (!myutils.containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
 							}
 						}
 					}

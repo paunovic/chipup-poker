@@ -45,7 +45,6 @@ function Server(db,activeUsersIN) {
 	this.activeUsers = activeUsersIN;
 	var PokerProfile = db.collection('PokerProfile');
 	this.clubs = db.collection('clubs');
-	this.handHistory = db.collection('handHistory');
 
 	this.sessionStore = new MongoStore(db,'sessions');
 	this.IO.set('authorization',this.socketAuth.bind(this));
@@ -155,7 +154,7 @@ function Server(db,activeUsersIN) {
 		res.writeHead(302,{Location:'/secure/broadcast?success=true'}); // FIXME
 		res.end();
 	}.bind(this));
-	app.get('/fetchhands',this.fetchHands.bind(this));
+	//app.get('/fetchhands',this.fetchHands.bind(this));
 	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
 	app.post('/secure/buildbot',function (req,res) {
 		console.log(req.body);
@@ -208,7 +207,7 @@ Server.prototype.addSync = function (app) {
 }
 Server.prototype.getHand = function (req,res) {
 	var start = Date.now();
-	this.handHistory.findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
+	models.HandHistory.findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
 		res.render('hand',{hand:hand,start:start});
 	});
 }
@@ -281,7 +280,7 @@ Server.prototype.secureLoginPost = function (req,res) {
 }
 Server.prototype.getGame = function (req,res) {
 	var start = Date.now();
-	this.handHistory.find({gameid:new ObjectID(req.query.id)}).limit(1000).sort({_id:-1}).toArray(function (err,hands) {
+	models.HandHistory.find({gameid:new ObjectID(req.query.id)}).limit(1000).sort({_id:-1}).exec(function (err,hands) {
 		Game.getGame(new ObjectID(req.query.id),function (err,game) {
 			game.Lock.writeLock(function (release) {
 				res.render('game',{game:game,hands:hands,start:start,util:util});
@@ -701,7 +700,7 @@ Server.prototype.errorUpload = function (req,res) {
 			});
 		}.bind(this));
 }
-Server.prototype.fetchHands = function (req,res) {
+/*Server.prototype.fetchHands = function (req,res) {
 	// FIXME
 	var token = profiler.start('fetchhands-outer');
 	// new Buffer(g._id.toString(),'hex')
@@ -756,7 +755,7 @@ Server.prototype.fetchHands = function (req,res) {
 			token.stop();
 		});
 	});
-}
+}*/
 Server.prototype.getAvatar = function (req,res) {
 	var id = req.query.id;
 	log('getting avatar %j %d %s',req.query,id.length,id);

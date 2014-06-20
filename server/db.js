@@ -47,7 +47,7 @@ var DebugLogSchema = new Schema({
 var ClubSchema = new Schema({
 	is_private:Boolean,
 	password:String,
-	name:String,
+	name:{type:String,index:{unique:true}},
 	owner:ObjectId,
 	chips:Number,
 	rake:Number,
@@ -118,6 +118,54 @@ var GameSchema = new Schema({
 	gameState:Schema.Types.Mixed,
 	clubid:ObjectId
 },{collection:'games'});
+var PotSchema = new Schema({
+	value:Number,
+	members:[Number],
+	trueMembers:[Number],
+	trueUsers:[ObjectId]
+});
+var WinnerPotInfoSchema = new Schema({
+	sum:Number,
+	rake:Number,
+	seats:[Number]
+});
+var MoveSchema = new Schema({
+	code:[String],
+	seat:Number,
+	bet:Number,
+	pot:[PotSchema],
+	potdata:[WinnerPotInfoSchema]
+});
+var PlayerSchema = new Schema({
+	seat:Number,
+	cards:[Number],
+	chips:Number,
+	muck:Boolean,
+	status:String
+});
+var HandHistorySchema = new Schema({
+	seq:{type:Number,index:true},
+	gameid:{type:ObjectId,index:true},
+	moves:[MoveSchema],
+	players:[PlayerSchema],
+	cards:[Number],
+	rake:Number,
+	dealer:Number,
+	current_game:String,
+	deck:[Number],
+	totalrake:Number,
+	endtime:Number
+},{collection:'handHistory'});
+var StatsSchema = new Schema({
+	gameid:ObjectId,
+	userid:ObjectId,
+	buyins:[Number],
+	cashouts:[Number],
+	secondsplayed:Number,
+	balance:Number,
+	rakecontrib:Number,
+	hands:Number
+},{collection:'allStats'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -141,6 +189,8 @@ module.exports.open = function () {
 	models.ServerError = mongoose.model('ServerError',ServerErrorSchema);
 	models.IPN_Hit = mongoose.model('IPN_Hit',IPN_HitSchema);
 	models.Game = mongoose.model('Game',GameSchema);
+	models.HandHistory = mongoose.model('HandHistory',HandHistorySchema);
+	models.GameStats = mongoose.model('GameStats',StatsSchema);
 }
 
 if (require.main === module) {
