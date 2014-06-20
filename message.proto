@@ -602,7 +602,7 @@ message HandHistory {
 		repeated TableEvent.TableEventType code = 1;
 		optional uint32 bet = 2;
 		optional int32 seat = 3;
-		repeated TableEvent.WinnerPotInfo potdata = 4;
+		repeated TableEvent.WinnerPotInfo WinnerPotData = 4;
 		repeated Pot pots = 5;
 	}
 	required bytes _id = 1;

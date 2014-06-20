@@ -133,8 +133,8 @@ var MoveSchema = new Schema({
 	code:[String],
 	seat:Number,
 	bet:Number,
-	pot:[PotSchema],
-	potdata:[WinnerPotInfoSchema]
+	pots:[PotSchema],
+	WinnerPotData:[WinnerPotInfoSchema]
 });
 var PlayerSchema = new Schema({
 	seat:Number,

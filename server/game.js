@@ -570,7 +570,7 @@ Game.prototype.clearCanShow = function () {
 }
 Game.prototype.addHistory = function (obj,winnercount) {
 	if (obj.code[0] == 'teWinning') {
-		this.history.potdata = obj.potdata;
+		this.history.WinnerPotData = obj.WinnerPotData;
 		this.history.winnercount = winnercount;
 	}
 	this.history.moves.push(obj);
@@ -800,7 +800,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 		var rakesplit = rake / pot.trueMembers.length;
 		rake = rakesplit * pot.trueMembers.length;
 		pot.rake = rake;
-		this.history.potdata[y].rake = rake;
+		this.history.WinnerPotData[y].rake = rake;
 		var split = ((pot.value-rake)/pot.winners.length);
 		// </redo>
 		//var rake = pot.value * (this.rake / 100);
@@ -974,7 +974,7 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 Game.prototype.calcWinners = function (cb,events,extradelay) {
 	assert(events);
 	assert.equal(typeof extradelay,'number');
-	var potdata = [];
+	var WinnerPotData = [];
 	var logmsg = [];
 	var winnercount = 0;
 	var potid = 0;
@@ -1020,7 +1020,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 		var winners = [];
 		var data = [];
 		if (pot.value == 0) return cb1();
-		potdata[potid] = { sum:pot.value, seats:pot.members };
+		WinnerPotData[potid] = { sum:pot.value, seats:pot.members };
 		this.log('this pot',potid,pot);
 
 		if (forcewin >= 0) {
@@ -1059,7 +1059,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 				}
 			}
 		}
-		potdata[potid].WinnerData = data;
+		WinnerPotData[potid].WinnerData = data;
 		this.log('winners of pot #'+potid,winners);
 		if (winners.length > winnercount) winnercount = winners.length;
 		potid++;
@@ -1069,8 +1069,8 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 		finish1.call(this);
 	
 	function finish1() {
-		events.push(this.makeEvent('teWinning',null,potdata));
-		this.addHistory({code:['teWinning'],potdata:potdata,seat:-1},winnercount);
+		events.push(this.makeEvent('teWinning',null,WinnerPotData));
+		this.addHistory({code:['teWinning'],WinnerPotData:WinnerPotData,seat:-1},winnercount);
 		this.doWin(function (rakestats) {
 			this.postWinSaveStats(rakestats,function () {
 				cb(events,0);
@@ -1342,8 +1342,8 @@ Game.prototype.putChips = function (conn,chips,cb) {
 }
 Game.prototype.saveHistory = function (cb) {
 	var updates = {$set:{moves:this.history.moves,deck:this.deck.cards,rake:this.rake}};
-	if (this.history.potdata) {
-		updates['$set'].potdata = this.history.potdata;
+	if (this.history.WinnerPotData) {
+		updates['$set'].WinnerPotData = this.history.WinnerPotData;
 		updates['$set'].winnercount = this.history.winnercount;
 		updates['$set'].balance_changes = this.balance_changes;
 		updates['$set'].totalrake = this.history.totalrake;
