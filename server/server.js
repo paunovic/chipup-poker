@@ -1333,6 +1333,7 @@ handlers[codes.scSetAvatar] = function (args,token) {
 					token.stop();
 				}.bind(this));
 			}.bind(this));
+		}.bind(this));
 	}.bind(this));
 }
 handlers[codes.scResendVerificationMail] = function () {
