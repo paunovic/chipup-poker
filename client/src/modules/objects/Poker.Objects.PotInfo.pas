@@ -94,7 +94,7 @@ end;
 procedure TPotInfos.Assign(const APots: TList<TPB_Pot>; const ARakePercent: UINT32);
 var
   pot: TPotInfo;
-  C1 : Integer;
+  C1: Integer;
 begin
   Clear;
 

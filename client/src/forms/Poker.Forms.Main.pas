@@ -73,8 +73,8 @@ type
     acAnimationsEnabled: TAction;
     acSettings: TAction;
     ActionMainMenuBar: TActionMainMenuBar;
-    ActionMainMenuBarColorMap: TStandardColorMap;
     acDisconnect: TAction;
+    ActionMainMenuBarColorMap: TXPColorMap;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -118,6 +118,8 @@ type
     FSelectedGame: TBytes;
     FCallbacksId: Integer;
     FShuttingDown: Boolean;
+    FActionMainMenuBarFont: TFont;
+    FActionMainMenuBarColormap: TXPColorMap;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -163,6 +165,7 @@ type
     procedure DoCreate; override;
     procedure WMQueryEndSession(var AMessage: TWMQueryEndSession); message WM_QUERYENDSESSION;
     procedure WMEndSession(var AMessage: TWMEndSession); message WM_ENDSESSION;
+    procedure WMSettingChange(var AMessage: TWMSettingChange); message WM_SETTINGCHANGE;
   public
     procedure LoginStatus(const AValue: TLoginStatus);
   end;
@@ -203,6 +206,12 @@ begin
 
   ActionManager.Style := ActionMainMenuBarStyle;
 
+  FActionMainMenuBarFont := TFont.Create;
+  FActionMainMenuBarFont.Assign(ActionMainMenuBar.Font);
+
+  FActionMainMenuBarColormap := TXPColorMap.Create(self);
+  FActionMainMenuBarColormap.Assign(ActionMainMenuBar.ColorMap);
+
   btHomeGames.Font.Name := 'Sintony Bold';
   btHomeGames.Font.Style := [];
   btHomeGames.Font.Size := 8;
@@ -226,6 +235,8 @@ begin
   FormsContainer.CloseAllForms;
   Tables.Clear;
   MessageContainer.RemoveCallbacks(FCallbacksId);
+  FActionMainMenuBarFont.Free;
+  FActionMainMenuBarColormap.Free;
 end;
 
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -608,13 +619,25 @@ end;
 procedure TfrmChipUpMain.WMEndSession(var AMessage: TWMEndSession);
 begin
   FShuttingDown := AMessage.EndSession;
+
   inherited;
 end;
 
 procedure TfrmChipUpMain.WMQueryEndSession(var AMessage: TWMQueryEndSession);
 begin
   FShuttingDown := TRUE;
+
   inherited;
+end;
+
+procedure TfrmChipUpMain.WMSettingChange(var AMessage: TWMSettingChange);
+begin
+  inherited;
+
+  // this reassigns font/colormap to ActionMainMenuBar
+  // bug info: http://stackoverflow.com/questions/9577540/tactionmainmenubar-and-tactiontoolbar-lose-settings
+  ActionMainMenuBar.Font.Assign(FActionMainMenuBarFont);
+  ActionMainMenuBar.ColorMap.Assign(FActionMainMenuBarColormap);
 end;
 
 procedure TfrmChipUpMain.gridMyHomeGamesEnter(Sender: TObject);

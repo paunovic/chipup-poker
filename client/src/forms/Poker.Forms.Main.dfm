@@ -3902,10 +3902,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
-        ExplicitLeft = 1
-        ExplicitTop = 1
-        ExplicitWidth = 792
-        ExplicitHeight = 427
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1
@@ -4194,9 +4190,9 @@ object frmChipUpMain: TfrmChipUpMain
           end>
         ActionBar = ActionMainMenuBar
       end>
-    Left = 492
+    Left = 456
     Top = 48
-    StyleName = 'Platform Default'
+    StyleName = 'XP Style'
     object acShowChangeEMailForm: TAction
       Category = 'Account'
       Caption = 'Change E-mail Address...'
@@ -4304,16 +4300,13 @@ object frmChipUpMain: TfrmChipUpMain
       OnExecute = acDisconnectExecute
     end
   end
-  object ActionMainMenuBarColorMap: TStandardColorMap
-    HighlightColor = 3026478
-    UnusedColor = 2368548
-    BtnFrameColor = 8332
-    BtnSelectedColor = 8332
-    BtnSelectedFont = clWhite
+  object ActionMainMenuBarColorMap: TXPColorMap
+    ShadowColor = clGray
     Color = 1644825
     DisabledFontColor = 4934475
     DisabledFontShadow = 1644825
     FontColor = 13092807
+    HighlightColor = 3026478
     HotColor = 8332
     HotFontColor = clWhite
     MenuColor = 1644825
@@ -4321,11 +4314,13 @@ object frmChipUpMain: TfrmChipUpMain
     FrameTopLeftOuter = 8332
     FrameBottomRightInner = 1644825
     FrameBottomRightOuter = 8332
-    DisabledColor = clGray
+    BtnFrameColor = 8332
+    BtnSelectedColor = 8332
+    BtnSelectedFont = clWhite
     SelectedColor = 8332
     SelectedFontColor = clWhite
-    ShadowColor = clGray
-    Left = 400
+    UnusedColor = 2368548
+    Left = 340
     Top = 48
   end
 end

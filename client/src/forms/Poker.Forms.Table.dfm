@@ -3033,4 +3033,9 @@ object frmTable: TfrmTable
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
   end
+  object tiRender: TTimer
+    OnTimer = tiRenderTimer
+    Left = 324
+    Top = 32
+  end
 end

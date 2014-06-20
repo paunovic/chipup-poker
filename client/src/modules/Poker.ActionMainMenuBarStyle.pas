@@ -6,12 +6,12 @@ uses
   System.Types, Vcl.ActnMan, Vcl.ActnMenus, Vcl.XPActnCtrls, Vcl.XPStyleActnCtrls, Vcl.GraphUtil;
 
 type
-  TBarStyle = class(TXPStyleActionBars)
+  TActionMainMenuBarStyle = class(TXPStyleActionBars)
   public
     function GetControlClass(ActionBar: TCustomActionBar; AnItem: TActionClientItem): TCustomActionControlClass; override;
   end;
 
-  TMenuStyle = class(TXPStyleMenuitem)
+  TActionMainMenuBarMenuStyle = class(TXPStyleMenuitem)
   protected
     procedure DrawSeparator(const Offset: Integer); override;
     procedure DrawGlyph(const Location: TPoint); override;
@@ -20,25 +20,25 @@ type
   end;
 
 var
-  ActionMainMenuBarStyle: TBarStyle;
+  ActionMainMenuBarStyle: TActionMainMenuBarStyle;
 
 implementation
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.ActnList, Vcl.Graphics, Vcl.ImgList, System.UITypes;
 
-{ TBarStyle }
+{ TActionMainMenuBarStyle }
 
-function TBarStyle.GetControlClass(ActionBar: TCustomActionBar; AnItem: TActionClientItem): TCustomActionControlClass;
+function TActionMainMenuBarStyle.GetControlClass(ActionBar: TCustomActionBar; AnItem: TActionClientItem): TCustomActionControlClass;
 begin
   result := inherited GetControlClass(ActionBar, AnItem);
   if ActionBar is TCustomActionPopupMenu then
-    result := TMenuStyle;
+    result := TActionMainMenuBarMenuStyle;
 end;
 
 { TMenuStyle }
 
-procedure TMenuStyle.CalcBounds;
+procedure TActionMainMenuBarMenuStyle.CalcBounds;
 begin
   inherited;
 
@@ -53,7 +53,7 @@ begin
     TextBounds.Offset(-7, 0);
 end;
 
-procedure TMenuStyle.DrawGlyph(const Location: TPoint);
+procedure TActionMainMenuBarMenuStyle.DrawGlyph(const Location: TPoint);
 var
   OldColor, OldBrushColor: TColor;
   NewLocation: TPoint;
@@ -125,7 +125,7 @@ begin
   end;
 end;
 
-procedure TMenuStyle.DrawSeparator(const Offset: Integer);
+procedure TActionMainMenuBarMenuStyle.DrawSeparator(const Offset: Integer);
 var
   PaintRect: TRect;
   PR: TPenRecall;
@@ -153,7 +153,7 @@ begin
 end;
 
 initialization
-  ActionMainMenuBarStyle := TBarStyle.Create;
+  ActionMainMenuBarStyle := TActionMainMenuBarStyle.Create;
 
 finalization
   FreeAndNil(ActionMainMenuBarStyle);

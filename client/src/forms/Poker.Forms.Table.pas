@@ -49,6 +49,7 @@ type
     pbHandPlaybackProgress: TcxProgressBar;
     acHandPlaybackStepForward: TAction;
     acHandPlaybackStepBackwards: TAction;
+    tiRender: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -92,6 +93,7 @@ type
     procedure acHandPlaybackPauseExecute(Sender: TObject);
     procedure acHandPlaybackStepForwardExecute(Sender: TObject);
     procedure acHandPlaybackStepBackwardsExecute(Sender: TObject);
+    procedure tiRenderTimer(Sender: TObject);
   private
     const
       FORM_ASPECT_RATIO = 1.35;
@@ -431,6 +433,11 @@ begin
   end;
 end;
 
+procedure TfrmTable.tiRenderTimer(Sender: TObject);
+begin
+  FTable.Renderer.Render;
+end;
+
 procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
 var
   seat_info: TSeatInfo;
@@ -713,122 +720,123 @@ begin
   begin
     FTable.Renderer.TableStatus.ActionStandUp := TRUE;
 
-    case seat_info.Status of
-      psOutOfPlay: begin
-        FTable.Renderer.TableStatus.ActionPlayNow := TRUE;
-        FTable.Renderer.TableStatus.ActionSitOut := FALSE;
-        FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
-        FTable.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
-      end;
+    if FTable.Game.State <> gsClosed then
+      case seat_info.Status of
+        psOutOfPlay: begin
+          FTable.Renderer.TableStatus.ActionPlayNow := TRUE;
+          FTable.Renderer.TableStatus.ActionSitOut := FALSE;
+          FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
+          FTable.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
+        end;
 
-      psOutOfHand: begin
-        FTable.Renderer.TableStatus.ActionSitOut := TRUE;
-        FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
-        FTable.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
-      end;
+        psOutOfHand: begin
+          FTable.Renderer.TableStatus.ActionSitOut := TRUE;
+          FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
+          FTable.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
+        end;
 
-      psInHand, psAllIn: begin
-        FTable.Renderer.TableStatus.ActionSitOut := TRUE;
-        FTable.Renderer.TableStatus.ActionSitOutNextBB := TRUE;
-        if (seat_info.Status = psInHand) and
-           (FTable.Renderer.TableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
-          FTable.Renderer.TableStatus.ActionFoldToAny := TRUE;
+        psInHand, psAllIn: begin
+          FTable.Renderer.TableStatus.ActionSitOut := TRUE;
+          FTable.Renderer.TableStatus.ActionSitOutNextBB := TRUE;
+          if (seat_info.Status = psInHand) and
+             (FTable.Renderer.TableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
+            FTable.Renderer.TableStatus.ActionFoldToAny := TRUE;
 
-        if (FTable.Renderer.TableStatus.CurrentSeat = FTable.SeatIndex) and
-           (not FTable.Renderer.TableStatus.Locked) and
-           (not FTable.Renderer.TableStatus.LockTimerEnabled) then
-          case FTable.Renderer.TableStatus.State of
-            tsIdle: begin
-              FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
-            end;
-
-            tsPreFlop, tsFlop, tsTurn, tsRiver: begin
-              focus := TRUE;
-              FTable.Renderer.TableStatus.ActionFold := TRUE;
-              // check if our current bet is smaller than minimumbet (call/raise situation)
-              if FTable.Renderer.TableStatus.GetBet(seat_info.SeatIndex) < FTable.Renderer.TableStatus.MinimumBet then
-              begin
-                // if fold to any bet is checked, fold
-                if cbFoldToAnyBet.Checked then
-                begin
-                  focus := FALSE;
-                  acFold.Execute;
-                end
-                else // else, configure call/raise options
-                begin
-                  if seat_info.Chips <= FTable.Renderer.TableStatus.MinimumBet then
-                    FTable.Renderer.TableStatus.ActionCallCaption := 'CALL (ALL-IN)'
-                  else
-                    FTable.Renderer.TableStatus.ActionCallCaption := Format('CALL (%s)', [ChipsToStr(FTable.Renderer.TableStatus.MinimumBet - FTable.Renderer.TableStatus.GetBet(seat_info.SeatIndex))]);
-                  FTable.Renderer.TableStatus.ActionCall := TRUE;
-
-                  // if we can call, there is a possibility that we can raise too - we check if we can raise here
-                  if (seat_info.Chips > FTable.Renderer.TableStatus.MinimumBet) and
-                     (FTable.Renderer.TableStatus.MinimumBet < FTable.Renderer.TableStatus.MinimumRaise) then
-                    FTable.Renderer.TableStatus.ActionRaise := TRUE;
-                end;
-              end
-              else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
-              begin
-                FTable.Renderer.TableStatus.ActionCheck := TRUE;
-                FTable.Renderer.TableStatus.ActionBet := TRUE;
-
-                if cbFoldToAnyBet.Checked then
-                begin
-                  focus := FALSE;
-                  acCheck.Execute;
-                end;
+          if (FTable.Renderer.TableStatus.CurrentSeat = FTable.SeatIndex) and
+             (not FTable.Renderer.TableStatus.Locked) and
+             (not FTable.Renderer.TableStatus.LockTimerEnabled) then
+            case FTable.Renderer.TableStatus.State of
+              tsIdle: begin
+                FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
               end;
 
-              // check if we should focus table
-              if focus then
-              begin
-                // check if table is currently in focus
-                fgwin := GetForegroundWindow;
-                for C1 := 0 to Tables.Count - 1 do
-                  if tables[C1].Form.Handle = fgwin then
+              tsPreFlop, tsFlop, tsTurn, tsRiver: begin
+                focus := TRUE;
+                FTable.Renderer.TableStatus.ActionFold := TRUE;
+                // check if our current bet is smaller than minimumbet (call/raise situation)
+                if FTable.Renderer.TableStatus.GetBet(seat_info.SeatIndex) < FTable.Renderer.TableStatus.MinimumBet then
+                begin
+                  // if fold to any bet is checked, fold
+                  if cbFoldToAnyBet.Checked then
                   begin
                     focus := FALSE;
-                    Break;
+                    acFold.Execute;
+                  end
+                  else // else, configure call/raise options
+                  begin
+                    if seat_info.Chips <= FTable.Renderer.TableStatus.MinimumBet then
+                      FTable.Renderer.TableStatus.ActionCallCaption := 'CALL (ALL-IN)'
+                    else
+                      FTable.Renderer.TableStatus.ActionCallCaption := Format('CALL (%s)', [ChipsToStr(FTable.Renderer.TableStatus.MinimumBet - FTable.Renderer.TableStatus.GetBet(seat_info.SeatIndex))]);
+                    FTable.Renderer.TableStatus.ActionCall := TRUE;
+
+                    // if we can call, there is a possibility that we can raise too - we check if we can raise here
+                    if (seat_info.Chips > FTable.Renderer.TableStatus.MinimumBet) and
+                       (FTable.Renderer.TableStatus.MinimumBet < FTable.Renderer.TableStatus.MinimumRaise) then
+                      FTable.Renderer.TableStatus.ActionRaise := TRUE;
                   end;
-
-                // if its not in focus, focus it
-                // we set FForceFocused to true once table is auto-focused, so we dont refocus it on each ConfigureActions() call
-                // we reset FForceFocused flag once seatindex changes
-                if (focus) and
-                   (not FForceFocused) then
+                end
+                else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
                 begin
-                  if IsIconic(Handle) then
-                    ShowWindow(Handle, SW_RESTORE);
-                  BringToFront;
-                  SetForegroundWindow(Handle);
-                  SetFocus;
-                  FForceFocused := TRUE;
+                  FTable.Renderer.TableStatus.ActionCheck := TRUE;
+                  FTable.Renderer.TableStatus.ActionBet := TRUE;
 
-                  // if chat is not focused, focus raise box, otherwise keep chatbox focus
-                  if (not edChat.Focused) and
-                     (seRaiseAmount.Visible) then
-                    seRaiseAmount.SetFocus;
+                  if cbFoldToAnyBet.Checked then
+                  begin
+                    focus := FALSE;
+                    acCheck.Execute;
+                  end;
+                end;
 
-                  TablePlaySound(Sounds.SOUND_TIMEBAR);
+                // check if we should focus table
+                if focus then
+                begin
+                  // check if table is currently in focus
+                  fgwin := GetForegroundWindow;
+                  for C1 := 0 to Tables.Count - 1 do
+                    if tables[C1].Form.Handle = fgwin then
+                    begin
+                      focus := FALSE;
+                      Break;
+                    end;
+
+                  // if its not in focus, focus it
+                  // we set FForceFocused to true once table is auto-focused, so we dont refocus it on each ConfigureActions() call
+                  // we reset FForceFocused flag once seatindex changes
+                  if (focus) and
+                     (not FForceFocused) then
+                  begin
+                    if IsIconic(Handle) then
+                      ShowWindow(Handle, SW_RESTORE);
+                    BringToFront;
+                    SetForegroundWindow(Handle);
+                    SetFocus;
+                    FForceFocused := TRUE;
+
+                    // if chat is not focused, focus raise box, otherwise keep chatbox focus
+                    if (not edChat.Focused) and
+                       (seRaiseAmount.Visible) then
+                      seRaiseAmount.SetFocus;
+
+                    TablePlaySound(Sounds.SOUND_TIMEBAR);
+                  end;
                 end;
               end;
-            end;
 
-            tsWinning, tsWinning2: begin
-              FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
-            end;
-          end
-        else
-          FForceFocused := FALSE;
-      end;
+              tsWinning, tsWinning2: begin
+                FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
+              end;
+            end
+          else
+            FForceFocused := FALSE;
+        end;
 
-      psFolded: begin
-        FTable.Renderer.TableStatus.ActionSitOut := TRUE;
-        FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
-        FTable.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
+        psFolded: begin
+          FTable.Renderer.TableStatus.ActionSitOut := TRUE;
+          FTable.Renderer.TableStatus.ActionFoldToAny := FALSE;
+          FTable.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
+        end;
       end;
-    end;
   end;
 
   // if raise slider was not enabled, set it to minimum value
