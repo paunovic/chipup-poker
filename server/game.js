@@ -2,7 +2,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,allGames,GameEvents,activeUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
+var activeGames,GameEvents,activeUsers,sharedconfig,allStats,handHistory,log,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -103,7 +103,6 @@ function Game(obj) {
 	else this.state2 = 'gsActive';
 }
 Game.init = function (db,input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN) {
-	allGames = db.collection('games');
 	activeGames = input;
 	activeUsers = activeUsersIN;
 	GameEvents = db.collection('GameEvents');
@@ -147,7 +146,8 @@ function clubBroadcastGameState(clubid,gamerow,cb) {
 	});
 }
 Game.prototype.close = function(conn,cb) {
-	allGames.update({_id:this.id},{$set:{state2:'gsClosed'}},function (err,ret) {
+	models.Game.findOneAndUpdate({_id:this.id},{$set:{state2:'gsClosed'}},function (err,ret) {
+		assert.ifError(err);
 		if (err) {
 			conn.reply(0,"internal error");
 			return;
@@ -403,7 +403,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 	//this.log('post rotation:%d omaha:%s limit:%s',this.rotation,this.omaha,this.game_limit);
 	myutils.getNextSequence('handHistory',function (seq) {
 		this.handid = seq;
-		allGames.update({_id:this.id},{$set:{lasthandid:seq, rotation:this.rotation}},function (err,res){});
+		models.Game.findOneAndUpdate({_id:this.id},{$set:{lasthandid:seq, rotation:this.rotation}},function (err,res){});
 		this.history = {moves:[],players:[],cards:[]};
 		hands = seq;
 		var oldDealer = this.dealer;
@@ -592,7 +592,7 @@ Game.prototype.eatChips = function (seat,chips,cb) {
 	models.UserModel.findOneAndUpdate({_id:this.members[seat].conn.userid},{ $inc:{chips:-chips}},function (err) {
 		assert.ifError(err);
 		this.members[seat].conn.log('lost chips',err,res,chips);
-		allGames.update({_id:this.obj._id},{$inc:{pot:chips}},function (err,res) {
+		models.Game.findOneAndUpdate({_id:this.obj._id},{$inc:{pot:chips}},function (err,res) {
 			assert(res == 1);
 			this.members[seat].conn.log('pot for game went up to ',this.pots);
 			cb();
@@ -856,7 +856,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 			cb2();
 		}.bind(this));
 	}.bind(this),function done() {
-		allGames.update({_id:this.obj._id},{$unset:{gameState:0},$inc:{rake:totalrake}},function (err,res) {
+		models.Game.findOneAndUpdate({_id:this.obj._id},{$unset:{gameState:0},$inc:{rake:totalrake}},function (err,res) {
 			assert(!err,err);
 			this.obj.rake += totalrake;
 			assert.equal(res,1);
@@ -964,8 +964,8 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 			}.bind(this));
 		}.bind(this),cbA);
 	}.bind(this),function b(cbB) {
-		allGames.update({_id:this.obj._id},{$inc:{hands:1}},function done(err,rows) {
-			assert.equal(rows,1);
+		models.Game.findOneAndUpdate({_id:this.obj._id},{$inc:{hands:1}},function done(err,row) {
+			assert.equal(row);
 			cbB();
 		});
 	}.bind(this)],function done() {
@@ -2053,7 +2053,7 @@ Game.prototype.logEvent = function (type,userid,change) {
 Game.getGame = function getgame(id,cb) {
 	getGameLock.writeLock(function (release) {
 		if (!activeGames[id]) {
-			allGames.findOne({_id:id},function (err,obj) {
+			models.Game.findOne({_id:id},function (err,obj) {
 				if (!obj) {
 					release();
 					return cb();
@@ -2125,7 +2125,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 		return;
 	}
 	this.log('closing game: %j',params);
-	allGames.findOne({_id:id},function (err,gamerow) {
+	models.Game.findOne({_id:id},function (err,gamerow) {
 		if (err) {
 			this.reply(0,"internal error");
 			return;
@@ -2190,13 +2190,13 @@ handlers[codes.scCreateGame] = function (args,token) {
 			return;
 		}
 		doc.clubid = club.clubid;
-		allGames.insert(doc,function (err,game) {
+		models.Game.create(doc,function (err,game) {
 			if (err) {
 				this.reply(0,"internal error");
 				return;
 			}
-			this.log('inserted',game[0]);
-			var g = makeGameProtobuf(game[0]);
+			this.log('inserted',game);
+			var g = makeGameProtobuf(game);
 			this.send(codes.srCreateGameOk,g,'Poker.Game');
 			if (club.obj.is_private) {
 				if (!club.obj.members) {

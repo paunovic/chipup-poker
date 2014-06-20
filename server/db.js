@@ -99,6 +99,24 @@ var IPN_HitSchema = new Schema({
 	reply:String,
 	params:Schema.Types.Mixed
 },{collection:'IPN_hits'});
+var GameSchema = new Schema({
+	game_type:String,
+	blinds:String,
+	seats:Number,
+	creator_mongo_id:ObjectId,
+	clubseq:Number,
+	gamename:String,
+	game_limit:String,
+	buyin_min:Number,
+	buyin_max:Number,
+	rake:Number,
+	rotation:Number,
+	hands:Number,
+	lasthandid:Number,
+	pot:Number,
+	state2:String,
+	gameState:Schema.Types.Mixed
+},{collection:'games'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -121,6 +139,7 @@ module.exports.open = function () {
 	models.ObjectSize = mongoose.model('ObjectSize',ObjectSizeSchema);
 	models.ServerError = mongoose.model('ServerError',ServerErrorSchema);
 	models.IPN_Hit = mongoose.model('IPN_Hit',IPN_HitSchema);
+	models.Game = mongoose.model('Game',GameSchema);
 }
 
 if (require.main === module) {

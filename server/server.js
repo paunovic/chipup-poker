@@ -110,7 +110,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allGames,handHistory,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
+var conn,handHistory,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -132,7 +132,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 
 	var allUsers = db.collection('users');
 	var allClubs = db.collection('clubs');
-	allGames = db.collection('games');
 	var allCounters = db.collection('counters');
 	handHistory = db.collection('handHistory');
 	Config = db.collection('config');
@@ -270,7 +269,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		});
 	}
 	function checkCorruptRake() {
-		allGames.find({rake:NaN}).toArray(function (err,badGames) { // should never find any
+		models.Game.collection.find({rake:NaN}).toArray(function (err,badGames) { // should never find any
 			if (badGames.length > 0) {
 				console.log(badGames);
 				process.send({type:'control',cmd:'autooff'});
@@ -1216,7 +1215,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 					mdb.models.UserModel.findOne({_id:this.userid},function(err,self) {
 						status.self = makeUserProtobuf(self);
 						// FIXME, hide closed games, send them in a second array for just the owner
-						allGames.find({clubid:{$in:clubids}}).toArray(function (err,games) {
+						models.Game.find({clubid:{$in:clubids}},function (err,games) {
 							if (err) {
 								this.reply(0,"internal error");
 								return;
@@ -1374,7 +1373,7 @@ handlers[codes.scQueryTableStats] = function (args,token) {
 		mdb.models.Clubs.find({owner:this.userid},function (err,clubs) {
 			assert.ifError(err);
 			for (var i=0; i<clubs.length; i++) clublist.push(clubs[i]._id);
-			allGames.find({clubid:{$in:clublist}}).toArray(function (err,games) {
+			models.Game.find({clubid:{$in:clublist}},function (err,games) {
 				assert.ifError(err);
 				for (var i=0; i<games.length; i++) {
 					if (!list2[games[i].clubid]) list2[games[i].clubid] = [];

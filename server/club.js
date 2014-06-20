@@ -1,5 +1,5 @@
 "use strict";
-var activeUsers,allStats,allGames,clubBalances,activeGames,handHistory,pb,regexLimits;
+var activeUsers,allStats,clubBalances,activeGames,handHistory,pb,regexLimits;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
@@ -69,7 +69,7 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 	if (activeUsers[this.obj.owner]) {
 		//console.log('owner is online');
 		var data = {};
-		allGames.find({clubid:this.clubid},{_id:1}).toArray(function (err,games) {
+		models.Game.find({clubid:this.clubid},{_id:1},function (err,games) {
 			assert.ifError(err);
 			var gamelist = [];
 			for (var x=0; x<games.length; x++) gamelist.push(games[x]._id);
@@ -87,7 +87,7 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 	} else cb();
 
 		if (handid) {
-			allGames.findOne({_id:gameObj.id},function (err,gameRow) {
+			models.Game.findOne({_id:gameObj.id},function (err,gameRow) {
 				assert.ifError(err);
 				handHistory.findOne({seq:handid},function (err,historyRow) {
 					assert.ifError(err);
@@ -189,7 +189,7 @@ Club.finishTableStatsPacket = function (data,cb) {
 		for (var i=0; i<playersOut.length; i++) {
 			playersOut[i]._id = myutils.fromMongoId(playersOut[i]._id);
 		}
-		allGames.find({_id:{$in:data.gamelist}}).toArray(function (err,rawgames) {
+		models.Game.find({_id:{$in:data.gamelist}},function (err,rawgames) {
 			for (var i=0; i<rawgames.length; i++) {
 				var gameidhex = rawgames[i]._id.toString();
 				if (data.games[gameidhex]) {
@@ -274,7 +274,7 @@ Club.prototype.goPublic = function (cb) {
 		clubBalances.find({clubid:this.clubid}).toArray(function (err,stats) {
 			assert.ifError(err);
 			var c = Club.makeClubProtobuf(this.obj,null,stats,this);
-			allGames.find({clubid:this.clubid}).toArray(function (err,games) {
+			models.Game.find({clubid:this.clubid},function (err,games) {
 				assert.ifError(err);
 				for (var x=0; x<games.length; x++) {
 					games[x] = makeGameProtobuf(games[x]);
@@ -331,7 +331,6 @@ Club.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
 	allStats = db.collection('allStats');
-	allGames = db.collection('games');
 	clubBalances = db.collection('clubBalances');
 	handHistory = db.collection('handHistory');
 	pb = pbIN;
@@ -531,7 +530,7 @@ handlers[codes.scDeleteClub] = function (args,token) {
 			this.reply("000","your not owner");
 			return;
 		}
-		allGames.find({clubid:clubObj.clubid},{state2:1}).toArray(function (err,games) {
+		models.Game.find({clubid:clubObj.clubid},{state2:1},function (err,games) {
 			for (var x=0; x<games.length; x++) {
 				if (games[x].state2 != 'gsClosed') {
 					this.reply(0,'not all games are closed');
@@ -580,7 +579,7 @@ handlers[codes.scKickPlayer] = function (args,token) {
 			}
 			var target = activeUsers[userid];
 			if (target) {
-				allGames.find({clubid:club.clubid}).toArray(function (err,clubGames) {
+				models.Game.find({clubid:club.clubid},function (err,clubGames) {
 					assert.ifError(err);
 					async.each(clubGames,function checkGame(gameRow,cb) {
 						var gameObj = activeGames[gameRow._id];
@@ -690,7 +689,7 @@ handlers[codes.scJoinClub] = function (args,token) {
 			this.log('join2');
 			clubObj.updateLimitPostWin(0,this.userid,function (){
 				clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-					allGames.find({clubid:clubObj.obj._id}).toArray(function (err,games) {
+					models.Game.find({clubid:clubObj.obj._id},function (err,games) {
 						for (var x=0; x<games.length; x++) {
 							games[x] = makeGameProtobuf(games[x]);
 						}
@@ -841,7 +840,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 				} else {
 					var userlist = [ ];
-					allGames.find({clubid:club.clubid}).toArray(function (err,games) {
+					models.Game.find({clubid:club.clubid},function (err,games) {
 						clubBalances.find({clubid:club.clubid}).toArray(function (err,stats) {
 							assert.ifError(err);
 							var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
