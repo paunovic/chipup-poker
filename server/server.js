@@ -25,7 +25,6 @@ var SmtpConnection = require('./smtp');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var deck = require('./deck');
 var codes = require('./ServerCodes');
-var dag = require('./dag/build/Release/dag');
 var bugsView = require('./bugs');
 var profiler = require('./profiler');
 var Club = require('./club').Club;
@@ -120,7 +119,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	}
 	conn = db;
 	Club.init(db,activeUsers,activeGames,pb,regexLimits);
-	Game.init(db,activeGames,activeUsers,sharedconfig,log,ClientSocket);
+	Game.init(activeGames,activeUsers,sharedconfig,log,ClientSocket);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
 		console.log(err.stack);

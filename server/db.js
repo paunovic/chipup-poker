@@ -123,7 +123,7 @@ var PotSchema = new Schema({
 	members:[Number],
 	trueMembers:[Number],
 	trueUsers:[ObjectId]
-});
+},{_id:false});
 var WinnerDataSchema = new Schema({
 	seat:Number,
 	msg:String
@@ -172,23 +172,44 @@ var StatsSchema = new Schema({
 	hands:Number
 },{collection:'allStats'});
 
-/*var GameStateSchema = new Schema({
-	pots,
-	current_seat,
-	dealer,
-	bets,
-	state,
-	flop,
-	turn,
-	river,
-	handid,
-	history,
-	keycount,
-	balance_changes,
-	rake,
-	minBet,
-	minimum_raise
-});*/
+var StateMemberSchema = new Schema({
+	userid:ObjectId,
+	hand:{
+		cards:[Number]
+	},
+	status:String,
+	chips:Number,
+	seat:Number,
+	sitOutNextRound:Boolean,
+	SittingOutRoundsCount:Number,
+	handsPlayed:Number,
+	can_show:Boolean
+},{_id:false});
+var GameStateSchema = new Schema({
+	pots:[PotSchema],
+	current_seat:Number,
+	dealer:Number,
+	bets:[Number],
+	state:String,
+	flop:{
+		cards:[Number]
+	},
+	turn:{
+		cards:[Number]
+	},
+	river:{
+		cards:[Number]
+	},
+	handid:Number,
+	history:Schema.Types.Mixed,
+	keycount:Number,
+	balance_changes:[Number],
+	rake:Number,
+	minBet:Number,
+	minimum_raise:Number,
+	members:[StateMemberSchema],
+	users:[ObjectId]
+},{collection:'gameState'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -214,6 +235,7 @@ module.exports.open = function () {
 	models.Game = mongoose.model('Game',GameSchema);
 	models.HandHistory = mongoose.model('HandHistory',HandHistorySchema);
 	models.GameStats = mongoose.model('GameStats',StatsSchema);
+	models.GameState = mongoose.model('GameState',GameStateSchema);
 }
 
 if (require.main === module) {

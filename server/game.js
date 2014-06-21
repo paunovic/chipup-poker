@@ -7,6 +7,7 @@ var activeGames,activeUsers,sharedconfig,log,ClientSocket;
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
 var dag = require('./dag/build/Release/dag');
+dag.init();
 var getGameLock = new ReadWriteLock();
 
 module.exports.makeGameProtobuf = makeGameProtobuf;
@@ -36,7 +37,6 @@ function makeGameProtobuf(g) {
 	}
 	g._id = new Buffer(g._id,'hex');
 	assert.equal(g._id.length,12);
-	g.creator_mongo_id = new Buffer(g.creator_mongo_id,'hex');
 	return g;
 }
 function Game(obj) {
@@ -103,10 +103,9 @@ function Game(obj) {
 	if (obj.state2) this.state2 = obj.state2;
 	else this.state2 = 'gsActive';
 }
-Game.init = function (db,input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN) {
+Game.init = function (input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN) {
 	activeGames = input;
 	activeUsers = activeUsersIN;
-	gameState = db.collection('gameState');
 	sharedconfig = sharedconfigIN;
 	log = logIN; // FIXME
 	ClientSocket = ClientSocketIN;
@@ -247,13 +246,13 @@ Game.prototype.edited = function edited(params) {
 Game.prototype.join = function join(conn,cb) {
 	assert.equal(this.Lock.readers,-1);
 	this.users[conn.userid] = conn;
-	this.updateMongoState({},{users:true},cb);
+	this.updateMongoState({users:true},cb);
 }
 Game.prototype.sitDown = function (conn,params,cb) {
 	function finish() {
 		this.club.seGameChanged(JSON.parse(JSON.stringify(this.obj)),function () {
 			this.club.buyin(conn.userid,params.chips);
-			this.updateMongoState({},{members:true},function () {
+			this.updateMongoState({members:true},function () {
 				cb(true,events);
 			});
 		}.bind(this),conn);
@@ -553,7 +552,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			else cards = 2;
 			this.startTimer(this.current_seat,1500 + (players*50*cards)); // FIXME, run this later
 			//this.stateMachine(function () {
-			this.updateMongoState({},{members:true},function () {
+			this.updateMongoState({members:true},function () {
 				cb([this.makeEvent('teDealing')]);
 			}.bind(this));
 			//}.bind(this));
@@ -604,7 +603,7 @@ Game.prototype.getNextSeat = function (current,validstates) {
 		x++;
 		while (!this.members[x]) {
 			if (limit-- < 0) {
-				this.log('giving up');
+				this.log('giving up next');
 				return -1;
 			}
 			x++;
@@ -629,7 +628,7 @@ Game.prototype.getPrevSeat = function (current) {
 		if (x < 0) x = this.obj.seats;
 		while (!this.members[x]) {
 			if (limit-- < 0) {
-				this.log('giving up');
+				this.log('giving up prev');
 				return -1;
 			}
 			x--;
@@ -665,7 +664,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 		this.saveHistory(function () {
 			token2.stop();
 			// FIXME, update members like sitDown
-			this.updateMongoState({},{},function () {
+			this.updateMongoState({},function () {
 				cb1.call(this,events,offset);
 			}.bind(this));
 		}.bind(this));
@@ -773,7 +772,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 						this.state = 'tsWinning2';
 						//this.broadcastStatus(null);
 						this.stateMachine(function (events) {
-							this.updateMongoState({},{members:true},function () {
+							this.updateMongoState({members:true},function () {
 								this.broadcastStatus(null,true,events); // teDeal
 								release();
 							}.bind(this));
@@ -1166,7 +1165,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 	token1.stop(); // 9ms avg
 	async.parallel([
 		function (cb) {
-			this.updateMongoState({},{},function () {
+			this.updateMongoState({},function () {
 				//this.log('pot for game updated');
 				cb();
 			}.bind(this));
@@ -1224,24 +1223,22 @@ Game.prototype.moveToPot = function (reason,cb1) {
 			cb1();
 		}.bind(this));
 }
-Game.prototype.updateMongoState = function (obj,options,cb) {
-	if (!obj) obj = {};
-	if (!obj.$set) obj.$set = {};
-	obj.$set.pots = this.pots;
-	obj.$set.current_seat = this.current_seat;
-	obj.$set.dealer = this.dealer;
-	obj.$set.bets = this.bets;
-	obj.$set.state = this.state;
-	obj.$set.flop = this.flop;
-	obj.$set.turn = this.turn;
-	obj.$set.river = this.river;
-	obj.$set.handid = this.handid;
-	obj.$set.history = this.history; // maybe only update it in some spots?
-	obj.$set.keycount = this.keycount;
-	obj.$set.balance_changes = this.balance_changes;
-	obj.$set.rake = this.rake;
-	obj.$set.minBet = this.minBet;
-	obj.$set.minimum_raise = this.minimum_raise;
+Game.prototype.updateMongoState = function (options,cb) {
+	this.stateRow.pots = this.pots;
+	this.stateRow.current_seat = this.current_seat;
+	this.stateRow.dealer = this.dealer;
+	this.stateRow.bets = this.bets;
+	this.stateRow.state = this.state;
+	this.stateRow.flop = this.flop;
+	this.stateRow.turn = this.turn;
+	this.stateRow.river = this.river;
+	this.stateRow.handid = this.handid;
+	this.stateRow.history = this.history; // maybe only update it in some spots?
+	this.stateRow.keycount = this.keycount;
+	this.stateRow.balance_changes = this.balance_changes;
+	this.stateRow.rake = this.rake;
+	this.stateRow.minBet = this.minBet;
+	this.stateRow.minimum_raise = this.minimum_raise;
 	if (options.members) {
 		var memberList = [];
 		var keys = ['hand','status','chips','seat','sitOutNextRound','SittingOutRoundsCount','handsPlayed','can_show'];
@@ -1255,17 +1252,15 @@ Game.prototype.updateMongoState = function (obj,options,cb) {
 			}
 			memberList.push(out);
 		}
-		obj.$set.members = memberList;
+		this.stateRow.members = memberList;
 	}
 	if (options.users) {
 		var U = [];
 		for (var key in this.users) U.push(this.users[key].userid);
-		obj.$set.users = U;
+		this.stateRow.users = U;
 	}
-	gameState.update({_id:this.obj._id}, obj,function updateMongoState_cb1(err,res) {
-		this.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
-		if (res != 1) console.log('rows found:%d state:%s state2:%s',res,this.state,this.state2);
-		assert(res == 1);
+	this.stateRow.save(function (err) {
+		assert.ifError(err);
 		cb();
 	}.bind(this));
 }
@@ -1334,7 +1329,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	//this.saveHistory(function () {
 		this.stateMachine(function (events,offset) {
 			assert.equal(typeof offset,'number');
-			this.updateMongoState({},{members:true},function () {
+			this.updateMongoState({members:true},function () {
 				cb(events,offset);
 			});
 		}.bind(this),null,null,[this.makeEvent(event,seat)],0);
@@ -1354,6 +1349,7 @@ Game.prototype.saveHistory = function (cb) {
 	// FIXME, re-save players obj at end of round
 	// FIXME, reuse mongoose Document
 	models.HandHistory.findOneAndUpdate({seq:this.handid},updates,function (err,res) {
+		assert.ifError(err);
 		assert(res);
 		cb();
 	});
@@ -1867,7 +1863,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 				this.updateCashOut(conn.userid,seatObj.chips,function () {
 					token9.stop(); // 7ms
 					token9 = profiler.start('standup-step4.2');
-					this.updateMongoState({},{members:true},function () {
+					this.updateMongoState({members:true},function () {
 						token2.stop();
 						token7.stop(); // 31ms 31%
 						token9.stop(); // 3ms
@@ -1909,7 +1905,7 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 						clearTimeout(this.deleteTimer);
 						this.doDelete();
 					}
-					gameState.remove({_id:this.obj._id},function (err,res) {
+					this.stateRow.remove({_id:this.obj._id},function (err,res) {
 						assert.ifError(err);
 						cb1();
 						release();
@@ -1917,7 +1913,7 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 					return;
 				}
 			}
-			this.updateMongoState({},{users:true},function () {
+			this.updateMongoState({users:true},function () {
 				cb1();
 				release();
 			});
@@ -2089,7 +2085,9 @@ Game.getGame = function getgame(id,cb) {
 							}
 						}
 						game.club = club;
-						gameState.insert({_id:game.id},function () {
+						models.GameState.create({_id:game.id},function (err,row) {
+							assert.ifError(err);
+							game.stateRow = row;
 							token.stop();
 							release();
 							cb(null,game);
@@ -2196,7 +2194,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	var doc = {game_type:game_type, blinds:blinds, seats:seats, creator_mongo_id:this.userid, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
+	var doc = {game_type:game_type, blinds:blinds, seats:seats, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
 	Club.getClubBySeq(clubseq,function (err,club) {
 		if (err == 'not found') {
 			this.reply(0,"club not found");
@@ -2311,7 +2309,7 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 				game.clearDealTimer();
 				game.members[seatIdx].sitOutNextRound = false;
 				game.members[seatIdx].sitOutBB = false;
-				game.updateMongoState({},{members:true},function () {
+				game.updateMongoState({members:true},function () {
 					game.broadcastStatus(null,true,[]);
 				});
 			} else if ('psOutOfHand' == game.members[seatIdx].status) {
@@ -2442,7 +2440,7 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 				}
 			} else finish([]);
 			function finish(events) { // teDeal
-				game.updateMongoState({},{members:true},function () {
+				game.updateMongoState({members:true},function () {
 					game.broadcastStatus(null,true,events);
 					token.stop();
 					release();
