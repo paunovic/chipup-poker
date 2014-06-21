@@ -52,6 +52,7 @@ function Game(obj) {
 	this.dealer = -1;
 	this.current_seat = -1;
 	this.bets = [];
+	for (var x=0; x<this.obj.seats; x++) this.bets[x] = 0;
 	this.pots = [ new Pot(this) ];
 	this.minBet = 0;
 	this.minimum_raise = 0;
@@ -407,6 +408,10 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.nextDealer();
 		this.bets = [];
 		this.balance_changes = [];
+		for (var x=0; x<this.obj.seats; x++) {
+			this.bets[x] = 0;
+			this.balance_changes[x] = 0;
+		}
 		this.addHistory({code:['teDealing'],seat:-1});
 
 		var todo = [];

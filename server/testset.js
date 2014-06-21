@@ -260,7 +260,7 @@ exports.game = {
 						gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
 							test.ok(worked);
 							console.log(worked,events);
-							gameObj.sitDown(opponent,{chips:100000,seat_index:1},function (worked,events) {
+							gameObj.sitDown(opponent,{chips:100000,seat_index:2},function (worked,events) {
 								test.ok(worked);
 								console.log(worked,events);
 								phase3(owner,opponent,gameObj,db,release);
@@ -272,7 +272,7 @@ exports.game = {
 		}
 		function phase3(owner,opponent,game,db,release) {
 			game.members[0].status = 'psOutOfHand'; // FIXME, make a playnow function
-			game.members[1].status = 'psOutOfHand';
+			game.members[2].status = 'psOutOfHand';
 			assert.equal(game.state,'tsIdle');
 			game.stateMachine(function (events) {
 				console.log(events);
