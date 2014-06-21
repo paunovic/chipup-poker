@@ -157,7 +157,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	for (var x=0; x<gamelist.length; x++) {
 		if (!containsObjectID(data.gamelist,gamelist[x])) data.gamelist.push(gamelist[x]);
 	}
-	models.GameStats.find({gameid:{$in:gamelist}},function (err,stats) {
+	models.GameStats.find({gameid:{$in:gamelist}}).lean(true).exec(function (err,stats) {
 		assert.ifError(err);
 			for (var i=0; i<stats.length; i++) {
 				var gameidhex = stats[i].gameid.toString();
@@ -334,7 +334,7 @@ Club.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
 	clubBalances = db.collection('clubBalances');
-	handHistory = db.collection('handHistory');
+	handHistory = db.collection('handHistory'); // FIXME
 	pb = pbIN;
 	regexLimits = regexLimitsIN;
 }

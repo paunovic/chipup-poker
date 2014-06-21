@@ -124,10 +124,15 @@ var PotSchema = new Schema({
 	trueMembers:[Number],
 	trueUsers:[ObjectId]
 });
+var WinnerDataSchema = new Schema({
+	seat:Number,
+	msg:String
+});
 var WinnerPotInfoSchema = new Schema({
 	sum:Number,
 	rake:Number,
-	seats:[Number]
+	seats:[Number],
+	WinnerData:[WinnerDataSchema]
 });
 var MoveSchema = new Schema({
 	code:[String],
@@ -166,6 +171,24 @@ var StatsSchema = new Schema({
 	rakecontrib:Number,
 	hands:Number
 },{collection:'allStats'});
+
+/*var GameStateSchema = new Schema({
+	pots,
+	current_seat,
+	dealer,
+	bets,
+	state,
+	flop,
+	turn,
+	river,
+	handid,
+	history,
+	keycount,
+	balance_changes,
+	rake,
+	minBet,
+	minimum_raise
+});*/
 
 module.exports.close = function () {
 	if (!connected) return;
