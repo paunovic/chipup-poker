@@ -45,8 +45,6 @@ var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
 protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong]);
 
-dag.init();
-
 // stats
 var hands = 0;
 

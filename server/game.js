@@ -2090,12 +2090,22 @@ Game.getGame = function getgame(id,cb) {
 							}
 						}
 						game.club = club;
-						models.GameState.create({_id:game.id},function (err,row) {
+						models.GameState.findOne({_id:game.id},function (err,row) {
 							assert.ifError(err);
-							game.stateRow = row;
-							token.stop();
-							release();
-							cb(null,game);
+							if (row) {
+								game.stateRow = row;
+								token.stop();
+								release();
+								cb(null,game);
+							} else {
+								models.GameState.create({_id:game.id},function (err,row) {
+									assert.ifError(err);
+									game.stateRow = row;
+									token.stop();
+									release();
+									cb(null,game);
+								});
+							}
 						});
 					});
 				}.bind(this));
