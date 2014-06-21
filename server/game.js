@@ -1245,19 +1245,24 @@ Game.prototype.updateMongoState = function (options,cb) {
 	this.stateRow.minBet = this.minBet;
 	this.stateRow.minimum_raise = this.minimum_raise;
 	if (options.members) {
-		var memberList = [];
 		var keys = ['hand','status','chips','seat','sitOutNextRound','SittingOutRoundsCount','handsPlayed','can_show'];
+		while (this.stateRow.members.length) this.stateRow.members.pop();
 		for (var x=0; x<this.members.length; x++) {
 			var input = this.members[x];
 			if (!input) continue;
+			console.log('saving seat %d',x);
 			var out = {userid:this.seats[x].userid};
 			for (var y=0; y<keys.length; y++) {
 				var key = keys[y];
 				out[key] = input[key];
 			}
-			memberList.push(out);
+			this.stateRow.members.push(out);
+			var out = this.stateRow.members[this.stateRow.members.length-1];
+			for (var y=0; y<input.hand.cards.length; y++) {
+				out.hand.cards[y] = input.hand.cards[y];
+			}
+			console.log('saved',out);
 		}
-		this.stateRow.members = memberList;
 	}
 	if (options.users) {
 		var U = [];
@@ -1272,6 +1277,7 @@ Game.prototype.updateMongoState = function (options,cb) {
 Game.prototype.putChips = function (conn,chips,cb) {
 	assert.equal(this.Lock.readers,-1);
 	var seat = this.findSeat(conn);
+	assert.equal(this.current_seat,seat);
 	this.stopTimer(seat);
 	if (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(this.state) == -1) {
 		this.log('putChips fail 1');
@@ -1361,6 +1367,8 @@ Game.prototype.saveHistory = function (cb) {
 }
 Game.prototype.findSeat = function (conn) {
 	for (var x=0; x<this.seats.length; x++) {
+		console.log('checking seat %d',x);
+		if (this.seats[x]) console.log('found',this.seats[x]);
 		if ((this.seats[x]) && (this.seats[x].conn == conn)) {
 			return x;
 		}
@@ -2115,6 +2123,90 @@ Game.getGame = function getgame(id,cb) {
 			cb(null,activeGames[id]);
 		}
 	}.bind(this));
+}
+Game.prototype.resume = function (game,cb) {
+	console.log('FINDME',game.members);
+	if (game.users) this.reconnect = game.users;
+	if (game.members) {
+		for (var x=0; x<game.members.length; x++) {
+			var item = game.members[x];
+			var pubSeat = { muck:true, disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed, can_show:item.can_show };
+			pubSeat.disconnectTimer = setTimeout(this.eject.bind(this,item.seat,item.userid),5 * 60 * 1000);
+			var privSeat = {conn:{log:ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'}, userid:item.userid};
+			pubSeat.hand.cards = item.hand.cards;
+			this.members[item.seat] = pubSeat;
+			this.seats[item.seat] = privSeat;
+			this.club.buyin(item.userid,item.chips);
+		}
+	}
+	if (game.flop) {
+		this.flop = new Hand();
+		this.turn = new Hand();
+		this.river = new Hand();
+
+		this.flop.cards = game.flop.cards;
+		this.turn.cards = game.turn.cards;
+		this.river.cards = game.river.cards;
+	}
+	this.handid = game.handid;
+	this.state = game.state;
+	this.current_seat = game.current_seat;
+	this.keycount = game.keycount;
+	this.balance_changes = game.balance_changes;
+	this.bets = game.bets;
+	this.dealer = game.dealer;
+	this.rake = game.rake;
+	if (game.minimum_raise) this.minimum_raise = game.minimum_raise;
+	if (game.minBet) this.minBet = game.minBet;
+	if (game.pots) {
+		for (var x=0; x<game.pots.length; x++) {
+			this.pots[x] = new Pot(this);
+			this.pots[x].value = game.pots[x].value;
+			this.pots[x].members = game.pots[x].members;
+			this.pots[x].trueMembers = game.pots[x].trueMembers;
+			this.pots[x].trueUsers = game.pots[x].trueUsers;
+		}
+	}
+	if (game.history) this.history = game.history;
+	cb();
+}
+Game.checkAndResume = function (cb1) {
+	models.GameState.find().lean(true).exec(function (err,badgames) {
+		if (badgames.length > 0) {
+			log('%d bad games found, recovering',badgames.length);
+			async.eachSeries(badgames,function (game,cb2) {
+				//gameState.remove({_id:game._id},cb)
+				//console.log('game is',game);
+				Game.getGame(game._id,function (err,gameObj) {
+					if (err == 'parent club missing') {
+						log('club missing for game %j',game);
+						cb2();
+						return;
+					}
+					assert.ifError(err);
+					log('bad game %j',game);
+					if (!gameObj) {
+						log('game is missing!');
+						cb2();
+						return;
+					}
+					if (!game.state) {
+						log('state is missing');
+						cb2();
+						return;
+					}
+					if (gameObj.state2 == 'gsClosed') {
+						log('game was closed!!!');
+						cb2();
+						return;
+					}
+					gameObj.resume(game,cb2);
+				});
+			},cb1);
+		} else {
+			cb1();
+		}
+	});
 }
 function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds,regexLimits) {
 	if (!blinds) return true;

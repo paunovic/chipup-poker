@@ -108,7 +108,7 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances;
+var conn,Config,FetchQueue,GameEvents,PokerProfile,clubBalances;
 var emailRegister,emailChange1,emailChange2;
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
@@ -135,7 +135,6 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	var allCounters = db.collection('counters');
 	Config = db.collection('config');
 	GameEvents = db.collection('GameEvents');
-	gameState = db.collection('gameState');
 	clubBalances = db.collection('clubBalances');
 
 	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
@@ -175,84 +174,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 
 	allCounters.insert({_id:"club",seq:1},function (err,res) {}); // FIXME
 	myutils.init(db);
-	gameState.find({}).toArray(function (err,badgames) {
-		if (badgames.length > 0) {
-			log('%d bad games found, recovering',badgames.length);
-			async.eachSeries(badgames,function (game,cb) {
-				//gameState.remove({_id:game._id},cb)
-				//console.log('game is',game);
-				Game.getGame(game._id,function (err,gameObj) {
-					if (err == 'parent club missing') {
-						log('club missing for game %j',game);
-						cb();
-						return;
-					}
-					assert.ifError(err);
-					log('bad game %j',game);
-					if (!gameObj) {
-						log('game is missing!');
-						cb();
-						return;
-					}
-					if (!game.state) {
-						log('state is missing');
-						cb();
-						return;
-					}
-					if (gameObj.state2 == 'gsClosed') {
-						log('game was closed!!!');
-						cb();
-						return;
-					}
-					if (game.users) gameObj.reconnect = game.users;
-					if (game.members) {
-						for (var x=0; x<game.members.length; x++) {
-							var item = game.members[x];
-							var pubSeat = { muck:true, disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed, can_show:item.can_show };
-							pubSeat.disconnectTimer = setTimeout(gameObj.eject.bind(gameObj,item.seat,item.userid),5 * 60 * 1000);
-							var privSeat = {conn:{log:ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'}, userid:item.userid};
-							pubSeat.hand.cards = item.hand.cards;
-							gameObj.members[item.seat] = pubSeat;
-							gameObj.seats[item.seat] = privSeat;
-							gameObj.club.buyin(item.userid,item.chips);
-						}
-					}
-					if (game.flop) {
-						gameObj.flop = new Hand();
-						gameObj.turn = new Hand();
-						gameObj.river = new Hand();
-
-						gameObj.flop.cards = game.flop.cards;
-						gameObj.turn.cards = game.turn.cards;
-						gameObj.river.cards = game.river.cards;
-					}
-					gameObj.handid = game.handid;
-					gameObj.state = game.state;
-					gameObj.current_seat = game.current_seat;
-					gameObj.keycount = game.keycount;
-					gameObj.balance_changes = game.balance_changes;
-					gameObj.bets = game.bets;
-					gameObj.dealer = game.dealer;
-					gameObj.rake = game.rake;
-					if (game.minimum_raise) gameObj.minimum_raise = game.minimum_raise;
-					if (game.minBet) gameObj.minBet = game.minBet;
-					if (game.pots) {
-						for (var x=0; x<game.pots.length; x++) {
-							gameObj.pots[x] = new Pot(gameObj);
-							gameObj.pots[x].value = game.pots[x].value;
-							gameObj.pots[x].members = game.pots[x].members;
-							gameObj.pots[x].trueMembers = game.pots[x].trueMembers;
-							gameObj.pots[x].trueUsers = game.pots[x].trueUsers;
-						}
-					}
-					if (game.history) gameObj.history = game.history;
-					cb();
-				});
-			},checkCorruptChips);
-		} else {
-			checkCorruptChips();
-		}
-	});
+	Game.checkAndResume(checkCorruptChips);
 	function checkCorruptChips() {
 		mdb.models.UserModel.collection.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
 			assert.ifError(err);
