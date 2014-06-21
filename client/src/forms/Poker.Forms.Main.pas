@@ -992,6 +992,8 @@ end;
 
 procedure TfrmChipUpMain.ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
 begin
+  // this reassigns colormap to ActionMainMenuBar
+  // bug info: http://stackoverflow.com/questions/9577540/tactionmainmenubar-and-tactiontoolbar-lose-settings
   ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
 end;
 

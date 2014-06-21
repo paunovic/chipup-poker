@@ -1,7 +1,6 @@
 object frmTable: TfrmTable
   Left = 0
   Top = 0
-  Caption = 'Table'
   ClientHeight = 524
   ClientWidth = 792
   Color = clWindow

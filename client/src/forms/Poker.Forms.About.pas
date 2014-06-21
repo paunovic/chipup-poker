@@ -57,7 +57,8 @@ end;
 
 procedure TfrmAbout.FormDeactivate(Sender: TObject);
 begin
-  if Screen.ActiveForm <> FLayeredForm then
+  if (Screen.ActiveForm <> FLayeredForm) and
+     (Screen.ActiveForm <> self) then
   begin
     ModalResult := mrOk;
     Close;

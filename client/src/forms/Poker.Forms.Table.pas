@@ -519,29 +519,14 @@ begin
       else
         cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), FTable.Club.Name]);
     end;
-    ttHandPlayback: begin
+    ttHandPlayback:
       if GetHandHistoryItem(hhi) then
-      begin
         cap := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.Limit, FALSE),
                  ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
-      end
-      else
-        cap := 'Unknown hand';
-    end;
   end;
 
   if cap <> Caption then
     Caption := cap;
-end;
-
-procedure TfrmTable.lbvHandHistoryClick(Sender: TObject);
-begin
-  acHandHistory.Execute;
-end;
-
-procedure TfrmTable.ModalFormClose(Sender: TObject);
-begin
-  EnableWindow(Handle, TRUE);
 end;
 
 function TfrmTable.GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
@@ -554,6 +539,16 @@ begin
     Exit(FALSE);
 
   Exit(TRUE);
+end;
+
+procedure TfrmTable.lbvHandHistoryClick(Sender: TObject);
+begin
+  acHandHistory.Execute;
+end;
+
+procedure TfrmTable.ModalFormClose(Sender: TObject);
+begin
+  EnableWindow(Handle, TRUE);
 end;
 
 procedure TfrmTable.edChatEnter(Sender: TObject);

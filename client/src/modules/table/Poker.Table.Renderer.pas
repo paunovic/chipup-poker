@@ -1242,7 +1242,7 @@ begin
       bet_point := FMetrics.GetBetPoint(C1, FTableStatus.Dealer);
       pot_point := FMetrics.GetPotPoint(0);
 
-      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, 0.25, 0.2, 0, FDXAreaSize);
+      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, 0.3, 0.2, 0, FDXAreaSize);
       animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
       animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
@@ -1304,7 +1304,7 @@ begin
         begin
           seat_point := FMetrics.GetSeatPoint(seat.SeatIndex);
           animation := DXTimer.AddAnimation(ACallback, Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y),
-                                            FMetrics.GetCardPoint(seat, card_index), 0.15, 1.5 + FDealAnimations.Count * 0.05, 0, FDXAreaSize);
+                                            FMetrics.GetCardPoint(seat, card_index), 0.25, 1.5 + FDealAnimations.Count * 0.05, 0, FDXAreaSize);
           animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
           Inc(cc);
           if cc mod 2 = 0 then
@@ -1363,7 +1363,7 @@ begin
         winenddelay := 0.5;
 
       animation := DXTimer.AddAnimation(ACallback, FMetrics.GetPotPoint(C1),
-           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer), 0.2, WinningAniDelay + 1.5 + C1 * 0.5, winenddelay, FDXAreaSize);
+           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer), 0.3, WinningAniDelay + 1.5 + C1 * 0.5, winenddelay, FDXAreaSize);
       animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
       PotWinAnimations.Add(animation.Id);
