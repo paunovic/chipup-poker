@@ -1250,7 +1250,6 @@ Game.prototype.updateMongoState = function (options,cb) {
 		for (var x=0; x<this.members.length; x++) {
 			var input = this.members[x];
 			if (!input) continue;
-			console.log('saving seat %d',x);
 			var out = {userid:this.seats[x].userid};
 			for (var y=0; y<keys.length; y++) {
 				var key = keys[y];
@@ -1261,7 +1260,6 @@ Game.prototype.updateMongoState = function (options,cb) {
 			for (var y=0; y<input.hand.cards.length; y++) {
 				out.hand.cards[y] = input.hand.cards[y];
 			}
-			console.log('saved',out);
 		}
 	}
 	if (options.users) {
