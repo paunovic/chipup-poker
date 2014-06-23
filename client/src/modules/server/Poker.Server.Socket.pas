@@ -888,6 +888,7 @@ var
 begin
   protobuf := TPB_Game.Create;
   try
+    Assert(Length(AGameId) = 12);
     protobuf.MongoId := AGameId;
     SendProtobuf(scTableJoin, protobuf);
   finally

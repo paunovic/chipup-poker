@@ -2237,6 +2237,36 @@ function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max
 	}
 	return false;
 }
+Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
+	this.Lock.writeLock(function (release) {
+		function finish2(events) {
+			this.log('finish2');
+			this.broadcastStatus(conn,true,events);
+			if (['tsFlop','tsTurn','tsRiver'].indexOf(this.state) != -1) {
+				var cards = this.flop.cards;
+				if (['tsTurn','tsRiver'].indexOf(this.state) != -1) cards = cards.concat(this.turn.cards);
+				if (this.state == 'tsRiver') cards = cards.concat(this.river.cards);
+				events.push(this.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
+			}
+			var status = this.getTableStatus(conn,true,events);
+			release();
+			cb(status);
+		}
+		this.users[conn.userid] = conn;
+		this.log('game state is %s',this.state);
+		this.log('game obj is %s',util.inspect(this));
+		var events = [];
+		if (seated) {
+			this.log('found seat, clearing disconnected');
+			clearTimeout(this.members[seat].disconnectTimer);
+			this.members[seat].disconnected = false;
+			this.seats[seat].conn = conn;
+			if (this.state == 'tsIdle') {
+				this.stateMachine(finish2.bind(this),null,{silent:true},events,0);
+			} else finish2.call(this,events);
+		} else finish2.call(this,events);
+	}.bind(this));
+}
 Game.registerHandlers = function (handlers,pb,regexLimits) {
 handlers[codes.scCloseGame] = function (args,token) {
 	try {
