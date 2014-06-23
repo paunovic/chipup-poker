@@ -3,7 +3,7 @@ object frmTable: TfrmTable
   Top = 0
   ClientHeight = 524
   ClientWidth = 792
-  Color = clWindow
+  Color = 3505587
   Constraints.MinWidth = 600
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET

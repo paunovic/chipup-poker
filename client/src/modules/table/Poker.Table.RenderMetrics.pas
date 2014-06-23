@@ -271,7 +271,7 @@ var
   x, y: Single;
   xr, yr: Single;
 begin
-  Assert(FGame.Seats < (Length(TTableResources.SEAT_POINTS)+1));
+  Assert(FGame.Seats < (Length(TTableResources.SEAT_POINTS)+1)); // FIXME
   xr := TableWidth / 1.25;
   yr := TableHeight / 1.45;
 

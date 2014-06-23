@@ -352,12 +352,14 @@ begin
 
   rpc_message := TPB_RpcMessage.Create(pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size)), rpc_size);
   try
-    if (not rpc_message.IsInitialized) or
-       (rpc_size + SizeOf(rpc_size) + rpc_message.DataSize > FReceiveBufferSize) then
+    if not rpc_message.IsInitialized then
     begin
-      {$IFDEF DEBUG} DebugLn('Invalid RPC message received', ditException); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn('RPC message not initialized', ditException); {$ENDIF}
       Exit;
     end;
+
+    if rpc_size + SizeOf(rpc_size) + rpc_message.DataSize > FReceiveBufferSize then
+      Exit;
 
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
