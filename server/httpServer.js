@@ -9,6 +9,7 @@ var async = require('async');
 var child_process = require('child_process');
 var http = require('http');
 var https = require('https');
+var heapdump = require('heapdump');
 
 var config = require('./config');
 var MongoStore = require('./mongoStore');
@@ -298,7 +299,7 @@ Server.prototype.getClub = function (req,res) {
 				userids.push(club.members[x]);
 			}
 		}
-		models.Games.find({clubid:new ObjectID(req.query.id)},function (err,games) {
+		models.Game.find({clubid:new ObjectID(req.query.id)},function (err,games) {
 			// FIXME
 			models.UserModel.collection.find({_id:{$in:userids}}).toArray(function (err,users) {
 				var usermap = {};

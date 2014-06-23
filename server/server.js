@@ -45,9 +45,6 @@ var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
 protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong]);
 
-// stats
-var hands = 0;
-
 var domain = "http://"+config.hostname+'/';
 var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:15,max_timebank:30};
 sharedconfig.minSizes.email = 6;
@@ -198,11 +195,11 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		allCounters.findOne({_id:'handHistory'},function (err,row) {
 			if (!row) {
 				myutils.getNextSequence('handHistory',function(seq) {
-					hands = seq;
+					Game.hands = seq;
 					compileJade();
 				});
 			} else {
-				hands = row.seq;
+				Game.hands = row.seq;
 				compileJade();
 			}
 		});
@@ -1191,7 +1188,7 @@ ClientSocket.prototype.destroy = function destroy() {
 }
 function cactiStats() {
 	var mem = process.memoryUsage();
-	var data = { hands:hands };
+	var data = { hands:Game.hands };
 	var msg = []
 	for (var x in data) {
 		msg.push(x+':'+data[x]);

@@ -503,12 +503,12 @@ handlers[codes.scCreateClub] = function (args,token) {
 }
 handlers[codes.scDeleteClub] = function (args,token) {
 	function deleteClub(clubObj) {
-		clubObj.deleteClub(function () {
-			this.log('delete worked',err,res);
+		clubObj.deleteClub(function (err) {
+			this.log('delete worked',err);
 			// FIXME, force end games in this club?
 			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
 				var userlist = [];
-				var out = Club.makeClubProtobuf(club,userlist,stats,clubObj);
+				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
 				this.send(codes.srClubDisbandOk,out,'Poker.Club');
 				this.log('userlist to inform:',userlist);
 				for (var x=0; x<userlist.length; x++) {
@@ -521,7 +521,7 @@ handlers[codes.scDeleteClub] = function (args,token) {
 	var params = pb.Parse(args,'Poker.Club');
 	var clubseq = params.seq;
 	this.log('deleting club',params);
-	Club.activeClubsSeq(clubseq,function (err,clubObj) {
+	Club.getClubBySeq(clubseq,function (err,clubObj) {
 		if (err == 'not found') {
 			this.log('club not found');
 			this.reply("000","club not found");

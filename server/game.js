@@ -1,3 +1,5 @@
+"use strict";
+
 var assert = require('assert');
 var util = require('util');
 var async = require('async');
@@ -52,6 +54,7 @@ function Game(obj) {
 	this.dealer = -1;
 	this.current_seat = -1;
 	this.bets = [];
+	this.keycount = 0;
 	for (var x=0; x<this.obj.seats; x++) this.bets[x] = 0;
 	this.pots = [ new Pot(this) ];
 	this.minBet = 0;
@@ -106,11 +109,14 @@ function Game(obj) {
 }
 Game.init = function (input,activeUsersIN,sharedconfigIN,logIN,ClientSocketIN) {
 	activeGames = input;
+	global.activeGames = activeGames;
+	global.util = require('util');
 	activeUsers = activeUsersIN;
 	sharedconfig = sharedconfigIN;
 	log = logIN; // FIXME
 	ClientSocket = ClientSocketIN;
 }
+Game.hands = 0;
 Game.prototype.doClose = function (conn,cb,gamerow) {
 	if (this.state == 'tsIdle') this.close(this,cb);
 	else {
@@ -403,7 +409,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		this.handid = seq;
 		models.Game.findOneAndUpdate({_id:this.id},{$set:{lasthandid:seq, rotation:this.rotation}},function (err,res){});
 		this.history = {moves:[],players:[],cards:[]};
-		hands = seq;
+		Game.hands = seq;
 		var oldDealer = this.dealer;
 		this.nextDealer();
 		this.bets = [];
@@ -557,10 +563,16 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			else cards = 2;
 			this.startTimer(this.current_seat,1500 + (players*50*cards)); // FIXME, run this later
 			//this.stateMachine(function () {
-			this.updateMongoState({members:true},function () {
-				cb([this.makeEvent('teDealing')]);
+
+			// hack to stop memory leak?
+			models.GameState.findOne({_id:this.id},function (err,row) {
+				assert.ifError(err);
+				this.stateRow = row;
+				// </hack>
+				this.updateMongoState({members:true},function () {
+					cb([this.makeEvent('teDealing')]);
+				}.bind(this));
 			}.bind(this));
-			//}.bind(this));
 			//}.bind(this),
 			//players * 100);
 		}.bind(this));
@@ -1229,6 +1241,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 		}.bind(this));
 }
 Game.prototype.updateMongoState = function (options,cb) {
+	assert(this.stateRow._events.isNew.length < 20);
 	this.stateRow.pots = this.pots;
 	this.stateRow.current_seat = this.current_seat;
 	this.stateRow.dealer = this.dealer;
@@ -1365,8 +1378,6 @@ Game.prototype.saveHistory = function (cb) {
 }
 Game.prototype.findSeat = function (conn) {
 	for (var x=0; x<this.seats.length; x++) {
-		console.log('checking seat %d',x);
-		if (this.seats[x]) console.log('found',this.seats[x]);
 		if ((this.seats[x]) && (this.seats[x].conn == conn)) {
 			return x;
 		}

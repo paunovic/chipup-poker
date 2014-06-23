@@ -141,6 +141,9 @@ var MoveSchema = new Schema({
 	pots:[PotSchema],
 	WinnerPotData:[WinnerPotInfoSchema]
 });
+MoveSchema.path('pots').validate(function (pots) {
+	return pots.length < 5;
+},'too many pots');
 var PlayerSchema = new Schema({
 	seat:Number,
 	cards:[Number],
@@ -210,6 +213,9 @@ var GameStateSchema = new Schema({
 	members:[StateMemberSchema],
 	users:[ObjectId]
 },{collection:'gameState'});
+GameStateSchema.path('pots').validate(function (pots) {
+	return pots.length < 5;
+},'too many pots');
 
 module.exports.close = function () {
 	if (!connected) return;
