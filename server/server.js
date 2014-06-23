@@ -328,36 +328,10 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 			if (toResume.length > 0) this.log('resuming %d games',toResume.length);
 			var statuses = [];
 			async.each(toResume,function resumer(game,cb) {
-				game.game.Lock.writeLock(function (release) {
-					function finish2(events) {
-						this.log('finish2');
-						game.game.broadcastStatus(this,true,events);
-						if (['tsFlop','tsTurn','tsRiver'].indexOf(game.game.state) != -1) {
-							var cards = game.game.flop.cards;
-							if (['tsTurn','tsRiver'].indexOf(game.game.state) != -1) cards = cards.concat(game.game.turn.cards);
-							if (game.game.state == 'tsRiver') cards = cards.concat(game.game.river.cards);
-							events.push(game.game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
-							game.game.log('new arrays %s %j %j %j %j',game.game.state,events,game.game.flop.cards,game.game.turn.cards,game.game.river.cards);
-						}
-						var status = game.game.getTableStatus(this,true,events);
-						statuses.push(status);
-						release();
-						cb();
-					}
-					game.game.users[row._id] = this;
-					this.log('game state is %s',game.game.state);
-					this.log('game obj is %s',util.inspect(game));
-					var events = [];
-					if (game.seated) {
-						this.log('found seat, clearing disconnected');
-						clearTimeout(game.game.members[game.seat].disconnectTimer);
-						game.game.members[game.seat].disconnected = false;
-						game.game.seats[game.seat].conn = this;
-						if (game.game.state == 'tsIdle') {
-							game.game.stateMachine(finish2.bind(this),null,{silent:true},events,0);
-						} else finish2.call(this,[]);
-					} else finish2.call(this,[]);
-				}.bind(this));
+				game.game.reconnectUser(this,game.seated,game.seat,function (status) {
+					statuses.push(status);
+					cb();
+				});
 			}.bind(this),function done() {
 				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses};
 				//console.log('login reply',obj);

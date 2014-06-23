@@ -22,17 +22,16 @@ exports.club = {
 		var Club = require('./club').Club
 		test.expect(3);
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			myutils.init(db);
-			db.collection('users').findOne(function (err,user) {
-				test.ok(user);
+		Club.init(activeUsers,activeGames,Core.pb);
+		myutils.init();
+		mdb.models.UserModel.findOne(function (err,user) {
+			test.ok(user);
+			mdb.models.Clubs.remove({name:'clubname'},function (err) {
 				Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
 					clubid = clubObj.obj.seq;
 					test.ok(worked);
 					Club.dupCheck('clubname',function (dup) {
 						test.ok(dup);
-						db.close();
 						mdb.close();
 						test.done();
 					});
@@ -45,31 +44,28 @@ exports.club = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			myutils.init(db);
-			db.collection('users').find().limit(3).toArray(function (err,users) {
-				Club.getClubBySeq(clubid,function (err,clubObj) {
-					console.log('spot 1',err);
-					test.ok(clubObj);
-					var out = [];
-					console.log('users:',users);
-					for (var x=0; x<users.length; x++) {
-						if (!clubObj.isOwner(users[x]._id)) out.push(users[x]);
-					}
-					console.log('out:',out);
-					async.eachSeries(out,function (user2,cb) {
-						console.log('user2',user2,typeof user2);
-						clubObj.joinClub(user2._id,function () {
-							cb();
-						});
-					},function () {
-							console.log(clubObj.obj);
-							db.close();
-							mdb.close();
-							test.done();
-					})
-				});
+		Club.init(activeUsers,activeGames,Core.pb);
+		myutils.init();
+		mdb.models.UserModel.find().limit(3).exec(function (err,users) {
+			Club.getClubBySeq(clubid,function (err,clubObj) {
+				console.log('spot 1',err);
+				test.ok(clubObj);
+				var out = [];
+				console.log('users:',users);
+				for (var x=0; x<users.length; x++) {
+					if (!clubObj.isOwner(users[x]._id)) out.push(users[x]);
+				}
+				console.log('out:',out);
+				async.eachSeries(out,function (user2,cb) {
+					console.log('user2',user2,typeof user2);
+					clubObj.joinClub(user2._id,function () {
+						cb();
+					});
+				},function () {
+						console.log(clubObj.obj);
+						mdb.close();
+						test.done();
+				})
 			});
 		});
 	},
@@ -78,31 +74,27 @@ exports.club = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var game = require('./game');
-		test.expect(7);
+		test.expect(6);
 		activeUsers['fake'] = { send: function(code,object,type) {
 			test.ok(true);
 		}};
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+		Club.init(activeUsers,activeGames,Core.pb);
+		game.Game.init(activeGames,activeUsers,{},null,null,null);
+		mdb.models.Clubs.findOne(function (err,row) {
 			test.ok(true);
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			game.Game.init(activeGames,activeUsers,{},null,null,null);
-			db.collection('clubs').findOne(function (err,row) {
+			mdb.models.UserModel.findOne(function (err,userRow) {
+				//console.log('userRow',userRow);
 				test.ok(true);
-				db.collection('users').findOne(function (err,userRow) {
-					//console.log('userRow',userRow);
+				mdb.models.ClubBalance.create({clubid:row._id,userid:userRow._id,balance:0,balance_limit:0,unlimited_limit:true},function (err) {
 					test.ok(true);
-					db.collection('clubBalances').insert({clubid:row._id,userid:userRow._id,balance:0,balance_limit:0,unlimited_limit:true},function (err) {
+					Club.getClubById(row._id,function (err,clubobj) {
 						test.ok(true);
-						Club.getClubById(row._id,function (err,clubobj) {
+						//console.log('clubobj',clubobj);
+						clubobj.goPublic(function () {
 							test.ok(true);
-							//console.log('clubobj',clubobj);
-							clubobj.goPublic(function () {
-								test.ok(true);
-								test.done();
-								db.close();
-								mdb.close();
-							});
+							test.done();
+							mdb.close();
 						});
 					});
 				});
@@ -112,26 +104,22 @@ exports.club = {
 		var activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
-		test.expect(6);
+		test.expect(5);
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+		Club.init(activeUsers,activeGames,Core.pb);
+		mdb.models.Clubs.findOne(function (err,row) {
 			test.ok(true);
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			db.collection('clubs').findOne(function (err,row) {
+			test.ok(row.members.length > 0);
+			if (row.members.length == 0) return test.done();
+			mdb.models.UserModel.findOne({_id:row.members[0]},function (err,userRow) {
 				test.ok(true);
-				test.ok(row.members.length > 0);
-				if (row.members.length == 0) return test.done();
-				db.collection('users').findOne({_id:row.members[0]},function (err,userRow) {
+				Club.getClubById(row._id,function (err,clubobj) {
 					test.ok(true);
-					Club.getClubById(row._id,function (err,clubobj) {
+					clubobj.setSuspended(true,userRow._id,function () {
 						test.ok(true);
-						clubobj.setSuspended(true,userRow._id,function () {
-							test.ok(true);
-							clubobj.setSuspended(false,userRow._id,function () {
-								db.close();
-								mdb.close();
-								test.done();
-							});
+						clubobj.setSuspended(false,userRow._id,function () {
+							mdb.close();
+							test.done();
 						});
 					});
 				});
@@ -143,17 +131,14 @@ exports.club = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			myutils.init(db);
-			Club.getClubBySeq(clubid,function (err,clubObj) {
-				test.ok(clubObj);
-				clubObj.Leave(clubObj.obj.members[0],function () {
-					test.ok(true);
-					db.close();
-					mdb.close();
-					test.done();
-				});
+		Club.init(activeUsers,activeGames,Core.pb);
+		myutils.init();
+		Club.getClubBySeq(clubid,function (err,clubObj) {
+			test.ok(clubObj);
+			clubObj.Leave(clubObj.obj.members[0],function () {
+				test.ok(true);
+				mdb.close();
+				test.done();
 			});
 		});
 	},
@@ -162,16 +147,13 @@ exports.club = {
 		var activeGames = {};
 		var Club = require('./club').Club;
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			myutils.init(db);
-			Club.getClubBySeq(clubid,function (err,clubObj) {
-				test.ok(clubObj);
-				clubObj.setOwner(clubObj.obj.members[0],function () {
-					db.close();
-					mdb.close();
-					test.done();
-				});
+		Club.init(activeUsers,activeGames,Core.pb);
+		myutils.init();
+		Club.getClubBySeq(clubid,function (err,clubObj) {
+			test.ok(clubObj);
+			clubObj.setOwner(clubObj.obj.members[0],function () {
+				mdb.close();
+				test.done();
 			});
 		});
 	},
@@ -181,17 +163,14 @@ exports.club = {
 		var Club = require('./club').Club;
 		mdb.open();
 		test.expect(1);
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			myutils.init(db);
-			Club.getClubBySeq(clubid,function (err,clubObj) {
-				test.ok(clubObj);
-				console.log(clubObj);
-				clubObj.deleteClub(function () {
-					db.close();
-					mdb.close();
-					test.done();
-				});
+		Club.init(activeUsers,activeGames,Core.pb);
+		myutils.init();
+		Club.getClubBySeq(clubid,function (err,clubObj) {
+			test.ok(clubObj);
+			console.log(clubObj);
+			clubObj.deleteClub(function () {
+				mdb.close();
+				test.done();
 			});
 		});
 	}
@@ -213,36 +192,34 @@ exports.game = {
 		var Game = require('./game').Game;
 		var profiler = require('./profiler');
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			myutils.init(db);
-			profiler.setup(mongoose.connection.db.collection('PokerProfile'));
-			Game.init(activeGames,activeUsers,{max_play_time:15,max_timebank:30},console.log,{});
-			mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+		Club.init(activeUsers,activeGames,Core.pb);
+		myutils.init();
+		profiler.setup(mdb.models.PokerProfile);
+		Game.init(activeGames,activeUsers,{max_play_time:15,max_timebank:30},console.log,{});
+		mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+			assert.ifError(err);
+			var owner = users[0];
+			var opponent = users[1];
+			test.ok(owner);
+			test.ok(opponent);
+			mdb.models.Clubs.remove({name:'clubname'},function (err) {
 				assert.ifError(err);
-				var owner = users[0];
-				var opponent = users[1];
-				test.ok(owner);
-				test.ok(opponent);
-				mdb.models.Clubs.remove({name:'clubname'},function (err) {
-					assert.ifError(err);
-					Club.createClub('clubname','password',owner._id,5,function (worked,clubObj) {
-						test.ok(worked);
-						clubid = clubObj.obj.seq;
-						var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:5,buyin_max:500,rake:0,rotation:0,hands:0});
-						gamerow.save(function (err) {
+				Club.createClub('clubname','password',owner._id,5,function (worked,clubObj) {
+					test.ok(worked);
+					clubid = clubObj.obj.seq;
+					var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:5,buyin_max:500,rake:0,rotation:0,hands:0});
+					gamerow.save(function (err) {
+						assert.ifError(err);
+						Game.getGame(gamerow._id,function (err,gameObj) {
 							assert.ifError(err);
-							Game.getGame(gamerow._id,function (err,gameObj) {
-								assert.ifError(err);
-								test.ok(gameObj);
-								phase2(new DummyConn(owner),new DummyConn(opponent),gameObj,db);
-							});
+							test.ok(gameObj);
+							phase2(new DummyConn(owner),new DummyConn(opponent),gameObj);
 						});
 					});
 				});
 			});
 		});
-		function phase2(owner,opponent,gameObj,db) {
+		function phase2(owner,opponent,gameObj) {
 			owner.nick = 'owner';
 			opponent.nick = 'opponent';
 			owner.send = function (code,obj,type) {
@@ -263,14 +240,14 @@ exports.game = {
 							gameObj.sitDown(opponent,{chips:100000,seat_index:2},function (worked,events) {
 								test.ok(worked);
 								console.log(worked,events);
-								phase3(owner,opponent,gameObj,db,release);
+								phase3(owner,opponent,gameObj,release);
 							});
 						});
 					});
 				});
 			});
 		}
-		function phase3(owner,opponent,game,db,release) {
+		function phase3(owner,opponent,game,release) {
 			game.members[0].status = 'psOutOfHand'; // FIXME, make a playnow function
 			game.members[2].status = 'psOutOfHand';
 			assert.equal(game.state,'tsIdle');
@@ -280,40 +257,39 @@ exports.game = {
 					console.log('put1',events,offset);
 					game.putChips(opponent,200,function (events,offset) {
 						console.log('put2',events,offset);
-						phase4(owner,opponent,game,db,release);
+						phase4(owner,opponent,game,release);
 					});
 				});
 			},owner,{},[],0);
 		}
-		function phase4(owner,opponent,game,db,release) {
+		function phase4(owner,opponent,game,release) {
 			game.putChips(opponent,0,function (events,offset) {
 				console.log('put3',events,offset);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put4',events,offset);
-					phase5(owner,opponent,game,db,release);
+					phase5(owner,opponent,game,release);
 				});
 			});
 		}
-		function phase5(owner,opponent,game,db,release) {
+		function phase5(owner,opponent,game,release) {
 			game.putChips(opponent,0,function (events,offset) {
 				console.log('put5',events,offset);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put6',events,offset);
-					phase6(owner,opponent,game,db,release);
+					phase6(owner,opponent,game,release);
 				});
 			});
 		}
-		function phase6(owner,opponent,game,db,release) {
+		function phase6(owner,opponent,game,release) {
 			game.putChips(opponent,0,function (events,offset) {
 				console.log('put7',events,offset);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put8',events,offset);
-					db.collection('gameState').findOne({_id:game.obj._id},function (err,state) {
+					mdb.models.GameState.findOne({_id:game.obj._id},function (err,state) {
 						console.log(state);
 						release();
 						test.done();
 						mdb.close();
-						db.close();
 					});
 				});
 			});
@@ -326,36 +302,34 @@ exports.game = {
 		var Game = require('./game').Game;
 		var profiler = require('./profiler');
 		mdb.open();
-		MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
-			Club.init(db,activeUsers,activeGames,Core.pb);
-			myutils.init(db);
-			profiler.setup(mongoose.connection.db.collection('PokerProfile'));
-			Game.init(activeGames,activeUsers,{max_play_time:15,max_timebank:30},console.log,DummyConn);
-			mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+		Club.init(activeUsers,activeGames,Core.pb);
+		myutils.init();
+		profiler.setup(mdb.models.PokerProfile);
+		Game.init(activeGames,activeUsers,{max_play_time:15,max_timebank:30},console.log,DummyConn);
+		mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+			assert.ifError(err);
+			var owner = users[0];
+			var opponent = users[1];
+			test.ok(owner);
+			test.ok(opponent);
+			mdb.models.Clubs.remove({name:'clubname'},function (err) {
 				assert.ifError(err);
-				var owner = users[0];
-				var opponent = users[1];
-				test.ok(owner);
-				test.ok(opponent);
-				mdb.models.Clubs.remove({name:'clubname'},function (err) {
-					assert.ifError(err);
-					Club.createClub('clubname','password',owner._id,5,function (worked,clubObj) {
-						test.ok(worked);
-						clubid = clubObj.obj.seq;
-						var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:5,buyin_max:500,rake:0,rotation:0,hands:0});
-						gamerow.save(function (err) {
+				Club.createClub('clubname','password',owner._id,5,function (worked,clubObj) {
+					test.ok(worked);
+					clubid = clubObj.obj.seq;
+					var gamerow = new mdb.models.Game({game_type:'gtHoldem',blinds:'gb1x2',seats:10,clubseq:clubObj.obj.seq,clubid:clubObj.obj._id,gamename:'unit test',game_limit:'glNoLimit',buyin_min:5,buyin_max:500,rake:0,rotation:0,hands:0});
+					gamerow.save(function (err) {
+						assert.ifError(err);
+						Game.getGame(gamerow._id,function (err,gameObj) {
 							assert.ifError(err);
-							Game.getGame(gamerow._id,function (err,gameObj) {
-								assert.ifError(err);
-								test.ok(gameObj);
-								phase2(new DummyConn(owner),new DummyConn(opponent),gameObj,db);
-							});
+							test.ok(gameObj);
+							phase2(new DummyConn(owner),new DummyConn(opponent),gameObj);
 						});
 					});
 				});
 			});
 		});
-		function phase2(owner,opponent,gameObj,db) {
+		function phase2(owner,opponent,gameObj) {
 			owner.nick = 'owner';
 			opponent.nick = 'opponent';
 			owner.send = function (code,obj,type) {
@@ -376,14 +350,14 @@ exports.game = {
 							gameObj.sitDown(opponent,{chips:100000,seat_index:2},function (worked,events) {
 								test.ok(worked);
 								console.log(worked,events);
-								phase3(owner,opponent,gameObj,db,release);
+								phase3(owner,opponent,gameObj,release);
 							});
 						});
 					});
 				});
 			});
 		}
-		function phase3(owner,opponent,game,db,release) {
+		function phase3(owner,opponent,game,release) {
 			game.members[0].status = 'psOutOfHand'; // FIXME, make a playnow function
 			game.members[2].status = 'psOutOfHand';
 			assert.equal(game.state,'tsIdle');
@@ -393,56 +367,55 @@ exports.game = {
 					console.log('put1',events,offset);
 					game.putChips(opponent,200,function (events,offset) {
 						console.log('put2',events,offset);
-						phase4(owner,opponent,game,db,release);
+						phase4(owner,opponent,game,release);
 					});
 				});
 			},owner,{},[],0);
 		}
-		function phase4(owner,opponent,game,db,release) {
+		function phase4(owner,opponent,game,release) {
 			delete activeGames[game.id];
 			mdb.models.GameState.findOne({_id:game.obj._id}).lean(true).exec(function (err,state) {
 				Game.getGame(game.id,function (err,game2) {
 					//console.log('game2',game2);
 					game2.resume(state,function () {});
-					game2.Lock.writeLock(function (release) {
-						// reconnect players to game
-						game2.users[owner.userid] = owner;
-						game2.users[opponent.userid] = opponent;
-						clearTimeout(game2.members[0].disconnectTimer);
-						clearTimeout(game2.members[2].disconnectTimer);
-						game2.seats[0].conn = owner;
-						game2.seats[2].conn = opponent;
-						game2.putChips(opponent,0,function (events,offset) {
-							console.log('put3',events,offset);
-							game2.putChips(owner,0,function (events,offset) {
-								console.log('put4',events,offset);
-								phase5(owner,opponent,game2,db,release);
+					// reconnect players to game
+					game2.reconnectUser(owner,true,0,function (status1) {
+						console.log(status1);
+						game2.reconnectUser(opponent,true,2,function (status2) {
+							console.log(status2);
+							game2.Lock.writeLock(function (release) {
+								game2.putChips(opponent,0,function (events,offset) {
+									console.log('put3',events,offset);
+									game2.putChips(owner,0,function (events,offset) {
+										console.log('put4',events,offset);
+										phase5(owner,opponent,game2,release);
+									});
+								});
 							});
 						});
 					});
 				});
 			});
 		}
-		function phase5(owner,opponent,game,db,release) {
+		function phase5(owner,opponent,game,release) {
 			game.putChips(opponent,0,function (events,offset) {
 				console.log('put5',events,offset);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put6',events,offset);
-					phase6(owner,opponent,game,db,release);
+					phase6(owner,opponent,game,release);
 				});
 			});
 		}
-		function phase6(owner,opponent,game,db,release) {
+		function phase6(owner,opponent,game,release) {
 			game.putChips(opponent,0,function (events,offset) {
 				console.log('put7',events,offset);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put8',events,offset);
-					db.collection('gameState').findOne({_id:game.obj._id},function (err,state) {
+					mdb.models.GameState.findOne({_id:game.obj._id},function (err,state) {
 						console.log(state);
 						release();
 						test.done();
 						mdb.close();
-						db.close();
 					});
 				});
 			});
