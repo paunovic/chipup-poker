@@ -262,8 +262,7 @@ begin
       if (CCV <> cvUnknown) and (CCS <> csUnknown) then
       begin
         SetLength(FCardArtworksImages, C1 + 1);
-        AddDXImage(Format('CardArtwork%s.image', [TCard.GetAsString(CCV, CCS)]),
-           FCardArtworksImages[C1], FCardArtworkAspectRatio);
+        AddDXImage(Format('CardArtwork%s.image', [TCard.GetAsString(CCV, CCS)]), FCardArtworksImages[C1], FCardArtworkAspectRatio);
         Inc(C1);
       end;
 

@@ -39,7 +39,7 @@ begin
   FSeat := AProtobuf.Seat;
   FBet := AProtobuf.Bet;
   FWinnerPots := TPotInfos.Create;
-  FWinnerPots.Assign(AProtobuf.Potdata);
+  FWinnerPots.Assign(AProtobuf.WinnerPotData);
   FPots := TPotInfos.Create;
   FPots.Assign(AProtobuf.Pots, 0);
 end;

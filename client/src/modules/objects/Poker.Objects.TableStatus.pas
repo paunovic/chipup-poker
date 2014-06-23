@@ -54,6 +54,8 @@ type
 
 //    FEvents        : TTableEvents;
 
+    procedure PadList(const AList: TList<UINT32>; const ACount: Integer);
+
   public
     constructor Create;
     destructor Destroy; override;
@@ -66,6 +68,7 @@ type
 
     procedure UpdateClosingTime(const AGame: TGameInfo);
     procedure UpdateCurrentPlaytime;
+    procedure NewHandCleanup;
 
     property State: TTableState read FState;
     property Dealer: Integer read FDealer;
@@ -93,6 +96,7 @@ type
     property ClosingTime: DWORD read FClosingTime;
     property TimebarEndtime: DWORD read FTimebarEndtime;
     property CurrentPlaytime: Int64 read FCurrentPlaytime;
+    property RakePercent: UINT32 read FRakePercent;
 
     property ActionStandUp: Boolean read FActionStandUp write FActionStandUp;
     property ActionFold: Boolean read FActionFold write FActionFold;
@@ -115,7 +119,7 @@ type
 implementation
 
 uses
-  System.SysUtils, Poker.Server.Socket;
+  System.SysUtils, Poker.Server.Socket, Poker.DataModule;
 
 { TTableStatus }
 
@@ -187,12 +191,29 @@ begin
   Exit(FALSE);
 end;
 
+procedure TTableStatus.NewHandCleanup;
+begin
+  FFlopCards.Clear;
+  FTurnCard.Clear;
+  FRiverCard.Clear;
+  FPreviousPots.Clear;
+  FPreviousBets.Clear;
+end;
+
+procedure TTableStatus.PadList(const AList: TList<UINT32>; const ACount: Integer);
+begin
+  while AList.Count < ACount do
+    AList.Add(0);
+end;
+
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
 var
   C1, C2: Integer;
   seat: TSeatInfo;
   delete: Boolean;
+  oldstate: TTableState;
 begin
+  oldstate := FState;
   FState := ATableStatusProtobuf.State;
   FDealer := ATableStatusProtobuf.Dealer;
   FSmallBlindSeat := ATableStatusProtobuf.SmallBlind;
@@ -201,19 +222,26 @@ begin
   FMinimumBet := ATableStatusProtobuf.MinimumBet;
   FHandId := ATableStatusProtobuf.Handid;
   FTime := ATableStatusProtobuf.Time;
-  FPreviousBets.Clear;
-  FPreviousBets.AddRange(FBets);
-  FBets.Clear;
-  FBets.AddRange(ATableStatusProtobuf.Bets);
   FLocked := ATableStatusProtobuf.Locked;
   FMaximumRaise := ATableStatusProtobuf.MaximumRaise;
   FRakePercent := ATableStatusProtobuf.RakePercent;
-  FPreviousPots.Assign(FPots, FRakePercent);
-  FPots.Assign(ATableStatusProtobuf.Pots, FRakePercent);
   FCurrentGame := ATableStatusProtobuf.CurrentGame;
   FRotationHand := ATableStatusProtobuf.Rotation;
   FCurrentLimit := ATableStatusProtobuf.GameLimit;
   FMinimumRaise := ATableStatusProtobuf.MinimumRaise;
+
+  // assign certain values only if new table state is < tsWinning or previous table state is < tsWinning
+  // this fixes animation bugs if some event occurs during tsWinning
+  if (oldstate < tsWinning) or
+     (FState < tsWinning) then
+  begin
+    FPreviousPots.Assign(FPots, FRakePercent);
+    FPots.Assign(ATableStatusProtobuf.Pots, FRakePercent);
+    FPreviousBets.Clear;
+    FPreviousBets.AddRange(FBets);
+    FBets.Clear;
+    FBets.AddRange(ATableStatusProtobuf.Bets);
+  end;
 
   if FTime > 0 then
     FTimebarEndtime := FTime - ServerSocket.TimeOffset
@@ -271,6 +299,18 @@ begin
     end;
   end;
 
+  if FSeatInfos.Count > 0 then
+  begin
+    while FPreviousPots.Count < FSeatInfos.Last.SeatIndex do
+      FPreviousPots.Add(TPotInfo.Create);
+
+    while FPots.Count < FSeatInfos.Last.SeatIndex do
+      FPots.Add(TPotInfo.Create);
+
+    PadList(FPreviousBets, FSeatInfos.Last.SeatIndex + 1);
+    PadList(FBets, FSeatInfos.Last.SeatIndex + 1);
+  end;
+
 //  FEvents.Assign(ATableStatusProtobuf.Events);
 end;
 
@@ -301,26 +341,28 @@ end;
 procedure TTableStatus.InitToDemoValues;
 var
   seatinfo: TSeatInfo;
+  bytes: TBytes;
 begin
   FState := tsPreFlop;
   FDealer := 2;
   FCurrentSeat := 5;
 
+  SetLength(bytes, 0);
   FSeatInfos.Clear;
   seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(2, 'reiser', 100000, 2);
+  seatinfo.InitToDemoValues(2, 'reiser', 100000, 2, bytes);
   FSeatInfos.Add(seatinfo);
 
   seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(3, 'paunovic', 132100, 2);
+  seatinfo.InitToDemoValues(3, '', 88400, 2, dmMain.SelfInfo.Id);
   FSeatInfos.Add(seatinfo);
 
   seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(4, 'marko', 88400, 2);
+  seatinfo.InitToDemoValues(4, 'paunovic', 88400, 2, bytes);
   FSeatInfos.Add(seatinfo);
 
   seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(5, 'boban', 111400, 2);
+  seatinfo.InitToDemoValues(5, 'marko', 111400, 2, bytes);
   FSeatInfos.Add(seatinfo);
 
   FBets.Clear;

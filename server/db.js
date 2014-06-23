@@ -9,8 +9,8 @@ var models = {};
 module.exports.models = models;
 
 var User = new Schema({
-	displayname:String,
-	email:String,
+	displayname:{type:String,index:{unique:true}},
+	email:{type:String,index:{unique:true}},
 	authcode:String,
 	password:Buffer,
 	salt:Buffer,
@@ -42,20 +42,198 @@ var DebugLogSchema = new Schema({
 	objects:Array,
 	gameid:ObjectId,
 	name:String
-},{collection:'debugLogs'});
+},{collection:'debugLogs',capped:1024 * 1024*32});
+
+var ProfileSchema = new Schema({
+	time:Number,
+	tag:String
+},{collection:'PokerProfile',capped:1024*1024*10});
 
 var ClubSchema = new Schema({
 	is_private:Boolean,
 	password:String,
-	name:String,
+	name:{type:String,index:{unique:true}},
 	owner:ObjectId,
 	chips:Number,
 	rake:Number,
 	unlimited_default_balance:Boolean,
 	default_balance_limit:Number,
-	members: Array,
-	suspended: Array
+	members: [ObjectId],
+	suspended: [ObjectId],
+	seq: Number,
+	testmode: Boolean
 },{collection:'clubs'});
+var AvatarSchema = new Schema({
+	_id: String,
+	image: Buffer,
+	size: Number,
+	created: { type: Date, default: Date.now },
+	ext: String
+},{collection:'avatars'});
+var BugsSchema = new Schema({
+	MailFrom:String,
+	MailSubject:String,
+	MailBody:String,
+	ScreenShot:Buffer,
+	BugReport:String
+},{collection:'bugs'});
+var DiffSchema = new Schema({
+	sourcehash:String,
+	desthash:String,
+	size:Number,
+	url:String,
+},{collection:'diffs'});
+var InstallerSchema = new Schema({
+	name:String,
+	version:String,
+	revision:String,
+	debug:String,
+	size: Number,
+	hashes: Schema.Types.Mixed,
+	ts:String
+},{collection:'installers'});
+var ObjectSizeSchema = new Schema({
+	_id:String,
+	size:Number
+},{collection:'objectSizes'});
+var ServerErrorSchema = new Schema({
+	error:String,
+	trace:String
+},{collection:'serverErrors'});
+var IPN_HitSchema = new Schema({
+	reply:String,
+	params:Schema.Types.Mixed
+},{collection:'IPN_hits'});
+var GameSchema = new Schema({
+	game_type:String,
+	blinds:String,
+	seats:Number,
+	creator_mongo_id:ObjectId,
+	clubseq:Number,
+	gamename:String,
+	game_limit:String,
+	buyin_min:Number,
+	buyin_max:Number,
+	rake:Number,
+	rotation:Number,
+	hands:Number,
+	lasthandid:Number,
+	pot:Number,
+	state2:String,
+	gameState:Schema.Types.Mixed,
+	clubid:ObjectId
+},{collection:'games'});
+var PotSchema = new Schema({
+	value:Number,
+	members:[Number],
+	trueMembers:[Number],
+	trueUsers:[ObjectId]
+},{_id:false});
+var WinnerDataSchema = new Schema({
+	seat:Number,
+	msg:String
+});
+var WinnerPotInfoSchema = new Schema({
+	sum:Number,
+	rake:Number,
+	seats:[Number],
+	WinnerData:[WinnerDataSchema]
+});
+var MoveSchema = new Schema({
+	code:[String],
+	seat:Number,
+	bet:Number,
+	pots:[PotSchema],
+	WinnerPotData:[WinnerPotInfoSchema]
+});
+MoveSchema.path('pots').validate(function (pots) {
+	return pots.length < 5;
+},'too many pots');
+var PlayerSchema = new Schema({
+	seat:Number,
+	cards:[Number],
+	chips:Number,
+	muck:Boolean,
+	status:String
+});
+var HandHistorySchema = new Schema({
+	seq:{type:Number,index:true},
+	gameid:{type:ObjectId,index:true},
+	moves:[MoveSchema],
+	players:[PlayerSchema],
+	cards:[Number],
+	rake:Number,
+	dealer:Number,
+	current_game:String,
+	deck:[Number],
+	totalrake:Number,
+	endtime:Number
+},{collection:'handHistory'});
+var StatsSchema = new Schema({
+	gameid:ObjectId,
+	userid:ObjectId,
+	buyins:[Number],
+	cashouts:[Number],
+	secondsplayed:Number,
+	balance:Number,
+	rakecontrib:Number,
+	hands:Number
+},{collection:'allStats'});
+
+var StateMemberSchema = new Schema({
+	userid:ObjectId,
+	hand:{
+		cards:[Number]
+	},
+	status:String,
+	chips:Number,
+	seat:Number,
+	sitOutNextRound:Boolean,
+	SittingOutRoundsCount:Number,
+	handsPlayed:Number,
+	can_show:Boolean
+},{_id:false});
+var GameStateSchema = new Schema({
+	pots:[PotSchema],
+	current_seat:Number,
+	dealer:Number,
+	bets:[Number],
+	state:String,
+	flop:{
+		cards:[Number]
+	},
+	turn:{
+		cards:[Number]
+	},
+	river:{
+		cards:[Number]
+	},
+	handid:Number,
+	history:Schema.Types.Mixed,
+	keycount:Number,
+	balance_changes:[Number],
+	rake:Number,
+	minBet:Number,
+	minimum_raise:Number,
+	members:[StateMemberSchema],
+	users:[ObjectId]
+},{collection:'gameState'});
+GameStateSchema.path('pots').validate(function (pots) {
+	return pots.length < 5;
+},'too many pots');
+
+var ClubBalanceSchema = new Schema({
+	clubid:ObjectId,
+	userid:ObjectId,
+	balance:Number,
+	balance_limit:Number,
+	unlimited_limit:Boolean
+},{collection:'clubBalances'});
+
+var CounterSchema = new Schema({
+	_id:String,
+	seq:Number
+},{collection:'counters'});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -71,13 +249,28 @@ module.exports.open = function () {
 	models.Config = mongoose.model('Config',ConfigSchema);
 	models.DebugLogs = mongoose.model('DebugLogs',DebugLogSchema);
 	models.Clubs = mongoose.model('Clubs',ClubSchema);
+	models.Avatars = mongoose.model('Avatars',AvatarSchema);
+	models.Bugs = mongoose.model('Bugs',BugsSchema);
+	models.Diff = mongoose.model('Diff',DiffSchema);
+	models.Installer = mongoose.model('Installer',InstallerSchema);
+	models.ObjectSize = mongoose.model('ObjectSize',ObjectSizeSchema);
+	models.ServerError = mongoose.model('ServerError',ServerErrorSchema);
+	models.IPN_Hit = mongoose.model('IPN_Hit',IPN_HitSchema);
+	models.Game = mongoose.model('Game',GameSchema);
+	models.HandHistory = mongoose.model('HandHistory',HandHistorySchema);
+	models.GameStats = mongoose.model('GameStats',StatsSchema);
+	models.GameState = mongoose.model('GameState',GameStateSchema);
+	models.PokerProfile = mongoose.model('PokerProfile',ProfileSchema);
+	models.ClubBalance = mongoose.model('ClubBalance',ClubBalanceSchema);
+	models.Counter = mongoose.model('Counter',CounterSchema);
 }
 
+module.exports.open();
+
 if (require.main === module) {
-	models.Admin.find({},function (err,docs) {
+	models.Counter.findOne({_id:'test'},function (err,docs) {
 		assert.ifError(err);
 		console.log(docs);
 	});
 }
 
-module.exports.open();

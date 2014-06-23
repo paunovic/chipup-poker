@@ -3,7 +3,7 @@ unit Poker.Objects.SeatInfo;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Cards, Poker.Protobufs.Objects.SeatInfo;
+  System.SysUtils, System.Generics.Collections, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Objects.PlayerInfo;
 
 type
   TSeatInfo = class
@@ -32,7 +32,7 @@ type
     procedure IncDealtCards;
     procedure FillDealtCards;
 
-    procedure InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer);
+    procedure InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer; const AMongoId: TBytes);
 
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
@@ -92,15 +92,10 @@ begin
   FCanShow := ASeatInfoProtobuf.CanShow;
 end;
 
-procedure TSeatInfo.IncDealtCards;
-begin
-  Inc(FDealtCards);
-end;
-
-procedure TSeatInfo.InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer);
+procedure TSeatInfo.InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer; const AMongoId: TBytes);
 begin
   FSeatIndex := ASeatIndex;
-  SetLength(FPlayerMongoId, 0);
+  FPlayerMongoId := Copy(AMongoId, 0, Length(AMongoId));
   FChips := AChips;
   FPreviousChips := AChips;
   FCards.Clear;
@@ -113,6 +108,11 @@ begin
   FCardsVisible := FALSE;
   FCanShow := FALSE;
   FDisconnected := FALSE;
+end;
+
+procedure TSeatInfo.IncDealtCards;
+begin
+  Inc(FDealtCards);
 end;
 
 procedure TSeatInfo.ResetDealtCards;

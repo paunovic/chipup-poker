@@ -21,7 +21,7 @@ type
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
   private
     const
-      FONTLIST: array[0..2] of String = ('SintonyBold', 'BarmenoBold', 'CardCharacters');
+      FONTLIST: array[0..0] of String = ('SintonyBold');
 
     var
       FSelfInfo: TPlayerInfo;
@@ -29,7 +29,6 @@ type
       FUpdaterBatchFile: String;
       FUpdaterInstallerFile: String;
       FReconnectedTables: TObjectList<TPB_TableStatus>;
-      FDomainURL: String;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -50,17 +49,16 @@ type
     procedure SetUpdaterBatchFile(const AFile: String);
     procedure SetUpdaterInstaller(const AFile: String);
 
-    property DomainURL: String read FDomainURL write FDomainURL;
     property SelfInfo: TPlayerInfo read FSelfInfo;
     property AvailableBalance: UINT32 read GetAvailableBalance;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
-
 var
   dmMain: TdmMain;
   SelfPath: String;
   AppDataPath: String;
+  DomainURL: String;
 
 implementation
 
@@ -117,12 +115,12 @@ begin
      (Settings.ServerIndex = 1) then
   begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    dmMain.DomainURL := DEV_URL_DOMAIN;
+    DomainURL := DEV_URL_DOMAIN;
   end
   else
   begin
     TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    dmMain.DomainURL := URL_DOMAIN;
+    DomainURL := URL_DOMAIN;
   end;
 
   FSelfInfo := TPlayerInfo.Create;
@@ -327,21 +325,16 @@ end;
 function TdmMain.GetAvailableBalance: UINT32;
 var
   table: TTable;
-  tstatus: TTableStatus;
   seat: TSeatInfo;
 begin
   result := FSelfInfo.Balance;
   for table in Tables do
-    if Assigned(table.Form) then
-    begin
-      tstatus := (table.Form as TfrmTable).TableStatus;
-      for seat in tstatus.Seats do
-        if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
-        begin
-          Assert(seat.Chips <= result);
-          Dec(result, seat.Chips)
-        end;
-    end;
+    for seat in table.Renderer.TableStatus.Seats do
+      if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
+      begin
+        Assert(seat.Chips <= result);
+        Dec(result, seat.Chips)
+      end;
 end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);

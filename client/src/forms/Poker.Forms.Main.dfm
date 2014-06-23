@@ -1,7 +1,7 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
-  ClientHeight = 554
+  ClientHeight = 573
   ClientWidth = 794
   Color = clBlack
   Constraints.MinHeight = 550
@@ -13,7 +13,6 @@ object frmChipUpMain: TfrmChipUpMain
   Font.Height = -11
   Font.Name = 'Arial'
   Font.Style = []
-  Menu = MainMenu
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
@@ -24,12 +23,12 @@ object frmChipUpMain: TfrmChipUpMain
   OnResize = FormResize
   DesignSize = (
     794
-    554)
+    573)
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
-    Left = -14
-    Top = -4
+    Left = -21
+    Top = 3
     AutoSize = True
     Picture.Data = {
       0B546478504E47496D61676589504E470D0A1A0A0000000D4948445200000362
@@ -3543,8 +3542,8 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
   end
   object imgCashier: TcxImage
-    Left = 644
-    Top = 5
+    Left = 641
+    Top = 11
     Anchors = [akTop, akRight]
     Properties.PopupMenuLayout.MenuItems = []
     Properties.Proportional = False
@@ -3568,7 +3567,7 @@ object frmChipUpMain: TfrmChipUpMain
     Left = 0
     Top = 144
     Width = 794
-    Height = 410
+    Height = 429
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
@@ -3579,13 +3578,13 @@ object frmChipUpMain: TfrmChipUpMain
       Left = 0
       Top = 0
       Width = 794
-      Height = 410
+      Height = 429
       Align = alClient
       TabOrder = 3
       Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ClientRectBottom = 410
+      ClientRectBottom = 429
       ClientRectRight = 794
       ClientRectTop = 0
       object tsHomeGames: TcxTabSheet
@@ -3593,12 +3592,12 @@ object frmChipUpMain: TfrmChipUpMain
         ImageIndex = 0
         DesignSize = (
           794
-          410)
+          429)
         object gridPublicHomeGames: TcxGrid
           Left = 152
           Top = 34
           Width = 312
-          Height = 200
+          Height = 219
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicHomeGamesEnter
@@ -3689,7 +3688,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object gridGames: TcxGrid
           Left = 155
-          Top = 237
+          Top = 256
           Width = 628
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
@@ -3772,9 +3771,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 254
+          Top = 269
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acOpenClubLobby
           Anchors = [akLeft, akBottom]
@@ -3791,9 +3790,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenTable: TcxButton
           Left = 10
-          Top = 291
+          Top = 307
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acShowGameTableForm
           Anchors = [akLeft, akBottom]
@@ -3810,9 +3809,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 328
+          Top = 345
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acShowCreateClubForm
           Anchors = [akLeft, akBottom]
@@ -3829,9 +3828,9 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 365
+          Top = 383
           Width = 143
-          Height = 34
+          Height = 35
           Margin = 18
           Action = acShowJoinClubForm
           Anchors = [akLeft, akBottom]
@@ -3850,7 +3849,7 @@ object frmChipUpMain: TfrmChipUpMain
           Left = 470
           Top = 34
           Width = 312
-          Height = 200
+          Height = 219
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 8
           OnEnter = gridMyHomeGamesEnter
@@ -4067,39 +4066,55 @@ object frmChipUpMain: TfrmChipUpMain
       ParentFont = False
     end
   end
+  object ActionMainMenuBar: TActionMainMenuBar
+    Left = 0
+    Top = 0
+    Width = 794
+    Height = 21
+    UseSystemFont = False
+    ActionManager = ActionManager
+    AnimateDuration = 50
+    AnimationStyle = asFade
+    ColorMap.HighlightColor = clBtnHighlight
+    ColorMap.UnusedColor = 14673125
+    ColorMap.MenuColor = clMenu
+    EdgeInner = esNone
+    EdgeOuter = esNone
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Shadows = False
+    Spacing = 0
+    VertMargin = 0
+    OnGetControlClass = ActionMainMenuBarGetControlClass
+  end
   object ActionManager: TActionManager
     ActionBars = <
       item
-      end
-      item
-        Items = <
-          item
-            Items = <
-              item
-                Caption = '-'
-              end
-              item
-                Action = acLogout
-                Caption = '&Logout'
-              end>
-            Caption = '&Account'
-          end>
-      end
-      item
         Items = <
           item
             Items = <
               item
                 Action = acShowChangeEMailForm
                 Caption = '&Change E-mail Address...'
+                ShowGlyph = False
               end
               item
                 Action = acShowChangePasswordForm
                 Caption = 'C&hange Password...'
+                ShowGlyph = False
               end
               item
                 Action = acShowChangeAvatarForm
                 Caption = 'Ch&ange Avatar...'
+                ShowGlyph = False
+              end
+              item
+                Action = acResendVerificationMail
+                Caption = '&Resend Verification Mail'
+                ShowGlyph = False
               end
               item
                 Caption = '-'
@@ -4107,44 +4122,79 @@ object frmChipUpMain: TfrmChipUpMain
               item
                 Action = acLogout
                 Caption = '&Logout'
+                ShowGlyph = False
               end>
             Caption = '&Account'
+            ShowGlyph = False
           end
           item
-            Caption = '&Clubs'
-          end>
-      end
-      item
-        Items = <
+            Items = <
+              item
+                Items = <
+                  item
+                    Action = acSoundsOnOff
+                    Caption = '&Sounds'
+                  end
+                  item
+                    Action = acAnimationsEnabled
+                    Caption = '&Animations'
+                  end
+                  item
+                    Action = acFoldChecks
+                    Caption = '&Check instead fold, whenever possible'
+                  end>
+                Caption = '&Table'
+              end
+              item
+                Caption = '-'
+              end
+              item
+                Action = acHandHistory
+                Caption = '&Hand History'
+                ShortCut = 16456
+              end
+              item
+                Caption = '-'
+              end
+              item
+                Visible = False
+                Action = acSettings
+                ShortCut = 16467
+              end>
+            Caption = '&Options'
+          end
           item
             Items = <
               item
-                Action = acLogout
-                Caption = '&Logout'
+                Action = acShowContactUsForm
+                Caption = '&Contact Us'
               end
               item
-                Action = acShowChangeEMailForm
-                Caption = '&Change E-mail Address...'
+                Action = acTermsAndConditions
+                Caption = '&Terms &&&& Conditions'
               end
               item
-                Action = acShowChangePasswordForm
-                Caption = 'C&hange Password...'
+                Caption = '-'
               end
               item
-                Action = acShowChangeAvatarForm
-                Caption = 'Ch&ange Avatar...'
+                Action = acShowAboutForm
+                Caption = '&About ChipUP Poker...'
               end>
-            Caption = '&Account'
+            Caption = '&Help'
+          end
+          item
+            Items = <
+              item
+                Action = acDisconnect
+                Caption = '&Disconnect'
+              end>
+            Caption = '&Dev'
           end>
+        ActionBar = ActionMainMenuBar
       end>
-    Left = 484
-    Top = 28
-    StyleName = 'Platform Default'
-    object acLogout: TAction
-      Category = 'Account'
-      Caption = 'Logout'
-      OnExecute = acLogoutExecute
-    end
+    Left = 440
+    Top = 56
+    StyleName = 'Standard'
     object acShowChangeEMailForm: TAction
       Category = 'Account'
       Caption = 'Change E-mail Address...'
@@ -4195,6 +4245,11 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Resend Verification Mail'
       OnExecute = acResendVerificationMailExecute
     end
+    object acLogout: TAction
+      Category = 'Account'
+      Caption = 'Logout'
+      OnExecute = acLogoutExecute
+    end
     object acShowContactUsForm: TAction
       Category = 'Help'
       Caption = 'Contact Us'
@@ -4213,11 +4268,13 @@ object frmChipUpMain: TfrmChipUpMain
     object acSoundsOnOff: TAction
       Category = 'Options'
       Caption = 'Sounds'
+      GroupIndex = 1
       OnExecute = acSoundsOnOffExecute
     end
     object acFoldChecks: TAction
       Category = 'Options'
       Caption = 'Check instead fold, whenever possible'
+      GroupIndex = 2
       OnExecute = acFoldChecksExecute
     end
     object acHandHistory: TAction
@@ -4229,6 +4286,7 @@ object frmChipUpMain: TfrmChipUpMain
     object acAnimationsEnabled: TAction
       Category = 'Options'
       Caption = 'Animations'
+      GroupIndex = 3
       OnExecute = acAnimationsEnabledExecute
     end
     object acSettings: TAction
@@ -4238,92 +4296,10 @@ object frmChipUpMain: TfrmChipUpMain
       Visible = False
       OnExecute = acSettingsExecute
     end
-  end
-  object MainMenu: TMainMenu
-    Left = 394
-    Top = 28
-    object miAccount: TMenuItem
-      Caption = 'Account'
-      object miChangeEMail: TMenuItem
-        Action = acShowChangeEMailForm
-      end
-      object miChangePassword: TMenuItem
-        Action = acShowChangePasswordForm
-      end
-      object miChangeAvatar: TMenuItem
-        Action = acShowChangeAvatarForm
-      end
-      object misAccount1: TMenuItem
-        Caption = '-'
-      end
-      object miResendVerificationMail: TMenuItem
-        Action = acResendVerificationMail
-      end
-      object misAccount2: TMenuItem
-        Caption = '-'
-      end
-      object miLogout: TMenuItem
-        Action = acLogout
-      end
-    end
-    object miOptions: TMenuItem
-      Caption = 'Options'
-      object miSounds: TMenuItem
-        Action = acSoundsOnOff
-      end
-      object misOptions1: TMenuItem
-        Caption = '-'
-      end
-      object miGameplay: TMenuItem
-        Caption = 'Gameplay'
-        GroupIndex = 1
-        object miAnimations: TMenuItem
-          Action = acAnimationsEnabled
-          GroupIndex = 1
-        end
-        object miCheckOnFold: TMenuItem
-          Action = acFoldChecks
-          GroupIndex = 1
-        end
-      end
-      object misOptions2: TMenuItem
-        Caption = '-'
-        GroupIndex = 1
-      end
-      object miHandHistory: TMenuItem
-        Action = acHandHistory
-        GroupIndex = 1
-      end
-      object misOptions3: TMenuItem
-        Caption = '-'
-        GroupIndex = 1
-      end
-      object miSettings: TMenuItem
-        Action = acSettings
-        GroupIndex = 1
-      end
-    end
-    object miHelp: TMenuItem
-      Caption = 'Help'
-      object miContactUs: TMenuItem
-        Action = acShowContactUsForm
-      end
-      object miTermsAndConditions: TMenuItem
-        Action = acTermsAndConditions
-      end
-      object misHelp1: TMenuItem
-        Caption = '-'
-      end
-      object miAbout: TMenuItem
-        Action = acShowAboutForm
-      end
-    end
-    object miDev: TMenuItem
-      Caption = 'Dev'
-      object miDisconnect: TMenuItem
-        Caption = 'Disconnect'
-        OnClick = miDisconnectClick
-      end
+    object acDisconnect: TAction
+      Category = 'Dev'
+      Caption = 'Disconnect'
+      OnExecute = acDisconnectExecute
     end
   end
 end

@@ -53,6 +53,7 @@ uses
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
+  Poker.Helpers.DX9Canvas in 'helpers\Poker.Helpers.DX9Canvas.pas',
   Poker.Common.Misc in 'modules\common\Poker.Common.Misc.pas',
   Poker.Common.Encryption in 'modules\common\Poker.Common.Encryption.pas',
   Poker.Common.FormsContainer in 'modules\common\Poker.Common.FormsContainer.pas',
@@ -73,8 +74,24 @@ uses
   Poker.Objects.ClubInfo in 'modules\objects\Poker.Objects.ClubInfo.pas',
   Poker.Objects.GameInfo in 'modules\objects\Poker.Objects.GameInfo.pas',
   Poker.Objects.TableStatus in 'modules\objects\Poker.Objects.TableStatus.pas',
+  Poker.Objects.SeatInfo in 'modules\objects\Poker.Objects.SeatInfo.pas',
+  Poker.Objects.PotInfo in 'modules\objects\Poker.Objects.PotInfo.pas',
+  Poker.Objects.WinnerData in 'modules\objects\Poker.Objects.WinnerData.pas',
+  Poker.Objects.TableEvent in 'modules\objects\Poker.Objects.TableEvent.pas',
   Poker.Table.Tables in 'modules\table\Poker.Table.Tables.pas',
   Poker.Table.Resources in 'modules\table\Poker.Table.Resources.pas',
+  Poker.Table.Renderer in 'modules\table\Poker.Table.Renderer.pas',
+  Poker.Table.RenderMetrics in 'modules\table\Poker.Table.RenderMetrics.pas',
+  Poker.Table.DXButton in 'modules\table\Poker.Table.DXButton.pas',
+  Poker.Stats.Table in 'modules\stats\Poker.Stats.Table.pas',
+  Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
+  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
+  Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas',
+  Poker.HandHistory.Core in 'modules\hand_history\Poker.HandHistory.Core.pas',
+  Poker.HandHistory.Items in 'modules\hand_history\Poker.HandHistory.Items.pas',
+  Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
+  Poker.HandHistory.Moves in 'modules\hand_history\Poker.HandHistory.Moves.pas',
+  Poker.HandHistory.Playback in 'modules\hand_history\Poker.HandHistory.Playback.pas',
   Poker.Avatars in 'modules\Poker.Avatars.pas',
   Poker.Cards in 'modules\Poker.Cards.pas',
   Poker.ChipStackMaker in 'modules\Poker.ChipStackMaker.pas',
@@ -143,25 +160,9 @@ uses
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
   Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas',
-  Poker.Stats.Table in 'modules\stats\Poker.Stats.Table.pas',
-  Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
-  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
-  Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas',
-  Poker.HandHistory.Core in 'modules\hand_history\Poker.HandHistory.Core.pas',
-  Poker.HandHistory.Items in 'modules\hand_history\Poker.HandHistory.Items.pas',
-  Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
-  Poker.HandHistory.Moves in 'modules\hand_history\Poker.HandHistory.Moves.pas',
-  Poker.HandHistory.Playback in 'modules\hand_history\Poker.HandHistory.Playback.pas',
-  Poker.Objects.SeatInfo in 'modules\objects\Poker.Objects.SeatInfo.pas',
-  Poker.Objects.PotInfo in 'modules\objects\Poker.Objects.PotInfo.pas',
-  Poker.Objects.WinnerData in 'modules\objects\Poker.Objects.WinnerData.pas',
-  Poker.Objects.TableEvent in 'modules\objects\Poker.Objects.TableEvent.pas',
-  Poker.Helpers.DX9Canvas in 'helpers\Poker.Helpers.DX9Canvas.pas',
-  Poker.Table.Renderer in 'modules\table\Poker.Table.Renderer.pas',
-  Poker.Table.RenderMetrics in 'modules\table\Poker.Table.RenderMetrics.pas',
-  Poker.Table.DXButton in 'modules\table\Poker.Table.DXButton.pas';
+  Poker.ActionMainMenuBarStyle in 'modules\Poker.ActionMainMenuBarStyle.pas';
 
-procedure FocusPokerApp;
+procedure FocusApp;
 var
   window_handle: THandle;
 begin
@@ -180,7 +181,7 @@ begin
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then
   begin
-    FocusPokerApp;
+    FocusApp;
     Exit;
   end;
   TInstanceController.RegisterInstance;

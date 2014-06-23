@@ -231,11 +231,11 @@ begin
   case (Sender as TcxComboBox).ItemIndex of
     0: begin
       server := Settings.Hardcoded.TCP_SERVER_ADDRESS;
-      dmMain.DomainURL := URL_DOMAIN;
+      DomainURL := URL_DOMAIN;
     end;
     1: begin
       server := Settings.Hardcoded.TCP_DEV_SERVER_ADDRESS;
-      dmMain.DomainURL := DEV_URL_DOMAIN;
+      DomainURL := DEV_URL_DOMAIN;
     end;
   end;
 

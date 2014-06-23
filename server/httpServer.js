@@ -9,6 +9,7 @@ var async = require('async');
 var child_process = require('child_process');
 var http = require('http');
 var https = require('https');
+var heapdump = require('heapdump');
 
 var config = require('./config');
 var MongoStore = require('./mongoStore');
@@ -27,35 +28,23 @@ module.exports.initHttpServer = initHttpServer;
 
 var sharedconfig,log,makeUserProtobuf;
 
-function initHttpServer(db,activeUsers,sharedconfigIN,logIN,makeUserProtobufIN) {
+function initHttpServer(activeUsers,sharedconfigIN,logIN,makeUserProtobufIN) {
 	sharedconfig = sharedconfigIN;
 	log = logIN;
 	makeUserProtobuf = makeUserProtobufIN;
-	var server = new Server(db,activeUsers);
+	var server = new Server(activeUsers);
 	return server;
 }
 
-function Server(db,activeUsersIN) {
+function Server(activeUsersIN) {
 	var app = express();
 	this.httpServer = http.createServer(app);
-	this.db = db;
 	this.IO = require('socket.io').listen(this.httpServer,{log:false});
 	var logger = require('morgan');
 	app.use(logger());
 	this.activeUsers = activeUsersIN;
-	var PokerProfile = db.collection('PokerProfile');
-	this.bugs = db.collection('bugs');
-	this.serverErrors = db.collection('serverErrors');
-	this.clubs = db.collection('clubs');
-	this.games = db.collection('games');
-	this.handHistory = db.collection('handHistory');
-	this.installers = db.collection('installers');
-	this.avatars = db.collection('avatars');
-	this.objectSizes = db.collection('objectSizes');
-	this.IPN_hits = db.collection('IPN_hits');
-	this.diffs = db.collection('diffs');
 
-	this.sessionStore = new MongoStore(db,'sessions');
+	this.sessionStore = new MongoStore(mongoose.connection.db,'sessions');
 	this.IO.set('authorization',this.socketAuth.bind(this));
 	app.use(express.cookieParser());
 	app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
@@ -78,21 +67,21 @@ function Server(db,activeUsersIN) {
 
 	app.get('/secure/performance',function (req,res) {
 		var start = Date.now();
-		db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
+		mongoose.connection.db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
 			res.render('profile',{rows:rows,start:start});
 		});
 	});
 	app.get('/secure/profile',function (req,res) {
 		var start = Date.now();
-		PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
-			PokerProfile.find({time:{$gt:2000}}).toArray(function (err,list) {
+		models.PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
+			models.PokerProfile.find({time:{$gt:2000}},function (err,list) {
 				res.render('profile2',{rows:rows,start:start,rawlist:list});
 			});
 		});
 	});
 	app.get('/secure/billing',function (req,res) {
 		var start = Date.now();
-		db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) {
+		mongoose.connection.db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) { // FIXME
 			res.render('billing',{billing:rows,start:start});
 		});
 	});
@@ -126,7 +115,7 @@ function Server(db,activeUsersIN) {
 	app.get("/install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'installerid'},function (err,row) {
 			assert.ifError(err);
-			this.installers.findOne({_id:row.value},function (err,row) {
+			models.Installer.findOne({_id:row.value},function (err,row) {
 				log('sending installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
@@ -135,7 +124,7 @@ function Server(db,activeUsersIN) {
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
 			assert.ifError(err);
-			this.installers.findOne({_id:row.value},function (err,row) {
+			models.Installer.findOne({_id:row.value},function (err,row) {
 				log('sending debug installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
@@ -163,7 +152,7 @@ function Server(db,activeUsersIN) {
 		res.writeHead(302,{Location:'/secure/broadcast?success=true'}); // FIXME
 		res.end();
 	}.bind(this));
-	app.get('/fetchhands',this.fetchHands.bind(this));
+	//app.get('/fetchhands',this.fetchHands.bind(this));
 	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
 	app.post('/secure/buildbot',function (req,res) {
 		console.log(req.body);
@@ -179,13 +168,14 @@ function Server(db,activeUsersIN) {
 }
 Server.prototype.syncMakeDiff = function (req,res) {
 	var t = req.body;
-	differ.makeDiff(t.sourcehash,t.desthash,t.path,this.diffs);
+	differ.makeDiff(t.sourcehash,t.desthash,t.path);
 	res.end('STARTED');
 }
 Server.prototype.syncNewDiff = function (req,res) {
 	var doc = req.body;
-	doc._id = new ObjectID(doc._id);
-	this.diffs.save(doc,function (err,rows) {
+	var obj = new models.Diff(doc);
+	obj.save(function (err,rows) {
+		assert.ifError(err);
 		res.end('OK');
 	});
 }
@@ -215,7 +205,7 @@ Server.prototype.addSync = function (app) {
 }
 Server.prototype.getHand = function (req,res) {
 	var start = Date.now();
-	this.handHistory.findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
+	models.HandHistory.findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
 		res.render('hand',{hand:hand,start:start});
 	});
 }
@@ -241,8 +231,8 @@ Server.prototype.secureChangePasswordPost = function (req,res) {
 				} else {
 					res.writeHead(302,{Location:'/secure/'});
 				}
+				res.end('done');
 			});
-			res.end('done');
 		});
 	}.bind(this));
 }
@@ -288,7 +278,7 @@ Server.prototype.secureLoginPost = function (req,res) {
 }
 Server.prototype.getGame = function (req,res) {
 	var start = Date.now();
-	this.handHistory.find({gameid:new ObjectID(req.query.id)}).limit(1000).sort({_id:-1}).toArray(function (err,hands) {
+	models.HandHistory.find({gameid:new ObjectID(req.query.id)}).limit(1000).sort({_id:-1}).exec(function (err,hands) {
 		Game.getGame(new ObjectID(req.query.id),function (err,game) {
 			game.Lock.writeLock(function (release) {
 				res.render('game',{game:game,hands:hands,start:start,util:util});
@@ -299,14 +289,14 @@ Server.prototype.getGame = function (req,res) {
 }
 Server.prototype.getClub = function (req,res) {
 	var start = Date.now();
-	this.clubs.findOne({_id:new ObjectID(req.query.id)},function (err,club) {
+	models.Clubs.findOne({_id:new ObjectID(req.query.id)},function (err,club) {
 		var userids = [ club.owner ];
 		if (club.members) {
 			for (var x=0; x<club.members.length; x++) {
 				userids.push(club.members[x]);
 			}
 		}
-		this.games.find({clubid:new ObjectID(req.query.id)}).toArray(function (err,games) {
+		models.Game.find({clubid:new ObjectID(req.query.id)},function (err,games) {
 			// FIXME
 			models.UserModel.collection.find({_id:{$in:userids}}).toArray(function (err,users) {
 				var usermap = {};
@@ -320,7 +310,7 @@ Server.prototype.getClub = function (req,res) {
 }
 Server.prototype.getClubs = function (req,res) {
 	var start = Date.now();
-	this.clubs.find({}).toArray(function (err,data) {
+	models.Clubs.find({},function (err,data) {
 		res.render('clubs',{clubs:data,start:start});
 	});
 }
@@ -329,14 +319,14 @@ Server.prototype.changePassword = function (req,res) {
 }
 Server.prototype.getBug = function (req,res) {
 	var start = Date.now();
-	this.bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
+	models.Bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
 		res.render('bug',{bug:row,start:start});
 	});
 }
 Server.prototype.getScreenshot = function (req,res) {
-	this.bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
+	models.Bugs.findOne({_id:new ObjectID(req.query.id)},function (err,row) {
 		res.set({"Content-Disposition":'filename="'+row._id+'.png"','Content-Type':'image/png'});
-		res.send(row.ScreenShot.buffer);
+		res.send(row.ScreenShot);
 	});
 }
 Server.prototype.secureIndex = function (req,res) {
@@ -353,16 +343,16 @@ Server.prototype.secureLogout = function (req,res) {
 }
 Server.prototype.bugList = function (req,res) {
 	var start = Date.now();
-	this.bugs.find({}).toArray(function (err,data) {
+	models.Bugs.find({},function (err,data) {
 		res.render('bugs',{bugs:data,start:start});
 	});
 }
 Server.prototype.ServerBugsList = function (req,res) {
 	var start = Date.now();
 	if (req.query.delete) {
-		this.serverErrors.remove({_id:new ObjectID(req.query.delete)},function () {});
+		models.ServerError.remove({_id:req.query.delete},function () {});
 	}
-	this.serverErrors.find().sort({_id:-1}).toArray(function (err,data) {
+	models.ServerError.find().sort({_id:-1}).exec(function (err,data) {
 		res.render('serverErrors',{rows:data,start:start});
 	});
 }
@@ -379,7 +369,7 @@ Server.prototype.userList = function (req,res) {
 Server.prototype.getUser = function (req,res) {
 	var start = Date.now();
 	models.UserModel.findById(req.query.id,function (err,row) {
-		this.clubs.find({$or:[ {members:new ObjectID(req.query.id)}, {owner:new ObjectID(req.query.id)} ]}).toArray(function (err,clubs) {
+		models.Clubs.find({$or:[ {members:new ObjectID(req.query.id)}, {owner:new ObjectID(req.query.id)} ]},function (err,clubs) {
 			var self = this.activeUsers[row._id];
 			var obj = {user:row,clubs:clubs,start:start,online:self,util:util}
 			res.render('user',obj);
@@ -393,21 +383,21 @@ Server.prototype.installers_func = function (req,res) {
 	if (req.query.showlist) showlist = true;
 	function makeDeleter(id) {
 		return function (cb) {
-			this.installers.findOne({_id:new ObjectID(id)},function (err,row) {
+			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
 				if (row) {
 					fs.unlink('installers/'+row.name,function (err) {
 						console.log('installer deleted');
 					});
 				}
 				// FIXME, delete the raw objects if they are unused
-				this.installers.remove({_id:new ObjectID(id)},function () {});
+				row.remove(function () {});
 				cb();
 			}.bind(this));
 		}.bind(this);
 	}
 	function makeActivator(id) {
 		return function (cb) {
-			this.installers.findOne({_id:new ObjectID(id)},function (err,row) {
+			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
 				assert.ifError(err);
 				if (row) {
 					if (row.debug == 'release') {
@@ -479,7 +469,7 @@ Server.prototype.installers_func = function (req,res) {
 	console.log('running jobs');
 	async.parallel(jobs,finish2.bind(this));
 	function finish2() {
-		this.installers.find({}).sort({_id:1}).toArray(function(err,data) {
+		models.Installer.find().sort({_id:1}).exec(function(err,data) {
 			models.Config.findOne({_id:'installerid'},function (err,row) {
 				var activeRelease;
 				for (var x=0; x<data.length; x++) {
@@ -536,8 +526,8 @@ Server.prototype.isSecureAuthed = function (req,res,next) {
 }
 Server.prototype.getDisk = function (req,res) {
 	var start = Date.now();
-	this.db.stats(function (err,stats) {
-		this.db.collectionNames(function (err,names) {
+	mongoose.connection.db.stats(function (err,stats) {
+		mongoose.connection.db.collectionNames(function (err,names) {
 			var out = [];
 			var input = [];
 			for (var x=0; x<names.length; x++) {
@@ -545,7 +535,7 @@ Server.prototype.getDisk = function (req,res) {
 			}
 			input.sort();
 			async.eachLimit(input,1,function (item,cb) {
-				this.db.collection(item.split('.')[1]).stats(function (err,stats) {
+				mongoose.connection.db.collection(item.split('.')[1]).stats(function (err,stats) {
 					if (!stats) {
 						console.log('name:%s stats:',item,stats);
 						cb();
@@ -701,13 +691,14 @@ Server.prototype.errorUpload = function (req,res) {
 			cb2();
 		});
 		}],function done() {
-			this.bugs.insert(doc,function (err,result) {
-				console.log(result);
+			var obj = new models.Bugs(doc);
+			obj.save(function (err) {
+				console.log(err,obj);
 				res.send(200);
 			});
 		}.bind(this));
 }
-Server.prototype.fetchHands = function (req,res) {
+/*Server.prototype.fetchHands = function (req,res) {
 	// FIXME
 	var token = profiler.start('fetchhands-outer');
 	// new Buffer(g._id.toString(),'hex')
@@ -740,7 +731,7 @@ Server.prototype.fetchHands = function (req,res) {
 				var end = Date.now();
 				token2.stop();
 				log('did %d hands in %dms',hands.length,end-start);
-				allGames.findOne({_id:toMongoId(req.gameid.buffer)},{clubid:1},function (err,game) {
+				models.Game.findOne({_id:toMongoId(req.gameid.buffer)},{clubid:1},function (err,game) {
 					assert.ifError(err);
 					GameEvents.find({gameid:game._id}).toArray(function (err,events) {
 						var start = Date.now();
@@ -762,7 +753,7 @@ Server.prototype.fetchHands = function (req,res) {
 			token.stop();
 		});
 	});
-}
+}*/
 Server.prototype.getAvatar = function (req,res) {
 	var id = req.query.id;
 	log('getting avatar %j %d %s',req.query,id.length,id);
@@ -775,7 +766,7 @@ Server.prototype.getAvatar = function (req,res) {
 	}
 	var raw = new Buffer(id,'hex');
 	var base64 = raw.toString('base64');
-	this.avatars.findOne({_id:base64},function (err,row) {
+	models.Avatars.findOne({_id:base64},function (err,row) {
 		if (!row) {
 			res.send(404);
 			return;
@@ -783,18 +774,18 @@ Server.prototype.getAvatar = function (req,res) {
 		var filename = req.query.id+"."+row.ext;
 		console.log(filename);
 		res.set({"Content-Disposition":'attachment; filename="'+filename+'"'});
-		res.send(row.image.buffer);
+		res.send(row.image);
 	});
 }
 Server.prototype.uploadAvatar = function (req,res) {
-	console.log('files',req.headers);
-	console.log('version',req.httpVersionMajor,req.httpVersionMinor);
+	//console.log('files',req.headers);
+	//console.log('version',req.httpVersionMajor,req.httpVersionMinor);
 	fs.readFile(req.files.avatar.path,function (err,data) {
 		var extension = req.files.avatar.originalFilename.split('.').pop();
 		var hasher = crypto.createHash('sha256');
 		hasher.update(data);
 		var hash = hasher.digest('base64');
-		this.avatars.findOne({_id:hash},function (err,row) {
+		models.Avatars.findOne({_id:hash},function (err,row) {
 			if (err) {
 				console.log('error',err);
 				res.send(JSON.stringify({error:err}));
@@ -805,14 +796,15 @@ Server.prototype.uploadAvatar = function (req,res) {
 				console.log('sending dup id',out);
 				res.send(200,out);
 			} else {
-				this.avatars.insert({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension},function (err,row) {
+				var obj = new models.Avatars({_id:hash,image:data,size:data.length,created:Date.now(),ext:extension});
+				obj.save(function (err) {
 					if (err) {
 						console.log('error',err);
 						res.send(JSON.stringify(err));
 						return;
 					}
-					var out = new Buffer(row[0]._id,'base64');
-					console.log('sending unique id',out);
+					var out = new Buffer(obj._id,'base64');
+					//console.log('sending unique id',out);
 					res.send(200,out);
 					fs.unlink(req.files.avatar.path);
 				});
@@ -852,18 +844,19 @@ Server.prototype.newVersion = function newVersion(req,res) {
 
 	fs.rename(req.files.installer.path,'installers/'+name1,function (err) {
 		assert.ifError(err);
-		this.installers.insert({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size},function (err,row) {
+		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size});
+		obj.save(function (err) {
 			assert.ifError(err);
-			log('new version recorded: %j',row);
-			installer.unpackInstaller(this.IO,row[0],this.installers,this.objectSizes,function (success) {
+			log('new version recorded: %j',obj);
+			installer.unpackInstaller(obj,function (success) {
 				if (success) {
 					if (debug == 'debug') var key1 = 'debuginstallerid';
 					else var key1 = 'installerid';
 					//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
 					//	assert.ifError(err);
 					//});
-					row[0].ts = row[0]._id.getTimestamp().toString();
-					this.IO.sockets.emit('new_installer',row[0]);
+					obj.ts = obj._id.getTimestamp().toString();
+					this.IO.sockets.emit('new_installer',obj);
 					res.send('OK');
 				} else {
 					res.send('error');
@@ -875,10 +868,11 @@ Server.prototype.newVersion = function newVersion(req,res) {
 Server.prototype.syncNewVersion = function (req,res) {
 	console.log(req.body);
 	req.body.installer._id = new ObjectID(req.body.installer._id);
-	this.installers.save(req.body.installer,function (err,reply) {
+	var obj = new models.Installer(req.body.installer);
+	obj.save(function (err,reply) {
 		console.log(err,reply);
 		async.each(req.body.sizes,function (row,cb) {
-			this.objectSizes.save(row,cb);
+			models.ObjectSize.create(row,cb);
 		}.bind(this),function () {
 			res.end('OK');
 		});
@@ -910,7 +904,7 @@ Server.prototype.paypalCallback = function (req,res) {
 				if ((res2.statusCode == 200) && (buffer.trim() == 'VERIFIED')) {
 					console.log('all good');
 					console.log(req.body);
-					this.IPN_hits.insert({reply:buffer.trim(),params:req.body},function (err,doc) {
+					models.IPN_Hit.create({reply:buffer.trim(),params:req.body},function (err,doc) {
 						assert.ifError(err);
 						res.send(200,'');
 					});
@@ -925,14 +919,14 @@ Server.prototype.paypalCallback = function (req,res) {
 	req2.end();
 }
 Server.prototype.paypalLog = function (req,res) {
-	this.IPN_hits.find().toArray(function (err,rows) {
+	models.IPN_Hit.find(function (err,rows) {
 		res.render('paypal_secure',{rows:rows});
 	});
 }
 Server.prototype.contactPost = function (req,res) {
 	console.log(req.body);
 	RT.postTicket(req.body.type,req.body.name+" <"+req.body.email+">",req.body.message,function () {
-		res.writeHead(302,{Location:'http://testing.chipuppoker.com/contact.html?success=true'}); // FIXME
+		res.writeHead(302,{Location:'/contact.html?success=true'}); // FIXME
 		res.end();
 	});
 }

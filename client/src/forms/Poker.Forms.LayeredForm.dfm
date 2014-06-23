@@ -15,6 +15,7 @@ object frmLayered: TfrmLayered
   OldCreateOrder = False
   Position = poScreenCenter
   OnActivate = FormActivate
+  OnDeactivate = FormDeactivate
   PixelsPerInch = 96
   TextHeight = 13
 end

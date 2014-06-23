@@ -130,7 +130,7 @@ begin
   for C1 := 1 to FDots do
     tmp := tmp + '.';
 
-  lbsStatus.Caption := 'Lost connection to server.'#10'Reconnecting' + tmp;
+  lbsStatus.Caption := 'Connection to the server has been lost.'#10'Reconnecting' + tmp;
   lbsStatus.Refresh;
 end;
 

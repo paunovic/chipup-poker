@@ -17,5 +17,5 @@ function Token(tag) {
 Token.prototype.stop = function () {
 	var end = Date.now();
 	var doc = {time:end-this.start, tag:this.tag};
-	PokerProfile.insert(doc,function (err,result){});
+	PokerProfile.create(doc,function (err,result){});
 }

@@ -6,9 +6,10 @@ var crypto = require('crypto');
 var http = require('http');
 
 var config = require('./config');
+var models = require('./db').models;
 
 module.exports.unpackInstaller = unpackInstaller;
-function unpackInstaller(io,row,installers,objectSizes,cb1) {
+function unpackInstaller(record,cb1) {
 	function updateLive(doc,sizes,cb) {
 		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
 		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
@@ -23,13 +24,11 @@ function unpackInstaller(io,row,installers,objectSizes,cb1) {
 		cb();
 	}
 	function hashFiles(files) {
-		var key = {_id:row._id};
 		var hashes = {};
 		var sizes = [];
-		var mods = { $set:{hashes:hashes}};
 		async.each(files,function hashFile(filename,cb2) {
 			var hasher = crypto.createHash('sha256');
-			var client = fs.createReadStream('unpacked/'+row._id+'/app/'+filename);
+			var client = fs.createReadStream('unpacked/'+record._id+'/app/'+filename);
 			var size = 0;
 			client.on('data',function (data) {
 				hasher.update(data);
@@ -41,26 +40,25 @@ function unpackInstaller(io,row,installers,objectSizes,cb1) {
 				var key = filename.replace('.','_');
 				sizes.push({_id:hash, size:size});
 				hashes[key] = hash;
-				copyFile('unpacked/'+row._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
-					fs.unlink('unpacked/'+row._id+'/app/'+filename,function () {
+				copyFile('unpacked/'+record._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
+					fs.unlink('unpacked/'+record._id+'/app/'+filename,function () {
 						cb2();
 					});
 				});
 			});
 		},function () {
-			installers.update(key,mods,function (err,newdoc) {
+			record.hashes = hashes;
+			record.save(function (err,newdoc) {
 				assert.ifError(err);
 				if (err) console.log(err);
 				console.log('inserted %j',newdoc);
-				fs.rmdir('unpacked/'+row._id+'/app/',function () {
-					fs.rmdir('unpacked/'+row._id,function () {
-						installers.findOne(key,function (err,doc) {
-							async.each(sizes,function (row,cb) {
-								objectSizes.save(row,cb);
-							},function () {
-								updateLive(doc,sizes,function () {
-									cb1(true);
-								});
+				fs.rmdir('unpacked/'+record._id+'/app/',function () {
+					fs.rmdir('unpacked/'+record._id,function () {
+						async.each(sizes,function (row,cb) {
+							models.ObjectSize.create(row,cb);
+						},function () {
+							updateLive(record,sizes,function () {
+								cb1(true);
 							});
 						});
 					});
@@ -94,14 +92,14 @@ function unpackInstaller(io,row,installers,objectSizes,cb1) {
 			});
 		});
 	}
-	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+row._id+'/','-e','installers/'+row.name],{stdio:'inherit'});
+	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+record._id+'/','-e','installers/'+record.name],{stdio:'inherit'});
 	unpacker.on('close',function (code) {
 		if (code != 0) {
 			cb1(false);
 			return;
 		}
 		assert.equal(code,0);
-		recurse_dir('','unpacked/'+row._id+'/app/',function (err,files) {
+		recurse_dir('','unpacked/'+record._id+'/app/',function (err,files) {
 			assert.ifError(err);
 			console.log('all files:%j',files);
 			hashFiles(files);

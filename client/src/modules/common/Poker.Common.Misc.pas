@@ -43,6 +43,8 @@ function IsDirectoryWriteable(const APath: String): Boolean;
 procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
 function PtInBounds(const APoint: TPoint; const ABounds: TPoint4): Boolean;
 function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
+function TempPath: String;
+
 
 implementation
 
@@ -667,7 +669,21 @@ begin
   result := Round(AChips / ABigBlind) * ABigBlind;
 end;
 
-
+function TempPath: String;
+var
+  buffer: TArray<Char>;
+  bufsize: Integer;
+  chars: Integer;
+begin
+  chars := 128;
+  repeat
+    bufsize := chars;
+    SetLength(buffer, bufsize);
+    chars := GetTempPath(bufsize, @buffer[0]);
+  until chars <= bufsize;
+  SetString(result, PChar(@buffer[0]), chars - 1);
+  result := IncludeTrailingPathDelimiter(result);
+end;
 
 end.
 

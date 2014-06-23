@@ -9,6 +9,7 @@ uses
 type
   TfrmLayered = class(TForm)
     procedure FormActivate(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
   private
     FParentForm: TForm;
     procedure SetAlphaBackground(const AResourceName: String);
@@ -35,8 +36,13 @@ end;
 
 procedure TfrmLayered.FormActivate(Sender: TObject);
 begin
-  if (Active) and (FParentForm.Visible) and (Assigned(FParentForm)) then
+  if Assigned(FParentForm) then
     FParentForm.SetFocus;
+end;
+
+procedure TfrmLayered.FormDeactivate(Sender: TObject);
+begin
+  FParentForm.OnDeactivate(Sender);
 end;
 
 procedure TfrmLayered.UpdatePosition;

@@ -25,17 +25,16 @@ var SmtpConnection = require('./smtp');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var deck = require('./deck');
 var codes = require('./ServerCodes');
-var dag = require('./dag/build/Release/dag');
 var bugsView = require('./bugs');
 var profiler = require('./profiler');
-var club = require('./club');
-var Club = club.Club;
+var Club = require('./club').Club;
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
 var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var differ = require('./differ');
 var mdb = require('./db');
+var models = mdb.models;
 
 var Hand = deck.Hand;
 var Game = require('./game').Game;
@@ -45,11 +44,6 @@ var myutils = require('./myutils');
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
 protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong]);
-
-dag.init();
-
-// stats
-var hands = 0;
 
 var domain = "http://"+config.hostname+'/';
 var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:15,max_timebank:30};
@@ -111,73 +105,46 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,allUsers,allClubs,avatars,allGames,bugs,handHistory,Installers,Config,FetchQueue,GameEvents,PokerProfile,gameState,clubBalances,diffs;
 var emailRegister,emailChange1,emailChange2;
-MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+/*MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
 		process.exit(1);
-	}
-	conn = db;
-	club.init(db,activeUsers,activeGames,pb);
-	Game.init(db,activeGames,activeUsers,sharedconfig,log,ClientSocket);
+	}*/
+	Club.init(activeUsers,activeGames,pb,regexLimits);
+	Game.init(activeGames,activeUsers,sharedconfig,log,ClientSocket);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
 		console.log(err.stack);
-		db.collection('serverErrors').insert({error:err.toString(),trace:err.stack.split('\n').slice(1).join('\n').trim()},function (err) {
+		var trace = '';
+		if (err.stack) trace = err.stack.split('\n').slice(1).join('\n').trim();
+		mdb.models.ServerError.create({error:err.toString(),trace:trace},function (err) {
 			if (err) console.log(err);
 			process.exit(-1);
 		});
 	});
-	process.send({msg:'connected'});
+	//process.send({msg:'connected'});
 
-	allUsers = db.collection('users');
-	allClubs = db.collection('clubs');
-	avatars = db.collection('avatars');
-	allGames = db.collection('games');
-	var allCounters = db.collection('counters');
-	bugs = db.collection('bugs');
-	handHistory = db.collection('handHistory');
-	Installers = db.collection('installers');
-	Config = db.collection('config');
-	GameEvents = db.collection('GameEvents');
-	gameState = db.collection('gameState');
-	clubBalances = db.collection('clubBalances');
-	diffs = db.collection('diffs');
-
-	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
+	/*db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
 		assert.ok(collection instanceof Collection);
 		FetchQueue = collection;
-	});
-	db.createCollection('PokerProfile',{capped:true,size:1024 * 1024*10},function (err,collection) {
-		assert.ok(collection instanceof Collection);
-		PokerProfile = collection;
-		profiler.setup(PokerProfile);
-	});
-	db.createCollection('debugLogs',{capped:true,size:1024 * 1024*32},function (err,collection) { // FIXME, move to mongoose
-		assert.ok(collection instanceof Collection);
-	});
+	});*/
+	profiler.setup(models.PokerProfile);
 
-	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log,makeUserProtobuf);
+	internalHttpServer = require('./httpServer').initHttpServer(activeUsers,sharedconfig,log,makeUserProtobuf);
 
-	allUsers.createIndex("email",{unique:true}, function (err,res) {});
-	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
-
-	allClubs.createIndex("name",{unique:true},function (err,res) {});
-	handHistory.ensureIndex({seq:1},function (err,res){});
-	handHistory.ensureIndex({gameid:1},function (err,res){});
-
-	Config.insert({_id:'installerid',value:''},function (err,res){
-		Config.insert({_id:'debuginstallerid',value:''},function (err,res){
-			Config.findOne({_id:'installerid'},function (err,row) {
-				Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
+	models.Config.create({_id:'installerid',value:''},function (err,res){
+		models.Config.create({_id:'debuginstallerid',value:''},function (err,res){
+			models.Config.findOne({_id:'installerid'},function (err,row) {
+				assert.ifError(err);
+				models.Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
 					assert.ifError(err);
-					Installers.findOne({_id:row.value},function (err,row) {
+					mdb.models.Installer.findOne({_id:row.value},function (err,row) {
 						if (row) {
 							sharedconfig.latestVersion = row.version;
 						}
 					});
-					Installers.findOne({_id:debugrow.value},function (err,row) {
+					mdb.models.Installer.findOne({_id:debugrow.value},function (err,row) {
 						if (row) {
 							sharedconfig.latestDebugVersion = row.version;
 						}
@@ -187,88 +154,11 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		});
 	});
 
-	allCounters.insert({_id:"club",seq:1},function (err,res) {}); // FIXME
-	myutils.init(db);
-	gameState.find({}).toArray(function (err,badgames) {
-		if (badgames.length > 0) {
-			log('%d bad games found, recovering',badgames.length);
-			async.eachSeries(badgames,function (game,cb) {
-				//gameState.remove({_id:game._id},cb)
-				//console.log('game is',game);
-				Game.getGame(game._id,function (err,gameObj) {
-					if (err == 'parent club missing') {
-						log('club missing for game %j',game);
-						cb();
-						return;
-					}
-					assert.ifError(err);
-					log('bad game %j',game);
-					if (!gameObj) {
-						log('game is missing!');
-						cb();
-						return;
-					}
-					if (!game.state) {
-						log('state is missing');
-						cb();
-						return;
-					}
-					if (gameObj.state2 == 'gsClosed') {
-						log('game was closed!!!');
-						cb();
-						return;
-					}
-					if (game.users) gameObj.reconnect = game.users;
-					if (game.members) {
-						for (var x=0; x<game.members.length; x++) {
-							var item = game.members[x];
-							var pubSeat = { muck:true, disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed, can_show:item.can_show };
-							pubSeat.disconnectTimer = setTimeout(gameObj.eject.bind(gameObj,item.seat,item.userid),5 * 60 * 1000);
-							var privSeat = {conn:{log:ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'}, userid:item.userid};
-							pubSeat.hand.cards = item.hand.cards;
-							gameObj.members[item.seat] = pubSeat;
-							gameObj.seats[item.seat] = privSeat;
-							gameObj.club.buyin(item.userid,item.chips);
-						}
-					}
-					if (game.flop) {
-						gameObj.flop = new Hand();
-						gameObj.turn = new Hand();
-						gameObj.river = new Hand();
-
-						gameObj.flop.cards = game.flop.cards;
-						gameObj.turn.cards = game.turn.cards;
-						gameObj.river.cards = game.river.cards;
-					}
-					gameObj.handid = game.handid;
-					gameObj.state = game.state;
-					gameObj.current_seat = game.current_seat;
-					gameObj.keycount = game.keycount;
-					gameObj.balance_changes = game.balance_changes;
-					gameObj.bets = game.bets;
-					gameObj.dealer = game.dealer;
-					gameObj.rake = game.rake;
-					if (game.minimum_raise) gameObj.minimum_raise = game.minimum_raise;
-					if (game.minBet) gameObj.minBet = game.minBet;
-					if (game.pots) {
-						for (var x=0; x<game.pots.length; x++) {
-							gameObj.pots[x] = new Pot(gameObj);
-							gameObj.pots[x].value = game.pots[x].value;
-							gameObj.pots[x].members = game.pots[x].members;
-							gameObj.pots[x].trueMembers = game.pots[x].trueMembers;
-							gameObj.pots[x].trueUsers = game.pots[x].trueUsers;
-						}
-					}
-					if (game.history) gameObj.history = game.history;
-					cb();
-				});
-			},checkCorruptChips);
-		} else {
-			checkCorruptChips();
-		}
-	});
+	myutils.init();
+	Game.checkAndResume(checkCorruptChips);
 	function checkCorruptChips() {
-		allUsers.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
+		mdb.models.UserModel.collection.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
+			assert.ifError(err);
 			if (badUsers.length > 0) {
 				console.log(badUsers);
 				process.send({type:'control',cmd:'autooff'});
@@ -277,7 +167,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		});
 	}
 	function checkCorruptRake() {
-		allGames.find({rake:NaN}).toArray(function (err,badGames) { // should never find any
+		models.Game.collection.find({rake:NaN}).toArray(function (err,badGames) { // should never find any
 			if (badGames.length > 0) {
 				console.log(badGames);
 				process.send({type:'control',cmd:'autooff'});
@@ -286,14 +176,14 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		});
 	}
 	function initHands() {
-		allCounters.findOne({_id:'handHistory'},function (err,row) {
+		models.Counter.findOne({_id:'handHistory'},function (err,row) {
 			if (!row) {
 				myutils.getNextSequence('handHistory',function(seq) {
-					hands = seq;
+					Game.hands = seq;
 					compileJade();
 				});
 			} else {
-				hands = row.seq;
+				Game.hands = row.seq;
 				compileJade();
 			}
 		});
@@ -319,7 +209,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			goOnline();
 		});
 	}
-});
+//});
 function log(format) {
 	var out = Array.prototype.slice.call(arguments);
 	if (format.indexOf('%') != -1) {
@@ -470,7 +360,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				}.bind(this));
 			}.bind(this),function done() {
 				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses};
-				console.log('login reply',obj);
+				//console.log('login reply',obj);
 				this.send(codes.srLoginReply,obj,'Poker.LoginReply');
 				// FIXME, embed in the same message
 				handlers[codes.scQueryTableStats].call(this,new Buffer(0),token);
@@ -546,12 +436,6 @@ function toMongoId(buf) {
 function fromMongoId(id) {
 	return new Buffer(id.id,'binary');
 }
-function containsObjectID(list,id) {
-	for (var x=0; x<list.length; x++) {
-		if (myutils.compareObjectID(id,list[x])) return true;
-	}
-	return false;
-}
 function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
 	var link = domain+'confirm?code='+authcode;
@@ -585,12 +469,12 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 		this.error(e);
 		return;
 	}
-	console.log('hello params',params);
+	//console.log('hello params',params);
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
-	Config.findOne({_id:key1},function (err,row2) {
-		conn.collection('installers').findOne({_id:row2.value},function (err,targetVersion) {
-			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+	models.Config.findOne({_id:key1},function (err,row2) {
+		mdb.models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
+			//console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
 			for (var x=0; x<params.files.length; x++) {
@@ -613,16 +497,16 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 					return cb();
 				}
 				if (clientFile.hash != targetFile) {
-					console.log('clientFile:%j',clientFile);
-					console.log('need to patch %s',clientFile.path);
-					diffs.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
+					//console.log('clientFile:%j',clientFile);
+					//console.log('need to patch %s',clientFile.path);
+					mdb.models.Diff.findOne({sourcehash:clientFile.hash,desthash:targetFile},function (err,diffRow) {
 						assert.ifError(err);
 						if (diffRow) {
 							var UFI = { path: clientFile.path.replace('/','\\'), url:diffRow.url, file_type:'ufDiff', file_size:diffRow.size };
 							toUpdate.push(UFI);
 							cb();
 						} else {
-							conn.collection('objectSizes').findOne({_id:targetFile},function (err,sizeRow) {
+							mdb.models.ObjectSize.findOne({_id:targetFile},function (err,sizeRow) {
 								assert.ifError(err);
 								if (sizeRow) {
 									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'http://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
@@ -631,7 +515,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 								}
 								cb();
 							});
-							if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path,diffs);
+							if (clientFile.hash) differ.makeDiff(clientFile.hash,targetFile,clientFile.path);
 						}
 					}.bind(this));
 				} else {
@@ -864,60 +748,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				//this.reply(codes.SR_LIST_CLUBS,JSON.stringify(arr));
 			}.bind(this));
 			break;*/
-		case codes.scGiveClubOwnership:
-			try {
-				var params = pb.Parse(args,'Poker.GiveClubOwnershipParams');
-				var clubseq = params.club_seq;
-				var newowner = toMongoId(params.player_mongo_id);
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			this.log('giving ownership away',clubseq,newowner);
-			allClubs.findOne({seq:clubseq},function (err,club) {
-				Club.getClubById(club._id,function (err,clubObj) {
-					clubObj.refresh(club);
-					clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
-						if (!club) {
-							this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(club,null,stats,clubObj),'Poker.Club');
-							return;
-						}
-						if (club.owner.equals(this.userid)) {
-							if (containsObjectID(club.members,newowner)) {
-								this.log('adding self to members',this.userid);
-								allClubs.update({_id:club._id},
-									{$addToSet:{members:this.userid}},function (err,res) {
-										this.log('result 2',err,res);
-										allClubs.update({_id:club._id},{
-										 $set:{owner:newowner},
-										 $pull:{members:newowner}
-										},function (err,res) {
-											this.log('err:%j res:%d',err,res);
-											allClubs.findOne({_id:club._id},function cb(err,row) {
-												clubObj.refresh(club);
-												var userlist = [ row.owner ];
-												var out = Club.makeClubProtobuf(row,userlist,stats,clubObj);
-												this.send(codes.srOwnershipGiveAwayOk,out,'Poker.Club');
-												this.log('i am %s, target is %s',this.userid,newowner);
-												this.log('userlist to inform:',userlist);
-												for (var x=0; x<userlist.length; x++) {
-													var user = activeUsers[userlist[x]];
-													if (user === this) continue;
-													if (user) user.send(codes.seClubChange,out,'Poker.Club');
-												}
-											}.bind(this));
-										}.bind(this));
-								}.bind(this));
-							} else {
-								this.send(codes.srOwnershipGiveAwayInvalidPlayerId,Club.makeClubProtobuf(club,stats,clubObj),'Poker.Club');
-							}
-						} else {
-							this.send(codes.srOwnershipGiveAwayNotOwner,Club.makeClubProtobuf(club,stats,clubObj),'Poker.Club');
-						}
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
 		case codes.scChangeEmail:
 			try {
 				var params = pb.Parse(args,'Poker.ChangeEMailParams');
@@ -963,82 +793,6 @@ ClientSocket.prototype.handle = function (code,args) {
 							this.send(codes.srChangeMailReply,{status:'cmSuccess'},'Poker.ChangeMailReply');
 						}.bind(this));
 					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scChangePassword:
-			try {
-				var params = pb.Parse(args,'Poker.ChangePasswordParams');
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			if (!regexLimits.password.exec(params.new_password)) {
-				this.reply(0,'password too long');
-				return;
-			}
-			deck.getRandom(16,function (salt) {
-				var hasher = crypto.createHash('sha256');
-				hasher.update(salt);
-				hasher.update(params.new_password);
-				var hash = hasher.digest();
-				allUsers.update({_id:this.userid},{$set:{password:hash,salt:salt}},function (err,res) {
-					if (err) {
-						this.reply("000","internal error");
-						return;
-					}
-					this.send(codes.srChangePasswordOk);
-					token.stop();
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scSetAvatar:
-			try {
-				var params = pb.Parse(args,'Poker.SetAvatarParams');
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			var id = params.avatar_id.toString('base64');
-			delete params.avatar_id;
-			this.log('changing avatar',id);
-			avatars.findOne({_id:id},function(err,row) {
-				if (err) {
-					this.reply("000","internal error");
-					return;
-				}
-				if (!row) {
-					this.send(codes.srSetAvatarReply,{status:'saNotFound'},'Poker.SetAvatarReply');
-					return;
-				}
-				allUsers.update({_id:this.userid},{$set:{avatar:id}},function (err,res) {
-					if (err) {
-						this.reply("000","internal error");
-						return;
-					}
-					this.send(codes.srSetAvatarReply,{status:'saSuccess'},'Poker.SetAvatarReply');
-					allClubs.find({$or:[{members:this.userid},{owner:this.userid}]},{owner:1,members:1}).toArray(function (err,rows) {
-								assert.ifError(err);
-								var out = [];
-								for (var i=0; i<rows.length;i++) {
-									if (!containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
-									if (rows[i].members) {
-										for (var j=0; j<rows[i].members.length; j++) {
-											if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
-										}
-									}
-								}
-								allUsers.findOne({_id:this.userid},function (err,self) {
-									assert.ifError(err);
-									var proto = pb.Serialize({users:[makeUserProtobuf(self)]},'Poker.UserChangeParams');
-									for (var i=0; i<out.length; i++) {
-										if (myutils.compareObjectID(this.userid,out[i])) continue;
-										var dest = activeUsers[out[i]];
-										if (dest) dest.send(codes.seUserChange,proto,'raw');
-									}
-									token.stop();
-								}.bind(this));
-							}.bind(this));
 				}.bind(this));
 			}.bind(this));
 			break;
@@ -1089,236 +843,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.error(e);
 			}
 			break;
-		case codes.scTableJoin:
-			var params = pb.Parse(args,'Poker.Game');
-			try {
-				var id = new toMongoId(params._id);
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			this.log('table join',id);
-			Game.getGame(id,function (err,game) {
-				if (!game) {
-					this.reply(0,'invalid gameid');
-					return;
-				}
-				if (game.state2 == 'gsClosed') return;
-				game.Lock.writeLock(function (release) {
-					this.log('game info',game.obj.clubid);
-					allClubs.findOne({_id:game.obj.clubid},function (err,club) {
-						if (club.suspended) {
-							for (var x=0; x<club.suspended.length; x++) {
-								console.log(club.suspended[x],this.userid);
-								if (myutils.compareObjectID(club.suspended[x],this.userid)) {
-									this.reply(0,'your suspended in that club'); // FIXME
-									release();
-									return;
-								}
-							}
-						}
-						console.log(club);
-						if (!myutils.compareObjectID(this.userid,club.owner) && (!club.members || !containsObjectID(club.members,this.userid)) && club.is_private) {
-							this.log('i am not a member');
-							this.reply(0,'your not a member of that club'); // FIXME, bots rely on this error
-							release();
-						} else {
-							game.join(this,function () {
-								var events = [];
-								if (['tsFlop','tsTurn','tsRiver'].indexOf(game.state) != -1) {
-									var cards = game.flop.cards;
-									if (['tsTurn','tsRiver'].indexOf(game.state) != -1) cards = cards.concat(game.turn.cards);
-									if (game.state == 'tsRiver') cards = cards.concat(game.river.cards);
-									events.push(game.makeEvent('teExistingCards',{cards:new Buffer(cards)}));
-								}
-								var status = game.getTableStatus(this,true,events);
-								this.send(codes.seTableStatus,status,'Poker.TableStatus');
-								release();
-								token.stop();
-							}.bind(this));
-						}
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scTableLeave:
-			var params = pb.Parse(args,'Poker.Game');
-			try {
-				var id = new toMongoId(params._id);
-			} catch (e) {
-				return;
-			}
-			delete params._id;
-			Game.getGame(id,function (err,game) {
-				if (!game) {
-					this.reply(0,'invalid gameid');
-				} else {
-					if (!game.users[this.userid]) {
-						this.reply(0,'your not at the table');
-						return;
-					}
-					game.leave(this,'protocol',function () {});
-					token.stop();
-				}
-			}.bind(this));
-			break;
-		case codes.scTableSit:
-			try {
-				var params = pb.Parse(args,'Poker.TableSit');
-				var id = new toMongoId(params.game_id);
-			} catch (e) {
-				this.log('params where %j',params);
-				this.error(e);
-				return;
-			}
-			delete params.game_id;
-			Game.getGame(id,function (err,game) {
-				if (!game) {
-					this.reply(0,'invalid gameid');
-					return;
-				}
-				if (game.state2 == 'gsClosed') return;
-				var temp = this.userid;
-				game.Lock.writeLock(function (release) {
-					if (temp != this.userid) {
-						this.reply(0,'sit error 1');
-						release();
-						return;
-					}
-					if (game.state2 == 'gsClosed') {
-						release();
-						return;
-					}
-					if (!game.users[this.userid]) {
-						this.reply(0,'your not at the table');
-						release();
-						return;
-					}
-					game.sitDown(this,params,function (sucess,events) {
-						if (sucess) {
-							game.broadcastStatus(this,true,events); // sendEvent
-							var status = game.getTableStatus(this,true,events);
-							this.send(codes.srTableSitOk,status,'Poker.TableStatus');
-						}
-						if (game.state == 'tsIdle') {
-							game.stateMachine(function () {
-								token.stop();
-								release();
-							},null,{silent:true},[],0);
-						} else {
-							token.stop();
-							release();
-						}
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scTableStandUp:
-			var params = pb.Parse(args,'Poker.Game');
-			try {
-				var id = toMongoId(params._id);
-			} catch (e) {
-				log('params to scTableStandUp where %j',params);
-				//this.error(e);
-				return;
-			}
-			var once = true;
-			Game.getGame(id,function (err,game) {
-				if (!game) return;
-				game.Lock.writeLock(function (release) {
-					var x = game.findSeat(this);
-					var seating = game.members[x];
-					if (!seating) {
-						this.log('standup error %d',x);
-						release();
-						return;
-					}
-					var token2 = profiler.start('stand-inner1');
-					game.standUp(this,function (folded,events,offset) {
-						assert(once);
-						once = false;
-						this.log('2events are %j',events);
-						if (folded && (game.current_seat >= 0)) {
-							game.startTimer(game.current_seat,offset);
-						}
-						this.send(codes.srTableStandUpOk,game.getTableStatus(this,true,events),'Poker.TableStatus');
-						var havechips = 0;
-						for (var x=0; x<game.members.length; x++) {
-							if (!game.members[x]) {
-								continue;
-							}
-							if (game.members[x].status == 'psOutOfPlay') continue;
-							if (game.members[x].disconnected) continue;
-							if (game.members[x].chips > 0) {
-								game.log('standup found one %d %s %d',x,game.members[x].status,game.members[x].chips);
-								havechips++;
-							}
-						}
-						if (havechips < 2) {
-							clearTimeout(game.dealTimer);
-							game.dealTimer = null;
-							game.log('cleared deal timer');
-						}
-						game.broadcastStatus(this,true,events);
-						token.stop();
-						token2.stop();
-						release();
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-			break;
-		case codes.scGetPlayers:
-			try {
-				var params = pb.Parse(args,'Poker.GetUserParams');
-				this.log('getting players: %j',params,args);
-				for (var x=0; x<params.user_mongo_ids.length; x++) {
-					params.user_mongo_ids[x] = toMongoId(params.user_mongo_ids[x]);
-				}
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			allUsers.find({_id:{$in:params.user_mongo_ids}}).toArray(function (err,users) {
-				this.log(params.user_mongo_ids,users);
-				var out = {users:[]};
-				for (var x=0; x<users.length; x++) {
-					out.users[x] = makeUserProtobuf(users[x]);
-				}
-				this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
-				token.stop();
-			}.bind(this));
-			break;
-		case codes.scTableAddOn:
-			try {
-				var params = pb.Parse(args,'Poker.TableSit');
-				if (params.chips < 1) {
-					this.reply(0,'you cant buyout');
-					return;
-				}
-				var id = new toMongoId(params.game_id);
-			} catch (e) {
-				this.error(e);
-				return;
-			}
-			delete params.game_id;
-			Game.getGame(id,function (err,game) {
-				var seatIdx = game.findSeat(this);
-				if (seatIdx === undefined) {
-					this.reply(0,'your not sitting');
-					return;
-				}
-				if (['psOutOfPlay','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
-					this.reply(0,'your not out of play!');
-					return;
-				}
-				if ((params.chips + game.members[seatIdx].chips) > (game.obj.buyin_max * game.obj.big_blind)) {
-					this.send(codes.srTableAddonOverLimit,game.getTableStatus(this,false,[]),'Poker.TableStatus');
-					return;
-				}
-				assert.equal(this.state,2);
-				game.AddOn(this,params.chips);
-			}.bind(this));
-			break;
 		default:
 			if (handlers[code]) handlers[code].call(this,args,token);
 			else this.log('unknown opcode %d/%s',code,codes.reverse[code]);
@@ -1336,7 +860,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false} ]};
 	// owner should see password
 	// all need to see name, _id, seq, private, chips, and members
-	allClubs.find(query).toArray(function(err,clubs) {
+	mdb.models.Clubs.find(query,function(err,clubs) {
 		var status = {};
 		status.clubs = clubs;
 		var x,y;
@@ -1354,7 +878,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 			}
 			clubids.push(c._id);
 		}
-		clubBalances.find({clubid:{$in:ownedClubs}}).toArray(function (err,balances) {
+		models.ClubBalances.find({clubid:{$in:ownedClubs}},function (err,balances) {
 			assert.ifError(err);
 			var clubsOut = [];
 			async.each(clubs,function getStatsAndClub(item,cb) {
@@ -1365,15 +889,17 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 				}.bind(this));
 			}.bind(this),function finished() {
 				status.clubs = clubsOut;
-				allUsers.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""}).toArray(function(err,users) {
+				mdb.models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""},function(err,users) {
 					for (var x=0; x<users.length; x++) {
 						users[x] = makeUserProtobuf(users[x]);
+						assert(users[x]._id.length == 12);
+						//console.log('test',users[x]);
 					}
 					status.users = users;
-					allUsers.findOne({_id:this.userid},function(err,self) {
+					mdb.models.UserModel.findOne({_id:this.userid},function(err,self) {
 						status.self = makeUserProtobuf(self);
 						// FIXME, hide closed games, send them in a second array for just the owner
-						allGames.find({clubid:{$in:clubids}}).toArray(function (err,games) {
+						models.Game.find({clubid:{$in:clubids}},function (err,games) {
 							if (err) {
 								this.reply(0,"internal error");
 								return;
@@ -1392,11 +918,114 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 		}.bind(this));
 	}.bind(this));
 }
-Game.registerHandlers(handlers,pb);
-Club.registerHandlers(handlers,pb);
-
+Game.registerHandlers(handlers,pb,regexLimits);
+Club.registerHandlers(handlers,pb,sharedconfig);
+handlers[codes.scChangePassword] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.ChangePasswordParams');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	if (!regexLimits.password.exec(params.new_password)) {
+		this.reply(0,'password too long');
+		return;
+	}
+	deck.getRandom(16,function (salt) {
+		var hasher = crypto.createHash('sha256');
+		hasher.update(salt);
+		hasher.update(params.new_password);
+		var hash = hasher.digest();
+		mdb.models.UserModel.findOne({_id:this.userid},function (err,self) {
+			self.password = hash;
+			self.salt = salt;
+			self.save(function (err) {
+				if (err) {
+					this.reply("000","internal error");
+					return;
+				}
+				this.send(codes.srChangePasswordOk);
+				token.stop();
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
+}
+handlers[codes.scGetPlayers] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.GetUserParams');
+		this.log('getting players: %j',params,args);
+		for (var x=0; x<params.user_mongo_ids.length; x++) {
+			params.user_mongo_ids[x] = myutils.toMongoId(params.user_mongo_ids[x]);
+		}
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	mdb.models.UserModel.find({_id:{$in:params.user_mongo_ids}},function (err,users) {
+		this.log(params.user_mongo_ids,users);
+		var out = {users:[]};
+		for (var x=0; x<users.length; x++) {
+			out.users[x] = makeUserProtobuf(users[x]);
+			assert(out.users[x]._id.length == 12);
+		}
+		console.log('getplayers:',out);
+		this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
+		token.stop();
+	}.bind(this));
+}
+handlers[codes.scSetAvatar] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.SetAvatarParams');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	var id = params.avatar_id.toString('base64');
+	delete params.avatar_id;
+	this.log('changing avatar',id);
+	mdb.models.Avatars.findOne({_id:id},function(err,row) {
+		if (err) {
+			this.reply("000","internal error");
+			return;
+		}
+		if (!row) {
+			this.send(codes.srSetAvatarReply,{status:'saNotFound'},'Poker.SetAvatarReply');
+			return;
+		}
+		mdb.models.UserModel.findOne({_id:this.userid},function (err,self) {
+			assert.ifError(err);
+			self.avatar = id;
+			self.save(function (err) {
+				if (err) {
+					this.reply("000","internal error");
+					return;
+				}
+				this.send(codes.srSetAvatarReply,{status:'saSuccess'},'Poker.SetAvatarReply');
+				mdb.models.Clubs.find({$or:[{members:this.userid},{owner:this.userid}]},{owner:1,members:1},function (err,rows) {
+					assert.ifError(err);
+					var out = [];
+					for (var i=0; i<rows.length;i++) {
+						if (!myutils.containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
+						if (rows[i].members) { // FIXME, remove
+							for (var j=0; j<rows[i].members.length; j++) {
+								if (!myutils.containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
+							}
+						}
+					}
+					var proto = pb.Serialize({users:[makeUserProtobuf(self)]},'Poker.UserChangeParams');
+					for (var i=0; i<out.length; i++) {
+						if (myutils.compareObjectID(this.userid,out[i])) continue;
+						var dest = activeUsers[out[i]];
+						if (dest) dest.send(codes.seUserChange,proto,'raw');
+					}
+					token.stop();
+				}.bind(this));
+			}.bind(this));
+		}.bind(this));
+	}.bind(this));
+}
 handlers[codes.scResendVerificationMail] = function () {
-	allUsers.findOne({_id:this.userid},function (err,row) {
+	mdb.models.UserModel.findOne({_id:this.userid},function (err,row) {
 		if (row.authcode) sendAuthEmail(this.userid,row.authcode,row.email,row.displayname,function () {},function () {},function () {});
 	}.bind(this));
 }
@@ -1425,10 +1054,10 @@ handlers[codes.scQueryTableStats] = function (args,token) {
 	var list2 = {};
 	if (params.gameid.length == 0) {
 		log('building list from owned clubs');
-		allClubs.find({owner:this.userid}).toArray(function (err,clubs) {
+		mdb.models.Clubs.find({owner:this.userid},function (err,clubs) {
 			assert.ifError(err);
 			for (var i=0; i<clubs.length; i++) clublist.push(clubs[i]._id);
-			allGames.find({clubid:{$in:clublist}}).toArray(function (err,games) {
+			models.Game.find({clubid:{$in:clublist}},function (err,games) {
 				assert.ifError(err);
 				for (var i=0; i<games.length; i++) {
 					if (!list2[games[i].clubid]) list2[games[i].clubid] = [];
@@ -1488,123 +1117,8 @@ handlers[codes.scContactUs] = function (args,token) {
 	this.send(codes.srContactUsOk);
 	token.stop();
 }
-handlers[codes.scTablePlayNow] = function (args,token) {
-	try {
-		var params = pb.Parse(args,'Poker.Game');
-		var id = toMongoId(params._id);
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Game.getGame(id,function (err,game) {
-		if (!game) return;
-		if (game.state2 == 'gsClosed') return;
-		game.Lock.writeLock(function (release) {
-			var seatIdx = game.findSeat(this);
-			if (seatIdx === undefined) {
-				this.reply(0,'your not sitting');
-				release();
-				return;
-			}
-			if (game.members[seatIdx].chips == 0) {
-				this.reply(0,'you dont have enough chips');
-				release();
-				return;
-			}
-			if (game.members[seatIdx].status != 'psOutOfPlay') {
-				game.members[seatIdx].sitOutNextRound = false;
-				game.members[seatIdx].sitOutBB = false;
-				release();
-				return;
-			}
-			game.members[seatIdx].status = 'psOutOfHand';
-			//game.members[seatIdx].sitTime = Date.now();
-			if (game.state == 'tsIdle') {
-				if (!game.dealTimer) {
-					game.dealTimer = setTimeout(function () {
-						game.Lock.writeLock(function (release) {
-							game.dealTimer = null;
-							game.stateMachine(function (events) {
-								game.broadcastStatus(null,true,events);
-								release();
-							}.bind(this),null,{silent:true},[],0);
-						}.bind(this));
-					}.bind(this),5000);
-					finish([]);
-				} else {
-					game.log('waiting for deal timer');
-					finish([]);
-				}
-			} else finish([]);
-			function finish(events) { // teDeal
-				game.updateMongoState({},{members:true},function () {
-					game.broadcastStatus(null,true,events);
-					token.stop();
-					release();
-				});
-			}
-		}.bind(this));
-	}.bind(this));
-}
-handlers[codes.scSetPlayerLimit] = function (args,token) {
-	try {
-		var params = pb.Parse(args,'Poker.PlayerLimitParams');
-		var clubid = toMongoId(params.clubid);
-		var userid = toMongoId(params.userid);
-		//this.log('params:%j',params);
-		if (params.limit < 1) return this.reply(0,'limit too low');
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Club.getClubById(clubid,function (err,clubObj) {
-		if (err == 'not found') {
-			this.reply(0,'club not found');
-			return;
-		}
-		assert.ifError(err);
-		assert(clubObj);
-		if (!clubObj.isOwner(this.userid)) {
-			this.reply(0,'your not the owner');
-			return;
-		}
-		clubObj.updateLimit(userid,params.limit,params.unlimited,function (result) {
-			//clubObj.getTableStatsPacket([
-			if (result) this.send(codes.srPlayerLimitOk,args,'raw');
-			else this.reply(0,'player not found');
-			token.stop();
-		}.bind(this));
-	}.bind(this));
-}
-handlers[codes.scResetPlayerBalance] = function (args,token) {
-	try {
-		var params = pb.Parse(args,'Poker.PlayerLimitParams');
-		var clubid = toMongoId(params.clubid);
-		var userid = toMongoId(params.userid);
-		this.log('params:%j',params);
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	Club.getClubById(clubid,function (err,clubObj) {
-		if (err == 'not found') {
-			this.reply(0,'club not found');
-			return;
-		}
-		assert.ifError(err);
-		assert(clubObj);
-		if (!clubObj.isOwner(this.userid)) {
-			this.reply(0,'your not the owner');
-			return;
-		}
-		clubObj.resetPlayerLimit(userid,function (result) {
-			if (result) this.send(codes.srResetPlayerBalanceOk,args,'raw');
-			else this.reply(0,'player not found');
-			token.stop();
-		}.bind(this));
-	}.bind(this));
-}
 function makeUserProtobuf(u) {
+	var u = JSON.parse(JSON.stringify(u));
 	if (u.avatar) u.avatar = new Buffer(u.avatar,'base64');
 	else u.avatar = new Buffer([33]);
 	u._id = new Buffer(u._id.toString(),'hex');
@@ -1652,33 +1166,13 @@ function setTimebankTimer() {
 	},target);
 }
 setTimebankTimer();
-function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds) {
-	if (!blinds) return true;
-	if (!game_type) return true;
-	if (!game_limit) return true;
-	if (!regexLimits.gamename.exec(gamename)) return true;
-	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
-	if (5 > buyin_min) {
-		log('min too low',buyin_min);
-		return true;
-	}
-	if (buyin_max < buyin_min) {
-		log('max too low');
-		return true;
-	}
-	if (10 > buyin_max) {
-		log('max too low',buyin_max);
-		return true;
-	}
-	return false;
-}
 ClientSocket.prototype.destroy = function destroy() {
 	this.socket.destroy();
 	clearTimeout(this.idleTimer);
 }
 function cactiStats() {
 	var mem = process.memoryUsage();
-	var data = { hands:hands };
+	var data = { hands:Game.hands };
 	var msg = []
 	for (var x in data) {
 		msg.push(x+':'+data[x]);

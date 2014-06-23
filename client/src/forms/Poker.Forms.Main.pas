@@ -8,7 +8,8 @@ uses
   cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo, Poker.Forms.Login, Poker.Objects.GameInfo, cxImage, Vcl.ActnMan,
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses;
+  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
+  Vcl.ActnColorMaps, Vcl.StdStyleActnCtrls;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -21,13 +22,6 @@ type
     acShowJoinClubForm: TAction;
     acShowGameTableForm: TAction;
     acOpenClubLobby: TAction;
-    MainMenu: TMainMenu;
-    miAccount: TMenuItem;
-    miChangeEMail: TMenuItem;
-    miChangePassword: TMenuItem;
-    miChangeAvatar: TMenuItem;
-    misAccount2: TMenuItem;
-    miLogout: TMenuItem;
     acShowTournamentLayout: TAction;
     acShowHomeGamesLayout: TAction;
     imgCashier: TcxImage;
@@ -36,8 +30,6 @@ type
     paMain: TPanel;
     btTournaments: TcxButton;
     btHomeGames: TcxButton;
-    miResendVerificationMail: TMenuItem;
-    misAccount1: TMenuItem;
     acResendVerificationMail: TAction;
     btFiller1: TcxButton;
     pcTabs: TcxPageControl;
@@ -66,16 +58,9 @@ type
     btJoinClub: TcxButton;
     btTournamentsHeader: TcxButton;
     lbsTournamentsComingSoon: TcxLabel;
-    miHelp: TMenuItem;
-    miContactUs: TMenuItem;
     acShowContactUsForm: TAction;
-    miTermsAndConditions: TMenuItem;
     acTermsAndConditions: TAction;
     acShowAboutForm: TAction;
-    misHelp1: TMenuItem;
-    miAbout: TMenuItem;
-    miOptions: TMenuItem;
-    miSounds: TMenuItem;
     acSoundsOnOff: TAction;
     gridMyHomeGames: TcxGrid;
     gridMyHomeGamesTable: TcxGridTableView;
@@ -83,20 +68,12 @@ type
     gridJoinedClubsClubName: TcxGridColumn;
     gridJoinedClubsStatus: TcxGridColumn;
     gridMyHomeGamesLevel: TcxGridLevel;
-    miDev: TMenuItem;
-    miDisconnect: TMenuItem;
-    misOptions1: TMenuItem;
-    miCheckOnFold: TMenuItem;
     acFoldChecks: TAction;
-    miGameplay: TMenuItem;
-    misOptions2: TMenuItem;
-    miHandHistory: TMenuItem;
     acHandHistory: TAction;
     acAnimationsEnabled: TAction;
-    miAnimations: TMenuItem;
-    misOptions3: TMenuItem;
-    miSettings: TMenuItem;
     acSettings: TAction;
+    ActionMainMenuBar: TActionMainMenuBar;
+    acDisconnect: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -129,17 +106,20 @@ type
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
     procedure acSoundsOnOffExecute(Sender: TObject);
-    procedure miDisconnectClick(Sender: TObject);
     procedure acShowAboutFormExecute(Sender: TObject);
     procedure acFoldChecksExecute(Sender: TObject);
     procedure acHandHistoryExecute(Sender: TObject);
     procedure acAnimationsEnabledExecute(Sender: TObject);
     procedure acSettingsExecute(Sender: TObject);
+    procedure acDisconnectExecute(Sender: TObject);
+    procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient;
+      var ControlClass: TCustomActionControlClass);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
     FCallbacksId: Integer;
     FShuttingDown: Boolean;
+    FActionMainMenuBarFont: TFont;
 
     procedure ModalFormClose(ASender: TObject);
 
@@ -185,6 +165,7 @@ type
     procedure DoCreate; override;
     procedure WMQueryEndSession(var AMessage: TWMQueryEndSession); message WM_QUERYENDSESSION;
     procedure WMEndSession(var AMessage: TWMEndSession); message WM_ENDSESSION;
+    procedure WMSettingChange(var AMessage: TWMSettingChange); message WM_SETTINGCHANGE;
   public
     procedure LoginStatus(const AValue: TLoginStatus);
   end;
@@ -208,7 +189,8 @@ uses
   Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
-  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings;
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
+  Poker.ActionMainMenuBarStyle;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -221,6 +203,12 @@ end;
 procedure TfrmChipUpMain.FormCreate(Sender: TObject);
 begin
   LoadImageFromResource(imgCashier, 'CashierNormal');
+
+  ActionManager.Style := ActionMainMenuBarStyle;
+  ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
+
+  FActionMainMenuBarFont := TFont.Create;
+  FActionMainMenuBarFont.Assign(ActionMainMenuBar.Font);
 
   btHomeGames.Font.Name := 'Sintony Bold';
   btHomeGames.Font.Style := [];
@@ -245,6 +233,7 @@ begin
   FormsContainer.CloseAllForms;
   Tables.Clear;
   MessageContainer.RemoveCallbacks(FCallbacksId);
+  FActionMainMenuBarFont.Free;
 end;
 
 procedure TfrmChipUpMain.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -348,21 +337,27 @@ function TfrmChipUpMain.GetSelectedGame(var AGame: TGameInfo): Boolean;
 var
   club: TClubInfo;
 begin
-  result := (GetSelectedClub(club)) and (club.Games.FindGame(FSelectedGame, AGame));
+  result := (GetSelectedClub(club)) and
+            (club.Games.FindGame(FSelectedGame, AGame));
 end;
 
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
 begin
   Settings.Animations := not Settings.Animations;
-  miAnimations.Checked := Settings.Animations;
+  acAnimationsEnabled.Checked := Settings.Animations;
   DXTimer.AnimationsEnabled := Settings.Animations;
   Settings.Save;
+end;
+
+procedure TfrmChipUpMain.acDisconnectExecute(Sender: TObject);
+begin
+  ServerSocket.Disconnect;
 end;
 
 procedure TfrmChipUpMain.acFoldChecksExecute(Sender: TObject);
 begin
   Settings.FoldChecks := not Settings.FoldChecks;
-  miCheckOnFold.Checked := Settings.FoldChecks;
+  acFoldChecks.Checked := Settings.FoldChecks;
   Settings.Save;
 end;
 
@@ -388,7 +383,6 @@ procedure TfrmChipUpMain.acOpenClubLobbyExecute(Sender: TObject);
 var
   club: TClubInfo;
   form: TForm;
-  found: Boolean;
 begin
   if not dmMain.CheckAuthed then
     Exit;
@@ -396,18 +390,15 @@ begin
   if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
     Exit;
 
-  found := FALSE;
   for form in FormsContainer.Items do
     if (form is TfrmClubLobby) and
        ((form as TfrmClubLobby).ClubId = FSelectedClub) then
     begin
       form.SetFocus;
-      found := TRUE;
-      Break;
+      Exit;
     end;
 
-  if not found then
-    FormsContainer.RunForm(TfrmClubLobby, self, [@FSelectedClub], TRUE);
+  FormsContainer.RunForm(TfrmClubLobby, self, [@FSelectedClub], TRUE);
 end;
 
 procedure TfrmChipUpMain.acResendVerificationMailExecute(Sender: TObject);
@@ -499,13 +490,13 @@ begin
   if cpt <> Caption then
     Caption := cpt;
 
-  miResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
+  acResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
 
-  miSounds.Checked := Settings.Sounds;
-  miCheckOnFold.Checked := Settings.FoldChecks;
-  miAnimations.Checked := Settings.Animations;
+  acSoundsOnOff.Checked := Settings.Sounds;
+  acFoldChecks.Checked := Settings.FoldChecks;
+  acAnimationsEnabled.Checked := Settings.Animations;
 
-  miDev.Visible := Settings.DeveloperMode;
+  ActionManager.ActionBars[0].Items[3].Visible := Settings.DeveloperMode;
 
   UpdateClublist;
   UpdateGamelist;
@@ -625,13 +616,25 @@ end;
 procedure TfrmChipUpMain.WMEndSession(var AMessage: TWMEndSession);
 begin
   FShuttingDown := AMessage.EndSession;
+
   inherited;
 end;
 
 procedure TfrmChipUpMain.WMQueryEndSession(var AMessage: TWMQueryEndSession);
 begin
   FShuttingDown := TRUE;
+
   inherited;
+end;
+
+procedure TfrmChipUpMain.WMSettingChange(var AMessage: TWMSettingChange);
+begin
+  inherited;
+
+  // this reassigns font/colormap to ActionMainMenuBar
+  // bug info: http://stackoverflow.com/questions/9577540/tactionmainmenubar-and-tactiontoolbar-lose-settings
+  ActionMainMenuBar.Font.Assign(FActionMainMenuBarFont);
+  ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
 end;
 
 procedure TfrmChipUpMain.gridMyHomeGamesEnter(Sender: TObject);
@@ -649,8 +652,7 @@ begin
   acOpenClubLobby.Execute;
 end;
 
-procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
-  AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acOpenClubLobby.Execute;
 end;
@@ -659,7 +661,7 @@ procedure TfrmChipUpMain.gridPublicHomeGamesTableFocusedRecordChanged(Sender: Tc
 var
   recIndex: Integer;
   club_id: Integer;
-  club: TclubInfo;
+  club: TClubInfo;
 begin
   recIndex := gridPublicHomeGamesTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
@@ -815,7 +817,7 @@ begin
   if ASender is TfrmReconnect then
   begin
     case (ASender as TfrmReconnect).CurrentStatus of
-      rsLoggedIn: ;
+      rsLoggedIn: ConfigureGUI;
     else
       FormsContainer.Items.Extract(ASender as TForm);
       ShowLoginForm;
@@ -979,13 +981,20 @@ end;
 procedure TfrmChipUpMain.acSoundsOnOffExecute(Sender: TObject);
 begin
   Settings.Sounds := not Settings.Sounds;
-  miSounds.Checked := Settings.Sounds;
+  acSoundsOnOff.Checked := Settings.Sounds;
   Settings.Save;
 end;
 
 procedure TfrmChipUpMain.acTermsAndConditionsExecute(Sender: TObject);
 begin
   dmMain.OpenTACLink;
+end;
+
+procedure TfrmChipUpMain.ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
+begin
+  // this reassigns colormap to ActionMainMenuBar
+  // bug info: http://stackoverflow.com/questions/9577540/tactionmainmenubar-and-tactiontoolbar-lose-settings
+  ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
 end;
 
 procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);
@@ -1180,11 +1189,5 @@ begin
   pb := AObject as TPB_ClubHandHistoryReply;
   HandHistory.Add(pb);
 end;
-
-procedure TfrmChipUpMain.miDisconnectClick(Sender: TObject);
-begin
-  ServerSocket.Disconnect;
-end;
-
 
 end.

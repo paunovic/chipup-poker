@@ -136,7 +136,7 @@ implementation
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
   Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings,
-  Poker.Objects.PotInfo;
+  Poker.Objects.PotInfo, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus;
 
 { THandHistoryItem }
 
@@ -170,8 +170,7 @@ begin
   FHandId := AHandHistory.Seq;
   FRake := AHandHistory.Rake;
   FTotalRake := AHandHistory.Totalrake;
-  SetLength(FCards, Length(AHandHistory.Cards));
-  Move(AHandHistory.Cards[0], FCards[0], Length(AHandHistory.Cards) * SizeOf(Byte));
+  FCards := Copy(AHandHistory.Cards, 0, Length(AHandHistory.Cards));
   FTableCardsStr := TCards.BytesToString(FCards);
   FEndTime := TTimeZone.Local.ToLocalTime(UnixToDateTime(AHandHistory.Endtime));
   FBalanceChanges.Clear;
@@ -210,9 +209,13 @@ var
   player_line: String;
   hand_strength: String;
   seat_winnings: TArray<UINT32>;
+  fold_on: TArray<TTableState>;
   line: String;
+  tablestate: TTableState;
 begin
   ALines.Clear;
+
+  tablestate := tsPreFlop;
 
   // basic info
   ALines.Add(Format('%sHand %s#%d%s: %s%s (%s/%s)%s - %s%s', [
@@ -233,6 +236,10 @@ begin
     line := '%sSeat %s%d%s: %s%s%s (%s%s%s chips';
     if FPlayers[C1].Seat = FDealerIndex then
       line := line + ', dealer';
+    if Players[C1].Status = psOutOfPlay then
+      line := line + ', sitting out';
+    if Players[C1].Status = psOutOfHand then
+      line := line + ', out of hand';
     line := line + ')';
 
     ALines.Add(Format(line, [
@@ -240,6 +247,8 @@ begin
         ATags.NormalText, ATags.Chips, ChipsToStr(FPlayers[C1].Chips), ATags.NormalText
     ]));
   end;
+
+  SetLength(fold_on, FParentItems.Game.Seats);
 
   // moves
   for move in FMoves do
@@ -256,6 +265,7 @@ begin
 
     if move.ContainsEvent(teDealing) then
     begin
+      tablestate := tsPreFlop;
       ALines.Add('');
       ALines.Add(Format('%s*** HOLE CARDS ***', [ATags.TableEvent]));
       ALines.Add('');
@@ -274,6 +284,7 @@ begin
 
     if move.ContainsEvent(teFlop) then
     begin
+      tablestate := tsFlop;
       ALines.Add('');
       ALines.Add(Format('%s*** FLOP *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCards.BytesToString(FCards, ' ', 3), ATags.TableEvent]));
       ALines.Add('');
@@ -281,6 +292,7 @@ begin
 
     if move.ContainsEvent(teTurn) then
     begin
+      tablestate := tsTurn;
       ALines.Add('');
       ALines.Add(Format('%s*** TURN *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCard.ByteToString(FCards[3]), ATags.TableEvent]));
       ALines.Add('');
@@ -288,16 +300,22 @@ begin
 
     if move.ContainsEvent(teRiver) then
     begin
+      tablestate := tsRiver;
       ALines.Add('');
       ALines.Add(Format('%s*** RIVER *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCard.ByteToString(FCards[4]), ATags.TableEvent]));
       ALines.Add('');
     end;
 
     if move.ContainsEvent(teFold) then
+    begin
       ALines.Add(Format('%s%s%s folds', [ATags.PlayerNick, player_nick, ATags.NormalText]));
+      fold_on[move.Seat] := tablestate;
+    end;
 
     if move.ContainsEvent(teWinning) then
     begin
+      tablestate := tsWinning;
+
       // showdown
       ALines.Add('');
       ALines.Add(Format('%s*** SHOW DOWN ***', [ATags.TableEvent]));
@@ -305,16 +323,20 @@ begin
 
       for C1 := 0 to FPlayers.Count - 1 do
       begin
+        if fold_on[FPlayers[C1].Seat] > tsIdle then
+          Continue;
+
         if FPlayers[C1].Mucked then
           ALines.Add(Format('%s%s%s mucks hand', [ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText]))
         else
-        begin
-          hand_strength := THandStrengthCalculator.GetHandStrength(FPlayers[C1].CardsStr, FTableCardsStr, FCurrentGame, FALSE);
-          ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
-              ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(FPlayers[C1].Cards, ' '),
-              ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
-          ]));
-        end;
+          if FPlayers[C1].Status in [psInHand, psFolded, psAllIn] then
+          begin
+            hand_strength := THandStrengthCalculator.GetHandStrength(FPlayers[C1].CardsStr, FTableCardsStr, FCurrentGame, FALSE);
+            ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
+                ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(FPlayers[C1].Cards, ' '),
+                ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
+            ]));
+          end;
       end;
 
       // summary
@@ -358,8 +380,24 @@ begin
           player_line := player_line + Format('[%s%s%s] ', [ATags.Cards, TCards.BytesToString(player.Cards, ' '), ATags.NormalText]);
         end;
 
-        if player.Mucked then
-          player_line := player_line + 'mucked ';
+        if player.Status = psOutOfPlay then
+          player_line := player_line + 'is sitting out '
+        else
+          if player.Status = psOutOfHand then
+            player_line := player_line + 'is out of hand '
+          else
+            if fold_on[player.Seat] > tsIdle then
+            begin
+              case fold_on[player.Seat] of
+                tsPreFlop: player_line := player_line + 'folded pre-flop ';
+                tsFlop: player_line := player_line + 'folded on flop ';
+                tsTurn: player_line := player_line + 'folded on turn ';
+                tsRiver: player_line := player_line + 'folded on river ';
+              end;
+            end
+            else
+              if player.Mucked then
+                player_line := player_line + 'mucked ';
 
         if seat_winnings[player.Seat] > 0 then
         begin

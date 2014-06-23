@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas, Poker.Settings;
+  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas, Poker.Settings, AsphyreSwapChains;
 
 
 class procedure TDXCore.Initialize;
@@ -65,6 +65,7 @@ begin
   FCanvas.Antialias := TRUE;
   FCanvas.MipMapping := TRUE;
 
+  FDevice.Initialize;
   for C1 := 1 to Settings.Hardcoded.DIRECTX_SWAPCHAIN_COUNT + 1 do
     FDevice.SwapChains.Add(FDummyWindow, Point2px(1, 1));
 
@@ -95,10 +96,14 @@ end;
 function TDXCore.AcquireSwapChainElement(const AHandle: THandle; out AIndex: Integer): Boolean;
 var
   C1: Integer;
+  rect: TRect;
 begin
   for C1 := 1 to FDevice.SwapChains.Count - 1 do
    if FDevice.SwapChains[C1].WindowHandle = FDummyWindow then
    begin
+     Winapi.Windows.GetClientRect(AHandle, rect);
+     FDevice.SwapChains[AIndex].Width := rect.Width;
+     FDevice.SwapChains[AIndex].Height := rect.Height;
      FDevice.SwapChains[AIndex].WindowHandle := AHandle;
      FDevice.SwapChains[AIndex].Multisamples := 4;
      FDevice.SwapChains[AIndex].VSync := TRUE;

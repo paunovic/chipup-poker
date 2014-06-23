@@ -271,10 +271,10 @@ procedure TServerSocket.SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; P
 begin
   if ErrCode = 0 then
   begin
-    {$IFDEF DEBUG} DebugLn('SSL handshake completed successfully', ditSocket); {$ENDIF}
     FSSLHandshakeDone := TRUE;
     ResetInactivityPingTimer;
     ResetPingTimer;
+    {$IFDEF DEBUG} DebugLn('SSL handshake done', ditSocket); {$ENDIF}
   end
   else
   begin
@@ -352,8 +352,12 @@ begin
 
   rpc_message := TPB_RpcMessage.Create(pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size)), rpc_size);
   try
-    if (rpc_size + SizeOf(rpc_size) + rpc_message.DataSize > FReceiveBufferSize) then
+    if (not rpc_message.IsInitialized) or
+       (rpc_size + SizeOf(rpc_size) + rpc_message.DataSize > FReceiveBufferSize) then
+    begin
+      {$IFDEF DEBUG} DebugLn('Invalid RPC message received', ditException); {$ENDIF}
       Exit;
+    end;
 
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
@@ -459,7 +463,6 @@ begin
     FConnectCode := ARpcMessage.MethodId;
 
   ADataObject := nil;
-  result := TRUE;
   valid_sc := FALSE;
   for sc := Low(TServerCodes) to High(TServerCodes) do
     if ARpcMessage.MethodId = Integer(sc) then
@@ -470,9 +473,8 @@ begin
 
   if not valid_sc then
   begin
-    result := FALSE;
     {$IFDEF DEBUG} DebugLn(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
-    Exit;
+    Exit(FALSE);
   end;
 
   case TServerCodes(ARpcMessage.MethodId) of
@@ -539,14 +541,24 @@ begin
     seGameDelete: ADataObject := TPB_Game.Create(ADataPointer, ARpcMessage.DataSize);
     seUserChange: ADataObject := TPB_UserChangeParams.Create(ADataPointer, ARpcMessage.DataSize);
     srTableStatsReply: ADataObject := TPB_TableStatsReplies.Create(ADataPointer, ARpcMessage.DataSize);
-    srContactUsOk: ADataObject := TPB_ContactMessage.Create(ADataPointer, ARpcMessage.DataSize);
+    srContactUsOk: ;
     srTableBuyinLessThanCashout,
     srInvalidTableBuyin: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
     srHandHistoryMsg: ADataObject := TPB_ClubHandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);
   else
-    result := FALSE;
+    Exit(FALSE);
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
   end;
+
+  if (Assigned(ADataObject)) and
+     (not (ADataObject as TProtobufBaseObject).IsInitialized) then
+  begin
+    {$IFDEF DEBUG} DebugLn(Format('MethodId: %s; ADataObject not initialized', [TranslateServerCode(ARpcMessage.MethodId)]), ditException); {$ENDIF}
+    FreeAndNil(ADataObject);
+    Exit(FALSE);
+  end;
+
+  Exit(TRUE);
 end;
 
 procedure TServerSocket.SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);

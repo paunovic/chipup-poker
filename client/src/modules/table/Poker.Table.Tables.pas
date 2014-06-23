@@ -59,8 +59,6 @@ type
     class procedure Initialize;
     class procedure Deinitialize;
 
-    constructor Create;
-
     procedure DisableAll;
     procedure EnableAll;
 
@@ -82,6 +80,7 @@ var
 implementation
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Objects.TableStatus;
 
@@ -162,8 +161,6 @@ begin
 end;
 
 procedure TTable.SetupSettingsPreviewTable(const AHandle: THandle);
-var
-  tablestatus: TTableStatus;
 begin
   FTableType := ttSettingsPreview;
   FSeatIndex := -1;
@@ -172,11 +169,9 @@ begin
   FGame := TGameInfo.Create;
   FGame.InitToDemoValues(FClub.Id);
   FClub.Games.Add(FGame);
-  tablestatus := TTableStatus.Create;
-  tablestatus.InitToDemoValues;
   FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttSettingsPreview);
+  FRenderer.TableStatus.InitToDemoValues;
   FRenderer.SetRenderTarget(AHandle);
-  FRenderer.UpdateTableStatus(tablestatus);
   FRenderer.FlopAnimated := TRUE;
   DXCore.ModifySwapChainElement(FSwapChainIndex, AHandle);
   FRenderer.UpdateDXAreaSize;
@@ -198,6 +193,7 @@ procedure TTable.ReassignObjects(const AClub: TClubInfo; const AGame: TGameInfo)
 begin
   FClub := AClub;
   FGame := AGame;
+  FRenderer.Game := FGame;
 end;
 
 function TTable.ReassignObjects(const AGameId: TBytes): Boolean;
@@ -209,8 +205,7 @@ begin
     for game in club.Games do
       if CompareBytes(game.MongoId, AGameId) then
       begin
-        FClub := club;
-        FGame := game;
+        ReassignObjects(club, game);
         Exit(TRUE);
       end;
   Exit(FALSE);
@@ -230,12 +225,7 @@ end;
 
 class procedure TTables.Deinitialize;
 begin
-  Tables.Free;
-end;
-
-constructor TTables.Create;
-begin
-  inherited Create;
+  FreeAndNil(Tables);
 end;
 
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
@@ -313,6 +303,8 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
+  {$IFDEF DEBUG} DebugLn('Reassigning table objects...', ditApplication); {$ENDIF}
+
   for table in ToArray do
     if (dmMain.SelfInfo.Clubs.FindClub(table.ClubSeq, club)) and
        (club.Games.FindGame(table.GameId, game)) then

@@ -1,10 +1,9 @@
 object frmTable: TfrmTable
   Left = 0
   Top = 0
-  Caption = 'Table'
   ClientHeight = 524
   ClientWidth = 792
-  Color = 1315656
+  Color = clWindow
   Constraints.MinWidth = 600
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -197,7 +196,7 @@ object frmTable: TfrmTable
     Left = 8
     Top = 6
     Cursor = crHandPoint
-    Caption = 'Previous Hand (#21819823)'
+    Caption = 'Previous Hand (#2607989742077)'
     ParentFont = False
     Style.Edges = []
     Style.Font.Charset = DEFAULT_CHARSET
@@ -225,8 +224,8 @@ object frmTable: TfrmTable
     OnClick = lbvHandHistoryClick
   end
   object btPlayPause: TcxButton
-    Left = 375
-    Top = 464
+    Left = 371
+    Top = 344
     Width = 48
     Height = 48
     Action = acHandPlaybackPause
@@ -249,8 +248,8 @@ object frmTable: TfrmTable
     ParentFont = False
   end
   object btStepForward: TcxButton
-    Left = 429
-    Top = 464
+    Left = 425
+    Top = 344
     Width = 48
     Height = 48
     Action = acHandPlaybackStepForward
@@ -274,8 +273,8 @@ object frmTable: TfrmTable
     ParentFont = False
   end
   object btStepBackwards: TcxButton
-    Left = 321
-    Top = 464
+    Left = 317
+    Top = 344
     Width = 48
     Height = 48
     Action = acHandPlaybackStepBackwards
@@ -299,8 +298,8 @@ object frmTable: TfrmTable
     ParentFont = False
   end
   object pbHandPlaybackProgress: TcxProgressBar
-    Left = 272
-    Top = 449
+    Left = 268
+    Top = 329
     AutoSize = False
     ParentColor = False
     Properties.BarStyle = cxbsGradient
@@ -634,14 +633,8 @@ object frmTable: TfrmTable
   object tiGameLock: TTimer
     Enabled = False
     OnTimer = tiGameLockTimer
-    Left = 232
-    Top = 104
-  end
-  object tiRender: TTimer
-    Interval = 500
-    OnTimer = tiRenderTimer
-    Left = 316
-    Top = 32
+    Left = 236
+    Top = 108
   end
   object tiHandPlayback: TTimer
     Enabled = False
@@ -3038,5 +3031,10 @@ object frmTable: TfrmTable
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
+  end
+  object tiRender: TTimer
+    OnTimer = tiRenderTimer
+    Left = 324
+    Top = 32
   end
 end

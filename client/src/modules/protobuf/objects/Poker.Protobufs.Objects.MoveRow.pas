@@ -15,14 +15,14 @@ type
       kCodeFieldNumber = 1;
       kBetFieldNumber = 2;
       kSeatFieldNumber = 3;
-      kPotdataFieldNumber = 4;
+      kWinnerPotDataFieldNumber = 4;
       kPotsFieldNumber = 5;
 
     var
       FCode: TList<TTableEventType>;
       FBet: UINT32;
       FSeat: Integer;
-      FPotdata: TList<TPB_WinnerPotInfo>;
+      FWinnerPotData: TList<TPB_WinnerPotInfo>;
       FPots: TList<TPB_Pot>;
       _has_bits_: Integer;
 
@@ -34,12 +34,12 @@ type
     procedure set_has_Seat;
     procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
-    procedure set_has_Potdata;
-    procedure clear_has_Potdata;
+    procedure set_has_WinnerPotData;
+    procedure clear_has_WinnerPotData;
     procedure set_has_Pots;
     procedure clear_has_Pots;
     procedure CodeNotifyEvent(Sender: TObject; const Item: TTableEventType; Action: TCollectionNotification);
-    procedure PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
+    procedure WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 
   protected
@@ -68,10 +68,10 @@ type
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // repeated FIXME Potdata = 4;
-    function has_Potdata: Boolean;
-    procedure clear_Potdata;
-    property Potdata: TList<TPB_WinnerPotInfo> read FPotdata;
+    // repeated FIXME WinnerPotData = 4;
+    function has_WinnerPotData: Boolean;
+    procedure clear_WinnerPotData;
+    property WinnerPotData: TList<TPB_WinnerPotInfo> read FWinnerPotData;
 
     // repeated FIXME Pots = 5;
     function has_Pots: Boolean;
@@ -90,14 +90,14 @@ procedure TPB_MoveRow.InitObjects;
 begin
   inherited;
   FCode := TList<TTableEventType>.Create;
-  FPotdata := TObjectList<TPB_WinnerPotInfo>.Create;
+  FWinnerPotData := TObjectList<TPB_WinnerPotInfo>.Create;
   FPots := TObjectList<TPB_Pot>.Create;
 end;
 procedure TPB_MoveRow.HookNotifiers;
 begin
   inherited;
   FCode.OnNotify := CodeNotifyEvent;
-  FPotdata.OnNotify := PotdataNotifyEvent;
+  FWinnerPotData.OnNotify := WinnerPotDataNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
@@ -114,10 +114,10 @@ begin
     FCode.OnNotify := nil;
     FreeAndNil(FCode);
   end;
-  if Assigned(FPotdata) then
+  if Assigned(FWinnerPotData) then
   begin
-    FPotdata.OnNotify := nil;
-    FreeAndNil(FPotdata);
+    FWinnerPotData.OnNotify := nil;
+    FreeAndNil(FWinnerPotData);
   end;
   if Assigned(FPots) then
   begin
@@ -150,10 +150,10 @@ begin
         FSeat := AProtobufReader.readInt32;
         set_has_Seat;
       end;
-      kPotdataFieldNumber: begin
+      kWinnerPotDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPotdata.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
-        set_has_Potdata;
+        FWinnerPotData.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_WinnerPotData;
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -176,8 +176,8 @@ begin
     SetBet(from.Bet);
   if (from.has_Seat) then
     SetSeat(from.Seat);
-  for temp3 in from.Potdata do
-    FPotdata.Add(TPB_WinnerPotInfo.Create(temp3));
+  for temp3 in from.WinnerPotData do
+    FWinnerPotData.Add(TPB_WinnerPotInfo.Create(temp3));
   for temp4 in from.Pots do
     FPots.Add(TPB_Pot.Create(temp4));
 end;
@@ -188,7 +188,7 @@ var
 begin
   Result := True;
   if ((_has_bits_ and $0) <> $0) Then Result := False;
-  for temp in Potdata do
+  for temp in WinnerPotData do
     if (not temp.IsInitialized) then Result := False;
   for temp in Pots do
     if (not temp.IsInitialized) then Result := False;
@@ -276,31 +276,31 @@ begin
   set_has_Seat;
 end;
 
-procedure TPB_MoveRow.clear_Potdata;
+procedure TPB_MoveRow.clear_WinnerPotData;
 begin
-  FPotdata.Clear;
-  clear_has_Potdata;
+  FWinnerPotData.Clear;
+  clear_has_WinnerPotData;
 end;
 
-function TPB_MoveRow.has_Potdata: Boolean;
+function TPB_MoveRow.has_WinnerPotData: Boolean;
 begin
   Result := (_has_bits_ and 8) > 0;
 end;
 
-procedure TPB_MoveRow.set_has_Potdata;
+procedure TPB_MoveRow.set_has_WinnerPotData;
 begin
   _has_bits_ := _has_bits_ or 8;
 end;
 
-procedure TPB_MoveRow.clear_has_Potdata;
+procedure TPB_MoveRow.clear_has_WinnerPotData;
 begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_MoveRow.PotdataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
+procedure TPB_MoveRow.WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
-  ProtobufOutput.writeTag(kPotdataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeTag(kWinnerPotDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
 end;

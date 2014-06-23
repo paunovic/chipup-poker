@@ -5,6 +5,14 @@ interface
 uses
   Winapi.Windows, System.Generics.Collections, Vectors2;
 
+const
+  ANITAG_CARD_INDEX = 'card_index';
+  ANITAG_SOUND = 'sound';
+  ANITAG_WINMSG = 'winmsg';
+  ANITAG_BLIND = 'blind';
+  ANITAG_CHIPS = 'chips';
+  ANITAG_SEAT = 'seat';
+
 type
   TDXAnimation = class;
 
@@ -26,18 +34,16 @@ type
     FStatus: TDXAnimationStatus;
     FProgress: Single;
     FRemoved: Boolean;
-    FTag: Integer;
-    FTagUINT: UINT32;
-    FTagSingle: Single;
-    FTagString: String;
+    FTags: TDictionary<String, Variant>;
     FAnimationEnabled: Boolean;
-    function GetCurrPoint: TPoint2;
 
   public
-    constructor Create(const AHandle: THandle; const AID: Integer; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single);
+    constructor Create(const AHandle: THandle; const AID: Integer; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single; const ACanvasSize: TPoint2);
     destructor Destroy; override;
 
     procedure Animate(const ACurrentTime: Double);
+
+    function GetCurrPoint(const ACanvasSize: TPoint2): TPoint2;
 
     property AnimationEnabled: Boolean read FAnimationEnabled write FAnimationEnabled;
 
@@ -45,15 +51,11 @@ type
     property Handle: THandle read FHandle;
     property StartPoint: TPoint2 read FStartPoint;
     property EndPoint: TPoint2 read FEndPoint;
-    property CurrPoint: TPoint2 read GetCurrPoint;
     property Speed: Single read FSpeed;
     property Status: TDXAnimationStatus read FStatus;
     property Progress: Single read FProgress;
     property Removed: Boolean read FRemoved write FRemoved;
-    property Tag: Integer read FTag write FTag;
-    property TagUINT: UINT32 read FTagUINT write FTagUINT;
-    property TagSingle: Single read FTagSingle write FTagSingle;
-    property TagString: String read FTagString write FTagString;
+    property Tags: TDictionary<String, Variant> read FTags;
   end;
 
   TDXAnimations = class(TObjectList<TDXAnimation>)
@@ -70,16 +72,19 @@ uses
   Poker.WindowMessages;
 
 
-constructor TDXAnimation.Create(const AHandle: THandle; const AID: Integer; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single);
+constructor TDXAnimation.Create(const AHandle: THandle; const AID: Integer; const AStartTime: Double; const AStartPoint, AEndPoint: TPoint2; const ASpeed, AStartDelay, AEndDelay: Single; const ACanvasSize: TPoint2);
 begin
+  FTags := TDictionary<String, Variant>.Create;
   FStartTime := AStartTime;
   FAniStartTime := AStartTime + AStartDelay * 1000;
   FAniEndTime := FAniStartTime + ASpeed * 1000;
   FEndTime := FAniEndTime + AEndDelay * 1000;
   FHandle := AHandle;
   FID := AID;
-  FStartPoint := AStartPoint;
-  FEndPoint := AEndPoint;
+  FStartPoint.x := AStartPoint.x / ACanvasSize.x;
+  FStartPoint.y := AStartPoint.y / ACanvasSize.y;
+  FEndPoint.x := AEndPoint.x / ACanvasSize.x;
+  FEndPoint.y := AEndPoint.y / ACanvasSize.y;
   FCurrPoint := FStartPoint;
   FSpeed := ASpeed;
   FStartDelay := AStartDelay;
@@ -89,19 +94,19 @@ end;
 
 destructor TDXAnimation.Destroy;
 begin
-
+  FTags.Free;
   inherited;
 end;
 
-function TDXAnimation.GetCurrPoint: TPoint2;
+function TDXAnimation.GetCurrPoint(const ACanvasSize: TPoint2): TPoint2;
 begin
   if AnimationEnabled then
-    Exit(FCurrPoint)
+    Exit(Point2(FCurrPoint.x * ACanvasSize.x, FCurrPoint.y * ACanvasSize.y))
   else
     if FStatus <> asDone then
-      Exit(FStartPoint)
+      Exit(Point2(FStartPoint.x * ACanvasSize.x, FStartPoint.y * ACanvasSize.y))
     else
-      Exit(FEndPoint);
+      Exit(Point2(FEndPoint.x * ACanvasSize.x, FEndPoint.y * ACanvasSize.y));
 end;
 
 procedure TDXAnimation.Animate(const ACurrentTime: Double);
