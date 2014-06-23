@@ -878,7 +878,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 			}
 			clubids.push(c._id);
 		}
-		models.ClubBalances.find({clubid:{$in:ownedClubs}},function (err,balances) {
+		models.ClubBalance.find({clubid:{$in:ownedClubs}},function (err,balances) {
 			assert.ifError(err);
 			var clubsOut = [];
 			async.each(clubs,function getStatsAndClub(item,cb) {
