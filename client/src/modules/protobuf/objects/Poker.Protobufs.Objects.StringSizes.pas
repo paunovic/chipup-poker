@@ -183,8 +183,8 @@ end;
 
 function TPB_StringSizes.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $7f) <> $7f) Then Result := False;
+  if ((_has_bits_ and $7f) <> $7f) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_StringSizes.clear_Email;

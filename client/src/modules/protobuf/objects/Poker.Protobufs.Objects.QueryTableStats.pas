@@ -99,8 +99,8 @@ end;
 
 function TPB_QueryTableStats.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  if ((_has_bits_ and $0) <> $0) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_QueryTableStats.clear_Gameid;

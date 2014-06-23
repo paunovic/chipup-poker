@@ -308,14 +308,14 @@ function TPB_HandHistory.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $937) <> $937) Then Result := False;
+  if ((_has_bits_ and $937) <> $937) Then Exit(false);
   for temp in Players do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   for temp in Moves do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   if (has_Game) then
-    if (not FGame.IsInitialized) then Result := False;
+    if (not FGame.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_HandHistory.clear_MongoId;

@@ -846,8 +846,7 @@ class BaseGenerator : public CodeGenerator {
 					"  temp: TProtobufBaseObject;\n");
 			}
 			printer.Print("begin\n"
-				"  Result := True;\n"
-				"  if ((_has_bits_ and $mask$) <> $mask$) Then Result := False;\n"
+				"  if ((_has_bits_ and $mask$) <> $mask$) Then Exit(false);\n"
 				,"mask",hack);
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
@@ -858,17 +857,18 @@ class BaseGenerator : public CodeGenerator {
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(vars,
 							"  for temp in $name$ do\n"
-							"    if (not temp.IsInitialized) then Result := False;\n"
+							"    if (not temp.IsInitialized) then Exit(false);\n"
 							);
 					} else {
 						printer.Print(vars,
 							"  if (has_$name$) then\n"
-							"    if (not $pname$.IsInitialized) then Result := False;\n"
+							"    if (not $pname$.IsInitialized) then Exit(false);\n"
 							);
 					}
 				}
 			}
-			printer.Print("end;\n\n");
+			printer.Print("  Exit(True);\n"
+				"end;\n\n");
 			GenerateSettersImpl(message,&printer);
 			printer.Print("end.\n");
 	}

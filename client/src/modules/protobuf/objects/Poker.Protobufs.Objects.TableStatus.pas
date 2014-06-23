@@ -484,14 +484,14 @@ function TPB_TableStatus.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $80041d) <> $80041d) Then Result := False;
+  if ((_has_bits_ and $80041d) <> $80041d) Then Exit(false);
   for temp in Seats do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   for temp in Events do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   for temp in Pots do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_TableStatus.clear_TableMongoId;

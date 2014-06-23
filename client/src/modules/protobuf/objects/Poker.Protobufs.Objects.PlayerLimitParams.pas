@@ -132,8 +132,8 @@ end;
 
 function TPB_PlayerLimitParams.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $f) <> $f) Then Result := False;
+  if ((_has_bits_ and $f) <> $f) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_PlayerLimitParams.clear_Clubid;

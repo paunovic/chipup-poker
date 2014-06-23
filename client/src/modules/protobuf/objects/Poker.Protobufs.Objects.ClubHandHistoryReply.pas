@@ -138,10 +138,10 @@ function TPB_ClubHandHistoryReply.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $3) <> $3) Then Result := False;
+  if ((_has_bits_ and $3) <> $3) Then Exit(false);
   for temp in Rows do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_ClubHandHistoryReply.clear_Clubid;

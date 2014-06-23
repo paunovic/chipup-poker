@@ -98,8 +98,8 @@ end;
 
 function TPB_TransferChipsParams.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $6) <> $6) Then Result := False;
+  if ((_has_bits_ and $6) <> $6) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_TransferChipsParams.clear_PlayerMongoId;

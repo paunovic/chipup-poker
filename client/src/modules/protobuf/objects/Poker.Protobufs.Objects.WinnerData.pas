@@ -99,8 +99,8 @@ end;
 
 function TPB_WinnerData.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $c) <> $c) Then Result := False;
+  if ((_has_bits_ and $c) <> $c) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_WinnerData.clear_Seat;

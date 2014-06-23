@@ -235,16 +235,16 @@ function TPB_HelloReply.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $bf) <> $bf) Then Result := False;
+  if ((_has_bits_ and $bf) <> $bf) Then Exit(false);
   if (has_StringSizes) then
-    if (not FStringSizes.IsInitialized) then Result := False;
+    if (not FStringSizes.IsInitialized) then Exit(false);
   if (has_MinSizes) then
-    if (not FMinSizes.IsInitialized) then Result := False;
+    if (not FMinSizes.IsInitialized) then Exit(false);
   for temp in UpdateFiles do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   if (has_ValidCharsRegex) then
-    if (not FValidCharsRegex.IsInitialized) then Result := False;
+    if (not FValidCharsRegex.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_HelloReply.clear_StringSizes;

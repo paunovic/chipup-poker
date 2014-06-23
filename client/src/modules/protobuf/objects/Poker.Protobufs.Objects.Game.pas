@@ -306,8 +306,8 @@ end;
 
 function TPB_Game.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  if ((_has_bits_ and $0) <> $0) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_Game.clear_MongoId;

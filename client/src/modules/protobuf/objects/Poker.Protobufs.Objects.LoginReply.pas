@@ -142,12 +142,12 @@ function TPB_LoginReply.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $1) <> $1) Then Result := False;
+  if ((_has_bits_ and $1) <> $1) Then Exit(false);
   if (has_Status) then
-    if (not FStatus.IsInitialized) then Result := False;
+    if (not FStatus.IsInitialized) then Exit(false);
   for temp in ReconnectTables do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_LoginReply.clear_LoginStatus;

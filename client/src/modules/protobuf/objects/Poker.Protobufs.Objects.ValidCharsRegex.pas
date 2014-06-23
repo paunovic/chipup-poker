@@ -166,8 +166,8 @@ end;
 
 function TPB_ValidCharsRegex.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $3f) <> $3f) Then Result := False;
+  if ((_has_bits_ and $3f) <> $3f) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_ValidCharsRegex.clear_Email;

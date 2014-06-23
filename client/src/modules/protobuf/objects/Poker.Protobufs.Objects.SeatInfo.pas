@@ -235,8 +235,8 @@ end;
 
 function TPB_SeatInfo.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $1e7) <> $1e7) Then Result := False;
+  if ((_has_bits_ and $1e7) <> $1e7) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_SeatInfo.clear_Seat;

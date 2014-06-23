@@ -175,16 +175,16 @@ function TPB_StatusReply.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $4) <> $4) Then Result := False;
+  if ((_has_bits_ and $4) <> $4) Then Exit(false);
   for temp in Clubs do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   for temp in Users do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   if (has_Self) then
-    if (not FSelf.IsInitialized) then Result := False;
+    if (not FSelf.IsInitialized) then Exit(false);
   for temp in Games do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_StatusReply.clear_Clubs;
