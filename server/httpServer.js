@@ -28,26 +28,23 @@ module.exports.initHttpServer = initHttpServer;
 
 var sharedconfig,log,makeUserProtobuf;
 
-function initHttpServer(db,activeUsers,sharedconfigIN,logIN,makeUserProtobufIN) {
+function initHttpServer(activeUsers,sharedconfigIN,logIN,makeUserProtobufIN) {
 	sharedconfig = sharedconfigIN;
 	log = logIN;
 	makeUserProtobuf = makeUserProtobufIN;
-	var server = new Server(db,activeUsers);
+	var server = new Server(activeUsers);
 	return server;
 }
 
-function Server(db,activeUsersIN) {
+function Server(activeUsersIN) {
 	var app = express();
 	this.httpServer = http.createServer(app);
-	this.db = db;
 	this.IO = require('socket.io').listen(this.httpServer,{log:false});
 	var logger = require('morgan');
 	app.use(logger());
 	this.activeUsers = activeUsersIN;
-	var PokerProfile = db.collection('PokerProfile');
-	this.clubs = db.collection('clubs');
 
-	this.sessionStore = new MongoStore(db,'sessions');
+	this.sessionStore = new MongoStore(mongoose.connection.db,'sessions');
 	this.IO.set('authorization',this.socketAuth.bind(this));
 	app.use(express.cookieParser());
 	app.use(express.session({secret:'ahQu6eey',key:'poker',store:this.sessionStore}));
@@ -70,21 +67,21 @@ function Server(db,activeUsersIN) {
 
 	app.get('/secure/performance',function (req,res) {
 		var start = Date.now();
-		db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
+		mongoose.connection.db.collection('system.profile').find({}).limit(50).sort({ts:-1}).toArray(function (err,rows) {
 			res.render('profile',{rows:rows,start:start});
 		});
 	});
 	app.get('/secure/profile',function (req,res) {
 		var start = Date.now();
-		PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
-			PokerProfile.find({time:{$gt:2000}}).toArray(function (err,list) {
+		models.PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
+			models.PokerProfile.find({time:{$gt:2000}},function (err,list) {
 				res.render('profile2',{rows:rows,start:start,rawlist:list});
 			});
 		});
 	});
 	app.get('/secure/billing',function (req,res) {
 		var start = Date.now();
-		db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) {
+		mongoose.connection.db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) { // FIXME
 			res.render('billing',{billing:rows,start:start});
 		});
 	});
@@ -292,7 +289,7 @@ Server.prototype.getGame = function (req,res) {
 }
 Server.prototype.getClub = function (req,res) {
 	var start = Date.now();
-	this.clubs.findOne({_id:new ObjectID(req.query.id)},function (err,club) {
+	models.Clubs.findOne({_id:new ObjectID(req.query.id)},function (err,club) {
 		var userids = [ club.owner ];
 		if (club.members) {
 			for (var x=0; x<club.members.length; x++) {
@@ -313,7 +310,7 @@ Server.prototype.getClub = function (req,res) {
 }
 Server.prototype.getClubs = function (req,res) {
 	var start = Date.now();
-	this.clubs.find({}).toArray(function (err,data) {
+	models.Clubs.find({},function (err,data) {
 		res.render('clubs',{clubs:data,start:start});
 	});
 }
@@ -372,7 +369,7 @@ Server.prototype.userList = function (req,res) {
 Server.prototype.getUser = function (req,res) {
 	var start = Date.now();
 	models.UserModel.findById(req.query.id,function (err,row) {
-		this.clubs.find({$or:[ {members:new ObjectID(req.query.id)}, {owner:new ObjectID(req.query.id)} ]}).toArray(function (err,clubs) {
+		models.Clubs.find({$or:[ {members:new ObjectID(req.query.id)}, {owner:new ObjectID(req.query.id)} ]},function (err,clubs) {
 			var self = this.activeUsers[row._id];
 			var obj = {user:row,clubs:clubs,start:start,online:self,util:util}
 			res.render('user',obj);
@@ -529,8 +526,8 @@ Server.prototype.isSecureAuthed = function (req,res,next) {
 }
 Server.prototype.getDisk = function (req,res) {
 	var start = Date.now();
-	this.db.stats(function (err,stats) {
-		this.db.collectionNames(function (err,names) {
+	mongoose.connection.db.stats(function (err,stats) {
+		mongoose.connection.db.collectionNames(function (err,names) {
 			var out = [];
 			var input = [];
 			for (var x=0; x<names.length; x++) {
@@ -538,7 +535,7 @@ Server.prototype.getDisk = function (req,res) {
 			}
 			input.sort();
 			async.eachLimit(input,1,function (item,cb) {
-				this.db.collection(item.split('.')[1]).stats(function (err,stats) {
+				mongoose.connection.db.collection(item.split('.')[1]).stats(function (err,stats) {
 					if (!stats) {
 						console.log('name:%s stats:',item,stats);
 						cb();

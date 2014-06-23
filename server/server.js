@@ -105,15 +105,13 @@ function goOnline() {
 	log('server up');
 }
 
-var conn,Config,FetchQueue,GameEvents,PokerProfile,clubBalances;
 var emailRegister,emailChange1,emailChange2;
-MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+/*MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	if (err) {
 		console.log(err);
 		process.exit(1);
-	}
-	conn = db;
-	Club.init(db,activeUsers,activeGames,pb,regexLimits);
+	}*/
+	Club.init(activeUsers,activeGames,pb,regexLimits);
 	Game.init(activeGames,activeUsers,sharedconfig,log,ClientSocket);
 	process.on('uncaughtException',function (err) {
 		console.log(err);
@@ -125,34 +123,21 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			process.exit(-1);
 		});
 	});
-	process.send({msg:'connected'});
+	//process.send({msg:'connected'});
 
-	var allUsers = db.collection('users');
-	var allClubs = db.collection('clubs');
-	var allCounters = db.collection('counters');
-	Config = db.collection('config');
-	GameEvents = db.collection('GameEvents');
-	clubBalances = db.collection('clubBalances');
-
-	db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
+	/*db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {
 		assert.ok(collection instanceof Collection);
 		FetchQueue = collection;
-	});
-	db.createCollection('PokerProfile',{capped:true,size:1024 * 1024*10},function (err,collection) {
-		assert.ok(collection instanceof Collection);
-		PokerProfile = collection;
-		profiler.setup(PokerProfile);
-	});
+	});*/
+	profiler.setup(models.PokerProfile);
 
-	internalHttpServer = require('./httpServer').initHttpServer(db,activeUsers,sharedconfig,log,makeUserProtobuf);
+	internalHttpServer = require('./httpServer').initHttpServer(activeUsers,sharedconfig,log,makeUserProtobuf);
 
-	allUsers.createIndex("email",{unique:true}, function (err,res) {});
-	allUsers.createIndex("displayname",{unique:true}, function (err,res) {});
-
-	Config.insert({_id:'installerid',value:''},function (err,res){
-		Config.insert({_id:'debuginstallerid',value:''},function (err,res){
-			Config.findOne({_id:'installerid'},function (err,row) {
-				Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
+	models.Config.create({_id:'installerid',value:''},function (err,res){
+		models.Config.create({_id:'debuginstallerid',value:''},function (err,res){
+			models.Config.findOne({_id:'installerid'},function (err,row) {
+				assert.ifError(err);
+				models.Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
 					assert.ifError(err);
 					mdb.models.Installer.findOne({_id:row.value},function (err,row) {
 						if (row) {
@@ -169,8 +154,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		});
 	});
 
-	allCounters.insert({_id:"club",seq:1},function (err,res) {}); // FIXME
-	myutils.init(db);
+	myutils.init();
 	Game.checkAndResume(checkCorruptChips);
 	function checkCorruptChips() {
 		mdb.models.UserModel.collection.find({chips:NaN}).toArray(function (err,badUsers) { // should never find any
@@ -192,7 +176,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		});
 	}
 	function initHands() {
-		allCounters.findOne({_id:'handHistory'},function (err,row) {
+		models.Counter.findOne({_id:'handHistory'},function (err,row) {
 			if (!row) {
 				myutils.getNextSequence('handHistory',function(seq) {
 					Game.hands = seq;
@@ -225,7 +209,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			goOnline();
 		});
 	}
-});
+//});
 function log(format) {
 	var out = Array.prototype.slice.call(arguments);
 	if (format.indexOf('%') != -1) {
@@ -488,7 +472,7 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 	//console.log('hello params',params);
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
-	Config.findOne({_id:key1},function (err,row2) {
+	models.Config.findOne({_id:key1},function (err,row2) {
 		mdb.models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
 			//console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
@@ -894,7 +878,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 			}
 			clubids.push(c._id);
 		}
-		clubBalances.find({clubid:{$in:ownedClubs}}).toArray(function (err,balances) {
+		models.ClubBalances.find({clubid:{$in:ownedClubs}},function (err,balances) {
 			assert.ifError(err);
 			var clubsOut = [];
 			async.each(clubs,function getStatsAndClub(item,cb) {

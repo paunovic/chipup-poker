@@ -6,9 +6,11 @@ module.exports.fromMongoId = fromMongoId;
 module.exports.compareObjectID = compareObjectID;
 module.exports.getNextSequence = getNextSequence;
 module.exports.containsObjectID = containsObjectID;
-var allCounters;
-module.exports.init = function (db) {
-	allCounters = db.collection('counters');
+
+var models = require('./db').models;
+
+module.exports.init = function () {
+	models.Counter.create({_id:'club',seq:1},function (err,res) {}); // default value
 }
 function toMongoId(buf) {
 	return new ObjectID(buf.toString('hex'));
@@ -23,15 +25,15 @@ function compareObjectID(a,b) {
 	return astr == bstr;
 }
 function getNextSequence(name,cb) {
-	allCounters.findAndModify({_id:name},[],
+	models.Counter.findOneAndUpdate({_id:name},
 		{ $inc:{seq:1}},
 	function (err,res) {
 		assert.ifError(err);
-		//console.log('seq',name,err,res);
+		console.log('seq',name,err,res);
 		if (res) {
 			cb(res.seq);
 		} else {
-			allCounters.insert({_id:name,seq:0},function (err,row) {
+			models.Counter.create({_id:name,seq:0},function (err,row) {
 				cb(1);
 			});
 		}

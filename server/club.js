@@ -1,5 +1,5 @@
 "use strict";
-var activeUsers,clubBalances,activeGames,handHistory,pb,regexLimits;
+var activeUsers,activeGames,pb,regexLimits;
 
 var assert = require('assert');
 var ObjectID = require('mongodb').ObjectID;
@@ -92,7 +92,7 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 		if (handid) {
 			models.Game.findOne({_id:gameObj.id},function (err,gameRow) {
 				assert.ifError(err);
-				handHistory.findOne({seq:handid},function (err,historyRow) {
+				models.HandHistory.findOne({seq:handid},function (err,historyRow) {
 					assert.ifError(err);
 					var savedCards = [];
 					var keyid = 0;
@@ -203,7 +203,7 @@ Club.finishTableStatsPacket = function (data,cb) {
 			var clubobj = {};
 			var clubarr = [];
 			//console.log('getting club balances %j',data.playerData);
-			clubBalances.find({clubid:{$in:data.clubList}}).toArray(function (err,balances) {
+			models.ClubBalance.find({clubid:{$in:data.clubList}},function (err,balances) {
 				assert.ifError(err);
 				//console.log('current user:%s, all stats: %j',stats[i].userid,balances);
 				for (var j=0; j<balances.length; j++) {
@@ -274,7 +274,7 @@ Club.prototype.goPublic = function (cb) {
 	this.obj.is_private = false;
 	this.obj.save(function (err) {
 		assert.ifError(err);
-		clubBalances.find({clubid:this.clubid}).toArray(function (err,stats) {
+		models.ClubBalance.find({clubid:this.clubid},function (err,stats) {
 			assert.ifError(err);
 			var c = Club.makeClubProtobuf(this.obj,null,stats,this);
 			models.Game.find({clubid:this.clubid},function (err,games) {
@@ -292,9 +292,9 @@ Club.prototype.goPublic = function (cb) {
 	}.bind(this));
 }
 Club.prototype.updateLimitPostWin = function (change,userid,callback) {
-	clubBalances.update({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,rows) {
+	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,rows) {
 		if (rows == 1) return callback();
-		clubBalances.insert({clubid:this.clubid, userid:userid, balance:change, balance_limit:this.obj.default_balance_limit, unlimited_limit:this.obj.unlimited_default_balance},callback);
+		models.ClubBalance.create({clubid:this.clubid, userid:userid, balance:change, balance_limit:this.obj.default_balance_limit, unlimited_limit:this.obj.unlimited_default_balance},callback);
 	}.bind(this));
 }
 Club.prototype.buyin = function (userid,chips) {
@@ -307,7 +307,7 @@ Club.prototype.cashout = function (userid,chips) {
 	//console.log('cashout balance',this.balance);
 }
 Club.prototype.getPotentialLosses = function (userid,cb) {
-	clubBalances.findOne({clubid:this.clubid, userid:userid},function (err,row) {
+	models.ClubBalance.findOne({clubid:this.clubid, userid:userid},function (err,row) {
 		assert.ifError(err);
 		if (!row && !this.balance[userid]) return cb(0);
 		if (!this.balance[userid]) return cb(row.balance,row.unlimited_limit,row.balance_limit);
@@ -317,24 +317,22 @@ Club.prototype.getPotentialLosses = function (userid,cb) {
 	}.bind(this));
 }
 Club.prototype.updateLimit = function (userid,limit,unlimited,cb) {
-	clubBalances.update({clubid:this.clubid, userid:userid},{$set:{balance_limit:limit, unlimited_limit:unlimited}},function (err,rows) {
+	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$set:{balance_limit:limit, unlimited_limit:unlimited}},function (err,rows) {
 		assert.ifError(err);
 		if (rows != 1) cb(false);
 		else cb(true);
 	}.bind(this));
 }
 Club.prototype.resetPlayerLimit = function (userid,cb) {
-	clubBalances.update({clubid:this.clubid, userid:userid},{$set:{balance:0}},function (err,rows) {
+	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$set:{balance:0}},function (err,rows) {
 		assert.ifError(err);
 		if (rows != 1) cb(false);
 		else cb(true);
 	}.bind(this));
 }
-Club.init = function (db,activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
+Club.init = function (activeUsersIn,activeGamesIn,pbIN,regexLimitsIN) {
 	activeUsers = activeUsersIn;
 	activeGames = activeGamesIn;
-	clubBalances = db.collection('clubBalances');
-	handHistory = db.collection('handHistory'); // FIXME
 	pb = pbIN;
 	regexLimits = regexLimitsIN;
 }
@@ -506,7 +504,7 @@ handlers[codes.scDeleteClub] = function (args,token) {
 		clubObj.deleteClub(function (err) {
 			this.log('delete worked',err);
 			// FIXME, force end games in this club?
-			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+			models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 				var userlist = [];
 				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
 				this.send(codes.srClubDisbandOk,out,'Poker.Club');
@@ -554,7 +552,7 @@ handlers[codes.scKickPlayer] = function (args,token) {
 				this.send(codes.srKickPlayerReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 				return;
 			}
-			clubBalances.find({clubid:club.clubid}).toArray(function (err,stats) {
+			models.ClubBalance.find({clubid:club.clubid},function (err,stats) {
 				var userlist = [ userid ];
 				var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
 				this.send(codes.srKickPlayerReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
@@ -622,7 +620,7 @@ handlers[codes.scSuspendPlayer] = function (args,token) {
 	}
 	var broadcast = function broadcast(code) {
 		Club.getClubById(clubid,function (err,clubObj) {
-			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+			models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 				var userlist = [ ];
 				var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
 				this.send(code,out,'Poker.Club');
@@ -690,7 +688,7 @@ handlers[codes.scJoinClub] = function (args,token) {
 		clubObj.joinClub(this.userid,function () {
 			this.log('join2');
 			clubObj.updateLimitPostWin(0,this.userid,function (){
-				clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+				models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 					models.Game.find({clubid:clubObj.obj._id},function (err,games) {
 						for (var x=0; x<games.length; x++) {
 							games[x] = makeGameProtobuf(games[x]);
@@ -901,7 +899,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 				} else {
 					var userlist = [ ];
 					models.Game.find({clubid:club.clubid},function (err,games) {
-						clubBalances.find({clubid:club.clubid}).toArray(function (err,stats) {
+						models.ClubBalance.find({clubid:club.clubid},function (err,stats) {
 							assert.ifError(err);
 							var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
 							for (var x=0; x<games.length; x++) {
@@ -932,7 +930,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 					if (err == 'not found') this.send(codes.srLeaveClubReply,{status:'csInvalidClubId'},'Poker.ClubCommandReply');
 					else {
 						clubObj.Leave(this.userid,function () {
-							clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+							models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 								var userlist = [ clubObj.obj.owner ]; // FIXME, send stats
 								var out = Club.makeClubProtobuf(clubObj.obj,userlist,stats,clubObj);
 								this.send(codes.srLeaveClubReply,{status:'csSuccess',club:out},'Poker.ClubCommandReply');
@@ -964,7 +962,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 				this.send(codes.srOwnershipGiveAwayInvalidClubId,Club.makeClubProtobuf(club,null,stats,clubObj),'Poker.Club');
 				return;
 			}
-			clubBalances.find({clubid:clubObj.clubid}).toArray(function (err,stats) {
+			models.ClubBalance.find({clubid:clubObj.clubid},function (err,stats) {
 				if (clubObj.isOwner(this.userid)) {
 					if (containsObjectID(clubObj.obj.members,newowner)) {
 						this.log('adding self to members',this.userid);

@@ -9,8 +9,8 @@ var models = {};
 module.exports.models = models;
 
 var User = new Schema({
-	displayname:String,
-	email:String,
+	displayname:{type:String,index:{unique:true}},
+	email:{type:String,index:{unique:true}},
 	authcode:String,
 	password:Buffer,
 	salt:Buffer,
@@ -43,6 +43,11 @@ var DebugLogSchema = new Schema({
 	gameid:ObjectId,
 	name:String
 },{collection:'debugLogs',capped:1024 * 1024*32});
+
+var ProfileSchema = new Schema({
+	time:Number,
+	tag:String
+},{collection:'PokerProfile',capped:1024*1024*10});
 
 var ClubSchema = new Schema({
 	is_private:Boolean,
@@ -217,6 +222,19 @@ GameStateSchema.path('pots').validate(function (pots) {
 	return pots.length < 5;
 },'too many pots');
 
+var ClubBalanceSchema = new Schema({
+	clubid:ObjectId,
+	userid:ObjectId,
+	balance:Number,
+	balance_limit:Number,
+	unlimited_limit:Boolean
+},{collection:'clubBalances'});
+
+var CounterSchema = new Schema({
+	_id:String,
+	seq:Number
+},{collection:'counters'});
+
 module.exports.close = function () {
 	if (!connected) return;
 	mongoose.disconnect();
@@ -242,13 +260,17 @@ module.exports.open = function () {
 	models.HandHistory = mongoose.model('HandHistory',HandHistorySchema);
 	models.GameStats = mongoose.model('GameStats',StatsSchema);
 	models.GameState = mongoose.model('GameState',GameStateSchema);
+	models.PokerProfile = mongoose.model('PokerProfile',ProfileSchema);
+	models.ClubBalance = mongoose.model('ClubBalance',ClubBalanceSchema);
+	models.Counter = mongoose.model('Counter',CounterSchema);
 }
 
+module.exports.open();
+
 if (require.main === module) {
-	models.Admin.find({},function (err,docs) {
+	models.Counter.findOne({_id:'test'},function (err,docs) {
 		assert.ifError(err);
 		console.log(docs);
 	});
 }
 
-module.exports.open();
