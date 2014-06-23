@@ -1538,6 +1538,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 			this.log('enough are sitting, checking sitOutBB');
 			var dealerbackup = this.dealer;
 			//if (this.dealer == -1) this.nextDealer();
+			this.nextDealer(); // TODO, figure out why this is needed
 			var pos = this.dealer;
 			if (havechips == 2) {
 				this.headsup = true;
