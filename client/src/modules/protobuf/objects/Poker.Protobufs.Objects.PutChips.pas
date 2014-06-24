@@ -115,8 +115,8 @@ end;
 
 function TPB_PutChips.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $7) <> $7) Then Result := False;
+  if ((_has_bits_ and $7) <> $7) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_PutChips.clear_TableMongoId;

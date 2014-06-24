@@ -81,8 +81,8 @@ end;
 
 function TPB_ForgotPasswordParams.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $1) <> $1) Then Result := False;
+  if ((_has_bits_ and $1) <> $1) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_ForgotPasswordParams.clear_Email;

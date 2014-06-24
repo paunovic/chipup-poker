@@ -274,10 +274,10 @@ function TPB_Club.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  if ((_has_bits_ and $0) <> $0) Then Exit(false);
   for temp in Members do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_Club.clear_MongoId;

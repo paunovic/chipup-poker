@@ -166,8 +166,8 @@ end;
 
 function TPB_User.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $5) <> $5) Then Result := False;
+  if ((_has_bits_ and $5) <> $5) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_User.clear_MongoId;

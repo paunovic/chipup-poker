@@ -99,8 +99,8 @@ end;
 
 function TPB_ContactMessage.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $3) <> $3) Then Result := False;
+  if ((_has_bits_ and $3) <> $3) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_ContactMessage.clear_Reason;

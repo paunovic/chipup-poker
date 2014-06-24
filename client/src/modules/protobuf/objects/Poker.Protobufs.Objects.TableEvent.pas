@@ -179,10 +179,10 @@ function TPB_TableEvent.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $1) <> $1) Then Result := False;
+  if ((_has_bits_ and $1) <> $1) Then Exit(false);
   for temp in Pots do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_TableEvent.clear_Event;

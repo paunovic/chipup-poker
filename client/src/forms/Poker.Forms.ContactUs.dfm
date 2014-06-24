@@ -3,7 +3,7 @@ object frmContactUs: TfrmContactUs
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Contact Us'
-  ClientHeight = 298
+  ClientHeight = 296
   ClientWidth = 430
   Color = clWindow
   Ctl3D = False
@@ -21,12 +21,12 @@ object frmContactUs: TfrmContactUs
   OnKeyDown = FormKeyDown
   DesignSize = (
     430
-    298)
+    296)
   PixelsPerInch = 96
   TextHeight = 13
   object lbsMessage: TcxLabel
-    Left = 14
-    Top = 38
+    Left = 9
+    Top = 33
     Caption = 'Message:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -39,8 +39,8 @@ object frmContactUs: TfrmContactUs
     Transparent = True
   end
   object cbType: TcxComboBox
-    Left = 77
-    Top = 13
+    Left = 72
+    Top = 8
     Anchors = [akLeft, akTop, akRight]
     Properties.DropDownListStyle = lsFixedList
     Properties.Items.Strings = (
@@ -51,11 +51,11 @@ object frmContactUs: TfrmContactUs
     Properties.ReadOnly = False
     TabOrder = 3
     Text = 'Question'
-    Width = 340
+    Width = 349
   end
   object lbsType: TcxLabel
-    Left = 14
-    Top = 15
+    Left = 9
+    Top = 10
     Caption = 'Type:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -68,15 +68,15 @@ object frmContactUs: TfrmContactUs
     Transparent = True
   end
   object meMessage: TcxMemo
-    Left = 77
-    Top = 40
+    Left = 72
+    Top = 35
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
-    Height = 211
-    Width = 340
+    Height = 219
+    Width = 349
   end
   object btSend: TcxButton
-    Left = 225
+    Left = 229
     Top = 261
     Width = 93
     Height = 27
@@ -92,7 +92,7 @@ object frmContactUs: TfrmContactUs
     ParentFont = False
   end
   object btCancel: TcxButton
-    Left = 324
+    Left = 328
     Top = 261
     Width = 93
     Height = 27

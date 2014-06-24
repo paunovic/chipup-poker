@@ -132,8 +132,8 @@ end;
 
 function TPB_ChatMessage.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $4) <> $4) Then Result := False;
+  if ((_has_bits_ and $4) <> $4) Then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_ChatMessage.clear_MongoId;

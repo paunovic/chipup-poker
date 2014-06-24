@@ -154,14 +154,14 @@ function TPB_TableStatsReplies.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  Result := True;
-  if ((_has_bits_ and $0) <> $0) Then Result := False;
+  if ((_has_bits_ and $0) <> $0) Then Exit(false);
   for temp in Reply do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   for temp in Players do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
   for temp in ClubStats do
-    if (not temp.IsInitialized) then Result := False;
+    if (not temp.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_TableStatsReplies.clear_Reply;

@@ -120,10 +120,10 @@ end;
 
 function TPB_ChatEvent.IsInitialized: Boolean;
 begin
-  Result := True;
-  if ((_has_bits_ and $3) <> $3) Then Result := False;
+  if ((_has_bits_ and $3) <> $3) Then Exit(false);
   if (has_Msg) then
-    if (not FMsg.IsInitialized) then Result := False;
+    if (not FMsg.IsInitialized) then Exit(false);
+  Exit(True);
 end;
 
 procedure TPB_ChatEvent.clear_Event;
