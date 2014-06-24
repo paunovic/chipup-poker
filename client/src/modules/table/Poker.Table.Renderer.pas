@@ -57,6 +57,7 @@ type
     FOnDealerChatMessage: TDealerChatMessageEvent;
     FOnSoundPlay: TSoundPlayEvent;
     FOnTimebankStarted: TNotifyEvent;
+    FRaiseThumbXOffset: Single;
     FRaiseThumbDown: Boolean;
 
     procedure RenderEvent(Sender: TObject);
@@ -227,7 +228,10 @@ begin
 
   // check click on raise thumb button
   if FMetrics.IsPointInRaiseThumb(X, Y) then
+  begin
+    FRaiseThumbXOffset := X - (FMetrics.RaiseThumbBounds[0].x + (FMetrics.RaiseThumbBounds[1].x - FMetrics.RaiseThumbBounds[0].x) / 2);
     FRaiseThumbDown := TRUE
+  end
   else
     if FMetrics.IsPointInRaiseTrack(X, Y, percent) then // check click on raise track
     begin
@@ -248,7 +252,7 @@ begin
 
   if FRaiseThumbDown then
   begin
-    percent := (X - FMetrics.RaiseTrackBounds[0].x) / (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x);
+    percent := (X - FRaiseThumbXOffset - FMetrics.RaiseTrackBounds[0].x) / (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x);
     if percent < 0 then
       percent := 0
     else
@@ -1142,7 +1146,7 @@ begin
     // render raise red fill
     red_bounds := pBounds4(FMetrics.RaiseTrackBounds[0].x + 1, FMetrics.RaiseTrackBounds[0].y + 1,
          FRaiseThumbPosition * (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x - 2),
-         FMetrics.RaiseTrackBounds[2].y - FMetrics.RaiseTrackBounds[0].y - 2);
+         FMetrics.RaiseTrackBounds[2].y - FMetrics.RaiseTrackBounds[0].y - 3);
     DXCore.Canvas.FillQuad(red_bounds, cColor4($FFB40004));
 
     // render raise thumb
