@@ -10,6 +10,7 @@ var child_process = require('child_process');
 var http = require('http');
 var https = require('https');
 var heapdump = require('heapdump');
+var mongoose = require('mongoose');
 
 var config = require('./config');
 var MongoStore = require('./mongoStore');
