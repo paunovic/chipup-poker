@@ -460,6 +460,12 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				bb = this.getNextSeat(sb);
 				if (bb < this.dealer) bb += this.obj.seats;
 				continue;*/
+			} else if ((oldDealer < x) && (x < bb) && (bb > this.obj.seats)) {
+				this.log('XXX %d is between %d-%d, but should still get cards',x,oldDealer,bb);
+				if (x == this.dealer) {
+					this.nextDealer();
+					todo[x] = 'forcedBB';
+				}
 			} else if ((oldDealer < x) && (x < bb)) {
 				this.log('XXX %d is between %d-%d',x,oldDealer,bb);
 				if (x == this.dealer) {

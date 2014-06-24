@@ -92,7 +92,7 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 		if (handid) {
 			models.Game.findOne({_id:gameObj.id},function (err,gameRow) {
 				assert.ifError(err);
-				models.HandHistory.findOne({seq:handid},function (err,historyRow) {
+				models.HandHistory.findOne({seq:handid}).lean(true).exec(function (err,historyRow) {
 					assert.ifError(err);
 					var savedCards = [];
 					var keyid = 0;
@@ -292,8 +292,8 @@ Club.prototype.goPublic = function (cb) {
 	}.bind(this));
 }
 Club.prototype.updateLimitPostWin = function (change,userid,callback) {
-	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,rows) {
-		if (rows == 1) return callback();
+	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$inc:{balance:change}},function (err,row) {
+		if (row) return callback();
 		models.ClubBalance.create({clubid:this.clubid, userid:userid, balance:change, balance_limit:this.obj.default_balance_limit, unlimited_limit:this.obj.unlimited_default_balance},callback);
 	}.bind(this));
 }
