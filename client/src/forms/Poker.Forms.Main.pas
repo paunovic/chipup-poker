@@ -743,7 +743,7 @@ procedure TfrmChipUpMain.imgCashierMouseDown(Sender: TObject; Button: TMouseButt
 begin
   if Button = mbLeft then
   begin
-    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
+    if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       LoadImageFromResource(imgCashier, 'CashierPressed');
   end;
 end;
@@ -752,7 +752,7 @@ procedure TfrmChipUpMain.imgCashierMouseUp(Sender: TObject; Button: TMouseButton
 begin
   if Button = mbLeft then
   begin
-    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
+    if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       dmMain.OpenCashierLink;
     LoadImageFromResource(imgCashier, 'CashierNormal');
   end;

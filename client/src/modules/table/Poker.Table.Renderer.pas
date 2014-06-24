@@ -57,6 +57,7 @@ type
     FOnDealerChatMessage: TDealerChatMessageEvent;
     FOnSoundPlay: TSoundPlayEvent;
     FOnTimebankStarted: TNotifyEvent;
+    FRaiseThumbDown: Boolean;
 
     procedure RenderEvent(Sender: TObject);
     procedure RenderBackground;
@@ -97,8 +98,8 @@ type
 
     procedure AnimationCallback(const AAnimationPointer: pointer);
 
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure MouseMove(Shift: TShiftState; X, Y: Integer);
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
     property TableStatus: TTableStatus read FTableStatus;
@@ -214,20 +215,49 @@ begin
   FMetrics.SetRenderHandle(FHandle);
 end;
 
-procedure TTableRenderer.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TTableRenderer.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
 var
   dxbutton: TDXButton;
+  percent: Single;
 begin
+  ASetRaiseAmount := FALSE;
+
   for dxbutton in FDXButtons do
     dxbutton.MouseDown(Button, Shift, X, Y);
+
+  // check click on raise thumb button
+  if FMetrics.IsPointInRaiseThumb(X, Y) then
+    FRaiseThumbDown := TRUE
+  else
+    if FMetrics.IsPointInRaiseTrack(X, Y, percent) then // check click on raise track
+    begin
+      FRaiseThumbPosition := percent;
+      ASetRaiseAmount := TRUE;
+    end;
 end;
 
-procedure TTableRenderer.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure TTableRenderer.MouseMove(Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
 var
   dxbutton: TDXButton;
+  percent: Single;
 begin
+  ASetRaiseAmount := FALSE;
+
   for dxbutton in FDXButtons do
     dxbutton.MouseMove(Shift, X, Y);
+
+  if FRaiseThumbDown then
+  begin
+    percent := (X - FMetrics.RaiseTrackBounds[0].x) / (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x);
+    if percent < 0 then
+      percent := 0
+    else
+      if percent > 1 then
+        percent := 1;
+
+    FRaiseThumbPosition := percent;
+    ASetRaiseAmount := TRUE;
+  end;
 end;
 
 procedure TTableRenderer.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -236,6 +266,8 @@ var
 begin
   for dxbutton in FDXButtons do
     dxbutton.MouseUp(Button, Shift, X, Y);
+
+  FRaiseThumbDown := FALSE;
 end;
 
 procedure TTableRenderer.UpdateDXAreaSize;

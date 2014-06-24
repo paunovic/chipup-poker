@@ -28,7 +28,7 @@ procedure LoadJPGFromResource(const AImage: TJPEGImage; const AResourceName: Str
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
-function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
+function PtInCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 function ReverseDWORD(dw: Cardinal): Cardinal;
 function SecondsToTimeStr(ASeconds: DWORD): String;
 function SecondsToTime(ASeconds: DWORD): TTime;
@@ -493,9 +493,9 @@ begin
   end;
 end;
 
-function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
+function PtInCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 begin
-  result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) < ARadius * ARadius;
+  result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) <= ARadius * ARadius;
 end;
 
 function ReverseDWORD(dw: Cardinal): Cardinal;
