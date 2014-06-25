@@ -1246,7 +1246,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 		}.bind(this));
 }
 Game.prototype.updateMongoState = function (options,cb) {
-	assert(this.stateRow._events.isNew.length < 100);
+	if (this.stateRow._events) assert(this.stateRow._events.isNew.length < 100);
 	this.stateRow.pots = this.pots;
 	this.stateRow.current_seat = this.current_seat;
 	this.stateRow.dealer = this.dealer;
