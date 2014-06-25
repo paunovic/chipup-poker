@@ -216,7 +216,8 @@ var GameStateSchema = new Schema({
 	minBet:Number,
 	minimum_raise:Number,
 	members:[StateMemberSchema],
-	users:[ObjectId]
+	users:[ObjectId],
+	deck:[Number]
 },{collection:'gameState'});
 GameStateSchema.path('pots').validate(function (pots) {
 	return pots.length < 5;

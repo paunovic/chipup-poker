@@ -242,6 +242,7 @@ exports.game = {
 				gameObj.join(p3,function (err) {
 					test.ifError(err);
 					gameObj.join(p1,function (err) {
+						test.ifError(err);
 						gameObj.join(p3,function (err) {
 							test.ifError(err);
 							gameObj.sitDown(p3,{chips:100000,seat_index:3},function (worked,events) {
@@ -265,7 +266,6 @@ exports.game = {
 			}
 			console.log('this game is:',gameObj.id);
 			gameObj.Lock.writeLock(function (release) {
-					test.ifError(err);
 					gameObj.join(opponent,function (err) {
 						test.ifError(err);
 						gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
@@ -320,7 +320,16 @@ exports.game = {
 					console.log('put8',events,offset);
 					mdb.models.GameState.findOne({_id:game.obj._id},function (err,state) {
 						console.log(state);
+						test.ok(state.flop.cards.length == 3);
+						test.ok(state.turn.cards.length == 1);
+						test.ok(state.river.cards.length == 1);
 						release();
+					});
+				},function () {
+					// post doWin delay
+					mdb.models.HandHistory.findOne({seq:game.handid},function (err,history) {
+						test.ok(history.cards.length == 5);
+						test.ok(history.deck.length == 43);
 						test.done();
 						mdb.close();
 					});

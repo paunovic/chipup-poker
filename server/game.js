@@ -552,19 +552,14 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			this.rake = 0;
 			this.minimum_raise = this.obj.big_blind * 2;
 			this.roundEnd();
+			this.stateRow.deck = this.deck.cards;
 			this.ranOut = false;
 			this.flop = new Hand();
 			this.turn = new Hand();
 			this.river = new Hand();
-			this.deck.draw(3,this.flop);
-			this.deck.draw(1,this.turn);
-			this.deck.draw(1,this.river);
-			this.history.cards = this.flop.cards;
-			this.history.cards = this.history.cards.concat(this.turn.cards);
-			this.history.cards = this.history.cards.concat(this.river.cards);
 			this.log('bcast 2');
 		
-			models.HandHistory.create({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,cards:this.history.cards,rake:this.rake,dealer:this.dealer,current_game:this.omaha ? 'gtOmaha' : 'gtHoldem'},function (err,row) {
+			models.HandHistory.create({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,rake:this.rake,dealer:this.dealer,current_game:this.omaha ? 'gtOmaha' : 'gtHoldem'},function (err,row) {
 				this.log('hand made:%j',row);
 				//this.broadcastStatus(null,null,[this.makeEvent('teDealing')]);
 				//setTimeout(function () {
@@ -749,7 +744,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 		break;
 	}
 }
-Game.prototype.doWin = function (cb,extradelay) {
+Game.prototype.doWin = function (cb,extradelay,cb3) {
 	var totalrake = 0;
 	var rakestats = [];
 
@@ -767,6 +762,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 		setTimeout(function () {
 			this.Lock.writeLock(function (release) {
 				this.saveHistory(function () {
+					if (cb3) cb3();
 					this.deck = new Deck();
 					this.deck.shuffle(function () {
 						// SPLIT this.deck.cards = [1,40,17,41,29,51,48,20,9,25,13,19,46,42,10,8,16,47,0,11,18,14,31,4,2,24,32,33,6,15,12,39,21,37,30,26,34,7,22,3,35,27,44,5,36,50,49,28,23,43,38,45];
@@ -883,7 +879,7 @@ Game.prototype.doWin = function (cb,extradelay) {
 		}.bind(this));
 	}.bind(this));
 }
-Game.prototype.checkRoundPass = function (cb,events,extradelay) {
+Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 	var token = profiler.start('checkRoundPass');
 	assert.equal(this.Lock.readers,-1);
 	assert(events);
@@ -911,6 +907,9 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.moveToPot('preflop',function () {
 					this.addHistory({code:['teFlop'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsFlop';
+					this.deck.draw(3,this.flop);
+					this.stateRow.flop = this.flop;
+					this.history.cards = this.flop.cards;
 					this.log('flop adding to %d',extradelay);
 					token.tag += 'c';
 					token.stop();
@@ -924,6 +923,9 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.moveToPot('turn',function () {
 					this.addHistory({code:['teTurn'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsTurn';
+					this.deck.draw(1,this.turn);
+					this.stateRow.turn = this.turn;
+					this.history.cards = this.history.cards.concat(this.turn.cards);
 					this.log('turn adding to %d',extradelay);
 					token.tag += 'd';
 					token.stop();
@@ -937,6 +939,9 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 				this.moveToPot('river',function () {
 					this.addHistory({code:['teRiver'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsRiver';
+					this.deck.draw(1,this.river);
+					this.stateRow.river = this.river;
+					this.history.cards = this.history.cards.concat(this.river.cards);
 					this.log('river adding to %d',extradelay);
 					token.tag += 'e';
 					token.stop();
@@ -951,7 +956,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 					this.log('events callback FIXME %s',new Error().stack);
 					token.tag += 'f';
 					token.stop();
-					this.calcWinners(cb,events,extradelay);
+					this.calcWinners(cb,events,extradelay,cb3);
 				}.bind(this));
 			}
 		} else {
@@ -992,7 +997,7 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 		cb();
 	});
 }
-Game.prototype.calcWinners = function (cb,events,extradelay) {
+Game.prototype.calcWinners = function (cb,events,extradelay,cb3) {
 	assert(events);
 	assert.equal(typeof extradelay,'number');
 	var WinnerPotData = [];
@@ -1096,7 +1101,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay) {
 			this.postWinSaveStats(rakestats,function () {
 				cb(events,0);
 			}.bind(this));
-		}.bind(this),extradelay);
+		}.bind(this),extradelay,cb3);
 		this.log('MOVE WIN END '+logmsg.join(','));
 	}
 }
@@ -1252,9 +1257,6 @@ Game.prototype.updateMongoState = function (options,cb) {
 	this.stateRow.dealer = this.dealer;
 	this.stateRow.bets = this.bets;
 	this.stateRow.state = this.state;
-	this.stateRow.flop = this.flop;
-	this.stateRow.turn = this.turn;
-	this.stateRow.river = this.river;
 	this.stateRow.handid = this.handid;
 	this.stateRow.history = this.history; // maybe only update it in some spots?
 	this.stateRow.balance_changes = this.balance_changes;
@@ -1289,7 +1291,7 @@ Game.prototype.updateMongoState = function (options,cb) {
 		cb();
 	}.bind(this));
 }
-Game.prototype.putChips = function (conn,chips,cb) {
+Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	assert.equal(this.Lock.readers,-1);
 	var seat = this.findSeat(conn);
 	assert.equal(this.current_seat,seat);
@@ -1358,11 +1360,11 @@ Game.prototype.putChips = function (conn,chips,cb) {
 			this.updateMongoState({members:true},function () {
 				cb(events,offset);
 			});
-		}.bind(this),null,null,[this.makeEvent(event,seat)],0);
+		}.bind(this),null,null,[this.makeEvent(event,seat)],0,cb3);
 	//}.bind(this));
 }
 Game.prototype.saveHistory = function (cb) {
-	var updates = {$set:{moves:this.history.moves,deck:this.deck.cards,rake:this.rake}};
+	var updates = {$set:{moves:this.history.moves,deck:this.deck.cards,rake:this.rake,cards:this.history.cards}};
 	if (this.history.WinnerPotData) {
 		updates['$set'].WinnerPotData = this.history.WinnerPotData;
 		updates['$set'].winnercount = this.history.winnercount;
@@ -1422,7 +1424,7 @@ Game.prototype.checkDelayedLeave = function () {
 		}
 	}
 }
-Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extradelay) {
+Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extradelay,cb3) {
 	function finish1() {
 		if (config && config.silent) {
 		} else this.broadcastStatus(conn,null,events);
@@ -1607,10 +1609,10 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 				assert.equal(typeof extradelay,'number');
 				this.log('player '+last+' skipped, doing state again, FIXME %d',events);
 				return this.stateMachine(cb,null,null,events,extradelay);
-			}.bind(this),events,extradelay);
+			}.bind(this),events,extradelay,cb3);
 			return;
 		}
-		this.checkRoundPass(finish.bind(this),events,0);
+		this.checkRoundPass(finish.bind(this),events,0,cb3);
 	}
 }
 Game.prototype.idleUnstick = function () {
@@ -2161,6 +2163,9 @@ Game.prototype.resume = function (game,cb) {
 		this.flop.cards = game.flop.cards;
 		this.turn.cards = game.turn.cards;
 		this.river.cards = game.river.cards;
+	}
+	if (game.deck) {
+		this.deck.cards = game.deck;
 	}
 	this.handid = game.handid;
 	this.state = game.state;
