@@ -54,7 +54,6 @@ function Game(obj) {
 	this.dealer = -1;
 	this.current_seat = -1;
 	this.bets = [];
-	this.keycount = 0;
 	for (var x=0; x<this.obj.seats; x++) this.bets[x] = 0;
 	this.pots = [ new Pot(this) ];
 	this.minBet = 0;
@@ -544,43 +543,43 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			}
 		}
 		
-		this.state = 'tsPreFlop';
-		this.rake = 0;
-		this.minimum_raise = this.obj.big_blind * 2;
-		this.roundEnd();
-		this.ranOut = false;
-		this.flop = new Hand();
-		this.turn = new Hand();
-		this.river = new Hand();
-		this.deck.draw(3,this.flop);
-		this.deck.draw(1,this.turn);
-		this.deck.draw(1,this.river);
-		this.history.cards = this.flop.cards;
-		this.history.cards = this.history.cards.concat(this.turn.cards);
-		this.history.cards = this.history.cards.concat(this.river.cards);
-		this.log('bcast 2');
+		// hack to stop memory leak?
+		models.GameState.findOne({_id:this.id},function (err,row) {
+			assert.ifError(err);
+			this.stateRow = row;
+			// </hack>
+			this.state = 'tsPreFlop';
+			this.rake = 0;
+			this.minimum_raise = this.obj.big_blind * 2;
+			this.roundEnd();
+			this.ranOut = false;
+			this.flop = new Hand();
+			this.turn = new Hand();
+			this.river = new Hand();
+			this.deck.draw(3,this.flop);
+			this.deck.draw(1,this.turn);
+			this.deck.draw(1,this.river);
+			this.history.cards = this.flop.cards;
+			this.history.cards = this.history.cards.concat(this.turn.cards);
+			this.history.cards = this.history.cards.concat(this.river.cards);
+			this.log('bcast 2');
 		
-		models.HandHistory.create({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,cards:this.history.cards,rake:this.rake,dealer:this.dealer,current_game:this.omaha ? 'gtOmaha' : 'gtHoldem'},function (err,row) {
-			this.log('hand made:%j',row);
-			//this.broadcastStatus(null,null,[this.makeEvent('teDealing')]);
-			//setTimeout(function () {
-			var cards;
-			if (this.omaha) cards = 4;
-			else cards = 2;
-			this.startTimer(this.current_seat,1500 + (players*50*cards)); // FIXME, run this later
-			//this.stateMachine(function () {
+			models.HandHistory.create({seq:seq,gameid:this.obj._id,moves:this.history.moves,players:this.history.players,cards:this.history.cards,rake:this.rake,dealer:this.dealer,current_game:this.omaha ? 'gtOmaha' : 'gtHoldem'},function (err,row) {
+				this.log('hand made:%j',row);
+				//this.broadcastStatus(null,null,[this.makeEvent('teDealing')]);
+				//setTimeout(function () {
+				var cards;
+				if (this.omaha) cards = 4;
+				else cards = 2;
+				this.startTimer(this.current_seat,1500 + (players*50*cards)); // FIXME, run this later
+				//this.stateMachine(function () {
 
-			// hack to stop memory leak?
-			models.GameState.findOne({_id:this.id},function (err,row) {
-				assert.ifError(err);
-				this.stateRow = row;
-				// </hack>
 				this.updateMongoState({members:true},function () {
 					cb([this.makeEvent('teDealing')]);
 				}.bind(this));
+				//}.bind(this),
+				//players * 100);
 			}.bind(this));
-			//}.bind(this),
-			//players * 100);
 		}.bind(this));
 	}.bind(this));
 }
@@ -735,7 +734,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 			}.bind(this));
 		} else {
 			priv.conn.log('fold with more then 1 person remaining',this.inHandCount());
-			this.keycount--;
+			this.stateRow.keycount--;
 			if (seat == this.current_seat) {
 				priv.conn.log('and i was active');
 				token.tag += 'b';
@@ -889,8 +888,8 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay) {
 	assert.equal(this.Lock.readers,-1);
 	assert(events);
 	assert.equal(typeof extradelay,'number');
-	this.log('key seat count is:'+this.keycount+' current:'+this.current_seat);
-	if (this.keycount <= 0) {
+	this.log('key seat count is:'+this.stateRow.keycount+' current:'+this.current_seat);
+	if (this.stateRow.keycount <= 0) {
 		var min = -1;
 		var max = 0;
 		for (var x=0; x<this.members.length; x++) {
@@ -1258,7 +1257,6 @@ Game.prototype.updateMongoState = function (options,cb) {
 	this.stateRow.river = this.river;
 	this.stateRow.handid = this.handid;
 	this.stateRow.history = this.history; // maybe only update it in some spots?
-	this.stateRow.keycount = this.keycount;
 	this.stateRow.balance_changes = this.balance_changes;
 	this.stateRow.rake = this.rake;
 	this.stateRow.minBet = this.minBet;
@@ -1349,7 +1347,7 @@ Game.prototype.putChips = function (conn,chips,cb) {
 	}
 	this.log('MOVE '+event+' '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
 	this.addHistory({seat:seat,bet:chips,code:[event]});
-	this.keycount--;
+	this.stateRow.keycount--;
 
 	conn.log('eating bets:'+JSON.stringify(this.bets)+' increase:'+increase+' chips:'+chips+' seat:'+seat);
 	this.setBet(seat,chips);
@@ -1594,7 +1592,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		if ((cantplay == 3) && (canplay == 1) && (cancheck == 1)) skip = true;
 		if ((canplay == 0) && (cancheck == 0)) {
 			skip = true;
-			this.keycount = -1;
+			this.stateRow.keycount = -1;
 		}
 		// if all but 1 have gone all-in
 		if (canplay == 1) {
@@ -1602,7 +1600,7 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 		}
 		if (skip) {
 			this.log('skipping a player');
-			this.keycount--;
+			this.stateRow.keycount--;
 			var last = this.current_seat;
 			this.current_seat = this.getNextSeat(this.current_seat);
 			this.checkRoundPass(function (events,extradelay) {
@@ -1776,7 +1774,7 @@ Game.prototype.roundEnd = function () {
 			havechips++;
 		}
 	}
-	this.keycount = havechips;
+	this.stateRow.keycount = havechips;
 }
 Game.prototype.updateCashOut = function (userid,buyin,cb) {
 	var mods = { $push:{cashouts:{
@@ -1819,7 +1817,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 		folded = true;
 	} else {
 		token = profiler.start('standup-inner3');
-		this.keycount--;
+		this.stateRow.keycount--;
 		finish1.call(this,[],-1);
 	}
 	function finish1(events,offset) {
@@ -2167,7 +2165,7 @@ Game.prototype.resume = function (game,cb) {
 	this.handid = game.handid;
 	this.state = game.state;
 	this.current_seat = game.current_seat;
-	this.keycount = game.keycount;
+	this.stateRow.keycount = game.keycount;
 	this.balance_changes = game.balance_changes;
 	this.bets = game.bets;
 	this.dealer = game.dealer;
