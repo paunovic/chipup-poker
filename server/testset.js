@@ -63,8 +63,10 @@ exports.club = {
 					});
 				},function () {
 						console.log(clubObj.obj);
-						mdb.close();
-						test.done();
+						setTimeout(function () {
+							mdb.close();
+							test.done();
+						},100);
 				})
 			});
 		});
@@ -137,8 +139,10 @@ exports.club = {
 			test.ok(clubObj);
 			clubObj.Leave(clubObj.obj.members[0],function () {
 				test.ok(true);
-				mdb.close();
-				test.done();
+				setTimeout(function () {
+					mdb.close();
+					test.done();
+				},100);
 			});
 		});
 	},
@@ -152,8 +156,10 @@ exports.club = {
 		Club.getClubBySeq(clubid,function (err,clubObj) {
 			test.ok(clubObj);
 			clubObj.setOwner(clubObj.obj.members[0],function () {
-				mdb.close();
-				test.done();
+				setTimeout(function () {
+					mdb.close();
+					test.done();
+				},100);
 			});
 		});
 	},
@@ -169,8 +175,10 @@ exports.club = {
 			test.ok(clubObj);
 			console.log(clubObj);
 			clubObj.deleteClub(function () {
-				mdb.close();
-				test.done();
+				setTimeout(function () {
+					mdb.close();
+					test.done();
+				},100);
 			});
 		});
 	}
