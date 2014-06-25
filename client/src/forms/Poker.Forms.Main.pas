@@ -153,7 +153,8 @@ type
 
     procedure AvatarChanged(Sender: TObject);
 
-    function ConfirmToCloseTables: Boolean;
+    function ConfirmToCloseTablesAppClose: Boolean;
+    function ConfirmToCloseTablesLogout: Boolean;
     function ProcessClubObject(const AClub: TPB_Club; const AMethodId: Integer): TClubInfo;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
@@ -244,7 +245,7 @@ end;
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := (FShuttingDown) or
-              (ConfirmToCloseTables);
+              (ConfirmToCloseTablesAppClose);
   if CanClose then
     ServerSocket.Logout;
 end;
@@ -368,7 +369,7 @@ end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
-  if not ConfirmToCloseTables then
+  if not ConfirmToCloseTablesLogout then
     Exit;
 
   ServerSocket.Logout;
@@ -503,11 +504,18 @@ begin
   UpdatePublicClublist;
 end;
 
-function TfrmChipUpMain.ConfirmToCloseTables: Boolean;
+function TfrmChipUpMain.ConfirmToCloseTablesAppClose: Boolean;
 begin
   result := TRUE;
   if Tables.SittingCount > 0 then
-    result := MessageDlg('If you close the application, you will automatically leave the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
+    result := MessageDlg('Closing the application will automatically leave all the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
+end;
+
+function TfrmChipUpMain.ConfirmToCloseTablesLogout: Boolean;
+begin
+  result := TRUE;
+  if Tables.SittingCount > 0 then
+    result := MessageDlg('Upon logout you will automatically leave all the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmChipUpMain.UpdateClublist;
@@ -743,7 +751,7 @@ procedure TfrmChipUpMain.imgCashierMouseDown(Sender: TObject; Button: TMouseButt
 begin
   if Button = mbLeft then
   begin
-    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
+    if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       LoadImageFromResource(imgCashier, 'CashierPressed');
   end;
 end;
@@ -752,7 +760,7 @@ procedure TfrmChipUpMain.imgCashierMouseUp(Sender: TObject; Button: TMouseButton
 begin
   if Button = mbLeft then
   begin
-    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
+    if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       dmMain.OpenCashierLink;
     LoadImageFromResource(imgCashier, 'CashierNormal');
   end;

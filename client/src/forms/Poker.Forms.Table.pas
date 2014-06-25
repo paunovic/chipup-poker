@@ -112,7 +112,7 @@ type
       FDXBRaisePresets: array[0..3] of Integer;
 
     procedure SetRaiseActionCaption;
-    procedure SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
+    procedure SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 
     procedure EnableGameLockTimer(const ASeconds: Single);
 
@@ -366,15 +366,24 @@ begin
 end;
 
 procedure TfrmTable.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  set_raise_amount: Boolean;
 begin
   DefocusControls;
-  FTable.Renderer.MouseDown(Button, Shift, X, Y);
+  FTable.Renderer.MouseDown(Button, Shift, X, Y, set_raise_amount);
+  if set_raise_amount then
+    SetRaiseValue(RoundToNearestBB(Round(FTable.Renderer.TableStatus.MaximumRaise * FTable.Renderer.RaiseThumbPosition), FTable.Game.BigBlind), TRUE, FALSE);
   FTable.Renderer.Render;
 end;
 
 procedure TfrmTable.FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var
+  set_raise_amount: Boolean;
 begin
-  FTable.Renderer.MouseMove(Shift, X, Y);
+  FTable.Renderer.MouseMove(Shift, X, Y, set_raise_amount);
+
+  if set_raise_amount then
+    SetRaiseValue(RoundToNearestBB(Round(FTable.Renderer.TableStatus.MaximumRaise * FTable.Renderer.RaiseThumbPosition), FTable.Game.BigBlind));
 end;
 
 procedure TfrmTable.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -421,7 +430,7 @@ begin
     valuint := Round(val * 100);
     if valuint > FTable.Renderer.TableStatus.MaximumRaise then
       valuint := FTable.Renderer.TableStatus.MaximumRaise;
-    SetRaiseSliderValue(valuint, FALSE);
+    SetRaiseValue(valuint, FALSE);
   end;
 end;
 
@@ -918,7 +927,7 @@ begin
           FTable.Renderer.GetDXButton(FDXBRaisePresets[3]).Action := acRaiseMax;
         end;
 
-        SetRaiseSliderValue(FRaiseValue, TRUE, TRUE, FALSE);
+        SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
       end;
 
       // enable seat blink timer, if it's not enabled already
@@ -1352,17 +1361,17 @@ begin
   if val = 0 then
     val := FTable.Game.BigBlind;
 
-  SetRaiseSliderValue(val * 3);
+  SetRaiseValue(val * 3);
 end;
 
 procedure TfrmTable.acRaiseMaxExecute(Sender: TObject);
 begin
-  SetRaiseSliderValue(FTable.Renderer.TableStatus.MaximumRaise);
+  SetRaiseValue(FTable.Renderer.TableStatus.MaximumRaise);
 end;
 
 procedure TfrmTable.acRaiseMinExecute(Sender: TObject);
 begin
-  SetRaiseSliderValue(FTable.Renderer.TableStatus.MinimumRaise);
+  SetRaiseValue(FTable.Renderer.TableStatus.MinimumRaise);
 end;
 
 procedure TfrmTable.acRaiseExecute(Sender: TObject);
@@ -1385,7 +1394,7 @@ begin
     Inc(raise_value, FTable.Renderer.TableStatus.Bets[C1]);
   raise_value := raise_value + FTable.Renderer.TableStatus.MinimumBet;
 
-  SetRaiseSliderValue(raise_value);
+  SetRaiseValue(raise_value);
 end;
 
 procedure TfrmTable.SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
@@ -1424,7 +1433,7 @@ begin
   end;
 end;
 
-procedure TfrmTable.SetRaiseSliderValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
+procedure TfrmTable.SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 var
   val: UINT32;
   oldval: UINT32;
@@ -1438,7 +1447,7 @@ begin
       val := oldval + FTable.Game.BigBlind
     else
       if val < oldval then
-        val := oldval - FTable.Game.SmallBlind;
+        val := oldval - FTable.Game.BigBlind;
   end;
 
   if val > FTable.Renderer.TableStatus.MaximumRaise then
@@ -1452,7 +1461,8 @@ begin
   if FTable.Renderer.TableStatus.MaximumRaise = FTable.Renderer.TableStatus.MinimumRaise then
     FTable.Renderer.RaiseThumbPosition := 1
   else
-    FTable.Renderer.RaiseThumbPosition := (val - FTable.Renderer.TableStatus.MinimumRaise) / (FTable.Renderer.TableStatus.MaximumRaise - FTable.Renderer.TableStatus.MinimumRaise);
+    FTable.Renderer.RaiseThumbPosition := (FRaiseValue - FTable.Renderer.TableStatus.MinimumRaise) /
+                                          (FTable.Renderer.TableStatus.MaximumRaise - FTable.Renderer.TableStatus.MinimumRaise);
 
   if ASetSpinEditValue then
     seRaiseAmount.Value := val / 100;
