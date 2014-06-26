@@ -227,7 +227,7 @@ object frmTable: TfrmTable
     Left = 371
     Top = 344
     Width = 48
-    Height = 48
+    Height = 47
     Action = acHandPlaybackPause
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -251,7 +251,7 @@ object frmTable: TfrmTable
     Left = 425
     Top = 344
     Width = 48
-    Height = 48
+    Height = 47
     Action = acHandPlaybackStepForward
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -276,7 +276,7 @@ object frmTable: TfrmTable
     Left = 317
     Top = 344
     Width = 48
-    Height = 48
+    Height = 47
     Action = acHandPlaybackStepBackwards
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed

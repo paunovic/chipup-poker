@@ -4,6 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, OverbyteIcsWSocket,
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Objects.Base, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.UpdateFileInfo, Poker.Server.SocketConnectThread, Poker.Protobufs.Objects.CloseGameData;
@@ -45,7 +46,7 @@ type
     procedure KillPingTimeoutTimer;
 
     {$IFDEF DEBUG}
-    procedure DebugRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
+    procedure DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
     {$ENDIF}
 
   public
@@ -121,7 +122,6 @@ implementation
 
 uses
   Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer,
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ChangeEMailParams,
   Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply, Poker.Protobufs.Objects.TransferChipsParams,
@@ -290,14 +290,14 @@ begin
 end;
 
 {$IFDEF DEBUG}
-procedure TServerSocket.DebugRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
+procedure TServerSocket.DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
 var
   dbgtype: TDebugInfoType;
 begin
   if ARpcMessage.MethodId in [Integer(scPing), Integer(srPong)] then
     dbgtype := ditPingPong
   else
-    dbgtype := ditSocketInc;
+    dbgtype := ADebugType;
 
   if ARpcMessage.DataSize = 0 then
     DebugLn(Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
@@ -364,7 +364,7 @@ begin
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
     begin
       ResetInactivityPingTimer;
-      {$IFDEF DEBUG} DebugRpcMessage(rpc_message, data_obj); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketInc, rpc_message, data_obj); {$ENDIF}
       PostMessage(MessageContainer.ReceiverWnd, WM_SOCKET_SERVER_REPLY, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
     end;
 
@@ -582,7 +582,7 @@ begin
       if ASize > 0 then
         mstream.Write(AProtobuf, rpc_message.DataSize);
 
-      {$IFDEF DEBUG} DebugRpcMessage(rpc_message, nil, mstream.Size); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, nil, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;
@@ -611,7 +611,7 @@ begin
       if rpc_message.Datasize > 0 then
         AProtobuf.ProtobufOutput.SaveToStream(mstream);
 
-      {$IFDEF DEBUG} DebugRpcMessage(rpc_message, AProtobuf, mstream.Size); {$ENDIF}
+      {$IFDEF DEBUG} DebugRpcMessage(ditSocketOut, rpc_message, AProtobuf, mstream.Size); {$ENDIF}
       FSocket.Send(mstream.Memory, mstream.Size);
     finally
       mstream.Free;

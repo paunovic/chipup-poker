@@ -4192,8 +4192,8 @@ object frmChipUpMain: TfrmChipUpMain
           end>
         ActionBar = ActionMainMenuBar
       end>
-    Left = 440
-    Top = 56
+    Left = 452
+    Top = 52
     StyleName = 'Standard'
     object acShowChangeEMailForm: TAction
       Category = 'Account'

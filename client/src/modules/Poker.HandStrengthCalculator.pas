@@ -774,7 +774,11 @@ begin
                       if AShort then
                         result := 'Two Pairs'
                       else
-                        result := Format('Two Pairs, %s and %s with %s kicker', [ShortCardToLong(overcard[1], TRUE), ShortCardToLong(undercard[1], TRUE), ShortCardToLong(kicker[1])])
+                      begin
+                        result := Format('Two Pairs, %s and %s', [ShortCardToLong(overcard[1], TRUE), ShortCardToLong(undercard[1], TRUE)]);
+                        if kicker <> '' then
+                          result := result + Format(' with %s kicker', [ShortCardToLong(kicker[1])]);
+                      end;
                     end;
                   end
                   else
@@ -797,7 +801,11 @@ begin
                         if AShort then
                           result := 'One Pair'
                         else
-                          result := Format('Pair of %s with %s kicker', [ShortCardToLong(card[1], TRUE), ShortCardToLong(kicker[1])]) // FIXME, bug here? cards or kicker empty?
+                        begin
+                          result := Format('Pair of %s', [ShortCardToLong(card[1], TRUE)]);
+                          if kicker <> '' then
+                            result := result + Format(' with %s kicker', [ShortCardToLong(kicker[1])]);
+                        end;
                       end;
                     end
                     else
