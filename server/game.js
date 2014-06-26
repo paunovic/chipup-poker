@@ -902,7 +902,6 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 			if (this.state == 'tsPreFlop') {
 				this.rake = this.real_rake;
 				this.log('flopping');
-				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
 					this.addHistory({code:['teFlop'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
@@ -910,6 +909,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 					this.deck.draw(3,this.flop);
 					this.stateRow.flop = this.flop;
 					this.history.cards = this.flop.cards;
+					events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
 					this.log('flop adding to %d',extradelay);
 					token.tag += 'c';
 					token.stop();
@@ -918,7 +918,6 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 				this.roundEnd();
 			} else if (this.state == 'tsFlop') {
 				this.log('turning');
-				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
 					this.addHistory({code:['teTurn'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
@@ -926,6 +925,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 					this.deck.draw(1,this.turn);
 					this.stateRow.turn = this.turn;
 					this.history.cards = this.history.cards.concat(this.turn.cards);
+					events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
 					this.log('turn adding to %d',extradelay);
 					token.tag += 'd';
 					token.stop();
@@ -934,7 +934,6 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 				this.roundEnd();
 			} else if (this.state == 'tsTurn') {
 				this.log('river time');
-				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
 					this.addHistory({code:['teRiver'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
@@ -942,6 +941,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 					this.deck.draw(1,this.river);
 					this.stateRow.river = this.river;
 					this.history.cards = this.history.cards.concat(this.river.cards);
+					events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
 					this.log('river adding to %d',extradelay);
 					token.tag += 'e';
 					token.stop();

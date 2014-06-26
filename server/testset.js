@@ -290,6 +290,8 @@ exports.game = {
 					console.log('put1',events,offset);
 					game.putChips(opponent,200,function (events,offset) {
 						console.log('put2',events,offset);
+						test.ok(events[1].event == 'teFlop');
+						test.ok(events[1].cards.length == 3);
 						phase4(owner,opponent,game,release);
 					});
 				});
@@ -300,6 +302,8 @@ exports.game = {
 				console.log('put3',events,offset);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put4',events,offset);
+					test.ok(events[1].event == 'teTurn');
+					test.ok(events[1].cards.length == 1);
 					phase5(owner,opponent,game,release);
 				});
 			});
@@ -309,6 +313,8 @@ exports.game = {
 				console.log('put5',events,offset);
 				game.putChips(owner,0,function (events,offset) {
 					console.log('put6',events,offset);
+					test.ok(events[1].event == 'teRiver');
+					test.ok(events[1].cards.length == 1);
 					phase6(owner,opponent,game,release);
 				});
 			});
