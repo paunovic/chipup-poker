@@ -139,11 +139,6 @@
 			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbOutput.pas"/>
 			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbPublic.pas"/>
 			<DCCReference Include="..\..\delphi-3rd-party\protobufs\StrBuffer.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializer.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerFactory.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerAbstract.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerRtti.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerSuperJson.pas"/>
 			<DCCReference Include="3rdparty\icsv8\OverbyteIcsHttpProt.pas"/>
 			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
 			<DCCReference Include="Poker.DataModule.pas">
