@@ -63,51 +63,52 @@ var
   method: TRttiMethod;
   val2: TValue;
 begin
+  result := '';
   if AValue.IsEmpty then
-    result := ''
-  else
-    case AValue.TypeInfo^.Kind of
-      tkClass: begin
-        result := '{';
-        method := nil;
-        if Assigned(AProperty) then
-          method := AProperty.PropertyType.GetMethod('ToArray');
-        if Assigned(method) then
-        begin
-          val2 := method.Invoke(AValue, []);
-          for C1 := 0 to val2.GetArrayLength - 1 do
-            result := result + Format('%s, ', [ValueToStr(nil, val2.GetArrayElement(C1))]);
-        end
-        else
-          result := result + SerializeObject(AValue.AsObject);
+    Exit;
 
+  case AValue.TypeInfo^.Kind of
+    tkClass: begin
+      result := '{';
+      method := nil;
+      if Assigned(AProperty) then
+        method := AProperty.PropertyType.GetMethod('ToArray');
+      if Assigned(method) then
+      begin
+        val2 := method.Invoke(AValue, []);
+        for C1 := 0 to val2.GetArrayLength - 1 do
+          result := result + Format('%s, ', [ValueToStr(nil, val2.GetArrayElement(C1))]);
+      end
+      else
+        result := result + SerializeObject(AValue.AsObject);
+
+      if result[Length(result)] = ' ' then
+        Delete(result, Length(result) - 1, 2);
+      result := result + '}';
+    end;
+
+    tkArray, tkDynArray: begin
+      convert_to_hex := (AValue.GetArrayLength > 0) and
+                        (AValue.GetArrayElement(0).TryAsType<Byte>(byteval));
+      if not convert_to_hex then
+        result := '[';
+      for C1 := 0 to AValue.GetArrayLength - 1 do
+        if convert_to_hex then
+          result := result + LowerCase(IntToHex(AValue.GetArrayElement(C1).AsInteger, 2))
+        else
+          result := result + Format('%s, ', [ValueToStr(AProperty, AValue.GetArrayElement(C1))]);
+      if not convert_to_hex then
+      begin
         if result[Length(result)] = ' ' then
           Delete(result, Length(result) - 1, 2);
-        result := result + '}';
+        result := result + ']';
       end;
-
-      tkArray, tkDynArray: begin
-        convert_to_hex := (AValue.GetArrayLength > 0) and
-                          (AValue.GetArrayElement(0).TryAsType<Byte>(byteval));
-        if not convert_to_hex then
-          result := '[';
-        for C1 := 0 to AValue.GetArrayLength - 1 do
-          if convert_to_hex then
-            result := result + LowerCase(IntToHex(AValue.GetArrayElement(C1).AsInteger, 2))
-          else
-            result := result + Format('%s, ', [ValueToStr(AProperty, AValue.GetArrayElement(C1))]);
-        if not convert_to_hex then
-        begin
-          if result[Length(result)] = ' ' then
-            Delete(result, Length(result) - 1, 2);
-          result := result + ']';
-        end;
-      end;
-
-      tkString, tkWString, tkLString, tkUString: result := Format('"%s"', [AValue.ToString]);
-    else
-      result := AValue.ToString;
     end;
+
+    tkString, tkWString, tkLString, tkUString: result := Format('"%s"', [AValue.ToString]);
+  else
+    result := AValue.ToString;
+  end;
 end;
 
 function SerializeObject(const AObject: TObject): String;
@@ -118,12 +119,9 @@ begin
   result := '';
   if not Assigned(AObject) then
     Exit;
-
   t := TRttiContext.Create.GetType(AObject.ClassType);
-
   for p in t.GetDeclaredProperties do
     result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
-
   if result <> '' then
     Delete(result, Length(result) - 1, 2);
 end;
