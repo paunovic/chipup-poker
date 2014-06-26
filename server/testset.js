@@ -292,6 +292,7 @@ exports.game = {
 						console.log('put2',events,offset);
 						test.ok(events[1].event == 'teFlop');
 						test.ok(events[1].cards.length == 3);
+						test.ok(events[1].bets[0] > 0);
 						phase4(owner,opponent,game,release);
 					});
 				});
