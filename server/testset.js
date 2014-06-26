@@ -63,8 +63,10 @@ exports.club = {
 					});
 				},function () {
 						console.log(clubObj.obj);
-						mdb.close();
-						test.done();
+						setTimeout(function () {
+							mdb.close();
+							test.done();
+						},100);
 				})
 			});
 		});
@@ -137,8 +139,10 @@ exports.club = {
 			test.ok(clubObj);
 			clubObj.Leave(clubObj.obj.members[0],function () {
 				test.ok(true);
-				mdb.close();
-				test.done();
+				setTimeout(function () {
+					mdb.close();
+					test.done();
+				},100);
 			});
 		});
 	},
@@ -152,8 +156,10 @@ exports.club = {
 		Club.getClubBySeq(clubid,function (err,clubObj) {
 			test.ok(clubObj);
 			clubObj.setOwner(clubObj.obj.members[0],function () {
-				mdb.close();
-				test.done();
+				setTimeout(function () {
+					mdb.close();
+					test.done();
+				},100);
 			});
 		});
 	},
@@ -169,8 +175,10 @@ exports.club = {
 			test.ok(clubObj);
 			console.log(clubObj);
 			clubObj.deleteClub(function () {
-				mdb.close();
-				test.done();
+				setTimeout(function () {
+					mdb.close();
+					test.done();
+				},100);
 			});
 		});
 	}
@@ -196,10 +204,11 @@ exports.game = {
 		myutils.init();
 		profiler.setup(mdb.models.PokerProfile);
 		Game.init(activeGames,activeUsers,{max_play_time:15,max_timebank:30},console.log,{});
-		mdb.models.UserModel.find().limit(2).exec(function (err,users) {
+		mdb.models.UserModel.find().limit(3).exec(function (err,users) {
 			assert.ifError(err);
 			var owner = users[0];
 			var opponent = users[1];
+			var p3 = users[2];
 			test.ok(owner);
 			test.ok(opponent);
 			mdb.models.Clubs.remove({name:'clubname'},function (err) {
@@ -213,25 +222,50 @@ exports.game = {
 						Game.getGame(gamerow._id,function (err,gameObj) {
 							assert.ifError(err);
 							test.ok(gameObj);
-							phase2(new DummyConn(owner),new DummyConn(opponent),gameObj);
+							resit(new DummyConn(owner),new DummyConn(opponent),new DummyConn(p3),gameObj);
 						});
 					});
 				});
 			});
 		});
-		function phase2(owner,opponent,gameObj) {
-			owner.nick = 'owner';
-			opponent.nick = 'opponent';
-			owner.send = function (code,obj,type) {
+		function resit(p1,p2,p3,gameObj) {
+			p1.nick = 'owner';
+			p2.nick = 'opponent';
+			p3.nick = 'p3';
+			p1.send = function (code,obj,type) {
 				console.log('owner send:',code,obj,type);
 			}
+			p3.send = function (code,obj,type) {
+				console.log('p3 send:',code,obj,type);
+			}
+			gameObj.Lock.writeLock(function (release) {
+				gameObj.join(p3,function (err) {
+					test.ifError(err);
+					gameObj.join(p1,function (err) {
+						test.ifError(err);
+						gameObj.join(p3,function (err) {
+							test.ifError(err);
+							gameObj.sitDown(p3,{chips:100000,seat_index:3},function (worked,events) {
+								test.ok(worked);
+								console.log(worked,events);
+								gameObj.standUp(p3,function (folded,events,offset) {
+									release();
+									gameObj.leave(p3,'nodeunit',function () {
+										phase2(p1,p2,gameObj);
+									});
+								},3);
+							});
+						});
+					});
+				});
+			});
+		}
+		function phase2(owner,opponent,gameObj) {
 			opponent.send = function (code,obj,type) {
 				console.log('opponent send:',code,obj,type);
 			}
 			console.log('this game is:',gameObj.id);
 			gameObj.Lock.writeLock(function (release) {
-				gameObj.join(owner,function (err) {
-					test.ifError(err);
 					gameObj.join(opponent,function (err) {
 						test.ifError(err);
 						gameObj.sitDown(owner,{chips:100000,seat_index:0},function (worked,events) {
@@ -244,7 +278,6 @@ exports.game = {
 							});
 						});
 					});
-				});
 			});
 		}
 		function phase3(owner,opponent,game,release) {
@@ -287,7 +320,16 @@ exports.game = {
 					console.log('put8',events,offset);
 					mdb.models.GameState.findOne({_id:game.obj._id},function (err,state) {
 						console.log(state);
+						test.ok(state.flop.cards.length == 3);
+						test.ok(state.turn.cards.length == 1);
+						test.ok(state.river.cards.length == 1);
 						release();
+					});
+				},function () {
+					// post doWin delay
+					mdb.models.HandHistory.findOne({seq:game.handid},function (err,history) {
+						test.ok(history.cards.length == 5);
+						test.ok(history.deck.length == 43);
 						test.done();
 						mdb.close();
 					});
