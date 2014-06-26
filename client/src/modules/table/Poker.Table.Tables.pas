@@ -87,26 +87,15 @@ uses
 { TTable }
 
 destructor TTable.Destroy;
-var
-  ts: TTableStatus;
 begin
   if FTableType = ttLiveGame then
     ServerSocket.LeaveTable(FGameId);
 
   FreeAndNil(FForm);
-
-  ts := nil;
-  if Assigned(FRenderer) then
-  begin
-    ts := FRenderer.TableStatus;
-    FreeAndNil(FRenderer);
-  end;
+  FreeAndNil(FRenderer);
 
   if FTableType = ttSettingsPreview then
-  begin
     FreeAndNil(FClub);
-    FreeAndNil(ts);
-  end;
 
   FreeAndNil(FHandHistoryPlayback);
 
