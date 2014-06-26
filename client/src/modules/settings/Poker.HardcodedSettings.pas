@@ -9,6 +9,11 @@ const
   DEV_URL_DOMAIN = 'http://dev-server.chipuppoker.com';
 
 type
+  TUpdateFile = record
+    Path: String;
+    RequiresReboot: Boolean;
+  end;
+
   THardcodedSettings = class
   private
     type
@@ -29,12 +34,12 @@ type
         DIRECTX_SWAPCHAIN_COUNT: Byte;
         TABLE_CHAT_SCROLLBACK_LINES: Word;
 
-        RESOURCES: record
+        ASSETS: record
           DIRECTORY: String;
           DIRECTX_MEDIA: String;
         end;
 
-        UPDATE_FILES: array[0..7] of String;
+        UPDATE_FILES: array[0..7] of TUpdateFile;
 
         URL: record
           TERMS_AND_CONDITIONS: String;
@@ -47,7 +52,7 @@ type
   public
     const
       Hardcoded: THardcodedSettingsRec = (
-        VERSION: '0.01a.0143';
+        VERSION: '0.01a.0144';
         REVISION: {$I revision.inc};
 
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
@@ -68,14 +73,22 @@ type
         TABLE_CHAT_SCROLLBACK_LINES: 200; // table chat scrollback lines
 
         // resources
-        RESOURCES: (
-          DIRECTORY: 'resources\';
+        ASSETS: (
+          DIRECTORY: 'assets\';
           DIRECTX_MEDIA: 'dxmedia.dat';
         );
 
         // check these files for update
-        UPDATE_FILES: ('chipuppoker.exe', 'libeay32.dll', 'ssleay32.dll', 'VclStylesInno.dll', 'Carbon.vsf',
-           'bspatch.exe', 'sqlite3.dll', 'resources\dxmedia.dat');
+        UPDATE_FILES: (
+          (Path: 'bspatch.exe'; RequiresReboot: TRUE),
+          (Path: 'chipuppoker.exe'; RequiresReboot: TRUE),
+          (Path: 'libeay32.dll'; RequiresReboot: TRUE),
+          (Path: 'ssleay32.dll'; RequiresReboot: TRUE),
+          (Path: 'sqlite3.dll'; RequiresReboot: TRUE),
+          (Path: 'VclStylesInno.dll'; RequiresReboot: FALSE),
+          (Path: 'Carbon.vsf'; RequiresReboot: FALSE),
+          (Path: 'assets\dxmedia.dat'; RequiresReboot: FALSE)
+        );
 
         // urls
         URL: (

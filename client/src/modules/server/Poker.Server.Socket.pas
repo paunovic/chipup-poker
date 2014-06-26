@@ -1187,7 +1187,7 @@ end;
 {$IFDEF DEBUG}
 procedure TServerSocket.CrashTest;
 var
-  pb: TPB_PlayerLimitParams;
+  pb: TPB_HelloParams;
   tmp: String;
   bytes: TBytes;
 {  bytes1: TBytes;
@@ -1199,12 +1199,9 @@ begin
   FillChar(bytes[0], Length(bytes) * SizeOf(Byte), 66);
   StringToBytes('537badf134a82b1763f7aee8', bytes);
 //  StringToBytes('533da6a40427a9b03915560d', bytes1);
-  pb := TPB_PlayerLimitParams.Create;
+  pb := TPB_HelloParams.Create;
   try
-    pb.Clubid := bytes;
-    pb.Limit := 0;
-    pb.Unlimited := TRUE;
-    SendProtobuf(scSetPlayerLimit, pb);
+    SendProtobuf(scHello, pb);
   finally
     pb.Free;
   end;
