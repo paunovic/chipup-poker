@@ -142,7 +142,7 @@ end;
 
 procedure TPB_PutChips.SetTableMongoId(const AValue: TBytes);
 begin
-  Assert(!has_TableMongoId);
+  Assert(not has_TableMongoId);
   FTableMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
   set_has_TableMongoId;
@@ -171,7 +171,7 @@ end;
 
 procedure TPB_PutChips.SetChipAmount(const AValue: UINT32);
 begin
-  Assert(!has_ChipAmount);
+  Assert(not has_ChipAmount);
   FChipAmount := AValue;
   ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
   set_has_ChipAmount;
@@ -200,7 +200,7 @@ end;
 
 procedure TPB_PutChips.SetCurrentState(const AValue: TTableState);
 begin
-  Assert(!has_CurrentState);
+  Assert(not has_CurrentState);
   FCurrentState := AValue;
   ProtobufOutput.writeInt32(kCurrentStateFieldNumber, Integer(AValue));
   set_has_CurrentState;

@@ -243,7 +243,7 @@ end;
 
 procedure TPB_MoveRow.SetBet(const AValue: UINT32);
 begin
-  Assert(!has_Bet);
+  Assert(not has_Bet);
   FBet := AValue;
   ProtobufOutput.writeUInt32(kBetFieldNumber, AValue);
   set_has_Bet;
@@ -272,7 +272,7 @@ end;
 
 procedure TPB_MoveRow.SetSeat(const AValue: Integer);
 begin
-  Assert(!has_Seat);
+  Assert(not has_Seat);
   FSeat := AValue;
   ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;

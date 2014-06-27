@@ -190,7 +190,7 @@ end;
 
 procedure TPB_WinnerPotInfo.SetSum(const AValue: UINT32);
 begin
-  Assert(!has_Sum);
+  Assert(not has_Sum);
   FSum := AValue;
   ProtobufOutput.writeUInt32(kSumFieldNumber, AValue);
   set_has_Sum;
@@ -275,7 +275,7 @@ end;
 
 procedure TPB_WinnerPotInfo.SetRake(const AValue: UINT32);
 begin
-  Assert(!has_Rake);
+  Assert(not has_Rake);
   FRake := AValue;
   ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
   set_has_Rake;

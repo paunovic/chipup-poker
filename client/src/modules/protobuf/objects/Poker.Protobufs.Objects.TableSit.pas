@@ -142,7 +142,7 @@ end;
 
 procedure TPB_TableSit.SetGameId(const AValue: TBytes);
 begin
-  Assert(!has_GameId);
+  Assert(not has_GameId);
   FGameId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
   set_has_GameId;
@@ -171,7 +171,7 @@ end;
 
 procedure TPB_TableSit.SetSeatIndex(const AValue: Integer);
 begin
-  Assert(!has_SeatIndex);
+  Assert(not has_SeatIndex);
   FSeatIndex := AValue;
   ProtobufOutput.writeInt32(kSeatIndexFieldNumber, AValue);
   set_has_SeatIndex;
@@ -200,7 +200,7 @@ end;
 
 procedure TPB_TableSit.SetChips(const AValue: UINT32);
 begin
-  Assert(!has_Chips);
+  Assert(not has_Chips);
   FChips := AValue;
   ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;

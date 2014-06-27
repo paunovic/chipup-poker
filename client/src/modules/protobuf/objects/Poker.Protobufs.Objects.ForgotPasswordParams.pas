@@ -108,7 +108,7 @@ end;
 
 procedure TPB_ForgotPasswordParams.SetEmail(const AValue: String);
 begin
-  Assert(!has_Email);
+  Assert(not has_Email);
   FEmail := AValue;
   ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;

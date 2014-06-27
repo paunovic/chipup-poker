@@ -125,7 +125,7 @@ end;
 
 procedure TPB_PingReply.SetUptime(const AValue: UINT32);
 begin
-  Assert(!has_Uptime);
+  Assert(not has_Uptime);
   FUptime := AValue;
   ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
   set_has_Uptime;
@@ -154,7 +154,7 @@ end;
 
 procedure TPB_PingReply.SetServertime(const AValue: UInt64);
 begin
-  Assert(!has_Servertime);
+  Assert(not has_Servertime);
   FServertime := AValue;
   ProtobufOutput.WriteInt64(kServertimeFieldNumber, AValue);
   set_has_Servertime;

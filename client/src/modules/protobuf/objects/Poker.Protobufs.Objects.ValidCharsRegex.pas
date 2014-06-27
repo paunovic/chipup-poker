@@ -193,7 +193,7 @@ end;
 
 procedure TPB_ValidCharsRegex.SetEmail(const AValue: String);
 begin
-  Assert(!has_Email);
+  Assert(not has_Email);
   FEmail := AValue;
   ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
@@ -222,7 +222,7 @@ end;
 
 procedure TPB_ValidCharsRegex.SetUsername(const AValue: String);
 begin
-  Assert(!has_Username);
+  Assert(not has_Username);
   FUsername := AValue;
   ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
   set_has_Username;
@@ -251,7 +251,7 @@ end;
 
 procedure TPB_ValidCharsRegex.SetPassword(const AValue: String);
 begin
-  Assert(!has_Password);
+  Assert(not has_Password);
   FPassword := AValue;
   ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
@@ -280,7 +280,7 @@ end;
 
 procedure TPB_ValidCharsRegex.SetClubname(const AValue: String);
 begin
-  Assert(!has_Clubname);
+  Assert(not has_Clubname);
   FClubname := AValue;
   ProtobufOutput.writeString(kClubnameFieldNumber, AValue);
   set_has_Clubname;
@@ -309,7 +309,7 @@ end;
 
 procedure TPB_ValidCharsRegex.SetClubpassword(const AValue: String);
 begin
-  Assert(!has_Clubpassword);
+  Assert(not has_Clubpassword);
   FClubpassword := AValue;
   ProtobufOutput.writeString(kClubpasswordFieldNumber, AValue);
   set_has_Clubpassword;
@@ -338,7 +338,7 @@ end;
 
 procedure TPB_ValidCharsRegex.SetGamename(const AValue: String);
 begin
-  Assert(!has_Gamename);
+  Assert(not has_Gamename);
   FGamename := AValue;
   ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
   set_has_Gamename;

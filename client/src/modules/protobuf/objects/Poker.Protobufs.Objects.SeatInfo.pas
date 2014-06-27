@@ -262,7 +262,7 @@ end;
 
 procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
 begin
-  Assert(!has_Seat);
+  Assert(not has_Seat);
   FSeat := AValue;
   ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
@@ -291,7 +291,7 @@ end;
 
 procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TBytes);
 begin
-  Assert(!has_PlayerMongoId);
+  Assert(not has_PlayerMongoId);
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
@@ -320,7 +320,7 @@ end;
 
 procedure TPB_SeatInfo.SetChips(const AValue: UINT32);
 begin
-  Assert(!has_Chips);
+  Assert(not has_Chips);
   FChips := AValue;
   ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;
@@ -349,7 +349,7 @@ end;
 
 procedure TPB_SeatInfo.SetCardCount(const AValue: Integer);
 begin
-  Assert(!has_CardCount);
+  Assert(not has_CardCount);
   FCardCount := AValue;
   ProtobufOutput.writeInt32(kCardCountFieldNumber, AValue);
   set_has_CardCount;
@@ -378,7 +378,7 @@ end;
 
 procedure TPB_SeatInfo.SetCards(const AValue: TBytes);
 begin
-  Assert(!has_Cards);
+  Assert(not has_Cards);
   FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
@@ -407,7 +407,7 @@ end;
 
 procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
 begin
-  Assert(!has_Status);
+  Assert(not has_Status);
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
@@ -436,7 +436,7 @@ end;
 
 procedure TPB_SeatInfo.SetTimebank(const AValue: UINT32);
 begin
-  Assert(!has_Timebank);
+  Assert(not has_Timebank);
   FTimebank := AValue;
   ProtobufOutput.writeUInt32(kTimebankFieldNumber, AValue);
   set_has_Timebank;
@@ -465,7 +465,7 @@ end;
 
 procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
 begin
-  Assert(!has_CardsVisible);
+  Assert(not has_CardsVisible);
   FCardsVisible := AValue;
   ProtobufOutput.writeBoolean(kCardsVisibleFieldNumber, AValue);
   set_has_CardsVisible;
@@ -494,7 +494,7 @@ end;
 
 procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
 begin
-  Assert(!has_Disconnected);
+  Assert(not has_Disconnected);
   FDisconnected := AValue;
   ProtobufOutput.writeBoolean(kDisconnectedFieldNumber, AValue);
   set_has_Disconnected;
@@ -523,7 +523,7 @@ end;
 
 procedure TPB_SeatInfo.SetCanShow(const AValue: Boolean);
 begin
-  Assert(!has_CanShow);
+  Assert(not has_CanShow);
   FCanShow := AValue;
   ProtobufOutput.writeBoolean(kCanShowFieldNumber, AValue);
   set_has_CanShow;

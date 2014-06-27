@@ -177,7 +177,7 @@ end;
 
 procedure TPB_UpdateFileInfo.SetPath(const AValue: String);
 begin
-  Assert(!has_Path);
+  Assert(not has_Path);
   FPath := AValue;
   ProtobufOutput.writeString(kPathFieldNumber, AValue);
   set_has_Path;
@@ -206,7 +206,7 @@ end;
 
 procedure TPB_UpdateFileInfo.SetHash(const AValue: TBytes);
 begin
-  Assert(!has_Hash);
+  Assert(not has_Hash);
   FHash := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kHashFieldNumber, AValue);
   set_has_Hash;
@@ -235,7 +235,7 @@ end;
 
 procedure TPB_UpdateFileInfo.SetUrl(const AValue: String);
 begin
-  Assert(!has_Url);
+  Assert(not has_Url);
   FUrl := AValue;
   ProtobufOutput.writeString(kUrlFieldNumber, AValue);
   set_has_Url;
@@ -264,7 +264,7 @@ end;
 
 procedure TPB_UpdateFileInfo.SetFileType(const AValue: TUpdateFileType);
 begin
-  Assert(!has_FileType);
+  Assert(not has_FileType);
   FFileType := AValue;
   ProtobufOutput.writeInt32(kFileTypeFieldNumber, Integer(AValue));
   set_has_FileType;
@@ -293,7 +293,7 @@ end;
 
 procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UINT32);
 begin
-  Assert(!has_FileSize);
+  Assert(not has_FileSize);
   FFileSize := AValue;
   ProtobufOutput.writeUInt32(kFileSizeFieldNumber, AValue);
   set_has_FileSize;

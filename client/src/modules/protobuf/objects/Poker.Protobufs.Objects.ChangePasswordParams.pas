@@ -108,7 +108,7 @@ end;
 
 procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);
 begin
-  Assert(!has_NewPassword);
+  Assert(not has_NewPassword);
   FNewPassword := AValue;
   ProtobufOutput.writeString(kNewPasswordFieldNumber, AValue);
   set_has_NewPassword;

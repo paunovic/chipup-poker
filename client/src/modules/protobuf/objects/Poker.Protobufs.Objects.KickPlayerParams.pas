@@ -125,7 +125,7 @@ end;
 
 procedure TPB_KickPlayerParams.SetClubSeq(const AValue: Integer);
 begin
-  Assert(!has_ClubSeq);
+  Assert(not has_ClubSeq);
   FClubSeq := AValue;
   ProtobufOutput.writeInt32(kClubSeqFieldNumber, AValue);
   set_has_ClubSeq;
@@ -154,7 +154,7 @@ end;
 
 procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: TBytes);
 begin
-  Assert(!has_PlayerMongoId);
+  Assert(not has_PlayerMongoId);
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;

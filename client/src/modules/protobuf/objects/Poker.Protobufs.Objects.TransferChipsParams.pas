@@ -125,7 +125,7 @@ end;
 
 procedure TPB_TransferChipsParams.SetPlayerMongoId(const AValue: TBytes);
 begin
-  Assert(!has_PlayerMongoId);
+  Assert(not has_PlayerMongoId);
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
@@ -154,7 +154,7 @@ end;
 
 procedure TPB_TransferChipsParams.SetChipAmount(const AValue: UINT32);
 begin
-  Assert(!has_ChipAmount);
+  Assert(not has_ChipAmount);
   FChipAmount := AValue;
   ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
   set_has_ChipAmount;

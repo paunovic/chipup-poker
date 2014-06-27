@@ -149,7 +149,7 @@ end;
 
 procedure TPB_ChatEvent.SetEvent(const AValue: TEventType);
 begin
-  Assert(!has_Event);
+  Assert(not has_Event);
   FEvent := AValue;
   ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
   set_has_Event;
@@ -178,7 +178,7 @@ end;
 
 procedure TPB_ChatEvent.SetMsg(const AValue: TPB_ChatMessage);
 begin
-  Assert(!has_Msg);
+  Assert(not has_Msg);
   FMsg := AValue;
   ProtobufOutput.writeMessage(kMsgFieldNumber, AValue.ProtobufOutput);
   set_has_Msg;
@@ -207,7 +207,7 @@ end;
 
 procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);
 begin
-  Assert(!has_TableId);
+  Assert(not has_TableId);
   FTableId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
   set_has_TableId;

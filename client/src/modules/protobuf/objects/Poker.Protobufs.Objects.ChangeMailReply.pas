@@ -109,7 +109,7 @@ end;
 
 procedure TPB_ChangeMailReply.SetStatus(const AValue: TChangeMailStatus);
 begin
-  Assert(!has_Status);
+  Assert(not has_Status);
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;

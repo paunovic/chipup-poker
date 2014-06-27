@@ -176,7 +176,7 @@ end;
 
 procedure TPB_ClubMember.SetMongoId(const AValue: TBytes);
 begin
-  Assert(!has_MongoId);
+  Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
@@ -205,7 +205,7 @@ end;
 
 procedure TPB_ClubMember.SetSuspended(const AValue: Boolean);
 begin
-  Assert(!has_Suspended);
+  Assert(not has_Suspended);
   FSuspended := AValue;
   ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
   set_has_Suspended;
@@ -234,7 +234,7 @@ end;
 
 procedure TPB_ClubMember.SetBalanceLimit(const AValue: UINT32);
 begin
-  Assert(!has_BalanceLimit);
+  Assert(not has_BalanceLimit);
   FBalanceLimit := AValue;
   ProtobufOutput.writeUInt32(kBalanceLimitFieldNumber, AValue);
   set_has_BalanceLimit;
@@ -263,7 +263,7 @@ end;
 
 procedure TPB_ClubMember.SetClubBalance(const AValue: Integer);
 begin
-  Assert(!has_ClubBalance);
+  Assert(not has_ClubBalance);
   FClubBalance := AValue;
   ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
   set_has_ClubBalance;
@@ -292,7 +292,7 @@ end;
 
 procedure TPB_ClubMember.SetUnlimitedLimit(const AValue: Boolean);
 begin
-  Assert(!has_UnlimitedLimit);
+  Assert(not has_UnlimitedLimit);
   FUnlimitedLimit := AValue;
   ProtobufOutput.writeBoolean(kUnlimitedLimitFieldNumber, AValue);
   set_has_UnlimitedLimit;

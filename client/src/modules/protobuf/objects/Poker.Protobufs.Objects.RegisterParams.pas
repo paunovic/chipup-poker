@@ -142,7 +142,7 @@ end;
 
 procedure TPB_RegisterParams.SetEmail(const AValue: String);
 begin
-  Assert(!has_Email);
+  Assert(not has_Email);
   FEmail := AValue;
   ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
@@ -171,7 +171,7 @@ end;
 
 procedure TPB_RegisterParams.SetPassword(const AValue: String);
 begin
-  Assert(!has_Password);
+  Assert(not has_Password);
   FPassword := AValue;
   ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
@@ -200,7 +200,7 @@ end;
 
 procedure TPB_RegisterParams.SetDisplayName(const AValue: String);
 begin
-  Assert(!has_DisplayName);
+  Assert(not has_DisplayName);
   FDisplayName := AValue;
   ProtobufOutput.writeString(kDisplayNameFieldNumber, AValue);
   set_has_DisplayName;

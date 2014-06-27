@@ -125,7 +125,7 @@ end;
 
 procedure TPB_LoginParams.SetUsername(const AValue: String);
 begin
-  Assert(!has_Username);
+  Assert(not has_Username);
   FUsername := AValue;
   ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
   set_has_Username;
@@ -154,7 +154,7 @@ end;
 
 procedure TPB_LoginParams.SetPassword(const AValue: String);
 begin
-  Assert(!has_Password);
+  Assert(not has_Password);
   FPassword := AValue;
   ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;

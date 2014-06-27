@@ -125,7 +125,7 @@ end;
 
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
 begin
-  Assert(!has_TableMongoId);
+  Assert(not has_TableMongoId);
   FTableMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
   set_has_TableMongoId;
@@ -154,7 +154,7 @@ end;
 
 procedure TPB_TableBoolFlag.SetFlag(const AValue: Boolean);
 begin
-  Assert(!has_Flag);
+  Assert(not has_Flag);
   FFlag := AValue;
   ProtobufOutput.writeBoolean(kFlagFieldNumber, AValue);
   set_has_Flag;

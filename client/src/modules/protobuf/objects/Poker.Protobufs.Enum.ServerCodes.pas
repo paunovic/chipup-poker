@@ -47,6 +47,7 @@ type
     srResetPlayerBalanceOk = 40,
     srClubBalanceReached = 41,
     srHandHistoryMsg = 42,
+    srQueryAssetsReply = 43,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -95,7 +96,8 @@ type
     scQueryTableStats = 104,
     scContactUs = 105,
     scSetPlayerLimit = 106,
-    scResetPlayerBalance = 107
+    scResetPlayerBalance = 107,
+    scQueryAssets = 108
   );
 
 {$IFDEF DEBUG}
@@ -169,6 +171,7 @@ begin
     srResetPlayerBalanceOk: result := 'srResetPlayerBalanceOk';
     srClubBalanceReached: result := 'srClubBalanceReached';
     srHandHistoryMsg: result := 'srHandHistoryMsg';
+    srQueryAssetsReply: result := 'srQueryAssetsReply';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -218,6 +221,7 @@ begin
     scContactUs: result := 'scContactUs';
     scSetPlayerLimit: result := 'scSetPlayerLimit';
     scResetPlayerBalance: result := 'scResetPlayerBalance';
+    scQueryAssets: result := 'scQueryAssets';
   end;
 end;
 {$ENDIF DEBUG}

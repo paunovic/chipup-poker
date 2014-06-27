@@ -411,7 +411,7 @@ class BaseGenerator : public CodeGenerator {
 			printer->Print(vars,
 				"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
 				"begin\n"
-				"  Assert(!has_$name$);\n"
+				"  Assert(not has_$name$);\n"
 				);
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				printer->Print(vars,

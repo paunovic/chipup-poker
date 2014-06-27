@@ -184,7 +184,7 @@ end;
 
 procedure TPB_TableStatsReply.SetClubid(const AValue: TBytes);
 begin
-  Assert(!has_Clubid);
+  Assert(not has_Clubid);
   FClubid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
@@ -213,7 +213,7 @@ end;
 
 procedure TPB_TableStatsReply.SetGameid(const AValue: TBytes);
 begin
-  Assert(!has_Gameid);
+  Assert(not has_Gameid);
   FGameid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
@@ -271,7 +271,7 @@ end;
 
 procedure TPB_TableStatsReply.SetHands(const AValue: UINT32);
 begin
-  Assert(!has_Hands);
+  Assert(not has_Hands);
   FHands := AValue;
   ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
   set_has_Hands;

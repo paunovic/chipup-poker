@@ -109,7 +109,7 @@ end;
 
 procedure TPB_SetAvatarReply.SetStatus(const AValue: TSetAvatarStatus);
 begin
-  Assert(!has_Status);
+  Assert(not has_Status);
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;

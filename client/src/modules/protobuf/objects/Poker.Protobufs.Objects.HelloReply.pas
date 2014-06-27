@@ -270,7 +270,7 @@ end;
 
 procedure TPB_HelloReply.SetStringSizes(const AValue: TPB_StringSizes);
 begin
-  Assert(!has_StringSizes);
+  Assert(not has_StringSizes);
   FStringSizes := AValue;
   ProtobufOutput.writeMessage(kStringSizesFieldNumber, AValue.ProtobufOutput);
   set_has_StringSizes;
@@ -299,7 +299,7 @@ end;
 
 procedure TPB_HelloReply.SetChangeExpireTime(const AValue: Integer);
 begin
-  Assert(!has_ChangeExpireTime);
+  Assert(not has_ChangeExpireTime);
   FChangeExpireTime := AValue;
   ProtobufOutput.writeInt32(kChangeExpireTimeFieldNumber, AValue);
   set_has_ChangeExpireTime;
@@ -328,7 +328,7 @@ end;
 
 procedure TPB_HelloReply.SetForgotExpireTime(const AValue: Integer);
 begin
-  Assert(!has_ForgotExpireTime);
+  Assert(not has_ForgotExpireTime);
   FForgotExpireTime := AValue;
   ProtobufOutput.writeInt32(kForgotExpireTimeFieldNumber, AValue);
   set_has_ForgotExpireTime;
@@ -357,7 +357,7 @@ end;
 
 procedure TPB_HelloReply.SetMaxPlayTime(const AValue: Integer);
 begin
-  Assert(!has_MaxPlayTime);
+  Assert(not has_MaxPlayTime);
   FMaxPlayTime := AValue;
   ProtobufOutput.writeInt32(kMaxPlayTimeFieldNumber, AValue);
   set_has_MaxPlayTime;
@@ -386,7 +386,7 @@ end;
 
 procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
 begin
-  Assert(!has_MaxTimebank);
+  Assert(not has_MaxTimebank);
   FMaxTimebank := AValue;
   ProtobufOutput.writeInt32(kMaxTimebankFieldNumber, AValue);
   set_has_MaxTimebank;
@@ -415,7 +415,7 @@ end;
 
 procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);
 begin
-  Assert(!has_MinSizes);
+  Assert(not has_MinSizes);
   FMinSizes := AValue;
   ProtobufOutput.writeMessage(kMinSizesFieldNumber, AValue.ProtobufOutput);
   set_has_MinSizes;
@@ -473,7 +473,7 @@ end;
 
 procedure TPB_HelloReply.SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
 begin
-  Assert(!has_ValidCharsRegex);
+  Assert(not has_ValidCharsRegex);
   FValidCharsRegex := AValue;
   ProtobufOutput.writeMessage(kValidCharsRegexFieldNumber, AValue.ProtobufOutput);
   set_has_ValidCharsRegex;

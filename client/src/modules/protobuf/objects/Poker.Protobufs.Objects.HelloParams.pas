@@ -150,7 +150,7 @@ end;
 
 procedure TPB_HelloParams.SetDebug(const AValue: Boolean);
 begin
-  Assert(!has_Debug);
+  Assert(not has_Debug);
   FDebug := AValue;
   ProtobufOutput.writeBoolean(kDebugFieldNumber, AValue);
   set_has_Debug;
