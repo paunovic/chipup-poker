@@ -42,7 +42,7 @@ function makeDiff(sourcehash,desthash,path) {
 		return;
 	}
 	fs.stat("unpacked/objects/"+sourcehash,function (err,localCopy) {
-		console.log('localCopy:%j',localCopy);
+		console.log('localCopy %s %s:%j',sourcehash,path,localCopy);
 		if (localCopy) {
 			bsdiffLock.writeLock(function bsdiffLocked(release) {
 				models.Diff.findOne({sourcehash:sourcehash,desthash:desthash},function (err,diffRow) {
