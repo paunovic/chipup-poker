@@ -239,8 +239,8 @@ begin
 
   Left := 0;
   Top := 0;
-  Width := Round(Screen.Monitors[0].Width / 2.8);
-  Height := Round(Screen.Monitors[0].Height / 2.5);
+  Width := Round(Screen.Monitors[0].Width / 2.9);
+  Height := Round(Screen.Monitors[0].Height / 2.6);
 
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
@@ -378,7 +378,7 @@ end;
 
 procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
 const
-  SCROLLBACK_LINES = 250;
+  SCROLLBACK_LINES = 500;
 var
   table: TRVTableItemInfo;
   sl: TStringList;

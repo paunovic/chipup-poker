@@ -84,11 +84,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket,
-  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
-  Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks,
-  Poker.Forms.Main, Poker.Common.FormsContainer, Poker.HardcodedSettings, Poker.Common.Encryption,
-  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParamProcesser;
+  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket, Poker.Server.MessageContainer,
+  Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
+  Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
+  Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParamProcesser,
+  Poker.Table.Resources, Poker.DirectX.Core;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
@@ -384,13 +384,11 @@ var
 begin
   pbhello := AObject as TPB_HelloReply;
 
-  if not TCommandLineParamProcesser.NoUpdateFlag then
+  if (not TCommandLineParamProcesser.NoUpdateFlag) and
+     (pbhello.UpdateFiles.Count > 0) then
   begin
-    if pbhello.UpdateFiles.Count > 0 then
-    begin
-      dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
-      acUpdate.Execute;
-    end;
+    dmMain.StoreUpdateFiles(pbhello.UpdateFiles);
+    acUpdate.Execute;
   end;
 
   ServerSettings.ParseHelloMessage(pbhello);
@@ -418,6 +416,8 @@ begin
 
   case pbreply.LoginStatus of
     lrSuccess: begin
+      if not Assigned(TableResources) then
+        TTableResources.Initialize(DXCore.Canvas);
       dmMain.SelfInfo.Password := edPassword.Text;
       dmMain.ProcessLoginReply(pbreply);
       CurrentStatus := lsLoggedIn;

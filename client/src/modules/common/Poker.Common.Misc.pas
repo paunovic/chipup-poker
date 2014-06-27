@@ -12,8 +12,7 @@ function SerializeObject(const AObject: TObject): String;
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = nil; const AParams: PChar = nil; const ADirectory: PChar = nil;
                    const AShowCmd: Integer = SW_SHOWNORMAL; const AVerb: String = 'open'; const AMask: DWORD = SEE_MASK_FLAG_NO_UI; const AHWND: HWND = 0): Boolean;
-procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
-                const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
+procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings; const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
 function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
 function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AShow: Boolean): TForm;
 function CompressStream(const AStream: TMemoryStream): Boolean;
@@ -50,8 +49,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
-  Poker.Interfaces.FormParams, System.Generics.Collections;
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams,
+  System.Generics.Collections;
 
 
 {$IFDEF DEBUG}
@@ -119,11 +118,20 @@ begin
   result := '';
   if not Assigned(AObject) then
     Exit;
+
   t := TRttiContext.Create.GetType(AObject.ClassType);
   for p in t.GetDeclaredProperties do
+  begin
     result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
+    if p.PropertyType.TypeKind = tkClass then
+      result := result + #10;
+  end;
+
   if result <> '' then
-    Delete(result, Length(result) - 1, 2);
+    if result[Length(result)] = #10 then
+      Delete(result, Length(result) - 2, 3)
+    else
+      Delete(result, Length(result) - 1, 2);
 end;
 {$ENDIF}
 
@@ -163,8 +171,7 @@ begin
     AExecInfo^ := exec_info;
 end;
 
-procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
-                const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
+procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings; const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
 var
   C1: Integer;
 begin

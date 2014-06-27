@@ -319,7 +319,7 @@ object frmTable: TfrmTable
     StyleHot.LookAndFeel.NativeStyle = True
     TabOrder = 11
     Visible = False
-    Height = 9
+    Height = 8
     Width = 257
   end
   object ActionManager: TActionManager
