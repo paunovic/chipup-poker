@@ -48,7 +48,7 @@ enum ServerCodes {
 	srResetPlayerBalanceOk = 40;
 	srClubBalanceReached = 41;
 	srHandHistoryMsg = 42;
-	srQueryAssetReply = 43;
+	srQueryAssetsReply = 43;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -100,7 +100,7 @@ enum ServerCodes {
 	scContactUs = 105;
 	scSetPlayerLimit = 106;
 	scResetPlayerBalance = 107;
-	scQueryAsset = 108;
+	scQueryAssets = 108;
 }
 
 message StringSizes {
