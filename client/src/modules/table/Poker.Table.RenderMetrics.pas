@@ -271,7 +271,7 @@ var
   x, y: Single;
   xr, yr: Single;
 begin
-  Assert(FGame.Seats < (Length(TTableResources.SEAT_POINTS)+1));
+  Assert(FGame.Seats < (Length(TTableResources.SEAT_POINTS)+1)); // FIXME
   xr := TableWidth / 1.25;
   yr := TableHeight / 1.45;
 
@@ -300,8 +300,8 @@ end;
 
 function TTableRenderMetrics.IsPointInRaiseThumb(const AX, AY: Integer): Boolean;
 begin
-  result := IsPointInsideCircle(AX, AY, FRaiseThumbBounds[0].x + (FRaiseThumbBounds[1].x - FRaiseThumbBounds[0].x) / 2,
-                  FRaiseThumbBounds[0].y + (FRaiseThumbBounds[1].y - FRaiseThumbBounds[0].y) / 2,
+  result := PtInCircle(AX, AY, FRaiseThumbBounds[0].x + (FRaiseThumbBounds[1].x - FRaiseThumbBounds[0].x) / 2,
+                  FRaiseThumbBounds[0].y + (FRaiseThumbBounds[2].y - FRaiseThumbBounds[0].y) / 2,
                   (FRaiseThumbBounds[1].x - FRaiseThumbBounds[0].x) / 2);
 end;
 

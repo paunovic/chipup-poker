@@ -12,8 +12,7 @@ function SerializeObject(const AObject: TObject): String;
 function IsValidString(const AString, AAllowedChars: String): Boolean;
 function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = nil; const AParams: PChar = nil; const ADirectory: PChar = nil;
                    const AShowCmd: Integer = SW_SHOWNORMAL; const AVerb: String = 'open'; const AMask: DWORD = SEE_MASK_FLAG_NO_UI; const AHWND: HWND = 0): Boolean;
-procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
-                const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
+procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings; const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
 function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
 function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AShow: Boolean): TForm;
 function CompressStream(const AStream: TMemoryStream): Boolean;
@@ -28,7 +27,7 @@ procedure LoadJPGFromResource(const AImage: TJPEGImage; const AResourceName: Str
 function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
-function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
+function PtInCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 function ReverseDWORD(dw: Cardinal): Cardinal;
 function SecondsToTimeStr(ASeconds: DWORD): String;
 function SecondsToTime(ASeconds: DWORD): TTime;
@@ -49,18 +48,90 @@ function TempPath: String;
 implementation
 
 uses
-  {$IFDEF DEBUG} SvSerializer, SvSerializerSuperJson, {$ENDIF}
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm,
-  Poker.Interfaces.FormParams, System.Generics.Collections;
+  {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams,
+  System.Generics.Collections;
 
 
 {$IFDEF DEBUG}
-function SerializeObject(const AObject: TObject): String;
+function ValueToStr(const AProperty: TRttiProperty; const AValue: TValue): String;
+var
+  C1: Integer;
+  byteval: Byte;
+  convert_to_hex: Boolean;
+  method: TRttiMethod;
+  val2: TValue;
 begin
-  if not Assigned(AObject) then
-    Exit('');
+  result := '';
+  if AValue.IsEmpty then
+    Exit;
 
-  TSvSerializer.SerializeObject(AObject, result, sstSuperJson);
+  case AValue.TypeInfo^.Kind of
+    tkClass: begin
+      result := '{';
+      method := nil;
+      if Assigned(AProperty) then
+        method := AProperty.PropertyType.GetMethod('ToArray');
+      if Assigned(method) then
+      begin
+        val2 := method.Invoke(AValue, []);
+        for C1 := 0 to val2.GetArrayLength - 1 do
+          result := result + Format('%s, ', [ValueToStr(nil, val2.GetArrayElement(C1))]);
+      end
+      else
+        result := result + SerializeObject(AValue.AsObject);
+
+      if result[Length(result)] = ' ' then
+        Delete(result, Length(result) - 1, 2);
+      result := result + '}';
+    end;
+
+    tkArray, tkDynArray: begin
+      convert_to_hex := (AValue.GetArrayLength > 0) and
+                        (AValue.GetArrayElement(0).TryAsType<Byte>(byteval));
+      if not convert_to_hex then
+        result := '[';
+      for C1 := 0 to AValue.GetArrayLength - 1 do
+        if convert_to_hex then
+          result := result + LowerCase(IntToHex(AValue.GetArrayElement(C1).AsInteger, 2))
+        else
+          result := result + Format('%s, ', [ValueToStr(AProperty, AValue.GetArrayElement(C1))]);
+      if not convert_to_hex then
+      begin
+        if result[Length(result)] = ' ' then
+          Delete(result, Length(result) - 1, 2);
+        result := result + ']';
+      end;
+    end;
+
+    tkString, tkWString, tkLString, tkUString: result := Format('"%s"', [AValue.ToString]);
+  else
+    result := AValue.ToString;
+  end;
+end;
+
+function SerializeObject(const AObject: TObject): String;
+var
+  t: TRttiType;
+  p: TRttiProperty;
+begin
+  result := '';
+  if not Assigned(AObject) then
+    Exit;
+
+  t := TRttiContext.Create.GetType(AObject.ClassType);
+  for p in t.GetDeclaredProperties do
+  begin
+    result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
+    if p.PropertyType.TypeKind = tkClass then
+      result := result + #10;
+  end;
+
+  if result <> '' then
+    if result[Length(result)] = #10 then
+      Delete(result, Length(result) - 2, 3)
+    else
+      Delete(result, Length(result) - 1, 2);
 end;
 {$ENDIF}
 
@@ -100,8 +171,7 @@ begin
     AExecInfo^ := exec_info;
 end;
 
-procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings;
-                const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
+procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings; const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
 var
   C1: Integer;
 begin
@@ -493,9 +563,9 @@ begin
   end;
 end;
 
-function IsPointInsideCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
+function PtInCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 begin
-  result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) < ARadius * ARadius;
+  result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) <= ARadius * ARadius;
 end;
 
 function ReverseDWORD(dw: Cardinal): Cardinal;

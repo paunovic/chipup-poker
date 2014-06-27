@@ -3,7 +3,7 @@ object frmTable: TfrmTable
   Top = 0
   ClientHeight = 524
   ClientWidth = 792
-  Color = clWindow
+  Color = 3505587
   Constraints.MinWidth = 600
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -227,7 +227,7 @@ object frmTable: TfrmTable
     Left = 371
     Top = 344
     Width = 48
-    Height = 48
+    Height = 47
     Action = acHandPlaybackPause
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -251,7 +251,7 @@ object frmTable: TfrmTable
     Left = 425
     Top = 344
     Width = 48
-    Height = 48
+    Height = 47
     Action = acHandPlaybackStepForward
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -276,7 +276,7 @@ object frmTable: TfrmTable
     Left = 317
     Top = 344
     Width = 48
-    Height = 48
+    Height = 47
     Action = acHandPlaybackStepBackwards
     Anchors = [akLeft, akBottom]
     Colors.PressedText = clRed
@@ -319,7 +319,7 @@ object frmTable: TfrmTable
     StyleHot.LookAndFeel.NativeStyle = True
     TabOrder = 11
     Visible = False
-    Height = 9
+    Height = 8
     Width = 257
   end
   object ActionManager: TActionManager

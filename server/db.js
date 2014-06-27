@@ -210,13 +210,14 @@ var GameStateSchema = new Schema({
 	},
 	handid:Number,
 	history:Schema.Types.Mixed,
-	keycount:Number,
+	keycount:{type:Number,default:0},
 	balance_changes:[Number],
 	rake:Number,
 	minBet:Number,
 	minimum_raise:Number,
 	members:[StateMemberSchema],
-	users:[ObjectId]
+	users:[ObjectId],
+	deck:[Number]
 },{collection:'gameState'});
 GameStateSchema.path('pots').validate(function (pots) {
 	return pots.length < 5;

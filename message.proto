@@ -48,6 +48,7 @@ enum ServerCodes {
 	srResetPlayerBalanceOk = 40;
 	srClubBalanceReached = 41;
 	srHandHistoryMsg = 42;
+	srQueryAssetsReply = 43;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -99,6 +100,7 @@ enum ServerCodes {
 	scContactUs = 105;
 	scSetPlayerLimit = 106;
 	scResetPlayerBalance = 107;
+	scQueryAssets = 108;
 }
 
 message StringSizes {
@@ -617,4 +619,8 @@ message HandHistory {
 	optional Game game = 10;
 	optional Game.GameType current_game = 11;
 	required int32 rake = 12;
+}
+
+message AssetList {
+	repeated UpdateFileInfo assets = 1;
 }

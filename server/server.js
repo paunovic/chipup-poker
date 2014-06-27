@@ -34,6 +34,7 @@ var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var differ = require('./differ');
 var mdb = require('./db');
+var installer = require('./installer');
 var models = mdb.models;
 
 var Hand = deck.Hand;
@@ -46,7 +47,7 @@ var protoreader = require('./protoreader');
 protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong]);
 
 var domain = "http://"+config.hostname+'/';
-var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:15,max_timebank:30};
+var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:16,max_timebank:30};
 sharedconfig.minSizes.email = 6;
 sharedconfig.stringSizes.email = 200;
 sharedconfig.minSizes.password = 6;
@@ -84,6 +85,7 @@ var badConfLink = "Invalid confirmation link.";
 
 var activeUsers = {};
 var activeGames = {};
+var assets = {};
 
 var internalHttpServer;
 /*function setup3(db) {
@@ -206,9 +208,52 @@ var emailRegister,emailChange1,emailChange2;
 				cb();
 			});
 		}],function () {
-			goOnline();
+			recheckAssets(goOnline);
 		});
 	}
+function hashAssets(cb) {
+	installer.recurse_dir('assets/','',function (err,files) {
+		assert.ifError(err);
+		assets = {};
+		async.each(files,function (file,cb) {
+			console.log('file',file);
+			if (file.indexOf('.filepart') != -1) return cb();
+			var hasher = crypto.createHash('sha256');
+			var client = fs.createReadStream(file);
+			var size = 0;
+			client.on('data',function (data) {
+				hasher.update(data);
+				size += data.length;
+			});
+			client.on('end',function () {
+				var hash = hasher.digest('hex');
+				assets[file.replace('.',':')] = hash;
+				console.log('hash of %s is %s',file,hash);
+				installer.copyFile(file,'unpacked/objects/'+hash,function () {
+					mdb.models.ObjectSize.create({_id:hash,size:size},function () {
+						cb();
+					});
+				});
+			});
+		},function () {
+			console.log(assets);
+			if (cb) cb();
+		});
+	});
+}
+var assetMtime;
+function recheckAssets(cb) {
+	fs.stat('assets',function (err,stats) {
+		//console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
+		if (assetMtime == stats.mtime.getTime()) {
+			if (cb) cb();
+		} else {
+			hashAssets(cb);
+			assetMtime = stats.mtime.getTime();
+		}
+	});
+}
+setInterval(recheckAssets,60000);
 //});
 function log(format) {
 	var out = Array.prototype.slice.call(arguments);
@@ -453,15 +498,18 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 			var checked = {};
 			for (var x=0; x<params.files.length; x++) {
 				var clientFile = params.files[x];
-				clientFile.key = clientFile.path.replace('.','_');
+				clientFile.key = clientFile.path.replace('.',':');
 				checked[clientFile.key] = true;
 			}
 			for (var key in targetVersion.hashes) {
 				if (!checked[key]) {
-					console.log('file %s is missing',key);
-					var fake = { path:key.replace('_','.'), hash:'', key:key };
+					console.log('file %s is missing',key.replace(':','.'));
+					var fake = { path:key.replace(':','.'), hash:'', key:key };
 					params.files.push(fake);
 				}
+			}
+			for (var x in assets) {
+				targetVersion.hashes[x] = assets[x];
 			}
 			async.each(params.files,function checkFile(clientFile,cb) {
 				clientFile.hash = clientFile.hash.toString('hex');

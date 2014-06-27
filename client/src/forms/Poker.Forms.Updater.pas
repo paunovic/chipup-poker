@@ -3,14 +3,12 @@ unit Poker.Forms.Updater;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit,
-  cxLabel, cxProgressBar, cxImage,
-  OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
-  OverbyteIcsWndControl, dxGDIPlusClasses;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit, cxLabel,
+  cxProgressBar, cxImage, OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
+  ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses, Poker.Interfaces.ModalForm;
 
 type
-  TfrmUpdater = class(TForm)
+  TfrmUpdater = class(TForm, IModalForm)
     pbProgress: TcxProgressBar;
     HttpClient: THttpCli;
     lbsCaption: TcxLabel;
@@ -28,22 +26,27 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
+    FCloseCallback: TNotifyEvent;
     FUpdateFileIndex: Integer;
     FUpdateDir: String;
-    FQuitMsgPosted: Boolean;
     FTotalSize: UINT32;
     FDownloadedSize: UINT32;
     FCurrentDownloadedSize: UINT32;
     FFullInstaller: Boolean;
+    FRequiresReboot: Boolean;
 
-    procedure PostQuitMessage;
+    function PatchNonRebootFiles: Integer;
     function ProcessNextFile: Boolean;
     function StoreDownloadedFile: Boolean;
-    function MakeBatchUpdater(out ABatchFile: String): Boolean;
+    function MakeBatchUpdater(out ABatchFile: String): Integer;
     procedure DownloadFullInstaller;
+    procedure DoUpdate;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
+    procedure SetCloseCallback(const ACallback: TNotifyEvent);
+
+    property RequiresReboot: Boolean read FRequiresReboot;
   end;
 
 implementation
@@ -51,8 +54,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule,
-  Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.Misc;
+  Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule, Poker.Protobufs.Objects.UpdateFileInfo,
+  Poker.Common.Misc, Poker.HardcodedSettings, Winapi.ShellApi;
 
 
 procedure TfrmUpdater.FormCreate(Sender: TObject);
@@ -82,7 +85,9 @@ begin
   (obj as TMemoryStream).Free;
 
   FormsContainer.Remove(self);
-  PostQuitMessage;
+
+  if Assigned(FCloseCallback) then
+    FCloseCallback(self);
 end;
 
 procedure TfrmUpdater.CreateParams(var AParams: TCreateParams);
@@ -96,7 +101,8 @@ begin
   HttpClient.OnDocData := nil;
   HttpClient.OnRequestDone := nil;
   HttpClient.ContentCodingHnd.Enabled := FALSE;
-  HttpClient.Abort;
+  if HttpClient.State <> httpReady then
+    HttpClient.Abort;
 
   Action := caFree;
 end;
@@ -111,13 +117,74 @@ begin
   WindowState := wsMinimized;
 end;
 
-procedure TfrmUpdater.PostQuitMessage;
+function TfrmUpdater.PatchNonRebootFiles: Integer;
+{
+  1 - success
+  2 - fatal error
+}
+var
+  ufi: TPB_UpdateFileInfo;
+  requires_reboot: Boolean;
+  update_file: TUpdateFile;
+  ufipath: String;
+  newfile, oldfile: String;
+  exec_info: TShellExecuteInfo;
 begin
-  if not FQuitMsgPosted then
+  result := 1;
+
+  for ufi in dmMain.UpdateFiles do
   begin
-    PostMessage(frmChipUpMain.Handle, WM_QUIT, 0, 0);
-    FQuitMsgPosted := TRUE;
+    requires_reboot := TRUE;
+    for update_file in Settings.Hardcoded.UPDATE_FILES do
+      if LowerCase(update_file.Path) = LowerCase(ufi.Path) then
+      begin
+        requires_reboot := update_file.RequiresReboot;
+        Break;
+      end;
+
+    if not requires_reboot then
+    begin
+      ufipath := StringReplace(ufi.Path, '/', '\', [rfReplaceAll]);
+      case ufi.FileType of
+        ufFull, ufDiff: begin
+          newfile := FUpdateDir + ufipath;
+          if not FileExists(newfile) then
+            Exit(2);
+
+          oldfile := SelfPath + ufipath;
+          ForceDirectories(ExtractFilePath(oldfile));
+
+          case ufi.FileType of
+            ufFull: CopyFile(PChar(newfile), PChar(oldfile), FALSE);
+            ufDiff: begin
+              if ShellOpen(PChar(SelfPath + 'bspatch.exe'), @exec_info, PChar(Format('"%s" "%s" "%s"', [oldfile, oldfile, newfile])), nil, SW_HIDE) then
+                WaitForSingleObject(exec_info.hProcess, INFINITE)
+              else
+                Exit(2);
+            end;
+          end;
+        end;
+        ufRemove: DeleteFile(SelfPath + ufipath);
+      end;
+    end;
   end;
+end;
+
+procedure TfrmUpdater.DoUpdate;
+var
+  batch_file: String;
+  pnr_res, mbu_res: Integer;
+begin
+  pnr_res := PatchNonRebootFiles;
+  mbu_res := MakeBatchUpdater(batch_file);
+  if (pnr_res = 2) or
+     (mbu_res = 2) then
+    DownloadFullInstaller;
+
+  FRequiresReboot := mbu_res = 1;
+  if FRequiresReboot then
+    dmMain.SetUpdaterBatchFile(batch_file);
+  Close;
 end;
 
 procedure TfrmUpdater.DownloadFullInstaller;
@@ -128,27 +195,45 @@ begin
   HttpClient.GetASync;
 end;
 
-function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Boolean;
+function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Integer;
+{
+  0 - no files to patch
+  1 - success
+  2 - fatal error
+}
 var
   ufi: TPB_UpdateFileInfo;
+  update_file: TUpdateFile;
   ufipath: String;
   newfile: String;
   oldfile: String;
   batch: TStringList;
-  res: Boolean;
+  requires_reboot: Boolean;
 begin
+  result := 0;
   batch := TStringList.Create;
   try
     batch.Add('PING 127.0.0.1 -n 2');
     for ufi in dmMain.UpdateFiles do
     begin
+      requires_reboot := TRUE;
+      for update_file in Settings.Hardcoded.UPDATE_FILES do
+        if LowerCase(update_file.Path) = LowerCase(ufi.Path) then
+        begin
+          requires_reboot := update_file.RequiresReboot;
+          Break;
+        end;
+
+      if not requires_reboot then
+        Continue;
+
       ufipath := StringReplace(ufi.Path, '/', '\', [rfReplaceAll]);
       case ufi.FileType of
         ufRemove: batch.Add(Format('DEL /S /Q "%s"', [SelfPath + ufipath]));
         ufFull, ufDiff: begin
           newfile := FUpdateDir + ufipath;
           if not FileExists(newfile) then
-            Exit(FALSE);
+            Exit(2);
 
           oldfile := SelfPath + ufipath;
           ForceDirectories(ExtractFilePath(oldfile));
@@ -159,7 +244,12 @@ begin
           end;
         end;
       end;
+      result := 1;
     end;
+
+    if result = 0 then
+      Exit;
+
     batch.Add(Format('START "" "%s"', [ParamStr(0)]));
     batch.Add(Format('RMDIR /S /Q "%s"', [FUpdateDir]));
     ABatchFile := FUpdateDir + 'updater.bat';
@@ -167,23 +257,30 @@ begin
     DeleteFile(ABatchFile);
     if FileExists(ABatchFile) then
     begin
-      {$IFDEF DEBUG} DebugLn('Error while deleting old batch file', ditApplication); {$ENDIF}
-      Exit(FALSE);
+      {$IFDEF DEBUG} DebugLn('Error while deleting old batch file', ditException); {$ENDIF}
+      Exit(2);
     end;
 
     ForceDirectories(ExtractFilePath(ABatchFile));
     batch.SaveToFile(ABatchFile);
-    res := FileExists(ABatchFile);
-    {$IFDEF DEBUG}
-    if res then
-      DebugLn('Batch file saved', ditApplication)
+    if FileExists(ABatchFile) then
+    begin
+      result := 1;
+      {$IFDEF DEBUG} DebugLn('Batch file saved', ditApplication); {$ENDIF}
+    end
     else
-      DebugLn('Error while saving batch file', ditException);
-    {$ENDIF}
-    Exit(res);
+    begin
+      result := 2;
+      {$IFDEF DEBUG} DebugLn('Error while saving batch file', ditException); {$ENDIF}
+    end;
   finally
     batch.Free;
   end;
+end;
+
+procedure TfrmUpdater.SetCloseCallback(const ACallback: TNotifyEvent);
+begin
+  FCloseCallback := ACallback;
 end;
 
 function TfrmUpdater.StoreDownloadedFile: Boolean;
@@ -197,7 +294,7 @@ begin
   DeleteFile(fname);
   if FileExists(fname) then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Error while storing file [%d/%d]: cannot delete old file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(Format('Error while storing file [%d/%d]: cannot delete old file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditException); {$ENDIF}
     Exit(FALSE);
   end;
   (HttpClient.RcvdStream as TMemoryStream).SaveToFile(fname);
@@ -206,14 +303,12 @@ begin
   if res then
     DebugLn(Format('File [%d/%d] saved', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication)
   else
-    DebugLn(Format('Error while storing file [%d/%d]: cannot save file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditApplication);
+    DebugLn(Format('Error while storing file [%d/%d]: cannot save file ', [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count]), ditException);
   {$ENDIF}
   Exit(res);
 end;
 
 function TfrmUpdater.ProcessNextFile: Boolean;
-var
-  batch_file: String;
 begin
   (HttpClient.RcvdStream as TMemoryStream).Clear;
   Inc(FDownloadedSize, FCurrentDownloadedSize);
@@ -221,13 +316,7 @@ begin
   Inc(FUpdateFileIndex);
   if FUpdateFileIndex > dmMain.UpdateFiles.Count - 1 then
   begin
-    if MakeBatchUpdater(batch_file) then
-    begin
-      Close;
-      dmMain.SetUpdaterBatchFile(batch_file)
-    end
-    else
-      DownloadFullInstaller;
+    DoUpdate;
     Exit(FALSE);
   end
   else
@@ -236,8 +325,9 @@ begin
       ufRemove: result := ProcessNextFile;
     else
       HttpClient.URL := dmMain.UpdateFiles[FUpdateFileIndex].Url;
-      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%.2fMB] %s',
-        [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(Format('Downloading update file [%d/%d] [%s] [%.2fMB] %s',
+          [FUpdateFileIndex + 1, dmMain.UpdateFiles.Count, dmMain.UpdateFiles[FUpdateFileIndex].Path,
+           dmMain.UpdateFiles[FUpdateFileIndex].FileSize / 1024 / 1024, HttpClient.URL]), ditNetInc); {$ENDIF}
       HttpClient.GetASync;
       Exit(TRUE);
     end;

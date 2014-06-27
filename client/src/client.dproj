@@ -95,7 +95,9 @@
 			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-			<Debugger_RunParams>-noupdate</Debugger_RunParams>
+			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
+			<DCC_DebugDCUs>true</DCC_DebugDCUs>
+			<Debugger_RunParams>-noupdate1</Debugger_RunParams>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=ChipUpPoker;LegalCopyright=Marko Paunovic, paunovic@gmail.com;LegalTrademarks=;OriginalFilename=chipuppoker.exe;ProductName=ChipUp Poker;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
@@ -133,10 +135,10 @@
 			<RcCompile Include="resources\Poker.Resources.Sounds.rc">
 				<Form>Poker.Resources.Sounds.res</Form>
 			</RcCompile>
-			<DCCReference Include="3rdparty\protobufs\pbInput.pas"/>
-			<DCCReference Include="3rdparty\protobufs\pbOutput.pas"/>
-			<DCCReference Include="3rdparty\protobufs\pbPublic.pas"/>
-			<DCCReference Include="3rdparty\protobufs\StrBuffer.pas"/>
+			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbInput.pas"/>
+			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbOutput.pas"/>
+			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbPublic.pas"/>
+			<DCCReference Include="..\..\delphi-3rd-party\protobufs\StrBuffer.pas"/>
 			<DCCReference Include="3rdparty\icsv8\OverbyteIcsHttpProt.pas"/>
 			<DCCReference Include="skins\ChipUpPokerDarkSkin\ChipUpPokerDarkSkin.pas"/>
 			<DCCReference Include="Poker.DataModule.pas">
@@ -410,8 +412,6 @@
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
-						<Excluded_Packages Name="c:\Program Files (x86)\Steema Software\TeeChart 2014 for RAD XE2\Delphi16.ios\Bin\DclFMITeePro916.bpl">TeeChart Pro 2014 for FireMonkey iOS Components</Excluded_Packages>
-						<Excluded_Packages Name="C:\Program Files (x86)\Steema Software\TeeChart 2014 for RAD XE2\Delphi16.win32\Bin\DclTree2D16Tee9.bpl">TeeTree 2 Components</Excluded_Packages>
 						<Excluded_Packages Name="C:\Users\reiser\Documents\DevExpress VCL\Library\Delphi16\dcldxPSDBTeeChartD16.bpl">ExpressPrinting System ReportLink for DBTeeChart by Developer Express Inc.</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k160.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp160.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>

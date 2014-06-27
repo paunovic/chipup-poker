@@ -15,7 +15,6 @@ type
     FGameId: TBytes;
     FClubId: TBytes;
     FHandId: UINT;
-    FClubSeq: Integer;
     FGame: TGameInfo;
     FClub: TClubInfo;
     FHandHistoryPlayback: THandHistoryPlayback;
@@ -44,7 +43,6 @@ type
     property Club: TClubInfo read FClub;
     property GameId: TBytes read FGameId;
     property ClubId: TBytes read FClubId;
-    property ClubSeq: Integer read FClubSeq;
     property HandId: UINT read FHandId;
     property Form: TForm read FForm;
     property SeatIndex: Integer read FSeatIndex write FSeatIndex;
@@ -87,26 +85,15 @@ uses
 { TTable }
 
 destructor TTable.Destroy;
-var
-  ts: TTableStatus;
 begin
   if FTableType = ttLiveGame then
     ServerSocket.LeaveTable(FGameId);
 
   FreeAndNil(FForm);
-
-  ts := nil;
-  if Assigned(FRenderer) then
-  begin
-    ts := FRenderer.TableStatus;
-    FreeAndNil(FRenderer);
-  end;
+  FreeAndNil(FRenderer);
 
   if FTableType = ttSettingsPreview then
-  begin
     FreeAndNil(FClub);
-    FreeAndNil(ts);
-  end;
 
   FreeAndNil(FHandHistoryPlayback);
 
@@ -128,7 +115,6 @@ begin
   FSeatIndex := -1;
   FGameId := AGame.MongoId;
   FClubId := AClub.MongoId;
-  FClubSeq := AClub.Id;
   FGame := AGame;
   FClub := AClub;
   FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttLiveGame);
@@ -306,7 +292,7 @@ begin
   {$IFDEF DEBUG} DebugLn('Reassigning table objects...', ditApplication); {$ENDIF}
 
   for table in ToArray do
-    if (dmMain.SelfInfo.Clubs.FindClub(table.ClubSeq, club)) and
+    if (dmMain.SelfInfo.Clubs.FindClub(table.ClubId, club)) and
        (club.Games.FindGame(table.GameId, game)) then
       table.ReassignObjects(game.MongoId)
 end;

@@ -6,7 +6,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
-  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsForm, Poker.Objects.ClubInfo,
+  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsForm, Poker.Objects.ClubInfo, Poker.HardcodedSettings,
   cxHint, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo,
   cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels, Vcl.ImgList,
   Vcl.Controls;
@@ -32,6 +32,7 @@ type
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
+    function GetUpdateFileObject(const AUpdateFile: TUpdateFile): TPB_UpdateFileInfo;
 
   public
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
@@ -70,9 +71,8 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
   Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer, Poker.Avatars,
-  Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.HardcodedSettings, Poker.Stats.Table, Poker.Forms.Table,
-  Poker.Objects.TableStatus, Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo,
-  Poker.Forms.About;
+  Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Stats.Table, Poker.Forms.Table, Poker.Objects.TableStatus,
+  Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -103,7 +103,6 @@ begin
   TDXCore.Initialize;
   TDXTimer.Initialize;
   DXTimer.AnimationsEnabled := Settings.Animations;
-  TTableResources.Initialize(DXCore.Canvas);
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
@@ -337,34 +336,35 @@ begin
       end;
 end;
 
-procedure TdmMain.GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);
+function TdmMain.GetUpdateFileObject(const AUpdateFile: TUpdateFile): TPB_UpdateFileInfo;
 var
-  pb_ufi: TPB_UpdateFileInfo;
   fullpath: String;
   hash: RawByteString;
   hash_bytes: TBytes;
-  client_path: String;
-  update_file: String;
+begin
+  result := TPB_UpdateFileInfo.Create;
+  result.Path := AUpdateFile.Path;
+  fullpath := SelfPath + result.Path;
+  SetLength(hash_bytes, 0);
+  if FileExists(fullpath) then
+  begin
+    hash := SHA256File(fullpath);
+    if Length(hash) > 0 then
+    begin
+      SetLength(hash_bytes, Length(hash));
+      Move(hash[1], hash_bytes[0], Length(hash));
+    end;
+  end;
+  result.Hash := hash_bytes;
+  result.Path := StringReplace(result.Path, '\', '/', [rfReplaceAll]);
+end;
+
+procedure TdmMain.GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);
+var
+  update_file: TUpdateFile;
 begin
   for update_file in Settings.Hardcoded.UPDATE_FILES do
-  begin
-    pb_ufi := TPB_UpdateFileInfo.Create;
-    pb_ufi.Path := update_file;
-    fullpath := client_path + pb_ufi.Path;
-    SetLength(hash_bytes, 0);
-    if FileExists(fullpath) then
-    begin
-      hash := SHA256File(fullpath);
-      if Length(hash) > 0 then
-      begin
-        SetLength(hash_bytes, Length(hash));
-        Move(hash[1], hash_bytes[0], Length(hash));
-      end;
-    end;
-    pb_ufi.Hash := hash_bytes;
-    pb_ufi.Path := StringReplace(pb_ufi.Path, '\', '/', [rfReplaceAll]);
-    AFiles.Add(pb_ufi);
-  end;
+    AFiles.Add(GetUpdateFileObject(update_file));
 end;
 
 end.

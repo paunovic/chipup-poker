@@ -29,7 +29,7 @@ function getNextSequence(name,cb) {
 		{ $inc:{seq:1}},
 	function (err,res) {
 		assert.ifError(err);
-		console.log('seq',name,err,res);
+		//console.log('seq',name,err,res);
 		if (res) {
 			cb(res.seq);
 		} else {

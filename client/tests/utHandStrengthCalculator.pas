@@ -47,56 +47,30 @@ end;
 procedure TestTHandStrengthCalculator.TestGetHandStrength;
 var
   ReturnValue: string;
-  AShort: Boolean;
-  AGameType: TGameType;
-  ATableCards: string;
-  APlayerCards: string;
-  fstream: TFileStream;
-  freader: TStreamReader;
-  ch: Char;
-  line: String;
-  valnum: Integer;
 begin
-  AGameType := gtHoldem;
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('AhAd', '', gtHoldem, FALSE);
+  Check(ReturnValue <> '');
 
-  valnum := 0;
-  fstream := TFileStream.Create('..\..\..\data\hands.txt', fmOpenRead or fmShareDenyNone);
-  try
-    freader := TStreamReader.Create(fstream);
-    try
-      while not freader.EndOfStream do
-      begin
-        line := freader.ReadLine;
-        if line = '' then
-          Continue;
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('AhAdKdKh', '', gtOmaha, FALSE);
+  Check(ReturnValue <> '');
 
-        ch := line[1];
-        case ch of
-          'h': AGameType := gtHoldem;
-          'o': AGameType := gtOmaha;
-        else
-          Continue;
-        end;
-        Delete(line, 1, 2);
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('AhAd', '5c6d7h', gtHoldem, FALSE);
+  Check(ReturnValue <> '');
 
-        ATableCards := Copy(line, 1, 10);
-        Delete(line, 1, 11);
-        APlayerCards := line;
-        AShort := FALSE;
-        ReturnValue := FHandStrengthCalculator.GetHandStrength(APlayerCards, ATableCards, AGameType, AShort);
-        Check(ReturnValue <> '');
-        Inc(valnum);
-        if valnum mod 10000 = 0 then
-          Status(Format('%d hands validated', [valnum]));
-      end;
-    finally
-      freader.Free;
-    end;
-  finally
-    fstream.Free;
-  end;
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('8d9cAhAd', '5c6d7h', gtOmaha, FALSE);
+  Check(ReturnValue <> '');
 
-  Status(Format('%d hands validated', [valnum]));
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('AhAd', '5c6d7h3d', gtHoldem, FALSE);
+  Check(ReturnValue <> '');
+
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('AhAd4h2c', '5c6d7h3d', gtOmaha, FALSE);
+  Check(ReturnValue <> '');
+
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('AhAd', '5c6d7h3dKh', gtHoldem, FALSE);
+  Check(ReturnValue <> '');
+
+  ReturnValue := FHandStrengthCalculator.GetHandStrength('AhAd4h2c', '5c6d7h3dKd', gtOmaha, FALSE);
+  Check(ReturnValue <> '');
 end;
 
 initialization

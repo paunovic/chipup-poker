@@ -9,6 +9,8 @@ var config = require('./config');
 var models = require('./db').models;
 
 module.exports.unpackInstaller = unpackInstaller;
+module.exports.copyFile = copyFile;
+module.exports.recurse_dir = recurse_dir;
 function unpackInstaller(record,cb1) {
 	function updateLive(doc,sizes,cb) {
 		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
@@ -37,7 +39,7 @@ function unpackInstaller(record,cb1) {
 			client.on('end',function () {
 				var hash = hasher.digest('hex');
 				console.log('hash of %s is %s',filename,hash);
-				var key = filename.replace('.','_');
+				var key = filename.replace('.',':');
 				sizes.push({_id:hash, size:size});
 				hashes[key] = hash;
 				copyFile('unpacked/'+record._id+'/app/'+filename,'unpacked/objects/'+hash,function () {
@@ -66,32 +68,6 @@ function unpackInstaller(record,cb1) {
 			});
 		});
 	}
-	function recurse_dir(path,prefix,cb4) {
-		var items = [];
-		fs.readdir(prefix+path,function (err,files) {
-			console.log('checked path %s %s',prefix,path);
-			assert.ifError(err);
-			async.each(files,function checkItem(filename,cb3) {
-				fs.stat(prefix+path+filename,function (err,stats) {
-					assert.ifError(err);
-					console.log('stats:%j',stats);
-					if (stats.isDirectory()) {
-						recurse_dir(filename+'/',prefix,function (err,items2) {
-							console.log('2nd level %j',items2);
-							assert.ifError(err);
-							items = items.concat(items2);
-							cb3();
-						});
-					} else if (stats.isFile()) {
-						items.push(path+filename);
-						cb3();
-					}
-				});
-			},function () {
-				cb4(null,items);
-			});
-		});
-	}
 	var unpacker = child_process.spawn('innoextract',['-l','-d','unpacked/'+record._id+'/','-e','installers/'+record.name],{stdio:'inherit'});
 	unpacker.on('close',function (code) {
 		if (code != 0) {
@@ -114,5 +90,31 @@ function copyFile(source,dest,cb) {
 		var output = fs.createWriteStream(dest);
 		input.pipe(output);
 		input.on('end',cb);
+	});
+}
+function recurse_dir(path,prefix,cb4) {
+	var items = [];
+	fs.readdir(prefix+path,function (err,files) {
+		console.log('checked path %s %s',prefix,path);
+		assert.ifError(err);
+		async.each(files,function checkItem(filename,cb3) {
+			fs.stat(prefix+path+filename,function (err,stats) {
+				assert.ifError(err);
+				console.log('stats:%j',stats);
+				if (stats.isDirectory()) {
+					recurse_dir(filename+'/',prefix,function (err,items2) {
+						console.log('2nd level %j',items2);
+						assert.ifError(err);
+						items = items.concat(items2);
+						cb3();
+					});
+				} else if (stats.isFile()) {
+					items.push(path+filename);
+					cb3();
+				}
+			});
+		},function () {
+			cb4(null,items);
+		});
 	});
 }

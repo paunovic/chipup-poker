@@ -215,7 +215,7 @@ begin
   ArchiveTypeAccess := ataAnyFile;
   FDXMediaFile := TAsphyreArchive.Create;
   FDXMediaFile.OpenMode := aomReadOnly;
-  FDXMediaFile.FileName := SelfPath + Settings.Hardcoded.RESOURCES.DIRECTORY + Settings.Hardcoded.RESOURCES.DIRECTX_MEDIA;
+  FDXMediaFile.FileName := SelfPath + Settings.Hardcoded.ASSETS.DIRECTORY + Settings.Hardcoded.ASSETS.DIRECTX_MEDIA;
 
   FDXImages := TAsphyreImages.Create;
 
@@ -312,7 +312,7 @@ var
   id: Integer;
 begin
   FDXImages.AddFromArchive(Format('%s.image', [AName]), FDXMediaFile);
-  id := FDXFonts.Insert(Format('\%s%s | %s.xml', [Settings.Hardcoded.RESOURCES.DIRECTORY, Settings.Hardcoded.RESOURCES.DIRECTX_MEDIA, AName]), Format('%s.image', [AName]));
+  id := FDXFonts.Insert(Format('\%s%s | %s.xml', [Settings.Hardcoded.ASSETS.DIRECTORY, Settings.Hardcoded.ASSETS.DIRECTX_MEDIA, AName]), Format('%s.image', [AName]));
   if id <> -1 then
     AReceiver := FDXFonts[id]
   else

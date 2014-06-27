@@ -123,8 +123,6 @@ type
 
     procedure ModalFormClose(ASender: TObject);
 
-    procedure ShowLoginForm;
-
     procedure DoLogout;
     procedure UpdateClublist;
     procedure UpdatePublicClublist;
@@ -153,7 +151,8 @@ type
 
     procedure AvatarChanged(Sender: TObject);
 
-    function ConfirmToCloseTables: Boolean;
+    function ConfirmToCloseTablesAppClose: Boolean;
+    function ConfirmToCloseTablesLogout: Boolean;
     function ProcessClubObject(const AClub: TPB_Club; const AMethodId: Integer): TClubInfo;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
@@ -168,6 +167,7 @@ type
     procedure WMSettingChange(var AMessage: TWMSettingChange); message WM_SETTINGCHANGE;
   public
     procedure LoginStatus(const AValue: TLoginStatus);
+    procedure ShowLoginForm;
   end;
 
 
@@ -244,7 +244,7 @@ end;
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose := (FShuttingDown) or
-              (ConfirmToCloseTables);
+              (ConfirmToCloseTablesAppClose);
   if CanClose then
     ServerSocket.Logout;
 end;
@@ -302,8 +302,6 @@ begin
 end;
 
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);
-var
-  reconnect_form: TfrmReconnect;
 begin
   case ANewState of
     wsClosed: begin // handle disconnection here (try to reconnect)
@@ -321,8 +319,7 @@ begin
         EnableWindow(Handle, FALSE);
 
         // open reconection form
-        reconnect_form := FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect;
-        reconnect_form.SetCloseCallback(ModalFormClose);
+        (FormsContainer.RunForm(TfrmReconnect, self, [], FALSE) as TfrmReconnect).SetCloseCallback(ModalFormClose);
       end;
     end;
   end;
@@ -368,7 +365,7 @@ end;
 
 procedure TfrmChipUpMain.acLogoutExecute(Sender: TObject);
 begin
-  if not ConfirmToCloseTables then
+  if not ConfirmToCloseTablesLogout then
     Exit;
 
   ServerSocket.Logout;
@@ -503,11 +500,18 @@ begin
   UpdatePublicClublist;
 end;
 
-function TfrmChipUpMain.ConfirmToCloseTables: Boolean;
+function TfrmChipUpMain.ConfirmToCloseTablesAppClose: Boolean;
 begin
   result := TRUE;
   if Tables.SittingCount > 0 then
-    result := MessageDlg('If you close the application, you will automatically leave the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
+    result := MessageDlg('Closing the application will automatically leave all the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
+end;
+
+function TfrmChipUpMain.ConfirmToCloseTablesLogout: Boolean;
+begin
+  result := TRUE;
+  if Tables.SittingCount > 0 then
+    result := MessageDlg('Upon logout you will automatically leave all the tables you are currently playing on. Proceed?', mtWarning, mbYesNo, 0) = mrYes;
 end;
 
 procedure TfrmChipUpMain.UpdateClublist;
@@ -743,7 +747,7 @@ procedure TfrmChipUpMain.imgCashierMouseDown(Sender: TObject; Button: TMouseButt
 begin
   if Button = mbLeft then
   begin
-    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
+    if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       LoadImageFromResource(imgCashier, 'CashierPressed');
   end;
 end;
@@ -752,7 +756,7 @@ procedure TfrmChipUpMain.imgCashierMouseUp(Sender: TObject; Button: TMouseButton
 begin
   if Button = mbLeft then
   begin
-    if IsPointInsideCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
+    if PtInCircle(X, Y, imgCashier.Width div 2, imgCashier.Height div 2, 42) then
       dmMain.OpenCashierLink;
     LoadImageFromResource(imgCashier, 'CashierNormal');
   end;
@@ -806,7 +810,7 @@ begin
       end;
     end;
 
-    lsUpdating: FormsContainer.RunForm(TfrmUpdater, self, [], FALSE);
+    lsUpdating: (FormsContainer.RunForm(TfrmUpdater, self, [], FALSE) as TfrmUpdater).SetCloseCallback(ModalFormClose);
   else
     Close;
   end;
@@ -815,14 +819,18 @@ end;
 procedure TfrmChipUpMain.ModalFormClose(ASender: TObject);
 begin
   if ASender is TfrmReconnect then
-  begin
     case (ASender as TfrmReconnect).CurrentStatus of
       rsLoggedIn: ConfigureGUI;
     else
       FormsContainer.Items.Extract(ASender as TForm);
       ShowLoginForm;
     end;
-  end;
+
+  if ASender is TfrmUpdater then
+    if (ASender as TfrmUpdater).RequiresReboot then
+      PostMessage(frmChipUpMain.Handle, WM_QUIT, 0, 0)
+    else
+      ShowLoginForm;
 
   EnableWindow(Handle, TRUE);
 end;
