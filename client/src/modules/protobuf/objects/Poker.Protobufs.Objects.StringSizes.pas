@@ -210,6 +210,7 @@ end;
 
 procedure TPB_StringSizes.SetEmail(const AValue: Integer);
 begin
+  Assert(!has_Email);
   FEmail := AValue;
   ProtobufOutput.writeInt32(kEmailFieldNumber, AValue);
   set_has_Email;
@@ -238,6 +239,7 @@ end;
 
 procedure TPB_StringSizes.SetPassword(const AValue: Integer);
 begin
+  Assert(!has_Password);
   FPassword := AValue;
   ProtobufOutput.writeInt32(kPasswordFieldNumber, AValue);
   set_has_Password;
@@ -266,6 +268,7 @@ end;
 
 procedure TPB_StringSizes.SetClubname(const AValue: Integer);
 begin
+  Assert(!has_Clubname);
   FClubname := AValue;
   ProtobufOutput.writeInt32(kClubnameFieldNumber, AValue);
   set_has_Clubname;
@@ -294,6 +297,7 @@ end;
 
 procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
 begin
+  Assert(!has_Invcode);
   FInvcode := AValue;
   ProtobufOutput.writeInt32(kInvcodeFieldNumber, AValue);
   set_has_Invcode;
@@ -322,6 +326,7 @@ end;
 
 procedure TPB_StringSizes.SetUsername(const AValue: Integer);
 begin
+  Assert(!has_Username);
   FUsername := AValue;
   ProtobufOutput.writeInt32(kUsernameFieldNumber, AValue);
   set_has_Username;
@@ -350,6 +355,7 @@ end;
 
 procedure TPB_StringSizes.SetGamename(const AValue: Integer);
 begin
+  Assert(!has_Gamename);
   FGamename := AValue;
   ProtobufOutput.writeInt32(kGamenameFieldNumber, AValue);
   set_has_Gamename;
@@ -378,6 +384,7 @@ end;
 
 procedure TPB_StringSizes.SetContactMessage(const AValue: Integer);
 begin
+  Assert(!has_ContactMessage);
   FContactMessage := AValue;
   ProtobufOutput.writeInt32(kContactMessageFieldNumber, AValue);
   set_has_ContactMessage;

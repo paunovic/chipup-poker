@@ -125,6 +125,7 @@ end;
 
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TBytes);
 begin
+  Assert(!has_Userid);
   FUserid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
@@ -153,6 +154,7 @@ end;
 
 procedure TPB_ClubPlayerStats.SetClubBalance(const AValue: Integer);
 begin
+  Assert(!has_ClubBalance);
   FClubBalance := AValue;
   ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
   set_has_ClubBalance;

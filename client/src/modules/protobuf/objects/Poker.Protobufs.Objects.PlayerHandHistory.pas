@@ -210,6 +210,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
 begin
+  Assert(!has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
@@ -238,6 +239,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetSeat(const AValue: Integer);
 begin
+  Assert(!has_Seat);
   FSeat := AValue;
   ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
@@ -266,6 +268,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetCards(const AValue: TBytes);
 begin
+  Assert(!has_Cards);
   FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
@@ -294,6 +297,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetChips(const AValue: UINT32);
 begin
+  Assert(!has_Chips);
   FChips := AValue;
   ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;
@@ -322,6 +326,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetNick(const AValue: String);
 begin
+  Assert(!has_Nick);
   FNick := AValue;
   ProtobufOutput.writeString(kNickFieldNumber, AValue);
   set_has_Nick;
@@ -350,6 +355,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetMuck(const AValue: Boolean);
 begin
+  Assert(!has_Muck);
   FMuck := AValue;
   ProtobufOutput.writeBoolean(kMuckFieldNumber, AValue);
   set_has_Muck;
@@ -378,6 +384,7 @@ end;
 
 procedure TPB_PlayerHandHistory.SetStatus(const AValue: TPlayerStatus);
 begin
+  Assert(!has_Status);
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;

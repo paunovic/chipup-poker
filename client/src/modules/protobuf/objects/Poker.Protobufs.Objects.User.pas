@@ -193,6 +193,7 @@ end;
 
 procedure TPB_User.SetMongoId(const AValue: TBytes);
 begin
+  Assert(!has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
@@ -221,6 +222,7 @@ end;
 
 procedure TPB_User.SetAvatar(const AValue: TBytes);
 begin
+  Assert(!has_Avatar);
   FAvatar := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kAvatarFieldNumber, AValue);
   set_has_Avatar;
@@ -249,6 +251,7 @@ end;
 
 procedure TPB_User.SetDisplayname(const AValue: String);
 begin
+  Assert(!has_Displayname);
   FDisplayname := AValue;
   ProtobufOutput.writeString(kDisplaynameFieldNumber, AValue);
   set_has_Displayname;
@@ -277,6 +280,7 @@ end;
 
 procedure TPB_User.SetEmail(const AValue: String);
 begin
+  Assert(!has_Email);
   FEmail := AValue;
   ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
@@ -305,6 +309,7 @@ end;
 
 procedure TPB_User.SetAuthed(const AValue: Boolean);
 begin
+  Assert(!has_Authed);
   FAuthed := AValue;
   ProtobufOutput.writeBoolean(kAuthedFieldNumber, AValue);
   set_has_Authed;
@@ -333,6 +338,7 @@ end;
 
 procedure TPB_User.SetChips(const AValue: UINT32);
 begin
+  Assert(!has_Chips);
   FChips := AValue;
   ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;

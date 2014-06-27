@@ -333,6 +333,7 @@ end;
 
 procedure TPB_Game.SetMongoId(const AValue: TBytes);
 begin
+  Assert(!has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
@@ -361,6 +362,7 @@ end;
 
 procedure TPB_Game.SetCreatorMongoId(const AValue: TBytes);
 begin
+  Assert(!has_CreatorMongoId);
   FCreatorMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCreatorMongoIdFieldNumber, AValue);
   set_has_CreatorMongoId;
@@ -389,6 +391,7 @@ end;
 
 procedure TPB_Game.SetGamename(const AValue: String);
 begin
+  Assert(!has_Gamename);
   FGamename := AValue;
   ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
   set_has_Gamename;
@@ -417,6 +420,7 @@ end;
 
 procedure TPB_Game.SetClubseq(const AValue: Integer);
 begin
+  Assert(!has_Clubseq);
   FClubseq := AValue;
   ProtobufOutput.writeInt32(kClubseqFieldNumber, AValue);
   set_has_Clubseq;
@@ -445,6 +449,7 @@ end;
 
 procedure TPB_Game.SetGameType(const AValue: TGameType);
 begin
+  Assert(!has_GameType);
   FGameType := AValue;
   ProtobufOutput.writeInt32(kGameTypeFieldNumber, Integer(AValue));
   set_has_GameType;
@@ -473,6 +478,7 @@ end;
 
 procedure TPB_Game.SetGameLimit(const AValue: TGameLimit);
 begin
+  Assert(!has_GameLimit);
   FGameLimit := AValue;
   ProtobufOutput.writeInt32(kGameLimitFieldNumber, Integer(AValue));
   set_has_GameLimit;
@@ -501,6 +507,7 @@ end;
 
 procedure TPB_Game.SetBlinds(const AValue: TGameBlinds);
 begin
+  Assert(!has_Blinds);
   FBlinds := AValue;
   ProtobufOutput.writeInt32(kBlindsFieldNumber, Integer(AValue));
   set_has_Blinds;
@@ -529,6 +536,7 @@ end;
 
 procedure TPB_Game.SetSeats(const AValue: Integer);
 begin
+  Assert(!has_Seats);
   FSeats := AValue;
   ProtobufOutput.writeInt32(kSeatsFieldNumber, AValue);
   set_has_Seats;
@@ -557,6 +565,7 @@ end;
 
 procedure TPB_Game.SetSitting(const AValue: Integer);
 begin
+  Assert(!has_Sitting);
   FSitting := AValue;
   ProtobufOutput.writeInt32(kSittingFieldNumber, AValue);
   set_has_Sitting;
@@ -585,6 +594,7 @@ end;
 
 procedure TPB_Game.SetBuyinMin(const AValue: Integer);
 begin
+  Assert(!has_BuyinMin);
   FBuyinMin := AValue;
   ProtobufOutput.writeInt32(kBuyinMinFieldNumber, AValue);
   set_has_BuyinMin;
@@ -613,6 +623,7 @@ end;
 
 procedure TPB_Game.SetBuyinMax(const AValue: Integer);
 begin
+  Assert(!has_BuyinMax);
   FBuyinMax := AValue;
   ProtobufOutput.writeInt32(kBuyinMaxFieldNumber, AValue);
   set_has_BuyinMax;
@@ -641,6 +652,7 @@ end;
 
 procedure TPB_Game.SetState(const AValue: TGameState);
 begin
+  Assert(!has_State);
   FState := AValue;
   ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));
   set_has_State;
@@ -669,6 +681,7 @@ end;
 
 procedure TPB_Game.SetClosetime(const AValue: UInt64);
 begin
+  Assert(!has_Closetime);
   FClosetime := AValue;
   ProtobufOutput.WriteInt64(kClosetimeFieldNumber, AValue);
   set_has_Closetime;
@@ -697,6 +710,7 @@ end;
 
 procedure TPB_Game.SetLasthandid(const AValue: UINT32);
 begin
+  Assert(!has_Lasthandid);
   FLasthandid := AValue;
   ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
   set_has_Lasthandid;

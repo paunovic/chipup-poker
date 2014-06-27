@@ -142,6 +142,7 @@ end;
 
 procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TBytes);
 begin
+  Assert(!has_ClubMongoId);
   FClubMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
   set_has_ClubMongoId;
@@ -170,6 +171,7 @@ end;
 
 procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TBytes);
 begin
+  Assert(!has_PlayerMongoId);
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
@@ -198,6 +200,7 @@ end;
 
 procedure TPB_ChangeSuspendState.SetSuspended(const AValue: Boolean);
 begin
+  Assert(!has_Suspended);
   FSuspended := AValue;
   ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
   set_has_Suspended;

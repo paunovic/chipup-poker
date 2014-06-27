@@ -143,6 +143,7 @@ end;
 
 procedure TPB_Pot.SetValue(const AValue: UINT32);
 begin
+  Assert(!has_Value);
   FValue := AValue;
   ProtobufOutput.writeUInt32(kValueFieldNumber, AValue);
   set_has_Value;

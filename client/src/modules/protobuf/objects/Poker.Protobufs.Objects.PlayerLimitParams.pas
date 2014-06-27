@@ -159,6 +159,7 @@ end;
 
 procedure TPB_PlayerLimitParams.SetClubid(const AValue: TBytes);
 begin
+  Assert(!has_Clubid);
   FClubid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
@@ -187,6 +188,7 @@ end;
 
 procedure TPB_PlayerLimitParams.SetUserid(const AValue: TBytes);
 begin
+  Assert(!has_Userid);
   FUserid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
@@ -215,6 +217,7 @@ end;
 
 procedure TPB_PlayerLimitParams.SetLimit(const AValue: UINT32);
 begin
+  Assert(!has_Limit);
   FLimit := AValue;
   ProtobufOutput.writeUInt32(kLimitFieldNumber, AValue);
   set_has_Limit;
@@ -243,6 +246,7 @@ end;
 
 procedure TPB_PlayerLimitParams.SetUnlimited(const AValue: Boolean);
 begin
+  Assert(!has_Unlimited);
   FUnlimited := AValue;
   ProtobufOutput.writeBoolean(kUnlimitedFieldNumber, AValue);
   set_has_Unlimited;

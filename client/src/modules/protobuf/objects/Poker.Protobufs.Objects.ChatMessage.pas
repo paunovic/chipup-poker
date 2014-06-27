@@ -159,6 +159,7 @@ end;
 
 procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
 begin
+  Assert(!has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
@@ -187,6 +188,7 @@ end;
 
 procedure TPB_ChatMessage.SetUsername(const AValue: String);
 begin
+  Assert(!has_Username);
   FUsername := AValue;
   ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
   set_has_Username;
@@ -215,6 +217,7 @@ end;
 
 procedure TPB_ChatMessage.SetMsg(const AValue: String);
 begin
+  Assert(!has_Msg);
   FMsg := AValue;
   ProtobufOutput.writeString(kMsgFieldNumber, AValue);
   set_has_Msg;
@@ -243,6 +246,7 @@ end;
 
 procedure TPB_ChatMessage.SetTimestamp(const AValue: Int64);
 begin
+  Assert(!has_Timestamp);
   FTimestamp := AValue;
   ProtobufOutput.WriteInt64(kTimestampFieldNumber, AValue);
   set_has_Timestamp;
