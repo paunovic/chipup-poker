@@ -231,11 +231,11 @@ begin
            ((not player.Mucked) and
             (pbtablestatus.State >= tsWinning)) then
           pbseat.Cards := player.Cards;
-        pbseat.Status := player.Status;
-        if (pbseat.Status in [psFolded]) and
+        if (player.Status in [psFolded]) and
            (not folded[player.Seat]) then
-          pbseat.Status := psInHand;
-
+          pbseat.Status := psInHand
+        else
+          pbseat.Status := player.Status;
         case AHandHistoryItem.CurrentGame of
           gtHoldem: pbseat.CardCount := 2;
           gtOmaha: pbseat.CardCount := 4;
