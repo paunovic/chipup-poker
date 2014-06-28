@@ -3632,7 +3632,7 @@ object frmChipUpMain: TfrmChipUpMain
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
               SortIndex = 0
-              SortOrder = soDescending
+              SortOrder = soAscending
               Width = 125
             end
           end
@@ -4301,5 +4301,10 @@ object frmChipUpMain: TfrmChipUpMain
       Caption = 'Disconnect'
       OnExecute = acDisconnectExecute
     end
+  end
+  object ApplicationEvents: TApplicationEvents
+    OnDeactivate = ApplicationEventsDeactivate
+    Left = 368
+    Top = 48
   end
 end
