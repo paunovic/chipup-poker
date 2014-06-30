@@ -1392,7 +1392,7 @@ begin
 
       nicks := nicks + Format('%s, ', [nick]);
 
-      // 600 seconds to render pot wins if table is in playback mode, otherwise 0.5
+      // restore bets if table is in playback mode, so values are shown
       if FTableType = ttHandPlayback then
         FTableStatus.Bets[pot.WinnerData[C2].Seat] := total_chips_val div UINT32(pot.WinnerData.Count);
 

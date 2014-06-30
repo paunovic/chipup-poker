@@ -181,7 +181,7 @@ implementation
 {$R *.dfm}
 
 uses
-  {$IFDEF DEBUG} {$ENDIF}
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.Generics.Collections,
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
   Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
@@ -274,6 +274,7 @@ procedure TfrmChipUpMain.DoLogout;
 begin
   FormsContainer.CloseAllForms;
   Tables.Clear;
+  gridPublicHomeGamesTable.DataController.SetRecordCount(0);
   gridMyHomeGamesTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
