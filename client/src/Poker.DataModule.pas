@@ -209,10 +209,7 @@ end;
 
 procedure TdmMain.SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
 begin
-  if AForm is TfrmAbout then
-    UseSkin := FALSE
-  else
-    UseSkin := TRUE;
+  UseSkin := not (AForm is TfrmAbout);
 end;
 
 procedure TdmMain.StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
