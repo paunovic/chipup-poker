@@ -66,8 +66,6 @@ var
   WizardInitialized: Boolean;
 
 function InitializeSetup(): Boolean;
-var
-  C1: Integer;
 begin
   ExtractTemporaryFile('{#SkinName}');
   LoadVCLStyleS(ExpandConstant('{tmp}\{#SkinName}'));
@@ -82,6 +80,7 @@ end;
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   WizardForm.DirEdit.Text := ExpandConstant('{code:AppInstallPath}');
+  result := '';
 end;
  
 procedure DeinitializeSetup();
