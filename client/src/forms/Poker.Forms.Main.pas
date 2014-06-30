@@ -9,7 +9,7 @@ uses
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.ActnColorMaps, Vcl.StdStyleActnCtrls;
+  Vcl.ActnColorMaps, Vcl.StdStyleActnCtrls, Vcl.AppEvnts;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -74,6 +74,7 @@ type
     acSettings: TAction;
     ActionMainMenuBar: TActionMainMenuBar;
     acDisconnect: TAction;
+    ApplicationEvents: TApplicationEvents;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -114,6 +115,7 @@ type
     procedure acDisconnectExecute(Sender: TObject);
     procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient;
       var ControlClass: TCustomActionControlClass);
+    procedure ApplicationEventsDeactivate(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -190,7 +192,7 @@ uses
   Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
-  Poker.ActionMainMenuBarStyle;
+  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -1003,6 +1005,11 @@ begin
   // this reassigns colormap to ActionMainMenuBar
   // bug info: http://stackoverflow.com/questions/9577540/tactionmainmenubar-and-tactiontoolbar-lose-settings
   ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
+end;
+
+procedure TfrmChipUpMain.ApplicationEventsDeactivate(Sender: TObject);
+begin
+  FormsContainer.Close(TfrmAbout);
 end;
 
 procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);

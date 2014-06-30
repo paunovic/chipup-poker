@@ -341,6 +341,7 @@ end;
 
 procedure TPB_HandHistory.SetMongoId(const AValue: TBytes);
 begin
+  Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
@@ -369,6 +370,7 @@ end;
 
 procedure TPB_HandHistory.SetSeq(const AValue: UINT32);
 begin
+  Assert(not has_Seq);
   FSeq := AValue;
   ProtobufOutput.writeUInt32(kSeqFieldNumber, AValue);
   set_has_Seq;
@@ -397,6 +399,7 @@ end;
 
 procedure TPB_HandHistory.SetTotalrake(const AValue: UINT32);
 begin
+  Assert(not has_Totalrake);
   FTotalrake := AValue;
   ProtobufOutput.writeUInt32(kTotalrakeFieldNumber, AValue);
   set_has_Totalrake;
@@ -454,6 +457,7 @@ end;
 
 procedure TPB_HandHistory.SetCards(const AValue: TBytes);
 begin
+  Assert(not has_Cards);
   FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
@@ -482,6 +486,7 @@ end;
 
 procedure TPB_HandHistory.SetEndtime(const AValue: UINT32);
 begin
+  Assert(not has_Endtime);
   FEndtime := AValue;
   ProtobufOutput.writeUInt32(kEndtimeFieldNumber, AValue);
   set_has_Endtime;
@@ -566,6 +571,7 @@ end;
 
 procedure TPB_HandHistory.SetDealer(const AValue: UINT32);
 begin
+  Assert(not has_Dealer);
   FDealer := AValue;
   ProtobufOutput.writeUInt32(kDealerFieldNumber, AValue);
   set_has_Dealer;
@@ -594,6 +600,7 @@ end;
 
 procedure TPB_HandHistory.SetGame(const AValue: TPB_Game);
 begin
+  Assert(not has_Game);
   FGame := AValue;
   ProtobufOutput.writeMessage(kGameFieldNumber, AValue.ProtobufOutput);
   set_has_Game;
@@ -622,6 +629,7 @@ end;
 
 procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
 begin
+  Assert(not has_CurrentGame);
   FCurrentGame := AValue;
   ProtobufOutput.writeInt32(kCurrentGameFieldNumber, Integer(AValue));
   set_has_CurrentGame;
@@ -650,6 +658,7 @@ end;
 
 procedure TPB_HandHistory.SetRake(const AValue: Integer);
 begin
+  Assert(not has_Rake);
   FRake := AValue;
   ProtobufOutput.writeInt32(kRakeFieldNumber, AValue);
   set_has_Rake;

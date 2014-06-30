@@ -108,6 +108,7 @@ end;
 
 procedure TPB_ChangeEMailParams.SetNewMail(const AValue: String);
 begin
+  Assert(not has_NewMail);
   FNewMail := AValue;
   ProtobufOutput.writeString(kNewMailFieldNumber, AValue);
   set_has_NewMail;

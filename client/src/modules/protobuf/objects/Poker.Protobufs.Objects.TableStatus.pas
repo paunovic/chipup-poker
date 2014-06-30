@@ -517,6 +517,7 @@ end;
 
 procedure TPB_TableStatus.SetTableMongoId(const AValue: TBytes);
 begin
+  Assert(not has_TableMongoId);
   FTableMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
   set_has_TableMongoId;
@@ -574,6 +575,7 @@ end;
 
 procedure TPB_TableStatus.SetState(const AValue: TTableState);
 begin
+  Assert(not has_State);
   FState := AValue;
   ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));
   set_has_State;
@@ -602,6 +604,7 @@ end;
 
 procedure TPB_TableStatus.SetDealer(const AValue: Integer);
 begin
+  Assert(not has_Dealer);
   FDealer := AValue;
   ProtobufOutput.writeInt32(kDealerFieldNumber, AValue);
   set_has_Dealer;
@@ -630,6 +633,7 @@ end;
 
 procedure TPB_TableStatus.SetCurrentSeat(const AValue: Integer);
 begin
+  Assert(not has_CurrentSeat);
   FCurrentSeat := AValue;
   ProtobufOutput.writeInt32(kCurrentSeatFieldNumber, AValue);
   set_has_CurrentSeat;
@@ -685,6 +689,7 @@ end;
 
 procedure TPB_TableStatus.SetLocked(const AValue: Boolean);
 begin
+  Assert(not has_Locked);
   FLocked := AValue;
   ProtobufOutput.writeBoolean(kLockedFieldNumber, AValue);
   set_has_Locked;
@@ -713,6 +718,7 @@ end;
 
 procedure TPB_TableStatus.SetSeq(const AValue: Integer);
 begin
+  Assert(not has_Seq);
   FSeq := AValue;
   ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
   set_has_Seq;
@@ -741,6 +747,7 @@ end;
 
 procedure TPB_TableStatus.SetMinimumBet(const AValue: UINT32);
 begin
+  Assert(not has_MinimumBet);
   FMinimumBet := AValue;
   ProtobufOutput.writeUInt32(kMinimumBetFieldNumber, AValue);
   set_has_MinimumBet;
@@ -769,6 +776,7 @@ end;
 
 procedure TPB_TableStatus.SetMaximumRaise(const AValue: UINT32);
 begin
+  Assert(not has_MaximumRaise);
   FMaximumRaise := AValue;
   ProtobufOutput.writeUInt32(kMaximumRaiseFieldNumber, AValue);
   set_has_MaximumRaise;
@@ -797,6 +805,7 @@ end;
 
 procedure TPB_TableStatus.SetSmallBlind(const AValue: UINT32);
 begin
+  Assert(not has_SmallBlind);
   FSmallBlind := AValue;
   ProtobufOutput.writeUInt32(kSmallBlindFieldNumber, AValue);
   set_has_SmallBlind;
@@ -825,6 +834,7 @@ end;
 
 procedure TPB_TableStatus.SetBigBlind(const AValue: UINT32);
 begin
+  Assert(not has_BigBlind);
   FBigBlind := AValue;
   ProtobufOutput.writeUInt32(kBigBlindFieldNumber, AValue);
   set_has_BigBlind;
@@ -853,6 +863,7 @@ end;
 
 procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
 begin
+  Assert(not has_Handid);
   FHandid := AValue;
   ProtobufOutput.writeUInt32(kHandidFieldNumber, AValue);
   set_has_Handid;
@@ -881,6 +892,7 @@ end;
 
 procedure TPB_TableStatus.SetTime(const AValue: UInt64);
 begin
+  Assert(not has_Time);
   FTime := AValue;
   ProtobufOutput.WriteInt64(kTimeFieldNumber, AValue);
   set_has_Time;
@@ -967,6 +979,7 @@ end;
 
 procedure TPB_TableStatus.SetRakePercent(const AValue: UINT32);
 begin
+  Assert(not has_RakePercent);
   FRakePercent := AValue;
   ProtobufOutput.writeUInt32(kRakePercentFieldNumber, AValue);
   set_has_RakePercent;
@@ -995,6 +1008,7 @@ end;
 
 procedure TPB_TableStatus.SetCurrentGame(const AValue: TGameType);
 begin
+  Assert(not has_CurrentGame);
   FCurrentGame := AValue;
   ProtobufOutput.writeInt32(kCurrentGameFieldNumber, Integer(AValue));
   set_has_CurrentGame;
@@ -1023,6 +1037,7 @@ end;
 
 procedure TPB_TableStatus.SetRotation(const AValue: UINT32);
 begin
+  Assert(not has_Rotation);
   FRotation := AValue;
   ProtobufOutput.writeUInt32(kRotationFieldNumber, AValue);
   set_has_Rotation;
@@ -1051,6 +1066,7 @@ end;
 
 procedure TPB_TableStatus.SetTotalBalance(const AValue: UINT32);
 begin
+  Assert(not has_TotalBalance);
   FTotalBalance := AValue;
   ProtobufOutput.writeUInt32(kTotalBalanceFieldNumber, AValue);
   set_has_TotalBalance;
@@ -1079,6 +1095,7 @@ end;
 
 procedure TPB_TableStatus.SetGameLimit(const AValue: TGameLimit);
 begin
+  Assert(not has_GameLimit);
   FGameLimit := AValue;
   ProtobufOutput.writeInt32(kGameLimitFieldNumber, Integer(AValue));
   set_has_GameLimit;
@@ -1107,6 +1124,7 @@ end;
 
 procedure TPB_TableStatus.SetMinimumRaise(const AValue: UINT32);
 begin
+  Assert(not has_MinimumRaise);
   FMinimumRaise := AValue;
   ProtobufOutput.writeUInt32(kMinimumRaiseFieldNumber, AValue);
   set_has_MinimumRaise;

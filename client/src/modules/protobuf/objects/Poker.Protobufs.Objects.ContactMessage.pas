@@ -126,6 +126,7 @@ end;
 
 procedure TPB_ContactMessage.SetReason(const AValue: TContactReason);
 begin
+  Assert(not has_Reason);
   FReason := AValue;
   ProtobufOutput.writeInt32(kReasonFieldNumber, Integer(AValue));
   set_has_Reason;
@@ -154,6 +155,7 @@ end;
 
 procedure TPB_ContactMessage.SetMessage(const AValue: String);
 begin
+  Assert(not has_Message);
   FMessage := AValue;
   ProtobufOutput.writeString(kMessageFieldNumber, AValue);
   set_has_Message;

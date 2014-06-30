@@ -173,6 +173,7 @@ end;
 
 procedure TPB_LoginReply.SetLoginStatus(const AValue: TLoginStatus);
 begin
+  Assert(not has_LoginStatus);
   FLoginStatus := AValue;
   ProtobufOutput.writeInt32(kLoginStatusFieldNumber, Integer(AValue));
   set_has_LoginStatus;
@@ -201,6 +202,7 @@ end;
 
 procedure TPB_LoginReply.SetStatus(const AValue: TPB_StatusReply);
 begin
+  Assert(not has_Status);
   FStatus := AValue;
   ProtobufOutput.writeMessage(kStatusFieldNumber, AValue.ProtobufOutput);
   set_has_Status;

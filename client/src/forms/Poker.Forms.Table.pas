@@ -335,8 +335,8 @@ begin
   begin
     if IsIconic(Handle) then
       ShowWindow(Handle, SW_RESTORE);
-    BringToFront;
     SetForegroundWindow(Handle);
+    BringToFront;
     SetFocus;
     FWindowFocused := TRUE;
 
@@ -476,6 +476,7 @@ end;
 procedure TfrmTable.tiRenderTimer(Sender: TObject);
 begin
   FTable.Renderer.Render;
+  UpdateHandStrength;
 end;
 
 procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
@@ -827,8 +828,7 @@ begin
   // if raise slider was not enabled, set it to minimum value
   if not raise_en then
     FRaiseValue := FTable.Renderer.TableStatus.MinimumRaise;
-
-  // set raise caption
+  SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
 
   // check if SHOW CARDS button is enabled
   FTable.Renderer.TableStatus.ActionShowCards := (FTable.Renderer.TableStatus.State in [tsWinning, tsWinning2]) and
@@ -942,7 +942,6 @@ begin
 
       lbvHandStrength.Top := Round(FTable.Renderer.GetDXButton(FDXBRaisePresets[High(FDXBRaisePresets)]).Bounds[0].y - lbvHandStrength.Height - 5);
       UpdateHandHistoryLabel;
-      UpdateHandStrength;
     end;
 
     ttHandPlayback: begin
@@ -954,6 +953,7 @@ begin
     end;
   end;
 
+  UpdateHandStrength;
   UpdateTableCaption;
 end;
 

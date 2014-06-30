@@ -125,6 +125,7 @@ end;
 
 procedure TPB_GameQuery.SetGameid(const AValue: TBytes);
 begin
+  Assert(not has_Gameid);
   FGameid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
@@ -153,6 +154,7 @@ end;
 
 procedure TPB_GameQuery.SetLasthandid(const AValue: UINT32);
 begin
+  Assert(not has_Lasthandid);
   FLasthandid := AValue;
   ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
   set_has_Lasthandid;

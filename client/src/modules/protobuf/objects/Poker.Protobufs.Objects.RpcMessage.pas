@@ -142,6 +142,7 @@ end;
 
 procedure TPB_RpcMessage.SetMethodId(const AValue: Integer);
 begin
+  Assert(not has_MethodId);
   FMethodId := AValue;
   ProtobufOutput.writeInt32(kMethodIdFieldNumber, AValue);
   set_has_MethodId;
@@ -170,6 +171,7 @@ end;
 
 procedure TPB_RpcMessage.SetDataSize(const AValue: Integer);
 begin
+  Assert(not has_DataSize);
   FDataSize := AValue;
   ProtobufOutput.writeInt32(kDataSizeFieldNumber, AValue);
   set_has_DataSize;
@@ -198,6 +200,7 @@ end;
 
 procedure TPB_RpcMessage.SetToken(const AValue: Integer);
 begin
+  Assert(not has_Token);
   FToken := AValue;
   ProtobufOutput.writeInt32(kTokenFieldNumber, AValue);
   set_has_Token;

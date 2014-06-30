@@ -109,6 +109,7 @@ end;
 
 procedure TPB_RegisterReply.SetStatus(const AValue: TRegisterStatus);
 begin
+  Assert(not has_Status);
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;

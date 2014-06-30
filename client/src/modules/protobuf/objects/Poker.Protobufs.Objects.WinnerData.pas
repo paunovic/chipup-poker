@@ -126,6 +126,7 @@ end;
 
 procedure TPB_WinnerData.SetSeat(const AValue: Integer);
 begin
+  Assert(not has_Seat);
   FSeat := AValue;
   ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
@@ -154,6 +155,7 @@ end;
 
 procedure TPB_WinnerData.SetMsg(const AValue: String);
 begin
+  Assert(not has_Msg);
   FMsg := AValue;
   ProtobufOutput.writeString(kMsgFieldNumber, AValue);
   set_has_Msg;

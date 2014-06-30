@@ -208,6 +208,7 @@ end;
 
 procedure TPB_TableEvent.SetEvent(const AValue: TTableEventType);
 begin
+  Assert(not has_Event);
   FEvent := AValue;
   ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
   set_has_Event;
@@ -236,6 +237,7 @@ end;
 
 procedure TPB_TableEvent.SetSeat(const AValue: Integer);
 begin
+  Assert(not has_Seat);
   FSeat := AValue;
   ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
@@ -320,6 +322,7 @@ end;
 
 procedure TPB_TableEvent.SetCards(const AValue: TBytes);
 begin
+  Assert(not has_Cards);
   FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;

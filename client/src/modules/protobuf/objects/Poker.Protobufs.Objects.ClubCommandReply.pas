@@ -173,6 +173,7 @@ end;
 
 procedure TPB_ClubCommandReply.SetStatus(const AValue: TClubStatus);
 begin
+  Assert(not has_Status);
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
@@ -201,6 +202,7 @@ end;
 
 procedure TPB_ClubCommandReply.SetClub(const AValue: TPB_Club);
 begin
+  Assert(not has_Club);
   FClub := AValue;
   ProtobufOutput.writeMessage(kClubFieldNumber, AValue.ProtobufOutput);
   set_has_Club;

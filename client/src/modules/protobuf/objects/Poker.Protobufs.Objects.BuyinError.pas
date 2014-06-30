@@ -125,6 +125,7 @@ end;
 
 procedure TPB_BuyinError.SetGameId(const AValue: TBytes);
 begin
+  Assert(not has_GameId);
   FGameId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
   set_has_GameId;
@@ -153,6 +154,7 @@ end;
 
 procedure TPB_BuyinError.SetLastCashout(const AValue: UINT32);
 begin
+  Assert(not has_LastCashout);
   FLastCashout := AValue;
   ProtobufOutput.writeUInt32(kLastCashoutFieldNumber, AValue);
   set_has_LastCashout;

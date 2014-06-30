@@ -126,6 +126,7 @@ end;
 
 procedure TPB_CloseGameData.SetGameid(const AValue: TBytes);
 begin
+  Assert(not has_Gameid);
   FGameid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
@@ -154,6 +155,7 @@ end;
 
 procedure TPB_CloseGameData.SetTimestamp(const AValue: TCloseGameTime);
 begin
+  Assert(not has_Timestamp);
   FTimestamp := AValue;
   ProtobufOutput.writeInt32(kTimestampFieldNumber, Integer(AValue));
   set_has_Timestamp;

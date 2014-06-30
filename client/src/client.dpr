@@ -160,7 +160,8 @@ uses
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
   Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas',
-  Poker.ActionMainMenuBarStyle in 'modules\Poker.ActionMainMenuBarStyle.pas';
+  Poker.ActionMainMenuBarStyle in 'modules\Poker.ActionMainMenuBarStyle.pas',
+  Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas';
 
 procedure FocusApp;
 var

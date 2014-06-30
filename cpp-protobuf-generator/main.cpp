@@ -410,15 +410,15 @@ class BaseGenerator : public CodeGenerator {
 			vars["writter"] = thisType.getWritter();
 			printer->Print(vars,
 				"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
+				"begin\n"
+				"  Assert(not has_$name$);\n"
 				);
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				printer->Print(vars,
-					"begin\n"
 					"  $pname$ := Copy($input$,0,Length($input$));\n"
 					"  ProtobufOutput.$writter$($enum$, $input$);\n");
 			} else {
 				printer->Print(vars,
-					"begin\n"
 					"  $pname$ := AValue;\n"
 					"  ProtobufOutput.$writter$($enum$, $input$);\n" // FIXME
 					);

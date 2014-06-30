@@ -268,6 +268,7 @@ end;
 
 procedure TPB_StatusReply.SetSelf(const AValue: TPB_User);
 begin
+  Assert(not has_Self);
   FSelf := AValue;
   ProtobufOutput.writeMessage(kSelfFieldNumber, AValue.ProtobufOutput);
   set_has_Self;

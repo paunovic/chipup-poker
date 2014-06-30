@@ -343,8 +343,7 @@ var
   hash_bytes: TBytes;
 begin
   result := TPB_UpdateFileInfo.Create;
-  result.Path := AUpdateFile.Path;
-  fullpath := SelfPath + result.Path;
+  fullpath := SelfPath + AUpdateFile.Path;
   SetLength(hash_bytes, 0);
   if FileExists(fullpath) then
   begin
@@ -355,8 +354,8 @@ begin
       Move(hash[1], hash_bytes[0], Length(hash));
     end;
   end;
+  result.Path := StringReplace(AUpdateFile.Path, '\', '/', [rfReplaceAll]);
   result.Hash := hash_bytes;
-  result.Path := StringReplace(result.Path, '\', '/', [rfReplaceAll]);
 end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);

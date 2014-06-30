@@ -102,7 +102,10 @@ begin
   HttpClient.OnRequestDone := nil;
   HttpClient.ContentCodingHnd.Enabled := FALSE;
   if HttpClient.State <> httpReady then
+  begin
     HttpClient.Abort;
+    FRequiresReboot := TRUE;
+  end;
 
   Action := caFree;
 end;

@@ -251,6 +251,7 @@ end;
 
 procedure TPB_TablePlayerStats.SetUserid(const AValue: TBytes);
 begin
+  Assert(not has_Userid);
   FUserid := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
@@ -279,6 +280,7 @@ end;
 
 procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
 begin
+  Assert(not has_Balance);
   FBalance := AValue;
   ProtobufOutput.writeInt32(kBalanceFieldNumber, AValue);
   set_has_Balance;
@@ -361,6 +363,7 @@ end;
 
 procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UINT32);
 begin
+  Assert(not has_Rakecontrib);
   FRakecontrib := AValue;
   ProtobufOutput.writeUInt32(kRakecontribFieldNumber, AValue);
   set_has_Rakecontrib;
@@ -389,6 +392,7 @@ end;
 
 procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UINT32);
 begin
+  Assert(not has_Secondsplayed);
   FSecondsplayed := AValue;
   ProtobufOutput.writeUInt32(kSecondsplayedFieldNumber, AValue);
   set_has_Secondsplayed;
@@ -417,6 +421,7 @@ end;
 
 procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UINT32);
 begin
+  Assert(not has_Chipsinplay);
   FChipsinplay := AValue;
   ProtobufOutput.writeUInt32(kChipsinplayFieldNumber, AValue);
   set_has_Chipsinplay;
@@ -445,6 +450,7 @@ end;
 
 procedure TPB_TablePlayerStats.SetHands(const AValue: UINT32);
 begin
+  Assert(not has_Hands);
   FHands := AValue;
   ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
   set_has_Hands;

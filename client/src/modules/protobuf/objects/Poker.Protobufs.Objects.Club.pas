@@ -303,6 +303,7 @@ end;
 
 procedure TPB_Club.SetMongoId(const AValue: TBytes);
 begin
+  Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
@@ -360,6 +361,7 @@ end;
 
 procedure TPB_Club.SetName(const AValue: String);
 begin
+  Assert(not has_Name);
   FName := AValue;
   ProtobufOutput.writeString(kNameFieldNumber, AValue);
   set_has_Name;
@@ -388,6 +390,7 @@ end;
 
 procedure TPB_Club.SetOwner(const AValue: TBytes);
 begin
+  Assert(not has_Owner);
   FOwner := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kOwnerFieldNumber, AValue);
   set_has_Owner;
@@ -416,6 +419,7 @@ end;
 
 procedure TPB_Club.SetPassword(const AValue: String);
 begin
+  Assert(not has_Password);
   FPassword := AValue;
   ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
@@ -444,6 +448,7 @@ end;
 
 procedure TPB_Club.SetIsPrivate(const AValue: Boolean);
 begin
+  Assert(not has_IsPrivate);
   FIsPrivate := AValue;
   ProtobufOutput.writeBoolean(kIsPrivateFieldNumber, AValue);
   set_has_IsPrivate;
@@ -472,6 +477,7 @@ end;
 
 procedure TPB_Club.SetSeq(const AValue: Integer);
 begin
+  Assert(not has_Seq);
   FSeq := AValue;
   ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
   set_has_Seq;
@@ -500,6 +506,7 @@ end;
 
 procedure TPB_Club.SetHasPassword(const AValue: Boolean);
 begin
+  Assert(not has_HasPassword);
   FHasPassword := AValue;
   ProtobufOutput.writeBoolean(kHasPasswordFieldNumber, AValue);
   set_has_HasPassword;
@@ -528,6 +535,7 @@ end;
 
 procedure TPB_Club.SetRake(const AValue: UINT32);
 begin
+  Assert(not has_Rake);
   FRake := AValue;
   ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
   set_has_Rake;
@@ -556,6 +564,7 @@ end;
 
 procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UINT32);
 begin
+  Assert(not has_DefaultBalanceLimit);
   FDefaultBalanceLimit := AValue;
   ProtobufOutput.writeUInt32(kDefaultBalanceLimitFieldNumber, AValue);
   set_has_DefaultBalanceLimit;
@@ -584,6 +593,7 @@ end;
 
 procedure TPB_Club.SetUnlimitedDefaultBalance(const AValue: Boolean);
 begin
+  Assert(not has_UnlimitedDefaultBalance);
   FUnlimitedDefaultBalance := AValue;
   ProtobufOutput.writeBoolean(kUnlimitedDefaultBalanceFieldNumber, AValue);
   set_has_UnlimitedDefaultBalance;

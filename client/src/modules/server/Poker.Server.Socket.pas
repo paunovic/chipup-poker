@@ -103,6 +103,7 @@ type
     procedure Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
     procedure SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetPlayerBalance(const AClubId, AMemberId: TBytes);
+    procedure QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
 
     {$IFDEF DEBUG}
     procedure CrashTest;
@@ -133,7 +134,8 @@ uses
   Poker.Protobufs.Objects.ChangeSuspendState, Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag,
   Poker.Protobufs.Objects.PutChips, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams,
   Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply,
-  Poker.Server.SSLCerts, Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams;
+  Poker.Server.SSLCerts, Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams,
+  Poker.Protobufs.Objects.AssetList;
 
 
 procedure TimerProc(HWND: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
@@ -547,6 +549,7 @@ begin
     srTableBuyinLessThanCashout,
     srInvalidTableBuyin: ADataObject := TPB_BuyinError.Create(ADataPointer, ARpcMessage.DataSize);
     srHandHistoryMsg: ADataObject := TPB_ClubHandHistoryReply.Create(ADataPointer, ARpcMessage.DataSize);
+    srQueryAssetsReply: ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
   else
     Exit(FALSE);
     {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
@@ -1183,6 +1186,20 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TServerSocket.QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
+var
+  protobuf: TPB_AssetList;
+begin
+  protobuf := TPB_AssetList.Create;
+  try
+    protobuf.Assets.AddRange(AAssets);
+    SendProtobuf(scQueryAssets, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 {$IFDEF DEBUG}
 procedure TServerSocket.CrashTest;
