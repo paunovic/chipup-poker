@@ -5,6 +5,7 @@ var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var assert = require('assert');
 var mongoose = require('mongoose');
+var crypto = require('crypto');
 
 var mdb = require('./db');
 var myutils = require('./myutils');
@@ -469,6 +470,33 @@ exports.game = {
 				});
 			});
 		}
+	}
+};
+exports.user = {
+	changePassword: function (test) {
+		var user = require('./user');
+		mdb.open();
+		mdb.models.UserModel.findOne(function (err,user2) {
+			assert.ifError(err);
+			var oldsalt = user2.salt;
+			var oldpass = user2.password;
+			user.ChangePassword('password',user2._id,function (err,row) {
+				assert.ifError(err);
+				console.log(arguments);
+				var hasher = crypto.createHash('sha256');
+				hasher.update(row.salt);
+				hasher.update('password');
+				var hash = hasher.digest();
+				assert.equal(hash.toString('hex'),row.password.toString('hex'));
+				user2.salt = oldsalt;
+				user2.password = oldpass;
+				user2.save(function (err) {
+					assert.ifError(err);
+					mdb.close();
+					test.done();
+				});
+			});
+		});
 	}
 };
 process.on('uncaughtException',function (err) {

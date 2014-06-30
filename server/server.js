@@ -41,6 +41,7 @@ var Hand = deck.Hand;
 var Game = require('./game').Game;
 var Pot = require('./pot').Pot;
 var myutils = require('./myutils');
+var user = require('./user');
 
 var pb = new p(fs.readFileSync("../message.desc"));
 var protoreader = require('./protoreader');
@@ -965,24 +966,13 @@ handlers[codes.scChangePassword] = function (args,token) {
 		this.reply(0,'password too long');
 		return;
 	}
-	// FIXME, refactor into a dedicated function and add a test
-	deck.getRandom(16,function changePw_cb1(salt) {
-		var hasher = crypto.createHash('sha256');
-		hasher.update(salt);
-		hasher.update(params.new_password);
-		var hash = hasher.digest();
-		mdb.models.UserModel.findOne({_id:this.userid},function changePw_cb2(err,self) {
-			self.password = hash;
-			self.salt = salt;
-			self.save(function changePw_cb3(err) {
-				if (err) {
-					this.reply("000","internal error");
-					return;
-				}
-				this.send(codes.srChangePasswordOk);
-				token.stop();
-			}.bind(this));
-		}.bind(this));
+	user.ChangePassword(params.new_password,this.userid,function changePw_cb3(err) {
+		if (err) {
+			this.reply("000","internal error");
+			return;
+		}
+		this.send(codes.srChangePasswordOk);
+		token.stop();
 	}.bind(this));
 }
 handlers[codes.scQueryAssets] = function (args,token) {
