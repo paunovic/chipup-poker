@@ -953,15 +953,16 @@ handlers[codes.scChangePassword] = function (args,token) {
 		this.reply(0,'password too long');
 		return;
 	}
-	deck.getRandom(16,function (salt) {
+	// FIXME, refactor into a dedicated function and add a test
+	deck.getRandom(16,function changePw_cb1(salt) {
 		var hasher = crypto.createHash('sha256');
 		hasher.update(salt);
 		hasher.update(params.new_password);
 		var hash = hasher.digest();
-		mdb.models.UserModel.findOne({_id:this.userid},function (err,self) {
+		mdb.models.UserModel.findOne({_id:this.userid},function changePw_cb2(err,self) {
 			self.password = hash;
 			self.salt = salt;
-			self.save(function (err) {
+			self.save(function changePw_cb3(err) {
 				if (err) {
 					this.reply("000","internal error");
 					return;
