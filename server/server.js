@@ -137,7 +137,9 @@ var emailRegister,emailChange1,emailChange2;
 	internalHttpServer = require('./httpServer').initHttpServer(activeUsers,sharedconfig,log,makeUserProtobuf);
 
 	models.Config.create({_id:'installerid',value:''},function (err,res){
+		assert.ifError(err);
 		models.Config.create({_id:'debuginstallerid',value:''},function (err,res){
+			assert.ifError(err);
 			models.Config.findOne({_id:'installerid'},function (err,row) {
 				assert.ifError(err);
 				models.Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
