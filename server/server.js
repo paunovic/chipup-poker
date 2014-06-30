@@ -136,27 +136,26 @@ var emailRegister,emailChange1,emailChange2;
 
 	internalHttpServer = require('./httpServer').initHttpServer(activeUsers,sharedconfig,log,makeUserProtobuf);
 
-	models.Config.create({_id:'installerid',value:''},function (err,res){
+	// FIXME, improve the defaults later?
+	models.Config.findOne({_id:'installerid'},function (err,row) {
 		assert.ifError(err);
-		models.Config.create({_id:'debuginstallerid',value:''},function (err,res){
-			assert.ifError(err);
-			models.Config.findOne({_id:'installerid'},function (err,row) {
-				assert.ifError(err);
-				models.Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
-					assert.ifError(err);
-					mdb.models.Installer.findOne({_id:row.value},function (err,row) {
-						if (row) {
-							sharedconfig.latestVersion = row.version;
-						}
-					});
-					mdb.models.Installer.findOne({_id:debugrow.value},function (err,row) {
-						if (row) {
-							sharedconfig.latestDebugVersion = row.version;
-						}
-					});
-				});
+		if (row) {
+			mdb.models.Installer.findOne({_id:row.value},function (err,row) {
+				if (row) {
+					sharedconfig.latestVersion = row.version;
+				}
 			});
-		});
+		}
+	});
+	models.Config.findOne({_id:'debuginstallerid'},function (err,debugrow) {
+		assert.ifError(err);
+		if (debugrow) {
+			mdb.models.Installer.findOne({_id:debugrow.value},function (err,row) {
+				if (row) {
+					sharedconfig.latestDebugVersion = row.version;
+				}
+			});
+		}
 	});
 
 	myutils.init();
