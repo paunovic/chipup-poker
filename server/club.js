@@ -841,7 +841,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 	var params = pb.Parse(args,'Poker.Club');
 	var clubseq = params.seq;
 	this.log('change club details %j',params);
-	Club.getClubBySeq(clubseq,function (err,club) {
+	Club.getClubBySeq(clubseq,function changeDetail_cb1(err,club) {
 		if (err == 'not found') {
 			this.reply("000","club not found");
 			return;
@@ -891,15 +891,15 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 		function finish() {
 			club.obj.rake = params.rake;
 			club.obj.unlimited_default_balance = params.unlimited_default_balance;
-			club.obj.save(function (err,ret) {
+			club.obj.save(function changeDetail_cb2(err,ret) {
 				this.log('detail update',clubseq,params,err,ret);
 				if (err) {
 					this.log('name collision');
 					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
 				} else {
 					var userlist = [ ];
-					models.Game.find({clubid:club.clubid},function (err,games) {
-						models.ClubBalance.find({clubid:club.clubid},function (err,stats) {
+					models.Game.find({clubid:club.clubid},function changeDetail_cb3(err,games) {
+						models.ClubBalance.find({clubid:club.clubid},function changeDetail_cb4(err,stats) {
 							assert.ifError(err);
 							var out = Club.makeClubProtobuf(club.obj,userlist,stats,club);
 							for (var x=0; x<games.length; x++) {

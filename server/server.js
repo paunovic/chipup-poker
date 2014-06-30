@@ -484,6 +484,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 	//console.log('hello params',params);
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
+	assert(files.length > 0);
 	models.Config.findOne({_id:key1},function (err,row2) {
 		mdb.models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
 			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
@@ -509,7 +510,6 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 				}
 			}
 			async.each(files,function checkFile(clientFile,cb) {
-				console.log('cf',mainfiles,clientFile);
 				if (clientFile.hash) clientFile.hash = clientFile.hash.toString('hex');
 				else clientFile.hash = '';
 				var targetFile = targetVersion.hashes[clientFile.key];
