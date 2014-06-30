@@ -480,39 +480,38 @@ ClientSocket.prototype.goneIdle = function () {
 	this.log('idle timeout');
 	this.error('ping timeout');
 }
-ClientSocket.prototype.doHelloProcessing = function(args,token) {
-	clearTimeout(this.oldTimer);
-	try {
-		var params = pb.Parse(args,'Poker.HelloParams');
-	} catch (e) {
-		this.error(e);
-		return;
-	}
+ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles,assetsEnabled) {
 	//console.log('hello params',params);
 	if (params.debug) var key1 = 'debuginstallerid';
 	else var key1 = 'installerid';
+	assert(files.length > 0);
 	models.Config.findOne({_id:key1},function (err,row2) {
 		mdb.models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
-			//console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
+			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
-			for (var x=0; x<params.files.length; x++) {
-				var clientFile = params.files[x];
+			for (var x=0; x<files.length; x++) {
+				var clientFile = files[x];
 				clientFile.key = clientFile.path.replace('.',':');
 				checked[clientFile.key] = true;
 			}
-			for (var key in targetVersion.hashes) {
-				if (!checked[key]) {
-					console.log('file %s is missing',key.replace(':','.'));
-					var fake = { path:key.replace(':','.'), hash:'', key:key };
-					params.files.push(fake);
+			if (mainfiles) {
+				for (var key in targetVersion.hashes) {
+					if (!checked[key]) {
+						console.log('file %s is missing',key.replace(':','.'));
+						var fake = { path:key.replace(':','.'), hash:'', key:key };
+						files.push(fake);
+					}
 				}
 			}
-			for (var x in assets) {
-				targetVersion.hashes[x] = assets[x];
+			if (assetsEnabled) {
+				for (var x in assets) {
+					targetVersion.hashes[x] = assets[x];
+				}
 			}
-			async.each(params.files,function checkFile(clientFile,cb) {
-				clientFile.hash = clientFile.hash.toString('hex');
+			async.each(files,function checkFile(clientFile,cb) {
+				if (clientFile.hash) clientFile.hash = clientFile.hash.toString('hex');
+				else clientFile.hash = '';
 				var targetFile = targetVersion.hashes[clientFile.key];
 				if (!targetFile) {
 					toUpdate.push({file_type:'ufRemove',path:clientFile.path});
@@ -548,10 +547,16 @@ ClientSocket.prototype.doHelloProcessing = function(args,token) {
 				if (toUpdate.length == 0) {
 					this.currentVersion = targetVersion._id;
 				}
-				var msg = JSON.parse(JSON.stringify(sharedconfig));
-				msg.update_files = toUpdate;
-				this.send(codes.srHello,msg,'Poker.HelloReply');
-				token.stop();
+				if (mainfiles) {
+					var msg = JSON.parse(JSON.stringify(sharedconfig));
+					msg.update_files = toUpdate;
+					this.send(codes.srHello,msg,'Poker.HelloReply');
+					token.stop();
+				} else {
+					var msg = {assets:toUpdate};
+					this.send(codes.srQueryAssetsReply,msg,'Poker.AssetList');
+					token.stop();
+				}
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
@@ -749,7 +754,14 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scHello:
-			this.doHelloProcessing(args,token);
+			try {
+				var params = pb.Parse(args,'Poker.HelloParams');
+			} catch (e) {
+				this.error(e);
+				return;
+			}
+			clearTimeout(this.oldTimer);
+			this.doHelloProcessing(params,params.files,token,true,true);
 		}
 		break;
 	case 2: // in the main lobby
@@ -953,15 +965,16 @@ handlers[codes.scChangePassword] = function (args,token) {
 		this.reply(0,'password too long');
 		return;
 	}
-	deck.getRandom(16,function (salt) {
+	// FIXME, refactor into a dedicated function and add a test
+	deck.getRandom(16,function changePw_cb1(salt) {
 		var hasher = crypto.createHash('sha256');
 		hasher.update(salt);
 		hasher.update(params.new_password);
 		var hash = hasher.digest();
-		mdb.models.UserModel.findOne({_id:this.userid},function (err,self) {
+		mdb.models.UserModel.findOne({_id:this.userid},function changePw_cb2(err,self) {
 			self.password = hash;
 			self.salt = salt;
-			self.save(function (err) {
+			self.save(function changePw_cb3(err) {
 				if (err) {
 					this.reply("000","internal error");
 					return;
@@ -971,6 +984,15 @@ handlers[codes.scChangePassword] = function (args,token) {
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
+}
+handlers[codes.scQueryAssets] = function (args,token) {
+	try {
+		var params = pb.Parse(args,'Poker.AssetList');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	this.doHelloProcessing(params,params.assets,token,false,true);
 }
 handlers[codes.scGetPlayers] = function (args,token) {
 	try {
