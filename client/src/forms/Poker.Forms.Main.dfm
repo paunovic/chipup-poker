@@ -4304,7 +4304,7 @@ object frmChipUpMain: TfrmChipUpMain
   end
   object ApplicationEvents: TApplicationEvents
     OnDeactivate = ApplicationEventsDeactivate
-    Left = 368
-    Top = 48
+    Left = 344
+    Top = 52
   end
 end

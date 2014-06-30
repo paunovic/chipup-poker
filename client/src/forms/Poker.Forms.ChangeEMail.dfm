@@ -4,7 +4,7 @@ object frmChangeEMail: TfrmChangeEMail
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Change E-mail Address'
-  ClientHeight = 174
+  ClientHeight = 170
   ClientWidth = 428
   Color = clWindow
   Ctl3D = False
@@ -22,7 +22,7 @@ object frmChangeEMail: TfrmChangeEMail
   OnKeyPress = FormKeyPress
   DesignSize = (
     428
-    174)
+    170)
   PixelsPerInch = 96
   TextHeight = 14
   object lbInfo: TcxLabel
@@ -101,7 +101,7 @@ object frmChangeEMail: TfrmChangeEMail
   end
   object btOK: TcxButton
     Left = 226
-    Top = 138
+    Top = 134
     Width = 93
     Height = 27
     Action = acOK
@@ -114,10 +114,11 @@ object frmChangeEMail: TfrmChangeEMail
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
+    ExplicitTop = 138
   end
   object btCancel: TcxButton
     Left = 325
-    Top = 138
+    Top = 134
     Width = 93
     Height = 27
     Action = acCancel
