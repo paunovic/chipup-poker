@@ -117,10 +117,17 @@ begin
     DomainURL := DEV_URL_DOMAIN;
   end
   else
-  begin
-    TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    DomainURL := URL_DOMAIN;
-  end;
+    if (Settings.DeveloperMode) and
+       (Settings.ServerIndex = 2) then
+    begin
+      TServerSocket.Initialize(TSettings.Hardcoded.TCP_LOCAL_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+      DomainURL := LOCAL_URL_DOMAIN;
+    end
+    else
+    begin
+      TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
+      DomainURL := URL_DOMAIN;
+    end;
 
   FSelfInfo := TPlayerInfo.Create;
 

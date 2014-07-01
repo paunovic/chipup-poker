@@ -167,6 +167,7 @@ begin
             end;
           end;
         end;
+
         ufRemove: DeleteFile(SelfPath + ufipath);
       end;
     end;

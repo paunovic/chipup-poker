@@ -7,6 +7,8 @@ interface
 const
   URL_DOMAIN = 'http://www.chipuppoker.com';
   DEV_URL_DOMAIN = 'http://dev-server.chipuppoker.com';
+  LOCAL_URL_DOMAIN = 'http://localchipup';
+
 
 type
   TUpdateFile = record
@@ -26,6 +28,7 @@ type
         DATABASE_FILENAME: String;
         TCP_SERVER_ADDRESS: String;
         TCP_DEV_SERVER_ADDRESS: String;
+        TCP_LOCAL_SERVER_ADDRESS: String;
         TCP_SERVER_PORT: Word;
         TCP_PING_INTERVAL: Byte;
         TCP_INACTIVITY_PING_INTERVAL: Byte;
@@ -52,7 +55,7 @@ type
   public
     const
       Hardcoded: THardcodedSettingsRec = (
-        VERSION: '0.01a.0144';
+        VERSION: '0.01a.0145';
         REVISION: {$I revision.inc};
 
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
@@ -63,6 +66,8 @@ type
 
         TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
         TCP_DEV_SERVER_ADDRESS: 'dev-server.chipuppoker.com';
+        TCP_LOCAL_SERVER_ADDRESS: 'localchipup';
+
         TCP_SERVER_PORT: 12346;
         TCP_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
         TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity

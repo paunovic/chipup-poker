@@ -144,6 +144,7 @@ begin
   FServerComboBox.Properties.Items.Clear;
   FServerComboBox.Properties.Items.Add('Official Server');
   FServerComboBox.Properties.Items.Add('Dev Server');
+  FServerComboBox.Properties.Items.Add('Local Server');
   FServerComboBox.ItemIndex := Settings.ServerIndex;
   FServerComboBox.Properties.OnChange := ServerComboboxChange;
 end;
@@ -236,6 +237,10 @@ begin
     1: begin
       server := Settings.Hardcoded.TCP_DEV_SERVER_ADDRESS;
       DomainURL := DEV_URL_DOMAIN;
+    end;
+    2: begin
+      server := Settings.Hardcoded.TCP_LOCAL_SERVER_ADDRESS;
+      DomainURL := LOCAL_URL_DOMAIN;
     end;
   end;
 
