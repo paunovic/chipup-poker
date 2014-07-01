@@ -28,3 +28,4 @@ server/cert.pem
 server/config.js
 server/.idea
 /node_modules/
+server/logs/*
