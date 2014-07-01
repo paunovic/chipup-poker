@@ -54,6 +54,7 @@ type
     procedure CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableInvalidBuyin(const AMethodId: Integer; const AObject: TObject);
     procedure CSRClubBalanceReached(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRNotSitting(const AMethodId: Integer; const AObject: TObject);
 
     function GetMaxBuyin: UINT32;
   protected
@@ -82,7 +83,8 @@ begin
                       TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit),
                       TServerMessageCallback.Create(srTableBuyinLessThanCashout, CSRTableBuyinLessThanCashout),
                       TServerMessageCallback.Create(srInvalidTableBuyin, CSRTableInvalidBuyin),
-                      TServerMessageCallback.Create(srClubBalanceReached, CSRClubBalanceReached)
+                      TServerMessageCallback.Create(srClubBalanceReached, CSRClubBalanceReached),
+                      TServerMessageCallback.Create(srNotSitting, CSRNotSitting)
                   ]);
 end;
 
@@ -315,6 +317,17 @@ begin
   acOK.Enabled := TRUE;
 end;
 
+procedure TfrmTableSit.CSRNotSitting(const AMethodId: Integer; const AObject: TObject);
+var
+  pbgame: TPB_Game;
+begin
+  pbgame := AObject as TPB_Game;
+  if not CompareBytes(FTable.Game.MongoId, pbgame.MongoId) then
+    Exit;
+
+  MessageDlg('You are not sitting', mtWarning, [mbOK], 0);
+  acOK.Enabled := TRUE;
+end;
 
 procedure TfrmTableSit.CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
 var

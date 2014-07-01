@@ -48,6 +48,7 @@ type
     srClubBalanceReached = 41,
     srHandHistoryMsg = 42,
     srQueryAssetsReply = 43,
+    srNotSitting = 44,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -172,6 +173,7 @@ begin
     srClubBalanceReached: result := 'srClubBalanceReached';
     srHandHistoryMsg: result := 'srHandHistoryMsg';
     srQueryAssetsReply: result := 'srQueryAssetsReply';
+    srNotSitting: result := 'srNotSitting';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
