@@ -18,6 +18,7 @@
     "password-generator": "~0.2.2",
     "rest": "^1.0.3",
     "socket.io": "~0.9.16",
-    "heapdump": "~0.2.9"
+    "heapdump": "~0.2.9",
+    "morgan": "~1.1.1"
   }
 }
