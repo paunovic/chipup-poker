@@ -227,27 +227,13 @@ end;
 
 procedure TfrmChipUpLogin.ServerComboboxChange(Sender: TObject);
 var
-  server: String;
+  item_index: Integer;
 begin
-  case (Sender as TcxComboBox).ItemIndex of
-    0: begin
-      server := Settings.Hardcoded.TCP_SERVER_ADDRESS;
-      DomainURL := URL_DOMAIN;
-    end;
-    1: begin
-      server := Settings.Hardcoded.TCP_DEV_SERVER_ADDRESS;
-      DomainURL := DEV_URL_DOMAIN;
-    end;
-    2: begin
-      server := Settings.Hardcoded.TCP_LOCAL_SERVER_ADDRESS;
-      DomainURL := LOCAL_URL_DOMAIN;
-    end;
-  end;
-
-  Settings.ServerIndex := (Sender as TcxComboBox).ItemIndex;
-
+  item_index := (Sender as TcxComboBox).ItemIndex;
+  DomainURL := Settings.Hardcoded.SERVER_CONFIG[item_index].URL;
+  Settings.ServerIndex := item_index;
   TServerSocket.Deinitialize;
-  TServerSocket.Initialize(server, Settings.Hardcoded.TCP_SERVER_PORT);
+  TServerSocket.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);
 end;
 
 procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);
