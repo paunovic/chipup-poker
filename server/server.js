@@ -488,6 +488,13 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 	assert(files.length > 0);
 	models.Config.findOne({_id:key1},function (err,row2) {
 		mdb.models.Installer.findOne({_id:row2.value},function (err,targetVersion) {
+			if (!targetVersion) {
+				if (mainfiles) {
+					this.send(codes.srHello,sharedconfig,'Poker.HelloReply');
+					token.stop();
+					return;
+				}
+			}
 			console.log('goal version: %s %j',targetVersion.version,targetVersion.hashes);
 			var toUpdate = [];
 			var checked = {};
