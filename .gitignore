@@ -18,6 +18,7 @@ client/installer/files/chipuppoker.exe
 cpp-protobuf-generator/protoc-gen-delphi.exe
 cpp-protobuf-generator/main.o
 cpp-protobuf-generator/Makefile.win
+cpp-protobuf-generator/protoc-gen-delphi
 dev-server-key.ppk
 message.desc
 client/src/client.cfg
