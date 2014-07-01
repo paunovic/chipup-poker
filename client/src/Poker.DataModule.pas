@@ -32,7 +32,7 @@ type
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
-    function GetUpdateFileObject(const AUpdateFile: TUpdateFile): TPB_UpdateFileInfo;
+    function GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;
 
   public
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
@@ -78,6 +78,7 @@ uses
 procedure TdmMain.DataModuleCreate(Sender: TObject);
 var
   common, local: String;
+  server_index: Integer;
 begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
@@ -111,16 +112,13 @@ begin
   THandHistory.Initialize;
 
   if (Settings.DeveloperMode) and
-     (Settings.ServerIndex = 1) then
-  begin
-    TServerSocket.Initialize(TSettings.Hardcoded.TCP_DEV_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    DomainURL := DEV_URL_DOMAIN;
-  end
+     (Settings.ServerIndex in [1, 2]) then
+    server_index := Settings.ServerIndex
   else
-  begin
-    TServerSocket.Initialize(TSettings.Hardcoded.TCP_SERVER_ADDRESS, TSettings.Hardcoded.TCP_SERVER_PORT);
-    DomainURL := URL_DOMAIN;
-  end;
+    server_index := 0;
+
+  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
+  DomainURL := TSettings.Hardcoded.SERVER_CONFIG[server_index].URL;
 
   FSelfInfo := TPlayerInfo.Create;
 
@@ -176,17 +174,17 @@ end;
 
 procedure TdmMain.OpenCashierLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.URL.CASHIER));
+  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.CASHIER));
 end;
 
 procedure TdmMain.OpenSiteLink;
 begin
-  ShellOpen(URL_DOMAIN);
+  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL));
 end;
 
 procedure TdmMain.OpenTACLink;
 begin
-  ShellOpen(PChar(Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
+  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
 end;
 
 procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
@@ -209,10 +207,7 @@ end;
 
 procedure TdmMain.SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
 begin
-  if AForm is TfrmAbout then
-    UseSkin := FALSE
-  else
-    UseSkin := TRUE;
+  UseSkin := not (AForm is TfrmAbout);
 end;
 
 procedure TdmMain.StoreUpdateFiles(const AFiles: TList<TPB_UpdateFileInfo>);
@@ -336,14 +331,14 @@ begin
       end;
 end;
 
-function TdmMain.GetUpdateFileObject(const AUpdateFile: TUpdateFile): TPB_UpdateFileInfo;
+function TdmMain.GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;
 var
   fullpath: String;
   hash: RawByteString;
   hash_bytes: TBytes;
 begin
   result := TPB_UpdateFileInfo.Create;
-  fullpath := SelfPath + AUpdateFile.Path;
+  fullpath := SelfPath + AUpdateFilePath;
   SetLength(hash_bytes, 0);
   if FileExists(fullpath) then
   begin
@@ -354,16 +349,16 @@ begin
       Move(hash[1], hash_bytes[0], Length(hash));
     end;
   end;
-  result.Path := StringReplace(AUpdateFile.Path, '\', '/', [rfReplaceAll]);
+  result.Path := StringReplace(AUpdateFilePath, '\', '/', [rfReplaceAll]);
   result.Hash := hash_bytes;
 end;
 
 procedure TdmMain.GetUpdateFilesList(const AFiles: TList<TPB_UpdateFileInfo>);
 var
-  update_file: TUpdateFile;
+  C1: Integer;
 begin
-  for update_file in Settings.Hardcoded.UPDATE_FILES do
-    AFiles.Add(GetUpdateFileObject(update_file));
+  for C1 := Low(Settings.Hardcoded.UPDATE_FILES) to High(Settings.Hardcoded.UPDATE_FILES) do
+    AFiles.Add(GetUpdateFileObject(Settings.Hardcoded.UPDATE_FILES[C1].Path));
 end;
 
 end.

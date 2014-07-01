@@ -204,6 +204,40 @@ end;
 
 procedure TfrmChipUpMain.FormCreate(Sender: TObject);
 begin
+  FCallbacksId := MessageContainer.AddCallbacks([
+                      TSocketStateChangeCallback.Create(SocketStateChange),
+                      TServerMessageCallback.Create(srStatus, CSRStatus),
+                      TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
+                      TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubCommand),
+                      TServerMessageCallback.Create(srCreateClubReply, CSRClubCommand),
+                      TServerMessageCallback.Create(srJoinClubReply, CSRClubCommand),
+                      TServerMessageCallback.Create(srKickPlayerReply, CSRClubCommand),
+                      TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
+                      TServerMessageCallback.Create(srLogout, CSRLogout),
+                      TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
+                      TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
+                      TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
+                      TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
+                      TServerMessageCallback.Create(seChat, CSEChatEvent),
+                      TServerMessageCallback.Create(seAccountConfirmed, CSEAccountConfirmed),
+                      TServerMessageCallback.Create(seClubChange, CSREClubOperation),
+                      TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
+                      TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
+                      TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
+                      TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
+                      TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
+                      TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
+                      TServerMessageCallback.Create(seGameChange, CSREGameOperation),
+                      TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
+                      TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
+                      TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
+                      TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
+                      TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
+                      TServerMessageCallback.Create(seUserChange, CSEUserChange),
+                      TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
+                      TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
+                  ], TRUE);
+
   LoadImageFromResource(imgCashier, 'CashierNormal');
 
   ActionManager.Style := ActionMainMenuBarStyle;
@@ -287,7 +321,6 @@ begin
   Application.ShowMainForm := FALSE;
   DoLogout;
   Hide;
-  MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.RunForm(TfrmChipUpLogin, self, [], FALSE);
 end;
 
@@ -305,10 +338,16 @@ begin
 end;
 
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);
+var
+  form: TForm;
 begin
   case ANewState of
     wsClosed: begin // handle disconnection here (try to reconnect)
-      // first, check if reconnect form already exists, if it does, don't recreate it!
+      // dont reconnect if login form is active
+      if FormsContainer.Find(TfrmChipUpLogin, form) then
+        Exit;
+
+      // check if reconnect form already exists, if it does, don't recreate it!
       if not FormsContainer.Contains(TfrmReconnect) then
       begin
         // save form states and disable them
@@ -769,48 +808,11 @@ procedure TfrmChipUpMain.LoginStatus(const AValue: TLoginStatus);
 begin
   case AValue of
     lsLoggedIn: begin
-      if FCallbacksId = -1 then
-      begin
-        FCallbacksId := MessageContainer.AddCallbacks([
-                            TSocketStateChangeCallback.Create(SocketStateChange),
-                            TServerMessageCallback.Create(srStatus, CSRStatus),
-                            TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                            TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubCommand),
-                            TServerMessageCallback.Create(srCreateClubReply, CSRClubCommand),
-                            TServerMessageCallback.Create(srJoinClubReply, CSRClubCommand),
-                            TServerMessageCallback.Create(srKickPlayerReply, CSRClubCommand),
-                            TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
-                            TServerMessageCallback.Create(srLogout, CSRLogout),
-                            TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
-                            TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                            TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                            TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
-                            TServerMessageCallback.Create(seChat, CSEChatEvent),
-                            TServerMessageCallback.Create(seAccountConfirmed, CSEAccountConfirmed),
-                            TServerMessageCallback.Create(seClubChange, CSREClubOperation),
-                            TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
-                            TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
-                            TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
-                            TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
-                            TServerMessageCallback.Create(seGameChange, CSREGameOperation),
-                            TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
-                            TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
-                            TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
-                            TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
-                            TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
-                            TServerMessageCallback.Create(seUserChange, CSEUserChange),
-                            TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
-                            TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
-                        ], TRUE);
-
-        FSelectedClub := -1;
-        SetLength(FSelectedGame, 0);
-        ConfigureGUI;
-        Show;
-        dmMain.ProcessReconnectedTables;
-      end;
+      FSelectedClub := -1;
+      SetLength(FSelectedGame, 0);
+      ConfigureGUI;
+      Show;
+      dmMain.ProcessReconnectedTables;
     end;
 
     lsUpdating: (FormsContainer.RunForm(TfrmUpdater, self, [], FALSE) as TfrmUpdater).SetCloseCallback(ModalFormClose);

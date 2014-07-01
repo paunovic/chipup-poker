@@ -4,19 +4,21 @@ interface
 
 {$I defines.inc}
 
-const
-  URL_DOMAIN = 'http://www.chipuppoker.com';
-  DEV_URL_DOMAIN = 'http://dev-server.chipuppoker.com';
-
 type
-  TUpdateFile = record
-    Path: String;
-    RequiresReboot: Boolean;
-  end;
-
   THardcodedSettings = class
   private
     type
+      TUpdateFile = record
+        Path: String;
+        RequiresReboot: Boolean;
+      end;
+
+      TServerConfig = record
+        TCPAddress: String;
+        TCPPort: Word;
+        URL: String;
+      end;
+
       THardcodedSettingsRec = record
         VERSION: String;
         REVISION: String;
@@ -24,9 +26,7 @@ type
         SETTINGS_FILENAME: String;
         SETTINGS_ENCRYPTION_KEY: String;
         DATABASE_FILENAME: String;
-        TCP_SERVER_ADDRESS: String;
-        TCP_DEV_SERVER_ADDRESS: String;
-        TCP_SERVER_PORT: Word;
+        SERVER_CONFIG: array[0..2] of TServerConfig;
         TCP_PING_INTERVAL: Byte;
         TCP_INACTIVITY_PING_INTERVAL: Byte;
         TCP_PING_TIMEOUT: Byte;
@@ -52,7 +52,7 @@ type
   public
     const
       Hardcoded: THardcodedSettingsRec = (
-        VERSION: '0.01a.0144';
+        VERSION: '0.01a.0145';
         REVISION: {$I revision.inc};
 
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';
@@ -61,9 +61,12 @@ type
         SETTINGS_ENCRYPTION_KEY: 'kVb5XrH2ntvjAsjY';
         DATABASE_FILENAME: 'database.sqlite';
 
-        TCP_SERVER_ADDRESS: 'server.chipuppoker.com';
-        TCP_DEV_SERVER_ADDRESS: 'dev-server.chipuppoker.com';
-        TCP_SERVER_PORT: 12346;
+        SERVER_CONFIG: (
+          (TCPAddress: 'server.chipuppoker.com'; TCPPort: 12346; URL: 'http://server.chipuppoker.com'),
+          (TCPAddress: 'dev-server.chipuppoker.com'; TCPPort: 12346; URL: 'http://dev-server.chipuppoker.com'),
+          (TCPAddress: 'localchipup'; TCPPort: 12346; URL: 'http://localchipup')
+        );
+
         TCP_PING_INTERVAL: 60; // send ping once these xx seconds, no matter what
         TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity
         TCP_PING_TIMEOUT: 15; // in seconds
@@ -92,8 +95,8 @@ type
 
         // urls
         URL: (
-          TERMS_AND_CONDITIONS: URL_DOMAIN + '/termsandconditions.html';
-          CASHIER: URL_DOMAIN + '/cashier.html';
+          TERMS_AND_CONDITIONS: '/termsandconditions.html';
+          CASHIER: '/cashier.html';
           GET_AVATAR: '/getavatar?id=%s';
           UPLOAD_AVATAR: '/uploadAvatar';
           LATEST_VERSION: '/install_chipuppoker.exe';

@@ -2451,7 +2451,7 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 		game.Lock.writeLock(function (release) {
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === undefined) {
-				this.reply(0,'your not sitting');
+				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
 				release();
 				return;
 			}
@@ -2537,7 +2537,7 @@ handlers[codes.scTableSitOutNextBB] = function (args) {
 		if (!game) return;
 		var seatIdx = game.findSeat(this);
 		if (seatIdx === undefined) {
-			this.reply(0,'your not sitting');
+			this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
 			return;
 		}
 		if (['psInHand','psAllIn','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
@@ -2561,7 +2561,7 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 		game.Lock.writeLock(function (release) {
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === undefined) {
-				this.reply(0,'your not sitting');
+				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
 				release();
 				return;
 			}
@@ -2624,7 +2624,7 @@ handlers[codes.scShowCards] = function (args,token) {
 			}
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === undefined) {
-				this.reply(0,'your not sitting');
+				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
 				release();
 				return;
 			}
@@ -2833,22 +2833,28 @@ handlers[codes.scShowCards] = function (args,token) {
 		}
 		delete params.game_id;
 		Game.getGame(id,function (err,game) {
-			var seatIdx = game.findSeat(this);
-			if (seatIdx === undefined) {
-				this.reply(0,'your not sitting');
-				return;
-			}
-			if (['psOutOfPlay','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
-				this.reply(0,'your not out of play!');
-				return;
-			}
-			if ((params.chips + game.members[seatIdx].chips) > (game.obj.buyin_max * game.obj.big_blind)) {
-				this.send(codes.srTableAddonOverLimit,game.getTableStatus(this,false,[]),'Poker.TableStatus');
-				return;
-			}
-			assert.equal(this.state,2);
-			game.AddOn(this,params.chips);
-			token.stop();
+			game.Lock.writeLock(function (release) {
+				var seatIdx = game.findSeat(this);
+				if (seatIdx == -1) {
+					this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
+					release();
+					return;
+				}
+				if (['psOutOfPlay','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
+					this.reply(0,'your not out of play!');
+					release();
+					return;
+				}
+				if ((params.chips + game.members[seatIdx].chips) > (game.obj.buyin_max * game.obj.big_blind)) {
+					this.send(codes.srTableAddonOverLimit,game.getTableStatus(this,false,[]),'Poker.TableStatus');
+					release();
+					return;
+				}
+				assert.equal(this.state,2);
+				game.AddOn(this,params.chips);
+				token.stop();
+				release();
+			}.bind(this));
 		}.bind(this));
 	}
 }

@@ -49,6 +49,7 @@ enum ServerCodes {
 	srClubBalanceReached = 41;
 	srHandHistoryMsg = 42;
 	srQueryAssetsReply = 43;
+	srNotSitting = 44;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;

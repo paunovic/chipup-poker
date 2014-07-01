@@ -128,20 +128,20 @@ function TfrmUpdater.PatchNonRebootFiles: Integer;
 var
   ufi: TPB_UpdateFileInfo;
   requires_reboot: Boolean;
-  update_file: TUpdateFile;
   ufipath: String;
   newfile, oldfile: String;
   exec_info: TShellExecuteInfo;
+  C1: Integer;
 begin
   result := 1;
 
   for ufi in dmMain.UpdateFiles do
   begin
     requires_reboot := TRUE;
-    for update_file in Settings.Hardcoded.UPDATE_FILES do
-      if LowerCase(update_file.Path) = LowerCase(ufi.Path) then
+    for C1 := Low(Settings.Hardcoded.UPDATE_FILES) to High(Settings.Hardcoded.UPDATE_FILES) do
+      if LowerCase(Settings.Hardcoded.UPDATE_FILES[C1].Path) = LowerCase(ufi.Path) then
       begin
-        requires_reboot := update_file.RequiresReboot;
+        requires_reboot := Settings.Hardcoded.UPDATE_FILES[C1].RequiresReboot;
         Break;
       end;
 
@@ -167,6 +167,7 @@ begin
             end;
           end;
         end;
+
         ufRemove: DeleteFile(SelfPath + ufipath);
       end;
     end;
@@ -206,12 +207,12 @@ function TfrmUpdater.MakeBatchUpdater(out ABatchFile: String): Integer;
 }
 var
   ufi: TPB_UpdateFileInfo;
-  update_file: TUpdateFile;
   ufipath: String;
   newfile: String;
   oldfile: String;
   batch: TStringList;
   requires_reboot: Boolean;
+  C1: Integer;
 begin
   result := 0;
   batch := TStringList.Create;
@@ -220,10 +221,10 @@ begin
     for ufi in dmMain.UpdateFiles do
     begin
       requires_reboot := TRUE;
-      for update_file in Settings.Hardcoded.UPDATE_FILES do
-        if LowerCase(update_file.Path) = LowerCase(ufi.Path) then
+      for C1 := Low(Settings.Hardcoded.UPDATE_FILES) to High(Settings.Hardcoded.UPDATE_FILES) do
+        if LowerCase(Settings.Hardcoded.UPDATE_FILES[C1].Path) = LowerCase(ufi.Path) then
         begin
-          requires_reboot := update_file.RequiresReboot;
+          requires_reboot := Settings.Hardcoded.UPDATE_FILES[C1].RequiresReboot;
           Break;
         end;
 

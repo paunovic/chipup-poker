@@ -5,12 +5,14 @@
 #define ApplicationInstanceMutex "CHIPUPINSTANCEMUTEX"
 #define InstallerFilename "install_chipuppoker"
 #define SkinName "Carbon.vsf"
+#define AppID "ChipUPPoker"
 
 [Setup]                                                                               
 AppName={#ApplicationName}
 AppVerName={#ApplicationName}
 AppPublisher={#ApplicationPublisher}
 AppPublisherURL={#ApplicationPublisherURL}
+AppID={#AppID}
 DefaultDirName={code:AppInstallPath}
 DefaultGroupName={#ApplicationName}
 UninstallFilesDir={app}\uninstall
@@ -43,8 +45,9 @@ Name: "{code:DesktopIconPath}\{#ApplicationName}"; Filename: "{app}\{#Applicatio
 Filename: "{app}\{#ApplicationExe}"; Description: "Launch {#ApplicationName}"; Flags: postinstall nowait runascurrentuser
 
 [Tasks]
-Name: install_allusers; Description: "&All users"; GroupDescription: "Install for:"; Flags: exclusive
-Name: install_currentuser; Description: "&Current user"; GroupDescription: "Install for:"; Flags: exclusive unchecked
+Name: install_allusers; Description: "&All users"; GroupDescription: "Install for:"; Flags: exclusive; Check: IsAllUsersEnabled
+Name: install_currentuser; Description: "&Current user"; GroupDescription: "Install for:"; Flags: exclusive unchecked; Check: IsCurrentUserEnabled
+
 Name: desktopicon; Description: "&Desktop shortcut"; GroupDescription: "Shortcuts:"
 Name: quicklaunch; Description: "&Quick launch shortcut"; GroupDescription: "Shortcuts:"
 Name: startmenu; Description: "&Start menu shortcut"; GroupDescription: "Shortcuts:"
@@ -66,8 +69,6 @@ var
   WizardInitialized: Boolean;
 
 function InitializeSetup(): Boolean;
-var
-  C1: Integer;
 begin
   ExtractTemporaryFile('{#SkinName}');
   LoadVCLStyleS(ExpandConstant('{tmp}\{#SkinName}'));
@@ -82,6 +83,7 @@ end;
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   WizardForm.DirEdit.Text := ExpandConstant('{code:AppInstallPath}');
+  result := '';
 end;
  
 procedure DeinitializeSetup();
@@ -135,23 +137,33 @@ begin
   end;
 end;
 
-function IsCurrentUserInstall: Boolean;
+function IsCurrentUserInstallChecked: Boolean;
 begin
   result := (WizardInitialized) and
             (IsTaskSelected('install_currentuser')); 
 end;
 
+function CurrentUserInstallPath: String;
+begin
+  result := ExpandConstant('{userpf}\{#ApplicationName}');
+end;
+
+function AllUsersInstallPath: String;
+begin
+  result := ExpandConstant('{commonappdata}\Programs\{#ApplicationName}');
+end;
+
 function AppInstallPath(Param: String): String;
 begin
-  if IsCurrentUserInstall then
-    result := ExpandConstant('{userpf}\{#ApplicationName}')
+  if IsCurrentUserInstallChecked then
+    result := CurrentUserInstallPath
   else
-    result := ExpandConstant('{commonappdata}\Programs\{#ApplicationName}');
+    result := AllUsersInstallPath;
 end;
 
 function DesktopIconPath(Param: String): String;
 begin
-  if IsCurrentUserInstall then
+  if IsCurrentUserInstallChecked then
     result := ExpandConstant('{userdesktop}')
   else
     result := ExpandConstant('{commondesktop}');
@@ -159,16 +171,48 @@ end;
 
 function StartMenuPath(Param: String): String;
 begin
-  if IsCurrentUserInstall then
+  if IsCurrentUserInstallChecked then
     result := ExpandConstant('{userprograms}')
   else
     result := ExpandConstant('{commonprograms}');
 end;
 
+function GetInstallPath(out APath: String): Boolean;
+var
+  uninstall_path: String;
+begin
+  result := FALSE;
+  APath := '';
+  uninstall_path := ExpandConstant('SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1');
+  if not RegQueryStringValue(HKLM, uninstall_path, 'InstallLocation', APath) then
+    RegQueryStringValue(HKCU, uninstall_path, 'InstallLocation', APath);
+  result := APath <> '';
+end;
+
 function QuickLaunchPath(Param: String): String;
 begin
-  if IsCurrentUserInstall then
+  if IsCurrentUserInstallChecked then
     result := ExpandConstant('{userappdata}\Microsoft\Internet Explorer\Quick Launch')
   else
     result := ExpandConstant('{commonappdata}\Microsoft\Internet Explorer\Quick Launch')
+end;
+
+function CheckInstallPath(const APath: String): Boolean;
+var
+  path: String;
+begin
+  result := TRUE;
+  if not GetInstallPath(path) then 
+    Exit;
+  result := LowerCase(AddBackslash(path)) = LowerCase(AddBackslash(APath));
+end;
+
+function IsAllUsersEnabled: Boolean;
+begin
+  result := CheckInstallPath(AllUsersInstallPath);
+end;
+
+function IsCurrentUserEnabled: Boolean;
+begin
+  result := CheckInstallPath(CurrentUserInstallPath);
 end;
