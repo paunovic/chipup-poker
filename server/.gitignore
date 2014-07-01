@@ -1,0 +1,4 @@
+# these are generated with generate_x509_key_pair_and_cert.sh script
+key.pem
+cert.pem
+config.js
