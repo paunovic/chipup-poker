@@ -133,6 +133,8 @@ begin
 end;
 
 procedure TfrmChipUpLogin.CreateServerCombobox;
+var
+  C1: Integer;
 begin
   FServerComboBox := TcxComboBox.Create(self);
   FServerComboBox.Parent := self;
@@ -142,9 +144,8 @@ begin
   FServerComboBox.Left := btLogin.Left;
   FServerComboBox.Properties.DropDownListStyle := lsFixedList;
   FServerComboBox.Properties.Items.Clear;
-  FServerComboBox.Properties.Items.Add('Official Server');
-  FServerComboBox.Properties.Items.Add('Dev Server');
-  FServerComboBox.Properties.Items.Add('Local Server');
+  for C1 := Low(Settings.Hardcoded.SERVER_CONFIG) to High(Settings.Hardcoded.SERVER_CONFIG) do
+    FServerComboBox.Properties.Items.Add(Settings.Hardcoded.SERVER_CONFIG[C1].TCPAddress);
   FServerComboBox.ItemIndex := Settings.ServerIndex;
   FServerComboBox.Properties.OnChange := ServerComboboxChange;
 end;
