@@ -1,0 +1,7 @@
+module.exports = { 
+	hostname:'dev-server.chipuppoker.com', 
+	staticserver:'dev-static.chipuppoker.com', 
+	diffserver:true, 
+	bbpassword:'', 
+	syncpassword:'' 
+};
