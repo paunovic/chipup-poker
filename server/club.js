@@ -782,8 +782,8 @@ handlers[codes.scTransferChips] = function (args,token) {
 handlers[codes.scSetPlayerLimit] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.PlayerLimitParams');
-		var clubid = toMongoId(params.clubid);
-		var userid = toMongoId(params.userid);
+		var clubid = myutils.toMongoId(params.clubid);
+		var userid = myutils.toMongoId(params.userid);
 		//this.log('params:%j',params);
 		if (params.limit < 1) return this.reply(0,'limit too low');
 	} catch (e) {
@@ -812,8 +812,8 @@ handlers[codes.scSetPlayerLimit] = function (args,token) {
 handlers[codes.scResetPlayerBalance] = function (args,token) {
 	try {
 		var params = pb.Parse(args,'Poker.PlayerLimitParams');
-		var clubid = toMongoId(params.clubid);
-		var userid = toMongoId(params.userid);
+		var clubid = myutils.toMongoId(params.clubid);
+		var userid = myutils.toMongoId(params.userid);
 		this.log('params:%j',params);
 	} catch (e) {
 		this.error(e);
