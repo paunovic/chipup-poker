@@ -326,7 +326,9 @@ begin
     Exit;
 
   MessageDlg('You are not sitting', mtWarning, [mbOK], 0);
-  acOK.Enabled := TRUE;
+
+  ModalResult := mrCancel;
+  Close;
 end;
 
 procedure TfrmTableSit.CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
