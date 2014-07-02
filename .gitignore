@@ -10,7 +10,6 @@ server/dag/build/*
 server/node_modules/*
 server/poker-eval-138.0/*
 client/tests/bin
-client/tools
 client/src/resources/**/*.psd
 client/installer/install_chipuppoker.exe
 client/installer/files/chipuppoker.exe
