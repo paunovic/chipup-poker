@@ -45,7 +45,6 @@ object frmReconnect: TfrmReconnect
     Properties.Alignment.Horz = taCenter
     Properties.Alignment.Vert = taVCenter
     Transparent = True
-    ExplicitWidth = 275
     Height = 40
     Width = 304
     AnchorX = 152

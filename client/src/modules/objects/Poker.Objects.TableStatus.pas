@@ -119,7 +119,7 @@ type
 implementation
 
 uses
-  System.SysUtils, Poker.Server.Socket, Poker.DataModule;
+  System.SysUtils, Poker.Server.Socket.Commands, Poker.DataModule;
 
 { TTableStatus }
 

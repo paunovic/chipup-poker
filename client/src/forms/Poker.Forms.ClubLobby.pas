@@ -197,7 +197,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.Generics.Collections,
-  Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.ChangeClubDetails,
+  Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
@@ -870,7 +870,6 @@ begin
   acUpdateClubDetails.Execute;
   tiUpdateClubDetails.Enabled := FALSE;
 end;
-
 
 procedure TfrmClubLobby.acCloseClubExecute(Sender: TObject);
 var

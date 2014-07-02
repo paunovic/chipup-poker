@@ -35,7 +35,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Protobufs.Objects.CloseGameData;
+  Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Protobufs.Objects.CloseGameData;
 
 
 procedure TfrmCloseTable.FormDestroy(Sender: TObject);

@@ -68,7 +68,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
+  Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.Game, Poker.Objects.SeatInfo;
 

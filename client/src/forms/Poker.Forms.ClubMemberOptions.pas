@@ -43,7 +43,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
+  Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Enum.ServerCodes;
 
 

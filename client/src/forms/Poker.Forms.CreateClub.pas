@@ -39,8 +39,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Validators, Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Server.Settings,
-  Poker.Server.MessageCallbacks, Poker.Common.FormsContainer;
+  Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Validators, Poker.Protobufs.Objects.ClubCommandReply,
+  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Server.MessageCallbacks, Poker.Common.FormsContainer;
 
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);

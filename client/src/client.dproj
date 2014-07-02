@@ -243,9 +243,11 @@
 			<DCCReference Include="modules\settings\Poker.Settings.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.Settings.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.Validators.pas"/>
-			<DCCReference Include="modules\server\Poker.Server.Socket.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.MessageContainer.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.MessageCallbacks.pas"/>
+			<DCCReference Include="modules\server\Poker.Server.SSLCerts.pas"/>
+			<DCCReference Include="modules\server\socket\Poker.Server.Socket.Core.pas"/>
+			<DCCReference Include="modules\server\socket\Poker.Server.Socket.ConnectThread.pas"/>
 			<DCCReference Include="modules\directx\Poker.DirectX.Core.pas"/>
 			<DCCReference Include="modules\directx\Poker.DirectX.Timer.pas"/>
 			<DCCReference Include="modules\directx\Poker.DirectX.Animation.pas"/>
@@ -264,8 +266,6 @@
 			<DCCReference Include="modules\table\Poker.Table.DXButton.pas"/>
 			<DCCReference Include="modules\stats\Poker.Stats.Table.pas"/>
 			<DCCReference Include="modules\stats\Poker.Stats.Player.pas"/>
-			<DCCReference Include="modules\server\Poker.Server.SSLCerts.pas"/>
-			<DCCReference Include="modules\server\Poker.Server.SocketConnectThread.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Items.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Players.pas"/>
@@ -341,6 +341,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas"/>
 			<DCCReference Include="modules\Poker.ActionMainMenuBarStyle.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas"/>
+			<DCCReference Include="modules\server\socket\Poker.Server.Socket.Commands.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

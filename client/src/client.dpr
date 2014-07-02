@@ -64,9 +64,11 @@ uses
   Poker.Settings in 'modules\settings\Poker.Settings.pas',
   Poker.Server.Settings in 'modules\server\Poker.Server.Settings.pas',
   Poker.Server.Validators in 'modules\server\Poker.Server.Validators.pas',
-  Poker.Server.Socket in 'modules\server\Poker.Server.Socket.pas',
   Poker.Server.MessageContainer in 'modules\server\Poker.Server.MessageContainer.pas',
   Poker.Server.MessageCallbacks in 'modules\server\Poker.Server.MessageCallbacks.pas',
+  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
+  Poker.Server.Socket.Core in 'modules\server\socket\Poker.Server.Socket.Core.pas',
+  Poker.Server.Socket.ConnectThread in 'modules\server\socket\Poker.Server.Socket.ConnectThread.pas',
   Poker.DirectX.Core in 'modules\directx\Poker.DirectX.Core.pas',
   Poker.DirectX.Timer in 'modules\directx\Poker.DirectX.Timer.pas',
   Poker.DirectX.Animation in 'modules\directx\Poker.DirectX.Animation.pas',
@@ -85,8 +87,6 @@ uses
   Poker.Table.DXButton in 'modules\table\Poker.Table.DXButton.pas',
   Poker.Stats.Table in 'modules\stats\Poker.Stats.Table.pas',
   Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
-  Poker.Server.SSLCerts in 'modules\server\Poker.Server.SSLCerts.pas',
-  Poker.Server.SocketConnectThread in 'modules\server\Poker.Server.SocketConnectThread.pas',
   Poker.HandHistory.Core in 'modules\hand_history\Poker.HandHistory.Core.pas',
   Poker.HandHistory.Items in 'modules\hand_history\Poker.HandHistory.Items.pas',
   Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
@@ -161,7 +161,8 @@ uses
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
   Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas',
   Poker.ActionMainMenuBarStyle in 'modules\Poker.ActionMainMenuBarStyle.pas',
-  Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas';
+  Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
+  Poker.Server.Socket.Commands in 'modules\server\socket\Poker.Server.Socket.Commands.pas';
 
 procedure FocusApp;
 var

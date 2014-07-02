@@ -69,7 +69,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
+  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Common.Misc,
   Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer, Poker.Avatars,
   Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Stats.Table, Poker.Forms.Table, Poker.Objects.TableStatus,
   Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
@@ -117,7 +117,7 @@ begin
   else
     server_index := 0;
 
-  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
+  TServerSocketCommands.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
   DomainURL := TSettings.Hardcoded.SERVER_CONFIG[server_index].URL;
 
   FSelfInfo := TPlayerInfo.Create;
@@ -140,7 +140,7 @@ begin
   TTables.Deinitialize;
   TPlayers.Deinitialize;
   FSelfInfo.Free;
-  TServerSocket.Deinitialize;
+  TServerSocketCommands.Deinitialize;
   THandHistory.Deinitialize;
   TTablesStats.Deinitialize;
   TSounds.Deinitialize;

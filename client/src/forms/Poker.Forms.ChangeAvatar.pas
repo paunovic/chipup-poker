@@ -51,7 +51,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   PNGImage, Poker.Avatars, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
   Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Common.FormsContainer, Poker.Forms.ImageCrop;
 
 
