@@ -34,6 +34,7 @@ var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var differ = require('./differ');
 var mdb = require('./db');
+mdb.open('poker');
 var installer = require('./installer');
 var models = mdb.models;
 
@@ -961,7 +962,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 		}.bind(this));
 	}.bind(this));
 }
-Game.registerHandlers(handlers,pb,regexLimits);
+require('./game_network').registerHandlers(handlers,pb,regexLimits,activeUsers);
 Club.registerHandlers(handlers,pb,sharedconfig);
 handlers[codes.scChangePassword] = function (args,token) {
 	try {
