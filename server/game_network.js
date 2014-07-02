@@ -1,8 +1,46 @@
-module.exports.registerHandlers = function (handlers,pb,regexLimits,activeUsers) {
+"use strict";
+/* global require,setTimeout,clearTimeout,module,Buffer */
+var assert = require('assert');
+var util = require('util');
+
+var myutils = require('./myutils');
+var Game = require('./game').Game;
+var Club = require('./club').Club;
+var codes = require('./ServerCodes');
+var profiler = require('./profiler');
+var models = require('./db').models;
+var makeGameProtobuf = require('./game').makeGameProtobuf;
+
+var log;
+
+function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds,regexLimits) {
+	if (!blinds) return true;
+	if (!game_type) return true;
+	if (!game_limit) return true;
+	if (!regexLimits.gamename.exec(gamename)) return true;
+	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
+	if (5 > buyin_min) {
+		log('min too low',buyin_min);
+		return true;
+	}
+	if (buyin_max < buyin_min) {
+		log('max too low');
+		return true;
+	}
+	if (10 > buyin_max) {
+		log('max too low',buyin_max);
+		return true;
+	}
+	return false;
+}
+
+module.exports.registerHandlers = function (handlers,pb,regexLimits,activeUsers,logIN) {
+	log = logIN;
 handlers[codes.scCloseGame] = function (args,token) {
+	var params,id;
 	try {
-		var params = pb.Parse(args,'Poker.CloseGameData');
-		var id = new myutils.toMongoId(params.gameid);
+		params = pb.Parse(args,'Poker.CloseGameData');
+		id = new myutils.toMongoId(params.gameid);
 		switch (params.timestamp) {
 		case 'cgtCurrentHand':
 			params.timestamp = 0;
@@ -44,7 +82,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 					}.bind(this),params.timestamp * 1000);
 					game.closeTime = Date.now() + (params.timestamp * 1000);
 					game.state2 = 'gsClosing';
-					clubBroadcastGameState(gamerow.clubid,JSON.parse(JSON.stringify(gamerow)),release);
+					Game.clubBroadcastGameState(gamerow.clubid,JSON.parse(JSON.stringify(gamerow)),release);
 				} else {
 					game.closeTime = 0;
 					game.doClose(this,release,gamerow);
@@ -52,16 +90,17 @@ handlers[codes.scCloseGame] = function (args,token) {
 			}.bind(this));
 		}.bind(this));
 	}.bind(this));
-}
+};
 handlers[codes.scCreateGame] = function (args,token) {
+	var game_type,blinds,seats,clubseq,gamename,params,game_limit;
 	try {
-		var params = pb.Parse(args,'Poker.Game');
-		var clubseq = params.clubseq;
-		var game_type = params.game_type;
-		var game_limit = params.game_limit;
-		var blinds = params.blinds;
-		var seats = params.seats;
-		var gamename = params.gamename;
+		params = pb.Parse(args,'Poker.Game');
+		clubseq = params.clubseq;
+		game_type = params.game_type;
+		game_limit = params.game_limit;
+		blinds = params.blinds;
+		seats = params.seats;
+		gamename = params.gamename;
 		if (checkGameParams(gamename,seats,game_type,game_limit,params.buyin_min,params.buyin_max,blinds,regexLimits)) {
 			this.log('invalid create game:%j',params);
 			this.reply(0,"invalid params");
@@ -87,6 +126,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 		}
 		doc.clubid = club.clubid;
 		models.Game.create(doc,function (err,game) {
+			var x,key;
 			if (err) {
 				this.reply(0,"internal error");
 				return;
@@ -101,7 +141,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 					return;
 				}
 				token.tag += '-private';
-				for (var x=0; x<club.obj.members.length; x++) {
+				for (x=0; x<club.obj.members.length; x++) {
 					var conn = activeUsers[club.obj.members[x]];
 					if (!conn) continue;
 					conn.send(codes.seGameCreate,g,'Poker.Game');
@@ -109,7 +149,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 				token.stop();
 			} else {
 				token.tag += '-public';
-				for (var key in activeUsers) {
+				for (key in activeUsers) {
 					if (key === this) continue;
 					activeUsers[key].send(codes.seGameCreate,g,'Poker.Game');
 				}
@@ -117,12 +157,12 @@ handlers[codes.scCreateGame] = function (args,token) {
 			}
 		}.bind(this));
 	}.bind(this));
-}
+};
 handlers[codes.scFold] = function (args,token) {
-	var token2 = profiler.start('fold-inner4');
+	var token2 = profiler.start('fold-inner4'),id;
 	try {
 		var params = pb.Parse(args,'Poker.Game');
-		var id = myutils.toMongoId(params._id);
+		id = myutils.toMongoId(params._id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -158,11 +198,12 @@ handlers[codes.scFold] = function (args,token) {
 			}
 		}.bind(this));
 	}.bind(this));
-}
+};
 handlers[codes.scTableSitOutNextHand] = function (args,token) {
+	var params,id;
 	try {
-		var params = pb.Parse(args,'Poker.TableBoolFlag');
-		var id = myutils.toMongoId(params.table_mongo_id);
+		params = pb.Parse(args,'Poker.TableBoolFlag');
+		id = myutils.toMongoId(params.table_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -199,11 +240,12 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 			release();
 		}.bind(this));
 	}.bind(this));
-}
+};
 handlers[codes.scPutChips] = function (args,token) {
+	var params,id;
 	try {
-		var params = pb.Parse(args,'Poker.PutChips');
-		var id = myutils.toMongoId(params.table_mongo_id);
+		params = pb.Parse(args,'Poker.PutChips');
+		id = myutils.toMongoId(params.table_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -245,11 +287,12 @@ handlers[codes.scPutChips] = function (args,token) {
 		}.bind(this));
 	}.bind(this));
 	token6.stop();
-}
+};
 handlers[codes.scTableSitOutNextBB] = function (args) {
+	var params,id;
 	try {
-		var params = pb.Parse(args,'Poker.TableBoolFlag');
-		var id = myutils.toMongoId(params.table_mongo_id);
+		params = pb.Parse(args,'Poker.TableBoolFlag');
+		id = myutils.toMongoId(params.table_mongo_id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -267,11 +310,12 @@ handlers[codes.scTableSitOutNextBB] = function (args) {
 		}
 		game.members[seatIdx].sitOutBB = params.flag;
 	}.bind(this));
-}
+};
 handlers[codes.scTablePlayNow] = function (args,token) {
+	var id;
 	try {
 		var params = pb.Parse(args,'Poker.Game');
-		var id = myutils.toMongoId(params._id);
+		id = myutils.toMongoId(params._id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -280,13 +324,20 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 		if (!game) return;
 		if (game.state2 == 'gsClosed') return;
 		game.Lock.writeLock(function (release) {
+			function finish(events) { // teDeal
+				game.updateMongoState({members:true},function () {
+					game.broadcastStatus(null,true,events);
+					token.stop();
+					release();
+				});
+			}
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === undefined) {
 				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
 				release();
 				return;
 			}
-			if (game.members[seatIdx].chips == 0) {
+			if (game.members[seatIdx].chips === 0) {
 				this.reply(0,'you dont have enough chips');
 				release();
 				return;
@@ -316,20 +367,14 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 					finish([]);
 				}
 			} else finish([]);
-			function finish(events) { // teDeal
-				game.updateMongoState({members:true},function () {
-					game.broadcastStatus(null,true,events);
-					token.stop();
-					release();
-				});
-			}
 		}.bind(this));
 	}.bind(this));
-}
+};
 handlers[codes.scShowCards] = function (args,token) {
+	var id;
 	try {
 		var params = pb.Parse(args,'Poker.Game');
-		var id = myutils.toMongoId(params._id);
+		id = myutils.toMongoId(params._id);
 	} catch (e) {
 		this.error(e);
 		return;
@@ -359,11 +404,11 @@ handlers[codes.scShowCards] = function (args,token) {
 			release();
 		}.bind(this));
 	}.bind(this));
-}
+};
 	handlers[codes.scTableJoin] = function (args,token) {
-		var params = pb.Parse(args,'Poker.Game');
+		var params = pb.Parse(args,'Poker.Game'),id;
 		try {
-			var id = new myutils.toMongoId(params._id);
+			id = new myutils.toMongoId(params._id);
 		} catch (e) {
 			this.error(e);
 			return;
@@ -377,11 +422,12 @@ handlers[codes.scShowCards] = function (args,token) {
 			}
 			if (game.state2 == 'gsClosed') return;
 			game.Lock.writeLock(function (release) {
+				var x;
 				this.log('game info',game.obj.clubid);
 				assert(game.club);
 				var club = game.club.obj; // FIXME
 					if (club.suspended) {
-						for (var x=0; x<club.suspended.length; x++) {
+						for (x=0; x<club.suspended.length; x++) {
 							if (myutils.compareObjectID(club.suspended[x],this.userid)) {
 								this.reply(0,'your suspended in that club'); // FIXME
 								release();
@@ -410,11 +456,11 @@ handlers[codes.scShowCards] = function (args,token) {
 					}
 			}.bind(this));
 		}.bind(this));
-	}
+	};
 	handlers[codes.scTableLeave] = function (args,token) {
-		var params = pb.Parse(args,'Poker.Game');
+		var params = pb.Parse(args,'Poker.Game'),id;
 		try {
-			var id = new myutils.toMongoId(params._id);
+			id = new myutils.toMongoId(params._id);
 		} catch (e) {
 			return;
 		}
@@ -432,11 +478,12 @@ handlers[codes.scShowCards] = function (args,token) {
 				token.stop();
 			}
 		}.bind(this));
-	}
+	};
 	handlers[codes.scTableSit] = function (args,token) {
+		var params,id;
 		try {
-			var params = pb.Parse(args,'Poker.TableSit');
-			var id = new myutils.toMongoId(params.game_id);
+			params = pb.Parse(args,'Poker.TableSit');
+			id = new myutils.toMongoId(params.game_id);
 		} catch (e) {
 			this.log('params where %j',params);
 			this.error(e);
@@ -484,30 +531,29 @@ handlers[codes.scShowCards] = function (args,token) {
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
-	}
+	};
 	handlers[codes.scTableStandUp] = function (args,token) {
-		var params = pb.Parse(args,'Poker.Game');
+		var params = pb.Parse(args,'Poker.Game'),once=true,id;
 		try {
-			var id = myutils.toMongoId(params._id);
+			id = myutils.toMongoId(params._id);
 		} catch (e) {
 			log('params to scTableStandUp where %j',params);
 			//this.error(e);
 			return;
 		}
-		var once = true;
 		Game.getGame(id,function (err,game) {
 			assert.ifError(err);
 			if (!game) return;
 			game.Lock.writeLock(function (release) {
-				var x = game.findSeat(this);
-				var seating = game.members[x];
+				var x = game.findSeat(this),token2,seating = game.members[x];
 				if (!seating) {
 					this.log('standup error %d',x);
 					release();
 					return;
 				}
-				var token2 = profiler.start('stand-inner1');
+				token2 = profiler.start('stand-inner1');
 				game.standUp(this,function (folded,events,offset) {
+					var x,havechips=0;
 					assert(once);
 					once = false;
 					this.log('2events are %j',events);
@@ -515,8 +561,7 @@ handlers[codes.scShowCards] = function (args,token) {
 						game.startTimer(game.current_seat,offset);
 					}
 					this.send(codes.srTableStandUpOk,game.getTableStatus(this,true,events),'Poker.TableStatus');
-					var havechips = 0;
-					for (var x=0; x<game.members.length; x++) {
+					for (x=0; x<game.members.length; x++) {
 						if (!game.members[x]) {
 							continue;
 						}
@@ -539,15 +584,16 @@ handlers[codes.scShowCards] = function (args,token) {
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
-	}
+	};
 	handlers[codes.scTableAddOn] = function (args,token) {
+		var params,id;
 		try {
-			var params = pb.Parse(args,'Poker.TableSit');
+			params = pb.Parse(args,'Poker.TableSit');
 			if (params.chips < 1) {
 				this.reply(0,'you cant buyout');
 				return;
 			}
-			var id = new myutils.toMongoId(params.game_id);
+			id = new myutils.toMongoId(params.game_id);
 		} catch (e) {
 			this.error(e);
 			return;
@@ -556,12 +602,12 @@ handlers[codes.scShowCards] = function (args,token) {
 		Game.getGame(id,function (err,game) {
 			game.Lock.writeLock(function (release) {
 				var seatIdx = game.findSeat(this);
-				if (seatIdx == -1) {
+				if (seatIdx === -1) {
 					this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
 					release();
 					return;
 				}
-				if (['psOutOfPlay','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
+				if (['psOutOfPlay','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) === -1) {
 					this.reply(0,'your not out of play!');
 					release();
 					return;
@@ -577,5 +623,5 @@ handlers[codes.scShowCards] = function (args,token) {
 				release();
 			}.bind(this));
 		}.bind(this));
-	}
-}
+	};
+};

@@ -962,7 +962,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 		}.bind(this));
 	}.bind(this));
 }
-require('./game_network').registerHandlers(handlers,pb,regexLimits,activeUsers);
+require('./game_network').registerHandlers(handlers,pb,regexLimits,activeUsers,log);
 Club.registerHandlers(handlers,pb,sharedconfig);
 handlers[codes.scChangePassword] = function (args,token) {
 	try {

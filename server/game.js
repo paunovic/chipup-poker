@@ -148,6 +148,7 @@ function clubBroadcastGameState(clubid,gamerow,cb) {
 		clubObj.seGameChanged(gamerow,cb);
 	});
 }
+Game.clubBroadcastGameState = clubBroadcastGameState;
 Game.prototype.close = function(conn,cb) {
 	models.Game.findOneAndUpdate({_id:this.id},{$set:{state2:'gsClosed'}},function (err,ret) {
 		assert.ifError(err);
@@ -2226,26 +2227,6 @@ Game.checkAndResume = function (cb1) {
 			cb1();
 		}
 	});
-}
-function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds,regexLimits) {
-	if (!blinds) return true;
-	if (!game_type) return true;
-	if (!game_limit) return true;
-	if (!regexLimits.gamename.exec(gamename)) return true;
-	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
-	if (5 > buyin_min) {
-		log('min too low',buyin_min);
-		return true;
-	}
-	if (buyin_max < buyin_min) {
-		log('max too low');
-		return true;
-	}
-	if (10 > buyin_max) {
-		log('max too low',buyin_max);
-		return true;
-	}
-	return false;
 }
 Game.prototype.reconnectUser = function (conn,seated,seat,cb) {
 	this.Lock.writeLock(function (release) {
