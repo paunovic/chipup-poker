@@ -1,22 +1,29 @@
 var util = require('util');
 
-module.exports = protoreader;
+module.exports = Protoreader;
 var pb,codes,hidden;
-function protoreader(socket,handler,error) {
-	if (!(this instanceof protoreader)) return new protoreader(socket,handler,error);
-	this.socket = socket;
+function Protoreader(socket,handler,error) {
+	if (!(this instanceof Protoreader)) return new Protoreader(socket,handler,error);
 	this.handler = handler;
 	this.buffer = null;
 	this.error = error;
-	function process_packet() {
+	socket.on('data',this._ondata.bind(this));
+}
+Protoreader.prototype._ondata = function (chunk) {
+	if (this.buffer) {
+		this.buffer = Buffer.concat([this.buffer,chunk]);
+	}
+	else this.buffer = chunk;
+
+	while (this.buffer.length > 0) {
 		if (this.buffer.length < 2) {
 			console.log('size prefix not in buffer yet');
-			return;
+			break;
 		}
 		var headersize = this.buffer.readInt16LE(0);
 		if (this.buffer.length < (2+headersize)) {
 			console.log('header not in buffer yet',headersize);
-			return false;
+			break;
 		}
 		//console.log('\nheader size:',headersize,this.buffer);
 		if (headersize > 0) {
@@ -28,11 +35,11 @@ function protoreader(socket,handler,error) {
 			} catch (e) {
 				console.log(header);
 				this.error(e);
-				return false;
+				break;
 			}
 			if (this.buffer.length < (2+headersize+header.DataSize)) {
 				console.log('arguments not in buffer yet');
-				return false;
+				break;
 			}
 			var args = this.buffer.slice(2+headersize,2+headersize+header.DataSize);
 		//try {
@@ -44,23 +51,15 @@ function protoreader(socket,handler,error) {
 		} else {
 			this.buffer = this.buffer.slice(2);
 		}
-		return true;
 	}
-	this.socket.on('data',function (chunk) {
-		if (this.buffer) {
-			this.buffer = Buffer.concat([this.buffer,chunk]);
-		}
-		else this.buffer = chunk;
-		while ((this.buffer.length > 0) && process_packet.call(this)) { }
-		//if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
-	}.bind(this));
+	//if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
 }
-protoreader.init = function init(input,mapping,hiddenin) {
+Protoreader.init = function init(input,mapping,hiddenin) {
 	pb = input;
 	codes = mapping;
 	hidden = hiddenin;
 }
-protoreader.reply = function reply(code,message,type) {
+Protoreader.reply = function reply(code,message,type) {
 	code = parseInt(code);
 	var args;
 	var datasize = 0;
