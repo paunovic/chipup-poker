@@ -46,7 +46,7 @@ var myutils = require('./myutils');
 var user = require('./user');
 
 var protoreader = require('./protoreader');
-protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong]);
+protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong,codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange,codes.PerGameMsgEvent]);
 
 var domain = "http://"+config.hostname+'/';
 var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:16,max_timebank:30};
