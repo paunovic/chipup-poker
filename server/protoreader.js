@@ -8,52 +8,49 @@ function protoreader(socket,handler,error) {
 	this.handler = handler;
 	this.buffer = null;
 	this.error = error;
+	var self = this;
+
 	function process_packet() {
-		if (this.buffer.length < 2) {
+		if (self.buffer.length < 2) {
 			console.log('size prefix not in buffer yet');
 			return;
 		}
-		var headersize = this.buffer.readInt16LE(0);
-		if (this.buffer.length < (2+headersize)) {
-			console.log('header not in buffer yet',headersize);
+		var headersize = self.buffer.readInt16LE(0);
+		if (self.buffer.length < (2 + headersize)) {
+			console.log('header not in buffer yet', headersize);
 			return false;
 		}
-		//console.log('\nheader size:',headersize,this.buffer);
+
 		if (headersize > 0) {
-			var header = this.buffer.slice(2,2+headersize);
+			var header = self.buffer.slice(2, 2 + headersize);
 			try {
 				header = pb.Parse(header,'Poker.RpcMessage');
 				if (!header.DataSize) header.DataSize = 0;
-				//console.log('header is',header);
 			} catch (e) {
 				console.log(header);
-				this.error(e);
+				self.error(e);
 				return false;
 			}
-			if (this.buffer.length < (2+headersize+header.DataSize)) {
+			if (self.buffer.length < (2 + headersize + header.DataSize)) {
 				console.log('arguments not in buffer yet');
 				return false;
 			}
-			var args = this.buffer.slice(2+headersize,2+headersize+header.DataSize);
-		//try {
-			this.handler(header.MethodId,args);
-		//} catch (e) {
-		//	this.handler.error(e);
-		//}
-			this.buffer = this.buffer.slice(2+headersize+header.DataSize);
+			var args = self.buffer.slice(2+headersize,2+headersize+header.DataSize);
+			self.handler(header.MethodId,args);
+			self.buffer = self.buffer.slice(2+headersize+header.DataSize);
 		} else {
-			this.buffer = this.buffer.slice(2);
+			self.buffer = self.buffer.slice(2);
 		}
 		return true;
 	}
-	this.socket.on('data',function (chunk) {
-		if (this.buffer) {
-			this.buffer = Buffer.concat([this.buffer,chunk]);
+
+	self.socket.on('data',function (chunk) {
+		if (self.buffer) {
+			self.buffer = Buffer.concat([self.buffer,chunk]);
 		}
-		else this.buffer = chunk;
-		while ((this.buffer.length > 0) && process_packet.call(this)) { }
-		//if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
-	}.bind(this));
+		else self.buffer = chunk;
+		while ((self.buffer.length > 0) && process_packet) { }
+	});
 }
 protoreader.init = function init(input,mapping,hiddenin) {
 	pb = input;
