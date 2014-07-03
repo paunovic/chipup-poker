@@ -25,31 +25,26 @@ Protoreader.prototype._ondata = function (chunk) {
 			console.log('header not in buffer yet',headersize);
 			break;
 		}
-		//console.log('\nheader size:',headersize,this.buffer);
+
 		if (headersize > 0) {
-			var header = this.buffer.slice(2,2+headersize);
+			var header = self.buffer.slice(2, 2 + headersize);
 			try {
 				header = pb.Parse(header,'Poker.RpcMessage');
 				if (!header.DataSize) header.DataSize = 0;
-				//console.log('header is',header);
 			} catch (e) {
 				console.log(header);
 				this.error(e);
 				break;
 			}
-			if (this.buffer.length < (2+headersize+header.DataSize)) {
+			if (self.buffer.length < (2 + headersize + header.DataSize)) {
 				console.log('arguments not in buffer yet');
 				break;
 			}
-			var args = this.buffer.slice(2+headersize,2+headersize+header.DataSize);
-		//try {
-			this.handler(header.MethodId,args);
-		//} catch (e) {
-		//	this.handler.error(e);
-		//}
-			this.buffer = this.buffer.slice(2+headersize+header.DataSize);
+			var args = self.buffer.slice(2+headersize,2+headersize+header.DataSize);
+			self.handler(header.MethodId,args);
+			self.buffer = self.buffer.slice(2+headersize+header.DataSize);
 		} else {
-			this.buffer = this.buffer.slice(2);
+			self.buffer = self.buffer.slice(2);
 		}
 	}
 	//if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
