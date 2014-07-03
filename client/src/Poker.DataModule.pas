@@ -5,11 +5,10 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
-  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsForm, Poker.Objects.ClubInfo, Poker.HardcodedSettings,
-  cxHint, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo,
-  cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels, Vcl.ImgList,
-  Vcl.Controls;
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.StatusReply,
+  Vcl.Forms, dxSkinsForm, Poker.Objects.ClubInfo, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
+  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls;
 
 type
   TdmMain = class(TDataModule)
@@ -301,13 +300,13 @@ end;
 
 procedure TdmMain.LoadFonts;
 var
-  rs: TResourceStream;
   nbFontAdded: DWORD;
-  C1: Integer;
+  rs: TResourceStream;
+  font: String;
 begin
-  for C1 := Low(FONTLIST) to High(FONTLIST) do
+  for font in FONTLIST do
   begin
-    rs := TResourceStream.Create(HInstance, FONTLIST[C1], RT_RCDATA);
+    rs := TResourceStream.Create(HInstance, font, RT_RCDATA);
     try
       AddFontMemResourceEx(rs.Memory, rs.Size, nil, @nbFontAdded);
     finally
