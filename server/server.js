@@ -195,12 +195,7 @@ function goOnline() {
 	}
 	function compileJade() {
 		// FIXME, redo this
-		log('compiling jade');
-		async.parallel([function (cb) {
-			user.UserInit(regexLimits,cb);
-		}],function () {
-			goOnline();
-		});
+		user.UserInit(regexLimits,goOnline);
 	}
 
 //});

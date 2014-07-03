@@ -7,6 +7,7 @@ var express = require('express');
 var http = require('http');
 var MongoClient = require('mongodb').MongoClient
 var crypto = require('crypto');
+var assert = require('assert');
 
 var protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
