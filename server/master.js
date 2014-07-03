@@ -7,6 +7,7 @@ var express = require('express');
 var http = require('http');
 var MongoClient = require('mongodb').MongoClient
 var crypto = require('crypto');
+var assert = require('assert');
 
 var protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
@@ -125,7 +126,7 @@ io.on('connection',function (socket) {
 });
 function Client(sockin) {
 	this.socket = sockin;
-	this.reader = new protoreader(this.socket,this);
+	this.reader = new protoreader(this.socket,this.handle.bind(this),this.error.bind(this));
 	this.reply(codes.Hello);
 	this.socket.on('end',function () {
 		this.log('connection lost');

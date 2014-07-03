@@ -19,7 +19,6 @@ var config = require('./config');
 var differ = require('./differ');
 var SmtpConnection = require('./smtp');
 var profiler = require('./profiler');
-var Club = require('./club').Club;
 var RT = require('./rt');
 var installer = require('./installer');
 
@@ -29,13 +28,12 @@ module.exports.ClientSocket = ClientSocket;
 
 var connections = 0;
 var handlers = {};
-var pb = global.pb;
+var pb;
 var emailChange1,emailRegister;
 var regexLimits;
 var assets = {};
 var assetMtime;
-
-Club.registerHandlers(handlers);
+var Club;
 
 function changePassword(new_password,userid,cb) {
 	// FIXME, refactor into a dedicated function and add a test
@@ -52,7 +50,9 @@ function changePassword(new_password,userid,cb) {
 	}.bind(this));
 }
 function UserInit(regexLimitsIN,cb2) {
+	Club = require('./club').Club;
 	regexLimits = regexLimitsIN;
+	Club.registerHandlers(handlers);
 	require('./game_network').registerHandlers(handlers,pb,regexLimits); // FIXME
 	async.parallel([function (cb) {
 		fs.readFile('views/password_change1.jade',{encoding:'utf8'},function (err,data) {
@@ -68,6 +68,7 @@ function UserInit(regexLimitsIN,cb2) {
 		cb2();
 	});
 	setInterval(recheckAssets,60000);
+	pb = global.pb;
 }
 function ClientSocket(socket) {
 	this.connid = connections++;
@@ -81,7 +82,7 @@ function ClientSocket(socket) {
 		delete global.activeUsers[this.userid];
 		Game.handleDisconnect(this,'closed');
 	}.bind(this));
-	this.reader = new Protoreader(socket,this);
+	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this));
 	this.oldTimer = setTimeout(function () {
 		this.log('hello timeout, sending it');
 		this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');

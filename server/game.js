@@ -4,7 +4,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,activeUsers,sharedconfig,log,ClientSocket;
+var activeGames,activeUsers,sharedconfig,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('./profiler');
@@ -19,10 +19,11 @@ var Pot = require('./pot').Pot;
 var deck = require('./deck');
 var Deck = deck.Deck;
 var Hand = deck.Hand;
-var Club = require('./club').Club;
+var Club;
 var myutils = require('./myutils');
 var mdb = require('./db');
 var models = mdb.models;
+var user = require('./user');
 
 function makeGameProtobuf(g) {
 	assert.equal(g._id.toString().length,24);
@@ -112,8 +113,8 @@ Game.init = function (input) {
 	global.util = require('util');
 	activeUsers = global.activeUsers;
 	sharedconfig = global.sharedconfig; // FIXME
-	log = global.log; // FIXME
 	ClientSocket = user.ClientSocket;
+	Club = require('./club').Club;
 };
 Game.hands = 0;
 Game.prototype.doClose = function (conn,cb,gamerow) {
@@ -351,7 +352,7 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 	models.GameStats.findOne(key,function (err,row) {
 		assert.ifError(err);
 		if (!row) {
-			log('inserting %j',doc);
+			global.log('inserting %j',doc);
 			models.GameStats.create(doc,finish.bind(this));
 		} else {
 			models.GameStats.findOneAndUpdate({_id:row._id},mods,finish.bind(this));
@@ -377,7 +378,7 @@ Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
 	models.GameStats.findOne(key,function (err,row) {
 		assert.ifError(err);
 		if (!row) {
-			log('inserting %j',doc);
+			global.log('inserting %j',doc);
 			models.GameStats.create(doc,finish);
 		} else {
 			models.GameStats.findOneAndUpdate({_id:row._id},mods,finish);
@@ -987,7 +988,7 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 	}
 	async.parallel([function a(cbA) {
 		async.each(jobs,function hack(job,cb2) {
-			log('updating stats %j',job);
+			global.log('updating stats %j',job);
 			models.GameStats.findOneAndUpdate(job.key,job.mods,function (err) {
 				assert.ifError(err);
 				this.club.updateLimitPostWin(job.change,job.userid,cb2);
@@ -1789,7 +1790,7 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 		$slice:-50
 	}}};
 	var key = {gameid:this.obj._id,userid:userid};
-	log('updating %s %s',key.gameid,key.userid);
+	global.log('updating %s %s',key.gameid,key.userid);
 	models.GameStats.findOneAndUpdate(key,mods,function (err) {
 		assert.ifError(err);
 		this.club.handOver(this,function () {
@@ -2197,7 +2198,7 @@ Game.prototype.resume = function (game,cb) {
 Game.checkAndResume = function (cb1) {
 	models.GameState.find().lean(true).exec(function (err,badgames) {
 		if (badgames.length > 0) {
-			log('%d bad games found, recovering',badgames.length);
+			global.log('%d bad games found, recovering',badgames.length);
 			async.eachSeries(badgames,function (game,cb2) {
 				//gameState.remove({_id:game._id},cb)
 				//console.log('game is',game);
@@ -2208,7 +2209,7 @@ Game.checkAndResume = function (cb1) {
 						return;
 					}
 					assert.ifError(err);
-					log('bad game %j',game);
+					global.log('bad game %j',game);
 					if (!gameObj) {
 						log('game is missing!');
 						cb2();
