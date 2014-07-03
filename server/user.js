@@ -82,7 +82,7 @@ function ClientSocket(socket) {
 		delete global.activeUsers[this.userid];
 		Game.handleDisconnect(this,'closed');
 	}.bind(this));
-	this.reader = new Protoreader(socket,this);
+	this.reader = new Protoreader(socket,this.handler.bind(this),this.error.bind(this));
 	this.oldTimer = setTimeout(function () {
 		this.log('hello timeout, sending it');
 		this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');

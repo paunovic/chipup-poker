@@ -126,7 +126,7 @@ io.on('connection',function (socket) {
 });
 function Client(sockin) {
 	this.socket = sockin;
-	this.reader = new protoreader(this.socket,this);
+	this.reader = new protoreader(this.socket,this.handle.bind(this),this.error.bind(this));
 	this.reply(codes.Hello);
 	this.socket.on('end',function () {
 		this.log('connection lost');

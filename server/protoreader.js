@@ -2,11 +2,12 @@ var util = require('util');
 
 module.exports = protoreader;
 var pb,codes,hidden;
-function protoreader(socket,handler) {
-	if (!(this instanceof protoreader)) return new protoreader(socket,handler);
+function protoreader(socket,handler,error) {
+	if (!(this instanceof protoreader)) return new protoreader(socket,handler,error);
 	this.socket = socket;
 	this.handler = handler;
 	this.buffer = null;
+	this.error = error;
 	function process_packet() {
 		if (this.buffer.length < 2) {
 			console.log('size prefix not in buffer yet');
@@ -26,7 +27,7 @@ function protoreader(socket,handler) {
 				//console.log('header is',header);
 			} catch (e) {
 				console.log(header);
-				this.handler.error(e);
+				this.error(e);
 				return false;
 			}
 			if (this.buffer.length < (2+headersize+header.DataSize)) {
@@ -35,7 +36,7 @@ function protoreader(socket,handler) {
 			}
 			var args = this.buffer.slice(2+headersize,2+headersize+header.DataSize);
 		//try {
-			this.handler.handle(header.MethodId,args);
+			this.handler(header.MethodId,args);
 		//} catch (e) {
 		//	this.handler.error(e);
 		//}
