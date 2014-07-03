@@ -1,5 +1,5 @@
 "use strict";
-/* global require,setTimeout,clearTimeout,module,Buffer */
+/* global require,setTimeout,clearTimeout,module,Buffer,global,console */
 var assert = require('assert');
 var util = require('util');
 
@@ -10,8 +10,7 @@ var codes = require('./ServerCodes');
 var profiler = require('./profiler');
 var models = require('./db').models;
 var makeGameProtobuf = require('./game').makeGameProtobuf;
-
-var log;
+var pb = global.pb; // FIXME, hack?
 
 function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds,regexLimits) {
 	if (!blinds) return true;
@@ -20,22 +19,21 @@ function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max
 	if (!regexLimits.gamename.exec(gamename)) return true;
 	if ([2,3,4,5,6,7,8,9,10].indexOf(seats) == -1) return true;
 	if (5 > buyin_min) {
-		log('min too low',buyin_min);
+		global.log('min too low',buyin_min);
 		return true;
 	}
 	if (buyin_max < buyin_min) {
-		log('max too low');
+		global.log('max too low');
 		return true;
 	}
 	if (10 > buyin_max) {
-		log('max too low',buyin_max);
+		global.log('max too low',buyin_max);
 		return true;
 	}
 	return false;
 }
 
-module.exports.registerHandlers = function (handlers,pb,regexLimits,activeUsers,logIN) {
-	log = logIN;
+module.exports.registerHandlers = function (handlers,regexLimits) {
 handlers[codes.scCloseGame] = function (args,token) {
 	var params,id;
 	try {
@@ -142,16 +140,16 @@ handlers[codes.scCreateGame] = function (args,token) {
 				}
 				token.tag += '-private';
 				for (x=0; x<club.obj.members.length; x++) {
-					var conn = activeUsers[club.obj.members[x]];
+					var conn = global.activeUsers[club.obj.members[x]];
 					if (!conn) continue;
 					conn.send(codes.seGameCreate,g,'Poker.Game');
 				}
 				token.stop();
 			} else {
 				token.tag += '-public';
-				for (key in activeUsers) {
+				for (key in global.activeUsers) {
 					if (key === this) continue;
-					activeUsers[key].send(codes.seGameCreate,g,'Poker.Game');
+					global.activeUsers[key].send(codes.seGameCreate,g,'Poker.Game');
 				}
 				token.stop();
 			}
@@ -537,7 +535,7 @@ handlers[codes.scShowCards] = function (args,token) {
 		try {
 			id = myutils.toMongoId(params._id);
 		} catch (e) {
-			log('params to scTableStandUp where %j',params);
+			global.log('params to scTableStandUp where %j',params);
 			//this.error(e);
 			return;
 		}

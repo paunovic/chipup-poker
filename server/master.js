@@ -30,6 +30,7 @@ var sessionStore;
 var restarting = false;
 
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+	assert.ifError(err);
 	sessionStore = new MongoStore(db,'master_sessions');
 	app.set('view engine','jade');
 	app.use(express.bodyParser({uploadDir:'./upload'}));

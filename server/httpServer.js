@@ -1,4 +1,5 @@
 "use strict";
+/* global require,module,global,console,Buffer,escape */
 var express = require('express');
 var fs = require('fs');
 var assert = require('assert');
@@ -11,6 +12,8 @@ var http = require('http');
 var https = require('https');
 var heapdump = require('heapdump');
 var mongoose = require('mongoose');
+var jade = require('jade');
+var generatePassword = require('password-generator');
 
 var config = require('./config');
 var MongoStore = require('./mongoStore');
@@ -24,16 +27,25 @@ var installer = require('./installer');
 var differ = require('./differ');
 var RT = require('./rt');
 var models = require('./db').models;
+var user = require('./user');
+var codes = require('./ServerCodes');
+var SmtpConnection = require('./smtp');
+var dag = require('./dag/build/Release/dag');
 
 module.exports.initHttpServer = initHttpServer;
 
-var sharedconfig,log,makeUserProtobuf;
+var badConfLink = "Invalid confirmation link.";
 
-function initHttpServer(activeUsers,sharedconfigIN,logIN,makeUserProtobufIN) {
-	sharedconfig = sharedconfigIN;
-	log = logIN;
-	makeUserProtobuf = makeUserProtobufIN;
-	var server = new Server(activeUsers);
+var sharedconfig,log,makeUserProtobuf,emailChange2;
+
+function initHttpServer() {
+	sharedconfig = global.sharedconfig; // FIXME
+	log = global.log; // FIXME
+	makeUserProtobuf = user.makeUserProtobuf; // FIXME
+	fs.readFile('views/password_change2.jade',{encoding:'utf8'},function (err,data) {
+		emailChange2 = jade.compile(data,{filename:'views/password_change2.jade',pretty:true});
+	});
+	var server = new Server(global.activeUsers);
 	return server;
 }
 
@@ -43,7 +55,7 @@ function Server(activeUsersIN) {
 	this.IO = require('socket.io').listen(this.httpServer,{log:false});
 	var logger = require('morgan');
 	app.use(logger());
-	this.activeUsers = activeUsersIN;
+	this.activeUsers = activeUsersIN; // FIXME
 
 	this.sessionStore = new MongoStore(mongoose.connection.db,'sessions');
 	this.IO.set('authorization',this.socketAuth.bind(this));
@@ -171,7 +183,7 @@ Server.prototype.syncMakeDiff = function (req,res) {
 	var t = req.body;
 	differ.makeDiff(t.sourcehash,t.desthash,t.path);
 	res.end('STARTED');
-}
+};
 Server.prototype.syncNewDiff = function (req,res) {
 	var doc = req.body;
 	var obj = new models.Diff(doc);
@@ -179,7 +191,7 @@ Server.prototype.syncNewDiff = function (req,res) {
 		assert.ifError(err);
 		res.end('OK');
 	});
-}
+};
 Server.prototype.addSecure = function (app) {
 	app.get('/secure/bugs',this.bugList.bind(this));
 	app.get('/secure/bug',this.getBug.bind(this));
@@ -198,18 +210,18 @@ Server.prototype.addSecure = function (app) {
 	app.get('/secure/paypal',this.paypalLog.bind(this));
 	app.post('/secure/newVersion',this.newVersion.bind(this));
 	app.get('/secure/disk',this.getDisk.bind(this));
-}
+};
 Server.prototype.addSync = function (app) {
 	app.get('/sync/gitHook',this.gitHook.bind(this));
 	app.post('/sync/newVersion',this.syncNewVersion.bind(this));
 	app.post('/sync/newDiff',this.syncNewDiff.bind(this));
-}
+};
 Server.prototype.getHand = function (req,res) {
 	var start = Date.now();
 	models.HandHistory.findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
 		res.render('hand',{hand:hand,start:start});
 	});
-}
+};
 Server.prototype.secureChangePasswordPost = function (req,res) {
 	console.log(req.body);
 	if (req.body.password != req.body.repeatPassword) {
@@ -236,7 +248,7 @@ Server.prototype.secureChangePasswordPost = function (req,res) {
 			});
 		});
 	}.bind(this));
-}
+};
 Server.prototype.secureLoginPost = function (req,res) {
 	console.log(req.body);
 	var username = req.body.username;
@@ -496,11 +508,12 @@ Server.prototype.goOnline = function () {
 	this.httpServer.listen(3000);
 }
 Server.prototype.socketAuth = function (handshakeData,callback) {
+	var parsed = false;
 	var test = require('./node_modules/express/node_modules/connect');
 	var cookieModule = require('./node_modules/express/node_modules/cookie');
 	if (handshakeData.headers.cookie) {
 		var cookies = cookieModule.parse(handshakeData.headers.cookie);
-		var parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
+		parsed = test.utils.parseSignedCookies(cookies,'ahQu6eey');
 	}
 	if (parsed && parsed.poker) {
 		this.sessionStore.get(parsed.poker,function (err,session) {
@@ -511,7 +524,6 @@ Server.prototype.socketAuth = function (handshakeData,callback) {
 			}
 		});
 	} else {
-		log('unauthorized ip: %s',ip);
 		callback(null,false);
 	}
 }
@@ -659,7 +671,7 @@ Server.prototype.passwordReset = function (req,res) {
 			delete user.forgotcode;
 			delete user.forgottime;
 			user.save(function (err) {
-				asser.ifError(err);
+				assert.ifError(err);
 				console.log('password change time',user);
 				res.send("Password changed, new password sent to your E-Mail.");
 				var test = new SmtpConnection();
@@ -850,9 +862,10 @@ Server.prototype.newVersion = function newVersion(req,res) {
 			assert.ifError(err);
 			log('new version recorded: %j',obj);
 			installer.unpackInstaller(obj,function (success) {
+				var key1;
 				if (success) {
-					if (debug == 'debug') var key1 = 'debuginstallerid';
-					else var key1 = 'installerid';
+					if (debug == 'debug') key1 = 'debuginstallerid';
+					else key1 = 'installerid';
 					//Config.update({_id:key1},{$set:{value:row[0]._id}},function(err,res2) {
 					//	assert.ifError(err);
 					//});
@@ -880,8 +893,9 @@ Server.prototype.syncNewVersion = function (req,res) {
 	}.bind(this));
 }
 Server.prototype.paypalCallback = function (req,res) {
-	if (req.body.test_ipn) var host = 'www.sandbox.paypal.com';
-	else var host = 'www.paypal.com';
+	var host;
+	if (req.body.test_ipn) host = 'www.sandbox.paypal.com';
+	else host = 'www.paypal.com';
 	var raw_post = [];
 	for (var key in req.body) {
 		raw_post.push(key+'='+escape(req.body[key]));
