@@ -292,10 +292,6 @@ end;
 
 procedure TTableRenderer.Render;
 begin
-  // dont render if its minimized
-  if IsIconic(FHandle) then
-    Exit;
-
   UpdateDXAreaSize;
   DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
 end;
@@ -1049,7 +1045,10 @@ begin
         chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
         RenderChipStack(animation.GetCurrPoint(FDXAreaSize), chips_stack);
 
-        Dec(pot_value, UINT32(animation.Tags[ANITAG_CHIPS]));
+        if animation.Tags[ANITAG_CHIPS] >= pot_value then
+          pot_value := 0
+        else
+          Dec(pot_value, UINT32(animation.Tags[ANITAG_CHIPS]));
 
         if animation.Tags.ContainsKey(ANITAG_SOUND) then
         begin
