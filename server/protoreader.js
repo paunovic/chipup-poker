@@ -9,7 +9,7 @@ function Protoreader(socket,handler,error) {
 	this.handler = handler;
 	this.buffer = new Buffer(0);
 	this.error = error;
-	socket.on('data', this._ondata.bind(this));
+	socket.on('data',this._ondata.bind(this));
 }
 Protoreader.prototype._ondata = function (chunk) {
 	this.buffer = Buffer.concat([this.buffer, chunk]);
@@ -21,10 +21,8 @@ Protoreader.prototype._ondata = function (chunk) {
 			break;
 		}
 
-		this.buffer = this.buffer.slice(2);
-
 		if (headersize > 0) {
-			var header = this.buffer.slice(headersize);
+			var header = this.buffer.slice(2, 2 + headersize);
 			try {
 				header = pb.Parse(header, SCHEMA);
 				if (!header.DataSize) header.DataSize = 0;
@@ -33,13 +31,15 @@ Protoreader.prototype._ondata = function (chunk) {
 				this.error(e);
 				break;
 			}
-			if (this.buffer.length < (headersize + header.DataSize)) {
+			if (this.buffer.length < (2 + headersize + header.DataSize)) {
 				console.log('arguments not in buffer yet');
 				break;
 			}
-			var args = this.buffer.slice(headersize, headersize + header.DataSize);
+			var args = this.buffer.slice(2 + headersize, 2 + headersize + header.DataSize);
 			this.handler(header.MethodId, args);
-			this.buffer = this.buffer.slice(headersize + header.DataSize);
+			this.buffer = this.buffer.slice(2 + headersize + header.DataSize);
+		} else {
+			this.buffer = this.buffer.slice(2);
 		}
 	}
 	//if (this.buffer.length > 0) this.handler.log('remaining data:',this.buffer);
