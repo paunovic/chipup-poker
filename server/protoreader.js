@@ -5,7 +5,7 @@ var pb, codes, hidden;
 var SCHEMA = 'Poker.RpcMessage';
 
 function Protoreader(socket,handler,error,log) {
-	if (!(this instanceof Protoreader)) return new Protoreader(socket,handler,error);
+	if (!(this instanceof Protoreader)) return new Protoreader(socket,handler,error,log);
 	this.handler = handler;
 	this.buffer = new Buffer(0);
 	this.error = error;
