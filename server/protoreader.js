@@ -15,11 +15,7 @@ Protoreader.prototype._ondata = function (chunk) {
 	}
 	else this.buffer = chunk;
 
-	while (this.buffer.length > 0) {
-		if (this.buffer.length < 2) {
-			console.log('size prefix not in buffer yet');
-			break;
-		}
+	while (this.buffer.length >= 0) {
 		var headersize = this.buffer.readInt16LE(0);
 		if (this.buffer.length < (2+headersize)) {
 			console.log('header not in buffer yet',headersize);
