@@ -231,7 +231,6 @@ var
   item_index: Integer;
 begin
   item_index := (Sender as TcxComboBox).ItemIndex;
-  DomainURL := Settings.Hardcoded.SERVER_CONFIG[item_index].URL;
   Settings.ServerIndex := item_index;
   TServerSocketCommands.Deinitialize;
   TServerSocketCommands.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);

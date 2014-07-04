@@ -94,7 +94,7 @@ type
 
     function AnimateBets(const ACallback: THandle; ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
     procedure AnimateBlinds(const ACallback: THandle);
-    procedure AnimatePots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
+    procedure AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
     procedure AnimateDealingCards(const ACallback: THandle);
 
     procedure AnimationCallback(const AAnimationPointer: pointer);
@@ -144,7 +144,7 @@ uses
   Winapi.Windows, Poker.DirectX.Core, Poker.Table.Resources, AbstractCanvas, System.SysUtils,
   Poker.Objects.PlayerInfo, Poker.Avatars, Poker.Protobufs.Objects.SeatInfo, Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation, Poker.DirectX.Timer, Poker.Objects.PotInfo,
-  Poker.Sounds, Poker.HandStrengthCalculator;
+  Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings;
 
 { TTableRenderer }
 
@@ -1278,7 +1278,8 @@ begin
       bet_point := FMetrics.GetBetPoint(C1, FTableStatus.Dealer);
       pot_point := FMetrics.GetPotPoint(0);
 
-      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, 0.3, 0.2, 0, FDXAreaSize);
+      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, Settings.Hardcoded.ANIMATION_METRICS.BETS_SPEED,
+          Settings.Hardcoded.ANIMATION_METRICS.BETS_START_DELAY, 0, FDXAreaSize);
       animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
       animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
@@ -1340,7 +1341,9 @@ begin
         begin
           seat_point := FMetrics.GetSeatPoint(seat.SeatIndex);
           animation := DXTimer.AddAnimation(ACallback, Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y),
-                                            FMetrics.GetCardPoint(seat, card_index), 0.25, 1.5 + FDealAnimations.Count * 0.05, 0, FDXAreaSize);
+                                            FMetrics.GetCardPoint(seat, card_index), Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_SPEED,
+                                            Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY + Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY,
+                                            0, FDXAreaSize);
           animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
           Inc(cc);
           if cc mod 2 = 0 then
@@ -1358,7 +1361,7 @@ begin
   until not iterate;
 end;
 
-procedure TTableRenderer.AnimatePots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
+procedure TTableRenderer.AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
 var
   pot: TPB_WinnerPotInfo;
   C1, C2: Integer;
@@ -1395,8 +1398,14 @@ begin
       if FTableType = ttHandPlayback then
         FTableStatus.Bets[pot.WinnerData[C2].Seat] := total_chips_val div UINT32(pot.WinnerData.Count);
 
-      animation := DXTimer.AddAnimation(ACallback, FMetrics.GetPotPoint(C1),
-           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer), 0.3, WinningAniDelay + 1.5 + C1 * 0.5, 0.5, FDXAreaSize);
+      animation := DXTimer.AddAnimation(ACallback,
+           FMetrics.GetPotPoint(C1),
+           FMetrics.GetBetPoint(pot.WinnerData[C2].Seat, FTableStatus.Dealer),
+           Settings.Hardcoded.ANIMATION_METRICS.POTS_INITIAL_DELAY,
+           WinningAniDelay + 1.5 + C1 * Settings.Hardcoded.ANIMATION_METRICS.POTS_INBETWEEN_DELAY,
+           Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
+           FDXAreaSize);
+
       animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
       PotWinAnimations.Add(animation.Id);

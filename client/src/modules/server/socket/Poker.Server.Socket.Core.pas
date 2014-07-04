@@ -55,6 +55,8 @@ type
     procedure Disconnect;
     function IsConnected: Boolean;
 
+    function IsPinging: Boolean;
+
     procedure SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
     procedure SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
     procedure ProcessTimer(const ATimerId: UINT_PTR);
@@ -378,6 +380,7 @@ end;
 procedure TServerSocketCore.ResetPingTimeoutTimer;
 begin
   FTimerIdPingTimeout := SetTimer(0, FTimerIdPingTimeout, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, @TimerProc);
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState, dfiLatency]); {$ENDIF}
 end;
 
 procedure TServerSocketCore.KillPingTimers;
@@ -466,6 +469,7 @@ begin
       FTimeOffset := FServerTime - gtc;
       KillPingTimeoutTimer;
       ResetPingTimer;
+      {$IFDEF DEBUG} RefreshDebugForm([dfiLatency]); {$ENDIF}
     end;
     seChat: ADataObject := TPB_ChatEvent.Create(ADataPointer, ARpcMessage.DataSize);
     srClubDisbandOk,
@@ -583,6 +587,8 @@ begin
   try
     protobuf.Uptime := GetTickCount;
     SendProtobuf(scPing, protobuf);
+    KillPingTimers;
+    ResetPingTimeoutTimer;
   finally
     protobuf.Free;
   end;
@@ -592,11 +598,7 @@ procedure TServerSocketCore.ProcessTimer(const ATimerId: UINT_PTR);
 begin
   if (ATimerId = FTimerIdPing) or
      (ATimerId = FTimerIdInactivityPing) then
-  begin
     Ping;
-    KillPingTimers;
-    ResetPingTimeoutTimer;
-  end;
 
   if ATimerId = FTimerIdPingTimeout then
   begin
@@ -604,6 +606,12 @@ begin
     Disconnect;
   end;
 end;
+
+function TServerSocketCore.IsPinging: Boolean;
+begin
+  result := FTimerIdPingTimeout <> 0;
+end;
+
 
 
 

@@ -58,7 +58,6 @@ var
   dmMain: TdmMain;
   SelfPath: String;
   AppDataPath: String;
-  DomainURL: String;
 
 implementation
 
@@ -117,7 +116,6 @@ begin
     server_index := 0;
 
   TServerSocketCommands.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
-  DomainURL := TSettings.Hardcoded.SERVER_CONFIG[server_index].URL;
 
   FSelfInfo := TPlayerInfo.Create;
 

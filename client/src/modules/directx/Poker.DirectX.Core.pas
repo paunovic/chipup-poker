@@ -109,6 +109,7 @@ begin
      FDevice.SwapChains[AIndex].VSync := TRUE;
      AIndex := C1;
      {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired', [AIndex]), ditApplication); {$ENDIF}
+     {$IFDEF DEBUG} RefreshDebugForm([dfiSwapChains]); {$ENDIF}
      Exit(TRUE);
    end;
 
@@ -130,6 +131,7 @@ begin
   FDevice.SwapChains[AIndex].VSync := FALSE;
   FDevice.SwapChains[AIndex].WindowHandle := FDummyWindow;
   {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSwapChains]); {$ENDIF}
 end;
 
 end.

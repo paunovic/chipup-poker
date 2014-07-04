@@ -1216,7 +1216,7 @@ begin
       if FTable.Renderer.AnimateBets(Handle, FTable.Renderer.TableStatus.PreviousBets) then
         TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
 
-      FTable.Renderer.AnimatePots(Handle, ATableEvent.Pots);
+      FTable.Renderer.AnimateWinnerPots(Handle, ATableEvent.Pots);
     end;
 
     teDealing: begin
@@ -1228,7 +1228,8 @@ begin
       FTable.Renderer.AnimateBlinds(Handle);
       FTable.Renderer.AnimateDealingCards(Handle);
 
-      EnableGameLockTimer(1.5 + FTable.Renderer.DealAnimations.Count * 0.075);
+      EnableGameLockTimer(0.5 + Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY +
+          FTable.Renderer.DealAnimations.Count * Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY);
     end;
 
     teCheck: begin

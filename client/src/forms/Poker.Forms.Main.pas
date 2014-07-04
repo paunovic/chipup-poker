@@ -365,6 +365,8 @@ begin
       end;
     end;
   end;
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState]); {$ENDIF}
 end;
 
 function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;

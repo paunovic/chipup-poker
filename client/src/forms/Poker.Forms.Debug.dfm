@@ -603,7 +603,6 @@ object frmDebug: TfrmDebug
     end
   end
   object tiAppInfoRefresh: TTimer
-    Interval = 500
     OnTimer = tiAppInfoRefreshTimer
     Left = 68
     Top = 88

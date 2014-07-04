@@ -13,6 +13,8 @@ uses
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
+  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains);
+  TDebugRefreshItemSet = set of TDebugRefreshItem;
 
   TDebugFormLog = class(TIdSync)
   private
@@ -27,6 +29,15 @@ type
     procedure DoSynchronize; override;
   public
     class procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+  end;
+
+  TDebugFormRefresh = class(TIdSync)
+  private
+    FRefreshItems: TDebugRefreshItemSet;
+  protected
+    procedure DoSynchronize; override;
+  public
+    class procedure Execute(const ARefreshItems: TDebugRefreshItemSet);
   end;
 
   TfrmDebug = class(TForm)
@@ -86,9 +97,11 @@ type
     class procedure Deinitialize;
 
     procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+    procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
   end;
 
-procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
+  procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
+  procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
 
 implementation
 
@@ -207,6 +220,13 @@ begin
   end;
 end;
 
+procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
+begin
+  if Assigned(frmDebug) then
+    TDebugFormRefresh.Execute(ARefreshItems);
+end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class procedure TfrmDebug.Initialize;
 const
@@ -248,81 +268,8 @@ begin
 end;
 
 procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
-var
-  server_socket_connected: Boolean;
-  server_socket_state: String;
-  server_socket_state_color: TColor;
-  swap_chains_occupied: Integer;
-  C1: Integer;
 begin
-  lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
-  lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
-  lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
-
-  server_socket_connected := FALSE;
-  server_socket_state_color := clWhite;
-  if Assigned(ServerSocket) then
-  begin
-    case ServerSocket.Socket.State of
-      wsInvalidState: server_socket_state := 'InvalidState';
-      wsOpened: server_socket_state := 'Opened';
-      wsBound: server_socket_state := 'Bound';
-      wsConnecting: server_socket_state := 'Connecting';
-      wsSocksConnected: server_socket_state := 'SocksConnected';
-      wsConnected: begin
-        server_socket_connected := TRUE;
-        server_socket_state := 'Connected';
-        server_socket_state_color := clLime;
-      end;
-      wsAccepting: server_socket_state := 'Accepting';
-      wsListening: server_socket_state := 'Listening';
-      wsClosed: begin
-        server_socket_state := 'Closed';
-        server_socket_state_color := clRed;
-      end;
-    else
-      server_socket_state := 'Unknown';
-    end;
-  end
-  else
-  begin
-    server_socket_state := 'Unassigned';
-    server_socket_state_color := clRed;
-  end;
-
-  lbvSocketState.Caption := server_socket_state;
-  lbvSocketState.Style.TextColor := server_socket_state_color;
-
-  if (server_socket_connected) and
-     (Assigned(ServerSocket)) and
-     (ServerSocket.Latency > 0) then
-  begin
-    lbvLatency.Caption := Format('%dms', [ServerSocket.Latency]);
-    if ServerSocket.Latency < 100 then
-      lbvLatency.Style.TextColor := clLime
-    else
-      if ServerSocket.Latency < 500 then
-        lbvLatency.Style.TextColor := clYellow
-      else
-        lbvLatency.Style.TextColor := clRed;
-  end
-  else
-  begin
-    lbvLatency.Caption := 'Unknown';
-    lbvLatency.Style.TextColor := clWhite;
-  end;
-
-  if (Assigned(DXCore)) and
-     (Assigned(DXCore.Device)) then
-  begin
-    swap_chains_occupied := 0;
-    for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
-      if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
-        Inc(swap_chains_occupied);
-    lbvSwapChains.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
-  end
-  else
-    lbvSwapChains.Caption := 'Unknown';
+  RefreshStats([]);
 end;
 
 procedure TfrmDebug.CreateParams(var AParams: TCreateParams);
@@ -561,6 +508,111 @@ begin
   {$ENDIF}
 end;
 
+procedure TfrmDebug.RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
+var
+  server_socket_connected: Boolean;
+  server_socket_state: String;
+  server_socket_state_color: TColor;
+  swap_chains_occupied: Integer;
+  C1: Integer;
+  refresh_items: TDebugRefreshItemSet;
+  dfi: TDebugRefreshItem;
+begin
+  refresh_items := ARefreshItems;
+  if refresh_items = [] then
+    for dfi := Low(TDebugRefreshItem) to High(TDebugRefreshItem) do
+      Include(refresh_items, dfi);
+
+  if dfiSystemMetrics in refresh_items then
+  begin
+    lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
+    lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
+  end;
+
+  if dfiCallbacks in refresh_items then
+    lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
+
+  if (dfiSocketState in refresh_items) or
+     (dfiLatency in refresh_items) then
+  begin
+    server_socket_connected := FALSE;
+    server_socket_state_color := clWhite;
+    if Assigned(ServerSocket) then
+    begin
+      case ServerSocket.Socket.State of
+        wsInvalidState: server_socket_state := 'InvalidState';
+        wsOpened: server_socket_state := 'Opened';
+        wsBound: server_socket_state := 'Bound';
+        wsConnecting: server_socket_state := 'Connecting';
+        wsSocksConnected: server_socket_state := 'SocksConnected';
+        wsConnected: begin
+          server_socket_connected := TRUE;
+          server_socket_state := 'Connected';
+          server_socket_state_color := clLime;
+        end;
+        wsAccepting: server_socket_state := 'Accepting';
+        wsListening: server_socket_state := 'Listening';
+        wsClosed: begin
+          server_socket_state := 'Closed';
+          server_socket_state_color := clRed;
+        end;
+      else
+        server_socket_state := 'Unknown';
+      end;
+    end
+    else
+    begin
+      server_socket_state := 'Unassigned';
+      server_socket_state_color := clRed;
+    end;
+
+    if dfiSocketState in refresh_items then
+    begin
+      lbvSocketState.Caption := server_socket_state;
+      lbvSocketState.Style.TextColor := server_socket_state_color;
+    end;
+
+    if dfiLatency in refresh_items then
+    begin
+      if (server_socket_connected) and
+         (Assigned(ServerSocket)) and
+         (ServerSocket.Latency > 0) then
+      begin
+        lbvLatency.Caption := Format('%dms', [ServerSocket.Latency]);
+        if ServerSocket.IsPinging then
+          lbvLatency.Caption := lbvLatency.Caption + ' ...';
+        if ServerSocket.Latency < 100 then
+          lbvLatency.Style.TextColor := clLime
+        else
+          if ServerSocket.Latency < 500 then
+            lbvLatency.Style.TextColor := clYellow
+          else
+            lbvLatency.Style.TextColor := clRed;
+      end
+      else
+      begin
+        lbvLatency.Caption := 'Unknown';
+        lbvLatency.Style.TextColor := clWhite;
+      end;
+    end;
+  end;
+
+  if dfiSwapChains in refresh_items then
+  begin
+    if (Assigned(DXCore)) and
+       (Assigned(DXCore.Device)) then
+    begin
+      swap_chains_occupied := 0;
+      for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
+        if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
+          Inc(swap_chains_occupied);
+      lbvSwapChains.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
+    end
+    else
+      lbvSwapChains.Caption := 'Unknown';
+  end;
+end;
+
 { TMemoLog }
 
 class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
@@ -585,6 +637,27 @@ end;
 procedure TDebugFormLog.DoSynchronize;
 begin
   frmDebug.Add(FType, FTime, FTypeStr, FData, FSubData, FTypeStyle, FDataStyle);
+end;
+
+{ TDebugFormRefresh }
+
+procedure TDebugFormRefresh.DoSynchronize;
+begin
+  inherited;
+  frmDebug.RefreshStats(FRefreshItems);
+end;
+
+class procedure TDebugFormRefresh.Execute(const ARefreshItems: TDebugRefreshItemSet);
+var
+  dfr: TDebugFormRefresh;
+begin
+  dfr := TDebugFormRefresh.Create;
+  try
+    dfr.FRefreshItems := ARefreshItems;
+    dfr.Synchronize;
+  finally
+    dfr.Free;
+  end;
 end;
 
 end.
