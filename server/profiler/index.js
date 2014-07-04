@@ -1,9 +1,12 @@
 module.exports.start = start;
 module.exports.setup = setup;
 
+var util = require('./build/Release/profile_util');
+
 var PokerProfile;
 function setup(input) {
 	PokerProfile = input;
+	console.log(util);
 }
 
 function start(tag) {

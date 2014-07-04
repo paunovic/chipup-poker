@@ -1,0 +1,9 @@
+{
+  "name":"profiler",
+  "version":"0.0.1",
+  "description":"profiler tool",
+  "main":"index.js",
+  "author":{
+    "name":"michael bishop"
+  }
+}
