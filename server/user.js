@@ -18,7 +18,7 @@ var myutils = require('./myutils');
 var config = require('./config');
 var differ = require('./differ');
 var SmtpConnection = require('./smtp');
-var profiler = require('./profiler');
+var profiler = require('profiler');
 var RT = require('./rt');
 var installer = require('./installer');
 
@@ -50,10 +50,11 @@ function changePassword(new_password,userid,cb) {
 	}.bind(this));
 }
 function UserInit(regexLimitsIN,cb2) {
+	assert(regexLimitsIN);
 	Club = require('./club').Club;
 	regexLimits = regexLimitsIN;
 	Club.registerHandlers(handlers);
-	require('./game_network').registerHandlers(handlers,pb,regexLimits); // FIXME
+	require('./game_network').registerHandlers(handlers,regexLimits); // FIXME
 	async.parallel([function (cb) {
 		fs.readFile('views/password_change1.jade',{encoding:'utf8'},function (err,data) {
 			emailChange1 = jade.compile(data,{filename:'views/password_change1.jade',pretty:true});
@@ -132,9 +133,10 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 			this.log('got status packet');
 			// FIXME, optimize this?
 			var toResume = [];
-			for (var key in Game.activeGames) {
+			for (var key in global.activeGames) {
+				this.log('checking game %s',key);
 				var added = false;
-				var game = Game.activeGames[key];
+				var game = global.activeGames[key];
 				for (var seatIdx = 0; seatIdx < game.seats.length; seatIdx++) {
 					if (!game.seats[seatIdx]) continue;
 					if (myutils.compareObjectID(game.seats[seatIdx].userid,row._id)) {
@@ -525,6 +527,10 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.scHello:
 			try {
 				params = pb.Parse(args,'Poker.HelloParams');
+				if (params.files.length == 0) {
+					this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
+					return;
+				}
 			} catch (e) {
 				this.error(e);
 				return;
@@ -928,7 +934,7 @@ ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts,token) {
 			ev.msg.timestamp = ts;
 		//}
 		var id = myutils.toMongoId(ev.table_id);
-		var game = Game.activeGames[id];
+		var game = global.activeGames[id];
 		if (!game) {
 			return;
 		}
@@ -959,7 +965,7 @@ function bufferMatch(a,b) {
 function hashAssets(cb) {
 	installer.recurse_dir('assets/','',function (err,files) {
 		assert.ifError(err);
-		assets = {};
+		var newassets = {};
 		async.each(files,function (file,cb) {
 			console.log('file',file);
 			if (file.indexOf('.filepart') != -1) return cb();
@@ -970,7 +976,7 @@ function hashAssets(cb) {
 			});
 			client.on('end',function () {
 				var hash = hasher.digest('hex');
-				assets[file.replace('.',':')] = hash;
+				newassets[file.replace('.',':')] = hash;
 				console.log('hash of %s is %s',file,hash);
 				installer.copyFile(file,'unpacked/objects/'+hash,function () {
 					models.ObjectSize.create({_id:hash,size:size},function () {
@@ -979,7 +985,8 @@ function hashAssets(cb) {
 				});
 			});
 		},function () {
-			console.log(assets);
+			assets = newassets;
+			console.log('done hashing assets',assets);
 			if (cb) cb();
 		});
 	});

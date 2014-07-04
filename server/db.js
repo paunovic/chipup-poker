@@ -46,7 +46,8 @@ var DebugLogSchema = new Schema({
 
 var ProfileSchema = new Schema({
 	time:Number,
-	tag:String
+	tag:String,
+	cputime:Number
 },{collection:'PokerProfile',capped:1024*1024*10});
 
 var ClubSchema = new Schema({

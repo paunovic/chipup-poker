@@ -7,12 +7,13 @@ var myutils = require('./myutils');
 var Game = require('./game').Game;
 var Club = require('./club').Club;
 var codes = require('./ServerCodes');
-var profiler = require('./profiler');
+var profiler = require('profiler');
 var models = require('./db').models;
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var pb = global.pb; // FIXME, hack?
 
 function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max,blinds,regexLimits) {
+	assert(regexLimits);
 	if (!blinds) return true;
 	if (!game_type) return true;
 	if (!game_limit) return true;
@@ -34,6 +35,7 @@ function checkGameParams(gamename,seats,game_type,game_limit,buyin_min,buyin_max
 }
 
 module.exports.registerHandlers = function (handlers,regexLimits) {
+	assert(regexLimits);
 handlers[codes.scCloseGame] = function (args,token) {
 	var params,id;
 	try {

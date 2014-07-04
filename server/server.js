@@ -24,11 +24,10 @@ var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it c
 var deck = require('./deck');
 var codes = require('./ServerCodes');
 var bugsView = require('./bugs');
-var profiler = require('./profiler');
+var profiler = require('profiler');
 var Club = require('./club').Club;
 var makeGameProtobuf = require('./game').makeGameProtobuf;
 var RT = require('./rt');
-var omaha2 = require('./dag2/omaha');
 var config = require('./config');
 var differ = require('./differ');
 var mdb = require('./db');
@@ -195,6 +194,7 @@ function goOnline() {
 	}
 	function compileJade() {
 		// FIXME, redo this
+		assert(regexLimits);
 		user.UserInit(regexLimits,goOnline);
 	}
 

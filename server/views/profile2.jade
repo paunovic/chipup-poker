@@ -4,11 +4,15 @@ block content
     tr
       th tag
       th avg
+      th cpu avg
+      th cpu usage
       th hits
     each row in rows
       tr
         td=row._id
         td=row.avg
+        td=row.cpuavg
+        th=Math.round((row.cpuavg/row.avg)*100)+'%'
         td=row.hits
   table(border=1)
     tr

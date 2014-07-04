@@ -12,10 +12,9 @@ protoreader.init(pb,codes,[codes.GlobalMsgEvent]);
 
 var autoRestart = false;
 
-var socket = new Client('127.0.0.1',45508);
 function Client(ip,port) {
 	this.socket = net.connect(port,ip,function (){});
-	this.reader = new protoreader(this.socket,this);
+	this.reader = new protoreader(this.socket,this.handle.bind(this),this.error.bind(this));
 	this.socket.on('end',function () {
 		this.log('connection lost');
 		process.stdin.pause();
@@ -64,6 +63,7 @@ Client.prototype.log = function log() {
 	console.log.apply(this,out);
 }
 Client.prototype.reply = protoreader.reply;
+var socket = new Client('127.0.0.1',45508);
 var menusetup = false;
 var currentOptions;
 function doMenu(options) {

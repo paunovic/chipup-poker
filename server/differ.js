@@ -7,7 +7,7 @@ var child_process = require('child_process');
 
 var config = require('./config');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
-var profiler = require('./profiler');
+var profiler = require('profiler');
 var models = require('./db').models;
 
 module.exports.makeDiff = makeDiff;

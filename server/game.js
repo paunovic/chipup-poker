@@ -7,8 +7,9 @@ var async = require('async');
 var activeGames,activeUsers,sharedconfig,ClientSocket;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
-var profiler = require('./profiler');
+var profiler = require('profiler');
 var dag = require('./dag/build/Release/dag');
+var omaha2 = require('./dag2/omaha');
 dag.init();
 var getGameLock = new ReadWriteLock();
 
@@ -108,6 +109,7 @@ function Game(obj) {
 	else this.state2 = 'gsActive';
 }
 Game.init = function (input) {
+	assert(input);
 	activeGames = input;
 	global.activeGames = activeGames; // FIXME, init this elsewhere
 	global.util = require('util');
@@ -1940,7 +1942,7 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 						clearTimeout(this.deleteTimer);
 						this.doDelete();
 					}
-					this.stateRow.remove({_id:this.obj._id},function (err,res) {
+					this.stateRow.remove(function (err,res) {
 						assert.ifError(err);
 						cb1();
 						release();

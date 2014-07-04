@@ -36,11 +36,10 @@ module.exports.initHttpServer = initHttpServer;
 
 var badConfLink = "Invalid confirmation link.";
 
-var sharedconfig,log,makeUserProtobuf,emailChange2;
+var sharedconfig,makeUserProtobuf,emailChange2;
 
 function initHttpServer() {
 	sharedconfig = global.sharedconfig; // FIXME
-	log = global.log; // FIXME
 	makeUserProtobuf = user.makeUserProtobuf; // FIXME
 	fs.readFile('views/password_change2.jade',{encoding:'utf8'},function (err,data) {
 		emailChange2 = jade.compile(data,{filename:'views/password_change2.jade',pretty:true});
@@ -84,14 +83,7 @@ function Server(activeUsersIN) {
 			res.render('profile',{rows:rows,start:start});
 		});
 	});
-	app.get('/secure/profile',function (req,res) {
-		var start = Date.now();
-		models.PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1} }}, function (err,rows) {
-			models.PokerProfile.find({time:{$gt:2000}},function (err,list) {
-				res.render('profile2',{rows:rows,start:start,rawlist:list});
-			});
-		});
-	});
+	app.get('/secure/profile',this.profile.bind(this));
 	app.get('/secure/billing',function (req,res) {
 		var start = Date.now();
 		mongoose.connection.db.collection('billing').find({TotalCost:{$gt:0}},{ProductCode:1,ProductName:1,UsageType:1,ItemDescription:1,CostBeforeTax:1,TotalCost:1,UsageQuantity:1,"user:Name":1,"user:service":1,year:1,month:1}).toArray(function (err,rows) { // FIXME
@@ -129,7 +121,7 @@ function Server(activeUsersIN) {
 		models.Config.findOne({_id:'installerid'},function (err,row) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
-				log('sending installer %j',row);
+				global.log('sending installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
 		}.bind(this));
@@ -138,7 +130,7 @@ function Server(activeUsersIN) {
 		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
-				log('sending debug installer %j',row);
+				global.log('sending debug installer %j',row);
 				res.sendfile('installers/'+row.name);
 			});
 		}.bind(this));
@@ -179,6 +171,14 @@ function Server(activeUsersIN) {
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
 }
+Server.prototype.profile = function (req,res) {
+	var start = Date.now();
+	models.PokerProfile.aggregate({$group:{_id:'$tag', avg:{$avg:'$time'}, hits:{$sum:1}, cpuavg:{$avg:'$cputime'} }}, function (err,rows) {
+		models.PokerProfile.find({time:{$gt:2000}},function (err,list) {
+			res.render('profile2',{rows:rows,start:start,rawlist:list});
+		});
+	});
+};
 Server.prototype.syncMakeDiff = function (req,res) {
 	var t = req.body;
 	differ.makeDiff(t.sourcehash,t.desthash,t.path);
@@ -769,7 +769,7 @@ Server.prototype.errorUpload = function (req,res) {
 }*/
 Server.prototype.getAvatar = function (req,res) {
 	var id = req.query.id;
-	log('getting avatar %j %d %s',req.query,id.length,id);
+	global.log('getting avatar %j %d %s',req.query,id.length,id);
 	if (id == 'default') {
 		fs.readFile('resources/default_avatar.jpg',function (err,data) {
 			if (err) throw err;
@@ -860,7 +860,7 @@ Server.prototype.newVersion = function newVersion(req,res) {
 		var obj = new models.Installer({name:name1,version:version,revision:revision,debug:debug,size:req.files.installer.size});
 		obj.save(function (err) {
 			assert.ifError(err);
-			log('new version recorded: %j',obj);
+			global.log('new version recorded: %j',obj);
 			installer.unpackInstaller(obj,function (success) {
 				var key1;
 				if (success) {
