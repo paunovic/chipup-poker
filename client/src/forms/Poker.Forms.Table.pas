@@ -1228,7 +1228,7 @@ begin
       FTable.Renderer.AnimateBlinds(Handle);
       FTable.Renderer.AnimateDealingCards(Handle);
 
-      EnableGameLockTimer(1.5 + FTable.Renderer.DealAnimations.Count * 0.05);
+      EnableGameLockTimer(1.5 + FTable.Renderer.DealAnimations.Count * 0.075);
     end;
 
     teCheck: begin
