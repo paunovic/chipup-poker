@@ -14,7 +14,7 @@ function Protoreader(socket,handler,error) {
 Protoreader.prototype._ondata = function (chunk) {
 	this.buffer = Buffer.concat([this.buffer, chunk]);
 
-	while (this.buffer.length >= 0) {
+	while (this.buffer.length >= 2) {
 		var headersize = this.buffer.readInt16LE(0);
 		if (this.buffer.length < (2 + headersize)) {
 			console.log('header not in buffer yet', headersize);
