@@ -53,13 +53,15 @@ Protoreader.init = function init(input, mapping, hiddenin) {
 }
 Protoreader.prototype.reply = function reply(code,message,type) {
 	code = parseInt(code);
-	var args;
+	var args,datasize=0;
 	if (type == 'raw') {
 		args = message;
 	} else if (message) {
 		args = pb.Serialize(message,type);
 	}
-	datasize = args.length;
+
+	if (args) datasize = args.length;
+
 	var object = { MethodId: code, DataSize: datasize };
 	var header = pb.Serialize(object, SCHEMA);
 	var totalsize = 2 + header.length + datasize;
