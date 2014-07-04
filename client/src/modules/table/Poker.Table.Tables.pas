@@ -17,6 +17,7 @@ type
     FHandId: UINT;
     FGame: TGameInfo;
     FClub: TClubInfo;
+    FLeaveNotify: Boolean;
     FHandHistoryPlayback: THandHistoryPlayback;
     FSwapChainIndex: Integer;
     FRenderer: TTableRenderer;
@@ -26,7 +27,6 @@ type
   public
     procedure SetupLiveTable(const AClub: TClubInfo; const AGame: TGameInfo; const ASendJoinCommand: Boolean);
     procedure SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
-    procedure SetupSettingsPreviewTable(const AHandle: THandle);
 
     destructor Destroy; override;
 
@@ -50,6 +50,7 @@ type
     property TableType: TTableType read FTableType;
     property Renderer: TTableRenderer read FRenderer;
     property HandHistoryPlayback: THandHistoryPlayback read FHandHistoryPlayback;
+    property LeaveNotify: Boolean read FLeaveNotify write FLeaveNotify;
   end;
 
   TTables = class(TObjectList<TTable>)
@@ -60,11 +61,12 @@ type
     procedure DisableAll;
     procedure EnableAll;
 
+    procedure ClearWithoutNotification;
+
     procedure ReassignObjects;
 
     function AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
     function AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
-    function AddSettingsPreviewTable(const AHandle: THandle): TTable;
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
     function FindTable(const AGameId: TBytes; var ATable: TTable): Boolean;
@@ -86,7 +88,7 @@ uses
 
 destructor TTable.Destroy;
 begin
-  if FTableType = ttLiveGame then
+  if FLeaveNotify then
     ServerSocket.LeaveTable(FGameId);
 
   FreeAndNil(FForm);
@@ -121,6 +123,7 @@ begin
   form := TfrmTable.Create(self);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
+  FLeaveNotify := TRUE;
   DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
   if ASendJoinCommand then
     ServerSocket.JoinTable(FGame.MongoId);
@@ -142,24 +145,8 @@ begin
   form := TfrmTable.Create(self);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
+  FLeaveNotify := FALSE;
   DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
-  FRenderer.UpdateDXAreaSize;
-end;
-
-procedure TTable.SetupSettingsPreviewTable(const AHandle: THandle);
-begin
-  FTableType := ttSettingsPreview;
-  FSeatIndex := -1;
-  FClub := TClubInfo.Create;
-  FClub.InitToDemoValues;
-  FGame := TGameInfo.Create;
-  FGame.InitToDemoValues(FClub.Id);
-  FClub.Games.Add(FGame);
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttSettingsPreview);
-  FRenderer.TableStatus.InitToDemoValues;
-  FRenderer.SetRenderTarget(AHandle);
-  FRenderer.FlopAnimated := TRUE;
-  DXCore.ModifySwapChainElement(FSwapChainIndex, AHandle);
   FRenderer.UpdateDXAreaSize;
 end;
 
@@ -266,23 +253,6 @@ begin
   result := table;
 end;
 
-function TTables.AddSettingsPreviewTable(const AHandle: THandle): TTable;
-var
-  table: TTable;
-begin
-  table := TTable.Create;
-  if not table.AcquireSwapChainElement then
-  begin
-    FreeAndNil(table);
-    Exit(nil);
-  end;
-
-  Add(table);
-  table.SetupSettingsPreviewTable(AHandle);
-
-  result := table;
-end;
-
 procedure TTables.ReassignObjects;
 var
   table: TTable;
@@ -315,6 +285,15 @@ begin
     if CompareBytes(AGameId, ToArray[C1].Game.MongoId) then
       Exit(C1);
   Exit(-1);
+end;
+
+procedure TTables.ClearWithoutNotification;
+var
+  table: TTable;
+begin
+  for table in ToArray do
+    table.LeaveNotify := FALSE;
+  Clear;
 end;
 
 procedure TTables.CloseTablesForClub(const AClubId: TBytes);

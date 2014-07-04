@@ -307,7 +307,7 @@ end;
 procedure TfrmChipUpMain.DoLogout;
 begin
   FormsContainer.CloseAllForms;
-  Tables.Clear;
+  Tables.ClearWithoutNotification;
   gridPublicHomeGamesTable.DataController.SetRecordCount(0);
   gridMyHomeGamesTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);

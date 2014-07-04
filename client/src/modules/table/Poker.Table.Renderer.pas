@@ -252,7 +252,7 @@ begin
 
   if FRaiseThumbDown then
   begin
-    percent := (X - FRaiseThumbXOffset - FMetrics.RaiseTrackBounds[0].x) / (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x);
+    percent := (X + FRaiseThumbXOffset - FMetrics.RaiseTrackBounds[0].x) / (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x);
     if percent < 0 then
       percent := 0
     else
