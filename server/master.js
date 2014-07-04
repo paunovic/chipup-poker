@@ -9,12 +9,12 @@ var MongoClient = require('mongodb').MongoClient
 var crypto = require('crypto');
 var assert = require('assert');
 
-var protoreader = require('./protoreader');
+var Protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
 var MongoStore = require('./mongoStore');
 
 var pb = new p(fs.readFileSync("../message.desc"));
-protoreader.init(pb,codes);
+Protoreader.init(pb,codes);
 
 var clients = [];
 
@@ -126,7 +126,7 @@ io.on('connection',function (socket) {
 });
 function Client(sockin) {
 	this.socket = sockin;
-	this.reader = new protoreader(this.socket,this.handle.bind(this),this.log.bind(this));
+	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.log.bind(this),this.log.bind(this));
 	this.reply(codes.Hello);
 	this.socket.on('end',function () {
 		this.log('connection lost');
@@ -142,7 +142,9 @@ Client.prototype.remove = function () {
 	var idx = clients.indexOf(this);
 	clients.splice(idx,1);
 }
-Client.prototype.reply = protoreader.reply;
+Client.prototype.reply = function (code,data,type) {
+	this.reader.reply(code,data,type);
+}
 Client.prototype.log = function log(format) {
 	var out = Array.prototype.slice.call(arguments);
 	//out.unshift(new Date().toString()+":");

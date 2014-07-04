@@ -2037,6 +2037,7 @@ Game.prototype.startTimer = function startTimer(seat,offset) {
 			this.log('minbet:%d seatbet:%d',this.minBet,this.bets[seat]);
 			if (this.minBet == this.bets[seat]) {
 				this.log('checking');
+				// FIXME, this will fail hard if that is not the current player, something didnt reset the timer right
 				this.putChips(this.seats[seat].conn,this.minBet,function (events,offset) {
 					this.log('checked %j',events);
 					if (this.current_seat >= 0) this.startTimer(this.current_seat,offset); /// FIXME?

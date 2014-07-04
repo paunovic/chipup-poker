@@ -4,17 +4,17 @@ var fs = require('fs');
 var colors = require('colors');
 var util = require('util');
 
-var protoreader = require('./protoreader');
+var Protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
 
 var pb = new p(fs.readFileSync("../message.desc"));
-protoreader.init(pb,codes,[codes.GlobalMsgEvent]);
+Protoreader.init(pb,codes,[codes.GlobalMsgEvent]);
 
 var autoRestart = false;
 
 function Client(ip,port) {
 	this.socket = net.connect(port,ip,function (){});
-	this.reader = new protoreader(this.socket,this.handle.bind(this),this.error.bind(this));
+	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.socket.on('end',function () {
 		this.log('connection lost');
 		process.stdin.pause();
@@ -62,7 +62,9 @@ Client.prototype.log = function log() {
 	//if (this.name != 'client3') return;
 	console.log.apply(this,out);
 }
-Client.prototype.reply = protoreader.reply;
+Client.prototype.reply = function (code,data,type) {
+	this.reader.reply(code,data,type);
+}
 var socket = new Client('127.0.0.1',45508);
 var menusetup = false;
 var currentOptions;

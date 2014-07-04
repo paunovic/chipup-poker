@@ -2,11 +2,13 @@ var util = require('util');
 
 module.exports = Protoreader;
 var pb,codes,hidden;
-function Protoreader(socket,handler,error) {
+function Protoreader(socket,handler,error,log) {
 	if (!(this instanceof Protoreader)) return new Protoreader(socket,handler,error);
 	this.handler = handler;
 	this.buffer = null;
 	this.error = error;
+	this.socket = socket;
+	this.log = log;
 	socket.on('data',this._ondata.bind(this));
 }
 Protoreader.prototype._ondata = function (chunk) {
@@ -54,7 +56,7 @@ Protoreader.init = function init(input,mapping,hiddenin) {
 	codes = mapping;
 	hidden = hiddenin;
 }
-Protoreader.reply = function reply(code,message,type) {
+Protoreader.prototype.reply = function reply(code,message,type) {
 	code = parseInt(code);
 	var args;
 	var datasize = 0;

@@ -83,7 +83,7 @@ function ClientSocket(socket) {
 		delete global.activeUsers[this.userid];
 		Game.handleDisconnect(this,'closed');
 	}.bind(this));
-	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this));
+	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.oldTimer = setTimeout(function () {
 		this.log('hello timeout, sending it');
 		this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
@@ -230,11 +230,13 @@ ClientSocket.prototype.reply = function reply(code,message,type) {
 if (false) {
 	ClientSocket.prototype.send = function (code,msg,type) {
 		setTimeout(function () {
-			Protoreader.reply.call(this,code,msg,type);
+			this.reader.reply(code,msg,type);
 		}.bind(this),2000);
 	};
 } else {
-	ClientSocket.prototype.send = Protoreader.reply;
+	ClientSocket.prototype.send = function (code,data,type) {
+		this.reader.reply(code,data,type);
+	}
 }
 ClientSocket.prototype.goneIdle = function () {
 	this.log('idle timeout');
