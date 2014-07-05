@@ -12,6 +12,7 @@ type
     FCanvas: TAsphyreCanvas;
     FFonts: TAsphyreFonts;
     FDummyWindow: HWND;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -54,6 +55,8 @@ constructor TDXCore.Create;
 var
   C1: Integer;
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('DXCore'); {$ENDIF}
+
   FDummyWindow := AllocateHwnd(nil);
 
   Factory.UseProvider(idDirectX9);
@@ -75,7 +78,7 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG} DebugLn('Failed to connect to DX device!', ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, 'Failed to connect to DX device!', ditException); {$ENDIF}
   end;
 end;
 
@@ -89,6 +92,8 @@ begin
   FreeAndNil(FDevice);
 
   DeallocateHWnd(FDummyWindow);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
   inherited;
 end;
@@ -108,19 +113,19 @@ begin
      FDevice.SwapChains[AIndex].Multisamples := 4;
      FDevice.SwapChains[AIndex].VSync := TRUE;
      AIndex := C1;
-     {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d acquired', [AIndex]), ditApplication); {$ENDIF}
+     {$IFDEF DEBUG} DebugLn(FDebugId, Format('DirectX swap chain element #%d acquired', [AIndex]), ditApplication); {$ENDIF}
      {$IFDEF DEBUG} RefreshDebugForm([dfiSwapChains]); {$ENDIF}
      Exit(TRUE);
    end;
 
-  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element not acquired', [AHandle]), ditException); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('DirectX swap chain element not acquired', [AHandle]), ditException); {$ENDIF}
   Exit(FALSE);
 end;
 
 procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
 begin
   FDevice.SwapChains[AIndex].WindowHandle := ANewHandle;
-  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('DirectX swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
 end;
 
 procedure TDXCore.ReleaseSwapChainElement(const AIndex: Integer);
@@ -130,7 +135,7 @@ begin
   FDevice.SwapChains[AIndex].Multisamples := 0;
   FDevice.SwapChains[AIndex].VSync := FALSE;
   FDevice.SwapChains[AIndex].WindowHandle := FDummyWindow;
-  {$IFDEF DEBUG} DebugLn(Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
   {$IFDEF DEBUG} RefreshDebugForm([dfiSwapChains]); {$ENDIF}
 end;
 

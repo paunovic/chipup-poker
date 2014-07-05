@@ -5,6 +5,7 @@ interface
 type
   TSounds = class
   private
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
   public
     const
       SOUND_DEALING        = 'Dealing';
@@ -16,6 +17,9 @@ type
 
     class procedure Initialize;
     class procedure Deinitialize;
+
+    constructor Create;
+    destructor Destroy; override;
 
     procedure Play(const ASound: String);
     procedure Stop;
@@ -30,6 +34,17 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.Windows, System.SysUtils, Winapi.MMSystem;
 
+
+constructor TSounds.Create;
+begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Sounds'); {$ENDIF}
+end;
+
+destructor TSounds.Destroy;
+begin
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+  inherited;
+end;
 
 class procedure TSounds.Initialize;
 begin
@@ -46,7 +61,7 @@ procedure TSounds.Play(const ASound: String);
 begin
   if not PlaySound(PChar(ASound), HInstance, SND_RESOURCE or SND_ASYNC or SND_NODEFAULT) then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Failed to play sound [%s] [err: %d]', [ASound, GetLastError]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to play sound [%s] [err: %d]', [ASound, GetLastError]), ditException); {$ENDIF}
   end;
 end;
 

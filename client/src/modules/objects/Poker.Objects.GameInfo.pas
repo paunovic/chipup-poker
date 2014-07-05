@@ -72,11 +72,6 @@ type
 
 implementation
 
-{$IFDEF DEBUG}
-uses
-  Poker.Forms.Debug;
-{$ENDIF}
-
 procedure TGameInfo.Assign(const AProtobufObject: TPB_Game);
 begin
   FMongoId := AProtobufObject.MongoId;
@@ -229,11 +224,6 @@ var
   index: Integer;
   game: TGameInfo;
 begin
-  {$IFDEF DEBUG}
-  if Length(AProtobufObject.MongoId) = 0 then
-    DebugLn(Format('Game [%s] mongo id is empty!', [AProtobufObject.Gamename]), ditException);
-  {$ENDIF}
-
   index := IndexOf(AProtobufObject.MongoId);
   if index = -1 then
   begin

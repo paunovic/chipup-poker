@@ -30,6 +30,7 @@ type
       FCallbacksId: Integer;
       FCurrentStatus: TReconnectionStatus;
       FDots: Integer;
+      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
@@ -61,6 +62,8 @@ uses
 
 procedure TfrmReconnect.FormCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   FDots := 3;
   SetStatusMessage;
 
@@ -77,6 +80,8 @@ procedure TfrmReconnect.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmReconnect.CreateParams(var AParams: TCreateParams);
@@ -216,7 +221,7 @@ begin
       Close;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 

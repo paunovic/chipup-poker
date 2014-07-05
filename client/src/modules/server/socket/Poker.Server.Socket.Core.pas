@@ -24,6 +24,7 @@ type
     FTimerIdPingTimeout: UINT_PTR;
     FSSLHandshakeDone: Boolean;
     FSocketConnectThread: TServerSocketConnectThread;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -98,6 +99,8 @@ end;
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('SocketCore'); {$ENDIF}
+
   FConnectCode := -1;
   FServer := AServer;
   FPort := APort;
@@ -124,13 +127,15 @@ end;
 
 destructor TServerSocketCore.Destroy;
 begin
-  {$IFDEF DEBUG} DebugLn('TServerSocketCore.Destroy', ditSocket); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, 'TServerSocketCore.Destroy', ditSocket); {$ENDIF}
 
   Disconnect;
 
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
   FSocket.Free;
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
   inherited;
 end;
@@ -141,7 +146,7 @@ begin
      (Assigned(FSocketConnectThread)) then
     Exit;
 
-  {$IFDEF DEBUG} DebugLn(Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('Connecting to %s:%d...', [FServer, FPort]), ditSocket); {$ENDIF}
 
   FreeReceiveBuffer;
 
@@ -173,7 +178,7 @@ begin
 
   if FSocket.State <> TSocketState.wsClosed then
   begin
-    {$IFDEF DEBUG} DebugLn('Closing socket...', ditSocket); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, 'Closing socket...', ditSocket); {$ENDIF}
     FSocket.Flush;
     FSocket.CloseDelayed;
   end;
@@ -185,7 +190,7 @@ procedure TServerSocketCore.SocketSessionConnected(Sender: TObject; ErrCode: Wor
 begin
   if ErrCode = 0 then
   begin
-    {$IFDEF DEBUG} DebugLn('Starting SSL handshake...', ditSocket); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, 'Starting SSL handshake...', ditSocket); {$ENDIF}
     FSocket.StartSslHandshake;
   end
   else
@@ -197,7 +202,7 @@ end;
 
 procedure TServerSocketCore.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn(Format('Session closed [%d]', [ErrCode]), ditException); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('Session closed [%d]', [ErrCode]), ditException); {$ENDIF}
 
   if FSocket.State = wsConnected then
     Disconnect;
@@ -218,7 +223,7 @@ begin
     FSSLHandshakeDone := TRUE;
     ResetInactivityPingTimer;
     ResetPingTimer;
-    {$IFDEF DEBUG} DebugLn('SSL handshake done', ditSocket); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, 'SSL handshake done', ditSocket); {$ENDIF}
   end
   else
   begin
@@ -230,7 +235,7 @@ end;
 
 procedure TServerSocketCore.SocketSslVerifyPeer(Sender: TObject; var Ok: Integer; Cert: TX509Base);
 begin
-  {$IFDEF DEBUG} DebugLn(Format('SSL verify peer result: %d', [Ok]), ditSocket); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('SSL verify peer result: %d', [Ok]), ditSocket); {$ENDIF}
 end;
 
 {$IFDEF DEBUG}
@@ -244,12 +249,12 @@ begin
     dbgtype := ADebugType;
 
   if ARpcMessage.DataSize = 0 then
-    DebugLn(Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
+    DebugLn(FDebugId, Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
   else
     if AStreamSize = 0 then
-      DebugLn(Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, SerializeObject(ADataObject))
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, SerializeObject(ADataObject))
     else
-      DebugLn(Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, SerializeObject(ADataObject));
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, SerializeObject(ADataObject));
 end;
 {$ENDIF}
 
@@ -298,7 +303,7 @@ begin
   try
     if not rpc_message.IsInitialized then
     begin
-      {$IFDEF DEBUG} DebugLn('RPC message not initialized', ditException); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(FDebugId, 'RPC message not initialized', ditException); {$ENDIF}
       Exit;
     end;
 
@@ -356,7 +361,7 @@ begin
   {$IFDEF DEBUG}
   last_err := FSocket.LastError;
   if last_err <> WSAEWOULDBLOCK then // ignore WSAEWOULDBLOCK
-    DebugLn(Format('Socket error [%d]: %s', [last_err, WSocketErrorDesc(last_err)]), ditException);
+    DebugLn(FDebugId, Format('Socket error [%d]: %s', [last_err, WSocketErrorDesc(last_err)]), ditException);
   {$ENDIF}
 
   case FSocket.State of
@@ -420,14 +425,14 @@ begin
 
   if not valid_sc then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
     Exit(FALSE);
   end;
 
   case TServerCodes(ARpcMessage.MethodId) of
     srNotImplemented: begin
       SetString(err, PAnsiChar(ADataPointer), ARpcMessage.DataSize);
-      {$IFDEF DEBUG} DebugLn(Format('Received not implemented MethodId: %s', [err]), ditException); {$ENDIF}
+      {$IFDEF DEBUG} DebugLn(FDebugId, Format('Received not implemented MethodId: %s', [err]), ditException); {$ENDIF}
     end;
     srLoginReply: ADataObject := TPB_LoginReply.Create(ADataPointer, ARpcMessage.DataSize);
     srLogout: ;
@@ -497,13 +502,13 @@ begin
     srQueryAssetsReply: ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
   else
     Exit(FALSE);
-    {$IFDEF DEBUG} DebugLn(Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
   end;
 
   if (Assigned(ADataObject)) and
      (not (ADataObject as TProtobufBaseObject).IsInitialized) then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('MethodId: %s; ADataObject not initialized', [TranslateServerCode(ARpcMessage.MethodId)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('MethodId: %s; ADataObject not initialized', [TranslateServerCode(ARpcMessage.MethodId)]), ditException); {$ENDIF}
     FreeAndNil(ADataObject);
     Exit(FALSE);
   end;
@@ -602,7 +607,7 @@ begin
 
   if ATimerId = FTimerIdPingTimeout then
   begin
-    {$IFDEF DEBUG} DebugLn('Ping timeout', ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, 'Ping timeout', ditException); {$ENDIF}
     Disconnect;
   end;
 end;

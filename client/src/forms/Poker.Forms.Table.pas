@@ -50,7 +50,6 @@ type
     acHandPlaybackStepForward: TAction;
     acHandPlaybackStepBackwards: TAction;
     tiRender: TTimer;
-    btPauseDebug: TcxButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -111,6 +110,7 @@ type
       FDXBCall: Integer;
       FDXBRaise: Integer;
       FDXBRaisePresets: array[0..3] of Integer;
+      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure SetRaiseActionCaption;
     procedure SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
@@ -126,6 +126,7 @@ type
     procedure RendererTimebankStarted(Sender: TObject);
     procedure ConfigureActions(out AFocusWindow: Boolean);
 
+    function GetTableCaption: String;
     procedure UpdateTableCaption;
     procedure UpdateHandHistoryLabel;
     procedure UpdateHandStrength;
@@ -191,6 +192,8 @@ end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('TABLE: [%s]', [GetTableCaption])); {$ENDIF}
+
   ActionManager.State := asSuspended;
 
   FCallbacksId := -1;
@@ -221,10 +224,6 @@ begin
       btStepBackwards.Visible := TRUE;
     end;
   end;
-
-  {$IFDEF DEBUG}
-  btPauseDebug.Visible := TRUE;
-  {$ENDIF}
 
   FTable.Renderer.UpdateDXAreaSize;
 
@@ -268,6 +267,8 @@ begin
     MessageContainer.RemoveCallbacks(FCallbacksId);
 
   DXTimer.RemoveAnimations(Handle);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmTable.FormPaint(Sender: TObject);
@@ -542,9 +543,8 @@ begin
     lbvHandStrength.Caption := '';
 end;
 
-procedure TfrmTable.UpdateTableCaption;
+function TfrmTable.GetTableCaption: String;
 var
-  cap: String;
   currentgame: String;
   rot_index: Integer;
   hhi: THandHistoryItem;
@@ -560,17 +560,23 @@ begin
         rot_index := FTable.Renderer.TableStatus.RotationHand;
         if rot_index = 0 then
           rot_index := 1;
-        cap := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), (rot_index - 1) mod FTable.Game.Seats + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
+        result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), (rot_index - 1) mod FTable.Game.Seats + 1, FTable.Game.Seats, currentgame, FTable.Club.Name])
       end
       else
-        cap := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), FTable.Club.Name]);
+        result := Format('%s (%s/%s %s) - %s', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(TRUE), FTable.Club.Name]);
     end;
 
     ttHandPlayback: if GetHandHistoryItem(hhi) then
-      cap := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.Limit, FALSE),
-               ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
+      result := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.Limit, FALSE),
+                 ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
   end;
+end;
 
+procedure TfrmTable.UpdateTableCaption;
+var
+  cap: String;
+begin
+  cap := GetTableCaption;
   if cap <> Caption then
     Caption := cap;
 end;
@@ -875,11 +881,6 @@ begin
       seRaiseAmount.BoundsRect := FTable.Renderer.Metrics.RaiseAmountBoxBounds;
       seRaiseAmount.Style.Font.Size := FTable.Renderer.Metrics.RaiseAmountBoxFontSize;
 
-      {$IFDEF DEBUG}
-      btPauseDebug.Left := edChat.Left;
-      btPauseDebug.Top := edChat.Top - 3 - btPauseDebug.Height;
-      {$ENDIF}
-
       cbSitOutNextBB.Top := rvChat.Top + rvChat.Height - cbSitOutNextBB.Height;
       cbSitOutNextHand.Top := cbSitOutNextBB.Top - cbSitOutNextHand.Height;
       cbFoldToAnyBet.Top := cbSitOutNextHand.Top - cbFoldToAnyBet.Height;
@@ -1107,64 +1108,61 @@ begin
   dmMain.UpdateSelfInfoInPlayers;
 
   {$IFDEF DEBUG}
-  if not btPauseDebug.Down then
+  tmp := GetEnumName(TypeInfo(TTableState), Integer(FTable.Renderer.TableStatus.State));
+  if pbtablestatus.Locked then
+    tmp := tmp + ', LOCKED';
+  seatdbg := nil;
+  playerdbg := nil;
+  tb := 0;
+  csdbg := IntToStr(FTable.Renderer.TableStatus.CurrentSeat);
+  if FTable.Renderer.TableStatus.GetSeatInfo(FTable.Renderer.TableStatus.CurrentSeat, seatdbg) then
   begin
-    tmp := GetEnumName(TypeInfo(TTableState), Integer(FTable.Renderer.TableStatus.State));
-    if pbtablestatus.Locked then
-      tmp := tmp + ', LOCKED';
+    if Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg) then
+      csdbg := csdbg + ' - ' + playerdbg.Nick;
+    tb := seatdbg.Timebank;
+  end;
+
+  tstatusdbg := Format('[#%d] %s, D: %d, E: %d | #%s, %.2fs/%.2fs',
+    [pbtablestatus.Seq, tmp, FTable.Renderer.TableStatus.Dealer, pbtablestatus.Events.Count, csdbg, FTable.Renderer.TableStatus.CurrentPlaytime / 1000, tb / 100]);
+
+  events := '';
+  for C1 := 0 to pbtablestatus.Events.Count - 1 do
+  begin
+    pbevent := pbtablestatus.Events[C1];
+    if events <> '' then
+      events := events + #10;
+
     seatdbg := nil;
     playerdbg := nil;
-    tb := 0;
-    csdbg := IntToStr(FTable.Renderer.TableStatus.CurrentSeat);
-    if FTable.Renderer.TableStatus.GetSeatInfo(FTable.Renderer.TableStatus.CurrentSeat, seatdbg) then
-    begin
-      if Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg) then
-        csdbg := csdbg + ' - ' + playerdbg.Nick;
-      tb := seatdbg.Timebank;
-    end;
+    if FTable.Renderer.TableStatus.GetSeatInfo(pbevent.Seat, seatdbg) then
+      Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg);
 
-    tstatusdbg := Format('[#%d] %s, D: %d, E: %d | #%s, %.2fs/%.2fs',
-      [pbtablestatus.Seq, tmp, FTable.Renderer.TableStatus.Dealer, pbtablestatus.Events.Count, csdbg, FTable.Renderer.TableStatus.CurrentPlaytime / 1000, tb / 100]);
-
-    events := '';
-    for C1 := 0 to pbtablestatus.Events.Count - 1 do
-    begin
-      pbevent := pbtablestatus.Events[C1];
-      if events <> '' then
-        events := events + #10;
-
-      seatdbg := nil;
-      playerdbg := nil;
-      if FTable.Renderer.TableStatus.GetSeatInfo(pbevent.Seat, seatdbg) then
-        Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg);
-
-      case pbevent.Event of
-        teFold: if Assigned(seatdbg) then
-          events := events + Format('FOLD [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)])
-        else
-          events := events + Format('FOLD [#%d]', [pbevent.Seat]);
-        teSit: events := events + Format('SIT [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teStandUp: events := events + Format('STAND UP [#%d]', [pbevent.Seat]);
-        teWinning: events := events + 'WINNING';
-        teDealing: events := events + 'DEALING';
-        teCheck: events := events + Format('CHECK [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teCall: events := events + Format('CALL [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teRaise: events := events + Format('RAISE [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teAllIn: events := events + Format('ALL-IN [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teFlop: events := events + Format('FLOP [%s]', [FTable.Renderer.TableStatus.FlopCards.AsString]);
-        teTurn: events := events + Format('TURN [%s]', [FTable.Renderer.TableStatus.TurnCard.AsString]);
-        teRiver: events := events + Format('RIVER [%s]', [FTable.Renderer.TableStatus.RiverCard.AsString]);
-        tePostRiver: events := events + 'POST RIVER';
-        tePreWin: events := events + 'PRE WIN';
-        teExistingCards: events := events + Format('EXISTING CARDS [%s]', [TCards.BytesToString(pbevent.Cards)]);
-        teDisconnect: events := events + Format('DISCONNECTED [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+    case pbevent.Event of
+      teFold: if Assigned(seatdbg) then
+        events := events + Format('FOLD [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)])
       else
-        events := events + Format('UNHANDLED EVENT RECEIVED: %s', [GetEnumName(TypeInfo(TTableEventType), Integer(pbevent.Event))]);
-      end;
+        events := events + Format('FOLD [#%d]', [pbevent.Seat]);
+      teSit: events := events + Format('SIT [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teStandUp: events := events + Format('STAND UP [#%d]', [pbevent.Seat]);
+      teWinning: events := events + 'WINNING';
+      teDealing: events := events + 'DEALING';
+      teCheck: events := events + Format('CHECK [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teCall: events := events + Format('CALL [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teRaise: events := events + Format('RAISE [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teAllIn: events := events + Format('ALL-IN [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+      teFlop: events := events + Format('FLOP [%s]', [FTable.Renderer.TableStatus.FlopCards.AsString]);
+      teTurn: events := events + Format('TURN [%s]', [FTable.Renderer.TableStatus.TurnCard.AsString]);
+      teRiver: events := events + Format('RIVER [%s]', [FTable.Renderer.TableStatus.RiverCard.AsString]);
+      tePostRiver: events := events + 'POST RIVER';
+      tePreWin: events := events + 'PRE WIN';
+      teExistingCards: events := events + Format('EXISTING CARDS [%s]', [TCards.BytesToString(pbevent.Cards)]);
+      teDisconnect: events := events + Format('DISCONNECTED [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(FTable.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
+    else
+      events := events + Format('UNHANDLED EVENT RECEIVED: %s', [GetEnumName(TypeInfo(TTableEventType), Integer(pbevent.Event))]);
     end;
-
-    DebugLn(tstatusdbg, ditApplication, events);
   end;
+
+  DebugLn(FDebugId, tstatusdbg, ditApplication, events);
   {$ENDIF}
 
   RefreshAll;

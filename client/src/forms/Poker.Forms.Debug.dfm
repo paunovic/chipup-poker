@@ -20,7 +20,7 @@ object frmDebug: TfrmDebug
   TextHeight = 14
   object meSeatPos: TcxMemo
     Left = 0
-    Top = 0
+    Top = 21
     Align = alClient
     Lines.Strings = (
       '(0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2'
@@ -51,14 +51,14 @@ object frmDebug: TfrmDebug
     Style.IsFontAssigned = True
     TabOrder = 0
     Visible = False
-    Height = 309
+    Height = 288
     Width = 675
   end
   object rvLog: TRichView
     Left = 0
-    Top = 0
+    Top = 21
     Width = 675
-    Height = 309
+    Height = 288
     Align = alClient
     PopupMenu = pmLog
     TabOrder = 1
@@ -248,10 +248,10 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object btSeatPos: TcxButton
-      Left = 599
+      Left = 602
       Top = 6
       Width = 70
-      Height = 31
+      Height = 23
       Anchors = [akRight, akBottom]
       Caption = 'SEAT POS'
       Colors.PressedText = clRed
@@ -551,6 +551,26 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
     end
+  end
+  object ccbLogForms: TcxCheckComboBox
+    Left = 0
+    Top = 0
+    Align = alTop
+    ParentFont = False
+    Properties.Alignment.Vert = taVCenter
+    Properties.DropDownRows = 16
+    Properties.Items = <>
+    Properties.OnChange = ccbLogFormsPropertiesChange
+    Style.Font.Charset = DEFAULT_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Consolas'
+    Style.Font.Style = []
+    Style.TextColor = 13882323
+    Style.TextStyle = []
+    Style.IsFontAssigned = True
+    TabOrder = 3
+    Width = 675
   end
   object alDebug: TActionList
     Left = 72

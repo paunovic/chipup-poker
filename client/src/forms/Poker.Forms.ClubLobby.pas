@@ -153,6 +153,7 @@ type
     FSelectedPlayerId: TBytes;
     FSelectedGameId: TBytes;
     FSelectedStatsTableId: TBytes;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure ConfigureGUI(const AUpdateLists: Boolean = TRUE);
 
@@ -254,7 +255,7 @@ begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
 
-  OutputDebugString('CLUB LOBBY DESTROY');
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -274,6 +275,8 @@ begin
 
   btClubHome.Click;
   ConfigureGUI;
+
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('%s [%s]', [Name, Caption])); {$ENDIF}
 end;
 
 procedure TfrmClubLobby.ConfigureGUI(const AUpdateLists: Boolean = TRUE);
@@ -1093,7 +1096,7 @@ begin
     csSuccess: ConfigureGUI;
     csNameExists: ;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 
@@ -1109,7 +1112,7 @@ begin
     csSuccess: Close;
     csInvalidClubId: ;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 
@@ -1125,7 +1128,7 @@ begin
     csSuccess: ConfigureGUI;
     csInvalidClubId: MessageDlg('Invalid club ID', mtError, [mbOk], 0);
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 

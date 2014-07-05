@@ -35,13 +35,13 @@ type
     pcTabs: TcxPageControl;
     tsHomeGames: TcxTabSheet;
     tsTournaments: TcxTabSheet;
-    gridPublicHomeGames: TcxGrid;
-    gridPublicHomeGamesTable: TcxGridTableView;
+    gridPublicClubs: TcxGrid;
+    gridPublicClubsTable: TcxGridTableView;
     gridClubsId: TcxGridColumn;
     gridClubsName: TcxGridColumn;
-    gridPublicHomeGamesLevel: TcxGridLevel;
-    btMyHomeGames: TcxButton;
-    btPublicHomeGames: TcxButton;
+    gridPublicClubsLevel: TcxGridLevel;
+    btPrivateClubs: TcxButton;
+    btPublicClubs: TcxButton;
     gridGames: TcxGrid;
     gridGamesTable: TcxGridTableView;
     gridGamesId: TcxGridColumn;
@@ -62,12 +62,12 @@ type
     acTermsAndConditions: TAction;
     acShowAboutForm: TAction;
     acSoundsOnOff: TAction;
-    gridMyHomeGames: TcxGrid;
-    gridMyHomeGamesTable: TcxGridTableView;
+    gridPrivateClubs: TcxGrid;
+    gridPrivateClubsTable: TcxGridTableView;
     gridJoinedClubsId: TcxGridColumn;
     gridJoinedClubsClubName: TcxGridColumn;
     gridJoinedClubsStatus: TcxGridColumn;
-    gridMyHomeGamesLevel: TcxGridLevel;
+    gridPrivateClubsLevel: TcxGridLevel;
     acFoldChecks: TAction;
     acHandHistory: TAction;
     acAnimationsEnabled: TAction;
@@ -75,15 +75,16 @@ type
     ActionMainMenuBar: TActionMainMenuBar;
     acDisconnect: TAction;
     ApplicationEvents: TApplicationEvents;
+    tiRefreshForm: TTimer;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
     procedure acShowJoinClubFormExecute(Sender: TObject);
-    procedure gridMyHomeGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure gridPrivateClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure acShowChangeEMailFormExecute(Sender: TObject);
     procedure acShowChangePasswordFormExecute(Sender: TObject);
     procedure acShowChangeAvatarFormExecute(Sender: TObject);
-    procedure gridMyHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure gridPrivateClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure acShowGameTableFormExecute(Sender: TObject);
@@ -98,11 +99,11 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure acResendVerificationMailExecute(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
-    procedure gridPublicHomeGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure gridPublicClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure FormResize(Sender: TObject);
-    procedure gridPublicHomeGamesEnter(Sender: TObject);
-    procedure gridMyHomeGamesEnter(Sender: TObject);
-    procedure gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure gridPublicClubsEnter(Sender: TObject);
+    procedure gridPrivateClubsEnter(Sender: TObject);
+    procedure gridPublicClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure pcTabsChange(Sender: TObject);
     procedure acShowContactUsFormExecute(Sender: TObject);
     procedure acTermsAndConditionsExecute(Sender: TObject);
@@ -116,6 +117,8 @@ type
     procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient;
       var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
+    procedure tiRefreshFormTimer(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FSelectedClub: Integer;
     FSelectedGame: TBytes;
@@ -292,24 +295,29 @@ end;
 
 procedure TfrmChipUpMain.FormResize(Sender: TObject);
 begin
-  btPublicHomeGames.Width := (tsHomeGames.Width - btPublicHomeGames.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
-  btMyHomeGames.Left := btPublicHomeGames.Left + btPublicHomeGames.Width + 3;
-  btMyHomeGames.Width := btPublicHomeGames.Width;
-  gridPublicHomeGames.Left := btPublicHomeGames.Left;
-  gridPublicHomeGames.Width := btPublicHomeGames.Width;
-  gridMyHomeGames.Left := btMyHomeGames.Left;
-  gridMyHomeGames.Width := btMyHomeGames.Width;
-  gridGames.Width := btMyHomeGames.Left + btMyHomeGames.Width - btPublicHomeGames.Left;
-  btTournamentsHeader.Left := btPublicHomeGames.Left;
-  btTournamentsHeader.Width := btPublicHomeGames.Width + 3 + btMyHomeGames.Width;
+  btPublicClubs.Width := (tsHomeGames.Width - btPublicClubs.Left - 3 - 11) div 2; // 3 = middle gap, 11 = right border
+  btPrivateClubs.Left := btPublicClubs.Left + btPublicClubs.Width + 3;
+  btPrivateClubs.Width := btPublicClubs.Width;
+  gridPublicClubs.Left := btPublicClubs.Left;
+  gridPublicClubs.Width := btPublicClubs.Width;
+  gridPrivateClubs.Left := btPrivateClubs.Left;
+  gridPrivateClubs.Width := btPrivateClubs.Width;
+  gridGames.Width := btPrivateClubs.Left + btPrivateClubs.Width - btPublicClubs.Left;
+  btTournamentsHeader.Left := btPublicClubs.Left;
+  btTournamentsHeader.Width := btPublicClubs.Width + 3 + btPrivateClubs.Width;
+end;
+
+procedure TfrmChipUpMain.FormShow(Sender: TObject);
+begin
+  tiRefreshForm.Enabled := TRUE;
 end;
 
 procedure TfrmChipUpMain.DoLogout;
 begin
   FormsContainer.CloseAllForms;
   Tables.ClearWithoutNotification;
-  gridPublicHomeGamesTable.DataController.SetRecordCount(0);
-  gridMyHomeGamesTable.DataController.SetRecordCount(0);
+  gridPublicClubsTable.DataController.SetRecordCount(0);
+  gridPrivateClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   Players.Clear;
@@ -328,11 +336,11 @@ procedure TfrmChipUpMain.ShowTournamentLayout(const AShow: Boolean);
 begin
   btCreateClub.Visible := not AShow;
   btJoinClub.Visible := not AShow;
-  gridMyHomeGames.Visible := not AShow;
-  gridPublicHomeGames.Visible := not AShow;
-  btMyHomeGames.Visible := not AShow;
+  gridPrivateClubs.Visible := not AShow;
+  gridPublicClubs.Visible := not AShow;
+  btPrivateClubs.Visible := not AShow;
   btOpenTable.Visible := not AShow;
-  btPublicHomeGames.Visible := not AShow;
+  btPublicClubs.Visible := not AShow;
   gridGames.Visible := not AShow;
   btOpenClubLobby.Visible := not AShow;
 end;
@@ -367,6 +375,11 @@ begin
   end;
 
   {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState]); {$ENDIF}
+end;
+
+procedure TfrmChipUpMain.tiRefreshFormTimer(Sender: TObject);
+begin
+  gridGames.Refresh;
 end;
 
 function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
@@ -565,16 +578,16 @@ var
   recidx: Integer;
   member: TClubMemberInfo;
 begin
-  gridMyHomeGamesTable.DataController.BeginFullUpdate;
+  gridPrivateClubsTable.DataController.BeginFullUpdate;
   try
-    gridMyHomeGamesTable.DataController.SetRecordCount(0);
+    gridPrivateClubsTable.DataController.SetRecordCount(0);
     for club in dmMain.SelfInfo.Clubs do
       if club.IsPrivate then
       begin
-        recidx := gridMyHomeGamesTable.DataController.AppendRecord;
+        recidx := gridPrivateClubsTable.DataController.AppendRecord;
 
-        gridMyHomeGamesTable.DataController.SetValue(recidx, gridJoinedClubsId.Index, club.Id);
-        gridMyHomeGamesTable.DataController.SetValue(recidx, gridJoinedClubsClubName.Index, club.Name);
+        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsId.Index, club.Id);
+        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsClubName.Index, club.Name);
 
         if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
           status := 'Manager'
@@ -588,12 +601,12 @@ begin
           end
           else
             status := 'Unknown';
-        gridMyHomeGamesTable.DataController.SetValue(recidx, gridJoinedClubsStatus.Index, status);
+        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsStatus.Index, status);
       end;
   finally
-    gridMyHomeGamesTable.DataController.EndFullUpdate;
+    gridPrivateClubsTable.DataController.EndFullUpdate;
   end;
-  gridMyHomeGamesTable.DataController.Refresh;
+  gridPrivateClubsTable.DataController.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
@@ -640,7 +653,7 @@ var
   club: TClubInfo;
   c: TcxGridDataController;
 begin
-  c := gridPublicHomeGamesTable.DataController;
+  c := gridPublicClubsTable.DataController;
 
   c.BeginFullUpdate;
   try
@@ -685,38 +698,38 @@ begin
   ActionMainMenuBar.ColorMap.Assign(ActionMainMenuBarColorMap);
 end;
 
-procedure TfrmChipUpMain.gridMyHomeGamesEnter(Sender: TObject);
+procedure TfrmChipUpMain.gridPrivateClubsEnter(Sender: TObject);
 begin
-  gridPublicHomeGamesTable.DataController.FocusedRecordIndex := -1;
+  gridPublicClubsTable.DataController.FocusedRecordIndex := -1;
 end;
 
-procedure TfrmChipUpMain.gridPublicHomeGamesEnter(Sender: TObject);
+procedure TfrmChipUpMain.gridPublicClubsEnter(Sender: TObject);
 begin
-  gridMyHomeGamesTable.DataController.FocusedRecordIndex := -1;
+  gridPrivateClubsTable.DataController.FocusedRecordIndex := -1;
 end;
 
-procedure TfrmChipUpMain.gridMyHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
-begin
-  acOpenClubLobby.Execute;
-end;
-
-procedure TfrmChipUpMain.gridPublicHomeGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+procedure TfrmChipUpMain.gridPrivateClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acOpenClubLobby.Execute;
 end;
 
-procedure TfrmChipUpMain.gridPublicHomeGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmChipUpMain.gridPublicClubsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  acOpenClubLobby.Execute;
+end;
+
+procedure TfrmChipUpMain.gridPublicClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
   club_id: Integer;
   club: TClubInfo;
 begin
-  recIndex := gridPublicHomeGamesTable.DataController.GetFocusedRecordIndex;
+  recIndex := gridPublicClubsTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
     FSelectedClub := -1
   else
   begin
-    club_id := gridPublicHomeGamesTable.DataController.GetValue(recIndex, gridClubsId.Index);
+    club_id := gridPublicClubsTable.DataController.GetValue(recIndex, gridClubsId.Index);
     if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
       FSelectedClub := -1
     else
@@ -738,18 +751,18 @@ begin
   acShowGameTableForm.Execute;
 end;
 
-procedure TfrmChipUpMain.gridMyHomeGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+procedure TfrmChipUpMain.gridPrivateClubsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
   club_id: Int64;
   club: TClubInfo;
 begin
-  recIndex := gridMyHomeGamesTable.DataController.GetFocusedRecordIndex;
+  recIndex := gridPrivateClubsTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
     FSelectedClub := -1
   else
   begin
-    club_id := gridMyHomeGamesTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
+    club_id := gridPrivateClubsTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
     if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
       FSelectedClub := -1
     else

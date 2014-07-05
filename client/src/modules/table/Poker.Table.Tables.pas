@@ -25,10 +25,11 @@ type
     function AcquireSwapChainElement: Boolean;
 
   public
+    destructor Destroy; override;
+
     procedure SetupLiveTable(const AClub: TClubInfo; const AGame: TGameInfo; const ASendJoinCommand: Boolean);
     procedure SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
 
-    destructor Destroy; override;
 
     function IsSitting: Boolean;
 
@@ -54,9 +55,14 @@ type
   end;
 
   TTables = class(TObjectList<TTable>)
+  private
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
   public
     class procedure Initialize;
     class procedure Deinitialize;
+
+    constructor Create;
+    destructor Destroy; override;
 
     procedure DisableAll;
     procedure EnableAll;
@@ -201,6 +207,20 @@ begin
   FreeAndNil(Tables);
 end;
 
+
+constructor TTables.Create;
+begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Tables'); {$ENDIF}
+  inherited Create;
+end;
+
+destructor TTables.Destroy;
+begin
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+
+  inherited;
+end;
+
 function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
 var
   table: TTable;
@@ -259,7 +279,7 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  {$IFDEF DEBUG} DebugLn('Reassigning table objects...', ditApplication); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, 'Reassigning table objects...', ditApplication); {$ENDIF}
 
   for table in ToArray do
     if (dmMain.SelfInfo.Clubs.FindClub(table.ClubId, club)) and

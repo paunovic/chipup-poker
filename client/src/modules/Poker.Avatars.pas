@@ -69,7 +69,6 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule,
   Poker.Settings;
 
@@ -106,8 +105,6 @@ end;
 
 procedure TAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn(Format('GET avatar done: %s', [FHTTP.URL]), ditNetInc); {$ENDIF}
-
   if Assigned(FHTTP.SendStream) then
   begin
     FHTTP.SendStream.Free;

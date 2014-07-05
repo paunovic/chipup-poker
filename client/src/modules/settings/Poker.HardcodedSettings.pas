@@ -62,7 +62,7 @@ type
   public
     const
       Hardcoded: THardcodedSettingsRec = (
-        VERSION: '0.01a.0150';
+        VERSION: '0.01a.0151';
         REVISION: {$I revision.inc};
 
         INSTANCE_MUTEX_NAME: 'CHIPUPINSTANCEMUTEX';

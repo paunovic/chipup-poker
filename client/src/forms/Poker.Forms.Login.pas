@@ -48,6 +48,7 @@ type
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
     FAlphaBlendThread: TAlphaBlendThread;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure ApplySettings;
     procedure SaveSettings;
@@ -93,6 +94,8 @@ uses
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   AlphaBlendValue := 0;
 
   FCallbacksId := MessageContainer.AddCallbacks([
@@ -117,6 +120,8 @@ begin
   SaveSettings;
 
   TAlphaBlendThread.FreeAlpaBlendThread(FAlphaBlendThread);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChipUpLogin.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -421,7 +426,7 @@ begin
       edLogin.SetFocus;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
     edLogin.SetFocus;
   end;
 end;

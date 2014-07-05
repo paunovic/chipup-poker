@@ -3155,10 +3155,10 @@ object frmChipUpLogin: TfrmChipUpLogin
       5904000018515904000018515904000018515904000018515904000018515904
       000018515904000018CC2FD3FF00C7961E0010C52F1D0000000049454E44AE42
       6082}
-    ExplicitLeft = 416
-    ExplicitTop = 196
-    ExplicitWidth = 105
-    ExplicitHeight = 105
+    ExplicitLeft = 3
+    ExplicitTop = 4
+    ExplicitWidth = 551
+    ExplicitHeight = 363
   end
   object cbRememberLogin: TcxCheckBox
     Left = 134

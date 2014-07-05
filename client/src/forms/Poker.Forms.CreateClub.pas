@@ -27,6 +27,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FCallbacksId: Integer;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CSRCreateClub(const AMethodId: Integer; const AObject: TObject);
   protected
@@ -45,6 +46,8 @@ uses
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(srCreateClubReply, CSRCreateClub)
                   ]);
@@ -57,6 +60,8 @@ procedure TfrmCreateClub.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmCreateClub.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -129,7 +134,7 @@ begin
       edClubCode.SetFocus;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRCreateClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRCreateClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 
   acOK.Enabled := TRUE;

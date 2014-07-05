@@ -34,6 +34,7 @@ type
     FAvatarId : TBytes;
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CloseModalCallback(Sender: TObject);
     procedure CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
@@ -59,6 +60,8 @@ procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
 var
   avatar: TAvatar;
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   FCallbacksId := MessageContainer.AddCallbacks([
                      TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
   ]);
@@ -83,6 +86,8 @@ begin
 
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -116,7 +121,7 @@ begin
      (SslHttp.StatusCode = 200) and
      (SslHttp.RcvdStream.Size > 0) then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Avatar received. Size: %d', [SslHttp.RcvdStream.Size]), ditNetInc); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar received. Size: %d', [SslHttp.RcvdStream.Size]), ditNetInc); {$ENDIF}
     SslHttp.RcvdStream.Position := 0;
     SetLength(FAvatarId, SslHttp.RcvdStream.Size);
     Move((SslHttp.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], SslHttp.RcvdStream.Size);
@@ -158,7 +163,7 @@ begin
   buf := sLineBreak + '--' + boundary + '--' + sLineBreak;
   SslHttp.SendStream.Write(buf[1], Length(buf));
 
-  {$IFDEF DEBUG}  DebugLn(Format('Uploading avatar to server [size: %d]', [SslHttp.SendStream.Size]), ditNetOut);  {$ENDIF}
+  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar to server [size: %d]', [SslHttp.SendStream.Size]), ditNetOut);  {$ENDIF}
 
   SslHttp.SendStream.Position := 0;
   SslHttp.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
