@@ -99,6 +99,14 @@ object frmDebug: TfrmDebug
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Shape = dxbsLineCenteredHorz
     end
+    object dxBevel3: TdxBevel
+      Left = 382
+      Top = 6
+      Width = 19
+      Height = 60
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Shape = dxbsLineCenteredHorz
+    end
     object lbsThreads: TcxLabel
       Left = 241
       Top = 3

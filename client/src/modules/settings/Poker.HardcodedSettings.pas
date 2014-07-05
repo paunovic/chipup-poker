@@ -107,7 +107,7 @@ type
         // animation metrics. times are in seconds
         ANIMATION_METRICS: (
           DEALING_INITIAL_DELAY: 1.5;
-          DEALING_CARD_SPEED: 0.25;
+          DEALING_CARD_SPEED: 0.22;
           DEALING_CARD_DELAY: 0.05;
 
           POTS_INITIAL_DELAY: 0.3;

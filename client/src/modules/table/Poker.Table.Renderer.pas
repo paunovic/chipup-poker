@@ -36,6 +36,7 @@ type
     FRaiseThumbPosition: Single;
     FDrawColor: TColor4;
     FDXButtons: TObjectList<TDXButton>;
+    FRenderingFoldedCards: Boolean;
 
     FFlopAnimations: TList<Integer>;
     FFlopAnimated: Boolean;
@@ -244,6 +245,8 @@ procedure TTableRenderer.MouseMove(Shift: TShiftState; X, Y: Integer; out ASetRa
 var
   dxbutton: TDXButton;
   percent: Single;
+  seat_index: Integer;
+  seat: TSeatInfo;
 begin
   ASetRaiseAmount := FALSE;
 
@@ -262,6 +265,23 @@ begin
     FRaiseThumbPosition := percent;
     ASetRaiseAmount := TRUE;
   end;
+
+  // render folded cards if needed, and set flag, so we can re-render scene once mouse cursor leaves the seat, and unset the flag then
+  if (FTableStatus.State > tsIdle) and
+     (FMetrics.IsPointInSeat(X, Y, seat_index)) and
+     (FTableStatus.GetSeatInfo(seat_index, seat)) and
+     (seat.Cards.IsKnown) and
+     (seat.Status = psFolded) then
+  begin
+    FRenderingFoldedCards := TRUE;
+    Render;
+  end
+  else
+    if FRenderingFoldedCards then
+    begin
+      FRenderingFoldedCards := FALSE;
+      Render;
+    end;
 end;
 
 procedure TTableRenderer.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -462,10 +482,10 @@ begin
       action_image := TableResources.SeatActionDisconnected;
 
     // render seat cards
-    if FTableStatus.State <> tsIdle then
+    if FTableStatus.State > tsIdle then
     begin
       case seat_info.Status of
-        psInHand, psAllIn:
+        psInHand, psAllIn: begin
           for C1 := 0 to seat_info.DealtCards - 1 do
           begin
             card_point := FMetrics.GetCardPoint(seat_info, C1);
@@ -475,6 +495,7 @@ begin
             else
               RenderCard(card_point, nil, FMetrics.CARD_HIDDEN_PERC);
           end;
+        end;
 
         psFolded: begin
           mousepoint := Mouse.CursorPos;
@@ -1340,10 +1361,12 @@ begin
         if seat.CardCount > card_index then
         begin
           seat_point := FMetrics.GetSeatPoint(seat.SeatIndex);
-          animation := DXTimer.AddAnimation(ACallback, Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y),
-                                            FMetrics.GetCardPoint(seat, card_index), Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_SPEED,
-                                            Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY + Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY,
-                                            0, FDXAreaSize);
+          animation := DXTimer.AddAnimation(ACallback,
+                Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y),
+                FMetrics.GetCardPoint(seat, card_index),
+                Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_SPEED,
+                Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY + Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY * cc,
+                0, FDXAreaSize);
           animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
           Inc(cc);
           if cc mod 2 = 0 then

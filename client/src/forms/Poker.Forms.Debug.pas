@@ -78,6 +78,7 @@ type
     pmiShowPings: TMenuItem;
     lbsSwapChains: TcxLabel;
     lbvSwapChains: TcxLabel;
+    dxBevel3: TdxBevel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -540,11 +541,11 @@ begin
     if Assigned(ServerSocket) then
     begin
       case ServerSocket.Socket.State of
-        wsInvalidState: server_socket_state := 'InvalidState';
+        wsInvalidState: server_socket_state := 'Invalid state';
         wsOpened: server_socket_state := 'Opened';
         wsBound: server_socket_state := 'Bound';
         wsConnecting: server_socket_state := 'Connecting';
-        wsSocksConnected: server_socket_state := 'SocksConnected';
+        wsSocksConnected: server_socket_state := 'Socks connected';
         wsConnected: begin
           server_socket_connected := TRUE;
           server_socket_state := 'Connected';
