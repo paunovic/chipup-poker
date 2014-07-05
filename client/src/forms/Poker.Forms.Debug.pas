@@ -94,7 +94,9 @@ type
     lbsSwapChains: TcxLabel;
     lbvSwapChains: TcxLabel;
     dxBevel3: TdxBevel;
+    Panel1: TPanel;
     ccbLogForms: TcxCheckComboBox;
+    cxLabel1: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);

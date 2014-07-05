@@ -211,6 +211,7 @@ end;
 constructor TTables.Create;
 begin
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Tables'); {$ENDIF}
+
   inherited Create;
 end;
 

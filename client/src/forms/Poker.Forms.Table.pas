@@ -192,7 +192,7 @@ end;
 
 procedure TfrmTable.FormCreate(Sender: TObject);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('TABLE: [%s]', [GetTableCaption])); {$ENDIF}
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('TABLE: %s', [GetTableCaption])); {$ENDIF}
 
   ActionManager.State := asSuspended;
 

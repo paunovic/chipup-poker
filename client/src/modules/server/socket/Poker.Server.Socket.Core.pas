@@ -99,7 +99,7 @@ end;
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('SocketCore'); {$ENDIF}
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Socket'); {$ENDIF}
 
   FConnectCode := -1;
   FServer := AServer;

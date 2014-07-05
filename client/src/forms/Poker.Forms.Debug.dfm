@@ -552,25 +552,54 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
   end
-  object ccbLogForms: TcxCheckComboBox
+  object Panel1: TPanel
     Left = 0
     Top = 0
-    Align = alTop
-    ParentFont = False
-    Properties.Alignment.Vert = taVCenter
-    Properties.DropDownRows = 16
-    Properties.Items = <>
-    Properties.OnChange = ccbLogFormsPropertiesChange
-    Style.Font.Charset = DEFAULT_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Consolas'
-    Style.Font.Style = []
-    Style.TextColor = 13882323
-    Style.TextStyle = []
-    Style.IsFontAssigned = True
-    TabOrder = 3
     Width = 675
+    Height = 21
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 3
+    DesignSize = (
+      675
+      21)
+    object ccbLogForms: TcxCheckComboBox
+      Left = 52
+      Top = 0
+      Align = alRight
+      Anchors = [akLeft, akTop, akRight, akBottom]
+      ParentFont = False
+      Properties.Alignment.Vert = taVCenter
+      Properties.DropDownRows = 16
+      Properties.Items = <>
+      Properties.OnChange = ccbLogFormsPropertiesChange
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.TextColor = 13882323
+      Style.TextStyle = []
+      Style.IsFontAssigned = True
+      TabOrder = 0
+      ExplicitHeight = 22
+      Width = 623
+    end
+    object cxLabel1: TcxLabel
+      Left = 5
+      Top = 2
+      Anchors = [akLeft, akBottom]
+      Caption = 'Filter:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
   end
   object alDebug: TActionList
     Left = 72
