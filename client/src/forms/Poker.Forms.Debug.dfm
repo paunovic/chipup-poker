@@ -3,7 +3,7 @@ object frmDebug: TfrmDebug
   Top = 0
   Caption = 'ChipUP Poker - Debug'
   ClientHeight = 380
-  ClientWidth = 675
+  ClientWidth = 621
   Color = clWindow
   Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
@@ -20,7 +20,7 @@ object frmDebug: TfrmDebug
   TextHeight = 14
   object meSeatPos: TcxMemo
     Left = 0
-    Top = 21
+    Top = 19
     Align = alClient
     Lines.Strings = (
       '(0, pi, 0, 0, 0, 0, 0, 0, 0, 0), // 2'
@@ -51,14 +51,17 @@ object frmDebug: TfrmDebug
     Style.IsFontAssigned = True
     TabOrder = 0
     Visible = False
-    Height = 288
-    Width = 675
+    ExplicitTop = 21
+    ExplicitWidth = 675
+    ExplicitHeight = 288
+    Height = 290
+    Width = 621
   end
   object rvLog: TRichView
     Left = 0
-    Top = 21
-    Width = 675
-    Height = 288
+    Top = 19
+    Width = 621
+    Height = 290
     Align = alClient
     PopupMenu = pmLog
     TabOrder = 1
@@ -66,11 +69,14 @@ object frmDebug: TfrmDebug
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
+    ExplicitTop = 21
+    ExplicitWidth = 675
+    ExplicitHeight = 288
   end
   object paInfo: TPanel
     Left = 0
     Top = 309
-    Width = 675
+    Width = 621
     Height = 71
     Align = alBottom
     BevelOuter = bvNone
@@ -80,8 +86,9 @@ object frmDebug: TfrmDebug
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 2
+    ExplicitWidth = 675
     DesignSize = (
-      675
+      621
       71)
     object dxBevel1: TdxBevel
       Left = 68
@@ -248,7 +255,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object btSeatPos: TcxButton
-      Left = 602
+      Left = 548
       Top = 6
       Width = 70
       Height = 23
@@ -268,6 +275,7 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
       OnClick = btSeatPosClick
+      ExplicitLeft = 602
     end
     object btPause: TcxButton
       Left = 5
@@ -552,53 +560,65 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
   end
-  object Panel1: TPanel
+  object paTop: TPanel
     Left = 0
     Top = 0
-    Width = 675
-    Height = 21
+    Width = 621
+    Height = 19
     Align = alTop
+    BevelEdges = [beLeft, beTop, beRight]
     BevelOuter = bvNone
     TabOrder = 3
-    DesignSize = (
-      675
-      21)
     object ccbLogForms: TcxCheckComboBox
-      Left = 52
+      Left = 0
       Top = 0
-      Align = alRight
-      Anchors = [akLeft, akTop, akRight, akBottom]
+      Align = alLeft
+      AutoSize = False
       ParentFont = False
       Properties.Alignment.Vert = taVCenter
       Properties.DropDownRows = 16
       Properties.Items = <>
       Properties.OnChange = ccbLogFormsPropertiesChange
+      Style.BorderStyle = ebsUltraFlat
+      Style.Edges = [bBottom]
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
       Style.Font.Height = -11
       Style.Font.Name = 'Consolas'
       Style.Font.Style = []
-      Style.TextColor = 13882323
       Style.TextStyle = []
       Style.IsFontAssigned = True
       TabOrder = 0
-      ExplicitHeight = 22
-      Width = 623
+      ExplicitLeft = 5
+      ExplicitWidth = 459
+      ExplicitHeight = 21
+      Height = 19
+      Width = 402
     end
-    object cxLabel1: TcxLabel
-      Left = 5
-      Top = 2
-      Anchors = [akLeft, akBottom]
-      Caption = 'Filter:'
+    object teRegexFilter: TcxTextEdit
+      Left = 402
+      Top = 0
+      Align = alClient
+      AutoSize = False
       ParentFont = False
+      Properties.OnChange = teRegexFilterPropertiesChange
+      Style.BorderStyle = ebsUltraFlat
+      Style.Edges = [bLeft, bBottom]
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
       Style.Font.Height = -11
       Style.Font.Name = 'Consolas'
-      Style.Font.Style = [fsBold]
-      Style.TextStyle = [fsBold]
+      Style.Font.Style = []
       Style.IsFontAssigned = True
-      Transparent = True
+      TabOrder = 1
+      Text = 'RegEx Filtering...'
+      OnEnter = teRegexFilterEnter
+      OnExit = teRegexFilterExit
+      ExplicitLeft = 420
+      ExplicitWidth = 255
+      ExplicitHeight = 21
+      Height = 19
+      Width = 219
     end
   end
   object alDebug: TActionList

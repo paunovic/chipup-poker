@@ -43,6 +43,7 @@ procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
 function PtInBounds(const APoint: TPoint; const ABounds: TPoint4): Boolean;
 function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 function TempPath: String;
+function IsValidRegex(const ARegex: String): Boolean;
 
 
 implementation
@@ -50,7 +51,7 @@ implementation
 uses
   {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams,
-  System.Generics.Collections;
+  System.Generics.Collections, System.RegularExpressionsAPI;
 
 
 {$IFDEF DEBUG}
@@ -753,6 +754,23 @@ begin
   until chars <= bufsize;
   SetString(result, PChar(@buffer[0]), chars - 1);
   result := IncludeTrailingPathDelimiter(result);
+end;
+
+function IsValidRegex(const ARegex: String): Boolean;
+var
+  pcre_error: PAnsiChar;
+  pcre_error_offset: Integer;
+  char_table: pointer;
+  pattern: pointer;
+begin
+  pattern := nil;
+  char_table := pcre_maketables;
+  try
+    pattern := pcre_compile(PAnsiChar(AnsiString(ARegex)), 0, @pcre_error, @pcre_error_offset, char_table);
+    result := Assigned(pattern);
+  finally
+    pcre_dispose(pattern, nil, char_table);
+  end;
 end;
 
 end.

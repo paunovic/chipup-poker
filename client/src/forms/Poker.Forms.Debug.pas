@@ -94,9 +94,9 @@ type
     lbsSwapChains: TcxLabel;
     lbvSwapChains: TcxLabel;
     dxBevel3: TdxBevel;
-    Panel1: TPanel;
+    paTop: TPanel;
     ccbLogForms: TcxCheckComboBox;
-    cxLabel1: TcxLabel;
+    teRegexFilter: TcxTextEdit;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -108,6 +108,9 @@ type
     procedure acRunNewInstanceExecute(Sender: TObject);
     procedure meSeatPosPropertiesChange(Sender: TObject);
     procedure ccbLogFormsPropertiesChange(Sender: TObject);
+    procedure teRegexFilterEnter(Sender: TObject);
+    procedure teRegexFilterExit(Sender: TObject);
+    procedure teRegexFilterPropertiesChange(Sender: TObject);
   private
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -135,7 +138,7 @@ uses
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, OverbyteIcsWSocket,
-  System.Generics.Collections, Poker.DirectX.Core;
+  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -339,6 +342,40 @@ begin
   {$ENDIF}
 end;
 
+procedure TfrmDebug.teRegexFilterEnter(Sender: TObject);
+begin
+  if teRegexFilter.Tag = 0 then
+  begin
+    teRegexFilter.Clear;
+    teRegexFilter.Tag := 1;
+  end;
+end;
+
+procedure TfrmDebug.teRegexFilterExit(Sender: TObject);
+begin
+  if (teRegexFilter.Tag = 1) and
+     (teRegexFilter.Text = '') then
+  begin
+    teRegexFilter.Text := 'RegEx Filtering...';
+    teRegexFilter.Tag := 0;
+  end;
+end;
+
+procedure TfrmDebug.teRegexFilterPropertiesChange(Sender: TObject);
+var
+  valuesset: TcxContainerStyleValues;
+begin
+  if IsValidRegex(teRegexFilter.Text) then
+  begin
+    teRegexFilter.Style.TextColor := clWindowText;
+    valuesset := teRegexFilter.Style.AssignedValues;
+    Exclude(valuesset, 7);
+    teRegexFilter.Style.AssignedValues := valuesset;
+  end
+  else
+    teRegexFilter.Style.TextColor := clRed;
+end;
+
 procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
 begin
   RefreshStats([]);
@@ -412,6 +449,17 @@ begin
      ((not Assigned(debug_object)) or
       (not debug_object.Enabled)) then
     Exit;
+
+  if (teRegexFilter.Tag = 1) and
+     (teRegexFilter.Text <> '') and
+     (IsValidRegex(teRegexFilter.Text)) then
+  begin
+    if (not TRegEx.IsMatch(ATime, teRegexFilter.Text)) and
+       (not TRegEx.IsMatch(ATypeStr, teRegexFilter.Text)) and
+       (not TRegEx.IsMatch(AData, teRegexFilter.Text)) and
+       (not TRegEx.IsMatch(ASubData, teRegexFilter.Text)) then
+      Exit;
+  end;
 
   if rvLog.ItemCount >= SCROLLBACK_LINES then
     rvLog.DeleteParas(0, rvLog.ItemCount - SCROLLBACK_LINES + 1);
