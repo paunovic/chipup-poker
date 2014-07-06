@@ -252,8 +252,8 @@
 			<DCCReference Include="modules\directx\Poker.DirectX.Timer.pas"/>
 			<DCCReference Include="modules\directx\Poker.DirectX.Animation.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.PlayerInfo.pas"/>
-			<DCCReference Include="modules\objects\Poker.Objects.ClubInfo.pas"/>
-			<DCCReference Include="modules\objects\Poker.Objects.GameInfo.pas"/>
+			<DCCReference Include="modules\objects\clubs\Poker.Objects.Clubs.Club.pas"/>
+			<DCCReference Include="modules\objects\games\Poker.Objects.Games.GameList.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.TableStatus.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.SeatInfo.pas"/>
 			<DCCReference Include="modules\objects\Poker.Objects.PotInfo.pas"/>
@@ -342,6 +342,9 @@
 			<DCCReference Include="modules\Poker.ActionMainMenuBarStyle.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas"/>
 			<DCCReference Include="modules\server\socket\Poker.Server.Socket.Commands.pas"/>
+			<DCCReference Include="modules\objects\clubs\Poker.Objects.Clubs.Member.pas"/>
+			<DCCReference Include="modules\objects\clubs\Poker.Objects.Clubs.ClubList.pas"/>
+			<DCCReference Include="modules\objects\games\Poker.Objects.Games.Game.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

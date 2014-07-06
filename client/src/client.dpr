@@ -73,8 +73,8 @@ uses
   Poker.DirectX.Timer in 'modules\directx\Poker.DirectX.Timer.pas',
   Poker.DirectX.Animation in 'modules\directx\Poker.DirectX.Animation.pas',
   Poker.Objects.PlayerInfo in 'modules\objects\Poker.Objects.PlayerInfo.pas',
-  Poker.Objects.ClubInfo in 'modules\objects\Poker.Objects.ClubInfo.pas',
-  Poker.Objects.GameInfo in 'modules\objects\Poker.Objects.GameInfo.pas',
+  Poker.Objects.Clubs.Club in 'modules\objects\clubs\Poker.Objects.Clubs.Club.pas',
+  Poker.Objects.Games.GameList in 'modules\objects\games\Poker.Objects.Games.GameList.pas',
   Poker.Objects.TableStatus in 'modules\objects\Poker.Objects.TableStatus.pas',
   Poker.Objects.SeatInfo in 'modules\objects\Poker.Objects.SeatInfo.pas',
   Poker.Objects.PotInfo in 'modules\objects\Poker.Objects.PotInfo.pas',
@@ -162,7 +162,10 @@ uses
   Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas',
   Poker.ActionMainMenuBarStyle in 'modules\Poker.ActionMainMenuBarStyle.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
-  Poker.Server.Socket.Commands in 'modules\server\socket\Poker.Server.Socket.Commands.pas';
+  Poker.Server.Socket.Commands in 'modules\server\socket\Poker.Server.Socket.Commands.pas',
+  Poker.Objects.Clubs.Member in 'modules\objects\clubs\Poker.Objects.Clubs.Member.pas',
+  Poker.Objects.Clubs.ClubList in 'modules\objects\clubs\Poker.Objects.Clubs.ClubList.pas',
+  Poker.Objects.Games.Game in 'modules\objects\games\Poker.Objects.Games.Game.pas';
 
 procedure FocusApp;
 var

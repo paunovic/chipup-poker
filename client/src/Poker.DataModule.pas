@@ -6,7 +6,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.StatusReply,
-  Vcl.Forms, dxSkinsForm, Poker.Objects.ClubInfo, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
+  Vcl.Forms, dxSkinsForm, Poker.Objects.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
   dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls;
 
@@ -67,10 +67,10 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Common.Misc,
-  Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer, Poker.Avatars,
-  Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Stats.Table, Poker.Forms.Table, Poker.Objects.TableStatus,
-  Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
+  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
+  Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
+  Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Stats.Table, Poker.Forms.Table, Poker.Objects.TableStatus,
+  Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);

@@ -3,7 +3,7 @@ unit Poker.Objects.PlayerInfo;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Objects.ClubInfo, Poker.Protobufs.Objects.StatusReply,
+  System.Generics.Collections, System.SysUtils, Poker.Objects.Clubs.ClubList, Poker.Protobufs.Objects.StatusReply,
   Poker.Protobufs.Objects.User;
 
 type
@@ -16,7 +16,7 @@ type
     FBalance: UINT32;
     FAuthed: Boolean;
     FAvatarId: TBytes;
-    FClubs: TClubsInfo;
+    FClubs: TClubList;
 
   public
     constructor Create;
@@ -33,7 +33,7 @@ type
     property Balance: UINT32 read FBalance write FBalance;
     property Authed: Boolean read FAuthed write FAuthed;
     property AvatarId: TBytes read FAvatarId write FAvatarId;
-    property Clubs: TClubsInfo read FClubs;
+    property Clubs: TClubList read FClubs;
   end;
 
   TPB_Users = TList<TPB_User>;
@@ -55,14 +55,13 @@ var
 implementation
 
 uses
-  PNGImage,
-  {$IFDEF DEBUG} {$ENDIF}
-  Poker.Objects.GameInfo, Poker.Table.Tables, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc;
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  Poker.Table.Tables, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc, Poker.Objects.Clubs.Club;
 
 
 constructor TPlayerInfo.Create;
 begin
-  FClubs := TClubsInfo.Create;
+  FClubs := TClubList.Create;
 end;
 
 destructor TPlayerInfo.Destroy;
@@ -105,9 +104,8 @@ begin
       FClubs.AddClub(AStatusReply.Clubs[C1]);
 
     for pbgame in AStatusReply.Games do
-      if FClubs.FindClub(pbgame.ClubSeq, club) then
+      if FClubs.FindClubBySeq(pbgame.ClubSeq, club) then
         club.Games.AddGame(pbgame);
-
 
     tables_close := TObjectList<TTable>.Create(FALSE);
     try

@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams,
-  Poker.Objects.ClubInfo, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
+  Poker.Objects.Clubs.Club, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
   cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel, cxImage, Vcl.ExtCtrls, Vcl.Menus,
   cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
@@ -199,11 +199,11 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.Generics.Collections,
   Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Forms.ChangeClubDetails,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.Games.Game,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions,
-  Poker.Protobufs.Objects.PlayerLimitParams;
+  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Objects.Clubs.Member;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -287,7 +287,7 @@ var
   admin_visible: Boolean;
   member: TClubMemberInfo;
 begin
-  if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
   begin
     Caption := Format('%s lobby', [club.Name]);
 
@@ -397,7 +397,7 @@ var
   game: TGameInfo;
   close_table_act: Boolean;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     SetLength(FSelectedGameId, 0)
   else
   begin
@@ -409,7 +409,7 @@ begin
   end;
 
   close_table_act := (Length(FSelectedGameId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and
-                     (club.Games.FindGame(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
+                     (club.Games.TryGetValue(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
 
   acCloseTable.Enabled := close_table_act;
 //  acShowEditGameForm.Enabled := actions_enabled;
@@ -420,7 +420,7 @@ var
   recIndex: Integer;
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     SetLength(FSelectedPlayerId, 0)
   else
   begin
@@ -549,7 +549,7 @@ var
   recIndex: Integer;
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     SetLength(FSelectedStatsTableId, 0)
   else
   begin
@@ -626,7 +626,7 @@ begin
   try
     gridPlayersListTable.DataController.SetRecordCount(0);
 
-    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     begin
       gridPlayersListTable.DataController.SetRecordCount(0);
       Exit;
@@ -662,13 +662,13 @@ begin
   try
     c.SetRecordCount(0);
 
-    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
       Exit;
 
     for tablestats in TablesStats do
       if CompareBytes(tablestats.ClubId, club.MongoId) then
       begin
-        if club.Games.FindGame(tablestats.GameId, game) then
+        if club.Games.TryGetValue(tablestats.GameId, game) then
           tmp := game.Name
         else
           tmp := 'UNKNOWN';
@@ -717,7 +717,7 @@ begin
     try
       c.SetRecordCount(0);
 
-      if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+      if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
         Exit;
 
       selectedids := TList<TBytes>.Create;
@@ -842,13 +842,11 @@ begin
   try
     c.SetRecordCount(0);
 
-    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
       Exit;
 
-    for C1 := 0 to club.Games.Count - 1 do
+    for game in club.Games.Values do
     begin
-      game := club.Games[C1];
-
       if game.State = gsClosed then
         Continue;
 
@@ -879,10 +877,10 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
-  for game in club.Games do
+  for game in club.Games.Values do
     if game.State <> gsClosed then
     begin
       MessageDlg('There are active tables in the club. Before closing the club, please close all active tables first', mtError, [mbOK], 0);
@@ -897,7 +895,7 @@ var
   club: TClubInfo;
   player: TPlayerInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not Players.FindPlayerById(FSelectedPlayerId, player)) then
     Exit;
 
@@ -916,7 +914,7 @@ var
   club: TClubInfo;
   player: TPlayerInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not Players.FindPlayerById(FSelectedPlayerId, player)) then
     Exit;
 
@@ -929,7 +927,7 @@ var
   club: TclubInfo;
   player: TPlayerInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not Players.FindPlayerById(FSelectedPlayerId, player)) then
     Exit;
 
@@ -942,7 +940,7 @@ var
   club: TClubInfo;
   member: TClubMemberInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not club.GetMemberInfo(FSelectedPlayerId, member)) then
     Exit;
 
@@ -953,7 +951,7 @@ procedure TfrmClubLobby.acShowClubChangeDetailsFormExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   FormsContainer.Add(RunModalForm(TfrmChangeClubDetails, self, [club], ModalFormClose));
@@ -964,7 +962,7 @@ var
   club: TClubInfo;
   pint: Integer;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   pint := 0;
@@ -977,8 +975,8 @@ var
   game: TGameInfo;
   pint: Integer;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not club.Games.FindGame(FSelectedGameId, game)) then
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
+     (not club.Games.TryGetValue(FSelectedGameId, game)) then
     Exit;
 
   pint := 1;
@@ -989,7 +987,7 @@ procedure TfrmClubLobby.acSuspendPlayerExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   ServerSocket.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
@@ -1029,7 +1027,7 @@ procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   ServerSocket.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, FALSE);
@@ -1040,8 +1038,8 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  if (dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) and
-     (club.Games.FindGame(FSelectedGameId, game)) then
+  if (dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) and
+     (club.Games.TryGetValue(FSelectedGameId, game)) then
     FormsContainer.Add(RunModalForm(TfrmCloseTable, self, [game], ModalFormClose));
 end;
 
@@ -1058,7 +1056,7 @@ var
 begin
   pbreply := AObject as TPB_TableStatsReplies;
 
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   for C1 := 0 to pbreply.Reply.Count - 1 do
@@ -1172,7 +1170,7 @@ var
 begin
   pbreply := AObject as TPB_PlayerLimitParams;
 
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not CompareBytes(club.MongoId, pbreply.Clubid)) then
     Exit;
 
@@ -1188,7 +1186,7 @@ var
 begin
   pbreply := AObject as TPB_PlayerLimitParams;
 
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not CompareBytes(club.MongoId, pbreply.Clubid)) then
     Exit;
 
@@ -1206,7 +1204,7 @@ begin
   if FClubId <> pbclub.Seq then
     Exit;
 
-  if dmMain.SelfInfo.Clubs.FindClub(pbclub.Seq, club) then
+  if dmMain.SelfInfo.Clubs.FindClubBySeq(pbclub.Seq, club) then
     ConfigureGUI
   else // current club is disbanded? close form
     Close;

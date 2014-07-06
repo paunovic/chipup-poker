@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
-  Poker.Objects.PotInfo, Poker.Objects.SeatInfo, Poker.Objects.GameInfo;
+  Poker.Objects.PotInfo, Poker.Objects.SeatInfo, Poker.Objects.Games.Game;
 
 type
   TTableStatus = class

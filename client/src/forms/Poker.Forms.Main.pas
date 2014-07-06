@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ActnList, Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel, cxGrid, cxLabel,
-  cxButtons, OverbyteIcsWSocket, Poker.Objects.ClubInfo, Poker.Forms.Login, Poker.Objects.GameInfo, cxImage, Vcl.ActnMan,
+  cxButtons, OverbyteIcsWSocket, Poker.Objects.Clubs.Club, Poker.Forms.Login, Poker.Objects.Games.Game, cxImage, Vcl.ActnMan,
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
@@ -195,7 +195,7 @@ uses
   Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
-  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo;
+  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Objects.Clubs.Member;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -384,7 +384,7 @@ end;
 
 function TfrmChipUpMain.GetSelectedClub(var AClub: TClubInfo): Boolean;
 begin
-  result := dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, AClub);
+  result := dmMain.SelfInfo.Clubs.FindClubBySeq(FSelectedClub, AClub);
 end;
 
 function TfrmChipUpMain.GetSelectedGame(var AGame: TGameInfo): Boolean;
@@ -392,7 +392,7 @@ var
   club: TClubInfo;
 begin
   result := (GetSelectedClub(club)) and
-            (club.Games.FindGame(FSelectedGame, AGame));
+            (club.Games.TryGetValue(FSelectedGame, AGame));
 end;
 
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
@@ -441,7 +441,7 @@ begin
   if not dmMain.CheckAuthed then
     Exit;
 
-  if not dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FSelectedClub, club) then
     Exit;
 
   for form in FormsContainer.Items do
@@ -581,7 +581,7 @@ begin
   gridPrivateClubsTable.DataController.BeginFullUpdate;
   try
     gridPrivateClubsTable.DataController.SetRecordCount(0);
-    for club in dmMain.SelfInfo.Clubs do
+    for club in dmMain.SelfInfo.Clubs.Values do
       if club.IsPrivate then
       begin
         recidx := gridPrivateClubsTable.DataController.AppendRecord;
@@ -624,10 +624,8 @@ begin
     if not GetSelectedClub(club) then
       Exit;
 
-    for C1 := 0 to club.Games.Count - 1 do
+    for game in club.Games.Values do
     begin
-      game := club.Games[C1];
-
       if game.State = gsClosed then
         Continue;
 
@@ -660,7 +658,7 @@ begin
     rcount := 0;
     c.SetRecordCount(0);
 
-    for club in dmMain.SelfInfo.Clubs do
+    for club in dmMain.SelfInfo.Clubs.Values do
       if not club.IsPrivate then
       begin
         Inc(rcount);
@@ -730,7 +728,7 @@ begin
   else
   begin
     club_id := gridPublicClubsTable.DataController.GetValue(recIndex, gridClubsId.Index);
-    if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(club_id, club) then
       FSelectedClub := -1
     else
     begin
@@ -740,7 +738,7 @@ begin
     end;
   end;
 
-  acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club)) and
+  acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.FindClubBySeq(FSelectedClub, club)) and
                              (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id));
 
   UpdateGamelist;
@@ -763,7 +761,7 @@ begin
   else
   begin
     club_id := gridPrivateClubsTable.DataController.GetValue(recIndex, gridJoinedClubsId.Index);
-    if dmMain.SelfInfo.Clubs.IndexOf(club_id) = -1 then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(club_id, club) then
       FSelectedClub := -1
     else
     begin
@@ -773,7 +771,7 @@ begin
     end;
   end;
 
-  acOpenClubLobby.Enabled := dmMain.SelfInfo.Clubs.FindClub(FSelectedClub, club);
+  acOpenClubLobby.Enabled := dmMain.SelfInfo.Clubs.FindClubBySeq(FSelectedClub, club);
 
   UpdateGamelist;
 end;
@@ -782,6 +780,7 @@ procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGri
 var
   recIndex: Integer;
   game_id: TBytes;
+  game: TGameInfo;
   club: TClubInfo;
 begin
   recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
@@ -791,7 +790,7 @@ begin
   else
   begin
     game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
-    if club.Games.IndexOf(game_id) = -1 then
+    if not club.Games.TryGetValue(game_id, game) then
       SetLength(FSelectedGame, 0)
     else
       FSelectedGame := game_id;
@@ -917,15 +916,15 @@ begin
        (club.IsPrivate) then
     begin
       Tables.CloseTablesForClub(club.MongoId);
-      dmMain.SelfInfo.Clubs.Remove(club);
+      dmMain.SelfInfo.Clubs.Remove(club.MongoId);
       club := nil;
     end;
   end
   else
   begin
     Tables.CloseTablesForClub(AClub.MongoId);
-    if dmMain.SelfInfo.Clubs.FindClub(AClub.Seq, club) then
-      dmMain.SelfInfo.Clubs.Remove(club);
+    dmMain.SelfInfo.Clubs.Remove(AClub.MongoId);
+    club := nil;
   end;
 
   result := club;
@@ -1098,14 +1097,11 @@ end;
 procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject: TObject);
 var
   pbclub: TPB_Club;
-  index : Integer;
 begin
   pbclub := AObject as TPB_Club;
 
   Tables.CloseTablesForClub(pbclub.MongoId);
-  index := dmMain.SelfInfo.Clubs.IndexOf(pbclub.Seq);
-  if index <> -1 then
-    dmMain.SelfInfo.Clubs.Delete(index);
+  dmMain.SelfInfo.Clubs.Remove(pbclub.MongoId);
 
   ConfigureGUI;
 end;
@@ -1119,8 +1115,8 @@ var
 begin
   pbgame := AObject as TPB_Game;
 
-  if (dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club)) and
-     (club.Games.FindGame(pbgame.MongoId, game)) then
+  if (dmMain.SelfInfo.Clubs.FindClubBySeq(pbgame.Clubseq, club)) and
+     (club.Games.TryGetValue(pbgame.MongoId, game)) then
   begin
     for C1 := 0 to Tables.Count - 1 do
       if Tables[C1].Game = game then
@@ -1144,7 +1140,7 @@ var
 begin
   pbgame := AObject as TPB_Game;
 
-  if dmMain.SelfInfo.Clubs.FindClub(pbgame.Clubseq, club) then
+  if dmMain.SelfInfo.Clubs.FindClubBySeq(pbgame.Clubseq, club) then
   begin
     game := club.Games.AddGame(pbgame);
 
@@ -1204,7 +1200,7 @@ begin
     ServerSocket.GetUserInfos(query_users);
 
   for clubstats in pb.ClubStats do
-    if dmMain.SelfInfo.Clubs.FindClub(clubstats.Clubid, club) then
+    if dmMain.SelfInfo.Clubs.TryGetValue(clubstats.Clubid, club) then
       club.UpdateFromClubStats(clubstats);
 
   for tablepb in pb.Reply do

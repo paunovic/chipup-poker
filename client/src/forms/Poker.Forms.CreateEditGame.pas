@@ -3,11 +3,10 @@ unit Poker.Forms.CreateEditGame;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Variants, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
-  Vcl.ActnList, cxButtons, cxLabel, cxTextEdit, cxDropDownEdit,
-  cxSpinEdit, Poker.Interfaces.FormParams, Poker.Objects.ClubInfo, Poker.Objects.GameInfo, Poker.Interfaces.ModalForm, cxGraphics,
-  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, Vcl.ActnList,
+  cxButtons, cxLabel, cxTextEdit, cxDropDownEdit, cxSpinEdit, Poker.Interfaces.FormParams, Poker.Objects.Clubs.Club, Poker.Objects.Games.Game,
+  Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
+  Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
 
 type
   TfrmCreateEditGame = class(TForm, IFormParams, IModalForm)

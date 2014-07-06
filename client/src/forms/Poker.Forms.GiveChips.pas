@@ -3,11 +3,10 @@ unit Poker.Forms.GiveChips;
 interface
 
 uses
-  Winapi.Windows, System.Variants, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer,
-  cxTextEdit, cxLabel, cxSpinEdit, cxButtons, Vcl.ActnList, Poker.Objects.ClubInfo,
-  Poker.Objects.PlayerInfo, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels,
-  cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit;
+  Winapi.Windows, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxTextEdit, cxLabel, cxSpinEdit,
+  cxButtons, Vcl.ActnList, Poker.Objects.Clubs.Club, Poker.Objects.PlayerInfo, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls,
+  cxMaskEdit;
 
 type
   TfrmGiveChips = class(TForm, IFormParams, IModalForm)

@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, System.SyncObjs, Poker.Protobufs.Objects.HandHistory,
-  Poker.HandHistory.Players, Poker.HandHistory.Moves, Poker.Objects.GameInfo, Poker.Objects.ClubInfo, Poker.Protobufs.Objects.Game;
+  Poker.HandHistory.Players, Poker.HandHistory.Moves, Poker.Objects.Games.Game, Poker.Objects.Clubs.Club, Poker.Protobufs.Objects.Game;
 
 type
   THandHistoryItems = class;
@@ -433,10 +433,10 @@ begin
   FGame := TGameInfo.Create;
 
   // try to copy Club and Game from internal lists (if found)
-  if dmMain.SelfInfo.Clubs.FindClub(AClubId, club) then
+  if dmMain.SelfInfo.Clubs.TryGetValue(AClubId, club) then
   begin
     FClub.Assign(club);
-    if club.Games.FindGame(AGameId, game) then
+    if club.Games.TryGetValue(AGameId, game) then
       FGame.Assign(game);
   end;
 

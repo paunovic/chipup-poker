@@ -3,8 +3,8 @@ unit Poker.Table.Tables;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Objects.GameInfo, Poker.HandHistory.Playback,
-  Poker.Objects.ClubInfo, Vcl.Forms, Poker.Avatars, Poker.HandHistory.Items, Poker.Table.Renderer;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Objects.Games.Game, Poker.HandHistory.Playback,
+  Poker.Objects.Clubs.Club, Vcl.Forms, Poker.Avatars, Poker.HandHistory.Items, Poker.Table.Renderer;
 
 type
   TTable = class
@@ -180,8 +180,8 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  for club in dmMain.SelfInfo.Clubs do
-    for game in club.Games do
+  for club in dmMain.SelfInfo.Clubs.Values do
+    for game in club.Games.Values do
       if CompareBytes(game.MongoId, AGameId) then
       begin
         ReassignObjects(club, game);
@@ -251,6 +251,7 @@ begin
   end
   else
   begin
+    {$IFDEF DEBUG} DebugLn(FDebugId, 'Failed to setup live table', ditException); {$ENDIF}
     Remove(table);
     result := nil;
   end;
@@ -290,8 +291,8 @@ begin
   {$IFDEF DEBUG} DebugLn(FDebugId, 'Reassigning table objects...', ditApplication); {$ENDIF}
 
   for table in ToArray do
-    if (dmMain.SelfInfo.Clubs.FindClub(table.ClubId, club)) and
-       (club.Games.FindGame(table.GameId, game)) then
+    if (dmMain.SelfInfo.Clubs.TryGetValue(table.ClubId, club)) and
+       (club.Games.TryGetValue(table.GameId, game)) then
       table.ReassignObjects(game.MongoId)
 end;
 

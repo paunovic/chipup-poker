@@ -61,7 +61,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.Items, Poker.Objects.ClubInfo, Poker.Objects.GameInfo,
+  Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.Items, Poker.Objects.Clubs.Club, Poker.Objects.Games.Game,
   Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes,
   Poker.Table.Tables;
 

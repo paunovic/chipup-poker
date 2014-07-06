@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   cxContainer, cxLabel,
-  cxTextEdit, cxButtons, Poker.Objects.ClubInfo, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
+  cxTextEdit, cxButtons, Poker.Objects.Clubs.Club, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
   cxSpinEdit, cxCheckBox, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
   Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
 

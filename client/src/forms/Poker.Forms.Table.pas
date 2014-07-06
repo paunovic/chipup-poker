@@ -173,7 +173,7 @@ uses
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources, Poker.WindowMessages,
   Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Settings,
-  Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game, Poker.Objects.GameInfo,
+  Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game, Poker.Objects.Games.Game,
   Poker.Protobufs.Objects.WinnerPotInfo, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator,
   Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core, Poker.Objects.PotInfo, Poker.Objects.SeatInfo, Poker.Cards;
 
