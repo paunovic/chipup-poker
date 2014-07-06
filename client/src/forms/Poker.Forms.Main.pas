@@ -1130,6 +1130,7 @@ begin
       end;
 
     club.Games.AddGame(pbgame);
+    Tables.ReassignObjects;
   end;
 
   ConfigureGUI;
@@ -1150,6 +1151,8 @@ begin
     if (Assigned(game)) and
        (AMethodId = Integer(srCreateGameOk)) then
       Tables.AddTable(club, game, FALSE, TRUE);
+
+    Tables.ReassignObjects;
   end;
 
   ConfigureGUI;

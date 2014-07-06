@@ -59,6 +59,7 @@ end;
 procedure TDXButton.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
   if (Button <> mbLeft) or
+     (not Assigned(FAction)) or
      (not FAction.Enabled) then
     Exit;
 
@@ -74,7 +75,8 @@ procedure TDXButton.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Inte
 begin
   if FDown then
   begin
-    if (FAction.Enabled) and
+    if (Assigned(FAction)) and
+       (FAction.Enabled) and
        (PtInBounds(Point(X, Y), FBounds^)) then
       FAction.Execute;
 
@@ -86,7 +88,8 @@ procedure TDXButton.RenderTo(const ACanvas: TAsphyreCanvas; const AMetrics: TTab
 var
   font: TAsphyreFont;
 begin
-  if not FAction.Enabled then
+  if (not Assigned(FAction)) or
+     (not FAction.Enabled) then
     Exit;
 
   ACanvas.UseImage(CurrentImage, TexFull4);
