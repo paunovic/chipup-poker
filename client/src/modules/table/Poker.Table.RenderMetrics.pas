@@ -10,6 +10,7 @@ type
 
   TTableRenderMetrics = class
   private
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FHandle: THandle;
     FGame: TGameInfo;
 
@@ -76,6 +77,8 @@ type
       CARD_FOLDED_PERC = 0.55;
 
     constructor Create(const AGame: TGameInfo);
+    destructor Destroy; override;
+
     procedure SetRenderHandle(const AHandle: THandle);
 
     function GetTableSector(const APoint: TPoint2): TTableSector;
@@ -135,14 +138,23 @@ type
 implementation
 
 uses
-  Poker.Table.Resources, Poker.Common.Misc;
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  System.SysUtils, Poker.Table.Resources, Poker.Common.Misc;
 
 { TTableRenderMetrics }
 
 constructor TTableRenderMetrics.Create(const AGame: TGameInfo);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('TableRenderMetrics'); {$ENDIF}
   FGame := AGame;
 end;
+
+destructor TTableRenderMetrics.Destroy;
+begin
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+  inherited;
+end;
+
 
 function TTableRenderMetrics.GetTableSector(const APoint: TPoint2): TTableSector;
 var
@@ -273,7 +285,10 @@ var
 begin
   if (FGame.Seats < Low(TableResources.SEAT_POINTS)) or // FIXME?
      (FGame.Seats > High(TableResources.SEAT_POINTS)) then
+  begin
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid FGame.Seats number [%d]', [FGame.Seats]), ditException); {$ENDIF}
     Exit(Point2(0, 0));
+  end;
 
   xr := TableWidth / 1.25;
   yr := TableHeight / 1.45;

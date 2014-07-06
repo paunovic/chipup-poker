@@ -255,8 +255,6 @@ end;
 
 procedure TdmMain.ProcessReconnectedTables;
 var
-  club: TclubInfo;
-  game: TGameInfo;
   table: TTable;
   tstatus: TPB_TableStatus;
   exists: Boolean;
@@ -281,18 +279,12 @@ begin
   for tstatus in FReconnectedTables do
   begin
     table := nil;
+
     if not Tables.FindTable(tstatus.TableMongoId, table) then
-      for club in FSelfInfo.Clubs do
-        if club.Games.FindGame(tstatus.TableMongoId, game) then
-        begin
-          table := Tables.AddTable(club, game, TRUE, FALSE);
-          Break;
-        end;
+      table := Tables.AddTable(tstatus.TableMongoId, TRUE, FALSE);
 
-    if not Assigned(table) then
-      Continue;
-
-    (table.Form as TfrmTable).SetTableStatus(tstatus, FALSE);
+    if Assigned(table) then
+      (table.Form as TfrmTable).SetTableStatus(tstatus, FALSE);
   end;
 end;
 

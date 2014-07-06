@@ -27,9 +27,8 @@ type
   public
     destructor Destroy; override;
 
-    procedure SetupLiveTable(const AClub: TClubInfo; const AGame: TGameInfo; const ASendJoinCommand: Boolean);
+    function SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
     procedure SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
-
 
     function IsSitting: Boolean;
 
@@ -71,7 +70,7 @@ type
 
     procedure ReassignObjects;
 
-    function AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
+    function AddTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
     function AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
     function SittingCount: Integer;
     function IndexOf(const AGameId: TBytes): Integer;
@@ -115,16 +114,16 @@ begin
   result := DXCore.AcquireSwapChainElement(0, FSwapChainIndex);
 end;
 
-procedure TTable.SetupLiveTable(const AClub: TClubInfo; const AGame: TGameInfo; const ASendJoinCommand: Boolean);
+function TTable.SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
 var
   form: TfrmTable;
 begin
   FTableType := ttLiveGame;
   FSeatIndex := -1;
-  FGameId := AGame.MongoId;
-  FClubId := AClub.MongoId;
-  FGame := AGame;
-  FClub := AClub;
+  FGameId := AGameId;
+  if not dmMain.SelfInfo.Clubs.FindGame(FGameId, FClub, FGame) then
+    Exit(FALSE);
+  FClubId := FClub.MongoId;
   FRenderer := TTableRenderer.Create(FSwapChainIndex, FGame, ttLiveGame);
   form := TfrmTable.Create(self);
   FRenderer.SetRenderTarget(form.Handle);
@@ -134,6 +133,7 @@ begin
   if ASendJoinCommand then
     ServerSocket.JoinTable(FGame.MongoId);
   FRenderer.UpdateDXAreaSize;
+  Exit(TRUE);
 end;
 
 procedure TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
@@ -222,11 +222,11 @@ begin
   inherited;
 end;
 
-function TTables.AddTable(const AClub: TClubInfo; const AGame: TGameInfo; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
+function TTables.AddTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
 var
   table: TTable;
 begin
-  if FindTable(AGame.MongoId, table) then
+  if FindTable(AGameId, table) then
   begin
     if AShow then
       table.BringToFront;
@@ -242,11 +242,18 @@ begin
 
   Add(table);
 
-  table.SetupLiveTable(AClub, AGame, ASendJoinCommand);
-  if AShow then
-    table.BringToFront;
+  if table.SetupLiveTable(AGameId, ASendJoinCommand) then
+  begin
+    if AShow then
+      table.BringToFront;
 
-  result := table;
+    result := table;
+  end
+  else
+  begin
+    Remove(table);
+    result := nil;
+  end;
 end;
 
 function TTables.AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;

@@ -523,7 +523,7 @@ begin
     if Tables.FindTable(game.MongoId, table) then
       table.BringToFront
     else
-      Tables.AddTable(club, game, FALSE, TRUE);
+      Tables.AddTable(game.MongoId, FALSE, TRUE);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);
@@ -1150,7 +1150,7 @@ begin
 
     if (Assigned(game)) and
        (AMethodId = Integer(srCreateGameOk)) then
-      Tables.AddTable(club, game, FALSE, TRUE);
+      Tables.AddTable(game.MongoId, FALSE, TRUE);
 
     Tables.ReassignObjects;
   end;

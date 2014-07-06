@@ -72,6 +72,7 @@ type
     function AddClub(const AProtobufObject: TPB_Club): TClubInfo;
     function FindClub(const AId: Integer; var AClubInfo: TClubInfo): Boolean; overload;
     function FindClub(const AMongoId: TBytes; var AClubInfo: TClubInfo): Boolean; overload;
+    function FindGame(const AMongoId: TBytes; out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
     function IndexOf(const AId: Integer): Integer;
   end;
 
@@ -252,6 +253,21 @@ begin
       Exit(TRUE);
     end;
 
+  Exit(FALSE);
+end;
+
+function TClubsInfo.FindGame(const AMongoId: TBytes; out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+var
+  club: TClubInfo;
+  game: TGameInfo;
+begin
+  for club in ToArray do
+    if club.Games.FindGame(AMongoId, game) then
+    begin
+      AClub := club;
+      AGame := game;
+      Exit(TRUE);
+    end;
   Exit(FALSE);
 end;
 

@@ -26,14 +26,14 @@ type
 
     procedure LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 
-    property Id      : TBytes read FId write FId;
-    property Nick    : String read FNick write FNick;
+    property Id: TBytes read FId write FId;
+    property Nick: String read FNick write FNick;
     property Password: String read FPassword write FPassword;
-    property EMail   : String read FEMail write FEMail;
-    property Balance : UINT32 read FBalance write FBalance;
-    property Authed  : Boolean read FAuthed write FAuthed;
+    property EMail: String read FEMail write FEMail;
+    property Balance: UINT32 read FBalance write FBalance;
+    property Authed: Boolean read FAuthed write FAuthed;
     property AvatarId: TBytes read FAvatarId write FAvatarId;
-    property Clubs   : TClubsInfo read FClubs;
+    property Clubs: TClubsInfo read FClubs;
   end;
 
   TPB_Users = TList<TPB_User>;
