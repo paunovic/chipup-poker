@@ -5,7 +5,7 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.StatusReply,
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.Players.Player, Poker.Protobufs.Objects.StatusReply,
   Vcl.Forms, dxSkinsForm, Poker.Objects.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
   dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls;
@@ -69,8 +69,9 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
-  Poker.Avatars, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Stats.Table, Poker.Forms.Table, Poker.Objects.TableStatus,
-  Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
+  Poker.Objects.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Objects.TableStatistics.TableStatsList,
+  Poker.Forms.Table, Poker.Objects.TableStatus, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About,
+  Poker.Objects.Players.PlayerList;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -98,7 +99,7 @@ begin
 
   TSettings.Initialize(AppDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
   TDatabase.Initialize(AppDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
-  TAvatars.Initialize;
+  TAvatarList.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
   DXTimer.AnimationsEnabled := Settings.Animations;
@@ -106,7 +107,7 @@ begin
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
   TSounds.Initialize;
-  TTablesStats.Initialize;
+  TTablesStatsList.Initialize;
   THandHistory.Initialize;
 
   if (Settings.DeveloperMode) and
@@ -119,7 +120,7 @@ begin
 
   FSelfInfo := TPlayerInfo.Create;
 
-  TPlayers.Initialize;
+  TPlayerList.Initialize;
   TTables.Initialize;
 
   FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
@@ -135,18 +136,18 @@ begin
   TFormsContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
   TTables.Deinitialize;
-  TPlayers.Deinitialize;
+  TPlayerList.Deinitialize;
   FSelfInfo.Free;
   TServerSocketCommands.Deinitialize;
   THandHistory.Deinitialize;
-  TTablesStats.Deinitialize;
+  TTablesStatsList.Deinitialize;
   TSounds.Deinitialize;
   TMessageContainer.Deinitialize;
   TServerSettings.Deinitialize;
   TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
-  TAvatars.Deinitialize;
+  TAvatarList.Deinitialize;
   TDatabase.Deinitialize;
   TSettings.Deinitialize;
 

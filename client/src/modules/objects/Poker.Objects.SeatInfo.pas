@@ -3,7 +3,7 @@ unit Poker.Objects.SeatInfo;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Objects.PlayerInfo;
+  System.SysUtils, System.Generics.Collections, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Objects.Players.Player;
 
 type
   TSeatInfo = class

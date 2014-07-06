@@ -51,9 +51,10 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  PNGImage, Poker.Avatars, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
-  Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Common.FormsContainer, Poker.Forms.ImageCrop;
+  PNGImage, Poker.Objects.Avatars.Avatar, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply,
+  Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Common.Encryption,
+  Poker.Settings, Poker.DataModule, Poker.Objects.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop,
+  Poker.Objects.Players.Player, Poker.Objects.Avatars.AvatarList;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
@@ -239,8 +240,8 @@ end;
 
 procedure TfrmChangeAvatar.CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
 var
-  avatar     : TAvatar;
-  pbreply    : TPB_SetAvatarReply;
+  avatar: TAvatar;
+  pbreply: TPB_SetAvatarReply;
   player_info: TPlayerInfo;
 begin
   pbreply := AObject as TPB_SetAvatarReply;
@@ -249,7 +250,7 @@ begin
     saSuccess: begin
       dmMain.SelfInfo.AvatarId := FAvatarId;
       avatar := Avatars.Add(dmMain.SelfInfo.AvatarId, FAvatarJPG);
-      if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+      if Players.TryGetValue(dmMain.SelfInfo.Id, player_info) then
         player_info.AvatarId := dmMain.SelfInfo.AvatarId;
       imgAvatar.Picture.Assign(avatar.GetImage);
 

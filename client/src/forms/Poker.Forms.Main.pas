@@ -187,15 +187,16 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.Generics.Collections,
   Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
-  Poker.Server.MessageContainer, Poker.Objects.PlayerInfo, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
+  Poker.Server.MessageContainer, Poker.Objects.Players.PlayerList, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Table.Tables, Poker.DirectX.Timer,
-  Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater,
-  Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Stats.Table, Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars, Poker.Forms.About,
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Table.Tables, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams,
+  Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater, Poker.Forms.ClubLobby,
+  Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Objects.TableStatistics.TableStatsList,
+  Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Objects.Avatars.Avatar, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
-  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Objects.Clubs.Member;
+  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Objects.Clubs.Member, Poker.Objects.Players.Player,
+  Poker.Objects.Avatars.AvatarList, Poker.Objects.TableStatistics.TableStats;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -611,7 +612,6 @@ end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
 var
-  C1: Integer;
   game: TGameInfo;
   c: TcxGridDataController;
   club: TClubInfo;
@@ -891,7 +891,7 @@ begin
     SetLength(query_users, 0);
     SetLength(empty_array, 0);
 
-    if not Players.FindPlayerById(AClub.Owner, player) then
+    if not Players.TryGetValue(AClub.Owner, player) then
     begin
       SetLength(query_users, 1);
       query_users[0] := AClub.Owner;
@@ -899,7 +899,7 @@ begin
     end;
 
     for memberpb in AClub.Members do
-      if (not Players.FindPlayerById(memberpb.MongoId, player)) or
+      if (not Players.TryGetValue(memberpb.MongoId, player)) or
          (player.Nick = '') or
          (Length(player.AvatarId) = 0) then
       begin
@@ -983,13 +983,13 @@ begin
   if AMethodId = Integer(seTransferChips) then
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount;
-    if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+    if Players.TryGetValue(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance - pbreply.ChipAmount;
   end
   else
   begin
     dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
-    if Players.FindPlayerById(pbreply.PlayerMongoId, player_info) then
+    if Players.TryGetValue(pbreply.PlayerMongoId, player_info) then
       player_info.Balance := player_info.Balance + pbreply.ChipAmount;
   end;
   dmMain.UpdateSelfInfoInPlayers;
@@ -1187,7 +1187,7 @@ begin
   SetLength(empty_array, 0);
   SetLength(query_users, 0);
   for player in pb.Players do
-    if Players.FindPlayerById(player.MongoId, playerinfo) then
+    if Players.TryGetValue(player.MongoId, playerinfo) then
       playerinfo.Nick := player.Displayname
     else
     begin
@@ -1204,13 +1204,13 @@ begin
       club.UpdateFromClubStats(clubstats);
 
   for tablepb in pb.Reply do
-    if TablesStats.Find(tablepb.Gameid, tablestats) then
+    if TablesStats.TryGetValue(tablepb.Gameid, tablestats) then
       tablestats.Assign(tablepb)
     else
     begin
       tablestats := TTableStats.Create;
       tablestats.Assign(tablepb);
-      TablesStats.Add(tablestats);
+      TablesStats.Add(tablestats.GameId, tablestats);
     end;
 end;
 

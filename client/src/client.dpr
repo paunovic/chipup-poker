@@ -72,7 +72,7 @@ uses
   Poker.DirectX.Core in 'modules\directx\Poker.DirectX.Core.pas',
   Poker.DirectX.Timer in 'modules\directx\Poker.DirectX.Timer.pas',
   Poker.DirectX.Animation in 'modules\directx\Poker.DirectX.Animation.pas',
-  Poker.Objects.PlayerInfo in 'modules\objects\Poker.Objects.PlayerInfo.pas',
+  Poker.Objects.Players.Player in 'modules\objects\players\Poker.Objects.Players.Player.pas',
   Poker.Objects.Clubs.Club in 'modules\objects\clubs\Poker.Objects.Clubs.Club.pas',
   Poker.Objects.Games.GameList in 'modules\objects\games\Poker.Objects.Games.GameList.pas',
   Poker.Objects.TableStatus in 'modules\objects\Poker.Objects.TableStatus.pas',
@@ -85,16 +85,13 @@ uses
   Poker.Table.Renderer in 'modules\table\Poker.Table.Renderer.pas',
   Poker.Table.RenderMetrics in 'modules\table\Poker.Table.RenderMetrics.pas',
   Poker.Table.DXButton in 'modules\table\Poker.Table.DXButton.pas',
-  Poker.Stats.Table in 'modules\stats\Poker.Stats.Table.pas',
   Poker.Stats.Player in 'modules\stats\Poker.Stats.Player.pas',
   Poker.HandHistory.Core in 'modules\hand_history\Poker.HandHistory.Core.pas',
   Poker.HandHistory.Items in 'modules\hand_history\Poker.HandHistory.Items.pas',
   Poker.HandHistory.Players in 'modules\hand_history\Poker.HandHistory.Players.pas',
   Poker.HandHistory.Moves in 'modules\hand_history\Poker.HandHistory.Moves.pas',
   Poker.HandHistory.Playback in 'modules\hand_history\Poker.HandHistory.Playback.pas',
-  Poker.Avatars in 'modules\Poker.Avatars.pas',
   Poker.Cards in 'modules\Poker.Cards.pas',
-  Poker.ChipStackMaker in 'modules\Poker.ChipStackMaker.pas',
   Poker.Sounds in 'modules\Poker.Sounds.pas',
   Poker.WindowMessages in 'modules\Poker.WindowMessages.pas',
   Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas',
@@ -165,7 +162,14 @@ uses
   Poker.Server.Socket.Commands in 'modules\server\socket\Poker.Server.Socket.Commands.pas',
   Poker.Objects.Clubs.Member in 'modules\objects\clubs\Poker.Objects.Clubs.Member.pas',
   Poker.Objects.Clubs.ClubList in 'modules\objects\clubs\Poker.Objects.Clubs.ClubList.pas',
-  Poker.Objects.Games.Game in 'modules\objects\games\Poker.Objects.Games.Game.pas';
+  Poker.Objects.Games.Game in 'modules\objects\games\Poker.Objects.Games.Game.pas',
+  Poker.Objects.Players.PlayerList in 'modules\objects\players\Poker.Objects.Players.PlayerList.pas',
+  Poker.Objects.Avatars.Avatar in 'modules\objects\avatars\Poker.Objects.Avatars.Avatar.pas',
+  Poker.Objects.Avatars.AvatarList in 'modules\objects\avatars\Poker.Objects.Avatars.AvatarList.pas',
+  Poker.Objects.TableStatistics.TableStats in 'modules\objects\table_statistics\Poker.Objects.TableStatistics.TableStats.pas',
+  Poker.Objects.TableStatistics.TableStatsList in 'modules\objects\table_statistics\Poker.Objects.TableStatistics.TableStatsList.pas',
+  Poker.Objects.ChipStackMaker.ChipStack in 'modules\objects\chip_stack_maker\Poker.Objects.ChipStackMaker.ChipStack.pas',
+  Poker.Objects.ChipStackMaker in 'modules\objects\chip_stack_maker\Poker.Objects.ChipStackMaker.pas';
 
 procedure FocusApp;
 var

@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Objects.Games.Game, Poker.HandHistory.Playback,
-  Poker.Objects.Clubs.Club, Vcl.Forms, Poker.Avatars, Poker.HandHistory.Items, Poker.Table.Renderer;
+  Poker.Objects.Clubs.Club, Vcl.Forms, Poker.Objects.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Table.Renderer,
+  Poker.Objects.Avatars.Avatar;
 
 type
   TTable = class

@@ -169,13 +169,13 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, System.TypInfo, {$ENDIF}
-  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.DirectX.Timer, Poker.Table.Renderer,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Table.Resources, Poker.WindowMessages,
-  Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Settings,
-  Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Protobufs.Objects.Game, Poker.Objects.Games.Game,
-  Poker.Protobufs.Objects.WinnerPotInfo, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator,
-  Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core, Poker.Objects.PotInfo, Poker.Objects.SeatInfo, Poker.Cards;
+  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.DirectX.Timer, Poker.Table.Renderer, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo,
+  Poker.Table.Resources, Poker.WindowMessages, Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
+  Poker.Common.Misc, Poker.Settings, Poker.Forms.TableSit, Poker.DataModule, Poker.Objects.Players.PlayerList, Poker.Protobufs.Objects.Game,
+  Poker.Objects.Games.Game, Poker.Protobufs.Objects.WinnerPotInfo, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator,
+  Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core, Poker.Objects.PotInfo, Poker.Objects.SeatInfo, Poker.Cards,
+  Poker.Objects.Players.Player;
 
 
 constructor TfrmTable.Create(const ATable: TTable);
@@ -1089,7 +1089,7 @@ begin
   // get user infos that we dont have
   SetLength(query_users, 0);
   for seat in FTable.Renderer.TableStatus.Seats do
-    if not Players.FindPlayerById(seat.PlayerMongoId, player) then
+    if not Players.TryGetValue(seat.PlayerMongoId, player) then
     begin
       SetLength(query_users, Length(query_users) + 1);
       query_users[Length(query_users) - 1] := seat.PlayerMongoId;
@@ -1117,7 +1117,7 @@ begin
   csdbg := IntToStr(FTable.Renderer.TableStatus.CurrentSeat);
   if FTable.Renderer.TableStatus.GetSeatInfo(FTable.Renderer.TableStatus.CurrentSeat, seatdbg) then
   begin
-    if Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg) then
+    if Players.TryGetValue(seatdbg.PlayerMongoId, playerdbg) then
       csdbg := csdbg + ' - ' + playerdbg.Nick;
     tb := seatdbg.Timebank;
   end;
@@ -1135,7 +1135,7 @@ begin
     seatdbg := nil;
     playerdbg := nil;
     if FTable.Renderer.TableStatus.GetSeatInfo(pbevent.Seat, seatdbg) then
-      Players.FindPlayerById(seatdbg.PlayerMongoId, playerdbg);
+      Players.TryGetValue(seatdbg.PlayerMongoId, playerdbg);
 
     case pbevent.Event of
       teFold: if Assigned(seatdbg) then

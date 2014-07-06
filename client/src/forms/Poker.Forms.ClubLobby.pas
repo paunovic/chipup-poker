@@ -5,10 +5,10 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams,
   Poker.Objects.Clubs.Club, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
-  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel, cxImage, Vcl.ExtCtrls, Vcl.Menus,
-  cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, dxSkinscxPCPainter,
-  cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
-  Vcl.StdCtrls, dxGDIPlusClasses;
+  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Objects.Players.PlayerList, dxBevel, cxImage, Vcl.ExtCtrls,
+  Vcl.Menus, cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
+  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit,
+  cxClasses, Vcl.StdCtrls, dxGDIPlusClasses;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -201,9 +201,9 @@ uses
   Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.Games.Game,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Objects.TableStatistics.TableStatsList, Poker.Stats.Player, System.DateUtils,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions,
-  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Objects.Clubs.Member;
+  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Objects.Clubs.Member, Poker.Objects.Players.Player, Poker.Objects.TableStatistics.TableStats;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -294,7 +294,7 @@ begin
     lbsHeader.Caption := club.Name;
 
     manager := '';
-    if Players.FindPlayerById(club.OwnerId, player) then
+    if Players.TryGetValue(club.OwnerId, player) then
       manager := player.Nick;
 
     lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
@@ -459,7 +459,7 @@ var
 begin
   AHintText := '';
 
-  if not TablesStats.Find(FSelectedStatsTableId, tablestats) then
+  if not TablesStats.TryGetValue(FSelectedStatsTableId, tablestats) then
     Exit;
 
   playerid := ARecord.Values[gridStatsTablePlayerId.Index];
@@ -592,7 +592,7 @@ var
     status: String;
   begin
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId);
-    if Players.FindPlayerById(AMember.MongoId, player) then
+    if Players.TryGetValue(AMember.MongoId, player) then
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick)
     else
     begin
@@ -665,7 +665,7 @@ begin
     if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
       Exit;
 
-    for tablestats in TablesStats do
+    for tablestats in TablesStats.Values do
       if CompareBytes(tablestats.ClubId, club.MongoId) then
       begin
         if club.Games.TryGetValue(tablestats.GameId, game) then
@@ -730,12 +730,12 @@ begin
         try
           if selectedids.Count = 0 then
           begin
-            if TablesStats.Find(FSelectedStatsTableId, tablestats) then
+            if TablesStats.TryGetValue(FSelectedStatsTableId, tablestats) then
               tablestatslist.Add(tablestats);
           end
           else
             for selectedid in selectedids do
-              if TablesStats.Find(selectedid, tablestats) then
+              if TablesStats.TryGetValue(selectedid, tablestats) then
                 tablestatslist.Add(tablestats);
 
           for tablestats in tablestatslist do
@@ -762,7 +762,7 @@ begin
           begin
             recidx := c.AppendRecord;
 
-            if Players.FindPlayerById(playerstats.UserId, player) then
+            if Players.TryGetValue(playerstats.UserId, player) then
               tmp := player.Nick
             else
               tmp := 'Unknown';
@@ -831,7 +831,6 @@ end;
 
 procedure TfrmClubLobby.UpdateGamesList;
 var
-  C1: Integer;
   game: TGameInfo;
   club: TClubInfo;
   c: TcxGridDataController;
@@ -896,7 +895,7 @@ var
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
-     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
+     (not Players.TryGetValue(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Are you sure you want to give club ownership to %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
@@ -915,7 +914,7 @@ var
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
-     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
+     (not Players.TryGetValue(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Are you sure you want to remove %s from the club?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
@@ -928,7 +927,7 @@ var
   player: TPlayerInfo;
 begin
   if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
-     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
+     (not Players.TryGetValue(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Reset balance for player %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then

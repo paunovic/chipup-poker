@@ -4,8 +4,8 @@ interface
 
 uses
   System.Classes, System.Generics.Collections, System.Types, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts, Poker.Table.RenderMetrics,
-  Vcl.ActnList, Poker.Objects.Games.Game, Poker.Objects.TableStatus, AsphyreImages, Poker.Objects.SeatInfo, Poker.Cards, Poker.ChipStackMaker,
-  IdSync, Poker.Table.DXButton, Vcl.Controls, Poker.Protobufs.Objects.WinnerPotInfo;
+  Vcl.ActnList, Poker.Objects.Games.Game, Poker.Objects.TableStatus, AsphyreImages, Poker.Objects.SeatInfo, Poker.Cards, Poker.Objects.ChipStackMaker,
+  IdSync, Poker.Table.DXButton, Vcl.Controls, Poker.Protobufs.Objects.WinnerPotInfo, Poker.Objects.ChipStackMaker.ChipStack;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
@@ -76,7 +76,7 @@ type
     procedure RenderBets;
     procedure RenderPots;
     procedure RenderValue(const APoint: TPoint2; const AValue: UINT32; const AColor: TColor2; const APot: Boolean);
-    procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipsStack);
+    procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack);
     procedure RenderButtons;
     procedure RenderRaisePanel;
 
@@ -142,10 +142,10 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, Poker.DirectX.Core, Poker.Table.Resources, AbstractCanvas, System.SysUtils,
-  Poker.Objects.PlayerInfo, Poker.Avatars, Poker.Protobufs.Objects.SeatInfo, Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation, Poker.DirectX.Timer, Poker.Objects.PotInfo,
-  Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings;
+  Winapi.Windows, Poker.DirectX.Core, Poker.Table.Resources, AbstractCanvas, System.SysUtils, Poker.Objects.Players.PlayerList,
+  Poker.Protobufs.Objects.SeatInfo, Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game,
+  Poker.Server.Settings, Poker.DirectX.Animation, Poker.DirectX.Timer, Poker.Objects.PotInfo, Poker.Sounds, Poker.HandStrengthCalculator,
+  Poker.Settings, Poker.Objects.Players.Player, Poker.Objects.Avatars.AvatarList, Poker.Objects.Avatars.Avatar;
 
 { TTableRenderer }
 
@@ -414,7 +414,7 @@ begin
      (FTableStatus.GetSeatInfo(ASeatIndex, seat_info)) then
   begin
     // find player info
-    if not Players.FindPlayerById(seat_info.PlayerMongoId, player_info) then
+    if not Players.TryGetValue(seat_info.PlayerMongoId, player_info) then
       player_info := nil;
 
     // set seat image that we should render
@@ -984,7 +984,7 @@ procedure TTableRenderer.RenderBets;
 var
   C1, C2: Integer;
   chips_point: TPoint2;
-  chips_stack: TChipsStack;
+  chips_stack: TChipStack;
   animation: TDXAnimation;
   seat_index: Integer;
   animated_seats: TList<Integer>;
@@ -1041,7 +1041,7 @@ procedure TTableRenderer.RenderPots;
 var
   C1, C2: Integer;
   pot_value: UINT32;
-  chips_stack: TChipsStack;
+  chips_stack: TChipStack;
   pot_point: TPoint2;
   animation: TDXAnimation;
   pots: TPotInfos;
@@ -1126,7 +1126,7 @@ begin
   font.TextMidF(p, text, AColor);
 end;
 
-procedure TTableRenderer.RenderChipStack(const APoint: TPoint2; const AChipStack: TChipsStack);
+procedure TTableRenderer.RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack);
 var
   C1: Integer;
 begin
@@ -1410,7 +1410,7 @@ begin
     for C2 := 0 to pot.WinnerData.Count - 1 do
     begin
       if (FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
-         (Players.FindPlayerById(seat.PlayerMongoId, player)) then
+         (Players.TryGetValue(seat.PlayerMongoId, player)) then
         nick := player.Nick
       else
         nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);

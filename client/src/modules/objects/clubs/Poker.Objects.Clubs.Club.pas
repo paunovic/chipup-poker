@@ -15,7 +15,7 @@ type
     FName: String;
     FPassword: String;
     FMembers: TObjectList<TClubMemberInfo>;
-    FGames: TGamesInfo;
+    FGames: TGameList;
     FRake: Integer;
     FPrivate: Boolean;
     FDefaultBalanceLimit: UINT32;
@@ -41,7 +41,7 @@ type
     property Name: String read FName;
     property Password: String read FPassword;
     property Members: TObjectList<TClubMemberInfo> read FMembers;
-    property Games: TGamesInfo read FGames;
+    property Games: TGameList read FGames;
     property Rake: Integer read FRake;
     property IsPrivate: Boolean read FPrivate write FPrivate;
     property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit;
@@ -58,7 +58,7 @@ uses
 constructor TClubInfo.Create;
 begin
   FMembers := TObjectList<TClubMemberInfo>.Create;
-  FGames := TGamesInfo.Create;
+  FGames := TGameList.Create;
 end;
 
 destructor TClubInfo.Destroy;
