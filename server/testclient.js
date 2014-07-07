@@ -278,7 +278,7 @@ function testmenu(cb,config) {
 								if (next == 'raise') {
 									var maxchips = conn.getSeat(conn.seat).chips;
 									console.log('oldbet',oldbet,'max',maxchips);
-									var newbet = conn.tableStatus.minimum_bet + 1000;
+									var newbet = conn.tableStatus.minimum_raise;
 									if (maxchips < (newbet - oldbet)) newbet = oldbet + maxchips;
 									return doit(function () {
 										moves.raise([newbet]);
