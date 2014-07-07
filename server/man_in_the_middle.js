@@ -2,7 +2,7 @@
 var net = require('net');
 var util = require('util');
 
-exports.createManInTheMiddleServer(protobufUtil, realServerPort, fakeServerPort, recordCallback) {
+exports.createManInTheMiddleServer = function (protobufUtil, realServerPort, fakeServerPort, recordCallback) {
 	var server = net.createServer();
 
 	server.on('connect', function (clientToFakeServerSocket) {
