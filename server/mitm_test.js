@@ -1,14 +1,23 @@
 'use strict';
+var fs = require("fs");
+var Protobuf = require("node-protobuf").Protobuf;
+var ProtobufUtil = require('./ProtobufUtil');
+var mitm = require('./man_in_the_middle');
+var codes = require('./ServerCodes.js');
+
 var schema = 'Poker.RpcMessage';
-var s2p = require('./protobuf_util');
-var protobuf = require("node-protobuf");
+var pb = new Protobuf(fs.readFileSync("../message.desc"));
+var pu = new ProtobufUtil(pb, schema);
+//var message = pu.encode(codes.srChangeClubDetailsReply, {	status: 'csNameExists' }, 'Poker.ClubCommandReply');
 
-var realServerPort = 5678;
-var fakeServerPort = 1234;
-var mitmServer = require(./man_in_the_middle).createManInTheMiddleServer(protobuf, schema, realServerPort, fakeServerPort, recordCallback);
-
+var realServerPort = 45508;
+var fakeServerPort = 45532;
+var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, fakeServerPort, recordCallback);
 
 function recordCallback(methodId, args) {
+	console.log(methodId);
+
+	/*
 	var MongoClient = require('mongodb').MongoClient
 		, format = require('util').format;
 
@@ -30,4 +39,5 @@ function recordCallback(methodId, args) {
 			});
 		});
 	});
+	*/
 }
