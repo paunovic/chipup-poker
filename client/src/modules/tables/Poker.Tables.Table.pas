@@ -34,8 +34,8 @@ type
 
     procedure UpdateAvatars(const AAvatar: TAvatar);
 
-    function GetGame(out AGame: TGameInfo): Boolean;
-    function GetClub(out AClub: TClubInfo): Boolean;
+    function GetObjects(out AGame: TGameInfo): Boolean; overload;
+    function GetObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean; overload;
 
     procedure BringToFront;
 
@@ -79,16 +79,16 @@ begin
   inherited;
 end;
 
-function TTable.GetClub(out AClub: TClubInfo): Boolean;
-begin
-  result := dmMain.SelfInfo.Clubs.TryGetValue(FClubId, AClub);
-end;
-
-function TTable.GetGame(out AGame: TGameInfo): Boolean;
+function TTable.GetObjects(out AGame: TGameInfo): Boolean;
 var
   club: TClubInfo;
 begin
   result := dmMain.SelfInfo.Clubs.FindGame(FGameId, club, AGame);
+end;
+
+function TTable.GetObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+begin
+  result := dmMain.SelfInfo.Clubs.FindGame(FGameId, AClub, AGame);
 end;
 
 function TTable.AcquireSwapChainElement: Boolean;

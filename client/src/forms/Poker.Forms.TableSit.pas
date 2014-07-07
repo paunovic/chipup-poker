@@ -110,7 +110,7 @@ end;
 function TfrmTableSit.GetObjects(out ATable: TTable; out AGame: TGameInfo): Boolean;
 begin
   result := (Tables.TryGetValue(FInternalId, ATable)) and
-            (ATable.GetGame(AGame));
+            (ATable.GetObjects(AGame));
 end;
 
 function TfrmTableSit.GetMaxBuyin: UINT32;
@@ -295,7 +295,7 @@ var
   table: TTable;
 begin
   if (not Tables.TryGetValue(FInternalId, table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   pbstatus := AObject as TPB_TableStatus;

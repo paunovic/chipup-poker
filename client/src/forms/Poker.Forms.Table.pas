@@ -396,7 +396,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   DefocusControls;
@@ -418,7 +418,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   table.Renderer.MouseMove(Shift, X, Y, set_raise_amount);
@@ -448,7 +448,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   client_cursor_pos := ScreenToClient(Mouse.CursorPos);
@@ -563,7 +563,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   if (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
@@ -580,7 +580,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   if (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
@@ -654,8 +654,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) or
-     (not table.GetClub(club)) then
+     (not table.GetObjects(club, game)) then
     Exit;
 
   case table.TableType of
@@ -740,7 +739,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   case Ord(Key) of
@@ -776,7 +775,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   ServerSocket.ShowCards(game.MongoId);
@@ -792,7 +791,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   if not ConfirmStandUp then
@@ -850,7 +849,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   table.Renderer.TableStatus.UpdateClosingTime(game);
@@ -870,7 +869,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   chat_event := AObject as TPB_ChatEvent;
@@ -899,7 +898,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   AFocusWindow := FALSE;
@@ -1200,7 +1199,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   pbtablestatus := AObject as TPB_TableStatus;
@@ -1511,7 +1510,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   Assert(table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info));
@@ -1530,7 +1529,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   ServerSocket.PutChips(game.MongoId, table.Renderer.TableStatus.GetBet(table.SeatIndex), table.Renderer.TableStatus.State);
@@ -1542,7 +1541,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   if (acCheck.Enabled) and
@@ -1560,7 +1559,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   if (table.IsSitting) and
@@ -1582,7 +1581,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   val := table.Renderer.TableStatus.MinimumBet;
@@ -1618,7 +1617,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   ServerSocket.PutChips(game.MongoId, FRaiseValue, table.Renderer.TableStatus.State);
@@ -1699,7 +1698,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   oldval := FRaiseValue;
@@ -1806,7 +1805,7 @@ var
   game: TGameInfo;
 begin
   if (not GetTable(table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   if not HandHistory.TryGetValue(table.GameId, hhis) then

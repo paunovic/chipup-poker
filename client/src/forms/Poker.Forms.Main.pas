@@ -1153,7 +1153,7 @@ var
 begin
   pbtstatus := AObject as TPB_TableStatus;
   if (not Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table)) or
-     (not table.GetGame(game)) then
+     (not table.GetObjects(game)) then
     Exit;
 
   game.UpdateFromTableStatus(pbtstatus);

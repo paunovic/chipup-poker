@@ -3905,10 +3905,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
-        ExplicitLeft = 1
-        ExplicitTop = 1
-        ExplicitWidth = 792
-        ExplicitHeight = 427
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1
