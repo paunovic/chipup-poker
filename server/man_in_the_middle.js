@@ -2,24 +2,20 @@
 var net = require('net');
 var util = require('util');
 
-exports.createManInTheMiddleServer(protobufUtil, realServerPort, fakeServerPort, recordCallback) {
-	var server = net.createServer();
+exports.createManInTheMiddleServer = function (pu, realServerPort, fakeServerPort, recordCallback) {
+	var server = net.createServer(function (clientToFakeServerSocket) {
+		var fakeToRealServerSocket = net.connect(realServerPort, function () {
+			var clientToServerSpy = createRecordAndForwardFn(fakeToRealServerSocket, pu, recordCallback);
+			clientToFakeServerSocket.on('data', pu.createOnDataListenerFn(clientToServerSpy));
 
-	server.on('connect', function (clientToFakeServerSocket) {
-		var fakeToRealServerSocket = net.connect(realServerPort);
+			var serverToClientSpy = createRecordAndForwardFn(clientToFakeServerSocket, pu, recordCallback);
+			fakeToRealServerSocket.on('data', pu.createOnDataListenerFn(serverToClientSpy));
 
-		var clientToServerSpy = createRecordAndForwardFn(fakeToRealServerSocket, protobufUtil, recordCallback);
-		clientToFakeServerSocket.on('data', s2p.createOnDataListenerFn(protobuf, schema, clientToServerSpy));
-
-		var serverToClientSpy = createRecordAndForwardFn(clientToFakeServerSocket, protobufUtil, recordCallback);
-		fakeToRealServerSocket.on('data', s2p.createOnDataListenerFn(protobuf, schema, serverToClientSpy));
-
-		server.on('close', function () {
-			fakeToRealServerSocket.destroy();
+			server.on('close', function () {
+				fakeToRealServerSocket.destroy();
+			});
 		});
-	});
-
-	server.listen(fakeServerPort);
+	}).listen(fakeServerPort);
 
 	return server;
 }
