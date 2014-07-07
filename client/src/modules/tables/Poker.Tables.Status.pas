@@ -49,9 +49,6 @@ type
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
 
-    FActionCallCaption: String;
-    FActionRaiseCaption: String;
-
 //    FEvents        : TTableEvents;
 
     procedure PadList(const AList: TList<UINT32>; const ACount: Integer);
@@ -109,9 +106,6 @@ type
     property ActionFoldToAny: Boolean read FActionFoldToAny write FActionFoldToAny;
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
-
-    property ActionCallCaption: String read FActionCallcaption write FActionCallCaption;
-    property ActionRaiseCaption: String read FActionRaiseCaption write FActionRaiseCaption;
 
 //    property Events: TTableEvents read FEvents;
   end;
@@ -276,12 +270,15 @@ begin
           seat := FSeatInfos[C2];
           Break;
         end;
+
       if not Assigned(seat) then
       begin
         seat := TSeatInfo.Create;
+        seat.Assign(ATableStatusProtobuf.Seats[C1]);
         FSeatInfos.Add(seat);
-      end;
-      seat.Assign(ATableStatusProtobuf.Seats[C1]);
+      end
+      else
+        seat.Assign(ATableStatusProtobuf.Seats[C1]);
     end;
 
     FSeatInfos.Sort;

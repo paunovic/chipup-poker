@@ -58,7 +58,6 @@ type
     FOnDealerChatMessage: TDealerChatMessageEvent;
     FOnSoundPlay: TSoundPlayEvent;
     FOnTimebankStarted: TNotifyEvent;
-    FRaiseThumbXOffset: Single;
     FRaiseThumbDown: Boolean;
 
     function GetGame(out AGame: TGameInfo): Boolean;
@@ -234,10 +233,7 @@ begin
 
   // check click on raise thumb button
   if FMetrics.IsPointInRaiseThumb(X, Y) then
-  begin
-    FRaiseThumbXOffset := X - (FMetrics.RaiseThumbBounds[0].x + (FMetrics.RaiseThumbBounds[1].x - FMetrics.RaiseThumbBounds[0].x) / 2);
     FRaiseThumbDown := TRUE
-  end
   else
     if FMetrics.IsPointInRaiseTrack(X, Y, percent) then // check click on raise track
     begin
@@ -264,7 +260,7 @@ begin
 
   if FRaiseThumbDown then
   begin
-    percent := (X + FRaiseThumbXOffset - FMetrics.RaiseTrackBounds[0].x) / (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x);
+    percent := (X - FMetrics.RaiseTrackBounds[0].x) / (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x);
     if percent < 0 then
       percent := 0
     else

@@ -406,7 +406,8 @@ begin
     Exit;
 
   if set_raise_amount then
-    SetRaiseValue(RoundToNearestBB(Round(table.Renderer.TableStatus.MaximumRaise * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
+    SetRaiseValue(RoundToNearestBB(Round(table.Renderer.TableStatus.MinimumRaise +
+        (table.Renderer.TableStatus.MaximumRaise - table.Renderer.TableStatus.MinimumRaise) * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
   table.Renderer.Render;
 end;
 
@@ -423,7 +424,8 @@ begin
   table.Renderer.MouseMove(Shift, X, Y, set_raise_amount);
 
   if set_raise_amount then
-    SetRaiseValue(RoundToNearestBB(Round(table.Renderer.TableStatus.MaximumRaise * table.Renderer.RaiseThumbPosition), game.BigBlind));
+    SetRaiseValue(RoundToNearestBB(Round(table.Renderer.TableStatus.MinimumRaise +
+        (table.Renderer.TableStatus.MaximumRaise - table.Renderer.TableStatus.MinimumRaise) * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
 end;
 
 procedure TfrmTable.FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -956,10 +958,10 @@ begin
                 if table.Renderer.TableStatus.GetBet(seat_info.SeatIndex) < table.Renderer.TableStatus.MinimumBet then
                 begin
                   if seat_info.Chips <= table.Renderer.TableStatus.MinimumBet then
-                       table.Renderer.TableStatus.ActionCallCaption := 'CALL (ALL-IN)'
-                     else
-                       table.Renderer.TableStatus.ActionCallCaption := Format('CALL (%s)', [ChipsToStr(table.Renderer.TableStatus.MinimumBet - table.Renderer.TableStatus.GetBet(seat_info.SeatIndex))]);
-                     table.Renderer.TableStatus.ActionCall := TRUE;
+                    acCall.Caption := 'CALL (ALL-IN)'
+                  else
+                    acCall.Caption := Format('CALL (%s)', [ChipsToStr(table.Renderer.TableStatus.MinimumBet{ - table.Renderer.TableStatus.GetBet(seat_info.SeatIndex)})]);
+                  table.Renderer.TableStatus.ActionCall := TRUE;
 
                   // if we can call, there is a possibility that we can raise too - we check if we can raise here
                   if (seat_info.Chips > table.Renderer.TableStatus.MinimumBet) and
@@ -1421,7 +1423,7 @@ begin
       table.Renderer.AnimateBlinds(Handle);
       table.Renderer.AnimateDealingCards(Handle);
 
-      EnableGameLockTimer(0.5 + Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY +
+      EnableGameLockTimer(0.1 + Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY +
           table.Renderer.DealAnimations.Count * Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY);
     end;
 
@@ -1679,7 +1681,7 @@ begin
     else
       if table.Renderer.TableStatus.ActionBet then
       begin
-        if FRaiseValue = seat_info.Chips then
+        if FRaiseValue = seat_info.Chips + table.Renderer.TableStatus.GetBet(table.SeatIndex) then
           acRaise.Caption := 'BET (ALL-IN)'
         else
           acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
@@ -1758,8 +1760,8 @@ begin
   if focus_window then
     FocusWindow;
 
-  table.Renderer.Render;
   ConfigureGUI;
+  table.Renderer.Render;
 
   if (table.Renderer.TableStatus.ActionFoldToAny) and
      (cbFoldToAnyBet.Checked) then

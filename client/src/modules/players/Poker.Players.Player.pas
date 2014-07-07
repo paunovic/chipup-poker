@@ -41,7 +41,9 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Tables.TableList, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc, Poker.Clubs.Club,
-  Poker.Tables.Table;
+  Poker.Tables.Table, Poker.Games.Game;
+
+{ TPlayerInfo }
 
 constructor TPlayerInfo.Create;
 begin
@@ -66,11 +68,11 @@ end;
 procedure TPlayerInfo.LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 var
   club: TClubInfo;
+  pbclub: TPB_Club;
   pbgame: TPB_Game;
-  C1: Integer;
   tables_ids: TList<TBytes>;
   tables_close: TObjectList<TTable>;
-  mongoid: TBytes;
+  game: TGameInfo;
   table: TTable;
 begin
   FId := AStatusReply.Self.MongoId;
@@ -82,37 +84,28 @@ begin
 
   tables_ids := TList<TBytes>.Create;
   try
-    for table in Tables.Values do
-      tables_ids.Add(table.GameId);
-
     FClubs.Clear;
-    for C1 := 0 to AStatusReply.Clubs.Count - 1 do
-      FClubs.AddClub(AStatusReply.Clubs[C1]);
+    for pbclub in AStatusReply.Clubs do
+      FClubs.AddClub(pbclub);
 
     for pbgame in AStatusReply.Games do
       if FClubs.FindClubBySeq(pbgame.Clubseq, club) then
         club.Games.AddGame(pbgame);
-{    FIXME
+
     tables_close := TObjectList<TTable>.Create(FALSE);
     try
-      for mongoid in tables_ids do
-        if not Tables.Items[C1].ReassignObjects(tables_ids[C1]) then
-          tables_close.Add(Tables.Items[C1]);
+      for table in Tables.Values do
+        if not FClubs.FindGame(table.GameId, club, game) then
+          tables_close.Add(table);
 
-      for C1 := 0 to tables_close.Count - 1 do
-        Tables.Remove(tables_close[C1]);
+      for table in tables_close do
+        Tables.Remove(table.InternalId);
     finally
       tables_close.Free;
     end;
-    }
   finally
     tables_ids.Free;
   end;
 end;
-
-
-{ TPlayerInfos }
-
-
 
 end.

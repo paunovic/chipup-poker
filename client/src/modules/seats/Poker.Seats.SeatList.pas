@@ -8,10 +8,13 @@ uses
 type
   TSeatList = class(TObjectList<TSeatInfo>)
   private
+    procedure NotifyEvent(Sender: TObject; const AValue: TSeatInfo; AAction: TCollectionNotification);
   public
+    constructor Create;
+
     procedure ClearCaptions;
 
-    procedure Sort; reintroduce;
+    procedure Sort;
   end;
 
 implementation
@@ -21,34 +24,45 @@ uses
 
 { TSeatList }
 
+constructor TSeatList.Create;
+begin
+  inherited Create(TRUE);
+  OnNotify := NotifyEvent;
+end;
+
+procedure TSeatList.NotifyEvent(Sender: TObject; const AValue: TSeatInfo; AAction: TCollectionNotification);
+begin
+  Sort;
+end;
+
 procedure TSeatList.Sort;
 var
   comparer: IComparer<TSeatInfo>;
-  comparison: TComparison<TSeatInfo>;
 begin
-  comparison := function(const ASeatInfo1, ASeatInfo2: TSeatInfo): Integer
-  begin
-    if ASeatInfo1.SeatIndex < ASeatInfo2.SeatIndex then
-      result := -1
-    else
-      if ASeatInfo1.SeatIndex > ASeatInfo2.SeatIndex then
-        result := 1
+  comparer := TComparer<TSeatInfo>.Construct(
+    function(const ASeatInfo1, ASeatInfo2: TSeatInfo): Integer
+    begin
+      if ASeatInfo1.SeatIndex < ASeatInfo2.SeatIndex then
+        result := -1
       else
-        result := 0;
-  end;
+        if ASeatInfo1.SeatIndex > ASeatInfo2.SeatIndex then
+          result := 1
+        else
+          result := 0;
+    end
+  );
 
-  comparer := TComparer<TSeatInfo>.Construct(comparison);
   inherited Sort(comparer);
 end;
 
 procedure TSeatList.ClearCaptions;
 var
-  C1: Integer;
+  seat: TSeatInfo;
 begin
-  for C1 := Low(ToArray) to High(ToArray) do
+  for seat in ToArray do
   begin
-    ToArray[C1].UpperCaption := '';
-    ToArray[C1].LowerCaption := '';
+    seat.UpperCaption := '';
+    seat.LowerCaption := '';
   end;
 end;
 
