@@ -5,11 +5,10 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.PlayerInfo,
-  Poker.Protobufs.Objects.StatusReply, Vcl.Forms, dxSkinsForm, Poker.Objects.ClubInfo, Poker.HardcodedSettings,
-  cxHint, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.UpdateFileInfo,
-  cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip, dxCustomHint, cxLookAndFeels, Vcl.ImgList,
-  Vcl.Controls;
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player, Poker.Protobufs.Objects.StatusReply,
+  Vcl.Forms, dxSkinsForm, Poker.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
+  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls;
 
 type
   TdmMain = class(TDataModule)
@@ -59,7 +58,6 @@ var
   dmMain: TdmMain;
   SelfPath: String;
   AppDataPath: String;
-  DomainURL: String;
 
 implementation
 
@@ -69,10 +67,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc,
-  Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer, Poker.Avatars,
-  Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Stats.Table, Poker.Forms.Table, Poker.Objects.TableStatus,
-  Poker.Objects.GameInfo, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About;
+  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Tables.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
+  Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
+  Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
+  Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
+  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -100,7 +99,7 @@ begin
 
   TSettings.Initialize(AppDataPath + TSettings.Hardcoded.SETTINGS_FILENAME);
   TDatabase.Initialize(AppDataPath + TSettings.Hardcoded.DATABASE_FILENAME);
-  TAvatars.Initialize;
+  TAvatarList.Initialize;
   TDXCore.Initialize;
   TDXTimer.Initialize;
   DXTimer.AnimationsEnabled := Settings.Animations;
@@ -108,7 +107,7 @@ begin
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
   TSounds.Initialize;
-  TTablesStats.Initialize;
+  TTablesStatsList.Initialize;
   THandHistory.Initialize;
 
   if (Settings.DeveloperMode) and
@@ -117,13 +116,12 @@ begin
   else
     server_index := 0;
 
-  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
-  DomainURL := TSettings.Hardcoded.SERVER_CONFIG[server_index].URL;
+  TServerSocketCommands.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
 
   FSelfInfo := TPlayerInfo.Create;
 
-  TPlayers.Initialize;
-  TTables.Initialize;
+  TPlayerList.Initialize;
+  TTableList.Initialize;
 
   FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
   FReconnectedTables := TObjectList<TPB_TableStatus>.Create;
@@ -137,19 +135,19 @@ begin
 
   TFormsContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
-  TTables.Deinitialize;
-  TPlayers.Deinitialize;
+  TTableList.Deinitialize;
+  TPlayerList.Deinitialize;
   FSelfInfo.Free;
-  TServerSocket.Deinitialize;
+  TServerSocketCommands.Deinitialize;
   THandHistory.Deinitialize;
-  TTablesStats.Deinitialize;
+  TTablesStatsList.Deinitialize;
   TSounds.Deinitialize;
   TMessageContainer.Deinitialize;
   TServerSettings.Deinitialize;
   TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
   TDXCore.Deinitialize;
-  TAvatars.Deinitialize;
+  TAvatarList.Deinitialize;
   TDatabase.Deinitialize;
   TSettings.Deinitialize;
 
@@ -258,56 +256,58 @@ end;
 
 procedure TdmMain.ProcessReconnectedTables;
 var
-  club: TclubInfo;
-  game: TGameInfo;
   table: TTable;
   tstatus: TPB_TableStatus;
   exists: Boolean;
-  C1: Integer;
+  to_remove: TList<TBytes>;
+  mongoid: TBytes;
 begin
   // first, close all tables that dont exist in reconnected tables array
-  for C1 := Tables.Count - 1 downto 0 do
-  begin
-    exists := FALSE;
-    for tstatus in FReconnectedTables do
-      if CompareBytes(tstatus.TableMongoId, Tables[C1].Game.MongoId) then
-      begin
-        exists := TRUE;
-        Break;
-      end;
+  to_remove := TList<TBytes>.Create;
+  try
+    for table in Tables.Values do
+    begin
+      exists := FALSE;
+      for tstatus in FReconnectedTables do
+        if CompareBytes(tstatus.TableMongoId, table.GameId) then
+        begin
+          exists := TRUE;
+          Break;
+        end;
 
-    if not exists then
-      Tables.Delete(C1);
+      if not exists then
+        to_remove.Add(table.GameId);
+    end;
+
+    for mongoid in to_remove do
+      if Tables.FindTable(mongoid, ttLiveGame, table) then
+        Tables.Remove(table.Internalid);
+  finally
+    to_remove.Free;
   end;
 
   // restore reconnected table states
   for tstatus in FReconnectedTables do
   begin
     table := nil;
-    if not Tables.FindTable(tstatus.TableMongoId, table) then
-      for club in FSelfInfo.Clubs do
-        if club.Games.FindGame(tstatus.TableMongoId, game) then
-        begin
-          table := Tables.AddTable(club, game, TRUE, FALSE);
-          Break;
-        end;
 
-    if not Assigned(table) then
-      Continue;
+    if not Tables.FindTable(tstatus.TableMongoId, ttLiveGame, table) then
+      table := Tables.AddTable(tstatus.TableMongoId, TRUE, FALSE);
 
-    (table.Form as TfrmTable).SetTableStatus(tstatus, FALSE);
+    if Assigned(table) then
+      (table.Form as TfrmTable).SetTableStatus(tstatus, FALSE);
   end;
 end;
 
 procedure TdmMain.LoadFonts;
 var
-  rs: TResourceStream;
   nbFontAdded: DWORD;
-  C1: Integer;
+  rs: TResourceStream;
+  font: String;
 begin
-  for C1 := Low(FONTLIST) to High(FONTLIST) do
+  for font in FONTLIST do
   begin
-    rs := TResourceStream.Create(HInstance, FONTLIST[C1], RT_RCDATA);
+    rs := TResourceStream.Create(HInstance, font, RT_RCDATA);
     try
       AddFontMemResourceEx(rs.Memory, rs.Size, nil, @nbFontAdded);
     finally
@@ -322,7 +322,7 @@ var
   seat: TSeatInfo;
 begin
   result := FSelfInfo.Balance;
-  for table in Tables do
+  for table in Tables.Values do
     for seat in table.Renderer.TableStatus.Seats do
       if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
       begin

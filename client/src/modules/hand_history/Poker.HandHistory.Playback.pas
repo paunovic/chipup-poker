@@ -27,7 +27,7 @@ implementation
 
 uses
   Poker.HandHistory.Moves, Poker.HandHistory.Players, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent,
-  Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Objects.PotInfo, Poker.Protobufs.Objects.WinnerPotInfo,
+  Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Pots.Pot, Poker.Protobufs.Objects.WinnerPotInfo,
   Poker.Protobufs.Objects.WinnerData, Poker.Common.Misc, Poker.DataModule;
 
 { THandHistoryPlayback }
@@ -221,7 +221,7 @@ begin
         pbtablestatus.Events.Add(pbevent);
       end;
 
-      for player in AHandHistoryItem.Players do
+      for player in AHandHistoryItem.Players.Values do
       begin
         pbseat := TPB_SeatInfo.Create;
         pbseat.Seat := player.Seat;

@@ -48,6 +48,7 @@ type
     FCallbacksId: Integer;
     FServerComboBox: TcxComboBox;
     FAlphaBlendThread: TAlphaBlendThread;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure ApplySettings;
     procedure SaveSettings;
@@ -84,15 +85,17 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket, Poker.Server.MessageContainer,
+  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket.Commands, Poker.Server.MessageContainer,
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParamProcesser,
-  Poker.Table.Resources, Poker.DirectX.Core;
+  Poker.Tables.Resources, Poker.DirectX.Core;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   AlphaBlendValue := 0;
 
   FCallbacksId := MessageContainer.AddCallbacks([
@@ -117,6 +120,8 @@ begin
   SaveSettings;
 
   TAlphaBlendThread.FreeAlpaBlendThread(FAlphaBlendThread);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChipUpLogin.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -231,10 +236,9 @@ var
   item_index: Integer;
 begin
   item_index := (Sender as TcxComboBox).ItemIndex;
-  DomainURL := Settings.Hardcoded.SERVER_CONFIG[item_index].URL;
   Settings.ServerIndex := item_index;
-  TServerSocket.Deinitialize;
-  TServerSocket.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);
+  TServerSocketCommands.Deinitialize;
+  TServerSocketCommands.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);
 end;
 
 procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);
@@ -422,7 +426,7 @@ begin
       edLogin.SetFocus;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
     edLogin.SetFocus;
   end;
 end;

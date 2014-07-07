@@ -84,7 +84,6 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 93
   end
   object btCancel: TcxButton
     Left = 190
@@ -101,7 +100,6 @@ object frmCreateClub: TfrmCreateClub
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitLeft = 192
   end
   object alCreateClub: TActionList
     Left = 19

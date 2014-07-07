@@ -46,7 +46,8 @@ var DebugLogSchema = new Schema({
 
 var ProfileSchema = new Schema({
 	time:Number,
-	tag:String
+	tag:String,
+	cputime:Number
 },{collection:'PokerProfile',capped:1024*1024*10});
 
 var ClubSchema = new Schema({
@@ -241,10 +242,10 @@ module.exports.close = function () {
 	mongoose.disconnect();
 	connected = false;
 }
-module.exports.open = function () {
+module.exports.open = function (dbname) {
 	if (connected) return;
 	connected = true;
-	mongoose.connect('mongodb://localhost/poker');
+	mongoose.connect('mongodb://localhost/'+dbname);
 	models.UserModel = mongoose.model('User',User);
 	models.Admin = mongoose.model('Admin',AdminSchema);
 	models.Config = mongoose.model('Config',ConfigSchema);
@@ -265,8 +266,6 @@ module.exports.open = function () {
 	models.ClubBalance = mongoose.model('ClubBalance',ClubBalanceSchema);
 	models.Counter = mongoose.model('Counter',CounterSchema);
 }
-
-module.exports.open();
 
 if (require.main === module) {
 	models.Counter.findOne({_id:'test'},function (err,docs) {

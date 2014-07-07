@@ -9,13 +9,22 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit,
   cxMemo, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync,
   cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
-  dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit;
+  dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxCheckComboBox;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
+  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains);
+  TDebugRefreshItemSet = set of TDebugRefreshItem;
+
+  TDebugObject = class
+    Enabled: Boolean;
+    Id: Integer;
+    Name: String;
+  end;
 
   TDebugFormLog = class(TIdSync)
   private
+    FDebugId: Integer;
     FType: TDebugInfoType;
     FTime: String;
     FTypeStr: String;
@@ -26,8 +35,25 @@ type
   protected
     procedure DoSynchronize; override;
   public
-    class procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+    class procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
   end;
+
+  TDebugFormRefresh = class(TIdSync)
+  private
+    FRefreshItems: TDebugRefreshItemSet;
+  protected
+    procedure DoSynchronize; override;
+  public
+    class procedure Execute(const ARefreshItems: TDebugRefreshItemSet);
+  end;
+
+  TDebugFormObjectChange = class(TIdSync)
+  protected
+    procedure DoSynchronize; override;
+  public
+    class procedure Execute;
+  end;
+
 
   TfrmDebug = class(TForm)
     alDebug: TActionList;
@@ -67,6 +93,10 @@ type
     pmiShowPings: TMenuItem;
     lbsSwapChains: TcxLabel;
     lbvSwapChains: TcxLabel;
+    dxBevel3: TdxBevel;
+    paTop: TPanel;
+    ccbLogForms: TcxCheckComboBox;
+    teRegexFilter: TcxTextEdit;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -77,18 +107,27 @@ type
     procedure acServerCrashTestExecute(Sender: TObject);
     procedure acRunNewInstanceExecute(Sender: TObject);
     procedure meSeatPosPropertiesChange(Sender: TObject);
+    procedure ccbLogFormsPropertiesChange(Sender: TObject);
+    procedure teRegexFilterEnter(Sender: TObject);
+    procedure teRegexFilterExit(Sender: TObject);
+    procedure teRegexFilterPropertiesChange(Sender: TObject);
   private
-    procedure ActiveFormChange(Sender: TObject);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
     class procedure Initialize;
     class procedure Deinitialize;
 
-    procedure Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+    procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+    procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
+    procedure RefreshDebugObjects;
   end;
 
-procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
+  procedure DebugLn(const ADebugId: Integer; const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
+  procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
+
+  function RegisterDebugObject(const AName: String): Integer;
+  procedure UnregisterDebugObject(const AId: Integer);
 
 implementation
 
@@ -98,8 +137,8 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
-  Poker.DirectX.Core;
+  Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, OverbyteIcsWSocket,
+  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -109,9 +148,60 @@ var
   frmDebug: TfrmDebug;
   DebugFilePath: String = '';
   ConsoleAttached: Boolean = FALSE;
+  FDebugObjects: TObjectList<TDebugObject>;
+
+  
+function RegisterDebugObject(const AName: String): Integer;
+var
+  id: Integer;
+  found: Boolean;
+  debug_object: TDebugObject;
+  enabled: Boolean;
+begin
+  id := 0;
+  repeat
+    Inc(id);
+    found := FALSE;
+    for debug_object in FDebugObjects do
+      if debug_object.Id = id then
+      begin
+        found := TRUE;
+        Break;
+      end;
+  until not found;
+
+  enabled := TRUE;
+  for debug_object in FDebugObjects do
+    if not debug_object.Enabled then
+    begin
+      enabled := FALSE;
+      Break;
+    end;
+
+  debug_object := TDebugObject.Create;
+  debug_object.Id := id;
+  debug_object.Name := AName;
+  debug_object.Enabled := enabled;
+  FDebugObjects.Add(debug_object);
+
+  TDebugFormObjectChange.Execute;
+
+  result := id;
+end;
+
+procedure UnregisterDebugObject(const AId: Integer);
+var 
+  C1: Integer;
+begin
+  for C1 := FDebugObjects.Count - 1 downto 0 do
+    if FDebugObjects[C1].Id = AId then
+      FDebugObjects.Delete(C1);
+
+  TDebugFormObjectChange.Execute;
+end;
 
 
-procedure DebugLn(const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
+procedure DebugLn(const ADebugId: Integer; const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
 var
   time_str: String;
   type_str: String;
@@ -176,7 +266,7 @@ begin
   end;
 
   if Assigned(frmDebug) then
-    TDebugFormLog.Add(AType, time_str, type_str, AData, ASubData, tstyle, dstyle);
+    TDebugFormLog.Add(ADebugId, AType, time_str, type_str, AData, ASubData, tstyle, dstyle);
 
   output := Format('%s [%s] %s', [time_str, type_str, AData]);
 
@@ -207,6 +297,13 @@ begin
   end;
 end;
 
+procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
+begin
+  if Assigned(frmDebug) then
+    TDebugFormRefresh.Execute(ARefreshItems);
+end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class procedure TfrmDebug.Initialize;
 const
@@ -235,8 +332,6 @@ begin
   rvLog.ClearAll;
   rvLog.Format;
 
-  Screen.OnActiveFormChange := ActiveFormChange;
-
   Left := 0;
   Top := 0;
   Width := Round(Screen.Monitors[0].Width / 2.9);
@@ -247,82 +342,43 @@ begin
   {$ENDIF}
 end;
 
-procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
-var
-  server_socket_connected: Boolean;
-  server_socket_state: String;
-  server_socket_state_color: TColor;
-  swap_chains_occupied: Integer;
-  C1: Integer;
+procedure TfrmDebug.teRegexFilterEnter(Sender: TObject);
 begin
-  lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
-  lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
-  lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
-
-  server_socket_connected := FALSE;
-  server_socket_state_color := clWhite;
-  if Assigned(ServerSocket) then
+  if teRegexFilter.Tag = 0 then
   begin
-    case ServerSocket.Socket.State of
-      wsInvalidState: server_socket_state := 'InvalidState';
-      wsOpened: server_socket_state := 'Opened';
-      wsBound: server_socket_state := 'Bound';
-      wsConnecting: server_socket_state := 'Connecting';
-      wsSocksConnected: server_socket_state := 'SocksConnected';
-      wsConnected: begin
-        server_socket_connected := TRUE;
-        server_socket_state := 'Connected';
-        server_socket_state_color := clLime;
-      end;
-      wsAccepting: server_socket_state := 'Accepting';
-      wsListening: server_socket_state := 'Listening';
-      wsClosed: begin
-        server_socket_state := 'Closed';
-        server_socket_state_color := clRed;
-      end;
-    else
-      server_socket_state := 'Unknown';
-    end;
-  end
-  else
-  begin
-    server_socket_state := 'Unassigned';
-    server_socket_state_color := clRed;
+    teRegexFilter.Clear;
+    teRegexFilter.Tag := 1;
   end;
+end;
 
-  lbvSocketState.Caption := server_socket_state;
-  lbvSocketState.Style.TextColor := server_socket_state_color;
-
-  if (server_socket_connected) and
-     (Assigned(ServerSocket)) and
-     (ServerSocket.Latency > 0) then
+procedure TfrmDebug.teRegexFilterExit(Sender: TObject);
+begin
+  if (teRegexFilter.Tag = 1) and
+     (teRegexFilter.Text = '') then
   begin
-    lbvLatency.Caption := Format('%dms', [ServerSocket.Latency]);
-    if ServerSocket.Latency < 100 then
-      lbvLatency.Style.TextColor := clLime
-    else
-      if ServerSocket.Latency < 500 then
-        lbvLatency.Style.TextColor := clYellow
-      else
-        lbvLatency.Style.TextColor := clRed;
-  end
-  else
-  begin
-    lbvLatency.Caption := 'Unknown';
-    lbvLatency.Style.TextColor := clWhite;
+    teRegexFilter.Text := 'RegEx Filtering...';
+    teRegexFilter.Tag := 0;
   end;
+end;
 
-  if (Assigned(DXCore)) and
-     (Assigned(DXCore.Device)) then
+procedure TfrmDebug.teRegexFilterPropertiesChange(Sender: TObject);
+var
+  valuesset: TcxContainerStyleValues;
+begin
+  if IsValidRegex(teRegexFilter.Text) then
   begin
-    swap_chains_occupied := 0;
-    for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
-      if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
-        Inc(swap_chains_occupied);
-    lbvSwapChains.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
+    teRegexFilter.Style.TextColor := clWindowText;
+    valuesset := teRegexFilter.Style.AssignedValues;
+    Exclude(valuesset, 7);
+    teRegexFilter.Style.AssignedValues := valuesset;
   end
   else
-    lbvSwapChains.Caption := 'Unknown';
+    teRegexFilter.Style.TextColor := clRed;
+end;
+
+procedure TfrmDebug.tiAppInfoRefreshTimer(Sender: TObject);
+begin
+  RefreshStats([]);
 end;
 
 procedure TfrmDebug.CreateParams(var AParams: TCreateParams);
@@ -365,24 +421,14 @@ begin
   {$ENDIF}
 end;
 
-procedure TfrmDebug.ActiveFormChange(Sender: TObject);
-begin
-  if not Assigned(Screen.ActiveForm) then
-    Exit;
-
-  if Screen.ActiveForm = self then
-    Exit;
-
-  DebugLn(Format('Active form: %s [%s]', [Screen.ActiveForm.Name, Screen.ActiveForm.Caption]), ditForm);
-end;
-
-procedure TfrmDebug.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+procedure TfrmDebug.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
 const
   SCROLLBACK_LINES = 500;
 var
   table: TRVTableItemInfo;
   sl: TStringList;
   C1: Integer;
+  debug_object: TDebugObject;
 begin
   if btPause.Down then
     Exit;
@@ -390,6 +436,30 @@ begin
   if (AType = ditPingPong) and
      (not pmiShowPings.Checked) then
     Exit;
+
+  debug_object := nil;
+  for C1 := 0 to FDebugObjects.Count - 1 do
+    if FDebugObjects[C1].Id = ADebugId then
+    begin
+      debug_object := FDebugObjects[C1];
+      Break;
+    end;
+
+  if (ADebugId > 0) and
+     ((not Assigned(debug_object)) or
+      (not debug_object.Enabled)) then
+    Exit;
+
+  if (teRegexFilter.Tag = 1) and
+     (teRegexFilter.Text <> '') and
+     (IsValidRegex(teRegexFilter.Text)) then
+  begin
+    if (not TRegEx.IsMatch(ATime, teRegexFilter.Text)) and
+       (not TRegEx.IsMatch(ATypeStr, teRegexFilter.Text)) and
+       (not TRegEx.IsMatch(AData, teRegexFilter.Text)) and
+       (not TRegEx.IsMatch(ASubData, teRegexFilter.Text)) then
+      Exit;
+  end;
 
   if rvLog.ItemCount >= SCROLLBACK_LINES then
     rvLog.DeleteParas(0, rvLog.ItemCount - SCROLLBACK_LINES + 1);
@@ -507,6 +577,17 @@ begin
   {$ENDIF}
 end;
 
+procedure TfrmDebug.ccbLogFormsPropertiesChange(Sender: TObject);
+var
+  C1: Integer;
+  debug_object: TDebugObject;
+begin
+  for C1 := 0 to ccbLogForms.Properties.Items.Count - 1 do
+    for debug_object in FDebugObjects do
+      if ccbLogForms.Properties.Items[C1].Tag = debug_object.Id then
+        debug_object.Enabled := ccbLogForms.States[C1] = cbsChecked;
+end;
+
 procedure TfrmDebug.meSeatPosPropertiesChange(Sender: TObject);
 {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
 var
@@ -561,14 +642,149 @@ begin
   {$ENDIF}
 end;
 
+procedure TfrmDebug.RefreshDebugObjects;
+var
+  C1: Integer;
+  ccbi: TcxCheckComboBoxItem;
+begin
+  for C1 := 0 to FDebugObjects.Count - 1 do
+    if (ccbLogForms.Properties.Items.Count <= C1) or
+       (FDebugObjects[C1].Id <> ccbLogForms.Properties.Items[C1].Tag) then
+    begin
+      while ccbLogForms.Properties.Items.Count > C1 do
+        ccbLogForms.Properties.Items.Delete(ccbLogForms.Properties.Items.Count - 1);
+      Break;
+    end;
+
+  for C1 := ccbLogForms.Properties.Items.Count to FDebugObjects.Count - 1 do
+  begin
+    ccbi := ccbLogForms.Properties.Items.Add;
+    ccbi.Tag := FDebugObjects[C1].Id;
+    ccbi.Description := FDebugObjects[C1].Name;
+    if FDebugObjects[C1].Enabled then
+      ccbLogForms.States[ccbi.Index] := cbsChecked;
+  end;
+
+  while ccbLogForms.Properties.Items.Count > FDebugObjects.Count do
+    ccbLogForms.Properties.Items.Delete(ccbLogForms.Properties.Items.Count - 1);
+
+  ccbLogForms.Refresh;
+end;
+
+procedure TfrmDebug.RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
+var
+  server_socket_connected: Boolean;
+  server_socket_state: String;
+  server_socket_state_color: TColor;
+  swap_chains_occupied: Integer;
+  C1: Integer;
+  refresh_items: TDebugRefreshItemSet;
+  dfi: TDebugRefreshItem;
+begin
+  refresh_items := ARefreshItems;
+  if refresh_items = [] then
+    for dfi := Low(TDebugRefreshItem) to High(TDebugRefreshItem) do
+      Include(refresh_items, dfi);
+
+  if dfiSystemMetrics in refresh_items then
+  begin
+    lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
+    lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
+  end;
+
+  if dfiCallbacks in refresh_items then
+    lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
+
+  if (dfiSocketState in refresh_items) or
+     (dfiLatency in refresh_items) then
+  begin
+    server_socket_connected := FALSE;
+    server_socket_state_color := clWhite;
+    if Assigned(ServerSocket) then
+    begin
+      case ServerSocket.Socket.State of
+        wsInvalidState: server_socket_state := 'Invalid state';
+        wsOpened: server_socket_state := 'Opened';
+        wsBound: server_socket_state := 'Bound';
+        wsConnecting: server_socket_state := 'Connecting';
+        wsSocksConnected: server_socket_state := 'Socks connected';
+        wsConnected: begin
+          server_socket_connected := TRUE;
+          server_socket_state := 'Connected';
+          server_socket_state_color := clLime;
+        end;
+        wsAccepting: server_socket_state := 'Accepting';
+        wsListening: server_socket_state := 'Listening';
+        wsClosed: begin
+          server_socket_state := 'Closed';
+          server_socket_state_color := clRed;
+        end;
+      else
+        server_socket_state := 'Unknown';
+      end;
+    end
+    else
+    begin
+      server_socket_state := 'Unassigned';
+      server_socket_state_color := clRed;
+    end;
+
+    if dfiSocketState in refresh_items then
+    begin
+      lbvSocketState.Caption := server_socket_state;
+      lbvSocketState.Style.TextColor := server_socket_state_color;
+    end;
+
+    if dfiLatency in refresh_items then
+    begin
+      if (server_socket_connected) and
+         (Assigned(ServerSocket)) and
+         (ServerSocket.Latency > 0) then
+      begin
+        lbvLatency.Caption := Format('%dms', [ServerSocket.Latency]);
+        if ServerSocket.IsPinging then
+          lbvLatency.Caption := lbvLatency.Caption + ' ...';
+        if ServerSocket.Latency < 100 then
+          lbvLatency.Style.TextColor := clLime
+        else
+          if ServerSocket.Latency < 500 then
+            lbvLatency.Style.TextColor := clYellow
+          else
+            lbvLatency.Style.TextColor := clRed;
+      end
+      else
+      begin
+        lbvLatency.Caption := 'Unknown';
+        lbvLatency.Style.TextColor := clWhite;
+      end;
+    end;
+  end;
+
+  if dfiSwapChains in refresh_items then
+  begin
+    if (Assigned(DXCore)) and
+       (Assigned(DXCore.Device)) then
+    begin
+      swap_chains_occupied := 0;
+      for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
+        if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
+          Inc(swap_chains_occupied);
+      lbvSwapChains.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
+    end
+    else
+      lbvSwapChains.Caption := 'Unknown';
+  end;
+end;
+
 { TMemoLog }
 
-class procedure TDebugFormLog.Add(const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+class procedure TDebugFormLog.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
 var
   dfl: TDebugFormLog;
 begin
   dfl := TDebugFormLog.Create;
   try
+    dfl.FDebugId := ADebugId;
     dfl.FType := AType;
     dfl.FTime := ATime;
     dfl.FTypeStr := ATypeStr;
@@ -584,8 +800,55 @@ end;
 
 procedure TDebugFormLog.DoSynchronize;
 begin
-  frmDebug.Add(FType, FTime, FTypeStr, FData, FSubData, FTypeStyle, FDataStyle);
+  frmDebug.Add(FDebugId, FType, FTime, FTypeStr, FData, FSubData, FTypeStyle, FDataStyle);
 end;
+
+{ TDebugFormRefresh }
+
+procedure TDebugFormRefresh.DoSynchronize;
+begin
+  inherited;
+  frmDebug.RefreshStats(FRefreshItems);
+end;
+
+class procedure TDebugFormRefresh.Execute(const ARefreshItems: TDebugRefreshItemSet);
+var
+  dfr: TDebugFormRefresh;
+begin
+  dfr := TDebugFormRefresh.Create;
+  try
+    dfr.FRefreshItems := ARefreshItems;
+    dfr.Synchronize;
+  finally
+    dfr.Free;
+  end;
+end;
+
+{ TDebugFormObjectChange }
+
+procedure TDebugFormObjectChange.DoSynchronize;
+begin
+  inherited;
+  frmDebug.RefreshDebugObjects;
+end;
+
+class procedure TDebugFormObjectChange.Execute;
+var
+  dfoc: TDebugFormObjectChange;
+begin
+  dfoc := TDebugFormObjectChange.Create;
+  try
+    dfoc.Synchronize;
+  finally
+    dfoc.Free;
+  end;
+end;
+
+initialization
+  FDebugObjects := TObjectList<TDebugObject>.Create;
+
+finalization
+  FreeAndNil(FDebugObjects);
 
 end.
 

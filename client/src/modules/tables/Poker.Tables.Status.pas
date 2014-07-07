@@ -1,10 +1,10 @@
-unit Poker.Objects.TableStatus;
+unit Poker.Tables.Status;
 
 interface
 
 uses
   Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
-  Poker.Objects.PotInfo, Poker.Objects.SeatInfo, Poker.Objects.GameInfo;
+  Poker.Pots.PotList, Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat;
 
 type
   TTableStatus = class
@@ -12,7 +12,7 @@ type
     FState: TTableState;
     FDealer: Integer;
     FCurrentSeat: Integer;
-    FSeatInfos: TSeatInfos;
+    FSeatInfos: TSeatList;
     FBets: TList<UINT32>;
     FPreviousBets: TList<UINT32>;
     FFlopCards: TCards;
@@ -26,8 +26,8 @@ type
     FMinimumBet: UINT32;
     FHandId: UINT32;
     FMaximumRaise: UINT32;
-    FPreviousPots: TPotInfos;
-    FPots: TPotInfos;
+    FPreviousPots: TPotList;
+    FPots: TPotList;
     FTime: UINT64;
     FRotationHand: UINT32;
     FCurrentGame: TGameType;
@@ -48,9 +48,6 @@ type
     FActionFoldToAny: Boolean;
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
-
-    FActionCallCaption: String;
-    FActionRaiseCaption: String;
 
 //    FEvents        : TTableEvents;
 
@@ -73,7 +70,7 @@ type
     property State: TTableState read FState;
     property Dealer: Integer read FDealer;
     property CurrentSeat: Integer read FCurrentSeat;
-    property Seats: TSeatInfos read FSeatInfos;
+    property Seats: TSeatList read FSeatInfos;
     property Bets: TList<UINT32> read FBets write FBets;
     property PreviousBets: TList<UINT32> read FPreviousBets;
     property MinimumBet: UINT32 read FMinimumBet;
@@ -84,8 +81,8 @@ type
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
-    property Pots: TPotInfos read FPots write FPots;
-    property PreviousPots: TPotInfos read FPreviousPots;
+    property Pots: TPotList read FPots write FPots;
+    property PreviousPots: TPotList read FPreviousPots;
     property MaximumRaise: UINT32 read FMaximumRaise;
     property Time: UINT64 read FTime;
     property RotationHand: UINT32 read FRotationHand;
@@ -110,16 +107,13 @@ type
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
 
-    property ActionCallCaption: String read FActionCallcaption write FActionCallCaption;
-    property ActionRaiseCaption: String read FActionRaiseCaption write FActionRaiseCaption;
-
 //    property Events: TTableEvents read FEvents;
   end;
 
 implementation
 
 uses
-  System.SysUtils, Poker.Server.Socket, Poker.DataModule;
+  System.SysUtils, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Pots.Pot;
 
 { TTableStatus }
 
@@ -127,13 +121,13 @@ constructor TTableStatus.Create;
 begin
   FDealer := -1;
   FCurrentSeat := -1;
-  FSeatInfos := TSeatInfos.Create;
+  FSeatInfos := TSeatList.Create;
 
   FBets := TList<UINT32>.Create;
   FPreviousBets := TList<UINT32>.Create;
 
-  FPreviousPots := TPotInfos.Create;
-  FPots := TPotInfos.Create;
+  FPreviousPots := TPotList.Create;
+  FPots := TPotList.Create;
   FFlopCards := TCards.Create;
   FTurnCard := TCard.Create;
   FRiverCard := TCard.Create;
@@ -276,12 +270,15 @@ begin
           seat := FSeatInfos[C2];
           Break;
         end;
+
       if not Assigned(seat) then
       begin
         seat := TSeatInfo.Create;
+        seat.Assign(ATableStatusProtobuf.Seats[C1]);
         FSeatInfos.Add(seat);
-      end;
-      seat.Assign(ATableStatusProtobuf.Seats[C1]);
+      end
+      else
+        seat.Assign(ATableStatusProtobuf.Seats[C1]);
     end;
 
     FSeatInfos.Sort;

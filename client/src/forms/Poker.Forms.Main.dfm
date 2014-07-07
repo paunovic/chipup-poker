@@ -21,6 +21,7 @@ object frmChipUpMain: TfrmChipUpMain
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
   OnResize = FormResize
+  OnShow = FormShow
   DesignSize = (
     794
     573)
@@ -3572,7 +3573,9 @@ object frmChipUpMain: TfrmChipUpMain
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     Color = clBlack
+    DoubleBuffered = False
     ParentBackground = False
+    ParentDoubleBuffered = False
     TabOrder = 2
     object pcTabs: TcxPageControl
       Left = 0
@@ -3593,17 +3596,17 @@ object frmChipUpMain: TfrmChipUpMain
         DesignSize = (
           794
           429)
-        object gridPublicHomeGames: TcxGrid
+        object gridPublicClubs: TcxGrid
           Left = 152
           Top = 34
           Width = 312
           Height = 219
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
-          OnEnter = gridPublicHomeGamesEnter
-          object gridPublicHomeGamesTable: TcxGridTableView
-            OnCellDblClick = gridPublicHomeGamesTableCellDblClick
-            OnFocusedRecordChanged = gridPublicHomeGamesTableFocusedRecordChanged
+          OnEnter = gridPublicClubsEnter
+          object gridPublicClubsTable: TcxGridTableView
+            OnCellDblClick = gridPublicClubsTableCellDblClick
+            OnFocusedRecordChanged = gridPublicClubsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
             DataController.Summary.SummaryGroups = <>
@@ -3636,11 +3639,11 @@ object frmChipUpMain: TfrmChipUpMain
               Width = 125
             end
           end
-          object gridPublicHomeGamesLevel: TcxGridLevel
-            GridView = gridPublicHomeGamesTable
+          object gridPublicClubsLevel: TcxGridLevel
+            GridView = gridPublicClubsTable
           end
         end
-        object btMyHomeGames: TcxButton
+        object btPrivateClubs: TcxButton
           Left = 470
           Top = 1
           Width = 311
@@ -3663,7 +3666,7 @@ object frmChipUpMain: TfrmChipUpMain
           ParentFont = False
           OnClick = acShowHomeGamesLayoutExecute
         end
-        object btPublicHomeGames: TcxButton
+        object btPublicClubs: TcxButton
           Left = 155
           Top = 1
           Width = 311
@@ -3845,17 +3848,17 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Style = [fsBold]
           ParentFont = False
         end
-        object gridMyHomeGames: TcxGrid
+        object gridPrivateClubs: TcxGrid
           Left = 470
           Top = 34
           Width = 312
           Height = 219
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 8
-          OnEnter = gridMyHomeGamesEnter
-          object gridMyHomeGamesTable: TcxGridTableView
-            OnCellDblClick = gridMyHomeGamesTableCellDblClick
-            OnFocusedRecordChanged = gridMyHomeGamesTableFocusedRecordChanged
+          OnEnter = gridPrivateClubsEnter
+          object gridPrivateClubsTable: TcxGridTableView
+            OnCellDblClick = gridPrivateClubsTableCellDblClick
+            OnFocusedRecordChanged = gridPrivateClubsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
             DataController.Summary.SummaryGroups = <>
@@ -3894,8 +3897,8 @@ object frmChipUpMain: TfrmChipUpMain
               Width = 62
             end
           end
-          object gridMyHomeGamesLevel: TcxGridLevel
-            GridView = gridMyHomeGamesTable
+          object gridPrivateClubsLevel: TcxGridLevel
+            GridView = gridPrivateClubsTable
           end
         end
       end
@@ -4305,6 +4308,12 @@ object frmChipUpMain: TfrmChipUpMain
   object ApplicationEvents: TApplicationEvents
     OnDeactivate = ApplicationEventsDeactivate
     Left = 344
+    Top = 52
+  end
+  object tiRefreshForm: TTimer
+    Interval = 200
+    OnTimer = tiRefreshFormTimer
+    Left = 524
     Top = 52
   end
 end

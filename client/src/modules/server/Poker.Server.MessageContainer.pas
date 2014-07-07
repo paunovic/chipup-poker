@@ -38,7 +38,7 @@ var
 implementation
 
 uses
-  {$IFDEF DEBUG} {$ENDIF}
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.SysUtils, System.Classes, Poker.WindowMessages;
 
 
@@ -104,6 +104,8 @@ begin
     else
       FCallbackSets.Insert(0, callback_set);
     result := id;
+
+    {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
   finally
     FLock.Leave;
   end;
@@ -160,7 +162,10 @@ begin
     while (C1 >= 0) and
           (C1 < FCallbackSets.Count) do
       if FCallbackSets[C1].Removed then
-        FCallbackSets.Delete(C1)
+      begin
+        FCallbackSets.Delete(C1);
+        {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
+      end
       else
         Dec(C1);
   finally

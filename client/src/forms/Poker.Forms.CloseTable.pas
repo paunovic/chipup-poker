@@ -3,8 +3,7 @@ unit Poker.Forms.CloseTable;
 interface
 
 uses
-  System.Classes,
-  Vcl.Controls, Vcl.Forms, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Poker.Objects.GameInfo,
+  System.Classes, Vcl.Controls, Vcl.Forms, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Poker.Games.Game,
   Vcl.ActnList, cxButtons, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls;
 
 type
@@ -35,7 +34,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Protobufs.Objects.CloseGameData;
+  Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Protobufs.Objects.CloseGameData;
 
 
 procedure TfrmCloseTable.FormDestroy(Sender: TObject);

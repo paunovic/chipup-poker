@@ -1,4 +1,4 @@
-unit Poker.Table.Resources;
+unit Poker.Tables.Resources;
 
 interface
 
@@ -77,6 +77,8 @@ type
       FStandUpButtonAspectRatio: Single;
       FPlayNowButtonAspectRatio: Single;
       FSeatActionFrameAspectRatio: Single;
+
+      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
@@ -212,6 +214,8 @@ var
   CCV: TCardValue;
   CCS: TCardSuit;
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('TableResources'); {$ENDIF}
+
   ArchiveTypeAccess := ataAnyFile;
   FDXMediaFile := TAsphyreArchive.Create;
   FDXMediaFile.OpenMode := aomReadOnly;
@@ -282,6 +286,8 @@ begin
   FDXFonts.Free;
   FDXImages.Free;
   FDXMediaFile.Free;
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TTableResources.AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single);
@@ -296,7 +302,7 @@ begin
   end
   else
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Failed to load DX image resource: %s', [AName]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to load DX image resource: %s', [AName]), ditException); {$ENDIF}
   end;
 end;
 
@@ -317,7 +323,7 @@ begin
     AReceiver := FDXFonts[id]
   else
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Failed to insert DX font resource: %s', [AName]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to insert DX font resource: %s', [AName]), ditException); {$ENDIF}
   end;
 end;
 

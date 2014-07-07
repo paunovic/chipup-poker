@@ -7,9 +7,8 @@ uses
   System.Generics.Collections, System.SyncObjs;
 
 type
-  THandHistory = class
+  THandHistory = class(TObjectDictionary<TBytes, THandHistoryItems>)
   private
-    FItems: TObjectList<THandHistoryItems>;
     FLock: TCriticalSection;
   public
     class procedure Initialize;
@@ -18,11 +17,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function FindGame(const AGameId: TBytes; out AHandHistoryItems: THandHistoryItems): Boolean;
-
     function Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply): Boolean;
-
-    property Items: TObjectList<THandHistoryItems> read FItems;
   end;
 
 var
@@ -48,13 +43,12 @@ end;
 constructor THandHistory.Create;
 begin
   FLock := TCriticalSection.Create;
-  FItems := TObjectList<THandHistoryItems>.Create;
+  inherited Create([doOwnsValues]);
 end;
 
 destructor THandHistory.Destroy;
 begin
-  FItems.Free;
-  FLock.Free;
+  FreeAndNil(FLock);
   inherited;
 end;
 
@@ -64,16 +58,16 @@ var
   hhis: THandHistoryItems;
   hhi: THandHistoryItem;
 begin
-  if not FindGame(AClubHandHistoryInfo.Gameid, hhis) then
+  if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
   begin
     FLock.Enter;
     try
-      FItems.Add(THandHistoryItems.Create(AClubHandHistoryInfo.Clubid, AClubHandHistoryInfo.Gameid));
+      inherited Add(AClubHandHistoryInfo.Gameid, THandHistoryItems.Create(AClubHandHistoryInfo.Clubid, AClubHandHistoryInfo.Gameid));
     finally
       FLock.Leave;
     end;
 
-    if not FindGame(AClubHandHistoryInfo.Gameid, hhis) then
+    if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
       Exit(FALSE);
   end;
 
@@ -83,24 +77,6 @@ begin
     else
       hhi.Assign(pbhh);
   Exit(TRUE);
-end;
-
-function THandHistory.FindGame(const AGameId: TBytes; out AHandHistoryItems: THandHistoryItems): Boolean;
-var
-  C1: Integer;
-begin
-  FLock.Enter;
-  try
-    for C1 := 0 to FItems.Count - 1 do
-      if CompareBytes(FItems[C1].FGameId, AGameId) then
-      begin
-        AHandHistoryItems := FItems[C1];
-        Exit(TRUE);
-      end;
-    Exit(FALSE);
-  finally
-    FLock.Leave;
-  end;
 end;
 
 end.

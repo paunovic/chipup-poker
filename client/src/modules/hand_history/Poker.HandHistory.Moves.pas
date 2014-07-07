@@ -3,7 +3,7 @@ unit Poker.HandHistory.Moves;
 interface
 
 uses
-  System.Generics.Collections, Poker.Protobufs.Objects.MoveRow, Poker.Protobufs.Objects.TableEvent, Poker.Objects.PotInfo;
+  System.Generics.Collections, Poker.Protobufs.Objects.MoveRow, Poker.Protobufs.Objects.TableEvent, Poker.Pots.PotList;
 
 type
   THandHistoryMove = class
@@ -11,8 +11,8 @@ type
     FEvents: TList<TTableEventType>;
     FSeat: Integer;
     FBet: UINT32;
-    FWinnerPots: TPotInfos;
-    FPots: TPotInfos;
+    FWinnerPots: TPotList;
+    FPots: TPotList;
   public
     constructor Create(const AProtobuf: TPB_MoveRow);
     destructor Destroy; override;
@@ -22,8 +22,8 @@ type
     property Events: TList<TTableEventType> read FEvents;
     property Seat: Integer read FSeat;
     property Bet: UINT32 read FBet;
-    property WinnerPots: TPotInfos read FWinnerPots;
-    property Pots: TPotInfos read FPots;
+    property WinnerPots: TPotList read FWinnerPots;
+    property Pots: TPotList read FPots;
   end;
 
   THandHistoryMoves = TObjectList<THandHistoryMove>;
@@ -38,9 +38,9 @@ begin
   FEvents.AddRange(AProtobuf.Code);
   FSeat := AProtobuf.Seat;
   FBet := AProtobuf.Bet;
-  FWinnerPots := TPotInfos.Create;
+  FWinnerPots := TPotList.Create;
   FWinnerPots.Assign(AProtobuf.WinnerPotData);
-  FPots := TPotInfos.Create;
+  FPots := TPotList.Create;
   FPots.Assign(AProtobuf.Pots, 0);
 end;
 

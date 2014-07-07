@@ -7,13 +7,14 @@ var express = require('express');
 var http = require('http');
 var MongoClient = require('mongodb').MongoClient
 var crypto = require('crypto');
+var assert = require('assert');
 
-var protoreader = require('./protoreader');
+var Protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
 var MongoStore = require('./mongoStore');
 
 var pb = new p(fs.readFileSync("../message.desc"));
-protoreader.init(pb,codes);
+Protoreader.init(pb,codes);
 
 var clients = [];
 
@@ -30,6 +31,7 @@ var sessionStore;
 var restarting = false;
 
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
+	assert.ifError(err);
 	sessionStore = new MongoStore(db,'master_sessions');
 	app.set('view engine','jade');
 	app.use(express.bodyParser({uploadDir:'./upload'}));
@@ -124,7 +126,7 @@ io.on('connection',function (socket) {
 });
 function Client(sockin) {
 	this.socket = sockin;
-	this.reader = new protoreader(this.socket,this);
+	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.log.bind(this),this.log.bind(this));
 	this.reply(codes.Hello);
 	this.socket.on('end',function () {
 		this.log('connection lost');
@@ -140,7 +142,9 @@ Client.prototype.remove = function () {
 	var idx = clients.indexOf(this);
 	clients.splice(idx,1);
 }
-Client.prototype.reply = protoreader.reply;
+Client.prototype.reply = function (code,data,type) {
+	this.reader.reply(code,data,type);
+}
 Client.prototype.log = function log(format) {
 	var out = Array.prototype.slice.call(arguments);
 	//out.unshift(new Date().toString()+":");

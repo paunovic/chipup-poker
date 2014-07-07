@@ -17,7 +17,6 @@ type
     property Removed: Boolean read FRemoved write FRemoved;
   end;
 
-
   TServerMessageCallbackMethod = procedure(const AMethodId: Integer; const AObject: TObject) of object;
   TServerMessageCallback = class
   private
@@ -30,7 +29,6 @@ type
     property Code: TServerCodes read FCode;
     property Callback: TServerMessageCallbackMethod read FCallback;
   end;
-
 
   TSocketStateChangeCallbackMethod = procedure(const AOldState, ANewState: TSocketState) of object;
   TSocketStateChangeCallback = class

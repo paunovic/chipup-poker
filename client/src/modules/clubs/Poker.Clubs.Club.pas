@@ -1,31 +1,12 @@
-unit Poker.Objects.ClubInfo;
+unit Poker.Clubs.Club;
 
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Objects.GameInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubMember,
-  Poker.Protobufs.Objects.ClubStatsReply, Poker.Protobufs.Objects.ClubPlayerStats;
-
+  System.Generics.Collections, System.SysUtils, Poker.Games.GameList, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubStatsReply,
+  Poker.Protobufs.Objects.ClubPlayerStats, Poker.Clubs.Member, Poker.Protobufs.Objects.ClubMember;
 
 type
-  TClubMemberInfo = class
-  private
-    FMongoId: TBytes;
-    FSuspended: Boolean;
-    FBalanceLimit: UINT32;
-    FClubBalance: Int32;
-    FUnlimitedLimit: Boolean;
-  public
-    constructor Create(const AClubMemberProtobuf: TPB_ClubMember); overload;
-    constructor Create(const AClubMemberInfo: TClubMemberInfo); overload;
-
-    property MongoId: TBytes read FMongoId;
-    property Suspended: Boolean read FSuspended;
-    property BalanceLimit: UINT32 read FBalanceLimit;
-    property ClubBalance: Int32 read FClubBalance write FClubBalance;
-    property UnlimitedLimit: Boolean read FUnlimitedLimit;
-  end;
-
   TClubInfo = class
   private
     FId: Integer;
@@ -34,7 +15,7 @@ type
     FName: String;
     FPassword: String;
     FMembers: TObjectList<TClubMemberInfo>;
-    FGames: TGamesInfo;
+    FGames: TGameList;
     FRake: Integer;
     FPrivate: Boolean;
     FDefaultBalanceLimit: UINT32;
@@ -60,19 +41,11 @@ type
     property Name: String read FName;
     property Password: String read FPassword;
     property Members: TObjectList<TClubMemberInfo> read FMembers;
-    property Games: TGamesInfo read FGames;
+    property Games: TGameList read FGames;
     property Rake: Integer read FRake;
     property IsPrivate: Boolean read FPrivate write FPrivate;
     property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit;
     property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance;
-  end;
-
-  TClubsInfo = class(TObjectList<TClubInfo>)
-  public
-    function AddClub(const AProtobufObject: TPB_Club): TClubInfo;
-    function FindClub(const AId: Integer; var AClubInfo: TClubInfo): Boolean; overload;
-    function FindClub(const AMongoId: TBytes; var AClubInfo: TClubInfo): Boolean; overload;
-    function IndexOf(const AId: Integer): Integer;
   end;
 
 implementation
@@ -85,7 +58,7 @@ uses
 constructor TClubInfo.Create;
 begin
   FMembers := TObjectList<TClubMemberInfo>.Create;
-  FGames := TGamesInfo.Create;
+  FGames := TGameList.Create;
 end;
 
 destructor TClubInfo.Destroy;
@@ -176,8 +149,8 @@ var
 begin
   if GetMemberInfo(AMemberId, member) then
   begin
-    member.FBalanceLimit := ALimit;
-    member.FUnlimitedLimit := AUnlimited;
+    member.BalanceLimit := ALimit;
+    member.UnlimitedLimit := AUnlimited;
   end;
 end;
 
@@ -186,7 +159,7 @@ var
   member: TClubMemberInfo;
 begin
   if GetMemberInfo(AMemberId, member) then
-    member.FClubBalance := 0;
+    member.ClubBalance := 0;
 end;
 
 procedure TClubInfo.AddMember(const AClubMemberInfo: TPB_ClubMember);
@@ -205,86 +178,5 @@ begin
   FMembers.Add(cmi);
 end;
 
-
-
-{ TPlayerClubsInfo }
-
-function TClubsInfo.AddClub(const AProtobufObject: TPB_Club): TClubInfo;
-var
-  index: Integer;
-  club: TClubInfo;
-begin
-  index := IndexOf(AProtobufObject.Seq);
-  if index = -1 then
-  begin
-    club := TClubInfo.Create;
-    club.Assign(AProtobufObject);
-    index := Add(club)
-  end
-  else
-    Items[index].Assign(AProtobufObject);
-
-  result := Items[index];
-end;
-
-function TClubsInfo.FindClub(const AId: Integer; var AClubInfo: TClubInfo): Boolean;
-var
-  clubinfo: TClubInfo;
-begin
-  for clubinfo in self.ToArray do
-    if clubinfo.Id = AId then
-    begin
-      AClubInfo := clubinfo;
-      Exit(TRUE);
-    end;
-
-  Exit(FALSE);
-end;
-
-function TClubsInfo.FindClub(const AMongoId: TBytes; var AClubInfo: TClubInfo): Boolean;
-var
-  clubinfo: TClubInfo;
-begin
-  for clubinfo in self.ToArray do
-    if CompareBytes(clubinfo.MongoId, AMongoId) then
-    begin
-      AClubInfo := clubinfo;
-      Exit(TRUE);
-    end;
-
-  Exit(FALSE);
-end;
-
-function TClubsInfo.IndexOf(const AId: Integer): Integer;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to Length(self.ToArray) - 1 do
-    if self.ToArray[C1].Id = AId then
-      Exit(C1);
-
-  Exit(-1);
-end;
-
-{ TClubMemberInfo }
-
-constructor TClubMemberInfo.Create(const AClubMemberProtobuf: TPB_ClubMember);
-begin
-  FMongoId := AClubMemberProtobuf.MongoId;
-  FSuspended := AClubMemberProtobuf.Suspended;
-  FBalanceLimit := AClubMemberProtobuf.BalanceLimit;
-  FClubBalance := AClubMemberProtobuf.ClubBalance;
-  FUnlimitedLimit := AClubMemberProtobuf.UnlimitedLimit;
-  Assert(Length(FMongoId) = 12);
-end;
-
-constructor TClubMemberInfo.Create(const AClubMemberInfo: TClubMemberInfo);
-begin
-  FMongoId := AClubMemberInfo.MongoId;
-  FSuspended := AClubMemberInfo.Suspended;
-  FBalanceLimit := AClubMemberInfo.BalanceLimit;
-  FClubBalance := AClubMemberInfo.ClubBalance;
-  FUnlimitedLimit := AClubMemberInfo.UnlimitedLimit;
-end;
 
 end.

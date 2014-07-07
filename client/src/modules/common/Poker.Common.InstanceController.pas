@@ -20,7 +20,6 @@ type
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, System.SysUtils, {$ENDIF}
   Winapi.Windows;
 
 class function TInstanceController.IsAlphaInstance: Boolean;
@@ -35,8 +34,6 @@ begin
   end
   else
     result := TRUE;
-
-  {$IFDEF DEBUG} DebugLn(Format('Alpha instance: %s', [BoolToStr(result, TRUE)]), ditApplication); {$ENDIF}
 end;
 
 class procedure TInstanceController.RegisterInstance;
@@ -49,7 +46,6 @@ begin
   if FMutexHandle = 0 then
     Exit;
 
-  {$IFDEF DEBUG} DebugLn('Releasing instance mutex', ditApplication); {$ENDIF}
   CloseHandle(FMutexHandle);
   FMutexHandle := 0;
 end;

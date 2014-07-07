@@ -1,10 +1,10 @@
-unit Poker.Stats.Table;
+unit Poker.Tables.Stats;
 
 interface
 
 uses
   System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Stats.Player;
+  Poker.Players.Stats;
 
 type
   TTableStats = class
@@ -25,19 +25,6 @@ type
     property Hands: UINT32 read FHands;
     property Players: TObjectList<TPlayerStats> read FPlayers;
   end;
-
-  TTablesStats = class(TObjectList<TTableStats>)
-  private
-  public
-    class procedure Initialize;
-    class procedure Deinitialize;
-
-    function IndexOf(const ATableId: TBytes): Integer;
-    function Find(const ATableId: TBytes; var ATableStats: TTableStats): Boolean;
-  end;
-
-var
-  TablesStats: TTablesStats;
 
 implementation
 
@@ -72,40 +59,6 @@ begin
     player.Assign(pbplayer);
     FPlayers.Add(player);
   end;
-end;
-
-
-{ TTablesStats }
-
-class procedure TTablesStats.Initialize;
-begin
-  TablesStats := TTablesStats.Create;
-end;
-
-class procedure TTablesStats.Deinitialize;
-begin
-  FreeAndNil(TablesStats);
-end;
-
-function TTablesStats.IndexOf(const ATableId: TBytes): Integer;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to Length(ToArray) - 1 do
-     if CompareBytes(ToArray[C1].FGameId, ATableId) then
-       Exit(C1);
-  Exit(-1);
-end;
-
-function TTablesStats.Find(const ATableId: TBytes; var ATableStats: TTableStats): Boolean;
-var
-  index: Integer;
-begin
-  index := IndexOf(ATableId);
-  if index = -1 then
-    Exit(FALSE);
-  ATableStats := ToArray[index];
-  Exit(TRUE);
 end;
 
 end.

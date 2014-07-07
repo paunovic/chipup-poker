@@ -3,11 +3,9 @@ unit Poker.Forms.ClubMemberOptions;
 interface
 
 uses
-  System.SysUtils, System.Variants, System.Classes,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxLabel, cxCheckBox, cxSpinEdit, cxButtons, Vcl.ActnList,
-  Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Objects.ClubInfo, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
-  Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, Vcl.StdCtrls;
+  System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxLabel, cxCheckBox, cxSpinEdit, cxButtons,
+  Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Clubs.Club, cxGraphics, cxLookAndFeels,
+  cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, Vcl.StdCtrls;
 
 type
   TfrmClubMemberOptions = class(TForm, IFormParams, IModalForm)
@@ -43,8 +41,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Enum.ServerCodes;
+  Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Clubs.Member;
 
 
 procedure TfrmClubMemberOptions.FormCreate(Sender: TObject);

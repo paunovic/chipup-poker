@@ -1,10 +1,9 @@
-unit Poker.Avatars;
+unit Poker.Avatars.Avatar;
 
 interface
 
 uses
-  Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes, System.SysUtils, AsphyreImages,
-  OverbyteIcsHttpProt, OverbyteIcsWSocket;
+  Vcl.Imaging.JPEG, Vcl.Graphics, System.Classes, System.SysUtils, AsphyreImages, OverbyteIcsHttpProt, OverbyteIcsWSocket;
 
 type
   TAvatar = class
@@ -19,15 +18,13 @@ type
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure SetId(const AValue: TBytes);
     procedure ImageChanged(Sender: TObject);
-
-  protected
-    procedure Download;
-    function Retrieve: Boolean;
-    procedure Save;
-
   public
     constructor Create(const AId: TBytes; const AImage: TJPEGImage);
     destructor Destroy; override;
+
+    procedure Download;
+    function Retrieve: Boolean;
+    procedure Save;
 
     procedure SetImage(const AImage: TJPEGImage); overload;
     procedure SetImage(const AStream: TStream); overload;
@@ -41,38 +38,10 @@ type
     property OnImageChanged: TNotifyEvent read FOnImageChanged write FOnImageChanged;
   end;
 
-  TAvatars = class(TObjectList<TAvatar>)
-  private
-    FRetrievingImage: TJPEGImage;
-    FOnAvatarChanged: TNotifyEvent;
-
-    procedure AvatarChangedInternal(Sender: TObject);
-  public
-    class procedure Initialize;
-    class procedure Deinitialize;
-
-    constructor Create;
-    destructor Destroy; override;
-
-    function Add(const AId: TBytes; const AImage: TJPEGImage): TAvatar; overload;
-    function DefaultAvatar: TAvatar;
-
-    function IndexOf(const AId: TBytes): Integer;
-    function Find(const AId: TBytes; out AAvatar: TAvatar): Boolean;
-
-    property OnAvatarChanged: TNotifyEvent read FOnAvatarChanged write FOnAvatarChanged;
-  end;
-
-var
-  Avatars: TAvatars;
-
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule,
-  Poker.Settings;
-
+  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule, Poker.Settings;
 
 { TAvatar }
 
@@ -106,8 +75,6 @@ end;
 
 procedure TAvatar.HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
 begin
-  {$IFDEF DEBUG} DebugLn(Format('GET avatar done: %s', [FHTTP.URL]), ditNetInc); {$ENDIF}
-
   if Assigned(FHTTP.SendStream) then
   begin
     FHTTP.SendStream.Free;
@@ -148,7 +115,7 @@ begin
   FHTTP.BandwidthLimit := 0;
   FHTTP.RequestVer := '1.1';
   FHTTP.RcvdStream := TMemoryStream.Create;
-  FHTTP.URL := Format(DomainURL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
+  FHTTP.URL := Format(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   FHTTP.OnRequestDone := HTTPRequestDone;
   FHTTP.SslContext.InitContext;
   FHTTP.GetAsync;
@@ -250,111 +217,6 @@ procedure TAvatar.SetImage(const AImage: TJPEGImage);
 begin
   FImage.Assign(AImage);
   ImageChanged(FImage);
-end;
-
-{ TAvatars }
-
-class procedure TAvatars.Initialize;
-begin
-  Avatars := TAvatars.Create;
-end;
-
-class procedure TAvatars.Deinitialize;
-begin
-  FreeAndNil(Avatars);
-end;
-
-constructor TAvatars.Create;
-begin
-  FRetrievingImage := TJPEGImage.Create;
-  LoadJPGFromResource(FRetrievingImage, 'RetrievingAvatar');
-
-  inherited Create;
-end;
-
-destructor TAvatars.Destroy;
-begin
-  FreeAndNil(FRetrievingImage);
-
-  inherited;
-end;
-
-procedure TAvatars.AvatarChangedInternal(Sender: TObject);
-begin
-  if Assigned(FOnAvatarChanged) then
-    FOnAvatarChanged(Sender);
-end;
-
-function TAvatars.DefaultAvatar: TAvatar;
-var
-  bytes: TBytes;
-begin
-  SetLength(bytes, 0);
-  result := Add(bytes, nil);
-end;
-
-function TAvatars.Add(const AId: TBytes; const AImage: TJPEGImage): TAvatar;
-var
-  avatar: TAvatar;
-  id: TBytes;
-begin
-  id := AId;
-  if Length(id) = 0 then
-  begin
-    SetLength(id, 1);
-    id[0] := 33;
-  end;
-
-  if Find(id, avatar) then
-  begin
-    if Assigned(AImage) then
-    begin
-      avatar.SetImage(AImage);
-      avatar.Save;
-    end;
-  end
-  else
-  begin
-    if Assigned(AImage) then
-      avatar := TAvatar.Create(id, AImage)
-    else
-      avatar := TAvatar.Create(id, FRetrievingImage);
-
-    avatar.OnImageChanged := AvatarChangedInternal;
-
-    inherited Add(avatar);
-
-    if not Assigned(AImage) then
-    begin
-      if not avatar.Retrieve then
-        avatar.Download;
-    end
-    else
-      avatar.Save;
-  end;
-
-  result := avatar;
-end;
-
-function TAvatars.IndexOf(const AId: TBytes): Integer;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to Length(ToArray) - 1 do
-    if CompareBytes(ToArray[C1].Id, AId) then
-      Exit(C1);
-  Exit(-1);
-end;
-
-function TAvatars.Find(const AId: TBytes; out AAvatar: TAvatar): Boolean;
-var
-  index: Integer;
-begin
-  index := IndexOf(AId);
-  if index = -1 then
-    Exit(FALSE);
-  AAvatar := ToArray[index];
-  Exit(TRUE);
 end;
 
 

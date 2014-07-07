@@ -2529,7 +2529,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsClubHome
+    Properties.ActivePage = tsStats
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2690,7 +2690,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 390
+          Top = 324
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2706,7 +2706,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 390
+          Top = 324
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2722,7 +2722,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 390
+          Top = 324
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2738,7 +2738,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 390
+          Top = 324
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2754,7 +2754,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 390
+          Top = 324
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2773,8 +2773,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2793,14 +2791,13 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 876
-          Height = 359
+          Height = 293
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitHeight = 371
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2874,7 +2871,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 343
+          Top = 277
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2887,11 +2884,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 355
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 343
+          Top = 277
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2904,11 +2900,10 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 355
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 279
+          Top = 213
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]
@@ -2924,15 +2919,12 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
           OnClick = acShowEditGameFormExecute
-          ExplicitTop = 291
         end
       end
     end
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -3221,9 +3213,8 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridTotalStatsTimePlayed: TcxGridColumn
               Caption = 'Time Played'
-              PropertiesClassName = 'TcxTimeEditProperties'
+              PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
-              Properties.SpinButtons.Visible = False
               HeaderAlignmentHorz = taCenter
               Width = 89
             end

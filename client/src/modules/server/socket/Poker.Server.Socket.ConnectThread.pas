@@ -1,4 +1,4 @@
-unit Poker.Server.SocketConnectThread;
+unit Poker.Server.Socket.ConnectThread;
 
 interface
 

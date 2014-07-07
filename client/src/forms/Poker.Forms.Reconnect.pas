@@ -30,6 +30,7 @@ type
       FCallbacksId: Integer;
       FCurrentStatus: TReconnectionStatus;
       FDots: Integer;
+      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CSRHello(const AMethodId: Integer; const AObject: TObject);
     procedure CSRLogin(const AMethodId: Integer; const AObject: TObject);
@@ -53,14 +54,16 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket, Poker.DataModule,
+  Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket.Commands, Poker.DataModule,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Settings,
-  Poker.Forms.Debug, Poker.Table.Tables, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections;
+  Poker.Forms.Debug, Poker.Tables.TableList, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections;
 
 { TfrmReconnect }
 
 procedure TfrmReconnect.FormCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   FDots := 3;
   SetStatusMessage;
 
@@ -77,6 +80,8 @@ procedure TfrmReconnect.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmReconnect.CreateParams(var AParams: TCreateParams);
@@ -216,7 +221,7 @@ begin
       Close;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 

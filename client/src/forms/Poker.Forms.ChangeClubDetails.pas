@@ -3,11 +3,9 @@ unit Poker.Forms.ChangeClubDetails;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxContainer, cxLabel,
-  cxTextEdit, cxButtons, Poker.Objects.ClubInfo, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
-  cxSpinEdit, cxCheckBox, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
+  Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxLabel, cxTextEdit,
+  cxButtons, Poker.Clubs.Club, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, cxSpinEdit, cxCheckBox, cxGraphics,
+  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)
@@ -35,6 +33,7 @@ type
     FCallbacksId: Integer;
     FClub: TClubInfo;
     FCloseCallback: TNotifyEvent;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
 
@@ -51,12 +50,14 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket.Commands, Poker.Server.MessageCallbacks,
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   FCallbacksId := MessageContainer.AddCallbacks([
                      TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubDetailsChange)
                   ])
@@ -66,6 +67,8 @@ procedure TfrmChangeClubDetails.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChangeClubDetails.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -174,7 +177,7 @@ begin
       edClubName.SetFocus;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRClubDetailsChange: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRClubDetailsChange: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 
   acOK.Enabled := TRUE;

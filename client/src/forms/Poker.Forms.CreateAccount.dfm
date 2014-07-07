@@ -4,7 +4,7 @@ object frmCreateAccount: TfrmCreateAccount
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Create New Account'
-  ClientHeight = 239
+  ClientHeight = 220
   ClientWidth = 336
   Color = clWindow
   Ctl3D = False
@@ -22,60 +22,60 @@ object frmCreateAccount: TfrmCreateAccount
   OnKeyPress = FormKeyPress
   DesignSize = (
     336
-    239)
+    220)
   PixelsPerInch = 96
   TextHeight = 14
   object edEMail: TcxTextEdit
-    Left = 120
-    Top = 21
+    Left = 112
+    Top = 12
     Properties.MaxLength = 200
     TabOrder = 0
-    Width = 198
+    Width = 211
   end
   object edPassword: TcxTextEdit
-    Left = 120
-    Top = 47
+    Left = 112
+    Top = 38
     Properties.EchoMode = eemPassword
     Properties.MaxLength = 32
     Properties.PasswordChar = '*'
     TabOrder = 1
-    Width = 198
+    Width = 211
   end
   object edConfirmPassword: TcxTextEdit
-    Left = 120
-    Top = 73
+    Left = 112
+    Top = 64
     Properties.EchoMode = eemPassword
     Properties.MaxLength = 32
     Properties.PasswordChar = '*'
     TabOrder = 2
-    Width = 198
+    Width = 211
   end
   object edUsername: TcxTextEdit
-    Left = 120
-    Top = 99
+    Left = 112
+    Top = 90
     Properties.MaxLength = 20
     TabOrder = 3
-    Width = 198
+    Width = 211
   end
   object cb18Years: TcxCheckBox
-    Left = 22
-    Top = 133
+    Left = 12
+    Top = 121
     Caption = 'I am at least 18 years of age'
     TabOrder = 4
     Transparent = True
     Width = 177
   end
   object cbTOS: TcxCheckBox
-    Left = 22
-    Top = 153
+    Left = 12
+    Top = 141
     Caption = 'I agree to'
     TabOrder = 5
     Transparent = True
     Width = 68
   end
   object btSignUp: TcxButton
-    Left = 188
-    Top = 188
+    Left = 193
+    Top = 173
     Width = 130
     Height = 36
     Action = acSignUp
@@ -88,10 +88,11 @@ object frmCreateAccount: TfrmCreateAccount
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
+    ExplicitTop = 192
   end
   object lbsEMail: TcxLabel
-    Left = 22
-    Top = 22
+    Left = 14
+    Top = 13
     Caption = 'E-mail address:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -104,8 +105,8 @@ object frmCreateAccount: TfrmCreateAccount
     Transparent = True
   end
   object lbsPassword: TcxLabel
-    Left = 22
-    Top = 48
+    Left = 14
+    Top = 39
     Caption = 'Password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -118,8 +119,8 @@ object frmCreateAccount: TfrmCreateAccount
     Transparent = True
   end
   object lbsConfirmPassword: TcxLabel
-    Left = 22
-    Top = 74
+    Left = 14
+    Top = 65
     Caption = 'Confirm password:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -132,8 +133,8 @@ object frmCreateAccount: TfrmCreateAccount
     Transparent = True
   end
   object lbsUsername: TcxLabel
-    Left = 22
-    Top = 100
+    Left = 14
+    Top = 91
     Caption = 'Username:'
     ParentFont = False
     Style.Font.Charset = ANSI_CHARSET
@@ -146,8 +147,8 @@ object frmCreateAccount: TfrmCreateAccount
     Transparent = True
   end
   object lbsTAC: TcxLabel
-    Left = 90
-    Top = 153
+    Left = 80
+    Top = 141
     Cursor = crHandPoint
     Caption = 'Terms and Conditions'
     ParentFont = False
@@ -167,7 +168,7 @@ object frmCreateAccount: TfrmCreateAccount
   end
   object alCreateAccount: TActionList
     Left = 44
-    Top = 189
+    Top = 165
     object acSignUp: TAction
       Caption = 'SIGN ME UP'
       OnExecute = acSignUpExecute

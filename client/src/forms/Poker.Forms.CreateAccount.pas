@@ -48,7 +48,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Settings, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes,
+  Poker.Settings, Poker.Server.Socket.Commands, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes,
   Poker.DataModule, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.RegisterReply, Poker.Server.MessageContainer,
   Poker.Server.Settings, Poker.Common.FormsContainer;
 

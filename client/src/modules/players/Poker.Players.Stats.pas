@@ -1,4 +1,4 @@
-unit Poker.Stats.Player;
+unit Poker.Players.Stats;
 
 interface
 

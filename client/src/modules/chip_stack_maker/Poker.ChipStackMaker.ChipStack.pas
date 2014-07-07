@@ -1,4 +1,4 @@
-unit Poker.ChipStackMaker;
+unit Poker.ChipStackMaker.ChipStack;
 
 interface
 
@@ -8,7 +8,7 @@ uses
 type
   TChipImages = TArray<TAsphyreImage>;
 
-  TChipsStack = class
+  TChipStack = class
   private
     FValue: UINT32;
     FChipCount: Integer;
@@ -24,34 +24,21 @@ type
     property Images: TChipImages read FImages;
   end;
 
-  TChipStackMaker = class
-  private
-    FStacks: TObjectList<TChipsStack>;
-  public
-    constructor Create;
-    destructor Destroy; override;
-
-    procedure Clear;
-
-    function MakeStack(const AValue: UINT32): TChipsStack;
-    function IndexOf(const AValue: UINT32): Integer;
-  end;
-
 implementation
 
 uses
-  Poker.Table.Resources;
+  Poker.Tables.Resources;
 
-{ TChipsStack }
+{ TChipStack }
 
-constructor TChipsStack.Create(const AValue: UINT32);
+constructor TChipStack.Create(const AValue: UINT32);
 begin
   FValue := AValue;
   SetLength(FImages, 0);
   MakeImages;
 end;
 
-procedure TChipsStack.MakeImages;
+procedure TChipStack.MakeImages;
 
   procedure AddImages(const ACount: Integer; var AIndex: Integer; const AImage: TAsphyreImage);
   var
@@ -103,47 +90,5 @@ begin
   AddImages(ccount, chip_index, TableResources.Chip1Image);
 }
 end;
-
-{ TChipsStacks }
-
-constructor TChipStackMaker.Create;
-begin
-  FStacks := TObjectList<TChipsStack>.Create;
-end;
-
-destructor TChipStackMaker.Destroy;
-begin
-  FStacks.Free;
-
-  inherited;
-end;
-
-function TChipStackMaker.IndexOf(const AValue: UINT32): Integer;
-var
-  C1: Integer;
-begin
-  for C1 := 0 to FStacks.Count - 1 do
-    if FStacks[C1].Value = AValue then
-      Exit(C1);
-  Exit(-1);
-end;
-
-function TChipStackMaker.MakeStack(const AValue: UINT32): TChipsStack;
-var
-  index: Integer;
-begin
-  index := IndexOf(AValue);
-  if index <> -1 then
-    Exit(FStacks[index]);
-
-  result := TChipsStack.Create(AValue);
-  FStacks.Add(result);
-end;
-
-procedure TChipStackMaker.Clear;
-begin
-  FStacks.Clear;
-end;
-
 
 end.

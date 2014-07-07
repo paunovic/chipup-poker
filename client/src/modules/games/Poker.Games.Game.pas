@@ -1,10 +1,9 @@
-unit Poker.Objects.GameInfo;
+unit Poker.Games.Game;
 
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus,
-  Poker.Common.Misc;
+  Winapi.Windows, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus;
 
 type
   TGameInfo = class
@@ -56,26 +55,11 @@ type
     property StateAsStr: String read GetStateStr;
     property ClosingTime: DWORD read FClosingTime write FClosingTime;
     property LastHandId: UINT32 read FLastHandId;
-
-  end;
-
-  TPB_Games = TList<TPB_Game>;
-
-  TGamesInfo = class(TObjectList<TGameInfo>)
-  public
-    procedure UpdateFromProtobufObjects(const AProtobufObjects: TPB_Games);
-
-    function AddGame(const AProtobufObject: TPB_Game): TGameInfo;
-    function FindGame(const AMongoId: TBytes; var AGameInfo: TGameInfo): Boolean;
-    function IndexOf(const AMongoId: TBytes): Integer;
   end;
 
 implementation
 
-{$IFDEF DEBUG}
-uses
-  Poker.Forms.Debug;
-{$ENDIF}
+{ TGameInfo }
 
 procedure TGameInfo.Assign(const AProtobufObject: TPB_Game);
 begin
@@ -220,66 +204,6 @@ begin
   FState := gsActive;
   FClosingTime := 0;
   FLastHandId := 0;
-end;
-
-{ TGamesInfo }
-
-function TGamesInfo.AddGame(const AProtobufObject: TPB_Game): TGameInfo;
-var
-  index: Integer;
-  game: TGameInfo;
-begin
-  {$IFDEF DEBUG}
-  if Length(AProtobufObject.MongoId) = 0 then
-    DebugLn(Format('Game [%s] mongo id is empty!', [AProtobufObject.Gamename]), ditException);
-  {$ENDIF}
-
-  index := IndexOf(AProtobufObject.MongoId);
-  if index = -1 then
-  begin
-    game := TGameInfo.Create;
-    game.Assign(AProtobufObject);
-    index := Add(game);
-  end
-  else
-    Items[index].Assign(AProtobufObject);
-  result := Items[index];
-end;
-
-function TGamesInfo.FindGame(const AMongoId: TBytes; var AGameInfo: TGameInfo): Boolean;
-var
-  index: Integer;
-begin
-  index := IndexOf(AMongoId);
-  if index = -1 then
-    Exit(FALSE)
-  else
-  begin
-    AGameInfo := ToArray[index];
-    Exit(TRUE);
-  end;
-end;
-
-function TGamesInfo.IndexOf(const AMongoId: TBytes): Integer;
-var
-  C1   : Integer;
-  a1len: Integer;
-begin
-  a1len := Length(AMongoId);
-  for C1 := 0 to Length(ToArray) - 1 do
-    if CompareBytes(AMongoId, ToArray[C1].MongoId, a1len) then
-      Exit(C1);
-
-  Exit(-1);
-end;
-
-procedure TGamesInfo.UpdateFromProtobufObjects(const AProtobufObjects: TPB_Games);
-var
-  game: TPB_Game;
-begin
-  Clear;
-  for game in AProtobufObjects do
-    AddGame(game);
 end;
 
 end.

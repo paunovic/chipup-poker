@@ -3,18 +3,18 @@ var fs = require('fs');
 
 var p = require("node-protobuf").Protobuf;
 
-var protoreader = require('./protoreader');
+var Protoreader = require('./protoreader');
 
 var pb = new p(fs.readFileSync("../message.desc"))
 var codes = require('./ServerCodes');
 
-protoreader.init(pb,codes,[codes.scHello]);
+Protoreader.init(pb,codes,[codes.scHello]);
 
 function Core(handle) {
 	if (!(this instanceof Core)) return new Core(handle);
 	this.socket = net.connect(12345,'dev-server.chipuppoker.com',function cb2() {
 	});
-	this.reader = new protoreader(this.socket,this);
+	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.handle = handle;
 	//this.socket.on('end',function () {
 		//this.log('connection lost');
@@ -48,5 +48,7 @@ Core.prototype.debugHandle = function (code,args) {
 	if (obj) console.log(this.codes.reverse[code],obj);
 	return obj;
 }
-Core.prototype.reply = protoreader.reply;
+Core.prototype.reply = function (code,data,type) {
+	this.reader.reply(code,data,type);
+}
 module.exports = Core;

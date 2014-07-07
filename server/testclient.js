@@ -3,13 +3,13 @@ var p = require("node-protobuf").Protobuf;
 var net = require('net');
 var pb = new p(fs.readFileSync("../message.desc"))
 var codes = require('./ServerCodes');
-var protoreader = require('./protoreader');
+var Protoreader = require('./protoreader');
 var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var colors = require('colors');
 var Hand = require('./deck').Hand;
 
-protoreader.init(pb,codes);
+Protoreader.init(pb,codes);
 
 function bufToCards(buf) {
 	if (!buf) return 'XXX';
@@ -81,7 +81,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 function Client(handle) {
 	this.socket = net.connect(12345,'dev-server.chipuppoker.com',function cb2() {
 	});
-	this.reader = new protoreader(this.socket,this);
+	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.handle = handle;
 	this.socket.on('end',function () {
 		this.log('connection lost');
@@ -93,7 +93,9 @@ function Client(handle) {
 Client.prototype.ping = function () {
 	this.reply(codes.scPing,{uptime:process.uptime()},'Poker.PingParams');
 }
-Client.prototype.reply = protoreader.reply;
+Client.prototype.reply = function (code,data,type) {
+	this.reader.reply(code,data,type);
+}
 function testchathandle(code,data) {
 	switch (code) {
 	case codes.SR_HELLO:

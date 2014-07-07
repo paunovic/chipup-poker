@@ -20,7 +20,6 @@ object frmSettings: TfrmSettings
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
-  OnShow = FormShow
   DesignSize = (
     690
     507)
@@ -78,15 +77,10 @@ object frmSettings: TfrmSettings
       object tsGeneral: TcxTabSheet
         Caption = 'tsGeneral'
         ImageIndex = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
       end
       object tsThemes: TcxTabSheet
         Caption = 'tsThemes'
         ImageIndex = 1
-        OnResize = tsThemesResize
         DesignSize = (
           494
           450)

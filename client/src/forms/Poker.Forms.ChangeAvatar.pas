@@ -34,6 +34,7 @@ type
     FAvatarId : TBytes;
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CloseModalCallback(Sender: TObject);
     procedure CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
@@ -50,15 +51,17 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  PNGImage, Poker.Avatars, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
-  Poker.DataModule, Poker.Objects.PlayerInfo, Poker.Common.FormsContainer, Poker.Forms.ImageCrop;
+  PNGImage, Poker.Avatars.Avatar, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
+  Poker.DataModule, Poker.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop, Poker.Players.Player, Poker.Avatars.AvatarList;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
 var
   avatar: TAvatar;
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Name); {$ENDIF}
+
   FCallbacksId := MessageContainer.AddCallbacks([
                      TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
   ]);
@@ -83,6 +86,8 @@ begin
 
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
+
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -116,7 +121,7 @@ begin
      (SslHttp.StatusCode = 200) and
      (SslHttp.RcvdStream.Size > 0) then
   begin
-    {$IFDEF DEBUG} DebugLn(Format('Avatar received. Size: %d', [SslHttp.RcvdStream.Size]), ditNetInc); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar received. Size: %d', [SslHttp.RcvdStream.Size]), ditNetInc); {$ENDIF}
     SslHttp.RcvdStream.Position := 0;
     SetLength(FAvatarId, SslHttp.RcvdStream.Size);
     Move((SslHttp.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], SslHttp.RcvdStream.Size);
@@ -158,10 +163,10 @@ begin
   buf := sLineBreak + '--' + boundary + '--' + sLineBreak;
   SslHttp.SendStream.Write(buf[1], Length(buf));
 
-  {$IFDEF DEBUG}  DebugLn(Format('Uploading avatar to server [size: %d]', [SslHttp.SendStream.Size]), ditNetOut);  {$ENDIF}
+  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar to server [size: %d]', [SslHttp.SendStream.Size]), ditNetOut);  {$ENDIF}
 
   SslHttp.SendStream.Position := 0;
-  SslHttp.URL := DomainURL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
+  SslHttp.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
   SslHttp.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
   SslHttp.OnRequestDone := HTTPRequestDone;
   SslHttp.PostASync;
@@ -234,8 +239,8 @@ end;
 
 procedure TfrmChangeAvatar.CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
 var
-  avatar     : TAvatar;
-  pbreply    : TPB_SetAvatarReply;
+  avatar: TAvatar;
+  pbreply: TPB_SetAvatarReply;
   player_info: TPlayerInfo;
 begin
   pbreply := AObject as TPB_SetAvatarReply;
@@ -244,7 +249,7 @@ begin
     saSuccess: begin
       dmMain.SelfInfo.AvatarId := FAvatarId;
       avatar := Avatars.Add(dmMain.SelfInfo.AvatarId, FAvatarJPG);
-      if Players.FindPlayerById(dmMain.SelfInfo.Id, player_info) then
+      if Players.TryGetValue(dmMain.SelfInfo.Id, player_info) then
         player_info.AvatarId := dmMain.SelfInfo.AvatarId;
       imgAvatar.Picture.Assign(avatar.GetImage);
 

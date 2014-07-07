@@ -6,15 +6,9 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin,
   dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxPC, Vcl.StdCtrls, dximctrl, cxContainer, cxEdit, cxGroupBox, Vcl.ImgList, cxListBox, cxLabel,
-  dxGDIPlusClasses, cxImage, cxRadioGroup, Vcl.Menus, Vcl.ActnList, cxButtons, cxTextEdit, cxMaskEdit, cxDropDownEdit, Vcl.ExtCtrls,
-  Poker.Table.Tables;
+  dxGDIPlusClasses, cxImage, cxRadioGroup, Vcl.Menus, Vcl.ActnList, cxButtons, cxTextEdit, cxMaskEdit, cxDropDownEdit, Vcl.ExtCtrls;
 
 type
-  TPaintPanel = class(TPanel)
-  protected
-    procedure Paint; override;
-  end;
-
   TfrmSettings = class(TForm)
     gbLeftPanel: TcxGroupBox;
     lbOptions: TcxListBox;
@@ -40,12 +34,8 @@ type
     procedure lbOptionsClick(Sender: TObject);
     procedure lbOptionsMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormShow(Sender: TObject);
     procedure lbOptionsDrawItem(AControl: TcxListBox; ACanvas: TcxCanvas; AIndex: Integer; ARect: TRect; AState: TOwnerDrawState);
-    procedure tsThemesResize(Sender: TObject);
   private
-    FTableThemePanel: TPaintPanel;
-    FTable: TTable;
     procedure LeftListboxChanged;
   public
     procedure RenderThemeTable;
@@ -68,7 +58,6 @@ end;
 
 procedure TfrmSettings.FormDestroy(Sender: TObject);
 begin
-  FTableThemePanel.Free;
   FormsContainer.Remove(self);
 end;
 
@@ -78,25 +67,8 @@ begin
     acCancel.Execute;
 end;
 
-procedure TfrmSettings.FormShow(Sender: TObject);
-begin
-  if not Assigned(FTableThemePanel) then
-  begin
-    FTableThemePanel := TPaintPanel.Create(self);
-    FTableThemePanel.AlignWithMargins := TRUE;
-    FTableThemePanel.Parent := tsThemes;
-    FTableThemePanel.Caption := '';
-    FTableThemePanel.Align := alBottom;
-    FTableThemePanel.BevelOuter := bvNone;
-    FTableThemePanel.Color := clBlack;
-    FTable := Tables.AddSettingsPreviewTable(FTableThemePanel.Handle);
-  end;
-end;
-
 procedure TfrmSettings.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  Tables.Remove(FTable);
-  FTable := nil;
   Action := caFree;
 end;
 
@@ -150,26 +122,10 @@ end;
 
 procedure TfrmSettings.RenderThemeTable;
 begin
-  if (pcSettings.ActivePage = tsThemes) and
-     (Assigned(FTable)) then
-    FTable.Renderer.Render;
-end;
-
-procedure TfrmSettings.tsThemesResize(Sender: TObject);
-begin
-  if Assigned(FTableThemePanel) then
-    FTableThemePanel.Height := Round(FTableThemePanel.Width / 1.35);
-
-  if Assigned(FTable) then
-    FTable.Renderer.UpdateDXAreaSize;
-end;
-
-{ TPaintPanel }
-
-procedure TPaintPanel.Paint;
-begin
-  inherited;
-  (Owner as TfrmSettings).RenderThemeTable;
 end;
 
 end.
+
+
+
+

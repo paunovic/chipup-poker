@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, System.SyncObjs, Poker.Protobufs.Objects.HandHistory,
-  Poker.HandHistory.Players, Poker.HandHistory.Moves, Poker.Objects.GameInfo, Poker.Objects.ClubInfo, Poker.Protobufs.Objects.Game;
+  Poker.HandHistory.Players, Poker.HandHistory.Moves, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game;
 
 type
   THandHistoryItems = class;
@@ -124,8 +124,8 @@ type
     destructor Destroy; override;
 
     procedure AddHand(const AHandHistory: TPB_HandHistory);
-    function FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
     function LastHandId: UINT;
+    function FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
 
     property Club: TClubInfo read FClub;
     property Game: TGameInfo read FGame;
@@ -135,8 +135,8 @@ implementation
 
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
-  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings,
-  Poker.Objects.PotInfo, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus;
+  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Pots.Pot,
+  Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus;
 
 { THandHistoryItem }
 
@@ -182,7 +182,7 @@ begin
 
   FPlayers.Clear;
   for phh in AHandHistory.Players do
-    FPlayers.Add(TPlayerHandHistory.Create(phh));
+    FPlayers.Add(phh.Seat, TPlayerHandHistory.Create(phh));
 
   FMoves.Clear;
   for mhh in AHandHistory.Moves do
@@ -199,7 +199,6 @@ end;
 
 procedure THandHistoryItem.MakeText(const ALines: TStrings; const ATags: TRichViewTags);
 var
-  C1: Integer;
   player: TPlayerHandHistory;
   move: THandHistoryMove;
   player_nick: String;
@@ -212,6 +211,7 @@ var
   fold_on: TArray<TTableState>;
   line: String;
   tablestate: TTableState;
+  C1: Integer;
 begin
   ALines.Clear;
 
@@ -231,20 +231,20 @@ begin
   ALines.Add('');
 
   // seats info
-  for C1 := 0 to FPlayers.Count - 1 do
+  for player in FPlayers.Values do
   begin
     line := '%sSeat %s%d%s: %s%s%s (%s%s%s chips';
-    if FPlayers[C1].Seat = FDealerIndex then
+    if player.Seat = FDealerIndex then
       line := line + ', dealer';
-    if Players[C1].Status = psOutOfPlay then
+    if player.Status = psOutOfPlay then
       line := line + ', sitting out';
-    if Players[C1].Status = psOutOfHand then
+    if player.Status = psOutOfHand then
       line := line + ', out of hand';
     line := line + ')';
 
     ALines.Add(Format(line, [
-        ATags.NormalText, ATags.SeatIndex, FPlayers[C1].Seat + 1, ATags.NormalText, ATags.PlayerNick, FPlayers[C1].Nick,
-        ATags.NormalText, ATags.Chips, ChipsToStr(FPlayers[C1].Chips), ATags.NormalText
+        ATags.NormalText, ATags.SeatIndex, player.Seat + 1, ATags.NormalText, ATags.PlayerNick, player.Nick,
+        ATags.NormalText, ATags.Chips, ChipsToStr(player.Chips), ATags.NormalText
     ]));
   end;
 
@@ -254,7 +254,7 @@ begin
   for move in FMoves do
   begin
     player_nick := 'Unknown';
-    if FPlayers.FindPlayer(move.Seat, player) then
+    if FPlayers.TryGetValue(move.Seat, player) then
       player_nick := player.Nick;
 
     if move.ContainsEvent(teSB) then
@@ -321,19 +321,19 @@ begin
       ALines.Add(Format('%s*** SHOW DOWN ***', [ATags.TableEvent]));
       ALines.Add('');
 
-      for C1 := 0 to FPlayers.Count - 1 do
+      for player in FPlayers.Values do
       begin
-        if fold_on[FPlayers[C1].Seat] > tsIdle then
+        if fold_on[player.Seat] > tsIdle then
           Continue;
 
-        if FPlayers[C1].Mucked then
-          ALines.Add(Format('%s%s%s mucks hand', [ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText]))
+        if player.Mucked then
+          ALines.Add(Format('%s%s%s mucks hand', [ATags.PlayerNick, player.Nick, ATags.NormalText]))
         else
-          if FPlayers[C1].Status in [psInHand, psFolded, psAllIn] then
+          if player.Status in [psInHand, psFolded, psAllIn] then
           begin
-            hand_strength := THandStrengthCalculator.GetHandStrength(FPlayers[C1].CardsStr, FTableCardsStr, FCurrentGame, FALSE);
+            hand_strength := THandStrengthCalculator.GetHandStrength(player.CardsStr, FTableCardsStr, FCurrentGame, FALSE);
             ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
-                ATags.PlayerNick, FPlayers[C1].Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(FPlayers[C1].Cards, ' '),
+                ATags.PlayerNick, player.Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(player.Cards, ' '),
                 ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
             ]));
           end;
@@ -366,9 +366,8 @@ begin
           Inc(seat_winnings[pot.WinnerData[C1].Seat], (pot.Value - pot.Rake) div UINT32(pot.WinnerData.Count));
 
       // show summary
-      for C1 := 0 to FPlayers.Count - 1 do
+      for player in FPlayers.Values do
       begin
-        player := FPlayers[C1];
         player_line := Format('%sSeat %s%d%s: %s%s%s ', [
             ATags.NormalText, ATags.SeatIndex, player.Seat, ATags.NormalText, ATags.PlayerNick, player.Nick, ATags.NormalText
         ]);
@@ -425,6 +424,8 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
+  inherited Create(TRUE);
+
   FLock := TCriticalSection.Create;
 
   FClubId := AClubId;
@@ -433,10 +434,10 @@ begin
   FGame := TGameInfo.Create;
 
   // try to copy Club and Game from internal lists (if found)
-  if dmMain.SelfInfo.Clubs.FindClub(AClubId, club) then
+  if dmMain.SelfInfo.Clubs.TryGetValue(AClubId, club) then
   begin
     FClub.Assign(club);
-    if club.Games.FindGame(AGameId, game) then
+    if club.Games.TryGetValue(AGameId, game) then
       FGame.Assign(game);
   end;
 
@@ -451,8 +452,6 @@ begin
   begin
 
   end;
-
-  inherited Create;
 end;
 
 destructor THandHistoryItems.Destroy;
@@ -463,28 +462,6 @@ begin
   FLock.Free;
 
   inherited;
-end;
-
-procedure THandHistoryItems.AddHand(const AHandHistory: TPB_HandHistory);
-var
-  hhi: THandHistoryItem;
-begin
-  FLock.Enter;
-  try
-    for hhi in ToArray do
-      if hhi.HandId = AHandHistory.Seq then
-      begin
-        hhi.Assign(AHandHistory);
-        Exit;
-      end;
-
-    while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
-      Delete(0);
-
-    Add(THandHistoryItem.Create(self, AHandHistory));
-  finally
-    FLock.Leave;
-  end;
 end;
 
 function THandHistoryItems.FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
@@ -500,6 +477,26 @@ begin
         Exit(TRUE);
       end;
     Exit(FALSE);
+  finally
+    FLock.Leave;
+  end;
+end;
+
+procedure THandHistoryItems.AddHand(const AHandHistory: TPB_HandHistory);
+var
+  hhi: THandHistoryItem;
+begin
+  FLock.Enter;
+  try
+    if FindHand(AHandHistory.Seq, hhi) then
+      hhi.Assign(AHandHistory)
+    else
+    begin
+      while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
+        Remove(Last);
+    end;
+
+    Add(THandHistoryItem.Create(self, AHandHistory));
   finally
     FLock.Leave;
   end;

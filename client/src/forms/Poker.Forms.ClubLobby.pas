@@ -4,11 +4,11 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams,
-  Poker.Objects.ClubInfo, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
-  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Objects.PlayerInfo, dxBevel, cxImage, Vcl.ExtCtrls, Vcl.Menus,
-  cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, dxSkinscxPCPainter,
-  cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit, cxClasses,
-  Vcl.StdCtrls, dxGDIPlusClasses;
+  Poker.Clubs.Club, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
+  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Players.PlayerList, dxBevel, cxImage, Vcl.ExtCtrls,
+  Vcl.Menus, cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
+  dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit,
+  cxClasses, Vcl.StdCtrls, dxGDIPlusClasses;
 
 type
   TfrmClubLobby = class(TForm, IFormParams)
@@ -153,6 +153,7 @@ type
     FSelectedPlayerId: TBytes;
     FSelectedGameId: TBytes;
     FSelectedStatsTableId: TBytes;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure ConfigureGUI(const AUpdateLists: Boolean = TRUE);
 
@@ -197,12 +198,12 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.Generics.Collections,
-  Poker.Common.Misc, Poker.Server.Socket, Poker.DataModule, Poker.Forms.ChangeClubDetails,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.GameInfo,
+  Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Forms.ChangeClubDetails,
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Games.Game,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Stats.Table, Poker.Stats.Player, System.DateUtils,
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, Poker.Players.Stats, System.DateUtils,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions,
-  Poker.Protobufs.Objects.PlayerLimitParams;
+  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member, Poker.Players.Player, Poker.Tables.Stats;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -254,7 +255,7 @@ begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
 
-  OutputDebugString('CLUB LOBBY DESTROY');
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TfrmClubLobby.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -274,6 +275,8 @@ begin
 
   btClubHome.Click;
   ConfigureGUI;
+
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('%s [%s]', [Name, Caption])); {$ENDIF}
 end;
 
 procedure TfrmClubLobby.ConfigureGUI(const AUpdateLists: Boolean = TRUE);
@@ -284,82 +287,82 @@ var
   admin_visible: Boolean;
   member: TClubMemberInfo;
 begin
-  if dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
+    Exit;
+
+  Caption := Format('%s lobby', [club.Name]);
+
+  lbsHeader.Caption := club.Name;
+
+  manager := '';
+  if Players.TryGetValue(club.OwnerId, player) then
+    manager := player.Nick;
+
+  lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
+
+  admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
+
+  if not club.GetMemberInfo(FSelectedPlayerId, member) then
+    member := nil;
+
+  gridPlayersListLimit.Visible := admin_visible;
+  gridPlayersListBalance.Visible := admin_visible;
+  btChangeClubDetails.Visible := admin_visible;
+  acShowClubChangeDetailsForm.Enabled := admin_visible;
+  acUpdateClubDetails.Enabled := admin_visible;
+  btCloseClub.Visible := admin_visible;
+  acCloseClub.Enabled := admin_visible;
+  btResetBalance.Visible := admin_visible;
+  btSetLimit.Visible := admin_visible;
+  acResetBalance.Enabled := (admin_visible) and (Assigned(member));
+  acSetLimit.Enabled := (admin_visible) and (Assigned(member));
+  btGiveOwnership.Visible := admin_visible;
+  acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
+  btRemovePlayerFromClub.Visible := admin_visible;
+  acRemovePlayer.Enabled := acGiveOwnership.Enabled;
+  btSuspendUnsuspend.Visible := admin_visible;
+  if btSuspendUnsuspend.Visible then
   begin
-    Caption := Format('%s lobby', [club.Name]);
-
-    lbsHeader.Caption := club.Name;
-
-    manager := '';
-    if Players.FindPlayerById(club.OwnerId, player) then
-      manager := player.Nick;
-
-    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
-
-    admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
-
-    if not club.GetMemberInfo(FSelectedPlayerId, member) then
-      member := nil;
-
-    gridPlayersListLimit.Visible := admin_visible;
-    gridPlayersListBalance.Visible := admin_visible;
-    btChangeClubDetails.Visible := admin_visible;
-    acShowClubChangeDetailsForm.Enabled := admin_visible;
-    acUpdateClubDetails.Enabled := admin_visible;
-    btCloseClub.Visible := admin_visible;
-    acCloseClub.Enabled := admin_visible;
-    btResetBalance.Visible := admin_visible;
-    btSetLimit.Visible := admin_visible;
-    acResetBalance.Enabled := (admin_visible) and (Assigned(member));
-    acSetLimit.Enabled := (admin_visible) and (Assigned(member));
-    btGiveOwnership.Visible := admin_visible;
-    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
-    btRemovePlayerFromClub.Visible := admin_visible;
-    acRemovePlayer.Enabled := acGiveOwnership.Enabled;
-    btSuspendUnsuspend.Visible := admin_visible;
-    if btSuspendUnsuspend.Visible then
-    begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
-      if acReinstatePlayer.Enabled then
-        btSuspendUnsuspend.Action := acReinstatePlayer
-      else
-        btSuspendUnsuspend.Action := acSuspendPlayer;
-    end;
-    btNewGame.Visible := admin_visible;
-    acShowCreateGameForm.Enabled := admin_visible;
-    btCloseTable.Visible := admin_visible;
-    acCloseTable.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
+    acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
+    acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
+    if acReinstatePlayer.Enabled then
+      btSuspendUnsuspend.Action := acReinstatePlayer
+    else
+      btSuspendUnsuspend.Action := acSuspendPlayer;
+  end;
+  btNewGame.Visible := admin_visible;
+  acShowCreateGameForm.Enabled := admin_visible;
+  btCloseTable.Visible := admin_visible;
+  acCloseTable.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
 //    btEditGame.Visible := admin_visible;
 //    acShowEditGameForm.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
-    Bevel1.Visible := admin_visible;
-    btLeaveClub.Visible := not admin_visible;
-    acLeaveClub.Enabled := not admin_visible;
-    if admin_visible then
-    begin
-      gridPlayersList.Align := alTop;
-      gridGames.Align := alTop;
+  Bevel1.Visible := admin_visible;
+  btLeaveClub.Visible := not admin_visible;
+  acLeaveClub.Enabled := not admin_visible;
+  if admin_visible then
+  begin
+    gridPlayersList.Align := alTop;
+    gridGames.Align := alTop;
 
-      gridPlayersList.Height := btSuspendUnsuspend.Top - 5;
-      gridGames.Height := btNewGame.Top - 5;
-    end
-    else
-    begin
-      gridPlayersList.Align := alClient;
-      gridGames.Align := alClient;
-    end;
+    gridPlayersList.Height := btSuspendUnsuspend.Top - 5;
+    gridGames.Height := btNewGame.Top - 5;
+  end
+  else
+  begin
+    gridPlayersList.Align := alClient;
+    gridGames.Align := alClient;
+  end;
 
-    btStats.Enabled := admin_visible;
+  btStats.Enabled := admin_visible;
 
-    if AUpdateLists then
+  if AUpdateLists then
+  begin
+    UpdatePlayerlist;
+    UpdateGamesList;
+    if btStats.Enabled then
     begin
-      UpdatePlayerlist;
-      UpdateGamesList;
-      if btStats.Enabled then
-      begin
-        UpdateTablesStatsList;
-        UpdatePlayersStatsList;
-      end;
+      UpdateTablesStatsList;
+      UpdatePlayersStatsList;
     end;
   end;
 end;
@@ -394,7 +397,7 @@ var
   game: TGameInfo;
   close_table_act: Boolean;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     SetLength(FSelectedGameId, 0)
   else
   begin
@@ -406,7 +409,7 @@ begin
   end;
 
   close_table_act := (Length(FSelectedGameId) > 0) and (CompareBytes(club.OwnerId, dmMain.SelfInfo.Id)) and
-                     (club.Games.FindGame(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
+                     (club.Games.TryGetValue(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
 
   acCloseTable.Enabled := close_table_act;
 //  acShowEditGameForm.Enabled := actions_enabled;
@@ -417,7 +420,7 @@ var
   recIndex: Integer;
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     SetLength(FSelectedPlayerId, 0)
   else
   begin
@@ -456,7 +459,7 @@ var
 begin
   AHintText := '';
 
-  if not TablesStats.Find(FSelectedStatsTableId, tablestats) then
+  if not TablesStats.TryGetValue(FSelectedStatsTableId, tablestats) then
     Exit;
 
   playerid := ARecord.Values[gridStatsTablePlayerId.Index];
@@ -546,7 +549,7 @@ var
   recIndex: Integer;
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     SetLength(FSelectedStatsTableId, 0)
   else
   begin
@@ -589,7 +592,7 @@ var
     status: String;
   begin
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId);
-    if Players.FindPlayerById(AMember.MongoId, player) then
+    if Players.TryGetValue(AMember.MongoId, player) then
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick)
     else
     begin
@@ -623,7 +626,7 @@ begin
   try
     gridPlayersListTable.DataController.SetRecordCount(0);
 
-    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     begin
       gridPlayersListTable.DataController.SetRecordCount(0);
       Exit;
@@ -659,13 +662,13 @@ begin
   try
     c.SetRecordCount(0);
 
-    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
       Exit;
 
-    for tablestats in TablesStats do
+    for tablestats in TablesStats.Values do
       if CompareBytes(tablestats.ClubId, club.MongoId) then
       begin
-        if club.Games.FindGame(tablestats.GameId, game) then
+        if club.Games.TryGetValue(tablestats.GameId, game) then
           tmp := game.Name
         else
           tmp := 'UNKNOWN';
@@ -705,7 +708,7 @@ var
   selectedid: TBytes;
   C1: Integer;
   found: Boolean;
-  total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay, total_timeplayed: Int64;
+  total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay: Int64;
 begin
   finalstats := TObjectList<TPlayerStats>.Create;
   try
@@ -714,7 +717,7 @@ begin
     try
       c.SetRecordCount(0);
 
-      if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+      if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
         Exit;
 
       selectedids := TList<TBytes>.Create;
@@ -727,12 +730,12 @@ begin
         try
           if selectedids.Count = 0 then
           begin
-            if TablesStats.Find(FSelectedStatsTableId, tablestats) then
+            if TablesStats.TryGetValue(FSelectedStatsTableId, tablestats) then
               tablestatslist.Add(tablestats);
           end
           else
             for selectedid in selectedids do
-              if TablesStats.Find(selectedid, tablestats) then
+              if TablesStats.TryGetValue(selectedid, tablestats) then
                 tablestatslist.Add(tablestats);
 
           for tablestats in tablestatslist do
@@ -759,7 +762,7 @@ begin
           begin
             recidx := c.AppendRecord;
 
-            if Players.FindPlayerById(playerstats.UserId, player) then
+            if Players.TryGetValue(playerstats.UserId, player) then
               tmp := player.Nick
             else
               tmp := 'Unknown';
@@ -791,7 +794,6 @@ begin
     total_cashouts := 0;
     total_rake := 0;
     total_chipsinplay := 0;
-    total_timeplayed := 0;
 
     for playerstats in finalstats do
     begin
@@ -800,7 +802,6 @@ begin
       Inc(total_cashouts, playerstats.CashoutsTotal);
       Inc(total_rake, playerstats.RakeContrib);
       Inc(total_chipsinplay, playerstats.ChipsInPlay);
-      Inc(total_timeplayed, playerstats.SecondsPlayed);
     end;
 
     c := gridTotalStatsTable.DataController;
@@ -813,10 +814,7 @@ begin
       c.SetValue(0, gridTotalStatsCashouts.Index, total_cashouts / 100);
       c.SetValue(0, gridTotalStatsRake.Index, total_rake / 100);
       c.SetValue(0, gridTotalStatsChipsInPlay.Index, total_chipsinplay / 100);
-
-      datetim := SecondsToTime(total_timeplayed);
-      ReplaceDate(datetim, Date);
-      c.SetValue(0, gridTotalStatsTimePlayed.Index, datetim);
+      c.SetValue(0, gridTotalStatsTimePlayed.Index, 'N/A');
     finally
       c.EndFullUpdate;
     end;
@@ -828,7 +826,6 @@ end;
 
 procedure TfrmClubLobby.UpdateGamesList;
 var
-  C1: Integer;
   game: TGameInfo;
   club: TClubInfo;
   c: TcxGridDataController;
@@ -839,13 +836,11 @@ begin
   try
     c.SetRecordCount(0);
 
-    if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+    if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
       Exit;
 
-    for C1 := 0 to club.Games.Count - 1 do
+    for game in club.Games.Values do
     begin
-      game := club.Games[C1];
-
       if game.State = gsClosed then
         Continue;
 
@@ -871,16 +866,15 @@ begin
   tiUpdateClubDetails.Enabled := FALSE;
 end;
 
-
 procedure TfrmClubLobby.acCloseClubExecute(Sender: TObject);
 var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
-  for game in club.Games do
+  for game in club.Games.Values do
     if game.State <> gsClosed then
     begin
       MessageDlg('There are active tables in the club. Before closing the club, please close all active tables first', mtError, [mbOK], 0);
@@ -895,8 +889,8 @@ var
   club: TClubInfo;
   player: TPlayerInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
+     (not Players.TryGetValue(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Are you sure you want to give club ownership to %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
@@ -914,8 +908,8 @@ var
   club: TClubInfo;
   player: TPlayerInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
+     (not Players.TryGetValue(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Are you sure you want to remove %s from the club?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
@@ -927,8 +921,8 @@ var
   club: TclubInfo;
   player: TPlayerInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not Players.FindPlayerById(FSelectedPlayerId, player)) then
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
+     (not Players.TryGetValue(FSelectedPlayerId, player)) then
     Exit;
 
   if MessageDlg(Format('Reset balance for player %s?', [player.Nick]), mtConfirmation, mbYesNo, 0) = mrYes then
@@ -940,7 +934,7 @@ var
   club: TClubInfo;
   member: TClubMemberInfo;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not club.GetMemberInfo(FSelectedPlayerId, member)) then
     Exit;
 
@@ -951,7 +945,7 @@ procedure TfrmClubLobby.acShowClubChangeDetailsFormExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   FormsContainer.Add(RunModalForm(TfrmChangeClubDetails, self, [club], ModalFormClose));
@@ -962,7 +956,7 @@ var
   club: TClubInfo;
   pint: Integer;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   pint := 0;
@@ -975,8 +969,8 @@ var
   game: TGameInfo;
   pint: Integer;
 begin
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
-     (not club.Games.FindGame(FSelectedGameId, game)) then
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
+     (not club.Games.TryGetValue(FSelectedGameId, game)) then
     Exit;
 
   pint := 1;
@@ -987,7 +981,7 @@ procedure TfrmClubLobby.acSuspendPlayerExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   ServerSocket.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, TRUE);
@@ -1027,7 +1021,7 @@ procedure TfrmClubLobby.acReinstatePlayerExecute(Sender: TObject);
 var
   club: TClubInfo;
 begin
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   ServerSocket.ChangePlayerSuspendState(club.MongoId, FSelectedPlayerId, FALSE);
@@ -1038,8 +1032,8 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  if (dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) and
-     (club.Games.FindGame(FSelectedGameId, game)) then
+  if (dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) and
+     (club.Games.TryGetValue(FSelectedGameId, game)) then
     FormsContainer.Add(RunModalForm(TfrmCloseTable, self, [game], ModalFormClose));
 end;
 
@@ -1056,7 +1050,7 @@ var
 begin
   pbreply := AObject as TPB_TableStatsReplies;
 
-  if not dmMain.SelfInfo.Clubs.FindClub(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
     Exit;
 
   for C1 := 0 to pbreply.Reply.Count - 1 do
@@ -1094,7 +1088,7 @@ begin
     csSuccess: ConfigureGUI;
     csNameExists: ;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 
@@ -1110,7 +1104,7 @@ begin
     csSuccess: Close;
     csInvalidClubId: ;
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLeaveClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 
@@ -1126,7 +1120,7 @@ begin
     csSuccess: ConfigureGUI;
     csInvalidClubId: MessageDlg('Invalid club ID', mtError, [mbOk], 0);
   else
-    {$IFDEF DEBUG} DebugLn(Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
 end;
 
@@ -1170,7 +1164,7 @@ var
 begin
   pbreply := AObject as TPB_PlayerLimitParams;
 
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not CompareBytes(club.MongoId, pbreply.Clubid)) then
     Exit;
 
@@ -1186,7 +1180,7 @@ var
 begin
   pbreply := AObject as TPB_PlayerLimitParams;
 
-  if (not dmMain.SelfInfo.Clubs.FindClub(FClubId, club)) or
+  if (not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club)) or
      (not CompareBytes(club.MongoId, pbreply.Clubid)) then
     Exit;
 
@@ -1204,7 +1198,7 @@ begin
   if FClubId <> pbclub.Seq then
     Exit;
 
-  if dmMain.SelfInfo.Clubs.FindClub(pbclub.Seq, club) then
+  if dmMain.SelfInfo.Clubs.FindClubBySeq(pbclub.Seq, club) then
     ConfigureGUI
   else // current club is disbanded? close form
     Close;
