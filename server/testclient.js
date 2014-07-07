@@ -37,7 +37,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			switch (mode) {
 			case 'menu':
 				tests = [ function sidepot(cb) {
-					testmenu(cb,{players:5,prefix:prefix});
+					testmenu(cb,{players:4,prefix:prefix});
 				} ];
 				break;
 			case 'sidepot':
@@ -79,7 +79,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 });
 
 function Client(handle) {
-	this.socket = net.connect(12345,'127.0.0.1',function cb2() {
+	this.socket = net.connect(12345,'dev-server.chipuppoker.com',function cb2() {
 	});
 	this.handle = handle;
 	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
@@ -87,6 +87,11 @@ function Client(handle) {
 		this.log('connection lost');
 		process.exit();
 	}.bind(this));
+	this.pinger = setInterval(this.ping.bind(this),30000);
+	this.reply(codes.scHello,{debug:false},'Poker.HelloParams');
+}
+Client.prototype.ping = function () {
+	this.reply(codes.scPing,{uptime:process.uptime()},'Poker.PingParams');
 }
 Client.prototype.reply = function (code,data,type) {
 	this.reader.reply(code,data,type);
@@ -217,13 +222,13 @@ function testmenu(cb,config) {
 		if (conn.tableStatus.minimum_bet == oldbet) {
 			moves.check = function () {
 				console.log('doing check with',oldbet,'all bets are',conn.tableStatus.bets);
-				conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount: oldbet},'Poker.PutChips');
+				conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount: oldbet, current_state:ts.state},'Poker.PutChips');
 			}
 		}
 		if (oldbet < conn.tableStatus.minimum_bet) {
 			moves.call = function () {
 				console.log('doing call from '+oldbet+'->'+conn.tableStatus.minimum_bet+'(adding '+(conn.tableStatus.minimum_bet-oldbet)+')');
-				var obj = {table_mongo_id:gameid, chip_amount:conn.tableStatus.minimum_bet};
+				var obj = {table_mongo_id:gameid, chip_amount:conn.tableStatus.minimum_bet, current_state:ts.state};
 				console.log(obj);
 				conn.reply(codes.scPutChips,obj,'Poker.PutChips');
 			}
@@ -232,7 +237,7 @@ function testmenu(cb,config) {
 		moves.raise = function (args) {
 			var newbet = parseInt(args[0]);
 			conn.log(actseq+':doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
-			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet},'Poker.PutChips');
+			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet, current_state:ts.state},'Poker.PutChips');
 		}
 		var ts = conn.tableStatus;
 		console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d state:%s',bufToCards(ts.flop),bufToCards(ts.turn),bufToCards(ts.river),ts.locked,ts.seq,ts.dealer,ts.handid,ts.state);
@@ -321,7 +326,7 @@ function testmenu(cb,config) {
 			var msg = data.toString('utf8');
 			this.log(msg.red);
 			if (msg == 'your not a member of that club') {
-				this.reply(codes.scJoinClub,{seq:clubseq},'Poker.Club');
+				this.reply(codes.scJoinClub,{seq:clubseq,password:'password'},'Poker.Club');
 			}
 			break;
 		case codes.srJoinClubReply:
@@ -387,10 +392,19 @@ function testmenu(cb,config) {
 				process.stdin.pause();
 			}
 			break;
+		case codes.seGameChange:
+			var params = pb.Parse(data,'Poker.Game');
+			this.log(params);
+			break;
+		case codes.srPong:
+			var params = pb.Parse(data,'Poker.PingReply');
+			break;
 		}
 	}
 	function printcode(code,data) {
-		if ([codes.srStatus,codes.seTableEvent,codes.seTableStatus,codes.srLoginReply,codes.srHello,codes.srTableSitOk,codes.srNotImplemented].indexOf(code) == -1) this.log('handle',codes.reverse[code],data);
+		var arr = [codes.srStatus,codes.seTableStatus,codes.srHello,codes.srTableSitOk,codes.srNotImplemented,codes.srTableStatsReply,codes.seGameChange,codes.srPong];
+		if (arr.indexOf(code) == -1) this.log('handle',codes.reverse[code],data);
+		//console.log(code,arr);
 	}
 	var madeclients = false;
 	function testregisterhandle(code,data) {
@@ -398,43 +412,18 @@ function testmenu(cb,config) {
 		switch (code) {
 		case codes.srLoginReply:
 			var params = pb.Parse(data,'Poker.LoginReply');
-			if (params.status == 'lrInvalid') {
+			if (params.login_status == 'lrInvalid') {
 				this.reply(codes.scRegister,{email:this.name+'@server.com',password:'password',displayName:this.name},'Poker.RegisterParams');
 				return;
 			}
-			if (params.status != 'lrSuccess') {
+			if (params.login_status != 'lrSuccess') {
 				this.log(params);
 				this.socket.destroy();
 				conn.close();
 				return;
 			}
-			this.reply(codes.scStatus);
+			parseStatusMain.call(this,params.status);
 				//this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
-			break;
-		case codes.srStatus:
-			var params = pb.Parse(data,'Poker.StatusReply');
-			var makeit = true;
-			for (var x=0; x<params.clubs.length; x++) {
-				if (params.clubs[x].name == (prefix + ' testbot club')) {
-					clubseq = params.clubs[x].seq;
-					makeit = false;
-				}
-			}
-			if (makeit) {
-				this.reply(codes.scCreateClub,{is_private:false, name:prefix+' testbot club'},'Poker.Club');
-			} else {
-				for (var x=0; x<params.games.length; x++) {
-					if (params.games[x].gamename == (prefix+' testbot game')) {
-						gameid = params.games[x]._id;
-					}
-				}
-				if (gameid) {
-					this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
-					this.joining = true;
-				} else {
-					this.reply(codes.scCreateGame,{clubseq: clubseq, game_type:'gtHoldem', game_limit:'glNoLimit', small_blind:5, big_blind:10, seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
-				}
-			}
 			break;
 		case codes.srCreateClubReply:
 			var params = pb.Parse(data,'Poker.ClubCommandReply');
@@ -445,7 +434,7 @@ function testmenu(cb,config) {
 			}
 			this.log('club seq is',params.club.seq);
 			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:'gtHoldem',
-				game_limit:'glNoLimit', small_blind:5, big_blind:10, seats:6, gamename:'testbot game',
+				game_limit:'glNoLimit', small_blind:5, big_blind:10, seats:6, gamename:prefix+' testbot game',
 				buyin_max:20000, buyin_min:5},'Poker.Game');
 			break;
 		case codes.srCreateGameOk:
@@ -493,22 +482,49 @@ function testmenu(cb,config) {
 			break;
 		case codes.seTableStatus:
 			var params = pb.Parse(data,'Poker.TableStatus');
+			for (var i=0; i<params.events.length; i++) {
+				console.log('EVENT#%d: %j',i,params.events[i]);
+			}
 			common.call(this,code,data);
 			break;
 		default:
 			common.call(this,code,data);
 		}
 	}
+	function parseStatusMain(params) {
+			var makeit = true;
+			for (var x=0; x<params.clubs.length; x++) {
+				if (params.clubs[x].name == (prefix + ' testbot club')) {
+					clubseq = params.clubs[x].seq;
+					makeit = false;
+				}
+			}
+			if (makeit) {
+				this.reply(codes.scCreateClub,{is_private:true, name:prefix+' testbot club',password:'password',rake:1},'Poker.Club');
+			} else {
+				for (var x=0; x<params.games.length; x++) {
+					if (params.games[x].gamename == (prefix+' testbot game')) {
+						gameid = params.games[x]._id;
+					}
+				}
+				if (gameid) {
+					this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
+					this.joining = true;
+				} else {
+					this.reply(codes.scCreateGame,{clubseq: clubseq, game_type:'gtHoldem', game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
+				}
+			}
+	}
 	function doClient2(code,data) {
 		printcode.call(this,code,data);
 		switch (code) {
 		case codes.srLoginReply:
 			var params = pb.Parse(data,'Poker.LoginReply');
-			if (params.status == 'lrInvalid') {
+			if (params.login_status == 'lrInvalid') {
 				this.reply(codes.scRegister,{email:this.name+'@server.com',password:'password',displayName:this.name},'Poker.RegisterParams');
 				return;
 			}
-			if (params.status != 'lrSuccess') {
+			if (params.login_status != 'lrSuccess') {
 				this.log(params);
 				this.socket.destroy();
 				conn.close();
