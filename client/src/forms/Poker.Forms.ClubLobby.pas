@@ -708,7 +708,7 @@ var
   selectedid: TBytes;
   C1: Integer;
   found: Boolean;
-  total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay, total_timeplayed: Int64;
+  total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay: Int64;
 begin
   finalstats := TObjectList<TPlayerStats>.Create;
   try
@@ -794,7 +794,6 @@ begin
     total_cashouts := 0;
     total_rake := 0;
     total_chipsinplay := 0;
-    total_timeplayed := 0;
 
     for playerstats in finalstats do
     begin
@@ -803,7 +802,6 @@ begin
       Inc(total_cashouts, playerstats.CashoutsTotal);
       Inc(total_rake, playerstats.RakeContrib);
       Inc(total_chipsinplay, playerstats.ChipsInPlay);
-      Inc(total_timeplayed, playerstats.SecondsPlayed);
     end;
 
     c := gridTotalStatsTable.DataController;
@@ -816,10 +814,7 @@ begin
       c.SetValue(0, gridTotalStatsCashouts.Index, total_cashouts / 100);
       c.SetValue(0, gridTotalStatsRake.Index, total_rake / 100);
       c.SetValue(0, gridTotalStatsChipsInPlay.Index, total_chipsinplay / 100);
-
-      datetim := SecondsToTime(total_timeplayed);
-      ReplaceDate(datetim, Date);
-      c.SetValue(0, gridTotalStatsTimePlayed.Index, datetim);
+      c.SetValue(0, gridTotalStatsTimePlayed.Index, 'N/A');
     finally
       c.EndFullUpdate;
     end;

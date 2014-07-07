@@ -2529,7 +2529,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsClubHome
+    Properties.ActivePage = tsStats
     Properties.HideTabs = True
     ClientRectBottom = 442
     ClientRectRight = 894
@@ -2773,8 +2773,6 @@ object frmClubLobby: TfrmClubLobby
     object tsTables: TcxTabSheet
       Caption = 'tsTables'
       ImageIndex = 1
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -2784,8 +2782,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 878
-        ExplicitHeight = 433
         DesignSize = (
           880
           435)
@@ -2802,7 +2798,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitHeight = 371
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2889,7 +2884,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 355
         end
         object btCloseTable: TcxButton
           Left = 112
@@ -2906,7 +2900,6 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 355
         end
         object btEditGame: TcxButton
           Left = 48
@@ -2926,15 +2919,12 @@ object frmClubLobby: TfrmClubLobby
           Font.Style = []
           ParentFont = False
           OnClick = acShowEditGameFormExecute
-          ExplicitTop = 291
         end
       end
     end
     object tsStats: TcxTabSheet
       Caption = 'tsStats'
       ImageIndex = 2
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         894
         442)
@@ -3223,9 +3213,8 @@ object frmClubLobby: TfrmClubLobby
             end
             object gridTotalStatsTimePlayed: TcxGridColumn
               Caption = 'Time Played'
-              PropertiesClassName = 'TcxTimeEditProperties'
+              PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
-              Properties.SpinButtons.Visible = False
               HeaderAlignmentHorz = taCenter
               Width = 89
             end
