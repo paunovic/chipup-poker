@@ -6,7 +6,7 @@ uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxButtons, cxTextEdit,
   cxSpinEdit, cxLabel, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Tables.Table, Poker.Tables.Status,
   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
-  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit;
+  ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit, Poker.Games.Game;
 
 type
   TfrmTableSit = class(TForm, IFormParams, IModalForm)
@@ -39,7 +39,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     FCallbacksId: Integer;
-    FTable: TTable;
+    FInternalId: Integer;
     FTableStatus: TTableStatus;
     FSeatIndex: Integer;
     FCloseCallback: TNotifyEvent;
@@ -57,7 +57,7 @@ type
     procedure CSRNotSitting(const AMethodId: Integer; const AObject: TObject);
 
     function GetMaxBuyin: UINT32;
-  protected
+    function GetObjects(out ATable: TTable; out AGame: TGameInfo): Boolean;
   public
     procedure SetParams(const AParams: array of pointer);
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
@@ -70,7 +70,7 @@ implementation
 uses
   Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
-  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Games.Game;
+  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
@@ -107,17 +107,24 @@ begin
   seBuyin.Properties.OnChange(Sender);
 end;
 
+function TfrmTableSit.GetObjects(out ATable: TTable; out AGame: TGameInfo): Boolean;
+begin
+  result := (Tables.TryGetValue(FInternalId, ATable)) and
+            (ATable.GetGame(AGame));
+end;
+
 function TfrmTableSit.GetMaxBuyin: UINT32;
 var
   seat_info: TSeatInfo;
   seat_chips: UINT32;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit(0);
 
-  if (FTable.SeatIndex <> -1) and
-     (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) then
+  if (table.SeatIndex <> -1) and
+     (FTableStatus.GetSeatInfo(table.SeatIndex, seat_info)) then
     seat_chips := seat_info.Chips
   else
     seat_chips := 0;
@@ -172,19 +179,20 @@ procedure TfrmTableSit.SetParams(const AParams: array of pointer);
 var
   default_buyin: UINT32;
   game: TGameInfo;
+  table: TTable;
 begin
-  FTable := AParams[0];
+  FInternalId := PInteger(AParams[0])^;
   FTableStatus := AParams[1];
   FSeatIndex := PInteger(AParams[2])^;
 
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   lbvTableName.Caption := Format('%s (%s/%s %s)', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(FALSE)]);
   lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(game.MinBuyin * game.BigBlind),
       ChipsToStr(game.MaxBuyin * game.BigBlind)]);
   lbvAvailableBalance.Caption := Format('%s', [ChipsToStr(dmMain.AvailableBalance)]);
-  if FTable.SeatIndex <> -1 then
+  if table.SeatIndex <> -1 then
     FBuyinPhrase := 'add-on'
   else
     FBuyinPhrase := 'buy-in';
@@ -211,9 +219,11 @@ end;
 procedure TfrmTableSit.acMinExecute(Sender: TObject);
 var
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
+
   SetBuyin(game.MinBuyin * game.BigBlind);
 end;
 
@@ -223,8 +233,9 @@ var
   seat_info: TSeatInfo;
   buyin: Single;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   if not TryStrToFloat(seBuyin.Text, buyin) then
@@ -235,7 +246,7 @@ begin
 
   if err = '' then
   begin
-    if FTable.SeatIndex = -1 then
+    if table.SeatIndex = -1 then
     begin
       if game.State = gsClosed then
         err := 'Table is closed';
@@ -247,7 +258,7 @@ begin
     end
     else
     begin
-      if not FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info) then
+      if not FTableStatus.GetSeatInfo(table.SeatIndex, seat_info) then
         err := 'Invalid seat index';
 
       if err = '' then
@@ -264,8 +275,9 @@ procedure TfrmTableSit.CSRTableSitNoChips(const AMethodId: Integer; const AObjec
 var
   pbstatus: TPB_TableStatus;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbstatus := AObject as TPB_TableStatus;
@@ -280,8 +292,10 @@ procedure TfrmTableSit.CSRTableSitOk(const AMethodId: Integer; const AObject: TO
 var
   pbstatus: TPB_TableStatus;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if (not Tables.TryGetValue(FInternalId, table)) or
+     (not table.GetGame(game)) then
     Exit;
 
   pbstatus := AObject as TPB_TableStatus;
@@ -296,8 +310,9 @@ procedure TfrmTableSit.CSRTableSitSeatTaken(const AMethodId: Integer; const AObj
 var
   pbstatus: TPB_TableStatus;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbstatus := AObject as TPB_TableStatus;
@@ -313,8 +328,9 @@ procedure TfrmTableSit.CSRTableAddonOk(const AMethodId: Integer; const AObject: 
 var
   pbstatus: TPB_TableStatus;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbstatus := AObject as TPB_TableStatus;
@@ -329,8 +345,9 @@ procedure TfrmTableSit.CSRTableAddonOverLimit(const AMethodId: Integer; const AO
 var
   pbstatus: TPB_TableStatus;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbstatus := AObject as TPB_TableStatus;
@@ -345,8 +362,9 @@ procedure TfrmTableSit.CSRClubBalanceReached(const AMethodId: Integer; const AOb
 var
   pbstatus: TPB_TableStatus;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbstatus := AObject as TPB_TableStatus;
@@ -361,8 +379,9 @@ procedure TfrmTableSit.CSRNotSitting(const AMethodId: Integer; const AObject: TO
 var
   pbgame: TPB_Game;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbgame := AObject as TPB_Game;
@@ -379,8 +398,9 @@ procedure TfrmTableSit.CSRTableBuyinLessThanCashout(const AMethodId: Integer; co
 var
   pbbuyinerr: TPB_BuyinError;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbbuyinerr := AObject as TPB_BuyinError;
@@ -399,8 +419,9 @@ procedure TfrmTableSit.CSRTableInvalidBuyin(const AMethodId: Integer; const AObj
 var
   pbbuyinerr: TPB_BuyinError;
   game: TGameInfo;
+  table: TTable;
 begin
-  if not FTable.GetGame(game) then
+  if not GetObjects(table, game) then
     Exit;
 
   pbbuyinerr := AObject as TPB_BuyinError;

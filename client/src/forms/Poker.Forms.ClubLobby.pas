@@ -287,82 +287,82 @@ var
   admin_visible: Boolean;
   member: TClubMemberInfo;
 begin
-  if dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
+  if not dmMain.SelfInfo.Clubs.FindClubBySeq(FClubId, club) then
+    Exit;
+
+  Caption := Format('%s lobby', [club.Name]);
+
+  lbsHeader.Caption := club.Name;
+
+  manager := '';
+  if Players.TryGetValue(club.OwnerId, player) then
+    manager := player.Nick;
+
+  lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
+
+  admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
+
+  if not club.GetMemberInfo(FSelectedPlayerId, member) then
+    member := nil;
+
+  gridPlayersListLimit.Visible := admin_visible;
+  gridPlayersListBalance.Visible := admin_visible;
+  btChangeClubDetails.Visible := admin_visible;
+  acShowClubChangeDetailsForm.Enabled := admin_visible;
+  acUpdateClubDetails.Enabled := admin_visible;
+  btCloseClub.Visible := admin_visible;
+  acCloseClub.Enabled := admin_visible;
+  btResetBalance.Visible := admin_visible;
+  btSetLimit.Visible := admin_visible;
+  acResetBalance.Enabled := (admin_visible) and (Assigned(member));
+  acSetLimit.Enabled := (admin_visible) and (Assigned(member));
+  btGiveOwnership.Visible := admin_visible;
+  acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
+  btRemovePlayerFromClub.Visible := admin_visible;
+  acRemovePlayer.Enabled := acGiveOwnership.Enabled;
+  btSuspendUnsuspend.Visible := admin_visible;
+  if btSuspendUnsuspend.Visible then
   begin
-    Caption := Format('%s lobby', [club.Name]);
-
-    lbsHeader.Caption := club.Name;
-
-    manager := '';
-    if Players.TryGetValue(club.OwnerId, player) then
-      manager := player.Nick;
-
-    lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
-
-    admin_visible := CompareBytes(club.OwnerId, dmMain.SelfInfo.Id);
-
-    if not club.GetMemberInfo(FSelectedPlayerId, member) then
-      member := nil;
-
-    gridPlayersListLimit.Visible := admin_visible;
-    gridPlayersListBalance.Visible := admin_visible;
-    btChangeClubDetails.Visible := admin_visible;
-    acShowClubChangeDetailsForm.Enabled := admin_visible;
-    acUpdateClubDetails.Enabled := admin_visible;
-    btCloseClub.Visible := admin_visible;
-    acCloseClub.Enabled := admin_visible;
-    btResetBalance.Visible := admin_visible;
-    btSetLimit.Visible := admin_visible;
-    acResetBalance.Enabled := (admin_visible) and (Assigned(member));
-    acSetLimit.Enabled := (admin_visible) and (Assigned(member));
-    btGiveOwnership.Visible := admin_visible;
-    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (not CompareBytes(club.OwnerId, FSelectedPlayerId));
-    btRemovePlayerFromClub.Visible := admin_visible;
-    acRemovePlayer.Enabled := acGiveOwnership.Enabled;
-    btSuspendUnsuspend.Visible := admin_visible;
-    if btSuspendUnsuspend.Visible then
-    begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
-      if acReinstatePlayer.Enabled then
-        btSuspendUnsuspend.Action := acReinstatePlayer
-      else
-        btSuspendUnsuspend.Action := acSuspendPlayer;
-    end;
-    btNewGame.Visible := admin_visible;
-    acShowCreateGameForm.Enabled := admin_visible;
-    btCloseTable.Visible := admin_visible;
-    acCloseTable.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
+    acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
+    acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (not CompareBytes(member.MongoId, club.OwnerId));
+    if acReinstatePlayer.Enabled then
+      btSuspendUnsuspend.Action := acReinstatePlayer
+    else
+      btSuspendUnsuspend.Action := acSuspendPlayer;
+  end;
+  btNewGame.Visible := admin_visible;
+  acShowCreateGameForm.Enabled := admin_visible;
+  btCloseTable.Visible := admin_visible;
+  acCloseTable.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
 //    btEditGame.Visible := admin_visible;
 //    acShowEditGameForm.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
-    Bevel1.Visible := admin_visible;
-    btLeaveClub.Visible := not admin_visible;
-    acLeaveClub.Enabled := not admin_visible;
-    if admin_visible then
-    begin
-      gridPlayersList.Align := alTop;
-      gridGames.Align := alTop;
+  Bevel1.Visible := admin_visible;
+  btLeaveClub.Visible := not admin_visible;
+  acLeaveClub.Enabled := not admin_visible;
+  if admin_visible then
+  begin
+    gridPlayersList.Align := alTop;
+    gridGames.Align := alTop;
 
-      gridPlayersList.Height := btSuspendUnsuspend.Top - 5;
-      gridGames.Height := btNewGame.Top - 5;
-    end
-    else
-    begin
-      gridPlayersList.Align := alClient;
-      gridGames.Align := alClient;
-    end;
+    gridPlayersList.Height := btSuspendUnsuspend.Top - 5;
+    gridGames.Height := btNewGame.Top - 5;
+  end
+  else
+  begin
+    gridPlayersList.Align := alClient;
+    gridGames.Align := alClient;
+  end;
 
-    btStats.Enabled := admin_visible;
+  btStats.Enabled := admin_visible;
 
-    if AUpdateLists then
+  if AUpdateLists then
+  begin
+    UpdatePlayerlist;
+    UpdateGamesList;
+    if btStats.Enabled then
     begin
-      UpdatePlayerlist;
-      UpdateGamesList;
-      if btStats.Enabled then
-      begin
-        UpdateTablesStatsList;
-        UpdatePlayersStatsList;
-      end;
+      UpdateTablesStatsList;
+      UpdatePlayersStatsList;
     end;
   end;
 end;

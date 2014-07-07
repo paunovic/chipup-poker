@@ -112,7 +112,7 @@ type
     property RVLines: TStringList read FRVLines;
   end;
 
-  THandHistoryItems = class(TObjectDictionary<UINT, THandHistoryItem>)
+  THandHistoryItems = class(TObjectList<THandHistoryItem>)
   var
     FGameId: TBytes;
     FClubId: TBytes;
@@ -125,6 +125,7 @@ type
 
     procedure AddHand(const AHandHistory: TPB_HandHistory);
     function LastHandId: UINT;
+    function FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
 
     property Club: TClubInfo read FClub;
     property Game: TGameInfo read FGame;
@@ -423,6 +424,8 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
+  inherited Create(TRUE);
+
   FLock := TCriticalSection.Create;
 
   FClubId := AClubId;
@@ -449,8 +452,6 @@ begin
   begin
 
   end;
-
-  inherited Create([doOwnsValues]);
 end;
 
 destructor THandHistoryItems.Destroy;
@@ -463,21 +464,39 @@ begin
   inherited;
 end;
 
+function THandHistoryItems.FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
+var
+  hhi: THandHistoryItem;
+begin
+  FLock.Enter;
+  try
+    for hhi in ToArray do
+      if hhi.HandId = AHandId then
+      begin
+        AHandHistoryItem := hhi;
+        Exit(TRUE);
+      end;
+    Exit(FALSE);
+  finally
+    FLock.Leave;
+  end;
+end;
+
 procedure THandHistoryItems.AddHand(const AHandHistory: TPB_HandHistory);
 var
   hhi: THandHistoryItem;
 begin
   FLock.Enter;
   try
-    if TryGetValue(AHandHistory.Seq, hhi) then
+    if FindHand(AHandHistory.Seq, hhi) then
       hhi.Assign(AHandHistory)
     else
     begin
       while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
-        Remove(Keys.ToArray[Count - 1]);
+        Remove(Last);
     end;
 
-    Add(AHandHistory.Seq, THandHistoryItem.Create(self, AHandHistory));
+    Add(THandHistoryItem.Create(self, AHandHistory));
   finally
     FLock.Leave;
   end;
@@ -490,7 +509,7 @@ begin
     if Count = 0 then
       Exit(0)
     else
-      result := Keys.ToArray[Count - 1];
+      result := Last.HandId;
   finally
     FLock.Leave;
   end;

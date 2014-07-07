@@ -283,7 +283,7 @@ begin
   cbHand.Properties.BeginUpdate;
   try
     C1 := 0;
-    for hhi in hhis.Values do
+    for hhi in hhis do
     begin
       hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhis.Game.Limit, FALSE),
          ChipsToStr(hhis.Game.SmallBlind), ChipsToStr(hhis.Game.BigBlind), hhi.StartTimeStr]);
@@ -323,7 +323,7 @@ var
 begin
   rvHandHistory.ClearAll;
   if (not HandHistory.TryGetValue(FSelectedTableId, hhis)) or
-     (not hhis.TryGetValue(FSelectedHandId, hhi)) then
+     (not hhis.FindHand(FSelectedHandId, hhi)) then
   begin
     acCopyToClipboard.Enabled := FALSE;
     acReplayHand.Enabled := FALSE;

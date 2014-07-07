@@ -462,7 +462,7 @@ begin
        (table.SeatIndex = seat_index) and
        (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
        (seat_info.Status in [psOutOfPlay, psOutOfHand]))) then
-    FormsContainer.Add(RunModalForm(TfrmTableSit, self, [table, table.Renderer.TableStatus, @seat_index], ModalFormClose));
+    FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Renderer.TableStatus, @seat_index], ModalFormClose));
 end;
 
 procedure TfrmTable.seRaiseAmountKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -698,7 +698,7 @@ begin
 
   if (table.TableType <> ttHandPlayback) or
      (not HandHistory.TryGetValue(table.GameId, hhis)) or
-     (not hhis.TryGetValue(table.HandId, AHandHistoryItem)) then
+     (not hhis.FindHand(table.HandId, AHandHistoryItem)) then
     Exit(FALSE);
 
   Exit(TRUE);

@@ -220,7 +220,6 @@ end;
 procedure TTableRenderer.SetRenderTarget(const AHandle: THandle);
 begin
   FHandle := AHandle;
-  FMetrics.SetRenderHandle(FHandle);
 end;
 
 procedure TTableRenderer.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);

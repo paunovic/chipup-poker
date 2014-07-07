@@ -11,8 +11,6 @@ type
   TTableRenderMetrics = class
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
-    FHandle: THandle;
-
     FTableResizeRatio: Single;
     FRawTableBounds: TPoint4;
     FTableWidth: Single;
@@ -74,8 +72,6 @@ type
 
     constructor Create;
     destructor Destroy; override;
-
-    procedure SetRenderHandle(const AHandle: THandle);
 
     function GetTableSector(const APoint: TPoint2): TTableSector;
     function GetSeatPoint(const AGame: TGameInfo; const ASeatIndex: Integer): TPoint2;
@@ -342,11 +338,6 @@ begin
     end;
   end;
   Exit(FALSE);
-end;
-
-procedure TTableRenderMetrics.SetRenderHandle(const AHandle: THandle);
-begin
-  FHandle := AHandle;
 end;
 
 procedure TTableRenderMetrics.Update(const AGame: TGameInfo; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);

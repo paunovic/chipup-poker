@@ -48,7 +48,7 @@ end;
 
 destructor THandHistory.Destroy;
 begin
-  FLock.Free;
+  FreeAndNil(FLock);
   inherited;
 end;
 
@@ -72,7 +72,7 @@ begin
   end;
 
   for pbhh in AClubHandHistoryInfo.Rows do
-    if not hhis.TryGetValue(pbhh.Seq, hhi) then
+    if not hhis.FindHand(pbhh.Seq, hhi) then
       hhis.AddHand(pbhh)
     else
       hhi.Assign(pbhh);

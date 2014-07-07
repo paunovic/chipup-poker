@@ -5,12 +5,13 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback,
   Poker.Clubs.Club, Vcl.Forms, Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Renderer,
-  Poker.Avatars.Avatar, Poker.Tables.Table;
+  Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs;
 
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+    FLock: TCriticalSection;
     FNextTableInternalId: Integer;
   public
     class procedure Initialize;
@@ -21,6 +22,9 @@ type
 
     procedure DisableAll;
     procedure EnableAll;
+
+    procedure Remove(const AId: Integer);
+    procedure Add(const AId: Integer; const ATable: TTable);
 
     procedure ClearWithoutNotification;
 
@@ -54,11 +58,11 @@ begin
   FreeAndNil(Tables);
 end;
 
-
 constructor TTableList.Create;
 begin
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Tables'); {$ENDIF}
 
+  FLock := TCriticalSection.Create;
   FNextTableInternalId := 0;
 
   inherited Create([doOwnsValues]);
@@ -68,7 +72,28 @@ destructor TTableList.Destroy;
 begin
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
+  FreeAndNil(FLock);
   inherited;
+end;
+
+procedure TTableList.Remove(const AId: Integer);
+begin
+  FLock.Enter;
+  try
+    inherited Remove(AId);
+  finally
+    FLock.Leave;
+  end;
+end;
+
+procedure TTableList.Add(const AId: Integer; const ATable: TTable);
+begin
+  FLock.Enter;
+  try
+    inherited Add(AId, ATable);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 function TTableList.AddTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
@@ -89,7 +114,7 @@ begin
     Exit(nil);
   end;
 
-  inherited Add(FNextTableInternalId, table);
+  Add(FNextTableInternalId, table);
   Inc(FNextTableInternalId);
 
   if table.SetupLiveTable(AGameId, ASendJoinCommand) then
@@ -114,7 +139,7 @@ var
   hhi: THandHistoryItem;
 begin
   if (not HandHistory.TryGetValue(AGameId, hhis)) or
-     (not hhis.TryGetValue(AHandId, hhi)) then
+     (not hhis.FindHand(AHandId, hhi)) then
     Exit(nil);
 
   table := TTable.Create(FNextTableInternalId);
@@ -124,7 +149,7 @@ begin
     Exit(nil);
   end;
 
-  inherited Add(FNextTableInternalId, table);
+  Add(FNextTableInternalId, table);
   Inc(FNextTableInternalId);
 
   table.SetupHandHistoryTable(hhis, hhi);
@@ -138,18 +163,28 @@ var
   table: TTable;
 begin
   result := 0;
-  for table in Values do
-    if table.IsSitting then
-      Inc(result);
+  FLock.Enter;
+  try
+    for table in Values do
+      if table.IsSitting then
+        Inc(result);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TTableList.ClearWithoutNotification;
 var
   table: TTable;
 begin
-  for table in Values do
-    table.LeaveNotify := FALSE;
-  Clear;
+  FLock.Enter;
+  try
+    for table in Values do
+      table.LeaveNotify := FALSE;
+    Clear;
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TTableList.CloseTablesForClub(const AClubId: TBytes);
@@ -160,9 +195,15 @@ var
 begin
   to_remove := TList<Integer>.Create;
   try
-    for table in Values do
-      if CompareBytes(table.ClubId, AClubId) then
-        to_remove.Add(table.InternalId);
+    FLock.Enter;
+    try
+      for table in Values do
+        if CompareBytes(table.ClubId, AClubId) then
+          to_remove.Add(table.InternalId);
+    finally
+      FLock.Leave;
+    end;
+
     for id in to_remove do
       Remove(id);
   finally
@@ -174,30 +215,45 @@ procedure TTableList.DisableAll;
 var
   table: TTable;
 begin
-  for table in Values do
-    EnableWindow(table.Form.Handle, FALSE);
+  FLock.Enter;
+  try
+    for table in Values do
+      EnableWindow(table.Form.Handle, FALSE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TTableList.EnableAll;
 var
   table: TTable;
 begin
-  for table in Values do
-    EnableWindow(table.Form.Handle, TRUE);
+  FLock.Enter;
+  try
+    for table in Values do
+      EnableWindow(table.Form.Handle, TRUE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 function TTableList.FindTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean;
 var
   table: TTable;
 begin
-  for table in Values do
-    if (CompareBytes(table.GameId, AMongoId)) and
-       (table.TableType = ATableType) then
-    begin
-      ATable := table;
-      Exit(TRUE);
-    end;
-  Exit(FALSE);
+  FLock.Enter;
+  try
+    for table in Values do
+      if (CompareBytes(table.GameId, AMongoId)) and
+         (table.TableType = ATableType) then
+      begin
+        ATable := table;
+        Exit(TRUE);
+      end;
+    Exit(FALSE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 end.
