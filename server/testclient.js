@@ -81,8 +81,8 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 function Client(handle) {
 	this.socket = net.connect(12345,'127.0.0.1',function cb2() {
 	});
-	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.handle = handle;
+	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.socket.on('end',function () {
 		this.log('connection lost');
 		process.exit();
