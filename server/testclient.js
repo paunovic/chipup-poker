@@ -9,6 +9,8 @@ var async = require('async');
 var colors = require('colors');
 var Hand = require('./deck').Hand;
 
+var PORT = process.argv[4] ? process.argv[4] : 12345;
+
 Protoreader.init(pb,codes);
 
 function bufToCards(buf) {
@@ -79,7 +81,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 });
 
 function Client(handle) {
-	this.socket = net.connect(12345,'dev-server.chipuppoker.com',function cb2() {
+	this.socket = net.connect(PORT ,'dev-server.chipuppoker.com',function cb2() {
 	});
 	this.handle = handle;
 	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
