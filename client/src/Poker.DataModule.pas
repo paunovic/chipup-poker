@@ -5,8 +5,8 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Objects.Players.Player, Poker.Protobufs.Objects.StatusReply,
-  Vcl.Forms, dxSkinsForm, Poker.Objects.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player, Poker.Protobufs.Objects.StatusReply,
+  Vcl.Forms, dxSkinsForm, Poker.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
   dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls;
 
@@ -67,11 +67,11 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Table.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
+  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Tables.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
-  Poker.Objects.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Table.Tables, Poker.Objects.TableStatistics.TableStatsList,
-  Poker.Forms.Table, Poker.Objects.TableStatus, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Objects.SeatInfo, Poker.Forms.About,
-  Poker.Objects.Players.PlayerList;
+  Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
+  Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
+  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -121,7 +121,7 @@ begin
   FSelfInfo := TPlayerInfo.Create;
 
   TPlayerList.Initialize;
-  TTables.Initialize;
+  TTableList.Initialize;
 
   FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
   FReconnectedTables := TObjectList<TPB_TableStatus>.Create;
@@ -135,7 +135,7 @@ begin
 
   TFormsContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
-  TTables.Deinitialize;
+  TTableList.Deinitialize;
   TPlayerList.Deinitialize;
   FSelfInfo.Free;
   TServerSocketCommands.Deinitialize;
@@ -259,21 +259,31 @@ var
   table: TTable;
   tstatus: TPB_TableStatus;
   exists: Boolean;
-  C1: Integer;
+  to_remove: TList<TBytes>;
+  mongoid: TBytes;
 begin
   // first, close all tables that dont exist in reconnected tables array
-  for C1 := Tables.Count - 1 downto 0 do
-  begin
-    exists := FALSE;
-    for tstatus in FReconnectedTables do
-      if CompareBytes(tstatus.TableMongoId, Tables[C1].Game.MongoId) then
-      begin
-        exists := TRUE;
-        Break;
-      end;
+  to_remove := TList<TBytes>.Create;
+  try
+    for table in Tables.Values do
+    begin
+      exists := FALSE;
+      for tstatus in FReconnectedTables do
+        if CompareBytes(tstatus.TableMongoId, table.GameId) then
+        begin
+          exists := TRUE;
+          Break;
+        end;
 
-    if not exists then
-      Tables.Delete(C1);
+      if not exists then
+        to_remove.Add(table.GameId);
+    end;
+
+    for mongoid in to_remove do
+      if Tables.FindTable(mongoid, ttLiveGame, table) then
+        Tables.Remove(table.Internalid);
+  finally
+    to_remove.Free;
   end;
 
   // restore reconnected table states
@@ -281,7 +291,7 @@ begin
   begin
     table := nil;
 
-    if not Tables.FindTable(tstatus.TableMongoId, table) then
+    if not Tables.FindTable(tstatus.TableMongoId, ttLiveGame, table) then
       table := Tables.AddTable(tstatus.TableMongoId, TRUE, FALSE);
 
     if Assigned(table) then
@@ -312,7 +322,7 @@ var
   seat: TSeatInfo;
 begin
   result := FSelfInfo.Balance;
-  for table in Tables do
+  for table in Tables.Values do
     for seat in table.Renderer.TableStatus.Seats do
       if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
       begin

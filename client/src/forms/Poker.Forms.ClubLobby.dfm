@@ -2551,7 +2551,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
-        ExplicitHeight = 435
         DesignSize = (
           250
           427)
@@ -2621,8 +2620,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
-        ExplicitWidth = 628
-        ExplicitHeight = 435
         DesignSize = (
           626
           427)
@@ -2701,7 +2698,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 346
+          Top = 322
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2718,7 +2715,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 346
+          Top = 322
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2735,7 +2732,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 346
+          Top = 322
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2752,7 +2749,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 346
+          Top = 322
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2769,7 +2766,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 346
+          Top = 322
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2802,8 +2799,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 880
-        ExplicitHeight = 435
         DesignSize = (
           878
           427)
@@ -2813,7 +2808,7 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 872
-          Height = 315
+          Height = 291
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -2897,7 +2892,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 299
+          Top = 275
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2914,7 +2909,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 299
+          Top = 275
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2931,7 +2926,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 235
+          Top = 211
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]

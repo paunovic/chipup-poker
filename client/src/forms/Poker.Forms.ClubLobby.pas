@@ -4,8 +4,8 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams,
-  Poker.Objects.Clubs.Club, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
-  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Objects.Players.PlayerList, dxBevel, cxImage, Vcl.ExtCtrls,
+  Poker.Clubs.Club, cxControls, cxEdit, cxLabel, cxButtons, cxPC, cxGroupBox, Vcl.ActnList, cxCustomData, cxGridLevel,
+  cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxGrid, Poker.Players.PlayerList, dxBevel, cxImage, Vcl.ExtCtrls,
   Vcl.Menus, cxStyles, cxData, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin,
   dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxFilter, cxDataStorage, cxBlobEdit, cxTextEdit, cxSpinEdit, cxCheckBox, cxCalendar, cxTimeEdit,
   cxClasses, Vcl.StdCtrls, dxGDIPlusClasses;
@@ -199,11 +199,11 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.Generics.Collections,
   Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Forms.ChangeClubDetails,
-  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Objects.Games.Game,
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Games.Game,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Objects.TableStatistics.TableStatsList, Poker.Stats.Player, System.DateUtils,
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, Poker.Players.Stats, System.DateUtils,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions,
-  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Objects.Clubs.Member, Poker.Objects.Players.Player, Poker.Objects.TableStatistics.TableStats;
+  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member, Poker.Players.Player, Poker.Tables.Stats;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);

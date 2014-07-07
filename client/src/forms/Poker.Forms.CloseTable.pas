@@ -3,7 +3,7 @@ unit Poker.Forms.CloseTable;
 interface
 
 uses
-  System.Classes, Vcl.Controls, Vcl.Forms, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Poker.Objects.Games.Game,
+  System.Classes, Vcl.Controls, Vcl.Forms, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Poker.Games.Game,
   Vcl.ActnList, cxButtons, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls;
 
 type

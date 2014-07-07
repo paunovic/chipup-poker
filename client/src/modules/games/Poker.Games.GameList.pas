@@ -1,9 +1,9 @@
-unit Poker.Objects.Games.GameList;
+unit Poker.Games.GameList;
 
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Objects.Games.Game, Poker.Protobufs.Objects.Game;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.Protobufs.Objects.Game;
 
 type
   TGameList = class(TObjectDictionary<TBytes, TGameInfo>)

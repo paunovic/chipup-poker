@@ -1,9 +1,9 @@
-unit Poker.Objects.Players.Player;
+unit Poker.Players.Player;
 
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Objects.Clubs.ClubList, Poker.Protobufs.Objects.StatusReply,
+  System.Generics.Collections, System.SysUtils, Poker.Clubs.ClubList, Poker.Protobufs.Objects.StatusReply,
   Poker.Protobufs.Objects.User;
 
 type
@@ -40,7 +40,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Table.Tables, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc, Poker.Objects.Clubs.Club;
+  Poker.Tables.TableList, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Common.Misc, Poker.Clubs.Club,
+  Poker.Tables.Table;
 
 constructor TPlayerInfo.Create;
 begin
@@ -69,6 +70,8 @@ var
   C1: Integer;
   tables_ids: TList<TBytes>;
   tables_close: TObjectList<TTable>;
+  mongoid: TBytes;
+  table: TTable;
 begin
   FId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
@@ -79,20 +82,20 @@ begin
 
   tables_ids := TList<TBytes>.Create;
   try
-    for C1 := 0 to Tables.Count - 1 do
-      tables_ids.Add(Tables.Items[C1].Game.MongoId);
+    for table in Tables.Values do
+      tables_ids.Add(table.GameId);
 
     FClubs.Clear;
     for C1 := 0 to AStatusReply.Clubs.Count - 1 do
       FClubs.AddClub(AStatusReply.Clubs[C1]);
 
     for pbgame in AStatusReply.Games do
-      if FClubs.FindClubBySeq(pbgame.ClubSeq, club) then
+      if FClubs.FindClubBySeq(pbgame.Clubseq, club) then
         club.Games.AddGame(pbgame);
-
+{    FIXME
     tables_close := TObjectList<TTable>.Create(FALSE);
     try
-      for C1 := 0 to tables_ids.Count - 1 do
+      for mongoid in tables_ids do
         if not Tables.Items[C1].ReassignObjects(tables_ids[C1]) then
           tables_close.Add(Tables.Items[C1]);
 
@@ -101,6 +104,7 @@ begin
     finally
       tables_close.Free;
     end;
+    }
   finally
     tables_ids.Free;
   end;

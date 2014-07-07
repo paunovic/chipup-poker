@@ -1,9 +1,9 @@
-unit Poker.Table.RenderMetrics;
+unit Poker.Tables.RenderMetrics;
 
 interface
 
 uses
-  Winapi.Windows, Vectors2px, Vectors2, AsphyreTypes, Poker.Objects.Games.Game, Poker.Objects.SeatInfo, System.Types;
+  Winapi.Windows, Vectors2px, Vectors2, AsphyreTypes, Poker.Games.Game, Poker.Seats.Seat, System.Types;
 
 type
   TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
@@ -12,7 +12,6 @@ type
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FHandle: THandle;
-    FGame: TGameInfo;
 
     FTableResizeRatio: Single;
     FRawTableBounds: TPoint4;
@@ -67,33 +66,29 @@ type
     FHandPlaybackPlay: TRect;
     FHandPlaybackBack: TRect;
     FHandPlaybackForward: TRect;
-
-    procedure SetGame(const AValue: TGameInfo);
-
   public
     const
       CARD_OPEN_PERC   = 0.55;
       CARD_HIDDEN_PERC = 0.35;
       CARD_FOLDED_PERC = 0.55;
 
-    constructor Create(const AGame: TGameInfo);
+    constructor Create;
     destructor Destroy; override;
 
     procedure SetRenderHandle(const AHandle: THandle);
 
     function GetTableSector(const APoint: TPoint2): TTableSector;
-    function GetSeatPoint(const ASeatIndex: Integer): TPoint2;
-    function GetCardPoint(const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
-    function GetDealerPoint(const ASeatIndex: Integer): TPoint2;
-    function GetBetPoint(const ASeatIndex, ACurrentDealer: Integer): TPoint2;
+    function GetSeatPoint(const AGame: TGameInfo; const ASeatIndex: Integer): TPoint2;
+    function GetCardPoint(const AGame: TGameInfo; const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
+    function GetDealerPoint(const AGame: TGameInfo; const ASeatIndex: Integer): TPoint2;
+    function GetBetPoint(const AGame: TGameInfo; const ASeatIndex, ACurrentDealer: Integer): TPoint2;
     function GetPotPoint(const APotIndex: Integer): TPoint2;
-    function IsPointInSeat(const AX, AY: Integer; out ASeatIndex: Integer): Boolean;
+    function IsPointInSeat(const AGame: TGameInfo; const AX, AY: Integer; out ASeatIndex: Integer): Boolean;
     function IsPointInRaiseThumb(const AX, AY: Integer): Boolean;
     function IsPointInRaiseTrack(const AX, AY: Integer; out APercentage: Single): Boolean;
 
-    procedure Update(const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
+    procedure Update(const AGame: TGameInfo; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
 
-    property Game: TGameInfo read FGame write SetGame;
     property TableResizeRatio: Single read FTableResizeRatio;
     property RawTableBounds: TPoint4 read FRawTableBounds;
     property TableWidth: Single read FTableWidth;
@@ -139,14 +134,13 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.Table.Resources, Poker.Common.Misc;
+  System.SysUtils, Poker.Tables.Resources, Poker.Common.Misc;
 
 { TTableRenderMetrics }
 
-constructor TTableRenderMetrics.Create(const AGame: TGameInfo);
+constructor TTableRenderMetrics.Create;
 begin
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject('TableRenderMetrics'); {$ENDIF}
-  FGame := AGame;
 end;
 
 destructor TTableRenderMetrics.Destroy;
@@ -196,13 +190,13 @@ begin
           result := tsMid;
 end;
 
-function TTableRenderMetrics.GetSeatPoint(const ASeatIndex: Integer): TPoint2;
+function TTableRenderMetrics.GetSeatPoint(const AGame: TGameInfo; const ASeatIndex: Integer): TPoint2;
 var
   seat_radians: Double;
   x, y: Single;
   pf: TPointF;
 begin
-  seat_radians := TTableResources.SEAT_POINTS[FGame.Seats, ASeatIndex];
+  seat_radians := TTableResources.SEAT_POINTS[AGame.Seats, ASeatIndex];
 
   x := TableCenter.X + (TableWidth * 0.9 / 2) * Cos(seat_radians);
   y := TableCenter.Y - TableCenterYOffset + (TableHeight * 0.95 / 2) * Sin(seat_radians) - 8 * TableResizeRatio;
@@ -223,7 +217,7 @@ begin
   result := Point2(pf.x, pf.y);
 end;
 
-function TTableRenderMetrics.GetBetPoint(const ASeatIndex, ACurrentDealer: Integer): TPoint2;
+function TTableRenderMetrics.GetBetPoint(const AGame: TGameInfo; const ASeatIndex, ACurrentDealer: Integer): TPoint2;
 var
   seat_radians: Double;
   x, y: Single;
@@ -240,13 +234,13 @@ begin
     yr := TableHeight / 1.45;
   end;
 
-  seat_radians := TTableResources.SEAT_POINTS[FGame.Seats, ASeatIndex];
+  seat_radians := TTableResources.SEAT_POINTS[AGame.Seats, ASeatIndex];
   x := TableCenter.X + (xr / 2) * Cos(seat_radians);
   y := TableCenter.Y - TableCenterYOffset + (yr / 2) * Sin(seat_radians) - 40 * TableResizeRatio;
   result := Point2(x, y);
 end;
 
-function TTableRenderMetrics.GetCardPoint(const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
+function TTableRenderMetrics.GetCardPoint(const AGame: TGameInfo; const ASeatInfo: TSeatInfo; const ACardIndex: Integer): TPoint2;
 var
   seat_point: TPoint2;
   cards_width: Single;
@@ -254,7 +248,7 @@ var
   cards_starting_x: Single;
   perc: Single;
 begin
-  seat_point := GetSeatPoint(ASeatInfo.SeatIndex);
+  seat_point := GetSeatPoint(AGame, ASeatInfo.SeatIndex);
   cards_width := ASeatInfo.CardCount * CardWidth;
   if (cards_width > SeatCardsMaxWidth) and
      (ASeatInfo.CardCount > 1) then
@@ -277,23 +271,23 @@ begin
   result := Point2(cards_starting_x + ACardIndex * (CardWidth - cards_overlap_width), seat_point.Y - SeatHeight / 2 - CardHeight * perc);
 end;
 
-function TTableRenderMetrics.GetDealerPoint(const ASeatIndex: Integer): TPoint2;
+function TTableRenderMetrics.GetDealerPoint(const AGame: TGameInfo; const ASeatIndex: Integer): TPoint2;
 var
   seat_radians: Double;
   x, y: Single;
   xr, yr: Single;
 begin
-  if (FGame.Seats < Low(TableResources.SEAT_POINTS)) or // FIXME?
-     (FGame.Seats > High(TableResources.SEAT_POINTS)) then
+  if (AGame.Seats < Low(TableResources.SEAT_POINTS)) or // FIXME?
+     (AGame.Seats > High(TableResources.SEAT_POINTS)) then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid FGame.Seats number [%d]', [FGame.Seats]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid AGame.Seats number [%d]', [AGame.Seats]), ditException); {$ENDIF}
     Exit(Point2(0, 0));
   end;
 
   xr := TableWidth / 1.25;
   yr := TableHeight / 1.45;
 
-  seat_radians := TTableResources.SEAT_POINTS[FGame.Seats, ASeatIndex];
+  seat_radians := TTableResources.SEAT_POINTS[AGame.Seats, ASeatIndex];
   x := TableCenter.X + (xr / 2) * Cos(seat_radians);
   y := TableCenter.Y - TableCenterYOffset + (yr / 2) * Sin(seat_radians) - 17 * TableResizeRatio;
   result := Point2(x, y);
@@ -330,15 +324,15 @@ begin
     APercentage := (AX - FRaiseTrackBounds[0].x) / (FRaiseTrackBounds[1].x - FRaiseTrackBounds[0].x);
 end;
 
-function TTableRenderMetrics.IsPointInSeat(const AX, AY: Integer; out ASeatIndex: Integer): Boolean;
+function TTableRenderMetrics.IsPointInSeat(const AGame: TGameInfo; const AX, AY: Integer; out ASeatIndex: Integer): Boolean;
 var
   C1: Integer;
   seat_point: TPoint2;
   seat_rect: TRectF;
 begin
-  for C1 := 0 to FGame.Seats - 1 do
+  for C1 := 0 to AGame.Seats - 1 do
   begin
-    seat_point := GetSeatPoint(C1);
+    seat_point := GetSeatPoint(AGame, C1);
     seat_rect := TRectF.Create(seat_point.X - FSeatWidth / 2, seat_point.Y - FSeatHeight / 2, seat_point.X + FSeatWidth / 2, seat_point.Y + FSeatHeight / 2);
     if (AX >= seat_rect.Left) and (AX <= seat_rect.Right) and
        (AY >= seat_rect.Top) and (AY <= seat_rect.Bottom) then
@@ -350,17 +344,12 @@ begin
   Exit(FALSE);
 end;
 
-procedure TTableRenderMetrics.SetGame(const AValue: TGameInfo);
-begin
-  FGame := AValue;
-end;
-
 procedure TTableRenderMetrics.SetRenderHandle(const AHandle: THandle);
 begin
   FHandle := AHandle;
 end;
 
-procedure TTableRenderMetrics.Update(const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
+procedure TTableRenderMetrics.Update(const AGame: TGameInfo; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
 const
   TABLE_X_LEFT = 64;
   TABLE_X_RIGHT = 64;
@@ -403,7 +392,7 @@ begin
 
   // seats
   FSeatHeight := (ADXAreaSize.y - (FTableBounds[2].Y - FTableBounds[0].Y)) / 5.2;
-  if FGame.Seats = 10 then
+  if AGame.Seats = 10 then
     FSeatHeight := FSeatHeight * 0.85;
 
   FSeatWidth := FSeatHeight * TableResources.SeatAspectRatio;

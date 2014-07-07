@@ -3,14 +3,14 @@ unit Poker.Objects.TableEvent;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TableEvent, Poker.Objects.PotInfo;
+  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TableEvent, Poker.Pots.PotList;
 
 type
   TTableEvent = class
   private
     FEvent: TTableEventType;
     FSeat: Integer;
-    FPots: TPotInfos;
+    FPots: TPotList;
     FBets: TList<UINT32>;
     FCards: TBytes;
   public
@@ -21,7 +21,7 @@ type
 
     property Event: TTableEventType read FEvent;
     property Seat: Integer read FSeat;
-    property Pots: TPotInfos read FPots;
+    property Pots: TPotList read FPots;
     property Bets: TList<UINT32> read FBets;
     property Cards: TBytes read FCards;
   end;
@@ -38,7 +38,7 @@ implementation
 constructor TTableEvent.Create(const APBTableEvent: TPB_TableEvent);
 begin
   FBets := TList<UINT32>.Create;
-  FPots := TPotInfos.Create;
+  FPots := TPotList.Create;
   Assign(APBTableEvent);
 end;
 

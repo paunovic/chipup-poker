@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxLabel, cxCheckBox, cxSpinEdit, cxButtons,
-  Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Objects.Clubs.Club, cxGraphics, cxLookAndFeels,
+  Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Clubs.Club, cxGraphics, cxLookAndFeels,
   cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, Vcl.StdCtrls;
 
 type
@@ -42,7 +42,7 @@ implementation
 
 uses
   Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Objects.Clubs.Member;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Clubs.Member;
 
 
 procedure TfrmClubMemberOptions.FormCreate(Sender: TObject);

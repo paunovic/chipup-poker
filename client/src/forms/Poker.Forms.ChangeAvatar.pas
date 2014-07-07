@@ -51,10 +51,9 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  PNGImage, Poker.Objects.Avatars.Avatar, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply,
-  Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Common.Encryption,
-  Poker.Settings, Poker.DataModule, Poker.Objects.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop,
-  Poker.Objects.Players.Player, Poker.Objects.Avatars.AvatarList;
+  PNGImage, Poker.Avatars.Avatar, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket.Commands, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
+  Poker.DataModule, Poker.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop, Poker.Players.Player, Poker.Avatars.AvatarList;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);

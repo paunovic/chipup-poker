@@ -1,9 +1,9 @@
-unit Poker.Objects.SeatInfo;
+unit Poker.Seats.Seat;
 
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Objects.Players.Player;
+  System.SysUtils, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Players.Player;
 
 type
   TSeatInfo = class
@@ -50,18 +50,7 @@ type
     property CanShow: Boolean read FCanShow;
   end;
 
-  TSeatInfos = class(TObjectList<TSeatInfo>)
-  private
-  public
-    procedure ClearCaptions;
-
-    procedure Sort; reintroduce;
-  end;
-
 implementation
-
-uses
-  System.Generics.Defaults;
 
 { TSeatInfo }
 
@@ -123,39 +112,6 @@ end;
 procedure TSeatInfo.FillDealtCards;
 begin
   FDealtCards := FCardCount;
-end;
-
-{ TSeatInfos }
-
-procedure TSeatInfos.Sort;
-var
-  comparer: IComparer<TSeatInfo>;
-  comparison: TComparison<TSeatInfo>;
-begin
-  comparison := function(const ASeatInfo1, ASeatInfo2: TSeatInfo): Integer
-  begin
-    if ASeatInfo1.SeatIndex < ASeatInfo2.SeatIndex then
-      result := -1
-    else
-      if ASeatInfo1.SeatIndex > ASeatInfo2.SeatIndex then
-        result := 1
-      else
-        result := 0;
-  end;
-
-  comparer := TComparer<TSeatInfo>.Construct(comparison);
-  inherited Sort(comparer);
-end;
-
-procedure TSeatInfos.ClearCaptions;
-var
-  C1: Integer;
-begin
-  for C1 := Low(ToArray) to High(ToArray) do
-  begin
-    ToArray[C1].UpperCaption := '';
-    ToArray[C1].LowerCaption := '';
-  end;
 end;
 
 

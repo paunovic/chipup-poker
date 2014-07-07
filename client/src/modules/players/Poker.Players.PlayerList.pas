@@ -1,9 +1,9 @@
-unit Poker.Objects.Players.PlayerList;
+unit Poker.Players.PlayerList;
 
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.User, Poker.Objects.Players.Player;
+  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.User, Poker.Players.Player;
 
 type
   TPlayerList = class(TObjectDictionary<TBytes, TPlayerInfo>)

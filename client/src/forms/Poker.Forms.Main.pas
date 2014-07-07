@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ActnList, Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel, cxGrid, cxLabel,
-  cxButtons, OverbyteIcsWSocket, Poker.Objects.Clubs.Club, Poker.Forms.Login, Poker.Objects.Games.Game, cxImage, Vcl.ActnMan,
+  cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login, Poker.Games.Game, cxImage, Vcl.ActnMan,
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
@@ -187,16 +187,16 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.Generics.Collections,
   Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
-  Poker.Server.MessageContainer, Poker.Objects.Players.PlayerList, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
+  Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Table.Tables, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams,
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams,
   Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater, Poker.Forms.ClubLobby,
-  Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Objects.TableStatistics.TableStatsList,
-  Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Objects.Avatars.Avatar, Poker.Forms.About,
+  Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList,
+  Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About,
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
-  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Objects.Clubs.Member, Poker.Objects.Players.Player,
-  Poker.Objects.Avatars.AvatarList, Poker.Objects.TableStatistics.TableStats;
+  Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
+  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Renderer;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -521,7 +521,7 @@ begin
      (member.Suspended) then
     MessageDlg('You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.', mtWarning, [mbOK], 0)
   else
-    if Tables.FindTable(game.MongoId, table) then
+    if Tables.FindTable(game.MongoId, ttLiveGame, table) then
       table.BringToFront
     else
       Tables.AddTable(game.MongoId, FALSE, TRUE);
@@ -945,7 +945,6 @@ begin
          (Assigned(club)) then
         club.Games.UpdateFromProtobufObjects(pbreply.Games);
 
-      Tables.ReassignObjects;
       ConfigureGUI;
     end;
   end;
@@ -1033,7 +1032,7 @@ procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);
 var
   table: TTable;
 begin
-  for table in Tables do
+  for table in Tables.Values do
     table.UpdateAvatars(Sender as TAvatar);
 end;
 
@@ -1111,22 +1110,16 @@ var
   pbgame: TPB_Game;
   club: TClubInfo;
   game: TGameInfo;
-  C1: Integer;
+  table: TTable;
 begin
   pbgame := AObject as TPB_Game;
 
   if (dmMain.SelfInfo.Clubs.FindClubBySeq(pbgame.Clubseq, club)) and
      (club.Games.TryGetValue(pbgame.MongoId, game)) then
   begin
-    for C1 := 0 to Tables.Count - 1 do
-      if Tables[C1].Game = game then
-      begin
-        Tables.Delete(C1);
-        Break;
-      end;
-
+    if Tables.FindTable(game.MongoId, ttLiveGame, table) then
+      Tables.Remove(table.InternalId);
     club.Games.AddGame(pbgame);
-    Tables.ReassignObjects;
   end;
 
   ConfigureGUI;
@@ -1147,8 +1140,6 @@ begin
     if (Assigned(game)) and
        (AMethodId = Integer(srCreateGameOk)) then
       Tables.AddTable(game.MongoId, FALSE, TRUE);
-
-    Tables.ReassignObjects;
   end;
 
   ConfigureGUI;
@@ -1158,12 +1149,14 @@ procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject:
 var
   pbtstatus: TPB_TableStatus;
   table: TTable;
+  game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
-  if not Tables.FindTable(pbtstatus.TableMongoId, table) then
+  if (not Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table)) or
+     (not table.GetGame(game)) then
     Exit;
 
-  table.Game.UpdateFromTableStatus(pbtstatus);
+  game.UpdateFromTableStatus(pbtstatus);
   if not table.Form.Visible then
     table.BringToFront;
 

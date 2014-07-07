@@ -1,4 +1,4 @@
-unit Poker.Objects.Games.Game;
+unit Poker.Games.Game;
 
 interface
 

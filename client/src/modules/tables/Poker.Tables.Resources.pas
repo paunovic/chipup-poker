@@ -1,4 +1,4 @@
-unit Poker.Table.Resources;
+unit Poker.Tables.Resources;
 
 interface
 

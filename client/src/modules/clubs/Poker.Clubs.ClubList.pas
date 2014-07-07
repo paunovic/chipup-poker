@@ -1,9 +1,9 @@
-unit Poker.Objects.Clubs.ClubList;
+unit Poker.Clubs.ClubList;
 
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Objects.Clubs.Club, Poker.Protobufs.Objects.Club, Poker.Objects.Games.Game;
+  System.Generics.Collections, System.SysUtils, Poker.Clubs.Club, Poker.Protobufs.Objects.Club, Poker.Games.Game;
 
 type
   TClubList = class(TObjectDictionary<TBytes, TClubInfo>)

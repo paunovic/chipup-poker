@@ -1,4 +1,4 @@
-unit Poker.Objects.ChipStackMaker.ChipStack;
+unit Poker.ChipStackMaker.ChipStack;
 
 interface
 
@@ -27,7 +27,7 @@ type
 implementation
 
 uses
-  Poker.Table.Resources;
+  Poker.Tables.Resources;
 
 { TChipStack }
 

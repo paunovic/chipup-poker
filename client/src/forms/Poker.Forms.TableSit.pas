@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxButtons, cxTextEdit,
-  cxSpinEdit, cxLabel, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Table.Tables, Poker.Objects.TableStatus,
+  cxSpinEdit, cxLabel, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Tables.Table, Poker.Tables.Status,
   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, dxSkinsCore,
   ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxMaskEdit;
 
@@ -70,7 +70,7 @@ implementation
 uses
   Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
-  Poker.Protobufs.Objects.Game, Poker.Objects.SeatInfo;
+  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Games.Game;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
@@ -111,18 +111,22 @@ function TfrmTableSit.GetMaxBuyin: UINT32;
 var
   seat_info: TSeatInfo;
   seat_chips: UINT32;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit(0);
+
   if (FTable.SeatIndex <> -1) and
      (FTableStatus.GetSeatInfo(FTable.SeatIndex, seat_info)) then
     seat_chips := seat_info.Chips
   else
     seat_chips := 0;
 
-  if seat_chips > FTable.Game.MaxBuyin * FTable.Game.BigBlind then
+  if seat_chips > game.MaxBuyin * game.BigBlind then
     result := 0
   else
   begin
-    result := FTable.Game.MaxBuyin * FTable.Game.BigBlind - seat_chips;
+    result := game.MaxBuyin * game.BigBlind - seat_chips;
     if result > dmMain.AvailableBalance then
       result := dmMain.AvailableBalance;
   end;
@@ -167,14 +171,18 @@ end;
 procedure TfrmTableSit.SetParams(const AParams: array of pointer);
 var
   default_buyin: UINT32;
+  game: TGameInfo;
 begin
   FTable := AParams[0];
   FTableStatus := AParams[1];
   FSeatIndex := PInteger(AParams[2])^;
 
-  lbvTableName.Caption := Format('%s (%s/%s %s)', [FTable.Game.Name, ChipsToStr(FTable.Game.SmallBlind), ChipsToStr(FTable.Game.BigBlind), FTable.Game.AsString(FALSE)]);
-  lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(FTable.Game.MinBuyin * FTable.Game.BigBlind),
-      ChipsToStr(FTable.Game.MaxBuyin * FTable.Game.BigBlind)]);
+  if not FTable.GetGame(game) then
+    Exit;
+
+  lbvTableName.Caption := Format('%s (%s/%s %s)', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(FALSE)]);
+  lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(game.MinBuyin * game.BigBlind),
+      ChipsToStr(game.MaxBuyin * game.BigBlind)]);
   lbvAvailableBalance.Caption := Format('%s', [ChipsToStr(dmMain.AvailableBalance)]);
   if FTable.SeatIndex <> -1 then
     FBuyinPhrase := 'add-on'
@@ -184,7 +192,7 @@ begin
   lbsMaxBuyin.Caption := Format('Your maximum %s:', [FBuyinPhrase]);
   lbvMaxBuyin.Caption := Format('%s', [ChipsToStr(GetMaxBuyin)]);
 
-  default_buyin := FTable.Game.BigBlind * 50;
+  default_buyin := game.BigBlind * 50;
   default_buyin := (default_buyin div 10) * 10;
   SetBuyin(default_buyin);
 end;
@@ -201,8 +209,12 @@ begin
 end;
 
 procedure TfrmTableSit.acMinExecute(Sender: TObject);
+var
+  game: TGameInfo;
 begin
-  SetBuyin(FTable.Game.MinBuyin * FTable.Game.BigBlind);
+  if not FTable.GetGame(game) then
+    Exit;
+  SetBuyin(game.MinBuyin * game.BigBlind);
 end;
 
 procedure TfrmTableSit.acOKExecute(Sender: TObject);
@@ -210,7 +222,11 @@ var
   err: String;
   seat_info: TSeatInfo;
   buyin: Single;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   if not TryStrToFloat(seBuyin.Text, buyin) then
   begin
     err := 'Invalid buyin';
@@ -221,11 +237,11 @@ begin
   begin
     if FTable.SeatIndex = -1 then
     begin
-      if FTable.Game.State = gsClosed then
+      if game.State = gsClosed then
         err := 'Table is closed';
 
       if err = '' then
-        ServerSocket.TableSit(FTable.Game.MongoId, FSeatIndex, Round(seBuyin.Value * 100))
+        ServerSocket.TableSit(game.MongoId, FSeatIndex, Round(seBuyin.Value * 100))
       else
         seBuyin.SelectAll;
     end
@@ -235,7 +251,7 @@ begin
         err := 'Invalid seat index';
 
       if err = '' then
-        ServerSocket.TableAddOn(FTable.Game.MongoId, Round(buyin * 100));
+        ServerSocket.TableAddOn(game.MongoId, Round(buyin * 100));
     end;
 
     acOK.Enabled := FALSE
@@ -247,9 +263,13 @@ end;
 procedure TfrmTableSit.CSRTableSitNoChips(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbstatus := AObject as TPB_TableStatus;
-  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+  if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
     Exit;
 
   MessageDlg('Insufficient chips', mtWarning, [mbOK], 0);
@@ -259,9 +279,13 @@ end;
 procedure TfrmTableSit.CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbstatus := AObject as TPB_TableStatus;
-  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+  if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
     Exit;
 
   ModalResult := mrOk;
@@ -271,9 +295,13 @@ end;
 procedure TfrmTableSit.CSRTableSitSeatTaken(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbstatus := AObject as TPB_TableStatus;
-  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+  if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
     Exit;
 
   MessageDlg('Seat is already taken. Please choose another seat', mtWarning, [mbOK], 0);
@@ -284,9 +312,13 @@ end;
 procedure TfrmTableSit.CSRTableAddonOk(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbstatus := AObject as TPB_TableStatus;
-  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+  if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
     Exit;
 
   ModalResult := mrOk;
@@ -296,9 +328,13 @@ end;
 procedure TfrmTableSit.CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbstatus := AObject as TPB_TableStatus;
-  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+  if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
     Exit;
 
   MessageDlg('You can''t add-on over maximum table buy-in limit', mtWarning, [mbOK], 0);
@@ -308,9 +344,13 @@ end;
 procedure TfrmTableSit.CSRClubBalanceReached(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbstatus := AObject as TPB_TableStatus;
-  if not CompareBytes(FTable.Game.MongoId, pbstatus.TableMongoId) then
+  if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
     Exit;
 
   MessageDlg('You reached your balance limit for this club', mtWarning, [mbOK], 0);
@@ -320,9 +360,13 @@ end;
 procedure TfrmTableSit.CSRNotSitting(const AMethodId: Integer; const AObject: TObject);
 var
   pbgame: TPB_Game;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbgame := AObject as TPB_Game;
-  if not CompareBytes(FTable.Game.MongoId, pbgame.MongoId) then
+  if not CompareBytes(game.MongoId, pbgame.MongoId) then
     Exit;
 
   MessageDlg('You are not sitting', mtWarning, [mbOK], 0);
@@ -334,12 +378,16 @@ end;
 procedure TfrmTableSit.CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
 var
   pbbuyinerr: TPB_BuyinError;
+  game: TGameInfo;
 begin
-  pbbuyinerr := AObject as TPB_BuyinError;
-  if not CompareBytes(FTable.Game.MongoId, pbbuyinerr.GameId) then
+  if not FTable.GetGame(game) then
     Exit;
 
-  if pbbuyinerr.LastCashout > FTable.Game.MaxBuyin * FTable.Game.BigBlind then
+  pbbuyinerr := AObject as TPB_BuyinError;
+  if not CompareBytes(game.MongoId, pbbuyinerr.GameId) then
+    Exit;
+
+  if pbbuyinerr.LastCashout > game.MaxBuyin * game.BigBlind then
     MessageDlg(Format('You must buyin with equal amount of chips as your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]), mtWarning, [mbOK], 0)
   else
     MessageDlg(Format('You must buyin with equal or more chips than your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]), mtWarning, [mbOK], 0);
@@ -350,9 +398,13 @@ end;
 procedure TfrmTableSit.CSRTableInvalidBuyin(const AMethodId: Integer; const AObject: TObject);
 var
   pbbuyinerr: TPB_BuyinError;
+  game: TGameInfo;
 begin
+  if not FTable.GetGame(game) then
+    Exit;
+
   pbbuyinerr := AObject as TPB_BuyinError;
-  if not CompareBytes(FTable.Game.MongoId, pbbuyinerr.GameId) then
+  if not CompareBytes(game.MongoId, pbbuyinerr.GameId) then
     Exit;
 
   MessageDlg('Invalid buy-in amount', mtWarning, [mbOK], 0);

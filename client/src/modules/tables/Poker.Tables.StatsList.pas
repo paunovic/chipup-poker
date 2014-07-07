@@ -1,10 +1,10 @@
-unit Poker.Objects.TableStatistics.TableStatsList;
+unit Poker.Tables.StatsList;
 
 interface
 
 uses
   System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Stats.Player, Poker.Objects.TableStatistics.TableStats;
+  Poker.Tables.Stats;
 
 type
   TTablesStatsList = class(TObjectDictionary<TBytes, TTableStats>)

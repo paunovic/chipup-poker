@@ -56,7 +56,7 @@ implementation
 uses
   Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket.Commands, Poker.DataModule,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Settings,
-  Poker.Forms.Debug, Poker.Table.Tables, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections;
+  Poker.Forms.Debug, Poker.Tables.TableList, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections;
 
 { TfrmReconnect }
 

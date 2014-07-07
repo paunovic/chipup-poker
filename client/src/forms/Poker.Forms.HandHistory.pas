@@ -61,9 +61,9 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.Items, Poker.Objects.Clubs.Club, Poker.Objects.Games.Game,
+  Poker.Common.FormsContainer, Poker.HandHistory.Core, Poker.HandHistory.Items, Poker.Clubs.Club, Poker.Games.Game,
   Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.MessageContainer, Poker.Protobufs.Enum.ServerCodes,
-  Poker.Table.Tables;
+  Poker.Tables.TableList;
 
 { TfrmHandHistory }
 
@@ -233,26 +233,29 @@ end;
 
 procedure TfrmHandHistory.RefreshTableList;
 var
-  C1: Integer;
   item_index: Integer;
   table_name: String;
+  hhis: THandHistoryItems;
+  C1: Integer;
 begin
   item_index := -1;
   cbTable.Properties.BeginUpdate;
   try
-    for C1 := 0 to HandHistory.Items.Count - 1 do
+    C1 := 0;
+    for hhis in HandHistory.Values do
     begin
-      table_name := Format('%s (%d-max) - %s', [HandHistory.Items[C1].Game.Name, HandHistory.Items[C1].Game.Seats, HandHistory.Items[C1].Club.Name]);
+      table_name := Format('%s (%d-max) - %s', [hhis.Game.Name, hhis.Game.Seats, hhis.Club.Name]);
       if C1 >= cbTable.Properties.Items.Count then
         cbTable.Properties.Items.Add(table_name)
       else
         if cbTable.Properties.Items[C1] <> table_name then
           cbTable.Properties.Items[C1] := table_name;
-      if CompareBytes(FSelectedTableId, HandHistory.Items[C1].FGameId) then
+      if CompareBytes(FSelectedTableId, hhis.FGameId) then
         item_index := C1;
+      Inc(C1);
     end;
 
-    while cbTable.Properties.Items.Count > HandHistory.Items.Count do
+    while cbTable.Properties.Items.Count > HandHistory.Count do
       cbTable.Properties.Items.Delete(cbTable.Properties.Items.Count - 1);
 
     cbTable.ItemIndex := item_index;
@@ -269,7 +272,7 @@ var
   C1: Integer;
   item_index: Integer;
 begin
-  if not HandHistory.FindGame(FSelectedTableId, hhis) then
+  if not HandHistory.TryGetValue(FSelectedTableId, hhis) then
   begin
     cbHand.ItemIndex := -1;
     cbHand.Properties.Items.Clear;
@@ -279,10 +282,9 @@ begin
   item_index := -1;
   cbHand.Properties.BeginUpdate;
   try
-    for C1 := 0 to hhis.Count - 1 do
+    C1 := 0;
+    for hhi in hhis.Values do
     begin
-      hhi := hhis[C1];
-
       hand_name := Format('#%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhis.Game.Limit, FALSE),
          ChipsToStr(hhis.Game.SmallBlind), ChipsToStr(hhis.Game.BigBlind), hhi.StartTimeStr]);
 
@@ -294,6 +296,8 @@ begin
 
       if hhi.HandId = FSelectedHandId then
         item_index := C1;
+
+      Inc(C1);
     end;
 
     while cbHand.Properties.Items.Count > hhis.Count do
@@ -318,8 +322,8 @@ var
   hhis: THandHistoryItems;
 begin
   rvHandHistory.ClearAll;
-  if (not HandHistory.FindGame(FSelectedTableId, hhis)) or
-     (not hhis.FindHand(FSelectedHandId, hhi)) then
+  if (not HandHistory.TryGetValue(FSelectedTableId, hhis)) or
+     (not hhis.TryGetValue(FSelectedHandId, hhi)) then
   begin
     acCopyToClipboard.Enabled := FALSE;
     acReplayHand.Enabled := FALSE;
@@ -378,7 +382,7 @@ begin
   if cbTable.ItemIndex = -1 then
     SetLength(FSelectedTableId, 0)
   else
-    FSelectedTableId := HandHistory.Items[cbTable.ItemIndex].FGameId;
+    FSelectedTableId := HandHistory.Keys.ToArray[cbTable.ItemIndex];
 
   RefreshHandList;
 end;

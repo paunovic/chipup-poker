@@ -1,4 +1,4 @@
-unit Poker.Objects.Avatars.Avatar;
+unit Poker.Avatars.Avatar;
 
 interface
 

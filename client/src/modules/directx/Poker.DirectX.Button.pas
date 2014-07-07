@@ -1,9 +1,9 @@
-unit Poker.Table.DXButton;
+unit Poker.DirectX.Button;
 
 interface
 
 uses
-  AsphyreImages, Vcl.ActnList, AbstractCanvas, AsphyreTypes, Vcl.Controls, System.Classes, Poker.Table.RenderMetrics;
+  AsphyreImages, Vcl.ActnList, AbstractCanvas, AsphyreTypes, Vcl.Controls, System.Classes, Poker.Tables.RenderMetrics;
 
 type
   TDXButton = class
@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  Poker.Common.Misc, System.Types, AsphyreFonts, Poker.Table.Resources, Vectors2;
+  Poker.Common.Misc, System.Types, AsphyreFonts, Poker.Tables.Resources, Vectors2;
 
 { TDXButton }
 

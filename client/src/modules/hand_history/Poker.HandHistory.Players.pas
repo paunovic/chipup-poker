@@ -18,7 +18,6 @@ type
     FStatus: TPlayerStatus;
   public
     constructor Create(const AProtobuf: TPB_PlayerHandHistory);
-    destructor Destroy; override;
 
     property MongoId: TBytes read FMongoId;
     property Seat: Integer read FSeat;
@@ -30,9 +29,9 @@ type
     property Status: TPlayerStatus read FStatus;
   end;
 
-  TPlayerHandHistories = class(TObjectList<TPlayerHandHistory>)
+  TPlayerHandHistories = class(TObjectDictionary<Integer, TPlayerHandHistory>)
   public
-    function FindPlayer(const ASeatIndex: Integer; var APlayer: TPlayerHandHistory): Boolean;
+    constructor Create;
   end;
 
 implementation
@@ -54,25 +53,11 @@ begin
   FStatus := AProtobuf.Status;
 end;
 
-destructor TPlayerHandHistory.Destroy;
-begin
-
-  inherited;
-end;
-
 { TPlayerHandHistories }
 
-function TPlayerHandHistories.FindPlayer(const ASeatIndex: Integer; var APlayer: TPlayerHandHistory): Boolean;
-var
-  C1: Integer;
+constructor TPlayerHandHistories.Create;
 begin
-  for C1 := 0 to Length(ToArray) - 1 do
-    if ToArray[C1].Seat = ASeatIndex then
-    begin
-      APlayer := ToArray[C1];
-      Exit(TRUE);
-    end;
-  Exit(FALSE);
+  inherited Create([doOwnsValues]);
 end;
 
 end.

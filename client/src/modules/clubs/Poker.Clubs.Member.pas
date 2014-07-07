@@ -1,4 +1,4 @@
-unit Poker.Objects.Clubs.Member;
+unit Poker.Clubs.Member;
 
 interface
 

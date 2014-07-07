@@ -1,4 +1,4 @@
-unit Poker.Objects.PotInfo;
+unit Poker.Pots.Pot;
 
 interface
 
@@ -26,14 +26,6 @@ type
     property Members: TList<Integer> read FMembers;
     property WinnerData: TWinnerDataList read FWinnerData;
     property ValueWithoutRake: UINT32 read GetValueWithoutRake;
-  end;
-
-  TPotInfos = class(TObjectList<TPotInfo>)
-  private
-  public
-    procedure Assign(const APots: TList<TPB_Pot>; const ARakePercent: UINT32); overload;
-    procedure Assign(const APots: TPotInfos; const ARakePercent: UINT32); overload;
-    procedure Assign(const APots: TList<TPB_WinnerPotInfo>); overload;
   end;
 
 implementation
@@ -87,53 +79,6 @@ begin
   FRake := AWinnerPotInfo.Rake;
   FMembers.AddRange(AWinnerPotInfo.Seats);
   FWinnerData.Assign(AWinnerPotInfo.WinnerData);
-end;
-
-{ TPotInfos }
-
-procedure TPotInfos.Assign(const APots: TList<TPB_Pot>; const ARakePercent: UINT32);
-var
-  pot: TPotInfo;
-  C1: Integer;
-begin
-  Clear;
-
-  for C1 := 0 to APots.Count - 1 do
-  begin
-    pot := TPotInfo.Create;
-    pot.Assign(APots[C1], ARakePercent);
-    Add(pot);
-  end;
-end;
-
-procedure TPotInfos.Assign(const APots: TPotInfos; const ARakePercent: UINT32);
-var
-  pot: TPotInfo;
-  C1 : Integer;
-begin
-  Clear;
-
-  for C1 := 0 to APots.Count - 1 do
-  begin
-    pot := TPotInfo.Create;
-    pot.Assign(APots[C1], ARakePercent);
-    Add(pot);
-  end;
-end;
-
-procedure TPotInfos.Assign(const APots: TList<TPB_WinnerPotInfo>);
-var
-  pot: TPotInfo;
-  C1 : Integer;
-begin
-  Clear;
-
-  for C1 := 0 to APots.Count - 1 do
-  begin
-    pot := TPotInfo.Create;
-    pot.Assign(APots[C1]);
-    Add(pot);
-  end;
 end;
 
 

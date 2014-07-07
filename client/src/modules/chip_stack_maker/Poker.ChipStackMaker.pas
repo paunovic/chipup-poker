@@ -1,9 +1,9 @@
-unit Poker.Objects.ChipStackMaker;
+unit Poker.ChipStackMaker;
 
 interface
 
 uses
-  System.Generics.Collections, AsphyreImages, Poker.Objects.ChipStackMaker.ChipStack;
+  System.Generics.Collections, AsphyreImages, Poker.ChipStackMaker.ChipStack;
 
 type
   TChipStackMaker = class(TObjectDictionary<UINT32, TChipStack>)
@@ -16,7 +16,7 @@ type
 implementation
 
 uses
-  Poker.Table.Resources;
+  Poker.Tables.Resources;
 
 { TChipStackMaker }
 
