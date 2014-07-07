@@ -21,9 +21,19 @@ Handle<Value> getThreadTime(const Arguments& args) {
 	tp2->Set(String::NewSymbol("tv_nsec"),Number::New(tp.tv_nsec));
 	return scope.Close(tp2);
 }
+Handle<Value> getMonoTime(const Arguments& args) {
+	HandleScope scope;
+	struct timespec tp;
+	clock_gettime(CLOCK_MONOTONIC,&tp);
+	Local<Object> tp2 = Object::New();
+	tp2->Set(String::NewSymbol("tv_sec"),Number::New(tp.tv_sec));
+	tp2->Set(String::NewSymbol("tv_nsec"),Number::New(tp.tv_nsec));
+	return scope.Close(tp2);
+}
 void init(Handle<Object> exports) {
 	exports->Set(String::NewSymbol("getCpuTime"),FunctionTemplate::New(getCpuTime)->GetFunction());
 	exports->Set(String::NewSymbol("getThreadTime"),FunctionTemplate::New(getThreadTime)->GetFunction());
+	exports->Set(String::NewSymbol("getMonoTime"),FunctionTemplate::New(getMonoTime)->GetFunction());
 }
 
 NODE_MODULE(profile_util,init);

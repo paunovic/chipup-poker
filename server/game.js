@@ -25,6 +25,7 @@ var myutils = require('./myutils');
 var mdb = require('./db');
 var models = mdb.models;
 var user = require('./user');
+var error = require('./error');
 
 function makeGameProtobuf(g) {
 	assert.equal(g._id.toString().length,24);
@@ -44,6 +45,7 @@ function makeGameProtobuf(g) {
 	return g;
 }
 function Game(obj) {
+	this.gameinactive = false;
 	this.users = {}; // all users, even not sitting
 	this.members = []; // all users, as seen by the users
 	this.seats = []; // internal data for seats
@@ -154,7 +156,7 @@ function clubBroadcastGameState(clubid,gamerow,cb) {
 Game.clubBroadcastGameState = clubBroadcastGameState;
 Game.prototype.close = function(conn,cb) {
 	models.Game.findOneAndUpdate({_id:this.id},{$set:{state2:'gsClosed'}},function (err,ret) {
-		assert.ifError(err);
+		error.handleError(err);
 		if (err) {
 			conn.reply(0,"internal error");
 			return;
@@ -352,7 +354,7 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 	}}};
 	var key = {gameid:this.obj._id,userid:this.seats[seatIdx].userid};
 	models.GameStats.findOne(key,function (err,row) {
-		assert.ifError(err);
+		error.handleError(err);
 		if (!row) {
 			global.log('inserting %j',doc);
 			models.GameStats.create(doc,finish.bind(this));
@@ -360,7 +362,7 @@ Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
 			models.GameStats.findOneAndUpdate({_id:row._id},mods,finish.bind(this));
 		}
 		function finish(err) {
-			assert.ifError(err);
+			error.handleError(err);
 			this.club.handOver(this,function () {
 				cb();
 			});
@@ -378,7 +380,7 @@ Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
 	var mods = { $inc:{secondsplayed:time}};
 	var key = {gameid:this.obj._id,userid:this.seats[seatIdx].userid};
 	models.GameStats.findOne(key,function (err,row) {
-		assert.ifError(err);
+		error.handleError(err);
 		if (!row) {
 			global.log('inserting %j',doc);
 			models.GameStats.create(doc,finish);
@@ -386,7 +388,7 @@ Game.prototype.updateLeaveStats = function (seatIdx,force,cb) {
 			models.GameStats.findOneAndUpdate({_id:row._id},mods,finish);
 		}
 		function finish(err) {
-			assert.ifError(err);
+			error.handleError(err);
 			if (cb) cb();
 		}
 	});
@@ -551,7 +553,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		
 		// hack to stop memory leak?
 		models.GameState.findOne({_id:this.id},function (err,row) {
-			assert.ifError(err);
+			error.handleError(err);
 			this.stateRow = row;
 			// </hack>
 			this.state = 'tsPreFlop';
@@ -610,7 +612,7 @@ Game.prototype.setBet = function (seat,bet) {
 Game.prototype.eatChips = function (seat,chips,cb) {
 	this.pots[0].value += chips;
 	models.UserModel.findOneAndUpdate({_id:this.members[seat].conn.userid},{ $inc:{chips:-chips}},function (err) {
-		assert.ifError(err);
+		error.handleError(err);
 		this.members[seat].conn.log('lost chips',err,res,chips);
 		models.Game.findOneAndUpdate({_id:this.obj._id},{$inc:{pot:chips}},function (err,res) {
 			assert(res == 1);
@@ -732,7 +734,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 				token.tag += 'a';
 				token.stop();
 				priv.conn.log('done moving to pot 2');
-				this.calcWinners(finish2.bind(this),[this.makeEvent('teFold',seat)],0);
+				this.calcWinners(finish2.bind(this),[this.makeEvent('teFold',seat)],0,null,false);
 			}.bind(this));
 		} else {
 			priv.conn.log('fold with more then 1 person remaining',this.inHandCount());
@@ -771,6 +773,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 			this.Lock.writeLock(function (release) {
 				this.saveHistory(function () {
 					if (cb3) cb3();
+					if (this.gameinactive) return;
 					this.deck = new Deck();
 					this.deck.shuffle(function () {
 						// SPLIT this.deck.cards = [1,40,17,41,29,51,48,20,9,25,13,19,46,42,10,8,16,47,0,11,18,14,31,4,2,24,32,33,6,15,12,39,21,37,30,26,34,7,22,3,35,27,44,5,36,50,49,28,23,43,38,45];
@@ -869,7 +872,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		var gain = wins[seat];
 		this.balance_changes[seat] += gain;
 		models.UserModel.findOneAndUpdate({_id:userid},{$inc:{chips:gain}},function (err) {
-			assert.ifError(err);
+			error.handleError(err);
 			this.log('seat #'+seat+' gained '+gain);
 			if (this.seats[seat].conn) {
 				this.seats[seat].conn.boughtin += gain;
@@ -887,7 +890,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 		}.bind(this));
 	}.bind(this));
 };
-Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
+Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 	var token = profiler.start('checkRoundPass');
 	assert.equal(this.Lock.readers,-1);
 	assert(events);
@@ -964,7 +967,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3) {
 					this.log('events callback FIXME %s',new Error().stack);
 					token.tag += 'f';
 					token.stop();
-					this.calcWinners(cb,events,extradelay,cb3);
+					this.calcWinners(cb,events,extradelay,cb3,autoending);
 				}.bind(this));
 			}
 		} else {
@@ -992,7 +995,7 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 		async.each(jobs,function hack(job,cb2) {
 			global.log('updating stats %j',job);
 			models.GameStats.findOneAndUpdate(job.key,job.mods,function (err) {
-				assert.ifError(err);
+				error.handleError(err);
 				this.club.updateLimitPostWin(job.change,job.userid,cb2);
 			}.bind(this));
 		}.bind(this),cbA);
@@ -1005,7 +1008,7 @@ Game.prototype.postWinSaveStats = function (rakestats,cb) {
 		cb();
 	});
 };
-Game.prototype.calcWinners = function (cb,events,extradelay,cb3) {
+Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 	assert(events);
 	assert.equal(typeof extradelay,'number');
 	var WinnerPotData = [];
@@ -1024,7 +1027,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3) {
 		if (this.members[x].status == 'psAllIn') allinfound = true;
 		hands.push({seat:x,hand:this.members[x].hand.cards});
 	}
-	if ((canplay == 1) && (allinfound)) {
+	if ((canplay == 1) && (allinfound) && autoending) {
 		for (var x=0; x<this.members.length; x++) {
 			if (!this.members[x]) continue;
 			if (['psInHand','psAllIn'].indexOf(this.members[x].status) == -1) continue;
@@ -1228,7 +1231,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				assert.equal(typeof betsToRemove[job.seat],'number');
 				this.balance_changes[job.seat] -= betsToRemove[job.seat];
 				models.UserModel.findOneAndUpdate({_id:priv.userid},{ $inc:{chips:-betsToRemove[job.seat]}},function (err,res) {
-					assert.ifError(err);
+					error.handleError(err);
 					assert(res);
 					this.log('lost chips',job.seat,betsToRemove[job.seat]);
 					if (priv.conn) {
@@ -1246,7 +1249,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 					//}.bind(this));
 				}.bind(this));
 			}.bind(this),function finish(err) {
-				assert.ifError(err);
+				error.handleError(err);
 				//this.log('remove chips done',betsToRemove);
 				token2.stop(); // 12ms avg
 				cb2();
@@ -1259,6 +1262,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 		}.bind(this));
 }
 Game.prototype.updateMongoState = function (options,cb) {
+	if (this.gameinactive) return cb();
 	if (this.stateRow._events) assert(this.stateRow._events.isNew.length < 100);
 	this.stateRow.pots = this.pots;
 	this.stateRow.current_seat = this.current_seat;
@@ -1294,8 +1298,9 @@ Game.prototype.updateMongoState = function (options,cb) {
 		for (var key in this.users) U.push(this.users[key].userid);
 		this.stateRow.users = U;
 	}
+	var tracer = new Error();
 	this.stateRow.save(function (err) {
-		assert.ifError(err);
+		error.handleError(err,tracer);
 		cb();
 	}.bind(this));
 }
@@ -1385,7 +1390,7 @@ Game.prototype.saveHistory = function (cb) {
 	// FIXME, re-save players obj at end of round
 	// FIXME, reuse mongoose Document
 	models.HandHistory.findOneAndUpdate({seq:this.handid},updates,function (err,res) {
-		assert.ifError(err);
+		error.handleError(err);
 		assert(res);
 		cb();
 	});
@@ -1617,10 +1622,10 @@ Game.prototype.stateMachine = function stateMachine(cb,conn,config,events,extrad
 				assert.equal(typeof extradelay,'number');
 				this.log('player '+last+' skipped, doing state again, FIXME %d',events);
 				return this.stateMachine(cb,null,null,events,extradelay);
-			}.bind(this),events,extradelay,cb3);
+			}.bind(this),events,extradelay,cb3,true);
 			return;
 		}
-		this.checkRoundPass(finish.bind(this),events,0,cb3);
+		this.checkRoundPass(finish.bind(this),events,0,cb3,false);
 	}
 }
 Game.prototype.idleUnstick = function () {
@@ -1794,7 +1799,7 @@ Game.prototype.updateCashOut = function (userid,buyin,cb) {
 	var key = {gameid:this.obj._id,userid:userid};
 	global.log('updating %s %s',key.gameid,key.userid);
 	models.GameStats.findOneAndUpdate(key,mods,function (err) {
-		assert.ifError(err);
+		error.handleError(err);
 		this.club.handOver(this,function () {
 			cb();
 		});
@@ -1862,7 +1867,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 			var token8 = profiler.start('standup-inner8');
 			this.pots[0].value += increase;
 			models.UserModel.findOneAndUpdate({_id:priv.userid},{ $inc:{chips:-this.bets[seatObj.seat]}},function (err,res) {
-				assert.ifError(err);
+				error.handleError(err);
 				assert(res);
 				priv.conn.log('lost chips',increase,this.bets[seatIdx],seatIdx);
 				priv.conn.boughtin -= this.bets[seatIdx];
@@ -1927,11 +1932,12 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 				}.bind(this));
 		} else finish.call(this);
 		function finish() {
-			var count = 0;
-			for (var key in this.users) {
+			var count = 0,key;
+			for (key in this.users) {
 				count++;
 				//console.log('key:%s count:%d',key,count);
 			}
+			for (key in this.reconnect) count++;
 			if (count == 0) {
 				if (this.state2 == 'gsClosing') {
 					this.log('staying alive!');
@@ -1942,8 +1948,9 @@ Game.prototype.leave = function leave(conn,reason,cb1) {
 						clearTimeout(this.deleteTimer);
 						this.doDelete();
 					}
+					this.gameinactive = true;
 					this.stateRow.remove(function (err,res) {
-						assert.ifError(err);
+						error.handleError(err);
 						cb1();
 						release();
 					}.bind(this));
@@ -2124,7 +2131,7 @@ Game.getGame = function getgame(id,cb) {
 						}
 						game.club = club;
 						models.GameState.findOne({_id:game.id},function (err,row) {
-							assert.ifError(err);
+							error.handleError(err);
 							if (row) {
 								game.stateRow = row;
 								token.stop();
@@ -2132,7 +2139,7 @@ Game.getGame = function getgame(id,cb) {
 								cb(null,game);
 							} else {
 								models.GameState.create({_id:game.id},function (err,row) {
-									assert.ifError(err);
+									error.handleError(err);
 									game.stateRow = row;
 									token.stop();
 									release();
@@ -2211,7 +2218,7 @@ Game.checkAndResume = function (cb1) {
 						cb2();
 						return;
 					}
-					assert.ifError(err);
+					error.handleError(err);
 					global.log('bad game %j',game);
 					if (!gameObj) {
 						log('game is missing!');
