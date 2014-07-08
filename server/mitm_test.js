@@ -10,12 +10,13 @@ var pb = new Protobuf(fs.readFileSync("../message.desc"));
 var pu = new ProtobufUtil(pb, schema);
 //var message = pu.encode(codes.srChangeClubDetailsReply, {	status: 'csNameExists' }, 'Poker.ClubCommandReply');
 
-var realServerPort = 45508;
-var fakeServerPort = 45532;
+var realServerPort = 12345;
+var fakeServerPort = 55555;
 var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, fakeServerPort, recordCallback);
 
 function recordCallback(methodId, args) {
-	console.log(methodId);
+	console.log(methodId.toString() + ', ' + args.toString());
+
 
 	/*
 	var MongoClient = require('mongodb').MongoClient
