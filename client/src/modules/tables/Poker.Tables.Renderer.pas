@@ -80,7 +80,6 @@ type
     procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack);
     procedure RenderButtons;
     procedure RenderRaisePanel;
-
   public
     constructor Create(const ASwapChainIndex: Integer; const AGameId: TBytes; const ATableType: TTableType);
     destructor Destroy; override;
@@ -1099,7 +1098,7 @@ begin
 
     for C2 := 0 to FPotWinAnimations.Count - 1 do
       if (DXTimer.Find(FHandle, FPotWinAnimations[C2], animation)) and
-         (animation.Tags[ANITAG_SEAT] = C1) and
+         (animation.Tags[ANITAG_POT_INDEX] = C1) and
          (animation.Status in [asAnimating, asDone]) then
       begin
         chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
@@ -1474,7 +1473,7 @@ begin
 
       // restore bets if table is in playback mode, so values are shown
       if FTableType = ttHandPlayback then
-        FTableStatus.Bets[pot.WinnerData[C2].Seat] := total_chips_val div UINT32(pot.WinnerData.Count);
+        FTableStatus.Bets[pot.WinnerData[C2].Seat] := FTableStatus.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
 
       animation := DXTimer.AddAnimation(ACallback,
            FMetrics.GetPotPoint(C1),
@@ -1484,7 +1483,8 @@ begin
            Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
            FDXAreaSize);
 
-      animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
+      animation.Tags.AddOrSetValue(ANITAG_POT_INDEX, C1);
+      animation.Tags.AddOrSetValue(ANITAG_SEAT, pot.WinnerData[C2].Seat);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
       PotWinAnimations.Add(animation.Id);
     end;

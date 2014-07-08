@@ -12,6 +12,7 @@ const
   ANITAG_BLIND = 'blind';
   ANITAG_CHIPS = 'chips';
   ANITAG_SEAT = 'seat';
+  ANITAG_POT_INDEX = 'pot_index';
 
 type
   TDXAnimation = class;
