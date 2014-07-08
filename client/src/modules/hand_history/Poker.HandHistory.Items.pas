@@ -182,7 +182,7 @@ begin
 
   FPlayers.Clear;
   for phh in AHandHistory.Players do
-    FPlayers.Add(phh.Seat, TPlayerHandHistory.Create(phh));
+    FPlayers.Add(TPlayerHandHistory.Create(phh));
 
   FMoves.Clear;
   for mhh in AHandHistory.Moves do
@@ -233,7 +233,7 @@ begin
   ALines.Add('');
 
   // seats info
-  for player in FPlayers.Values do
+  for player in FPlayers do
   begin
     line := '%sSeat %s%d%s: %s%s%s (%s%s%s chips';
     if player.Seat = FDealerIndex then
@@ -257,7 +257,7 @@ begin
   for move in FMoves do
   begin
     player_nick := 'Unknown player';
-    if FPlayers.TryGetValue(move.Seat, player) then
+    if FPlayers.FindPlayer(move.Seat, player) then
       player_nick := player.Nick;
 
     if move.ContainsEvent(teSB) then
@@ -352,7 +352,7 @@ begin
       ALines.Add(Format('%s*** SHOW DOWN ***', [ATags.TableEvent]));
       ALines.Add('');
 
-      for player in FPlayers.Values do
+      for player in FPlayers do
       begin
         if fold_on[player.Seat] > tsIdle then
           Continue;
@@ -397,7 +397,7 @@ begin
           Inc(seat_winnings[pot.WinnerData[C1].Seat], (pot.Value - pot.Rake) div UINT32(pot.WinnerData.Count));
 
       // show summary
-      for player in FPlayers.Values do
+      for player in FPlayers do
       begin
         player_line := Format('%sSeat %s%d%s: %s%s%s ', [
             ATags.NormalText, ATags.SeatIndex, player.Seat, ATags.NormalText, ATags.PlayerNick, player.Nick, ATags.NormalText

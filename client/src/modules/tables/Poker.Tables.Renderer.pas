@@ -5,7 +5,7 @@ interface
 uses
   System.Classes, System.Generics.Collections, System.Types, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts, Poker.Tables.RenderMetrics,
   Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, AsphyreImages, Poker.Seats.Seat, Poker.Cards, Poker.ChipStackMaker,
-  IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.Protobufs.Objects.WinnerPotInfo, Poker.ChipStackMaker.ChipStack, System.SysUtils;
+  IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
@@ -94,7 +94,7 @@ type
 
     function AnimateBets(const ACallback: THandle; ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
     procedure AnimateBlinds(const ACallback: THandle);
-    procedure AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
+    procedure AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_Pot>);
     procedure AnimateDealingCards(const ACallback: THandle);
 
     procedure AnimationCallback(const AAnimationPointer: pointer);
@@ -1434,9 +1434,9 @@ begin
   until not iterate;
 end;
 
-procedure TTableRenderer.AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
+procedure TTableRenderer.AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_Pot>);
 var
-  pot: TPB_WinnerPotInfo;
+  pot: TPB_Pot;
   C1, C2: Integer;
   total_chips_val: UINT32;
   nick, nicks: String;
@@ -1454,10 +1454,10 @@ begin
   begin
     pot := APots[C1];
 
-    if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
+    if (pot.Value = 0) or (pot.WinnerData.Count = 0) then
       Continue;
 
-    total_chips_val := pot.Sum - pot.Rake;
+    total_chips_val := pot.Value - pot.Rake;
 
     nicks := '';
     animation := nil;

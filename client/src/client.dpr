@@ -145,7 +145,6 @@ uses
   Poker.Protobufs.Objects.TableEvent in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableEvent.pas',
   Poker.Protobufs.Objects.PutChips in 'modules\protobuf\objects\Poker.Protobufs.Objects.PutChips.pas',
   Poker.Protobufs.Objects.WinnerData in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerData.pas',
-  Poker.Protobufs.Objects.WinnerPotInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerPotInfo.pas',
   Poker.Protobufs.Objects.PingParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.PingParams.pas',
   Poker.Protobufs.Objects.PingReply in 'modules\protobuf\objects\Poker.Protobufs.Objects.PingReply.pas',
   Poker.Protobufs.Objects.Pot in 'modules\protobuf\objects\Poker.Protobufs.Objects.Pot.pas',
@@ -171,8 +170,7 @@ uses
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
-  Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
-  Poker.Protobufs.Objects.WinnerRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.WinnerRow.pas';
+  Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas';
 
 procedure FocusApp;
 var

@@ -27,8 +27,8 @@ implementation
 
 uses
   Poker.HandHistory.Moves, Poker.HandHistory.Players, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent,
-  Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Pots.Pot, Poker.Protobufs.Objects.WinnerPotInfo,
-  Poker.Protobufs.Objects.WinnerData, Poker.Common.Misc, Poker.DataModule;
+  Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game, Poker.Pots.Pot, Poker.Protobufs.Objects.WinnerData,
+  Poker.Common.Misc, Poker.DataModule;
 
 { THandHistoryPlayback }
 
@@ -57,11 +57,12 @@ var
   bets: TArray<UINT32>;
   sbseat: Integer;
   bbseat: Integer;
-  pbwinnerpotinfo: TPB_WinnerPotInfo;
   winnerdata: TPB_WinnerData;
   C1, C2, C3: Integer;
   folded: TArray<Boolean>;
   pots: TObjectList<TPB_Pot>;
+  player_chips_at_phase_beginning: TArray<UINT32>;
+  current_player_chips: TArray<UINT32>;
 begin
   bbseat := -1;
   sbseat := -1;
@@ -72,6 +73,16 @@ begin
   SetLength(bets, AHandHistoryItems.Game.Seats);
   FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);
   SetLength(folded, AHandHistoryItems.Game.Seats);
+  SetLength(current_player_chips, AHandHistoryItems.Game.Seats);
+  FillChar(current_player_chips[0], Length(current_player_chips) * SizeOf(UINT32), 0);
+  SetLength(player_chips_at_phase_beginning, AHandHistoryItems.Game.Seats);
+  FillChar(player_chips_at_phase_beginning[0], Length(player_chips_at_phase_beginning) * SizeOf(UINT32), 0);
+
+  for player in AHandHistoryItem.Players do
+  begin
+    player_chips_at_phase_beginning[player.Seat] := player.Chips;
+    current_player_chips[player.Seat] := player.Chips;
+  end;
 
   pots := TObjectList<TPB_Pot>.Create;
   try
@@ -91,6 +102,7 @@ begin
         if sbseat = -1 then
           sbseat := move.Seat;
         bets[move.Seat] := move.Bet;
+        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
       end;
 
       if move.ContainsEvent(teBB) then
@@ -98,6 +110,7 @@ begin
         if bbseat = -1 then
           bbseat := move.Seat;
         bets[move.Seat] := move.Bet;
+        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
       end;
 
       pbtablestatus.SmallBlind := sbseat;
@@ -115,12 +128,16 @@ begin
            (move.ContainsEvent(teTurn)) or
            (move.ContainsEvent(teRiver)) then
         begin
+          for C3 := Low(player_chips_at_phase_beginning) to High(player_chips_at_phase_beginning) do
+            player_chips_at_phase_beginning[C3] := current_player_chips[C3];
+
           pots.Clear;
           for C3 := 0 to move.Pots.Count - 1 do
           begin
             pbpot := TPB_Pot.Create;
             pbpot.Value := move.Pots[C3].Value;
             pbpot.Members.AddRange(move.Pots[C3].Members);
+            pbpot.Rake := move.Pots[C3].Rake;
             pots.Add(pbpot);
           end;
 
@@ -155,18 +172,18 @@ begin
         pbevent := TPB_TableEvent.Create;
         for C2 := 0 to move.WinnerPots.Count - 1 do
         begin
-          pbwinnerpotinfo := TPB_WinnerPotInfo.Create;
-          pbwinnerpotinfo.Sum := move.WinnerPots[C2].Value;
-          pbwinnerpotinfo.Rake := move.WinnerPots[C2].Rake;
+          pbpot := TPB_Pot.Create;
+          pbpot.Value := move.WinnerPots[C2].Value;
+          pbpot.Rake := move.WinnerPots[C2].Rake;
+          pbpot.Members.AddRange(move.WinnerPots[C2].Members);
           for C3 := 0 to move.WinnerPots[C2].WinnerData.Count - 1 do
           begin
             winnerdata := TPB_WinnerData.Create;
             winnerdata.Seat := move.WinnerPots[C2].WinnerData[C3].Seat;
             winnerdata.Msg := move.WinnerPots[C2].WinnerData[C3].Msg;
-            pbwinnerpotinfo.WinnerData.Add(winnerdata);
+            pbpot.WinnerData.Add(winnerdata);
           end;
-          pbwinnerpotinfo.Seats.AddRange(move.WinnerPots[C2].Members);
-          pbevent.Pots.Add(pbwinnerpotinfo);
+          pbevent.Pots.Add(pbpot);
         end;
 
         FillChar(bets[0], Length(bets) * SizeOf(UINT32), 0);
@@ -179,12 +196,7 @@ begin
       pbtablestatus.State := tablestate;
 
       for C2 := 0 to pots.Count - 1 do
-      begin
-        pbpot := TPB_Pot.Create;
-        pbpot.Value := pots[C2].Value;
-        pbpot.Members.AddRange(pots[C2].Members);
-        pbtablestatus.Pots.Add(pbpot);
-      end;
+        pbtablestatus.Pots.Add(TPB_Pot.Create(pots[C2]));
 
       if move.ContainsEvent(teFold) then
       begin
@@ -210,6 +222,7 @@ begin
         bets[move.Seat] := move.Bet;
         pbevent.Event := teRaise;
         pbtablestatus.Events.Add(pbevent);
+        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
       end;
 
       if move.ContainsEvent(teCall) then
@@ -219,6 +232,7 @@ begin
         bets[move.Seat] := move.Bet;
         pbevent.Event := teCall;
         pbtablestatus.Events.Add(pbevent);
+        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
       end;
 
       if move.ContainsEvent(teAllIn) then
@@ -228,14 +242,15 @@ begin
         bets[move.Seat] := move.Bet;
         pbevent.Event := teAllIn;
         pbtablestatus.Events.Add(pbevent);
+        current_player_chips[move.Seat] := player_chips_at_phase_beginning[move.Seat] - bets[move.Seat];
       end;
 
-      for player in AHandHistoryItem.Players.Values do
+      for player in AHandHistoryItem.Players do
       begin
         pbseat := TPB_SeatInfo.Create;
         pbseat.Seat := player.Seat;
         pbseat.PlayerMongoId := player.MongoId;
-        pbseat.Chips := player.Chips;
+        pbseat.Chips := current_player_chips[player.Seat];
         if (CompareBytes(dmMain.SelfInfo.Id, player.MongoId)) or
            ((not player.Mucked) and
             (pbtablestatus.State >= tsWinning)) then

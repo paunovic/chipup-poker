@@ -3,7 +3,7 @@ unit Poker.Pots.Pot;
 interface
 
 uses
-  System.Generics.Collections, Poker.Objects.WinnerData, Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.WinnerPotInfo;
+  System.Generics.Collections, Poker.Objects.WinnerData, Poker.Protobufs.Objects.Pot;
 
 type
   TPotInfo = class
@@ -17,9 +17,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Assign(const APotProtobuf: TPB_Pot; const ARakePercent: UINT32); overload;
-    procedure Assign(const APotInfo: TPotInfo; const ARakePercent: UINT32); overload;
-    procedure Assign(const AWinnerPotInfo: TPB_WinnerPotInfo); overload;
+    procedure Assign(const APotProtobuf: TPB_Pot); overload;
+    procedure Assign(const APotInfo: TPotInfo); overload;
 
     property Value: UINT32 read FValue write FValue;
     property Rake: UINT32 read FRake write FRake;
@@ -56,30 +55,20 @@ begin
     result := FValue - FRake;
 end;
 
-procedure TPotInfo.Assign(const APotProtobuf: TPB_Pot; const ARakePercent: UINT32);
+procedure TPotInfo.Assign(const APotProtobuf: TPB_Pot);
 begin
   FValue := APotProtobuf.Value;
-  FRake := Round(FValue * (ARakePercent / 100));
+  FRake := APotProtobuf.Rake;
   FMembers.AddRange(APotProtobuf.Members);
-  FWinnerData.Clear;
+  FWinnerData.Assign(APotProtobuf.WinnerData);
 end;
 
-
-procedure TPotInfo.Assign(const APotInfo: TPotInfo; const ARakePercent: UINT32);
+procedure TPotInfo.Assign(const APotInfo: TPotInfo);
 begin
   FValue := APotInfo.Value;
-  FRake := Round(FValue * (ARakePercent / 100));
+  FRake := APotInfo.Rake;
   FMembers.AddRange(APotInfo.Members);
   FWinnerData.Assign(APotInfo.WinnerData);
 end;
-
-procedure TPotInfo.Assign(const AWinnerPotInfo: TPB_WinnerPotInfo);
-begin
-  FValue := AWinnerPotInfo.Sum;
-  FRake := AWinnerPotInfo.Rake;
-  FMembers.AddRange(AWinnerPotInfo.Seats);
-  FWinnerData.Assign(AWinnerPotInfo.WinnerData);
-end;
-
 
 end.
