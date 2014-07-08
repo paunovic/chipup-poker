@@ -221,6 +221,15 @@ begin
         pbtablestatus.Events.Add(pbevent);
       end;
 
+      if move.ContainsEvent(teAllIn) then
+      begin
+        pbevent := TPB_TableEvent.Create;
+        pbevent.Seat := move.Seat;
+        bets[move.Seat] := move.Bet;
+        pbevent.Event := teAllIn;
+        pbtablestatus.Events.Add(pbevent);
+      end;
+
       for player in AHandHistoryItem.Players.Values do
       begin
         pbseat := TPB_SeatInfo.Create;
