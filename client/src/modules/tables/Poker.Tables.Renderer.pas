@@ -80,7 +80,6 @@ type
     procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack);
     procedure RenderButtons;
     procedure RenderRaisePanel;
-
   public
     constructor Create(const ASwapChainIndex: Integer; const AGameId: TBytes; const ATableType: TTableType);
     destructor Destroy; override;
