@@ -336,6 +336,8 @@ message TableSit {
 message Pot {
 	required uint32 value = 1;
 	repeated int32 members = 2;
+	repeated TableEvent.WinnerData WinnerData = 3;
+	optional uint32 rake = 4;
 }
 
 message TableStatus {
@@ -477,15 +479,9 @@ message TableEvent {
 		required int32 seat = 3;
 		required string msg = 4;
 	}
-	message WinnerPotInfo {
-		required uint32 sum = 1;
-		repeated int32 seats = 2;
-		repeated WinnerData WinnerData = 3;
-		optional uint32 rake = 4;
-	}
 	required TableEventType event = 1;
 	optional int32 seat = 2;
-	repeated WinnerPotInfo pots = 4;
+	repeated Pot pots = 4;
 	repeated uint32 bets = 5;
 	optional bytes cards = 6;
 }
@@ -605,7 +601,7 @@ message HandHistory {
 		repeated TableEvent.TableEventType code = 1;
 		optional uint32 bet = 2;
 		optional int32 seat = 3;
-		repeated TableEvent.WinnerPotInfo WinnerPotData = 4;
+		repeated Pot WinnerPotData = 4;
 		repeated Pot pots = 5;
 	}
 	required bytes _id = 1;
