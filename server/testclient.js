@@ -436,7 +436,7 @@ function testmenu(cb,config) {
 			}
 			this.log('club seq is',params.club.seq);
 			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:'gtHoldem',
-				game_limit:'glNoLimit', small_blind:5, big_blind:10, seats:6, gamename:prefix+' testbot game',
+				game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix+' testbot game',
 				buyin_max:20000, buyin_min:5},'Poker.Game');
 			break;
 		case codes.srCreateGameOk:
