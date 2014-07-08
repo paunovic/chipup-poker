@@ -2,9 +2,10 @@
 
 module.exports = ProtobufUtil;
 
-function ProtobufUtil(protobuf, schema) {
+function ProtobufUtil(protobuf, schema,codes) {
 	this.protobuf = protobuf;
 	this.schema = schema;
+	this.codes = codes;
 }
 
 ProtobufUtil.prototype.createOnDataListenerFn = function (callback, logger) {
@@ -73,5 +74,19 @@ ProtobufUtil.prototype.encode = function (code, message, type) {
 		args.copy(encodedMessage, 2 + header.length);
 
 	return encodedMessage;
+};
+
+ProtobufUtil.prototype.reply = function (socket,hidden,log,code,message,type) {
+	var packet = this.encode(code,message,type)
+	var alldone = socket.write(packet);
+	if (!alldone) {
+		if (socket._handle) log('partial message write %d %s', socket.bufferSize,util.inspect({a:socket._handle.writeQueueSize,b:socket._writableState.length}));
+	}
+	if (socket._writableState.length > (256 * 1024)) {
+		error('sendq overflow');
+	}
+	if (!hidden || hidden.indexOf(code) === -1) {
+		log('sent %d bytes for code %s', packet.length, this.codes.reverse[code]);
+	}
 };
 

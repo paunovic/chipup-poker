@@ -1,18 +1,19 @@
 var fs = require("fs");
 var p = require("node-protobuf").Protobuf;
 var net = require('net');
-var pb = new p(fs.readFileSync("../message.desc"))
-var codes = require('./ServerCodes');
-var Protoreader = require('./protoreader');
 var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var colors = require('colors');
+var assert = require('assert');
+
+var pb = new p(fs.readFileSync("../message.desc"))
+var codes = require('./ServerCodes');
+var ProtobufUtil = require('./ProtobufUtil');
+var pbu = new ProtobufUtil(pb,'Poker.RpcMessage',codes);
 var Hand = require('./deck').Hand;
 
 var PORT = process.argv[5] ? process.argv[5] : 12345;
 var HOST = process.argv[4] ? process.argv[4] : 'dev-server.chipuppoker.com';
-
-Protoreader.init(pb,codes);
 
 function bufToCards(buf) {
 	if (!buf) return 'XXX';
@@ -85,7 +86,7 @@ function Client(handle) {
 	this.socket = net.connect(PORT, HOST,function cb2() {
 	});
 	this.handle = handle;
-	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
+	this.socket.on('data',pbu.createOnDataListenerFn(this.handle.bind(this),this.log.bind(this)));
 	this.socket.on('end',function () {
 		this.log('connection lost');
 		process.exit();
@@ -97,7 +98,8 @@ Client.prototype.ping = function () {
 	this.reply(codes.scPing,{uptime:process.uptime()},'Poker.PingParams');
 }
 Client.prototype.reply = function (code,data,type) {
-	this.reader.reply(code,data,type);
+	var hidden = [];
+	pbu.reply(this.socket,hidden,this.log.bind(this),code,data,type);
 }
 function testchathandle(code,data) {
 	switch (code) {
@@ -410,7 +412,8 @@ function testmenu(cb,config) {
 		//console.log(code,arr);
 	}
 	var madeclients = false;
-	function testregisterhandle(code,data) {
+	function testregisterhandle(err,code,data) {
+		assert.ifError(err);
 		printcode.call(this,code,data);
 		switch (code) {
 		case codes.srLoginReply:
@@ -518,7 +521,7 @@ function testmenu(cb,config) {
 				}
 			}
 	}
-	function doClient2(code,data) {
+	function doClient2(err,code,data) {
 		printcode.call(this,code,data);
 		switch (code) {
 		case codes.srLoginReply:
