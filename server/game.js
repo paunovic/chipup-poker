@@ -323,7 +323,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					var timediff = Date.now() - last.when;
 					conn.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
 					if (timediff < (30 * 60 * 1000)) {
-						if (params.chips < last.chips && false) {
+						if (params.chips < last.chips) {
 							conn.send(codes.srTableBuyinLessThanCashout,{game_id:myutils.fromMongoId(this.id),last_cashout:last.chips},'Poker.BuyinError');
 							cb(false,events);
 							return;
@@ -335,7 +335,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				if (obeymax) {
 					conn.log('checking that %d is between %d and %d',params.chips,min,max);
 					if ((params.chips > max) || (params.chips < min)) {
-						conn.send(codes.srTableBuyinLessThanCashout,{game_id:myutils.fromMongoId(this.id),last_cashout:lastcashout},'Poker.BuyinError');
+						conn.send(codes.srInvalidTableBuyin,{game_id:myutils.fromMongoId(this.id),last_cashout:lastcashout},'Poker.BuyinError');
 						conn.log('buyin:%d min:%d max:%d',params.chips,min,max);
 						cb(false,events);
 						return;
