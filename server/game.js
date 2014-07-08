@@ -335,7 +335,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				if (obeymax) {
 					conn.log('checking that %d is between %d and %d',params.chips,min,max);
 					if ((params.chips > max) || (params.chips < min)) {
-						conn.send(codes.srInvalidTableBuyin,{game_id:myutils.fromMongoId(this.id),last_cashout:lastcashout},'Poker.BuyinError');
+						conn.send(codes.srTableBuyinLessThanCashout,{game_id:myutils.fromMongoId(this.id),last_cashout:lastcashout},'Poker.BuyinError');
 						conn.log('buyin:%d min:%d max:%d',params.chips,min,max);
 						cb(false,events);
 						return;
@@ -1057,7 +1057,7 @@ Game.prototype.calcWinners = function (cb,events,extradelay,cb3,autoending) {
 		var winners = [];
 		var data = [];
 		if (pot.value == 0) return cb1();
-		WinnerPotData[potid] = { sum:pot.value, seats:pot.members };
+		WinnerPotData[potid] = { value:pot.value, members:pot.members };
 		this.log('this pot',potid,pot);
 
 		if (forcewin >= 0) {
