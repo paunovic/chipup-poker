@@ -51,9 +51,6 @@ object frmDebug: TfrmDebug
     Style.IsFontAssigned = True
     TabOrder = 0
     Visible = False
-    ExplicitTop = 21
-    ExplicitWidth = 675
-    ExplicitHeight = 288
     Height = 290
     Width = 621
   end
@@ -69,9 +66,6 @@ object frmDebug: TfrmDebug
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
     OnRVMouseUp = rvLogRVMouseUp
-    ExplicitTop = 21
-    ExplicitWidth = 675
-    ExplicitHeight = 288
   end
   object paInfo: TPanel
     Left = 0
@@ -86,7 +80,6 @@ object frmDebug: TfrmDebug
     ParentCtl3D = False
     ParentDoubleBuffered = False
     TabOrder = 2
-    ExplicitWidth = 675
     DesignSize = (
       621
       71)
@@ -99,15 +92,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object dxBevel2: TdxBevel
-      Left = 226
-      Top = 6
-      Width = 19
-      Height = 60
-      LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      Shape = dxbsLineCenteredHorz
-    end
-    object dxBevel3: TdxBevel
-      Left = 382
+      Left = 243
       Top = 6
       Width = 19
       Height = 60
@@ -115,7 +100,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 241
+      Left = 258
       Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
@@ -130,7 +115,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 241
+      Left = 258
       Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Memory usage:'
@@ -160,7 +145,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsCalbackSets: TcxLabel
-      Left = 241
+      Left = 258
       Top = 35
       Anchors = [akLeft, akBottom]
       Caption = 'Callback sets:'
@@ -175,9 +160,10 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 330
+      Left = 347
       Top = 3
       Anchors = [akLeft, akBottom]
+      AutoSize = False
       Caption = 'Unknown'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
@@ -193,11 +179,14 @@ object frmDebug: TfrmDebug
       StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
+      Height = 17
+      Width = 81
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 330
+      Left = 347
       Top = 19
       Anchors = [akLeft, akBottom]
+      AutoSize = False
       Caption = 'Unknown'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
@@ -213,11 +202,14 @@ object frmDebug: TfrmDebug
       StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
+      Height = 17
+      Width = 81
     end
     object lbvCallbackSets: TcxLabel
-      Left = 330
+      Left = 347
       Top = 35
       Anchors = [akLeft, akBottom]
+      AutoSize = False
       Caption = 'Unknown'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
@@ -233,11 +225,14 @@ object frmDebug: TfrmDebug
       StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
+      Height = 17
+      Width = 81
     end
     object lbvSocketState: TcxLabel
       Left = 166
       Top = 3
       Anchors = [akLeft, akBottom]
+      AutoSize = False
       Caption = 'Unknown'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
@@ -253,6 +248,8 @@ object frmDebug: TfrmDebug
       StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
+      Height = 17
+      Width = 86
     end
     object btSeatPos: TcxButton
       Left = 548
@@ -275,7 +272,6 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
       OnClick = btSeatPosClick
-      ExplicitLeft = 602
     end
     object btPause: TcxButton
       Left = 5
@@ -394,6 +390,7 @@ object frmDebug: TfrmDebug
       Left = 166
       Top = 19
       Anchors = [akLeft, akBottom]
+      AutoSize = False
       Caption = 'Unknown'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
@@ -409,6 +406,8 @@ object frmDebug: TfrmDebug
       StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
+      Height = 17
+      Width = 86
     end
     object btRunAnotherInstance: TcxButton
       Left = 38
@@ -525,7 +524,7 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object lbsSwapChains: TcxLabel
-      Left = 241
+      Left = 258
       Top = 51
       Anchors = [akLeft, akBottom]
       Caption = 'Swap chains:'
@@ -540,9 +539,10 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSwapChains: TcxLabel
-      Left = 330
+      Left = 347
       Top = 51
       Anchors = [akLeft, akBottom]
+      AutoSize = False
       Caption = 'Unknown'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
@@ -558,6 +558,46 @@ object frmDebug: TfrmDebug
       StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
+      Height = 17
+      Width = 81
+    end
+    object lbsUser: TcxLabel
+      Left = 83
+      Top = 35
+      Anchors = [akLeft, akBottom]
+      Caption = 'User:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvUser: TcxLabel
+      Left = 166
+      Top = 35
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 86
     end
   end
   object paTop: TPanel
@@ -589,9 +629,6 @@ object frmDebug: TfrmDebug
       Style.TextStyle = []
       Style.IsFontAssigned = True
       TabOrder = 0
-      ExplicitLeft = 5
-      ExplicitWidth = 459
-      ExplicitHeight = 21
       Height = 19
       Width = 402
     end
@@ -614,9 +651,6 @@ object frmDebug: TfrmDebug
       Text = 'RegEx Filtering...'
       OnEnter = teRegexFilterEnter
       OnExit = teRegexFilterExit
-      ExplicitLeft = 420
-      ExplicitWidth = 255
-      ExplicitHeight = 21
       Height = 19
       Width = 219
     end

@@ -60,8 +60,12 @@ end;
 procedure TPlayerInfo.Flush;
 begin
   SetLength(FId, 0);
-
   FNick := '';
+  FEMail := '';
+  FPassword := '';
+  FBalance := 0;
+  FAuthed := FALSE;
+  SetLength(FAvatarId, 0);
   FClubs.Clear;
 end;
 

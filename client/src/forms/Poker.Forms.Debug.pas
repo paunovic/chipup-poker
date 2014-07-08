@@ -13,7 +13,7 @@ uses
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
-  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains);
+  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser);
   TDebugRefreshItemSet = set of TDebugRefreshItem;
 
   TDebugObject = class
@@ -93,10 +93,11 @@ type
     pmiShowPings: TMenuItem;
     lbsSwapChains: TcxLabel;
     lbvSwapChains: TcxLabel;
-    dxBevel3: TdxBevel;
     paTop: TPanel;
     ccbLogForms: TcxCheckComboBox;
     teRegexFilter: TcxTextEdit;
+    lbsUser: TcxLabel;
+    lbvUser: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -138,7 +139,7 @@ uses
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, OverbyteIcsWSocket,
-  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions;
+  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -690,10 +691,15 @@ begin
   begin
     lbvThreads.Caption := Format('%d', [GetThreadsCount(GetCurrentProcessId)]);
     lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
+    lbvThreads.Refresh;
+    lbvMemoryUsage.Refresh;
   end;
 
   if dfiCallbacks in refresh_items then
+  begin
     lbvCallbackSets.Caption := Format('%d', [MessageContainer.CallbackSetsCount]);
+    lbvCallbackSets.Refresh;
+  end;
 
   if (dfiSocketState in refresh_items) or
      (dfiLatency in refresh_items) then
@@ -733,6 +739,7 @@ begin
     begin
       lbvSocketState.Caption := server_socket_state;
       lbvSocketState.Style.TextColor := server_socket_state_color;
+      lbvSocketState.Refresh;
     end;
 
     if dfiLatency in refresh_items then
@@ -757,6 +764,7 @@ begin
         lbvLatency.Caption := 'Unknown';
         lbvLatency.Style.TextColor := clWhite;
       end;
+      lbvLatency.Refresh;
     end;
   end;
 
@@ -773,6 +781,17 @@ begin
     end
     else
       lbvSwapChains.Caption := 'Unknown';
+    lbvSwapChains.Refresh;
+  end;
+
+  if dfiUser in refresh_items then
+  begin
+    if (Assigned(dmMain.SelfInfo)) and
+       (dmMain.SelfInfo.Nick <> '') then
+      lbvUser.Caption := dmMain.SelfInfo.Nick
+    else
+      lbvUser.Caption := 'Unknown';
+    lbvUser.Refresh;
   end;
 end;
 

@@ -429,6 +429,8 @@ begin
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
     edLogin.SetFocus;
   end;
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
 procedure TfrmChipUpLogin.AlphaBlendThreadNotify(Sender: TObject);

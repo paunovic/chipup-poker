@@ -323,6 +323,7 @@ begin
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
+  {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
 procedure TfrmChipUpMain.ShowLoginForm;
