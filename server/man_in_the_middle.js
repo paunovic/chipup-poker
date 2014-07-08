@@ -6,7 +6,7 @@ var C2S = 'client to server direction';
 var S2C = 'server to client direction';
 
 var socketCount = 0;
-exports.createManInTheMiddleServer = function (pu, realServerPort, fakeServerPort, recorderCallback) {
+exports.createManInTheMiddleServer = function (pu, realServerPort, recorderCallback) {
 	var server = net.createServer(function (clientToFakeServerSocket) {
 		var socketId = socketCount++;
 		var fakeToRealServerSocket = net.connect(realServerPort, function () {
@@ -20,7 +20,7 @@ exports.createManInTheMiddleServer = function (pu, realServerPort, fakeServerPor
 				fakeToRealServerSocket.destroy();
 			});
 		});
-	}).listen(fakeServerPort);
+	});
 
 	return server;
 }

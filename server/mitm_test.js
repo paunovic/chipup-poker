@@ -16,7 +16,8 @@ var fakeServerPort = 55555;
 MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 	if (err) throw err;
 
-	var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, fakeServerPort, recordCallback);
+	var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, recordCallback);
+	mitmServer.listen(fakeServerPort);
 
 	function recordCallback(methodId, args, type, socketId, direction) {
 		console.log(methodId.toString() + ', ' + args.toString() + ', ' + type + ', ' + socketId + ', ' + direction);
