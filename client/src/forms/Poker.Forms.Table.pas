@@ -1016,6 +1016,7 @@ begin
   acRaisePot.Enabled := acRaise.Enabled;
   acRaiseMax.Enabled := acRaise.Enabled;
   acPlayNow.Enabled := table.Renderer.TableStatus.ActionPlayNow;
+  acShowCards.Enabled := table.Renderer.TableStatus.ActionShowCards;
 end;
 
 procedure TfrmTable.ConfigureGUI;
@@ -1394,7 +1395,8 @@ begin
     end;
 
     teStandUp: begin
-      table.Renderer.AnimateBets(Handle, table.Renderer.TableStatus.PreviousBets, ATableEvent.Seat);
+      if table.Renderer.PotWinAnimations.Count = 0 then
+        table.Renderer.AnimateBets(Handle, table.Renderer.TableStatus.PreviousBets, ATableEvent.Seat);
     end;
 
     tePostRiver: begin
@@ -1567,7 +1569,7 @@ begin
      (seat.Chips = 0) then
   begin
     sindex := seat.SeatIndex;
-    FormsContainer.Add(RunModalForm(TfrmTableSit, self, [table, table.Renderer.TableStatus, @sindex], ModalFormClose));
+    FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Renderer.TableStatus, @sindex], ModalFormClose));
     Exit;
   end;
 
