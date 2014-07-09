@@ -1,0 +1,88 @@
+'use strict';
+var net = require('net');
+var MongoClient = require('mongodb').MongoClient;
+var fs = require("fs");
+var util = require("util");
+var Protobuf = require("node-protobuf").Protobuf;
+var ProtobufUtil = require('./ProtobufUtil');
+var directions = require('./directions');
+var serverCodes = require('./ServerCodes.js');
+
+var schema = 'Poker.RpcMessage';
+var pb = new Protobuf(fs.readFileSync("../message.desc"));
+var pu = new ProtobufUtil(pb, schema);
+var port = process.argv[3] ? process.argv[3] : 12345;
+var host = process.argv[2] ? process.argv[2] : 'localhost';
+var mitmCollection = 'mitm';
+var socketId = 0;
+
+MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
+	if (err) throw err;
+
+	db.collection(mitmCollection).find({
+		$query: { socketId: socketId },
+		$orderby: { timestamp : 1 }
+	}).toArray(function (err, requests) {
+		if (err) console.warn(err.message);
+
+		var socket = net.connect(port, host, function () {
+			var counter = 0;
+			sendRequests();
+
+			socket.on('error', function (e) {
+				console.warn(e.message);
+			});
+
+			socket.on('data', pu.createOnDataListenerFn(checkIfRequestsMatch));
+			
+			function checkIfRequestsMatch(err, methodId, args, type) {
+				if (err) {
+					console.log(err.message);
+					socket.destroy();
+				}
+				if (requests[counter].direction !== directions.S2C) {
+					throw new Error('Received response from the server out of order!');
+				}
+				var methodName = serverCodes.reverse[methodId];
+				
+				if (methodName !== requests[counter].method) {
+					throw new Error('Methods do not match! SocketId' + socketId + " request #" + counter);
+				}
+				if (util.inspect(args).substring(8) != util.inspect(requests[counter].args.buffer).substring(12)) {
+					throw new Error('Args do not match! SocketId' + socketId + " request #" + counter);
+				}
+				if (type !== requests[counter].type) {
+					throw new Error('Type param do not match! SocketId' + socketId + " request #" + counter);
+				}
+				console.log("Request #" + counter + " match!");
+				++counter;
+				sendRequests();
+			}
+
+			function sendRequests() {
+				var methodId;
+
+				while (requests[counter].direction === directions.C2S) {
+					methodId = serverCodes[requests[counter].method];
+
+					var encodedMessage = pu.encode(methodId, requests[counter].args, requests[counter].type);
+
+					if (!socket.write(encodedMessage) && socket._handle) {
+						console.log(
+							'partial message write %d %s',
+							socket.bufferSize,
+							util.inspect({
+								a: socket._handle.writeQueueSize,
+								b: socket._writableState.length
+							})
+						);
+					}
+
+					if (socket._writableState.length > (256 * 1024))
+						throw new Error('send overflow');
+					++counter;
+				}
+			}
+		});
+	});
+});

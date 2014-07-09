@@ -3,7 +3,6 @@ var fs = require("fs");
 var Protobuf = require("node-protobuf").Protobuf;
 var ProtobufUtil = require('./ProtobufUtil');
 var mitm = require('./man_in_the_middle');
-var codes = require('./ServerCodes.js');
 var MongoClient = require('mongodb').MongoClient;
 var serverCodes = require('./ServerCodes.js');
 
@@ -25,7 +24,6 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 	mitmServer.listen(fakeServerPort);
 
 	function recordCallback(methodId, args, type, socketId, direction) {
-		//console.log(methodId.toString() + ', ' + args.toString() + ', ' + type + ', ' + socketId + ', ' + direction);
 		db.collection('mitm').insert({
 			method: serverCodes.reverse[methodId],
 			args: args,
