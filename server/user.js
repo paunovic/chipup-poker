@@ -527,6 +527,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scHello:
+			clearTimeout(this.oldTimer);
 			try {
 				params = pb.Parse(args,'Poker.HelloParams');
 				if (params.files.length == 0) {
@@ -537,7 +538,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.error(e);
 				return;
 			}
-			clearTimeout(this.oldTimer);
 			this.doHelloProcessing(params,params.files,token,true,true);
 		}
 		break;
