@@ -144,12 +144,12 @@ type
     procedure clear_TableMongoId;
     property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
 
-    // repeated FIXME Seats = 2;
+    // repeated SeatInfo Seats = 2;
     function has_Seats: Boolean;
     procedure clear_Seats;
     property Seats: TList<TPB_SeatInfo> read FSeats;
 
-    // required FIXME State = 3;
+    // required TableState State = 3;
     function has_State: Boolean;
     procedure clear_State;
     property State: TTableState read FState write SetState;
@@ -209,12 +209,12 @@ type
     procedure clear_Time;
     property Time: UInt64 read FTime write SetTime;
 
-    // repeated FIXME Events = 19;
+    // repeated TableEvent Events = 19;
     function has_Events: Boolean;
     procedure clear_Events;
     property Events: TList<TPB_TableEvent> read FEvents;
 
-    // repeated FIXME Pots = 20;
+    // repeated Pot Pots = 20;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
@@ -224,7 +224,7 @@ type
     procedure clear_RakePercent;
     property RakePercent: UINT32 read FRakePercent write SetRakePercent;
 
-    // optional FIXME CurrentGame = 22;
+    // optional GameType CurrentGame = 22;
     function has_CurrentGame: Boolean;
     procedure clear_CurrentGame;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;
@@ -239,7 +239,7 @@ type
     procedure clear_TotalBalance;
     property TotalBalance: UINT32 read FTotalBalance write SetTotalBalance;
 
-    // optional FIXME GameLimit = 25;
+    // optional GameLimit GameLimit = 25;
     function has_GameLimit: Boolean;
     procedure clear_GameLimit;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;

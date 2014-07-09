@@ -68,7 +68,7 @@ type
     procedure MergeFrom(const from: TPB_HelloReply);
     function IsInitialized: Boolean; override;
 
-    // required FIXME StringSizes = 1;
+    // required StringSizes StringSizes = 1;
     function has_StringSizes: Boolean;
     procedure clear_StringSizes;
     property StringSizes: TPB_StringSizes read FStringSizes write SetStringSizes;
@@ -93,17 +93,17 @@ type
     procedure clear_MaxTimebank;
     property MaxTimebank: Integer read FMaxTimebank write SetMaxTimebank;
 
-    // required FIXME MinSizes = 6;
+    // required StringSizes MinSizes = 6;
     function has_MinSizes: Boolean;
     procedure clear_MinSizes;
     property MinSizes: TPB_StringSizes read FMinSizes write SetMinSizes;
 
-    // repeated FIXME UpdateFiles = 7;
+    // repeated UpdateFileInfo UpdateFiles = 7;
     function has_UpdateFiles: Boolean;
     procedure clear_UpdateFiles;
     property UpdateFiles: TList<TPB_UpdateFileInfo> read FUpdateFiles;
 
-    // required FIXME ValidCharsRegex = 8;
+    // required ValidCharsRegex ValidCharsRegex = 8;
     function has_ValidCharsRegex: Boolean;
     procedure clear_ValidCharsRegex;
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;

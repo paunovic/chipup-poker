@@ -2,32 +2,36 @@
 var net = require('net');
 var util = require('util');
 
-exports.createManInTheMiddleServer(protobufUtil, realServerPort, fakeServerPort, recordCallback) {
-	var server = net.createServer();
+var C2S = 'client to server';
+var S2C = 'server to client';
 
-	server.on('connect', function (clientToFakeServerSocket) {
-		var fakeToRealServerSocket = net.connect(realServerPort);
+var socketCount = 0;
+exports.createManInTheMiddleServer = function (pu, realServerPort, recorderCallback) {
+	var server = net.createServer(function (clientToFakeServerSocket) {
+		var socketId = socketCount++;
+		var fakeToRealServerSocket = net.connect(realServerPort, function () {
+			var clientToServerSpy = createRecordAndForwardFn(fakeToRealServerSocket, pu, recorderCallback, socketId, C2S);
+			clientToFakeServerSocket.on('data', pu.createOnDataListenerFn(clientToServerSpy));
 
-		var clientToServerSpy = createRecordAndForwardFn(fakeToRealServerSocket, protobufUtil, recordCallback);
-		clientToFakeServerSocket.on('data', s2p.createOnDataListenerFn(protobuf, schema, clientToServerSpy));
+			var serverToClientSpy = createRecordAndForwardFn(clientToFakeServerSocket, pu, recorderCallback, socketId, S2C);
+			fakeToRealServerSocket.on('data', pu.createOnDataListenerFn(serverToClientSpy));
 
-		var serverToClientSpy = createRecordAndForwardFn(clientToFakeServerSocket, protobufUtil, recordCallback);
-		fakeToRealServerSocket.on('data', s2p.createOnDataListenerFn(protobuf, schema, serverToClientSpy));
-
-		server.on('close', function () {
-			fakeToRealServerSocket.destroy();
+			server.on('close', function () {
+				fakeToRealServerSocket.destroy();
+			});
 		});
 	});
-
-	server.listen(fakeServerPort);
 
 	return server;
 }
 
-function createRecordAndForwardFn(destinationSocket, protobufUtil, recorderCallback) {
-	return function (methodId, args) {
-		recorderCallback(methodId, args);
-		var encodedMessage = protobufUtil.encode(methodId, args);
+function createRecordAndForwardFn(destinationSocket, protobufUtil, recorderCallback, socketId, direction) {
+	return function (err, methodId, args, type) {
+		if (err) {
+			console.log(err.name + ": " + err.message);
+		}
+		recorderCallback(methodId, args, type, socketId, direction);
+		var encodedMessage = protobufUtil.encode(methodId, args, type);
 
 		if (!destinationSocket.write(encodedMessage) && destinationSocket._handle) {
 			console.log(

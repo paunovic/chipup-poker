@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.MoveRow;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.WinnerPotInfo,Poker.Protobufs.Objects.Pot;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.TableEvent,Poker.Protobufs.Objects.Pot;
 
 type
   TPB_MoveRow = class(TProtobufBaseObject)
@@ -22,7 +22,7 @@ type
       FCode: TList<TTableEventType>;
       FBet: UINT32;
       FSeat: Integer;
-      FWinnerPotData: TList<TPB_WinnerPotInfo>;
+      FWinnerPotData: TList<TPB_Pot>;
       FPots: TList<TPB_Pot>;
       _has_bits_: Integer;
 
@@ -39,7 +39,7 @@ type
     procedure set_has_Pots;
     procedure clear_has_Pots;
     procedure CodeNotifyEvent(Sender: TObject; const Item: TTableEventType; Action: TCollectionNotification);
-    procedure WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
+    procedure WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 
   protected
@@ -53,7 +53,7 @@ type
     procedure MergeFrom(const from: TPB_MoveRow);
     function IsInitialized: Boolean; override;
 
-    // repeated FIXME Code = 1;
+    // repeated TableEventType Code = 1;
     function has_Code: Boolean;
     procedure clear_Code;
     property Code: TList<TTableEventType> read FCode;
@@ -68,12 +68,12 @@ type
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // repeated FIXME WinnerPotData = 4;
+    // repeated Pot WinnerPotData = 4;
     function has_WinnerPotData: Boolean;
     procedure clear_WinnerPotData;
-    property WinnerPotData: TList<TPB_WinnerPotInfo> read FWinnerPotData;
+    property WinnerPotData: TList<TPB_Pot> read FWinnerPotData;
 
-    // repeated FIXME Pots = 5;
+    // repeated Pot Pots = 5;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
@@ -90,7 +90,7 @@ procedure TPB_MoveRow.InitObjects;
 begin
   inherited;
   FCode := TList<TTableEventType>.Create;
-  FWinnerPotData := TObjectList<TPB_WinnerPotInfo>.Create;
+  FWinnerPotData := TObjectList<TPB_Pot>.Create;
   FPots := TObjectList<TPB_Pot>.Create;
 end;
 procedure TPB_MoveRow.HookNotifiers;
@@ -152,7 +152,7 @@ begin
       end;
       kWinnerPotDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FWinnerPotData.Add(TPB_WinnerPotInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        FWinnerPotData.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
         set_has_WinnerPotData;
       end;
       kPotsFieldNumber: begin
@@ -168,7 +168,7 @@ end;
 
 procedure TPB_MoveRow.MergeFrom(const from: TPB_MoveRow);
 var
-  temp3: TPB_WinnerPotInfo;
+  temp3: TPB_Pot;
   temp4: TPB_Pot;
 begin
   FCode.AddRange(from.Code);
@@ -177,7 +177,7 @@ begin
   if (from.has_Seat) then
     SetSeat(from.Seat);
   for temp3 in from.WinnerPotData do
-    FWinnerPotData.Add(TPB_WinnerPotInfo.Create(temp3));
+    FWinnerPotData.Add(TPB_Pot.Create(temp3));
   for temp4 in from.Pots do
     FPots.Add(TPB_Pot.Create(temp4));
 end;
@@ -299,7 +299,7 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_MoveRow.WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerPotInfo; Action: TCollectionNotification);
+procedure TPB_MoveRow.WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(kWinnerPotDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);

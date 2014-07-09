@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.Pot;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.WinnerData;
 
 type
   TPB_Pot = class(TProtobufBaseObject)
@@ -14,10 +14,14 @@ type
     const
       kValueFieldNumber = 1;
       kMembersFieldNumber = 2;
+      kWinnerDataFieldNumber = 3;
+      kRakeFieldNumber = 4;
 
     var
       FValue: UINT32;
       FMembers: TList<Integer>;
+      FWinnerData: TList<TPB_WinnerData>;
+      FRake: UINT32;
       _has_bits_: Integer;
 
     procedure set_has_Value;
@@ -25,7 +29,13 @@ type
     procedure SetValue(const AValue: UINT32);
     procedure set_has_Members;
     procedure clear_has_Members;
+    procedure set_has_WinnerData;
+    procedure clear_has_WinnerData;
+    procedure set_has_Rake;
+    procedure clear_has_Rake;
+    procedure SetRake(const AValue: UINT32);
     procedure MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
+    procedure WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -48,6 +58,16 @@ type
     procedure clear_Members;
     property Members: TList<Integer> read FMembers;
 
+    // repeated WinnerData WinnerData = 3;
+    function has_WinnerData: Boolean;
+    procedure clear_WinnerData;
+    property WinnerData: TList<TPB_WinnerData> read FWinnerData;
+
+    // optional uint32 Rake = 4;
+    function has_Rake: Boolean;
+    procedure clear_Rake;
+    property Rake: UINT32 read FRake write SetRake;
+
   end;
 
 implementation
@@ -60,11 +80,13 @@ procedure TPB_Pot.InitObjects;
 begin
   inherited;
   FMembers := TList<Integer>.Create;
+  FWinnerData := TObjectList<TPB_WinnerData>.Create;
 end;
 procedure TPB_Pot.HookNotifiers;
 begin
   inherited;
   FMembers.OnNotify := MembersNotifyEvent;
+  FWinnerData.OnNotify := WinnerDataNotifyEvent;
 end;
 
 constructor TPB_Pot.Create(const AFrom: TPB_Pot);
@@ -79,6 +101,11 @@ begin
   begin
     FMembers.OnNotify := nil;
     FreeAndNil(FMembers);
+  end;
+  if Assigned(FWinnerData) then
+  begin
+    FWinnerData.OnNotify := nil;
+    FreeAndNil(FWinnerData);
   end;
   inherited;
 end;
@@ -101,6 +128,16 @@ begin
         FMembers.Add(AProtobufReader.readInt32);
         set_has_Members;
       end;
+      kWinnerDataFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
+        set_has_WinnerData;
+      end;
+      kRakeFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FRake := AProtobufReader.readUInt32;
+        set_has_Rake;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -108,15 +145,25 @@ begin
 end;
 
 procedure TPB_Pot.MergeFrom(const from: TPB_Pot);
+var
+  temp2: TPB_WinnerData;
 begin
   if (from.has_Value) then
     SetValue(from.Value);
   FMembers.AddRange(from.Members);
+  for temp2 in from.WinnerData do
+    FWinnerData.Add(TPB_WinnerData.Create(temp2));
+  if (from.has_Rake) then
+    SetRake(from.Rake);
 end;
 
 function TPB_Pot.IsInitialized: Boolean;
+var
+  temp: TProtobufBaseObject;
 begin
   if ((_has_bits_ and $1) <> $1) Then Exit(false);
+  for temp in WinnerData do
+    if (not temp.IsInitialized) then Exit(false);
   Exit(True);
 end;
 
@@ -174,6 +221,64 @@ procedure TPB_Pot.MembersNotifyEvent(Sender: TObject; const Item: Integer; Actio
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
+end;
+
+procedure TPB_Pot.clear_WinnerData;
+begin
+  FWinnerData.Clear;
+  clear_has_WinnerData;
+end;
+
+function TPB_Pot.has_WinnerData: Boolean;
+begin
+  Result := (_has_bits_ and 4) > 0;
+end;
+
+procedure TPB_Pot.set_has_WinnerData;
+begin
+  _has_bits_ := _has_bits_ or 4;
+end;
+
+procedure TPB_Pot.clear_has_WinnerData;
+begin
+  _has_bits_ := _has_bits_ and not 4;
+end;
+
+procedure TPB_Pot.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  ProtobufOutput.writeTag(kWinnerDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+  Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_Pot.clear_Rake;
+begin
+  FRake := 0;
+  clear_has_Rake;
+end;
+
+function TPB_Pot.has_Rake: Boolean;
+begin
+  Result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_Pot.set_has_Rake;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_Pot.clear_has_Rake;
+begin
+  _has_bits_ := _has_bits_ and not 8;
+end;
+
+procedure TPB_Pot.SetRake(const AValue: UINT32);
+begin
+  Assert(not has_Rake);
+  FRake := AValue;
+  ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
+  set_has_Rake;
 end;
 
 end.

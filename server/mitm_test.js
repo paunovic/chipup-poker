@@ -1,33 +1,41 @@
 'use strict';
+var fs = require("fs");
+var Protobuf = require("node-protobuf").Protobuf;
+var ProtobufUtil = require('./ProtobufUtil');
+var mitm = require('./man_in_the_middle');
+var codes = require('./ServerCodes.js');
+var MongoClient = require('mongodb').MongoClient;
+var serverCodes = require('./ServerCodes.js');
+
 var schema = 'Poker.RpcMessage';
-var s2p = require('./protobuf_util');
-var protobuf = require("node-protobuf");
+var pb = new Protobuf(fs.readFileSync("../message.desc"));
+var pu = new ProtobufUtil(pb, schema);
 
-var realServerPort = 5678;
-var fakeServerPort = 1234;
-var mitmServer = require(./man_in_the_middle).createManInTheMiddleServer(protobuf, schema, realServerPort, fakeServerPort, recordCallback);
+var realServerPort = 12345;
+var fakeServerPort = 55555;
 
+MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
+	if (err) throw err;
 
-function recordCallback(methodId, args) {
-	var MongoClient = require('mongodb').MongoClient
-		, format = require('util').format;
-
-	MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
-		if(err) throw err;
-
-		var collection = db.collection('test_insert');
-		collection.insert({a:2}, function(err, docs) {
-
-			collection.count(function(err, count) {
-				console.log(format("count = %s", count));
-			});
-
-			// Locate all the entries using find
-			collection.find().toArray(function(err, results) {
-				console.dir(results);
-				// Let's close the db
-				db.close();
-			});
-		});
+	db.collection('mitm').remove({}, function (err, result) {
+		if (err) console.warn(err.message);
 	});
-}
+
+	var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, recordCallback);
+	mitmServer.listen(fakeServerPort);
+
+	function recordCallback(methodId, args, type, socketId, direction) {
+		//console.log(methodId.toString() + ', ' + args.toString() + ', ' + type + ', ' + socketId + ', ' + direction);
+		db.collection('mitm').insert({
+			method: serverCodes.reverse[methodId],
+			args: args,
+			type: type,
+			socketId: socketId,
+			direction: direction,
+			timestamp: Date.now()
+		}, function (err, inserted) {
+			if (err) console.warn(err.message);
+		});
+	}
+});
+

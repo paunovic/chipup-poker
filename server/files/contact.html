@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ChipUp Poker | Welcome</title>
+    <title>ChipUP Poker | Contact Us</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="css/foundation.css" />
@@ -28,23 +28,23 @@
          </nav>
       </div>
     </div>
-    <div class="row inner">
-  		<div class="large-3 medium-12 columns"><h1 class="side_title">Contact</h1></div>
-  		<div class="large-6 medium-12 small-12 columns">
-			<form id="contact_form" name="input" action="/contactPost" method="post">
-			<input type="text" placeholder="Name" name="name" />
-			<input type="text" placeholder="E-Mail" name="email" />
+	<div class="row inner">
+		<div class="large-3 medium-12 columns"><h1 class="side_title">Contact us</h1></div>
+		<div class="large-6 medium-12 small-12 columns">
+			<form id="contact_form" name="input" action="/contactPost" method="post" onsubmit="return validateForm();">
+			<input type="text" placeholder="Name" name="name" id="name" />
+			<input type="text" placeholder="E-Mail" name="email" id="email" />
 			<select name="type">
 				<option value="Questions">Questions</option>
 				<option value="Suggestions">Suggestions</option>
 				<option value="Other">Other</option>
-		        </select>
-		        <textarea rows="12" placeholder="Message" name="message"></textarea>
-		        <input class="button" type="submit" value="Send">
-	  		</form>
-  		</div>
-  		<div class="large-3 medium-12 small-12 columns"><img src="img/chip.png"></div>
-    </div>
+			</select>
+			<textarea rows="12" placeholder="Message" name="message" id="message"></textarea>
+			<input class="button" type="submit" value="Send">
+			</form>
+		</div>
+		<div class="large-3 medium-12 small-12 columns"><img src="img/chip.png"></div>
+	</div>
 	<div class="row">
 		<div class="large-12">
 			<footer>
@@ -60,6 +60,25 @@
     <script>
       $(document).foundation();
       if (document.location.search.indexOf('success=true') != -1) alert('Thank you for contacting us.');
-    </script>
-  </body>
+		function validateForm() {
+			if (document.getElementById('name').value.length < 1) {
+				alert('Please fill all fields.');
+				return false;
+			}
+			if (document.getElementById('email').value.length < 1) {
+				alert('Please fill all fields.');
+				return false;
+			}
+			if (document.getElementById('email').value.indexOf('@') == -1) {
+				alert('Please fill all fields.');
+				return false;
+			}
+			if (document.getElementById('message').value.length < 1) {
+				alert('Please fill all fields.');
+				return false;
+			}
+			return true;
+		}
+		</script>
+	</body>
 </html>

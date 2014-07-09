@@ -29,15 +29,19 @@ type
     property Status: TPlayerStatus read FStatus;
   end;
 
-  TPlayerHandHistories = class(TObjectDictionary<Integer, TPlayerHandHistory>)
+  TPlayerHandHistories = class(TObjectList<TPlayerHandHistory>)
+  private
+    procedure NotifyEvent(Sender: TObject; const AValue: TPlayerHandHistory; AAction: TCollectionNotification);
   public
     constructor Create;
+    procedure Sort;
+    function FindPlayer(const ASeat: Integer; out APlayer: TPlayerHandHistory): Boolean;
   end;
 
 implementation
 
 uses
-  Poker.Cards;
+  Poker.Cards, System.Generics.Defaults;
 
 { TPlayerHandHistory }
 
@@ -57,7 +61,46 @@ end;
 
 constructor TPlayerHandHistories.Create;
 begin
-  inherited Create([doOwnsValues]);
+  inherited Create;
+  OnNotify := NotifyEvent;
+end;
+
+procedure TPlayerHandHistories.NotifyEvent(Sender: TObject; const AValue: TPlayerHandHistory; AAction: TCollectionNotification);
+begin
+  Sort;
+end;
+
+procedure TPlayerHandHistories.Sort;
+var
+  comparer: IComparer<TPlayerHandHistory>;
+begin
+  comparer := TComparer<TPlayerHandHistory>.Construct(
+    function(const APlayerHandHistory1, APlayerHandHistory2: TPlayerHandHistory): Integer
+    begin
+      if APlayerHandHistory1.Seat < APlayerHandHistory2.Seat then
+        result := -1
+      else
+        if APlayerHandHistory1.Seat > APlayerHandHistory2.Seat then
+          result := 1
+        else
+          result := 0;
+    end
+  );
+
+  inherited Sort(comparer);
+end;
+
+function TPlayerHandHistories.FindPlayer(const ASeat: Integer; out APlayer: TPlayerHandHistory): Boolean;
+var
+  phh: TPlayerHandHistory;
+begin
+  for phh in ToArray do
+    if phh.Seat = ASeat then
+    begin
+      APlayer := phh;
+      Exit(TRUE);
+    end;
+  Exit(FALSE);
 end;
 
 end.

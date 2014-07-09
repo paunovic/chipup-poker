@@ -1,6 +1,20 @@
 var fs = require('fs');
+
+var config = require('./config');
+
 var rand = -1;
 var getRandom;
+if (config.random_seed) {
+	var srand = require('srand');
+	srand.seed(config.random_seed);
+	getRandom = function (size,cb) {
+		var buffer = new Buffer(size);
+		for (var x=0; x<size; x++) {
+			buffer[x] = parseInt(srand.random() * 255);
+		}
+		cb(buffer);
+	}
+} else {
 fs.open('/dev/urandom','r',function (err,fd) {
 	if (err) {
 		getRandom = function winGetRandom(size,callback) {
@@ -29,6 +43,7 @@ fs.open('/dev/urandom','r',function (err,fd) {
 		});
 	}
 });
+}
 module.exports.Deck = Deck;
 module.exports.Hand = Hand;
 function Deck() {

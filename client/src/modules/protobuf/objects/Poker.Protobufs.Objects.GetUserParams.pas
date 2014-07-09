@@ -43,7 +43,7 @@ type
     procedure clear_UserMongoIds;
     property UserMongoIds: TList<TBytes> read FUserMongoIds;
 
-    // repeated FIXME Users = 2;
+    // repeated User Users = 2;
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;

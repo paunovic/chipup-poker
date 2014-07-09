@@ -89,7 +89,7 @@ type
     procedure clear_Muck;
     property Muck: Boolean read FMuck write SetMuck;
 
-    // required FIXME Status = 7;
+    // required PlayerStatus Status = 7;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TPlayerStatus read FStatus write SetStatus;

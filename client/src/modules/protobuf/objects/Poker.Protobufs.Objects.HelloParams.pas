@@ -43,7 +43,7 @@ type
     procedure clear_Debug;
     property Debug: Boolean read FDebug write SetDebug;
 
-    // repeated FIXME Files = 2;
+    // repeated UpdateFileInfo Files = 2;
     function has_Files: Boolean;
     procedure clear_Files;
     property Files: TList<TPB_UpdateFileInfo> read FFiles;

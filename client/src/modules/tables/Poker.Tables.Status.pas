@@ -229,8 +229,8 @@ begin
   if (oldstate < tsWinning) or
      (FState < tsWinning) then
   begin
-    FPreviousPots.Assign(FPots, FRakePercent);
-    FPots.Assign(ATableStatusProtobuf.Pots, FRakePercent);
+    FPreviousPots.Assign(FPots);
+    FPots.Assign(ATableStatusProtobuf.Pots);
     FPreviousBets.Clear;
     FPreviousBets.AddRange(FBets);
     FBets.Clear;

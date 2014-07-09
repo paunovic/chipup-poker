@@ -2,14 +2,16 @@
 
 module.exports = ProtobufUtil;
 
-function ProtobufUtil(protobuf, schema) {
+function ProtobufUtil(protobuf, schema,codes) {
 	this.protobuf = protobuf;
 	this.schema = schema;
+	this.codes = codes;
 }
 
 ProtobufUtil.prototype.createOnDataListenerFn = function (callback, logger) {
 	logger = typeof logger !== 'undefined' ?  logger : console.log;
 	var buffer = new Buffer(0);
+	var self = this;
 
 	return function (chunk) {
 		buffer = Buffer.concat([buffer, chunk]);
@@ -30,7 +32,7 @@ ProtobufUtil.prototype.createOnDataListenerFn = function (callback, logger) {
 			var headerUnparsed = buffer.slice(2, 2 + headerSize);
 
 			try {
-				var header = this.protobuf.Parse(headerUnparsed, this.schema);
+				var header = self.protobuf.Parse(headerUnparsed, self.schema);
 
 				if (!header.DataSize)
 					header.DataSize = 0;
@@ -41,7 +43,7 @@ ProtobufUtil.prototype.createOnDataListenerFn = function (callback, logger) {
 				}
 
 				var args = buffer.slice(2 + headerSize, 2 + headerSize + header.DataSize);
-				callback(null, header.MethodId, args);
+				callback(null, header.MethodId, args, 'raw');
 				buffer = buffer.slice(2 + headerSize + header.DataSize);
 			} catch (e) {
 				callback(e);
@@ -73,5 +75,19 @@ ProtobufUtil.prototype.encode = function (code, message, type) {
 		args.copy(encodedMessage, 2 + header.length);
 
 	return encodedMessage;
+};
+
+ProtobufUtil.prototype.reply = function (socket,hidden,log,code,message,type) {
+	var packet = this.encode(code,message,type)
+	var alldone = socket.write(packet);
+	if (!alldone) {
+		if (socket._handle) log('partial message write %d %s', socket.bufferSize,util.inspect({a:socket._handle.writeQueueSize,b:socket._writableState.length}));
+	}
+	if (socket._writableState.length > (256 * 1024)) {
+		error('sendq overflow');
+	}
+	if (!hidden || hidden.indexOf(code) === -1) {
+		log('sent %d bytes for code %s', packet.length, this.codes.reverse[code]);
+	}
 };
 

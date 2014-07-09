@@ -5,6 +5,7 @@ block content
       th ts
       th msg
       th trace
+      th trace2
     each row in rows
       tr
         td
@@ -13,3 +14,5 @@ block content
         td=row.error
         td
           pre=row.trace
+        td
+          pre=row.trace2

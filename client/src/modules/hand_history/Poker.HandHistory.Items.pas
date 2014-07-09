@@ -182,7 +182,7 @@ begin
 
   FPlayers.Clear;
   for phh in AHandHistory.Players do
-    FPlayers.Add(phh.Seat, TPlayerHandHistory.Create(phh));
+    FPlayers.Add(TPlayerHandHistory.Create(phh));
 
   FMoves.Clear;
   for mhh in AHandHistory.Moves do
@@ -212,6 +212,8 @@ var
   line: String;
   tablestate: TTableState;
   C1: Integer;
+  action: String;
+  last_bet: UINT32;
 begin
   ALines.Clear;
 
@@ -231,7 +233,7 @@ begin
   ALines.Add('');
 
   // seats info
-  for player in FPlayers.Values do
+  for player in FPlayers do
   begin
     line := '%sSeat %s%d%s: %s%s%s (%s%s%s chips';
     if player.Seat = FDealerIndex then
@@ -250,18 +252,25 @@ begin
 
   SetLength(fold_on, FParentItems.Game.Seats);
 
+  last_bet := 0;
   // moves
   for move in FMoves do
   begin
-    player_nick := 'Unknown';
-    if FPlayers.TryGetValue(move.Seat, player) then
+    player_nick := 'Unknown player';
+    if FPlayers.FindPlayer(move.Seat, player) then
       player_nick := player.Nick;
 
     if move.ContainsEvent(teSB) then
+    begin
       ALines.Add(Format('%s%s%s posts small blind (%s%s%s)', [ATags.PlayerNick, player_nick, ATags.NormalText, ATags.Chips, ChipsToStr(move.Bet), ATags.NormalText]));
+      last_bet := move.Bet;
+    end;
 
     if move.ContainsEvent(teBB) then
+    begin
       ALines.Add(Format('%s%s%s posts big blind (%s%s%s)', [ATags.PlayerNick, player_nick, ATags.NormalText, ATags.Chips, ChipsToStr(move.Bet), ATags.NormalText]));
+      last_bet := move.Bet;
+    end;
 
     if move.ContainsEvent(teDealing) then
     begin
@@ -275,15 +284,35 @@ begin
       ALines.Add(Format('%s%s%s checks', [ATags.PlayerNick, player_nick, ATags.NormalText, player_nick]));
 
     if move.ContainsEvent(teCall) then
-      ALines.Add(Format('%s%s%s calls %s%s', [ATags.PlayerNick, player_nick, ATags.NormalText, ATags.Chips, ChipsToStr(move.Bet)]));
-
-    if move.ContainsEvent(teRaise) then // handler for BET here too! FIXME
     begin
-      ALines.Add(Format('%s%s%s raises %s%s', [ATags.PlayerNick, player_nick, ATags.NormalText, ATags.Chips, ChipsToStr(move.Bet)]));
+      ALines.Add(Format('%s%s%s calls %s%s', [ATags.PlayerNick, player_nick, ATags.NormalText, ATags.Chips, ChipsToStr(move.Bet)]));
+      last_bet := move.Bet;
+    end;
+
+    if move.ContainsEvent(teRaise) then
+    begin
+      if last_bet = 0 then
+        action := 'bets'
+      else
+        action := 'raises';
+
+      ALines.Add(Format('%s%s%s %s %s%s', [ATags.PlayerNick, player_nick, ATags.NormalText, action, ATags.Chips, ChipsToStr(move.Bet)]));
+      last_bet := move.Bet;
+    end;
+
+    if move.ContainsEvent(teAllIn) then
+    begin
+      if move.Bet > last_bet then
+        action := 'raises'
+      else
+        action := 'calls';
+
+      ALines.Add(Format('%s%s%s %s %s%s%s and is all-in', [ATags.PlayerNick, player_nick, ATags.NormalText, action, ATags.Chips, ChipsToStr(move.Bet), ATags.NormalText]));
     end;
 
     if move.ContainsEvent(teFlop) then
     begin
+      last_bet := 0;
       tablestate := tsFlop;
       ALines.Add('');
       ALines.Add(Format('%s*** FLOP *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCards.BytesToString(FCards, ' ', 3), ATags.TableEvent]));
@@ -292,6 +321,7 @@ begin
 
     if move.ContainsEvent(teTurn) then
     begin
+      last_bet := 0;
       tablestate := tsTurn;
       ALines.Add('');
       ALines.Add(Format('%s*** TURN *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCard.ByteToString(FCards[3]), ATags.TableEvent]));
@@ -300,6 +330,7 @@ begin
 
     if move.ContainsEvent(teRiver) then
     begin
+      last_bet := 0;
       tablestate := tsRiver;
       ALines.Add('');
       ALines.Add(Format('%s*** RIVER *** [%s%s%s]', [ATags.TableEvent, ATags.Cards, TCard.ByteToString(FCards[4]), ATags.TableEvent]));
@@ -321,7 +352,7 @@ begin
       ALines.Add(Format('%s*** SHOW DOWN ***', [ATags.TableEvent]));
       ALines.Add('');
 
-      for player in FPlayers.Values do
+      for player in FPlayers do
       begin
         if fold_on[player.Seat] > tsIdle then
           Continue;
@@ -366,7 +397,7 @@ begin
           Inc(seat_winnings[pot.WinnerData[C1].Seat], (pot.Value - pot.Rake) div UINT32(pot.WinnerData.Count));
 
       // show summary
-      for player in FPlayers.Values do
+      for player in FPlayers do
       begin
         player_line := Format('%sSeat %s%d%s: %s%s%s ', [
             ATags.NormalText, ATags.SeatIndex, player.Seat, ATags.NormalText, ATags.PlayerNick, player.Nick, ATags.NormalText

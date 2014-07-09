@@ -116,16 +116,6 @@ function goOnline() {
 	}*/
 	Club.init(activeGames,regexLimits);
 	Game.init(activeGames);
-	process.on('uncaughtException',function (err) {
-		console.log(err);
-		console.log(err.stack);
-		var trace = '';
-		if (err.stack) trace = err.stack.split('\n').slice(1).join('\n').trim();
-		mdb.models.ServerError.create({error:err.toString(),trace:trace},function (err) {
-			if (err) console.log(err);
-			process.exit(-1);
-		});
-	});
 	//process.send({msg:'connected'});
 
 	/*db.createCollection('fetchQueue',{capped:true,size:128 * 1024},function (err,collection) {

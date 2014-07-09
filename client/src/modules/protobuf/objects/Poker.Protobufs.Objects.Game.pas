@@ -118,17 +118,17 @@ type
     procedure clear_Clubseq;
     property Clubseq: Integer read FClubseq write SetClubseq;
 
-    // optional FIXME GameType = 5;
+    // optional GameType GameType = 5;
     function has_GameType: Boolean;
     procedure clear_GameType;
     property GameType: TGameType read FGameType write SetGameType;
 
-    // optional FIXME GameLimit = 6;
+    // optional GameLimit GameLimit = 6;
     function has_GameLimit: Boolean;
     procedure clear_GameLimit;
     property GameLimit: TGameLimit read FGameLimit write SetGameLimit;
 
-    // optional FIXME Blinds = 7;
+    // optional GameBlinds Blinds = 7;
     function has_Blinds: Boolean;
     procedure clear_Blinds;
     property Blinds: TGameBlinds read FBlinds write SetBlinds;
@@ -153,7 +153,7 @@ type
     procedure clear_BuyinMax;
     property BuyinMax: Integer read FBuyinMax write SetBuyinMax;
 
-    // optional FIXME State = 13;
+    // optional GameState State = 13;
     function has_State: Boolean;
     procedure clear_State;
     property State: TGameState read FState write SetState;

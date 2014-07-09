@@ -41,7 +41,7 @@ begin
   FWinnerPots := TPotList.Create;
   FWinnerPots.Assign(AProtobuf.WinnerPotData);
   FPots := TPotList.Create;
-  FPots.Assign(AProtobuf.Pots, 0);
+  FPots.Assign(AProtobuf.Pots);
 end;
 
 destructor THandHistoryMove.Destroy;

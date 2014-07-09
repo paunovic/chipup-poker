@@ -40,12 +40,12 @@ type
     procedure MergeFrom(const from: TPB_ChatEvent);
     function IsInitialized: Boolean; override;
 
-    // required FIXME Event = 1;
+    // required EventType Event = 1;
     function has_Event: Boolean;
     procedure clear_Event;
     property Event: TEventType read FEvent write SetEvent;
 
-    // required FIXME Msg = 2;
+    // required ChatMessage Msg = 2;
     function has_Msg: Boolean;
     procedure clear_Msg;
     property Msg: TPB_ChatMessage read FMsg write SetMsg;

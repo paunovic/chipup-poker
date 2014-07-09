@@ -35,7 +35,7 @@ type
     procedure MergeFrom(const from: TPB_ContactMessage);
     function IsInitialized: Boolean; override;
 
-    // required FIXME Reason = 1;
+    // required ContactReason Reason = 1;
     function has_Reason: Boolean;
     procedure clear_Reason;
     property Reason: TContactReason read FReason write SetReason;

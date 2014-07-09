@@ -325,8 +325,8 @@ Club.prototype.getPotentialLosses = function (userid,cb) {
 Club.prototype.updateLimit = function (userid,limit,unlimited,cb) {
 	models.ClubBalance.findOneAndUpdate({clubid:this.clubid, userid:userid},{$set:{balance_limit:limit, unlimited_limit:unlimited}},function (err,rows) {
 		assert.ifError(err);
-		if (rows != 1) cb(false);
-		else cb(true);
+		if (rows) cb(true);
+		else cb(false);
 	}.bind(this));
 }
 Club.prototype.resetPlayerLimit = function (userid,cb) {

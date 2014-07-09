@@ -5,7 +5,7 @@ interface
 uses
   System.Classes, System.Generics.Collections, System.Types, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts, Poker.Tables.RenderMetrics,
   Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, AsphyreImages, Poker.Seats.Seat, Poker.Cards, Poker.ChipStackMaker,
-  IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.Protobufs.Objects.WinnerPotInfo, Poker.ChipStackMaker.ChipStack, System.SysUtils;
+  IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
@@ -80,7 +80,6 @@ type
     procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack);
     procedure RenderButtons;
     procedure RenderRaisePanel;
-
   public
     constructor Create(const ASwapChainIndex: Integer; const AGameId: TBytes; const ATableType: TTableType);
     destructor Destroy; override;
@@ -95,7 +94,7 @@ type
 
     function AnimateBets(const ACallback: THandle; ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
     procedure AnimateBlinds(const ACallback: THandle);
-    procedure AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
+    procedure AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_Pot>);
     procedure AnimateDealingCards(const ACallback: THandle);
 
     procedure AnimationCallback(const AAnimationPointer: pointer);
@@ -1099,7 +1098,7 @@ begin
 
     for C2 := 0 to FPotWinAnimations.Count - 1 do
       if (DXTimer.Find(FHandle, FPotWinAnimations[C2], animation)) and
-         (animation.Tags[ANITAG_SEAT] = C1) and
+         (animation.Tags[ANITAG_POT_INDEX] = C1) and
          (animation.Status in [asAnimating, asDone]) then
       begin
         chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
@@ -1435,9 +1434,9 @@ begin
   until not iterate;
 end;
 
-procedure TTableRenderer.AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_WinnerPotInfo>);
+procedure TTableRenderer.AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_Pot>);
 var
-  pot: TPB_WinnerPotInfo;
+  pot: TPB_Pot;
   C1, C2: Integer;
   total_chips_val: UINT32;
   nick, nicks: String;
@@ -1455,10 +1454,10 @@ begin
   begin
     pot := APots[C1];
 
-    if (pot.Sum = 0) or (pot.WinnerData.Count = 0) then
+    if (pot.Value = 0) or (pot.WinnerData.Count = 0) then
       Continue;
 
-    total_chips_val := pot.Sum - pot.Rake;
+    total_chips_val := pot.Value - pot.Rake;
 
     nicks := '';
     animation := nil;
@@ -1474,7 +1473,7 @@ begin
 
       // restore bets if table is in playback mode, so values are shown
       if FTableType = ttHandPlayback then
-        FTableStatus.Bets[pot.WinnerData[C2].Seat] := total_chips_val div UINT32(pot.WinnerData.Count);
+        FTableStatus.Bets[pot.WinnerData[C2].Seat] := FTableStatus.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
 
       animation := DXTimer.AddAnimation(ACallback,
            FMetrics.GetPotPoint(C1),
@@ -1484,7 +1483,8 @@ begin
            Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
            FDXAreaSize);
 
-      animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
+      animation.Tags.AddOrSetValue(ANITAG_POT_INDEX, C1);
+      animation.Tags.AddOrSetValue(ANITAG_SEAT, pot.WinnerData[C2].Seat);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
       PotWinAnimations.Add(animation.Id);
     end;

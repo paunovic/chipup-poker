@@ -99,7 +99,8 @@ var ObjectSizeSchema = new Schema({
 },{collection:'objectSizes'});
 var ServerErrorSchema = new Schema({
 	error:String,
-	trace:String
+	trace:String,
+	trace2:String
 },{collection:'serverErrors'});
 var IPN_HitSchema = new Schema({
 	reply:String,

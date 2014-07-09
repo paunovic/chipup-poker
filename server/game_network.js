@@ -519,15 +519,8 @@ handlers[codes.scShowCards] = function (args,token) {
 						var status = game.getTableStatus(this,true,events);
 						this.send(codes.srTableSitOk,status,'Poker.TableStatus');
 					}
-					if (game.state == 'tsIdle') {
-						game.stateMachine(function () {
-							token.stop();
-							release();
-						},null,{silent:true},[],0);
-					} else {
-						token.stop();
-						release();
-					}
+					token.stop();
+					release();
 				}.bind(this));
 			}.bind(this));
 		}.bind(this));
