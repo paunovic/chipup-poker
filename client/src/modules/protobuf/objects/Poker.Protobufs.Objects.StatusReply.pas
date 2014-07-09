@@ -48,22 +48,22 @@ type
     procedure MergeFrom(const from: TPB_StatusReply);
     function IsInitialized: Boolean; override;
 
-    // repeated FIXME Clubs = 1;
+    // repeated Club Clubs = 1;
     function has_Clubs: Boolean;
     procedure clear_Clubs;
     property Clubs: TList<TPB_Club> read FClubs;
 
-    // repeated FIXME Users = 2;
+    // repeated User Users = 2;
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
 
-    // required FIXME Self = 3;
+    // required User Self = 3;
     function has_Self: Boolean;
     procedure clear_Self;
     property Self: TPB_User read FSelf write SetSelf;
 
-    // repeated FIXME Games = 4;
+    // repeated Game Games = 4;
     function has_Games: Boolean;
     procedure clear_Games;
     property Games: TList<TPB_Game> read FGames;

@@ -557,6 +557,8 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			this.stateRow = row;
 			// </hack>
 			this.state = 'tsPreFlop';
+			this.real_rake = this.club.obj.rake;
+			if (!this.real_rake) this.real_rake = 5;
 			this.rake = 0;
 			this.minimum_raise = this.obj.big_blind * 2;
 			this.roundEnd();
@@ -824,6 +826,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 
 		// redo
 		var rake = Math.round(pot.value * (this.rake / 100));
+		if (pot.trueMembers.length == 0) console.log('pots are',this.pots);
 		assert(pot.trueMembers.length > 0);
 		var rakesplit = rake / pot.trueMembers.length;
 		rake = rakesplit * pot.trueMembers.length;
@@ -919,6 +922,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				events.push(this.makeEvent('teFlop',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.flop.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('preflop',function () {
+					this.updatePotRakes();
 					this.addHistory({code:['teFlop'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsFlop';
 					this.log('flop adding to %d',extradelay);
@@ -935,6 +939,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				events.push(this.makeEvent('teTurn',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.turn.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('turn',function () {
+					this.updatePotRakes();
 					this.addHistory({code:['teTurn'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsTurn';
 					this.log('turn adding to %d',extradelay);
@@ -951,6 +956,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				events.push(this.makeEvent('teRiver',{bets:this.bets.slice(),oldpots:this.pots,cards:new Buffer(this.river.cards)}));
 				this.current_seat = this.dealer;
 				this.moveToPot('river',function () {
+					this.updatePotRakes();
 					this.addHistory({code:['teRiver'],seat:-1,pots:JSON.parse(JSON.stringify(this.pots))});
 					this.state = 'tsRiver';
 					this.log('river adding to %d',extradelay);
@@ -963,6 +969,7 @@ Game.prototype.checkRoundPass = function (cb,events,extradelay,cb3,autoending) {
 				//this.broadcastStatus(null);
 				events.push(this.makeEvent('tePostRiver',{bets:this.bets.slice()}));
 				this.moveToPot('post-river',function () {
+					this.updatePotRakes();
 					//events.push(this.makeEvent('tePreWin',{pots:this.pots}));
 					this.log('events callback FIXME %s',new Error().stack);
 					token.tag += 'f';
@@ -1263,6 +1270,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 }
 Game.prototype.updateMongoState = function (options,cb) {
 	if (this.gameinactive) return cb();
+	var token = profiler.start('updateMongoState');
 	if (this.stateRow._events) assert(this.stateRow._events.isNew.length < 100);
 	this.stateRow.pots = this.pots;
 	this.stateRow.current_seat = this.current_seat;
@@ -1301,6 +1309,7 @@ Game.prototype.updateMongoState = function (options,cb) {
 	var tracer = new Error();
 	this.stateRow.save(function (err) {
 		error.handleError(err,tracer);
+		token.stop();
 		cb();
 	}.bind(this));
 }
@@ -1692,6 +1701,11 @@ Game.prototype.broadcastStatus = function (conn,forceunlock,events) {
 	token.stop();
 }
 var counter = 0;
+Game.prototype.updatePotRakes = function () {
+	for (var x=0; x<this.pots.length; x++) {
+		this.pots[x].rake = this.pots[x].value - this.pots[x].getPostRake(this.rake);
+	}
+}
 Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events) {
 	assert(self);
 	assert(events);
@@ -1703,6 +1717,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
 	if (this.pots) {
+		this.updatePotRakes();
 		tableStatus.pots = this.pots;
 	}
 	if (this.timer && this.timer.time) tableStatus.time = this.timer.time;

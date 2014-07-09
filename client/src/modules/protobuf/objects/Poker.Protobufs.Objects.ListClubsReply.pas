@@ -33,7 +33,7 @@ type
     procedure MergeFrom(const from: TPB_ListClubsReply);
     function IsInitialized: Boolean; override;
 
-    // repeated FIXME Clubs = 1;
+    // repeated Club Clubs = 1;
     function has_Clubs: Boolean;
     procedure clear_Clubs;
     property Clubs: TList<TPB_Club> read FClubs;

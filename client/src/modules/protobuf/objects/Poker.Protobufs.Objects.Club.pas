@@ -88,7 +88,7 @@ type
     procedure clear_MongoId;
     property MongoId: TBytes read FId write SetMongoId;
 
-    // repeated FIXME Members = 2;
+    // repeated ClubMember Members = 2;
     function has_Members: Boolean;
     procedure clear_Members;
     property Members: TList<TPB_ClubMember> read FMembers;

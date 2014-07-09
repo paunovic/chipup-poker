@@ -1,3 +1,4 @@
+'use strict';
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
 var assert = require('assert');
@@ -125,28 +126,24 @@ var GameSchema = new Schema({
 	gameState:Schema.Types.Mixed,
 	clubid:ObjectId
 },{collection:'games'});
-var PotSchema = new Schema({
-	value:Number,
-	members:[Number],
-	trueMembers:[Number],
-	trueUsers:[ObjectId]
-},{_id:false});
 var WinnerDataSchema = new Schema({
 	seat:Number,
 	msg:String
 });
-var WinnerPotInfoSchema = new Schema({
-	sum:Number,
+var PotSchema = new Schema({
+	value:Number,
+	members:[Number],
+	trueMembers:[Number],
+	trueUsers:[ObjectId],
 	rake:Number,
-	seats:[Number],
 	WinnerData:[WinnerDataSchema]
-});
+},{_id:false});
 var MoveSchema = new Schema({
 	code:[String],
 	seat:Number,
 	bet:Number,
 	pots:[PotSchema],
-	WinnerPotData:[WinnerPotInfoSchema]
+	WinnerPotData:[PotSchema]
 });
 MoveSchema.path('pots').validate(function (pots) {
 	return pots.length < 5;

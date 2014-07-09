@@ -30,7 +30,7 @@ type
     procedure MergeFrom(const from: TPB_SetAvatarReply);
     function IsInitialized: Boolean; override;
 
-    // required FIXME Status = 1;
+    // required SetAvatarStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TSetAvatarStatus read FStatus write SetStatus;

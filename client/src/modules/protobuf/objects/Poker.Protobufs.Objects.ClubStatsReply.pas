@@ -43,7 +43,7 @@ type
     procedure clear_Clubid;
     property Clubid: TBytes read FClubid write SetClubid;
 
-    // repeated FIXME PlayerStats = 2;
+    // repeated ClubPlayerStats PlayerStats = 2;
     function has_PlayerStats: Boolean;
     procedure clear_PlayerStats;
     property PlayerStats: TList<TPB_ClubPlayerStats> read FPlayerStats;

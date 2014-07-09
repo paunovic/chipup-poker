@@ -58,7 +58,7 @@ type
     procedure clear_Gameid;
     property Gameid: TBytes read FGameid write SetGameid;
 
-    // repeated FIXME Playerstats = 3;
+    // repeated TablePlayerStats Playerstats = 3;
     function has_Playerstats: Boolean;
     procedure clear_Playerstats;
     property Playerstats: TList<TPB_TablePlayerStats> read FPlayerstats;

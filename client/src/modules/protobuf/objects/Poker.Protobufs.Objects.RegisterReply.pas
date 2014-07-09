@@ -30,7 +30,7 @@ type
     procedure MergeFrom(const from: TPB_RegisterReply);
     function IsInitialized: Boolean; override;
 
-    // required FIXME Status = 1;
+    // required RegisterStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TRegisterStatus read FStatus write SetStatus;

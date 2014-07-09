@@ -58,7 +58,7 @@ type
     procedure clear_Members;
     property Members: TList<Integer> read FMembers;
 
-    // repeated FIXME WinnerData = 3;
+    // repeated WinnerData WinnerData = 3;
     function has_WinnerData: Boolean;
     procedure clear_WinnerData;
     property WinnerData: TList<TPB_WinnerData> read FWinnerData;

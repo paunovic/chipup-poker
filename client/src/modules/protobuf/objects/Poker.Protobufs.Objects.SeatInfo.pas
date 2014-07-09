@@ -100,7 +100,7 @@ type
     procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
 
-    // required FIXME Status = 6;
+    // required PlayerStatus Status = 6;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TPlayerStatus read FStatus write SetStatus;

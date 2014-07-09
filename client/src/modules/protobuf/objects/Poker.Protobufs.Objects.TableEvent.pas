@@ -54,7 +54,7 @@ type
     procedure MergeFrom(const from: TPB_TableEvent);
     function IsInitialized: Boolean; override;
 
-    // required FIXME Event = 1;
+    // required TableEventType Event = 1;
     function has_Event: Boolean;
     procedure clear_Event;
     property Event: TTableEventType read FEvent write SetEvent;
@@ -64,7 +64,7 @@ type
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // repeated FIXME Pots = 4;
+    // repeated Pot Pots = 4;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;

@@ -53,7 +53,7 @@ type
     procedure MergeFrom(const from: TPB_MoveRow);
     function IsInitialized: Boolean; override;
 
-    // repeated FIXME Code = 1;
+    // repeated TableEventType Code = 1;
     function has_Code: Boolean;
     procedure clear_Code;
     property Code: TList<TTableEventType> read FCode;
@@ -68,12 +68,12 @@ type
     procedure clear_Seat;
     property Seat: Integer read FSeat write SetSeat;
 
-    // repeated FIXME WinnerPotData = 4;
+    // repeated Pot WinnerPotData = 4;
     function has_WinnerPotData: Boolean;
     procedure clear_WinnerPotData;
     property WinnerPotData: TList<TPB_Pot> read FWinnerPotData;
 
-    // repeated FIXME Pots = 5;
+    // repeated Pot Pots = 5;
     function has_Pots: Boolean;
     procedure clear_Pots;
     property Pots: TList<TPB_Pot> read FPots;
