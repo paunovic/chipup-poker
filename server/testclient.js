@@ -51,6 +51,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 				break;
 			case 'fastbot':
 				tests = [ function autobot(cb) {
+					autoconfig.silent = true;
 					autoconfig.speed = [10,2];
 					testmenu(cb,autoconfig);
 				} ];
@@ -98,7 +99,7 @@ Client.prototype.ping = function () {
 	this.reply(codes.scPing,{uptime:process.uptime()},'Poker.PingParams');
 }
 Client.prototype.reply = function (code,data,type) {
-	var hidden = [];
+	var hidden = [codes.scPing,codes.scPutChips,codes.scTablePlayNow,codes.scTableSit];
 	pbu.reply(this.socket,hidden,this.log.bind(this),code,data,type);
 }
 function testchathandle(code,data) {
@@ -241,7 +242,7 @@ function testmenu(cb,config) {
 		}
 		moves.raise = function (args) {
 			var newbet = parseInt(args[0]);
-			conn.log(actseq+':doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
+			if (!config.silent) conn.log(actseq+':doing raise from '+oldbet+'->'+newbet+'(adding '+(newbet-oldbet)+')');
 			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet, current_state:ts.state},'Poker.PutChips');
 		}
 		var ts = conn.tableStatus;
@@ -266,14 +267,14 @@ function testmenu(cb,config) {
 			if (randomMoves) {
 				for (var y=0; y<10; y++) {
 					var rand = Math.random();
-					console.log('%d AUTO %s',ts.seq,rand);
+					if (!config.silent) console.log('%d AUTO %s',ts.seq,rand);
 					for (var x=0; x<randomMoves.length; x++) {
 						if ((randomMoves[x].min < rand) && (randomMoves[x].max > rand)) {
 							var next = randomMoves[x].move;
-							console.log('%d %d AUTO %s',ts.seq,ts.current_seat,next);
+							if (!config.silent) console.log('%d %d AUTO %s',ts.seq,ts.current_seat,next);
 							if (next == 'call') {
 								var maxchips = conn.getSeat(conn.seat).chips;
-								conn.log('oldbet',oldbet,'max',maxchips);
+								if (!config.silent) conn.log('oldbet',oldbet,'max',maxchips);
 								var newbet = conn.tableStatus.minimum_bet;
 								if (maxchips < (newbet - oldbet)) newbet = oldbet + maxchips;
 								return doit(function () {
@@ -282,7 +283,7 @@ function testmenu(cb,config) {
 							} else if (moves[next]) {
 								if (next == 'raise') {
 									var maxchips = conn.getSeat(conn.seat).chips;
-									console.log('oldbet',oldbet,'max',maxchips);
+									if (!config.silent) console.log('oldbet',oldbet,'max',maxchips);
 									var newbet = conn.tableStatus.minimum_raise;
 									if (maxchips < (newbet - oldbet)) newbet = oldbet + maxchips;
 									return doit(function () {
@@ -312,17 +313,19 @@ function testmenu(cb,config) {
 	}
 	function checkAndPrint(params) {
 		if (params.current_seat == this.seat) {
-			console.log('table state:',params.state,'active seat:',params.current_seat,'pots:',params.pots);
+			if (!config.silent) console.log('table state:',params.state,'active seat:',params.current_seat,'pots:',params.pots);
 			console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d time:%d',bufToCards(params.flop),bufToCards(params.turn),bufToCards(params.river),params.locked,params.seq,params.dealer,params.handid,params.time);
 			if (params.state != 'tsIdle') {
-				for (var x=0; x<params.seats.length; x++) {
-					var s = params.seats[x];
-					var line = 'player#'+s.seat+' state:'+s.status+' bet:'+params.bets[x]+' chips:'+params.seats[x].chips+' cards:'+bufToCards(params.seats[x].cards);
-					if (s.seat == params.current_seat) console.log(line.green);
-					else console.log(line);
+				if (!config.silent) {
+					for (var x=0; x<params.seats.length; x++) {
+						var s = params.seats[x];
+						var line = 'player#'+s.seat+' state:'+s.status+' bet:'+params.bets[x]+' chips:'+params.seats[x].chips+' cards:'+bufToCards(params.seats[x].cards);
+						if (s.seat == params.current_seat) console.log(line.green);
+						else console.log(line);
+					}
 				}
 			}
-			process.stdout.write("\n");
+			if (!config.silent) process.stdout.write("\n");
 		}
 	}
 	function common(code,data) {
@@ -399,7 +402,7 @@ function testmenu(cb,config) {
 			break;
 		case codes.seGameChange:
 			var params = pb.Parse(data,'Poker.Game');
-			this.log(params);
+			//this.log('game change',params);
 			break;
 		case codes.srPong:
 			var params = pb.Parse(data,'Poker.PingReply');
