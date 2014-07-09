@@ -40,7 +40,7 @@ type
     procedure clear_Gameid;
     property Gameid: TBytes read FGameid write SetGameid;
 
-    // required FIXME Timestamp = 2;
+    // required CloseGameTime Timestamp = 2;
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;

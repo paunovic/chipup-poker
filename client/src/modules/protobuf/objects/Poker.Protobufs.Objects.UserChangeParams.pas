@@ -33,7 +33,7 @@ type
     procedure MergeFrom(const from: TPB_UserChangeParams);
     function IsInitialized: Boolean; override;
 
-    // repeated FIXME Users = 1;
+    // repeated User Users = 1;
     function has_Users: Boolean;
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;

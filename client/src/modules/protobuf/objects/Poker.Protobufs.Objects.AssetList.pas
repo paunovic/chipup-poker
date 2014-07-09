@@ -33,7 +33,7 @@ type
     procedure MergeFrom(const from: TPB_AssetList);
     function IsInitialized: Boolean; override;
 
-    // repeated FIXME Assets = 1;
+    // repeated UpdateFileInfo Assets = 1;
     function has_Assets: Boolean;
     procedure clear_Assets;
     property Assets: TList<TPB_UpdateFileInfo> read FAssets;

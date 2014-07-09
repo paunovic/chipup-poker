@@ -44,17 +44,17 @@ type
     procedure MergeFrom(const from: TPB_ClubCommandReply);
     function IsInitialized: Boolean; override;
 
-    // required FIXME Status = 1;
+    // required ClubStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TClubStatus read FStatus write SetStatus;
 
-    // optional FIXME Club = 2;
+    // optional Club Club = 2;
     function has_Club: Boolean;
     procedure clear_Club;
     property Club: TPB_Club read FClub write SetClub;
 
-    // repeated FIXME Games = 3;
+    // repeated Game Games = 3;
     function has_Games: Boolean;
     procedure clear_Games;
     property Games: TList<TPB_Game> read FGames;

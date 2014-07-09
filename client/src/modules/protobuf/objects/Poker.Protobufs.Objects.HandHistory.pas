@@ -103,7 +103,7 @@ type
     procedure clear_Totalrake;
     property Totalrake: UINT32 read FTotalrake write SetTotalrake;
 
-    // repeated FIXME Players = 4;
+    // repeated PlayerHandHistory Players = 4;
     function has_Players: Boolean;
     procedure clear_Players;
     property Players: TList<TPB_PlayerHandHistory> read FPlayers;
@@ -123,7 +123,7 @@ type
     procedure clear_BalanceChanges;
     property BalanceChanges: TList<Integer> read FBalanceChanges;
 
-    // repeated FIXME Moves = 8;
+    // repeated MoveRow Moves = 8;
     function has_Moves: Boolean;
     procedure clear_Moves;
     property Moves: TList<TPB_MoveRow> read FMoves;
@@ -133,12 +133,12 @@ type
     procedure clear_Dealer;
     property Dealer: UINT32 read FDealer write SetDealer;
 
-    // optional FIXME Game = 10;
+    // optional Game Game = 10;
     function has_Game: Boolean;
     procedure clear_Game;
     property Game: TPB_Game read FGame write SetGame;
 
-    // optional FIXME CurrentGame = 11;
+    // optional GameType CurrentGame = 11;
     function has_CurrentGame: Boolean;
     procedure clear_CurrentGame;
     property CurrentGame: TGameType read FCurrentGame write SetCurrentGame;

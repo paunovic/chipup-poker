@@ -32,6 +32,7 @@ public:
 			reader = "readInt64";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
+			typeName = "int64";
 			break;
 		case FieldDescriptor::TYPE_UINT64:
 			baseDelphiName = delphiName = "UInt64";
@@ -39,6 +40,7 @@ public:
 			reader = "readInt64";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
+			typeName = "uint64";
 			break;
 		case FieldDescriptor::TYPE_INT32:
 			baseDelphiName = delphiName = "Integer";
@@ -46,6 +48,7 @@ public:
 			reader = "readInt32";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
+			typeName = "int32";
 			break;
 		case FieldDescriptor::TYPE_BOOL:
 			baseDelphiName = delphiName = "Boolean";
@@ -53,6 +56,7 @@ public:
 			reader = "readBoolean";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "false";
+			typeName = "bool";
 			break;
 		case FieldDescriptor::TYPE_STRING:
 			baseDelphiName = delphiName = "String";
@@ -60,6 +64,7 @@ public:
 			reader = "readUtf8String";
 			wiretype = "WIRETYPE_LENGTH_DELIMITED";
 			defaultdefault = "''";
+			typeName = "string";
 			break;
 		case FieldDescriptor::TYPE_MESSAGE:
 			// FIXME
@@ -72,6 +77,7 @@ public:
 			writter = "writeBytes";
 			reader = "readBytes";
 			wiretype = "WIRETYPE_LENGTH_DELIMITED";
+			typeName = "bytes";
 			break;
 		case FieldDescriptor::TYPE_UINT32:
 			baseDelphiName = delphiName = "UINT32";
@@ -79,6 +85,7 @@ public:
 			reader = "readUInt32";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
+			typeName = "uint32";
 			break;
 		case FieldDescriptor::TYPE_ENUM:
 			// FIXME
@@ -103,6 +110,7 @@ public:
 		case FieldDescriptor::LABEL_REPEATED: return "repeated";
 		}
 	}
+	string getTypeName() { return typeName; }
 	string getTypeString() {
 		switch (field->type()) {
 		case FieldDescriptor::TYPE_DOUBLE: return "double";
@@ -175,12 +183,14 @@ private:
 			delphiName = "TPB_"+subtype->name();
 			baseDelphiName = delphiName;
 		}
+		typeName = subtype->name();
 	}
 	void setEnum(const FieldDescriptor *field) {
 		const EnumDescriptor *subtype = field->enum_type();
 		delphiName = "T" + subtype->name();
 		defaultdefault = delphiName+"(0)";
 		baseDelphiName = delphiName;
+		typeName = subtype->name();
 	}
 	string delphiName;
 	string baseDelphiName;
@@ -190,6 +200,7 @@ private:
 	string defaultdefault,propertyName,privateField;
 	const FieldDescriptor *field;
 	FieldDescriptor::Type type;
+	string typeName;
 };
 TypeInfo *typeinfo[18];
 // taken from cpp_helpers.cc in protobuf
@@ -574,7 +585,7 @@ class BaseGenerator : public CodeGenerator {
 				vars["number"] = hack;
 				vars["type"] = instance.getDelphiName();
 				vars["label"] = instance.getLabelString();
-				vars["typename"] = instance.getTypeString();
+				vars["typename"] = instance.getTypeName();
 
 				printer.Print(vars,
 					"    // $label$ $typename$ $name$ = $number$;\n"
@@ -706,11 +717,12 @@ class BaseGenerator : public CodeGenerator {
 				vars["pubname"] = instance.PropertyName();
 				vars["reader"] = typeinfo[field->type()]->getReader();
 				vars["wiretype"] = typeinfo[field->type()]->getWireType();
+				vars["typename"] = typeinfo[field->type()]->getTypeName();
 				if ((field->type() == FieldDescriptor::TYPE_INT32) && (field->is_packed())) {
 					printer.Print(vars,
 						"      $name$: begin\n"
 						"        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);\n"
-						"        // FIXME $pname$ := AProtobufReader.$reader$;\n"
+						"        // $typename$ $pname$ := AProtobufReader.$reader$;\n"
 						"        AProtobufReader.skipField(tag);\n"
 						"      end;\n");
 				} else if (field->type() == FieldDescriptor::TYPE_MESSAGE) {

@@ -43,17 +43,17 @@ type
     procedure MergeFrom(const from: TPB_TableStatsReplies);
     function IsInitialized: Boolean; override;
 
-    // repeated FIXME Reply = 1;
+    // repeated TableStatsReply Reply = 1;
     function has_Reply: Boolean;
     procedure clear_Reply;
     property Reply: TList<TPB_TableStatsReply> read FReply;
 
-    // repeated FIXME Players = 2;
+    // repeated User Players = 2;
     function has_Players: Boolean;
     procedure clear_Players;
     property Players: TList<TPB_User> read FPlayers;
 
-    // repeated FIXME ClubStats = 3;
+    // repeated ClubStatsReply ClubStats = 3;
     function has_ClubStats: Boolean;
     procedure clear_ClubStats;
     property ClubStats: TList<TPB_ClubStatsReply> read FClubStats;

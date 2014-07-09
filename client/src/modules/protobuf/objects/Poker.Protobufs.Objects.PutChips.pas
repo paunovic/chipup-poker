@@ -49,7 +49,7 @@ type
     procedure clear_ChipAmount;
     property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
 
-    // required FIXME CurrentState = 3;
+    // required TableState CurrentState = 3;
     function has_CurrentState: Boolean;
     procedure clear_CurrentState;
     property CurrentState: TTableState read FCurrentState write SetCurrentState;

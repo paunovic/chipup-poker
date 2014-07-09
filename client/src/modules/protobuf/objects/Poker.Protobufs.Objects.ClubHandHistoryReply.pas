@@ -53,7 +53,7 @@ type
     procedure clear_Gameid;
     property Gameid: TBytes read FGameid write SetGameid;
 
-    // repeated FIXME Rows = 3;
+    // repeated HandHistory Rows = 3;
     function has_Rows: Boolean;
     procedure clear_Rows;
     property Rows: TList<TPB_HandHistory> read FRows;

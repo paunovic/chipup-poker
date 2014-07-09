@@ -30,7 +30,7 @@ type
     procedure MergeFrom(const from: TPB_ChangeMailReply);
     function IsInitialized: Boolean; override;
 
-    // required FIXME Status = 1;
+    // required ChangeMailStatus Status = 1;
     function has_Status: Boolean;
     procedure clear_Status;
     property Status: TChangeMailStatus read FStatus write SetStatus;

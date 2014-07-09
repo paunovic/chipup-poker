@@ -65,7 +65,7 @@ type
     procedure clear_Url;
     property Url: String read FUrl write SetUrl;
 
-    // optional FIXME FileType = 4;
+    // optional UpdateFileType FileType = 4;
     function has_FileType: Boolean;
     procedure clear_FileType;
     property FileType: TUpdateFileType read FFileType write SetFileType;
