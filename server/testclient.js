@@ -47,7 +47,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 				break;
 			case 'fastbot':
 				tests = [ function autobot(cb) {
-					autoconfig.speed = [10,0];
+					autoconfig.speed = [10,2];
 					testmenu(cb,autoconfig);
 				} ];
 				break;
@@ -398,6 +398,10 @@ function testmenu(cb,config) {
 			break;
 		case codes.srPong:
 			var params = pb.Parse(data,'Poker.PingReply');
+			break;
+		case codes.srTableBuyinLessThanCashout:
+			var params = pb.Parse(data,'Poker.BuyinError');
+			this.reply(codes.scTableSit,{game_id:gameid,seat_index:this.seat,chips:params.last_cashout},'Poker.TableSit');
 			break;
 		}
 	}
