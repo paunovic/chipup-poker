@@ -2,8 +2,8 @@
 var net = require('net');
 var util = require('util');
 
-var C2S = 'client to server direction';
-var S2C = 'server to client direction';
+var C2S = 'client to server';
+var S2C = 'server to client';
 
 var socketCount = 0;
 exports.createManInTheMiddleServer = function (pu, realServerPort, recorderCallback) {
