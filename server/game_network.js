@@ -222,15 +222,17 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 				release();
 				return;
 			}
-			if ((game.state == 'tsIdle') && (['psInHand','psOutOfHand'].indexOf(game.members[seatIdx].status) != -1)) {
+			this.log('flag is %j, status:%s state:%s',params,game.members[seatIdx].status);
+			if ((game.state == 'tsIdle') && (['psInHand','psOutOfHand'].indexOf(game.members[seatIdx].status) != -1) && params.flag) {
+				this.log('going out of play');
 				game.members[seatIdx].status = 'psOutOfPlay';
-				game.clearDealTimer();
+				game.clearDealTimer(); // FIXME, it may stop dealing when others are waiting?
 				game.members[seatIdx].sitOutNextRound = false;
 				game.members[seatIdx].sitOutBB = false;
 				game.updateMongoState({members:true},function () {
 					game.broadcastStatus(null,true,[]);
 				});
-			} else if ('psOutOfHand' == game.members[seatIdx].status) {
+			} else if (('psOutOfHand' == game.members[seatIdx].status) && params.flag) {
 				game.members[seatIdx].status = 'psOutOfPlay';
 				game.broadcastStatus(null,true,[]);
 			} else {
