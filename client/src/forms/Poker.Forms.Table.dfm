@@ -640,7 +640,7 @@ object frmTable: TfrmTable
     Enabled = False
     OnTimer = tiHandPlaybackTimer
     Left = 404
-    Top = 100
+    Top = 108
   end
   object il48px: TImageList
     DrawingStyle = dsTransparent
@@ -3033,6 +3033,7 @@ object frmTable: TfrmTable
       000000000000}
   end
   object tiRender: TTimer
+    Interval = 250
     OnTimer = tiRenderTimer
     Left = 324
     Top = 32

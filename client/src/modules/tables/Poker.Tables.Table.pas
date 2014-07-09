@@ -34,8 +34,10 @@ type
 
     procedure UpdateAvatars(const AAvatar: TAvatar);
 
-    function GetObjects(out AGame: TGameInfo): Boolean; overload;
-    function GetObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean; overload;
+    function GetAndLockObjects(out AGame: TGameInfo): Boolean; overload;
+    function GetAndLockObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean; overload;
+
+    procedure UnlockObjects;
 
     procedure BringToFront;
 
@@ -79,16 +81,31 @@ begin
   inherited;
 end;
 
-function TTable.GetObjects(out AGame: TGameInfo): Boolean;
+function TTable.GetAndLockObjects(out AGame: TGameInfo): Boolean;
 var
   club: TClubInfo;
 begin
-  result := dmMain.SelfInfo.Clubs.FindGame(FGameId, club, AGame);
+  result := GetAndLockObjects(club, AGame);
 end;
 
-function TTable.GetObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+function TTable.GetAndLockObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
 begin
   result := dmMain.SelfInfo.Clubs.FindGame(FGameId, AClub, AGame);
+  if result then
+  begin
+    dmMain.SelfInfo.Clubs.Lock;
+    AClub.Games.Lock;
+  end;
+end;
+
+procedure TTable.UnlockObjects;
+var
+  club: TClubInfo;
+  game: TGameInfo;
+begin
+  dmMain.SelfInfo.Clubs.Unlock;
+  if dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
+    club.Games.Unlock;
 end;
 
 function TTable.AcquireSwapChainElement: Boolean;
@@ -108,7 +125,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
     Exit(FALSE);
   FClubId := club.MongoId;
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, AGameId, ttLiveGame);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId);
   form := TfrmTable.Create(FInternalId);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
@@ -129,7 +146,7 @@ begin
   FGameId := AHandHistoryItems.FGameId;
   FHandId := AHandHistoryItem.HandId;
   FHandHistoryPlayback := THandHistoryPlayback.Create(AHandHistoryItems, AHandHistoryItem);
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, FGameId, ttHandPlayback);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId);
   form := TfrmTable.Create(FInternalId);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;

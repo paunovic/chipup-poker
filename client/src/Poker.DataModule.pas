@@ -129,7 +129,7 @@ end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
-  // deinit objects
+  // free/deinit objects
   FreeAndNil(FUpdateFiles);
   FreeAndNil(FReconnectedTables);
 

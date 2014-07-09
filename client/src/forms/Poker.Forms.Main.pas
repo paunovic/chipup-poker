@@ -114,8 +114,7 @@ type
     procedure acAnimationsEnabledExecute(Sender: TObject);
     procedure acSettingsExecute(Sender: TObject);
     procedure acDisconnectExecute(Sender: TObject);
-    procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient;
-      var ControlClass: TCustomActionControlClass);
+    procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
     procedure tiRefreshFormTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -323,6 +322,7 @@ begin
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
+  HandHistory.Clear;
   {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
@@ -1153,15 +1153,24 @@ var
   game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
-  if (not Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table)) or
-     (not table.GetObjects(game)) then
-    Exit;
+  if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+  begin
+    Tables.Lock;
+    try
+      if table.GetAndLockObjects(game) then
+      try
+        game.UpdateFromTableStatus(pbtstatus);
+        if not table.Form.Visible then
+          table.BringToFront;
 
-  game.UpdateFromTableStatus(pbtstatus);
-  if not table.Form.Visible then
-    table.BringToFront;
-
-  ConfigureGUI;
+        ConfigureGUI;
+      finally
+        table.UnlockObjects;
+      end;
+    finally
+      Tables.Unlock;
+    end;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);

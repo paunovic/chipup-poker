@@ -26,6 +26,11 @@ type
     procedure Remove(const AId: Integer);
     procedure Add(const AId: Integer; const ATable: TTable);
 
+    procedure Lock;
+    procedure Unlock;
+
+    function GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
+
     procedure ClearWithoutNotification;
 
     function FindTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean;
@@ -74,6 +79,16 @@ begin
 
   FreeAndNil(FLock);
   inherited;
+end;
+
+procedure TTableList.Lock;
+begin
+  FLock.Enter;
+end;
+
+procedure TTableList.Unlock;
+begin
+  FLock.Leave;
 end;
 
 procedure TTableList.Remove(const AId: Integer);
@@ -253,6 +268,17 @@ begin
     Exit(FALSE);
   finally
     FLock.Leave;
+  end;
+end;
+
+function TTableList.GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
+begin
+  result := TryGetValue(AId, ATable);
+  if result then
+    Lock
+  else
+  begin
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Cannot find table with internal id: %d', [AId]), ditException); {$ENDIF}
   end;
 end;
 
