@@ -60,27 +60,32 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 
 				var argsFromDb = requestFromDb.args.buffer;
 
-				if (util.inspect(args).substring(8) != util.inspect(argsFromDb).substring(12)) {
+				if (args.toString('hex') != argsFromDb.toString('hex')) {
 					debugger;
+					if (!methodToTypeMap[methodName]) {
+						throw new Error('schema for code '+methodName+' not known');
+					}
 					var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
-					argsParsed = zeroOutChips(argsParsed);
-					//var argsJson = JSON.stringify(argsParsed, undefined, 2);
 					var argsFromDbParsed = pb.Parse(argsFromDb, methodToTypeMap[requestFromDb.method]);
-					argsFromDbParsed = zeroOutChips(argsFromDbParsed);
+					if (methodId == serverCodes.srLoginReply) {
+						argsParsed = sanitizeLoginReply(argsParsed);
+					//var argsJson = JSON.stringify(argsParsed, undefined, 2);
+						argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
+					}
 					//var argsFromDbJson = JSON.stringify(argsFromDbParsed, undefined, 2);
 					
 					var difference = diff(argsParsed, argsFromDbParsed);
-					console.log("A-server, B-from db\n" + JSON.stringify(difference), undefined, 2);
-		
-					/*		
+					console.log("A-server, B-from db\n%j",difference, undefined, 2);
+					
+					/*
 					if (argsJson !== argsFromDbParsed) {
 						console.log("Args saved in the db:\n" + argsFromDbJson);
 						console.log("Args I just got from the server:\n" + argsJson);
 						throw new Error('Args do not match! SocketId' + socketId + " request #" + counter);
 					}
-					*/	
-					//console.log("Args saved in the db: " + util.inspect(argsFromDbParsed));
-					throw new Error('Args do not match! ' + currentRequestInfo);		
+					*/
+					//console.log("Args saved in the db: ",argsFromDbParsed);
+					if (difference.length != 0) throw new Error('Args do not match! ' + currentRequestInfo);
 				}
 				
 				if (type !== requestFromDb.type) 
@@ -106,13 +111,23 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 	});
 });
 
-function zeroOutChips(args) {
-  args.status.self.chips = 0;
-  
-  for(var i = 0; i < args.status.users.length; i++) 
-	  args.status.users[i].chips = 0;	  
-	  
-  return args;
+function sanitizeLoginReply(args) {
+	var i,j;
+	args.status.self.chips = 0;
+	
+	for(i = 0; i < args.status.users.length; i++) 
+		args.status.users[i].chips = 0;
+	
+	for (i=0; i<args.status.clubs.length; i++) {
+		var club = args.status.clubs[i];
+		for (j=0; j<club.members.length; j++) {
+			club.members[j].club_balance = 0;
+		}
+	}
+	for (i=0; i<args.status.games.length; i++) {
+		args.status.games[i].lasthandid = 0;
+	}
+	return args;
 }
 
 function writeMessageAndTestIfItsOk(encodedMessage, socket) {
