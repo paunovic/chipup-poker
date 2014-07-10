@@ -1193,6 +1193,7 @@ var
 begin
   pb := AObject as TPB_TableStatsReplies;
 
+  SetLength(empty_array, 1); // FIXME
   SetLength(empty_array, 0);
   SetLength(query_users, 0);
   for player in pb.Players do
