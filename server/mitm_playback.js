@@ -96,26 +96,12 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 
 			function sendRequests() {
 				var methodId;
+				var request = requests[counter];
 
-				while (requests[counter].direction === directions.C2S) {
-					methodId = serverCodes[requests[counter].method];
-
-					var encodedMessage = pu.encode(methodId, requests[counter].args, requests[counter].type);
-
-					if (!socket.write(encodedMessage) && socket._handle) {
-						console.log(
-							'partial message write %d %s',
-							socket.bufferSize,
-							util.inspect({
-								a: socket._handle.writeQueueSize,
-								b: socket._writableState.length
-							})
-						);
-					}
-
-					if (socket._writableState.length > (256 * 1024))
-						throw new Error('send overflow');
-					
+				while (request.direction === directions.C2S) {
+					methodId = serverCodes[request.method];
+					var encodedMessage = pu.encode(methodId, request.args, request.type);
+					writeMessageAndTestIfItsOk(encodedMessage, socket);
 					++counter;
 				}
 			}
@@ -130,4 +116,20 @@ function zeroOutChips(args) {
 	  args.status.users[i].chips = 0;	  
 	  
   return args;
+}
+
+function writeMessageAndTestIfItsOk(encodedMessage, socket) {
+	if (!socket.write(encodedMessage) && socket._handle) {
+		console.log(
+			'partial message write %d %s',
+			socket.bufferSize,
+			util.inspect({
+				a: socket._handle.writeQueueSize,
+				b: socket._writableState.length
+			})
+		);
+	}
+
+	if (socket._writableState.length > (256 * 1024))
+		throw new Error('send overflow');						
 }
