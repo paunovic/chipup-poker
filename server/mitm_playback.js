@@ -35,17 +35,18 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 		if (err) console.warn(err.message);
 
 		var socket = net.connect(port, host, function () {
-			var counter = 0;
-			sendRequests();
-
 			socket.on('error', function (e) {
 				throw e;
 			});
+
+			var counter = 0;
+			sendRequests();
 
 			socket.on('data', pu.createOnDataListenerFn(checkIfRequestsMatch));
 			
 			function checkIfRequestsMatch(err, methodId, args, type) {
 				if (err) throw err;
+				var currentRequestInfo = 'SocketId' + socketId + " request #" + counter;
 
 				var requestFromDb = requests[counter];
 
@@ -55,9 +56,8 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 				var methodName = serverCodes.reverse[methodId];
 				
 				if (methodName !== requestFromDb.method) 
-					throw new Error('Methods do not match! SocketId' + socketId + " request #" + counter);
+					throw new Error('Methods do not match! ' + currentRequestInfo);
 
-				
 				var argsFromDb = requestFromDb.args.buffer;
 
 				if (util.inspect(args).substring(8) != util.inspect(argsFromDb).substring(12)) {
@@ -80,13 +80,11 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 					}
 					*/	
 					//console.log("Args saved in the db: " + util.inspect(argsFromDbParsed));
-					throw new Error('Args do not match! SocketId' + socketId + " request #" + counter);		
+					throw new Error('Args do not match! ' + currentRequestInfo);		
 				}
 				
-
-				if (type !== requests[counter].type) {
-					throw new Error('Type param do not match! SocketId' + socketId + " request #" + counter);
-				}
+				if (type !== requests[counter].type) 
+					throw new Error('Type param do not match! ' + currentRequestInfo);
 
 				console.log("Request #" + counter + " match!");
 
@@ -95,11 +93,10 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 			}
 
 			function sendRequests() {
-				var methodId;
 				var request = requests[counter];
 
 				while (request.direction === directions.C2S) {
-					methodId = serverCodes[request.method];
+					var methodId = serverCodes[request.method];
 					var encodedMessage = pu.encode(methodId, request.args, request.type);
 					writeMessageAndTestIfItsOk(encodedMessage, socket);
 					++counter;
