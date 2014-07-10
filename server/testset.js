@@ -22,19 +22,27 @@ exports.club = {
 		var activeGames = {};
 		var Club = require('./club').Club
 		test.expect(3);
-		mdb.open();
+		mdb.open('nodeunit');
 		Club.init(activeUsers,activeGames,Core.pb);
 		myutils.init();
-		mdb.models.UserModel.findOne(function (err,user) {
-			test.ok(user);
-			mdb.models.Clubs.remove({name:'clubname'},function (err) {
-				Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
-					clubid = clubObj.obj.seq;
-					test.ok(worked);
-					Club.dupCheck('clubname',function (dup) {
-						test.ok(dup);
-						mdb.close();
-						test.done();
+		mdb.models.UserModel.create({displayname:'user1',chips:1000000,email:'email1'},function (err,rows) {
+			mdb.models.UserModel.create({displayname:'user2',chips:1000000,email:'email2'},function (err,rows) {
+				mdb.models.UserModel.create({displayname:'user3',chips:1000000,email:'email3'},function (err,rows) {
+					mdb.models.UserModel.findOne(function (err,user) {
+						test.ok(user);
+						assert(user);
+						console.log(user);
+						mdb.models.Clubs.remove({name:'clubname'},function (err) {
+							Club.createClub('clubname','password',user._id,5,function (worked,clubObj) {
+								clubid = clubObj.obj.seq;
+								test.ok(worked);
+								Club.dupCheck('clubname',function (dup) {
+									test.ok(dup);
+									mdb.close();
+									test.done();
+								});
+							});
+						});
 					});
 				});
 			});
@@ -44,7 +52,7 @@ exports.club = {
 		var activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
-		mdb.open();
+		mdb.open('nodeunit');
 		Club.init(activeUsers,activeGames,Core.pb);
 		myutils.init();
 		mdb.models.UserModel.find().limit(3).exec(function (err,users) {
@@ -73,17 +81,17 @@ exports.club = {
 		});
 	},
 	goPublic: function (test) {
-		var activeUsers = {};
+		global.activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var game = require('./game');
 		test.expect(6);
-		activeUsers['fake'] = { send: function(code,object,type) {
+		global.activeUsers['fake'] = { send: function(code,object,type) {
 			test.ok(true);
 		}};
-		mdb.open();
-		Club.init(activeUsers,activeGames,Core.pb);
-		game.Game.init(activeGames,activeUsers,{},null,null,null);
+		mdb.open('nodeunit');
+		Club.init(activeGames);
+		game.Game.init(activeGames);
 		mdb.models.Clubs.findOne(function (err,row) {
 			test.ok(true);
 			mdb.models.UserModel.findOne(function (err,userRow) {
@@ -104,12 +112,12 @@ exports.club = {
 			});
 		});
 	},suspend: function (test) {
-		var activeUsers = {};
+		global.activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
 		test.expect(5);
-		mdb.open();
-		Club.init(activeUsers,activeGames,Core.pb);
+		mdb.open('nodeunit');
+		Club.init(activeGames);
 		mdb.models.Clubs.findOne(function (err,row) {
 			test.ok(true);
 			test.ok(row.members.length > 0);
@@ -133,7 +141,7 @@ exports.club = {
 		var activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
-		mdb.open();
+		mdb.open('nodeunit');
 		Club.init(activeUsers,activeGames,Core.pb);
 		myutils.init();
 		Club.getClubBySeq(clubid,function (err,clubObj) {
@@ -151,7 +159,7 @@ exports.club = {
 		var activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
-		mdb.open();
+		mdb.open('nodeunit');
 		Club.init(activeUsers,activeGames,Core.pb);
 		myutils.init();
 		Club.getClubBySeq(clubid,function (err,clubObj) {
@@ -168,7 +176,7 @@ exports.club = {
 		var activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
-		mdb.open();
+		mdb.open('nodeunit');
 		test.expect(1);
 		Club.init(activeUsers,activeGames,Core.pb);
 		myutils.init();
@@ -195,16 +203,19 @@ DummyConn.prototype.log = function () {
 }
 exports.game = {
 	create: function (test) {
-		var activeUsers = {};
+		global.activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
-		var profiler = require('./profiler');
-		mdb.open();
-		Club.init(activeUsers,activeGames,Core.pb);
+		var profiler = require('profiler');
+		mdb.open('nodeunit');
+		global.pb = Core.pb;
+		Club.init(activeGames);
 		myutils.init();
 		profiler.setup(mdb.models.PokerProfile);
-		Game.init(activeGames,activeUsers,{max_play_time:15,max_timebank:30},console.log,{});
+		global.sharedconfig = {max_play_time:15,max_timebank:30};
+		global.log = console.log;
+		Game.init(activeGames);
 		mdb.models.UserModel.find().limit(3).exec(function (err,users) {
 			assert.ifError(err);
 			var owner = users[0];
@@ -249,6 +260,7 @@ exports.game = {
 							gameObj.sitDown(p3,{chips:100000,seat_index:3},function (worked,events) {
 								test.ok(worked);
 								console.log(worked,events);
+								assert(worked);
 								gameObj.standUp(p3,function (folded,events,offset) {
 									release();
 									gameObj.leave(p3,'nodeunit',function () {
@@ -346,16 +358,16 @@ exports.game = {
 		}
 	},
 	resume: function (test) {
-		var activeUsers = {};
+		global.activeUsers = {};
 		var activeGames = {};
 		var Club = require('./club').Club;
 		var Game = require('./game').Game;
 		var profiler = require('./profiler');
-		mdb.open();
-		Club.init(activeUsers,activeGames,Core.pb);
+		mdb.open('nodeunit');
+		Club.init(activeGames);
 		myutils.init();
 		profiler.setup(mdb.models.PokerProfile);
-		Game.init(activeGames,activeUsers,{max_play_time:15,max_timebank:30},console.log,DummyConn);
+		Game.init(activeGames);
 		mdb.models.UserModel.find().limit(2).exec(function (err,users) {
 			assert.ifError(err);
 			var owner = users[0];
@@ -475,14 +487,13 @@ exports.game = {
 exports.user = {
 	changePassword: function (test) {
 		var user = require('./user');
-		mdb.open();
+		mdb.open('nodeunit');
 		mdb.models.UserModel.findOne(function (err,user2) {
 			assert.ifError(err);
 			var oldsalt = user2.salt;
 			var oldpass = user2.password;
-			user.ChangePassword('password',user2._id,function (err,row) {
+			user.changePassword('password',user2._id,function (err,row) {
 				assert.ifError(err);
-				console.log(arguments);
 				var hasher = crypto.createHash('sha256');
 				hasher.update(row.salt);
 				hasher.update('password');

@@ -25,6 +25,7 @@ var installer = require('./installer');
 module.exports.UserInit = UserInit;
 module.exports.makeUserProtobuf = makeUserProtobuf;
 module.exports.ClientSocket = ClientSocket;
+module.exports.changePassword = changePassword;
 
 var connections = 0;
 var handlers = {};
