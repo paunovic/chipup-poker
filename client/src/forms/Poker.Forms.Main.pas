@@ -1159,10 +1159,10 @@ var
   game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
-  if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
-  begin
-    Tables.Lock;
-    try
+  Tables.Lock;
+  try
+    if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+    begin
       if table.GetObjectCopy(game) then
       try
         game.UpdateFromTableStatus(pbtstatus);
@@ -1173,9 +1173,9 @@ begin
       finally
         game.Free;
       end;
-    finally
-      Tables.Unlock;
     end;
+  finally
+    Tables.Unlock;
   end;
 end;
 
@@ -1193,7 +1193,6 @@ var
 begin
   pb := AObject as TPB_TableStatsReplies;
 
-  SetLength(empty_array, 1); // FIXME
   SetLength(empty_array, 0);
   SetLength(query_users, 0);
   for player in pb.Players do

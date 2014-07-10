@@ -75,10 +75,15 @@ end;
 
 destructor TTableList.Destroy;
 begin
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
-
-  FreeAndNil(FLock);
+  FLock.Enter;
+  try
+    Clear;
+  finally
+    FLock.Leave;
+  end;
   inherited;
+  FreeAndNil(FLock);
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 end;
 
 procedure TTableList.Lock;
