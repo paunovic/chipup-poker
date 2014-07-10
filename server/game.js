@@ -724,6 +724,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 		var inhandcount = this.inHandCount();
 		if (inhandcount == 0) {
 			priv.conn.log('wut now??');
+			assert(false,'this should never happen');
 			finish2.call(this);
 		} else if (inhandcount == 1) {
 			priv.conn.log('d');
@@ -1756,7 +1757,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 			if (['psOutOfPlay','psOutOfHand','psFolded'].indexOf(seat.status) != -1) {
 			} else if (this.omaha) assert.equal(obj.card_count,4);
 			else {
-				//console.log('card count',seat,obj);
+				console.log('card count %s %j %s',util.inspect(seat),obj,this.state);
 				assert.equal(obj.card_count,2);
 			}
 		}

@@ -355,8 +355,8 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 			if (game.state == 'tsIdle') {
 				if (!game.dealTimer) {
 					game.dealTimer = setTimeout(function () {
+						game.dealTimer = null;
 						game.Lock.writeLock(function (release) {
-							game.dealTimer = null;
 							game.stateMachine(function (events) {
 								game.broadcastStatus(null,true,events);
 								release();
