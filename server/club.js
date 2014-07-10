@@ -39,6 +39,11 @@ Club.getClubBySeq = function (seq,cb) {
 	getLock.writeLock(function (release) {
 		if (!Club.activeClubsSeq[seq]) {
 			mdb.models.Clubs.findOne({seq:seq},function (err,obj) {
+				assert.ifError(err);
+				if (!obj) {
+					release();
+					return cb('not found');
+				}
 				Club.activeClubsSeq[seq] = new Club(obj);
 				Club.activeClubsId[obj._id] = Club.activeClubsSeq[seq];
 				release();
@@ -165,6 +170,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	models.GameStats.find({gameid:{$in:gamelist}}).lean(true).exec(function (err,stats) {
 		assert.ifError(err);
 			for (var i=0; i<stats.length; i++) {
+				assert(stats[i].userid);
 				var gameidhex = stats[i].gameid.toString();
 				if (!games[gameidhex]) {
 					games[gameidhex] = {gameid: myutils.fromMongoId(stats[i].gameid), playerstats:[]};

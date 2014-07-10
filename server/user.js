@@ -139,6 +139,9 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				var game = global.activeGames[key];
 				for (var seatIdx = 0; seatIdx < game.seats.length; seatIdx++) {
 					if (!game.seats[seatIdx]) continue;
+					if (!game.seats[seatIdx].userid) {
+						console.log('seat %d is missing userid',seatIdx,game.seats[seatIdx]);
+					}
 					if (myutils.compareObjectID(game.seats[seatIdx].userid,row._id)) {
 						if (game.members[seatIdx].disconnected) {
 							toResume.push({game:game,seat:seatIdx,seated:true});

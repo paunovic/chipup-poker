@@ -31,6 +31,7 @@ var user = require('./user');
 var codes = require('./ServerCodes');
 var SmtpConnection = require('./smtp');
 var dag = require('./dag/build/Release/dag');
+var error = require('./error');
 
 module.exports.initHttpServer = initHttpServer;
 
@@ -188,7 +189,7 @@ Server.prototype.syncNewDiff = function (req,res) {
 	var doc = req.body;
 	var obj = new models.Diff(doc);
 	obj.save(function (err,rows) {
-		assert.ifError(err);
+		// might cause a duplicate key error, those are safe to ignore
 		res.end('OK');
 	});
 };

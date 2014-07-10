@@ -555,6 +555,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 		models.GameState.findOne({_id:this.id},function (err,row) {
 			error.handleError(err);
 			this.stateRow = row;
+			this.stateRow.moveCounter = 0;
 			// </hack>
 			this.state = 'tsPreFlop';
 			this.real_rake = this.club.obj.rake;
@@ -716,6 +717,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 				this.pots[x].members.splice(idx,1);
 			}
 		}
+		this.stateRow.moveCounter++;
 		if (seatObj) seatObj.status = 'psFolded';
 		this.history.players[seat].status = 'psFolded';
 		this.addHistory({seat:seat,code:['teFold']});
@@ -1318,6 +1320,7 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	var seat = this.findSeat(conn);
 	assert.equal(this.current_seat,seat);
 	this.stopTimer(seat);
+	conn.log('putchips, counter==%d',this.stateRow.moveCounter);
 	if (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(this.state) == -1) {
 		this.log('putChips fail 1');
 		cb();
@@ -1372,6 +1375,7 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	this.log('MOVE '+event+' '+this.seats[seat].conn.nick+' '+this.seats[seat].userid);
 	this.addHistory({seat:seat,bet:chips,code:[event]});
 	this.stateRow.keycount--;
+	this.stateRow.moveCounter++;
 
 	conn.log('eating bets:'+JSON.stringify(this.bets)+' increase:'+increase+' chips:'+chips+' seat:'+seat);
 	this.setBet(seat,chips);
@@ -1725,6 +1729,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (!this.members[x]) continue;
 		var seat = this.members[x];
 		var priv = this.seats[x];
+		assert(priv.userid);
 		//console.log('table debug',x,seat.conn.userid,seat.hand.prettyPrint());
 		if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
 		var timebank = this.timebanks[priv.userid];
