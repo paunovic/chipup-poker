@@ -563,7 +563,7 @@ object frmDebug: TfrmDebug
     end
     object lbsUser: TcxLabel
       Left = 83
-      Top = 35
+      Top = 51
       Anchors = [akLeft, akBottom]
       Caption = 'User:'
       ParentFont = False
@@ -577,6 +577,44 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvUser: TcxLabel
+      Left = 135
+      Top = 51
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 78
+    end
+    object lbsServer: TcxLabel
+      Left = 83
+      Top = 35
+      Anchors = [akLeft, akBottom]
+      Caption = 'Server:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvServer: TcxLabel
       Left = 135
       Top = 35
       Anchors = [akLeft, akBottom]

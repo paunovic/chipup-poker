@@ -376,7 +376,7 @@ begin
     end;
   end;
 
-  {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState]); {$ENDIF}
+  {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocketState]); {$ENDIF}
 end;
 
 procedure TfrmChipUpMain.tiRefreshFormTimer(Sender: TObject);

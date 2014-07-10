@@ -13,7 +13,7 @@ uses
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
-  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser);
+  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser, dfiServer);
   TDebugRefreshItemSet = set of TDebugRefreshItem;
 
   TDebugObject = class
@@ -98,6 +98,8 @@ type
     teRegexFilter: TcxTextEdit;
     lbsUser: TcxLabel;
     lbvUser: TcxLabel;
+    lbsServer: TcxLabel;
+    lbvServer: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -681,6 +683,7 @@ var
   C1: Integer;
   refresh_items: TDebugRefreshItemSet;
   dfi: TDebugRefreshItem;
+  line: String;
 begin
   refresh_items := ARefreshItems;
   if refresh_items = [] then
@@ -792,6 +795,21 @@ begin
     else
       lbvUser.Caption := 'Unknown';
     lbvUser.Refresh;
+  end;
+
+  if dfiServer in refresh_items then
+  begin
+    if (Assigned(ServerSocket)) and
+       (ServerSocket.Socket.Addr <> '') then
+    begin
+      line := ServerSocket.Socket.Addr;
+      if Pos('.', line) > 0 then
+        line := Copy(line, 1, Pos('.', line) - 1);
+      lbvServer.Caption := line;
+    end
+    else
+      lbvServer.Caption := 'Unknown';
+    lbvServer.Refresh;
   end;
 end;
 
