@@ -260,7 +260,7 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       // render folded cards if needed, and set flag, so we can re-render scene once mouse cursor leaves the seat, and unset the flag then
       if (FTableStatus.State > tsIdle) and
@@ -279,7 +279,7 @@ begin
           Render;
         end;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -318,14 +318,14 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       FMetrics.Update(game, FDXAreaSize, FRaiseThumbPosition);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
-    table.UnlockObjects;
+    Tables.Unlock;
   end;
 
   DXCore.Device.Resize(FSwapChainIndex, FDXAreaSize);
@@ -344,7 +344,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       RenderBackground;
       RenderTable;
@@ -359,7 +359,7 @@ begin
       RenderRaisePanel;
       RenderButtons;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -386,12 +386,12 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       for C1 := 0 to game.Seats - 1 do
         RenderSeat(game, C1);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1341,7 +1341,7 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       for C1 := 0 to ABets.Count - 1 do
         if (ABets[C1] > 0) and
@@ -1361,7 +1361,7 @@ begin
           result := TRUE;
         end;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1382,7 +1382,7 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       bet_point := FMetrics.GetBetPoint(game, FTableStatus.SmallBlindSeat, FTableStatus.Dealer);
       animation := DXTimer.AddAnimation(ACallback, bet_point, bet_point, 0.1, 0.1, 0.9, FDXAreaSize);
@@ -1400,10 +1400,10 @@ begin
       animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
       FBetAnimations.Add(animation.Id);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
-    table.UnlockObjects;
+    Tables.Unlock;
   end;
 end;
 
@@ -1421,7 +1421,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       cc := 0;
       card_index := 0;
@@ -1459,10 +1459,10 @@ begin
         Inc(card_index);
       until not iterate;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
-    table.UnlockObjects;
+    Tables.Unlock;
   end;
 end;
 
@@ -1482,7 +1482,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       for C1 := 0 to APots.Count - 1 do
       begin
@@ -1549,10 +1549,10 @@ begin
         animation.Tags.AddOrSetValue(ANITAG_WINMSG, Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]));
       end;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
-    table.UnlockObjects;
+    Tables.Unlock;
   end;
 end;
 

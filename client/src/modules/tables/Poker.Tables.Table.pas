@@ -9,6 +9,7 @@ uses
 type
   TTable = class
   private
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FTableType: TTableType;
     FForm: TForm;
     FSeatIndex: Integer;
@@ -34,10 +35,8 @@ type
 
     procedure UpdateAvatars(const AAvatar: TAvatar);
 
-    function GetAndLockObjects(out AGame: TGameInfo): Boolean; overload;
-    function GetAndLockObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean; overload;
-
-    procedure UnlockObjects;
+    function GetObjectCopy(out AGame: TGameInfo): Boolean; overload;
+    function GetObjectCopy(out AClub: TClubInfo; out AGame: TGameInfo): Boolean; overload;
 
     procedure BringToFront;
 
@@ -61,10 +60,12 @@ uses
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Tables.Status;
 
+
 { TTable }
 
 constructor TTable.Create(const AInternalId: Integer);
 begin
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Table #%d', [AInternalId])); {$ENDIF}
   FInternalId := AInternalId;
 end;
 
@@ -78,34 +79,41 @@ begin
   FreeAndNil(FHandHistoryPlayback);
   DXCore.ReleaseSwapChainElement(FSwapChainIndex);
 
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+
   inherited;
 end;
 
-function TTable.GetAndLockObjects(out AGame: TGameInfo): Boolean;
-var
-  club: TClubInfo;
-begin
-  result := GetAndLockObjects(club, AGame);
-end;
-
-function TTable.GetAndLockObjects(out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
-begin
-  result := dmMain.SelfInfo.Clubs.FindGame(FGameId, AClub, AGame);
-  if result then
-  begin
-    dmMain.SelfInfo.Clubs.Lock;
-    AClub.Games.Lock;
-  end;
-end;
-
-procedure TTable.UnlockObjects;
+function TTable.GetObjectCopy(out AGame: TGameInfo): Boolean;
 var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  dmMain.SelfInfo.Clubs.Unlock;
   if dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
-    club.Games.Unlock;
+  begin
+    AGame := TGameInfo.Create;
+    AGame.Assign(game);
+    result := TRUE;
+  end
+  else
+    result := FALSE;
+end;
+
+function TTable.GetObjectCopy(out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+var
+  club: TClubInfo;
+  game: TGameInfo;
+begin
+  if dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
+  begin
+    AClub := TClubInfo.Create;
+    AClub.Assign(club);
+    AGame := TGameInfo.Create;
+    AGame.Assign(game);
+    result := TRUE;
+  end
+  else
+    result := FALSE;
 end;
 
 function TTable.AcquireSwapChainElement: Boolean;

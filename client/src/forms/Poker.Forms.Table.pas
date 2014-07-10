@@ -406,7 +406,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       DefocusControls;
       table.Renderer.MouseDown(Button, Shift, X, Y, set_raise_amount);
@@ -417,7 +417,7 @@ begin
 
       table.Renderer.Render;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -432,7 +432,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       table.Renderer.MouseMove(Shift, X, Y, set_raise_amount);
 
@@ -440,7 +440,7 @@ begin
         SetRaiseValue(RoundToNearestBB(Round(table.Renderer.TableStatus.MinimumRaise +
             (table.Renderer.TableStatus.MaximumRaise - table.Renderer.TableStatus.MinimumRaise) * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -470,7 +470,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       client_cursor_pos := ScreenToClient(Mouse.CursorPos);
 
@@ -487,7 +487,7 @@ begin
            (seat_info.Status in [psOutOfPlay, psOutOfHand]))) then
         FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Renderer.TableStatus, @seat_index], ModalFormClose));
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -601,7 +601,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
          (seat_info.Status <> psOutOfPlay) then
@@ -609,7 +609,7 @@ begin
 
       tiSitOutNextBB.Enabled := FALSE;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -624,7 +624,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
          (seat_info.Status <> psOutOfPlay) then
@@ -632,7 +632,7 @@ begin
 
       tiSitOutNextHand.Enabled := FALSE;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -698,7 +698,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(club, game) then
+    if table.GetObjectCopy(club, game) then
     try
       case table.TableType of
         ttLiveGame: begin
@@ -722,7 +722,8 @@ begin
                      ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
       end;
     finally
-      table.UnlockObjects;
+      club.Free;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -792,7 +793,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       case Ord(Key) of
         VK_RETURN: begin
@@ -806,7 +807,7 @@ begin
         end;
       end;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -836,7 +837,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       ServerSocket.ShowCards(game.MongoId);
       acShowCards.Enabled := FALSE;
@@ -844,7 +845,7 @@ begin
         seat.CardsVisible := TRUE;
       RefreshAll;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -858,14 +859,14 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if not ConfirmStandUp then
         Exit;
 
       ServerSocket.TableStandUp(game.MongoId);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -922,12 +923,12 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       table.Renderer.TableStatus.UpdateClosingTime(game);
       RefreshAll;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -948,7 +949,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       chat_event := AObject as TPB_ChatEvent;
 
@@ -961,7 +962,7 @@ begin
         ceServerMessage: ;
       end;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -983,7 +984,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       AFocusWindow := FALSE;
       raise_en := table.Renderer.TableStatus.ActionRaise;
@@ -1102,7 +1103,7 @@ begin
       acPlayNow.Enabled := table.Renderer.TableStatus.ActionPlayNow;
       acShowCards.Enabled := table.Renderer.TableStatus.ActionShowCards;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1299,7 +1300,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbtablestatus := AObject as TPB_TableStatus;
       if not CompareBytes(pbtablestatus.TableMongoId, game.MongoId) then
@@ -1445,7 +1446,7 @@ begin
 
       RefreshAll;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1619,7 +1620,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       Assert(table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info));
       seat_bet := table.Renderer.TableStatus.GetBet(seat_info.SeatIndex);
@@ -1630,7 +1631,7 @@ begin
 
       ServerSocket.PutChips(game.MongoId, call_amount, table.Renderer.TableStatus.State);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1644,11 +1645,11 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       ServerSocket.PutChips(game.MongoId, table.Renderer.TableStatus.GetBet(table.SeatIndex), table.Renderer.TableStatus.State);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1662,7 +1663,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if (acCheck.Enabled) and
          (Settings.FoldChecks) then
@@ -1670,7 +1671,7 @@ begin
       else
         ServerSocket.Fold(game.MongoId);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1686,7 +1687,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if (table.IsSitting) and
          (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat)) and
@@ -1699,7 +1700,7 @@ begin
 
       ServerSocket.TablePlayNow(game.MongoId);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1714,7 +1715,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       val := table.Renderer.TableStatus.MinimumBet;
       if val = 0 then
@@ -1722,7 +1723,7 @@ begin
 
       SetRaiseValue(val * 3);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1760,11 +1761,11 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       ServerSocket.PutChips(game.MongoId, FRaiseValue, table.Renderer.TableStatus.State);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1853,7 +1854,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       oldval := FRaiseValue;
 
@@ -1893,7 +1894,7 @@ begin
           ConfigureGUI;
       end;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -1970,7 +1971,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if not HandHistory.TryGetValue(table.GameId, hhis) then
         handid := 0
@@ -1985,7 +1986,7 @@ begin
       else
         FormsContainer.RunForm(TfrmHandHistory, frmChipUpMain, [game, @handid], FALSE)
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;

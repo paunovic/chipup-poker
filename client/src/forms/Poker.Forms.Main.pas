@@ -577,19 +577,23 @@ procedure TfrmChipUpMain.UpdateClublist;
 var
   club: TClubInfo;
   status: String;
-  recidx: Integer;
+  rcount: Integer;
+  c: TcxDataController;
   member: TClubMemberInfo;
 begin
-  gridPrivateClubsTable.DataController.BeginFullUpdate;
+  c := gridPrivateClubsTable.DataController;
+  c.BeginFullUpdate;
   try
-    gridPrivateClubsTable.DataController.SetRecordCount(0);
+    rcount := 0;
     for club in dmMain.SelfInfo.Clubs.Values do
       if club.IsPrivate then
       begin
-        recidx := gridPrivateClubsTable.DataController.AppendRecord;
+        Inc(rcount);
+        if rcount > c.RecordCount then
+          c.SetRecordCount(rcount);
 
-        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsId.Index, club.Id);
-        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsClubName.Index, club.Name);
+        c.SetValue(rcount - 1, gridJoinedClubsId.Index, club.Id);
+        c.SetValue(rcount - 1, gridJoinedClubsClubName.Index, club.Name);
 
         if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
           status := 'Manager'
@@ -603,12 +607,13 @@ begin
           end
           else
             status := 'Unknown';
-        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsStatus.Index, status);
+        c.SetValue(rcount - 1, gridJoinedClubsStatus.Index, status);
       end;
+    c.SetRecordCount(rcount);
   finally
-    gridPrivateClubsTable.DataController.EndFullUpdate;
+    c.EndFullUpdate;
   end;
-  gridPrivateClubsTable.DataController.Refresh;
+  c.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
@@ -616,30 +621,31 @@ var
   game: TGameInfo;
   c: TcxGridDataController;
   club: TClubInfo;
-  recidx: Integer;
+  rcount: Integer;
 begin
   c := gridGamesTable.DataController;
   c.BeginFullUpdate;
   try
-    c.SetRecordCount(0);
-    if not GetSelectedClub(club) then
-      Exit;
+    rcount := 0;
+    if GetSelectedClub(club) then
+      for game in club.Games.Values do
+      begin
+        if game.State = gsClosed then
+          Continue;
 
-    for game in club.Games.Values do
-    begin
-      if game.State = gsClosed then
-        Continue;
+        Inc(rcount);
+        if rcount > c.RecordCount then
+          c.SetRecordCount(rcount);
 
-      recidx := c.AppendRecord;
-
-      c.SetValue(recidx, gridGamesId.Index, game.MongoId);
-      c.SetValue(recidx, gridGamesName.Index, game.Name);
-      c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
-      c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
-      c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
-      c.SetValue(recidx, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
-      c.SetValue(recidx, gridGamesStatus.Index, game.StateAsStr);
-    end;
+        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId);
+        c.SetValue(rcount - 1, gridGamesName.Index, game.Name);
+        c.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
+        c.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
+        c.SetValue(rcount - 1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
+        c.SetValue(rcount - 1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
+        c.SetValue(rcount - 1, gridGamesStatus.Index, game.StateAsStr);
+      end;
+    c.SetRecordCount(rcount);
   finally
     c.EndFullUpdate;
   end;
@@ -657,16 +663,16 @@ begin
   c.BeginFullUpdate;
   try
     rcount := 0;
-    c.SetRecordCount(0);
-
     for club in dmMain.SelfInfo.Clubs.Values do
       if not club.IsPrivate then
       begin
         Inc(rcount);
-        c.SetRecordCount(rcount);
+        if rcount > c.RecordCount then
+          c.SetRecordCount(rcount);
         c.SetValue(rcount - 1, gridClubsId.Index, club.Id);
         c.SetValue(rcount - 1, gridClubsName.Index, club.Name);
       end;
+    c.SetRecordCount(rcount);
   finally
     c.EndFullUpdate;
   end;
@@ -1157,7 +1163,7 @@ begin
   begin
     Tables.Lock;
     try
-      if table.GetAndLockObjects(game) then
+      if table.GetObjectCopy(game) then
       try
         game.UpdateFromTableStatus(pbtstatus);
         if not table.Form.Visible then
@@ -1165,7 +1171,7 @@ begin
 
         ConfigureGUI;
       finally
-        table.UnlockObjects;
+        game.Free;
       end;
     finally
       Tables.Unlock;

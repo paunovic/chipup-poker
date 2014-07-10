@@ -139,7 +139,7 @@ uses
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, OverbyteIcsWSocket,
-  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule;
+  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
