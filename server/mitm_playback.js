@@ -99,7 +99,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 					var methodId = serverCodes[request.method];
 					var encodedMessage = pu.encode(methodId, request.args.buffer, request.type);
 					writeMessageAndTestIfItsOk(encodedMessage, socket);
-					++counter;
+					request = requests[++counter];
 				}
 			}
 		});
