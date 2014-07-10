@@ -563,7 +563,7 @@ object frmDebug: TfrmDebug
     end
     object lbsUser: TcxLabel
       Left = 83
-      Top = 35
+      Top = 51
       Anchors = [akLeft, akBottom]
       Caption = 'User:'
       ParentFont = False
@@ -577,6 +577,44 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvUser: TcxLabel
+      Left = 135
+      Top = 51
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 78
+    end
+    object lbsServer: TcxLabel
+      Left = 83
+      Top = 35
+      Anchors = [akLeft, akBottom]
+      Caption = 'Server:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvServer: TcxLabel
       Left = 135
       Top = 35
       Anchors = [akLeft, akBottom]
@@ -721,6 +759,13 @@ object frmDebug: TfrmDebug
   object RVStyles: TRVStyle
     TextStyles = <
       item
+        StyleName = 'Default'
+        FontName = 'Consolas'
+        Size = 8
+        Color = clSilver
+        Unicode = True
+      end
+      item
         StyleName = 'Time'
         FontName = 'Consolas'
         Size = 8
@@ -729,7 +774,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Exception'
+        StyleName = 'T-EXCP'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -737,7 +782,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Application'
+        StyleName = 'T-APPL'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -745,7 +790,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Socket'
+        StyleName = 'T-SINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -753,7 +798,23 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Net'
+        StyleName = 'T-SOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'T-SOCK'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'T-NINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -761,7 +822,15 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Form'
+        StyleName = 'T-NOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clMoneyGreen
+        Unicode = True
+      end
+      item
+        StyleName = 'T-FORM'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -769,7 +838,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Unknown'
+        StyleName = 'T-UNKN'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -777,7 +846,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Exception'
+        StyleName = 'D-EXCP'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -785,7 +854,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Application'
+        StyleName = 'D-APPL'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -793,7 +862,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Socket'
+        StyleName = 'D-SINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -801,7 +870,23 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Net'
+        StyleName = 'D-SOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'D-SOCK'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'D-NINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -809,7 +894,15 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Form'
+        StyleName = 'D-NOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clMoneyGreen
+        Unicode = True
+      end
+      item
+        StyleName = 'D-FORM'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -817,7 +910,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Unknown'
+        StyleName = 'D-UNKN'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]

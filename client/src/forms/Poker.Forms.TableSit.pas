@@ -116,7 +116,7 @@ begin
   result := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if (table.SeatIndex <> -1) and
          (FTableStatus.GetSeatInfo(table.SeatIndex, seat_info)) then
@@ -133,7 +133,7 @@ begin
           result := dmMain.AvailableBalance;
       end;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -188,7 +188,7 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       lbvTableName.Caption := Format('%s (%s/%s %s)', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(FALSE)]);
       lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(game.MinBuyin * game.BigBlind),
@@ -206,7 +206,7 @@ begin
       default_buyin := (default_buyin div 10) * 10;
       SetBuyin(default_buyin);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -231,11 +231,11 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       SetBuyin(game.MinBuyin * game.BigBlind);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -252,7 +252,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       if not TryStrToFloat(seBuyin.Text, buyin) then
       begin
@@ -286,7 +286,7 @@ begin
       else
         MessageDlg(err, mtError, [mbOK], 0);
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -301,7 +301,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbstatus := AObject as TPB_TableStatus;
       if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
@@ -310,7 +310,7 @@ begin
       MessageDlg('Insufficient chips', mtWarning, [mbOK], 0);
       acOK.Enabled := TRUE;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -325,7 +325,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbstatus := AObject as TPB_TableStatus;
       if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
@@ -334,7 +334,7 @@ begin
       ModalResult := mrOk;
       Close;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -349,7 +349,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbstatus := AObject as TPB_TableStatus;
       if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
@@ -359,7 +359,7 @@ begin
       ModalResult := mrClose;
       Close;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -374,7 +374,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbstatus := AObject as TPB_TableStatus;
       if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
@@ -383,7 +383,7 @@ begin
       ModalResult := mrOk;
       Close;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -398,7 +398,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbstatus := AObject as TPB_TableStatus;
       if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
@@ -407,7 +407,7 @@ begin
       MessageDlg('You can''t add-on over maximum table buy-in limit', mtWarning, [mbOK], 0);
       acOK.Enabled := TRUE;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -422,7 +422,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbstatus := AObject as TPB_TableStatus;
       if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
@@ -431,7 +431,7 @@ begin
       MessageDlg('You reached your balance limit for this club', mtWarning, [mbOK], 0);
       acOK.Enabled := TRUE;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -446,7 +446,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbgame := AObject as TPB_Game;
       if not CompareBytes(game.MongoId, pbgame.MongoId) then
@@ -457,7 +457,7 @@ begin
       ModalResult := mrCancel;
       Close;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -472,7 +472,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbbuyinerr := AObject as TPB_BuyinError;
       if not CompareBytes(game.MongoId, pbbuyinerr.GameId) then
@@ -485,7 +485,7 @@ begin
 
       acOK.Enabled := TRUE;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;
@@ -500,7 +500,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetAndLockObjects(game) then
+    if table.GetObjectCopy(game) then
     try
       pbbuyinerr := AObject as TPB_BuyinError;
       if not CompareBytes(game.MongoId, pbbuyinerr.GameId) then
@@ -510,7 +510,7 @@ begin
 
       acOK.Enabled := TRUE;
     finally
-      table.UnlockObjects;
+      game.Free;
     end;
   finally
     Tables.Unlock;

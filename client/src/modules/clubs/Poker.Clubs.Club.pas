@@ -51,7 +51,7 @@ type
 implementation
 
 uses
-  Poker.Common.Misc;
+  Poker.Common.Misc, Poker.Games.Game;
 
 { TClubInfo }
 
@@ -118,6 +118,8 @@ end;
 procedure TClubInfo.Assign(const AClubInfo: TClubInfo);
 var
   member: TClubMemberInfo;
+  game: TGameInfo;
+  gamecopy: TGameInfo;
 begin
   FMongoId := AClubInfo.MongoId;
   FOwnerId := AClubInfo.OwnerId;
@@ -131,6 +133,13 @@ begin
   FPrivate := AClubInfo.IsPrivate;
   FDefaultBalanceLimit := AClubInfo.DefaultBalanceLimit;
   FUnlimitedDefaultBalance := AClubInfo.UnlimitedDefaultBalance;
+  FGames.Clear;
+  for game in AClubInfo.Games.Values do
+  begin
+    gamecopy := TGameInfo.Create;
+    gamecopy.Assign(game);
+    FGames.Add(gamecopy.MongoId, gamecopy);
+  end;
 end;
 
 procedure TClubInfo.UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
