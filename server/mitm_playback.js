@@ -83,7 +83,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 					throw new Error('Args do not match! ' + currentRequestInfo);		
 				}
 				
-				if (type !== requests[counter].type) 
+				if (type !== requestFromDb.type) 
 					throw new Error('Type param do not match! ' + currentRequestInfo);
 
 				console.log("Request #" + counter + " match!");
