@@ -71,6 +71,9 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 						argsParsed = sanitizeLoginReply(argsParsed);
 					//var argsJson = JSON.stringify(argsParsed, undefined, 2);
 						argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
+					} else if (methodId == serverCodes.srTableStatsReply) {
+						argsParsed = sanitizeTableStats(argsParsed);
+						argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
 					}
 					//var argsFromDbJson = JSON.stringify(argsFromDbParsed, undefined, 2);
 					
@@ -126,6 +129,18 @@ function sanitizeLoginReply(args) {
 	}
 	for (i=0; i<args.status.games.length; i++) {
 		args.status.games[i].lasthandid = 0;
+	}
+	return args;
+}
+function sanitizeTableStats(args) {
+	var i,j;
+	for (i=0; i<args.reply.length; i++) {
+		var reply = args.reply[i];
+		for (j=0; j<reply.playerstats.length; j++) {
+			console.log(reply.playerstats[j]);
+			delete reply.playerstats[j].userid;
+			reply.playerstats[j].balance = 0;
+		}
 	}
 	return args;
 }
