@@ -759,6 +759,13 @@ object frmDebug: TfrmDebug
   object RVStyles: TRVStyle
     TextStyles = <
       item
+        StyleName = 'Default'
+        FontName = 'Consolas'
+        Size = 8
+        Color = clSilver
+        Unicode = True
+      end
+      item
         StyleName = 'Time'
         FontName = 'Consolas'
         Size = 8
@@ -767,7 +774,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Exception'
+        StyleName = 'T-EXCP'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -775,7 +782,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Application'
+        StyleName = 'T-APPL'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -783,7 +790,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Socket'
+        StyleName = 'T-SINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -791,7 +798,23 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Net'
+        StyleName = 'T-SOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'T-SOCK'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'T-NINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -799,7 +822,15 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Form'
+        StyleName = 'T-NOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clMoneyGreen
+        Unicode = True
+      end
+      item
+        StyleName = 'T-FORM'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -807,7 +838,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Unknown'
+        StyleName = 'T-UNKN'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -815,7 +846,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Exception'
+        StyleName = 'D-EXCP'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -823,7 +854,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Application'
+        StyleName = 'D-APPL'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -831,7 +862,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Socket'
+        StyleName = 'D-SINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -839,7 +870,23 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Net'
+        StyleName = 'D-SOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'D-SOCK'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'D-NINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -847,7 +894,15 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Form'
+        StyleName = 'D-NOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clMoneyGreen
+        Unicode = True
+      end
+      item
+        StyleName = 'D-FORM'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -855,7 +910,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Unknown'
+        StyleName = 'D-UNKN'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]

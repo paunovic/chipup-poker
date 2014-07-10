@@ -30,12 +30,10 @@ type
     FTypeStr: String;
     FData: String;
     FSubData: String;
-    FTypeStyle: Integer;
-    FDataStyle: Integer;
   protected
     procedure DoSynchronize; override;
   public
-    class procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+    class procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
   end;
 
   TDebugFormRefresh = class(TIdSync)
@@ -115,13 +113,14 @@ type
     procedure teRegexFilterExit(Sender: TObject);
     procedure teRegexFilterPropertiesChange(Sender: TObject);
   private
+    function FindStyleWithName(const AName: String): Integer;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
     class procedure Initialize;
     class procedure Deinitialize;
 
-    procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+    procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
     procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
     procedure RefreshDebugObjects;
   end;
@@ -208,8 +207,6 @@ procedure DebugLn(const ADebugId: Integer; const AData: String; const AType: TDe
 var
   time_str: String;
   type_str: String;
-  tstyle: Integer;
-  dstyle: Integer;
   output: String;
   fstream: TFileStream;
   fwriter: TStreamWriter;
@@ -217,59 +214,21 @@ begin
   time_str := FormatDateTime('hh:nn:ss:zzz', Now);
 
   case AType of
-    ditException: begin
-      type_str := 'EXCP';
-      tstyle := 1;
-      dstyle := 7;
-    end;
-    ditApplication: begin
-      type_str := 'APPL';
-      tstyle := 2;
-      dstyle := 8;
-    end;
-    ditSocketInc: begin
-      type_str := 'SINC';
-      tstyle := 3;
-      dstyle := 9;
-    end;
-    ditSocketOut: begin
-      type_str := 'SOUT';
-      tstyle := 3;
-      dstyle := 9;
-    end;
-    ditSocket: begin
-      type_str := 'SOCK';
-      tstyle := 3;
-      dstyle := 9;
-    end;
-    ditNetInc: begin
-      type_str := 'NINC';
-      tstyle := 4;
-      dstyle := 10;
-    end;
-    ditNetOut: begin
-      type_str := 'NOUT';
-      tstyle := 4;
-      dstyle := 10;
-    end;
-    ditForm: begin
-      type_str := 'FORM';
-      tstyle := 5;
-      dstyle := 11;
-    end;
-    ditPingPong: begin
-      type_str := 'PING';
-      tstyle := 3;
-      dstyle := 9;
-    end;
+    ditException: type_str := 'EXCP';
+    ditApplication: type_str := 'APPL';
+    ditSocketInc: type_str := 'SINC';
+    ditSocketOut: type_str := 'SOUT';
+    ditSocket: type_str := 'SOCK';
+    ditNetInc: type_str := 'NINC';
+    ditNetOut: type_str := 'NOUT';
+    ditForm: type_str := 'FORM';
+    ditPingPong: type_str := 'PING';
   else
     type_str := 'UNKN';
-    tstyle := 6;
-    dstyle := 12;
   end;
 
   if Assigned(frmDebug) then
-    TDebugFormLog.Add(ADebugId, AType, time_str, type_str, AData, ASubData, tstyle, dstyle);
+    TDebugFormLog.Add(ADebugId, AType, time_str, type_str, AData, ASubData);
 
   output := Format('%s [%s] %s', [time_str, type_str, AData]);
 
@@ -424,7 +383,17 @@ begin
   {$ENDIF}
 end;
 
-procedure TfrmDebug.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+function TfrmDebug.FindStyleWithName(const AName: String): Integer;
+var
+  C1: Integer;
+begin
+  for C1 := 0 to RVStyles.TextStyles.Count - 1 do
+    if RVStyles.TextStyles[C1].StyleName = AName then
+      Exit(C1);
+  Exit(0);
+end;
+
+procedure TfrmDebug.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
 const
   SCROLLBACK_LINES = 500;
 var
@@ -488,13 +457,13 @@ begin
     Cells[0, 2].Clear;
     Cells[0, 3].Clear;
 
-    Cells[0, 0].AddFmt('%s', [ATime], 0, 0);
-    Cells[0, 1].AddFmt('%s', [ATypeStr], ATypeStyle, 1);
+    Cells[0, 0].AddFmt('%s', [ATime], FindStyleWithName('Time'), 0);
+    Cells[0, 1].AddFmt('%s', [ATypeStr], FindStyleWithName('T-' + ATypeStr), 1);
     if ASubData <> '' then
-      Cells[0, 2].AddFmt('+', [], 13, 1)
+      Cells[0, 2].AddFmt('+', [], FindStyleWithName('Subdata'), 1)
     else
-      Cells[0, 2].AddFmt('', [], 13, 1);
-    Cells[0, 3].AddFmt('%s', [AData], ADataStyle, 2);
+      Cells[0, 2].AddFmt('', [], FindStyleWithName('Subdata'), 1);
+    Cells[0, 3].AddFmt('%s', [AData], FindStyleWithName('D-' + ATypeStr), 2);
   end;
   rvLog.AddItem('', table);
 
@@ -529,7 +498,7 @@ begin
       try
         Split(#10, ASubData, sl);
         for C1 := 0 to sl.Count - 1 do
-          Cells[0, 3].AddFmt('%s', [sl[C1]], 13, 2);
+          Cells[0, 3].AddFmt('%s', [sl[C1]], FindStyleWithName('Subdata'), 2);
       finally
         sl.Free;
       end;
@@ -815,7 +784,7 @@ end;
 
 { TMemoLog }
 
-class procedure TDebugFormLog.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String; const ATypeStyle, ADataStyle: Integer);
+class procedure TDebugFormLog.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
 var
   dfl: TDebugFormLog;
 begin
@@ -827,8 +796,6 @@ begin
     dfl.FTypeStr := ATypeStr;
     dfl.FData := AData;
     dfl.FSubData := ASubData;
-    dfl.FTypeStyle := ATypeStyle;
-    dfl.FDataStyle := ADataStyle;
     dfl.Synchronize;
   finally
     dfl.Free;
@@ -837,7 +804,7 @@ end;
 
 procedure TDebugFormLog.DoSynchronize;
 begin
-  frmDebug.Add(FDebugId, FType, FTime, FTypeStr, FData, FSubData, FTypeStyle, FDataStyle);
+  frmDebug.Add(FDebugId, FType, FTime, FTypeStr, FData, FSubData);
 end;
 
 { TDebugFormRefresh }
