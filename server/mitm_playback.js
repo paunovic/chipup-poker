@@ -97,7 +97,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 
 				while (request.direction === directions.C2S) {
 					var methodId = serverCodes[request.method];
-					var encodedMessage = pu.encode(methodId, request.args, request.type);
+					var encodedMessage = pu.encode(methodId, request.args.buffer, request.type);
 					writeMessageAndTestIfItsOk(encodedMessage, socket);
 					++counter;
 				}
