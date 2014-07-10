@@ -1905,7 +1905,7 @@ procedure TfrmTable.TablePlaySound(const ASound: String);
 begin
   if (GetForegroundWindow = Handle) and
      (Settings.Sounds) then
-    Sounds.Play(ASound);
+    Sounds.Play(Handle, ASound);
 end;
 
 procedure TfrmTable.RefreshAll;

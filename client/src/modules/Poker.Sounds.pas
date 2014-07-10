@@ -2,10 +2,15 @@ unit Poker.Sounds;
 
 interface
 
+uses
+  System.Generics.Collections, Poker.WavePlayer.Player, System.SyncObjs;
+
 type
   TSounds = class
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+    FLock: TCriticalSection;
+    FWavePlayers: TObjectList<TWavePlayer>;
   public
     const
       SOUND_DEALING        = 'Dealing';
@@ -21,7 +26,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Play(const ASound: String);
+    procedure CleanupFinishedSounds;
+
+    function Play(const AHandle: THandle; ASound: String): Boolean;
     procedure Stop;
   end;
 
@@ -32,19 +39,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.SysUtils, Winapi.MMSystem;
+  Winapi.Windows, System.SysUtils;
 
-
-constructor TSounds.Create;
-begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Sounds'); {$ENDIF}
-end;
-
-destructor TSounds.Destroy;
-begin
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
-  inherited;
-end;
 
 class procedure TSounds.Initialize;
 begin
@@ -56,18 +52,66 @@ begin
   FreeAndNil(Sounds);
 end;
 
-
-procedure TSounds.Play(const ASound: String);
+constructor TSounds.Create;
 begin
-  if not PlaySound(PChar(ASound), HInstance, SND_RESOURCE or SND_ASYNC or SND_NODEFAULT) then
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Sounds'); {$ENDIF}
+  FLock := TCriticalSection.Create;
+  FWavePlayers := TObjectList<TWavePlayer>.Create;
+end;
+
+destructor TSounds.Destroy;
+begin
+  FreeAndNil(FWavePlayers);
+  FreeAndNil(FLock);
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+  inherited;
+end;
+
+function TSounds.Play(const AHandle: THandle; ASound: String): Boolean;
+var
+  wave_player: TWavePlayer;
+begin
+  wave_player := TWavePlayer.Create(AHandle);
+  wave_player.FreeOnDone := TRUE;
+  if (not wave_player.Load(ASound)) or
+     (not wave_player.PlayBuffer(FALSE)) then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to play sound [%s] [err: %d]', [ASound, GetLastError]), ditException); {$ENDIF}
+    wave_player.Free;
+    result := FALSE;
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to play sound [%s]', [ASound]), ditException); {$ENDIF}
+  end
+  else
+  begin
+    FLock.Enter;
+    try
+      FWavePlayers.Add(wave_player);
+    finally
+      FLock.Leave;
+    end;
+    result := TRUE;
   end;
+
+  CleanupFinishedSounds;
 end;
 
 procedure TSounds.Stop;
 begin
-  PlaySound(nil, 0, 0);
+  FWavePlayers.Clear;
 end;
+
+procedure TSounds.CleanupFinishedSounds;
+var
+  C1: Integer;
+begin
+  FLock.Enter;
+  try
+    for C1 := FWavePlayers.Count - 1 downto 0 do
+      if FWavePlayers[C1].IsBufferPlaying = dsbsNone then
+        FWavePlayers.Delete(C1);
+  finally
+    FLock.Leave;
+  end;
+end;
+
 
 end.
