@@ -73,6 +73,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 				this.reply(0,'you dont own that club!');
 				return;
 			}
+			game.obj = gamerow; // FIXME
 			game.Lock.writeLock(function (release) {
 				if (params.timestamp > 0) {
 					game.closeTimer = setTimeout(function () {
@@ -82,7 +83,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 					}.bind(this),params.timestamp * 1000);
 					game.closeTime = Date.now() + (params.timestamp * 1000);
 					game.state2 = 'gsClosing';
-					Game.clubBroadcastGameState(gamerow.clubid,JSON.parse(JSON.stringify(gamerow)),release);
+					Game.clubBroadcastGameState(game,release);
 				} else {
 					game.closeTime = 0;
 					game.doClose(this,release,gamerow);

@@ -241,7 +241,7 @@ Club.finishTableStatsPacket = function (data,cb) {
 		}.bind(this));
 	}.bind(this));
 };
-Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
+Club.prototype.seGameChanged = function (gameObj,cb,exclude) {
 	var token = profiler.start('seGameChanged');
 	// FIXME, cache object
 	mdb.models.Clubs.findOne({_id:this.clubid},function (err,club) { // FIXME, get it via a required refresh
@@ -252,33 +252,36 @@ Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 			return;
 		}
 		this.refresh(club);
-		var g = makeGameProtobuf(gamerow);
-		if (club.is_private) {
-			token.tag += 'a';
-			var conn = global.activeUsers[club.owner];
-			if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
-			if (club.members) {
+		var g = makeGameProtobuf(gameObj.obj);
+		var serialized = pb.Serialize(g,'Poker.Game');
+		myutils.throttle('seGameChange.'+gameObj.id,30,function () {
+			if (club.is_private) {
+				token.tag += 'a';
+				var conn = global.activeUsers[club.owner];
+				if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
+				if (club.members) {
+					count = 0;
+					rawmsg = pb.Serialize(g,'Poker.Game');
+					for (x=0; x<club.members.length; x++) {
+						conn = global.activeUsers[club.members[x]];
+						if (!conn) continue;
+						if (conn === exclude) continue;
+						conn.send(codes.seGameChange,rawmsg,'raw');
+						count++;
+					}
+					token.tag += '.'+count;
+				}
+			} else {
+				token.tag += 'b';
 				count = 0;
 				rawmsg = pb.Serialize(g,'Poker.Game');
-				for (x=0; x<club.members.length; x++) {
-					conn = global.activeUsers[club.members[x]];
-					if (!conn) continue;
-					if (conn === exclude) continue;
-					conn.send(codes.seGameChange,rawmsg,'raw');
+				for (x in global.activeUsers) {
+					global.activeUsers[x].send(codes.seGameChange,rawmsg,'raw');
 					count++;
 				}
 				token.tag += '.'+count;
 			}
-		} else {
-			token.tag += 'b';
-			count = 0;
-			rawmsg = pb.Serialize(g,'Poker.Game');
-			for (x in global.activeUsers) {
-				global.activeUsers[x].send(codes.seGameChange,rawmsg,'raw');
-				count++;
-			}
-			token.tag += '.'+count;
-		}
+		});
 		token.stop();
 		cb();
 	}.bind(this));

@@ -148,10 +148,8 @@ Game.prototype.clearDealTimer = function () {
 		this.log('cleared deal timer');
 	}
 };
-function clubBroadcastGameState(clubid,gamerow,cb) {
-	Club.getClubById(clubid,function (err,clubObj) {
-		clubObj.seGameChanged(gamerow,cb);
-	});
+function clubBroadcastGameState(game,cb) {
+	game.club.seGameChanged(game,cb);
 }
 Game.clubBroadcastGameState = clubBroadcastGameState;
 Game.prototype.close = function(conn,cb) {
@@ -175,9 +173,7 @@ Game.prototype.close = function(conn,cb) {
 			this.doDelete();
 		} else {
 			this.deleteTimer = setTimeout(this.doDelete.bind(this),5 * 60 * 1000);
-			this.club.seGameChanged(JSON.parse(JSON.stringify(this.obj)),function () {
-				cb();
-			}.bind(this));
+			this.club.seGameChanged(this,cb);
 		}
 	}.bind(this));
 };
@@ -263,7 +259,7 @@ Game.prototype.join = function join(conn,cb) {
 };
 Game.prototype.sitDown = function (conn,params,cb) {
 	function finish() {
-		this.club.seGameChanged(JSON.parse(JSON.stringify(this.obj)),function () {
+		this.club.seGameChanged(this,function () {
 			this.club.buyin(conn.userid,params.chips);
 			this.updateMongoState({members:true},function () {
 				cb(true,events);
@@ -1320,7 +1316,6 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	assert.equal(this.Lock.readers,-1);
 	var seat = this.findSeat(conn);
 	assert.equal(this.current_seat,seat);
-	this.stopTimer(seat);
 	conn.log('putchips, counter==%d',this.stateRow.moveCounter);
 	if (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(this.state) == -1) {
 		this.log('putChips fail 1');
@@ -1333,30 +1328,33 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	var oldbet = this.bets[seat];
 	var maxbet = this.getLimit(seat);
 
-	this.clearCanShow();
 
 	if (chips > maxbet) { // cheater!
-		conn.error('cheater, going over pot limit '+chips+' '+maxbet);
-		conn.destroy();
+		conn.reply(0,'trying to go over pot limit');
+		//conn.error('cheater, going over pot limit '+chips+' '+maxbet);
+		//conn.destroy();
 		cb([],0);
 		return;
 	} else if (chips < oldbet) { // cheater!
-		conn.error('cheater detected, lowering bet '+chips+','+oldbet);
-		conn.destroy();
+		conn.reply(0,'you tried to lower your bet!');
+		//conn.error('cheater detected, lowering bet '+chips+','+oldbet);
+		//conn.destroy();
 		cb([],0);
 		return;
 	} else if (this.members[seat].chips == increase) {
 		this.members[seat].status = 'psAllIn';
 		event = 'teAllIn';
 	} else if (chips < this.minBet) { // cheater!
-		conn.error('cheater detected, betting low '+chips+','+this.minBet);
-		conn.destroy();
+		conn.reply(0,'not meeting min bet');
+		//conn.error('cheater detected, betting low '+chips+','+this.minBet);
+		//conn.destroy();
 		cb([],0);
 		return;
 	} else if (chips > this.minBet) {
 		if ((chips - this.minBet) < this.minimum_raise) {
-			conn.error(util.format('cheater detected, not meeting min raise, chips:%d minBet:%d minRaise:%d inplay:%d increase:%d',chips,this.minBet,this.minimum_raise,this.members[seat].chips,increase));
-			conn.destroy();
+			conn.reply(0,'not meeting min raise');
+			//conn.error(util.format('cheater detected, not meeting min raise, chips:%d minBet:%d minRaise:%d inplay:%d increase:%d',chips,this.minBet,this.minimum_raise,this.members[seat].chips,increase));
+			//conn.destroy();
 			cb([],0);
 			return;
 		}
@@ -1366,6 +1364,8 @@ Game.prototype.putChips = function (conn,chips,cb,cb3) {
 	} else if (chips == this.minBet) {
 		event = 'teCall';
 	}
+	this.clearCanShow();
+	this.stopTimer(seat);
 
 	if (increase > this.members[seat].chips) {
 		conn.error('cheater detected, overbetting '+chips+','+increase+','+this.members[seat].chips);
@@ -1916,12 +1916,11 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 			//this.broadcastStatus(conn);
 			conn.log('a');
 			token.stop();
-			// FIXME json performance hack
-			this.club.seGameChanged(JSON.parse(JSON.stringify(this.obj)),function () {
+			this.club.seGameChanged(this,function () {
 				token9.stop(); // 5ms
 				token9 = profiler.start('standup-step4.1');
 				if (seatObj.handsPlayed > 0 ) {
-					this.lastCashout[conn.userid] = { chips:seatObj.chips, when:Date.now() };
+					this.lastCashout[conn.userid] = { chips:parseInt(seatObj.chips), when:Date.now() };
 				}
 				this.updateCashOut(conn.userid,seatObj.chips,function () {
 					token9.stop(); // 7ms

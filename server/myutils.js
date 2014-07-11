@@ -6,6 +6,7 @@ module.exports.fromMongoId = fromMongoId;
 module.exports.compareObjectID = compareObjectID;
 module.exports.getNextSequence = getNextSequence;
 module.exports.containsObjectID = containsObjectID;
+module.exports.throttle = throttle;
 
 var models = require('./db').models;
 
@@ -44,4 +45,26 @@ function containsObjectID(list,id) {
 		if (compareObjectID(id,list[x])) return true;
 	}
 	return false;
+}
+var throttled_funcs = {};
+function throttle(key,interval,func) {
+	console.log(throttled_funcs);
+	if (!throttled_funcs[key]) {
+		throttled_funcs[key] = { lastrun: Date.now() };
+		func();
+		return;
+	}
+	if ((Date.now() - throttled_funcs[key].lastrun) > (interval * 1000)) {
+		if (throttled_funcs[key].timer) clearTimeout(throttled_funcs[key].timer);
+		throttled_funcs[key].timer = null;
+		throttled_funcs[key].lastrun = Date.now();
+		func();
+		return;
+	}
+	if (throttled_funcs[key].timer) clearTimeout(throttled_funcs[key].timer);
+	throttled_funcs[key].timer = setTimeout(function () {
+		throttled_funcs[key].timer = null;
+		throttled_funcs[key].lastrun = Date.now();
+		func();
+	},(interval * 1000) - (Date.now() - throttled_funcs[key].lastrun));
 }
