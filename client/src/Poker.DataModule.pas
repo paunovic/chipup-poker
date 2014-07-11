@@ -103,7 +103,7 @@ begin
   TDXCore.Initialize;
   TDXTimer.Initialize;
   DXTimer.AnimationsEnabled := Settings.Animations;
-  TSounds.Initialize;
+  TSounds.Initialize(Application.Handle);
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;

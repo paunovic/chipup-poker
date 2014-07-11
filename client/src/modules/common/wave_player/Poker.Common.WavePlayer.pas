@@ -3,25 +3,25 @@ unit Poker.Common.WavePlayer;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.DirectSound, System.SyncObjs, System.Generics.Collections, Poker.Common.WavePlayer.DirectSoundBuffer;
+  Winapi.Windows, Winapi.DirectSound, System.SyncObjs, System.Generics.Collections, Poker.Common.WavePlayer.DirectSoundBuffer,
+  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread;
 
 type
   TWavePlayer = class
   private
-    FInternalHWND: HWND;
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FLock: TCriticalSection;
     FDirectSound: IDirectSound;
     FBuffers: TObjectList<TDirectSoundBuffer>;
+    FBufferNotificationThread: TDirectSoundBufferNotificationThread;
 
-    procedure WndProc(var AMessage: TMessage);
-
+    procedure BufferDoneEvent(const ABuffer: TDirectSoundBuffer);
     function InitDirectSound(const AHandle: HWND): Boolean;
   public
-    constructor Create;
+    constructor Create(const AHandle: HWND);
     destructor Destroy; override;
 
     function Load(const AName: String; out ADirectSoundBuffer: TDirectSoundBuffer): Boolean;
-    procedure CleanupFinishedBuffers;
 
     property Buffers: TObjectList<TDirectSoundBuffer> read FBuffers;
   end;
@@ -29,27 +29,30 @@ type
 implementation
 
 uses
-  System.SysUtils, System.Classes;
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  System.SysUtils;
 
-constructor TWavePlayer.Create;
+constructor TWavePlayer.Create(const AHandle: HWND);
 begin
+  {$IFDEF DEBUG} RegisterDebugObject('WavePlayer'); {$ENDIF}
   FLock := TCriticalSection.Create;
-  FInternalHWND := AllocateHWnd(WndProc);
-  InitDirectSound(FInternalHWND);
+  InitDirectSound(AHandle);
   FBuffers := TObjectList<TDirectSoundBuffer>.Create;
+  FBufferNotificationThread := TDirectSoundBufferNotificationThread.Create;
+  FBufferNotificationThread.OnBufferDone := BufferDoneEvent;
+  FBufferNotificationThread.Start;
 end;
 
 destructor TWavePlayer.Destroy;
 begin
+  FBufferNotificationThread.Terminate;
+  FBufferNotificationThread.Signal;
+  FBufferNotificationThread.WaitFor;
+  FBufferNotificationThread.Free;
   FBuffers.Free;
   FDirectSound := nil;
-  DeallocateHWnd(FInternalHWND);
   FreeAndNil(FLock);
-  inherited;
-end;
-
-procedure TWavePlayer.WndProc(var AMessage: TMessage);
-begin
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
   inherited;
 end;
 
@@ -61,7 +64,7 @@ begin
   if Failed(DirectSoundCreate(nil, FDirectSound, nil)) then
     Exit(FALSE);
 
-  if Failed(FDirectSound.SetCooperativeLevel(AHandle, DSSCL_NORMAL)) then
+  if Failed(FDirectSound.SetCooperativeLevel(AHandle, DSSCL_PRIORITY)) then
   begin
     FDirectSound := nil;
     Exit(FALSE);
@@ -70,14 +73,16 @@ begin
   FillChar(dsbd, SizeOf(dsbd), 0);
   dsbd.dwSize := SizeOf(dsbd);
   dsbd.dwFlags := DSBCAPS_PRIMARYBUFFER;
-  if Failed(FDirectSound.CreateSoundBuffer(dsbd, dsbprimary, nil)) then
+  if Succeeded(FDirectSound.CreateSoundBuffer(dsbd, dsbprimary, nil)) then
+  begin
+    dsbprimary := nil;
+    Exit(TRUE);
+  end
+  else
   begin
     FDirectSound := nil;
     Exit(FALSE);
   end;
-
-  dsbprimary := nil;
-  Exit(TRUE);
 end;
 
 function TWavePlayer.Load(const AName: String; out ADirectSoundBuffer: TDirectSoundBuffer): Boolean;
@@ -88,6 +93,7 @@ begin
   if (buffer.CreateBuffer(FDirectSound, AName)) and
      (buffer.FillBuffer) then
   begin
+    FBufferNotificationThread.Add(buffer, buffer.PositionNotify.hEventNotify);
     FLock.Enter;
     try
       FBuffers.Add(buffer);
@@ -95,7 +101,8 @@ begin
       FLock.Leave;
     end;
     ADirectSoundBuffer := buffer;
-    Exit(TRUE)
+    {$IFDEF DEBUG} RefreshDebugForm([dfiSoundBuffers]); {$ENDIF}
+    Exit(TRUE);
   end
   else
   begin
@@ -104,18 +111,16 @@ begin
   end;
 end;
 
-procedure TWavePlayer.CleanupFinishedBuffers;
-var
-  C1: Integer;
+procedure TWavePlayer.BufferDoneEvent(const ABuffer: TDirectSoundBuffer);
 begin
   FLock.Enter;
   try
-    for C1 := FBuffers.Count - 1 downto 0 do
-      if not FBuffers[C1].IsPlaying then
-        FBuffers.Delete(C1);
+    FBuffers.Remove(ABuffer);
   finally
     FLock.Leave;
   end;
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiSoundBuffers]); {$ENDIF}
 end;
 
 end.

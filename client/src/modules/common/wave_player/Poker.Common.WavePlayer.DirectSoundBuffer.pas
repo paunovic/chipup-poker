@@ -11,6 +11,7 @@ type
     FBuffer: IDirectSoundBuffer;
     FSize: Integer;
     FReader: TWaveSoundReader;
+    FPositionNotify: TDSBPositionNotify;
   public
     destructor Destroy; override;
 
@@ -23,12 +24,13 @@ type
 
     property Buffer: IDirectSoundBuffer read FBuffer;
     property Size: Integer read FSize;
+    property PositionNotify: TDSBPositionNotify read FPositionNotify;
   end;
 
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils;
+  Winapi.Windows, System.SysUtils, Poker.Common.WavePlayer.DirectSoundBufferNotificationThread;
 
 { TDirectSoundBuffer }
 
@@ -44,6 +46,7 @@ end;
 function TDirectSoundBuffer.CreateBuffer(const ADirectSound: IDirectSound; const AName: String): Boolean;
 var
   dsbd: TDSBufferDesc;
+  dsnotify: IDirectSoundNotify;
 begin
   FReader := TWaveSoundReader.Create;
   if not FReader.Open(AName) then
@@ -54,20 +57,37 @@ begin
 
   FillChar(dsbd, SizeOf(dsbd), 0);
   dsbd.dwSize := SizeOf(dsbd);
-  dsbd.dwFlags := DSBCAPS_STATIC;
+  dsbd.dwFlags := DSBCAPS_STATIC or DSBCAPS_CTRLPOSITIONNOTIFY;
   dsbd.dwBufferBytes := FReader.CKIn.cksize;
   dsbd.lpwfxFormat := FReader.WFX;
 
-  if Succeeded(ADirectSound.CreateSoundBuffer(dsbd, FBuffer, nil)) then
-  begin
-    FSize := dsbd.dwBufferBytes;
-    Exit(TRUE);
-  end
-  else
+  if Failed(ADirectSound.CreateSoundBuffer(dsbd, FBuffer, nil)) then
   begin
     FreeAndNil(FReader);
     Exit(FALSE);
   end;
+
+  if Failed(FBuffer.QueryInterface(IID_IDirectSoundNotify8, dsnotify)) then
+  begin
+    FreeAndNil(FReader);
+    FBuffer := nil;
+    Exit(FALSE);
+  end;
+
+  FPositionNotify.dwOffset := DSBPN_OFFSETSTOP;
+  FPositionNotify.hEventNotify := CreateEvent(nil, FALSE, FALSE, nil);
+  if Failed(dsnotify.SetNotificationPositions(1, @FPositionNotify)) then
+  begin
+    CloseHandle(FPositionNotify.hEventNotify);
+    FreeAndNil(FReader);
+    dsnotify := nil;
+    FBuffer := nil;
+    Exit(FALSE);
+  end;
+
+  dsnotify := nil;
+  FSize := dsbd.dwBufferBytes;
+  Exit(TRUE);
 end;
 
 function TDirectSoundBuffer.FillBuffer: Boolean;

@@ -8,6 +8,7 @@ uses
 type
   TDXTimer = class(TThread)
   private
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FAnimations: TDXAnimations;
     FSignalEvent: TEvent;
     FTiming: TAsphyreTiming;
@@ -34,6 +35,7 @@ type
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
 
+    property Animations: TDXAnimations read FAnimations;
     property AnimationsEnabled: Boolean read GetAnimationsEnabled write SetAnimationsEnabled;
   end;
 
@@ -43,6 +45,7 @@ var
 implementation
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.SysUtils, System.Generics.Collections, Poker.WindowMessages, Poker.Settings;
 
 
@@ -61,6 +64,7 @@ end;
 
 constructor TDXTimer.Create;
 begin
+  {$IFDEF DEBUG} RegisterDebugObject('DXTimer'); {$ENDIF}
   FNextId := 0;
   FLock := TCriticalSection.Create;
   FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
@@ -77,7 +81,7 @@ begin
   FTiming.Free;
   FreeAndNil(FSignalEvent);
   FreeAndNil(FLock);
-
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
   inherited;
 end;
 
@@ -91,6 +95,8 @@ begin
   FAnimations.Add(animation);
   result := animation;
   FSignalEvent.SetEvent;
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiAnimations]); {$ENDIF}
 end;
 
 procedure TDXTimer.RemoveAnimations(const AHandle: THandle);
@@ -106,6 +112,8 @@ begin
     end
     else
       Inc(C1);
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiAnimations]); {$ENDIF}
 end;
 
 function TDXTimer.Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;

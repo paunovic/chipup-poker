@@ -353,6 +353,7 @@
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas"/>
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.pas"/>
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

@@ -19,14 +19,16 @@ type
       SOUND_TIMEBAR        = 'Timebar';
       SOUND_TIMEBANK       = 'Timebank';
 
-    class procedure Initialize;
+    class procedure Initialize(const AHandle: THandle);
     class procedure Deinitialize;
 
-    constructor Create;
+    constructor Create(const AHandle: THandle);
     destructor Destroy; override;
 
     function Play(ASound: String): Boolean;
     procedure StopAll;
+
+    property WavePlayer: TWavePlayer read FWavePlayer;
   end;
 
 var
@@ -39,9 +41,9 @@ uses
   Winapi.Windows, System.SysUtils, Poker.Common.WavePlayer.DirectSoundBuffer;
 
 
-class procedure TSounds.Initialize;
+class procedure TSounds.Initialize(const AHandle: THandle);
 begin
-  Sounds := TSounds.Create;
+  Sounds := TSounds.Create(AHandle);
 end;
 
 class procedure TSounds.Deinitialize;
@@ -49,10 +51,10 @@ begin
   FreeAndNil(Sounds);
 end;
 
-constructor TSounds.Create;
+constructor TSounds.Create(const AHandle: THandle);
 begin
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Sounds'); {$ENDIF}
-  FWavePlayer := TWavePlayer.Create;
+  FWavePlayer := TWavePlayer.Create(AHandle);
 end;
 
 destructor TSounds.Destroy;
@@ -68,7 +70,6 @@ var
 begin
   result := (FWavePlayer.Load(ASound, buffer)) and
             (buffer.PlayBuffer);
-  FWavePlayer.CleanupFinishedBuffers;
 
   if not result then
   begin
