@@ -242,6 +242,7 @@ end;
 procedure TServerSocketCore.DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
 var
   dbgtype: TDebugInfoType;
+  serialized_object: String;
 begin
   if ARpcMessage.MethodId in [Integer(scPing), Integer(srPong)] then
     dbgtype := ditPingPong
@@ -251,10 +252,14 @@ begin
   if ARpcMessage.DataSize = 0 then
     DebugLn(FDebugId, Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
   else
+    serialized_object := '';
+    if IsDebugFormAssigned then
+      serialized_object := SerializeObject(ADataObject);
+
     if AStreamSize = 0 then
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, SerializeObject(ADataObject))
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
     else
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, SerializeObject(ADataObject));
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
 end;
 {$ENDIF}
 

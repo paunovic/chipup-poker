@@ -15,6 +15,7 @@ object frmDebug: TfrmDebug
   Position = poDesigned
   ScreenSnap = True
   SnapBuffer = 20
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 14

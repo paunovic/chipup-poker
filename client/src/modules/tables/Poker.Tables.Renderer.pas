@@ -617,18 +617,11 @@ var
   text_color: TColor2;
   card_font: TAsphyreFont;
   color: TColor4;
-  blending_effect: TBlendingEffect;
 begin
   if ATransparency > 0 then
-  begin
-    color := cAlpha4(ATransparency);
-    blending_effect := beNormal;
-  end
+    color := cAlpha4(ATransparency)
   else
-  begin
     color := clWhite4;
-    blending_effect := beNormal;
-  end;
 
   if (not Assigned(ACard)) or
      (not ACard.IsKnown) then
@@ -638,7 +631,7 @@ begin
       pBounds4(0, 0,
         TableResources.CardBackgroundImage.Texture[0].Width,
         TableResources.CardBackgroundImage.Texture[0].Height * APercentage));
-    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FMetrics.CardWidth, FMetrics.CardHeight * APercentage), color, blending_effect);
+    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FMetrics.CardWidth, FMetrics.CardHeight * APercentage), color);
   end
   else
   begin
@@ -648,7 +641,7 @@ begin
         TableResources.CardFrontBackgroundImage.Texture[0].Width,
         TableResources.CardFrontBackgroundImage.Texture[0].Height * APercentage));
 
-    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FMetrics.CardWidth, FMetrics.CardHeight * APercentage), color, blending_effect);
+    DXCore.Canvas.TexMap(pBounds4(APoint.x, APoint.y + 2, FMetrics.CardWidth, FMetrics.CardHeight * APercentage), color);
 
     // render card value & suit
     card_value_text := ACard.ValueAsString(ACard.Value);
@@ -711,10 +704,10 @@ begin
       DXCore.Canvas.UseImagePx(card_artwork, pBounds4(0, 0,
           card_artwork.Texture[0].Width,
           card_artwork.Texture[0].Height));
-      DXCore.Canvas.TexMap(artwork_points, color, blending_effect);
+      DXCore.Canvas.TexMap(artwork_points, color);
 
       // render rectangle frame around artwork
-      DXCore.Canvas.FrameRect(artwork_points, cColorAlpha4($FFCFCFCF, ATransparency), blending_effect);
+      DXCore.Canvas.FrameRect(artwork_points, cColorAlpha4($FFCFCFCF, ATransparency));
     end
     else
     begin

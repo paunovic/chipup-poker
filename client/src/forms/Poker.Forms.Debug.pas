@@ -52,7 +52,6 @@ type
     class procedure Execute;
   end;
 
-
   TfrmDebug = class(TForm)
     alDebug: TActionList;
     acClearLog: TAction;
@@ -117,6 +116,7 @@ type
     procedure teRegexFilterEnter(Sender: TObject);
     procedure teRegexFilterExit(Sender: TObject);
     procedure teRegexFilterPropertiesChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     function FindStyleWithName(const AName: String): Integer;
   protected
@@ -130,6 +130,7 @@ type
     procedure RefreshDebugObjects;
   end;
 
+  function IsDebugFormAssigned: Boolean;
   procedure DebugLn(const ADebugId: Integer; const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
   procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
 
@@ -208,6 +209,11 @@ begin
   TDebugFormObjectChange.Execute;
 end;
 
+function IsDebugFormAssigned: Boolean;
+begin
+  result := Assigned(frmDebug);
+end;
+
 
 procedure DebugLn(const ADebugId: Integer; const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
 var
@@ -233,7 +239,7 @@ begin
     type_str := 'UNKN';
   end;
 
-  if Assigned(frmDebug) then
+  if IsDebugFormAssigned then
     TDebugFormLog.Add(ADebugId, AType, time_str, type_str, AData, ASubData);
 
   output := Format('%s [%s] %s', [time_str, type_str, AData]);
@@ -267,7 +273,7 @@ end;
 
 procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
 begin
-  if Assigned(frmDebug) then
+  if IsDebugFormAssigned then
     TDebugFormRefresh.Execute(ARefreshItems);
 end;
 
@@ -308,6 +314,12 @@ begin
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
   {$ENDIF}
+end;
+
+procedure TfrmDebug.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+  frmDebug := nil;
 end;
 
 procedure TfrmDebug.teRegexFilterEnter(Sender: TObject);
@@ -836,7 +848,8 @@ end;
 procedure TDebugFormRefresh.DoSynchronize;
 begin
   inherited;
-  frmDebug.RefreshStats(FRefreshItems);
+  if IsDebugFormAssigned then
+    frmDebug.RefreshStats(FRefreshItems);
 end;
 
 class procedure TDebugFormRefresh.Execute(const ARefreshItems: TDebugRefreshItemSet);
@@ -857,7 +870,8 @@ end;
 procedure TDebugFormObjectChange.DoSynchronize;
 begin
   inherited;
-  frmDebug.RefreshDebugObjects;
+  if IsDebugFormAssigned then
+    frmDebug.RefreshDebugObjects;
 end;
 
 class procedure TDebugFormObjectChange.Execute;

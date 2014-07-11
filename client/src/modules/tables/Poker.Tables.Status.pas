@@ -332,7 +332,10 @@ end;
 
 procedure TTableStatus.UpdateCurrentPlaytime;
 begin
-  FCurrentPlaytime := Int64(FTimebarEndtime) - Int64(GetTickCount);
+  if FTimebarEndtime = 0 then
+    FCurrentPlaytime := 0
+  else
+    FCurrentPlaytime := Int64(FTimebarEndtime) - Int64(GetTickCount);
 end;
 
 procedure TTableStatus.InitToDemoValues;
