@@ -31,93 +31,90 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 	mitmCollection.find({
 		$query: { socketId: socketId },
 		$orderby: { timestamp : 1 }
-	}).toArray(function (err, requests) {
-		if (err) console.warn(err.message);
+	}).toArray(replayAndTestAll);
+});
 
-		var socket = net.connect(port, host, function () {
-			socket.on('error', function (e) {
-				throw e;
-			});
+function replayAndTestAll(err, requests) {
+	if (err) console.warn(err.message);
 
-			var counter = 0;
+	var socket = net.connect(port, host, function () {
+		socket.on('error', function (e) {
+			throw e;
+		});
+
+		var counter = 0;
+		sendRequests();
+
+		socket.on('data', pu.createOnDataListenerFn(checkIfRequestsMatch));
+
+		function checkIfRequestsMatch(err, methodId, args, type) {
+			if (err) throw err;
+			var currentRequestInfo = 'SocketId' + socketId + " request #" + counter;
+
+			var requestFromDb = requests[counter];
+
+			if (requestFromDb.direction !== directions.S2C)
+				throw new Error('Received response from the server out of order!');
+
+			var methodName = serverCodes.reverse[methodId];
+
+			if (methodName !== requestFromDb.method)
+				throw new Error('Methods do not match! ' + currentRequestInfo+' '+methodName+' vs '+requestFromDb.method);
+
+			var argsFromDb = requestFromDb.args.buffer;
+
+			if (args.toString('hex') !== argsFromDb.toString('hex')) {
+				if (!methodToTypeMap[methodName])
+					throw new Error('schema for code ' + methodName + ' not known');
+
+				var argsParsed = makeArgsAndSanatize();
+				var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
+				console.log("A-server, B-from db\n%j", difference, undefined, 2);
+
+				if (difference.length != 0)
+					throw new Error('Args do not match! ' + methodName + ' ' + currentRequestInfo);
+			}
+
+			if (type !== requestFromDb.type)
+				throw new Error('Type param do not match! ' + currentRequestInfo);
+
+			console.log("Request #" + counter + " match!");
+
+			++counter;
 			sendRequests();
 
-			socket.on('data', pu.createOnDataListenerFn(checkIfRequestsMatch));
-			
-			function checkIfRequestsMatch(err, methodId, args, type) {
-				if (err) throw err;
-				var currentRequestInfo = 'SocketId' + socketId + " request #" + counter;
+			function makeArgsAndSanatize() {
+				var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
+				var argsFromDbParsed = pb.Parse(argsFromDb, methodToTypeMap[requestFromDb.method]);
 
-				var requestFromDb = requests[counter];
-
-				if (requestFromDb.direction !== directions.S2C) 
-					throw new Error('Received response from the server out of order!');
-				
-				var methodName = serverCodes.reverse[methodId];
-				
-				if (methodName !== requestFromDb.method) 
-					throw new Error('Methods do not match! ' + currentRequestInfo+' '+methodName+' vs '+requestFromDb.method);
-
-				var argsFromDb = requestFromDb.args.buffer;
-
-				if (args.toString('hex') != argsFromDb.toString('hex')) {
-					debugger;
-					if (!methodToTypeMap[methodName]) {
-						throw new Error('schema for code '+methodName+' not known');
-					}
-					var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
-					var argsFromDbParsed = pb.Parse(argsFromDb, methodToTypeMap[requestFromDb.method]);
-					if (methodId == serverCodes.srLoginReply) {
-						argsParsed = sanitizeLoginReply(argsParsed);
-					//var argsJson = JSON.stringify(argsParsed, undefined, 2);
-						argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
-					} else if (methodId == serverCodes.srTableStatsReply) {
-						argsParsed = sanitizeTableStats(argsParsed);
-						argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
-					} else if (methodId == serverCodes.seGameChange) {
-						argsParsed.lasthandid = argsFromDbParsed.lasthandid;
-					} else if ([serverCodes.seTableStatus,codes.srTableSitOk].indexOf(methodId) != -1) {
-						argsParsed = sanitizeTableStatus(argsParsed);
-						argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
-					}
-					//var argsFromDbJson = JSON.stringify(argsFromDbParsed, undefined, 2);
-					
-					var difference = diff(argsParsed, argsFromDbParsed);
-					console.log("A-server, B-from db\n%j",difference, undefined, 2);
-					
-					/*
-					if (argsJson !== argsFromDbParsed) {
-						console.log("Args saved in the db:\n" + argsFromDbJson);
-						console.log("Args I just got from the server:\n" + argsJson);
-						throw new Error('Args do not match! SocketId' + socketId + " request #" + counter);
-					}
-					*/
-					//console.log("Args saved in the db: ",argsFromDbParsed);
-					if (difference.length != 0) throw new Error('Args do not match! ' +methodName+' '+ currentRequestInfo);
+				if (methodId === serverCodes.srLoginReply) {
+					argsParsed = sanitizeLoginReply(argsParsed);
+					argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
+				} else if (methodId === serverCodes.srTableStatsReply) {
+					argsParsed = sanitizeTableStats(argsParsed);
+					argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
+				} else if (methodId === serverCodes.seGameChange) {
+					argsParsed.lasthandid = argsFromDbParsed.lasthandid;
+				} else if ([serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
+					argsParsed = sanitizeTableStatus(argsParsed);
+					argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
 				}
-				
-				if (type !== requestFromDb.type) 
-					throw new Error('Type param do not match! ' + currentRequestInfo);
-
-				console.log("Request #" + counter + " match!");
-
-				++counter;
-				sendRequests();
+				return {fromServer: argsParsed, fromDb: argsFromDbParsed};
 			}
+		}
 
-			function sendRequests() {
-				var request = requests[counter];
+		function sendRequests() {
+			var request = requests[counter];
 
-				while (request.direction === directions.C2S) {
-					var methodId = serverCodes[request.method];
-					var encodedMessage = pu.encode(methodId, request.args.buffer, request.type);
-					writeMessageAndTestIfItsOk(encodedMessage, socket);
-					request = requests[++counter];
-				}
+			while (request.direction === directions.C2S) {
+				var methodId = serverCodes[request.method];
+				var encodedMessage = pu.encode(methodId, request.args.buffer, request.type);
+				writeMessageAndTestIfItsOk(encodedMessage, socket);
+				request = requests[++counter];
 			}
-		});
+		}
 	});
-});
+}
 
 function sanitizeLoginReply(args) {
 	var i,j;
@@ -183,5 +180,5 @@ function writeMessageAndTestIfItsOk(encodedMessage, socket) {
 	}
 
 	if (socket._writableState.length > (256 * 1024))
-		throw new Error('send overflow');						
+		throw new Error('send overflow');
 }
