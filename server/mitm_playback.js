@@ -45,9 +45,25 @@ function replayAndTestAll(err, requests) {
 		var counter = 0;
 		sendRequests();
 
-		socket.on('data', pu.createOnDataListenerFn(checkIfRequestsMatch));
+		socket.on('data', pu.createOnDataListenerFn(checkIfNextRequestsMatch));
 
-		function checkIfRequestsMatch(err, methodId, args, type) {
+		function checkIfNextRequestsMatch(err, methodId, args, type) {
+			debugger;
+			for (var i = counter; i < requests.length; i++) {
+				try {
+					checkIfRequestMatch(err, methodId, args, type, i);
+					console.log("Request #" + counter + " match!");
+					++counter;
+					sendRequests();
+					return;
+				} catch (e) {
+					if (requests[i + 1].direction !== directions.S2C)
+						throw new Error("None of the next requests match, starting from request #" + counter);
+				}
+			}
+		}
+
+		function checkIfRequestMatch(err, methodId, args, type, counter) {
 			if (err) throw err;
 			var currentRequestInfo = 'SocketId' + socketId + " request #" + counter;
 
@@ -59,7 +75,7 @@ function replayAndTestAll(err, requests) {
 			var methodName = serverCodes.reverse[methodId];
 
 			if (methodName !== requestFromDb.method)
-				throw new Error('Methods do not match! ' + currentRequestInfo+' '+methodName+' vs '+requestFromDb.method);
+				throw new Error('Methods do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
 
 			var argsFromDb = requestFromDb.args.buffer;
 
@@ -77,11 +93,6 @@ function replayAndTestAll(err, requests) {
 
 			if (type !== requestFromDb.type)
 				throw new Error('Type param do not match! ' + currentRequestInfo);
-
-			console.log("Request #" + counter + " match!");
-
-			++counter;
-			sendRequests();
 
 			function makeArgsAndSanatize() {
 				var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
