@@ -100,7 +100,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object dxBevel3: TdxBevel
-      Left = 392
+      Left = 349
       Top = 6
       Width = 19
       Height = 60
@@ -108,7 +108,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 230
+      Left = 364
       Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
@@ -123,10 +123,10 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 230
+      Left = 364
       Top = 19
       Anchors = [akLeft, akBottom]
-      Caption = 'Memory usage:'
+      Caption = 'Memory:'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
@@ -138,7 +138,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsSocketState: TcxLabel
-      Left = 83
+      Left = 82
       Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Socket:'
@@ -154,7 +154,7 @@ object frmDebug: TfrmDebug
     end
     object lbsCalbackSets: TcxLabel
       Left = 230
-      Top = 35
+      Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Callbacks:'
       ParentFont = False
@@ -168,7 +168,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 312
+      Left = 416
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -191,7 +191,7 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 312
+      Left = 416
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -214,8 +214,8 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object lbvCallbackSets: TcxLabel
-      Left = 312
-      Top = 35
+      Left = 306
+      Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -234,10 +234,10 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 90
+      Width = 52
     end
     object lbvSocketState: TcxLabel
-      Left = 135
+      Left = 134
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -415,7 +415,7 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object lbsLatency: TcxLabel
-      Left = 83
+      Left = 82
       Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Latency:'
@@ -430,7 +430,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvLatency: TcxLabel
-      Left = 135
+      Left = 134
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -568,7 +568,7 @@ object frmDebug: TfrmDebug
     end
     object lbsSwapChains: TcxLabel
       Left = 230
-      Top = 51
+      Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Swap chains:'
       ParentFont = False
@@ -582,8 +582,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSwapChains: TcxLabel
-      Left = 312
-      Top = 51
+      Left = 306
+      Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -602,10 +602,10 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 90
+      Width = 52
     end
     object lbsUser: TcxLabel
-      Left = 83
+      Left = 82
       Top = 51
       Anchors = [akLeft, akBottom]
       Caption = 'User:'
@@ -620,7 +620,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvUser: TcxLabel
-      Left = 135
+      Left = 134
       Top = 51
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -643,7 +643,7 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object lbsServer: TcxLabel
-      Left = 83
+      Left = 82
       Top = 35
       Anchors = [akLeft, akBottom]
       Caption = 'Server:'
@@ -658,7 +658,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvServer: TcxLabel
-      Left = 135
+      Left = 134
       Top = 35
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -681,8 +681,8 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object lbsSoundBuffers: TcxLabel
-      Left = 407
-      Top = 19
+      Left = 230
+      Top = 51
       Anchors = [akLeft, akBottom]
       Caption = 'Sounds:'
       ParentFont = False
@@ -696,8 +696,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSoundBuffers: TcxLabel
-      Left = 477
-      Top = 19
+      Left = 306
+      Top = 51
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -716,11 +716,11 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 78
+      Width = 52
     end
     object lbsAnimations: TcxLabel
-      Left = 407
-      Top = 3
+      Left = 230
+      Top = 35
       Anchors = [akLeft, akBottom]
       Caption = 'Animations:'
       ParentFont = False
@@ -734,8 +734,8 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvAnimations: TcxLabel
-      Left = 477
-      Top = 3
+      Left = 306
+      Top = 35
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -754,7 +754,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 78
+      Width = 52
     end
   end
   object paTop: TPanel

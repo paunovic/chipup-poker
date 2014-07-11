@@ -58,8 +58,8 @@ end;
 
 function TWavePlayer.InitDirectSound(const AHandle: HWND): Boolean;
 var
-  dsbd: TDSBufferDesc;
-  dsbprimary: IDirectSoundBuffer;
+  ds_buffer_desc: TDSBufferDesc;
+  ds_buffer: IDirectSoundBuffer;
 begin
   if Failed(DirectSoundCreate(nil, FDirectSound, nil)) then
     Exit(FALSE);
@@ -70,12 +70,12 @@ begin
     Exit(FALSE);
   end;
 
-  FillChar(dsbd, SizeOf(dsbd), 0);
-  dsbd.dwSize := SizeOf(dsbd);
-  dsbd.dwFlags := DSBCAPS_PRIMARYBUFFER;
-  if Succeeded(FDirectSound.CreateSoundBuffer(dsbd, dsbprimary, nil)) then
+  FillChar(ds_buffer_desc, SizeOf(ds_buffer_desc), 0);
+  ds_buffer_desc.dwSize := SizeOf(ds_buffer_desc);
+  ds_buffer_desc.dwFlags := DSBCAPS_PRIMARYBUFFER;
+  if Succeeded(FDirectSound.CreateSoundBuffer(ds_buffer_desc, ds_buffer, nil)) then
   begin
-    dsbprimary := nil;
+    ds_buffer := nil;
     Exit(TRUE);
   end
   else
@@ -87,26 +87,26 @@ end;
 
 function TWavePlayer.Load(const AName: String; out ADirectSoundBuffer: TDirectSoundBuffer): Boolean;
 var
-  buffer: TDirectSoundBuffer;
+  ds_buffer: TDirectSoundBuffer;
 begin
-  buffer := TDirectSoundBuffer.Create;
-  if (buffer.CreateBuffer(FDirectSound, AName)) and
-     (buffer.FillBuffer) then
+  ds_buffer := TDirectSoundBuffer.Create;
+  if (ds_buffer.CreateBuffer(FDirectSound, AName)) and
+     (ds_buffer.FillBuffer) then
   begin
-    FBufferNotificationThread.Add(buffer, buffer.PositionNotify.hEventNotify);
+    FBufferNotificationThread.Add(ds_buffer, ds_buffer.PositionNotify.hEventNotify);
     FLock.Enter;
     try
-      FBuffers.Add(buffer);
+      FBuffers.Add(ds_buffer);
     finally
       FLock.Leave;
     end;
-    ADirectSoundBuffer := buffer;
+    ADirectSoundBuffer := ds_buffer;
     {$IFDEF DEBUG} RefreshDebugForm([dfiSoundBuffers]); {$ENDIF}
     Exit(TRUE);
   end
   else
   begin
-    buffer.Free;
+    ds_buffer.Free;
     Exit(FALSE);
   end;
 end;

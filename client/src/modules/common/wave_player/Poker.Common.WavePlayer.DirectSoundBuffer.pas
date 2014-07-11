@@ -95,8 +95,8 @@ var
   wav_size: DWORD;
   wav_file_size: DWORD;
   wav_data: pointer;
-  audiop: pointer;
-  audiosize: DWORD;
+  audio_ptr: pointer;
+  audio_size: DWORD;
 begin
   wav_file_size := FReader.ckIn.cksize;
   GetMem(wav_data, wav_file_size);
@@ -105,12 +105,12 @@ begin
        (not FReader.Reset) then
       Exit(FALSE);
 
-    if Failed(FBuffer.Lock(0, 0, @audiop, @audiosize, nil, nil, DSBLOCK_ENTIREBUFFER)) then
+    if Failed(FBuffer.Lock(0, 0, @audio_ptr, @audio_size, nil, nil, DSBLOCK_ENTIREBUFFER)) then
       Exit(FALSE);
     try
-      Move(wav_data^, audiop^, audiosize);
+      Move(wav_data^, audio_ptr^, audio_size);
     finally
-      FBuffer.Unlock(audiop, audiosize, nil, 0);
+      FBuffer.Unlock(audio_ptr, audio_size, nil, 0);
     end;
   finally
     FreeMem(wav_data, wav_file_size);
@@ -120,22 +120,22 @@ end;
 
 function TDirectSoundBuffer.RestoreBuffer: Boolean;
 var
-  hr: HRESULT;
-  status: DWORD;
+  hres: HRESULT;
+  buffer_status: DWORD;
 begin
   if not Assigned(FBuffer) then
     Exit(FALSE);
 
-  if Failed(FBuffer.GetStatus(status)) then
+  if Failed(FBuffer.GetStatus(buffer_status)) then
     Exit(FALSE);
 
-  if status and DSBSTATUS_BUFFERLOST = DSBSTATUS_BUFFERLOST then
+  if buffer_status and DSBSTATUS_BUFFERLOST = DSBSTATUS_BUFFERLOST then
   begin
     repeat
-      hr := FBuffer.Restore;
-      if hr = DSERR_BUFFERLOST then
+      hres := FBuffer.Restore;
+      if hres = DSERR_BUFFERLOST then
         Sleep(10);
-    until Succeeded(hr);
+    until Succeeded(hres);
 
     if not FillBuffer then
       Exit(FALSE);
@@ -146,11 +146,11 @@ end;
 
 function TDirectSoundBuffer.IsPlaying: Boolean;
 var
-  status: DWORD;
+  buffer_status: DWORD;
 begin
   result := (Assigned(FBuffer)) and
-            (Succeeded(FBuffer.GetStatus(status))) and
-            (status and DSBSTATUS_PLAYING = DSBSTATUS_PLAYING);
+            (Succeeded(FBuffer.GetStatus(buffer_status))) and
+            (buffer_status and DSBSTATUS_PLAYING = DSBSTATUS_PLAYING);
 end;
 
 function TDirectSoundBuffer.PlayBuffer(const ALooped: Boolean = FALSE): Boolean;

@@ -10,10 +10,10 @@ type
 
   TDirectSoundBufferNotificationThread = class(TThread)
   private
-    FOnBufferDone: TDirectSoundBufferDoneEvent;
     FWaitHandles: TList<NativeUInt>;
-    FWaitResult: Integer;
     FBuffers: TObjectList<TDirectSoundBuffer>;
+    FWaitResult: Integer;
+    FOnBufferDone: TDirectSoundBufferDoneEvent;
 
     procedure syncBufferDone;
   protected
