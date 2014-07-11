@@ -50,14 +50,14 @@ function replayAndTestAll(err, requests) {
 						
 			for (var i = counter; i < requests.length; i++) {
 				try {
-					checkIfRequestMatch(err, methodId, args, type, i);
+					checkIfRequestMatch(methodId, args, type, i);
 					console.log("Request #" + counter + " match!");
 					++counter;
 					sendRequests();
 					return;
 				} catch (e) {
 					if (requests[i + 1].direction !== directions.S2C)
-						checkIfRequestMatch(err, methodId, args, type, counter); // this will throw the original request mismatch error
+						checkIfRequestMatch(methodId, args, type, counter); // this will throw the original request mismatch error
 				}
 			}
 		}));
