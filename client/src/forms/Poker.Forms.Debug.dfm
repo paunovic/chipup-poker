@@ -92,7 +92,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object dxBevel2: TdxBevel
-      Left = 207
+      Left = 223
       Top = 6
       Width = 19
       Height = 60
@@ -100,7 +100,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 222
+      Left = 238
       Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
@@ -115,7 +115,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 222
+      Left = 238
       Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Memory usage:'
@@ -145,7 +145,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsCalbackSets: TcxLabel
-      Left = 222
+      Left = 238
       Top = 35
       Anchors = [akLeft, akBottom]
       Caption = 'Callbacks:'
@@ -160,7 +160,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 304
+      Left = 320
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -183,7 +183,7 @@ object frmDebug: TfrmDebug
       Width = 78
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 304
+      Left = 320
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -206,7 +206,7 @@ object frmDebug: TfrmDebug
       Width = 78
     end
     object lbvCallbackSets: TcxLabel
-      Left = 304
+      Left = 320
       Top = 35
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -249,7 +249,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 78
+      Width = 95
     end
     object btSeatPos: TcxButton
       Left = 548
@@ -407,7 +407,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 78
+      Width = 95
     end
     object btRunAnotherInstance: TcxButton
       Left = 38
@@ -524,7 +524,7 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object lbsSwapChains: TcxLabel
-      Left = 222
+      Left = 238
       Top = 51
       Anchors = [akLeft, akBottom]
       Caption = 'Swap chains:'
@@ -539,7 +539,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSwapChains: TcxLabel
-      Left = 304
+      Left = 320
       Top = 51
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -597,7 +597,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 78
+      Width = 95
     end
     object lbsServer: TcxLabel
       Left = 83
@@ -635,7 +635,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 78
+      Width = 95
     end
   end
   object paTop: TPanel

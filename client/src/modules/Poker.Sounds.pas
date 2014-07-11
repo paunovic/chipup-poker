@@ -3,7 +3,7 @@ unit Poker.Sounds;
 interface
 
 uses
-  System.Generics.Collections, Poker.WavePlayer.Player;
+  System.Generics.Collections, Poker.Common.WavePlayer;
 
 type
   TSounds = class
@@ -36,7 +36,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.SysUtils, Poker.WavePlayer.DirectSoundBuffer;
+  Winapi.Windows, System.SysUtils, Poker.Common.WavePlayer.DirectSoundBuffer;
 
 
 class procedure TSounds.Initialize;

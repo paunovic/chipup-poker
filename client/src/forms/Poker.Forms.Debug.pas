@@ -684,15 +684,15 @@ begin
         wsInvalidState: server_socket_state := 'Invalid state';
         wsOpened: server_socket_state := 'Opened';
         wsBound: server_socket_state := 'Bound';
-        wsConnecting: server_socket_state := 'Connecting';
+        wsConnecting: server_socket_state := 'Connecting...';
         wsSocksConnected: server_socket_state := 'Socks connected';
         wsConnected: begin
           server_socket_connected := TRUE;
           server_socket_state := 'Connected';
           server_socket_state_color := clLime;
         end;
-        wsAccepting: server_socket_state := 'Accepting';
-        wsListening: server_socket_state := 'Listening';
+        wsAccepting: server_socket_state := 'Accepting...';
+        wsListening: server_socket_state := 'Listening...';
         wsClosed: begin
           server_socket_state := 'Closed';
           server_socket_state_color := clRed;

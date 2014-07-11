@@ -1,4 +1,4 @@
-unit Poker.WavePlayer.Reader;
+unit Poker.Common.WavePlayer.Reader;
 
 interface
 

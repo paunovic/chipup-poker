@@ -1,9 +1,9 @@
-unit Poker.WavePlayer.Player;
+unit Poker.Common.WavePlayer;
 
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, Winapi.DirectSound, System.SyncObjs, System.Generics.Collections, Poker.WavePlayer.DirectSoundBuffer;
+  Winapi.Windows, Winapi.Messages, Winapi.DirectSound, System.SyncObjs, System.Generics.Collections, Poker.Common.WavePlayer.DirectSoundBuffer;
 
 type
   TWavePlayer = class

@@ -171,9 +171,9 @@ uses
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
-  Poker.WavePlayer.Player in 'modules\wave_player\Poker.WavePlayer.Player.pas',
-  Poker.WavePlayer.Reader in 'modules\wave_player\Poker.WavePlayer.Reader.pas',
-  Poker.WavePlayer.DirectSoundBuffer in 'modules\wave_player\Poker.WavePlayer.DirectSoundBuffer.pas';
+  Poker.Common.WavePlayer.DirectSoundBuffer in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas',
+  Poker.Common.WavePlayer in 'modules\common\wave_player\Poker.Common.WavePlayer.pas',
+  Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas';
 
 procedure FocusApp;
 var

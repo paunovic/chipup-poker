@@ -1,9 +1,9 @@
-unit Poker.WavePlayer.DirectSoundBuffer;
+unit Poker.Common.WavePlayer.DirectSoundBuffer;
 
 interface
 
 uses
-  System.Generics.Collections, Winapi.DirectSound, Poker.WavePlayer.Reader;
+  System.Generics.Collections, Winapi.DirectSound, Poker.Common.WavePlayer.Reader;
 
 type
   TDirectSoundBuffer = class
