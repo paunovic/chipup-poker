@@ -192,7 +192,7 @@ procedure TfrmTable.FormCreate(Sender: TObject);
 var
   table: TTable;
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('TABLE: %s', [GetTableCaption])); {$ENDIF}
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('frmTable: %s', [GetTableCaption])); {$ENDIF}
 
   ActionManager.State := asSuspended;
 
@@ -1919,6 +1919,7 @@ begin
     if focus_window then
       FocusWindow;
 
+    table.Renderer.UpdateDXAreaSize;
     ConfigureGUI;
     table.Renderer.Render;
 

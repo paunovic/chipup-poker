@@ -1355,7 +1355,8 @@ begin
               Settings.Hardcoded.ANIMATION_METRICS.BETS_START_DELAY, 0, FDXAreaSize);
           animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
           animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
-          animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
+          if ASeatIndex <> -1 then
+            animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
           FBetAnimations.Add(animation.Id);
 
           result := TRUE;

@@ -3,12 +3,13 @@ unit Poker.Common.FormsContainer;
 interface
 
 uses
-  System.Generics.Collections, Vcl.Forms;
+  System.Generics.Collections, Vcl.Forms, System.SyncObjs;
 
 type
   TForms = TObjectList<TForm>;
   TFormsContainer = class
   private
+    FLock: TCriticalSection;
     FItems: TForms;
     FStates: TList<Boolean>;
   public
@@ -57,6 +58,7 @@ end;
 
 constructor TFormsContainer.Create;
 begin
+  FLock := TCriticalSection.Create;
   FItems := TForms.Create(FALSE);
   FStates := TList<Boolean>.Create;
 end;
@@ -65,24 +67,32 @@ destructor TFormsContainer.Destroy;
 begin
   FStates.Free;
   FItems.Free;
-
+  FreeAndNil(FLock);
   inherited;
 end;
 
 procedure TFormsContainer.Add(const AForm: TForm);
 begin
-  FItems.Add(AForm);
+  FLock.Enter;
+  try
+    FItems.Add(AForm);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TFormsContainer.Remove(const AForm: TForm);
 var
   index: Integer;
 begin
-  index := FItems.IndexOf(AForm);
-  if index = -1 then
-    Exit;
-
-  FItems.Delete(index);
+  FLock.Enter;
+  try
+    index := FItems.IndexOf(AForm);
+    if index >= 0 then
+      FItems.Delete(index);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TFormsContainer.Remove(const AFormClass: TFormClass);
@@ -97,23 +107,33 @@ function TFormsContainer.Find(const AFormClass: TFormClass; out AForm: TForm): B
 var
   form: TForm;
 begin
-  for form in FItems do
-    if form is AFormClass then
-    begin
-      AForm := form;
-      Exit(TRUE);
-    end;
-  Exit(FALSE);
+  FLock.Enter;
+  try
+    for form in FItems do
+      if form is AFormClass then
+      begin
+        AForm := form;
+        Exit(TRUE);
+      end;
+    Exit(FALSE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 function TFormsContainer.Contains(const AFormClass: TFormClass): Boolean;
 var
   form: TForm;
 begin
-  for form in FItems do
-    if form is AFormClass then
-      Exit(TRUE);
-  Exit(FALSE);
+  FLock.Enter;
+  try
+    for form in FItems do
+      if form is AFormClass then
+        Exit(TRUE);
+    Exit(FALSE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TFormsContainer.Close(const AFormClass: TFormClass);
@@ -131,9 +151,14 @@ procedure TFormsContainer.CloseAllForms;
 var
   C1: Integer;
 begin
-  for C1 := 0 to FItems.Count - 1 do
-    FItems[C1].Close;
-  FItems.Clear;
+  FLock.Enter;
+  try
+    for C1 := 0 to FItems.Count - 1 do
+      FItems[C1].Close;
+    FItems.Clear;
+  finally
+    FLock.Leave;
+  end;
 end;
 
 function TFormsContainer.RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean; const AShow: Boolean = TRUE): TForm;
@@ -158,25 +183,40 @@ procedure TFormsContainer.DisableAll;
 var
   C1: Integer;
 begin
-  for C1 := 0 to FItems.Count - 1 do
-    EnableWindow(FItems[C1].Handle, FALSE);
+  FLock.Enter;
+  try
+    for C1 := 0 to FItems.Count - 1 do
+      EnableWindow(FItems[C1].Handle, FALSE);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TFormsContainer.ResetState;
 var
   C1: Integer;
 begin
-  for C1 := 0 to FStates.Count - 1 do
-    EnableWindow(FItems[C1].Handle, FStates[C1]);
+  FLock.Enter;
+  try
+    for C1 := 0 to FStates.Count - 1 do
+      EnableWindow(FItems[C1].Handle, FStates[C1]);
+  finally
+    FLock.Leave;
+  end;
 end;
 
 procedure TFormsContainer.SaveState;
 var
   C1: Integer;
 begin
-  FStates.Clear;
-  for C1 := 0 to FItems.Count - 1 do
-    FStates.Add(IsWindowEnabled(FItems[C1].Handle));
+  FLock.Enter;
+  try
+    FStates.Clear;
+    for C1 := 0 to FItems.Count - 1 do
+      FStates.Add(IsWindowEnabled(FItems[C1].Handle));
+  finally
+    FLock.Leave;
+  end;
 end;
 
 end.

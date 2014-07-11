@@ -103,10 +103,10 @@ begin
   TDXCore.Initialize;
   TDXTimer.Initialize;
   DXTimer.AnimationsEnabled := Settings.Animations;
+  TSounds.Initialize(Application.Handle);
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
-  TSounds.Initialize;
   TTablesStatsList.Initialize;
   THandHistory.Initialize;
 
@@ -134,15 +134,15 @@ begin
   FreeAndNil(FReconnectedTables);
 
   TFormsContainer.Deinitialize;
+  TServerSocketCommands.Deinitialize;
+  TMessageContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
   TTableList.Deinitialize;
   TPlayerList.Deinitialize;
   FSelfInfo.Free;
-  TServerSocketCommands.Deinitialize;
   THandHistory.Deinitialize;
   TTablesStatsList.Deinitialize;
   TSounds.Deinitialize;
-  TMessageContainer.Deinitialize;
   TServerSettings.Deinitialize;
   TTableResources.Deinitialize;
   TDXTimer.Deinitialize;

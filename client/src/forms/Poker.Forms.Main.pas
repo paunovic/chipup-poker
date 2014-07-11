@@ -1159,10 +1159,10 @@ var
   game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
-  if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
-  begin
-    Tables.Lock;
-    try
+  Tables.Lock;
+  try
+    if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+    begin
       if table.GetObjectCopy(game) then
       try
         game.UpdateFromTableStatus(pbtstatus);
@@ -1173,9 +1173,9 @@ begin
       finally
         game.Free;
       end;
-    finally
-      Tables.Unlock;
     end;
+  finally
+    Tables.Unlock;
   end;
 end;
 

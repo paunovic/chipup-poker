@@ -13,7 +13,7 @@ uses
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
-  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser, dfiServer);
+  TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser, dfiServer, dfiSoundBuffers, dfiAnimations);
   TDebugRefreshItemSet = set of TDebugRefreshItem;
 
   TDebugObject = class
@@ -98,6 +98,11 @@ type
     lbvUser: TcxLabel;
     lbsServer: TcxLabel;
     lbvServer: TcxLabel;
+    dxBevel3: TdxBevel;
+    lbsSoundBuffers: TcxLabel;
+    lbvSoundBuffers: TcxLabel;
+    lbsAnimations: TcxLabel;
+    lbvAnimations: TcxLabel;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -140,7 +145,8 @@ uses
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, OverbyteIcsWSocket,
-  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept;
+  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept,
+  Poker.Sounds, Poker.DirectX.Timer;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -684,15 +690,15 @@ begin
         wsInvalidState: server_socket_state := 'Invalid state';
         wsOpened: server_socket_state := 'Opened';
         wsBound: server_socket_state := 'Bound';
-        wsConnecting: server_socket_state := 'Connecting';
+        wsConnecting: server_socket_state := 'Connecting...';
         wsSocksConnected: server_socket_state := 'Socks connected';
         wsConnected: begin
           server_socket_connected := TRUE;
           server_socket_state := 'Connected';
           server_socket_state_color := clLime;
         end;
-        wsAccepting: server_socket_state := 'Accepting';
-        wsListening: server_socket_state := 'Listening';
+        wsAccepting: server_socket_state := 'Accepting...';
+        wsListening: server_socket_state := 'Listening...';
         wsClosed: begin
           server_socket_state := 'Closed';
           server_socket_state_color := clRed;
@@ -779,6 +785,24 @@ begin
     else
       lbvServer.Caption := 'Unknown';
     lbvServer.Refresh;
+  end;
+
+  if dfiSoundBuffers in refresh_items then
+  begin
+    if Assigned(Sounds) then
+      lbvSoundBuffers.Caption := IntToStr(Sounds.WavePlayer.Buffers.Count)
+    else
+      lbvSoundBuffers.Caption := 'Unknown';
+    lbvSoundBuffers.Refresh;
+  end;
+
+  if dfiAnimations in refresh_items then
+  begin
+    if Assigned(DXTimer) then
+      lbvAnimations.Caption := IntToStr(DXTimer.Animations.Count)
+    else
+      lbvAnimations.Caption := 'Unknown';
+    lbvAnimations.Refresh;
   end;
 end;
 

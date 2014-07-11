@@ -2,10 +2,14 @@ unit Poker.Sounds;
 
 interface
 
+uses
+  System.Generics.Collections, Poker.Common.WavePlayer;
+
 type
   TSounds = class
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+    FWavePlayer: TWavePlayer;
   public
     const
       SOUND_DEALING        = 'Dealing';
@@ -15,14 +19,16 @@ type
       SOUND_TIMEBAR        = 'Timebar';
       SOUND_TIMEBANK       = 'Timebank';
 
-    class procedure Initialize;
+    class procedure Initialize(const AHandle: THandle);
     class procedure Deinitialize;
 
-    constructor Create;
+    constructor Create(const AHandle: THandle);
     destructor Destroy; override;
 
-    procedure Play(const ASound: String);
-    procedure Stop;
+    function Play(ASound: String): Boolean;
+    procedure StopAll;
+
+    property WavePlayer: TWavePlayer read FWavePlayer;
   end;
 
 var
@@ -32,23 +38,12 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.SysUtils, Winapi.MMSystem;
+  Winapi.Windows, System.SysUtils, Poker.Common.WavePlayer.DirectSoundBuffer;
 
 
-constructor TSounds.Create;
+class procedure TSounds.Initialize(const AHandle: THandle);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Sounds'); {$ENDIF}
-end;
-
-destructor TSounds.Destroy;
-begin
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
-  inherited;
-end;
-
-class procedure TSounds.Initialize;
-begin
-  Sounds := TSounds.Create;
+  Sounds := TSounds.Create(AHandle);
 end;
 
 class procedure TSounds.Deinitialize;
@@ -56,18 +51,36 @@ begin
   FreeAndNil(Sounds);
 end;
 
-
-procedure TSounds.Play(const ASound: String);
+constructor TSounds.Create(const AHandle: THandle);
 begin
-  if not PlaySound(PChar(ASound), HInstance, SND_RESOURCE or SND_ASYNC or SND_NODEFAULT) then
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Sounds'); {$ENDIF}
+  FWavePlayer := TWavePlayer.Create(AHandle);
+end;
+
+destructor TSounds.Destroy;
+begin
+  FreeAndNil(FWavePlayer);
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+  inherited;
+end;
+
+function TSounds.Play(ASound: String): Boolean;
+var
+  buffer: TDirectSoundBuffer;
+begin
+  result := (FWavePlayer.Load(ASound, buffer)) and
+            (buffer.PlayBuffer);
+
+  if not result then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to play sound [%s] [err: %d]', [ASound, GetLastError]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Failed to play sound [%s]', [ASound]), ditException); {$ENDIF}
   end;
 end;
 
-procedure TSounds.Stop;
+procedure TSounds.StopAll;
 begin
-  PlaySound(nil, 0, 0);
+  FWavePlayer.Buffers.Clear;
 end;
+
 
 end.
