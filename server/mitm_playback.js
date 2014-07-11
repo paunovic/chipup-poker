@@ -13,7 +13,7 @@ var ProtobufUtil = require('./ProtobufUtil');
 var directions = require('./directions');
 var serverCodes = require('./ServerCodes.js');
 var methodToTypeMap = require("./method_to_type_map");
-var diff = require("./object_diff");
+var diff = require('deep-diff')
 
 var schema = 'Poker.RpcMessage';
 var pb = new Protobuf(fs.readFileSync("../message.desc"));
@@ -90,9 +90,6 @@ function replayAndTestAll(err, requests) {
 				var argsParsed = makeArgsAndSanatize();
 				var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
 				console.log("A-server, B-from db\n%j", difference, undefined, 2);
-
-				if (difference.length != 0)
-					throw new Error('Args do not match! ' + methodName + ' ' + currentRequestInfo);
 			}
 
 			if (type !== requestFromDb.type)
