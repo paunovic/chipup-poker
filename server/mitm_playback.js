@@ -25,8 +25,8 @@ var socketId = 0;
 MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
 	if (err) throw err;
 
-	db.gameState.remove().exec(function(err) {
-    if(err) throw err;
+	db.collection('gameState').remove(function(err) {
+    	if(err) throw err;
 		MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 			if (err) throw err;
 
