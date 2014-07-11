@@ -56,7 +56,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 				var methodName = serverCodes.reverse[methodId];
 				
 				if (methodName !== requestFromDb.method) 
-					throw new Error('Methods do not match! ' + currentRequestInfo);
+					throw new Error('Methods do not match! ' + currentRequestInfo+' '+methodName+' vs '+requestFromDb.method);
 
 				var argsFromDb = requestFromDb.args.buffer;
 
@@ -74,6 +74,11 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 					} else if (methodId == serverCodes.srTableStatsReply) {
 						argsParsed = sanitizeTableStats(argsParsed);
 						argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
+					} else if (methodId == serverCodes.seGameChange) {
+						argsParsed.lasthandid = argsFromDbParsed.lasthandid;
+					} else if ([serverCodes.seTableStatus,codes.srTableSitOk].indexOf(methodId) != -1) {
+						argsParsed = sanitizeTableStatus(argsParsed);
+						argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
 					}
 					//var argsFromDbJson = JSON.stringify(argsFromDbParsed, undefined, 2);
 					
@@ -88,7 +93,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 					}
 					*/
 					//console.log("Args saved in the db: ",argsFromDbParsed);
-					if (difference.length != 0) throw new Error('Args do not match! ' + currentRequestInfo);
+					if (difference.length != 0) throw new Error('Args do not match! ' +methodName+' '+ currentRequestInfo);
 				}
 				
 				if (type !== requestFromDb.type) 
@@ -140,8 +145,28 @@ function sanitizeTableStats(args) {
 			console.log(reply.playerstats[j]);
 			delete reply.playerstats[j].userid;
 			reply.playerstats[j].balance = 0;
+			reply.playerstats[j].rakecontrib = 0;
+			reply.playerstats[j].hands = 0;
+			delete reply.playerstats[j].buyins;
+			delete reply.playerstats[j].cashouts;
+			reply.playerstats[j].secondsplayed = 0;
+		}
+		reply.hands = 0;
+	}
+	for (i=0; i<args.players.length; i++) {
+		args.players[i].chips = 0;
+	}
+	for (i=0; i<args.club_stats.length; i++) {
+		var cs = args.club_stats[i];
+		for (j=0; j<cs.player_stats.length; j++) {
+			cs.player_stats[j].club_balance = 0;
 		}
 	}
+	return args;
+}
+function sanitizeTableStatus(args) {
+	args.rotation = 0;
+	args.total_balance = 0;
 	return args;
 }
 
