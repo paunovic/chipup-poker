@@ -1,8 +1,7 @@
 /*
 TODO:
-1. write code to wipe gameState collection on the beginning, you need to switch to 'poker' db first, or open new connection
-2. add code to control master.js to start/restart it everytime you run pinning tests and when you wipe gameState
-3. random generator?
+1. add code to control master.js to start/restart it everytime you run pinning tests and when you wipe gameState
+2. random generator?
 */
 'use strict';
 var net = require('net');
@@ -23,15 +22,22 @@ var port = process.argv[3] ? process.argv[3] : 12345;
 var host = process.argv[2] ? process.argv[2] : 'localhost';
 var socketId = 0;
 
-MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
+MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
 	if (err) throw err;
 
-	var mitmCollection = db.collection('mitm');
+	db.gameState.remove().exec(function(err) {
+    if(err) throw err;
+		MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
+			if (err) throw err;
 
-	mitmCollection.find({
-		$query: { socketId: socketId },
-		$orderby: { timestamp : 1 }
-	}).toArray(replayAndTestAll);
+			var mitmCollection = db.collection('mitm');
+
+			mitmCollection.find({
+				$query: { socketId: socketId },
+				$orderby: { timestamp : 1 }
+			}).toArray(replayAndTestAll);
+		});
+ });
 });
 
 function replayAndTestAll(err, requests) {
