@@ -57,7 +57,7 @@ function replayAndTestAll(err, requests) {
 			for (var i = counter; i < requests.length; i++) {
 				try {
 					checkIfRequestMatch(methodId, args, type, i);
-					console.log("Request #" + counter + " match!");
+					console.log("Request #" + counter + " match! "+serverCodes.reverse[methodId]);
 					++counter;
 					sendRequests();
 					return;
@@ -89,7 +89,7 @@ function replayAndTestAll(err, requests) {
 
 				var argsParsed = makeArgsAndSanatize();
 				var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
-				console.log("A-server, B-from db\n%j", difference, undefined, 2);
+				console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
 			}
 
 			if (type !== requestFromDb.type)
