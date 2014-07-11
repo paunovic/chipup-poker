@@ -151,9 +151,14 @@ procedure TFormsContainer.CloseAllForms;
 var
   C1: Integer;
 begin
-  for C1 := 0 to FItems.Count - 1 do
-    FItems[C1].Close;
-  FItems.Clear;
+  FLock.Enter;
+  try
+    for C1 := 0 to FItems.Count - 1 do
+      FItems[C1].Close;
+    FItems.Clear;
+  finally
+    FLock.Leave;
+  end;
 end;
 
 function TFormsContainer.RunForm(const AFormClass: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AAllowDuplicates: Boolean; const AShow: Boolean = TRUE): TForm;

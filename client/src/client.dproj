@@ -352,6 +352,7 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas"/>
 			<DCCReference Include="modules\wave_player\Poker.WavePlayer.Player.pas"/>
 			<DCCReference Include="modules\wave_player\Poker.WavePlayer.Reader.pas"/>
+			<DCCReference Include="modules\wave_player\Poker.WavePlayer.DirectSoundBuffer.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

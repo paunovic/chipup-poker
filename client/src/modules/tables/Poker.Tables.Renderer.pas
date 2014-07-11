@@ -1052,6 +1052,13 @@ begin
 
           if animation.Tags.ContainsKey(ANITAG_BLIND) then
             RenderValue(chips_point, animation.Tags[ANITAG_CHIPS], clWhite2, FALSE);
+
+          if animation.Tags.ContainsKey(ANITAG_SOUND) then
+          begin
+            if Assigned(FOnSoundPlay) then
+              FOnSoundPlay(animation.Tags[ANITAG_SOUND]);
+            animation.Tags.Remove(ANITAG_SOUND);
+          end;
         end;
         animated_seats.Add(animation.Tags[ANITAG_SEAT]);
       end;
@@ -1348,6 +1355,8 @@ begin
               Settings.Hardcoded.ANIMATION_METRICS.BETS_START_DELAY, 0, FDXAreaSize);
           animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
           animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
+          if ASeatIndex <> -1 then
+            animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
           FBetAnimations.Add(animation.Id);
 
           result := TRUE;

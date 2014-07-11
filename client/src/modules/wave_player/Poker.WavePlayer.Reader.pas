@@ -129,6 +129,9 @@ begin
   AHMMIOIn := mmioOpen(PChar(AName), nil, MMIO_ALLOCBUF or MMIO_READ);
   if AHMMIOIn = 0 then // opening it as file failed, so try it as a resource
   begin
+    if FindResource(HInstance, PChar(AName), 'WAVE') = 0 then
+      Exit(E_FAIL);
+
     rstream := TResourceStream.Create(HInstance, AName, 'WAVE');
     try
       FillChar(mmio_info, SizeOf(TMMIOInfo), 0);

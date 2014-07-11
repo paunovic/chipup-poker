@@ -172,7 +172,8 @@ uses
   Poker.Protobufs.Objects.MoveRow in 'modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
   Poker.WavePlayer.Player in 'modules\wave_player\Poker.WavePlayer.Player.pas',
-  Poker.WavePlayer.Reader in 'modules\wave_player\Poker.WavePlayer.Reader.pas';
+  Poker.WavePlayer.Reader in 'modules\wave_player\Poker.WavePlayer.Reader.pas',
+  Poker.WavePlayer.DirectSoundBuffer in 'modules\wave_player\Poker.WavePlayer.DirectSoundBuffer.pas';
 
 procedure FocusApp;
 var
