@@ -45,10 +45,9 @@ function replayAndTestAll(err, requests) {
 		var counter = 0;
 		sendRequests();
 
-		socket.on('data', pu.createOnDataListenerFn(checkIfNextRequestsMatch));
-
-		function checkIfNextRequestsMatch(err, methodId, args, type) {
-			debugger;
+		socket.on('data', pu.createOnDataListenerFn(function (err, methodId, args, type) {
+			if (err) throw err;
+						
 			for (var i = counter; i < requests.length; i++) {
 				try {
 					checkIfRequestMatch(err, methodId, args, type, i);
@@ -58,16 +57,15 @@ function replayAndTestAll(err, requests) {
 					return;
 				} catch (e) {
 					if (requests[i + 1].direction !== directions.S2C)
-						throw new Error("None of the next requests match, starting from request #" + counter);
+						checkIfRequestMatch(err, methodId, args, type, counter); // this will throw the original request mismatch error
 				}
 			}
-		}
+		}));
 
-		function checkIfRequestMatch(err, methodId, args, type, counter) {
-			if (err) throw err;
-			var currentRequestInfo = 'SocketId' + socketId + " request #" + counter;
+		function checkIfRequestMatch(methodId, args, type, requestNum) {
+			var currentRequestInfo = 'SocketId' + socketId + " request #" + requestNum;
 
-			var requestFromDb = requests[counter];
+			var requestFromDb = requests[requestNum];
 
 			if (requestFromDb.direction !== directions.S2C)
 				throw new Error('Received response from the server out of order!');
