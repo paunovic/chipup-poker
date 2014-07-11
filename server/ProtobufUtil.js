@@ -33,21 +33,22 @@ ProtobufUtil.prototype.createOnDataListenerFn = function (callback, logger) {
 
 			try {
 				var header = self.protobuf.Parse(headerUnparsed, self.schema);
-
-				if (!header.DataSize)
-					header.DataSize = 0;
-
-				if (buffer.length < (2 + headerSize + header.DataSize)) {
-					logger('arguments not in buffer yet');
-					break;
-				}
-
-				var args = buffer.slice(2 + headerSize, 2 + headerSize + header.DataSize);
-				callback(null, header.MethodId, args, 'raw');
-				buffer = buffer.slice(2 + headerSize + header.DataSize);
 			} catch (e) {
 				callback(e);
+				break;
 			}
+			
+			if (!header.DataSize)
+				header.DataSize = 0;
+	
+			if (buffer.length < (2 + headerSize + header.DataSize)) {
+				logger('arguments not in buffer yet');
+				break;
+			}
+	
+			var args = buffer.slice(2 + headerSize, 2 + headerSize + header.DataSize);
+			callback(null, header.MethodId, args, 'raw');
+			buffer = buffer.slice(2 + headerSize + header.DataSize);
 		}
 	};
 };
