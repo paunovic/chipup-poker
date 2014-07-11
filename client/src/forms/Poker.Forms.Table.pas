@@ -1401,8 +1401,9 @@ begin
         tb := seatdbg.Timebank;
       end;
 
+      table.Renderer.TableStatus.UpdateCurrentPlaytime;
       tstatusdbg := Format('[#%d] %s, D: %d, E: %d | #%s, %.2fs/%.2fs',
-        [pbtablestatus.Seq, tmp, table.Renderer.TableStatus.Dealer, pbtablestatus.Events.Count, csdbg, table.Renderer.TableStatus.CurrentPlaytime / 1000, tb / 100]);
+        [pbtablestatus.Seq, tmp, table.Renderer.TableStatus.Dealer, pbtablestatus.Events.Count, csdbg, table.Renderer.TableStatus.CurrentPlaytime / 1000, tb / 1000]);
 
       events := '';
       for C1 := 0 to pbtablestatus.Events.Count - 1 do

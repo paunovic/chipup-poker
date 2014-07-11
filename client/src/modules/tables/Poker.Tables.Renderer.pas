@@ -829,7 +829,6 @@ begin
     seat_point := FMetrics.GetSeatPoint(AGame, seat.SeatIndex);
 
     FTableStatus.UpdateCurrentPlaytime;
-
     if FTableStatus.CurrentPlaytime > 0 then
     begin
       FTimeImage := TableResources.TimebarImage;

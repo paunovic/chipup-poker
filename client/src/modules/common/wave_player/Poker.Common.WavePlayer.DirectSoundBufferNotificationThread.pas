@@ -38,7 +38,7 @@ begin
   FWaitHandles := TList<NativeUInt>.Create;
   FBuffers := TObjectList<TDirectSoundBuffer>.Create(FALSE);
   FWaitHandles.Add(CreateEvent(nil, FALSE, FALSE, nil));
-  FBuffers.Add(nil); // add one dummy element to align indexes with WaitHandles list
+  FBuffers.Add(nil); // add one dummy element to FBuffers, to align indexes with FWaitHandles list
 end;
 
 destructor TDirectSoundBufferNotificationThread.Destroy;
