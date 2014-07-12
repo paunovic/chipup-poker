@@ -10,28 +10,22 @@ type
   TTable = class
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+    FInternalId: Integer;
     FTableType: TTableType;
-    FForm: TForm;
-    FSeatIndex: Integer;
     FGameId: TBytes;
     FClubId: TBytes;
-    FHandId: UINT;
-    FLeaveNotify: Boolean;
-    FHandHistoryPlayback: THandHistoryPlayback;
-    FSwapChainIndex: Integer;
+    FForm: TForm;
     FRenderer: TTableRenderer;
-    FInternalId: Integer;
+    FLeaveNotify: Boolean;
+    FHandHistoryHandId: UINT;
+    FHandHistoryPlayback: THandHistoryPlayback;
 
   public
     constructor Create(const AInternalId: Integer);
     destructor Destroy; override;
 
-    function AcquireSwapChainElement: Boolean;
-
     function SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
-    procedure SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
-
-    function IsSitting: Boolean;
+    function SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
 
     procedure UpdateAvatars(const AAvatar: TAvatar);
 
@@ -41,16 +35,14 @@ type
     procedure BringToFront;
 
     property InternalId: Integer read FInternalId;
+    property TableType: TTableType read FTableType;
     property GameId: TBytes read FGameId;
     property ClubId: TBytes read FClubId;
-    property HandId: UINT read FHandId;
     property Form: TForm read FForm;
-    property SeatIndex: Integer read FSeatIndex write FSeatIndex;
-    property SwapChainIndex: Integer read FSwapChainIndex;
-    property TableType: TTableType read FTableType;
     property Renderer: TTableRenderer read FRenderer;
-    property HandHistoryPlayback: THandHistoryPlayback read FHandHistoryPlayback;
     property LeaveNotify: Boolean read FLeaveNotify write FLeaveNotify;
+    property HandHistoryHandId: UINT read FHandHistoryHandId;
+    property HandHistoryPlayback: THandHistoryPlayback read FHandHistoryPlayback;
   end;
 
 implementation
@@ -77,7 +69,6 @@ begin
   FreeAndNil(FForm);
   FreeAndNil(FRenderer);
   FreeAndNil(FHandHistoryPlayback);
-  DXCore.ReleaseSwapChainElement(FSwapChainIndex);
 
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
@@ -116,11 +107,6 @@ begin
     result := FALSE;
 end;
 
-function TTable.AcquireSwapChainElement: Boolean;
-begin
-  result := DXCore.AcquireSwapChainElement(0, FSwapChainIndex);
-end;
-
 function TTable.SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
 var
   form: TfrmTable;
@@ -128,44 +114,48 @@ var
   club: TClubInfo;
 begin
   FTableType := ttLiveGame;
-  FSeatIndex := -1;
   FGameId := AGameId;
   if not dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
     Exit(FALSE);
   FClubId := club.MongoId;
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId, FTableType);
+  FRenderer := TTableRenderer.Create(FInternalId, FTableType);
+  if not FRenderer.AcquireSwapChainElement then
+  begin
+    FreeAndNil(FRenderer);
+    Exit(FALSE);
+  end;
   form := TfrmTable.Create(FInternalId);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
   FLeaveNotify := TRUE;
-  DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
+  DXCore.ModifySwapChainElement(FRenderer.SwapChainIndex, FForm.Handle);
   if ASendJoinCommand then
     ServerSocket.JoinTable(AGameId);
   FRenderer.UpdateDXAreaSize;
   Exit(TRUE);
 end;
 
-procedure TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem);
+function TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
 var
   form: TfrmTable;
 begin
   FTableType := ttHandPlayback;
-  FSeatIndex := -1;
   FGameId := AHandHistoryItems.FGameId;
-  FHandId := AHandHistoryItem.HandId;
+  FHandHistoryHandId := AHandHistoryItem.HandId;
   FHandHistoryPlayback := THandHistoryPlayback.Create(AHandHistoryItems, AHandHistoryItem);
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId, FTableType);
+  FRenderer := TTableRenderer.Create(FInternalId, FTableType);
+  if not FRenderer.AcquireSwapChainElement then
+  begin
+    FreeAndNil(FRenderer);
+    Exit(FALSE);
+  end;
   form := TfrmTable.Create(FInternalId);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
   FLeaveNotify := FALSE;
-  DXCore.ModifySwapChainElement(FSwapChainIndex, FForm.Handle);
+  DXCore.ModifySwapChainElement(FRenderer.SwapChainIndex, FForm.Handle);
   FRenderer.UpdateDXAreaSize;
-end;
-
-function TTable.IsSitting: Boolean;
-begin
-  result := FSeatIndex <> -1;
+  Exit(TRUE);
 end;
 
 procedure TTable.BringToFront;

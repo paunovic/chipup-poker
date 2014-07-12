@@ -26,7 +26,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
+    procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo); overload;
+    procedure Assign(const ASeatInfo: TSeatInfo); overload;
 
     procedure ResetDealtCards;
     procedure IncDealtCards;
@@ -54,6 +55,7 @@ implementation
 
 { TSeatInfo }
 
+
 constructor TSeatInfo.Create;
 begin
   FCards := TCards.Create;
@@ -79,6 +81,25 @@ begin
   FCardsVisible := ASeatInfoProtobuf.CardsVisible;
   FDisconnected := ASeatInfoProtobuf.Disconnected;
   FCanShow := ASeatInfoProtobuf.CanShow;
+end;
+
+procedure TSeatInfo.Assign(const ASeatInfo: TSeatInfo);
+var
+  C1: Integer;
+begin
+  FSeatIndex := ASeatInfo.FSeatIndex;
+  FPlayerMongoId := ASeatInfo.FPlayerMongoId;
+  FPreviousChips := ASeatInfo.FPreviousChips;
+  FChips := ASeatInfo.FChips;
+  FCardCount := ASeatInfo.FCardCount;
+  FCards.Clear;
+  for C1 := 0 to ASeatInfo.FCards.Count - 1 do
+    FCards.Add(TCard.Create(ASeatInfo.FCards[C1].Value, ASeatInfo.FCards[C1].Suit));
+  FStatus := ASeatInfo.FStatus;
+  FTimeBank := ASeatInfo.FTimebank;
+  FCardsVisible := ASeatInfo.FCardsVisible;
+  FDisconnected := ASeatInfo.Disconnected;
+  FCanShow := ASeatInfo.FCanShow;
 end;
 
 procedure TSeatInfo.InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer; const AMongoId: TBytes);

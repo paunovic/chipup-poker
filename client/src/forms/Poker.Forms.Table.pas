@@ -508,11 +508,11 @@ begin
       if (table.TableType = ttLiveGame) and
          (game.State <> gsClosed) and
          (table.Renderer.Metrics.IsPointInSeat(game, client_cursor_pos.X, client_cursor_pos.Y, seat_index)) and
-         (((not table.IsSitting) and
+         (((not table.Renderer.TableStatus.IsSitting) and
            (not table.Renderer.TableStatus.IsSeatTaken(seat_index))) or
-          ((table.IsSitting) and
-           (table.SeatIndex = seat_index) and
-           (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
+          ((table.Renderer.TableStatus.IsSitting) and
+           (table.Renderer.TableStatus.SelfSeatIndex = seat_index) and
+           (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
            (seat_info.Status in [psOutOfPlay, psOutOfHand]))) then
         FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Renderer.TableStatus, @seat_index], ModalFormClose));
     finally
@@ -632,7 +632,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
+    if (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
        (seat_info.Status <> psOutOfPlay) then
       ServerSocket.TableSitOutNextBB(FGameId, cbSitOutNextBB.Checked);
   finally
@@ -648,7 +648,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
+    if (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
        (seat_info.Status <> psOutOfPlay) then
       ServerSocket.TableSitOutNextHand(FGameId, cbSitOutNextHand.Checked);
   finally
@@ -679,8 +679,8 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.IsSitting) and
-       (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) and
+    if (table.Renderer.TableStatus.IsSitting) and
+       (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
        (seat_info.Status in [psAllIn, psFolded, psInHand]) and
        (seat_info.CardCount > 0) and
        (seat_info.DealtCards = seat_info.CardCount) then
@@ -761,7 +761,7 @@ begin
   try
     if (table.TableType <> ttHandPlayback) or
        (not HandHistory.TryGetValue(table.GameId, hhis)) or
-       (not hhis.FindHand(table.HandId, AHandHistoryItem)) then
+       (not hhis.FindHand(table.HandHistoryHandId, AHandHistoryItem)) then
       Exit(FALSE);
 
     Exit(TRUE);
@@ -836,7 +836,7 @@ begin
   acShowCards.Enabled := FALSE;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat) then
+    if table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat) then
       seat.CardsVisible := TRUE;
   finally
     Tables.Unlock;
@@ -967,7 +967,7 @@ begin
 
       seat_info := nil;
       if (table.TableType = ttLiveGame) and
-         (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info)) then
+         (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) then
       begin
         table.Renderer.TableStatus.ActionStandUp := TRUE;
 
@@ -993,7 +993,7 @@ begin
                  (table.Renderer.TableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
                 table.Renderer.TableStatus.ActionFoldToAny := TRUE;
 
-              if (table.Renderer.TableStatus.CurrentSeat = table.SeatIndex) and
+              if (table.Renderer.TableStatus.CurrentSeat = table.Renderer.TableStatus.SelfSeatIndex) and
                  (not table.Renderer.TableStatus.Locked) and
                  (not table.Renderer.TableStatus.LockTimerEnabled) then
                 case table.Renderer.TableStatus.State of
@@ -1218,7 +1218,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     tt := table.TableType;
-    is_sitting := table.IsSitting;
+    is_sitting := table.Renderer.TableStatus.IsSitting;
   finally
     Tables.Unlock;
   end;
@@ -1244,8 +1244,8 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     tt := table.TableType;
-    is_sitting := table.IsSitting;
-    if table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat) then
+    is_sitting := table.Renderer.TableStatus.IsSitting;
+    if table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat) then
       player_status := seat.Status;
   finally
     Tables.Unlock;
@@ -1262,7 +1262,6 @@ procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TOb
 var
   pbtablestatus: TPB_TableStatus;
   C1: Integer;
-  seat_index: Integer;
   player: TPlayerInfo;
   query_users: TArray<TBytes>;
   empty_array: TBytes;
@@ -1304,16 +1303,6 @@ begin
       if table.Renderer.TableStatus.State in [tsRiver, tsWinning, tsWinning2] then
         table.Renderer.RiverAnimated := TRUE;
     end;
-
-    // iterate through table status seats and find our seat index
-    seat_index := -1;
-    for C1 := 0 to pbtablestatus.Seats.Count - 1 do
-      if CompareBytes(pbtablestatus.Seats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
-      begin
-        seat_index := pbtablestatus.Seats[C1].Seat;
-        Break;
-      end;
-    table.SeatIndex := seat_index;
 
     // reset animation delays
     table.Renderer.WinningFlopAniDelay := 0;
@@ -1597,7 +1586,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    Assert(table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info));
+    Assert(table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info));
     seat_bet := table.Renderer.TableStatus.GetBet(seat_info.SeatIndex);
     if seat_bet + seat_info.Chips < table.Renderer.TableStatus.MinimumBet then
       call_amount := seat_bet + seat_info.Chips
@@ -1615,7 +1604,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    ServerSocket.PutChips(FGameId, table.Renderer.TableStatus.GetBet(table.SeatIndex), table.Renderer.TableStatus.State);
+    ServerSocket.PutChips(FGameId, table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex), table.Renderer.TableStatus.State);
   finally
     Tables.Unlock;
   end;
@@ -1638,8 +1627,8 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.IsSitting) and
-       (table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat)) and
+    if (table.Renderer.TableStatus.IsSitting) and
+       (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat)) and
        (seat.Chips = 0) then
     begin
       sindex := seat.SeatIndex;
@@ -1729,7 +1718,7 @@ begin
   raise_value := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    seat_bet := table.Renderer.TableStatus.GetBet(table.SeatIndex);
+    seat_bet := table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex);
 
     raise_value := table.Renderer.TableStatus.MinimumBet - seat_bet;
     for C1 := 0 to table.Renderer.TableStatus.Pots.Count - 1 do
@@ -1773,11 +1762,11 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.Renderer.TableStatus.GetSeatInfo(table.SeatIndex, seat_info) then
+    if table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info) then
     begin
       if table.Renderer.TableStatus.ActionRaise then
       begin
-        if FRaiseValue = seat_info.Chips + table.Renderer.TableStatus.GetBet(table.SeatIndex) then
+        if FRaiseValue = seat_info.Chips + table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex) then
           acRaise.Caption := 'RAISE (ALL-IN)'
         else
           acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)])
@@ -1785,7 +1774,7 @@ begin
       else
         if table.Renderer.TableStatus.ActionBet then
         begin
-          if FRaiseValue = seat_info.Chips + table.Renderer.TableStatus.GetBet(table.SeatIndex) then
+          if FRaiseValue = seat_info.Chips + table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex) then
             acRaise.Caption := 'BET (ALL-IN)'
           else
             acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
@@ -1901,7 +1890,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.Renderer.TableStatus.CurrentSeat = table.SeatIndex then
+    if table.Renderer.TableStatus.CurrentSeat = table.Renderer.TableStatus.SelfSeatIndex then
       TablePlaySound(Sounds.SOUND_TIMEBANK);
   finally
     Tables.Unlock;

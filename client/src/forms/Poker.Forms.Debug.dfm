@@ -966,6 +966,14 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
+        StyleName = 'T-PING'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
         StyleName = 'D-EXCP'
         FontName = 'Consolas'
         Size = 8
@@ -1035,6 +1043,14 @@ object frmDebug: TfrmDebug
         Size = 8
         Style = [fsBold]
         Color = clYellow
+        Unicode = True
+      end
+      item
+        StyleName = 'D-PING'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
         Unicode = True
       end
       item

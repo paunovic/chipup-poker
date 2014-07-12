@@ -128,20 +128,12 @@ begin
   end;
 
   table := TTable.Create(FNextTableInternalId);
-  if not table.AcquireSwapChainElement then
-  begin
-    FreeAndNil(table);
-    Exit(nil);
-  end;
-
   Add(FNextTableInternalId, table);
-  Inc(FNextTableInternalId);
-
   if table.SetupLiveTable(AGameId, ASendJoinCommand) then
   begin
+    Inc(FNextTableInternalId);
     if AShow then
       table.BringToFront;
-
     result := table;
   end
   else
@@ -163,19 +155,18 @@ begin
     Exit(nil);
 
   table := TTable.Create(FNextTableInternalId);
-  if not table.AcquireSwapChainElement then
-  begin
-    FreeAndNil(table);
-    Exit(nil);
-  end;
-
   Add(FNextTableInternalId, table);
-  Inc(FNextTableInternalId);
-
-  table.SetupHandHistoryTable(hhis, hhi);
-  table.BringToFront;
-
-  result := table;
+  if table.SetupHandHistoryTable(hhis, hhi) then
+  begin
+    Inc(FNextTableInternalId);
+    table.BringToFront;
+    result := table;
+  end
+  else
+  begin
+    Remove(FNextTableInternalId);
+    result := nil;
+  end;
 end;
 
 function TTableList.SittingCount: Integer;
@@ -186,7 +177,7 @@ begin
   FLock.Enter;
   try
     for table in Values do
-      if table.IsSitting then
+      if table.Renderer.TableStatus.IsSitting then
         Inc(result);
   finally
     FLock.Leave;

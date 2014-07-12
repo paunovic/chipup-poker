@@ -79,9 +79,10 @@ type
     procedure RenderButtons;
     procedure RenderRaisePanel;
   public
-    constructor Create(const ASwapChainIndex: Integer; const AInternalId: Integer; const ATableType: TTableType);
+    constructor Create(const AInternalId: Integer; const ATableType: TTableType);
     destructor Destroy; override;
 
+    function AcquireSwapChainElement: Boolean;
     procedure SetRenderTarget(const AHandle: THandle);
 
     procedure ClearAnimations;
@@ -101,6 +102,7 @@ type
     procedure MouseMove(Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
+    property SwapChainIndex: Integer read FSwapChainIndex;
     property TableStatus: TTableStatus read FTableStatus;
 
     property Metrics: TTableRenderMetrics read FMetrics;
@@ -145,9 +147,8 @@ uses
 
 { TTableRenderer }
 
-constructor TTableRenderer.Create(const ASwapChainIndex: Integer; const AInternalId: Integer; const ATableType: TTableType);
+constructor TTableRenderer.Create(const AInternalId: Integer; const ATableType: TTableType);
 begin
-  FSwapChainIndex := ASwapChainIndex;
   FInternalId := AInternalId;
   FMetrics := TTableRenderMetrics.Create;
   FChipStackMaker := TChipStackMaker.Create;
@@ -187,8 +188,14 @@ begin
   FChipStackMaker.Free;
   FMetrics.Free;
   FreeAndNil(FTableStatus);
+  DXCore.ReleaseSwapChainElement(FSwapChainIndex);
 
   inherited;
+end;
+
+function TTableRenderer.AcquireSwapChainElement: Boolean;
+begin
+  result := DXCore.AcquireSwapChainElement(0, FSwapChainIndex);
 end;
 
 function TTableRenderer.GetDXButton(const AId: Integer): TDXButton;

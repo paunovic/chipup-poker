@@ -12,7 +12,7 @@ type
     FState: TTableState;
     FDealer: Integer;
     FCurrentSeat: Integer;
-    FSeatInfos: TSeatList;
+    FSeats: TSeatList;
     FBets: TList<UINT32>;
     FPreviousBets: TList<UINT32>;
     FFlopCards: TCards;
@@ -36,6 +36,7 @@ type
     FClosingTime: DWORD;
     FTimebarEndtime: DWORD;
     FCurrentPlaytime: Int64;
+    FSelfSeatIndex: Integer;
 
     FActionStandUp: Boolean;
     FActionFold: Boolean;
@@ -70,7 +71,7 @@ type
     property State: TTableState read FState;
     property Dealer: Integer read FDealer;
     property CurrentSeat: Integer read FCurrentSeat;
-    property Seats: TSeatList read FSeatInfos;
+    property Seats: TSeatList read FSeats;
     property Bets: TList<UINT32> read FBets write FBets;
     property PreviousBets: TList<UINT32> read FPreviousBets;
     property MinimumBet: UINT32 read FMinimumBet;
@@ -94,6 +95,9 @@ type
     property TimebarEndtime: DWORD read FTimebarEndtime;
     property CurrentPlaytime: Int64 read FCurrentPlaytime;
     property RakePercent: UINT32 read FRakePercent;
+    property SelfSeatIndex: Integer read FSelfSeatIndex;
+
+    function IsSitting: Boolean;
 
     property ActionStandUp: Boolean read FActionStandUp write FActionStandUp;
     property ActionFold: Boolean read FActionFold write FActionFold;
@@ -113,7 +117,7 @@ type
 implementation
 
 uses
-  System.SysUtils, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Pots.Pot;
+  System.SysUtils, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Pots.Pot, Poker.Common.Misc;
 
 { TTableStatus }
 
@@ -121,7 +125,8 @@ constructor TTableStatus.Create;
 begin
   FDealer := -1;
   FCurrentSeat := -1;
-  FSeatInfos := TSeatList.Create;
+  FSelfSeatIndex := -1;
+  FSeats := TSeatList.Create;
 
   FBets := TList<UINT32>.Create;
   FPreviousBets := TList<UINT32>.Create;
@@ -144,7 +149,7 @@ begin
   FRiverCard.Free;
   FPots.Free;
   FPreviousPots.Free;
-  FSeatInfos.Free;
+  FSeats.Free;
 
   inherited;
 end;
@@ -162,10 +167,10 @@ function TTableStatus.GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSea
 var
   C1: Integer;
 begin
-  for C1 := 0 to FSeatInfos.Count - 1 do
-    if FSeatInfos[C1].SeatIndex = ASeatIndex then
+  for C1 := 0 to FSeats.Count - 1 do
+    if FSeats[C1].SeatIndex = ASeatIndex then
     begin
-      ASeatInfo := FSeatInfos[C1];
+      ASeatInfo := FSeats[C1];
       Exit(TRUE);
     end;
 
@@ -176,13 +181,18 @@ function TTableStatus.IsSeatTaken(const ASeatIndex: Integer): Boolean;
 var
   C1: Integer;
 begin
-  if not Assigned(FSeatInfos) then
+  if not Assigned(FSeats) then
     Exit(FALSE);
 
-  for C1 := 0 to FSeatInfos.Count - 1 do
-    if FSeatInfos[C1].SeatIndex = ASeatIndex then
+  for C1 := 0 to FSeats.Count - 1 do
+    if FSeats[C1].SeatIndex = ASeatIndex then
       Exit(TRUE);
   Exit(FALSE);
+end;
+
+function TTableStatus.IsSitting: Boolean;
+begin
+  result := FSelfSeatIndex <> -1;
 end;
 
 procedure TTableStatus.NewHandCleanup;
@@ -206,6 +216,7 @@ var
   seat: TSeatInfo;
   delete: Boolean;
   oldstate: TTableState;
+  seat_index: Integer;
 begin
   oldstate := FState;
   FState := ATableStatusProtobuf.State;
@@ -245,18 +256,18 @@ begin
   if Assigned(ATableStatusProtobuf.Seats) then
   begin
     C1 := 0;
-    while C1 < FSeatInfos.Count do
+    while C1 < FSeats.Count do
     begin
       delete := TRUE;
       for C2 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
-        if ATableStatusProtobuf.Seats[C2].Seat = FSeatInfos[C1].SeatIndex then
+        if ATableStatusProtobuf.Seats[C2].Seat = FSeats[C1].SeatIndex then
         begin
           delete := FALSE;
           Break;
         end;
 
       if delete then
-        FSeatInfos.Delete(C1)
+        FSeats.Delete(C1)
       else
         Inc(C1);
     end;
@@ -264,10 +275,10 @@ begin
     for C1 := 0 to ATableStatusProtobuf.Seats.Count - 1 do
     begin
       seat := nil;
-      for C2 := 0 to FSeatInfos.Count - 1 do
-        if FSeatInfos[C2].SeatIndex = ATableStatusProtobuf.Seats[C1].Seat then
+      for C2 := 0 to FSeats.Count - 1 do
+        if FSeats[C2].SeatIndex = ATableStatusProtobuf.Seats[C1].Seat then
         begin
-          seat := FSeatInfos[C2];
+          seat := FSeats[C2];
           Break;
         end;
 
@@ -275,16 +286,26 @@ begin
       begin
         seat := TSeatInfo.Create;
         seat.Assign(ATableStatusProtobuf.Seats[C1]);
-        FSeatInfos.Add(seat);
+        FSeats.Add(seat);
       end
       else
         seat.Assign(ATableStatusProtobuf.Seats[C1]);
     end;
 
-    FSeatInfos.Sort;
+    FSeats.Sort;
   end
   else
-    FSeatInfos.Clear;
+    FSeats.Clear;
+
+  // iterate through table status seats and find our seat index
+  seat_index := -1;
+  for C1 := 0 to FSeats.Count - 1 do
+    if CompareBytes(FSeats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
+    begin
+      seat_index := FSeats[C1].SeatIndex;
+      Break;
+    end;
+  FSelfSeatIndex := seat_index;
 
   case FState of
     tsIdle: begin
@@ -296,16 +317,16 @@ begin
     end;
   end;
 
-  if FSeatInfos.Count > 0 then
+  if FSeats.Count > 0 then
   begin
-    while FPreviousPots.Count < FSeatInfos.Last.SeatIndex do
+    while FPreviousPots.Count < FSeats.Last.SeatIndex do
       FPreviousPots.Add(TPotInfo.Create);
 
-    while FPots.Count < FSeatInfos.Last.SeatIndex do
+    while FPots.Count < FSeats.Last.SeatIndex do
       FPots.Add(TPotInfo.Create);
 
-    PadList(FPreviousBets, FSeatInfos.Last.SeatIndex + 1);
-    PadList(FBets, FSeatInfos.Last.SeatIndex + 1);
+    PadList(FPreviousBets, FSeats.Last.SeatIndex + 1);
+    PadList(FBets, FSeats.Last.SeatIndex + 1);
   end;
 
 //  FEvents.Assign(ATableStatusProtobuf.Events);
@@ -348,22 +369,22 @@ begin
   FCurrentSeat := 5;
 
   SetLength(bytes, 0);
-  FSeatInfos.Clear;
+  FSeats.Clear;
   seatinfo := TSeatInfo.Create;
   seatinfo.InitToDemoValues(2, 'reiser', 100000, 2, bytes);
-  FSeatInfos.Add(seatinfo);
+  FSeats.Add(seatinfo);
 
   seatinfo := TSeatInfo.Create;
   seatinfo.InitToDemoValues(3, '', 88400, 2, dmMain.SelfInfo.Id);
-  FSeatInfos.Add(seatinfo);
+  FSeats.Add(seatinfo);
 
   seatinfo := TSeatInfo.Create;
   seatinfo.InitToDemoValues(4, 'paunovic', 88400, 2, bytes);
-  FSeatInfos.Add(seatinfo);
+  FSeats.Add(seatinfo);
 
   seatinfo := TSeatInfo.Create;
   seatinfo.InitToDemoValues(5, 'marko', 111400, 2, bytes);
-  FSeatInfos.Add(seatinfo);
+  FSeats.Add(seatinfo);
 
   FBets.Clear;
   FBets.Add(0); FBets.Add(0); FBets.Add(3573); FBets.Add(7317); FBets.Add(18458);
@@ -391,8 +412,5 @@ begin
   FTimebarEndtime := 0;
   FCurrentPlaytime := 0;
 end;
-
-
-
 
 end.
