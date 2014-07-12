@@ -98,9 +98,14 @@ begin
 
     tables_close := TObjectList<TTable>.Create(FALSE);
     try
-      for table in Tables.Values do
-        if not FClubs.FindGame(table.GameId, club, game) then
-          tables_close.Add(table);
+      Tables.Lock;
+      try
+        for table in Tables.Values do
+          if not FClubs.FindGame(table.GameId, club, game) then
+            tables_close.Add(table);
+      finally
+        Tables.Unlock;
+      end;
 
       for table in tables_close do
         Tables.Remove(table.InternalId);

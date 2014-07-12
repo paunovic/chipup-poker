@@ -265,18 +265,23 @@ begin
   // first, close all tables that dont exist in reconnected tables array
   to_remove := TList<TBytes>.Create;
   try
-    for table in Tables.Values do
-    begin
-      exists := FALSE;
-      for tstatus in FReconnectedTables do
-        if CompareBytes(tstatus.TableMongoId, table.GameId) then
-        begin
-          exists := TRUE;
-          Break;
-        end;
+    Tables.Lock;
+    try
+      for table in Tables.Values do
+      begin
+        exists := FALSE;
+        for tstatus in FReconnectedTables do
+          if CompareBytes(tstatus.TableMongoId, table.GameId) then
+          begin
+            exists := TRUE;
+            Break;
+          end;
 
-      if not exists then
-        to_remove.Add(table.GameId);
+        if not exists then
+          to_remove.Add(table.GameId);
+      end;
+    finally
+      Tables.Unlock;
     end;
 
     for mongoid in to_remove do
@@ -322,13 +327,18 @@ var
   seat: TSeatInfo;
 begin
   result := FSelfInfo.Balance;
-  for table in Tables.Values do
-    for seat in table.Renderer.TableStatus.Seats do
-      if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
-      begin
-        Assert(seat.Chips <= result);
-        Dec(result, seat.Chips)
-      end;
+  Tables.Lock;
+  try
+    for table in Tables.Values do
+      for seat in table.Renderer.TableStatus.Seats do
+        if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
+        begin
+          Assert(seat.Chips <= result);
+          Dec(result, seat.Chips)
+        end;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 function TdmMain.GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;

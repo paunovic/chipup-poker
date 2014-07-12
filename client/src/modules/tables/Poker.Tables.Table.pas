@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
-  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Renderer, Poker.Avatars.Avatar;
+  Poker.HandHistory.Items, Poker.Tables.Renderer, Poker.Avatars.Avatar;
 
 type
   TTable = class
@@ -27,7 +27,7 @@ type
     function SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
     function SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
 
-    procedure UpdateAvatars(const AAvatar: TAvatar);
+    procedure RenderSync;
 
     function GetObjectCopy(out AGame: TGameInfo): Boolean; overload;
     function GetObjectCopy(out AClub: TClubInfo; out AGame: TGameInfo): Boolean; overload;
@@ -165,7 +165,7 @@ begin
   FForm.Show;
 end;
 
-procedure TTable.UpdateAvatars(const AAvatar: TAvatar);
+procedure TTable.RenderSync;
 begin
   TSyncRenderer.Render(FRenderer);
 end;

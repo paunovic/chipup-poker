@@ -270,7 +270,12 @@ end;
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   FormsContainer.CloseAllForms;
-  Tables.Clear;
+  Tables.Lock;
+  try
+    Tables.Clear;
+  finally
+    Tables.Unlock;
+  end;
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FActionMainMenuBarFont.Free;
 end;
@@ -1039,8 +1044,13 @@ procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);
 var
   table: TTable;
 begin
-  for table in Tables.Values do
-    table.UpdateAvatars(Sender as TAvatar);
+  Tables.Lock;
+  try
+    for table in Tables.Values do
+      table.RenderSync;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);
@@ -1159,10 +1169,10 @@ var
   game: TGameInfo;
 begin
   pbtstatus := AObject as TPB_TableStatus;
-  Tables.Lock;
-  try
-    if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
-    begin
+  if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+  begin
+    Tables.Lock;
+    try
       if table.GetObjectCopy(game) then
       try
         game.UpdateFromTableStatus(pbtstatus);
@@ -1173,9 +1183,9 @@ begin
       finally
         game.Free;
       end;
+    finally
+      Tables.Unlock;
     end;
-  finally
-    Tables.Unlock;
   end;
 end;
 

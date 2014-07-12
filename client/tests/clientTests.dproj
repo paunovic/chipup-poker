@@ -80,15 +80,10 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbOutput.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\protobufs\StrBuffer.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbPublic.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\protobufs\pbInput.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializer.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerFactory.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerAbstract.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerRtti.pas"/>
-			<DCCReference Include="..\..\delphi-3rd-party\SvSerializer\Persistence\SvSerializerSuperJson.pas"/>
+			<DCCReference Include="..\src\3rdparty\protobufs\pbOutput.pas"/>
+			<DCCReference Include="..\src\3rdparty\protobufs\StrBuffer.pas"/>
+			<DCCReference Include="..\src\3rdparty\protobufs\pbPublic.pas"/>
+			<DCCReference Include="..\src\3rdparty\protobufs\pbInput.pas"/>
 			<DCCReference Include="..\src\modules\common\Poker.Common.Misc.pas"/>
 			<DCCReference Include="..\src\interfaces\Poker.Interfaces.ModalForm.pas"/>
 			<DCCReference Include="..\src\interfaces\Poker.Interfaces.FormParams.pas"/>
