@@ -294,7 +294,7 @@ begin
       if last_bet = 0 then
         action := 'bets'
       else
-        action := 'raises';
+        action := 'raises to';
 
       ALines.Add(Format('%s%s%s %s %s%s', [ATags.PlayerNick, player_nick, ATags.NormalText, action, ATags.Chips, ChipsToStr(move.Bet)]));
       last_bet := move.Bet;
@@ -303,7 +303,7 @@ begin
     if move.ContainsEvent(teAllIn) then
     begin
       if move.Bet > last_bet then
-        action := 'raises'
+        action := 'raises to'
       else
         action := 'calls';
 

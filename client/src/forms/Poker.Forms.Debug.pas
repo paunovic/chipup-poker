@@ -88,8 +88,8 @@ type
     btServerTest: TcxButton;
     acServerCrashTest: TAction;
     pmiShowPings: TMenuItem;
-    lbsSwapChains: TcxLabel;
-    lbvSwapChains: TcxLabel;
+    lbsSwapChain: TcxLabel;
+    lbvSwapChain: TcxLabel;
     paTop: TPanel;
     ccbLogForms: TcxCheckComboBox;
     teRegexFilter: TcxTextEdit;
@@ -767,11 +767,11 @@ begin
       for C1 := 1 to DXCore.Device.SwapChains.Count - 1 do
         if DXCore.Device.SwapChains[C1].WindowHandle <> DXCore.DummyWindow then
           Inc(swap_chains_occupied);
-      lbvSwapChains.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
+      lbvSwapChain.Caption := Format('%d/%d', [swap_chains_occupied, DXCore.Device.SwapChains.Count - 1]);
     end
     else
-      lbvSwapChains.Caption := 'Unknown';
-    lbvSwapChains.Refresh;
+      lbvSwapChain.Caption := 'Unknown';
+    lbvSwapChain.Refresh;
   end;
 
   if dfiUser in refresh_items then

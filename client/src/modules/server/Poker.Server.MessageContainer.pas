@@ -56,18 +56,14 @@ end;
 constructor TMessageContainer.Create;
 begin
   FLock := TCriticalSection.Create;
-
   FReceiverWnd := AllocateHwnd(ReceiverWndProc);
-
   FCallbackSets := TObjectList<TCallbackSet>.Create;
 end;
 
 destructor TMessageContainer.Destroy;
 begin
   FCallbackSets.Free;
-
   DeallocateHWnd(FReceiverWnd);
-
   FLock.Free;
 
   inherited;
@@ -84,11 +80,11 @@ var
   id: Integer;
   found: Boolean;
 begin
-  FLock.Enter;
-  try
-    id := 0;
-    repeat
-      found := FALSE;
+  id := 0;
+  repeat
+    found := FALSE;
+    FLock.Enter;
+    try
       for callback_set in FCallbackSets do
         if callback_set.Id = id then
         begin
@@ -96,19 +92,24 @@ begin
           found := TRUE;
           Break;
         end;
-    until not found;
+    finally
+      FLock.Leave;
+    end;
+  until not found;
 
-    callback_set := TCallbackSet.Create(id, ACallbacks);
+  callback_set := TCallbackSet.Create(id, ACallbacks);
+  FLock.Enter;
+  try
     if not APriority then
       FCallbackSets.Add(callback_set)
     else
       FCallbackSets.Insert(0, callback_set);
-    result := id;
-
-    {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
   finally
     FLock.Leave;
   end;
+  result := id;
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
 end;
 
 procedure TMessageContainer.RemoveCallbacks(var AId: Integer);
@@ -123,10 +124,10 @@ begin
         callback.Removed := TRUE;
         Break;
       end;
-    AId := -1;
   finally
     FLock.Leave;
   end;
+  AId := -1;
 end;
 
 procedure TMessageContainer.ProcessMessage(const AMessage: TMessage);

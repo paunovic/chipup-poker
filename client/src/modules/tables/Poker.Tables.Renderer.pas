@@ -63,7 +63,7 @@ type
     procedure RenderEvent(Sender: TObject);
     procedure RenderBackground;
     procedure RenderTable;
-    procedure RenderSeats;
+    procedure RenderSeats(const AGameInfo: TGameInfo);
     procedure RenderSeat(const AGame: TGameInfo; const ASeatIndex: Integer);
     procedure RenderCard(const APoint: TPoint2; const ACard: TCard; const APercentage: Single; const ATransparency: Byte = 0);
     procedure RenderScaleFont(const AText: String; const AColor: TColor2; const AMidPoint: TPoint2; const AFonts: array of TAsphyreFont; const ALowBound, AMinIndex, AMaxIndex, AKerning: Integer; const AMaxHeight, AMaxWidth: Single);
@@ -239,8 +239,10 @@ var
   seat: TSeatInfo;
   game: TGameInfo;
   table: TTable;
+  render_it: Boolean;
 begin
   ASetRaiseAmount := FALSE;
+  render_it := FALSE;
 
   for dxbutton in FDXButtons do
     dxbutton.MouseMove(Shift, X, Y);
@@ -270,13 +272,13 @@ begin
          (seat.Status = psFolded) then
       begin
         FRenderingFoldedCards := TRUE;
-        Render;
+        render_it := TRUE;
       end
       else
         if FRenderingFoldedCards then
         begin
           FRenderingFoldedCards := FALSE;
-          Render;
+          render_it := TRUE;
         end;
     finally
       game.Free;
@@ -284,6 +286,9 @@ begin
   finally
     Tables.Unlock;
   end;
+
+  if render_it then
+    Render;
 end;
 
 procedure TTableRenderer.MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -340,7 +345,7 @@ end;
 procedure TTableRenderer.RenderEvent(Sender: TObject);
 var
   table: TTable;
-  game: TGameInfo; //fixme
+  game: TGameInfo;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
@@ -352,7 +357,7 @@ begin
       RenderTableCards;
       RenderDealerButton(game);
       RenderDealingCardsAni;
-      RenderSeats;
+      RenderSeats(game);
       RenderBets(game);
       RenderPots;
       RenderTimebar(game);
@@ -378,24 +383,12 @@ begin
   DXCore.Canvas.TexMap(FMetrics.RawTableBounds, FDrawColor);
 end;
 
-procedure TTableRenderer.RenderSeats;
+procedure TTableRenderer.RenderSeats(const AGameInfo: TGameInfo);
 var
   C1: Integer;
-  table: TTable;
-  game: TGameInfo;
 begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if table.GetObjectCopy(game) then
-    try
-      for C1 := 0 to game.Seats - 1 do
-        RenderSeat(game, C1);
-    finally
-      game.Free;
-    end;
-  finally
-    Tables.Unlock;
-  end;
+  for C1 := 0 to AGameInfo.Seats - 1 do
+    RenderSeat(AGameInfo, C1);
 end;
 
 procedure TTableRenderer.RenderSeat(const AGame: TGameInfo; const ASeatIndex: Integer);
@@ -1331,39 +1324,40 @@ begin
   if not Assigned(FTableStatus) then
     Exit;
 
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if table.GetObjectCopy(game) then
-    try
-      for C1 := 0 to ABets.Count - 1 do
-        if (ABets[C1] > 0) and
-           ((ASeatIndex = -1) or
-            (ASeatIndex = C1)) then
-        begin
+  for C1 := 0 to ABets.Count - 1 do
+    if (ABets[C1] > 0) and
+       ((ASeatIndex = -1) or
+        (ASeatIndex = C1)) then
+    begin
+      if Tables.GetAndLockTable(FInternalId, table) then
+      try
+        if table.GetObjectCopy(game) then
+        try
           bet_point := FMetrics.GetBetPoint(game, C1, FTableStatus.Dealer);
-          pot_point := FMetrics.GetPotPoint(0);
-
-          animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, Settings.Hardcoded.ANIMATION_METRICS.BETS_SPEED,
-              Settings.Hardcoded.ANIMATION_METRICS.BETS_START_DELAY, 0, FDXAreaSize);
-          animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
-          animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
-          if ASeatIndex <> -1 then
-            animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
-          FBetAnimations.Add(animation.Id);
-
-          result := TRUE;
+        finally
+          game.Free;
         end;
-    finally
-      game.Free;
+      finally
+        Tables.Unlock;
+      end;
+
+      pot_point := FMetrics.GetPotPoint(0);
+
+      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, Settings.Hardcoded.ANIMATION_METRICS.BETS_SPEED,
+          Settings.Hardcoded.ANIMATION_METRICS.BETS_START_DELAY, 0, FDXAreaSize);
+      animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
+      animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
+      if ASeatIndex <> -1 then
+        animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
+      FBetAnimations.Add(animation.Id);
+
+      result := TRUE;
     end;
-  finally
-    Tables.Unlock;
-  end;
 end;
 
 procedure TTableRenderer.AnimateBlinds(const ACallback: THandle);
 var
-  bet_point: TPoint2;
+  bet_point_sb, bet_point_bb: TPoint2;
   animation: TDXAnimation;
   table: TTable;
   game: TGameInfo;
@@ -1377,27 +1371,28 @@ begin
   try
     if table.GetObjectCopy(game) then
     try
-      bet_point := FMetrics.GetBetPoint(game, FTableStatus.SmallBlindSeat, FTableStatus.Dealer);
-      animation := DXTimer.AddAnimation(ACallback, bet_point, bet_point, 0.1, 0.1, 0.9, FDXAreaSize);
-      animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.SmallBlindSeat);
-      animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.SmallBlindSeat]);
-      animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
-      animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
-      FBetAnimations.Add(animation.Id);
-
-      bet_point := Metrics.GetBetPoint(game, FTableStatus.BigBlindSeat, FTableStatus.Dealer);
-      animation := DXTimer.AddAnimation(ACallback, bet_point, bet_point, 0.1, 0.5, 0.5, FDXAreaSize);
-      animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.BigBlindSeat);
-      animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.BigBlindSeat]);
-      animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
-      animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
-      FBetAnimations.Add(animation.Id);
+      bet_point_sb := FMetrics.GetBetPoint(game, FTableStatus.SmallBlindSeat, FTableStatus.Dealer);
+      bet_point_bb := FMetrics.GetBetPoint(game, FTableStatus.BigBlindSeat, FTableStatus.Dealer);
     finally
       game.Free;
     end;
   finally
     Tables.Unlock;
   end;
+
+  animation := DXTimer.AddAnimation(ACallback, bet_point_sb, bet_point_sb, 0.1, 0.1, 0.9, FDXAreaSize);
+  animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.SmallBlindSeat);
+  animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.SmallBlindSeat]);
+  animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
+  animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
+  FBetAnimations.Add(animation.Id);
+
+  animation := DXTimer.AddAnimation(ACallback, bet_point_bb, bet_point_bb, 0.1, 0.5, 0.5, FDXAreaSize);
+  animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.BigBlindSeat);
+  animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.BigBlindSeat]);
+  animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
+  animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
+  FBetAnimations.Add(animation.Id);
 end;
 
 procedure TTableRenderer.AnimateDealingCards(const ACallback: THandle);
@@ -1409,54 +1404,59 @@ var
   C1: Integer;
   seat: TSeatInfo;
   seat_point: TPoint2;
+  card_point: TPoint2;
   table: TTable;
   game: TGameInfo;
+  game_seats: Integer;
 begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if table.GetObjectCopy(game) then
-    try
-      cc := 0;
-      card_index := 0;
-      repeat
-        iterate := FALSE;
-        C1 := FTableStatus.SmallBlindSeat;
-        if C1 < 0 then
-          Break;
-        repeat
-          if FTableStatus.GetSeatInfo(C1, seat) then
-          begin
-            seat.ResetDealtCards;
-            if seat.CardCount > card_index then
-            begin
+  cc := 0;
+  card_index := 0;
+  game_seats := 0;
+  repeat
+    iterate := FALSE;
+    C1 := FTableStatus.SmallBlindSeat;
+    if C1 < 0 then
+      Break;
+    repeat
+      if FTableStatus.GetSeatInfo(C1, seat) then
+      begin
+        seat.ResetDealtCards;
+        if seat.CardCount > card_index then
+        begin
+          if Tables.GetAndLockTable(FInternalId, table) then
+          try
+            if table.GetObjectCopy(game) then
+            try
               seat_point := FMetrics.GetSeatPoint(game, seat.SeatIndex);
-              animation := DXTimer.AddAnimation(ACallback,
-                    Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y),
-                    FMetrics.GetCardPoint(game, seat, card_index),
-                    Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_SPEED,
-                    Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY + Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY * cc,
-                    0, FDXAreaSize);
-              animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
-              Inc(cc);
-              if cc mod 2 = 0 then
-                animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_DEALING);
-              FDealAnimations.Add(animation.Id);
-              iterate := TRUE;
+              card_point := FMetrics.GetCardPoint(game, seat, card_index);
+              game_seats := game.Seats;
+            finally
+              game.Free;
             end;
+          finally
+            Tables.Unlock;
           end;
 
-          Inc(C1);
-          if C1 >= game.Seats then
-            C1 := 0;
-        until C1 = FTableStatus.SmallBlindSeat;
-        Inc(card_index);
-      until not iterate;
-    finally
-      game.Free;
-    end;
-  finally
-    Tables.Unlock;
-  end;
+          animation := DXTimer.AddAnimation(ACallback,
+                Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y), card_point,
+                Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_SPEED,
+                Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY + Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY * cc,
+                0, FDXAreaSize);
+          animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
+          Inc(cc);
+          if cc mod 2 = 0 then
+            animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_DEALING);
+          FDealAnimations.Add(animation.Id);
+          iterate := TRUE;
+        end;
+      end;
+
+      Inc(C1);
+      if C1 >= game_seats then
+        C1 := 0;
+    until C1 = FTableStatus.SmallBlindSeat;
+    Inc(card_index);
+  until not iterate;
 end;
 
 procedure TTableRenderer.AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_Pot>);
@@ -1470,82 +1470,83 @@ var
   player: TPlayerInfo;
   suffix, chips_plural: String;
   winmsg: String;
+  bet_point: TPoint2;
   table: TTable;
   game: TGameInfo;
 begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if table.GetObjectCopy(game) then
-    try
-      for C1 := 0 to APots.Count - 1 do
-      begin
-        pot := APots[C1];
+  for C1 := 0 to APots.Count - 1 do
+  begin
+    pot := APots[C1];
 
-        if (pot.Value = 0) or (pot.WinnerData.Count = 0) then
-          Continue;
+    if (pot.Value = 0) or (pot.WinnerData.Count = 0) then
+      Continue;
 
-        total_chips_val := pot.Value - pot.Rake;
+    total_chips_val := pot.Value - pot.Rake;
 
-        nicks := '';
-        animation := nil;
-        for C2 := 0 to pot.WinnerData.Count - 1 do
-        begin
-          if (FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
-             (Players.TryGetValue(seat.PlayerMongoId, player)) then
-            nick := player.Nick
-          else
-            nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
+    nicks := '';
+    animation := nil;
+    for C2 := 0 to pot.WinnerData.Count - 1 do
+    begin
+      if (FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
+         (Players.TryGetValue(seat.PlayerMongoId, player)) then
+        nick := player.Nick
+      else
+        nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
 
-          nicks := nicks + Format('%s, ', [nick]);
+      nicks := nicks + Format('%s, ', [nick]);
 
-          // restore bets if table is in playback mode, so values are shown
-          if FTableType = ttHandPlayback then
-            FTableStatus.Bets[pot.WinnerData[C2].Seat] := FTableStatus.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
+      // restore bets if table is in playback mode, so values are shown
+      if FTableType = ttHandPlayback then
+        FTableStatus.Bets[pot.WinnerData[C2].Seat] := FTableStatus.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
 
-          animation := DXTimer.AddAnimation(ACallback,
-               FMetrics.GetPotPoint(C1),
-               FMetrics.GetBetPoint(game, pot.WinnerData[C2].Seat, FTableStatus.Dealer),
-               Settings.Hardcoded.ANIMATION_METRICS.POTS_INITIAL_DELAY,
-               WinningAniDelay + 1.5 + C1 * Settings.Hardcoded.ANIMATION_METRICS.POTS_INBETWEEN_DELAY,
-               Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
-               FDXAreaSize);
-
-          animation.Tags.AddOrSetValue(ANITAG_POT_INDEX, C1);
-          animation.Tags.AddOrSetValue(ANITAG_SEAT, pot.WinnerData[C2].Seat);
-          animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
-          PotWinAnimations.Add(animation.Id);
+      if Tables.GetAndLockTable(FInternalId, table) then
+      try
+        if table.GetObjectCopy(game) then
+        try
+          bet_point := FMetrics.GetBetPoint(game, pot.WinnerData[C2].Seat, FTableStatus.Dealer);
+        finally
+          game.Free;
         end;
-        Delete(nicks, Length(nicks) - 1, 2);
-
-        chips_plural := '';
-        if total_chips_val <> 100 then
-          chips_plural := 's';
-
-        suffix := '';
-        if pot.WinnerData.Count > 1 then
-          suffix := 'each ';
-
-        winmsg := pot.WinnerData[0].Msg;
-        if winmsg = 'default' then
-          winmsg := ''
-        else
-          if FTableStatus.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
-            winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE)
-          else
-            winmsg := pot.WinnerData[0].Msg;
-
-        if winmsg <> '' then
-          winmsg := Format('(%s)', [winmsg]);
-
-        Assert(Assigned(animation));
-        animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
-        animation.Tags.AddOrSetValue(ANITAG_WINMSG, Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]));
+      finally
+        Tables.Unlock;
       end;
-    finally
-      game.Free;
+
+      animation := DXTimer.AddAnimation(ACallback, FMetrics.GetPotPoint(C1), bet_point,
+           Settings.Hardcoded.ANIMATION_METRICS.POTS_INITIAL_DELAY,
+           WinningAniDelay + 1.5 + C1 * Settings.Hardcoded.ANIMATION_METRICS.POTS_INBETWEEN_DELAY,
+           Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
+           FDXAreaSize);
+
+      animation.Tags.AddOrSetValue(ANITAG_POT_INDEX, C1);
+      animation.Tags.AddOrSetValue(ANITAG_SEAT, pot.WinnerData[C2].Seat);
+      animation.Tags.AddOrSetValue(ANITAG_CHIPS, total_chips_val div UINT32(pot.WinnerData.Count));
+      PotWinAnimations.Add(animation.Id);
     end;
-  finally
-    Tables.Unlock;
+    Delete(nicks, Length(nicks) - 1, 2);
+
+    chips_plural := '';
+    if total_chips_val <> 100 then
+      chips_plural := 's';
+
+    suffix := '';
+    if pot.WinnerData.Count > 1 then
+      suffix := 'each ';
+
+    winmsg := pot.WinnerData[0].Msg;
+    if winmsg = 'default' then
+      winmsg := ''
+    else
+      if FTableStatus.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
+        winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE)
+      else
+        winmsg := pot.WinnerData[0].Msg;
+
+    if winmsg <> '' then
+      winmsg := Format('(%s)', [winmsg]);
+
+    Assert(Assigned(animation));
+    animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
+    animation.Tags.AddOrSetValue(ANITAG_WINMSG, Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]));
   end;
 end;
 

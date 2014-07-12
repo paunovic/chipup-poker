@@ -127,6 +127,7 @@ type
     procedure RendererSoundPlay(const ASound: String);
     procedure RendererTimebankStarted(Sender: TObject);
     procedure ConfigureActions(out AFocusWindow: Boolean);
+    procedure AddChatMessage(const AUser: String; const AUserStyle, AUserParagraph: Integer; const AMessage: String; const AMessageStyle, AMessageParagraph: Integer);
 
     function GetTableCaption: String;
     procedure UpdateTableCaption;
@@ -851,12 +852,12 @@ begin
   ServerSocket.TableStandUp(FGameId);
 end;
 
-procedure TfrmTable.AddDealerChatMessage(const AMessage: String);
+procedure TfrmTable.AddChatMessage(const AUser: String; const AUserStyle, AUserParagraph: Integer; const AMessage: String; const AMessageStyle, AMessageParagraph: Integer);
 begin
   CheckChatScrollbackLimit;
 
-  rvChat.AddNL('Dealer: ', 2, 0);
-  rvChat.AddNL(AMessage, 3, -1);
+  rvChat.AddNL(AUser, AUserStyle, AUserParagraph);
+  rvChat.AddNL(AMessage, AMessageStyle, AMessageParagraph);
 
   if rvChat.VScrollPos < rvChat.VScrollMax then
     rvChat.Format
@@ -864,17 +865,14 @@ begin
     rvChat.FormatTail;
 end;
 
+procedure TfrmTable.AddDealerChatMessage(const AMessage: String);
+begin
+  AddChatMessage('Dealer: ', 2, 0, AMessage, 3, -1);
+end;
+
 procedure TfrmTable.AddUserChatMessage(const AUser, AMessage: String);
 begin
-  CheckChatScrollbackLimit;
-
-  rvChat.AddNL(Format('%s: ', [AUser]), 0, 0);
-  rvChat.AddNL(AMessage, 1, -1);
-
-  if rvChat.VScrollPos < rvChat.VScrollMax then
-    rvChat.Format
-  else
-    rvChat.FormatTail;
+  AddChatMessage(Format('%s: ', [AUser]), 0, 0, AMessage, 1, -1);
 end;
 
 procedure TfrmTable.cbFoldToAnyBetPropertiesChange(Sender: TObject);

@@ -101,7 +101,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object dxBevel3: TdxBevel
-      Left = 349
+      Left = 342
       Top = 6
       Width = 19
       Height = 60
@@ -109,7 +109,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 364
+      Left = 358
       Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
@@ -124,7 +124,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 364
+      Left = 358
       Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Memory:'
@@ -169,7 +169,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 416
+      Left = 410
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -192,7 +192,7 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 416
+      Left = 410
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -215,7 +215,7 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object lbvCallbackSets: TcxLabel
-      Left = 306
+      Left = 300
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -567,11 +567,11 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object lbsSwapChains: TcxLabel
+    object lbsSwapChain: TcxLabel
       Left = 230
       Top = 19
       Anchors = [akLeft, akBottom]
-      Caption = 'Swap chains:'
+      Caption = 'Swap chain:'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
@@ -582,8 +582,8 @@ object frmDebug: TfrmDebug
       Style.IsFontAssigned = True
       Transparent = True
     end
-    object lbvSwapChains: TcxLabel
-      Left = 306
+    object lbvSwapChain: TcxLabel
+      Left = 300
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -697,7 +697,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvSoundBuffers: TcxLabel
-      Left = 306
+      Left = 300
       Top = 51
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -735,7 +735,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvAnimations: TcxLabel
-      Left = 306
+      Left = 300
       Top = 35
       Anchors = [akLeft, akBottom]
       AutoSize = False
