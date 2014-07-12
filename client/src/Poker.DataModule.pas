@@ -39,6 +39,7 @@ type
     procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
 
     function CheckAuthed: Boolean;
+    function IsLoggedIn: Boolean;
 
     procedure OpenCashierLink;
     procedure OpenTACLink;
@@ -71,7 +72,7 @@ uses
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
-  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer;
+  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -369,6 +370,12 @@ var
 begin
   for C1 := Low(Settings.Hardcoded.UPDATE_FILES) to High(Settings.Hardcoded.UPDATE_FILES) do
     AFiles.Add(GetUpdateFileObject(Settings.Hardcoded.UPDATE_FILES[C1].Path));
+end;
+
+function TdmMain.IsLoggedIn: Boolean;
+begin
+  result := (not FormsContainer.Contains(TfrmChipUpLogin)) and
+            (dmMain.SelfInfo.Nick <> '');
 end;
 
 end.
