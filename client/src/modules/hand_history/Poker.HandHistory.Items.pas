@@ -387,7 +387,9 @@ begin
          ATags.NormalText, ATags.Chips, ChipsToStr(total_pot - total_rake), ATags.NormalText, ATags.Chips, ChipsToStr(total_rake),
          ATags.NormalText
       ]));
-      ALines.Add(Format('%sTable cards [%s%s%s]', [ATags.NormalText, ATags.Cards, TCards.BytesToString(FCards, ' '), ATags.NormalText]));
+
+      if Length(FCards) > 0 then
+        ALines.Add(Format('%sTable cards [%s%s%s]', [ATags.NormalText, ATags.Cards, TCards.BytesToString(FCards, ' '), ATags.NormalText]));
 
       // calculate each player winning amount
       SetLength(seat_winnings, FParentItems.Game.Seats);
