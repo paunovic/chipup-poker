@@ -863,6 +863,7 @@ begin
     rvChat.Format
   else
     rvChat.FormatTail;
+  rvChat.Refresh;
 end;
 
 procedure TfrmTable.AddDealerChatMessage(const AMessage: String);

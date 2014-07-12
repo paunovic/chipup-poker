@@ -287,9 +287,11 @@ end;
 
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := (FShuttingDown) or
+  CanClose := (FormsContainer.Contains(TfrmChipUpLogin)) or
+              (FShuttingDown) or
               (ConfirmToCloseTablesAppClose);
-  if CanClose then
+  if (CanClose) and
+     (not (FormsContainer.Contains(TfrmChipUpLogin))) then
     ServerSocket.Logout;
 end;
 

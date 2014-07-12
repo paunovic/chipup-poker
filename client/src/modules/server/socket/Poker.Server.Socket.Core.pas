@@ -252,14 +252,17 @@ begin
   if ARpcMessage.DataSize = 0 then
     DebugLn(FDebugId, Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
   else
-    serialized_object := '';
+  begin
     if IsDebugFormAssigned then
-      serialized_object := SerializeObject(ADataObject);
+      serialized_object := SerializeObject(ADataObject)
+    else
+      serialized_object := '';
 
     if AStreamSize = 0 then
       DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
     else
       DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
+  end;
 end;
 {$ENDIF}
 

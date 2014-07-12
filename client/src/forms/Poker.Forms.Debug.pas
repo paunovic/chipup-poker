@@ -529,6 +529,7 @@ begin
     rvLog.Format
   else
     rvLog.FormatTail;
+  rvLog.Refresh;
 end;
 
 procedure TfrmDebug.rvLogRVMouseUp(Sender: TCustomRichView; Button: TMouseButton; Shift: TShiftState; ItemNo, X, Y: Integer);
