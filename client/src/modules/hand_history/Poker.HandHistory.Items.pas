@@ -383,10 +383,8 @@ begin
         Inc(total_pot, pot.Value);
         Inc(total_rake, pot.Rake);
       end;
-      ALines.Add(Format('%sTotal pot: %s%s%s | Rake: %s%s%s', [
-         ATags.NormalText, ATags.Chips, ChipsToStr(total_pot - total_rake), ATags.NormalText, ATags.Chips, ChipsToStr(total_rake),
-         ATags.NormalText
-      ]));
+      ALines.Add(Format('%sTotal pot: %s%s%s | Rake: %s%s%s', [ATags.NormalText, ATags.Chips, ChipsToStr(total_pot - total_rake),
+         ATags.NormalText, ATags.Chips, ChipsToStr(total_rake), ATags.NormalText]));
 
       if Length(FCards) > 0 then
         ALines.Add(Format('%sTable cards [%s%s%s]', [ATags.NormalText, ATags.Cards, TCards.BytesToString(FCards, ' '), ATags.NormalText]));

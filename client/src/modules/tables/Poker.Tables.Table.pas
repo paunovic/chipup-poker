@@ -133,7 +133,7 @@ begin
   if not dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
     Exit(FALSE);
   FClubId := club.MongoId;
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId, FTableType);
   form := TfrmTable.Create(FInternalId);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;
@@ -154,7 +154,7 @@ begin
   FGameId := AHandHistoryItems.FGameId;
   FHandId := AHandHistoryItem.HandId;
   FHandHistoryPlayback := THandHistoryPlayback.Create(AHandHistoryItems, AHandHistoryItem);
-  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId);
+  FRenderer := TTableRenderer.Create(FSwapChainIndex, FInternalId, FTableType);
   form := TfrmTable.Create(FInternalId);
   FRenderer.SetRenderTarget(form.Handle);
   FForm := form;

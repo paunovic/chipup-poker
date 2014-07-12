@@ -79,7 +79,7 @@ type
     procedure RenderButtons;
     procedure RenderRaisePanel;
   public
-    constructor Create(const ASwapChainIndex: Integer; const AInternalId: Integer);
+    constructor Create(const ASwapChainIndex: Integer; const AInternalId: Integer; const ATableType: TTableType);
     destructor Destroy; override;
 
     procedure SetRenderTarget(const AHandle: THandle);
@@ -145,7 +145,7 @@ uses
 
 { TTableRenderer }
 
-constructor TTableRenderer.Create(const ASwapChainIndex: Integer; const AInternalId: Integer);
+constructor TTableRenderer.Create(const ASwapChainIndex: Integer; const AInternalId: Integer; const ATableType: TTableType);
 begin
   FSwapChainIndex := ASwapChainIndex;
   FInternalId := AInternalId;
@@ -153,6 +153,7 @@ begin
   FChipStackMaker := TChipStackMaker.Create;
   FDXButtons := TObjectList<TDXButton>.Create;
   FTableStatus := TTableStatus.Create;
+  FTableType := ATableType;
 
   if FTableType = ttHandPlayback then
     FDrawColor := cAlpha4(150)
