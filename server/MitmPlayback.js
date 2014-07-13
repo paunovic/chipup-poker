@@ -67,14 +67,15 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args
 			continue;
 
 		try {
-			checkIfSingleRequestMatch(methodId, args, type, i);
-			console.log("Request #" + currentRequestNumber + " match!");
-			++currentRequestNumber;
-			sendRequests();
+			this._checkIfSingleRequestMatch(methodId, args, type, i);
+			var methodName = this.serverCodes.reverse[methodId];
+			console.log("Request #" + this.currentRequestNumber + " match! " + methodName);
+			++this.currentRequestNumber;
+			this._sendRequests();
 			return;
 		} catch (e) {
-			if (requests[i + 1].direction !== directions.S2C)
-				checkIfSingleRequestMatch(methodId, args, type, currentRequestNumber); // this will throw the original request mismatch error
+			if (this.requests[i + 1].direction !== directions.S2C)
+				this.checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
 		}
 	}
 }
@@ -94,6 +95,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args
 
 
 		function checkIfSingleRequestMatch(methodId, args, type, requestNum) {
+			// find socket id by iterating thru sockets array and see which one matches the current socket
 			var currentRequestInfo = 'SocketId' + socketId + " request #" + requestNum;
 
 			var requestFromDb = requests[requestNum];
@@ -114,7 +116,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args
 
 				var argsParsed = makeArgsAndSanatize();
 				var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
-				console.log("A-server, B-from db\n%j", difference, undefined, 2);
+				console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
 			}
 
 			if (type !== requestFromDb.type)
