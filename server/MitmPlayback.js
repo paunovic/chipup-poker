@@ -16,9 +16,11 @@ function MitmPlayback(config) {
 	this.sockets = [];
 }
 
+
 MitmPlayback.prototype.startPlayback = function() {
 	this._sendRequests();
 };
+
 
 MitmPlayback.prototype._sendRequests = function() {
 	var request = this.requests[this.currentRequestNumber];
@@ -30,6 +32,7 @@ MitmPlayback.prototype._sendRequests = function() {
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
+
 
 MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, socketId) {
 	if (!this.sockets[socketId])
@@ -52,12 +55,14 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 		throw new Error('Send overflow!');
 }
 
+
 MitmPlayback.prototype._openNewSocket	=	function (socketId) {
 	this.sockets[socketId] = net.connect(this.port, this.host, function () {
 		socket.on('error', function (err) { throw err; });
 		socket.on('data', this.protobufUtil.createOnDataListenerFn(this._checkIfNextRequestsMatch));
 	}
 }
+
 
 MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args, type) {
 	if (err) throw err;
@@ -81,80 +86,54 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args
 }
 
 
+MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
+	// find socket id by iterating thru sockets array and see which one matches the current socket
+	var currentRequestInfo = 'SocketId' + socketId + " request #" + requestNum;
+
+	var requestFromDb = requests[requestNum];
+
+	if (requestFromDb.direction !== directions.S2C)
+		throw new Error('Received response from the server out of order!');
+
+	var methodName = serverCodes.reverse[methodId];
+
+	if (methodName !== requestFromDb.method)
+		throw new Error('Methods do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
+
+	var argsFromDb = requestFromDb.args.buffer;
+
+	if (args.toString('hex') !== argsFromDb.toString('hex')) {
+		if (!methodToTypeMap[methodName])
+			throw new Error('schema for code ' + methodName + ' not known');
+
+		var argsParsed = makeArgsAndSanatize();
+		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
+		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
+	}
+
+	if (type !== requestFromDb.type)
+		throw new Error('Type param do not match! ' + currentRequestInfo);
+}
 
 
+MitmPlayback.prototype._makeArgsAndSanatize = function () {
+	var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
+	var argsFromDbParsed = pb.Parse(argsFromDb, methodToTypeMap[requestFromDb.method]);
 
-
-
-
-
-
-
-
-
-
-
-		function checkIfSingleRequestMatch(methodId, args, type, requestNum) {
-			// find socket id by iterating thru sockets array and see which one matches the current socket
-			var currentRequestInfo = 'SocketId' + socketId + " request #" + requestNum;
-
-			var requestFromDb = requests[requestNum];
-
-			if (requestFromDb.direction !== directions.S2C)
-				throw new Error('Received response from the server out of order!');
-
-			var methodName = serverCodes.reverse[methodId];
-
-			if (methodName !== requestFromDb.method)
-				throw new Error('Methods do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
-
-			var argsFromDb = requestFromDb.args.buffer;
-
-			if (args.toString('hex') !== argsFromDb.toString('hex')) {
-				if (!methodToTypeMap[methodName])
-					throw new Error('schema for code ' + methodName + ' not known');
-
-				var argsParsed = makeArgsAndSanatize();
-				var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
-				console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
-			}
-
-			if (type !== requestFromDb.type)
-				throw new Error('Type param do not match! ' + currentRequestInfo);
-
-			function makeArgsAndSanatize() {
-				var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
-				var argsFromDbParsed = pb.Parse(argsFromDb, methodToTypeMap[requestFromDb.method]);
-
-				if (methodId === serverCodes.srLoginReply) {
-					argsParsed = sanitizeLoginReply(argsParsed);
-					argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
-				} else if (methodId === serverCodes.srTableStatsReply) {
-					argsParsed = sanitizeTableStats(argsParsed);
-					argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
-				} else if (methodId === serverCodes.seGameChange) {
-					argsParsed.lasthandid = argsFromDbParsed.lasthandid;
-				} else if ([serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
-					argsParsed = sanitizeTableStatus(argsParsed);
-					argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
-				}
-				return {fromServer: argsParsed, fromDb: argsFromDbParsed};
-			}
-		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	if (methodId === serverCodes.srLoginReply) {
+		argsParsed = sanitizeLoginReply(argsParsed);
+		argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
+	} else if (methodId === serverCodes.srTableStatsReply) {
+		argsParsed = sanitizeTableStats(argsParsed);
+		argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
+	} else if (methodId === serverCodes.seGameChange) {
+		argsParsed.lasthandid = argsFromDbParsed.lasthandid;
+	} else if ([serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
+		argsParsed = sanitizeTableStatus(argsParsed);
+		argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
+	}
+	return {fromServer: argsParsed, fromDb: argsFromDbParsed};
+}
 
 MitmPlayback.prototype._sanitizeLoginReply = function (args) {
 	var i,j;
@@ -175,6 +154,7 @@ MitmPlayback.prototype._sanitizeLoginReply = function (args) {
 	
 	return args;
 }
+
 
 MitmPlayback.prototype._sanitizeTableStats = function (args) {
 	var i,j;
@@ -207,6 +187,7 @@ MitmPlayback.prototype._sanitizeTableStats = function (args) {
 	}
 	return args;
 }
+
 
 MitmPlayback.prototype._sanitizeTableStatus = function (args) {
 	args.rotation = 0;

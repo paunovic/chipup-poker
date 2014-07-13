@@ -48,5 +48,4 @@ function replayAndTestAll(err, requests) {
 
 	var mitmPlayback = new MitmPlayback(config);
 	mitmPlayback.startPlayback();
-	});
 }
