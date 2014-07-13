@@ -3,14 +3,13 @@ unit Poker.Tables.Renderer;
 interface
 
 uses
-  System.Classes, System.Generics.Collections, System.Types, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts, Poker.Tables.RenderMetrics,
-  Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, AsphyreImages, Poker.Seats.Seat, Poker.Cards, Poker.ChipStackMaker,
-  IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot;
+  Winapi.Windows, System.Classes, System.Generics.Collections, System.Types, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts,
+  Poker.Tables.RenderMetrics, Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, AsphyreImages, Poker.Seats.Seat, Poker.Cards,
+  Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
   TSoundPlayEvent = procedure(const ASound: String) of object;
-  TTableType = (ttLiveGame, ttHandPlayback);
 
   TTableRenderer = class;
 
@@ -26,12 +25,13 @@ type
   TTableRenderer = class
   private
     FHandle: THandle;
+    FEnabled: Boolean;
     FSwapChainIndex: Integer;
     FDXAreaSize: TPoint2px;
     FMetrics: TTableRenderMetrics;
     FInternalId: Integer;
+    FInternalHWND: HWND;
     FTableType: TTableType;
-    FTableStatus: TTableStatus;
     FTimeImage: TAsphyreImage;
     FRaiseThumbPosition: Single;
     FDrawColor: TColor4;
@@ -79,8 +79,11 @@ type
     procedure RenderButtons;
     procedure RenderRaisePanel;
   public
-    constructor Create(const AInternalId: Integer; const ATableType: TTableType);
+    constructor Create(const AInternalId: Integer; const AInternalHWND: HWND; const ATableType: TTableType);
     destructor Destroy; override;
+
+    procedure Enable;
+    procedure Disable;
 
     function AcquireSwapChainElement: Boolean;
     procedure SetRenderTarget(const AHandle: THandle);
@@ -91,10 +94,10 @@ type
     function UpdateDXAreaSize: Boolean;
     procedure Render;
 
-    function AnimateBets(const ACallback: THandle; ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
-    procedure AnimateBlinds(const ACallback: THandle);
-    procedure AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_Pot>);
-    procedure AnimateDealingCards(const ACallback: THandle);
+    function AnimateBets(ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
+    procedure AnimateBlinds;
+    procedure AnimateWinnerPots(const APots: TList<TPB_Pot>);
+    procedure AnimateDealingCards;
 
     procedure AnimationCallback(const AAnimationPointer: pointer);
 
@@ -103,7 +106,6 @@ type
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 
     property SwapChainIndex: Integer read FSwapChainIndex;
-    property TableStatus: TTableStatus read FTableStatus;
 
     property Metrics: TTableRenderMetrics read FMetrics;
     property ChipStackMaker: TChipStackMaker read FChipStackMaker;
@@ -134,26 +136,28 @@ type
     function GetDXButton(const AId: Integer): TDXButton;
 
     property DXButtons: TObjectList<TDXButton> read FDXButtons;
+    property RenderHandle: THandle read FHandle;
   end;
 
 implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, Poker.DirectX.Core, Poker.Tables.Resources, AbstractCanvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
+  Poker.DirectX.Core, Poker.Tables.Resources, AbstractCanvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
   Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation,
   Poker.DirectX.Timer, Poker.Pots.PotList, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table;
 
 { TTableRenderer }
 
-constructor TTableRenderer.Create(const AInternalId: Integer; const ATableType: TTableType);
+constructor TTableRenderer.Create(const AInternalId: Integer; const AInternalHWND: HWND; const ATableType: TTableType);
 begin
+  FEnabled := FALSE;
   FInternalId := AInternalId;
+  FInternalHWND := AInternalHWND;
   FMetrics := TTableRenderMetrics.Create;
   FChipStackMaker := TChipStackMaker.Create;
   FDXButtons := TObjectList<TDXButton>.Create;
-  FTableStatus := TTableStatus.Create;
   FTableType := ATableType;
 
   if FTableType = ttHandPlayback then
@@ -187,10 +191,19 @@ begin
   FDXButtons.Free;
   FChipStackMaker.Free;
   FMetrics.Free;
-  FreeAndNil(FTableStatus);
   DXCore.ReleaseSwapChainElement(FSwapChainIndex);
 
   inherited;
+end;
+
+procedure TTableRenderer.Disable;
+begin
+  FEnabled := FALSE;
+end;
+
+procedure TTableRenderer.Enable;
+begin
+  FEnabled := TRUE;
 end;
 
 function TTableRenderer.AcquireSwapChainElement: Boolean;
@@ -216,6 +229,7 @@ end;
 procedure TTableRenderer.SetRenderTarget(const AHandle: THandle);
 begin
   FHandle := AHandle;
+  DXCore.ModifySwapChainElement(FSwapChainIndex, FHandle);
 end;
 
 procedure TTableRenderer.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer; out ASetRaiseAmount: Boolean);
@@ -273,9 +287,9 @@ begin
     if table.GetObjectCopy(game) then
     try
       // render folded cards if needed, and set flag, so we can re-render scene once mouse cursor leaves the seat, and unset the flag then
-      if (FTableStatus.State > tsIdle) and
+      if (table.Status.State > tsIdle) and
          (FMetrics.IsPointInSeat(game, X, Y, seat_index)) and
-         (FTableStatus.GetSeatInfo(seat_index, seat)) and
+         (table.Status.GetSeatInfo(seat_index, seat)) and
          (seat.Cards.IsKnown) and
          (seat.Status = psFolded) then
       begin
@@ -346,6 +360,9 @@ end;
 
 procedure TTableRenderer.Render;
 begin
+  if not FEnabled then
+    Exit;
+
   if UpdateDXAreaSize then
     DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
 end;
@@ -426,6 +443,7 @@ var
   C1: Integer;
   mousepoint: TPoint;
   mousepointf: TPointF;
+  table: TTable;
 begin
   // get seat point
   seat_point := FMetrics.GetSeatPoint(AGame, ASeatIndex);
@@ -457,150 +475,154 @@ begin
   seat_action_frame_point := Point2(seat_point.x, seat_point.Y + FMetrics.SeatHeight / 2 + FMetrics.SeatActionFrameHeight / 2.15);
 
   // seat taken
-  if (Assigned(FTableStatus)) and
-     (FTableStatus.GetSeatInfo(ASeatIndex, seat_info)) then
-  begin
-    // find player info
-    if not Players.TryGetValue(seat_info.PlayerMongoId, player_info) then
-      player_info := nil;
-
-    // set seat image that we should render
-    if (FTableStatus.CurrentSeat = seat_info.SeatIndex) and
-       (not FTableStatus.Locked) and
-       (not FTableStatus.LockTimerEnabled) then
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if table.Status.GetSeatInfo(ASeatIndex, seat_info) then
     begin
-{      if tiActiveFrameBlink.Tag = 1 then
-        seat_image := active_seat_light_image
-      else
-        seat_image := active_seat_dark_image;}
-      seat_image := seat_active_image;
-    end
-    else
-      seat_image := seat_inactive_image;
+      // find player info
+      if not Players.TryGetValue(seat_info.PlayerMongoId, player_info) then
+        player_info := nil;
 
-    if Assigned(player_info) then
-    begin
-      // set avatar
-      avatar := Avatars.Add(player_info.AvatarId, nil);
-
-      // set seat upper text
-      seat_upper_text := player_info.Nick;
-      seat_upper_text_color := cColor2($FFCCCCCC);
-    end
-    else
-    begin
-      // set seat upper text
-      seat_upper_text := seat_info.UpperCaption;
-      seat_upper_text_color := cColor2($FFCCCCCC);
-
-      avatar := Avatars.DefaultAvatar;
-    end;
-
-    // set seat lower text
-    if seat_info.Disconnected then
-    begin
-      seat_lower_text := 'Disconnected';
-      seat_lower_text_color := cColor2($FFFF3535);
-    end
-    else
-    begin
-      case seat_info.Status of
-        psOutOfPlay: seat_lower_text := 'Sitting Out';
-      else
-        if FWinningAniDelay > 0 then
-          seat_lower_text := ChipsToStr(seat_info.PreviousChips)
+      // set seat image that we should render
+      if (table.Status.CurrentSeat = seat_info.SeatIndex) and
+         (not table.Status.Locked) and
+         (not table.GameplayLocked) then
+      begin
+  {      if tiActiveFrameBlink.Tag = 1 then
+          seat_image := active_seat_light_image
         else
-          seat_lower_text := ChipsToStr(seat_info.Chips);
+          seat_image := active_seat_dark_image;}
+        seat_image := seat_active_image;
+      end
+      else
+        seat_image := seat_inactive_image;
+
+      if Assigned(player_info) then
+      begin
+        // set avatar
+        avatar := Avatars.Add(player_info.AvatarId, nil);
+
+        // set seat upper text
+        seat_upper_text := player_info.Nick;
+        seat_upper_text_color := cColor2($FFCCCCCC);
+      end
+      else
+      begin
+        // set seat upper text
+        seat_upper_text := seat_info.UpperCaption;
+        seat_upper_text_color := cColor2($FFCCCCCC);
+
+        avatar := Avatars.DefaultAvatar;
       end;
-      seat_lower_text_color := cColor2($FF8DC63F);
-    end;
 
-    // set seat action
-    action_image := nil;
-    if seat_info.LowerCaption = 'CALL' then
-      action_image := TableResources.SeatActionCall;
-    if seat_info.LowerCaption = 'CHECK' then
-      action_image := TableResources.SeatActionCheck;
-    if seat_info.LowerCaption = 'RAISE' then
-      action_image := TableResources.SeatActionRaise;
-    if seat_info.LowerCaption = 'FOLD' then
-      action_image := TableResources.SeatActionFold;
-    if seat_info.LowerCaption = 'DISCONNECTED' then
-      action_image := TableResources.SeatActionDisconnected;
-
-    // render seat cards
-    if FTableStatus.State > tsIdle then
-    begin
-      case seat_info.Status of
-        psInHand, psAllIn: begin
-          for C1 := 0 to seat_info.DealtCards - 1 do
-          begin
-            card_point := FMetrics.GetCardPoint(AGame, seat_info, C1);
-            if ((C1 >= 0) and (C1 < seat_info.Cards.Count)) and
-               (seat_info.Cards[C1].IsKnown) then
-              RenderCard(card_point, seat_info.Cards[C1], FMetrics.CARD_OPEN_PERC)
-            else
-              RenderCard(card_point, nil, FMetrics.CARD_HIDDEN_PERC);
-          end;
+      // set seat lower text
+      if seat_info.Disconnected then
+      begin
+        seat_lower_text := 'Disconnected';
+        seat_lower_text_color := cColor2($FFFF3535);
+      end
+      else
+      begin
+        case seat_info.Status of
+          psOutOfPlay: seat_lower_text := 'Sitting Out';
+        else
+          if FWinningAniDelay > 0 then
+            seat_lower_text := ChipsToStr(seat_info.PreviousChips)
+          else
+            seat_lower_text := ChipsToStr(seat_info.Chips);
         end;
+        seat_lower_text_color := cColor2($FF8DC63F);
+      end;
 
-        psFolded: begin
-          mousepoint := Mouse.CursorPos;
-          ScreenToClient(FHandle, mousepoint);
-          mousepointf.X := mousepoint.X;
-          mousepointf.Y := mousepoint.Y;
+      // set seat action
+      action_image := nil;
+      if seat_info.LowerCaption = 'CALL' then
+        action_image := TableResources.SeatActionCall;
+      if seat_info.LowerCaption = 'CHECK' then
+        action_image := TableResources.SeatActionCheck;
+      if seat_info.LowerCaption = 'RAISE' then
+        action_image := TableResources.SeatActionRaise;
+      if seat_info.LowerCaption = 'FOLD' then
+        action_image := TableResources.SeatActionFold;
+      if seat_info.LowerCaption = 'DISCONNECTED' then
+        action_image := TableResources.SeatActionDisconnected;
 
-          if (seat_info.CardsVisible) or
-             ((seat_info.Cards.IsKnown) and
-              (System.Types.PtInRect(RectF(seat_point.x - FMetrics.SeatWidth / 2, seat_point.y - FMetrics.SeatHeight / 2,
-                     seat_point.x + FMetrics.SeatWidth / 2, seat_point.y + FMetrics.SeatHeight / 2), mousepointf))) then
-            for C1 := 0 to seat_info.Cards.Count - 1 do
+      // render seat cards
+      if table.Status.State > tsIdle then
+      begin
+        case seat_info.Status of
+          psInHand, psAllIn: begin
+            for C1 := 0 to seat_info.DealtCards - 1 do
             begin
               card_point := FMetrics.GetCardPoint(AGame, seat_info, C1);
-              RenderCard(card_point, seat_info.Cards[C1], FMetrics.CARD_FOLDED_PERC, 170)
+              if ((C1 >= 0) and (C1 < seat_info.Cards.Count)) and
+                 (seat_info.Cards[C1].IsKnown) then
+                RenderCard(card_point, seat_info.Cards[C1], FMetrics.CARD_OPEN_PERC)
+              else
+                RenderCard(card_point, nil, FMetrics.CARD_HIDDEN_PERC);
             end;
+          end;
+
+          psFolded: begin
+            mousepoint := Mouse.CursorPos;
+            ScreenToClient(FHandle, mousepoint);
+            mousepointf.X := mousepoint.X;
+            mousepointf.Y := mousepoint.Y;
+
+            if (seat_info.CardsVisible) or
+               ((seat_info.Cards.IsKnown) and
+                (System.Types.PtInRect(RectF(seat_point.x - FMetrics.SeatWidth / 2, seat_point.y - FMetrics.SeatHeight / 2,
+                       seat_point.x + FMetrics.SeatWidth / 2, seat_point.y + FMetrics.SeatHeight / 2), mousepointf))) then
+              for C1 := 0 to seat_info.Cards.Count - 1 do
+              begin
+                card_point := FMetrics.GetCardPoint(AGame, seat_info, C1);
+                RenderCard(card_point, seat_info.Cards[C1], FMetrics.CARD_FOLDED_PERC, 170)
+              end;
+          end;
         end;
       end;
-    end;
 
-    // render avatar
-    if avatar.DXImage.TextureCount > 0 then
+      // render avatar
+      if avatar.DXImage.TextureCount > 0 then
+      begin
+        DXCore.Canvas.UseImage(avatar.DXImage, TexFull4);
+        DXCore.Canvas.TexMap(pBounds4(avatar_point.X - avatar_width / 2, avatar_point.Y - avatar_height / 2, avatar_width, avatar_height), clWhite4);
+      end;
+
+      // render seat
+      DXCore.Canvas.UseImage(seat_image, TexFull4);
+      DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.SeatWidth / 2, seat_point.Y - FMetrics.SeatHeight / 2, FMetrics.SeatWidth, FMetrics.SeatHeight), clWhite4);
+
+      // render upper seat text
+      RenderScaleFont(seat_upper_text, seat_upper_text_color, seat_upper_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
+                      Low(TableResources.BarmenoFonts), 16, 0, FMetrics.SeatHeight * 0.36, FMetrics.SeatWidth * 0.75);
+
+      // render lower seat text
+      RenderScaleFont(seat_lower_text, seat_lower_text_color, seat_lower_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
+                      Low(TableResources.BarmenoFonts), High(TableResources.BarmenoFonts), 0, FMetrics.SeatHeight * 0.37, FMetrics.SeatWidth * 0.55);
+
+      // render seat action frame/text
+      if Assigned(action_image) then
+      begin
+        // render seat action frame
+        DXCore.Canvas.UseImage(action_image, TexFull4);
+        DXCore.Canvas.TexMap(pBounds4(seat_action_frame_point.X - FMetrics.SeatActionFrameWidth / 2,
+             seat_action_frame_point.Y - FMetrics.SeatActionFrameHeight / 2, FMetrics.SeatActionFrameWidth, FMetrics.SeatActionFrameHeight), clWhite4);
+  {
+        // render seat action text
+        RenderScaleFont(seat_action_text, seat_action_text_color, seat_action_frame_point, TableResources.SintonyFonts, Low(TableResources.SintonyFonts),
+                        10, 16, 2, FSeatActionFrameHeight * 0.75, FSeatActionFrameWidth * 0.9);
+  }
+      end;
+    end
+    else
     begin
-      DXCore.Canvas.UseImage(avatar.DXImage, TexFull4);
-      DXCore.Canvas.TexMap(pBounds4(avatar_point.X - avatar_width / 2, avatar_point.Y - avatar_height / 2, avatar_width, avatar_height), clWhite4);
+      // empty seat
+      DXCore.Canvas.UseImage(seat_empty_image, TexFull4);
+      DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.SeatWidth / 2, seat_point.Y - FMetrics.SeatHeight / 2, FMetrics.SeatWidth, FMetrics.SeatHeight), clWhite4);
     end;
-
-    // render seat
-    DXCore.Canvas.UseImage(seat_image, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.SeatWidth / 2, seat_point.Y - FMetrics.SeatHeight / 2, FMetrics.SeatWidth, FMetrics.SeatHeight), clWhite4);
-
-    // render upper seat text
-    RenderScaleFont(seat_upper_text, seat_upper_text_color, seat_upper_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
-                    Low(TableResources.BarmenoFonts), 16, 0, FMetrics.SeatHeight * 0.36, FMetrics.SeatWidth * 0.75);
-
-    // render lower seat text
-    RenderScaleFont(seat_lower_text, seat_lower_text_color, seat_lower_text_point, TableResources.BarmenoFonts, Low(TableResources.BarmenoFonts),
-                    Low(TableResources.BarmenoFonts), High(TableResources.BarmenoFonts), 0, FMetrics.SeatHeight * 0.37, FMetrics.SeatWidth * 0.55);
-
-    // render seat action frame/text
-    if Assigned(action_image) then
-    begin
-      // render seat action frame
-      DXCore.Canvas.UseImage(action_image, TexFull4);
-      DXCore.Canvas.TexMap(pBounds4(seat_action_frame_point.X - FMetrics.SeatActionFrameWidth / 2,
-           seat_action_frame_point.Y - FMetrics.SeatActionFrameHeight / 2, FMetrics.SeatActionFrameWidth, FMetrics.SeatActionFrameHeight), clWhite4);
-{
-      // render seat action text
-      RenderScaleFont(seat_action_text, seat_action_text_color, seat_action_frame_point, TableResources.SintonyFonts, Low(TableResources.SintonyFonts),
-                      10, 16, 2, FSeatActionFrameHeight * 0.75, FSeatActionFrameWidth * 0.9);
-}
-    end;
-  end
-  else
-  begin
-    // empty seat
-    DXCore.Canvas.UseImage(seat_empty_image, TexFull4);
-    DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.SeatWidth / 2, seat_point.Y - FMetrics.SeatHeight / 2, FMetrics.SeatWidth, FMetrics.SeatHeight), clWhite4);
+  finally
+    Tables.Unlock;
   end;
 end;
 
@@ -776,23 +798,26 @@ var
   mins: Integer;
   minute_text: String;
   txt: String;
+  table: TTable;
 begin
   case AGame.State of
     gsClosing: begin
-      if Assigned(FTableStatus) then
-      begin
-        FTableStatus.UpdateClosingTime(AGame);
+      if Tables.GetAndLockTable(FInternalId, table) then
+      try
+        table.Status.UpdateClosingTime(AGame);
 
-        if FTableStatus.ClosingTime = 0 then
+        if table.Status.ClosingTime = 0 then
           txt := 'Table is closing after curent hand'
         else
         begin
-          mins := FTableStatus.ClosingTime div 60000 + 1;
+          mins := table.Status.ClosingTime div 60000 + 1;
           if mins = 1 then
             txt := Format('Table is closing in less than a minute', [mins, minute_text])
           else
             txt := Format('Table is closing in %d minutes', [mins]);
         end;
+      finally
+
       end;
 
       RenderScaleFont(txt, clWhite2, Point2(FMetrics.TableCenter.x, FMetrics.TableCenter.Y + FMetrics.CardHeight / 3), TableResources.SintonyFonts,
@@ -810,45 +835,50 @@ var
   seat: TSeatInfo;
   seat_point: TPoint2;
   time_percent: Single;
+  table: TTable;
 begin
-  if (not Assigned(FTableStatus)) or
-     (FTableStatus.Locked) or
-     (FTableStatus.Time = 0) or
-     (FTableStatus.TimebarEndtime = 0) or
-     (FTableStatus.LockTimerEnabled) then
-    Exit;
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.Status.Locked) or
+       (table.Status.Time = 0) or
+       (table.Status.TimebarEndtime = 0) or
+       (table.GameplayLocked) then
+      Exit;
 
-  if FTableStatus.GetSeatInfo(FTableStatus.CurrentSeat, seat) then
-  begin
-    seat_point := FMetrics.GetSeatPoint(AGame, seat.SeatIndex);
-
-    FTableStatus.UpdateCurrentPlaytime;
-    if FTableStatus.CurrentPlaytime > 0 then
+    if table.Status.GetSeatInfo(table.Status.CurrentSeat, seat) then
     begin
-      FTimeImage := TableResources.TimebarImage;
-      time_percent := (FTableStatus.CurrentPlaytime / (ServerSettings.Playtime * 1000)) * 1.5;
-    end
-    else
-    begin
-      // using timebank..
-      if (FTimeImage <> TableResources.TimebankImage) and
-         (Assigned(FOnTimebankStarted)) then
-        FOnTimebankStarted(self);
+      seat_point := FMetrics.GetSeatPoint(AGame, seat.SeatIndex);
 
-      FTimeImage := TableResources.TimebankImage;
-      time_percent := (Integer(seat.Timebank) + FTableStatus.CurrentPlaytime) / (ServerSettings.Timebank * 1000);
+      table.Status.UpdateCurrentPlaytime;
+      if table.Status.CurrentPlaytime > 0 then
+      begin
+        FTimeImage := TableResources.TimebarImage;
+        time_percent := (table.Status.CurrentPlaytime / (ServerSettings.Playtime * 1000)) * 1.5;
+      end
+      else
+      begin
+        // using timebank..
+        if (FTimeImage <> TableResources.TimebankImage) and
+           (Assigned(FOnTimebankStarted)) then
+          FOnTimebankStarted(self);
+
+        FTimeImage := TableResources.TimebankImage;
+        time_percent := (Integer(seat.Timebank) + table.Status.CurrentPlaytime) / (ServerSettings.Timebank * 1000);
+      end;
+
+      if time_percent > 1 then
+        time_percent := 1;
+
+      if time_percent > 0 then
+      begin
+        DXCore.Canvas.UseImagePx(FTimeImage, pBounds4(0, 0, time_percent * FTimeImage.Texture[0].Width, FTimeImage.Texture[0].Height));
+        DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.TimebarWidth / 2,
+           seat_point.Y + FMetrics.SeatHeight / 2 - 3 * FMetrics.TableResizeRatio, FMetrics.TimebarWidth * time_percent, FMetrics.TimebarHeight),
+           clWhite4);
+      end;
     end;
-
-    if time_percent > 1 then
-      time_percent := 1;
-
-    if time_percent > 0 then
-    begin
-      DXCore.Canvas.UseImagePx(FTimeImage, pBounds4(0, 0, time_percent * FTimeImage.Texture[0].Width, FTimeImage.Texture[0].Height));
-      DXCore.Canvas.TexMap(pBounds4(seat_point.X - FMetrics.TimebarWidth / 2,
-         seat_point.Y + FMetrics.SeatHeight / 2 - 3 * FMetrics.TableResizeRatio, FMetrics.TimebarWidth * time_percent, FMetrics.TimebarHeight),
-         clWhite4);
-    end;
+  finally
+    Tables.Unlock;
   end;
 end;
 
@@ -864,7 +894,7 @@ procedure TTableRenderer.RenderTableCards;
       if not AIsAnimated then
       begin
         AAnimationsList.Clear;
-        animation := DXTimer.AddAnimation(FHandle, AAnimateFrom, AAnimateTo, 0.15, ADelay, 0, FDXAreaSize); AAnimationsList.Add(animation.Id);
+        animation := DXTimer.AddAnimation(FInternalHWND, AAnimateFrom, AAnimateTo, 0.15, ADelay, 0, FDXAreaSize); AAnimationsList.Add(animation.Id);
         AIsAnimated := TRUE;
       end;
 
@@ -872,7 +902,7 @@ procedure TTableRenderer.RenderTableCards;
         if DXTimer.AnimationsEnabled then
         begin
           for C1 := 0 to AAnimationsList.Count - 1 do
-            if DXTimer.Find(FHandle, AAnimationsList[C1], animation) then
+            if DXTimer.Find(FInternalHWND, AAnimationsList[C1], animation) then
             begin
               ACurrentCardPoint := animation.GetCurrPoint(FDXAreaSize);
               if animation.Status = asAnimating then
@@ -899,6 +929,7 @@ var
   card_points_final: array of TPoint2;
   show_cards: array of Integer; // -1 - hide completely, 0 - card face down, 1 - card face up
   animation: TDXAnimation;
+  table: TTable;
 begin
   SetLength(card_points_final, 5);
   SetLength(card_points_curr, 5);
@@ -918,83 +949,89 @@ begin
 //  card_points_mid[3].x := card_points_final[3].x + FCardWidth / 2;
 //  card_points_mid[4].x := card_points_final[4].x + FCardWidth / 2;
 
-  if (Assigned(FTableStatus)) and
-     (FTableStatus.FlopCards.Count > 0) and
-     (FTableStatus.State >= tsFlop) then
-  begin
-    if not FFlopAnimated then
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.Status.FlopCards.Count > 0) and
+       (table.Status.State >= tsFlop) then
     begin
-      FFlopAnimations.Clear;
-
-      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[0], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[1], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, FMetrics.DealerPoint, card_points_mid[2], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
-
-      animation := DXTimer.AddAnimation(FHandle, card_points_mid[0], card_points_final[0], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, card_points_mid[1], card_points_final[1], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
-      animation := DXTimer.AddAnimation(FHandle, card_points_mid[2], card_points_final[2], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
-
-      FFlopAnimated := TRUE;
-    end;
-
-    if FFlopAnimations.Count > 0 then
-      if DXTimer.AnimationsEnabled then
+      if not FFlopAnimated then
       begin
-        for C1 := 0 to FFlopAnimations.Count - 1 do
-          if (DXTimer.Find(FHandle, FFlopAnimations[C1], animation)) and
-             (animation.Status = asAnimating) then
-          begin
-            card_points_curr[Integer(animation.Tags[ANITAG_CARD_INDEX])] := animation.GetCurrPoint(FDXAreaSize);
-            if FFlopAnimations.Count > 3 then
-              show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 0
-            else
-              show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 1;
-          end;
-      end
+        FFlopAnimations.Clear;
+
+        animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[0], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
+        animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[1], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
+        animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.DealerPoint, card_points_mid[2], 0.15, 0.9, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
+
+        animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[0], card_points_final[0], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 0); FFlopAnimations.Add(animation.Id);
+        animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[1], card_points_final[1], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 1); FFlopAnimations.Add(animation.Id);
+        animation := DXTimer.AddAnimation(FInternalHWND, card_points_mid[2], card_points_final[2], 0.2, 1.1, 0, FDXAreaSize); animation.Tags.AddOrSetValue(ANITAG_CARD_INDEX, 2); FFlopAnimations.Add(animation.Id);
+
+        FFlopAnimated := TRUE;
+      end;
+
+      if FFlopAnimations.Count > 0 then
+        if DXTimer.AnimationsEnabled then
+        begin
+          for C1 := 0 to FFlopAnimations.Count - 1 do
+            if (DXTimer.Find(FInternalHWND, FFlopAnimations[C1], animation)) and
+               (animation.Status = asAnimating) then
+            begin
+              card_points_curr[Integer(animation.Tags[ANITAG_CARD_INDEX])] := animation.GetCurrPoint(FDXAreaSize);
+              if FFlopAnimations.Count > 3 then
+                show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 0
+              else
+                show_cards[Integer(animation.Tags[ANITAG_CARD_INDEX])] := 1;
+            end;
+        end
+        else
+        begin
+          show_cards[0] := -1;
+          show_cards[1] := -1;
+          show_cards[2] := -1;
+        end
       else
       begin
-        show_cards[0] := -1;
-        show_cards[1] := -1;
-        show_cards[2] := -1;
-      end
-    else
-    begin
-      show_cards[0] := 1;
-      show_cards[1] := 1;
-      show_cards[2] := 1;
+        show_cards[0] := 1;
+        show_cards[1] := 1;
+        show_cards[2] := 1;
+      end;
+
+      for C1 := 0 to table.Status.FlopCards.Count - 1 do
+        case show_cards[C1] of
+          -1: Continue;
+           0: RenderCard(card_points_curr[C1], nil, 1);
+           1: RenderCard(card_points_curr[C1], table.Status.FlopCards[C1], 1);
+        end;
     end;
 
-    for C1 := 0 to FTableStatus.FlopCards.Count - 1 do
-      case show_cards[C1] of
-        -1: Continue;
-         0: RenderCard(card_points_curr[C1], nil, 1);
-         1: RenderCard(card_points_curr[C1], FTableStatus.FlopCards[C1], 1);
-      end;
-  end;
+    if table.Status.State >= tsTurn then
+      RenderSingleCard(table.Status.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FMetrics.DealerPoint, card_points_final[3], 0.75 + FWinningTurnAniDelay);
 
-  if Assigned(FTableStatus) then
-  begin
-    if FTableStatus.State >= tsTurn then
-      RenderSingleCard(FTableStatus.TurnCard, FTurnAnimations, FTurnAnimated, card_points_curr[3], show_cards[3], FMetrics.DealerPoint, card_points_final[3], 0.75 + FWinningTurnAniDelay);
-
-    if FTableStatus.State >= tsRiver then
-      RenderSingleCard(FTableStatus.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FMetrics.DealerPoint, card_points_final[4], 0.75 + FWinningRiverAniDelay);
+    if table.Status.State >= tsRiver then
+      RenderSingleCard(table.Status.RiverCard, FRiverAnimations, FRiverAnimated, card_points_curr[4], show_cards[4], FMetrics.DealerPoint, card_points_final[4], 0.75 + FWinningRiverAniDelay);
+  finally
+    Tables.Unlock;
   end;
 end;
 
 procedure TTableRenderer.RenderDealerButton(const AGame: TGameInfo);
 var
   dealer_point: TPoint2;
+  table: TTable;
 begin
-  if (not Assigned(FTableStatus)) or
-     (FTableStatus.Dealer = -1) then
-    Exit;
+  if Tables.TryGetValue(FInternalId, table) then
+  try
+    if table.Status.Dealer = -1 then
+      Exit;
 
-  dealer_point := FMetrics.GetDealerPoint(AGame, FTableStatus.Dealer);
+    dealer_point := FMetrics.GetDealerPoint(AGame, table.Status.Dealer);
 
-  DXCore.Canvas.UseImage(TableResources.DealerButtonImage, TexFull4);
-  DXCore.Canvas.TexMap(pBounds4(dealer_point.X - FMetrics.DealerButtonWidth / 2, dealer_point.Y - FMetrics.DealerButtonHeight / 2,
-       FMetrics.DealerButtonWidth, FMetrics.DealerButtonHeight), clWhite4);
+    DXCore.Canvas.UseImage(TableResources.DealerButtonImage, TexFull4);
+    DXCore.Canvas.TexMap(pBounds4(dealer_point.X - FMetrics.DealerButtonWidth / 2, dealer_point.Y - FMetrics.DealerButtonHeight / 2,
+         FMetrics.DealerButtonWidth, FMetrics.DealerButtonHeight), clWhite4);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TTableRenderer.RenderDealingCardsAni;
@@ -1006,7 +1043,7 @@ begin
     Exit;
 
   for C1 := 0 to FDealAnimations.Count - 1 do
-    if (DXTimer.Find(FHandle, FDealAnimations[C1], animation)) and
+    if (DXTimer.Find(FInternalHWND, FDealAnimations[C1], animation)) and
        (animation.Status = asAnimating) then
     begin
       RenderCard(animation.GetCurrPoint(FDXAreaSize), nil, 1);
@@ -1027,14 +1064,12 @@ var
   animation: TDXAnimation;
   seat_index: Integer;
   animated_seats: TList<Integer>;
+  table: TTable;
 begin
-  if not Assigned(FTableStatus) then
-    Exit;
-
   animated_seats := TList<Integer>.Create;
   try
     for C2 := 0 to FBetAnimations.Count - 1 do
-      if DXTimer.Find(FHandle, FBetAnimations[C2], animation) then
+      if DXTimer.Find(FInternalHWND, FBetAnimations[C2], animation) then
       begin
         if (not animation.Tags.ContainsKey(ANITAG_BLIND)) or
            (animation.Status = asAnimating) then
@@ -1056,21 +1091,26 @@ begin
         animated_seats.Add(animation.Tags[ANITAG_SEAT]);
       end;
 
-    if FPotWinAnimations.Count = 0 then
-      for C1 := 0 to FTableStatus.Seats.Count - 1 do
+    if (FPotWinAnimations.Count = 0) and
+       (Tables.TryGetValue(FInternalId, table)) then
+    try
+      for C1 := 0 to table.Status.Seats.Count - 1 do
       begin
-        seat_index := FTableStatus.Seats[C1].SeatIndex;
+        seat_index := table.Status.Seats[C1].SeatIndex;
 
         if (not animated_seats.Contains(seat_index)) and
-           (FTableStatus.Bets.Count > seat_index) and
-           (FTableStatus.Bets[seat_index] > 0) then
+           (table.Status.Bets.Count > seat_index) and
+           (table.Status.Bets[seat_index] > 0) then
         begin
-          chips_point := FMetrics.GetBetPoint(AGame, seat_index, FTableStatus.Dealer);
-          chips_stack := FChipStackMaker.MakeStack(FTableStatus.Bets[seat_index]);
+          chips_point := FMetrics.GetBetPoint(AGame, seat_index, table.Status.Dealer);
+          chips_stack := FChipStackMaker.MakeStack(table.Status.Bets[seat_index]);
           RenderChipStack(chips_point, chips_stack);
-          RenderValue(chips_point, FTableStatus.Bets[seat_index], clWhite2, FALSE);
+          RenderValue(chips_point, table.Status.Bets[seat_index], clWhite2, FALSE);
         end;
       end;
+    finally
+      Tables.Unlock;
+    end;
   finally
     animated_seats.Free;
   end;
@@ -1084,57 +1124,60 @@ var
   pot_point: TPoint2;
   animation: TDXAnimation;
   pots: TPotList;
+  table: TTable;
 begin
-  if not Assigned(FTableStatus) then
-    Exit;
+  if Tables.TryGetValue(FInternalId, table) then
+  try
+    if FBetAnimations.Count = 0 then
+      pots := table.Status.Pots
+    else
+      pots := table.Status.PreviousPots;
 
-  if FBetAnimations.Count = 0 then
-    pots := FTableStatus.Pots
-  else
-    pots := FTableStatus.PreviousPots;
-
-  for C1 := 0 to pots.Count - 1 do
-  begin
-    pot_value := pots[C1].ValueWithoutRake;
-
-    for C2 := 0 to FPotWinAnimations.Count - 1 do
-      if (DXTimer.Find(FHandle, FPotWinAnimations[C2], animation)) and
-         (animation.Tags[ANITAG_POT_INDEX] = C1) and
-         (animation.Status in [asAnimating, asDone]) then
-      begin
-        chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
-        RenderChipStack(animation.GetCurrPoint(FDXAreaSize), chips_stack);
-
-        if animation.Tags[ANITAG_CHIPS] >= pot_value then
-          pot_value := 0
-        else
-          Dec(pot_value, UINT32(animation.Tags[ANITAG_CHIPS]));
-
-        if animation.Tags.ContainsKey(ANITAG_SOUND) then
-        begin
-          if Assigned(FOnSoundPlay) then
-            FOnSoundPlay(animation.Tags[ANITAG_SOUND]);
-          animation.Tags.Remove(ANITAG_SOUND);
-        end;
-
-        if animation.Tags.ContainsKey(ANITAG_WINMSG) then
-        begin
-          if Assigned(FOnDealerChatMessage) then
-            FOnDealerChatMessage(animation.Tags[ANITAG_WINMSG]);
-          animation.Tags.Remove(ANITAG_WINMSG);
-        end;
-      end;
-
-    if pot_value > 0 then
+    for C1 := 0 to pots.Count - 1 do
     begin
-      pot_point := FMetrics.GetPotPoint(C1);
-      if (pot_point.X > 0) and (pot_point.Y > 0) then
+      pot_value := pots[C1].ValueWithoutRake;
+
+      for C2 := 0 to FPotWinAnimations.Count - 1 do
+        if (DXTimer.Find(FInternalHWND, FPotWinAnimations[C2], animation)) and
+           (animation.Tags[ANITAG_POT_INDEX] = C1) and
+           (animation.Status in [asAnimating, asDone]) then
+        begin
+          chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
+          RenderChipStack(animation.GetCurrPoint(FDXAreaSize), chips_stack);
+
+          if animation.Tags[ANITAG_CHIPS] >= pot_value then
+            pot_value := 0
+          else
+            Dec(pot_value, UINT32(animation.Tags[ANITAG_CHIPS]));
+
+          if animation.Tags.ContainsKey(ANITAG_SOUND) then
+          begin
+            if Assigned(FOnSoundPlay) then
+              FOnSoundPlay(animation.Tags[ANITAG_SOUND]);
+            animation.Tags.Remove(ANITAG_SOUND);
+          end;
+
+          if animation.Tags.ContainsKey(ANITAG_WINMSG) then
+          begin
+            if Assigned(FOnDealerChatMessage) then
+              FOnDealerChatMessage(animation.Tags[ANITAG_WINMSG]);
+            animation.Tags.Remove(ANITAG_WINMSG);
+          end;
+        end;
+
+      if pot_value > 0 then
       begin
-        chips_stack := FChipStackMaker.MakeStack(pot_value);
-        RenderChipStack(pot_point, chips_stack);
-        RenderValue(pot_point, pot_value, clWhite2, TRUE);
+        pot_point := FMetrics.GetPotPoint(C1);
+        if (pot_point.X > 0) and (pot_point.Y > 0) then
+        begin
+          chips_stack := FChipStackMaker.MakeStack(pot_value);
+          RenderChipStack(pot_point, chips_stack);
+          RenderValue(pot_point, pot_value, clWhite2, TRUE);
+        end;
       end;
     end;
+  finally
+    Tables.Unlock;
   end;
 end;
 
@@ -1191,26 +1234,29 @@ end;
 procedure TTableRenderer.RenderRaisePanel;
 var
   red_bounds: TPoint4;
+  table: TTable;
 begin
-  if not Assigned(FTableStatus) then
-    Exit;
+  if Tables.TryGetValue(FInternalId, table) then
+  try
+    if (table.Status.ActionRaise) or
+       (table.Status.ActionBet) then
+    begin
+      // render raise slider background
+      DXCore.Canvas.UseImage(TableResources.RaiseSliderBackgroundImage, TexFull4);
+      DXCore.Canvas.TexMap(FMetrics.RaisePanelBounds, clWhite4);
 
-  if (FTableStatus.ActionRaise) or
-     (FTableStatus.ActionBet) then
-  begin
-    // render raise slider background
-    DXCore.Canvas.UseImage(TableResources.RaiseSliderBackgroundImage, TexFull4);
-    DXCore.Canvas.TexMap(FMetrics.RaisePanelBounds, clWhite4);
+      // render raise red fill
+      red_bounds := pBounds4(FMetrics.RaiseTrackBounds[0].x + 1, FMetrics.RaiseTrackBounds[0].y + 1,
+           FRaiseThumbPosition * (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x - 2),
+           FMetrics.RaiseTrackBounds[2].y - FMetrics.RaiseTrackBounds[0].y - 3);
+      DXCore.Canvas.FillQuad(red_bounds, cColor4($FFB40004));
 
-    // render raise red fill
-    red_bounds := pBounds4(FMetrics.RaiseTrackBounds[0].x + 1, FMetrics.RaiseTrackBounds[0].y + 1,
-         FRaiseThumbPosition * (FMetrics.RaiseTrackBounds[1].x - FMetrics.RaiseTrackBounds[0].x - 2),
-         FMetrics.RaiseTrackBounds[2].y - FMetrics.RaiseTrackBounds[0].y - 3);
-    DXCore.Canvas.FillQuad(red_bounds, cColor4($FFB40004));
-
-    // render raise thumb
-    DXCore.Canvas.UseImage(TableResources.RaiseSliderButtonImage, TexFull4);
-    DXCore.Canvas.TexMap(FMetrics.RaiseThumbBounds, clWhite4);
+      // render raise thumb
+      DXCore.Canvas.UseImage(TableResources.RaiseSliderButtonImage, TexFull4);
+      DXCore.Canvas.TexMap(FMetrics.RaiseThumbBounds, clWhite4);
+    end;
+  finally
+    Tables.Unlock;
   end;
 end;
 
@@ -1248,6 +1294,8 @@ begin
 end;
 
 procedure TTableRenderer.ClearAnimations;
+var
+  table: TTable;
 begin
   FFlopAnimations.Clear;
   FTurnAnimations.Clear;
@@ -1256,17 +1304,13 @@ begin
   FBetAnimations.Clear;
   FPotWinAnimations.Clear;
 
-  if Assigned(FTableStatus) then
-  begin
-    FFlopAnimated := FTableStatus.State >= tsFlop;
-    FTurnAnimated := FTableStatus.State >= tsTurn;
-    FRiverAnimated := FTableStatus.State >= tsRiver;
-  end
-  else
-  begin
-    FFlopAnimated := FALSE;
-    FTurnAnimated := FALSE;
-    FRiverAnimated := FALSE;
+  if Tables.TryGetValue(FInternalId, table) then
+  try
+    FFlopAnimated := table.Status.State >= tsFlop;
+    FTurnAnimated := table.Status.State >= tsTurn;
+    FRiverAnimated := table.Status.State >= tsRiver;
+  finally
+    Tables.Unlock;
   end;
 end;
 
@@ -1275,6 +1319,7 @@ var
   seat_index: Integer;
   seat: TSeatInfo;
   animation: TDXAnimation;
+  table: TTable;
 begin
   if not Assigned(AAnimationPointer) then
   begin
@@ -1303,23 +1348,34 @@ begin
       FPotWinAnimations.Remove(animation.Id);
       if FPotWinAnimations.Count = 0 then
       begin
-        FTableStatus.PreviousPots.Clear;
-        FTableStatus.Pots.Clear;
+        if Tables.TryGetValue(FInternalId, table) then
+        try
+          table.Status.PreviousPots.Clear;
+          table.Status.Pots.Clear;
+        finally
+          Tables.Unlock;
+        end;
       end;
     end;
 
     if FDealAnimations.Contains(animation.Id) then
     begin
       seat_index := animation.Tags[ANITAG_SEAT];
-      if (Assigned(FTableStatus)) and
-         (FTableStatus.GetSeatInfo(seat_index, seat)) then
-        seat.IncDealtCards;
+      if Tables.TryGetValue(FInternalId, table) then
+      try
+        if table.Status.GetSeatInfo(seat_index, seat) then
+          seat.IncDealtCards;
+      finally
+        Tables.Unlock;
+      end;
       FDealAnimations.Remove(animation.Id);
     end;
   end;
+
+  Render;
 end;
 
-function TTableRenderer.AnimateBets(const ACallback: THandle; ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
+function TTableRenderer.AnimateBets(ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
 var
   C1: Integer;
   bet_point: TPoint2;
@@ -1329,9 +1385,6 @@ var
   game: TGameInfo;
 begin
   result := FALSE;
-  if not Assigned(FTableStatus) then
-    Exit;
-
   for C1 := 0 to ABets.Count - 1 do
     if (ABets[C1] > 0) and
        ((ASeatIndex = -1) or
@@ -1341,7 +1394,7 @@ begin
       try
         if table.GetObjectCopy(game) then
         try
-          bet_point := FMetrics.GetBetPoint(game, C1, FTableStatus.Dealer);
+          bet_point := FMetrics.GetBetPoint(game, C1, table.Status.Dealer);
         finally
           game.Free;
         end;
@@ -1351,7 +1404,7 @@ begin
 
       pot_point := FMetrics.GetPotPoint(0);
 
-      animation := DXTimer.AddAnimation(ACallback, bet_point, pot_point, Settings.Hardcoded.ANIMATION_METRICS.BETS_SPEED,
+      animation := DXTimer.AddAnimation(FInternalHWND, bet_point, pot_point, Settings.Hardcoded.ANIMATION_METRICS.BETS_SPEED,
           Settings.Hardcoded.ANIMATION_METRICS.BETS_START_DELAY, 0, FDXAreaSize);
       animation.Tags.AddOrSetValue(ANITAG_SEAT, C1);
       animation.Tags.AddOrSetValue(ANITAG_CHIPS, ABets[C1]);
@@ -1363,47 +1416,46 @@ begin
     end;
 end;
 
-procedure TTableRenderer.AnimateBlinds(const ACallback: THandle);
+procedure TTableRenderer.AnimateBlinds;
 var
   bet_point_sb, bet_point_bb: TPoint2;
   animation: TDXAnimation;
   table: TTable;
   game: TGameInfo;
 begin
-  if (not Assigned(FTableStatus)) or
-     (FTableStatus.SmallBlindSeat < 0) or (FTableStatus.SmallBlindSeat > FTableStatus.Bets.Count - 1) or
-     (FTableStatus.BigBlindSeat < 0) or (FTableStatus.BigBlindSeat > FTableStatus.Bets.Count - 1) then
-    Exit;
-
   if Tables.GetAndLockTable(FInternalId, table) then
   try
+    if (table.Status.SmallBlindSeat < 0) or (table.Status.SmallBlindSeat > table.Status.Bets.Count - 1) or
+       (table.Status.BigBlindSeat < 0) or (table.Status.BigBlindSeat > table.Status.Bets.Count - 1) then
+      Exit;
+
     if table.GetObjectCopy(game) then
     try
-      bet_point_sb := FMetrics.GetBetPoint(game, FTableStatus.SmallBlindSeat, FTableStatus.Dealer);
-      bet_point_bb := FMetrics.GetBetPoint(game, FTableStatus.BigBlindSeat, FTableStatus.Dealer);
+      bet_point_sb := FMetrics.GetBetPoint(game, table.Status.SmallBlindSeat, table.Status.Dealer);
+      bet_point_bb := FMetrics.GetBetPoint(game, table.Status.BigBlindSeat, table.Status.Dealer);
     finally
       game.Free;
     end;
+
+    animation := DXTimer.AddAnimation(FInternalHWND, bet_point_sb, bet_point_sb, 0.1, 0.1, 0.9, FDXAreaSize);
+    animation.Tags.AddOrSetValue(ANITAG_SEAT, table.Status.SmallBlindSeat);
+    animation.Tags.AddOrSetValue(ANITAG_CHIPS, table.Status.Bets[table.Status.SmallBlindSeat]);
+    animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
+    animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
+    FBetAnimations.Add(animation.Id);
+
+    animation := DXTimer.AddAnimation(FInternalHWND, bet_point_bb, bet_point_bb, 0.1, 0.5, 0.5, FDXAreaSize);
+    animation.Tags.AddOrSetValue(ANITAG_SEAT, table.Status.BigBlindSeat);
+    animation.Tags.AddOrSetValue(ANITAG_CHIPS, table.Status.Bets[table.Status.BigBlindSeat]);
+    animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
+    animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
+    FBetAnimations.Add(animation.Id);
   finally
     Tables.Unlock;
   end;
-
-  animation := DXTimer.AddAnimation(ACallback, bet_point_sb, bet_point_sb, 0.1, 0.1, 0.9, FDXAreaSize);
-  animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.SmallBlindSeat);
-  animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.SmallBlindSeat]);
-  animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
-  animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
-  FBetAnimations.Add(animation.Id);
-
-  animation := DXTimer.AddAnimation(ACallback, bet_point_bb, bet_point_bb, 0.1, 0.5, 0.5, FDXAreaSize);
-  animation.Tags.AddOrSetValue(ANITAG_SEAT, FTableStatus.BigBlindSeat);
-  animation.Tags.AddOrSetValue(ANITAG_CHIPS, FTableStatus.Bets[FTableStatus.BigBlindSeat]);
-  animation.Tags.AddOrSetValue(ANITAG_BLIND, TRUE);
-  animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_PUTCHIPS_SMALL);
-  FBetAnimations.Add(animation.Id);
 end;
 
-procedure TTableRenderer.AnimateDealingCards(const ACallback: THandle);
+procedure TTableRenderer.AnimateDealingCards;
 var
   iterate: Boolean;
   animation: TDXAnimation;
@@ -1422,17 +1474,18 @@ begin
   game_seats := 0;
   repeat
     iterate := FALSE;
-    C1 := FTableStatus.SmallBlindSeat;
-    if C1 < 0 then
-      Break;
-    repeat
-      if FTableStatus.GetSeatInfo(C1, seat) then
-      begin
-        seat.ResetDealtCards;
-        if seat.CardCount > card_index then
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      C1 := table.Status.SmallBlindSeat;
+      if C1 < 0 then
+        Break;
+
+      repeat
+        if table.Status.GetSeatInfo(C1, seat) then
         begin
-          if Tables.GetAndLockTable(FInternalId, table) then
-          try
+          seat.ResetDealtCards;
+          if seat.CardCount > card_index then
+          begin
             if table.GetObjectCopy(game) then
             try
               seat_point := FMetrics.GetSeatPoint(game, seat.SeatIndex);
@@ -1441,33 +1494,33 @@ begin
             finally
               game.Free;
             end;
-          finally
-            Tables.Unlock;
+
+            animation := DXTimer.AddAnimation(FInternalHWND,
+                  Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y), card_point,
+                  Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_SPEED,
+                  Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY + Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY * cc,
+                  0, FDXAreaSize);
+            animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
+            Inc(cc);
+            if cc mod 2 = 0 then
+              animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_DEALING);
+            FDealAnimations.Add(animation.Id);
+            iterate := TRUE;
           end;
-
-          animation := DXTimer.AddAnimation(ACallback,
-                Point2(FMetrics.TableCenter.x - FMetrics.CardWidth / 2, FMetrics.TableBounds[0].y), card_point,
-                Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_SPEED,
-                Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY + Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY * cc,
-                0, FDXAreaSize);
-          animation.Tags.AddOrSetValue(ANITAG_SEAT, seat.SeatIndex);
-          Inc(cc);
-          if cc mod 2 = 0 then
-            animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_DEALING);
-          FDealAnimations.Add(animation.Id);
-          iterate := TRUE;
         end;
-      end;
 
-      Inc(C1);
-      if C1 >= game_seats then
-        C1 := 0;
-    until C1 = FTableStatus.SmallBlindSeat;
-    Inc(card_index);
+        Inc(C1);
+        if C1 >= game_seats then
+          C1 := 0;
+      until C1 = table.Status.SmallBlindSeat;
+      Inc(card_index);
+    finally
+      Tables.Unlock;
+    end;
   until not iterate;
 end;
 
-procedure TTableRenderer.AnimateWinnerPots(const ACallback: THandle; const APots: TList<TPB_Pot>);
+procedure TTableRenderer.AnimateWinnerPots(const APots: TList<TPB_Pot>);
 var
   pot: TPB_Pot;
   C1, C2: Integer;
@@ -1495,23 +1548,23 @@ begin
     animation := nil;
     for C2 := 0 to pot.WinnerData.Count - 1 do
     begin
-      if (FTableStatus.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
-         (Players.TryGetValue(seat.PlayerMongoId, player)) then
-        nick := player.Nick
-      else
-        nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
-
-      nicks := nicks + Format('%s, ', [nick]);
-
-      // restore bets if table is in playback mode, so values are shown
-      if FTableType = ttHandPlayback then
-        FTableStatus.Bets[pot.WinnerData[C2].Seat] := FTableStatus.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
-
       if Tables.GetAndLockTable(FInternalId, table) then
       try
+        if (table.Status.GetSeatInfo(pot.WinnerData[C2].Seat, seat)) and
+           (Players.TryGetValue(seat.PlayerMongoId, player)) then
+          nick := player.Nick
+        else
+          nick := Format('Seat #%d', [pot.WinnerData[C2].Seat]);
+
+        nicks := nicks + Format('%s, ', [nick]);
+
+        // restore bets if table is in playback mode, so values are shown
+        if FTableType = ttHandPlayback then
+          table.Status.Bets[pot.WinnerData[C2].Seat] := table.Status.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
+
         if table.GetObjectCopy(game) then
         try
-          bet_point := FMetrics.GetBetPoint(game, pot.WinnerData[C2].Seat, FTableStatus.Dealer);
+          bet_point := FMetrics.GetBetPoint(game, pot.WinnerData[C2].Seat, table.Status.Dealer);
         finally
           game.Free;
         end;
@@ -1519,7 +1572,7 @@ begin
         Tables.Unlock;
       end;
 
-      animation := DXTimer.AddAnimation(ACallback, FMetrics.GetPotPoint(C1), bet_point,
+      animation := DXTimer.AddAnimation(FInternalHWND, FMetrics.GetPotPoint(C1), bet_point,
            Settings.Hardcoded.ANIMATION_METRICS.POTS_INITIAL_DELAY,
            WinningAniDelay + 1.5 + C1 * Settings.Hardcoded.ANIMATION_METRICS.POTS_INBETWEEN_DELAY,
            Settings.Hardcoded.ANIMATION_METRICS.POTS_END_DELAY,
@@ -1544,10 +1597,17 @@ begin
     if winmsg = 'default' then
       winmsg := ''
     else
-      if FTableStatus.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
-        winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, FTableStatus.FlopCards.AsString + FTableStatus.TurnCard.AsString + FTableStatus.RiverCard.AsString, FTableStatus.CurrentGame, FALSE)
-      else
-        winmsg := pot.WinnerData[0].Msg;
+    begin
+      if Tables.GetAndLockTable(FInternalId, table) then
+      try
+        if table.Status.GetSeatInfo(pot.WinnerData[0].Seat, seat) then
+          winmsg := THandStrengthCalculator.GetHandStrength(seat.Cards.AsString, table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString, table.Status.CurrentGame, FALSE)
+        else
+         winmsg := pot.WinnerData[0].Msg;
+      finally
+        Tables.Unlock;
+      end;
+    end;
 
     if winmsg <> '' then
       winmsg := Format('(%s)', [winmsg]);

@@ -6,72 +6,23 @@ uses
   System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TableEvent, Poker.Pots.PotList;
 
 type
-  TTableEvent = class
-  private
-    FEvent: TTableEventType;
-    FSeat: Integer;
-    FPots: TPotList;
-    FBets: TList<UINT32>;
-    FCards: TBytes;
+  TTableEvents = class(TObjectList<TPB_TableEvent>)
   public
-    constructor Create(const APBTableEvent: TPB_TableEvent);
-    destructor Destroy; override;
-
-    procedure Assign(const APBTableEvent: TPB_TableEvent);
-
-    property Event: TTableEventType read FEvent;
-    property Seat: Integer read FSeat;
-    property Pots: TPotList read FPots;
-    property Bets: TList<UINT32> read FBets;
-    property Cards: TBytes read FCards;
-  end;
-
-  TTableEvents = class(TObjectList<TTableEvent>)
-  public
-    procedure Assign(const AEvents: TObjectList<TPB_TableEvent>);
+    procedure Assign(const AEvents: TList<TPB_TableEvent>);
   end;
 
 implementation
 
-{ TTableEvent }
-
-constructor TTableEvent.Create(const APBTableEvent: TPB_TableEvent);
-begin
-  FBets := TList<UINT32>.Create;
-  FPots := TPotList.Create;
-  Assign(APBTableEvent);
-end;
-
-destructor TTableEvent.Destroy;
-begin
-  FPots.Free;
-  FBets.Free;
-  inherited;
-end;
-
-procedure TTableEvent.Assign(const APBTableEvent: TPB_TableEvent);
-begin
-  FEvent := APBTableEvent.Event;
-  FSeat := APBTableEvent.Seat;
-  FBets.Clear;
-  FBets.AddRange(APBTableEvent.Bets);
-  FPots.Assign(APBTableEvent.Pots);
-  FCards := APBTableEvent.Cards;
-end;
-
-
 { TTableEvents }
 
-procedure TTableEvents.Assign(const AEvents: TObjectList<TPB_TableEvent>);
+procedure TTableEvents.Assign(const AEvents: TList<TPB_TableEvent>);
 var
-  C1: Integer;
+  pbevent: TPB_TableEvent;
 begin
   Clear;
-  if not Assigned(AEvents) then
-    Exit;
-
-  for C1 := 0 to AEvents.Count - 1 do
-    Add(TTableEvent.Create(AEvents[C1]));
+  if Assigned(AEvents) then
+    for pbevent in AEvents do
+      Add(TPB_TableEvent.Create(pbevent));
 end;
 
 end.

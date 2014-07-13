@@ -4,9 +4,11 @@ interface
 
 uses
   Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
-  Poker.Pots.PotList, Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat;
+  Poker.Pots.PotList, Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Objects.TableEvent;
 
 type
+  TTableType = (ttLiveGame, ttHandPlayback);
+
   TTableStatus = class
   private
     FState: TTableState;
@@ -49,11 +51,7 @@ type
     FActionFoldToAny: Boolean;
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
-
-//    FEvents        : TTableEvents;
-
-    procedure PadList(const AList: TList<UINT32>; const ACount: Integer);
-
+    FEvents: TTableEvents;
   public
     constructor Create;
     destructor Destroy; override;
@@ -90,7 +88,6 @@ type
     property CurrentGame: TGameType read FCurrentGame;
     property CurrentLimit: TGameLimit read FCurrentLimit;
     property MinimumRaise: UINT32 read FMinimumRaise;
-    property LockTimerEnabled: Boolean read FLockTimerEnabled write FLockTimerEnabled;
     property ClosingTime: DWORD read FClosingTime;
     property TimebarEndtime: DWORD read FTimebarEndtime;
     property CurrentPlaytime: Int64 read FCurrentPlaytime;
@@ -111,7 +108,7 @@ type
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
 
-//    property Events: TTableEvents read FEvents;
+    property Events: TTableEvents read FEvents;
   end;
 
 implementation
@@ -136,14 +133,14 @@ begin
   FFlopCards := TCards.Create;
   FTurnCard := TCard.Create;
   FRiverCard := TCard.Create;
-//  FEvents := TTableEvents.Create;
+  FEvents := TTableEvents.Create;
 end;
 
 destructor TTableStatus.Destroy;
 begin
   FBets.Free;
   FPreviousBets.Free;
-//  FEvents.Free;
+  FEvents.Free;
   FFlopCards.Free;
   FTurnCard.Free;
   FRiverCard.Free;
@@ -202,12 +199,6 @@ begin
   FRiverCard.Clear;
   FPreviousPots.Clear;
   FPreviousBets.Clear;
-end;
-
-procedure TTableStatus.PadList(const AList: TList<UINT32>; const ACount: Integer);
-begin
-  while AList.Count < ACount do
-    AList.Add(0);
 end;
 
 procedure TTableStatus.Assign(const ATableStatusProtobuf: TPB_TableStatus);
@@ -324,12 +315,9 @@ begin
 
     while FPots.Count < FSeats.Last.SeatIndex do
       FPots.Add(TPotInfo.Create);
-
-    PadList(FPreviousBets, FSeats.Last.SeatIndex + 1);
-    PadList(FBets, FSeats.Last.SeatIndex + 1);
   end;
 
-//  FEvents.Assign(ATableStatusProtobuf.Events);
+  FEvents.Assign(ATableStatusProtobuf.Events);
 end;
 
 procedure TTableStatus.UpdateClosingTime(const AGame: TGameInfo);

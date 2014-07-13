@@ -3,9 +3,8 @@ unit Poker.Tables.TableList;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback,
-  Poker.Clubs.Club, Vcl.Forms, Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Renderer,
-  Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
+  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs;
 
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)
@@ -49,7 +48,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
-  Poker.HandHistory.Core, Poker.Tables.Status;
+  Poker.HandHistory.Core;
 
 { TTableList }
 
@@ -177,7 +176,7 @@ begin
   FLock.Enter;
   try
     for table in Values do
-      if table.Renderer.TableStatus.IsSitting then
+      if table.Status.IsSitting then
         Inc(result);
   finally
     FLock.Leave;

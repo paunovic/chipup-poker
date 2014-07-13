@@ -8,7 +8,7 @@ uses
   Vcl.ActnList, cxLabel, Poker.Tables.Table, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
   Vectors2px, Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, AsphyreImages, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls,
-  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, Poker.HandHistory.Items, Poker.Tables.Renderer;
+  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit;
 
 type
   TfrmTable = class(TForm)
@@ -18,10 +18,8 @@ type
     acCall: TAction;
     acCheck: TAction;
     acRaise: TAction;
-    tiActiveFrameBlink: TTimer;
     acPlayNow: TAction;
     tiSitOutNextHand: TTimer;
-    tiSeatCaptionClear: TTimer;
     acRaiseMin: TAction;
     acRaise3BB: TAction;
     acRaisePot: TAction;
@@ -35,7 +33,6 @@ type
     seRaiseAmount: TcxSpinEdit;
     RVStyle: TRVStyle;
     rvChat: TRichView;
-    tiGameLock: TTimer;
     lbvHandStrength: TcxLabel;
     lbvHandHistory: TcxLabel;
     acHandHistory: TAction;
@@ -49,7 +46,6 @@ type
     pbHandPlaybackProgress: TcxProgressBar;
     acHandPlaybackStepForward: TAction;
     acHandPlaybackStepBackwards: TAction;
-    tiRender: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -60,11 +56,9 @@ type
     procedure acCheckExecute(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure acRaiseExecute(Sender: TObject);
-    procedure tiActiveFrameBlinkTimer(Sender: TObject);
     procedure acPlayNowExecute(Sender: TObject);
     procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
     procedure tiSitOutNextHandTimer(Sender: TObject);
-    procedure tiSeatClearCaptionTimer(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
     procedure acRaiseMinExecute(Sender: TObject);
     procedure acRaise3BBExecute(Sender: TObject);
@@ -80,7 +74,6 @@ type
     procedure FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FormActivate(Sender: TObject);
-    procedure tiGameLockTimer(Sender: TObject);
     procedure edChatExit(Sender: TObject);
     procedure edChatEnter(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -92,7 +85,6 @@ type
     procedure acHandPlaybackPauseExecute(Sender: TObject);
     procedure acHandPlaybackStepForwardExecute(Sender: TObject);
     procedure acHandPlaybackStepBackwardsExecute(Sender: TObject);
-    procedure tiRenderTimer(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     const
@@ -117,8 +109,6 @@ type
     procedure SetRaiseActionCaption;
     procedure SetRaiseValue(const AValue: UINT32; const ASetSpinEditValue: Boolean = TRUE; const AAbsoluteJump: Boolean = TRUE; const AConfigureGUI: Boolean = TRUE);
 
-    procedure EnableGameLockTimer(const ASeconds: Single);
-
     procedure AddUserChatMessage(const AUser, AMessage: String);
     procedure AddDealerChatMessage(const AMessage: String);
     procedure ModalFormClose(Sender: TObject);
@@ -138,8 +128,6 @@ type
     function ConfirmLeaveTable: Boolean;
     function ConfirmStandUp: Boolean;
 
-    function GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
-
     procedure CSRChatEvent(const AMethodId: Integer; const AObject: TObject);
     procedure CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
@@ -147,23 +135,17 @@ type
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
 
-    procedure TablePlaySound(const ASound: String);
-
-    procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
-
     procedure ConfigureGUI;
     procedure DefocusControls;
     procedure RefreshAll;
+    procedure TableStatusUpdate;
 
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure WMSizing(var AMessage: TMessage); message WM_SIZING;
     procedure WndProc(var AMessage: TMessage); override;
-
   public
     constructor Create(const AInternalId: Integer); reintroduce;
-
-    procedure SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
   end;
 
 implementation
@@ -177,7 +159,8 @@ uses
   Poker.Tables.Resources, Poker.WindowMessages, Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
   Poker.Common.Misc, Poker.Settings, Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game,
   Poker.Games.Game, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main,
-  Poker.HandHistory.Core, Poker.Pots.Pot, Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club;
+  Poker.HandHistory.Core, Poker.Pots.Pot, Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club,
+  Poker.HandHistory.Items;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -331,23 +314,15 @@ begin
 end;
 
 procedure TfrmTable.WndProc(var AMessage: TMessage);
-var
-  table: TTable;
 begin
   // prevent ALT key from switching between forms
   if (AMessage.Msg = WM_SYSCOMMAND) and
      (AMessage.WParam = SC_KEYMENU) then
     Exit;
 
-  if AMessage.Msg = WM_DIRECTX_ANIMATION then
-  begin
-    if Tables.GetAndLockTable(FInternalId, table) then
-    try
-      table.Renderer.AnimationCallback(pointer(AMessage.WParam));
-    finally
-      Tables.Unlock;
-    end;
-  end;
+  // this message is broadcasted to render handle when TTable updates TableStatus object
+  if AMessage.Msg = WM_TABLESTATUS_REFRESH then
+    TableStatusUpdate;
 
   inherited;
 end;
@@ -398,7 +373,12 @@ begin
        (seRaiseAmount.Visible) then
       seRaiseAmount.SetFocus;
 
-    TablePlaySound(Sounds.SOUND_TIMEBAR);
+    if Tables.GetAndLockTable(FInternalId, table) then
+    try
+      table.PlaySound(Sounds.SOUND_TIMEBAR);
+    finally
+      Tables.Unlock;
+    end;
   end;
 end;
 
@@ -408,22 +388,11 @@ begin
 end;
 
 procedure TfrmTable.FormShow(Sender: TObject);
-var
-  table: TTable;
 begin
   if FTableType = ttHandPlayback then
-  begin
-    if Tables.GetAndLockTable(FInternalId, table) then
-    try
-      SetTableStatus(table.HandHistoryPlayback.CurrentState, FALSE);
-    finally
-      Tables.Unlock;
-    end;
+    acHandPlaybackPlay.Execute;
 
-    tiHandPlayback.Enabled := TRUE;
-  end
-  else
-    RefreshAll;
+  RefreshAll;
 end;
 
 procedure TfrmTable.FormMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -440,8 +409,8 @@ begin
     if (set_raise_amount) and
        (table.GetObjectCopy(game)) then
     try
-      SetRaiseValue(RoundToNearestBB(Round(table.Renderer.TableStatus.MinimumRaise +
-          (table.Renderer.TableStatus.MaximumRaise - table.Renderer.TableStatus.MinimumRaise) * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
+      SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +
+          (table.Status.MaximumRaise - table.Status.MinimumRaise) * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
     finally
       game.Free;
     end;
@@ -465,8 +434,8 @@ begin
     if (set_raise_amount) and
        (table.GetObjectCopy(game)) then
     try
-      SetRaiseValue(RoundToNearestBB(Round(table.Renderer.TableStatus.MinimumRaise +
-          (table.Renderer.TableStatus.MaximumRaise - table.Renderer.TableStatus.MinimumRaise) * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
+      SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +
+          (table.Status.MaximumRaise - table.Status.MinimumRaise) * table.Renderer.RaiseThumbPosition), game.BigBlind), TRUE, FALSE);
     finally
       game.Free;
     end;
@@ -508,13 +477,13 @@ begin
       if (table.TableType = ttLiveGame) and
          (game.State <> gsClosed) and
          (table.Renderer.Metrics.IsPointInSeat(game, client_cursor_pos.X, client_cursor_pos.Y, seat_index)) and
-         (((not table.Renderer.TableStatus.IsSitting) and
-           (not table.Renderer.TableStatus.IsSeatTaken(seat_index))) or
-          ((table.Renderer.TableStatus.IsSitting) and
-           (table.Renderer.TableStatus.SelfSeatIndex = seat_index) and
-           (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
+         (((not table.Status.IsSitting) and
+           (not table.Status.IsSeatTaken(seat_index))) or
+          ((table.Status.IsSitting) and
+           (table.Status.SelfSeatIndex = seat_index) and
+           (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
            (seat_info.Status in [psOutOfPlay, psOutOfHand]))) then
-        FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Renderer.TableStatus, @seat_index], ModalFormClose));
+        FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Status, @seat_index], ModalFormClose));
     finally
       game.Free;
     end;
@@ -540,89 +509,13 @@ begin
     valuint := Round(val * 100);
     if Tables.GetAndLockTable(FInternalId, table) then
     try
-      if valuint > table.Renderer.TableStatus.MaximumRaise then
-        valuint := table.Renderer.TableStatus.MaximumRaise;
+      if valuint > table.Status.MaximumRaise then
+        valuint := table.Status.MaximumRaise;
     finally
       Tables.Unlock;
     end;
     SetRaiseValue(valuint, FALSE);
   end;
-end;
-
-procedure TfrmTable.tiActiveFrameBlinkTimer(Sender: TObject);
-var
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if table.Renderer.TableStatus.CurrentSeat = -1 then
-    begin
-      tiActiveFrameBlink.Enabled := FALSE;
-      Exit;
-    end;
-
-    if tiActiveFrameBlink.Tag = 0 then
-      tiActiveFrameBlink.Tag := 1
-    else
-      tiActiveFrameBlink.Tag := 0;
-
-    table.Renderer.Render;
-  finally
-    Tables.Unlock;
-  end;
-end;
-
-procedure TfrmTable.tiGameLockTimer(Sender: TObject);
-var
-  table: TTable;
-begin
-  tiGameLock.Enabled := FALSE;
-
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    table.Renderer.TableStatus.LockTimerEnabled := tiGameLock.Enabled;
-  finally
-    Tables.Unlock;
-  end;
-
-  RefreshAll;
-end;
-
-procedure TfrmTable.tiHandPlaybackTimer(Sender: TObject);
-var
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    SetTableStatus(table.HandHistoryPlayback.NextState, TRUE);
-
-    if table.Renderer.TableStatus.LockTimerEnabled then
-      tiHandPlayback.Interval := tiGameLock.Interval
-    else
-      tiHandPlayback.Interval := 1000;
-
-    if table.HandHistoryPlayback.CurrentStateIndex = table.HandHistoryPlayback.States.Count - 1 then
-    begin
-      tiHandPlayback.Enabled := FALSE;
-      btPlayPause.Action := acHandPlaybackPlay;
-    end;
-  finally
-    Tables.Unlock;
-  end;
-end;
-
-procedure TfrmTable.tiRenderTimer(Sender: TObject);
-var
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    table.Renderer.Render;
-  finally
-    Tables.Unlock;
-  end;
-
-  UpdateHandStrength;
 end;
 
 procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
@@ -632,7 +525,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
+    if (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
        (seat_info.Status <> psOutOfPlay) then
       ServerSocket.TableSitOutNextBB(FGameId, cbSitOutNextBB.Checked);
   finally
@@ -648,7 +541,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
+    if (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
        (seat_info.Status <> psOutOfPlay) then
       ServerSocket.TableSitOutNextHand(FGameId, cbSitOutNextHand.Checked);
   finally
@@ -679,8 +572,8 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.Renderer.TableStatus.IsSitting) and
-       (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) and
+    if (table.Status.IsSitting) and
+       (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
        (seat_info.Status in [psAllIn, psFolded, psInHand]) and
        (seat_info.CardCount > 0) and
        (seat_info.DealtCards = seat_info.CardCount) then
@@ -689,8 +582,8 @@ begin
          (table.Renderer.TurnAnimations.Count = 0) and
          (table.Renderer.RiverAnimations.Count = 0) then
         lbvHandStrength.Caption := THandStrengthCalculator.GetHandStrength(seat_info.Cards.AsString,
-              table.Renderer.TableStatus.FlopCards.AsString + table.Renderer.TableStatus.TurnCard.AsString + table.Renderer.TableStatus.RiverCard.AsString,
-              table.Renderer.TableStatus.CurrentGame, TRUE)
+              table.Status.FlopCards.AsString + table.Status.TurnCard.AsString + table.Status.RiverCard.AsString,
+              table.Status.CurrentGame, TRUE)
     end
     else
       lbvHandStrength.Caption := '';
@@ -708,38 +601,38 @@ var
   club: TClubInfo;
   game: TGameInfo;
 begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
     case FTableType of
       ttLiveGame: begin
-        if Tables.GetAndLockTable(FInternalId, table) then
+        if table.GetObjectCopy(club, game) then
         try
-          if table.GetObjectCopy(club, game) then
-          try
-            if game.GameType = gtRotationNLHPLO then
-            begin
-              case table.Renderer.TableStatus.CurrentGame of
-                gtHoldem: currentgame := 'NLH';
-                gtOmaha: currentgame := 'PLO';
-              end;
-              rot_index := table.Renderer.TableStatus.RotationHand;
-              if rot_index = 0 then
-                rot_index := 1;
-              result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(TRUE), (rot_index - 1) mod game.Seats + 1, game.Seats, currentgame, club.Name])
-            end
-            else
-              result := Format('%s (%s/%s %s) - %s', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(TRUE), club.Name]);
-          finally
-            club.Free;
-            game.Free;
-          end;
+          if game.GameType = gtRotationNLHPLO then
+          begin
+            case table.Status.CurrentGame of
+              gtHoldem: currentgame := 'NLH';
+              gtOmaha: currentgame := 'PLO';
+            end;
+            rot_index := table.Status.RotationHand;
+            if rot_index = 0 then
+              rot_index := 1;
+            result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(TRUE), (rot_index - 1) mod game.Seats + 1, game.Seats, currentgame, club.Name])
+          end
+          else
+            result := Format('%s (%s/%s %s) - %s', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(TRUE), club.Name]);
         finally
-          Tables.Unlock;
+          club.Free;
+          game.Free;
         end;
       end;
 
-      ttHandPlayback: if GetHandHistoryItem(hhi) then
+      ttHandPlayback: if table.GetHandHistoryItem(hhi) then
         result := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.Limit, FALSE),
                    ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
     end;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmTable.UpdateTableCaption;
@@ -749,25 +642,6 @@ begin
   cap := GetTableCaption;
   if cap <> Caption then
     Caption := cap;
-end;
-
-function TfrmTable.GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
-var
-  hhis: THandHistoryItems;
-  table: TTable;
-begin
-  result := FALSE;
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if (table.TableType <> ttHandPlayback) or
-       (not HandHistory.TryGetValue(table.GameId, hhis)) or
-       (not hhis.FindHand(table.HandHistoryHandId, AHandHistoryItem)) then
-      Exit(FALSE);
-
-    Exit(TRUE);
-  finally
-    Tables.Unlock;
-  end;
 end;
 
 procedure TfrmTable.lbvHandHistoryClick(Sender: TObject);
@@ -813,20 +687,6 @@ begin
   end;
 end;
 
-procedure TfrmTable.EnableGameLockTimer(const ASeconds: Single);
-var
-  table: TTable;
-begin
-  tiGameLock.Enabled := FALSE;
-  tiGameLock.Interval := Round(ASeconds * 1000);
-  tiGameLock.Enabled := TRUE;  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    table.Renderer.TableStatus.LockTimerEnabled := tiGameLock.Enabled;
-  finally
-    Tables.Unlock;
-  end;
-end;
-
 procedure TfrmTable.acShowCardsExecute(Sender: TObject);
 var
   seat: TSeatInfo;
@@ -836,7 +696,7 @@ begin
   acShowCards.Enabled := FALSE;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat) then
+    if table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat) then
       seat.CardsVisible := TRUE;
   finally
     Tables.Unlock;
@@ -902,7 +762,7 @@ begin
   try
     if table.GetObjectCopy(game) then
     try
-      table.Renderer.TableStatus.UpdateClosingTime(game);
+      table.Status.UpdateClosingTime(game);
     finally
       game.Free;
     end;
@@ -953,82 +813,82 @@ begin
   try
     if table.GetObjectCopy(game) then
     try
-      raise_en := table.Renderer.TableStatus.ActionRaise;
-      table.Renderer.TableStatus.ActionStandUp := FALSE;
-      table.Renderer.TableStatus.ActionFold := FALSE;
-      table.Renderer.TableStatus.ActionCall := FALSE;
-      table.Renderer.TableStatus.ActionCheck := FALSE;
-      table.Renderer.TableStatus.ActionRaise := FALSE;
-      table.Renderer.TableStatus.ActionBet := FALSE;
-      table.Renderer.TableStatus.ActionPlayNow := FALSE;
-      table.Renderer.TableStatus.ActionSitOut := FALSE;
-      table.Renderer.TableStatus.ActionFoldToAny := FALSE;
-      table.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
-      table.Renderer.TableStatus.ActionShowCards := FALSE;
+      raise_en := table.Status.ActionRaise;
+      table.Status.ActionStandUp := FALSE;
+      table.Status.ActionFold := FALSE;
+      table.Status.ActionCall := FALSE;
+      table.Status.ActionCheck := FALSE;
+      table.Status.ActionRaise := FALSE;
+      table.Status.ActionBet := FALSE;
+      table.Status.ActionPlayNow := FALSE;
+      table.Status.ActionSitOut := FALSE;
+      table.Status.ActionFoldToAny := FALSE;
+      table.Status.ActionSitOutNextBB := FALSE;
+      table.Status.ActionShowCards := FALSE;
 
       seat_info := nil;
       if (table.TableType = ttLiveGame) and
-         (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) then
+         (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) then
       begin
-        table.Renderer.TableStatus.ActionStandUp := TRUE;
+        table.Status.ActionStandUp := TRUE;
 
         if game.State <> gsClosed then
           case seat_info.Status of
             psOutOfPlay: begin
-              table.Renderer.TableStatus.ActionPlayNow := TRUE;
-              table.Renderer.TableStatus.ActionFoldToAny := FALSE;
-              table.Renderer.TableStatus.ActionSitOut := FALSE;
-              table.Renderer.TableStatus.ActionSitOutNextBB := FALSE;
+              table.Status.ActionPlayNow := TRUE;
+              table.Status.ActionFoldToAny := FALSE;
+              table.Status.ActionSitOut := FALSE;
+              table.Status.ActionSitOutNextBB := FALSE;
             end;
 
             psOutOfHand: begin
-              table.Renderer.TableStatus.ActionFoldToAny := FALSE;
-              table.Renderer.TableStatus.ActionSitOut := TRUE;
-              table.Renderer.TableStatus.ActionSitOutNextBB := TRUE;
+              table.Status.ActionFoldToAny := FALSE;
+              table.Status.ActionSitOut := TRUE;
+              table.Status.ActionSitOutNextBB := TRUE;
             end;
 
             psInHand, psAllIn: begin
-              table.Renderer.TableStatus.ActionSitOut := TRUE;
-              table.Renderer.TableStatus.ActionSitOutNextBB := TRUE;
+              table.Status.ActionSitOut := TRUE;
+              table.Status.ActionSitOutNextBB := TRUE;
               if (seat_info.Status = psInHand) and
-                 (table.Renderer.TableStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
-                table.Renderer.TableStatus.ActionFoldToAny := TRUE;
+                 (table.Status.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
+                table.Status.ActionFoldToAny := TRUE;
 
-              if (table.Renderer.TableStatus.CurrentSeat = table.Renderer.TableStatus.SelfSeatIndex) and
-                 (not table.Renderer.TableStatus.Locked) and
-                 (not table.Renderer.TableStatus.LockTimerEnabled) then
-                case table.Renderer.TableStatus.State of
+              if (table.Status.CurrentSeat = table.Status.SelfSeatIndex) and
+                 (not table.Status.Locked) and
+                 (not table.GameplayLocked) then
+                case table.Status.State of
                   tsIdle: begin
-                    table.Renderer.TableStatus.ActionFoldToAny := FALSE;
+                    table.Status.ActionFoldToAny := FALSE;
                   end;
 
                   tsPreFlop, tsFlop, tsTurn, tsRiver: begin
-                    table.Renderer.TableStatus.ActionFold := TRUE;
+                    table.Status.ActionFold := TRUE;
                     // check if our current bet is smaller than minimumbet (call/raise situation)
-                    if table.Renderer.TableStatus.GetBet(seat_info.SeatIndex) < table.Renderer.TableStatus.MinimumBet then
+                    if table.Status.GetBet(seat_info.SeatIndex) < table.Status.MinimumBet then
                     begin
-                      if seat_info.Chips <= table.Renderer.TableStatus.MinimumBet then
+                      if seat_info.Chips <= table.Status.MinimumBet then
                         acCall.Caption := 'CALL (ALL-IN)'
                       else
-                        acCall.Caption := Format('CALL (%s)', [ChipsToStr(table.Renderer.TableStatus.MinimumBet{ - table.Renderer.TableStatus.GetBet(seat_info.SeatIndex)})]);
-                      table.Renderer.TableStatus.ActionCall := TRUE;
+                        acCall.Caption := Format('CALL (%s)', [ChipsToStr(table.Status.MinimumBet{ - table.Status.GetBet(seat_info.SeatIndex)})]);
+                      table.Status.ActionCall := TRUE;
 
                       // if we can call, there is a possibility that we can raise too - we check if we can raise here
-                      if (seat_info.Chips > table.Renderer.TableStatus.MinimumBet) and
-                         (table.Renderer.TableStatus.MinimumBet < table.Renderer.TableStatus.MinimumRaise) then
-                        table.Renderer.TableStatus.ActionRaise := TRUE;
+                      if (seat_info.Chips > table.Status.MinimumBet) and
+                         (table.Status.MinimumBet < table.Status.MinimumRaise) then
+                        table.Status.ActionRaise := TRUE;
                     end
                     else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
                     begin
-                      table.Renderer.TableStatus.ActionCheck := TRUE;
-                      table.Renderer.TableStatus.ActionBet := TRUE;
+                      table.Status.ActionCheck := TRUE;
+                      table.Status.ActionBet := TRUE;
                     end;
 
                     AFocusWindow := TRUE;
                   end;
 
                   tsWinning, tsWinning2: begin
-                    table.Renderer.TableStatus.ActionFoldToAny := FALSE;
+                    table.Status.ActionFoldToAny := FALSE;
                   end;
                 end
               else
@@ -1036,38 +896,38 @@ begin
             end;
 
             psFolded: begin
-              table.Renderer.TableStatus.ActionFoldToAny := FALSE;
-              table.Renderer.TableStatus.ActionSitOut := TRUE;
-              table.Renderer.TableStatus.ActionSitOutNextBB := TRUE;
+              table.Status.ActionFoldToAny := FALSE;
+              table.Status.ActionSitOut := TRUE;
+              table.Status.ActionSitOutNextBB := TRUE;
             end;
           end;
       end;
 
       // if raise slider was not enabled, set it to minimum value
       if not raise_en then
-        FRaiseValue := table.Renderer.TableStatus.MinimumRaise;
+        FRaiseValue := table.Status.MinimumRaise;
       SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
 
       // check if SHOW CARDS button is enabled
-      table.Renderer.TableStatus.ActionShowCards := (table.Renderer.TableStatus.State in [tsWinning, tsWinning2]) and
+      table.Status.ActionShowCards := (table.Status.State in [tsWinning, tsWinning2]) and
                                       (Assigned(seat_info)) and
                                       (seat_info.CanShow) and
                                       (not seat_info.CardsVisible) and
                                       (seat_info.Status in [psFolded, psAllIn, psInHand]);
 
       // enable actions
-      acStandUp.Enabled := table.Renderer.TableStatus.ActionStandUp;
-      acFold.Enabled := table.Renderer.TableStatus.ActionFold;
-      acCall.Enabled := table.Renderer.TableStatus.ActionCall;
-      acCheck.Enabled := table.Renderer.TableStatus.ActionCheck;
-      acRaise.Enabled := table.Renderer.TableStatus.ActionRaise;
-      acRaise.Enabled := (table.Renderer.TableStatus.ActionBet) or (table.Renderer.TableStatus.ActionRaise);
+      acStandUp.Enabled := table.Status.ActionStandUp;
+      acFold.Enabled := table.Status.ActionFold;
+      acCall.Enabled := table.Status.ActionCall;
+      acCheck.Enabled := table.Status.ActionCheck;
+      acRaise.Enabled := table.Status.ActionRaise;
+      acRaise.Enabled := (table.Status.ActionBet) or (table.Status.ActionRaise);
       acRaiseMin.Enabled := acRaise.Enabled;
       acRaise3BB.Enabled := acRaise.Enabled;
       acRaisePot.Enabled := acRaise.Enabled;
       acRaiseMax.Enabled := acRaise.Enabled;
-      acPlayNow.Enabled := table.Renderer.TableStatus.ActionPlayNow;
-      acShowCards.Enabled := table.Renderer.TableStatus.ActionShowCards;
+      acPlayNow.Enabled := table.Status.ActionPlayNow;
+      acShowCards.Enabled := table.Status.ActionShowCards;
     finally
       game.Free;
     end;
@@ -1106,14 +966,14 @@ begin
         cbSitOutNextHand.Left := table.Renderer.Metrics.CheckboxesLeft;
         cbSitOutNextBB.Left := table.Renderer.Metrics.CheckboxesLeft;
 
-        if table.Renderer.TableStatus.ActionSitOut then
+        if table.Status.ActionSitOut then
         begin
           cbSitOutNextHand.Visible := TRUE;
           cbSitOutNextBB.Visible := TRUE;
           cbFoldToAnyBet.Visible := TRUE;
 
-          cbSitOutNextBB.Enabled := table.Renderer.TableStatus.ActionSitOutNextBB;
-          cbFoldToAnyBet.Enabled := table.Renderer.TableStatus.ActionFoldToAny;
+          cbSitOutNextBB.Enabled := table.Status.ActionSitOutNextBB;
+          cbFoldToAnyBet.Enabled := table.Status.ActionFoldToAny;
 
           if not cbSitOutNextBB.Enabled then
             cbSitOutNextBB.Checked := FALSE;
@@ -1140,7 +1000,7 @@ begin
         if acRaise.Enabled then
         begin
           // if game is pot limit, we dont have to show MAX button, since POT = MAX
-          if table.Renderer.TableStatus.CurrentLimit = glPotLimit then
+          if table.Status.CurrentLimit = glPotLimit then
           begin
             table.Renderer.GetDXButton(FDXBRaisePresets[0]).Action := nil;
             table.Renderer.GetDXButton(FDXBRaisePresets[1]).Action := acRaiseMin;
@@ -1158,16 +1018,6 @@ begin
           SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
         end;
 
-        // enable seat blink timer, if it's not enabled already
-        if (table.Renderer.TableStatus.CurrentSeat <> -1) and
-           (not tiActiveFrameBlink.Enabled) and
-           (not table.Renderer.TableStatus.Locked) and
-           (not table.Renderer.TableStatus.LockTimerEnabled) then
-        begin
-          tiActiveFrameBlink.Tag := 1;
-          tiActiveFrameBlink.Enabled := TRUE;
-        end;
-
         lbvHandStrength.Top := Round(table.Renderer.GetDXButton(FDXBRaisePresets[High(FDXBRaisePresets)]).Bounds^[0].y - lbvHandStrength.Height - 5);
         UpdateHandHistoryLabel;
       end;
@@ -1178,6 +1028,7 @@ begin
         btPlayPause.BoundsRect := table.Renderer.Metrics.HandPlaybackPlay;
         btStepForward.BoundsRect := table.Renderer.Metrics.HandPlaybackForward;
         btStepBackwards.BoundsRect := table.Renderer.Metrics.HandPlaybackBack;
+        pbHandPlaybackProgress.Position := table.HandHistoryPlayback.CurrentStateIndex;
       end;
     end;
   finally
@@ -1186,26 +1037,6 @@ begin
 
   UpdateHandStrength;
   UpdateTableCaption;
-end;
-
-procedure TfrmTable.tiSeatClearCaptionTimer(Sender: TObject);
-var
-  seat: TSeatInfo;
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if (table.Renderer.TableStatus.GetSeatInfo(tiSeatCaptionClear.Tag, seat)) and
-       (seat.LowerCaption <> '') then
-    begin
-      seat.LowerCaption := '';
-      table.Renderer.Render;
-    end;
-  finally
-    Tables.Unlock;
-  end;
-
-  tiSeatCaptionClear.Enabled := FALSE;
 end;
 
 function TfrmTable.ConfirmLeaveTable: Boolean;
@@ -1219,7 +1050,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     tt := table.TableType;
-    is_sitting := table.Renderer.TableStatus.IsSitting;
+    is_sitting := table.Status.IsSitting;
   finally
     Tables.Unlock;
   end;
@@ -1245,8 +1076,8 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     tt := table.TableType;
-    is_sitting := table.Renderer.TableStatus.IsSitting;
-    if table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat) then
+    is_sitting := table.Status.IsSitting;
+    if table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat) then
       player_status := seat.Status;
   finally
     Tables.Unlock;
@@ -1262,22 +1093,6 @@ end;
 procedure TfrmTable.CSRETableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtablestatus: TPB_TableStatus;
-  C1: Integer;
-  player: TPlayerInfo;
-  query_users: TArray<TBytes>;
-  empty_array: TBytes;
-  seat: TSeatInfo;
-  winning: Boolean;
-  {$IFDEF DEBUG}
-  pbevent: TPB_TableEvent;
-  events: String;
-  tmp: String;
-  tb: UINT32;
-  tstatusdbg: String;
-  csdbg: String;
-  seatdbg: TSeatInfo;
-  playerdbg: TPlayerInfo;
-  {$ENDIF}
   table: TTable;
 begin
   pbtablestatus := AObject as TPB_TableStatus;
@@ -1286,139 +1101,10 @@ begin
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    // update local objects with new table status
-    table.Renderer.TableStatus.Assign(pbtablestatus);
-
-    // ActionManager is initially in suspended state, to make sure no actions can be executed while table contains no data
-    // this block is executed when first tablestatus is received, and it also enables ActionManager
-    if ActionManager.State = asSuspended then
-    begin
-      ActionManager.State := asNormal;
-      for C1 := 0 to table.Renderer.TableStatus.Seats.Count - 1 do
-        table.Renderer.TableStatus.Seats[C1].FillDealtCards;
-
-      if table.Renderer.TableStatus.State in [tsFlop, tsTurn, tsRiver, tsWinning, tsWinning2] then
-        table.Renderer.FlopAnimated := TRUE;
-      if table.Renderer.TableStatus.State in [tsTurn, tsRiver, tsWinning, tsWinning2] then
-        table.Renderer.TurnAnimated := TRUE;
-      if table.Renderer.TableStatus.State in [tsRiver, tsWinning, tsWinning2] then
-        table.Renderer.RiverAnimated := TRUE;
-    end;
-
-    // reset animation delays
-    table.Renderer.WinningFlopAniDelay := 0;
-    table.Renderer.WinningTurnAniDelay := 0;
-    table.Renderer.WinningRiverAniDelay := 0;
-    table.Renderer.WinningAniDelay := 0;
-
-    // check if its winning phase
-    winning := FALSE;
-    for C1 := 0 to pbtablestatus.Events.Count - 1 do
-      if pbtablestatus.Events[C1].Event = teWinning then
-      begin
-        winning := TRUE;
-        Break;
-      end;
-
-    // ...and if it is, make animation delays
-    // this is required if everyone goes all in pre-flop for example, so it shows cards one by one (flop > turn > river), with proper delays
-    if winning then
-      for C1 := 0 to pbtablestatus.Events.Count - 1 do
-        case pbtablestatus.Events[C1].Event of
-          teFlop: table.Renderer.WinningFlopAniDelay := 0.2;
-          teTurn: table.Renderer.WinningTurnAniDelay := table.Renderer.WinningFlopAniDelay + 1;
-          teRiver: table.Renderer.WinningRiverAniDelay := table.Renderer.WinningFlopAniDelay + table.Renderer.WinningTurnAniDelay + 1;
-          teWinning: table.Renderer.WinningAniDelay := table.Renderer.WinningFlopAniDelay + table.Renderer.WinningTurnAniDelay + table.Renderer.WinningRiverAniDelay + 0.2;
-        end;
-
-    // process table events
-    for C1 := 0 to pbtablestatus.Events.Count - 1 do
-      ProcessTableEvent(pbtablestatus.Events[C1]);
-
-    // get user infos that we dont have
-    SetLength(query_users, 0);
-    for seat in table.Renderer.TableStatus.Seats do
-      if not Players.TryGetValue(seat.PlayerMongoId, player) then
-      begin
-        SetLength(query_users, Length(query_users) + 1);
-        query_users[Length(query_users) - 1] := seat.PlayerMongoId;
-      end;
-
-    if Length(query_users) > 0 then
-    begin
-      SetLength(empty_array, 0);
-      for C1 := 0 to Length(query_users) - 1 do
-        Players.AddPlayer(query_users[C1], 'Retrieving...', '', 0, empty_array);
-      ServerSocket.GetUserInfos(query_users);
-    end;
-
-    // update self info
-    dmMain.SelfInfo.Balance := pbtablestatus.TotalBalance;
-    dmMain.UpdateSelfInfoInPlayers;
-
-    {$IFDEF DEBUG}
-    tmp := GetEnumName(TypeInfo(TTableState), Integer(table.Renderer.TableStatus.State));
-    if pbtablestatus.Locked then
-      tmp := tmp + ', LOCKED';
-    seatdbg := nil;
-    playerdbg := nil;
-    tb := 0;
-    csdbg := IntToStr(table.Renderer.TableStatus.CurrentSeat);
-    if table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.CurrentSeat, seatdbg) then
-    begin
-      if Players.TryGetValue(seatdbg.PlayerMongoId, playerdbg) then
-        csdbg := csdbg + ' - ' + playerdbg.Nick;
-      tb := seatdbg.Timebank;
-    end;
-
-    table.Renderer.TableStatus.UpdateCurrentPlaytime;
-    tstatusdbg := Format('[#%d] %s, D: %d, E: %d | #%s, %.2fs/%.2fs',
-      [pbtablestatus.Seq, tmp, table.Renderer.TableStatus.Dealer, pbtablestatus.Events.Count, csdbg, table.Renderer.TableStatus.CurrentPlaytime / 1000, tb / 1000]);
-
-    events := '';
-    for C1 := 0 to pbtablestatus.Events.Count - 1 do
-    begin
-      pbevent := pbtablestatus.Events[C1];
-      if events <> '' then
-        events := events + #10;
-
-      seatdbg := nil;
-      playerdbg := nil;
-      if table.Renderer.TableStatus.GetSeatInfo(pbevent.Seat, seatdbg) then
-        Players.TryGetValue(seatdbg.PlayerMongoId, playerdbg);
-
-      case pbevent.Event of
-        teFold: if Assigned(seatdbg) then
-          events := events + Format('FOLD [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(table.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)])
-        else
-          events := events + Format('FOLD [#%d]', [pbevent.Seat]);
-        teSit: events := events + Format('SIT [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(table.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teStandUp: events := events + Format('STAND UP [#%d]', [pbevent.Seat]);
-        teWinning: events := events + 'WINNING';
-        teDealing: events := events + 'DEALING';
-        teCheck: events := events + Format('CHECK [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(table.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teCall: events := events + Format('CALL [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(table.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teRaise: events := events + Format('RAISE [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(table.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teAllIn: events := events + Format('ALL-IN [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(table.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-        teFlop: events := events + Format('FLOP [%s]', [table.Renderer.TableStatus.FlopCards.AsString]);
-        teTurn: events := events + Format('TURN [%s]', [table.Renderer.TableStatus.TurnCard.AsString]);
-        teRiver: events := events + Format('RIVER [%s]', [table.Renderer.TableStatus.RiverCard.AsString]);
-        tePostRiver: events := events + 'POST RIVER';
-        tePreWin: events := events + 'PRE WIN';
-        teExistingCards: events := events + Format('EXISTING CARDS [%s]', [TCards.BytesToString(pbevent.Cards)]);
-        teDisconnect: events := events + Format('DISCONNECTED [#%d] %s (%s, %s)', [seatdbg.SeatIndex, playerdbg.Nick, ChipsToStr(table.Renderer.TableStatus.GetBet(seatdbg.SeatIndex)), ChipsToStr(seatdbg.Chips)]);
-      else
-        events := events + Format('UNHANDLED EVENT RECEIVED: %s', [GetEnumName(TypeInfo(TTableEventType), Integer(pbevent.Event))]);
-      end;
-    end;
-
-    DebugLn(FDebugId, tstatusdbg, ditApplication, events);
-    {$ENDIF}
+    table.SetTableStatus(pbtablestatus, FALSE);
   finally
     Tables.Unlock;
   end;
-
-  RefreshAll;
 end;
 
 procedure TfrmTable.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
@@ -1435,149 +1121,6 @@ begin
     DefocusControl(seRaiseAmount, FALSE);
 end;
 
-procedure TfrmTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
-var
-  seat_caption: String;
-  seat: TSeatInfo;
-  flop: TBytes;
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    seat_caption := '';
-    case ATableEvent.Event of
-      teExistingCards: begin
-        if Length(ATableEvent.Cards) >= 3 then
-        begin
-          flop := Copy(ATableEvent.Cards, 0, 3);
-          table.Renderer.TableStatus.FlopCards.Assign(flop);
-        end;
-        if Length(ATableEvent.Cards) >= 4 then
-          table.Renderer.TableStatus.TurnCard.Assign(ATableEvent.Cards[3]);
-        if Length(ATableEvent.Cards) >= 5 then
-          table.Renderer.TableStatus.RiverCard.Assign(ATableEvent.Cards[4]);
-      end;
-
-      teFold: begin
-        tiActiveFrameBlink.Enabled := FALSE;
-        seat_caption := 'FOLD';
-      end;
-
-      teSit: begin
-      end;
-
-      teStandUp: begin
-        if table.Renderer.PotWinAnimations.Count = 0 then
-          table.Renderer.AnimateBets(Handle, table.Renderer.TableStatus.PreviousBets, ATableEvent.Seat);
-      end;
-
-      tePostRiver: begin
-        table.Renderer.TableStatus.PreviousBets.Clear;
-        table.Renderer.TableStatus.PreviousBets.AddRange(ATableEvent.Bets);
-      end;
-
-      teWinning: begin
-        EnableGameLockTimer(2 + ATableEvent.Pots.Count * 0.5);
-
-        table.Renderer.TableStatus.Pots.Assign(ATableEvent.Pots);
-
-        if table.Renderer.AnimateBets(Handle, table.Renderer.TableStatus.PreviousBets) then
-          TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
-
-        table.Renderer.AnimateWinnerPots(Handle, ATableEvent.Pots);
-      end;
-
-      teDealing: begin
-        table.Renderer.ClearAnimations;
-        table.Renderer.ChipStackMaker.Clear;
-
-        table.Renderer.TableStatus.NewHandCleanup;
-
-        table.Renderer.AnimateBlinds(Handle);
-        table.Renderer.AnimateDealingCards(Handle);
-
-        EnableGameLockTimer(0.1 + Settings.Hardcoded.ANIMATION_METRICS.DEALING_INITIAL_DELAY +
-            table.Renderer.DealAnimations.Count * Settings.Hardcoded.ANIMATION_METRICS.DEALING_CARD_DELAY);
-      end;
-
-      teCheck: begin
-        tiActiveFrameBlink.Enabled := FALSE;
-        seat_caption := 'CHECK';
-
-        TablePlaySound(Sounds.SOUND_CHECK);
-      end;
-
-      teCall: begin
-        tiActiveFrameBlink.Enabled := FALSE;
-        seat_caption := 'CALL';
-
-        TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
-      end;
-
-      teRaise: begin
-        tiActiveFrameBlink.Enabled := FALSE;
-        seat_caption := 'RAISE';
-
-        TablePlaySound(Sounds.SOUND_PUTCHIPS_SMALL);
-      end;
-
-      teAllIn: begin
-        tiActiveFrameBlink.Enabled := FALSE;
-        seat_caption := 'ALL-IN';
-      end;
-
-      teFlop: begin
-        table.Renderer.TableStatus.FlopCards.Assign(ATableEvent.Cards);
-
-        tiActiveFrameBlink.Enabled := FALSE;
-        EnableGameLockTimer(1.5 + table.Renderer.WinningFlopAniDelay);
-        if table.Renderer.AnimateBets(Handle, ATableEvent.Bets) then
-          TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
-      end;
-
-      teTurn: begin
-        table.Renderer.TableStatus.TurnCard.Assign(ATableEvent.Cards);
-
-        tiActiveFrameBlink.Enabled := FALSE;
-        EnableGameLockTimer(1.5 + table.Renderer.WinningTurnAniDelay);
-        if table.Renderer.AnimateBets(Handle, ATableEvent.Bets) then
-          TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
-      end;
-
-      teRiver: begin
-        table.Renderer.TableStatus.RiverCard.Assign(ATableEvent.Cards);
-
-        tiActiveFrameBlink.Enabled := FALSE;
-        EnableGameLockTimer(1.5 + table.Renderer.WinningRiverAniDelay);
-        if table.Renderer.AnimateBets(Handle, ATableEvent.Bets) then
-          TablePlaySound(Sounds.SOUND_MOVE_CHIPS);
-      end;
-
-      teDisconnect: begin
-  {
-        if table.Renderer.TableStatus.GetSeatInfo(ATableEvent.Seat, seat) then
-          seat_caption := 'DISCONNECTED';}
-      end;
-    end;
-
-    if seat_caption <> '' then
-    begin
-      table.Renderer.TableStatus.Seats.ClearCaptions;
-      if table.Renderer.TableStatus.GetSeatInfo(ATableEvent.Seat, seat) then
-      begin
-        seat.LowerCaption := seat_caption;
-        if tiSeatCaptionClear.Enabled then
-          tiSeatCaptionClear.OnTimer(tiSeatCaptionClear);
-        tiSeatCaptionClear.Enabled := FALSE;
-        tiSeatCaptionClear.Tag := seat.SeatIndex;
-        tiSeatCaptionClear.Enabled := TRUE;
-      end;
-    end;
-  finally
-    Tables.Unlock;
-  end;
-end;
-
 procedure TfrmTable.acCallExecute(Sender: TObject);
 var
   seat_info: TSeatInfo;
@@ -1587,13 +1130,13 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    Assert(table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info));
-    seat_bet := table.Renderer.TableStatus.GetBet(seat_info.SeatIndex);
-    if seat_bet + seat_info.Chips < table.Renderer.TableStatus.MinimumBet then
+    Assert(table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info));
+    seat_bet := table.Status.GetBet(seat_info.SeatIndex);
+    if seat_bet + seat_info.Chips < table.Status.MinimumBet then
       call_amount := seat_bet + seat_info.Chips
     else
-      call_amount := table.Renderer.TableStatus.MinimumBet;
-    ServerSocket.PutChips(FGameId, call_amount, table.Renderer.TableStatus.State);
+      call_amount := table.Status.MinimumBet;
+    ServerSocket.PutChips(FGameId, call_amount, table.Status.State);
   finally
     Tables.Unlock;
   end;
@@ -1605,7 +1148,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    ServerSocket.PutChips(FGameId, table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex), table.Renderer.TableStatus.State);
+    ServerSocket.PutChips(FGameId, table.Status.GetBet(table.Status.SelfSeatIndex), table.Status.State);
   finally
     Tables.Unlock;
   end;
@@ -1628,12 +1171,12 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if (table.Renderer.TableStatus.IsSitting) and
-       (table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat)) and
+    if (table.Status.IsSitting) and
+       (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat)) and
        (seat.Chips = 0) then
     begin
       sindex := seat.SeatIndex;
-      FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Renderer.TableStatus, @sindex], ModalFormClose));
+      FormsContainer.Add(RunModalForm(TfrmTableSit, self, [@FInternalId, table.Status, @sindex], ModalFormClose));
       Exit;
     end;
 
@@ -1651,7 +1194,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    val := table.Renderer.TableStatus.MinimumBet;
+    val := table.Status.MinimumBet;
     if (val = 0) and
        (table.GetObjectCopy(game)) then
     try
@@ -1673,7 +1216,7 @@ begin
   maxraise := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    maxraise := table.Renderer.TableStatus.MaximumRaise;
+    maxraise := table.Status.MaximumRaise;
   finally
     Tables.Unlock;
   end;
@@ -1689,7 +1232,7 @@ begin
   minraise := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    minraise := table.Renderer.TableStatus.MinimumRaise;
+    minraise := table.Status.MinimumRaise;
   finally
     Tables.Unlock;
   end;
@@ -1703,7 +1246,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    ServerSocket.PutChips(FGameId, FRaiseValue, table.Renderer.TableStatus.State);
+    ServerSocket.PutChips(FGameId, FRaiseValue, table.Status.State);
   finally
     Tables.Unlock;
   end;
@@ -1719,41 +1262,19 @@ begin
   raise_value := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    seat_bet := table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex);
+    seat_bet := table.Status.GetBet(table.Status.SelfSeatIndex);
 
-    raise_value := table.Renderer.TableStatus.MinimumBet - seat_bet;
-    for C1 := 0 to table.Renderer.TableStatus.Pots.Count - 1 do
-      Inc(raise_value, table.Renderer.TableStatus.Pots[C1].ValueWithoutRake);
-    for C1 := 0 to table.Renderer.TableStatus.Bets.Count - 1 do
-      Inc(raise_value, table.Renderer.TableStatus.Bets[C1]);
-    raise_value := raise_value + table.Renderer.TableStatus.MinimumBet;
+    raise_value := table.Status.MinimumBet - seat_bet;
+    for C1 := 0 to table.Status.Pots.Count - 1 do
+      Inc(raise_value, table.Status.Pots[C1].ValueWithoutRake);
+    for C1 := 0 to table.Status.Bets.Count - 1 do
+      Inc(raise_value, table.Status.Bets[C1]);
+    raise_value := raise_value + table.Status.MinimumBet;
   finally
     Tables.Unlock;
   end;
 
   SetRaiseValue(raise_value);
-end;
-
-procedure TfrmTable.SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
-var
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if AClearAnimations then
-      table.Renderer.ClearAnimations;
-  finally
-    Tables.Unlock;
-  end;
-
-  CSRETableStatus(0, ATableStatus);
-  if (FTableType = ttHandPlayback) and
-     (Tables.GetAndLockTable(FInternalId, table)) then
-  try
-    pbHandPlaybackProgress.Position := table.HandHistoryPlayback.CurrentStateIndex;
-  finally
-    Tables.Unlock;
-  end;
 end;
 
 procedure TfrmTable.SetRaiseActionCaption;
@@ -1763,19 +1284,19 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.Renderer.TableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info) then
+    if table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info) then
     begin
-      if table.Renderer.TableStatus.ActionRaise then
+      if table.Status.ActionRaise then
       begin
-        if FRaiseValue = seat_info.Chips + table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex) then
+        if FRaiseValue = seat_info.Chips + table.Status.GetBet(table.Status.SelfSeatIndex) then
           acRaise.Caption := 'RAISE (ALL-IN)'
         else
           acRaise.Caption := Format('RAISE (%s)', [ChipsToStr(FRaiseValue)])
       end
       else
-        if table.Renderer.TableStatus.ActionBet then
+        if table.Status.ActionBet then
         begin
-          if FRaiseValue = seat_info.Chips + table.Renderer.TableStatus.GetBet(table.Renderer.TableStatus.SelfSeatIndex) then
+          if FRaiseValue = seat_info.Chips + table.Status.GetBet(table.Status.SelfSeatIndex) then
             acRaise.Caption := 'BET (ALL-IN)'
           else
             acRaise.Caption := Format('BET (%s)', [ChipsToStr(FRaiseValue)]);
@@ -1812,19 +1333,19 @@ begin
       game.Free;
     end;
 
-    if val > table.Renderer.TableStatus.MaximumRaise then
-      val := table.Renderer.TableStatus.MaximumRaise
+    if val > table.Status.MaximumRaise then
+      val := table.Status.MaximumRaise
     else
-      if val < table.Renderer.TableStatus.MinimumRaise then
-        val := table.Renderer.TableStatus.MinimumRaise;
+      if val < table.Status.MinimumRaise then
+        val := table.Status.MinimumRaise;
 
     FRaiseValue := val;
 
-    if table.Renderer.TableStatus.MaximumRaise = table.Renderer.TableStatus.MinimumRaise then
+    if table.Status.MaximumRaise = table.Status.MinimumRaise then
       table.Renderer.RaiseThumbPosition := 1
     else
-      table.Renderer.RaiseThumbPosition := (FRaiseValue - table.Renderer.TableStatus.MinimumRaise) /
-                                            (table.Renderer.TableStatus.MaximumRaise - table.Renderer.TableStatus.MinimumRaise);
+      table.Renderer.RaiseThumbPosition := (FRaiseValue - table.Status.MinimumRaise) /
+                                            (table.Status.MaximumRaise - table.Status.MinimumRaise);
 
     if ASetSpinEditValue then
       seRaiseAmount.Value := val / 100;
@@ -1842,11 +1363,28 @@ begin
     ConfigureGUI;
 end;
 
-procedure TfrmTable.TablePlaySound(const ASound: String);
+procedure TfrmTable.TableStatusUpdate;
+var
+  table: TTable;
 begin
-  if (GetForegroundWindow = Handle) and
-     (Settings.Sounds) then
-    Sounds.Play(ASound);
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    table.Renderer.Enable;
+  finally
+    Tables.Unlock;
+  end;
+
+  // ActionManager is initially in suspended state, to make sure no actions can be executed while table contains no data
+  // this block is executed when first tablestatus is received, and it also enables ActionManager
+  // also start playback of the hand, if table is in ttHandPlayback mode
+  if ActionManager.State = asSuspended then
+  begin
+    ActionManager.State := asNormal;
+    if FTableType = ttHandPlayback then
+      acHandPlaybackPlay.Execute;
+  end;
+
+  RefreshAll;
 end;
 
 procedure TfrmTable.RefreshAll;
@@ -1864,7 +1402,7 @@ begin
     ConfigureGUI;
     table.Renderer.Render;
 
-    if (table.Renderer.TableStatus.ActionFoldToAny) and
+    if (table.Status.ActionFoldToAny) and
        (cbFoldToAnyBet.Checked) then
       if acCheck.Enabled then
         acCheck.Execute
@@ -1881,8 +1419,15 @@ begin
 end;
 
 procedure TfrmTable.RendererSoundPlay(const ASound: String);
+var
+  table: TTable;
 begin
-  TablePlaySound(ASound);
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    table.PlaySound(ASound);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmTable.RendererTimebankStarted(Sender: TObject);
@@ -1891,8 +1436,8 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.Renderer.TableStatus.CurrentSeat = table.Renderer.TableStatus.SelfSeatIndex then
-      TablePlaySound(Sounds.SOUND_TIMEBANK);
+    if table.Status.CurrentSeat = table.Status.SelfSeatIndex then
+      table.PlaySound(Sounds.SOUND_TIMEBANK);
   finally
     Tables.Unlock;
   end;
@@ -1900,7 +1445,34 @@ end;
 
 procedure TfrmTable.CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
 begin
-  ConfigureGUI;
+  RefreshAll;
+end;
+
+procedure TfrmTable.tiHandPlaybackTimer(Sender: TObject);
+var
+  table: TTable;
+  gtc: DWORD;
+begin
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    table.SetTableStatus(table.HandHistoryPlayback.NextState, TRUE);
+
+    tiHandPlayback.Interval := 1000;
+    if table.GameplayLocked then
+    begin
+      gtc := GetTickCount;
+      if gtc < table.GameplayLockedEndTime then
+        tiHandPlayback.Interval := table.GameplayLockedEndTime - GetTickCount;
+    end;
+
+    if table.HandHistoryPlayback.CurrentStateIndex = table.HandHistoryPlayback.States.Count - 1 then
+    begin
+      tiHandPlayback.Enabled := FALSE;
+      btPlayPause.Action := acHandPlaybackPlay;
+    end;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmTable.acHandHistoryExecute(Sender: TObject);
@@ -1939,7 +1511,7 @@ begin
     if table.HandHistoryPlayback.CurrentStateIndex = table.HandHistoryPlayback.States.Count - 1 then
     begin
       table.HandHistoryPlayback.CurrentStateIndex := 0;
-      SetTableStatus(table.HandHistoryPlayback.CurrentState, TRUE);
+      table.SetTableStatus(table.HandHistoryPlayback.CurrentState, TRUE);
     end;
     btPlayPause.Action := acHandPlaybackPause;
   finally
@@ -1955,7 +1527,7 @@ begin
   try
     acHandPlaybackPause.Execute;
     if table.HandHistoryPlayback.CurrentStateIndex > 0 then
-      SetTableStatus(table.HandHistoryPlayback.PrevState, TRUE);
+      table.SetTableStatus(table.HandHistoryPlayback.PrevState, TRUE);
   finally
     Tables.Unlock;
   end;
@@ -1969,7 +1541,7 @@ begin
   try
     acHandPlaybackPause.Execute;
     if table.HandHistoryPlayback.CurrentStateIndex < table.HandHistoryPlayback.States.Count - 1 then
-      SetTableStatus(table.HandHistoryPlayback.NextState, TRUE);
+      table.SetTableStatus(table.HandHistoryPlayback.NextState, TRUE);
   finally
     Tables.Unlock;
   end;

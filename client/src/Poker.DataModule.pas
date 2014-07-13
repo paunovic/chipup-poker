@@ -301,7 +301,7 @@ begin
       table := Tables.AddTable(tstatus.TableMongoId, TRUE, FALSE);
 
     if Assigned(table) then
-      (table.Form as TfrmTable).SetTableStatus(tstatus, FALSE);
+      table.SetTableStatus(tstatus, FALSE);
   end;
 end;
 
@@ -331,7 +331,7 @@ begin
   Tables.Lock;
   try
     for table in Tables.Values do
-      for seat in table.Renderer.TableStatus.Seats do
+      for seat in table.Status.Seats do
         if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
         begin
           Assert(seat.Chips <= result);

@@ -195,7 +195,7 @@ uses
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Renderer;
+  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Status;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -1170,26 +1170,31 @@ var
   pbtstatus: TPB_TableStatus;
   table: TTable;
   game: TGameInfo;
+  config_gui: Boolean;
 begin
+  config_gui := FALSE;
   pbtstatus := AObject as TPB_TableStatus;
-  if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
-  begin
-    Tables.Lock;
-    try
+  Tables.Lock;
+  try
+    if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+    begin
+      table.Renderer.Disable;
       if table.GetObjectCopy(game) then
       try
         game.UpdateFromTableStatus(pbtstatus);
         if not table.Form.Visible then
           table.BringToFront;
-
-        ConfigureGUI;
+        config_gui := TRUE;
       finally
         game.Free;
       end;
-    finally
-      Tables.Unlock;
     end;
+  finally
+    Tables.Unlock;
   end;
+
+  if config_gui then
+    ConfigureGUI;
 end;
 
 procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);

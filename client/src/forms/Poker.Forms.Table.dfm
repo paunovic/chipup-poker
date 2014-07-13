@@ -324,8 +324,8 @@ object frmTable: TfrmTable
   end
   object ActionManager: TActionManager
     Images = il48px
-    Left = 56
-    Top = 104
+    Left = 48
+    Top = 52
     StyleName = 'Platform Default'
     object acStandUp: TAction
       Category = 'Game'
@@ -423,33 +423,19 @@ object frmTable: TfrmTable
       OnExecute = acHandPlaybackStepBackwardsExecute
     end
   end
-  object tiActiveFrameBlink: TTimer
-    Enabled = False
-    Interval = 750
-    OnTimer = tiActiveFrameBlinkTimer
-    Left = 56
-    Top = 32
-  end
   object tiSitOutNextHand: TTimer
     Enabled = False
     Interval = 500
     OnTimer = tiSitOutNextHandTimer
-    Left = 144
-    Top = 32
-  end
-  object tiSeatCaptionClear: TTimer
-    Enabled = False
-    Interval = 1800
-    OnTimer = tiSeatClearCaptionTimer
-    Left = 236
-    Top = 32
+    Left = 48
+    Top = 108
   end
   object tiSitOutNextBB: TTimer
     Enabled = False
     Interval = 500
     OnTimer = tiSitOutNextBBTimer
-    Left = 144
-    Top = 108
+    Left = 48
+    Top = 164
   end
   object RVStyle: TRVStyle
     TextStyles = <
@@ -627,27 +613,21 @@ object frmTable: TfrmTable
       8000808080008080800080808000808080008080800080808000808080008080
       8000}
     StyleTemplates = <>
-    Left = 316
-    Top = 104
-  end
-  object tiGameLock: TTimer
-    Enabled = False
-    OnTimer = tiGameLockTimer
-    Left = 236
-    Top = 108
+    Left = 132
+    Top = 52
   end
   object tiHandPlayback: TTimer
     Enabled = False
     OnTimer = tiHandPlaybackTimer
-    Left = 404
+    Left = 132
     Top = 108
   end
   object il48px: TImageList
     DrawingStyle = dsTransparent
     Height = 48
     Width = 48
-    Left = 60
-    Top = 168
+    Left = 216
+    Top = 52
     Bitmap = {
       494C010104000900040030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C00000006000000001002000000000000020
@@ -3031,11 +3011,5 @@ object frmTable: TfrmTable
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
-  end
-  object tiRender: TTimer
-    Interval = 250
-    OnTimer = tiRenderTimer
-    Left = 324
-    Top = 32
   end
 end

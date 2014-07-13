@@ -118,8 +118,8 @@ begin
   try
     if table.GetObjectCopy(game) then
     try
-      if (table.Renderer.TableStatus.SelfSeatIndex <> -1) and
-         (FTableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info)) then
+      if (table.Status.SelfSeatIndex <> -1) and
+         (FTableStatus.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) then
         seat_chips := seat_info.Chips
       else
         seat_chips := 0;
@@ -194,7 +194,7 @@ begin
       lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(game.MinBuyin * game.BigBlind),
           ChipsToStr(game.MaxBuyin * game.BigBlind)]);
       lbvAvailableBalance.Caption := Format('%s', [ChipsToStr(dmMain.AvailableBalance)]);
-      if table.Renderer.TableStatus.SelfSeatIndex <> -1 then
+      if table.Status.SelfSeatIndex <> -1 then
         FBuyinPhrase := 'add-on'
       else
         FBuyinPhrase := 'buy-in';
@@ -262,7 +262,7 @@ begin
 
       if err = '' then
       begin
-        if table.Renderer.TableStatus.SelfSeatIndex = -1 then
+        if table.Status.SelfSeatIndex = -1 then
         begin
           if game.State = gsClosed then
             err := 'Table is closed';
@@ -274,7 +274,7 @@ begin
         end
         else
         begin
-          if not FTableStatus.GetSeatInfo(table.Renderer.TableStatus.SelfSeatIndex, seat_info) then
+          if not FTableStatus.GetSeatInfo(table.Status.SelfSeatIndex, seat_info) then
             err := 'Invalid seat index';
 
           if err = '' then
