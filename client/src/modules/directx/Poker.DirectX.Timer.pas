@@ -220,7 +220,7 @@ begin
       FSignalEvent.WaitFor;
     end
     else
-      Sleep(1);
+      Sleep(10);
   end;
 end;
 

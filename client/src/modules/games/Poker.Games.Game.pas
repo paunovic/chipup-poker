@@ -30,8 +30,6 @@ type
   public
     procedure Assign(const AProtobufObject: TPB_Game); overload;
     procedure Assign(const AGameInfo: TGameInfo); overload;
-    procedure UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
-    procedure InitToDemoValues(const AClubId: Int64);
 
     class procedure BlindsEnumToInts(const ABlinds: TGameBlinds; out ASmallBlind, ABigBlind: UINT32);
     class function GameTypeToStr(const AGameType: TGameType; const AGameLimit: TGameLimit; const AShort: Boolean): String;
@@ -168,12 +166,6 @@ begin
   end;
 end;
 
-procedure TGameInfo.UpdateFromTableStatus(const ATableStatus: TPB_TableStatus);
-begin
-  FMongoId := ATableStatus.TableMongoId;
-  FSitting := ATableStatus.Seats.Count;
-end;
-
 function TGameInfo.GetStateStr: String;
 begin
   case FState of
@@ -184,26 +176,6 @@ begin
   else
     result := 'Unknown';
   end;
-end;
-
-procedure TGameInfo.InitToDemoValues(const AClubId: Int64);
-begin
-  SetLength(FMongoId, 0);
-  FClubId := AClubId;
-  SetLength(FCreatorId, 0);
-  FName := '';
-  FSmallBlind := 5;
-  FBigBlind := 5;
-  FBlinds := gb5x10;
-  FGameType := gtHoldem;
-  FGameLimit := glNoLimit;
-  FMinBuyin := 5;
-  FMaxBuyin := 500;
-  FSeats := 6;
-  FSitting := 0;
-  FState := gsActive;
-  FClosingTime := 0;
-  FLastHandId := 0;
 end;
 
 end.

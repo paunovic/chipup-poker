@@ -33,8 +33,6 @@ type
     procedure IncDealtCards;
     procedure FillDealtCards;
 
-    procedure InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer; const AMongoId: TBytes);
-
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
     property PreviousChips: UINT32 read FPreviousChips;
@@ -100,24 +98,6 @@ begin
   FCardsVisible := ASeatInfo.FCardsVisible;
   FDisconnected := ASeatInfo.Disconnected;
   FCanShow := ASeatInfo.FCanShow;
-end;
-
-procedure TSeatInfo.InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer; const AMongoId: TBytes);
-begin
-  FSeatIndex := ASeatIndex;
-  FPlayerMongoId := Copy(AMongoId, 0, Length(AMongoId));
-  FChips := AChips;
-  FPreviousChips := AChips;
-  FCards.Clear;
-  FDealtCards := ACardCount;
-  FCardCount := ACardCount;
-  FStatus := psInHand;
-  FUpperCaption := AUpperCaption;
-  FLowerCaption := '';
-  FTimebank := 0;
-  FCardsVisible := FALSE;
-  FCanShow := FALSE;
-  FDisconnected := FALSE;
 end;
 
 procedure TSeatInfo.IncDealtCards;

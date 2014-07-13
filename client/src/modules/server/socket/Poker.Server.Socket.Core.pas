@@ -253,7 +253,8 @@ begin
     DebugLn(FDebugId, Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
   else
   begin
-    if IsDebugFormAssigned then
+    if (IsDebugFormAssigned) and
+       (IsDebugRTTIEnabled) then
       serialized_object := SerializeObject(ADataObject)
     else
       serialized_object := '';

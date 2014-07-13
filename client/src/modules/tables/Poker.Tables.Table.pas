@@ -175,7 +175,6 @@ begin
   if ASendJoinCommand then
     ServerSocket.JoinTable(AGameId);
   FRenderer.UpdateDXAreaSize;
-  FRenderer.Enable;
   Exit(TRUE);
 end;
 
@@ -246,6 +245,8 @@ var
   playerdbg: TPlayerInfo;
   {$ENDIF}
 begin
+  FRenderer.Disable;
+
   if AClearAnimations then
     FRenderer.ClearAnimations;
 
@@ -532,8 +533,5 @@ begin
 
   end;
 end;
-
-
-
 
 end.

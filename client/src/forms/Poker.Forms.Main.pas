@@ -1168,33 +1168,26 @@ end;
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
-  table: TTable;
+  club: TClubInfo;
   game: TGameInfo;
-  config_gui: Boolean;
+  table: TTable;
 begin
-  config_gui := FALSE;
   pbtstatus := AObject as TPB_TableStatus;
-  Tables.Lock;
-  try
-    if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
-    begin
-      table.Renderer.Disable;
-      if table.GetObjectCopy(game) then
-      try
-        game.UpdateFromTableStatus(pbtstatus);
+  if dmMain.SelfInfo.Clubs.FindGame(pbtstatus.TableMongoId, club, game) then
+  begin
+    game.Sitting := pbtstatus.Seats.Count;
+
+    Tables.Lock;
+    try
+      if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
         if not table.Form.Visible then
           table.BringToFront;
-        config_gui := TRUE;
-      finally
-        game.Free;
-      end;
+    finally
+      Tables.Unlock;
     end;
-  finally
-    Tables.Unlock;
-  end;
 
-  if config_gui then
     ConfigureGUI;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);

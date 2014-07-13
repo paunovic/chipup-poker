@@ -24,7 +24,6 @@ type
     FBigBlindSeat: Integer;
     FRakePercent: UINT32;
     FLocked: Boolean;
-    FLockTimerEnabled: Boolean;
     FMinimumBet: UINT32;
     FHandId: UINT32;
     FMaximumRaise: UINT32;
@@ -60,7 +59,6 @@ type
     function IsSeatTaken(const ASeatIndex: Integer): Boolean;
     function GetSeatInfo(const ASeatIndex: Integer; var ASeatInfo: TSeatInfo): Boolean;
     procedure Assign(const ATableStatusProtobuf: TPB_TableStatus);
-    procedure InitToDemoValues;
 
     procedure UpdateClosingTime(const AGame: TGameInfo);
     procedure UpdateCurrentPlaytime;
@@ -345,60 +343,6 @@ begin
     FCurrentPlaytime := 0
   else
     FCurrentPlaytime := Int64(FTimebarEndtime) - Int64(GetTickCount);
-end;
-
-procedure TTableStatus.InitToDemoValues;
-var
-  seatinfo: TSeatInfo;
-  bytes: TBytes;
-begin
-  FState := tsPreFlop;
-  FDealer := 2;
-  FCurrentSeat := 5;
-
-  SetLength(bytes, 0);
-  FSeats.Clear;
-  seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(2, 'reiser', 100000, 2, bytes);
-  FSeats.Add(seatinfo);
-
-  seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(3, '', 88400, 2, dmMain.SelfInfo.Id);
-  FSeats.Add(seatinfo);
-
-  seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(4, 'paunovic', 88400, 2, bytes);
-  FSeats.Add(seatinfo);
-
-  seatinfo := TSeatInfo.Create;
-  seatinfo.InitToDemoValues(5, 'marko', 111400, 2, bytes);
-  FSeats.Add(seatinfo);
-
-  FBets.Clear;
-  FBets.Add(0); FBets.Add(0); FBets.Add(3573); FBets.Add(7317); FBets.Add(18458);
-  FPreviousBets.Clear;
-  FPreviousBets.AddRange(FBets);
-  FFlopCards.Clear;
-  FTurnCard.Clear;
-  FRiverCard.Clear;
-  FSmallBlindSeat := 3;
-  FBigBlindSeat := 4;
-  FRakePercent := 5;
-  FLocked := FALSE;
-  FLockTimerEnabled := FALSE;
-  FMinimumBet := 0;
-  FHandId := 0;
-  FMaximumRaise := 0;
-  FPots.Clear;
-  FPreviousPots.Clear;
-  FTime := 0;
-  FRotationHand := 0;
-  FCurrentGame := gtHoldem;
-  FCurrentLimit := glNoLimit;
-  FMinimumRaise := 0;
-  FClosingTime := 0;
-  FTimebarEndtime := 0;
-  FCurrentPlaytime := 0;
 end;
 
 end.

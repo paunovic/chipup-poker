@@ -850,25 +850,31 @@ object frmDebug: TfrmDebug
       Caption = 'Show pings'
       GroupIndex = 1
     end
+    object pmiRTTIEnabled: TMenuItem
+      AutoCheck = True
+      Caption = 'Enable RTTI'
+      Checked = True
+      GroupIndex = 2
+    end
     object N1: TMenuItem
       Caption = '-'
-      GroupIndex = 1
+      GroupIndex = 2
     end
     object pmiLogSave: TMenuItem
       Action = acSaveLog
-      GroupIndex = 1
+      GroupIndex = 3
     end
     object pmiLogCopy: TMenuItem
       Action = acCopyLogSelection
-      GroupIndex = 1
+      GroupIndex = 3
     end
     object N2: TMenuItem
       Caption = '-'
-      GroupIndex = 1
+      GroupIndex = 3
     end
     object pmiLogClear: TMenuItem
       Action = acClearLog
-      GroupIndex = 1
+      GroupIndex = 3
     end
   end
   object tiAppInfoRefresh: TTimer

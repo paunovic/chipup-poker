@@ -5,11 +5,10 @@
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit,
-  cxMemo, Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync,
-  cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters,
-  dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxCheckComboBox;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit, cxMemo,
+  Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics,
+  cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  cxCheckComboBox;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
@@ -22,7 +21,7 @@ type
     Name: String;
   end;
 
-  TDebugFormLog = class(TIdSync)
+  TDebugFormLog = class(TIdNotify)
   private
     FDebugId: Integer;
     FType: TDebugInfoType;
@@ -31,23 +30,23 @@ type
     FData: String;
     FSubData: String;
   protected
-    procedure DoSynchronize; override;
+    procedure DoNotify; override;
   public
     class procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
   end;
 
-  TDebugFormRefresh = class(TIdSync)
+  TDebugFormRefresh = class(TIdNotify)
   private
     FRefreshItems: TDebugRefreshItemSet;
   protected
-    procedure DoSynchronize; override;
+    procedure DoNotify; override;
   public
     class procedure Execute(const ARefreshItems: TDebugRefreshItemSet);
   end;
 
-  TDebugFormObjectChange = class(TIdSync)
+  TDebugFormObjectChange = class(TIdNotify)
   protected
-    procedure DoSynchronize; override;
+    procedure DoNotify; override;
   public
     class procedure Execute;
   end;
@@ -102,6 +101,7 @@ type
     lbvSoundBuffers: TcxLabel;
     lbsAnimations: TcxLabel;
     lbvAnimations: TcxLabel;
+    pmiRTTIEnabled: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -131,6 +131,8 @@ type
   end;
 
   function IsDebugFormAssigned: Boolean;
+  function IsDebugRTTIEnabled: Boolean;
+
   procedure DebugLn(const ADebugId: Integer; const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
   procedure RefreshDebugForm(const ARefreshItems: TDebugRefreshItemSet);
 
@@ -212,6 +214,11 @@ end;
 function IsDebugFormAssigned: Boolean;
 begin
   result := Assigned(frmDebug);
+end;
+
+function IsDebugRTTIEnabled: Boolean;
+begin
+  result := frmDebug.pmiRTTIEnabled.Checked;
 end;
 
 
@@ -826,27 +833,23 @@ var
   dfl: TDebugFormLog;
 begin
   dfl := TDebugFormLog.Create;
-  try
-    dfl.FDebugId := ADebugId;
-    dfl.FType := AType;
-    dfl.FTime := ATime;
-    dfl.FTypeStr := ATypeStr;
-    dfl.FData := AData;
-    dfl.FSubData := ASubData;
-    dfl.Synchronize;
-  finally
-    dfl.Free;
-  end;
+  dfl.FDebugId := ADebugId;
+  dfl.FType := AType;
+  dfl.FTime := ATime;
+  dfl.FTypeStr := ATypeStr;
+  dfl.FData := AData;
+  dfl.FSubData := ASubData;
+  dfl.Notify;
 end;
 
-procedure TDebugFormLog.DoSynchronize;
+procedure TDebugFormLog.DoNotify;
 begin
   frmDebug.Add(FDebugId, FType, FTime, FTypeStr, FData, FSubData);
 end;
 
 { TDebugFormRefresh }
 
-procedure TDebugFormRefresh.DoSynchronize;
+procedure TDebugFormRefresh.DoNotify;
 begin
   inherited;
   if IsDebugFormAssigned then
@@ -858,17 +861,13 @@ var
   dfr: TDebugFormRefresh;
 begin
   dfr := TDebugFormRefresh.Create;
-  try
-    dfr.FRefreshItems := ARefreshItems;
-    dfr.Synchronize;
-  finally
-    dfr.Free;
-  end;
+  dfr.FRefreshItems := ARefreshItems;
+  dfr.Notify;
 end;
 
 { TDebugFormObjectChange }
 
-procedure TDebugFormObjectChange.DoSynchronize;
+procedure TDebugFormObjectChange.DoNotify;
 begin
   inherited;
   if IsDebugFormAssigned then
@@ -876,15 +875,8 @@ begin
 end;
 
 class procedure TDebugFormObjectChange.Execute;
-var
-  dfoc: TDebugFormObjectChange;
 begin
-  dfoc := TDebugFormObjectChange.Create;
-  try
-    dfoc.Synchronize;
-  finally
-    dfoc.Free;
-  end;
+  TDebugFormObjectChange.Create.Notify;
 end;
 
 initialization
