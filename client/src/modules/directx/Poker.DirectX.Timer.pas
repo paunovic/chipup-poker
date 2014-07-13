@@ -8,13 +8,18 @@ uses
 type
   TDXTimer = class(TThread)
   private
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
-    FAnimations: TDXAnimations;
-    FSignalEvent: TEvent;
-    FTiming: TAsphyreTiming;
-    FLastUpdate: Double;
-    FNextId: Integer;
-    FLocK: TCriticalSection;
+    const
+      UPDATE_FPS      = 60;
+      UPDATE_INTERVAL = 1000 div UPDATE_FPS;
+
+    var
+      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+      FAnimations: TDXAnimations;
+      FSignalEvent: TEvent;
+      FTiming: TAsphyreTiming;
+      FLastUpdate: Double;
+      FNextId: Integer;
+      FLocK: TCriticalSection;
 
     procedure Process;
     procedure Shutdown;
@@ -149,9 +154,6 @@ end;
 
 
 procedure TDXTimer.Process;
-const
-  UPDATE_FPS      = 60;
-  UPDATE_INTERVAL = 1000 / UPDATE_FPS;
 var
   C1: Integer;
   callbacks: TList<THandle>;
@@ -220,7 +222,7 @@ begin
       FSignalEvent.WaitFor;
     end
     else
-      Sleep(10);
+      Sleep(UPDATE_INTERVAL);
   end;
 end;
 

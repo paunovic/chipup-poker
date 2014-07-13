@@ -1186,7 +1186,7 @@ begin
       Tables.Unlock;
     end;
 
-    ConfigureGUI;
+    UpdateGamelist;
   end;
 end;
 
