@@ -40,7 +40,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 	var params,id;
 	try {
 		params = pb.Parse(args,'Poker.CloseGameData');
-		id = new myutils.toMongoId(params.gameid);
+		id = myutils.toMongoId(params.gameid);
 		switch (params.timestamp) {
 		case 'cgtCurrentHand':
 			params.timestamp = 0;
@@ -93,10 +93,10 @@ handlers[codes.scCloseGame] = function (args,token) {
 	}.bind(this));
 };
 handlers[codes.scCreateGame] = function (args,token) {
-	var game_type,blinds,seats,clubseq,gamename,params,game_limit;
+	var game_type,blinds,seats,clubid,gamename,params,game_limit;
 	try {
 		params = pb.Parse(args,'Poker.Game');
-		clubseq = params.clubseq;
+		clubid = myutils.toMongoId(params.club_mongoid);
 		game_type = params.game_type;
 		game_limit = params.game_limit;
 		blinds = params.blinds;
@@ -111,8 +111,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	var doc = {game_type:game_type, blinds:blinds, seats:seats, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
-	Club.getClubBySeq(clubseq,function (err,club) {
+	Club.getClubById(clubid,function (err,club) {
 		if (err == 'not found') {
 			this.reply(0,"club not found");
 			return;
@@ -121,6 +120,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 			this.reply(0,"internal error");
 			return;
 		}
+		var doc = {game_type:game_type, blinds:blinds, seats:seats, clubseq:club.obj.seq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
 		if (!club.isOwner(this.userid)) {
 			this.reply(0,'your not owner');
 			return;

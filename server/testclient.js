@@ -192,6 +192,7 @@ function testmenu(cb,config) {
 	var client2;
 	var gameid;
 	var clubseq;
+	var clubid;
 	var autoMoves = [];
 	var total = 0;
 	var clients = [];
@@ -446,7 +447,7 @@ function testmenu(cb,config) {
 				return;
 			}
 			this.log('club seq is',params.club.seq);
-			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:'gtHoldem',
+			this.reply(codes.scCreateGame,{club_mongoid: params.club._id, game_type:'gtHoldem',
 				game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix+' testbot game',
 				buyin_max:20000, buyin_min:5},'Poker.Game');
 			break;
@@ -509,6 +510,7 @@ function testmenu(cb,config) {
 			for (var x=0; x<params.clubs.length; x++) {
 				if (params.clubs[x].name == (prefix + ' testbot club')) {
 					clubseq = params.clubs[x].seq;
+					clubid = params.clubs[x]._id;
 					makeit = false;
 				}
 			}
@@ -524,7 +526,7 @@ function testmenu(cb,config) {
 					this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
 					this.joining = true;
 				} else {
-					this.reply(codes.scCreateGame,{clubseq: clubseq, game_type:'gtHoldem', game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
+					this.reply(codes.scCreateGame,{club_mongoid: clubid, game_type:'gtHoldem', game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
 				}
 			}
 	}
