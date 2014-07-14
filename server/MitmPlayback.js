@@ -23,7 +23,7 @@ function MitmPlayback(config) {
 
 MitmPlayback.prototype.startPlayback = function() {
 	this.socketIds.forEach(function(socketId) {
-		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected);
+		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected.bind(this));
 	}, this);
 };
 
