@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HandHistory;
 interface
 
 uses
-  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.PlayerHandHistory,Poker.Protobufs.Objects.MoveRow,Poker.Protobufs.Objects.Game;
+  Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,Poker.Protobufs.Objects.PlayerHandHistory,Poker.Protobufs.Objects.HandHistoryMove,Poker.Protobufs.Objects.Game;
 
 type
   TPB_HandHistory = class(TProtobufBaseObject)
@@ -33,7 +33,7 @@ type
       FCards: TBytes;
       FEndtime: UINT32;
       FBalanceChanges: TList<Integer>;
-      FMoves: TList<TPB_MoveRow>;
+      FMoves: TList<TPB_HandHistoryMove>;
       FDealer: UINT32;
       FGame: TPB_Game;
       FCurrentGame: TGameType;
@@ -75,7 +75,7 @@ type
     procedure SetRake(const AValue: Integer);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
     procedure BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
-    procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
+    procedure MovesNotifyEvent(Sender: TObject; const Item: TPB_HandHistoryMove; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -124,10 +124,10 @@ type
     procedure clear_BalanceChanges;
     property BalanceChanges: TList<Integer> read FBalanceChanges;
 
-    // repeated MoveRow Moves = 8;
+    // repeated HandHistoryMove Moves = 8;
     function has_Moves: Boolean;
     procedure clear_Moves;
-    property Moves: TList<TPB_MoveRow> read FMoves;
+    property Moves: TList<TPB_HandHistoryMove> read FMoves;
 
     // required uint32 Dealer = 9;
     function has_Dealer: Boolean;
@@ -165,7 +165,7 @@ begin
   inherited;
   FPlayers := TObjectList<TPB_PlayerHandHistory>.Create;
   FBalanceChanges := TList<Integer>.Create;
-  FMoves := TObjectList<TPB_MoveRow>.Create;
+  FMoves := TObjectList<TPB_HandHistoryMove>.Create;
 end;
 procedure TPB_HandHistory.HookNotifiers;
 begin
@@ -247,7 +247,7 @@ begin
       end;
       kMovesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FMoves.Add(TPB_MoveRow.Create(AProtobufReader,AProtobufReader.readInt32));
+        FMoves.Add(TPB_HandHistoryMove.Create(AProtobufReader,AProtobufReader.readInt32));
         set_has_Moves;
       end;
       kDealerFieldNumber: begin
@@ -281,7 +281,7 @@ end;
 procedure TPB_HandHistory.MergeFrom(const from: TPB_HandHistory);
 var
   temp3: TPB_PlayerHandHistory;
-  temp7: TPB_MoveRow;
+  temp7: TPB_HandHistoryMove;
 begin
   if (from.has_MongoId) then
     SetMongoId(from.MongoId);
@@ -297,7 +297,7 @@ begin
     SetEndtime(from.Endtime);
   FBalanceChanges.AddRange(from.BalanceChanges);
   for temp7 in from.Moves do
-    FMoves.Add(TPB_MoveRow.Create(temp7));
+    FMoves.Add(TPB_HandHistoryMove.Create(temp7));
   if (from.has_Dealer) then
     SetDealer(from.Dealer);
   if (from.has_Game) then
@@ -544,7 +544,7 @@ begin
   _has_bits_ := _has_bits_ and not 128;
 end;
 
-procedure TPB_HandHistory.MovesNotifyEvent(Sender: TObject; const Item: TPB_MoveRow; Action: TCollectionNotification);
+procedure TPB_HandHistory.MovesNotifyEvent(Sender: TObject; const Item: TPB_HandHistoryMove; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeTag(kMovesFieldNumber,WIRETYPE_LENGTH_DELIMITED);

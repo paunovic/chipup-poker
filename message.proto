@@ -239,7 +239,7 @@ message Game {
 	optional bytes _id = 1;
 	optional bytes creator_mongo_id = 2;
 	optional string gamename = 3;
-	optional int32 clubseq = 4;
+	optional bytes club_mongoid = 4;
 	optional GameType game_type = 5;
 	optional GameLimit game_limit = 6;
 	optional GameBlinds blinds = 7;
@@ -597,7 +597,7 @@ message HandHistory {
 		optional bool muck = 6;
 		required SeatInfo.PlayerStatus status = 7;
 	}
-	message MoveRow {
+	message HandHistoryMove {
 		repeated TableEvent.TableEventType code = 1;
 		optional uint32 bet = 2;
 		optional int32 seat = 3;
@@ -611,7 +611,7 @@ message HandHistory {
 	required bytes cards = 5;
 	required uint32 endtime = 6;
 	repeated int32 balance_changes = 7;
-	repeated MoveRow moves = 8;
+	repeated HandHistoryMove moves = 8;
 	required uint32 dealer = 9;
 	optional Game game = 10;
 	optional Game.GameType current_game = 11;
