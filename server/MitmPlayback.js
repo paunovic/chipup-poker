@@ -85,7 +85,6 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 
 MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 	return function (err, methodId, args, type) {
-		debugger;
 		if (err) throw err;
 					
 		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
@@ -112,7 +111,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 	debugger;
 	var currentRequestInfo = "request #" + requestNum;
 
-	var requestFromDb = requests[requestNum];
+	var requestFromDb = this.requests[requestNum];
 
 	if (requestFromDb.direction !== directions.S2C)
 		throw new Error('Received response from the server out of order!');
@@ -128,7 +127,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 		if (!methodToTypeMap[methodName])
 			throw new Error('schema for code ' + methodName + ' not known');
 
-		var argsParsed = makeArgsAndSanatize();
+		var argsParsed = makeArgsAndSanatize(methodName);
 		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
 		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
 	}
@@ -138,21 +137,21 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 };
 
 
-MitmPlayback.prototype._makeArgsAndSanatize = function () {
-	var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
-	var argsFromDbParsed = pb.Parse(argsFromDb, methodToTypeMap[requestFromDb.method]);
+MitmPlayback.prototype._makeArgsAndSanatize = function (methodName) {
+	var argsParsed = this.protobuf.Parse(args, this.methodToTypeMap[methodName]);
+	var argsFromDbParsed = this.protobuf.Parse(argsFromDb, this.methodToTypeMap[requestFromDb.method]);
 
-	if (methodId === serverCodes.srLoginReply) {
-		argsParsed = sanitizeLoginReply(argsParsed);
-		argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
-	} else if (methodId === serverCodes.srTableStatsReply) {
-		argsParsed = sanitizeTableStats(argsParsed);
-		argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
-	} else if (methodId === serverCodes.seGameChange) {
+	if (methodId === this.serverCodes.srLoginReply) {
+		argsParsed = this.sanitizeLoginReply(argsParsed);
+		argsFromDbParsed = this.sanitizeLoginReply(argsFromDbParsed);
+	} else if (methodId === this.serverCodes.srTableStatsReply) {
+		argsParsed = this.sanitizeTableStats(argsParsed);
+		argsFromDbParsed = this.sanitizeTableStats(argsFromDbParsed);
+	} else if (methodId === this.serverCodes.seGameChange) {
 		argsParsed.lasthandid = argsFromDbParsed.lasthandid;
-	} else if ([serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
-		argsParsed = sanitizeTableStatus(argsParsed);
-		argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
+	} else if ([this.serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
+		argsParsed = this.sanitizeTableStatus(argsParsed);
+		argsFromDbParsed = this.sanitizeTableStatus(argsFromDbParsed);
 	}
 	return {fromServer: argsParsed, fromDb: argsFromDbParsed};
 };
