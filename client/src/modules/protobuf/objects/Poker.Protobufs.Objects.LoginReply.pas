@@ -236,6 +236,7 @@ end;
 procedure TPB_LoginReply.ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_ReconnectTables;
   ProtobufOutput.writeTag(kReconnectTablesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

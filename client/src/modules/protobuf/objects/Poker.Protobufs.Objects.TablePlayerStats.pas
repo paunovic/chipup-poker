@@ -314,6 +314,7 @@ end;
 procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Buyins;
   ProtobufOutput.writeUInt32(kBuyinsFieldNumber,Item);
 end;
 
@@ -341,6 +342,7 @@ end;
 procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Cashouts;
   ProtobufOutput.writeUInt32(kCashoutsFieldNumber,Item);
 end;
 

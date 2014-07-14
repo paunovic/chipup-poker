@@ -138,6 +138,7 @@ end;
 procedure TPB_AssetList.AssetsNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Assets;
   ProtobufOutput.writeTag(kAssetsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

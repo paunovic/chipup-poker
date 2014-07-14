@@ -390,7 +390,8 @@ class BaseGenerator : public CodeGenerator {
 				printer->Print(vars,
 					"procedure TPB_$message$.$name$NotifyEvent(Sender: TObject; const Item: $subtype$; Action: TCollectionNotification);\n"
 					"begin\n"
-					"  Assert(Action = cnAdded);\n");
+					"  Assert(Action = cnAdded);\n"
+					"  set_has_$name$;\n");
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					printer->Print(vars,
 						"  ProtobufOutput.writeTag($enum$,$tagtype$);\n"

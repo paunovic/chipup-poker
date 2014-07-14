@@ -337,6 +337,7 @@ end;
 procedure TPB_Club.MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMember; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Members;
   ProtobufOutput.writeTag(kMembersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

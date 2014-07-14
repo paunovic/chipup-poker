@@ -184,6 +184,7 @@ end;
 procedure TPB_ClubStatsReply.PlayerStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubPlayerStats; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_PlayerStats;
   ProtobufOutput.writeTag(kPlayerStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

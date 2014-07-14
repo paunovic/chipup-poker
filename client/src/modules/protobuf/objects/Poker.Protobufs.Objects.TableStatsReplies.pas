@@ -192,6 +192,7 @@ end;
 procedure TPB_TableStatsReplies.ReplyNotifyEvent(Sender: TObject; const Item: TPB_TableStatsReply; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Reply;
   ProtobufOutput.writeTag(kReplyFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -221,6 +222,7 @@ end;
 procedure TPB_TableStatsReplies.PlayersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Players;
   ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -250,6 +252,7 @@ end;
 procedure TPB_TableStatsReplies.ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_ClubStats;
   ProtobufOutput.writeTag(kClubStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

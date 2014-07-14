@@ -224,6 +224,7 @@ end;
 procedure TPB_Pot.MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Members;
   ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
 end;
 
@@ -251,6 +252,7 @@ end;
 procedure TPB_Pot.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_WinnerData;
   ProtobufOutput.writeTag(kWinnerDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

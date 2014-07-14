@@ -271,6 +271,7 @@ end;
 procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Pots;
   ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -300,6 +301,7 @@ end;
 procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Bets;
   ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
 end;
 
