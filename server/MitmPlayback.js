@@ -2,11 +2,11 @@
 var util = require("util");
 var directions = require('./directions');
 var diff = require('deep-diff');
+var net = require('net');
 
 module.exports = MitmPlayback;
 
 function MitmPlayback(config) {
-	debugger;
 	this.requests = config.requests;
 	this.host = config.host;
 	this.port = config.port;
@@ -23,8 +23,8 @@ function MitmPlayback(config) {
 
 MitmPlayback.prototype.startPlayback = function() {
 	this.socketIds.forEach(function(socketId) {
-		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected);
-	});
+		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected.bind(this));
+	}, this);
 };
 
 
@@ -32,13 +32,14 @@ MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
 	var allConnected = true;
 	this.socketIds.forEach(function(socketId) {
 		if (!this.sockets[socketId]) allConnected = false;
-	});
+	}, this);
 
 	if (allConnected) this._sendRequests();
 };
 
 
 MitmPlayback.prototype._sendRequests = function() {
+	debugger;
 	var request = this.requests[this.currentRequestNumber];
 
 	while (request.direction === directions.C2S) {
@@ -69,12 +70,12 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 };
 
 
-MitmPlayback.prototype._openNewSocket	=	function (socketId, callback) {
-	debugger;
+MitmPlayback.prototype._openNewSocket = function (socketId, callback) {
+	var self = this;
 	this.sockets[socketId] = net.connect(this.port, this.host, function () {
-		callback();
 		socket.on('error', function (err) { throw err; });
-		socket.on('data', this.protobufUtil.createOnDataListenerFn(this._checkIfNextRequestsMatch.bind(this)));
+		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfNextRequestsMatch));
+		callback();
 	});
 };
 

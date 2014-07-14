@@ -31,7 +31,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
 				mitm.find({
 					$query: {},
 					$orderby: { timestamp : 1 }
-				}).toArray(function (err, requests, socketIds) {
+				}).toArray(function (err, requests) {
 					if (err) throw err;
 					var config = {
 						requests: requests,
