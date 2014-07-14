@@ -41,7 +41,6 @@ MitmPlayback.prototype._openNewSocket = function (socketId, callback) {
 
 
 MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
-	debugger;
 	var allConnected = true;
 	this.socketIds.forEach(function(socketId) {
 		if (!this.sockets[socketId]) allConnected = false;
@@ -81,17 +80,18 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 
 	if (socket._writableState.length > (256 * 1024))
 		throw new Error('Send overflow!');
+		
+	console.log("Sent message on socket id " + socketId);
 };
 
 
 MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
-	debugger;
 	return function (err, methodId, args, type) {
 		debugger;
 		if (err) throw err;
 					
 		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
-			if (requests[i].socketId !== socketId) 
+			if (this.requests[i].socketId !== socketId) 
 				continue;
 	
 			try {
