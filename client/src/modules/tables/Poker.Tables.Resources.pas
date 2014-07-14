@@ -193,7 +193,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.DataModule, Poker.Settings;
+  System.SysUtils, Poker.DataModule, Poker.Settings, AsphyreColors;
 
 
 
@@ -335,6 +335,5 @@ begin
   suitint := Integer(ACard.Suit) - 1;
   result := FCardArtworksImages[valueint * 4 + suitint];
 end;
-
 
 end.

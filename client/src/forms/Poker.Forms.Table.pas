@@ -116,7 +116,7 @@ type
     procedure RendererDealerChatMessage(const AMessage: String);
     procedure RendererSoundPlay(const ASound: String);
     procedure RendererTimebankStarted(Sender: TObject);
-    procedure ConfigureActions(out AFocusWindow: Boolean);
+    procedure ConfigureActions;
     procedure AddChatMessage(const AUser: String; const AUserStyle, AUserParagraph: Integer; const AMessage: String; const AMessageStyle, AMessageParagraph: Integer);
 
     function GetTableCaption: String;
@@ -800,137 +800,24 @@ begin
     rvChat.DeleteParas(0, rvChat.ItemCount - Settings.Hardcoded.TABLE_CHAT_SCROLLBACK_LINES + 1);
 end;
 
-procedure TfrmTable.ConfigureActions(out AFocusWindow: Boolean);
+procedure TfrmTable.ConfigureActions;
 var
-  raise_en: Boolean;
-  seat_info: TSeatInfo;
   table: TTable;
-  game: TGameInfo;
 begin
-  AFocusWindow := FALSE;
-
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      raise_en := table.Status.ActionRaise;
-      table.Status.ActionStandUp := FALSE;
-      table.Status.ActionFold := FALSE;
-      table.Status.ActionCall := FALSE;
-      table.Status.ActionCheck := FALSE;
-      table.Status.ActionRaise := FALSE;
-      table.Status.ActionBet := FALSE;
-      table.Status.ActionPlayNow := FALSE;
-      table.Status.ActionSitOut := FALSE;
-      table.Status.ActionFoldToAny := FALSE;
-      table.Status.ActionSitOutNextBB := FALSE;
-      table.Status.ActionShowCards := FALSE;
-
-      seat_info := nil;
-      if (table.TableType = ttLiveGame) and
-         (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) then
-      begin
-        table.Status.ActionStandUp := TRUE;
-
-        if game.State <> gsClosed then
-          case seat_info.Status of
-            psOutOfPlay: begin
-              table.Status.ActionPlayNow := TRUE;
-              table.Status.ActionFoldToAny := FALSE;
-              table.Status.ActionSitOut := FALSE;
-              table.Status.ActionSitOutNextBB := FALSE;
-            end;
-
-            psOutOfHand: begin
-              table.Status.ActionFoldToAny := FALSE;
-              table.Status.ActionSitOut := TRUE;
-              table.Status.ActionSitOutNextBB := TRUE;
-            end;
-
-            psInHand, psAllIn: begin
-              table.Status.ActionSitOut := TRUE;
-              table.Status.ActionSitOutNextBB := TRUE;
-              if (seat_info.Status = psInHand) and
-                 (table.Status.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
-                table.Status.ActionFoldToAny := TRUE;
-
-              if (table.Status.CurrentSeat = table.Status.SelfSeatIndex) and
-                 (not table.Status.Locked) and
-                 (not table.GameplayLocked) then
-                case table.Status.State of
-                  tsIdle: begin
-                    table.Status.ActionFoldToAny := FALSE;
-                  end;
-
-                  tsPreFlop, tsFlop, tsTurn, tsRiver: begin
-                    table.Status.ActionFold := TRUE;
-                    // check if our current bet is smaller than minimumbet (call/raise situation)
-                    if table.Status.GetBet(seat_info.SeatIndex) < table.Status.MinimumBet then
-                    begin
-                      if seat_info.Chips <= table.Status.MinimumBet then
-                        acCall.Caption := 'CALL (ALL-IN)'
-                      else
-                        acCall.Caption := Format('CALL (%s)', [ChipsToStr(table.Status.MinimumBet{ - table.Status.GetBet(seat_info.SeatIndex)})]);
-                      table.Status.ActionCall := TRUE;
-
-                      // if we can call, there is a possibility that we can raise too - we check if we can raise here
-                      if (seat_info.Chips > table.Status.MinimumBet) and
-                         (table.Status.MinimumBet < table.Status.MinimumRaise) then
-                        table.Status.ActionRaise := TRUE;
-                    end
-                    else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
-                    begin
-                      table.Status.ActionCheck := TRUE;
-                      table.Status.ActionBet := TRUE;
-                    end;
-
-                    AFocusWindow := TRUE;
-                  end;
-
-                  tsWinning, tsWinning2: begin
-                    table.Status.ActionFoldToAny := FALSE;
-                  end;
-                end
-              else
-                FWindowFocused := FALSE;
-            end;
-
-            psFolded: begin
-              table.Status.ActionFoldToAny := FALSE;
-              table.Status.ActionSitOut := TRUE;
-              table.Status.ActionSitOutNextBB := TRUE;
-            end;
-          end;
-      end;
-
-      // if raise slider was not enabled, set it to minimum value
-      if not raise_en then
-        FRaiseValue := table.Status.MinimumRaise;
-      SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
-
-      // check if SHOW CARDS button is enabled
-      table.Status.ActionShowCards := (table.Status.State in [tsWinning, tsWinning2]) and
-                                      (Assigned(seat_info)) and
-                                      (seat_info.CanShow) and
-                                      (not seat_info.CardsVisible) and
-                                      (seat_info.Status in [psFolded, psAllIn, psInHand]);
-
-      // enable actions
-      acStandUp.Enabled := table.Status.ActionStandUp;
-      acFold.Enabled := table.Status.ActionFold;
-      acCall.Enabled := table.Status.ActionCall;
-      acCheck.Enabled := table.Status.ActionCheck;
-      acRaise.Enabled := table.Status.ActionRaise;
-      acRaise.Enabled := (table.Status.ActionBet) or (table.Status.ActionRaise);
-      acRaiseMin.Enabled := acRaise.Enabled;
-      acRaise3BB.Enabled := acRaise.Enabled;
-      acRaisePot.Enabled := acRaise.Enabled;
-      acRaiseMax.Enabled := acRaise.Enabled;
-      acPlayNow.Enabled := table.Status.ActionPlayNow;
-      acShowCards.Enabled := table.Status.ActionShowCards;
-    finally
-      game.Free;
-    end;
+    acStandUp.Enabled := table.Status.ActionStandUp;
+    acFold.Enabled := table.Status.ActionFold;
+    acCall.Enabled := table.Status.ActionCall;
+    acCheck.Enabled := table.Status.ActionCheck;
+    acRaise.Enabled := table.Status.ActionRaise;
+    acRaise.Enabled := (table.Status.ActionBet) or (table.Status.ActionRaise);
+    acRaiseMin.Enabled := acRaise.Enabled;
+    acRaise3BB.Enabled := acRaise.Enabled;
+    acRaisePot.Enabled := acRaise.Enabled;
+    acRaiseMax.Enabled := acRaise.Enabled;
+    acPlayNow.Enabled := table.Status.ActionPlayNow;
+    acShowCards.Enabled := table.Status.ActionShowCards;
   finally
     Tables.Unlock;
   end;
@@ -1366,9 +1253,15 @@ end;
 procedure TfrmTable.TableStatusUpdate;
 var
   table: TTable;
+  focus_window: Boolean;
 begin
+  focus_window := FALSE;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
+    if table.Status.ResetRaiseValue then
+      FRaiseValue := table.Status.MinimumRaise;
+    focus_window := table.Status.FocusWindow;
+    table.Status.FocusWindow := FALSE;
     table.Renderer.Enable;
   finally
     Tables.Unlock;
@@ -1384,18 +1277,19 @@ begin
       acHandPlaybackPlay.Execute;
   end;
 
+  SetRaiseValue(FRaiseValue, TRUE, TRUE, FALSE);
+
   RefreshAll;
+
+  if focus_window then
+    FocusWindow;
 end;
 
 procedure TfrmTable.RefreshAll;
 var
-  focus_window: Boolean;
   table: TTable;
 begin
-  ConfigureActions(focus_window);
-  if focus_window then
-    FocusWindow;
-
+  ConfigureActions;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     table.Renderer.UpdateDXAreaSize;

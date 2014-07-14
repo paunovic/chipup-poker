@@ -105,7 +105,7 @@ begin
 
     avatar.OnImageChanged := AvatarChangedInternal;
 
-    inherited Add(AId, avatar);
+    inherited Add(id, avatar);
 
     if not Assigned(AImage) then
     begin

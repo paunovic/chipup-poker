@@ -51,6 +51,10 @@ type
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
     FEvents: TObjectList<TPB_TableEvent>;
+
+    FCallCaption: String;
+    FResetRaiseValue: Boolean;
+    FFocusWindow: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -105,6 +109,10 @@ type
     property ActionFoldToAny: Boolean read FActionFoldToAny write FActionFoldToAny;
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
+
+    property CallCaption: String read FCallCaption write FCallCaption;
+    property ResetRaiseValue: Boolean read FResetRaiseValue write FResetRaiseValue;
+    property FocusWindow: Boolean read FFocusWindow write FFocusWindow;
 
     property Events: TObjectList<TPB_TableEvent> read FEvents;
   end;

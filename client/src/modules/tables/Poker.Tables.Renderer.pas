@@ -146,7 +146,7 @@ uses
   Poker.DirectX.Core, Poker.Tables.Resources, AbstractCanvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
   Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation,
   Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
-  Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table;
+  Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table, AsphyreColors;
 
 { TTableRenderer }
 
@@ -161,9 +161,9 @@ begin
   FTableType := ATableType;
 
   if FTableType = ttHandPlayback then
-    FDrawColor := cAlpha4(150)
+    FDrawColor := cRGB4(120, 120, 120)
   else
-    FDrawColor := clWhite4;
+    FDrawColor := cGray4(150);
 
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
@@ -405,7 +405,7 @@ end;
 procedure TTableRenderer.RenderTable;
 begin
   DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4);
-  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, FDrawColor);
+  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, clWhite4);
 end;
 
 procedure TTableRenderer.RenderSeats(const AGameInfo: TGameInfo);

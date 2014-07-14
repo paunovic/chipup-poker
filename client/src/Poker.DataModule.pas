@@ -19,15 +19,11 @@ type
     procedure DataModuleDestroy(Sender: TObject);
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
   private
-    const
-      FONTLIST: array[0..0] of String = ('SintonyBold');
-
-    var
-      FSelfInfo: TPlayerInfo;
-      FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
-      FUpdaterBatchFile: String;
-      FUpdaterInstallerFile: String;
-      FReconnectedTables: TObjectList<TPB_TableStatus>;
+    FSelfInfo: TPlayerInfo;
+    FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
+    FUpdaterBatchFile: String;
+    FUpdaterInstallerFile: String;
+    FReconnectedTables: TObjectList<TPB_TableStatus>;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -306,6 +302,8 @@ begin
 end;
 
 procedure TdmMain.LoadFonts;
+const
+  FONTLIST: array[0..0] of String = ('SintonyBold');
 var
   nbFontAdded: DWORD;
   rs: TResourceStream;
