@@ -29,6 +29,7 @@ MitmPlayback.prototype.startPlayback = function() {
 
 
 MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
+	debugger;
 	var allConnected = true;
 	this.socketIds.forEach(function(socketId) {
 		if (!this.sockets[socketId]) allConnected = false;
@@ -72,9 +73,10 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 
 MitmPlayback.prototype._openNewSocket = function (socketId, callback) {
 	var self = this;
-	this.sockets[socketId] = net.connect(this.port, this.host, function () {
+	var socket = net.connect(this.port, this.host, function () {
 		socket.on('error', function (err) { throw err; });
-		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfNextRequestsMatch));
+		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfNextRequestsMatch.bind(self)));
+		self.sockets[socketId] = socket;
 		callback();
 	});
 };
