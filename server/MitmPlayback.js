@@ -39,6 +39,7 @@ MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
 
 
 MitmPlayback.prototype._sendRequests = function() {
+	debugger;
 	var request = this.requests[this.currentRequestNumber];
 
 	while (request.direction === directions.C2S) {
@@ -51,6 +52,7 @@ MitmPlayback.prototype._sendRequests = function() {
 
 
 MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, socketId) {
+	debugger;
 	var socket = this.sockets[socketId];
 
 	if (!socket.write(encodedMessage) && socket._handle) {
@@ -81,16 +83,17 @@ MitmPlayback.prototype._openNewSocket = function (socketId, callback) {
 
 
 MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId, self) {
+	debugger;
 	return function (err, methodId, args, type) {
 		debugger;
 		if (err) throw err;
 					
 		for (var i = self.currentRequestNumber; i < self.requests.length; i++) {
-			if (self.requests[i].socketId !== socketId) 
+			if (requests[i].socketId !== socketId) 
 				continue;
 	
 			try {
-				self._checkIfSingleRequestMatch(methodId, args, type, i, socketId);
+				self._checkIfSingleRequestMatch(methodId, args, type, i);
 				var methodName = self.serverCodes.reverse[methodId];
 				console.log("Request #" + self.currentRequestNumber + " match! " + methodName);
 				++self.currentRequestNumber;
@@ -98,23 +101,23 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId, self) {
 				return;
 			} catch (e) {
 				if (self.requests[i + 1].direction !== directions.S2C)
-					self.checkIfSingleRequestMatch(methodId, args, type, self.currentRequestNumber); // this will throw the original request mismatch error
+					self._checkIfSingleRequestMatch(methodId, args, type, self.currentRequestNumber); // this will throw the original request mismatch error
 			}
 		}
 	};
 };
 
 
-MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum, socketId) {
-	debugger;
+MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
+	// find socket id by iterating thru sockets array and see which one matches the current socket
 	var currentRequestInfo = 'SocketId' + socketId + " request #" + requestNum;
 
-	var requestFromDb = this.requests[requestNum];
+	var requestFromDb = requests[requestNum];
 
 	if (requestFromDb.direction !== directions.S2C)
 		throw new Error('Received response from the server out of order!');
 
-	var methodName = this.serverCodes.reverse[methodId];
+	var methodName = serverCodes.reverse[methodId];
 
 	if (methodName !== requestFromDb.method)
 		throw new Error('Methods do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
@@ -122,12 +125,12 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 	var argsFromDb = requestFromDb.args.buffer;
 
 	if (args.toString('hex') !== argsFromDb.toString('hex')) {
-		if (!this.methodToTypeMap[methodName])
+		if (!methodToTypeMap[methodName])
 			throw new Error('schema for code ' + methodName + ' not known');
 
 		var argsParsed = makeArgsAndSanatize();
 		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
-		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
+		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
 	}
 
 	if (type !== requestFromDb.type)
