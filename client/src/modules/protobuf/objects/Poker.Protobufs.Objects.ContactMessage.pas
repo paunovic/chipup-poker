@@ -33,6 +33,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ContactMessage);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required ContactReason Reason = 1;
@@ -171,6 +172,15 @@ begin
   Clear;
   for pbobj in APB_ContactMessageList do
     Add(TPB_ContactMessage.Create(pbobj));
+end;
+
+procedure TPB_ContactMessage.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Reason;
+    clear_Message;
+  end;
 end;
 
 end.

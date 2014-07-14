@@ -46,6 +46,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Pot);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required uint32 Value = 1;
@@ -291,6 +292,17 @@ begin
   Clear;
   for pbobj in APB_PotList do
     Add(TPB_Pot.Create(pbobj));
+end;
+
+procedure TPB_Pot.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Value;
+    clear_Members;
+    clear_WinnerData;
+    clear_Rake;
+  end;
 end;
 
 end.

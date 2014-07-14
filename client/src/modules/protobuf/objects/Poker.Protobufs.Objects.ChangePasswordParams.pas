@@ -27,6 +27,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangePasswordParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string NewPassword = 1;
@@ -124,6 +125,14 @@ begin
   Clear;
   for pbobj in APB_ChangePasswordParamsList do
     Add(TPB_ChangePasswordParams.Create(pbobj));
+end;
+
+procedure TPB_ChangePasswordParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_NewPassword;
+  end;
 end;
 
 end.

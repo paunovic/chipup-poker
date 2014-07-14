@@ -31,6 +31,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_AssetList);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated UpdateFileInfo Assets = 1;
@@ -149,6 +150,14 @@ begin
   Clear;
   for pbobj in APB_AssetListList do
     Add(TPB_AssetList.Create(pbobj));
+end;
+
+procedure TPB_AssetList.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Assets;
+  end;
 end;
 
 end.

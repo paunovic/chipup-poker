@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_BuyinError);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes GameId = 1;
@@ -170,6 +171,15 @@ begin
   Clear;
   for pbobj in APB_BuyinErrorList do
     Add(TPB_BuyinError.Create(pbobj));
+end;
+
+procedure TPB_BuyinError.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_GameId;
+    clear_LastCashout;
+  end;
 end;
 
 end.

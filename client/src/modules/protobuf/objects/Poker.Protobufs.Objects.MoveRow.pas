@@ -51,6 +51,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_MoveRow);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated TableEventType Code = 1;
@@ -346,6 +347,18 @@ begin
   Clear;
   for pbobj in APB_MoveRowList do
     Add(TPB_MoveRow.Create(pbobj));
+end;
+
+procedure TPB_MoveRow.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Code;
+    clear_Bet;
+    clear_Seat;
+    clear_WinnerPotData;
+    clear_Pots;
+  end;
 end;
 
 end.

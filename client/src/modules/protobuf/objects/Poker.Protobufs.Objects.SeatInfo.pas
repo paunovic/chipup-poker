@@ -73,6 +73,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SeatInfo);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required int32 Seat = 1;
@@ -539,6 +540,23 @@ begin
   Clear;
   for pbobj in APB_SeatInfoList do
     Add(TPB_SeatInfo.Create(pbobj));
+end;
+
+procedure TPB_SeatInfo.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Seat;
+    clear_PlayerMongoId;
+    clear_Chips;
+    clear_CardCount;
+    clear_Cards;
+    clear_Status;
+    clear_Timebank;
+    clear_CardsVisible;
+    clear_Disconnected;
+    clear_CanShow;
+  end;
 end;
 
 end.

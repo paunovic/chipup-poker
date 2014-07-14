@@ -81,6 +81,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Club);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // optional bytes MongoId = 1;
@@ -609,6 +610,24 @@ begin
   Clear;
   for pbobj in APB_ClubList do
     Add(TPB_Club.Create(pbobj));
+end;
+
+procedure TPB_Club.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_Members;
+    clear_Name;
+    clear_Owner;
+    clear_Password;
+    clear_IsPrivate;
+    clear_Seq;
+    clear_HasPassword;
+    clear_Rake;
+    clear_DefaultBalanceLimit;
+    clear_UnlimitedDefaultBalance;
+  end;
 end;
 
 end.

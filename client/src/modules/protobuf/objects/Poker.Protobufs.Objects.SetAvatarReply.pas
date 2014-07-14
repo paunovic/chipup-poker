@@ -28,6 +28,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SetAvatarReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required SetAvatarStatus Status = 1;
@@ -125,6 +126,14 @@ begin
   Clear;
   for pbobj in APB_SetAvatarReplyList do
     Add(TPB_SetAvatarReply.Create(pbobj));
+end;
+
+procedure TPB_SetAvatarReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Status;
+  end;
 end;
 
 end.

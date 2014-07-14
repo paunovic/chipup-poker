@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableSit);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes GameId = 1;
@@ -216,6 +217,16 @@ begin
   Clear;
   for pbobj in APB_TableSitList do
     Add(TPB_TableSit.Create(pbobj));
+end;
+
+procedure TPB_TableSit.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_GameId;
+    clear_SeatIndex;
+    clear_Chips;
+  end;
 end;
 
 end.

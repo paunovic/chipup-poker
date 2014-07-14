@@ -41,6 +41,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubHandHistoryReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes Clubid = 1;
@@ -241,6 +242,16 @@ begin
   Clear;
   for pbobj in APB_ClubHandHistoryReplyList do
     Add(TPB_ClubHandHistoryReply.Create(pbobj));
+end;
+
+procedure TPB_ClubHandHistoryReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Clubid;
+    clear_Gameid;
+    clear_Rows;
+  end;
 end;
 
 end.

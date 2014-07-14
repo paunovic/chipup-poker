@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatMessage);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // optional bytes MongoId = 1;
@@ -262,6 +263,17 @@ begin
   Clear;
   for pbobj in APB_ChatMessageList do
     Add(TPB_ChatMessage.Create(pbobj));
+end;
+
+procedure TPB_ChatMessage.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_Username;
+    clear_Msg;
+    clear_Timestamp;
+  end;
 end;
 
 end.

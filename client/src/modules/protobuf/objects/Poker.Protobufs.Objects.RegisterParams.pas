@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string Email = 1;
@@ -216,6 +217,16 @@ begin
   Clear;
   for pbobj in APB_RegisterParamsList do
     Add(TPB_RegisterParams.Create(pbobj));
+end;
+
+procedure TPB_RegisterParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Email;
+    clear_Password;
+    clear_DisplayName;
+  end;
 end;
 
 end.

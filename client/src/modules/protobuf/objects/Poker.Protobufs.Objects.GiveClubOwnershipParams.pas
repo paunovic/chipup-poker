@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GiveClubOwnershipParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required int32 ClubSeq = 1;
@@ -170,6 +171,15 @@ begin
   Clear;
   for pbobj in APB_GiveClubOwnershipParamsList do
     Add(TPB_GiveClubOwnershipParams.Create(pbobj));
+end;
+
+procedure TPB_GiveClubOwnershipParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_ClubSeq;
+    clear_PlayerMongoId;
+  end;
 end;
 
 end.

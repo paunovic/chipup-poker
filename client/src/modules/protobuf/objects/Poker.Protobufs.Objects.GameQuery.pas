@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GameQuery);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes Gameid = 1;
@@ -170,6 +171,15 @@ begin
   Clear;
   for pbobj in APB_GameQueryList do
     Add(TPB_GameQuery.Create(pbobj));
+end;
+
+procedure TPB_GameQuery.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Gameid;
+    clear_Lasthandid;
+  end;
 end;
 
 end.

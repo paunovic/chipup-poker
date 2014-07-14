@@ -572,6 +572,7 @@ class BaseGenerator : public CodeGenerator {
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
 				"    procedure MergeFrom(const from: TPB_$name$);\n"
+				"    procedure Clear;\n"
 				"    function IsInitialized: Boolean; override;\n"
 				"\n",
 				"name",message->name());
@@ -896,6 +897,19 @@ class BaseGenerator : public CodeGenerator {
 				"    Add(TPB_$name$.Create(pbobj));\n"
 				"end;\n\n"
 				,"name",message->name());
+			printer.Print(
+				"procedure TPB_$name$.Clear;\n"
+				"begin\n"
+				"  if (_has_bits_ <> 0) then\n"
+				"  begin\n"
+				,"name",message->name());
+			for (int j=0; j<message->field_count(); j++) {
+				const FieldDescriptor *field = message->field(j);
+				TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+				printer.Print("    clear_$name$;\n","name",instance.PropertyName());
+			}
+			printer.Print("  end;\n"
+			"end;\n\n");
 			printer.Print("end.\n");
 	}
 };

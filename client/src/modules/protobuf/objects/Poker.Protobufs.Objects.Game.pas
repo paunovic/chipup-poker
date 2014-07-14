@@ -96,6 +96,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Game);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // optional bytes MongoId = 1;
@@ -726,6 +727,27 @@ begin
   Clear;
   for pbobj in APB_GameList do
     Add(TPB_Game.Create(pbobj));
+end;
+
+procedure TPB_Game.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_CreatorMongoId;
+    clear_Gamename;
+    clear_Clubseq;
+    clear_GameType;
+    clear_GameLimit;
+    clear_Blinds;
+    clear_Seats;
+    clear_Sitting;
+    clear_BuyinMin;
+    clear_BuyinMax;
+    clear_State;
+    clear_Closetime;
+    clear_Lasthandid;
+  end;
 end;
 
 end.

@@ -48,6 +48,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UpdateFileInfo);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string Path = 1;
@@ -309,6 +310,18 @@ begin
   Clear;
   for pbobj in APB_UpdateFileInfoList do
     Add(TPB_UpdateFileInfo.Create(pbobj));
+end;
+
+procedure TPB_UpdateFileInfo.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Path;
+    clear_Hash;
+    clear_Url;
+    clear_FileType;
+    clear_FileSize;
+  end;
 end;
 
 end.

@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerLimitParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes Clubid = 1;
@@ -262,6 +263,17 @@ begin
   Clear;
   for pbobj in APB_PlayerLimitParamsList do
     Add(TPB_PlayerLimitParams.Create(pbobj));
+end;
+
+procedure TPB_PlayerLimitParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Clubid;
+    clear_Userid;
+    clear_Limit;
+    clear_Unlimited;
+  end;
 end;
 
 end.

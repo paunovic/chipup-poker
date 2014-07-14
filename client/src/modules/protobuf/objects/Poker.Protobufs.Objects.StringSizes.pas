@@ -57,6 +57,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_StringSizes);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required int32 Email = 1;
@@ -400,6 +401,20 @@ begin
   Clear;
   for pbobj in APB_StringSizesList do
     Add(TPB_StringSizes.Create(pbobj));
+end;
+
+procedure TPB_StringSizes.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Email;
+    clear_Password;
+    clear_Clubname;
+    clear_Invcode;
+    clear_Username;
+    clear_Gamename;
+    clear_ContactMessage;
+  end;
 end;
 
 end.

@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_User);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
@@ -354,6 +355,19 @@ begin
   Clear;
   for pbobj in APB_UserList do
     Add(TPB_User.Create(pbobj));
+end;
+
+procedure TPB_User.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_Avatar;
+    clear_Displayname;
+    clear_Email;
+    clear_Authed;
+    clear_Chips;
+  end;
 end;
 
 end.

@@ -57,6 +57,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerHandHistory);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
@@ -400,6 +401,20 @@ begin
   Clear;
   for pbobj in APB_PlayerHandHistoryList do
     Add(TPB_PlayerHandHistory.Create(pbobj));
+end;
+
+procedure TPB_PlayerHandHistory.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_Seat;
+    clear_Cards;
+    clear_Chips;
+    clear_Nick;
+    clear_Muck;
+    clear_Status;
+  end;
 end;
 
 end.

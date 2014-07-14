@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableEvent);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required TableEventType Event = 1;
@@ -338,6 +339,18 @@ begin
   Clear;
   for pbobj in APB_TableEventList do
     Add(TPB_TableEvent.Create(pbobj));
+end;
+
+procedure TPB_TableEvent.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Event;
+    clear_Seat;
+    clear_Pots;
+    clear_Bets;
+    clear_Cards;
+  end;
 end;
 
 end.

@@ -46,6 +46,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_StatusReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated Club Clubs = 1;
@@ -313,6 +314,17 @@ begin
   Clear;
   for pbobj in APB_StatusReplyList do
     Add(TPB_StatusReply.Create(pbobj));
+end;
+
+procedure TPB_StatusReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Clubs;
+    clear_Users;
+    clear_Self;
+    clear_Games;
+  end;
 end;
 
 end.
