@@ -122,12 +122,6 @@ begin
   Exit(FALSE);
 end;
 
-procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
-begin
-  FDevice.SwapChains[AIndex].WindowHandle := ANewHandle;
-  {$IFDEF DEBUG} DebugLn(FDebugId, Format('DirectX swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
-end;
-
 procedure TDXCore.ReleaseSwapChainElement(const AIndex: Integer);
 begin
   FDevice.SwapChains[AIndex].Width := 1;
@@ -137,6 +131,12 @@ begin
   FDevice.SwapChains[AIndex].WindowHandle := FDummyWindow;
   {$IFDEF DEBUG} DebugLn(FDebugId, Format('DirectX swap chain element #%d released', [AIndex]), ditApplication); {$ENDIF}
   {$IFDEF DEBUG} RefreshDebugForm([dfiSwapChains]); {$ENDIF}
+end;
+
+procedure TDXCore.ModifySwapChainElement(const AIndex: Integer; const ANewHandle: THandle);
+begin
+  FDevice.SwapChains[AIndex].WindowHandle := ANewHandle;
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('DirectX swap chain element #%d modified', [AIndex]), ditApplication); {$ENDIF}
 end;
 
 end.
