@@ -1,10 +1,12 @@
 "use strict";
 var util = require("util");
 var directions = require('./directions');
+var diff = require('deep-diff');
 
 module.exports = MitmPlayback;
 
 function MitmPlayback(config) {
+	debugger;
 	this.requests = config.requests;
 	this.host = config.host;
 	this.port = config.port;
@@ -12,7 +14,6 @@ function MitmPlayback(config) {
 	this.protobufUtil = config.protobufUtil;
 	this.serverCodes = config.serverCodes;
 	this.methodToTypeMap = config.methodToTypeMap;
-	this.diff = config.diff;
 
 	this.currentRequestNumber = 0;
 	this.sockets = [];
@@ -58,19 +59,21 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 };
 
 
-MitmPlayback.prototype._openNewSocket	=	function (socketId) {
+MitmPlayback.prototype._openNewSocket	=	function (socketId, callback) {
+	debugger;
 	this.sockets[socketId] = net.connect(this.port, this.host, function () {
 		socket.on('error', function (err) { throw err; });
-		socket.on('data', this.protobufUtil.createOnDataListenerFn(this._checkIfNextRequestsMatch));
+		socket.on('data', this.protobufUtil.createOnDataListenerFn(this._checkIfNextRequestsMatch.bind(this)));
 	});
 };
 
 
 MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args, type) {
+	debugger;
 	if (err) throw err;
 				
 	for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
-		if (requests[i].socketId !== socketId) // IT SHOULD BE ACCESSIBLE FROM HERE, closure??
+		if (requests[i].socketId !== socketId) 
 			continue;
 
 		try {

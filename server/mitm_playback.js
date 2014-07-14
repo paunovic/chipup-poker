@@ -25,26 +25,29 @@ MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
     	if(err) throw err;
 		MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 			if (err) throw err;
-			db.collection('mitm').find({
-				$query: {},
-				$orderby: { timestamp : 1 }
-			}).toArray(replayAndTestAll);
+			var mitm = db.collection('mitm');
+			mitm.distinct('socketId', function(err, socketIds) {
+				if (err) throw err;
+				mitm.find({
+					$query: {},
+					$orderby: { timestamp : 1 }
+				}).toArray(function (err, requests, socketIds) {
+					if (err) throw err;
+					var config = {
+						requests: requests,
+						host: host,
+						port: port,
+						protobuf: pb,
+						protobufUtil: pu,
+						methodToTypeMap: methodToTypeMap,
+						serverCodes: serverCodes,
+						socketIds: socketIds
+					};
+
+					var mitmPlayback = new MitmPlayback(config);
+					mitmPlayback.startPlayback();
+				});
+			});
 		});
- });
+	});
 });
-
-function replayAndTestAll(err, requests) {
-	if (err) throw err;
-	var config = {
-		requests: requests,
-		host: host,
-		port: port,
-		protobuf: pb,
-		protobufUtil: pu,
-		methodToTypeMap: methodToTypeMap,
-		serverCodes: serverCodes
-	};
-
-	var mitmPlayback = new MitmPlayback(config);
-	mitmPlayback.startPlayback();
-}
