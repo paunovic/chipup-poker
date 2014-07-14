@@ -29,7 +29,6 @@ MitmPlayback.prototype.startPlayback = function() {
 
 
 MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
-	debugger;
 	var allConnected = true;
 	this.socketIds.forEach(function(socketId) {
 		if (!this.sockets[socketId]) allConnected = false;
@@ -53,6 +52,7 @@ MitmPlayback.prototype._sendRequests = function() {
 
 
 MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, socketId) {
+	debugger;
 	var socket = this.sockets[socketId];
 
 	if (!socket.write(encodedMessage) && socket._handle) {
@@ -75,33 +75,36 @@ MitmPlayback.prototype._openNewSocket = function (socketId, callback) {
 	var self = this;
 	var socket = net.connect(this.port, this.host, function () {
 		socket.on('error', function (err) { throw err; });
-		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfNextRequestsMatch.bind(self)));
+		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfNextRequestsMatch(socketId, self)));
 		self.sockets[socketId] = socket;
 		callback();
 	});
 };
 
 
-MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args, type) {
+MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId, self) {
 	debugger;
-	if (err) throw err;
-				
-	for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
-		if (requests[i].socketId !== socketId) 
-			continue;
-
-		try {
-			this._checkIfSingleRequestMatch(methodId, args, type, i);
-			var methodName = this.serverCodes.reverse[methodId];
-			console.log("Request #" + this.currentRequestNumber + " match! " + methodName);
-			++this.currentRequestNumber;
-			this._sendRequests();
-			return;
-		} catch (e) {
-			if (this.requests[i + 1].direction !== directions.S2C)
-				this.checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
+	return function (err, methodId, args, type) {
+		debugger;
+		if (err) throw err;
+					
+		for (var i = self.currentRequestNumber; i < self.requests.length; i++) {
+			if (requests[i].socketId !== socketId) 
+				continue;
+	
+			try {
+				self._checkIfSingleRequestMatch(methodId, args, type, i);
+				var methodName = self.serverCodes.reverse[methodId];
+				console.log("Request #" + self.currentRequestNumber + " match! " + methodName);
+				++self.currentRequestNumber;
+				self._sendRequests();
+				return;
+			} catch (e) {
+				if (self.requests[i + 1].direction !== directions.S2C)
+					self.checkIfSingleRequestMatch(methodId, args, type, self.currentRequestNumber); // this will throw the original request mismatch error
+			}
 		}
-	}
+	};
 };
 
 
