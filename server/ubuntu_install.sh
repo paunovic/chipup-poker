@@ -1,7 +1,9 @@
 #!/bin/bash
 npm install
 npm install profiler
-cd dag
+pushd dag
 npm install
-cd ../..
+popd
+pushd ..
 npm install jade
+popd
