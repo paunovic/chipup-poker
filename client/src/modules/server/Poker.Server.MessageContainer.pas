@@ -3,8 +3,7 @@ unit Poker.Server.MessageContainer;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Generics.Collections, OverbyteIcsWSocket, System.SyncObjs,
-  Poker.Server.MessageCallbacks;
+  Winapi.Windows, System.Generics.Collections, OverbyteIcsWSocket, System.SyncObjs, Poker.Server.MessageCallbacks;
 
 type
   TMessageContainer = class
@@ -38,7 +37,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, Poker.WindowMessages;
+  System.SysUtils;
 
 
 class procedure TMessageContainer.Initialize;
