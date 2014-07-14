@@ -55,6 +55,9 @@ type
     property Token: Integer read FToken write SetToken;
 
   end;
+  TPB_RpcMessageList = class (TObjectList<TPB_RpcMessage>)
+    procedure Assign(const APB_RpcMessageList: TList<TPB_RpcMessage>);
+  end;
 
 implementation
 
@@ -204,6 +207,15 @@ begin
   FToken := AValue;
   ProtobufOutput.writeInt32(kTokenFieldNumber, AValue);
   set_has_Token;
+end;
+
+procedure TPB_RpcMessageList.Assign(const APB_RpcMessageList: TList<TPB_RpcMessage>);
+var
+  pbobj: TPB_RpcMessage;
+begin
+  Clear;
+  for pbobj in APB_RpcMessageList do
+    Add(TPB_RpcMessage.Create(pbobj));
 end;
 
 end.

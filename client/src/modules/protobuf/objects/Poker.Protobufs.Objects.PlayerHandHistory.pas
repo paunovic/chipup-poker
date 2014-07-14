@@ -95,6 +95,9 @@ type
     property Status: TPlayerStatus read FStatus write SetStatus;
 
   end;
+  TPB_PlayerHandHistoryList = class (TObjectList<TPB_PlayerHandHistory>)
+    procedure Assign(const APB_PlayerHandHistoryList: TList<TPB_PlayerHandHistory>);
+  end;
 
 implementation
 
@@ -388,6 +391,15 @@ begin
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
+end;
+
+procedure TPB_PlayerHandHistoryList.Assign(const APB_PlayerHandHistoryList: TList<TPB_PlayerHandHistory>);
+var
+  pbobj: TPB_PlayerHandHistory;
+begin
+  Clear;
+  for pbobj in APB_PlayerHandHistoryList do
+    Add(TPB_PlayerHandHistory.Create(pbobj));
 end;
 
 end.

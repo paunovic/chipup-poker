@@ -169,6 +169,9 @@ type
     property Lasthandid: UINT32 read FLasthandid write SetLasthandid;
 
   end;
+  TPB_GameList = class (TObjectList<TPB_Game>)
+    procedure Assign(const APB_GameList: TList<TPB_Game>);
+  end;
 
 implementation
 
@@ -714,6 +717,15 @@ begin
   FLasthandid := AValue;
   ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
   set_has_Lasthandid;
+end;
+
+procedure TPB_GameList.Assign(const APB_GameList: TList<TPB_Game>);
+var
+  pbobj: TPB_Game;
+begin
+  Clear;
+  for pbobj in APB_GameList do
+    Add(TPB_Game.Create(pbobj));
 end;
 
 end.

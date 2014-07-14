@@ -60,6 +60,9 @@ type
     property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
 
   end;
+  TPB_LoginReplyList = class (TObjectList<TPB_LoginReply>)
+    procedure Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
+  end;
 
 implementation
 
@@ -235,6 +238,15 @@ begin
   ProtobufOutput.writeTag(kReconnectTablesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
+var
+  pbobj: TPB_LoginReply;
+begin
+  Clear;
+  for pbobj in APB_LoginReplyList do
+    Add(TPB_LoginReply.Create(pbobj));
 end;
 
 end.

@@ -80,6 +80,9 @@ type
     property Cards: TBytes read FCards write SetCards;
 
   end;
+  TPB_TableEventList = class (TObjectList<TPB_TableEvent>)
+    procedure Assign(const APB_TableEventList: TList<TPB_TableEvent>);
+  end;
 
 implementation
 
@@ -326,6 +329,15 @@ begin
   FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
+end;
+
+procedure TPB_TableEventList.Assign(const APB_TableEventList: TList<TPB_TableEvent>);
+var
+  pbobj: TPB_TableEvent;
+begin
+  Clear;
+  for pbobj in APB_TableEventList do
+    Add(TPB_TableEvent.Create(pbobj));
 end;
 
 end.

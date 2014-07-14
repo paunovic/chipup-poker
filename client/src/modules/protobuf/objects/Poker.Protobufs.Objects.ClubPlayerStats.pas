@@ -45,6 +45,9 @@ type
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
 
   end;
+  TPB_ClubPlayerStatsList = class (TObjectList<TPB_ClubPlayerStats>)
+    procedure Assign(const APB_ClubPlayerStatsList: TList<TPB_ClubPlayerStats>);
+  end;
 
 implementation
 
@@ -158,6 +161,15 @@ begin
   FClubBalance := AValue;
   ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
   set_has_ClubBalance;
+end;
+
+procedure TPB_ClubPlayerStatsList.Assign(const APB_ClubPlayerStatsList: TList<TPB_ClubPlayerStats>);
+var
+  pbobj: TPB_ClubPlayerStats;
+begin
+  Clear;
+  for pbobj in APB_ClubPlayerStatsList do
+    Add(TPB_ClubPlayerStats.Create(pbobj));
 end;
 
 end.

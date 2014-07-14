@@ -46,6 +46,9 @@ type
     property Message: String read FMessage write SetMessage;
 
   end;
+  TPB_ContactMessageList = class (TObjectList<TPB_ContactMessage>)
+    procedure Assign(const APB_ContactMessageList: TList<TPB_ContactMessage>);
+  end;
 
 implementation
 
@@ -159,6 +162,15 @@ begin
   FMessage := AValue;
   ProtobufOutput.writeString(kMessageFieldNumber, AValue);
   set_has_Message;
+end;
+
+procedure TPB_ContactMessageList.Assign(const APB_ContactMessageList: TList<TPB_ContactMessage>);
+var
+  pbobj: TPB_ContactMessage;
+begin
+  Clear;
+  for pbobj in APB_ContactMessageList do
+    Add(TPB_ContactMessage.Create(pbobj));
 end;
 
 end.

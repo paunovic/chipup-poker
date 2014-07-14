@@ -85,6 +85,9 @@ type
     property Gamename: String read FGamename write SetGamename;
 
   end;
+  TPB_ValidCharsRegexList = class (TObjectList<TPB_ValidCharsRegex>)
+    procedure Assign(const APB_ValidCharsRegexList: TList<TPB_ValidCharsRegex>);
+  end;
 
 implementation
 
@@ -342,6 +345,15 @@ begin
   FGamename := AValue;
   ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
   set_has_Gamename;
+end;
+
+procedure TPB_ValidCharsRegexList.Assign(const APB_ValidCharsRegexList: TList<TPB_ValidCharsRegex>);
+var
+  pbobj: TPB_ValidCharsRegex;
+begin
+  Clear;
+  for pbobj in APB_ValidCharsRegexList do
+    Add(TPB_ValidCharsRegex.Create(pbobj));
 end;
 
 end.

@@ -36,6 +36,9 @@ type
     property Status: TSetAvatarStatus read FStatus write SetStatus;
 
   end;
+  TPB_SetAvatarReplyList = class (TObjectList<TPB_SetAvatarReply>)
+    procedure Assign(const APB_SetAvatarReplyList: TList<TPB_SetAvatarReply>);
+  end;
 
 implementation
 
@@ -113,6 +116,15 @@ begin
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
+end;
+
+procedure TPB_SetAvatarReplyList.Assign(const APB_SetAvatarReplyList: TList<TPB_SetAvatarReply>);
+var
+  pbobj: TPB_SetAvatarReply;
+begin
+  Clear;
+  for pbobj in APB_SetAvatarReplyList do
+    Add(TPB_SetAvatarReply.Create(pbobj));
 end;
 
 end.

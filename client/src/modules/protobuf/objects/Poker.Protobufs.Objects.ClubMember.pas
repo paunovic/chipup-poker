@@ -75,6 +75,9 @@ type
     property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
 
   end;
+  TPB_ClubMemberList = class (TObjectList<TPB_ClubMember>)
+    procedure Assign(const APB_ClubMemberList: TList<TPB_ClubMember>);
+  end;
 
 implementation
 
@@ -296,6 +299,15 @@ begin
   FUnlimitedLimit := AValue;
   ProtobufOutput.writeBoolean(kUnlimitedLimitFieldNumber, AValue);
   set_has_UnlimitedLimit;
+end;
+
+procedure TPB_ClubMemberList.Assign(const APB_ClubMemberList: TList<TPB_ClubMember>);
+var
+  pbobj: TPB_ClubMember;
+begin
+  Clear;
+  for pbobj in APB_ClubMemberList do
+    Add(TPB_ClubMember.Create(pbobj));
 end;
 
 end.

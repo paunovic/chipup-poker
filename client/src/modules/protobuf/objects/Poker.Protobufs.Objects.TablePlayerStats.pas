@@ -109,6 +109,9 @@ type
     property Hands: UINT32 read FHands write SetHands;
 
   end;
+  TPB_TablePlayerStatsList = class (TObjectList<TPB_TablePlayerStats>)
+    procedure Assign(const APB_TablePlayerStatsList: TList<TPB_TablePlayerStats>);
+  end;
 
 implementation
 
@@ -454,6 +457,15 @@ begin
   FHands := AValue;
   ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
   set_has_Hands;
+end;
+
+procedure TPB_TablePlayerStatsList.Assign(const APB_TablePlayerStatsList: TList<TPB_TablePlayerStats>);
+var
+  pbobj: TPB_TablePlayerStats;
+begin
+  Clear;
+  for pbobj in APB_TablePlayerStatsList do
+    Add(TPB_TablePlayerStats.Create(pbobj));
 end;
 
 end.

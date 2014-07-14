@@ -35,6 +35,9 @@ type
     property Email: String read FEmail write SetEmail;
 
   end;
+  TPB_ForgotPasswordParamsList = class (TObjectList<TPB_ForgotPasswordParams>)
+    procedure Assign(const APB_ForgotPasswordParamsList: TList<TPB_ForgotPasswordParams>);
+  end;
 
 implementation
 
@@ -112,6 +115,15 @@ begin
   FEmail := AValue;
   ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
+end;
+
+procedure TPB_ForgotPasswordParamsList.Assign(const APB_ForgotPasswordParamsList: TList<TPB_ForgotPasswordParams>);
+var
+  pbobj: TPB_ForgotPasswordParams;
+begin
+  Clear;
+  for pbobj in APB_ForgotPasswordParamsList do
+    Add(TPB_ForgotPasswordParams.Create(pbobj));
 end;
 
 end.

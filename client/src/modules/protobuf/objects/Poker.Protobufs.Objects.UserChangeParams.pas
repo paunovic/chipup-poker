@@ -39,6 +39,9 @@ type
     property Users: TList<TPB_User> read FUsers;
 
   end;
+  TPB_UserChangeParamsList = class (TObjectList<TPB_UserChangeParams>)
+    procedure Assign(const APB_UserChangeParamsList: TList<TPB_UserChangeParams>);
+  end;
 
 implementation
 
@@ -137,6 +140,15 @@ begin
   ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_UserChangeParamsList.Assign(const APB_UserChangeParamsList: TList<TPB_UserChangeParams>);
+var
+  pbobj: TPB_UserChangeParams;
+begin
+  Clear;
+  for pbobj in APB_UserChangeParamsList do
+    Add(TPB_UserChangeParams.Create(pbobj));
 end;
 
 end.

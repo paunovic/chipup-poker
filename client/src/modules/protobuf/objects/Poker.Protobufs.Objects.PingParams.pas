@@ -35,6 +35,9 @@ type
     property Uptime: UINT32 read FUptime write SetUptime;
 
   end;
+  TPB_PingParamsList = class (TObjectList<TPB_PingParams>)
+    procedure Assign(const APB_PingParamsList: TList<TPB_PingParams>);
+  end;
 
 implementation
 
@@ -112,6 +115,15 @@ begin
   FUptime := AValue;
   ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
   set_has_Uptime;
+end;
+
+procedure TPB_PingParamsList.Assign(const APB_PingParamsList: TList<TPB_PingParams>);
+var
+  pbobj: TPB_PingParams;
+begin
+  Clear;
+  for pbobj in APB_PingParamsList do
+    Add(TPB_PingParams.Create(pbobj));
 end;
 
 end.

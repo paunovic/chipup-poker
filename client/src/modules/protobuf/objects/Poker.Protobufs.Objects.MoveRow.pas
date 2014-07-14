@@ -79,6 +79,9 @@ type
     property Pots: TList<TPB_Pot> read FPots;
 
   end;
+  TPB_MoveRowList = class (TObjectList<TPB_MoveRow>)
+    procedure Assign(const APB_MoveRowList: TList<TPB_MoveRow>);
+  end;
 
 implementation
 
@@ -334,6 +337,15 @@ begin
   ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_MoveRowList.Assign(const APB_MoveRowList: TList<TPB_MoveRow>);
+var
+  pbobj: TPB_MoveRow;
+begin
+  Clear;
+  for pbobj in APB_MoveRowList do
+    Add(TPB_MoveRow.Create(pbobj));
 end;
 
 end.

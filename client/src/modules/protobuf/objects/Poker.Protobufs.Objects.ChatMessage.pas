@@ -65,6 +65,9 @@ type
     property Timestamp: Int64 read FTimestamp write SetTimestamp;
 
   end;
+  TPB_ChatMessageList = class (TObjectList<TPB_ChatMessage>)
+    procedure Assign(const APB_ChatMessageList: TList<TPB_ChatMessage>);
+  end;
 
 implementation
 
@@ -250,6 +253,15 @@ begin
   FTimestamp := AValue;
   ProtobufOutput.WriteInt64(kTimestampFieldNumber, AValue);
   set_has_Timestamp;
+end;
+
+procedure TPB_ChatMessageList.Assign(const APB_ChatMessageList: TList<TPB_ChatMessage>);
+var
+  pbobj: TPB_ChatMessage;
+begin
+  Clear;
+  for pbobj in APB_ChatMessageList do
+    Add(TPB_ChatMessage.Create(pbobj));
 end;
 
 end.

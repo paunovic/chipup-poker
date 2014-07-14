@@ -59,6 +59,9 @@ type
     property Rows: TList<TPB_HandHistory> read FRows;
 
   end;
+  TPB_ClubHandHistoryReplyList = class (TObjectList<TPB_ClubHandHistoryReply>)
+    procedure Assign(const APB_ClubHandHistoryReplyList: TList<TPB_ClubHandHistoryReply>);
+  end;
 
 implementation
 
@@ -229,6 +232,15 @@ begin
   ProtobufOutput.writeTag(kRowsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_ClubHandHistoryReplyList.Assign(const APB_ClubHandHistoryReplyList: TList<TPB_ClubHandHistoryReply>);
+var
+  pbobj: TPB_ClubHandHistoryReply;
+begin
+  Clear;
+  for pbobj in APB_ClubHandHistoryReplyList do
+    Add(TPB_ClubHandHistoryReply.Create(pbobj));
 end;
 
 end.

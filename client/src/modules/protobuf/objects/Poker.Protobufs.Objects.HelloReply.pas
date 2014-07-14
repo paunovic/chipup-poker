@@ -109,6 +109,9 @@ type
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
 
   end;
+  TPB_HelloReplyList = class (TObjectList<TPB_HelloReply>)
+    procedure Assign(const APB_HelloReplyList: TList<TPB_HelloReply>);
+  end;
 
 implementation
 
@@ -477,6 +480,15 @@ begin
   FValidCharsRegex := AValue;
   ProtobufOutput.writeMessage(kValidCharsRegexFieldNumber, AValue.ProtobufOutput);
   set_has_ValidCharsRegex;
+end;
+
+procedure TPB_HelloReplyList.Assign(const APB_HelloReplyList: TList<TPB_HelloReply>);
+var
+  pbobj: TPB_HelloReply;
+begin
+  Clear;
+  for pbobj in APB_HelloReplyList do
+    Add(TPB_HelloReply.Create(pbobj));
 end;
 
 end.

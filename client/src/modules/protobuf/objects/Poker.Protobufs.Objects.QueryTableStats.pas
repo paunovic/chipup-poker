@@ -39,6 +39,9 @@ type
     property Gameid: TList<TBytes> read FGameid;
 
   end;
+  TPB_QueryTableStatsList = class (TObjectList<TPB_QueryTableStats>)
+    procedure Assign(const APB_QueryTableStatsList: TList<TPB_QueryTableStats>);
+  end;
 
 implementation
 
@@ -128,6 +131,15 @@ procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBy
 begin
   Assert(Action = cnAdded);
   ProtobufOutput.writeBytes(kGameidFieldNumber,Item);
+end;
+
+procedure TPB_QueryTableStatsList.Assign(const APB_QueryTableStatsList: TList<TPB_QueryTableStats>);
+var
+  pbobj: TPB_QueryTableStats;
+begin
+  Clear;
+  for pbobj in APB_QueryTableStatsList do
+    Add(TPB_QueryTableStats.Create(pbobj));
 end;
 
 end.

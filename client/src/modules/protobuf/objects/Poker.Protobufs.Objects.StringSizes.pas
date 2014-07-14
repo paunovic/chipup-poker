@@ -95,6 +95,9 @@ type
     property ContactMessage: Integer read FContactMessage write SetContactMessage;
 
   end;
+  TPB_StringSizesList = class (TObjectList<TPB_StringSizes>)
+    procedure Assign(const APB_StringSizesList: TList<TPB_StringSizes>);
+  end;
 
 implementation
 
@@ -388,6 +391,15 @@ begin
   FContactMessage := AValue;
   ProtobufOutput.writeInt32(kContactMessageFieldNumber, AValue);
   set_has_ContactMessage;
+end;
+
+procedure TPB_StringSizesList.Assign(const APB_StringSizesList: TList<TPB_StringSizes>);
+var
+  pbobj: TPB_StringSizes;
+begin
+  Clear;
+  for pbobj in APB_StringSizesList do
+    Add(TPB_StringSizes.Create(pbobj));
 end;
 
 end.

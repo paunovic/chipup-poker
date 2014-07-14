@@ -49,6 +49,9 @@ type
     property Users: TList<TPB_User> read FUsers;
 
   end;
+  TPB_GetUserParamsList = class (TObjectList<TPB_GetUserParams>)
+    procedure Assign(const APB_GetUserParamsList: TList<TPB_GetUserParams>);
+  end;
 
 implementation
 
@@ -187,6 +190,15 @@ begin
   ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_GetUserParamsList.Assign(const APB_GetUserParamsList: TList<TPB_GetUserParams>);
+var
+  pbobj: TPB_GetUserParams;
+begin
+  Clear;
+  for pbobj in APB_GetUserParamsList do
+    Add(TPB_GetUserParams.Create(pbobj));
 end;
 
 end.

@@ -45,6 +45,9 @@ type
     property Password: String read FPassword write SetPassword;
 
   end;
+  TPB_LoginParamsList = class (TObjectList<TPB_LoginParams>)
+    procedure Assign(const APB_LoginParamsList: TList<TPB_LoginParams>);
+  end;
 
 implementation
 
@@ -158,6 +161,15 @@ begin
   FPassword := AValue;
   ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
+end;
+
+procedure TPB_LoginParamsList.Assign(const APB_LoginParamsList: TList<TPB_LoginParams>);
+var
+  pbobj: TPB_LoginParams;
+begin
+  Clear;
+  for pbobj in APB_LoginParamsList do
+    Add(TPB_LoginParams.Create(pbobj));
 end;
 
 end.

@@ -49,6 +49,9 @@ type
     property Files: TList<TPB_UpdateFileInfo> read FFiles;
 
   end;
+  TPB_HelloParamsList = class (TObjectList<TPB_HelloParams>)
+    procedure Assign(const APB_HelloParamsList: TList<TPB_HelloParams>);
+  end;
 
 implementation
 
@@ -183,6 +186,15 @@ begin
   ProtobufOutput.writeTag(kFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_HelloParamsList.Assign(const APB_HelloParamsList: TList<TPB_HelloParams>);
+var
+  pbobj: TPB_HelloParams;
+begin
+  Clear;
+  for pbobj in APB_HelloParamsList do
+    Add(TPB_HelloParams.Create(pbobj));
 end;
 
 end.

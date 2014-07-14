@@ -45,6 +45,9 @@ type
     property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
 
   end;
+  TPB_TransferChipsParamsList = class (TObjectList<TPB_TransferChipsParams>)
+    procedure Assign(const APB_TransferChipsParamsList: TList<TPB_TransferChipsParams>);
+  end;
 
 implementation
 
@@ -158,6 +161,15 @@ begin
   FChipAmount := AValue;
   ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
   set_has_ChipAmount;
+end;
+
+procedure TPB_TransferChipsParamsList.Assign(const APB_TransferChipsParamsList: TList<TPB_TransferChipsParams>);
+var
+  pbobj: TPB_TransferChipsParams;
+begin
+  Clear;
+  for pbobj in APB_TransferChipsParamsList do
+    Add(TPB_TransferChipsParams.Create(pbobj));
 end;
 
 end.

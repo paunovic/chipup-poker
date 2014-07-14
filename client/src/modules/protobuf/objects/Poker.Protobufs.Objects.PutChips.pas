@@ -55,6 +55,9 @@ type
     property CurrentState: TTableState read FCurrentState write SetCurrentState;
 
   end;
+  TPB_PutChipsList = class (TObjectList<TPB_PutChips>)
+    procedure Assign(const APB_PutChipsList: TList<TPB_PutChips>);
+  end;
 
 implementation
 
@@ -204,6 +207,15 @@ begin
   FCurrentState := AValue;
   ProtobufOutput.writeInt32(kCurrentStateFieldNumber, Integer(AValue));
   set_has_CurrentState;
+end;
+
+procedure TPB_PutChipsList.Assign(const APB_PutChipsList: TList<TPB_PutChips>);
+var
+  pbobj: TPB_PutChips;
+begin
+  Clear;
+  for pbobj in APB_PutChipsList do
+    Add(TPB_PutChips.Create(pbobj));
 end;
 
 end.

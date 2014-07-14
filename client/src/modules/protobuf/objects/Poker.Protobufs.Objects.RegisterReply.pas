@@ -36,6 +36,9 @@ type
     property Status: TRegisterStatus read FStatus write SetStatus;
 
   end;
+  TPB_RegisterReplyList = class (TObjectList<TPB_RegisterReply>)
+    procedure Assign(const APB_RegisterReplyList: TList<TPB_RegisterReply>);
+  end;
 
 implementation
 
@@ -113,6 +116,15 @@ begin
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
+end;
+
+procedure TPB_RegisterReplyList.Assign(const APB_RegisterReplyList: TList<TPB_RegisterReply>);
+var
+  pbobj: TPB_RegisterReply;
+begin
+  Clear;
+  for pbobj in APB_RegisterReplyList do
+    Add(TPB_RegisterReply.Create(pbobj));
 end;
 
 end.

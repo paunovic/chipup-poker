@@ -39,6 +39,9 @@ type
     property Assets: TList<TPB_UpdateFileInfo> read FAssets;
 
   end;
+  TPB_AssetListList = class (TObjectList<TPB_AssetList>)
+    procedure Assign(const APB_AssetListList: TList<TPB_AssetList>);
+  end;
 
 implementation
 
@@ -137,6 +140,15 @@ begin
   ProtobufOutput.writeTag(kAssetsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_AssetListList.Assign(const APB_AssetListList: TList<TPB_AssetList>);
+var
+  pbobj: TPB_AssetList;
+begin
+  Clear;
+  for pbobj in APB_AssetListList do
+    Add(TPB_AssetList.Create(pbobj));
 end;
 
 end.

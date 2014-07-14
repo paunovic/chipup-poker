@@ -45,6 +45,9 @@ type
     property Servertime: UInt64 read FServertime write SetServertime;
 
   end;
+  TPB_PingReplyList = class (TObjectList<TPB_PingReply>)
+    procedure Assign(const APB_PingReplyList: TList<TPB_PingReply>);
+  end;
 
 implementation
 
@@ -158,6 +161,15 @@ begin
   FServertime := AValue;
   ProtobufOutput.WriteInt64(kServertimeFieldNumber, AValue);
   set_has_Servertime;
+end;
+
+procedure TPB_PingReplyList.Assign(const APB_PingReplyList: TList<TPB_PingReply>);
+var
+  pbobj: TPB_PingReply;
+begin
+  Clear;
+  for pbobj in APB_PingReplyList do
+    Add(TPB_PingReply.Create(pbobj));
 end;
 
 end.

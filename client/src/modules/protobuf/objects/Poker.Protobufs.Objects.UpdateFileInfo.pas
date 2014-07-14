@@ -76,6 +76,9 @@ type
     property FileSize: UINT32 read FFileSize write SetFileSize;
 
   end;
+  TPB_UpdateFileInfoList = class (TObjectList<TPB_UpdateFileInfo>)
+    procedure Assign(const APB_UpdateFileInfoList: TList<TPB_UpdateFileInfo>);
+  end;
 
 implementation
 
@@ -297,6 +300,15 @@ begin
   FFileSize := AValue;
   ProtobufOutput.writeUInt32(kFileSizeFieldNumber, AValue);
   set_has_FileSize;
+end;
+
+procedure TPB_UpdateFileInfoList.Assign(const APB_UpdateFileInfoList: TList<TPB_UpdateFileInfo>);
+var
+  pbobj: TPB_UpdateFileInfo;
+begin
+  Clear;
+  for pbobj in APB_UpdateFileInfoList do
+    Add(TPB_UpdateFileInfo.Create(pbobj));
 end;
 
 end.

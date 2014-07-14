@@ -55,6 +55,9 @@ type
     property DisplayName: String read FDisplayName write SetDisplayName;
 
   end;
+  TPB_RegisterParamsList = class (TObjectList<TPB_RegisterParams>)
+    procedure Assign(const APB_RegisterParamsList: TList<TPB_RegisterParams>);
+  end;
 
 implementation
 
@@ -204,6 +207,15 @@ begin
   FDisplayName := AValue;
   ProtobufOutput.writeString(kDisplayNameFieldNumber, AValue);
   set_has_DisplayName;
+end;
+
+procedure TPB_RegisterParamsList.Assign(const APB_RegisterParamsList: TList<TPB_RegisterParams>);
+var
+  pbobj: TPB_RegisterParams;
+begin
+  Clear;
+  for pbobj in APB_RegisterParamsList do
+    Add(TPB_RegisterParams.Create(pbobj));
 end;
 
 end.

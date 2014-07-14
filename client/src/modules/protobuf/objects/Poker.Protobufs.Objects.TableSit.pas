@@ -55,6 +55,9 @@ type
     property Chips: UINT32 read FChips write SetChips;
 
   end;
+  TPB_TableSitList = class (TObjectList<TPB_TableSit>)
+    procedure Assign(const APB_TableSitList: TList<TPB_TableSit>);
+  end;
 
 implementation
 
@@ -204,6 +207,15 @@ begin
   FChips := AValue;
   ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;
+end;
+
+procedure TPB_TableSitList.Assign(const APB_TableSitList: TList<TPB_TableSit>);
+var
+  pbobj: TPB_TableSit;
+begin
+  Clear;
+  for pbobj in APB_TableSitList do
+    Add(TPB_TableSit.Create(pbobj));
 end;
 
 end.

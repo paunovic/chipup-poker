@@ -69,6 +69,9 @@ type
     property Rake: UINT32 read FRake write SetRake;
 
   end;
+  TPB_PotList = class (TObjectList<TPB_Pot>)
+    procedure Assign(const APB_PotList: TList<TPB_Pot>);
+  end;
 
 implementation
 
@@ -279,6 +282,15 @@ begin
   FRake := AValue;
   ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
   set_has_Rake;
+end;
+
+procedure TPB_PotList.Assign(const APB_PotList: TList<TPB_Pot>);
+var
+  pbobj: TPB_Pot;
+begin
+  Clear;
+  for pbobj in APB_PotList do
+    Add(TPB_Pot.Create(pbobj));
 end;
 
 end.

@@ -56,6 +56,9 @@ type
     property TableId: TBytes read FTableId write SetTableId;
 
   end;
+  TPB_ChatEventList = class (TObjectList<TPB_ChatEvent>)
+    procedure Assign(const APB_ChatEventList: TList<TPB_ChatEvent>);
+  end;
 
 implementation
 
@@ -211,6 +214,15 @@ begin
   FTableId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
   set_has_TableId;
+end;
+
+procedure TPB_ChatEventList.Assign(const APB_ChatEventList: TList<TPB_ChatEvent>);
+var
+  pbobj: TPB_ChatEvent;
+begin
+  Clear;
+  for pbobj in APB_ChatEventList do
+    Add(TPB_ChatEvent.Create(pbobj));
 end;
 
 end.

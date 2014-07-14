@@ -55,6 +55,9 @@ type
     property Suspended: Boolean read FSuspended write SetSuspended;
 
   end;
+  TPB_ChangeSuspendStateList = class (TObjectList<TPB_ChangeSuspendState>)
+    procedure Assign(const APB_ChangeSuspendStateList: TList<TPB_ChangeSuspendState>);
+  end;
 
 implementation
 
@@ -204,6 +207,15 @@ begin
   FSuspended := AValue;
   ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
   set_has_Suspended;
+end;
+
+procedure TPB_ChangeSuspendStateList.Assign(const APB_ChangeSuspendStateList: TList<TPB_ChangeSuspendState>);
+var
+  pbobj: TPB_ChangeSuspendState;
+begin
+  Clear;
+  for pbobj in APB_ChangeSuspendStateList do
+    Add(TPB_ChangeSuspendState.Create(pbobj));
 end;
 
 end.

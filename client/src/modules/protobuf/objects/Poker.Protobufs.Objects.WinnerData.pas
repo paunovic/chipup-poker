@@ -46,6 +46,9 @@ type
     property Msg: String read FMsg write SetMsg;
 
   end;
+  TPB_WinnerDataList = class (TObjectList<TPB_WinnerData>)
+    procedure Assign(const APB_WinnerDataList: TList<TPB_WinnerData>);
+  end;
 
 implementation
 
@@ -159,6 +162,15 @@ begin
   FMsg := AValue;
   ProtobufOutput.writeString(kMsgFieldNumber, AValue);
   set_has_Msg;
+end;
+
+procedure TPB_WinnerDataList.Assign(const APB_WinnerDataList: TList<TPB_WinnerData>);
+var
+  pbobj: TPB_WinnerData;
+begin
+  Clear;
+  for pbobj in APB_WinnerDataList do
+    Add(TPB_WinnerData.Create(pbobj));
 end;
 
 end.

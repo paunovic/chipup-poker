@@ -149,6 +149,9 @@ type
     property Rake: Integer read FRake write SetRake;
 
   end;
+  TPB_HandHistoryList = class (TObjectList<TPB_HandHistory>)
+    procedure Assign(const APB_HandHistoryList: TList<TPB_HandHistory>);
+  end;
 
 implementation
 
@@ -662,6 +665,15 @@ begin
   FRake := AValue;
   ProtobufOutput.writeInt32(kRakeFieldNumber, AValue);
   set_has_Rake;
+end;
+
+procedure TPB_HandHistoryList.Assign(const APB_HandHistoryList: TList<TPB_HandHistory>);
+var
+  pbobj: TPB_HandHistory;
+begin
+  Clear;
+  for pbobj in APB_HandHistoryList do
+    Add(TPB_HandHistory.Create(pbobj));
 end;
 
 end.

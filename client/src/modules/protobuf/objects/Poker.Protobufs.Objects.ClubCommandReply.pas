@@ -60,6 +60,9 @@ type
     property Games: TList<TPB_Game> read FGames;
 
   end;
+  TPB_ClubCommandReplyList = class (TObjectList<TPB_ClubCommandReply>)
+    procedure Assign(const APB_ClubCommandReplyList: TList<TPB_ClubCommandReply>);
+  end;
 
 implementation
 
@@ -235,6 +238,15 @@ begin
   ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_ClubCommandReplyList.Assign(const APB_ClubCommandReplyList: TList<TPB_ClubCommandReply>);
+var
+  pbobj: TPB_ClubCommandReply;
+begin
+  Clear;
+  for pbobj in APB_ClubCommandReplyList do
+    Add(TPB_ClubCommandReply.Create(pbobj));
 end;
 
 end.

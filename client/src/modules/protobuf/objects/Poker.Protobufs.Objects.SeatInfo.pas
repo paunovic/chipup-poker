@@ -126,6 +126,9 @@ type
     property CanShow: Boolean read FCanShow write SetCanShow;
 
   end;
+  TPB_SeatInfoList = class (TObjectList<TPB_SeatInfo>)
+    procedure Assign(const APB_SeatInfoList: TList<TPB_SeatInfo>);
+  end;
 
 implementation
 
@@ -527,6 +530,15 @@ begin
   FCanShow := AValue;
   ProtobufOutput.writeBoolean(kCanShowFieldNumber, AValue);
   set_has_CanShow;
+end;
+
+procedure TPB_SeatInfoList.Assign(const APB_SeatInfoList: TList<TPB_SeatInfo>);
+var
+  pbobj: TPB_SeatInfo;
+begin
+  Clear;
+  for pbobj in APB_SeatInfoList do
+    Add(TPB_SeatInfo.Create(pbobj));
 end;
 
 end.

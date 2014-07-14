@@ -65,6 +65,9 @@ type
     property Unlimited: Boolean read FUnlimited write SetUnlimited;
 
   end;
+  TPB_PlayerLimitParamsList = class (TObjectList<TPB_PlayerLimitParams>)
+    procedure Assign(const APB_PlayerLimitParamsList: TList<TPB_PlayerLimitParams>);
+  end;
 
 implementation
 
@@ -250,6 +253,15 @@ begin
   FUnlimited := AValue;
   ProtobufOutput.writeBoolean(kUnlimitedFieldNumber, AValue);
   set_has_Unlimited;
+end;
+
+procedure TPB_PlayerLimitParamsList.Assign(const APB_PlayerLimitParamsList: TList<TPB_PlayerLimitParams>);
+var
+  pbobj: TPB_PlayerLimitParams;
+begin
+  Clear;
+  for pbobj in APB_PlayerLimitParamsList do
+    Add(TPB_PlayerLimitParams.Create(pbobj));
 end;
 
 end.

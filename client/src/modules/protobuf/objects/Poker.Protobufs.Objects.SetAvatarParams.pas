@@ -35,6 +35,9 @@ type
     property AvatarId: TBytes read FAvatarId write SetAvatarId;
 
   end;
+  TPB_SetAvatarParamsList = class (TObjectList<TPB_SetAvatarParams>)
+    procedure Assign(const APB_SetAvatarParamsList: TList<TPB_SetAvatarParams>);
+  end;
 
 implementation
 
@@ -112,6 +115,15 @@ begin
   FAvatarId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);
   set_has_AvatarId;
+end;
+
+procedure TPB_SetAvatarParamsList.Assign(const APB_SetAvatarParamsList: TList<TPB_SetAvatarParams>);
+var
+  pbobj: TPB_SetAvatarParams;
+begin
+  Clear;
+  for pbobj in APB_SetAvatarParamsList do
+    Add(TPB_SetAvatarParams.Create(pbobj));
 end;
 
 end.

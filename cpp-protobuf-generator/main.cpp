@@ -601,13 +601,17 @@ class BaseGenerator : public CodeGenerator {
 			}
 			printer.Print(
 				"  end;\n"
+				"  TPB_$name$List = class (TObjectList<TPB_$name$>)\n"
+				"    procedure Assign(const APB_$name$List: TList<TPB_$name$>);\n"
+				"  end;\n"
 				"\n"
 				"implementation\n"
 				"\n"
 				"uses\n"
 				"  pbPublic, Poker.Common.Misc;\n"
 				"\n"
-				"\n");
+				"\n"
+				,"name",message->name());
 			if (needsInit) {
 				printer.Print(
 					"procedure TPB_$name$.InitObjects;\n"
@@ -882,6 +886,16 @@ class BaseGenerator : public CodeGenerator {
 			printer.Print("  Exit(True);\n"
 				"end;\n\n");
 			GenerateSettersImpl(message,&printer);
+			printer.Print(
+				"procedure TPB_$name$List.Assign(const APB_$name$List: TList<TPB_$name$>);\n"
+				"var\n"
+				"  pbobj: TPB_$name$;\n"
+				"begin\n"
+				"  Clear;\n"
+				"  for pbobj in APB_$name$List do\n"
+				"    Add(TPB_$name$.Create(pbobj));\n"
+				"end;\n\n"
+				,"name",message->name());
 			printer.Print("end.\n");
 	}
 };

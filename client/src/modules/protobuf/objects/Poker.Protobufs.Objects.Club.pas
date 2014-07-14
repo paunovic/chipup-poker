@@ -139,6 +139,9 @@ type
     property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;
 
   end;
+  TPB_ClubList = class (TObjectList<TPB_Club>)
+    procedure Assign(const APB_ClubList: TList<TPB_Club>);
+  end;
 
 implementation
 
@@ -597,6 +600,15 @@ begin
   FUnlimitedDefaultBalance := AValue;
   ProtobufOutput.writeBoolean(kUnlimitedDefaultBalanceFieldNumber, AValue);
   set_has_UnlimitedDefaultBalance;
+end;
+
+procedure TPB_ClubList.Assign(const APB_ClubList: TList<TPB_Club>);
+var
+  pbobj: TPB_Club;
+begin
+  Clear;
+  for pbobj in APB_ClubList do
+    Add(TPB_Club.Create(pbobj));
 end;
 
 end.

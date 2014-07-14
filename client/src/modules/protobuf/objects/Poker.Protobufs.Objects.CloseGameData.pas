@@ -46,6 +46,9 @@ type
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
 
   end;
+  TPB_CloseGameDataList = class (TObjectList<TPB_CloseGameData>)
+    procedure Assign(const APB_CloseGameDataList: TList<TPB_CloseGameData>);
+  end;
 
 implementation
 
@@ -159,6 +162,15 @@ begin
   FTimestamp := AValue;
   ProtobufOutput.writeInt32(kTimestampFieldNumber, Integer(AValue));
   set_has_Timestamp;
+end;
+
+procedure TPB_CloseGameDataList.Assign(const APB_CloseGameDataList: TList<TPB_CloseGameData>);
+var
+  pbobj: TPB_CloseGameData;
+begin
+  Clear;
+  for pbobj in APB_CloseGameDataList do
+    Add(TPB_CloseGameData.Create(pbobj));
 end;
 
 end.

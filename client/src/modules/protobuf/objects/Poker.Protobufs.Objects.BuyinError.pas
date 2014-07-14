@@ -45,6 +45,9 @@ type
     property LastCashout: UINT32 read FLastCashout write SetLastCashout;
 
   end;
+  TPB_BuyinErrorList = class (TObjectList<TPB_BuyinError>)
+    procedure Assign(const APB_BuyinErrorList: TList<TPB_BuyinError>);
+  end;
 
 implementation
 
@@ -158,6 +161,15 @@ begin
   FLastCashout := AValue;
   ProtobufOutput.writeUInt32(kLastCashoutFieldNumber, AValue);
   set_has_LastCashout;
+end;
+
+procedure TPB_BuyinErrorList.Assign(const APB_BuyinErrorList: TList<TPB_BuyinError>);
+var
+  pbobj: TPB_BuyinError;
+begin
+  Clear;
+  for pbobj in APB_BuyinErrorList do
+    Add(TPB_BuyinError.Create(pbobj));
 end;
 
 end.

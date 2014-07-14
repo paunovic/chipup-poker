@@ -36,6 +36,9 @@ type
     property Status: TChangeMailStatus read FStatus write SetStatus;
 
   end;
+  TPB_ChangeMailReplyList = class (TObjectList<TPB_ChangeMailReply>)
+    procedure Assign(const APB_ChangeMailReplyList: TList<TPB_ChangeMailReply>);
+  end;
 
 implementation
 
@@ -113,6 +116,15 @@ begin
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
+end;
+
+procedure TPB_ChangeMailReplyList.Assign(const APB_ChangeMailReplyList: TList<TPB_ChangeMailReply>);
+var
+  pbobj: TPB_ChangeMailReply;
+begin
+  Clear;
+  for pbobj in APB_ChangeMailReplyList do
+    Add(TPB_ChangeMailReply.Create(pbobj));
 end;
 
 end.

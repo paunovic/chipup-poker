@@ -250,6 +250,9 @@ type
     property MinimumRaise: UINT32 read FMinimumRaise write SetMinimumRaise;
 
   end;
+  TPB_TableStatusList = class (TObjectList<TPB_TableStatus>)
+    procedure Assign(const APB_TableStatusList: TList<TPB_TableStatus>);
+  end;
 
 implementation
 
@@ -1128,6 +1131,15 @@ begin
   FMinimumRaise := AValue;
   ProtobufOutput.writeUInt32(kMinimumRaiseFieldNumber, AValue);
   set_has_MinimumRaise;
+end;
+
+procedure TPB_TableStatusList.Assign(const APB_TableStatusList: TList<TPB_TableStatus>);
+var
+  pbobj: TPB_TableStatus;
+begin
+  Clear;
+  for pbobj in APB_TableStatusList do
+    Add(TPB_TableStatus.Create(pbobj));
 end;
 
 end.

@@ -49,6 +49,9 @@ type
     property PlayerStats: TList<TPB_ClubPlayerStats> read FPlayerStats;
 
   end;
+  TPB_ClubStatsReplyList = class (TObjectList<TPB_ClubStatsReply>)
+    procedure Assign(const APB_ClubStatsReplyList: TList<TPB_ClubStatsReply>);
+  end;
 
 implementation
 
@@ -183,6 +186,15 @@ begin
   ProtobufOutput.writeTag(kPlayerStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_ClubStatsReplyList.Assign(const APB_ClubStatsReplyList: TList<TPB_ClubStatsReply>);
+var
+  pbobj: TPB_ClubStatsReply;
+begin
+  Clear;
+  for pbobj in APB_ClubStatsReplyList do
+    Add(TPB_ClubStatsReply.Create(pbobj));
 end;
 
 end.

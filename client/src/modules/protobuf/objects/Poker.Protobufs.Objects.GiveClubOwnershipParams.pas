@@ -45,6 +45,9 @@ type
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
 
   end;
+  TPB_GiveClubOwnershipParamsList = class (TObjectList<TPB_GiveClubOwnershipParams>)
+    procedure Assign(const APB_GiveClubOwnershipParamsList: TList<TPB_GiveClubOwnershipParams>);
+  end;
 
 implementation
 
@@ -158,6 +161,15 @@ begin
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
+end;
+
+procedure TPB_GiveClubOwnershipParamsList.Assign(const APB_GiveClubOwnershipParamsList: TList<TPB_GiveClubOwnershipParams>);
+var
+  pbobj: TPB_GiveClubOwnershipParams;
+begin
+  Clear;
+  for pbobj in APB_GiveClubOwnershipParamsList do
+    Add(TPB_GiveClubOwnershipParams.Create(pbobj));
 end;
 
 end.
