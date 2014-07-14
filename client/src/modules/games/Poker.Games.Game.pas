@@ -9,7 +9,7 @@ type
   TGameInfo = class
   private
     FMongoId: TBytes;
-    FClubId: Int64;
+    FClubId: TBytes;
     FCreatorId: TBytes;
     FName: String;
     FSmallBlind: UINT32;
@@ -37,7 +37,7 @@ type
     function AsString(const AShort: Boolean): String;
 
     property MongoId: TBytes read FMongoId write FMongoId;
-    property ClubId: Int64 read FClubId write FClubId;
+    property ClubId: TBytes read FClubId write FClubId;
     property CreatorId: TBytes read FCreatorId write FCreatorId;
     property Name: String read FName write FName;
     property Blinds: TGameBlinds read FBlinds;
@@ -63,7 +63,7 @@ procedure TGameInfo.Assign(const AProtobufObject: TPB_Game);
 begin
   FMongoId := AProtobufObject.MongoId;
   FCreatorId := AProtobufObject.CreatorMongoId;
-  FClubId := AProtobufObject.Clubseq;
+  FClubId := AProtobufObject.ClubMongoid;
   FName := AProtobufObject.Gamename;
   FBlinds := AProtobufObject.Blinds;
   BlindsEnumToInts(FBlinds, FSmallBlind, FBigBlind);

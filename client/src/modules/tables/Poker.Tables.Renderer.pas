@@ -145,7 +145,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.DirectX.Core, Poker.Tables.Resources, AbstractCanvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
   Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation,
-  Poker.DirectX.Timer, Poker.Pots.PotList, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player,
+  Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table;
 
 { TTableRenderer }
@@ -1123,7 +1123,7 @@ var
   chips_stack: TChipStack;
   pot_point: TPoint2;
   animation: TDXAnimation;
-  pots: TPotList;
+  pots: TPB_PotList;
   table: TTable;
 begin
   if Tables.TryGetValue(FInternalId, table) then

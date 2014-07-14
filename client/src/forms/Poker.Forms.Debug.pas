@@ -35,18 +35,18 @@ type
     class procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
   end;
 
-  TDebugFormRefresh = class(TIdNotify)
+  TDebugFormRefresh = class(TIdSync)
   private
     FRefreshItems: TDebugRefreshItemSet;
   protected
-    procedure DoNotify; override;
+    procedure DoSynchronize; override;
   public
     class procedure Execute(const ARefreshItems: TDebugRefreshItemSet);
   end;
 
-  TDebugFormObjectChange = class(TIdNotify)
+  TDebugFormObjectChange = class(TIdSync)
   protected
-    procedure DoNotify; override;
+    procedure DoSynchronize; override;
   public
     class procedure Execute;
   end;
@@ -119,15 +119,14 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     function FindStyleWithName(const AName: String): Integer;
+    procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
+    procedure RefreshDebugObjects;
+    procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
     class procedure Initialize;
     class procedure Deinitialize;
-
-    procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
-    procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
-    procedure RefreshDebugObjects;
   end;
 
   function IsDebugFormAssigned: Boolean;
@@ -160,6 +159,7 @@ var
   DebugFilePath: String = '';
   ConsoleAttached: Boolean = FALSE;
   FDebugObjects: TObjectList<TDebugObject>;
+  FActiveNotifyObjects: TObjectList<TIdNotify>;
 
   
 function RegisterDebugObject(const AName: String): Integer;
@@ -826,13 +826,23 @@ begin
   end;
 end;
 
-{ TMemoLog }
+{ TDebugFormLog }
+
+procedure TDebugFormLog.DoNotify;
+begin
+  if IsDebugFormAssigned then
+    frmDebug.Add(FDebugId, FType, FTime, FTypeStr, FData, FSubData);
+
+  FActiveNotifyObjects.Extract(self);
+  FActiveNotifyObjects.TrimExcess;
+end;
 
 class procedure TDebugFormLog.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
 var
   dfl: TDebugFormLog;
 begin
   dfl := TDebugFormLog.Create;
+  FActiveNotifyObjects.Add(dfl);
   dfl.FDebugId := ADebugId;
   dfl.FType := AType;
   dfl.FTime := ATime;
@@ -842,16 +852,10 @@ begin
   dfl.Notify;
 end;
 
-procedure TDebugFormLog.DoNotify;
-begin
-  frmDebug.Add(FDebugId, FType, FTime, FTypeStr, FData, FSubData);
-end;
-
 { TDebugFormRefresh }
 
-procedure TDebugFormRefresh.DoNotify;
+procedure TDebugFormRefresh.DoSynchronize;
 begin
-  inherited;
   if IsDebugFormAssigned then
     frmDebug.RefreshStats(FRefreshItems);
 end;
@@ -861,28 +865,41 @@ var
   dfr: TDebugFormRefresh;
 begin
   dfr := TDebugFormRefresh.Create;
-  dfr.FRefreshItems := ARefreshItems;
-  dfr.Notify;
+  try
+    dfr.FRefreshItems := ARefreshItems;
+    dfr.Synchronize;
+  finally
+    dfr.Free;
+  end;
 end;
 
 { TDebugFormObjectChange }
 
-procedure TDebugFormObjectChange.DoNotify;
+procedure TDebugFormObjectChange.DoSynchronize;
 begin
-  inherited;
   if IsDebugFormAssigned then
     frmDebug.RefreshDebugObjects;
 end;
 
 class procedure TDebugFormObjectChange.Execute;
+var
+  dfoc: TDebugFormObjectChange;
 begin
-  TDebugFormObjectChange.Create.Notify;
+  dfoc := TDebugFormObjectChange.Create;
+  try
+    dfoc.Synchronize;
+  finally
+    dfoc.Free;
+  end;
 end;
+
 
 initialization
   FDebugObjects := TObjectList<TDebugObject>.Create;
+  FActiveNotifyObjects := TObjectList<TIdNotify>.Create;
 
 finalization
+  FreeAndNil(FActiveNotifyObjects);
   FreeAndNil(FDebugObjects);
 
 end.

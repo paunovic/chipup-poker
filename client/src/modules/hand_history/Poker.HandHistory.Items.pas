@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, System.SyncObjs, Poker.Protobufs.Objects.HandHistory,
-  Poker.HandHistory.Players, Poker.HandHistory.Moves, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game;
+  Poker.HandHistory.Players, Poker.Protobufs.Objects.HandHistoryMove, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game;
 
 type
   THandHistoryItems = class;
@@ -77,7 +77,7 @@ type
     FStartTimeStr: String;
     FEndTime: TDateTime;
     FBalanceChanges: TList<Integer>;
-    FMoves: THandHistoryMoves;
+    FMoves: TPB_HandHistoryMoveList;
     FLines: TStringList;
     FRVLines: TStringList;
     FDealerIndex: Integer;
@@ -104,7 +104,7 @@ type
     property StartTimeStr: String read FStartTimeStr;
     property EndTime: TDateTime read FEndTime;
     property BalanceChanges: TList<Integer> read FBalanceChanges;
-    property Moves: THandHistoryMoves read FMoves;
+    property Moves: TPB_HandHistoryMoveList read FMoves;
     property DealerIndex: Integer read FDealerIndex;
     property CurrentGame: TGameType read FCurrentGame;
 
@@ -134,9 +134,9 @@ type
 implementation
 
 uses
-  Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.MoveRow,
-  Poker.Cards, Poker.Common.Misc, Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Pots.Pot,
-  Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus;
+  Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Cards, Poker.Common.Misc,
+  Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus,
+  Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove;
 
 { THandHistoryItem }
 
@@ -145,7 +145,7 @@ begin
   FBalanceChanges := TList<Integer>.Create;;
   FParentItems := AParent;
   FPlayers := TPlayerHandHistories.Create;
-  FMoves := THandHistoryMoves.Create;
+  FMoves := TPB_HandHistoryMoveList.Create;
   FLines := TStringList.Create;
   FRVLines := TStringList.Create;
   Assign(AHandHistory);
@@ -162,9 +162,6 @@ begin
 end;
 
 procedure THandHistoryItem.Assign(const AHandHistory: TPB_HandHistory);
-var
-  phh: TPB_PlayerHandHistory;
-  mhh: TPB_MoveRow;
 begin
   FMongoId := AHandHistory.MongoId;
   FHandId := AHandHistory.Seq;
@@ -179,15 +176,8 @@ begin
   FCurrentGame := AHandHistory.CurrentGame;
   FStartTime := TTimeZone.Local.ToLocalTime(MongoIdToDateTime(FMongoId));
   FStartTimeStr := FormatDateTime('yyyy/mm/dd hh:nn:ss', FStartTime);
-
-  FPlayers.Clear;
-  for phh in AHandHistory.Players do
-    FPlayers.Add(TPlayerHandHistory.Create(phh));
-
-  FMoves.Clear;
-  for mhh in AHandHistory.Moves do
-    FMoves.Add(THandHistoryMove.Create(mhh));
-
+  FPlayers.Assign(AHandHistory.Players);
+  FMoves.Assign(AHandHistory.Moves);
   MakeLines;
 end;
 
@@ -199,10 +189,10 @@ end;
 
 procedure THandHistoryItem.MakeText(const ALines: TStrings; const ATags: TRichViewTags);
 var
-  player: TPlayerHandHistory;
-  move: THandHistoryMove;
+  player: TPB_PlayerHandHistory;
+  move: TPB_HandHistoryMove;
   player_nick: String;
-  pot: TPotInfo;
+  pot: TPB_Pot;
   total_pot: UINT32;
   total_rake: UINT32;
   player_line: String;
@@ -357,12 +347,12 @@ begin
         if fold_on[player.Seat] > tsIdle then
           Continue;
 
-        if player.Mucked then
+        if player.Muck then
           ALines.Add(Format('%s%s%s mucks hand', [ATags.PlayerNick, player.Nick, ATags.NormalText]))
         else
           if player.Status in [psInHand, psFolded, psAllIn] then
           begin
-            hand_strength := THandStrengthCalculator.GetHandStrength(player.CardsStr, FTableCardsStr, FCurrentGame, FALSE);
+            hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), FTableCardsStr, FCurrentGame, FALSE);
             ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
                 ATags.PlayerNick, player.Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(player.Cards, ' '),
                 ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
@@ -378,7 +368,7 @@ begin
       // show total pot and rake
       total_pot := 0;
       total_rake := 0;
-      for pot in move.WinnerPots do
+      for pot in move.WinnerPotData do
       begin
         Inc(total_pot, pot.Value);
         Inc(total_rake, pot.Rake);
@@ -392,7 +382,7 @@ begin
       // calculate each player winning amount
       SetLength(seat_winnings, FParentItems.Game.Seats);
       FillChar(seat_winnings[0], Length(seat_winnings) * SizeOf(UINT32), 0);
-      for pot in move.WinnerPots do
+      for pot in move.WinnerPotData do
         for C1 := 0 to pot.WinnerData.Count - 1 do
           Inc(seat_winnings[pot.WinnerData[C1].Seat], (pot.Value - pot.Rake) div UINT32(pot.WinnerData.Count));
 
@@ -406,7 +396,7 @@ begin
         hand_strength := '';
         if Length(player.Cards) > 0 then
         begin
-          hand_strength := THandStrengthCalculator.GetHandStrength(player.CardsStr, FTableCardsStr, FCurrentGame, FALSE);
+          hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), FTableCardsStr, FCurrentGame, FALSE);
           player_line := player_line + Format('[%s%s%s] ', [ATags.Cards, TCards.BytesToString(player.Cards, ' '), ATags.NormalText]);
         end;
 
@@ -426,12 +416,12 @@ begin
               end;
             end
             else
-              if player.Mucked then
+              if player.Muck then
                 player_line := player_line + 'mucked ';
 
         if seat_winnings[player.Seat] > 0 then
         begin
-          if player.Mucked then
+          if player.Muck then
             player_line := player_line + 'and ';
 
           player_line := player_line + Format('won %s%s%s', [ATags.Chips, ChipsToStr(seat_winnings[player.Seat]), ATags.NormalText]);

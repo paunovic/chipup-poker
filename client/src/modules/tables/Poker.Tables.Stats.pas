@@ -3,8 +3,7 @@ unit Poker.Tables.Stats;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Players.Stats;
+  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply;
 
 type
   TTableStats = class
@@ -12,7 +11,7 @@ type
     FClubId: TBytes;
     FGameId: TBytes;
     FHands: UINT32;
-    FPlayers: TObjectList<TPlayerStats>;
+    FPlayers: TPB_TablePlayerStatsList;
 
   public
     constructor Create;
@@ -23,7 +22,7 @@ type
     property ClubId: TBytes read FClubId;
     property GameId: TBytes read FGameId;
     property Hands: UINT32 read FHands;
-    property Players: TObjectList<TPlayerStats> read FPlayers;
+    property Players: TPB_TablePlayerStatsList read FPlayers;
   end;
 
 implementation
@@ -35,7 +34,7 @@ uses
 
 constructor TTableStats.Create;
 begin
-  FPlayers := TObjectList<TPlayerStats>.Create
+  FPlayers := TPB_TablePlayerStatsList.Create
 end;
 
 destructor TTableStats.Destroy;
@@ -44,21 +43,11 @@ begin
 end;
 
 procedure TTableStats.Assign(const AProtobuf: TPB_TableStatsReply);
-var
-  player: TPlayerStats;
-  pbplayer: TPB_TablePlayerStats;
 begin
   FClubId := AProtobuf.Clubid;
   FGameId := AProtobuf.Gameid;
   FHands := AProtobuf.Hands;
-
-  FPlayers.Clear;
-  for pbplayer in AProtobuf.Playerstats do
-  begin
-    player := TPlayerStats.Create;
-    player.Assign(pbplayer);
-    FPlayers.Add(player);
-  end;
+  FPlayers.Assign(AProtobuf.Playerstats);
 end;
 
 end.

@@ -48,7 +48,7 @@ var Protoreader = require('./protoreader');
 Protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong,codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange,codes.PerGameMsgEvent]);
 
 var domain = "http://"+config.hostname+'/';
-var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:16,max_timebank:30};
+var sharedconfig = {stringSizes:{},minSizes:{},max_play_time:15,max_timebank:30};
 sharedconfig.minSizes.email = 6;
 sharedconfig.stringSizes.email = 200;
 sharedconfig.minSizes.password = 6;
