@@ -1,5 +1,8 @@
 "use strict";
 var util = require("util");
+var directions = require('./directions');
+
+module.exports = MitmPlayback;
 
 function MitmPlayback(config) {
 	this.requests = config.requests;
@@ -7,14 +10,13 @@ function MitmPlayback(config) {
 	this.port = config.port;
 	this.protobuf = config.protobuf;
 	this.protobufUtil = config.protobufUtil;
-	this.directions = config.directions;
 	this.serverCodes = config.serverCodes;
 	this.methodToTypeMap = config.methodToTypeMap;
 	this.diff = config.diff;
 
 	this.currentRequestNumber = 0;
 	this.sockets = [];
-}
+};
 
 
 MitmPlayback.prototype.startPlayback = function() {
@@ -53,15 +55,15 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 
 	if (socket._writableState.length > (256 * 1024))
 		throw new Error('Send overflow!');
-}
+};
 
 
 MitmPlayback.prototype._openNewSocket	=	function (socketId) {
 	this.sockets[socketId] = net.connect(this.port, this.host, function () {
 		socket.on('error', function (err) { throw err; });
 		socket.on('data', this.protobufUtil.createOnDataListenerFn(this._checkIfNextRequestsMatch));
-	}
-}
+	});
+};
 
 
 MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args, type) {
@@ -83,7 +85,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args
 				this.checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
 		}
 	}
-}
+};
 
 
 MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
@@ -113,7 +115,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 
 	if (type !== requestFromDb.type)
 		throw new Error('Type param do not match! ' + currentRequestInfo);
-}
+};
 
 
 MitmPlayback.prototype._makeArgsAndSanatize = function () {
@@ -133,7 +135,8 @@ MitmPlayback.prototype._makeArgsAndSanatize = function () {
 		argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
 	}
 	return {fromServer: argsParsed, fromDb: argsFromDbParsed};
-}
+};
+
 
 MitmPlayback.prototype._sanitizeLoginReply = function (args) {
 	var i,j;
@@ -153,7 +156,7 @@ MitmPlayback.prototype._sanitizeLoginReply = function (args) {
 		args.status.games[i].lasthandid = 0;
 	
 	return args;
-}
+};
 
 
 MitmPlayback.prototype._sanitizeTableStats = function (args) {
@@ -186,12 +189,12 @@ MitmPlayback.prototype._sanitizeTableStats = function (args) {
 			cs.player_stats[j].club_balance = 0;
 	}
 	return args;
-}
+};
 
 
 MitmPlayback.prototype._sanitizeTableStatus = function (args) {
 	args.rotation = 0;
 	args.total_balance = 0;
 	return args;
-}
+};
 

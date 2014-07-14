@@ -9,10 +9,9 @@ var MongoClient = require('mongodb').MongoClient;
 var fs = require("fs");
 var Protobuf = require("node-protobuf").Protobuf;
 var ProtobufUtil = require('./ProtobufUtil');
-var directions = require('./directions');
 var serverCodes = require('./ServerCodes.js');
 var methodToTypeMap = require("./method_to_type_map");
-var diff = require('deep-diff')
+var MitmPlayback = require("./MitmPlayback");
 
 var schema = 'Poker.RpcMessage';
 var pb = new Protobuf(fs.readFileSync("../message.desc"));
@@ -27,6 +26,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
 		MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 			if (err) throw err;
 			db.collection('mitm').find({
+				$query: {},
 				$orderby: { timestamp : 1 }
 			}).toArray(replayAndTestAll);
 		});
@@ -34,14 +34,13 @@ MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
 });
 
 function replayAndTestAll(err, requests) {
+	if (err) throw err;
 	var config = {
 		requests: requests,
 		host: host,
 		port: port,
 		protobuf: pb,
 		protobufUtil: pu,
-		directions: directions,
-		diff: diff,
 		methodToTypeMap: methodToTypeMap,
 		serverCodes: serverCodes
 	};
