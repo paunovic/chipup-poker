@@ -95,7 +95,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 				continue;
 	
 			try {
-				this._checkIfSingleRequestMatch(methodId, args, type, i);
+				this._checkIfSingleRequestMatch(methodId, args, type, i, socketId);
 				var methodName = this.serverCodes.reverse[methodId];
 				console.log("Request #" + this.currentRequestNumber + " match! " + methodName);
 				++this.currentRequestNumber;
@@ -103,15 +103,15 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 				return;
 			} catch (e) {
 				if (this.requests[i + 1].direction !== directions.S2C)
-					this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
+					this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber, socketId); // this will throw the original request mismatch error
 			}
 		}
 	};
 };
 
 
-MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
-	// find socket id by iterating thru sockets array and see which one matches the current socket
+MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum, socketId) {
+	debugger;
 	var currentRequestInfo = 'SocketId' + socketId + " request #" + requestNum;
 
 	var requestFromDb = requests[requestNum];
