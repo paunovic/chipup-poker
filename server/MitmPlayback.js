@@ -14,6 +14,7 @@ function MitmPlayback(config) {
 	this.protobufUtil = config.protobufUtil;
 	this.serverCodes = config.serverCodes;
 	this.methodToTypeMap = config.methodToTypeMap;
+	this.socketIds = config.socketIds;
 
 	this.currentRequestNumber = 0;
 	this.sockets = [];
@@ -21,7 +22,19 @@ function MitmPlayback(config) {
 
 
 MitmPlayback.prototype.startPlayback = function() {
-	this._sendRequests();
+	this.socketIds.forEach(function(socketId) {
+		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected);
+	});
+};
+
+
+MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
+	var allConnected = true;
+	this.socketIds.forEach(function(socketId) {
+		if (!this.sockets[socketId]) allConnected = false;
+	});
+
+	if (allConnected) this._sendRequests();
 };
 
 
@@ -38,9 +51,6 @@ MitmPlayback.prototype._sendRequests = function() {
 
 
 MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, socketId) {
-	if (!this.sockets[socketId])
-		this._openNewSocket(socketId);
-
 	var socket = this.sockets[socketId];
 
 	if (!socket.write(encodedMessage) && socket._handle) {
@@ -62,6 +72,7 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 MitmPlayback.prototype._openNewSocket	=	function (socketId, callback) {
 	debugger;
 	this.sockets[socketId] = net.connect(this.port, this.host, function () {
+		callback();
 		socket.on('error', function (err) { throw err; });
 		socket.on('data', this.protobufUtil.createOnDataListenerFn(this._checkIfNextRequestsMatch.bind(this)));
 	});
