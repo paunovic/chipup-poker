@@ -1,3 +1,4 @@
+'use strict';
 var fs = require("fs");
 var p = require("node-protobuf").Protobuf;
 var net = require('net');
@@ -25,19 +26,20 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		console.log(err);
 		process.exit(1);
 	}
-	conn = db;
+	var conn = db;
 	db.collection('users',function (err,collection) {
 		if (err) {
 			console.log(err);
 			process.exit(1);
 		}
-		allUsers = collection;
+		//allUsers = collection;
 		if (require.main === module) {
 			console.log(process.argv);
 			var mode = process.argv[2];
 			var autoconfig = {moves:[],autoRandom:{call:16,fold:2,raise:8,standup:1},speed:[0,0],players:5, buyins:[100000,100000,100000,100000,100000]};
 			var prefix = process.argv[3];
 			if (prefix) autoconfig.prefix = prefix;
+			var tests;
 			switch (mode) {
 			case 'menu':
 				tests = [ function sidepot(cb) {
@@ -79,7 +81,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			});
 		}
 	});
-	clubs = db.collection('clubs');
+	//clubs = db.collection('clubs');
 	conn.close();
 });
 
@@ -197,6 +199,7 @@ function testmenu(cb,config) {
 	var total = 0;
 	var clients = [];
 	var prefix = 'client';
+	var x;
 	if (config && config.prefix) prefix = config.prefix;
 	if (config && config.autoRandom) {
 		for (x in config.autoRandom) {
@@ -218,7 +221,7 @@ function testmenu(cb,config) {
 		timer = setTimeout(func,(config.speed[1] * Math.random())+config.speed[0]);
 	}
 	function showMoves(conn,actseq) {
-		moves = {fold:function() {
+		var moves = {fold:function() {
 			conn.reply(codes.scFold,{_id:gameid},'Poker.Game');
 		}};
 		moves.standup = function () {
