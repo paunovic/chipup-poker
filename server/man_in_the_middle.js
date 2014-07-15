@@ -1,3 +1,9 @@
+/*
+TODO: 
+[03.06.13] clever: pavle, first minor bug in mitm_test, when a client socket from the testclient is closed
+[03.06.37] clever: mitm_test should close the matching socket to the server, and record it similar to a packet from client->server, so it replays the closure the same way
+[03.07.01] clever: its minor, because thats the end of the recording, but it hard-crashes instead of closing the recording cleanly
+*/
 'use strict';
 var net = require('net');
 var util = require('util');
