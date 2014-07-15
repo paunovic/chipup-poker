@@ -428,7 +428,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			newuser.displayname = params.displayName;
 			newuser.authed = false;
 			newuser.chips = 0;
-			doc = {email:params.email, displayname:params.displayName, tokens:100, authed:false, chips:0 };
+			doc = {email:params.email, displayname:params.displayName, tokens:100, authed:false, chips:0, subscription_plan:'pspBasic' };
 			doc.authcode = uuid.v4();
 			newuser.authcode = doc.authcode;
 			if (!regexLimits.email.exec(doc.email)) {

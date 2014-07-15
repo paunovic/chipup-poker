@@ -199,12 +199,18 @@ message Club {
 }
 
 message User {
+	enum PlayerSubscriptionPlan {
+		pspBasic = 1;
+		pspNormal = 2;
+		pspSuper = 3;
+	}
 	required bytes _id = 1;
 	optional bytes avatar = 2;
 	required string displayname = 3;
 	
 	optional string email = 5;
 	optional bool authed = 6;
+	required PlayerSubscriptionPlan subscription_plan = 7;
 }
 
 message Game {

@@ -20,7 +20,8 @@ var User = new Schema({
 	forgottime:Number,
 	newemail:String,
 	changecode:String,
-	changetime:Number
+	changetime:Number,
+	subscription_plan:String // FIXME, add some validation and defaults
 });
 
 var AdminSchema = new Schema({
