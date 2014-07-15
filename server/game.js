@@ -41,6 +41,7 @@ function makeGameProtobuf(g) {
 		g.state = 'gsEmpty';
 	}
 	g._id = new Buffer(g._id,'hex');
+	g.club_mongoid = new Buffer(g.clubid,'hex');
 	assert.equal(g._id.length,12);
 	return g;
 }
@@ -450,6 +451,12 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				this.lastplayer[x] = this.seats[x].userid;
 				continue;
 			}
+			if (this.members[x].status == 'psOutOfHand') {
+				this.seats[x].conn.log('moving into hand %s %s %j',this.seats[x].userid,this.lastplayer[x],config);
+				if (myutils.compareObjectID(this.seats[x].userid,this.lastplayer[x])) {
+					this.members[x].status = 'psInHand';
+				}
+			}
 			if (canplay < 3) { // for 2 player games, just allow all
 			} else if (bb == -1) { // initial round
 			} else if (sb == -1) {
@@ -480,7 +487,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			}
 			this.members[x].SittingOutRoundsCount = 0;
 			if (this.omaha) {
-				players++;
+				//players++;
 				this.deck.draw(4,this.members[x].hand);
 			} else this.deck.draw(2,this.members[x].hand);
 			players++;
@@ -500,6 +507,7 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 			this.members[x].muck = true;
 			this.balance_changes[x] = 0;
 		}
+		assert(players > 1,util.format('gamename:%s players:%d canplay:%d',this.obj.gamename,players,canplay));
 
 		this.pots = [ new Pot(this) ];
 		this.log('pots reset to zero');
@@ -632,7 +640,7 @@ Game.prototype.getNextSeat = function (current,validstates) {
 			}
 			x++;
 			if (x >= this.obj.seats) x = 0;
-			this.lastplayer[x] = null;
+			//this.lastplayer[x] = null;
 		}
 		return x;
 	}
@@ -704,7 +712,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 	case 'tsFlop':
 	case 'tsTurn':
 	case 'tsRiver':
-		priv.conn.log('normal fold state');
+		priv.conn.log('normal fold state %s',this.state);
 		for (x=0; x<this.pots.length; x++) {
 			//priv.conn.log('folding seat %d, pots:%j',seat,this.pots[x].members);
 			var idx = this.pots[x].members.indexOf(seat);
@@ -720,7 +728,7 @@ Game.prototype.fold = function fold(seat,cb1) {
 		var inhandcount = this.inHandCount();
 		if (inhandcount == 0) {
 			priv.conn.log('wut now??');
-			assert(false,'this should never happen');
+			assert(false,'this should never happen:'+this.state);
 			finish2.call(this);
 		} else if (inhandcount == 1) {
 			priv.conn.log('d');
@@ -1757,7 +1765,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 			if (['psOutOfPlay','psOutOfHand','psFolded'].indexOf(seat.status) != -1) {
 			} else if (this.omaha) assert.equal(obj.card_count,4);
 			else {
-				console.log('card count %s %j %s',util.inspect(seat),obj,this.state);
+				if (obj.card_count != 2) console.log('card count %s %j %s',util.inspect(seat),obj,this.state);
 				assert.equal(obj.card_count,2);
 			}
 		}
@@ -1837,7 +1845,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 	var token3 = profiler.start('standup-inner6');
 	var token9 = profiler.start('standup-step1');
 
-	conn.log('standing up seat:%d bet:%d status:%s locked:%d',seatIdx,this.bets[seatIdx],util.inspect(seatObj),this.Lock.readers);
+	this.log('standing up seat:%d bet:%d status:%s locked:%d',seatIdx,this.bets[seatIdx],util.inspect(seatObj),this.Lock.readers);
 	this.updateLeaveStats(seatIdx);
 	this.logEvent('geCashout',conn.userid,seatObj.chips);
 	conn.boughtin -= seatObj.chips;
@@ -1845,7 +1853,7 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 	
 	this.members[seatIdx] = null;
 	this.lastplayer[seatIdx] = conn.userid;
-	conn.log('nulled out seat',seatIdx);
+	this.log('nulled out seat',seatIdx);
 	
 	if ((['tsIdle','tsWinning'].indexOf(this.state) == -1) && (['psInHand','psAllIn'].indexOf(seatObj.status) != -1)) {
 		token = profiler.start('standup-inner2');
@@ -1864,15 +1872,15 @@ Game.prototype.standUp = function (conn,cb1,seatIdxIn) {
 		assert.equal(typeof offset,'number');
 		this.log('1events are %j',events);
 		assert.equal(this.Lock.readers,-1);
-		conn.log('standing up seat:',seatIdx,'bet:',this.bets[seatIdx],'status:',seatObj.status);
+		this.log('standing up seat:',seatIdx,'bet:',this.bets[seatIdx],'status:',seatObj.status);
 		var priv = this.seats[seatIdx];
-		conn.log('instant leave');
+		this.log('instant leave');
 		//this.broadcastStatus();
 		if (this.bets[seatIdx] === undefined) this.bets[seatIdx] = 0;
 		this.log('bets:',this.bets);
 		assert.equal(typeof this.bets[seatIdx],'number');
 		var increase = this.bets[seatIdx];
-		conn.log('increase is',increase);
+		this.log('increase is',increase);
 		assert(priv);
 		if (['tsIdle','tsWinning'].indexOf(this.state) != -1) {
 			token9.stop();
@@ -2015,7 +2023,7 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 Game.prototype.eject = function (seatIdx,userid) {
 	assert(userid);
 	this.Lock.writeLock(function (release) {
-		this.standUp(this.seats[seatIdx].conn,function (folded,events,offset) {
+		this.standUp(this.seats[seatIdx].conn,function eject_locked(folded,events,offset) {
 			for (var x=0; x<this.reconnect.length; x++) {
 				if (myutils.compareObjectID(userid,this.reconnect[x])) {
 					this.reconnect.splice(x,1);
