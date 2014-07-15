@@ -1748,8 +1748,6 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	tableStatus.current_game = this.omaha ? "gtOmaha" : "gtHoldem";
 	tableStatus.game_limit = this.game_limit;
 	tableStatus.rotation = this.rotation;
-	tableStatus.total_balance = self.chips;
-	assert.equal(typeof self.chips,'number');
 	//this.log('made status:%d %s %j',counter-1,self ? 'for '+self.nick: '',tableStatus);
 	return tableStatus;
 }

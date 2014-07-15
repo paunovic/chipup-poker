@@ -697,7 +697,7 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 				}.bind(this));
 			}.bind(this),function finished() {
 				status.clubs = clubsOut;
-				models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:""},function(err,users) {
+				models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:"",subscription_plan:""},function(err,users) {
 					for (var x=0; x<users.length; x++) {
 						users[x] = makeUserProtobuf(users[x]);
 						assert(users[x]._id.length == 12);
