@@ -122,9 +122,9 @@ begin
     Exit;
 
   t := TRttiContext.Create.GetType(AObject.ClassType);
-  for p in t.GetDeclaredProperties do
+  for p in t.GetProperties do
   begin
-    print_it := TRUE;
+    print_it := FALSE;
 
     method := t.GetMethod(Format('has_%s', [p.Name]));
     if Assigned(method) then
@@ -133,6 +133,7 @@ begin
     if print_it then
     begin
       result := result + Format('%s: %s; ', [p.Name, ValueToStr(p, p.GetValue(AObject))]);
+
       if p.PropertyType.TypeKind = tkClass then
         result := result + #10;
     end;

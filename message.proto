@@ -200,9 +200,9 @@ message Club {
 
 message User {
 	enum PlayerSubscriptionPlan {
-		pspBasic = 1;
-		pspNormal = 2;
-		pspSuper = 3;
+		pspBasic = 0;
+		pspNormal = 1;
+		pspSuper = 2;
 	}
 	required bytes _id = 1;
 	optional bytes avatar = 2;
