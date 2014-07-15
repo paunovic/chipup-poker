@@ -55,7 +55,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Forms.Debug, Poker.Settings, Poker.DataModule, Poker.Protobufs.Objects.UpdateFileInfo,
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Settings, Poker.DataModule, Poker.Protobufs.Objects.UpdateFileInfo,
   Poker.Common.Misc, Poker.HardcodedSettings, Winapi.ShellApi;
 
 
