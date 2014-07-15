@@ -129,7 +129,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 		if (!this.methodToTypeMap[methodName])
 			throw new Error('schema for code ' + methodName + ' not known');
 
-		var argsParsed = this._makeArgsAndSanatize(args, methodName, argsFromDb, requestFromDb);
+		var argsParsed = this._makeArgsAndSanatize(args, methodId, argsFromDb, requestFromDb);
 		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
 		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
 	}
@@ -139,8 +139,9 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 };
 
 
-MitmPlayback.prototype._makeArgsAndSanatize = function (args, methodName, argsFromDb, requestFromDb) {
+MitmPlayback.prototype._makeArgsAndSanatize = function (args, methodId, argsFromDb, requestFromDb) {
 	debugger;
+	var methodName = this.serverCodes.reverse[methodId];
 	var argsParsed = this.protobuf.Parse(args, this.methodToTypeMap[methodName]);
 	var argsFromDbParsed = this.protobuf.Parse(argsFromDb, this.methodToTypeMap[requestFromDb.method]);
 
