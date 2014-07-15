@@ -75,9 +75,10 @@ type
     procedure RenderBets(const AGame: TGameInfo);
     procedure RenderPots;
     procedure RenderValue(const APoint: TPoint2; const AValue: UINT32; const AColor: TColor2; const APot: Boolean);
-    procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack);
+    procedure RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack; const AColor: TColor4);
     procedure RenderButtons;
     procedure RenderRaisePanel;
+    procedure RenderRake;
   public
     constructor Create(const AInternalId: Integer; const AInternalHWND: HWND; const ATableType: TTableType);
     destructor Destroy; override;
@@ -386,6 +387,7 @@ begin
       RenderBets(game);
       RenderPots;
       RenderTimebar(game);
+      RenderRake;
       RenderRaisePanel;
       RenderButtons;
     finally
@@ -1070,7 +1072,7 @@ begin
         begin
           chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
           chips_point := animation.GetCurrPoint(FDXAreaSize);
-          RenderChipStack(chips_point, chips_stack);
+          RenderChipStack(chips_point, chips_stack, clWhite4);
 
           if animation.Tags.ContainsKey(ANITAG_BLIND) then
             RenderValue(chips_point, animation.Tags[ANITAG_CHIPS], clWhite2, FALSE);
@@ -1098,7 +1100,7 @@ begin
         begin
           chips_point := FMetrics.GetBetPoint(AGame, seat_index, table.Status.Dealer);
           chips_stack := FChipStackMaker.MakeStack(table.Status.Bets[seat_index]);
-          RenderChipStack(chips_point, chips_stack);
+          RenderChipStack(chips_point, chips_stack, clWhite4);
           RenderValue(chips_point, table.Status.Bets[seat_index], clWhite2, FALSE);
         end;
       end;
@@ -1137,7 +1139,7 @@ begin
            (animation.Status in [asAnimating, asDone]) then
         begin
           chips_stack := FChipStackMaker.MakeStack(animation.Tags[ANITAG_CHIPS]);
-          RenderChipStack(animation.GetCurrPoint(FDXAreaSize), chips_stack);
+          RenderChipStack(animation.GetCurrPoint(FDXAreaSize), chips_stack, clWhite4);
 
           if animation.Tags[ANITAG_CHIPS] >= pot_value then
             pot_value := 0
@@ -1165,7 +1167,7 @@ begin
         if (pot_point.X > 0) and (pot_point.Y > 0) then
         begin
           chips_stack := FChipStackMaker.MakeStack(pot_value);
-          RenderChipStack(pot_point, chips_stack);
+          RenderChipStack(pot_point, chips_stack, clWhite4);
           RenderValue(pot_point, pot_value, clWhite2, TRUE);
         end;
       end;
@@ -1202,7 +1204,7 @@ begin
   font.TextMidF(p, text, AColor);
 end;
 
-procedure TTableRenderer.RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack);
+procedure TTableRenderer.RenderChipStack(const APoint: TPoint2; const AChipStack: TChipStack; const AColor: TColor4);
 var
   C1: Integer;
 begin
@@ -1213,7 +1215,7 @@ begin
   begin
     DXCore.Canvas.UseImage(AChipStack.Images[C1], TexFull4);
     DXCore.Canvas.TexMap(pBounds4(APoint.X - FMetrics.ChipWidth / 2,
-        APoint.Y - C1 * 5 * FMetrics.TableResizeRatio, FMetrics.ChipWidth, FMetrics.ChipHeight), clWhite4);
+        APoint.Y - C1 * 5 * FMetrics.TableResizeRatio, FMetrics.ChipWidth, FMetrics.ChipHeight), AColor);
   end;
 end;
 
@@ -1252,6 +1254,28 @@ begin
   finally
     Tables.Unlock;
   end;
+end;
+
+procedure TTableRenderer.RenderRake;
+var
+  table: TTable;
+  rake: UINT32;
+  chips_stack: TChipStack;
+begin
+  rake := 0;
+  if Tables.TryGetValue(FInternalId, table) then
+  try
+    rake := table.Status.TotalRake;
+  finally
+    Tables.Unlock;
+  end;
+
+  if (rake > 0) and
+     (rake < 100) then
+    rake := 100;
+
+  chips_stack := FChipStackMaker.MakeStack(rake);
+  RenderChipStack(FMetrics.TotalRakePoint, chips_stack, cRGB4(150, 150, 150));
 end;
 
 function TTableRenderer.AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage; const ARenderActionCaption: Boolean = FALSE; const AFontScale: Single = 1): Integer;

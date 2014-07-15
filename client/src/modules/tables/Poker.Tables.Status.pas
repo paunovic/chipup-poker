@@ -55,6 +55,7 @@ type
     FCallCaption: String;
     FResetRaiseValue: Boolean;
     FFocusWindow: Boolean;
+    FTotalRake: UINT32;
   public
     constructor Create;
     destructor Destroy; override;
@@ -95,6 +96,7 @@ type
     property CurrentPlaytime: Int64 read FCurrentPlaytime;
     property RakePercent: UINT32 read FRakePercent;
     property SelfSeatIndex: Integer read FSelfSeatIndex;
+    property TotalRake: UINT32 read FTotalRake;
 
     function IsSitting: Boolean;
 
@@ -214,6 +216,7 @@ var
   delete: Boolean;
   oldstate: TTableState;
   seat_index: Integer;
+  pot: TPB_Pot;
 begin
   oldstate := FState;
   FState := ATableStatusProtobuf.State;
@@ -322,6 +325,10 @@ begin
     while FPots.Count < FSeats.Last.SeatIndex do
       FPots.Add(TPB_Pot.Create);
   end;
+
+  FTotalRake := 0;
+  for pot in FPots do
+    Inc(FTotalRake, pot.Rake);
 
   FEvents.Assign(ATableStatusProtobuf.Events);
 

@@ -12,6 +12,7 @@ object frmTable: TfrmTable
   Font.Name = 'Sintony'
   Font.Style = [fsBold]
   OldCreateOrder = False
+  ShowHint = True
   OnActivate = FormActivate
   OnClick = FormClick
   OnClose = FormClose

@@ -239,6 +239,7 @@ object dmMain: TdmMain
   end
   object HintController: TcxHintStyleController
     HintStyleClassName = 'TcxHintStyle'
+    HintStyle.Animate = cxhaFadeIn
     HintStyle.CaptionFont.Charset = DEFAULT_CHARSET
     HintStyle.CaptionFont.Color = clWindowText
     HintStyle.CaptionFont.Height = -11
