@@ -183,15 +183,15 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.Generics.Collections,
-  Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Forms.CreateClub, Poker.Forms.JoinClub,
-  Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail, Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams,
-  Poker.Common.FormsContainer, Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater, Poker.Forms.ClubLobby,
-  Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList,
-  Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About,
-  Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
+  System.Generics.Collections, Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
+  Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
+  Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
+  Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus,
+  Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer,
+  Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams,
+  Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList, Poker.Protobufs.Objects.TableStatsReply,
+  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
+  Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Status;
@@ -266,13 +266,13 @@ end;
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
-  FormsContainer.CloseAllForms;
   Tables.Lock;
   try
     Tables.Clear;
   finally
     Tables.Unlock;
   end;
+  FormsContainer.CloseAllForms;
   FActionMainMenuBarFont.Free;
 end;
 
