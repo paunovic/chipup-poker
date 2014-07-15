@@ -26,8 +26,7 @@ enum ServerCodes {
 	srOwnershipGiveAwayInvalidClubId = 18;
 	srOwnershipGiveAwayOk = 19;
 	srClubDisbandOk = 20;
-	srTransferChipsOk = 21;
-	srTransferChipsInvalidAmount = 22;
+
 	srChangePasswordOk = 23;
 	srCreateGameOk = 24;
 	srDeleteGameOk = 25;
@@ -60,7 +59,7 @@ enum ServerCodes {
 	seGameCreate = 56;
 	seGameDelete = 57;
 	seTableStatus = 58;
-	seTransferChips = 59;
+
 	seUserChange = 60;
 	
 	scHello = 70;
@@ -76,7 +75,7 @@ enum ServerCodes {
 	scGiveClubOwnership = 80;
 	scChangeClubDetails = 81;
 	scDeleteClub = 82;
-	scTransferChips = 83;
+
 	scChangeEmail = 84;
 	scChangePassword = 85;
 	scSetAvatar = 86;
@@ -270,11 +269,6 @@ message KickPlayerParams {
 message GiveClubOwnershipParams {
 	required int32 club_seq = 1;
 	required bytes player_mongo_id = 2;
-}
-
-message TransferChipsParams {
-	required bytes player_mongo_id = 2;
-	required uint32 chip_amount = 3;
 }
 
 message ChangeEMailParams {
