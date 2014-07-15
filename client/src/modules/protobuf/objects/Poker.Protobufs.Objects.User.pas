@@ -9,7 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
-  TPlayerSubscriptionPlan = (pspBasic = 1,pspNormal = 2,pspSuper = 3);
+  TPlayerSubscriptionPlan = (pspBasic = 0,pspNormal = 1,pspSuper = 2);
   TPB_User = class(TProtobufBaseObject)
   private
     const

@@ -788,12 +788,12 @@ object frmDebug: TfrmDebug
       Style.IsFontAssigned = True
       TabOrder = 0
       Height = 19
-      Width = 402
+      Width = 313
     end
     object teRegexFilter: TcxTextEdit
-      Left = 402
+      Left = 313
       Top = 0
-      Align = alClient
+      Align = alLeft
       AutoSize = False
       ParentFont = False
       Properties.OnChange = teRegexFilterPropertiesChange
@@ -806,11 +806,35 @@ object frmDebug: TfrmDebug
       Style.Font.Style = []
       Style.IsFontAssigned = True
       TabOrder = 1
-      Text = 'RegEx Filtering...'
-      OnEnter = teRegexFilterEnter
-      OnExit = teRegexFilterExit
+      Text = 'RegEx filtering...'
+      OnEnter = teFindTextEnter
+      OnExit = teFindTextExit
       Height = 19
-      Width = 219
+      Width = 154
+    end
+    object teFindText: TcxTextEdit
+      Left = 467
+      Top = 0
+      Align = alClient
+      AutoSize = False
+      ParentFont = False
+      Properties.OnChange = teFindTextPropertiesChange
+      Style.BorderStyle = ebsUltraFlat
+      Style.Edges = [bLeft, bBottom]
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.IsFontAssigned = True
+      TabOrder = 2
+      Text = 'Find text...'
+      OnEnter = teFindTextEnter
+      OnExit = teFindTextExit
+      ExplicitLeft = 461
+      ExplicitWidth = 150
+      Height = 19
+      Width = 154
     end
   end
   object alDebug: TActionList

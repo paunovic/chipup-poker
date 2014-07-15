@@ -102,6 +102,7 @@ type
     lbsAnimations: TcxLabel;
     lbvAnimations: TcxLabel;
     pmiRTTIEnabled: TMenuItem;
+    teFindText: TcxTextEdit;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -113,10 +114,11 @@ type
     procedure acRunNewInstanceExecute(Sender: TObject);
     procedure meSeatPosPropertiesChange(Sender: TObject);
     procedure ccbLogFormsPropertiesChange(Sender: TObject);
-    procedure teRegexFilterEnter(Sender: TObject);
-    procedure teRegexFilterExit(Sender: TObject);
     procedure teRegexFilterPropertiesChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure teFindTextEnter(Sender: TObject);
+    procedure teFindTextExit(Sender: TObject);
+    procedure teFindTextPropertiesChange(Sender: TObject);
   private
     function FindStyleWithName(const AName: String): Integer;
     procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
@@ -148,7 +150,7 @@ uses
   {$ENDIF}
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept,
-  Poker.Sounds, Poker.DirectX.Timer;
+  Poker.Sounds, Poker.DirectX.Timer, RectMarks;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -329,23 +331,40 @@ begin
   frmDebug := nil;
 end;
 
-procedure TfrmDebug.teRegexFilterEnter(Sender: TObject);
+procedure TfrmDebug.teFindTextEnter(Sender: TObject);
 begin
-  if teRegexFilter.Tag = 0 then
+  if (Sender as TcxTextEdit).Tag = 0 then
   begin
-    teRegexFilter.Clear;
-    teRegexFilter.Tag := 1;
+    (Sender as TcxTextEdit).Clear;
+    (Sender as TcxTextEdit).Tag := 1;
   end;
 end;
 
-procedure TfrmDebug.teRegexFilterExit(Sender: TObject);
+procedure TfrmDebug.teFindTextExit(Sender: TObject);
+var
+  teobj: TcxTextEdit;
 begin
-  if (teRegexFilter.Tag = 1) and
-     (teRegexFilter.Text = '') then
+  teobj := Sender as TcxTextEdit;
+  if (teobj.Tag = 1) and
+     (teobj.Text = '') then
   begin
-    teRegexFilter.Text := 'RegEx Filtering...';
-    teRegexFilter.Tag := 0;
+    if teobj = teRegexFilter then
+      teobj.Text := 'RegEx filtering...'
+    else
+      if teobj = teFindText then
+        teobj.Text := 'Find text...';
+
+    teobj.Tag := 0;
   end;
+end;
+
+procedure TfrmDebug.teFindTextPropertiesChange(Sender: TObject);
+begin
+  ClearRectMarks(rvLog);
+  if teFindText.Text <> '' then
+    MarkSubstring(rvLog, teFindText.Text, clRed);
+
+  rvLog.Format;
 end;
 
 procedure TfrmDebug.teRegexFilterPropertiesChange(Sender: TObject);
@@ -531,6 +550,10 @@ begin
     rvLog.AddItem('', table);
     rvLog.SetItemExtraIntProperty(rvLog.ItemCount - 1, rvepHidden, 1);
   end;
+
+  ClearRectMarks(rvLog);
+  if teFindText.Text <> '' then
+    MarkSubstring(rvLog, teFindText.Text, clRed);
 
   if rvLog.VScrollPos < rvLog.VScrollMax then
     rvLog.Format

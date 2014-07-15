@@ -53,6 +53,9 @@ uses
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
   Poker.Helpers.DX9Canvas in 'helpers\Poker.Helpers.DX9Canvas.pas',
+  Poker.Helpers.PB_Pot in 'helpers\Poker.Helpers.PB_Pot.pas',
+  Poker.Helpers.HandHistoryMove in 'helpers\Poker.Helpers.HandHistoryMove.pas',
+  Poker.Helpers.PB_TablePlayerStats in 'helpers\Poker.Helpers.PB_TablePlayerStats.pas',
   Poker.Common.Misc in 'modules\common\Poker.Common.Misc.pas',
   Poker.Common.Encryption in 'modules\common\Poker.Common.Encryption.pas',
   Poker.Common.FormsContainer in 'modules\common\Poker.Common.FormsContainer.pas',
@@ -73,6 +76,7 @@ uses
   Poker.DirectX.Timer in 'modules\directx\Poker.DirectX.Timer.pas',
   Poker.DirectX.Animation in 'modules\directx\Poker.DirectX.Animation.pas',
   Poker.DirectX.Button in 'modules\directx\Poker.DirectX.Button.pas',
+  Poker.DirectX.Animations in 'modules\directx\Poker.DirectX.Animations.pas',
   Poker.Players.Player in 'modules\players\Poker.Players.Player.pas',
   Poker.Players.PlayerList in 'modules\players\Poker.Players.PlayerList.pas',
   Poker.Clubs.Club in 'modules\clubs\Poker.Clubs.Club.pas',
@@ -104,6 +108,7 @@ uses
   Poker.WindowMessages in 'modules\Poker.WindowMessages.pas',
   Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas',
   Poker.Database.Core in 'modules\database\Poker.Database.Core.pas',
+  Poker.Types in 'modules\Poker.Types.pas',
   Poker.Protobufs.Enum.ServerCodes in 'modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas',
   Poker.Protobufs.Reader in 'modules\protobuf\Poker.Protobufs.Reader.pas',
   Poker.Protobufs.Objects.Base in 'modules\protobuf\Poker.Protobufs.Objects.Base.pas',
@@ -163,16 +168,11 @@ uses
   Poker.Protobufs.Objects.HandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas',
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
+  Poker.Protobufs.Objects.HandHistoryMove in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas',
   Poker.Common.WavePlayer.DirectSoundBuffer in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas',
   Poker.Common.WavePlayer in 'modules\common\wave_player\Poker.Common.WavePlayer.pas',
   Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas',
-  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas',
-  Poker.Types in 'modules\Poker.Types.pas',
-  Poker.Helpers.PB_Pot in 'helpers\Poker.Helpers.PB_Pot.pas',
-  Poker.DirectX.Animations in 'modules\directx\Poker.DirectX.Animations.pas',
-  Poker.Helpers.HandHistoryMove in 'helpers\Poker.Helpers.HandHistoryMove.pas',
-  Poker.Helpers.PB_TablePlayerStats in 'helpers\Poker.Helpers.PB_TablePlayerStats.pas',
-  Poker.Protobufs.Objects.HandHistoryMove in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas';
+  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas';
 
 procedure FocusApp;
 var
