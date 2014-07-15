@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required uint32 Uptime = 1;
@@ -44,6 +45,9 @@ type
     procedure clear_Servertime;
     property Servertime: UInt64 read FServertime write SetServertime;
 
+  end;
+  TPB_PingReplyList = class (TObjectList<TPB_PingReply>)
+    procedure Assign(const APB_PingReplyList: TList<TPB_PingReply>);
   end;
 
 implementation
@@ -158,6 +162,24 @@ begin
   FServertime := AValue;
   ProtobufOutput.WriteInt64(kServertimeFieldNumber, AValue);
   set_has_Servertime;
+end;
+
+procedure TPB_PingReplyList.Assign(const APB_PingReplyList: TList<TPB_PingReply>);
+var
+  pbobj: TPB_PingReply;
+begin
+  Clear;
+  for pbobj in APB_PingReplyList do
+    Add(TPB_PingReply.Create(pbobj));
+end;
+
+procedure TPB_PingReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Uptime;
+    clear_Servertime;
+  end;
 end;
 
 end.

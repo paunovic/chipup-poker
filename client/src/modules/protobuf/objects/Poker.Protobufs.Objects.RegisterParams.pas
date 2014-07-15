@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string Email = 1;
@@ -54,6 +55,9 @@ type
     procedure clear_DisplayName;
     property DisplayName: String read FDisplayName write SetDisplayName;
 
+  end;
+  TPB_RegisterParamsList = class (TObjectList<TPB_RegisterParams>)
+    procedure Assign(const APB_RegisterParamsList: TList<TPB_RegisterParams>);
   end;
 
 implementation
@@ -204,6 +208,25 @@ begin
   FDisplayName := AValue;
   ProtobufOutput.writeString(kDisplayNameFieldNumber, AValue);
   set_has_DisplayName;
+end;
+
+procedure TPB_RegisterParamsList.Assign(const APB_RegisterParamsList: TList<TPB_RegisterParams>);
+var
+  pbobj: TPB_RegisterParams;
+begin
+  Clear;
+  for pbobj in APB_RegisterParamsList do
+    Add(TPB_RegisterParams.Create(pbobj));
+end;
+
+procedure TPB_RegisterParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Email;
+    clear_Password;
+    clear_DisplayName;
+  end;
 end;
 
 end.

@@ -26,13 +26,12 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo);
+    procedure Assign(const ASeatInfoProtobuf: TPB_SeatInfo); overload;
+    procedure Assign(const ASeatInfo: TSeatInfo); overload;
 
     procedure ResetDealtCards;
     procedure IncDealtCards;
     procedure FillDealtCards;
-
-    procedure InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer; const AMongoId: TBytes);
 
     property SeatIndex: Integer read FSeatIndex;
     property PlayerMongoId: TBytes read FPlayerMongoId;
@@ -53,6 +52,7 @@ type
 implementation
 
 { TSeatInfo }
+
 
 constructor TSeatInfo.Create;
 begin
@@ -81,22 +81,24 @@ begin
   FCanShow := ASeatInfoProtobuf.CanShow;
 end;
 
-procedure TSeatInfo.InitToDemoValues(const ASeatIndex: Integer; const AUpperCaption: String; const AChips: UINT32; const ACardCount: Integer; const AMongoId: TBytes);
+procedure TSeatInfo.Assign(const ASeatInfo: TSeatInfo);
+var
+  C1: Integer;
 begin
-  FSeatIndex := ASeatIndex;
-  FPlayerMongoId := Copy(AMongoId, 0, Length(AMongoId));
-  FChips := AChips;
-  FPreviousChips := AChips;
+  FSeatIndex := ASeatInfo.FSeatIndex;
+  FPlayerMongoId := ASeatInfo.FPlayerMongoId;
+  FPreviousChips := ASeatInfo.FPreviousChips;
+  FChips := ASeatInfo.FChips;
+  FCardCount := ASeatInfo.FCardCount;
   FCards.Clear;
-  FDealtCards := ACardCount;
-  FCardCount := ACardCount;
-  FStatus := psInHand;
-  FUpperCaption := AUpperCaption;
-  FLowerCaption := '';
-  FTimebank := 0;
-  FCardsVisible := FALSE;
-  FCanShow := FALSE;
-  FDisconnected := FALSE;
+  for C1 := 0 to ASeatInfo.FCards.Count - 1 do
+    FCards.Add(TCard.Create(ASeatInfo.FCards[C1].Value, ASeatInfo.FCards[C1].Suit));
+  FStatus := ASeatInfo.FStatus;
+  FTimeBank := ASeatInfo.FTimebank;
+  FCardsVisible := ASeatInfo.FCardsVisible;
+  FDisconnected := ASeatInfo.Disconnected;
+  FCanShow := ASeatInfo.FCanShow;
+  FDealtCards := ASeatInfo.DealtCards;
 end;
 
 procedure TSeatInfo.IncDealtCards;

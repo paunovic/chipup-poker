@@ -3,7 +3,7 @@ unit Poker.Avatars.AvatarList;
 interface
 
 uses
-  Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes, System.SysUtils, AsphyreImages, Poker.Avatars.Avatar,
+  Vcl.Imaging.JPEG, Vcl.Graphics, System.Generics.Collections, System.Classes, System.SysUtils, Asphyre.Images, Poker.Avatars.Avatar,
   OverbyteIcsHttpProt, OverbyteIcsWSocket;
 
 type
@@ -105,7 +105,7 @@ begin
 
     avatar.OnImageChanged := AvatarChangedInternal;
 
-    inherited Add(AId, avatar);
+    inherited Add(id, avatar);
 
     if not Assigned(AImage) then
     begin

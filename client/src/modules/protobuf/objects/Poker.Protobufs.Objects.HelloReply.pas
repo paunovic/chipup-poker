@@ -66,6 +66,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required StringSizes StringSizes = 1;
@@ -108,6 +109,9 @@ type
     procedure clear_ValidCharsRegex;
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
 
+  end;
+  TPB_HelloReplyList = class (TObjectList<TPB_HelloReply>)
+    procedure Assign(const APB_HelloReplyList: TList<TPB_HelloReply>);
   end;
 
 implementation
@@ -445,6 +449,7 @@ end;
 procedure TPB_HelloReply.UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_UpdateFiles;
   ProtobufOutput.writeTag(kUpdateFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -477,6 +482,30 @@ begin
   FValidCharsRegex := AValue;
   ProtobufOutput.writeMessage(kValidCharsRegexFieldNumber, AValue.ProtobufOutput);
   set_has_ValidCharsRegex;
+end;
+
+procedure TPB_HelloReplyList.Assign(const APB_HelloReplyList: TList<TPB_HelloReply>);
+var
+  pbobj: TPB_HelloReply;
+begin
+  Clear;
+  for pbobj in APB_HelloReplyList do
+    Add(TPB_HelloReply.Create(pbobj));
+end;
+
+procedure TPB_HelloReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_StringSizes;
+    clear_ChangeExpireTime;
+    clear_ForgotExpireTime;
+    clear_MaxPlayTime;
+    clear_MaxTimebank;
+    clear_MinSizes;
+    clear_UpdateFiles;
+    clear_ValidCharsRegex;
+  end;
 end;
 
 end.

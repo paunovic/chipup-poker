@@ -28,6 +28,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required RegisterStatus Status = 1;
@@ -35,6 +36,9 @@ type
     procedure clear_Status;
     property Status: TRegisterStatus read FStatus write SetStatus;
 
+  end;
+  TPB_RegisterReplyList = class (TObjectList<TPB_RegisterReply>)
+    procedure Assign(const APB_RegisterReplyList: TList<TPB_RegisterReply>);
   end;
 
 implementation
@@ -113,6 +117,23 @@ begin
   FStatus := AValue;
   ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
+end;
+
+procedure TPB_RegisterReplyList.Assign(const APB_RegisterReplyList: TList<TPB_RegisterReply>);
+var
+  pbobj: TPB_RegisterReply;
+begin
+  Clear;
+  for pbobj in APB_RegisterReplyList do
+    Add(TPB_RegisterReply.Create(pbobj));
+end;
+
+procedure TPB_RegisterReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Status;
+  end;
 end;
 
 end.

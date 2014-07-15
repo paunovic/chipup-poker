@@ -66,6 +66,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TablePlayerStats);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes Userid = 1;
@@ -108,6 +109,9 @@ type
     procedure clear_Hands;
     property Hands: UINT32 read FHands write SetHands;
 
+  end;
+  TPB_TablePlayerStatsList = class (TObjectList<TPB_TablePlayerStats>)
+    procedure Assign(const APB_TablePlayerStatsList: TList<TPB_TablePlayerStats>);
   end;
 
 implementation
@@ -310,6 +314,7 @@ end;
 procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Buyins;
   ProtobufOutput.writeUInt32(kBuyinsFieldNumber,Item);
 end;
 
@@ -337,6 +342,7 @@ end;
 procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Cashouts;
   ProtobufOutput.writeUInt32(kCashoutsFieldNumber,Item);
 end;
 
@@ -454,6 +460,30 @@ begin
   FHands := AValue;
   ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
   set_has_Hands;
+end;
+
+procedure TPB_TablePlayerStatsList.Assign(const APB_TablePlayerStatsList: TList<TPB_TablePlayerStats>);
+var
+  pbobj: TPB_TablePlayerStats;
+begin
+  Clear;
+  for pbobj in APB_TablePlayerStatsList do
+    Add(TPB_TablePlayerStats.Create(pbobj));
+end;
+
+procedure TPB_TablePlayerStats.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Userid;
+    clear_Balance;
+    clear_Buyins;
+    clear_Cashouts;
+    clear_Rakecontrib;
+    clear_Secondsplayed;
+    clear_Chipsinplay;
+    clear_Hands;
+  end;
 end;
 
 end.

@@ -40,7 +40,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 	var params,id;
 	try {
 		params = pb.Parse(args,'Poker.CloseGameData');
-		id = new myutils.toMongoId(params.gameid);
+		id = myutils.toMongoId(params.gameid);
 		switch (params.timestamp) {
 		case 'cgtCurrentHand':
 			params.timestamp = 0;
@@ -73,6 +73,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 				this.reply(0,'you dont own that club!');
 				return;
 			}
+			game.obj = gamerow; // FIXME
 			game.Lock.writeLock(function (release) {
 				if (params.timestamp > 0) {
 					game.closeTimer = setTimeout(function () {
@@ -82,7 +83,7 @@ handlers[codes.scCloseGame] = function (args,token) {
 					}.bind(this),params.timestamp * 1000);
 					game.closeTime = Date.now() + (params.timestamp * 1000);
 					game.state2 = 'gsClosing';
-					Game.clubBroadcastGameState(gamerow.clubid,JSON.parse(JSON.stringify(gamerow)),release);
+					Game.clubBroadcastGameState(game,release);
 				} else {
 					game.closeTime = 0;
 					game.doClose(this,release,gamerow);
@@ -92,10 +93,10 @@ handlers[codes.scCloseGame] = function (args,token) {
 	}.bind(this));
 };
 handlers[codes.scCreateGame] = function (args,token) {
-	var game_type,blinds,seats,clubseq,gamename,params,game_limit;
+	var game_type,blinds,seats,clubid,gamename,params,game_limit;
 	try {
 		params = pb.Parse(args,'Poker.Game');
-		clubseq = params.clubseq;
+		clubid = myutils.toMongoId(params.club_mongoid);
 		game_type = params.game_type;
 		game_limit = params.game_limit;
 		blinds = params.blinds;
@@ -110,8 +111,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	var doc = {game_type:game_type, blinds:blinds, seats:seats, clubseq:clubseq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
-	Club.getClubBySeq(clubseq,function (err,club) {
+	Club.getClubById(clubid,function (err,club) {
 		if (err == 'not found') {
 			this.reply(0,"club not found");
 			return;
@@ -120,6 +120,7 @@ handlers[codes.scCreateGame] = function (args,token) {
 			this.reply(0,"internal error");
 			return;
 		}
+		var doc = {game_type:game_type, blinds:blinds, seats:seats, clubseq:club.obj.seq, gamename:gamename, game_limit:game_limit, buyin_min:params.buyin_min, buyin_max:params.buyin_max,rake:0, rotation:0, hands:0};
 		if (!club.isOwner(this.userid)) {
 			this.reply(0,'your not owner');
 			return;
@@ -222,15 +223,17 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 				release();
 				return;
 			}
-			if ((game.state == 'tsIdle') && (['psInHand','psOutOfHand'].indexOf(game.members[seatIdx].status) != -1)) {
+			this.log('flag is %j, status:%s state:%s',params,game.members[seatIdx].status);
+			if ((game.state == 'tsIdle') && (['psInHand','psOutOfHand'].indexOf(game.members[seatIdx].status) != -1) && params.flag) {
+				this.log('going out of play');
 				game.members[seatIdx].status = 'psOutOfPlay';
-				game.clearDealTimer();
+				game.clearDealTimer(); // FIXME, it may stop dealing when others are waiting?
 				game.members[seatIdx].sitOutNextRound = false;
 				game.members[seatIdx].sitOutBB = false;
 				game.updateMongoState({members:true},function () {
 					game.broadcastStatus(null,true,[]);
 				});
-			} else if ('psOutOfHand' == game.members[seatIdx].status) {
+			} else if (('psOutOfHand' == game.members[seatIdx].status) && params.flag) {
 				game.members[seatIdx].status = 'psOutOfPlay';
 				game.broadcastStatus(null,true,[]);
 			} else {
@@ -353,8 +356,8 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 			if (game.state == 'tsIdle') {
 				if (!game.dealTimer) {
 					game.dealTimer = setTimeout(function () {
+						game.dealTimer = null;
 						game.Lock.writeLock(function (release) {
-							game.dealTimer = null;
 							game.stateMachine(function (events) {
 								game.broadcastStatus(null,true,events);
 								release();

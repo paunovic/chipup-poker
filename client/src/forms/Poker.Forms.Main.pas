@@ -114,8 +114,7 @@ type
     procedure acAnimationsEnabledExecute(Sender: TObject);
     procedure acSettingsExecute(Sender: TObject);
     procedure acDisconnectExecute(Sender: TObject);
-    procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient;
-      var ControlClass: TCustomActionControlClass);
+    procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
     procedure tiRefreshFormTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -196,7 +195,7 @@ uses
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Renderer;
+  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Status;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -261,7 +260,6 @@ begin
   btJoinClub.Font.Assign(btHomeGames.Font);
 
   pcTabs.ActivePage := tsHomeGames;
-  FCallbacksId := -1;
 
   Avatars.OnAvatarChanged := AvatarChanged;
 
@@ -270,9 +268,14 @@ end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
-  FormsContainer.CloseAllForms;
-  Tables.Clear;
   MessageContainer.RemoveCallbacks(FCallbacksId);
+  FormsContainer.CloseAllForms;
+  Tables.Lock;
+  try
+    Tables.Clear;
+  finally
+    Tables.Unlock;
+  end;
   FActionMainMenuBarFont.Free;
 end;
 
@@ -283,10 +286,15 @@ end;
 
 procedure TfrmChipUpMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := (FShuttingDown) or
+  CanClose := (not dmMain.IsLoggedIn) or
+              (FShuttingDown) or
               (ConfirmToCloseTablesAppClose);
+
   if CanClose then
-    ServerSocket.Logout;
+  begin
+    if (dmMain.IsLoggedIn) then
+      ServerSocket.Logout;
+  end;
 end;
 
 procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
@@ -323,6 +331,7 @@ begin
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
+  HandHistory.Clear;
   {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
@@ -376,7 +385,7 @@ begin
     end;
   end;
 
-  {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState]); {$ENDIF}
+  {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocketState]); {$ENDIF}
 end;
 
 procedure TfrmChipUpMain.tiRefreshFormTimer(Sender: TObject);
@@ -577,19 +586,23 @@ procedure TfrmChipUpMain.UpdateClublist;
 var
   club: TClubInfo;
   status: String;
-  recidx: Integer;
+  rcount: Integer;
+  c: TcxDataController;
   member: TClubMemberInfo;
 begin
-  gridPrivateClubsTable.DataController.BeginFullUpdate;
+  c := gridPrivateClubsTable.DataController;
+  c.BeginFullUpdate;
   try
-    gridPrivateClubsTable.DataController.SetRecordCount(0);
+    rcount := 0;
     for club in dmMain.SelfInfo.Clubs.Values do
       if club.IsPrivate then
       begin
-        recidx := gridPrivateClubsTable.DataController.AppendRecord;
+        Inc(rcount);
+        if rcount > c.RecordCount then
+          c.SetRecordCount(rcount);
 
-        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsId.Index, club.Id);
-        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsClubName.Index, club.Name);
+        c.SetValue(rcount - 1, gridJoinedClubsId.Index, club.Id);
+        c.SetValue(rcount - 1, gridJoinedClubsClubName.Index, club.Name);
 
         if CompareBytes(dmMain.SelfInfo.Id, club.OwnerId) then
           status := 'Manager'
@@ -603,12 +616,13 @@ begin
           end
           else
             status := 'Unknown';
-        gridPrivateClubsTable.DataController.SetValue(recidx, gridJoinedClubsStatus.Index, status);
+        c.SetValue(rcount - 1, gridJoinedClubsStatus.Index, status);
       end;
+    c.SetRecordCount(rcount);
   finally
-    gridPrivateClubsTable.DataController.EndFullUpdate;
+    c.EndFullUpdate;
   end;
-  gridPrivateClubsTable.DataController.Refresh;
+  c.Refresh;
 end;
 
 procedure TfrmChipUpMain.UpdateGamelist;
@@ -616,30 +630,31 @@ var
   game: TGameInfo;
   c: TcxGridDataController;
   club: TClubInfo;
-  recidx: Integer;
+  rcount: Integer;
 begin
   c := gridGamesTable.DataController;
   c.BeginFullUpdate;
   try
-    c.SetRecordCount(0);
-    if not GetSelectedClub(club) then
-      Exit;
+    rcount := 0;
+    if GetSelectedClub(club) then
+      for game in club.Games.Values do
+      begin
+        if game.State = gsClosed then
+          Continue;
 
-    for game in club.Games.Values do
-    begin
-      if game.State = gsClosed then
-        Continue;
+        Inc(rcount);
+        if rcount > c.RecordCount then
+          c.SetRecordCount(rcount);
 
-      recidx := c.AppendRecord;
-
-      c.SetValue(recidx, gridGamesId.Index, game.MongoId);
-      c.SetValue(recidx, gridGamesName.Index, game.Name);
-      c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
-      c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
-      c.SetValue(recidx, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
-      c.SetValue(recidx, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
-      c.SetValue(recidx, gridGamesStatus.Index, game.StateAsStr);
-    end;
+        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId);
+        c.SetValue(rcount - 1, gridGamesName.Index, game.Name);
+        c.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
+        c.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
+        c.SetValue(rcount - 1, gridGamesBuyinLimits.Index, Format('%d-%d', [game.MinBuyin, game.MaxBuyin]));
+        c.SetValue(rcount - 1, gridGamesPlayers.Index, Format('%d/%d', [game.Sitting, game.Seats]));
+        c.SetValue(rcount - 1, gridGamesStatus.Index, game.StateAsStr);
+      end;
+    c.SetRecordCount(rcount);
   finally
     c.EndFullUpdate;
   end;
@@ -657,16 +672,16 @@ begin
   c.BeginFullUpdate;
   try
     rcount := 0;
-    c.SetRecordCount(0);
-
     for club in dmMain.SelfInfo.Clubs.Values do
       if not club.IsPrivate then
       begin
         Inc(rcount);
-        c.SetRecordCount(rcount);
+        if rcount > c.RecordCount then
+          c.SetRecordCount(rcount);
         c.SetValue(rcount - 1, gridClubsId.Index, club.Id);
         c.SetValue(rcount - 1, gridClubsName.Index, club.Name);
       end;
+    c.SetRecordCount(rcount);
   finally
     c.EndFullUpdate;
   end;
@@ -1033,8 +1048,13 @@ procedure TfrmChipUpMain.AvatarChanged(Sender: TObject);
 var
   table: TTable;
 begin
-  for table in Tables.Values do
-    table.UpdateAvatars(Sender as TAvatar);
+  Tables.Lock;
+  try
+    for table in Tables.Values do
+      table.RenderSync;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);
@@ -1115,7 +1135,7 @@ var
 begin
   pbgame := AObject as TPB_Game;
 
-  if (dmMain.SelfInfo.Clubs.FindClubBySeq(pbgame.Clubseq, club)) and
+  if (dmMain.SelfInfo.Clubs.TryGetValue(pbgame.ClubMongoid, club)) and
      (club.Games.TryGetValue(pbgame.MongoId, game)) then
   begin
     if Tables.FindTable(game.MongoId, ttLiveGame, table) then
@@ -1134,7 +1154,7 @@ var
 begin
   pbgame := AObject as TPB_Game;
 
-  if dmMain.SelfInfo.Clubs.FindClubBySeq(pbgame.Clubseq, club) then
+  if dmMain.SelfInfo.Clubs.TryGetValue(pbgame.ClubMongoid, club) then
   begin
     game := club.Games.AddGame(pbgame);
 
@@ -1149,19 +1169,26 @@ end;
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
-  table: TTable;
+  club: TClubInfo;
   game: TGameInfo;
+  table: TTable;
 begin
   pbtstatus := AObject as TPB_TableStatus;
-  if (not Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table)) or
-     (not table.GetObjects(game)) then
-    Exit;
+  if dmMain.SelfInfo.Clubs.FindGame(pbtstatus.TableMongoId, club, game) then
+  begin
+    game.Sitting := pbtstatus.Seats.Count;
 
-  game.UpdateFromTableStatus(pbtstatus);
-  if not table.Form.Visible then
-    table.BringToFront;
+    Tables.Lock;
+    try
+      if Tables.FindTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+        if not table.Form.Visible then
+          table.BringToFront;
+    finally
+      Tables.Unlock;
+    end;
 
-  ConfigureGUI;
+    UpdateGamelist;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);

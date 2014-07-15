@@ -41,6 +41,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatsReplies);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated TableStatsReply Reply = 1;
@@ -58,6 +59,9 @@ type
     procedure clear_ClubStats;
     property ClubStats: TList<TPB_ClubStatsReply> read FClubStats;
 
+  end;
+  TPB_TableStatsRepliesList = class (TObjectList<TPB_TableStatsReplies>)
+    procedure Assign(const APB_TableStatsRepliesList: TList<TPB_TableStatsReplies>);
   end;
 
 implementation
@@ -188,6 +192,7 @@ end;
 procedure TPB_TableStatsReplies.ReplyNotifyEvent(Sender: TObject; const Item: TPB_TableStatsReply; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Reply;
   ProtobufOutput.writeTag(kReplyFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -217,6 +222,7 @@ end;
 procedure TPB_TableStatsReplies.PlayersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Players;
   ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -246,9 +252,29 @@ end;
 procedure TPB_TableStatsReplies.ClubStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubStatsReply; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_ClubStats;
   ProtobufOutput.writeTag(kClubStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_TableStatsRepliesList.Assign(const APB_TableStatsRepliesList: TList<TPB_TableStatsReplies>);
+var
+  pbobj: TPB_TableStatsReplies;
+begin
+  Clear;
+  for pbobj in APB_TableStatsRepliesList do
+    Add(TPB_TableStatsReplies.Create(pbobj));
+end;
+
+procedure TPB_TableStatsReplies.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Reply;
+    clear_Players;
+    clear_ClubStats;
+  end;
 end;
 
 end.

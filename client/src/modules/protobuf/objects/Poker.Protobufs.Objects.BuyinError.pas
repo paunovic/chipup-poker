@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_BuyinError);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes GameId = 1;
@@ -44,6 +45,9 @@ type
     procedure clear_LastCashout;
     property LastCashout: UINT32 read FLastCashout write SetLastCashout;
 
+  end;
+  TPB_BuyinErrorList = class (TObjectList<TPB_BuyinError>)
+    procedure Assign(const APB_BuyinErrorList: TList<TPB_BuyinError>);
   end;
 
 implementation
@@ -158,6 +162,24 @@ begin
   FLastCashout := AValue;
   ProtobufOutput.writeUInt32(kLastCashoutFieldNumber, AValue);
   set_has_LastCashout;
+end;
+
+procedure TPB_BuyinErrorList.Assign(const APB_BuyinErrorList: TList<TPB_BuyinError>);
+var
+  pbobj: TPB_BuyinError;
+begin
+  Clear;
+  for pbobj in APB_BuyinErrorList do
+    Add(TPB_BuyinError.Create(pbobj));
+end;
+
+procedure TPB_BuyinError.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_GameId;
+    clear_LastCashout;
+  end;
 end;
 
 end.

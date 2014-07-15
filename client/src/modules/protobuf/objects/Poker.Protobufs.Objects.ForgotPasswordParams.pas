@@ -27,6 +27,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ForgotPasswordParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string Email = 1;
@@ -34,6 +35,9 @@ type
     procedure clear_Email;
     property Email: String read FEmail write SetEmail;
 
+  end;
+  TPB_ForgotPasswordParamsList = class (TObjectList<TPB_ForgotPasswordParams>)
+    procedure Assign(const APB_ForgotPasswordParamsList: TList<TPB_ForgotPasswordParams>);
   end;
 
 implementation
@@ -112,6 +116,23 @@ begin
   FEmail := AValue;
   ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
+end;
+
+procedure TPB_ForgotPasswordParamsList.Assign(const APB_ForgotPasswordParamsList: TList<TPB_ForgotPasswordParams>);
+var
+  pbobj: TPB_ForgotPasswordParams;
+begin
+  Clear;
+  for pbobj in APB_ForgotPasswordParamsList do
+    Add(TPB_ForgotPasswordParams.Create(pbobj));
+end;
+
+procedure TPB_ForgotPasswordParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Email;
+  end;
 end;
 
 end.

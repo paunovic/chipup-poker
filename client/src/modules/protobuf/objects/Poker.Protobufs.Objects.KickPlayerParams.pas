@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_KickPlayerParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required int32 ClubSeq = 1;
@@ -44,6 +45,9 @@ type
     procedure clear_PlayerMongoId;
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
 
+  end;
+  TPB_KickPlayerParamsList = class (TObjectList<TPB_KickPlayerParams>)
+    procedure Assign(const APB_KickPlayerParamsList: TList<TPB_KickPlayerParams>);
   end;
 
 implementation
@@ -158,6 +162,24 @@ begin
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
+end;
+
+procedure TPB_KickPlayerParamsList.Assign(const APB_KickPlayerParamsList: TList<TPB_KickPlayerParams>);
+var
+  pbobj: TPB_KickPlayerParams;
+begin
+  Clear;
+  for pbobj in APB_KickPlayerParamsList do
+    Add(TPB_KickPlayerParams.Create(pbobj));
+end;
+
+procedure TPB_KickPlayerParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_ClubSeq;
+    clear_PlayerMongoId;
+  end;
 end;
 
 end.

@@ -27,6 +27,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeEMailParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string NewMail = 1;
@@ -34,6 +35,9 @@ type
     procedure clear_NewMail;
     property NewMail: String read FNewMail write SetNewMail;
 
+  end;
+  TPB_ChangeEMailParamsList = class (TObjectList<TPB_ChangeEMailParams>)
+    procedure Assign(const APB_ChangeEMailParamsList: TList<TPB_ChangeEMailParams>);
   end;
 
 implementation
@@ -112,6 +116,23 @@ begin
   FNewMail := AValue;
   ProtobufOutput.writeString(kNewMailFieldNumber, AValue);
   set_has_NewMail;
+end;
+
+procedure TPB_ChangeEMailParamsList.Assign(const APB_ChangeEMailParamsList: TList<TPB_ChangeEMailParams>);
+var
+  pbobj: TPB_ChangeEMailParams;
+begin
+  Clear;
+  for pbobj in APB_ChangeEMailParamsList do
+    Add(TPB_ChangeEMailParams.Create(pbobj));
+end;
+
+procedure TPB_ChangeEMailParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_NewMail;
+  end;
 end;
 
 end.

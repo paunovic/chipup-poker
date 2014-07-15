@@ -46,6 +46,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Pot);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required uint32 Value = 1;
@@ -68,6 +69,9 @@ type
     procedure clear_Rake;
     property Rake: UINT32 read FRake write SetRake;
 
+  end;
+  TPB_PotList = class (TObjectList<TPB_Pot>)
+    procedure Assign(const APB_PotList: TList<TPB_Pot>);
   end;
 
 implementation
@@ -220,6 +224,7 @@ end;
 procedure TPB_Pot.MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Members;
   ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
 end;
 
@@ -247,6 +252,7 @@ end;
 procedure TPB_Pot.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_WinnerData;
   ProtobufOutput.writeTag(kWinnerDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -279,6 +285,26 @@ begin
   FRake := AValue;
   ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
   set_has_Rake;
+end;
+
+procedure TPB_PotList.Assign(const APB_PotList: TList<TPB_Pot>);
+var
+  pbobj: TPB_Pot;
+begin
+  Clear;
+  for pbobj in APB_PotList do
+    Add(TPB_Pot.Create(pbobj));
+end;
+
+procedure TPB_Pot.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Value;
+    clear_Members;
+    clear_WinnerData;
+    clear_Rake;
+  end;
 end;
 
 end.

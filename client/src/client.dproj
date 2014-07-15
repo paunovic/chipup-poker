@@ -255,14 +255,11 @@
 			<DCCReference Include="modules\directx\Poker.DirectX.Button.pas"/>
 			<DCCReference Include="modules\players\Poker.Players.Player.pas"/>
 			<DCCReference Include="modules\players\Poker.Players.PlayerList.pas"/>
-			<DCCReference Include="modules\players\Poker.Players.Stats.pas"/>
 			<DCCReference Include="modules\clubs\Poker.Clubs.Club.pas"/>
 			<DCCReference Include="modules\clubs\Poker.Clubs.Member.pas"/>
 			<DCCReference Include="modules\clubs\Poker.Clubs.ClubList.pas"/>
 			<DCCReference Include="modules\games\Poker.Games.Game.pas"/>
 			<DCCReference Include="modules\games\Poker.Games.GameList.pas"/>
-			<DCCReference Include="modules\objects\Poker.Objects.WinnerData.pas"/>
-			<DCCReference Include="modules\objects\Poker.Objects.TableEvent.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.Status.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.Table.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.TableList.pas"/>
@@ -274,7 +271,6 @@
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Items.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Players.pas"/>
-			<DCCReference Include="modules\hand_history\Poker.HandHistory.Moves.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Playback.pas"/>
 			<DCCReference Include="modules\avatars\Poker.Avatars.Avatar.pas"/>
 			<DCCReference Include="modules\avatars\Poker.Avatars.AvatarList.pas"/>
@@ -282,8 +278,6 @@
 			<DCCReference Include="modules\chip_stack_maker\Poker.ChipStackMaker.ChipStack.pas"/>
 			<DCCReference Include="modules\seats\Poker.Seats.Seat.pas"/>
 			<DCCReference Include="modules\seats\Poker.Seats.SeatList.pas"/>
-			<DCCReference Include="modules\pots\Poker.Pots.Pot.pas"/>
-			<DCCReference Include="modules\pots\Poker.Pots.PotList.pas"/>
 			<DCCReference Include="modules\Poker.ActionMainMenuBarStyle.pas"/>
 			<DCCReference Include="modules\Poker.Cards.pas"/>
 			<DCCReference Include="modules\Poker.Sounds.pas"/>
@@ -348,8 +342,17 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ClubHandHistoryReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.MoveRow.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas"/>
+			<DCCReference Include="modules\Poker.Types.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.PB_Pot.pas"/>
+			<DCCReference Include="modules\directx\Poker.DirectX.Animations.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.HandHistoryMove.pas"/>
+			<DCCReference Include="helpers\Poker.Helpers.PB_TablePlayerStats.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

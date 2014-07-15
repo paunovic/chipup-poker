@@ -110,16 +110,17 @@ end;
 
 procedure TfrmHandHistory.SetParams(const AParams: array of pointer);
 var
-  game: TGameInfo;
+  game_id: TBytes;
   handid: UINT;
 begin
   if not Assigned(AParams[0]) then
     SetSelectedHandId(nil, 0)
   else
   begin
-    game := AParams[0];
+    SetLength(game_id, 12);
+    Move(AParams[0]^, game_id[0], 12);
     handid := PUINT(AParams[1])^;
-    SetSelectedHandId(game.MongoId, handid);
+    SetSelectedHandId(game_id, handid);
   end;
 end;
 

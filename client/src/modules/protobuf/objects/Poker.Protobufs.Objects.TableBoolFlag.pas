@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableBoolFlag);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes TableMongoId = 1;
@@ -44,6 +45,9 @@ type
     procedure clear_Flag;
     property Flag: Boolean read FFlag write SetFlag;
 
+  end;
+  TPB_TableBoolFlagList = class (TObjectList<TPB_TableBoolFlag>)
+    procedure Assign(const APB_TableBoolFlagList: TList<TPB_TableBoolFlag>);
   end;
 
 implementation
@@ -158,6 +162,24 @@ begin
   FFlag := AValue;
   ProtobufOutput.writeBoolean(kFlagFieldNumber, AValue);
   set_has_Flag;
+end;
+
+procedure TPB_TableBoolFlagList.Assign(const APB_TableBoolFlagList: TList<TPB_TableBoolFlag>);
+var
+  pbobj: TPB_TableBoolFlag;
+begin
+  Clear;
+  for pbobj in APB_TableBoolFlagList do
+    Add(TPB_TableBoolFlag.Create(pbobj));
+end;
+
+procedure TPB_TableBoolFlag.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_TableMongoId;
+    clear_Flag;
+  end;
 end;
 
 end.

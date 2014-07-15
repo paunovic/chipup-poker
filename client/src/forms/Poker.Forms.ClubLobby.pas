@@ -201,9 +201,9 @@ uses
   Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Forms.ChangeClubDetails,
   Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageContainer, Poker.Games.Game,
   Poker.Forms.CreateEditGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, Poker.Players.Stats, System.DateUtils,
-  Poker.Protobufs.Objects.TableStatsReplies, Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions,
-  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member, Poker.Players.Player, Poker.Tables.Stats;
+  Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
+  Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member,
+  Poker.Players.Player, Poker.Tables.Stats, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -453,7 +453,7 @@ procedure TfrmClubLobby.gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTab
 var
   C1: Integer;
   tablestats: TTableStats;
-  player: TPlayerStats;
+  player: TPB_TablePlayerStats;
   playerid: TBytes;
   list: TList<UINT32>;
 begin
@@ -697,20 +697,19 @@ var
   c: TcxGridDataController;
   recidx: Integer;
   tablestats: TTableStats;
-  playerstats: TPlayerStats;
-  playerstats_new: TPlayerStats;
+  playerstats: TPB_TablePlayerStats;
   player: TPlayerInfo;
   tmp: String;
   datetim: TDateTime;
   selectedids: TList<TBytes>;
   tablestatslist: TObjectList<TTableStats>;
-  finalstats: TObjectList<TPlayerStats>;
+  finalstats: TPB_TablePlayerStatsList;
   selectedid: TBytes;
   C1: Integer;
   found: Boolean;
   total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay: Int64;
 begin
-  finalstats := TObjectList<TPlayerStats>.Create;
+  finalstats := TPB_TablePlayerStatsList.Create;
   try
     c := gridStatsTable.DataController;
     c.BeginFullUpdate;
@@ -751,11 +750,7 @@ begin
                 end;
 
               if not found then
-              begin
-                playerstats_new := TPlayerStats.Create;
-                playerstats_new.Assign(playerstats);
-                finalstats.Add(playerstats_new);
-              end;
+                finalstats.Add(TPB_TablePlayerStats.Create(playerstats));
             end;
 
           for playerstats in finalstats do
@@ -770,8 +765,8 @@ begin
 
             c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId);
             c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
-            c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.BuyinsTotal / 100);
-            c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.CashoutsTotal / 100);
+            c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.GetBuyinsTotal / 100);
+            c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.GetCashoutsTotal / 100);
             c.SetValue(recidx, gridStatsTableRake.Index, playerstats.RakeContrib / 100);
             c.SetValue(recidx, gridStatsTableChipsInPlay.Index, playerstats.ChipsInPlay / 100);
             datetim := SecondsToTime(playerstats.SecondsPlayed);
@@ -798,8 +793,8 @@ begin
     for playerstats in finalstats do
     begin
       Inc(total_balance, playerstats.Balance);
-      Inc(total_buyins, playerstats.BuyinsTotal);
-      Inc(total_cashouts, playerstats.CashoutsTotal);
+      Inc(total_buyins, playerstats.GetBuyinsTotal);
+      Inc(total_cashouts, playerstats.GetCashoutsTotal);
       Inc(total_rake, playerstats.RakeContrib);
       Inc(total_chipsinplay, playerstats.ChipsInPlay);
     end;
@@ -1207,10 +1202,12 @@ end;
 procedure TfrmClubLobby.CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
 var
   pbgame: TPB_Game;
+  club: TClubInfo;
 begin
   pbgame := AObject as TPB_Game;
 
-  if pbgame.Clubseq = FClubId then
+  if (dmMain.SelfInfo.Clubs.TryGetValue(pbgame.MongoId, club)) and
+     (club.Id = FClubId) then
     ConfigureGUI;
 end;
 

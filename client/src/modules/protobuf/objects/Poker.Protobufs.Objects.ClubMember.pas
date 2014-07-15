@@ -47,6 +47,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubMember);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
@@ -74,6 +75,9 @@ type
     procedure clear_UnlimitedLimit;
     property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
 
+  end;
+  TPB_ClubMemberList = class (TObjectList<TPB_ClubMember>)
+    procedure Assign(const APB_ClubMemberList: TList<TPB_ClubMember>);
   end;
 
 implementation
@@ -296,6 +300,27 @@ begin
   FUnlimitedLimit := AValue;
   ProtobufOutput.writeBoolean(kUnlimitedLimitFieldNumber, AValue);
   set_has_UnlimitedLimit;
+end;
+
+procedure TPB_ClubMemberList.Assign(const APB_ClubMemberList: TList<TPB_ClubMember>);
+var
+  pbobj: TPB_ClubMember;
+begin
+  Clear;
+  for pbobj in APB_ClubMemberList do
+    Add(TPB_ClubMember.Create(pbobj));
+end;
+
+procedure TPB_ClubMember.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_Suspended;
+    clear_BalanceLimit;
+    clear_ClubBalance;
+    clear_UnlimitedLimit;
+  end;
 end;
 
 end.

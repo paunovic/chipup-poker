@@ -41,6 +41,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubHandHistoryReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes Clubid = 1;
@@ -58,6 +59,9 @@ type
     procedure clear_Rows;
     property Rows: TList<TPB_HandHistory> read FRows;
 
+  end;
+  TPB_ClubHandHistoryReplyList = class (TObjectList<TPB_ClubHandHistoryReply>)
+    procedure Assign(const APB_ClubHandHistoryReplyList: TList<TPB_ClubHandHistoryReply>);
   end;
 
 implementation
@@ -226,9 +230,29 @@ end;
 procedure TPB_ClubHandHistoryReply.RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Rows;
   ProtobufOutput.writeTag(kRowsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_ClubHandHistoryReplyList.Assign(const APB_ClubHandHistoryReplyList: TList<TPB_ClubHandHistoryReply>);
+var
+  pbobj: TPB_ClubHandHistoryReply;
+begin
+  Clear;
+  for pbobj in APB_ClubHandHistoryReplyList do
+    Add(TPB_ClubHandHistoryReply.Create(pbobj));
+end;
+
+procedure TPB_ClubHandHistoryReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Clubid;
+    clear_Gameid;
+    clear_Rows;
+  end;
 end;
 
 end.

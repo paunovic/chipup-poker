@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required LoginStatus LoginStatus = 1;
@@ -59,6 +60,9 @@ type
     procedure clear_ReconnectTables;
     property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
 
+  end;
+  TPB_LoginReplyList = class (TObjectList<TPB_LoginReply>)
+    procedure Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
   end;
 
 implementation
@@ -232,9 +236,29 @@ end;
 procedure TPB_LoginReply.ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_ReconnectTables;
   ProtobufOutput.writeTag(kReconnectTablesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
+var
+  pbobj: TPB_LoginReply;
+begin
+  Clear;
+  for pbobj in APB_LoginReplyList do
+    Add(TPB_LoginReply.Create(pbobj));
+end;
+
+procedure TPB_LoginReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_LoginStatus;
+    clear_Status;
+    clear_ReconnectTables;
+  end;
 end;
 
 end.

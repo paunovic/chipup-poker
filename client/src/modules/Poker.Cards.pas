@@ -22,6 +22,7 @@ type
 
     procedure Assign(const AByte: Byte); overload;
     procedure Assign(const ABytes: TBytes); overload;
+    procedure Assign(const ACard: TCard); overload;
 
     procedure Clear;
 
@@ -158,6 +159,12 @@ begin
   else
     result :=  '';
   end;
+end;
+
+procedure TCard.Assign(const ACard: TCard);
+begin
+  FValue := ACard.Value;
+  FSuit := ACard.Suit;
 end;
 
 function TCard.AsString: String;

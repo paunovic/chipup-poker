@@ -31,6 +31,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_QueryTableStats);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated bytes Gameid = 1;
@@ -38,6 +39,9 @@ type
     procedure clear_Gameid;
     property Gameid: TList<TBytes> read FGameid;
 
+  end;
+  TPB_QueryTableStatsList = class (TObjectList<TPB_QueryTableStats>)
+    procedure Assign(const APB_QueryTableStatsList: TList<TPB_QueryTableStats>);
   end;
 
 implementation
@@ -127,7 +131,25 @@ end;
 procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Gameid;
   ProtobufOutput.writeBytes(kGameidFieldNumber,Item);
+end;
+
+procedure TPB_QueryTableStatsList.Assign(const APB_QueryTableStatsList: TList<TPB_QueryTableStats>);
+var
+  pbobj: TPB_QueryTableStats;
+begin
+  Clear;
+  for pbobj in APB_QueryTableStatsList do
+    Add(TPB_QueryTableStats.Create(pbobj));
+end;
+
+procedure TPB_QueryTableStats.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Gameid;
+  end;
 end;
 
 end.

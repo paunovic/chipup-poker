@@ -31,6 +31,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UserChangeParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated User Users = 1;
@@ -38,6 +39,9 @@ type
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
 
+  end;
+  TPB_UserChangeParamsList = class (TObjectList<TPB_UserChangeParams>)
+    procedure Assign(const APB_UserChangeParamsList: TList<TPB_UserChangeParams>);
   end;
 
 implementation
@@ -134,9 +138,27 @@ end;
 procedure TPB_UserChangeParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Users;
   ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_UserChangeParamsList.Assign(const APB_UserChangeParamsList: TList<TPB_UserChangeParams>);
+var
+  pbobj: TPB_UserChangeParams;
+begin
+  Clear;
+  for pbobj in APB_UserChangeParamsList do
+    Add(TPB_UserChangeParams.Create(pbobj));
+end;
+
+procedure TPB_UserChangeParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Users;
+  end;
 end;
 
 end.

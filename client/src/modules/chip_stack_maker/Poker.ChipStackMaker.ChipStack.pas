@@ -3,7 +3,7 @@ unit Poker.ChipStackMaker.ChipStack;
 interface
 
 uses
-  System.Generics.Collections, AsphyreImages;
+  System.Generics.Collections, Asphyre.Images;
 
 type
   TChipImages = TArray<TAsphyreImage>;

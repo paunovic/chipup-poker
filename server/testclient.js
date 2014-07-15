@@ -1,3 +1,4 @@
+'use strict';
 var fs = require("fs");
 var p = require("node-protobuf").Protobuf;
 var net = require('net');
@@ -25,19 +26,20 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 		console.log(err);
 		process.exit(1);
 	}
-	conn = db;
+	var conn = db;
 	db.collection('users',function (err,collection) {
 		if (err) {
 			console.log(err);
 			process.exit(1);
 		}
-		allUsers = collection;
+		//allUsers = collection;
 		if (require.main === module) {
 			console.log(process.argv);
 			var mode = process.argv[2];
 			var autoconfig = {moves:[],autoRandom:{call:32,fold:4,raise:16,standup:4},speed:[0,0],players:5, buyins:[100000,100000,100000,100000,100000]};
 			var prefix = process.argv[3];
 			if (prefix) autoconfig.prefix = prefix;
+			var tests;
 			switch (mode) {
 			case 'menu':
 				tests = [ function sidepot(cb) {
@@ -79,7 +81,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 			});
 		}
 	});
-	clubs = db.collection('clubs');
+	//clubs = db.collection('clubs');
 	conn.close();
 });
 
@@ -192,10 +194,12 @@ function testmenu(cb,config) {
 	var client2;
 	var gameid;
 	var clubseq;
+	var clubid;
 	var autoMoves = [];
 	var total = 0;
 	var clients = [];
 	var prefix = 'client';
+	var x;
 	if (config && config.prefix) prefix = config.prefix;
 	if (config && config.autoRandom) {
 		for (x in config.autoRandom) {
@@ -217,7 +221,7 @@ function testmenu(cb,config) {
 		timer = setTimeout(func,(config.speed[1] * Math.random())+config.speed[0]);
 	}
 	function showMoves(conn,actseq) {
-		moves = {fold:function() {
+		var moves = {fold:function() {
 			conn.reply(codes.scFold,{_id:gameid},'Poker.Game');
 		}};
 		moves.standup = function () {
@@ -448,7 +452,7 @@ function testmenu(cb,config) {
 				return;
 			}
 			this.log('club seq is',params.club.seq);
-			this.reply(codes.scCreateGame,{clubseq: params.club.seq, game_type:'gtHoldem',
+			this.reply(codes.scCreateGame,{club_mongoid: params.club._id, game_type:'gtHoldem',
 				game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix+' testbot game',
 				buyin_max:20000, buyin_min:5},'Poker.Game');
 			break;
@@ -511,6 +515,7 @@ function testmenu(cb,config) {
 			for (var x=0; x<params.clubs.length; x++) {
 				if (params.clubs[x].name == (prefix + ' testbot club')) {
 					clubseq = params.clubs[x].seq;
+					clubid = params.clubs[x]._id;
 					makeit = false;
 				}
 			}
@@ -526,7 +531,7 @@ function testmenu(cb,config) {
 					this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
 					this.joining = true;
 				} else {
-					this.reply(codes.scCreateGame,{clubseq: clubseq, game_type:'gtHoldem', game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
+					this.reply(codes.scCreateGame,{club_mongoid: clubid, game_type:'gtHoldem', game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
 				}
 			}
 	}

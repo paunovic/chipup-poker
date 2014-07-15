@@ -38,6 +38,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatEvent);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required EventType Event = 1;
@@ -55,6 +56,9 @@ type
     procedure clear_TableId;
     property TableId: TBytes read FTableId write SetTableId;
 
+  end;
+  TPB_ChatEventList = class (TObjectList<TPB_ChatEvent>)
+    procedure Assign(const APB_ChatEventList: TList<TPB_ChatEvent>);
   end;
 
 implementation
@@ -211,6 +215,25 @@ begin
   FTableId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
   set_has_TableId;
+end;
+
+procedure TPB_ChatEventList.Assign(const APB_ChatEventList: TList<TPB_ChatEvent>);
+var
+  pbobj: TPB_ChatEvent;
+begin
+  Clear;
+  for pbobj in APB_ChatEventList do
+    Add(TPB_ChatEvent.Create(pbobj));
+end;
+
+procedure TPB_ChatEvent.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Event;
+    clear_Msg;
+    clear_TableId;
+  end;
 end;
 
 end.

@@ -19,7 +19,7 @@ type
       kIdFieldNumber = 1;
       kCreatorMongoIdFieldNumber = 2;
       kGamenameFieldNumber = 3;
-      kClubseqFieldNumber = 4;
+      kClubMongoidFieldNumber = 4;
       kGameTypeFieldNumber = 5;
       kGameLimitFieldNumber = 6;
       kBlindsFieldNumber = 7;
@@ -35,7 +35,7 @@ type
       FId: TBytes;
       FCreatorMongoId: TBytes;
       FGamename: String;
-      FClubseq: Integer;
+      FClubMongoid: TBytes;
       FGameType: TGameType;
       FGameLimit: TGameLimit;
       FBlinds: TGameBlinds;
@@ -57,9 +57,9 @@ type
     procedure set_has_Gamename;
     procedure clear_has_Gamename;
     procedure SetGamename(const AValue: String);
-    procedure set_has_Clubseq;
-    procedure clear_has_Clubseq;
-    procedure SetClubseq(const AValue: Integer);
+    procedure set_has_ClubMongoid;
+    procedure clear_has_ClubMongoid;
+    procedure SetClubMongoid(const AValue: TBytes);
     procedure set_has_GameType;
     procedure clear_has_GameType;
     procedure SetGameType(const AValue: TGameType);
@@ -96,6 +96,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Game);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // optional bytes MongoId = 1;
@@ -113,10 +114,10 @@ type
     procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;
 
-    // optional int32 Clubseq = 4;
-    function has_Clubseq: Boolean;
-    procedure clear_Clubseq;
-    property Clubseq: Integer read FClubseq write SetClubseq;
+    // optional bytes ClubMongoid = 4;
+    function has_ClubMongoid: Boolean;
+    procedure clear_ClubMongoid;
+    property ClubMongoid: TBytes read FClubMongoid write SetClubMongoid;
 
     // optional GameType GameType = 5;
     function has_GameType: Boolean;
@@ -169,6 +170,9 @@ type
     property Lasthandid: UINT32 read FLasthandid write SetLasthandid;
 
   end;
+  TPB_GameList = class (TObjectList<TPB_Game>)
+    procedure Assign(const APB_GameList: TList<TPB_Game>);
+  end;
 
 implementation
 
@@ -211,10 +215,10 @@ begin
         FGamename := AProtobufReader.readUtf8String;
         set_has_Gamename;
       end;
-      kClubseqFieldNumber: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FClubseq := AProtobufReader.readInt32;
-        set_has_Clubseq;
+      kClubMongoidFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FClubMongoid := AProtobufReader.readBytes;
+        set_has_ClubMongoid;
       end;
       kGameTypeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
@@ -280,8 +284,8 @@ begin
     SetCreatorMongoId(from.CreatorMongoId);
   if (from.has_Gamename) then
     SetGamename(from.Gamename);
-  if (from.has_Clubseq) then
-    SetClubseq(from.Clubseq);
+  if (from.has_ClubMongoid) then
+    SetClubMongoid(from.ClubMongoid);
   if (from.has_GameType) then
     SetGameType(from.GameType);
   if (from.has_GameLimit) then
@@ -397,33 +401,33 @@ begin
   set_has_Gamename;
 end;
 
-procedure TPB_Game.clear_Clubseq;
+procedure TPB_Game.clear_ClubMongoid;
 begin
-  FClubseq := 0;
-  clear_has_Clubseq;
+  SetLength(FClubMongoid,0);
+  clear_has_ClubMongoid;
 end;
 
-function TPB_Game.has_Clubseq: Boolean;
+function TPB_Game.has_ClubMongoid: Boolean;
 begin
   Result := (_has_bits_ and 8) > 0;
 end;
 
-procedure TPB_Game.set_has_Clubseq;
+procedure TPB_Game.set_has_ClubMongoid;
 begin
   _has_bits_ := _has_bits_ or 8;
 end;
 
-procedure TPB_Game.clear_has_Clubseq;
+procedure TPB_Game.clear_has_ClubMongoid;
 begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_Game.SetClubseq(const AValue: Integer);
+procedure TPB_Game.SetClubMongoid(const AValue: TBytes);
 begin
-  Assert(not has_Clubseq);
-  FClubseq := AValue;
-  ProtobufOutput.writeInt32(kClubseqFieldNumber, AValue);
-  set_has_Clubseq;
+  Assert(not has_ClubMongoid);
+  FClubMongoid := Copy(AValue,0,Length(AValue));
+  ProtobufOutput.writeBytes(kClubMongoidFieldNumber, AValue);
+  set_has_ClubMongoid;
 end;
 
 procedure TPB_Game.clear_GameType;
@@ -714,6 +718,36 @@ begin
   FLasthandid := AValue;
   ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
   set_has_Lasthandid;
+end;
+
+procedure TPB_GameList.Assign(const APB_GameList: TList<TPB_Game>);
+var
+  pbobj: TPB_Game;
+begin
+  Clear;
+  for pbobj in APB_GameList do
+    Add(TPB_Game.Create(pbobj));
+end;
+
+procedure TPB_Game.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_CreatorMongoId;
+    clear_Gamename;
+    clear_ClubMongoid;
+    clear_GameType;
+    clear_GameLimit;
+    clear_Blinds;
+    clear_Seats;
+    clear_Sitting;
+    clear_BuyinMin;
+    clear_BuyinMax;
+    clear_State;
+    clear_Closetime;
+    clear_Lasthandid;
+  end;
 end;
 
 end.

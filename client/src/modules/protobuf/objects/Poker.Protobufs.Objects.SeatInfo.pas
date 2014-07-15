@@ -73,6 +73,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SeatInfo);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required int32 Seat = 1;
@@ -125,6 +126,9 @@ type
     procedure clear_CanShow;
     property CanShow: Boolean read FCanShow write SetCanShow;
 
+  end;
+  TPB_SeatInfoList = class (TObjectList<TPB_SeatInfo>)
+    procedure Assign(const APB_SeatInfoList: TList<TPB_SeatInfo>);
   end;
 
 implementation
@@ -527,6 +531,32 @@ begin
   FCanShow := AValue;
   ProtobufOutput.writeBoolean(kCanShowFieldNumber, AValue);
   set_has_CanShow;
+end;
+
+procedure TPB_SeatInfoList.Assign(const APB_SeatInfoList: TList<TPB_SeatInfo>);
+var
+  pbobj: TPB_SeatInfo;
+begin
+  Clear;
+  for pbobj in APB_SeatInfoList do
+    Add(TPB_SeatInfo.Create(pbobj));
+end;
+
+procedure TPB_SeatInfo.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Seat;
+    clear_PlayerMongoId;
+    clear_Chips;
+    clear_CardCount;
+    clear_Cards;
+    clear_Status;
+    clear_Timebank;
+    clear_CardsVisible;
+    clear_Disconnected;
+    clear_CanShow;
+  end;
 end;
 
 end.

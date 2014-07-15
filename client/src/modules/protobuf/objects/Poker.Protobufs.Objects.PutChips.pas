@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PutChips);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes TableMongoId = 1;
@@ -54,6 +55,9 @@ type
     procedure clear_CurrentState;
     property CurrentState: TTableState read FCurrentState write SetCurrentState;
 
+  end;
+  TPB_PutChipsList = class (TObjectList<TPB_PutChips>)
+    procedure Assign(const APB_PutChipsList: TList<TPB_PutChips>);
   end;
 
 implementation
@@ -204,6 +208,25 @@ begin
   FCurrentState := AValue;
   ProtobufOutput.writeInt32(kCurrentStateFieldNumber, Integer(AValue));
   set_has_CurrentState;
+end;
+
+procedure TPB_PutChipsList.Assign(const APB_PutChipsList: TList<TPB_PutChips>);
+var
+  pbobj: TPB_PutChips;
+begin
+  Clear;
+  for pbobj in APB_PutChipsList do
+    Add(TPB_PutChips.Create(pbobj));
+end;
+
+procedure TPB_PutChips.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_TableMongoId;
+    clear_ChipAmount;
+    clear_CurrentState;
+  end;
 end;
 
 end.

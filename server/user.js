@@ -25,6 +25,7 @@ var installer = require('./installer');
 module.exports.UserInit = UserInit;
 module.exports.makeUserProtobuf = makeUserProtobuf;
 module.exports.ClientSocket = ClientSocket;
+module.exports.changePassword = changePassword;
 
 var connections = 0;
 var handlers = {};
@@ -139,6 +140,9 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 				var game = global.activeGames[key];
 				for (var seatIdx = 0; seatIdx < game.seats.length; seatIdx++) {
 					if (!game.seats[seatIdx]) continue;
+					if (!game.seats[seatIdx].userid) {
+						console.log('seat %d is missing userid',seatIdx,game.seats[seatIdx]);
+					}
 					if (myutils.compareObjectID(game.seats[seatIdx].userid,row._id)) {
 						if (game.members[seatIdx].disconnected) {
 							toResume.push({game:game,seat:seatIdx,seated:true});
@@ -527,6 +531,7 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scHello:
+			clearTimeout(this.oldTimer);
 			try {
 				params = pb.Parse(args,'Poker.HelloParams');
 				if (params.files.length == 0) {
@@ -537,7 +542,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				this.error(e);
 				return;
 			}
-			clearTimeout(this.oldTimer);
 			this.doHelloProcessing(params,params.files,token,true,true);
 		}
 		break;

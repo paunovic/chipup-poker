@@ -48,6 +48,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UpdateFileInfo);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string Path = 1;
@@ -75,6 +76,9 @@ type
     procedure clear_FileSize;
     property FileSize: UINT32 read FFileSize write SetFileSize;
 
+  end;
+  TPB_UpdateFileInfoList = class (TObjectList<TPB_UpdateFileInfo>)
+    procedure Assign(const APB_UpdateFileInfoList: TList<TPB_UpdateFileInfo>);
   end;
 
 implementation
@@ -297,6 +301,27 @@ begin
   FFileSize := AValue;
   ProtobufOutput.writeUInt32(kFileSizeFieldNumber, AValue);
   set_has_FileSize;
+end;
+
+procedure TPB_UpdateFileInfoList.Assign(const APB_UpdateFileInfoList: TList<TPB_UpdateFileInfo>);
+var
+  pbobj: TPB_UpdateFileInfo;
+begin
+  Clear;
+  for pbobj in APB_UpdateFileInfoList do
+    Add(TPB_UpdateFileInfo.Create(pbobj));
+end;
+
+procedure TPB_UpdateFileInfo.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Path;
+    clear_Hash;
+    clear_Url;
+    clear_FileType;
+    clear_FileSize;
+  end;
 end;
 
 end.
