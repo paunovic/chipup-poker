@@ -9,8 +9,10 @@ var config = require('./config');
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('profiler');
 var models = require('./db').models;
+var IO=null;
 
 module.exports.makeDiff = makeDiff;
+module.exports.setIO = setIO;
 
 var bsdiffLock = new ReadWriteLock();
 
@@ -52,11 +54,13 @@ function makeDiff(sourcehash,desthash,path) {
 						return release();
 					}
 					console.log('making diff for %s',path);
+					if (IO) IO.sockets.emit('makeDiff',{sourcehash:sourcehash,desthash:desthash,path:path});
 					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
 					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
 						assert.ifError(err);
 						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'http://'+config.staticserver+'/'+outfile };
 						var obj = new models.Diff(doc);
+						if (IO) IO.sockets.emit('makeDiff',{sourcehash:sourcehash,desthash:desthash,path:path,size:stats.size});
 						obj.save(function () {
 							pushDiff(obj);
 							release();
@@ -66,6 +70,9 @@ function makeDiff(sourcehash,desthash,path) {
 			});
 		}
 	});
+}
+function setIO(IOin) {
+	IO = IOin;
 }
 
 function bsdiff(oldfile,newfile,diff,cb) {

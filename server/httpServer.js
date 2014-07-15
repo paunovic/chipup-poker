@@ -53,6 +53,7 @@ function Server(activeUsersIN) {
 	var app = express();
 	this.httpServer = http.createServer(app);
 	this.IO = require('socket.io').listen(this.httpServer,{log:false});
+	differ.setIO(this.IO);
 	var logger = require('morgan');
 	app.use(logger());
 	this.activeUsers = activeUsersIN; // FIXME
@@ -400,7 +401,6 @@ Server.prototype.installers_func = function (req,res) {
 			models.Installer.findOne({_id:new ObjectID(id)},function (err,row) {
 				if (row) {
 					fs.unlink('installers/'+row.name,function (err) {
-						console.log('installer deleted');
 					});
 				}
 				// FIXME, delete the raw objects if they are unused
