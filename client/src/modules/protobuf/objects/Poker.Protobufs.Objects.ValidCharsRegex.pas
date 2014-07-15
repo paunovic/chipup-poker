@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ValidCharsRegex);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string Email = 1;
@@ -84,6 +85,9 @@ type
     procedure clear_Gamename;
     property Gamename: String read FGamename write SetGamename;
 
+  end;
+  TPB_ValidCharsRegexList = class (TObjectList<TPB_ValidCharsRegex>)
+    procedure Assign(const APB_ValidCharsRegexList: TList<TPB_ValidCharsRegex>);
   end;
 
 implementation
@@ -342,6 +346,28 @@ begin
   FGamename := AValue;
   ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
   set_has_Gamename;
+end;
+
+procedure TPB_ValidCharsRegexList.Assign(const APB_ValidCharsRegexList: TList<TPB_ValidCharsRegex>);
+var
+  pbobj: TPB_ValidCharsRegex;
+begin
+  Clear;
+  for pbobj in APB_ValidCharsRegexList do
+    Add(TPB_ValidCharsRegex.Create(pbobj));
+end;
+
+procedure TPB_ValidCharsRegex.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Email;
+    clear_Username;
+    clear_Password;
+    clear_Clubname;
+    clear_Clubpassword;
+    clear_Gamename;
+  end;
 end;
 
 end.

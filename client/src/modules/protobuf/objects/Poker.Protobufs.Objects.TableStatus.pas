@@ -137,6 +137,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatus);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes TableMongoId = 1;
@@ -249,6 +250,9 @@ type
     procedure clear_MinimumRaise;
     property MinimumRaise: UINT32 read FMinimumRaise write SetMinimumRaise;
 
+  end;
+  TPB_TableStatusList = class (TObjectList<TPB_TableStatus>)
+    procedure Assign(const APB_TableStatusList: TList<TPB_TableStatus>);
   end;
 
 implementation
@@ -547,6 +551,7 @@ end;
 procedure TPB_TableStatus.SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Seats;
   ProtobufOutput.writeTag(kSeatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -663,6 +668,7 @@ end;
 procedure TPB_TableStatus.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Bets;
   ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
 end;
 
@@ -922,6 +928,7 @@ end;
 procedure TPB_TableStatus.EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Events;
   ProtobufOutput.writeTag(kEventsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -951,6 +958,7 @@ end;
 procedure TPB_TableStatus.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Pots;
   ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -1128,6 +1136,44 @@ begin
   FMinimumRaise := AValue;
   ProtobufOutput.writeUInt32(kMinimumRaiseFieldNumber, AValue);
   set_has_MinimumRaise;
+end;
+
+procedure TPB_TableStatusList.Assign(const APB_TableStatusList: TList<TPB_TableStatus>);
+var
+  pbobj: TPB_TableStatus;
+begin
+  Clear;
+  for pbobj in APB_TableStatusList do
+    Add(TPB_TableStatus.Create(pbobj));
+end;
+
+procedure TPB_TableStatus.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_TableMongoId;
+    clear_Seats;
+    clear_State;
+    clear_Dealer;
+    clear_CurrentSeat;
+    clear_Bets;
+    clear_Locked;
+    clear_Seq;
+    clear_MinimumBet;
+    clear_MaximumRaise;
+    clear_SmallBlind;
+    clear_BigBlind;
+    clear_Handid;
+    clear_Time;
+    clear_Events;
+    clear_Pots;
+    clear_RakePercent;
+    clear_CurrentGame;
+    clear_Rotation;
+    clear_TotalBalance;
+    clear_GameLimit;
+    clear_MinimumRaise;
+  end;
 end;
 
 end.

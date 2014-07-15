@@ -16,12 +16,12 @@ var User = new Schema({
 	password:Buffer,
 	salt:Buffer,
 	authed:Boolean,
-	chips:Number,
 	forgotcode:String,
 	forgottime:Number,
 	newemail:String,
 	changecode:String,
-	changetime:Number
+	changetime:Number,
+	subscription_plan:String // FIXME, add some validation and defaults
 });
 
 var AdminSchema = new Schema({
@@ -216,7 +216,8 @@ var GameStateSchema = new Schema({
 	minimum_raise:Number,
 	members:[StateMemberSchema],
 	users:[ObjectId],
-	deck:[Number]
+	deck:[Number],
+	moveCounter: Number
 },{collection:'gameState'});
 GameStateSchema.path('pots').validate(function (pots) {
 	return pots.length < 5;

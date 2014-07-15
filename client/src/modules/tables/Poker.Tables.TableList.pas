@@ -3,9 +3,8 @@ unit Poker.Tables.TableList;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback,
-  Poker.Clubs.Club, Vcl.Forms, Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Renderer,
-  Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
+  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs;
 
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)
@@ -26,6 +25,11 @@ type
     procedure Remove(const AId: Integer);
     procedure Add(const AId: Integer; const ATable: TTable);
 
+    procedure Lock;
+    procedure Unlock;
+
+    function GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
+
     procedure ClearWithoutNotification;
 
     function FindTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean;
@@ -43,8 +47,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
-  Poker.HandHistory.Core, Poker.Tables.Status;
+  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
+  Poker.HandHistory.Core;
 
 { TTableList }
 
@@ -70,10 +74,25 @@ end;
 
 destructor TTableList.Destroy;
 begin
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
-
-  FreeAndNil(FLock);
+  FLock.Enter;
+  try
+    Clear;
+  finally
+    FLock.Leave;
+  end;
   inherited;
+  FreeAndNil(FLock);
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+end;
+
+procedure TTableList.Lock;
+begin
+  FLock.Enter;
+end;
+
+procedure TTableList.Unlock;
+begin
+  FLock.Leave;
 end;
 
 procedure TTableList.Remove(const AId: Integer);
@@ -108,20 +127,12 @@ begin
   end;
 
   table := TTable.Create(FNextTableInternalId);
-  if not table.AcquireSwapChainElement then
-  begin
-    FreeAndNil(table);
-    Exit(nil);
-  end;
-
   Add(FNextTableInternalId, table);
-  Inc(FNextTableInternalId);
-
   if table.SetupLiveTable(AGameId, ASendJoinCommand) then
   begin
+    Inc(FNextTableInternalId);
     if AShow then
       table.BringToFront;
-
     result := table;
   end
   else
@@ -143,19 +154,18 @@ begin
     Exit(nil);
 
   table := TTable.Create(FNextTableInternalId);
-  if not table.AcquireSwapChainElement then
-  begin
-    FreeAndNil(table);
-    Exit(nil);
-  end;
-
   Add(FNextTableInternalId, table);
-  Inc(FNextTableInternalId);
-
-  table.SetupHandHistoryTable(hhis, hhi);
-  table.BringToFront;
-
-  result := table;
+  if table.SetupHandHistoryTable(hhis, hhi) then
+  begin
+    Inc(FNextTableInternalId);
+    table.BringToFront;
+    result := table;
+  end
+  else
+  begin
+    Remove(FNextTableInternalId);
+    result := nil;
+  end;
 end;
 
 function TTableList.SittingCount: Integer;
@@ -166,7 +176,7 @@ begin
   FLock.Enter;
   try
     for table in Values do
-      if table.IsSitting then
+      if table.Status.IsSitting then
         Inc(result);
   finally
     FLock.Leave;
@@ -253,6 +263,17 @@ begin
     Exit(FALSE);
   finally
     FLock.Leave;
+  end;
+end;
+
+function TTableList.GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
+begin
+  result := TryGetValue(AId, ATable);
+  if result then
+    Lock
+  else
+  begin
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Cannot find table with internal id: %d', [AId]), ditException); {$ENDIF}
   end;
 end;
 

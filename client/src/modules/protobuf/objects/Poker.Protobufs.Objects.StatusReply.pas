@@ -46,6 +46,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_StatusReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated Club Clubs = 1;
@@ -68,6 +69,9 @@ type
     procedure clear_Games;
     property Games: TList<TPB_Game> read FGames;
 
+  end;
+  TPB_StatusReplyList = class (TObjectList<TPB_StatusReply>)
+    procedure Assign(const APB_StatusReplyList: TList<TPB_StatusReply>);
   end;
 
 implementation
@@ -211,6 +215,7 @@ end;
 procedure TPB_StatusReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Clubs;
   ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -240,6 +245,7 @@ end;
 procedure TPB_StatusReply.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Users;
   ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -298,9 +304,30 @@ end;
 procedure TPB_StatusReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Games;
   ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_StatusReplyList.Assign(const APB_StatusReplyList: TList<TPB_StatusReply>);
+var
+  pbobj: TPB_StatusReply;
+begin
+  Clear;
+  for pbobj in APB_StatusReplyList do
+    Add(TPB_StatusReply.Create(pbobj));
+end;
+
+procedure TPB_StatusReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Clubs;
+    clear_Users;
+    clear_Self;
+    clear_Games;
+  end;
 end;
 
 end.

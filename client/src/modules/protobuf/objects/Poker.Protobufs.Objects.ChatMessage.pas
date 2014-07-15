@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatMessage);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // optional bytes MongoId = 1;
@@ -64,6 +65,9 @@ type
     procedure clear_Timestamp;
     property Timestamp: Int64 read FTimestamp write SetTimestamp;
 
+  end;
+  TPB_ChatMessageList = class (TObjectList<TPB_ChatMessage>)
+    procedure Assign(const APB_ChatMessageList: TList<TPB_ChatMessage>);
   end;
 
 implementation
@@ -250,6 +254,26 @@ begin
   FTimestamp := AValue;
   ProtobufOutput.WriteInt64(kTimestampFieldNumber, AValue);
   set_has_Timestamp;
+end;
+
+procedure TPB_ChatMessageList.Assign(const APB_ChatMessageList: TList<TPB_ChatMessage>);
+var
+  pbobj: TPB_ChatMessage;
+begin
+  Clear;
+  for pbobj in APB_ChatMessageList do
+    Add(TPB_ChatMessage.Create(pbobj));
+end;
+
+procedure TPB_ChatMessage.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_Username;
+    clear_Msg;
+    clear_Timestamp;
+  end;
 end;
 
 end.

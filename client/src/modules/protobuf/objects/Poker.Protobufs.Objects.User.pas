@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_User);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes MongoId = 1;
@@ -84,6 +85,9 @@ type
     procedure clear_Chips;
     property Chips: UINT32 read FChips write SetChips;
 
+  end;
+  TPB_UserList = class (TObjectList<TPB_User>)
+    procedure Assign(const APB_UserList: TList<TPB_User>);
   end;
 
 implementation
@@ -342,6 +346,28 @@ begin
   FChips := AValue;
   ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;
+end;
+
+procedure TPB_UserList.Assign(const APB_UserList: TList<TPB_User>);
+var
+  pbobj: TPB_User;
+begin
+  Clear;
+  for pbobj in APB_UserList do
+    Add(TPB_User.Create(pbobj));
+end;
+
+procedure TPB_User.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_MongoId;
+    clear_Avatar;
+    clear_Displayname;
+    clear_Email;
+    clear_Authed;
+    clear_Chips;
+  end;
 end;
 
 end.

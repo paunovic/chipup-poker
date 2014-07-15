@@ -5,7 +5,7 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas, Poker.Cards;
+  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas, Poker.Cards;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
@@ -335,6 +335,5 @@ begin
   suitint := Integer(ACard.Suit) - 1;
   result := FCardArtworksImages[valueint * 4 + suitint];
 end;
-
 
 end.

@@ -36,6 +36,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GetUserParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated bytes UserMongoIds = 1;
@@ -48,6 +49,9 @@ type
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
 
+  end;
+  TPB_GetUserParamsList = class (TObjectList<TPB_GetUserParams>)
+    procedure Assign(const APB_GetUserParamsList: TList<TPB_GetUserParams>);
   end;
 
 implementation
@@ -157,6 +161,7 @@ end;
 procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_UserMongoIds;
   ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber,Item);
 end;
 
@@ -184,9 +189,28 @@ end;
 procedure TPB_GetUserParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Users;
   ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_GetUserParamsList.Assign(const APB_GetUserParamsList: TList<TPB_GetUserParams>);
+var
+  pbobj: TPB_GetUserParams;
+begin
+  Clear;
+  for pbobj in APB_GetUserParamsList do
+    Add(TPB_GetUserParams.Create(pbobj));
+end;
+
+procedure TPB_GetUserParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_UserMongoIds;
+    clear_Users;
+  end;
 end;
 
 end.

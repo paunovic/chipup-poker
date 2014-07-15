@@ -52,6 +52,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableEvent);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required TableEventType Event = 1;
@@ -79,6 +80,9 @@ type
     procedure clear_Cards;
     property Cards: TBytes read FCards write SetCards;
 
+  end;
+  TPB_TableEventList = class (TObjectList<TPB_TableEvent>)
+    procedure Assign(const APB_TableEventList: TList<TPB_TableEvent>);
   end;
 
 implementation
@@ -267,6 +271,7 @@ end;
 procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Pots;
   ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -296,6 +301,7 @@ end;
 procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Bets;
   ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
 end;
 
@@ -326,6 +332,27 @@ begin
   FCards := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
+end;
+
+procedure TPB_TableEventList.Assign(const APB_TableEventList: TList<TPB_TableEvent>);
+var
+  pbobj: TPB_TableEvent;
+begin
+  Clear;
+  for pbobj in APB_TableEventList do
+    Add(TPB_TableEvent.Create(pbobj));
+end;
+
+procedure TPB_TableEvent.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Event;
+    clear_Seat;
+    clear_Pots;
+    clear_Bets;
+    clear_Cards;
+  end;
 end;
 
 end.

@@ -3,7 +3,7 @@ unit Poker.DirectX.Animation;
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, Vectors2;
+  Winapi.Windows, System.Generics.Collections, Asphyre.Math;
 
 const
   ANITAG_CARD_INDEX = 'card_index';

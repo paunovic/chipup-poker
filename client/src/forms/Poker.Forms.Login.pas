@@ -276,7 +276,8 @@ begin
       FormsContainer.Close(TfrmCreateAccount);
       CurrentStatus := lsIdle;
       EnableGUI(FALSE);
-      ServerSocket.Disconnect;
+      if Assigned(ServerSocket) then
+        ServerSocket.Disconnect;
     end;
   end;
 end;

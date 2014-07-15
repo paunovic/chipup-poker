@@ -42,6 +42,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubCommandReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required ClubStatus Status = 1;
@@ -59,6 +60,9 @@ type
     procedure clear_Games;
     property Games: TList<TPB_Game> read FGames;
 
+  end;
+  TPB_ClubCommandReplyList = class (TObjectList<TPB_ClubCommandReply>)
+    procedure Assign(const APB_ClubCommandReplyList: TList<TPB_ClubCommandReply>);
   end;
 
 implementation
@@ -232,9 +236,29 @@ end;
 procedure TPB_ClubCommandReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Games;
   ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_ClubCommandReplyList.Assign(const APB_ClubCommandReplyList: TList<TPB_ClubCommandReply>);
+var
+  pbobj: TPB_ClubCommandReply;
+begin
+  Clear;
+  for pbobj in APB_ClubCommandReplyList do
+    Add(TPB_ClubCommandReply.Create(pbobj));
+end;
+
+procedure TPB_ClubCommandReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Status;
+    clear_Club;
+    clear_Games;
+  end;
 end;
 
 end.

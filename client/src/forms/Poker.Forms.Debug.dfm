@@ -15,6 +15,7 @@ object frmDebug: TfrmDebug
   Position = poDesigned
   ScreenSnap = True
   SnapBuffer = 20
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 14
@@ -92,7 +93,15 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object dxBevel2: TdxBevel
-      Left = 243
+      Left = 215
+      Top = 6
+      Width = 19
+      Height = 60
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Shape = dxbsLineCenteredHorz
+    end
+    object dxBevel3: TdxBevel
+      Left = 342
       Top = 6
       Width = 19
       Height = 60
@@ -100,7 +109,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 258
+      Left = 358
       Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
@@ -115,10 +124,10 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 258
+      Left = 358
       Top = 19
       Anchors = [akLeft, akBottom]
-      Caption = 'Memory usage:'
+      Caption = 'Memory:'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
@@ -130,10 +139,10 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsSocketState: TcxLabel
-      Left = 83
+      Left = 82
       Top = 3
       Anchors = [akLeft, akBottom]
-      Caption = 'Socket state:'
+      Caption = 'Socket:'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
@@ -145,10 +154,10 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsCalbackSets: TcxLabel
-      Left = 258
-      Top = 35
+      Left = 230
+      Top = 3
       Anchors = [akLeft, akBottom]
-      Caption = 'Callback sets:'
+      Caption = 'Callbacks:'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
@@ -160,7 +169,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 347
+      Left = 410
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -180,10 +189,10 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 81
+      Width = 90
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 347
+      Left = 410
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -203,33 +212,10 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 81
+      Width = 90
     end
     object lbvCallbackSets: TcxLabel
-      Left = 347
-      Top = 35
-      Anchors = [akLeft, akBottom]
-      AutoSize = False
-      Caption = 'Unknown'
-      ParentFont = False
-      Style.Font.Charset = DEFAULT_CHARSET
-      Style.Font.Color = clWindowText
-      Style.Font.Height = -11
-      Style.Font.Name = 'Consolas'
-      Style.Font.Style = []
-      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      Style.TextColor = clWhite
-      Style.TextStyle = [fsBold]
-      Style.IsFontAssigned = True
-      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
-      Transparent = True
-      Height = 17
-      Width = 81
-    end
-    object lbvSocketState: TcxLabel
-      Left = 166
+      Left = 300
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -249,16 +235,74 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 86
+      Width = 52
+    end
+    object lbvSocketState: TcxLabel
+      Left = 134
+      Top = 3
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 90
     end
     object btSeatPos: TcxButton
-      Left = 548
-      Top = 6
-      Width = 70
-      Height = 23
-      Anchors = [akRight, akBottom]
-      Caption = 'SEAT POS'
+      Left = 38
+      Top = 38
+      Width = 30
+      Height = 29
+      Hint = 'Seat positions'
+      Anchors = [akLeft, akBottom]
       Colors.PressedText = clRed
+      OptionsImage.Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000686868807979799400000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000929292B3B0B0B0D800000000000000000000000000000000000000000000
+        00000000000000000000141414191A1A1A201818181E13131317111111151111
+        1115929292B3A6A6A6CC00000000000000000000000000000000000000000000
+        000000000000000000006F6F6F88929292B38D8D8DADB2B2B2DAC3C3C3EFC3C3
+        C3EFCCCCCCFAA1A1A1C500000000000000000000000000000000000000000000
+        0000000000000000000000000000000000002A2A2A34C7C7C7F4D0D0D0FFD0D0
+        D0FFD0D0D0FF8A8A8AA900000000000000000000000000000000000000000000
+        0000000000000000000000000000000000004F4F4F61D0D0D0FF6868687F3A3A
+        3A473A3A3A470D0D0D1000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000004A4A4A5BD0D0D0FF393939460000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000004A4A4A5BD0D0D0FF4040404E0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000004E4E4E60D0D0D0FF3F3F3F4D0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000037373744BCBCBCE63333333E0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000001919191F5F5F5F742323232B0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000001616161BB5B5B5DED0D0D0FFBCBCBCE61D1D
+        1D24000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000003030303BD0D0D0FFD0D0D0FFD0D0D0FF3A3A
+        3A47000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000070707097C7C7C98B7B7B7E0868686A40909
+        090B000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000}
       SpeedButtonOptions.GroupIndex = 3
       SpeedButtonOptions.CanBeFocused = False
       SpeedButtonOptions.AllowAllUp = True
@@ -372,7 +416,7 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object lbsLatency: TcxLabel
-      Left = 83
+      Left = 82
       Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Latency:'
@@ -387,7 +431,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvLatency: TcxLabel
-      Left = 166
+      Left = 134
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -407,7 +451,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 86
+      Width = 90
     end
     object btRunAnotherInstance: TcxButton
       Left = 38
@@ -523,11 +567,11 @@ object frmDebug: TfrmDebug
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object lbsSwapChains: TcxLabel
-      Left = 258
-      Top = 51
+    object lbsSwapChain: TcxLabel
+      Left = 230
+      Top = 19
       Anchors = [akLeft, akBottom]
-      Caption = 'Swap chains:'
+      Caption = 'Swap chain:'
       ParentFont = False
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
@@ -538,9 +582,9 @@ object frmDebug: TfrmDebug
       Style.IsFontAssigned = True
       Transparent = True
     end
-    object lbvSwapChains: TcxLabel
-      Left = 347
-      Top = 51
+    object lbvSwapChain: TcxLabel
+      Left = 300
+      Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
       Caption = 'Unknown'
@@ -559,11 +603,11 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 81
+      Width = 52
     end
     object lbsUser: TcxLabel
-      Left = 83
-      Top = 35
+      Left = 82
+      Top = 51
       Anchors = [akLeft, akBottom]
       Caption = 'User:'
       ParentFont = False
@@ -577,7 +621,45 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvUser: TcxLabel
-      Left = 166
+      Left = 134
+      Top = 51
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 90
+    end
+    object lbsServer: TcxLabel
+      Left = 82
+      Top = 35
+      Anchors = [akLeft, akBottom]
+      Caption = 'Server:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvServer: TcxLabel
+      Left = 134
       Top = 35
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -597,7 +679,83 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 86
+      Width = 90
+    end
+    object lbsSoundBuffers: TcxLabel
+      Left = 230
+      Top = 51
+      Anchors = [akLeft, akBottom]
+      Caption = 'Sounds:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvSoundBuffers: TcxLabel
+      Left = 300
+      Top = 51
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 52
+    end
+    object lbsAnimations: TcxLabel
+      Left = 230
+      Top = 35
+      Anchors = [akLeft, akBottom]
+      Caption = 'Animations:'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = [fsBold]
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Transparent = True
+    end
+    object lbvAnimations: TcxLabel
+      Left = 300
+      Top = 35
+      Anchors = [akLeft, akBottom]
+      AutoSize = False
+      Caption = 'Unknown'
+      ParentFont = False
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Consolas'
+      Style.Font.Style = []
+      Style.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Style.TextColor = clWhite
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      StyleDisabled.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleFocused.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Transparent = True
+      Height = 17
+      Width = 52
     end
   end
   object paTop: TPanel
@@ -692,25 +850,31 @@ object frmDebug: TfrmDebug
       Caption = 'Show pings'
       GroupIndex = 1
     end
+    object pmiRTTIEnabled: TMenuItem
+      AutoCheck = True
+      Caption = 'Enable RTTI'
+      Checked = True
+      GroupIndex = 2
+    end
     object N1: TMenuItem
       Caption = '-'
-      GroupIndex = 1
+      GroupIndex = 2
     end
     object pmiLogSave: TMenuItem
       Action = acSaveLog
-      GroupIndex = 1
+      GroupIndex = 3
     end
     object pmiLogCopy: TMenuItem
       Action = acCopyLogSelection
-      GroupIndex = 1
+      GroupIndex = 3
     end
     object N2: TMenuItem
       Caption = '-'
-      GroupIndex = 1
+      GroupIndex = 3
     end
     object pmiLogClear: TMenuItem
       Action = acClearLog
-      GroupIndex = 1
+      GroupIndex = 3
     end
   end
   object tiAppInfoRefresh: TTimer
@@ -721,6 +885,13 @@ object frmDebug: TfrmDebug
   object RVStyles: TRVStyle
     TextStyles = <
       item
+        StyleName = 'Default'
+        FontName = 'Consolas'
+        Size = 8
+        Color = clSilver
+        Unicode = True
+      end
+      item
         StyleName = 'Time'
         FontName = 'Consolas'
         Size = 8
@@ -729,7 +900,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Exception'
+        StyleName = 'T-EXCP'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -737,7 +908,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Application'
+        StyleName = 'T-APPL'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -745,7 +916,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Socket'
+        StyleName = 'T-SINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -753,7 +924,23 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Net'
+        StyleName = 'T-SOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'T-SOCK'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'T-NINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -761,7 +948,15 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Form'
+        StyleName = 'T-NOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clMoneyGreen
+        Unicode = True
+      end
+      item
+        StyleName = 'T-FORM'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -769,7 +964,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Type: Unknown'
+        StyleName = 'T-UNKN'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -777,7 +972,15 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Exception'
+        StyleName = 'T-PING'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'D-EXCP'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -785,7 +988,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Application'
+        StyleName = 'D-APPL'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -793,7 +996,7 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Socket'
+        StyleName = 'D-SINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -801,7 +1004,23 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Net'
+        StyleName = 'D-SOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'D-SOCK'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
+        Unicode = True
+      end
+      item
+        StyleName = 'D-NINC'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -809,7 +1028,15 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Form'
+        StyleName = 'D-NOUT'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clMoneyGreen
+        Unicode = True
+      end
+      item
+        StyleName = 'D-FORM'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
@@ -817,11 +1044,19 @@ object frmDebug: TfrmDebug
         Unicode = True
       end
       item
-        StyleName = 'Data: Unknown'
+        StyleName = 'D-UNKN'
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
         Color = clYellow
+        Unicode = True
+      end
+      item
+        StyleName = 'D-PING'
+        FontName = 'Consolas'
+        Size = 8
+        Style = [fsBold]
+        Color = clLime
         Unicode = True
       end
       item

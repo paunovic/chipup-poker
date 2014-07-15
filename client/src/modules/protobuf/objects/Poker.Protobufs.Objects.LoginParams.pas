@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required string Username = 1;
@@ -44,6 +45,9 @@ type
     procedure clear_Password;
     property Password: String read FPassword write SetPassword;
 
+  end;
+  TPB_LoginParamsList = class (TObjectList<TPB_LoginParams>)
+    procedure Assign(const APB_LoginParamsList: TList<TPB_LoginParams>);
   end;
 
 implementation
@@ -158,6 +162,24 @@ begin
   FPassword := AValue;
   ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
+end;
+
+procedure TPB_LoginParamsList.Assign(const APB_LoginParamsList: TList<TPB_LoginParams>);
+var
+  pbobj: TPB_LoginParams;
+begin
+  Clear;
+  for pbobj in APB_LoginParamsList do
+    Add(TPB_LoginParams.Create(pbobj));
+end;
+
+procedure TPB_LoginParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Username;
+    clear_Password;
+  end;
 end;
 
 end.

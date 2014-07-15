@@ -3,26 +3,29 @@ unit Poker.DirectX.Timer;
 interface
 
 uses
-  Winapi.Windows, System.Classes, Poker.DirectX.Animation, Vectors2, AsphyreTiming, System.SyncObjs;
+  Winapi.Windows, System.Classes, Poker.DirectX.Animation, Asphyre.Math, Asphyre.Timing, System.SyncObjs;
 
 type
   TDXTimer = class(TThread)
   private
-    FAnimations: TDXAnimations;
-    FSignalEvent: TEvent;
-    FTiming: TAsphyreTiming;
-    FLastUpdate: Double;
-    FNextId: Integer;
-    FLocK: TCriticalSection;
+    const
+      UPDATE_FPS      = 60;
+      UPDATE_INTERVAL = 1000 div UPDATE_FPS;
+
+    var
+      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+      FAnimations: TDXAnimations;
+      FSignalEvent: TEvent;
+      FTiming: TAsphyreTiming;
+      FLastUpdate: Double;
+      FNextId: Integer;
 
     procedure Process;
     procedure Shutdown;
     procedure SetAnimationsEnabled(const AValue: Boolean);
     function GetAnimationsEnabled: Boolean;
-
   protected
     procedure Execute; override;
-
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -34,6 +37,7 @@ type
     procedure RemoveAnimations(const AHandle: THandle);
     function Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
 
+    property Animations: TDXAnimations read FAnimations;
     property AnimationsEnabled: Boolean read GetAnimationsEnabled write SetAnimationsEnabled;
   end;
 
@@ -43,6 +47,7 @@ var
 implementation
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   System.SysUtils, System.Generics.Collections, Poker.WindowMessages, Poker.Settings;
 
 
@@ -61,8 +66,8 @@ end;
 
 constructor TDXTimer.Create;
 begin
+  {$IFDEF DEBUG} RegisterDebugObject('DXTimer'); {$ENDIF}
   FNextId := 0;
-  FLock := TCriticalSection.Create;
   FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
   FAnimations := TDXAnimations.Create;
@@ -76,8 +81,7 @@ begin
   FAnimations.Free;
   FTiming.Free;
   FreeAndNil(FSignalEvent);
-  FreeAndNil(FLock);
-
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
   inherited;
 end;
 
@@ -91,6 +95,8 @@ begin
   FAnimations.Add(animation);
   result := animation;
   FSignalEvent.SetEvent;
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiAnimations]); {$ENDIF}
 end;
 
 procedure TDXTimer.RemoveAnimations(const AHandle: THandle);
@@ -106,6 +112,8 @@ begin
     end
     else
       Inc(C1);
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiAnimations]); {$ENDIF}
 end;
 
 function TDXTimer.Find(const AHandle: THandle; const AID: Integer; out AAnimation: TDXAnimation): Boolean;
@@ -141,47 +149,41 @@ end;
 
 
 procedure TDXTimer.Process;
-const
-  UPDATE_FPS      = 60;
-  UPDATE_INTERVAL = 1000 / UPDATE_FPS;
 var
   C1: Integer;
   callbacks: TList<THandle>;
   callbacks_must: TList<THandle>;
+  timing_value: Double;
 begin
   callbacks := TList<THandle>.Create;
   try
     callbacks_must := TList<THandle>.Create;
     try
-      FLock.Enter;
-      try
-        C1 := 0;
-        while (Assigned(FAnimations)) and (C1 < FAnimations.Count) do
+      timing_value := FTiming.GetTimeValue;
+      C1 := 0;
+      while (Assigned(FAnimations)) and (C1 < FAnimations.Count) do
+      begin
+        if FAnimations[C1].Removed then
         begin
-          if FAnimations[C1].Removed then
-          begin
-            FAnimations.Delete(C1);
-            Continue;
-          end;
-
-          FAnimations[C1].Animate(FTiming.GetTimeValue);
-
-          if FAnimations[C1].Status = asDone then
-          begin
-            callbacks.Remove(FAnimations[C1].Handle);
-            if callbacks_must.IndexOf(FAnimations[C1].Handle) = -1 then
-              callbacks_must.Add(FAnimations[C1].Handle);
-            FAnimations.Delete(C1);
-            Continue;
-          end;
-
-          if (callbacks_must.IndexOf(FAnimations[C1].Handle) = -1) and
-             (callbacks.IndexOf(FAnimations[C1].Handle) = -1) then
-            callbacks.Add(FAnimations[C1].Handle);
-          Inc(C1);
+          FAnimations.Delete(C1);
+          Continue;
         end;
-      finally
-        FLock.Leave;
+
+        FAnimations[C1].Animate(timing_value);
+
+        if FAnimations[C1].Status = asDone then
+        begin
+          callbacks.Remove(FAnimations[C1].Handle);
+          if callbacks_must.IndexOf(FAnimations[C1].Handle) = -1 then
+            callbacks_must.Add(FAnimations[C1].Handle);
+          FAnimations.Delete(C1);
+          Continue;
+        end;
+
+        if (callbacks_must.IndexOf(FAnimations[C1].Handle) = -1) and
+           (callbacks.IndexOf(FAnimations[C1].Handle) = -1) then
+          callbacks.Add(FAnimations[C1].Handle);
+        Inc(C1);
       end;
 
       for C1 := 0 to callbacks_must.Count - 1 do
@@ -212,7 +214,7 @@ begin
       FSignalEvent.WaitFor;
     end
     else
-      Sleep(1);
+      Sleep(UPDATE_INTERVAL);
   end;
 end;
 

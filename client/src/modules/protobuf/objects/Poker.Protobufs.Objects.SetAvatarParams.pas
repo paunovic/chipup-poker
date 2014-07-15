@@ -27,6 +27,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SetAvatarParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes AvatarId = 1;
@@ -34,6 +35,9 @@ type
     procedure clear_AvatarId;
     property AvatarId: TBytes read FAvatarId write SetAvatarId;
 
+  end;
+  TPB_SetAvatarParamsList = class (TObjectList<TPB_SetAvatarParams>)
+    procedure Assign(const APB_SetAvatarParamsList: TList<TPB_SetAvatarParams>);
   end;
 
 implementation
@@ -112,6 +116,23 @@ begin
   FAvatarId := Copy(AValue,0,Length(AValue));
   ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);
   set_has_AvatarId;
+end;
+
+procedure TPB_SetAvatarParamsList.Assign(const APB_SetAvatarParamsList: TList<TPB_SetAvatarParams>);
+var
+  pbobj: TPB_SetAvatarParams;
+begin
+  Clear;
+  for pbobj in APB_SetAvatarParamsList do
+    Add(TPB_SetAvatarParams.Create(pbobj));
+end;
+
+procedure TPB_SetAvatarParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_AvatarId;
+  end;
 end;
 
 end.

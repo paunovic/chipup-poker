@@ -33,6 +33,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_CloseGameData);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes Gameid = 1;
@@ -45,6 +46,9 @@ type
     procedure clear_Timestamp;
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
 
+  end;
+  TPB_CloseGameDataList = class (TObjectList<TPB_CloseGameData>)
+    procedure Assign(const APB_CloseGameDataList: TList<TPB_CloseGameData>);
   end;
 
 implementation
@@ -159,6 +163,24 @@ begin
   FTimestamp := AValue;
   ProtobufOutput.writeInt32(kTimestampFieldNumber, Integer(AValue));
   set_has_Timestamp;
+end;
+
+procedure TPB_CloseGameDataList.Assign(const APB_CloseGameDataList: TList<TPB_CloseGameData>);
+var
+  pbobj: TPB_CloseGameData;
+begin
+  Clear;
+  for pbobj in APB_CloseGameDataList do
+    Add(TPB_CloseGameData.Create(pbobj));
+end;
+
+procedure TPB_CloseGameData.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Gameid;
+    clear_Timestamp;
+  end;
 end;
 
 end.

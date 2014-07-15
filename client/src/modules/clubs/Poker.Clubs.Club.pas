@@ -29,7 +29,6 @@ type
     procedure UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
     procedure UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetMemberBalance(const AMemberId: TBytes);
-    procedure InitToDemoValues;
 
     procedure AddMember(const AClubMemberInfo: TPB_ClubMember); overload;
     procedure AddMember(const AClubMemberInfo: TClubMemberInfo); overload;
@@ -51,7 +50,7 @@ type
 implementation
 
 uses
-  Poker.Common.Misc;
+  Poker.Common.Misc, Poker.Games.Game;
 
 { TClubInfo }
 
@@ -82,21 +81,6 @@ begin
   Exit(FALSE);
 end;
 
-procedure TClubInfo.InitToDemoValues;
-begin
-  FId := 0;
-  SetLength(FMongoId, 0);
-  SetLength(FOwnerId, 0);
-  FName := '';
-  FPassword := '';
-  FMembers.Clear;
-  FGames.Clear;
-  FRake := 5;
-  FPrivate := TRUE;
-  FDefaultBalanceLimit := 1000;
-  FUnlimitedDefaultBalance := TRUE;
-end;
-
 procedure TClubInfo.Assign(const AProtobufObject: TPB_Club);
 var
   member: TPB_ClubMember;
@@ -118,6 +102,8 @@ end;
 procedure TClubInfo.Assign(const AClubInfo: TClubInfo);
 var
   member: TClubMemberInfo;
+  game: TGameInfo;
+  gamecopy: TGameInfo;
 begin
   FMongoId := AClubInfo.MongoId;
   FOwnerId := AClubInfo.OwnerId;
@@ -131,6 +117,13 @@ begin
   FPrivate := AClubInfo.IsPrivate;
   FDefaultBalanceLimit := AClubInfo.DefaultBalanceLimit;
   FUnlimitedDefaultBalance := AClubInfo.UnlimitedDefaultBalance;
+  FGames.Clear;
+  for game in AClubInfo.Games.Values do
+  begin
+    gamecopy := TGameInfo.Create;
+    gamecopy.Assign(game);
+    FGames.Add(gamecopy.MongoId, gamecopy);
+  end;
 end;
 
 procedure TClubInfo.UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);

@@ -390,7 +390,8 @@ class BaseGenerator : public CodeGenerator {
 				printer->Print(vars,
 					"procedure TPB_$message$.$name$NotifyEvent(Sender: TObject; const Item: $subtype$; Action: TCollectionNotification);\n"
 					"begin\n"
-					"  Assert(Action = cnAdded);\n");
+					"  Assert(Action = cnAdded);\n"
+					"  set_has_$name$;\n");
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					printer->Print(vars,
 						"  ProtobufOutput.writeTag($enum$,$tagtype$);\n"
@@ -572,6 +573,7 @@ class BaseGenerator : public CodeGenerator {
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
 				"    procedure MergeFrom(const from: TPB_$name$);\n"
+				"    procedure Clear;\n"
 				"    function IsInitialized: Boolean; override;\n"
 				"\n",
 				"name",message->name());
@@ -601,13 +603,17 @@ class BaseGenerator : public CodeGenerator {
 			}
 			printer.Print(
 				"  end;\n"
+				"  TPB_$name$List = class (TObjectList<TPB_$name$>)\n"
+				"    procedure Assign(const APB_$name$List: TList<TPB_$name$>);\n"
+				"  end;\n"
 				"\n"
 				"implementation\n"
 				"\n"
 				"uses\n"
 				"  pbPublic, Poker.Common.Misc;\n"
 				"\n"
-				"\n");
+				"\n"
+				,"name",message->name());
 			if (needsInit) {
 				printer.Print(
 					"procedure TPB_$name$.InitObjects;\n"
@@ -882,6 +888,29 @@ class BaseGenerator : public CodeGenerator {
 			printer.Print("  Exit(True);\n"
 				"end;\n\n");
 			GenerateSettersImpl(message,&printer);
+			printer.Print(
+				"procedure TPB_$name$List.Assign(const APB_$name$List: TList<TPB_$name$>);\n"
+				"var\n"
+				"  pbobj: TPB_$name$;\n"
+				"begin\n"
+				"  Clear;\n"
+				"  for pbobj in APB_$name$List do\n"
+				"    Add(TPB_$name$.Create(pbobj));\n"
+				"end;\n\n"
+				,"name",message->name());
+			printer.Print(
+				"procedure TPB_$name$.Clear;\n"
+				"begin\n"
+				"  if (_has_bits_ <> 0) then\n"
+				"  begin\n"
+				,"name",message->name());
+			for (int j=0; j<message->field_count(); j++) {
+				const FieldDescriptor *field = message->field(j);
+				TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+				printer.Print("    clear_$name$;\n","name",instance.PropertyName());
+			}
+			printer.Print("  end;\n"
+			"end;\n\n");
 			printer.Print("end.\n");
 	}
 };

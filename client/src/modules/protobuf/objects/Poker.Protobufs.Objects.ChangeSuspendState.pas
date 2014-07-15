@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeSuspendState);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes ClubMongoId = 1;
@@ -54,6 +55,9 @@ type
     procedure clear_Suspended;
     property Suspended: Boolean read FSuspended write SetSuspended;
 
+  end;
+  TPB_ChangeSuspendStateList = class (TObjectList<TPB_ChangeSuspendState>)
+    procedure Assign(const APB_ChangeSuspendStateList: TList<TPB_ChangeSuspendState>);
   end;
 
 implementation
@@ -204,6 +208,25 @@ begin
   FSuspended := AValue;
   ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
   set_has_Suspended;
+end;
+
+procedure TPB_ChangeSuspendStateList.Assign(const APB_ChangeSuspendStateList: TList<TPB_ChangeSuspendState>);
+var
+  pbobj: TPB_ChangeSuspendState;
+begin
+  Clear;
+  for pbobj in APB_ChangeSuspendStateList do
+    Add(TPB_ChangeSuspendState.Create(pbobj));
+end;
+
+procedure TPB_ChangeSuspendState.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_ClubMongoId;
+    clear_PlayerMongoId;
+    clear_Suspended;
+  end;
 end;
 
 end.

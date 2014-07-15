@@ -32,6 +32,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubPlayerStats);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bytes Userid = 1;
@@ -44,6 +45,9 @@ type
     procedure clear_ClubBalance;
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
 
+  end;
+  TPB_ClubPlayerStatsList = class (TObjectList<TPB_ClubPlayerStats>)
+    procedure Assign(const APB_ClubPlayerStatsList: TList<TPB_ClubPlayerStats>);
   end;
 
 implementation
@@ -158,6 +162,24 @@ begin
   FClubBalance := AValue;
   ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
   set_has_ClubBalance;
+end;
+
+procedure TPB_ClubPlayerStatsList.Assign(const APB_ClubPlayerStatsList: TList<TPB_ClubPlayerStats>);
+var
+  pbobj: TPB_ClubPlayerStats;
+begin
+  Clear;
+  for pbobj in APB_ClubPlayerStatsList do
+    Add(TPB_ClubPlayerStats.Create(pbobj));
+end;
+
+procedure TPB_ClubPlayerStats.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Userid;
+    clear_ClubBalance;
+  end;
 end;
 
 end.

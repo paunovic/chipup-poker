@@ -27,6 +27,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required uint32 Uptime = 1;
@@ -34,6 +35,9 @@ type
     procedure clear_Uptime;
     property Uptime: UINT32 read FUptime write SetUptime;
 
+  end;
+  TPB_PingParamsList = class (TObjectList<TPB_PingParams>)
+    procedure Assign(const APB_PingParamsList: TList<TPB_PingParams>);
   end;
 
 implementation
@@ -112,6 +116,23 @@ begin
   FUptime := AValue;
   ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
   set_has_Uptime;
+end;
+
+procedure TPB_PingParamsList.Assign(const APB_PingParamsList: TList<TPB_PingParams>);
+var
+  pbobj: TPB_PingParams;
+begin
+  Clear;
+  for pbobj in APB_PingParamsList do
+    Add(TPB_PingParams.Create(pbobj));
+end;
+
+procedure TPB_PingParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Uptime;
+  end;
 end;
 
 end.

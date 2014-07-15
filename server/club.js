@@ -39,6 +39,11 @@ Club.getClubBySeq = function (seq,cb) {
 	getLock.writeLock(function (release) {
 		if (!Club.activeClubsSeq[seq]) {
 			mdb.models.Clubs.findOne({seq:seq},function (err,obj) {
+				assert.ifError(err);
+				if (!obj) {
+					release();
+					return cb('not found');
+				}
 				Club.activeClubsSeq[seq] = new Club(obj);
 				Club.activeClubsId[obj._id] = Club.activeClubsSeq[seq];
 				release();
@@ -165,6 +170,8 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 	models.GameStats.find({gameid:{$in:gamelist}}).lean(true).exec(function (err,stats) {
 		assert.ifError(err);
 			for (var i=0; i<stats.length; i++) {
+				if (!stats[i].userid) console.log('FINDME',stats[i]);
+				assert(stats[i].userid);
 				var gameidhex = stats[i].gameid.toString();
 				if (!games[gameidhex]) {
 					games[gameidhex] = {gameid: myutils.fromMongoId(stats[i].gameid), playerstats:[]};
@@ -234,7 +241,7 @@ Club.finishTableStatsPacket = function (data,cb) {
 		}.bind(this));
 	}.bind(this));
 };
-Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
+Club.prototype.seGameChanged = function (gameObj,cb,exclude) {
 	var token = profiler.start('seGameChanged');
 	// FIXME, cache object
 	mdb.models.Clubs.findOne({_id:this.clubid},function (err,club) { // FIXME, get it via a required refresh
@@ -245,33 +252,36 @@ Club.prototype.seGameChanged = function (gamerow,cb,exclude) {
 			return;
 		}
 		this.refresh(club);
-		var g = makeGameProtobuf(gamerow);
-		if (club.is_private) {
-			token.tag += 'a';
-			var conn = global.activeUsers[club.owner];
-			if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
-			if (club.members) {
+		var g = makeGameProtobuf(gameObj.obj);
+		var serialized = pb.Serialize(g,'Poker.Game');
+		myutils.throttle('seGameChange.'+gameObj.id,30,function () {
+			if (club.is_private) {
+				token.tag += 'a';
+				var conn = global.activeUsers[club.owner];
+				if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
+				if (club.members) {
+					count = 0;
+					rawmsg = pb.Serialize(g,'Poker.Game');
+					for (x=0; x<club.members.length; x++) {
+						conn = global.activeUsers[club.members[x]];
+						if (!conn) continue;
+						if (conn === exclude) continue;
+						conn.send(codes.seGameChange,rawmsg,'raw');
+						count++;
+					}
+					token.tag += '.'+count;
+				}
+			} else {
+				token.tag += 'b';
 				count = 0;
 				rawmsg = pb.Serialize(g,'Poker.Game');
-				for (x=0; x<club.members.length; x++) {
-					conn = global.activeUsers[club.members[x]];
-					if (!conn) continue;
-					if (conn === exclude) continue;
-					conn.send(codes.seGameChange,rawmsg,'raw');
+				for (x in global.activeUsers) {
+					global.activeUsers[x].send(codes.seGameChange,rawmsg,'raw');
 					count++;
 				}
 				token.tag += '.'+count;
 			}
-		} else {
-			token.tag += 'b';
-			count = 0;
-			rawmsg = pb.Serialize(g,'Poker.Game');
-			for (x in global.activeUsers) {
-				global.activeUsers[x].send(codes.seGameChange,rawmsg,'raw');
-				count++;
-			}
-			token.tag += '.'+count;
-		}
+		});
 		token.stop();
 		cb();
 	}.bind(this));
@@ -714,76 +724,6 @@ handlers[codes.scJoinClub] = function (args,token) {
 			}.bind(this));
 		}.bind(this));
 		this.log('join3',err,this.userid);
-	}.bind(this));
-}
-handlers[codes.scTransferChips] = function (args,token) {
-	var userid,params;
-	try {
-		params = pb.Parse(args,'Poker.TransferChipsParams');
-		userid = myutils.toMongoId(params.player_mongo_id);
-	} catch (e) {
-		this.error(e);
-		return;
-	}
-	var chips = params.chip_amount;
-	this.log('transfering chips',userid,chips);
-	models.UserModel.findOne({_id:this.userid},function (err,source) {
-		if (!source) {
-			this.reply("000","self not found");
-			return;
-		}
-		if (source.chips < chips) {
-			this.send(codes.srTransferChipsInvalidAmount);
-			return;
-		}
-		if (chips < 1) {
-			this.reply(codes.srTransferChipsInvalidAmount);
-			return;
-		}
-		models.UserModel.findOne({_id:userid},function (err,dest) {
-			assert.ifError(err);
-			if (!dest) {
-				this.reply(0,"dest not found");
-				return;
-			}
-			source.update({ $inc:{chips:-chips}},function (err) {
-				assert.ifError(err);
-				this.log('step 1',err);
-				dest.update({ $inc:{chips:chips}},function (err) {
-					assert.ifError(err);
-					this.log('step 2',err);
-					this.send(codes.srTransferChipsOk,args,'raw');
-					var dest = global.activeUsers[userid];
-					if (dest) {
-						dest.send(codes.seTransferChips,{chip_amount:chips,player_mongo_id:myutils.fromMongoId(this.userid)},'Poker.TransferChipsParams');
-						dest.chips += chips;
-					}
-					this.chips -= chips;
-					var list = [ userid, this.userid ];
-					models.Clubs.find({$or:[{members:{$in:list}},{owner:{$in:list}}]},{owner:1,members:1}).toArray(function (err,rows) {
-						assert.ifError(err);
-						var out = [];
-						for (var i=0; i<rows.length;i++) {
-							if (!containsObjectID(out,rows[i].owner)) out.push(rows[i].owner);
-							if (!rows[i].members) continue;
-							for (var j=0; j<rows[i].members.length; j++) {
-								if (!containsObjectID(out,rows[i].members[j])) out.push(rows[i].members[j]);
-							}
-						}
-						models.UserModel.find({_id:{$in:[this.userid,userid]}},function (err,rows) {
-							assert.ifError(err);
-							var proto = pb.Serialize({users:[user.makeUserProtobuf(rows[0]),user.makeUserProtobuf(rows[1])]},'Poker.UserChangeParams');
-							for (var i=0; i<out.length; i++) {
-								if (myutils.compareObjectID(this.userid,out[i])) continue;
-								if (myutils.compareObjectID(userid,out[i])) continue;
-								var dest = global.activeUsers[out[i]];
-								if (dest) dest.send(codes.seUserChange,proto,'raw');
-							}
-						}.bind(this));
-					}.bind(this));
-				}.bind(this));
-			}.bind(this));
-		}.bind(this));
 	}.bind(this));
 }
 handlers[codes.scSetPlayerLimit] = function (args,token) {

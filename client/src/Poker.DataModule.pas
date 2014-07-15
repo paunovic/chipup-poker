@@ -19,15 +19,11 @@ type
     procedure DataModuleDestroy(Sender: TObject);
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
   private
-    const
-      FONTLIST: array[0..0] of String = ('SintonyBold');
-
-    var
-      FSelfInfo: TPlayerInfo;
-      FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
-      FUpdaterBatchFile: String;
-      FUpdaterInstallerFile: String;
-      FReconnectedTables: TObjectList<TPB_TableStatus>;
+    FSelfInfo: TPlayerInfo;
+    FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
+    FUpdaterBatchFile: String;
+    FUpdaterInstallerFile: String;
+    FReconnectedTables: TObjectList<TPB_TableStatus>;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -39,6 +35,7 @@ type
     procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
 
     function CheckAuthed: Boolean;
+    function IsLoggedIn: Boolean;
 
     procedure OpenCashierLink;
     procedure OpenTACLink;
@@ -71,7 +68,7 @@ uses
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
-  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer;
+  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -82,14 +79,16 @@ begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
   common := GetSpecialFolderPath(CSIDL_COMMON_APPDATA);
-  if (Pos(LowerCase(common), LowerCase(SelfPath)) > 0) and
-     (IsDirectoryWriteable(common)) then
+  if Pos(LowerCase(common), LowerCase(SelfPath)) > 0 then
     AppDataPath := common
   else
     AppDataPath := local;
   AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AppDataPath) + 'ChipUP Poker');
 
   ForceDirectories(AppDataPath);
+  if (not DirectoryExists(AppDataPath)) or
+     (not IsDirectoryWriteable(AppDataPath)) then
+    AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(local) + 'ChipUP Poker');
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
@@ -103,10 +102,10 @@ begin
   TDXCore.Initialize;
   TDXTimer.Initialize;
   DXTimer.AnimationsEnabled := Settings.Animations;
+  TSounds.Initialize(Application.Handle);
   TServerSettings.Initialize;
   TMessageContainer.Initialize;
   TFormsContainer.Initialize;
-  TSounds.Initialize;
   TTablesStatsList.Initialize;
   THandHistory.Initialize;
 
@@ -129,20 +128,20 @@ end;
 
 procedure TdmMain.DataModuleDestroy(Sender: TObject);
 begin
-  // deinit objects
+  // free/deinit objects
   FreeAndNil(FUpdateFiles);
   FreeAndNil(FReconnectedTables);
 
   TFormsContainer.Deinitialize;
+  TServerSocketCommands.Deinitialize;
+  TMessageContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
   TTableList.Deinitialize;
   TPlayerList.Deinitialize;
   FSelfInfo.Free;
-  TServerSocketCommands.Deinitialize;
   THandHistory.Deinitialize;
   TTablesStatsList.Deinitialize;
   TSounds.Deinitialize;
-  TMessageContainer.Deinitialize;
   TServerSettings.Deinitialize;
   TTableResources.Deinitialize;
   TDXTimer.Deinitialize;
@@ -265,18 +264,23 @@ begin
   // first, close all tables that dont exist in reconnected tables array
   to_remove := TList<TBytes>.Create;
   try
-    for table in Tables.Values do
-    begin
-      exists := FALSE;
-      for tstatus in FReconnectedTables do
-        if CompareBytes(tstatus.TableMongoId, table.GameId) then
-        begin
-          exists := TRUE;
-          Break;
-        end;
+    Tables.Lock;
+    try
+      for table in Tables.Values do
+      begin
+        exists := FALSE;
+        for tstatus in FReconnectedTables do
+          if CompareBytes(tstatus.TableMongoId, table.GameId) then
+          begin
+            exists := TRUE;
+            Break;
+          end;
 
-      if not exists then
-        to_remove.Add(table.GameId);
+        if not exists then
+          to_remove.Add(table.GameId);
+      end;
+    finally
+      Tables.Unlock;
     end;
 
     for mongoid in to_remove do
@@ -295,11 +299,13 @@ begin
       table := Tables.AddTable(tstatus.TableMongoId, TRUE, FALSE);
 
     if Assigned(table) then
-      (table.Form as TfrmTable).SetTableStatus(tstatus, FALSE);
+      table.SetTableStatus(tstatus, FALSE);
   end;
 end;
 
 procedure TdmMain.LoadFonts;
+const
+  FONTLIST: array[0..0] of String = ('SintonyBold');
 var
   nbFontAdded: DWORD;
   rs: TResourceStream;
@@ -322,13 +328,18 @@ var
   seat: TSeatInfo;
 begin
   result := FSelfInfo.Balance;
-  for table in Tables.Values do
-    for seat in table.Renderer.TableStatus.Seats do
-      if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
-      begin
-        Assert(seat.Chips <= result);
-        Dec(result, seat.Chips)
-      end;
+  Tables.Lock;
+  try
+    for table in Tables.Values do
+      for seat in table.Status.Seats do
+        if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
+        begin
+          Assert(seat.Chips <= result);
+          Dec(result, seat.Chips)
+        end;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 function TdmMain.GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;
@@ -359,6 +370,12 @@ var
 begin
   for C1 := Low(Settings.Hardcoded.UPDATE_FILES) to High(Settings.Hardcoded.UPDATE_FILES) do
     AFiles.Add(GetUpdateFileObject(Settings.Hardcoded.UPDATE_FILES[C1].Path));
+end;
+
+function TdmMain.IsLoggedIn: Boolean;
+begin
+  result := (not FormsContainer.Contains(TfrmChipUpLogin)) and
+            (dmMain.SelfInfo.Nick <> '');
 end;
 
 end.

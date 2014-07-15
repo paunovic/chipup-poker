@@ -74,10 +74,12 @@ var
   club: TClubInfo;
   pbclub: TPB_Club;
   pbgame: TPB_Game;
-  tables_ids: TList<TBytes>;
   tables_close: TObjectList<TTable>;
   game: TGameInfo;
   table: TTable;
+  found: Boolean;
+  to_remove: TList<TBytes>;
+  mongoid: TBytes;
 begin
   FId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
@@ -86,21 +88,67 @@ begin
   FAvatarId := AStatusReply.Self.Avatar;
   FBalance := AStatusReply.Self.Chips;
 
-  tables_ids := TList<TBytes>.Create;
+  to_remove := TList<TBytes>.Create;
   try
-    FClubs.Clear;
+    FClubs.Lock;
+    try
+      for club in FClubs.Values do
+      begin
+        found := FALSE;
+        for pbclub in AStatusReply.Clubs do
+          if CompareBytes(pbclub.MongoId, club.MongoId) then
+          begin
+            club.Assign(pbclub);
+            found := TRUE;
+            Break;
+          end;
+
+        if not found then
+          to_remove.Add(club.Mongoid);
+      end;
+    finally
+      FClubs.Unlock;
+    end;
+
+    for mongoid in to_remove do
+    begin
+      FClubs.Lock;
+      try
+        if FClubs.ContainsKey(mongoid) then
+        begin
+          Tables.CloseTablesForClub(mongoid);
+          FClubs.Remove(mongoid);
+        end;
+      finally
+        FClubs.Unlock;
+      end;
+    end;
+
     for pbclub in AStatusReply.Clubs do
-      FClubs.AddClub(pbclub);
+    begin
+      FClubs.Lock;
+      try
+        if not FClubs.ContainsKey(pbclub.MongoId) then
+          FClubs.AddClub(pbclub);
+      finally
+        FClubs.Unlock;
+      end;
+    end;
 
     for pbgame in AStatusReply.Games do
-      if FClubs.FindClubBySeq(pbgame.Clubseq, club) then
+      if FClubs.TryGetValue(pbgame.ClubMongoid, club) then
         club.Games.AddGame(pbgame);
 
     tables_close := TObjectList<TTable>.Create(FALSE);
     try
-      for table in Tables.Values do
-        if not FClubs.FindGame(table.GameId, club, game) then
-          tables_close.Add(table);
+      Tables.Lock;
+      try
+        for table in Tables.Values do
+          if not FClubs.FindGame(table.GameId, club, game) then
+            tables_close.Add(table);
+      finally
+        Tables.Unlock;
+      end;
 
       for table in tables_close do
         Tables.Remove(table.InternalId);
@@ -108,7 +156,7 @@ begin
       tables_close.Free;
     end;
   finally
-    tables_ids.Free;
+    to_remove.Free;
   end;
 end;
 

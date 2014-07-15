@@ -3,18 +3,14 @@ unit Poker.Server.MessageContainer;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.Generics.Collections, OverbyteIcsWSocket, System.SyncObjs,
-  Poker.Server.MessageCallbacks;
+  Winapi.Windows, System.Generics.Collections, OverbyteIcsWSocket, System.SyncObjs, Poker.Server.MessageCallbacks;
 
 type
   TMessageContainer = class
   private
-    FReceiverWnd: HWND;
     FCallbackSets: TObjectList<TCallbackSet>;
     FLock: TCriticalSection;
 
-    procedure ReceiverWndProc(var AMessage: TMessage);
-    procedure ProcessMessage(const AMessage: TMessage);
     function GetCallbackSetsCount: Integer;
 
   public
@@ -27,8 +23,10 @@ type
     function AddCallbacks(const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
     procedure RemoveCallbacks(var AId: Integer);
 
+    procedure ProcessSocketReply(const AMethodId: Integer; const AObject: TObject);
+    procedure ProcessSocketStateChange(const AOldState, ANewState: TSocketState);
+
     property CallbackSetsCount: Integer read GetCallbackSetsCount;
-    property ReceiverWnd: HWND read FReceiverWnd;
   end;
 
 var
@@ -39,7 +37,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, Poker.WindowMessages;
+  System.SysUtils;
 
 
 class procedure TMessageContainer.Initialize;
@@ -56,26 +54,30 @@ end;
 constructor TMessageContainer.Create;
 begin
   FLock := TCriticalSection.Create;
-
-  FReceiverWnd := AllocateHwnd(ReceiverWndProc);
-
   FCallbackSets := TObjectList<TCallbackSet>.Create;
 end;
 
 destructor TMessageContainer.Destroy;
 begin
-  FCallbackSets.Free;
-
-  DeallocateHWnd(FReceiverWnd);
-
-  FLock.Free;
+  FLock.Enter;
+  try
+    FreeAndNil(FCallbackSets);
+  finally
+    FLock.Leave;
+  end;
+  FreeAndNil(FLock);
 
   inherited;
 end;
 
 function TMessageContainer.GetCallbackSetsCount: Integer;
 begin
-  result := FCallbackSets.Count;
+  FLock.Enter;
+  try
+    result := FCallbackSets.Count;
+  finally
+    FLock.Leave;
+  end;
 end;
 
 function TMessageContainer.AddCallbacks(const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
@@ -84,11 +86,11 @@ var
   id: Integer;
   found: Boolean;
 begin
-  FLock.Enter;
-  try
-    id := 0;
-    repeat
-      found := FALSE;
+  id := 0;
+  repeat
+    found := FALSE;
+    FLock.Enter;
+    try
       for callback_set in FCallbackSets do
         if callback_set.Id = id then
         begin
@@ -96,19 +98,24 @@ begin
           found := TRUE;
           Break;
         end;
-    until not found;
+    finally
+      FLock.Leave;
+    end;
+  until not found;
 
-    callback_set := TCallbackSet.Create(id, ACallbacks);
+  callback_set := TCallbackSet.Create(id, ACallbacks);
+  FLock.Enter;
+  try
     if not APriority then
       FCallbackSets.Add(callback_set)
     else
       FCallbackSets.Insert(0, callback_set);
-    result := id;
-
-    {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
   finally
     FLock.Leave;
   end;
+  result := id;
+
+  {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
 end;
 
 procedure TMessageContainer.RemoveCallbacks(var AId: Integer);
@@ -120,68 +127,55 @@ begin
     for callback in FCallbackSets do
       if callback.Id = AId then
       begin
-        callback.Removed := TRUE;
+        FCallbackSets.Remove(callback);
         Break;
       end;
-    AId := -1;
   finally
     FLock.Leave;
   end;
+  AId := -1;
+  {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
 end;
 
-procedure TMessageContainer.ProcessMessage(const AMessage: TMessage);
+procedure TMessageContainer.ProcessSocketReply(const AMethodId: Integer; const AObject: TObject);
 var
   callback_set: TCallbackSet;
-  obj, data_obj: TObject;
   callback_servermsg: TServerMessageCallback;
-  C1: Integer;
+  obj: TObject;
 begin
-  data_obj := nil;
-  if AMessage.Msg = WM_SOCKET_SERVER_REPLY then
-    data_obj := pointer(AMessage.WParam);
-
   FLock.Enter;
   try
     for callback_set in FCallbackSets do
-      if (Assigned(callback_set)) and
-         (not callback_set.Removed) then
-        for obj in callback_set do
-          if (AMessage.Msg = WM_SOCKET_SERVER_REPLY) and
-             (obj is TServerMessageCallback) then
-          begin
-            callback_servermsg := obj as TServerMessageCallback;
-            if Integer(callback_servermsg.Code) = AMessage.LParam then
-              callback_servermsg.Callback(AMessage.LParam, data_obj)
-          end
-          else
-            if (AMessage.Msg = WM_SOCKET_STATE_CHANGE) and
-               (obj is TSocketStateChangeCallback) then
-              (obj as TSocketStateChangeCallback).Callback(TSocketState(AMessage.WParam), TSocketState(AMessage.LParam));
-
-    C1 := FCallbackSets.Count - 1;
-    while (C1 >= 0) and
-          (C1 < FCallbackSets.Count) do
-      if FCallbackSets[C1].Removed then
-      begin
-        FCallbackSets.Delete(C1);
-        {$IFDEF DEBUG} RefreshDebugForm([dfiCallbacks]); {$ENDIF}
-      end
-      else
-        Dec(C1);
+      for obj in callback_set do
+        if obj is TServerMessageCallback then
+        begin
+          callback_servermsg := obj as TServerMessageCallback;
+          if Integer(callback_servermsg.Code) = AMethodId then
+            callback_servermsg.Callback(AMethodId, AObject)
+        end;
   finally
     FLock.Leave;
   end;
-
-  if Assigned(data_obj) then
-    data_obj.Free;
 end;
 
-procedure TMessageContainer.ReceiverWndProc(var AMessage: TMessage);
+procedure TMessageContainer.ProcessSocketStateChange(const AOldState, ANewState: TSocketState);
+var
+  callback_set: TCallbackSet;
+  callback_socketstatechange: TSocketStateChangeCallback;
+  obj: TObject;
 begin
-  if (AMessage.Msg = WM_SOCKET_SERVER_REPLY) or
-     (AMessage.Msg = WM_SOCKET_STATE_CHANGE) then
-    ProcessMessage(AMessage);
+  FLock.Enter;
+  try
+    for callback_set in FCallbackSets do
+      for obj in callback_set do
+        if obj is TSocketStateChangeCallback then
+        begin
+          callback_socketstatechange := obj as TSocketStateChangeCallback;
+          callback_socketstatechange.Callback(AOldState, ANewState);
+        end;
+  finally
+    FLock.Leave;
+  end;
 end;
-
 
 end.

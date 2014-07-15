@@ -31,6 +31,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ListClubsReply);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated Club Clubs = 1;
@@ -38,6 +39,9 @@ type
     procedure clear_Clubs;
     property Clubs: TList<TPB_Club> read FClubs;
 
+  end;
+  TPB_ListClubsReplyList = class (TObjectList<TPB_ListClubsReply>)
+    procedure Assign(const APB_ListClubsReplyList: TList<TPB_ListClubsReply>);
   end;
 
 implementation
@@ -134,9 +138,27 @@ end;
 procedure TPB_ListClubsReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Clubs;
   ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_ListClubsReplyList.Assign(const APB_ListClubsReplyList: TList<TPB_ListClubsReply>);
+var
+  pbobj: TPB_ListClubsReply;
+begin
+  Clear;
+  for pbobj in APB_ListClubsReplyList do
+    Add(TPB_ListClubsReply.Create(pbobj));
+end;
+
+procedure TPB_ListClubsReply.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Clubs;
+  end;
 end;
 
 end.

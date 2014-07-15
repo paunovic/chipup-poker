@@ -31,6 +31,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_AssetList);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // repeated UpdateFileInfo Assets = 1;
@@ -38,6 +39,9 @@ type
     procedure clear_Assets;
     property Assets: TList<TPB_UpdateFileInfo> read FAssets;
 
+  end;
+  TPB_AssetListList = class (TObjectList<TPB_AssetList>)
+    procedure Assign(const APB_AssetListList: TList<TPB_AssetList>);
   end;
 
 implementation
@@ -134,9 +138,27 @@ end;
 procedure TPB_AssetList.AssetsNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Assets;
   ProtobufOutput.writeTag(kAssetsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_AssetListList.Assign(const APB_AssetListList: TList<TPB_AssetList>);
+var
+  pbobj: TPB_AssetList;
+begin
+  Clear;
+  for pbobj in APB_AssetListList do
+    Add(TPB_AssetList.Create(pbobj));
+end;
+
+procedure TPB_AssetList.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Assets;
+  end;
 end;
 
 end.

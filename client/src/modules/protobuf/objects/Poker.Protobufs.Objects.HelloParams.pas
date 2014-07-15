@@ -36,6 +36,7 @@ type
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloParams);
+    procedure Clear;
     function IsInitialized: Boolean; override;
 
     // required bool Debug = 1;
@@ -48,6 +49,9 @@ type
     procedure clear_Files;
     property Files: TList<TPB_UpdateFileInfo> read FFiles;
 
+  end;
+  TPB_HelloParamsList = class (TObjectList<TPB_HelloParams>)
+    procedure Assign(const APB_HelloParamsList: TList<TPB_HelloParams>);
   end;
 
 implementation
@@ -180,9 +184,28 @@ end;
 procedure TPB_HelloParams.FilesNotifyEvent(Sender: TObject; const Item: TPB_UpdateFileInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Files;
   ProtobufOutput.writeTag(kFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
+end;
+
+procedure TPB_HelloParamsList.Assign(const APB_HelloParamsList: TList<TPB_HelloParams>);
+var
+  pbobj: TPB_HelloParams;
+begin
+  Clear;
+  for pbobj in APB_HelloParamsList do
+    Add(TPB_HelloParams.Create(pbobj));
+end;
+
+procedure TPB_HelloParams.Clear;
+begin
+  if (_has_bits_ <> 0) then
+  begin
+    clear_Debug;
+    clear_Files;
+  end;
 end;
 
 end.

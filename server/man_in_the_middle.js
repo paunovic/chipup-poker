@@ -1,19 +1,17 @@
 'use strict';
 var net = require('net');
 var util = require('util');
-
-var C2S = 'client to server';
-var S2C = 'server to client';
+var directions = require('./directions');
 
 var socketCount = 0;
 exports.createManInTheMiddleServer = function (pu, realServerPort, recorderCallback) {
 	var server = net.createServer(function (clientToFakeServerSocket) {
 		var socketId = socketCount++;
 		var fakeToRealServerSocket = net.connect(realServerPort, function () {
-			var clientToServerSpy = createRecordAndForwardFn(fakeToRealServerSocket, pu, recorderCallback, socketId, C2S);
+			var clientToServerSpy = createRecordAndForwardFn(fakeToRealServerSocket, pu, recorderCallback, socketId, directions.C2S);
 			clientToFakeServerSocket.on('data', pu.createOnDataListenerFn(clientToServerSpy));
 
-			var serverToClientSpy = createRecordAndForwardFn(clientToFakeServerSocket, pu, recorderCallback, socketId, S2C);
+			var serverToClientSpy = createRecordAndForwardFn(clientToFakeServerSocket, pu, recorderCallback, socketId, directions.S2C);
 			fakeToRealServerSocket.on('data', pu.createOnDataListenerFn(serverToClientSpy));
 
 			server.on('close', function () {

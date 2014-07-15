@@ -20,14 +20,13 @@ enum ServerCodes {
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
 	srGetPlayers = 14;
-	srTableSitNoChips = 15;
+
 	srOwnershipGiveAwayNotOwner = 16;
 	srOwnershipGiveAwayInvalidPlayerId = 17;
 	srOwnershipGiveAwayInvalidClubId = 18;
 	srOwnershipGiveAwayOk = 19;
 	srClubDisbandOk = 20;
-	srTransferChipsOk = 21;
-	srTransferChipsInvalidAmount = 22;
+
 	srChangePasswordOk = 23;
 	srCreateGameOk = 24;
 	srDeleteGameOk = 25;
@@ -60,7 +59,7 @@ enum ServerCodes {
 	seGameCreate = 56;
 	seGameDelete = 57;
 	seTableStatus = 58;
-	seTransferChips = 59;
+
 	seUserChange = 60;
 	
 	scHello = 70;
@@ -76,7 +75,7 @@ enum ServerCodes {
 	scGiveClubOwnership = 80;
 	scChangeClubDetails = 81;
 	scDeleteClub = 82;
-	scTransferChips = 83;
+
 	scChangeEmail = 84;
 	scChangePassword = 85;
 	scSetAvatar = 86;
@@ -200,13 +199,18 @@ message Club {
 }
 
 message User {
+	enum PlayerSubscriptionPlan {
+		pspBasic = 1;
+		pspNormal = 2;
+		pspSuper = 3;
+	}
 	required bytes _id = 1;
 	optional bytes avatar = 2;
 	required string displayname = 3;
 	
 	optional string email = 5;
 	optional bool authed = 6;
-	optional uint32 chips = 7;
+	required PlayerSubscriptionPlan subscription_plan = 7;
 }
 
 message Game {
@@ -239,7 +243,7 @@ message Game {
 	optional bytes _id = 1;
 	optional bytes creator_mongo_id = 2;
 	optional string gamename = 3;
-	optional int32 clubseq = 4;
+	optional bytes club_mongoid = 4;
 	optional GameType game_type = 5;
 	optional GameLimit game_limit = 6;
 	optional GameBlinds blinds = 7;
@@ -271,11 +275,6 @@ message KickPlayerParams {
 message GiveClubOwnershipParams {
 	required int32 club_seq = 1;
 	required bytes player_mongo_id = 2;
-}
-
-message TransferChipsParams {
-	required bytes player_mongo_id = 2;
-	required uint32 chip_amount = 3;
 }
 
 message ChangeEMailParams {
@@ -370,7 +369,6 @@ message TableStatus {
 	optional uint32 rake_percent = 21;
 	optional Game.GameType current_game = 22;
 	optional uint32 rotation = 23;
-	required uint32 total_balance = 24;
 	optional Game.GameLimit game_limit = 25;
 	optional uint32 minimum_raise = 26;
 }
@@ -597,7 +595,7 @@ message HandHistory {
 		optional bool muck = 6;
 		required SeatInfo.PlayerStatus status = 7;
 	}
-	message MoveRow {
+	message HandHistoryMove {
 		repeated TableEvent.TableEventType code = 1;
 		optional uint32 bet = 2;
 		optional int32 seat = 3;
@@ -611,7 +609,7 @@ message HandHistory {
 	required bytes cards = 5;
 	required uint32 endtime = 6;
 	repeated int32 balance_changes = 7;
-	repeated MoveRow moves = 8;
+	repeated HandHistoryMove moves = 8;
 	required uint32 dealer = 9;
 	optional Game game = 10;
 	optional Game.GameType current_game = 11;

@@ -13,15 +13,14 @@ type
     FSocket: TSslWSocket;
     FServer: String;
     FPort: Integer;
-    FConnectCode: Integer;
     FReceiveBuffer: PAnsiChar;
     FReceiveBufferSize: Integer;
     FLatency: Integer;
     FServerTime: UINT64;
     FTimeOffset: UINT64;
-    FTimerIdInactivityPing: UINT_PTR;
-    FTimerIdPing: UINT_PTR;
-    FTimerIdPingTimeout: UINT_PTR;
+    FTimerIdInactivityPing: UINT32;
+    FTimerIdPing: UINT32;
+    FTimerIdPingTimeout: UINT32;
     FSSLHandshakeDone: Boolean;
     FSocketConnectThread: TServerSocketConnectThread;
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
@@ -75,11 +74,10 @@ implementation
 
 uses
   Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer, Poker.Server.Socket.Commands,
-  Poker.Server.SSLCerts, Poker.WindowMessages,
-  Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply,
-  Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ChangeEMailParams,
-  Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply, Poker.Protobufs.Objects.TransferChipsParams,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.KickPlayerParams,
+  Poker.Server.SSLCerts, Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply,
+  Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club,
+  Poker.Protobufs.Objects.ChangeEMailParams, Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply,
+  Poker.Protobufs.Objects.TransferChipsParams, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply,
   Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply, Poker.Protobufs.Objects.GiveClubOwnershipParams,
   Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
@@ -88,7 +86,7 @@ uses
   Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.QueryTableStats,
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
-  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams;
 
 
 procedure TimerProc(HWND: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
@@ -101,7 +99,6 @@ constructor TServerSocketCore.Create(const AServer: String; const APort: Integer
 begin
   {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Socket'); {$ENDIF}
 
-  FConnectCode := -1;
   FServer := AServer;
   FPort := APort;
 
@@ -133,7 +130,7 @@ begin
 
   FSocket.SslContext.DeInitContext;
   FSocket.SslContext.Free;
-  FSocket.Free;
+  FreeAndNil(FSocket);
 
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
@@ -175,14 +172,13 @@ procedure TServerSocketCore.Disconnect;
 begin
   KillPingTimers;
   KillPingTimeoutTimer;
-
   if FSocket.State <> TSocketState.wsClosed then
   begin
     {$IFDEF DEBUG} DebugLn(FDebugId, 'Closing socket...', ditSocket); {$ENDIF}
     FSocket.Flush;
     FSocket.CloseDelayed;
   end;
-
+  FSSLHandshakeDone := FALSE;
   FreeReceiveBuffer;
 end;
 
@@ -203,17 +199,7 @@ end;
 procedure TServerSocketCore.SocketSessionClosed(Sender: TObject; ErrCode: Word);
 begin
   {$IFDEF DEBUG} DebugLn(FDebugId, Format('Session closed [%d]', [ErrCode]), ditException); {$ENDIF}
-
-  if FSocket.State = wsConnected then
-    Disconnect;
-
-  FreeReceiveBuffer;
-  FConnectCode := -1;
-
-  FSSLHandshakeDone := FALSE;
-
-  KillPingTimers;
-  KillPingTimeoutTimer;
+  Disconnect;
 end;
 
 procedure TServerSocketCore.SocketSslHandshakeDone(Sender: TObject; ErrCode: Word; PeerCert: TX509Base; var Disconnect: Boolean);
@@ -242,6 +228,7 @@ end;
 procedure TServerSocketCore.DebugRpcMessage(const ADebugType: TDebugInfoType; const ARpcMessage: TPB_RpcMessage; const ADataObject: TObject; const AStreamSize: Int64 = 0);
 var
   dbgtype: TDebugInfoType;
+  serialized_object: String;
 begin
   if ARpcMessage.MethodId in [Integer(scPing), Integer(srPong)] then
     dbgtype := ditPingPong
@@ -251,10 +238,18 @@ begin
   if ARpcMessage.DataSize = 0 then
     DebugLn(FDebugId, Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
   else
-    if AStreamSize = 0 then
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, SerializeObject(ADataObject))
+  begin
+    if (IsDebugFormAssigned) and
+       (IsDebugRTTIEnabled) then
+      serialized_object := SerializeObject(ADataObject)
     else
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, SerializeObject(ADataObject));
+      serialized_object := '';
+
+    if AStreamSize = 0 then
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
+    else
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
+  end;
 end;
 {$ENDIF}
 
@@ -311,10 +306,12 @@ begin
       Exit;
 
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
-    begin
+    try
       ResetInactivityPingTimer;
       {$IFDEF DEBUG} DebugRpcMessage(ditSocketInc, rpc_message, data_obj); {$ENDIF}
-      PostMessage(MessageContainer.ReceiverWnd, WM_SOCKET_SERVER_REPLY, WPARAM(pointer(data_obj)), LPARAM(rpc_message.MethodId));
+      MessageContainer.ProcessSocketReply(rpc_message.MethodId, data_obj);
+    finally
+      data_obj.Free;
     end;
 
     ptmp := pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
@@ -343,7 +340,7 @@ begin
     wsClosed: ;
   end;
 
-  PostMessage(MessageContainer.ReceiverWnd, WM_SOCKET_STATE_CHANGE, WPARAM(OldState), LPARAM(NewState));
+  MessageContainer.ProcessSocketStateChange(OldState, NewState);
 end;
 
 
@@ -390,13 +387,16 @@ end;
 
 procedure TServerSocketCore.KillPingTimers;
 begin
-  KillWindowsTimer(FTimerIdPing);
-  KillWindowsTimer(FTimerIdInactivityPing);
+  KillTimer(0, FTimerIdPing);
+  FTimerIdPing := 0;
+  KillTimer(0, FTimerIdInactivityPing);
+  FTimerIdInactivityPing := 0;
 end;
 
 procedure TServerSocketCore.KillPingTimeoutTimer;
 begin
-  KillWindowsTimer(FTimerIdPingTimeout);
+  KillTimer(0, FTimerIdPingTimeout);
+  FTimerIdPingTimeout := 0;
 end;
 
 function TServerSocketCore.IsConnected: Boolean;
@@ -411,9 +411,6 @@ var
   valid_sc: Boolean;
   gtc: DWORD;
 begin
-  if FConnectCode = -1 then
-    FConnectCode := ARpcMessage.MethodId;
-
   ADataObject := nil;
   valid_sc := FALSE;
   for sc := Low(TServerCodes) to High(TServerCodes) do
