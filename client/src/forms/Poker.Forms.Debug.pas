@@ -348,19 +348,22 @@ begin
   if (teobj.Tag = 1) and
      (teobj.Text = '') then
   begin
+    teobj.Tag := 0;
     if teobj = teRegexFilter then
       teobj.Text := 'RegEx filtering...'
     else
       if teobj = teFindText then
         teobj.Text := 'Find text...';
-
-    teobj.Tag := 0;
   end;
 end;
 
 procedure TfrmDebug.teFindTextPropertiesChange(Sender: TObject);
 begin
   ClearRectMarks(rvLog);
+
+  if teFindText.Tag = 0 then
+    Exit;
+
   if teFindText.Text <> '' then
     MarkSubstring(rvLog, teFindText.Text, clRed);
 
@@ -371,6 +374,9 @@ procedure TfrmDebug.teRegexFilterPropertiesChange(Sender: TObject);
 var
   valuesset: TcxContainerStyleValues;
 begin
+  if teRegexFilter.Tag = 0 then
+    Exit;
+
   if IsValidRegex(teRegexFilter.Text) then
   begin
     teRegexFilter.Style.TextColor := clWindowText;
@@ -551,9 +557,11 @@ begin
     rvLog.SetItemExtraIntProperty(rvLog.ItemCount - 1, rvepHidden, 1);
   end;
 
-  ClearRectMarks(rvLog);
   if teFindText.Text <> '' then
+  begin
+    ClearRectMarks(rvLog);
     MarkSubstring(rvLog, teFindText.Text, clRed);
+  end;
 
   if rvLog.VScrollPos < rvLog.VScrollMax then
     rvLog.Format
