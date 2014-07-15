@@ -224,12 +224,6 @@ Game.prototype.log = function log(format) {
 };
 Game.prototype.AddOn = function AddOn(conn,chips) {
 	var seat = this.findSeat(conn);
-	models.UserModel.findOne({_id:conn.userid},function (err,self) {
-		assert.equal(conn.state,2);
-		if ((conn.boughtin + chips) > self.chips) {
-			conn.send(codes.srTableSitNoChips,this.getTableStatus(conn,false,[]),'Poker.TableStatus');
-			return;
-		}
 		conn.boughtin += chips;
 		this.club.buyin(conn.userid,chips);
 		this.logEvent('geCashin',conn.userid,chips);
@@ -239,7 +233,6 @@ Game.prototype.AddOn = function AddOn(conn,chips) {
 			conn.send(codes.srTableAddonOk,status,'Poker.TableStatus');
 			this.broadcastStatus(conn,null,[]);
 		}.bind(this));
-	}.bind(this));
 };
 Game.prototype.edited = function edited(params) {
 	// FIXME, more fields, also now acts as a cache for seGameChange/seGameDelete
@@ -292,14 +285,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 		conn.send(codes.srTableSitSeatTaken,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
 		cb(false,events);
 	} else {
-		models.UserModel.findOne({_id:conn.userid},function (err,userinfo) {
 			conn.log('state:%d %s',conn.state,conn.userid);
-			conn.log('self:%j boughtin:%d chips:%d',userinfo,conn.boughtin,userinfo.chips);
-			if ((userinfo.chips === undefined) || (params.chips > (userinfo.chips - conn.boughtin))) {
-				conn.send(codes.srTableSitNoChips,this.getTableStatus(conn,null,[]),'Poker.TableStatus');
-				cb(false,events);
-				return;
-			}
 			this.club.getPotentialLosses(conn.userid,function (maxLosses,unlimited,limit) {
 				if (unlimited) this.log('unlimited user');
 				else {
@@ -339,7 +325,6 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				}
 				doSit.call(this);
 			}.bind(this));
-		}.bind(this));
 	}
 };
 Game.prototype.updateBuyin = function (seatIdx,buyin,cb) {
@@ -1229,6 +1214,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 			token1.tag += '.'+jobs.length;
 			token.tag += '.'+jobs.length;
 			async.each(jobs,function repeat(job,cb) {
+				// FIXME, clean up this code
 				var priv = this.seats[job.seat];
 				var item = this.members[job.seat];
 				if (betsToRemove[job.seat] === undefined) betsToRemove[job.seat] = 0;
@@ -1236,24 +1222,7 @@ Game.prototype.moveToPot = function (reason,cb1) {
 				assert(priv.userid);
 				assert.equal(typeof betsToRemove[job.seat],'number');
 				this.balance_changes[job.seat] -= betsToRemove[job.seat];
-				models.UserModel.findOneAndUpdate({_id:priv.userid},{ $inc:{chips:-betsToRemove[job.seat]}},function (err,res) {
-					error.handleError(err);
-					assert(res);
-					this.log('lost chips',job.seat,betsToRemove[job.seat]);
-					if (priv.conn) {
-						priv.conn.boughtin -= betsToRemove[job.seat];
-						priv.conn.chips -= betsToRemove[job.seat];
-					}
-					betsToRemove[job.seat] = 0;
-					// debug to detect desync
-					// usage: set buyin on a table with EVERYTHING on every user
-					//allUsers.findOne({_id:priv.userid},function (err,check) {
-					//priv.conn.log('CHECK global:',check.chips,'table:',item.chips,'boughtin:',priv.conn.boughtin);
-					//assert.equal(check.chips,item.chips);
-					//assert.equal(check.chips,priv.conn.boughtin);
-					cb();
-					//}.bind(this));
-				}.bind(this));
+				cb();
 			}.bind(this),function finish(err) {
 				error.handleError(err);
 				//this.log('remove chips done',betsToRemove);
