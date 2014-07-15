@@ -32,7 +32,6 @@ type
       kRakePercentFieldNumber = 21;
       kCurrentGameFieldNumber = 22;
       kRotationFieldNumber = 23;
-      kTotalBalanceFieldNumber = 24;
       kGameLimitFieldNumber = 25;
       kMinimumRaiseFieldNumber = 26;
 
@@ -56,7 +55,6 @@ type
       FRakePercent: UINT32;
       FCurrentGame: TGameType;
       FRotation: UINT32;
-      FTotalBalance: UINT32;
       FGameLimit: TGameLimit;
       FMinimumRaise: UINT32;
       _has_bits_: Integer;
@@ -114,9 +112,6 @@ type
     procedure set_has_Rotation;
     procedure clear_has_Rotation;
     procedure SetRotation(const AValue: UINT32);
-    procedure set_has_TotalBalance;
-    procedure clear_has_TotalBalance;
-    procedure SetTotalBalance(const AValue: UINT32);
     procedure set_has_GameLimit;
     procedure clear_has_GameLimit;
     procedure SetGameLimit(const AValue: TGameLimit);
@@ -234,11 +229,6 @@ type
     function has_Rotation: Boolean;
     procedure clear_Rotation;
     property Rotation: UINT32 read FRotation write SetRotation;
-
-    // required uint32 TotalBalance = 24;
-    function has_TotalBalance: Boolean;
-    procedure clear_TotalBalance;
-    property TotalBalance: UINT32 read FTotalBalance write SetTotalBalance;
 
     // optional GameLimit GameLimit = 25;
     function has_GameLimit: Boolean;
@@ -412,11 +402,6 @@ begin
         FRotation := AProtobufReader.readUInt32;
         set_has_Rotation;
       end;
-      kTotalBalanceFieldNumber: begin
-        Assert(wire_type = WIRETYPE_VARINT);
-        FTotalBalance := AProtobufReader.readUInt32;
-        set_has_TotalBalance;
-      end;
       kGameLimitFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
         FGameLimit := TGameLimit(AProtobufReader.readEnum);
@@ -476,8 +461,6 @@ begin
     SetCurrentGame(from.CurrentGame);
   if (from.has_Rotation) then
     SetRotation(from.Rotation);
-  if (from.has_TotalBalance) then
-    SetTotalBalance(from.TotalBalance);
   if (from.has_GameLimit) then
     SetGameLimit(from.GameLimit);
   if (from.has_MinimumRaise) then
@@ -488,7 +471,7 @@ function TPB_TableStatus.IsInitialized: Boolean;
 var
   temp: TProtobufBaseObject;
 begin
-  if ((_has_bits_ and $80041d) <> $80041d) Then Exit(false);
+  if ((_has_bits_ and $41d) <> $41d) Then Exit(false);
   for temp in Seats do
     if (not temp.IsInitialized) then Exit(false);
   for temp in Events do
@@ -1051,35 +1034,6 @@ begin
   set_has_Rotation;
 end;
 
-procedure TPB_TableStatus.clear_TotalBalance;
-begin
-  FTotalBalance := 0;
-  clear_has_TotalBalance;
-end;
-
-function TPB_TableStatus.has_TotalBalance: Boolean;
-begin
-  Result := (_has_bits_ and 8388608) > 0;
-end;
-
-procedure TPB_TableStatus.set_has_TotalBalance;
-begin
-  _has_bits_ := _has_bits_ or 8388608;
-end;
-
-procedure TPB_TableStatus.clear_has_TotalBalance;
-begin
-  _has_bits_ := _has_bits_ and not 8388608;
-end;
-
-procedure TPB_TableStatus.SetTotalBalance(const AValue: UINT32);
-begin
-  Assert(not has_TotalBalance);
-  FTotalBalance := AValue;
-  ProtobufOutput.writeUInt32(kTotalBalanceFieldNumber, AValue);
-  set_has_TotalBalance;
-end;
-
 procedure TPB_TableStatus.clear_GameLimit;
 begin
   FGameLimit := TGameLimit(0);
@@ -1170,7 +1124,6 @@ begin
     clear_RakePercent;
     clear_CurrentGame;
     clear_Rotation;
-    clear_TotalBalance;
     clear_GameLimit;
     clear_MinimumRaise;
   end;

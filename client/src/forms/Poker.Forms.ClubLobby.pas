@@ -169,7 +169,6 @@ type
     procedure CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRKickPlayer(const AMethodId: Integer; const AObject: TObject);
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
-    procedure CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSROwnerGiveawayNotOwner(const AMethodId: Integer; const AObject: TObject);
@@ -228,8 +227,6 @@ begin
                       TServerMessageCallback.Create(srEditGameOk, CSREGameOperation),
                       TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
                       TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
-                      TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
                       TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStatsReply),
@@ -1054,11 +1051,6 @@ begin
       ConfigureGUI;
       Exit;
     end;
-end;
-
-procedure TfrmClubLobby.CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
-begin
-  ConfigureGUI;
 end;
 
 procedure TfrmClubLobby.CSETableStatus(const AMethodId: Integer; const AObject: TObject);

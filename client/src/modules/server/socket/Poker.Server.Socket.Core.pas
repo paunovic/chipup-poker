@@ -437,12 +437,8 @@ begin
     srChangePasswordOk: ;
     seSecondaryLoginDetected: ;
     seAccountConfirmed: ADataObject := TPB_User.Create(ADataPointer, ARpcMessage.DataSize);
-    srTransferChipsInvalidAmount: ;
     srPlayerLimitOk,
     srResetPlayerBalanceOk: ADataObject := TPB_PlayerLimitParams.Create(ADataPointer, ARpcMessage.DataSize);
-
-    seTransferChips,
-    srTransferChipsOk: ADataObject := TPB_TransferChipsParams.Create(ADataPointer, ARpcMessage.DataSize);
     srGetPlayers: ADataObject := TPB_GetUserParams.Create(ADataPointer, ARpcMessage.DataSize);
     srChangeMailReply: ADataObject := TPB_ChangeMailReply.Create(ADataPointer, ARpcMessage.DataSize);
     srSetAvatarReply: ADataObject := TPB_SetAvatarReply.Create(ADataPointer, ARpcMessage.DataSize);
@@ -451,11 +447,9 @@ begin
     srLeaveClubReply,
     srChangeClubDetailsReply,
     srKickPlayerReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
-
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
     srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srTableSitNoChips,
     srTableAddonOverLimit,
     seTableStatus,
     srTableSitOk,

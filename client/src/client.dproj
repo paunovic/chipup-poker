@@ -5,7 +5,7 @@
 			<FrameworkType>VCL</FrameworkType>
 			<MainSource>client.dpr</MainSource>
 			<Base>True</Base>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>
 			<TargetedPlatforms>3</TargetedPlatforms>
 			<AppType>Application</AppType>
@@ -165,9 +165,6 @@
 			</DCCReference>
 			<DCCReference Include="forms\Poker.Forms.ChangeClubDetails.pas">
 				<Form>frmChangeClubDetails</Form>
-			</DCCReference>
-			<DCCReference Include="forms\Poker.Forms.GiveChips.pas">
-				<Form>frmGiveChips</Form>
 			</DCCReference>
 			<DCCReference Include="forms\Poker.Forms.ChangeEMail.pas">
 				<Form>frmChangeEMail</Form>

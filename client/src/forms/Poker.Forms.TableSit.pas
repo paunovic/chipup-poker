@@ -23,10 +23,6 @@ type
     acMin: TAction;
     acMax: TAction;
     lbsTableBuyins: TcxLabel;
-    lbsAvailableBalance: TcxLabel;
-    lbvAvailableBalance: TcxLabel;
-    lbsMaxBuyin: TcxLabel;
-    lbvMaxBuyin: TcxLabel;
     procedure acCancelExecute(Sender: TObject);
     procedure acOKExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -48,7 +44,6 @@ type
     procedure SetBuyin(const ABuyin: UINT32);
     procedure CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableSitSeatTaken(const AMethodId: Integer; const AObject: TObject);
-    procedure CSRTableSitNoChips(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableAddonOk(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
@@ -77,7 +72,6 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(srTableSitOk, CSRTableSitOk),
                       TServerMessageCallback.Create(srTableSitSeatTaken, CSRTableSitSeatTaken),
-                      TServerMessageCallback.Create(srTableSitNoChips, CSRTableSitNoChips),
                       TServerMessageCallback.Create(srTableAddonOk, CSRTableAddonOk),
                       TServerMessageCallback.Create(srTableAddonOverLimit, CSRTableAddonOverLimit),
                       TServerMessageCallback.Create(srTableBuyinLessThanCashout, CSRTableBuyinLessThanCashout),
@@ -127,11 +121,7 @@ begin
       if seat_chips > game.MaxBuyin * game.BigBlind then
         result := 0
       else
-      begin
         result := game.MaxBuyin * game.BigBlind - seat_chips;
-        if result > dmMain.AvailableBalance then
-          result := dmMain.AvailableBalance;
-      end;
     finally
       game.Free;
     end;
@@ -193,14 +183,10 @@ begin
       lbvTableName.Caption := Format('%s (%s/%s %s)', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(FALSE)]);
       lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(game.MinBuyin * game.BigBlind),
           ChipsToStr(game.MaxBuyin * game.BigBlind)]);
-      lbvAvailableBalance.Caption := Format('%s', [ChipsToStr(dmMain.AvailableBalance)]);
       if table.Status.SelfSeatIndex <> -1 then
         FBuyinPhrase := 'add-on'
       else
         FBuyinPhrase := 'buy-in';
-
-      lbsMaxBuyin.Caption := Format('Your maximum %s:', [FBuyinPhrase]);
-      lbvMaxBuyin.Caption := Format('%s', [ChipsToStr(GetMaxBuyin)]);
 
       default_buyin := game.BigBlind * 50;
       default_buyin := (default_buyin div 10) * 10;
@@ -285,30 +271,6 @@ begin
       end
       else
         MessageDlg(err, mtError, [mbOK], 0);
-    finally
-      game.Free;
-    end;
-  finally
-    Tables.Unlock;
-  end;
-end;
-
-procedure TfrmTableSit.CSRTableSitNoChips(const AMethodId: Integer; const AObject: TObject);
-var
-  pbstatus: TPB_TableStatus;
-  game: TGameInfo;
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if table.GetObjectCopy(game) then
-    try
-      pbstatus := AObject as TPB_TableStatus;
-      if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
-        Exit;
-
-      MessageDlg('Insufficient chips', mtWarning, [mbOK], 0);
-      acOK.Enabled := TRUE;
     finally
       game.Free;
     end;

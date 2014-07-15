@@ -13,7 +13,6 @@ type
     FNick: String;
     FEMail: String;
     FPassword: String;
-    FBalance: UINT32;
     FAuthed: Boolean;
     FAvatarId: TBytes;
     FClubs: TClubList;
@@ -30,7 +29,6 @@ type
     property Nick: String read FNick write FNick;
     property Password: String read FPassword write FPassword;
     property EMail: String read FEMail write FEMail;
-    property Balance: UINT32 read FBalance write FBalance;
     property Authed: Boolean read FAuthed write FAuthed;
     property AvatarId: TBytes read FAvatarId write FAvatarId;
     property Clubs: TClubList read FClubs;
@@ -63,7 +61,6 @@ begin
   FNick := '';
   FEMail := '';
   FPassword := '';
-  FBalance := 0;
   FAuthed := FALSE;
   SetLength(FAvatarId, 0);
   FClubs.Clear;
@@ -86,7 +83,6 @@ begin
   FNick := AStatusReply.Self.DisplayName;
   FAuthed := AStatusReply.Self.Authed;
   FAvatarId := AStatusReply.Self.Avatar;
-  FBalance := AStatusReply.Self.Chips;
 
   to_remove := TList<TBytes>.Create;
   try

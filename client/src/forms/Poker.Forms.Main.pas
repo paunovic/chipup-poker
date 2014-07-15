@@ -9,7 +9,13 @@ uses
   Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
   dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
   Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.ActnColorMaps, Vcl.StdStyleActnCtrls, Vcl.AppEvnts;
+  Vcl.ActnColorMaps, Vcl.StdStyleActnCtrls, Vcl.AppEvnts, dxSkinBlack, dxSkinBlue, dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee,
+  dxSkinDarkRoom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy, dxSkinGlassOceans, dxSkinHighContrast,
+  dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMoneyTwins, dxSkinOffice2007Black,
+  dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink, dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue,
+  dxSkinOffice2010Silver, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic, dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringTime,
+  dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinsDefaultPainters, dxSkinValentine, dxSkinVS2010, dxSkinWhiteprint,
+  dxSkinXmas2008Blue;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -138,7 +144,6 @@ type
     procedure CSRClubCommand(const AMethodId: Integer; const AObject: TObject);
     procedure CSRStatus(const AMethodId: Integer; const AObject: TObject);
     procedure CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
-    procedure CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
 
     procedure CSRLogout(const AMethodId: Integer; const AObject: TObject);
     procedure CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);
@@ -227,8 +232,6 @@ begin
                       TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
                       TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
                       TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srTransferChipsOk, CSRETransferChipsOk),
-                      TServerMessageCallback.Create(seTransferChips, CSRETransferChipsOk),
                       TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
                       TServerMessageCallback.Create(seGameChange, CSREGameOperation),
                       TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
@@ -911,7 +914,7 @@ begin
     begin
       SetLength(query_users, 1);
       query_users[0] := AClub.Owner;
-      Players.AddPlayer(AClub.Owner, 'Retrieving...', '', 0, empty_array);
+      Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_array);
     end;
 
     for memberpb in AClub.Members do
@@ -921,7 +924,7 @@ begin
       begin
         SetLength(query_users, Length(query_users) + 1);
         query_users[Length(query_users) - 1] := memberpb.MongoId;
-        Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', 0, empty_array);
+        Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_array);
       end;
 
     if Length(query_users) > 0 then
@@ -986,28 +989,6 @@ begin
 
   for user in pbreply.Users do
     Players.AddPlayer(user);
-end;
-
-procedure TfrmChipUpMain.CSRETransferChipsOk(const AMethodId: Integer; const AObject: TObject);
-var
-  pbreply: TPB_TransferChipsParams;
-  player_info: TPlayerInfo;
-begin
-  pbreply := AObject as TPB_TransferChipsParams;
-
-  if AMethodId = Integer(seTransferChips) then
-  begin
-    dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance + pbreply.ChipAmount;
-    if Players.TryGetValue(pbreply.PlayerMongoId, player_info) then
-      player_info.Balance := player_info.Balance - pbreply.ChipAmount;
-  end
-  else
-  begin
-    dmMain.SelfInfo.Balance := dmMain.SelfInfo.Balance - pbreply.ChipAmount;
-    if Players.TryGetValue(pbreply.PlayerMongoId, player_info) then
-      player_info.Balance := player_info.Balance + pbreply.ChipAmount;
-  end;
-  dmMain.UpdateSelfInfoInPlayers;
 end;
 
 procedure TfrmChipUpMain.acShowHomeGamesLayoutExecute(Sender: TObject);
@@ -1094,7 +1075,6 @@ begin
   pbuser := AObject as TPB_User;
 
   dmMain.SelfInfo.Id := pbuser.MongoId;
-  dmMain.SelfInfo.Balance := pbuser.Chips;
   dmMain.SelfInfo.EMail := pbuser.Email;
   dmMain.SelfInfo.Nick := pbuser.Displayname;
   dmMain.SelfInfo.AvatarId := pbuser.Avatar;
@@ -1214,7 +1194,7 @@ begin
     begin
       SetLength(query_users, Length(query_users) + 1);
       query_users[Length(query_users) - 1] := player.MongoId;
-      Players.AddPlayer(player.MongoId, 'Retrieving...', '', 0, empty_array);
+      Players.AddPlayer(player.MongoId, 'Retrieving...', '', empty_array);
     end;
 
   if Length(query_users) <> 0 then

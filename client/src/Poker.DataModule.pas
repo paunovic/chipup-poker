@@ -25,7 +25,6 @@ type
     FUpdaterInstallerFile: String;
     FReconnectedTables: TObjectList<TPB_TableStatus>;
 
-    function GetAvailableBalance: UINT32;
     procedure LoadFonts;
     function GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;
 
@@ -47,7 +46,6 @@ type
     procedure SetUpdaterInstaller(const AFile: String);
 
     property SelfInfo: TPlayerInfo read FSelfInfo;
-    property AvailableBalance: UINT32 read GetAvailableBalance;
     property UpdateFiles: TObjectList<TPB_UpdateFileInfo> read FUpdateFiles;
   end;
 
@@ -227,7 +225,7 @@ end;
 
 procedure TdmMain.UpdateSelfInfoInPlayers;
 begin
-  Players.AddPlayer(FSelfInfo.Id, FSelfInfo.Nick, FSelfInfo.EMail, FSelfInfo.Balance, FSelfInfo.AvatarId);
+  Players.AddPlayer(FSelfInfo.Id, FSelfInfo.Nick, FSelfInfo.EMail, FSelfInfo.AvatarId);
 end;
 
 procedure TdmMain.ProcessLoginReply(const ALoginReply: TPB_LoginReply);
@@ -319,26 +317,6 @@ begin
     finally
       rs.Free;
     end;
-  end;
-end;
-
-function TdmMain.GetAvailableBalance: UINT32;
-var
-  table: TTable;
-  seat: TSeatInfo;
-begin
-  result := FSelfInfo.Balance;
-  Tables.Lock;
-  try
-    for table in Tables.Values do
-      for seat in table.Status.Seats do
-        if CompareBytes(seat.PlayerMongoId, FSelfInfo.Id) then
-        begin
-          Assert(seat.Chips <= result);
-          Dec(result, seat.Chips)
-        end;
-  finally
-    Tables.Unlock;
   end;
 end;
 

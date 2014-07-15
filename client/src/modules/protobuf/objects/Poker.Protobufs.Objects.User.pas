@@ -9,6 +9,7 @@ uses
   Classes, SysUtils, {$IFNDEF FPC}System.Generics.Collections{$ELSE}Contnrs{$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
 
 type
+  TPlayerSubscriptionPlan = (pspBasic = 1,pspNormal = 2,pspSuper = 3);
   TPB_User = class(TProtobufBaseObject)
   private
     const
@@ -17,7 +18,7 @@ type
       kDisplaynameFieldNumber = 3;
       kEmailFieldNumber = 5;
       kAuthedFieldNumber = 6;
-      kChipsFieldNumber = 7;
+      kSubscriptionPlanFieldNumber = 7;
 
     var
       FId: TBytes;
@@ -25,7 +26,7 @@ type
       FDisplayname: String;
       FEmail: String;
       FAuthed: Boolean;
-      FChips: UINT32;
+      FSubscriptionPlan: TPlayerSubscriptionPlan;
       _has_bits_: Integer;
 
     procedure set_has_MongoId;
@@ -43,9 +44,9 @@ type
     procedure set_has_Authed;
     procedure clear_has_Authed;
     procedure SetAuthed(const AValue: Boolean);
-    procedure set_has_Chips;
-    procedure clear_has_Chips;
-    procedure SetChips(const AValue: UINT32);
+    procedure set_has_SubscriptionPlan;
+    procedure clear_has_SubscriptionPlan;
+    procedure SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
 
   public
     constructor Create(const AFrom: TPB_User); overload;
@@ -80,10 +81,10 @@ type
     procedure clear_Authed;
     property Authed: Boolean read FAuthed write SetAuthed;
 
-    // optional uint32 Chips = 7;
-    function has_Chips: Boolean;
-    procedure clear_Chips;
-    property Chips: UINT32 read FChips write SetChips;
+    // required PlayerSubscriptionPlan SubscriptionPlan = 7;
+    function has_SubscriptionPlan: Boolean;
+    procedure clear_SubscriptionPlan;
+    property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
 
   end;
   TPB_UserList = class (TObjectList<TPB_User>)
@@ -141,10 +142,10 @@ begin
         FAuthed := AProtobufReader.readBoolean;
         set_has_Authed;
       end;
-      kChipsFieldNumber: begin
+      kSubscriptionPlanFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FChips := AProtobufReader.readUInt32;
-        set_has_Chips;
+        FSubscriptionPlan := TPlayerSubscriptionPlan(AProtobufReader.readEnum);
+        set_has_SubscriptionPlan;
       end;
     else
       AProtobufReader.skipField(tag);
@@ -164,13 +165,13 @@ begin
     SetEmail(from.Email);
   if (from.has_Authed) then
     SetAuthed(from.Authed);
-  if (from.has_Chips) then
-    SetChips(from.Chips);
+  if (from.has_SubscriptionPlan) then
+    SetSubscriptionPlan(from.SubscriptionPlan);
 end;
 
 function TPB_User.IsInitialized: Boolean;
 begin
-  if ((_has_bits_ and $5) <> $5) Then Exit(false);
+  if ((_has_bits_ and $45) <> $45) Then Exit(false);
   Exit(True);
 end;
 
@@ -319,33 +320,33 @@ begin
   set_has_Authed;
 end;
 
-procedure TPB_User.clear_Chips;
+procedure TPB_User.clear_SubscriptionPlan;
 begin
-  FChips := 0;
-  clear_has_Chips;
+  FSubscriptionPlan := TPlayerSubscriptionPlan(0);
+  clear_has_SubscriptionPlan;
 end;
 
-function TPB_User.has_Chips: Boolean;
+function TPB_User.has_SubscriptionPlan: Boolean;
 begin
   Result := (_has_bits_ and 64) > 0;
 end;
 
-procedure TPB_User.set_has_Chips;
+procedure TPB_User.set_has_SubscriptionPlan;
 begin
   _has_bits_ := _has_bits_ or 64;
 end;
 
-procedure TPB_User.clear_has_Chips;
+procedure TPB_User.clear_has_SubscriptionPlan;
 begin
   _has_bits_ := _has_bits_ and not 64;
 end;
 
-procedure TPB_User.SetChips(const AValue: UINT32);
+procedure TPB_User.SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
 begin
-  Assert(not has_Chips);
-  FChips := AValue;
-  ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
-  set_has_Chips;
+  Assert(not has_SubscriptionPlan);
+  FSubscriptionPlan := AValue;
+  ProtobufOutput.writeInt32(kSubscriptionPlanFieldNumber, Integer(AValue));
+  set_has_SubscriptionPlan;
 end;
 
 procedure TPB_UserList.Assign(const APB_UserList: TList<TPB_User>);
@@ -366,7 +367,7 @@ begin
     clear_Displayname;
     clear_Email;
     clear_Authed;
-    clear_Chips;
+    clear_SubscriptionPlan;
   end;
 end;
 

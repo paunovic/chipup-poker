@@ -13,7 +13,7 @@ type
 
     constructor Create;
 
-    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: UINT32; const AAvatarId: TBytes): TPlayerInfo; overload;
+    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AAvatarId: TBytes): TPlayerInfo; overload;
     function AddPlayer(const AUser: TPB_User): TPlayerInfo; overload;
     procedure LoadFromUsersProtobuf(const AUsers: TList<TPB_User>);
   end;
@@ -44,7 +44,7 @@ begin
   inherited Create([doOwnsValues]);
 end;
 
-function TPlayerList.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AChips: UINT32; const AAvatarId: TBytes): TPlayerInfo;
+function TPlayerList.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AAvatarId: TBytes): TPlayerInfo;
 var
   player: TPlayerInfo;
 begin
@@ -57,14 +57,13 @@ begin
   player.Id := AId;
   player.Nick := ANick;
   player.EMail := AEMail;
-  player.Balance := AChips;
   player.AvatarId := AAvatarId;
   result := player;
 end;
 
 function TPlayerList.AddPlayer(const AUser: TPB_User): TPlayerInfo;
 begin
-  result := AddPlayer(AUser.MongoId, AUser.Displayname, AUser.Email, AUser.Chips, AUser.Avatar);
+  result := AddPlayer(AUser.MongoId, AUser.Displayname, AUser.Email, AUser.Avatar);
 end;
 
 procedure TPlayerList.LoadFromUsersProtobuf(const AUsers: TList<TPB_User>);
@@ -72,7 +71,7 @@ var
   user: TPB_User;
 begin
   for user in AUsers do
-    AddPlayer(user.MongoId, user.DisplayName, user.EMail, user.Chips, user.Avatar);
+    AddPlayer(user.MongoId, user.DisplayName, user.EMail, user.Avatar);
 end;
 
 end.

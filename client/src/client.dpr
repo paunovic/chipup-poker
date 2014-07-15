@@ -29,7 +29,6 @@ uses
   Poker.Forms.CreateClub in 'forms\Poker.Forms.CreateClub.pas' {frmCreateClub},
   Poker.Forms.JoinClub in 'forms\Poker.Forms.JoinClub.pas' {frmJoinClub},
   Poker.Forms.ChangeClubDetails in 'forms\Poker.Forms.ChangeClubDetails.pas' {frmChangeClubDetails},
-  Poker.Forms.GiveChips in 'forms\Poker.Forms.GiveChips.pas' {frmGiveChips},
   Poker.Forms.ChangeEMail in 'forms\Poker.Forms.ChangeEMail.pas' {frmChangeEMail},
   Poker.Forms.ChangePassword in 'forms\Poker.Forms.ChangePassword.pas' {frmChangePassword},
   Poker.Forms.Table in 'forms\Poker.Forms.Table.pas' {frmTable},

@@ -25,7 +25,6 @@ type
     procedure GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
     procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
     procedure DisbandClub(const AClubId: Int64);
-    procedure TransferChips(const APlayerId: TBytes; const AChipAmount: Integer);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
@@ -233,20 +232,6 @@ begin
   try
     protobuf.Seq := AClubId;
     SendProtobuf(scDeleteClub, protobuf);
-  finally
-    protobuf.Free;
-  end;
-end;
-
-procedure TServerSocketCommands.TransferChips(const APlayerId: TBytes; const AChipAmount: Integer);
-var
-  protobuf: TPB_TransferChipsParams;
-begin
-  protobuf := TPB_TransferChipsParams.Create;
-  try
-    protobuf.PlayerMongoId := APlayerId;
-    protobuf.ChipAmount := AChipAmount;
-    SendProtobuf(scTransferChips, protobuf);
   finally
     protobuf.Free;
   end;

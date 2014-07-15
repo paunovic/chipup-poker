@@ -19,14 +19,11 @@ type
     srSetAvatarReply = 12,
     srChangeMailReply = 13,
     srGetPlayers = 14,
-    srTableSitNoChips = 15,
     srOwnershipGiveAwayNotOwner = 16,
     srOwnershipGiveAwayInvalidPlayerId = 17,
     srOwnershipGiveAwayInvalidClubId = 18,
     srOwnershipGiveAwayOk = 19,
     srClubDisbandOk = 20,
-    srTransferChipsOk = 21,
-    srTransferChipsInvalidAmount = 22,
     srChangePasswordOk = 23,
     srCreateGameOk = 24,
     srDeleteGameOk = 25,
@@ -58,7 +55,6 @@ type
     seGameCreate = 56,
     seGameDelete = 57,
     seTableStatus = 58,
-    seTransferChips = 59,
     seUserChange = 60,
     scHello = 70,
     scLogin = 71,
@@ -73,7 +69,6 @@ type
     scGiveClubOwnership = 80,
     scChangeClubDetails = 81,
     scDeleteClub = 82,
-    scTransferChips = 83,
     scChangeEmail = 84,
     scChangePassword = 85,
     scSetAvatar = 86,
@@ -144,14 +139,11 @@ begin
     srSetAvatarReply: result := 'srSetAvatarReply';
     srChangeMailReply: result := 'srChangeMailReply';
     srGetPlayers: result := 'srGetPlayers';
-    srTableSitNoChips: result := 'srTableSitNoChips';
     srOwnershipGiveAwayNotOwner: result := 'srOwnershipGiveAwayNotOwner';
     srOwnershipGiveAwayInvalidPlayerId: result := 'srOwnershipGiveAwayInvalidPlayerId';
     srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
     srOwnershipGiveAwayOk: result := 'srOwnershipGiveAwayOk';
     srClubDisbandOk: result := 'srClubDisbandOk';
-    srTransferChipsOk: result := 'srTransferChipsOk';
-    srTransferChipsInvalidAmount: result := 'srTransferChipsInvalidAmount';
     srChangePasswordOk: result := 'srChangePasswordOk';
     srCreateGameOk: result := 'srCreateGameOk';
     srDeleteGameOk: result := 'srDeleteGameOk';
@@ -183,7 +175,6 @@ begin
     seGameCreate: result := 'seGameCreate';
     seGameDelete: result := 'seGameDelete';
     seTableStatus: result := 'seTableStatus';
-    seTransferChips: result := 'seTransferChips';
     seUserChange: result := 'seUserChange';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
@@ -198,7 +189,6 @@ begin
     scGiveClubOwnership: result := 'scGiveClubOwnership';
     scChangeClubDetails: result := 'scChangeClubDetails';
     scDeleteClub: result := 'scDeleteClub';
-    scTransferChips: result := 'scTransferChips';
     scChangeEmail: result := 'scChangeEmail';
     scChangePassword: result := 'scChangePassword';
     scSetAvatar: result := 'scSetAvatar';

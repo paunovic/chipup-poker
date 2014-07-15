@@ -9,6 +9,9 @@
 			<Projects Include="client\tests\clientTests.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="protocopier\src\protocopier.dproj">
+				<Dependencies/>
+			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
 		<Target Name="clientTests:Make">
 			<MSBuild Targets="Make" Projects="client\tests\clientTests.dproj"/>
 		</Target>
+		<Target Name="protocopier">
+			<MSBuild Projects="protocopier\src\protocopier.dproj"/>
+		</Target>
+		<Target Name="protocopier:Clean">
+			<MSBuild Targets="Clean" Projects="protocopier\src\protocopier.dproj"/>
+		</Target>
+		<Target Name="protocopier:Make">
+			<MSBuild Targets="Make" Projects="protocopier\src\protocopier.dproj"/>
+		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="client;clientTests"/>
+			<CallTarget Targets="client;clientTests;protocopier"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="client:Clean;clientTests:Clean"/>
+			<CallTarget Targets="client:Clean;clientTests:Clean;protocopier:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="client:Make;clientTests:Make"/>
+			<CallTarget Targets="client:Make;clientTests:Make;protocopier:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

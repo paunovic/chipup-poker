@@ -312,12 +312,11 @@ begin
   begin
     SetLength(empty_array, 0);
     for C1 := 0 to Length(query_users) - 1 do
-      Players.AddPlayer(query_users[C1], 'Retrieving...', '', 0, empty_array);
+      Players.AddPlayer(query_users[C1], 'Retrieving...', '', empty_array);
     ServerSocket.GetUserInfos(query_users);
   end;
 
   // update self info
-  dmMain.SelfInfo.Balance := ATableStatus.TotalBalance;
   dmMain.UpdateSelfInfoInPlayers;
 
   ConfigureActions;

@@ -28,3 +28,5 @@ server/config.js
 server/.idea
 /node_modules/
 server/logs/*
+protocopier/bin/Win32/Debug/*
+protocopier/bin/Win32/Release/dcu/*
