@@ -50,7 +50,7 @@ type
     FActionFoldToAny: Boolean;
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
-    FEvents: TObjectList<TPB_TableEvent>;
+    FEvents: TPB_TableEventList;
 
     FCallCaption: String;
     FResetRaiseValue: Boolean;
@@ -114,7 +114,7 @@ type
     property ResetRaiseValue: Boolean read FResetRaiseValue write FResetRaiseValue;
     property FocusWindow: Boolean read FFocusWindow write FFocusWindow;
 
-    property Events: TObjectList<TPB_TableEvent> read FEvents;
+    property Events: TPB_TableEventList read FEvents;
   end;
 
 implementation
@@ -139,7 +139,7 @@ begin
   FFlopCards := TCards.Create;
   FTurnCard := TCard.Create;
   FRiverCard := TCard.Create;
-  FEvents := TObjectList<TPB_TableEvent>.Create;
+  FEvents := TPB_TableEventList.Create;
 end;
 
 destructor TTableStatus.Destroy;
@@ -214,7 +214,6 @@ var
   delete: Boolean;
   oldstate: TTableState;
   seat_index: Integer;
-  pbevent: TPB_TableEvent;
 begin
   oldstate := FState;
   FState := ATableStatusProtobuf.State;
@@ -324,10 +323,9 @@ begin
       FPots.Add(TPB_Pot.Create);
   end;
 
-  FEvents.Clear;
-  if Assigned(ATableStatusProtobuf.Events) then
-    for pbevent in ATableStatusProtobuf.Events do
-      FEvents.Add(TPB_TableEvent.Create(pbevent));
+  FEvents.Assign(ATableStatusProtobuf.Events);
+
+  UpdateCurrentPlaytime;
 end;
 
 procedure TTableStatus.UpdateClosingTime(const AGame: TGameInfo);

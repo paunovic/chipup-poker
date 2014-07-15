@@ -1282,7 +1282,12 @@ begin
   RefreshAll;
 
   if focus_window then
+  begin
     FocusWindow;
+    FWindowFocused := TRUE;
+  end
+  else
+    FWindowFocused := FALSE;
 end;
 
 procedure TfrmTable.RefreshAll;
@@ -1330,6 +1335,7 @@ var
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
+    FocusWindow;
     if table.Status.CurrentSeat = table.Status.SelfSeatIndex then
       table.PlaySound(Sounds.SOUND_TIMEBANK);
   finally

@@ -37,6 +37,7 @@ type
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
     procedure SeatClearCaptionTimerCallback;
     procedure ConfigureActions;
+    procedure NotifyRendererHandle;
   public
     constructor Create(const AInternalId: Integer);
     destructor Destroy; override;
@@ -336,7 +337,6 @@ begin
     tb := seatdbg.Timebank;
   end;
 
-  FStatus.UpdateCurrentPlaytime;
   tstatusdbg := Format('[#%d] %s, D: %d, E: %d | #%s, %.2fs/%.2fs',
     [ATableStatus.Seq, tmp, FStatus.Dealer, ATableStatus.Events.Count, csdbg, FStatus.CurrentPlaytime / 1000, tb / 1000]);
 
@@ -380,9 +380,7 @@ begin
   DebugLn(FDebugId, tstatusdbg, ditApplication, events);
   {$ENDIF}
 
-  // notify render handle that table status is updated
-  if FRenderer.RenderHandle > 0 then
-    PostMessage(FRenderer.RenderHandle, WM_TABLESTATUS_REFRESH, 0, 0);
+  NotifyRendererHandle;
 end;
 
 procedure TTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
@@ -516,14 +514,18 @@ begin
   SetTimer(FInternalHWND, TIMER_ID_GAMEPLAY_LOCK, milliseconds, nil);
 end;
 
+procedure TTable.NotifyRendererHandle;
+begin
+  if FRenderer.RenderHandle > 0 then
+    PostMessage(FRenderer.RenderHandle, WM_TABLESTATUS_REFRESH, 0, 0);
+end;
+
 procedure TTable.ConfigureActions;
 var
-  raise_en: Boolean;
   seat: TSeatInfo;
   game: TGameInfo;
 begin
-  // configure actions
-  raise_en := FStatus.ActionRaise;
+  FStatus.ResetRaiseValue := not FStatus.ActionRaise;
   FStatus.ActionStandUp := FALSE;
   FStatus.ActionFold := FALSE;
   FStatus.ActionCall := FALSE;
@@ -615,16 +617,13 @@ begin
     finally
       game.Free;
     end;
+
+    // check if SHOW CARDS button is enabled
+    FStatus.ActionShowCards := (FStatus.State in [tsWinning, tsWinning2]) and
+                               (seat.CanShow) and
+                               (not seat.CardsVisible) and
+                               (seat.Status in [psFolded, psAllIn, psInHand]);
   end;
-
-  FStatus.ResetRaiseValue := not raise_en;
-
-  // check if SHOW CARDS button is enabled
-  FStatus.ActionShowCards := (FStatus.State in [tsWinning, tsWinning2]) and
-                                  (Assigned(seat)) and
-                                  (seat.CanShow) and
-                                  (not seat.CardsVisible) and
-                                  (seat.Status in [psFolded, psAllIn, psInHand]);
 end;
 
 procedure TTable.WndProc(var AMessage: TMessage);
@@ -643,8 +642,7 @@ begin
         FGameplayLockedEndTime := 0;
         ConfigureActions;
         FRenderer.Disable;
-        if FRenderer.RenderHandle > 0 then
-          PostMessage(FRenderer.RenderHandle, WM_TABLESTATUS_REFRESH, 0, 0)
+        NotifyRendererHandle;
       end;
     end;
 

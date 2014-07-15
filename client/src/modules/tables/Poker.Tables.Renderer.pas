@@ -163,7 +163,7 @@ begin
   if FTableType = ttHandPlayback then
     FDrawColor := cRGB4(120, 120, 120)
   else
-    FDrawColor := cGray4(150);
+    FDrawColor := clWhite4;
 
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
@@ -405,7 +405,7 @@ end;
 procedure TTableRenderer.RenderTable;
 begin
   DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4);
-  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, clWhite4);
+  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, FDrawColor);
 end;
 
 procedure TTableRenderer.RenderSeats(const AGameInfo: TGameInfo);
@@ -487,13 +487,7 @@ begin
       if (table.Status.CurrentSeat = seat_info.SeatIndex) and
          (not table.Status.Locked) and
          (not table.GameplayLocked) then
-      begin
-  {      if tiActiveFrameBlink.Tag = 1 then
-          seat_image := active_seat_light_image
-        else
-          seat_image := active_seat_dark_image;}
-        seat_image := seat_active_image;
-      end
+        seat_image := seat_active_image
       else
         seat_image := seat_inactive_image;
 
