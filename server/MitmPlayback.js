@@ -146,16 +146,16 @@ MitmPlayback.prototype._makeArgsAndSanatize = function (args, methodId, argsFrom
 	var argsFromDbParsed = this.protobuf.Parse(argsFromDb, this.methodToTypeMap[requestFromDb.method]);
 
 	if (methodId === this.serverCodes.srLoginReply) {
-		argsParsed = this.sanitizeLoginReply(argsParsed);
-		argsFromDbParsed = this.sanitizeLoginReply(argsFromDbParsed);
+		argsParsed = this._sanitizeLoginReply(argsParsed);
+		argsFromDbParsed = this._sanitizeLoginReply(argsFromDbParsed);
 	} else if (methodId === this.serverCodes.srTableStatsReply) {
-		argsParsed = this.sanitizeTableStats(argsParsed);
-		argsFromDbParsed = this.sanitizeTableStats(argsFromDbParsed);
+		argsParsed = this._sanitizeTableStats(argsParsed);
+		argsFromDbParsed = this._sanitizeTableStats(argsFromDbParsed);
 	} else if (methodId === this.serverCodes.seGameChange) {
 		argsParsed.lasthandid = argsFromDbParsed.lasthandid;
 	} else if ([this.serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
-		argsParsed = this.sanitizeTableStatus(argsParsed);
-		argsFromDbParsed = this.sanitizeTableStatus(argsFromDbParsed);
+		argsParsed = this._sanitizeTableStatus(argsParsed);
+		argsFromDbParsed = this._sanitizeTableStatus(argsFromDbParsed);
 	}
 	return {fromServer: argsParsed, fromDb: argsFromDbParsed};
 };
@@ -183,20 +183,20 @@ MitmPlayback.prototype._sanitizeLoginReply = function (args) {
 
 
 MitmPlayback.prototype._sanitizeTableStats = function (args) {
-	var i,j;
+	var i, j;
 
 	for (i = 0; i < args.reply.length; i++) {
 		var reply = args.reply[i];
 
-		for (j = 0; j < reply.playerstats.length; j++) {
-			console.log(reply.playerstats[j]);
-			delete reply.playerstats[j].userid;
-			reply.playerstats[j].balance = 0;
-			reply.playerstats[j].rakecontrib = 0;
-			reply.playerstats[j].hands = 0;
-			delete reply.playerstats[j].buyins;
-			delete reply.playerstats[j].cashouts;
-			reply.playerstats[j].secondsplayed = 0;
+		for (j = 0; j < reply.playerStats.length; j++) {
+			console.log(reply.playerStats[j]);
+			delete reply.playerStats[j].userid;
+			reply.playerStats[j].balance = 0;
+			reply.playerStats[j].rakecontrib = 0;
+			reply.playerStats[j].hands = 0;
+			delete reply.playerStats[j].buyins;
+			delete reply.playerStats[j].cashouts;
+			reply.playerStats[j].secondsplayed = 0;
 		}
 
 		reply.hands = 0;
