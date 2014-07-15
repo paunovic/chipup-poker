@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.Generics.Collections, Poker.Protobufs.Objects.TableStatus, Poker.Cards, Poker.Protobufs.Objects.Game,
-  Poker.Pots.PotList, Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Objects.TableEvent;
+  Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
 
 type
   TTableType = (ttLiveGame, ttHandPlayback);
@@ -27,8 +27,8 @@ type
     FMinimumBet: UINT32;
     FHandId: UINT32;
     FMaximumRaise: UINT32;
-    FPreviousPots: TPotList;
-    FPots: TPotList;
+    FPreviousPots: TPB_PotList;
+    FPots: TPB_PotList;
     FTime: UINT64;
     FRotationHand: UINT32;
     FCurrentGame: TGameType;
@@ -50,7 +50,11 @@ type
     FActionFoldToAny: Boolean;
     FActionSitOutNextBB: Boolean;
     FActionShowCards: Boolean;
-    FEvents: TTableEvents;
+    FEvents: TPB_TableEventList;
+
+    FCallCaption: String;
+    FResetRaiseValue: Boolean;
+    FFocusWindow: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
@@ -78,8 +82,8 @@ type
     property BigBlindSeat: Integer read FBigBlindSeat;
     property Locked: Boolean read FLocked;
     property HandId: UINT32 read FHandId;
-    property Pots: TPotList read FPots write FPots;
-    property PreviousPots: TPotList read FPreviousPots;
+    property Pots: TPB_PotList read FPots write FPots;
+    property PreviousPots: TPB_PotList read FPreviousPots;
     property MaximumRaise: UINT32 read FMaximumRaise;
     property Time: UINT64 read FTime;
     property RotationHand: UINT32 read FRotationHand;
@@ -106,13 +110,17 @@ type
     property ActionSitOutNextBB: Boolean read FActionSitOutNextBB write FActionSitOutNextBB;
     property ActionShowCards: Boolean read FActionShowCards write FActionShowCards;
 
-    property Events: TTableEvents read FEvents;
+    property CallCaption: String read FCallCaption write FCallCaption;
+    property ResetRaiseValue: Boolean read FResetRaiseValue write FResetRaiseValue;
+    property FocusWindow: Boolean read FFocusWindow write FFocusWindow;
+
+    property Events: TPB_TableEventList read FEvents;
   end;
 
 implementation
 
 uses
-  System.SysUtils, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Pots.Pot, Poker.Common.Misc;
+  System.SysUtils, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Common.Misc;
 
 { TTableStatus }
 
@@ -126,12 +134,12 @@ begin
   FBets := TList<UINT32>.Create;
   FPreviousBets := TList<UINT32>.Create;
 
-  FPreviousPots := TPotList.Create;
-  FPots := TPotList.Create;
+  FPreviousPots := TPB_PotList.Create;
+  FPots := TPB_PotList.Create;
   FFlopCards := TCards.Create;
   FTurnCard := TCard.Create;
   FRiverCard := TCard.Create;
-  FEvents := TTableEvents.Create;
+  FEvents := TPB_TableEventList.Create;
 end;
 
 destructor TTableStatus.Destroy;
@@ -309,13 +317,15 @@ begin
   if FSeats.Count > 0 then
   begin
     while FPreviousPots.Count < FSeats.Last.SeatIndex do
-      FPreviousPots.Add(TPotInfo.Create);
+      FPreviousPots.Add(TPB_Pot.Create);
 
     while FPots.Count < FSeats.Last.SeatIndex do
-      FPots.Add(TPotInfo.Create);
+      FPots.Add(TPB_Pot.Create);
   end;
 
   FEvents.Assign(ATableStatusProtobuf.Events);
+
+  UpdateCurrentPlaytime;
 end;
 
 procedure TTableStatus.UpdateClosingTime(const AGame: TGameInfo);

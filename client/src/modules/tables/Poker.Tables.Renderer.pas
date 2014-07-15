@@ -3,8 +3,8 @@ unit Poker.Tables.Renderer;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.Generics.Collections, System.Types, Vectors2, Vectors2px, AsphyreTypes, AsphyreFonts,
-  Poker.Tables.RenderMetrics, Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, AsphyreImages, Poker.Seats.Seat, Poker.Cards,
+  Winapi.Windows, System.Classes, System.Generics.Collections, System.Types, Asphyre.Math, Asphyre.Types, Asphyre.Fonts,
+  Poker.Tables.RenderMetrics, Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, Asphyre.Images, Poker.Seats.Seat, Poker.Cards,
   Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot;
 
 type
@@ -143,9 +143,9 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.DirectX.Core, Poker.Tables.Resources, AbstractCanvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
+  Poker.DirectX.Core, Poker.Tables.Resources, Asphyre.Canvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
   Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation,
-  Poker.DirectX.Timer, Poker.Pots.PotList, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player,
+  Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table;
 
 { TTableRenderer }
@@ -161,7 +161,7 @@ begin
   FTableType := ATableType;
 
   if FTableType = ttHandPlayback then
-    FDrawColor := cAlpha4(150)
+    FDrawColor := cRGB4(120, 120, 120)
   else
     FDrawColor := clWhite4;
 
@@ -487,13 +487,7 @@ begin
       if (table.Status.CurrentSeat = seat_info.SeatIndex) and
          (not table.Status.Locked) and
          (not table.GameplayLocked) then
-      begin
-  {      if tiActiveFrameBlink.Tag = 1 then
-          seat_image := active_seat_light_image
-        else
-          seat_image := active_seat_dark_image;}
-        seat_image := seat_active_image;
-      end
+        seat_image := seat_active_image
       else
         seat_image := seat_inactive_image;
 
@@ -1123,7 +1117,7 @@ var
   chips_stack: TChipStack;
   pot_point: TPoint2;
   animation: TDXAnimation;
-  pots: TPotList;
+  pots: TPB_PotList;
   table: TTable;
 begin
   if Tables.TryGetValue(FInternalId, table) then

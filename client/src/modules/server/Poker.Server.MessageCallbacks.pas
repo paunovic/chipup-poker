@@ -9,12 +9,10 @@ type
   TCallbackSet = class(TObjectList<TObject>)
   private
     FId: Integer;
-    FRemoved: Boolean;
   public
     constructor Create(const AId: Integer; const ACallbacks: array of TObject);
 
     property Id: Integer read FId;
-    property Removed: Boolean read FRemoved write FRemoved;
   end;
 
   TServerMessageCallbackMethod = procedure(const AMethodId: Integer; const AObject: TObject) of object;

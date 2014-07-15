@@ -222,6 +222,7 @@ end;
 procedure TPB_HandHistoryMove.CodeNotifyEvent(Sender: TObject; const Item: TTableEventType; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Code;
 end;
 
 procedure TPB_HandHistoryMove.clear_Bet;
@@ -306,6 +307,7 @@ end;
 procedure TPB_HandHistoryMove.WinnerPotDataNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_WinnerPotData;
   ProtobufOutput.writeTag(kWinnerPotDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -335,6 +337,7 @@ end;
 procedure TPB_HandHistoryMove.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Pots;
   ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

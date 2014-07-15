@@ -209,7 +209,9 @@ end;
 
 function IsAllUsersEnabled: Boolean;
 begin
-  result := CheckInstallPath(AllUsersInstallPath);
+  result := (CheckInstallPath(AllUsersInstallPath)) and
+            ((IsAdminLoggedOn) or
+             (IsPowerUserLoggedOn));
 end;
 
 function IsCurrentUserEnabled: Boolean;

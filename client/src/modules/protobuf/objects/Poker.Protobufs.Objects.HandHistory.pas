@@ -433,6 +433,7 @@ end;
 procedure TPB_HandHistory.PlayersNotifyEvent(Sender: TObject; const Item: TPB_PlayerHandHistory; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Players;
   ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -520,6 +521,7 @@ end;
 procedure TPB_HandHistory.BalanceChangesNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_BalanceChanges;
   ProtobufOutput.writeInt32(kBalanceChangesFieldNumber,Item);
 end;
 
@@ -547,6 +549,7 @@ end;
 procedure TPB_HandHistory.MovesNotifyEvent(Sender: TObject; const Item: TPB_HandHistoryMove; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Moves;
   ProtobufOutput.writeTag(kMovesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

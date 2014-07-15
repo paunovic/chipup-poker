@@ -3,7 +3,7 @@ unit Poker.Helpers.AsphyreImage;
 interface
 
 uses
-  System.Classes, AsphyreImages, AsphyreJPG;
+  System.Classes, Asphyre.Images, Asphyre.Bitmaps.JPG;
 
 type
   TAsphyreImageHelper = class helper for TAsphyreImage
@@ -13,7 +13,7 @@ type
 implementation
 
 uses
-  System.SysUtils, AsphyreTypes, AsphyreDef, AsphyreConv, SystemSurfaces, AbstractTextures, AsphyreBitmaps;
+  System.SysUtils, Asphyre.Types, Asphyre.TypeDef, Asphyre.Surfaces, Asphyre.Textures, Asphyre.Bitmaps, Asphyre.Formats;
 
 
 function TAsphyreImageHelper.LoadFromStream(const AExtension: String; const AStream: TStream): Boolean;

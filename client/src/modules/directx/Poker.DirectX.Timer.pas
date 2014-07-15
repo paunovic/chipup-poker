@@ -3,7 +3,7 @@ unit Poker.DirectX.Timer;
 interface
 
 uses
-  Winapi.Windows, System.Classes, Poker.DirectX.Animation, Vectors2, AsphyreTiming, System.SyncObjs;
+  Winapi.Windows, System.Classes, Poker.DirectX.Animation, Asphyre.Math, Asphyre.Timing, System.SyncObjs;
 
 type
   TDXTimer = class(TThread)
@@ -19,16 +19,13 @@ type
       FTiming: TAsphyreTiming;
       FLastUpdate: Double;
       FNextId: Integer;
-      FLocK: TCriticalSection;
 
     procedure Process;
     procedure Shutdown;
     procedure SetAnimationsEnabled(const AValue: Boolean);
     function GetAnimationsEnabled: Boolean;
-
   protected
     procedure Execute; override;
-
   public
     class procedure Initialize;
     class procedure Deinitialize;
@@ -71,7 +68,6 @@ constructor TDXTimer.Create;
 begin
   {$IFDEF DEBUG} RegisterDebugObject('DXTimer'); {$ENDIF}
   FNextId := 0;
-  FLock := TCriticalSection.Create;
   FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
   FAnimations := TDXAnimations.Create;
@@ -85,7 +81,6 @@ begin
   FAnimations.Free;
   FTiming.Free;
   FreeAndNil(FSignalEvent);
-  FreeAndNil(FLock);
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
   inherited;
 end;
@@ -158,40 +153,37 @@ var
   C1: Integer;
   callbacks: TList<THandle>;
   callbacks_must: TList<THandle>;
+  timing_value: Double;
 begin
   callbacks := TList<THandle>.Create;
   try
     callbacks_must := TList<THandle>.Create;
     try
-      FLock.Enter;
-      try
-        C1 := 0;
-        while (Assigned(FAnimations)) and (C1 < FAnimations.Count) do
+      timing_value := FTiming.GetTimeValue;
+      C1 := 0;
+      while (Assigned(FAnimations)) and (C1 < FAnimations.Count) do
+      begin
+        if FAnimations[C1].Removed then
         begin
-          if FAnimations[C1].Removed then
-          begin
-            FAnimations.Delete(C1);
-            Continue;
-          end;
-
-          FAnimations[C1].Animate(FTiming.GetTimeValue);
-
-          if FAnimations[C1].Status = asDone then
-          begin
-            callbacks.Remove(FAnimations[C1].Handle);
-            if callbacks_must.IndexOf(FAnimations[C1].Handle) = -1 then
-              callbacks_must.Add(FAnimations[C1].Handle);
-            FAnimations.Delete(C1);
-            Continue;
-          end;
-
-          if (callbacks_must.IndexOf(FAnimations[C1].Handle) = -1) and
-             (callbacks.IndexOf(FAnimations[C1].Handle) = -1) then
-            callbacks.Add(FAnimations[C1].Handle);
-          Inc(C1);
+          FAnimations.Delete(C1);
+          Continue;
         end;
-      finally
-        FLock.Leave;
+
+        FAnimations[C1].Animate(timing_value);
+
+        if FAnimations[C1].Status = asDone then
+        begin
+          callbacks.Remove(FAnimations[C1].Handle);
+          if callbacks_must.IndexOf(FAnimations[C1].Handle) = -1 then
+            callbacks_must.Add(FAnimations[C1].Handle);
+          FAnimations.Delete(C1);
+          Continue;
+        end;
+
+        if (callbacks_must.IndexOf(FAnimations[C1].Handle) = -1) and
+           (callbacks.IndexOf(FAnimations[C1].Handle) = -1) then
+          callbacks.Add(FAnimations[C1].Handle);
+        Inc(C1);
       end;
 
       for C1 := 0 to callbacks_must.Count - 1 do

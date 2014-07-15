@@ -551,6 +551,7 @@ end;
 procedure TPB_TableStatus.SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Seats;
   ProtobufOutput.writeTag(kSeatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -667,6 +668,7 @@ end;
 procedure TPB_TableStatus.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Bets;
   ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
 end;
 
@@ -926,6 +928,7 @@ end;
 procedure TPB_TableStatus.EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Events;
   ProtobufOutput.writeTag(kEventsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);
@@ -955,6 +958,7 @@ end;
 procedure TPB_TableStatus.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Pots;
   ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

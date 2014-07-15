@@ -230,6 +230,7 @@ end;
 procedure TPB_ClubHandHistoryReply.RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Rows;
   ProtobufOutput.writeTag(kRowsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

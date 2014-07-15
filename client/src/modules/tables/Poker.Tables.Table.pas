@@ -36,6 +36,8 @@ type
     procedure WndProc(var AMessage: TMessage);
     procedure ProcessTableEvent(const ATableEvent: TPB_TableEvent);
     procedure SeatClearCaptionTimerCallback;
+    procedure ConfigureActions;
+    procedure NotifyRendererHandle;
   public
     constructor Create(const AInternalId: Integer);
     destructor Destroy; override;
@@ -73,9 +75,9 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, System.TypInfo, {$ENDIF}
-  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Vectors2px, Poker.DataModule,
+  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Players.Player, Poker.Players.PlayerList, Poker.Seats.Seat, Poker.Cards, Poker.Sounds, Poker.Settings,
-  System.Classes, Poker.WindowMessages;
+  System.Classes, Poker.WindowMessages, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.SeatInfo;
 
 
 { TTable }
@@ -318,9 +320,7 @@ begin
   dmMain.SelfInfo.Balance := ATableStatus.TotalBalance;
   dmMain.UpdateSelfInfoInPlayers;
 
-  // notify render handle that table status is updated
-  if FRenderer.RenderHandle > 0 then
-    PostMessage(FRenderer.RenderHandle, WM_TABLESTATUS_REFRESH, 0, 0);
+  ConfigureActions;
 
   {$IFDEF DEBUG}
   tmp := GetEnumName(TypeInfo(TTableState), Integer(FStatus.State));
@@ -337,7 +337,6 @@ begin
     tb := seatdbg.Timebank;
   end;
 
-  FStatus.UpdateCurrentPlaytime;
   tstatusdbg := Format('[#%d] %s, D: %d, E: %d | #%s, %.2fs/%.2fs',
     [ATableStatus.Seq, tmp, FStatus.Dealer, ATableStatus.Events.Count, csdbg, FStatus.CurrentPlaytime / 1000, tb / 1000]);
 
@@ -380,6 +379,8 @@ begin
 
   DebugLn(FDebugId, tstatusdbg, ditApplication, events);
   {$ENDIF}
+
+  NotifyRendererHandle;
 end;
 
 procedure TTable.ProcessTableEvent(const ATableEvent: TPB_TableEvent);
@@ -477,7 +478,7 @@ begin
     end;
 
     teDisconnect: begin
-//      if table.Status.GetSeatInfo(ATableEvent.Seat, seat) then
+//      if FStatus.GetSeatInfo(ATableEvent.Seat, seat) then
 //        seat_caption := 'DISCONNECTED';
     end;
   end;
@@ -513,6 +514,118 @@ begin
   SetTimer(FInternalHWND, TIMER_ID_GAMEPLAY_LOCK, milliseconds, nil);
 end;
 
+procedure TTable.NotifyRendererHandle;
+begin
+  if FRenderer.RenderHandle > 0 then
+    PostMessage(FRenderer.RenderHandle, WM_TABLESTATUS_REFRESH, 0, 0);
+end;
+
+procedure TTable.ConfigureActions;
+var
+  seat: TSeatInfo;
+  game: TGameInfo;
+begin
+  FStatus.ResetRaiseValue := not FStatus.ActionRaise;
+  FStatus.ActionStandUp := FALSE;
+  FStatus.ActionFold := FALSE;
+  FStatus.ActionCall := FALSE;
+  FStatus.ActionCheck := FALSE;
+  FStatus.ActionRaise := FALSE;
+  FStatus.ActionBet := FALSE;
+  FStatus.ActionPlayNow := FALSE;
+  FStatus.ActionSitOut := FALSE;
+  FStatus.ActionFoldToAny := FALSE;
+  FStatus.ActionSitOutNextBB := FALSE;
+  FStatus.ActionShowCards := FALSE;
+
+  seat := nil;
+  if (FTableType = ttLiveGame) and
+     (FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
+  begin
+    FStatus.ActionStandUp := TRUE;
+
+    if GetObjectCopy(game) then
+    try
+      FStatus.FocusWindow := FALSE;
+      if game.State <> gsClosed then
+        case seat.Status of
+          psOutOfPlay: begin
+            FStatus.ActionPlayNow := TRUE;
+            FStatus.ActionFoldToAny := FALSE;
+            FStatus.ActionSitOut := FALSE;
+            FStatus.ActionSitOutNextBB := FALSE;
+          end;
+
+          psOutOfHand: begin
+            FStatus.ActionFoldToAny := FALSE;
+            FStatus.ActionSitOut := TRUE;
+            FStatus.ActionSitOutNextBB := TRUE;
+          end;
+
+          psInHand, psAllIn: begin
+            FStatus.ActionSitOut := TRUE;
+            FStatus.ActionSitOutNextBB := TRUE;
+            if (seat.Status = psInHand) and
+               (FStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
+              FStatus.ActionFoldToAny := TRUE;
+
+            if (FStatus.CurrentSeat = FStatus.SelfSeatIndex) and
+               (not FStatus.Locked) and
+               (not FGameplayLocked) then
+              case FStatus.State of
+                tsIdle: begin
+                  FStatus.ActionFoldToAny := FALSE;
+                end;
+
+                tsPreFlop, tsFlop, tsTurn, tsRiver: begin
+                  FStatus.ActionFold := TRUE;
+                  // check if our current bet is smaller than minimumbet (call/raise situation)
+                  if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
+                  begin
+                    if seat.Chips <= FStatus.MinimumBet then
+                      FStatus.CallCaption := 'CALL (ALL-IN)'
+                    else
+                      FStatus.CallCaption := Format('CALL (%s)', [ChipsToStr(FStatus.MinimumBet{ - FStatus.GetBet(seat_info.SeatIndex)})]);
+                    FStatus.ActionCall := TRUE;
+
+                    // if we can call, there is a possibility that we can raise too - we check if we can raise here
+                    if (seat.Chips > FStatus.MinimumBet) and
+                       (FStatus.MinimumBet < FStatus.MinimumRaise) then
+                      FStatus.ActionRaise := TRUE;
+
+                    FStatus.FocusWindow := TRUE;
+                  end
+                  else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
+                  begin
+                    FStatus.ActionCheck := TRUE;
+                    FStatus.ActionBet := TRUE;
+                  end;
+                end;
+
+                tsWinning, tsWinning2: begin
+                  FStatus.ActionFoldToAny := FALSE;
+                end;
+              end;
+          end;
+
+          psFolded: begin
+            FStatus.ActionFoldToAny := FALSE;
+            FStatus.ActionSitOut := TRUE;
+            FStatus.ActionSitOutNextBB := TRUE;
+          end;
+        end;
+    finally
+      game.Free;
+    end;
+
+    // check if SHOW CARDS button is enabled
+    FStatus.ActionShowCards := (FStatus.State in [tsWinning, tsWinning2]) and
+                               (seat.CanShow) and
+                               (not seat.CardsVisible) and
+                               (seat.Status in [psFolded, psAllIn, psInHand]);
+  end;
+end;
+
 procedure TTable.WndProc(var AMessage: TMessage);
 begin
   inherited;
@@ -527,7 +640,9 @@ begin
         KillTimer(FInternalHWND, TIMER_ID_GAMEPLAY_LOCK);
         FGameplayLocked := FALSE;
         FGameplayLockedEndTime := 0;
-        FRenderer.Render;
+        ConfigureActions;
+        FRenderer.Disable;
+        NotifyRendererHandle;
       end;
     end;
 

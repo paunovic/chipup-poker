@@ -20,7 +20,7 @@ enum ServerCodes {
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
 	srGetPlayers = 14;
-	srTableSitNoChips = 15;
+
 	srOwnershipGiveAwayNotOwner = 16;
 	srOwnershipGiveAwayInvalidPlayerId = 17;
 	srOwnershipGiveAwayInvalidClubId = 18;
@@ -206,7 +206,6 @@ message User {
 	
 	optional string email = 5;
 	optional bool authed = 6;
-	optional uint32 chips = 7;
 }
 
 message Game {
@@ -370,7 +369,6 @@ message TableStatus {
 	optional uint32 rake_percent = 21;
 	optional Game.GameType current_game = 22;
 	optional uint32 rotation = 23;
-	required uint32 total_balance = 24;
 	optional Game.GameLimit game_limit = 25;
 	optional uint32 minimum_raise = 26;
 }

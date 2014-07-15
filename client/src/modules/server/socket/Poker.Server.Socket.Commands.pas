@@ -29,7 +29,7 @@ type
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
-    procedure CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+    procedure CreateGame(const AClubId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
     procedure CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
     procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
     procedure JoinTable(const AGameId: TBytes);
@@ -291,14 +291,14 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.CreateGame(const AClubId: Int64; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+procedure TServerSocketCommands.CreateGame(const AClubId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
   protobuf := TPB_Game.Create;
   try
     protobuf.Gamename := AGameName;
-    protobuf.Clubseq := AClubId;
+    protobuf.ClubMongoid := AClubId;
     protobuf.GameType := AGameType;
     protobuf.GameLimit := AGameLimit;
     protobuf.Blinds := ABlinds;

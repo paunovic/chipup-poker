@@ -2,11 +2,11 @@
 var util = require("util");
 var directions = require('./directions');
 var diff = require('deep-diff');
+var net = require('net');
 
 module.exports = MitmPlayback;
 
 function MitmPlayback(config) {
-	debugger;
 	this.requests = config.requests;
 	this.host = config.host;
 	this.port = config.port;
@@ -23,7 +23,19 @@ function MitmPlayback(config) {
 
 MitmPlayback.prototype.startPlayback = function() {
 	this.socketIds.forEach(function(socketId) {
-		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected);
+		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected.bind(this));
+	}, this);
+};
+
+
+MitmPlayback.prototype._openNewSocket = function (socketId, callback) {
+	var self = this;
+	var socket = net.connect(this.port, this.host, function () {
+		socket.on('error', function (err) { throw err; });
+		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfNextRequestsMatch(socketId).bind(self)));
+		self.sockets[socketId] = socket;
+		console.log("Opened socket id " + socketId);
+		callback();
 	});
 };
 
@@ -32,7 +44,7 @@ MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
 	var allConnected = true;
 	this.socketIds.forEach(function(socketId) {
 		if (!this.sockets[socketId]) allConnected = false;
-	});
+	}, this);
 
 	if (allConnected) this._sendRequests();
 };
@@ -66,47 +78,40 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 
 	if (socket._writableState.length > (256 * 1024))
 		throw new Error('Send overflow!');
+		
+	console.log("Sent message on socket id " + socketId);
 };
 
 
-MitmPlayback.prototype._openNewSocket	=	function (socketId, callback) {
-	debugger;
-	this.sockets[socketId] = net.connect(this.port, this.host, function () {
-		callback();
-		socket.on('error', function (err) { throw err; });
-		socket.on('data', this.protobufUtil.createOnDataListenerFn(this._checkIfNextRequestsMatch.bind(this)));
-	});
-};
-
-
-MitmPlayback.prototype._checkIfNextRequestsMatch = function (err, methodId, args, type) {
-	debugger;
-	if (err) throw err;
-				
-	for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
-		if (requests[i].socketId !== socketId) 
-			continue;
-
-		try {
-			this._checkIfSingleRequestMatch(methodId, args, type, i);
-			var methodName = this.serverCodes.reverse[methodId];
-			console.log("Request #" + this.currentRequestNumber + " match! " + methodName);
-			++this.currentRequestNumber;
-			this._sendRequests();
-			return;
-		} catch (e) {
-			if (this.requests[i + 1].direction !== directions.S2C)
-				this.checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
+MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
+	return function (err, methodId, args, type) {
+		if (err) throw err;
+					
+		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
+			if (this.requests[i].socketId !== socketId) 
+				continue;
+	
+			try {
+				this._checkIfSingleRequestMatch(methodId, args, type, i);
+				var methodName = this.serverCodes.reverse[methodId];
+				console.log("Request #" + this.currentRequestNumber + " match! " + methodName);
+				++this.currentRequestNumber;
+				this._sendRequests();
+				return;
+			} catch (e) {
+				if (this.requests[i + 1].direction !== directions.S2C)
+					this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
+			}
 		}
-	}
+	};
 };
 
 
 MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
-	// find socket id by iterating thru sockets array and see which one matches the current socket
-	var currentRequestInfo = 'SocketId' + socketId + " request #" + requestNum;
+	debugger;
+	var currentRequestInfo = "request #" + requestNum;
 
-	var requestFromDb = requests[requestNum];
+	var requestFromDb = this.requests[requestNum];
 
 	if (requestFromDb.direction !== directions.S2C)
 		throw new Error('Received response from the server out of order!');
@@ -122,7 +127,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 		if (!methodToTypeMap[methodName])
 			throw new Error('schema for code ' + methodName + ' not known');
 
-		var argsParsed = makeArgsAndSanatize();
+		var argsParsed = makeArgsAndSanatize(methodName);
 		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
 		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
 	}
@@ -132,21 +137,21 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 };
 
 
-MitmPlayback.prototype._makeArgsAndSanatize = function () {
-	var argsParsed = pb.Parse(args, methodToTypeMap[methodName]);
-	var argsFromDbParsed = pb.Parse(argsFromDb, methodToTypeMap[requestFromDb.method]);
+MitmPlayback.prototype._makeArgsAndSanatize = function (methodName) {
+	var argsParsed = this.protobuf.Parse(args, this.methodToTypeMap[methodName]);
+	var argsFromDbParsed = this.protobuf.Parse(argsFromDb, this.methodToTypeMap[requestFromDb.method]);
 
-	if (methodId === serverCodes.srLoginReply) {
-		argsParsed = sanitizeLoginReply(argsParsed);
-		argsFromDbParsed = sanitizeLoginReply(argsFromDbParsed);
-	} else if (methodId === serverCodes.srTableStatsReply) {
-		argsParsed = sanitizeTableStats(argsParsed);
-		argsFromDbParsed = sanitizeTableStats(argsFromDbParsed);
-	} else if (methodId === serverCodes.seGameChange) {
+	if (methodId === this.serverCodes.srLoginReply) {
+		argsParsed = this.sanitizeLoginReply(argsParsed);
+		argsFromDbParsed = this.sanitizeLoginReply(argsFromDbParsed);
+	} else if (methodId === this.serverCodes.srTableStatsReply) {
+		argsParsed = this.sanitizeTableStats(argsParsed);
+		argsFromDbParsed = this.sanitizeTableStats(argsFromDbParsed);
+	} else if (methodId === this.serverCodes.seGameChange) {
 		argsParsed.lasthandid = argsFromDbParsed.lasthandid;
-	} else if ([serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
-		argsParsed = sanitizeTableStatus(argsParsed);
-		argsFromDbParsed = sanitizeTableStatus(argsFromDbParsed);
+	} else if ([this.serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
+		argsParsed = this.sanitizeTableStatus(argsParsed);
+		argsFromDbParsed = this.sanitizeTableStatus(argsFromDbParsed);
 	}
 	return {fromServer: argsParsed, fromDb: argsFromDbParsed};
 };

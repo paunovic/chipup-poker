@@ -98,6 +98,7 @@ begin
   FCardsVisible := ASeatInfo.FCardsVisible;
   FDisconnected := ASeatInfo.Disconnected;
   FCanShow := ASeatInfo.FCanShow;
+  FDealtCards := ASeatInfo.DealtCards;
 end;
 
 procedure TSeatInfo.IncDealtCards;

@@ -19,15 +19,11 @@ type
     procedure DataModuleDestroy(Sender: TObject);
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
   private
-    const
-      FONTLIST: array[0..0] of String = ('SintonyBold');
-
-    var
-      FSelfInfo: TPlayerInfo;
-      FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
-      FUpdaterBatchFile: String;
-      FUpdaterInstallerFile: String;
-      FReconnectedTables: TObjectList<TPB_TableStatus>;
+    FSelfInfo: TPlayerInfo;
+    FUpdateFiles: TObjectList<TPB_UpdateFileInfo>;
+    FUpdaterBatchFile: String;
+    FUpdaterInstallerFile: String;
+    FReconnectedTables: TObjectList<TPB_TableStatus>;
 
     function GetAvailableBalance: UINT32;
     procedure LoadFonts;
@@ -83,14 +79,16 @@ begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
   common := GetSpecialFolderPath(CSIDL_COMMON_APPDATA);
-  if (Pos(LowerCase(common), LowerCase(SelfPath)) > 0) and
-     (IsDirectoryWriteable(common)) then
+  if Pos(LowerCase(common), LowerCase(SelfPath)) > 0 then
     AppDataPath := common
   else
     AppDataPath := local;
   AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AppDataPath) + 'ChipUP Poker');
 
   ForceDirectories(AppDataPath);
+  if (not DirectoryExists(AppDataPath)) or
+     (not IsDirectoryWriteable(AppDataPath)) then
+    AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(local) + 'ChipUP Poker');
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;
@@ -306,6 +304,8 @@ begin
 end;
 
 procedure TdmMain.LoadFonts;
+const
+  FONTLIST: array[0..0] of String = ('SintonyBold');
 var
   nbFontAdded: DWORD;
   rs: TResourceStream;

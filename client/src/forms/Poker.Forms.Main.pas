@@ -260,7 +260,6 @@ begin
   btJoinClub.Font.Assign(btHomeGames.Font);
 
   pcTabs.ActivePage := tsHomeGames;
-  FCallbacksId := -1;
 
   Avatars.OnAvatarChanged := AvatarChanged;
 
@@ -269,6 +268,7 @@ end;
 
 procedure TfrmChipUpMain.FormDestroy(Sender: TObject);
 begin
+  MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.CloseAllForms;
   Tables.Lock;
   try
@@ -276,7 +276,6 @@ begin
   finally
     Tables.Unlock;
   end;
-  MessageContainer.RemoveCallbacks(FCallbacksId);
   FActionMainMenuBarFont.Free;
 end;
 
@@ -291,9 +290,11 @@ begin
               (FShuttingDown) or
               (ConfirmToCloseTablesAppClose);
 
-  if (CanClose) and
-     (dmMain.IsLoggedIn) then
-    ServerSocket.Logout;
+  if CanClose then
+  begin
+    if (dmMain.IsLoggedIn) then
+      ServerSocket.Logout;
+  end;
 end;
 
 procedure TfrmChipUpMain.FormDeactivate(Sender: TObject);
@@ -1134,7 +1135,7 @@ var
 begin
   pbgame := AObject as TPB_Game;
 
-  if (dmMain.SelfInfo.Clubs.FindClubBySeq(pbgame.Clubseq, club)) and
+  if (dmMain.SelfInfo.Clubs.TryGetValue(pbgame.ClubMongoid, club)) and
      (club.Games.TryGetValue(pbgame.MongoId, game)) then
   begin
     if Tables.FindTable(game.MongoId, ttLiveGame, table) then
@@ -1153,7 +1154,7 @@ var
 begin
   pbgame := AObject as TPB_Game;
 
-  if dmMain.SelfInfo.Clubs.FindClubBySeq(pbgame.Clubseq, club) then
+  if dmMain.SelfInfo.Clubs.TryGetValue(pbgame.ClubMongoid, club) then
   begin
     game := club.Games.AddGame(pbgame);
 

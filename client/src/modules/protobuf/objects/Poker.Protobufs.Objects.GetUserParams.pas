@@ -161,6 +161,7 @@ end;
 procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_UserMongoIds;
   ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber,Item);
 end;
 
@@ -188,6 +189,7 @@ end;
 procedure TPB_GetUserParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Users;
   ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
   ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
   Item.ProtobufOutput.writeTo(ProtobufOutput);

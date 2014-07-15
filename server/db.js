@@ -16,7 +16,6 @@ var User = new Schema({
 	password:Buffer,
 	salt:Buffer,
 	authed:Boolean,
-	chips:Number,
 	forgotcode:String,
 	forgottime:Number,
 	newemail:String,

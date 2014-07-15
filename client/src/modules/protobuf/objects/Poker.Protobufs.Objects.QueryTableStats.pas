@@ -131,6 +131,7 @@ end;
 procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
+  set_has_Gameid;
   ProtobufOutput.writeBytes(kGameidFieldNumber,Item);
 end;
 

@@ -3,7 +3,7 @@ unit Poker.Tables.RenderMetrics;
 interface
 
 uses
-  Winapi.Windows, Vectors2px, Vectors2, AsphyreTypes, Poker.Games.Game, Poker.Seats.Seat, System.Types;
+  Winapi.Windows, Asphyre.Math, Asphyre.Types, Poker.Games.Game, Poker.Seats.Seat, System.Types;
 
 type
   TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
