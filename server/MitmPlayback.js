@@ -57,6 +57,7 @@ MitmPlayback.prototype._sendRequests = function() {
 		var methodId = this.serverCodes[request.method];
 		var encodedMessage = this.protobufUtil.encode(methodId, request.args.buffer, request.type);
 		this._writeMessageAndTestIfItsOk(encodedMessage, request.socketId);
+		console.log("Sent request #" + this.currentRequestNumber);
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
@@ -94,11 +95,12 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 			try {
 				this._checkIfSingleRequestMatch(methodId, args, type, i);
 				var methodName = this.serverCodes.reverse[methodId];
-				console.log("Request #" + this.currentRequestNumber + " match! " + methodName);
+				console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
 				++this.currentRequestNumber;
 				this._sendRequests();
 				return;
 			} catch (e) {
+				console.log(e.message);
 				if (this.requests[i + 1].direction !== directions.S2C)
 					this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
 			}
@@ -108,15 +110,14 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 
 
 MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
-	debugger;
-	var currentRequestInfo = "request #" + requestNum;
 
+	var currentRequestInfo = "request #" + requestNum;
 	var requestFromDb = this.requests[requestNum];
 
 	if (requestFromDb.direction !== directions.S2C)
 		throw new Error('Received response from the server out of order!');
 
-	var methodName = serverCodes.reverse[methodId];
+	var methodName = this.serverCodes.reverse[methodId];
 
 	if (methodName !== requestFromDb.method)
 		throw new Error('Methods do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
@@ -124,12 +125,13 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 	var argsFromDb = requestFromDb.args.buffer;
 
 	if (args.toString('hex') !== argsFromDb.toString('hex')) {
-		if (!methodToTypeMap[methodName])
+		debugger;
+		if (!this.methodToTypeMap[methodName])
 			throw new Error('schema for code ' + methodName + ' not known');
 
-		var argsParsed = makeArgsAndSanatize(methodName);
+		var argsParsed = this._makeArgsAndSanatize(args, methodName, argsFromDb, requestFromDb);
 		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
-		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer,argsParsed.fromDb,difference);
+		console.log("A-server, B-from db\n%j\n%j\n%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
 	}
 
 	if (type !== requestFromDb.type)
@@ -137,7 +139,8 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 };
 
 
-MitmPlayback.prototype._makeArgsAndSanatize = function (methodName) {
+MitmPlayback.prototype._makeArgsAndSanatize = function (args, methodName, argsFromDb, requestFromDb) {
+	debugger;
 	var argsParsed = this.protobuf.Parse(args, this.methodToTypeMap[methodName]);
 	var argsFromDbParsed = this.protobuf.Parse(argsFromDb, this.methodToTypeMap[requestFromDb.method]);
 
