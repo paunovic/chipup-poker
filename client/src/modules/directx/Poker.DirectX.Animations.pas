@@ -3,7 +3,7 @@ unit Poker.DirectX.Animations;
 interface
 
 uses
-   Winapi.Windows, System.Classes, Vectors2, AsphyreTiming, System.SyncObjs;
+   Winapi.Windows, System.Classes, Asphyre.Math, Asphyre.Timing, System.SyncObjs;
 
 type
   TDXAnimations = class(TThread)

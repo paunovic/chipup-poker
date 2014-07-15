@@ -3,7 +3,7 @@ unit Poker.Helpers.DX9Canvas;
 interface
 
 uses
-  DX9Canvas, DX9Types, AsphyreD3D9;
+  Asphyre.Canvas.DX9, Asphyre.Types.DX9, Asphyre.D3D9;
 
 type
   TDX9CanvasHelper = class helper for TDX9Canvas

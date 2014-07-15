@@ -79,14 +79,16 @@ begin
   SelfPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   local := GetSpecialFolderPath(CSIDL_LOCAL_APPDATA);
   common := GetSpecialFolderPath(CSIDL_COMMON_APPDATA);
-  if (Pos(LowerCase(common), LowerCase(SelfPath)) > 0) and
-     (IsDirectoryWriteable(common)) then
+  if Pos(LowerCase(common), LowerCase(SelfPath)) > 0 then
     AppDataPath := common
   else
     AppDataPath := local;
   AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(AppDataPath) + 'ChipUP Poker');
 
   ForceDirectories(AppDataPath);
+  if (not DirectoryExists(AppDataPath)) or
+     (not IsDirectoryWriteable(AppDataPath)) then
+    AppDataPath := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(local) + 'ChipUP Poker');
 
   {$IFDEF DEBUG}
   TfrmDebug.Initialize;

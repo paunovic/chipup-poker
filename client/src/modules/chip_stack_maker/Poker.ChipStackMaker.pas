@@ -3,7 +3,7 @@ unit Poker.ChipStackMaker;
 interface
 
 uses
-  System.Generics.Collections, AsphyreImages, Poker.ChipStackMaker.ChipStack;
+  System.Generics.Collections, Asphyre.Images, Poker.ChipStackMaker.ChipStack;
 
 type
   TChipStackMaker = class(TObjectDictionary<UINT32, TChipStack>)

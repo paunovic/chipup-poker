@@ -3,7 +3,7 @@ unit Poker.DirectX.Core;
 interface
 
 uses
-  Winapi.Windows, AsphyreFonts, AbstractDevices, AbstractCanvas, DX9Canvas;
+  Winapi.Windows, Asphyre.Fonts, Asphyre.Devices, Asphyre.Canvas, Asphyre.Canvas.DX9;
 
 type
   TDXCore = class
@@ -37,7 +37,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, AsphyreFactory, Vectors2px, DX9Providers, Poker.Helpers.DX9Canvas, Poker.Settings, AsphyreSwapChains;
+  System.SysUtils, System.Classes, Asphyre.Math, Poker.Helpers.DX9Canvas, Poker.Settings, Asphyre.SwapChains, Asphyre.Providers,
+  Asphyre.Providers.DX9;
 
 
 class procedure TDXCore.Initialize;
@@ -49,7 +50,6 @@ class procedure TDXCore.Deinitialize;
 begin
   FreeAndNil(DXCore);
 end;
-
 
 constructor TDXCore.Create;
 var

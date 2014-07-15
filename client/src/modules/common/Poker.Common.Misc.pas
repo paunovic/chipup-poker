@@ -3,7 +3,7 @@ unit Poker.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG, AsphyreTypes,
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG, Asphyre.Types,
   Vcl.Controls;
 
 {$IFDEF DEBUG}

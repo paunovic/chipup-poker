@@ -5,7 +5,7 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, AsphyreImages, AsphyreArchives, AsphyreFonts, AbstractCanvas, Poker.Cards;
+  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas, Poker.Cards;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
@@ -193,7 +193,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.DataModule, Poker.Settings, AsphyreColors;
+  System.SysUtils, Poker.DataModule, Poker.Settings;
 
 
 
