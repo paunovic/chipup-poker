@@ -213,6 +213,11 @@ message User {
 	required PlayerSubscriptionPlan subscription_plan = 7;
 }
 
+message SubscriptionUpgrade {
+	required PlayerSubscriptionPlan subscription_plan = 1;
+	optional string url = 2;
+}
+
 message Game {
 	enum GameLimit {
 		glNoLimit = 0;
