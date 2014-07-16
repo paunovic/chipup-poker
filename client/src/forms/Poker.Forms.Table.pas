@@ -8,7 +8,7 @@ uses
   Vcl.ActnList, cxLabel, Poker.Tables.Table, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, Asphyre.Images, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls,
-  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit;
+  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage;
 
 type
   TfrmTable = class(TForm)
@@ -430,6 +430,17 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     table.Renderer.MouseMove(Shift, X, Y, set_raise_amount);
+
+    if (table.Status.TotalRake > 0) and
+       (PtInRect(RectF(table.Renderer.Metrics.TotalRakePoint.x - table.Renderer.Metrics.ChipWidth / 2, 0,
+                       table.Renderer.Metrics.TotalRakePoint.x + table.Renderer.Metrics.ChipWidth / 2,
+                       table.Renderer.Metrics.TotalRakePoint.y + table.Renderer.Metrics.ChipHeight), PointF(X, Y))) then
+    begin
+      Hint := Format('Rake: %s', [ChipsToStr(table.Status.TotalRake)]);
+      ShowHint := TRUE;
+    end
+    else
+      Hint := '';
 
     if (set_raise_amount) and
        (table.GetObjectCopy(game)) then

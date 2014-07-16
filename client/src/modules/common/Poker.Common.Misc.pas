@@ -644,6 +644,8 @@ begin
     Delete(result, Length(result) - 1, 2)
   else
     Insert('.', result, Length(result) - 1);
+  if AValue < 100 then
+    result := '0' + result;
 end;
 
 procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);

@@ -3,15 +3,19 @@ unit Poker.Server.MessageContainer;
 interface
 
 uses
-  Winapi.Windows, System.Generics.Collections, OverbyteIcsWSocket, System.SyncObjs, Poker.Server.MessageCallbacks;
+  Winapi.Windows, Winapi.Messages, System.Generics.Collections, OverbyteIcsWSocket, System.SyncObjs, Poker.Server.MessageCallbacks;
 
 type
   TMessageContainer = class
   private
     FCallbackSets: TObjectList<TCallbackSet>;
+    FInternalHWND: HWND;
     FLock: TCriticalSection;
 
     function GetCallbackSetsCount: Integer;
+    procedure WndProc(var AMessage: TMessage);
+    procedure ProcessSocketReply(const AMethodId: Integer; const AObject: TObject);
+    procedure ProcessSocketStateChange(const AOldState, ANewState: TSocketState);
 
   public
     class procedure Initialize;
@@ -23,10 +27,8 @@ type
     function AddCallbacks(const ACallbacks: array of TObject; const APriority: Boolean = FALSE): Integer;
     procedure RemoveCallbacks(var AId: Integer);
 
-    procedure ProcessSocketReply(const AMethodId: Integer; const AObject: TObject);
-    procedure ProcessSocketStateChange(const AOldState, ANewState: TSocketState);
-
     property CallbackSetsCount: Integer read GetCallbackSetsCount;
+    property HWND: HWND read FInternalHWND;
   end;
 
 var
@@ -37,7 +39,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils;
+  System.SysUtils, System.Classes, Poker.WindowMessages;
 
 
 class procedure TMessageContainer.Initialize;
@@ -54,6 +56,7 @@ end;
 constructor TMessageContainer.Create;
 begin
   FLock := TCriticalSection.Create;
+  FInternalHWND := AllocateHWND(WndProc);
   FCallbackSets := TObjectList<TCallbackSet>.Create;
 end;
 
@@ -62,6 +65,7 @@ begin
   FLock.Enter;
   try
     FreeAndNil(FCallbackSets);
+    DeallocateHWnd(FInternalHWND);
   finally
     FLock.Leave;
   end;
@@ -153,6 +157,9 @@ begin
           if Integer(callback_servermsg.Code) = AMethodId then
             callback_servermsg.Callback(AMethodId, AObject)
         end;
+
+    if Assigned(AObject) then
+      AObject.Free;
   finally
     FLock.Leave;
   end;
@@ -176,6 +183,16 @@ begin
   finally
     FLock.Leave;
   end;
+end;
+
+procedure TMessageContainer.WndProc(var AMessage: TMessage);
+begin
+  case AMessage.Msg of
+    WM_MESSAGE_CALLBACK_PROTO: ProcessSocketReply(AMessage.LParam, pointer(AMessage.WParam));
+    WM_MESSAGE_CALLBACK_SOCKET_STATE: ProcessSocketStateChange(TSocketState(AMessage.WParam), TSocketState(AMessage.LParam));
+  end;
+
+  inherited;
 end;
 
 end.

@@ -831,8 +831,6 @@ object frmDebug: TfrmDebug
       Text = 'Find text...'
       OnEnter = teFindTextEnter
       OnExit = teFindTextExit
-      ExplicitLeft = 461
-      ExplicitWidth = 150
       Height = 19
       Width = 154
     end

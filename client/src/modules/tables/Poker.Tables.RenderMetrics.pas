@@ -51,6 +51,7 @@ type
     FStandUpButtonWidth: Single;
     FStandUpButtonHeight: Single;
     FStandUpButtonBounds: TPoint4;
+    FTotalRakePoint: TPoint2;
     FPlayNowResizeRatio: Single;
     FPlayNowButtonWidth: Single;
     FPlayNowButtonHeight: Single;
@@ -123,6 +124,7 @@ type
     property PlayNowButtonBounds: TPoint4 read FPlayNowButtonBounds;
     property RaisePresetButtonsBounds: TArray<TPoint4> read FRaisePresetButtonsBounds;
     property ActionButtonsBounds: TArray<TPoint4> read FActionButtonsBounds;
+    property TotalRakePoint: TPoint2 read FTotalRakePoint;
   end;
 
 
@@ -516,6 +518,9 @@ begin
 
   FHandPlaybackForward := FHandPlaybackPlay;
   FHandPlaybackForward.Offset(wint + 3, 0);
+
+  // total rake bounds
+  FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4);
 end;
 
 end.
