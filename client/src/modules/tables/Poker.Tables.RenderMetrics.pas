@@ -11,6 +11,7 @@ type
   TTableRenderMetrics = class
   private
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+    FLastDXAreaSize: TPoint2px;
     FTableResizeRatio: Single;
     FRawTableBounds: TPoint4;
     FTableWidth: Single;
@@ -354,115 +355,125 @@ var
   C1: Integer;
   w, h: Single;
   wint, hint: Integer;
+  area_resized: Boolean;
 begin
-  // table resize ratio
-  FTableResizeRatio := (ADXAreaSize.y * TABLE_HEIGHT_OF_FORM) / TableResources.TableImage.Texture[0].Height;
+  area_resized := (ADXAreaSize.x <> FLastDXAreaSize.x) or
+                  (ADXAreaSize.y <> FLastDXAreaSize.y);
+  if area_resized then
+  begin
+    // table resize ratio
+    FTableResizeRatio := (ADXAreaSize.y * TABLE_HEIGHT_OF_FORM) / TableResources.TableImage.Texture[0].Height;
 
-  // lower interface border
-  FLowerIntfBorder := Round(10 * FTableResizeRatio);
+    // lower interface border
+    FLowerIntfBorder := Round(10 * FTableResizeRatio);
 
-  // table raw dimensions, the ones that include table shadow, used to draw table on canvas
-  w := TableResources.TableImage.Texture[0].Width * FTableResizeRatio;
-  h := TableResources.TableImage.Texture[0].Height * FTableResizeRatio;
-  FRawTableBounds := pBounds4((ADXAreaSize.x - w) / 2, (ADXAreaSize.y - h) / 2 + TABLE_Y_OFFSET * FTableResizeRatio, w, h);
+    // table raw dimensions, the ones that include table shadow, used to draw table on canvas
+    w := TableResources.TableImage.Texture[0].Width * FTableResizeRatio;
+    h := TableResources.TableImage.Texture[0].Height * FTableResizeRatio;
+    FRawTableBounds := pBounds4((ADXAreaSize.x - w) / 2, (ADXAreaSize.y - h) / 2 + TABLE_Y_OFFSET * FTableResizeRatio, w, h);
 
-  // dimensions of table only, used to calculate position of elements inside it (chips, cards, etc)
-  FTableWidth := (FRawTableBounds[1].X - FRawTableBounds[0].X) - (TABLE_X_LEFT + TABLE_X_RIGHT) * FTableResizeRatio;
-  FTableHeight := (FRawTableBounds[2].Y - FRawTableBounds[0].Y) - (TABLE_Y_TOP + TABLE_Y_BOTTOM) * FTableResizeRatio;
-  FTableBounds := pBounds4(FRawTableBounds[0].X + TABLE_X_LEFT * FTableResizeRatio,
-                           FRawTableBounds[0].Y + TABLE_Y_TOP * FTableResizeRatio,
-                           FTableWidth,
-                           FTableHeight);
+    // dimensions of table only, used to calculate position of elements inside it (chips, cards, etc)
+    FTableWidth := (FRawTableBounds[1].X - FRawTableBounds[0].X) - (TABLE_X_LEFT + TABLE_X_RIGHT) * FTableResizeRatio;
+    FTableHeight := (FRawTableBounds[2].Y - FRawTableBounds[0].Y) - (TABLE_Y_TOP + TABLE_Y_BOTTOM) * FTableResizeRatio;
+    FTableBounds := pBounds4(FRawTableBounds[0].X + TABLE_X_LEFT * FTableResizeRatio,
+                             FRawTableBounds[0].Y + TABLE_Y_TOP * FTableResizeRatio,
+                             FTableWidth,
+                             FTableHeight);
 
-  // table center
-  FTableCenterYOffset := -28 * FTableResizeRatio;
-  FTableCenter.X := FTableBounds[0].X + (FTableBounds[1].X - FTableBounds[0].X) / 2;
-  FTableCenter.Y := FTableBounds[0].Y + (FTableBounds[2].Y - FTableBounds[0].Y) / 2 + FTableCenterYOffset;
+    // table center
+    FTableCenterYOffset := -28 * FTableResizeRatio;
+    FTableCenter.X := FTableBounds[0].X + (FTableBounds[1].X - FTableBounds[0].X) / 2;
+    FTableCenter.Y := FTableBounds[0].Y + (FTableBounds[2].Y - FTableBounds[0].Y) / 2 + FTableCenterYOffset;
 
-  // dealer center point (where the cards come from, not dealer button point!)
-  FDealerPoint.X := FTableCenter.X;
-  FDealerPoint.Y := FTableBounds[0].Y;
+    // dealer center point (where the cards come from, not dealer button point!)
+    FDealerPoint.X := FTableCenter.X;
+    FDealerPoint.Y := FTableBounds[0].Y;
+
+  end;
 
   // seats
   FSeatHeight := (ADXAreaSize.y - (FTableBounds[2].Y - FTableBounds[0].Y)) / 5.2;
   if AGame.Seats = 10 then
     FSeatHeight := FSeatHeight * 0.85;
 
-  FSeatWidth := FSeatHeight * TableResources.SeatAspectRatio;
-  FSeatResizeRatio := FSeatWidth / TableResources.SeatLeftImage.Texture[0].Width;
-  FSeatActionResizeRatio := FSeatResizeRatio * 1.1;
+  if area_resized then
+  begin
+    FSeatWidth := FSeatHeight * TableResources.SeatAspectRatio;
+    FSeatResizeRatio := FSeatWidth / TableResources.SeatLeftImage.Texture[0].Width;
+    FSeatActionResizeRatio := FSeatResizeRatio * 1.1;
 
-  // cards
-  FCardWidth := TableResources.CardBackgroundImage.Texture[0].Width * FTableResizeRatio;
-  FCardHeight := FCardWidth / TableResources.CardAspectRatio;
-  FCardArtworkWidth := FCardWidth * (0.48 + FTableResizeRatio / 5);
-  FCardArtworkHeight := FCardHeight * 0.85;
-  FSeatCardsMaxWidth := FSeatWidth * 0.65;
-  if FSeatCardsMaxWidth < (FCardWidth * 2) + 2 then
-    FSeatCardsMaxWidth := (FCardWidth * 2) + 2;
+    // cards
+    FCardWidth := TableResources.CardBackgroundImage.Texture[0].Width * FTableResizeRatio;
+    FCardHeight := FCardWidth / TableResources.CardAspectRatio;
+    FCardArtworkWidth := FCardWidth * (0.48 + FTableResizeRatio / 5);
+    FCardArtworkHeight := FCardHeight * 0.85;
+    FSeatCardsMaxWidth := FSeatWidth * 0.65;
+    if FSeatCardsMaxWidth < (FCardWidth * 2) + 2 then
+      FSeatCardsMaxWidth := (FCardWidth * 2) + 2;
 
-  // dealer button
-  FDealerButtonWidth := TableResources.DealerButtonImage.Texture[0].Width * FTableResizeRatio;
-  FDealerButtonHeight := FDealerButtonWidth / TableResources.DealerButtonAspectRatio;
+    // dealer button
+    FDealerButtonWidth := TableResources.DealerButtonImage.Texture[0].Width * FTableResizeRatio;
+    FDealerButtonHeight := FDealerButtonWidth / TableResources.DealerButtonAspectRatio;
 
-  // chips
-  FChipWidth := TableResources.Chip1Image.Texture[0].Width * FTableResizeRatio;
-  FChipHeight := FChipWidth / TableResources.ChipAspectRatio;
+    // chips
+    FChipWidth := TableResources.Chip1Image.Texture[0].Width * FTableResizeRatio;
+    FChipHeight := FChipWidth / TableResources.ChipAspectRatio;
 
-  // timebar/timebank
-  FTimebarWidth := TableResources.TimebarImage.Texture[0].Width * FSeatActionResizeRatio;
-  FTimebarHeight := FTimebarWidth / TableResources.TimebarAspectRatio;
+    // timebar/timebank
+    FTimebarWidth := TableResources.TimebarImage.Texture[0].Width * FSeatActionResizeRatio;
+    FTimebarHeight := FTimebarWidth / TableResources.TimebarAspectRatio;
 
-  // seat action frame
-  FSeatActionFrameWidth := TableResources.SeatActionCheck.Texture[0].Width * FSeatActionResizeRatio;
-  FSeatActionFrameHeight := FSeatActionFrameWidth / TableResources.SeatActionFrameAspectRatio;
+    // seat action frame
+    FSeatActionFrameWidth := TableResources.SeatActionCheck.Texture[0].Width * FSeatActionResizeRatio;
+    FSeatActionFrameHeight := FSeatActionFrameWidth / TableResources.SeatActionFrameAspectRatio;
 
-  // standup button resize ratio
-  FStandUpResizeRatio := FTableResizeRatio * 1.5;
-  if FStandUpResizeRatio > 1 then
-    FStandUpResizeRatio := 1;
+    // standup button resize ratio
+    FStandUpResizeRatio := FTableResizeRatio * 1.5;
+    if FStandUpResizeRatio > 1 then
+      FStandUpResizeRatio := 1;
 
-  // standup button bounds
-  FStandUpButtonWidth := TableResources.StandUpButtonNormalImage.Texture[0].Width * FStandUpResizeRatio;
-  FStandUpButtonHeight := FStandUpButtonWidth / TableResources.StandUpButtonAspectRatio;
-  FStandUpButtonBounds := pBounds4(ADXAreaSize.x - FStandUpButtonWidth + 1, -1, FStandUpButtonWidth, FStandUpButtonHeight);
+    // standup button bounds
+    FStandUpButtonWidth := TableResources.StandUpButtonNormalImage.Texture[0].Width * FStandUpResizeRatio;
+    FStandUpButtonHeight := FStandUpButtonWidth / TableResources.StandUpButtonAspectRatio;
+    FStandUpButtonBounds := pBounds4(ADXAreaSize.x - FStandUpButtonWidth + 1, -1, FStandUpButtonWidth, FStandUpButtonHeight);
 
-  // playnow button resize ratio
-  FPlayNowResizeRatio := FTableResizeRatio * 1.38;
-  if FPlayNowResizeRatio > 1 then
-    FPlayNowResizeRatio := 1;
+    // playnow button resize ratio
+    FPlayNowResizeRatio := FTableResizeRatio * 1.38;
+    if FPlayNowResizeRatio > 1 then
+      FPlayNowResizeRatio := 1;
 
-  // playnow button bounds
-  FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
-  FPlayNowButtonHeight := FPlayNowButtonWidth / TableResources.PlayNowButtonAspectRatio;
-  FPlayNowButtonBounds := pBounds4(FChatBoxBounds.Right + (ADXAreaSize.x - FChatBoxBounds.Right) / 2 - FPlayNowButtonWidth / 2,
-                                   FChatBoxBounds.Top + (ADXAreaSize.y - FChatBoxBounds.Top) / 2.5 - FPlayNowButtonHeight / 2,
-                                   FPlayNowButtonWidth, FPlayNowButtonHeight);
+    // playnow button bounds
+    FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
+    FPlayNowButtonHeight := FPlayNowButtonWidth / TableResources.PlayNowButtonAspectRatio;
+    FPlayNowButtonBounds := pBounds4(FChatBoxBounds.Right + (ADXAreaSize.x - FChatBoxBounds.Right) / 2 - FPlayNowButtonWidth / 2,
+                                     FChatBoxBounds.Top + (ADXAreaSize.y - FChatBoxBounds.Top) / 2.5 - FPlayNowButtonHeight / 2,
+                                     FPlayNowButtonWidth, FPlayNowButtonHeight);
 
-  // action buttons bounds
-  FActionButtonWidth := TableResources.ActionButtonNormalImage.Texture[0].Width * FTableResizeRatio;
-  FActionButtonHeight := FActionButtonWidth / TableResources.ActionButtonAspectRatio;
-  SetLength(FActionButtonsBounds, 3);
-  FActionButtonsBounds[High(FActionButtonsBounds)] := pBounds4(ADXAreaSize.x - FLowerIntfBorder * 1.5 - FActionButtonWidth,
-                                                               ADXAreaSize.y - FLowerIntfBorder - FActionButtonHeight,
-                                                               FActionButtonWidth, FActionButtonHeight);
+    // action buttons bounds
+    FActionButtonWidth := TableResources.ActionButtonNormalImage.Texture[0].Width * FTableResizeRatio;
+    FActionButtonHeight := FActionButtonWidth / TableResources.ActionButtonAspectRatio;
+    SetLength(FActionButtonsBounds, 3);
+    FActionButtonsBounds[High(FActionButtonsBounds)] := pBounds4(ADXAreaSize.x - FLowerIntfBorder * 1.5 - FActionButtonWidth,
+                                                                 ADXAreaSize.y - FLowerIntfBorder - FActionButtonHeight,
+                                                                 FActionButtonWidth, FActionButtonHeight);
 
-  for C1 := High(FActionButtonsBounds) - 1 downto Low(FActionButtonsBounds) do
-    FActionButtonsBounds[C1] := pBounds4(FActionButtonsBounds[C1 + 1][0].x - FlowerIntfBorder * 2 - FActionButtonWidth,
-                                         FActionButtonsBounds[C1 + 1][0].y, FActionButtonWidth, FActionButtonHeight);
+    for C1 := High(FActionButtonsBounds) - 1 downto Low(FActionButtonsBounds) do
+      FActionButtonsBounds[C1] := pBounds4(FActionButtonsBounds[C1 + 1][0].x - FlowerIntfBorder * 2 - FActionButtonWidth,
+                                           FActionButtonsBounds[C1 + 1][0].y, FActionButtonWidth, FActionButtonHeight);
 
-  // raise panel bounds
-  w := FActionButtonsBounds[High(FActionButtonsBounds)][0].x + FActionButtonWidth - FActionButtonsBounds[Low(FActionButtonsBounds)][0].x;
-  h := Round(w / TableResources.RaiseSliderAspectRatio);
-  FRaisePanelResizeRatio := w / TableResources.RaiseSliderBackgroundImage.Texture[0].Width;
+    // raise panel bounds
+    w := FActionButtonsBounds[High(FActionButtonsBounds)][0].x + FActionButtonWidth - FActionButtonsBounds[Low(FActionButtonsBounds)][0].x;
+    h := Round(w / TableResources.RaiseSliderAspectRatio);
+    FRaisePanelResizeRatio := w / TableResources.RaiseSliderBackgroundImage.Texture[0].Width;
 
-  FRaisePanelBounds := pBounds4(FActionButtonsBounds[Low(FActionButtonsBounds)][0].x, FActionButtonsBounds[Low(FActionButtonsBounds)][0].y - FLowerIntfBorder - h, w, h);
+    FRaisePanelBounds := pBounds4(FActionButtonsBounds[Low(FActionButtonsBounds)][0].x, FActionButtonsBounds[Low(FActionButtonsBounds)][0].y - FLowerIntfBorder - h, w, h);
 
-  // raise track bounds (track where thumb button moves on)
-  FRaiseTrackBounds := pBounds4(FRaisePanelBounds[0].x + TableResources.RAISE_TRACK_LEFT_OFFSET * FRaisePanelResizeRatio,
-                                FRaisePanelBounds[0].y + TableResources.RAISE_TRACK_TOP_OFFSET * FRaisePanelResizeRatio,
-                                TableResources.RAISE_TRACK_SLIDER_WIDTH * FRaisePanelResizeRatio,
-                                TableResources.RAISE_TRACK_SLIDER_HEIGHT * FRaisePanelResizeRatio);
+    // raise track bounds (track where thumb button moves on)
+    FRaiseTrackBounds := pBounds4(FRaisePanelBounds[0].x + TableResources.RAISE_TRACK_LEFT_OFFSET * FRaisePanelResizeRatio,
+                                  FRaisePanelBounds[0].y + TableResources.RAISE_TRACK_TOP_OFFSET * FRaisePanelResizeRatio,
+                                  TableResources.RAISE_TRACK_SLIDER_WIDTH * FRaisePanelResizeRatio,
+                                  TableResources.RAISE_TRACK_SLIDER_HEIGHT * FRaisePanelResizeRatio);
+  end;
 
   // raise thumb button bounds
   w := TableResources.RaiseSliderButtonImage.Texture[0].Width * FRaisePanelResizeRatio;
@@ -470,60 +481,66 @@ begin
   FRaiseThumbBounds := pBounds4(FRaiseTrackBounds[0].x + ARaiseThumbPosition * (FRaiseTrackBounds[1].x - FRaiseTrackBounds[0].x) - w / 2,
                                 FRaiseTrackBounds[0].y + (FRaiseTrackBounds[2].y - FRaiseTrackBounds[0].y) / 2 - h / 2, w, h);
 
-  // raise preset buttons bounds
-  FRaisePresetButtonWidth := TableResources.RaisePresetButtonNormalImage.Texture[0].Width * FTableResizeRatio;
-  FRaisePresetButtonHeight := FRaisePresetButtonWidth / TableResources.RaisePresetButtonAspectRatio;
+  if area_resized then
+  begin
+    // raise preset buttons bounds
+    FRaisePresetButtonWidth := TableResources.RaisePresetButtonNormalImage.Texture[0].Width * FTableResizeRatio;
+    FRaisePresetButtonHeight := FRaisePresetButtonWidth / TableResources.RaisePresetButtonAspectRatio;
 
-  SetLength(FRaisePresetButtonsBounds, 4);
-  FRaisePresetButtonsBounds[High(FRaisePresetButtonsBounds)] := pBounds4(FRaisePanelBounds[1].x - FRaisePresetButtonWidth,
-                                                                         FRaisePanelBounds[0].y - FLowerIntfBorder / 2.5 - FRaisePresetButtonHeight,
-                                                                         FRaisePresetButtonWidth, FRaisePresetButtonHeight);
-  for C1 := High(FRaisePresetButtonsBounds) - 1 downto Low(FRaisePresetButtonsBounds) do
-    FRaisePresetButtonsBounds[C1] := pBounds4(FRaisePresetButtonsBounds[C1 + 1][0].x - FLowerIntfBorder - FRaisePresetButtonWidth,
-                                              FRaisePresetButtonsBounds[C1 + 1][0].y, FRaisePresetButtonWidth, FRaisePresetButtonHeight);
+    SetLength(FRaisePresetButtonsBounds, 4);
+    FRaisePresetButtonsBounds[High(FRaisePresetButtonsBounds)] := pBounds4(FRaisePanelBounds[1].x - FRaisePresetButtonWidth,
+                                                                           FRaisePanelBounds[0].y - FLowerIntfBorder / 2.5 - FRaisePresetButtonHeight,
+                                                                           FRaisePresetButtonWidth, FRaisePresetButtonHeight);
+    for C1 := High(FRaisePresetButtonsBounds) - 1 downto Low(FRaisePresetButtonsBounds) do
+      FRaisePresetButtonsBounds[C1] := pBounds4(FRaisePresetButtonsBounds[C1 + 1][0].x - FLowerIntfBorder - FRaisePresetButtonWidth,
+                                                FRaisePresetButtonsBounds[C1 + 1][0].y, FRaisePresetButtonWidth, FRaisePresetButtonHeight);
 
-  // raise amount box bounds
-  FRaiseAmountBoxBounds.Left := Round(FRaisePanelBounds[0].x + TableResources.RAISE_VALUEBOX_X * FRaisePanelResizeRatio);
-  FRaiseAmountBoxBounds.Top := Round(FRaisePanelBounds[0].y + TableResources.RAISE_VALUEBOX_Y * FRaisePanelResizeRatio);
-  FRaiseAmountBoxBounds.Width := Round(TableResources.RAISE_VALUEBOX_WIDTH * FRaisePanelResizeRatio);
-  FRaiseAmountBoxBounds.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaisePanelResizeRatio);
+    // raise amount box bounds
+    FRaiseAmountBoxBounds.Left := Round(FRaisePanelBounds[0].x + TableResources.RAISE_VALUEBOX_X * FRaisePanelResizeRatio);
+    FRaiseAmountBoxBounds.Top := Round(FRaisePanelBounds[0].y + TableResources.RAISE_VALUEBOX_Y * FRaisePanelResizeRatio);
+    FRaiseAmountBoxBounds.Width := Round(TableResources.RAISE_VALUEBOX_WIDTH * FRaisePanelResizeRatio);
+    FRaiseAmountBoxBounds.Height := Round(TableResources.RAISE_VALUEBOX_HEIGHT * FRaisePanelResizeRatio);
 
-  // raise amount font size
-  if FRaiseAmountBoxBounds.Height < 19 then
-    FRaiseAmountBoxFontSize := 7
-  else
-    if FRaiseAmountBoxBounds.Height < 22 then
-      FRaiseAmountBoxFontSize := 9
+    // raise amount font size
+    if FRaiseAmountBoxBounds.Height < 19 then
+      FRaiseAmountBoxFontSize := 7
     else
-      FRaiseAmountBoxFontSize := 10;
+      if FRaiseAmountBoxBounds.Height < 22 then
+        FRaiseAmountBoxFontSize := 9
+      else
+        FRaiseAmountBoxFontSize := 10;
 
-  // chat box and editbox bounds
-  wint := Round(ADXAreaSize.x / 3.15);
-  hint := ADXAreaSize.y div 7;
-  FChatBoxBounds := TRect.Create(Point(FLowerIntfBorder, ADXAreaSize.y - FLowerIntfBorder - hint), wint, hint);
-  FChatEditBounds := TRect.Create(Point(FChatBoxBounds.Left, FChatBoxBounds.Top - 18), FChatBoxBounds.Width, 18);
-  FCheckboxesLeft := FChatBoxBounds.Right + FLowerIntfBorder;
+    // chat box and editbox bounds
+    wint := Round(ADXAreaSize.x / 3.15);
+    hint := ADXAreaSize.y div 7;
+    FChatBoxBounds := TRect.Create(Point(FLowerIntfBorder, ADXAreaSize.y - FLowerIntfBorder - hint), wint, hint);
+    FChatEditBounds := TRect.Create(Point(FChatBoxBounds.Left, FChatBoxBounds.Top - 18), FChatBoxBounds.Width, 18);
+    FCheckboxesLeft := FChatBoxBounds.Right + FLowerIntfBorder;
 
-  // hand playback bounds
-  wint := ADXAreaSize.x div 3;
-  hint := 9;
-  FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 5), FChatBoxBounds.Top), wint, hint);
+    // hand playback bounds
+    wint := ADXAreaSize.x div 3;
+    hint := 9;
+    FHandPlaybackProgress := TRect.Create(Point(Round(ADXAreaSize.x / 2 - wint / 5), FChatBoxBounds.Top), wint, hint);
 
-  wint := 48;
-  hint := 48;
-  FHandPlaybackPlay := TRect.Create(Point(Round(FHandPlaybackProgress.Left + FHandPlaybackProgress.Width / 2 - wint / 2),
-                                          Round(FHandPlaybackProgress.Bottom + 3)), wint, hint);
-  FHandPlaybackBack := FHandPlaybackPlay;
-  FHandPlaybackBack.Offset(-wint - 3, 0);
+    wint := 48;
+    hint := 48;
+    FHandPlaybackPlay := TRect.Create(Point(Round(FHandPlaybackProgress.Left + FHandPlaybackProgress.Width / 2 - wint / 2),
+                                            Round(FHandPlaybackProgress.Bottom + 3)), wint, hint);
+    FHandPlaybackBack := FHandPlaybackPlay;
+    FHandPlaybackBack.Offset(-wint - 3, 0);
 
-  FHandPlaybackForward := FHandPlaybackPlay;
-  FHandPlaybackForward.Offset(wint + 3, 0);
+    FHandPlaybackForward := FHandPlaybackPlay;
+    FHandPlaybackForward.Offset(wint + 3, 0);
+  end;
 
   // total rake bounds
   if ATableStatus.IsSitting then
     FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
   else
-    FTotalRakePoint := Point2(FStandUpButtonBounds[1].x - 10 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
+    FTotalRakePoint := Point2(FStandUpButtonBounds[1].x - 10 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4);
+
+  if area_resized then
+    FLastDXAreaSize := ADXAreaSize;
 end;
 
 end.
