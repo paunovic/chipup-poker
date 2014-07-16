@@ -2,7 +2,7 @@
 var fs = require("fs");
 var Protobuf = require("node-protobuf").Protobuf;
 var ProtobufUtil = require('./ProtobufUtil');
-var mitm = require('./man_in_the_middle');
+var mitm = require('./mitm');
 var MongoClient = require('mongodb').MongoClient;
 var serverCodes = require('./ServerCodes.js');
 
