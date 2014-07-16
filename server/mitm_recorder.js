@@ -6,9 +6,8 @@ var mitm = require('./mitm');
 var MongoClient = require('mongodb').MongoClient;
 var serverCodes = require('./ServerCodes.js');
 
-var schema = 'Poker.RpcMessage';
 var pb = new Protobuf(fs.readFileSync("../message.desc"));
-var pu = new ProtobufUtil(pb, schema);
+var pu = new ProtobufUtil(pb, 'Poker.RpcMessage');
 
 var realServerPort = 12345;
 var fakeServerPort = 55555;
@@ -16,24 +15,27 @@ var fakeServerPort = 55555;
 MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 	if (err) throw err;
 
-	db.collection('mitm').remove({}, function (err, result) {
-		if (err) console.warn(err.message);
-	});
+	db.collection('gameState').remove(function(err) {
+    if(err) throw err;
+    
+		db.collection('mitm').remove({}, function (err, result) {
+			if (err) throw err;
 
-	var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, recordCallback);
-	mitmServer.listen(fakeServerPort);
-
-	function recordCallback(methodId, args, type, socketId, direction) {
-		db.collection('mitm').insert({
-			method: serverCodes.reverse[methodId],
-			args: args,
-			type: type,
-			socketId: socketId,
-			direction: direction,
-			timestamp: Date.now()
-		}, function (err, inserted) {
-			if (err) console.warn(err.message);
+			var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, recordCallback);
+			mitmServer.listen(fakeServerPort);
 		});
-	}
-});
 
+		function recordCallback(methodId, args, type, socketId, direction) {
+			db.collection('mitm').insert({
+				method: serverCodes.reverse[methodId],
+				args: args,
+				type: type,
+				socketId: socketId,
+				direction: direction,
+				timestamp: Date.now()
+			}, function (err, inserted) {
+				if (err) console.warn(err.message);
+			});
+		}
+   });
+});
