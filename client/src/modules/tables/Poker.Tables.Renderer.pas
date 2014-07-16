@@ -397,7 +397,7 @@ begin
   if FTableType = ttLiveGame then
     DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4)
   else
-    DXCore.Canvas.UseImage(TableResources.RoomBackgroundGrayscaleImage, TexFull4);
+    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.RoomBackgroundImage), TexFull4);
   DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), clWhite4);
 end;
 
@@ -406,7 +406,7 @@ begin
   if FTableType = ttLiveGame then
     DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4)
   else
-    DXCore.Canvas.UseImage(TableResources.TableGrayscaleImage, TexFull4);
+    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.TableImage), TexFull4);
   DXCore.Canvas.TexMap(FMetrics.RawTableBounds, clWhite4);
 end;
 

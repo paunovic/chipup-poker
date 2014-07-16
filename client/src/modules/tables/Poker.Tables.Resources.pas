@@ -5,7 +5,7 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas, Poker.Cards;
+  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas, Poker.Cards, System.Generics.Collections;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
@@ -22,9 +22,7 @@ type
       FDXFonts: TAsphyreFonts;
 
       FRoomBackgroundImage: TAsphyreImage;
-      FRoomBackgroundGrayscaleImage: TAsphyreImage;
       FTableImage: TAsphyreImage;
-      FTableGrayscaleImage: TAsphyreImage;
       FCardBackgroundImage: TAsphyreImage;
       FSeatLeftImage: TAsphyreImage;
       FSeatLeftActiveImage: TAsphyreImage;
@@ -60,6 +58,7 @@ type
       FSeatActionFold: TAsphyreImage;
       FSeatActionRaise: TAsphyreImage;
       FSeatActionDisconnected: TAsphyreImage;
+      FGrayscaleImages: TObjectDictionary<TAsphyreImage, TAsphyreImage>;
 
       FBarmenoFonts: TBarmenoFonts;
       FCardCharactersFont_19px: TAsphyreFont;
@@ -129,13 +128,12 @@ type
     destructor Destroy; override;
 
     function GetCardArtwork(const ACard: TCard): TAsphyreImage;
+    function GrayscaleVersion(const AImage: TAsphyreImage): TAsphyreImage;
 
     property DXImages: TAsphyreImages read FDXImages;
 
     property RoomBackgroundImage: TAsphyreImage read FRoomBackgroundImage;
-    property RoomBackgroundGrayscaleImage: TAsphyreImage read FRoomBackgroundGrayscaleImage;
     property TableImage: TAsphyreImage read FTableImage;
-    property TableGrayscaleImage: TAsphyreImage read FTableGrayscaleImage;
     property CardBackgroundImage: TAsphyreImage read FCardBackgroundImage;
     property SeatLeftImage: TAsphyreImage read FSeatLeftImage;
     property SeatLeftActiveImage: TAsphyreImage read FSeatLeftActiveImage;
@@ -229,11 +227,7 @@ begin
   FDXImages := TAsphyreImages.Create;
 
   AddDXImage('TableBackground.image', FRoomBackgroundImage);
-  AddDXImage('TableBackground.image', FRoomBackgroundGrayscaleImage);
-  DesaturateImage(FRoomBackgroundGrayscaleImage);
   AddDXImage('Table.image', FTableImage, FTableAspectRatio);
-  AddDXImage('Table.image', FTableGrayscaleImage);
-  DesaturateImage(FTableGrayscaleImage);
   AddDXImage('SeatLeft.image', FSeatLeftImage, FSeatAspectRatio);
   AddDXImage('SeatLeftActive.image', FSeatLeftActiveImage);
   AddDXImage('SeatLeftEmpty.image', FSeatLeftEmptyImage);
@@ -269,6 +263,8 @@ begin
   AddDXImage('ActionFold.image', FSeatActionFold);
   AddDXImage('ActionRaise.image', FSeatActionRaise);
 
+  FGrayscaleImages := TObjectDictionary<TAsphyreImage, TAsphyreImage>.Create([]);
+
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
     for CCS := Low(TCardSuit) to High(TCardSuit) do
@@ -292,6 +288,7 @@ end;
 
 destructor TTableResources.Destroy;
 begin
+  FGrayscaleImages.Free;
   FDXFonts.Free;
   FDXImages.Free;
   FDXMediaFile.Free;
@@ -307,6 +304,7 @@ begin
   if id <> -1 then
   begin
     AReceiver := FDXImages[id];
+    AReceiver.Name := AName;
     AAspectRatio := AReceiver.Texture[0].Width / AReceiver.Texture[0].Height;
   end
   else
@@ -343,6 +341,16 @@ begin
   valueint := Integer(ACard.Value) - 1;
   suitint := Integer(ACard.Suit) - 1;
   result := FCardArtworksImages[valueint * 4 + suitint];
+end;
+
+function TTableResources.GrayscaleVersion(const AImage: TAsphyreImage): TAsphyreImage;
+begin
+  if not FGrayscaleImages.TryGetValue(AImage, result) then
+  begin
+    AddDXImage(AImage.Name, result);
+    DesaturateImage(result);
+    FGrayscaleImages.Add(AImage, result);
+  end;
 end;
 
 procedure TTableResources.DesaturateImage(const AImage: TAsphyreImage);
