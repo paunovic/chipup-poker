@@ -112,18 +112,21 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 	
 			try {
 				this._checkIfRequestMatch(methodId, args, type, i);
-				console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
-				this._continueToNextRequests();
-				return;
 			} catch (e) {
 				if (e.message.substring(0, 17) === "Args do not match") 
 					throw e;
-
-				console.log(e.message);
-
-				if (this.requests[i + 1].direction !== directions.S2C)
-					this._checkIfRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
+				else if (this.requests[i + 1].direction !== directions.S2C)
+					// this will throw the original request mismatch error
+					this._checkIfRequestMatch(methodId, args, type, this.currentRequestNumber); 
+				else {
+					console.log("While checking next requests for match, I got this: " + e.message);
+					continue;	
+				}
 			}
+
+			console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
+			this._continueToNextRequests();
+			return;
 		}
 	};
 };
