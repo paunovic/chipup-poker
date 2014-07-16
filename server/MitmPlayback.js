@@ -21,7 +21,7 @@ function MitmPlayback(config) {
 };
 
 
-MitmPlayback.prototype.IGNORE_METHODS = ["scPing", "srPong", "srTableStatsReply"];
+MitmPlayback.prototype.IGNORE_METHODS = ["scPing", "srPong", "srTableStatsReply", "seGameChange"];
 
 
 MitmPlayback.prototype.startPlayback = function() {
