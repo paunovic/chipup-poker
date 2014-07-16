@@ -306,12 +306,10 @@ begin
       Exit;
 
     if ParseRpcMessage(rpc_message, pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size), data_obj) then
-    try
+    begin
       ResetInactivityPingTimer;
       {$IFDEF DEBUG} DebugRpcMessage(ditSocketInc, rpc_message, data_obj); {$ENDIF}
-      MessageContainer.ProcessSocketReply(rpc_message.MethodId, data_obj);
-    finally
-      data_obj.Free;
+      PostMessage(MessageContainer.HWND, WM_MESSAGE_CALLBACK_PROTO, NativeUInt(data_obj), rpc_message.MethodId);
     end;
 
     ptmp := pointer(Integer(FReceiveBuffer) + SizeOf(rpc_size) + rpc_size + rpc_message.DataSize);
@@ -340,7 +338,7 @@ begin
     wsClosed: ;
   end;
 
-  MessageContainer.ProcessSocketStateChange(OldState, NewState);
+  PostMessage(MessageContainer.HWND, WM_MESSAGE_CALLBACK_SOCKET_STATE, Integer(OldState), Integer(NewState));
 end;
 
 
