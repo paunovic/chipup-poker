@@ -60,7 +60,7 @@ MitmPlayback.prototype._sendRequests = function() {
 		var methodId = this.serverCodes[request.method];
 		var encodedMessage = this.protobufUtil.encode(methodId, request.args.buffer, request.type);
 		this._writeMessageAndTestIfItsOk(encodedMessage, request.socketId);
-		console.log("Sent request #" + this.currentRequestNumber);
+		console.log("Sent request #%d, %s",this.currentRequestNumber,request.method);
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
