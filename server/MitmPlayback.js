@@ -60,7 +60,7 @@ MitmPlayback.prototype._sendRequests = function() {
 		var methodId = this.serverCodes[request.method];
 		var encodedMessage = this.protobufUtil.encode(methodId, request.args.buffer, request.type);
 		this._writeMessageAndTestIfItsOk(encodedMessage, request.socketId);
-		console.log("Sent request #" + this.currentRequestNumber);
+		console.log("Sent request #" + this.currentRequestNumber + " on socket id " + request.socketId);
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
@@ -82,8 +82,16 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 
 	if (socket._writableState.length > (256 * 1024))
 		throw new Error('Send overflow!');
-		
-	console.log("Sent message on socket id " + socketId);
+};
+
+
+MitmPlayback.prototype._getMethodName = function (methodId) {
+	return this.serverCodes.reverse[methodId];
+};
+
+
+MitmPlayback.prototype._isInTheIgnoreList = function (methodName) {
+	return this.IGNORE_METHODS.indexOf(methodName) !== -1;
 };
 
 
@@ -91,17 +99,22 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 	return function (err, methodId, args, type) {
 		if (err) throw err;
 
-		var methodName = this.serverCodes.reverse[methodId];
-		if (this.IGNORE_METHODS.indexOf(methodName) !== -1) return this._continueToNextRequests();
+		var methodName = this._getMethodName(methodId);
+		
+		if (this._isInTheIgnoreList(methodName)) {
+			this._continueToNextRequests();
+			return;
+		} 
 					
 		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
 			if (this.requests[i].socketId !== socketId) 
 				continue;
 	
 			try {
-				this._checkIfSingleRequestMatch(methodId, args, type, i);
+				this._checkIfRequestMatch(methodId, args, type, i);
 				console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
-				return this._continueToNextRequests();
+				this._continueToNextRequests();
+				return;
 			} catch (e) {
 				if (e.message.substring(0, 17) === "Args do not match") 
 					throw e;
@@ -109,7 +122,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 				console.log(e.message);
 
 				if (this.requests[i + 1].direction !== directions.S2C)
-					this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
+					this._checkIfRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
 			}
 		}
 	};
@@ -121,15 +134,18 @@ MitmPlayback.prototype._continueToNextRequests = function () {
 	this._sendRequests();
 };
 
-MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
+MitmPlayback.prototype._isServerToClientDirection = function (direction) {
+	return direction === directions.S2C;
+};
 
+MitmPlayback.prototype._checkIfRequestMatch = function (methodId, args, type, requestNum) {
 	var currentRequestInfo = "request #" + requestNum;
 	var requestFromDb = this.requests[requestNum];
 
-	if (requestFromDb.direction !== directions.S2C)
+	if ( ! this._isServerToClientDirection(requestFromDb.direction))
 		throw new Error('Received response from the server out of order!');
 
-	var methodName = this.serverCodes.reverse[methodId];
+	var methodName = this._getMethodName(methodId);
 
 	if (methodName !== requestFromDb.method)
 		throw new Error('Methods do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
@@ -137,7 +153,6 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 	var argsFromDb = requestFromDb.args.buffer;
 
 	if (args.toString('hex') !== argsFromDb.toString('hex')) {
-		debugger;
 		if (!this.methodToTypeMap[methodName])
 			throw new Error('schema for code ' + methodName + ' not known');
 
@@ -151,13 +166,13 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 	}
 
 	if (type !== requestFromDb.type)
-		throw new Error('Type param do not match! ' + currentRequestInfo);
+		throw new Error('Type param does not match! ' + currentRequestInfo);
 };
 
 
 MitmPlayback.prototype._makeArgsAndSanatize = function (args, methodId, argsFromDb, requestFromDb) {
 	debugger;
-	var methodName = this.serverCodes.reverse[methodId];
+	var methodName = this._getMethodName(methodId);
 	var argsParsed = this.protobuf.Parse(args, this.methodToTypeMap[methodName]);
 	var argsFromDbParsed = this.protobuf.Parse(argsFromDb, this.methodToTypeMap[requestFromDb.method]);
 
