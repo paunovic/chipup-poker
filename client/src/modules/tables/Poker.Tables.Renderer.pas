@@ -855,6 +855,7 @@ begin
       begin
         // using timebank..
         if (FTimeImage <> TableResources.TimebankImage) and
+           (table.Status.CurrentSeat = table.Status.SelfSeatIndex) and
            (Assigned(FOnTimebankStarted)) then
           FOnTimebankStarted(self);
 
