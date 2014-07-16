@@ -139,8 +139,11 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 
 		var argsParsed = this._makeArgsAndSanatize(args, methodId, argsFromDb, requestFromDb);
 		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
-		console.log("A-server, B-from db\n%j\n%j\ndiff:%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
-		if (difference) throw new Error('Requests do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
+		
+		if (difference) {
+			console.log("A-server, B-from db\n%j\n%j\ndiff:%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
+			throw new Error('Requests do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
+		}
 	}
 
 	if (type !== requestFromDb.type)
