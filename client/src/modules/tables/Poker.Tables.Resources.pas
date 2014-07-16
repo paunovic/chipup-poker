@@ -44,10 +44,8 @@ type
       FRaiseSliderBackgroundImage: TAsphyreImage;
       FRaiseSliderButtonImage: TAsphyreImage;
       FActionButtonNormalImage: TAsphyreImage;
-//      FActionButtonHotImage: TAsphyreImage;
       FActionButtonPressedImage: TAsphyreImage;
       FRaisePresetButtonNormalImage: TAsphyreImage;
-//      FRaisePresetButtonHotImage: TAsphyreImage;
       FRaisePresetButtonPressedImage: TAsphyreImage;
       FStandUpButtonNormalImage: TAsphyreImage;
       FStandUpButtonPressedImage: TAsphyreImage;
@@ -154,10 +152,8 @@ type
     property RaiseSliderBackgroundImage: TAsphyreImage read FRaiseSliderBackgroundImage;
     property RaiseSliderButtonImage: TAsphyreImage read FRaiseSliderButtonImage;
     property ActionButtonNormalImage: TAsphyreImage read FActionButtonNormalImage;
-//    property ActionButtonHotImage: TAsphyreImage read FActionButtonHotImage;
     property ActionButtonPressedImage: TAsphyreImage read FActionButtonPressedImage;
     property RaisePresetButtonNormalImage: TAsphyreImage read FRaisePresetButtonNormalImage;
-//    property RaisePresetButtonHotImage: TAsphyreImage read FRaisePresetButtonHotImage;
     property RaisePresetButtonPressedImage: TAsphyreImage read FRaisePresetButtonPressedImage;
     property StandUpButtonNormalImage: TAsphyreImage read FStandUpButtonNormalImage;
     property StandUpButtonPressedImage: TAsphyreImage read FStandUpButtonPressedImage;
@@ -248,10 +244,8 @@ begin
   AddDXImage('RaiseSliderBackground.image', FRaiseSliderBackgroundImage, FRaiseSliderAspectRatio);
   AddDXImage('RaiseSliderButton.image', FRaiseSliderButtonImage, FRaiseSliderButtonAspectRatio);
   AddDXImage('ActionButtonNormal.image', FActionButtonNormalImage, FActionButtonAspectRatio);
-//  AddDXImage('ActionButtonHot.image', FActionButtonHotImage);
   AddDXImage('ActionButtonPressed.image', FActionButtonPressedImage);
   AddDXImage('RaisePresetButtonNormal.image', FRaisePresetButtonNormalImage, FRaisePresetButtonAspectRatio);
-//  AddDXImage('RaisePresetButtonHot.image', FRaisePresetButtonHotImage);
   AddDXImage('RaisePresetButtonPressed.image', FRaisePresetButtonPressedImage);
   AddDXImage('StandUpButtonNormal.image', FStandUpButtonNormalImage, FStandUpButtonAspectRatio);
   AddDXImage('StandUpButtonPressed.image', FStandUpButtonPressedImage);
