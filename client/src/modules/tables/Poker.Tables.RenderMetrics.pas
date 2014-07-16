@@ -3,7 +3,7 @@ unit Poker.Tables.RenderMetrics;
 interface
 
 uses
-  Winapi.Windows, Asphyre.Math, Asphyre.Types, Poker.Games.Game, Poker.Seats.Seat, System.Types;
+  Winapi.Windows, Asphyre.Math, Asphyre.Types, Poker.Games.Game, Poker.Seats.Seat, System.Types, Poker.Tables.Status;
 
 type
   TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
@@ -84,7 +84,7 @@ type
     function IsPointInRaiseThumb(const AX, AY: Integer): Boolean;
     function IsPointInRaiseTrack(const AX, AY: Integer; out APercentage: Single): Boolean;
 
-    procedure Update(const AGame: TGameInfo; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
+    procedure Update(const AGame: TGameInfo; const ATableStatus: TTableStatus; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
 
     property TableResizeRatio: Single read FTableResizeRatio;
     property RawTableBounds: TPoint4 read FRawTableBounds;
@@ -342,7 +342,7 @@ begin
   Exit(FALSE);
 end;
 
-procedure TTableRenderMetrics.Update(const AGame: TGameInfo; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
+procedure TTableRenderMetrics.Update(const AGame: TGameInfo; const ATableStatus: TTableStatus; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
 const
   TABLE_X_LEFT = 64;
   TABLE_X_RIGHT = 64;
@@ -520,7 +520,10 @@ begin
   FHandPlaybackForward.Offset(wint + 3, 0);
 
   // total rake bounds
-  FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4);
+  if ATableStatus.IsSitting then
+    FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
+  else
+    FTotalRakePoint := Point2(FStandUpButtonBounds[1].x - 10 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
 end;
 
 end.

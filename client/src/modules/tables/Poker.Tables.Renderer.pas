@@ -348,7 +348,7 @@ begin
   try
     if table.GetObjectCopy(game) then
     try
-      FMetrics.Update(game, FDXAreaSize, FRaiseThumbPosition);
+      FMetrics.Update(game, table.Status, FDXAreaSize, FRaiseThumbPosition);
     finally
       game.Free;
     end;
@@ -1275,7 +1275,7 @@ begin
     rake := 100;
 
   chips_stack := FChipStackMaker.MakeStack(rake);
-  RenderChipStack(FMetrics.TotalRakePoint, chips_stack, cRGB4(150, 150, 150));
+  RenderChipStack(FMetrics.TotalRakePoint, chips_stack, cRGB4(110, 110, 110));
 end;
 
 function TTableRenderer.AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage; const ARenderActionCaption: Boolean = FALSE; const AFontScale: Single = 1): Integer;

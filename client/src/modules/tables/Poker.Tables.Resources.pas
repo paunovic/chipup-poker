@@ -83,6 +83,7 @@ type
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
     procedure AddDXFont(const AName: String; var AReceiver: TAsphyreFont);
+    procedure ImageToGrayscale(const AImage: TAsphyreImage);
 
   public
     const
@@ -193,7 +194,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.DataModule, Poker.Settings;
+  System.SysUtils, Poker.DataModule, Poker.Settings, Asphyre.Colors, Asphyre.Types;
 
 
 
@@ -334,6 +335,17 @@ begin
   valueint := Integer(ACard.Value) - 1;
   suitint := Integer(ACard.Suit) - 1;
   result := FCardArtworksImages[valueint * 4 + suitint];
+end;
+
+procedure TTableResources.ImageToGrayscale(const AImage: TAsphyreImage);
+var
+  C1: Integer;
+  x, y: Integer;
+begin
+  for C1 := 0 to AImage.TextureCount - 1 do
+    for x := 0 to AImage.Texture[C1].Width div 10 - 1 do
+      for y := 0 to AImage.Texture[C1].Height - 1 do;
+//        AImage.Texture[C1].Pixels[x, y] := Gray(AImage.Texture[C1].Pixels[x, y]);
 end;
 
 end.
