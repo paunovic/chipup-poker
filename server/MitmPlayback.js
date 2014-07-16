@@ -103,7 +103,11 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 				console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
 				return this._continueToNextRequests();
 			} catch (e) {
+				if (e.message.substring(0, 17) === "Args do not match") 
+					throw e;
+
 				console.log(e.message);
+
 				if (this.requests[i + 1].direction !== directions.S2C)
 					this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber); // this will throw the original request mismatch error
 			}
@@ -142,7 +146,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 		
 		if (difference) {
 			console.log("A-server, B-from db\n%j\n%j\ndiff:%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
-			throw new Error('Requests do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
+			throw new Error('Args do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
 		}
 	}
 
