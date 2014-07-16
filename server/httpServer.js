@@ -402,9 +402,9 @@ Server.prototype.installers_func = function (req,res) {
 				if (row) {
 					fs.unlink('installers/'+row.name,function (err) {
 					});
+					row.remove(function () {});
 				}
 				// FIXME, delete the raw objects if they are unused
-				row.remove(function () {});
 				cb();
 			}.bind(this));
 		}.bind(this);
