@@ -22,7 +22,9 @@ type
       FDXFonts: TAsphyreFonts;
 
       FRoomBackgroundImage: TAsphyreImage;
+      FRoomBackgroundGrayscaleImage: TAsphyreImage;
       FTableImage: TAsphyreImage;
+      FTableGrayscaleImage: TAsphyreImage;
       FCardBackgroundImage: TAsphyreImage;
       FSeatLeftImage: TAsphyreImage;
       FSeatLeftActiveImage: TAsphyreImage;
@@ -83,7 +85,7 @@ type
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
     procedure AddDXFont(const AName: String; var AReceiver: TAsphyreFont);
-    procedure ImageToGrayscale(const AImage: TAsphyreImage);
+    procedure DesaturateImage(const AImage: TAsphyreImage);
 
   public
     const
@@ -131,7 +133,9 @@ type
     property DXImages: TAsphyreImages read FDXImages;
 
     property RoomBackgroundImage: TAsphyreImage read FRoomBackgroundImage;
+    property RoomBackgroundGrayscaleImage: TAsphyreImage read FRoomBackgroundGrayscaleImage;
     property TableImage: TAsphyreImage read FTableImage;
+    property TableGrayscaleImage: TAsphyreImage read FTableGrayscaleImage;
     property CardBackgroundImage: TAsphyreImage read FCardBackgroundImage;
     property SeatLeftImage: TAsphyreImage read FSeatLeftImage;
     property SeatLeftActiveImage: TAsphyreImage read FSeatLeftActiveImage;
@@ -194,7 +198,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.DataModule, Poker.Settings, Asphyre.Colors, Asphyre.Types;
+  System.SysUtils, Poker.DataModule, Poker.Settings, Asphyre.Colors, Asphyre.Types, System.Types;
 
 
 
@@ -225,7 +229,11 @@ begin
   FDXImages := TAsphyreImages.Create;
 
   AddDXImage('TableBackground.image', FRoomBackgroundImage);
+  AddDXImage('TableBackground.image', FRoomBackgroundGrayscaleImage);
+  DesaturateImage(FRoomBackgroundGrayscaleImage);
   AddDXImage('Table.image', FTableImage, FTableAspectRatio);
+  AddDXImage('Table.image', FTableGrayscaleImage);
+  DesaturateImage(FTableGrayscaleImage);
   AddDXImage('SeatLeft.image', FSeatLeftImage, FSeatAspectRatio);
   AddDXImage('SeatLeftActive.image', FSeatLeftActiveImage);
   AddDXImage('SeatLeftEmpty.image', FSeatLeftEmptyImage);
@@ -337,15 +345,41 @@ begin
   result := FCardArtworksImages[valueint * 4 + suitint];
 end;
 
-procedure TTableResources.ImageToGrayscale(const AImage: TAsphyreImage);
+procedure TTableResources.DesaturateImage(const AImage: TAsphyreImage);
+type
+  PPixelRec = ^TPixelRec;
+  TPixelRec = packed record
+    B: Byte;
+    G: Byte;
+    R: Byte;
+    A: Byte;
+  end;
 var
-  C1: Integer;
-  x, y: Integer;
+  C1, x, y: Integer;
+  bitsp: pointer;
+  pitch: Integer;
+  bytes_per_pixel: Integer;
+  pixel: PPixelRec;
+  gray_value: Byte;
 begin
   for C1 := 0 to AImage.TextureCount - 1 do
-    for x := 0 to AImage.Texture[C1].Width div 10 - 1 do
-      for y := 0 to AImage.Texture[C1].Height - 1 do;
-//        AImage.Texture[C1].Pixels[x, y] := Gray(AImage.Texture[C1].Pixels[x, y]);
+  begin
+    AImage.Texture[C1].Lock(Rect(0, 0, AImage.Texture[C1].Width, AImage.Texture[C1].Height), bitsp, pitch);
+    try
+      bytes_per_pixel := pitch div AImage.Texture[C1].Width;
+      for y := 0 to AImage.Texture[C1].Height - 1 do
+        for x := 0 to AImage.Texture[C1].Width - 1 do
+        begin
+          pixel := PPixelRec(Integer(bitsp) + y * pitch + x * bytes_per_pixel);
+          gray_value := Round(0.30 * pixel^.r + 0.59 * pixel^.g + 0.11 * pixel^.b);
+          pixel^.r := gray_value;
+          pixel^.g := gray_value;
+          pixel^.b := gray_value;
+        end;
+    finally
+      AImage.Texture[C1].Unlock;
+    end;
+  end;
 end;
 
 end.

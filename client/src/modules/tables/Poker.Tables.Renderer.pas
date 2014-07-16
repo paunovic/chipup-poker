@@ -34,7 +34,6 @@ type
     FTableType: TTableType;
     FTimeImage: TAsphyreImage;
     FRaiseThumbPosition: Single;
-    FDrawColor: TColor4;
     FDXButtons: TObjectList<TDXButton>;
     FRenderingFoldedCards: Boolean;
 
@@ -160,11 +159,6 @@ begin
   FChipStackMaker := TChipStackMaker.Create;
   FDXButtons := TObjectList<TDXButton>.Create;
   FTableType := ATableType;
-
-  if FTableType = ttHandPlayback then
-    FDrawColor := cRGB4(120, 120, 120)
-  else
-    FDrawColor := clWhite4;
 
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
@@ -400,14 +394,20 @@ end;
 
 procedure TTableRenderer.RenderBackground;
 begin
-  DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4);
-  DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), FDrawColor);
+  if FTableType = ttLiveGame then
+    DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4)
+  else
+    DXCore.Canvas.UseImage(TableResources.RoomBackgroundGrayscaleImage, TexFull4);
+  DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), clWhite4);
 end;
 
 procedure TTableRenderer.RenderTable;
 begin
-  DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4);
-  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, FDrawColor);
+  if FTableType = ttLiveGame then
+    DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4)
+  else
+    DXCore.Canvas.UseImage(TableResources.TableGrayscaleImage, TexFull4);
+  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, clWhite4);
 end;
 
 procedure TTableRenderer.RenderSeats(const AGameInfo: TGameInfo);
