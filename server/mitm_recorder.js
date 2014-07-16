@@ -1,4 +1,13 @@
 'use strict';
+/*
+How to use:
+1) empty gameState collection from poker db
+2) start server (node master.js)
+3) run this file
+
+* if you want to run again, stop the server, empty gameState and then run the server again
+
+*/
 var fs = require("fs");
 var Protobuf = require("node-protobuf").Protobuf;
 var ProtobufUtil = require('./ProtobufUtil');
@@ -15,27 +24,23 @@ var fakeServerPort = 55555;
 MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 	if (err) throw err;
 
-	db.collection('gameState').remove(function(err) {
-    if(err) throw err;
-    
-		db.collection('mitm').remove({}, function (err, result) {
-			if (err) throw err;
+	db.collection('mitm').remove({}, function (err, result) {
+		if (err) throw err;
 
-			var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, recordCallback);
-			mitmServer.listen(fakeServerPort);
+		var mitmServer = mitm.createManInTheMiddleServer(pu, realServerPort, recordCallback);
+		mitmServer.listen(fakeServerPort);
+	});
+
+	function recordCallback(methodId, args, type, socketId, direction) {
+		db.collection('mitm').insert({
+			method: serverCodes.reverse[methodId],
+			args: args,
+			type: type,
+			socketId: socketId,
+			direction: direction,
+			timestamp: Date.now()
+		}, function (err, inserted) {
+			if (err) console.warn(err.message);
 		});
-
-		function recordCallback(methodId, args, type, socketId, direction) {
-			db.collection('mitm').insert({
-				method: serverCodes.reverse[methodId],
-				args: args,
-				type: type,
-				socketId: socketId,
-				direction: direction,
-				timestamp: Date.now()
-			}, function (err, inserted) {
-				if (err) console.warn(err.message);
-			});
-		}
-   });
+	}
 });
