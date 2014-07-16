@@ -1,4 +1,11 @@
 /*
+How to use:
+1) empty gameState collection from poker db
+2) start server (node master.js)
+3) run this file
+
+* if you want to run again, stop the server, empty gameState and then run the server again
+
 TODO:
 1. add code to control master.js to start/restart it everytime you run pinning tests and when you wipe gameState
 2. random generator?
