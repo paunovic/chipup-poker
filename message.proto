@@ -20,7 +20,7 @@ enum ServerCodes {
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
 	srGetPlayers = 14;
-
+	srSubscriptionPlanChange = 15;
 	srOwnershipGiveAwayNotOwner = 16;
 	srOwnershipGiveAwayInvalidPlayerId = 17;
 	srOwnershipGiveAwayInvalidClubId = 18;
@@ -75,7 +75,7 @@ enum ServerCodes {
 	scGiveClubOwnership = 80;
 	scChangeClubDetails = 81;
 	scDeleteClub = 82;
-
+	scSubscriptionPlanChange = 83;
 	scChangeEmail = 84;
 	scChangePassword = 85;
 	scSetAvatar = 86;
@@ -214,7 +214,7 @@ message User {
 }
 
 message SubscriptionUpgrade {
-	required PlayerSubscriptionPlan subscription_plan = 1;
+	required User.PlayerSubscriptionPlan subscription_plan = 1;
 	optional string url = 2;
 }
 
