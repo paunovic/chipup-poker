@@ -21,6 +21,9 @@ function MitmPlayback(config) {
 };
 
 
+MitmPlayback.prototype.IGNORE_METHODS = ["scPing", "srPong"];
+
+
 MitmPlayback.prototype.startPlayback = function() {
 	this.socketIds.forEach(function(socketId) {
 		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected.bind(this));
@@ -87,6 +90,9 @@ MitmPlayback.prototype._writeMessageAndTestIfItsOk = function (encodedMessage, s
 MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 	return function (err, methodId, args, type) {
 		if (err) throw err;
+
+		var methodName = this.serverCodes.reverse[methodId];
+		if (this.IGNORE_METHODS.indexOf(methodName) !== -1) return;
 					
 		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
 			if (this.requests[i].socketId !== socketId) 
@@ -94,7 +100,6 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 	
 			try {
 				this._checkIfSingleRequestMatch(methodId, args, type, i);
-				var methodName = this.serverCodes.reverse[methodId];
 				console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
 				++this.currentRequestNumber;
 				this._sendRequests();
