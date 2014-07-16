@@ -92,7 +92,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 		if (err) throw err;
 
 		var methodName = this.serverCodes.reverse[methodId];
-		if (this.IGNORE_METHODS.indexOf(methodName) !== -1) return;
+		if (this.IGNORE_METHODS.indexOf(methodName) !== -1) return this._continueToNextRequests();
 					
 		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
 			if (this.requests[i].socketId !== socketId) 
@@ -101,9 +101,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 			try {
 				this._checkIfSingleRequestMatch(methodId, args, type, i);
 				console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
-				++this.currentRequestNumber;
-				this._sendRequests();
-				return;
+				return this._continueToNextRequests();
 			} catch (e) {
 				console.log(e.message);
 				if (this.requests[i + 1].direction !== directions.S2C)
@@ -113,6 +111,11 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 	};
 };
 
+
+MitmPlayback.prototype._continueToNextRequests = function () {
+	++this.currentRequestNumber;
+	this._sendRequests();
+};
 
 MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
 
