@@ -117,7 +117,7 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
 			if (this.requests[i].socketId !== socketId) 
 				continue;
-	
+			
 			try {
 				this._checkIfRequestMatch(methodId, args, type, i);
 			} catch (e) {
@@ -127,8 +127,8 @@ MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
 					// this will throw the original request mismatch error
 					this._checkIfRequestMatch(methodId, args, type, this.currentRequestNumber); 
 				else {
-					console.log("While checking next requests for match, I got this: " + e.message);
-					continue;	
+					console.log("While checking next requests for match, I got this: %s\n%s",e.message,e.stack);
+					continue;
 				}
 			}
 
@@ -168,11 +168,11 @@ MitmPlayback.prototype._checkIfRequestMatch = function (methodId, args, type, re
 			throw new Error('schema for code ' + methodName + ' not known');
 
 		var argsParsed = this._makeArgsAndSanatize(args, methodId, argsFromDb, requestFromDb);
-		var difference = diff(argsParsed.fromServer, argsParsed.fromDb);
+		var difference = diff(argsParsed.fromDb,argsParsed.fromServer);
 		
 		if (difference) {
-			console.log("A-server, B-from db\n%j\n%j\ndiff:%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
-			throw new Error('Args do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
+			console.log("left=db right=server\nserver:%j\ndb:%j\ndiff:%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
+			throw new Error(util.format('Args do not match! socket#%d ',requestFromDb.socketId) + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
 		}
 	}
 
