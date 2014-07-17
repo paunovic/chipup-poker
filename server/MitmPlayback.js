@@ -112,6 +112,10 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 		var methodName = this._getMethodName(methodId);
 		var requestInfo = "request #" + this.currentRequestNumber + " socket id " + socketId 
 			+ ", " + methodName;
+
+
+		console.log('_checkIfRequestMatch called! ' + requestInfo);
+
 		
 		if (this._methodShouldBeIgnored(methodName)) {
 			this._continueToNextRequests();
