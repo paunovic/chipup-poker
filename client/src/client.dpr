@@ -173,7 +173,8 @@ uses
   Poker.Common.WavePlayer.DirectSoundBuffer in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas',
   Poker.Common.WavePlayer in 'modules\common\wave_player\Poker.Common.WavePlayer.pas',
   Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas',
-  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas';
+  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas',
+  Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas';
 
 procedure FocusApp;
 var
