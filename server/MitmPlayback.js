@@ -26,24 +26,24 @@ MitmPlayback.prototype.IGNORE_METHODS = ["scPing", "srPong", "srTableStatsReply"
 
 MitmPlayback.prototype.startPlayback = function() {
 	this.socketIds.forEach(function(socketId) {
-		this._openNewSocket(socketId, this._checkIfAllSocketsAreConnected.bind(this));
+		this._openNewSocket(socketId);
 	}, this);
 };
 
 
-MitmPlayback.prototype._openNewSocket = function (socketId, callback) {
+MitmPlayback.prototype._openNewSocket = function (socketId) {
 	var self = this;
 	var socket = net.connect(this.port, this.host, function () {
 		socket.on('error', function (err) { throw err; });
-		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfNextRequestsMatch(socketId).bind(self)));
+		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfRequestMatch(socketId).bind(self)));
 		self.sockets[socketId] = socket;
 		console.log("Opened socket id " + socketId);
-		callback();
+		self._checkIfAllSocketsAreConnected();
 	});
 };
 
 
-MitmPlayback.prototype._checkIfAllSocketsAreConnected = function(callback) {
+MitmPlayback.prototype._checkIfAllSocketsAreConnected = function() {
 	var allConnected = true;
 	this.socketIds.forEach(function(socketId) {
 		if (!this.sockets[socketId]) allConnected = false;
@@ -60,17 +60,13 @@ MitmPlayback.prototype._sendRequests = function() {
 		var methodId = this.serverCodes[request.method];
 		var encodedMessage = this.protobufUtil.encode(methodId, request.args.buffer, request.type);
 		this._writeMessageAndTestIfItsOk(encodedMessage, request.socketId);
-		console.log("Sent request #%d, %s on socket id %d, %s",this.currentRequestNumber,request.method,request.socketId,this._debugFormat(methodId,request.args.buffer));
+		console.log("Sent request #%d, %s on socket id %d, %s", this.currentRequestNumber, request.method, request.socketId, this._debugFormat(methodId,request.args.buffer));
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
 
 MitmPlayback.prototype._debugFormat = function (methodId,args) {
-	if (methodId == this.serverCodes.scLogin) {
-		return JSON.stringify(this.protobuf.Parse(args,'Poker.LoginParams'));
-	} else {
-		return '';
-	}
+	return (methodId == this.serverCodes.scLogin) ? JSON.stringify(this.protobuf.Parse(args, 'Poker.LoginParams') : '';
 }
 
 
@@ -98,43 +94,58 @@ MitmPlayback.prototype._getMethodName = function (methodId) {
 };
 
 
-MitmPlayback.prototype._isInTheIgnoreList = function (methodName) {
+MitmPlayback.prototype._methodShouldBeIgnored = function (methodName) {
 	return this.IGNORE_METHODS.indexOf(methodName) !== -1;
 };
 
 
-MitmPlayback.prototype._checkIfNextRequestsMatch = function (socketId) {
+MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 	return function (err, methodId, args, type) {
 		if (err) throw err;
 
 		var methodName = this._getMethodName(methodId);
+		var requestInfo = "request #" + this.currentRequestNumber + " socket id " + socketId 
+			+ ", " + methodName;
 		
-		if (this._isInTheIgnoreList(methodName)) {
+		if (this._methodShouldBeIgnored(methodName)) {
 			this._continueToNextRequests();
 			return;
 		} 
-					
-		for (var i = this.currentRequestNumber; i < this.requests.length; i++) {
-			if (this.requests[i].socketId !== socketId) 
-				continue;
-			
-			try {
-				this._checkIfRequestMatch(methodId, args, type, i);
-			} catch (e) {
-				if (e.message.substring(0, 17) === "Args do not match") 
-					throw e;
-				else if (this.requests[i + 1].direction !== directions.S2C)
-					// this will throw the original request mismatch error
-					this._checkIfRequestMatch(methodId, args, type, this.currentRequestNumber); 
-				else {
-					console.log("While checking next requests for match, I got this: %s\n%s",e.message,e.stack);
-					continue;
-				}
-			}
 
-			console.log("Received request #" + this.currentRequestNumber + ", match! " + methodName);
+		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber);
+
+		if (response.code === this.REQUESTS_MATCH) {
+			console.log("MATCH, " + requestInfo);
 			this._continueToNextRequests();
 			return;
+		}
+		else if (response.code === this.WRONG_DIRECTION 
+		    || response.code === this.ARGS_DO_NOT_MATCH
+		    || response.code === this.TYPE_DOES_NOT_MATCH) {
+			throw new Error(response.explanation);
+		}
+		else if (response.code === this.METHODS_DO_NOT_MATCH) {
+			// test if next requests match?
+			for (var i = this.currentRequestNumber + 1; i < this.requests.length; i++) {
+				if (this.requests.socketId !== socketId)
+					continue;
+				
+				response = this._checkIfSingleRequestMatch(methodId, args, type, i);
+				
+				if (response.code === this.REQUESTS_MATCH) {
+					console.log("MATCH, " + requestInfo);
+					this._continueToNextRequests();
+					return;
+				}
+				else if (response.code === this.WRONG_DIRECTION 
+					|| response.code === this.ARGS_DO_NOT_MATCH
+					|| response.code === this.TYPE_DOES_NOT_MATCH) {
+					throw new Error("NO MATCH, " + requestInfo);
+				}
+			}
+		}
+		else {
+			throw new Error('Unknown response code: ' + response.code);
 		}
 	};
 };
@@ -149,40 +160,67 @@ MitmPlayback.prototype._isServerToClientDirection = function (direction) {
 	return direction === directions.S2C;
 };
 
-MitmPlayback.prototype._checkIfRequestMatch = function (methodId, args, type, requestNum) {
-	var currentRequestInfo = "request #" + requestNum;
+MitmPlayback.prototype.WRONG_DIRECTION = 1;
+MitmPlayback.prototype.METHODS_DO_NOT_MATCH = 2;
+MitmPlayback.prototype.ARGS_DO_NOT_MATCH = 3;
+MitmPlayback.prototype.TYPE_DOES_NOT_MATCH = 4;
+MitmPlayback.prototype.REQUESTS_MATCH = 5;
+
+MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
 	var requestFromDb = this.requests[requestNum];
-
-	if ( ! this._isServerToClientDirection(requestFromDb.direction))
-		throw new Error('Received response from the server out of order!');
-
 	var methodName = this._getMethodName(methodId);
+	var requestInfo = "request #" + requestNum + ", method " + methodName + ' vs ' + requestFromDb.method;
 
-	if (methodName !== requestFromDb.method)
-		throw new Error('Methods do not match! ' + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
+	if ( ! this._isServerToClientDirection(requestFromDb.direction)) {
+		return {
+			code: this.WRONG_DIRECTION,
+			explanation: 'This request has a direction client to server, ' + requestInfo
+		};
+	}
+
+	if (methodName !== requestFromDb.method) {
+		return {
+			code: this.METHODS_DO_NOT_MATCH,
+			explanation: 'Methods do not match! ' + requestInfo
+		};
+	}
 
 	var argsFromDb = requestFromDb.args.buffer;
 
 	if (args.toString('hex') !== argsFromDb.toString('hex')) {
 		if (!this.methodToTypeMap[methodName])
-			throw new Error('schema for code ' + methodName + ' not known');
+			throw new Error('Schema for code ' + methodName + ' not known');
 
 		var argsParsed = this._makeArgsAndSanatize(args, methodId, argsFromDb, requestFromDb);
 		var difference = diff(argsParsed.fromDb,argsParsed.fromServer);
 		
 		if (difference) {
-			console.log("left=db right=server\nserver:%j\ndb:%j\ndiff:%j\n", argsParsed.fromServer, argsParsed.fromDb, difference);
-			throw new Error(util.format('Args do not match! socket#%d ',requestFromDb.socketId) + currentRequestInfo + ' ' + methodName + ' vs ' + requestFromDb.method);
+			var message =  "Args do not match! " + requestInfo 
+				+ "\nleft=db right=server\nserver: " + argsParsed.fromServer + "\ndb: "
+				+ argsParsed.fromDb + "\ndiff: " + difference;
+
+			return {
+				code: this.ARGS_DO_NOT_MATCH,
+				explanation: message
+			};
 		}
 	}
 
-	if (type !== requestFromDb.type)
-		throw new Error('Type param does not match! ' + currentRequestInfo);
+	if (type !== requestFromDb.type) {
+		return {
+			code: TYPE_DOES_NOT_MATCH,
+			explanation: 'Type param does not match! ' + requestInfo +' vs ' + requestFromDb.method
+		};
+	}
+
+	return {
+		code: this.REQUESTS_MATCH,
+		explanation: ''
+	};
 };
 
 
 MitmPlayback.prototype._makeArgsAndSanatize = function (args, methodId, argsFromDb, requestFromDb) {
-	debugger;
 	var methodName = this._getMethodName(methodId);
 	var argsParsed = this.protobuf.Parse(args, this.methodToTypeMap[methodName]);
 	var argsFromDbParsed = this.protobuf.Parse(argsFromDb, this.methodToTypeMap[requestFromDb.method]);
@@ -190,15 +228,19 @@ MitmPlayback.prototype._makeArgsAndSanatize = function (args, methodId, argsFrom
 	if (methodId === this.serverCodes.srLoginReply) {
 		argsParsed = this._sanitizeLoginReply(argsParsed);
 		argsFromDbParsed = this._sanitizeLoginReply(argsFromDbParsed);
-	} else if (methodId === this.serverCodes.srTableStatsReply) {
+	} 
+	else if (methodId === this.serverCodes.srTableStatsReply) {
 		argsParsed = this._sanitizeTableStats(argsParsed);
 		argsFromDbParsed = this._sanitizeTableStats(argsFromDbParsed);
-	} else if (methodId === this.serverCodes.seGameChange) {
+	} 
+	else if (methodId === this.serverCodes.seGameChange) {
 		argsParsed.lasthandid = argsFromDbParsed.lasthandid;
-	} else if ([this.serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
+	} 
+	else if ([this.serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
 		argsParsed = this._sanitizeTableStatus(argsParsed);
 		argsFromDbParsed = this._sanitizeTableStatus(argsFromDbParsed);
 	}
+
 	return {fromServer: argsParsed, fromDb: argsFromDbParsed};
 };
 
