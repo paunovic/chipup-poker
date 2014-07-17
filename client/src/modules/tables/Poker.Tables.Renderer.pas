@@ -34,7 +34,6 @@ type
     FTableType: TTableType;
     FTimeImage: TAsphyreImage;
     FRaiseThumbPosition: Single;
-    FDrawColor: TColor4;
     FDXButtons: TObjectList<TDXButton>;
     FRenderingFoldedCards: Boolean;
 
@@ -160,11 +159,6 @@ begin
   FChipStackMaker := TChipStackMaker.Create;
   FDXButtons := TObjectList<TDXButton>.Create;
   FTableType := ATableType;
-
-  if FTableType = ttHandPlayback then
-    FDrawColor := cRGB4(120, 120, 120)
-  else
-    FDrawColor := clWhite4;
 
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
@@ -326,29 +320,31 @@ end;
 
 function TTableRenderer.UpdateDXAreaSize: Boolean;
 var
-  rect: TRect;
+  client_rect: TRect;
   table: TTable;
   game: TGameInfo;
 begin
   result := FALSE;
   if FHandle > 0 then
-  begin
-    Winapi.Windows.GetClientRect(FHandle, rect);
+    Winapi.Windows.GetClientRect(FHandle, client_rect);
 
-    // dont resize if its 0px wide/tall, this causes swap chain element to get destroyed in Asphyre, and black screen after that
-    if (rect.Width > 0) and
-       (rect.Height > 0) then
-    begin
-      FDXAreaSize := Point2px(rect.Width, rect.Height);
-      result := TRUE;
-    end;
+  // dont resize if its 0px wide/tall, this causes swap chain element to get destroyed in Asphyre, and black screen after that
+  if (client_rect.Width > 0) and
+     (client_rect.Height > 0) then
+  begin
+    FDXAreaSize := Point2px(client_rect.Width, client_rect.Height);
+    result := TRUE;
   end;
+
+  if (FDXAreaSize.x = 0) or
+     (FDXAreaSize.y = 0) then
+    FDXAreaSize := Point2px(1, 1);
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     if table.GetObjectCopy(game) then
     try
-      FMetrics.Update(game, FDXAreaSize, FRaiseThumbPosition);
+      FMetrics.Update(game, table.Status, FDXAreaSize, FRaiseThumbPosition);
     finally
       game.Free;
     end;
@@ -400,14 +396,20 @@ end;
 
 procedure TTableRenderer.RenderBackground;
 begin
-  DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4);
-  DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), FDrawColor);
+  if FTableType = ttLiveGame then
+    DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4)
+  else
+    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.RoomBackgroundImage), TexFull4);
+  DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), clWhite4);
 end;
 
 procedure TTableRenderer.RenderTable;
 begin
-  DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4);
-  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, FDrawColor);
+  if FTableType = ttLiveGame then
+    DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4)
+  else
+    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.TableImage), TexFull4);
+  DXCore.Canvas.TexMap(FMetrics.RawTableBounds, clWhite4);
 end;
 
 procedure TTableRenderer.RenderSeats(const AGameInfo: TGameInfo);
@@ -855,6 +857,7 @@ begin
       begin
         // using timebank..
         if (FTimeImage <> TableResources.TimebankImage) and
+           (table.Status.CurrentSeat = table.Status.SelfSeatIndex) and
            (Assigned(FOnTimebankStarted)) then
           FOnTimebankStarted(self);
 
@@ -1275,7 +1278,7 @@ begin
     rake := 100;
 
   chips_stack := FChipStackMaker.MakeStack(rake);
-  RenderChipStack(FMetrics.TotalRakePoint, chips_stack, cRGB4(150, 150, 150));
+  RenderChipStack(FMetrics.TotalRakePoint, chips_stack, cRGB4(110, 110, 110));
 end;
 
 function TTableRenderer.AddDXButton(const AAction: TAction; const ABounds: PPoint4; const ANormalImage, ADownImage, AHotImage: TAsphyreImage; const ARenderActionCaption: Boolean = FALSE; const AFontScale: Single = 1): Integer;

@@ -15,12 +15,12 @@ enum ServerCodes {
 	srChangeClubDetailsReply = 7;
 	srLogout = 8;
 	srListClubs = 9;
-	srStatus = 10;
+
 	srKickPlayerReply = 11;
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
 	srGetPlayers = 14;
-
+	srSubscriptionPlanChange = 15;
 	srOwnershipGiveAwayNotOwner = 16;
 	srOwnershipGiveAwayInvalidPlayerId = 17;
 	srOwnershipGiveAwayInvalidClubId = 18;
@@ -30,7 +30,6 @@ enum ServerCodes {
 	srChangePasswordOk = 23;
 	srCreateGameOk = 24;
 	srDeleteGameOk = 25;
-	srEditGameOk = 26;
 	srTableSitOk = 27;
 	srTableSitSeatTaken = 28;
 	srTableStandUpOk = 29;
@@ -64,7 +63,7 @@ enum ServerCodes {
 	
 	scHello = 70;
 	scLogin = 71;
-	scStatus = 72;
+
 	scRegister = 73;
 	scForgotPassword = 74;
 	scLogout = 75;
@@ -75,7 +74,7 @@ enum ServerCodes {
 	scGiveClubOwnership = 80;
 	scChangeClubDetails = 81;
 	scDeleteClub = 82;
-
+	scSubscriptionPlanChange = 83;
 	scChangeEmail = 84;
 	scChangePassword = 85;
 	scSetAvatar = 86;
@@ -211,6 +210,12 @@ message User {
 	optional string email = 5;
 	optional bool authed = 6;
 	required PlayerSubscriptionPlan subscription_plan = 7;
+}
+
+message SubscriptionUpgrade {
+	required User.PlayerSubscriptionPlan subscription_plan = 1;
+	optional string url = 2;
+	optional string stripe_token = 3;
 }
 
 message Game {

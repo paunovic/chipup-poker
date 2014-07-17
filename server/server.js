@@ -220,12 +220,6 @@ function fromMongoId(id) {
 	return new Buffer(id.id,'binary');
 }
 
-/*handlers[codes.scStatus] = function(args,token) {
-	this.getStatusPacket(function (status) {
-		this.send(codes.srStatus,status,'Poker.StatusReply');
-		token.stop();
-	}.bind(this));
-}*/
 /*handlers[codes.scRetrieveHandHistoryData] = function (args) {
 	var params = pb.Parse(args,'Poker.RetrieveHandHistoryData');
 	handHistory.find({seq:{ $gt:params.startid, $lt:params.endid }},{seq:1}).toArray(function (err,rows) {

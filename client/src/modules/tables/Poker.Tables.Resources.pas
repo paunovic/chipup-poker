@@ -5,7 +5,7 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas, Poker.Cards;
+  Winapi.Windows, Asphyre.Images, Asphyre.Archives, Asphyre.Fonts, Asphyre.Canvas, Poker.Cards, System.Generics.Collections;
 
 type
   TSeatPointsArray = array[2..10, 0..9] of TPoint;
@@ -44,10 +44,8 @@ type
       FRaiseSliderBackgroundImage: TAsphyreImage;
       FRaiseSliderButtonImage: TAsphyreImage;
       FActionButtonNormalImage: TAsphyreImage;
-//      FActionButtonHotImage: TAsphyreImage;
       FActionButtonPressedImage: TAsphyreImage;
       FRaisePresetButtonNormalImage: TAsphyreImage;
-//      FRaisePresetButtonHotImage: TAsphyreImage;
       FRaisePresetButtonPressedImage: TAsphyreImage;
       FStandUpButtonNormalImage: TAsphyreImage;
       FStandUpButtonPressedImage: TAsphyreImage;
@@ -58,6 +56,7 @@ type
       FSeatActionFold: TAsphyreImage;
       FSeatActionRaise: TAsphyreImage;
       FSeatActionDisconnected: TAsphyreImage;
+      FGrayscaleImages: TObjectDictionary<TAsphyreImage, TAsphyreImage>;
 
       FBarmenoFonts: TBarmenoFonts;
       FCardCharactersFont_19px: TAsphyreFont;
@@ -83,6 +82,7 @@ type
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage; out AAspectRatio: Single); overload;
     procedure AddDXImage(const AName: String; var AReceiver: TAsphyreImage); overload;
     procedure AddDXFont(const AName: String; var AReceiver: TAsphyreFont);
+    procedure DesaturateImage(const AImage: TAsphyreImage);
 
   public
     const
@@ -126,6 +126,7 @@ type
     destructor Destroy; override;
 
     function GetCardArtwork(const ACard: TCard): TAsphyreImage;
+    function GrayscaleVersion(const AImage: TAsphyreImage): TAsphyreImage;
 
     property DXImages: TAsphyreImages read FDXImages;
 
@@ -151,10 +152,8 @@ type
     property RaiseSliderBackgroundImage: TAsphyreImage read FRaiseSliderBackgroundImage;
     property RaiseSliderButtonImage: TAsphyreImage read FRaiseSliderButtonImage;
     property ActionButtonNormalImage: TAsphyreImage read FActionButtonNormalImage;
-//    property ActionButtonHotImage: TAsphyreImage read FActionButtonHotImage;
     property ActionButtonPressedImage: TAsphyreImage read FActionButtonPressedImage;
     property RaisePresetButtonNormalImage: TAsphyreImage read FRaisePresetButtonNormalImage;
-//    property RaisePresetButtonHotImage: TAsphyreImage read FRaisePresetButtonHotImage;
     property RaisePresetButtonPressedImage: TAsphyreImage read FRaisePresetButtonPressedImage;
     property StandUpButtonNormalImage: TAsphyreImage read FStandUpButtonNormalImage;
     property StandUpButtonPressedImage: TAsphyreImage read FStandUpButtonPressedImage;
@@ -193,7 +192,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.DataModule, Poker.Settings;
+  System.SysUtils, Poker.DataModule, Poker.Settings, Asphyre.Colors, Asphyre.Types, System.Types;
 
 
 
@@ -245,10 +244,8 @@ begin
   AddDXImage('RaiseSliderBackground.image', FRaiseSliderBackgroundImage, FRaiseSliderAspectRatio);
   AddDXImage('RaiseSliderButton.image', FRaiseSliderButtonImage, FRaiseSliderButtonAspectRatio);
   AddDXImage('ActionButtonNormal.image', FActionButtonNormalImage, FActionButtonAspectRatio);
-//  AddDXImage('ActionButtonHot.image', FActionButtonHotImage);
   AddDXImage('ActionButtonPressed.image', FActionButtonPressedImage);
   AddDXImage('RaisePresetButtonNormal.image', FRaisePresetButtonNormalImage, FRaisePresetButtonAspectRatio);
-//  AddDXImage('RaisePresetButtonHot.image', FRaisePresetButtonHotImage);
   AddDXImage('RaisePresetButtonPressed.image', FRaisePresetButtonPressedImage);
   AddDXImage('StandUpButtonNormal.image', FStandUpButtonNormalImage, FStandUpButtonAspectRatio);
   AddDXImage('StandUpButtonPressed.image', FStandUpButtonPressedImage);
@@ -259,6 +256,8 @@ begin
   AddDXImage('ActionDisconnected.image', FSeatActionDisconnected);
   AddDXImage('ActionFold.image', FSeatActionFold);
   AddDXImage('ActionRaise.image', FSeatActionRaise);
+
+  FGrayscaleImages := TObjectDictionary<TAsphyreImage, TAsphyreImage>.Create([]);
 
   C1 := 0;
   for CCV := Low(TCardValue) to High(TCardValue) do
@@ -283,6 +282,7 @@ end;
 
 destructor TTableResources.Destroy;
 begin
+  FGrayscaleImages.Free;
   FDXFonts.Free;
   FDXImages.Free;
   FDXMediaFile.Free;
@@ -298,6 +298,7 @@ begin
   if id <> -1 then
   begin
     AReceiver := FDXImages[id];
+    AReceiver.Name := AName;
     AAspectRatio := AReceiver.Texture[0].Width / AReceiver.Texture[0].Height;
   end
   else
@@ -334,6 +335,53 @@ begin
   valueint := Integer(ACard.Value) - 1;
   suitint := Integer(ACard.Suit) - 1;
   result := FCardArtworksImages[valueint * 4 + suitint];
+end;
+
+function TTableResources.GrayscaleVersion(const AImage: TAsphyreImage): TAsphyreImage;
+begin
+  if not FGrayscaleImages.TryGetValue(AImage, result) then
+  begin
+    AddDXImage(AImage.Name, result);
+    DesaturateImage(result);
+    FGrayscaleImages.Add(AImage, result);
+  end;
+end;
+
+procedure TTableResources.DesaturateImage(const AImage: TAsphyreImage);
+type
+  PPixelRec = ^TPixelRec;
+  TPixelRec = packed record
+    B: Byte;
+    G: Byte;
+    R: Byte;
+    A: Byte;
+  end;
+var
+  C1, x, y: Integer;
+  bitsp: pointer;
+  pitch: Integer;
+  bytes_per_pixel: Integer;
+  pixel: PPixelRec;
+  gray_value: Byte;
+begin
+  for C1 := 0 to AImage.TextureCount - 1 do
+  begin
+    AImage.Texture[C1].Lock(Rect(0, 0, AImage.Texture[C1].Width, AImage.Texture[C1].Height), bitsp, pitch);
+    try
+      bytes_per_pixel := pitch div AImage.Texture[C1].Width;
+      for y := 0 to AImage.Texture[C1].Height - 1 do
+        for x := 0 to AImage.Texture[C1].Width - 1 do
+        begin
+          pixel := PPixelRec(Integer(bitsp) + y * pitch + x * bytes_per_pixel);
+          gray_value := Round(0.30 * pixel^.r + 0.59 * pixel^.g + 0.11 * pixel^.b);
+          pixel^.r := gray_value;
+          pixel^.g := gray_value;
+          pixel^.b := gray_value;
+        end;
+    finally
+      AImage.Texture[C1].Unlock;
+    end;
+  end;
 end;
 
 end.
