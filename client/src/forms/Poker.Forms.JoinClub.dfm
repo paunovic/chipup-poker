@@ -40,7 +40,7 @@ object frmJoinClub: TfrmJoinClub
     Style.IsFontAssigned = True
     Transparent = True
   end
-  object edClubCode: TcxTextEdit
+  object edClubPassword: TcxTextEdit
     Left = 95
     Top = 37
     Anchors = [akLeft, akTop, akRight]
@@ -48,7 +48,7 @@ object frmJoinClub: TfrmJoinClub
     TabOrder = 1
     Width = 189
   end
-  object lbsInvCode: TcxLabel
+  object lbsClubPassword: TcxLabel
     Left = 11
     Top = 38
     Caption = 'Club password:'

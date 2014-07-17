@@ -25,7 +25,7 @@ type
     destructor Destroy; override;
 
     procedure Assign(const AProtobufObject: TPB_Club); overload;
-    procedure Assign(const AClubInfo: TClubInfo); overload;
+    procedure Assign(const AClubInfo: TClubInfo; const AAssignGames: Boolean = TRUE); overload;
     procedure UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
     procedure UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetMemberBalance(const AMemberId: TBytes);
@@ -99,7 +99,7 @@ begin
   FUnlimitedDefaultBalance := AProtobufObject.UnlimitedDefaultBalance;
 end;
 
-procedure TClubInfo.Assign(const AClubInfo: TClubInfo);
+procedure TClubInfo.Assign(const AClubInfo: TClubInfo; const AAssignGames: Boolean = TRUE);
 var
   member: TClubMemberInfo;
   game: TGameInfo;
@@ -118,12 +118,13 @@ begin
   FDefaultBalanceLimit := AClubInfo.DefaultBalanceLimit;
   FUnlimitedDefaultBalance := AClubInfo.UnlimitedDefaultBalance;
   FGames.Clear;
-  for game in AClubInfo.Games.Values do
-  begin
-    gamecopy := TGameInfo.Create;
-    gamecopy.Assign(game);
-    FGames.Add(gamecopy.MongoId, gamecopy);
-  end;
+  if AAssignGames then
+    for game in AClubInfo.Games.Values do
+    begin
+      gamecopy := TGameInfo.Create;
+      gamecopy.Assign(game);
+      FGames.Add(gamecopy.MongoId, gamecopy);
+    end;
 end;
 
 procedure TClubInfo.UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);

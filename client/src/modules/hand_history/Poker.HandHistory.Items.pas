@@ -125,7 +125,9 @@ type
 
     procedure AddHand(const AHandHistory: TPB_HandHistory);
     function LastHandId: UINT;
-    function FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
+    function GetAndLockHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
+
+    procedure Unlock;
 
     property Club: TClubInfo read FClub;
     property Game: TGameInfo read FGame;
@@ -163,7 +165,7 @@ end;
 
 procedure THandHistoryItem.Assign(const AHandHistory: TPB_HandHistory);
 begin
-  FMongoId := AHandHistory.MongoId;
+  FMongoId := Copy(AHandHistory.MongoId, 0, Length(AHandHistory.MongoId));
   FHandId := AHandHistory.Seq;
   FRake := AHandHistory.Rake;
   FTotalRake := AHandHistory.Totalrake;
@@ -455,11 +457,13 @@ begin
   FGame := TGameInfo.Create;
 
   // try to copy Club and Game from internal lists (if found)
-  if dmMain.SelfInfo.Clubs.TryGetValue(AClubId, club) then
-  begin
-    FClub.Assign(club);
+  if dmMain.SelfInfo.Clubs.GetAndLock(AClubId, club) then
+  try
+    FClub.Assign(club, FALSE);
     if club.Games.TryGetValue(AGameId, game) then
       FGame.Assign(game);
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
   end;
 
   // check if objects are found, and if not, try to copy them from server proto
@@ -485,41 +489,43 @@ begin
   inherited;
 end;
 
-function THandHistoryItems.FindHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
+function THandHistoryItems.GetAndLockHand(const AHandId: UINT; out AHandHistoryItem: THandHistoryItem): Boolean;
 var
   hhi: THandHistoryItem;
 begin
+  result := FALSE;
   FLock.Enter;
-  try
-    for hhi in ToArray do
-      if hhi.HandId = AHandId then
-      begin
-        AHandHistoryItem := hhi;
-        Exit(TRUE);
-      end;
-    Exit(FALSE);
-  finally
-    FLock.Leave;
-  end;
+  for hhi in ToArray do
+    if hhi.HandId = AHandId then
+    begin
+      AHandHistoryItem := hhi;
+      Exit(TRUE);
+    end
+    else
+      if hhi.HandId > AHandId then
+        Break;
+  FLock.Leave;
 end;
 
 procedure THandHistoryItems.AddHand(const AHandHistory: TPB_HandHistory);
 var
   hhi: THandHistoryItem;
 begin
-  FLock.Enter;
-  try
-    if FindHand(AHandHistory.Seq, hhi) then
-      hhi.Assign(AHandHistory)
-    else
-    begin
+  if GetAndLockHand(AHandHistory.Seq, hhi) then
+  begin
+    hhi.Assign(AHandHistory);
+    Unlock;
+  end
+  else
+  begin
+    FLock.Enter;
+    try
       while Count >= Settings.Hardcoded.HAND_HISTORY_HAND_LIMIT_PER_TABLE do
-        Remove(Last);
+        inherited Remove(Last);
+      inherited Add(THandHistoryItem.Create(self, AHandHistory));
+    finally
+      FLock.Leave;
     end;
-
-    Add(THandHistoryItem.Create(self, AHandHistory));
-  finally
-    FLock.Leave;
   end;
 end;
 
@@ -534,6 +540,11 @@ begin
   finally
     FLock.Leave;
   end;
+end;
+
+procedure THandHistoryItems.Unlock;
+begin
+  FLock.Leave;
 end;
 
 end.

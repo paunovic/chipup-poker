@@ -1,4 +1,4 @@
-unit Poker.Forms.CreateEditGame;
+unit Poker.Forms.CreateGame;
 
 interface
 
@@ -9,7 +9,7 @@ uses
   Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
 
 type
-  TfrmCreateEditGame = class(TForm, IFormParams, IModalForm)
+  TfrmCreateGame = class(TForm, IFormParams, IModalForm)
     edGameName: TcxTextEdit;
     lbsGameName: TcxLabel;
     lbsGameType: TcxLabel;
@@ -40,19 +40,13 @@ type
     procedure cbGameTypePropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
-    FFormType: Integer;
-    FClub: TClubInfo;
-    FGame: TGameInfo;
+    FClubId: TBytes;
     FCloseCallback: TNotifyEvent;
 
     procedure CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
-    procedure CSREditGameOk(const AMethodId: Integer; const AObject: TObject);
-
-  protected
   public
     procedure SetParams(const AParams: array of pointer);
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
-
   end;
 
 implementation
@@ -60,26 +54,25 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.Validators,
+  Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.MessageCallbacks, Poker.Server.Validators,
   Poker.Protobufs.Objects.Game, Poker.Server.MessageContainer, Poker.Common.FormsContainer;
 
 
 
-procedure TfrmCreateEditGame.FormCreate(Sender: TObject);
+procedure TfrmCreateGame.FormCreate(Sender: TObject);
 begin
   FCallbacksId := MessageContainer.AddCallbacks([
-                      TServerMessageCallback.Create(srCreateGameOk, CSRCreateGameOk),
-                      TServerMessageCallback.Create(srEditGameOk, CSREditGameOk)
+                      TServerMessageCallback.Create(srCreateGameOk, CSRCreateGameOk)
                   ]);
 end;
 
-procedure TfrmCreateEditGame.FormDestroy(Sender: TObject);
+procedure TfrmCreateGame.FormDestroy(Sender: TObject);
 begin
   MessageContainer.RemoveCallbacks(FCallbacksId);
   FormsContainer.Remove(self);
 end;
 
-procedure TfrmCreateEditGame.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TfrmCreateGame.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
 
@@ -87,7 +80,7 @@ begin
     FCloseCallback(self);
 end;
 
-procedure TfrmCreateEditGame.FormKeyPress(Sender: TObject; var Key: Char);
+procedure TfrmCreateGame.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_ESCAPE: begin
@@ -104,60 +97,24 @@ begin
   end;
 end;
 
-procedure TfrmCreateEditGame.SetCloseCallback(const ACallback: TNotifyEvent);
+procedure TfrmCreateGame.SetCloseCallback(const ACallback: TNotifyEvent);
 begin
   FCloseCallback := ACallback;
 end;
 
-procedure TfrmCreateEditGame.SetParams(const AParams: array of pointer);
-var
-  blstr: String;
-  C1   : Integer;
+procedure TfrmCreateGame.SetParams(const AParams: array of pointer);
 begin
-  FFormType := PInteger(AParams[0])^;
-  case FFormType of
-    0: begin
-      Caption := 'Create a Table';
-      FClub := AParams[1];
-    end;
-    1: begin
-      Caption := 'Edit Table';
-      FGame := AParams[1];
-
-      edGameName.Text := FGame.Name;
-      cbGameType.ItemIndex := Integer(FGame.GameType);
-      cbLimit.ItemIndex := Integer(FGame.Limit);
-
-      cbBlinds.ItemIndex := 0;
-      blstr := Format('%d/%d', [FGame.SmallBlind, FGame.BigBlind]);
-      for C1 := 0 to cbBlinds.Properties.Items.Count - 1 do
-        if cbBlinds.Properties.Items[C1] = blstr then
-        begin
-          cbBlinds.ItemIndex := C1;
-          Break;
-        end;
-
-      seBuyinMin.Value := FGame.MinBuyin;
-      seBuyinMax.Value := FGame.MaxBuyin;
-
-      cbSeats.ItemIndex := 0;
-      for C1 := 0 to cbSeats.Properties.Items.Count - 1 do
-        if cbSeats.Properties.Items[C1] = IntToStr(FGame.Seats) then
-        begin
-          cbSeats.ItemIndex := C1;
-          Break;
-        end;
-    end;
-  end;
+  SetLength(FClubId, 12);
+  Move(AParams[0]^, FClubId[0], 12);
 end;
 
-procedure TfrmCreateEditGame.acCancelExecute(Sender: TObject);
+procedure TfrmCreateGame.acCancelExecute(Sender: TObject);
 begin
   ModalResult := mrCancel;
   Close;
 end;
 
-procedure TfrmCreateEditGame.acOKExecute(Sender: TObject);
+procedure TfrmCreateGame.acOKExecute(Sender: TObject);
 var
   sb, bb: Integer;
   err: String;
@@ -186,30 +143,19 @@ begin
         if ValidateGameName(edGameName.Text, err) then
         begin
           acOK.Enabled := FALSE;
-          case FFormType of
-            0: ServerSocket.CreateGame(FClub.MongoId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
-//            1: ServerSocket.EditGame(FGame.MongoId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
-          else
-            Assert(FALSE, 'Invalid FFormType');
-          end;
+          ServerSocket.CreateGame(FClubId, edGameName.Text, TGameType(cbGameType.ItemIndex), TGameLimit(cbLimit.ItemIndex), TGameBlinds(cbBlinds.ItemIndex), seBuyinMin.Value, seBuyinMax.Value, StrToInt(cbSeats.Properties.Items[cbSeats.ItemIndex]));
         end;
 
   if err <> '' then
     MessageDlg(err, mtError, [mbOK], 0);
 end;
 
-procedure TfrmCreateEditGame.cbGameTypePropertiesChange(Sender: TObject);
+procedure TfrmCreateGame.cbGameTypePropertiesChange(Sender: TObject);
 begin
   cbLimit.Enabled := cbGameType.ItemIndex <> Integer(gtRotationNLHPLO);
 end;
 
-procedure TfrmCreateEditGame.CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
-begin
-  ModalResult := mrOk;
-  Close;
-end;
-
-procedure TfrmCreateEditGame.CSREditGameOk(const AMethodId: Integer; const AObject: TObject);
+procedure TfrmCreateGame.CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
 begin
   ModalResult := mrOk;
   Close;

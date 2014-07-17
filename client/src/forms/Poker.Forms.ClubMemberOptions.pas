@@ -26,7 +26,7 @@ type
   private
     FCallbacksId: Integer;
     FCloseCallback: TNotifyEvent;
-    FClub: TClubInfo;
+    FClubId: TBytes;
     FPlayerId: TBytes;
 
     procedure CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);
@@ -41,8 +41,8 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Clubs.Member;
+  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Clubs.Member, Poker.DataModule;
 
 
 procedure TfrmClubMemberOptions.FormCreate(Sender: TObject);
@@ -65,14 +65,22 @@ end;
 procedure TfrmClubMemberOptions.SetParams(const AParams: array of pointer);
 var
   member: TClubMemberInfo;
+  club: TClubInfo;
 begin
-  FClub := AParams[0];
-  FPlayerId := AParams[1];
+  SetLength(FClubId, 12);
+  Move(AParams[0]^, FClubId[0], 12);
+  SetLength(FPlayerId, 12);
+  Move(AParams[1]^, FPlayerId[0], 12);
 
-  if FClub.GetMemberInfo(FPlayerId, member) then
-  begin
-    cbUnlimited.Checked := member.UnlimitedLimit;
-    seLimit.Value := member.BalanceLimit / 100;
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    if club.GetMemberInfo(FPlayerId, member) then
+    begin
+      cbUnlimited.Checked := member.UnlimitedLimit;
+      seLimit.Value := member.BalanceLimit / 100;
+    end;
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
   end;
 end;
 
@@ -109,7 +117,7 @@ begin
 
   limit := Trunc(limit_float * 100);
 
-  ServerSocket.SetPlayerLimit(FClub.MongoId, FPlayerId, limit, cbUnlimited.Checked);
+  ServerSocket.SetPlayerLimit(FClubId, FPlayerId, limit, cbUnlimited.Checked);
 end;
 
 procedure TfrmClubMemberOptions.cbUnlimitedPropertiesChange(Sender: TObject);

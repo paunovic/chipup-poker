@@ -9,7 +9,7 @@ uses
 type
   TPlayerInfo = class
   private
-    FId: TBytes;
+    FMongoId: TBytes;
     FNick: String;
     FEMail: String;
     FPassword: String;
@@ -25,7 +25,7 @@ type
 
     procedure LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 
-    property Id: TBytes read FId write FId;
+    property MongoId: TBytes read FMongoId write FMongoId;
     property Nick: String read FNick write FNick;
     property Password: String read FPassword write FPassword;
     property EMail: String read FEMail write FEMail;
@@ -57,7 +57,7 @@ end;
 
 procedure TPlayerInfo.Flush;
 begin
-  SetLength(FId, 0);
+  SetLength(FMongoId, 0);
   FNick := '';
   FEMail := '';
   FPassword := '';
@@ -78,7 +78,7 @@ var
   to_remove: TList<TBytes>;
   mongoid: TBytes;
 begin
-  FId := AStatusReply.Self.MongoId;
+  FMongoId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
   FNick := AStatusReply.Self.DisplayName;
   FAuthed := AStatusReply.Self.Authed;
@@ -132,16 +132,22 @@ begin
     end;
 
     for pbgame in AStatusReply.Games do
-      if FClubs.TryGetValue(pbgame.ClubMongoid, club) then
+      if FClubs.GetAndLock(pbgame.ClubMongoid, club) then
+      try
         club.Games.AddGame(pbgame);
+      finally
+        FClubs.Unlock;
+      end;
 
     tables_close := TObjectList<TTable>.Create(FALSE);
     try
       Tables.Lock;
       try
         for table in Tables.Values do
-          if not FClubs.FindGame(table.GameId, club, game) then
-            tables_close.Add(table);
+          if not FClubs.GetAndLockByGame(table.GameId, club, game) then
+            tables_close.Add(table)
+          else
+            FClubs.Unlock;
       finally
         Tables.Unlock;
       end;

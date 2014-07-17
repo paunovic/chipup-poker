@@ -3,7 +3,7 @@ unit Poker.Tables.RenderMetrics;
 interface
 
 uses
-  Winapi.Windows, Asphyre.Math, Asphyre.Types, Poker.Games.Game, Poker.Seats.Seat, System.Types, Poker.Tables.Status;
+  Winapi.Windows, Asphyre.Math, Asphyre.Types, Poker.Games.Game, Poker.Seats.Seat, System.Types;
 
 type
   TTableSector = (tsTopLeft, tsTop, tsTopRight, tsRight, tsBottomRight, tsBottom, tsBottomLeft, tsLeft, tsMid);
@@ -85,7 +85,7 @@ type
     function IsPointInRaiseThumb(const AX, AY: Integer): Boolean;
     function IsPointInRaiseTrack(const AX, AY: Integer; out APercentage: Single): Boolean;
 
-    procedure Update(const AGame: TGameInfo; const ATableStatus: TTableStatus; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
+    procedure Update(const ATable: TObject; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
 
     property TableResizeRatio: Single read FTableResizeRatio;
     property RawTableBounds: TPoint4 read FRawTableBounds;
@@ -133,7 +133,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, Poker.Tables.Resources, Poker.Common.Misc;
+  System.SysUtils, Poker.Tables.Resources, Poker.Common.Misc, Poker.Tables.Table;
 
 { TTableRenderMetrics }
 
@@ -276,7 +276,7 @@ var
   x, y: Single;
   xr, yr: Single;
 begin
-  if (AGame.Seats < Low(TableResources.SEAT_POINTS)) or // FIXME?
+  if (AGame.Seats < Low(TableResources.SEAT_POINTS)) or
      (AGame.Seats > High(TableResources.SEAT_POINTS)) then
   begin
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Invalid AGame.Seats number [%d]', [AGame.Seats]), ditException); {$ENDIF}
@@ -343,7 +343,7 @@ begin
   Exit(FALSE);
 end;
 
-procedure TTableRenderMetrics.Update(const AGame: TGameInfo; const ATableStatus: TTableStatus; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
+procedure TTableRenderMetrics.Update(const ATable: TObject; const ADXAreaSize: TPoint2px; const ARaiseThumbPosition: Single);
 const
   TABLE_X_LEFT = 64;
   TABLE_X_RIGHT = 64;
@@ -359,6 +359,7 @@ var
 begin
   area_resized := (ADXAreaSize.x <> FLastDXAreaSize.x) or
                   (ADXAreaSize.y <> FLastDXAreaSize.y);
+
   if area_resized then
   begin
     // table resize ratio
@@ -388,12 +389,11 @@ begin
     // dealer center point (where the cards come from, not dealer button point!)
     FDealerPoint.X := FTableCenter.X;
     FDealerPoint.Y := FTableBounds[0].Y;
-
   end;
 
   // seats
   FSeatHeight := (ADXAreaSize.y - (FTableBounds[2].Y - FTableBounds[0].Y)) / 5.2;
-  if AGame.Seats = 10 then
+  if (ATable as TTable).Game.Seats = 10 then
     FSeatHeight := FSeatHeight * 0.85;
 
   if area_resized then
@@ -475,12 +475,6 @@ begin
                                   TableResources.RAISE_TRACK_SLIDER_HEIGHT * FRaisePanelResizeRatio);
   end;
 
-  // raise thumb button bounds
-  w := TableResources.RaiseSliderButtonImage.Texture[0].Width * FRaisePanelResizeRatio;
-  h := w * TableResources.RaiseSliderButtonAspectRatio;
-  FRaiseThumbBounds := pBounds4(FRaiseTrackBounds[0].x + ARaiseThumbPosition * (FRaiseTrackBounds[1].x - FRaiseTrackBounds[0].x) - w / 2,
-                                FRaiseTrackBounds[0].y + (FRaiseTrackBounds[2].y - FRaiseTrackBounds[0].y) / 2 - h / 2, w, h);
-
   if area_resized then
   begin
     // raise preset buttons bounds
@@ -533,8 +527,14 @@ begin
     FHandPlaybackForward.Offset(wint + 3, 0);
   end;
 
+  // raise thumb button bounds
+  w := TableResources.RaiseSliderButtonImage.Texture[0].Width * FRaisePanelResizeRatio;
+  h := w * TableResources.RaiseSliderButtonAspectRatio;
+  FRaiseThumbBounds := pBounds4(FRaiseTrackBounds[0].x + ARaiseThumbPosition * (FRaiseTrackBounds[1].x - FRaiseTrackBounds[0].x) - w / 2,
+                                FRaiseTrackBounds[0].y + (FRaiseTrackBounds[2].y - FRaiseTrackBounds[0].y) / 2 - h / 2, w, h);
+
   // total rake bounds
-  if ATableStatus.IsSitting then
+  if (ATable as TTable).Status.IsSitting then
     FTotalRakePoint := Point2(FStandUpButtonBounds[0].x - 30 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4)
   else
     FTotalRakePoint := Point2(FStandUpButtonBounds[1].x - 10 * FTableResizeRatio - FChipWidth / 2, FStandUpButtonBounds[0].y + (FStandUpButtonBounds[2].y - FStandUpButtonBounds[0].y) / 4);

@@ -73,7 +73,7 @@ type
 implementation
 
 uses
-  Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer, Poker.Server.Socket.Commands,
+  Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer, Poker.Server.Socket,
   Poker.Server.SSLCerts, Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club,
   Poker.Protobufs.Objects.ChangeEMailParams, Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply,
@@ -447,7 +447,6 @@ begin
     srKickPlayerReply: ADataObject := TPB_ClubCommandReply.Create(ADataPointer, ARpcMessage.DataSize);
     srHello: ADataObject := TPB_HelloReply.Create(ADataPointer, ARpcMessage.DataSize);
     srListClubs: ADataObject := TPB_ListClubsReply.Create(ADataPointer, ARpcMessage.DataSize);
-    srStatus: ADataObject := TPB_StatusReply.Create(ADataPointer, ARpcMessage.DataSize);
     srTableAddonOverLimit,
     seTableStatus,
     srTableSitOk,
@@ -475,7 +474,6 @@ begin
     srReinstatePlayerOk,
     seClubChange,
     seClubDeleted: ADataObject := TPB_Club.Create(ADataPointer, ARpcMessage.DataSize);
-    srEditGameOk,
     srCreateGameOk,
     srDeleteGameOk,
     seGameChange,

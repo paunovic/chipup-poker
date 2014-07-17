@@ -36,7 +36,6 @@ type
   private
     FCallbacksId: Integer;
     FInternalId: Integer;
-    FTableStatus: TTableStatus;
     FSeatIndex: Integer;
     FCloseCallback: TNotifyEvent;
     FBuyinPhrase: String;
@@ -62,7 +61,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
+  Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList;
 
@@ -104,27 +103,21 @@ function TfrmTableSit.GetMaxBuyin: UINT32;
 var
   seat_info: TSeatInfo;
   seat_chips: UINT32;
-  game: TGameInfo;
   table: TTable;
 begin
   result := 0;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      if (table.Status.SelfSeatIndex <> -1) and
-         (FTableStatus.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) then
-        seat_chips := seat_info.Chips
-      else
-        seat_chips := 0;
+    if (table.Status.SelfSeatIndex <> -1) and
+       (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) then
+      seat_chips := seat_info.Chips
+    else
+      seat_chips := 0;
 
-      if seat_chips > game.MaxBuyin * game.BigBlind then
-        result := 0
-      else
-        result := game.MaxBuyin * game.BigBlind - seat_chips;
-    finally
-      game.Free;
-    end;
+    if seat_chips > table.Game.MaxBuyin * table.Game.BigBlind then
+      result := 0
+    else
+      result := table.Game.MaxBuyin * table.Game.BigBlind - seat_chips;
   finally
     Tables.Unlock;
   end;
@@ -169,31 +162,24 @@ end;
 procedure TfrmTableSit.SetParams(const AParams: array of pointer);
 var
   default_buyin: UINT32;
-  game: TGameInfo;
   table: TTable;
 begin
   FInternalId := PInteger(AParams[0])^;
-  FTableStatus := AParams[1];
-  FSeatIndex := PInteger(AParams[2])^;
+  FSeatIndex := PInteger(AParams[1])^;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      lbvTableName.Caption := Format('%s (%s/%s %s)', [game.Name, ChipsToStr(game.SmallBlind), ChipsToStr(game.BigBlind), game.AsString(FALSE)]);
-      lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(game.MinBuyin * game.BigBlind),
-          ChipsToStr(game.MaxBuyin * game.BigBlind)]);
-      if table.Status.SelfSeatIndex <> -1 then
-        FBuyinPhrase := 'add-on'
-      else
-        FBuyinPhrase := 'buy-in';
+    lbvTableName.Caption := Format('%s (%s/%s %s)', [table.Game.Name, ChipsToStr(table.Game.SmallBlind), ChipsToStr(table.Game.BigBlind), table.Game.AsString(FALSE)]);
+    lbsTableBuyins.Caption := Format('(min buy-in %s, max buyin %s)', [ChipsToStr(table.Game.MinBuyin * table.Game.BigBlind),
+        ChipsToStr(table.Game.MaxBuyin * table.Game.BigBlind)]);
+    if table.Status.SelfSeatIndex <> -1 then
+      FBuyinPhrase := 'add-on'
+    else
+      FBuyinPhrase := 'buy-in';
 
-      default_buyin := game.BigBlind * 50;
-      default_buyin := (default_buyin div 10) * 10;
-      SetBuyin(default_buyin);
-    finally
-      game.Free;
-    end;
+    default_buyin := table.Game.BigBlind * 50;
+    default_buyin := (default_buyin div 10) * 10;
+    SetBuyin(default_buyin);
   finally
     Tables.Unlock;
   end;
@@ -212,17 +198,11 @@ end;
 
 procedure TfrmTableSit.acMinExecute(Sender: TObject);
 var
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      SetBuyin(game.MinBuyin * game.BigBlind);
-    finally
-      game.Free;
-    end;
+    SetBuyin(table.Game.MinBuyin * table.Game.BigBlind);
   finally
     Tables.Unlock;
   end;
@@ -233,45 +213,39 @@ var
   err: String;
   seat_info: TSeatInfo;
   buyin: Single;
-  game: TGameInfo;
   table: TTable;
 begin
   err := '';
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      if not TryStrToFloat(seBuyin.Text, buyin) then
-      begin
-        err := 'Invalid buyin';
-        seBuyin.SelectAll;
-      end;
+    if not TryStrToFloat(seBuyin.Text, buyin) then
+    begin
+      err := 'Invalid buyin';
+      seBuyin.SelectAll;
+    end;
 
-      if err = '' then
+    if err = '' then
+    begin
+      if table.Status.SelfSeatIndex = -1 then
       begin
-        if table.Status.SelfSeatIndex = -1 then
-        begin
-          if game.State = gsClosed then
-            err := 'Table is closed';
+        if table.Game.State = gsClosed then
+          err := 'Table is closed';
 
-          if err = '' then
-            ServerSocket.TableSit(game.MongoId, FSeatIndex, Round(seBuyin.Value * 100))
-          else
-            seBuyin.SelectAll;
-        end
+        if err = '' then
+          ServerSocket.TableSit(table.Game.MongoId, FSeatIndex, Round(seBuyin.Value * 100))
         else
-        begin
-          if not FTableStatus.GetSeatInfo(table.Status.SelfSeatIndex, seat_info) then
-            err := 'Invalid seat index';
+          seBuyin.SelectAll;
+      end
+      else
+      begin
+        if not table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info) then
+          err := 'Invalid seat index';
 
-          if err = '' then
-            ServerSocket.TableAddOn(game.MongoId, Round(buyin * 100));
-        end;
-
-        acOK.Enabled := FALSE
+        if err = '' then
+          ServerSocket.TableAddOn(table.Game.MongoId, Round(buyin * 100));
       end;
-    finally
-      game.Free;
+
+      acOK.Enabled := FALSE
     end;
   finally
     Tables.Unlock;
@@ -284,22 +258,16 @@ end;
 procedure TfrmTableSit.CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbstatus := AObject as TPB_TableStatus;
-      if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
-        Exit;
+    pbstatus := AObject as TPB_TableStatus;
+    if not CompareBytes(table.Game.MongoId, pbstatus.TableMongoId) then
+      Exit;
 
-      ModalResult := mrOk;
-      Close;
-    finally
-      game.Free;
-    end;
+    ModalResult := mrOk;
+    Close;
   finally
     Tables.Unlock;
   end;
@@ -308,19 +276,13 @@ end;
 procedure TfrmTableSit.CSRTableSitSeatTaken(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbstatus := AObject as TPB_TableStatus;
-      if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
-        Exit;
-    finally
-      game.Free;
-    end;
+    pbstatus := AObject as TPB_TableStatus;
+    if not CompareBytes(table.Game.MongoId, pbstatus.TableMongoId) then
+      Exit;
   finally
     Tables.Unlock;
   end;
@@ -333,22 +295,16 @@ end;
 procedure TfrmTableSit.CSRTableAddonOk(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbstatus := AObject as TPB_TableStatus;
-      if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
-        Exit;
+    pbstatus := AObject as TPB_TableStatus;
+    if not CompareBytes(table.Game.MongoId, pbstatus.TableMongoId) then
+      Exit;
 
-      ModalResult := mrOk;
-      Close;
-    finally
-      game.Free;
-    end;
+    ModalResult := mrOk;
+    Close;
   finally
     Tables.Unlock;
   end;
@@ -357,19 +313,13 @@ end;
 procedure TfrmTableSit.CSRTableAddonOverLimit(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbstatus := AObject as TPB_TableStatus;
-      if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
-        Exit;
-    finally
-      game.Free;
-    end;
+    pbstatus := AObject as TPB_TableStatus;
+    if not CompareBytes(table.game.MongoId, pbstatus.TableMongoId) then
+      Exit;
   finally
     Tables.Unlock;
   end;
@@ -381,19 +331,13 @@ end;
 procedure TfrmTableSit.CSRClubBalanceReached(const AMethodId: Integer; const AObject: TObject);
 var
   pbstatus: TPB_TableStatus;
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbstatus := AObject as TPB_TableStatus;
-      if not CompareBytes(game.MongoId, pbstatus.TableMongoId) then
-        Exit;
-    finally
-      game.Free;
-    end;
+    pbstatus := AObject as TPB_TableStatus;
+    if not CompareBytes(table.game.MongoId, pbstatus.TableMongoId) then
+      Exit;
   finally
     Tables.Unlock;
   end;
@@ -405,19 +349,13 @@ end;
 procedure TfrmTableSit.CSRNotSitting(const AMethodId: Integer; const AObject: TObject);
 var
   pbgame: TPB_Game;
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbgame := AObject as TPB_Game;
-      if not CompareBytes(game.MongoId, pbgame.MongoId) then
-        Exit;
-    finally
-      game.Free;
-    end;
+    pbgame := AObject as TPB_Game;
+    if not CompareBytes(table.game.MongoId, pbgame.MongoId) then
+      Exit;
   finally
     Tables.Unlock;
   end;
@@ -430,26 +368,20 @@ end;
 procedure TfrmTableSit.CSRTableBuyinLessThanCashout(const AMethodId: Integer; const AObject: TObject);
 var
   pbbuyinerr: TPB_BuyinError;
-  game: TGameInfo;
   table: TTable;
   err: String;
 begin
   err := '';
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbbuyinerr := AObject as TPB_BuyinError;
-      if not CompareBytes(game.MongoId, pbbuyinerr.GameId) then
-        Exit;
+    pbbuyinerr := AObject as TPB_BuyinError;
+    if not CompareBytes(table.game.MongoId, pbbuyinerr.GameId) then
+      Exit;
 
-      if pbbuyinerr.LastCashout > game.MaxBuyin * game.BigBlind then
-        err := Format('You must buyin with equal amount of chips as your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)])
-      else
-        err := Format('You must buyin with equal or more chips than your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]);
-    finally
-      game.Free;
-    end;
+    if pbbuyinerr.LastCashout > table.game.MaxBuyin * table.game.BigBlind then
+      err := Format('You must buyin with equal amount of chips as your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)])
+    else
+      err := Format('You must buyin with equal or more chips than your last cashout (%s)', [ChipsToStr(pbbuyinerr.LastCashout)]);
   finally
     Tables.Unlock;
   end;
@@ -461,19 +393,13 @@ end;
 procedure TfrmTableSit.CSRTableInvalidBuyin(const AMethodId: Integer; const AObject: TObject);
 var
   pbbuyinerr: TPB_BuyinError;
-  game: TGameInfo;
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if table.GetObjectCopy(game) then
-    try
-      pbbuyinerr := AObject as TPB_BuyinError;
-      if not CompareBytes(game.MongoId, pbbuyinerr.GameId) then
-        Exit;
-    finally
-      game.Free;
-    end;
+    pbbuyinerr := AObject as TPB_BuyinError;
+    if not CompareBytes(table.game.MongoId, pbbuyinerr.GameId) then
+      Exit;
   finally
     Tables.Unlock;
   end;

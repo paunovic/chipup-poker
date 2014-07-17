@@ -22,6 +22,8 @@ type
       FTableType: TTableType;
       FGameId: TBytes;
       FClubId: TBytes;
+      FClub: TClubInfo;
+      FGame: TGameInfo;
       FForm: TForm;
       FRenderer: TTableRenderer;
       FLeaveNotify: Boolean;
@@ -48,19 +50,20 @@ type
     procedure RenderSync;
     procedure LockGameplay(const ASeconds: Single);
 
-    function GetObjectCopy(out AGame: TGameInfo): Boolean; overload;
-    function GetObjectCopy(out AClub: TClubInfo; out AGame: TGameInfo): Boolean; overload;
-
     procedure BringToFront;
     procedure SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
     procedure PlaySound(const ASound: String);
 
-    function GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
+    function UpdateObjects: Boolean;
+
+    function GetTableCaption: String;
 
     property InternalId: Integer read FInternalId;
     property TableType: TTableType read FTableType;
     property GameId: TBytes read FGameId;
     property ClubId: TBytes read FClubId;
+    property Game: TGameInfo read FGame;
+    property Club: TClubInfo read FClub;
     property Form: TForm read FForm;
     property Renderer: TTableRenderer read FRenderer;
     property LeaveNotify: Boolean read FLeaveNotify write FLeaveNotify;
@@ -75,7 +78,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, System.TypInfo, {$ENDIF}
-  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
+  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Players.Player, Poker.Players.PlayerList, Poker.Seats.Seat, Poker.Cards, Poker.Sounds, Poker.Settings,
   System.Classes, Poker.WindowMessages, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.SeatInfo;
 
@@ -89,6 +92,8 @@ begin
   FInternalId := AInternalId;
   FInternalHWND := AllocateHWnd(WndProc);
   FStatus := TTableStatus.Create;
+  FClub := TClubInfo.Create;
+  FGame := TGameInfo.Create;
 end;
 
 destructor TTable.Destroy;
@@ -99,11 +104,14 @@ begin
   KillTimer(FInternalHWND, TIMER_ID_RENDER);
   KillTimer(FInternalHWND, TIMER_ID_SEAT_CAPTION_CLEAR);
   KillTimer(FInternalHWND, TIMER_ID_GAMEPLAY_LOCK);
-  FRenderer.SetRenderTarget(0);
+  if Assigned(FRenderer) then
+    FRenderer.SetRenderTarget(0);
   FreeAndNil(FForm);
   FreeAndNil(FRenderer);
   FreeAndNil(FHandHistoryPlayback);
   FreeAndNil(FStatus);
+  FreeAndNil(FGame);
+  FreeAndNil(FClub);
   DeallocateHWnd(FInternalHWND);
 
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
@@ -111,58 +119,86 @@ begin
   inherited;
 end;
 
-function TTable.GetObjectCopy(out AGame: TGameInfo): Boolean;
-var
-  club: TClubInfo;
-  game: TGameInfo;
-begin
-  if dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
-  begin
-    AGame := TGameInfo.Create;
-    AGame.Assign(game);
-    result := TRUE;
-  end
-  else
-    result := FALSE;
-end;
 
-function TTable.GetHandHistoryItem(out AHandHistoryItem: THandHistoryItem): Boolean;
+function TTable.GetTableCaption: String;
 var
+  currentgame: String;
+  rot_index: Integer;
   hhis: THandHistoryItems;
+  hhi: THandHistoryItem;
 begin
-  result := (FTableType = ttHandPlayback) and
-            (HandHistory.TryGetValue(FGameId, hhis)) and
-            (hhis.FindHand(FHandHistoryHandId, AHandHistoryItem));
+  result := '';
+  case FTableType of
+    ttLiveGame: begin
+      if FGame.GameType = gtRotationNLHPLO then
+      begin
+        case FStatus.CurrentGame of
+          gtHoldem: currentgame := 'NLH';
+          gtOmaha: currentgame := 'PLO';
+        end;
+        rot_index := FStatus.RotationHand;
+        if rot_index = 0 then
+          rot_index := 1;
+        result := Format('%s (%s/%s %s) (%d/%d %s) - %s', [FGame.Name, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind),
+             FGame.AsString(TRUE), (rot_index - 1) mod FGame.Seats + 1, FGame.Seats, currentgame, FClub.Name])
+      end
+      else
+        result := Format('%s (%s/%s %s) - %s', [FGame.Name, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind), FGame.AsString(TRUE), FClub.Name]);
+    end;
+
+    ttHandPlayback: begin
+      HandHistory.Lock;
+      try
+        if not HandHistory.TryGetValue(FGameId, hhis) then
+          Exit;
+
+        if hhis.GetAndLockHand(FHandHistoryHandId, hhi) then
+        try
+          result := Format('Hand #%d: %s (%s/%s) - %s', [hhi.HandId, TGameInfo.GameTypeToStr(hhi.CurrentGame, hhi.ParentItems.Game.Limit, FALSE),
+                     ChipsToStr(hhi.ParentItems.Game.SmallBlind), ChipsToStr(hhi.ParentItems.Game.BigBlind), hhi.StartTimeStr]);
+        finally
+          hhis.Unlock;
+        end;
+      finally
+        HandHistory.Unlock;
+      end;
+    end;
+  end;
 end;
 
-function TTable.GetObjectCopy(out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+function TTable.UpdateObjects;
 var
   club: TClubInfo;
   game: TGameInfo;
 begin
-  if dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
-  begin
-    AClub := TClubInfo.Create;
-    AClub.Assign(club);
-    AGame := TGameInfo.Create;
-    AGame.Assign(game);
-    result := TRUE;
-  end
+  case FTableType of
+    ttLiveGame: begin
+      result := FALSE;
+      if dmMain.SelfInfo.Clubs.GetAndLockByGame(FGameId, club, game) then
+      try
+        FClub.Assign(club);
+        FClubId := FClub.MongoId;
+        FGame.Assign(game);
+        result := TRUE;
+      finally
+        dmMain.SelfInfo.Clubs.Unlock;
+      end;
+    end;
+
+    ttHandPlayback: result := TRUE;
   else
     result := FALSE;
+  end;
 end;
 
 function TTable.SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
 var
   form: TfrmTable;
-  game: TGameInfo;
-  club: TClubInfo;
 begin
   FTableType := ttLiveGame;
   FGameId := AGameId;
-  if not dmMain.SelfInfo.Clubs.FindGame(FGameId, club, game) then
+  if not UpdateObjects then
     Exit(FALSE);
-  FClubId := club.MongoId;
   FRenderer := TTableRenderer.Create(FInternalId, FInternalHWND, FTableType);
   if not FRenderer.AcquireSwapChainElement then
   begin
@@ -186,6 +222,9 @@ var
 begin
   FTableType := ttHandPlayback;
   FGameId := AHandHistoryItems.FGameId;
+  FClubId := AHandHistoryItems.FClubId;
+  FClub.Assign(AHandHistoryItems.Club);
+  FGame.Assign(AHandHistoryItems.Game);
   FHandHistoryHandId := AHandHistoryItem.HandId;
   FHandHistoryPlayback := THandHistoryPlayback.Create(AHandHistoryItems, AHandHistoryItem);
   FRenderer := TTableRenderer.Create(FInternalId, FInternalHWND, FTableType);
@@ -522,7 +561,6 @@ end;
 procedure TTable.ConfigureActions;
 var
   seat: TSeatInfo;
-  game: TGameInfo;
 begin
   FStatus.ResetRaiseValue := not FStatus.ActionRaise;
   FStatus.ActionStandUp := FALSE;
@@ -537,92 +575,85 @@ begin
   FStatus.ActionSitOutNextBB := FALSE;
   FStatus.ActionShowCards := FALSE;
 
-  seat := nil;
-  if (FTableType = ttLiveGame) and
-     (FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
-  begin
-    FStatus.ActionStandUp := TRUE;
+  if (FTableType <> ttLiveGame) or
+     (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
+    Exit;
+  FStatus.ActionStandUp := TRUE;
 
-    if GetObjectCopy(game) then
-    try
-      FStatus.FocusWindow := FALSE;
-      if game.State <> gsClosed then
-        case seat.Status of
-          psOutOfPlay: begin
-            FStatus.ActionPlayNow := TRUE;
-            FStatus.ActionFoldToAny := FALSE;
-            FStatus.ActionSitOut := FALSE;
-            FStatus.ActionSitOutNextBB := FALSE;
-          end;
+  FStatus.FocusWindow := FALSE;
+  if FGame.State <> gsClosed then
+    case seat.Status of
+      psOutOfPlay: begin
+        FStatus.ActionPlayNow := TRUE;
+        FStatus.ActionFoldToAny := FALSE;
+        FStatus.ActionSitOut := FALSE;
+        FStatus.ActionSitOutNextBB := FALSE;
+      end;
 
-          psOutOfHand: begin
-            FStatus.ActionFoldToAny := FALSE;
-            FStatus.ActionSitOut := TRUE;
-            FStatus.ActionSitOutNextBB := TRUE;
-          end;
+      psOutOfHand: begin
+        FStatus.ActionFoldToAny := FALSE;
+        FStatus.ActionSitOut := TRUE;
+        FStatus.ActionSitOutNextBB := TRUE;
+      end;
 
-          psInHand, psAllIn: begin
-            FStatus.ActionSitOut := TRUE;
-            FStatus.ActionSitOutNextBB := TRUE;
-            if (seat.Status = psInHand) and
-               (FStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
-              FStatus.ActionFoldToAny := TRUE;
+      psInHand, psAllIn: begin
+        FStatus.ActionSitOut := TRUE;
+        FStatus.ActionSitOutNextBB := TRUE;
+        if (seat.Status = psInHand) and
+           (FStatus.State in [tsPreFlop, tsFlop, tsTurn, tsRiver]) then
+          FStatus.ActionFoldToAny := TRUE;
 
-            if (FStatus.CurrentSeat = FStatus.SelfSeatIndex) and
-               (not FStatus.Locked) and
-               (not FGameplayLocked) then
-              case FStatus.State of
-                tsIdle: begin
-                  FStatus.ActionFoldToAny := FALSE;
-                end;
+        if (FStatus.CurrentSeat = FStatus.SelfSeatIndex) and
+           (not FStatus.Locked) and
+           (not FGameplayLocked) then
+          case FStatus.State of
+            tsIdle: begin
+              FStatus.ActionFoldToAny := FALSE;
+            end;
 
-                tsPreFlop, tsFlop, tsTurn, tsRiver: begin
-                  FStatus.ActionFold := TRUE;
-                  // check if our current bet is smaller than minimumbet (call/raise situation)
-                  if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
-                  begin
-                    if seat.Chips <= FStatus.MinimumBet then
-                      FStatus.CallCaption := 'CALL (ALL-IN)'
-                    else
-                      FStatus.CallCaption := Format('CALL (%s)', [ChipsToStr(FStatus.MinimumBet{ - FStatus.GetBet(seat_info.SeatIndex)})]);
-                    FStatus.ActionCall := TRUE;
+            tsPreFlop, tsFlop, tsTurn, tsRiver: begin
+              FStatus.ActionFold := TRUE;
+              // check if our current bet is smaller than minimumbet (call/raise situation)
+              if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
+              begin
+                if seat.Chips <= FStatus.MinimumBet then
+                  FStatus.CallCaption := 'CALL (ALL-IN)'
+                else
+                  FStatus.CallCaption := Format('CALL (%s)', [ChipsToStr(FStatus.MinimumBet{ - FStatus.GetBet(seat_info.SeatIndex)})]);
+                FStatus.ActionCall := TRUE;
 
-                    // if we can call, there is a possibility that we can raise too - we check if we can raise here
-                    if (seat.Chips > FStatus.MinimumBet) and
-                       (FStatus.MinimumBet < FStatus.MinimumRaise) then
-                      FStatus.ActionRaise := TRUE;
+                // if we can call, there is a possibility that we can raise too - we check if we can raise here
+                if (seat.Chips > FStatus.MinimumBet) and
+                   (FStatus.MinimumBet < FStatus.MinimumRaise) then
+                  FStatus.ActionRaise := TRUE;
 
-                    FStatus.FocusWindow := TRUE;
-                  end
-                  else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
-                  begin
-                    FStatus.ActionCheck := TRUE;
-                    FStatus.ActionBet := TRUE;
-                  end;
-                end;
-
-                tsWinning, tsWinning2: begin
-                  FStatus.ActionFoldToAny := FALSE;
-                end;
+                FStatus.FocusWindow := TRUE;
+              end
+              else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
+              begin
+                FStatus.ActionCheck := TRUE;
+                FStatus.ActionBet := TRUE;
               end;
-          end;
+            end;
 
-          psFolded: begin
-            FStatus.ActionFoldToAny := FALSE;
-            FStatus.ActionSitOut := TRUE;
-            FStatus.ActionSitOutNextBB := TRUE;
+            tsWinning, tsWinning2: begin
+              FStatus.ActionFoldToAny := FALSE;
+            end;
           end;
-        end;
-    finally
-      game.Free;
+      end;
+
+      psFolded: begin
+        FStatus.ActionFoldToAny := FALSE;
+        FStatus.ActionSitOut := TRUE;
+        FStatus.ActionSitOutNextBB := TRUE;
+      end;
     end;
 
-    // check if SHOW CARDS button is enabled
-    FStatus.ActionShowCards := (FStatus.State in [tsWinning, tsWinning2]) and
-                               (seat.CanShow) and
-                               (not seat.CardsVisible) and
-                               (seat.Status in [psFolded, psAllIn, psInHand]);
-  end;
+  // check if SHOW CARDS button is enabled
+  FStatus.ActionShowCards := (FStatus.State in [tsWinning, tsWinning2]) and
+                             (seat.CanShow) and
+                             (not seat.CardsVisible) and
+                             (seat.Status in [psFolded, psAllIn, psInHand]);
 end;
 
 procedure TTable.WndProc(var AMessage: TMessage);

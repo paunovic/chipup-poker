@@ -86,7 +86,7 @@ type
           (TCPAddress: 'localchipup'; TCPPort: 12346; URL: 'http://localchipup')
         );
 
-        // asset paths
+        // assets paths
         ASSETS: (
           DIRECTORY: 'assets\';
           DIRECTX_MEDIA: 'dxmedia.dat';

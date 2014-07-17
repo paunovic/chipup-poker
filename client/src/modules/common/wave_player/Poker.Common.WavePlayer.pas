@@ -9,7 +9,6 @@ uses
 type
   TWavePlayer = class
   private
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FLock: TCriticalSection;
     FDirectSound: IDirectSound;
     FBuffers: TObjectList<TDirectSoundBuffer>;
@@ -34,7 +33,6 @@ uses
 
 constructor TWavePlayer.Create(const AHandle: HWND);
 begin
-  {$IFDEF DEBUG} RegisterDebugObject('WavePlayer'); {$ENDIF}
   FLock := TCriticalSection.Create;
   InitDirectSound(AHandle);
   FBuffers := TObjectList<TDirectSoundBuffer>.Create;
@@ -49,10 +47,14 @@ begin
   FBufferNotificationThread.Signal;
   FBufferNotificationThread.WaitFor;
   FBufferNotificationThread.Free;
-  FBuffers.Free;
+  FLock.Enter;
+  try
+    FBuffers.Free;
+  finally
+    FLock.Leave;
+  end;
   FDirectSound := nil;
   FreeAndNil(FLock);
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
   inherited;
 end;
 

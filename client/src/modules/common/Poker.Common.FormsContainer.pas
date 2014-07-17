@@ -142,8 +142,8 @@ var
 begin
   while Find(AFormClass, form) do
   begin
-    Remove(form);
     form.Close;
+    Remove(form);
   end;
 end;
 

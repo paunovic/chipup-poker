@@ -28,14 +28,15 @@ type
     procedure Lock;
     procedure Unlock;
 
-    function GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
+    function GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean; overload;
+    function GetAndLockTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean; overload;
+    procedure UpdateGameObject(const AGameId: TBytes);
+    procedure UpdateClubObject(const AClubId: TBytes);
 
     procedure ClearWithoutNotification;
 
-    function FindTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean;
-
-    function AddTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
-    function AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
+    function AddLiveTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
+    function AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): Boolean;
     function SittingCount: Integer;
     procedure CloseTablesForClub(const AClubId: TBytes);
   end;
@@ -47,7 +48,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
+  Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
   Poker.HandHistory.Core;
 
 { TTableList }
@@ -115,15 +116,17 @@ begin
   end;
 end;
 
-function TTableList.AddTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): TTable;
+function TTableList.AddLiveTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
 var
   table: TTable;
 begin
-  if FindTable(AGameId, ttLiveGame, table) then
+  result := FALSE;
+  if GetAndLockTable(AGameId, ttLiveGame, table) then
   begin
     if AShow then
       table.BringToFront;
-    Exit(table);
+    Unlock;
+    Exit(TRUE);
   end;
 
   table := TTable.Create(FNextTableInternalId);
@@ -133,38 +136,44 @@ begin
     Inc(FNextTableInternalId);
     if AShow then
       table.BringToFront;
-    result := table;
+    result := TRUE;
   end
   else
   begin
     {$IFDEF DEBUG} DebugLn(FDebugId, 'Failed to setup live table', ditException); {$ENDIF}
     Remove(FNextTableInternalId);
-    result := nil;
   end;
 end;
 
-function TTableList.AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): TTable;
+function TTableList.AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): Boolean;
 var
   table: TTable;
   hhis: THandHistoryItems;
   hhi: THandHistoryItem;
 begin
-  if (not HandHistory.TryGetValue(AGameId, hhis)) or
-     (not hhis.FindHand(AHandId, hhi)) then
-    Exit(nil);
+  result := FALSE;
+  HandHistory.Lock;
+  try
+    if not HandHistory.TryGetValue(AGameId, hhis) then
+      Exit;
 
-  table := TTable.Create(FNextTableInternalId);
-  Add(FNextTableInternalId, table);
-  if table.SetupHandHistoryTable(hhis, hhi) then
-  begin
-    Inc(FNextTableInternalId);
-    table.BringToFront;
-    result := table;
-  end
-  else
-  begin
-    Remove(FNextTableInternalId);
-    result := nil;
+    if hhis.GetAndLockHand(AHandId, hhi) then
+    try
+      table := TTable.Create(FNextTableInternalId);
+      Add(FNextTableInternalId, table);
+      if table.SetupHandHistoryTable(hhis, hhi) then
+      begin
+        Inc(FNextTableInternalId);
+        table.BringToFront;
+        result := TRUE;
+      end
+      else
+        Remove(FNextTableInternalId);
+    finally
+      hhis.Unlock;
+    end;
+  finally
+    HandHistory.Unlock;
   end;
 end;
 
@@ -176,7 +185,8 @@ begin
   FLock.Enter;
   try
     for table in Values do
-      if table.Status.IsSitting then
+      if (table.TableType = ttLiveGame) and
+         (table.Status.IsSitting) then
         Inc(result);
   finally
     FLock.Leave;
@@ -247,33 +257,56 @@ begin
   end;
 end;
 
-function TTableList.FindTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean;
+function TTableList.GetAndLockTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean;
+var
+  table: TTable;
+begin
+  FLock.Enter;
+  for table in Values do
+    if (table.TableType = ATableType) and
+       (CompareBytes(table.GameId, AMongoId)) then
+    begin
+      ATable := table;
+      Exit(TRUE);
+    end;
+  FLock.Leave;
+  Exit(FALSE);
+end;
+
+function TTableList.GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
+begin
+  FLock.Enter;
+  result := TryGetValue(AId, ATable);
+  if not result then
+  begin
+    FLock.Leave;
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Cannot find table with internal id: %d', [AId]), ditException); {$ENDIF}
+  end;
+end;
+
+procedure TTableList.UpdateClubObject(const AClubId: TBytes);
 var
   table: TTable;
 begin
   FLock.Enter;
   try
     for table in Values do
-      if (CompareBytes(table.GameId, AMongoId)) and
-         (table.TableType = ATableType) then
-      begin
-        ATable := table;
-        Exit(TRUE);
-      end;
-    Exit(FALSE);
+      if CompareBytes(table.ClubId, AClubId) then
+        table.UpdateObjects;
   finally
     FLock.Leave;
   end;
 end;
 
-function TTableList.GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean;
+procedure TTableList.UpdateGameObject(const AGameId: TBytes);
+var
+  table: TTable;
 begin
-  result := TryGetValue(AId, ATable);
-  if result then
-    Lock
-  else
-  begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Cannot find table with internal id: %d', [AId]), ditException); {$ENDIF}
+  if GetAndLockTable(AGameId, ttLiveGame, table) then
+  try
+    table.UpdateObjects;
+  finally
+    Unlock;
   end;
 end;
 

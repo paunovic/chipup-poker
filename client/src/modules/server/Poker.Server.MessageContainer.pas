@@ -157,12 +157,12 @@ begin
           if Integer(callback_servermsg.Code) = AMethodId then
             callback_servermsg.Callback(AMethodId, AObject)
         end;
-
-    if Assigned(AObject) then
-      AObject.Free;
   finally
     FLock.Leave;
   end;
+
+  if Assigned(AObject) then
+    AObject.Free;
 end;
 
 procedure TMessageContainer.ProcessSocketStateChange(const AOldState, ANewState: TSocketState);

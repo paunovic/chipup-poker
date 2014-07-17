@@ -36,7 +36,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Server.Socket.Commands, Poker.Server.Validators, Poker.Server.Settings, Poker.Common.FormsContainer;
+  Poker.Server.Socket, Poker.Server.Validators, Poker.Server.Settings, Poker.Common.FormsContainer;
 
 
 procedure TfrmForgotPassword.FormCreate(Sender: TObject);

@@ -14,11 +14,11 @@ type
     srChangeClubDetailsReply = 7,
     srLogout = 8,
     srListClubs = 9,
-    srStatus = 10,
     srKickPlayerReply = 11,
     srSetAvatarReply = 12,
     srChangeMailReply = 13,
     srGetPlayers = 14,
+    srSubscriptionPlanChange = 15,
     srOwnershipGiveAwayNotOwner = 16,
     srOwnershipGiveAwayInvalidPlayerId = 17,
     srOwnershipGiveAwayInvalidClubId = 18,
@@ -27,7 +27,6 @@ type
     srChangePasswordOk = 23,
     srCreateGameOk = 24,
     srDeleteGameOk = 25,
-    srEditGameOk = 26,
     srTableSitOk = 27,
     srTableSitSeatTaken = 28,
     srTableStandUpOk = 29,
@@ -58,7 +57,6 @@ type
     seUserChange = 60,
     scHello = 70,
     scLogin = 71,
-    scStatus = 72,
     scRegister = 73,
     scForgotPassword = 74,
     scLogout = 75,
@@ -69,6 +67,7 @@ type
     scGiveClubOwnership = 80,
     scChangeClubDetails = 81,
     scDeleteClub = 82,
+    scSubscriptionPlanChange = 83,
     scChangeEmail = 84,
     scChangePassword = 85,
     scSetAvatar = 86,
@@ -134,11 +133,11 @@ begin
     srChangeClubDetailsReply: result := 'srChangeClubDetailsReply';
     srLogout: result := 'srLogout';
     srListClubs: result := 'srListClubs';
-    srStatus: result := 'srStatus';
     srKickPlayerReply: result := 'srKickPlayerReply';
     srSetAvatarReply: result := 'srSetAvatarReply';
     srChangeMailReply: result := 'srChangeMailReply';
     srGetPlayers: result := 'srGetPlayers';
+    srSubscriptionPlanChange: result := 'srSubscriptionPlanChange';
     srOwnershipGiveAwayNotOwner: result := 'srOwnershipGiveAwayNotOwner';
     srOwnershipGiveAwayInvalidPlayerId: result := 'srOwnershipGiveAwayInvalidPlayerId';
     srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
@@ -147,7 +146,6 @@ begin
     srChangePasswordOk: result := 'srChangePasswordOk';
     srCreateGameOk: result := 'srCreateGameOk';
     srDeleteGameOk: result := 'srDeleteGameOk';
-    srEditGameOk: result := 'srEditGameOk';
     srTableSitOk: result := 'srTableSitOk';
     srTableSitSeatTaken: result := 'srTableSitSeatTaken';
     srTableStandUpOk: result := 'srTableStandUpOk';
@@ -178,7 +176,6 @@ begin
     seUserChange: result := 'seUserChange';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
-    scStatus: result := 'scStatus';
     scRegister: result := 'scRegister';
     scForgotPassword: result := 'scForgotPassword';
     scLogout: result := 'scLogout';
@@ -189,6 +186,7 @@ begin
     scGiveClubOwnership: result := 'scGiveClubOwnership';
     scChangeClubDetails: result := 'scChangeClubDetails';
     scDeleteClub: result := 'scDeleteClub';
+    scSubscriptionPlanChange: result := 'scSubscriptionPlanChange';
     scChangeEmail: result := 'scChangeEmail';
     scChangePassword: result := 'scChangePassword';
     scSetAvatar: result := 'scSetAvatar';

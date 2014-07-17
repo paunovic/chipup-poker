@@ -31,7 +31,7 @@ type
     procedure cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
-    FClub: TClubInfo;
+    FClubId: TBytes;
     FCloseCallback: TNotifyEvent;
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
@@ -50,8 +50,8 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket.Commands, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks,
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
@@ -99,14 +99,22 @@ begin
 end;
 
 procedure TfrmChangeClubDetails.SetParams(const AParams: array of pointer);
+var
+  club: TClubInfo;
 begin
-  FClub := AParams[0];
+  SetLength(FClubId, 12);
+  Move(AParams[0]^, FClubId[0], 12);
 
-  edClubName.Text := FClub.Name;
-  edInvitationCode.Text := FClub.Password;
-  seRake.Value := FClub.Rake;
-  seLimit.Value := FClub.DefaultBalanceLimit / 100;
-  cbDefaultPlayerLimit.Checked := not FClub.UnlimitedDefaultBalance;
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    edClubName.Text := club.Name;
+    edInvitationCode.Text := club.Password;
+    seRake.Value := club.Rake;
+    seLimit.Value := club.DefaultBalanceLimit / 100;
+    cbDefaultPlayerLimit.Checked := not club.UnlimitedDefaultBalance;
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
 end;
 
 procedure TfrmChangeClubDetails.acCancelExecute(Sender: TObject);
@@ -151,7 +159,7 @@ begin
   limituint := Trunc(limit * 100);
 
   acOK.Enabled := FALSE;
-  ServerSocket.ChangeClubDetails(FClub.Id, edClubName.Text, edInvitationCode.Text, rake, limituint, not cbDefaultPlayerLimit.Checked);
+  ServerSocket.ChangeClubDetails(FClubId, edClubName.Text, edInvitationCode.Text, rake, limituint, not cbDefaultPlayerLimit.Checked);
 end;
 
 procedure TfrmChangeClubDetails.cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
@@ -164,7 +172,7 @@ var
   pbreply: TPB_ClubCommandReply;
 begin
   pbreply := AObject as TPB_ClubCommandReply;
-  if not CompareBytes(pbreply.Club.MongoId, FClub.MongoId) then
+  if not CompareBytes(pbreply.Club.MongoId, FClubId) then
     Exit;
 
   case pbreply.Status of

@@ -14,6 +14,9 @@ type
     class procedure Initialize;
     class procedure Deinitialize;
 
+    procedure Lock;
+    procedure Unlock;
+
     constructor Create;
     destructor Destroy; override;
 
@@ -34,6 +37,7 @@ begin
   HandHistory := THandHistory.Create;
 end;
 
+
 class procedure THandHistory.Deinitialize;
 begin
   FreeAndNil(HandHistory);
@@ -48,8 +52,8 @@ end;
 
 destructor THandHistory.Destroy;
 begin
-  FreeAndNil(FLock);
   inherited;
+  FreeAndNil(FLock);
 end;
 
 function THandHistory.Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply): Boolean;
@@ -58,25 +62,38 @@ var
   hhis: THandHistoryItems;
   hhi: THandHistoryItem;
 begin
-  if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
-  begin
-    FLock.Enter;
-    try
+  FLock.Enter;
+  try
+    if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
+    begin
       inherited Add(AClubHandHistoryInfo.Gameid, THandHistoryItems.Create(AClubHandHistoryInfo.Clubid, AClubHandHistoryInfo.Gameid));
-    finally
-      FLock.Leave;
+      if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
+        Exit(FALSE);
     end;
 
-    if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
-      Exit(FALSE);
-  end;
+    for pbhh in AClubHandHistoryInfo.Rows do
+      if not hhis.GetAndLockHand(pbhh.Seq, hhi) then
+        hhis.AddHand(pbhh)
+      else
+      begin
+        hhi.Assign(pbhh);
+        hhis.Unlock;
+      end;
 
-  for pbhh in AClubHandHistoryInfo.Rows do
-    if not hhis.FindHand(pbhh.Seq, hhi) then
-      hhis.AddHand(pbhh)
-    else
-      hhi.Assign(pbhh);
-  Exit(TRUE);
+    Exit(TRUE);
+  finally
+    FLock.Leave;
+  end;
+end;
+
+procedure THandHistory.Lock;
+begin
+  FLock.Enter;
+end;
+
+procedure THandHistory.Unlock;
+begin
+  FLock.Leave;
 end;
 
 end.

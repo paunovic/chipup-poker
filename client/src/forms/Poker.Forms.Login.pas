@@ -85,7 +85,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket.Commands, Poker.Server.MessageContainer,
+  Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket, Poker.Server.MessageContainer,
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParamProcesser,
@@ -237,8 +237,8 @@ var
 begin
   item_index := (Sender as TcxComboBox).ItemIndex;
   Settings.ServerIndex := item_index;
-  TServerSocketCommands.Deinitialize;
-  TServerSocketCommands.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);
+  TServerSocket.Deinitialize;
+  TServerSocket.Initialize(Settings.Hardcoded.SERVER_CONFIG[item_index].TCPAddress, Settings.Hardcoded.SERVER_CONFIG[item_index].TCPPort);
 end;
 
 procedure TfrmChipUpLogin.SetCurrentStatus(const AValue: TLoginStatus);

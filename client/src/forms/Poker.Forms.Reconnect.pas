@@ -55,7 +55,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket.Commands, Poker.DataModule,
+  Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket, Poker.DataModule,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Settings,
   Poker.Tables.TableList, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections;
 

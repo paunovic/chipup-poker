@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
   Poker.Clubs.Club, Vcl.ActnList, cxButtons, cxTextEdit, cxLabel, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus,
-  dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, Vcl.StdCtrls;
+  dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, Vcl.StdCtrls, System.SysUtils;
 
 type
   TfrmCloseClubConfirmation = class(TForm, IFormParams, IModalForm)
@@ -26,7 +26,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure edPasswordPropertiesChange(Sender: TObject);
   private
-    FClub: TClubInfo;
+    FClubId: TBytes;
     FCloseCallback: TNotifyEvent;
   protected
   public
@@ -39,7 +39,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Settings, Poker.Server.Validators;
+  Poker.Common.FormsContainer, Poker.Server.Settings, Poker.Server.Validators, Poker.DataModule;
 
 { TfrmCloseClubConfirmation }
 
@@ -68,13 +68,14 @@ end;
 
 procedure TfrmCloseClubConfirmation.SetParams(const AParams: array of pointer);
 begin
-  FClub := AParams[0];
+  SetLength(FClubId, 12);
+  Move(AParams[0]^, FClubId[0], 12);
 end;
 
 procedure TfrmCloseClubConfirmation.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = vk_RETURN then
-    acCancel.Execute;
+    acConfirm.Execute;
 end;
 
 procedure TfrmCloseClubConfirmation.acCancelExecute(Sender: TObject);
@@ -84,8 +85,19 @@ begin
 end;
 
 procedure TfrmCloseClubConfirmation.acConfirmExecute(Sender: TObject);
+var
+  club: TClubInfo;
+  clubpass: String;
 begin
-  if edPassword.Text = FClub.Password then
+  clubpass := '';
+  if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
+  try
+    clubpass := club.Password;
+  finally
+    dmMain.SelfInfo.Clubs.Unlock;
+  end;
+
+  if edPassword.Text = clubpass then
   begin
     ModalResult := mrOk;
     Close;

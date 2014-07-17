@@ -12,8 +12,8 @@ uses
 type
   TfrmJoinClub = class(TForm, IFormParams)
     lbsClubID: TcxLabel;
-    edClubCode: TcxTextEdit;
-    lbsInvCode: TcxLabel;
+    edClubPassword: TcxTextEdit;
+    lbsClubPassword: TcxLabel;
     alJoinClub: TActionList;
     acOk: TAction;
     edClubID: TcxSpinEdit;
@@ -44,7 +44,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Server.Socket.Commands, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply,
+  Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Server.Validators;
 
 
@@ -55,7 +55,7 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                       TServerMessageCallback.Create(srJoinClubReply, CSRJoinClub)
                   ]);
-  edClubCode.Properties.MaxLength := ServerSettings.MaxStringLengths.ClubInvCode;
+  edClubPassword.Properties.MaxLength := ServerSettings.MaxStringLengths.ClubInvCode;
 end;
 
 procedure TfrmJoinClub.FormDestroy(Sender: TObject);
@@ -73,7 +73,7 @@ end;
 
 procedure TfrmJoinClub.SetParams(const AParams: array of pointer);
 begin
-  edClubCode.TabOrder := 0;
+  edClubPassword.TabOrder := 0;
   edClubID.TabOrder := 1;
   edClubID.Text := IntToStr(PInt64(AParams[0])^);
 end;
@@ -90,7 +90,7 @@ procedure TfrmJoinClub.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   case Ord(Key) of
     VK_RETURN: begin
-      if not edClubCode.Focused then
+      if not edClubPassword.Focused then
         SelectNext(ActiveControl, TRUE, TRUE)
       else
         acOk.Execute;
@@ -121,8 +121,11 @@ var
   error: String;
 begin
   error := '';
-  if not ValidateClubPassword(edClubCode.Text, error) then
-    edClubCode.SetFocus;
+  if not ValidateClubPassword(edClubPassword.Text, error) then
+  begin
+    edClubPassword.SetFocus;
+    edClubPassword.SelectAll;
+  end;
 
   if error <> '' then
   begin
@@ -131,7 +134,7 @@ begin
   end;
 
   acOK.Enabled := FALSE;
-  ServerSocket.JoinClub(edClubID.Value, edClubCode.Text);
+  ServerSocket.JoinClub(edClubID.Value, edClubPassword.Text);
 end;
 
 procedure TfrmJoinClub.CSRJoinClub(const AMethodId: Integer; const AObject: TObject);
@@ -152,14 +155,17 @@ begin
     csInvalidClubId: begin
       MessageDlg('Invalid club ID', mtError, [mbOK], 0);
       edClubID.SetFocus;
+      edClubID.SelectAll;
     end;
     csAlreadyMember: begin
       MessageDlg('You are already member of this club', mtInformation, [mbOK], 0);
       edClubID.SetFocus;
+      edClubID.SelectAll;
     end;
     csInvalidPassword: begin
       MessageDlg('Invalid club password', mtError, [mbOK], 0);
-      edClubCode.SetFocus;
+      edClubPassword.SetFocus;
+      edClubPassword.SelectAll;
     end;
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRJoinClub: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}

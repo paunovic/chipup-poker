@@ -36,7 +36,6 @@ type
     function CheckAuthed: Boolean;
     function IsLoggedIn: Boolean;
 
-    procedure OpenCashierLink;
     procedure OpenTACLink;
     procedure OpenSiteLink;
     procedure UpdateSelfInfoInPlayers;
@@ -62,7 +61,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Tables.Resources, Poker.Common.FormsContainer, Poker.Server.Socket.Commands,
+  Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Tables.Resources, Poker.Common.FormsContainer, Poker.Server.Socket,
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
@@ -113,7 +112,7 @@ begin
   else
     server_index := 0;
 
-  TServerSocketCommands.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
+  TServerSocket.Initialize(TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPAddress, TSettings.Hardcoded.SERVER_CONFIG[server_index].TCPPort);
 
   FSelfInfo := TPlayerInfo.Create;
 
@@ -131,7 +130,7 @@ begin
   FreeAndNil(FReconnectedTables);
 
   TFormsContainer.Deinitialize;
-  TServerSocketCommands.Deinitialize;
+  TServerSocket.Deinitialize;
   TMessageContainer.Deinitialize;
   TfrmSystemTrayPopup.DestroyIfExists;
   TTableList.Deinitialize;
@@ -162,14 +161,8 @@ end;
 function TdmMain.CheckAuthed: Boolean;
 begin
   result := FSelfInfo.Authed;
-
   if not result then
     MessageDlg('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.', mtWarning, [mbOK], 0);
-end;
-
-procedure TdmMain.OpenCashierLink;
-begin
-  ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.CASHIER));
 end;
 
 procedure TdmMain.OpenSiteLink;
@@ -225,7 +218,7 @@ end;
 
 procedure TdmMain.UpdateSelfInfoInPlayers;
 begin
-  Players.AddPlayer(FSelfInfo.Id, FSelfInfo.Nick, FSelfInfo.EMail, FSelfInfo.AvatarId);
+  Players.AddPlayer(FSelfInfo.MongoId, FSelfInfo.Nick, FSelfInfo.EMail, FSelfInfo.AvatarId);
 end;
 
 procedure TdmMain.ProcessLoginReply(const ALoginReply: TPB_LoginReply);
@@ -257,7 +250,9 @@ var
   tstatus: TPB_TableStatus;
   exists: Boolean;
   to_remove: TList<TBytes>;
+  to_remove_iid: TList<Integer>;
   mongoid: TBytes;
+  C1: Integer;
 begin
   // first, close all tables that dont exist in reconnected tables array
   to_remove := TList<TBytes>.Create;
@@ -281,9 +276,16 @@ begin
       Tables.Unlock;
     end;
 
-    for mongoid in to_remove do
-      if Tables.FindTable(mongoid, ttLiveGame, table) then
-        Tables.Remove(table.Internalid);
+    to_remove_iid := TList<Integer>.Create;
+    try
+      for mongoid in to_remove do
+        if Tables.GetAndLockTable(mongoid, ttLiveGame, table) then
+          to_remove_iid.Add(table.InternalId);
+      for C1 := 0 to to_remove_iid.Count - 1 do
+        Tables.Remove(to_remove_iid[C1]);
+    finally
+      to_remove_iid.Free;
+    end;
   finally
     to_remove.Free;
   end;
@@ -291,13 +293,13 @@ begin
   // restore reconnected table states
   for tstatus in FReconnectedTables do
   begin
-    table := nil;
-
-    if not Tables.FindTable(tstatus.TableMongoId, ttLiveGame, table) then
-      table := Tables.AddTable(tstatus.TableMongoId, TRUE, FALSE);
-
-    if Assigned(table) then
+    Tables.AddLiveTable(tstatus.TableMongoId, TRUE, FALSE);
+    if Tables.GetAndLockTable(tstatus.TableMongoId, ttLiveGame, table) then
+    try
       table.SetTableStatus(tstatus, FALSE);
+    finally
+      Tables.Unlock;
+    end;
   end;
 end;
 

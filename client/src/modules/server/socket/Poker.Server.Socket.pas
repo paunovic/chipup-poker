@@ -1,4 +1,4 @@
-unit Poker.Server.Socket.Commands;
+unit Poker.Server.Socket;
 
 interface
 
@@ -8,7 +8,7 @@ uses
   Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
-  TServerSocketCommands = class(TServerSocketCore)
+  TServerSocket = class(TServerSocketCore)
   private
   public
     class procedure Initialize(const AServer: String; const APort: Integer);
@@ -19,12 +19,12 @@ type
     procedure CreateAccount(const AUsername, APassword, AEMail: String);
     procedure ForgotPassword(const AEMail: String);
     procedure CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
-    procedure JoinClub(const AId: Int64; const ACode: String);
-    procedure LeaveClub(const AId: Int64);
-    procedure KickPlayer(const AClubId: Int64; const APlayerId: TBytes);
-    procedure GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
-    procedure ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
-    procedure DisbandClub(const AClubId: Int64);
+    procedure JoinClub(const AClubId: Int64; const ACode: String);
+    procedure LeaveClub(const AClubId: TBytes);
+    procedure KickPlayer(const AClubId: TBytes; const APlayerId: TBytes);
+    procedure GiveOwnership(const AClubId: TBytes; const APlayerId: TBytes);
+    procedure ChangeClubDetails(const AClubId: TBytes; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
+    procedure DisbandClub(const AClubId: TBytes);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
@@ -59,7 +59,7 @@ type
   end;
 
 var
-  ServerSocket: TServerSocketCommands;
+  ServerSocket: TServerSocket;
 
 implementation
 
@@ -79,17 +79,17 @@ uses
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams;
 
 
-class procedure TServerSocketCommands.Initialize(const AServer: String; const APort: Integer);
+class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
 begin
-  ServerSocket := TServerSocketCommands.Create(AServer, APort);
+  ServerSocket := TServerSocket.Create(AServer, APort);
 end;
 
-class procedure TServerSocketCommands.Deinitialize;
+class procedure TServerSocket.Deinitialize;
 begin
   FreeAndNil(ServerSocket);
 end;
 
-procedure TServerSocketCommands.Login(const ALogin, APass: String);
+procedure TServerSocket.Login(const ALogin, APass: String);
 var
   protobuf: TPB_LoginParams;
 begin
@@ -103,12 +103,12 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.Logout;
+procedure TServerSocket.Logout;
 begin
   SendProtobuf(scLogout, nil);
 end;
 
-procedure TServerSocketCommands.CreateAccount(const AUsername, APassword, AEMail: String);
+procedure TServerSocket.CreateAccount(const AUsername, APassword, AEMail: String);
 var
   protobuf: TPB_RegisterParams;
 begin
@@ -123,7 +123,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.ForgotPassword(const AEMail: String);
+procedure TServerSocket.ForgotPassword(const AEMail: String);
 var
   protobuf: TPB_ForgotPasswordParams;
 begin
@@ -136,7 +136,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
+procedure TServerSocket.CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
 var
   protobuf: TPB_Club;
 begin
@@ -151,13 +151,13 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.JoinClub(const AId: Int64; const ACode: String);
+procedure TServerSocket.JoinClub(const AClubId: Int64; const ACode: String);
 var
   protobuf: TPB_Club;
 begin
   protobuf := TPB_Club.Create;
   try
-    protobuf.Seq := AId;
+    protobuf.Seq := AClubId;
     protobuf.Password := ACode;
     SendProtobuf(scJoinClub, protobuf);
   finally
@@ -165,13 +165,13 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.KickPlayer(const AClubId: Int64; const APlayerId: TBytes);
+procedure TServerSocket.KickPlayer(const AClubId: TBytes; const APlayerId: TBytes);
 var
   protobuf: TPB_KickPlayerParams;
 begin
   protobuf := TPB_KickPlayerParams.Create;
   try
-    protobuf.ClubSeq := AClubId;
+    protobuf.ClubMongoId := AClubId;
     protobuf.PlayerMongoId := APlayerId;
     SendProtobuf(scKickPlayer, protobuf);
   finally
@@ -179,26 +179,26 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.LeaveClub(const AId: Int64);
+procedure TServerSocket.LeaveClub(const AClubId: TBytes);
 var
   protobuf: TPB_Club;
 begin
   protobuf := TPB_Club.Create;
   try
-    protobuf.Seq := AId;
+    protobuf.MongoId := AClubId;
     SendProtobuf(scLeaveClub, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TServerSocketCommands.GiveOwnership(const AClubId: Int64; const APlayerId: TBytes);
+procedure TServerSocket.GiveOwnership(const AClubId: TBytes; const APlayerId: TBytes);
 var
   protobuf: TPB_GiveClubOwnershipParams;
 begin
   protobuf := TPB_GiveClubOwnershipParams.Create;
   try
-    protobuf.ClubSeq := AClubId;
+    protobuf.ClubMongoId := AClubId;
     protobuf.PlayerMongoId := APlayerId;
     SendProtobuf(scGiveClubOwnership, protobuf);
   finally
@@ -206,13 +206,13 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.ChangeClubDetails(const AClubId: Int64; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
+procedure TServerSocket.ChangeClubDetails(const AClubId: TBytes; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
 var
   protobuf: TPB_Club;
 begin
   protobuf := TPB_Club.Create;
   try
-    protobuf.Seq := AClubId;
+    protobuf.MongoId := AClubId;
     protobuf.Name := AClubName;
     protobuf.Password := AClubCode;
     protobuf.Rake := AClubRake;
@@ -224,20 +224,20 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.DisbandClub(const AClubId: Int64);
+procedure TServerSocket.DisbandClub(const AClubId: TBytes);
 var
   protobuf: TPB_Club;
 begin
   protobuf := TPB_Club.Create;
   try
-    protobuf.Seq := AClubId;
+    protobuf.MongoId := AClubId;
     SendProtobuf(scDeleteClub, protobuf);
   finally
     protobuf.Free;
   end;
 end;
 
-procedure TServerSocketCommands.ChangeEMail(const ANewMail: String);
+procedure TServerSocket.ChangeEMail(const ANewMail: String);
 var
   protobuf: TPB_ChangeEMailParams;
 begin
@@ -250,7 +250,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.ChangePassword(const APassword: String);
+procedure TServerSocket.ChangePassword(const APassword: String);
 var
   protobuf: TPB_ChangePasswordParams;
 begin
@@ -263,7 +263,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.SetAvatar(const AAvatarId: TBytes);
+procedure TServerSocket.SetAvatar(const AAvatarId: TBytes);
 var
   protobuf: TPB_SetAvatarParams;
 begin
@@ -276,7 +276,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.CreateGame(const AClubId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+procedure TServerSocket.CreateGame(const AClubId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
@@ -296,7 +296,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
+procedure TServerSocket.CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
 var
   protobuf: TPB_CloseGameData;
 begin
@@ -310,7 +310,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.SendTableChatLine(const AGameId: TBytes; const ALine: String);
+procedure TServerSocket.SendTableChatLine(const AGameId: TBytes; const ALine: String);
 var
   protobuf: TPB_ChatEvent;
   pbmsg   : TPB_ChatMessage;
@@ -328,7 +328,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.JoinTable(const AGameId: TBytes);
+procedure TServerSocket.JoinTable(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
@@ -342,7 +342,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.LeaveTable(const AGameId: TBytes);
+procedure TServerSocket.LeaveTable(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
@@ -355,7 +355,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
+procedure TServerSocket.TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
 var
   protobuf: TPB_TableSit;
 begin
@@ -370,7 +370,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.TableAddOn(const AGameId: TBytes; const AChips: Integer);
+procedure TServerSocket.TableAddOn(const AGameId: TBytes; const AChips: Integer);
 var
   protobuf: TPB_TableSit;
 begin
@@ -384,7 +384,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.TableStandUp(const AGameId: TBytes);
+procedure TServerSocket.TableStandUp(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
@@ -397,7 +397,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
+procedure TServerSocket.ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
 var
   protobuf: TPB_ChangeSuspendState;
 begin
@@ -412,7 +412,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.GetUserInfos(const AMongoIds: array of TBytes);
+procedure TServerSocket.GetUserInfos(const AMongoIds: array of TBytes);
 var
   protobuf: TPB_GetUserParams;
   C1: Integer;
@@ -430,7 +430,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.Fold(const AGameId: TBytes);
+procedure TServerSocket.Fold(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
@@ -443,7 +443,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
+procedure TServerSocket.PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
 var
   protobuf: TPB_PutChips;
 begin
@@ -458,7 +458,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.TablePlayNow(const AGameId: TBytes);
+procedure TServerSocket.TablePlayNow(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
@@ -471,17 +471,17 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.TableSitOutNextHand(const AGameId: TBytes; const AFlag: Boolean);
+procedure TServerSocket.TableSitOutNextHand(const AGameId: TBytes; const AFlag: Boolean);
 begin
   TableBoolFlag(scTableSitOutNextHand, AGameId, AFlag);
 end;
 
-procedure TServerSocketCommands.TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
+procedure TServerSocket.TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
 begin
   TableBoolFlag(scTableSitOutNextBB, AGameId, AFlag);
 end;
 
-procedure TServerSocketCommands.TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
+procedure TServerSocket.TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
 var
   protobuf: TPB_TableBoolFlag;
 begin
@@ -495,12 +495,12 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.ResendVerificationMail;
+procedure TServerSocket.ResendVerificationMail;
 begin
   SendProtobuf(scResendVerificationMail, nil);
 end;
 
-procedure TServerSocketCommands.ShowCards(const AGameId: TBytes);
+procedure TServerSocket.ShowCards(const AGameId: TBytes);
 var
   protobuf: TPB_Game;
 begin
@@ -513,7 +513,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.QueryTableStats(const ATables: array of TBytes);
+procedure TServerSocket.QueryTableStats(const ATables: array of TBytes);
 var
   protobuf: TPB_QueryTableStats;
   C1: Integer;
@@ -528,7 +528,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.ContactUs(const AReason: TContactReason; const AMessage: String);
+procedure TServerSocket.ContactUs(const AReason: TContactReason; const AMessage: String);
 var
   protobuf: TPB_ContactMessage;
 begin
@@ -542,7 +542,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
+procedure TServerSocket.Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
 var
   protobuf: TPB_HelloParams;
 begin
@@ -566,7 +566,7 @@ begin
     ABytes[C1] := StrToInt('$' + Copy(AString, C1 * 2 + 1, 2));
 end;
 
-procedure TServerSocketCommands.SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
+procedure TServerSocket.SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
 var
   protobuf: TPB_PlayerLimitParams;
 begin
@@ -582,7 +582,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.ResetPlayerBalance(const AClubId, AMemberId: TBytes);
+procedure TServerSocket.ResetPlayerBalance(const AClubId, AMemberId: TBytes);
 var
   protobuf: TPB_PlayerLimitParams;
 begin
@@ -598,7 +598,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCommands.QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
+procedure TServerSocket.QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
 var
   protobuf: TPB_AssetList;
 begin
@@ -612,7 +612,7 @@ begin
 end;
 
 {$IFDEF DEBUG}
-procedure TServerSocketCommands.CrashTest;
+procedure TServerSocket.CrashTest;
 var
   pb: TPB_HelloParams;
   tmp: String;

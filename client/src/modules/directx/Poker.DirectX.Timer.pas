@@ -13,7 +13,6 @@ type
       UPDATE_INTERVAL = 1000 div UPDATE_FPS;
 
     var
-      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
       FAnimations: TDXAnimations;
       FSignalEvent: TEvent;
       FTiming: TAsphyreTiming;
@@ -66,7 +65,6 @@ end;
 
 constructor TDXTimer.Create;
 begin
-  {$IFDEF DEBUG} RegisterDebugObject('DXTimer'); {$ENDIF}
   FNextId := 0;
   FSignalEvent := TEvent.Create(nil, FALSE, FALSE, '');
   FTiming := TAsphyreTiming.Create;
@@ -81,7 +79,6 @@ begin
   FAnimations.Free;
   FTiming.Free;
   FreeAndNil(FSignalEvent);
-  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
   inherited;
 end;
 

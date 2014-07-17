@@ -323,39 +323,47 @@ var
   hhis: THandHistoryItems;
 begin
   rvHandHistory.ClearAll;
-  if (not HandHistory.TryGetValue(FSelectedTableId, hhis)) or
-     (not hhis.FindHand(FSelectedHandId, hhi)) then
-  begin
-    acCopyToClipboard.Enabled := FALSE;
-    acReplayHand.Enabled := FALSE;
-    Exit;
-  end;
+  acCopyToClipboard.Enabled := FALSE;
+  acReplayHand.Enabled := FALSE;
 
-  // select appropriate hand in combobox
-  item_index := cbHand.Properties.Items.Count - 1;
-  for C1 := 0 to cbHand.Properties.Items.Count - 1 do
-  begin
-    hand_id := StrToIntDef(Copy(cbHand.Properties.Items[C1], 2, Pos(':', cbHand.Properties.Items[C1]) - 2), -1);
-    if hand_id = FSelectedHandId then
-    begin
-      item_index := C1;
-      Break;
+  HandHistory.Lock;
+  try
+    if not HandHistory.TryGetValue(FSelectedTableId, hhis) then
+      Exit;
+
+    if hhis.GetAndLockHand(FSelectedHandId, hhi) then
+    try
+      // select appropriate hand in combobox
+      item_index := cbHand.Properties.Items.Count - 1;
+      for C1 := 0 to cbHand.Properties.Items.Count - 1 do
+      begin
+        hand_id := StrToIntDef(Copy(cbHand.Properties.Items[C1], 2, Pos(':', cbHand.Properties.Items[C1]) - 2), -1);
+        if hand_id = FSelectedHandId then
+        begin
+          item_index := C1;
+          Break;
+        end;
+      end;
+      cbHand.ItemIndex := item_index;
+
+      // add first two lines with ParaNo = 1, so they're centered
+      // a bit dirty fix, ideally there should be \p%d parameter
+      for C1 := 0 to hhi.RVLines.Count - 1 do
+        if C1 < 2 then
+          AddRVLine(hhi.RVLines[C1], 1)
+        else
+          AddRVLine(hhi.RVLines[C1], 0);
+
+      rvHandHistory.ScrollTo(0);
+
+      acCopyToClipboard.Enabled := TRUE;
+      acReplayHand.Enabled := TRUE;
+    finally
+      hhis.Unlock;
     end;
+  finally
+    HandHistory.Unlock;
   end;
-  cbHand.ItemIndex := item_index;
-
-  // add first two lines with ParaNo = 1, so they're centered
-  // a bit dirty fix, ideally there should be \p%d parameter
-  for C1 := 0 to hhi.RVLines.Count - 1 do
-    if C1 < 2 then
-      AddRVLine(hhi.RVLines[C1], 1)
-    else
-      AddRVLine(hhi.RVLines[C1], 0);
-
-  rvHandHistory.ScrollTo(0);
-
-  acCopyToClipboard.Enabled := TRUE;
-  acReplayHand.Enabled := TRUE;
 end;
 
 procedure TfrmHandHistory.tiCopyHideTimerTimer(Sender: TObject);

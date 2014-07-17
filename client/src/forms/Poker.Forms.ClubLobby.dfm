@@ -2690,7 +2690,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 324
+          Top = 306
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2706,7 +2706,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 324
+          Top = 306
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2722,7 +2722,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 324
+          Top = 306
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2738,7 +2738,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 324
+          Top = 306
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2754,7 +2754,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 324
+          Top = 306
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2793,13 +2793,17 @@ object frmClubLobby: TfrmClubLobby
           Left = 2
           Top = 19
           Width = 876
-          Height = 293
+          Height = 275
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
+          ExplicitLeft = 3
+          ExplicitTop = 16
+          ExplicitWidth = 872
+          ExplicitHeight = 279
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2873,7 +2877,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 277
+          Top = 259
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2886,10 +2890,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 263
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 277
+          Top = 259
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2902,10 +2907,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
+          ExplicitTop = 263
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 213
+          Top = 195
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]
@@ -2920,7 +2926,7 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          OnClick = acShowEditGameFormExecute
+          ExplicitTop = 199
         end
       end
     end
@@ -2942,6 +2948,7 @@ object frmClubLobby: TfrmClubLobby
         BevelOuter = bvNone
         BorderStyle = cxcbsNone
         TabOrder = 0
+        ExplicitHeight = 430
         object gridTablesTable: TcxGridTableView
           PopupMenu = pmTablesStats
           OnDblClick = gridTablesTableDblClick
@@ -3031,11 +3038,13 @@ object frmClubLobby: TfrmClubLobby
         BevelOuter = bvNone
         ShowCaption = False
         TabOrder = 1
+        ExplicitWidth = 536
+        ExplicitHeight = 430
         object gridStats: TcxGrid
           Left = 0
           Top = 0
-          Width = 538
-          Height = 392
+          Width = 536
+          Height = 390
           Align = alClient
           BevelInner = bvNone
           BevelOuter = bvNone
@@ -3138,8 +3147,8 @@ object frmClubLobby: TfrmClubLobby
         end
         object gridTotalStats: TcxGrid
           Left = 0
-          Top = 392
-          Width = 538
+          Top = 390
+          Width = 536
           Height = 40
           Align = alBottom
           BevelInner = bvNone

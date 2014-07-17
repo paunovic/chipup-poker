@@ -122,7 +122,7 @@ type
 implementation
 
 uses
-  System.SysUtils, Poker.Server.Socket.Commands, Poker.DataModule, Poker.Common.Misc;
+  System.SysUtils, Poker.Server.Socket, Poker.DataModule, Poker.Common.Misc;
 
 { TTableStatus }
 
@@ -300,7 +300,7 @@ begin
   // iterate through table status seats and find our seat index
   seat_index := -1;
   for C1 := 0 to FSeats.Count - 1 do
-    if CompareBytes(FSeats[C1].PlayerMongoId, dmMain.SelfInfo.Id) then
+    if CompareBytes(FSeats[C1].PlayerMongoId, dmMain.SelfInfo.MongoId) then
     begin
       seat_index := FSeats[C1].SeatIndex;
       Break;
@@ -327,8 +327,14 @@ begin
   end;
 
   FTotalRake := 0;
-  for pot in FPots do
-    Inc(FTotalRake, pot.Rake);
+  if FState >= tsWinning then
+  begin
+    for pot in FPreviousPots do
+      Inc(FTotalRake, pot.Rake);
+  end
+  else
+    for pot in FPots do
+      Inc(FTotalRake, pot.Rake);
 
   FEvents.Assign(ATableStatusProtobuf.Events);
 

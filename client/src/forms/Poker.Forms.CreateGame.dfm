@@ -1,8 +1,9 @@
-object frmCreateEditGame: TfrmCreateEditGame
+object frmCreateGame: TfrmCreateGame
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
+  Caption = 'Create a Table'
   ClientHeight = 226
   ClientWidth = 376
   Color = clWindow

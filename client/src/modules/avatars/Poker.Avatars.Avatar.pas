@@ -8,6 +8,7 @@ uses
 type
   TAvatar = class
   private
+    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
     FId: TBytes;
     FIdAsString: String;
     FImage: TJPEGImage;
@@ -41,12 +42,14 @@ type
 implementation
 
 uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule, Poker.Settings;
 
 { TAvatar }
 
 constructor TAvatar.Create(const AId: TBytes; const AImage: TJPEGImage);
 begin
+  {$IFDEF DEBUG} RegisterDebugObject('Avatar'); {$ENDIF}
   FDXImage := TAsphyreImage.Create;
 
   SetId(AId);
@@ -70,6 +73,8 @@ begin
   FreeAndNil(FImage);
   FreeAndNil(FDXImage);
 
+  {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
+
   inherited;
 end;
 
@@ -92,7 +97,16 @@ begin
         FHTTP.RcvdStream.Position := 0;
         FImage.LoadFromStream(FHTTP.RcvdStream);
         Save;
+        {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar downloaded [%s] [%d bytes]', [FIdAsString, FHTTP.RcvdStream.Size]), ditNetInc); {$ENDIF}
+      end
+      else
+      begin
+        {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar is not JPEG stream [%s]', [FIdAsString]), ditException); {$ENDIF}
       end;
+    end
+    else
+    begin
+      {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar not downloaded [%s] [ErrCode: %d; StatusCode: %d]', [FIdAsString, ErrCode, FHTTP.StatusCode]), ditException); {$ENDIF}
     end;
 
     FHTTP.RcvdStream.Free;
@@ -119,6 +133,7 @@ begin
   FHTTP.OnRequestDone := HTTPRequestDone;
   FHTTP.SslContext.InitContext;
   FHTTP.GetAsync;
+  {$IFDEF DEBUG} DebugLn(FDebugId, Format('Downlading avatar [%s]', [FIdAsString]), ditNetInc); {$ENDIF}
 end;
 
 function TAvatar.GetImage: TJPEGImage;

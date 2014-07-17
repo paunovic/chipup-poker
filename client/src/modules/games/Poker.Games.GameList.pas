@@ -12,7 +12,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure UpdateFromProtobufObjects(const AProtobufObjects: TList<TPB_Game>);
+    procedure Assign(const AGameList: TList<TPB_Game>);
     function AddGame(const AProtobufObject: TPB_Game): TGameInfo;
 
     procedure Lock;
@@ -35,7 +35,7 @@ end;
 destructor TGameList.Destroy;
 begin
   inherited;
-  FLock.Free;
+  FreeAndNil(FLock);
 end;
 
 function TGameList.AddGame(const AProtobufObject: TPB_Game): TGameInfo;
@@ -59,19 +59,46 @@ begin
   end;
 end;
 
-procedure TGameList.UpdateFromProtobufObjects(const AProtobufObjects: TList<TPB_Game>);
+procedure TGameList.Assign(const AGameList: TList<TPB_Game>);
 var
-  game: TPB_Game;
+  gameinfo: TGameInfo;
+  gamepb: TPB_Game;
+  found: Boolean;
+  to_remove: TList<TBytes>;
+  mongoid: TBytes;
 begin
   FLock.Enter;
   try
-    Clear;
+    if not Assigned(AGameList) then
+    begin
+      Clear;
+      Exit;
+    end;
+
+    to_remove := TList<TBytes>.Create;
+    try
+      for gameinfo in Values do
+      begin
+        found := FALSE;
+        for gamepb in AGameList do
+          if CompareBytes(gamepb.MongoId, gameinfo.MongoId) then
+          begin
+            found := TRUE;
+            Break;
+          end;
+        if not found then
+          to_remove.Add(gameinfo.MongoId);
+      end;
+      for mongoid in to_remove do
+        Remove(mongoid);
+      for gamepb in AGameList do
+        AddGame(gamepb);
+    finally
+      to_remove.Free;
+    end;
   finally
     FLock.Leave;
   end;
-
-  for game in AProtobufObjects do
-    AddGame(game);
 end;
 
 procedure TGameList.Lock;

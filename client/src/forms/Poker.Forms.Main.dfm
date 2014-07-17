@@ -29,7 +29,7 @@ object frmChipUpMain: TfrmChipUpMain
   TextHeight = 14
   object imgHeader: TcxImage
     Left = -21
-    Top = 3
+    Top = 7
     AutoSize = True
     Picture.Data = {
       0B546478504E47496D61676589504E470D0A1A0A0000000D4948445200000362
@@ -3544,7 +3544,7 @@ object frmChipUpMain: TfrmChipUpMain
   end
   object imgCashier: TcxImage
     Left = 641
-    Top = 11
+    Top = 15
     Anchors = [akTop, akRight]
     Properties.PopupMenuLayout.MenuItems = []
     Properties.Proportional = False
@@ -3622,14 +3622,16 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
-            object gridClubsId: TcxGridColumn
+            object gridPublicClubsMongoId: TcxGridColumn
               Caption = 'Club ID'
-              PropertiesClassName = 'TcxSpinEditProperties'
+              DataBinding.ValueType = 'Variant'
+              PropertiesClassName = 'TcxBlobEditProperties'
+              Properties.BlobEditKind = bekMemo
               Visible = False
               HeaderAlignmentHorz = taCenter
               Width = 41
             end
-            object gridClubsName: TcxGridColumn
+            object gridPublicClubsName: TcxGridColumn
               Caption = 'Club name'
               PropertiesClassName = 'TcxTextEditProperties'
               HeaderAlignmentHorz = taCenter
@@ -3858,7 +3860,7 @@ object frmChipUpMain: TfrmChipUpMain
           OnEnter = gridPrivateClubsEnter
           object gridPrivateClubsTable: TcxGridTableView
             OnCellDblClick = gridPrivateClubsTableCellDblClick
-            OnFocusedRecordChanged = gridPrivateClubsTableFocusedRecordChanged
+            OnFocusedRecordChanged = gridPublicClubsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
             DataController.Summary.SummaryGroups = <>
@@ -3874,20 +3876,26 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
-            object gridJoinedClubsId: TcxGridColumn
+            object gridHomeClubsMongoId: TcxGridColumn
+              DataBinding.ValueType = 'Variant'
+              PropertiesClassName = 'TcxBlobEditProperties'
+              Properties.BlobEditKind = bekMemo
+              Visible = False
+            end
+            object gridHomeClubsId: TcxGridColumn
               Caption = 'Club ID'
               PropertiesClassName = 'TcxSpinEditProperties'
               HeaderAlignmentHorz = taCenter
               Width = 65
             end
-            object gridJoinedClubsClubName: TcxGridColumn
+            object gridHomeClubsName: TcxGridColumn
               Caption = 'Club name'
               PropertiesClassName = 'TcxTextEditProperties'
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
               Width = 161
             end
-            object gridJoinedClubsStatus: TcxGridColumn
+            object gridHomeClubsStatus: TcxGridColumn
               Caption = 'Status'
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
@@ -4260,7 +4268,7 @@ object frmChipUpMain: TfrmChipUpMain
     end
     object acTermsAndConditions: TAction
       Category = 'Help'
-      Caption = 'Terms && Conditions'
+      Caption = 'Terms &&&& Conditions'
       OnExecute = acTermsAndConditionsExecute
     end
     object acShowAboutForm: TAction
@@ -4295,6 +4303,7 @@ object frmChipUpMain: TfrmChipUpMain
     object acSettings: TAction
       Category = 'Options'
       Caption = 'Settings'
+      Enabled = False
       ShortCut = 16467
       Visible = False
       OnExecute = acSettingsExecute

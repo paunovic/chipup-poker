@@ -8,18 +8,12 @@ uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit, cxMemo,
   Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics,
   cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  cxCheckComboBox;
+  cxCheckComboBox, System.SyncObjs, System.Generics.Collections;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
   TDebugRefreshItem = (dfiSystemMetrics, dfiSocketState, dfiLatency, dfiCallbacks, dfiSwapChains, dfiUser, dfiServer, dfiSoundBuffers, dfiAnimations);
   TDebugRefreshItemSet = set of TDebugRefreshItem;
-
-  TDebugObject = class
-    Enabled: Boolean;
-    Id: Integer;
-    Name: String;
-  end;
 
   TDebugFormLog = class(TIdNotify)
   private
@@ -49,6 +43,24 @@ type
     procedure DoSynchronize; override;
   public
     class procedure Execute;
+  end;
+
+  TDebugObject = class
+    Enabled: Boolean;
+    Id: Integer;
+    Name: String;
+    Count: Integer;
+  end;
+
+  TDebugObjects = class(TObjectDictionary<String, TDebugObject>)
+  private
+    FLock: TCriticalSection;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    function RegisterObject(const AName: String): Integer;
+    procedure UnregisterObject(const AId: Integer);
   end;
 
   TfrmDebug = class(TForm)
@@ -148,9 +160,9 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket.Commands, Poker.Server.MessageContainer, OverbyteIcsWSocket,
-  System.Generics.Collections, Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept,
-  Poker.Sounds, Poker.DirectX.Timer, RectMarks;
+  Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
+  Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds,
+  Poker.DirectX.Timer, RectMarks;
 
 
 function AttachConsole(dwProcessID: Integer): Boolean; stdcall; external 'kernel32.dll';
@@ -160,57 +172,18 @@ var
   frmDebug: TfrmDebug;
   DebugFilePath: String = '';
   ConsoleAttached: Boolean = FALSE;
-  FDebugObjects: TObjectList<TDebugObject>;
-  FActiveNotifyObjects: TObjectList<TIdNotify>;
+  DebugObjects: TDebugObjects;
+  ActiveNotifyObjects: TObjectList<TIdNotify>;
 
-  
+
 function RegisterDebugObject(const AName: String): Integer;
-var
-  id: Integer;
-  found: Boolean;
-  debug_object: TDebugObject;
-  enabled: Boolean;
 begin
-  id := 0;
-  repeat
-    Inc(id);
-    found := FALSE;
-    for debug_object in FDebugObjects do
-      if debug_object.Id = id then
-      begin
-        found := TRUE;
-        Break;
-      end;
-  until not found;
-
-  enabled := TRUE;
-  for debug_object in FDebugObjects do
-    if not debug_object.Enabled then
-    begin
-      enabled := FALSE;
-      Break;
-    end;
-
-  debug_object := TDebugObject.Create;
-  debug_object.Id := id;
-  debug_object.Name := AName;
-  debug_object.Enabled := enabled;
-  FDebugObjects.Add(debug_object);
-
-  TDebugFormObjectChange.Execute;
-
-  result := id;
+  result := DebugObjects.RegisterObject(AName);
 end;
 
 procedure UnregisterDebugObject(const AId: Integer);
-var 
-  C1: Integer;
 begin
-  for C1 := FDebugObjects.Count - 1 downto 0 do
-    if FDebugObjects[C1].Id = AId then
-      FDebugObjects.Delete(C1);
-
-  TDebugFormObjectChange.Execute;
+  DebugObjects.UnregisterObject(AId);
 end;
 
 function IsDebugFormAssigned: Boolean;
@@ -222,7 +195,6 @@ function IsDebugRTTIEnabled: Boolean;
 begin
   result := frmDebug.pmiRTTIEnabled.Checked;
 end;
-
 
 procedure DebugLn(const ADebugId: Integer; const AData: String; const AType: TDebugInfoType; const ASubData: String = '');
 var
@@ -451,6 +423,7 @@ var
   sl: TStringList;
   C1: Integer;
   debug_object: TDebugObject;
+  found: Boolean;
 begin
   if btPause.Down then
     Exit;
@@ -459,16 +432,17 @@ begin
      (not pmiShowPings.Checked) then
     Exit;
 
+  found := FALSE;
   debug_object := nil;
-  for C1 := 0 to FDebugObjects.Count - 1 do
-    if FDebugObjects[C1].Id = ADebugId then
+  for debug_object in DebugObjects.Values do
+    if debug_object.Id = ADebugId then
     begin
-      debug_object := FDebugObjects[C1];
+      found := TRUE;
       Break;
     end;
 
   if (ADebugId > 0) and
-     ((not Assigned(debug_object)) or
+     ((not found) or
       (not debug_object.Enabled)) then
     Exit;
 
@@ -612,19 +586,26 @@ var
   debug_object: TDebugObject;
 begin
   for C1 := 0 to ccbLogForms.Properties.Items.Count - 1 do
-    for debug_object in FDebugObjects do
-      if ccbLogForms.Properties.Items[C1].Tag = debug_object.Id then
-        debug_object.Enabled := ccbLogForms.States[C1] = cbsChecked;
+  begin
+    DebugObjects.FLock.Enter;
+    try
+      for debug_object in DebugObjects.Values do
+        if ccbLogForms.Properties.Items[C1].Tag = debug_object.Id then
+          debug_object.Enabled := ccbLogForms.States[C1] = cbsChecked;
+    finally
+      DebugObjects.FLock.Leave;
+    end;
+  end;
 end;
 
 procedure TfrmDebug.meSeatPosPropertiesChange(Sender: TObject);
 {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
 var
   C1, C2: Integer;
-  line  : String;
-  tmp   : String;
-  val   : Extended;
-  cpos  : Integer;
+  line: String;
+  tmp: String;
+  val: Extended;
+  cpos: Integer;
   evaluator: TEvaluator;
 {$ENDIF}
 begin
@@ -675,27 +656,48 @@ procedure TfrmDebug.RefreshDebugObjects;
 var
   C1: Integer;
   ccbi: TcxCheckComboBoxItem;
+  debug_object: TDebugObject;
+  found: Boolean;
 begin
-  for C1 := 0 to FDebugObjects.Count - 1 do
-    if (ccbLogForms.Properties.Items.Count <= C1) or
-       (FDebugObjects[C1].Id <> ccbLogForms.Properties.Items[C1].Tag) then
+  C1 := 0;
+  DebugObjects.FLock.Enter;
+  try
+    while C1 < ccbLogForms.Properties.Items.Count do
     begin
-      while ccbLogForms.Properties.Items.Count > C1 do
-        ccbLogForms.Properties.Items.Delete(ccbLogForms.Properties.Items.Count - 1);
-      Break;
+      if DebugObjects.TryGetValue(ccbLogForms.Properties.Items[C1].Description, debug_object) then
+      begin
+        if debug_object.Enabled then
+          ccbLogForms.States[C1] := cbsChecked
+        else
+          ccbLogForms.States[C1] := cbsUnchecked;
+        Inc(C1);
+      end
+      else
+        ccbLogForms.Properties.Items.Delete(C1)
     end;
 
-  for C1 := ccbLogForms.Properties.Items.Count to FDebugObjects.Count - 1 do
-  begin
-    ccbi := ccbLogForms.Properties.Items.Add;
-    ccbi.Tag := FDebugObjects[C1].Id;
-    ccbi.Description := FDebugObjects[C1].Name;
-    if FDebugObjects[C1].Enabled then
-      ccbLogForms.States[ccbi.Index] := cbsChecked;
-  end;
+    for debug_object in DebugObjects.Values do
+    begin
+      found := FALSE;
+      for C1 := 0 to ccbLogForms.Properties.Items.Count - 1 do
+        if ccbLogForms.Properties.Items[C1].Tag = debug_object.Id then
+        begin
+          found := TRUE;
+          Break;
+        end;
 
-  while ccbLogForms.Properties.Items.Count > FDebugObjects.Count do
-    ccbLogForms.Properties.Items.Delete(ccbLogForms.Properties.Items.Count - 1);
+      if not found then
+      begin
+        ccbi := ccbLogForms.Properties.Items.Add;
+        ccbi.Tag := debug_object.Id;
+        ccbi.Description := debug_object.Name;
+        if debug_object.Enabled then
+          ccbLogForms.States[ccbi.Index] := cbsChecked;
+      end;
+    end;
+  finally
+    DebugObjects.FLock.Leave;
+  end;
 
   ccbLogForms.Refresh;
 end;
@@ -864,8 +866,8 @@ begin
   if IsDebugFormAssigned then
     frmDebug.Add(FDebugId, FType, FTime, FTypeStr, FData, FSubData);
 
-  FActiveNotifyObjects.Extract(self);
-  FActiveNotifyObjects.TrimExcess;
+  ActiveNotifyObjects.Extract(self);
+  ActiveNotifyObjects.TrimExcess;
 end;
 
 class procedure TDebugFormLog.Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
@@ -873,7 +875,7 @@ var
   dfl: TDebugFormLog;
 begin
   dfl := TDebugFormLog.Create;
-  FActiveNotifyObjects.Add(dfl);
+  ActiveNotifyObjects.Add(dfl);
   dfl.FDebugId := ADebugId;
   dfl.FType := AType;
   dfl.FTime := ATime;
@@ -925,13 +927,104 @@ begin
 end;
 
 
+{ TDebugObjects }
+
+constructor TDebugObjects.Create;
+begin
+  FLock := TCriticalSection.Create;
+  inherited Create([doOwnsValues]);
+end;
+
+destructor TDebugObjects.Destroy;
+begin
+  inherited;
+  FreeAndNil(FLock);
+end;
+
+function TDebugObjects.RegisterObject(const AName: String): Integer;
+var
+  id: Integer;
+  found: Boolean;
+  debug_object: TDebugObject;
+  enabled: Boolean;
+begin
+  FLock.Enter;
+  try
+    if TryGetValue(AName, debug_object) then
+    begin
+      Inc(debug_object.Count);
+      Exit(debug_object.Id);
+    end;
+  finally
+    FLock.Leave;
+  end;
+
+  FLock.Enter;
+  try
+    id := 0;
+    repeat
+      Inc(id);
+      found := FALSE;
+      for debug_object in DebugObjects.Values do
+        if debug_object.Id = id then
+        begin
+          found := TRUE;
+          Break;
+        end;
+    until not found;
+
+    enabled := TRUE;
+    for debug_object in DebugObjects.Values do
+      if not debug_object.Enabled then
+      begin
+        enabled := FALSE;
+        Break;
+      end;
+
+    debug_object := TDebugObject.Create;
+    debug_object.Id := id;
+    debug_object.Name := AName;
+    debug_object.Enabled := enabled;
+    debug_object.Count := 1;
+    DebugObjects.Add(AName, debug_object);
+  finally
+    FLock.Leave;
+  end;
+
+  TDebugFormObjectChange.Execute;
+
+  result := id;
+end;
+
+procedure TDebugObjects.UnregisterObject(const AId: Integer);
+var
+  debug_object: TDebugObject;
+begin
+  FLock.Enter;
+  try
+    for debug_object in DebugObjects.Values do
+      if debug_object.Id = AId then
+      begin
+        if debug_object.Count = 1 then
+          DebugObjects.Remove(debug_object.Name)
+        else
+          Dec(debug_object.Count);
+        Break;
+      end;
+  finally
+    FLock.Leave;
+  end;
+
+  TDebugFormObjectChange.Execute;
+end;
+
 initialization
-  FDebugObjects := TObjectList<TDebugObject>.Create;
-  FActiveNotifyObjects := TObjectList<TIdNotify>.Create;
+  DebugObjects := TDebugObjects.Create;
+  ActiveNotifyObjects := TObjectList<TIdNotify>.Create;
 
 finalization
-  FreeAndNil(FActiveNotifyObjects);
-  FreeAndNil(FDebugObjects);
+  FreeAndNil(ActiveNotifyObjects);
+  FreeAndNil(DebugObjects);
 
 end.
 

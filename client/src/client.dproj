@@ -175,8 +175,8 @@
 			<DCCReference Include="forms\Poker.Forms.Table.pas">
 				<Form>frmTable</Form>
 			</DCCReference>
-			<DCCReference Include="forms\Poker.Forms.CreateEditGame.pas">
-				<Form>frmCreateEditGame</Form>
+			<DCCReference Include="forms\Poker.Forms.CreateGame.pas">
+				<Form>frmCreateGame</Form>
 			</DCCReference>
 			<DCCReference Include="forms\Poker.Forms.Debug.pas">
 				<Form>frmDebug</Form>
@@ -223,6 +223,9 @@
 			<DCCReference Include="forms\Poker.Forms.LayeredForm.pas">
 				<Form>frmLayered</Form>
 			</DCCReference>
+			<DCCReference Include="forms\Poker.Forms.Subscriptions.pas">
+				<Form>frmSubscriptions</Form>
+			</DCCReference>
 			<DCCReference Include="forms\Poker.Forms.Settings.pas">
 				<Form>frmSettings</Form>
 			</DCCReference>
@@ -247,7 +250,7 @@
 			<DCCReference Include="modules\server\Poker.Server.MessageCallbacks.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.SSLCerts.pas"/>
 			<DCCReference Include="modules\server\socket\Poker.Server.Socket.Core.pas"/>
-			<DCCReference Include="modules\server\socket\Poker.Server.Socket.Commands.pas"/>
+			<DCCReference Include="modules\server\socket\Poker.Server.Socket.pas"/>
 			<DCCReference Include="modules\server\socket\Poker.Server.Socket.ConnectThread.pas"/>
 			<DCCReference Include="modules\directx\Poker.DirectX.Core.pas"/>
 			<DCCReference Include="modules\directx\Poker.DirectX.Timer.pas"/>

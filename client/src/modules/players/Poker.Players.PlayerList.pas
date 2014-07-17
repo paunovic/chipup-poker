@@ -54,7 +54,7 @@ begin
     Add(AId, player);
   end;
 
-  player.Id := AId;
+  player.MongoId := AId;
   player.Nick := ANick;
   player.EMail := AEMail;
   player.AvatarId := AAvatarId;
