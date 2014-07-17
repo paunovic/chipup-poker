@@ -85,10 +85,6 @@ function ClientSocket(socket) {
 		Game.handleDisconnect(this,'closed');
 	}.bind(this));
 	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
-	this.oldTimer = setTimeout(function () {
-		this.log('hello timeout, sending it');
-		this.send(codes.srHello,global.sharedconfig,'Poker.HelloReply');
-	}.bind(this),5000);
 	socket.on('error',function(err) {
 		clearTimeout(this.idleTimer);
 		this.state = -2;
@@ -531,7 +527,6 @@ ClientSocket.prototype.handle = function (code,args) {
 			}.bind(this));
 			break;
 		case codes.scHello:
-			clearTimeout(this.oldTimer);
 			try {
 				params = pb.Parse(args,'Poker.HelloParams');
 				if (params.files.length == 0) {

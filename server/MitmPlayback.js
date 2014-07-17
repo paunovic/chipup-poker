@@ -54,6 +54,7 @@ MitmPlayback.prototype._checkIfAllSocketsAreConnected = function() {
 
 
 MitmPlayback.prototype._sendRequests = function() {
+	console.log('_sendRequests currentRequestNumber=%d',this.currentRequestNumber);
 	var request = this.requests[this.currentRequestNumber];
 
 	while (request.direction === directions.C2S) {
@@ -124,6 +125,8 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 
 		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber);
 
+		console.log('response code %d',response.code);
+
 		if (response.code === this.REQUESTS_MATCH) {
 			console.log("MATCH, " + requestInfo);
 			this._continueToNextRequests();
@@ -141,6 +144,7 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 					continue;
 				
 				response = this._checkIfSingleRequestMatch(methodId, args, type, i);
+				console.log('response code %d again',response.code);
 				
 				if (response.code === this.REQUESTS_MATCH) {
 					console.log("MATCH, " + requestInfo);
@@ -151,6 +155,8 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 					|| response.code === this.ARGS_DO_NOT_MATCH
 					|| response.code === this.TYPE_DOES_NOT_MATCH) {
 					throw new Error("NO MATCH, " + requestInfo);
+				} else {
+					console.log('should this even happen?');
 				}
 			}
 		}
@@ -170,7 +176,7 @@ MitmPlayback.prototype._isServerToClientDirection = function (direction) {
 	return direction === directions.S2C;
 };
 
-MitmPlayback.prototype.WRONG_DIRECTION = 1;
+MitmPlayback.prototype.WRONG_DIRECTION = 1; // these should go directly on MitmPlayback, not the prototype
 MitmPlayback.prototype.METHODS_DO_NOT_MATCH = 2;
 MitmPlayback.prototype.ARGS_DO_NOT_MATCH = 3;
 MitmPlayback.prototype.TYPE_DOES_NOT_MATCH = 4;
@@ -205,9 +211,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 		var difference = diff(argsParsed.fromDb,argsParsed.fromServer);
 		
 		if (difference) {
-			var message =  "Args do not match! " + requestInfo 
-				+ "\nleft=db right=server\nserver: " + argsParsed.fromServer + "\ndb: "
-				+ argsParsed.fromDb + "\ndiff: " + difference;
+			var message =  util.format("Args do not match! %s\nleft=db right=server\nserver: %j\ndb: %j\ndiff: %j",requestInfo,argsParsed.fromServer,argsParsed.fromDb,difference);
 
 			return {
 				code: this.ARGS_DO_NOT_MATCH,
