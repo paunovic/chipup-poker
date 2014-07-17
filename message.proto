@@ -30,7 +30,6 @@ enum ServerCodes {
 	srChangePasswordOk = 23;
 	srCreateGameOk = 24;
 	srDeleteGameOk = 25;
-	srEditGameOk = 26;
 	srTableSitOk = 27;
 	srTableSitSeatTaken = 28;
 	srTableStandUpOk = 29;
