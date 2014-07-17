@@ -212,7 +212,7 @@ message User {
 	required PlayerSubscriptionPlan subscription_plan = 7;
 }
 
-message SubscriptionUpgrade {
+message SubscriptionPlanChange {
 	required User.PlayerSubscriptionPlan subscription_plan = 1;
 	optional string url = 2;
 	optional string stripe_token = 3;
