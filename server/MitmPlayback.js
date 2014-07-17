@@ -144,7 +144,7 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 		else if (response.code === this.METHODS_DO_NOT_MATCH) {
 			// test if next requests match?
 			for (var i = this.currentRequestNumber + 1; i < this.requests.length; i++) {
-				if (this.requests.socketId !== socketId)
+				if (this.requests[i].socketId !== socketId)
 					continue;
 				
 				response = this._checkIfSingleRequestMatch(methodId, args, type, i);
