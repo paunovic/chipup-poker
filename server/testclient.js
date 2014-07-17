@@ -338,7 +338,7 @@ function testmenu(cb,config) {
 			var msg = data.toString('utf8');
 			this.log(msg.red);
 			if (msg == 'your not a member of that club') {
-				this.reply(codes.scJoinClub,{seq:clubseq,password:'password'},'Poker.Club');
+				this.reply(codes.scJoinClub,{club_mongo_id:clubid,password:'password'},'Poker.Club');
 			}
 			break;
 		case codes.srJoinClubReply:
