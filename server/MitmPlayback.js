@@ -60,13 +60,19 @@ MitmPlayback.prototype._sendRequests = function() {
 		var methodId = this.serverCodes[request.method];
 		var encodedMessage = this.protobufUtil.encode(methodId, request.args.buffer, request.type);
 		this._writeMessageAndTestIfItsOk(encodedMessage, request.socketId);
-		console.log("Sent request #%d, %s on socket id %d, %s", this.currentRequestNumber, request.method, request.socketId, this._debugFormat(methodId,request.args.buffer));
+		console.log(
+		  "Sent request #%d, %s on socket id %d, %s", 
+		  this.currentRequestNumber, 
+		  request.method, 
+		  request.socketId, 
+		  this._parseLoginParams(methodId,request.args.buffer)
+		 );
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
 
-MitmPlayback.prototype._debugFormat = function (methodId,args) {
-	return (methodId == this.serverCodes.scLogin) ? JSON.stringify(this.protobuf.Parse(args, 'Poker.LoginParams') : '';
+MitmPlayback.prototype._parseLoginParams = function (methodId, args) {
+	return methodId === this.serverCodes.scLogin ? JSON.stringify(this.protobuf.Parse(args, 'Poker.LoginParams')) : '';
 }
 
 
