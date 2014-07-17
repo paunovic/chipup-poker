@@ -1,8 +1,10 @@
 "use strict";
 var util = require("util");
-var directions = require('./directions');
 var diff = require('deep-diff');
 var net = require('net');
+var assert = require('assert');
+
+var directions = require('./directions');
 
 module.exports = MitmPlayback;
 
@@ -127,6 +129,7 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 			return;
 		} 
 
+		assert.equal(this.requests[this.currentRequestNumber].socketId,socketId); // ensure that you only match against packets on the same socket
 		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber);
 
 		console.log('response code %d',response.code);
