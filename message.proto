@@ -15,7 +15,7 @@ enum ServerCodes {
 	srChangeClubDetailsReply = 7;
 	srLogout = 8;
 	srListClubs = 9;
-	srStatus = 10;
+
 	srKickPlayerReply = 11;
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
@@ -64,7 +64,7 @@ enum ServerCodes {
 	
 	scHello = 70;
 	scLogin = 71;
-	scStatus = 72;
+
 	scRegister = 73;
 	scForgotPassword = 74;
 	scLogout = 75;
@@ -216,6 +216,7 @@ message User {
 message SubscriptionUpgrade {
 	required User.PlayerSubscriptionPlan subscription_plan = 1;
 	optional string url = 2;
+	optional string stripe_token = 3;
 }
 
 message Game {
