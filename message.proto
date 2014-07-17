@@ -268,12 +268,12 @@ message ListClubsReply {
 }
 
 message KickPlayerParams {
-	required int32 club_seq = 1;
+	required bytes club_mongo_id = 1;
 	required bytes player_mongo_id = 2;
 }
 
 message GiveClubOwnershipParams {
-	required int32 club_seq = 1;
+	required bytes club_mongo_id = 1;
 	required bytes player_mongo_id = 2;
 }
 

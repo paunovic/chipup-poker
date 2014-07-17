@@ -429,7 +429,10 @@ Game.prototype.deal = function deal(cb,config,emptyseat) {
 				this.history.players[x] = { _id:this.seats[x].userid, seat:x, chips:this.members[x].chips, status:this.members[x].status };
 				continue;
 			}
-			if (this.members[x].disconnected) continue;
+			if (this.members[x].disconnected) {
+				this.members[x].status = 'psOutOfPlay';
+				continue;
+			}
 			if (this.members[x].chips == 0) {
 				this.members[x].status = 'psOutOfPlay';
 				this.updateLeaveStats(x);
@@ -747,6 +750,12 @@ Game.prototype.fold = function fold(seat,cb1) {
 		break;
 	}
 };
+Game.prototype.removeSuspended = function () {
+	for (var x=0; x<this.members.length; x++) {
+		if (!this.members[x]) continue;
+		if (this.club.isSuspended(this.seats[x].userid)) this.members[x].status = 'psOutOfPlay';
+	}
+}
 Game.prototype.doWin = function (cb,extradelay,cb3) {
 	var x,y;
 	var totalrake = 0;
@@ -792,6 +801,7 @@ Game.prototype.doWin = function (cb,extradelay,cb3) {
 								}
 							}
 						}
+						this.removeSuspended();
 						this.state = 'tsWinning2';
 						//this.broadcastStatus(null);
 						this.stateMachine(function (events) {

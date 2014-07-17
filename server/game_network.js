@@ -351,6 +351,13 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 				release();
 				return;
 			}
+			if (game.club.isSuspended(this.userid)) {
+				game.standUp(this,function (folded,events2,offset) {
+					game.broadcastStatus(null,true,events2);
+					release();
+				}.bind(this));
+				return;
+			}
 			game.members[seatIdx].status = 'psOutOfHand';
 			//game.members[seatIdx].sitTime = Date.now();
 			if (game.state == 'tsIdle') {
@@ -500,6 +507,7 @@ handlers[codes.scShowCards] = function (args,token) {
 				return;
 			}
 			if (game.state2 == 'gsClosed') return;
+			if (game.club.isSuspended(this.userid)) return;
 			var temp = this.userid;
 			game.Lock.writeLock(function (release) {
 				if (temp != this.userid) {
