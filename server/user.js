@@ -21,6 +21,7 @@ var SmtpConnection = require('./smtp');
 var profiler = require('profiler');
 var RT = require('./rt');
 var installer = require('./installer');
+var error = require('./error');
 
 module.exports.UserInit = UserInit;
 module.exports.makeUserProtobuf = makeUserProtobuf;
@@ -910,6 +911,22 @@ handlers[codes.scContactUs] = function (args,token) {
 	RT.postTicket(queue,this.email,params.message);
 	this.send(codes.srContactUsOk);
 	token.stop();
+};
+handlers[codes.scSubscriptionPlanChange] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.SubscriptionPlanChange');
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	models.PaypalRequest.create({plan:params.subscription_plan, userid:this.userid},function (err,request) {
+		error.handleError(err);
+		params.url = 'http://'+config.hostname+'/pay?id='+request._id;
+		params.url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55JPJAFUEWSNC&custom='+request._id;
+		console.log(params,request);
+		this.send(codes.srSubscriptionPlanChange,params,'Poker.SubscriptionPlanChange');
+	}.bind(this));
 };
 function sendAuthEmail(userid,authcode,email,displayname,fail1,fail2,sucess) {
 	var test = new SmtpConnection();
