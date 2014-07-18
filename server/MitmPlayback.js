@@ -55,7 +55,6 @@ MitmPlayback.prototype._checkIfAllSocketsAreConnected = function() {
 
 
 MitmPlayback.prototype._sendRequests = function() {
-	console.log('_sendRequests currentRequestNumber=%d',this.currentRequestNumber);
 	var request = this.requests[this.currentRequestNumber];
 
 	while (request.direction === directions.C2S) {
@@ -110,6 +109,10 @@ MitmPlayback.prototype._methodShouldBeIgnored = function (methodName) {
 MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 	return function (err, methodId, args, type) {
 		if (err) throw err;
+		
+		if (this.currentRequestNumber === 5) {
+			debugger;
+		}
 
 		var methodName = this._getMethodName(methodId);
 		var requestInfo = "request #" + this.currentRequestNumber + " socket id " + socketId 
@@ -117,12 +120,7 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 
 		if (this._methodShouldBeIgnored(methodName)) {
 			console.log('ignoring ', requestInfo);
-			this._continueToNextRequests();
 			return;
-		}
-		
-		if (this.currentRequestNumber === 13) {
-			debugger;
 		}
 
 		console.log('_checkIfRequestMatch called! ' + requestInfo);
