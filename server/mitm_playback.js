@@ -29,16 +29,19 @@ var port = process.argv[3] ? process.argv[3] : 12345;
 var host = process.argv[2] ? process.argv[2] : 'localhost';
 
 MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
-	assert.ifError(err);
+	if (err) throw err;
 	db.collection('gameState').remove(function(err) {
-		assert.ifError(err);
+    	if(err) throw err;
 		MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
-			assert.ifError(err);
+			if (err) throw err;
 			var mitm = db.collection('mitm');
 			mitm.distinct('socketId', function(err, socketIds) {
-				assert.ifError(err);
-				mitm.find({method:{$nin:MitmPlayback.prototype.IGNORE_METHODS}}).sort({ _id : 1 }).toArray(function (err, requests) {
-					assert.ifError(err);
+				if (err) throw err;
+				mitm.find({
+					$query: {},
+					$orderby: { timestamp : 1 }
+				}).toArray(function (err, requests) {
+					if (err) throw err;
 					var config = {
 						requests: requests,
 						host: host,
