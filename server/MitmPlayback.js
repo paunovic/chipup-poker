@@ -143,6 +143,8 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 			for (var i = this.currentRequestNumber + 1; i < this.requests.length; i++) {
 				if (this.requests[i].socketId !== socketId)
 					continue;
+
+				console.log("   checking if " + methodName + " can match request #" + i + " from db");
 				
 				response = this._checkIfSingleRequestMatch(methodId, args, type, i, socketId);
 				
@@ -229,7 +231,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 
 	if (type !== requestFromDb.type) {
 		return {
-			code: TYPE_DOES_NOT_MATCH,
+			code: this.TYPE_DOES_NOT_MATCH,
 			explanation: 'Type param does not match! ' + requestInfo +' vs ' + requestFromDb.method
 		};
 	}
