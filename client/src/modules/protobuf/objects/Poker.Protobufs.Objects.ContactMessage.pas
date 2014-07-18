@@ -48,7 +48,8 @@ type
     property Message: String read FMessage write SetMessage;
 
   end;
-  TPB_ContactMessageList = class (TObjectList<TPB_ContactMessage>)
+
+  TPB_ContactMessageList = class(TObjectList<TPB_ContactMessage>)
     procedure Assign(const APB_ContactMessageList: TList<TPB_ContactMessage>);
   end;
 
@@ -56,7 +57,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ContactMessage.Create(const AFrom: TPB_ContactMessage; const ALightweight: Boolean = FALSE);

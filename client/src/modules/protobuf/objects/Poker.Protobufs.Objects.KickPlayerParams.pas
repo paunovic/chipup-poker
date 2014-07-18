@@ -46,7 +46,8 @@ type
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
 
   end;
-  TPB_KickPlayerParamsList = class (TObjectList<TPB_KickPlayerParams>)
+
+  TPB_KickPlayerParamsList = class(TObjectList<TPB_KickPlayerParams>)
     procedure Assign(const APB_KickPlayerParamsList: TList<TPB_KickPlayerParams>);
   end;
 
@@ -54,7 +55,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_KickPlayerParams.Create(const AFrom: TPB_KickPlayerParams; const ALightweight: Boolean = FALSE);

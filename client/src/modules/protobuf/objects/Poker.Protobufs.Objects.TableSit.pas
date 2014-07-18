@@ -19,7 +19,7 @@ type
     var
       FGameId: TBytes;
       FSeatIndex: Integer;
-      FChips: UINT32;
+      FChips: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_GameId;
@@ -30,7 +30,7 @@ type
     procedure SetSeatIndex(const AValue: Integer);
     procedure set_has_Chips;
     procedure clear_has_Chips;
-    procedure SetChips(const AValue: UINT32);
+    procedure SetChips(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_TableSit; const ALightweight: Boolean = FALSE); overload;
@@ -53,10 +53,11 @@ type
     // required uint32 Chips = 3;
     function has_Chips: Boolean;
     procedure clear_Chips;
-    property Chips: UINT32 read FChips write SetChips;
+    property Chips: UInt32 read FChips write SetChips;
 
   end;
-  TPB_TableSitList = class (TObjectList<TPB_TableSit>)
+
+  TPB_TableSitList = class(TObjectList<TPB_TableSit>)
     procedure Assign(const APB_TableSitList: TList<TPB_TableSit>);
   end;
 
@@ -64,7 +65,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_TableSit.Create(const AFrom: TPB_TableSit; const ALightweight: Boolean = FALSE);
@@ -204,7 +204,7 @@ begin
   _has_bits_ := _has_bits_ and not 4;
 end;
 
-procedure TPB_TableSit.SetChips(const AValue: UINT32);
+procedure TPB_TableSit.SetChips(const AValue: UInt32);
 begin
   Assert(not has_Chips);
   FChips := AValue;

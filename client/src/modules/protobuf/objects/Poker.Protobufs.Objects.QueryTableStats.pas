@@ -40,7 +40,8 @@ type
     property Gameid: TList<TBytes> read FGameid;
 
   end;
-  TPB_QueryTableStatsList = class (TObjectList<TPB_QueryTableStats>)
+
+  TPB_QueryTableStatsList = class(TObjectList<TPB_QueryTableStats>)
     procedure Assign(const APB_QueryTableStatsList: TList<TPB_QueryTableStats>);
   end;
 
@@ -49,18 +50,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_QueryTableStats.InitObjects;
-begin
-  inherited;
-  FGameid := TList<TBytes>.Create;
-end;
-
-procedure TPB_QueryTableStats.HookNotifiers;
-begin
-  inherited;
-  FGameid.OnNotify := GameidNotifyEvent;
-end;
 
 constructor TPB_QueryTableStats.Create(const AFrom: TPB_QueryTableStats; const ALightweight: Boolean = FALSE);
 begin
@@ -78,6 +67,17 @@ begin
   inherited;
 end;
 
+procedure TPB_QueryTableStats.InitObjects;
+begin
+  inherited;
+  FGameid := TList<TBytes>.Create;
+end;
+
+procedure TPB_QueryTableStats.HookNotifiers;
+begin
+  inherited;
+  FGameid.OnNotify := GameidNotifyEvent;
+end;
 procedure TPB_QueryTableStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

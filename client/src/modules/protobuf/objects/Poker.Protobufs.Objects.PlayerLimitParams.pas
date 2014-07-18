@@ -20,7 +20,7 @@ type
     var
       FClubid: TBytes;
       FUserid: TBytes;
-      FLimit: UINT32;
+      FLimit: UInt32;
       FUnlimited: Boolean;
       _has_bits_: UINT32;
 
@@ -32,7 +32,7 @@ type
     procedure SetUserid(const AValue: TBytes);
     procedure set_has_Limit;
     procedure clear_has_Limit;
-    procedure SetLimit(const AValue: UINT32);
+    procedure SetLimit(const AValue: UInt32);
     procedure set_has_Unlimited;
     procedure clear_has_Unlimited;
     procedure SetUnlimited(const AValue: Boolean);
@@ -58,7 +58,7 @@ type
     // required uint32 Limit = 3;
     function has_Limit: Boolean;
     procedure clear_Limit;
-    property Limit: UINT32 read FLimit write SetLimit;
+    property Limit: UInt32 read FLimit write SetLimit;
 
     // required bool Unlimited = 4;
     function has_Unlimited: Boolean;
@@ -66,7 +66,8 @@ type
     property Unlimited: Boolean read FUnlimited write SetUnlimited;
 
   end;
-  TPB_PlayerLimitParamsList = class (TObjectList<TPB_PlayerLimitParams>)
+
+  TPB_PlayerLimitParamsList = class(TObjectList<TPB_PlayerLimitParams>)
     procedure Assign(const APB_PlayerLimitParamsList: TList<TPB_PlayerLimitParams>);
   end;
 
@@ -74,7 +75,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_PlayerLimitParams.Create(const AFrom: TPB_PlayerLimitParams; const ALightweight: Boolean = FALSE);
@@ -221,7 +221,7 @@ begin
   _has_bits_ := _has_bits_ and not 4;
 end;
 
-procedure TPB_PlayerLimitParams.SetLimit(const AValue: UINT32);
+procedure TPB_PlayerLimitParams.SetLimit(const AValue: UInt32);
 begin
   Assert(not has_Limit);
   FLimit := AValue;

@@ -610,8 +610,8 @@ class BaseGenerator : public CodeGenerator {
 				printer.Print("\n");
 			}
 			printer.Print(
-				"  end;\n"
-				"  TPB_$name$List = class (TObjectList<TPB_$name$>)\n"
+				"  end;\n\n"
+				"  TPB_$name$List = class(TObjectList<TPB_$name$>)\n"
 				"    procedure Assign(const APB_$name$List: TList<TPB_$name$>);\n"
 				"  end;\n"
 				"\n"
@@ -620,49 +620,8 @@ class BaseGenerator : public CodeGenerator {
 				"uses\n"
 				"  pbPublic, Poker.Common.Misc;\n"
 				"\n"
-				"\n"
 				,"name",message->name());
-			if (needsInit) {
-				printer.Print(
-					"procedure TPB_$name$.InitObjects;\n"
-					"begin\n"
-					"  inherited;\n"
-					,"name",message->name());
-				for (int j=0; j<message->field_count(); j++) {
-					const FieldDescriptor *field = message->field(j);
-					TypeInfo instance = typeinfo[field->type()]->getInstance(field);
 
-					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						vars["name"] = instance.PropertyName();
-						vars["pname"] = instance.PrivateFieldName();
-						vars["subname"] = instance.getBaseDelphiName();
-						
-						if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-							printer.Print(vars,"  $pname$ := TObjectList<$subname$>.Create;\n");
-						} else {
-							printer.Print(vars,"  $pname$ := TList<$subname$>.Create;\n");
-						}
-					}
-				}
-				printer.Print("end;\n\n");
-				printer.Print(
-					"procedure TPB_$name$.HookNotifiers;\n"
-					"begin\n"
-					"  inherited;\n"
-					,"name",message->name());
-				for (int j=0; j<message->field_count(); j++) {
-					const FieldDescriptor *field = message->field(j);
-					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
-						TypeInfo instance = typeinfo[field->type()]->getInstance(field);
-						printer.Print(
-							"  $pname$.OnNotify := $name$NotifyEvent;\n"
-							,"name",instance.PropertyName()
-							,"pname",instance.PrivateFieldName()
-							,"subname",instance.getBaseDelphiName());
-					}
-				}
-				printer.Print("end;\n");
-			}
 			printer.Print(
 				"\n"
 				"constructor TPB_$name$.Create(const AFrom: TPB_$name$; const ALightweight: Boolean = FALSE);\n"
@@ -708,7 +667,50 @@ class BaseGenerator : public CodeGenerator {
 			printer.Print(
 				"  inherited;\n"
 				"end;\n"
-				"\n"
+				"\n");
+				
+			if (needsInit) {
+				printer.Print(
+					"procedure TPB_$name$.InitObjects;\n"
+					"begin\n"
+					"  inherited;\n"
+					,"name",message->name());
+				for (int j=0; j<message->field_count(); j++) {
+					const FieldDescriptor *field = message->field(j);
+					TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						vars["name"] = instance.PropertyName();
+						vars["pname"] = instance.PrivateFieldName();
+						vars["subname"] = instance.getBaseDelphiName();
+						
+						if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+							printer.Print(vars,"  $pname$ := TObjectList<$subname$>.Create;\n");
+						} else {
+							printer.Print(vars,"  $pname$ := TList<$subname$>.Create;\n");
+						}
+					}
+				}
+				printer.Print("end;\n\n");
+				printer.Print(
+					"procedure TPB_$name$.HookNotifiers;\n"
+					"begin\n"
+					"  inherited;\n"
+					,"name",message->name());
+				for (int j=0; j<message->field_count(); j++) {
+					const FieldDescriptor *field = message->field(j);
+					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
+						TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+						printer.Print(
+							"  $pname$.OnNotify := $name$NotifyEvent;\n"
+							,"name",instance.PropertyName()
+							,"pname",instance.PrivateFieldName()
+							,"subname",instance.getBaseDelphiName());
+					}
+				}
+				printer.Print("end;\n");
+			}
+      printer.Print(  				
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
 				"var\n"
 				"  tag, field_number, wire_type, endpos: Integer;\n"

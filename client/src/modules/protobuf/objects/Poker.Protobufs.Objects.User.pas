@@ -88,7 +88,8 @@ type
     property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
 
   end;
-  TPB_UserList = class (TObjectList<TPB_User>)
+
+  TPB_UserList = class(TObjectList<TPB_User>)
     procedure Assign(const APB_UserList: TList<TPB_User>);
   end;
 
@@ -96,7 +97,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_User.Create(const AFrom: TPB_User; const ALightweight: Boolean = FALSE);

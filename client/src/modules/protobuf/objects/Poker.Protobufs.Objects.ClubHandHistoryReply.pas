@@ -61,7 +61,8 @@ type
     property Rows: TList<TPB_HandHistory> read FRows;
 
   end;
-  TPB_ClubHandHistoryReplyList = class (TObjectList<TPB_ClubHandHistoryReply>)
+
+  TPB_ClubHandHistoryReplyList = class(TObjectList<TPB_ClubHandHistoryReply>)
     procedure Assign(const APB_ClubHandHistoryReplyList: TList<TPB_ClubHandHistoryReply>);
   end;
 
@@ -70,18 +71,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_ClubHandHistoryReply.InitObjects;
-begin
-  inherited;
-  FRows := TObjectList<TPB_HandHistory>.Create;
-end;
-
-procedure TPB_ClubHandHistoryReply.HookNotifiers;
-begin
-  inherited;
-  FRows.OnNotify := RowsNotifyEvent;
-end;
 
 constructor TPB_ClubHandHistoryReply.Create(const AFrom: TPB_ClubHandHistoryReply; const ALightweight: Boolean = FALSE);
 begin
@@ -99,6 +88,17 @@ begin
   inherited;
 end;
 
+procedure TPB_ClubHandHistoryReply.InitObjects;
+begin
+  inherited;
+  FRows := TObjectList<TPB_HandHistory>.Create;
+end;
+
+procedure TPB_ClubHandHistoryReply.HookNotifiers;
+begin
+  inherited;
+  FRows.OnNotify := RowsNotifyEvent;
+end;
 procedure TPB_ClubHandHistoryReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

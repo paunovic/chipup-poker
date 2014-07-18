@@ -17,7 +17,7 @@ type
 
     var
       FGameId: TBytes;
-      FLastCashout: UINT32;
+      FLastCashout: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_GameId;
@@ -25,7 +25,7 @@ type
     procedure SetGameId(const AValue: TBytes);
     procedure set_has_LastCashout;
     procedure clear_has_LastCashout;
-    procedure SetLastCashout(const AValue: UINT32);
+    procedure SetLastCashout(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_BuyinError; const ALightweight: Boolean = FALSE); overload;
@@ -43,10 +43,11 @@ type
     // required uint32 LastCashout = 2;
     function has_LastCashout: Boolean;
     procedure clear_LastCashout;
-    property LastCashout: UINT32 read FLastCashout write SetLastCashout;
+    property LastCashout: UInt32 read FLastCashout write SetLastCashout;
 
   end;
-  TPB_BuyinErrorList = class (TObjectList<TPB_BuyinError>)
+
+  TPB_BuyinErrorList = class(TObjectList<TPB_BuyinError>)
     procedure Assign(const APB_BuyinErrorList: TList<TPB_BuyinError>);
   end;
 
@@ -54,7 +55,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_BuyinError.Create(const AFrom: TPB_BuyinError; const ALightweight: Boolean = FALSE);
@@ -157,7 +157,7 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_BuyinError.SetLastCashout(const AValue: UINT32);
+procedure TPB_BuyinError.SetLastCashout(const AValue: UInt32);
 begin
   Assert(not has_LastCashout);
   FLastCashout := AValue;

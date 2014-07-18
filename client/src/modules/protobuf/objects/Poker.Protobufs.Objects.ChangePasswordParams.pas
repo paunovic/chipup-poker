@@ -36,7 +36,8 @@ type
     property NewPassword: String read FNewPassword write SetNewPassword;
 
   end;
-  TPB_ChangePasswordParamsList = class (TObjectList<TPB_ChangePasswordParams>)
+
+  TPB_ChangePasswordParamsList = class(TObjectList<TPB_ChangePasswordParams>)
     procedure Assign(const APB_ChangePasswordParamsList: TList<TPB_ChangePasswordParams>);
   end;
 
@@ -44,7 +45,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ChangePasswordParams.Create(const AFrom: TPB_ChangePasswordParams; const ALightweight: Boolean = FALSE);

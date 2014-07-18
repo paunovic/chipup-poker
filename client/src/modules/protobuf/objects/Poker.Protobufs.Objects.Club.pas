@@ -34,8 +34,8 @@ type
       FIsPrivate: Boolean;
       FSeq: Integer;
       FHasPassword: Boolean;
-      FRake: UINT32;
-      FDefaultBalanceLimit: UINT32;
+      FRake: UInt32;
+      FDefaultBalanceLimit: UInt32;
       FUnlimitedDefaultBalance: Boolean;
       _has_bits_: UINT32;
 
@@ -64,10 +64,10 @@ type
     procedure SetHasPassword(const AValue: Boolean);
     procedure set_has_Rake;
     procedure clear_has_Rake;
-    procedure SetRake(const AValue: UINT32);
+    procedure SetRake(const AValue: UInt32);
     procedure set_has_DefaultBalanceLimit;
     procedure clear_has_DefaultBalanceLimit;
-    procedure SetDefaultBalanceLimit(const AValue: UINT32);
+    procedure SetDefaultBalanceLimit(const AValue: UInt32);
     procedure set_has_UnlimitedDefaultBalance;
     procedure clear_has_UnlimitedDefaultBalance;
     procedure SetUnlimitedDefaultBalance(const AValue: Boolean);
@@ -128,12 +128,12 @@ type
     // optional uint32 Rake = 9;
     function has_Rake: Boolean;
     procedure clear_Rake;
-    property Rake: UINT32 read FRake write SetRake;
+    property Rake: UInt32 read FRake write SetRake;
 
     // optional uint32 DefaultBalanceLimit = 10;
     function has_DefaultBalanceLimit: Boolean;
     procedure clear_DefaultBalanceLimit;
-    property DefaultBalanceLimit: UINT32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
+    property DefaultBalanceLimit: UInt32 read FDefaultBalanceLimit write SetDefaultBalanceLimit;
 
     // optional bool UnlimitedDefaultBalance = 11;
     function has_UnlimitedDefaultBalance: Boolean;
@@ -141,7 +141,8 @@ type
     property UnlimitedDefaultBalance: Boolean read FUnlimitedDefaultBalance write SetUnlimitedDefaultBalance;
 
   end;
-  TPB_ClubList = class (TObjectList<TPB_Club>)
+
+  TPB_ClubList = class(TObjectList<TPB_Club>)
     procedure Assign(const APB_ClubList: TList<TPB_Club>);
   end;
 
@@ -150,18 +151,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_Club.InitObjects;
-begin
-  inherited;
-  FMembers := TObjectList<TPB_ClubMember>.Create;
-end;
-
-procedure TPB_Club.HookNotifiers;
-begin
-  inherited;
-  FMembers.OnNotify := MembersNotifyEvent;
-end;
 
 constructor TPB_Club.Create(const AFrom: TPB_Club; const ALightweight: Boolean = FALSE);
 begin
@@ -179,6 +168,17 @@ begin
   inherited;
 end;
 
+procedure TPB_Club.InitObjects;
+begin
+  inherited;
+  FMembers := TObjectList<TPB_ClubMember>.Create;
+end;
+
+procedure TPB_Club.HookNotifiers;
+begin
+  inherited;
+  FMembers.OnNotify := MembersNotifyEvent;
+end;
 procedure TPB_Club.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -551,7 +551,7 @@ begin
   _has_bits_ := _has_bits_ and not 256;
 end;
 
-procedure TPB_Club.SetRake(const AValue: UINT32);
+procedure TPB_Club.SetRake(const AValue: UInt32);
 begin
   Assert(not has_Rake);
   FRake := AValue;
@@ -581,7 +581,7 @@ begin
   _has_bits_ := _has_bits_ and not 512;
 end;
 
-procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UINT32);
+procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UInt32);
 begin
   Assert(not has_DefaultBalanceLimit);
   FDefaultBalanceLimit := AValue;

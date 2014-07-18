@@ -51,7 +51,8 @@ type
     property Files: TList<TPB_UpdateFileInfo> read FFiles;
 
   end;
-  TPB_HelloParamsList = class (TObjectList<TPB_HelloParams>)
+
+  TPB_HelloParamsList = class(TObjectList<TPB_HelloParams>)
     procedure Assign(const APB_HelloParamsList: TList<TPB_HelloParams>);
   end;
 
@@ -60,18 +61,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_HelloParams.InitObjects;
-begin
-  inherited;
-  FFiles := TObjectList<TPB_UpdateFileInfo>.Create;
-end;
-
-procedure TPB_HelloParams.HookNotifiers;
-begin
-  inherited;
-  FFiles.OnNotify := FilesNotifyEvent;
-end;
 
 constructor TPB_HelloParams.Create(const AFrom: TPB_HelloParams; const ALightweight: Boolean = FALSE);
 begin
@@ -89,6 +78,17 @@ begin
   inherited;
 end;
 
+procedure TPB_HelloParams.InitObjects;
+begin
+  inherited;
+  FFiles := TObjectList<TPB_UpdateFileInfo>.Create;
+end;
+
+procedure TPB_HelloParams.HookNotifiers;
+begin
+  inherited;
+  FFiles.OnNotify := FilesNotifyEvent;
+end;
 procedure TPB_HelloParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

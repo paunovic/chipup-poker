@@ -96,7 +96,8 @@ type
     property ContactMessage: Integer read FContactMessage write SetContactMessage;
 
   end;
-  TPB_StringSizesList = class (TObjectList<TPB_StringSizes>)
+
+  TPB_StringSizesList = class(TObjectList<TPB_StringSizes>)
     procedure Assign(const APB_StringSizesList: TList<TPB_StringSizes>);
   end;
 
@@ -104,7 +105,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_StringSizes.Create(const AFrom: TPB_StringSizes; const ALightweight: Boolean = FALSE);

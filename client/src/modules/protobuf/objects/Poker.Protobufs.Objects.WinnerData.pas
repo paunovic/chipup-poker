@@ -48,7 +48,8 @@ type
     property Msg: String read FMsg write SetMsg;
 
   end;
-  TPB_WinnerDataList = class (TObjectList<TPB_WinnerData>)
+
+  TPB_WinnerDataList = class(TObjectList<TPB_WinnerData>)
     procedure Assign(const APB_WinnerDataList: TList<TPB_WinnerData>);
   end;
 
@@ -56,7 +57,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_WinnerData.Create(const AFrom: TPB_WinnerData; const ALightweight: Boolean = FALSE);

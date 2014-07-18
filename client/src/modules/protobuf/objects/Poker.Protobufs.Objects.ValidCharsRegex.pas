@@ -86,7 +86,8 @@ type
     property Gamename: String read FGamename write SetGamename;
 
   end;
-  TPB_ValidCharsRegexList = class (TObjectList<TPB_ValidCharsRegex>)
+
+  TPB_ValidCharsRegexList = class(TObjectList<TPB_ValidCharsRegex>)
     procedure Assign(const APB_ValidCharsRegexList: TList<TPB_ValidCharsRegex>);
   end;
 
@@ -94,7 +95,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ValidCharsRegex.Create(const AFrom: TPB_ValidCharsRegex; const ALightweight: Boolean = FALSE);

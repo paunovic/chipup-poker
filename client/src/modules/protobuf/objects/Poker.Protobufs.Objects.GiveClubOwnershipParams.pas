@@ -46,7 +46,8 @@ type
     property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
 
   end;
-  TPB_GiveClubOwnershipParamsList = class (TObjectList<TPB_GiveClubOwnershipParams>)
+
+  TPB_GiveClubOwnershipParamsList = class(TObjectList<TPB_GiveClubOwnershipParams>)
     procedure Assign(const APB_GiveClubOwnershipParamsList: TList<TPB_GiveClubOwnershipParams>);
   end;
 
@@ -54,7 +55,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_GiveClubOwnershipParams.Create(const AFrom: TPB_GiveClubOwnershipParams; const ALightweight: Boolean = FALSE);

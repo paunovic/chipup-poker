@@ -28,14 +28,14 @@ type
 
     var
       FId: TBytes;
-      FSeq: UINT32;
-      FTotalrake: UINT32;
+      FSeq: UInt32;
+      FTotalrake: UInt32;
       FPlayers: TList<TPB_PlayerHandHistory>;
       FCards: TBytes;
-      FEndtime: UINT32;
+      FEndtime: UInt32;
       FBalanceChanges: TList<Integer>;
       FMoves: TList<TPB_HandHistoryMove>;
-      FDealer: UINT32;
+      FDealer: UInt32;
       FGame: TPB_Game;
       FCurrentGame: TGameType;
       FRake: Integer;
@@ -46,10 +46,10 @@ type
     procedure SetMongoId(const AValue: TBytes);
     procedure set_has_Seq;
     procedure clear_has_Seq;
-    procedure SetSeq(const AValue: UINT32);
+    procedure SetSeq(const AValue: UInt32);
     procedure set_has_Totalrake;
     procedure clear_has_Totalrake;
-    procedure SetTotalrake(const AValue: UINT32);
+    procedure SetTotalrake(const AValue: UInt32);
     procedure set_has_Players;
     procedure clear_has_Players;
     procedure set_has_Cards;
@@ -57,14 +57,14 @@ type
     procedure SetCards(const AValue: TBytes);
     procedure set_has_Endtime;
     procedure clear_has_Endtime;
-    procedure SetEndtime(const AValue: UINT32);
+    procedure SetEndtime(const AValue: UInt32);
     procedure set_has_BalanceChanges;
     procedure clear_has_BalanceChanges;
     procedure set_has_Moves;
     procedure clear_has_Moves;
     procedure set_has_Dealer;
     procedure clear_has_Dealer;
-    procedure SetDealer(const AValue: UINT32);
+    procedure SetDealer(const AValue: UInt32);
     procedure set_has_Game;
     procedure clear_has_Game;
     procedure SetGame(const AValue: TPB_Game);
@@ -98,12 +98,12 @@ type
     // required uint32 Seq = 2;
     function has_Seq: Boolean;
     procedure clear_Seq;
-    property Seq: UINT32 read FSeq write SetSeq;
+    property Seq: UInt32 read FSeq write SetSeq;
 
     // required uint32 Totalrake = 3;
     function has_Totalrake: Boolean;
     procedure clear_Totalrake;
-    property Totalrake: UINT32 read FTotalrake write SetTotalrake;
+    property Totalrake: UInt32 read FTotalrake write SetTotalrake;
 
     // repeated PlayerHandHistory Players = 4;
     function has_Players: Boolean;
@@ -118,7 +118,7 @@ type
     // required uint32 Endtime = 6;
     function has_Endtime: Boolean;
     procedure clear_Endtime;
-    property Endtime: UINT32 read FEndtime write SetEndtime;
+    property Endtime: UInt32 read FEndtime write SetEndtime;
 
     // repeated int32 BalanceChanges = 7;
     function has_BalanceChanges: Boolean;
@@ -133,7 +133,7 @@ type
     // required uint32 Dealer = 9;
     function has_Dealer: Boolean;
     procedure clear_Dealer;
-    property Dealer: UINT32 read FDealer write SetDealer;
+    property Dealer: UInt32 read FDealer write SetDealer;
 
     // optional Game Game = 10;
     function has_Game: Boolean;
@@ -151,7 +151,8 @@ type
     property Rake: Integer read FRake write SetRake;
 
   end;
-  TPB_HandHistoryList = class (TObjectList<TPB_HandHistory>)
+
+  TPB_HandHistoryList = class(TObjectList<TPB_HandHistory>)
     procedure Assign(const APB_HandHistoryList: TList<TPB_HandHistory>);
   end;
 
@@ -160,22 +161,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_HandHistory.InitObjects;
-begin
-  inherited;
-  FPlayers := TObjectList<TPB_PlayerHandHistory>.Create;
-  FBalanceChanges := TList<Integer>.Create;
-  FMoves := TObjectList<TPB_HandHistoryMove>.Create;
-end;
-
-procedure TPB_HandHistory.HookNotifiers;
-begin
-  inherited;
-  FPlayers.OnNotify := PlayersNotifyEvent;
-  FBalanceChanges.OnNotify := BalanceChangesNotifyEvent;
-  FMoves.OnNotify := MovesNotifyEvent;
-end;
 
 constructor TPB_HandHistory.Create(const AFrom: TPB_HandHistory; const ALightweight: Boolean = FALSE);
 begin
@@ -204,6 +189,21 @@ begin
   inherited;
 end;
 
+procedure TPB_HandHistory.InitObjects;
+begin
+  inherited;
+  FPlayers := TObjectList<TPB_PlayerHandHistory>.Create;
+  FBalanceChanges := TList<Integer>.Create;
+  FMoves := TObjectList<TPB_HandHistoryMove>.Create;
+end;
+
+procedure TPB_HandHistory.HookNotifiers;
+begin
+  inherited;
+  FPlayers.OnNotify := PlayersNotifyEvent;
+  FBalanceChanges.OnNotify := BalanceChangesNotifyEvent;
+  FMoves.OnNotify := MovesNotifyEvent;
+end;
 procedure TPB_HandHistory.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -378,7 +378,7 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_HandHistory.SetSeq(const AValue: UINT32);
+procedure TPB_HandHistory.SetSeq(const AValue: UInt32);
 begin
   Assert(not has_Seq);
   FSeq := AValue;
@@ -408,7 +408,7 @@ begin
   _has_bits_ := _has_bits_ and not 4;
 end;
 
-procedure TPB_HandHistory.SetTotalrake(const AValue: UINT32);
+procedure TPB_HandHistory.SetTotalrake(const AValue: UInt32);
 begin
   Assert(not has_Totalrake);
   FTotalrake := AValue;
@@ -501,7 +501,7 @@ begin
   _has_bits_ := _has_bits_ and not 32;
 end;
 
-procedure TPB_HandHistory.SetEndtime(const AValue: UINT32);
+procedure TPB_HandHistory.SetEndtime(const AValue: UInt32);
 begin
   Assert(not has_Endtime);
   FEndtime := AValue;
@@ -593,7 +593,7 @@ begin
   _has_bits_ := _has_bits_ and not 256;
 end;
 
-procedure TPB_HandHistory.SetDealer(const AValue: UINT32);
+procedure TPB_HandHistory.SetDealer(const AValue: UInt32);
 begin
   Assert(not has_Dealer);
   FDealer := AValue;

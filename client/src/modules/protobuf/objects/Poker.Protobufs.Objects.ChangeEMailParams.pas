@@ -36,7 +36,8 @@ type
     property NewMail: String read FNewMail write SetNewMail;
 
   end;
-  TPB_ChangeEMailParamsList = class (TObjectList<TPB_ChangeEMailParams>)
+
+  TPB_ChangeEMailParamsList = class(TObjectList<TPB_ChangeEMailParams>)
     procedure Assign(const APB_ChangeEMailParamsList: TList<TPB_ChangeEMailParams>);
   end;
 
@@ -44,7 +45,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ChangeEMailParams.Create(const AFrom: TPB_ChangeEMailParams; const ALightweight: Boolean = FALSE);

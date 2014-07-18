@@ -38,7 +38,8 @@ type
     property Status: TRegisterStatus read FStatus write SetStatus;
 
   end;
-  TPB_RegisterReplyList = class (TObjectList<TPB_RegisterReply>)
+
+  TPB_RegisterReplyList = class(TObjectList<TPB_RegisterReply>)
     procedure Assign(const APB_RegisterReplyList: TList<TPB_RegisterReply>);
   end;
 
@@ -46,7 +47,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_RegisterReply.Create(const AFrom: TPB_RegisterReply; const ALightweight: Boolean = FALSE);

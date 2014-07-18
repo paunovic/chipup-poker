@@ -19,22 +19,22 @@ type
       kRakeFieldNumber = 4;
 
     var
-      FValue: UINT32;
+      FValue: UInt32;
       FMembers: TList<Integer>;
       FWinnerData: TList<TPB_WinnerData>;
-      FRake: UINT32;
+      FRake: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_Value;
     procedure clear_has_Value;
-    procedure SetValue(const AValue: UINT32);
+    procedure SetValue(const AValue: UInt32);
     procedure set_has_Members;
     procedure clear_has_Members;
     procedure set_has_WinnerData;
     procedure clear_has_WinnerData;
     procedure set_has_Rake;
     procedure clear_has_Rake;
-    procedure SetRake(const AValue: UINT32);
+    procedure SetRake(const AValue: UInt32);
     procedure MembersNotifyEvent(Sender: TObject; const Item: Integer; Action: TCollectionNotification);
     procedure WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerData; Action: TCollectionNotification);
 
@@ -53,7 +53,7 @@ type
     // required uint32 Value = 1;
     function has_Value: Boolean;
     procedure clear_Value;
-    property Value: UINT32 read FValue write SetValue;
+    property Value: UInt32 read FValue write SetValue;
 
     // repeated int32 Members = 2;
     function has_Members: Boolean;
@@ -68,10 +68,11 @@ type
     // optional uint32 Rake = 4;
     function has_Rake: Boolean;
     procedure clear_Rake;
-    property Rake: UINT32 read FRake write SetRake;
+    property Rake: UInt32 read FRake write SetRake;
 
   end;
-  TPB_PotList = class (TObjectList<TPB_Pot>)
+
+  TPB_PotList = class(TObjectList<TPB_Pot>)
     procedure Assign(const APB_PotList: TList<TPB_Pot>);
   end;
 
@@ -80,20 +81,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_Pot.InitObjects;
-begin
-  inherited;
-  FMembers := TList<Integer>.Create;
-  FWinnerData := TObjectList<TPB_WinnerData>.Create;
-end;
-
-procedure TPB_Pot.HookNotifiers;
-begin
-  inherited;
-  FMembers.OnNotify := MembersNotifyEvent;
-  FWinnerData.OnNotify := WinnerDataNotifyEvent;
-end;
 
 constructor TPB_Pot.Create(const AFrom: TPB_Pot; const ALightweight: Boolean = FALSE);
 begin
@@ -116,6 +103,19 @@ begin
   inherited;
 end;
 
+procedure TPB_Pot.InitObjects;
+begin
+  inherited;
+  FMembers := TList<Integer>.Create;
+  FWinnerData := TObjectList<TPB_WinnerData>.Create;
+end;
+
+procedure TPB_Pot.HookNotifiers;
+begin
+  inherited;
+  FMembers.OnNotify := MembersNotifyEvent;
+  FWinnerData.OnNotify := WinnerDataNotifyEvent;
+end;
 procedure TPB_Pot.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -195,7 +195,7 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_Pot.SetValue(const AValue: UINT32);
+procedure TPB_Pot.SetValue(const AValue: UInt32);
 begin
   Assert(not has_Value);
   FValue := AValue;
@@ -287,7 +287,7 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_Pot.SetRake(const AValue: UINT32);
+procedure TPB_Pot.SetRake(const AValue: UInt32);
 begin
   Assert(not has_Rake);
   FRake := AValue;

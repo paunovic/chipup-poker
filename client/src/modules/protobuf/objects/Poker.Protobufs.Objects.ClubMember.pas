@@ -21,7 +21,7 @@ type
     var
       FId: TBytes;
       FSuspended: Boolean;
-      FBalanceLimit: UINT32;
+      FBalanceLimit: UInt32;
       FClubBalance: Integer;
       FUnlimitedLimit: Boolean;
       _has_bits_: UINT32;
@@ -34,7 +34,7 @@ type
     procedure SetSuspended(const AValue: Boolean);
     procedure set_has_BalanceLimit;
     procedure clear_has_BalanceLimit;
-    procedure SetBalanceLimit(const AValue: UINT32);
+    procedure SetBalanceLimit(const AValue: UInt32);
     procedure set_has_ClubBalance;
     procedure clear_has_ClubBalance;
     procedure SetClubBalance(const AValue: Integer);
@@ -63,7 +63,7 @@ type
     // optional uint32 BalanceLimit = 3;
     function has_BalanceLimit: Boolean;
     procedure clear_BalanceLimit;
-    property BalanceLimit: UINT32 read FBalanceLimit write SetBalanceLimit;
+    property BalanceLimit: UInt32 read FBalanceLimit write SetBalanceLimit;
 
     // optional int32 ClubBalance = 4;
     function has_ClubBalance: Boolean;
@@ -76,7 +76,8 @@ type
     property UnlimitedLimit: Boolean read FUnlimitedLimit write SetUnlimitedLimit;
 
   end;
-  TPB_ClubMemberList = class (TObjectList<TPB_ClubMember>)
+
+  TPB_ClubMemberList = class(TObjectList<TPB_ClubMember>)
     procedure Assign(const APB_ClubMemberList: TList<TPB_ClubMember>);
   end;
 
@@ -84,7 +85,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ClubMember.Create(const AFrom: TPB_ClubMember; const ALightweight: Boolean = FALSE);
@@ -238,7 +238,7 @@ begin
   _has_bits_ := _has_bits_ and not 4;
 end;
 
-procedure TPB_ClubMember.SetBalanceLimit(const AValue: UINT32);
+procedure TPB_ClubMember.SetBalanceLimit(const AValue: UInt32);
 begin
   Assert(not has_BalanceLimit);
   FBalanceLimit := AValue;

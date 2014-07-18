@@ -36,7 +36,8 @@ type
     property AvatarId: TBytes read FAvatarId write SetAvatarId;
 
   end;
-  TPB_SetAvatarParamsList = class (TObjectList<TPB_SetAvatarParams>)
+
+  TPB_SetAvatarParamsList = class(TObjectList<TPB_SetAvatarParams>)
     procedure Assign(const APB_SetAvatarParamsList: TList<TPB_SetAvatarParams>);
   end;
 
@@ -44,7 +45,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_SetAvatarParams.Create(const AFrom: TPB_SetAvatarParams; const ALightweight: Boolean = FALSE);

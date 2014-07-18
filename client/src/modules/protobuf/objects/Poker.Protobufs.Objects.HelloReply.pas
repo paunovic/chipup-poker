@@ -111,7 +111,8 @@ type
     property ValidCharsRegex: TPB_ValidCharsRegex read FValidCharsRegex write SetValidCharsRegex;
 
   end;
-  TPB_HelloReplyList = class (TObjectList<TPB_HelloReply>)
+
+  TPB_HelloReplyList = class(TObjectList<TPB_HelloReply>)
     procedure Assign(const APB_HelloReplyList: TList<TPB_HelloReply>);
   end;
 
@@ -120,18 +121,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_HelloReply.InitObjects;
-begin
-  inherited;
-  FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
-end;
-
-procedure TPB_HelloReply.HookNotifiers;
-begin
-  inherited;
-  FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
-end;
 
 constructor TPB_HelloReply.Create(const AFrom: TPB_HelloReply; const ALightweight: Boolean = FALSE);
 begin
@@ -155,6 +144,17 @@ begin
   inherited;
 end;
 
+procedure TPB_HelloReply.InitObjects;
+begin
+  inherited;
+  FUpdateFiles := TObjectList<TPB_UpdateFileInfo>.Create;
+end;
+
+procedure TPB_HelloReply.HookNotifiers;
+begin
+  inherited;
+  FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
+end;
 procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

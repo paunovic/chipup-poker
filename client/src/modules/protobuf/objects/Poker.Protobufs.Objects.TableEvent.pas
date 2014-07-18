@@ -25,7 +25,7 @@ type
       FEvent: TTableEventType;
       FSeat: Integer;
       FPots: TList<TPB_Pot>;
-      FBets: TList<UINT32>;
+      FBets: TList<UInt32>;
       FCards: TBytes;
       _has_bits_: UINT32;
 
@@ -43,7 +43,7 @@ type
     procedure clear_has_Cards;
     procedure SetCards(const AValue: TBytes);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
-    procedure BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
+    procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -75,7 +75,7 @@ type
     // repeated uint32 Bets = 5;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TList<UINT32> read FBets;
+    property Bets: TList<UInt32> read FBets;
 
     // optional bytes Cards = 6;
     function has_Cards: Boolean;
@@ -83,7 +83,8 @@ type
     property Cards: TBytes read FCards write SetCards;
 
   end;
-  TPB_TableEventList = class (TObjectList<TPB_TableEvent>)
+
+  TPB_TableEventList = class(TObjectList<TPB_TableEvent>)
     procedure Assign(const APB_TableEventList: TList<TPB_TableEvent>);
   end;
 
@@ -92,20 +93,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_TableEvent.InitObjects;
-begin
-  inherited;
-  FPots := TObjectList<TPB_Pot>.Create;
-  FBets := TList<UINT32>.Create;
-end;
-
-procedure TPB_TableEvent.HookNotifiers;
-begin
-  inherited;
-  FPots.OnNotify := PotsNotifyEvent;
-  FBets.OnNotify := BetsNotifyEvent;
-end;
 
 constructor TPB_TableEvent.Create(const AFrom: TPB_TableEvent; const ALightweight: Boolean = FALSE);
 begin
@@ -128,6 +115,19 @@ begin
   inherited;
 end;
 
+procedure TPB_TableEvent.InitObjects;
+begin
+  inherited;
+  FPots := TObjectList<TPB_Pot>.Create;
+  FBets := TList<UInt32>.Create;
+end;
+
+procedure TPB_TableEvent.HookNotifiers;
+begin
+  inherited;
+  FPots.OnNotify := PotsNotifyEvent;
+  FBets.OnNotify := BetsNotifyEvent;
+end;
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -307,7 +307,7 @@ begin
   _has_bits_ := _has_bits_ and not 16;
 end;
 
-procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
+procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   set_has_Bets;

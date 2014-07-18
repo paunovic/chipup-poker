@@ -51,7 +51,8 @@ type
     property Users: TList<TPB_User> read FUsers;
 
   end;
-  TPB_GetUserParamsList = class (TObjectList<TPB_GetUserParams>)
+
+  TPB_GetUserParamsList = class(TObjectList<TPB_GetUserParams>)
     procedure Assign(const APB_GetUserParamsList: TList<TPB_GetUserParams>);
   end;
 
@@ -60,20 +61,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_GetUserParams.InitObjects;
-begin
-  inherited;
-  FUserMongoIds := TList<TBytes>.Create;
-  FUsers := TObjectList<TPB_User>.Create;
-end;
-
-procedure TPB_GetUserParams.HookNotifiers;
-begin
-  inherited;
-  FUserMongoIds.OnNotify := UserMongoIdsNotifyEvent;
-  FUsers.OnNotify := UsersNotifyEvent;
-end;
 
 constructor TPB_GetUserParams.Create(const AFrom: TPB_GetUserParams; const ALightweight: Boolean = FALSE);
 begin
@@ -96,6 +83,19 @@ begin
   inherited;
 end;
 
+procedure TPB_GetUserParams.InitObjects;
+begin
+  inherited;
+  FUserMongoIds := TList<TBytes>.Create;
+  FUsers := TObjectList<TPB_User>.Create;
+end;
+
+procedure TPB_GetUserParams.HookNotifiers;
+begin
+  inherited;
+  FUserMongoIds.OnNotify := UserMongoIdsNotifyEvent;
+  FUsers.OnNotify := UsersNotifyEvent;
+end;
 procedure TPB_GetUserParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
