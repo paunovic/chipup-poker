@@ -36,7 +36,8 @@ type
     property Email: String read FEmail write SetEmail;
 
   end;
-  TPB_ForgotPasswordParamsList = class (TObjectList<TPB_ForgotPasswordParams>)
+
+  TPB_ForgotPasswordParamsList = class(TObjectList<TPB_ForgotPasswordParams>)
     procedure Assign(const APB_ForgotPasswordParamsList: TList<TPB_ForgotPasswordParams>);
   end;
 
@@ -44,7 +45,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ForgotPasswordParams.Create(const AFrom: TPB_ForgotPasswordParams; const ALightweight: Boolean = FALSE);

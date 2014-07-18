@@ -22,7 +22,7 @@ type
       FClubid: TBytes;
       FGameid: TBytes;
       FPlayerstats: TList<TPB_TablePlayerStats>;
-      FHands: UINT32;
+      FHands: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_Clubid;
@@ -35,7 +35,7 @@ type
     procedure clear_has_Playerstats;
     procedure set_has_Hands;
     procedure clear_has_Hands;
-    procedure SetHands(const AValue: UINT32);
+    procedure SetHands(const AValue: UInt32);
     procedure PlayerstatsNotifyEvent(Sender: TObject; const Item: TPB_TablePlayerStats; Action: TCollectionNotification);
 
   protected
@@ -68,10 +68,11 @@ type
     // optional uint32 Hands = 4;
     function has_Hands: Boolean;
     procedure clear_Hands;
-    property Hands: UINT32 read FHands write SetHands;
+    property Hands: UInt32 read FHands write SetHands;
 
   end;
-  TPB_TableStatsReplyList = class (TObjectList<TPB_TableStatsReply>)
+
+  TPB_TableStatsReplyList = class(TObjectList<TPB_TableStatsReply>)
     procedure Assign(const APB_TableStatsReplyList: TList<TPB_TableStatsReply>);
   end;
 
@@ -80,18 +81,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_TableStatsReply.InitObjects;
-begin
-  inherited;
-  FPlayerstats := TObjectList<TPB_TablePlayerStats>.Create;
-end;
-
-procedure TPB_TableStatsReply.HookNotifiers;
-begin
-  inherited;
-  FPlayerstats.OnNotify := PlayerstatsNotifyEvent;
-end;
 
 constructor TPB_TableStatsReply.Create(const AFrom: TPB_TableStatsReply; const ALightweight: Boolean = FALSE);
 begin
@@ -109,6 +98,17 @@ begin
   inherited;
 end;
 
+procedure TPB_TableStatsReply.InitObjects;
+begin
+  inherited;
+  FPlayerstats := TObjectList<TPB_TablePlayerStats>.Create;
+end;
+
+procedure TPB_TableStatsReply.HookNotifiers;
+begin
+  inherited;
+  FPlayerstats.OnNotify := PlayerstatsNotifyEvent;
+end;
 procedure TPB_TableStatsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -282,7 +282,7 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_TableStatsReply.SetHands(const AValue: UINT32);
+procedure TPB_TableStatsReply.SetHands(const AValue: UInt32);
 begin
   Assert(not has_Hands);
   FHands := AValue;

@@ -46,7 +46,8 @@ type
     property Flag: Boolean read FFlag write SetFlag;
 
   end;
-  TPB_TableBoolFlagList = class (TObjectList<TPB_TableBoolFlag>)
+
+  TPB_TableBoolFlagList = class(TObjectList<TPB_TableBoolFlag>)
     procedure Assign(const APB_TableBoolFlagList: TList<TPB_TableBoolFlag>);
   end;
 
@@ -54,7 +55,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_TableBoolFlag.Create(const AFrom: TPB_TableBoolFlag; const ALightweight: Boolean = FALSE);

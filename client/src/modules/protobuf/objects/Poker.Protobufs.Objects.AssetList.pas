@@ -41,7 +41,8 @@ type
     property Assets: TList<TPB_UpdateFileInfo> read FAssets;
 
   end;
-  TPB_AssetListList = class (TObjectList<TPB_AssetList>)
+
+  TPB_AssetListList = class(TObjectList<TPB_AssetList>)
     procedure Assign(const APB_AssetListList: TList<TPB_AssetList>);
   end;
 
@@ -50,18 +51,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_AssetList.InitObjects;
-begin
-  inherited;
-  FAssets := TObjectList<TPB_UpdateFileInfo>.Create;
-end;
-
-procedure TPB_AssetList.HookNotifiers;
-begin
-  inherited;
-  FAssets.OnNotify := AssetsNotifyEvent;
-end;
 
 constructor TPB_AssetList.Create(const AFrom: TPB_AssetList; const ALightweight: Boolean = FALSE);
 begin
@@ -79,6 +68,17 @@ begin
   inherited;
 end;
 
+procedure TPB_AssetList.InitObjects;
+begin
+  inherited;
+  FAssets := TObjectList<TPB_UpdateFileInfo>.Create;
+end;
+
+procedure TPB_AssetList.HookNotifiers;
+begin
+  inherited;
+  FAssets.OnNotify := AssetsNotifyEvent;
+end;
 procedure TPB_AssetList.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

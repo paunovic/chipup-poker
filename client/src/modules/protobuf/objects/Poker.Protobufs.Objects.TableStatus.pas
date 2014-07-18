@@ -43,22 +43,22 @@ type
       FState: TTableState;
       FDealer: Integer;
       FCurrentSeat: Integer;
-      FBets: TList<UINT32>;
+      FBets: TList<UInt32>;
       FLocked: Boolean;
       FSeq: Integer;
-      FMinimumBet: UINT32;
-      FMaximumRaise: UINT32;
-      FSmallBlind: UINT32;
-      FBigBlind: UINT32;
-      FHandid: UINT32;
+      FMinimumBet: UInt32;
+      FMaximumRaise: UInt32;
+      FSmallBlind: UInt32;
+      FBigBlind: UInt32;
+      FHandid: UInt32;
       FTime: UInt64;
       FEvents: TList<TPB_TableEvent>;
       FPots: TList<TPB_Pot>;
-      FRakePercent: UINT32;
+      FRakePercent: UInt32;
       FCurrentGame: TGameType;
-      FRotation: UINT32;
+      FRotation: UInt32;
       FGameLimit: TGameLimit;
-      FMinimumRaise: UINT32;
+      FMinimumRaise: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
@@ -85,19 +85,19 @@ type
     procedure SetSeq(const AValue: Integer);
     procedure set_has_MinimumBet;
     procedure clear_has_MinimumBet;
-    procedure SetMinimumBet(const AValue: UINT32);
+    procedure SetMinimumBet(const AValue: UInt32);
     procedure set_has_MaximumRaise;
     procedure clear_has_MaximumRaise;
-    procedure SetMaximumRaise(const AValue: UINT32);
+    procedure SetMaximumRaise(const AValue: UInt32);
     procedure set_has_SmallBlind;
     procedure clear_has_SmallBlind;
-    procedure SetSmallBlind(const AValue: UINT32);
+    procedure SetSmallBlind(const AValue: UInt32);
     procedure set_has_BigBlind;
     procedure clear_has_BigBlind;
-    procedure SetBigBlind(const AValue: UINT32);
+    procedure SetBigBlind(const AValue: UInt32);
     procedure set_has_Handid;
     procedure clear_has_Handid;
-    procedure SetHandid(const AValue: UINT32);
+    procedure SetHandid(const AValue: UInt32);
     procedure set_has_Time;
     procedure clear_has_Time;
     procedure SetTime(const AValue: UInt64);
@@ -107,21 +107,21 @@ type
     procedure clear_has_Pots;
     procedure set_has_RakePercent;
     procedure clear_has_RakePercent;
-    procedure SetRakePercent(const AValue: UINT32);
+    procedure SetRakePercent(const AValue: UInt32);
     procedure set_has_CurrentGame;
     procedure clear_has_CurrentGame;
     procedure SetCurrentGame(const AValue: TGameType);
     procedure set_has_Rotation;
     procedure clear_has_Rotation;
-    procedure SetRotation(const AValue: UINT32);
+    procedure SetRotation(const AValue: UInt32);
     procedure set_has_GameLimit;
     procedure clear_has_GameLimit;
     procedure SetGameLimit(const AValue: TGameLimit);
     procedure set_has_MinimumRaise;
     procedure clear_has_MinimumRaise;
-    procedure SetMinimumRaise(const AValue: UINT32);
+    procedure SetMinimumRaise(const AValue: UInt32);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
-    procedure BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
+    procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
     procedure PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; Action: TCollectionNotification);
 
@@ -165,7 +165,7 @@ type
     // repeated uint32 Bets = 6;
     function has_Bets: Boolean;
     procedure clear_Bets;
-    property Bets: TList<UINT32> read FBets;
+    property Bets: TList<UInt32> read FBets;
 
     // required bool Locked = 11;
     function has_Locked: Boolean;
@@ -180,27 +180,27 @@ type
     // optional uint32 MinimumBet = 13;
     function has_MinimumBet: Boolean;
     procedure clear_MinimumBet;
-    property MinimumBet: UINT32 read FMinimumBet write SetMinimumBet;
+    property MinimumBet: UInt32 read FMinimumBet write SetMinimumBet;
 
     // optional uint32 MaximumRaise = 14;
     function has_MaximumRaise: Boolean;
     procedure clear_MaximumRaise;
-    property MaximumRaise: UINT32 read FMaximumRaise write SetMaximumRaise;
+    property MaximumRaise: UInt32 read FMaximumRaise write SetMaximumRaise;
 
     // optional uint32 SmallBlind = 15;
     function has_SmallBlind: Boolean;
     procedure clear_SmallBlind;
-    property SmallBlind: UINT32 read FSmallBlind write SetSmallBlind;
+    property SmallBlind: UInt32 read FSmallBlind write SetSmallBlind;
 
     // optional uint32 BigBlind = 16;
     function has_BigBlind: Boolean;
     procedure clear_BigBlind;
-    property BigBlind: UINT32 read FBigBlind write SetBigBlind;
+    property BigBlind: UInt32 read FBigBlind write SetBigBlind;
 
     // optional uint32 Handid = 17;
     function has_Handid: Boolean;
     procedure clear_Handid;
-    property Handid: UINT32 read FHandid write SetHandid;
+    property Handid: UInt32 read FHandid write SetHandid;
 
     // optional uint64 Time = 18;
     function has_Time: Boolean;
@@ -220,7 +220,7 @@ type
     // optional uint32 RakePercent = 21;
     function has_RakePercent: Boolean;
     procedure clear_RakePercent;
-    property RakePercent: UINT32 read FRakePercent write SetRakePercent;
+    property RakePercent: UInt32 read FRakePercent write SetRakePercent;
 
     // optional GameType CurrentGame = 22;
     function has_CurrentGame: Boolean;
@@ -230,7 +230,7 @@ type
     // optional uint32 Rotation = 23;
     function has_Rotation: Boolean;
     procedure clear_Rotation;
-    property Rotation: UINT32 read FRotation write SetRotation;
+    property Rotation: UInt32 read FRotation write SetRotation;
 
     // optional GameLimit GameLimit = 25;
     function has_GameLimit: Boolean;
@@ -240,10 +240,11 @@ type
     // optional uint32 MinimumRaise = 26;
     function has_MinimumRaise: Boolean;
     procedure clear_MinimumRaise;
-    property MinimumRaise: UINT32 read FMinimumRaise write SetMinimumRaise;
+    property MinimumRaise: UInt32 read FMinimumRaise write SetMinimumRaise;
 
   end;
-  TPB_TableStatusList = class (TObjectList<TPB_TableStatus>)
+
+  TPB_TableStatusList = class(TObjectList<TPB_TableStatus>)
     procedure Assign(const APB_TableStatusList: TList<TPB_TableStatus>);
   end;
 
@@ -252,24 +253,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_TableStatus.InitObjects;
-begin
-  inherited;
-  FSeats := TObjectList<TPB_SeatInfo>.Create;
-  FBets := TList<UINT32>.Create;
-  FEvents := TObjectList<TPB_TableEvent>.Create;
-  FPots := TObjectList<TPB_Pot>.Create;
-end;
-
-procedure TPB_TableStatus.HookNotifiers;
-begin
-  inherited;
-  FSeats.OnNotify := SeatsNotifyEvent;
-  FBets.OnNotify := BetsNotifyEvent;
-  FEvents.OnNotify := EventsNotifyEvent;
-  FPots.OnNotify := PotsNotifyEvent;
-end;
 
 constructor TPB_TableStatus.Create(const AFrom: TPB_TableStatus; const ALightweight: Boolean = FALSE);
 begin
@@ -302,6 +285,23 @@ begin
   inherited;
 end;
 
+procedure TPB_TableStatus.InitObjects;
+begin
+  inherited;
+  FSeats := TObjectList<TPB_SeatInfo>.Create;
+  FBets := TList<UInt32>.Create;
+  FEvents := TObjectList<TPB_TableEvent>.Create;
+  FPots := TObjectList<TPB_Pot>.Create;
+end;
+
+procedure TPB_TableStatus.HookNotifiers;
+begin
+  inherited;
+  FSeats.OnNotify := SeatsNotifyEvent;
+  FBets.OnNotify := BetsNotifyEvent;
+  FEvents.OnNotify := EventsNotifyEvent;
+  FPots.OnNotify := PotsNotifyEvent;
+end;
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -661,7 +661,7 @@ begin
   _has_bits_ := _has_bits_ and not 32;
 end;
 
-procedure TPB_TableStatus.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
+procedure TPB_TableStatus.BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   set_has_Bets;
@@ -750,7 +750,7 @@ begin
   _has_bits_ := _has_bits_ and not 4096;
 end;
 
-procedure TPB_TableStatus.SetMinimumBet(const AValue: UINT32);
+procedure TPB_TableStatus.SetMinimumBet(const AValue: UInt32);
 begin
   Assert(not has_MinimumBet);
   FMinimumBet := AValue;
@@ -780,7 +780,7 @@ begin
   _has_bits_ := _has_bits_ and not 8192;
 end;
 
-procedure TPB_TableStatus.SetMaximumRaise(const AValue: UINT32);
+procedure TPB_TableStatus.SetMaximumRaise(const AValue: UInt32);
 begin
   Assert(not has_MaximumRaise);
   FMaximumRaise := AValue;
@@ -810,7 +810,7 @@ begin
   _has_bits_ := _has_bits_ and not 16384;
 end;
 
-procedure TPB_TableStatus.SetSmallBlind(const AValue: UINT32);
+procedure TPB_TableStatus.SetSmallBlind(const AValue: UInt32);
 begin
   Assert(not has_SmallBlind);
   FSmallBlind := AValue;
@@ -840,7 +840,7 @@ begin
   _has_bits_ := _has_bits_ and not 32768;
 end;
 
-procedure TPB_TableStatus.SetBigBlind(const AValue: UINT32);
+procedure TPB_TableStatus.SetBigBlind(const AValue: UInt32);
 begin
   Assert(not has_BigBlind);
   FBigBlind := AValue;
@@ -870,7 +870,7 @@ begin
   _has_bits_ := _has_bits_ and not 65536;
 end;
 
-procedure TPB_TableStatus.SetHandid(const AValue: UINT32);
+procedure TPB_TableStatus.SetHandid(const AValue: UInt32);
 begin
   Assert(not has_Handid);
   FHandid := AValue;
@@ -996,7 +996,7 @@ begin
   _has_bits_ := _has_bits_ and not 1048576;
 end;
 
-procedure TPB_TableStatus.SetRakePercent(const AValue: UINT32);
+procedure TPB_TableStatus.SetRakePercent(const AValue: UInt32);
 begin
   Assert(not has_RakePercent);
   FRakePercent := AValue;
@@ -1056,7 +1056,7 @@ begin
   _has_bits_ := _has_bits_ and not 4194304;
 end;
 
-procedure TPB_TableStatus.SetRotation(const AValue: UINT32);
+procedure TPB_TableStatus.SetRotation(const AValue: UInt32);
 begin
   Assert(not has_Rotation);
   FRotation := AValue;
@@ -1116,7 +1116,7 @@ begin
   _has_bits_ := _has_bits_ and not 33554432;
 end;
 
-procedure TPB_TableStatus.SetMinimumRaise(const AValue: UINT32);
+procedure TPB_TableStatus.SetMinimumRaise(const AValue: UInt32);
 begin
   Assert(not has_MinimumRaise);
   FMinimumRaise := AValue;

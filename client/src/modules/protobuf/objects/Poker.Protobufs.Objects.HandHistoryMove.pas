@@ -21,7 +21,7 @@ type
 
     var
       FCode: TList<TTableEventType>;
-      FBet: UINT32;
+      FBet: UInt32;
       FSeat: Integer;
       FWinnerPotData: TList<TPB_Pot>;
       FPots: TList<TPB_Pot>;
@@ -31,7 +31,7 @@ type
     procedure clear_has_Code;
     procedure set_has_Bet;
     procedure clear_has_Bet;
-    procedure SetBet(const AValue: UINT32);
+    procedure SetBet(const AValue: UInt32);
     procedure set_has_Seat;
     procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
@@ -63,7 +63,7 @@ type
     // optional uint32 Bet = 2;
     function has_Bet: Boolean;
     procedure clear_Bet;
-    property Bet: UINT32 read FBet write SetBet;
+    property Bet: UInt32 read FBet write SetBet;
 
     // optional int32 Seat = 3;
     function has_Seat: Boolean;
@@ -81,7 +81,8 @@ type
     property Pots: TList<TPB_Pot> read FPots;
 
   end;
-  TPB_HandHistoryMoveList = class (TObjectList<TPB_HandHistoryMove>)
+
+  TPB_HandHistoryMoveList = class(TObjectList<TPB_HandHistoryMove>)
     procedure Assign(const APB_HandHistoryMoveList: TList<TPB_HandHistoryMove>);
   end;
 
@@ -90,22 +91,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_HandHistoryMove.InitObjects;
-begin
-  inherited;
-  FCode := TList<TTableEventType>.Create;
-  FWinnerPotData := TObjectList<TPB_Pot>.Create;
-  FPots := TObjectList<TPB_Pot>.Create;
-end;
-
-procedure TPB_HandHistoryMove.HookNotifiers;
-begin
-  inherited;
-  FCode.OnNotify := CodeNotifyEvent;
-  FWinnerPotData.OnNotify := WinnerPotDataNotifyEvent;
-  FPots.OnNotify := PotsNotifyEvent;
-end;
 
 constructor TPB_HandHistoryMove.Create(const AFrom: TPB_HandHistoryMove; const ALightweight: Boolean = FALSE);
 begin
@@ -133,6 +118,21 @@ begin
   inherited;
 end;
 
+procedure TPB_HandHistoryMove.InitObjects;
+begin
+  inherited;
+  FCode := TList<TTableEventType>.Create;
+  FWinnerPotData := TObjectList<TPB_Pot>.Create;
+  FPots := TObjectList<TPB_Pot>.Create;
+end;
+
+procedure TPB_HandHistoryMove.HookNotifiers;
+begin
+  inherited;
+  FCode.OnNotify := CodeNotifyEvent;
+  FWinnerPotData.OnNotify := WinnerPotDataNotifyEvent;
+  FPots.OnNotify := PotsNotifyEvent;
+end;
 procedure TPB_HandHistoryMove.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -250,7 +250,7 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_HandHistoryMove.SetBet(const AValue: UINT32);
+procedure TPB_HandHistoryMove.SetBet(const AValue: UInt32);
 begin
   Assert(not has_Bet);
   FBet := AValue;

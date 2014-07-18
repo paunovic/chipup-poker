@@ -71,7 +71,8 @@ type
     property Games: TList<TPB_Game> read FGames;
 
   end;
-  TPB_StatusReplyList = class (TObjectList<TPB_StatusReply>)
+
+  TPB_StatusReplyList = class(TObjectList<TPB_StatusReply>)
     procedure Assign(const APB_StatusReplyList: TList<TPB_StatusReply>);
   end;
 
@@ -80,22 +81,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_StatusReply.InitObjects;
-begin
-  inherited;
-  FClubs := TObjectList<TPB_Club>.Create;
-  FUsers := TObjectList<TPB_User>.Create;
-  FGames := TObjectList<TPB_Game>.Create;
-end;
-
-procedure TPB_StatusReply.HookNotifiers;
-begin
-  inherited;
-  FClubs.OnNotify := ClubsNotifyEvent;
-  FUsers.OnNotify := UsersNotifyEvent;
-  FGames.OnNotify := GamesNotifyEvent;
-end;
 
 constructor TPB_StatusReply.Create(const AFrom: TPB_StatusReply; const ALightweight: Boolean = FALSE);
 begin
@@ -125,6 +110,21 @@ begin
   inherited;
 end;
 
+procedure TPB_StatusReply.InitObjects;
+begin
+  inherited;
+  FClubs := TObjectList<TPB_Club>.Create;
+  FUsers := TObjectList<TPB_User>.Create;
+  FGames := TObjectList<TPB_Game>.Create;
+end;
+
+procedure TPB_StatusReply.HookNotifiers;
+begin
+  inherited;
+  FClubs.OnNotify := ClubsNotifyEvent;
+  FUsers.OnNotify := UsersNotifyEvent;
+  FGames.OnNotify := GamesNotifyEvent;
+end;
 procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

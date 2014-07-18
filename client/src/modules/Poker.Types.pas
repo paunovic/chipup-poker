@@ -8,7 +8,7 @@ uses
 type
   TMongoId = array[0..11] of Byte;
 
-procedure PointerToMongoId(const APointer: pointer; out AMongoId: TMongoId);
+procedure PtrToMongoId(const APointer: pointer; out AMongoId: TMongoId);
 function MongoIdToDateTime(const AMongoId: TMongoId): TDateTime; overload;
 function MongoIdToDateTime(const AMongoId: TBytes): TDateTime; overload; // FIXME: REMOVE
 function ReverseDWORD(dw: Cardinal): Cardinal;
@@ -18,7 +18,7 @@ implementation
 uses
   Winapi.Windows;
 
-procedure PointerToMongoId(const APointer: pointer; out AMongoId: TMongoId);
+procedure PtrToMongoId(const APointer: pointer; out AMongoId: TMongoId);
 begin
   Move(APointer^, AMongoId[0], Length(AMongoId));
 end;

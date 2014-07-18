@@ -63,7 +63,8 @@ type
     property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
 
   end;
-  TPB_LoginReplyList = class (TObjectList<TPB_LoginReply>)
+
+  TPB_LoginReplyList = class(TObjectList<TPB_LoginReply>)
     procedure Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
   end;
 
@@ -72,18 +73,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_LoginReply.InitObjects;
-begin
-  inherited;
-  FReconnectTables := TObjectList<TPB_TableStatus>.Create;
-end;
-
-procedure TPB_LoginReply.HookNotifiers;
-begin
-  inherited;
-  FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
-end;
 
 constructor TPB_LoginReply.Create(const AFrom: TPB_LoginReply; const ALightweight: Boolean = FALSE);
 begin
@@ -102,6 +91,17 @@ begin
   inherited;
 end;
 
+procedure TPB_LoginReply.InitObjects;
+begin
+  inherited;
+  FReconnectTables := TObjectList<TPB_TableStatus>.Create;
+end;
+
+procedure TPB_LoginReply.HookNotifiers;
+begin
+  inherited;
+  FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
+end;
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

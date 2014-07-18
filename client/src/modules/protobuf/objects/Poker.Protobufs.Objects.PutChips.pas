@@ -19,7 +19,7 @@ type
 
     var
       FTableMongoId: TBytes;
-      FChipAmount: UINT32;
+      FChipAmount: UInt32;
       FCurrentState: TTableState;
       _has_bits_: UINT32;
 
@@ -28,7 +28,7 @@ type
     procedure SetTableMongoId(const AValue: TBytes);
     procedure set_has_ChipAmount;
     procedure clear_has_ChipAmount;
-    procedure SetChipAmount(const AValue: UINT32);
+    procedure SetChipAmount(const AValue: UInt32);
     procedure set_has_CurrentState;
     procedure clear_has_CurrentState;
     procedure SetCurrentState(const AValue: TTableState);
@@ -49,7 +49,7 @@ type
     // required uint32 ChipAmount = 2;
     function has_ChipAmount: Boolean;
     procedure clear_ChipAmount;
-    property ChipAmount: UINT32 read FChipAmount write SetChipAmount;
+    property ChipAmount: UInt32 read FChipAmount write SetChipAmount;
 
     // required TableState CurrentState = 3;
     function has_CurrentState: Boolean;
@@ -57,7 +57,8 @@ type
     property CurrentState: TTableState read FCurrentState write SetCurrentState;
 
   end;
-  TPB_PutChipsList = class (TObjectList<TPB_PutChips>)
+
+  TPB_PutChipsList = class(TObjectList<TPB_PutChips>)
     procedure Assign(const APB_PutChipsList: TList<TPB_PutChips>);
   end;
 
@@ -65,7 +66,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_PutChips.Create(const AFrom: TPB_PutChips; const ALightweight: Boolean = FALSE);
@@ -175,7 +175,7 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_PutChips.SetChipAmount(const AValue: UINT32);
+procedure TPB_PutChips.SetChipAmount(const AValue: UInt32);
 begin
   Assert(not has_ChipAmount);
   FChipAmount := AValue;

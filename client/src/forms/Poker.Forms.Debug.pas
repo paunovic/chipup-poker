@@ -115,6 +115,8 @@ type
     lbvAnimations: TcxLabel;
     pmiRTTIEnabled: TMenuItem;
     teFindText: TcxTextEdit;
+    btMemoryState: TcxButton;
+    rvMemoryState: TRichView;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -131,11 +133,13 @@ type
     procedure teFindTextEnter(Sender: TObject);
     procedure teFindTextExit(Sender: TObject);
     procedure teFindTextPropertiesChange(Sender: TObject);
+    procedure btMemoryStateClick(Sender: TObject);
   private
     function FindStyleWithName(const AName: String): Integer;
     procedure RefreshStats(const ARefreshItems: TDebugRefreshItemSet);
     procedure RefreshDebugObjects;
     procedure Add(const ADebugId: Integer; const AType: TDebugInfoType; const ATime, ATypeStr, AData, ASubData: String);
+    procedure UpdateMemoryUsageDetails;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
   public
@@ -160,6 +164,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
+  FastMM4,
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds,
   Poker.DirectX.Timer, RectMarks;
@@ -171,6 +176,7 @@ function FreeConsole: Boolean; stdcall; external 'kernel32.dll';
 var
   frmDebug: TfrmDebug;
   DebugFilePath: String = '';
+  MemoryUsageFilePath: String = '';
   ConsoleAttached: Boolean = FALSE;
   DebugObjects: TDebugObjects;
   ActiveNotifyObjects: TObjectList<TIdNotify>;
@@ -233,6 +239,9 @@ begin
   // do NOT use SelfPath variable here, because this function can be called before SelfPath is initialized!
   if DebugFilePath = '' then
     DebugFilePath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + Format('debug\%s [%d].txt', [FormatDateTime('dd-mm-yyyy hh-nn-ss', Now), GetCurrentProcessId]);
+
+  if MemoryUsageFilePath = '' then
+    MemoryUsageFilePath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'debug\MemoryManagerState.txt';
 
   ForceDirectories(ExtractFilePath(DebugFilePath));
   if not FileExists(DebugFilePath) then
@@ -330,16 +339,23 @@ begin
 end;
 
 procedure TfrmDebug.teFindTextPropertiesChange(Sender: TObject);
+var
+  rv: TRichView;
 begin
-  ClearRectMarks(rvLog);
+  if rvMemoryState.Visible then
+    rv := rvMemoryState
+  else
+    rv := rvLog;
+
+  ClearRectMarks(rv);
 
   if teFindText.Tag = 0 then
     Exit;
 
   if teFindText.Text <> '' then
-    MarkSubstring(rvLog, teFindText.Text, clRed);
+    MarkSubstring(rv, teFindText.Text, clRed);
 
-  rvLog.Format;
+  rv.Format;
 end;
 
 procedure TfrmDebug.teRegexFilterPropertiesChange(Sender: TObject);
@@ -571,6 +587,22 @@ begin
   end;
 end;
 
+procedure TfrmDebug.btMemoryStateClick(Sender: TObject);
+begin
+  rvMemoryState.Visible := btMemoryState.Down;
+  if rvMemoryState.Visible then
+  begin
+    ClearRectMarks(rvLog);
+    UpdateMemoryUsageDetails;
+    rvMemoryState.BringToFront;
+  end
+  else
+  begin
+    ClearRectMarks(rvMemoryState);
+    teFindText.Properties.OnChange(nil);
+  end;
+end;
+
 procedure TfrmDebug.btSeatPosClick(Sender: TObject);
 begin
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
@@ -724,6 +756,9 @@ begin
     lbvMemoryUsage.Caption := Format('%.2fmb', [GetWorkingSetSize / (1024 * 1024)]);
     lbvThreads.Refresh;
     lbvMemoryUsage.Refresh;
+
+    if rvMemoryState.Visible then
+      UpdateMemoryUsageDetails;
   end;
 
   if dfiCallbacks in refresh_items then
@@ -858,6 +893,16 @@ begin
     lbvAnimations.Refresh;
   end;
 end;
+
+procedure TfrmDebug.UpdateMemoryUsageDetails;
+begin
+  LogMemoryManagerStateToFile(MemoryUsageFilePath);
+  rvMemoryState.ClearAll;
+  rvMemoryState.LoadText(MemoryUsageFilePath, FindStyleWithName('MemoryState'), 2, FALSE);
+  rvMemoryState.Format;
+  teFindText.Properties.OnChange(nil);
+end;
+
 
 { TDebugFormLog }
 

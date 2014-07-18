@@ -61,7 +61,8 @@ type
     property ClubStats: TList<TPB_ClubStatsReply> read FClubStats;
 
   end;
-  TPB_TableStatsRepliesList = class (TObjectList<TPB_TableStatsReplies>)
+
+  TPB_TableStatsRepliesList = class(TObjectList<TPB_TableStatsReplies>)
     procedure Assign(const APB_TableStatsRepliesList: TList<TPB_TableStatsReplies>);
   end;
 
@@ -70,22 +71,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_TableStatsReplies.InitObjects;
-begin
-  inherited;
-  FReply := TObjectList<TPB_TableStatsReply>.Create;
-  FPlayers := TObjectList<TPB_User>.Create;
-  FClubStats := TObjectList<TPB_ClubStatsReply>.Create;
-end;
-
-procedure TPB_TableStatsReplies.HookNotifiers;
-begin
-  inherited;
-  FReply.OnNotify := ReplyNotifyEvent;
-  FPlayers.OnNotify := PlayersNotifyEvent;
-  FClubStats.OnNotify := ClubStatsNotifyEvent;
-end;
 
 constructor TPB_TableStatsReplies.Create(const AFrom: TPB_TableStatsReplies; const ALightweight: Boolean = FALSE);
 begin
@@ -113,6 +98,21 @@ begin
   inherited;
 end;
 
+procedure TPB_TableStatsReplies.InitObjects;
+begin
+  inherited;
+  FReply := TObjectList<TPB_TableStatsReply>.Create;
+  FPlayers := TObjectList<TPB_User>.Create;
+  FClubStats := TObjectList<TPB_ClubStatsReply>.Create;
+end;
+
+procedure TPB_TableStatsReplies.HookNotifiers;
+begin
+  inherited;
+  FReply.OnNotify := ReplyNotifyEvent;
+  FPlayers.OnNotify := PlayersNotifyEvent;
+  FClubStats.OnNotify := ClubStatsNotifyEvent;
+end;
 procedure TPB_TableStatsReplies.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

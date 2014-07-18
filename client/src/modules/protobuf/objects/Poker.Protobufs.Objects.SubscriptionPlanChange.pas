@@ -57,7 +57,8 @@ type
     property StripeToken: String read FStripeToken write SetStripeToken;
 
   end;
-  TPB_SubscriptionPlanChangeList = class (TObjectList<TPB_SubscriptionPlanChange>)
+
+  TPB_SubscriptionPlanChangeList = class(TObjectList<TPB_SubscriptionPlanChange>)
     procedure Assign(const APB_SubscriptionPlanChangeList: TList<TPB_SubscriptionPlanChange>);
   end;
 
@@ -65,7 +66,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_SubscriptionPlanChange.Create(const AFrom: TPB_SubscriptionPlanChange; const ALightweight: Boolean = FALSE);

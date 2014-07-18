@@ -38,7 +38,8 @@ type
     property Status: TSetAvatarStatus read FStatus write SetStatus;
 
   end;
-  TPB_SetAvatarReplyList = class (TObjectList<TPB_SetAvatarReply>)
+
+  TPB_SetAvatarReplyList = class(TObjectList<TPB_SetAvatarReply>)
     procedure Assign(const APB_SetAvatarReplyList: TList<TPB_SetAvatarReply>);
   end;
 
@@ -46,7 +47,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_SetAvatarReply.Create(const AFrom: TPB_SetAvatarReply; const ALightweight: Boolean = FALSE);

@@ -16,13 +16,13 @@ type
       kServertimeFieldNumber = 2;
 
     var
-      FUptime: UINT32;
+      FUptime: UInt32;
       FServertime: UInt64;
       _has_bits_: UINT32;
 
     procedure set_has_Uptime;
     procedure clear_has_Uptime;
-    procedure SetUptime(const AValue: UINT32);
+    procedure SetUptime(const AValue: UInt32);
     procedure set_has_Servertime;
     procedure clear_has_Servertime;
     procedure SetServertime(const AValue: UInt64);
@@ -38,7 +38,7 @@ type
     // required uint32 Uptime = 1;
     function has_Uptime: Boolean;
     procedure clear_Uptime;
-    property Uptime: UINT32 read FUptime write SetUptime;
+    property Uptime: UInt32 read FUptime write SetUptime;
 
     // required uint64 Servertime = 2;
     function has_Servertime: Boolean;
@@ -46,7 +46,8 @@ type
     property Servertime: UInt64 read FServertime write SetServertime;
 
   end;
-  TPB_PingReplyList = class (TObjectList<TPB_PingReply>)
+
+  TPB_PingReplyList = class(TObjectList<TPB_PingReply>)
     procedure Assign(const APB_PingReplyList: TList<TPB_PingReply>);
   end;
 
@@ -54,7 +55,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_PingReply.Create(const AFrom: TPB_PingReply; const ALightweight: Boolean = FALSE);
@@ -127,7 +127,7 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_PingReply.SetUptime(const AValue: UINT32);
+procedure TPB_PingReply.SetUptime(const AValue: UInt32);
 begin
   Assert(not has_Uptime);
   FUptime := AValue;

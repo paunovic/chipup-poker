@@ -49,7 +49,7 @@ type
       FBuyinMax: Integer;
       FState: TGameState;
       FClosetime: UInt64;
-      FLasthandid: UINT32;
+      FLasthandid: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -93,7 +93,7 @@ type
     procedure SetClosetime(const AValue: UInt64);
     procedure set_has_Lasthandid;
     procedure clear_has_Lasthandid;
-    procedure SetLasthandid(const AValue: UINT32);
+    procedure SetLasthandid(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE); overload;
@@ -171,10 +171,11 @@ type
     // optional uint32 Lasthandid = 15;
     function has_Lasthandid: Boolean;
     procedure clear_Lasthandid;
-    property Lasthandid: UINT32 read FLasthandid write SetLasthandid;
+    property Lasthandid: UInt32 read FLasthandid write SetLasthandid;
 
   end;
-  TPB_GameList = class (TObjectList<TPB_Game>)
+
+  TPB_GameList = class(TObjectList<TPB_Game>)
     procedure Assign(const APB_GameList: TList<TPB_Game>);
   end;
 
@@ -182,7 +183,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_Game.Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE);
@@ -729,7 +729,7 @@ begin
   _has_bits_ := _has_bits_ and not 16384;
 end;
 
-procedure TPB_Game.SetLasthandid(const AValue: UINT32);
+procedure TPB_Game.SetLasthandid(const AValue: UInt32);
 begin
   Assert(not has_Lasthandid);
   FLasthandid := AValue;

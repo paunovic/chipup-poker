@@ -56,7 +56,8 @@ type
     property DisplayName: String read FDisplayName write SetDisplayName;
 
   end;
-  TPB_RegisterParamsList = class (TObjectList<TPB_RegisterParams>)
+
+  TPB_RegisterParamsList = class(TObjectList<TPB_RegisterParams>)
     procedure Assign(const APB_RegisterParamsList: TList<TPB_RegisterParams>);
   end;
 
@@ -64,7 +65,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_RegisterParams.Create(const AFrom: TPB_RegisterParams; const ALightweight: Boolean = FALSE);

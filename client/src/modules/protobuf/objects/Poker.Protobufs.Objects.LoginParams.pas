@@ -46,7 +46,8 @@ type
     property Password: String read FPassword write SetPassword;
 
   end;
-  TPB_LoginParamsList = class (TObjectList<TPB_LoginParams>)
+
+  TPB_LoginParamsList = class(TObjectList<TPB_LoginParams>)
     procedure Assign(const APB_LoginParamsList: TList<TPB_LoginParams>);
   end;
 
@@ -54,7 +55,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_LoginParams.Create(const AFrom: TPB_LoginParams; const ALightweight: Boolean = FALSE);

@@ -25,7 +25,7 @@ type
       FHash: TBytes;
       FUrl: String;
       FFileType: TUpdateFileType;
-      FFileSize: UINT32;
+      FFileSize: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_Path;
@@ -42,7 +42,7 @@ type
     procedure SetFileType(const AValue: TUpdateFileType);
     procedure set_has_FileSize;
     procedure clear_has_FileSize;
-    procedure SetFileSize(const AValue: UINT32);
+    procedure SetFileSize(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_UpdateFileInfo; const ALightweight: Boolean = FALSE); overload;
@@ -75,10 +75,11 @@ type
     // optional uint32 FileSize = 5;
     function has_FileSize: Boolean;
     procedure clear_FileSize;
-    property FileSize: UINT32 read FFileSize write SetFileSize;
+    property FileSize: UInt32 read FFileSize write SetFileSize;
 
   end;
-  TPB_UpdateFileInfoList = class (TObjectList<TPB_UpdateFileInfo>)
+
+  TPB_UpdateFileInfoList = class(TObjectList<TPB_UpdateFileInfo>)
     procedure Assign(const APB_UpdateFileInfoList: TList<TPB_UpdateFileInfo>);
   end;
 
@@ -86,7 +87,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_UpdateFileInfo.Create(const AFrom: TPB_UpdateFileInfo; const ALightweight: Boolean = FALSE);
@@ -300,7 +300,7 @@ begin
   _has_bits_ := _has_bits_ and not 16;
 end;
 
-procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UINT32);
+procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UInt32);
 begin
   Assert(not has_FileSize);
   FFileSize := AValue;

@@ -56,7 +56,8 @@ type
     property Token: Integer read FToken write SetToken;
 
   end;
-  TPB_RpcMessageList = class (TObjectList<TPB_RpcMessage>)
+
+  TPB_RpcMessageList = class(TObjectList<TPB_RpcMessage>)
     procedure Assign(const APB_RpcMessageList: TList<TPB_RpcMessage>);
   end;
 
@@ -64,7 +65,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_RpcMessage.Create(const AFrom: TPB_RpcMessage; const ALightweight: Boolean = FALSE);

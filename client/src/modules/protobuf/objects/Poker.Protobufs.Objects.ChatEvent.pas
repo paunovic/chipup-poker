@@ -59,7 +59,8 @@ type
     property TableId: TBytes read FTableId write SetTableId;
 
   end;
-  TPB_ChatEventList = class (TObjectList<TPB_ChatEvent>)
+
+  TPB_ChatEventList = class(TObjectList<TPB_ChatEvent>)
     procedure Assign(const APB_ChatEventList: TList<TPB_ChatEvent>);
   end;
 
@@ -67,7 +68,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ChatEvent.Create(const AFrom: TPB_ChatEvent; const ALightweight: Boolean = FALSE);

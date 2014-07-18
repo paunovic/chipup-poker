@@ -24,12 +24,12 @@ type
     var
       FUserid: TBytes;
       FBalance: Integer;
-      FBuyins: TList<UINT32>;
-      FCashouts: TList<UINT32>;
-      FRakecontrib: UINT32;
-      FSecondsplayed: UINT32;
-      FChipsinplay: UINT32;
-      FHands: UINT32;
+      FBuyins: TList<UInt32>;
+      FCashouts: TList<UInt32>;
+      FRakecontrib: UInt32;
+      FSecondsplayed: UInt32;
+      FChipsinplay: UInt32;
+      FHands: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_Userid;
@@ -44,18 +44,18 @@ type
     procedure clear_has_Cashouts;
     procedure set_has_Rakecontrib;
     procedure clear_has_Rakecontrib;
-    procedure SetRakecontrib(const AValue: UINT32);
+    procedure SetRakecontrib(const AValue: UInt32);
     procedure set_has_Secondsplayed;
     procedure clear_has_Secondsplayed;
-    procedure SetSecondsplayed(const AValue: UINT32);
+    procedure SetSecondsplayed(const AValue: UInt32);
     procedure set_has_Chipsinplay;
     procedure clear_has_Chipsinplay;
-    procedure SetChipsinplay(const AValue: UINT32);
+    procedure SetChipsinplay(const AValue: UInt32);
     procedure set_has_Hands;
     procedure clear_has_Hands;
-    procedure SetHands(const AValue: UINT32);
-    procedure BuyinsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
-    procedure CashoutsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
+    procedure SetHands(const AValue: UInt32);
+    procedure BuyinsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
+    procedure CashoutsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -82,35 +82,36 @@ type
     // repeated uint32 Buyins = 4;
     function has_Buyins: Boolean;
     procedure clear_Buyins;
-    property Buyins: TList<UINT32> read FBuyins;
+    property Buyins: TList<UInt32> read FBuyins;
 
     // repeated uint32 Cashouts = 5;
     function has_Cashouts: Boolean;
     procedure clear_Cashouts;
-    property Cashouts: TList<UINT32> read FCashouts;
+    property Cashouts: TList<UInt32> read FCashouts;
 
     // optional uint32 Rakecontrib = 6;
     function has_Rakecontrib: Boolean;
     procedure clear_Rakecontrib;
-    property Rakecontrib: UINT32 read FRakecontrib write SetRakecontrib;
+    property Rakecontrib: UInt32 read FRakecontrib write SetRakecontrib;
 
     // optional uint32 Secondsplayed = 7;
     function has_Secondsplayed: Boolean;
     procedure clear_Secondsplayed;
-    property Secondsplayed: UINT32 read FSecondsplayed write SetSecondsplayed;
+    property Secondsplayed: UInt32 read FSecondsplayed write SetSecondsplayed;
 
     // optional uint32 Chipsinplay = 8;
     function has_Chipsinplay: Boolean;
     procedure clear_Chipsinplay;
-    property Chipsinplay: UINT32 read FChipsinplay write SetChipsinplay;
+    property Chipsinplay: UInt32 read FChipsinplay write SetChipsinplay;
 
     // optional uint32 Hands = 9;
     function has_Hands: Boolean;
     procedure clear_Hands;
-    property Hands: UINT32 read FHands write SetHands;
+    property Hands: UInt32 read FHands write SetHands;
 
   end;
-  TPB_TablePlayerStatsList = class (TObjectList<TPB_TablePlayerStats>)
+
+  TPB_TablePlayerStatsList = class(TObjectList<TPB_TablePlayerStats>)
     procedure Assign(const APB_TablePlayerStatsList: TList<TPB_TablePlayerStats>);
   end;
 
@@ -119,20 +120,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_TablePlayerStats.InitObjects;
-begin
-  inherited;
-  FBuyins := TList<UINT32>.Create;
-  FCashouts := TList<UINT32>.Create;
-end;
-
-procedure TPB_TablePlayerStats.HookNotifiers;
-begin
-  inherited;
-  FBuyins.OnNotify := BuyinsNotifyEvent;
-  FCashouts.OnNotify := CashoutsNotifyEvent;
-end;
 
 constructor TPB_TablePlayerStats.Create(const AFrom: TPB_TablePlayerStats; const ALightweight: Boolean = FALSE);
 begin
@@ -155,6 +142,19 @@ begin
   inherited;
 end;
 
+procedure TPB_TablePlayerStats.InitObjects;
+begin
+  inherited;
+  FBuyins := TList<UInt32>.Create;
+  FCashouts := TList<UInt32>.Create;
+end;
+
+procedure TPB_TablePlayerStats.HookNotifiers;
+begin
+  inherited;
+  FBuyins.OnNotify := BuyinsNotifyEvent;
+  FCashouts.OnNotify := CashoutsNotifyEvent;
+end;
 procedure TPB_TablePlayerStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -314,7 +314,7 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
+procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   set_has_Buyins;
@@ -343,7 +343,7 @@ begin
   _has_bits_ := _has_bits_ and not 16;
 end;
 
-procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UINT32; Action: TCollectionNotification);
+procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   set_has_Cashouts;
@@ -372,7 +372,7 @@ begin
   _has_bits_ := _has_bits_ and not 32;
 end;
 
-procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UINT32);
+procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UInt32);
 begin
   Assert(not has_Rakecontrib);
   FRakecontrib := AValue;
@@ -402,7 +402,7 @@ begin
   _has_bits_ := _has_bits_ and not 64;
 end;
 
-procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UINT32);
+procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UInt32);
 begin
   Assert(not has_Secondsplayed);
   FSecondsplayed := AValue;
@@ -432,7 +432,7 @@ begin
   _has_bits_ := _has_bits_ and not 128;
 end;
 
-procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UINT32);
+procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UInt32);
 begin
   Assert(not has_Chipsinplay);
   FChipsinplay := AValue;
@@ -462,7 +462,7 @@ begin
   _has_bits_ := _has_bits_ and not 256;
 end;
 
-procedure TPB_TablePlayerStats.SetHands(const AValue: UINT32);
+procedure TPB_TablePlayerStats.SetHands(const AValue: UInt32);
 begin
   Assert(not has_Hands);
   FHands := AValue;

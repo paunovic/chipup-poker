@@ -46,7 +46,8 @@ type
     property ClubBalance: Integer read FClubBalance write SetClubBalance;
 
   end;
-  TPB_ClubPlayerStatsList = class (TObjectList<TPB_ClubPlayerStats>)
+
+  TPB_ClubPlayerStatsList = class(TObjectList<TPB_ClubPlayerStats>)
     procedure Assign(const APB_ClubPlayerStatsList: TList<TPB_ClubPlayerStats>);
   end;
 
@@ -54,7 +55,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ClubPlayerStats.Create(const AFrom: TPB_ClubPlayerStats; const ALightweight: Boolean = FALSE);

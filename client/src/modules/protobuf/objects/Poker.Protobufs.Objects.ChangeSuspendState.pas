@@ -56,7 +56,8 @@ type
     property Suspended: Boolean read FSuspended write SetSuspended;
 
   end;
-  TPB_ChangeSuspendStateList = class (TObjectList<TPB_ChangeSuspendState>)
+
+  TPB_ChangeSuspendStateList = class(TObjectList<TPB_ChangeSuspendState>)
     procedure Assign(const APB_ChangeSuspendStateList: TList<TPB_ChangeSuspendState>);
   end;
 
@@ -64,7 +65,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ChangeSuspendState.Create(const AFrom: TPB_ChangeSuspendState; const ALightweight: Boolean = FALSE);

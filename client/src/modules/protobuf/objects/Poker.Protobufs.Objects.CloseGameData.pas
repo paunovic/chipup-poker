@@ -48,7 +48,8 @@ type
     property Timestamp: TCloseGameTime read FTimestamp write SetTimestamp;
 
   end;
-  TPB_CloseGameDataList = class (TObjectList<TPB_CloseGameData>)
+
+  TPB_CloseGameDataList = class(TObjectList<TPB_CloseGameData>)
     procedure Assign(const APB_CloseGameDataList: TList<TPB_CloseGameData>);
   end;
 
@@ -56,7 +57,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_CloseGameData.Create(const AFrom: TPB_CloseGameData; const ALightweight: Boolean = FALSE);

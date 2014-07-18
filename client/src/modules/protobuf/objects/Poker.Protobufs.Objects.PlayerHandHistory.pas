@@ -25,7 +25,7 @@ type
       FId: TBytes;
       FSeat: Integer;
       FCards: TBytes;
-      FChips: UINT32;
+      FChips: UInt32;
       FNick: String;
       FMuck: Boolean;
       FStatus: TPlayerStatus;
@@ -42,7 +42,7 @@ type
     procedure SetCards(const AValue: TBytes);
     procedure set_has_Chips;
     procedure clear_has_Chips;
-    procedure SetChips(const AValue: UINT32);
+    procedure SetChips(const AValue: UInt32);
     procedure set_has_Nick;
     procedure clear_has_Nick;
     procedure SetNick(const AValue: String);
@@ -79,7 +79,7 @@ type
     // required uint32 Chips = 4;
     function has_Chips: Boolean;
     procedure clear_Chips;
-    property Chips: UINT32 read FChips write SetChips;
+    property Chips: UInt32 read FChips write SetChips;
 
     // required string Nick = 5;
     function has_Nick: Boolean;
@@ -97,7 +97,8 @@ type
     property Status: TPlayerStatus read FStatus write SetStatus;
 
   end;
-  TPB_PlayerHandHistoryList = class (TObjectList<TPB_PlayerHandHistory>)
+
+  TPB_PlayerHandHistoryList = class(TObjectList<TPB_PlayerHandHistory>)
     procedure Assign(const APB_PlayerHandHistoryList: TList<TPB_PlayerHandHistory>);
   end;
 
@@ -105,7 +106,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_PlayerHandHistory.Create(const AFrom: TPB_PlayerHandHistory; const ALightweight: Boolean = FALSE);
@@ -303,7 +303,7 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_PlayerHandHistory.SetChips(const AValue: UINT32);
+procedure TPB_PlayerHandHistory.SetChips(const AValue: UInt32);
 begin
   Assert(not has_Chips);
   FChips := AValue;

@@ -41,7 +41,8 @@ type
     property Users: TList<TPB_User> read FUsers;
 
   end;
-  TPB_UserChangeParamsList = class (TObjectList<TPB_UserChangeParams>)
+
+  TPB_UserChangeParamsList = class(TObjectList<TPB_UserChangeParams>)
     procedure Assign(const APB_UserChangeParamsList: TList<TPB_UserChangeParams>);
   end;
 
@@ -50,18 +51,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_UserChangeParams.InitObjects;
-begin
-  inherited;
-  FUsers := TObjectList<TPB_User>.Create;
-end;
-
-procedure TPB_UserChangeParams.HookNotifiers;
-begin
-  inherited;
-  FUsers.OnNotify := UsersNotifyEvent;
-end;
 
 constructor TPB_UserChangeParams.Create(const AFrom: TPB_UserChangeParams; const ALightweight: Boolean = FALSE);
 begin
@@ -79,6 +68,17 @@ begin
   inherited;
 end;
 
+procedure TPB_UserChangeParams.InitObjects;
+begin
+  inherited;
+  FUsers := TObjectList<TPB_User>.Create;
+end;
+
+procedure TPB_UserChangeParams.HookNotifiers;
+begin
+  inherited;
+  FUsers.OnNotify := UsersNotifyEvent;
+end;
 procedure TPB_UserChangeParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

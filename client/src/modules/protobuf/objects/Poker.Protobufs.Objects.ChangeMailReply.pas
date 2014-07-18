@@ -38,7 +38,8 @@ type
     property Status: TChangeMailStatus read FStatus write SetStatus;
 
   end;
-  TPB_ChangeMailReplyList = class (TObjectList<TPB_ChangeMailReply>)
+
+  TPB_ChangeMailReplyList = class(TObjectList<TPB_ChangeMailReply>)
     procedure Assign(const APB_ChangeMailReplyList: TList<TPB_ChangeMailReply>);
   end;
 
@@ -46,7 +47,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ChangeMailReply.Create(const AFrom: TPB_ChangeMailReply; const ALightweight: Boolean = FALSE);

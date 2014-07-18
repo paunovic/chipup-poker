@@ -66,7 +66,8 @@ type
     property Timestamp: Int64 read FTimestamp write SetTimestamp;
 
   end;
-  TPB_ChatMessageList = class (TObjectList<TPB_ChatMessage>)
+
+  TPB_ChatMessageList = class(TObjectList<TPB_ChatMessage>)
     procedure Assign(const APB_ChatMessageList: TList<TPB_ChatMessage>);
   end;
 
@@ -74,7 +75,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_ChatMessage.Create(const AFrom: TPB_ChatMessage; const ALightweight: Boolean = FALSE);

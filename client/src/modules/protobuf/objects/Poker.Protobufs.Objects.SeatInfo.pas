@@ -28,11 +28,11 @@ type
     var
       FSeat: Integer;
       FPlayerMongoId: TBytes;
-      FChips: UINT32;
+      FChips: UInt32;
       FCardCount: Integer;
       FCards: TBytes;
       FStatus: TPlayerStatus;
-      FTimebank: UINT32;
+      FTimebank: UInt32;
       FCardsVisible: Boolean;
       FDisconnected: Boolean;
       FCanShow: Boolean;
@@ -46,7 +46,7 @@ type
     procedure SetPlayerMongoId(const AValue: TBytes);
     procedure set_has_Chips;
     procedure clear_has_Chips;
-    procedure SetChips(const AValue: UINT32);
+    procedure SetChips(const AValue: UInt32);
     procedure set_has_CardCount;
     procedure clear_has_CardCount;
     procedure SetCardCount(const AValue: Integer);
@@ -58,7 +58,7 @@ type
     procedure SetStatus(const AValue: TPlayerStatus);
     procedure set_has_Timebank;
     procedure clear_has_Timebank;
-    procedure SetTimebank(const AValue: UINT32);
+    procedure SetTimebank(const AValue: UInt32);
     procedure set_has_CardsVisible;
     procedure clear_has_CardsVisible;
     procedure SetCardsVisible(const AValue: Boolean);
@@ -90,7 +90,7 @@ type
     // required uint32 Chips = 3;
     function has_Chips: Boolean;
     procedure clear_Chips;
-    property Chips: UINT32 read FChips write SetChips;
+    property Chips: UInt32 read FChips write SetChips;
 
     // optional int32 CardCount = 4;
     function has_CardCount: Boolean;
@@ -110,7 +110,7 @@ type
     // required uint32 Timebank = 7;
     function has_Timebank: Boolean;
     procedure clear_Timebank;
-    property Timebank: UINT32 read FTimebank write SetTimebank;
+    property Timebank: UInt32 read FTimebank write SetTimebank;
 
     // required bool CardsVisible = 8;
     function has_CardsVisible: Boolean;
@@ -128,7 +128,8 @@ type
     property CanShow: Boolean read FCanShow write SetCanShow;
 
   end;
-  TPB_SeatInfoList = class (TObjectList<TPB_SeatInfo>)
+
+  TPB_SeatInfoList = class(TObjectList<TPB_SeatInfo>)
     procedure Assign(const APB_SeatInfoList: TList<TPB_SeatInfo>);
   end;
 
@@ -136,7 +137,6 @@ implementation
 
 uses
   pbPublic, Poker.Common.Misc;
-
 
 
 constructor TPB_SeatInfo.Create(const AFrom: TPB_SeatInfo; const ALightweight: Boolean = FALSE);
@@ -325,7 +325,7 @@ begin
   _has_bits_ := _has_bits_ and not 4;
 end;
 
-procedure TPB_SeatInfo.SetChips(const AValue: UINT32);
+procedure TPB_SeatInfo.SetChips(const AValue: UInt32);
 begin
   Assert(not has_Chips);
   FChips := AValue;
@@ -445,7 +445,7 @@ begin
   _has_bits_ := _has_bits_ and not 64;
 end;
 
-procedure TPB_SeatInfo.SetTimebank(const AValue: UINT32);
+procedure TPB_SeatInfo.SetTimebank(const AValue: UInt32);
 begin
   Assert(not has_Timebank);
   FTimebank := AValue;

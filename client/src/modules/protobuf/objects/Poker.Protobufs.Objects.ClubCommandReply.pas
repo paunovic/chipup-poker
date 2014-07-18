@@ -63,7 +63,8 @@ type
     property Games: TList<TPB_Game> read FGames;
 
   end;
-  TPB_ClubCommandReplyList = class (TObjectList<TPB_ClubCommandReply>)
+
+  TPB_ClubCommandReplyList = class(TObjectList<TPB_ClubCommandReply>)
     procedure Assign(const APB_ClubCommandReplyList: TList<TPB_ClubCommandReply>);
   end;
 
@@ -72,18 +73,6 @@ implementation
 uses
   pbPublic, Poker.Common.Misc;
 
-
-procedure TPB_ClubCommandReply.InitObjects;
-begin
-  inherited;
-  FGames := TObjectList<TPB_Game>.Create;
-end;
-
-procedure TPB_ClubCommandReply.HookNotifiers;
-begin
-  inherited;
-  FGames.OnNotify := GamesNotifyEvent;
-end;
 
 constructor TPB_ClubCommandReply.Create(const AFrom: TPB_ClubCommandReply; const ALightweight: Boolean = FALSE);
 begin
@@ -102,6 +91,17 @@ begin
   inherited;
 end;
 
+procedure TPB_ClubCommandReply.InitObjects;
+begin
+  inherited;
+  FGames := TObjectList<TPB_Game>.Create;
+end;
+
+procedure TPB_ClubCommandReply.HookNotifiers;
+begin
+  inherited;
+  FGames.OnNotify := GamesNotifyEvent;
+end;
 procedure TPB_ClubCommandReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
