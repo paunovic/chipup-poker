@@ -6,10 +6,10 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ExtCtrls, Vcl.ActnList, Vcl.Menus, cxCustomData, cxEdit, cxGridCustomTableView, cxGridTableView, cxGridLevel, cxGrid, cxLabel,
   cxButtons, OverbyteIcsWSocket, Poker.Clubs.Club, Poker.Forms.Login, Poker.Games.Game, cxImage, Vcl.ActnMan,
-  Poker.Protobufs.Objects.Club, ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer,
-  dxSkinsCore, dxSkinscxPCPainter, cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit,
-  Vcl.PlatformDefaultStyleActnCtrls, Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus,
-  Vcl.ActnColorMaps, Vcl.StdStyleActnCtrls, Vcl.AppEvnts, Poker.Protobufs.Objects.Game, System.Generics.Collections;
+  ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter,
+  cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls,
+  Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts,
+  System.Generics.Collections, Vcl.StdStyleActnCtrls;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -155,7 +155,6 @@ type
 
     function ConfirmToCloseTablesAppClose: Boolean;
     function ConfirmToCloseTablesLogout: Boolean;
-    function ProcessClubObject(const AClub: TPB_Club; const AGames: TList<TPB_Game>; const AMethodId: Integer): TClubInfo;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
     procedure ConfigureGUI;
@@ -191,7 +190,8 @@ uses
   Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions;
+  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club,
+  Poker.Protobufs.Objects.Game;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -872,81 +872,6 @@ begin
     ShowTournamentLayout(TRUE);
 end;
 
-function TfrmChipUpMain.ProcessClubObject(const AClub: TPB_Club; const AGames: TList<TPB_Game>; const AMethodId: Integer): TClubInfo;
-var
-  club: TClubInfo;
-  player: TPlayerInfo;
-  query_users: TArray<TBytes>;
-  empty_array: TBytes;
-  member: TClubMemberInfo;
-  memberpb: TPB_ClubMember;
-begin
-  if AMethodId <> Integer(srClubDisbandOk) then
-  begin
-    dmMain.SelfInfo.Clubs.AddClub(AClub);
-    if dmMain.SelfInfo.Clubs.GetAndLock(AClub.MongoId, club) then
-    try
-      SetLength(query_users, 0);
-      SetLength(empty_array, 0);
-
-      if not Players.TryGetValue(AClub.Owner, player) then
-      begin
-        SetLength(query_users, 1);
-        query_users[0] := AClub.Owner;
-        Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_array);
-      end;
-
-      for memberpb in AClub.Members do
-        if (not Players.TryGetValue(memberpb.MongoId, player)) or
-           (player.Nick = '') or
-           (Length(player.AvatarId) = 0) then
-        begin
-          SetLength(query_users, Length(query_users) + 1);
-          query_users[Length(query_users) - 1] := memberpb.MongoId;
-          Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_array);
-        end;
-
-      if Length(query_users) > 0 then
-        ServerSocket.GetUserInfos(query_users);
-
-      if (AMethodId in [Integer(srJoinClubReply), Integer(srChangeClubDetailsReply)]) and
-         (Assigned(club)) then
-        club.Games.Assign(AGames);
-
-      // we got kicked.. or club got deleted
-      if (not club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
-         (club.IsPrivate) then
-      begin
-        Tables.CloseTablesForClub(club.MongoId);
-        dmMain.SelfInfo.Clubs.Remove(club.MongoId);
-        club := nil;
-      end;
-    finally
-      dmMain.SelfInfo.Clubs.Unlock;
-    end;
-  end
-  else
-  begin
-    Tables.CloseTablesForClub(AClub.MongoId);
-    dmMain.SelfInfo.Clubs.Lock;
-    try
-      dmMain.SelfInfo.Clubs.Remove(AClub.MongoId);
-    finally
-      dmMain.SelfInfo.Clubs.Unlock;
-    end;
-    club := nil;
-  end;
-
-  Tables.Lock;
-  try
-    Tables.UpdateClubObject(AClub.MongoId);
-  finally
-    Tables.Unlock;
-  end;
-
-  result := club;
-end;
-
 procedure TfrmChipUpMain.CSRLeaveClub(const AMethodId: Integer; const AObject: TObject);
 var
   pbreply: TPB_ClubCommandReply;
@@ -955,7 +880,7 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
-      ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
+      dmMain.ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
       ConfigureGUI;
     end;
   end;
@@ -969,7 +894,7 @@ begin
 
   case pbreply.Status of
     csSuccess: begin
-      ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
+      dmMain.ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
       ConfigureGUI;
     end;
   end;
@@ -980,7 +905,7 @@ var
   pbclub: TPB_Club;
 begin
   pbclub := AObject as TPB_Club;
-  ProcessClubObject(pbclub, nil, AMethodId);
+  dmMain.ProcessClubObject(pbclub, nil, AMethodId);
   ConfigureGUI;
 end;
 

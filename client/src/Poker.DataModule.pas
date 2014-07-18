@@ -8,7 +8,7 @@ uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player, Poker.Protobufs.Objects.StatusReply,
   Vcl.Forms, dxSkinsForm, Poker.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
-  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls;
+  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
 
 type
   TdmMain = class(TDataModule)
@@ -32,6 +32,7 @@ type
     procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
     procedure ProcessReconnectedTables;
     procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
+    procedure ProcessClubObject(const AClub: TPB_Club; const AGames: TList<TPB_Game>; const AMethodId: Integer);
 
     function CheckAuthed: Boolean;
     function IsLoggedIn: Boolean;
@@ -64,8 +65,9 @@ uses
   Winapi.ShlObj, Vcl.Dialogs, Poker.Settings, Poker.Tables.Resources, Poker.Common.FormsContainer, Poker.Server.Socket,
   Poker.Common.Misc, Poker.DirectX.Core, Poker.DirectX.Timer, Poker.Database.Core, Poker.Common.Encryption, Poker.Server.MessageContainer,
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
-  Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About,
-  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login;
+  Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About, Poker.Clubs.Member,
+  Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login, Poker.Protobufs.Objects.ClubMember,
+  Poker.Protobufs.Enum.ServerCodes;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -356,6 +358,79 @@ function TdmMain.IsLoggedIn: Boolean;
 begin
   result := (not FormsContainer.Contains(TfrmChipUpLogin)) and
             (dmMain.SelfInfo.Nick <> '');
+end;
+
+procedure TdmMain.ProcessClubObject(const AClub: TPB_Club; const AGames: TList<TPB_Game>; const AMethodId: Integer);
+var
+  club: TClubInfo;
+  player: TPlayerInfo;
+  query_users: TArray<TBytes>;
+  empty_array: TBytes;
+  member: TClubMemberInfo;
+  memberpb: TPB_ClubMember;
+begin
+  if AMethodId <> Integer(srClubDisbandOk) then
+  begin
+    dmMain.SelfInfo.Clubs.AddClub(AClub);
+    if dmMain.SelfInfo.Clubs.GetAndLock(AClub.MongoId, club) then
+    try
+      SetLength(query_users, 0);
+      SetLength(empty_array, 0);
+
+      if not Players.TryGetValue(AClub.Owner, player) then
+      begin
+        SetLength(query_users, 1);
+        query_users[0] := AClub.Owner;
+        Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_array);
+      end;
+
+      for memberpb in AClub.Members do
+        if (not Players.TryGetValue(memberpb.MongoId, player)) or
+           (player.Nick = '') or
+           (Length(player.AvatarId) = 0) then
+        begin
+          SetLength(query_users, Length(query_users) + 1);
+          query_users[Length(query_users) - 1] := memberpb.MongoId;
+          Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_array);
+        end;
+
+      if Length(query_users) > 0 then
+        ServerSocket.GetUserInfos(query_users);
+
+      if (AMethodId in [Integer(srJoinClubReply), Integer(srChangeClubDetailsReply)]) and
+         (Assigned(club)) then
+        club.Games.Assign(AGames);
+
+      // we got kicked.. or club got deleted
+      if (not club.GetMemberInfo(dmMain.SelfInfo.MongoId, member)) and
+         (club.IsPrivate) then
+      begin
+        Tables.CloseTablesForClub(club.MongoId);
+        dmMain.SelfInfo.Clubs.Remove(club.MongoId);
+        club := nil;
+      end;
+    finally
+      dmMain.SelfInfo.Clubs.Unlock;
+    end;
+  end
+  else
+  begin
+    Tables.CloseTablesForClub(AClub.MongoId);
+    dmMain.SelfInfo.Clubs.Lock;
+    try
+      dmMain.SelfInfo.Clubs.Remove(AClub.MongoId);
+    finally
+      dmMain.SelfInfo.Clubs.Unlock;
+    end;
+    club := nil;
+  end;
+
+  Tables.Lock;
+  try
+    Tables.UpdateClubObject(AClub.MongoId);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 end.
