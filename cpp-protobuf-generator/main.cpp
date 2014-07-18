@@ -80,7 +80,7 @@ public:
 			typeName = "bytes";
 			break;
 		case FieldDescriptor::TYPE_UINT32:
-			baseDelphiName = delphiName = "UINT32";
+			baseDelphiName = delphiName = "UInt32";
 			writer = "writeUInt32";
 			reader = "readUInt32";
 			wiretype = "WIRETYPE_VARINT";

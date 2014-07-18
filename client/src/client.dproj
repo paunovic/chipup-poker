@@ -135,6 +135,8 @@
 			<RcCompile Include="resources\Poker.Resources.Sounds.rc">
 				<Form>Poker.Resources.Sounds.res</Form>
 			</RcCompile>
+			<DCCReference Include="3rdparty\FastMM\FastMM4.pas"/>
+			<DCCReference Include="3rdparty\FastMM\FastMM4Messages.pas"/>
 			<DCCReference Include="3rdparty\protobufs\pbInput.pas"/>
 			<DCCReference Include="3rdparty\protobufs\pbOutput.pas"/>
 			<DCCReference Include="3rdparty\protobufs\pbPublic.pas"/>

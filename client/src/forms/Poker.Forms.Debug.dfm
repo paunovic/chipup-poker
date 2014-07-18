@@ -19,6 +19,21 @@ object frmDebug: TfrmDebug
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 14
+  object rvMemoryState: TRichView
+    Left = 0
+    Top = 19
+    Width = 621
+    Height = 290
+    Align = alClient
+    TabOrder = 4
+    Visible = False
+    BorderStyle = bsNone
+    DoInPaletteMode = rvpaCreateCopies
+    Style = RVStyles
+    OnRVMouseUp = rvLogRVMouseUp
+    ExplicitTop = 4
+    ExplicitHeight = 71
+  end
   object meSeatPos: TcxMemo
     Left = 0
     Top = 19
@@ -198,6 +213,8 @@ object frmDebug: TfrmDebug
       AutoSize = False
       Caption = 'Unknown'
       ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
       Style.Font.Charset = DEFAULT_CHARSET
       Style.Font.Color = clWindowText
       Style.Font.Height = -11
@@ -261,8 +278,8 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object btSeatPos: TcxButton
-      Left = 38
-      Top = 38
+      Left = 586
+      Top = 6
       Width = 30
       Height = 29
       Hint = 'Seat positions'
@@ -454,8 +471,8 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object btRunAnotherInstance: TcxButton
-      Left = 38
-      Top = 6
+      Left = 5
+      Top = 37
       Width = 30
       Height = 29
       Action = acRunNewInstance
@@ -511,8 +528,8 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object btServerTest: TcxButton
-      Left = 5
-      Top = 38
+      Left = 37
+      Top = 37
       Width = 30
       Height = 29
       Action = acServerCrashTest
@@ -756,6 +773,66 @@ object frmDebug: TfrmDebug
       Transparent = True
       Height = 17
       Width = 52
+    end
+    object btMemoryState: TcxButton
+      Left = 37
+      Top = 6
+      Width = 30
+      Height = 29
+      Hint = 'Memory state'
+      Action = acServerCrashTest
+      Anchors = [akLeft, akBottom]
+      Colors.PressedText = clRed
+      OptionsImage.Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000002B2B2B36676767810808080A6262627B44444455141414197272
+        728E000000005252526640404050000000000000000000000000000000000000
+        00000000000034343441808080A012121217747474915858586E1F1F1F278686
+        86A80D0D0D10666666804C4C4C5F000000000000000000000000000000000000
+        00002323232C868686A79D9D9DC4868686A7969696BC929292B7898989AB9999
+        99BF878787A9999999BF8A8A8AAD2222222B0000000000000000000000002424
+        242D7E7E7E9DCCCCCCFFCBCBCBFECCCCCCFFC9C9C9FBCBCBCBFECBCBCBFEC9C9
+        C9FBCCCCCCFFCACACAFDCCCCCCFF7F7F7F9F2626262F00000000000000004D4D
+        4D60949494B9CCCCCCFFC1C1C1F1C1C1C1F1C2C2C2F2C1C1C1F1C1C1C1F1C2C2
+        C2F2C1C1C1F1C1C1C1F1CCCCCCFF999999BF4E4E4E6100000000000000004646
+        46578E8E8EB1CCCCCCFFC1C1C1F1C2C2C2F2C2C2C2F2C2C2C2F2C2C2C2F2C2C2
+        C2F2C2C2C2F2C1C1C1F1CCCCCCFF939393B84646465700000000000000004040
+        40508C8C8CAFCCCCCCFFC1C1C1F1C2C2C2F2C2C2C2F2C2C2C2F2C2C2C2F2C2C2
+        C2F2C2C2C2F2C1C1C1F1CCCCCCFF939393B84040405000000000000000004E4E
+        4E62949494B9CCCCCCFFC1C1C1F1C1C1C1F1C2C2C2F2C1C1C1F1C1C1C1F1C2C2
+        C2F2C1C1C1F1C1C1C1F1CCCCCCFF9A9A9AC15050506400000000000000002323
+        232C7E7E7E9DCCCCCCFFCBCBCBFECCCCCCFFC9C9C9FBCBCBCBFECBCBCBFEC8C8
+        C8FACCCCCCFFCACACAFDCCCCCCFF7D7D7D9C2323232C00000000000000000000
+        00002222222B848484A59B9B9BC2848484A5959595BA919191B5878787A99898
+        98BE868686A7969696BB878787A9212121290000000000000000000000000000
+        00000000000033333340808080A012121216737373905656566C1E1E1E268686
+        86A80C0C0C0F6565657E4A4A4A5C000000000000000000000000000000000000
+        0000000000002C2C2C37686868820808080A6363637C44444455141414197171
+        718D000000005151516540404050000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000}
+      ParentShowHint = False
+      ShowHint = True
+      SpeedButtonOptions.GroupIndex = 2
+      SpeedButtonOptions.CanBeFocused = False
+      SpeedButtonOptions.AllowAllUp = True
+      SpeedButtonOptions.Flat = True
+      SpeedButtonOptions.Transparent = True
+      TabOrder = 24
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+      OnClick = btMemoryStateClick
     end
   end
   object paTop: TPanel
@@ -1087,6 +1164,13 @@ object frmDebug: TfrmDebug
         Size = 8
         Style = [fsBold]
         Color = 13750737
+        Unicode = True
+      end
+      item
+        StyleName = 'MemoryState'
+        FontName = 'Consolas'
+        Size = 8
+        Color = clWhite
         Unicode = True
       end>
     ParaStyles = <
