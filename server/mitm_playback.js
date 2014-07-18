@@ -37,7 +37,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
 			var mitm = db.collection('mitm');
 			mitm.distinct('socketId', function(err, socketIds) {
 				if (err) throw err;
-				mitm.find({}).sort({ timestamp : 1 }).toArray(function (err, requests) {
+				mitm.find({method:{$nin:MitmPlayback.prototype.IGNORE_METHODS}}).sort({ timestamp : 1 }).toArray(function (err, requests) {
 					if (err) throw err;
 					var config = {
 						requests: requests,
