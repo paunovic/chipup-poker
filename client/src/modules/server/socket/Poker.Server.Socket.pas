@@ -3,7 +3,7 @@ unit Poker.Server.Socket;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core,
+  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core, Poker.Protobufs.Objects.User,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Enum.ServerCodes,
   Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.UpdateFileInfo;
 
@@ -52,6 +52,7 @@ type
     procedure SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
     procedure ResetPlayerBalance(const AClubId, AMemberId: TBytes);
     procedure QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
+    procedure SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
 
     {$IFDEF DEBUG}
     procedure CrashTest;
@@ -74,9 +75,9 @@ uses
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.ChangeSuspendState,
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag, Poker.Protobufs.Objects.PutChips,
-  Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.QueryTableStats,
-  Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.BuyinError,
-  Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams;
+  Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
+  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams,
+  Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -610,6 +611,20 @@ begin
     protobuf.Free;
   end;
 end;
+
+procedure TServerSocket.SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
+var
+  protobuf: TPB_SubscriptionPlanChange;
+begin
+  protobuf := TPB_SubscriptionPlanChange.Create;
+  try
+    protobuf.SubscriptionPlan := ASubscriptionPlan;
+    SendProtobuf(scSubscriptionPlanChange, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
 
 {$IFDEF DEBUG}
 procedure TServerSocket.CrashTest;

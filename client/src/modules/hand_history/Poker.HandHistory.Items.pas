@@ -72,25 +72,23 @@ type
     FTotalRake: UINT32;
     FPlayers: TPlayerHandHistories;
     FCards: TBytes;
-    FTableCardsStr: String;
     FStartTime: TDateTime;
     FStartTimeStr: String;
     FEndTime: TDateTime;
     FBalanceChanges: TList<Integer>;
     FMoves: TPB_HandHistoryMoveList;
-    FLines: TStringList;
+//    FLines: TStringList;
     FRVLines: TStringList;
     FDealerIndex: Integer;
     FCurrentGame: TGameType;
 
     procedure MakeText(const ALines: TStrings; const ATags: TRichViewTags);
-    procedure MakeLines;
-
   public
     constructor Create(const AParent: THandHistoryItems; const AHandHistory: TPB_HandHistory);
     destructor Destroy; override;
 
     procedure Assign(const AHandHistory: TPB_HandHistory);
+    procedure MakeLines;
 
     property ParentItems: THandHistoryItems read FParentItems;
     property MongoId: TBytes read FMongoId;
@@ -99,7 +97,6 @@ type
     property TotalRake: UINT32 read FTotalRake;
     property Players: TPlayerHandHistories read FPlayers;
     property Cards: TBytes read FCards;
-    property TableCardsStr: String read FTableCardsStr;
     property StartTime: TDateTime read FStartTime;
     property StartTimeStr: String read FStartTimeStr;
     property EndTime: TDateTime read FEndTime;
@@ -108,7 +105,6 @@ type
     property DealerIndex: Integer read FDealerIndex;
     property CurrentGame: TGameType read FCurrentGame;
 
-    property Lines: TStringList read FLines;
     property RVLines: TStringList read FRVLines;
   end;
 
@@ -138,7 +134,7 @@ implementation
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Cards, Poker.Common.Misc,
   Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove;
+  Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove, Poker.Types;
 
 { THandHistoryItem }
 
@@ -148,7 +144,7 @@ begin
   FParentItems := AParent;
   FPlayers := TPlayerHandHistories.Create;
   FMoves := TPB_HandHistoryMoveList.Create;
-  FLines := TStringList.Create;
+//  FLines := TStringList.Create;
   FRVLines := TStringList.Create;
   Assign(AHandHistory);
 end;
@@ -156,7 +152,7 @@ end;
 destructor THandHistoryItem.Destroy;
 begin
   FBalanceChanges.Free;
-  FLines.Free;
+//  FLines.Free;
   FRVLines.Free;
   FMoves.Free;
   FPlayers.Free;
@@ -170,7 +166,6 @@ begin
   FRake := AHandHistory.Rake;
   FTotalRake := AHandHistory.Totalrake;
   FCards := Copy(AHandHistory.Cards, 0, Length(AHandHistory.Cards));
-  FTableCardsStr := TCards.BytesToString(FCards);
   FEndTime := TTimeZone.Local.ToLocalTime(UnixToDateTime(AHandHistory.Endtime));
   FBalanceChanges.Clear;
   FBalanceChanges.AddRange(AHandHistory.BalanceChanges);
@@ -180,12 +175,11 @@ begin
   FStartTimeStr := FormatDateTime('yyyy/mm/dd hh:nn:ss', FStartTime);
   FPlayers.Assign(AHandHistory.Players);
   FMoves.Assign(AHandHistory.Moves);
-  MakeLines;
 end;
 
 procedure THandHistoryItem.MakeLines;
 begin
-  MakeText(FLines, PLAIN_TAGS);
+//  MakeText(FLines, PLAIN_TAGS);
   MakeText(FRVLines, RV_TAGS);
 end;
 
@@ -354,7 +348,7 @@ begin
         else
           if player.Status in [psInHand, psFolded, psAllIn] then
           begin
-            hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), FTableCardsStr, FCurrentGame, FALSE);
+            hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
             ALines.Add(Format('%s%s%s shows [%s%s%s] (%s%s%s)', [
                 ATags.PlayerNick, player.Nick, ATags.NormalText, ATags.Cards, TCards.BytesToString(player.Cards, ' '),
                 ATags.NormalText, ATags.HandStrength, hand_strength, ATags.NormalText
@@ -398,7 +392,7 @@ begin
         hand_strength := '';
         if Length(player.Cards) > 0 then
         begin
-          hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), FTableCardsStr, FCurrentGame, FALSE);
+          hand_strength := THandStrengthCalculator.GetHandStrength(TCards.BytesToString(player.Cards), TCards.BytesToString(FCards), FCurrentGame, FALSE);
           player_line := player_line + Format('[%s%s%s] ', [ATags.Cards, TCards.BytesToString(player.Cards, ' '), ATags.NormalText]);
         end;
 

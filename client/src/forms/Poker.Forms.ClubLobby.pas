@@ -200,7 +200,7 @@ uses
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member,
-  Poker.Players.Player, Poker.Tables.Stats, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats;
+  Poker.Players.Player, Poker.Tables.Stats, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Types;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);

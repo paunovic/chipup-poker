@@ -335,7 +335,7 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 				});
 			}
 			var seatIdx = game.findSeat(this);
-			if (seatIdx === undefined) {
+			if (seatIdx === -1) {
 				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
 				release();
 				return;

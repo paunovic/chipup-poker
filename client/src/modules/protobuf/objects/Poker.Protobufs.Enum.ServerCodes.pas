@@ -106,7 +106,7 @@ uses System.SysUtils;
 
 function TranslateServerCode(const ACode: Integer): String;
 var
-  sc      : TServerCodes;
+  sc: TServerCodes;
   sc_valid: Boolean;
 begin
   sc_valid := FALSE;
@@ -118,9 +118,7 @@ begin
     end;
 
   if not sc_valid then
-  begin
-    result := Format('UNKNOWN CODE [%d]', [ACode]);
-  end;
+    Exit(Format('UNKNOWN CODE [%d]', [ACode]));
 
   case TServerCodes(ACode) of
     srNotImplemented: result := 'srNotImplemented';

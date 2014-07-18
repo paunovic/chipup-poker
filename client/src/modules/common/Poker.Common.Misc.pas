@@ -28,10 +28,8 @@ function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer 
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
 function PtInCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
-function ReverseDWORD(dw: Cardinal): Cardinal;
 function SecondsToTimeStr(ASeconds: DWORD): String;
 function SecondsToTime(ASeconds: DWORD): TTime;
-function MongoIdToDateTime(const AMongoId: TBytes): TDateTime;
 procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
 function ChipsToStr(const AValue: UINT32): String;
 procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);
@@ -44,13 +42,12 @@ function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 function TempPath: String;
 function IsValidRegex(const ARegex: String): Boolean;
 
-
 implementation
 
 uses
   {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams,
-  System.Generics.Collections, System.RegularExpressionsAPI;
+  System.Generics.Collections, System.RegularExpressionsAPI, Poker.Types;
 
 
 {$IFDEF DEBUG}
@@ -580,11 +577,6 @@ begin
   result := (AX - ACircleX) * (AX - ACircleX) + (AY - ACircleY) * (AY - ACircleY) <= ARadius * ARadius;
 end;
 
-function ReverseDWORD(dw: Cardinal): Cardinal;
-asm
-  bswap eax
-end;
-
 function SecondsToTimeStr(ASeconds: DWORD): String;
 var
   s, m, h: DWORD;
@@ -599,16 +591,6 @@ begin
     result := Format('%.2dm %.2ds', [m, s])
   else
     result := Format('%.2dh %.2dm %.2ds', [h, m, s]);
-end;
-
-function MongoIdToDateTime(const AMongoId: TBytes): TDateTime;
-var
-  unix_timestamp: UINT;
-begin
-  if Length(AMongoId) < 4 then
-    Exit(0);
-  unix_timestamp := ReverseDWORD(PUINT(@AMongoId[0])^);
- result := (unix_timestamp / 86400) + 25569;
 end;
 
 function SecondsToTime(ASeconds: DWORD): TTime;

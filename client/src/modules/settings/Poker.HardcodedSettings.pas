@@ -75,7 +75,7 @@ type
         TCP_INACTIVITY_PING_INTERVAL: 5; // send ping after this much seconds of inactivity (no command received or sent)
         TCP_PING_TIMEOUT: 15; // in seconds
 
-        HAND_HISTORY_HAND_LIMIT_PER_TABLE: 1000; // amount of hands to store per table
+        HAND_HISTORY_HAND_LIMIT_PER_TABLE: 500; // amount of hands to store per table
         DIRECTX_SWAPCHAIN_COUNT: 64; // directx swapchain count
         TABLE_CHAT_SCROLLBACK_LINES: 200; // amount of chat lines to store per table
 

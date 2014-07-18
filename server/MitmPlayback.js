@@ -1,8 +1,10 @@
 "use strict";
 var util = require("util");
-var directions = require('./directions');
 var diff = require('deep-diff');
 var net = require('net');
+var assert = require('assert');
+
+var directions = require('./directions');
 
 module.exports = MitmPlayback;
 
@@ -54,19 +56,26 @@ MitmPlayback.prototype._checkIfAllSocketsAreConnected = function() {
 
 
 MitmPlayback.prototype._sendRequests = function() {
+	console.log('_sendRequests currentRequestNumber=%d',this.currentRequestNumber);
 	var request = this.requests[this.currentRequestNumber];
 
 	while (request.direction === directions.C2S) {
 		var methodId = this.serverCodes[request.method];
 		var encodedMessage = this.protobufUtil.encode(methodId, request.args.buffer, request.type);
 		this._writeMessageAndTestIfItsOk(encodedMessage, request.socketId);
-		console.log("Sent request #%d, %s on socket id %d, %s", this.currentRequestNumber, request.method, request.socketId, this._debugFormat(methodId,request.args.buffer));
+		console.log(
+		  "Sent request #%d, %s on socket id %d, %s", 
+		  this.currentRequestNumber, 
+		  request.method, 
+		  request.socketId, 
+		  this._parseLoginParams(methodId,request.args.buffer)
+		 );
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
 
-MitmPlayback.prototype._debugFormat = function (methodId,args) {
-	return (methodId == this.serverCodes.scLogin) ? JSON.stringify(this.protobuf.Parse(args, 'Poker.LoginParams') : '';
+MitmPlayback.prototype._parseLoginParams = function (methodId, args) {
+	return methodId === this.serverCodes.scLogin ? JSON.stringify(this.protobuf.Parse(args, 'Poker.LoginParams')) : '';
 }
 
 
@@ -104,15 +113,26 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 		if (err) throw err;
 
 		var methodName = this._getMethodName(methodId);
+		if (this._methodShouldBeIgnored(methodName)) {
+			console.log('ignoring incoming %s',methodName);
+			return;
+		}
 		var requestInfo = "request #" + this.currentRequestNumber + " socket id " + socketId 
 			+ ", " + methodName;
+
+
+		console.log('_checkIfRequestMatch called! ' + requestInfo);
+
 		
 		if (this._methodShouldBeIgnored(methodName)) {
 			this._continueToNextRequests();
 			return;
 		} 
 
+		assert.equal(this.requests[this.currentRequestNumber].socketId,socketId); // ensure that you only match against packets on the same socket
 		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber);
+
+		console.log('response code %d',response.code);
 
 		if (response.code === this.REQUESTS_MATCH) {
 			console.log("MATCH, " + requestInfo);
@@ -127,10 +147,11 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 		else if (response.code === this.METHODS_DO_NOT_MATCH) {
 			// test if next requests match?
 			for (var i = this.currentRequestNumber + 1; i < this.requests.length; i++) {
-				if (this.requests.socketId !== socketId)
+				if (this.requests[i].socketId !== socketId)
 					continue;
 				
 				response = this._checkIfSingleRequestMatch(methodId, args, type, i);
+				console.log('response code %d again',response.code);
 				
 				if (response.code === this.REQUESTS_MATCH) {
 					console.log("MATCH, " + requestInfo);
@@ -141,6 +162,8 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 					|| response.code === this.ARGS_DO_NOT_MATCH
 					|| response.code === this.TYPE_DOES_NOT_MATCH) {
 					throw new Error("NO MATCH, " + requestInfo);
+				} else {
+					console.log('should this even happen?');
 				}
 			}
 		}
@@ -160,7 +183,7 @@ MitmPlayback.prototype._isServerToClientDirection = function (direction) {
 	return direction === directions.S2C;
 };
 
-MitmPlayback.prototype.WRONG_DIRECTION = 1;
+MitmPlayback.prototype.WRONG_DIRECTION = 1; // these should go directly on MitmPlayback, not the prototype
 MitmPlayback.prototype.METHODS_DO_NOT_MATCH = 2;
 MitmPlayback.prototype.ARGS_DO_NOT_MATCH = 3;
 MitmPlayback.prototype.TYPE_DOES_NOT_MATCH = 4;
@@ -195,9 +218,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 		var difference = diff(argsParsed.fromDb,argsParsed.fromServer);
 		
 		if (difference) {
-			var message =  "Args do not match! " + requestInfo 
-				+ "\nleft=db right=server\nserver: " + argsParsed.fromServer + "\ndb: "
-				+ argsParsed.fromDb + "\ndiff: " + difference;
+			var message =  util.format("Args do not match! %s\nleft=db right=server\nserver: %j\ndb: %j\ndiff: %j",requestInfo,argsParsed.fromServer,argsParsed.fromDb,difference);
 
 			return {
 				code: this.ARGS_DO_NOT_MATCH,

@@ -38,8 +38,7 @@ MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 			args: args,
 			type: type,
 			socketId: socketId,
-			direction: direction,
-			timestamp: Date.now()
+			direction: direction
 		}, function (err, inserted) {
 			if (err) console.warn(err.message);
 		});
