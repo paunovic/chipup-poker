@@ -2,7 +2,6 @@
 var util = require("util");
 var diff = require('deep-diff');
 var net = require('net');
-var assert = require('assert');
 
 var directions = require('./directions');
 
@@ -113,24 +112,22 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 		if (err) throw err;
 
 		var methodName = this._getMethodName(methodId);
-		if (this._methodShouldBeIgnored(methodName)) {
-			console.log('ignoring incoming %s',methodName);
-			return;
-		}
 		var requestInfo = "request #" + this.currentRequestNumber + " socket id " + socketId 
 			+ ", " + methodName;
 
+		if (this._methodShouldBeIgnored(methodName)) {
+			console.log('ignoring ', requestInfo);
+			this._continueToNextRequests();
+			return;
+		}
+		
+		if (this.currentRequestNumber === 13) {
+			debugger;
+		}
 
 		console.log('_checkIfRequestMatch called! ' + requestInfo);
 
-		
-		if (this._methodShouldBeIgnored(methodName)) {
-			this._continueToNextRequests();
-			return;
-		} 
-
-		assert.equal(this.requests[this.currentRequestNumber].socketId,socketId); // ensure that you only match against packets on the same socket
-		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber);
+		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber, socketId);
 
 		console.log('response code %d',response.code);
 
@@ -144,13 +141,14 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 		    || response.code === this.TYPE_DOES_NOT_MATCH) {
 			throw new Error(response.explanation);
 		}
-		else if (response.code === this.METHODS_DO_NOT_MATCH) {
+		else if (response.code === this.METHODS_DO_NOT_MATCH
+			|| response.code === this.SOCKETS_DONT_MATCH) {
 			// test if next requests match?
 			for (var i = this.currentRequestNumber + 1; i < this.requests.length; i++) {
 				if (this.requests[i].socketId !== socketId)
 					continue;
 				
-				response = this._checkIfSingleRequestMatch(methodId, args, type, i);
+				response = this._checkIfSingleRequestMatch(methodId, args, type, i, socketId);
 				console.log('response code %d again',response.code);
 				
 				if (response.code === this.REQUESTS_MATCH) {
@@ -158,14 +156,13 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 					this._continueToNextRequests();
 					return;
 				}
-				else if (response.code === this.WRONG_DIRECTION 
-					|| response.code === this.ARGS_DO_NOT_MATCH
+				else if (response.code === this.ARGS_DO_NOT_MATCH
 					|| response.code === this.TYPE_DOES_NOT_MATCH) {
 					throw new Error("NO MATCH, " + requestInfo);
-				} else {
-					console.log('should this even happen?');
-				}
+				} 
 			}
+			
+			throw new Error("I've checked next requests and there is no match for " + requestInfo);
 		}
 		else {
 			throw new Error('Unknown response code: ' + response.code);
@@ -188,11 +185,12 @@ MitmPlayback.prototype.METHODS_DO_NOT_MATCH = 2;
 MitmPlayback.prototype.ARGS_DO_NOT_MATCH = 3;
 MitmPlayback.prototype.TYPE_DOES_NOT_MATCH = 4;
 MitmPlayback.prototype.REQUESTS_MATCH = 5;
+MitmPlayback.prototype.SOCKETS_DONT_MATCH = 6;
 
-MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum) {
+MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum, socketId) {
 	var requestFromDb = this.requests[requestNum];
 	var methodName = this._getMethodName(methodId);
-	var requestInfo = "request #" + requestNum + ", method " + methodName + ' vs ' + requestFromDb.method;
+	var requestInfo = "SocketId " + socketId + " request #" + requestNum + ", method " + methodName + ' vs ' + requestFromDb.method;
 
 	if ( ! this._isServerToClientDirection(requestFromDb.direction)) {
 		return {
@@ -205,6 +203,13 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 		return {
 			code: this.METHODS_DO_NOT_MATCH,
 			explanation: 'Methods do not match! ' + requestInfo
+		};
+	}
+	
+	if (socketId !== requestFromDb.socketId) {
+		return {
+			code: this.SOCKETS_DONT_MATCH,
+			explanation: 'Sockets do not match! ' + requestInfo
 		};
 	}
 
