@@ -38,7 +38,7 @@ MitmPlayback.prototype._openNewSocket = function (socketId) {
 		socket.on('error', function (err) { throw err; });
 		socket.on('data', self.protobufUtil.createOnDataListenerFn(self._checkIfRequestMatch(socketId).bind(self)));
 		self.sockets[socketId] = socket;
-		console.log("Opened socket id " + socketId);
+		console.log("%d\tOpened socket",socketId);
 		self._checkIfAllSocketsAreConnected();
 	});
 };
@@ -56,18 +56,18 @@ MitmPlayback.prototype._checkIfAllSocketsAreConnected = function() {
 
 MitmPlayback.prototype._sendRequests = function() {
 	var request = this.requests[this.currentRequestNumber];
+	console.log('%d\t_sendRequests considering req#%d %j',request.socketId,this.currentRequestNumber,request);
 
 	while (request.direction === directions.C2S) {
 		var methodId = this.serverCodes[request.method];
 		var encodedMessage = this.protobufUtil.encode(methodId, request.args.buffer, request.type);
 		this._writeMessageAndTestIfItsOk(encodedMessage, request.socketId);
-		console.log(
-		  "Sent request #%d, %s on socket id %d, %s", 
-		  this.currentRequestNumber, 
-		  request.method, 
-		  request.socketId, 
-		  this._parseLoginParams(methodId,request.args.buffer)
-		 );
+		console.log("%d\tSent request #%d, %s, %s",
+			request.socketId,
+			this.currentRequestNumber, 
+			request.method, 
+			this._parseLoginParams(methodId,request.args.buffer)
+		);
 		request = this.requests[++this.currentRequestNumber];
 	}
 };
@@ -119,16 +119,16 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 			+ ", " + methodName;
 
 		if (this._methodShouldBeIgnored(methodName)) {
-			console.log('ignoring ', requestInfo);
+			console.log('%d\tignoring ', socketId,requestInfo);
 			return;
 		}
 
-		console.log('_checkIfRequestMatch called! ' + requestInfo);
+		console.log('%d\t_checkIfRequestMatch called! %s',socketId,requestInfo);
 
 		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber, socketId);
 
 		if (response.code === this.REQUESTS_MATCH) {
-			console.log("MATCH, " + requestInfo);
+			console.log("%d\tMATCH, %s",socketId,requestInfo);
 			this._continueToNextRequests();
 			return;
 		}
@@ -144,7 +144,7 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 				if (this.requests[i].socketId !== socketId)
 					continue;
 
-				console.log("   checking if " + methodName + " can match request #" + i + " from db");
+				console.log("%d\t\tchecking if %s can match request #%d from db, %j",socketId,methodName,i,this.requests[i]);
 				
 				response = this._checkIfSingleRequestMatch(methodId, args, type, i, socketId);
 				
@@ -170,6 +170,7 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 
 MitmPlayback.prototype._continueToNextRequests = function () {
 	++this.currentRequestNumber;
+	console.log('%d\t_continueToNextRequests advanced to request %d',this.requests[this.currentRequestNumber].socketId,this.currentRequestNumber);
 	this._sendRequests();
 };
 

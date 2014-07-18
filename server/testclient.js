@@ -1,6 +1,6 @@
 'use strict';
 var fs = require("fs");
-var p = require("node-protobuf").Protobuf;
+var p = require("node-protobuf");
 var net = require('net');
 var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
