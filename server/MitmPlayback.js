@@ -129,8 +129,6 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 
 		var response = this._checkIfSingleRequestMatch(methodId, args, type, this.currentRequestNumber, socketId);
 
-		console.log('response code %d',response.code);
-
 		if (response.code === this.REQUESTS_MATCH) {
 			console.log("MATCH, " + requestInfo);
 			this._continueToNextRequests();
@@ -142,14 +140,13 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 			throw new Error(response.explanation);
 		}
 		else if (response.code === this.METHODS_DO_NOT_MATCH
-			|| response.code === this.SOCKETS_DONT_MATCH) {
-			// test if next requests match?
+			|| response.code === this.SOCKETS_DO_NOT_MATCH) {
+			// check if next requests match?
 			for (var i = this.currentRequestNumber + 1; i < this.requests.length; i++) {
 				if (this.requests[i].socketId !== socketId)
 					continue;
 				
 				response = this._checkIfSingleRequestMatch(methodId, args, type, i, socketId);
-				console.log('response code %d again',response.code);
 				
 				if (response.code === this.REQUESTS_MATCH) {
 					console.log("MATCH, " + requestInfo);
@@ -180,12 +177,12 @@ MitmPlayback.prototype._isServerToClientDirection = function (direction) {
 	return direction === directions.S2C;
 };
 
-MitmPlayback.prototype.WRONG_DIRECTION = 1; // these should go directly on MitmPlayback, not the prototype
+MitmPlayback.prototype.WRONG_DIRECTION = 1; 
 MitmPlayback.prototype.METHODS_DO_NOT_MATCH = 2;
 MitmPlayback.prototype.ARGS_DO_NOT_MATCH = 3;
 MitmPlayback.prototype.TYPE_DOES_NOT_MATCH = 4;
-MitmPlayback.prototype.REQUESTS_MATCH = 5;
-MitmPlayback.prototype.SOCKETS_DONT_MATCH = 6;
+MitmPlayback.prototype.SOCKETS_DO_NOT_MATCH = 5;
+MitmPlayback.prototype.REQUESTS_MATCH = 6;
 
 MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, type, requestNum, socketId) {
 	var requestFromDb = this.requests[requestNum];
@@ -208,7 +205,7 @@ MitmPlayback.prototype._checkIfSingleRequestMatch = function (methodId, args, ty
 	
 	if (socketId !== requestFromDb.socketId) {
 		return {
-			code: this.SOCKETS_DONT_MATCH,
+			code: this.SOCKETS_DO_NOT_MATCH,
 			explanation: 'Sockets do not match! ' + requestInfo
 		};
 	}
