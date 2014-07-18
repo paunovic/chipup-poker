@@ -116,16 +116,14 @@ Club.prototype.handOver = function (gameObj,cb,handid) {
 								savedCards[player.keyid] = new Buffer(player.cards);
 							}
 							player.origid = player._id;
-							player._id = myutils.fromMongoId(player._id);
 
 							if (!player.muck && player.cards) player.cards = new Buffer(player.cards);
 							else delete player.cards;
 							cb();
 						});
 					},function () {
-						historyRow._id = myutils.fromMongoId(historyRow._id);
 						historyRow.cards = new Buffer(historyRow.cards);
-						var obj = {clubid:myutils.fromMongoId(this.clubid), gameid:myutils.fromMongoId(gameObj.id), rows:[historyRow] };
+						var obj = {clubid:this.clubid, gameid:gameObj.id, rows:[historyRow] };
 					for (var x in gameObj.users) {
 						for (var y=0; y<obj.rows[0].players.length; y++) {
 							if (obj.rows[0].players[y]) {
@@ -174,7 +172,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 				assert(stats[i].userid);
 				var gameidhex = stats[i].gameid.toString();
 				if (!games[gameidhex]) {
-					games[gameidhex] = {gameid: myutils.fromMongoId(stats[i].gameid), playerstats:[]};
+					games[gameidhex] = {gameid: stats[i].gameid, playerstats:[]};
 					out.push(games[gameidhex]);
 				}
 				if (!containsObjectID(players,stats[i].userid)) players.push(stats[i].userid);
@@ -191,7 +189,7 @@ Club.prototype.getTableStatsPacket = function (gamelist,data,cb) {
 					}
 				}
 				stats[i].club_balance = -1;
-				stats[i].userid = myutils.fromMongoId(stats[i].userid);
+				stats[i].userid = stats[i].userid;
 				//console.log('stats i',stats[i]);
 				games[gameidhex].playerstats.push(stats[i]);
 			}
@@ -202,15 +200,15 @@ Club.finishTableStatsPacket = function (data,cb) {
 	models.UserModel.find({_id:{$in:data.players}}).lean(true).exec(function (err,playersOut) {
 		assert.ifError(err);
 		for (var i=0; i<playersOut.length; i++) {
-			playersOut[i]._id = myutils.fromMongoId(playersOut[i]._id);
+			playersOut[i]._id = playersOut[i]._id;
 		}
 		models.Game.find({_id:{$in:data.gamelist}},function (err,rawgames) {
 			for (var i=0; i<rawgames.length; i++) {
 				var gameidhex = rawgames[i]._id.toString();
 				if (data.games[gameidhex]) {
-					data.games[gameidhex].clubid = myutils.fromMongoId(rawgames[i].clubid);
+					data.games[gameidhex].clubid = rawgames[i].clubid;
 					data.games[gameidhex].hands = rawgames[i].hands;
-				} else data.out.push({ clubid:myutils.fromMongoId(rawgames[i].clubid), gameid:myutils.fromMongoId(rawgames[i]._id), hands:rawgames[i].hands });
+				} else data.out.push({ clubid:rawgames[i].clubid, gameid:rawgames[i]._id, hands:rawgames[i].hands });
 			}
 			var clubobj = {};
 			var clubarr = [];
@@ -228,11 +226,11 @@ Club.finishTableStatsPacket = function (data,cb) {
 						if (data.playerData[balances[j].userid]) inplay = data.playerData[balances[j].userid].chipsinplay;
 						var club_balance = balances[j].balance - inplay;
 						if (!clubobj[balances[j].clubid]) {
-							var obj = { clubid:myutils.fromMongoId(balances[j].clubid), player_stats:[] };
+							var obj = { clubid:balances[j].clubid, player_stats:[] };
 							clubobj[balances[j].clubid] = obj;
 							clubarr.push(obj);
 						}
-						var player_obj = { userid:myutils.fromMongoId(balances[j].userid), club_balance: club_balance };
+						var player_obj = { userid:balances[j].userid, club_balance: club_balance };
 						clubobj[balances[j].clubid].player_stats.push(player_obj);
 					//}
 				}
@@ -394,8 +392,8 @@ Club.makeClubProtobuf = function makeClubProtobuf(input,userlist,stats,self) {
 	}
 	c.members = out;
 	delete c.suspended;
-	c._id = new Buffer(input._id.toString(),'hex');
-	c.owner = new Buffer(input.owner.toString(),'hex');
+	c._id = input._id.toProtobuf();
+	c.owner = input.owner.toProtobuf();
 	return c;
 }
 Club.prototype.log = function log(format) {
@@ -850,7 +848,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			club.obj.rake = params.rake;
 			club.obj.unlimited_default_balance = params.unlimited_default_balance;
 			club.obj.save(function changeDetail_cb2(err,ret) {
-				this.log('detail update',clubseq,params,err,ret);
+				this.log('detail update',clubid,params,err,ret);
 				if (err) {
 					this.log('name collision');
 					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');

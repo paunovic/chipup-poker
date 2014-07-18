@@ -214,7 +214,7 @@ handlers[codes.scTableSitOutNextHand] = function (args,token) {
 		game.Lock.writeLock(function (release) {
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === undefined) {
-				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
+				this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
 				release();
 				return;
 			}
@@ -304,7 +304,7 @@ handlers[codes.scTableSitOutNextBB] = function (args) {
 		if (!game) return;
 		var seatIdx = game.findSeat(this);
 		if (seatIdx === undefined) {
-			this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
+			this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
 			return;
 		}
 		if (['psInHand','psAllIn','psFolded','psOutOfHand'].indexOf(game.members[seatIdx].status) == -1) {
@@ -336,7 +336,7 @@ handlers[codes.scTablePlayNow] = function (args,token) {
 			}
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === -1) {
-				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
+				this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
 				release();
 				return;
 			}
@@ -400,7 +400,7 @@ handlers[codes.scShowCards] = function (args,token) {
 			}
 			var seatIdx = game.findSeat(this);
 			if (seatIdx === undefined) {
-				this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
+				this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
 				release();
 				return;
 			}
@@ -607,7 +607,7 @@ handlers[codes.scShowCards] = function (args,token) {
 			game.Lock.writeLock(function (release) {
 				var seatIdx = game.findSeat(this);
 				if (seatIdx === -1) {
-					this.send(codes.srNotSitting,{_id:myutils.fromMongoId(game.obj._id)},'Poker.Game');
+					this.send(codes.srNotSitting,{_id:game.obj._id},'Poker.Game');
 					release();
 					return;
 				}

@@ -37,11 +37,10 @@ module.exports.initHttpServer = initHttpServer;
 
 var badConfLink = "Invalid confirmation link.";
 
-var sharedconfig,makeUserProtobuf,emailChange2;
+var sharedconfig,emailChange2;
 
 function initHttpServer() {
 	sharedconfig = global.sharedconfig; // FIXME
-	makeUserProtobuf = user.makeUserProtobuf; // FIXME
 	fs.readFile('views/password_change2.jade',{encoding:'utf8'},function (err,data) {
 		emailChange2 = jade.compile(data,{filename:'views/password_change2.jade',pretty:true});
 	});
@@ -169,9 +168,26 @@ function Server(activeUsersIN) {
 			res.end(JSON.stringify('OK'));
 		});
 	});
+	app.get('/pay',this.pay.bind(this));
 	this.addSync(app);
 	app.use(express.static('files'));
 	app.use('/rawinstallers',express.static('installers'));
+}
+Server.prototype.pay = function (req,res) {
+	console.log(req.query);
+	if (!req.query.id) {
+		res.end('invalid token');
+		return;
+	}
+	models.PaypalRequest.findById(req.query.id,function (err,row) {
+		if (err) {
+			console.log('pay error',err);
+			res.end('internal error');
+			return;
+		}
+		console.log(row);
+		res.render('pay',{row:row});
+	}.bind(this));
 }
 Server.prototype.profile = function (req,res) {
 	var start = Date.now();
@@ -588,7 +604,7 @@ Server.prototype.confirmAccount = function (req,res) {
 			if (!conn) return;
 			// FIXME
 			models.UserModel.collection.findOne({_id:user._id},function (err,self) {
-				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
+				conn.send(codes.seAccountConfirmed,self,'Poker.User');
 			});
 		}.bind(this));
 	}.bind(this));
@@ -631,7 +647,7 @@ Server.prototype.confirmChange = function (req,res) {
 			if (!conn) return;
 			// FIXME
 			models.UserModel.collection.findOne({_id:user._id},function (err,self) {
-				conn.send(codes.seAccountConfirmed,makeUserProtobuf(self),'Poker.User');
+				conn.send(codes.seAccountConfirmed,self,'Poker.User');
 			});
 		}.bind(this));
 	}.bind(this));

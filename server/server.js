@@ -10,7 +10,7 @@ var ObjectID = require('mongodb').ObjectID;
 //var Reader = require('./reader').reader;
 var express = require('express');
 var crypto = require('crypto');
-var p = require("node-protobuf").Protobuf;
+var p = require("node-protobuf");
 var https = require('https');
 var assert = require('assert');
 var util = require('util');
@@ -215,9 +215,6 @@ var cactiServer = require('net').createServer(stats_server);
 
 function toMongoId(buf) {
 	return new ObjectID(buf.toString('hex'));
-}
-function fromMongoId(id) {
-	return new Buffer(id.id,'binary');
 }
 
 /*handlers[codes.scRetrieveHandHistoryData] = function (args) {

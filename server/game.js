@@ -28,8 +28,8 @@ var user = require('./user');
 var error = require('./error');
 
 function makeGameProtobuf(g) {
+	// FIXME, remove this entirely?
 	assert.equal(g._id.toString().length,24);
-	g = JSON.parse(JSON.stringify(g));
 	var gameobj = activeGames[g._id];
 	if (gameobj) {
 		g.sitting = gameobj.sittingCount();
@@ -40,9 +40,7 @@ function makeGameProtobuf(g) {
 	} else {
 		g.state = 'gsEmpty';
 	}
-	g._id = new Buffer(g._id,'hex');
-	g.club_mongoid = new Buffer(g.clubid,'hex');
-	assert.equal(g._id.length,12);
+	g.club_mongoid = g.clubid; // FIXME, rename this somewhere
 	return g;
 }
 function Game(obj) {
@@ -307,7 +305,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 					conn.log('last cashout %d vs %d age:%d',last.chips,params.chips,timediff/1000);
 					if (timediff < (30 * 60 * 1000)) {
 						if (params.chips < last.chips) {
-							conn.send(codes.srTableBuyinLessThanCashout,{game_id:myutils.fromMongoId(this.id),last_cashout:last.chips},'Poker.BuyinError');
+							conn.send(codes.srTableBuyinLessThanCashout,{game_id:this.id,last_cashout:last.chips},'Poker.BuyinError');
 							cb(false,events);
 							return;
 						}
@@ -318,7 +316,7 @@ Game.prototype.sitDown = function (conn,params,cb) {
 				if (obeymax) {
 					conn.log('checking that %d is between %d and %d',params.chips,min,max);
 					if ((params.chips > max) || (params.chips < min)) {
-						conn.send(codes.srInvalidTableBuyin,{game_id:myutils.fromMongoId(this.id),last_cashout:lastcashout},'Poker.BuyinError');
+						conn.send(codes.srInvalidTableBuyin,{game_id:this.id,last_cashout:lastcashout},'Poker.BuyinError');
 						conn.log('buyin:%d min:%d max:%d',params.chips,min,max);
 						cb(false,events);
 						return;
@@ -1705,7 +1703,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	/*if ((['tsIdle','tsDealing','tsWinning','tsWinning2'].indexOf(this.state) == -1)) {
 		assert(this.timer,util.inspect(this));
 	}*/
-	var tableStatus = {rake_percent:this.rake, table_mongo_id: myutils.fromMongoId(this.id),seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet, minimum_raise:this.minBet + this.minimum_raise,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
+	var tableStatus = {rake_percent:this.rake, table_mongo_id: this.id,seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet, minimum_raise:this.minBet + this.minimum_raise,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
 	if (this.pots) {
@@ -1722,7 +1720,7 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 		if (!this.timebanks[priv.userid]) this.timebanks[priv.userid] = sharedconfig.max_timebank * 1000;
 		var timebank = this.timebanks[priv.userid];
 		if (timebank < 0) timebank = 0;
-		var obj = {seat:x, player_mongo_id:myutils.fromMongoId(priv.userid), chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected};
+		var obj = {seat:x, player_mongo_id:priv.userid, chips:seat.chips, status:seat.status, timebank:timebank, disconnected:seat.disconnected};
 		var showcards = false;
 		if (this.testmode) showcards = true;
 		if ((['tsWinning','tsWinning2'].indexOf(this.state) != -1) && !seat.muck) showcards = true;

@@ -1,9 +1,9 @@
 #!/usr/bin/php
 <?php
-include '/home/dsis/config/config.php';
+include '/home/poker/config/config.php';
 $space = disk_free_space('/');
 mysql_connect('localhost',$user,$pass) or die('1'.mysql_error());
-mysql_select_db($base.'_dsis') or die('2'.mysql_error());
+mysql_select_db('diskspace') or die('2'.mysql_error());
 
 $res = mysql_query('SELECT MAX(rowid) AS rowid FROM disk_data');
 $row = mysql_fetch_assoc($res);
@@ -26,10 +26,11 @@ $now = time();
 mysql_query('INSERT INTO disk_data (free_space,`when`,loss,timediff,timeleft) VALUES ('.$space.','.$now.','.($free_space-$space).','.($now - $when).','.$maxtime.')');
 $msg .= ($space/1024/1024)."mb free\n";
 $msg .= "will run out in ".($maxtime/60/60)." hours\n";
-if (($maxtime < 0) && ($space > (1024*1024*50))) { // recently gained space and 50mb is free
+if (($maxtime < 0) && ($space > (1024*1024*1024*2))) { // recently gained space and 2gig is free
 	exit(0);
 }
 if ($maxtime > (60 * 60 * 24)) { // over 24h of space
 	exit(0);
 }
-mail('ipod@angeldsis.com','disk space',$msg);
+mail('poker@chipuppoker.com','disk space',$msg);
+mail('paunovic@gmail.com','disk space',$msg);

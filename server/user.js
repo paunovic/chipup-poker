@@ -24,7 +24,6 @@ var installer = require('./installer');
 var error = require('./error');
 
 module.exports.UserInit = UserInit;
-module.exports.makeUserProtobuf = makeUserProtobuf;
 module.exports.ClientSocket = ClientSocket;
 module.exports.changePassword = changePassword;
 
@@ -694,14 +693,9 @@ ClientSocket.prototype.getStatusPacket = function (maincb) {
 			}.bind(this),function finished() {
 				status.clubs = clubsOut;
 				models.UserModel.find({_id:{$in:userlist}},{displayname:"",_id:"",chips:"",avatar:"",subscription_plan:""},function(err,users) {
-					for (var x=0; x<users.length; x++) {
-						users[x] = makeUserProtobuf(users[x]);
-						assert(users[x]._id.length == 12);
-						//console.log('test',users[x]);
-					}
 					status.users = users;
 					models.UserModel.findOne({_id:this.userid},function(err,self) {
-						status.self = makeUserProtobuf(self);
+						status.self = self;
 						// FIXME, hide closed games, send them in a second array for just the owner
 						models.Game.find({clubid:{$in:clubids}},function (err,games) {
 							if (err) {
@@ -767,11 +761,7 @@ handlers[codes.scGetPlayers] = function (args,token) {
 	}
 	models.UserModel.find({_id:{$in:params.user_mongo_ids}},function (err,users) {
 		this.log(params.user_mongo_ids,users);
-		var out = {users:[]};
-		for (var x=0; x<users.length; x++) {
-			out.users[x] = makeUserProtobuf(users[x]);
-			assert(out.users[x]._id.length == 12);
-		}
+		var out = {users:users};
 		console.log('getplayers:',out);
 		this.send(codes.srGetPlayers,out,'Poker.GetUserParams');
 		token.stop();
@@ -786,7 +776,6 @@ handlers[codes.scSetAvatar] = function (args,token) {
 		return;
 	}
 	var id = params.avatar_id.toString('base64');
-	delete params.avatar_id;
 	this.log('changing avatar',id);
 	models.Avatars.findOne({_id:id},function(err,row) {
 		if (err) {
@@ -799,7 +788,7 @@ handlers[codes.scSetAvatar] = function (args,token) {
 		}
 		models.UserModel.findOne({_id:this.userid},function (err,self) {
 			assert.ifError(err);
-			self.avatar = id;
+			self.avatar = params.avatar_id;
 			self.save(function (err) {
 				if (err) {
 					this.reply("000","internal error");
@@ -818,7 +807,7 @@ handlers[codes.scSetAvatar] = function (args,token) {
 							}
 						}
 					}
-					var proto = pb.Serialize({users:[makeUserProtobuf(self)]},'Poker.UserChangeParams');
+					var proto = pb.Serialize({users:[self]},'Poker.UserChangeParams');
 					for (i=0; i<out.length; i++) {
 						if (myutils.compareObjectID(this.userid,out[i])) continue;
 						var dest = global.activeUsers[out[i]];
@@ -965,13 +954,6 @@ ClientSocket.prototype.handleChatEvent = function handleChatEvent(ev,ts,token) {
 	}
 
 };
-function makeUserProtobuf(u) {
-	u = JSON.parse(JSON.stringify(u));
-	if (u.avatar) u.avatar = new Buffer(u.avatar,'base64');
-	else u.avatar = new Buffer([33]);
-	u._id = new Buffer(u._id.toString(),'hex');
-	return u;
-}
 function bufferMatch(a,b) {
 	// TODO, move to myutils.js
 	if (a.length != b.length) return false;

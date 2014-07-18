@@ -3,6 +3,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema, ObjectId = Schema.ObjectId;
 var assert = require('assert');
 
+mongoose.Types.ObjectId.prototype.toProtobuf = function () {
+	return new Buffer(this.id,'binary');
+}
+
 
 var connected = false;
 
@@ -21,7 +25,7 @@ var User = new Schema({
 	newemail:String,
 	changecode:String,
 	changetime:Number,
-	avatar:String,
+	avatar:Buffer,
 	subscription_plan:String // FIXME, add some validation and defaults
 });
 
@@ -237,6 +241,11 @@ var CounterSchema = new Schema({
 	seq:Number
 },{collection:'counters'});
 
+var PaypalRequestSchema = new Schema({
+	plan:String,
+	userid:ObjectId,
+});
+
 module.exports.close = function () {
 	if (!connected) return;
 	mongoose.disconnect();
@@ -265,6 +274,7 @@ module.exports.open = function (dbname) {
 	models.PokerProfile = mongoose.model('PokerProfile',ProfileSchema);
 	models.ClubBalance = mongoose.model('ClubBalance',ClubBalanceSchema);
 	models.Counter = mongoose.model('Counter',CounterSchema);
+	models.PaypalRequest = mongoose.model('PaypalRequest',PaypalRequestSchema);
 }
 
 if (require.main === module) {
