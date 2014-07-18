@@ -1,8 +1,7 @@
 package Poker;
 
-option optimize_for = LITE_RUNTIME;
-
 import "common.proto";
+import "extra.proto";
 
 enum ServerCodes {
 	srNotImplemented = 0;
@@ -203,7 +202,7 @@ message User {
 		pspNormal = 1;
 		pspSuper = 2;
 	}
-	required bytes _id = 1;
+	required bytes _id = 1 [(ObjectId)=true];
 	optional bytes avatar = 2;
 	required string displayname = 3;
 	

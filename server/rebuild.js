@@ -1,5 +1,5 @@
 var fs = require('fs');
-var p = require("node-protobuf").Protobuf;
+var p = require("node-protobuf");
 
 /*var data = fs.readFileSync('client/src/uServerCodes.pas','utf8');
 var lines = data.split('\n');

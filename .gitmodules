@@ -1,0 +1,3 @@
+[submodule "server/node-protobuf"]
+	path = server/node-protobuf
+	url = https://github.com/cleverca22/node-protobuf.git/
