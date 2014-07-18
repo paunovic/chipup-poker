@@ -14,7 +14,7 @@ TODO:
 var net = require('net');
 var MongoClient = require('mongodb').MongoClient;
 var fs = require("fs");
-var Protobuf = require("node-protobuf").Protobuf;
+var Protobuf = require("node-protobuf");
 var assert = require('assert');
 
 var ProtobufUtil = require('./ProtobufUtil');
