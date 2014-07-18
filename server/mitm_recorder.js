@@ -10,7 +10,7 @@ How to use:
 
 */
 var fs = require("fs");
-var Protobuf = require("node-protobuf").Protobuf;
+var Protobuf = require("node-protobuf");
 var ProtobufUtil = require('./ProtobufUtil');
 var mitm = require('./mitm');
 var MongoClient = require('mongodb').MongoClient;

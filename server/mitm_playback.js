@@ -14,7 +14,9 @@ TODO:
 var net = require('net');
 var MongoClient = require('mongodb').MongoClient;
 var fs = require("fs");
-var Protobuf = require("node-protobuf").Protobuf;
+var Protobuf = require("node-protobuf");
+var assert = require('assert');
+
 var ProtobufUtil = require('./ProtobufUtil');
 var serverCodes = require('./ServerCodes.js');
 var methodToTypeMap = require("./method_to_type_map");
@@ -29,16 +31,13 @@ var host = process.argv[2] ? process.argv[2] : 'localhost';
 MongoClient.connect('mongodb://127.0.0.1:27017/poker', function (err, db) {
 	if (err) throw err;
 	db.collection('gameState').remove(function(err) {
-    	if(err) throw err;
+		if(err) throw err;
 		MongoClient.connect('mongodb://127.0.0.1:27017/test', function (err, db) {
 			if (err) throw err;
 			var mitm = db.collection('mitm');
 			mitm.distinct('socketId', function(err, socketIds) {
 				if (err) throw err;
-				mitm.find({
-					$query: {},
-					$orderby: { timestamp : 1 }
-				}).toArray(function (err, requests) {
+				mitm.find({method:{$nin:MitmPlayback.prototype.IGNORE_METHODS}}).sort({ timestamp : 1 }).toArray(function (err, requests) {
 					if (err) throw err;
 					var config = {
 						requests: requests,

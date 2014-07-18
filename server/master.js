@@ -1,5 +1,5 @@
 var fs = require('fs');
-var p = require("node-protobuf").Protobuf;
+var p = require("node-protobuf");
 var net = require('net');
 var colors = require('colors');
 var util = require('util');
