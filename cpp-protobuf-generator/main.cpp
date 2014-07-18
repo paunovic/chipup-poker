@@ -16,10 +16,10 @@ using namespace google::protobuf;
 
 class TypeInfo {
 public:
-	TypeInfo(string type, string writter, string reader, string wiretype, string defaultdefault) {
+	TypeInfo(string type, string writer, string reader, string wiretype, string defaultdefault) {
 		this->delphiName = type;
 		baseDelphiName = type;
-		this->writter = writter;
+		this->writer = writer;
 		this->reader = reader;
 		this->wiretype = wiretype;
 		this->defaultdefault = defaultdefault;
@@ -28,7 +28,7 @@ public:
 		switch (type) {
 		case FieldDescriptor::TYPE_INT64:
 			baseDelphiName = delphiName = "Int64";
-			writter = "WriteInt64";
+			writer = "WriteInt64";
 			reader = "readInt64";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
@@ -36,7 +36,7 @@ public:
 			break;
 		case FieldDescriptor::TYPE_UINT64:
 			baseDelphiName = delphiName = "UInt64";
-			writter = "WriteInt64";
+			writer = "WriteInt64";
 			reader = "readInt64";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
@@ -44,7 +44,7 @@ public:
 			break;
 		case FieldDescriptor::TYPE_INT32:
 			baseDelphiName = delphiName = "Integer";
-			writter = "writeInt32";
+			writer = "writeInt32";
 			reader = "readInt32";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
@@ -52,7 +52,7 @@ public:
 			break;
 		case FieldDescriptor::TYPE_BOOL:
 			baseDelphiName = delphiName = "Boolean";
-			writter = "writeBoolean";
+			writer = "writeBoolean";
 			reader = "readBoolean";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "false";
@@ -60,7 +60,7 @@ public:
 			break;
 		case FieldDescriptor::TYPE_STRING:
 			baseDelphiName = delphiName = "String";
-			writter = "writeString";
+			writer = "writeString";
 			reader = "readUtf8String";
 			wiretype = "WIRETYPE_LENGTH_DELIMITED";
 			defaultdefault = "''";
@@ -69,19 +69,19 @@ public:
 		case FieldDescriptor::TYPE_MESSAGE:
 			// FIXME
 			defaultdefault = "nil";
-			writter = "writeMessage";
+			writer = "writeMessage";
 			wiretype = "WIRETYPE_LENGTH_DELIMITED";
 			break;
 		case FieldDescriptor::TYPE_BYTES:
 			baseDelphiName = delphiName = "TBytes";
-			writter = "writeBytes";
+			writer = "writeBytes";
 			reader = "readBytes";
 			wiretype = "WIRETYPE_LENGTH_DELIMITED";
 			typeName = "bytes";
 			break;
 		case FieldDescriptor::TYPE_UINT32:
 			baseDelphiName = delphiName = "UINT32";
-			writter = "writeUInt32";
+			writer = "writeUInt32";
 			reader = "readUInt32";
 			wiretype = "WIRETYPE_VARINT";
 			defaultdefault = "0";
@@ -89,14 +89,14 @@ public:
 			break;
 		case FieldDescriptor::TYPE_ENUM:
 			// FIXME
-			writter = "writeInt32";
+			writer = "writeInt32";
 			break;
 		default:
 			assert(false);
 		}
 	}
 	string getDefault() { return defaultdefault; }
-	string getWritter() { return writter; }
+	string getWriter() { return writer; }
 	string getReader() { return reader; }
 	string getWireType() { return wiretype; }
 	string getDelphiName() { return delphiName; }
@@ -194,7 +194,7 @@ private:
 	}
 	string delphiName;
 	string baseDelphiName;
-	string writter;
+	string writer;
 	string reader;
 	string wiretype;
 	string defaultdefault,propertyName,privateField;
@@ -249,7 +249,7 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"\n"
 		"function TranslateServerCode(const ACode: Integer): String;\n"
 		"var\n"
-		"  sc      : T$name$;\n"
+		"  sc: T$name$;\n"
 		"  sc_valid: Boolean;\n"
 		"begin\n"
 		"  sc_valid := FALSE;\n"
@@ -261,9 +261,7 @@ void GenerateEnum(const EnumDescriptor *type, GeneratorContext* generator_contex
 		"    end;\n"
 		"\n"
 		"  if not sc_valid then\n"
-		"  begin\n"
-		"    result := Format('UNKNOWN CODE [%d]', [ACode]);\n"
-		"  end;\n"
+		"    Exit(Format('UNKNOWN CODE [%d]', [ACode]));\n"
 		"\n"
 		"  case TServerCodes(ACode) of\n"
 		,"name",type->name()
@@ -329,7 +327,7 @@ class BaseGenerator : public CodeGenerator {
 			if (!typeinfo[field->type()]) cerr << "cant get new type for " << field->name() << field->type() << endl;
 			assert(typeinfo[field->type()]);
 			TypeInfo thisType = typeinfo[field->type()]->getInstance(field);
-			assert(field->number() < 30);
+			assert(field->number() < 33);
 			snprintf(hack,10,"%d",1 << (field->number()-1));
 			vars["bit"] = hack;
 			vars["message"] = message->name();
@@ -346,7 +344,7 @@ class BaseGenerator : public CodeGenerator {
 				printer->Print(vars,
 					"procedure TPB_$message$.clear_$name$;\n"
 					"begin\n"
-					"  SetLength($pname$,0);\n"
+					"  SetLength($pname$, 0);\n"
 					"  clear_has_$name$;\n"
 					"end;\n\n");
 			} else 	if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
@@ -370,7 +368,7 @@ class BaseGenerator : public CodeGenerator {
 			printer->Print(vars,
 				"function TPB_$message$.has_$name$: Boolean;\n"
 				"begin\n"
-				"  Result := (_has_bits_ and $bit$) > 0;\n"
+				"  result := (_has_bits_ and $bit$) > 0;\n"
 				"end;\n\n"
 				"procedure TPB_$message$.set_has_$name$;\n"
 				"begin\n"
@@ -402,10 +400,10 @@ class BaseGenerator : public CodeGenerator {
                         "  end;\n");
 				} else if ((field->type() == FieldDescriptor::TYPE_INT32) || (field->type() == FieldDescriptor::TYPE_UINT32)
 					|| (field->type() == FieldDescriptor::TYPE_BYTES)) {
-					vars["writter"] = instance.getWritter();
+					vars["writer"] = instance.getWriter();
 					printer->Print(vars,
-					    "  if not Lightweight then\n"
-						"    ProtobufOutput.$writter$($enum$,Item);\n");
+					  "  if not Lightweight then\n"
+						"    ProtobufOutput.$writer$($enum$,Item);\n");
 				}
 				printer->Print(
 					"end;\n"
@@ -423,7 +421,7 @@ class BaseGenerator : public CodeGenerator {
 			} else {
 				vars["input"] = "AValue";
 			}
-			vars["writter"] = thisType.getWritter();
+			vars["writer"] = thisType.getWriter();
 			printer->Print(vars,
 				"procedure TPB_$message$.Set$name$(const AValue: $type$);\n"
 				"begin\n"
@@ -431,14 +429,14 @@ class BaseGenerator : public CodeGenerator {
 				);
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				printer->Print(vars,
-					"  $pname$ := Copy($input$,0,Length($input$));\n"
+					"  $pname$ := Copy($input$, 0, Length($input$));\n"
 					"  if not Lightweight then\n"
-					"    ProtobufOutput.$writter$($enum$, $input$);\n");
+					"    ProtobufOutput.$writer$($enum$, $input$);\n");
 			} else {
 				printer->Print(vars,
 					"  $pname$ := AValue;\n"
 					"  if not Lightweight then\n"
-					"    ProtobufOutput.$writter$($enum$, $input$);\n" // FIXME
+					"    ProtobufOutput.$writer$($enum$, $input$);\n" // FIXME
 					);
 			}
 			printer->Print(vars,
@@ -456,14 +454,14 @@ class BaseGenerator : public CodeGenerator {
 			io::Printer printer(output.get(), '$');
 			printer.Print(
 				"// Generated by the protocol buffer compiler.  DO NOT EDIT!\n"
-				"// source: $filename$\n"
+				"// Source: $filename$\n"
 				"\n"
 				"unit Poker.Protobufs.Objects.$name$;\n"
 				"\n"
 				"interface\n"
 				"\n"
 				"uses\n"
-				"  Classes, SysUtils, {$$IFNDEF FPC}System.Generics.Collections{$$ELSE}Contnrs{$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader"
+				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader"
 				,"filename",file->name()
 				,"name",message->name());
 			if (message->field_count() > 0) {
@@ -503,8 +501,12 @@ class BaseGenerator : public CodeGenerator {
 						}
 					}
 				}
+				if(size > 0)
+          printer.Print(",\n  ");
 				for (int j=0; j<size; j++) {
-					printer.Print(",Poker.Protobufs.Objects.$name$","name",types[j]);
+					printer.Print("Poker.Protobufs.Objects.$name$","name",types[j]);
+					if(j < size-1)
+					  printer.Print(", ");
 				}
 				delete[] types;
 			}
@@ -525,7 +527,7 @@ class BaseGenerator : public CodeGenerator {
 					snprintf(hack,9,"%d",value->number());
 					printer.Print("$name$ = $hack$","name",value->name(),"hack",hack);
 				}
-				printer.Print(");\n");
+				printer.Print(");\n\n");
 			}
 
 			printer.Print(
@@ -550,7 +552,7 @@ class BaseGenerator : public CodeGenerator {
 				instance.printPrivateVariable(&printer,field);
 			}
 			printer.Print(
-				"      _has_bits_: Integer;\n"
+				"      _has_bits_: UINT32;\n"
 				"\n");
 			GenerateSettersDec(message,&printer);
 			for (int j=0; j<message->field_count(); j++) {
@@ -578,7 +580,7 @@ class BaseGenerator : public CodeGenerator {
 				"    constructor Create(const AFrom: TPB_$name$; const ALightweight: Boolean = FALSE); overload;\n"
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
-				"    procedure MergeFrom(const from: TPB_$name$);\n"
+				"    procedure MergeFrom(const AFrom: TPB_$name$);\n"
 				"    procedure Clear;\n"
 				"    function IsInitialized: Boolean; override;\n"
 				"\n",
@@ -642,7 +644,7 @@ class BaseGenerator : public CodeGenerator {
 						}
 					}
 				}
-				printer.Print("end;\n");
+				printer.Print("end;\n\n");
 				printer.Print(
 					"procedure TPB_$name$.HookNotifiers;\n"
 					"begin\n"
@@ -709,13 +711,13 @@ class BaseGenerator : public CodeGenerator {
 				"\n"
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
 				"var\n"
-				"  tag,field_number,wire_type,endpos : Integer;\n"
+				"  tag, field_number, wire_type, endpos: Integer;\n"
 				"begin\n",
 				"name",message->name());
 			printer.Print(
 				"  endpos := AProtobufReader.getPos + ASize;\n"
 				"  while (AProtobufReader.getPos < endpos) and\n"
-				"        (AProtobufReader.GetNext(tag, wire_type, field_number)) do begin\n"
+				"        (AProtobufReader.GetNext(tag, wire_type, field_number)) do\n"
 				"    case field_number of\n");
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
@@ -797,10 +799,9 @@ class BaseGenerator : public CodeGenerator {
 				"    else\n"
 				"      AProtobufReader.skipField(tag);\n"
 				"    end;\n"
-				"  end;\n"
 				"end;\n"
 				"\n"
-				"procedure TPB_$name$.MergeFrom(const from: TPB_$name$);\n"
+				"procedure TPB_$name$.MergeFrom(const AFrom: TPB_$name$);\n"
 				,"name",message->name());
 			bool haveVar = false;
 			for (int j=0; j<message->field_count(); j++) {
@@ -812,7 +813,7 @@ class BaseGenerator : public CodeGenerator {
 					}
 					TypeInfo instance = typeinfo[field->type()]->getInstance(field);
 					snprintf(hack,10,"%d",j);
-					printer.Print("  temp$id$: $type$;\n","id",hack,"type",instance.getBaseDelphiName());
+					printer.Print("  pbobj$id$: $type$;\n","id",hack,"type",instance.getBaseDelphiName());
 				}
 			}
 			printer.Print("begin\n");
@@ -824,14 +825,14 @@ class BaseGenerator : public CodeGenerator {
 					(field->label() == FieldDescriptor::LABEL_OPTIONAL)) {
 					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 						printer.Print(
-							"  if (from.has_$name$) then\n"
-							"    $pname$.MergeFrom(from.$name$);\n"
+							"  if (AFrom.has_$name$) then\n"
+							"    $pname$.MergeFrom(AFrom.$name$);\n"
 							,"name",instance.PropertyName()
 							,"pname",instance.PrivateFieldName());
 					} else {
 						printer.Print(
-							"  if (from.has_$name$) then\n"
-							"    Set$name$(from.$name$);\n"
+							"  if AFrom.has_$name$ then\n"
+							"    Set$name$(AFrom.$name$);\n"
 							,"name",instance.PropertyName());
 					}
 				} else if (field->label() == FieldDescriptor::LABEL_REPEATED) {
@@ -843,11 +844,11 @@ class BaseGenerator : public CodeGenerator {
 					vars2["name"] = instance.PropertyName();
 					if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 						printer.Print(vars2,
-							"  for temp$id$ in from.$name$ do\n"
-							"    $pname$.Add($type$.Create(temp$id$));\n"
+							"  for pbobj$id$ in AFrom.$name$ do\n"
+							"    $pname$.Add($type$.Create(pbobj$id$));\n"
 							);
 					} else {
-						printer.Print(vars2,"  $pname$.AddRange(from.$name$);\n");
+						printer.Print(vars2,"  $pname$.AddRange(AFrom.$name$);\n");
 					}
 				}
 			}
@@ -867,10 +868,11 @@ class BaseGenerator : public CodeGenerator {
 				,"name",message->name());
 			if (needtemp) {
 				printer.Print("var\n"
-					"  temp: TProtobufBaseObject;\n");
+					"  pbobj: TProtobufBaseObject;\n");
 			}
 			printer.Print("begin\n"
-				"  if ((_has_bits_ and $mask$) <> $mask$) Then Exit(false);\n"
+				"  if (_has_bits_ and $mask$) <> $mask$ then\n"
+        "    Exit(FALSE);\n"
 				,"mask",hack);
 			for (int j=0; j<message->field_count(); j++) {
 				const FieldDescriptor *field = message->field(j);
@@ -880,20 +882,36 @@ class BaseGenerator : public CodeGenerator {
 					vars["pname"] = instance.PrivateFieldName();
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(vars,
-							"  for temp in $name$ do\n"
-							"    if (not temp.IsInitialized) then Exit(false);\n"
-							);
+							"  for pbobj in $name$ do\n"
+							"    if not pbobj.IsInitialized then\n"
+              "      Exit(FALSE);\n"
+              );
 					} else {
 						printer.Print(vars,
 							"  if (has_$name$) then\n"
-							"    if (not $pname$.IsInitialized) then Exit(false);\n"
+							"    if not $pname$.IsInitialized then\n"
+              "      Exit(FALSE);\n"
 							);
 					}
 				}
 			}
-			printer.Print("  Exit(True);\n"
+			printer.Print("  Exit(TRUE);\n"
 				"end;\n\n");
 			GenerateSettersImpl(message,&printer);
+			
+			printer.Print(
+				"procedure TPB_$name$.Clear;\n"
+				"begin\n"
+				"  if _has_bits_ = 0 then\n"
+				"    Exit;\n\n"
+				,"name",message->name());
+			for (int j=0; j<message->field_count(); j++) {
+				const FieldDescriptor *field = message->field(j);
+				TypeInfo instance = typeinfo[field->type()]->getInstance(field);
+				printer.Print("  clear_$name$;\n","name",instance.PropertyName());
+			}
+			printer.Print("end;\n\n");
+            			
 			printer.Print(
 				"procedure TPB_$name$List.Assign(const APB_$name$List: TList<TPB_$name$>);\n"
 				"var\n"
@@ -904,19 +922,6 @@ class BaseGenerator : public CodeGenerator {
 				"    Add(TPB_$name$.Create(pbobj, TRUE));\n"
 				"end;\n\n"
 				,"name",message->name());
-			printer.Print(
-				"procedure TPB_$name$.Clear;\n"
-				"begin\n"
-				"  if (_has_bits_ <> 0) then\n"
-				"  begin\n"
-				,"name",message->name());
-			for (int j=0; j<message->field_count(); j++) {
-				const FieldDescriptor *field = message->field(j);
-				TypeInfo instance = typeinfo[field->type()]->getInstance(field);
-				printer.Print("    clear_$name$;\n","name",instance.PropertyName());
-			}
-			printer.Print("  end;\n"
-			"end;\n\n");
 			printer.Print("end.\n");
 	}
 };
