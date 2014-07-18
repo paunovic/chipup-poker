@@ -82,7 +82,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_HandHistory); overload;
+    constructor Create(const AFrom: TPB_HandHistory; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HandHistory);
@@ -175,9 +175,9 @@ begin
   FMoves.OnNotify := MovesNotifyEvent;
 end;
 
-constructor TPB_HandHistory.Create(const AFrom: TPB_HandHistory);
+constructor TPB_HandHistory.Create(const AFrom: TPB_HandHistory; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -227,7 +227,7 @@ begin
       end;
       kPlayersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayers.Add(TPB_PlayerHandHistory.Create(AProtobufReader,AProtobufReader.readInt32));
+        FPlayers.Add(TPB_PlayerHandHistory.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Players;
       end;
       kCardsFieldNumber: begin
@@ -247,7 +247,7 @@ begin
       end;
       kMovesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FMoves.Add(TPB_HandHistoryMove.Create(AProtobufReader,AProtobufReader.readInt32));
+        FMoves.Add(TPB_HandHistoryMove.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Moves;
       end;
       kDealerFieldNumber: begin
@@ -347,7 +347,8 @@ procedure TPB_HandHistory.SetMongoId(const AValue: TBytes);
 begin
   Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
 
@@ -376,7 +377,8 @@ procedure TPB_HandHistory.SetSeq(const AValue: UINT32);
 begin
   Assert(not has_Seq);
   FSeq := AValue;
-  ProtobufOutput.writeUInt32(kSeqFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kSeqFieldNumber, AValue);
   set_has_Seq;
 end;
 
@@ -405,7 +407,8 @@ procedure TPB_HandHistory.SetTotalrake(const AValue: UINT32);
 begin
   Assert(not has_Totalrake);
   FTotalrake := AValue;
-  ProtobufOutput.writeUInt32(kTotalrakeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kTotalrakeFieldNumber, AValue);
   set_has_Totalrake;
 end;
 
@@ -434,9 +437,12 @@ procedure TPB_HandHistory.PlayersNotifyEvent(Sender: TObject; const Item: TPB_Pl
 begin
   Assert(Action = cnAdded);
   set_has_Players;
-  ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_HandHistory.clear_Cards;
@@ -464,7 +470,8 @@ procedure TPB_HandHistory.SetCards(const AValue: TBytes);
 begin
   Assert(not has_Cards);
   FCards := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
 end;
 
@@ -493,7 +500,8 @@ procedure TPB_HandHistory.SetEndtime(const AValue: UINT32);
 begin
   Assert(not has_Endtime);
   FEndtime := AValue;
-  ProtobufOutput.writeUInt32(kEndtimeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kEndtimeFieldNumber, AValue);
   set_has_Endtime;
 end;
 
@@ -522,7 +530,8 @@ procedure TPB_HandHistory.BalanceChangesNotifyEvent(Sender: TObject; const Item:
 begin
   Assert(Action = cnAdded);
   set_has_BalanceChanges;
-  ProtobufOutput.writeInt32(kBalanceChangesFieldNumber,Item);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kBalanceChangesFieldNumber,Item);
 end;
 
 procedure TPB_HandHistory.clear_Moves;
@@ -550,9 +559,12 @@ procedure TPB_HandHistory.MovesNotifyEvent(Sender: TObject; const Item: TPB_Hand
 begin
   Assert(Action = cnAdded);
   set_has_Moves;
-  ProtobufOutput.writeTag(kMovesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kMovesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_HandHistory.clear_Dealer;
@@ -580,7 +592,8 @@ procedure TPB_HandHistory.SetDealer(const AValue: UINT32);
 begin
   Assert(not has_Dealer);
   FDealer := AValue;
-  ProtobufOutput.writeUInt32(kDealerFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kDealerFieldNumber, AValue);
   set_has_Dealer;
 end;
 
@@ -609,7 +622,8 @@ procedure TPB_HandHistory.SetGame(const AValue: TPB_Game);
 begin
   Assert(not has_Game);
   FGame := AValue;
-  ProtobufOutput.writeMessage(kGameFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kGameFieldNumber, AValue.ProtobufOutput);
   set_has_Game;
 end;
 
@@ -638,7 +652,8 @@ procedure TPB_HandHistory.SetCurrentGame(const AValue: TGameType);
 begin
   Assert(not has_CurrentGame);
   FCurrentGame := AValue;
-  ProtobufOutput.writeInt32(kCurrentGameFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kCurrentGameFieldNumber, Integer(AValue));
   set_has_CurrentGame;
 end;
 
@@ -667,7 +682,8 @@ procedure TPB_HandHistory.SetRake(const AValue: Integer);
 begin
   Assert(not has_Rake);
   FRake := AValue;
-  ProtobufOutput.writeInt32(kRakeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kRakeFieldNumber, AValue);
   set_has_Rake;
 end;
 
@@ -677,7 +693,7 @@ var
 begin
   Clear;
   for pbobj in APB_HandHistoryList do
-    Add(TPB_HandHistory.Create(pbobj));
+    Add(TPB_HandHistory.Create(pbobj, TRUE));
 end;
 
 procedure TPB_HandHistory.Clear;

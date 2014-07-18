@@ -37,7 +37,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_TableStatsReplies); overload;
+    constructor Create(const AFrom: TPB_TableStatsReplies; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatsReplies);
@@ -85,9 +85,9 @@ begin
   FClubStats.OnNotify := ClubStatsNotifyEvent;
 end;
 
-constructor TPB_TableStatsReplies.Create(const AFrom: TPB_TableStatsReplies);
+constructor TPB_TableStatsReplies.Create(const AFrom: TPB_TableStatsReplies; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -121,17 +121,17 @@ begin
     case field_number of
       kReplyFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FReply.Add(TPB_TableStatsReply.Create(AProtobufReader,AProtobufReader.readInt32));
+        FReply.Add(TPB_TableStatsReply.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Reply;
       end;
       kPlayersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        FPlayers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Players;
       end;
       kClubStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader,AProtobufReader.readInt32));
+        FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_ClubStats;
       end;
     else
@@ -193,9 +193,12 @@ procedure TPB_TableStatsReplies.ReplyNotifyEvent(Sender: TObject; const Item: TP
 begin
   Assert(Action = cnAdded);
   set_has_Reply;
-  ProtobufOutput.writeTag(kReplyFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kReplyFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_TableStatsReplies.clear_Players;
@@ -223,9 +226,12 @@ procedure TPB_TableStatsReplies.PlayersNotifyEvent(Sender: TObject; const Item: 
 begin
   Assert(Action = cnAdded);
   set_has_Players;
-  ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_TableStatsReplies.clear_ClubStats;
@@ -253,9 +259,12 @@ procedure TPB_TableStatsReplies.ClubStatsNotifyEvent(Sender: TObject; const Item
 begin
   Assert(Action = cnAdded);
   set_has_ClubStats;
-  ProtobufOutput.writeTag(kClubStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kClubStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_TableStatsRepliesList.Assign(const APB_TableStatsRepliesList: TList<TPB_TableStatsReplies>);
@@ -264,7 +273,7 @@ var
 begin
   Clear;
   for pbobj in APB_TableStatsRepliesList do
-    Add(TPB_TableStatsReplies.Create(pbobj));
+    Add(TPB_TableStatsReplies.Create(pbobj, TRUE));
 end;
 
 procedure TPB_TableStatsReplies.Clear;

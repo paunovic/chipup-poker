@@ -33,7 +33,7 @@ type
     procedure SetDisplayName(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_RegisterParams); overload;
+    constructor Create(const AFrom: TPB_RegisterParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterParams);
@@ -67,9 +67,9 @@ uses
 
 
 
-constructor TPB_RegisterParams.Create(const AFrom: TPB_RegisterParams);
+constructor TPB_RegisterParams.Create(const AFrom: TPB_RegisterParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -148,7 +148,8 @@ procedure TPB_RegisterParams.SetEmail(const AValue: String);
 begin
   Assert(not has_Email);
   FEmail := AValue;
-  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
 end;
 
@@ -177,7 +178,8 @@ procedure TPB_RegisterParams.SetPassword(const AValue: String);
 begin
   Assert(not has_Password);
   FPassword := AValue;
-  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
 end;
 
@@ -206,7 +208,8 @@ procedure TPB_RegisterParams.SetDisplayName(const AValue: String);
 begin
   Assert(not has_DisplayName);
   FDisplayName := AValue;
-  ProtobufOutput.writeString(kDisplayNameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kDisplayNameFieldNumber, AValue);
   set_has_DisplayName;
 end;
 
@@ -216,7 +219,7 @@ var
 begin
   Clear;
   for pbobj in APB_RegisterParamsList do
-    Add(TPB_RegisterParams.Create(pbobj));
+    Add(TPB_RegisterParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_RegisterParams.Clear;

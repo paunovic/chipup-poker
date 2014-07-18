@@ -38,7 +38,7 @@ type
     procedure SetUnlimited(const AValue: Boolean);
 
   public
-    constructor Create(const AFrom: TPB_PlayerLimitParams); overload;
+    constructor Create(const AFrom: TPB_PlayerLimitParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PlayerLimitParams);
@@ -77,9 +77,9 @@ uses
 
 
 
-constructor TPB_PlayerLimitParams.Create(const AFrom: TPB_PlayerLimitParams);
+constructor TPB_PlayerLimitParams.Create(const AFrom: TPB_PlayerLimitParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -165,7 +165,8 @@ procedure TPB_PlayerLimitParams.SetClubid(const AValue: TBytes);
 begin
   Assert(not has_Clubid);
   FClubid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;
 
@@ -194,7 +195,8 @@ procedure TPB_PlayerLimitParams.SetUserid(const AValue: TBytes);
 begin
   Assert(not has_Userid);
   FUserid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
 end;
 
@@ -223,7 +225,8 @@ procedure TPB_PlayerLimitParams.SetLimit(const AValue: UINT32);
 begin
   Assert(not has_Limit);
   FLimit := AValue;
-  ProtobufOutput.writeUInt32(kLimitFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kLimitFieldNumber, AValue);
   set_has_Limit;
 end;
 
@@ -252,7 +255,8 @@ procedure TPB_PlayerLimitParams.SetUnlimited(const AValue: Boolean);
 begin
   Assert(not has_Unlimited);
   FUnlimited := AValue;
-  ProtobufOutput.writeBoolean(kUnlimitedFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kUnlimitedFieldNumber, AValue);
   set_has_Unlimited;
 end;
 
@@ -262,7 +266,7 @@ var
 begin
   Clear;
   for pbobj in APB_PlayerLimitParamsList do
-    Add(TPB_PlayerLimitParams.Create(pbobj));
+    Add(TPB_PlayerLimitParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_PlayerLimitParams.Clear;

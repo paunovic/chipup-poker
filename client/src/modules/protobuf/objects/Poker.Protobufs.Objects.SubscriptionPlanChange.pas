@@ -33,7 +33,7 @@ type
     procedure SetStripeToken(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_SubscriptionPlanChange); overload;
+    constructor Create(const AFrom: TPB_SubscriptionPlanChange; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SubscriptionPlanChange);
@@ -67,9 +67,9 @@ uses
 
 
 
-constructor TPB_SubscriptionPlanChange.Create(const AFrom: TPB_SubscriptionPlanChange);
+constructor TPB_SubscriptionPlanChange.Create(const AFrom: TPB_SubscriptionPlanChange; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -148,7 +148,8 @@ procedure TPB_SubscriptionPlanChange.SetSubscriptionPlan(const AValue: TPlayerSu
 begin
   Assert(not has_SubscriptionPlan);
   FSubscriptionPlan := AValue;
-  ProtobufOutput.writeInt32(kSubscriptionPlanFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSubscriptionPlanFieldNumber, Integer(AValue));
   set_has_SubscriptionPlan;
 end;
 
@@ -177,7 +178,8 @@ procedure TPB_SubscriptionPlanChange.SetUrl(const AValue: String);
 begin
   Assert(not has_Url);
   FUrl := AValue;
-  ProtobufOutput.writeString(kUrlFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kUrlFieldNumber, AValue);
   set_has_Url;
 end;
 
@@ -206,7 +208,8 @@ procedure TPB_SubscriptionPlanChange.SetStripeToken(const AValue: String);
 begin
   Assert(not has_StripeToken);
   FStripeToken := AValue;
-  ProtobufOutput.writeString(kStripeTokenFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kStripeTokenFieldNumber, AValue);
   set_has_StripeToken;
 end;
 
@@ -216,7 +219,7 @@ var
 begin
   Clear;
   for pbobj in APB_SubscriptionPlanChangeList do
-    Add(TPB_SubscriptionPlanChange.Create(pbobj));
+    Add(TPB_SubscriptionPlanChange.Create(pbobj, TRUE));
 end;
 
 procedure TPB_SubscriptionPlanChange.Clear;

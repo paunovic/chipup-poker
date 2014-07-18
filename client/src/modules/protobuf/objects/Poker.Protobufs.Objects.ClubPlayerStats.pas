@@ -28,7 +28,7 @@ type
     procedure SetClubBalance(const AValue: Integer);
 
   public
-    constructor Create(const AFrom: TPB_ClubPlayerStats); overload;
+    constructor Create(const AFrom: TPB_ClubPlayerStats; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubPlayerStats);
@@ -57,9 +57,9 @@ uses
 
 
 
-constructor TPB_ClubPlayerStats.Create(const AFrom: TPB_ClubPlayerStats);
+constructor TPB_ClubPlayerStats.Create(const AFrom: TPB_ClubPlayerStats; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -131,7 +131,8 @@ procedure TPB_ClubPlayerStats.SetUserid(const AValue: TBytes);
 begin
   Assert(not has_Userid);
   FUserid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
 end;
 
@@ -160,7 +161,8 @@ procedure TPB_ClubPlayerStats.SetClubBalance(const AValue: Integer);
 begin
   Assert(not has_ClubBalance);
   FClubBalance := AValue;
-  ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
   set_has_ClubBalance;
 end;
 
@@ -170,7 +172,7 @@ var
 begin
   Clear;
   for pbobj in APB_ClubPlayerStatsList do
-    Add(TPB_ClubPlayerStats.Create(pbobj));
+    Add(TPB_ClubPlayerStats.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ClubPlayerStats.Clear;

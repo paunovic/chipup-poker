@@ -44,7 +44,7 @@ type
     procedure SetFileSize(const AValue: UINT32);
 
   public
-    constructor Create(const AFrom: TPB_UpdateFileInfo); overload;
+    constructor Create(const AFrom: TPB_UpdateFileInfo; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UpdateFileInfo);
@@ -88,9 +88,9 @@ uses
 
 
 
-constructor TPB_UpdateFileInfo.Create(const AFrom: TPB_UpdateFileInfo);
+constructor TPB_UpdateFileInfo.Create(const AFrom: TPB_UpdateFileInfo; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -183,7 +183,8 @@ procedure TPB_UpdateFileInfo.SetPath(const AValue: String);
 begin
   Assert(not has_Path);
   FPath := AValue;
-  ProtobufOutput.writeString(kPathFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kPathFieldNumber, AValue);
   set_has_Path;
 end;
 
@@ -212,7 +213,8 @@ procedure TPB_UpdateFileInfo.SetHash(const AValue: TBytes);
 begin
   Assert(not has_Hash);
   FHash := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kHashFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kHashFieldNumber, AValue);
   set_has_Hash;
 end;
 
@@ -241,7 +243,8 @@ procedure TPB_UpdateFileInfo.SetUrl(const AValue: String);
 begin
   Assert(not has_Url);
   FUrl := AValue;
-  ProtobufOutput.writeString(kUrlFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kUrlFieldNumber, AValue);
   set_has_Url;
 end;
 
@@ -270,7 +273,8 @@ procedure TPB_UpdateFileInfo.SetFileType(const AValue: TUpdateFileType);
 begin
   Assert(not has_FileType);
   FFileType := AValue;
-  ProtobufOutput.writeInt32(kFileTypeFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kFileTypeFieldNumber, Integer(AValue));
   set_has_FileType;
 end;
 
@@ -299,7 +303,8 @@ procedure TPB_UpdateFileInfo.SetFileSize(const AValue: UINT32);
 begin
   Assert(not has_FileSize);
   FFileSize := AValue;
-  ProtobufOutput.writeUInt32(kFileSizeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kFileSizeFieldNumber, AValue);
   set_has_FileSize;
 end;
 
@@ -309,7 +314,7 @@ var
 begin
   Clear;
   for pbobj in APB_UpdateFileInfoList do
-    Add(TPB_UpdateFileInfo.Create(pbobj));
+    Add(TPB_UpdateFileInfo.Create(pbobj, TRUE));
 end;
 
 procedure TPB_UpdateFileInfo.Clear;

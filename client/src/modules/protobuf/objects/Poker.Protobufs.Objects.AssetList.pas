@@ -27,7 +27,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_AssetList); overload;
+    constructor Create(const AFrom: TPB_AssetList; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_AssetList);
@@ -61,9 +61,9 @@ begin
   FAssets.OnNotify := AssetsNotifyEvent;
 end;
 
-constructor TPB_AssetList.Create(const AFrom: TPB_AssetList);
+constructor TPB_AssetList.Create(const AFrom: TPB_AssetList; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -87,7 +87,7 @@ begin
     case field_number of
       kAssetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FAssets.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        FAssets.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Assets;
       end;
     else
@@ -139,9 +139,12 @@ procedure TPB_AssetList.AssetsNotifyEvent(Sender: TObject; const Item: TPB_Updat
 begin
   Assert(Action = cnAdded);
   set_has_Assets;
-  ProtobufOutput.writeTag(kAssetsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kAssetsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_AssetListList.Assign(const APB_AssetListList: TList<TPB_AssetList>);
@@ -150,7 +153,7 @@ var
 begin
   Clear;
   for pbobj in APB_AssetListList do
-    Add(TPB_AssetList.Create(pbobj));
+    Add(TPB_AssetList.Create(pbobj, TRUE));
 end;
 
 procedure TPB_AssetList.Clear;

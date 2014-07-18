@@ -23,7 +23,7 @@ type
     procedure SetUptime(const AValue: UINT32);
 
   public
-    constructor Create(const AFrom: TPB_PingParams); overload;
+    constructor Create(const AFrom: TPB_PingParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingParams);
@@ -47,9 +47,9 @@ uses
 
 
 
-constructor TPB_PingParams.Create(const AFrom: TPB_PingParams);
+constructor TPB_PingParams.Create(const AFrom: TPB_PingParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -114,7 +114,8 @@ procedure TPB_PingParams.SetUptime(const AValue: UINT32);
 begin
   Assert(not has_Uptime);
   FUptime := AValue;
-  ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
   set_has_Uptime;
 end;
 
@@ -124,7 +125,7 @@ var
 begin
   Clear;
   for pbobj in APB_PingParamsList do
-    Add(TPB_PingParams.Create(pbobj));
+    Add(TPB_PingParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_PingParams.Clear;

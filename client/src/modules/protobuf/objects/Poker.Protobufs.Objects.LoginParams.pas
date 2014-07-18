@@ -28,7 +28,7 @@ type
     procedure SetPassword(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_LoginParams); overload;
+    constructor Create(const AFrom: TPB_LoginParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginParams);
@@ -57,9 +57,9 @@ uses
 
 
 
-constructor TPB_LoginParams.Create(const AFrom: TPB_LoginParams);
+constructor TPB_LoginParams.Create(const AFrom: TPB_LoginParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -131,7 +131,8 @@ procedure TPB_LoginParams.SetUsername(const AValue: String);
 begin
   Assert(not has_Username);
   FUsername := AValue;
-  ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
   set_has_Username;
 end;
 
@@ -160,7 +161,8 @@ procedure TPB_LoginParams.SetPassword(const AValue: String);
 begin
   Assert(not has_Password);
   FPassword := AValue;
-  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
 end;
 
@@ -170,7 +172,7 @@ var
 begin
   Clear;
   for pbobj in APB_LoginParamsList do
-    Add(TPB_LoginParams.Create(pbobj));
+    Add(TPB_LoginParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_LoginParams.Clear;

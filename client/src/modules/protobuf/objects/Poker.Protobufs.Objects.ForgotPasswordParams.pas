@@ -23,7 +23,7 @@ type
     procedure SetEmail(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_ForgotPasswordParams); overload;
+    constructor Create(const AFrom: TPB_ForgotPasswordParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ForgotPasswordParams);
@@ -47,9 +47,9 @@ uses
 
 
 
-constructor TPB_ForgotPasswordParams.Create(const AFrom: TPB_ForgotPasswordParams);
+constructor TPB_ForgotPasswordParams.Create(const AFrom: TPB_ForgotPasswordParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -114,7 +114,8 @@ procedure TPB_ForgotPasswordParams.SetEmail(const AValue: String);
 begin
   Assert(not has_Email);
   FEmail := AValue;
-  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
 end;
 
@@ -124,7 +125,7 @@ var
 begin
   Clear;
   for pbobj in APB_ForgotPasswordParamsList do
-    Add(TPB_ForgotPasswordParams.Create(pbobj));
+    Add(TPB_ForgotPasswordParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ForgotPasswordParams.Clear;

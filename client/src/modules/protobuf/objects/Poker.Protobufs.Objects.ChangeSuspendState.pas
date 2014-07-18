@@ -33,7 +33,7 @@ type
     procedure SetSuspended(const AValue: Boolean);
 
   public
-    constructor Create(const AFrom: TPB_ChangeSuspendState); overload;
+    constructor Create(const AFrom: TPB_ChangeSuspendState; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeSuspendState);
@@ -67,9 +67,9 @@ uses
 
 
 
-constructor TPB_ChangeSuspendState.Create(const AFrom: TPB_ChangeSuspendState);
+constructor TPB_ChangeSuspendState.Create(const AFrom: TPB_ChangeSuspendState; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -148,7 +148,8 @@ procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TBytes);
 begin
   Assert(not has_ClubMongoId);
   FClubMongoId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
   set_has_ClubMongoId;
 end;
 
@@ -177,7 +178,8 @@ procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TBytes);
 begin
   Assert(not has_PlayerMongoId);
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
 end;
 
@@ -206,7 +208,8 @@ procedure TPB_ChangeSuspendState.SetSuspended(const AValue: Boolean);
 begin
   Assert(not has_Suspended);
   FSuspended := AValue;
-  ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
   set_has_Suspended;
 end;
 
@@ -216,7 +219,7 @@ var
 begin
   Clear;
   for pbobj in APB_ChangeSuspendStateList do
-    Add(TPB_ChangeSuspendState.Create(pbobj));
+    Add(TPB_ChangeSuspendState.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ChangeSuspendState.Clear;

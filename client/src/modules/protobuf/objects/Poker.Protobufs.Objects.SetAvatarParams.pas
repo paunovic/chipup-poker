@@ -23,7 +23,7 @@ type
     procedure SetAvatarId(const AValue: TBytes);
 
   public
-    constructor Create(const AFrom: TPB_SetAvatarParams); overload;
+    constructor Create(const AFrom: TPB_SetAvatarParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SetAvatarParams);
@@ -47,9 +47,9 @@ uses
 
 
 
-constructor TPB_SetAvatarParams.Create(const AFrom: TPB_SetAvatarParams);
+constructor TPB_SetAvatarParams.Create(const AFrom: TPB_SetAvatarParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -114,7 +114,8 @@ procedure TPB_SetAvatarParams.SetAvatarId(const AValue: TBytes);
 begin
   Assert(not has_AvatarId);
   FAvatarId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kAvatarIdFieldNumber, AValue);
   set_has_AvatarId;
 end;
 
@@ -124,7 +125,7 @@ var
 begin
   Clear;
   for pbobj in APB_SetAvatarParamsList do
-    Add(TPB_SetAvatarParams.Create(pbobj));
+    Add(TPB_SetAvatarParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_SetAvatarParams.Clear;

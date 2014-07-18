@@ -53,7 +53,7 @@ type
     procedure SetContactMessage(const AValue: Integer);
 
   public
-    constructor Create(const AFrom: TPB_StringSizes); overload;
+    constructor Create(const AFrom: TPB_StringSizes; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_StringSizes);
@@ -107,9 +107,9 @@ uses
 
 
 
-constructor TPB_StringSizes.Create(const AFrom: TPB_StringSizes);
+constructor TPB_StringSizes.Create(const AFrom: TPB_StringSizes; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -216,7 +216,8 @@ procedure TPB_StringSizes.SetEmail(const AValue: Integer);
 begin
   Assert(not has_Email);
   FEmail := AValue;
-  ProtobufOutput.writeInt32(kEmailFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kEmailFieldNumber, AValue);
   set_has_Email;
 end;
 
@@ -245,7 +246,8 @@ procedure TPB_StringSizes.SetPassword(const AValue: Integer);
 begin
   Assert(not has_Password);
   FPassword := AValue;
-  ProtobufOutput.writeInt32(kPasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kPasswordFieldNumber, AValue);
   set_has_Password;
 end;
 
@@ -274,7 +276,8 @@ procedure TPB_StringSizes.SetClubname(const AValue: Integer);
 begin
   Assert(not has_Clubname);
   FClubname := AValue;
-  ProtobufOutput.writeInt32(kClubnameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kClubnameFieldNumber, AValue);
   set_has_Clubname;
 end;
 
@@ -303,7 +306,8 @@ procedure TPB_StringSizes.SetInvcode(const AValue: Integer);
 begin
   Assert(not has_Invcode);
   FInvcode := AValue;
-  ProtobufOutput.writeInt32(kInvcodeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kInvcodeFieldNumber, AValue);
   set_has_Invcode;
 end;
 
@@ -332,7 +336,8 @@ procedure TPB_StringSizes.SetUsername(const AValue: Integer);
 begin
   Assert(not has_Username);
   FUsername := AValue;
-  ProtobufOutput.writeInt32(kUsernameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kUsernameFieldNumber, AValue);
   set_has_Username;
 end;
 
@@ -361,7 +366,8 @@ procedure TPB_StringSizes.SetGamename(const AValue: Integer);
 begin
   Assert(not has_Gamename);
   FGamename := AValue;
-  ProtobufOutput.writeInt32(kGamenameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kGamenameFieldNumber, AValue);
   set_has_Gamename;
 end;
 
@@ -390,7 +396,8 @@ procedure TPB_StringSizes.SetContactMessage(const AValue: Integer);
 begin
   Assert(not has_ContactMessage);
   FContactMessage := AValue;
-  ProtobufOutput.writeInt32(kContactMessageFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kContactMessageFieldNumber, AValue);
   set_has_ContactMessage;
 end;
 
@@ -400,7 +407,7 @@ var
 begin
   Clear;
   for pbobj in APB_StringSizesList do
-    Add(TPB_StringSizes.Create(pbobj));
+    Add(TPB_StringSizes.Create(pbobj, TRUE));
 end;
 
 procedure TPB_StringSizes.Clear;

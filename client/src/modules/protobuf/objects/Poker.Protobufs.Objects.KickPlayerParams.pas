@@ -28,7 +28,7 @@ type
     procedure SetPlayerMongoId(const AValue: TBytes);
 
   public
-    constructor Create(const AFrom: TPB_KickPlayerParams); overload;
+    constructor Create(const AFrom: TPB_KickPlayerParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_KickPlayerParams);
@@ -57,9 +57,9 @@ uses
 
 
 
-constructor TPB_KickPlayerParams.Create(const AFrom: TPB_KickPlayerParams);
+constructor TPB_KickPlayerParams.Create(const AFrom: TPB_KickPlayerParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -131,7 +131,8 @@ procedure TPB_KickPlayerParams.SetClubMongoId(const AValue: TBytes);
 begin
   Assert(not has_ClubMongoId);
   FClubMongoId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
   set_has_ClubMongoId;
 end;
 
@@ -160,7 +161,8 @@ procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: TBytes);
 begin
   Assert(not has_PlayerMongoId);
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
 end;
 
@@ -170,7 +172,7 @@ var
 begin
   Clear;
   for pbobj in APB_KickPlayerParamsList do
-    Add(TPB_KickPlayerParams.Create(pbobj));
+    Add(TPB_KickPlayerParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_KickPlayerParams.Clear;

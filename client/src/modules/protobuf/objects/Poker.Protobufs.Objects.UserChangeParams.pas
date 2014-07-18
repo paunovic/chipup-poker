@@ -27,7 +27,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_UserChangeParams); overload;
+    constructor Create(const AFrom: TPB_UserChangeParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_UserChangeParams);
@@ -61,9 +61,9 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 
-constructor TPB_UserChangeParams.Create(const AFrom: TPB_UserChangeParams);
+constructor TPB_UserChangeParams.Create(const AFrom: TPB_UserChangeParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -87,7 +87,7 @@ begin
     case field_number of
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Users;
       end;
     else
@@ -139,9 +139,12 @@ procedure TPB_UserChangeParams.UsersNotifyEvent(Sender: TObject; const Item: TPB
 begin
   Assert(Action = cnAdded);
   set_has_Users;
-  ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_UserChangeParamsList.Assign(const APB_UserChangeParamsList: TList<TPB_UserChangeParams>);
@@ -150,7 +153,7 @@ var
 begin
   Clear;
   for pbobj in APB_UserChangeParamsList do
-    Add(TPB_UserChangeParams.Create(pbobj));
+    Add(TPB_UserChangeParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_UserChangeParams.Clear;

@@ -38,7 +38,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_LoginReply); overload;
+    constructor Create(const AFrom: TPB_LoginReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_LoginReply);
@@ -82,9 +82,9 @@ begin
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
 end;
 
-constructor TPB_LoginReply.Create(const AFrom: TPB_LoginReply);
+constructor TPB_LoginReply.Create(const AFrom: TPB_LoginReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -121,7 +121,7 @@ begin
       end;
       kReconnectTablesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader,AProtobufReader.readInt32));
+        FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_ReconnectTables;
       end;
     else
@@ -179,7 +179,8 @@ procedure TPB_LoginReply.SetLoginStatus(const AValue: TLoginStatus);
 begin
   Assert(not has_LoginStatus);
   FLoginStatus := AValue;
-  ProtobufOutput.writeInt32(kLoginStatusFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kLoginStatusFieldNumber, Integer(AValue));
   set_has_LoginStatus;
 end;
 
@@ -208,7 +209,8 @@ procedure TPB_LoginReply.SetStatus(const AValue: TPB_StatusReply);
 begin
   Assert(not has_Status);
   FStatus := AValue;
-  ProtobufOutput.writeMessage(kStatusFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kStatusFieldNumber, AValue.ProtobufOutput);
   set_has_Status;
 end;
 
@@ -237,9 +239,12 @@ procedure TPB_LoginReply.ReconnectTablesNotifyEvent(Sender: TObject; const Item:
 begin
   Assert(Action = cnAdded);
   set_has_ReconnectTables;
-  ProtobufOutput.writeTag(kReconnectTablesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kReconnectTablesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
@@ -248,7 +253,7 @@ var
 begin
   Clear;
   for pbobj in APB_LoginReplyList do
-    Add(TPB_LoginReply.Create(pbobj));
+    Add(TPB_LoginReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_LoginReply.Clear;

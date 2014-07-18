@@ -29,7 +29,7 @@ type
     procedure SetMsg(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_WinnerData); overload;
+    constructor Create(const AFrom: TPB_WinnerData; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_WinnerData);
@@ -58,9 +58,9 @@ uses
 
 
 
-constructor TPB_WinnerData.Create(const AFrom: TPB_WinnerData);
+constructor TPB_WinnerData.Create(const AFrom: TPB_WinnerData; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -132,7 +132,8 @@ procedure TPB_WinnerData.SetSeat(const AValue: Integer);
 begin
   Assert(not has_Seat);
   FSeat := AValue;
-  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
 end;
 
@@ -161,7 +162,8 @@ procedure TPB_WinnerData.SetMsg(const AValue: String);
 begin
   Assert(not has_Msg);
   FMsg := AValue;
-  ProtobufOutput.writeString(kMsgFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kMsgFieldNumber, AValue);
   set_has_Msg;
 end;
 
@@ -171,7 +173,7 @@ var
 begin
   Clear;
   for pbobj in APB_WinnerDataList do
-    Add(TPB_WinnerData.Create(pbobj));
+    Add(TPB_WinnerData.Create(pbobj, TRUE));
 end;
 
 procedure TPB_WinnerData.Clear;

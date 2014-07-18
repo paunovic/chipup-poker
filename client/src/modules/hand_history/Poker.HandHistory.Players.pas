@@ -24,7 +24,7 @@ uses
 
 constructor TPlayerHandHistories.Create;
 begin
-  inherited Create;
+  inherited Create(TRUE);
   OnNotify := NotifyEvent;
 end;
 

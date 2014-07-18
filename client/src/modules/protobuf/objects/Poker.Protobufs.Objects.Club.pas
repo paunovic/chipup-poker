@@ -77,7 +77,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_Club); overload;
+    constructor Create(const AFrom: TPB_Club; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Club);
@@ -161,9 +161,9 @@ begin
   FMembers.OnNotify := MembersNotifyEvent;
 end;
 
-constructor TPB_Club.Create(const AFrom: TPB_Club);
+constructor TPB_Club.Create(const AFrom: TPB_Club; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -192,7 +192,7 @@ begin
       end;
       kMembersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FMembers.Add(TPB_ClubMember.Create(AProtobufReader,AProtobufReader.readInt32));
+        FMembers.Add(TPB_ClubMember.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Members;
       end;
       kNameFieldNumber: begin
@@ -309,7 +309,8 @@ procedure TPB_Club.SetMongoId(const AValue: TBytes);
 begin
   Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
 
@@ -338,9 +339,12 @@ procedure TPB_Club.MembersNotifyEvent(Sender: TObject; const Item: TPB_ClubMembe
 begin
   Assert(Action = cnAdded);
   set_has_Members;
-  ProtobufOutput.writeTag(kMembersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kMembersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_Club.clear_Name;
@@ -368,7 +372,8 @@ procedure TPB_Club.SetName(const AValue: String);
 begin
   Assert(not has_Name);
   FName := AValue;
-  ProtobufOutput.writeString(kNameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kNameFieldNumber, AValue);
   set_has_Name;
 end;
 
@@ -397,7 +402,8 @@ procedure TPB_Club.SetOwner(const AValue: TBytes);
 begin
   Assert(not has_Owner);
   FOwner := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kOwnerFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kOwnerFieldNumber, AValue);
   set_has_Owner;
 end;
 
@@ -426,7 +432,8 @@ procedure TPB_Club.SetPassword(const AValue: String);
 begin
   Assert(not has_Password);
   FPassword := AValue;
-  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
 end;
 
@@ -455,7 +462,8 @@ procedure TPB_Club.SetIsPrivate(const AValue: Boolean);
 begin
   Assert(not has_IsPrivate);
   FIsPrivate := AValue;
-  ProtobufOutput.writeBoolean(kIsPrivateFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kIsPrivateFieldNumber, AValue);
   set_has_IsPrivate;
 end;
 
@@ -484,7 +492,8 @@ procedure TPB_Club.SetSeq(const AValue: Integer);
 begin
   Assert(not has_Seq);
   FSeq := AValue;
-  ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSeqFieldNumber, AValue);
   set_has_Seq;
 end;
 
@@ -513,7 +522,8 @@ procedure TPB_Club.SetHasPassword(const AValue: Boolean);
 begin
   Assert(not has_HasPassword);
   FHasPassword := AValue;
-  ProtobufOutput.writeBoolean(kHasPasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kHasPasswordFieldNumber, AValue);
   set_has_HasPassword;
 end;
 
@@ -542,7 +552,8 @@ procedure TPB_Club.SetRake(const AValue: UINT32);
 begin
   Assert(not has_Rake);
   FRake := AValue;
-  ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
   set_has_Rake;
 end;
 
@@ -571,7 +582,8 @@ procedure TPB_Club.SetDefaultBalanceLimit(const AValue: UINT32);
 begin
   Assert(not has_DefaultBalanceLimit);
   FDefaultBalanceLimit := AValue;
-  ProtobufOutput.writeUInt32(kDefaultBalanceLimitFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kDefaultBalanceLimitFieldNumber, AValue);
   set_has_DefaultBalanceLimit;
 end;
 
@@ -600,7 +612,8 @@ procedure TPB_Club.SetUnlimitedDefaultBalance(const AValue: Boolean);
 begin
   Assert(not has_UnlimitedDefaultBalance);
   FUnlimitedDefaultBalance := AValue;
-  ProtobufOutput.writeBoolean(kUnlimitedDefaultBalanceFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kUnlimitedDefaultBalanceFieldNumber, AValue);
   set_has_UnlimitedDefaultBalance;
 end;
 
@@ -610,7 +623,7 @@ var
 begin
   Clear;
   for pbobj in APB_ClubList do
-    Add(TPB_Club.Create(pbobj));
+    Add(TPB_Club.Create(pbobj, TRUE));
 end;
 
 procedure TPB_Club.Clear;

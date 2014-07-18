@@ -28,7 +28,7 @@ type
     procedure SetFlag(const AValue: Boolean);
 
   public
-    constructor Create(const AFrom: TPB_TableBoolFlag); overload;
+    constructor Create(const AFrom: TPB_TableBoolFlag; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableBoolFlag);
@@ -57,9 +57,9 @@ uses
 
 
 
-constructor TPB_TableBoolFlag.Create(const AFrom: TPB_TableBoolFlag);
+constructor TPB_TableBoolFlag.Create(const AFrom: TPB_TableBoolFlag; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -131,7 +131,8 @@ procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
 begin
   Assert(not has_TableMongoId);
   FTableMongoId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
   set_has_TableMongoId;
 end;
 
@@ -160,7 +161,8 @@ procedure TPB_TableBoolFlag.SetFlag(const AValue: Boolean);
 begin
   Assert(not has_Flag);
   FFlag := AValue;
-  ProtobufOutput.writeBoolean(kFlagFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kFlagFieldNumber, AValue);
   set_has_Flag;
 end;
 
@@ -170,7 +172,7 @@ var
 begin
   Clear;
   for pbobj in APB_TableBoolFlagList do
-    Add(TPB_TableBoolFlag.Create(pbobj));
+    Add(TPB_TableBoolFlag.Create(pbobj, TRUE));
 end;
 
 procedure TPB_TableBoolFlag.Clear;

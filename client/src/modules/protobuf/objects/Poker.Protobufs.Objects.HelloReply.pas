@@ -62,7 +62,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_HelloReply); overload;
+    constructor Create(const AFrom: TPB_HelloReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloReply);
@@ -131,9 +131,9 @@ begin
   FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
 end;
 
-constructor TPB_HelloReply.Create(const AFrom: TPB_HelloReply);
+constructor TPB_HelloReply.Create(const AFrom: TPB_HelloReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -197,7 +197,7 @@ begin
       end;
       kUpdateFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_UpdateFiles;
       end;
       kValidCharsRegexFieldNumber: begin
@@ -276,7 +276,8 @@ procedure TPB_HelloReply.SetStringSizes(const AValue: TPB_StringSizes);
 begin
   Assert(not has_StringSizes);
   FStringSizes := AValue;
-  ProtobufOutput.writeMessage(kStringSizesFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kStringSizesFieldNumber, AValue.ProtobufOutput);
   set_has_StringSizes;
 end;
 
@@ -305,7 +306,8 @@ procedure TPB_HelloReply.SetChangeExpireTime(const AValue: Integer);
 begin
   Assert(not has_ChangeExpireTime);
   FChangeExpireTime := AValue;
-  ProtobufOutput.writeInt32(kChangeExpireTimeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kChangeExpireTimeFieldNumber, AValue);
   set_has_ChangeExpireTime;
 end;
 
@@ -334,7 +336,8 @@ procedure TPB_HelloReply.SetForgotExpireTime(const AValue: Integer);
 begin
   Assert(not has_ForgotExpireTime);
   FForgotExpireTime := AValue;
-  ProtobufOutput.writeInt32(kForgotExpireTimeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kForgotExpireTimeFieldNumber, AValue);
   set_has_ForgotExpireTime;
 end;
 
@@ -363,7 +366,8 @@ procedure TPB_HelloReply.SetMaxPlayTime(const AValue: Integer);
 begin
   Assert(not has_MaxPlayTime);
   FMaxPlayTime := AValue;
-  ProtobufOutput.writeInt32(kMaxPlayTimeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kMaxPlayTimeFieldNumber, AValue);
   set_has_MaxPlayTime;
 end;
 
@@ -392,7 +396,8 @@ procedure TPB_HelloReply.SetMaxTimebank(const AValue: Integer);
 begin
   Assert(not has_MaxTimebank);
   FMaxTimebank := AValue;
-  ProtobufOutput.writeInt32(kMaxTimebankFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kMaxTimebankFieldNumber, AValue);
   set_has_MaxTimebank;
 end;
 
@@ -421,7 +426,8 @@ procedure TPB_HelloReply.SetMinSizes(const AValue: TPB_StringSizes);
 begin
   Assert(not has_MinSizes);
   FMinSizes := AValue;
-  ProtobufOutput.writeMessage(kMinSizesFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kMinSizesFieldNumber, AValue.ProtobufOutput);
   set_has_MinSizes;
 end;
 
@@ -450,9 +456,12 @@ procedure TPB_HelloReply.UpdateFilesNotifyEvent(Sender: TObject; const Item: TPB
 begin
   Assert(Action = cnAdded);
   set_has_UpdateFiles;
-  ProtobufOutput.writeTag(kUpdateFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kUpdateFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_HelloReply.clear_ValidCharsRegex;
@@ -480,7 +489,8 @@ procedure TPB_HelloReply.SetValidCharsRegex(const AValue: TPB_ValidCharsRegex);
 begin
   Assert(not has_ValidCharsRegex);
   FValidCharsRegex := AValue;
-  ProtobufOutput.writeMessage(kValidCharsRegexFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kValidCharsRegexFieldNumber, AValue.ProtobufOutput);
   set_has_ValidCharsRegex;
 end;
 
@@ -490,7 +500,7 @@ var
 begin
   Clear;
   for pbobj in APB_HelloReplyList do
-    Add(TPB_HelloReply.Create(pbobj));
+    Add(TPB_HelloReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_HelloReply.Clear;

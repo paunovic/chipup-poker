@@ -48,7 +48,7 @@ type
     procedure SetGamename(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_ValidCharsRegex); overload;
+    constructor Create(const AFrom: TPB_ValidCharsRegex; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ValidCharsRegex);
@@ -97,9 +97,9 @@ uses
 
 
 
-constructor TPB_ValidCharsRegex.Create(const AFrom: TPB_ValidCharsRegex);
+constructor TPB_ValidCharsRegex.Create(const AFrom: TPB_ValidCharsRegex; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -199,7 +199,8 @@ procedure TPB_ValidCharsRegex.SetEmail(const AValue: String);
 begin
   Assert(not has_Email);
   FEmail := AValue;
-  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
 end;
 
@@ -228,7 +229,8 @@ procedure TPB_ValidCharsRegex.SetUsername(const AValue: String);
 begin
   Assert(not has_Username);
   FUsername := AValue;
-  ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
   set_has_Username;
 end;
 
@@ -257,7 +259,8 @@ procedure TPB_ValidCharsRegex.SetPassword(const AValue: String);
 begin
   Assert(not has_Password);
   FPassword := AValue;
-  ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kPasswordFieldNumber, AValue);
   set_has_Password;
 end;
 
@@ -286,7 +289,8 @@ procedure TPB_ValidCharsRegex.SetClubname(const AValue: String);
 begin
   Assert(not has_Clubname);
   FClubname := AValue;
-  ProtobufOutput.writeString(kClubnameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kClubnameFieldNumber, AValue);
   set_has_Clubname;
 end;
 
@@ -315,7 +319,8 @@ procedure TPB_ValidCharsRegex.SetClubpassword(const AValue: String);
 begin
   Assert(not has_Clubpassword);
   FClubpassword := AValue;
-  ProtobufOutput.writeString(kClubpasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kClubpasswordFieldNumber, AValue);
   set_has_Clubpassword;
 end;
 
@@ -344,7 +349,8 @@ procedure TPB_ValidCharsRegex.SetGamename(const AValue: String);
 begin
   Assert(not has_Gamename);
   FGamename := AValue;
-  ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kGamenameFieldNumber, AValue);
   set_has_Gamename;
 end;
 
@@ -354,7 +360,7 @@ var
 begin
   Clear;
   for pbobj in APB_ValidCharsRegexList do
-    Add(TPB_ValidCharsRegex.Create(pbobj));
+    Add(TPB_ValidCharsRegex.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ValidCharsRegex.Clear;

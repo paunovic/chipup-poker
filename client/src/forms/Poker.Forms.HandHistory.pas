@@ -346,6 +346,9 @@ begin
       end;
       cbHand.ItemIndex := item_index;
 
+      if hhi.RVLines.Count = 0 then
+        hhi.MakeLines;
+
       // add first two lines with ParaNo = 1, so they're centered
       // a bit dirty fix, ideally there should be \p%d parameter
       for C1 := 0 to hhi.RVLines.Count - 1 do

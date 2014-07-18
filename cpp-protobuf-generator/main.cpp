@@ -394,14 +394,18 @@ class BaseGenerator : public CodeGenerator {
 					"  set_has_$name$;\n");
 				if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 					printer->Print(vars,
-						"  ProtobufOutput.writeTag($enum$,$tagtype$);\n"
-						"  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);\n"
-						"  Item.ProtobufOutput.writeTo(ProtobufOutput);\n");
+					    "  if not Lightweight then\n"
+					    "  begin\n"
+						"    ProtobufOutput.writeTag($enum$,$tagtype$);\n"
+						"    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);\n"
+						"    Item.ProtobufOutput.writeTo(ProtobufOutput);\n"
+                        "  end;\n");
 				} else if ((field->type() == FieldDescriptor::TYPE_INT32) || (field->type() == FieldDescriptor::TYPE_UINT32)
 					|| (field->type() == FieldDescriptor::TYPE_BYTES)) {
 					vars["writter"] = instance.getWritter();
 					printer->Print(vars,
-						"  ProtobufOutput.$writter$($enum$,Item);\n");
+					    "  if not Lightweight then\n"
+						"    ProtobufOutput.$writter$($enum$,Item);\n");
 				}
 				printer->Print(
 					"end;\n"
@@ -428,11 +432,13 @@ class BaseGenerator : public CodeGenerator {
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				printer->Print(vars,
 					"  $pname$ := Copy($input$,0,Length($input$));\n"
-					"  ProtobufOutput.$writter$($enum$, $input$);\n");
+					"  if not Lightweight then\n"
+					"    ProtobufOutput.$writter$($enum$, $input$);\n");
 			} else {
 				printer->Print(vars,
 					"  $pname$ := AValue;\n"
-					"  ProtobufOutput.$writter$($enum$, $input$);\n" // FIXME
+					"  if not Lightweight then\n"
+					"    ProtobufOutput.$writter$($enum$, $input$);\n" // FIXME
 					);
 			}
 			printer->Print(vars,
@@ -569,7 +575,7 @@ class BaseGenerator : public CodeGenerator {
 				"  public\n"
 				);
 			printer.Print(
-				"    constructor Create(const AFrom: TPB_$name$); overload;\n"
+				"    constructor Create(const AFrom: TPB_$name$; const ALightweight: Boolean = FALSE); overload;\n"
 				"    destructor Destroy; override;\n"
 				"    procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;\n"
 				"    procedure MergeFrom(const from: TPB_$name$);\n"
@@ -657,9 +663,9 @@ class BaseGenerator : public CodeGenerator {
 			}
 			printer.Print(
 				"\n"
-				"constructor TPB_$name$.Create(const AFrom: TPB_$name$);\n"
+				"constructor TPB_$name$.Create(const AFrom: TPB_$name$; const ALightweight: Boolean = FALSE);\n"
 				"begin\n"
-				"  inherited Create;\n"
+				"  inherited Create(ALightweight);\n"
 				"  MergeFrom(AFrom);\n"
 				"end;\n\n"
 				"destructor TPB_$name$.Destroy;\n"
@@ -738,7 +744,7 @@ class BaseGenerator : public CodeGenerator {
 						"        Assert(wire_type = $wiretype$);\n");
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(vars,
-							"        $pname$.Add($subname$.Create(AProtobufReader,AProtobufReader.readInt32));\n");
+							"        $pname$.Add($subname$.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));\n");
 					} else {
 						printer.Print(vars,
 							"        if not Assigned($pname$) then\n"
@@ -895,7 +901,7 @@ class BaseGenerator : public CodeGenerator {
 				"begin\n"
 				"  Clear;\n"
 				"  for pbobj in APB_$name$List do\n"
-				"    Add(TPB_$name$.Create(pbobj));\n"
+				"    Add(TPB_$name$.Create(pbobj, TRUE));\n"
 				"end;\n\n"
 				,"name",message->name());
 			printer.Print(

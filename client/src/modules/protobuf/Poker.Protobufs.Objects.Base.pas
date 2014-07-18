@@ -9,6 +9,7 @@ type
   TProtobufBaseObject = class
   private
     FProtobufOutput: TProtoBufOutput;
+    FLightweight: Boolean;
 
     function GetProtobufOutputSize: Word;
 
@@ -17,10 +18,10 @@ type
     procedure HookNotifiers; virtual;
 
   public
-    constructor Create; overload;
-    constructor Create(const APointer: pointer; const ASize: Integer); overload;
-    constructor Create(const AStream: TMemoryStream); overload;
-    constructor Create(const AProtobufReader: TProtobufReader; const ASize: Integer); overload;
+    constructor Create(const ALightweight: Boolean = FALSE); overload;
+    constructor Create(const APointer: pointer; const ASize: Integer; const ALightweight: Boolean = FALSE); overload;
+    constructor Create(const AStream: TMemoryStream; const ALightweight: Boolean = FALSE); overload;
+    constructor Create(const AProtobufReader: TProtobufReader; const ASize: Integer; const ALightweight: Boolean = FALSE); overload;
 
     destructor Destroy; override;
 
@@ -29,23 +30,27 @@ type
 
     property ProtobufOutput: TProtoBufOutput read FProtobufOutput;
     property ProtobufOutputSize: Word read GetProtobufOutputSize;
+    property Lightweight: Boolean read FLightweight;
   end;
 
 
 implementation
 
 
-constructor TProtobufBaseObject.Create;
+constructor TProtobufBaseObject.Create(const ALightweight: Boolean = FALSE);
 begin
+  FLightweight := ALightweight;
   InitObjects;
-  FProtobufOutput := TProtobufOutput.Create;
+  if not ALightweight then
+    FProtobufOutput := TProtobufOutput.Create;
   HookNotifiers;
 end;
 
-constructor TProtobufBaseObject.Create(const APointer: pointer; const ASize: Integer);
+constructor TProtobufBaseObject.Create(const APointer: pointer; const ASize: Integer; const ALightweight: Boolean = FALSE);
 var
   protobuf_reader: TProtobufReader;
 begin
+  FLightweight := ALightweight;
   InitObjects;
 
   FProtobufOutput := TProtobufOutput.Create;
@@ -60,8 +65,9 @@ begin
   HookNotifiers;
 end;
 
-constructor TProtobufBaseObject.Create(const AProtobufReader: TProtobufReader; const ASize: Integer);
+constructor TProtobufBaseObject.Create(const AProtobufReader: TProtobufReader; const ASize: Integer; const ALightweight: Boolean = FALSE);
 begin
+  FLightweight := ALightweight;
   InitObjects;
 
   FProtobufOutput := TProtobufOutput.Create;
@@ -71,10 +77,11 @@ begin
   HookNotifiers;
 end;
 
-constructor TProtobufBaseObject.Create(const AStream: TMemoryStream);
+constructor TProtobufBaseObject.Create(const AStream: TMemoryStream; const ALightweight: Boolean = FALSE);
 var
   protobuf_reader: TProtobufReader;
 begin
+  FLightweight := ALightweight;
   InitObjects;
 
   FProtobufOutput := TProtobufOutput.Create;
@@ -91,7 +98,8 @@ end;
 
 destructor TProtobufBaseObject.Destroy;
 begin
-  FProtobufOutput.Free;
+  if Assigned(FProtobufOutput) then
+    FProtobufOutput.Free;
 
   inherited;
 end;

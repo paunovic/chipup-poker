@@ -28,7 +28,7 @@ type
     procedure SetLasthandid(const AValue: UINT32);
 
   public
-    constructor Create(const AFrom: TPB_GameQuery); overload;
+    constructor Create(const AFrom: TPB_GameQuery; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GameQuery);
@@ -57,9 +57,9 @@ uses
 
 
 
-constructor TPB_GameQuery.Create(const AFrom: TPB_GameQuery);
+constructor TPB_GameQuery.Create(const AFrom: TPB_GameQuery; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -131,7 +131,8 @@ procedure TPB_GameQuery.SetGameid(const AValue: TBytes);
 begin
   Assert(not has_Gameid);
   FGameid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
 end;
 
@@ -160,7 +161,8 @@ procedure TPB_GameQuery.SetLasthandid(const AValue: UINT32);
 begin
   Assert(not has_Lasthandid);
   FLasthandid := AValue;
-  ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kLasthandidFieldNumber, AValue);
   set_has_Lasthandid;
 end;
 
@@ -170,7 +172,7 @@ var
 begin
   Clear;
   for pbobj in APB_GameQueryList do
-    Add(TPB_GameQuery.Create(pbobj));
+    Add(TPB_GameQuery.Create(pbobj, TRUE));
 end;
 
 procedure TPB_GameQuery.Clear;

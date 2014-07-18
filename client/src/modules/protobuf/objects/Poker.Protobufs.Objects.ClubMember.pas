@@ -43,7 +43,7 @@ type
     procedure SetUnlimitedLimit(const AValue: Boolean);
 
   public
-    constructor Create(const AFrom: TPB_ClubMember); overload;
+    constructor Create(const AFrom: TPB_ClubMember; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubMember);
@@ -87,9 +87,9 @@ uses
 
 
 
-constructor TPB_ClubMember.Create(const AFrom: TPB_ClubMember);
+constructor TPB_ClubMember.Create(const AFrom: TPB_ClubMember; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -182,7 +182,8 @@ procedure TPB_ClubMember.SetMongoId(const AValue: TBytes);
 begin
   Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
 
@@ -211,7 +212,8 @@ procedure TPB_ClubMember.SetSuspended(const AValue: Boolean);
 begin
   Assert(not has_Suspended);
   FSuspended := AValue;
-  ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kSuspendedFieldNumber, AValue);
   set_has_Suspended;
 end;
 
@@ -240,7 +242,8 @@ procedure TPB_ClubMember.SetBalanceLimit(const AValue: UINT32);
 begin
   Assert(not has_BalanceLimit);
   FBalanceLimit := AValue;
-  ProtobufOutput.writeUInt32(kBalanceLimitFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBalanceLimitFieldNumber, AValue);
   set_has_BalanceLimit;
 end;
 
@@ -269,7 +272,8 @@ procedure TPB_ClubMember.SetClubBalance(const AValue: Integer);
 begin
   Assert(not has_ClubBalance);
   FClubBalance := AValue;
-  ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kClubBalanceFieldNumber, AValue);
   set_has_ClubBalance;
 end;
 
@@ -298,7 +302,8 @@ procedure TPB_ClubMember.SetUnlimitedLimit(const AValue: Boolean);
 begin
   Assert(not has_UnlimitedLimit);
   FUnlimitedLimit := AValue;
-  ProtobufOutput.writeBoolean(kUnlimitedLimitFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kUnlimitedLimitFieldNumber, AValue);
   set_has_UnlimitedLimit;
 end;
 
@@ -308,7 +313,7 @@ var
 begin
   Clear;
   for pbobj in APB_ClubMemberList do
-    Add(TPB_ClubMember.Create(pbobj));
+    Add(TPB_ClubMember.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ClubMember.Clear;

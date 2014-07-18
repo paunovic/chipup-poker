@@ -49,7 +49,7 @@ type
     procedure SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
 
   public
-    constructor Create(const AFrom: TPB_User); overload;
+    constructor Create(const AFrom: TPB_User; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_User);
@@ -98,9 +98,9 @@ uses
 
 
 
-constructor TPB_User.Create(const AFrom: TPB_User);
+constructor TPB_User.Create(const AFrom: TPB_User; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -200,7 +200,8 @@ procedure TPB_User.SetMongoId(const AValue: TBytes);
 begin
   Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
 
@@ -229,7 +230,8 @@ procedure TPB_User.SetAvatar(const AValue: TBytes);
 begin
   Assert(not has_Avatar);
   FAvatar := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kAvatarFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kAvatarFieldNumber, AValue);
   set_has_Avatar;
 end;
 
@@ -258,7 +260,8 @@ procedure TPB_User.SetDisplayname(const AValue: String);
 begin
   Assert(not has_Displayname);
   FDisplayname := AValue;
-  ProtobufOutput.writeString(kDisplaynameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kDisplaynameFieldNumber, AValue);
   set_has_Displayname;
 end;
 
@@ -287,7 +290,8 @@ procedure TPB_User.SetEmail(const AValue: String);
 begin
   Assert(not has_Email);
   FEmail := AValue;
-  ProtobufOutput.writeString(kEmailFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kEmailFieldNumber, AValue);
   set_has_Email;
 end;
 
@@ -316,7 +320,8 @@ procedure TPB_User.SetAuthed(const AValue: Boolean);
 begin
   Assert(not has_Authed);
   FAuthed := AValue;
-  ProtobufOutput.writeBoolean(kAuthedFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kAuthedFieldNumber, AValue);
   set_has_Authed;
 end;
 
@@ -345,7 +350,8 @@ procedure TPB_User.SetSubscriptionPlan(const AValue: TPlayerSubscriptionPlan);
 begin
   Assert(not has_SubscriptionPlan);
   FSubscriptionPlan := AValue;
-  ProtobufOutput.writeInt32(kSubscriptionPlanFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSubscriptionPlanFieldNumber, Integer(AValue));
   set_has_SubscriptionPlan;
 end;
 
@@ -355,7 +361,7 @@ var
 begin
   Clear;
   for pbobj in APB_UserList do
-    Add(TPB_User.Create(pbobj));
+    Add(TPB_User.Create(pbobj, TRUE));
 end;
 
 procedure TPB_User.Clear;

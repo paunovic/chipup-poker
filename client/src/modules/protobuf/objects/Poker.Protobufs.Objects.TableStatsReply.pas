@@ -42,7 +42,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_TableStatsReply); overload;
+    constructor Create(const AFrom: TPB_TableStatsReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableStatsReply);
@@ -91,9 +91,9 @@ begin
   FPlayerstats.OnNotify := PlayerstatsNotifyEvent;
 end;
 
-constructor TPB_TableStatsReply.Create(const AFrom: TPB_TableStatsReply);
+constructor TPB_TableStatsReply.Create(const AFrom: TPB_TableStatsReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -127,7 +127,7 @@ begin
       end;
       kPlayerstatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader,AProtobufReader.readInt32));
+        FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Playerstats;
       end;
       kHandsFieldNumber: begin
@@ -190,7 +190,8 @@ procedure TPB_TableStatsReply.SetClubid(const AValue: TBytes);
 begin
   Assert(not has_Clubid);
   FClubid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;
 
@@ -219,7 +220,8 @@ procedure TPB_TableStatsReply.SetGameid(const AValue: TBytes);
 begin
   Assert(not has_Gameid);
   FGameid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
 end;
 
@@ -248,9 +250,12 @@ procedure TPB_TableStatsReply.PlayerstatsNotifyEvent(Sender: TObject; const Item
 begin
   Assert(Action = cnAdded);
   set_has_Playerstats;
-  ProtobufOutput.writeTag(kPlayerstatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPlayerstatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_TableStatsReply.clear_Hands;
@@ -278,7 +283,8 @@ procedure TPB_TableStatsReply.SetHands(const AValue: UINT32);
 begin
   Assert(not has_Hands);
   FHands := AValue;
-  ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
   set_has_Hands;
 end;
 
@@ -288,7 +294,7 @@ var
 begin
   Clear;
   for pbobj in APB_TableStatsReplyList do
-    Add(TPB_TableStatsReply.Create(pbobj));
+    Add(TPB_TableStatsReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_TableStatsReply.Clear;

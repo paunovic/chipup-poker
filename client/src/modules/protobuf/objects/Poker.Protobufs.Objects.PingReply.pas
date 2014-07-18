@@ -28,7 +28,7 @@ type
     procedure SetServertime(const AValue: UInt64);
 
   public
-    constructor Create(const AFrom: TPB_PingReply); overload;
+    constructor Create(const AFrom: TPB_PingReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PingReply);
@@ -57,9 +57,9 @@ uses
 
 
 
-constructor TPB_PingReply.Create(const AFrom: TPB_PingReply);
+constructor TPB_PingReply.Create(const AFrom: TPB_PingReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -131,7 +131,8 @@ procedure TPB_PingReply.SetUptime(const AValue: UINT32);
 begin
   Assert(not has_Uptime);
   FUptime := AValue;
-  ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kUptimeFieldNumber, AValue);
   set_has_Uptime;
 end;
 
@@ -160,7 +161,8 @@ procedure TPB_PingReply.SetServertime(const AValue: UInt64);
 begin
   Assert(not has_Servertime);
   FServertime := AValue;
-  ProtobufOutput.WriteInt64(kServertimeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.WriteInt64(kServertimeFieldNumber, AValue);
   set_has_Servertime;
 end;
 
@@ -170,7 +172,7 @@ var
 begin
   Clear;
   for pbobj in APB_PingReplyList do
-    Add(TPB_PingReply.Create(pbobj));
+    Add(TPB_PingReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_PingReply.Clear;

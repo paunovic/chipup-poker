@@ -37,7 +37,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_ClubHandHistoryReply); overload;
+    constructor Create(const AFrom: TPB_ClubHandHistoryReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubHandHistoryReply);
@@ -81,9 +81,9 @@ begin
   FRows.OnNotify := RowsNotifyEvent;
 end;
 
-constructor TPB_ClubHandHistoryReply.Create(const AFrom: TPB_ClubHandHistoryReply);
+constructor TPB_ClubHandHistoryReply.Create(const AFrom: TPB_ClubHandHistoryReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -117,7 +117,7 @@ begin
       end;
       kRowsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FRows.Add(TPB_HandHistory.Create(AProtobufReader,AProtobufReader.readInt32));
+        FRows.Add(TPB_HandHistory.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Rows;
       end;
     else
@@ -173,7 +173,8 @@ procedure TPB_ClubHandHistoryReply.SetClubid(const AValue: TBytes);
 begin
   Assert(not has_Clubid);
   FClubid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;
 
@@ -202,7 +203,8 @@ procedure TPB_ClubHandHistoryReply.SetGameid(const AValue: TBytes);
 begin
   Assert(not has_Gameid);
   FGameid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
 end;
 
@@ -231,9 +233,12 @@ procedure TPB_ClubHandHistoryReply.RowsNotifyEvent(Sender: TObject; const Item: 
 begin
   Assert(Action = cnAdded);
   set_has_Rows;
-  ProtobufOutput.writeTag(kRowsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kRowsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_ClubHandHistoryReplyList.Assign(const APB_ClubHandHistoryReplyList: TList<TPB_ClubHandHistoryReply>);
@@ -242,7 +247,7 @@ var
 begin
   Clear;
   for pbobj in APB_ClubHandHistoryReplyList do
-    Add(TPB_ClubHandHistoryReply.Create(pbobj));
+    Add(TPB_ClubHandHistoryReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ClubHandHistoryReply.Clear;

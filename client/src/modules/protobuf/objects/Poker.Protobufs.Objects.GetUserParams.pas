@@ -32,7 +32,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_GetUserParams); overload;
+    constructor Create(const AFrom: TPB_GetUserParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_GetUserParams);
@@ -73,9 +73,9 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
 end;
 
-constructor TPB_GetUserParams.Create(const AFrom: TPB_GetUserParams);
+constructor TPB_GetUserParams.Create(const AFrom: TPB_GetUserParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -109,7 +109,7 @@ begin
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Users;
       end;
     else
@@ -162,7 +162,8 @@ procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item:
 begin
   Assert(Action = cnAdded);
   set_has_UserMongoIds;
-  ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber,Item);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber,Item);
 end;
 
 procedure TPB_GetUserParams.clear_Users;
@@ -190,9 +191,12 @@ procedure TPB_GetUserParams.UsersNotifyEvent(Sender: TObject; const Item: TPB_Us
 begin
   Assert(Action = cnAdded);
   set_has_Users;
-  ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_GetUserParamsList.Assign(const APB_GetUserParamsList: TList<TPB_GetUserParams>);
@@ -201,7 +205,7 @@ var
 begin
   Clear;
   for pbobj in APB_GetUserParamsList do
-    Add(TPB_GetUserParams.Create(pbobj));
+    Add(TPB_GetUserParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_GetUserParams.Clear;

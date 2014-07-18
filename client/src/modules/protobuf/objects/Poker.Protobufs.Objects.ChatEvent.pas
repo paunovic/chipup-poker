@@ -34,7 +34,7 @@ type
     procedure SetTableId(const AValue: TBytes);
 
   public
-    constructor Create(const AFrom: TPB_ChatEvent); overload;
+    constructor Create(const AFrom: TPB_ChatEvent; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatEvent);
@@ -68,9 +68,9 @@ uses
 
 
 
-constructor TPB_ChatEvent.Create(const AFrom: TPB_ChatEvent);
+constructor TPB_ChatEvent.Create(const AFrom: TPB_ChatEvent; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -155,7 +155,8 @@ procedure TPB_ChatEvent.SetEvent(const AValue: TEventType);
 begin
   Assert(not has_Event);
   FEvent := AValue;
-  ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
   set_has_Event;
 end;
 
@@ -184,7 +185,8 @@ procedure TPB_ChatEvent.SetMsg(const AValue: TPB_ChatMessage);
 begin
   Assert(not has_Msg);
   FMsg := AValue;
-  ProtobufOutput.writeMessage(kMsgFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kMsgFieldNumber, AValue.ProtobufOutput);
   set_has_Msg;
 end;
 
@@ -213,7 +215,8 @@ procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);
 begin
   Assert(not has_TableId);
   FTableId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
   set_has_TableId;
 end;
 
@@ -223,7 +226,7 @@ var
 begin
   Clear;
   for pbobj in APB_ChatEventList do
-    Add(TPB_ChatEvent.Create(pbobj));
+    Add(TPB_ChatEvent.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ChatEvent.Clear;

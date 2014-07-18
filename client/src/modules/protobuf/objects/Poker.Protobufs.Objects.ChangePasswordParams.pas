@@ -23,7 +23,7 @@ type
     procedure SetNewPassword(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_ChangePasswordParams); overload;
+    constructor Create(const AFrom: TPB_ChangePasswordParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangePasswordParams);
@@ -47,9 +47,9 @@ uses
 
 
 
-constructor TPB_ChangePasswordParams.Create(const AFrom: TPB_ChangePasswordParams);
+constructor TPB_ChangePasswordParams.Create(const AFrom: TPB_ChangePasswordParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -114,7 +114,8 @@ procedure TPB_ChangePasswordParams.SetNewPassword(const AValue: String);
 begin
   Assert(not has_NewPassword);
   FNewPassword := AValue;
-  ProtobufOutput.writeString(kNewPasswordFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kNewPasswordFieldNumber, AValue);
   set_has_NewPassword;
 end;
 
@@ -124,7 +125,7 @@ var
 begin
   Clear;
   for pbobj in APB_ChangePasswordParamsList do
-    Add(TPB_ChangePasswordParams.Create(pbobj));
+    Add(TPB_ChangePasswordParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ChangePasswordParams.Clear;

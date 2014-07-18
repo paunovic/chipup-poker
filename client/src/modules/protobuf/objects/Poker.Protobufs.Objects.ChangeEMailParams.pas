@@ -23,7 +23,7 @@ type
     procedure SetNewMail(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_ChangeEMailParams); overload;
+    constructor Create(const AFrom: TPB_ChangeEMailParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeEMailParams);
@@ -47,9 +47,9 @@ uses
 
 
 
-constructor TPB_ChangeEMailParams.Create(const AFrom: TPB_ChangeEMailParams);
+constructor TPB_ChangeEMailParams.Create(const AFrom: TPB_ChangeEMailParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -114,7 +114,8 @@ procedure TPB_ChangeEMailParams.SetNewMail(const AValue: String);
 begin
   Assert(not has_NewMail);
   FNewMail := AValue;
-  ProtobufOutput.writeString(kNewMailFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kNewMailFieldNumber, AValue);
   set_has_NewMail;
 end;
 
@@ -124,7 +125,7 @@ var
 begin
   Clear;
   for pbobj in APB_ChangeEMailParamsList do
-    Add(TPB_ChangeEMailParams.Create(pbobj));
+    Add(TPB_ChangeEMailParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ChangeEMailParams.Clear;

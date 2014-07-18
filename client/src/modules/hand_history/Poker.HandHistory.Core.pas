@@ -60,7 +60,6 @@ function THandHistory.Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply):
 var
   pbhh: TPB_HandHistory;
   hhis: THandHistoryItems;
-  hhi: THandHistoryItem;
 begin
   FLock.Enter;
   try
@@ -72,13 +71,7 @@ begin
     end;
 
     for pbhh in AClubHandHistoryInfo.Rows do
-      if not hhis.GetAndLockHand(pbhh.Seq, hhi) then
-        hhis.AddHand(pbhh)
-      else
-      begin
-        hhi.Assign(pbhh);
-        hhis.Unlock;
-      end;
+      hhis.AddHand(pbhh);
 
     Exit(TRUE);
   finally

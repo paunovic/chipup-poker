@@ -24,7 +24,7 @@ type
     procedure SetStatus(const AValue: TRegisterStatus);
 
   public
-    constructor Create(const AFrom: TPB_RegisterReply); overload;
+    constructor Create(const AFrom: TPB_RegisterReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RegisterReply);
@@ -48,9 +48,9 @@ uses
 
 
 
-constructor TPB_RegisterReply.Create(const AFrom: TPB_RegisterReply);
+constructor TPB_RegisterReply.Create(const AFrom: TPB_RegisterReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -115,7 +115,8 @@ procedure TPB_RegisterReply.SetStatus(const AValue: TRegisterStatus);
 begin
   Assert(not has_Status);
   FStatus := AValue;
-  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
 end;
 
@@ -125,7 +126,7 @@ var
 begin
   Clear;
   for pbobj in APB_RegisterReplyList do
-    Add(TPB_RegisterReply.Create(pbobj));
+    Add(TPB_RegisterReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_RegisterReply.Clear;

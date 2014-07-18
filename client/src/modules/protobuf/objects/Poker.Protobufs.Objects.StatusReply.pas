@@ -42,7 +42,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_StatusReply); overload;
+    constructor Create(const AFrom: TPB_StatusReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_StatusReply);
@@ -95,9 +95,9 @@ begin
   FGames.OnNotify := GamesNotifyEvent;
 end;
 
-constructor TPB_StatusReply.Create(const AFrom: TPB_StatusReply);
+constructor TPB_StatusReply.Create(const AFrom: TPB_StatusReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -133,12 +133,12 @@ begin
     case field_number of
       kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
+        FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Clubs;
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32));
+        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Users;
       end;
       kSelfFieldNumber: begin
@@ -150,7 +150,7 @@ begin
       end;
       kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
+        FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Games;
       end;
     else
@@ -216,9 +216,12 @@ procedure TPB_StatusReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club
 begin
   Assert(Action = cnAdded);
   set_has_Clubs;
-  ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_StatusReply.clear_Users;
@@ -246,9 +249,12 @@ procedure TPB_StatusReply.UsersNotifyEvent(Sender: TObject; const Item: TPB_User
 begin
   Assert(Action = cnAdded);
   set_has_Users;
-  ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_StatusReply.clear_Self;
@@ -276,7 +282,8 @@ procedure TPB_StatusReply.SetSelf(const AValue: TPB_User);
 begin
   Assert(not has_Self);
   FSelf := AValue;
-  ProtobufOutput.writeMessage(kSelfFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kSelfFieldNumber, AValue.ProtobufOutput);
   set_has_Self;
 end;
 
@@ -305,9 +312,12 @@ procedure TPB_StatusReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game
 begin
   Assert(Action = cnAdded);
   set_has_Games;
-  ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_StatusReplyList.Assign(const APB_StatusReplyList: TList<TPB_StatusReply>);
@@ -316,7 +326,7 @@ var
 begin
   Clear;
   for pbobj in APB_StatusReplyList do
-    Add(TPB_StatusReply.Create(pbobj));
+    Add(TPB_StatusReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_StatusReply.Clear;

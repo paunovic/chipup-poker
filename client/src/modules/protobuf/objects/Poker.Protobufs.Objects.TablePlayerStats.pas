@@ -62,7 +62,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_TablePlayerStats); overload;
+    constructor Create(const AFrom: TPB_TablePlayerStats; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TablePlayerStats);
@@ -133,9 +133,9 @@ begin
   FCashouts.OnNotify := CashoutsNotifyEvent;
 end;
 
-constructor TPB_TablePlayerStats.Create(const AFrom: TPB_TablePlayerStats);
+constructor TPB_TablePlayerStats.Create(const AFrom: TPB_TablePlayerStats; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -257,7 +257,8 @@ procedure TPB_TablePlayerStats.SetUserid(const AValue: TBytes);
 begin
   Assert(not has_Userid);
   FUserid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
   set_has_Userid;
 end;
 
@@ -286,7 +287,8 @@ procedure TPB_TablePlayerStats.SetBalance(const AValue: Integer);
 begin
   Assert(not has_Balance);
   FBalance := AValue;
-  ProtobufOutput.writeInt32(kBalanceFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kBalanceFieldNumber, AValue);
   set_has_Balance;
 end;
 
@@ -315,7 +317,8 @@ procedure TPB_TablePlayerStats.BuyinsNotifyEvent(Sender: TObject; const Item: UI
 begin
   Assert(Action = cnAdded);
   set_has_Buyins;
-  ProtobufOutput.writeUInt32(kBuyinsFieldNumber,Item);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBuyinsFieldNumber,Item);
 end;
 
 procedure TPB_TablePlayerStats.clear_Cashouts;
@@ -343,7 +346,8 @@ procedure TPB_TablePlayerStats.CashoutsNotifyEvent(Sender: TObject; const Item: 
 begin
   Assert(Action = cnAdded);
   set_has_Cashouts;
-  ProtobufOutput.writeUInt32(kCashoutsFieldNumber,Item);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kCashoutsFieldNumber,Item);
 end;
 
 procedure TPB_TablePlayerStats.clear_Rakecontrib;
@@ -371,7 +375,8 @@ procedure TPB_TablePlayerStats.SetRakecontrib(const AValue: UINT32);
 begin
   Assert(not has_Rakecontrib);
   FRakecontrib := AValue;
-  ProtobufOutput.writeUInt32(kRakecontribFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kRakecontribFieldNumber, AValue);
   set_has_Rakecontrib;
 end;
 
@@ -400,7 +405,8 @@ procedure TPB_TablePlayerStats.SetSecondsplayed(const AValue: UINT32);
 begin
   Assert(not has_Secondsplayed);
   FSecondsplayed := AValue;
-  ProtobufOutput.writeUInt32(kSecondsplayedFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kSecondsplayedFieldNumber, AValue);
   set_has_Secondsplayed;
 end;
 
@@ -429,7 +435,8 @@ procedure TPB_TablePlayerStats.SetChipsinplay(const AValue: UINT32);
 begin
   Assert(not has_Chipsinplay);
   FChipsinplay := AValue;
-  ProtobufOutput.writeUInt32(kChipsinplayFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kChipsinplayFieldNumber, AValue);
   set_has_Chipsinplay;
 end;
 
@@ -458,7 +465,8 @@ procedure TPB_TablePlayerStats.SetHands(const AValue: UINT32);
 begin
   Assert(not has_Hands);
   FHands := AValue;
-  ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kHandsFieldNumber, AValue);
   set_has_Hands;
 end;
 
@@ -468,7 +476,7 @@ var
 begin
   Clear;
   for pbobj in APB_TablePlayerStatsList do
-    Add(TPB_TablePlayerStats.Create(pbobj));
+    Add(TPB_TablePlayerStats.Create(pbobj, TRUE));
 end;
 
 procedure TPB_TablePlayerStats.Clear;

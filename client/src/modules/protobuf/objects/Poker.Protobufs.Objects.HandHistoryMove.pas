@@ -47,7 +47,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_HandHistoryMove); overload;
+    constructor Create(const AFrom: TPB_HandHistoryMove; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HandHistoryMove);
@@ -105,9 +105,9 @@ begin
   FPots.OnNotify := PotsNotifyEvent;
 end;
 
-constructor TPB_HandHistoryMove.Create(const AFrom: TPB_HandHistoryMove);
+constructor TPB_HandHistoryMove.Create(const AFrom: TPB_HandHistoryMove; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -156,12 +156,12 @@ begin
       end;
       kWinnerPotDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FWinnerPotData.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
+        FWinnerPotData.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_WinnerPotData;
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
+        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Pots;
       end;
     else
@@ -250,7 +250,8 @@ procedure TPB_HandHistoryMove.SetBet(const AValue: UINT32);
 begin
   Assert(not has_Bet);
   FBet := AValue;
-  ProtobufOutput.writeUInt32(kBetFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBetFieldNumber, AValue);
   set_has_Bet;
 end;
 
@@ -279,7 +280,8 @@ procedure TPB_HandHistoryMove.SetSeat(const AValue: Integer);
 begin
   Assert(not has_Seat);
   FSeat := AValue;
-  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
 end;
 
@@ -308,9 +310,12 @@ procedure TPB_HandHistoryMove.WinnerPotDataNotifyEvent(Sender: TObject; const It
 begin
   Assert(Action = cnAdded);
   set_has_WinnerPotData;
-  ProtobufOutput.writeTag(kWinnerPotDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kWinnerPotDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_HandHistoryMove.clear_Pots;
@@ -338,9 +343,12 @@ procedure TPB_HandHistoryMove.PotsNotifyEvent(Sender: TObject; const Item: TPB_P
 begin
   Assert(Action = cnAdded);
   set_has_Pots;
-  ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_HandHistoryMoveList.Assign(const APB_HandHistoryMoveList: TList<TPB_HandHistoryMove>);
@@ -349,7 +357,7 @@ var
 begin
   Clear;
   for pbobj in APB_HandHistoryMoveList do
-    Add(TPB_HandHistoryMove.Create(pbobj));
+    Add(TPB_HandHistoryMove.Create(pbobj, TRUE));
 end;
 
 procedure TPB_HandHistoryMove.Clear;

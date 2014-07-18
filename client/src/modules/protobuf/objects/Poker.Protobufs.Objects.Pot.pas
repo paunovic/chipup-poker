@@ -42,7 +42,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_Pot); overload;
+    constructor Create(const AFrom: TPB_Pot; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_Pot);
@@ -93,9 +93,9 @@ begin
   FWinnerData.OnNotify := WinnerDataNotifyEvent;
 end;
 
-constructor TPB_Pot.Create(const AFrom: TPB_Pot);
+constructor TPB_Pot.Create(const AFrom: TPB_Pot; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -134,7 +134,7 @@ begin
       end;
       kWinnerDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32));
+        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_WinnerData;
       end;
       kRakeFieldNumber: begin
@@ -196,7 +196,8 @@ procedure TPB_Pot.SetValue(const AValue: UINT32);
 begin
   Assert(not has_Value);
   FValue := AValue;
-  ProtobufOutput.writeUInt32(kValueFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kValueFieldNumber, AValue);
   set_has_Value;
 end;
 
@@ -225,7 +226,8 @@ procedure TPB_Pot.MembersNotifyEvent(Sender: TObject; const Item: Integer; Actio
 begin
   Assert(Action = cnAdded);
   set_has_Members;
-  ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
 end;
 
 procedure TPB_Pot.clear_WinnerData;
@@ -253,9 +255,12 @@ procedure TPB_Pot.WinnerDataNotifyEvent(Sender: TObject; const Item: TPB_WinnerD
 begin
   Assert(Action = cnAdded);
   set_has_WinnerData;
-  ProtobufOutput.writeTag(kWinnerDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kWinnerDataFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_Pot.clear_Rake;
@@ -283,7 +288,8 @@ procedure TPB_Pot.SetRake(const AValue: UINT32);
 begin
   Assert(not has_Rake);
   FRake := AValue;
-  ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kRakeFieldNumber, AValue);
   set_has_Rake;
 end;
 
@@ -293,7 +299,7 @@ var
 begin
   Clear;
   for pbobj in APB_PotList do
-    Add(TPB_Pot.Create(pbobj));
+    Add(TPB_Pot.Create(pbobj, TRUE));
 end;
 
 procedure TPB_Pot.Clear;

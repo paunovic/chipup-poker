@@ -38,7 +38,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_ClubCommandReply); overload;
+    constructor Create(const AFrom: TPB_ClubCommandReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubCommandReply);
@@ -82,9 +82,9 @@ begin
   FGames.OnNotify := GamesNotifyEvent;
 end;
 
-constructor TPB_ClubCommandReply.Create(const AFrom: TPB_ClubCommandReply);
+constructor TPB_ClubCommandReply.Create(const AFrom: TPB_ClubCommandReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -121,7 +121,7 @@ begin
       end;
       kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32));
+        FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Games;
       end;
     else
@@ -179,7 +179,8 @@ procedure TPB_ClubCommandReply.SetStatus(const AValue: TClubStatus);
 begin
   Assert(not has_Status);
   FStatus := AValue;
-  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
 end;
 
@@ -208,7 +209,8 @@ procedure TPB_ClubCommandReply.SetClub(const AValue: TPB_Club);
 begin
   Assert(not has_Club);
   FClub := AValue;
-  ProtobufOutput.writeMessage(kClubFieldNumber, AValue.ProtobufOutput);
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kClubFieldNumber, AValue.ProtobufOutput);
   set_has_Club;
 end;
 
@@ -237,9 +239,12 @@ procedure TPB_ClubCommandReply.GamesNotifyEvent(Sender: TObject; const Item: TPB
 begin
   Assert(Action = cnAdded);
   set_has_Games;
-  ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_ClubCommandReplyList.Assign(const APB_ClubCommandReplyList: TList<TPB_ClubCommandReply>);
@@ -248,7 +253,7 @@ var
 begin
   Clear;
   for pbobj in APB_ClubCommandReplyList do
-    Add(TPB_ClubCommandReply.Create(pbobj));
+    Add(TPB_ClubCommandReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ClubCommandReply.Clear;

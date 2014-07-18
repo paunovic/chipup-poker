@@ -69,7 +69,7 @@ type
     procedure SetCanShow(const AValue: Boolean);
 
   public
-    constructor Create(const AFrom: TPB_SeatInfo); overload;
+    constructor Create(const AFrom: TPB_SeatInfo; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_SeatInfo);
@@ -138,9 +138,9 @@ uses
 
 
 
-constructor TPB_SeatInfo.Create(const AFrom: TPB_SeatInfo);
+constructor TPB_SeatInfo.Create(const AFrom: TPB_SeatInfo; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -268,7 +268,8 @@ procedure TPB_SeatInfo.SetSeat(const AValue: Integer);
 begin
   Assert(not has_Seat);
   FSeat := AValue;
-  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
 end;
 
@@ -297,7 +298,8 @@ procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TBytes);
 begin
   Assert(not has_PlayerMongoId);
   FPlayerMongoId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
   set_has_PlayerMongoId;
 end;
 
@@ -326,7 +328,8 @@ procedure TPB_SeatInfo.SetChips(const AValue: UINT32);
 begin
   Assert(not has_Chips);
   FChips := AValue;
-  ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;
 end;
 
@@ -355,7 +358,8 @@ procedure TPB_SeatInfo.SetCardCount(const AValue: Integer);
 begin
   Assert(not has_CardCount);
   FCardCount := AValue;
-  ProtobufOutput.writeInt32(kCardCountFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kCardCountFieldNumber, AValue);
   set_has_CardCount;
 end;
 
@@ -384,7 +388,8 @@ procedure TPB_SeatInfo.SetCards(const AValue: TBytes);
 begin
   Assert(not has_Cards);
   FCards := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
 end;
 
@@ -413,7 +418,8 @@ procedure TPB_SeatInfo.SetStatus(const AValue: TPlayerStatus);
 begin
   Assert(not has_Status);
   FStatus := AValue;
-  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
 end;
 
@@ -442,7 +448,8 @@ procedure TPB_SeatInfo.SetTimebank(const AValue: UINT32);
 begin
   Assert(not has_Timebank);
   FTimebank := AValue;
-  ProtobufOutput.writeUInt32(kTimebankFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kTimebankFieldNumber, AValue);
   set_has_Timebank;
 end;
 
@@ -471,7 +478,8 @@ procedure TPB_SeatInfo.SetCardsVisible(const AValue: Boolean);
 begin
   Assert(not has_CardsVisible);
   FCardsVisible := AValue;
-  ProtobufOutput.writeBoolean(kCardsVisibleFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kCardsVisibleFieldNumber, AValue);
   set_has_CardsVisible;
 end;
 
@@ -500,7 +508,8 @@ procedure TPB_SeatInfo.SetDisconnected(const AValue: Boolean);
 begin
   Assert(not has_Disconnected);
   FDisconnected := AValue;
-  ProtobufOutput.writeBoolean(kDisconnectedFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kDisconnectedFieldNumber, AValue);
   set_has_Disconnected;
 end;
 
@@ -529,7 +538,8 @@ procedure TPB_SeatInfo.SetCanShow(const AValue: Boolean);
 begin
   Assert(not has_CanShow);
   FCanShow := AValue;
-  ProtobufOutput.writeBoolean(kCanShowFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kCanShowFieldNumber, AValue);
   set_has_CanShow;
 end;
 
@@ -539,7 +549,7 @@ var
 begin
   Clear;
   for pbobj in APB_SeatInfoList do
-    Add(TPB_SeatInfo.Create(pbobj));
+    Add(TPB_SeatInfo.Create(pbobj, TRUE));
 end;
 
 procedure TPB_SeatInfo.Clear;

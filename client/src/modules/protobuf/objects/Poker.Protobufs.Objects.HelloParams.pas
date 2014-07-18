@@ -32,7 +32,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_HelloParams); overload;
+    constructor Create(const AFrom: TPB_HelloParams; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_HelloParams);
@@ -71,9 +71,9 @@ begin
   FFiles.OnNotify := FilesNotifyEvent;
 end;
 
-constructor TPB_HelloParams.Create(const AFrom: TPB_HelloParams);
+constructor TPB_HelloParams.Create(const AFrom: TPB_HelloParams; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -102,7 +102,7 @@ begin
       end;
       kFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32));
+        FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Files;
       end;
     else
@@ -156,7 +156,8 @@ procedure TPB_HelloParams.SetDebug(const AValue: Boolean);
 begin
   Assert(not has_Debug);
   FDebug := AValue;
-  ProtobufOutput.writeBoolean(kDebugFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBoolean(kDebugFieldNumber, AValue);
   set_has_Debug;
 end;
 
@@ -185,9 +186,12 @@ procedure TPB_HelloParams.FilesNotifyEvent(Sender: TObject; const Item: TPB_Upda
 begin
   Assert(Action = cnAdded);
   set_has_Files;
-  ProtobufOutput.writeTag(kFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kFilesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_HelloParamsList.Assign(const APB_HelloParamsList: TList<TPB_HelloParams>);
@@ -196,7 +200,7 @@ var
 begin
   Clear;
   for pbobj in APB_HelloParamsList do
-    Add(TPB_HelloParams.Create(pbobj));
+    Add(TPB_HelloParams.Create(pbobj, TRUE));
 end;
 
 procedure TPB_HelloParams.Clear;

@@ -27,7 +27,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_ListClubsReply); overload;
+    constructor Create(const AFrom: TPB_ListClubsReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ListClubsReply);
@@ -61,9 +61,9 @@ begin
   FClubs.OnNotify := ClubsNotifyEvent;
 end;
 
-constructor TPB_ListClubsReply.Create(const AFrom: TPB_ListClubsReply);
+constructor TPB_ListClubsReply.Create(const AFrom: TPB_ListClubsReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -87,7 +87,7 @@ begin
     case field_number of
       kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32));
+        FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Clubs;
       end;
     else
@@ -139,9 +139,12 @@ procedure TPB_ListClubsReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_C
 begin
   Assert(Action = cnAdded);
   set_has_Clubs;
-  ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_ListClubsReplyList.Assign(const APB_ListClubsReplyList: TList<TPB_ListClubsReply>);
@@ -150,7 +153,7 @@ var
 begin
   Clear;
   for pbobj in APB_ListClubsReplyList do
-    Add(TPB_ListClubsReply.Create(pbobj));
+    Add(TPB_ListClubsReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ListClubsReply.Clear;

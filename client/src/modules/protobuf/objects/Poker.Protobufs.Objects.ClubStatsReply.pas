@@ -32,7 +32,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_ClubStatsReply); overload;
+    constructor Create(const AFrom: TPB_ClubStatsReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ClubStatsReply);
@@ -71,9 +71,9 @@ begin
   FPlayerStats.OnNotify := PlayerStatsNotifyEvent;
 end;
 
-constructor TPB_ClubStatsReply.Create(const AFrom: TPB_ClubStatsReply);
+constructor TPB_ClubStatsReply.Create(const AFrom: TPB_ClubStatsReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -102,7 +102,7 @@ begin
       end;
       kPlayerStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader,AProtobufReader.readInt32));
+        FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_PlayerStats;
       end;
     else
@@ -156,7 +156,8 @@ procedure TPB_ClubStatsReply.SetClubid(const AValue: TBytes);
 begin
   Assert(not has_Clubid);
   FClubid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
   set_has_Clubid;
 end;
 
@@ -185,9 +186,12 @@ procedure TPB_ClubStatsReply.PlayerStatsNotifyEvent(Sender: TObject; const Item:
 begin
   Assert(Action = cnAdded);
   set_has_PlayerStats;
-  ProtobufOutput.writeTag(kPlayerStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPlayerStatsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_ClubStatsReplyList.Assign(const APB_ClubStatsReplyList: TList<TPB_ClubStatsReply>);
@@ -196,7 +200,7 @@ var
 begin
   Clear;
   for pbobj in APB_ClubStatsReplyList do
-    Add(TPB_ClubStatsReply.Create(pbobj));
+    Add(TPB_ClubStatsReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ClubStatsReply.Clear;

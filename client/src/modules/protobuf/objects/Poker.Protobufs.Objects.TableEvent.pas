@@ -48,7 +48,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_TableEvent); overload;
+    constructor Create(const AFrom: TPB_TableEvent; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableEvent);
@@ -104,9 +104,9 @@ begin
   FBets.OnNotify := BetsNotifyEvent;
 end;
 
-constructor TPB_TableEvent.Create(const AFrom: TPB_TableEvent);
+constructor TPB_TableEvent.Create(const AFrom: TPB_TableEvent; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -145,7 +145,7 @@ begin
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32));
+        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
         set_has_Pots;
       end;
       kBetsFieldNumber: begin
@@ -214,7 +214,8 @@ procedure TPB_TableEvent.SetEvent(const AValue: TTableEventType);
 begin
   Assert(not has_Event);
   FEvent := AValue;
-  ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kEventFieldNumber, Integer(AValue));
   set_has_Event;
 end;
 
@@ -243,7 +244,8 @@ procedure TPB_TableEvent.SetSeat(const AValue: Integer);
 begin
   Assert(not has_Seat);
   FSeat := AValue;
-  ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSeatFieldNumber, AValue);
   set_has_Seat;
 end;
 
@@ -272,9 +274,12 @@ procedure TPB_TableEvent.PotsNotifyEvent(Sender: TObject; const Item: TPB_Pot; A
 begin
   Assert(Action = cnAdded);
   set_has_Pots;
-  ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
-  ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
-  Item.ProtobufOutput.writeTo(ProtobufOutput);
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPotsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
 end;
 
 procedure TPB_TableEvent.clear_Bets;
@@ -302,7 +307,8 @@ procedure TPB_TableEvent.BetsNotifyEvent(Sender: TObject; const Item: UINT32; Ac
 begin
   Assert(Action = cnAdded);
   set_has_Bets;
-  ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
 end;
 
 procedure TPB_TableEvent.clear_Cards;
@@ -330,7 +336,8 @@ procedure TPB_TableEvent.SetCards(const AValue: TBytes);
 begin
   Assert(not has_Cards);
   FCards := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kCardsFieldNumber, AValue);
   set_has_Cards;
 end;
 
@@ -340,7 +347,7 @@ var
 begin
   Clear;
   for pbobj in APB_TableEventList do
-    Add(TPB_TableEvent.Create(pbobj));
+    Add(TPB_TableEvent.Create(pbobj, TRUE));
 end;
 
 procedure TPB_TableEvent.Clear;

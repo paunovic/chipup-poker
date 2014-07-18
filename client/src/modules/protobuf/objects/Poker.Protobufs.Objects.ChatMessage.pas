@@ -38,7 +38,7 @@ type
     procedure SetTimestamp(const AValue: Int64);
 
   public
-    constructor Create(const AFrom: TPB_ChatMessage); overload;
+    constructor Create(const AFrom: TPB_ChatMessage; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChatMessage);
@@ -77,9 +77,9 @@ uses
 
 
 
-constructor TPB_ChatMessage.Create(const AFrom: TPB_ChatMessage);
+constructor TPB_ChatMessage.Create(const AFrom: TPB_ChatMessage; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -165,7 +165,8 @@ procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
 begin
   Assert(not has_MongoId);
   FId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
   set_has_MongoId;
 end;
 
@@ -194,7 +195,8 @@ procedure TPB_ChatMessage.SetUsername(const AValue: String);
 begin
   Assert(not has_Username);
   FUsername := AValue;
-  ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kUsernameFieldNumber, AValue);
   set_has_Username;
 end;
 
@@ -223,7 +225,8 @@ procedure TPB_ChatMessage.SetMsg(const AValue: String);
 begin
   Assert(not has_Msg);
   FMsg := AValue;
-  ProtobufOutput.writeString(kMsgFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kMsgFieldNumber, AValue);
   set_has_Msg;
 end;
 
@@ -252,7 +255,8 @@ procedure TPB_ChatMessage.SetTimestamp(const AValue: Int64);
 begin
   Assert(not has_Timestamp);
   FTimestamp := AValue;
-  ProtobufOutput.WriteInt64(kTimestampFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.WriteInt64(kTimestampFieldNumber, AValue);
   set_has_Timestamp;
 end;
 
@@ -262,7 +266,7 @@ var
 begin
   Clear;
   for pbobj in APB_ChatMessageList do
-    Add(TPB_ChatMessage.Create(pbobj));
+    Add(TPB_ChatMessage.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ChatMessage.Clear;

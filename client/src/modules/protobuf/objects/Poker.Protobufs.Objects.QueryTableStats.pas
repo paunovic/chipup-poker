@@ -27,7 +27,7 @@ type
     procedure HookNotifiers; override;
 
   public
-    constructor Create(const AFrom: TPB_QueryTableStats); overload;
+    constructor Create(const AFrom: TPB_QueryTableStats; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_QueryTableStats);
@@ -61,9 +61,9 @@ begin
   FGameid.OnNotify := GameidNotifyEvent;
 end;
 
-constructor TPB_QueryTableStats.Create(const AFrom: TPB_QueryTableStats);
+constructor TPB_QueryTableStats.Create(const AFrom: TPB_QueryTableStats; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -132,7 +132,8 @@ procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBy
 begin
   Assert(Action = cnAdded);
   set_has_Gameid;
-  ProtobufOutput.writeBytes(kGameidFieldNumber,Item);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kGameidFieldNumber,Item);
 end;
 
 procedure TPB_QueryTableStatsList.Assign(const APB_QueryTableStatsList: TList<TPB_QueryTableStats>);
@@ -141,7 +142,7 @@ var
 begin
   Clear;
   for pbobj in APB_QueryTableStatsList do
-    Add(TPB_QueryTableStats.Create(pbobj));
+    Add(TPB_QueryTableStats.Create(pbobj, TRUE));
 end;
 
 procedure TPB_QueryTableStats.Clear;

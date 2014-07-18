@@ -33,7 +33,7 @@ type
     procedure SetChips(const AValue: UINT32);
 
   public
-    constructor Create(const AFrom: TPB_TableSit); overload;
+    constructor Create(const AFrom: TPB_TableSit; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_TableSit);
@@ -67,9 +67,9 @@ uses
 
 
 
-constructor TPB_TableSit.Create(const AFrom: TPB_TableSit);
+constructor TPB_TableSit.Create(const AFrom: TPB_TableSit; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -148,7 +148,8 @@ procedure TPB_TableSit.SetGameId(const AValue: TBytes);
 begin
   Assert(not has_GameId);
   FGameId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
   set_has_GameId;
 end;
 
@@ -177,7 +178,8 @@ procedure TPB_TableSit.SetSeatIndex(const AValue: Integer);
 begin
   Assert(not has_SeatIndex);
   FSeatIndex := AValue;
-  ProtobufOutput.writeInt32(kSeatIndexFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kSeatIndexFieldNumber, AValue);
   set_has_SeatIndex;
 end;
 
@@ -206,7 +208,8 @@ procedure TPB_TableSit.SetChips(const AValue: UINT32);
 begin
   Assert(not has_Chips);
   FChips := AValue;
-  ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kChipsFieldNumber, AValue);
   set_has_Chips;
 end;
 
@@ -216,7 +219,7 @@ var
 begin
   Clear;
   for pbobj in APB_TableSitList do
-    Add(TPB_TableSit.Create(pbobj));
+    Add(TPB_TableSit.Create(pbobj, TRUE));
 end;
 
 procedure TPB_TableSit.Clear;

@@ -24,7 +24,7 @@ type
     procedure SetStatus(const AValue: TChangeMailStatus);
 
   public
-    constructor Create(const AFrom: TPB_ChangeMailReply); overload;
+    constructor Create(const AFrom: TPB_ChangeMailReply; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ChangeMailReply);
@@ -48,9 +48,9 @@ uses
 
 
 
-constructor TPB_ChangeMailReply.Create(const AFrom: TPB_ChangeMailReply);
+constructor TPB_ChangeMailReply.Create(const AFrom: TPB_ChangeMailReply; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -115,7 +115,8 @@ procedure TPB_ChangeMailReply.SetStatus(const AValue: TChangeMailStatus);
 begin
   Assert(not has_Status);
   FStatus := AValue;
-  ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
   set_has_Status;
 end;
 
@@ -125,7 +126,7 @@ var
 begin
   Clear;
   for pbobj in APB_ChangeMailReplyList do
-    Add(TPB_ChangeMailReply.Create(pbobj));
+    Add(TPB_ChangeMailReply.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ChangeMailReply.Clear;

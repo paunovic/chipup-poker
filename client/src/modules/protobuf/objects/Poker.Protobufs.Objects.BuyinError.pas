@@ -28,7 +28,7 @@ type
     procedure SetLastCashout(const AValue: UINT32);
 
   public
-    constructor Create(const AFrom: TPB_BuyinError); overload;
+    constructor Create(const AFrom: TPB_BuyinError; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_BuyinError);
@@ -57,9 +57,9 @@ uses
 
 
 
-constructor TPB_BuyinError.Create(const AFrom: TPB_BuyinError);
+constructor TPB_BuyinError.Create(const AFrom: TPB_BuyinError; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -131,7 +131,8 @@ procedure TPB_BuyinError.SetGameId(const AValue: TBytes);
 begin
   Assert(not has_GameId);
   FGameId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
   set_has_GameId;
 end;
 
@@ -160,7 +161,8 @@ procedure TPB_BuyinError.SetLastCashout(const AValue: UINT32);
 begin
   Assert(not has_LastCashout);
   FLastCashout := AValue;
-  ProtobufOutput.writeUInt32(kLastCashoutFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kLastCashoutFieldNumber, AValue);
   set_has_LastCashout;
 end;
 
@@ -170,7 +172,7 @@ var
 begin
   Clear;
   for pbobj in APB_BuyinErrorList do
-    Add(TPB_BuyinError.Create(pbobj));
+    Add(TPB_BuyinError.Create(pbobj, TRUE));
 end;
 
 procedure TPB_BuyinError.Clear;

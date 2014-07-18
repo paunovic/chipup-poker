@@ -29,7 +29,7 @@ type
     procedure SetMessage(const AValue: String);
 
   public
-    constructor Create(const AFrom: TPB_ContactMessage); overload;
+    constructor Create(const AFrom: TPB_ContactMessage; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_ContactMessage);
@@ -58,9 +58,9 @@ uses
 
 
 
-constructor TPB_ContactMessage.Create(const AFrom: TPB_ContactMessage);
+constructor TPB_ContactMessage.Create(const AFrom: TPB_ContactMessage; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -132,7 +132,8 @@ procedure TPB_ContactMessage.SetReason(const AValue: TContactReason);
 begin
   Assert(not has_Reason);
   FReason := AValue;
-  ProtobufOutput.writeInt32(kReasonFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kReasonFieldNumber, Integer(AValue));
   set_has_Reason;
 end;
 
@@ -161,7 +162,8 @@ procedure TPB_ContactMessage.SetMessage(const AValue: String);
 begin
   Assert(not has_Message);
   FMessage := AValue;
-  ProtobufOutput.writeString(kMessageFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeString(kMessageFieldNumber, AValue);
   set_has_Message;
 end;
 
@@ -171,7 +173,7 @@ var
 begin
   Clear;
   for pbobj in APB_ContactMessageList do
-    Add(TPB_ContactMessage.Create(pbobj));
+    Add(TPB_ContactMessage.Create(pbobj, TRUE));
 end;
 
 procedure TPB_ContactMessage.Clear;

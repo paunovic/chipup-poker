@@ -29,7 +29,7 @@ type
     procedure SetTimestamp(const AValue: TCloseGameTime);
 
   public
-    constructor Create(const AFrom: TPB_CloseGameData); overload;
+    constructor Create(const AFrom: TPB_CloseGameData; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_CloseGameData);
@@ -58,9 +58,9 @@ uses
 
 
 
-constructor TPB_CloseGameData.Create(const AFrom: TPB_CloseGameData);
+constructor TPB_CloseGameData.Create(const AFrom: TPB_CloseGameData; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -132,7 +132,8 @@ procedure TPB_CloseGameData.SetGameid(const AValue: TBytes);
 begin
   Assert(not has_Gameid);
   FGameid := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
   set_has_Gameid;
 end;
 
@@ -161,7 +162,8 @@ procedure TPB_CloseGameData.SetTimestamp(const AValue: TCloseGameTime);
 begin
   Assert(not has_Timestamp);
   FTimestamp := AValue;
-  ProtobufOutput.writeInt32(kTimestampFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kTimestampFieldNumber, Integer(AValue));
   set_has_Timestamp;
 end;
 
@@ -171,7 +173,7 @@ var
 begin
   Clear;
   for pbobj in APB_CloseGameDataList do
-    Add(TPB_CloseGameData.Create(pbobj));
+    Add(TPB_CloseGameData.Create(pbobj, TRUE));
 end;
 
 procedure TPB_CloseGameData.Clear;

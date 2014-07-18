@@ -33,7 +33,7 @@ type
     procedure SetToken(const AValue: Integer);
 
   public
-    constructor Create(const AFrom: TPB_RpcMessage); overload;
+    constructor Create(const AFrom: TPB_RpcMessage; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_RpcMessage);
@@ -67,9 +67,9 @@ uses
 
 
 
-constructor TPB_RpcMessage.Create(const AFrom: TPB_RpcMessage);
+constructor TPB_RpcMessage.Create(const AFrom: TPB_RpcMessage; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -148,7 +148,8 @@ procedure TPB_RpcMessage.SetMethodId(const AValue: Integer);
 begin
   Assert(not has_MethodId);
   FMethodId := AValue;
-  ProtobufOutput.writeInt32(kMethodIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kMethodIdFieldNumber, AValue);
   set_has_MethodId;
 end;
 
@@ -177,7 +178,8 @@ procedure TPB_RpcMessage.SetDataSize(const AValue: Integer);
 begin
   Assert(not has_DataSize);
   FDataSize := AValue;
-  ProtobufOutput.writeInt32(kDataSizeFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kDataSizeFieldNumber, AValue);
   set_has_DataSize;
 end;
 
@@ -206,7 +208,8 @@ procedure TPB_RpcMessage.SetToken(const AValue: Integer);
 begin
   Assert(not has_Token);
   FToken := AValue;
-  ProtobufOutput.writeInt32(kTokenFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kTokenFieldNumber, AValue);
   set_has_Token;
 end;
 
@@ -216,7 +219,7 @@ var
 begin
   Clear;
   for pbobj in APB_RpcMessageList do
-    Add(TPB_RpcMessage.Create(pbobj));
+    Add(TPB_RpcMessage.Create(pbobj, TRUE));
 end;
 
 procedure TPB_RpcMessage.Clear;

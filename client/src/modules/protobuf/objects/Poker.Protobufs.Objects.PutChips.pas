@@ -33,7 +33,7 @@ type
     procedure SetCurrentState(const AValue: TTableState);
 
   public
-    constructor Create(const AFrom: TPB_PutChips); overload;
+    constructor Create(const AFrom: TPB_PutChips; const ALightweight: Boolean = FALSE); overload;
     destructor Destroy; override;
     procedure LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer); override;
     procedure MergeFrom(const from: TPB_PutChips);
@@ -67,9 +67,9 @@ uses
 
 
 
-constructor TPB_PutChips.Create(const AFrom: TPB_PutChips);
+constructor TPB_PutChips.Create(const AFrom: TPB_PutChips; const ALightweight: Boolean = FALSE);
 begin
-  inherited Create;
+  inherited Create(ALightweight);
   MergeFrom(AFrom);
 end;
 
@@ -148,7 +148,8 @@ procedure TPB_PutChips.SetTableMongoId(const AValue: TBytes);
 begin
   Assert(not has_TableMongoId);
   FTableMongoId := Copy(AValue,0,Length(AValue));
-  ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
   set_has_TableMongoId;
 end;
 
@@ -177,7 +178,8 @@ procedure TPB_PutChips.SetChipAmount(const AValue: UINT32);
 begin
   Assert(not has_ChipAmount);
   FChipAmount := AValue;
-  ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
+  if not Lightweight then
+    ProtobufOutput.writeUInt32(kChipAmountFieldNumber, AValue);
   set_has_ChipAmount;
 end;
 
@@ -206,7 +208,8 @@ procedure TPB_PutChips.SetCurrentState(const AValue: TTableState);
 begin
   Assert(not has_CurrentState);
   FCurrentState := AValue;
-  ProtobufOutput.writeInt32(kCurrentStateFieldNumber, Integer(AValue));
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kCurrentStateFieldNumber, Integer(AValue));
   set_has_CurrentState;
 end;
 
@@ -216,7 +219,7 @@ var
 begin
   Clear;
   for pbobj in APB_PutChipsList do
-    Add(TPB_PutChips.Create(pbobj));
+    Add(TPB_PutChips.Create(pbobj, TRUE));
 end;
 
 procedure TPB_PutChips.Clear;
