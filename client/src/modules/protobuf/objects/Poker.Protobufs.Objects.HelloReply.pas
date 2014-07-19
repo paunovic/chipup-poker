@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HelloReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.StringSizes, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.ValidCharsRegex;
 
 type
@@ -155,6 +155,7 @@ begin
   inherited;
   FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
 end;
+
 procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

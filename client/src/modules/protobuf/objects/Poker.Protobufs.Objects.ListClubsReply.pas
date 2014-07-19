@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ListClubsReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Club;
 
 type
@@ -79,6 +79,7 @@ begin
   inherited;
   FClubs.OnNotify := ClubsNotifyEvent;
 end;
+
 procedure TPB_ListClubsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

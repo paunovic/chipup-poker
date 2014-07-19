@@ -3,7 +3,7 @@ unit Poker.Server.Socket;
 interface
 
 uses
-  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core, Poker.Protobufs.Objects.User,
+  System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core, Poker.Protobufs.Objects.User, Poker.Types,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Enum.ServerCodes,
   Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.UpdateFileInfo;
 
@@ -20,37 +20,37 @@ type
     procedure ForgotPassword(const AEMail: String);
     procedure CreateClub(const AName, AInvCode: String; const AClubRake: Integer);
     procedure JoinClub(const AClubId: Int64; const ACode: String);
-    procedure LeaveClub(const AClubId: TBytes);
-    procedure KickPlayer(const AClubId: TBytes; const APlayerId: TBytes);
-    procedure GiveOwnership(const AClubId: TBytes; const APlayerId: TBytes);
-    procedure ChangeClubDetails(const AClubId: TBytes; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
-    procedure DisbandClub(const AClubId: TBytes);
+    procedure LeaveClub(const AClubId: TMongoId);
+    procedure KickPlayer(const AClubId: TMongoId; const APlayerId: TMongoId);
+    procedure GiveOwnership(const AClubId: TMongoId; const APlayerId: TMongoId);
+    procedure ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
+    procedure DisbandClub(const AClubId: TMongoId);
     procedure ChangeEMail(const ANewMail: String);
     procedure ChangePassword(const APassword: String);
     procedure SetAvatar(const AAvatarId: TBytes);
-    procedure CreateGame(const AClubId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
-    procedure CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
-    procedure SendTableChatLine(const AGameId: TBytes; const ALine: String);
-    procedure JoinTable(const AGameId: TBytes);
-    procedure LeaveTable(const AGameId: TBytes);
-    procedure TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
-    procedure TableAddOn(const AGameId: TBytes; const AChips: Integer);
-    procedure TableStandUp(const AGameId: TBytes);
-    procedure TablePlayNow(const AGameId: TBytes);
-    procedure TableSitOutNextHand(const AGameId: TBytes; const AFlag: Boolean);
-    procedure TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
-    procedure ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
-    procedure GetUserInfos(const AMongoIds: array of TBytes);
-    procedure Fold(const AGameId: TBytes);
-    procedure PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
-    procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
+    procedure CreateGame(const AClubId: TMongoId; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+    procedure CloseGame(const AGameId: TMongoId; const ATimestamp: TCloseGameTime);
+    procedure SendTableChatLine(const AGameId: TMongoId; const ALine: String);
+    procedure JoinTable(const AGameId: TMongoId);
+    procedure LeaveTable(const AGameId: TMongoId);
+    procedure TableSit(const AGameId: TMongoId; const ASeatIndex, AChips: Integer);
+    procedure TableAddOn(const AGameId: TMongoId; const AChips: Integer);
+    procedure TableStandUp(const AGameId: TMongoId);
+    procedure TablePlayNow(const AGameId: TMongoId);
+    procedure TableSitOutNextHand(const AGameId: TMongoId; const AFlag: Boolean);
+    procedure TableSitOutNextBB(const AGameId: TMongoId; const AFlag: Boolean);
+    procedure ChangePlayerSuspendState(const AClubId, APlayerId: TMongoId; const ASuspended: Boolean);
+    procedure GetUserInfos(const AMongoIds: array of TMongoId);
+    procedure Fold(const AGameId: TMongoId);
+    procedure PutChips(const AGameId: TMongoId; const AChipAmount: Integer; const ATableState: TTableState);
+    procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TMongoId; const AFlag: Boolean);
     procedure ResendVerificationMail;
-    procedure ShowCards(const AGameId: TBytes);
-    procedure QueryTableStats(const ATables: array of TBytes);
+    procedure ShowCards(const AGameId: TMongoId);
+    procedure QueryTableStats(const ATables: array of TMongoId);
     procedure ContactUs(const AReason: TContactReason; const AMessage: String);
     procedure Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
-    procedure SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
-    procedure ResetPlayerBalance(const AClubId, AMemberId: TBytes);
+    procedure SetPlayerLimit(const AClubId, AMemberId: TMongoId; const ALimit: UINT32; const AUnlimited: Boolean);
+    procedure ResetPlayerBalance(const AClubId, AMemberId: TMongoId);
     procedure QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
     procedure SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
 
@@ -166,7 +166,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.KickPlayer(const AClubId: TBytes; const APlayerId: TBytes);
+procedure TServerSocket.KickPlayer(const AClubId: TMongoId; const APlayerId: TMongoId);
 var
   protobuf: TPB_KickPlayerParams;
 begin
@@ -180,7 +180,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.LeaveClub(const AClubId: TBytes);
+procedure TServerSocket.LeaveClub(const AClubId: TMongoId);
 var
   protobuf: TPB_Club;
 begin
@@ -193,7 +193,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.GiveOwnership(const AClubId: TBytes; const APlayerId: TBytes);
+procedure TServerSocket.GiveOwnership(const AClubId: TMongoId; const APlayerId: TMongoId);
 var
   protobuf: TPB_GiveClubOwnershipParams;
 begin
@@ -207,7 +207,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangeClubDetails(const AClubId: TBytes; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
+procedure TServerSocket.ChangeClubDetails(const AClubId: TMongoId; const AClubName, AClubCode: String; const AClubRake: Integer; const ADefaultPlayerLimit: UINT32; const AUnlimitedDefaultBalance: Boolean);
 var
   protobuf: TPB_Club;
 begin
@@ -225,7 +225,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.DisbandClub(const AClubId: TBytes);
+procedure TServerSocket.DisbandClub(const AClubId: TMongoId);
 var
   protobuf: TPB_Club;
 begin
@@ -277,7 +277,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.CreateGame(const AClubId: TBytes; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
+procedure TServerSocket.CreateGame(const AClubId: TMongoId; const AGameName: String; const AGameType: TGameType; const AGameLimit: TGameLimit; const ABlinds: TGameBlinds; const ABuyinMin, ABuyinMax, ASeats: Integer);
 var
   protobuf: TPB_Game;
 begin
@@ -297,7 +297,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.CloseGame(const AGameId: TBytes; const ATimestamp: TCloseGameTime);
+procedure TServerSocket.CloseGame(const AGameId: TMongoId; const ATimestamp: TCloseGameTime);
 var
   protobuf: TPB_CloseGameData;
 begin
@@ -311,7 +311,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.SendTableChatLine(const AGameId: TBytes; const ALine: String);
+procedure TServerSocket.SendTableChatLine(const AGameId: TMongoId; const ALine: String);
 var
   protobuf: TPB_ChatEvent;
   pbmsg   : TPB_ChatMessage;
@@ -329,7 +329,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.JoinTable(const AGameId: TBytes);
+procedure TServerSocket.JoinTable(const AGameId: TMongoId);
 var
   protobuf: TPB_Game;
 begin
@@ -343,7 +343,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.LeaveTable(const AGameId: TBytes);
+procedure TServerSocket.LeaveTable(const AGameId: TMongoId);
 var
   protobuf: TPB_Game;
 begin
@@ -356,7 +356,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.TableSit(const AGameId: TBytes; const ASeatIndex, AChips: Integer);
+procedure TServerSocket.TableSit(const AGameId: TMongoId; const ASeatIndex, AChips: Integer);
 var
   protobuf: TPB_TableSit;
 begin
@@ -371,7 +371,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.TableAddOn(const AGameId: TBytes; const AChips: Integer);
+procedure TServerSocket.TableAddOn(const AGameId: TMongoId; const AChips: Integer);
 var
   protobuf: TPB_TableSit;
 begin
@@ -385,7 +385,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.TableStandUp(const AGameId: TBytes);
+procedure TServerSocket.TableStandUp(const AGameId: TMongoId);
 var
   protobuf: TPB_Game;
 begin
@@ -398,7 +398,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ChangePlayerSuspendState(const AClubId, APlayerId: TBytes; const ASuspended: Boolean);
+procedure TServerSocket.ChangePlayerSuspendState(const AClubId, APlayerId: TMongoId; const ASuspended: Boolean);
 var
   protobuf: TPB_ChangeSuspendState;
 begin
@@ -413,7 +413,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.GetUserInfos(const AMongoIds: array of TBytes);
+procedure TServerSocket.GetUserInfos(const AMongoIds: array of TMongoId);
 var
   protobuf: TPB_GetUserParams;
   C1: Integer;
@@ -431,7 +431,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.Fold(const AGameId: TBytes);
+procedure TServerSocket.Fold(const AGameId: TMongoId);
 var
   protobuf: TPB_Game;
 begin
@@ -444,7 +444,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.PutChips(const AGameId: TBytes; const AChipAmount: Integer; const ATableState: TTableState);
+procedure TServerSocket.PutChips(const AGameId: TMongoId; const AChipAmount: Integer; const ATableState: TTableState);
 var
   protobuf: TPB_PutChips;
 begin
@@ -459,7 +459,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.TablePlayNow(const AGameId: TBytes);
+procedure TServerSocket.TablePlayNow(const AGameId: TMongoId);
 var
   protobuf: TPB_Game;
 begin
@@ -472,17 +472,17 @@ begin
   end;
 end;
 
-procedure TServerSocket.TableSitOutNextHand(const AGameId: TBytes; const AFlag: Boolean);
+procedure TServerSocket.TableSitOutNextHand(const AGameId: TMongoId; const AFlag: Boolean);
 begin
   TableBoolFlag(scTableSitOutNextHand, AGameId, AFlag);
 end;
 
-procedure TServerSocket.TableSitOutNextBB(const AGameId: TBytes; const AFlag: Boolean);
+procedure TServerSocket.TableSitOutNextBB(const AGameId: TMongoId; const AFlag: Boolean);
 begin
   TableBoolFlag(scTableSitOutNextBB, AGameId, AFlag);
 end;
 
-procedure TServerSocket.TableBoolFlag(const ACommand: TServerCodes; const AGameId: TBytes; const AFlag: Boolean);
+procedure TServerSocket.TableBoolFlag(const ACommand: TServerCodes; const AGameId: TMongoId; const AFlag: Boolean);
 var
   protobuf: TPB_TableBoolFlag;
 begin
@@ -501,7 +501,7 @@ begin
   SendProtobuf(scResendVerificationMail, nil);
 end;
 
-procedure TServerSocket.ShowCards(const AGameId: TBytes);
+procedure TServerSocket.ShowCards(const AGameId: TMongoId);
 var
   protobuf: TPB_Game;
 begin
@@ -514,7 +514,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.QueryTableStats(const ATables: array of TBytes);
+procedure TServerSocket.QueryTableStats(const ATables: array of TMongoId);
 var
   protobuf: TPB_QueryTableStats;
   C1: Integer;
@@ -557,17 +557,7 @@ begin
   end;
 end;
 
-procedure StringToBytes(const AString: String; var ABytes: TBytes);
-var
-  C1: Integer;
-begin
-  Assert(Length(AString) mod 2 = 0);
-  SetLength(ABytes, Length(AString) div 2);
-  for C1 := 0 to Length(AString) div 2 - 1 do
-    ABytes[C1] := StrToInt('$' + Copy(AString, C1 * 2 + 1, 2));
-end;
-
-procedure TServerSocket.SetPlayerLimit(const AClubId, AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
+procedure TServerSocket.SetPlayerLimit(const AClubId, AMemberId: TMongoId; const ALimit: UINT32; const AUnlimited: Boolean);
 var
   protobuf: TPB_PlayerLimitParams;
 begin
@@ -583,7 +573,7 @@ begin
   end;
 end;
 
-procedure TServerSocket.ResetPlayerBalance(const AClubId, AMemberId: TBytes);
+procedure TServerSocket.ResetPlayerBalance(const AClubId, AMemberId: TMongoId);
 var
   protobuf: TPB_PlayerLimitParams;
 begin
@@ -631,15 +621,15 @@ procedure TServerSocket.CrashTest;
 var
   pb: TPB_HelloParams;
   tmp: String;
-  bytes: TBytes;
-{  bytes1: TBytes;
-  bytesx2: TArray<TBytes>;   }
+  bytes: TMongoId;
+{  bytes1: TMongoId;
+  bytesx2: TArray<TMongoId>;   }
 begin
   SetLength(tmp, 100);
-  SetLength(bytes, 100);
+//  SetLength(bytes, 100);
   FillChar(tmp[1], Length(tmp) * SizeOf(Char), 65);
   FillChar(bytes[0], Length(bytes) * SizeOf(Byte), 66);
-  StringToBytes('537badf134a82b1763f7aee8', bytes);
+//  StringToBytes('537badf134a82b1763f7aee8', bytes);
 //  StringToBytes('533da6a40427a9b03915560d', bytes1);
   pb := TPB_HelloParams.Create;
   try

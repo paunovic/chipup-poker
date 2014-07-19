@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.PlayerLimitParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_PlayerLimitParams = class(TProtobufBaseObject)
@@ -18,18 +18,18 @@ type
       kUnlimitedFieldNumber = 4;
 
     var
-      FClubid: TBytes;
-      FUserid: TBytes;
+      FClubid: TMongoId;
+      FUserid: TMongoId;
       FLimit: UInt32;
       FUnlimited: Boolean;
       _has_bits_: UINT32;
 
     procedure set_has_Clubid;
     procedure clear_has_Clubid;
-    procedure SetClubid(const AValue: TBytes);
+    procedure SetClubid(const AValue: TMongoId);
     procedure set_has_Userid;
     procedure clear_has_Userid;
-    procedure SetUserid(const AValue: TBytes);
+    procedure SetUserid(const AValue: TMongoId);
     procedure set_has_Limit;
     procedure clear_has_Limit;
     procedure SetLimit(const AValue: UInt32);
@@ -48,12 +48,12 @@ type
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
-    property Clubid: TBytes read FClubid write SetClubid;
+    property Clubid: TMongoId read FClubid write SetClubid;
 
     // required bytes Userid = 2;
     function has_Userid: Boolean;
     procedure clear_Userid;
-    property Userid: TBytes read FUserid write SetUserid;
+    property Userid: TMongoId read FUserid write SetUserid;
 
     // required uint32 Limit = 3;
     function has_Limit: Boolean;
@@ -98,12 +98,12 @@ begin
     case field_number of
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubid := AProtobufReader.readBytes;
+        FClubid := AProtobufReader.readMongoId;
         set_has_Clubid;
       end;
       kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUserid := AProtobufReader.readBytes;
+        FUserid := AProtobufReader.readMongoId;
         set_has_Userid;
       end;
       kLimitFieldNumber: begin
@@ -142,7 +142,7 @@ end;
 
 procedure TPB_PlayerLimitParams.clear_Clubid;
 begin
-  SetLength(FClubid, 0);
+  FillChar(FClubid[0], Length(FClubid), 0);
   clear_has_Clubid;
 end;
 
@@ -161,18 +161,22 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_PlayerLimitParams.SetClubid(const AValue: TBytes);
+procedure TPB_PlayerLimitParams.SetClubid(const AValue: TMongoId);
 begin
   Assert(not has_Clubid);
-  FClubid := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FClubid[0], Length(FClubid));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kClubidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_Clubid;
 end;
 
 procedure TPB_PlayerLimitParams.clear_Userid;
 begin
-  SetLength(FUserid, 0);
+  FillChar(FUserid[0], Length(FUserid), 0);
   clear_has_Userid;
 end;
 
@@ -191,12 +195,16 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_PlayerLimitParams.SetUserid(const AValue: TBytes);
+procedure TPB_PlayerLimitParams.SetUserid(const AValue: TMongoId);
 begin
   Assert(not has_Userid);
-  FUserid := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FUserid[0], Length(FUserid));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kUseridFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_Userid;
 end;
 

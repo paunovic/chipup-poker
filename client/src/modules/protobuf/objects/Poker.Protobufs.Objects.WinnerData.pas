@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.WinnerData;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TCardRankings = (crRoyalFlush = 0,crStraightFlush = 1,cr4OfKind = 2,crFullHouse = 3,crFlush = 4,crStraight = 5,crThreeOfKind = 6,crTwoPair = 7,crOnePair = 8,crHighCard = 9);

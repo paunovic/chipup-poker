@@ -8,7 +8,7 @@ uses
   Vcl.ActnList, cxLabel, Poker.Tables.Table, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, Asphyre.Images, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls,
-  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage;
+  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types;
 
 type
   TfrmTable = class(TForm)
@@ -95,7 +95,7 @@ type
       FCallbacksId: Integer;
       FRaiseValue: UINT32;
       FWindowFocused: Boolean;
-      FGameId: TBytes;
+      FGameId: TMongoId;
       FTableType: TTableType;
 
       FDXBFold: Integer;
@@ -159,7 +159,7 @@ uses
   Poker.Common.Misc, Poker.Settings, Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game,
   Poker.Games.Game, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main,
   Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items,
-  Poker.Helpers.PB_Pot, Poker.Clubs.Member;
+  Poker.Helpers.PB_Pot, Poker.Clubs.Member, Poker.Protobufs.Objects.Base;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -748,12 +748,13 @@ var
   chat_event: TPB_ChatEvent;
   chat_message: TPB_ChatMessage;
 begin
-  chat_event := AObject as TPB_ChatEvent;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ChatEvent, pointer(chat_event)) then
+    Exit;
 
   case chat_event.Event of
     ceUserMessage: begin
       chat_message := chat_event.Msg;
-      if CompareBytes(chat_event.TableId, FGameId) then
+      if CompareMongoId(chat_event.TableId, FGameId) then
         AddUserChatMessage(chat_message.Username, chat_message.Msg);
     end;
     ceServerMessage: ;
@@ -948,8 +949,9 @@ var
   pbtablestatus: TPB_TableStatus;
   table: TTable;
 begin
-  pbtablestatus := AObject as TPB_TableStatus;
-  if not CompareBytes(pbtablestatus.TableMongoId, FGameId) then
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbtablestatus)) then
+    Exit;
+  if not CompareMongoId(pbtablestatus.TableMongoId, FGameId) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then

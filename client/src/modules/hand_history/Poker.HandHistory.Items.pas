@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, System.SyncObjs, Poker.Protobufs.Objects.HandHistory,
-  Poker.HandHistory.Players, Poker.Protobufs.Objects.HandHistoryMove, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game;
+  Poker.HandHistory.Players, Poker.Protobufs.Objects.HandHistoryMove, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game,
+  Poker.Types;
 
 type
   THandHistoryItems = class;
@@ -66,7 +67,7 @@ type
 
   private
     FParentItems: THandHistoryItems;
-    FMongoId: TBytes;
+    FMongoId: TMongoId;
     FHandId: UINT32;
     FRake: Integer;
     FTotalRake: UINT32;
@@ -91,7 +92,7 @@ type
     procedure MakeLines;
 
     property ParentItems: THandHistoryItems read FParentItems;
-    property MongoId: TBytes read FMongoId;
+    property MongoId: TMongoId read FMongoId;
     property HandId: UINT32 read FHandId;
     property Rake: Integer read FRake;
     property TotalRake: UINT32 read FTotalRake;
@@ -110,13 +111,13 @@ type
 
   THandHistoryItems = class(TObjectList<THandHistoryItem>)
   var
-    FGameId: TBytes;
-    FClubId: TBytes;
+    FGameId: TMongoId;
+    FClubId: TMongoId;
     FGame: TGameInfo;
     FClub: TClubInfo;
     FLock: TCriticalSection;
   public
-    constructor Create(const AClubId, AGameId: TBytes);
+    constructor Create(const AClubId, AGameId: TMongoId);
     destructor Destroy; override;
 
     procedure AddHand(const AHandHistory: TPB_HandHistory);
@@ -134,18 +135,18 @@ implementation
 uses
   Poker.DataModule, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.TableEvent, Poker.Cards, Poker.Common.Misc,
   Poker.HandStrengthCalculator, System.DateUtils, Poker.Settings, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableStatus,
-  Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove, Poker.Types;
+  Poker.Protobufs.Objects.Pot, Poker.Helpers.HandHistoryMove;
 
 { THandHistoryItem }
 
 constructor THandHistoryItem.Create(const AParent: THandHistoryItems; const AHandHistory: TPB_HandHistory);
 begin
-  FBalanceChanges := TList<Integer>.Create;;
   FParentItems := AParent;
   FPlayers := TPlayerHandHistories.Create;
   FMoves := TPB_HandHistoryMoveList.Create;
 //  FLines := TStringList.Create;
   FRVLines := TStringList.Create;
+  FBalanceChanges := TList<Integer>.Create;;
   Assign(AHandHistory);
 end;
 
@@ -161,7 +162,7 @@ end;
 
 procedure THandHistoryItem.Assign(const AHandHistory: TPB_HandHistory);
 begin
-  FMongoId := Copy(AHandHistory.MongoId, 0, Length(AHandHistory.MongoId));
+  FMongoId := AHandHistory.MongoId;
   FHandId := AHandHistory.Seq;
   FRake := AHandHistory.Rake;
   FTotalRake := AHandHistory.Totalrake;
@@ -436,7 +437,7 @@ end;
 
 { THandHistoryItems }
 
-constructor THandHistoryItems.Create(const AClubId, AGameId: TBytes);
+constructor THandHistoryItems.Create(const AClubId, AGameId: TMongoId);
 var
   club: TClubInfo;
   game: TGameInfo;

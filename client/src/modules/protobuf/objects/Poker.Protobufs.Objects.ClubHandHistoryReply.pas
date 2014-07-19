@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ClubHandHistoryReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.HandHistory;
 
 type
@@ -18,17 +18,17 @@ type
       kRowsFieldNumber = 3;
 
     var
-      FClubid: TBytes;
-      FGameid: TBytes;
+      FClubid: TMongoId;
+      FGameid: TMongoId;
       FRows: TList<TPB_HandHistory>;
       _has_bits_: UINT32;
 
     procedure set_has_Clubid;
     procedure clear_has_Clubid;
-    procedure SetClubid(const AValue: TBytes);
+    procedure SetClubid(const AValue: TMongoId);
     procedure set_has_Gameid;
     procedure clear_has_Gameid;
-    procedure SetGameid(const AValue: TBytes);
+    procedure SetGameid(const AValue: TMongoId);
     procedure set_has_Rows;
     procedure clear_has_Rows;
     procedure RowsNotifyEvent(Sender: TObject; const Item: TPB_HandHistory; Action: TCollectionNotification);
@@ -48,12 +48,12 @@ type
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
-    property Clubid: TBytes read FClubid write SetClubid;
+    property Clubid: TMongoId read FClubid write SetClubid;
 
     // required bytes Gameid = 2;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TBytes read FGameid write SetGameid;
+    property Gameid: TMongoId read FGameid write SetGameid;
 
     // repeated HandHistory Rows = 3;
     function has_Rows: Boolean;
@@ -99,6 +99,7 @@ begin
   inherited;
   FRows.OnNotify := RowsNotifyEvent;
 end;
+
 procedure TPB_ClubHandHistoryReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -109,12 +110,12 @@ begin
     case field_number of
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubid := AProtobufReader.readBytes;
+        FClubid := AProtobufReader.readMongoId;
         set_has_Clubid;
       end;
       kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGameid := AProtobufReader.readBytes;
+        FGameid := AProtobufReader.readMongoId;
         set_has_Gameid;
       end;
       kRowsFieldNumber: begin
@@ -153,7 +154,7 @@ end;
 
 procedure TPB_ClubHandHistoryReply.clear_Clubid;
 begin
-  SetLength(FClubid, 0);
+  FillChar(FClubid[0], Length(FClubid), 0);
   clear_has_Clubid;
 end;
 
@@ -172,18 +173,22 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_ClubHandHistoryReply.SetClubid(const AValue: TBytes);
+procedure TPB_ClubHandHistoryReply.SetClubid(const AValue: TMongoId);
 begin
   Assert(not has_Clubid);
-  FClubid := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FClubid[0], Length(FClubid));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kClubidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_Clubid;
 end;
 
 procedure TPB_ClubHandHistoryReply.clear_Gameid;
 begin
-  SetLength(FGameid, 0);
+  FillChar(FGameid[0], Length(FGameid), 0);
   clear_has_Gameid;
 end;
 
@@ -202,12 +207,16 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_ClubHandHistoryReply.SetGameid(const AValue: TBytes);
+procedure TPB_ClubHandHistoryReply.SetGameid(const AValue: TMongoId);
 begin
   Assert(not has_Gameid);
-  FGameid := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FGameid[0], Length(FGameid));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kGameidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_Gameid;
 end;
 

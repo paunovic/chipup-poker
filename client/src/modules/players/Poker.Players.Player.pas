@@ -3,13 +3,13 @@ unit Poker.Players.Player;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Clubs.ClubList, Poker.Protobufs.Objects.StatusReply,
+  System.Generics.Collections, System.SysUtils, Poker.Clubs.ClubList, Poker.Protobufs.Objects.StatusReply, Poker.Types,
   Poker.Protobufs.Objects.User;
 
 type
   TPlayerInfo = class
   private
-    FMongoId: TBytes;
+    FMongoId: TMongoId;
     FNick: String;
     FEMail: String;
     FPassword: String;
@@ -25,7 +25,7 @@ type
 
     procedure LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
 
-    property MongoId: TBytes read FMongoId write FMongoId;
+    property MongoId: TMongoId read FMongoId write FMongoId;
     property Nick: String read FNick write FNick;
     property Password: String read FPassword write FPassword;
     property EMail: String read FEMail write FEMail;
@@ -57,7 +57,7 @@ end;
 
 procedure TPlayerInfo.Flush;
 begin
-  SetLength(FMongoId, 0);
+  FMongoId := EMPTY_MONGO_ID;
   FNick := '';
   FEMail := '';
   FPassword := '';
@@ -75,8 +75,8 @@ var
   game: TGameInfo;
   table: TTable;
   found: Boolean;
-  to_remove: TList<TBytes>;
-  mongoid: TBytes;
+  to_remove: TList<TMongoId>;
+  mongoid: TMongoId;
 begin
   FMongoId := AStatusReply.Self.MongoId;
   FEMail := AStatusReply.Self.EMail;
@@ -84,7 +84,7 @@ begin
   FAuthed := AStatusReply.Self.Authed;
   FAvatarId := AStatusReply.Self.Avatar;
 
-  to_remove := TList<TBytes>.Create;
+  to_remove := TList<TMongoId>.Create;
   try
     FClubs.Lock;
     try
@@ -92,7 +92,7 @@ begin
       begin
         found := FALSE;
         for pbclub in AStatusReply.Clubs do
-          if CompareBytes(pbclub.MongoId, club.MongoId) then
+          if CompareMongoId(pbclub.MongoId, club.MongoId) then
           begin
             club.Assign(pbclub);
             found := TRUE;

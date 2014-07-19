@@ -9,7 +9,7 @@ uses
   ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts,
-  System.Generics.Collections, Vcl.StdStyleActnCtrls;
+  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -119,8 +119,8 @@ type
     procedure tiRefreshFormTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    FSelectedClub: TBytes;
-    FSelectedGame: TBytes;
+    FSelectedClub: TMongoId;
+    FSelectedGame: TMongoId;
     FCallbacksId: Integer;
     FShuttingDown: Boolean;
     FActionMainMenuBarFont: TFont;
@@ -191,7 +191,7 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.Base;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -432,7 +432,7 @@ begin
 
   for form in FormsContainer.Items do
     if (form is TfrmClubLobby) and
-       (CompareBytes((form as TfrmClubLobby).ClubId, FSelectedClub)) then
+       (CompareMongoId((form as TfrmClubLobby).ClubId, FSelectedClub)) then
     begin
       form.SetFocus;
       Exit;
@@ -591,11 +591,11 @@ begin
           if rcount > c.RecordCount then
             c.SetRecordCount(rcount);
 
-          c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId);
+//          c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId); FIXME
           c.SetValue(rcount - 1, gridHomeClubsId.Index, club.Id);
           c.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
 
-          if CompareBytes(dmMain.SelfInfo.MongoId, club.OwnerId) then
+          if CompareMongoId(dmMain.SelfInfo.MongoId, club.OwnerId) then
             status := 'Manager'
           else
             if club.GetMemberInfo(dmMain.SelfInfo.Mongoid, member) then
@@ -641,7 +641,7 @@ begin
         if rcount > c.RecordCount then
           c.SetRecordCount(rcount);
 
-        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId);
+//        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId);
         c.SetValue(rcount - 1, gridGamesName.Index, game.Name);
         c.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
@@ -678,7 +678,7 @@ begin
           Inc(rcount);
           if rcount > c.RecordCount then
             c.SetRecordCount(rcount);
-          c.SetValue(rcount - 1, gridPublicClubsMongoId.Index, club.MongoId);
+//          c.SetValue(rcount - 1, gridPublicClubsMongoId.Index, club.MongoId); FIXME
           c.SetValue(rcount - 1, gridPublicClubsName.Index, club.Name);
         end;
     finally
@@ -740,11 +740,11 @@ var
   recIndex: Integer;
   club_col_id: Integer;
   club: TClubInfo;
-  club_mongoid: TBytes;
+  club_mongoid: TMongoId;
 begin
   recIndex := Sender.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
-    SetLength(FSelectedClub, 0)
+    FSelectedClub := EMPTY_MONGO_ID
   else
   begin
     if Sender = gridPublicClubsTable then
@@ -752,23 +752,23 @@ begin
     else
       club_col_id := gridHomeClubsMongoId.Index;
 
-    club_mongoid := Sender.DataController.GetValue(recIndex, club_col_id);
+    VariantToMongoId(Sender.DataController.GetValue(recIndex, club_col_id), club_mongoid);
     if dmMain.SelfInfo.Clubs.GetAndLock(club_mongoid, club) then
     begin
       FSelectedClub := club.MongoId;
       dmMain.SelfInfo.Clubs.Unlock;
-      SetLength(FSelectedGame, 0);
+      FSelectedGame := EMPTY_MONGO_ID;
       gridGamesTable.DataController.FocusedRecordIndex := -1;
     end
     else
-      SetLength(FSelectedClub, 0)
+      FSelectedClub := EMPTY_MONGO_ID;
   end;
 
   dmMain.SelfInfo.Clubs.Lock;
   try
     acOpenClubLobby.Enabled := (dmMain.SelfInfo.Clubs.TryGetValue(FSelectedClub, club)) and
                                ((club.IsPrivate) or
-                                (CompareBytes(club.OwnerId, dmMain.SelfInfo.MongoId)));
+                                (CompareMongoId(club.OwnerId, dmMain.SelfInfo.MongoId)));
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
@@ -784,7 +784,7 @@ end;
 procedure TfrmChipUpMain.gridGamesTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  game_id: TBytes;
+  game_id: TMongoId;
   game: TGameInfo;
   club: TClubInfo;
 begin
@@ -793,12 +793,12 @@ begin
   try
     if (recIndex = -1) or
        (not dmMain.SelfInfo.Clubs.TryGetValue(FSelectedClub, club)) then
-      SetLength(FSelectedGame, 0)
+      FSelectedGame := EMPTY_MONGO_ID
     else
     begin
-      game_id := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
+      VariantToMongoId(gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index), game_id);
       if not club.Games.TryGetValue(game_id, game) then
-        SetLength(FSelectedGame, 0)
+        FSelectedGame := EMPTY_MONGO_ID
       else
         FSelectedGame := game_id;
     end;
@@ -832,8 +832,8 @@ procedure TfrmChipUpMain.LoginStatus(const AValue: TLoginStatus);
 begin
   case AValue of
     lsLoggedIn: begin
-      SetLength(FSelectedClub, 0);
-      SetLength(FSelectedGame, 0);
+      FSelectedClub := EMPTY_MONGO_ID;
+      FSelectedGame := EMPTY_MONGO_ID;
       ConfigureGUI;
       Show;
       dmMain.ProcessReconnectedTables;
@@ -876,7 +876,8 @@ procedure TfrmChipUpMain.CSRLeaveClub(const AMethodId: Integer; const AObject: T
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  pbreply := AObject as TPB_ClubCommandReply;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+    Exit;
 
   case pbreply.Status of
     csSuccess: begin
@@ -890,7 +891,8 @@ procedure TfrmChipUpMain.CSRClubCommand(const AMethodId: Integer; const AObject:
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  pbreply := AObject as TPB_ClubCommandReply;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+    Exit;
 
   case pbreply.Status of
     csSuccess: begin
@@ -904,7 +906,9 @@ procedure TfrmChipUpMain.CSREClubOperation(const AMethodId: Integer; const AObje
 var
   pbclub: TPB_Club;
 begin
-  pbclub := AObject as TPB_Club;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Club, pointer(pbclub)) then
+    Exit;
+
   dmMain.ProcessClubObject(pbclub, nil, AMethodId);
   ConfigureGUI;
 end;
@@ -914,7 +918,8 @@ var
   pbreply: TPB_GetUserParams;
   user: TPB_User;
 begin
-  pbreply := AObject as TPB_GetUserParams;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_GetUserParams, pointer(pbreply)) then
+    Exit;
 
   for user in pbreply.Users do
     Players.AddPlayer(user);
@@ -975,9 +980,10 @@ end;
 procedure TfrmChipUpMain.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
 var
   pbusers: TPB_UserChangeParams;
-  pbuser: TPB_user;
+  pbuser: TPB_User;
 begin
-  pbusers := AObject as TPB_UserChangeParams;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_UserChangeParams, pointer(pbusers)) then
+    Exit;
 
   for pbuser in pbusers.Users do
     Players.AddPlayer(pbuser);
@@ -992,7 +998,8 @@ procedure TfrmChipUpMain.CSEAccountConfirmed(const AMethodId: Integer; const AOb
 var
   pbuser: TPB_User;
 begin
-  pbuser := AObject as TPB_User;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_User, pointer(pbuser)) then
+    Exit;
 
   dmMain.SelfInfo.MongoId := pbuser.MongoId;
   dmMain.SelfInfo.EMail := pbuser.Email;
@@ -1007,18 +1014,21 @@ end;
 
 procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: TObject);
 var
-  chatEvent: TPB_ChatEvent;
+  pbchatevent: TPB_ChatEvent;
 begin
-  chatEvent := AObject as TPB_ChatEvent;
-  if chatEvent.Event = ceServerMessage then
-    TfrmSystemTrayPopup.ShowPopup(chatEvent.Msg.Msg);
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ChatEvent, pointer(pbchatevent)) then
+    Exit;
+
+  if pbchatevent.Event = ceServerMessage then
+    TfrmSystemTrayPopup.ShowPopup(pbchatevent.Msg.Msg);
 end;
 
 procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject: TObject);
 var
   pbclub: TPB_Club;
 begin
-  pbclub := AObject as TPB_Club;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Club, pointer(pbclub)) then
+    Exit;
 
   Tables.CloseTablesForClub(pbclub.MongoId);
   dmMain.SelfInfo.Clubs.Lock;
@@ -1045,7 +1055,8 @@ var
   table: TTable;
   club: TClubInfo;
 begin
-  pbgame := AObject as TPB_Game;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Game, pointer(pbgame)) then
+    Exit;
 
   iid := -1;
   if Tables.GetAndLockTable(pbgame.MongoId, ttLiveGame, table) then
@@ -1072,7 +1083,8 @@ var
   pbgame: TPB_Game;
   club: TClubInfo;
 begin
-  pbgame := AObject as TPB_Game;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Game, pointer(pbgame)) then
+    Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLock(pbgame.ClubMongoid, club) then
   try
@@ -1101,7 +1113,8 @@ var
   game: TGameInfo;
   table: TTable;
 begin
-  pbtstatus := AObject as TPB_TableStatus;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbtstatus)) then
+    Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLockByGame(pbtstatus.TableMongoId, club, game) then
   try
@@ -1129,11 +1142,12 @@ var
   player: TPB_User;
   playerinfo: TPlayerInfo;
   club: TClubInfo;
-  query_users: TArray<TBytes>;
+  query_users: TArray<TMongoId>;
   empty_array: TBytes;
   clubstats: TPB_ClubStatsReply;
 begin
-  pb := AObject as TPB_TableStatsReplies;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatsReplies, pointer(pb)) then
+    Exit;
 
   SetLength(empty_array, 0);
   SetLength(query_users, 0);
@@ -1175,7 +1189,9 @@ procedure TfrmChipUpMain.CSRHandHistoryMsg(const AMethodId: Integer; const AObje
 var
   pb: TPB_ClubHandHistoryReply;
 begin
-  pb := AObject as TPB_ClubHandHistoryReply;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubHandHistoryReply, pointer(pb)) then
+    Exit;
+
   HandHistory.Add(pb);
 end;
 

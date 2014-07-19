@@ -20,8 +20,8 @@ type
       FInternalId: Integer;
       FInternalHWND: HWND;
       FTableType: TTableType;
-      FGameId: TBytes;
-      FClubId: TBytes;
+      FGameId: TMongoId;
+      FClubId: TMongoId;
       FClub: TClubInfo;
       FGame: TGameInfo;
       FForm: TForm;
@@ -44,7 +44,7 @@ type
     constructor Create(const AInternalId: Integer);
     destructor Destroy; override;
 
-    function SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
+    function SetupLiveTable(const AGameId: TMongoId; const ASendJoinCommand: Boolean): Boolean;
     function SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
 
     procedure RenderSync;
@@ -60,8 +60,8 @@ type
 
     property InternalId: Integer read FInternalId;
     property TableType: TTableType read FTableType;
-    property GameId: TBytes read FGameId;
-    property ClubId: TBytes read FClubId;
+    property GameId: TMongoId read FGameId;
+    property ClubId: TMongoId read FClubId;
     property Game: TGameInfo read FGame;
     property Club: TClubInfo read FClub;
     property Form: TForm read FForm;
@@ -191,7 +191,7 @@ begin
   end;
 end;
 
-function TTable.SetupLiveTable(const AGameId: TBytes; const ASendJoinCommand: Boolean): Boolean;
+function TTable.SetupLiveTable(const AGameId: TMongoId; const ASendJoinCommand: Boolean): Boolean;
 var
   form: TfrmTable;
 begin
@@ -271,8 +271,8 @@ procedure TTable.SetTableStatus(const ATableStatus: TPB_TableStatus; const AClea
 var
   C1: Integer;
   player: TPlayerInfo;
-  query_users: TArray<TBytes>;
-  empty_array: TBytes;
+  query_users: TArray<TMongoId>;
+  empty_avatar_id: TBytes;
   seat: TSeatInfo;
   winning: Boolean;
   {$IFDEF DEBUG}
@@ -349,9 +349,9 @@ begin
 
   if Length(query_users) > 0 then
   begin
-    SetLength(empty_array, 0);
+    SetLength(empty_avatar_id, 0);
     for C1 := 0 to Length(query_users) - 1 do
-      Players.AddPlayer(query_users[C1], 'Retrieving...', '', empty_array);
+      Players.AddPlayer(query_users[C1], 'Retrieving...', '', empty_avatar_id);
     ServerSocket.GetUserInfos(query_users);
   end;
 

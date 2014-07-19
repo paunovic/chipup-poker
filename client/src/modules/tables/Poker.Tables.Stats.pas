@@ -3,13 +3,14 @@ unit Poker.Tables.Stats;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply;
+  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
+  Poker.Types;
 
 type
   TTableStats = class
   private
-    FClubId: TBytes;
-    FGameId: TBytes;
+    FClubId: TMongoId;
+    FGameId: TMongoId;
     FHands: UINT32;
     FPlayers: TPB_TablePlayerStatsList;
 
@@ -19,8 +20,8 @@ type
 
     procedure Assign(const AProtobuf: TPB_TableStatsReply);
 
-    property ClubId: TBytes read FClubId;
-    property GameId: TBytes read FGameId;
+    property ClubId: TMongoId read FClubId;
+    property GameId: TMongoId read FGameId;
     property Hands: UINT32 read FHands;
     property Players: TPB_TablePlayerStatsList read FPlayers;
   end;

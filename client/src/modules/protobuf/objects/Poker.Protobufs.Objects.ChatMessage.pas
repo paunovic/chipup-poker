@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ChatMessage;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChatMessage = class(TProtobufBaseObject)
@@ -18,7 +18,7 @@ type
       kTimestampFieldNumber = 4;
 
     var
-      FId: TBytes;
+      FId: TMongoId;
       FUsername: String;
       FMsg: String;
       FTimestamp: Int64;
@@ -26,7 +26,7 @@ type
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
-    procedure SetMongoId(const AValue: TBytes);
+    procedure SetMongoId(const AValue: TMongoId);
     procedure set_has_Username;
     procedure clear_has_Username;
     procedure SetUsername(const AValue: String);
@@ -48,7 +48,7 @@ type
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TBytes read FId write SetMongoId;
+    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional string Username = 2;
     function has_Username: Boolean;
@@ -98,7 +98,7 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FId := AProtobufReader.readBytes;
+        FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
       kUsernameFieldNumber: begin
@@ -142,7 +142,7 @@ end;
 
 procedure TPB_ChatMessage.clear_MongoId;
 begin
-  SetLength(FId, 0);
+  FillChar(FId[0], Length(FId), 0);
   clear_has_MongoId;
 end;
 
@@ -161,12 +161,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_ChatMessage.SetMongoId(const AValue: TBytes);
+procedure TPB_ChatMessage.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  FId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FId[0], Length(FId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_MongoId;
 end;
 

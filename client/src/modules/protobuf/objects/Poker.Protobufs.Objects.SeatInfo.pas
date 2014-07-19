@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.SeatInfo;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPlayerStatus = (psOutOfPlay = 0,psOutOfHand = 1,psInHand = 2,psFolded = 3,psAllIn = 4);
@@ -27,7 +27,7 @@ type
 
     var
       FSeat: Integer;
-      FPlayerMongoId: TBytes;
+      FPlayerMongoId: TMongoId;
       FChips: UInt32;
       FCardCount: Integer;
       FCards: TBytes;
@@ -43,7 +43,7 @@ type
     procedure SetSeat(const AValue: Integer);
     procedure set_has_PlayerMongoId;
     procedure clear_has_PlayerMongoId;
-    procedure SetPlayerMongoId(const AValue: TBytes);
+    procedure SetPlayerMongoId(const AValue: TMongoId);
     procedure set_has_Chips;
     procedure clear_has_Chips;
     procedure SetChips(const AValue: UInt32);
@@ -85,7 +85,7 @@ type
     // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
-    property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+    property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
 
     // required uint32 Chips = 3;
     function has_Chips: Boolean;
@@ -165,7 +165,7 @@ begin
       end;
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerMongoId := AProtobufReader.readBytes;
+        FPlayerMongoId := AProtobufReader.readMongoId;
         set_has_PlayerMongoId;
       end;
       kChipsFieldNumber: begin
@@ -276,7 +276,7 @@ end;
 
 procedure TPB_SeatInfo.clear_PlayerMongoId;
 begin
-  SetLength(FPlayerMongoId, 0);
+  FillChar(FPlayerMongoId[0], Length(FPlayerMongoId), 0);
   clear_has_PlayerMongoId;
 end;
 
@@ -295,12 +295,16 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TBytes);
+procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TMongoId);
 begin
   Assert(not has_PlayerMongoId);
-  FPlayerMongoId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FPlayerMongoId[0], Length(FPlayerMongoId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kPlayerMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_PlayerMongoId;
 end;
 

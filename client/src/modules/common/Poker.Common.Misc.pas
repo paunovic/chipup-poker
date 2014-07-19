@@ -47,7 +47,7 @@ implementation
 uses
   {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
   System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams,
-  System.Generics.Collections, System.RegularExpressionsAPI, Poker.Types;
+  System.Generics.Collections, System.RegularExpressionsAPI;
 
 
 {$IFDEF DEBUG}

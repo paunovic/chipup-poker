@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ClubPlayerStats;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ClubPlayerStats = class(TProtobufBaseObject)
@@ -16,13 +16,13 @@ type
       kClubBalanceFieldNumber = 2;
 
     var
-      FUserid: TBytes;
+      FUserid: TMongoId;
       FClubBalance: Integer;
       _has_bits_: UINT32;
 
     procedure set_has_Userid;
     procedure clear_has_Userid;
-    procedure SetUserid(const AValue: TBytes);
+    procedure SetUserid(const AValue: TMongoId);
     procedure set_has_ClubBalance;
     procedure clear_has_ClubBalance;
     procedure SetClubBalance(const AValue: Integer);
@@ -38,7 +38,7 @@ type
     // required bytes Userid = 1;
     function has_Userid: Boolean;
     procedure clear_Userid;
-    property Userid: TBytes read FUserid write SetUserid;
+    property Userid: TMongoId read FUserid write SetUserid;
 
     // required int32 ClubBalance = 2;
     function has_ClubBalance: Boolean;
@@ -78,7 +78,7 @@ begin
     case field_number of
       kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUserid := AProtobufReader.readBytes;
+        FUserid := AProtobufReader.readMongoId;
         set_has_Userid;
       end;
       kClubBalanceFieldNumber: begin
@@ -108,7 +108,7 @@ end;
 
 procedure TPB_ClubPlayerStats.clear_Userid;
 begin
-  SetLength(FUserid, 0);
+  FillChar(FUserid[0], Length(FUserid), 0);
   clear_has_Userid;
 end;
 
@@ -127,12 +127,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_ClubPlayerStats.SetUserid(const AValue: TBytes);
+procedure TPB_ClubPlayerStats.SetUserid(const AValue: TMongoId);
 begin
   Assert(not has_Userid);
-  FUserid := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FUserid[0], Length(FUserid));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kUseridFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_Userid;
 end;
 

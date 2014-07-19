@@ -60,12 +60,16 @@ var
   bsize: Integer;
 begin
   bsize := readInt32;
-  SetLength(Result, bsize);
-  readRawBytes(Result[0], bsize);
+  SetLength(result, bsize);
+  readRawBytes(result[0], bsize);
 end;
 
 function TProtobufReader.readMongoId: TMongoId;
+var
+  bsize: Integer;
 begin
+  bsize := readInt32;
+  readRawBytes(result[0], bsize);
 end;
 
 end.

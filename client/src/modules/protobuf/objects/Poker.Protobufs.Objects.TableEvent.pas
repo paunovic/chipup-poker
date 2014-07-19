@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableEvent;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Pot;
 
 type
@@ -128,6 +128,7 @@ begin
   FPots.OnNotify := PotsNotifyEvent;
   FBets.OnNotify := BetsNotifyEvent;
 end;
+
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -312,7 +313,7 @@ begin
   Assert(Action = cnAdded);
   set_has_Bets;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
+    ProtobufOutput.writeUInt32(kBetsFieldNumber, Item);
 end;
 
 procedure TPB_TableEvent.clear_Cards;

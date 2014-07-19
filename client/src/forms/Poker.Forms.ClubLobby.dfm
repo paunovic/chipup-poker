@@ -2551,7 +2551,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
-        ExplicitHeight = 435
         DesignSize = (
           250
           427)
@@ -2621,8 +2620,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
-        ExplicitWidth = 628
-        ExplicitHeight = 435
         DesignSize = (
           626
           427)
@@ -2638,9 +2635,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 2
-          ExplicitTop = 19
-          ExplicitWidth = 624
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2655,9 +2649,11 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
+            OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             object gridPlayersListId: TcxGridColumn
               Caption = 'Id'
               DataBinding.ValueType = 'Variant'
@@ -2701,7 +2697,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 298
+          Top = 280
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2714,11 +2710,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 286
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 298
+          Top = 280
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2731,11 +2727,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 286
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 298
+          Top = 280
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2748,11 +2744,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 286
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 298
+          Top = 280
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2765,11 +2761,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 286
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 298
+          Top = 280
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2782,7 +2778,7 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 286
         end
       end
     end
@@ -2802,8 +2798,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 880
-        ExplicitHeight = 435
         DesignSize = (
           878
           427)
@@ -2813,14 +2807,14 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 872
-          Height = 267
+          Height = 249
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitHeight = 279
+          ExplicitHeight = 255
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2835,9 +2829,11 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
+            OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             object gridGamesId: TcxGridColumn
               DataBinding.ValueType = 'Variant'
               PropertiesClassName = 'TcxBlobEditProperties'
@@ -2894,7 +2890,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 251
+          Top = 233
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2907,11 +2903,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 263
+          ExplicitTop = 239
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 251
+          Top = 233
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2924,11 +2920,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 263
+          ExplicitTop = 239
         end
         object btEditGame: TcxButton
           Left = 48
-          Top = 187
+          Top = 169
           Width = 98
           Height = 28
           Anchors = [akLeft, akBottom]
@@ -2943,7 +2939,7 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 199
+          ExplicitTop = 175
         end
       end
     end
@@ -2985,6 +2981,7 @@ object frmClubLobby: TfrmClubLobby
           OptionsView.ColumnAutoWidth = True
           OptionsView.GridLines = glVertical
           OptionsView.GroupByBox = False
+          Styles.Inactive = dmMain.styleInactiveCell
           Styles.Selection = styleTableRowSelected
           Styles.OnGetContentStyle = gridTablesTableStylesGetContentStyle
           object gridTablesTableId: TcxGridColumn
@@ -3081,10 +3078,12 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
+            OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = 'No stats available for this table(s)'
             OptionsView.ColumnAutoWidth = True
             OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             OnColumnSizeChanged = gridStatsTableColumnSizeChanged
             object gridStatsTablePlayerId: TcxGridColumn
               DataBinding.ValueType = 'Variant'
@@ -3184,6 +3183,7 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
+            OptionsView.FocusRect = False
             OptionsView.ColumnAutoWidth = True
             OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
@@ -3362,13 +3362,6 @@ object frmClubLobby: TfrmClubLobby
       Enabled = False
       OnExecute = acSetLimitExecute
     end
-  end
-  object tiUpdateClubDetails: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tiUpdateClubDetailsTimer
-    Left = 160
-    Top = 472
   end
   object pmTablesStats: TPopupMenu
     Left = 140

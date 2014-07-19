@@ -30,9 +30,6 @@ object frmDebug: TfrmDebug
     BorderStyle = bsNone
     DoInPaletteMode = rvpaCreateCopies
     Style = RVStyles
-    OnRVMouseUp = rvLogRVMouseUp
-    ExplicitTop = 4
-    ExplicitHeight = 71
   end
   object meSeatPos: TcxMemo
     Left = 0
@@ -335,7 +332,7 @@ object frmDebug: TfrmDebug
       OnClick = btSeatPosClick
     end
     object btPause: TcxButton
-      Left = 5
+      Left = 6
       Top = 6
       Width = 30
       Height = 29
@@ -471,7 +468,7 @@ object frmDebug: TfrmDebug
       Width = 90
     end
     object btRunAnotherInstance: TcxButton
-      Left = 5
+      Left = 6
       Top = 37
       Width = 30
       Height = 29
@@ -528,7 +525,7 @@ object frmDebug: TfrmDebug
       ParentFont = False
     end
     object btServerTest: TcxButton
-      Left = 37
+      Left = 38
       Top = 37
       Width = 30
       Height = 29
@@ -775,12 +772,11 @@ object frmDebug: TfrmDebug
       Width = 52
     end
     object btMemoryState: TcxButton
-      Left = 37
+      Left = 38
       Top = 6
       Width = 30
       Height = 29
       Hint = 'Memory state'
-      Action = acServerCrashTest
       Anchors = [akLeft, akBottom]
       Colors.PressedText = clRed
       OptionsImage.Glyph.Data = {
@@ -847,7 +843,7 @@ object frmDebug: TfrmDebug
     object ccbLogForms: TcxCheckComboBox
       Left = 0
       Top = 0
-      Align = alLeft
+      Align = alClient
       AutoSize = False
       ParentFont = False
       Properties.Alignment.Vert = taVCenter
@@ -870,7 +866,7 @@ object frmDebug: TfrmDebug
     object teRegexFilter: TcxTextEdit
       Left = 313
       Top = 0
-      Align = alLeft
+      Align = alRight
       AutoSize = False
       ParentFont = False
       Properties.OnChange = teRegexFilterPropertiesChange
@@ -892,7 +888,7 @@ object frmDebug: TfrmDebug
     object teFindText: TcxTextEdit
       Left = 467
       Top = 0
-      Align = alClient
+      Align = alRight
       AutoSize = False
       ParentFont = False
       Properties.OnChange = teFindTextPropertiesChange

@@ -3,10 +3,10 @@ unit Poker.Games.GameList;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.Protobufs.Objects.Game, System.SyncObjs;
+  Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.Protobufs.Objects.Game, System.SyncObjs, Poker.Types;
 
 type
-  TGameList = class(TObjectDictionary<TBytes, TGameInfo>)
+  TGameList = class(TObjectDictionary<TMongoId, TGameInfo>)
   private
     FLock: TCriticalSection;
   public
@@ -64,8 +64,8 @@ var
   gameinfo: TGameInfo;
   gamepb: TPB_Game;
   found: Boolean;
-  to_remove: TList<TBytes>;
-  mongoid: TBytes;
+  to_remove: TList<TMongoId>;
+  mongoid: TMongoId;
 begin
   FLock.Enter;
   try
@@ -75,13 +75,13 @@ begin
       Exit;
     end;
 
-    to_remove := TList<TBytes>.Create;
+    to_remove := TList<TMongoId>.Create;
     try
       for gameinfo in Values do
       begin
         found := FALSE;
         for gamepb in AGameList do
-          if CompareBytes(gamepb.MongoId, gameinfo.MongoId) then
+          if CompareMongoId(gamepb.MongoId, gameinfo.MongoId) then
           begin
             found := TRUE;
             Break;

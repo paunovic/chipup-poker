@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.StatusReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game;
 
 type
@@ -125,6 +125,7 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
   FGames.OnNotify := GamesNotifyEvent;
 end;
+
 procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.Game;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TGameLimit = (glNoLimit = 0,glPotLimit = 1,glFixedLimit = 2);
@@ -36,10 +36,10 @@ type
       kLasthandidFieldNumber = 15;
 
     var
-      FId: TBytes;
-      FCreatorMongoId: TBytes;
+      FId: TMongoId;
+      FCreatorMongoId: TMongoId;
       FGamename: String;
-      FClubMongoid: TBytes;
+      FClubMongoid: TMongoId;
       FGameType: TGameType;
       FGameLimit: TGameLimit;
       FBlinds: TGameBlinds;
@@ -54,16 +54,16 @@ type
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
-    procedure SetMongoId(const AValue: TBytes);
+    procedure SetMongoId(const AValue: TMongoId);
     procedure set_has_CreatorMongoId;
     procedure clear_has_CreatorMongoId;
-    procedure SetCreatorMongoId(const AValue: TBytes);
+    procedure SetCreatorMongoId(const AValue: TMongoId);
     procedure set_has_Gamename;
     procedure clear_has_Gamename;
     procedure SetGamename(const AValue: String);
     procedure set_has_ClubMongoid;
     procedure clear_has_ClubMongoid;
-    procedure SetClubMongoid(const AValue: TBytes);
+    procedure SetClubMongoid(const AValue: TMongoId);
     procedure set_has_GameType;
     procedure clear_has_GameType;
     procedure SetGameType(const AValue: TGameType);
@@ -106,12 +106,12 @@ type
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TBytes read FId write SetMongoId;
+    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional bytes CreatorMongoId = 2;
     function has_CreatorMongoId: Boolean;
     procedure clear_CreatorMongoId;
-    property CreatorMongoId: TBytes read FCreatorMongoId write SetCreatorMongoId;
+    property CreatorMongoId: TMongoId read FCreatorMongoId write SetCreatorMongoId;
 
     // optional string Gamename = 3;
     function has_Gamename: Boolean;
@@ -121,7 +121,7 @@ type
     // optional bytes ClubMongoid = 4;
     function has_ClubMongoid: Boolean;
     procedure clear_ClubMongoid;
-    property ClubMongoid: TBytes read FClubMongoid write SetClubMongoid;
+    property ClubMongoid: TMongoId read FClubMongoid write SetClubMongoid;
 
     // optional GameType GameType = 5;
     function has_GameType: Boolean;
@@ -206,12 +206,12 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FId := AProtobufReader.readBytes;
+        FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
       kCreatorMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FCreatorMongoId := AProtobufReader.readBytes;
+        FCreatorMongoId := AProtobufReader.readMongoId;
         set_has_CreatorMongoId;
       end;
       kGamenameFieldNumber: begin
@@ -221,7 +221,7 @@ begin
       end;
       kClubMongoidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubMongoid := AProtobufReader.readBytes;
+        FClubMongoid := AProtobufReader.readMongoId;
         set_has_ClubMongoid;
       end;
       kGameTypeFieldNumber: begin
@@ -320,7 +320,7 @@ end;
 
 procedure TPB_Game.clear_MongoId;
 begin
-  SetLength(FId, 0);
+  FillChar(FId[0], Length(FId), 0);
   clear_has_MongoId;
 end;
 
@@ -339,18 +339,22 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_Game.SetMongoId(const AValue: TBytes);
+procedure TPB_Game.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  FId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FId[0], Length(FId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_MongoId;
 end;
 
 procedure TPB_Game.clear_CreatorMongoId;
 begin
-  SetLength(FCreatorMongoId, 0);
+  FillChar(FCreatorMongoId[0], Length(FCreatorMongoId), 0);
   clear_has_CreatorMongoId;
 end;
 
@@ -369,12 +373,16 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_Game.SetCreatorMongoId(const AValue: TBytes);
+procedure TPB_Game.SetCreatorMongoId(const AValue: TMongoId);
 begin
   Assert(not has_CreatorMongoId);
-  FCreatorMongoId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FCreatorMongoId[0], Length(FCreatorMongoId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kCreatorMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kCreatorMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_CreatorMongoId;
 end;
 
@@ -410,7 +418,7 @@ end;
 
 procedure TPB_Game.clear_ClubMongoid;
 begin
-  SetLength(FClubMongoid, 0);
+  FillChar(FClubMongoid[0], Length(FClubMongoid), 0);
   clear_has_ClubMongoid;
 end;
 
@@ -429,12 +437,16 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_Game.SetClubMongoid(const AValue: TBytes);
+procedure TPB_Game.SetClubMongoid(const AValue: TMongoId);
 begin
   Assert(not has_ClubMongoid);
-  FClubMongoid := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FClubMongoid[0], Length(FClubMongoid));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kClubMongoidFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kClubMongoidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_ClubMongoid;
 end;
 

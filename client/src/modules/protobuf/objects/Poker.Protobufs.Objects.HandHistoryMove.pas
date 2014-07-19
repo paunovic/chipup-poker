@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HandHistoryMove;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
 
 type
@@ -133,6 +133,7 @@ begin
   FWinnerPotData.OnNotify := WinnerPotDataNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
 end;
+
 procedure TPB_HandHistoryMove.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

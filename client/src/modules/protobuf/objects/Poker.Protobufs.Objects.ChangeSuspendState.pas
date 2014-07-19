@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ChangeSuspendState;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ChangeSuspendState = class(TProtobufBaseObject)
@@ -17,17 +17,17 @@ type
       kSuspendedFieldNumber = 2;
 
     var
-      FClubMongoId: TBytes;
-      FPlayerMongoId: TBytes;
+      FClubMongoId: TMongoId;
+      FPlayerMongoId: TMongoId;
       FSuspended: Boolean;
       _has_bits_: UINT32;
 
     procedure set_has_ClubMongoId;
     procedure clear_has_ClubMongoId;
-    procedure SetClubMongoId(const AValue: TBytes);
+    procedure SetClubMongoId(const AValue: TMongoId);
     procedure set_has_PlayerMongoId;
     procedure clear_has_PlayerMongoId;
-    procedure SetPlayerMongoId(const AValue: TBytes);
+    procedure SetPlayerMongoId(const AValue: TMongoId);
     procedure set_has_Suspended;
     procedure clear_has_Suspended;
     procedure SetSuspended(const AValue: Boolean);
@@ -43,12 +43,12 @@ type
     // required bytes ClubMongoId = 1;
     function has_ClubMongoId: Boolean;
     procedure clear_ClubMongoId;
-    property ClubMongoId: TBytes read FClubMongoId write SetClubMongoId;
+    property ClubMongoId: TMongoId read FClubMongoId write SetClubMongoId;
 
     // required bytes PlayerMongoId = 3;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
-    property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+    property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
 
     // required bool Suspended = 2;
     function has_Suspended: Boolean;
@@ -88,12 +88,12 @@ begin
     case field_number of
       kClubMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubMongoId := AProtobufReader.readBytes;
+        FClubMongoId := AProtobufReader.readMongoId;
         set_has_ClubMongoId;
       end;
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerMongoId := AProtobufReader.readBytes;
+        FPlayerMongoId := AProtobufReader.readMongoId;
         set_has_PlayerMongoId;
       end;
       kSuspendedFieldNumber: begin
@@ -125,7 +125,7 @@ end;
 
 procedure TPB_ChangeSuspendState.clear_ClubMongoId;
 begin
-  SetLength(FClubMongoId, 0);
+  FillChar(FClubMongoId[0], Length(FClubMongoId), 0);
   clear_has_ClubMongoId;
 end;
 
@@ -144,18 +144,22 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TBytes);
+procedure TPB_ChangeSuspendState.SetClubMongoId(const AValue: TMongoId);
 begin
   Assert(not has_ClubMongoId);
-  FClubMongoId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FClubMongoId[0], Length(FClubMongoId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kClubMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_ClubMongoId;
 end;
 
 procedure TPB_ChangeSuspendState.clear_PlayerMongoId;
 begin
-  SetLength(FPlayerMongoId, 0);
+  FillChar(FPlayerMongoId[0], Length(FPlayerMongoId), 0);
   clear_has_PlayerMongoId;
 end;
 
@@ -174,12 +178,16 @@ begin
   _has_bits_ := _has_bits_ and not 4;
 end;
 
-procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TBytes);
+procedure TPB_ChangeSuspendState.SetPlayerMongoId(const AValue: TMongoId);
 begin
   Assert(not has_PlayerMongoId);
-  FPlayerMongoId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FPlayerMongoId[0], Length(FPlayerMongoId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kPlayerMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_PlayerMongoId;
 end;
 

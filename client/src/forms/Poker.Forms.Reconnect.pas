@@ -39,10 +39,8 @@ type
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
     procedure SetStatusMessage;
-
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
-
   public
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
 
@@ -57,7 +55,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Server.Socket, Poker.DataModule,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.LoginReply, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Settings,
-  Poker.Tables.TableList, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections;
+  Poker.Tables.TableList, Poker.Protobufs.Objects.UpdateFileInfo, System.Generics.Collections, Poker.Types, Poker.Protobufs.Objects.Base;
 
 { TfrmReconnect }
 
@@ -186,7 +184,8 @@ procedure TfrmReconnect.CSRHello(const AMethodId: Integer; const AObject: TObjec
 var
   pbhello: TPB_HelloReply;
 begin
-  pbhello := AObject as TPB_HelloReply;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_HelloReply, pointer(pbhello)) then
+    Exit;
 
   FCurrentStatus := rsHelloOk;
 
@@ -205,7 +204,8 @@ procedure TfrmReconnect.CSRLogin(const AMethodId: Integer; const AObject: TObjec
 var
   pbreply: TPB_LoginReply;
 begin
-  pbreply := AObject as TPB_LoginReply;
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_LoginReply, pointer(pbreply)) then
+    Exit;
 
   case pbreply.LoginStatus of
     lrSuccess: begin

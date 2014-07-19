@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.QueryTableStats;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_QueryTableStats = class(TProtobufBaseObject)
@@ -15,12 +15,12 @@ type
       kGameidFieldNumber = 1;
 
     var
-      FGameid: TList<TBytes>;
+      FGameid: TList<TMongoId>;
       _has_bits_: UINT32;
 
     procedure set_has_Gameid;
     procedure clear_has_Gameid;
-    procedure GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
+    procedure GameidNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -37,7 +37,7 @@ type
     // repeated bytes Gameid = 1;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TList<TBytes> read FGameid;
+    property Gameid: TList<TMongoId> read FGameid;
 
   end;
 
@@ -70,7 +70,7 @@ end;
 procedure TPB_QueryTableStats.InitObjects;
 begin
   inherited;
-  FGameid := TList<TBytes>.Create;
+  FGameid := TList<TMongoId>.Create;
 end;
 
 procedure TPB_QueryTableStats.HookNotifiers;
@@ -78,6 +78,7 @@ begin
   inherited;
   FGameid.OnNotify := GameidNotifyEvent;
 end;
+
 procedure TPB_QueryTableStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -88,7 +89,7 @@ begin
     case field_number of
       kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGameid.Add(AProtobufReader.readBytes);
+        FGameid.Add(AProtobufReader.readMongoId);
         set_has_Gameid;
       end;
     else
@@ -129,12 +130,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
+procedure TPB_QueryTableStats.GameidNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   set_has_Gameid;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kGameidFieldNumber,Item);
+  begin
+    ProtobufOutput.writeTag(kGameidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(Item));
+    ProtobufOutput.writeRawData(@Item[0], Length(Item));
+  end;
 end;
 
 procedure TPB_QueryTableStats.Clear;

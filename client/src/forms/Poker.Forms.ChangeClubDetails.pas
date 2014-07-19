@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxLabel, cxTextEdit,
   cxButtons, Poker.Clubs.Club, Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, cxSpinEdit, cxCheckBox, cxGraphics,
-  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
+  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, cxMaskEdit, Vcl.StdCtrls, Poker.Types;
 
 type
   TfrmChangeClubDetails = class(TForm, IFormParams, IModalForm)
@@ -31,12 +31,11 @@ type
     procedure cbDefaultPlayerLimitPropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
-    FClubId: TBytes;
+    FClubId: TMongoId;
     FCloseCallback: TNotifyEvent;
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
 
     procedure CSRClubDetailsChange(const AMethodId: Integer; const AObject: TObject);
-
   protected
   public
     procedure SetParams(const AParams: array of pointer);
@@ -51,7 +50,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule;
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule, Poker.Protobufs.Objects.Base;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
@@ -102,9 +101,7 @@ procedure TfrmChangeClubDetails.SetParams(const AParams: array of pointer);
 var
   club: TClubInfo;
 begin
-  SetLength(FClubId, 12);
-  Move(AParams[0]^, FClubId[0], 12);
-
+  PtrToMongoId(AParams[0], FClubId);
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
     edClubName.Text := club.Name;
@@ -171,8 +168,9 @@ procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMethodId: Integer; c
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  pbreply := AObject as TPB_ClubCommandReply;
-  if not CompareBytes(pbreply.Club.MongoId, FClubId) then
+  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+    Exit;
+  if not CompareMongoId(pbreply.Club.MongoId, FClubId) then
     Exit;
 
   case pbreply.Status of

@@ -28,7 +28,7 @@ implementation
 uses
   Poker.HandHistory.Players, Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.WinnerData, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HandHistoryMove,
-  Poker.Helpers.HandHistoryMove, Poker.Protobufs.Objects.PlayerHandHistory;
+  Poker.Helpers.HandHistoryMove, Poker.Protobufs.Objects.PlayerHandHistory, Poker.Types;
 
 { THandHistoryPlayback }
 
@@ -53,7 +53,6 @@ var
   player: TPB_PlayerHandHistory;
   tablestate: TTableState;
   pbevent: TPB_TableEvent;
-  pbpot: TPB_Pot;
   bets: TArray<UINT32>;
   sbseat: Integer;
   bbseat: Integer;
@@ -132,13 +131,7 @@ begin
 
           pots.Clear;
           for C3 := 0 to move.Pots.Count - 1 do
-          begin
-            pbpot := TPB_Pot.Create;
-            pbpot.Value := move.Pots[C3].Value;
-            pbpot.Members.AddRange(move.Pots[C3].Members);
-            pbpot.Rake := move.Pots[C3].Rake;
-            pots.Add(pbpot);
-          end;
+            pots.Add(TPB_Pot.Create(move.Pots[C3]));
 
           pbevent := TPB_TableEvent.Create;
           if move.ContainsEvent(teFlop) then
@@ -235,7 +228,7 @@ begin
         pbseat.Seat := player.Seat;
         pbseat.PlayerMongoId := player.MongoId;
         pbseat.Chips := current_player_chips[player.Seat];
-        if (CompareBytes(dmMain.SelfInfo.MongoId, player.MongoId)) or
+        if (CompareMongoId(dmMain.SelfInfo.MongoId, player.MongoId)) or
            ((not player.Muck) and
             (pbtablestatus.State >= tsWinning)) then
           pbseat.Cards := player.Cards;

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.RegisterReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TRegisterStatus = (regSuccess = 0,regDuplicateEmail = 1,regDupUsername = 2,regInvalidEmail = 3,regInvalidName = 4);

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.Club;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.ClubMember;
 
 type
@@ -26,10 +26,10 @@ type
       kUnlimitedDefaultBalanceFieldNumber = 11;
 
     var
-      FId: TBytes;
+      FId: TMongoId;
       FMembers: TList<TPB_ClubMember>;
       FName: String;
-      FOwner: TBytes;
+      FOwner: TMongoId;
       FPassword: String;
       FIsPrivate: Boolean;
       FSeq: Integer;
@@ -41,7 +41,7 @@ type
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
-    procedure SetMongoId(const AValue: TBytes);
+    procedure SetMongoId(const AValue: TMongoId);
     procedure set_has_Members;
     procedure clear_has_Members;
     procedure set_has_Name;
@@ -49,7 +49,7 @@ type
     procedure SetName(const AValue: String);
     procedure set_has_Owner;
     procedure clear_has_Owner;
-    procedure SetOwner(const AValue: TBytes);
+    procedure SetOwner(const AValue: TMongoId);
     procedure set_has_Password;
     procedure clear_has_Password;
     procedure SetPassword(const AValue: String);
@@ -88,7 +88,7 @@ type
     // optional bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TBytes read FId write SetMongoId;
+    property MongoId: TMongoId read FId write SetMongoId;
 
     // repeated ClubMember Members = 2;
     function has_Members: Boolean;
@@ -103,7 +103,7 @@ type
     // optional bytes Owner = 4;
     function has_Owner: Boolean;
     procedure clear_Owner;
-    property Owner: TBytes read FOwner write SetOwner;
+    property Owner: TMongoId read FOwner write SetOwner;
 
     // optional string Password = 5;
     function has_Password: Boolean;
@@ -179,6 +179,7 @@ begin
   inherited;
   FMembers.OnNotify := MembersNotifyEvent;
 end;
+
 procedure TPB_Club.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -189,7 +190,7 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FId := AProtobufReader.readBytes;
+        FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
       kMembersFieldNumber: begin
@@ -204,7 +205,7 @@ begin
       end;
       kOwnerFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FOwner := AProtobufReader.readBytes;
+        FOwner := AProtobufReader.readMongoId;
         set_has_Owner;
       end;
       kPasswordFieldNumber: begin
@@ -289,7 +290,7 @@ end;
 
 procedure TPB_Club.clear_MongoId;
 begin
-  SetLength(FId, 0);
+  FillChar(FId[0], Length(FId), 0);
   clear_has_MongoId;
 end;
 
@@ -308,12 +309,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_Club.SetMongoId(const AValue: TBytes);
+procedure TPB_Club.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  FId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FId[0], Length(FId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_MongoId;
 end;
 
@@ -382,7 +387,7 @@ end;
 
 procedure TPB_Club.clear_Owner;
 begin
-  SetLength(FOwner, 0);
+  FillChar(FOwner[0], Length(FOwner), 0);
   clear_has_Owner;
 end;
 
@@ -401,12 +406,16 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_Club.SetOwner(const AValue: TBytes);
+procedure TPB_Club.SetOwner(const AValue: TMongoId);
 begin
   Assert(not has_Owner);
-  FOwner := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FOwner[0], Length(FOwner));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kOwnerFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kOwnerFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_Owner;
 end;
 

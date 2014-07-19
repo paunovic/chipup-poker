@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.LoginReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.TableStatus;
 
 type
@@ -102,6 +102,7 @@ begin
   inherited;
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
 end;
+
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;

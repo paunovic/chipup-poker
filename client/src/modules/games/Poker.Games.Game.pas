@@ -3,14 +3,14 @@ unit Poker.Games.Game;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus;
+  Winapi.Windows, System.SysUtils, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TableStatus, Poker.Types;
 
 type
   TGameInfo = class
   private
-    FMongoId: TBytes;
-    FClubId: TBytes;
-    FCreatorId: TBytes;
+    FMongoId: TMongoId;
+    FClubId: TMongoId;
+    FCreatorId: TMongoId;
     FName: String;
     FSmallBlind: UINT32;
     FBigBlind: UINT32;
@@ -36,9 +36,9 @@ type
 
     function AsString(const AShort: Boolean): String;
 
-    property MongoId: TBytes read FMongoId write FMongoId;
-    property ClubId: TBytes read FClubId write FClubId;
-    property CreatorId: TBytes read FCreatorId write FCreatorId;
+    property MongoId: TMongoId read FMongoId write FMongoId;
+    property ClubId: TMongoId read FClubId write FClubId;
+    property CreatorId: TMongoId read FCreatorId write FCreatorId;
     property Name: String read FName write FName;
     property Blinds: TGameBlinds read FBlinds;
     property SmallBlind: UINT32 read FSmallBlind;

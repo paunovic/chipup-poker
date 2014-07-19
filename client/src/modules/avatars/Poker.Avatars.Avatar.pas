@@ -97,7 +97,7 @@ begin
         FHTTP.RcvdStream.Position := 0;
         FImage.LoadFromStream(FHTTP.RcvdStream);
         Save;
-        {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar downloaded [%s] [%d bytes]', [FIdAsString, FHTTP.RcvdStream.Size]), ditNetInc); {$ENDIF}
+        {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar downloaded [%s] [%.2fkb]', [FIdAsString, FHTTP.RcvdStream.Size / 1024]), ditNetInc); {$ENDIF}
       end
       else
       begin

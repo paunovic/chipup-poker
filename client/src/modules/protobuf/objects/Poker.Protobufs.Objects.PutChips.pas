@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.PutChips;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableStatus;
 
 type
@@ -18,14 +18,14 @@ type
       kCurrentStateFieldNumber = 3;
 
     var
-      FTableMongoId: TBytes;
+      FTableMongoId: TMongoId;
       FChipAmount: UInt32;
       FCurrentState: TTableState;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
     procedure clear_has_TableMongoId;
-    procedure SetTableMongoId(const AValue: TBytes);
+    procedure SetTableMongoId(const AValue: TMongoId);
     procedure set_has_ChipAmount;
     procedure clear_has_ChipAmount;
     procedure SetChipAmount(const AValue: UInt32);
@@ -44,7 +44,7 @@ type
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
-    property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
+    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
 
     // required uint32 ChipAmount = 2;
     function has_ChipAmount: Boolean;
@@ -89,7 +89,7 @@ begin
     case field_number of
       kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FTableMongoId := AProtobufReader.readBytes;
+        FTableMongoId := AProtobufReader.readMongoId;
         set_has_TableMongoId;
       end;
       kChipAmountFieldNumber: begin
@@ -126,7 +126,7 @@ end;
 
 procedure TPB_PutChips.clear_TableMongoId;
 begin
-  SetLength(FTableMongoId, 0);
+  FillChar(FTableMongoId[0], Length(FTableMongoId), 0);
   clear_has_TableMongoId;
 end;
 
@@ -145,12 +145,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_PutChips.SetTableMongoId(const AValue: TBytes);
+procedure TPB_PutChips.SetTableMongoId(const AValue: TMongoId);
 begin
   Assert(not has_TableMongoId);
-  FTableMongoId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FTableMongoId[0], Length(FTableMongoId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kTableMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_TableMongoId;
 end;
 

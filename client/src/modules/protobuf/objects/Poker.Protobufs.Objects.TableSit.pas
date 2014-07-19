@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableSit;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TableSit = class(TProtobufBaseObject)
@@ -17,14 +17,14 @@ type
       kChipsFieldNumber = 3;
 
     var
-      FGameId: TBytes;
+      FGameId: TMongoId;
       FSeatIndex: Integer;
       FChips: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_GameId;
     procedure clear_has_GameId;
-    procedure SetGameId(const AValue: TBytes);
+    procedure SetGameId(const AValue: TMongoId);
     procedure set_has_SeatIndex;
     procedure clear_has_SeatIndex;
     procedure SetSeatIndex(const AValue: Integer);
@@ -43,7 +43,7 @@ type
     // required bytes GameId = 1;
     function has_GameId: Boolean;
     procedure clear_GameId;
-    property GameId: TBytes read FGameId write SetGameId;
+    property GameId: TMongoId read FGameId write SetGameId;
 
     // optional int32 SeatIndex = 2;
     function has_SeatIndex: Boolean;
@@ -88,7 +88,7 @@ begin
     case field_number of
       kGameIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGameId := AProtobufReader.readBytes;
+        FGameId := AProtobufReader.readMongoId;
         set_has_GameId;
       end;
       kSeatIndexFieldNumber: begin
@@ -125,7 +125,7 @@ end;
 
 procedure TPB_TableSit.clear_GameId;
 begin
-  SetLength(FGameId, 0);
+  FillChar(FGameId[0], Length(FGameId), 0);
   clear_has_GameId;
 end;
 
@@ -144,12 +144,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_TableSit.SetGameId(const AValue: TBytes);
+procedure TPB_TableSit.SetGameId(const AValue: TMongoId);
 begin
   Assert(not has_GameId);
-  FGameId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FGameId[0], Length(FGameId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kGameIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kGameIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_GameId;
 end;
 

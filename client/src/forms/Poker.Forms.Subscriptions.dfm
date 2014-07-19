@@ -88,7 +88,6 @@ object frmSubscriptions: TfrmSubscriptions
       Properties.Alignment.Horz = taCenter
       Properties.Alignment.Vert = taBottomJustify
       Transparent = True
-      ExplicitWidth = 399
       Height = 23
       Width = 401
       AnchorX = 201
@@ -103,8 +102,6 @@ object frmSubscriptions: TfrmSubscriptions
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 4
-    ExplicitHeight = 77
     object cxButton4: TcxButton
       Left = 78
       Top = 29

@@ -441,7 +441,8 @@ var
   debug_object: TDebugObject;
   found: Boolean;
 begin
-  if btPause.Down then
+  if (not rvLog.Visible) or
+     (btPause.Down) then
     Exit;
 
   if (AType = ditPingPong) and
@@ -590,6 +591,7 @@ end;
 procedure TfrmDebug.btMemoryStateClick(Sender: TObject);
 begin
   rvMemoryState.Visible := btMemoryState.Down;
+  rvLog.Visible := not rvMemoryState.Visible;
   if rvMemoryState.Visible then
   begin
     ClearRectMarks(rvLog);
@@ -897,10 +899,13 @@ end;
 procedure TfrmDebug.UpdateMemoryUsageDetails;
 begin
   LogMemoryManagerStateToFile(MemoryUsageFilePath);
-  rvMemoryState.ClearAll;
-  rvMemoryState.LoadText(MemoryUsageFilePath, FindStyleWithName('MemoryState'), 2, FALSE);
-  rvMemoryState.Format;
-  teFindText.Properties.OnChange(nil);
+  if not btPause.Down then
+  begin
+    rvMemoryState.ClearAll;
+    rvMemoryState.LoadText(MemoryUsageFilePath, FindStyleWithName('MemoryState'), 2, FALSE);
+    rvMemoryState.Format;
+    teFindText.Properties.OnChange(nil);
+  end;
 end;
 
 

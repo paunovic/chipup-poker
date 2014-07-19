@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm,
   Poker.Clubs.Club, Vcl.ActnList, cxButtons, cxTextEdit, cxLabel, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus,
-  dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, Vcl.StdCtrls, System.SysUtils;
+  dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, Vcl.StdCtrls, System.SysUtils, Poker.Types;
 
 type
   TfrmCloseClubConfirmation = class(TForm, IFormParams, IModalForm)
@@ -26,7 +26,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure edPasswordPropertiesChange(Sender: TObject);
   private
-    FClubId: TBytes;
+    FClubId: TMongoId;
     FCloseCallback: TNotifyEvent;
   protected
   public
@@ -68,8 +68,7 @@ end;
 
 procedure TfrmCloseClubConfirmation.SetParams(const AParams: array of pointer);
 begin
-  SetLength(FClubId, 12);
-  Move(AParams[0]^, FClubId[0], 12);
+  PtrToMongoId(AParams[0], FClubId);
 end;
 
 procedure TfrmCloseClubConfirmation.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

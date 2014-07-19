@@ -32,8 +32,7 @@ var
 implementation
 
 uses
-  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule,
-  Poker.Settings;
+  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule, Poker.Settings;
 
 { TAvatars }
 

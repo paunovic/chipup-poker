@@ -3,12 +3,12 @@ unit Poker.Clubs.Member;
 interface
 
 uses
-  System.SysUtils, Poker.Protobufs.Objects.ClubMember;
+  System.SysUtils, Poker.Protobufs.Objects.ClubMember, Poker.Types;
 
 type
   TClubMemberInfo = class
   private
-    FMongoId: TBytes;
+    FMongoId: TMongoId;
     FSuspended: Boolean;
     FBalanceLimit: UINT32;
     FClubBalance: Int32;
@@ -17,7 +17,7 @@ type
     constructor Create(const AClubMemberProtobuf: TPB_ClubMember); overload;
     constructor Create(const AClubMemberInfo: TClubMemberInfo); overload;
 
-    property MongoId: TBytes read FMongoId;
+    property MongoId: TMongoId read FMongoId;
     property Suspended: Boolean read FSuspended;
     property BalanceLimit: UINT32 read FBalanceLimit write FBalanceLimit;
     property ClubBalance: Int32 read FClubBalance write FClubBalance;

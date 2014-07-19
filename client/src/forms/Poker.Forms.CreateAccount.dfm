@@ -88,7 +88,6 @@ object frmCreateAccount: TfrmCreateAccount
     Font.Name = 'Arial'
     Font.Style = [fsBold]
     ParentFont = False
-    ExplicitTop = 192
   end
   object lbsEMail: TcxLabel
     Left = 14

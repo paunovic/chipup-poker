@@ -253,4 +253,14 @@ object dmMain: TdmMain
     Left = 116
     Top = 12
   end
+  object GridStyles: TcxStyleRepository
+    Left = 112
+    Top = 68
+    PixelsPerInch = 96
+    object styleInactiveCell: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 1052722
+      TextColor = 14474460
+    end
+  end
 end

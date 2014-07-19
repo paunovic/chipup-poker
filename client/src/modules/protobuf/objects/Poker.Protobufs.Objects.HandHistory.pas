@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HandHistory;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.PlayerHandHistory, Poker.Protobufs.Objects.HandHistoryMove, Poker.Protobufs.Objects.Game;
 
 type
@@ -27,7 +27,7 @@ type
       kRakeFieldNumber = 12;
 
     var
-      FId: TBytes;
+      FId: TMongoId;
       FSeq: UInt32;
       FTotalrake: UInt32;
       FPlayers: TList<TPB_PlayerHandHistory>;
@@ -43,7 +43,7 @@ type
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
-    procedure SetMongoId(const AValue: TBytes);
+    procedure SetMongoId(const AValue: TMongoId);
     procedure set_has_Seq;
     procedure clear_has_Seq;
     procedure SetSeq(const AValue: UInt32);
@@ -93,7 +93,7 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TBytes read FId write SetMongoId;
+    property MongoId: TMongoId read FId write SetMongoId;
 
     // required uint32 Seq = 2;
     function has_Seq: Boolean;
@@ -204,6 +204,7 @@ begin
   FBalanceChanges.OnNotify := BalanceChangesNotifyEvent;
   FMoves.OnNotify := MovesNotifyEvent;
 end;
+
 procedure TPB_HandHistory.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -214,7 +215,7 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FId := AProtobufReader.readBytes;
+        FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
       kSeqFieldNumber: begin
@@ -329,7 +330,7 @@ end;
 
 procedure TPB_HandHistory.clear_MongoId;
 begin
-  SetLength(FId, 0);
+  FillChar(FId[0], Length(FId), 0);
   clear_has_MongoId;
 end;
 
@@ -348,12 +349,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_HandHistory.SetMongoId(const AValue: TBytes);
+procedure TPB_HandHistory.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  FId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FId[0], Length(FId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+  end;
   set_has_MongoId;
 end;
 
@@ -536,7 +541,7 @@ begin
   Assert(Action = cnAdded);
   set_has_BalanceChanges;
   if not Lightweight then
-    ProtobufOutput.writeInt32(kBalanceChangesFieldNumber,Item);
+    ProtobufOutput.writeInt32(kBalanceChangesFieldNumber, Item);
 end;
 
 procedure TPB_HandHistory.clear_Moves;

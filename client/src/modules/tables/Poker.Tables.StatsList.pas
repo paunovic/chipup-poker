@@ -4,10 +4,10 @@ interface
 
 uses
   System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Tables.Stats;
+  Poker.Tables.Stats, Poker.Types;
 
 type
-  TTablesStatsList = class(TObjectDictionary<TBytes, TTableStats>)
+  TTablesStatsList = class(TObjectDictionary<TMongoId, TTableStats>)
   private
   public
     class procedure Initialize;

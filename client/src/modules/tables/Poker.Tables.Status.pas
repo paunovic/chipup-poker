@@ -122,7 +122,7 @@ type
 implementation
 
 uses
-  System.SysUtils, Poker.Server.Socket, Poker.DataModule, Poker.Common.Misc;
+  System.SysUtils, Poker.Server.Socket, Poker.DataModule, Poker.Common.Misc, Poker.Types;
 
 { TTableStatus }
 
@@ -300,7 +300,7 @@ begin
   // iterate through table status seats and find our seat index
   seat_index := -1;
   for C1 := 0 to FSeats.Count - 1 do
-    if CompareBytes(FSeats[C1].PlayerMongoId, dmMain.SelfInfo.MongoId) then
+    if CompareMongoId(FSeats[C1].PlayerMongoId, dmMain.SelfInfo.MongoId) then
     begin
       seat_index := FSeats[C1].SeatIndex;
       Break;
