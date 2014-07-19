@@ -708,7 +708,7 @@ class BaseGenerator : public CodeGenerator {
 							,"subname",instance.getBaseDelphiName());
 					}
 				}
-				printer.Print("end;\n");
+				printer.Print("end;\n\n");
 			}
       printer.Print(  				
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
