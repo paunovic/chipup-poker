@@ -51,7 +51,6 @@ type
     gridGamesLevel: TcxGridLevel;
     btNewGame: TcxButton;
     btCloseTable: TcxButton;
-    btEditGame: TcxButton;
     acSuspendPlayer: TAction;
     acReinstatePlayer: TAction;
     btLeaveClub: TcxButton;
@@ -113,6 +112,8 @@ type
     acResetBalance: TAction;
     btSetLimit: TcxButton;
     acSetLimit: TAction;
+    styleCheckedRow: TcxStyle;
+    styleSelectedRow: TcxStyle;
     procedure btClubHomeClick(Sender: TObject);
     procedure btTablesClick(Sender: TObject);
     procedure acCloseClubExecute(Sender: TObject);
@@ -142,6 +143,8 @@ type
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
     procedure acResetBalanceExecute(Sender: TObject);
     procedure acSetLimitExecute(Sender: TObject);
+    procedure gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
   private
     FCallbacksId: Integer;
     FClubId: TMongoId;
@@ -233,7 +236,6 @@ begin
   btResetBalance.Top := btGiveOwnership.Top;
   btSetLimit.Top := btGiveOwnership.Top;
   btNewGame.Top := gbTables.Height - btNewGame.Height - 13;
-  btEditGame.Top := btNewGame.Top;
   btCloseTable.Top := btNewGame.Top;
 end;
 
@@ -531,6 +533,16 @@ begin
     VariantToMongoId(gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index), FSelectedStatsTableId);
 
   UpdatePlayersStatsList;
+end;
+
+procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+begin
+  if ARecord.Values[gridTablesEnabled.Index] = TRUE then
+    AStyle := styleCheckedRow
+  else
+    if Sender.DataController.FocusedRowIndex = ARecord.Index then
+      AStyle := styleSelectedRow;
 end;
 
 procedure TfrmClubLobby.ModalFormClose(ASender: TObject);

@@ -425,7 +425,10 @@ begin
       ShowHint := TRUE;
     end
     else
+    begin
       Hint := '';
+      ShowHint := FALSE;
+    end;
 
     if set_raise_amount then
       SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +

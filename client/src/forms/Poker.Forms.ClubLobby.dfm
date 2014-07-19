@@ -2529,7 +2529,7 @@ object frmClubLobby: TfrmClubLobby
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 2
-    Properties.ActivePage = tsStats
+    Properties.ActivePage = tsClubHome
     Properties.HideTabs = True
     ClientRectBottom = 441
     ClientRectLeft = 1
@@ -2693,7 +2693,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 250
+          Top = 238
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2709,7 +2709,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 250
+          Top = 238
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2725,7 +2725,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 250
+          Top = 238
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2741,7 +2741,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 250
+          Top = 238
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2757,7 +2757,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 250
+          Top = 238
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2794,7 +2794,7 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 872
-          Height = 219
+          Height = 401
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
@@ -2816,7 +2816,7 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
             OptionsView.FocusRect = False
-            OptionsView.NoDataToDisplayInfoText = ' '
+            OptionsView.NoDataToDisplayInfoText = 'No active tables in this club'
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell
@@ -2876,7 +2876,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 203
+          Top = 391
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2892,31 +2892,13 @@ object frmClubLobby: TfrmClubLobby
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 203
+          Top = 391
           Width = 98
           Height = 28
           Action = acCloseTable
           Anchors = [akLeft, akBottom]
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 2
-          Font.Charset = ANSI_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Arial'
-          Font.Style = []
-          ParentFont = False
-        end
-        object btEditGame: TcxButton
-          Left = 48
-          Top = 139
-          Width = 98
-          Height = 28
-          Anchors = [akLeft, akBottom]
-          Caption = 'Edit Table...'
-          Enabled = False
-          SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 3
-          Visible = False
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -2962,6 +2944,7 @@ object frmClubLobby: TfrmClubLobby
           OptionsView.GridLines = glVertical
           OptionsView.GroupByBox = False
           Styles.Inactive = dmMain.styleInactiveCell
+          Styles.OnGetContentStyle = gridTablesTableStylesGetContentStyle
           object gridTablesTableId: TcxGridColumn
             DataBinding.ValueType = 'Variant'
             PropertiesClassName = 'TcxBlobEditProperties'
@@ -3057,7 +3040,7 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
             OptionsView.FocusRect = False
-            OptionsView.NoDataToDisplayInfoText = 'No stats available for this table(s)'
+            OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
@@ -3162,6 +3145,7 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
             OptionsView.FocusRect = False
+            OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
@@ -3343,7 +3327,7 @@ object frmClubLobby: TfrmClubLobby
   end
   object pmTablesStats: TPopupMenu
     Left = 140
-    Top = 404
+    Top = 408
     object SelectAll1: TMenuItem
       Action = acTablesStatsSelectAll
     end
@@ -3352,8 +3336,8 @@ object frmClubLobby: TfrmClubLobby
     end
   end
   object StatsStyleRepo: TcxStyleRepository
-    Left = 240
-    Top = 420
+    Left = 228
+    Top = 408
     PixelsPerInch = 96
     object styleBalancePositive: TcxStyle
       AssignedValues = [svColor]
@@ -3372,6 +3356,16 @@ object frmClubLobby: TfrmClubLobby
       Color = 28416
     end
     object styleTableClosed: TcxStyle
+    end
+    object styleCheckedRow: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 7094323
+      TextColor = 14474460
+    end
+    object styleSelectedRow: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 537923640
+      TextColor = 551345372
     end
   end
 end

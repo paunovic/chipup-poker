@@ -3716,8 +3716,6 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
-            OptionsSelection.HideSelection = True
-            OptionsSelection.UnselectFocusedRecordOnExit = False
             OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
