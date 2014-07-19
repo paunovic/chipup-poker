@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.User;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types, ;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPlayerSubscriptionPlan = (pspBasic = 0,pspNormal = 1,pspSuper = 2);
@@ -120,7 +120,7 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FId := AProtobufReader.readBytes;
+        FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
       kAvatarFieldNumber: begin
@@ -178,7 +178,7 @@ end;
 
 procedure TPB_User.clear_MongoId;
 begin
-  SetLength(FId, 0);
+  FillChar(FId[0], Length(FId), 0);
   clear_has_MongoId;
 end;
 
@@ -198,11 +198,17 @@ begin
 end;
 
 procedure TPB_User.SetMongoId(const AValue: TMongoId);
+var
+  bytes: TBytes;
 begin
   Assert(not has_MongoId);
-  FId := Copy(AValue, 0, Length(AValue));
+  Move(AValue[0], FId[0], Length(FId));
   if not Lightweight then
-    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  begin
+    SetLength(bytes, Length(AValue));
+    Move(AValue[0], bytes[0], Length(AValue));
+    ProtobufOutput.writeBytes(kIdFieldNumber, bytes);
+  end;
   set_has_MongoId;
 end;
 
