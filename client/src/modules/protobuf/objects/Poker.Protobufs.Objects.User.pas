@@ -205,9 +205,9 @@ begin
   Move(AValue[0], FId[0], Length(FId));
   if not Lightweight then
   begin
-    SetLength(bytes, Length(AValue));
-    Move(AValue[0], bytes[0], Length(AValue));
-    ProtobufOutput.writeBytes(kIdFieldNumber, bytes);
+    ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Length(AValue));
+    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
   end;
   set_has_MongoId;
 end;
