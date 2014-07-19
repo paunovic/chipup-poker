@@ -158,6 +158,7 @@ public:
 				uint64 test = isObjectId.varint();
 				cerr << "its " << test << " for obj " << copy.propertyName.c_str() << endl;
 				copy.baseDelphiName = copy.delphiName = "TMongoId";
+				copy.reader = "readMongoId";
 			}
 		}
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
@@ -353,12 +354,22 @@ class BaseGenerator : public CodeGenerator {
 				"  clear_has_$name$;\n"
 				"end;\n\n");
 			} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
-				printer->Print(vars,
-					"procedure TPB_$message$.clear_$name$;\n"
-					"begin\n"
-					"  SetLength($pname$, 0);\n"
-					"  clear_has_$name$;\n"
-					"end;\n\n");
+				// FIXME, merge with TypeInfo
+				if (thisType.getBaseDelphiName() == "TMongoId") {
+					printer->Print(vars,
+						"procedure TPB_$message$.clear_$name$;\n"
+						"begin\n"
+						"  FillChar($pname$[0], Length($pname$), 0);\n"
+						"  clear_has_$name$;\n"
+						"end;\n\n");
+				} else {
+					printer->Print(vars,
+						"procedure TPB_$message$.clear_$name$;\n"
+						"begin\n"
+						"  SetLength($pname$, 0);\n"
+						"  clear_has_$name$;\n"
+						"end;\n\n");
+				}
 			} else 	if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 				printer->Print(vars,
 					"procedure TPB_$message$.clear_$name$;\n"
@@ -440,10 +451,21 @@ class BaseGenerator : public CodeGenerator {
 				"  Assert(not has_$name$);\n"
 				);
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
-				printer->Print(vars,
-					"  $pname$ := Copy($input$, 0, Length($input$));\n"
-					"  if not Lightweight then\n"
-					"    ProtobufOutput.$writer$($enum$, $input$);\n");
+				if (thisType.getBaseDelphiName() == "TMongoId") {
+					printer->Print(vars,
+						"  Move($input$[0], $pname$[0], Length($pname$));\n"
+						"  if not Lightweight then\n"
+						"  begin\n"
+						"    ProtobufOutput.writeTag($enum$, WIRETYPE_LENGTH_DELIMITED);\n"
+						"    ProtobufOutput.writeRawVarint32(Length($input$));\n"
+						"    ProtobufOutput.writeRawData(@$input$[0], Length($input$));\n"
+						"  end;\n");
+				} else {
+					printer->Print(vars,
+						"  $pname$ := Copy($input$, 0, Length($input$));\n"
+						"  if not Lightweight then\n"
+						"    ProtobufOutput.$writer$($enum$, $input$);\n");
+				}
 			} else {
 				printer->Print(vars,
 					"  $pname$ := AValue;\n"
@@ -473,7 +495,7 @@ class BaseGenerator : public CodeGenerator {
 				"interface\n"
 				"\n"
 				"uses\n"
-				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types, "
+				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types"
 				,"filename",file->name()
 				,"name",message->name());
 			if (message->field_count() > 0) {
@@ -722,7 +744,7 @@ class BaseGenerator : public CodeGenerator {
 				}
 				printer.Print("end;\n\n");
 			}
-      printer.Print(  				
+      printer.Print(
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
 				"var\n"
 				"  tag, field_number, wire_type, endpos: Integer;\n"
@@ -743,7 +765,7 @@ class BaseGenerator : public CodeGenerator {
 				vars["name"] = EnumName(field);
 				vars["pname"] = instance.PrivateFieldName();
 				vars["pubname"] = instance.PropertyName();
-				vars["reader"] = typeinfo[field->type()]->getReader();
+				vars["reader"] = instance.getReader();
 				vars["wiretype"] = typeinfo[field->type()]->getWireType();
 				vars["typename"] = typeinfo[field->type()]->getTypeName();
 				if ((field->type() == FieldDescriptor::TYPE_INT32) && (field->is_packed())) {

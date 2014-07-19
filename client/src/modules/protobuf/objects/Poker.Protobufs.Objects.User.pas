@@ -198,8 +198,6 @@ begin
 end;
 
 procedure TPB_User.SetMongoId(const AValue: TMongoId);
-var
-  bytes: TBytes;
 begin
   Assert(not has_MongoId);
   Move(AValue[0], FId[0], Length(FId));
