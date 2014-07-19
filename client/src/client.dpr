@@ -65,6 +65,10 @@ uses
   Poker.Common.InstanceController in 'modules\common\Poker.Common.InstanceController.pas',
   Poker.Common.AlphaBlendThread in 'modules\common\Poker.Common.AlphaBlendThread.pas',
   Poker.Common.CommandLineParamProcesser in 'modules\common\Poker.Common.CommandLineParamProcesser.pas',
+  Poker.Common.WavePlayer.DirectSoundBuffer in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas',
+  Poker.Common.WavePlayer in 'modules\common\wave_player\Poker.Common.WavePlayer.pas',
+  Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas',
+  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas',
   Poker.HardcodedSettings in 'modules\settings\Poker.HardcodedSettings.pas',
   Poker.Settings in 'modules\settings\Poker.Settings.pas',
   Poker.Server.Settings in 'modules\server\Poker.Server.Settings.pas',
@@ -130,7 +134,6 @@ uses
   Poker.Protobufs.Objects.ChangePasswordParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.ChangePasswordParams.pas',
   Poker.Protobufs.Objects.Game in 'modules\protobuf\objects\Poker.Protobufs.Objects.Game.pas',
   Poker.Protobufs.Objects.SetAvatarParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.SetAvatarParams.pas',
-  Poker.Protobufs.Objects.TransferChipsParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.TransferChipsParams.pas',
   Poker.Protobufs.Objects.ChatMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.ChatMessage.pas',
   Poker.Protobufs.Objects.ChatEvent in 'modules\protobuf\objects\Poker.Protobufs.Objects.ChatEvent.pas',
   Poker.Protobufs.Objects.TableSit in 'modules\protobuf\objects\Poker.Protobufs.Objects.TableSit.pas',
@@ -172,10 +175,6 @@ uses
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
   Poker.Protobufs.Objects.HandHistoryMove in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas',
-  Poker.Common.WavePlayer.DirectSoundBuffer in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas',
-  Poker.Common.WavePlayer in 'modules\common\wave_player\Poker.Common.WavePlayer.pas',
-  Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas',
-  Poker.Common.WavePlayer.DirectSoundBufferNotificationThread in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas',
   Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas';
 
 procedure FocusApp;

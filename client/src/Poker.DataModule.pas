@@ -368,7 +368,7 @@ var
   club: TClubInfo;
   player: TPlayerInfo;
   query_users: TArray<TMongoId>;
-  empty_array: TBytes;
+  empty_avatar_id: TBytes;
   member: TClubMemberInfo;
   memberpb: TPB_ClubMember;
 begin
@@ -378,13 +378,13 @@ begin
     if dmMain.SelfInfo.Clubs.GetAndLock(AClub.MongoId, club) then
     try
       SetLength(query_users, 0);
-      SetLength(empty_array, 0);
+      SetLength(empty_avatar_id, 0);
 
       if not Players.TryGetValue(AClub.Owner, player) then
       begin
         SetLength(query_users, 1);
         query_users[0] := AClub.Owner;
-        Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_array);
+        Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_avatar_id);
       end;
 
       for memberpb in AClub.Members do
@@ -394,7 +394,7 @@ begin
         begin
           SetLength(query_users, Length(query_users) + 1);
           query_users[Length(query_users) - 1] := memberpb.MongoId;
-          Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_array);
+          Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_avatar_id);
         end;
 
       if Length(query_users) > 0 then

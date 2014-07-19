@@ -31,7 +31,7 @@ type
     procedure SslHttpSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
   private
     FCallbacksId: Integer;
-    FAvatarId : TBytes;
+    FAvatarId: TBytes;
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}

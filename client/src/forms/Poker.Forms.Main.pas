@@ -184,7 +184,7 @@ uses
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
   Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus,
   Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer,
-  Poker.Protobufs.Objects.TransferChipsParams, Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams,
+  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams,
   Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList, Poker.Protobufs.Objects.TableStatsReply,
   Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
   Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
@@ -591,7 +591,7 @@ begin
           if rcount > c.RecordCount then
             c.SetRecordCount(rcount);
 
-//          c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId); FIXME
+          c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, MongoIdToVariant(club.MongoId));
           c.SetValue(rcount - 1, gridHomeClubsId.Index, club.Id);
           c.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
 
@@ -641,7 +641,7 @@ begin
         if rcount > c.RecordCount then
           c.SetRecordCount(rcount);
 
-//        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId);
+        c.SetValue(rcount - 1, gridGamesId.Index, MongoIdToVariant(game.MongoId));
         c.SetValue(rcount - 1, gridGamesName.Index, game.Name);
         c.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
@@ -678,7 +678,7 @@ begin
           Inc(rcount);
           if rcount > c.RecordCount then
             c.SetRecordCount(rcount);
-//          c.SetValue(rcount - 1, gridPublicClubsMongoId.Index, club.MongoId); FIXME
+          c.SetValue(rcount - 1, gridPublicClubsMongoId.Index, MongoIdToVariant(club.MongoId));
           c.SetValue(rcount - 1, gridPublicClubsName.Index, club.Name);
         end;
     finally
@@ -806,7 +806,7 @@ begin
     dmMain.SelfInfo.Clubs.Unlock;
   end;
 
-  acShowGameTableForm.Enabled := Length(FSelectedGame) > 0;
+  acShowGameTableForm.Enabled := not CompareMongoId(FSelectedGame, EMPTY_MONGO_ID);
 end;
 
 procedure TfrmChipUpMain.imgCashierMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -1105,7 +1105,6 @@ begin
 
   ConfigureGUI;
 end;
-
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
@@ -1143,13 +1142,13 @@ var
   playerinfo: TPlayerInfo;
   club: TClubInfo;
   query_users: TArray<TMongoId>;
-  empty_array: TBytes;
+  empty_avatar_id: TBytes;
   clubstats: TPB_ClubStatsReply;
 begin
   if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatsReplies, pointer(pb)) then
     Exit;
 
-  SetLength(empty_array, 0);
+  SetLength(empty_avatar_id, 0);
   SetLength(query_users, 0);
   for player in pb.Players do
     if Players.TryGetValue(player.MongoId, playerinfo) then
@@ -1158,7 +1157,7 @@ begin
     begin
       SetLength(query_users, Length(query_users) + 1);
       query_users[Length(query_users) - 1] := player.MongoId;
-      Players.AddPlayer(player.MongoId, 'Retrieving...', '', empty_array);
+      Players.AddPlayer(player.MongoId, 'Retrieving...', '', empty_avatar_id);
     end;
 
   if Length(query_users) <> 0 then

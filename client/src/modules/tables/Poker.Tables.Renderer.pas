@@ -1599,7 +1599,6 @@ begin
     if winmsg <> '' then
       winmsg := Format('(%s)', [winmsg]);
 
-    Assert(Assigned(animation));
     animation.Tags.AddOrSetValue(ANITAG_SOUND, Sounds.SOUND_MOVE_CHIPS);
     animation.Tags.AddOrSetValue(ANITAG_WINMSG, Format('%s won %s chip%s %s%s', [nicks, ChipsToStr(total_chips_val div UINT32(pot.WinnerData.Count)), chips_plural, suffix, winmsg]));
   end;

@@ -35,7 +35,6 @@ begin
   FBalanceLimit := AClubMemberProtobuf.BalanceLimit;
   FClubBalance := AClubMemberProtobuf.ClubBalance;
   FUnlimitedLimit := AClubMemberProtobuf.UnlimitedLimit;
-  Assert(Length(FMongoId) = 12);
 end;
 
 constructor TClubMemberInfo.Create(const AClubMemberInfo: TClubMemberInfo);

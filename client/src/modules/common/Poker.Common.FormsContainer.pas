@@ -3,7 +3,7 @@ unit Poker.Common.FormsContainer;
 interface
 
 uses
-  System.Generics.Collections, Vcl.Forms, System.SyncObjs;
+  System.Generics.Collections, Vcl.Forms, System.SyncObjs, System.Classes;
 
 type
   TForms = TObjectList<TForm>;
@@ -39,10 +39,56 @@ type
 var
   FormsContainer: TFormsContainer;
 
+function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
+function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AShow: Boolean): TForm;
+
 implementation
 
 uses
-  Winapi.Windows, Poker.Common.Misc, System.SysUtils;
+  Winapi.Windows, Poker.Common.Misc, System.SysUtils, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm;
+
+
+
+function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
+var
+  form: TForm;
+begin
+  form := AClassType.Create(AOwner);
+
+  if Assigned(AOwner) then
+  begin
+    form.PopupParent := AOwner;
+    EnableWindow(AOwner.Handle, FALSE);
+  end;
+
+  if Length(AParams) > 0 then
+    (form as IFormParams).SetParams(AParams);
+
+  if Assigned(ACloseCallback) then
+    (form as IModalForm).SetCloseCallback(ACloseCallback);
+
+  form.Show;
+
+  result := form;
+end;
+
+function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AShow: Boolean): TForm;
+var
+  form: TForm;
+begin
+  form := AClassType.Create(AOwner);
+
+  if Assigned(AOwner) then
+    form.PopupParent := AOwner;
+
+  if Length(AParams) > 0 then
+    (form as IFormParams).SetParams(AParams);
+
+  if AShow then
+    form.Show;
+
+  result := form;
+end;
 
 
 class procedure TFormsContainer.Initialize;
@@ -173,7 +219,7 @@ begin
   end
   else
   begin
-    form := Poker.Common.Misc.RunForm(AFormClass, AOwner, AParams, AShow);
+    form := Poker.Common.FormsContainer.RunForm(AFormClass, AOwner, AParams, AShow);
     Add(form);
     result := form;
   end;

@@ -68,7 +68,7 @@ uses
   Winapi.Windows,
   Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ChangeEMailParams,
-  Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply, Poker.Protobufs.Objects.TransferChipsParams,
+  Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply,
   Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.KickPlayerParams,
   Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply, Poker.Protobufs.Objects.GiveClubOwnershipParams,
   Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
@@ -335,7 +335,6 @@ var
 begin
   protobuf := TPB_Game.Create;
   try
-    Assert(Length(AGameId) = 12);
     protobuf.MongoId := AGameId;
     SendProtobuf(scTableJoin, protobuf);
   finally
@@ -422,7 +421,6 @@ begin
   try
     for C1 := Low(AMongoIds) to High(AMongoIds) do
     begin
-      Assert(Length(AMongoIds[C1]) = 12);
       protobuf.UserMongoIds.Add(AMongoIds[C1]);
     end;
     SendProtobuf(scGetPlayers, protobuf);

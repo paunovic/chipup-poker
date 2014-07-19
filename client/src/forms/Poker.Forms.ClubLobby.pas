@@ -315,9 +315,7 @@ begin
     btNewGame.Visible := admin_visible;
     acShowCreateGameForm.Enabled := admin_visible;
     btCloseTable.Visible := admin_visible;
-    acCloseTable.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
-  //    btEditGame.Visible := admin_visible;
-  //    acShowEditGameForm.Enabled := (admin_visible) and (Length(FSelectedGameId) > 0);
+    acCloseTable.Enabled := (admin_visible) and (not CompareMongoId(FSelectedGameId, EMPTY_MONGO_ID));
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
     acLeaveClub.Enabled := not admin_visible;
@@ -390,7 +388,7 @@ begin
     if recIndex > -1 then
       VariantToMongoId(gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index), FSelectedGameId);
 
-    close_table_act := (Length(FSelectedGameId) > 0) and
+    close_table_act := (not CompareMongoId(FSelectedGameId, EMPTY_MONGO_ID)) and
                        (CompareMongoId(club.OwnerId, dmMain.SelfInfo.MongoId)) and
                        (club.Games.TryGetValue(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
 
@@ -567,7 +565,7 @@ var
     player: TPlayerInfo;
     status: String;
   begin
-//     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId); FIXME
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, MongoIdToVariant(AMember.MongoId));
     if Players.TryGetValue(AMember.MongoId, player) then
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick)
     else
@@ -607,10 +605,7 @@ begin
       SetLength(query_players, 0);
       gridPlayersListTable.DataController.SetRecordCount(club.Members.Count);
       for C1 := 0 to club.Members.Count - 1 do
-      begin
-        Assert(Length(club.Members[C1].MongoId) = 12);
         AddPlayerToGrid(C1, club.Members[C1]);
-      end;
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
@@ -648,7 +643,7 @@ begin
             tmp := 'UNKNOWN';
 
           recidx := c.AppendRecord;
-//          c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId); FIXME
+          c.SetValue(recidx, gridTablesTableId.Index, MongoIdToVariant(tablestats.GameId));
           c.SetValue(recidx, gridTablesHands.Index, tablestats.Hands);
           c.SetValue(recidx, gridTablesName.Index, tmp);
 
@@ -742,7 +737,7 @@ begin
                 tmp := 'Unknown';
               c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
 
-//               c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId); FIXME
+               c.SetValue(recidx, gridStatsTablePlayerId.Index, MongoIdToVariant(playerstats.UserId));
               c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
               c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.GetBuyinsTotal / 100);
               c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.GetCashoutsTotal / 100);
@@ -822,7 +817,7 @@ begin
 
         recidx := c.AppendRecord;
 
-//         c.SetValue(recidx, gridGamesId.Index, game.MongoId);FIXME
+         c.SetValue(recidx, gridGamesId.Index, MongoIdToVariant(game.MongoId));
         c.SetValue(recidx, gridGamesName.Index, game.Name);
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
