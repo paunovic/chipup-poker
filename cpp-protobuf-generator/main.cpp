@@ -424,9 +424,19 @@ class BaseGenerator : public CodeGenerator {
 				} else if ((field->type() == FieldDescriptor::TYPE_INT32) || (field->type() == FieldDescriptor::TYPE_UINT32)
 					|| (field->type() == FieldDescriptor::TYPE_BYTES)) {
 					vars["writer"] = instance.getWriter();
-					printer->Print(vars,
-					  "  if not Lightweight then\n"
-						"    ProtobufOutput.$writer$($enum$,Item);\n");
+					if (thisType.getBaseDelphiName() == "TMongoId") {
+						printer->Print(vars,
+							"  if not Lightweight then\n"
+							"  begin\n"
+							"    ProtobufOutput.writeTag($enum$, WIRETYPE_LENGTH_DELIMITED);\n"
+							"    ProtobufOutput.writeRawVarint32(Length(Item));\n"
+							"    ProtobufOutput.writeRawData(@Item[0], Length(Item));\n"
+							"  end;\n");
+					} else {
+						printer->Print(vars,
+							"  if not Lightweight then\n"
+							"    ProtobufOutput.$writer$($enum$, Item);\n");
+					}
 				}
 				printer->Print(
 					"end;\n"
