@@ -346,13 +346,20 @@ class BaseGenerator : public CodeGenerator {
 			vars["message"] = message->name();
 			vars["name"] = thisType.PropertyName();
 			vars["pname"] = thisType.PrivateFieldName();
+			vars["subname"] = thisType.getBaseDelphiName();
 			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 				printer->Print(vars,
 				"procedure TPB_$message$.clear_$name$;\n"
+				"var\n"
+				"  on_notify: TCollectionNotifyEvent<$subname$>;\n"
 				"begin\n"
+				"  on_notify := $pname$.OnNotify;\n"
+				"  $pname$.OnNotify := nil;\n"
 				"  $pname$.Clear;\n"
+				"  $pname$.OnNotify := on_notify;\n"
 				"  clear_has_$name$;\n"
-				"end;\n\n");
+				"end;\n\n"
+        );
 			} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				// FIXME, merge with TypeInfo
 				if (thisType.getBaseDelphiName() == "TMongoId") {

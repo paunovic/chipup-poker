@@ -142,8 +142,13 @@ begin
 end;
 
 procedure TPB_GetUserParams.clear_UserMongoIds;
+var
+  on_notify: TCollectionNotifyEvent<TMongoId>;
 begin
+  on_notify := FUserMongoIds.OnNotify;
+  FUserMongoIds.OnNotify := nil;
   FUserMongoIds.Clear;
+  FUserMongoIds.OnNotify := on_notify;
   clear_has_UserMongoIds;
 end;
 
@@ -175,8 +180,13 @@ begin
 end;
 
 procedure TPB_GetUserParams.clear_Users;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FUsers.OnNotify;
+  FUsers.OnNotify := nil;
   FUsers.Clear;
+  FUsers.OnNotify := on_notify;
   clear_has_Users;
 end;
 

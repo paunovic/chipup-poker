@@ -13,7 +13,6 @@ enum ServerCodes {
 	srLeaveClubReply = 6;
 	srChangeClubDetailsReply = 7;
 	srLogout = 8;
-	srListClubs = 9;
 
 	srKickPlayerReply = 11;
 	srSetAvatarReply = 12;
@@ -511,18 +510,6 @@ message CloseGameData {
 	}
 	required bytes gameid = 1 [(ObjectId)=true];
 	required CloseGameTime timestamp = 2;
-}
-
-message FetchHandHistory {
-	message GameQuery {
-		required bytes gameid = 1 [(ObjectId)=true];
-		required uint32 lasthandid = 2;
-	}
-	repeated GameQuery games = 1;
-}
-
-message FetchHandReply {
-	required string uuid = 1;
 }
 
 message QueryTableStats {

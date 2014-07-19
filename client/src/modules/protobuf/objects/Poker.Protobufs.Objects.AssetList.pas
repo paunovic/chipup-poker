@@ -119,8 +119,13 @@ begin
 end;
 
 procedure TPB_AssetList.clear_Assets;
+var
+  on_notify: TCollectionNotifyEvent<TPB_UpdateFileInfo>;
 begin
+  on_notify := FAssets.OnNotify;
+  FAssets.OnNotify := nil;
   FAssets.Clear;
+  FAssets.OnNotify := on_notify;
   clear_has_Assets;
 end;
 

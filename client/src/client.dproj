@@ -276,7 +276,6 @@
 			<DCCReference Include="modules\tables\Poker.Tables.Resources.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.Renderer.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.RenderMetrics.pas"/>
-			<DCCReference Include="modules\tables\Poker.Tables.Stats.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.StatsList.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Items.pas"/>
@@ -306,7 +305,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RegisterParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ForgotPasswordParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.User.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ListClubsReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GiveClubOwnershipParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.KickPlayerParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChangeEMailParams.pas"/>
@@ -334,8 +332,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.QueryTableStats.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReplies.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas"/>

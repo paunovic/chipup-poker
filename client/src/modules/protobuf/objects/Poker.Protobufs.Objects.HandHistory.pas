@@ -423,8 +423,13 @@ begin
 end;
 
 procedure TPB_HandHistory.clear_Players;
+var
+  on_notify: TCollectionNotifyEvent<TPB_PlayerHandHistory>;
 begin
+  on_notify := FPlayers.OnNotify;
+  FPlayers.OnNotify := nil;
   FPlayers.Clear;
+  FPlayers.OnNotify := on_notify;
   clear_has_Players;
 end;
 
@@ -516,8 +521,13 @@ begin
 end;
 
 procedure TPB_HandHistory.clear_BalanceChanges;
+var
+  on_notify: TCollectionNotifyEvent<Integer>;
 begin
+  on_notify := FBalanceChanges.OnNotify;
+  FBalanceChanges.OnNotify := nil;
   FBalanceChanges.Clear;
+  FBalanceChanges.OnNotify := on_notify;
   clear_has_BalanceChanges;
 end;
 
@@ -545,8 +555,13 @@ begin
 end;
 
 procedure TPB_HandHistory.clear_Moves;
+var
+  on_notify: TCollectionNotifyEvent<TPB_HandHistoryMove>;
 begin
+  on_notify := FMoves.OnNotify;
+  FMoves.OnNotify := nil;
   FMoves.Clear;
+  FMoves.OnNotify := on_notify;
   clear_has_Moves;
 end;
 

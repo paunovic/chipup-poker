@@ -3879,7 +3879,7 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
             OptionsView.FocusRect = False
-            OptionsView.NoDataToDisplayInfoText = 'You are not the member of any private clubs yet'
+            OptionsView.NoDataToDisplayInfoText = 'You are not member of any private clubs'
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
             Styles.Inactive = dmMain.styleInactiveCell

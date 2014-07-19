@@ -46,7 +46,6 @@ type
     procedure TableBoolFlag(const ACommand: TServerCodes; const AGameId: TMongoId; const AFlag: Boolean);
     procedure ResendVerificationMail;
     procedure ShowCards(const AGameId: TMongoId);
-    procedure QueryTableStats(const ATables: array of TMongoId);
     procedure ContactUs(const AReason: TContactReason; const AMessage: String);
     procedure Hello(const ADebug: Boolean; const AFiles: TObjectList<TPB_UpdateFileInfo>);
     procedure SetPlayerLimit(const AClubId, AMemberId: TMongoId; const ALimit: UINT32; const AUnlimited: Boolean);
@@ -66,18 +65,17 @@ implementation
 
 uses
   Winapi.Windows,
-  Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.HelloReply,
+  Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ChangeEMailParams,
-  Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ListClubsReply,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.KickPlayerParams,
-  Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply, Poker.Protobufs.Objects.GiveClubOwnershipParams,
+  Poker.Protobufs.Objects.ForgotPasswordParams,  Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.SetAvatarReply,
+  Poker.Protobufs.Objects.KickPlayerParams, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
   Poker.Protobufs.Objects.ChangePasswordParams, Poker.Protobufs.Objects.RegisterReply, Poker.Protobufs.Objects.LoginReply,
   Poker.Protobufs.Objects.GetUserParams, Poker.Protobufs.Objects.SetAvatarParams, Poker.Protobufs.Objects.ChatEvent,
   Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.TableSit, Poker.Protobufs.Objects.ChangeSuspendState,
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag, Poker.Protobufs.Objects.PutChips,
-  Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.QueryTableStats, Poker.Protobufs.Objects.TableStatsReplies,
-  Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams,
-  Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange;
+  Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply,
+  Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
+  Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -507,21 +505,6 @@ begin
   try
     protobuf.MongoId := AGameId;
     SendProtobuf(scShowCards, protobuf);
-  finally
-    protobuf.Free;
-  end;
-end;
-
-procedure TServerSocket.QueryTableStats(const ATables: array of TMongoId);
-var
-  protobuf: TPB_QueryTableStats;
-  C1: Integer;
-begin
-  protobuf := TPB_QueryTableStats.Create;
-  try
-    for C1 := Low(ATables) to High(ATables) do
-      protobuf.Gameid.Add(ATables[C1]);
-    SendProtobuf(scQueryTableStats, protobuf);
   finally
     protobuf.Free;
   end;

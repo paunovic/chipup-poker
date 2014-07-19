@@ -204,8 +204,13 @@ begin
 end;
 
 procedure TPB_HandHistoryMove.clear_Code;
+var
+  on_notify: TCollectionNotifyEvent<TTableEventType>;
 begin
+  on_notify := FCode.OnNotify;
+  FCode.OnNotify := nil;
   FCode.Clear;
+  FCode.OnNotify := on_notify;
   clear_has_Code;
 end;
 
@@ -291,8 +296,13 @@ begin
 end;
 
 procedure TPB_HandHistoryMove.clear_WinnerPotData;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FWinnerPotData.OnNotify;
+  FWinnerPotData.OnNotify := nil;
   FWinnerPotData.Clear;
+  FWinnerPotData.OnNotify := on_notify;
   clear_has_WinnerPotData;
 end;
 
@@ -324,8 +334,13 @@ begin
 end;
 
 procedure TPB_HandHistoryMove.clear_Pots;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FPots.OnNotify;
+  FPots.OnNotify := nil;
   FPots.Clear;
+  FPots.OnNotify := on_notify;
   clear_has_Pots;
 end;
 

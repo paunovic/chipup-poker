@@ -523,8 +523,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_Seats;
+var
+  on_notify: TCollectionNotifyEvent<TPB_SeatInfo>;
 begin
+  on_notify := FSeats.OnNotify;
+  FSeats.OnNotify := nil;
   FSeats.Clear;
+  FSeats.OnNotify := on_notify;
   clear_has_Seats;
 end;
 
@@ -646,8 +651,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_Bets;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FBets.OnNotify;
+  FBets.OnNotify := nil;
   FBets.Clear;
+  FBets.OnNotify := on_notify;
   clear_has_Bets;
 end;
 
@@ -915,8 +925,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_Events;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TableEvent>;
 begin
+  on_notify := FEvents.OnNotify;
+  FEvents.OnNotify := nil;
   FEvents.Clear;
+  FEvents.OnNotify := on_notify;
   clear_has_Events;
 end;
 
@@ -948,8 +963,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_Pots;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FPots.OnNotify;
+  FPots.OnNotify := nil;
   FPots.Clear;
+  FPots.OnNotify := on_notify;
   clear_has_Pots;
 end;
 

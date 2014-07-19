@@ -221,8 +221,13 @@ begin
 end;
 
 procedure TPB_LoginReply.clear_ReconnectTables;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TableStatus>;
 begin
+  on_notify := FReconnectTables.OnNotify;
+  FReconnectTables.OnNotify := nil;
   FReconnectTables.Clear;
+  FReconnectTables.OnNotify := on_notify;
   clear_has_ReconnectTables;
 end;
 

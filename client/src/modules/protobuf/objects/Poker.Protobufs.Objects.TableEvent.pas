@@ -255,8 +255,13 @@ begin
 end;
 
 procedure TPB_TableEvent.clear_Pots;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FPots.OnNotify;
+  FPots.OnNotify := nil;
   FPots.Clear;
+  FPots.OnNotify := on_notify;
   clear_has_Pots;
 end;
 
@@ -288,8 +293,13 @@ begin
 end;
 
 procedure TPB_TableEvent.clear_Bets;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FBets.OnNotify;
+  FBets.OnNotify := nil;
   FBets.Clear;
+  FBets.OnNotify := on_notify;
   clear_has_Bets;
 end;
 

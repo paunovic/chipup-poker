@@ -439,8 +439,13 @@ begin
 end;
 
 procedure TPB_HelloReply.clear_UpdateFiles;
+var
+  on_notify: TCollectionNotifyEvent<TPB_UpdateFileInfo>;
 begin
+  on_notify := FUpdateFiles.OnNotify;
+  FUpdateFiles.OnNotify := nil;
   FUpdateFiles.Clear;
+  FUpdateFiles.OnNotify := on_notify;
   clear_has_UpdateFiles;
 end;
 

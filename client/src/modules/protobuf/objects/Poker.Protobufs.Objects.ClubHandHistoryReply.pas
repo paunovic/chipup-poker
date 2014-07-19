@@ -221,8 +221,13 @@ begin
 end;
 
 procedure TPB_ClubHandHistoryReply.clear_Rows;
+var
+  on_notify: TCollectionNotifyEvent<TPB_HandHistory>;
 begin
+  on_notify := FRows.OnNotify;
+  FRows.OnNotify := nil;
   FRows.Clear;
+  FRows.OnNotify := on_notify;
   clear_has_Rows;
 end;
 

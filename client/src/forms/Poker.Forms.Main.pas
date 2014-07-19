@@ -182,16 +182,15 @@ uses
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
-  Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus,
-  Poker.Tables.Table, Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer,
-  Poker.Forms.Updater, Poker.Forms.ClubLobby, Poker.Protobufs.Objects.UserChangeParams,
-  Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList, Poker.Protobufs.Objects.TableStatsReply,
-  Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About, Poker.Protobufs.Objects.ChatEvent,
-  Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
+  Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table,
+  Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.Forms.ClubLobby,
+  Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList,
+  Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About,
+  Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Tables.Stats, Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club,
-  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.Base;
+  Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
+  Poker.Protobufs.Objects.Base;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -1137,7 +1136,7 @@ procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: 
 var
   pb: TPB_TableStatsReplies;
   tablepb: TPB_TableStatsReply;
-  tablestats: TTableStats;
+  tablestats: TPB_TableStatsReply;
   player: TPB_User;
   playerinfo: TPlayerInfo;
   club: TClubInfo;
@@ -1175,11 +1174,13 @@ begin
 
   for tablepb in pb.Reply do
     if TablesStats.TryGetValue(tablepb.Gameid, tablestats) then
-      tablestats.Assign(tablepb)
+    begin
+      tablestats.Clear;
+      tablestats.MergeFrom(tablepb)
+    end
     else
     begin
-      tablestats := TTableStats.Create;
-      tablestats.Assign(tablepb);
+      tablestats := TPB_TableStatsReply.Create(tablepb);
       TablesStats.Add(tablestats.GameId, tablestats);
     end;
 end;

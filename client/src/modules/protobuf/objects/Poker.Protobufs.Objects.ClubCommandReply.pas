@@ -221,8 +221,13 @@ begin
 end;
 
 procedure TPB_ClubCommandReply.clear_Games;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Game>;
 begin
+  on_notify := FGames.OnNotify;
+  FGames.OnNotify := nil;
   FGames.Clear;
+  FGames.OnNotify := on_notify;
   clear_has_Games;
 end;
 

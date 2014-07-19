@@ -299,8 +299,13 @@ begin
 end;
 
 procedure TPB_TablePlayerStats.clear_Buyins;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FBuyins.OnNotify;
+  FBuyins.OnNotify := nil;
   FBuyins.Clear;
+  FBuyins.OnNotify := on_notify;
   clear_has_Buyins;
 end;
 
@@ -328,8 +333,13 @@ begin
 end;
 
 procedure TPB_TablePlayerStats.clear_Cashouts;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FCashouts.OnNotify;
+  FCashouts.OnNotify := nil;
   FCashouts.Clear;
+  FCashouts.OnNotify := on_notify;
   clear_has_Cashouts;
 end;
 

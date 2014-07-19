@@ -206,8 +206,13 @@ begin
 end;
 
 procedure TPB_Pot.clear_Members;
+var
+  on_notify: TCollectionNotifyEvent<Integer>;
 begin
+  on_notify := FMembers.OnNotify;
+  FMembers.OnNotify := nil;
   FMembers.Clear;
+  FMembers.OnNotify := on_notify;
   clear_has_Members;
 end;
 
@@ -235,8 +240,13 @@ begin
 end;
 
 procedure TPB_Pot.clear_WinnerData;
+var
+  on_notify: TCollectionNotifyEvent<TPB_WinnerData>;
 begin
+  on_notify := FWinnerData.OnNotify;
+  FWinnerData.OnNotify := nil;
   FWinnerData.Clear;
+  FWinnerData.OnNotify := on_notify;
   clear_has_WinnerData;
 end;
 

@@ -323,8 +323,13 @@ begin
 end;
 
 procedure TPB_Club.clear_Members;
+var
+  on_notify: TCollectionNotifyEvent<TPB_ClubMember>;
 begin
+  on_notify := FMembers.OnNotify;
+  FMembers.OnNotify := nil;
   FMembers.Clear;
+  FMembers.OnNotify := on_notify;
   clear_has_Members;
 end;
 

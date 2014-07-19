@@ -81,7 +81,6 @@ type
     gridTablesStatusInt: TcxGridColumn;
     styleTableClosing: TcxStyle;
     styleTableClosed: TcxStyle;
-    styleTableRowSelected: TcxStyle;
     acTablesStatsSelectAll: TAction;
     SelectAll1: TMenuItem;
     gridTablesHands: TcxGridColumn;
@@ -138,7 +137,6 @@ type
     procedure gridTablesEnabledPropertiesChange(Sender: TObject);
     procedure gridStatsTableBalanceStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridTablesStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
-    procedure gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord; AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
     procedure gridTablesTableDblClick(Sender: TObject);
     procedure acTablesStatsSelectAllExecute(Sender: TObject);
     procedure gridStatsTableColumnSizeChanged(Sender: TcxGridTableView; AColumn: TcxGridColumn);
@@ -195,8 +193,8 @@ uses
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member,
-  Poker.Players.Player, Poker.Tables.Stats, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats,
-  Poker.Protobufs.Objects.Base;
+  Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.Base,
+  Poker.Protobufs.Objects.TableStatsReply;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -430,7 +428,7 @@ procedure TfrmClubLobby.gridStatsTableBuyinsGetCellHint(Sender: TcxCustomGridTab
   var AHintTextRect: TRect);
 var
   C1: Integer;
-  tablestats: TTableStats;
+  tablestats: TPB_TableStatsReply;
   player: TPB_TablePlayerStats;
   playerid: TMongoId;
   list: TList<UINT32>;
@@ -443,7 +441,7 @@ begin
   VariantToMongoId(ARecord.Values[gridStatsTablePlayerId.Index], playerid);
 
   list := nil;
-  for player in tablestats.Players do
+  for player in tablestats.Playerstats do
     if CompareMongoId(player.UserId, playerid) then
     begin
       if ACellViewInfo.Item.Index = gridStatsTableBuyins.Index then
@@ -535,13 +533,6 @@ begin
   UpdatePlayersStatsList;
 end;
 
-procedure TfrmClubLobby.gridTablesTableStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
-  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
-begin
-  if ARecord.Values[gridTablesEnabled.Index] = TRUE then
-    AStyle := styleTableRowSelected;
-end;
-
 procedure TfrmClubLobby.ModalFormClose(ASender: TObject);
 begin
   if ASender is TfrmCloseClubConfirmation then
@@ -624,7 +615,7 @@ var
   club: TClubInfo;
   c: TcxGridDataController;
   recidx: Integer;
-  tablestats: TTableStats;
+  tablestats: TPB_TableStatsReply;
   tmp: String;
 begin
   c := gridTablesTable.DataController;
@@ -668,13 +659,14 @@ var
   club: TClubInfo;
   c: TcxGridDataController;
   recidx: Integer;
-  tablestats: TTableStats;
+  tablestats: TPB_TableStatsReply;
   playerstats: TPB_TablePlayerStats;
+  tmpplayerstats: TPB_TablePlayerStats;
   player: TPlayerInfo;
   tmp: String;
   datetim: TDateTime;
   selectedids: TList<TMongoId>;
-  tablestatslist: TObjectList<TTableStats>;
+  tablestatslist: TPB_TableStatsReplyList;
   finalstats: TPB_TablePlayerStatsList;
   selectedid: TMongoId;
   C1: Integer;
@@ -699,7 +691,7 @@ begin
               selectedids.Add(selectedid);
             end;
 
-          tablestatslist := TObjectList<TTableStats>.Create(FALSE);
+          tablestatslist := TPB_TableStatsReplyList.Create(FALSE);
           try
             if selectedids.Count = 0 then
             begin
@@ -712,19 +704,39 @@ begin
                   tablestatslist.Add(tablestats);
 
             for tablestats in tablestatslist do
-              for playerstats in tablestats.Players do
+              for playerstats in tablestats.Playerstats do
               begin
                 found := FALSE;
                 for C1 := 0 to finalstats.Count - 1 do
                   if CompareMongoId(finalstats[C1].UserId, playerstats.UserId) then
                   begin
-                    finalstats[C1].Merge(playerstats);
-                    found := TRUE;
-                    Break;
+                    tmpplayerstats := TPB_TablePlayerStats.Create(finalstats[C1], TRUE);
+                    try
+                      finalstats[C1].clear_Balance;
+                      finalstats[C1].Balance := tmpplayerstats.Balance + playerstats.Balance;
+                      finalstats[C1].clear_Buyins;
+                      finalstats[C1].Buyins.AddRange(tmpplayerstats.Buyins);
+                      finalstats[C1].Buyins.AddRange(playerstats.Buyins);
+                      finalstats[C1].clear_Cashouts;
+                      finalstats[C1].Cashouts.AddRange(tmpplayerstats.Cashouts);
+                      finalstats[C1].Cashouts.AddRange(playerstats.Cashouts);
+                      finalstats[C1].clear_Rakecontrib;
+                      finalstats[C1].Rakecontrib := tmpplayerstats.Rakecontrib + playerstats.Rakecontrib;
+                      finalstats[C1].clear_Secondsplayed;
+                      finalstats[C1].Secondsplayed := tmpplayerstats.Secondsplayed + playerstats.Secondsplayed;
+                      finalstats[C1].clear_Chipsinplay;
+                      finalstats[C1].Chipsinplay := tmpplayerstats.Chipsinplay + playerstats.Chipsinplay;
+                      finalstats[C1].clear_Hands;
+                      finalstats[C1].Hands := finalstats[C1].Hands + playerstats.Hands;
+                      found := TRUE;
+                      Break;
+                    finally
+                      tmpplayerstats.Free;
+                    end;
                   end;
 
                 if not found then
-                  finalstats.Add(TPB_TablePlayerStats.Create(playerstats));
+                  finalstats.Add(TPB_TablePlayerStats.Create(playerstats, TRUE));
               end;
 
             for playerstats in finalstats do

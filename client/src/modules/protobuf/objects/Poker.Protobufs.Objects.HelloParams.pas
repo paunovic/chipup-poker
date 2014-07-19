@@ -166,8 +166,13 @@ begin
 end;
 
 procedure TPB_HelloParams.clear_Files;
+var
+  on_notify: TCollectionNotifyEvent<TPB_UpdateFileInfo>;
 begin
+  on_notify := FFiles.OnNotify;
+  FFiles.OnNotify := nil;
   FFiles.Clear;
+  FFiles.OnNotify := on_notify;
   clear_has_Files;
 end;
 

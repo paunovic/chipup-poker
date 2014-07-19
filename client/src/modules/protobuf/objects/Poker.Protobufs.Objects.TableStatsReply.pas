@@ -238,8 +238,13 @@ begin
 end;
 
 procedure TPB_TableStatsReply.clear_Playerstats;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TablePlayerStats>;
 begin
+  on_notify := FPlayerstats.OnNotify;
+  FPlayerstats.OnNotify := nil;
   FPlayerstats.Clear;
+  FPlayerstats.OnNotify := on_notify;
   clear_has_Playerstats;
 end;
 

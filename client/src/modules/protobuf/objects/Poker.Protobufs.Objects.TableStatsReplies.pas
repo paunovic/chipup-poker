@@ -175,8 +175,13 @@ begin
 end;
 
 procedure TPB_TableStatsReplies.clear_Reply;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TableStatsReply>;
 begin
+  on_notify := FReply.OnNotify;
+  FReply.OnNotify := nil;
   FReply.Clear;
+  FReply.OnNotify := on_notify;
   clear_has_Reply;
 end;
 
@@ -208,8 +213,13 @@ begin
 end;
 
 procedure TPB_TableStatsReplies.clear_Players;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FPlayers.OnNotify;
+  FPlayers.OnNotify := nil;
   FPlayers.Clear;
+  FPlayers.OnNotify := on_notify;
   clear_has_Players;
 end;
 
@@ -241,8 +251,13 @@ begin
 end;
 
 procedure TPB_TableStatsReplies.clear_ClubStats;
+var
+  on_notify: TCollectionNotifyEvent<TPB_ClubStatsReply>;
 begin
+  on_notify := FClubStats.OnNotify;
+  FClubStats.OnNotify := nil;
   FClubStats.Clear;
+  FClubStats.OnNotify := on_notify;
   clear_has_ClubStats;
 end;
 

@@ -119,8 +119,13 @@ begin
 end;
 
 procedure TPB_UserChangeParams.clear_Users;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FUsers.OnNotify;
+  FUsers.OnNotify := nil;
   FUsers.Clear;
+  FUsers.OnNotify := on_notify;
   clear_has_Users;
 end;
 

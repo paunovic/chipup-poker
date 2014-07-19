@@ -199,8 +199,13 @@ begin
 end;
 
 procedure TPB_StatusReply.clear_Clubs;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Club>;
 begin
+  on_notify := FClubs.OnNotify;
+  FClubs.OnNotify := nil;
   FClubs.Clear;
+  FClubs.OnNotify := on_notify;
   clear_has_Clubs;
 end;
 
@@ -232,8 +237,13 @@ begin
 end;
 
 procedure TPB_StatusReply.clear_Users;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FUsers.OnNotify;
+  FUsers.OnNotify := nil;
   FUsers.Clear;
+  FUsers.OnNotify := on_notify;
   clear_has_Users;
 end;
 
@@ -295,8 +305,13 @@ begin
 end;
 
 procedure TPB_StatusReply.clear_Games;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Game>;
 begin
+  on_notify := FGames.OnNotify;
+  FGames.OnNotify := nil;
   FGames.Clear;
+  FGames.OnNotify := on_notify;
   clear_has_Games;
 end;
 
