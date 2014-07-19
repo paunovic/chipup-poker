@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.User;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types, ;
 
 type
   TPlayerSubscriptionPlan = (pspBasic = 0,pspNormal = 1,pspSuper = 2);
@@ -22,7 +22,7 @@ type
       kSubscriptionPlanFieldNumber = 7;
 
     var
-      FId: TBytes;
+      FId: TMongoId;
       FAvatar: TBytes;
       FDisplayname: String;
       FEmail: String;
@@ -32,7 +32,7 @@ type
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
-    procedure SetMongoId(const AValue: TBytes);
+    procedure SetMongoId(const AValue: TMongoId);
     procedure set_has_Avatar;
     procedure clear_has_Avatar;
     procedure SetAvatar(const AValue: TBytes);
@@ -60,7 +60,7 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TBytes read FId write SetMongoId;
+    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional bytes Avatar = 2;
     function has_Avatar: Boolean;
@@ -197,7 +197,7 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_User.SetMongoId(const AValue: TBytes);
+procedure TPB_User.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
   FId := Copy(AValue, 0, Length(AValue));

@@ -1,6 +1,8 @@
 #include <google/protobuf/compiler/plugin.h>
 #include <google/protobuf/compiler/code_generator.h>
 #include <google/protobuf/descriptor.h>
+#include <google/protobuf/descriptor.pb.h>
+#include <google/protobuf/unknown_field_set.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <iostream>
@@ -147,6 +149,16 @@ public:
 				copy.delphiName = "TList<"+copy.delphiName+">";
 			}
 			return copy;
+		} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
+			const FieldOptions options = field->options();
+			const UnknownFieldSet &extra = options.unknown_fields();
+			for (int i=0; i<extra.field_count(); i++) {
+				const UnknownField isObjectId = extra.field(i);
+				if (isObjectId.number() != 50000) continue;
+				uint64 test = isObjectId.varint();
+				cerr << "its " << test << " for obj " << copy.propertyName.c_str() << endl;
+				copy.baseDelphiName = copy.delphiName = "TMongoId";
+			}
 		}
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 			copy.delphiName = "TList<"+copy.delphiName+">";
@@ -461,7 +473,7 @@ class BaseGenerator : public CodeGenerator {
 				"interface\n"
 				"\n"
 				"uses\n"
-				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader"
+				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types, "
 				,"filename",file->name()
 				,"name",message->name());
 			if (message->field_count() > 0) {
