@@ -24,8 +24,8 @@ type
     class operator NotEqual(const AMongoId1, AMongoId2: TMongoId): Boolean;
 
     function ToDateTime: TDateTime;
-    function AsVariant: Variant;
-    function AsString: String;
+    function ToVariant: Variant;
+    function ToString: String;
     function IsEmpty: Boolean;
     procedure Clear;
 
@@ -38,28 +38,25 @@ type
     class function TryCast<T>(const AValue: TValue; var AOutput: T): Boolean;
   end;
 
-function ReverseDWORD(dw: DWORD): DWORD;
+function ReverseDWORD(const AValue: DWORD): DWORD;
 function BytesToHex(const ABytes: TBytes): String;
 
 
 implementation
 
 uses
-  System.Variants;
+  System.Variants, System.Classes;
 
 
-function ReverseDWORD(dw: Cardinal): Cardinal;
+function ReverseDWORD(const AValue: Cardinal): Cardinal;
 asm
   bswap eax
 end;
 
 function BytesToHex(const ABytes: TBytes): String;
-var
-  C1: Integer;
 begin
-  result := '';
-  for C1 := Low(ABytes) to High(ABytes) do
-    result := result + IntToHex(ABytes[C1], 2);
+  SetLength(result, 2 * Length(ABytes));
+  BinToHex(@ABytes[0], PChar(@result[1]), Length(ABytes));
   result := LowerCase(result);
 end;
 
@@ -148,7 +145,7 @@ begin
   result := (unix_timestamp / 86400) + 25569;
 end;
 
-function TMongoId.AsVariant: Variant;
+function TMongoId.ToVariant: Variant;
 var
   safe_array: PVarArray;
 begin
@@ -157,13 +154,11 @@ begin
   Move(FMongoIdArray[0], safe_array.Data^, 12);
 end;
 
-function TMongoId.AsString: String;
-var
-  C1: Integer;
+function TMongoId.ToString: String;
 begin
-  result := '';
-  for C1 := 0 to 11 do
-    result := result + LowerCase(IntToHex(FMongoIdArray[C1], 2));
+  SetLength(result, 24);
+  BinToHex(@FMongoIdArray[0], PChar(@result[1]), 12);
+  result := LowerCase(result);
 end;
 
 end.

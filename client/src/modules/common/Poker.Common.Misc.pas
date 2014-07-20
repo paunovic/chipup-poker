@@ -96,6 +96,16 @@ begin
     end;
 
     tkString, tkWString, tkLString, tkUString: result := Format('"%s"', [AValue.ToString]);
+
+    tkRecord: begin
+      method := nil;
+      if Assigned(AProperty) then
+        method := AProperty.PropertyType.GetMethod('ToString');
+      if Assigned(method) then
+        result := method.Invoke(AValue, []).AsString
+      else
+        result := AValue.ToString;
+    end;
   else
     result := AValue.ToString;
   end;

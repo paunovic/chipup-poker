@@ -567,7 +567,7 @@ var
     player: TPlayerInfo;
     status: String;
   begin
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId.AsVariant);
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId.ToVariant);
     if Players.TryGetValue(AMember.MongoId, player) then
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick)
     else
@@ -662,7 +662,7 @@ begin
           if current_mongoid <> tablestats.GameId then
             c.SetValue(recidx, gridTablesEnabled.Index, FALSE);
 
-          c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId.AsVariant);
+          c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId.ToVariant);
           c.SetValue(recidx, gridTablesHands.Index, tablestats.Hands);
           c.SetValue(recidx, gridTablesName.Index, tmp);
 
@@ -759,7 +759,7 @@ begin
               else
                 tmp := 'Unknown';
               c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
-              c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId.AsVariant);
+              c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId.ToVariant);
               c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
               c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.GetBuyinsTotal / 100);
               c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.GetCashoutsTotal / 100);
@@ -840,7 +840,7 @@ begin
 
         recidx := c.AppendRecord;
 
-        c.SetValue(recidx, gridGamesId.Index, game.MongoId.AsVariant);
+        c.SetValue(recidx, gridGamesId.Index, game.MongoId.ToVariant);
         c.SetValue(recidx, gridGamesName.Index, game.Name);
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));

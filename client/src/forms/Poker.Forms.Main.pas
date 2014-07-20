@@ -589,7 +589,7 @@ begin
           if rcount > c.RecordCount then
             c.SetRecordCount(rcount);
 
-          c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId.AsVariant);
+          c.SetValue(rcount - 1, gridHomeClubsMongoId.Index, club.MongoId.ToVariant);
           c.SetValue(rcount - 1, gridHomeClubsId.Index, club.Id);
           c.SetValue(rcount - 1, gridHomeClubsName.Index, club.Name);
 
@@ -639,7 +639,7 @@ begin
         if rcount > c.RecordCount then
           c.SetRecordCount(rcount);
 
-        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId.AsVariant);
+        c.SetValue(rcount - 1, gridGamesId.Index, game.MongoId.ToVariant);
         c.SetValue(rcount - 1, gridGamesName.Index, game.Name);
         c.SetValue(rcount - 1, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(rcount - 1, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
@@ -676,7 +676,7 @@ begin
           Inc(rcount);
           if rcount > c.RecordCount then
             c.SetRecordCount(rcount);
-          c.SetValue(rcount - 1, gridPublicClubsMongoId.Index, club.MongoId.AsVariant);
+          c.SetValue(rcount - 1, gridPublicClubsMongoId.Index, club.MongoId.ToVariant);
           c.SetValue(rcount - 1, gridPublicClubsName.Index, club.Name);
         end;
     finally

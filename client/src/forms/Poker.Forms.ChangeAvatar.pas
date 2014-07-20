@@ -160,14 +160,13 @@ begin
   FAvatarJPG.SaveToStream(SslHttp.SendStream);
   buf := sLineBreak + '--' + boundary + '--' + sLineBreak;
   SslHttp.SendStream.Write(buf[1], Length(buf));
-
-  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar to server [size: %.2fkb]', [SslHttp.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
-
   SslHttp.SendStream.Position := 0;
   SslHttp.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
   SslHttp.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
   SslHttp.OnRequestDone := HTTPRequestDone;
   SslHttp.PostASync;
+
+  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar [size: %.2fkb]', [SslHttp.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);
