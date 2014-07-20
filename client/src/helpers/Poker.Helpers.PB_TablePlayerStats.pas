@@ -39,14 +39,19 @@ var
 begin
   tmppb := TPB_TablePlayerStats.Create(self);
   try
-    self.Clear;
+    self.clear_Balance;
     self.Balance := tmppb.Balance + APlayerStats.Balance;
+    self.clear_Buyins;
     self.Buyins.AddRange(tmppb.Buyins);
     self.Buyins.AddRange(APlayerStats.Buyins);
+    self.clear_Cashouts;
     self.Cashouts.AddRange(tmppb.Cashouts);
     self.Cashouts.AddRange(APlayerStats.Cashouts);
+    self.clear_Rakecontrib;
     self.Rakecontrib := tmppb.Rakecontrib + APlayerStats.Rakecontrib;
+    self.clear_Secondsplayed;
     self.Secondsplayed := tmppb.Secondsplayed + APlayerStats.Secondsplayed;
+    self.clear_Chipsinplay;
     self.Chipsinplay := APlayerStats.Chipsinplay;
   finally
     tmppb.Free;

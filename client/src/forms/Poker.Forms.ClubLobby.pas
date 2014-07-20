@@ -598,21 +598,23 @@ var
 
 var
   C1: Integer;
+  rec_count: Integer;
 begin
   gridPlayersListTable.DataController.BeginFullUpdate;
   try
-    gridPlayersListTable.DataController.SetRecordCount(0);
-
+    SetLength(query_players, 0);
+    rec_count := 0;
     if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
     try
-      SetLength(query_players, 0);
-      gridPlayersListTable.DataController.SetRecordCount(club.Members.Count);
+      rec_count := club.Members.Count;
+      gridPlayersListTable.DataController.SetRecordCount(rec_count);
       for C1 := 0 to club.Members.Count - 1 do
         AddPlayerToGrid(C1, club.Members[C1]);
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
 
+    gridPlayersListTable.DataController.SetRecordCount(rec_count);
     if Length(query_players) > 0 then
       ServerSocket.GetUserInfos(query_players);
   finally
@@ -629,23 +631,38 @@ var
   recidx: Integer;
   tablestats: TPB_TableStatsReply;
   tmp: String;
+  rec_count: Integer;
+  current_mongoid: TMongoId;
 begin
   c := gridTablesTable.DataController;
   c.BeginFullUpdate;
   try
-    c.SetRecordCount(0);
-
+    rec_count := 0;
     if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
     try
       for tablestats in TablesStats.Values do
         if CompareMongoId(tablestats.ClubId, club.MongoId) then
         begin
+          Inc(rec_count);
+          if rec_count > c.RecordCount then
+          begin
+            recidx := c.AppendRecord;
+            current_mongoid := EMPTY_MONGO_ID;
+          end
+          else
+          begin
+            recidx := rec_count - 1;
+            VariantToMongoId(c.GetValue(recidx, gridTablesTableId.Index), current_mongoid);
+          end;
+
           if club.Games.TryGetValue(tablestats.GameId, game) then
             tmp := game.Name
           else
             tmp := 'UNKNOWN';
 
-          recidx := c.AppendRecord;
+          if not CompareMongoId(current_mongoid, tablestats.GameId) then
+            c.SetValue(recidx, gridTablesEnabled.Index, FALSE);
+
           c.SetValue(recidx, gridTablesTableId.Index, MongoIdToVariant(tablestats.GameId));
           c.SetValue(recidx, gridTablesHands.Index, tablestats.Hands);
           c.SetValue(recidx, gridTablesName.Index, tmp);
@@ -660,6 +677,7 @@ begin
     finally
       dmMain.SelfInfo.Clubs.Unlock;
     end;
+    c.SetRecordCount(rec_count);
   finally
     c.EndFullUpdate;
   end;
@@ -673,7 +691,6 @@ var
   recidx: Integer;
   tablestats: TPB_TableStatsReply;
   playerstats: TPB_TablePlayerStats;
-  tmpplayerstats: TPB_TablePlayerStats;
   player: TPlayerInfo;
   tmp: String;
   datetim: TDateTime;
@@ -684,14 +701,14 @@ var
   C1: Integer;
   found: Boolean;
   total_balance, total_buyins, total_cashouts, total_rake, total_chipsinplay: Int64;
+  rec_count: Integer;
 begin
   finalstats := TPB_TablePlayerStatsList.Create;
   try
     c := gridStatsTable.DataController;
     c.BeginFullUpdate;
     try
-      c.SetRecordCount(0);
-
+      rec_count := 0;
       if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
       try
         selectedids := TList<TMongoId>.Create;
@@ -722,29 +739,8 @@ begin
                 for C1 := 0 to finalstats.Count - 1 do
                   if CompareMongoId(finalstats[C1].UserId, playerstats.UserId) then
                   begin
-                    tmpplayerstats := TPB_TablePlayerStats.Create(finalstats[C1], TRUE);
-                    try
-                      finalstats[C1].clear_Balance;
-                      finalstats[C1].Balance := tmpplayerstats.Balance + playerstats.Balance;
-                      finalstats[C1].clear_Buyins;
-                      finalstats[C1].Buyins.AddRange(tmpplayerstats.Buyins);
-                      finalstats[C1].Buyins.AddRange(playerstats.Buyins);
-                      finalstats[C1].clear_Cashouts;
-                      finalstats[C1].Cashouts.AddRange(tmpplayerstats.Cashouts);
-                      finalstats[C1].Cashouts.AddRange(playerstats.Cashouts);
-                      finalstats[C1].clear_Rakecontrib;
-                      finalstats[C1].Rakecontrib := tmpplayerstats.Rakecontrib + playerstats.Rakecontrib;
-                      finalstats[C1].clear_Secondsplayed;
-                      finalstats[C1].Secondsplayed := tmpplayerstats.Secondsplayed + playerstats.Secondsplayed;
-                      finalstats[C1].clear_Chipsinplay;
-                      finalstats[C1].Chipsinplay := tmpplayerstats.Chipsinplay + playerstats.Chipsinplay;
-                      finalstats[C1].clear_Hands;
-                      finalstats[C1].Hands := finalstats[C1].Hands + playerstats.Hands;
-                      found := TRUE;
-                      Break;
-                    finally
-                      tmpplayerstats.Free;
-                    end;
+                    finalstats[C1].Merge(playerstats);
+                    Break;
                   end;
 
                 if not found then
@@ -753,15 +749,18 @@ begin
 
             for playerstats in finalstats do
             begin
-              recidx := c.AppendRecord;
+              Inc(rec_count);
+              if rec_count > c.RecordCount then
+                recidx := c.AppendRecord
+              else
+                recidx := rec_count - 1;
 
               if Players.TryGetValue(playerstats.UserId, player) then
                 tmp := player.Nick
               else
                 tmp := 'Unknown';
               c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
-
-               c.SetValue(recidx, gridStatsTablePlayerId.Index, MongoIdToVariant(playerstats.UserId));
+              c.SetValue(recidx, gridStatsTablePlayerId.Index, MongoIdToVariant(playerstats.UserId));
               c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
               c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.GetBuyinsTotal / 100);
               c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.GetCashoutsTotal / 100);
@@ -780,6 +779,7 @@ begin
       finally
         dmMain.SelfInfo.Clubs.Unlock;
       end;
+      c.SetRecordCount(rec_count);
     finally
       c.EndFullUpdate;
     end;
@@ -841,7 +841,7 @@ begin
 
         recidx := c.AppendRecord;
 
-         c.SetValue(recidx, gridGamesId.Index, MongoIdToVariant(game.MongoId));
+        c.SetValue(recidx, gridGamesId.Index, MongoIdToVariant(game.MongoId));
         c.SetValue(recidx, gridGamesName.Index, game.Name);
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
