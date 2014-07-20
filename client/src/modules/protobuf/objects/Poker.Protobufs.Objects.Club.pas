@@ -195,7 +195,7 @@ begin
       end;
       kMembersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FMembers.Add(TPB_ClubMember.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FMembers.Add(TPB_ClubMember.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Members;
       end;
       kNameFieldNumber: begin
@@ -290,7 +290,7 @@ end;
 
 procedure TPB_Club.clear_MongoId;
 begin
-  FillChar(FId[0], Length(FId), 0);
+  FId.Clear;
   clear_has_MongoId;
 end;
 
@@ -312,12 +312,12 @@ end;
 procedure TPB_Club.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  Move(AValue[0], FId[0], Length(FId));
+  FId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_MongoId;
 end;
@@ -392,7 +392,7 @@ end;
 
 procedure TPB_Club.clear_Owner;
 begin
-  FillChar(FOwner[0], Length(FOwner), 0);
+  FOwner.Clear;
   clear_has_Owner;
 end;
 
@@ -414,12 +414,12 @@ end;
 procedure TPB_Club.SetOwner(const AValue: TMongoId);
 begin
   Assert(not has_Owner);
-  Move(AValue[0], FOwner[0], Length(FOwner));
+  FOwner := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kOwnerFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_Owner;
 end;

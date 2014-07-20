@@ -73,7 +73,7 @@ var
   member: TClubMemberInfo;
 begin
   for member in FMembers do
-    if CompareMongoId(AMongoId, member.MongoId) then
+    if AMongoId = member.MongoId then
     begin
       AMemberInfo := member;
       Exit(TRUE);

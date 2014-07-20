@@ -89,7 +89,7 @@ uses
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
   Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParamProcesser,
-  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types, Poker.Protobufs.Objects.Base;
+  Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types;
 
 
 procedure TfrmChipUpLogin.FormCreate(Sender: TObject);
@@ -379,7 +379,7 @@ procedure TfrmChipUpLogin.CSRHello(const AMethodId: Integer; const AObject: TObj
 var
   pbhello: TPB_HelloReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_HelloReply, pointer(pbhello)) then
+  if not TPokerTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
     Exit;
 
   if (not TCommandLineParamProcesser.NoUpdateFlag) and
@@ -410,7 +410,7 @@ procedure TfrmChipUpLogin.CSRLogin(const AMethodId: Integer; const AObject: TObj
 var
   pbreply: TPB_LoginReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_LoginReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_LoginReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.LoginStatus of

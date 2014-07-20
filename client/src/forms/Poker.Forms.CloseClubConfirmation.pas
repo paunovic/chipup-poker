@@ -68,7 +68,7 @@ end;
 
 procedure TfrmCloseClubConfirmation.SetParams(const AParams: array of pointer);
 begin
-  PtrToMongoId(AParams[0], FClubId);
+  FClubId := AParams[0];
 end;
 
 procedure TfrmCloseClubConfirmation.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

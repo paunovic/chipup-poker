@@ -41,8 +41,7 @@ implementation
 
 uses
   Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.ChangeMailReply, Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Types,
-  Poker.Protobufs.Objects.Base;
+  Poker.Protobufs.Objects.ChangeMailReply, Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Types;
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
 begin
@@ -107,7 +106,7 @@ procedure TfrmChangeEMail.CSRChangeMail(const AMethodId: Integer; const AObject:
 var
   pbreply: TPB_ChangeMailReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ChangeMailReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_ChangeMailReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

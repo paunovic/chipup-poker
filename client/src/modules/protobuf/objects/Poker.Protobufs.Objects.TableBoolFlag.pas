@@ -108,7 +108,7 @@ end;
 
 procedure TPB_TableBoolFlag.clear_TableMongoId;
 begin
-  FillChar(FTableMongoId[0], Length(FTableMongoId), 0);
+  FTableMongoId.Clear;
   clear_has_TableMongoId;
 end;
 
@@ -130,12 +130,12 @@ end;
 procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TMongoId);
 begin
   Assert(not has_TableMongoId);
-  Move(AValue[0], FTableMongoId[0], Length(FTableMongoId));
+  FTableMongoId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kTableMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_TableMongoId;
 end;

@@ -112,7 +112,7 @@ begin
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Users;
       end;
     else
@@ -174,8 +174,8 @@ begin
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kUserMongoIdsFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(Item));
-    ProtobufOutput.writeRawData(@Item[0], Length(Item));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(Item.Memory, 12);
   end;
 end;
 

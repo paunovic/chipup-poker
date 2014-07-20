@@ -100,7 +100,7 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FMsg) then
           FMsg := TPB_ChatMessage.Create;
-        FMsg.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FMsg.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_Msg;
       end;
       kTableIdFieldNumber: begin
@@ -195,7 +195,7 @@ end;
 
 procedure TPB_ChatEvent.clear_TableId;
 begin
-  FillChar(FTableId[0], Length(FTableId), 0);
+  FTableId.Clear;
   clear_has_TableId;
 end;
 
@@ -217,12 +217,12 @@ end;
 procedure TPB_ChatEvent.SetTableId(const AValue: TMongoId);
 begin
   Assert(not has_TableId);
-  Move(AValue[0], FTableId[0], Length(FTableId));
+  FTableId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kTableIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_TableId;
 end;

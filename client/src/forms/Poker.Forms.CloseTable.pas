@@ -52,7 +52,7 @@ end;
 
 procedure TfrmCloseTable.SetParams(const AParams: array of pointer);
 begin
-  PtrToMongoId(AParams[0], FGameId);
+  FGameId := AParams[0];
 end;
 
 procedure TfrmCloseTable.SetCloseCallback(const ACallback: TNotifyEvent);

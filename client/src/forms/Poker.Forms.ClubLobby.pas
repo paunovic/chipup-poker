@@ -196,8 +196,7 @@ uses
   Poker.Forms.CreateGame, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Common.FormsContainer, Poker.Forms.CloseTable, Poker.Tables.StatsList, System.DateUtils, Poker.Protobufs.Objects.TableStatsReplies,
   Poker.Forms.CloseClubConfirmation, Poker.Forms.ClubMemberOptions, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Clubs.Member,
-  Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.Base,
-  Poker.Protobufs.Objects.TableStatsReply;
+  Poker.Players.Player, Poker.Protobufs.Objects.TablePlayerStats, Poker.Helpers.PB_TablePlayerStats, Poker.Protobufs.Objects.TableStatsReply;
 
 
 procedure TfrmClubLobby.FormCreate(Sender: TObject);
@@ -254,7 +253,7 @@ end;
 
 procedure TfrmClubLobby.SetParams(const AParams: array of pointer);
 begin
-  PtrToMongoId(AParams[0], FClubId);
+  FClubId := AParams[0];
 
   btClubHome.Click;
   ConfigureGUI;
@@ -282,7 +281,7 @@ begin
 
     lbsSubheader.Caption := Format('Manager: %s           Members: %d           Club ID: %d', [manager, club.Members.Count, club.Id]);
 
-    admin_visible := CompareMongoId(club.OwnerId, dmMain.SelfInfo.MongoId);
+    admin_visible := club.OwnerId = dmMain.SelfInfo.MongoId;
 
     if not club.GetMemberInfo(FSelectedPlayerId, member) then
       member := nil;
@@ -299,14 +298,14 @@ begin
     acResetBalance.Enabled := (admin_visible) and (Assigned(member));
     acSetLimit.Enabled := (admin_visible) and (Assigned(member));
     btGiveOwnership.Visible := admin_visible;
-    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (not CompareMongoId(club.OwnerId, FSelectedPlayerId));
+    acGiveOwnership.Enabled := (admin_visible) and (Assigned(member)) and (club.OwnerId <> FSelectedPlayerId);
     btRemovePlayerFromClub.Visible := admin_visible;
     acRemovePlayer.Enabled := acGiveOwnership.Enabled;
     btSuspendUnsuspend.Visible := admin_visible;
     if btSuspendUnsuspend.Visible then
     begin
-      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (not CompareMongoId(member.MongoId, club.OwnerId));
-      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (not CompareMongoId(member.MongoId, club.OwnerId));
+      acSuspendPlayer.Enabled := (Assigned(member)) and (not member.Suspended) and (member.MongoId <> club.OwnerId);
+      acReinstatePlayer.Enabled := (Assigned(member)) and (member.Suspended) and (member.MongoId <> club.OwnerId);
       if acReinstatePlayer.Enabled then
         btSuspendUnsuspend.Action := acReinstatePlayer
       else
@@ -315,7 +314,7 @@ begin
     btNewGame.Visible := admin_visible;
     acShowCreateGameForm.Enabled := admin_visible;
     btCloseTable.Visible := admin_visible;
-    acCloseTable.Enabled := (admin_visible) and (not CompareMongoId(FSelectedGameId, EMPTY_MONGO_ID));
+    acCloseTable.Enabled := (admin_visible) and (not FSelectedGameId.IsEmpty);
     Bevel1.Visible := admin_visible;
     btLeaveClub.Visible := not admin_visible;
     acLeaveClub.Enabled := not admin_visible;
@@ -381,15 +380,15 @@ var
   close_table_act: Boolean;
 begin
   close_table_act := FALSE;
-  FSelectedGameId := EMPTY_MONGO_ID;
+  FSelectedGameId.Clear;
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
     recIndex := gridGamesTable.DataController.GetFocusedRecordIndex;
     if recIndex > -1 then
-      VariantToMongoId(gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index), FSelectedGameId);
+      FSelectedGameId := gridGamesTable.DataController.GetValue(recIndex, gridGamesId.Index);
 
-    close_table_act := (not CompareMongoId(FSelectedGameId, EMPTY_MONGO_ID)) and
-                       (CompareMongoId(club.OwnerId, dmMain.SelfInfo.MongoId)) and
+    close_table_act := (not FSelectedGameId.IsEmpty) and
+                       (club.OwnerId = dmMain.SelfInfo.MongoId) and
                        (club.Games.TryGetValue(FSelectedGameId, game)) and (game.State in [gsActive, gsEmpty]);
 
   finally
@@ -405,9 +404,9 @@ var
 begin
   recIndex := gridPlayersListTable.DataController.GetFocusedRecordIndex;
   if recIndex > -1 then
-    VariantToMongoId(gridPlayersListTable.DataController.GetValue(recIndex, gridPlayersListId.Index), FSelectedPlayerId)
+    FSelectedPlayerId := gridPlayersListTable.DataController.GetValue(recIndex, gridPlayersListId.Index)
   else
-    FSelectedPlayerId := EMPTY_MONGO_ID;
+    FSelectedPlayerId.Clear;
 
   ConfigureGUI(FALSE);
 end;
@@ -440,11 +439,11 @@ begin
   if not TablesStats.TryGetValue(FSelectedStatsTableId, tablestats) then
     Exit;
 
-  VariantToMongoId(ARecord.Values[gridStatsTablePlayerId.Index], playerid);
+  playerid := ARecord.Values[gridStatsTablePlayerId.Index];
 
   list := nil;
   for player in tablestats.Playerstats do
-    if CompareMongoId(player.UserId, playerid) then
+    if player.UserId = playerid then
     begin
       if ACellViewInfo.Item.Index = gridStatsTableBuyins.Index then
         list := player.Buyins
@@ -528,9 +527,9 @@ var
 begin
   recIndex := gridTablesTable.DataController.GetFocusedRecordIndex;
   if recIndex = -1 then
-    FSelectedStatsTableId := EMPTY_MONGO_ID
+    FSelectedStatsTableId.Clear
   else
-    VariantToMongoId(gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index), FSelectedStatsTableId);
+    FSelectedStatsTableId := gridTablesTable.DataController.GetValue(recIndex, gridTablesTableId.Index);
 
   UpdatePlayersStatsList;
 end;
@@ -568,7 +567,7 @@ var
     player: TPlayerInfo;
     status: String;
   begin
-    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, MongoIdToVariant(AMember.MongoId));
+    gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListId.Index, AMember.MongoId.AsVariant);
     if Players.TryGetValue(AMember.MongoId, player) then
       gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListName.Index, player.Nick)
     else
@@ -586,7 +585,7 @@ var
       status := '-' + ChipsToStr(AMember.BalanceLimit);
     gridPlayersListTable.DataController.SetValue(ARowIndex, gridPlayersListLimit.Index, status);
 
-    if CompareMongoId(AMember.MongoId, club.OwnerId) then
+    if AMember.MongoId = club.OwnerId then
       status := 'Manager'
     else
       if AMember.Suspended then
@@ -641,18 +640,18 @@ begin
     if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
     try
       for tablestats in TablesStats.Values do
-        if CompareMongoId(tablestats.ClubId, club.MongoId) then
+        if tablestats.ClubId = club.MongoId then
         begin
           Inc(rec_count);
           if rec_count > c.RecordCount then
           begin
             recidx := c.AppendRecord;
-            current_mongoid := EMPTY_MONGO_ID;
+            current_mongoid.Clear;
           end
           else
           begin
             recidx := rec_count - 1;
-            VariantToMongoId(c.GetValue(recidx, gridTablesTableId.Index), current_mongoid);
+            current_mongoid := c.GetValue(recidx, gridTablesTableId.Index);
           end;
 
           if club.Games.TryGetValue(tablestats.GameId, game) then
@@ -660,17 +659,17 @@ begin
           else
             tmp := 'UNKNOWN';
 
-          if not CompareMongoId(current_mongoid, tablestats.GameId) then
+          if current_mongoid <> tablestats.GameId then
             c.SetValue(recidx, gridTablesEnabled.Index, FALSE);
 
-          c.SetValue(recidx, gridTablesTableId.Index, MongoIdToVariant(tablestats.GameId));
+          c.SetValue(recidx, gridTablesTableId.Index, tablestats.GameId.AsVariant);
           c.SetValue(recidx, gridTablesHands.Index, tablestats.Hands);
           c.SetValue(recidx, gridTablesName.Index, tmp);
 
           if Assigned(game) then
           begin
             c.SetValue(recidx, gridTablesStatus.Index, game.StateAsStr);
-            c.SetValue(recidx, gridTablesDate.Index, TTimeZone.Local.ToLocalTime(MongoIdToDateTime(game.MongoId)));
+            c.SetValue(recidx, gridTablesDate.Index, TTimeZone.Local.ToLocalTime(game.MongoId.ToDateTime));
             c.SetValue(recidx, gridTablesStatusInt.Index, Integer(game.State));
           end;
         end;
@@ -716,7 +715,7 @@ begin
           for C1 := 0 to gridTablesTable.DataController.RecordCount - 1 do
             if gridTablesTable.DataController.GetValue(C1, gridTablesEnabled.Index) = TRUE then
             begin
-              VariantToMongoId(gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index), selectedid);
+              selectedid := gridTablesTable.DataController.GetValue(C1, gridTablesTableId.Index);
               selectedids.Add(selectedid);
             end;
 
@@ -737,7 +736,7 @@ begin
               begin
                 found := FALSE;
                 for C1 := 0 to finalstats.Count - 1 do
-                  if CompareMongoId(finalstats[C1].UserId, playerstats.UserId) then
+                  if finalstats[C1].UserId = playerstats.UserId then
                   begin
                     finalstats[C1].Merge(playerstats);
                     Break;
@@ -760,7 +759,7 @@ begin
               else
                 tmp := 'Unknown';
               c.SetValue(recidx, gridStatsTablePlayerName.Index, tmp);
-              c.SetValue(recidx, gridStatsTablePlayerId.Index, MongoIdToVariant(playerstats.UserId));
+              c.SetValue(recidx, gridStatsTablePlayerId.Index, playerstats.UserId.AsVariant);
               c.SetValue(recidx, gridStatsTableBalance.Index, playerstats.Balance / 100);
               c.SetValue(recidx, gridStatsTableBuyins.Index, playerstats.GetBuyinsTotal / 100);
               c.SetValue(recidx, gridStatsTableCashouts.Index, playerstats.GetCashoutsTotal / 100);
@@ -841,7 +840,7 @@ begin
 
         recidx := c.AppendRecord;
 
-        c.SetValue(recidx, gridGamesId.Index, MongoIdToVariant(game.MongoId));
+        c.SetValue(recidx, gridGamesId.Index, game.MongoId.AsVariant);
         c.SetValue(recidx, gridGamesName.Index, game.Name);
         c.SetValue(recidx, gridGamesType.Index, game.AsString(TRUE));
         c.SetValue(recidx, gridGamesBlinds.Index, Format('%d/%d', [Trunc(game.SmallBlind / 100), Trunc(game.BigBlind / 100)]));
@@ -875,7 +874,7 @@ begin
       end;
 
     if err = '' then
-      FormsContainer.Add(RunModalForm(TfrmCloseClubConfirmation, self, [@club.MongoId[0]], ModalFormClose));
+      FormsContainer.Add(RunModalForm(TfrmCloseClubConfirmation, self, [club.MongoId.Memory], ModalFormClose));
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;
@@ -940,7 +939,7 @@ end;
 
 procedure TfrmClubLobby.acSetLimitExecute(Sender: TObject);
 begin
-  FormsContainer.Add(RunModalForm(TfrmClubMemberOptions, self, [@FClubId[0], @FSelectedPlayerId[0]], ModalFormClose));
+  FormsContainer.Add(RunModalForm(TfrmClubMemberOptions, self, [FClubId.Memory, FSelectedPlayerId.Memory], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.acShowClubChangeDetailsFormExecute(Sender: TObject);
@@ -951,12 +950,12 @@ begin
     Exit;
   dmMain.SelfInfo.Clubs.Unlock;
 
-  FormsContainer.Add(RunModalForm(TfrmChangeClubDetails, self, [@FClubId[0]], ModalFormClose));
+  FormsContainer.Add(RunModalForm(TfrmChangeClubDetails, self, [FClubId.Memory], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.acShowCreateGameFormExecute(Sender: TObject);
 begin
-  FormsContainer.Add(RunModalForm(TfrmCreateGame, self, [@FClubId[0]], ModalFormClose));
+  FormsContainer.Add(RunModalForm(TfrmCreateGame, self, [FClubId.Memory], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.acSuspendPlayerExecute(Sender: TObject);
@@ -1013,7 +1012,7 @@ end;
 
 procedure TfrmClubLobby.acCloseTableExecute(Sender: TObject);
 begin
-  FormsContainer.Add(RunModalForm(TfrmCloseTable, self, [@FSelectedGameId[0]], ModalFormClose));
+  FormsContainer.Add(RunModalForm(TfrmCloseTable, self, [FSelectedGameId.Memory], ModalFormClose));
 end;
 
 procedure TfrmClubLobby.CSRTableStatsReply(const AMethodId: Integer; const AObject: TObject);
@@ -1021,11 +1020,11 @@ var
   pbreply: TPB_TableStatsReplies;
   C1: Integer;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatsReplies, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_TableStatsReplies>(AObject, pbreply) then
     Exit;
 
   for C1 := 0 to pbreply.Reply.Count - 1 do
-    if CompareMongoId(FClubId, pbreply.Reply[C1].Clubid) then
+    if FClubId = pbreply.Reply[C1].Clubid then
     begin
       ConfigureGUI;
       Exit;
@@ -1046,9 +1045,9 @@ procedure TfrmClubLobby.CSRClubDetailsChange(const AMethodId: Integer; const AOb
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if not CompareMongoId(pbreply.Club.MongoId, FClubId) then
+  if pbreply.Club.MongoId <> FClubId then
     Exit;
 
   case pbreply.Status of
@@ -1063,9 +1062,9 @@ procedure TfrmClubLobby.CSRLeaveClub(const AMethodId: Integer; const AObject: TO
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if not CompareMongoId(pbreply.Club.MongoId, FClubId) then
+  if pbreply.Club.MongoId <> FClubId then
     Exit;
 
   case pbreply.Status of
@@ -1080,9 +1079,9 @@ procedure TfrmClubLobby.CSRKickPlayer(const AMethodId: Integer; const AObject: T
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if not CompareMongoId(pbreply.Club.MongoId, FClubId) then
+  if pbreply.Club.MongoId <> FClubId then
     Exit;
 
   case pbreply.Status of
@@ -1097,9 +1096,9 @@ procedure TfrmClubLobby.CSROwnerGiveawayInvalidClubId(const AMethodId: Integer; 
 var
   pbclub: TPB_Club;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Club, pointer(pbclub)) then
+  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
-  if not CompareMongoId(pbclub.MongoId, FClubId) then
+  if pbclub.MongoId <> FClubId then
     Exit;
 
   MessageDlg('Invalid club ID', mtError, [mbOk], 0);
@@ -1109,9 +1108,9 @@ procedure TfrmClubLobby.CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer
 var
   pbclub: TPB_Club;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Club, pointer(pbclub)) then
+  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
-  if not CompareMongoId(pbclub.MongoId, FClubId) then
+  if pbclub.MongoId <> FClubId then
     Exit;
 
   MessageDlg('Invalid player ID', mtError, [mbOk], 0);
@@ -1121,9 +1120,9 @@ procedure TfrmClubLobby.CSROwnerGiveawayNotOwner(const AMethodId: Integer; const
 var
   pbclub: TPB_Club;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Club, pointer(pbclub)) then
+  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
-  if not CompareMongoId(pbclub.MongoId, FClubId) then
+  if pbclub.MongoId <> FClubId then
     Exit;
 
   MessageDlg('You are not manager of this club', mtError, [mbOk], 0);
@@ -1134,9 +1133,9 @@ var
   pbreply: TPB_PlayerLimitParams;
   club: TClubInfo;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_PlayerLimitParams, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
     Exit;
-  if not CompareMongoId(FClubId, pbreply.Clubid) then
+  if FClubId <> pbreply.Clubid then
     Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
@@ -1154,9 +1153,9 @@ var
   pbreply: TPB_PlayerLimitParams;
   club: TClubInfo;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_PlayerLimitParams, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
     Exit;
-  if not CompareMongoId(FClubId, pbreply.Clubid) then
+  if FClubId <> pbreply.Clubid then
     Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
@@ -1174,9 +1173,9 @@ var
   pbclub: TPB_Club;
   contains_key: Boolean;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Club, pointer(pbclub)) then
+  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
-  if not CompareMongoId(pbclub.MongoId, FClubId) then
+  if pbclub.MongoId <> FClubId then
     Exit;
 
   dmMain.SelfInfo.Clubs.Lock;
@@ -1199,13 +1198,13 @@ var
   config_gui: Boolean;
   game: TGameInfo;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Game, pointer(pbgame)) then
+  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   config_gui := FALSE;
   if dmMain.SelfInfo.Clubs.GetAndLockByGame(pbgame.MongoId, club, game) then
   try
-    config_gui := CompareMongoId(FClubId, club.MongoId);
+    config_gui := FClubId = club.MongoId;
   finally
     dmMain.SelfInfo.Clubs.Unlock;
   end;

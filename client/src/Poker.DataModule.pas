@@ -268,7 +268,7 @@ begin
       begin
         exists := FALSE;
         for tstatus in FReconnectedTables do
-          if CompareMongoId(tstatus.TableMongoId, table.GameId) then
+          if tstatus.TableMongoId = table.GameId then
           begin
             exists := TRUE;
             Break;

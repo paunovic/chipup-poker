@@ -3,67 +3,54 @@ unit Poker.Types;
 interface
 
 uses
-  System.SysUtils, System.DateUtils;
+  Winapi.Windows, System.SysUtils, System.DateUtils, System.Rtti;
 
 type
-  TMongoId = array[0..11] of Byte;
+  TMongoIdArray = array[0..11] of Byte;
 
-const
-  EMPTY_MONGO_ID: TMongoId = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  TMongoId = record
+  strict private
+    FMongoIdArray: TMongoIdArray;
 
-procedure PtrToMongoId(const APointer: pointer; out AMongoId: TMongoId);
-function MongoIdToDateTime(const AMongoId: TMongoId): TDateTime;
-procedure VariantToMongoId(const AVariant: Variant; out AMongoId: TMongoId);
-function MongoIdToVariant(const AMongoId: TMongoId): Variant;
-function CompareMongoId(const AMongoId1, AMongoId2: TMongoId): Boolean;
-function ReverseDWORD(dw: Cardinal): Cardinal;
+    function GetMongoIdByte(Index: Integer): Byte;
+    procedure SetMongoIdByte(Index: Integer; const Value: Byte);
+    function GetMemory: pointer;
+  public
+    class operator Implicit(const AMongoId: TMongoIdArray): TMongoId;
+    class operator Implicit(const APointer: pointer): TMongoId;
+    class operator Implicit(const AVariant: Variant): TMongoId;
+    class operator Implicit(const AString: String): TMongoId;
+    class operator Equal(const AMongoId1, AMongoId2: TMongoId): Boolean;
+    class operator NotEqual(const AMongoId1, AMongoId2: TMongoId): Boolean;
+
+    function ToDateTime: TDateTime;
+    function AsVariant: Variant;
+    function AsString: String;
+    function IsEmpty: Boolean;
+    procedure Clear;
+
+    property Memory: pointer read GetMemory;
+    property IdData[Index: Integer]: Byte read GetMongoIdByte write SetMongoIdByte; default;
+  end;
+
+  TPokerTypes = class
+  public
+    class function TryCast<T>(const AValue: TValue; var AOutput: T): Boolean;
+  end;
+
+function ReverseDWORD(dw: DWORD): DWORD;
 function BytesToHex(const ABytes: TBytes): String;
 
 
 implementation
 
 uses
-  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Winapi.Windows, System.Variants;
+  System.Variants;
 
-procedure PtrToMongoId(const APointer: pointer; out AMongoId: TMongoId);
-begin
-  Move(APointer^, AMongoId[0], Length(AMongoId));
-end;
-
-function MongoIdToDateTime(const AMongoId: TMongoId): TDateTime;
-var
-  unix_timestamp: UINT32;
-begin
-  unix_timestamp := ReverseDWORD(PUINT(@AMongoId[0])^);
-  result := (unix_timestamp / 86400) + 25569;
-end;
 
 function ReverseDWORD(dw: Cardinal): Cardinal;
 asm
   bswap eax
-end;
-
-function CompareMongoId(const AMongoId1, AMongoId2: TMongoId): Boolean;
-begin
-  result := CompareMem(@AMongoId1[0], @AMongoId2[0], Length(AMongoId1));
-end;
-
-procedure VariantToMongoId(const AVariant: Variant; out AMongoId: TMongoId);
-var
-  safe_array: PVarArray;
-begin
-  safe_array := VarArrayAsPSafeArray(AVariant);
-  Move(safe_array.Data^, AMongoId[0], Length(AMongoId));
-end;
-
-function MongoIdToVariant(const AMongoId: TMongoId): Variant;
-var
-  safe_array: PVarArray;
-begin
-  result := VarArrayCreate([0, High(AMongoId)], varByte);
-  safe_array := VarArrayAsPSafeArray(result);
-  Move(AMongoId[0], safe_array.Data^, Length(AMongoId));
 end;
 
 function BytesToHex(const ABytes: TBytes): String;
@@ -74,6 +61,109 @@ begin
   for C1 := Low(ABytes) to High(ABytes) do
     result := result + IntToHex(ABytes[C1], 2);
   result := LowerCase(result);
+end;
+
+class function TPokerTypes.TryCast<T>(const AValue: TValue; var AOutput: T): Boolean;
+begin
+  result := AValue.TryAsType<T>(AOutput);
+end;
+
+{ TMongoId }
+
+class operator TMongoId.Implicit(const APointer: pointer): TMongoId;
+begin
+  if Assigned(APointer) then
+    Move(APointer^, result.FMongoIdArray[0], 12)
+  else
+    result.Clear;
+end;
+
+class operator TMongoId.Implicit(const AString: String): TMongoId;
+var
+  C1: Integer;
+begin
+  if AString = '' then
+    result.Clear
+  else
+    if Length(AString) = 24 then
+      for C1 := 0 to 11 do
+        result.IdData[C1] := StrToInt('$' + Copy(AString, C1 * 2, 2));
+end;
+
+function TMongoId.GetMemory: pointer;
+begin
+  result := @FMongoIdArray[0];
+end;
+
+function TMongoId.GetMongoIdByte(Index: Integer): Byte;
+begin
+  result := FMongoIdArray[Index];
+end;
+
+procedure TMongoId.SetMongoIdByte(Index: Integer; const Value: Byte);
+begin
+  FMongoIdArray[Index] := Value;
+end;
+
+function TMongoId.IsEmpty: Boolean;
+const
+  EMPTY_MONGO_ID: TMongoIdArray = (0, 0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0);
+begin
+  result := CompareMem(@FMongoIdArray[0], @EMPTY_MONGO_ID[0], 12);
+end;
+
+class operator TMongoId.Implicit(const AVariant: Variant): TMongoId;
+var
+  safe_array: PVarArray;
+begin
+  safe_array := VarArrayAsPSafeArray(AVariant);
+  Move(safe_array.Data^, result.FMongoIdArray[0], 12);
+end;
+
+class operator TMongoId.Implicit(const AMongoId: TMongoIdArray): TMongoId;
+begin
+  Move(AMongoId[0], result.Memory^, 12);
+end;
+
+procedure TMongoId.Clear;
+begin
+  FillChar(FMongoIdArray[0], 12, 0);
+end;
+
+class operator TMongoId.Equal(const AMongoId1, AMongoId2: TMongoId): Boolean;
+begin
+  result := CompareMem(AMongoId1.Memory, AMongoId2.Memory, 12);
+end;
+
+class operator TMongoId.NotEqual(const AMongoId1, AMongoId2: TMongoId): Boolean;
+begin
+  result := not CompareMem(AMongoId1.Memory, AMongoId2.Memory, 12);
+end;
+
+function TMongoId.ToDateTime: TDateTime;
+var
+  unix_timestamp: UINT32;
+begin
+  unix_timestamp := ReverseDWORD(PUINT(@FMongoIdArray[0])^);
+  result := (unix_timestamp / 86400) + 25569;
+end;
+
+function TMongoId.AsVariant: Variant;
+var
+  safe_array: PVarArray;
+begin
+  result := VarArrayCreate([0, High(FMongoIdArray)], varByte);
+  safe_array := VarArrayAsPSafeArray(result);
+  Move(FMongoIdArray[0], safe_array.Data^, 12);
+end;
+
+function TMongoId.AsString: String;
+var
+  C1: Integer;
+begin
+  result := '';
+  for C1 := 0 to 11 do
+    result := result + LowerCase(IntToHex(FMongoIdArray[C1], 2));
 end;
 
 end.

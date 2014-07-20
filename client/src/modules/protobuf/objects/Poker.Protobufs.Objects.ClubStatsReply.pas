@@ -105,7 +105,7 @@ begin
       end;
       kPlayerStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_PlayerStats;
       end;
     else
@@ -137,7 +137,7 @@ end;
 
 procedure TPB_ClubStatsReply.clear_Clubid;
 begin
-  FillChar(FClubid[0], Length(FClubid), 0);
+  FClubid.Clear;
   clear_has_Clubid;
 end;
 
@@ -159,12 +159,12 @@ end;
 procedure TPB_ClubStatsReply.SetClubid(const AValue: TMongoId);
 begin
   Assert(not has_Clubid);
-  Move(AValue[0], FClubid[0], Length(FClubid));
+  FClubid := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kClubidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_Clubid;
 end;

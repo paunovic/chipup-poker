@@ -602,14 +602,13 @@ procedure TServerSocket.CrashTest;
 var
   pb: TPB_HelloParams;
   tmp: String;
-  bytes: TMongoId;
 {  bytes1: TMongoId;
   bytesx2: TArray<TMongoId>;   }
 begin
   SetLength(tmp, 100);
 //  SetLength(bytes, 100);
   FillChar(tmp[1], Length(tmp) * SizeOf(Char), 65);
-  FillChar(bytes[0], Length(bytes) * SizeOf(Byte), 66);
+//  FillChar(bytes[0], Length(bytes) * SizeOf(Byte), 66);
 //  StringToBytes('537badf134a82b1763f7aee8', bytes);
 //  StringToBytes('533da6a40427a9b03915560d', bytes1);
   pb := TPB_HelloParams.Create;

@@ -108,7 +108,7 @@ end;
 
 procedure TPB_ClubPlayerStats.clear_Userid;
 begin
-  FillChar(FUserid[0], Length(FUserid), 0);
+  FUserid.Clear;
   clear_has_Userid;
 end;
 
@@ -130,12 +130,12 @@ end;
 procedure TPB_ClubPlayerStats.SetUserid(const AValue: TMongoId);
 begin
   Assert(not has_Userid);
-  Move(AValue[0], FUserid[0], Length(FUserid));
+  FUserid := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kUseridFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_Userid;
 end;

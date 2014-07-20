@@ -124,17 +124,17 @@ begin
     case field_number of
       kReplyFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FReply.Add(TPB_TableStatsReply.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FReply.Add(TPB_TableStatsReply.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Reply;
       end;
       kPlayersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPlayers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Players;
       end;
       kClubStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_ClubStats;
       end;
     else

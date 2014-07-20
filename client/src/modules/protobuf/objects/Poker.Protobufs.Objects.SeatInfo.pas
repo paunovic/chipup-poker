@@ -276,7 +276,7 @@ end;
 
 procedure TPB_SeatInfo.clear_PlayerMongoId;
 begin
-  FillChar(FPlayerMongoId[0], Length(FPlayerMongoId), 0);
+  FPlayerMongoId.Clear;
   clear_has_PlayerMongoId;
 end;
 
@@ -298,12 +298,12 @@ end;
 procedure TPB_SeatInfo.SetPlayerMongoId(const AValue: TMongoId);
 begin
   Assert(not has_PlayerMongoId);
-  Move(AValue[0], FPlayerMongoId[0], Length(FPlayerMongoId));
+  FPlayerMongoId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kPlayerMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_PlayerMongoId;
 end;

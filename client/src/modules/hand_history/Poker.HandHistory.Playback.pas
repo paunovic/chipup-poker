@@ -228,7 +228,7 @@ begin
         pbseat.Seat := player.Seat;
         pbseat.PlayerMongoId := player.MongoId;
         pbseat.Chips := current_player_chips[player.Seat];
-        if (CompareMongoId(dmMain.SelfInfo.MongoId, player.MongoId)) or
+        if (dmMain.SelfInfo.MongoId = player.MongoId) or
            ((not player.Muck) and
             (pbtablestatus.State >= tsWinning)) then
           pbseat.Cards := player.Cards;

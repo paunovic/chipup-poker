@@ -55,7 +55,6 @@ type
 implementation
 
 uses
-  {$IFDEF DEBUG} {$ENDIF}
   Poker.Common.FormsContainer;
 
 {$R *.dfm}

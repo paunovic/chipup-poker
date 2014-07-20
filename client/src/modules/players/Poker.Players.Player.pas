@@ -57,7 +57,7 @@ end;
 
 procedure TPlayerInfo.Flush;
 begin
-  FMongoId := EMPTY_MONGO_ID;
+  FMongoId.Clear;
   FNick := '';
   FEMail := '';
   FPassword := '';
@@ -92,7 +92,7 @@ begin
       begin
         found := FALSE;
         for pbclub in AStatusReply.Clubs do
-          if CompareMongoId(pbclub.MongoId, club.MongoId) then
+          if pbclub.MongoId = club.MongoId then
           begin
             club.Assign(pbclub);
             found := TRUE;

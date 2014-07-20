@@ -32,8 +32,6 @@ type
     property ProtobufOutput: TProtoBufOutput read FProtobufOutput;
     property ProtobufOutputSize: Word read GetProtobufOutputSize;
     property Lightweight: Boolean read FLightweight;
-
-    class function ObjectToProto(const AObject: TObject; const AProtoClass: TProtobufBaseObjectClass; var AOutput: pointer): Boolean;
   end;
 
 
@@ -124,18 +122,6 @@ end;
 procedure TProtobufBaseObject.InitObjects;
 begin
 //
-end;
-
-
-class function TProtobufBaseObject.ObjectToProto(const AObject: TObject; const AProtoClass: TProtobufBaseObjectClass; var AOutput: pointer): Boolean;
-begin
-  result := AObject is AProtoClass;
-  if result then
-    AOutput := AObject as AProtoClass
-  else
-  begin
-    {$IFDEF DEBUG} DebugLn(0, Format('Proto casting failed [received %s, expected %s]', [AObject.ClassName, AProtoClass.ClassName]), ditException); {$ENDIF}
-  end;
 end;
 
 end.

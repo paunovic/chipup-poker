@@ -105,7 +105,7 @@ begin
       end;
       kFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Files;
       end;
     else

@@ -221,7 +221,14 @@ end;
 
 procedure TServerSocketCore.SocketSslVerifyPeer(Sender: TObject; var Ok: Integer; Cert: TX509Base);
 begin
-  {$IFDEF DEBUG} DebugLn(FDebugId, Format('SSL verify peer result: %d', [Ok]), ditSocket); {$ENDIF}
+  {$IFDEF DEBUG}
+  case Ok of
+    0: DebugLn(FDebugId, 'SSL peer not verified', ditException);
+    1: DebugLn(FDebugId, 'SSL peer successfully verified', ditSocket);
+  else
+    DebugLn(FDebugId, Format('SSL verify peer result: %d', [Ok]), ditException);
+  end;
+  {$ENDIF}
 end;
 
 {$IFDEF DEBUG}

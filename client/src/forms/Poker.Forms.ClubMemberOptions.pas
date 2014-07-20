@@ -67,8 +67,8 @@ var
   member: TClubMemberInfo;
   club: TClubInfo;
 begin
-  PtrToMongoId(AParams[0], FClubId);
-  PtrToMongoId(AParams[1], FPlayerId);
+  FClubId := AParams[0];
+  FPlayerId := AParams[1];
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try

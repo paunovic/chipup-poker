@@ -81,7 +81,7 @@ begin
       begin
         found := FALSE;
         for gamepb in AGameList do
-          if CompareMongoId(gamepb.MongoId, gameinfo.MongoId) then
+          if gamepb.MongoId = gameinfo.MongoId then
           begin
             found := TRUE;
             Break;

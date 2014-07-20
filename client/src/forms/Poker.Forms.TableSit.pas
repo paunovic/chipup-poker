@@ -63,7 +63,7 @@ implementation
 uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
-  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList, Poker.Types, Poker.Protobufs.Objects.Base;
+  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList, Poker.Types;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
@@ -260,12 +260,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbstatus)) then
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.Game.MongoId, pbstatus.TableMongoId) then
+    if table.Game.MongoId <> pbstatus.TableMongoId then
       Exit;
 
     ModalResult := mrOk;
@@ -280,12 +280,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbstatus)) then
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.Game.MongoId, pbstatus.TableMongoId) then
+    if table.Game.MongoId <> pbstatus.TableMongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -301,12 +301,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbstatus)) then
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.Game.MongoId, pbstatus.TableMongoId) then
+    if table.Game.MongoId <> pbstatus.TableMongoId then
       Exit;
 
     ModalResult := mrOk;
@@ -321,12 +321,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbstatus)) then
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.game.MongoId, pbstatus.TableMongoId) then
+    if table.game.MongoId <> pbstatus.TableMongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -341,12 +341,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbstatus)) then
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.game.MongoId, pbstatus.TableMongoId) then
+    if table.game.MongoId <> pbstatus.TableMongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -361,12 +361,12 @@ var
   pbgame: TPB_Game;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_Game, pointer(pbgame)) then
+  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.game.MongoId, pbgame.MongoId) then
+    if table.game.MongoId <> pbgame.MongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -383,13 +383,13 @@ var
   table: TTable;
   err: String;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_BuyinError, pointer(pbbuyinerr)) then
+  if not TPokerTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
     Exit;
 
   err := '';
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.game.MongoId, pbbuyinerr.GameId) then
+    if table.game.MongoId <> pbbuyinerr.GameId then
       Exit;
 
     if pbbuyinerr.LastCashout > table.game.MaxBuyin * table.game.BigBlind then
@@ -409,12 +409,12 @@ var
   pbbuyinerr: TPB_BuyinError;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_BuyinError, pointer(pbbuyinerr)) then
+  if not TPokerTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    if not CompareMongoId(table.game.MongoId, pbbuyinerr.GameId) then
+    if table.game.MongoId <> pbbuyinerr.GameId then
       Exit;
   finally
     Tables.Unlock;

@@ -142,7 +142,7 @@ end;
 
 procedure TPB_PlayerLimitParams.clear_Clubid;
 begin
-  FillChar(FClubid[0], Length(FClubid), 0);
+  FClubid.Clear;
   clear_has_Clubid;
 end;
 
@@ -164,19 +164,19 @@ end;
 procedure TPB_PlayerLimitParams.SetClubid(const AValue: TMongoId);
 begin
   Assert(not has_Clubid);
-  Move(AValue[0], FClubid[0], Length(FClubid));
+  FClubid := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kClubidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_Clubid;
 end;
 
 procedure TPB_PlayerLimitParams.clear_Userid;
 begin
-  FillChar(FUserid[0], Length(FUserid), 0);
+  FUserid.Clear;
   clear_has_Userid;
 end;
 
@@ -198,12 +198,12 @@ end;
 procedure TPB_PlayerLimitParams.SetUserid(const AValue: TMongoId);
 begin
   Assert(not has_Userid);
-  Move(AValue[0], FUserid[0], Length(FUserid));
+  FUserid := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kUseridFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_Userid;
 end;

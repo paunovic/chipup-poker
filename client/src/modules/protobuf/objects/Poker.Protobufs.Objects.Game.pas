@@ -320,7 +320,7 @@ end;
 
 procedure TPB_Game.clear_MongoId;
 begin
-  FillChar(FId[0], Length(FId), 0);
+  FId.Clear;
   clear_has_MongoId;
 end;
 
@@ -342,19 +342,19 @@ end;
 procedure TPB_Game.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  Move(AValue[0], FId[0], Length(FId));
+  FId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_MongoId;
 end;
 
 procedure TPB_Game.clear_CreatorMongoId;
 begin
-  FillChar(FCreatorMongoId[0], Length(FCreatorMongoId), 0);
+  FCreatorMongoId.Clear;
   clear_has_CreatorMongoId;
 end;
 
@@ -376,12 +376,12 @@ end;
 procedure TPB_Game.SetCreatorMongoId(const AValue: TMongoId);
 begin
   Assert(not has_CreatorMongoId);
-  Move(AValue[0], FCreatorMongoId[0], Length(FCreatorMongoId));
+  FCreatorMongoId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kCreatorMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_CreatorMongoId;
 end;
@@ -418,7 +418,7 @@ end;
 
 procedure TPB_Game.clear_ClubMongoid;
 begin
-  FillChar(FClubMongoid[0], Length(FClubMongoid), 0);
+  FClubMongoid.Clear;
   clear_has_ClubMongoid;
 end;
 
@@ -440,12 +440,12 @@ end;
 procedure TPB_Game.SetClubMongoid(const AValue: TMongoId);
 begin
   Assert(not has_ClubMongoid);
-  Move(AValue[0], FClubMongoid[0], Length(FClubMongoid));
+  FClubMongoid := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kClubMongoidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_ClubMongoid;
 end;

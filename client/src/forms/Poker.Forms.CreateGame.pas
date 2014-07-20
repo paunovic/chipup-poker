@@ -104,7 +104,7 @@ end;
 
 procedure TfrmCreateGame.SetParams(const AParams: array of pointer);
 begin
-  PtrToMongoId(AParams[0], FClubId);
+  FClubId := AParams[0];
 end;
 
 procedure TfrmCreateGame.acCancelExecute(Sender: TObject);

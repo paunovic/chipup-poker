@@ -137,7 +137,7 @@ begin
       end;
       kWinnerDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_WinnerData;
       end;
       kRakeFieldNumber: begin

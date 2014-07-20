@@ -366,7 +366,7 @@ class BaseGenerator : public CodeGenerator {
 					printer->Print(vars,
 						"procedure TPB_$message$.clear_$name$;\n"
 						"begin\n"
-						"  FillChar($pname$[0], Length($pname$), 0);\n"
+						"  $pname$.Clear;\n"
 						"  clear_has_$name$;\n"
 						"end;\n\n");
 				} else {
@@ -436,8 +436,8 @@ class BaseGenerator : public CodeGenerator {
 							"  if not Lightweight then\n"
 							"  begin\n"
 							"    ProtobufOutput.writeTag($enum$, WIRETYPE_LENGTH_DELIMITED);\n"
-							"    ProtobufOutput.writeRawVarint32(Length(Item));\n"
-							"    ProtobufOutput.writeRawData(@Item[0], Length(Item));\n"
+							"    ProtobufOutput.writeRawVarint32(12);\n"
+							"    ProtobufOutput.writeRawData(Item.Memory, 12);\n"
 							"  end;\n");
 					} else {
 						printer->Print(vars,
@@ -470,12 +470,12 @@ class BaseGenerator : public CodeGenerator {
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
 				if (thisType.getBaseDelphiName() == "TMongoId") {
 					printer->Print(vars,
-						"  Move($input$[0], $pname$[0], Length($pname$));\n"
+						"  $pname$ := $input$;\n"
 						"  if not Lightweight then\n"
 						"  begin\n"
 						"    ProtobufOutput.writeTag($enum$, WIRETYPE_LENGTH_DELIMITED);\n"
-						"    ProtobufOutput.writeRawVarint32(Length($input$));\n"
-						"    ProtobufOutput.writeRawData(@$input$[0], Length($input$));\n"
+						"    ProtobufOutput.writeRawVarint32(12);\n"
+						"    ProtobufOutput.writeRawData($input$.Memory, 12);\n"
 						"  end;\n");
 				} else {
 					printer->Print(vars,
@@ -799,12 +799,12 @@ class BaseGenerator : public CodeGenerator {
 						"        Assert(wire_type = $wiretype$);\n");
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(vars,
-							"        $pname$.Add($subname$.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));\n");
+							"        $pname$.Add($subname$.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));\n");
 					} else {
 						printer.Print(vars,
 							"        if not Assigned($pname$) then\n"
 							"          $pname$ := $subname$.Create;\n"
-							"        $pname$.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);\n");
+							"        $pname$.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);\n");
 					}
 					printer.Print(vars,
 						"        set_has_$pubname$;\n"

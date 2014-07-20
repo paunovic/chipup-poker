@@ -36,6 +36,7 @@ function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 function TempPath: String;
 function IsValidRegex(const ARegex: String): Boolean;
 
+
 implementation
 
 uses
@@ -676,6 +677,7 @@ begin
     pcre_dispose(pattern, nil, char_table);
   end;
 end;
+
 
 end.
 

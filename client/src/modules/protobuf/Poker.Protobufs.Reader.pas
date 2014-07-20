@@ -68,7 +68,7 @@ var
 begin
   bsize := readInt32;
   Assert(bsize = 12, Format('Received MongoId length = %d', [bsize]));
-  readRawBytes(result[0], bsize);
+  readRawBytes(result.Memory^, bsize);
 end;
 
 end.

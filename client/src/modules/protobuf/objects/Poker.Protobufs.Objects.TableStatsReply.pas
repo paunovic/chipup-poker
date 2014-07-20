@@ -130,7 +130,7 @@ begin
       end;
       kPlayerstatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Playerstats;
       end;
       kHandsFieldNumber: begin
@@ -171,7 +171,7 @@ end;
 
 procedure TPB_TableStatsReply.clear_Clubid;
 begin
-  FillChar(FClubid[0], Length(FClubid), 0);
+  FClubid.Clear;
   clear_has_Clubid;
 end;
 
@@ -193,19 +193,19 @@ end;
 procedure TPB_TableStatsReply.SetClubid(const AValue: TMongoId);
 begin
   Assert(not has_Clubid);
-  Move(AValue[0], FClubid[0], Length(FClubid));
+  FClubid := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kClubidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_Clubid;
 end;
 
 procedure TPB_TableStatsReply.clear_Gameid;
 begin
-  FillChar(FGameid[0], Length(FGameid), 0);
+  FGameid.Clear;
   clear_has_Gameid;
 end;
 
@@ -227,12 +227,12 @@ end;
 procedure TPB_TableStatsReply.SetGameid(const AValue: TMongoId);
 begin
   Assert(not has_Gameid);
-  Move(AValue[0], FGameid[0], Length(FGameid));
+  FGameid := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kGameidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_Gameid;
 end;

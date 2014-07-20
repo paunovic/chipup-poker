@@ -51,8 +51,7 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   PNGImage, Poker.Avatars.Avatar, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
   Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings, Poker.Types,
-  Poker.DataModule, Poker.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Protobufs.Objects.Base;
+  Poker.DataModule, Poker.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop, Poker.Players.Player, Poker.Avatars.AvatarList;
 
 
 procedure TfrmChangeAvatar.FormCreate(Sender: TObject);
@@ -242,7 +241,7 @@ var
   pbreply: TPB_SetAvatarReply;
   player_info: TPlayerInfo;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_SetAvatarReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_SetAvatarReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

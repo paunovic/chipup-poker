@@ -113,10 +113,10 @@ var
   handid: UINT;
 begin
   if not Assigned(AParams[0]) then
-    SetSelectedHandId(EMPTY_MONGO_ID, 0)
+    SetSelectedHandId(nil, 0)
   else
   begin
-    PtrToMongoId(AParams[0], game_id);
+    game_id := AParams[0];
     handid := PUINT(AParams[1])^;
     SetSelectedHandId(game_id, handid);
   end;
@@ -124,7 +124,10 @@ end;
 
 procedure TfrmHandHistory.SetSelectedHandId(const AGameId: TMongoId; const AHandId: UINT);
 begin
-  FSelectedTableId := AGameId;
+  if AGameId = nil then
+    FSelectedTableId.Clear
+  else
+    FSelectedTableId := AGameId;
   FSelectedHandId := AHandId;
   RefreshTableList;
   ShowHand;
@@ -249,7 +252,7 @@ begin
       else
         if cbTable.Properties.Items[C1] <> table_name then
           cbTable.Properties.Items[C1] := table_name;
-      if CompareMongoId(FSelectedTableId, hhis.FGameId) then
+      if FSelectedTableId = hhis.FGameId then
         item_index := C1;
       Inc(C1);
     end;
@@ -390,7 +393,7 @@ end;
 procedure TfrmHandHistory.cbTablePropertiesChange(Sender: TObject);
 begin
   if cbTable.ItemIndex = -1 then
-    FSelectedTableId := EMPTY_MONGO_ID
+    FSelectedTableId.Clear
   else
     FSelectedTableId := HandHistory.Keys.ToArray[cbTable.ItemIndex];
 

@@ -300,7 +300,7 @@ begin
   // iterate through table status seats and find our seat index
   seat_index := -1;
   for C1 := 0 to FSeats.Count - 1 do
-    if CompareMongoId(FSeats[C1].PlayerMongoId, dmMain.SelfInfo.MongoId) then
+    if FSeats[C1].PlayerMongoId = dmMain.SelfInfo.MongoId then
     begin
       seat_index := FSeats[C1].SeatIndex;
       Break;

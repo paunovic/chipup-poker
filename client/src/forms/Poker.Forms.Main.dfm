@@ -3797,8 +3797,8 @@ object frmChipUpMain: TfrmChipUpMain
           ParentFont = False
         end
         object btOpenTable: TcxButton
-          Left = 10
-          Top = 305
+          Left = 6
+          Top = 302
           Width = 143
           Height = 35
           Margin = 18

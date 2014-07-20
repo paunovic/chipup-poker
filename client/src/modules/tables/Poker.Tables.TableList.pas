@@ -219,7 +219,7 @@ begin
     FLock.Enter;
     try
       for table in Values do
-        if CompareMongoId(table.ClubId, AClubId) then
+        if table.ClubId = AClubId then
           to_remove.Add(table.InternalId);
     finally
       FLock.Leave;
@@ -265,7 +265,7 @@ begin
   FLock.Enter;
   for table in Values do
     if (table.TableType = ATableType) and
-       (CompareMongoId(table.GameId, AMongoId)) then
+       (table.GameId = AMongoId) then
     begin
       ATable := table;
       Exit(TRUE);
@@ -292,7 +292,7 @@ begin
   FLock.Enter;
   try
     for table in Values do
-      if CompareMongoId(table.ClubId, AClubId) then
+      if table.ClubId = AClubId then
         table.UpdateObjects;
   finally
     FLock.Leave;

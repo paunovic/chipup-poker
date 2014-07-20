@@ -50,7 +50,7 @@ implementation
 uses
   Poker.Settings, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes, Poker.Types,
   Poker.DataModule, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.RegisterReply, Poker.Server.MessageContainer,
-  Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Protobufs.Objects.Base;
+  Poker.Server.Settings, Poker.Common.FormsContainer;
 
 
 procedure TfrmCreateAccount.FormCreate(Sender: TObject);
@@ -142,7 +142,7 @@ procedure TfrmCreateAccount.CSRRegisterReply(const AMethodId: Integer; const AOb
 var
   pbreply: TPB_RegisterReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_RegisterReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_RegisterReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

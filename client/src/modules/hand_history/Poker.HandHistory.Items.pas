@@ -172,7 +172,7 @@ begin
   FBalanceChanges.AddRange(AHandHistory.BalanceChanges);
   FDealerIndex := AHandHistory.Dealer;
   FCurrentGame := AHandHistory.CurrentGame;
-  FStartTime := TTimeZone.Local.ToLocalTime(MongoIdToDateTime(FMongoId));
+  FStartTime := TTimeZone.Local.ToLocalTime(FMongoId.ToDateTime);
   FStartTimeStr := FormatDateTime('yyyy/mm/dd hh:nn:ss', FStartTime);
   FPlayers.Assign(AHandHistory.Players);
   FMoves.Assign(AHandHistory.Moves);

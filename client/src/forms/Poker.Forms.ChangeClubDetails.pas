@@ -50,7 +50,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.Server.Validators, Poker.Server.Socket, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule, Poker.Protobufs.Objects.Base;
+  Poker.Protobufs.Objects.ClubCommandReply, Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.DataModule;
 
 
 procedure TfrmChangeClubDetails.FormCreate(Sender: TObject);
@@ -101,7 +101,7 @@ procedure TfrmChangeClubDetails.SetParams(const AParams: array of pointer);
 var
   club: TClubInfo;
 begin
-  PtrToMongoId(AParams[0], FClubId);
+  FClubId := AParams[0];
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try
     edClubName.Text := club.Name;
@@ -168,9 +168,9 @@ procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMethodId: Integer; c
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if not CompareMongoId(pbreply.Club.MongoId, FClubId) then
+  if pbreply.Club.MongoId <> FClubId then
     Exit;
 
   case pbreply.Status of

@@ -159,12 +159,12 @@ begin
       end;
       kWinnerPotDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FWinnerPotData.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FWinnerPotData.Add(TPB_Pot.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_WinnerPotData;
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPots.Add(TPB_Pot.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Pots;
       end;
     else

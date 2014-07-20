@@ -125,7 +125,7 @@ end;
 
 procedure TPB_TableSit.clear_GameId;
 begin
-  FillChar(FGameId[0], Length(FGameId), 0);
+  FGameId.Clear;
   clear_has_GameId;
 end;
 
@@ -147,12 +147,12 @@ end;
 procedure TPB_TableSit.SetGameId(const AValue: TMongoId);
 begin
   Assert(not has_GameId);
-  Move(AValue[0], FGameId[0], Length(FGameId));
+  FGameId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kGameIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_GameId;
 end;

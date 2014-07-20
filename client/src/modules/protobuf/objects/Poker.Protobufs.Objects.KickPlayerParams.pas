@@ -108,7 +108,7 @@ end;
 
 procedure TPB_KickPlayerParams.clear_ClubMongoId;
 begin
-  FillChar(FClubMongoId[0], Length(FClubMongoId), 0);
+  FClubMongoId.Clear;
   clear_has_ClubMongoId;
 end;
 
@@ -130,19 +130,19 @@ end;
 procedure TPB_KickPlayerParams.SetClubMongoId(const AValue: TMongoId);
 begin
   Assert(not has_ClubMongoId);
-  Move(AValue[0], FClubMongoId[0], Length(FClubMongoId));
+  FClubMongoId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kClubMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_ClubMongoId;
 end;
 
 procedure TPB_KickPlayerParams.clear_PlayerMongoId;
 begin
-  FillChar(FPlayerMongoId[0], Length(FPlayerMongoId), 0);
+  FPlayerMongoId.Clear;
   clear_has_PlayerMongoId;
 end;
 
@@ -164,12 +164,12 @@ end;
 procedure TPB_KickPlayerParams.SetPlayerMongoId(const AValue: TMongoId);
 begin
   Assert(not has_PlayerMongoId);
-  Move(AValue[0], FPlayerMongoId[0], Length(FPlayerMongoId));
+  FPlayerMongoId := AValue;
   if not Lightweight then
   begin
     ProtobufOutput.writeTag(kPlayerMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
-    ProtobufOutput.writeRawVarint32(Length(AValue));
-    ProtobufOutput.writeRawData(@AValue[0], Length(AValue));
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
   end;
   set_has_PlayerMongoId;
 end;

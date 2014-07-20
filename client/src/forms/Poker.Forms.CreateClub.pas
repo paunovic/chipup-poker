@@ -41,8 +41,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.Validators, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Server.MessageCallbacks, Poker.Common.FormsContainer, Poker.Types,
-  Poker.Protobufs.Objects.Base;
+  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Server.MessageCallbacks, Poker.Common.FormsContainer, Poker.Types;
 
 
 procedure TfrmCreateClub.FormCreate(Sender: TObject);
@@ -115,7 +114,7 @@ procedure TfrmCreateClub.CSRCreateClub(const AMethodId: Integer; const AObject: 
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ClubCommandReply, pointer(pbreply)) then
+  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

@@ -159,7 +159,7 @@ uses
   Poker.Common.Misc, Poker.Settings, Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game,
   Poker.Games.Game, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main,
   Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items,
-  Poker.Helpers.PB_Pot, Poker.Clubs.Member, Poker.Protobufs.Objects.Base;
+  Poker.Helpers.PB_Pot, Poker.Clubs.Member;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -751,13 +751,13 @@ var
   chat_event: TPB_ChatEvent;
   chat_message: TPB_ChatMessage;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_ChatEvent, pointer(chat_event)) then
+  if not TPokerTypes.TryCast<TPB_ChatEvent>(AObject, chat_event) then
     Exit;
 
   case chat_event.Event of
     ceUserMessage: begin
       chat_message := chat_event.Msg;
-      if CompareMongoId(chat_event.TableId, FGameId) then
+      if chat_event.TableId = FGameId then
         AddUserChatMessage(chat_message.Username, chat_message.Msg);
     end;
     ceServerMessage: ;
@@ -952,9 +952,9 @@ var
   pbtablestatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TProtobufBaseObject.ObjectToProto(AObject, TPB_TableStatus, pointer(pbtablestatus)) then
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbtablestatus) then
     Exit;
-  if not CompareMongoId(pbtablestatus.TableMongoId, FGameId) then
+  if pbtablestatus.TableMongoId <> FGameId then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -1360,7 +1360,7 @@ begin
     form.SetFocus;
   end
   else
-    FormsContainer.RunForm(TfrmHandHistory, frmChipUpMain, [@FGameId[0], @handid], FALSE)
+    FormsContainer.RunForm(TfrmHandHistory, frmChipUpMain, [FGameId.Memory, @handid], FALSE)
 end;
 
 procedure TfrmTable.acHandPlaybackPauseExecute(Sender: TObject);
