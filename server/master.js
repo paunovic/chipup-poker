@@ -26,9 +26,15 @@ var server = net.createServer(function (socket) {
 var cactiServer = require('net').createServer(stats_server);
 var app = express();
 var masterServer = http.createServer(app);
-var io = require('socket.io').listen(masterServer,{log:false});
+var IO = require('socket.io').listen(masterServer,{log:false});
 var sessionStore;
 var restarting = false;
+var main_server;
+var bots = {};
+var buffer = [];
+var autoRestart = true;
+Error.stackTraceLimit = 20;
+var retry = 20;
 
 MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	assert.ifError(err);
@@ -48,7 +54,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 					if (adminRow.password == password) {
 						req.session.authed = true;
 						req.session.username = adminRow.username;
-						res.end('sucess');
+						res.render('master_index');
 						return;
 					}
 				} else {
@@ -82,7 +88,7 @@ MongoClient.connect('mongodb://localhost:27017/poker',function (err,db) {
 	masterServer.listen(8080);
 	startImHub();
 });
-io.set('authorization',function (handshakeData,callback) {
+IO.set('authorization',function (handshakeData,callback) {
 	var test = require('./node_modules/express/node_modules/connect');
 	var cookieModule = require('./node_modules/express/node_modules/cookie');
 	if (handshakeData.headers.cookie) {
@@ -95,9 +101,9 @@ io.set('authorization',function (handshakeData,callback) {
 		});
 	}
 });
-io.on('connection',function (socket) {
+IO.on('connection',function (socket) {
 	socket.on('start',function () {
-		if (im_hub) {
+		if (main_server) {
 			console.log('server already up');
 		} else if (restarting) {
 		} else {
@@ -107,22 +113,46 @@ io.on('connection',function (socket) {
 	});
 	socket.on('stop',function () {
 		console.log('stop time?');
-		if (im_hub) {
+		if (main_server) {
 			autoRestart = false;
-			im_hub.kill();
+			main_server.kill();
 		} else {
 			console.log('server already down');
 		}
 	});
 	socket.on('restart',function () {
 		autoRestart = true;
-		if (im_hub) {
-			im_hub.kill();
+		if (main_server) {
+			main_server.kill();
 		} else if (restarting) {
 		} else {
 			startImHub();
 		}
 	});
+	socket.on('startBot',function (obj) {
+		console.log(obj);
+		if (bots[obj.name]) {
+			console.log('bot already running');
+		} else {
+			bots[obj.name] = require('child_process').fork('./testclient.js',[obj.mode,obj.name,'127.0.0.1']);
+			bots[obj.name].on('exit',function () {
+				delete bots[obj.name];
+				IO.sockets.emit('botStopped',obj.name);
+			});
+			bots[obj.name].config = obj;
+			IO.sockets.emit('botStarted',obj);
+		}
+	});
+	socket.on('stopBot',function (name) {
+		if (bots[name]) {
+			bots[name].kill();
+			delete bots[name];
+		}
+		IO.sockets.emit('botStopped',name);
+	});
+	for (var key in bots) {
+		socket.emit('botStarted',bots[key].config);
+	}
 });
 function Client(sockin) {
 	this.socket = sockin;
@@ -160,7 +190,7 @@ Client.prototype.handle = function (code,data) {
 	console.log(code,data);
 	switch (code) {
 	case codes.StartServer:
-		if (im_hub) {
+		if (main_server) {
 			console.log('server already up');
 		} else if (restarting) {
 		} else {
@@ -169,17 +199,17 @@ Client.prototype.handle = function (code,data) {
 		}
 		break;
 	case codes.StopServer:
-		if (im_hub) {
+		if (main_server) {
 			autoRestart = false;
-			im_hub.kill();
+			main_server.kill();
 		} else {
 			console.log('server already down');
 		}
 		break;
 	case codes.RestartServer:
 		autoRestart = true;
-		if (im_hub) {
-			im_hub.kill();
+		if (main_server) {
+			main_server.kill();
 		} else if (restarting) {
 		} else {
 			startImHub();
@@ -189,11 +219,6 @@ Client.prototype.handle = function (code,data) {
 }
 server.listen(45508);
 cactiServer.listen(45509);
-var im_hub;
-var buffer = [];
-var autoRestart = true;
-Error.stackTraceLimit = 20;
-var retry = 20;
 function getLog(name) {
 	if (!logs[name]) {
 		logs[name] = fs.createWriteStream('logs/'+name+'.log');
@@ -205,7 +230,7 @@ function startImHub() {
 	for (var x=0; x<clients.length; x++) {
 		clients[x].reply(codes.Starting);
 	}
-	im_hub = require('child_process').fork('./server.js');
+	main_server = require('child_process').fork('./server.js');
 	//im_hub.stdout.setEncoding('utf8');
 	//im_hub.stdout.on('data',readStdOut);
 	//im_hub.stderr.setEncoding('utf8');
@@ -214,8 +239,8 @@ function startImHub() {
 	if (process.platform == 'linux') {
 		//setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
 	}
-	im_hub.on('message',function (msg) {
-		io.sockets.emit('message',msg);
+	main_server.on('message',function (msg) {
+		IO.sockets.emit('message',msg);
 		buffer.push(msg);
 		switch (msg.type) {
 		case 'control':
@@ -269,7 +294,7 @@ function startImHub() {
 		}
 	});
 	//process.stdin.resume();
-	im_hub.on('exit',restartImHub);
+	main_server.on('exit',restartImHub);
 }
 function readStdOut(data) {
 	buffer.push(data);
@@ -285,7 +310,7 @@ function restartImHub(code) {
 	for (var x=0; x<clients.length; x++) {
 		clients[x].reply(codes.Stopping);
 	}
-	im_hub = null;
+	main_server = null;
 	if (autoRestart) {
 	//var db = require('./db').makeIt();
 	//db.verbose = true;

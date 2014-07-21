@@ -1,5 +1,6 @@
 var socket = io.connect("http://control.chipuppoker.com:8080");
 var filter = /XXXXXXXXXXXX/;
+var bots = {};
 
 function start() { socket.emit('start'); }
 function stop() { socket.emit('stop'); }
@@ -84,7 +85,36 @@ socket.on('message',function (obj) {
 		console.log(obj);
 	}
 });
+socket.on('botStarted',function (obj) {
+	if (bots[obj.name]) {
+		var bot = bots[obj.name];
+		bot.node.parentNode.removeChild(bot.node);
+	}
+	var bot = {};
+	bots[obj.name] = bot;
+	bot.node = document.createElement('div');
+	document.getElementById('bots').appendChild(bot.node);
+	var button = document.createElement('input');
+	button.type = 'button';
+	button.addEventListener('click',function () {
+		socket.emit('stopBot',obj.name);
+	});
+	button.value = 'stop bot '+obj.name;
+	bot.node.appendChild(button);
+});
+socket.on('botStopped',function (name) {
+	if (bots[name]) {
+		var bot = bots[name];
+		bot.node.parentNode.removeChild(bot.node);
+		delete bots[name];
+	}
+});
 function updatefilter() {
 	var text = document.getElementById('blacklist').value;
 	filter = new RegExp(text);
+}
+function startBot() {
+	var setname = document.getElementById('setname').value;
+	var mode = document.getElementById('mode').value;
+	socket.emit('startBot',{name:setname,mode:mode});
 }

@@ -20,3 +20,14 @@ html
       | blacklist:
       input(type="text",id="blacklist",onkeyup="updatefilter()")
     div(id="debug",style="border:1px solid red; height: 500px; overflow-y: scroll")
+    div
+      div
+        | set name
+        input(type="text",value="set1",id="setname")
+      div
+        | mode
+        select(id="mode")
+          option(value="fastbot") fastbot
+          option(value="slowbot") slowbot
+      input(type="button",onclick="startBot();",value="Start")
+    div(id="bots")

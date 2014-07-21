@@ -48,7 +48,7 @@ function containsObjectID(list,id) {
 }
 var throttled_funcs = {};
 function throttle(key,interval,func) {
-	console.log(throttled_funcs);
+	//console.log(throttled_funcs);
 	if (!throttled_funcs[key]) {
 		throttled_funcs[key] = { lastrun: Date.now() };
 		func();

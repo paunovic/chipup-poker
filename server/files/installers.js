@@ -1,6 +1,7 @@
 var socket = io.connect("http://dev-server.chipuppoker.com:3000");
 function buildRevision(hash) {
 	console.log(hash);
+	// FIXME, use socket.io
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST','/secure/buildbot',true);
 	xhr.setRequestHeader("Content-Type","application/json");
@@ -41,6 +42,12 @@ socket.on('new_revision',function (obj) {
 	document.getElementById('buildButton').onclick = function () {
 		buildRevision(obj.hash);
 	}
+});
+socket.on('makeDiff',function (obj) {
+	console.log('makeDIff',obj);
+	var msg = 'making diff for '+obj.path;
+	if (obj.size) msg += ' it is '+obj.size+' bytes';
+	document.getElementById('diffs').textContent = msg;
 });
 function masscheck() {
 	var list = document.querySelectorAll('.deleteCheckbox');

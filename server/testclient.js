@@ -101,7 +101,7 @@ Client.prototype.ping = function () {
 	this.reply(codes.scPing,{uptime:process.uptime()},'Poker.PingParams');
 }
 Client.prototype.reply = function (code,data,type) {
-	var hidden = [codes.scPing,codes.scPutChips,codes.scTablePlayNow,codes.scTableSit];
+	var hidden = [codes.scPing,codes.scPutChips,codes.scTablePlayNow,codes.scTableSit,codes.scTableStandUp,codes.scFold];
 	pbu.reply(this.socket,hidden,this.log.bind(this),code,data,type);
 }
 function testchathandle(code,data) {
@@ -250,7 +250,7 @@ function testmenu(cb,config) {
 			conn.reply(codes.scPutChips,{table_mongo_id:gameid, chip_amount:newbet, current_state:ts.state},'Poker.PutChips');
 		}
 		var ts = conn.tableStatus;
-		console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d state:%s',bufToCards(ts.flop),bufToCards(ts.turn),bufToCards(ts.river),ts.locked,ts.seq,ts.dealer,ts.handid,ts.state);
+		if (!config.silent) console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d state:%s',bufToCards(ts.flop),bufToCards(ts.turn),bufToCards(ts.river),ts.locked,ts.seq,ts.dealer,ts.handid,ts.state);
 		if (conn.tableStatus.locked) {
 			console.log('table locked');
 		} else {
@@ -275,7 +275,7 @@ function testmenu(cb,config) {
 					for (var x=0; x<randomMoves.length; x++) {
 						if ((randomMoves[x].min < rand) && (randomMoves[x].max > rand)) {
 							var next = randomMoves[x].move;
-							console.log('%d %d AUTO %s',ts.seq,ts.current_seat,next);
+							if (!config.silent) console.log('%d %d AUTO %s',ts.seq,ts.current_seat,next);
 							if (next == 'call') {
 								var maxchips = conn.getSeat(conn.seat).chips;
 								if (!config.silent) conn.log('oldbet',oldbet,'max',maxchips);
@@ -317,8 +317,10 @@ function testmenu(cb,config) {
 	}
 	function checkAndPrint(params) {
 		if (params.current_seat == this.seat) {
-			if (!config.silent) console.log('table state:',params.state,'active seat:',params.current_seat,'pots:',params.pots);
-			console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d time:%d',bufToCards(params.flop),bufToCards(params.turn),bufToCards(params.river),params.locked,params.seq,params.dealer,params.handid,params.time);
+			if (!config.silent) {
+				console.log('table state:',params.state,'active seat:',params.current_seat,'pots:',params.pots);
+				console.log('flop:%s turn:%s river:%s locked:%s seq:%d dealer:%s handid:%d time:%d',bufToCards(params.flop),bufToCards(params.turn),bufToCards(params.river),params.locked,params.seq,params.dealer,params.handid,params.time);
+			}
 			if (params.state != 'tsIdle') {
 				if (!config.silent) {
 					for (var x=0; x<params.seats.length; x++) {
@@ -368,7 +370,7 @@ function testmenu(cb,config) {
 			
 			if (this.sitting) {
 				if ((params.current_seat == this.seat) && (['tsPreFlop','tsFlop','tsTurn','tsRiver'].indexOf(params.state) != -1)) {
-					this.log('its my turnB',params.state);
+					//this.log('its my turnB',params.state);
 					showMoves(this,params.seq);
 					//this.reply(codes.seChat,{event: 'ceUserMessage',msg:{msg:'my hand sucks, *folding*'},table_id:gameid},'Poker.ChatEvent');
 					//this.reply(codes.scFold,{_id:gameid},'Poker.Game');
@@ -382,7 +384,6 @@ function testmenu(cb,config) {
 			}
 			break;
 		case codes.srTableSitOk:
-			this.log('sit ok');
 			this.sitting = true;
 			var params = pb.Parse(data,'Poker.TableStatus');
 			this.tableStatus = params;
@@ -420,7 +421,7 @@ function testmenu(cb,config) {
 		}
 	}
 	function printcode(code,data) {
-		var arr = [codes.srStatus,codes.seTableStatus,codes.srTableSitOk,codes.srNotImplemented,codes.srTableStatsReply,codes.seGameChange,codes.srPong];
+		var arr = [codes.srStatus,codes.seTableStatus,codes.srTableSitOk,codes.srNotImplemented,codes.srTableStatsReply,codes.seGameChange,codes.srPong,codes.srTableStandUpOk,codes.srHandHistoryMsg,codes.srTableBuyinLessThanCashout];
 		if (arr.indexOf(code) == -1) this.log('handle',codes.reverse[code],data);
 		//console.log(code,arr);
 	}
@@ -501,8 +502,10 @@ function testmenu(cb,config) {
 			break;
 		case codes.seTableStatus:
 			var params = pb.Parse(data,'Poker.TableStatus');
-			for (var i=0; i<params.events.length; i++) {
-				console.log('EVENT#%d: %j',i,params.events[i]);
+			if (!config.silent) {
+					for (var i=0; i<params.events.length; i++) {
+					console.log('EVENT#%d: %j',i,params.events[i]);
+				}
 			}
 			common.call(this,code,data);
 			break;

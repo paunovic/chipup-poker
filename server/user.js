@@ -424,20 +424,19 @@ ClientSocket.prototype.handle = function (code,args) {
 			newuser.displayname = params.displayName;
 			newuser.authed = false;
 			newuser.chips = 0;
-			doc = {email:params.email, displayname:params.displayName, tokens:100, authed:false, chips:0, subscription_plan:'pspBasic' };
-			doc.authcode = uuid.v4();
-			newuser.authcode = doc.authcode;
-			if (!regexLimits.email.exec(doc.email)) {
-				console.log('email invalid',doc.email);
+			newuser.authcode = uuid.v4();
+			newuser.subscription_plan = 'pspBasic';
+			if (!regexLimits.email.exec(newuser.email)) {
+				console.log('email invalid',newuser.email);
 				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
-			if ((doc.email.length > global.sharedconfig.stringSizes.email) || (doc.email.length < global.sharedconfig.minSizes.email)) {
+			if ((newuser.email.length > global.sharedconfig.stringSizes.email) || (newuser.email.length < global.sharedconfig.minSizes.email)) {
 				this.log('email out of bounds');
 				this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 				return;
 			}
-			if (!regexLimits.username.exec(doc.displayname)) {
+			if (!regexLimits.username.exec(newuser.displayname)) {
 				this.log('display name out of bounds');
 				this.send(codes.srRegisterReply,{status:'regInvalidName'},'Poker.RegisterReply');
 				return;
@@ -451,8 +450,6 @@ ClientSocket.prototype.handle = function (code,args) {
 				hasher.update(salt);
 				hasher.update(params.password);
 				var hash = hasher.digest();
-				doc.password = hash;
-				doc.salt = salt;
 				newuser.password = hash;
 				newuser.salt = salt;
 				// FIXME, case insensitive
@@ -471,7 +468,7 @@ ClientSocket.prototype.handle = function (code,args) {
 										console.log('error 1',err);
 										process.exit(1);
 									}
-									sendAuthEmail(newuser._id,doc.authcode,doc.email,doc.displayname, function fail1() {
+									sendAuthEmail(newuser._id,newuser.authcode,newuser.email,newuser.displayname, function fail1() {
 										this.send(codes.srRegisterReply,{status:'regInvalidEmail'},'Poker.RegisterReply');
 										newuser.remove(function (err,res) {
 											this.log('delete done',err,res,newuser);
