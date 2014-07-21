@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HandHistoryMove;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
 
 type
@@ -133,6 +133,7 @@ begin
   FWinnerPotData.OnNotify := WinnerPotDataNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
 end;
+
 procedure TPB_HandHistoryMove.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -158,12 +159,12 @@ begin
       end;
       kWinnerPotDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FWinnerPotData.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FWinnerPotData.Add(TPB_Pot.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_WinnerPotData;
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPots.Add(TPB_Pot.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Pots;
       end;
     else
@@ -203,8 +204,13 @@ begin
 end;
 
 procedure TPB_HandHistoryMove.clear_Code;
+var
+  on_notify: TCollectionNotifyEvent<TTableEventType>;
 begin
+  on_notify := FCode.OnNotify;
+  FCode.OnNotify := nil;
   FCode.Clear;
+  FCode.OnNotify := on_notify;
   clear_has_Code;
 end;
 
@@ -290,8 +296,13 @@ begin
 end;
 
 procedure TPB_HandHistoryMove.clear_WinnerPotData;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FWinnerPotData.OnNotify;
+  FWinnerPotData.OnNotify := nil;
   FWinnerPotData.Clear;
+  FWinnerPotData.OnNotify := on_notify;
   clear_has_WinnerPotData;
 end;
 
@@ -323,8 +334,13 @@ begin
 end;
 
 procedure TPB_HandHistoryMove.clear_Pots;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FPots.OnNotify;
+  FPots.OnNotify := nil;
   FPots.Clear;
+  FPots.OnNotify := on_notify;
   clear_has_Pots;
 end;
 

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.AssetList;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
@@ -79,6 +79,7 @@ begin
   inherited;
   FAssets.OnNotify := AssetsNotifyEvent;
 end;
+
 procedure TPB_AssetList.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -89,7 +90,7 @@ begin
     case field_number of
       kAssetsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FAssets.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FAssets.Add(TPB_UpdateFileInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Assets;
       end;
     else
@@ -118,8 +119,13 @@ begin
 end;
 
 procedure TPB_AssetList.clear_Assets;
+var
+  on_notify: TCollectionNotifyEvent<TPB_UpdateFileInfo>;
 begin
+  on_notify := FAssets.OnNotify;
+  FAssets.OnNotify := nil;
   FAssets.Clear;
+  FAssets.OnNotify := on_notify;
   clear_has_Assets;
 end;
 

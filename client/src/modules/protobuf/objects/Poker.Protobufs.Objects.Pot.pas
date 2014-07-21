@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.Pot;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.WinnerData;
 
 type
@@ -116,6 +116,7 @@ begin
   FMembers.OnNotify := MembersNotifyEvent;
   FWinnerData.OnNotify := WinnerDataNotifyEvent;
 end;
+
 procedure TPB_Pot.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -136,7 +137,7 @@ begin
       end;
       kWinnerDataFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FWinnerData.Add(TPB_WinnerData.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_WinnerData;
       end;
       kRakeFieldNumber: begin
@@ -205,8 +206,13 @@ begin
 end;
 
 procedure TPB_Pot.clear_Members;
+var
+  on_notify: TCollectionNotifyEvent<Integer>;
 begin
+  on_notify := FMembers.OnNotify;
+  FMembers.OnNotify := nil;
   FMembers.Clear;
+  FMembers.OnNotify := on_notify;
   clear_has_Members;
 end;
 
@@ -230,12 +236,17 @@ begin
   Assert(Action = cnAdded);
   set_has_Members;
   if not Lightweight then
-    ProtobufOutput.writeInt32(kMembersFieldNumber,Item);
+    ProtobufOutput.writeInt32(kMembersFieldNumber, Item);
 end;
 
 procedure TPB_Pot.clear_WinnerData;
+var
+  on_notify: TCollectionNotifyEvent<TPB_WinnerData>;
 begin
+  on_notify := FWinnerData.OnNotify;
+  FWinnerData.OnNotify := nil;
   FWinnerData.Clear;
+  FWinnerData.OnNotify := on_notify;
   clear_has_WinnerData;
 end;
 

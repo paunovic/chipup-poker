@@ -31,7 +31,7 @@ type
     procedure SslHttpSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
   private
     FCallbacksId: Integer;
-    FAvatarId : TBytes;
+    FAvatarId: TBytes;
     FAvatarJPG: TJPEGImage;
     FAvatarChanged: Boolean;
     {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
@@ -40,8 +40,6 @@ type
     procedure CSRSetAvatar(const AMethodId: Integer; const AObject: TObject);
 
     procedure UploadAvatar;
-
-  protected
   public
   end;
 
@@ -52,7 +50,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   PNGImage, Poker.Avatars.Avatar, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.SetAvatarReply, Poker.Server.MessageContainer,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings,
+  Poker.Protobufs.Enum.ServerCodes, Poker.Server.Socket, Poker.Common.Misc, Poker.Common.Encryption, Poker.Settings, Poker.Types,
   Poker.DataModule, Poker.Players.PlayerList, Poker.Common.FormsContainer, Poker.Forms.ImageCrop, Poker.Players.Player, Poker.Avatars.AvatarList;
 
 
@@ -121,10 +119,10 @@ begin
      (SslHttp.StatusCode = 200) and
      (SslHttp.RcvdStream.Size > 0) then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar received. Size: %d', [SslHttp.RcvdStream.Size]), ditNetInc); {$ENDIF}
     SslHttp.RcvdStream.Position := 0;
     SetLength(FAvatarId, SslHttp.RcvdStream.Size);
     Move((SslHttp.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], SslHttp.RcvdStream.Size);
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar received [%s]', [BytesToHex(FAvatarId)]), ditNetInc); {$ENDIF}
     ServerSocket.SetAvatar(FAvatarId);
   end
   else
@@ -162,14 +160,13 @@ begin
   FAvatarJPG.SaveToStream(SslHttp.SendStream);
   buf := sLineBreak + '--' + boundary + '--' + sLineBreak;
   SslHttp.SendStream.Write(buf[1], Length(buf));
-
-  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar to server [size: %d]', [SslHttp.SendStream.Size]), ditNetOut);  {$ENDIF}
-
   SslHttp.SendStream.Position := 0;
   SslHttp.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
   SslHttp.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
   SslHttp.OnRequestDone := HTTPRequestDone;
   SslHttp.PostASync;
+
+  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar [size: %.2fkb]', [SslHttp.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);
@@ -243,7 +240,8 @@ var
   pbreply: TPB_SetAvatarReply;
   player_info: TPlayerInfo;
 begin
-  pbreply := AObject as TPB_SetAvatarReply;
+  if not TPokerTypes.TryCast<TPB_SetAvatarReply>(AObject, pbreply) then
+    Exit;
 
   case pbreply.Status of
     saSuccess: begin

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableStatsReplies;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TableStatsReply, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.ClubStatsReply;
 
 type
@@ -113,6 +113,7 @@ begin
   FPlayers.OnNotify := PlayersNotifyEvent;
   FClubStats.OnNotify := ClubStatsNotifyEvent;
 end;
+
 procedure TPB_TableStatsReplies.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -123,17 +124,17 @@ begin
     case field_number of
       kReplyFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FReply.Add(TPB_TableStatsReply.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FReply.Add(TPB_TableStatsReply.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Reply;
       end;
       kPlayersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPlayers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Players;
       end;
       kClubStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FClubStats.Add(TPB_ClubStatsReply.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_ClubStats;
       end;
     else
@@ -174,8 +175,13 @@ begin
 end;
 
 procedure TPB_TableStatsReplies.clear_Reply;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TableStatsReply>;
 begin
+  on_notify := FReply.OnNotify;
+  FReply.OnNotify := nil;
   FReply.Clear;
+  FReply.OnNotify := on_notify;
   clear_has_Reply;
 end;
 
@@ -207,8 +213,13 @@ begin
 end;
 
 procedure TPB_TableStatsReplies.clear_Players;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FPlayers.OnNotify;
+  FPlayers.OnNotify := nil;
   FPlayers.Clear;
+  FPlayers.OnNotify := on_notify;
   clear_has_Players;
 end;
 
@@ -240,8 +251,13 @@ begin
 end;
 
 procedure TPB_TableStatsReplies.clear_ClubStats;
+var
+  on_notify: TCollectionNotifyEvent<TPB_ClubStatsReply>;
 begin
+  on_notify := FClubStats.OnNotify;
+  FClubStats.OnNotify := nil;
   FClubStats.Clear;
+  FClubStats.OnNotify := on_notify;
   clear_has_ClubStats;
 end;
 

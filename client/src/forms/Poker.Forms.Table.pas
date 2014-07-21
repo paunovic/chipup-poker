@@ -8,7 +8,7 @@ uses
   Vcl.ActnList, cxLabel, Poker.Tables.Table, cxTextEdit, Vcl.ActnMan, cxSpinEdit, cxCheckBox, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.TableEvent, System.Types, RVStyle, RVScroll, RichView, Asphyre.Images, cxGraphics, cxControls,
   cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.ImgList, Vcl.PlatformDefaultStyleActnCtrls,
-  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage;
+  cxProgressBar, Vcl.StdCtrls, cxButtons, cxMaskEdit, dxScreenTip, dxCustomHint, cxHint, cxImage, Poker.Types;
 
 type
   TfrmTable = class(TForm)
@@ -95,7 +95,7 @@ type
       FCallbacksId: Integer;
       FRaiseValue: UINT32;
       FWindowFocused: Boolean;
-      FGameId: TBytes;
+      FGameId: TMongoId;
       FTableType: TTableType;
 
       FDXBFold: Integer;
@@ -425,7 +425,10 @@ begin
       ShowHint := TRUE;
     end
     else
+    begin
       Hint := '';
+      ShowHint := FALSE;
+    end;
 
     if set_raise_amount then
       SetRaiseValue(RoundToNearestBB(Round(table.Status.MinimumRaise +
@@ -748,12 +751,13 @@ var
   chat_event: TPB_ChatEvent;
   chat_message: TPB_ChatMessage;
 begin
-  chat_event := AObject as TPB_ChatEvent;
+  if not TPokerTypes.TryCast<TPB_ChatEvent>(AObject, chat_event) then
+    Exit;
 
   case chat_event.Event of
     ceUserMessage: begin
       chat_message := chat_event.Msg;
-      if CompareBytes(chat_event.TableId, FGameId) then
+      if chat_event.TableId = FGameId then
         AddUserChatMessage(chat_message.Username, chat_message.Msg);
     end;
     ceServerMessage: ;
@@ -948,8 +952,9 @@ var
   pbtablestatus: TPB_TableStatus;
   table: TTable;
 begin
-  pbtablestatus := AObject as TPB_TableStatus;
-  if not CompareBytes(pbtablestatus.TableMongoId, FGameId) then
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbtablestatus) then
+    Exit;
+  if pbtablestatus.TableMongoId <> FGameId then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -1355,7 +1360,7 @@ begin
     form.SetFocus;
   end
   else
-    FormsContainer.RunForm(TfrmHandHistory, frmChipUpMain, [@FGameId[0], @handid], FALSE)
+    FormsContainer.RunForm(TfrmHandHistory, frmChipUpMain, [FGameId.Memory, @handid], FALSE)
 end;
 
 procedure TfrmTable.acHandPlaybackPauseExecute(Sender: TObject);

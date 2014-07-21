@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableStatus;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.SeatInfo, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot, Poker.Protobufs.Objects.Game;
 
 type
@@ -38,7 +38,7 @@ type
       kMinimumRaiseFieldNumber = 26;
 
     var
-      FTableMongoId: TBytes;
+      FTableMongoId: TMongoId;
       FSeats: TList<TPB_SeatInfo>;
       FState: TTableState;
       FDealer: Integer;
@@ -63,7 +63,7 @@ type
 
     procedure set_has_TableMongoId;
     procedure clear_has_TableMongoId;
-    procedure SetTableMongoId(const AValue: TBytes);
+    procedure SetTableMongoId(const AValue: TMongoId);
     procedure set_has_Seats;
     procedure clear_has_Seats;
     procedure set_has_State;
@@ -140,7 +140,7 @@ type
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
-    property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
+    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
 
     // repeated SeatInfo Seats = 2;
     function has_Seats: Boolean;
@@ -302,6 +302,7 @@ begin
   FEvents.OnNotify := EventsNotifyEvent;
   FPots.OnNotify := PotsNotifyEvent;
 end;
+
 procedure TPB_TableStatus.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -312,12 +313,12 @@ begin
     case field_number of
       kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FTableMongoId := AProtobufReader.readBytes;
+        FTableMongoId := AProtobufReader.readMongoId;
         set_has_TableMongoId;
       end;
       kSeatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FSeats.Add(TPB_SeatInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FSeats.Add(TPB_SeatInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Seats;
       end;
       kStateFieldNumber: begin
@@ -382,12 +383,12 @@ begin
       end;
       kEventsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FEvents.Add(TPB_TableEvent.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FEvents.Add(TPB_TableEvent.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Events;
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPots.Add(TPB_Pot.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Pots;
       end;
       kRakePercentFieldNumber: begin
@@ -489,7 +490,7 @@ end;
 
 procedure TPB_TableStatus.clear_TableMongoId;
 begin
-  SetLength(FTableMongoId, 0);
+  FTableMongoId.Clear;
   clear_has_TableMongoId;
 end;
 
@@ -508,18 +509,27 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_TableStatus.SetTableMongoId(const AValue: TBytes);
+procedure TPB_TableStatus.SetTableMongoId(const AValue: TMongoId);
 begin
   Assert(not has_TableMongoId);
-  FTableMongoId := Copy(AValue, 0, Length(AValue));
+  FTableMongoId := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kTableMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_TableMongoId;
 end;
 
 procedure TPB_TableStatus.clear_Seats;
+var
+  on_notify: TCollectionNotifyEvent<TPB_SeatInfo>;
 begin
+  on_notify := FSeats.OnNotify;
+  FSeats.OnNotify := nil;
   FSeats.Clear;
+  FSeats.OnNotify := on_notify;
   clear_has_Seats;
 end;
 
@@ -641,8 +651,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_Bets;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FBets.OnNotify;
+  FBets.OnNotify := nil;
   FBets.Clear;
+  FBets.OnNotify := on_notify;
   clear_has_Bets;
 end;
 
@@ -666,7 +681,7 @@ begin
   Assert(Action = cnAdded);
   set_has_Bets;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
+    ProtobufOutput.writeUInt32(kBetsFieldNumber, Item);
 end;
 
 procedure TPB_TableStatus.clear_Locked;
@@ -910,8 +925,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_Events;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TableEvent>;
 begin
+  on_notify := FEvents.OnNotify;
+  FEvents.OnNotify := nil;
   FEvents.Clear;
+  FEvents.OnNotify := on_notify;
   clear_has_Events;
 end;
 
@@ -943,8 +963,13 @@ begin
 end;
 
 procedure TPB_TableStatus.clear_Pots;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FPots.OnNotify;
+  FPots.OnNotify := nil;
   FPots.Clear;
+  FPots.OnNotify := on_notify;
   clear_has_Pots;
 end;
 

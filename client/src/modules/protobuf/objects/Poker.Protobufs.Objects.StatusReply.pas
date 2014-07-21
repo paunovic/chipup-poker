@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.StatusReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game;
 
 type
@@ -125,6 +125,7 @@ begin
   FUsers.OnNotify := UsersNotifyEvent;
   FGames.OnNotify := GamesNotifyEvent;
 end;
+
 procedure TPB_StatusReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -135,24 +136,24 @@ begin
     case field_number of
       kClubsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubs.Add(TPB_Club.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Clubs;
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Users;
       end;
       kSelfFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FSelf) then
           FSelf := TPB_User.Create;
-        FSelf.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_Self;
       end;
       kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Games;
       end;
     else
@@ -198,8 +199,13 @@ begin
 end;
 
 procedure TPB_StatusReply.clear_Clubs;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Club>;
 begin
+  on_notify := FClubs.OnNotify;
+  FClubs.OnNotify := nil;
   FClubs.Clear;
+  FClubs.OnNotify := on_notify;
   clear_has_Clubs;
 end;
 
@@ -231,8 +237,13 @@ begin
 end;
 
 procedure TPB_StatusReply.clear_Users;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FUsers.OnNotify;
+  FUsers.OnNotify := nil;
   FUsers.Clear;
+  FUsers.OnNotify := on_notify;
   clear_has_Users;
 end;
 
@@ -294,8 +305,13 @@ begin
 end;
 
 procedure TPB_StatusReply.clear_Games;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Game>;
 begin
+  on_notify := FGames.OnNotify;
+  FGames.OnNotify := nil;
   FGames.Clear;
+  FGames.OnNotify := on_notify;
   clear_has_Games;
 end;
 

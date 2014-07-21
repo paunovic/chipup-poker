@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxLabel, cxCheckBox, cxSpinEdit, cxButtons,
-  Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Clubs.Club, cxGraphics, cxLookAndFeels,
+  Vcl.ActnList, Poker.Interfaces.FormParams, Poker.Interfaces.ModalForm, Poker.Clubs.Club, cxGraphics, cxLookAndFeels, Poker.Types,
   cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, Vcl.StdCtrls;
 
 type
@@ -26,8 +26,8 @@ type
   private
     FCallbacksId: Integer;
     FCloseCallback: TNotifyEvent;
-    FClubId: TBytes;
-    FPlayerId: TBytes;
+    FClubId: TMongoId;
+    FPlayerId: TMongoId;
 
     procedure CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);
 
@@ -67,10 +67,8 @@ var
   member: TClubMemberInfo;
   club: TClubInfo;
 begin
-  SetLength(FClubId, 12);
-  Move(AParams[0]^, FClubId[0], 12);
-  SetLength(FPlayerId, 12);
-  Move(AParams[1]^, FPlayerId[0], 12);
+  FClubId := AParams[0];
+  FPlayerId := AParams[1];
 
   if dmMain.SelfInfo.Clubs.GetAndLock(FClubId, club) then
   try

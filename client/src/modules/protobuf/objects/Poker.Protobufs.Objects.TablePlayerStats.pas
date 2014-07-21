@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TablePlayerStats;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TablePlayerStats = class(TProtobufBaseObject)
@@ -22,7 +22,7 @@ type
       kHandsFieldNumber = 9;
 
     var
-      FUserid: TBytes;
+      FUserid: TMongoId;
       FBalance: Integer;
       FBuyins: TList<UInt32>;
       FCashouts: TList<UInt32>;
@@ -34,7 +34,7 @@ type
 
     procedure set_has_Userid;
     procedure clear_has_Userid;
-    procedure SetUserid(const AValue: TBytes);
+    procedure SetUserid(const AValue: TMongoId);
     procedure set_has_Balance;
     procedure clear_has_Balance;
     procedure SetBalance(const AValue: Integer);
@@ -72,7 +72,7 @@ type
     // required bytes Userid = 1;
     function has_Userid: Boolean;
     procedure clear_Userid;
-    property Userid: TBytes read FUserid write SetUserid;
+    property Userid: TMongoId read FUserid write SetUserid;
 
     // optional int32 Balance = 3;
     function has_Balance: Boolean;
@@ -155,6 +155,7 @@ begin
   FBuyins.OnNotify := BuyinsNotifyEvent;
   FCashouts.OnNotify := CashoutsNotifyEvent;
 end;
+
 procedure TPB_TablePlayerStats.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -165,7 +166,7 @@ begin
     case field_number of
       kUseridFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUserid := AProtobufReader.readBytes;
+        FUserid := AProtobufReader.readMongoId;
         set_has_Userid;
       end;
       kBalanceFieldNumber: begin
@@ -235,7 +236,7 @@ end;
 
 procedure TPB_TablePlayerStats.clear_Userid;
 begin
-  SetLength(FUserid, 0);
+  FUserid.Clear;
   clear_has_Userid;
 end;
 
@@ -254,12 +255,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_TablePlayerStats.SetUserid(const AValue: TBytes);
+procedure TPB_TablePlayerStats.SetUserid(const AValue: TMongoId);
 begin
   Assert(not has_Userid);
-  FUserid := Copy(AValue, 0, Length(AValue));
+  FUserid := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kUseridFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kUseridFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_Userid;
 end;
 
@@ -294,8 +299,13 @@ begin
 end;
 
 procedure TPB_TablePlayerStats.clear_Buyins;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FBuyins.OnNotify;
+  FBuyins.OnNotify := nil;
   FBuyins.Clear;
+  FBuyins.OnNotify := on_notify;
   clear_has_Buyins;
 end;
 
@@ -319,12 +329,17 @@ begin
   Assert(Action = cnAdded);
   set_has_Buyins;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kBuyinsFieldNumber,Item);
+    ProtobufOutput.writeUInt32(kBuyinsFieldNumber, Item);
 end;
 
 procedure TPB_TablePlayerStats.clear_Cashouts;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FCashouts.OnNotify;
+  FCashouts.OnNotify := nil;
   FCashouts.Clear;
+  FCashouts.OnNotify := on_notify;
   clear_has_Cashouts;
 end;
 
@@ -348,7 +363,7 @@ begin
   Assert(Action = cnAdded);
   set_has_Cashouts;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kCashoutsFieldNumber,Item);
+    ProtobufOutput.writeUInt32(kCashoutsFieldNumber, Item);
 end;
 
 procedure TPB_TablePlayerStats.clear_Rakecontrib;

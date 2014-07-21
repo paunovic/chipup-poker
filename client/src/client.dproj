@@ -244,6 +244,10 @@
 			<DCCReference Include="modules\common\Poker.Common.InstanceController.pas"/>
 			<DCCReference Include="modules\common\Poker.Common.AlphaBlendThread.pas"/>
 			<DCCReference Include="modules\common\Poker.Common.CommandLineParamProcesser.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas"/>
+			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas"/>
 			<DCCReference Include="modules\settings\Poker.HardcodedSettings.pas"/>
 			<DCCReference Include="modules\settings\Poker.Settings.pas"/>
 			<DCCReference Include="modules\server\Poker.Server.Settings.pas"/>
@@ -272,7 +276,6 @@
 			<DCCReference Include="modules\tables\Poker.Tables.Resources.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.Renderer.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.RenderMetrics.pas"/>
-			<DCCReference Include="modules\tables\Poker.Tables.Stats.pas"/>
 			<DCCReference Include="modules\tables\Poker.Tables.StatsList.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Core.pas"/>
 			<DCCReference Include="modules\hand_history\Poker.HandHistory.Items.pas"/>
@@ -302,14 +305,12 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RegisterParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ForgotPasswordParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.User.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ListClubsReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GiveClubOwnershipParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.KickPlayerParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChangeEMailParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChangePasswordParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Game.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.SetAvatarParams.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TransferChipsParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChatMessage.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.ChatEvent.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableSit.pas"/>
@@ -331,8 +332,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableBoolFlag.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.UserChangeParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.CloseGameData.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.GameQuery.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.QueryTableStats.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReplies.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TableStatsReply.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TablePlayerStats.pas"/>
@@ -351,10 +350,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas"/>
-			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas"/>
-			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.pas"/>
-			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas"/>
-			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBufferNotificationThread.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>

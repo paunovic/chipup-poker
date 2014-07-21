@@ -4,14 +4,14 @@ interface
 
 uses
   System.Generics.Collections, System.SysUtils, Poker.Games.GameList, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.ClubStatsReply,
-  Poker.Protobufs.Objects.ClubPlayerStats, Poker.Clubs.Member, Poker.Protobufs.Objects.ClubMember;
+  Poker.Protobufs.Objects.ClubPlayerStats, Poker.Clubs.Member, Poker.Protobufs.Objects.ClubMember, Poker.Types;
 
 type
   TClubInfo = class
   private
     FId: Integer;
-    FMongoId: TBytes;
-    FOwnerId: TBytes;
+    FMongoId: TMongoId;
+    FOwnerId: TMongoId;
     FName: String;
     FPassword: String;
     FMembers: TObjectList<TClubMemberInfo>;
@@ -27,16 +27,16 @@ type
     procedure Assign(const AProtobufObject: TPB_Club); overload;
     procedure Assign(const AClubInfo: TClubInfo; const AAssignGames: Boolean = TRUE); overload;
     procedure UpdateFromClubStats(const AClubStats: TPB_ClubStatsReply);
-    procedure UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
-    procedure ResetMemberBalance(const AMemberId: TBytes);
+    procedure UpdateMember(const AMemberId: TMongoId; const ALimit: UINT32; const AUnlimited: Boolean);
+    procedure ResetMemberBalance(const AMemberId: TMongoId);
 
     procedure AddMember(const AClubMemberInfo: TPB_ClubMember); overload;
     procedure AddMember(const AClubMemberInfo: TClubMemberInfo); overload;
-    function GetMemberInfo(const AMongoId: TBytes; out AMemberInfo: TClubMemberInfo): Boolean;
+    function GetMemberInfo(const AMongoId: TMongoId; out AMemberInfo: TClubMemberInfo): Boolean;
 
     property Id: Integer read FId;
-    property MongoId: TBytes read FMongoId;
-    property OwnerId: TBytes read FOwnerId;
+    property MongoId: TMongoId read FMongoId;
+    property OwnerId: TMongoId read FOwnerId;
     property Name: String read FName;
     property Password: String read FPassword;
     property Members: TObjectList<TClubMemberInfo> read FMembers;
@@ -68,12 +68,12 @@ begin
   inherited;
 end;
 
-function TClubInfo.GetMemberInfo(const AMongoId: TBytes; out AMemberInfo: TClubMemberInfo): Boolean;
+function TClubInfo.GetMemberInfo(const AMongoId: TMongoId; out AMemberInfo: TClubMemberInfo): Boolean;
 var
   member: TClubMemberInfo;
 begin
   for member in FMembers do
-    if CompareBytes(AMongoId, member.MongoId) then
+    if AMongoId = member.MongoId then
     begin
       AMemberInfo := member;
       Exit(TRUE);
@@ -137,7 +137,7 @@ begin
       member.ClubBalance := playerstats.ClubBalance;
 end;
 
-procedure TClubInfo.UpdateMember(const AMemberId: TBytes; const ALimit: UINT32; const AUnlimited: Boolean);
+procedure TClubInfo.UpdateMember(const AMemberId: TMongoId; const ALimit: UINT32; const AUnlimited: Boolean);
 var
   member: TClubMemberInfo;
 begin
@@ -148,7 +148,7 @@ begin
   end;
 end;
 
-procedure TClubInfo.ResetMemberBalance(const AMemberId: TBytes);
+procedure TClubInfo.ResetMemberBalance(const AMemberId: TMongoId);
 var
   member: TClubMemberInfo;
 begin

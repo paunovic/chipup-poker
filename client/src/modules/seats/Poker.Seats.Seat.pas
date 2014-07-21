@@ -3,13 +3,13 @@ unit Poker.Seats.Seat;
 interface
 
 uses
-  System.SysUtils, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Players.Player;
+  System.SysUtils, Poker.Cards, Poker.Protobufs.Objects.SeatInfo, Poker.Players.Player, Poker.Types;
 
 type
   TSeatInfo = class
   private
     FSeatIndex: Integer;
-    FPlayerMongoId: TBytes;
+    FPlayerMongoId: TMongoId;
     FPreviousChips: UINT32;
     FChips: UINT32;
     FCardCount: Integer;
@@ -34,7 +34,7 @@ type
     procedure FillDealtCards;
 
     property SeatIndex: Integer read FSeatIndex;
-    property PlayerMongoId: TBytes read FPlayerMongoId;
+    property PlayerMongoId: TMongoId read FPlayerMongoId;
     property PreviousChips: UINT32 read FPreviousChips;
     property Chips: UINT32 read FChips;
     property CardCount: Integer read FCardCount;

@@ -1,6 +1,8 @@
 #include <google/protobuf/compiler/plugin.h>
 #include <google/protobuf/compiler/code_generator.h>
 #include <google/protobuf/descriptor.h>
+#include <google/protobuf/descriptor.pb.h>
+#include <google/protobuf/unknown_field_set.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <iostream>
@@ -147,6 +149,17 @@ public:
 				copy.delphiName = "TList<"+copy.delphiName+">";
 			}
 			return copy;
+		} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
+			const FieldOptions options = field->options();
+			const UnknownFieldSet &extra = options.unknown_fields();
+			for (int i=0; i<extra.field_count(); i++) {
+				const UnknownField isObjectId = extra.field(i);
+				if (isObjectId.number() != 50000) continue;
+				uint64 test = isObjectId.varint();
+				cerr << "its " << test << " for obj " << copy.propertyName.c_str() << endl;
+				copy.baseDelphiName = copy.delphiName = "TMongoId";
+				copy.reader = "readMongoId";
+			}
 		}
 		if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 			copy.delphiName = "TList<"+copy.delphiName+">";
@@ -333,20 +346,37 @@ class BaseGenerator : public CodeGenerator {
 			vars["message"] = message->name();
 			vars["name"] = thisType.PropertyName();
 			vars["pname"] = thisType.PrivateFieldName();
+			vars["subname"] = thisType.getBaseDelphiName();
 			if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 				printer->Print(vars,
 				"procedure TPB_$message$.clear_$name$;\n"
+				"var\n"
+				"  on_notify: TCollectionNotifyEvent<$subname$>;\n"
 				"begin\n"
+				"  on_notify := $pname$.OnNotify;\n"
+				"  $pname$.OnNotify := nil;\n"
 				"  $pname$.Clear;\n"
+				"  $pname$.OnNotify := on_notify;\n"
 				"  clear_has_$name$;\n"
-				"end;\n\n");
+				"end;\n\n"
+        );
 			} else if (field->type() == FieldDescriptor::TYPE_BYTES) {
-				printer->Print(vars,
-					"procedure TPB_$message$.clear_$name$;\n"
-					"begin\n"
-					"  SetLength($pname$, 0);\n"
-					"  clear_has_$name$;\n"
-					"end;\n\n");
+				// FIXME, merge with TypeInfo
+				if (thisType.getBaseDelphiName() == "TMongoId") {
+					printer->Print(vars,
+						"procedure TPB_$message$.clear_$name$;\n"
+						"begin\n"
+						"  $pname$.Clear;\n"
+						"  clear_has_$name$;\n"
+						"end;\n\n");
+				} else {
+					printer->Print(vars,
+						"procedure TPB_$message$.clear_$name$;\n"
+						"begin\n"
+						"  SetLength($pname$, 0);\n"
+						"  clear_has_$name$;\n"
+						"end;\n\n");
+				}
 			} else 	if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
 				printer->Print(vars,
 					"procedure TPB_$message$.clear_$name$;\n"
@@ -401,9 +431,19 @@ class BaseGenerator : public CodeGenerator {
 				} else if ((field->type() == FieldDescriptor::TYPE_INT32) || (field->type() == FieldDescriptor::TYPE_UINT32)
 					|| (field->type() == FieldDescriptor::TYPE_BYTES)) {
 					vars["writer"] = instance.getWriter();
-					printer->Print(vars,
-					  "  if not Lightweight then\n"
-						"    ProtobufOutput.$writer$($enum$,Item);\n");
+					if (thisType.getBaseDelphiName() == "TMongoId") {
+						printer->Print(vars,
+							"  if not Lightweight then\n"
+							"  begin\n"
+							"    ProtobufOutput.writeTag($enum$, WIRETYPE_LENGTH_DELIMITED);\n"
+							"    ProtobufOutput.writeRawVarint32(12);\n"
+							"    ProtobufOutput.writeRawData(Item.Memory, 12);\n"
+							"  end;\n");
+					} else {
+						printer->Print(vars,
+							"  if not Lightweight then\n"
+							"    ProtobufOutput.$writer$($enum$, Item);\n");
+					}
 				}
 				printer->Print(
 					"end;\n"
@@ -428,10 +468,21 @@ class BaseGenerator : public CodeGenerator {
 				"  Assert(not has_$name$);\n"
 				);
 			if (field->type() == FieldDescriptor::TYPE_BYTES) {
-				printer->Print(vars,
-					"  $pname$ := Copy($input$, 0, Length($input$));\n"
-					"  if not Lightweight then\n"
-					"    ProtobufOutput.$writer$($enum$, $input$);\n");
+				if (thisType.getBaseDelphiName() == "TMongoId") {
+					printer->Print(vars,
+						"  $pname$ := $input$;\n"
+						"  if not Lightweight then\n"
+						"  begin\n"
+						"    ProtobufOutput.writeTag($enum$, WIRETYPE_LENGTH_DELIMITED);\n"
+						"    ProtobufOutput.writeRawVarint32(12);\n"
+						"    ProtobufOutput.writeRawData($input$.Memory, 12);\n"
+						"  end;\n");
+				} else {
+					printer->Print(vars,
+						"  $pname$ := Copy($input$, 0, Length($input$));\n"
+						"  if not Lightweight then\n"
+						"    ProtobufOutput.$writer$($enum$, $input$);\n");
+				}
 			} else {
 				printer->Print(vars,
 					"  $pname$ := AValue;\n"
@@ -461,7 +512,7 @@ class BaseGenerator : public CodeGenerator {
 				"interface\n"
 				"\n"
 				"uses\n"
-				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader"
+				"  System.SysUtils, System.Classes, {$$IFNDEF FPC} System.Generics.Collections {$$ELSE} Contnrs {$$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types"
 				,"filename",file->name()
 				,"name",message->name());
 			if (message->field_count() > 0) {
@@ -708,9 +759,9 @@ class BaseGenerator : public CodeGenerator {
 							,"subname",instance.getBaseDelphiName());
 					}
 				}
-				printer.Print("end;\n");
+				printer.Print("end;\n\n");
 			}
-      printer.Print(  				
+      printer.Print(
 				"procedure TPB_$name$.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);\n"
 				"var\n"
 				"  tag, field_number, wire_type, endpos: Integer;\n"
@@ -731,7 +782,7 @@ class BaseGenerator : public CodeGenerator {
 				vars["name"] = EnumName(field);
 				vars["pname"] = instance.PrivateFieldName();
 				vars["pubname"] = instance.PropertyName();
-				vars["reader"] = typeinfo[field->type()]->getReader();
+				vars["reader"] = instance.getReader();
 				vars["wiretype"] = typeinfo[field->type()]->getWireType();
 				vars["typename"] = typeinfo[field->type()]->getTypeName();
 				if ((field->type() == FieldDescriptor::TYPE_INT32) && (field->is_packed())) {
@@ -748,12 +799,12 @@ class BaseGenerator : public CodeGenerator {
 						"        Assert(wire_type = $wiretype$);\n");
 					if (field->label() == FieldDescriptor::LABEL_REPEATED) {
 						printer.Print(vars,
-							"        $pname$.Add($subname$.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));\n");
+							"        $pname$.Add($subname$.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));\n");
 					} else {
 						printer.Print(vars,
 							"        if not Assigned($pname$) then\n"
 							"          $pname$ := $subname$.Create;\n"
-							"        $pname$.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);\n");
+							"        $pname$.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);\n");
 					}
 					printer.Print(vars,
 						"        set_has_$pubname$;\n"

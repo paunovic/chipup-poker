@@ -2551,7 +2551,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akBottom]
         Caption = 'Club Settings'
         TabOrder = 0
-        ExplicitHeight = 435
         DesignSize = (
           250
           427)
@@ -2621,8 +2620,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Members'
         TabOrder = 1
-        ExplicitWidth = 628
-        ExplicitHeight = 435
         DesignSize = (
           626
           427)
@@ -2638,9 +2635,6 @@ object frmClubLobby: TfrmClubLobby
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitLeft = 2
-          ExplicitTop = 19
-          ExplicitWidth = 624
           object gridPlayersListTable: TcxGridTableView
             OnFocusedRecordChanged = gridPlayersListTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2655,9 +2649,11 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
+            OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             object gridPlayersListId: TcxGridColumn
               Caption = 'Id'
               DataBinding.ValueType = 'Variant'
@@ -2701,7 +2697,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btGiveOwnership: TcxButton
           Left = 115
-          Top = 298
+          Top = 208
           Width = 101
           Height = 26
           Action = acGiveOwnership
@@ -2714,11 +2710,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 232
         end
         object btRemovePlayerFromClub: TcxButton
           Left = 222
-          Top = 298
+          Top = 208
           Width = 101
           Height = 26
           Action = acRemovePlayer
@@ -2731,11 +2727,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 232
         end
         object btSuspendUnsuspend: TcxButton
           Left = 8
-          Top = 298
+          Top = 208
           Width = 101
           Height = 26
           Action = acSuspendPlayer
@@ -2748,11 +2744,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 232
         end
         object btResetBalance: TcxButton
           Left = 436
-          Top = 298
+          Top = 208
           Width = 101
           Height = 26
           Action = acResetBalance
@@ -2765,11 +2761,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 232
         end
         object btSetLimit: TcxButton
           Left = 329
-          Top = 298
+          Top = 208
           Width = 101
           Height = 26
           Action = acSetLimit
@@ -2782,7 +2778,7 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 306
+          ExplicitTop = 232
         end
       end
     end
@@ -2802,8 +2798,6 @@ object frmClubLobby: TfrmClubLobby
         Anchors = [akLeft, akTop, akRight, akBottom]
         Caption = 'Tables'
         TabOrder = 0
-        ExplicitWidth = 880
-        ExplicitHeight = 435
         DesignSize = (
           878
           427)
@@ -2813,14 +2807,14 @@ object frmClubLobby: TfrmClubLobby
           Left = 3
           Top = 16
           Width = 872
-          Height = 267
+          Height = 371
           Align = alTop
           Anchors = [akLeft, akTop, akRight, akBottom]
           BevelInner = bvNone
           BevelOuter = bvNone
           BorderStyle = cxcbsNone
           TabOrder = 0
-          ExplicitHeight = 279
+          ExplicitHeight = 401
           object gridGamesTable: TcxGridTableView
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -2835,9 +2829,11 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
-            OptionsView.NoDataToDisplayInfoText = ' '
+            OptionsView.FocusRect = False
+            OptionsView.NoDataToDisplayInfoText = 'No active tables in this club'
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             object gridGamesId: TcxGridColumn
               DataBinding.ValueType = 'Variant'
               PropertiesClassName = 'TcxBlobEditProperties'
@@ -2894,7 +2890,7 @@ object frmClubLobby: TfrmClubLobby
         end
         object btNewGame: TcxButton
           Left = 8
-          Top = 251
+          Top = 361
           Width = 98
           Height = 28
           Action = acShowCreateGameForm
@@ -2907,11 +2903,11 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 263
+          ExplicitTop = 391
         end
         object btCloseTable: TcxButton
           Left = 112
-          Top = 251
+          Top = 361
           Width = 98
           Height = 28
           Action = acCloseTable
@@ -2924,26 +2920,7 @@ object frmClubLobby: TfrmClubLobby
           Font.Name = 'Arial'
           Font.Style = []
           ParentFont = False
-          ExplicitTop = 263
-        end
-        object btEditGame: TcxButton
-          Left = 48
-          Top = 187
-          Width = 98
-          Height = 28
-          Anchors = [akLeft, akBottom]
-          Caption = 'Edit Table...'
-          Enabled = False
-          SpeedButtonOptions.CanBeFocused = False
-          TabOrder = 3
-          Visible = False
-          Font.Charset = ANSI_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Arial'
-          Font.Style = []
-          ParentFont = False
-          ExplicitTop = 199
+          ExplicitTop = 391
         end
       end
     end
@@ -2981,11 +2958,12 @@ object frmClubLobby: TfrmClubLobby
           OptionsData.Deleting = False
           OptionsData.DeletingConfirmation = False
           OptionsData.Inserting = False
+          OptionsView.FocusRect = False
           OptionsView.NoDataToDisplayInfoText = 'No tables available for this club'
           OptionsView.ColumnAutoWidth = True
           OptionsView.GridLines = glVertical
           OptionsView.GroupByBox = False
-          Styles.Selection = styleTableRowSelected
+          Styles.Inactive = dmMain.styleInactiveCell
           Styles.OnGetContentStyle = gridTablesTableStylesGetContentStyle
           object gridTablesTableId: TcxGridColumn
             DataBinding.ValueType = 'Variant'
@@ -3081,10 +3059,12 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
-            OptionsView.NoDataToDisplayInfoText = 'No stats available for this table(s)'
+            OptionsView.FocusRect = False
+            OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             OnColumnSizeChanged = gridStatsTableColumnSizeChanged
             object gridStatsTablePlayerId: TcxGridColumn
               DataBinding.ValueType = 'Variant'
@@ -3184,6 +3164,8 @@ object frmClubLobby: TfrmClubLobby
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
+            OptionsView.FocusRect = False
+            OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GridLines = glVertical
             OptionsView.GroupByBox = False
@@ -3298,8 +3280,8 @@ object frmClubLobby: TfrmClubLobby
     OnClick = btStatsClick
   end
   object alManageClubs: TActionList
-    Left = 64
-    Top = 468
+    Left = 56
+    Top = 408
     object acRemovePlayer: TAction
       Caption = 'Remove'
       Enabled = False
@@ -3363,16 +3345,9 @@ object frmClubLobby: TfrmClubLobby
       OnExecute = acSetLimitExecute
     end
   end
-  object tiUpdateClubDetails: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tiUpdateClubDetailsTimer
-    Left = 160
-    Top = 472
-  end
   object pmTablesStats: TPopupMenu
     Left = 140
-    Top = 404
+    Top = 408
     object SelectAll1: TMenuItem
       Action = acTablesStatsSelectAll
     end
@@ -3381,8 +3356,8 @@ object frmClubLobby: TfrmClubLobby
     end
   end
   object StatsStyleRepo: TcxStyleRepository
-    Left = 60
-    Top = 404
+    Left = 228
+    Top = 408
     PixelsPerInch = 96
     object styleBalancePositive: TcxStyle
       AssignedValues = [svColor]
@@ -3402,9 +3377,15 @@ object frmClubLobby: TfrmClubLobby
     end
     object styleTableClosed: TcxStyle
     end
-    object styleTableRowSelected: TcxStyle
-      AssignedValues = [svColor]
-      Color = 5329233
+    object styleCheckedRow: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 7094323
+      TextColor = 14474460
+    end
+    object styleSelectedRow: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = 537923640
+      TextColor = 551345372
     end
   end
 end

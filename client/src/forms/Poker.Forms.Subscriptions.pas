@@ -39,7 +39,7 @@ implementation
 
 uses
   Poker.Common.FormsContainer, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes,
-  Poker.Server.Socket, Poker.Protobufs.Objects.User, Poker.Common.Misc, Poker.Protobufs.Objects.SubscriptionPlanChange;
+  Poker.Server.Socket, Poker.Protobufs.Objects.User, Poker.Common.Misc, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Types;
 
 procedure TfrmSubscriptions.FormCreate(Sender: TObject);
 begin
@@ -81,7 +81,8 @@ procedure TfrmSubscriptions.CSRSubscriptionPlanChange(const AMethodId: Integer; 
 var
   proto: TPB_SubscriptionPlanChange;
 begin
-  proto := AObject as TPB_SubscriptionPlanChange;
+  if not TPokerTypes.TryCast<TPB_SubscriptionPlanChange>(AObject, proto) then
+    Exit;
   ShellOpen(PChar(proto.Url));
 end;
 

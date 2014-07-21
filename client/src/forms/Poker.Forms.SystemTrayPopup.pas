@@ -47,7 +47,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.DataModule, Poker.Common.Misc;
+  Poker.DataModule, Poker.Common.Misc, Poker.Common.FormsContainer;
 
 var
   frmSystemTrayPopup: TfrmSystemTrayPopup;

@@ -4,7 +4,8 @@ interface
 
 uses
   System.Classes, Vcl.Controls, Vcl.Forms, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams, Poker.Games.Game, System.SysUtils,
-  Vcl.ActnList, cxButtons, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls;
+  Vcl.ActnList, cxButtons, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls,
+  Poker.Types;
 
 type
   TfrmCloseTable = class(TForm, IFormParams, IModalForm)
@@ -23,7 +24,7 @@ type
   private
     FCloseCallback: TNotifyEvent;
   public
-    FGameId: TBytes;
+    FGameId: TMongoId;
 
     procedure SetParams(const AParams: array of pointer);
     procedure SetCloseCallback(const ACallback: TNotifyEvent);
@@ -51,8 +52,7 @@ end;
 
 procedure TfrmCloseTable.SetParams(const AParams: array of pointer);
 begin
-  SetLength(FGameId, 12);
-  Move(AParams[0]^, FGameId[0], 12);
+  FGameId := AParams[0];
 end;
 
 procedure TfrmCloseTable.SetCloseCallback(const ACallback: TNotifyEvent);

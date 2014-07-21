@@ -6,6 +6,7 @@ uses
   System.Classes, pbOutput, Poker.Protobufs.Reader;
 
 type
+  TProtobufBaseObjectClass = class of TProtobufBaseObject;
   TProtobufBaseObject = class
   private
     FProtobufOutput: TProtoBufOutput;
@@ -35,6 +36,10 @@ type
 
 
 implementation
+
+uses
+  {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
+  System.SysUtils;
 
 
 constructor TProtobufBaseObject.Create(const ALightweight: Boolean = FALSE);
@@ -118,6 +123,5 @@ procedure TProtobufBaseObject.InitObjects;
 begin
 //
 end;
-
 
 end.

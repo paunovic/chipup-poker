@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HelloReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.StringSizes, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.ValidCharsRegex;
 
 type
@@ -155,6 +155,7 @@ begin
   inherited;
   FUpdateFiles.OnNotify := UpdateFilesNotifyEvent;
 end;
+
 procedure TPB_HelloReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -167,7 +168,7 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FStringSizes) then
           FStringSizes := TPB_StringSizes.Create;
-        FStringSizes.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FStringSizes.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_StringSizes;
       end;
       kChangeExpireTimeFieldNumber: begin
@@ -194,19 +195,19 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FMinSizes) then
           FMinSizes := TPB_StringSizes.Create;
-        FMinSizes.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FMinSizes.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_MinSizes;
       end;
       kUpdateFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FUpdateFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_UpdateFiles;
       end;
       kValidCharsRegexFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FValidCharsRegex) then
           FValidCharsRegex := TPB_ValidCharsRegex.Create;
-        FValidCharsRegex.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FValidCharsRegex.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_ValidCharsRegex;
       end;
     else
@@ -438,8 +439,13 @@ begin
 end;
 
 procedure TPB_HelloReply.clear_UpdateFiles;
+var
+  on_notify: TCollectionNotifyEvent<TPB_UpdateFileInfo>;
 begin
+  on_notify := FUpdateFiles.OnNotify;
+  FUpdateFiles.OnNotify := nil;
   FUpdateFiles.Clear;
+  FUpdateFiles.OnNotify := on_notify;
   clear_has_UpdateFiles;
 end;
 

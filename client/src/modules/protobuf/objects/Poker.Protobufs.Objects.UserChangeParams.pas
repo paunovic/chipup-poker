@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.UserChangeParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.User;
 
 type
@@ -79,6 +79,7 @@ begin
   inherited;
   FUsers.OnNotify := UsersNotifyEvent;
 end;
+
 procedure TPB_UserChangeParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -89,7 +90,7 @@ begin
     case field_number of
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Users;
       end;
     else
@@ -118,8 +119,13 @@ begin
 end;
 
 procedure TPB_UserChangeParams.clear_Users;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FUsers.OnNotify;
+  FUsers.OnNotify := nil;
   FUsers.Clear;
+  FUsers.OnNotify := on_notify;
   clear_has_Users;
 end;
 

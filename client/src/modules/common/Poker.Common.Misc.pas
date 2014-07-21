@@ -3,8 +3,7 @@ unit Poker.Common.Misc;
 interface
 
 uses
-  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG, Asphyre.Types,
-  Vcl.Controls;
+  Winapi.ShellApi, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Forms, cxImage, Vcl.Imaging.JPEG, Asphyre.Types, Vcl.Controls;
 
 {$IFDEF DEBUG}
 function SerializeObject(const AObject: TObject): String;
@@ -13,8 +12,6 @@ function IsValidString(const AString, AAllowedChars: String): Boolean;
 function ShellOpen(const AFileName: PChar; const AExecInfo: PShellExecuteInfo = nil; const AParams: PChar = nil; const ADirectory: PChar = nil;
                    const AShowCmd: Integer = SW_SHOWNORMAL; const AVerb: String = 'open'; const AMask: DWORD = SEE_MASK_FLAG_NO_UI; const AHWND: HWND = 0): Boolean;
 procedure Split(const ADelimiter: Char; const AInput: String; const AStrings: TStrings; const ATrim: Boolean = FALSE; const AStrictDelimiter: Boolean = TRUE);
-function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
-function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AShow: Boolean): TForm;
 function CompressStream(const AStream: TMemoryStream): Boolean;
 function DecompressStream(const AStream: TMemoryStream): Boolean;
 function GetFileSize(const AFile: String): DWORD;
@@ -24,17 +21,14 @@ function EncodeURL(const ASrc: String): String;
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
 function IsJPEGStream(const AStream: TStream): Boolean;
 procedure LoadJPGFromResource(const AImage: TJPEGImage; const AResourceName: String);
-function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
 procedure LoadImageFromResource(const AImage: TcxImage; const AResourceName: String);
 function PtInCircle(const AX, AY, ACircleX, ACircleY: Single; ARadius: Single): Boolean;
 function SecondsToTimeStr(ASeconds: DWORD): String;
 function SecondsToTime(ASeconds: DWORD): TTime;
-procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
 function ChipsToStr(const AValue: UINT32): String;
 procedure GetAllCombinations(const AInput: TArray<String>; const ALength: Integer; out ACombinations: TArray<String>);
 function GetTaskbarHeight: Integer;
-function BytesToHex(const ABytes: TBytes): String;
 function IsDirectoryWriteable(const APath: String): Boolean;
 procedure RoundControl(const AControl: TWinControl; const AAmount: Integer);
 function PtInBounds(const APoint: TPoint; const ABounds: TPoint4): Boolean;
@@ -42,12 +36,12 @@ function RoundToNearestBB(const AChips, ABigBlind: UINT32): UINT32;
 function TempPath: String;
 function IsValidRegex(const ARegex: String): Boolean;
 
+
 implementation
 
 uses
   {$IFDEF DEBUG} System.Rtti, System.TypInfo, {$ENDIF}
-  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, Poker.Interfaces.ModalForm, Poker.Interfaces.FormParams,
-  System.Generics.Collections, System.RegularExpressionsAPI, Poker.Types;
+  System.ZLib, Winapi.PsApi, Winapi.TlHelp32, Winapi.ShlObj, dxGDIPlusClasses, System.Generics.Collections, System.RegularExpressionsAPI;
 
 
 {$IFDEF DEBUG}
@@ -102,6 +96,16 @@ begin
     end;
 
     tkString, tkWString, tkLString, tkUString: result := Format('"%s"', [AValue.ToString]);
+
+    tkRecord: begin
+      method := nil;
+      if Assigned(AProperty) then
+        method := AProperty.PropertyType.GetMethod('ToString');
+      if Assigned(method) then
+        result := method.Invoke(AValue, []).AsString
+      else
+        result := AValue.ToString;
+    end;
   else
     result := AValue.ToString;
   end;
@@ -192,47 +196,6 @@ begin
   if ATrim then
     for C1 := 0 to AStrings.Count - 1 do
       AStrings[C1] := Trim(AStrings[C1]);
-end;
-
-function RunModalForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const ACloseCallback: TNotifyEvent): TForm;
-var
-  form: TForm;
-begin
-  form := AClassType.Create(AOwner);
-
-  if Assigned(AOwner) then
-  begin
-    form.PopupParent := AOwner;
-    EnableWindow(AOwner.Handle, FALSE);
-  end;
-
-  if Length(AParams) > 0 then
-    (form as IFormParams).SetParams(AParams);
-
-  if Assigned(ACloseCallback) then
-    (form as IModalForm).SetCloseCallback(ACloseCallback);
-
-  form.Show;
-
-  result := form;
-end;
-
-function RunForm(const AClassType: TFormClass; const AOwner: TForm; const AParams: array of pointer; const AShow: Boolean): TForm;
-var
-  form: TForm;
-begin
-  form := AClassType.Create(AOwner);
-
-  if Assigned(AOwner) then
-    form.PopupParent := AOwner;
-
-  if Length(AParams) > 0 then
-    (form as IFormParams).SetParams(AParams);
-
-  if AShow then
-    form.Show;
-
-  result := form;
 end;
 
 function MyZCompressStream(inStream, outStream: TStream; level: TZCompressionLevel): Boolean;
@@ -446,7 +409,7 @@ end;
 
 function EncodeURL(const ASrc: String): String;
 const
-  HexMap     : String = '0123456789ABCDEF';
+  HEXMAP     : String = '0123456789ABCDEF';
   SAFE_CHARS = [33, 39..42, 45, 46, 48..57, 65..90, 95, 97..122, 126];
 var
   I, J: Integer;
@@ -459,7 +422,7 @@ begin
   begin
     if Ord(ASrc[I]) in SAFE_CHARS then
     begin
-      Result[J] := ASrc[I];
+      result[J] := ASrc[I];
       Inc(J);
     end
     else
@@ -471,14 +434,14 @@ begin
       else
       begin
         result[J + 0] := '%';
-        result[J + 1] := HexMap[(Ord(ASrc[I]) shr 4) + 1];
-        result[J + 2] := HexMap[(Ord(ASrc[I]) and 15) + 1];
+        result[J + 1] := HEXMAP[(Ord(ASrc[I]) shr 4) + 1];
+        result[J + 2] := HEXMAP[(Ord(ASrc[I]) and 15) + 1];
         Inc(J, 3);
       end;
     Inc(I);
   end;
 
-  SetLength(Result, J-1);
+  SetLength(result, J - 1);
 end;
 
 function GetBlinds(const AString: String; out ASmallBlind, ABigBlind: Integer): Boolean;
@@ -519,16 +482,6 @@ begin
   finally
     ms.Free;
   end;
-end;
-
-function CompareBytes(const A1, A2: TBytes; A1Len: Integer = -1; A2Len: Integer = -1): Boolean;
-begin
-  if A1Len = -1 then
-    A1Len := Length(A1);
-  if A2Len = -1 then
-    A2Len := Length(A2);
-
-  result := (A1Len = A2Len) and (CompareMem(A1, A2, A1Len));
 end;
 
 function GetSpecialFolderPath(const ACSIDL: Integer): String;
@@ -606,19 +559,6 @@ begin
   result := EncodeTime(h, m, s, 0)
 end;
 
-procedure AppendArray(var AAppendTo: TArray<UINT32>; const AArray: TArray<UINT32>);
-var
-  a1len, a2len: Integer;
-begin
-  a2len := Length(AArray);
-  if a2len = 0 then
-    Exit;
-  a1len := Length(AAppendTo);
-
-  SetLength(AAppendTo, a1len + a2len);
-  Move(AArray[0], AAppendTo[a1len], a2len * SizeOf(UINT32));
-end;
-
 function ChipsToStr(const AValue: UINT32): String;
 begin
   result := IntToStr(AValue);
@@ -684,16 +624,6 @@ begin
   end;
 end;
 
-function BytesToHex(const ABytes: TBytes): String;
-var
-  C1: Integer;
-begin
-  result := '';
-  for C1 := Low(ABytes) to High(ABytes) do
-    result := result + IntToHex(ABytes[C1], 2);
-  result := LowerCase(result);
-end;
-
 function IsDirectoryWriteable(const APath: String): Boolean;
 var
   fname: String;
@@ -757,6 +687,7 @@ begin
     pcre_dispose(pattern, nil, char_table);
   end;
 end;
+
 
 end.
 

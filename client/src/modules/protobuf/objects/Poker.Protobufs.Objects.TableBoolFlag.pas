@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableBoolFlag;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_TableBoolFlag = class(TProtobufBaseObject)
@@ -16,13 +16,13 @@ type
       kFlagFieldNumber = 2;
 
     var
-      FTableMongoId: TBytes;
+      FTableMongoId: TMongoId;
       FFlag: Boolean;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
     procedure clear_has_TableMongoId;
-    procedure SetTableMongoId(const AValue: TBytes);
+    procedure SetTableMongoId(const AValue: TMongoId);
     procedure set_has_Flag;
     procedure clear_has_Flag;
     procedure SetFlag(const AValue: Boolean);
@@ -38,7 +38,7 @@ type
     // required bytes TableMongoId = 1;
     function has_TableMongoId: Boolean;
     procedure clear_TableMongoId;
-    property TableMongoId: TBytes read FTableMongoId write SetTableMongoId;
+    property TableMongoId: TMongoId read FTableMongoId write SetTableMongoId;
 
     // required bool Flag = 2;
     function has_Flag: Boolean;
@@ -78,7 +78,7 @@ begin
     case field_number of
       kTableMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FTableMongoId := AProtobufReader.readBytes;
+        FTableMongoId := AProtobufReader.readMongoId;
         set_has_TableMongoId;
       end;
       kFlagFieldNumber: begin
@@ -108,7 +108,7 @@ end;
 
 procedure TPB_TableBoolFlag.clear_TableMongoId;
 begin
-  SetLength(FTableMongoId, 0);
+  FTableMongoId.Clear;
   clear_has_TableMongoId;
 end;
 
@@ -127,12 +127,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TBytes);
+procedure TPB_TableBoolFlag.SetTableMongoId(const AValue: TMongoId);
 begin
   Assert(not has_TableMongoId);
-  FTableMongoId := Copy(AValue, 0, Length(AValue));
+  FTableMongoId := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kTableMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kTableMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_TableMongoId;
 end;
 

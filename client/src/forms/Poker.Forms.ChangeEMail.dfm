@@ -114,7 +114,6 @@ object frmChangeEMail: TfrmChangeEMail
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 138
   end
   object btCancel: TcxButton
     Left = 325

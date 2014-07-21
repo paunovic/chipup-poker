@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.HelloParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.UpdateFileInfo;
 
 type
@@ -89,6 +89,7 @@ begin
   inherited;
   FFiles.OnNotify := FilesNotifyEvent;
 end;
+
 procedure TPB_HelloParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -104,7 +105,7 @@ begin
       end;
       kFilesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FFiles.Add(TPB_UpdateFileInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Files;
       end;
     else
@@ -165,8 +166,13 @@ begin
 end;
 
 procedure TPB_HelloParams.clear_Files;
+var
+  on_notify: TCollectionNotifyEvent<TPB_UpdateFileInfo>;
 begin
+  on_notify := FFiles.OnNotify;
+  FFiles.OnNotify := nil;
   FFiles.Clear;
+  FFiles.OnNotify := on_notify;
   clear_has_Files;
 end;
 

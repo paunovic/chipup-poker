@@ -1,13 +1,12 @@
+
 unit Poker.Forms.HandHistory;
 
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, cxEdit,
-  cxLabel, cxDropDownEdit, cxButtons, Vcl.ActnList,
-  Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle, Vcl.ExtCtrls, cxGraphics, cxControls,
-  cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxTextEdit, cxMaskEdit;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Poker.Types, Vcl.Controls, Vcl.Forms, cxEdit, cxLabel, cxDropDownEdit,
+  cxButtons, Vcl.ActnList, Poker.Interfaces.FormParams, System.Generics.Collections, RVScroll, RichView, RVStyle, Vcl.ExtCtrls, cxGraphics,
+  cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.Menus, Vcl.StdCtrls, cxTextEdit, cxMaskEdit;
 
 type
   TfrmHandHistory = class(TForm, IFormParams)
@@ -36,7 +35,7 @@ type
     procedure tiCopyHideTimerTimer(Sender: TObject);
     procedure acReplayHandExecute(Sender: TObject);
   private
-    FSelectedTableId: TBytes;
+    FSelectedTableId: TMongoId;
     FSelectedHandId: UINT;
     FCallbacksId: Integer;
 
@@ -53,7 +52,7 @@ type
   public
     procedure SetParams(const AParams: array of pointer);
 
-    procedure SetSelectedHandId(const AGameId: TBytes; const AHandId: UINT);
+    procedure SetSelectedHandId(const AGameId: TMongoId; const AHandId: UINT);
   end;
 
 implementation
@@ -110,23 +109,25 @@ end;
 
 procedure TfrmHandHistory.SetParams(const AParams: array of pointer);
 var
-  game_id: TBytes;
+  game_id: TMongoId;
   handid: UINT;
 begin
   if not Assigned(AParams[0]) then
     SetSelectedHandId(nil, 0)
   else
   begin
-    SetLength(game_id, 12);
-    Move(AParams[0]^, game_id[0], 12);
+    game_id := AParams[0];
     handid := PUINT(AParams[1])^;
     SetSelectedHandId(game_id, handid);
   end;
 end;
 
-procedure TfrmHandHistory.SetSelectedHandId(const AGameId: TBytes; const AHandId: UINT);
+procedure TfrmHandHistory.SetSelectedHandId(const AGameId: TMongoId; const AHandId: UINT);
 begin
-  FSelectedTableId := AGameId;
+  if AGameId = nil then
+    FSelectedTableId.Clear
+  else
+    FSelectedTableId := AGameId;
   FSelectedHandId := AHandId;
   RefreshTableList;
   ShowHand;
@@ -251,7 +252,7 @@ begin
       else
         if cbTable.Properties.Items[C1] <> table_name then
           cbTable.Properties.Items[C1] := table_name;
-      if CompareBytes(FSelectedTableId, hhis.FGameId) then
+      if FSelectedTableId = hhis.FGameId then
         item_index := C1;
       Inc(C1);
     end;
@@ -392,7 +393,7 @@ end;
 procedure TfrmHandHistory.cbTablePropertiesChange(Sender: TObject);
 begin
   if cbTable.ItemIndex = -1 then
-    SetLength(FSelectedTableId, 0)
+    FSelectedTableId.Clear
   else
     FSelectedTableId := HandHistory.Keys.ToArray[cbTable.ItemIndex];
 

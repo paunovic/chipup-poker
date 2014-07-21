@@ -6,7 +6,7 @@ uses
   Winapi.Windows, System.SysUtils, System.Variants, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, Vcl.ActnList,
   cxButtons, cxLabel, cxTextEdit, cxDropDownEdit, cxSpinEdit, Poker.Interfaces.FormParams, Poker.Clubs.Club, Poker.Games.Game,
   Poker.Interfaces.ModalForm, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxEdit, dxSkinsCore, ChipUpPokerDarkSkin,
-  Vcl.Menus, cxMaskEdit, Vcl.StdCtrls;
+  Vcl.Menus, cxMaskEdit, Vcl.StdCtrls, Poker.Types;
 
 type
   TfrmCreateGame = class(TForm, IFormParams, IModalForm)
@@ -40,7 +40,7 @@ type
     procedure cbGameTypePropertiesChange(Sender: TObject);
   private
     FCallbacksId: Integer;
-    FClubId: TBytes;
+    FClubId: TMongoId;
     FCloseCallback: TNotifyEvent;
 
     procedure CSRCreateGameOk(const AMethodId: Integer; const AObject: TObject);
@@ -104,8 +104,7 @@ end;
 
 procedure TfrmCreateGame.SetParams(const AParams: array of pointer);
 begin
-  SetLength(FClubId, 12);
-  Move(AParams[0]^, FClubId[0], 12);
+  FClubId := AParams[0];
 end;
 
 procedure TfrmCreateGame.acCancelExecute(Sender: TObject);

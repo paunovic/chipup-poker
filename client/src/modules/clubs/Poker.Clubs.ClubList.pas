@@ -3,10 +3,10 @@ unit Poker.Clubs.ClubList;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Clubs.Club, Poker.Protobufs.Objects.Club, Poker.Games.Game, System.SyncObjs;
+  System.Generics.Collections, System.SysUtils, Poker.Clubs.Club, Poker.Protobufs.Objects.Club, Poker.Games.Game, System.SyncObjs, Poker.Types;
 
 type
-  TClubList = class(TObjectDictionary<TBytes, TClubInfo>)
+  TClubList = class(TObjectDictionary<TMongoId, TClubInfo>)
   private
     FLock: TCriticalSection;
   public
@@ -16,8 +16,8 @@ type
     procedure Lock;
     procedure Unlock;
 
-    function GetAndLock(const AId: TBytes; out AClub: TClubInfo): Boolean; overload;
-    function GetAndLockByGame(const AMongoId: TBytes; out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+    function GetAndLock(const AClubId: TMongoId; out AClub: TClubInfo): Boolean; overload;
+    function GetAndLockByGame(const AGameId: TMongoId; out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
 
     procedure AddClub(const AProtobufObject: TPB_Club);
   end;
@@ -58,14 +58,14 @@ begin
   end;
 end;
 
-function TClubList.GetAndLockByGame(const AMongoId: TBytes; out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
+function TClubList.GetAndLockByGame(const AGameId: TMongoId; out AClub: TClubInfo; out AGame: TGameInfo): Boolean;
 var
   club: TClubInfo;
   game: TGameInfo;
 begin
   Lock;
   for club in Values do
-    if club.Games.TryGetValue(AMongoId, game) then
+    if club.Games.TryGetValue(AGameId, game) then
     begin
       AClub := club;
       AGame := game;
@@ -75,11 +75,11 @@ begin
   Exit(FALSE);
 end;
 
-function TClubList.GetAndLock(const AId: TBytes; out AClub: TClubInfo): Boolean;
+function TClubList.GetAndLock(const AClubId: TMongoId; out AClub: TClubInfo): Boolean;
 begin
   AClub := nil;
   Lock;
-  result := TryGetValue(AId, AClub);
+  result := TryGetValue(AClubId, AClub);
   if not result then
     Unlock;
 end;

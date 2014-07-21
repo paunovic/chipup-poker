@@ -3587,20 +3587,21 @@ object frmChipUpMain: TfrmChipUpMain
       Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ClientRectBottom = 429
-      ClientRectRight = 794
-      ClientRectTop = 0
+      ClientRectBottom = 428
+      ClientRectLeft = 1
+      ClientRectRight = 793
+      ClientRectTop = 1
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
         DesignSize = (
-          794
-          429)
+          792
+          427)
         object gridPublicClubs: TcxGrid
           Left = 152
           Top = 34
           Width = 312
-          Height = 219
+          Height = 217
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicClubsEnter
@@ -3619,9 +3620,11 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
-            OptionsView.NoDataToDisplayInfoText = ' '
+            OptionsView.FocusRect = False
+            OptionsView.NoDataToDisplayInfoText = 'There are no active public clubs at the moment'
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             object gridPublicClubsMongoId: TcxGridColumn
               Caption = 'Club ID'
               DataBinding.ValueType = 'Variant'
@@ -3693,8 +3696,8 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object gridGames: TcxGrid
           Left = 155
-          Top = 256
-          Width = 628
+          Top = 254
+          Width = 626
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
@@ -3713,11 +3716,11 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
-            OptionsSelection.HideSelection = True
-            OptionsSelection.UnselectFocusedRecordOnExit = False
+            OptionsView.FocusRect = False
             OptionsView.NoDataToDisplayInfoText = ' '
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             object gridGamesId: TcxGridColumn
               Caption = 'Id'
               DataBinding.ValueType = 'Variant'
@@ -3776,7 +3779,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 269
+          Top = 267
           Width = 143
           Height = 35
           Margin = 18
@@ -3794,8 +3797,8 @@ object frmChipUpMain: TfrmChipUpMain
           ParentFont = False
         end
         object btOpenTable: TcxButton
-          Left = 10
-          Top = 307
+          Left = 6
+          Top = 302
           Width = 143
           Height = 35
           Margin = 18
@@ -3814,7 +3817,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 345
+          Top = 343
           Width = 143
           Height = 35
           Margin = 18
@@ -3833,7 +3836,7 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 383
+          Top = 381
           Width = 143
           Height = 35
           Margin = 18
@@ -3854,7 +3857,7 @@ object frmChipUpMain: TfrmChipUpMain
           Left = 470
           Top = 34
           Width = 312
-          Height = 219
+          Height = 217
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 8
           OnEnter = gridPrivateClubsEnter
@@ -3873,9 +3876,11 @@ object frmChipUpMain: TfrmChipUpMain
             OptionsData.Editing = False
             OptionsData.Inserting = False
             OptionsSelection.CellSelect = False
-            OptionsView.NoDataToDisplayInfoText = ' '
+            OptionsView.FocusRect = False
+            OptionsView.NoDataToDisplayInfoText = 'You are not member of any private clubs'
             OptionsView.ColumnAutoWidth = True
             OptionsView.GroupByBox = False
+            Styles.Inactive = dmMain.styleInactiveCell
             object gridHomeClubsMongoId: TcxGridColumn
               DataBinding.ValueType = 'Variant'
               PropertiesClassName = 'TcxBlobEditProperties'

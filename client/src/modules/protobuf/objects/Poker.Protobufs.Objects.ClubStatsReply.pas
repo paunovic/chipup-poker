@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ClubStatsReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.ClubPlayerStats;
 
 type
@@ -17,13 +17,13 @@ type
       kPlayerStatsFieldNumber = 2;
 
     var
-      FClubid: TBytes;
+      FClubid: TMongoId;
       FPlayerStats: TList<TPB_ClubPlayerStats>;
       _has_bits_: UINT32;
 
     procedure set_has_Clubid;
     procedure clear_has_Clubid;
-    procedure SetClubid(const AValue: TBytes);
+    procedure SetClubid(const AValue: TMongoId);
     procedure set_has_PlayerStats;
     procedure clear_has_PlayerStats;
     procedure PlayerStatsNotifyEvent(Sender: TObject; const Item: TPB_ClubPlayerStats; Action: TCollectionNotification);
@@ -43,7 +43,7 @@ type
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
-    property Clubid: TBytes read FClubid write SetClubid;
+    property Clubid: TMongoId read FClubid write SetClubid;
 
     // repeated ClubPlayerStats PlayerStats = 2;
     function has_PlayerStats: Boolean;
@@ -89,6 +89,7 @@ begin
   inherited;
   FPlayerStats.OnNotify := PlayerStatsNotifyEvent;
 end;
+
 procedure TPB_ClubStatsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -99,12 +100,12 @@ begin
     case field_number of
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubid := AProtobufReader.readBytes;
+        FClubid := AProtobufReader.readMongoId;
         set_has_Clubid;
       end;
       kPlayerStatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPlayerStats.Add(TPB_ClubPlayerStats.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_PlayerStats;
       end;
     else
@@ -136,7 +137,7 @@ end;
 
 procedure TPB_ClubStatsReply.clear_Clubid;
 begin
-  SetLength(FClubid, 0);
+  FClubid.Clear;
   clear_has_Clubid;
 end;
 
@@ -155,18 +156,27 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_ClubStatsReply.SetClubid(const AValue: TBytes);
+procedure TPB_ClubStatsReply.SetClubid(const AValue: TMongoId);
 begin
   Assert(not has_Clubid);
-  FClubid := Copy(AValue, 0, Length(AValue));
+  FClubid := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kClubidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_Clubid;
 end;
 
 procedure TPB_ClubStatsReply.clear_PlayerStats;
+var
+  on_notify: TCollectionNotifyEvent<TPB_ClubPlayerStats>;
 begin
+  on_notify := FPlayerStats.OnNotify;
+  FPlayerStats.OnNotify := nil;
   FPlayerStats.Clear;
+  FPlayerStats.OnNotify := on_notify;
   clear_has_PlayerStats;
 end;
 

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.LoginReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.TableStatus;
 
 type
@@ -102,6 +102,7 @@ begin
   inherited;
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
 end;
+
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -119,12 +120,12 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FStatus) then
           FStatus := TPB_StatusReply.Create;
-        FStatus.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FStatus.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_Status;
       end;
       kReconnectTablesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_ReconnectTables;
       end;
     else
@@ -220,8 +221,13 @@ begin
 end;
 
 procedure TPB_LoginReply.clear_ReconnectTables;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TableStatus>;
 begin
+  on_notify := FReconnectTables.OnNotify;
+  FReconnectTables.OnNotify := nil;
   FReconnectTables.Clear;
+  FReconnectTables.OnNotify := on_notify;
   clear_has_ReconnectTables;
 end;
 

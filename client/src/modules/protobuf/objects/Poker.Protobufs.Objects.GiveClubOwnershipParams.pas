@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.GiveClubOwnershipParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_GiveClubOwnershipParams = class(TProtobufBaseObject)
@@ -16,16 +16,16 @@ type
       kPlayerMongoIdFieldNumber = 2;
 
     var
-      FClubMongoId: TBytes;
-      FPlayerMongoId: TBytes;
+      FClubMongoId: TMongoId;
+      FPlayerMongoId: TMongoId;
       _has_bits_: UINT32;
 
     procedure set_has_ClubMongoId;
     procedure clear_has_ClubMongoId;
-    procedure SetClubMongoId(const AValue: TBytes);
+    procedure SetClubMongoId(const AValue: TMongoId);
     procedure set_has_PlayerMongoId;
     procedure clear_has_PlayerMongoId;
-    procedure SetPlayerMongoId(const AValue: TBytes);
+    procedure SetPlayerMongoId(const AValue: TMongoId);
 
   public
     constructor Create(const AFrom: TPB_GiveClubOwnershipParams; const ALightweight: Boolean = FALSE); overload;
@@ -38,12 +38,12 @@ type
     // required bytes ClubMongoId = 1;
     function has_ClubMongoId: Boolean;
     procedure clear_ClubMongoId;
-    property ClubMongoId: TBytes read FClubMongoId write SetClubMongoId;
+    property ClubMongoId: TMongoId read FClubMongoId write SetClubMongoId;
 
     // required bytes PlayerMongoId = 2;
     function has_PlayerMongoId: Boolean;
     procedure clear_PlayerMongoId;
-    property PlayerMongoId: TBytes read FPlayerMongoId write SetPlayerMongoId;
+    property PlayerMongoId: TMongoId read FPlayerMongoId write SetPlayerMongoId;
 
   end;
 
@@ -78,12 +78,12 @@ begin
     case field_number of
       kClubMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubMongoId := AProtobufReader.readBytes;
+        FClubMongoId := AProtobufReader.readMongoId;
         set_has_ClubMongoId;
       end;
       kPlayerMongoIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerMongoId := AProtobufReader.readBytes;
+        FPlayerMongoId := AProtobufReader.readMongoId;
         set_has_PlayerMongoId;
       end;
     else
@@ -108,7 +108,7 @@ end;
 
 procedure TPB_GiveClubOwnershipParams.clear_ClubMongoId;
 begin
-  SetLength(FClubMongoId, 0);
+  FClubMongoId.Clear;
   clear_has_ClubMongoId;
 end;
 
@@ -127,18 +127,22 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_GiveClubOwnershipParams.SetClubMongoId(const AValue: TBytes);
+procedure TPB_GiveClubOwnershipParams.SetClubMongoId(const AValue: TMongoId);
 begin
   Assert(not has_ClubMongoId);
-  FClubMongoId := Copy(AValue, 0, Length(AValue));
+  FClubMongoId := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kClubMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kClubMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_ClubMongoId;
 end;
 
 procedure TPB_GiveClubOwnershipParams.clear_PlayerMongoId;
 begin
-  SetLength(FPlayerMongoId, 0);
+  FPlayerMongoId.Clear;
   clear_has_PlayerMongoId;
 end;
 
@@ -157,12 +161,16 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_GiveClubOwnershipParams.SetPlayerMongoId(const AValue: TBytes);
+procedure TPB_GiveClubOwnershipParams.SetPlayerMongoId(const AValue: TMongoId);
 begin
   Assert(not has_PlayerMongoId);
-  FPlayerMongoId := Copy(AValue, 0, Length(AValue));
+  FPlayerMongoId := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kPlayerMongoIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kPlayerMongoIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_PlayerMongoId;
 end;
 

@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableEvent;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Pot;
 
 type
@@ -128,6 +128,7 @@ begin
   FPots.OnNotify := PotsNotifyEvent;
   FBets.OnNotify := BetsNotifyEvent;
 end;
+
 procedure TPB_TableEvent.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -148,7 +149,7 @@ begin
       end;
       kPotsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPots.Add(TPB_Pot.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPots.Add(TPB_Pot.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Pots;
       end;
       kBetsFieldNumber: begin
@@ -254,8 +255,13 @@ begin
 end;
 
 procedure TPB_TableEvent.clear_Pots;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Pot>;
 begin
+  on_notify := FPots.OnNotify;
+  FPots.OnNotify := nil;
   FPots.Clear;
+  FPots.OnNotify := on_notify;
   clear_has_Pots;
 end;
 
@@ -287,8 +293,13 @@ begin
 end;
 
 procedure TPB_TableEvent.clear_Bets;
+var
+  on_notify: TCollectionNotifyEvent<UInt32>;
 begin
+  on_notify := FBets.OnNotify;
+  FBets.OnNotify := nil;
   FBets.Clear;
+  FBets.OnNotify := on_notify;
   clear_has_Bets;
 end;
 
@@ -312,7 +323,7 @@ begin
   Assert(Action = cnAdded);
   set_has_Bets;
   if not Lightweight then
-    ProtobufOutput.writeUInt32(kBetsFieldNumber,Item);
+    ProtobufOutput.writeUInt32(kBetsFieldNumber, Item);
 end;
 
 procedure TPB_TableEvent.clear_Cards;

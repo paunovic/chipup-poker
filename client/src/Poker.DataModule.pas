@@ -8,13 +8,15 @@ uses
   Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player, Poker.Protobufs.Objects.StatusReply,
   Vcl.Forms, dxSkinsForm, Poker.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
-  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
+  dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
 
 type
   TdmMain = class(TDataModule)
     il20px: TcxImageList;
     SkinController: TdxSkinController;
     HintController: TcxHintStyleController;
+    GridStyles: TcxStyleRepository;
+    styleInactiveCell: TcxStyle;
     procedure DataModuleCreate(Sender: TObject);
     procedure DataModuleDestroy(Sender: TObject);
     procedure SkinControllerSkinForm(Sender: TObject; AForm: TCustomForm; var ASkinName: string; var UseSkin: Boolean);
@@ -67,7 +69,7 @@ uses
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About, Poker.Clubs.Member,
   Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login, Poker.Protobufs.Objects.ClubMember,
-  Poker.Protobufs.Enum.ServerCodes;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Types;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -234,13 +236,14 @@ begin
   FReconnectedTables.Clear;
   mstream := TMemoryStream.Create;
   try
-    for C1 := 0 to ALoginReply.ReconnectTables.Count - 1 do
-    begin
-      mstream.Clear;
-      ALoginReply.ReconnectTables[C1].ProtobufOutput.SaveToStream(mstream);
-      pbts := TPB_TableStatus.Create(mstream);
-      FReconnectedTables.Add(pbts);
-    end;
+    if Assigned(ALoginReply.ReconnectTables) then
+      for C1 := 0 to ALoginReply.ReconnectTables.Count - 1 do
+      begin
+        mstream.Clear;
+        ALoginReply.ReconnectTables[C1].ProtobufOutput.SaveToStream(mstream);
+        pbts := TPB_TableStatus.Create(mstream);
+        FReconnectedTables.Add(pbts);
+      end;
   finally
     mstream.Free;
   end;
@@ -251,13 +254,13 @@ var
   table: TTable;
   tstatus: TPB_TableStatus;
   exists: Boolean;
-  to_remove: TList<TBytes>;
+  to_remove: TList<TMongoId>;
   to_remove_iid: TList<Integer>;
-  mongoid: TBytes;
+  mongoid: TMongoId;
   C1: Integer;
 begin
   // first, close all tables that dont exist in reconnected tables array
-  to_remove := TList<TBytes>.Create;
+  to_remove := TList<TMongoId>.Create;
   try
     Tables.Lock;
     try
@@ -265,7 +268,7 @@ begin
       begin
         exists := FALSE;
         for tstatus in FReconnectedTables do
-          if CompareBytes(tstatus.TableMongoId, table.GameId) then
+          if tstatus.TableMongoId = table.GameId then
           begin
             exists := TRUE;
             Break;
@@ -364,8 +367,8 @@ procedure TdmMain.ProcessClubObject(const AClub: TPB_Club; const AGames: TList<T
 var
   club: TClubInfo;
   player: TPlayerInfo;
-  query_users: TArray<TBytes>;
-  empty_array: TBytes;
+  query_users: TArray<TMongoId>;
+  empty_avatar_id: TBytes;
   member: TClubMemberInfo;
   memberpb: TPB_ClubMember;
 begin
@@ -375,13 +378,13 @@ begin
     if dmMain.SelfInfo.Clubs.GetAndLock(AClub.MongoId, club) then
     try
       SetLength(query_users, 0);
-      SetLength(empty_array, 0);
+      SetLength(empty_avatar_id, 0);
 
       if not Players.TryGetValue(AClub.Owner, player) then
       begin
         SetLength(query_users, 1);
         query_users[0] := AClub.Owner;
-        Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_array);
+        Players.AddPlayer(AClub.Owner, 'Retrieving...', '', empty_avatar_id);
       end;
 
       for memberpb in AClub.Members do
@@ -391,7 +394,7 @@ begin
         begin
           SetLength(query_users, Length(query_users) + 1);
           query_users[Length(query_users) - 1] := memberpb.MongoId;
-          Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_array);
+          Players.AddPlayer(memberpb.MongoId, 'Retrieving...', '', empty_avatar_id);
         end;
 
       if Length(query_users) > 0 then

@@ -48,7 +48,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Settings, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes,
+  Poker.Settings, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes, Poker.Types,
   Poker.DataModule, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.RegisterReply, Poker.Server.MessageContainer,
   Poker.Server.Settings, Poker.Common.FormsContainer;
 
@@ -142,7 +142,8 @@ procedure TfrmCreateAccount.CSRRegisterReply(const AMethodId: Integer; const AOb
 var
   pbreply: TPB_RegisterReply;
 begin
-  pbreply := AObject as TPB_RegisterReply;
+  if not TPokerTypes.TryCast<TPB_RegisterReply>(AObject, pbreply) then
+    Exit;
 
   case pbreply.Status of
    regSuccess: begin

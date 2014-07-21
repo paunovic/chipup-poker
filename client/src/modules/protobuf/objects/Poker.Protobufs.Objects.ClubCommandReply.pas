@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ClubCommandReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
 
 type
@@ -102,6 +102,7 @@ begin
   inherited;
   FGames.OnNotify := GamesNotifyEvent;
 end;
+
 procedure TPB_ClubCommandReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -119,12 +120,12 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FClub) then
           FClub := TPB_Club.Create;
-        FClub.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FClub.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_Club;
       end;
       kGamesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGames.Add(TPB_Game.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Games;
       end;
     else
@@ -220,8 +221,13 @@ begin
 end;
 
 procedure TPB_ClubCommandReply.clear_Games;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Game>;
 begin
+  on_notify := FGames.OnNotify;
+  FGames.OnNotify := nil;
   FGames.Clear;
+  FGames.OnNotify := on_notify;
   clear_has_Games;
 end;
 

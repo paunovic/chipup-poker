@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ChatEvent;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.ChatMessage;
 
 type
@@ -22,7 +22,7 @@ type
     var
       FEvent: TEventType;
       FMsg: TPB_ChatMessage;
-      FTableId: TBytes;
+      FTableId: TMongoId;
       _has_bits_: UINT32;
 
     procedure set_has_Event;
@@ -33,7 +33,7 @@ type
     procedure SetMsg(const AValue: TPB_ChatMessage);
     procedure set_has_TableId;
     procedure clear_has_TableId;
-    procedure SetTableId(const AValue: TBytes);
+    procedure SetTableId(const AValue: TMongoId);
 
   public
     constructor Create(const AFrom: TPB_ChatEvent; const ALightweight: Boolean = FALSE); overload;
@@ -56,7 +56,7 @@ type
     // optional bytes TableId = 3;
     function has_TableId: Boolean;
     procedure clear_TableId;
-    property TableId: TBytes read FTableId write SetTableId;
+    property TableId: TMongoId read FTableId write SetTableId;
 
   end;
 
@@ -100,12 +100,12 @@ begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
         if not Assigned(FMsg) then
           FMsg := TPB_ChatMessage.Create;
-        FMsg.LoadFromProtobufReader(AProtobufReader,AProtobufReader.readInt32);
+        FMsg.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
         set_has_Msg;
       end;
       kTableIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FTableId := AProtobufReader.readBytes;
+        FTableId := AProtobufReader.readMongoId;
         set_has_TableId;
       end;
     else
@@ -195,7 +195,7 @@ end;
 
 procedure TPB_ChatEvent.clear_TableId;
 begin
-  SetLength(FTableId, 0);
+  FTableId.Clear;
   clear_has_TableId;
 end;
 
@@ -214,12 +214,16 @@ begin
   _has_bits_ := _has_bits_ and not 4;
 end;
 
-procedure TPB_ChatEvent.SetTableId(const AValue: TBytes);
+procedure TPB_ChatEvent.SetTableId(const AValue: TMongoId);
 begin
   Assert(not has_TableId);
-  FTableId := Copy(AValue, 0, Length(AValue));
+  FTableId := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kTableIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kTableIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_TableId;
 end;
 

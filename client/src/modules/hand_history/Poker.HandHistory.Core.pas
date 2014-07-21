@@ -3,11 +3,11 @@ unit Poker.HandHistory.Core;
 interface
 
 uses
-  System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Items,
+  System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Items, Poker.Types,
   System.Generics.Collections, System.SyncObjs;
 
 type
-  THandHistory = class(TObjectDictionary<TBytes, THandHistoryItems>)
+  THandHistory = class(TObjectDictionary<TMongoId, THandHistoryItems>)
   private
     FLock: TCriticalSection;
   public
@@ -72,7 +72,6 @@ begin
 
     for pbhh in AClubHandHistoryInfo.Rows do
       hhis.AddHand(pbhh);
-
     Exit(TRUE);
   finally
     FLock.Leave;

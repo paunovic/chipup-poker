@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.TableStatsReply;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.TablePlayerStats;
 
 type
@@ -19,18 +19,18 @@ type
       kHandsFieldNumber = 4;
 
     var
-      FClubid: TBytes;
-      FGameid: TBytes;
+      FClubid: TMongoId;
+      FGameid: TMongoId;
       FPlayerstats: TList<TPB_TablePlayerStats>;
       FHands: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_Clubid;
     procedure clear_has_Clubid;
-    procedure SetClubid(const AValue: TBytes);
+    procedure SetClubid(const AValue: TMongoId);
     procedure set_has_Gameid;
     procedure clear_has_Gameid;
-    procedure SetGameid(const AValue: TBytes);
+    procedure SetGameid(const AValue: TMongoId);
     procedure set_has_Playerstats;
     procedure clear_has_Playerstats;
     procedure set_has_Hands;
@@ -53,12 +53,12 @@ type
     // required bytes Clubid = 1;
     function has_Clubid: Boolean;
     procedure clear_Clubid;
-    property Clubid: TBytes read FClubid write SetClubid;
+    property Clubid: TMongoId read FClubid write SetClubid;
 
     // required bytes Gameid = 2;
     function has_Gameid: Boolean;
     procedure clear_Gameid;
-    property Gameid: TBytes read FGameid write SetGameid;
+    property Gameid: TMongoId read FGameid write SetGameid;
 
     // repeated TablePlayerStats Playerstats = 3;
     function has_Playerstats: Boolean;
@@ -109,6 +109,7 @@ begin
   inherited;
   FPlayerstats.OnNotify := PlayerstatsNotifyEvent;
 end;
+
 procedure TPB_TableStatsReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -119,17 +120,17 @@ begin
     case field_number of
       kClubidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FClubid := AProtobufReader.readBytes;
+        FClubid := AProtobufReader.readMongoId;
         set_has_Clubid;
       end;
       kGameidFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FGameid := AProtobufReader.readBytes;
+        FGameid := AProtobufReader.readMongoId;
         set_has_Gameid;
       end;
       kPlayerstatsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FPlayerstats.Add(TPB_TablePlayerStats.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Playerstats;
       end;
       kHandsFieldNumber: begin
@@ -170,7 +171,7 @@ end;
 
 procedure TPB_TableStatsReply.clear_Clubid;
 begin
-  SetLength(FClubid, 0);
+  FClubid.Clear;
   clear_has_Clubid;
 end;
 
@@ -189,18 +190,22 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_TableStatsReply.SetClubid(const AValue: TBytes);
+procedure TPB_TableStatsReply.SetClubid(const AValue: TMongoId);
 begin
   Assert(not has_Clubid);
-  FClubid := Copy(AValue, 0, Length(AValue));
+  FClubid := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kClubidFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kClubidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_Clubid;
 end;
 
 procedure TPB_TableStatsReply.clear_Gameid;
 begin
-  SetLength(FGameid, 0);
+  FGameid.Clear;
   clear_has_Gameid;
 end;
 
@@ -219,18 +224,27 @@ begin
   _has_bits_ := _has_bits_ and not 2;
 end;
 
-procedure TPB_TableStatsReply.SetGameid(const AValue: TBytes);
+procedure TPB_TableStatsReply.SetGameid(const AValue: TMongoId);
 begin
   Assert(not has_Gameid);
-  FGameid := Copy(AValue, 0, Length(AValue));
+  FGameid := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kGameidFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kGameidFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_Gameid;
 end;
 
 procedure TPB_TableStatsReply.clear_Playerstats;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TablePlayerStats>;
 begin
+  on_notify := FPlayerstats.OnNotify;
+  FPlayerstats.OnNotify := nil;
   FPlayerstats.Clear;
+  FPlayerstats.OnNotify := on_notify;
   clear_has_Playerstats;
 end;
 

@@ -437,18 +437,6 @@ begin
     FStandUpButtonHeight := FStandUpButtonWidth / TableResources.StandUpButtonAspectRatio;
     FStandUpButtonBounds := pBounds4(ADXAreaSize.x - FStandUpButtonWidth + 1, -1, FStandUpButtonWidth, FStandUpButtonHeight);
 
-    // playnow button resize ratio
-    FPlayNowResizeRatio := FTableResizeRatio * 1.38;
-    if FPlayNowResizeRatio > 1 then
-      FPlayNowResizeRatio := 1;
-
-    // playnow button bounds
-    FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
-    FPlayNowButtonHeight := FPlayNowButtonWidth / TableResources.PlayNowButtonAspectRatio;
-    FPlayNowButtonBounds := pBounds4(FChatBoxBounds.Right + (ADXAreaSize.x - FChatBoxBounds.Right) / 2 - FPlayNowButtonWidth / 2,
-                                     FChatBoxBounds.Top + (ADXAreaSize.y - FChatBoxBounds.Top) / 2.5 - FPlayNowButtonHeight / 2,
-                                     FPlayNowButtonWidth, FPlayNowButtonHeight);
-
     // action buttons bounds
     FActionButtonWidth := TableResources.ActionButtonNormalImage.Texture[0].Width * FTableResizeRatio;
     FActionButtonHeight := FActionButtonWidth / TableResources.ActionButtonAspectRatio;
@@ -510,6 +498,18 @@ begin
     FChatBoxBounds := TRect.Create(Point(FLowerIntfBorder, ADXAreaSize.y - FLowerIntfBorder - hint), wint, hint);
     FChatEditBounds := TRect.Create(Point(FChatBoxBounds.Left, FChatBoxBounds.Top - 18), FChatBoxBounds.Width, 18);
     FCheckboxesLeft := FChatBoxBounds.Right + FLowerIntfBorder;
+
+    // playnow button resize ratio
+    FPlayNowResizeRatio := FTableResizeRatio * 1.38;
+    if FPlayNowResizeRatio > 1 then
+      FPlayNowResizeRatio := 1;
+
+    // playnow button bounds
+    FPlayNowButtonWidth := TableResources.PlayNowButtonNormalImage.Texture[0].Width * FPlayNowResizeRatio;
+    FPlayNowButtonHeight := FPlayNowButtonWidth / TableResources.PlayNowButtonAspectRatio;
+    FPlayNowButtonBounds := pBounds4(FChatBoxBounds.Right + (ADXAreaSize.x - FChatBoxBounds.Right) / 2 - FPlayNowButtonWidth / 2,
+                                     FChatBoxBounds.Top + (ADXAreaSize.y - FChatBoxBounds.Top) / 2.5 - FPlayNowButtonHeight / 2,
+                                     FPlayNowButtonWidth, FPlayNowButtonHeight);
 
     // hand playback bounds
     wint := ADXAreaSize.x div 3;

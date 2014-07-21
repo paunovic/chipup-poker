@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.ClubMember;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader;
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
   TPB_ClubMember = class(TProtobufBaseObject)
@@ -19,7 +19,7 @@ type
       kUnlimitedLimitFieldNumber = 5;
 
     var
-      FId: TBytes;
+      FId: TMongoId;
       FSuspended: Boolean;
       FBalanceLimit: UInt32;
       FClubBalance: Integer;
@@ -28,7 +28,7 @@ type
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
-    procedure SetMongoId(const AValue: TBytes);
+    procedure SetMongoId(const AValue: TMongoId);
     procedure set_has_Suspended;
     procedure clear_has_Suspended;
     procedure SetSuspended(const AValue: Boolean);
@@ -53,7 +53,7 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TBytes read FId write SetMongoId;
+    property MongoId: TMongoId read FId write SetMongoId;
 
     // optional bool Suspended = 2;
     function has_Suspended: Boolean;
@@ -108,7 +108,7 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FId := AProtobufReader.readBytes;
+        FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
       kSuspendedFieldNumber: begin
@@ -159,7 +159,7 @@ end;
 
 procedure TPB_ClubMember.clear_MongoId;
 begin
-  SetLength(FId, 0);
+  FId.Clear;
   clear_has_MongoId;
 end;
 
@@ -178,12 +178,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_ClubMember.SetMongoId(const AValue: TBytes);
+procedure TPB_ClubMember.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  FId := Copy(AValue, 0, Length(AValue));
+  FId := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_MongoId;
 end;
 

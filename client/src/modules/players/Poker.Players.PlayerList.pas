@@ -3,17 +3,17 @@ unit Poker.Players.PlayerList;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.User, Poker.Players.Player;
+  System.Generics.Collections, System.SysUtils, Poker.Protobufs.Objects.User, Poker.Players.Player, Poker.Types;
 
 type
-  TPlayerList = class(TObjectDictionary<TBytes, TPlayerInfo>)
+  TPlayerList = class(TObjectDictionary<TMongoId, TPlayerInfo>)
   public
     class procedure Initialize;
     class procedure Deinitialize;
 
     constructor Create;
 
-    function AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AAvatarId: TBytes): TPlayerInfo; overload;
+    function AddPlayer(const AId: TMongoId; const ANick, AEMail: String; const AAvatarId: TBytes): TPlayerInfo; overload;
     function AddPlayer(const AUser: TPB_User): TPlayerInfo; overload;
     procedure LoadFromUsersProtobuf(const AUsers: TList<TPB_User>);
   end;
@@ -44,7 +44,7 @@ begin
   inherited Create([doOwnsValues]);
 end;
 
-function TPlayerList.AddPlayer(const AId: TBytes; const ANick, AEMail: String; const AAvatarId: TBytes): TPlayerInfo;
+function TPlayerList.AddPlayer(const AId: TMongoId; const ANick, AEMail: String; const AAvatarId: TBytes): TPlayerInfo;
 var
   player: TPlayerInfo;
 begin

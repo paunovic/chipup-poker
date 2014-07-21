@@ -3,21 +3,21 @@ unit Poker.Protobufs.Reader;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils,
-  pbInput, pbPublic;
+  Winapi.Windows, System.SysUtils, pbInput, pbPublic, Poker.Types;
 
 type
   TProtobufReader = class(TProtoBufInput)
   private
     FSize: Integer;
   public
-    constructor Create(const APointer: pointer; const ASize: DWORD);
+    constructor Create(const APointer: pointer; const ASize: Integer);
     function GetNext(out ATag, AWireType, AFieldNumber: Integer): Boolean;
     function readBytes: TBytes;
+    function readMongoId: TMongoId;
 
+    property Size: Integer read FSize;
     property Buffer: PAnsiChar read FBuffer;
     property BufferPos: Integer read FPos;
-    property Size: Integer read FSize;
   end;
 
 implementation
@@ -26,7 +26,7 @@ uses
   System.Classes;
 
 
-constructor TProtobufReader.Create(const APointer: pointer; const ASize: DWORD);
+constructor TProtobufReader.Create(const APointer: pointer; const ASize: Integer);
 var
   mstream: TMemoryStream;
 begin
@@ -58,8 +58,17 @@ var
   bsize: Integer;
 begin
   bsize := readInt32;
-  SetLength(Result, bsize);
-  readRawBytes(Result[0], bsize);
+  SetLength(result, bsize);
+  readRawBytes(result[0], bsize);
+end;
+
+function TProtobufReader.readMongoId: TMongoId;
+var
+  bsize: Integer;
+begin
+  bsize := readInt32;
+  Assert(bsize = 12, Format('Received MongoId length = %d', [bsize]));
+  readRawBytes(result.Memory^, bsize);
 end;
 
 end.

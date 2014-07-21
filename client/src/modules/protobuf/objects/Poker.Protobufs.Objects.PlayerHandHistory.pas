@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.PlayerHandHistory;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.SeatInfo;
 
 type
@@ -22,7 +22,7 @@ type
       kStatusFieldNumber = 7;
 
     var
-      FId: TBytes;
+      FId: TMongoId;
       FSeat: Integer;
       FCards: TBytes;
       FChips: UInt32;
@@ -33,7 +33,7 @@ type
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
-    procedure SetMongoId(const AValue: TBytes);
+    procedure SetMongoId(const AValue: TMongoId);
     procedure set_has_Seat;
     procedure clear_has_Seat;
     procedure SetSeat(const AValue: Integer);
@@ -64,7 +64,7 @@ type
     // required bytes MongoId = 1;
     function has_MongoId: Boolean;
     procedure clear_MongoId;
-    property MongoId: TBytes read FId write SetMongoId;
+    property MongoId: TMongoId read FId write SetMongoId;
 
     // required int32 Seat = 2;
     function has_Seat: Boolean;
@@ -129,7 +129,7 @@ begin
     case field_number of
       kIdFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FId := AProtobufReader.readBytes;
+        FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
       kSeatFieldNumber: begin
@@ -194,7 +194,7 @@ end;
 
 procedure TPB_PlayerHandHistory.clear_MongoId;
 begin
-  SetLength(FId, 0);
+  FId.Clear;
   clear_has_MongoId;
 end;
 
@@ -213,12 +213,16 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TBytes);
+procedure TPB_PlayerHandHistory.SetMongoId(const AValue: TMongoId);
 begin
   Assert(not has_MongoId);
-  FId := Copy(AValue, 0, Length(AValue));
+  FId := AValue;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kIdFieldNumber, AValue);
+  begin
+    ProtobufOutput.writeTag(kIdFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
   set_has_MongoId;
 end;
 

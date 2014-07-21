@@ -63,7 +63,7 @@ implementation
 uses
   Poker.Common.Misc, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.DataModule,
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.BuyinError,
-  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList;
+  Poker.Protobufs.Objects.Game, Poker.Seats.Seat, Poker.Tables.TableList, Poker.Types;
 
 
 procedure TfrmTableSit.FormCreate(Sender: TObject);
@@ -260,10 +260,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+    Exit;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbstatus := AObject as TPB_TableStatus;
-    if not CompareBytes(table.Game.MongoId, pbstatus.TableMongoId) then
+    if table.Game.MongoId <> pbstatus.TableMongoId then
       Exit;
 
     ModalResult := mrOk;
@@ -278,10 +280,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+    Exit;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbstatus := AObject as TPB_TableStatus;
-    if not CompareBytes(table.Game.MongoId, pbstatus.TableMongoId) then
+    if table.Game.MongoId <> pbstatus.TableMongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -297,10 +301,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+    Exit;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbstatus := AObject as TPB_TableStatus;
-    if not CompareBytes(table.Game.MongoId, pbstatus.TableMongoId) then
+    if table.Game.MongoId <> pbstatus.TableMongoId then
       Exit;
 
     ModalResult := mrOk;
@@ -315,10 +321,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+    Exit;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbstatus := AObject as TPB_TableStatus;
-    if not CompareBytes(table.game.MongoId, pbstatus.TableMongoId) then
+    if table.game.MongoId <> pbstatus.TableMongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -333,10 +341,12 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
+  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+    Exit;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbstatus := AObject as TPB_TableStatus;
-    if not CompareBytes(table.game.MongoId, pbstatus.TableMongoId) then
+    if table.game.MongoId <> pbstatus.TableMongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -351,10 +361,12 @@ var
   pbgame: TPB_Game;
   table: TTable;
 begin
+  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+    Exit;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbgame := AObject as TPB_Game;
-    if not CompareBytes(table.game.MongoId, pbgame.MongoId) then
+    if table.game.MongoId <> pbgame.MongoId then
       Exit;
   finally
     Tables.Unlock;
@@ -371,11 +383,13 @@ var
   table: TTable;
   err: String;
 begin
+  if not TPokerTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
+    Exit;
+
   err := '';
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbbuyinerr := AObject as TPB_BuyinError;
-    if not CompareBytes(table.game.MongoId, pbbuyinerr.GameId) then
+    if table.game.MongoId <> pbbuyinerr.GameId then
       Exit;
 
     if pbbuyinerr.LastCashout > table.game.MaxBuyin * table.game.BigBlind then
@@ -395,10 +409,12 @@ var
   pbbuyinerr: TPB_BuyinError;
   table: TTable;
 begin
+  if not TPokerTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
+    Exit;
+
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    pbbuyinerr := AObject as TPB_BuyinError;
-    if not CompareBytes(table.game.MongoId, pbbuyinerr.GameId) then
+    if table.game.MongoId <> pbbuyinerr.GameId then
       Exit;
   finally
     Tables.Unlock;

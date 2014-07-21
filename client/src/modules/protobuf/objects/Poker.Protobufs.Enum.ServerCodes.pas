@@ -13,7 +13,6 @@ type
     srLeaveClubReply = 6,
     srChangeClubDetailsReply = 7,
     srLogout = 8,
-    srListClubs = 9,
     srKickPlayerReply = 11,
     srSetAvatarReply = 12,
     srChangeMailReply = 13,
@@ -130,7 +129,6 @@ begin
     srLeaveClubReply: result := 'srLeaveClubReply';
     srChangeClubDetailsReply: result := 'srChangeClubDetailsReply';
     srLogout: result := 'srLogout';
-    srListClubs: result := 'srListClubs';
     srKickPlayerReply: result := 'srKickPlayerReply';
     srSetAvatarReply: result := 'srSetAvatarReply';
     srChangeMailReply: result := 'srChangeMailReply';

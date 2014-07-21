@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
-  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs;
+  Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs,
+  Poker.Types;
 
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)
@@ -29,16 +30,16 @@ type
     procedure Unlock;
 
     function GetAndLockTable(const AId: Integer; out ATable: TTable): Boolean; overload;
-    function GetAndLockTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean; overload;
-    procedure UpdateGameObject(const AGameId: TBytes);
-    procedure UpdateClubObject(const AClubId: TBytes);
+    function GetAndLockTable(const AMongoId: TMongoId; const ATableType: TTableType; out ATable: TTable): Boolean; overload;
+    procedure UpdateGameObject(const AGameId: TMongoId);
+    procedure UpdateClubObject(const AClubId: TMongoId);
 
     procedure ClearWithoutNotification;
 
-    function AddLiveTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
-    function AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): Boolean;
+    function AddLiveTable(const AGameId: TMongoId; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
+    function AddHandPlaybackTable(const AGameId: TMongoId; const AHandId: UINT): Boolean;
     function SittingCount: Integer;
-    procedure CloseTablesForClub(const AClubId: TBytes);
+    procedure CloseTablesForClub(const AClubId: TMongoId);
   end;
 
 var
@@ -116,7 +117,7 @@ begin
   end;
 end;
 
-function TTableList.AddLiveTable(const AGameId: TBytes; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
+function TTableList.AddLiveTable(const AGameId: TMongoId; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
 var
   table: TTable;
 begin
@@ -145,7 +146,7 @@ begin
   end;
 end;
 
-function TTableList.AddHandPlaybackTable(const AGameId: TBytes; const AHandId: UINT): Boolean;
+function TTableList.AddHandPlaybackTable(const AGameId: TMongoId; const AHandId: UINT): Boolean;
 var
   table: TTable;
   hhis: THandHistoryItems;
@@ -207,7 +208,7 @@ begin
   end;
 end;
 
-procedure TTableList.CloseTablesForClub(const AClubId: TBytes);
+procedure TTableList.CloseTablesForClub(const AClubId: TMongoId);
 var
   table: TTable;
   to_remove: TList<Integer>;
@@ -218,7 +219,7 @@ begin
     FLock.Enter;
     try
       for table in Values do
-        if CompareBytes(table.ClubId, AClubId) then
+        if table.ClubId = AClubId then
           to_remove.Add(table.InternalId);
     finally
       FLock.Leave;
@@ -257,14 +258,14 @@ begin
   end;
 end;
 
-function TTableList.GetAndLockTable(const AMongoId: TBytes; const ATableType: TTableType; out ATable: TTable): Boolean;
+function TTableList.GetAndLockTable(const AMongoId: TMongoId; const ATableType: TTableType; out ATable: TTable): Boolean;
 var
   table: TTable;
 begin
   FLock.Enter;
   for table in Values do
     if (table.TableType = ATableType) and
-       (CompareBytes(table.GameId, AMongoId)) then
+       (table.GameId = AMongoId) then
     begin
       ATable := table;
       Exit(TRUE);
@@ -284,21 +285,21 @@ begin
   end;
 end;
 
-procedure TTableList.UpdateClubObject(const AClubId: TBytes);
+procedure TTableList.UpdateClubObject(const AClubId: TMongoId);
 var
   table: TTable;
 begin
   FLock.Enter;
   try
     for table in Values do
-      if CompareBytes(table.ClubId, AClubId) then
+      if table.ClubId = AClubId then
         table.UpdateObjects;
   finally
     FLock.Leave;
   end;
 end;
 
-procedure TTableList.UpdateGameObject(const AGameId: TBytes);
+procedure TTableList.UpdateGameObject(const AGameId: TMongoId);
 var
   table: TTable;
 begin

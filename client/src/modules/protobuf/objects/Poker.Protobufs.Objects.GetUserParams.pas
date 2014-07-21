@@ -6,7 +6,7 @@ unit Poker.Protobufs.Objects.GetUserParams;
 interface
 
 uses
-  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader,
+  System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
   Poker.Protobufs.Objects.User;
 
 type
@@ -17,7 +17,7 @@ type
       kUsersFieldNumber = 2;
 
     var
-      FUserMongoIds: TList<TBytes>;
+      FUserMongoIds: TList<TMongoId>;
       FUsers: TList<TPB_User>;
       _has_bits_: UINT32;
 
@@ -25,7 +25,7 @@ type
     procedure clear_has_UserMongoIds;
     procedure set_has_Users;
     procedure clear_has_Users;
-    procedure UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
+    procedure UserMongoIdsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
     procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
 
   protected
@@ -43,7 +43,7 @@ type
     // repeated bytes UserMongoIds = 1;
     function has_UserMongoIds: Boolean;
     procedure clear_UserMongoIds;
-    property UserMongoIds: TList<TBytes> read FUserMongoIds;
+    property UserMongoIds: TList<TMongoId> read FUserMongoIds;
 
     // repeated User Users = 2;
     function has_Users: Boolean;
@@ -86,7 +86,7 @@ end;
 procedure TPB_GetUserParams.InitObjects;
 begin
   inherited;
-  FUserMongoIds := TList<TBytes>.Create;
+  FUserMongoIds := TList<TMongoId>.Create;
   FUsers := TObjectList<TPB_User>.Create;
 end;
 
@@ -96,6 +96,7 @@ begin
   FUserMongoIds.OnNotify := UserMongoIdsNotifyEvent;
   FUsers.OnNotify := UsersNotifyEvent;
 end;
+
 procedure TPB_GetUserParams.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
 var
   tag, field_number, wire_type, endpos: Integer;
@@ -106,12 +107,12 @@ begin
     case field_number of
       kUserMongoIdsFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUserMongoIds.Add(AProtobufReader.readBytes);
+        FUserMongoIds.Add(AProtobufReader.readMongoId);
         set_has_UserMongoIds;
       end;
       kUsersFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        FUsers.Add(TPB_User.Create(AProtobufReader,AProtobufReader.readInt32, Lightweight));
+        FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Users;
       end;
     else
@@ -141,8 +142,13 @@ begin
 end;
 
 procedure TPB_GetUserParams.clear_UserMongoIds;
+var
+  on_notify: TCollectionNotifyEvent<TMongoId>;
 begin
+  on_notify := FUserMongoIds.OnNotify;
+  FUserMongoIds.OnNotify := nil;
   FUserMongoIds.Clear;
+  FUserMongoIds.OnNotify := on_notify;
   clear_has_UserMongoIds;
 end;
 
@@ -161,17 +167,26 @@ begin
   _has_bits_ := _has_bits_ and not 1;
 end;
 
-procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TBytes; Action: TCollectionNotification);
+procedure TPB_GetUserParams.UserMongoIdsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
 begin
   Assert(Action = cnAdded);
   set_has_UserMongoIds;
   if not Lightweight then
-    ProtobufOutput.writeBytes(kUserMongoIdsFieldNumber,Item);
+  begin
+    ProtobufOutput.writeTag(kUserMongoIdsFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(Item.Memory, 12);
+  end;
 end;
 
 procedure TPB_GetUserParams.clear_Users;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
 begin
+  on_notify := FUsers.OnNotify;
+  FUsers.OnNotify := nil;
   FUsers.Clear;
+  FUsers.OnNotify := on_notify;
   clear_has_Users;
 end;
 
