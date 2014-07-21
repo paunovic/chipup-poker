@@ -2011,7 +2011,7 @@ Game.prototype.eject = function (seatIdx,userid) {
 }
 Game.prototype.doDelete = function () {
 	assert(this.club);
-	var g = makeGameProtobuf(JSON.parse(JSON.stringify(this.obj)));
+	var g = makeGameProtobuf(this.obj);
 	g.state = 'gsClosed';
 	var conn = activeUsers[this.club.obj.owner];
 	if (conn) conn.send(codes.seGameDelete,g,'Poker.Game');
@@ -2121,7 +2121,7 @@ Game.getGame = function getgame(id,cb) {
 						if (!game.real_rake) game.real_rake = 5;
 						game.rake = 0;
 						game.testmode = club.obj.testmode;
-						var g = makeGameProtobuf(JSON.parse(JSON.stringify(obj)));
+						var g = makeGameProtobuf(obj);
 						var conn = activeUsers[club.obj.owner];
 						if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
 
