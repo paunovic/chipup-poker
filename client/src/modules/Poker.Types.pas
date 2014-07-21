@@ -6,17 +6,16 @@ uses
   Winapi.Windows, System.SysUtils, System.DateUtils, System.Rtti;
 
 type
-  TMongoIdArray = array[0..11] of Byte;
-
   TMongoId = record
   strict private
-    FMongoIdArray: TMongoIdArray;
+    FMongoIdArray: array[0..11] of Byte;
 
     function GetMongoIdByte(Index: Integer): Byte;
     procedure SetMongoIdByte(Index: Integer; const Value: Byte);
     function GetMemory: pointer;
+
+    property MongoIdArray[Index: Integer]: Byte read GetMongoIdByte write SetMongoIdByte; default;
   public
-    class operator Implicit(const AMongoId: TMongoIdArray): TMongoId;
     class operator Implicit(const APointer: pointer): TMongoId;
     class operator Implicit(const AVariant: Variant): TMongoId;
     class operator Implicit(const AString: String): TMongoId;
@@ -30,7 +29,6 @@ type
     procedure Clear;
 
     property Memory: pointer read GetMemory;
-    property IdData[Index: Integer]: Byte read GetMongoIdByte write SetMongoIdByte; default;
   end;
 
   TPokerTypes = class
@@ -84,7 +82,7 @@ begin
   else
     if Length(AString) = 24 then
       for C1 := 0 to 11 do
-        result.IdData[C1] := StrToInt('$' + Copy(AString, C1 * 2, 2));
+        result.MongoIdArray[C1] := StrToInt('$' + Copy(AString, C1 * 2, 2));
 end;
 
 function TMongoId.GetMemory: pointer;
@@ -104,7 +102,7 @@ end;
 
 function TMongoId.IsEmpty: Boolean;
 const
-  EMPTY_MONGO_ID: TMongoIdArray = (0, 0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0);
+  EMPTY_MONGO_ID: array[0..11] of Byte = (0, 0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0);
 begin
   result := CompareMem(@FMongoIdArray[0], @EMPTY_MONGO_ID[0], 12);
 end;
@@ -115,11 +113,6 @@ var
 begin
   safe_array := VarArrayAsPSafeArray(AVariant);
   Move(safe_array.Data^, result.FMongoIdArray[0], 12);
-end;
-
-class operator TMongoId.Implicit(const AMongoId: TMongoIdArray): TMongoId;
-begin
-  Move(AMongoId[0], result.Memory^, 12);
 end;
 
 procedure TMongoId.Clear;
@@ -149,7 +142,7 @@ function TMongoId.ToVariant: Variant;
 var
   safe_array: PVarArray;
 begin
-  result := VarArrayCreate([0, High(FMongoIdArray)], varByte);
+  result := VarArrayCreate([0, 11], varByte);
   safe_array := VarArrayAsPSafeArray(result);
   Move(FMongoIdArray[0], safe_array.Data^, 12);
 end;
