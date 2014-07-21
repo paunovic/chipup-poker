@@ -4,11 +4,9 @@ block content
     tr
       th date registered
       th name
-      th chips
     each val in users
       tr
         td=val._id.getTimestamp()
         td
           a(href='/secure/user?id='+val._id)=val.displayname
-        td=val.chips
   div=Math.round(sum/100)
