@@ -102,7 +102,7 @@ end;
 
 function TMongoId.IsEmpty: Boolean;
 const
-  EMPTY_MONGO_ID: array[0..11] of Byte = (0, 0, 0, 0, 0, 0, 0, 0, 0,	0, 0, 0);
+  EMPTY_MONGO_ID: array[0..11] of Byte = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 begin
   result := CompareMem(@FMongoIdArray[0], @EMPTY_MONGO_ID[0], 12);
 end;
@@ -132,7 +132,7 @@ end;
 
 function TMongoId.ToDateTime: TDateTime;
 var
-  unix_timestamp: UINT32;
+  unix_timestamp: UINT;
 begin
   unix_timestamp := ReverseDWORD(PUINT(@FMongoIdArray[0])^);
   result := (unix_timestamp / 86400) + 25569;

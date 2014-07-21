@@ -3598,7 +3598,7 @@ object frmChipUpMain: TfrmChipUpMain
           792
           427)
         object gridPublicClubs: TcxGrid
-          Left = 152
+          Left = 155
           Top = 34
           Width = 312
           Height = 217
@@ -3697,7 +3697,7 @@ object frmChipUpMain: TfrmChipUpMain
         object gridGames: TcxGrid
           Left = 155
           Top = 254
-          Width = 626
+          Width = 627
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
@@ -3797,8 +3797,8 @@ object frmChipUpMain: TfrmChipUpMain
           ParentFont = False
         end
         object btOpenTable: TcxButton
-          Left = 6
-          Top = 302
+          Left = 10
+          Top = 305
           Width = 143
           Height = 35
           Margin = 18
