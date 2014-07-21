@@ -26,6 +26,7 @@ var User = new Schema({
 	changecode:String,
 	changetime:Number,
 	avatar:Buffer,
+	currentVersion:ObjectId,
 	subscription_plan:String // FIXME, add some validation and defaults
 });
 
