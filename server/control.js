@@ -3,6 +3,7 @@ var p = require("node-protobuf");
 var fs = require('fs');
 var colors = require('colors');
 var util = require('util');
+var tls = require('tls');
 
 var Protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
@@ -13,7 +14,7 @@ Protoreader.init(pb,codes,[codes.GlobalMsgEvent]);
 var autoRestart = false;
 
 function Client(ip,port) {
-	this.socket = net.connect(port,ip,function (){});
+	this.socket = tls.connect(port,ip,{ca:[fs.readFileSync('cert.pem')],servername:'master.chipuppoker.com'},function (){});
 	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	this.socket.on('end',function () {
 		this.log('connection lost');
