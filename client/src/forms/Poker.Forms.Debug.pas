@@ -117,14 +117,6 @@ type
     teFindText: TcxTextEdit;
     btMemoryState: TcxButton;
     rvMemoryState: TRichView;
-    dxBevel4: TdxBevel;
-    btStartBots: TcxButton;
-    cbServers: TcxComboBox;
-    cxCheckBox1: TcxCheckBox;
-    cxTextEdit1: TcxTextEdit;
-    cxButton1: TcxButton;
-    acStartBots: TAction;
-    acStopBots: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -172,7 +164,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  FastMM4, Poker.Settings,
+  FastMM4,
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds,
   Poker.DirectX.Timer, RectMarks;
@@ -297,8 +289,6 @@ end;
 
 
 procedure TfrmDebug.FormCreate(Sender: TObject);
-var
-  C1: Integer;
 begin
   Left := 0;
   Top := 0;
@@ -310,10 +300,6 @@ begin
   Top := 0;
   Width := Round(Screen.Monitors[0].Width / 2.9);
   Height := Round(Screen.Monitors[0].Height / 2.6);
-
-  for C1 := Low(Settings.Hardcoded.SERVER_CONFIG) to High(Settings.Hardcoded.SERVER_CONFIG) do
-    cbServers.Properties.Items.Add(Settings.Hardcoded.SERVER_CONFIG[C1].TCPAddress);
-  cbServers.ItemIndex := 0;
 
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
@@ -921,7 +907,6 @@ begin
     teFindText.Properties.OnChange(nil);
   end;
 end;
-
 
 { TDebugFormLog }
 

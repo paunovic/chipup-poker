@@ -352,9 +352,6 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas"/>
 			<DCCReference Include="modules\directx\Poker.DirectX.AnimationNew.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Enum.BackendFunctions.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.StartBot.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.StopBot.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

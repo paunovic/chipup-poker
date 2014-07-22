@@ -5,25 +5,30 @@ interface
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Winapi.Windows, System.Classes, System.SysUtils, System.Generics.Collections, OverbyteIcsWSocket, Poker.Server.Socket.ConnectThread,
-  Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Base;
+  Poker.Protobufs.Objects.RpcMessage, Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.Base, Winapi.Messages;
 
 type
   TServerSocketCore = class
   private
-    FSocket: TSslWSocket;
-    FServer: String;
-    FPort: Integer;
-    FReceiveBuffer: PAnsiChar;
-    FReceiveBufferSize: Integer;
-    FLatency: Integer;
-    FServerTime: UINT64;
-    FTimeOffset: UINT64;
-    FTimerIdInactivityPing: UINT32;
-    FTimerIdPing: UINT32;
-    FTimerIdPingTimeout: UINT32;
-    FSSLHandshakeDone: Boolean;
-    FSocketConnectThread: TServerSocketConnectThread;
-    {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+    const
+      TIMER_ID_PING = 1;
+      TIMER_ID_PING_TIMEOUT = 2;
+      TIMER_ID_INACTIVITY_PING = 3;
+
+    var
+      {$IFDEF DEBUG} FDebugId: Integer; {$ENDIF}
+      FSocket: TSslWSocket;
+      FInternalHWND: HWND;
+      FServer: String;
+      FPort: Integer;
+      FReceiveBuffer: PAnsiChar;
+      FReceiveBufferSize: Integer;
+      FLatency: Integer;
+      FServerTime: UINT64;
+      FTimeOffset: UINT64;
+      FPinging: Boolean;
+      FSSLHandshakeDone: Boolean;
+      FSocketConnectThread: TServerSocketConnectThread;
 
     procedure SocketSessionConnected(Sender: TObject; ErrCode: Word);
     procedure SocketSessionClosed(Sender: TObject; ErrCode: Word);
@@ -33,6 +38,8 @@ type
     procedure SocketDataAvailable(Sender: TObject; Error: Word);
     procedure SocketError(Sender: TObject);
     procedure SocketConnectThreadTerminate(Sender: TObject);
+
+    procedure WndProc(var AMessage: TMessage);
 
     procedure FreeReceiveBuffer;
     function ParseRpcMessage(const ARpcMessage: TPB_RpcMessage; const ADataPointer: pointer; out ADataObject: TObject): Boolean;
@@ -51,15 +58,12 @@ type
     constructor Create(const AServer: String; const APort: Integer);
     destructor Destroy; override;
 
-    procedure Connect;
+    procedure Connect(const AConnectSynchronously: Boolean = FALSE);
     procedure Disconnect;
     function IsConnected: Boolean;
 
-    function IsPinging: Boolean;
-
-    procedure SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
-    procedure SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
-    procedure ProcessTimer(const ATimerId: UINT_PTR);
+    procedure SendProtobuf(const AMethodId: Integer; const AProtobuf: TProtobufBaseObject);
+    procedure SendRawBytes(const AMethodId: Integer; const AProtobuf; const ASize: Integer);
 
     procedure Ping;
 
@@ -68,6 +72,7 @@ type
     property Latency: Integer read FLatency;
     property ServerTime: UINT64 read FServerTime;
     property TimeOffset: UINT64 read FTimeOffset;
+    property IsPinging: Boolean read FPinging;
   end;
 
 implementation
@@ -89,22 +94,14 @@ uses
   Poker.Protobufs.Objects.SubscriptionPlanChange;
 
 
-procedure TimerProc(HWND: HWND; uMsg: UINT; idEvent: UINT_PTR; dwTime: DWORD); stdcall;
-begin
-  if Assigned(ServerSocket) then
-    ServerSocket.ProcessTimer(idEvent);
-end;
-
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
 begin
-  {$IFDEF DEBUG} FDebugId := RegisterDebugObject('Socket'); {$ENDIF}
+  {$IFDEF DEBUG} FDebugId := RegisterDebugObject(Format('Socket [%s:%d]', [AServer, APort])); {$ENDIF}
 
   FServer := AServer;
   FPort := APort;
 
-  FTimerIdPing := 0;
-  FTimerIdInactivityPing := 0;
-  FTimerIdPingTimeout := 0;
+  FInternalHWND := AllocateHwnd(WndProc);
 
   FSocket := TSslWSocket.Create(nil);
   FSocket.TimeoutConnect := 1500;
@@ -132,12 +129,14 @@ begin
   FSocket.SslContext.Free;
   FreeAndNil(FSocket);
 
+  DeallocateHWnd(FInternalHWND);
+
   {$IFDEF DEBUG} UnregisterDebugObject(FDebugId); {$ENDIF}
 
   inherited;
 end;
 
-procedure TServerSocketCore.Connect;
+procedure TServerSocketCore.Connect(const AConnectSynchronously: Boolean = FALSE);
 begin
   if (FSocket.State <> wsClosed) or
      (Assigned(FSocketConnectThread)) then
@@ -162,10 +161,15 @@ begin
   KillPingTimers;
   KillPingTimeoutTimer;
 
-  FSocketConnectThread := TServerSocketConnectThread.Create(FSocket);
-  FSocketConnectThread.FreeOnTerminate := TRUE;
-  FSocketConnectThread.OnTerminate := SocketConnectThreadTerminate;
-  FSocketConnectThread.Start;
+  if AConnectSynchronously then
+    FSocket.Connect
+  else
+  begin
+    FSocketConnectThread := TServerSocketConnectThread.Create(FSocket);
+    FSocketConnectThread.FreeOnTerminate := TRUE;
+    FSocketConnectThread.OnTerminate := SocketConnectThreadTerminate;
+    FSocketConnectThread.Start;
+  end;
 end;
 
 procedure TServerSocketCore.Disconnect;
@@ -229,6 +233,21 @@ begin
     DebugLn(FDebugId, Format('SSL verify peer result: %d', [Ok]), ditException);
   end;
   {$ENDIF}
+end;
+
+procedure TServerSocketCore.WndProc(var AMessage: TMessage);
+begin
+  inherited;
+
+  case AMessage.Msg of
+    WM_TIMER: case AMessage.WParam of
+      TIMER_ID_PING, TIMER_ID_INACTIVITY_PING: Ping;
+      TIMER_ID_PING_TIMEOUT: begin
+        {$IFDEF DEBUG} DebugLn(FDebugId, 'Ping timeout', ditException); {$ENDIF}
+        Disconnect;
+      end;
+    end;
+  end;
 end;
 
 {$IFDEF DEBUG}
@@ -376,32 +395,31 @@ end;
 
 procedure TServerSocketCore.ResetPingTimer;
 begin
-  FTimerIdPing := SetTimer(0, FTimerIdPing, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, @TimerProc);
+  SetTimer(FInternalHWND, TIMER_ID_PING, Settings.Hardcoded.TCP_PING_INTERVAL * 1000, nil);
 end;
 
 procedure TServerSocketCore.ResetInactivityPingTimer;
 begin
-  FTimerIdInactivityPing := SetTimer(0, FTimerIdInactivityPing, Settings.Hardcoded.TCP_INACTIVITY_PING_INTERVAL * 1000, @TimerProc);
+  SetTimer(FInternalHWND, TIMER_ID_INACTIVITY_PING, Settings.Hardcoded.TCP_INACTIVITY_PING_INTERVAL * 1000, nil);
 end;
 
 procedure TServerSocketCore.ResetPingTimeoutTimer;
 begin
-  FTimerIdPingTimeout := SetTimer(0, FTimerIdPingTimeout, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, @TimerProc);
+  SetTimer(FInternalHWND, TIMER_ID_PING_TIMEOUT, Settings.Hardcoded.TCP_PING_TIMEOUT * 1000, nil);
+  FPinging := TRUE;
   {$IFDEF DEBUG} RefreshDebugForm([dfiSocketState, dfiLatency]); {$ENDIF}
 end;
 
 procedure TServerSocketCore.KillPingTimers;
 begin
-  KillTimer(0, FTimerIdPing);
-  FTimerIdPing := 0;
-  KillTimer(0, FTimerIdInactivityPing);
-  FTimerIdInactivityPing := 0;
+  KillTimer(FInternalHWND, TIMER_ID_PING);
+  KillTimer(FInternalHWND, TIMER_ID_INACTIVITY_PING);
 end;
 
 procedure TServerSocketCore.KillPingTimeoutTimer;
 begin
-  KillTimer(0, FTimerIdPingTimeout);
-  FTimerIdPingTimeout := 0;
+  KillTimer(FInternalHWND, TIMER_ID_PING_TIMEOUT);
+  FPinging := FALSE;
 end;
 
 function TServerSocketCore.IsConnected: Boolean;
@@ -418,6 +436,7 @@ var
 begin
   ADataObject := nil;
   valid_sc := FALSE;
+
   for sc := Low(TServerCodes) to High(TServerCodes) do
     if ARpcMessage.MethodId = Integer(sc) then
     begin
@@ -510,7 +529,7 @@ begin
   Exit(TRUE);
 end;
 
-procedure TServerSocketCore.SendRawBytes(const AMethodId: TServerCodes; const AProtobuf; const ASize: Integer);
+procedure TServerSocketCore.SendRawBytes(const AMethodId: Integer; const AProtobuf; const ASize: Integer);
 var
   rpc_message: TPB_RpcMessage;
   mstream: TMemoryStream;
@@ -539,7 +558,7 @@ begin
   end;
 end;
 
-procedure TServerSocketCore.SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
+procedure TServerSocketCore.SendProtobuf(const AMethodId: Integer; const AProtobuf: TProtobufBaseObject);
 var
   rpc_message: TPB_RpcMessage;
   mstream: TMemoryStream;
@@ -547,7 +566,7 @@ var
 begin
   rpc_message := TPB_RpcMessage.Create;
   try
-    rpc_message.Methodid := Integer(AMethodId);
+    rpc_message.Methodid := AMethodId;
     if Assigned(AProtobuf) then
       rpc_message.DataSize := AProtobuf.ProtobufOutputSize;
     mstream := TMemoryStream.Create;
@@ -585,34 +604,13 @@ begin
   protobuf := TPB_PingParams.Create;
   try
     protobuf.Uptime := GetTickCount;
-    SendProtobuf(scPing, protobuf);
+    SendProtobuf(Integer(scPing), protobuf);
     KillPingTimers;
     ResetPingTimeoutTimer;
   finally
     protobuf.Free;
   end;
 end;
-
-procedure TServerSocketCore.ProcessTimer(const ATimerId: UINT_PTR);
-begin
-  if (ATimerId = FTimerIdPing) or
-     (ATimerId = FTimerIdInactivityPing) then
-    Ping;
-
-  if ATimerId = FTimerIdPingTimeout then
-  begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, 'Ping timeout', ditException); {$ENDIF}
-    Disconnect;
-  end;
-end;
-
-function TServerSocketCore.IsPinging: Boolean;
-begin
-  result := FTimerIdPingTimeout <> 0;
-end;
-
-
-
 
 end.
 

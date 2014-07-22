@@ -5,11 +5,12 @@ interface
 uses
   System.SysUtils, System.Generics.Collections, Poker.Server.Socket.Core, Poker.Protobufs.Objects.User, Poker.Types,
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.CloseGameData, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Enum.ServerCodes,
-  Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.UpdateFileInfo;
+  Poker.Protobufs.Objects.ContactMessage, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Protobufs.Objects.Base;
 
 type
   TServerSocket = class(TServerSocketCore)
   private
+    procedure SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject); overload;
   public
     class procedure Initialize(const AServer: String; const APort: Integer);
     class procedure Deinitialize;
@@ -86,6 +87,11 @@ end;
 class procedure TServerSocket.Deinitialize;
 begin
   FreeAndNil(ServerSocket);
+end;
+
+procedure TServerSocket.SendProtobuf(const AMethodId: TServerCodes; const AProtobuf: TProtobufBaseObject);
+begin
+  SendProtobuf(Integer(AMethodId), AProtobuf);
 end;
 
 procedure TServerSocket.Login(const ALogin, APass: String);
