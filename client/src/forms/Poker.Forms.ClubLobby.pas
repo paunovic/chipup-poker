@@ -1038,7 +1038,7 @@ var
 begin
   if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if pbreply.Club.MongoId <> FClubId then // FIXME: crash, nil pointer excp
+  if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
 
   case pbreply.Status of
@@ -1055,7 +1055,7 @@ var
 begin
   if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if pbreply.Club.MongoId <> FClubId then
+  if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
 
   case pbreply.Status of
@@ -1072,12 +1072,12 @@ var
 begin
   if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if pbreply.Club.MongoId <> FClubId then
+  if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
 
   case pbreply.Status of
     csSuccess: ConfigureGUI;
-    csInvalidClubId: MessageDlg('Invalid club ID', mtError, [mbOk], 0);
+    csInvalidClubId: ;
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
