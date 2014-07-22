@@ -8,6 +8,7 @@ var http = require('http');
 var MongoClient = require('mongodb').MongoClient
 var crypto = require('crypto');
 var assert = require('assert');
+var tls = require('tls');
 
 var Protoreader = require('./protoreader');
 var codes = require('./BackendFunctions');
@@ -23,7 +24,13 @@ var clients = [];
 
 var logs = {};
 
-var server = net.createServer(function (socket) {
+var options = {
+	key: fs.readFileSync('key.pem'),
+	cert: fs.readFileSync('cert.pem')
+};
+
+//var server = net.createServer(function (socket) {
+var server = tls.createServer(options,function listener(socket) {
 	var handler = new Client(socket);
 });
 var cactiServer = require('net').createServer(stats_server);
@@ -141,7 +148,7 @@ IO.on('connection',function (socket) {
 		} else livelink.startBot(obj);
 	});
 	socket.on('stopBot',function (obj) {
-		if (activeServer == 'dev') stopBot(obj.name);
+		if (obj.target == 'dev') stopBot(obj.name);
 		else livelink.stopBot(obj.name);
 	});
 	socket.on('disconnect',function () {
@@ -162,7 +169,7 @@ function startBot(obj) {
 		bots[obj.name] = require('child_process').fork('./testclient.js',[obj.mode,obj.name,'127.0.0.1']);
 		bots[obj.name].on('exit',function () {
 			delete bots[obj.name];
-			IO.sockets.emit('botStopped',obj.name);
+			IO.sockets.emit('botStopped',{name:obj.name,target:'dev'});
 			sendAll(codes.srBotStopped,{name:obj.name,target:obj.target},'Backend.StopBot');
 		});
 		bots[obj.name].config = obj;
@@ -176,7 +183,7 @@ function stopBot(name) {
 	}
 }
 function ControlLink() {
-	this.socket = net.connect(45508,'chipuppoker.com');
+	this.socket = tls.connect(45508,'chipuppoker.com',{ca:[fs.readFileSync('cert.pem')],servername:'master.chipuppoker.com'},function (){});
 	this.socket.on('error',function (err) {
 		console.log('unable to control/connect to live',err);
 	});
@@ -206,7 +213,7 @@ ControlLink.prototype.handle = function (err,method,args) {
 		break;
 	case codes.srBotStopped:
 		params = pb.Parse(args,'Backend.StopBot');
-		IO.sockets.emit('botStopped',params.name);
+		IO.sockets.emit('botStopped',{name:params.name,target:'live'});
 		break;
 	default:
 		console.log('controllink',method,args);

@@ -104,18 +104,18 @@ socket.on('botStarted',function (obj) {
 	var button = document.createElement('input');
 	button.type = 'button';
 	button.addEventListener('click',function () {
-		socket.emit('stopBot',{name:obj.name, target:'live'} );
+		socket.emit('stopBot',{name:obj.name, target:obj.target} );
 	});
 	button.value = 'stop bot '+obj.name;
 	bot.node.appendChild(button);
 });
-socket.on('botStopped',function (name) {
+socket.on('botStopped',function (obj) {
 	var id = 'dev_bots';
 	if (obj.target == 'live') id = 'live_bots';
-	if (bots[name+id]) {
-		var bot = bots[name+id];
+	if (bots[obj.name+id]) {
+		var bot = bots[obj.name+id];
 		bot.node.parentNode.removeChild(bot.node);
-		delete bots[name+id];
+		delete bots[obj.name+id];
 	}
 });
 socket.on('live',function (obj) {
