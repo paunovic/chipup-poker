@@ -1,11 +1,15 @@
 var socket = io.connect("http://control.chipuppoker.com:8080");
 var filter = /XXXXXXXXXXXX/;
 var bots = {};
+var activeServer = 'dev';
 
 function start() { socket.emit('start'); }
 function stop() { socket.emit('stop'); }
 function restart() { socket.emit('restart'); }
-socket.on('message',function (obj) {
+socket.on('message',function devMsg(obj) {
+	if (activeServer == 'dev') processMessage(obj);
+});
+function processMessage(obj) {
 	var autoscroll = document.getElementById('autoScroll').checked;
 	if (document.getElementById('debug').children.length > 500) document.getElementById('debug').removeChild(document.getElementById('debug').children[0]);
 	switch (obj.type) {
@@ -85,16 +89,18 @@ socket.on('message',function (obj) {
 	default:
 		console.log(obj);
 	}
-});
+}
 socket.on('botStarted',function (obj) {
-	if (bots[obj.name]) {
-		var bot = bots[obj.name];
+	var id = 'dev_bots';
+	if (obj.target == 'live') id = 'live_bots';
+	if (bots[obj.name+id]) {
+		var bot = bots[obj.name+id];
 		bot.node.parentNode.removeChild(bot.node);
 	}
 	var bot = {};
-	bots[obj.name] = bot;
+	bots[obj.name+id] = bot;
 	bot.node = document.createElement('div');
-	document.getElementById('bots').appendChild(bot.node);
+	document.getElementById(id).appendChild(bot.node);
 	var button = document.createElement('input');
 	button.type = 'button';
 	button.addEventListener('click',function () {
@@ -104,11 +110,16 @@ socket.on('botStarted',function (obj) {
 	bot.node.appendChild(button);
 });
 socket.on('botStopped',function (name) {
-	if (bots[name]) {
-		var bot = bots[name];
+	var id = 'dev_bots';
+	if (obj.target == 'live') id = 'live_bots';
+	if (bots[name+id]) {
+		var bot = bots[name+id];
 		bot.node.parentNode.removeChild(bot.node);
-		delete bots[name];
+		delete bots[name+id];
 	}
+});
+socket.on('live',function (obj) {
+	if (activeServer == 'live') processMessage(obj);
 });
 function updatefilter() {
 	var text = document.getElementById('blacklist').value;
@@ -118,4 +129,8 @@ function startBot() {
 	var setname = document.getElementById('setname').value;
 	var mode = document.getElementById('mode').value;
 	socket.emit('startBot',{name:setname,mode:mode,target:'live'});
+}
+function changeServer(name) {
+	socket.emit('changeServer',name);
+	activeServer = name;
 }
