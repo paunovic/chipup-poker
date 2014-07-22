@@ -548,7 +548,8 @@ begin
     rvLog.SetItemExtraIntProperty(rvLog.ItemCount - 1, rvepHidden, 1);
   end;
 
-  if teFindText.Text <> '' then
+  if (teFindText.Tag = 1) and
+     (teFindText.Text <> '') then
   begin
     ClearRectMarks(rvLog);
     MarkSubstring(rvLog, teFindText.Text, clRed);

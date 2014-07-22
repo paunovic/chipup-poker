@@ -141,7 +141,7 @@ procedure TfrmJoinClub.CSRJoinClub(const AMethodId: Integer; const AObject: TObj
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

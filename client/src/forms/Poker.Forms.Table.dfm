@@ -424,20 +424,6 @@ object frmTable: TfrmTable
       OnExecute = acHandPlaybackStepBackwardsExecute
     end
   end
-  object tiSitOutNextHand: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tiSitOutNextHandTimer
-    Left = 48
-    Top = 108
-  end
-  object tiSitOutNextBB: TTimer
-    Enabled = False
-    Interval = 500
-    OnTimer = tiSitOutNextBBTimer
-    Left = 48
-    Top = 164
-  end
   object RVStyle: TRVStyle
     TextStyles = <
       item
@@ -620,8 +606,8 @@ object frmTable: TfrmTable
   object tiHandPlayback: TTimer
     Enabled = False
     OnTimer = tiHandPlaybackTimer
-    Left = 132
-    Top = 108
+    Left = 312
+    Top = 52
   end
   object il48px: TImageList
     DrawingStyle = dsTransparent

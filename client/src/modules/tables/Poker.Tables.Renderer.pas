@@ -6,7 +6,8 @@ interface
 uses
   Winapi.Windows, System.Classes, System.Generics.Collections, System.Types, Asphyre.Math, Asphyre.Types, Asphyre.Fonts,
   Poker.Tables.RenderMetrics, Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, Asphyre.Images, Poker.Seats.Seat, Poker.Cards,
-  Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot;
+  Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils,
+  Poker.Protobufs.Objects.Pot, Poker.DirectX.Animations;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
@@ -38,6 +39,7 @@ type
     FRaiseThumbPosition: Single;
     FDXButtons: TObjectList<TDXButton>;
     FRenderingFoldedCards: Boolean;
+//    FAnimations: TDXAnimations;
 
     FFlopAnimations: TList<Integer>;
     FFlopAnimated: Boolean;
@@ -60,6 +62,9 @@ type
     FOnSoundPlay: TSoundPlayEvent;
     FOnTimebankStarted: TNotifyEvent;
     FRaiseThumbDown: Boolean;
+
+    FPots: TPB_PotList;
+    FBets: TList<Integer>;
 
     procedure RenderEvent(Sender: TObject);
     procedure RenderBackground;
@@ -94,7 +99,7 @@ type
 
     procedure SetTableId(const AId: Integer);
     function UpdateDXAreaSize: Boolean;
-    procedure Render;
+    procedure Render(const AUpdateDXAreaSize: Boolean = TRUE);
 
     function AnimateBets(ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
     procedure AnimateBlinds;
@@ -163,6 +168,11 @@ begin
   FDXButtons := TObjectList<TDXButton>.Create;
   FTableType := ATableType;
 
+  FPots := TPB_PotList.Create;
+  FBets := TList<Integer>.Create;
+{  FAnimations := Poker.DirectX.Animations.TDXAnimations.Create;
+  FAnimations.Start;
+}
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
 
@@ -179,6 +189,14 @@ end;
 
 destructor TTableRenderer.Destroy;
 begin
+  FBets.Free;
+  FPots.Free;
+
+{  FAnimations.Terminate;
+  FAnimations.Signal;
+  FAnimations.WaitFor;
+  FAnimations.Free;
+ }
   FDealAnimations.Free;
   FFlopAnimations.Free;
   FTurnAnimations.Free;
@@ -344,16 +362,18 @@ begin
   if FDXAreaSize <> FLastDXAreaSize then
   begin
     DXCore.Device.Resize(FSwapChainIndex, FDXAreaSize);
+//    FAnimations.DXAreaSize := FDXAreaSize;
     FLastDXAreaSize := FDXAreaSize;
   end;
 end;
 
-procedure TTableRenderer.Render;
+procedure TTableRenderer.Render(const AUpdateDXAreaSize: Boolean = TRUE);
 begin
   if not FEnabled then
     Exit;
 
-  if UpdateDXAreaSize then
+  if (not AUpdateDXAreaSize) or
+     (UpdateDXAreaSize) then
     DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
 end;
 
@@ -1316,6 +1336,8 @@ procedure TTableRenderer.ClearAnimations;
 var
   table: TTable;
 begin
+//  FAnimations.Clear;
+
   FFlopAnimations.Clear;
   FTurnAnimations.Clear;
   FRiverAnimations.Clear;
@@ -1391,7 +1413,12 @@ begin
     end;
   end;
 
-  Render;
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    Render;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 function TTableRenderer.AnimateBets(ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;

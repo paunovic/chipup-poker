@@ -209,23 +209,14 @@ begin
                       TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, CSROwnerGiveawayNotOwner),
                       TServerMessageCallback.Create(srOwnershipGiveawayInvalidPlayerId, CSROwnerGiveawayInvalidPlayerId),
                       TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, CSROwnerGiveawayInvalidClubId),
-                      TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(seClubChange, CSREClubOperation),
-                      TServerMessageCallback.Create(seClubDeleted, CSREClubOperation),
-                      TServerMessageCallback.Create(seGameDelete, CSREGameOperation),
-                      TServerMessageCallback.Create(seGameChange, CSREGameOperation),
-                      TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
-                      TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                      TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStatsReply),
                       TServerMessageCallback.Create(seTableStatus, CSETableStatus),
                       TServerMessageCallback.Create(srPlayerLimitOk, CSRPlayerLimitOk),
-                      TServerMessageCallback.Create(srResetPlayerBalanceOk, CSRResetPlayerBalanceOk)
-
+                      TServerMessageCallback.Create(srResetPlayerBalanceOk, CSRResetPlayerBalanceOk),
+                      TServerMessageCallback.Create([srOwnershipGiveAwayOk, srSuspendPlayerOk, srReinstatePlayerOk, seClubDeleted,
+                                                     seClubChange, srClubDisbandOk], CSREClubOperation),
+                      TServerMessageCallback.Create([seGameDelete, seGameChange, seGameCreate, srCreateGameOk, srDeleteGameOk], CSREGameOperation)
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
@@ -1020,7 +1011,7 @@ var
   pbreply: TPB_TableStatsReplies;
   C1: Integer;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatsReplies>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_TableStatsReplies>(AObject, pbreply) then
     Exit;
 
   for C1 := 0 to pbreply.Reply.Count - 1 do
@@ -1045,9 +1036,9 @@ procedure TfrmClubLobby.CSRClubDetailsChange(const AMethodId: Integer; const AOb
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if pbreply.Club.MongoId <> FClubId then
+  if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
 
   case pbreply.Status of
@@ -1062,9 +1053,9 @@ procedure TfrmClubLobby.CSRLeaveClub(const AMethodId: Integer; const AObject: TO
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if pbreply.Club.MongoId <> FClubId then
+  if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
 
   case pbreply.Status of
@@ -1079,14 +1070,14 @@ procedure TfrmClubLobby.CSRKickPlayer(const AMethodId: Integer; const AObject: T
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if pbreply.Club.MongoId <> FClubId then
+  if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
 
   case pbreply.Status of
     csSuccess: ConfigureGUI;
-    csInvalidClubId: MessageDlg('Invalid club ID', mtError, [mbOk], 0);
+    csInvalidClubId: ;
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRKickPlayer: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
   end;
@@ -1096,7 +1087,7 @@ procedure TfrmClubLobby.CSROwnerGiveawayInvalidClubId(const AMethodId: Integer; 
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1108,7 +1099,7 @@ procedure TfrmClubLobby.CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1120,7 +1111,7 @@ procedure TfrmClubLobby.CSROwnerGiveawayNotOwner(const AMethodId: Integer; const
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1133,7 +1124,7 @@ var
   pbreply: TPB_PlayerLimitParams;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
     Exit;
   if FClubId <> pbreply.Clubid then
     Exit;
@@ -1153,7 +1144,7 @@ var
   pbreply: TPB_PlayerLimitParams;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
     Exit;
   if FClubId <> pbreply.Clubid then
     Exit;
@@ -1173,7 +1164,7 @@ var
   pbclub: TPB_Club;
   contains_key: Boolean;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1198,7 +1189,7 @@ var
   config_gui: Boolean;
   game: TGameInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+  if not TTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   config_gui := FALSE;

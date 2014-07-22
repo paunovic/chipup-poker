@@ -168,7 +168,7 @@ procedure TfrmChangeClubDetails.CSRClubDetailsChange(const AMethodId: Integer; c
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
   if pbreply.Club.MongoId <> FClubId then
     Exit;

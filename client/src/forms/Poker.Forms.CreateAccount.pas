@@ -142,7 +142,7 @@ procedure TfrmCreateAccount.CSRRegisterReply(const AMethodId: Integer; const AOb
 var
   pbreply: TPB_RegisterReply;
 begin
-  if not TPokerTypes.TryCast<TPB_RegisterReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_RegisterReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

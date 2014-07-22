@@ -98,6 +98,7 @@ end;
 
 destructor TTable.Destroy;
 begin
+
   if FLeaveNotify then
     ServerSocket.LeaveTable(FGameId);
 
@@ -105,7 +106,10 @@ begin
   KillTimer(FInternalHWND, TIMER_ID_SEAT_CAPTION_CLEAR);
   KillTimer(FInternalHWND, TIMER_ID_GAMEPLAY_LOCK);
   if Assigned(FRenderer) then
+  begin
+    FRenderer.Disable;
     FRenderer.SetRenderTarget(0);
+  end;
   FreeAndNil(FForm);
   FreeAndNil(FRenderer);
   FreeAndNil(FHandHistoryPlayback);

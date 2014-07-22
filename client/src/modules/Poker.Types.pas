@@ -31,7 +31,7 @@ type
     property Memory: pointer read GetMemory;
   end;
 
-  TPokerTypes = class
+  TTypes = class
   public
     class function TryCast<T>(const AValue: TValue; var AOutput: T): Boolean;
   end;
@@ -58,7 +58,7 @@ begin
   result := LowerCase(result);
 end;
 
-class function TPokerTypes.TryCast<T>(const AValue: TValue; var AOutput: T): Boolean;
+class function TTypes.TryCast<T>(const AValue: TValue; var AOutput: T): Boolean;
 begin
   result := AValue.TryAsType<T>(AOutput);
 end;

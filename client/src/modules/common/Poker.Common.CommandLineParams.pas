@@ -1,9 +1,9 @@
-unit Poker.Common.CommandLineParamProcesser;
+unit Poker.Common.CommandLineParams;
 
 interface
 
 type
-  TCommandLineParamProcesser = class
+  TCommandLineParams = class
   private
     class var
       FNoUpdateFlag: Boolean;
@@ -15,9 +15,9 @@ type
 
 implementation
 
-{ TCommandLineParamProcesser }
+{ TCommandLineParams }
 
-class procedure TCommandLineParamProcesser.ParseParams;
+class procedure TCommandLineParams.ParseParams;
 var
   C1: Integer;
 begin

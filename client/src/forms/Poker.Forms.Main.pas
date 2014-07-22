@@ -75,7 +75,6 @@ type
     ActionMainMenuBar: TActionMainMenuBar;
     acDisconnect: TAction;
     ApplicationEvents: TApplicationEvents;
-    tiRefreshForm: TTimer;
     gridHomeClubsMongoId: TcxGridColumn;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -116,8 +115,6 @@ type
     procedure acDisconnectExecute(Sender: TObject);
     procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
-    procedure tiRefreshFormTimer(Sender: TObject);
-    procedure FormShow(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -204,31 +201,20 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                       TSocketStateChangeCallback.Create(SocketStateChange),
                       TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                      TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubCommand),
-                      TServerMessageCallback.Create(srCreateClubReply, CSRClubCommand),
-                      TServerMessageCallback.Create(srJoinClubReply, CSRClubCommand),
-                      TServerMessageCallback.Create(srKickPlayerReply, CSRClubCommand),
                       TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
                       TServerMessageCallback.Create(srLogout, CSRLogout),
-                      TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                      TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                      TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
                       TServerMessageCallback.Create(seChat, CSEChatEvent),
                       TServerMessageCallback.Create(seAccountConfirmed, CSEAccountConfirmed),
-                      TServerMessageCallback.Create(seClubChange, CSREClubOperation),
-                      TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
                       TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
-                      TServerMessageCallback.Create(seGameChange, CSREGameOperation),
-                      TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                       TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
-                      TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
-                      TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
-                      TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
-                      TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
+                      TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
+                      TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
+                      TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
+                      TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
+                      TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
+                      TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk], CSRTableStatus)
                   ], TRUE);
 
   LoadImageFromResource(imgCashier, 'CashierNormal');
@@ -306,11 +292,6 @@ begin
   btTournamentsHeader.Width := btPublicClubs.Width + 3 + btPrivateClubs.Width;
 end;
 
-procedure TfrmChipUpMain.FormShow(Sender: TObject);
-begin
-  tiRefreshForm.Enabled := TRUE;
-end;
-
 procedure TfrmChipUpMain.LogoutFlushData;
 begin
   FormsContainer.CloseAllForms;
@@ -376,11 +357,6 @@ begin
   end;
 
   {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocketState]); {$ENDIF}
-end;
-
-procedure TfrmChipUpMain.tiRefreshFormTimer(Sender: TObject);
-begin
-  gridGames.Refresh;
 end;
 
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);
@@ -874,7 +850,7 @@ procedure TfrmChipUpMain.CSRLeaveClub(const AMethodId: Integer; const AObject: T
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of
@@ -889,7 +865,7 @@ procedure TfrmChipUpMain.CSRClubCommand(const AMethodId: Integer; const AObject:
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of
@@ -904,7 +880,7 @@ procedure TfrmChipUpMain.CSREClubOperation(const AMethodId: Integer; const AObje
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
 
   dmMain.ProcessClubObject(pbclub, nil, AMethodId);
@@ -916,7 +892,7 @@ var
   pbreply: TPB_GetUserParams;
   user: TPB_User;
 begin
-  if not TPokerTypes.TryCast<TPB_GetUserParams>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_GetUserParams>(AObject, pbreply) then
     Exit;
 
   for user in pbreply.Users do
@@ -980,7 +956,7 @@ var
   pbusers: TPB_UserChangeParams;
   pbuser: TPB_User;
 begin
-  if not TPokerTypes.TryCast<TPB_UserChangeParams>(AObject, pbusers) then
+  if not TTypes.TryCast<TPB_UserChangeParams>(AObject, pbusers) then
     Exit;
 
   for pbuser in pbusers.Users do
@@ -996,7 +972,7 @@ procedure TfrmChipUpMain.CSEAccountConfirmed(const AMethodId: Integer; const AOb
 var
   pbuser: TPB_User;
 begin
-  if not TPokerTypes.TryCast<TPB_User>(AObject, pbuser) then
+  if not TTypes.TryCast<TPB_User>(AObject, pbuser) then
     Exit;
 
   dmMain.SelfInfo.MongoId := pbuser.MongoId;
@@ -1014,7 +990,7 @@ procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: T
 var
   pbchatevent: TPB_ChatEvent;
 begin
-  if not TPokerTypes.TryCast<TPB_ChatEvent>(AObject, pbchatevent) then
+  if not TTypes.TryCast<TPB_ChatEvent>(AObject, pbchatevent) then
     Exit;
 
   if pbchatevent.Event = ceServerMessage then
@@ -1025,7 +1001,7 @@ procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject:
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
 
   Tables.CloseTablesForClub(pbclub.MongoId);
@@ -1053,7 +1029,7 @@ var
   table: TTable;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+  if not TTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   iid := -1;
@@ -1081,7 +1057,7 @@ var
   pbgame: TPB_Game;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+  if not TTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLock(pbgame.ClubMongoid, club) then
@@ -1110,7 +1086,7 @@ var
   game: TGameInfo;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbtstatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbtstatus) then
     Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLockByGame(pbtstatus.TableMongoId, club, game) then
@@ -1143,7 +1119,7 @@ var
   empty_avatar_id: TBytes;
   clubstats: TPB_ClubStatsReply;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatsReplies>(AObject, pb) then
+  if not TTypes.TryCast<TPB_TableStatsReplies>(AObject, pb) then
     Exit;
 
   SetLength(empty_avatar_id, 0);
@@ -1188,7 +1164,7 @@ procedure TfrmChipUpMain.CSRHandHistoryMsg(const AMethodId: Integer; const AObje
 var
   pb: TPB_ClubHandHistoryReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubHandHistoryReply>(AObject, pb) then
+  if not TTypes.TryCast<TPB_ClubHandHistoryReply>(AObject, pb) then
     Exit;
 
   HandHistory.Add(pb);

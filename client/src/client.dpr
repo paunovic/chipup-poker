@@ -64,7 +64,7 @@ uses
   Poker.Common.FormsContainer in 'modules\common\Poker.Common.FormsContainer.pas',
   Poker.Common.InstanceController in 'modules\common\Poker.Common.InstanceController.pas',
   Poker.Common.AlphaBlendThread in 'modules\common\Poker.Common.AlphaBlendThread.pas',
-  Poker.Common.CommandLineParamProcesser in 'modules\common\Poker.Common.CommandLineParamProcesser.pas',
+  Poker.Common.CommandLineParams in 'modules\common\Poker.Common.CommandLineParams.pas',
   Poker.Common.WavePlayer.DirectSoundBuffer in 'modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas',
   Poker.Common.WavePlayer in 'modules\common\wave_player\Poker.Common.WavePlayer.pas',
   Poker.Common.WavePlayer.Reader in 'modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas',
@@ -171,15 +171,16 @@ uses
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
   Poker.Protobufs.Objects.HandHistoryMove in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas',
-  Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas';
+  Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas',
+  Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas';
 
 procedure FocusApp;
 var
   window_handle: THandle;
 begin
-  window_handle := FindWindow('TfrmChipUpMain', nil);
-  if window_handle <> 0 then
-    window_handle := FindWindow('TfrmChipUpLogin', nil);
+  window_handle := FindWindow('TfrmChipUpLogin', nil);
+  if window_handle = 0 then
+    window_handle := FindWindow('TfrmChipUpMain', nil);
   if window_handle <> 0 then
     SetForegroundWindow(window_handle);
 end;
@@ -187,7 +188,7 @@ end;
 begin
   {$IFDEF DEBUG} ReportMemoryLeaksOnShutdown := TRUE; {$ENDIF}
 
-  TCommandLineParamProcesser.ParseParams;
+  TCommandLineParams.ParseParams;
 
   TInstanceController.MutexName := Settings.Hardcoded.INSTANCE_MUTEX_NAME;
   if not TInstanceController.IsAlphaInstance then

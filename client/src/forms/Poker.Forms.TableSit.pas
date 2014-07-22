@@ -260,7 +260,7 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -280,7 +280,7 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -301,7 +301,7 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -321,7 +321,7 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -341,7 +341,7 @@ var
   pbstatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbstatus) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -361,7 +361,7 @@ var
   pbgame: TPB_Game;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+  if not TTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then
@@ -383,7 +383,7 @@ var
   table: TTable;
   err: String;
 begin
-  if not TPokerTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
+  if not TTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
     Exit;
 
   err := '';
@@ -409,7 +409,7 @@ var
   pbbuyinerr: TPB_BuyinError;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
+  if not TTypes.TryCast<TPB_BuyinError>(AObject, pbbuyinerr) then
     Exit;
 
   if Tables.GetAndLockTable(FInternalId, table) then

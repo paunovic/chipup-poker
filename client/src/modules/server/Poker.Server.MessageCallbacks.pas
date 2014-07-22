@@ -6,6 +6,8 @@ uses
   System.Generics.Collections, Poker.Protobufs.Enum.ServerCodes, OverbyteIcsWSocket;
 
 type
+  TServerCodesSet = set of TServerCodes;
+
   TCallbackSet = class(TObjectList<TObject>)
   private
     FId: Integer;
@@ -18,13 +20,14 @@ type
   TServerMessageCallbackMethod = procedure(const AMethodId: Integer; const AObject: TObject) of object;
   TServerMessageCallback = class
   private
-    FCode: TServerCodes;
+    FCodes: TServerCodesSet;
     FCallback: TServerMessageCallbackMethod;
 
   public
-    constructor Create(const ACode: TServerCodes; const ACallback: TServerMessageCallbackMethod);
+    constructor Create(const ACodes: TServerCodesSet; const ACallback: TServerMessageCallbackMethod); overload;
+    constructor Create(const ACode: TServerCodes; const ACallback: TServerMessageCallbackMethod); overload;
 
-    property Code: TServerCodes read FCode;
+    property Codes: TServerCodesSet read FCodes;
     property Callback: TServerMessageCallbackMethod read FCallback;
   end;
 
@@ -44,21 +47,24 @@ implementation
 { TCallbackSet }
 
 constructor TCallbackSet.Create(const AId: Integer; const ACallbacks: array of TObject);
-var
-  callback: TObject;
 begin
   inherited Create(TRUE);
 
   FId := AId;
-  for callback in ACallbacks do
-    Add(callback);
+  AddRange(ACallbacks);
 end;
 
 { TServerMessageCallback }
 
+constructor TServerMessageCallback.Create(const ACodes: TServerCodesSet; const ACallback: TServerMessageCallbackMethod);
+begin
+  FCodes := ACodes;
+  FCallback := ACallback;
+end;
+
 constructor TServerMessageCallback.Create(const ACode: TServerCodes; const ACallback: TServerMessageCallbackMethod);
 begin
-  FCode := ACode;
+  FCodes := [ACode];
   FCallback := ACallback;
 end;
 

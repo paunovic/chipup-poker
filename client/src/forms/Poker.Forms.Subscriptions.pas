@@ -81,7 +81,7 @@ procedure TfrmSubscriptions.CSRSubscriptionPlanChange(const AMethodId: Integer; 
 var
   proto: TPB_SubscriptionPlanChange;
 begin
-  if not TPokerTypes.TryCast<TPB_SubscriptionPlanChange>(AObject, proto) then
+  if not TTypes.TryCast<TPB_SubscriptionPlanChange>(AObject, proto) then
     Exit;
   ShellOpen(PChar(proto.Url));
 end;
