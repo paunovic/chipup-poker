@@ -120,6 +120,14 @@ object frmDebug: TfrmDebug
       LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Shape = dxbsLineCenteredHorz
     end
+    object dxBevel4: TdxBevel
+      Left = 462
+      Top = 6
+      Width = 19
+      Height = 60
+      LookAndFeel.SkinName = 'ChipUpDarkStyle'
+      Shape = dxbsLineCenteredHorz
+    end
     object lbsThreads: TcxLabel
       Left = 358
       Top = 3
@@ -201,7 +209,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 90
+      Width = 62
     end
     object lbvMemoryUsage: TcxLabel
       Left = 410
@@ -226,7 +234,7 @@ object frmDebug: TfrmDebug
       StyleHot.LookAndFeel.SkinName = 'ChipUpDarkStyle'
       Transparent = True
       Height = 17
-      Width = 90
+      Width = 62
     end
     object lbvCallbackSets: TcxLabel
       Left = 300
@@ -830,6 +838,68 @@ object frmDebug: TfrmDebug
       ParentFont = False
       OnClick = btMemoryStateClick
     end
+    object btStartBots: TcxButton
+      Left = 572
+      Top = 49
+      Width = 44
+      Height = 19
+      Action = acStartBots
+      Anchors = [akTop, akRight]
+      TabOrder = 25
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
+    object cbServers: TcxComboBox
+      Left = 476
+      Top = 6
+      Anchors = [akLeft, akTop, akRight]
+      AutoSize = False
+      Properties.Alignment.Vert = taVCenter
+      Properties.DropDownListStyle = lsFixedList
+      Style.Edges = []
+      TabOrder = 26
+      Height = 18
+      Width = 140
+    end
+    object cxCheckBox1: TcxCheckBox
+      Left = 564
+      Top = 24
+      Anchors = [akRight, akBottom]
+      Caption = 'FAST'
+      TabOrder = 27
+      Transparent = True
+      Width = 52
+    end
+    object cxTextEdit1: TcxTextEdit
+      Left = 476
+      Top = 26
+      Anchors = [akLeft, akRight, akBottom]
+      AutoSize = False
+      Style.Edges = []
+      TabOrder = 28
+      Text = 'set1'
+      Height = 17
+      Width = 86
+    end
+    object cxButton1: TcxButton
+      Left = 522
+      Top = 49
+      Width = 44
+      Height = 19
+      Action = acStopBots
+      Anchors = [akTop, akRight]
+      TabOrder = 29
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Arial'
+      Font.Style = [fsBold]
+      ParentFont = False
+    end
   end
   object paTop: TPanel
     Left = 0
@@ -930,6 +1000,12 @@ object frmDebug: TfrmDebug
     object acServerCrashTest: TAction
       Hint = 'Server crash test'
       OnExecute = acServerCrashTestExecute
+    end
+    object acStartBots: TAction
+      Caption = 'START'
+    end
+    object acStopBots: TAction
+      Caption = 'STOP'
     end
   end
   object SaveDialog: TSaveDialog

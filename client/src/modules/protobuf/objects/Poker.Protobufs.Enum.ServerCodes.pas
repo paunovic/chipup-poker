@@ -95,7 +95,7 @@ type
   );
 
 {$IFDEF DEBUG}
-function TranslateServerCode(const ACode: Integer): String;
+function TranslateCode(const ACode: Integer): String;
 {$ENDIF DEBUG}
 
 implementation
@@ -103,7 +103,7 @@ implementation
 {$IFDEF DEBUG}
 uses System.SysUtils;
 
-function TranslateServerCode(const ACode: Integer): String;
+function TranslateCode(const ACode: Integer): String;
 var
   sc: TServerCodes;
   sc_valid: Boolean;

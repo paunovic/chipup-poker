@@ -172,7 +172,10 @@ uses
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
   Poker.Protobufs.Objects.HandHistoryMove in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas',
   Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas',
-  Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas';
+  Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas',
+  Poker.Protobufs.Enum.BackendFunctions in 'modules\protobuf\objects\Poker.Protobufs.Enum.BackendFunctions.pas',
+  Poker.Protobufs.Objects.StartBot in 'modules\protobuf\objects\Poker.Protobufs.Objects.StartBot.pas',
+  Poker.Protobufs.Objects.StopBot in 'modules\protobuf\objects\Poker.Protobufs.Objects.StopBot.pas';
 
 procedure FocusApp;
 var
