@@ -157,7 +157,7 @@ function startBot(obj) {
 		bots[obj.name].on('exit',function () {
 			delete bots[obj.name];
 			IO.sockets.emit('botStopped',obj.name);
-			sendAll(codes.srBotStopped,{name:name},'Backend.StopBot');
+			sendAll(codes.srBotStopped,{name:obj.name},'Backend.StopBot');
 		});
 		bots[obj.name].config = obj;
 		IO.sockets.emit('botStarted',obj);
