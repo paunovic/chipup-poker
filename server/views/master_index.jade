@@ -10,6 +10,9 @@ html
       .msg { padding: 2px; border: 1px solid green; display: inline; }
       .typeGame { background: lightblue; }
   body
+    select(id="server",onchange="changeServer(this.value)")
+      option(value="dev") dev
+      option(value="live") live
     div
       input(value="start",type="button",onclick="start()")
       input(value="stop",type="button",onclick="stop()")
@@ -30,4 +33,6 @@ html
           option(value="fastbot") fastbot
           option(value="slowbot") slowbot
       input(type="button",onclick="startBot();",value="Start")
-    div(id="bots")
+    div
+      span(id="dev_bots")
+      span(id="live_bots")
