@@ -209,23 +209,14 @@ begin
                       TServerMessageCallback.Create(srOwnershipGiveAwayNotOwner, CSROwnerGiveawayNotOwner),
                       TServerMessageCallback.Create(srOwnershipGiveawayInvalidPlayerId, CSROwnerGiveawayInvalidPlayerId),
                       TServerMessageCallback.Create(srOwnershipGiveAwayInvalidClubId, CSROwnerGiveawayInvalidClubId),
-                      TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(seClubChange, CSREClubOperation),
-                      TServerMessageCallback.Create(seClubDeleted, CSREClubOperation),
-                      TServerMessageCallback.Create(seGameDelete, CSREGameOperation),
-                      TServerMessageCallback.Create(seGameChange, CSREGameOperation),
-                      TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
-                      TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                      TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srDeleteGameOk, CSREGameOperation),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStatsReply),
                       TServerMessageCallback.Create(seTableStatus, CSETableStatus),
                       TServerMessageCallback.Create(srPlayerLimitOk, CSRPlayerLimitOk),
-                      TServerMessageCallback.Create(srResetPlayerBalanceOk, CSRResetPlayerBalanceOk)
-
+                      TServerMessageCallback.Create(srResetPlayerBalanceOk, CSRResetPlayerBalanceOk),
+                      TServerMessageCallback.Create([srOwnershipGiveAwayOk, srSuspendPlayerOk, srReinstatePlayerOk, seClubDeleted,
+                                                     seClubChange, srClubDisbandOk], CSREClubOperation),
+                      TServerMessageCallback.Create([seGameDelete, seGameChange, seGameCreate, srCreateGameOk, srDeleteGameOk], CSREGameOperation)
                   ]);
 
   // following block fixes Delphi IDE bug that shifts components by several pixels up occassionally
@@ -1047,7 +1038,7 @@ var
 begin
   if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
-  if pbreply.Club.MongoId <> FClubId then
+  if pbreply.Club.MongoId <> FClubId then // FIXME: crash, nil pointer excp
     Exit;
 
   case pbreply.Status of

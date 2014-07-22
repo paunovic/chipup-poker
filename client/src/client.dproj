@@ -243,7 +243,7 @@
 			<DCCReference Include="modules\common\Poker.Common.FormsContainer.pas"/>
 			<DCCReference Include="modules\common\Poker.Common.InstanceController.pas"/>
 			<DCCReference Include="modules\common\Poker.Common.AlphaBlendThread.pas"/>
-			<DCCReference Include="modules\common\Poker.Common.CommandLineParamProcesser.pas"/>
+			<DCCReference Include="modules\common\Poker.Common.CommandLineParams.pas"/>
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.DirectSoundBuffer.pas"/>
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.pas"/>
 			<DCCReference Include="modules\common\wave_player\Poker.Common.WavePlayer.Reader.pas"/>

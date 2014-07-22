@@ -94,7 +94,7 @@ type
 
     procedure SetTableId(const AId: Integer);
     function UpdateDXAreaSize: Boolean;
-    procedure Render;
+    procedure Render(const AUpdateDXAreaSize: Boolean = TRUE);
 
     function AnimateBets(ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;
     procedure AnimateBlinds;
@@ -348,12 +348,13 @@ begin
   end;
 end;
 
-procedure TTableRenderer.Render;
+procedure TTableRenderer.Render(const AUpdateDXAreaSize: Boolean = TRUE);
 begin
   if not FEnabled then
     Exit;
 
-  if UpdateDXAreaSize then
+  if (not AUpdateDXAreaSize) or
+     (UpdateDXAreaSize) then
     DXCore.Device.Render(FSwapChainIndex, RenderEvent, 0);
 end;
 

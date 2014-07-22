@@ -39,7 +39,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  System.SysUtils, System.Classes, Poker.WindowMessages;
+  System.SysUtils, System.Classes, Poker.WindowMessages, Poker.Protobufs.Enum.ServerCodes;
 
 
 class procedure TMessageContainer.Initialize;
@@ -154,7 +154,7 @@ begin
         if obj is TServerMessageCallback then
         begin
           callback_servermsg := obj as TServerMessageCallback;
-          if Integer(callback_servermsg.Code) = AMethodId then
+          if TServerCodes(AMethodId) in callback_servermsg.Codes then
             callback_servermsg.Callback(AMethodId, AObject)
         end;
   finally

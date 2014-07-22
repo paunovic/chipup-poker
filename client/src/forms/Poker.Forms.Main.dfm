@@ -21,7 +21,6 @@ object frmChipUpMain: TfrmChipUpMain
   OnDestroy = FormDestroy
   OnDeactivate = FormDeactivate
   OnResize = FormResize
-  OnShow = FormShow
   DesignSize = (
     794
     573)
@@ -4322,12 +4321,6 @@ object frmChipUpMain: TfrmChipUpMain
   object ApplicationEvents: TApplicationEvents
     OnDeactivate = ApplicationEventsDeactivate
     Left = 344
-    Top = 52
-  end
-  object tiRefreshForm: TTimer
-    Interval = 200
-    OnTimer = tiRefreshFormTimer
-    Left = 524
     Top = 52
   end
 end

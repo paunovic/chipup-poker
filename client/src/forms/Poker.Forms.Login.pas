@@ -88,7 +88,7 @@ uses
   Poker.Forms.CreateAccount, Poker.Forms.ForgotPassword, Poker.Settings, Poker.Server.Socket, Poker.Server.MessageContainer,
   Poker.Server.Settings, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule, Poker.Protobufs.Objects.HelloReply,
   Poker.Protobufs.Objects.LoginReply, Poker.Server.MessageCallbacks, Poker.Forms.Main, Poker.Common.FormsContainer,
-  Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParamProcesser,
+  Poker.HardcodedSettings, Poker.Common.Encryption, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Common.CommandLineParams,
   Poker.Tables.Resources, Poker.DirectX.Core, Poker.Types;
 
 
@@ -382,7 +382,7 @@ begin
   if not TPokerTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
     Exit;
 
-  if (not TCommandLineParamProcesser.NoUpdateFlag) and
+  if (not TCommandLineParams.NoUpdateFlag) and
      (pbhello.UpdateFiles.Count > 0) then
   begin
     dmMain.StoreUpdateFiles(pbhello.UpdateFiles);

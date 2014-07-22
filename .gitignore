@@ -5,6 +5,7 @@ cpp-protobuf-generator/output
 *.local
 *.fbpInf
 *.identcache
+*.tvsconfig
 server/dag/handeval/*
 server/dag/build/*
 server/node_modules/*

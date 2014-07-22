@@ -75,7 +75,6 @@ type
     ActionMainMenuBar: TActionMainMenuBar;
     acDisconnect: TAction;
     ApplicationEvents: TApplicationEvents;
-    tiRefreshForm: TTimer;
     gridHomeClubsMongoId: TcxGridColumn;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -116,8 +115,6 @@ type
     procedure acDisconnectExecute(Sender: TObject);
     procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
-    procedure tiRefreshFormTimer(Sender: TObject);
-    procedure FormShow(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -204,31 +201,20 @@ begin
   FCallbacksId := MessageContainer.AddCallbacks([
                       TSocketStateChangeCallback.Create(SocketStateChange),
                       TServerMessageCallback.Create(srLeaveClubReply, CSRLeaveClub),
-                      TServerMessageCallback.Create(srChangeClubDetailsReply, CSRClubCommand),
-                      TServerMessageCallback.Create(srCreateClubReply, CSRClubCommand),
-                      TServerMessageCallback.Create(srJoinClubReply, CSRClubCommand),
-                      TServerMessageCallback.Create(srKickPlayerReply, CSRClubCommand),
                       TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
                       TServerMessageCallback.Create(srLogout, CSRLogout),
-                      TServerMessageCallback.Create(srCreateGameOk, CSREGameOperation),
-                      TServerMessageCallback.Create(srClubDisbandOk, CSREClubOperation),
-                      TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
                       TServerMessageCallback.Create(seChat, CSEChatEvent),
                       TServerMessageCallback.Create(seAccountConfirmed, CSEAccountConfirmed),
-                      TServerMessageCallback.Create(seClubChange, CSREClubOperation),
-                      TServerMessageCallback.Create(srSuspendPlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srReinstatePlayerOk, CSREClubOperation),
-                      TServerMessageCallback.Create(srOwnershipGiveAwayOk, CSREClubOperation),
                       TServerMessageCallback.Create(seClubDeleted, CSEClubDeleted),
-                      TServerMessageCallback.Create(seGameChange, CSREGameOperation),
-                      TServerMessageCallback.Create(seGameCreate, CSREGameOperation),
                       TServerMessageCallback.Create(seGameDelete, CSREGameDelete),
-                      TServerMessageCallback.Create(seTableStatus, CSRTableStatus),
-                      TServerMessageCallback.Create(srTableStandUpOk, CSRTableStatus),
-                      TServerMessageCallback.Create(srTableSitOk, CSRTableStatus),
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
-                      TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
+                      TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
+                      TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
+                      TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
+                      TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
+                      TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
+                      TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk], CSRTableStatus)
                   ], TRUE);
 
   LoadImageFromResource(imgCashier, 'CashierNormal');
@@ -306,11 +292,6 @@ begin
   btTournamentsHeader.Width := btPublicClubs.Width + 3 + btPrivateClubs.Width;
 end;
 
-procedure TfrmChipUpMain.FormShow(Sender: TObject);
-begin
-  tiRefreshForm.Enabled := TRUE;
-end;
-
 procedure TfrmChipUpMain.LogoutFlushData;
 begin
   FormsContainer.CloseAllForms;
@@ -376,11 +357,6 @@ begin
   end;
 
   {$IFDEF DEBUG} RefreshDebugForm([dfiServer, dfiSocketState]); {$ENDIF}
-end;
-
-procedure TfrmChipUpMain.tiRefreshFormTimer(Sender: TObject);
-begin
-  gridGames.Refresh;
 end;
 
 procedure TfrmChipUpMain.acAnimationsEnabledExecute(Sender: TObject);

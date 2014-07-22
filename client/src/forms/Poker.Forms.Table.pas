@@ -19,12 +19,10 @@ type
     acCheck: TAction;
     acRaise: TAction;
     acPlayNow: TAction;
-    tiSitOutNextHand: TTimer;
     acRaiseMin: TAction;
     acRaise3BB: TAction;
     acRaisePot: TAction;
     acRaiseMax: TAction;
-    tiSitOutNextBB: TTimer;
     acShowCards: TAction;
     edChat: TcxTextEdit;
     cbFoldToAnyBet: TcxCheckBox;
@@ -58,14 +56,12 @@ type
     procedure acRaiseExecute(Sender: TObject);
     procedure acPlayNowExecute(Sender: TObject);
     procedure cbSitOutNextHandPropertiesChange(Sender: TObject);
-    procedure tiSitOutNextHandTimer(Sender: TObject);
     procedure seRaiseAmountPropertiesChange(Sender: TObject);
     procedure acRaiseMinExecute(Sender: TObject);
     procedure acRaise3BBExecute(Sender: TObject);
     procedure acRaisePotExecute(Sender: TObject);
     procedure acRaiseMaxExecute(Sender: TObject);
     procedure cbSitOutNextBBPropertiesChange(Sender: TObject);
-    procedure tiSitOutNextBBTimer(Sender: TObject);
     procedure cbFoldToAnyBetPropertiesChange(Sender: TObject);
     procedure acShowCardsExecute(Sender: TObject);
     procedure FormClick(Sender: TObject);
@@ -138,7 +134,6 @@ type
     procedure DefocusControls;
     procedure RefreshAll;
     procedure TableStatusUpdate;
-
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure WMSizing(var AMessage: TMessage); message WM_SIZING;
@@ -153,13 +148,13 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, System.TypInfo, {$ENDIF}
-  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.DirectX.Timer, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo,
-  Poker.Tables.Resources, Poker.WindowMessages, Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket,
-  Poker.Common.Misc, Poker.Settings, Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game,
-  Poker.Games.Game, Poker.Sounds, Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main,
-  Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items,
-  Poker.Helpers.PB_Pot, Poker.Clubs.Member;
+  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.DirectX.Timer, Poker.Server.MessageCallbacks, Poker.Protobufs.Enum.ServerCodes,
+  Poker.Protobufs.Objects.ChatEvent, Poker.Protobufs.Objects.ChatMessage, Poker.Protobufs.Objects.SeatInfo, Poker.Tables.Resources,
+  Poker.WindowMessages, Poker.DirectX.Core, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Common.Misc, Poker.Settings,
+  Poker.Forms.TableSit, Poker.DataModule, Poker.Players.PlayerList, Poker.Protobufs.Objects.Game, Poker.Games.Game, Poker.Sounds,
+  Poker.Protobufs.Objects.WinnerData, Poker.HandStrengthCalculator, Poker.Forms.HandHistory, Poker.Forms.Main, Poker.HandHistory.Core,
+  Poker.Seats.Seat, Poker.Cards, Poker.Players.Player, Poker.Tables.TableList, Poker.Clubs.Club, Poker.HandHistory.Items, Poker.Helpers.PB_Pot,
+  Poker.Clubs.Member;
 
 
 constructor TfrmTable.Create(const AInternalId: Integer);
@@ -193,14 +188,11 @@ begin
     ttLiveGame: begin
       FCallbacksId := MessageContainer.AddCallbacks([
                           TServerMessageCallback.Create(seChat, CSRChatEvent),
-                          TServerMessageCallback.Create(seTableStatus, CSRETableStatus),
-                          TServerMessageCallback.Create(srTableSitOk, CSRETableStatus),
-                          TServerMessageCallback.Create(srTableAddonOk, CSRETableStatus),
-                          TServerMessageCallback.Create(srTableStandUpOk, CSRETableStatus),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
                           TServerMessageCallback.Create(seGameChange, CSEGameChange),
                           TServerMessageCallback.Create(srGetPlayers, CSRGetUsers),
-                          TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg)
+                          TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
+                          TServerMessageCallback.Create([seTableStatus, srTableSitOk, srTableAddonOk, srTableStandUpOk], CSRETableStatus)
                       ]);
     end;
     ttHandPlayback: begin
@@ -521,38 +513,6 @@ begin
   end;
 end;
 
-procedure TfrmTable.tiSitOutNextBBTimer(Sender: TObject);
-var
-  seat_info: TSeatInfo;
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
-       (seat_info.Status <> psOutOfPlay) then
-      ServerSocket.TableSitOutNextBB(FGameId, cbSitOutNextBB.Checked);
-  finally
-    Tables.Unlock;
-  end;
-  tiSitOutNextBB.Enabled := FALSE;
-end;
-
-procedure TfrmTable.tiSitOutNextHandTimer(Sender: TObject);
-var
-  seat_info: TSeatInfo;
-  table: TTable;
-begin
-  if Tables.GetAndLockTable(FInternalId, table) then
-  try
-    if (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
-       (seat_info.Status <> psOutOfPlay) then
-      ServerSocket.TableSitOutNextHand(FGameId, cbSitOutNextHand.Checked);
-  finally
-    Tables.Unlock;
-  end;
-  tiSitOutNextHand.Enabled := FALSE;
-end;
-
 procedure TfrmTable.UpdateHandHistoryLabel;
 var
   hhis: THandHistoryItems;
@@ -717,15 +677,39 @@ begin
 end;
 
 procedure TfrmTable.cbSitOutNextBBPropertiesChange(Sender: TObject);
+var
+  seat_info: TSeatInfo;
+  table: TTable;
 begin
-  tiSitOutNextBB.Enabled := FALSE;
-  tiSitOutNextBB.Enabled := TRUE;
+  if not cbSitOutNextBB.Enabled then
+    Exit;
+
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
+       (seat_info.Status <> psOutOfPlay) then
+      ServerSocket.TableSitOutNextBB(FGameId, cbSitOutNextBB.Checked);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmTable.cbSitOutNextHandPropertiesChange(Sender: TObject);
+var
+  seat_info: TSeatInfo;
+  table: TTable;
 begin
-  tiSitOutNextHand.Enabled := FALSE;
-  tiSitOutNextHand.Enabled := TRUE;
+  if not cbSitOutNextHand.Enabled then
+    Exit;
+
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    if (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat_info)) and
+       (seat_info.Status <> psOutOfPlay) then
+      ServerSocket.TableSitOutNextHand(FGameId, cbSitOutNextHand.Checked);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmTable.CSEGameChange(const AMethodId: Integer; const AObject: TObject);
@@ -1263,7 +1247,7 @@ begin
   try
     table.Renderer.UpdateDXAreaSize;
     ConfigureGUI;
-    table.Renderer.Render;
+    table.Renderer.Render(FALSE);
 
     if (table.Status.ActionFoldToAny) and
        (cbFoldToAnyBet.Checked) then
