@@ -138,9 +138,8 @@ IO.on('connection',function (socket) {
 		else livelink.startBot(obj);
 	});
 	socket.on('stopBot',function (name) {
-		if (bots[name]) {
-			bots[name].send({cmd:'stop'});
-		}
+		if (obj.target == 'dev') stopBot(name);
+		else livelink.stopBot(name);
 		//IO.sockets.emit('botStopped',name);
 	});
 	socket.on('disconnect',function () {
@@ -159,9 +158,16 @@ function startBot(obj) {
 		bots[obj.name].on('exit',function () {
 			delete bots[obj.name];
 			IO.sockets.emit('botStopped',obj.name);
+			sendAll(codes.srBotStopped,{name:name},'Backend.StopBot');
 		});
 		bots[obj.name].config = obj;
 		IO.sockets.emit('botStarted',obj);
+		sendAll(codes.srBotStarted,obj,'Backend.StartBot');
+	}
+}
+function stopBot(name) {
+	if (bots[name]) {
+		bots[name].send({cmd:'stop'});
 	}
 }
 function ControlLink() {
@@ -178,6 +184,9 @@ ControlLink.prototype.handle = function (err,method,args) {
 }
 ControlLink.prototype.startBot = function (obj) {
 	this.reply(codes.scStartBot,obj,'Backend.StartBot');
+}
+ControlLink.prototype.stopBot = function (name) {
+	this.reply(codes.scStopBot,{name:name},'Backend.StopBot');
 }
 ControlLink.prototype.disconnect = function () {
 	this.socket.destroy();
@@ -259,6 +268,11 @@ function getLog(name) {
 		logs[name] = fs.createWriteStream('logs/'+name+'.log');
 	}
 	return logs[name];
+}
+function sendAll(code,data,type) {
+	for (var x=0; x<clients.length; x++) {
+		clients[x].reply(code,data,type);
+	}
 }
 function startImHub() {
 	restarting = false;

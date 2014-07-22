@@ -13,6 +13,9 @@ enum BackendFunctions {
 	GlobalMsgEvent = 7;
 	PerGameMsgEvent = 8;
 	scStartBot = 9;
+	srBotStarted = 10;
+	scStopBot = 11;
+	srBotStopped = 12;
 }
 message PerClientMsg {
 	required string ts = 1;
@@ -30,4 +33,7 @@ message GlobalMsg {
 message StartBot {
 	required string name = 1;
 	required string mode = 2;
+}
+message StopBot {
+	required string name = 1;
 }
