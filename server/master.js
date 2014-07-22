@@ -174,9 +174,6 @@ function ControlLink() {
 ControlLink.prototype.handle = function (err,method,args) {
 	console.log('controllink',method,args);
 	switch (method) {
-	case codes.scStartBot:
-		startBot(pb.Parse(args,'Backend.StartBot'));
-		break;
 	}
 }
 ControlLink.prototype.startBot = function (obj) {
@@ -249,6 +246,9 @@ Client.prototype.handle = function (code,data) {
 		} else {
 			startImHub();
 		}
+		break;
+	case codes.scStartBot:
+		startBot(pb.Parse(data,'Backend.StartBot'));
 		break;
 	}
 }
