@@ -98,7 +98,7 @@ socket.on('botStarted',function (obj) {
 	var button = document.createElement('input');
 	button.type = 'button';
 	button.addEventListener('click',function () {
-		socket.emit('stopBot',obj.name);
+		socket.emit('stopBot',{name:obj.name, target:'live'} );
 	});
 	button.value = 'stop bot '+obj.name;
 	bot.node.appendChild(button);

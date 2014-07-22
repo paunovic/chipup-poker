@@ -137,10 +137,9 @@ IO.on('connection',function (socket) {
 		if (obj.target == 'dev') startBot(obj);
 		else livelink.startBot(obj);
 	});
-	socket.on('stopBot',function (name) {
-		if (obj.target == 'dev') stopBot(name);
-		else livelink.stopBot(name);
-		//IO.sockets.emit('botStopped',name);
+	socket.on('stopBot',function (obj) {
+		if (obj.target == 'dev') stopBot(obj.name);
+		else livelink.stopBot(obj.name);
 	});
 	socket.on('disconnect',function () {
 		livelink.disconnect();
