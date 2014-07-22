@@ -106,6 +106,7 @@ IO.set('authorization',function (handshakeData,callback) {
 });
 IO.on('connection',function (socket) {
 	var livelink = new ControlLink();
+	var activeServer = 'dev';
 	socket.on('start',function () {
 		if (main_server) {
 			console.log('server already up');
@@ -134,15 +135,20 @@ IO.on('connection',function (socket) {
 		}
 	});
 	socket.on('startBot',function (obj) {
-		if (obj.target == 'dev') startBot(obj);
-		else livelink.startBot(obj);
+		if (activeServer == 'dev') {
+			obj.target = 'dev';
+			startBot(obj);
+		} else livelink.startBot(obj);
 	});
 	socket.on('stopBot',function (obj) {
-		if (obj.target == 'dev') stopBot(obj.name);
+		if (activeServer == 'dev') stopBot(obj.name);
 		else livelink.stopBot(obj.name);
 	});
 	socket.on('disconnect',function () {
 		livelink.disconnect();
+	});
+	socket.on('changeServer',function (id) {
+		activeServer = id;
 	});
 	for (var key in bots) {
 		socket.emit('botStarted',bots[key].config);
@@ -157,7 +163,7 @@ function startBot(obj) {
 		bots[obj.name].on('exit',function () {
 			delete bots[obj.name];
 			IO.sockets.emit('botStopped',obj.name);
-			sendAll(codes.srBotStopped,{name:obj.name},'Backend.StopBot');
+			sendAll(codes.srBotStopped,{name:obj.name,target:obj.target},'Backend.StopBot');
 		});
 		bots[obj.name].config = obj;
 		IO.sockets.emit('botStarted',obj);
@@ -178,14 +184,29 @@ function ControlLink() {
 }
 ControlLink.prototype.handle = function (err,method,args) {
 	var params;
+	function forward(data) {
+		// FIXME, forward to websocket
+		IO.sockets.emit('live',data);
+	}
 	switch (method) {
 	case codes.PerClientMsgEvent:
+		params = pb.Parse(args,'Backend.PerClientMsg');
+		params.type = 'conn';
+		forward(params);
+		break;
 	case codes.PerGameMsgEvent:
-		// FIXME, forward to websocket
+		params = pb.Parse(args,'Backend.PerGameMsg');
+		params.type = 'game';
+		forward(params);
 		break;
 	case codes.srBotStarted:
 		params = pb.Parse(args,'Backend.StartBot');
+		params.target = 'live';
 		IO.sockets.emit('botStarted',params);
+		break;
+	case codes.srBotStopped:
+		params = pb.Parse(args,'Backend.StopBot');
+		IO.sockets.emit('botStopped',params.name);
 		break;
 	default:
 		console.log('controllink',method,args);
@@ -208,6 +229,9 @@ function Client(sockin) {
 	this.socket = sockin;
 	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.log.bind(this),this.log.bind(this));
 	this.reply(codes.Hello);
+	for (var key in bots) {
+		sendAll(codes.srBotStarted,bots[key].config,'Backend.StartBot');
+	}
 	this.socket.on('end',function () {
 		this.log('connection lost');
 		this.remove();
@@ -237,6 +261,7 @@ Client.prototype.log = function log(format) {
 	console.log.apply(this,out);
 }
 Client.prototype.handle = function (code,data) {
+	var params;
 	console.log(code,data);
 	switch (code) {
 	case codes.StartServer:
@@ -266,7 +291,9 @@ Client.prototype.handle = function (code,data) {
 		}
 		break;
 	case codes.scStartBot:
-		startBot(pb.Parse(data,'Backend.StartBot'));
+		params = pb.Parse(data,'Backend.StartBot')
+		params.target = 'live';
+		startBot(params);
 		break;
 	case codes.scStopBot:
 		params = pb.Parse(data,'Backend.StopBot');
@@ -302,7 +329,7 @@ function startImHub() {
 		//setTimeout(function () { im_hub.kill('SIGUSR1'); },100);
 	}
 	main_server.on('message',function (msg) {
-		IO.sockets.emit('message',msg);
+		IO.sockets.emit('message',msg); // FIXME, filter it more
 		buffer.push(msg);
 		switch (msg.type) {
 		case 'control':
