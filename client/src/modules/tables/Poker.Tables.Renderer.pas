@@ -63,6 +63,9 @@ type
     FOnTimebankStarted: TNotifyEvent;
     FRaiseThumbDown: Boolean;
 
+    FPots: TPB_PotList;
+    FBets: TList<Integer>;
+
     procedure RenderEvent(Sender: TObject);
     procedure RenderBackground;
     procedure RenderTable;
@@ -164,6 +167,9 @@ begin
   FChipStackMaker := TChipStackMaker.Create;
   FDXButtons := TObjectList<TDXButton>.Create;
   FTableType := ATableType;
+
+  FPots := TPB_PotList.Create;
+  FBets := TList<Integer>.Create;
 {  FAnimations := Poker.DirectX.Animations.TDXAnimations.Create;
   FAnimations.Start;
 }
@@ -183,6 +189,9 @@ end;
 
 destructor TTableRenderer.Destroy;
 begin
+  FBets.Free;
+  FPots.Free;
+
 {  FAnimations.Terminate;
   FAnimations.Signal;
   FAnimations.WaitFor;

@@ -5,6 +5,13 @@ interface
 uses
    Winapi.Windows, System.Generics.Collections, System.Classes, Asphyre.Math, Asphyre.Timing, System.SyncObjs, Poker.DirectX.AnimationNew;
 
+const
+  ANITAG_CARD_INDEX   = 1;
+  ANITAG_WIN_MESSAGE  = 2;
+  ANITAG_CHIPS_AMOUNT = 3;
+  ANITAG_SEAT_INDEX   = 4;
+  ANITAG_POT_INDEX    = 5;
+
 type
   TDXAnimations = class(TThread)
   private
@@ -137,7 +144,7 @@ begin
     if Count = 0 then
       FWaitEvent.WaitFor
     else
-      Sleep(FUpdateInterval);
+      FWaitEvent.WaitFor(FUpdateInterval);
 
     UpdateAnimations;
   end;

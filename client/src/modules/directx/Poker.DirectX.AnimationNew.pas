@@ -6,10 +6,11 @@ uses
   Asphyre.Math, System.Generics.Collections;
 
 type
-  TDXAnimationStatus = (asStarting, asAnimating, asFinished);
+  TDXAnimationStatus = (asAnimating, asFinished);
   TDXAnimationNew = class
   private
     FPoints: TList<TPoint2>;
+    FTags: TDictionary<Integer, Variant>;
     FStartTime: Double;
     FEndTime: Double;
     FTimePerPoint: Double;
@@ -29,6 +30,7 @@ type
     property Status: TDXAnimationStatus read FStatus;
     property Enabled: Boolean read FEnabled write FEnabled;
     property CurrentPos: TPoint2 read FCurrentRealPos;
+    property Tags: TDictionary<Integer, Variant> read FTags;
   end;
 
 implementation
@@ -40,9 +42,10 @@ var
   point: TPoint2;
 begin
   FEnabled := TRUE;
-  FStatus := asStarting;
+  FStatus := asAnimating;
   FStartTime := AStartAt;
   FEndTime := AEndAt;
+  FTags := TDictionary<Integer, Variant>.Create;
   FPoints := TList<TPoint2>.Create;
   for point in APoints do
     FPoints.Add(Point2(point.x / ADXAreaSize.x, point.y / ADXAreaSize.y));
@@ -55,6 +58,7 @@ end;
 destructor TDXAnimationNew.Destroy;
 begin
   FPoints.Free;
+  FTags.Free;
   inherited;
 end;
 
@@ -62,13 +66,8 @@ procedure TDXAnimationNew.Update(const ATime: Double; const ADXAreaSize: TPoint2
 var
   xp, yp, ptime: Double;
 begin
-  if ATime < FStartTime then
-  begin
-    FStatus := asStarting;
-    Exit;
-  end;
-
-  if FStatus = asFinished then
+  if (FStatus = asFinished) or
+     (ATime < FStartTime) then
     Exit;
 
   xp := FPoints[FCurrentPoint + 1].x - FPoints[FCurrentPoint].x;
@@ -85,15 +84,12 @@ begin
     UpdateRealPos(ADXAreaSize);
   end
   else
-  begin
-    FStatus := asAnimating;
     if FEnabled then
     begin
       FCurrentPercPos.x := FPoints[FCurrentPoint].x + xp / ptime;
       FCurrentPercPos.y := FPoints[FCurrentPoint].y + yp / ptime;
       UpdateRealPos(ADXAreaSize);
     end;
-  end;
 end;
 
 procedure TDXAnimationNew.UpdateRealPos(const ADXAreaSize: TPoint2px);
