@@ -6,6 +6,7 @@ var MongoClient = require('mongodb').MongoClient;
 var async = require('async');
 var colors = require('colors');
 var assert = require('assert');
+var util = require('util');
 
 var pb = new p(fs.readFileSync("../message.desc"))
 var codes = require('./ServerCodes');
@@ -200,6 +201,14 @@ function testmenu(cb,config) {
 	var clients = [];
 	var prefix = 'client';
 	var x;
+	process.on('message',function (obj) {
+		if (obj.cmd == 'stop') {
+			for (var x=0; x<clients.length; x++) {
+				clients[x].reply(codes.scLogout);
+				clearTimeout(clients[x].pinger);
+			}
+		}
+	});
 	if (config && config.prefix) prefix = config.prefix;
 	if (config && config.autoRandom) {
 		for (x in config.autoRandom) {
@@ -340,7 +349,9 @@ function testmenu(cb,config) {
 			var msg = data.toString('utf8');
 			this.log(msg.red);
 			if (msg == 'your not a member of that club') {
-				this.reply(codes.scJoinClub,{club_mongo_id:clubid,password:'password'},'Poker.Club');
+				var obj = {seq:clubseq,password:'password'};
+				console.log(util.format('joining club %j %s',obj,new Buffer(clubid).toString('hex')));
+				this.reply(codes.scJoinClub,obj,'Poker.Club');
 			}
 			break;
 		case codes.srJoinClubReply:
@@ -406,6 +417,10 @@ function testmenu(cb,config) {
 				conn = null;
 				process.stdin.pause();
 			}
+			break;
+		case codes.srLogout:
+			this.socket.destroy();
+			process.stdin.pause();
 			break;
 		case codes.seGameChange:
 			var params = pb.Parse(data,'Poker.Game');

@@ -822,7 +822,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 			Club.dupCheck(params.name,function (dup) {
 				if (dup) {
 					this.log('dup club name');
-					this.send(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
+					this.send(codes.srChangeClubDetailsReply,{status:'csNameExists',club:Club.makeClubProtobuf(club.obj,null,[],club)},'Poker.ClubCommandReply');
 				} else {
 					club.obj.name = params.name;
 					finish.call(this);
@@ -851,7 +851,7 @@ handlers[codes.scChangeClubDetails] = function (args,token) {
 				this.log('detail update',clubid,params,err,ret);
 				if (err) {
 					this.log('name collision');
-					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists'},'Poker.ClubCommandReply');
+					this.reply(codes.srChangeClubDetailsReply,{status:'csNameExists',club:Club.makeClubProtobuf(club.obj,null,null,club)},'Poker.ClubCommandReply');
 				} else {
 					var userlist = [ ];
 					models.Game.find({clubid:club.clubid},function changeDetail_cb3(err,games) {

@@ -9,4 +9,5 @@ codes.Stopping=5;
 codes.PerClientMsgEvent=6;
 codes.GlobalMsgEvent=7;
 codes.PerGameMsgEvent=8;
-codes.reverse = ["Hello","StartServer","StopServer","RestartServer","Starting","Stopping","PerClientMsgEvent","GlobalMsgEvent","PerGameMsgEvent"];
+codes.scStartBot=9;
+codes.reverse = ["Hello","StartServer","StopServer","RestartServer","Starting","Stopping","PerClientMsgEvent","GlobalMsgEvent","PerGameMsgEvent","scStartBot"];

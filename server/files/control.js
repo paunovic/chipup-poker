@@ -7,6 +7,7 @@ function stop() { socket.emit('stop'); }
 function restart() { socket.emit('restart'); }
 socket.on('message',function (obj) {
 	var autoscroll = document.getElementById('autoScroll').checked;
+	if (document.getElementById('debug').children.length > 500) document.getElementById('debug').removeChild(document.getElementById('debug').children[0]);
 	switch (obj.type) {
 	case 'conn':
 		var div = document.createElement('div');
@@ -116,5 +117,5 @@ function updatefilter() {
 function startBot() {
 	var setname = document.getElementById('setname').value;
 	var mode = document.getElementById('mode').value;
-	socket.emit('startBot',{name:setname,mode:mode});
+	socket.emit('startBot',{name:setname,mode:mode,target:'live'});
 }

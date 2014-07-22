@@ -16,6 +16,9 @@ var MongoStore = require('./mongoStore');
 var pb = new p(fs.readFileSync("../message.desc"));
 Protoreader.init(pb,codes);
 
+var ProtobufUtil = require('./ProtobufUtil');
+var pbu = new ProtobufUtil(pb,'Poker.RpcMessage',codes);
+
 var clients = [];
 
 var logs = {};
@@ -102,6 +105,7 @@ IO.set('authorization',function (handshakeData,callback) {
 	}
 });
 IO.on('connection',function (socket) {
+	var livelink = new ControlLink();
 	socket.on('start',function () {
 		if (main_server) {
 			console.log('server already up');
@@ -130,30 +134,51 @@ IO.on('connection',function (socket) {
 		}
 	});
 	socket.on('startBot',function (obj) {
-		console.log(obj);
-		if (bots[obj.name]) {
-			console.log('bot already running');
-		} else {
-			bots[obj.name] = require('child_process').fork('./testclient.js',[obj.mode,obj.name,'127.0.0.1']);
-			bots[obj.name].on('exit',function () {
-				delete bots[obj.name];
-				IO.sockets.emit('botStopped',obj.name);
-			});
-			bots[obj.name].config = obj;
-			IO.sockets.emit('botStarted',obj);
-		}
+		if (obj.target == 'dev') startBot(obj);
+		else livelink.startBot(obj);
 	});
 	socket.on('stopBot',function (name) {
 		if (bots[name]) {
-			bots[name].kill();
-			delete bots[name];
+			bots[name].send({cmd:'stop'});
 		}
-		IO.sockets.emit('botStopped',name);
+		//IO.sockets.emit('botStopped',name);
+	});
+	socket.on('disconnect',function () {
+		livelink.disconnect();
 	});
 	for (var key in bots) {
 		socket.emit('botStarted',bots[key].config);
 	}
 });
+function startBot(obj) {
+	console.log(obj);
+	if (bots[obj.name]) {
+		console.log('bot already running');
+	} else {
+		bots[obj.name] = require('child_process').fork('./testclient.js',[obj.mode,obj.name,'127.0.0.1']);
+		bots[obj.name].on('exit',function () {
+			delete bots[obj.name];
+			IO.sockets.emit('botStopped',obj.name);
+		});
+		bots[obj.name].config = obj;
+		IO.sockets.emit('botStarted',obj);
+	}
+}
+function ControlLink() {
+	this.socket = net.connect('chipuppoker.com',45508);
+	this.socket.on('data',pbu.createOnDataListenerFn(this.handle.bind(this),console.log));
+}
+ControlLink.prototype.handle = function (method,args) {
+	console.log('controllink',method,args);
+	switch (method) {
+	case codes.scStartBot:
+		startBot(pb.Parse(args,'Backend.StartBot'));
+		break;
+	}
+}
+ControlLink.prototype.startBot = function (obj) {
+	this.reply(codes.scStartBot,obj,'Backend.StartBot');
+}
 function Client(sockin) {
 	this.socket = sockin;
 	this.reader = new Protoreader(this.socket,this.handle.bind(this),this.log.bind(this),this.log.bind(this));
