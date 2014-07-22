@@ -243,7 +243,7 @@ begin
     dbgtype := ADebugType;
 
   if ARpcMessage.DataSize = 0 then
-    DebugLn(FDebugId, Format('Method: %s', [TranslateServerCode(ARpcMessage.MethodId)]), dbgtype)
+    DebugLn(FDebugId, Format('Method: %s', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), dbgtype)
   else
   begin
     if (IsDebugFormAssigned) and
@@ -253,9 +253,9 @@ begin
       serialized_object := '';
 
     if AStreamSize = 0 then
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize]), dbgtype, serialized_object)
     else
-      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [TranslateServerCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
+      DebugLn(FDebugId, Format('Method: %s; DataSize: %d; StreamSize: %d', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId), ARpcMessage.DataSize, AStreamSize]), dbgtype, serialized_object);
   end;
 end;
 {$ENDIF}
@@ -502,7 +502,7 @@ begin
   if (Assigned(ADataObject)) and
      (not (ADataObject as TProtobufBaseObject).IsInitialized) then
   begin
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('MethodId: %s; ADataObject not initialized', [TranslateServerCode(ARpcMessage.MethodId)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('MethodId: %s; ADataObject not initialized', [Poker.Protobufs.Enum.ServerCodes.TranslateCode(ARpcMessage.MethodId)]), ditException); {$ENDIF}
     FreeAndNil(ADataObject);
     Exit(FALSE);
   end;

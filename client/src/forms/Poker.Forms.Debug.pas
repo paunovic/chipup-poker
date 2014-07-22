@@ -8,7 +8,7 @@ uses
   Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxContainer, cxEdit, cxMemo,
   Vcl.ExtCtrls, Vcl.Menus, cxButtons, Vcl.ActnList, IdSync, cxLabel, RVScroll, RichView, RVStyle, RVTable, CRVData, dxBevel, cxGraphics,
   cxControls, cxLookAndFeels, cxLookAndFeelPainters, dxSkinsCore, ChipUpPokerDarkSkin, Vcl.StdCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  cxCheckComboBox, System.SyncObjs, System.Generics.Collections;
+  cxCheckComboBox, System.SyncObjs, System.Generics.Collections, cxRadioGroup, cxCheckBox;
 
 type
   TDebugInfoType = (ditException = 0, ditApplication, ditSocket, ditSocketInc, ditSocketOut, ditNetInc, ditNetOut, ditForm, ditPingPong, ditUnknown);
@@ -117,6 +117,14 @@ type
     teFindText: TcxTextEdit;
     btMemoryState: TcxButton;
     rvMemoryState: TRichView;
+    dxBevel4: TdxBevel;
+    btStartBots: TcxButton;
+    cbServers: TcxComboBox;
+    cxCheckBox1: TcxCheckBox;
+    cxTextEdit1: TcxTextEdit;
+    cxButton1: TcxButton;
+    acStartBots: TAction;
+    acStopBots: TAction;
     procedure FormCreate(Sender: TObject);
     procedure acClearLogExecute(Sender: TObject);
     procedure acSaveLogExecute(Sender: TObject);
@@ -164,7 +172,7 @@ uses
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   JclExprEval, Poker.Table.Resources,
   {$ENDIF}
-  FastMM4,
+  FastMM4, Poker.Settings,
   Poker.Common.InstanceController, RVItem, Poker.Common.Misc, Poker.Server.Socket, Poker.Server.MessageContainer, OverbyteIcsWSocket,
   Poker.DirectX.Core, System.RegularExpressionsAPI, System.RegularExpressions, Poker.DataModule, madExcept, Poker.Sounds,
   Poker.DirectX.Timer, RectMarks;
@@ -289,6 +297,8 @@ end;
 
 
 procedure TfrmDebug.FormCreate(Sender: TObject);
+var
+  C1: Integer;
 begin
   Left := 0;
   Top := 0;
@@ -300,6 +310,10 @@ begin
   Top := 0;
   Width := Round(Screen.Monitors[0].Width / 2.9);
   Height := Round(Screen.Monitors[0].Height / 2.6);
+
+  for C1 := Low(Settings.Hardcoded.SERVER_CONFIG) to High(Settings.Hardcoded.SERVER_CONFIG) do
+    cbServers.Properties.Items.Add(Settings.Hardcoded.SERVER_CONFIG[C1].TCPAddress);
+  cbServers.ItemIndex := 0;
 
   {$IFDEF SEAT_POSITIONS_CONFIGURATOR}
   btSeatPos.Visible := TRUE;
@@ -559,7 +573,6 @@ begin
     rvLog.Format
   else
     rvLog.FormatTail;
-  rvLog.Refresh;
 end;
 
 procedure TfrmDebug.rvLogRVMouseUp(Sender: TCustomRichView; Button: TMouseButton; Shift: TShiftState; ItemNo, X, Y: Integer);
@@ -976,7 +989,6 @@ begin
     dfoc.Free;
   end;
 end;
-
 
 { TDebugObjects }
 
