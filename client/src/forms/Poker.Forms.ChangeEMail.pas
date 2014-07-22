@@ -106,7 +106,7 @@ procedure TfrmChangeEMail.CSRChangeMail(const AMethodId: Integer; const AObject:
 var
   pbreply: TPB_ChangeMailReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ChangeMailReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ChangeMailReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

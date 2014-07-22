@@ -240,7 +240,7 @@ var
   pbreply: TPB_SetAvatarReply;
   player_info: TPlayerInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_SetAvatarReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_SetAvatarReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

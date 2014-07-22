@@ -184,7 +184,7 @@ procedure TfrmReconnect.CSRHello(const AMethodId: Integer; const AObject: TObjec
 var
   pbhello: TPB_HelloReply;
 begin
-  if not TPokerTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
+  if not TTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
     Exit;
 
   FCurrentStatus := rsHelloOk;
@@ -204,7 +204,7 @@ procedure TfrmReconnect.CSRLogin(const AMethodId: Integer; const AObject: TObjec
 var
   pbreply: TPB_LoginReply;
 begin
-  if not TPokerTypes.TryCast<TPB_LoginReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_LoginReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.LoginStatus of

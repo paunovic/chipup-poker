@@ -850,7 +850,7 @@ procedure TfrmChipUpMain.CSRLeaveClub(const AMethodId: Integer; const AObject: T
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of
@@ -865,7 +865,7 @@ procedure TfrmChipUpMain.CSRClubCommand(const AMethodId: Integer; const AObject:
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of
@@ -880,7 +880,7 @@ procedure TfrmChipUpMain.CSREClubOperation(const AMethodId: Integer; const AObje
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
 
   dmMain.ProcessClubObject(pbclub, nil, AMethodId);
@@ -892,7 +892,7 @@ var
   pbreply: TPB_GetUserParams;
   user: TPB_User;
 begin
-  if not TPokerTypes.TryCast<TPB_GetUserParams>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_GetUserParams>(AObject, pbreply) then
     Exit;
 
   for user in pbreply.Users do
@@ -956,7 +956,7 @@ var
   pbusers: TPB_UserChangeParams;
   pbuser: TPB_User;
 begin
-  if not TPokerTypes.TryCast<TPB_UserChangeParams>(AObject, pbusers) then
+  if not TTypes.TryCast<TPB_UserChangeParams>(AObject, pbusers) then
     Exit;
 
   for pbuser in pbusers.Users do
@@ -972,7 +972,7 @@ procedure TfrmChipUpMain.CSEAccountConfirmed(const AMethodId: Integer; const AOb
 var
   pbuser: TPB_User;
 begin
-  if not TPokerTypes.TryCast<TPB_User>(AObject, pbuser) then
+  if not TTypes.TryCast<TPB_User>(AObject, pbuser) then
     Exit;
 
   dmMain.SelfInfo.MongoId := pbuser.MongoId;
@@ -990,7 +990,7 @@ procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: T
 var
   pbchatevent: TPB_ChatEvent;
 begin
-  if not TPokerTypes.TryCast<TPB_ChatEvent>(AObject, pbchatevent) then
+  if not TTypes.TryCast<TPB_ChatEvent>(AObject, pbchatevent) then
     Exit;
 
   if pbchatevent.Event = ceServerMessage then
@@ -1001,7 +1001,7 @@ procedure TfrmChipUpMain.CSEClubDeleted(const AMethodId: Integer; const AObject:
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
 
   Tables.CloseTablesForClub(pbclub.MongoId);
@@ -1029,7 +1029,7 @@ var
   table: TTable;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+  if not TTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   iid := -1;
@@ -1057,7 +1057,7 @@ var
   pbgame: TPB_Game;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+  if not TTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLock(pbgame.ClubMongoid, club) then
@@ -1086,7 +1086,7 @@ var
   game: TGameInfo;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbtstatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbtstatus) then
     Exit;
 
   if dmMain.SelfInfo.Clubs.GetAndLockByGame(pbtstatus.TableMongoId, club, game) then
@@ -1119,7 +1119,7 @@ var
   empty_avatar_id: TBytes;
   clubstats: TPB_ClubStatsReply;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatsReplies>(AObject, pb) then
+  if not TTypes.TryCast<TPB_TableStatsReplies>(AObject, pb) then
     Exit;
 
   SetLength(empty_avatar_id, 0);
@@ -1164,7 +1164,7 @@ procedure TfrmChipUpMain.CSRHandHistoryMsg(const AMethodId: Integer; const AObje
 var
   pb: TPB_ClubHandHistoryReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubHandHistoryReply>(AObject, pb) then
+  if not TTypes.TryCast<TPB_ClubHandHistoryReply>(AObject, pb) then
     Exit;
 
   HandHistory.Add(pb);

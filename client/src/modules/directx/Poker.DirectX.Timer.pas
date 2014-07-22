@@ -144,7 +144,6 @@ begin
   result := FAnimations.AnimationsEnabled;
 end;
 
-
 procedure TDXTimer.Process;
 var
   C1: Integer;

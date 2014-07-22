@@ -171,7 +171,8 @@ uses
   Poker.Protobufs.Objects.PlayerHandHistory in 'modules\protobuf\objects\Poker.Protobufs.Objects.PlayerHandHistory.pas',
   Poker.Protobufs.Objects.AssetList in 'modules\protobuf\objects\Poker.Protobufs.Objects.AssetList.pas',
   Poker.Protobufs.Objects.HandHistoryMove in 'modules\protobuf\objects\Poker.Protobufs.Objects.HandHistoryMove.pas',
-  Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas';
+  Poker.Protobufs.Objects.SubscriptionPlanChange in 'modules\protobuf\objects\Poker.Protobufs.Objects.SubscriptionPlanChange.pas',
+  Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas';
 
 procedure FocusApp;
 var

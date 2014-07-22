@@ -379,7 +379,7 @@ procedure TfrmChipUpLogin.CSRHello(const AMethodId: Integer; const AObject: TObj
 var
   pbhello: TPB_HelloReply;
 begin
-  if not TPokerTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
+  if not TTypes.TryCast<TPB_HelloReply>(AObject, pbhello) then
     Exit;
 
   if (not TCommandLineParams.NoUpdateFlag) and
@@ -410,7 +410,7 @@ procedure TfrmChipUpLogin.CSRLogin(const AMethodId: Integer; const AObject: TObj
 var
   pbreply: TPB_LoginReply;
 begin
-  if not TPokerTypes.TryCast<TPB_LoginReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_LoginReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.LoginStatus of

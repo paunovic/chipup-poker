@@ -114,7 +114,7 @@ procedure TfrmCreateClub.CSRCreateClub(const AMethodId: Integer; const AObject: 
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
 
   case pbreply.Status of

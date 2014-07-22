@@ -6,7 +6,8 @@ interface
 uses
   Winapi.Windows, System.Classes, System.Generics.Collections, System.Types, Asphyre.Math, Asphyre.Types, Asphyre.Fonts,
   Poker.Tables.RenderMetrics, Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, Asphyre.Images, Poker.Seats.Seat, Poker.Cards,
-  Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils, Poker.Protobufs.Objects.Pot;
+  Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils,
+  Poker.Protobufs.Objects.Pot, Poker.DirectX.Animations;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
@@ -38,6 +39,7 @@ type
     FRaiseThumbPosition: Single;
     FDXButtons: TObjectList<TDXButton>;
     FRenderingFoldedCards: Boolean;
+//    FAnimations: TDXAnimations;
 
     FFlopAnimations: TList<Integer>;
     FFlopAnimated: Boolean;
@@ -162,7 +164,9 @@ begin
   FChipStackMaker := TChipStackMaker.Create;
   FDXButtons := TObjectList<TDXButton>.Create;
   FTableType := ATableType;
-
+{  FAnimations := Poker.DirectX.Animations.TDXAnimations.Create;
+  FAnimations.Start;
+}
   FFlopAnimations := TList<Integer>.Create;
   FFlopAnimated := FALSE;
 
@@ -179,6 +183,11 @@ end;
 
 destructor TTableRenderer.Destroy;
 begin
+{  FAnimations.Terminate;
+  FAnimations.Signal;
+  FAnimations.WaitFor;
+  FAnimations.Free;
+ }
   FDealAnimations.Free;
   FFlopAnimations.Free;
   FTurnAnimations.Free;
@@ -344,6 +353,7 @@ begin
   if FDXAreaSize <> FLastDXAreaSize then
   begin
     DXCore.Device.Resize(FSwapChainIndex, FDXAreaSize);
+//    FAnimations.DXAreaSize := FDXAreaSize;
     FLastDXAreaSize := FDXAreaSize;
   end;
 end;
@@ -1317,6 +1327,8 @@ procedure TTableRenderer.ClearAnimations;
 var
   table: TTable;
 begin
+//  FAnimations.Clear;
+
   FFlopAnimations.Clear;
   FTurnAnimations.Clear;
   FRiverAnimations.Clear;
@@ -1392,7 +1404,12 @@ begin
     end;
   end;
 
-  Render;
+  if Tables.GetAndLockTable(FInternalId, table) then
+  try
+    Render;
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 function TTableRenderer.AnimateBets(ABets: TList<UINT32>; const ASeatIndex: Integer = -1): Boolean;

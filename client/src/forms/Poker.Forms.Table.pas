@@ -735,7 +735,7 @@ var
   chat_event: TPB_ChatEvent;
   chat_message: TPB_ChatMessage;
 begin
-  if not TPokerTypes.TryCast<TPB_ChatEvent>(AObject, chat_event) then
+  if not TTypes.TryCast<TPB_ChatEvent>(AObject, chat_event) then
     Exit;
 
   case chat_event.Event of
@@ -936,7 +936,7 @@ var
   pbtablestatus: TPB_TableStatus;
   table: TTable;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatus>(AObject, pbtablestatus) then
+  if not TTypes.TryCast<TPB_TableStatus>(AObject, pbtablestatus) then
     Exit;
   if pbtablestatus.TableMongoId <> FGameId then
     Exit;

@@ -1011,7 +1011,7 @@ var
   pbreply: TPB_TableStatsReplies;
   C1: Integer;
 begin
-  if not TPokerTypes.TryCast<TPB_TableStatsReplies>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_TableStatsReplies>(AObject, pbreply) then
     Exit;
 
   for C1 := 0 to pbreply.Reply.Count - 1 do
@@ -1036,7 +1036,7 @@ procedure TfrmClubLobby.CSRClubDetailsChange(const AMethodId: Integer; const AOb
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
   if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
@@ -1053,7 +1053,7 @@ procedure TfrmClubLobby.CSRLeaveClub(const AMethodId: Integer; const AObject: TO
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
   if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
@@ -1070,7 +1070,7 @@ procedure TfrmClubLobby.CSRKickPlayer(const AMethodId: Integer; const AObject: T
 var
   pbreply: TPB_ClubCommandReply;
 begin
-  if not TPokerTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_ClubCommandReply>(AObject, pbreply) then
     Exit;
   if (not Assigned(pbreply.Club)) or (pbreply.Club.MongoId <> FClubId) then
     Exit;
@@ -1087,7 +1087,7 @@ procedure TfrmClubLobby.CSROwnerGiveawayInvalidClubId(const AMethodId: Integer; 
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1099,7 +1099,7 @@ procedure TfrmClubLobby.CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1111,7 +1111,7 @@ procedure TfrmClubLobby.CSROwnerGiveawayNotOwner(const AMethodId: Integer; const
 var
   pbclub: TPB_Club;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1124,7 +1124,7 @@ var
   pbreply: TPB_PlayerLimitParams;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
     Exit;
   if FClubId <> pbreply.Clubid then
     Exit;
@@ -1144,7 +1144,7 @@ var
   pbreply: TPB_PlayerLimitParams;
   club: TClubInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
+  if not TTypes.TryCast<TPB_PlayerLimitParams>(AObject, pbreply) then
     Exit;
   if FClubId <> pbreply.Clubid then
     Exit;
@@ -1164,7 +1164,7 @@ var
   pbclub: TPB_Club;
   contains_key: Boolean;
 begin
-  if not TPokerTypes.TryCast<TPB_Club>(AObject, pbclub) then
+  if not TTypes.TryCast<TPB_Club>(AObject, pbclub) then
     Exit;
   if pbclub.MongoId <> FClubId then
     Exit;
@@ -1189,7 +1189,7 @@ var
   config_gui: Boolean;
   game: TGameInfo;
 begin
-  if not TPokerTypes.TryCast<TPB_Game>(AObject, pbgame) then
+  if not TTypes.TryCast<TPB_Game>(AObject, pbgame) then
     Exit;
 
   config_gui := FALSE;
