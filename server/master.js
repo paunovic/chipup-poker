@@ -165,10 +165,13 @@ function startBot(obj) {
 	}
 }
 function ControlLink() {
-	this.socket = net.connect('chipuppoker.com',45508);
+	this.socket = net.connect(45508,'chipuppoker.com');
+	this.socket.on('error',function (err) {
+		console.log('unable to control/connect to live',err);
+	});
 	this.socket.on('data',pbu.createOnDataListenerFn(this.handle.bind(this),console.log));
 }
-ControlLink.prototype.handle = function (method,args) {
+ControlLink.prototype.handle = function (err,method,args) {
 	console.log('controllink',method,args);
 	switch (method) {
 	case codes.scStartBot:
@@ -178,6 +181,13 @@ ControlLink.prototype.handle = function (method,args) {
 }
 ControlLink.prototype.startBot = function (obj) {
 	this.reply(codes.scStartBot,obj,'Backend.StartBot');
+}
+ControlLink.prototype.disconnect = function () {
+	this.socket.destroy();
+}
+ControlLink.prototype.reply = function (code,data,type) {
+	var hidden = [];
+	pbu.reply(this.socket,hidden,console.log,code,data,type);
 }
 function Client(sockin) {
 	this.socket = sockin;
