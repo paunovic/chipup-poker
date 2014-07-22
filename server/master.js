@@ -177,8 +177,18 @@ function ControlLink() {
 	this.socket.on('data',pbu.createOnDataListenerFn(this.handle.bind(this),console.log));
 }
 ControlLink.prototype.handle = function (err,method,args) {
-	console.log('controllink',method,args);
+	var params;
 	switch (method) {
+	case codes.PerClientMsgEvent:
+	case codes.PerGameMsgEvent:
+		// FIXME, forward to websocket
+		break;
+	case codes.srBotStarted:
+		params = pb.Parse(args,'Backend.StartBot');
+		IO.sockets.emit('botStarted',params);
+		break;
+	default:
+		console.log('controllink',method,args);
 	}
 }
 ControlLink.prototype.startBot = function (obj) {
@@ -257,6 +267,10 @@ Client.prototype.handle = function (code,data) {
 		break;
 	case codes.scStartBot:
 		startBot(pb.Parse(data,'Backend.StartBot'));
+		break;
+	case codes.scStopBot:
+		params = pb.Parse(data,'Backend.StopBot');
+		stopBot(params.name);
 		break;
 	}
 }
