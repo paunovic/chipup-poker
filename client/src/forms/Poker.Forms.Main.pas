@@ -9,7 +9,7 @@ uses
   ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts,
-  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types;
+  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types, RVScroll, RichView, RVStyle;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -57,7 +57,6 @@ type
     btCreateClub: TcxButton;
     btJoinClub: TcxButton;
     btTournamentsHeader: TcxButton;
-    lbsTournamentsComingSoon: TcxLabel;
     acShowContactUsForm: TAction;
     acTermsAndConditions: TAction;
     acShowAboutForm: TAction;
@@ -76,6 +75,17 @@ type
     acDisconnect: TAction;
     ApplicationEvents: TApplicationEvents;
     gridHomeClubsMongoId: TcxGridColumn;
+    gridTournaments: TcxGrid;
+    gridTournamentsTable: TcxGridTableView;
+    gridTournamentsId: TcxGridColumn;
+    gridTournemantsName: TcxGridColumn;
+    gridTournemantsStartTime: TcxGridColumn;
+    gridTournamentsStatus: TcxGridColumn;
+    gridTournamentsLevel: TcxGridLevel;
+    rvTournamentInfo: TRichView;
+    btTournamentLobby: TcxButton;
+    RVStyle: TRVStyle;
+    acTournamentLobby: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -290,7 +300,12 @@ begin
   gridGames.Width := btPrivateClubs.Left + btPrivateClubs.Width - btPublicClubs.Left;
   btTournamentsHeader.Left := btPublicClubs.Left;
   btTournamentsHeader.Width := btPublicClubs.Width + 3 + btPrivateClubs.Width;
+  gridTournaments.Left := btTournamentsHeader.Left;
+  rvTournamentInfo.Left := gridTournaments.Left + gridTournaments.Width + 3;
+  rvTournamentInfo.Width := btTournamentsHeader.Width - gridTournaments.Width - 4;
+  rvTournamentInfo.Height := gridTournaments.Height - 1;
 end;
+
 
 procedure TfrmChipUpMain.LogoutFlushData;
 begin
@@ -325,6 +340,11 @@ begin
   btPublicClubs.Visible := not AShow;
   gridGames.Visible := not AShow;
   btOpenClubLobby.Visible := not AShow;
+
+  btTournamentsHeader.Visible := AShow;
+  gridTournaments.Visible := AShow;
+  rvTournamentInfo.Visible := AShow;
+  btTournamentLobby.Visible := AShow;
 end;
 
 procedure TfrmChipUpMain.SocketStateChange(const AOldState, ANewState: TSocketState);

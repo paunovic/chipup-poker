@@ -121,7 +121,7 @@ object frmDebug: TfrmDebug
       Shape = dxbsLineCenteredHorz
     end
     object lbsThreads: TcxLabel
-      Left = 358
+      Left = 357
       Top = 3
       Anchors = [akLeft, akBottom]
       Caption = 'Threads:'
@@ -136,7 +136,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbsMemoryUsage: TcxLabel
-      Left = 358
+      Left = 357
       Top = 19
       Anchors = [akLeft, akBottom]
       Caption = 'Memory:'
@@ -181,7 +181,7 @@ object frmDebug: TfrmDebug
       Transparent = True
     end
     object lbvThreads: TcxLabel
-      Left = 410
+      Left = 409
       Top = 3
       Anchors = [akLeft, akBottom]
       AutoSize = False
@@ -204,7 +204,7 @@ object frmDebug: TfrmDebug
       Width = 62
     end
     object lbvMemoryUsage: TcxLabel
-      Left = 410
+      Left = 409
       Top = 19
       Anchors = [akLeft, akBottom]
       AutoSize = False
