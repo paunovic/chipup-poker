@@ -28,7 +28,7 @@ function doUpload(version,host) {
 	var textsize = header.length + footer.length;
 	var filesize1 = fs.statSync('../client/installer/install_chipuppoker.exe').size;
 
-	var request = https.request({host:host,method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
+	var request = https.request({hostname:host,method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
 		'&debug='+process.argv[2],
 		headers:{'Content-Length':textsize+filesize1}
 	},function (res) {
@@ -38,7 +38,7 @@ function doUpload(version,host) {
 		});
 	});
 	request.on('error',function (err) {
-		console.log('unable to upload to %s due to %j',host,err);
+		console.log('unable to upload to %s due to',host,err);
 	});
 	console.log('doing post');
 	request.setHeader('Content-Type','multipart/form-data; boundary="'+key+'"');
