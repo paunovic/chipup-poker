@@ -104,6 +104,7 @@ function Server(activeUsersIN) {
 			});
 		});
 	});
+	app.get('/secure/tournament_create',this.createTourn.bind(this));
 	app.get('/confirmchange',this.confirmChange.bind(this));
 	app.get("/passwordreset",this.passwordReset.bind(this));
 	app.post('/paypal_callback',this.paypalCallback.bind(this));
@@ -240,6 +241,9 @@ Server.prototype.getHand = function (req,res) {
 		res.render('hand',{hand:hand,start:start});
 	});
 };
+Server.prototype.createTourn = function (req,res) {
+	res.render('tournament_create');
+}
 Server.prototype.secureChangePasswordPost = function (req,res) {
 	console.log(req.body);
 	if (req.body.password != req.body.repeatPassword) {
