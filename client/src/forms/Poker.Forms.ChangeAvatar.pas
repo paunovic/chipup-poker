@@ -3,11 +3,9 @@ unit Poker.Forms.ChangeAvatar;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  cxButtons,
-  Vcl.ActnList, cxImage, Vcl.Imaging.jpeg, OverbyteIcsHttpProt, cxProgressBar,
-  OverbyteIcsWSocket, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus, dxSkinsCore, ChipUpPokerDarkSkin, cxControls,
-  cxContainer, cxEdit, OverbyteIcsWndControl, Vcl.StdCtrls;
+  Winapi.Windows, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, cxButtons, Vcl.ActnList, cxImage,
+  Vcl.Imaging.jpeg, OverbyteIcsHttpProt, cxProgressBar, OverbyteIcsWSocket, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Vcl.Menus,
+  dxSkinsCore, ChipUpPokerDarkSkin, cxControls, cxContainer, cxEdit, OverbyteIcsWndControl, Vcl.StdCtrls;
 
 type
   TfrmChangeAvatar = class(TForm)
@@ -18,7 +16,7 @@ type
     acClose: TAction;
     imgAvatar: TcxImage;
     OpenDialog: TOpenDialog;
-    SslHttp: TSslHttpCli;
+    HttpClient: TSslHttpCli;
     SslContext: TSslContext;
     pbUpload: TcxProgressBar;
     procedure acCloseExecute(Sender: TObject);
@@ -28,7 +26,7 @@ type
     procedure HTTPRequestDone(Sender: TObject; RqType: THttpRequest; ErrCode: Word);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure SslHttpSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
+    procedure HttpClientSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
   private
     FCallbacksId: Integer;
     FAvatarId: TBytes;
@@ -64,7 +62,7 @@ begin
                      TServerMessageCallback.Create(srSetAvatarReply, CSRSetAvatar)
   ]);
 
-  SslHttp.RcvdStream := TMemoryStream.Create;
+  HttpClient.RcvdStream := TMemoryStream.Create;
 
   FAvatarJPG := TJPEGImage.Create;
 
@@ -74,11 +72,11 @@ end;
 
 procedure TfrmChangeAvatar.FormDestroy(Sender: TObject);
 begin
-  if Assigned(SslHttp.SendStream) then
-    SslHttp.SendStream.Free;
+  if Assigned(HttpClient.SendStream) then
+    HttpClient.SendStream.Free;
 
-  if Assigned(SslHttp.RcvdStream) then
-    SslHttp.RcvdStream.Free;
+  if Assigned(HttpClient.RcvdStream) then
+    HttpClient.RcvdStream.Free;
 
   FAvatarJPG.Free;
 
@@ -90,10 +88,10 @@ end;
 
 procedure TfrmChangeAvatar.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  if SslHttp.State <> httpReady then
+  if HttpClient.State <> httpReady then
   begin
-    SslHttp.OnRequestDone := nil;
-    SslHttp.Abort;
+    HttpClient.OnRequestDone := nil;
+    HttpClient.Abort;
   end;
 
   Action := caFree;
@@ -116,12 +114,12 @@ begin
   error := '';
 
   if (ErrCode = 0) and
-     (SslHttp.StatusCode = 200) and
-     (SslHttp.RcvdStream.Size > 0) then
+     (HttpClient.StatusCode = 200) and
+     (HttpClient.RcvdStream.Size > 0) then
   begin
-    SslHttp.RcvdStream.Position := 0;
-    SetLength(FAvatarId, SslHttp.RcvdStream.Size);
-    Move((SslHttp.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], SslHttp.RcvdStream.Size);
+    HttpClient.RcvdStream.Position := 0;
+    SetLength(FAvatarId, HttpClient.RcvdStream.Size);
+    Move((HttpClient.RcvdStream as TMemoryStream).Memory^, FAvatarId[0], HttpClient.RcvdStream.Size);
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Avatar received [%s]', [BytesToHex(FAvatarId)]), ditNetInc); {$ENDIF}
     ServerSocket.SetAvatar(FAvatarId);
   end
@@ -131,14 +129,14 @@ begin
   if error <> '' then
   begin
     pbUpload.Visible := FALSE;
-    MessageDlg(error, mtError, [mbOK], 0);
+    ShowWarningDialog(error);
     acChange.Enabled := TRUE;
   end;
 end;
 
-procedure TfrmChangeAvatar.SslHttpSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
+procedure TfrmChangeAvatar.HttpClientSendData(Sender: TObject; Buffer: Pointer; Len: Integer);
 begin
-  pbUpload.Position := (SslHttp.SentCount / SslHttp.SendStream.Size) * 100;
+  pbUpload.Position := (HttpClient.SentCount / HttpClient.SendStream.Size) * 100;
 end;
 
 procedure TfrmChangeAvatar.acCloseExecute(Sender: TObject);
@@ -151,22 +149,22 @@ var
   boundary: AnsiString;
   buf: AnsiString;
 begin
-  if not Assigned(SslHttp.SendStream) then
-    SslHttp.SendStream := TMemoryStream.Create;
+  if not Assigned(HttpClient.SendStream) then
+    HttpClient.SendStream := TMemoryStream.Create;
 
   boundary := AnsiString(FormatDateTime('mmddyyhhnnsszzz', Now));
   buf := '--' + boundary + sLineBreak + 'Content-Disposition: form-data; name="avatar" filename="avatar.jpg"' + sLineBreak + 'Content-Type: image/jpeg' + sLineBreak + sLineBreak;
-  SslHttp.SendStream.Write(buf[1], Length(buf));
-  FAvatarJPG.SaveToStream(SslHttp.SendStream);
+  HttpClient.SendStream.Write(buf[1], Length(buf));
+  FAvatarJPG.SaveToStream(HttpClient.SendStream);
   buf := sLineBreak + '--' + boundary + '--' + sLineBreak;
-  SslHttp.SendStream.Write(buf[1], Length(buf));
-  SslHttp.SendStream.Position := 0;
-  SslHttp.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
-  SslHttp.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
-  SslHttp.OnRequestDone := HTTPRequestDone;
-  SslHttp.PostASync;
+  HttpClient.SendStream.Write(buf[1], Length(buf));
+  HttpClient.SendStream.Position := 0;
+  HttpClient.URL := Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.UPLOAD_AVATAR;
+  HttpClient.ContentTypePost := Format('multipart/form-data; boundary=%s', [boundary]);
+  HttpClient.OnRequestDone := HTTPRequestDone;
+  HttpClient.PostASync;
 
-  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar [size: %.2fkb]', [SslHttp.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
+  {$IFDEF DEBUG}  DebugLn(FDebugId, Format('Uploading avatar [size: %.2fkb]', [HttpClient.SendStream.Size / 1024]), ditNetOut);  {$ENDIF}
 end;
 
 procedure TfrmChangeAvatar.acChangeExecute(Sender: TObject);
@@ -182,13 +180,13 @@ begin
   if not FileExists(fname) then
     error := 'File doesn''t exist';
 
-  if GetFileSize(fname) > 5 * 1024 * 1024 then
-    error := 'File size is too big (must be below 5Mb)';
+  if GetFileSize(fname) > 10 * 1024 * 1024 then
+    error := 'File size is too big (must be below 10Mb)';
 
   if error = '' then
     FormsContainer.Add(RunModalForm(TfrmImageCrop, self, [@fname], CloseModalCallback))
   else
-    MessageDlg(error, mtError, [mbOK], 0);
+    ShowWarningDialog(error);
 end;
 
 procedure TfrmChangeAvatar.CloseModalCallback(Sender: TObject);
@@ -265,7 +263,7 @@ begin
       else
       begin
         FAvatarChanged := FALSE;
-        MessageDlg('Invalid avatar ID', mtError, [mbOK], 0);
+        ShowWarningDialog('Invalid avatar ID');
         acChange.Enabled := TRUE;
       end;
     end;

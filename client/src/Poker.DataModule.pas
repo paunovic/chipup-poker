@@ -168,7 +168,7 @@ function TdmMain.CheckAuthed: Boolean;
 begin
   result := FSelfInfo.Authed;
   if not result then
-    MessageDlg('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.', mtWarning, [mbOK], 0);
+    ShowWarningDialog('You cannot do this action until you verify your account. Please check your inbox for verification E-Mail.');
 end;
 
 procedure TdmMain.OpenSiteLink;

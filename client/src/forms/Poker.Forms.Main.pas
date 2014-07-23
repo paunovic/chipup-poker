@@ -519,7 +519,7 @@ begin
   end;
 
   if err <> '' then
-    MessageDlg(err, mtWarning, [mbOK], 0)
+    ShowWarningDialog(err);
 end;
 
 procedure TfrmChipUpMain.acShowJoinClubFormExecute(Sender: TObject);

@@ -50,7 +50,7 @@ implementation
 uses
   Poker.Settings, Poker.Server.Socket, Poker.Server.Validators, Poker.Protobufs.Enum.ServerCodes, Poker.Types,
   Poker.DataModule, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.RegisterReply, Poker.Server.MessageContainer,
-  Poker.Server.Settings, Poker.Common.FormsContainer;
+  Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Common.Misc;
 
 
 procedure TfrmCreateAccount.FormCreate(Sender: TObject);
@@ -126,7 +126,7 @@ begin
 
   result := error = '';
   if not result then
-    MessageDlg(error, mtError, [mbOK], 0);
+    ShowWarningDialog(error);
 end;
 
 procedure TfrmCreateAccount.acSignUpExecute(Sender: TObject);
@@ -154,19 +154,19 @@ begin
       Close;
    end;
    regDuplicateEmail: begin
-     MessageDlg('E-mail address already exists', mtError, [mbOK], 0);
+     ShowWarningDialog('E-mail address already exists');
      edEmail.SetFocus;
    end;
    regDupUsername: begin
-     MessageDlg('Username already exists', mtError, [mbOK], 0);
+     ShowWarningDialog('Username already exists');
      edUsername.SetFocus;
    end;
    regInvalidEmail: begin
-     MessageDlg('Invalid E-mail address', mtError, [mbOK], 0);
+     ShowWarningDialog('Invalid E-mail address');
      edEmail.SetFocus;
    end;
    regInvalidName: begin
-     MessageDlg('Invalid username', mtError, [mbOK], 0);
+     ShowWarningDialog('Invalid username');
      edUsername.SetFocus;
    end;
   end;

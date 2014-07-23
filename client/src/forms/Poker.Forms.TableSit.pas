@@ -252,7 +252,7 @@ begin
   end;
 
   if err <> '' then
-    MessageDlg(err, mtError, [mbOK], 0);
+    ShowWarningDialog(err);
 end;
 
 procedure TfrmTableSit.CSRTableSitOk(const AMethodId: Integer; const AObject: TObject);
@@ -291,7 +291,7 @@ begin
     Tables.Unlock;
   end;
 
-  MessageDlg('Seat is already taken. Please choose another seat', mtWarning, [mbOK], 0);
+  ShowWarningDialog('Seat is already taken. Please choose another seat');
   ModalResult := mrClose;
   Close;
 end;
@@ -332,7 +332,7 @@ begin
     Tables.Unlock;
   end;
 
-  MessageDlg('You can''t add-on over maximum table buy-in limit', mtWarning, [mbOK], 0);
+  ShowWarningDialog('You can''t add-on over maximum table buy-in limit');
   acOK.Enabled := TRUE;
 end;
 
@@ -352,7 +352,7 @@ begin
     Tables.Unlock;
   end;
 
-  MessageDlg('You reached your balance limit for this club', mtWarning, [mbOK], 0);
+  ShowWarningDialog('You reached your balance limit for this club');
   acOK.Enabled := TRUE;
 end;
 
@@ -372,7 +372,7 @@ begin
     Tables.Unlock;
   end;
 
-  MessageDlg('You are not sitting', mtWarning, [mbOK], 0);
+  ShowWarningDialog('You are not sitting');
   ModalResult := mrCancel;
   Close;
 end;
@@ -400,7 +400,7 @@ begin
     Tables.Unlock;
   end;
 
-  MessageDlg(err, mtWarning, [mbOK], 0);
+  ShowWarningDialog(err);
   acOK.Enabled := TRUE;
 end;
 
@@ -420,7 +420,7 @@ begin
     Tables.Unlock;
   end;
 
-  MessageDlg('Invalid buy-in amount', mtWarning, [mbOK], 0);
+  ShowWarningDialog('Invalid buy-in amount');
   acOK.Enabled := TRUE;
 end;
 

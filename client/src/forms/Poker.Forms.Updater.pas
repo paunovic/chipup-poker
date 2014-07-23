@@ -79,6 +79,10 @@ begin
   FCurrentDownloadedSize := 0;
   for ufi in dmMain.UpdateFiles do
     Inc(FTotalSize, ufi.FileSize);
+
+  HttpClient.SslContext.InitContext;
+  HttpClient.SslContext.TrustCert(SSLCert_OfficialServer);
+  HttpClient.SslContext.TrustCert(SSLCert_DevServer);
 end;
 
 procedure TfrmUpdater.FormDestroy(Sender: TObject);
@@ -420,10 +424,6 @@ end;
 
 procedure TfrmUpdater.FormShow(Sender: TObject);
 begin
-  HttpClient.SslContext.InitContext;
-  HttpClient.SslContext.TrustCert(SSLCert_OfficialServer);
-  HttpClient.SslContext.TrustCert(SSLCert_DevServer);
-
   ProcessNextFile;
 end;
 

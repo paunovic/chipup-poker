@@ -41,7 +41,7 @@ implementation
 
 uses
   Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks,
-  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer;
+  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Common.Misc;
 
 
 procedure TfrmChangePassword.FormCreate(Sender: TObject);
@@ -104,7 +104,7 @@ begin
 
   if error <> '' then
   begin
-    MessageDlg(error, mtError, [mbOK], 0);
+    ShowWarningDialog(error);
     Exit;
   end;
 

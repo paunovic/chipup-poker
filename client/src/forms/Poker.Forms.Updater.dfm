@@ -264,8 +264,7 @@ object frmUpdater: TfrmUpdater
     SocksAuthentication = socksNoAuthentication
     SocketFamily = sfIPv4
     SslContext = SslContext
-    Left = 276
-    Top = 4
+    Left = 228
   end
   object SslContext: TSslContext
     SslVerifyPeer = False
@@ -278,7 +277,6 @@ object frmUpdater: TfrmUpdater
     SslVersionMethod = sslV3
     SslSessionTimeout = 0
     SslSessionCacheSize = 20480
-    Left = 204
-    Top = 4
+    Left = 296
   end
 end

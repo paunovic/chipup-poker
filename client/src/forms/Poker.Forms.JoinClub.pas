@@ -45,7 +45,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.ClubCommandReply,
-  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Server.Validators, Poker.Types;
+  Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Server.Validators, Poker.Types, Poker.Common.Misc;
 
 
 procedure TfrmJoinClub.FormCreate(Sender: TObject);
@@ -129,7 +129,7 @@ begin
 
   if error <> '' then
   begin
-    MessageDlg(error, mtError, [mbOK], 0);
+    ShowWarningDialog(error);
     Exit;
   end;
 
@@ -154,17 +154,17 @@ begin
       Close;
     end;
     csInvalidClubId: begin
-      MessageDlg('Invalid club ID', mtError, [mbOK], 0);
+      ShowWarningDialog('Invalid club ID');
       edClubID.SetFocus;
       edClubID.SelectAll;
     end;
     csAlreadyMember: begin
-      MessageDlg('You are already member of this club', mtInformation, [mbOK], 0);
+      ShowWarningDialog('You are already member of this club');
       edClubID.SetFocus;
       edClubID.SelectAll;
     end;
     csInvalidPassword: begin
-      MessageDlg('Invalid club password', mtError, [mbOK], 0);
+      ShowWarningDialog('Invalid club password');
       edClubPassword.SetFocus;
       edClubPassword.SelectAll;
     end;

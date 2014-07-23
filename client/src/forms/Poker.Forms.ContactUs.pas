@@ -40,7 +40,7 @@ implementation
 
 uses
   Poker.Server.MessageContainer, Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Protobufs.Objects.ContactMessage,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Server.Validators, Poker.Server.Settings;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks, Poker.Server.Validators, Poker.Server.Settings, Poker.Common.Misc;
 
 
 procedure TfrmContactUs.FormCreate(Sender: TObject);
@@ -67,7 +67,7 @@ begin
 
   if error <> '' then
   begin
-    MessageDlg(error, mtError, [mbOK], 0);
+    ShowWarningDialog(error);
     Exit;
   end;
 

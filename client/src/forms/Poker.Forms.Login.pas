@@ -423,7 +423,7 @@ begin
       TAlphaBlendThread.CreateAlphaBlendThread(FAlphaBlendThread, AlphaBlendValue, 0, 0, 0.1, AlphaBlendThreadNotify);
     end;
     lrInvalid: begin
-      MessageDlg('Invalid login/password', mtError, [mbOK], 0);
+      ShowWarningDialog('Invalid login/password');
       CurrentStatus := lsHelloOk;
       EnableGUI(TRUE);
       edLogin.SetFocus;

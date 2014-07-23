@@ -149,7 +149,7 @@ begin
 
   if error <> '' then
   begin
-    MessageDlg(error, mtError, [mbOK], 0);
+    ShowWarningDialog(error);
     Exit;
   end;
 
@@ -179,7 +179,7 @@ begin
       Close;
     end;
     csNameExists: begin
-      MessageDlg('Club name already exists', mtError, [mbOk], 0);
+      ShowWarningDialog('Club name already exists');
       edClubName.SetFocus;
     end;
   else
