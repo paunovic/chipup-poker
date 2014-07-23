@@ -623,6 +623,7 @@ message TournamentInfo {
 	required uint32 startingchips = 9;
 	required uint32 timeperlevel = 10;
 	required uint32 registered_players = 11;
+	required uint32 start_time = 12;
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];
