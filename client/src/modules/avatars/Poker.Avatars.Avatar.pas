@@ -43,7 +43,7 @@ implementation
 
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
-  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule, Poker.Settings;
+  Poker.Helpers.AsphyreImage, Poker.Common.Misc, Poker.Database.Core, SynDBSQLite3, Poker.DataModule, Poker.Settings, Poker.Server.SSLCerts;
 
 { TAvatar }
 
@@ -132,6 +132,8 @@ begin
   FHTTP.URL := Format(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.GET_AVATAR, [EncodeURL(String(FIdAsString))]);
   FHTTP.OnRequestDone := HTTPRequestDone;
   FHTTP.SslContext.InitContext;
+  FHTTP.SslContext.TrustCert(SSLCert_OfficialServer);
+  FHTTP.SslContext.TrustCert(SSLCert_DevServer);
   FHTTP.GetAsync;
   {$IFDEF DEBUG} DebugLn(FDebugId, Format('Downlading avatar [%s]', [FIdAsString]), ditNetInc); {$ENDIF}
 end;

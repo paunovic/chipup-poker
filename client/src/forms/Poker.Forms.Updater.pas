@@ -5,16 +5,17 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit, cxLabel,
   cxProgressBar, cxImage, OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
-  ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses, Poker.Interfaces.ModalForm;
+  ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses, Poker.Interfaces.ModalForm, OverbyteIcsWSocket;
 
 type
   TfrmUpdater = class(TForm, IModalForm)
     pbProgress: TcxProgressBar;
-    HttpClient: THttpCli;
     lbsCaption: TcxLabel;
     imgHeader: TcxImage;
     imgClose: TcxImage;
     imgMinimize: TcxImage;
+    HttpClient: TSslHttpCli;
+    SslContext: TSslContext;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure HttpClientDocData(Sender: TObject; Buffer: Pointer; Len: Integer);
@@ -57,7 +58,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.Common.FormsContainer, Poker.Forms.Main, Poker.Settings, Poker.DataModule, Poker.Protobufs.Objects.UpdateFileInfo,
-  Poker.Common.Misc, Poker.HardcodedSettings, Winapi.ShellApi;
+  Poker.Common.Misc, Poker.HardcodedSettings, Winapi.ShellApi, Poker.Server.SSLCerts;
 
 
 procedure TfrmUpdater.FormCreate(Sender: TObject);
@@ -419,6 +420,10 @@ end;
 
 procedure TfrmUpdater.FormShow(Sender: TObject);
 begin
+  HttpClient.SslContext.InitContext;
+  HttpClient.SslContext.TrustCert(SSLCert_OfficialServer);
+  HttpClient.SslContext.TrustCert(SSLCert_DevServer);
+
   ProcessNextFile;
 end;
 

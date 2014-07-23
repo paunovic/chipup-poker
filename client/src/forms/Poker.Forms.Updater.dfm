@@ -241,20 +241,21 @@ object frmUpdater: TfrmUpdater
     Height = 20
     Width = 20
   end
-  object HttpClient: THttpCli
+  object HttpClient: TSslHttpCli
     LocalAddr = '0.0.0.0'
     ProxyPort = '80'
-    Agent = 'Mozilla/4.0 (compatible; ICS)'
+    Agent = 'ChipUP Poker Client'
     Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
-    NoCache = True
+    Connection = 'Keep-Alive'
+    NoCache = False
     ContentTypePost = 'application/x-www-form-urlencoded'
     MultiThreaded = False
-    RequestVer = '1.0'
+    RequestVer = '1.1'
     FollowRelocation = True
     LocationChangeMaxCount = 5
     ServerAuth = httpAuthNone
     ProxyAuth = httpAuthNone
-    BandwidthLimit = 10000
+    BandwidthLimit = 0
     BandwidthSampling = 1000
     Options = [httpoEnableContentCoding]
     Timeout = 30
@@ -262,6 +263,21 @@ object frmUpdater: TfrmUpdater
     OnRequestDone = HttpClientRequestDone
     SocksAuthentication = socksNoAuthentication
     SocketFamily = sfIPv4
+    SslContext = SslContext
+    Left = 276
+    Top = 4
+  end
+  object SslContext: TSslContext
+    SslVerifyPeer = False
+    SslVerifyDepth = 1
+    SslVerifyFlags = []
+    SslOptions = []
+    SslVerifyPeerModes = []
+    SslSessionCacheModes = []
+    SslCipherList = 'ALL:!ADH:RC4+RSA:+SSLv2:@STRENGTH'
+    SslVersionMethod = sslV3
+    SslSessionTimeout = 0
+    SslSessionCacheSize = 20480
     Left = 204
     Top = 4
   end

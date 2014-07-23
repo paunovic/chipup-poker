@@ -222,7 +222,7 @@ begin
 
   FDXImages := TAsphyreImages.Create;
 
-  AddDXImage('TableBackground.image', FRoomBackgroundImage);
+  AddDXImage('RoomBackground.image', FRoomBackgroundImage);
   AddDXImage('Table.image', FTableImage, FTableAspectRatio);
   AddDXImage('SeatLeft.image', FSeatLeftImage, FSeatAspectRatio);
   AddDXImage('SeatLeftActive.image', FSeatLeftActiveImage);

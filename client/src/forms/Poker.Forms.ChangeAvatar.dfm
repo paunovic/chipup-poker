@@ -111,7 +111,7 @@ object frmChangeAvatar: TfrmChangeAvatar
   object SslHttp: TSslHttpCli
     LocalAddr = '0.0.0.0'
     ProxyPort = '80'
-    Agent = 'Mozilla/4.0 (compatible; ICS)'
+    Agent = 'ChipUP Poker Client'
     Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
     Connection = 'Keep-Alive'
     NoCache = False
