@@ -1,5 +1,8 @@
 'use strict';
 /*
+
+*** Set random_seed: 1 (it could be any number) in config.js
+
 How to use:
 1) empty gameState collection from poker db and mitm collection from test db
 2) start server (node master.js)
