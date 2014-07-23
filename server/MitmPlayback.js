@@ -192,7 +192,7 @@ MitmPlayback.prototype._compareRequests = function (receivedRequest, requestFrom
 		
 		if (difference) {
 			var message = util.format("Args do not match! %s\nleft=db right=server\nserver: %j\ndb: %j\ndiff: %j", requestInfo, argsParsed.fromServer, argsParsed.fromDb, difference);
-
+debugger;
 			return {
 				code: this.ARGS_DO_NOT_MATCH,
 				explanation: message
@@ -220,7 +220,6 @@ MitmPlayback.prototype._getMethodId = function (methodName) {
 
 
 MitmPlayback.prototype._makeArgsAndSanatize = function (receivedRequest, requestFromDb) {
-	debugger;
 	var receivedArgsParsed = this.protobuf.Parse(receivedRequest.args.buffer, this.methodToTypeMap[receivedRequest.method]);
 	var argsFromDbParsed = this.protobuf.Parse(requestFromDb.args.buffer, this.methodToTypeMap[requestFromDb.method]);
 	var receivedMethodId = this._getMethodId(receivedRequest.method);
@@ -230,6 +229,10 @@ MitmPlayback.prototype._makeArgsAndSanatize = function (receivedRequest, request
 
 
 MitmPlayback.prototype._sanatizeArgs = function (argsFromDbParsed, receivedArgsParsed, receivedMethodId) {
+	this._zeroOutField('rotation', argsFromDbParsed, receivedArgsParsed);
+	this._zeroOutField('handid', argsFromDbParsed, receivedArgsParsed);
+	this._zeroOutField('time', argsFromDbParsed, receivedArgsParsed);
+
 	if (receivedMethodId === this.serverCodes.srLoginReply) {
 		receivedArgsParsed = this._sanitizeLoginReply(receivedArgsParsed);
 		argsFromDbParsed = this._sanitizeLoginReply(argsFromDbParsed);
@@ -247,6 +250,12 @@ MitmPlayback.prototype._sanatizeArgs = function (argsFromDbParsed, receivedArgsP
 	}
 
 	return {fromServer: receivedArgsParsed, fromDb: argsFromDbParsed};
+};
+
+
+MitmPlayback.prototype._zeroOutField = function (fieldName, argsFromDbParsed, receivedArgsParsed) {
+	argsFromDbParsed[fieldName] = 0;
+	receivedArgsParsed[fieldName] = 0;
 };
 
 

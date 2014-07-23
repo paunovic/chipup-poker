@@ -6,5 +6,7 @@ module.exports = {
 	"seGameChange": "Poker.Game",
 	"seTableStatus": "Poker.TableStatus",
 	"srTableSitOk": "Poker.TableStatus",
-	"srHello": "Poker.HelloReply"
+	"srHello": "Poker.HelloReply",
+	"srTableStandUpOk": "Poker.TableStatus",
+	"srHandHistoryMsg": "Poker.ClubHandHistoryReply"
 };
