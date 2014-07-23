@@ -30,9 +30,6 @@ type
   public
   end;
 
-var
-  frmSubscriptions: TfrmSubscriptions;
-
 implementation
 
 {$R *.dfm}

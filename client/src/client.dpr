@@ -52,6 +52,7 @@ uses
   Poker.Forms.LayeredForm in 'forms\Poker.Forms.LayeredForm.pas' {frmLayered},
   Poker.Forms.Subscriptions in 'forms\Poker.Forms.Subscriptions.pas' {frmSubscriptions},
   Poker.Forms.Settings in 'forms\Poker.Forms.Settings.pas' {frmSettings},
+  Poker.Forms.TournamentLobby in 'forms\Poker.Forms.TournamentLobby.pas' {frmTournamentLobby},
   Poker.Interfaces.FormParams in 'interfaces\Poker.Interfaces.FormParams.pas',
   Poker.Interfaces.ModalForm in 'interfaces\Poker.Interfaces.ModalForm.pas',
   Poker.Helpers.AsphyreImage in 'helpers\Poker.Helpers.AsphyreImage.pas',
