@@ -30,7 +30,8 @@ function doUpload(version,host) {
 
 	var request = https.request({hostname:host,method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
 		'&debug='+process.argv[2],
-		headers:{'Content-Length':textsize+filesize1}
+		headers:{'Content-Length':textsize+filesize1},
+		ca:fs.readFileSync('sub.class1.server.ca.pem')
 	},function (res) {
 		console.log('%s reply',host);
 		res.on('data',function (chunk) {
