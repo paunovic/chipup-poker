@@ -69,7 +69,7 @@ uses
   Poker.Avatars.AvatarList, Poker.Server.Settings, Poker.Sounds, Poker.Tables.TableList, Poker.Tables.StatsList, Poker.Forms.Table,
   Poker.Tables.Status, Poker.Forms.SystemTrayPopup, Poker.HandHistory.Core, Poker.Seats.Seat, Poker.Forms.About, Poker.Clubs.Member,
   Poker.Players.PlayerList, Poker.Tables.Table, Poker.Tables.Renderer, Poker.Forms.Login, Poker.Protobufs.Objects.ClubMember,
-  Poker.Protobufs.Enum.ServerCodes, Poker.Types;
+  Poker.Protobufs.Enum.ServerCodes, Poker.Types, Poker.Tournaments;
 
 
 procedure TdmMain.DataModuleCreate(Sender: TObject);
@@ -109,6 +109,7 @@ begin
   TFormsContainer.Initialize;
   TTablesStatsList.Initialize;
   THandHistory.Initialize;
+  TTournamentList.Initialize;
 
   if (Settings.DeveloperMode) and
      (Settings.ServerIndex in [1, 2]) then
@@ -142,6 +143,7 @@ begin
   FSelfInfo.Free;
   THandHistory.Deinitialize;
   TTablesStatsList.Deinitialize;
+  TTournamentList.Deinitialize;
   TSounds.Deinitialize;
   TServerSettings.Deinitialize;
   TTableResources.Deinitialize;

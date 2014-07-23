@@ -9,7 +9,7 @@ uses
   ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts,
-  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types, RVScroll, RichView, RVStyle;
+  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -78,8 +78,8 @@ type
     gridTournaments: TcxGrid;
     gridTournamentsTable: TcxGridTableView;
     gridTournamentsId: TcxGridColumn;
-    gridTournemantsName: TcxGridColumn;
-    gridTournemantsStartTime: TcxGridColumn;
+    gridTournamentsName: TcxGridColumn;
+    gridTournamentsStartTime: TcxGridColumn;
     gridTournamentsStatus: TcxGridColumn;
     gridTournamentsLevel: TcxGridLevel;
     rvTournamentInfo: TRichView;
@@ -138,6 +138,7 @@ type
     procedure UpdateClublist;
     procedure UpdatePublicClublist;
     procedure UpdateGamelist;
+    procedure UpdateTournamentList;
 
     procedure ShowTournamentLayout(const AShow: Boolean);
 
@@ -157,6 +158,7 @@ type
     procedure CSEUserChange(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
+    procedure CSETournamentList(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -175,7 +177,6 @@ type
   public
     procedure LoginStatus(const AValue: TLoginStatus);
   end;
-
 
 var
   frmChipUpMain: TfrmChipUpMain;
@@ -196,7 +197,8 @@ uses
   Poker.Protobufs.Objects.ChatEvent, Poker.Forms.SystemTrayPopup, Poker.Protobufs.Objects.ClubMember, Poker.Protobufs.Objects.ClubStatsReply,
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
-  Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game;
+  Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
+  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -220,6 +222,7 @@ begin
                       TServerMessageCallback.Create(seUserChange, CSEUserChange),
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
+                      TServerMessageCallback.Create(seTournamentList, CSETournamentList),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -660,7 +663,6 @@ var
   c: TcxGridDataController;
 begin
   c := gridPublicClubsTable.DataController;
-
   c.BeginFullUpdate;
   try
     rcount := 0;
@@ -677,6 +679,39 @@ begin
         end;
     finally
       dmMain.SelfInfo.Clubs.Unlock;
+    end;
+    c.SetRecordCount(rcount);
+  finally
+    c.EndFullUpdate;
+  end;
+  c.Refresh;
+end;
+
+procedure TfrmChipUpMain.UpdateTournamentList;
+var
+  c: TcxGridDataController;
+  rcount: Integer;
+  tournament_info: TPB_TournamentInfo;
+begin
+  c := gridTournamentsTable.DataController;
+  c.BeginFullUpdate;
+  try
+    rcount := 0;
+    Tournaments.Lock;
+    try
+      for tournament_info in Tournaments.Items do
+      begin
+        Inc(rcount);
+        if rcount > c.RecordCount then
+          c.SetRecordCount(rcount);
+
+        c.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
+        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, UnixToDateTime(tournament_info.StartTime));
+        c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
+        c.SetValue(rcount - 1, gridTournamentsStatus.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
+      end;
+    finally
+      Tournaments.Unlock;
     end;
     c.SetRecordCount(rcount);
   finally
@@ -969,6 +1004,17 @@ end;
 procedure TfrmChipUpMain.CSESecondaryLoginDetected(const AMethodId: Integer; const AObject: TObject);
 begin
   DoLogout;
+end;
+
+procedure TfrmChipUpMain.CSETournamentList(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentList;
+begin
+  if not TTypes.TryCast<TPB_TournamentList>(AObject, proto) then
+    Exit;
+
+  Tournaments.MergeFrom(proto);
+  UpdateTournamentList;
 end;
 
 procedure TfrmChipUpMain.CSEUserChange(const AMethodId: Integer; const AObject: TObject);
