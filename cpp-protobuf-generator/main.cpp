@@ -156,7 +156,7 @@ public:
 				const UnknownField isObjectId = extra.field(i);
 				if (isObjectId.number() != 50000) continue;
 				uint64 test = isObjectId.varint();
-				cerr << "its " << test << " for obj " << copy.propertyName.c_str() << endl;
+//				cerr << "its " << test << " for obj " << copy.propertyName.c_str() << endl;
 				copy.baseDelphiName = copy.delphiName = "TMongoId";
 				copy.reader = "readMongoId";
 			}
