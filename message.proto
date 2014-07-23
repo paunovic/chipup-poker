@@ -612,9 +612,9 @@ message AssetList {
 }
 
 message TournamentList {
-	repeated Tournament tournaments = 1;
+	repeated TournamentInfo tournaments = 1;
 }
-message Tournament {
+message TournamentInfo {
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
 	required string description = 3;

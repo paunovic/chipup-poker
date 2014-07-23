@@ -312,7 +312,6 @@ begin
     begin
       gridPlayersList.Align := alTop;
       gridGames.Align := alTop;
-
       gridPlayersList.Height := btSuspendUnsuspend.Top - 5;
       gridGames.Height := btNewGame.Top - 5;
     end
