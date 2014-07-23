@@ -38,7 +38,7 @@ type
 
 function ReverseDWORD(const AValue: DWORD): DWORD;
 function BytesToHex(const ABytes: TBytes): String;
-
+function UnixToDateTime(const AUnixTimestamp: UINT32): TDateTime;
 
 implementation
 
@@ -56,6 +56,11 @@ begin
   SetLength(result, 2 * Length(ABytes));
   BinToHex(@ABytes[0], PChar(@result[1]), Length(ABytes));
   result := LowerCase(result);
+end;
+
+function UnixToDateTime(const AUnixTimestamp: UINT32): TDateTime;
+begin
+  result := (AUnixTimestamp / 86400) + 25569;
 end;
 
 class function TTypes.TryCast<T>(const AValue: TValue; var AOutput: T): Boolean;
@@ -135,7 +140,7 @@ var
   unix_timestamp: UINT;
 begin
   unix_timestamp := ReverseDWORD(PUINT(@FMongoIdArray[0])^);
-  result := (unix_timestamp / 86400) + 25569;
+  result := UnixToDateTime(unix_timestamp);
 end;
 
 function TMongoId.ToVariant: Variant;

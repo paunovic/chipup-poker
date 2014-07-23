@@ -48,7 +48,7 @@ type
       FBuyinMin: Integer;
       FBuyinMax: Integer;
       FState: TGameState;
-      FClosetime: UInt64;
+      FClosetime: UInt32;
       FLasthandid: UInt32;
       _has_bits_: UINT32;
 
@@ -90,7 +90,7 @@ type
     procedure SetState(const AValue: TGameState);
     procedure set_has_Closetime;
     procedure clear_has_Closetime;
-    procedure SetClosetime(const AValue: UInt64);
+    procedure SetClosetime(const AValue: UInt32);
     procedure set_has_Lasthandid;
     procedure clear_has_Lasthandid;
     procedure SetLasthandid(const AValue: UInt32);
@@ -163,10 +163,10 @@ type
     procedure clear_State;
     property State: TGameState read FState write SetState;
 
-    // optional uint64 Closetime = 14;
+    // optional uint32 Closetime = 14;
     function has_Closetime: Boolean;
     procedure clear_Closetime;
-    property Closetime: UInt64 read FClosetime write SetClosetime;
+    property Closetime: UInt32 read FClosetime write SetClosetime;
 
     // optional uint32 Lasthandid = 15;
     function has_Lasthandid: Boolean;
@@ -266,7 +266,7 @@ begin
       end;
       kClosetimeFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FClosetime := AProtobufReader.readInt64;
+        FClosetime := AProtobufReader.readUInt32;
         set_has_Closetime;
       end;
       kLasthandidFieldNumber: begin
@@ -711,12 +711,12 @@ begin
   _has_bits_ := _has_bits_ and not 8192;
 end;
 
-procedure TPB_Game.SetClosetime(const AValue: UInt64);
+procedure TPB_Game.SetClosetime(const AValue: UInt32);
 begin
   Assert(not has_Closetime);
   FClosetime := AValue;
   if not Lightweight then
-    ProtobufOutput.WriteInt64(kClosetimeFieldNumber, AValue);
+    ProtobufOutput.writeUInt32(kClosetimeFieldNumber, AValue);
   set_has_Closetime;
 end;
 

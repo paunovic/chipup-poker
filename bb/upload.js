@@ -1,6 +1,6 @@
 var fs = require('fs');
 var child = require('child_process');
-var http = require('http');
+var https = require('https');
 
 var data = fs.readFileSync('../client/src/modules/settings/Poker.HardcodedSettings.pas');
 var res = /VERSION *: *'([0-9.a-z]+)';/.exec(data);
@@ -28,7 +28,7 @@ function doUpload(version,host) {
 	var textsize = header.length + footer.length;
 	var filesize1 = fs.statSync('../client/installer/install_chipuppoker.exe').size;
 
-	var request = http.request({host:host,method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
+	var request = https.request({host:host,method:'POST',path:'/newVersion?version='+res[1]+'&revision='+version+
 		'&debug='+process.argv[2],
 		headers:{'Content-Length':textsize+filesize1}
 	},function (res) {

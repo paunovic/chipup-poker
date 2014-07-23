@@ -92,8 +92,8 @@ object frmChangeAvatar: TfrmChangeAvatar
     Width = 192
   end
   object alChangeAvatar: TActionList
-    Left = 104
-    Top = 124
+    Left = 128
+    Top = 108
     object acChange: TAction
       Caption = 'Change...'
       OnExecute = acChangeExecute
@@ -105,13 +105,13 @@ object frmChangeAvatar: TfrmChangeAvatar
   end
   object OpenDialog: TOpenDialog
     Filter = 'Picture Files (*.jpg, *.png, *.bmp)|*.jpg;*.png;*.bmp'
-    Left = 28
-    Top = 124
+    Left = 56
+    Top = 108
   end
-  object SslHttp: TSslHttpCli
+  object HttpClient: TSslHttpCli
     LocalAddr = '0.0.0.0'
     ProxyPort = '80'
-    Agent = 'Mozilla/4.0 (compatible; ICS)'
+    Agent = 'ChipUP Poker Client'
     Accept = 'image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*'
     Connection = 'Keep-Alive'
     NoCache = False
@@ -126,7 +126,7 @@ object frmChangeAvatar: TfrmChangeAvatar
     BandwidthSampling = 1000
     Options = []
     Timeout = 30
-    OnSendData = SslHttpSendData
+    OnSendData = HttpClientSendData
     SocksAuthentication = socksNoAuthentication
     SocketFamily = sfIPv4
     SslContext = SslContext

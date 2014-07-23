@@ -252,7 +252,7 @@ message Game {
 	optional int32 buyin_min = 11;
 	optional int32 buyin_max = 12;
 	optional GameState state = 13;
-	optional uint64 closetime = 14;
+	optional uint32 closetime = 14;
 	optional uint32 lasthandid = 15;
 }
 
@@ -310,7 +310,7 @@ message ChatMessage {
 	optional bytes _id = 1 [(ObjectId)=true];
 	optional string username = 2;
 	required string msg = 3;
-	optional int64 timestamp = 4;
+	optional uint32 timestamp = 4;
 }
 
 service Server {
@@ -609,7 +609,7 @@ message AssetList {
 }
 
 message TournamentList {
-	repeated TournamentInfo tournaments = 1;
+	repeated TournamentInfo items = 1;
 }
 message TournamentInfo {
 	required bytes _id = 1 [(ObjectId)=true];
@@ -623,6 +623,7 @@ message TournamentInfo {
 	required uint32 startingchips = 9;
 	required uint32 timeperlevel = 10;
 	required uint32 registered_players = 11;
+	required uint32 start_time = 12;
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];

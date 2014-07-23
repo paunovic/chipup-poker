@@ -645,7 +645,7 @@ ClientSocket.prototype.handle = function (code,args) {
 		case codes.seChat:
 			try {
 				var event = pb.Parse(args,'Poker.ChatEvent');
-				this.handleChatEvent(event,Date.now(),token);
+				this.handleChatEvent(event,Math.round(Date.now()/1000),token);
 			} catch (e) {
 				this.error(e);
 			}

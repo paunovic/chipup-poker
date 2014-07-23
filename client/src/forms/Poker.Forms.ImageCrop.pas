@@ -55,7 +55,7 @@ type
 implementation
 
 uses
-  Poker.Common.FormsContainer;
+  Poker.Common.FormsContainer, Poker.Common.Misc;
 
 {$R *.dfm}
 
@@ -357,7 +357,7 @@ begin
   if (FSelectionBitmap.Width = 0) or
      (FSelectionBitmap.Height = 0) then
   begin
-    MessageDlg('Please make a selection', mtError, [mbOK], 0);
+    ShowWarningDialog('Please make a selection');
     Exit;
   end;
 

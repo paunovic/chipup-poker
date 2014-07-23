@@ -3582,7 +3582,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 429
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsHomeGames
+      Properties.ActivePage = tsTournaments
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 428
@@ -3592,6 +3592,10 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         DesignSize = (
           792
           427)
@@ -3916,8 +3920,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
-        ExplicitLeft = -43
-        ExplicitTop = -23
         DesignSize = (
           792
           427)
@@ -3978,16 +3980,17 @@ object frmChipUpMain: TfrmChipUpMain
               Properties.BlobEditKind = bekMemo
               Visible = False
             end
-            object gridTournemantsStartTime: TcxGridColumn
+            object gridTournamentsStartTime: TcxGridColumn
               Caption = 'Start Time'
-              PropertiesClassName = 'TcxTextEditProperties'
-              Properties.Alignment.Horz = taCenter
+              PropertiesClassName = 'TcxTimeEditProperties'
+              Properties.ShowDate = True
+              Properties.TimeFormat = tfHourMin
               HeaderAlignmentHorz = taCenter
               SortIndex = 0
               SortOrder = soAscending
               Width = 110
             end
-            object gridTournemantsName: TcxGridColumn
+            object gridTournamentsName: TcxGridColumn
               Caption = 'Tournament'
               PropertiesClassName = 'TcxTextEditProperties'
               HeaderAlignmentHorz = taCenter

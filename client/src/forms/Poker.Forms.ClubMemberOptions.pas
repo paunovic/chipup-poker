@@ -40,7 +40,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks,
+  Poker.Common.FormsContainer, Poker.Server.Socket, Poker.Server.MessageContainer, Poker.Server.MessageCallbacks, Poker.Common.Misc,
   Poker.Protobufs.Enum.ServerCodes, Poker.Clubs.Member, Poker.DataModule;
 
 
@@ -108,7 +108,7 @@ begin
 
   if err <> '' then
   begin
-    MessageDlg(err, mtError, [mbOK], 0);
+    ShowWarningDialog(err);
     Exit;
   end;
 

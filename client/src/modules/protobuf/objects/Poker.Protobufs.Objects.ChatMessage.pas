@@ -21,7 +21,7 @@ type
       FId: TMongoId;
       FUsername: String;
       FMsg: String;
-      FTimestamp: Int64;
+      FTimestamp: UInt32;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -35,7 +35,7 @@ type
     procedure SetMsg(const AValue: String);
     procedure set_has_Timestamp;
     procedure clear_has_Timestamp;
-    procedure SetTimestamp(const AValue: Int64);
+    procedure SetTimestamp(const AValue: UInt32);
 
   public
     constructor Create(const AFrom: TPB_ChatMessage; const ALightweight: Boolean = FALSE); overload;
@@ -60,10 +60,10 @@ type
     procedure clear_Msg;
     property Msg: String read FMsg write SetMsg;
 
-    // optional int64 Timestamp = 4;
+    // optional uint32 Timestamp = 4;
     function has_Timestamp: Boolean;
     procedure clear_Timestamp;
-    property Timestamp: Int64 read FTimestamp write SetTimestamp;
+    property Timestamp: UInt32 read FTimestamp write SetTimestamp;
 
   end;
 
@@ -113,7 +113,7 @@ begin
       end;
       kTimestampFieldNumber: begin
         Assert(wire_type = WIRETYPE_VARINT);
-        FTimestamp := AProtobufReader.readInt64;
+        FTimestamp := AProtobufReader.readUInt32;
         set_has_Timestamp;
       end;
     else
@@ -255,12 +255,12 @@ begin
   _has_bits_ := _has_bits_ and not 8;
 end;
 
-procedure TPB_ChatMessage.SetTimestamp(const AValue: Int64);
+procedure TPB_ChatMessage.SetTimestamp(const AValue: UInt32);
 begin
   Assert(not has_Timestamp);
   FTimestamp := AValue;
   if not Lightweight then
-    ProtobufOutput.WriteInt64(kTimestampFieldNumber, AValue);
+    ProtobufOutput.writeUInt32(kTimestampFieldNumber, AValue);
   set_has_Timestamp;
 end;
 

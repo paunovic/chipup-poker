@@ -869,7 +869,7 @@ begin
   end;
 
   if err <> '' then
-    MessageDlg(err, mtWarning, [mbOK], 0);
+    ShowWarningDialog(err);
 end;
 
 procedure TfrmClubLobby.acGiveOwnershipExecute(Sender: TObject);
@@ -1090,7 +1090,7 @@ begin
   if pbclub.MongoId <> FClubId then
     Exit;
 
-  MessageDlg('Invalid club ID', mtError, [mbOk], 0);
+  ShowWarningDialog('Invalid club ID');
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayInvalidPlayerId(const AMethodId: Integer; const AObject: TObject);
@@ -1102,7 +1102,7 @@ begin
   if pbclub.MongoId <> FClubId then
     Exit;
 
-  MessageDlg('Invalid player ID', mtError, [mbOk], 0);
+  ShowWarningDialog('Invalid player ID');
 end;
 
 procedure TfrmClubLobby.CSROwnerGiveawayNotOwner(const AMethodId: Integer; const AObject: TObject);
@@ -1114,7 +1114,7 @@ begin
   if pbclub.MongoId <> FClubId then
     Exit;
 
-  MessageDlg('You are not manager of this club', mtError, [mbOk], 0);
+  ShowWarningDialog('You are not manager of this club');
 end;
 
 procedure TfrmClubLobby.CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);

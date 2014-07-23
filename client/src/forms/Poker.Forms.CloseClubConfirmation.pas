@@ -39,7 +39,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Poker.Common.FormsContainer, Poker.Server.Settings, Poker.Server.Validators, Poker.DataModule;
+  Poker.Common.FormsContainer, Poker.Server.Settings, Poker.Server.Validators, Poker.DataModule, Poker.Common.Misc;
 
 { TfrmCloseClubConfirmation }
 
@@ -103,7 +103,7 @@ begin
   end
   else
   begin
-    MessageDlg('Incorrect password', mtError, [mbOK], 0);
+    ShowWarningDialog('Incorrect password');
     edPassword.SelectAll;
   end;
 end;

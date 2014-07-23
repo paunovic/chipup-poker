@@ -146,7 +146,7 @@ begin
         end;
 
   if err <> '' then
-    MessageDlg(err, mtError, [mbOK], 0);
+    ShowWarningDialog(err);
 end;
 
 procedure TfrmCreateGame.cbGameTypePropertiesChange(Sender: TObject);

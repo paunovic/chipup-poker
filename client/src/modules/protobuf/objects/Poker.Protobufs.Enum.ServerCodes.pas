@@ -53,6 +53,7 @@ type
     seGameCreate = 56,
     seGameDelete = 57,
     seTableStatus = 58,
+    seTournamentList = 59,
     seUserChange = 60,
     scHello = 70,
     scLogin = 71,
@@ -169,6 +170,7 @@ begin
     seGameCreate: result := 'seGameCreate';
     seGameDelete: result := 'seGameDelete';
     seTableStatus: result := 'seTableStatus';
+    seTournamentList: result := 'seTournamentList';
     seUserChange: result := 'seUserChange';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';

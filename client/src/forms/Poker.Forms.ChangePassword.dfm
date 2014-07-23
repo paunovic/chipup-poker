@@ -115,7 +115,6 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 92
   end
   object btCancel: TcxButton
     Left = 200
@@ -132,7 +131,6 @@ object frmChangePassword: TfrmChangePassword
     Font.Name = 'Arial'
     Font.Style = []
     ParentFont = False
-    ExplicitTop = 92
   end
   object alChangePassword: TActionList
     Left = 36

@@ -41,7 +41,8 @@ implementation
 
 uses
   Poker.DataModule, Poker.Server.Validators, Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Server.MessageCallbacks,
-  Poker.Protobufs.Objects.ChangeMailReply, Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Types;
+  Poker.Protobufs.Objects.ChangeMailReply, Poker.Server.MessageContainer, Poker.Server.Settings, Poker.Common.FormsContainer, Poker.Types,
+  Poker.Common.Misc;
 
 procedure TfrmChangeEMail.FormCreate(Sender: TObject);
 begin
@@ -115,12 +116,12 @@ begin
       Close;
     end;
     cmDuplicateMail: begin
-      MessageDlg('E-mail address is already in use', mtError, [mbOK], 0);
+      ShowWarningDialog('E-mail address is already in use');
       edNewMail.SetFocus;
       acOK.Enabled := TRUE;
     end;
     cmInvalidEmail: begin
-      MessageDlg('Invalid E-mail address', mtError, [mbOK], 0);
+      ShowWarningDialog('Invalid E-mail address');
       edNewMail.SetFocus;
       acOK.Enabled := TRUE;
     end;
