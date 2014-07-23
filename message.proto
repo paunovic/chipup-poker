@@ -610,3 +610,23 @@ message HandHistory {
 message AssetList {
 	repeated UpdateFileInfo assets = 1;
 }
+
+message TournamentList {
+	repeated Tournament tournaments = 1;
+}
+message Tournament {
+	required bytes _id = 1 [(ObjectId)=true];
+	required string name = 2;
+	required string description = 3;
+	required Game.GameType gametype = 4;
+	required Game.GameLimit limit = 5;
+	required uint32 seats_per_table = 6;
+	required uint32 minplayers = 7;
+	required uint32 maxplayers = 8;
+	required uint32 startingchips = 9;
+	required uint32 timeperlevel = 10;
+	required uint32 registered_players = 11;
+}
+message TournamentStatus {
+	repeated bytes registered_players = 11 [(ObjectId)=true];
+}
