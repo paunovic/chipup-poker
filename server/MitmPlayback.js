@@ -115,19 +115,20 @@ MitmPlayback.prototype._makeRequestObject = function (methodName, args, socketId
 };
 
 MitmPlayback.prototype._testIfRequestsMatch = function(receivedRequest, position) {
-	var requestInfo = receivedRequest.method + ", socket id " + receivedRequest.socketId;
+	var requestInfo = "socketId " + receivedRequest.socketId + ", " + receivedRequest.method;
 	console.log(requestInfo + ' _testIfRequestsMatch called!');
 	var requestFromDb = this._getRequest(position);
 
 	if ( ! this._isServerToClientDirection(requestFromDb.direction)) {
-		console.log("\t%s from db has wrong direction, checking next requests from db...", requestFromDb.method);
+		console.log("\tCurrent request from db is %s, but it has wrong direction, checking next requests from db...", requestFromDb.method);
 		return this._testIfRequestsMatch(receivedRequest, ++position);
 	}
 
 	var result = this._compareRequests(receivedRequest, requestFromDb);
+	requestInfo += " vs " + requestFromDb.method;
 
 	if (result.code === this.REQUESTS_MATCH) {
-		console.log(requestInfo + " MATCH");
+		console.log(requestInfo + " MATCH!");
 		this._deleteRequest(position);
 		this._sendRequests();
 		return;
@@ -138,7 +139,7 @@ MitmPlayback.prototype._testIfRequestsMatch = function(receivedRequest, position
 	}
 	else if (result.code === this.METHODS_DO_NOT_MATCH
 		|| result.code === this.SOCKETS_DO_NOT_MATCH) {
-		console.log("\t" + result.explanation);
+		console.log("\t" + result.explanation + " => going to check next requests...");
 		return this._testIfRequestsMatch(receivedRequest, ++position);
 	}
 }
@@ -151,10 +152,8 @@ MitmPlayback.prototype._checkIfRequestMatch = function (socketId) {
 		var methodName = this._getMethodName(methodId);
 		var requestInfo = methodName + ", socket id " + socketId;
 
-		console.log(requestInfo + ' _checkIfRequestMatch called! ');
-
 		if (this._methodShouldBeIgnored(methodName)) {
-			console.log(requestInfo + 'IGNORED ');
+			console.log(requestInfo + ' IGNORED');
 			return;
 		}
 
@@ -242,7 +241,7 @@ MitmPlayback.prototype._sanatizeArgs = function (argsFromDbParsed, receivedArgsP
 	else if (receivedMethodId === this.serverCodes.seGameChange) {
 		receivedArgsParsed.lasthandid = argsFromDbParsed.lasthandid;
 	} 
-	else if ([this.serverCodes.seTableStatus, codes.srTableSitOk].indexOf(methodId) !== -1) {
+	else if ([this.serverCodes.seTableStatus, codes.srTableSitOk].indexOf(receivedMethodId) !== -1) {
 		receivedArgsParsed = this._sanitizeTableStatus(receivedArgsParsed);
 		argsFromDbParsed = this._sanitizeTableStatus(argsFromDbParsed);
 	}

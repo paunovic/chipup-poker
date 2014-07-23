@@ -383,7 +383,7 @@ ClientSocket.prototype.handle = function (code,args) {
 					if (row.changecode) {
 						var age = Date.now() - row.changetime;
 						console.log('code age',age);
-						if (age > (global.sharedconfig.changeexpire*1000)) {
+						if (age > (global.sharedconfig.ChangeExpireTime*1000)) {
 							delete row.changecode;
 							delete row.changetime;
 							row.save(function (err) {

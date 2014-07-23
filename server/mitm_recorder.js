@@ -1,10 +1,10 @@
 'use strict';
 /*
 How to use:
-1) empty gameState collection from poker db
+1) empty gameState collection from poker db and mitm collection from test db
 2) start server (node master.js)
 3) run this file
-4) run bots, node testclient fastbot set1 localhost 55555, (55555) is the fake server port, se below
+4) run bots, `node testclient fastbot set1 localhost 55555`, (55555) is the fake server port, se below
 
 * if you want to run again, stop the server, empty gameState and then run the server again
 
