@@ -13,7 +13,6 @@ enum ServerCodes {
 	srLeaveClubReply = 6;
 	srChangeClubDetailsReply = 7;
 	srLogout = 8;
-
 	srKickPlayerReply = 11;
 	srSetAvatarReply = 12;
 	srChangeMailReply = 13;
@@ -24,7 +23,6 @@ enum ServerCodes {
 	srOwnershipGiveAwayInvalidClubId = 18;
 	srOwnershipGiveAwayOk = 19;
 	srClubDisbandOk = 20;
-
 	srChangePasswordOk = 23;
 	srCreateGameOk = 24;
 	srDeleteGameOk = 25;
@@ -56,12 +54,11 @@ enum ServerCodes {
 	seGameCreate = 56;
 	seGameDelete = 57;
 	seTableStatus = 58;
-
+	seTournamentList = 59;
 	seUserChange = 60;
 	
 	scHello = 70;
 	scLogin = 71;
-
 	scRegister = 73;
 	scForgotPassword = 74;
 	scLogout = 75;
