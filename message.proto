@@ -609,7 +609,7 @@ message AssetList {
 }
 
 message TournamentList {
-	repeated TournamentInfo tournaments = 1;
+	repeated TournamentInfo items = 1;
 }
 message TournamentInfo {
 	required bytes _id = 1 [(ObjectId)=true];
