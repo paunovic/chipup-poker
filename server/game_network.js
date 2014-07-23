@@ -515,6 +515,11 @@ handlers[codes.scShowCards] = function (args,token) {
 					release();
 					return;
 				}
+				if (this.state != 2) {
+					this.log('sit error 2');
+					release();
+					return;
+				}
 				if (game.state2 == 'gsClosed') {
 					release();
 					return;
