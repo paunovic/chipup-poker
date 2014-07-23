@@ -285,11 +285,13 @@ MitmPlayback.prototype._sanitizeLoginReply = function (args) {
 		var club = args.status.clubs[i];
 
 		for (j = 0; j < club.members.length; j++) 
-			club.members[j].club_balance = 0;	
+			club.members[j].club_balance = 0;
 	}
 
-	for (i = 0; i < args.status.games.length; i++) 
+	for (i = 0; i < args.status.games.length; i++) {
 		args.status.games[i].lasthandid = 0;
+		args.status.games[i].sitting = 0;
+	}
 	
 	return args;
 };
