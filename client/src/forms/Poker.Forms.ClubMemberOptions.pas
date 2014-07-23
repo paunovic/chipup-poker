@@ -30,7 +30,6 @@ type
     FPlayerId: TMongoId;
 
     procedure CSRPlayerLimitOk(const AMethodId: Integer; const AObject: TObject);
-
   public
     procedure SetParams(const AParams: array of pointer);
     procedure SetCloseCallback(const ACallback: TNotifyEvent);

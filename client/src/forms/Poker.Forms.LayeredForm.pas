@@ -18,9 +18,6 @@ type
     procedure UpdatePosition;
   end;
 
-var
-  frmLayered: TfrmLayered;
-
 implementation
 
 {$R *.dfm}
