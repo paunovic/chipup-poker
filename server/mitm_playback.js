@@ -22,9 +22,8 @@ var serverCodes = require('./ServerCodes.js');
 var methodToTypeMap = require("./method_to_type_map");
 var MitmPlayback = require("./MitmPlayback");
 
-var schema = 'Poker.RpcMessage';
 var pb = new Protobuf(fs.readFileSync("../message.desc"));
-var pu = new ProtobufUtil(pb, schema);
+var pu = new ProtobufUtil(pb, 'Poker.RpcMessage', serverCodes);
 var port = process.argv[3] ? process.argv[3] : 12345;
 var host = process.argv[2] ? process.argv[2] : 'localhost';
 

@@ -2,7 +2,7 @@
 
 module.exports = ProtobufUtil;
 
-function ProtobufUtil(protobuf, schema,codes) {
+function ProtobufUtil(protobuf, schema, codes) {
 	this.protobuf = protobuf;
 	this.schema = schema;
 	this.codes = codes;
