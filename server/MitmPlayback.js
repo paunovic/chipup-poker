@@ -130,6 +130,7 @@ MitmPlayback.prototype._testIfRequestsMatch = function(receivedRequest, position
 	if (result.code === this.REQUESTS_MATCH) {
 		console.log(requestInfo + " MATCH!");
 		this._deleteRequest(position);
+		console.log("Elements left to match " + this.requests.length);
 		this._sendRequests();
 		return;
 	}
@@ -229,9 +230,15 @@ MitmPlayback.prototype._makeArgsAndSanatize = function (receivedRequest, request
 
 
 MitmPlayback.prototype._sanatizeArgs = function (argsFromDbParsed, receivedArgsParsed, receivedMethodId) {
-	this._zeroOutField('rotation', argsFromDbParsed, receivedArgsParsed);
-	this._zeroOutField('handid', argsFromDbParsed, receivedArgsParsed);
-	this._zeroOutField('time', argsFromDbParsed, receivedArgsParsed);
+	this._zeroOutFieldIfPresent('rotation', argsFromDbParsed);
+	this._zeroOutFieldIfPresent('rotation', receivedArgsParsed);
+	this._zeroOutFieldIfPresent('handid', argsFromDbParsed);
+	this._zeroOutFieldIfPresent('handid', receivedArgsParsed);
+	this._zeroOutFieldIfPresent('time', receivedArgsParsed);
+	this._zeroOutFieldIfPresent('time', argsFromDbParsed);
+
+	if (argsFromDbParsed.rows) this._zeroOutRows(argsFromDbParsed.rows);
+	if (receivedArgsParsed.rows) this._zeroOutRows(receivedArgsParsed.rows);
 
 	if (receivedMethodId === this.serverCodes.srLoginReply) {
 		receivedArgsParsed = this._sanitizeLoginReply(receivedArgsParsed);
@@ -253,9 +260,17 @@ MitmPlayback.prototype._sanatizeArgs = function (argsFromDbParsed, receivedArgsP
 };
 
 
-MitmPlayback.prototype._zeroOutField = function (fieldName, argsFromDbParsed, receivedArgsParsed) {
-	argsFromDbParsed[fieldName] = 0;
-	receivedArgsParsed[fieldName] = 0;
+MitmPlayback.prototype._zeroOutFieldIfPresent = function (fieldName, object) {
+	if (object[fieldName]) object[fieldName] = 0;
+};
+
+
+MitmPlayback.prototype._zeroOutRows = function (rows) {
+	rows.forEach(function(row, index, rows) {
+		row._id = 0;
+		row.endtime = 0;
+		row.seq = 0;
+	});
 };
 
 
