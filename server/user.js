@@ -22,6 +22,7 @@ var profiler = require('profiler');
 var RT = require('./rt');
 var installer = require('./installer');
 var error = require('./error');
+var Tournament = require('./tournament');
 
 module.exports.UserInit = UserInit;
 module.exports.ClientSocket = ClientSocket;
@@ -83,6 +84,7 @@ function ClientSocket(socket) {
 		this.log('client lost');
 		delete global.activeUsers[this.userid];
 		Game.handleDisconnect(this,'closed');
+		this.destroy();
 	}.bind(this));
 	this.reader = new Protoreader(socket,this.handle.bind(this),this.error.bind(this),this.log.bind(this));
 	socket.on('error',function(err) {
@@ -94,6 +96,9 @@ function ClientSocket(socket) {
 	}.bind(this));
 	clearTimeout(this.idleTimer);
 	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
+	Tournament.core.on('new_tournament',this.newTourn.bind(this));
+	this.lastTourn = 0;
+	this.tournQueue = [];
 }
 ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
@@ -103,7 +108,30 @@ ClientSocket.prototype.error = function error(e) {
 	Game.handleDisconnect(this,'error2');
 	if (e != 'sendq overflow') this.logout();
 	this.socket.destroy();
+	this.destroy();
 };
+ClientSocket.prototype.destroy = function () {
+	Tournament.core.removeListener('new_tournament',this.newTourn.bind(this));
+};
+ClientSocket.prototype.newTourn = function (doc) {
+	console.log('args are',arguments);
+	if (this.state != 2) return;
+	var elapsed = Date.now() - this.lastTourn;
+	this.tournQueue.push(doc);
+	if (elapsed < 30000) { // 30 sec
+		if (this.tournTimer) clearTimeout(this.tournTimer);
+		this.tournTimer = setTimeout(this.flushTourn.bind(this),30000 - elapsed);
+	} else {
+		this.flushTourn();
+	}
+};
+ClientSocket.prototype.flushTourn = function () {
+	delete this.tournTimer;
+	var out = { items: this.tournQueue };
+	this.tournQueue = [];
+	console.log('out is %j',out);
+	this.send(codes.seTournamentList,out,'Poker.TournamentList');
+}
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	function finish(row) {
 		if (this.currentVersion) {
@@ -301,7 +329,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 							models.ObjectSize.findOne({_id:targetFile},function (err,sizeRow) {
 								assert.ifError(err);
 								if (sizeRow) {
-									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'http://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
+									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
 								} else {
 									global.log('cant find original of %s',clientFile.path);
 								}
@@ -509,7 +537,7 @@ ClientSocket.prototype.handle = function (code,args) {
 				row.save(function (err,res) {
 					assert.ifError(err);
 					var test = new SmtpConnection();
-					var link = 'http://'+config.hostname+'/passwordreset?code='+doc.forgotcode;
+					var link = 'https://'+config.hostname+'/passwordreset?code='+doc.forgotcode;
 					var body = emailChange1({authlink:link});
 					test.sendMail(row.email,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+row.displayname+'<'+email+'>\r\nContent-Type: text/html\r\nSubject: Password Reset Confirmation\r\n\r\n'+body,function cb(err,ret) {
 						console.log('cb',err,ret);
@@ -590,7 +618,7 @@ ClientSocket.prototype.handle = function (code,args) {
 							return;
 						}
 						var test = new SmtpConnection();
-						var link = 'http://'+config.hostname+'/confirmchange?code='+authcode;
+						var link = 'https://'+config.hostname+'/confirmchange?code='+authcode;
 						test.sendMail(newemail,'From: ChipUP Poker <service@chipuppoker.com>\r\nTo: '+newemail+'\r\nSubject: E-Mail Change Verification\r\n\r\nConfirmation link: '+link,function cb(err,ret) {
 							console.log('cb',err,ret);
 							if (err) {
@@ -903,7 +931,7 @@ handlers[codes.scSubscriptionPlanChange] = function (args,token) {
 	}
 	models.PaypalRequest.create({plan:params.subscription_plan, userid:this.userid},function (err,request) {
 		error.handleError(err);
-		params.url = 'http://'+config.hostname+'/pay?id='+request._id;
+		params.url = 'https://'+config.hostname+'/pay?id='+request._id;
 		params.url = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=55JPJAFUEWSNC&custom='+request._id;
 		console.log(params,request);
 		this.send(codes.srSubscriptionPlanChange,params,'Poker.SubscriptionPlanChange');

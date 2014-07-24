@@ -1,9 +1,10 @@
 extends secure
 block content
   form(method="post")
-    input(type="text",placeholder="name",name="name")
+    | name:
+    input(type="text",name="name")
     br
-    textarea(placeholder="description",name="notes",rows="8",cols="40")
+    textarea(placeholder="description",name="description",rows="8",cols="40")
     br
     select(name="gametype")
       option(value="gtHoldem") Holdem
@@ -14,7 +15,8 @@ block content
       option(value="glNoLimit") no limit
       option(value="glPotLimit") pot limit
     br
-    select(name="seats")
+    | seats:
+    select(name="seats_per_table")
       option(value="2") 2
       option(value="3") 3
       option(value="4") 4
@@ -24,12 +26,21 @@ block content
       option(value="8") 8
       option(value="9") 9
     br
-    input(type="text",name="minplayers",placeholder="min players")
-    input(type="text",name="maxplayers",placeholder="max players")
+    | Players min:
+    input(type="text",name="minplayers")
+    | Max:
+    input(type="text",name="maxplayers")
     br
-    input(type="text",name="startingchips",placeholder="starting chips")
+    | Starting Chips:
+    input(type="text",name="startingchips")
     br
-    input(type="text",name="timeperlevel",placeholder="minutes per level")
+    | Minutes per level:
+    input(type="text",name="timeperlevel")
     br
     | blind structure
+    br
+    | Start time:
+    input(type="datetime",name="start_time")
+    br
+    input(type="submit",value="Create!")
     br
