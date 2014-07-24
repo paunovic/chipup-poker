@@ -1,0 +1,13 @@
+form {
+  display: inline;
+}
+.warning {
+  background:red;
+}
+.dateField {
+	width: 140px;
+	padding 6px;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	text-align: center;
+}

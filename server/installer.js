@@ -3,7 +3,7 @@ var async = require('async');
 var assert = require('assert');
 var child_process = require('child_process');
 var crypto = require('crypto');
-var http = require('http');
+var https = require('https');
 
 var config = require('./config');
 var models = require('./db').models;
@@ -14,7 +14,7 @@ module.exports.recurse_dir = recurse_dir;
 function unpackInstaller(record,cb1) {
 	function updateLive(doc,sizes,cb) {
 		var body = new Buffer(JSON.stringify({installer:doc,sizes:sizes}));
-		var req = http.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
+		var req = https.request({host:'chipuppoker.com',method:'POST',path:'/sync/newVersion',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
 		req.on('data',function (chunk) {
 			console.log(chunk);
 		});

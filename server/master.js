@@ -183,7 +183,7 @@ function stopBot(name) {
 	}
 }
 function ControlLink() {
-	this.socket = tls.connect(45508,'chipuppoker.com',{ca:[fs.readFileSync('cert.pem')],servername:'master.chipuppoker.com'},function (){});
+	this.socket = tls.connect(45508,'chipuppoker.com',{ca:[fs.readFileSync('live-cert.pem')],servername:'server.chipuppoker.com'},function (){});
 	this.socket.on('error',function (err) {
 		console.log('unable to control/connect to live',err);
 	});

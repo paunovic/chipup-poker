@@ -231,7 +231,7 @@ GameStateSchema.path('pots').validate(function (pots) {
 
 var ClubBalanceSchema = new Schema({
 	clubid:ObjectId,
-	userid:ObjectId,
+	userid: { type:ObjectId, required:true },
 	balance:Number,
 	balance_limit:Number,
 	unlimited_limit:Boolean

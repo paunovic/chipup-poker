@@ -1,4 +1,16 @@
 extends secure
+block header
+  link(rel="stylesheet",type="text/css",href="/css/calendarview.css")
+  script(src="/js/jquery-1.11.1.min.js")
+  script(src="/js/prototype.js")
+  script(src="/js/jquery.timepicker.js")
+  script(src="/js/calendarview.js")
+block header2
+  script.
+    jQuery(document).ready(function ($) {
+      Calendar.setup({dateField:'dateField'});
+      $('#timeField').timepicker();
+    });
 block content
   form(method="post")
     | name:
@@ -40,7 +52,8 @@ block content
     | blind structure
     br
     | Start time:
-    input(type="datetime",name="start_time")
+    input(type="text",id="dateField",class="dateField",value="Date",name="start_date")
+    input(type="text",id="timeField",name="start_time")
     br
     input(type="submit",value="Create!")
     br

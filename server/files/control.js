@@ -128,7 +128,7 @@ function updatefilter() {
 function startBot() {
 	var setname = document.getElementById('setname').value;
 	var mode = document.getElementById('mode').value;
-	socket.emit('startBot',{name:setname,mode:mode,target:'live'});
+	socket.emit('startBot',{name:setname,mode:mode,target:activeServer});
 }
 function changeServer(name) {
 	socket.emit('changeServer',name);

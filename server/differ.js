@@ -58,7 +58,7 @@ function makeDiff(sourcehash,desthash,path) {
 					var outfile = 'diffs/'+sourcehash+'-'+desthash+'.diff';
 					bsdiff("unpacked/objects/"+sourcehash,"unpacked/objects/"+desthash,outfile,function (err,stats) {
 						assert.ifError(err);
-						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'http://'+config.staticserver+'/'+outfile };
+						var doc = { sourcehash:sourcehash, desthash:desthash, size:stats.size, url:'https://'+config.staticserver+'/'+outfile };
 						var obj = new models.Diff(doc);
 						if (IO) IO.sockets.emit('makeDiff',{sourcehash:sourcehash,desthash:desthash,path:path,size:stats.size});
 						obj.save(function () {
