@@ -9,7 +9,7 @@ uses
   ChipUpPokerDarkSkin, cxPC, cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore, dxSkinscxPCPainter,
   cxPCdxBarPopupMenu, cxStyles, cxFilter, cxData, cxDataStorage, cxSpinEdit, cxTextEdit, cxBlobEdit, Vcl.PlatformDefaultStyleActnCtrls,
   Vcl.StdCtrls, cxClasses, cxGridCustomView, dxGDIPlusClasses, Vcl.ToolWin, Vcl.ActnCtrls, Vcl.ActnMenus, Vcl.AppEvnts,
-  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit;
+  System.Generics.Collections, Vcl.StdStyleActnCtrls, Poker.Types, RVScroll, RichView, RVStyle, cxTimeEdit, cxCalendar;
 
 type
   TfrmChipUpMain = class(TForm)
@@ -86,6 +86,7 @@ type
     btTournamentLobby: TcxButton;
     RVStyle: TRVStyle;
     acTournamentLobby: TAction;
+    gridTournamentsPlayers: TcxGridColumn;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -125,9 +126,12 @@ type
     procedure acDisconnectExecute(Sender: TObject);
     procedure ActionMainMenuBarGetControlClass(Sender: TCustomActionBar; AnItem: TActionClient; var ControlClass: TCustomActionControlClass);
     procedure ApplicationEventsDeactivate(Sender: TObject);
+    procedure gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
+      AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
+    FSelectedTournament: TMongoId;
     FCallbacksId: Integer;
     FShuttingDown: Boolean;
     FActionMainMenuBarFont: TFont;
@@ -551,6 +555,7 @@ begin
   UpdateClublist;
   UpdateGamelist;
   UpdatePublicClublist;
+  UpdateTournamentList;
 end;
 
 function TfrmChipUpMain.ConfirmToCloseTablesAppClose: Boolean;
@@ -699,7 +704,7 @@ begin
     rcount := 0;
     Tournaments.Lock;
     try
-      for tournament_info in Tournaments.Items do
+      for tournament_info in Tournaments.Values do
       begin
         Inc(rcount);
         if rcount > c.RecordCount then
@@ -708,7 +713,8 @@ begin
         c.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
         c.SetValue(rcount - 1, gridTournamentsStartTime.Index, UnixToDateTime(tournament_info.StartTime));
         c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
-        c.SetValue(rcount - 1, gridTournamentsStatus.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
+        c.SetValue(rcount - 1, gridTournamentsPlayers.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
+        c.SetValue(rcount - 1, gridTournamentsStatus.Index, 'Registering');
       end;
     finally
       Tournaments.Unlock;
@@ -805,6 +811,33 @@ begin
   UpdateGamelist;
 end;
 
+procedure TfrmChipUpMain.gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+var
+  recIndex: Integer;
+  tournament: TPB_TournamentInfo;
+  tournament_id: TMongoId;
+begin
+  recIndex := gridTournamentsTable.DataController.GetFocusedRecordIndex;
+  Tournaments.Lock;
+  try
+    if (recIndex = -1) or
+       (not Tournaments.TryGetValue(FSelectedTournament, tournament)) then
+      FSelectedTournament.Clear
+    else
+    begin
+      tournament_id := gridTournamentsTable.DataController.GetValue(recIndex, gridTournamentsId.Index);
+      if not Tournaments.TryGetValue(tournament_id, tournament) then
+        FSelectedTournament.Clear
+      else
+        FSelectedTournament := tournament_id;
+    end;
+  finally
+    Tournaments.Unlock;
+  end;
+
+  acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
+end;
+
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acShowGameTableForm.Execute;
@@ -863,6 +896,7 @@ begin
     lsLoggedIn: begin
       FSelectedClub.Clear;
       FSelectedGame.Clear;
+      FSelectedTournament.Clear;
       ConfigureGUI;
       Show;
       dmMain.ProcessReconnectedTables;
@@ -1013,7 +1047,7 @@ begin
   if not TTypes.TryCast<TPB_TournamentList>(AObject, proto) then
     Exit;
 
-  Tournaments.MergeFrom(proto);
+  Tournaments.Assign(proto);
   UpdateTournamentList;
 end;
 

@@ -1,6 +1,7 @@
 object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
+  Caption = 'ChipUP Poker'
   ClientHeight = 573
   ClientWidth = 794
   Color = clBlack
@@ -3592,10 +3593,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
           792
           427)
@@ -3954,8 +3951,7 @@ object frmChipUpMain: TfrmChipUpMain
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 1
           object gridTournamentsTable: TcxGridTableView
-            OnCellDblClick = gridGamesTableCellDblClick
-            OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
+            OnFocusedRecordChanged = gridTournamentsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
             DataController.Summary.SummaryGroups = <>
@@ -3982,9 +3978,14 @@ object frmChipUpMain: TfrmChipUpMain
             end
             object gridTournamentsStartTime: TcxGridColumn
               Caption = 'Start Time'
-              PropertiesClassName = 'TcxTimeEditProperties'
-              Properties.ShowDate = True
-              Properties.TimeFormat = tfHourMin
+              PropertiesClassName = 'TcxDateEditProperties'
+              Properties.Alignment.Horz = taCenter
+              Properties.DateButtons = []
+              Properties.EditFormat = 'dd MMM hh:mm'
+              Properties.InputKind = ikStandard
+              Properties.Kind = ckDateTime
+              Properties.ReadOnly = False
+              Properties.UseLeftAlignmentOnEditing = False
               HeaderAlignmentHorz = taCenter
               SortIndex = 0
               SortOrder = soAscending
@@ -3996,6 +3997,11 @@ object frmChipUpMain: TfrmChipUpMain
               HeaderAlignmentHorz = taCenter
               Options.Editing = False
               Width = 222
+            end
+            object gridTournamentsPlayers: TcxGridColumn
+              Caption = 'Players'
+              PropertiesClassName = 'TcxTextEditProperties'
+              HeaderAlignmentHorz = taCenter
             end
             object gridTournamentsStatus: TcxGridColumn
               Caption = 'Status'

@@ -4,7 +4,8 @@ object frmTournamentLobby: TfrmTournamentLobby
   Caption = 'Tournament Lobby'
   ClientHeight = 466
   ClientWidth = 682
-  Color = clBtnFace
+  Color = clWindow
+  Ctl3D = False
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
