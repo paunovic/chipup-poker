@@ -130,6 +130,8 @@ type
     procedure ApplicationEventsDeactivate(Sender: TObject);
     procedure gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
       AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure acTournamentLobbyExecute(Sender: TObject);
+    procedure acTournamentRegisterExecute(Sender: TObject);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -820,25 +822,22 @@ var
   tournament: TPB_TournamentInfo;
   tournament_id: TMongoId;
 begin
-  recIndex := gridTournamentsTable.DataController.GetFocusedRecordIndex;
-  Tournaments.Lock;
-  try
-    if (recIndex = -1) or
-       (not Tournaments.TryGetValue(FSelectedTournament, tournament)) then
-      FSelectedTournament.Clear
-    else
-    begin
-      tournament_id := gridTournamentsTable.DataController.GetValue(recIndex, gridTournamentsId.Index);
-      if not Tournaments.TryGetValue(tournament_id, tournament) then
-        FSelectedTournament.Clear
-      else
-        FSelectedTournament := tournament_id;
+  recIndex := Sender.DataController.GetFocusedRecordIndex;
+  if recIndex = -1 then
+    FSelectedTournament.Clear
+  else
+  begin
+    tournament_id := Sender.DataController.GetValue(recIndex, gridTournamentsId.Index);
+    if Tournaments.GetAndLock(tournament_id, tournament) then
+    try
+      FSelectedTournament := tournament_id;
+    finally
+      Tournaments.Unlock;
     end;
-  finally
-    Tournaments.Unlock;
   end;
 
   acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
+  acTournamentRegister.Enabled := not FSelectedTournament.IsEmpty; // fixme
 end;
 
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -1271,6 +1270,16 @@ begin
     Exit;
 
   HandHistory.Add(pb);
+end;
+
+procedure TfrmChipUpMain.acTournamentLobbyExecute(Sender: TObject);
+begin
+//
+end;
+
+procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
+begin
+//
 end;
 
 end.
