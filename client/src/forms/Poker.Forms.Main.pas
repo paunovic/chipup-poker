@@ -325,6 +325,7 @@ begin
   Players.Clear;
   TablesStats.Clear;
   HandHistory.Clear;
+  Tournaments.Clear;
   {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 

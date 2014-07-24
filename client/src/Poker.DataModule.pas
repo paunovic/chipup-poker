@@ -234,6 +234,7 @@ var
   pbts: TPB_TableStatus;
 begin
   ProcessStatusProtobuf(ALoginReply.Status);
+  Tournaments.Assign(ALoginReply.TournamentInfos);
 
   FReconnectedTables.Clear;
   mstream := TMemoryStream.Create;

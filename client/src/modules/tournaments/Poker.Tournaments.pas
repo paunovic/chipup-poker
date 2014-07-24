@@ -16,8 +16,10 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Assign(const ATournamentList: TPB_TournamentList);
+    procedure Assign(const ATournamentList: TList<TPB_TournamentInfo>); overload;
+    procedure Assign(const ATournamentList: TPB_TournamentList); overload;
     procedure Add(const ATournamentInfo: TPB_TournamentInfo);
+    procedure Clear;
 
     procedure Lock;
     procedure Unlock;
@@ -65,19 +67,35 @@ begin
   FLock.Leave;
 end;
 
+procedure TTournamentList.Clear;
+begin
+  FLock.Enter;
+  try
+    inherited Clear;
+  finally
+    FLock.Leave;
+  end;
+end;
+
 procedure TTournamentList.Assign(const ATournamentList: TPB_TournamentList);
+begin
+  Assign(ATournamentList.Items);
+end;
+
+procedure TTournamentList.Assign(const ATournamentList: TList<TPB_TournamentInfo>);
 var
   pbtournament: TPB_TournamentInfo;
 begin
   FLock.Enter;
   try
     Clear;
-    for pbtournament in ATournamentList.Items do
+    for pbtournament in ATournamentList do
       Add(pbtournament);
   finally
     FLock.Leave;
   end;
 end;
+
 
 procedure TTournamentList.Add(const ATournamentInfo: TPB_TournamentInfo);
 begin
