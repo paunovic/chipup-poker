@@ -246,6 +246,19 @@ var PaypalRequestSchema = new Schema({
 	plan:String,
 	userid:ObjectId,
 });
+var TournamentSchema = new Schema({
+	name: String,
+	description: String,
+	gametype: String,
+	limit: String,
+	seats_per_table: Number,
+	minplayers: {type:Number,required:true},
+	maxplayers: {type:Number,required:true},
+	startingchips: {type:Number,required:true},
+	timeperlevel: {type:Number,required:true},
+	registered_players: { type:Number, required:true, default:0 },
+	start_time: { type:Number, required:true, default: 0 }
+});
 
 module.exports.close = function () {
 	if (!connected) return;
@@ -276,6 +289,7 @@ module.exports.open = function (dbname) {
 	models.ClubBalance = mongoose.model('ClubBalance',ClubBalanceSchema);
 	models.Counter = mongoose.model('Counter',CounterSchema);
 	models.PaypalRequest = mongoose.model('PaypalRequest',PaypalRequestSchema);
+	models.Tournament = mongoose.model('Tournament',TournamentSchema);
 }
 
 if (require.main === module) {

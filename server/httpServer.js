@@ -32,6 +32,7 @@ var codes = require('./ServerCodes');
 var SmtpConnection = require('./smtp');
 var dag = require('./dag/build/Release/dag');
 var error = require('./error');
+var Tournament = require('./tournament');
 
 module.exports.initHttpServer = initHttpServer;
 
@@ -105,6 +106,7 @@ function Server(activeUsersIN) {
 		});
 	});
 	app.get('/secure/tournament_create',this.createTourn.bind(this));
+	app.post('/secure/tournament_create',this.createTournPost.bind(this));
 	app.get('/confirmchange',this.confirmChange.bind(this));
 	app.get("/passwordreset",this.passwordReset.bind(this));
 	app.post('/paypal_callback',this.paypalCallback.bind(this));
@@ -243,6 +245,16 @@ Server.prototype.getHand = function (req,res) {
 };
 Server.prototype.createTourn = function (req,res) {
 	res.render('tournament_create');
+}
+Server.prototype.createTournPost = function (req,res) {
+	Tournament.create(req.body,function (err) {
+		if (err && ((err.name == 'ValidationError') || (err.name == 'CastError'))) {
+			res.end(err.toString());
+			return;
+		}
+		console.log(req.body);
+		res.end('test');
+	});
 }
 Server.prototype.secureChangePasswordPost = function (req,res) {
 	console.log(req.body);
