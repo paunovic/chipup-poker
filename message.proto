@@ -168,6 +168,7 @@ message LoginReply {
 	required LoginStatus login_status = 1;
 	optional StatusReply status = 2;
 	repeated TableStatus reconnect_tables = 3;
+	repeated TournamentInfo tournament_infos = 4;
 }
 
 message ClubMember {

@@ -7,7 +7,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
-  Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.TableStatus;
+  Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo;
 
 type
   TLoginStatus = (lrSuccess = 0,lrInvalid = 1);
@@ -18,11 +18,13 @@ type
       kLoginStatusFieldNumber = 1;
       kStatusFieldNumber = 2;
       kReconnectTablesFieldNumber = 3;
+      kTournamentInfosFieldNumber = 4;
 
     var
       FLoginStatus: TLoginStatus;
       FStatus: TPB_StatusReply;
       FReconnectTables: TList<TPB_TableStatus>;
+      FTournamentInfos: TList<TPB_TournamentInfo>;
       _has_bits_: UINT32;
 
     procedure set_has_LoginStatus;
@@ -33,7 +35,10 @@ type
     procedure SetStatus(const AValue: TPB_StatusReply);
     procedure set_has_ReconnectTables;
     procedure clear_has_ReconnectTables;
+    procedure set_has_TournamentInfos;
+    procedure clear_has_TournamentInfos;
     procedure ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
+    procedure TournamentInfosNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -62,6 +67,11 @@ type
     procedure clear_ReconnectTables;
     property ReconnectTables: TList<TPB_TableStatus> read FReconnectTables;
 
+    // repeated TournamentInfo TournamentInfos = 4;
+    function has_TournamentInfos: Boolean;
+    procedure clear_TournamentInfos;
+    property TournamentInfos: TList<TPB_TournamentInfo> read FTournamentInfos;
+
   end;
 
   TPB_LoginReplyList = class(TObjectList<TPB_LoginReply>)
@@ -88,6 +98,11 @@ begin
     FReconnectTables.OnNotify := nil;
     FreeAndNil(FReconnectTables);
   end;
+  if Assigned(FTournamentInfos) then
+  begin
+    FTournamentInfos.OnNotify := nil;
+    FreeAndNil(FTournamentInfos);
+  end;
   inherited;
 end;
 
@@ -95,12 +110,14 @@ procedure TPB_LoginReply.InitObjects;
 begin
   inherited;
   FReconnectTables := TObjectList<TPB_TableStatus>.Create;
+  FTournamentInfos := TObjectList<TPB_TournamentInfo>.Create;
 end;
 
 procedure TPB_LoginReply.HookNotifiers;
 begin
   inherited;
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
+  FTournamentInfos.OnNotify := TournamentInfosNotifyEvent;
 end;
 
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -128,6 +145,11 @@ begin
         FReconnectTables.Add(TPB_TableStatus.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_ReconnectTables;
       end;
+      kTournamentInfosFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FTournamentInfos.Add(TPB_TournamentInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_TournamentInfos;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -136,6 +158,7 @@ end;
 procedure TPB_LoginReply.MergeFrom(const AFrom: TPB_LoginReply);
 var
   pbobj2: TPB_TableStatus;
+  pbobj3: TPB_TournamentInfo;
 begin
   if AFrom.has_LoginStatus then
     SetLoginStatus(AFrom.LoginStatus);
@@ -143,6 +166,8 @@ begin
     FStatus.MergeFrom(AFrom.Status);
   for pbobj2 in AFrom.ReconnectTables do
     FReconnectTables.Add(TPB_TableStatus.Create(pbobj2));
+  for pbobj3 in AFrom.TournamentInfos do
+    FTournamentInfos.Add(TPB_TournamentInfo.Create(pbobj3));
 end;
 
 function TPB_LoginReply.IsInitialized: Boolean;
@@ -155,6 +180,9 @@ begin
     if not FStatus.IsInitialized then
       Exit(FALSE);
   for pbobj in ReconnectTables do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  for pbobj in TournamentInfos do
     if not pbobj.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
@@ -258,6 +286,44 @@ begin
   end;
 end;
 
+procedure TPB_LoginReply.clear_TournamentInfos;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TournamentInfo>;
+begin
+  on_notify := FTournamentInfos.OnNotify;
+  FTournamentInfos.OnNotify := nil;
+  FTournamentInfos.Clear;
+  FTournamentInfos.OnNotify := on_notify;
+  clear_has_TournamentInfos;
+end;
+
+function TPB_LoginReply.has_TournamentInfos: Boolean;
+begin
+  result := (_has_bits_ and 8) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_TournamentInfos;
+begin
+  _has_bits_ := _has_bits_ or 8;
+end;
+
+procedure TPB_LoginReply.clear_has_TournamentInfos;
+begin
+  _has_bits_ := _has_bits_ and not 8;
+end;
+
+procedure TPB_LoginReply.TournamentInfosNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_TournamentInfos;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kTournamentInfosFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
 procedure TPB_LoginReply.Clear;
 begin
   if _has_bits_ = 0 then
@@ -266,6 +332,7 @@ begin
   clear_LoginStatus;
   clear_Status;
   clear_ReconnectTables;
+  clear_TournamentInfos;
 end;
 
 procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
