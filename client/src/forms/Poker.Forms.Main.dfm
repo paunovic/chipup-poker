@@ -2,8 +2,8 @@ object frmChipUpMain: TfrmChipUpMain
   Left = 0
   Top = 0
   Caption = 'ChipUP Poker'
-  ClientHeight = 573
-  ClientWidth = 794
+  ClientHeight = 582
+  ClientWidth = 841
   Color = clBlack
   Constraints.MinHeight = 550
   Constraints.MinWidth = 600
@@ -22,8 +22,8 @@ object frmChipUpMain: TfrmChipUpMain
   OnDeactivate = FormDeactivate
   OnResize = FormResize
   DesignSize = (
-    794
-    573)
+    841
+    582)
   PixelsPerInch = 96
   TextHeight = 14
   object imgHeader: TcxImage
@@ -3542,7 +3542,7 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
   end
   object imgCashier: TcxImage
-    Left = 641
+    Left = 688
     Top = 15
     Anchors = [akTop, akRight]
     Properties.PopupMenuLayout.MenuItems = []
@@ -3560,14 +3560,15 @@ object frmChipUpMain: TfrmChipUpMain
     Transparent = True
     OnMouseDown = imgCashierMouseDown
     OnMouseUp = imgCashierMouseUp
+    ExplicitLeft = 641
     Height = 140
     Width = 140
   end
   object paMain: TPanel
     Left = 0
     Top = 144
-    Width = 794
-    Height = 429
+    Width = 841
+    Height = 438
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
@@ -3576,31 +3577,37 @@ object frmChipUpMain: TfrmChipUpMain
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 2
+    ExplicitWidth = 794
+    ExplicitHeight = 429
     object pcTabs: TcxPageControl
       Left = 0
       Top = 0
-      Width = 794
-      Height = 429
+      Width = 841
+      Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsTournaments
+      Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
-      ClientRectBottom = 428
+      ExplicitWidth = 794
+      ExplicitHeight = 429
+      ClientRectBottom = 437
       ClientRectLeft = 1
-      ClientRectRight = 793
+      ClientRectRight = 840
       ClientRectTop = 1
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
+        ExplicitWidth = 792
+        ExplicitHeight = 427
         DesignSize = (
-          792
-          427)
+          839
+          436)
         object gridPublicClubs: TcxGrid
           Left = 155
           Top = 34
-          Width = 312
-          Height = 217
+          Width = 336
+          Height = 226
           Anchors = [akLeft, akTop, akBottom]
           TabOrder = 0
           OnEnter = gridPublicClubsEnter
@@ -3648,10 +3655,11 @@ object frmChipUpMain: TfrmChipUpMain
           end
         end
         object btPrivateClubs: TcxButton
-          Left = 470
+          Left = 493
           Top = 1
-          Width = 311
+          Width = 334
           Height = 32
+          Anchors = [akTop, akRight]
           Caption = 'MY HOME GAMES'
           Colors.DefaultText = 539056881
           Colors.NormalText = 539056881
@@ -3673,7 +3681,7 @@ object frmChipUpMain: TfrmChipUpMain
         object btPublicClubs: TcxButton
           Left = 155
           Top = 1
-          Width = 311
+          Width = 334
           Height = 32
           Caption = 'PUBLIC HOME GAMES'
           Colors.DefaultText = 539056881
@@ -3695,11 +3703,13 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object gridGames: TcxGrid
           Left = 155
-          Top = 254
-          Width = 627
+          Top = 263
+          Width = 674
           Height = 162
           Anchors = [akLeft, akRight, akBottom]
           TabOrder = 3
+          ExplicitTop = 254
+          ExplicitWidth = 627
           object gridGamesTable: TcxGridTableView
             OnCellDblClick = gridGamesTableCellDblClick
             OnFocusedRecordChanged = gridGamesTableFocusedRecordChanged
@@ -3778,14 +3788,14 @@ object frmChipUpMain: TfrmChipUpMain
         end
         object btOpenClubLobby: TcxButton
           Left = 10
-          Top = 267
+          Top = 276
           Width = 143
           Height = 35
-          Margin = 18
+          Margin = 15
           Action = acOpenClubLobby
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
-          OptionsImage.Margin = 18
+          OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 4
           Font.Charset = DEFAULT_CHARSET
@@ -3794,17 +3804,18 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 267
         end
         object btOpenTable: TcxButton
           Left = 10
-          Top = 305
+          Top = 314
           Width = 143
           Height = 35
-          Margin = 18
+          Margin = 15
           Action = acShowGameTableForm
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
-          OptionsImage.Margin = 18
+          OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 5
           Font.Charset = DEFAULT_CHARSET
@@ -3813,17 +3824,18 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 305
         end
         object btCreateClub: TcxButton
           Left = 10
-          Top = 343
+          Top = 352
           Width = 143
           Height = 35
-          Margin = 18
+          Margin = 15
           Action = acShowCreateClubForm
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
-          OptionsImage.Margin = 18
+          OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 6
           Font.Charset = DEFAULT_CHARSET
@@ -3832,17 +3844,18 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 343
         end
         object btJoinClub: TcxButton
           Left = 10
-          Top = 381
+          Top = 390
           Width = 143
           Height = 35
-          Margin = 18
+          Margin = 15
           Action = acShowJoinClubForm
           Anchors = [akLeft, akBottom]
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
-          OptionsImage.Margin = 18
+          OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 7
           Font.Charset = DEFAULT_CHARSET
@@ -3851,13 +3864,14 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 381
         end
         object gridPrivateClubs: TcxGrid
-          Left = 470
+          Left = 493
           Top = 34
-          Width = 312
-          Height = 217
-          Anchors = [akLeft, akTop, akBottom]
+          Width = 336
+          Height = 226
+          Anchors = [akTop, akRight]
           TabOrder = 8
           OnEnter = gridPrivateClubsEnter
           object gridPrivateClubsTable: TcxGridTableView
@@ -3917,9 +3931,11 @@ object frmChipUpMain: TfrmChipUpMain
       object tsTournaments: TcxTabSheet
         Caption = 'tsTournaments'
         ImageIndex = 1
+        ExplicitWidth = 792
+        ExplicitHeight = 427
         DesignSize = (
-          792
-          427)
+          839
+          436)
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1
@@ -3946,10 +3962,12 @@ object frmChipUpMain: TfrmChipUpMain
         object gridTournaments: TcxGrid
           Left = 155
           Top = 34
-          Width = 414
-          Height = 382
+          Width = 461
+          Height = 391
           Anchors = [akLeft, akTop, akRight, akBottom]
           TabOrder = 1
+          ExplicitWidth = 414
+          ExplicitHeight = 382
           object gridTournamentsTable: TcxGridTableView
             OnFocusedRecordChanged = gridTournamentsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
@@ -4019,22 +4037,26 @@ object frmChipUpMain: TfrmChipUpMain
           Left = 572
           Top = 34
           Width = 208
-          Height = 382
+          Height = 391
           Anchors = [akLeft, akTop, akBottom]
           Color = 4539717
           TabOrder = 2
           BorderStyle = bsNone
           DoInPaletteMode = rvpaCreateCopies
           Style = RVStyle
+          ExplicitHeight = 382
         end
         object btTournamentLobby: TcxButton
           Left = 10
-          Top = 381
+          Top = 390
           Width = 143
           Height = 35
+          Margin = 15
           Action = acTournamentLobby
           Anchors = [akLeft, akBottom]
+          Caption = 'TOURNAMENT LOBBY'
           LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
+          OptionsImage.Margin = 15
           SpeedButtonOptions.CanBeFocused = False
           TabOrder = 3
           Font.Charset = DEFAULT_CHARSET
@@ -4043,6 +4065,31 @@ object frmChipUpMain: TfrmChipUpMain
           Font.Name = 'Sintony'
           Font.Style = [fsBold]
           ParentFont = False
+          ExplicitTop = 381
+        end
+        object btTournamentRegister: TcxButton
+          Left = 10
+          Top = 352
+          Width = 143
+          Height = 35
+          Margin = 15
+          Action = acTournamentRegister
+          Anchors = [akLeft, akBottom]
+          Colors.NormalText = 48896
+          Colors.HotText = 58880
+          Colors.PressedText = 48896
+          Colors.DisabledText = 7631988
+          LookAndFeel.SkinName = 'ChipUpPokerDarkStyle_MainFormButtons'
+          OptionsImage.Margin = 15
+          SpeedButtonOptions.CanBeFocused = False
+          TabOrder = 4
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = 51712
+          Font.Height = -11
+          Font.Name = 'Sintony'
+          Font.Style = [fsBold]
+          ParentFont = False
+          ExplicitTop = 343
         end
       end
     end
@@ -4172,7 +4219,7 @@ object frmChipUpMain: TfrmChipUpMain
   object ActionMainMenuBar: TActionMainMenuBar
     Left = 0
     Top = 0
-    Width = 794
+    Width = 841
     Height = 21
     UseSystemFont = False
     ActionManager = ActionManager
@@ -4192,6 +4239,7 @@ object frmChipUpMain: TfrmChipUpMain
     Spacing = 0
     VertMargin = 0
     OnGetControlClass = ActionMainMenuBarGetControlClass
+    ExplicitWidth = 794
   end
   object ActionManager: TActionManager
     ActionBars = <
@@ -4412,6 +4460,10 @@ object frmChipUpMain: TfrmChipUpMain
     object acTournamentLobby: TAction
       Category = 'Tournaments'
       Caption = 'TOURNAMENT LOBBY...'
+    end
+    object acTournamentRegister: TAction
+      Category = 'Tournaments'
+      Caption = 'REGISTER'
     end
   end
   object ApplicationEvents: TApplicationEvents

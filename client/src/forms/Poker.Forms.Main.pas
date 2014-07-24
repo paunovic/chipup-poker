@@ -87,6 +87,8 @@ type
     RVStyle: TRVStyle;
     acTournamentLobby: TAction;
     gridTournamentsPlayers: TcxGridColumn;
+    btTournamentRegister: TcxButton;
+    acTournamentRegister: TAction;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
