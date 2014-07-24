@@ -3970,6 +3970,7 @@ object frmChipUpMain: TfrmChipUpMain
           ExplicitWidth = 414
           ExplicitHeight = 382
           object gridTournamentsTable: TcxGridTableView
+            OnCellDblClick = gridTournamentsTableCellDblClick
             OnFocusedRecordChanged = gridTournamentsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>

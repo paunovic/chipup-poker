@@ -132,6 +132,8 @@ type
       AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure acTournamentLobbyExecute(Sender: TObject);
     procedure acTournamentRegisterExecute(Sender: TObject);
+    procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -206,7 +208,7 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments;
+  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -816,6 +818,11 @@ begin
   UpdateGamelist;
 end;
 
+procedure TfrmChipUpMain.gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  acTournamentLobby.Execute;
+end;
+
 procedure TfrmChipUpMain.gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
@@ -1273,8 +1280,21 @@ begin
 end;
 
 procedure TfrmChipUpMain.acTournamentLobbyExecute(Sender: TObject);
+var
+  form: TForm;
 begin
-//
+  if not dmMain.CheckAuthed then
+    Exit;
+
+  for form in FormsContainer.Items do
+    if (form is TfrmTournamentLobby) and
+       ((form as TfrmTournamentLobby).TournamentId = FSelectedTournament) then
+    begin
+      form.SetFocus;
+      Exit;
+    end;
+
+  FormsContainer.RunForm(TfrmTournamentLobby, self, [FSelectedTournament.Memory], TRUE);
 end;
 
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);

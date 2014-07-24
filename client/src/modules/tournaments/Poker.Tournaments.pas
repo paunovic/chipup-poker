@@ -98,7 +98,6 @@ begin
   end;
 end;
 
-
 procedure TTournamentList.Add(const ATournamentInfo: TPB_TournamentInfo);
 begin
   FLock.Enter;
