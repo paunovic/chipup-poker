@@ -235,7 +235,6 @@ var
 begin
   ProcessStatusProtobuf(ALoginReply.Status);
   Tournaments.Assign(ALoginReply.TournamentInfos);
-
   FReconnectedTables.Clear;
   mstream := TMemoryStream.Create;
   try
