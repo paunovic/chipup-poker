@@ -3,10 +3,10 @@ unit Poker.Tournaments;
 interface
 
 uses
-  Poker.Protobufs.Objects.TournamentList, System.SyncObjs;
+  Poker.Protobufs.Objects.TournamentList, System.SyncObjs, System.Generics.Collections, Poker.Types, Poker.Protobufs.Objects.TournamentInfo;
 
 type
-  TTournamentList = class(TPB_TournamentList)
+  TTournamentList = class(TObjectDictionary<TMongoId, TPB_TournamentInfo>)
   private
     FLock: TCriticalSection;
   public
@@ -15,6 +15,9 @@ type
 
     constructor Create;
     destructor Destroy; override;
+
+    procedure Assign(const ATournamentList: TPB_TournamentList);
+    procedure Add(const ATournamentInfo: TPB_TournamentInfo);
 
     procedure Lock;
     procedure Unlock;
@@ -43,7 +46,7 @@ end;
 constructor TTournamentList.Create;
 begin
   FLock := TCriticalSection.Create;
-  inherited Create;
+  inherited Create([doOwnsValues]);
 end;
 
 destructor TTournamentList.Destroy;
@@ -51,7 +54,6 @@ begin
   FLock.Free;
   inherited;
 end;
-
 
 procedure TTournamentList.Lock;
 begin
@@ -62,5 +64,30 @@ procedure TTournamentList.Unlock;
 begin
   FLock.Leave;
 end;
+
+procedure TTournamentList.Assign(const ATournamentList: TPB_TournamentList);
+var
+  pbtournament: TPB_TournamentInfo;
+begin
+  FLock.Enter;
+  try
+    Clear;
+    for pbtournament in ATournamentList.Items do
+      Add(pbtournament);
+  finally
+    FLock.Leave;
+  end;
+end;
+
+procedure TTournamentList.Add(const ATournamentInfo: TPB_TournamentInfo);
+begin
+  FLock.Enter;
+  try
+    AddOrSetValue(ATournamentInfo.MongoId, ATournamentInfo);
+  finally
+    FLock.Leave;
+  end;
+end;
+
 
 end.

@@ -268,11 +268,11 @@ object frmUpdater: TfrmUpdater
   end
   object SslContext: TSslContext
     SslVerifyPeer = False
-    SslVerifyDepth = 1
-    SslVerifyFlags = []
+    SslVerifyDepth = 9
+    SslVerifyFlags = [sslX509_V_FLAG_CRL_CHECK_ALL]
     SslOptions = []
-    SslVerifyPeerModes = []
-    SslSessionCacheModes = []
+    SslVerifyPeerModes = [SslVerifyMode_PEER]
+    SslSessionCacheModes = [sslSESS_CACHE_CLIENT, sslSESS_CACHE_NO_INTERNAL_LOOKUP, sslSESS_CACHE_NO_INTERNAL_STORE]
     SslCipherList = 'ALL:!ADH:RC4+RSA:+SSLv2:@STRENGTH'
     SslVersionMethod = sslV3
     SslSessionTimeout = 0

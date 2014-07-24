@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, cxGraphics, cxEdit, cxLabel,
   cxProgressBar, cxImage, OverbyteIcsHttpProt, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, dxSkinsCore,
-  ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses, Poker.Interfaces.ModalForm, OverbyteIcsWSocket;
+  ChipUpPokerDarkSkin, OverbyteIcsWndControl, dxGDIPlusClasses, Poker.Interfaces.ModalForm, OverbyteIcsWSocket, OverbyteIcsLogger;
 
 type
   TfrmUpdater = class(TForm, IModalForm)
@@ -80,9 +80,9 @@ begin
   for ufi in dmMain.UpdateFiles do
     Inc(FTotalSize, ufi.FileSize);
 
-  HttpClient.SslContext.InitContext;
-  HttpClient.SslContext.TrustCert(SSLCert_OfficialServer);
-  HttpClient.SslContext.TrustCert(SSLCert_DevServer);
+  SslContext.InitContext;
+  SslContext.TrustCert(SSLCert_SubClass1Server);
+  HttpClient.CtrlSocket.StartSslHandshake;
 end;
 
 procedure TfrmUpdater.FormDestroy(Sender: TObject);

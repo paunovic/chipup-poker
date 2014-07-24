@@ -81,8 +81,8 @@ type
 
         // server configs
         SERVER_CONFIG: (
-          (TCPAddress: 'server.chipuppoker.com'; TCPPort: 12346; URL: 'http://www.chipuppoker.com'),
-          (TCPAddress: 'dev-server.chipuppoker.com'; TCPPort: 12346; URL: 'http://dev-server.chipuppoker.com'),
+          (TCPAddress: 'server.chipuppoker.com'; TCPPort: 12346; URL: 'https://www.chipuppoker.com'),
+          (TCPAddress: 'dev-server.chipuppoker.com'; TCPPort: 12346; URL: 'https://dev-server.chipuppoker.com'),
           (TCPAddress: 'localchipup'; TCPPort: 12346; URL: 'http://localchipup')
         );
 

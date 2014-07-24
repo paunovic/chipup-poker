@@ -136,12 +136,12 @@ object frmChangeAvatar: TfrmChangeAvatar
   object SslContext: TSslContext
     SslVerifyPeer = False
     SslVerifyDepth = 9
-    SslVerifyFlags = []
+    SslVerifyFlags = [sslX509_V_FLAG_CRL_CHECK_ALL]
     SslOptions = []
     SslVerifyPeerModes = [SslVerifyMode_PEER]
     SslSessionCacheModes = []
     SslCipherList = 'ALL:!ADH:RC4+RSA:+SSLv2:@STRENGTH'
-    SslVersionMethod = sslV23
+    SslVersionMethod = sslV3
     SslSessionTimeout = 0
     SslSessionCacheSize = 20480
     Left = 124
