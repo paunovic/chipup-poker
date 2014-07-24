@@ -7,6 +7,7 @@ var util = require('util');
 var uuid = require('node-uuid');
 var fs = require('fs');
 var jade = require('jade');
+var https = require('https');
 
 var models = require('./db').models;
 var deck = require('./deck');
@@ -98,7 +99,6 @@ function ClientSocket(socket) {
 	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
 	Tournament.core.on('new_tournament',this.newTourn.bind(this));
 	this.lastTourn = 0;
-	this.tournQueue = [];
 }
 ClientSocket.prototype.error = function error(e) {
 	clearTimeout(this.idleTimer);
@@ -117,7 +117,6 @@ ClientSocket.prototype.newTourn = function (doc) {
 	console.log('args are',arguments);
 	if (this.state != 2) return;
 	var elapsed = Date.now() - this.lastTourn;
-	this.tournQueue.push(doc);
 	if (elapsed < 30000) { // 30 sec
 		if (this.tournTimer) clearTimeout(this.tournTimer);
 		this.tournTimer = setTimeout(this.flushTourn.bind(this),30000 - elapsed);
@@ -127,12 +126,14 @@ ClientSocket.prototype.newTourn = function (doc) {
 };
 ClientSocket.prototype.flushTourn = function () {
 	delete this.tournTimer;
-	var out = { items: this.tournQueue };
-	this.tournQueue = [];
-	console.log('out is %j',out);
-	this.send(codes.seTournamentList,out,'Poker.TournamentList');
+	models.Tournament.find(function (err,items) {
+		var out = { items: items };
+		console.log('out is %j',out);
+		this.send(codes.seTournamentList,out,'Poker.TournamentList');
+	}.bind(this));
 }
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
+	var tournaments = [];
 	function finish(row) {
 		if (this.currentVersion) {
 			row.currentVersion = this.currentVersion;
@@ -143,6 +144,13 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 		} else finish2.call(this,row);
 	}
 	function finish2(row) {
+		models.Tournament.find(function (err,items) {
+			error.handleError(err);
+			tournaments = items;
+			finish3.call(this,row);
+		}.bind(this));
+	}
+	function finish3(row) {
 		var oldconn = global.activeUsers[row._id];
 		if (oldconn) {
 			oldconn.eject();
@@ -193,7 +201,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					cb();
 				});
 			}.bind(this),function done() {
-				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses};
+				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses, tournament_infos:tournaments };
 				//console.log('login reply',obj);
 				this.send(codes.srLoginReply,obj,'Poker.LoginReply');
 				// FIXME, embed in the same message
@@ -1012,11 +1020,22 @@ function hashAssets(cb) {
 		},function () {
 			assets = newassets;
 			console.log('done hashing assets',assets);
+			var body = new Buffer(JSON.stringify(assets))
+			var req = https.request({hostname:'chipuppoker.com',method:'POST',path:'/sync/assets',headers:{'Content-Length':body.length,'Content-Type':'application/json'},auth:'sync:'+config.syncpassword});
+			req.on('data',function (chunk) {
+				console.log(chunk);
+			});
+			req.on('error',function (err) {
+				console.log('http error sending new assets:',err);
+			});
+			req.write(body);
+			req.end();
 			if (cb) cb();
 		});
 	});
 }
 function recheckAssets(cb) {
+	if (!config.diffserver) return;
 	fs.stat('assets',function (err,stats) {
 		//console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
 		if (assetMtime == stats.mtime.getTime()) {
