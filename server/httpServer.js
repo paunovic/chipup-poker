@@ -126,7 +126,12 @@ function Server(activeUsersIN) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
 				global.log('sending installer %j',row);
-				res.sendfile('installers/'+row.name);
+				if (config.diffserver) {
+					res.sendfile('installers/'+row.name);
+				} else {
+					res.writeHead(302,{Location:'https://dev-server.chipuppoker.com/redirect/install_chipuppoker.exe?name='+row.name});
+					res.end();
+				}
 			});
 		}.bind(this));
 	}.bind(this));
@@ -236,6 +241,7 @@ Server.prototype.addSync = function (app) {
 	app.get('/sync/gitHook',this.gitHook.bind(this));
 	app.post('/sync/newVersion',this.syncNewVersion.bind(this));
 	app.post('/sync/newDiff',this.syncNewDiff.bind(this));
+	app.post('/sync/assets',this.syncAssets.bind(this));
 };
 Server.prototype.getHand = function (req,res) {
 	var start = Date.now();
@@ -912,6 +918,11 @@ Server.prototype.newVersion = function newVersion(req,res) {
 		}.bind(this));
 	}.bind(this));
 }
+Server.prototype.syncAssets = function (req,res) {
+	console.log(req.body);
+	user.assetSync(req.body);
+	res.end('OK');
+};
 Server.prototype.syncNewVersion = function (req,res) {
 	console.log(req.body);
 	req.body.installer._id = new ObjectID(req.body.installer._id);
