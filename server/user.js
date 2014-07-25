@@ -1028,6 +1028,9 @@ function hashAssets(cb) {
 			req.on('error',function (err) {
 				console.log('http error sending new assets:',err);
 			});
+			req.on('end',function () {
+				console.log('req ended',req);
+			});
 			req.write(body);
 			req.end();
 			if (cb) cb();

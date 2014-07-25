@@ -130,6 +130,11 @@ function Server(activeUsersIN) {
 			});
 		}.bind(this));
 	}.bind(this));
+	app.get("/redirect/install_chipuppoker.exe",function (req,res) {
+		models.Installer.findOne({name:req.query.name},function (err,row) {
+			res.sendfile('installers/'+row.name);
+		});
+	}.bind(this));
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
 			assert.ifError(err);
@@ -247,6 +252,8 @@ Server.prototype.createTourn = function (req,res) {
 	res.render('tournament_create');
 }
 Server.prototype.createTournPost = function (req,res) {
+	var str = req.body.start_date + ' ' + req.body.start_time;
+	req.body.start_time = Math.round(new Date(str).getTime()/1000);
 	Tournament.create(req.body,function (err) {
 		if (err && ((err.name == 'ValidationError') || (err.name == 'CastError'))) {
 			res.end(err.toString());
