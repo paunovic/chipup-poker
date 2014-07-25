@@ -1015,7 +1015,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item
@@ -1023,7 +1023,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item
@@ -1031,7 +1031,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item
@@ -1095,7 +1095,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item
@@ -1103,7 +1103,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item
@@ -1111,7 +1111,7 @@ object frmDebug: TfrmDebug
         FontName = 'Consolas'
         Size = 8
         Style = [fsBold]
-        Color = clLime
+        Color = 1958479
         Unicode = True
       end
       item
