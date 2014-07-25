@@ -3586,7 +3586,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsHomeGames
+      Properties.ActivePage = tsTournaments
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ExplicitWidth = 794
@@ -3939,8 +3939,9 @@ object frmChipUpMain: TfrmChipUpMain
         object btTournamentsHeader: TcxButton
           Left = 155
           Top = 1
-          Width = 626
+          Width = 672
           Height = 32
+          Anchors = [akLeft, akTop, akRight]
           Caption = 'TOURNAMENTS'
           Colors.DefaultText = 539056881
           Colors.NormalText = 539056881
@@ -3969,6 +3970,7 @@ object frmChipUpMain: TfrmChipUpMain
           ExplicitWidth = 414
           ExplicitHeight = 382
           object gridTournamentsTable: TcxGridTableView
+            OnCellDblClick = gridTournamentsTableCellDblClick
             OnFocusedRecordChanged = gridTournamentsTableFocusedRecordChanged
             DataController.Summary.DefaultGroupSummaryItems = <>
             DataController.Summary.FooterSummaryItems = <>
@@ -3999,7 +4001,8 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxDateEditProperties'
               Properties.Alignment.Horz = taCenter
               Properties.DateButtons = []
-              Properties.EditFormat = 'dd MMM hh:mm'
+              Properties.DisplayFormat = 'dd MMM, hh:mm'
+              Properties.EditFormat = 'dd MMM, hh:mm'
               Properties.InputKind = ikStandard
               Properties.Kind = ckDateTime
               Properties.ReadOnly = False
@@ -4019,6 +4022,7 @@ object frmChipUpMain: TfrmChipUpMain
             object gridTournamentsPlayers: TcxGridColumn
               Caption = 'Players'
               PropertiesClassName = 'TcxTextEditProperties'
+              Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
             end
             object gridTournamentsStatus: TcxGridColumn
@@ -4034,17 +4038,16 @@ object frmChipUpMain: TfrmChipUpMain
           end
         end
         object rvTournamentInfo: TRichView
-          Left = 572
+          Left = 619
           Top = 34
           Width = 208
           Height = 391
-          Anchors = [akLeft, akTop, akBottom]
+          Anchors = [akTop, akRight, akBottom]
           Color = 4539717
           TabOrder = 2
           BorderStyle = bsNone
           DoInPaletteMode = rvpaCreateCopies
           Style = RVStyle
-          ExplicitHeight = 382
         end
         object btTournamentLobby: TcxButton
           Left = 10
@@ -4460,10 +4463,14 @@ object frmChipUpMain: TfrmChipUpMain
     object acTournamentLobby: TAction
       Category = 'Tournaments'
       Caption = 'TOURNAMENT LOBBY...'
+      Enabled = False
+      OnExecute = acTournamentLobbyExecute
     end
     object acTournamentRegister: TAction
       Category = 'Tournaments'
       Caption = 'REGISTER'
+      Enabled = False
+      OnExecute = acTournamentRegisterExecute
     end
   end
   object ApplicationEvents: TApplicationEvents

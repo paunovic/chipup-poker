@@ -28,6 +28,7 @@ var Tournament = require('./tournament');
 module.exports.UserInit = UserInit;
 module.exports.ClientSocket = ClientSocket;
 module.exports.changePassword = changePassword;
+module.exports.assetSync = assetSync;
 
 var connections = 0;
 var handlers = {};
@@ -38,6 +39,10 @@ var assets = {};
 var assetMtime;
 var Club;
 
+function assetSync(obj) {
+	console.log('assets synced %j',obj);
+	assets = obj;
+}
 function changePassword(new_password,userid,cb) {
 	// FIXME, refactor into a dedicated function and add a test
 	deck.getRandom(16,function changePw_cb1(salt) {
@@ -1038,7 +1043,10 @@ function hashAssets(cb) {
 	});
 }
 function recheckAssets(cb) {
-	if (!config.diffserver) return;
+	if (!config.diffserver) {
+		if (cb) return cb();
+		return;
+	}
 	fs.stat('assets',function (err,stats) {
 		//console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
 		if (assetMtime == stats.mtime.getTime()) {

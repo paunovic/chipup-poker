@@ -16,6 +16,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    function GetAndLock(const AId: TMongoId; out ATournament: TPB_TournamentInfo): Boolean;
+
     procedure Assign(const ATournamentList: TList<TPB_TournamentInfo>); overload;
     procedure Assign(const ATournamentList: TPB_TournamentList); overload;
     procedure Add(const ATournamentInfo: TPB_TournamentInfo);
@@ -96,7 +98,6 @@ begin
   end;
 end;
 
-
 procedure TTournamentList.Add(const ATournamentInfo: TPB_TournamentInfo);
 begin
   FLock.Enter;
@@ -106,6 +107,19 @@ begin
     FLock.Leave;
   end;
 end;
+
+function TTournamentList.GetAndLock(const AId: TMongoId; out ATournament: TPB_TournamentInfo): Boolean;
+begin
+  FLock.Enter;
+  if TryGetValue(AId, ATournament) then
+    result := TRUE
+  else
+  begin
+    FLock.Leave;
+    result := FALSE;
+  end;
+end;
+
 
 
 end.

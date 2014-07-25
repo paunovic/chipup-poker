@@ -130,6 +130,10 @@ type
     procedure ApplicationEventsDeactivate(Sender: TObject);
     procedure gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord,
       AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
+    procedure acTournamentLobbyExecute(Sender: TObject);
+    procedure acTournamentRegisterExecute(Sender: TObject);
+    procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
+      AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -204,7 +208,7 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments;
+  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -328,6 +332,8 @@ begin
   TablesStats.Clear;
   HandHistory.Clear;
   Tournaments.Clear;
+  btHomeGames.Down := TRUE;
+  acShowHomeGamesLayout.Execute;
   {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
@@ -814,31 +820,33 @@ begin
   UpdateGamelist;
 end;
 
+procedure TfrmChipUpMain.gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+begin
+  acTournamentLobby.Execute;
+end;
+
 procedure TfrmChipUpMain.gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
   tournament: TPB_TournamentInfo;
   tournament_id: TMongoId;
 begin
-  recIndex := gridTournamentsTable.DataController.GetFocusedRecordIndex;
-  Tournaments.Lock;
-  try
-    if (recIndex = -1) or
-       (not Tournaments.TryGetValue(FSelectedTournament, tournament)) then
-      FSelectedTournament.Clear
-    else
-    begin
-      tournament_id := gridTournamentsTable.DataController.GetValue(recIndex, gridTournamentsId.Index);
-      if not Tournaments.TryGetValue(tournament_id, tournament) then
-        FSelectedTournament.Clear
-      else
-        FSelectedTournament := tournament_id;
+  recIndex := Sender.DataController.GetFocusedRecordIndex;
+  if recIndex = -1 then
+    FSelectedTournament.Clear
+  else
+  begin
+    tournament_id := Sender.DataController.GetValue(recIndex, gridTournamentsId.Index);
+    if Tournaments.GetAndLock(tournament_id, tournament) then
+    try
+      FSelectedTournament := tournament_id;
+    finally
+      Tournaments.Unlock;
     end;
-  finally
-    Tournaments.Unlock;
   end;
 
   acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
+  acTournamentRegister.Enabled := not FSelectedTournament.IsEmpty; // fixme
 end;
 
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -1271,6 +1279,29 @@ begin
     Exit;
 
   HandHistory.Add(pb);
+end;
+
+procedure TfrmChipUpMain.acTournamentLobbyExecute(Sender: TObject);
+var
+  form: TForm;
+begin
+  if not dmMain.CheckAuthed then
+    Exit;
+
+  for form in FormsContainer.Items do
+    if (form is TfrmTournamentLobby) and
+       ((form as TfrmTournamentLobby).TournamentId = FSelectedTournament) then
+    begin
+      form.SetFocus;
+      Exit;
+    end;
+
+  FormsContainer.RunForm(TfrmTournamentLobby, self, [FSelectedTournament.Memory], TRUE);
+end;
+
+procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
+begin
+//
 end;
 
 end.
