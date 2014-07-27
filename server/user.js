@@ -8,6 +8,7 @@ var uuid = require('node-uuid');
 var fs = require('fs');
 var jade = require('jade');
 var https = require('https');
+var http = require('http');
 
 var models = require('./db').models;
 var deck = require('./deck');
@@ -1046,9 +1047,29 @@ function hashAssets(cb) {
 		});
 	});
 }
+var asset_initial = true;
 function recheckAssets(cb) {
 	if (!config.diffserver) {
-		if (cb) return cb();
+		if (asset_initial) {
+			var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
+				res.setEncoding('ascii');
+				var buffer = '';
+				res.on('data',function (chunk) {
+					buffer += chunk;
+				});
+				res.on('error',function (err) {
+					console.log('http error sending new assets:',err);
+				});
+				res.on('end',function () {
+					console.log('req ended',buffer);
+					assets = JSON.parse(buffer);
+					if (cb) return cb();
+				});
+			});
+			req.end();
+		} else {
+			if (cb) return cb();
+		}
 		return;
 	}
 	fs.stat('assets',function (err,stats) {
