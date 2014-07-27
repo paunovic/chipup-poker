@@ -29,6 +29,7 @@ module.exports.UserInit = UserInit;
 module.exports.ClientSocket = ClientSocket;
 module.exports.changePassword = changePassword;
 module.exports.assetSync = assetSync;
+module.exports.getAssets = getAssets;
 
 var connections = 0;
 var handlers = {};
@@ -42,6 +43,9 @@ var Club;
 function assetSync(obj) {
 	console.log('assets synced %j',obj);
 	assets = obj;
+}
+function getAssets() {
+	return assets;
 }
 function changePassword(new_password,userid,cb) {
 	// FIXME, refactor into a dedicated function and add a test

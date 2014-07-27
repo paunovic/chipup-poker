@@ -247,7 +247,11 @@ Server.prototype.addSync = function (app) {
 	app.post('/sync/newVersion',this.syncNewVersion.bind(this));
 	app.post('/sync/newDiff',this.syncNewDiff.bind(this));
 	app.post('/sync/assets',this.syncAssets.bind(this));
+	app.get('/sync/assets',this.getAssets.bind(this));
 };
+Server.prototype.getAssets = function (req,res) {
+	res.end(JSON.stringify(user.getAssets()));
+}
 Server.prototype.getHand = function (req,res) {
 	var start = Date.now();
 	models.HandHistory.findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
