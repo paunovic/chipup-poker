@@ -177,7 +177,8 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 		this.chips = row.chips;
 		this.log('sucessfully logged in');
 		global.activeUsers[row._id] = this;
-		this.getStatusPacket(function (status) {
+		var output = {};
+		this.getStatusPacket(output,function (status) {
 			this.log('got status packet');
 			// FIXME, optimize this?
 			var toResume = [];
@@ -216,9 +217,11 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					cb();
 				});
 			}.bind(this),function done() {
-				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses, tournament_infos:tournaments, registered_tournaments:registered_tournaments };
-				//console.log('login reply',obj);
-				this.send(codes.srLoginReply,obj,'Poker.LoginReply');
+				output.login_status = 'lrSuccess';
+				output.reconnect_tables = statuses;
+				output.tournament_infos = tournaments;
+				output.registered_tournaments = registered_tournaments;
+				this.send(codes.srLoginReply,output,'Poker.LoginReply');
 				// FIXME, embed in the same message
 				handlers[codes.scQueryTableStats].call(this,new Buffer(0),token);
 			}.bind(this));
@@ -707,12 +710,11 @@ ClientSocket.prototype.handle = function (code,args) {
 		}
 	}
 };
-ClientSocket.prototype.getStatusPacket = function (maincb) {
+ClientSocket.prototype.getStatusPacket = function (status,maincb) {
 	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false} ]};
 	// owner should see password
 	// all need to see name, _id, seq, private, chips, and members
 	models.Clubs.find(query,function(err,clubs) {
-		var status = {};
 		status.clubs = clubs;
 		var x,y;
 		var userlist = [];
@@ -1103,6 +1105,8 @@ handlers[codes.scTournamentRegister] = function (args,token) {
 	Tournament.core.join(params._id,this.userid,function (code) {
 		if (code == 'OK') {
 			params.reply_status = 'tceRegisterOk';
+		} else if (code == 'full') {
+			params.reply_status = 'tceRegisterLimitReached';
 		} else if (code == 'alreadyMember') {
 			params.reply_status = 'tceAlreadyRegistered';
 		}
@@ -1123,5 +1127,5 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 		params.reply_status = 'tceUnregisterOk';
 		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
 		token.stop();
-	});
+	}.bind(this));
 };
