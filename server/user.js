@@ -8,6 +8,7 @@ var uuid = require('node-uuid');
 var fs = require('fs');
 var jade = require('jade');
 var https = require('https');
+var http = require('http');
 
 var models = require('./db').models;
 var deck = require('./deck');
@@ -28,6 +29,8 @@ var Tournament = require('./tournament');
 module.exports.UserInit = UserInit;
 module.exports.ClientSocket = ClientSocket;
 module.exports.changePassword = changePassword;
+module.exports.assetSync = assetSync;
+module.exports.getAssets = getAssets;
 
 var connections = 0;
 var handlers = {};
@@ -38,6 +41,13 @@ var assets = {};
 var assetMtime;
 var Club;
 
+function assetSync(obj) {
+	console.log('assets synced %j',obj);
+	assets = obj;
+}
+function getAssets() {
+	return assets;
+}
 function changePassword(new_password,userid,cb) {
 	// FIXME, refactor into a dedicated function and add a test
 	deck.getRandom(16,function changePw_cb1(salt) {
@@ -1028,14 +1038,40 @@ function hashAssets(cb) {
 			req.on('error',function (err) {
 				console.log('http error sending new assets:',err);
 			});
+			req.on('end',function () {
+				console.log('req ended',req);
+			});
 			req.write(body);
 			req.end();
 			if (cb) cb();
 		});
 	});
 }
+var asset_initial = true;
 function recheckAssets(cb) {
-	if (!config.diffserver) return;
+	if (!config.diffserver) {
+		if (asset_initial) {
+			var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
+				res.setEncoding('ascii');
+				var buffer = '';
+				res.on('data',function (chunk) {
+					buffer += chunk;
+				});
+				res.on('error',function (err) {
+					console.log('http error sending new assets:',err);
+				});
+				res.on('end',function () {
+					console.log('req ended',buffer);
+					assets = JSON.parse(buffer);
+					if (cb) return cb();
+				});
+			});
+			req.end();
+		} else {
+			if (cb) return cb();
+		}
+		return;
+	}
 	fs.stat('assets',function (err,stats) {
 		//console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
 		if (assetMtime == stats.mtime.getTime()) {

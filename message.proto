@@ -59,6 +59,7 @@ enum ServerCodes {
 	
 	scHello = 70;
 	scLogin = 71;
+	scTournamentRegister = 72;
 	scRegister = 73;
 	scForgotPassword = 74;
 	scLogout = 75;
@@ -628,4 +629,7 @@ message TournamentInfo {
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];
+}
+message TournamentCmdParams {
+	required bytes _id = 1 [(ObjectId)=true];
 }
