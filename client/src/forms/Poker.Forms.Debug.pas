@@ -784,7 +784,7 @@ begin
         wsConnected: begin
           server_socket_connected := TRUE;
           server_socket_state := 'Connected';
-          server_socket_state_color := clLime;
+          server_socket_state_color := $001DE24F;
         end;
         wsAccepting: server_socket_state := 'Accepting...';
         wsListening: server_socket_state := 'Listening...';
@@ -819,7 +819,7 @@ begin
         if ServerSocket.IsPinging then
           lbvLatency.Caption := lbvLatency.Caption + ' ...';
         if ServerSocket.Latency < 100 then
-          lbvLatency.Style.TextColor := clLime
+          lbvLatency.Style.TextColor := $001DE24F
         else
           if ServerSocket.Latency < 500 then
             lbvLatency.Style.TextColor := clYellow

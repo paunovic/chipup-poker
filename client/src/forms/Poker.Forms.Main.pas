@@ -332,6 +332,8 @@ begin
   TablesStats.Clear;
   HandHistory.Clear;
   Tournaments.Clear;
+  btHomeGames.Down := TRUE;
+  acShowHomeGamesLayout.Execute;
   {$IFDEF DEBUG} RefreshDebugForm([dfiUser]); {$ENDIF}
 end;
 
