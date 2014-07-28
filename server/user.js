@@ -1051,6 +1051,7 @@ var asset_initial = true;
 function recheckAssets(cb) {
 	if (!config.diffserver) {
 		if (asset_initial) {
+			asset_initial = false;
 			var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
 				res.setEncoding('ascii');
 				var buffer = '';
