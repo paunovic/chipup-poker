@@ -47,5 +47,6 @@ TournamentCore.prototype.leave = function (tournid,userid,cb) {
 		doc.players.pull(userid);
 		cb('OK');
 	});
+}
 var core = new TournamentCore();
 Tournament.core = core;

@@ -1120,7 +1120,8 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 		return;
 	}
 	Tournament.core.leave(params._id,this.userid,function (code) {
-		params.reply_status = 'tceunRegisterOk';
+		params.reply_status = 'tceUnregisterOk';
 		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
 		token.stop();
 	});
+};

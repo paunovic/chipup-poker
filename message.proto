@@ -639,7 +639,7 @@ message TournamentCommandParams {
 		tceAlreadyRegistered = 1;
 		tceRegisterLimitReached = 2;
 		tceRegisterFailed = 3;
-		tceunRegisterOk = 4;
+		tceUnregisterOk = 4;
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	optional TournamentCommandEnum reply_status = 2;
