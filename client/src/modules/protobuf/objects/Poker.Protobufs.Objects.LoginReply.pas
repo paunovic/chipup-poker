@@ -7,7 +7,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
-  Poker.Protobufs.Objects.StatusReply, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo;
+  Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.User, Poker.Protobufs.Objects.Game;
 
 type
   TLoginStatus = (lrSuccess = 0,lrInvalid = 1);
@@ -16,34 +16,49 @@ type
   private
     const
       kLoginStatusFieldNumber = 1;
-      kStatusFieldNumber = 2;
       kReconnectTablesFieldNumber = 3;
       kTournamentInfosFieldNumber = 4;
       kRegisteredTournamentsFieldNumber = 5;
+      kClubsFieldNumber = 6;
+      kUsersFieldNumber = 7;
+      kSelfFieldNumber = 8;
+      kGamesFieldNumber = 9;
 
     var
       FLoginStatus: TLoginStatus;
-      FStatus: TPB_StatusReply;
       FReconnectTables: TList<TPB_TableStatus>;
       FTournamentInfos: TList<TPB_TournamentInfo>;
       FRegisteredTournaments: TList<TMongoId>;
+      FClubs: TList<TPB_Club>;
+      FUsers: TList<TPB_User>;
+      FSelf: TPB_User;
+      FGames: TList<TPB_Game>;
       _has_bits_: UINT32;
 
     procedure set_has_LoginStatus;
     procedure clear_has_LoginStatus;
     procedure SetLoginStatus(const AValue: TLoginStatus);
-    procedure set_has_Status;
-    procedure clear_has_Status;
-    procedure SetStatus(const AValue: TPB_StatusReply);
     procedure set_has_ReconnectTables;
     procedure clear_has_ReconnectTables;
     procedure set_has_TournamentInfos;
     procedure clear_has_TournamentInfos;
     procedure set_has_RegisteredTournaments;
     procedure clear_has_RegisteredTournaments;
+    procedure set_has_Clubs;
+    procedure clear_has_Clubs;
+    procedure set_has_Users;
+    procedure clear_has_Users;
+    procedure set_has_Self;
+    procedure clear_has_Self;
+    procedure SetSelf(const AValue: TPB_User);
+    procedure set_has_Games;
+    procedure clear_has_Games;
     procedure ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
     procedure TournamentInfosNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
     procedure RegisteredTournamentsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
+    procedure ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+    procedure UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+    procedure GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -62,11 +77,6 @@ type
     procedure clear_LoginStatus;
     property LoginStatus: TLoginStatus read FLoginStatus write SetLoginStatus;
 
-    // optional StatusReply Status = 2;
-    function has_Status: Boolean;
-    procedure clear_Status;
-    property Status: TPB_StatusReply read FStatus write SetStatus;
-
     // repeated TableStatus ReconnectTables = 3;
     function has_ReconnectTables: Boolean;
     procedure clear_ReconnectTables;
@@ -81,6 +91,26 @@ type
     function has_RegisteredTournaments: Boolean;
     procedure clear_RegisteredTournaments;
     property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
+
+    // repeated Club Clubs = 6;
+    function has_Clubs: Boolean;
+    procedure clear_Clubs;
+    property Clubs: TList<TPB_Club> read FClubs;
+
+    // repeated User Users = 7;
+    function has_Users: Boolean;
+    procedure clear_Users;
+    property Users: TList<TPB_User> read FUsers;
+
+    // required User Self = 8;
+    function has_Self: Boolean;
+    procedure clear_Self;
+    property Self: TPB_User read FSelf write SetSelf;
+
+    // repeated Game Games = 9;
+    function has_Games: Boolean;
+    procedure clear_Games;
+    property Games: TList<TPB_Game> read FGames;
 
   end;
 
@@ -102,7 +132,6 @@ end;
 
 destructor TPB_LoginReply.Destroy;
 begin
-  if Assigned(FStatus) then FreeAndNil(FStatus);
   if Assigned(FReconnectTables) then
   begin
     FReconnectTables.OnNotify := nil;
@@ -118,6 +147,23 @@ begin
     FRegisteredTournaments.OnNotify := nil;
     FreeAndNil(FRegisteredTournaments);
   end;
+  if Assigned(FClubs) then
+  begin
+    FClubs.OnNotify := nil;
+    FreeAndNil(FClubs);
+  end;
+  if Assigned(FUsers) then
+  begin
+    FUsers.OnNotify := nil;
+    FreeAndNil(FUsers);
+  end;
+  if Assigned(FSelf) then
+    FreeAndNil(FSelf);
+  if Assigned(FGames) then
+  begin
+    FGames.OnNotify := nil;
+    FreeAndNil(FGames);
+  end;
   inherited;
 end;
 
@@ -127,6 +173,9 @@ begin
   FReconnectTables := TObjectList<TPB_TableStatus>.Create;
   FTournamentInfos := TObjectList<TPB_TournamentInfo>.Create;
   FRegisteredTournaments := TList<TMongoId>.Create;
+  FClubs := TObjectList<TPB_Club>.Create;
+  FUsers := TObjectList<TPB_User>.Create;
+  FGames := TObjectList<TPB_Game>.Create;
 end;
 
 procedure TPB_LoginReply.HookNotifiers;
@@ -135,6 +184,9 @@ begin
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
   FTournamentInfos.OnNotify := TournamentInfosNotifyEvent;
   FRegisteredTournaments.OnNotify := RegisteredTournamentsNotifyEvent;
+  FClubs.OnNotify := ClubsNotifyEvent;
+  FUsers.OnNotify := UsersNotifyEvent;
+  FGames.OnNotify := GamesNotifyEvent;
 end;
 
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -149,13 +201,6 @@ begin
         Assert(wire_type = WIRETYPE_VARINT);
         FLoginStatus := TLoginStatus(AProtobufReader.readEnum);
         set_has_LoginStatus;
-      end;
-      kStatusFieldNumber: begin
-        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
-        if not Assigned(FStatus) then
-          FStatus := TPB_StatusReply.Create;
-        FStatus.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
-        set_has_Status;
       end;
       kReconnectTablesFieldNumber: begin
         Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
@@ -172,6 +217,28 @@ begin
         FRegisteredTournaments.Add(AProtobufReader.readMongoId);
         set_has_RegisteredTournaments;
       end;
+      kClubsFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FClubs.Add(TPB_Club.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_Clubs;
+      end;
+      kUsersFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FUsers.Add(TPB_User.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_Users;
+      end;
+      kSelfFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        if not Assigned(FSelf) then
+          FSelf := TPB_User.Create;
+        FSelf.LoadFromProtobufReader(AProtobufReader, AProtobufReader.readInt32);
+        set_has_Self;
+      end;
+      kGamesFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FGames.Add(TPB_Game.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_Games;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -179,33 +246,51 @@ end;
 
 procedure TPB_LoginReply.MergeFrom(const AFrom: TPB_LoginReply);
 var
-  pbobj2: TPB_TableStatus;
-  pbobj3: TPB_TournamentInfo;
+  pbobj1: TPB_TableStatus;
+  pbobj2: TPB_TournamentInfo;
+  pbobj4: TPB_Club;
+  pbobj5: TPB_User;
+  pbobj7: TPB_Game;
 begin
   if AFrom.has_LoginStatus then
     SetLoginStatus(AFrom.LoginStatus);
-  if (AFrom.has_Status) then
-    FStatus.MergeFrom(AFrom.Status);
-  for pbobj2 in AFrom.ReconnectTables do
-    FReconnectTables.Add(TPB_TableStatus.Create(pbobj2));
-  for pbobj3 in AFrom.TournamentInfos do
-    FTournamentInfos.Add(TPB_TournamentInfo.Create(pbobj3));
+  for pbobj1 in AFrom.ReconnectTables do
+    FReconnectTables.Add(TPB_TableStatus.Create(pbobj1));
+  for pbobj2 in AFrom.TournamentInfos do
+    FTournamentInfos.Add(TPB_TournamentInfo.Create(pbobj2));
   FRegisteredTournaments.AddRange(AFrom.RegisteredTournaments);
+  for pbobj4 in AFrom.Clubs do
+    FClubs.Add(TPB_Club.Create(pbobj4));
+  for pbobj5 in AFrom.Users do
+    FUsers.Add(TPB_User.Create(pbobj5));
+  if (AFrom.has_Self) then
+    FSelf.MergeFrom(AFrom.Self);
+  for pbobj7 in AFrom.Games do
+    FGames.Add(TPB_Game.Create(pbobj7));
 end;
 
 function TPB_LoginReply.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $1) <> $1 then
+  if (_has_bits_ and $81) <> $81 then
     Exit(FALSE);
-  if (has_Status) then
-    if not FStatus.IsInitialized then
-      Exit(FALSE);
   for pbobj in ReconnectTables do
     if not pbobj.IsInitialized then
       Exit(FALSE);
   for pbobj in TournamentInfos do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  for pbobj in Clubs do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  for pbobj in Users do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
+  if (has_Self) then
+    if not FSelf.IsInitialized then
+      Exit(FALSE);
+  for pbobj in Games do
     if not pbobj.IsInitialized then
       Exit(FALSE);
   Exit(TRUE);
@@ -239,36 +324,6 @@ begin
   if not Lightweight then
     ProtobufOutput.writeInt32(kLoginStatusFieldNumber, Integer(AValue));
   set_has_LoginStatus;
-end;
-
-procedure TPB_LoginReply.clear_Status;
-begin
-  FreeAndNil(FStatus);
-  clear_has_Status;
-end;
-
-function TPB_LoginReply.has_Status: Boolean;
-begin
-  result := (_has_bits_ and 2) > 0;
-end;
-
-procedure TPB_LoginReply.set_has_Status;
-begin
-  _has_bits_ := _has_bits_ or 2;
-end;
-
-procedure TPB_LoginReply.clear_has_Status;
-begin
-  _has_bits_ := _has_bits_ and not 2;
-end;
-
-procedure TPB_LoginReply.SetStatus(const AValue: TPB_StatusReply);
-begin
-  Assert(not has_Status);
-  FStatus := AValue;
-  if not Lightweight then
-    ProtobufOutput.writeMessage(kStatusFieldNumber, AValue.ProtobufOutput);
-  set_has_Status;
 end;
 
 procedure TPB_LoginReply.clear_ReconnectTables;
@@ -385,16 +440,163 @@ begin
   end;
 end;
 
+procedure TPB_LoginReply.clear_Clubs;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Club>;
+begin
+  on_notify := FClubs.OnNotify;
+  FClubs.OnNotify := nil;
+  FClubs.Clear;
+  FClubs.OnNotify := on_notify;
+  clear_has_Clubs;
+end;
+
+function TPB_LoginReply.has_Clubs: Boolean;
+begin
+  result := (_has_bits_ and 32) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ or 32;
+end;
+
+procedure TPB_LoginReply.clear_has_Clubs;
+begin
+  _has_bits_ := _has_bits_ and not 32;
+end;
+
+procedure TPB_LoginReply.ClubsNotifyEvent(Sender: TObject; const Item: TPB_Club; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_Clubs;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kClubsFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
+procedure TPB_LoginReply.clear_Users;
+var
+  on_notify: TCollectionNotifyEvent<TPB_User>;
+begin
+  on_notify := FUsers.OnNotify;
+  FUsers.OnNotify := nil;
+  FUsers.Clear;
+  FUsers.OnNotify := on_notify;
+  clear_has_Users;
+end;
+
+function TPB_LoginReply.has_Users: Boolean;
+begin
+  result := (_has_bits_ and 64) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_Users;
+begin
+  _has_bits_ := _has_bits_ or 64;
+end;
+
+procedure TPB_LoginReply.clear_has_Users;
+begin
+  _has_bits_ := _has_bits_ and not 64;
+end;
+
+procedure TPB_LoginReply.UsersNotifyEvent(Sender: TObject; const Item: TPB_User; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_Users;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kUsersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
+procedure TPB_LoginReply.clear_Self;
+begin
+  FreeAndNil(FSelf);
+  clear_has_Self;
+end;
+
+function TPB_LoginReply.has_Self: Boolean;
+begin
+  result := (_has_bits_ and 128) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_Self;
+begin
+  _has_bits_ := _has_bits_ or 128;
+end;
+
+procedure TPB_LoginReply.clear_has_Self;
+begin
+  _has_bits_ := _has_bits_ and not 128;
+end;
+
+procedure TPB_LoginReply.SetSelf(const AValue: TPB_User);
+begin
+  Assert(not has_Self);
+  FSelf := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeMessage(kSelfFieldNumber, AValue.ProtobufOutput);
+  set_has_Self;
+end;
+
+procedure TPB_LoginReply.clear_Games;
+var
+  on_notify: TCollectionNotifyEvent<TPB_Game>;
+begin
+  on_notify := FGames.OnNotify;
+  FGames.OnNotify := nil;
+  FGames.Clear;
+  FGames.OnNotify := on_notify;
+  clear_has_Games;
+end;
+
+function TPB_LoginReply.has_Games: Boolean;
+begin
+  result := (_has_bits_ and 256) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_Games;
+begin
+  _has_bits_ := _has_bits_ or 256;
+end;
+
+procedure TPB_LoginReply.clear_has_Games;
+begin
+  _has_bits_ := _has_bits_ and not 256;
+end;
+
+procedure TPB_LoginReply.GamesNotifyEvent(Sender: TObject; const Item: TPB_Game; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_Games;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kGamesFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
 procedure TPB_LoginReply.Clear;
 begin
   if _has_bits_ = 0 then
     Exit;
 
   clear_LoginStatus;
-  clear_Status;
   clear_ReconnectTables;
   clear_TournamentInfos;
   clear_RegisteredTournaments;
+  clear_Clubs;
+  clear_Users;
+  clear_Self;
+  clear_Games;
 end;
 
 procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);

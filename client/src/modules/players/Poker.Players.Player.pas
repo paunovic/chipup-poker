@@ -3,7 +3,7 @@ unit Poker.Players.Player;
 interface
 
 uses
-  System.Generics.Collections, System.SysUtils, Poker.Clubs.ClubList, Poker.Protobufs.Objects.StatusReply, Poker.Types,
+  System.Generics.Collections, System.SysUtils, Poker.Clubs.ClubList, Poker.Protobufs.Objects.LoginReply, Poker.Types,
   Poker.Protobufs.Objects.User;
 
 type
@@ -16,6 +16,7 @@ type
     FAuthed: Boolean;
     FAvatarId: TBytes;
     FClubs: TClubList;
+    FRegisteredTournaments: TList<TMongoId>;
 
   public
     constructor Create;
@@ -23,7 +24,7 @@ type
 
     procedure Flush;
 
-    procedure LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
+    procedure LoadFromLoginReply(const ALoginReply: TPB_LoginReply);
 
     property MongoId: TMongoId read FMongoId write FMongoId;
     property Nick: String read FNick write FNick;
@@ -32,6 +33,7 @@ type
     property Authed: Boolean read FAuthed write FAuthed;
     property AvatarId: TBytes read FAvatarId write FAvatarId;
     property Clubs: TClubList read FClubs;
+    property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
   end;
 
 implementation
@@ -46,10 +48,12 @@ uses
 constructor TPlayerInfo.Create;
 begin
   FClubs := TClubList.Create;
+  FRegisteredTournaments := TList<TMongoId>.Create;
 end;
 
 destructor TPlayerInfo.Destroy;
 begin
+  FRegisteredTournaments.Free;
   FClubs.Free;
 
   inherited;
@@ -66,7 +70,7 @@ begin
   FClubs.Clear;
 end;
 
-procedure TPlayerInfo.LoadFromStatusProtobuf(const AStatusReply: TPB_StatusReply);
+procedure TPlayerInfo.LoadFromLoginReply(const ALoginReply: TPB_LoginReply);
 var
   club: TClubInfo;
   pbclub: TPB_Club;
@@ -78,11 +82,11 @@ var
   to_remove: TList<TMongoId>;
   mongoid: TMongoId;
 begin
-  FMongoId := AStatusReply.Self.MongoId;
-  FEMail := AStatusReply.Self.EMail;
-  FNick := AStatusReply.Self.DisplayName;
-  FAuthed := AStatusReply.Self.Authed;
-  FAvatarId := AStatusReply.Self.Avatar;
+  FMongoId := ALoginReply.Self.MongoId;
+  FEMail := ALoginReply.Self.EMail;
+  FNick := ALoginReply.Self.DisplayName;
+  FAuthed := ALoginReply.Self.Authed;
+  FAvatarId := ALoginReply.Self.Avatar;
 
   to_remove := TList<TMongoId>.Create;
   try
@@ -91,7 +95,7 @@ begin
       for club in FClubs.Values do
       begin
         found := FALSE;
-        for pbclub in AStatusReply.Clubs do
+        for pbclub in AloginReply.Clubs do
           if pbclub.MongoId = club.MongoId then
           begin
             club.Assign(pbclub);
@@ -120,7 +124,7 @@ begin
       end;
     end;
 
-    for pbclub in AStatusReply.Clubs do
+    for pbclub in AloginReply.Clubs do
     begin
       FClubs.Lock;
       try
@@ -131,7 +135,7 @@ begin
       end;
     end;
 
-    for pbgame in AStatusReply.Games do
+    for pbgame in AloginReply.Games do
       if FClubs.GetAndLock(pbgame.ClubMongoid, club) then
       try
         club.Games.AddGame(pbgame);

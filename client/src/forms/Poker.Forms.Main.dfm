@@ -4012,6 +4012,7 @@ object frmChipUpMain: TfrmChipUpMain
               PropertiesClassName = 'TcxTextEditProperties'
               Properties.Alignment.Horz = taCenter
               HeaderAlignmentHorz = taCenter
+              Styles.OnGetContentStyle = gridTournamentsStatusStylesGetContentStyle
               Width = 92
             end
           end
@@ -4451,6 +4452,11 @@ object frmChipUpMain: TfrmChipUpMain
       Enabled = False
       OnExecute = acTournamentRegisterExecute
     end
+    object acTournamentUnregister: TAction
+      Category = 'Tournaments'
+      Caption = 'UNREGISTER'
+      OnExecute = acTournamentUnregisterExecute
+    end
   end
   object ApplicationEvents: TApplicationEvents
     OnDeactivate = ApplicationEventsDeactivate
@@ -4462,6 +4468,8 @@ object frmChipUpMain: TfrmChipUpMain
       item
         StyleName = 'Normal text'
         FontName = 'Arial'
+        Size = 9
+        Color = 14211288
         Unicode = True
       end>
     ParaStyles = <
@@ -4610,5 +4618,18 @@ object frmChipUpMain: TfrmChipUpMain
     StyleTemplates = <>
     Left = 560
     Top = 52
+  end
+  object StyleRepository: TcxStyleRepository
+    Left = 672
+    Top = 52
+    PixelsPerInch = 96
+    object styleTournamentsRegistering: TcxStyle
+      AssignedValues = [svColor]
+      Color = 5188621
+    end
+    object styleTournamentsRegistered: TcxStyle
+      AssignedValues = [svColor]
+      Color = 2178337
+    end
   end
 end

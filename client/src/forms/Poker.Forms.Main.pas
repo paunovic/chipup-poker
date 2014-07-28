@@ -89,6 +89,10 @@ type
     gridTournamentsPlayers: TcxGridColumn;
     btTournamentRegister: TcxButton;
     acTournamentRegister: TAction;
+    acTournamentUnregister: TAction;
+    StyleRepository: TcxStyleRepository;
+    styleTournamentsRegistering: TcxStyle;
+    styleTournamentsRegistered: TcxStyle;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -134,6 +138,10 @@ type
     procedure acTournamentRegisterExecute(Sender: TObject);
     procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure acTournamentUnregisterExecute(Sender: TObject);
+    procedure gridTournamentsStatusStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -149,6 +157,7 @@ type
     procedure UpdatePublicClublist;
     procedure UpdateGamelist;
     procedure UpdateTournamentList;
+    procedure ConfigureTournamentActions;
 
     procedure ShowTournamentLayout(const AShow: Boolean);
 
@@ -169,6 +178,7 @@ type
     procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentList(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -200,7 +210,7 @@ uses
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
-  Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table,
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table,
   Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.Forms.ClubLobby,
   Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList,
   Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About,
@@ -208,7 +218,8 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby;
+  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
+  Poker.Protobufs.Objects.TournamentCommandParams;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -233,6 +244,7 @@ begin
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
+                      TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -567,6 +579,40 @@ begin
   UpdateTournamentList;
 end;
 
+procedure TfrmChipUpMain.ConfigureTournamentActions;
+var
+  registered: Boolean;
+  tournament: TPB_TournamentInfo;
+begin
+  acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
+  registered := dmMain.SelfInfo.RegisteredTournaments.Contains(FSelectedTournament);
+  acTournamentRegister.Enabled := (not FSelectedTournament.IsEmpty) and (not registered);
+  acTournamentUnregister.Enabled := (not FSelectedTournament.IsEmpty) and (registered);
+  if acTournamentUnregister.Enabled then
+  begin
+    btTournamentRegister.Action := acTournamentUnregister;
+    btTournamentRegister.Colors.HotText := $001111DF;
+    btTournamentRegister.Colors.NormalText := $001111BF;
+    btTournamentRegister.Colors.PressedText := $001111BF;
+  end
+  else
+  begin
+    btTournamentRegister.Action := acTournamentRegister;
+    btTournamentRegister.Colors.HotText := $0000E600;
+    btTournamentRegister.Colors.NormalText := $0000BF00;
+    btTournamentRegister.Colors.PressedText := $0000BF00;
+  end;
+
+  if Tournaments.TryGetValue(FSelectedTournament, tournament) then
+  try
+    rvTournamentInfo.Clear;
+    rvTournamentInfo.AddNL(tournament.Description, 0, 0);
+    rvTournamentInfo.Format;
+  finally
+    Tournaments.Unlock;
+  end;
+end;
+
 function TfrmChipUpMain.ConfirmToCloseTablesAppClose: Boolean;
 begin
   result := TRUE;
@@ -723,7 +769,11 @@ begin
         c.SetValue(rcount - 1, gridTournamentsStartTime.Index, UnixToDateTime(tournament_info.StartTime));
         c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
         c.SetValue(rcount - 1, gridTournamentsPlayers.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
-        c.SetValue(rcount - 1, gridTournamentsStatus.Index, 'Registering');
+
+        if dmMain.SelfInfo.RegisteredTournaments.Contains(tournament_info.MongoId) then
+          c.SetValue(rcount - 1, gridTournamentsStatus.Index, 'Registered')
+        else
+          c.SetValue(rcount - 1, gridTournamentsStatus.Index, 'Registering');
       end;
     finally
       Tournaments.Unlock;
@@ -820,6 +870,18 @@ begin
   UpdateGamelist;
 end;
 
+procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+var
+  text: String;
+begin
+  text := ARecord.Values[AItem.Index];
+  if text = 'Registering' then
+    AStyle := styleTournamentsRegistering;
+  if text = 'Registered' then
+    AStyle := styleTournamentsRegistered;
+end;
+
 procedure TfrmChipUpMain.gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acTournamentLobby.Execute;
@@ -845,8 +907,7 @@ begin
     end;
   end;
 
-  acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
-  acTournamentRegister.Enabled := not FSelectedTournament.IsEmpty; // fixme
+  ConfigureTournamentActions;
 end;
 
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -1218,6 +1279,32 @@ begin
   UpdateGamelist;
 end;
 
+procedure TfrmChipUpMain.CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentCommandParams;
+begin
+  if not TTypes.TryCast<TPB_TournamentCommandParams>(AObject, proto) then
+    Exit;
+
+  case proto.ReplyStatus of
+    tceRegisterOk: begin
+      dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
+      Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, 1);
+      UpdateTournamentList;
+      ConfigureTournamentActions;
+    end;
+    tceAlreadyRegistered: ;
+    tceRegisterLimitReached: ShowWarningDialog('This tournament is already filled');
+    tceRegisterFailed: ShowWarningDialog('Tournament registration failed');
+    tceUnregisterOk: begin
+      dmMain.SelfInfo.RegisteredTournaments.Remove(proto.MongoId);
+      Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, -1);
+      UpdateTournamentList;
+      ConfigureTournamentActions;
+    end;
+  end;
+end;
+
 procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);
 var
   pb: TPB_TableStatsReplies;
@@ -1302,6 +1389,11 @@ end;
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
 begin
   ServerSocket.TournamentRegister(FSelectedTournament);
+end;
+
+procedure TfrmChipUpMain.acTournamentUnregisterExecute(Sender: TObject);
+begin
+  ServerSocket.TournamentUnregister(FSelectedTournament);
 end;
 
 end.

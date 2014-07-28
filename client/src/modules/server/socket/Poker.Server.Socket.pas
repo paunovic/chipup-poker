@@ -54,6 +54,7 @@ type
     procedure QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
     procedure SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
     procedure TournamentRegister(const ATournamentId: TMongoId);
+    procedure TournamentUnregister(const ATournamentId: TMongoId);
   end;
 
 var
@@ -608,6 +609,19 @@ begin
   try
     protobuf.MongoId := ATournamentId;
     SendProtobuf(scTournamentRegister, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.TournamentUnregister(const ATournamentId: TMongoId);
+var
+  protobuf: TPB_TournamentCommandParams;
+begin
+  protobuf := TPB_TournamentCommandParams.Create;
+  try
+    protobuf.MongoId := ATournamentId;
+    SendProtobuf(scTournamentUnregister, protobuf);
   finally
     protobuf.Free;
   end;

@@ -9,7 +9,7 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
-  TTournamentCommandEnum = (tceRegisterOk = 0,tceAlreadyRegistered = 1,tceRegisterLimitReached = 2,tceRegisterFailed = 3);
+  TTournamentCommandEnum = (tceRegisterOk = 0,tceAlreadyRegistered = 1,tceRegisterLimitReached = 2,tceRegisterFailed = 3,tceUnregisterOk = 4);
 
   TPB_TournamentCommandParams = class(TProtobufBaseObject)
   private
