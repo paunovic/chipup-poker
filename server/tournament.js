@@ -32,7 +32,7 @@ TournamentCore.prototype.join = function (tournid,userid,cb) {
 		if (myutils.containsObjectID(doc.players,userid)) {
 			// error, already a member
 			return cb('alreadyMember');
-		} else if (doc.registered_players => doc.maxplayers) {
+		} else if (doc.registered_players >= doc.maxplayers) {
 			return cb('full');
 		} else {
 			doc.players.push(userid);
