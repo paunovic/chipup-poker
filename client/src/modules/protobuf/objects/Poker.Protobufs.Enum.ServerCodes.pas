@@ -57,6 +57,7 @@ type
     seUserChange = 60,
     scHello = 70,
     scLogin = 71,
+    scTournamentRegister = 72,
     scRegister = 73,
     scForgotPassword = 74,
     scLogout = 75,
@@ -174,6 +175,7 @@ begin
     seUserChange: result := 'seUserChange';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
+    scTournamentRegister: result := 'scTournamentRegister';
     scRegister: result := 'scRegister';
     scForgotPassword: result := 'scForgotPassword';
     scLogout: result := 'scLogout';

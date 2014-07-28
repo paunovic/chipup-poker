@@ -44,6 +44,7 @@ enum ServerCodes {
 	srHandHistoryMsg = 42;
 	srQueryAssetsReply = 43;
 	srNotSitting = 44;
+	srTournamentReply = 45;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -631,5 +632,12 @@ message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];
 }
 message TournamentCommandParams {
+	enum TournamentCommandEnum {
+		tceRegisterOk = 0;
+		tceAlreadyRegistered = 1;
+		tceRegisterLimitReached = 2;
+		tceRegisterFailed = 3;
+	}
 	required bytes _id = 1 [(ObjectId)=true];
+	optional TournamentCommandEnum reply_status = 2;
 }

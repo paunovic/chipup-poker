@@ -116,9 +116,7 @@ uses
   Poker.HandStrengthCalculator in 'modules\Poker.HandStrengthCalculator.pas',
   Poker.Database.Core in 'modules\database\Poker.Database.Core.pas',
   Poker.Types in 'modules\Poker.Types.pas',
-  Poker.Protobufs.Enum.ServerCodes in 'modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas',
   Poker.Protobufs.Reader in 'modules\protobuf\Poker.Protobufs.Reader.pas',
-  Poker.Protobufs.Objects.Base in 'modules\protobuf\Poker.Protobufs.Objects.Base.pas',
   Poker.Protobufs.Objects.RpcMessage in 'modules\protobuf\objects\Poker.Protobufs.Objects.RpcMessage.pas',
   Poker.Protobufs.Objects.LoginParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.LoginParams.pas',
   Poker.Protobufs.Objects.Club in 'modules\protobuf\objects\Poker.Protobufs.Objects.Club.pas',
@@ -176,7 +174,10 @@ uses
   Poker.DirectX.AnimationNew in 'modules\directx\Poker.DirectX.AnimationNew.pas',
   Poker.Protobufs.Objects.TournamentInfo in 'modules\protobuf\objects\Poker.Protobufs.Objects.TournamentInfo.pas',
   Poker.Protobufs.Objects.TournamentList in 'modules\protobuf\objects\Poker.Protobufs.Objects.TournamentList.pas',
-  Poker.Tournaments in 'modules\tournaments\Poker.Tournaments.pas';
+  Poker.Tournaments in 'modules\tournaments\Poker.Tournaments.pas',
+  Poker.Protobufs.Objects.Base in 'modules\protobuf\Poker.Protobufs.Objects.Base.pas',
+  Poker.Protobufs.Enum.ServerCodes in 'modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas',
+  Poker.Protobufs.Objects.TournamentCommandParams in 'modules\protobuf\objects\Poker.Protobufs.Objects.TournamentCommandParams.pas';
 
 procedure FocusApp;
 var

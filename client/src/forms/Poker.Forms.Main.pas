@@ -1301,7 +1301,7 @@ end;
 
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
 begin
-//
+  ServerSocket.TournamentRegister(FSelectedTournament);
 end;
 
 end.

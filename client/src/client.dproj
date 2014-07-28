@@ -297,9 +297,7 @@
 			<DCCReference Include="modules\Poker.HandStrengthCalculator.pas"/>
 			<DCCReference Include="modules\database\Poker.Database.Core.pas"/>
 			<DCCReference Include="modules\Poker.Types.pas"/>
-			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas"/>
 			<DCCReference Include="modules\protobuf\Poker.Protobufs.Reader.pas"/>
-			<DCCReference Include="modules\protobuf\Poker.Protobufs.Objects.Base.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.RpcMessage.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.LoginParams.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.Club.pas"/>
@@ -358,6 +356,9 @@
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TournamentInfo.pas"/>
 			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TournamentList.pas"/>
 			<DCCReference Include="modules\tournaments\Poker.Tournaments.pas"/>
+			<DCCReference Include="modules\protobuf\Poker.Protobufs.Objects.Base.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Enum.ServerCodes.pas"/>
+			<DCCReference Include="modules\protobuf\objects\Poker.Protobufs.Objects.TournamentCommandParams.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>
@@ -444,12 +445,12 @@
 					</Source>
 				</Delphi.Personality>
 				<Deployment>
-					<DeployFile LocalName="..\bin\Win32\Debug\client.rsm" Configuration="Debug" Class="DebugSymbols">
+					<DeployFile Class="DebugSymbols" Configuration="Debug" LocalName="..\bin\Win32\Debug\client.rsm">
 						<Platform Name="Win32">
 							<RemoteName>client.rsm</RemoteName>
 						</Platform>
 					</DeployFile>
-					<DeployFile LocalName="..\bin\Win32\Debug\client.exe" Configuration="Debug" Class="ProjectOutput">
+					<DeployFile Class="ProjectOutput" Configuration="Debug" LocalName="..\bin\Win32\Debug\client.exe">
 						<Platform Name="Win32"/>
 					</DeployFile>
 					<DeployClass Name="ProjectOutput" Required="true">
