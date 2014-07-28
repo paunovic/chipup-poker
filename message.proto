@@ -169,10 +169,13 @@ message LoginReply {
 		lrInvalid = 1;
 	}
 	required LoginStatus login_status = 1;
-	optional StatusReply status = 2;
 	repeated TableStatus reconnect_tables = 3;
 	repeated TournamentInfo tournament_infos = 4;
 	repeated bytes registered_tournaments = 5 [(ObjectId)=true];
+	repeated Club clubs = 6;
+	repeated User users = 7;
+	required User self = 8;
+	repeated Game games = 9;
 }
 
 message ClubMember {
@@ -259,13 +262,6 @@ message Game {
 	optional GameState state = 13;
 	optional uint32 closetime = 14;
 	optional uint32 lasthandid = 15;
-}
-
-message StatusReply {
-	repeated Club clubs = 1;
-	repeated User users = 2;
-	required User self = 3;
-	repeated Game games = 4;
 }
 
 message ListClubsReply {
