@@ -97,6 +97,7 @@ enum ServerCodes {
 	scSetPlayerLimit = 106;
 	scResetPlayerBalance = 107;
 	scQueryAssets = 108;
+	scTournamentUnregister = 109;
 }
 
 message StringSizes {
@@ -638,6 +639,7 @@ message TournamentCommandParams {
 		tceAlreadyRegistered = 1;
 		tceRegisterLimitReached = 2;
 		tceRegisterFailed = 3;
+		tceunRegisterOk = 4;
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	optional TournamentCommandEnum reply_status = 2;

@@ -144,6 +144,7 @@ ClientSocket.prototype.flushTourn = function () {
 }
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	var tournaments = [];
+	var registered_tournaments = [];
 	function finish(row) {
 		if (this.currentVersion) {
 			row.currentVersion = this.currentVersion;
@@ -155,7 +156,11 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	}
 	function finish2(row) {
 		models.Tournament.find(function (err,items) {
+			var i;
 			error.handleError(err);
+			for (i=0; i<items.length; i++) {
+				if (myutils.containsObjectID(items[i].players,row._id)) registered_tournaments.push(items[i]._id);
+			}
 			tournaments = items;
 			finish3.call(this,row);
 		}.bind(this));
@@ -211,7 +216,7 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					cb();
 				});
 			}.bind(this),function done() {
-				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses, tournament_infos:tournaments };
+				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses, tournament_infos:tournaments, registered_tournaments:registered_tournaments };
 				//console.log('login reply',obj);
 				this.send(codes.srLoginReply,obj,'Poker.LoginReply');
 				// FIXME, embed in the same message
@@ -1086,3 +1091,36 @@ ClientSocket.prototype.destroy = function destroy() {
 	this.socket.destroy();
 	clearTimeout(this.idleTimer);
 };
+handlers[codes.scTournamentRegister] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentCommandParams');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Tournament.core.join(params._id,this.userid,function (code) {
+		if (code == 'OK') {
+			params.reply_status = 'tceRegisterOk';
+		} else if (code == 'alreadyMember') {
+			params.reply_status = 'tceAlreadyRegistered';
+		}
+		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
+		token.stop();
+	}.bind(this));
+};
+handlers[codes.scTournamentUnregister] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentCommandParams');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Tournament.core.leave(params._id,this.userid,function (code) {
+		params.reply_status = 'tceunRegisterOk';
+		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
+		token.stop();
+	});

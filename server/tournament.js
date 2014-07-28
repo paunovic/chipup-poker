@@ -1,6 +1,7 @@
 var models = require('./db').models,
 	util = require('util'),
-	EventEmitter = require('events').EventEmitter;
+	EventEmitter = require('events').EventEmitter,
+	myutils = require('./myutils');
 
 var error = require('./error');
 
@@ -25,5 +26,26 @@ function TournamentCore() {
 }
 util.inherits(TournamentCore,EventEmitter);
 util.inherits(Tournament,EventEmitter);
+TournamentCore.prototype.join = function (tournid,userid,cb) {
+	models.Tournament.findById(tournid,function (err,doc) {
+		console.log(err,userid,doc);
+		if (myutils.containsObjectID(doc.players,userid)) {
+			// error, already a member
+			return cb('alreadyMember');
+		} else {
+			doc.players.push(userid);
+			doc.registered_players = doc.players.length;
+			doc.save(function (err) {
+				console.log('saved',arguments,doc);
+				cb('OK');
+			});
+		}
+	});
+}
+TournamentCore.prototype.leave = function (tournid,userid,cb) {
+	models.Tournament.findById(tournid,function (err,doc) {
+		doc.players.pull(userid);
+		cb('OK');
+	});
 var core = new TournamentCore();
 Tournament.core = core;
