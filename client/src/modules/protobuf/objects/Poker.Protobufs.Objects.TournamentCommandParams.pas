@@ -9,18 +9,25 @@ uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types;
 
 type
+  TTournamentCommandEnum = (tceRegisterOk = 0,tceAlreadyRegistered = 1,tceRegisterLimitReached = 2,tceRegisterFailed = 3);
+
   TPB_TournamentCommandParams = class(TProtobufBaseObject)
   private
     const
       kIdFieldNumber = 1;
+      kReplyStatusFieldNumber = 2;
 
     var
       FId: TMongoId;
+      FReplyStatus: TTournamentCommandEnum;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
     procedure clear_has_MongoId;
     procedure SetMongoId(const AValue: TMongoId);
+    procedure set_has_ReplyStatus;
+    procedure clear_has_ReplyStatus;
+    procedure SetReplyStatus(const AValue: TTournamentCommandEnum);
 
   public
     constructor Create(const AFrom: TPB_TournamentCommandParams; const ALightweight: Boolean = FALSE); overload;
@@ -34,6 +41,11 @@ type
     function has_MongoId: Boolean;
     procedure clear_MongoId;
     property MongoId: TMongoId read FId write SetMongoId;
+
+    // optional TournamentCommandEnum ReplyStatus = 2;
+    function has_ReplyStatus: Boolean;
+    procedure clear_ReplyStatus;
+    property ReplyStatus: TTournamentCommandEnum read FReplyStatus write SetReplyStatus;
 
   end;
 
@@ -71,6 +83,11 @@ begin
         FId := AProtobufReader.readMongoId;
         set_has_MongoId;
       end;
+      kReplyStatusFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FReplyStatus := TTournamentCommandEnum(AProtobufReader.readEnum);
+        set_has_ReplyStatus;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -80,6 +97,8 @@ procedure TPB_TournamentCommandParams.MergeFrom(const AFrom: TPB_TournamentComma
 begin
   if AFrom.has_MongoId then
     SetMongoId(AFrom.MongoId);
+  if AFrom.has_ReplyStatus then
+    SetReplyStatus(AFrom.ReplyStatus);
 end;
 
 function TPB_TournamentCommandParams.IsInitialized: Boolean;
@@ -123,12 +142,43 @@ begin
   set_has_MongoId;
 end;
 
+procedure TPB_TournamentCommandParams.clear_ReplyStatus;
+begin
+  FReplyStatus := TTournamentCommandEnum(0);
+  clear_has_ReplyStatus;
+end;
+
+function TPB_TournamentCommandParams.has_ReplyStatus: Boolean;
+begin
+  result := (_has_bits_ and 2) > 0;
+end;
+
+procedure TPB_TournamentCommandParams.set_has_ReplyStatus;
+begin
+  _has_bits_ := _has_bits_ or 2;
+end;
+
+procedure TPB_TournamentCommandParams.clear_has_ReplyStatus;
+begin
+  _has_bits_ := _has_bits_ and not 2;
+end;
+
+procedure TPB_TournamentCommandParams.SetReplyStatus(const AValue: TTournamentCommandEnum);
+begin
+  Assert(not has_ReplyStatus);
+  FReplyStatus := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kReplyStatusFieldNumber, Integer(AValue));
+  set_has_ReplyStatus;
+end;
+
 procedure TPB_TournamentCommandParams.Clear;
 begin
   if _has_bits_ = 0 then
     Exit;
 
   clear_MongoId;
+  clear_ReplyStatus;
 end;
 
 procedure TPB_TournamentCommandParamsList.Assign(const APB_TournamentCommandParamsList: TList<TPB_TournamentCommandParams>);

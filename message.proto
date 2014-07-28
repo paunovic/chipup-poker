@@ -171,6 +171,7 @@ message LoginReply {
 	optional StatusReply status = 2;
 	repeated TableStatus reconnect_tables = 3;
 	repeated TournamentInfo tournament_infos = 4;
+	repeated bytes registered_tournaments = 5 [(ObjectId)=true];
 }
 
 message ClubMember {

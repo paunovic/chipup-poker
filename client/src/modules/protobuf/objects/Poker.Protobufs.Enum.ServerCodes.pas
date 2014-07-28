@@ -44,6 +44,7 @@ type
     srHandHistoryMsg = 42,
     srQueryAssetsReply = 43,
     srNotSitting = 44,
+    srTournamentReply = 45,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -162,6 +163,7 @@ begin
     srHandHistoryMsg: result := 'srHandHistoryMsg';
     srQueryAssetsReply: result := 'srQueryAssetsReply';
     srNotSitting: result := 'srNotSitting';
+    srTournamentReply: result := 'srTournamentReply';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';

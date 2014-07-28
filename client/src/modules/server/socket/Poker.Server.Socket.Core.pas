@@ -91,7 +91,7 @@ uses
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
-  Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList;
+  Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams;
 
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
@@ -514,6 +514,7 @@ begin
     srQueryAssetsReply: ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
     srSubscriptionPlanChange: ADataObject := TPB_SubscriptionPlanChange.Create(ADataPointer, ARpcMessage.DataSize);
     seTournamentList: ADataObject := TPB_TournamentList.Create(ADataPointer, ARpcMessage.DataSize);
+    srTournamentReply: ADataObject := TPB_TournamentCommandParams.Create(ADataPointer, ARpcMessage.DataSize);
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
     Exit(FALSE);

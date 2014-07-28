@@ -19,12 +19,14 @@ type
       kStatusFieldNumber = 2;
       kReconnectTablesFieldNumber = 3;
       kTournamentInfosFieldNumber = 4;
+      kRegisteredTournamentsFieldNumber = 5;
 
     var
       FLoginStatus: TLoginStatus;
       FStatus: TPB_StatusReply;
       FReconnectTables: TList<TPB_TableStatus>;
       FTournamentInfos: TList<TPB_TournamentInfo>;
+      FRegisteredTournaments: TList<TMongoId>;
       _has_bits_: UINT32;
 
     procedure set_has_LoginStatus;
@@ -37,8 +39,11 @@ type
     procedure clear_has_ReconnectTables;
     procedure set_has_TournamentInfos;
     procedure clear_has_TournamentInfos;
+    procedure set_has_RegisteredTournaments;
+    procedure clear_has_RegisteredTournaments;
     procedure ReconnectTablesNotifyEvent(Sender: TObject; const Item: TPB_TableStatus; Action: TCollectionNotification);
     procedure TournamentInfosNotifyEvent(Sender: TObject; const Item: TPB_TournamentInfo; Action: TCollectionNotification);
+    procedure RegisteredTournamentsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
 
   protected
     procedure InitObjects; override;
@@ -72,6 +77,11 @@ type
     procedure clear_TournamentInfos;
     property TournamentInfos: TList<TPB_TournamentInfo> read FTournamentInfos;
 
+    // repeated bytes RegisteredTournaments = 5;
+    function has_RegisteredTournaments: Boolean;
+    procedure clear_RegisteredTournaments;
+    property RegisteredTournaments: TList<TMongoId> read FRegisteredTournaments;
+
   end;
 
   TPB_LoginReplyList = class(TObjectList<TPB_LoginReply>)
@@ -103,6 +113,11 @@ begin
     FTournamentInfos.OnNotify := nil;
     FreeAndNil(FTournamentInfos);
   end;
+  if Assigned(FRegisteredTournaments) then
+  begin
+    FRegisteredTournaments.OnNotify := nil;
+    FreeAndNil(FRegisteredTournaments);
+  end;
   inherited;
 end;
 
@@ -111,6 +126,7 @@ begin
   inherited;
   FReconnectTables := TObjectList<TPB_TableStatus>.Create;
   FTournamentInfos := TObjectList<TPB_TournamentInfo>.Create;
+  FRegisteredTournaments := TList<TMongoId>.Create;
 end;
 
 procedure TPB_LoginReply.HookNotifiers;
@@ -118,6 +134,7 @@ begin
   inherited;
   FReconnectTables.OnNotify := ReconnectTablesNotifyEvent;
   FTournamentInfos.OnNotify := TournamentInfosNotifyEvent;
+  FRegisteredTournaments.OnNotify := RegisteredTournamentsNotifyEvent;
 end;
 
 procedure TPB_LoginReply.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -150,6 +167,11 @@ begin
         FTournamentInfos.Add(TPB_TournamentInfo.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_TournamentInfos;
       end;
+      kRegisteredTournamentsFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FRegisteredTournaments.Add(AProtobufReader.readMongoId);
+        set_has_RegisteredTournaments;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -168,6 +190,7 @@ begin
     FReconnectTables.Add(TPB_TableStatus.Create(pbobj2));
   for pbobj3 in AFrom.TournamentInfos do
     FTournamentInfos.Add(TPB_TournamentInfo.Create(pbobj3));
+  FRegisteredTournaments.AddRange(AFrom.RegisteredTournaments);
 end;
 
 function TPB_LoginReply.IsInitialized: Boolean;
@@ -324,6 +347,44 @@ begin
   end;
 end;
 
+procedure TPB_LoginReply.clear_RegisteredTournaments;
+var
+  on_notify: TCollectionNotifyEvent<TMongoId>;
+begin
+  on_notify := FRegisteredTournaments.OnNotify;
+  FRegisteredTournaments.OnNotify := nil;
+  FRegisteredTournaments.Clear;
+  FRegisteredTournaments.OnNotify := on_notify;
+  clear_has_RegisteredTournaments;
+end;
+
+function TPB_LoginReply.has_RegisteredTournaments: Boolean;
+begin
+  result := (_has_bits_ and 16) > 0;
+end;
+
+procedure TPB_LoginReply.set_has_RegisteredTournaments;
+begin
+  _has_bits_ := _has_bits_ or 16;
+end;
+
+procedure TPB_LoginReply.clear_has_RegisteredTournaments;
+begin
+  _has_bits_ := _has_bits_ and not 16;
+end;
+
+procedure TPB_LoginReply.RegisteredTournamentsNotifyEvent(Sender: TObject; const Item: TMongoId; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_RegisteredTournaments;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kRegisteredTournamentsFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(Item.Memory, 12);
+  end;
+end;
+
 procedure TPB_LoginReply.Clear;
 begin
   if _has_bits_ = 0 then
@@ -333,6 +394,7 @@ begin
   clear_Status;
   clear_ReconnectTables;
   clear_TournamentInfos;
+  clear_RegisteredTournaments;
 end;
 
 procedure TPB_LoginReplyList.Assign(const APB_LoginReplyList: TList<TPB_LoginReply>);
