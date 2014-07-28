@@ -53,10 +53,8 @@ type
     procedure ResetPlayerBalance(const AClubId, AMemberId: TMongoId);
     procedure QueryAssets(const AAssets: TObjectList<TPB_UpdateFileInfo>);
     procedure SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
-
-    {$IFDEF DEBUG}
-    procedure CrashTest;
-    {$ENDIF}
+    procedure TournamentRegister(const ATournamentId: TMongoId);
+    procedure TournamentUnregister(const ATournamentId: TMongoId);
   end;
 
 var
@@ -76,7 +74,8 @@ uses
   Poker.Protobufs.Objects.ChangeMailReply, Poker.Protobufs.Objects.TableBoolFlag, Poker.Protobufs.Objects.PutChips,
   Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply,
   Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
-  Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams;
+  Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams,
+  Poker.Protobufs.Objects.TournamentCommandParams;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -602,29 +601,30 @@ begin
   end;
 end;
 
-
-{$IFDEF DEBUG}
-procedure TServerSocket.CrashTest;
+procedure TServerSocket.TournamentRegister(const ATournamentId: TMongoId);
 var
-  pb: TPB_HelloParams;
-  tmp: String;
-{  bytes1: TMongoId;
-  bytesx2: TArray<TMongoId>;   }
+  protobuf: TPB_TournamentCommandParams;
 begin
-  SetLength(tmp, 100);
-//  SetLength(bytes, 100);
-  FillChar(tmp[1], Length(tmp) * SizeOf(Char), 65);
-//  FillChar(bytes[0], Length(bytes) * SizeOf(Byte), 66);
-//  StringToBytes('537badf134a82b1763f7aee8', bytes);
-//  StringToBytes('533da6a40427a9b03915560d', bytes1);
-  pb := TPB_HelloParams.Create;
+  protobuf := TPB_TournamentCommandParams.Create;
   try
-    SendProtobuf(scHello, pb);
+    protobuf.MongoId := ATournamentId;
+    SendProtobuf(scTournamentRegister, protobuf);
   finally
-    pb.Free;
+    protobuf.Free;
   end;
 end;
-{$ENDIF}
 
+procedure TServerSocket.TournamentUnregister(const ATournamentId: TMongoId);
+var
+  protobuf: TPB_TournamentCommandParams;
+begin
+  protobuf := TPB_TournamentCommandParams.Create;
+  try
+    protobuf.MongoId := ATournamentId;
+    SendProtobuf(scTournamentUnregister, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
 
 end.

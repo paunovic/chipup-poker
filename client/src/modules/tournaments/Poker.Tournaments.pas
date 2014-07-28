@@ -17,6 +17,7 @@ type
     destructor Destroy; override;
 
     function GetAndLock(const AId: TMongoId; out ATournament: TPB_TournamentInfo): Boolean;
+    function AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
 
     procedure Assign(const ATournamentList: TList<TPB_TournamentInfo>); overload;
     procedure Assign(const ATournamentList: TPB_TournamentList); overload;
@@ -76,6 +77,26 @@ begin
     inherited Clear;
   finally
     FLock.Leave;
+  end;
+end;
+
+function TTournamentList.AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
+var
+  tournament: TPB_TournamentInfo;
+  reg_players: Integer;
+begin
+  result := FALSE;
+  if GetAndLock(AId, tournament) then
+  try
+    reg_players := tournament.RegisteredPlayers;
+    Inc(reg_players, AAdjustment);
+    if reg_players < 0 then
+      reg_players := 0;
+    tournament.clear_RegisteredPlayers;
+    tournament.RegisteredPlayers := reg_players;
+    result := TRUE;
+  finally
+    Unlock;
   end;
 end;
 

@@ -222,7 +222,7 @@ begin
       Close;
     end;
   else
-    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.Status)]), ditException); {$ENDIF}
+    {$IFDEF DEBUG} DebugLn(FDebugId, Format('CSRLogin: invalid status received [%d]]', [Integer(pbreply.LoginStatus)]), ditException); {$ENDIF}
   end;
 end;
 

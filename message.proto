@@ -44,6 +44,7 @@ enum ServerCodes {
 	srHandHistoryMsg = 42;
 	srQueryAssetsReply = 43;
 	srNotSitting = 44;
+	srTournamentReply = 45;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -59,6 +60,7 @@ enum ServerCodes {
 	
 	scHello = 70;
 	scLogin = 71;
+	scTournamentRegister = 72;
 	scRegister = 73;
 	scForgotPassword = 74;
 	scLogout = 75;
@@ -95,6 +97,7 @@ enum ServerCodes {
 	scSetPlayerLimit = 106;
 	scResetPlayerBalance = 107;
 	scQueryAssets = 108;
+	scTournamentUnregister = 109;
 }
 
 message StringSizes {
@@ -166,9 +169,13 @@ message LoginReply {
 		lrInvalid = 1;
 	}
 	required LoginStatus login_status = 1;
-	optional StatusReply status = 2;
 	repeated TableStatus reconnect_tables = 3;
 	repeated TournamentInfo tournament_infos = 4;
+	repeated bytes registered_tournaments = 5 [(ObjectId)=true];
+	repeated Club clubs = 6;
+	repeated User users = 7;
+	required User self = 8;
+	repeated Game games = 9;
 }
 
 message ClubMember {
@@ -255,13 +262,6 @@ message Game {
 	optional GameState state = 13;
 	optional uint32 closetime = 14;
 	optional uint32 lasthandid = 15;
-}
-
-message StatusReply {
-	repeated Club clubs = 1;
-	repeated User users = 2;
-	required User self = 3;
-	repeated Game games = 4;
 }
 
 message ListClubsReply {
@@ -628,4 +628,15 @@ message TournamentInfo {
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];
+}
+message TournamentCommandParams {
+	enum TournamentCommandEnum {
+		tceRegisterOk = 0;
+		tceAlreadyRegistered = 1;
+		tceRegisterLimitReached = 2;
+		tceRegisterFailed = 3;
+		tceUnregisterOk = 4;
+	}
+	required bytes _id = 1 [(ObjectId)=true];
+	optional TournamentCommandEnum reply_status = 2;
 }

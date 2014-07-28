@@ -457,7 +457,7 @@ function testmenu(cb,config) {
 				conn.close();
 				return;
 			}
-			parseStatusMain.call(this,params.status);
+			parseStatusMain.call(this,params);
 				//this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
 			break;
 		case codes.srCreateClubReply:

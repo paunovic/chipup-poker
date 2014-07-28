@@ -79,7 +79,7 @@ implementation
 
 uses
   Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer, Poker.Server.Socket,
-  Poker.Server.SSLCerts, Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply,
+  Poker.Server.SSLCerts, Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club,
   Poker.Protobufs.Objects.ChangeEMailParams, Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
@@ -91,7 +91,7 @@ uses
   Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.Protobufs.Objects.BuyinError,
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
-  Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList;
+  Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams;
 
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
@@ -514,6 +514,7 @@ begin
     srQueryAssetsReply: ADataObject := TPB_AssetList.Create(ADataPointer, ARpcMessage.DataSize);
     srSubscriptionPlanChange: ADataObject := TPB_SubscriptionPlanChange.Create(ADataPointer, ARpcMessage.DataSize);
     seTournamentList: ADataObject := TPB_TournamentList.Create(ADataPointer, ARpcMessage.DataSize);
+    srTournamentReply: ADataObject := TPB_TournamentCommandParams.Create(ADataPointer, ARpcMessage.DataSize);
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
     Exit(FALSE);

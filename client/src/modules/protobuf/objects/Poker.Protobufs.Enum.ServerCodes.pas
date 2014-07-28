@@ -44,6 +44,7 @@ type
     srHandHistoryMsg = 42,
     srQueryAssetsReply = 43,
     srNotSitting = 44,
+    srTournamentReply = 45,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -57,6 +58,7 @@ type
     seUserChange = 60,
     scHello = 70,
     scLogin = 71,
+    scTournamentRegister = 72,
     scRegister = 73,
     scForgotPassword = 74,
     scLogout = 75,
@@ -92,7 +94,8 @@ type
     scContactUs = 105,
     scSetPlayerLimit = 106,
     scResetPlayerBalance = 107,
-    scQueryAssets = 108
+    scQueryAssets = 108,
+    scTournamentUnregister = 109
   );
 
 {$IFDEF DEBUG}
@@ -161,6 +164,7 @@ begin
     srHandHistoryMsg: result := 'srHandHistoryMsg';
     srQueryAssetsReply: result := 'srQueryAssetsReply';
     srNotSitting: result := 'srNotSitting';
+    srTournamentReply: result := 'srTournamentReply';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -174,6 +178,7 @@ begin
     seUserChange: result := 'seUserChange';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
+    scTournamentRegister: result := 'scTournamentRegister';
     scRegister: result := 'scRegister';
     scForgotPassword: result := 'scForgotPassword';
     scLogout: result := 'scLogout';
@@ -210,6 +215,7 @@ begin
     scSetPlayerLimit: result := 'scSetPlayerLimit';
     scResetPlayerBalance: result := 'scResetPlayerBalance';
     scQueryAssets: result := 'scQueryAssets';
+    scTournamentUnregister: result := 'scTournamentUnregister';
   end;
 end;
 {$ENDIF DEBUG}

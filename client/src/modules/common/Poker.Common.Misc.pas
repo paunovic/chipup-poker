@@ -61,9 +61,7 @@ begin
   case AValue.TypeInfo^.Kind of
     tkClass: begin
       result := '{';
-      method := nil;
-      if Assigned(AProperty) then
-        method := AProperty.PropertyType.GetMethod('ToArray');
+      method := TRttiContext.Create.GetType(AValue.TypeInfo).GetMethod('ToArray');
       if Assigned(method) then
       begin
         val2 := method.Invoke(AValue, []);
@@ -87,7 +85,7 @@ begin
         if convert_to_hex then
           result := result + LowerCase(IntToHex(AValue.GetArrayElement(C1).AsInteger, 2))
         else
-          result := result + Format('%s, ', [ValueToStr(AProperty, AValue.GetArrayElement(C1))]);
+          result := result + Format('%s, ', [ValueToStr(nil, AValue.GetArrayElement(C1))]);
       if not convert_to_hex then
       begin
         if result[Length(result)] = ' ' then
@@ -98,9 +96,7 @@ begin
 
     tkString, tkWString, tkLString, tkUString: result := Format('"%s"', [AValue.ToString]);
   else
-    method := nil;
-    if Assigned(AProperty) then
-      method := AProperty.PropertyType.GetMethod('ToString');
+    method := TRttiContext.Create.GetType(AValue.TypeInfo).GetMethod('ToString');
     if Assigned(method) then
       result := method.Invoke(AValue, []).AsString
     else

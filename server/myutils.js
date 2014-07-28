@@ -10,6 +10,10 @@ module.exports.throttle = throttle;
 
 var models = require('./db').models;
 
+ObjectID.prototype.toProtobuf = function () {
+	return new Buffer(this.id,'binary');
+}
+
 module.exports.init = function () {
 	models.Counter.create({_id:'club',seq:1},function (err,res) {}); // default value
 }

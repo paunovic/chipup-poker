@@ -257,7 +257,8 @@ var TournamentSchema = new Schema({
 	startingchips: {type:Number,required:true},
 	timeperlevel: {type:Number,required:true},
 	registered_players: { type:Number, required:true, default:0 },
-	start_time: { type:Number, required:true, default: 0 }
+	start_time: { type:Number, required:true, default: 0 },
+	players: { type:[ObjectId] }
 });
 
 module.exports.close = function () {
