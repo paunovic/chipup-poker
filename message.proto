@@ -630,6 +630,6 @@ message TournamentInfo {
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];
 }
-message TournamentCmdParams {
+message TournamentCommandParams {
 	required bytes _id = 1 [(ObjectId)=true];
 }
