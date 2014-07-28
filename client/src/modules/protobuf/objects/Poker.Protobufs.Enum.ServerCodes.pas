@@ -94,7 +94,8 @@ type
     scContactUs = 105,
     scSetPlayerLimit = 106,
     scResetPlayerBalance = 107,
-    scQueryAssets = 108
+    scQueryAssets = 108,
+    scTournamentUnregister = 109
   );
 
 {$IFDEF DEBUG}
@@ -214,6 +215,7 @@ begin
     scSetPlayerLimit: result := 'scSetPlayerLimit';
     scResetPlayerBalance: result := 'scResetPlayerBalance';
     scQueryAssets: result := 'scQueryAssets';
+    scTournamentUnregister: result := 'scTournamentUnregister';
   end;
 end;
 {$ENDIF DEBUG}

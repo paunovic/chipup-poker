@@ -79,7 +79,7 @@ implementation
 
 uses
   Winapi.WinSock, Poker.Settings, Poker.Common.Misc, pbOutput, Poker.Server.MessageContainer, Poker.Server.Socket,
-  Poker.Server.SSLCerts, Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams, Poker.Protobufs.Objects.StatusReply,
+  Poker.Server.SSLCerts, Poker.WindowMessages, Poker.Protobufs.Objects.LoginParams,
   Poker.Protobufs.Objects.HelloReply, Poker.Protobufs.Objects.RegisterParams, Poker.Protobufs.Objects.Club,
   Poker.Protobufs.Objects.ChangeEMailParams, Poker.Protobufs.Objects.ForgotPasswordParams, Poker.Protobufs.Objects.ClubCommandReply,
   Poker.Protobufs.Objects.SetAvatarReply, Poker.Protobufs.Objects.PingParams, Poker.Protobufs.Objects.PingReply,
