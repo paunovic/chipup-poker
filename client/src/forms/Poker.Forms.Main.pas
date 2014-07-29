@@ -157,7 +157,11 @@ type
     procedure UpdatePublicClublist;
     procedure UpdateGamelist;
     procedure UpdateTournamentList;
-    procedure ConfigureTournamentActions;
+    procedure UpdateTournamentActions;
+    procedure RefreshGrids;
+    procedure UpdateMenuActions;
+    procedure UpdateFormCaption;
+    procedure RefreshAll;
 
     procedure ShowTournamentLayout(const AShow: Boolean);
 
@@ -186,7 +190,6 @@ type
     function ConfirmToCloseTablesLogout: Boolean;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
-    procedure ConfigureGUI;
 
     procedure DoLogout;
   protected
@@ -555,7 +558,7 @@ begin
   FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
 end;
 
-procedure TfrmChipUpMain.ConfigureGUI;
+procedure TfrmChipUpMain.UpdateFormCaption;
 var
   cpt: String;
 begin
@@ -564,7 +567,10 @@ begin
     cpt := cpt + ' (account verification pending)';
   if cpt <> Caption then
     Caption := cpt;
+end;
 
+procedure TfrmChipUpMain.UpdateMenuActions;
+begin
   acResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
 
   acSoundsOnOff.Checked := Settings.Sounds;
@@ -572,14 +578,25 @@ begin
   acAnimationsEnabled.Checked := Settings.Animations;
 
   ActionManager.ActionBars[0].Items[3].Visible := Settings.DeveloperMode;
+end;
 
+procedure TfrmChipUpMain.RefreshAll;
+begin
+  UpdateFormCaption;
+  RefreshGrids;
+  UpdateMenuActions;
+  UpdateTournamentActions;
+end;
+
+procedure TfrmChipUpMain.RefreshGrids;
+begin
   UpdateClublist;
   UpdateGamelist;
   UpdatePublicClublist;
   UpdateTournamentList;
 end;
 
-procedure TfrmChipUpMain.ConfigureTournamentActions;
+procedure TfrmChipUpMain.UpdateTournamentActions;
 var
   registered: Boolean;
   tournament: TPB_TournamentInfo;
@@ -907,7 +924,7 @@ begin
     end;
   end;
 
-  ConfigureTournamentActions;
+  UpdateTournamentActions;
 end;
 
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -969,7 +986,7 @@ begin
       FSelectedClub.Clear;
       FSelectedGame.Clear;
       FSelectedTournament.Clear;
-      ConfigureGUI;
+      RefreshAll;
       Show;
       dmMain.ProcessReconnectedTables;
     end;
@@ -984,7 +1001,7 @@ procedure TfrmChipUpMain.ModalFormClose(ASender: TObject);
 begin
   if ASender is TfrmReconnect then
     case (ASender as TfrmReconnect).CurrentStatus of
-      rsLoggedIn: ConfigureGUI;
+      rsLoggedIn: RefreshAll;
     else
       FormsContainer.Items.Extract(ASender as TForm);
       DoLogout;
@@ -1017,7 +1034,7 @@ begin
   case pbreply.Status of
     csSuccess: begin
       dmMain.ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
-      ConfigureGUI;
+      RefreshAll;
     end;
   end;
 end;
@@ -1032,7 +1049,7 @@ begin
   case pbreply.Status of
     csSuccess: begin
       dmMain.ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
-      ConfigureGUI;
+      RefreshAll;
     end;
   end;
 end;
@@ -1045,7 +1062,7 @@ begin
     Exit;
 
   dmMain.ProcessClubObject(pbclub, nil, AMethodId);
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
@@ -1155,7 +1172,7 @@ begin
 
   dmMain.UpdateSelfInfoInPlayers;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: TObject);
@@ -1191,7 +1208,7 @@ begin
     Tables.Unlock;
   end;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSREGameDelete(const AMethodId: Integer; const AObject: TObject);
@@ -1221,7 +1238,7 @@ begin
     dmMain.SelfInfo.Clubs.Unlock;
   end;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
@@ -1249,8 +1266,9 @@ begin
     Tables.Unlock;
   end;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
+
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
@@ -1291,7 +1309,7 @@ begin
       dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
       Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, 1);
       UpdateTournamentList;
-      ConfigureTournamentActions;
+      UpdateTournamentActions;
     end;
     tceAlreadyRegistered: ;
     tceRegisterLimitReached: ShowWarningDialog('This tournament is already filled');
@@ -1300,7 +1318,7 @@ begin
       dmMain.SelfInfo.RegisteredTournaments.Remove(proto.MongoId);
       Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, -1);
       UpdateTournamentList;
-      ConfigureTournamentActions;
+      UpdateTournamentActions;
     end;
   end;
 end;
