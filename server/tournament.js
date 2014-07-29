@@ -19,6 +19,7 @@ Tournament.create = function (obj,cb) {
 		error.handleError(err);
 		console.log('doc is',doc);
 		core.emit('new_tournament',doc);
+		core.resetTimer();
 		cb();
 	});
 }
@@ -44,7 +45,7 @@ TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
 			doc.players.push({_id:userid,displayname:nick,chips:doc.startingchips*100});
 			doc.registered_players = doc.players.length;
 			doc.save(function (err) {
-				console.log('saved',arguments,doc);
+				console.log('saved -  join',arguments,doc);
 				cb('OK');
 			});
 		}
@@ -63,6 +64,38 @@ TournamentCore.prototype.leave = function (tournid,userid,cb) {
 			cb('OK');
 		});
 	});
+}
+TournamentCore.prototype.resetTimer = function () {
+	if (this.timer) clearTimeout(this.timer);
+	delete this.timer;
+	models.Tournament.find({state:'tnsOpen'},{name:1,start_time:1,state:1}).sort({start_time:1}).limit(1).exec(function (err,rows) {
+		if (rows.length != 1) return; // dont start a timer, there is nothing to wait for
+		var row = rows[0];
+		var now = Date.now() / 1000;
+		var timeleft = row.start_time - now;
+		if (timeleft < 0) this.checkTournaments();
+		else {
+			console.log('found',err,rows,timeleft);
+			console.log('%d now',now);
+			console.log('%d goal',row.start_time);
+			this.timer = setTimeout(this.checkTournaments.bind(this),(timeleft+60)*1000);
+		}
+	}.bind(this));
+}
+TournamentCore.prototype.checkTournaments = function () {
+	models.Tournament.find({state:'tnsOpen'}).sort({name:1,start_time:1}).limit(1).exec(function (err,rows) {
+		if (rows.length != 1) return; // nothing found
+		var row = rows[0];
+		var now = Date.now() / 1000;
+		var timeleft = row.start_time - now;
+		if (timeleft > 0) return this.resetTimer();
+		console.log('found2',err,rows);
+		row.state = 'tnsInProgress';
+		row.save(function () {
+			core.emit('tournament_start',row);
+			this.resetTimer();
+		}.bind(this));
+	}.bind(this));
 }
 var core = new TournamentCore();
 Tournament.core = core;

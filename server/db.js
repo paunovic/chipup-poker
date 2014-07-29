@@ -264,7 +264,7 @@ var TournamentSchema = new Schema({
 	registered_players: { type:Number, required:true, default:0 },
 	start_time: { type:Number, required:true, default: 0 },
 	players: { type:[TournamentMemberSchema] },
-	status: { type:String, default:'tysOpen' }
+	state: { type:String, default:'tnsOpen', required:true }
 });
 
 module.exports.close = function () {

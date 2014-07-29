@@ -57,6 +57,7 @@
 			var p = $('#p_' + i).val();
 			var v = h + ':' + m + ' ' + p;
 			$('#' + i).val(v);
+			updateTime();
 		});
 		
 		return this;

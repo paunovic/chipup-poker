@@ -108,6 +108,7 @@ function ClientSocket(socket) {
 	clearTimeout(this.idleTimer);
 	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
 	Tournament.core.on('new_tournament',this.newTourn.bind(this));
+	Tournament.core.on('tournament_start',this.newTourn.bind(this));
 	this.lastTourn = 0;
 }
 ClientSocket.prototype.error = function error(e) {
@@ -122,9 +123,9 @@ ClientSocket.prototype.error = function error(e) {
 };
 ClientSocket.prototype.destroy = function () {
 	Tournament.core.removeListener('new_tournament',this.newTourn.bind(this));
+	Tournament.core.removeListener('tournament_start',this.newTourn.bind(this));
 };
 ClientSocket.prototype.newTourn = function (doc) {
-	console.log('args are',arguments);
 	if (this.state != 2) return;
 	var elapsed = Date.now() - this.lastTourn;
 	if (elapsed < 30000) { // 30 sec
@@ -1145,12 +1146,6 @@ handlers[codes.scGetTournamentDetails] = function (args,token) {
 	}
 	models.Tournament.findById(params._id,function (err,doc) {
 		error.handleError(err);
-		console.log('players:',doc.players);
-		console.log(doc);
-		var test = pb.Serialize(doc,'Poker.TournamentInfo');
-		var test2 = pb.Parse(test,'Poker.TournamentInfo');
-		console.log(test);
-		console.log(test2);
 		this.send(codes.srTournamentDetails,doc,'Poker.TournamentInfo');
 		token.stop();
 	}.bind(this));

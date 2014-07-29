@@ -269,7 +269,7 @@ Server.prototype.createTournPost = function (req,res) {
 			res.end(err.toString());
 			return;
 		}
-		console.log(req.body);
+		console.log('http body',req.body);
 		res.end('test');
 	});
 }
