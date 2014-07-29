@@ -623,6 +623,10 @@ message TournamentMember {
 	required uint32 chips = 3;
 }
 message TournamentInfo {
+	enum TyStatus {
+		tysOpen = 0;
+		tysInProgress = 1;
+	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
 	required string description = 3;
@@ -636,6 +640,7 @@ message TournamentInfo {
 	required uint32 registered_players = 11;
 	required uint32 start_time = 12;
 	repeated TournamentMember players = 13;
+	required TyStatus status = 14;
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];

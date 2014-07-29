@@ -246,6 +246,11 @@ var PaypalRequestSchema = new Schema({
 	plan:String,
 	userid:ObjectId,
 });
+var TournamentMemberSchema = new Schema({
+	_id: ObjectId,
+	displayname: String,
+	chips: Number
+});
 var TournamentSchema = new Schema({
 	name: String,
 	description: String,
@@ -258,7 +263,8 @@ var TournamentSchema = new Schema({
 	timeperlevel: {type:Number,required:true},
 	registered_players: { type:Number, required:true, default:0 },
 	start_time: { type:Number, required:true, default: 0 },
-	players: { type:[ObjectId] }
+	players: { type:[TournamentMemberSchema] },
+	status: { type:String, default:'tysOpen' }
 });
 
 module.exports.close = function () {

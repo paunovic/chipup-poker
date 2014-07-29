@@ -156,10 +156,14 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	}
 	function finish2(row) {
 		models.Tournament.find(function (err,items) {
-			var i;
+			var i,j;
 			error.handleError(err);
 			for (i=0; i<items.length; i++) {
-				if (myutils.containsObjectID(items[i].players,row._id)) registered_tournaments.push(items[i]._id);
+				for (j=0; j<items[i].players.length; j++) {
+					if (myutils.compareObjectID(items[i].players[j]._id,row._id)) {
+						registered_tournaments.push(items[i]._id);
+					}
+				}
 			}
 			tournaments = items;
 			finish3.call(this,row);
@@ -1103,7 +1107,7 @@ handlers[codes.scTournamentRegister] = function (args,token) {
 		this.error(e);
 		return;
 	}
-	Tournament.core.join(params._id,this.userid,function (code) {
+	Tournament.core.join(params._id,this.userid,this.nick,function (code) {
 		if (code == 'OK') {
 			params.reply_status = 'tceRegisterOk';
 		} else if (code == 'full') {
