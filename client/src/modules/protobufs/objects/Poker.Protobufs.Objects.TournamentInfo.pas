@@ -10,6 +10,8 @@ uses
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember;
 
 type
+  TTyStatus = (tysOpen = 0,tysInProgress = 1);
+
   TPB_TournamentInfo = class(TProtobufBaseObject)
   private
     const
@@ -26,6 +28,7 @@ type
       kRegisteredPlayersFieldNumber = 11;
       kStartTimeFieldNumber = 12;
       kPlayersFieldNumber = 13;
+      kStatusFieldNumber = 14;
 
     var
       FId: TMongoId;
@@ -41,6 +44,7 @@ type
       FRegisteredPlayers: UInt32;
       FStartTime: UInt32;
       FPlayers: TList<TPB_TournamentMember>;
+      FStatus: TTyStatus;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -81,6 +85,9 @@ type
     procedure SetStartTime(const AValue: UInt32);
     procedure set_has_Players;
     procedure clear_has_Players;
+    procedure set_has_Status;
+    procedure clear_has_Status;
+    procedure SetStatus(const AValue: TTyStatus);
     procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_TournamentMember; Action: TCollectionNotification);
 
   protected
@@ -159,6 +166,11 @@ type
     function has_Players: Boolean;
     procedure clear_Players;
     property Players: TList<TPB_TournamentMember> read FPlayers;
+
+    // required TyStatus Status = 14;
+    function has_Status: Boolean;
+    procedure clear_Status;
+    property Status: TTyStatus read FStatus write SetStatus;
 
   end;
 
@@ -273,6 +285,11 @@ begin
         FPlayers.Add(TPB_TournamentMember.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
         set_has_Players;
       end;
+      kStatusFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FStatus := TTyStatus(AProtobufReader.readEnum);
+        set_has_Status;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -308,13 +325,15 @@ begin
     SetStartTime(AFrom.StartTime);
   for pbobj12 in AFrom.Players do
     FPlayers.Add(TPB_TournamentMember.Create(pbobj12));
+  if AFrom.has_Status then
+    SetStatus(AFrom.Status);
 end;
 
 function TPB_TournamentInfo.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $fff) <> $fff then
+  if (_has_bits_ and $2fff) <> $2fff then
     Exit(FALSE);
   for pbobj in Players do
     if not pbobj.IsInitialized then
@@ -724,6 +743,36 @@ begin
   end;
 end;
 
+procedure TPB_TournamentInfo.clear_Status;
+begin
+  FStatus := TTyStatus(0);
+  clear_has_Status;
+end;
+
+function TPB_TournamentInfo.has_Status: Boolean;
+begin
+  result := (_has_bits_ and 8192) > 0;
+end;
+
+procedure TPB_TournamentInfo.set_has_Status;
+begin
+  _has_bits_ := _has_bits_ or 8192;
+end;
+
+procedure TPB_TournamentInfo.clear_has_Status;
+begin
+  _has_bits_ := _has_bits_ and not 8192;
+end;
+
+procedure TPB_TournamentInfo.SetStatus(const AValue: TTyStatus);
+begin
+  Assert(not has_Status);
+  FStatus := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kStatusFieldNumber, Integer(AValue));
+  set_has_Status;
+end;
+
 procedure TPB_TournamentInfo.Clear;
 begin
   if _has_bits_ = 0 then
@@ -742,6 +791,7 @@ begin
   clear_RegisteredPlayers;
   clear_StartTime;
   clear_Players;
+  clear_Status;
 end;
 
 procedure TPB_TournamentInfoList.Assign(const APB_TournamentInfoList: TList<TPB_TournamentInfo>);
