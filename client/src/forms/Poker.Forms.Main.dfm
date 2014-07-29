@@ -3583,7 +3583,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsTournaments
+      Properties.ActivePage = tsHomeGames
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 438
@@ -3592,8 +3592,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
           841
           438)
@@ -3858,8 +3856,8 @@ object frmChipUpMain: TfrmChipUpMain
           Left = 495
           Top = 34
           Width = 336
-          Height = 226
-          Anchors = [akTop, akRight]
+          Height = 228
+          Anchors = [akTop, akRight, akBottom]
           TabOrder = 8
           OnEnter = gridPrivateClubsEnter
           object gridPrivateClubsTable: TcxGridTableView
