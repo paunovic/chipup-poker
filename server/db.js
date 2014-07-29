@@ -258,7 +258,7 @@ var TournamentSchema = new Schema({
 	timeperlevel: {type:Number,required:true},
 	registered_players: { type:Number, required:true, default:0 },
 	start_time: { type:Number, required:true, default: 0 },
-	players: { type:[ObjectId], required:true }
+	players: { type:[ObjectId] }
 });
 
 module.exports.close = function () {

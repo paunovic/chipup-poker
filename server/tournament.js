@@ -32,6 +32,8 @@ TournamentCore.prototype.join = function (tournid,userid,cb) {
 		if (myutils.containsObjectID(doc.players,userid)) {
 			// error, already a member
 			return cb('alreadyMember');
+		} else if (doc.registered_players >= doc.maxplayers) {
+			return cb('full');
 		} else {
 			doc.players.push(userid);
 			doc.registered_players = doc.players.length;
@@ -45,7 +47,10 @@ TournamentCore.prototype.join = function (tournid,userid,cb) {
 TournamentCore.prototype.leave = function (tournid,userid,cb) {
 	models.Tournament.findById(tournid,function (err,doc) {
 		doc.players.pull(userid);
-		cb('OK');
+		doc.save(function (err) {
+			error.handleError(err);
+			cb('OK');
+		});
 	});
 }
 var core = new TournamentCore();
