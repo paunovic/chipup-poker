@@ -124,7 +124,9 @@ procedure TTournamentList.Add(const ATournamentInfo: TPB_TournamentInfo);
 begin
   FLock.Enter;
   try
-    AddOrSetValue(ATournamentInfo.MongoId, TTournamentInfo.Create(ATournamentInfo));
+    if ContainsKey(ATournamentInfo.MongoId) then
+      inherited Remove(ATournamentInfo.MongoId);
+    inherited Add(ATournamentInfo.MongoId, TTournamentInfo.Create(ATournamentInfo));
   finally
     FLock.Leave;
   end;

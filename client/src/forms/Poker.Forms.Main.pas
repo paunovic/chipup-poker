@@ -183,6 +183,7 @@ type
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentList(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -248,6 +249,7 @@ begin
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
                       TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply),
+                      TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -1404,6 +1406,17 @@ begin
 
   FormsContainer.RunForm(TfrmTournamentLobby, self, [FSelectedTournament.Memory], TRUE);
 end;
+
+procedure TfrmChipUpMain.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentInfo;
+begin
+  if not TTypes.TryCast<TPB_TournamentInfo>(AObject, proto) then
+    Exit;
+
+  Tournaments.Add(proto);
+end;
+
 
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
 begin
