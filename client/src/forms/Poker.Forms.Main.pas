@@ -222,7 +222,7 @@ uses
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
-  Poker.Protobufs.Objects.TournamentCommandParams;
+  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -342,6 +342,7 @@ begin
   gridPublicClubsTable.DataController.SetRecordCount(0);
   gridPrivateClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
+  gridTournamentsTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
@@ -599,7 +600,7 @@ end;
 procedure TfrmChipUpMain.UpdateTournamentActions;
 var
   registered: Boolean;
-  tournament: TPB_TournamentInfo;
+  tournament: TTournamentInfo;
 begin
   acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
   registered := dmMain.SelfInfo.RegisteredTournaments.Contains(FSelectedTournament);
@@ -783,7 +784,7 @@ begin
           c.SetRecordCount(rcount);
 
         c.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
-        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, UnixToDateTime(tournament_info.StartTime));
+        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament_info.StartTime)));
         c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
         c.SetValue(rcount - 1, gridTournamentsPlayers.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
 
@@ -907,7 +908,7 @@ end;
 procedure TfrmChipUpMain.gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  tournament: TPB_TournamentInfo;
+  tournament: TTournamentInfo;
   tournament_id: TMongoId;
 begin
   recIndex := Sender.DataController.GetFocusedRecordIndex;

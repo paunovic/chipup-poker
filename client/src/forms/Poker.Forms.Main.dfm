@@ -3583,7 +3583,7 @@ object frmChipUpMain: TfrmChipUpMain
       Height = 438
       Align = alClient
       TabOrder = 3
-      Properties.ActivePage = tsHomeGames
+      Properties.ActivePage = tsTournaments
       Properties.HideTabs = True
       OnChange = pcTabsChange
       ClientRectBottom = 438
