@@ -98,6 +98,7 @@ enum ServerCodes {
 	scResetPlayerBalance = 107;
 	scQueryAssets = 108;
 	scTournamentUnregister = 109;
+	scGetTournamentDetails = 110;
 }
 
 message StringSizes {
@@ -612,7 +613,14 @@ message AssetList {
 message TournamentList {
 	repeated TournamentInfo items = 1;
 }
+message TournamentQuery {
+	required bytes _id = 1 [(ObjectId)=true];
+}
 message TournamentInfo {
+	message PlayerRow {
+		required bytes _id = 1 [(ObjectId)=true];
+		required string name = 2;
+	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
 	required string description = 3;
@@ -625,6 +633,7 @@ message TournamentInfo {
 	required uint32 timeperlevel = 10;
 	required uint32 registered_players = 11;
 	required uint32 start_time = 12;
+	repeated PlayerRow players = 13;
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];
