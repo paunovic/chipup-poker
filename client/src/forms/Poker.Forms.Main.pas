@@ -605,9 +605,24 @@ var
   tournament: TTournamentInfo;
 begin
   acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
-  registered := dmMain.SelfInfo.RegisteredTournaments.Contains(FSelectedTournament);
-  acTournamentRegister.Enabled := (not FSelectedTournament.IsEmpty) and (not registered);
-  acTournamentUnregister.Enabled := (not FSelectedTournament.IsEmpty) and (registered);
+
+  if not FSelectedTournament.IsEmpty then
+  begin
+    registered := dmMain.SelfInfo.RegisteredTournaments.Contains(FSelectedTournament);
+    if not Tournaments.TryGetValue(FSelectedTournament, tournament) then
+    begin
+      acTournamentRegister.Enabled := FALSE;
+      acTournamentUnregister.Enabled := FALSE;
+    end
+    else
+      try
+        acTournamentRegister.Enabled := (not FSelectedTournament.IsEmpty) and (not registered) and (tournament.State = tnsOpen);
+        acTournamentUnregister.Enabled := (not FSelectedTournament.IsEmpty) and (registered) and (tournament.State = tnsOpen);
+      finally
+        Tournaments.Unlock;
+      end;
+  end;
+
   if acTournamentUnregister.Enabled then
   begin
     btTournamentRegister.Action := acTournamentUnregister;
@@ -772,6 +787,7 @@ var
   c: TcxGridDataController;
   rcount: Integer;
   tournament_info: TPB_TournamentInfo;
+  text: String;
 begin
   c := gridTournamentsTable.DataController;
   c.BeginFullUpdate;
@@ -790,10 +806,11 @@ begin
         c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
         c.SetValue(rcount - 1, gridTournamentsPlayers.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
 
-        if dmMain.SelfInfo.RegisteredTournaments.Contains(tournament_info.MongoId) then
-          c.SetValue(rcount - 1, gridTournamentsStatus.Index, 'Registered')
-        else
-          c.SetValue(rcount - 1, gridTournamentsStatus.Index, 'Registering');
+        case tournament_info.State of
+          tnsOpen: text := 'Open';
+          tnsInProgress: text := 'In Progress';
+        end;
+        c.SetValue(rcount - 1, gridTournamentsStatus.Index, text);
       end;
     finally
       Tournaments.Unlock;
@@ -893,13 +910,13 @@ end;
 procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
   AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
 var
-  text: String;
+  mongoid: TMongoId;
 begin
-  text := ARecord.Values[AItem.Index];
-  if text = 'Registering' then
+  mongoid := ARecord.Values[gridTournamentsId.Index];
+  if dmMain.SelfInfo.RegisteredTournaments.Contains(mongoid) then
+    AStyle := styleTournamentsRegistered
+  else
     AStyle := styleTournamentsRegistering;
-  if text = 'Registered' then
-    AStyle := styleTournamentsRegistered;
 end;
 
 procedure TfrmChipUpMain.gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
