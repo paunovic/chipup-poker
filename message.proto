@@ -45,6 +45,7 @@ enum ServerCodes {
 	srQueryAssetsReply = 43;
 	srNotSitting = 44;
 	srTournamentReply = 45;
+	srTournamentDetails = 46;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -613,7 +614,7 @@ message AssetList {
 message TournamentList {
 	repeated TournamentInfo items = 1;
 }
-message TournamentQuery {
+message TournamentDetails {
 	required bytes _id = 1 [(ObjectId)=true];
 }
 message TournamentInfo {
