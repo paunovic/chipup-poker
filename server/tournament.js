@@ -35,7 +35,7 @@ TournamentCore.prototype.join = function (tournid,userid,cb) {
 		} else if (doc.registered_players >= doc.maxplayers) {
 			return cb('full');
 		} else {
-			doc.players.push(userid);
+			doc.players.push({_id:userid,displayname:nick,chips:doc.startingchips});
 			doc.registered_players = doc.players.length;
 			doc.save(function (err) {
 				console.log('saved',arguments,doc);
@@ -46,7 +46,11 @@ TournamentCore.prototype.join = function (tournid,userid,cb) {
 }
 TournamentCore.prototype.leave = function (tournid,userid,cb) {
 	models.Tournament.findById(tournid,function (err,doc) {
-		doc.players.pull(userid);
+		for (var i=0; i<doc.players.length; i++) {
+			if (myutils.compareMongoId(doc.players[i]._id,userid)) {
+				doc.players.splice(x,1);
+			}
+		}
 		doc.save(function (err) {
 			error.handleError(err);
 			cb('OK');

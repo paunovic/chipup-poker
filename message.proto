@@ -617,6 +617,11 @@ message TournamentList {
 message TournamentDetails {
 	required bytes _id = 1 [(ObjectId)=true];
 }
+message TournamentMember {
+	required bytes _id = 1 [(ObjectId)=true];
+	required string displayname = 2;
+	required uint32 chips = 3;
+}
 message TournamentInfo {
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
@@ -630,7 +635,7 @@ message TournamentInfo {
 	required uint32 timeperlevel = 10;
 	required uint32 registered_players = 11;
 	required uint32 start_time = 12;
-	repeated User players = 13;
+	repeated TournamentMember players = 13;
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];

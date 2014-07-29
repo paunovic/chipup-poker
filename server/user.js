@@ -1130,3 +1130,24 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 		token.stop();
 	}.bind(this));
 };
+handlers[codes.scGetTournamentDetails] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentDetails');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	models.Tournament.findById(params._id,function (err,doc) {
+		error.handleError(err);
+		console.log('players:',doc.players);
+		console.log(doc);
+		var test = pb.Serialize(doc,'Poker.TournamentInfo');
+		var test2 = pb.Parse(test,'Poker.TournamentInfo');
+		console.log(test);
+		console.log(test2);
+		this.send(codes.srTournamentDetails,doc,'Poker.TournamentInfo');
+		token.stop();
+	}.bind(this));
+};
