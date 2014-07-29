@@ -45,6 +45,7 @@ type
     srQueryAssetsReply = 43,
     srNotSitting = 44,
     srTournamentReply = 45,
+    srTournamentDetails = 46,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -95,7 +96,8 @@ type
     scSetPlayerLimit = 106,
     scResetPlayerBalance = 107,
     scQueryAssets = 108,
-    scTournamentUnregister = 109
+    scTournamentUnregister = 109,
+    scGetTournamentDetails = 110
   );
 
 {$IFDEF DEBUG}
@@ -165,6 +167,7 @@ begin
     srQueryAssetsReply: result := 'srQueryAssetsReply';
     srNotSitting: result := 'srNotSitting';
     srTournamentReply: result := 'srTournamentReply';
+    srTournamentDetails: result := 'srTournamentDetails';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -216,6 +219,7 @@ begin
     scResetPlayerBalance: result := 'scResetPlayerBalance';
     scQueryAssets: result := 'scQueryAssets';
     scTournamentUnregister: result := 'scTournamentUnregister';
+    scGetTournamentDetails: result := 'scGetTournamentDetails';
   end;
 end;
 {$ENDIF DEBUG}

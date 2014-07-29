@@ -55,6 +55,7 @@ type
     procedure SubscriptionPlanChange(const ASubscriptionPlan: TPlayerSubscriptionPlan);
     procedure TournamentRegister(const ATournamentId: TMongoId);
     procedure TournamentUnregister(const ATournamentId: TMongoId);
+    procedure GetTournamentDetails(const ATournamentId: TMongoId);
   end;
 
 var
@@ -75,7 +76,7 @@ uses
   Poker.Protobufs.Objects.UserChangeParams, Poker.Protobufs.Objects.TableStatsReplies, Poker.Protobufs.Objects.ClubHandHistoryReply,
   Poker.Protobufs.Objects.BuyinError, Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList,
   Poker.Protobufs.Objects.HelloParams, Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.GiveClubOwnershipParams,
-  Poker.Protobufs.Objects.TournamentCommandParams;
+  Poker.Protobufs.Objects.TournamentCommandParams, Poker.Protobufs.Objects.TournamentDetails;
 
 
 class procedure TServerSocket.Initialize(const AServer: String; const APort: Integer);
@@ -622,6 +623,19 @@ begin
   try
     protobuf.MongoId := ATournamentId;
     SendProtobuf(scTournamentUnregister, protobuf);
+  finally
+    protobuf.Free;
+  end;
+end;
+
+procedure TServerSocket.GetTournamentDetails(const ATournamentId: TMongoId);
+var
+  protobuf: TPB_TournamentDetails;
+begin
+  protobuf := TPB_TournamentDetails.Create;
+  try
+    protobuf.MongoId := ATournamentId;
+    SendProtobuf(scGetTournamentDetails, protobuf);
   finally
     protobuf.Free;
   end;

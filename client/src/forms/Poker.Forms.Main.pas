@@ -183,6 +183,7 @@ type
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentList(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -222,7 +223,7 @@ uses
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
-  Poker.Protobufs.Objects.TournamentCommandParams;
+  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -248,6 +249,7 @@ begin
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
                       TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply),
+                      TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -342,6 +344,7 @@ begin
   gridPublicClubsTable.DataController.SetRecordCount(0);
   gridPrivateClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
+  gridTournamentsTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
@@ -599,7 +602,7 @@ end;
 procedure TfrmChipUpMain.UpdateTournamentActions;
 var
   registered: Boolean;
-  tournament: TPB_TournamentInfo;
+  tournament: TTournamentInfo;
 begin
   acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
   registered := dmMain.SelfInfo.RegisteredTournaments.Contains(FSelectedTournament);
@@ -783,7 +786,7 @@ begin
           c.SetRecordCount(rcount);
 
         c.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
-        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, UnixToDateTime(tournament_info.StartTime));
+        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament_info.StartTime)));
         c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
         c.SetValue(rcount - 1, gridTournamentsPlayers.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
 
@@ -907,7 +910,7 @@ end;
 procedure TfrmChipUpMain.gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  tournament: TPB_TournamentInfo;
+  tournament: TTournamentInfo;
   tournament_id: TMongoId;
 begin
   recIndex := Sender.DataController.GetFocusedRecordIndex;
@@ -1403,6 +1406,17 @@ begin
 
   FormsContainer.RunForm(TfrmTournamentLobby, self, [FSelectedTournament.Memory], TRUE);
 end;
+
+procedure TfrmChipUpMain.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentInfo;
+begin
+  if not TTypes.TryCast<TPB_TournamentInfo>(AObject, proto) then
+    Exit;
+
+  Tournaments.Add(proto);
+end;
+
 
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
 begin
