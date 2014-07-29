@@ -213,7 +213,7 @@ message User {
 	
 	optional string email = 5;
 	optional bool authed = 6;
-	required PlayerSubscriptionPlan subscription_plan = 7;
+	optional PlayerSubscriptionPlan subscription_plan = 7;
 }
 
 message SubscriptionPlanChange {
@@ -617,10 +617,6 @@ message TournamentQuery {
 	required bytes _id = 1 [(ObjectId)=true];
 }
 message TournamentInfo {
-	message PlayerRow {
-		required bytes _id = 1 [(ObjectId)=true];
-		required string name = 2;
-	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
 	required string description = 3;
@@ -633,7 +629,7 @@ message TournamentInfo {
 	required uint32 timeperlevel = 10;
 	required uint32 registered_players = 11;
 	required uint32 start_time = 12;
-	repeated PlayerRow players = 13;
+	repeated User players = 13;
 }
 message TournamentStatus {
 	repeated bytes registered_players = 11 [(ObjectId)=true];
