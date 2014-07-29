@@ -124,7 +124,7 @@ begin
           c.SetRecordCount(rec_count);
         c.SetValue(rec_count - 1, gridPlayersMongoId.Index, tournament.Players[C1].MongoId.ToVariant);
         c.SetValue(rec_count - 1, gridPlayersName.Index, tournament.Players[C1].Displayname);
-        c.SetValue(rec_count - 1, gridPlayersChips.Index, tournament.Players[C1].Chips);
+        c.SetValue(rec_count - 1, gridPlayersChips.Index, tournament.Players[C1].Chips / 100);
       end;
       c.SetRecordCount(rec_count);
     finally
