@@ -623,9 +623,9 @@ message TournamentMember {
 	required uint32 chips = 3;
 }
 message TournamentInfo {
-	enum TyStatus {
-		tysOpen = 0;
-		tysInProgress = 1;
+	enum TournamentState {
+		tnsOpen = 0;
+		tnsInProgress = 1;
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
@@ -640,11 +640,9 @@ message TournamentInfo {
 	required uint32 registered_players = 11;
 	required uint32 start_time = 12;
 	repeated TournamentMember players = 13;
-	required TyStatus status = 14;
+	required TournamentState state = 14;
 }
-message TournamentStatus {
-	repeated bytes registered_players = 11 [(ObjectId)=true];
-}
+
 message TournamentCommandParams {
 	enum TournamentCommandEnum {
 		tceRegisterOk = 0;
