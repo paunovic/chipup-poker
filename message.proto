@@ -626,6 +626,7 @@ message TournamentInfo {
 	enum TournamentState {
 		tnsOpen = 0;
 		tnsInProgress = 1;
+		tnsCancelled = 2;
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
