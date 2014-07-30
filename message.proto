@@ -176,7 +176,7 @@ message LoginReply {
 	repeated bytes registered_tournaments = 5 [(ObjectId)=true];
 	repeated Club clubs = 6;
 	repeated User users = 7;
-	required User self = 8;
+	optional User self = 8;
 	repeated Game games = 9;
 }
 
