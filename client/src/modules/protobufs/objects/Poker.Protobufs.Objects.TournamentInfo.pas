@@ -10,7 +10,7 @@ uses
   Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember;
 
 type
-  TTournamentState = (tnsOpen = 0,tnsInProgress = 1);
+  TTournamentState = (tnsOpen = 0,tnsInProgress = 1,tnsCancelled = 2);
 
   TPB_TournamentInfo = class(TProtobufBaseObject)
   private

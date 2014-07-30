@@ -3592,8 +3592,6 @@ object frmChipUpMain: TfrmChipUpMain
       object tsHomeGames: TcxTabSheet
         Caption = 'tsHomeGames'
         ImageIndex = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         DesignSize = (
           841
           438)
@@ -4625,13 +4623,17 @@ object frmChipUpMain: TfrmChipUpMain
     Left = 672
     Top = 52
     PixelsPerInch = 96
-    object styleTournamentsRegistering: TcxStyle
+    object styleTournamentOpen: TcxStyle
       AssignedValues = [svColor]
-      Color = 5188621
+      Color = 1003277
     end
-    object styleTournamentsRegistered: TcxStyle
+    object styleTournamentInProgress: TcxStyle
       AssignedValues = [svColor]
-      Color = 2178337
+      Color = 4919830
+    end
+    object styleTournamentCancelled: TcxStyle
+      AssignedValues = [svColor]
+      Color = 108
     end
   end
 end
