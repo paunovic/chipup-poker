@@ -170,9 +170,22 @@ begin
 end;
 
 procedure TfrmTournamentLobby.RefreshAll;
+var
+  tournament: TTournamentInfo;
 begin
-  acRegister.Enabled := not dmMain.SelfInfo.RegisteredTournaments.Contains(FTournamentId);
-  acUnregister.Enabled := not acRegister.Enabled;
+  if not Tournaments.GetAndLock(FTournamentId, tournament) then
+  begin
+    acRegister.Enabled := FALSE;
+    acUnregister.Enabled := FALSE;
+  end
+  else
+    try
+      acRegister.Enabled := (tournament.State = tnsOpen) and (not dmMain.SelfInfo.RegisteredTournaments.Contains(FTournamentId));
+      acUnregister.Enabled := (tournament.State = tnsOpen) and (dmMain.SelfInfo.RegisteredTournaments.Contains(FTournamentId));
+    finally
+      Tournaments.Unlock;
+    end;
+
   if acUnregister.Enabled then
   begin
     btTournamentRegister.Action := acUnregister;

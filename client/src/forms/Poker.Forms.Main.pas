@@ -609,7 +609,7 @@ begin
   if not FSelectedTournament.IsEmpty then
   begin
     registered := dmMain.SelfInfo.RegisteredTournaments.Contains(FSelectedTournament);
-    if not Tournaments.TryGetValue(FSelectedTournament, tournament) then
+    if not Tournaments.GetAndLock(FSelectedTournament, tournament) then
     begin
       acTournamentRegister.Enabled := FALSE;
       acTournamentUnregister.Enabled := FALSE;
