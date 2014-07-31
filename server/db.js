@@ -130,7 +130,8 @@ var GameSchema = new Schema({
 	pot:Number,
 	state2:String,
 	gameState:Schema.Types.Mixed,
-	clubid:ObjectId
+	clubid:ObjectId,
+	tournament:ObjectId
 },{collection:'games'});
 var WinnerDataSchema = new Schema({
 	seat:Number,

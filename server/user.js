@@ -139,7 +139,6 @@ ClientSocket.prototype.flushTourn = function () {
 	delete this.tournTimer;
 	models.Tournament.find(function (err,items) {
 		var out = { items: items };
-		console.log('out is %j',out);
 		this.send(codes.seTournamentList,out,'Poker.TournamentList');
 	}.bind(this));
 }
