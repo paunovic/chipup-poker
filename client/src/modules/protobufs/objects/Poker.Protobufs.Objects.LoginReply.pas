@@ -102,7 +102,7 @@ type
     procedure clear_Users;
     property Users: TList<TPB_User> read FUsers;
 
-    // required User Self = 8;
+    // optional User Self = 8;
     function has_Self: Boolean;
     procedure clear_Self;
     property Self: TPB_User read FSelf write SetSelf;
@@ -157,8 +157,7 @@ begin
     FUsers.OnNotify := nil;
     FreeAndNil(FUsers);
   end;
-  if Assigned(FSelf) then
-    FreeAndNil(FSelf);
+  if Assigned(FSelf) then FreeAndNil(FSelf);
   if Assigned(FGames) then
   begin
     FGames.OnNotify := nil;
@@ -273,7 +272,7 @@ function TPB_LoginReply.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $81) <> $81 then
+  if (_has_bits_ and $1) <> $1 then
     Exit(FALSE);
   for pbobj in ReconnectTables do
     if not pbobj.IsInitialized then

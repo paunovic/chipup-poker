@@ -91,8 +91,9 @@ type
     acTournamentRegister: TAction;
     acTournamentUnregister: TAction;
     StyleRepository: TcxStyleRepository;
-    styleTournamentsRegistering: TcxStyle;
-    styleTournamentsRegistered: TcxStyle;
+    styleTournamentOpen: TcxStyle;
+    styleTournamentInProgress: TcxStyle;
+    styleTournamentCancelled: TcxStyle;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -809,6 +810,7 @@ begin
         case tournament_info.State of
           tnsOpen: text := 'Open';
           tnsInProgress: text := 'In Progress';
+          tnsCancelled: text := 'Cancelled';
         end;
         c.SetValue(rcount - 1, gridTournamentsStatus.Index, text);
       end;
@@ -911,12 +913,19 @@ procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxC
   AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
 var
   mongoid: TMongoId;
+  tournament: TTournamentInfo;
 begin
   mongoid := ARecord.Values[gridTournamentsId.Index];
-  if dmMain.SelfInfo.RegisteredTournaments.Contains(mongoid) then
-    AStyle := styleTournamentsRegistered
-  else
-    AStyle := styleTournamentsRegistering;
+  if Tournaments.GetAndLock(mongoid, tournament) then
+  try
+    case tournament.State of
+      tnsOpen: AStyle := styleTournamentOpen;
+      tnsInProgress: AStyle := styleTournamentInProgress;
+      tnsCancelled: AStyle := styleTournamentCancelled;
+    end;
+  finally
+    Tournaments.Unlock;
+  end;
 end;
 
 procedure TfrmChipUpMain.gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -1433,7 +1442,6 @@ begin
 
   Tournaments.Add(proto);
 end;
-
 
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
 begin
