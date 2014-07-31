@@ -361,7 +361,8 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 								if (sizeRow) {
 									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
 								} else {
-									global.log('cant find original of %s',clientFile.path);
+									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
+									console.log('cant find original of %s',clientFile.path);
 								}
 								cb();
 							});
@@ -1129,7 +1130,13 @@ handlers[codes.scTournamentUnregister] = function (args,token) {
 		return;
 	}
 	Tournament.core.leave(params._id,this.userid,function (code) {
-		params.reply_status = 'tceUnregisterOk';
+		if (code == '404') {
+			this.reply(0,'tournament not found');
+			return;
+		}
+		if (code == 'OK') {
+			params.reply_status = 'tceUnregisterOk';
+		}
 		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
 		token.stop();
 	}.bind(this));

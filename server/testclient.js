@@ -191,6 +191,13 @@ function doMenu(options) {
 	console.log('current options:'.underline);
 	printMenu();
 }
+function makeName(prefix,number) {
+	var words = prefix.split(' ');
+	var out = words[0];
+	if (words.length > 1) out += words[1];
+	out += number;
+	return out;
+}
 function testmenu(cb,config) {
 	var client2;
 	var gameid;
@@ -469,7 +476,7 @@ function testmenu(cb,config) {
 			}
 			this.log('club seq is',params.club.seq);
 			this.reply(codes.scCreateGame,{club_mongoid: params.club._id, game_type:'gtHoldem',
-				game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix+' testbot game',
+				game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix,
 				buyin_max:20000, buyin_min:5},'Poker.Game');
 			break;
 		case codes.srCreateGameOk:
@@ -487,7 +494,7 @@ function testmenu(cb,config) {
 				console.log('clients',(config && config.players) ? config.players : 3);
 				for (var x=1; x<((config && config.players) ? config.players : 3); x++) {
 					var client2 = new Client(doClient2);
-					client2.name = prefix+x;
+					client2.name = makeName(prefix,x);
 					client2.seat = x;
 					client2.buyin = (config && config.buyins) ? config.buyins.shift() : 10000;
 					clients[x] = client2;
@@ -531,17 +538,17 @@ function testmenu(cb,config) {
 	function parseStatusMain(params) {
 			var makeit = true;
 			for (var x=0; x<params.clubs.length; x++) {
-				if (params.clubs[x].name == (prefix + ' testbot club')) {
+				if (params.clubs[x].name == prefix) {
 					clubseq = params.clubs[x].seq;
 					clubid = params.clubs[x]._id;
 					makeit = false;
 				}
 			}
 			if (makeit) {
-				this.reply(codes.scCreateClub,{is_private:true, name:prefix+' testbot club',password:'password',rake:1},'Poker.Club');
+				this.reply(codes.scCreateClub,{is_private:true, name:prefix,password:'password',rake:1},'Poker.Club');
 			} else {
 				for (var x=0; x<params.games.length; x++) {
-					if (params.games[x].gamename == (prefix+' testbot game')) {
+					if (params.games[x].gamename == prefix) {
 						gameid = params.games[x]._id;
 					}
 				}
@@ -549,7 +556,7 @@ function testmenu(cb,config) {
 					this.reply(codes.scTableJoin,{_id:gameid},'Poker.Game');
 					this.joining = true;
 				} else {
-					this.reply(codes.scCreateGame,{club_mongoid: clubid, game_type:'gtHoldem', game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix +' testbot game',buyin_max:20000, buyin_min:5},'Poker.Game');
+					this.reply(codes.scCreateGame,{club_mongoid: clubid, game_type:'gtHoldem', game_limit:'glNoLimit', blinds:'gb5x10', seats:6, gamename:prefix,buyin_max:20000, buyin_min:5},'Poker.Game');
 				}
 			}
 	}
@@ -580,7 +587,7 @@ function testmenu(cb,config) {
 		}
 	}
 	var client = new Client(testregisterhandle);
-	client.name = prefix+'0';
+	client.name = makeName(prefix,'0');
 	client.seat = 0;
 	client.buyin = (config && config.buyins) ? config.buyins.shift() : 10000;
 	clients[0] = client;
