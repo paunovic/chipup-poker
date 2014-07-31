@@ -55,6 +55,7 @@ TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
 }
 TournamentCore.prototype.leave = function (tournid,userid,cb) {
 	models.Tournament.findById(tournid,function (err,doc) {
+		if (!doc) return cb('404');
 		for (var i=0; i<doc.players.length; i++) {
 			if (myutils.compareObjectID(doc.players[i]._id,userid)) {
 				doc.players.splice(i,1);
