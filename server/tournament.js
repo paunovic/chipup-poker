@@ -5,6 +5,8 @@ var models = require('./db').models,
 
 var error = require('./error');
 
+var async = require('async');
+
 module.exports = Tournament;
 
 function Tournament() {
@@ -89,11 +91,36 @@ TournamentCore.prototype.checkTournaments = function () {
 		var now = Date.now() / 1000;
 		var timeleft = row.start_time - now;
 		if (timeleft > 0) return this.resetTimer();
-		console.log('found2',err,rows);
-		row.state = 'tnsInProgress';
-		row.save(function () {
-			core.emit('tournament_start',row);
+		if (row.registered_players < row.minplayers) {
+			row.state = 'tnsCancelled';
+			row.save(function () {
+				core.emit('tournament_start',row);
+				this.resetTimer();
+			}.bind(this));
+			return;
+		}
+		this.startTournament(row,function () {
 			this.resetTimer();
+		});
+	}.bind(this));
+}
+TournamentCore.prototype.startTournament = function (row,cb) {
+	row.state = 'tnsInProgress';
+	var table_count = row.registered_players / row.seats_per_table;
+	console.log('need %d tables',table_count);
+	var todo = [];
+	for (var i=0; i<table_count; i++) {
+		var doc = {game_type:row.gametype, blinds:'gb5x10', seats:row.seats_per_table, gamename:'Tournament '+row.name+' table#'+(i+1), game_limit:row.limit, buyin_min: 10, buyin_max:20, rake:0, rotation:0, hands:0, tournament:row._id};
+		todo.push(doc);
+	}
+	async.each(todo,function (doc,cb) {
+		models.Game.create(doc,function (err,game) {
+			cb();
+		});
+	},function () {
+		row.save(function () {
+			this.emit('tournament_start',row);
+			cb();
 		}.bind(this));
 	}.bind(this));
 }
