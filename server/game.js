@@ -24,9 +24,15 @@ var Club;
 var myutils = require('./myutils');
 var mdb = require('./db');
 var models = mdb.models;
-var user = require('./user'),
-	ClientSocket = user.ClientSocket;
 var error = require('./error');
+
+var lazy = {};
+lazy.__defineGetter__('user',function () {
+	return require('./user');
+});
+lazy.__defineGetter__('ClientSocket',function () {
+	return lazy.user.ClientSocket;
+});
 
 function makeGameProtobuf(g) {
 	// FIXME, remove this entirely?
@@ -1706,6 +1712,8 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	var tableStatus = {rake_percent:this.rake, table_mongo_id: this.id,seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet, minimum_raise:this.minBet + this.minimum_raise,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
+	if (this.club) tableStatus.table_type = 'ttLive';
+	else tableStatus.table_type = 'ttTournament';
 	if (this.pots) {
 		this.updatePotRakes();
 		tableStatus.pots = this.pots;
@@ -1986,7 +1994,7 @@ Game.prototype.handleDisconnect = function (conn,reason,cb) {
 		if (seatIdx >= 0) {
 			this.members[seatIdx].disconnected = true;
 			this.members[seatIdx].disconnectTimer = setTimeout(this.eject.bind(this,seatIdx,userid),5 * 60 * 1000);
-			var fakeconn = {log:ClientSocket.prototype.log,userid:userid, nick:this.seats[seatIdx].conn.nick};
+			var fakeconn = {log:lazy.ClientSocket.prototype.log,userid:userid, nick:this.seats[seatIdx].conn.nick};
 			this.seats[seatIdx].conn = fakeconn;
 			var events = [];
 			events.push(this.makeEvent('teDisconnect',seatIdx));
@@ -2182,7 +2190,7 @@ Game.prototype.resume = function (game,cb) {
 			var item = game.members[x];
 			var pubSeat = { muck:true, disconnected:true, hand:new Hand(), status:item.status, chips:item.chips, seat:item.seat, sitOutNextRound:item.sitOutNextRound, SittingOutRoundsCount:item.SittingOutRoundsCount, handsPlayed:item.handsPlayed, can_show:item.can_show };
 			pubSeat.disconnectTimer = setTimeout(this.eject.bind(this,item.seat,item.userid),5 * 60 * 1000);
-			var privSeat = {conn:{log:ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'}, userid:item.userid};
+			var privSeat = {conn:{log:lazy.ClientSocket.prototype.log,userid:item.userid, nick:'FIXME'}, userid:item.userid};
 			pubSeat.hand.cards = item.hand.cards;
 			this.members[item.seat] = pubSeat;
 			this.seats[item.seat] = privSeat;
