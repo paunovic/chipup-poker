@@ -185,6 +185,7 @@ type
     procedure CSETournamentList(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -224,7 +225,7 @@ uses
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
-  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info;
+  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info, Poker.Protobufs.Objects.TournamentTableStart;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -251,11 +252,12 @@ begin
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
                       TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply),
                       TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
+                      TServerMessageCallback.Create(srTournamentOpenTable, CSRTournamentOpenTable),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
                       TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
-                      TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk], CSRTableStatus)
+                      TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk, srTournamentOpenTable], CSRTableStatus)
                   ], TRUE);
 
   LoadImageFromResource(imgCashier, 'CashierNormal');
@@ -538,7 +540,7 @@ begin
          (member.Suspended) then
         err := 'You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.'
       else
-        if Tables.GetAndLockTable(game.MongoId, ttLiveGame, table) then
+        if Tables.GetAndLockTable(game.MongoId, ttLive, table) then
         begin
           table.BringToFront;
           Tables.Unlock;
@@ -622,6 +624,11 @@ begin
       finally
         Tournaments.Unlock;
       end;
+  end
+  else
+  begin
+    acTournamentRegister.Enabled := FALSE;
+    acTournamentUnregister.Enabled := FALSE;
   end;
 
   if acTournamentUnregister.Enabled then
@@ -1251,7 +1258,7 @@ begin
     Exit;
 
   iid := -1;
-  if Tables.GetAndLockTable(pbgame.MongoId, ttLiveGame, table) then
+  if Tables.GetAndLockTable(pbgame.MongoId, ttLive, table) then
   try
     iid := table.InternalId;
   finally
@@ -1315,7 +1322,8 @@ begin
     dmMain.SelfInfo.Clubs.Unlock;
   end;
 
-  if Tables.GetAndLockTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+  if (Tables.GetAndLockTable(pbtstatus.TableMongoId, ttLive, table)) or
+     (Tables.GetAndLockTable(pbtstatus.TableMongoId, ttTournament, table)) then
   try
     if not table.Form.Visible then
       table.BringToFront;
@@ -1441,6 +1449,31 @@ begin
     Exit;
 
   Tournaments.Add(proto);
+end;
+
+procedure TfrmChipUpMain.CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentTableStart;
+  tournament: TTournamentInfo;
+  table: TTable;
+begin
+  if not TTypes.TryCast<TPB_TournamentTableStart>(AObject, proto) then
+    Exit;
+
+  if Tournaments.GetAndLock(proto.Game.Tournament, tournament) then
+  try
+    tournament.Games.AddGame(proto.Game);
+  finally
+    Tournaments.Unlock;
+  end;
+
+  Tables.AddTournamentTable(proto.Game.MongoId, TRUE);
+  if Tables.GetAndLockTable(proto.Game.MongoId, ttTournament, table) then
+  try
+    table.SetTableStatus(proto.TableStatus, TRUE);
+  finally
+    Tables.Unlock;
+  end;
 end;
 
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);

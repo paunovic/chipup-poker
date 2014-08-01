@@ -12,6 +12,8 @@ uses
 type
   TTableState = (tsIdle = 0,tsPreFlop = 1,tsFlop = 2,tsTurn = 3,tsRiver = 4,tsWinning = 5,tsWinning2 = 6);
 
+  TTableType = (ttLive = 0,ttTournament = 1,ttHandReplay = 2);
+
   TPB_TableStatus = class(TProtobufBaseObject)
   private
     const
@@ -36,6 +38,7 @@ type
       kRotationFieldNumber = 23;
       kGameLimitFieldNumber = 25;
       kMinimumRaiseFieldNumber = 26;
+      kTableTypeFieldNumber = 27;
 
     var
       FTableMongoId: TMongoId;
@@ -59,6 +62,7 @@ type
       FRotation: UInt32;
       FGameLimit: TGameLimit;
       FMinimumRaise: UInt32;
+      FTableType: TTableType;
       _has_bits_: UINT32;
 
     procedure set_has_TableMongoId;
@@ -120,6 +124,9 @@ type
     procedure set_has_MinimumRaise;
     procedure clear_has_MinimumRaise;
     procedure SetMinimumRaise(const AValue: UInt32);
+    procedure set_has_TableType;
+    procedure clear_has_TableType;
+    procedure SetTableType(const AValue: TTableType);
     procedure SeatsNotifyEvent(Sender: TObject; const Item: TPB_SeatInfo; Action: TCollectionNotification);
     procedure BetsNotifyEvent(Sender: TObject; const Item: UInt32; Action: TCollectionNotification);
     procedure EventsNotifyEvent(Sender: TObject; const Item: TPB_TableEvent; Action: TCollectionNotification);
@@ -241,6 +248,11 @@ type
     function has_MinimumRaise: Boolean;
     procedure clear_MinimumRaise;
     property MinimumRaise: UInt32 read FMinimumRaise write SetMinimumRaise;
+
+    // required TableType TableType = 27;
+    function has_TableType: Boolean;
+    procedure clear_TableType;
+    property TableType: TTableType read FTableType write SetTableType;
 
   end;
 
@@ -416,6 +428,11 @@ begin
         FMinimumRaise := AProtobufReader.readUInt32;
         set_has_MinimumRaise;
       end;
+      kTableTypeFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FTableType := TTableType(AProtobufReader.readEnum);
+        set_has_TableType;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -468,13 +485,15 @@ begin
     SetGameLimit(AFrom.GameLimit);
   if AFrom.has_MinimumRaise then
     SetMinimumRaise(AFrom.MinimumRaise);
+  if AFrom.has_TableType then
+    SetTableType(AFrom.TableType);
 end;
 
 function TPB_TableStatus.IsInitialized: Boolean;
 var
   pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $41d) <> $41d then
+  if (_has_bits_ and $400041d) <> $400041d then
     Exit(FALSE);
   for pbobj in Seats do
     if not pbobj.IsInitialized then
@@ -1150,6 +1169,36 @@ begin
   set_has_MinimumRaise;
 end;
 
+procedure TPB_TableStatus.clear_TableType;
+begin
+  FTableType := TTableType(0);
+  clear_has_TableType;
+end;
+
+function TPB_TableStatus.has_TableType: Boolean;
+begin
+  result := (_has_bits_ and 67108864) > 0;
+end;
+
+procedure TPB_TableStatus.set_has_TableType;
+begin
+  _has_bits_ := _has_bits_ or 67108864;
+end;
+
+procedure TPB_TableStatus.clear_has_TableType;
+begin
+  _has_bits_ := _has_bits_ and not 67108864;
+end;
+
+procedure TPB_TableStatus.SetTableType(const AValue: TTableType);
+begin
+  Assert(not has_TableType);
+  FTableType := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kTableTypeFieldNumber, Integer(AValue));
+  set_has_TableType;
+end;
+
 procedure TPB_TableStatus.Clear;
 begin
   if _has_bits_ = 0 then
@@ -1176,6 +1225,7 @@ begin
   clear_Rotation;
   clear_GameLimit;
   clear_MinimumRaise;
+  clear_TableType;
 end;
 
 procedure TPB_TableStatusList.Assign(const APB_TableStatusList: TList<TPB_TableStatus>);

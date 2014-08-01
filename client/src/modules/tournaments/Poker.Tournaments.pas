@@ -4,7 +4,7 @@ interface
 
 uses
   Poker.Protobufs.Objects.TournamentList, System.SyncObjs, System.Generics.Collections, Poker.Types, Poker.Tournaments.Info,
-  Poker.Protobufs.Objects.TournamentInfo;
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Games.Game;
 
 type
   TTournamentList = class(TObjectDictionary<TMongoId, TTournamentInfo>)
@@ -18,6 +18,7 @@ type
     destructor Destroy; override;
 
     function GetAndLock(const AId: TMongoId; out ATournament: TTournamentInfo): Boolean;
+    function GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TGameInfo): Boolean;
     function AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
 
     procedure Assign(const ATournamentList: TList<TPB_TournamentInfo>); overload;
@@ -144,6 +145,21 @@ begin
   end;
 end;
 
-
+function TTournamentList.GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TGameInfo): Boolean;
+var
+  tournament: TTournamentInfo;
+  game: TGameInfo;
+begin
+  FLock.Enter;
+  for tournament in Values do
+    if tournament.Games.TryGetValue(AId, game) then
+    begin
+      ATournament := tournament;
+      AGame := game;
+      Exit(TRUE);
+    end;
+  FLock.Leave;
+  Exit(FALSE);
+end;
 
 end.

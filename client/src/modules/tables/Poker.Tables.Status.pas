@@ -7,8 +7,6 @@ uses
   Poker.Seats.SeatList, Poker.Games.Game, Poker.Seats.Seat, Poker.Protobufs.Objects.TableEvent, Poker.Protobufs.Objects.Pot;
 
 type
-  TTableType = (ttLiveGame, ttHandPlayback);
-
   TTableStatus = class
   private
     FState: TTableState;
