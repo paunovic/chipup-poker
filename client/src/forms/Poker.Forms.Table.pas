@@ -185,7 +185,7 @@ begin
 
   FCallbacksId := -1;
   case FTableType of
-    ttLive: begin
+    ttLive, ttTournament: begin
       FCallbacksId := MessageContainer.AddCallbacks([
                           TServerMessageCallback.Create(seChat, CSRChatEvent),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),

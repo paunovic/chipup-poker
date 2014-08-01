@@ -1322,7 +1322,8 @@ begin
     dmMain.SelfInfo.Clubs.Unlock;
   end;
 
-  if Tables.GetAndLockTable(pbtstatus.TableMongoId, ttLive, table) then
+  if (Tables.GetAndLockTable(pbtstatus.TableMongoId, ttLive, table)) or
+     (Tables.GetAndLockTable(pbtstatus.TableMongoId, ttTournament, table)) then
   try
     if not table.Form.Visible then
       table.BringToFront;
