@@ -42,6 +42,19 @@ function TournamentCore() {
 }
 util.inherits(TournamentCore,EventEmitter);
 util.inherits(Tournament,EventEmitter);
+Tournament.prototype.startGames = function () {
+	async.each(this.tables,function (tbl,cb1) {
+		tbl.Lock.writeLock(function (release) {
+			var events = [];
+			tbl.stateMachine(function (events) {
+				console.log('events:%j',events);
+				tbl.broadcastStatus(null,true,events);
+				release();
+				cb1();
+			},null,{silent:true},events,0);
+		});
+	});
+}
 TournamentCore.prototype.join = function (tournid,userid,nick,cb) {
 	models.Tournament.findById(tournid,function (err,doc) {
 		console.log(err,userid,doc);
@@ -154,7 +167,7 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 					var conn = global.activeUsers[user._id];
 					tbl.users[user._id] = conn;
 					tbl.seats[freeSeat].conn = conn;
-					conn.send(codes.srTableSitOk,tbl.getTableStatus(conn,true,[]),'Poker.TableStatus'); // FIXME, add a sit event?
+					conn.send(codes.srTournamentOpenTable,{game:tbl.obj,table_status:tbl.getTableStatus(conn,true,[])},'Poker.TournamentTableStart'); // FIXME, add a sit event?
 				} else {
 					tbl.reconnect.push(user._id);
 					tbl.members[freeSeat].disconnected = true;
@@ -179,6 +192,7 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 		//console.log('max users per table: %d\noffline per table: %d',userspertable,offlinepertable);
 		async.eachSeries(online,forceSitDown,function (err) {
 			async.eachSeries(offline,forceSitDown,function (err) {
+				setTimeout(tourn.startGames.bind(tourn),30000);
 				row.save(function () {
 					this.emit('tournament_start',row);
 					cb();
