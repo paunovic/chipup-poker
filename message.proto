@@ -352,6 +352,11 @@ message TableStatus {
 		tsWinning = 5;
 		tsWinning2 = 6;
 	}
+
+	enum TableType {
+		ttLive = 0;
+		ttTournament = 1;
+	}
 	
 	required bytes table_mongo_id = 1 [(ObjectId)=true];
 	repeated SeatInfo seats = 2;
@@ -374,6 +379,7 @@ message TableStatus {
 	optional uint32 rotation = 23;
 	optional Game.GameLimit game_limit = 25;
 	optional uint32 minimum_raise = 26;
+	required TableType table_type = 27;
 }
 
 message SeatInfo {
