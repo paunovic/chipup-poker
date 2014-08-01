@@ -356,6 +356,7 @@ message TableStatus {
 	enum TableType {
 		ttLive = 0;
 		ttTournament = 1;
+		ttHandReplay = 2;
 	}
 	
 	required bytes table_mongo_id = 1 [(ObjectId)=true];
