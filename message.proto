@@ -265,6 +265,7 @@ message Game {
 	optional GameState state = 13;
 	optional uint32 closetime = 14;
 	optional uint32 lasthandid = 15;
+	optional bytes tournament_mongoid = 16 [(ObjectId)=true];
 }
 
 message ListClubsReply {
@@ -662,4 +663,8 @@ message TournamentCommandParams {
 	}
 	required bytes _id = 1 [(ObjectId)=true];
 	optional TournamentCommandEnum reply_status = 2;
+}
+message TournamentTableStart {
+	required Game game = 1;
+	required TableStatus table_status = 2;
 }
