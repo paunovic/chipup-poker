@@ -362,6 +362,7 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
 								} else {
 									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
+									fetchSize(targetFile);
 									console.log('cant find original of %s',clientFile.path);
 								}
 								cb();
@@ -1094,6 +1095,27 @@ function recheckAssets(cb) {
 			assetMtime = stats.mtime.getTime();
 		}
 	});
+}
+function fetchSize(hash) {
+	var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/sizes?hash='+hash,auth:'sync:'+config.syncpassword},function (res) {
+		res.setEncoding('ascii');
+		var buffer = '';
+		res.on('data',function (chunk) {
+			buffer += chunk;
+		});
+		res.on('error',function (err) {
+			console.log('http error getting object size:',err);
+		});
+		res.on('end',function () {
+			console.log('req ended',buffer);
+			if (buffer.length > 2) {
+				models.ObjectSize.create({_id:hash,size:buffer},function (err) {
+					assert.ifError(err);
+				});
+			}
+		});
+	});
+	req.end();
 }
 ClientSocket.prototype.destroy = function destroy() {
 	this.socket.destroy();
