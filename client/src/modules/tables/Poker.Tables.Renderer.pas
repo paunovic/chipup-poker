@@ -7,7 +7,7 @@ uses
   Winapi.Windows, System.Classes, System.Generics.Collections, System.Types, Asphyre.Math, Asphyre.Types, Asphyre.Fonts,
   Poker.Tables.RenderMetrics, Vcl.ActnList, Poker.Games.Game, Poker.Tables.Status, Asphyre.Images, Poker.Seats.Seat, Poker.Cards,
   Poker.ChipStackMaker, IdSync, Poker.DirectX.Button, Vcl.Controls, Poker.ChipStackMaker.ChipStack, System.SysUtils,
-  Poker.Protobufs.Objects.Pot, Poker.DirectX.Animations;
+  Poker.Protobufs.Objects.Pot, Poker.DirectX.Animations, Poker.Protobufs.Objects.TableStatus;
 
 type
   TDealerChatMessageEvent = procedure(const AMessage: String) of object;
@@ -151,7 +151,7 @@ implementation
 uses
   {$IFDEF DEBUG} Poker.Forms.Debug, {$ENDIF}
   Poker.DirectX.Core, Poker.Tables.Resources, Asphyre.Canvas, Poker.Players.PlayerList, Poker.Protobufs.Objects.SeatInfo,
-  Poker.Common.Misc, Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation,
+  Poker.Common.Misc, Poker.Protobufs.Objects.Game, Poker.Server.Settings, Poker.DirectX.Animation,
   Poker.DirectX.Timer, Poker.Sounds, Poker.HandStrengthCalculator, Poker.Settings, Poker.Players.Player, Poker.Helpers.PB_Pot,
   Poker.Avatars.AvatarList, Poker.Avatars.Avatar, Poker.DataModule, Poker.Clubs.Club, Poker.Tables.TableList, Poker.Tables.Table,
   Poker.Clubs.Member;
@@ -403,19 +403,19 @@ end;
 
 procedure TTableRenderer.RenderBackground;
 begin
-  if FTableType = ttLiveGame then
-    DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4)
+  if FTableType = ttHandReplay then
+    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.RoomBackgroundImage), TexFull4)
   else
-    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.RoomBackgroundImage), TexFull4);
+    DXCore.Canvas.UseImage(TableResources.RoomBackgroundImage, TexFull4);
   DXCore.Canvas.TexMap(pBounds4(0, 0, FDXAreaSize.x, FDXAreaSize.y), clWhite4);
 end;
 
 procedure TTableRenderer.RenderTable;
 begin
-  if FTableType = ttLiveGame then
-    DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4)
+  if FTableType = ttHandReplay then
+    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.TableImage), TexFull4)
   else
-    DXCore.Canvas.UseImage(TableResources.GrayscaleVersion(TableResources.TableImage), TexFull4);
+    DXCore.Canvas.UseImage(TableResources.TableImage, TexFull4);
   DXCore.Canvas.TexMap(FMetrics.RawTableBounds, clWhite4);
 end;
 
@@ -815,7 +815,7 @@ var
   txt: String;
   table: TTable;
 begin
-  if FTableType = ttLiveGame then
+  if FTableType = ttLive then
     case AGame.State of
       gsClosing: begin
         if Tables.GetAndLockTable(FInternalId, table) then
@@ -1578,7 +1578,7 @@ begin
         nicks := nicks + Format('%s, ', [nick]);
 
         // restore bets if table is in playback mode, so values are shown
-        if FTableType = ttHandPlayback then
+        if FTableType = ttHandReplay then
           table.Status.Bets[pot.WinnerData[C2].Seat] := table.Status.Bets[pot.WinnerData[C2].Seat] + total_chips_val div UINT32(pot.WinnerData.Count);
 
         bet_point := FMetrics.GetBetPoint(table.Game, pot.WinnerData[C2].Seat, table.Status.Dealer);

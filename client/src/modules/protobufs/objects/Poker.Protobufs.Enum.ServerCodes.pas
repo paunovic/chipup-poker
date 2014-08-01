@@ -23,6 +23,7 @@ type
     srOwnershipGiveAwayInvalidClubId = 18,
     srOwnershipGiveAwayOk = 19,
     srClubDisbandOk = 20,
+    srTournamentOpenTable = 21,
     srChangePasswordOk = 23,
     srCreateGameOk = 24,
     srDeleteGameOk = 25,
@@ -145,6 +146,7 @@ begin
     srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
     srOwnershipGiveAwayOk: result := 'srOwnershipGiveAwayOk';
     srClubDisbandOk: result := 'srClubDisbandOk';
+    srTournamentOpenTable: result := 'srTournamentOpenTable';
     srChangePasswordOk: result := 'srChangePasswordOk';
     srCreateGameOk: result := 'srCreateGameOk';
     srDeleteGameOk: result := 'srDeleteGameOk';

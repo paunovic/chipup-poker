@@ -185,7 +185,7 @@ begin
 
   FCallbacksId := -1;
   case FTableType of
-    ttLiveGame: begin
+    ttLive: begin
       FCallbacksId := MessageContainer.AddCallbacks([
                           TServerMessageCallback.Create(seChat, CSRChatEvent),
                           TServerMessageCallback.Create(seUserChange, CSEUserChange),
@@ -195,7 +195,7 @@ begin
                           TServerMessageCallback.Create([seTableStatus, srTableSitOk, srTableAddonOk, srTableStandUpOk], CSRETableStatus)
                       ]);
     end;
-    ttHandPlayback: begin
+    ttHandReplay: begin
       edChat.Visible := FALSE;
       lbvHandHistory.Visible := FALSE;
       lbvHandStrength.Visible := FALSE;
@@ -373,7 +373,7 @@ end;
 
 procedure TfrmTable.FormShow(Sender: TObject);
 begin
-  if FTableType = ttHandPlayback then
+  if FTableType = ttHandReplay then
     acHandPlaybackPlay.Execute;
 
   RefreshAll;
@@ -459,7 +459,7 @@ begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
     // if table is not live game or its closed, abort
-    if (table.TableType <> ttLiveGame) or
+    if (table.TableType <> ttLive) or
        (table.game.State = gsClosed) then
       Exit;
 
@@ -519,7 +519,7 @@ var
   lbl: String;
 begin
   lbl := '';
-  if FTableType = ttLiveGame then
+  if FTableType in [ttTournament, ttLive] then
   begin
     HandHistory.Lock;
     try
@@ -794,7 +794,7 @@ begin
     rvChat.BoundsRect := table.Renderer.Metrics.ChatBoxBounds;
 
     case table.TableType of
-      ttLiveGame: begin
+      ttLive, ttTournament: begin
         edChat.BoundsRect := table.Renderer.Metrics.ChatEditBounds;
         seRaiseAmount.BoundsRect := table.Renderer.Metrics.RaiseAmountBoxBounds;
         seRaiseAmount.Style.Font.Size := table.Renderer.Metrics.RaiseAmountBoxFontSize;
@@ -860,10 +860,9 @@ begin
         end;
 
         lbvHandStrength.Top := Round(table.Renderer.GetDXButton(FDXBRaisePresets[High(FDXBRaisePresets)]).Bounds^[0].y - lbvHandStrength.Height - 5);
-        UpdateHandHistoryLabel;
       end;
 
-      ttHandPlayback: begin
+      ttHandReplay: begin
         rvChat.Color := $00262626;
         pbHandPlaybackProgress.BoundsRect := table.Renderer.Metrics.HandPlaybackProgress;
         btPlayPause.BoundsRect := table.Renderer.Metrics.HandPlaybackPlay;
@@ -877,6 +876,7 @@ begin
   end;
 
   UpdateHandStrength;
+  UpdateHandHistoryLabel;
   UpdateTableCaption;
 end;
 
@@ -886,7 +886,7 @@ var
   tt: TTableType;
   is_sitting: Boolean;
 begin
-  tt := ttLiveGame;
+  tt := ttLive;
   is_sitting := FALSE;
   if Tables.GetAndLockTable(FInternalId, table) then
   try
@@ -897,7 +897,7 @@ begin
   end;
 
   result := TRUE;
-  if (tt = ttLiveGame) and
+  if (tt = ttLive) and
      (is_sitting) then
     result := MessageDlg('Are you sure you want to leave the table? This will automatically fold your current hand and get you up from the seat.', mtWarning, mbYesNo, 0) = mrYes;
 end;
@@ -910,7 +910,7 @@ var
   is_sitting: Boolean;
   player_status: TPlayerStatus;
 begin
-  tt := ttLiveGame;
+  tt := ttLive;
   is_sitting := FALSE;
   player_status := psOutOfPlay;
 
@@ -925,7 +925,7 @@ begin
   end;
 
   result := TRUE;
-  if (tt = ttLiveGame) and
+  if (tt = ttLive) and
      (is_sitting) and
      (player_status in [psInHand, psFolded, psAllIn]) then
     result := MessageDlg('Are you sure you want to stand up? This will automatically fold your current hand and any chips that you commited to current pot.', mtWarning, mbYesNo, 0) = mrYes;
@@ -1221,7 +1221,7 @@ begin
   if ActionManager.State = asSuspended then
   begin
     ActionManager.State := asNormal;
-    if FTableType = ttHandPlayback then
+    if FTableType = ttHandReplay then
       acHandPlaybackPlay.Execute;
   end;
 

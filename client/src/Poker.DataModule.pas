@@ -284,7 +284,7 @@ begin
     to_remove_iid := TList<Integer>.Create;
     try
       for mongoid in to_remove do
-        if Tables.GetAndLockTable(mongoid, ttLiveGame, table) then
+        if Tables.GetAndLockTable(mongoid, ttLive, table) then
           to_remove_iid.Add(table.InternalId);
       for C1 := 0 to to_remove_iid.Count - 1 do
         Tables.Remove(to_remove_iid[C1]);
@@ -299,7 +299,7 @@ begin
   for tstatus in FReconnectedTables do
   begin
     Tables.AddLiveTable(tstatus.TableMongoId, TRUE, FALSE);
-    if Tables.GetAndLockTable(tstatus.TableMongoId, ttLiveGame, table) then
+    if Tables.GetAndLockTable(tstatus.TableMongoId, ttLive, table) then
     try
       table.SetTableStatus(tstatus, FALSE);
     finally
