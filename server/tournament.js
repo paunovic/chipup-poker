@@ -3,13 +3,26 @@ var models = require('./db').models,
 	EventEmitter = require('events').EventEmitter,
 	myutils = require('./myutils');
 
-var error = require('./error');
+var error = require('./error'),
+	Game = require('./game').Game,
+	deck = require('./deck'),
+	Hand = deck.Hand,
+	codes = require('./ServerCodes');
+
+var lazy = {};
+lazy.__defineGetter__('user',function () {
+	return require('./user');
+});
+lazy.__defineGetter__('ClientSocket',function () {
+	return lazy.user.ClientSocket;
+});
 
 var async = require('async');
 
 module.exports = Tournament;
 
 function Tournament() {
+	this.tables = [];
 }
 
 Tournament.create = function (obj,cb) {
@@ -102,7 +115,7 @@ TournamentCore.prototype.checkTournaments = function () {
 		}
 		this.startTournament(row,function () {
 			this.resetTimer();
-		});
+		}.bind(this));
 	}.bind(this));
 }
 TournamentCore.prototype.startTournament = function (row,cb) {
@@ -114,14 +127,63 @@ TournamentCore.prototype.startTournament = function (row,cb) {
 		var doc = {game_type:row.gametype, blinds:'gb5x10', seats:row.seats_per_table, gamename:'Tournament '+row.name+' table#'+(i+1), game_limit:row.limit, buyin_min: 10, buyin_max:20, rake:0, rotation:0, hands:0, tournament:row._id};
 		todo.push(doc);
 	}
+	var tourn = new Tournament(row);
 	async.each(todo,function (doc,cb) {
 		models.Game.create(doc,function (err,game) {
-			cb();
+			console.log('made %j',game);
+			Game.getGame(game._id,function (err,gameout) {
+				console.log('got game');
+				tourn.tables.push(gameout);
+				cb();
+			});
 		});
 	},function () {
-		row.save(function () {
-			this.emit('tournament_start',row);
-			cb();
+		var tableindex = 0;
+		function forceSitDown(user,cb) {
+			if (tableindex >= tourn.tables.length) tableindex = 0;
+			var tbl = tourn.tables[tableindex];
+			tbl.Lock.writeLock(function (release) {
+				var userOnline = false;
+				if (global.activeUsers[user._id]) userOnline = true;
+				var freeSeat = 0;
+				while (tbl.members[freeSeat]) freeSeat++;
+				console.log('found seat %d in table "%s"',freeSeat,tbl.obj.gamename);
+				tbl.members[freeSeat] = { hand: new Hand(), status:'psOutOfHand', chips:user.chips, seat:freeSeat, sitOutNextRound:false, sittingOutRoundsCount:0, handsPlayed:0, muck:false };
+				tbl.seats[freeSeat] = { userid: user._id };
+				if (userOnline) {
+					var conn = global.activeUsers[user._id];
+					tbl.users[user._id] = conn;
+					tbl.seats[freeSeat].conn = conn;
+					conn.send(codes.srTableSitOk,tbl.getTableStatus(conn,true,[]),'Poker.TableStatus'); // FIXME, add a sit event?
+				} else {
+					tbl.reconnect.push(user._id);
+					tbl.members[freeSeat].disconnected = true;
+					tbl.seats[freeSeat].conn = {log:lazy.ClientSocket.prototype.log, userid:user._id, nick:user.displayname};
+				}
+				tableindex++;
+				tbl.broadcastStatus(null,true,[]);
+				release();
+				cb();
+			});
+		}
+		// force all users to sit, even if they are disconnected
+		var online = [];
+		var offline = [];
+		for (var x=0; x<row.players.length; x++) {
+			if (global.activeUsers[row.players[x]._id]) online.push(row.players[x]);
+			else offline.push(row.players[x]);
+		}
+		console.log('online:%j\noffline:%j',online,offline);
+		//var offlinepertable = Math.ceil(offline.length / tourn.tables.length);
+		//var userspertable = Math.ceil(row.players.length / tourn.tables.length);
+		//console.log('max users per table: %d\noffline per table: %d',userspertable,offlinepertable);
+		async.eachSeries(online,forceSitDown,function (err) {
+			async.eachSeries(offline,forceSitDown,function (err) {
+				row.save(function () {
+					this.emit('tournament_start',row);
+					cb();
+				}.bind(this));
+			}.bind(this));
 		}.bind(this));
 	}.bind(this));
 }

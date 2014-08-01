@@ -4,7 +4,7 @@ var assert = require('assert');
 var util = require('util');
 var async = require('async');
 
-var activeGames,activeUsers,sharedconfig,ClientSocket;
+var activeGames,activeUsers,sharedconfig;
 
 var ReadWriteLock = require('./lock'); // FIXME, send them a PR?, fork it?, it came from the rwlock npm package
 var profiler = require('profiler');
@@ -24,7 +24,8 @@ var Club;
 var myutils = require('./myutils');
 var mdb = require('./db');
 var models = mdb.models;
-var user = require('./user');
+var user = require('./user'),
+	ClientSocket = user.ClientSocket;
 var error = require('./error');
 
 function makeGameProtobuf(g) {
@@ -48,7 +49,7 @@ function Game(obj) {
 	this.users = {}; // all users, even not sitting
 	this.members = []; // all users, as seen by the users
 	this.seats = []; // internal data for seats
-	this.reconnect = [];
+	this.reconnect = []; // array of ObjectId's for offline members
 	this.timebanks = {}; // timebank data for all users who have visited the table
 	this.obj = obj;
 	this.id = obj._id;
@@ -116,7 +117,6 @@ Game.init = function (input) {
 	global.util = require('util');
 	activeUsers = global.activeUsers;
 	sharedconfig = global.sharedconfig; // FIXME
-	ClientSocket = user.ClientSocket;
 	Club = require('./club').Club;
 };
 Game.hands = 0;
@@ -2096,13 +2096,13 @@ Game.prototype.logEvent = function (type,userid,change) {
 	if (change) doc.change = change;
 	//GameEvents.insert(doc,function (){});
 }
-Game.getGame = function getgame(id,cb) {
-	getGameLock.writeLock(function (release) {
+Game.getGame = function getgame(id,cb1) {
+	getGameLock.writeLock(function getGameLocked(release) {
 		if (!activeGames[id]) {
 			models.Game.findOne({_id:id},function (err,obj) {
 				if (!obj) {
 					release();
-					return cb();
+					return cb1();
 				}
 				var token = profiler.start('game-create');
 				var game = new Game(obj);
@@ -2111,51 +2111,66 @@ Game.getGame = function getgame(id,cb) {
 				game.deck = new Deck();
 				game.deck.shuffle(function shuffled(){
 					//this.send(codes.SR_DECKREPLY,{deck:deck.prettyPrint()},'Poker.GetDeckReply');
-					Club.getClubById(obj.clubid,function (err,club) {
-						if (!club) {
-							release();
-							cb('parent club missing');
-							return;
-						}
-						game.real_rake = club.obj.rake;
+					if (obj.clubid) { // club based game
+						Club.getClubById(obj.clubid,function (err,club) {
+							if (!club) {
+								release();
+								cb1('parent club missing');
+								return;
+							}
+							game.real_rake = club.obj.rake;
+							game.testmode = club.obj.testmode;
+							game.club = club;
+							finishGameInit(function () {
+								var g = makeGameProtobuf(obj);
+								var conn = activeUsers[club.obj.owner];
+								if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
+								if (club.obj.members) { // FIXME, remove
+									for (var x=0; x<club.obj.members.length; x++) {
+										conn = activeUsers[club.obj.members[x]];
+										if (!conn) continue;
+										conn.send(codes.seGameChange,g,'Poker.Game');
+									}
+								}
+								cb1(null,game);
+							});
+						});
+					} else if (obj.tournament) { // tournament game
+						game.real_rake = 0;
+						models.Tournament.findById(game.tournament,function (err,tourn) {
+							game.tournament = tourn
+							finishGameInit(function () {
+								cb1(null,game);
+							});
+						}.bind(this));
+					}
+					function finishGameInit(cb2) {
 						if (!game.real_rake) game.real_rake = 5;
 						game.rake = 0;
-						game.testmode = club.obj.testmode;
-						var g = makeGameProtobuf(obj);
-						var conn = activeUsers[club.obj.owner];
-						if (conn) conn.send(codes.seGameChange,g,'Poker.Game');
 
-						if (club.obj.members) { // FIXME, remove
-							for (var x=0; x<club.obj.members.length; x++) {
-								conn = activeUsers[club.obj.members[x]];
-								if (!conn) continue;
-								conn.send(codes.seGameChange,g,'Poker.Game');
-							}
-						}
-						game.club = club;
 						models.GameState.findOne({_id:game.id},function (err,row) {
 							error.handleError(err);
 							if (row) {
 								game.stateRow = row;
 								token.stop();
 								release();
-								cb(null,game);
+								cb2();
 							} else {
 								models.GameState.create({_id:game.id},function (err,row) {
 									error.handleError(err);
 									game.stateRow = row;
 									token.stop();
 									release();
-									cb(null,game);
+									cb2();
 								});
 							}
 						});
-					});
+					}
 				}.bind(this));
 			}.bind(this));
 		} else {
 			release();
-			cb(null,activeGames[id]);
+			cb1(null,activeGames[id]);
 		}
 	}.bind(this));
 }

@@ -14,8 +14,8 @@ var models = {};
 module.exports.models = models;
 
 var User = new Schema({
-	displayname:{type:String,index:{unique:true}},
-	email:{type:String,index:{unique:true}},
+	displayname:{type:String,index:{unique:true},required:true},
+	email:{type:String,index:{unique:true},required:true},
 	authcode:String,
 	password:Buffer,
 	salt:Buffer,
