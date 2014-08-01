@@ -23,6 +23,7 @@ enum ServerCodes {
 	srOwnershipGiveAwayInvalidClubId = 18;
 	srOwnershipGiveAwayOk = 19;
 	srClubDisbandOk = 20;
+	srTournamentOpenTable = 21;
 	srChangePasswordOk = 23;
 	srCreateGameOk = 24;
 	srDeleteGameOk = 25;
