@@ -1706,6 +1706,8 @@ Game.prototype.getTableStatus = function getTableStatus(self,forceunlock,events)
 	var tableStatus = {rake_percent:this.rake, table_mongo_id: this.id,seats:[], state:this.state, bets:this.bets, pots:[], locked:this.Lock.readers == -1, seq:counter++, minimum_bet:this.minBet, minimum_raise:this.minBet + this.minimum_raise,small_blind:this.small_blind, big_blind:this.big_blind, events:events};
 	if (forceunlock) tableStatus.locked = false;
 	if (this.handid) tableStatus.handid = this.handid;
+	if (this.club) tableStatus.table_type = 'ttLive';
+	else tableStatus.table_type = 'ttTournament';
 	if (this.pots) {
 		this.updatePotRakes();
 		tableStatus.pots = this.pots;
