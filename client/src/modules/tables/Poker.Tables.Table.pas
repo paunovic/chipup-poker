@@ -630,7 +630,7 @@ begin
   FStatus.ActionSitOutNextBB := FALSE;
   FStatus.ActionShowCards := FALSE;
 
-  if (FTableType <> ttLive) or
+  if (not (FTableType in [ttLive, ttTournament])) or
      (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
     Exit;
   FStatus.ActionStandUp := TRUE;
