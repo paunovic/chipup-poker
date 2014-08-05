@@ -172,7 +172,6 @@ function Server(activeUsersIN) {
 		res.end();
 	}.bind(this));
 	//app.get('/fetchhands',this.fetchHands.bind(this));
-	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
 	app.post('/secure/buildbot',function (req,res) {
 		console.log(req.body);
 		buildbot.doLogin(function () {
@@ -248,6 +247,15 @@ Server.prototype.addSync = function (app) {
 	app.post('/sync/newDiff',this.syncNewDiff.bind(this));
 	app.post('/sync/assets',this.syncAssets.bind(this));
 	app.get('/sync/assets',this.getAssets.bind(this));
+	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
+	app.get('/sync/sizes',this.getSize.bind(this));
+};
+Server.prototype.getSize = function (req,res) {
+	models.ObjectSize.findOne({_id:req.query.hash},function (err,row) {
+		assert.ifError(err);
+		console.log('row:%j',row);
+		res.end(row.size+'');
+	});
 };
 Server.prototype.getAssets = function (req,res) {
 	res.end(JSON.stringify(user.getAssets()));
