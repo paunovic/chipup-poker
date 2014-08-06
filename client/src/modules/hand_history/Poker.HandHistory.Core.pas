@@ -3,7 +3,7 @@ unit Poker.HandHistory.Core;
 interface
 
 uses
-  System.Classes, System.SysUtils, Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Items, Poker.Types,
+  System.Classes, System.SysUtils, Poker.Protobufs.Objects.HandHistoryReply, Poker.HandHistory.Items, Poker.Types,
   System.Generics.Collections, System.SyncObjs;
 
 type
@@ -20,7 +20,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply): Boolean;
+    function Add(const AHandHistoryInfo: TPB_HandHistoryReply): Boolean;
   end;
 
 var
@@ -56,21 +56,27 @@ begin
   FreeAndNil(FLock);
 end;
 
-function THandHistory.Add(const AClubHandHistoryInfo: TPB_ClubHandHistoryReply): Boolean;
+function THandHistory.Add(const AHandHistoryInfo: TPB_HandHistoryReply): Boolean;
 var
   pbhh: TPB_HandHistory;
   hhis: THandHistoryItems;
+  parentid: TMongoId;
 begin
   FLock.Enter;
   try
-    if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
+    if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
     begin
-      inherited Add(AClubHandHistoryInfo.Gameid, THandHistoryItems.Create(AClubHandHistoryInfo.Clubid, AClubHandHistoryInfo.Gameid));
-      if not TryGetValue(AClubHandHistoryInfo.Gameid, hhis) then
+      if AHandHistoryInfo.Clubid.IsEmpty then
+        parentid := AHandHistoryInfo.TournamentId
+      else
+        parentid := AHandHistoryInfo.ClubId;
+
+      inherited Add(AHandHistoryInfo.Gameid, THandHistoryItems.Create(parentid, AHandHistoryInfo.Gameid));
+      if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
         Exit(FALSE);
     end;
 
-    for pbhh in AClubHandHistoryInfo.Rows do
+    for pbhh in AHandHistoryInfo.Rows do
       hhis.AddHand(pbhh);
     Exit(TRUE);
   finally
