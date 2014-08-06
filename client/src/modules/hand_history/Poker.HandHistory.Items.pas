@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, System.Classes, System.SyncObjs, Poker.Protobufs.Objects.HandHistory,
   Poker.HandHistory.Players, Poker.Protobufs.Objects.HandHistoryMove, Poker.Games.Game, Poker.Clubs.Club, Poker.Protobufs.Objects.Game,
-  Poker.Types;
+  Poker.Types, Poker.Tournaments, Poker.Tournaments.Info;
 
 type
   THandHistoryItems = class;
@@ -112,12 +112,13 @@ type
   THandHistoryItems = class(TObjectList<THandHistoryItem>)
   var
     FGameId: TMongoId;
-    FClubId: TMongoId;
+    FParentId: TMongoId;
     FGame: TGameInfo;
     FClub: TClubInfo;
+    FTournament: TTournamentInfo;
     FLock: TCriticalSection;
   public
-    constructor Create(const AClubId, AGameId: TMongoId);
+    constructor Create(const AParentId, AGameId: TMongoId);
     destructor Destroy; override;
 
     procedure AddHand(const AHandHistory: TPB_HandHistory);
@@ -128,6 +129,7 @@ type
 
     property Club: TClubInfo read FClub;
     property Game: TGameInfo read FGame;
+    property Tournament: TTournamentInfo read FTournament;
   end;
 
 implementation
@@ -437,22 +439,24 @@ end;
 
 { THandHistoryItems }
 
-constructor THandHistoryItems.Create(const AClubId, AGameId: TMongoId);
+constructor THandHistoryItems.Create(const AParentId, AGameId: TMongoId);
 var
   club: TClubInfo;
   game: TGameInfo;
+  tournament: TTournamentInfo;
 begin
   inherited Create(TRUE);
 
   FLock := TCriticalSection.Create;
 
-  FClubId := AClubId;
+  FParentId := AParentId;
   FGameId := AGameId;
   FClub := TClubInfo.Create;
   FGame := TGameInfo.Create;
+  FTournament := nil;
 
   // try to copy Club and Game from internal lists (if found)
-  if dmMain.SelfInfo.Clubs.GetAndLock(AClubId, club) then
+  if dmMain.SelfInfo.Clubs.GetAndLock(FParentId, club) then
   try
     FClub.Assign(club, FALSE);
     if club.Games.TryGetValue(AGameId, game) then
@@ -461,13 +465,19 @@ begin
     dmMain.SelfInfo.Clubs.Unlock;
   end;
 
-  // check if objects are found, and if not, try to copy them from server proto
-  // fixme
   if not Assigned(club) then
   begin
-
+    if Tournaments.GetAndLock(FParentId, tournament) then
+    try
+      FTournament := TTournamentInfo.Create(tournament);
+      if FTournament.Games.TryGetValue(FGameId, game) then
+        FGame.Assign(game);
+    finally
+      Tournaments.Unlock;
+    end;
   end;
 
+  // fixme
   if not Assigned(game) then
   begin
 
@@ -478,6 +488,7 @@ destructor THandHistoryItems.Destroy;
 begin
   FGame.Free;
   FClub.Free;
+  FreeAndNil(FTournament);
 
   FLock.Free;
 

@@ -277,7 +277,8 @@ var
 begin
   FTableType := ttHandReplay;
   FGameId := AHandHistoryItems.FGameId;
-  FClubId := AHandHistoryItems.FClubId;
+  FClubId := AHandHistoryItems.FParentId;
+  FTournamentId := AHandHistoryItems.FParentId;
   FClub.Assign(AHandHistoryItems.Club);
   FGame.Assign(AHandHistoryItems.Game);
   FHandHistoryHandId := AHandHistoryItem.HandId;
@@ -633,7 +634,8 @@ begin
   if (not (FTableType in [ttLive, ttTournament])) or
      (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
     Exit;
-  FStatus.ActionStandUp := TRUE;
+
+  FStatus.ActionStandUp := FTableType = ttLive;
 
   FStatus.FocusWindow := FALSE;
   if FGame.State <> gsClosed then
@@ -668,6 +670,8 @@ begin
 
             tsPreFlop, tsFlop, tsTurn, tsRiver: begin
               FStatus.ActionFold := TRUE;
+              FStatus.FocusWindow := TRUE;
+
               // check if our current bet is smaller than minimumbet (call/raise situation)
               if FStatus.GetBet(seat.SeatIndex) < FStatus.MinimumBet then
               begin
@@ -681,8 +685,6 @@ begin
                 if (seat.Chips > FStatus.MinimumBet) and
                    (FStatus.MinimumBet < FStatus.MinimumRaise) then
                   FStatus.ActionRaise := TRUE;
-
-                FStatus.FocusWindow := TRUE;
               end
               else // if our current bet isnt smaller than minimum bet, that means its check/raise situation
               begin
