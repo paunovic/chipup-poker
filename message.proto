@@ -59,6 +59,7 @@ enum ServerCodes {
 	seTableStatus = 58;
 	seTournamentList = 59;
 	seUserChange = 60;
+	seTournamentPlayerFinished = 61;
 	
 	scHello = 70;
 	scLogin = 71;
