@@ -33,9 +33,6 @@ var
 
 implementation
 
-
-
-
 class procedure TDatabase.Initialize(const ADatabasePath: String);
 begin
   sqlite3 := TSQLite3LibraryDynamic.Create;

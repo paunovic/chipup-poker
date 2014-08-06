@@ -122,7 +122,7 @@ end;
 
 destructor TServerSocketCore.Destroy;
 begin
-  {$IFDEF DEBUG} DebugLn(FDebugId, 'TServerSocketCore.Destroy', ditSocket); {$ENDIF}
+  {$IFDEF DEBUG} DebugLn(FDebugId, 'Destroying socket...', ditSocket); {$ENDIF}
 
   Disconnect;
 
