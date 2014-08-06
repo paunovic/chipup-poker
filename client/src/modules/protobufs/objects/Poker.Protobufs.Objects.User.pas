@@ -82,7 +82,7 @@ type
     procedure clear_Authed;
     property Authed: Boolean read FAuthed write SetAuthed;
 
-    // required PlayerSubscriptionPlan SubscriptionPlan = 7;
+    // optional PlayerSubscriptionPlan SubscriptionPlan = 7;
     function has_SubscriptionPlan: Boolean;
     procedure clear_SubscriptionPlan;
     property SubscriptionPlan: TPlayerSubscriptionPlan read FSubscriptionPlan write SetSubscriptionPlan;
@@ -171,7 +171,7 @@ end;
 
 function TPB_User.IsInitialized: Boolean;
 begin
-  if (_has_bits_ and $45) <> $45 then
+  if (_has_bits_ and $5) <> $5 then
     Exit(FALSE);
   Exit(TRUE);
 end;

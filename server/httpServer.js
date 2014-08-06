@@ -126,9 +126,19 @@ function Server(activeUsersIN) {
 			assert.ifError(err);
 			models.Installer.findOne({_id:row.value},function (err,row) {
 				global.log('sending installer %j',row);
-				res.sendfile('installers/'+row.name);
+				if (config.diffserver) {
+					res.sendfile('installers/'+row.name);
+				} else {
+					res.writeHead(302,{Location:'https://dev-server.chipuppoker.com/redirect/install_chipuppoker.exe?name='+row.name});
+					res.end();
+				}
 			});
 		}.bind(this));
+	}.bind(this));
+	app.get("/redirect/install_chipuppoker.exe",function (req,res) {
+		models.Installer.findOne({name:req.query.name},function (err,row) {
+			res.sendfile('installers/'+row.name);
+		});
 	}.bind(this));
 	app.get("/debug_install_chipuppoker.exe",function (req,res) {
 		models.Config.findOne({_id:'debuginstallerid'},function (err,row) {
@@ -162,7 +172,6 @@ function Server(activeUsersIN) {
 		res.end();
 	}.bind(this));
 	//app.get('/fetchhands',this.fetchHands.bind(this));
-	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
 	app.post('/secure/buildbot',function (req,res) {
 		console.log(req.body);
 		buildbot.doLogin(function () {
@@ -236,7 +245,21 @@ Server.prototype.addSync = function (app) {
 	app.get('/sync/gitHook',this.gitHook.bind(this));
 	app.post('/sync/newVersion',this.syncNewVersion.bind(this));
 	app.post('/sync/newDiff',this.syncNewDiff.bind(this));
+	app.post('/sync/assets',this.syncAssets.bind(this));
+	app.get('/sync/assets',this.getAssets.bind(this));
+	app.post('/sync/makeDiff',this.syncMakeDiff.bind(this));
+	app.get('/sync/sizes',this.getSize.bind(this));
 };
+Server.prototype.getSize = function (req,res) {
+	models.ObjectSize.findOne({_id:req.query.hash},function (err,row) {
+		assert.ifError(err);
+		console.log('row:%j',row);
+		res.end(row.size+'');
+	});
+};
+Server.prototype.getAssets = function (req,res) {
+	res.end(JSON.stringify(user.getAssets()));
+}
 Server.prototype.getHand = function (req,res) {
 	var start = Date.now();
 	models.HandHistory.findOne({_id:new ObjectID(req.query.id)},function (err,hand) {
@@ -247,12 +270,14 @@ Server.prototype.createTourn = function (req,res) {
 	res.render('tournament_create');
 }
 Server.prototype.createTournPost = function (req,res) {
+	var str = req.body.start_date + ' ' + req.body.start_time;
+	req.body.start_time = Math.round(new Date(str).getTime()/1000);
 	Tournament.create(req.body,function (err) {
 		if (err && ((err.name == 'ValidationError') || (err.name == 'CastError'))) {
 			res.end(err.toString());
 			return;
 		}
-		console.log(req.body);
+		console.log('http body',req.body);
 		res.end('test');
 	});
 }
@@ -912,6 +937,11 @@ Server.prototype.newVersion = function newVersion(req,res) {
 		}.bind(this));
 	}.bind(this));
 }
+Server.prototype.syncAssets = function (req,res) {
+	console.log(req.body);
+	user.assetSync(req.body);
+	res.end('OK');
+};
 Server.prototype.syncNewVersion = function (req,res) {
 	console.log(req.body);
 	req.body.installer._id = new ObjectID(req.body.installer._id);

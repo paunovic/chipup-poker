@@ -14,8 +14,8 @@ var models = {};
 module.exports.models = models;
 
 var User = new Schema({
-	displayname:{type:String,index:{unique:true}},
-	email:{type:String,index:{unique:true}},
+	displayname:{type:String,index:{unique:true},required:true},
+	email:{type:String,index:{unique:true},required:true},
 	authcode:String,
 	password:Buffer,
 	salt:Buffer,
@@ -130,7 +130,8 @@ var GameSchema = new Schema({
 	pot:Number,
 	state2:String,
 	gameState:Schema.Types.Mixed,
-	clubid:ObjectId
+	clubid:ObjectId,
+	tournament:ObjectId
 },{collection:'games'});
 var WinnerDataSchema = new Schema({
 	seat:Number,
@@ -246,6 +247,11 @@ var PaypalRequestSchema = new Schema({
 	plan:String,
 	userid:ObjectId,
 });
+var TournamentMemberSchema = new Schema({
+	_id: ObjectId,
+	displayname: String,
+	chips: Number
+});
 var TournamentSchema = new Schema({
 	name: String,
 	description: String,
@@ -257,7 +263,9 @@ var TournamentSchema = new Schema({
 	startingchips: {type:Number,required:true},
 	timeperlevel: {type:Number,required:true},
 	registered_players: { type:Number, required:true, default:0 },
-	start_time: { type:Number, required:true, default: 0 }
+	start_time: { type:Number, required:true, default: 0 },
+	players: { type:[TournamentMemberSchema] },
+	state: { type:String, default:'tnsOpen', required:true }
 });
 
 module.exports.close = function () {

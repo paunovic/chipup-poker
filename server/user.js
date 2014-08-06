@@ -8,6 +8,7 @@ var uuid = require('node-uuid');
 var fs = require('fs');
 var jade = require('jade');
 var https = require('https');
+var http = require('http');
 
 var models = require('./db').models;
 var deck = require('./deck');
@@ -28,6 +29,8 @@ var Tournament = require('./tournament');
 module.exports.UserInit = UserInit;
 module.exports.ClientSocket = ClientSocket;
 module.exports.changePassword = changePassword;
+module.exports.assetSync = assetSync;
+module.exports.getAssets = getAssets;
 
 var connections = 0;
 var handlers = {};
@@ -38,6 +41,13 @@ var assets = {};
 var assetMtime;
 var Club;
 
+function assetSync(obj) {
+	console.log('assets synced %j',obj);
+	assets = obj;
+}
+function getAssets() {
+	return assets;
+}
 function changePassword(new_password,userid,cb) {
 	// FIXME, refactor into a dedicated function and add a test
 	deck.getRandom(16,function changePw_cb1(salt) {
@@ -98,6 +108,7 @@ function ClientSocket(socket) {
 	clearTimeout(this.idleTimer);
 	this.idleTimer = setTimeout(this.goneIdle.bind(this),90000);
 	Tournament.core.on('new_tournament',this.newTourn.bind(this));
+	Tournament.core.on('tournament_start',this.newTourn.bind(this));
 	this.lastTourn = 0;
 }
 ClientSocket.prototype.error = function error(e) {
@@ -112,9 +123,9 @@ ClientSocket.prototype.error = function error(e) {
 };
 ClientSocket.prototype.destroy = function () {
 	Tournament.core.removeListener('new_tournament',this.newTourn.bind(this));
+	Tournament.core.removeListener('tournament_start',this.newTourn.bind(this));
 };
 ClientSocket.prototype.newTourn = function (doc) {
-	console.log('args are',arguments);
 	if (this.state != 2) return;
 	var elapsed = Date.now() - this.lastTourn;
 	if (elapsed < 30000) { // 30 sec
@@ -128,12 +139,12 @@ ClientSocket.prototype.flushTourn = function () {
 	delete this.tournTimer;
 	models.Tournament.find(function (err,items) {
 		var out = { items: items };
-		console.log('out is %j',out);
 		this.send(codes.seTournamentList,out,'Poker.TournamentList');
 	}.bind(this));
 }
 ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	var tournaments = [];
+	var registered_tournaments = [];
 	function finish(row) {
 		if (this.currentVersion) {
 			row.currentVersion = this.currentVersion;
@@ -145,7 +156,15 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 	}
 	function finish2(row) {
 		models.Tournament.find(function (err,items) {
+			var i,j;
 			error.handleError(err);
+			for (i=0; i<items.length; i++) {
+				for (j=0; j<items[i].players.length; j++) {
+					if (myutils.compareObjectID(items[i].players[j]._id,row._id)) {
+						registered_tournaments.push(items[i]._id);
+					}
+				}
+			}
 			tournaments = items;
 			finish3.call(this,row);
 		}.bind(this));
@@ -162,7 +181,8 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 		this.chips = row.chips;
 		this.log('sucessfully logged in');
 		global.activeUsers[row._id] = this;
-		this.getStatusPacket(function (status) {
+		var output = {};
+		this.getStatusPacket(output,function (status) {
 			this.log('got status packet');
 			// FIXME, optimize this?
 			var toResume = [];
@@ -201,9 +221,11 @@ ClientSocket.prototype.doLogin = function doLogin(row,password,token) {
 					cb();
 				});
 			}.bind(this),function done() {
-				var obj = {login_status:'lrSuccess',status:status,reconnect_tables:statuses, tournament_infos:tournaments };
-				//console.log('login reply',obj);
-				this.send(codes.srLoginReply,obj,'Poker.LoginReply');
+				output.login_status = 'lrSuccess';
+				output.reconnect_tables = statuses;
+				output.tournament_infos = tournaments;
+				output.registered_tournaments = registered_tournaments;
+				this.send(codes.srLoginReply,output,'Poker.LoginReply');
 				// FIXME, embed in the same message
 				handlers[codes.scQueryTableStats].call(this,new Buffer(0),token);
 			}.bind(this));
@@ -339,7 +361,9 @@ ClientSocket.prototype.doHelloProcessing = function(params,files,token,mainfiles
 								if (sizeRow) {
 									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:sizeRow.size});
 								} else {
-									global.log('cant find original of %s',clientFile.path);
+									toUpdate.push({file_type:'ufFull',path:clientFile.path.replace('/','\\'),url:'https://'+config.staticserver+'/unpacked/objects/'+targetFile,file_size:-1});
+									fetchSize(targetFile);
+									console.log('cant find original of %s',clientFile.path);
 								}
 								cb();
 							});
@@ -692,12 +716,11 @@ ClientSocket.prototype.handle = function (code,args) {
 		}
 	}
 };
-ClientSocket.prototype.getStatusPacket = function (maincb) {
+ClientSocket.prototype.getStatusPacket = function (status,maincb) {
 	var query = {$or:[ {owner:this.userid} , {members:this.userid} , {is_private:false} ]};
 	// owner should see password
 	// all need to see name, _id, seq, private, chips, and members
 	models.Clubs.find(query,function(err,clubs) {
-		var status = {};
 		status.clubs = clubs;
 		var x,y;
 		var userlist = [];
@@ -1028,14 +1051,41 @@ function hashAssets(cb) {
 			req.on('error',function (err) {
 				console.log('http error sending new assets:',err);
 			});
+			req.on('end',function () {
+				console.log('req ended',req);
+			});
 			req.write(body);
 			req.end();
 			if (cb) cb();
 		});
 	});
 }
+var asset_initial = true;
 function recheckAssets(cb) {
-	if (!config.diffserver) return;
+	if (!config.diffserver) {
+		if (asset_initial) {
+			asset_initial = false;
+			var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/assets',auth:'sync:'+config.syncpassword},function (res) {
+				res.setEncoding('ascii');
+				var buffer = '';
+				res.on('data',function (chunk) {
+					buffer += chunk;
+				});
+				res.on('error',function (err) {
+					console.log('http error sending new assets:',err);
+				});
+				res.on('end',function () {
+					console.log('req ended',buffer);
+					assets = JSON.parse(buffer);
+					if (cb) return cb();
+				});
+			});
+			req.end();
+		} else {
+			if (cb) return cb();
+		}
+		return;
+	}
 	fs.stat('assets',function (err,stats) {
 		//console.log(stats,assetMtime,stats.mtime.getTime(),stats.mtime.getTime()-assetMtime);
 		if (assetMtime == stats.mtime.getTime()) {
@@ -1046,7 +1096,85 @@ function recheckAssets(cb) {
 		}
 	});
 }
+function fetchSize(hash) {
+	var req = http.request({hostname:'dev-server.chipuppoker.com',method:'GET',path:'/sync/sizes?hash='+hash,auth:'sync:'+config.syncpassword},function (res) {
+		res.setEncoding('ascii');
+		var buffer = '';
+		res.on('data',function (chunk) {
+			buffer += chunk;
+		});
+		res.on('error',function (err) {
+			console.log('http error getting object size:',err);
+		});
+		res.on('end',function () {
+			console.log('req ended',buffer);
+			if (buffer.length > 2) {
+				models.ObjectSize.create({_id:hash,size:buffer},function (err) {
+					assert.ifError(err);
+				});
+			}
+		});
+	});
+	req.end();
+}
 ClientSocket.prototype.destroy = function destroy() {
 	this.socket.destroy();
 	clearTimeout(this.idleTimer);
+};
+handlers[codes.scTournamentRegister] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentCommandParams');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Tournament.core.join(params._id,this.userid,this.nick,function (code) {
+		if (code == 'OK') {
+			params.reply_status = 'tceRegisterOk';
+		} else if (code == 'full') {
+			params.reply_status = 'tceRegisterLimitReached';
+		} else if (code == 'alreadyMember') {
+			params.reply_status = 'tceAlreadyRegistered';
+		}
+		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
+		token.stop();
+	}.bind(this));
+};
+handlers[codes.scTournamentUnregister] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentCommandParams');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	Tournament.core.leave(params._id,this.userid,function (code) {
+		if (code == '404') {
+			this.reply(0,'tournament not found');
+			return;
+		}
+		if (code == 'OK') {
+			params.reply_status = 'tceUnregisterOk';
+		}
+		this.send(codes.srTournamentReply,params,'Poker.TournamentCommandParams');
+		token.stop();
+	}.bind(this));
+};
+handlers[codes.scGetTournamentDetails] = function (args,token) {
+	var params;
+	try {
+		params = pb.Parse(args,'Poker.TournamentDetails');
+		params._id = myutils.toMongoId(params._id);
+	} catch (e) {
+		this.error(e);
+		return;
+	}
+	models.Tournament.findById(params._id,function (err,doc) {
+		error.handleError(err);
+		this.send(codes.srTournamentDetails,doc,'Poker.TournamentInfo');
+		token.stop();
+	}.bind(this));
 };

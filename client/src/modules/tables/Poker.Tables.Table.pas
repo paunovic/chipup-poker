@@ -24,6 +24,7 @@ type
       FClubId: TMongoId;
       FClub: TClubInfo;
       FGame: TGameInfo;
+      FTournamentId: TMongoId;
       FForm: TForm;
       FRenderer: TTableRenderer;
       FLeaveNotify: Boolean;
@@ -45,6 +46,7 @@ type
     destructor Destroy; override;
 
     function SetupLiveTable(const AGameId: TMongoId; const ASendJoinCommand: Boolean): Boolean;
+    function SetupTournamentTable(const AGameId: TMongoId): Boolean;
     function SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
 
     procedure RenderSync;
@@ -80,7 +82,8 @@ uses
   {$IFDEF DEBUG} Poker.Forms.Debug, System.TypInfo, {$ENDIF}
   Vcl.Controls, Poker.Forms.Table, Poker.Common.Misc, Poker.Server.Socket, Poker.DirectX.Core, Asphyre.Math, Poker.DataModule,
   Poker.HandHistory.Core, Poker.Players.Player, Poker.Players.PlayerList, Poker.Seats.Seat, Poker.Cards, Poker.Sounds, Poker.Settings,
-  System.Classes, Poker.WindowMessages, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.SeatInfo;
+  System.Classes, Poker.WindowMessages, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.SeatInfo,
+  Poker.Tournaments, Poker.Tournaments.Info;
 
 
 { TTable }
@@ -130,10 +133,11 @@ var
   rot_index: Integer;
   hhis: THandHistoryItems;
   hhi: THandHistoryItem;
+  tournament: TTournamentInfo;
 begin
   result := '';
   case FTableType of
-    ttLiveGame: begin
+    ttLive: begin
       if FGame.GameType = gtRotationNLHPLO then
       begin
         case FStatus.CurrentGame of
@@ -150,7 +154,17 @@ begin
         result := Format('%s (%s/%s %s) - %s', [FGame.Name, ChipsToStr(FGame.SmallBlind), ChipsToStr(FGame.BigBlind), FGame.AsString(TRUE), FClub.Name]);
     end;
 
-    ttHandPlayback: begin
+    ttTournament: begin
+      result := 'Tournament';
+      if Tournaments.GetAndLock(FTournamentId, tournament) then
+      try
+        result := Format('Tournament %s, table %', [tournament.Name, FGame.Name]);
+      finally
+        Tournaments.Unlock;
+      end;
+    end;
+
+    ttHandReplay: begin
       HandHistory.Lock;
       try
         if not HandHistory.TryGetValue(FGameId, hhis) then
@@ -174,9 +188,10 @@ function TTable.UpdateObjects;
 var
   club: TClubInfo;
   game: TGameInfo;
+  tournament: TTournamentInfo;
 begin
   case FTableType of
-    ttLiveGame: begin
+    ttLive: begin
       result := FALSE;
       if dmMain.SelfInfo.Clubs.GetAndLockByGame(FGameId, club, game) then
       try
@@ -189,7 +204,20 @@ begin
       end;
     end;
 
-    ttHandPlayback: result := TRUE;
+    ttHandReplay: result := TRUE;
+
+    ttTournament: begin
+      result := FALSE;
+      if Tournaments.GetAndLockByGame(FGameId, tournament, game) then
+      try
+        FTournamentId := tournament.MongoId;
+        FGame.Assign(game);
+        result := TRUE;
+      finally
+        Tournaments.Unlock;
+      end;
+
+    end;
   else
     result := FALSE;
   end;
@@ -199,7 +227,7 @@ function TTable.SetupLiveTable(const AGameId: TMongoId; const ASendJoinCommand: 
 var
   form: TfrmTable;
 begin
-  FTableType := ttLiveGame;
+  FTableType := ttLive;
   FGameId := AGameId;
   if not UpdateObjects then
     Exit(FALSE);
@@ -220,11 +248,34 @@ begin
   Exit(TRUE);
 end;
 
+function TTable.SetupTournamentTable(const AGameId: TMongoId): Boolean;
+var
+  form: TfrmTable;
+begin
+  FTableType := ttTournament;
+  FGameId := AGameId;
+  if not UpdateObjects then
+    Exit(FALSE);
+  FRenderer := TTableRenderer.Create(FInternalId, FInternalHWND, FTableType);
+  if not FRenderer.AcquireSwapChainElement then
+  begin
+    FreeAndNil(FRenderer);
+    Exit(FALSE);
+  end;
+  form := TfrmTable.Create(FInternalId);
+  FRenderer.SetRenderTarget(form.Handle);
+  SetTimer(FInternalHWND, TIMER_ID_RENDER, 250, nil);
+  FForm := form;
+  FLeaveNotify := TRUE;
+  FRenderer.UpdateDXAreaSize;
+  Exit(TRUE);
+end;
+
 function TTable.SetupHandHistoryTable(const AHandHistoryItems: THandHistoryItems; const AHandHistoryItem: THandHistoryItem): Boolean;
 var
   form: TfrmTable;
 begin
-  FTableType := ttHandPlayback;
+  FTableType := ttHandReplay;
   FGameId := AHandHistoryItems.FGameId;
   FClubId := AHandHistoryItems.FClubId;
   FClub.Assign(AHandHistoryItems.Club);
@@ -579,7 +630,7 @@ begin
   FStatus.ActionSitOutNextBB := FALSE;
   FStatus.ActionShowCards := FALSE;
 
-  if (FTableType <> ttLiveGame) or
+  if (not (FTableType in [ttLive, ttTournament])) or
      (not FStatus.GetSeatInfo(FStatus.SelfSeatIndex, seat)) then
     Exit;
   FStatus.ActionStandUp := TRUE;

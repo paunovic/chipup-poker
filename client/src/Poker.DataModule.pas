@@ -5,7 +5,7 @@ interface
 {$I defines.inc}
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player, Poker.Protobufs.Objects.StatusReply,
+  Winapi.Windows, System.SysUtils, System.Classes, System.Generics.Collections, Poker.Players.Player,
   Vcl.Forms, dxSkinsForm, Poker.Clubs.Club, Poker.HardcodedSettings, cxHint, Poker.Protobufs.Objects.TableStatus,
   Poker.Protobufs.Objects.UpdateFileInfo, cxGraphics, Poker.Protobufs.Objects.LoginReply, dxSkinsCore, ChipUpPokerDarkSkin, dxScreenTip,
   dxCustomHint, cxLookAndFeels, Vcl.ImgList, Vcl.Controls, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game, cxStyles, cxClasses;
@@ -29,11 +29,9 @@ type
 
     procedure LoadFonts;
     function GetUpdateFileObject(const AUpdateFilePath: String): TPB_UpdateFileInfo;
-
   public
-    procedure ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
-    procedure ProcessReconnectedTables;
     procedure ProcessLoginReply(const ALoginReply: TPB_LoginReply);
+    procedure ProcessReconnectedTables;
     procedure ProcessClubObject(const AClub: TPB_Club; const AGames: TList<TPB_Game>; const AMethodId: Integer);
 
     function CheckAuthed: Boolean;
@@ -181,14 +179,6 @@ begin
   ShellOpen(PChar(Settings.Hardcoded.SERVER_CONFIG[Settings.ServerIndex].URL + Settings.Hardcoded.URL.TERMS_AND_CONDITIONS));
 end;
 
-procedure TdmMain.ProcessStatusProtobuf(const AStatusProtobuf: TPB_StatusReply);
-begin
-  FSelfInfo.LoadFromStatusProtobuf(AStatusProtobuf);
-  Avatars.Add(FSelfInfo.AvatarId, nil);
-  Players.LoadFromUsersProtobuf(AStatusProtobuf.Users);
-  UpdateSelfInfoInPlayers;
-end;
-
 procedure TdmMain.SetUpdaterBatchFile(const AFile: String);
 begin
   FUpdaterBatchFile := AFile;
@@ -233,8 +223,16 @@ var
   C1: Integer;
   pbts: TPB_TableStatus;
 begin
-  ProcessStatusProtobuf(ALoginReply.Status);
+  FSelfInfo.LoadFromLoginReply(ALoginReply);
+  Avatars.Add(FSelfInfo.AvatarId, nil);
+  Players.LoadFromUsersProtobuf(ALoginReply.Users);
+  UpdateSelfInfoInPlayers;
+
   Tournaments.Assign(ALoginReply.TournamentInfos);
+
+  FSelfInfo.RegisteredTournaments.Clear;
+  FSelfInfo.RegisteredTournaments.AddRange(ALoginReply.RegisteredTournaments);
+
   FReconnectedTables.Clear;
   mstream := TMemoryStream.Create;
   try
@@ -286,7 +284,7 @@ begin
     to_remove_iid := TList<Integer>.Create;
     try
       for mongoid in to_remove do
-        if Tables.GetAndLockTable(mongoid, ttLiveGame, table) then
+        if Tables.GetAndLockTable(mongoid, ttLive, table) then
           to_remove_iid.Add(table.InternalId);
       for C1 := 0 to to_remove_iid.Count - 1 do
         Tables.Remove(to_remove_iid[C1]);
@@ -301,7 +299,7 @@ begin
   for tstatus in FReconnectedTables do
   begin
     Tables.AddLiveTable(tstatus.TableMongoId, TRUE, FALSE);
-    if Tables.GetAndLockTable(tstatus.TableMongoId, ttLiveGame, table) then
+    if Tables.GetAndLockTable(tstatus.TableMongoId, ttLive, table) then
     try
       table.SetTableStatus(tstatus, FALSE);
     finally

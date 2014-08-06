@@ -23,6 +23,7 @@ type
     srOwnershipGiveAwayInvalidClubId = 18,
     srOwnershipGiveAwayOk = 19,
     srClubDisbandOk = 20,
+    srTournamentOpenTable = 21,
     srChangePasswordOk = 23,
     srCreateGameOk = 24,
     srDeleteGameOk = 25,
@@ -44,6 +45,8 @@ type
     srHandHistoryMsg = 42,
     srQueryAssetsReply = 43,
     srNotSitting = 44,
+    srTournamentReply = 45,
+    srTournamentDetails = 46,
     seChat = 50,
     seSecondaryLoginDetected = 51,
     seAccountConfirmed = 52,
@@ -57,6 +60,7 @@ type
     seUserChange = 60,
     scHello = 70,
     scLogin = 71,
+    scTournamentRegister = 72,
     scRegister = 73,
     scForgotPassword = 74,
     scLogout = 75,
@@ -92,7 +96,9 @@ type
     scContactUs = 105,
     scSetPlayerLimit = 106,
     scResetPlayerBalance = 107,
-    scQueryAssets = 108
+    scQueryAssets = 108,
+    scTournamentUnregister = 109,
+    scGetTournamentDetails = 110
   );
 
 {$IFDEF DEBUG}
@@ -140,6 +146,7 @@ begin
     srOwnershipGiveAwayInvalidClubId: result := 'srOwnershipGiveAwayInvalidClubId';
     srOwnershipGiveAwayOk: result := 'srOwnershipGiveAwayOk';
     srClubDisbandOk: result := 'srClubDisbandOk';
+    srTournamentOpenTable: result := 'srTournamentOpenTable';
     srChangePasswordOk: result := 'srChangePasswordOk';
     srCreateGameOk: result := 'srCreateGameOk';
     srDeleteGameOk: result := 'srDeleteGameOk';
@@ -161,6 +168,8 @@ begin
     srHandHistoryMsg: result := 'srHandHistoryMsg';
     srQueryAssetsReply: result := 'srQueryAssetsReply';
     srNotSitting: result := 'srNotSitting';
+    srTournamentReply: result := 'srTournamentReply';
+    srTournamentDetails: result := 'srTournamentDetails';
     seChat: result := 'seChat';
     seSecondaryLoginDetected: result := 'seSecondaryLoginDetected';
     seAccountConfirmed: result := 'seAccountConfirmed';
@@ -174,6 +183,7 @@ begin
     seUserChange: result := 'seUserChange';
     scHello: result := 'scHello';
     scLogin: result := 'scLogin';
+    scTournamentRegister: result := 'scTournamentRegister';
     scRegister: result := 'scRegister';
     scForgotPassword: result := 'scForgotPassword';
     scLogout: result := 'scLogout';
@@ -210,6 +220,8 @@ begin
     scSetPlayerLimit: result := 'scSetPlayerLimit';
     scResetPlayerBalance: result := 'scResetPlayerBalance';
     scQueryAssets: result := 'scQueryAssets';
+    scTournamentUnregister: result := 'scTournamentUnregister';
+    scGetTournamentDetails: result := 'scGetTournamentDetails';
   end;
 end;
 {$ENDIF DEBUG}

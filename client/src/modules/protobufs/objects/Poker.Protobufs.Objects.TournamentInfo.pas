@@ -7,9 +7,11 @@ interface
 
 uses
   System.SysUtils, System.Classes, {$IFNDEF FPC} System.Generics.Collections {$ELSE} Contnrs {$ENDIF}, pbOutput, Poker.Protobufs.Objects.Base, Poker.Protobufs.Reader, Poker.Types,
-  Poker.Protobufs.Objects.Game;
+  Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.TournamentMember;
 
 type
+  TTournamentState = (tnsOpen = 0,tnsInProgress = 1,tnsCancelled = 2);
+
   TPB_TournamentInfo = class(TProtobufBaseObject)
   private
     const
@@ -25,6 +27,8 @@ type
       kTimeperlevelFieldNumber = 10;
       kRegisteredPlayersFieldNumber = 11;
       kStartTimeFieldNumber = 12;
+      kPlayersFieldNumber = 13;
+      kStateFieldNumber = 14;
 
     var
       FId: TMongoId;
@@ -39,6 +43,8 @@ type
       FTimeperlevel: UInt32;
       FRegisteredPlayers: UInt32;
       FStartTime: UInt32;
+      FPlayers: TList<TPB_TournamentMember>;
+      FState: TTournamentState;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -77,6 +83,16 @@ type
     procedure set_has_StartTime;
     procedure clear_has_StartTime;
     procedure SetStartTime(const AValue: UInt32);
+    procedure set_has_Players;
+    procedure clear_has_Players;
+    procedure set_has_State;
+    procedure clear_has_State;
+    procedure SetState(const AValue: TTournamentState);
+    procedure PlayersNotifyEvent(Sender: TObject; const Item: TPB_TournamentMember; Action: TCollectionNotification);
+
+  protected
+    procedure InitObjects; override;
+    procedure HookNotifiers; override;
 
   public
     constructor Create(const AFrom: TPB_TournamentInfo; const ALightweight: Boolean = FALSE); overload;
@@ -146,6 +162,16 @@ type
     procedure clear_StartTime;
     property StartTime: UInt32 read FStartTime write SetStartTime;
 
+    // repeated TournamentMember Players = 13;
+    function has_Players: Boolean;
+    procedure clear_Players;
+    property Players: TList<TPB_TournamentMember> read FPlayers;
+
+    // required TournamentState State = 14;
+    function has_State: Boolean;
+    procedure clear_State;
+    property State: TTournamentState read FState write SetState;
+
   end;
 
   TPB_TournamentInfoList = class(TObjectList<TPB_TournamentInfo>)
@@ -166,7 +192,24 @@ end;
 
 destructor TPB_TournamentInfo.Destroy;
 begin
+  if Assigned(FPlayers) then
+  begin
+    FPlayers.OnNotify := nil;
+    FreeAndNil(FPlayers);
+  end;
   inherited;
+end;
+
+procedure TPB_TournamentInfo.InitObjects;
+begin
+  inherited;
+  FPlayers := TObjectList<TPB_TournamentMember>.Create;
+end;
+
+procedure TPB_TournamentInfo.HookNotifiers;
+begin
+  inherited;
+  FPlayers.OnNotify := PlayersNotifyEvent;
 end;
 
 procedure TPB_TournamentInfo.LoadFromProtobufReader(const AProtobufReader: TProtobufReader; const ASize: Integer);
@@ -237,12 +280,24 @@ begin
         FStartTime := AProtobufReader.readUInt32;
         set_has_StartTime;
       end;
+      kPlayersFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FPlayers.Add(TPB_TournamentMember.Create(AProtobufReader, AProtobufReader.readInt32, Lightweight));
+        set_has_Players;
+      end;
+      kStateFieldNumber: begin
+        Assert(wire_type = WIRETYPE_VARINT);
+        FState := TTournamentState(AProtobufReader.readEnum);
+        set_has_State;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
 end;
 
 procedure TPB_TournamentInfo.MergeFrom(const AFrom: TPB_TournamentInfo);
+var
+  pbobj12: TPB_TournamentMember;
 begin
   if AFrom.has_MongoId then
     SetMongoId(AFrom.MongoId);
@@ -268,12 +323,21 @@ begin
     SetRegisteredPlayers(AFrom.RegisteredPlayers);
   if AFrom.has_StartTime then
     SetStartTime(AFrom.StartTime);
+  for pbobj12 in AFrom.Players do
+    FPlayers.Add(TPB_TournamentMember.Create(pbobj12));
+  if AFrom.has_State then
+    SetState(AFrom.State);
 end;
 
 function TPB_TournamentInfo.IsInitialized: Boolean;
+var
+  pbobj: TProtobufBaseObject;
 begin
-  if (_has_bits_ and $fff) <> $fff then
+  if (_has_bits_ and $2fff) <> $2fff then
     Exit(FALSE);
+  for pbobj in Players do
+    if not pbobj.IsInitialized then
+      Exit(FALSE);
   Exit(TRUE);
 end;
 
@@ -641,6 +705,74 @@ begin
   set_has_StartTime;
 end;
 
+procedure TPB_TournamentInfo.clear_Players;
+var
+  on_notify: TCollectionNotifyEvent<TPB_TournamentMember>;
+begin
+  on_notify := FPlayers.OnNotify;
+  FPlayers.OnNotify := nil;
+  FPlayers.Clear;
+  FPlayers.OnNotify := on_notify;
+  clear_has_Players;
+end;
+
+function TPB_TournamentInfo.has_Players: Boolean;
+begin
+  result := (_has_bits_ and 4096) > 0;
+end;
+
+procedure TPB_TournamentInfo.set_has_Players;
+begin
+  _has_bits_ := _has_bits_ or 4096;
+end;
+
+procedure TPB_TournamentInfo.clear_has_Players;
+begin
+  _has_bits_ := _has_bits_ and not 4096;
+end;
+
+procedure TPB_TournamentInfo.PlayersNotifyEvent(Sender: TObject; const Item: TPB_TournamentMember; Action: TCollectionNotification);
+begin
+  Assert(Action = cnAdded);
+  set_has_Players;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kPlayersFieldNumber,WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(Item.ProtobufOutput.getSerializedSize);
+    Item.ProtobufOutput.writeTo(ProtobufOutput);
+  end;
+end;
+
+procedure TPB_TournamentInfo.clear_State;
+begin
+  FState := TTournamentState(0);
+  clear_has_State;
+end;
+
+function TPB_TournamentInfo.has_State: Boolean;
+begin
+  result := (_has_bits_ and 8192) > 0;
+end;
+
+procedure TPB_TournamentInfo.set_has_State;
+begin
+  _has_bits_ := _has_bits_ or 8192;
+end;
+
+procedure TPB_TournamentInfo.clear_has_State;
+begin
+  _has_bits_ := _has_bits_ and not 8192;
+end;
+
+procedure TPB_TournamentInfo.SetState(const AValue: TTournamentState);
+begin
+  Assert(not has_State);
+  FState := AValue;
+  if not Lightweight then
+    ProtobufOutput.writeInt32(kStateFieldNumber, Integer(AValue));
+  set_has_State;
+end;
+
 procedure TPB_TournamentInfo.Clear;
 begin
   if _has_bits_ = 0 then
@@ -658,6 +790,8 @@ begin
   clear_Timeperlevel;
   clear_RegisteredPlayers;
   clear_StartTime;
+  clear_Players;
+  clear_State;
 end;
 
 procedure TPB_TournamentInfoList.Assign(const APB_TournamentInfoList: TList<TPB_TournamentInfo>);

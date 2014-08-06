@@ -96,8 +96,6 @@ type
     lbvLatency: TcxLabel;
     btRunAnotherInstance: TcxButton;
     acRunNewInstance: TAction;
-    btServerTest: TcxButton;
-    acServerCrashTest: TAction;
     pmiShowPings: TMenuItem;
     lbsSwapChain: TcxLabel;
     lbvSwapChain: TcxLabel;
@@ -124,7 +122,6 @@ type
     procedure tiAppInfoRefreshTimer(Sender: TObject);
     procedure btSeatPosClick(Sender: TObject);
     procedure rvLogRVMouseUp(Sender: TCustomRichView; Button: TMouseButton; Shift: TShiftState; ItemNo, X, Y: Integer);
-    procedure acServerCrashTestExecute(Sender: TObject);
     procedure acRunNewInstanceExecute(Sender: TObject);
     procedure meSeatPosPropertiesChange(Sender: TObject);
     procedure ccbLogFormsPropertiesChange(Sender: TObject);
@@ -411,13 +408,6 @@ begin
       1: rvLog.SaveRTF(ChangeFileExt(SaveDialog.FileName, '.rtf'), FALSE);
       2: rvLog.SaveText(ChangeFileExt(SaveDialog.FileName, '.txt'), 0);
     end;
-end;
-
-procedure TfrmDebug.acServerCrashTestExecute(Sender: TObject);
-begin
-  {$IFDEF DEBUG}
-  ServerSocket.CrashTest;
-  {$ENDIF}
 end;
 
 function TfrmDebug.FindStyleWithName(const AName: String): Integer;

@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, System.SysUtils, System.Generics.Collections, Poker.Games.Game, Poker.HandHistory.Playback, Poker.Clubs.Club, Vcl.Forms,
   Poker.Avatars.AvatarList, Poker.HandHistory.Items, Poker.Tables.Status, Poker.Avatars.Avatar, Poker.Tables.Table, System.SyncObjs,
-  Poker.Types;
+  Poker.Types, Poker.Protobufs.Objects.TableStatus;
 
 type
   TTableList = class(TObjectDictionary<Integer, TTable>)
@@ -37,6 +37,7 @@ type
     procedure ClearWithoutNotification;
 
     function AddLiveTable(const AGameId: TMongoId; const AShow: Boolean; const ASendJoinCommand: Boolean): Boolean;
+    function AddTournamentTable(const AGameId: TMongoId; const AShow: Boolean): Boolean;
     function AddHandPlaybackTable(const AGameId: TMongoId; const AHandId: UINT): Boolean;
     function SittingCount: Integer;
     procedure CloseTablesForClub(const AClubId: TMongoId);
@@ -122,7 +123,7 @@ var
   table: TTable;
 begin
   result := FALSE;
-  if GetAndLockTable(AGameId, ttLiveGame, table) then
+  if GetAndLockTable(AGameId, ttLive, table) then
   begin
     if AShow then
       table.BringToFront;
@@ -142,6 +143,35 @@ begin
   else
   begin
     {$IFDEF DEBUG} DebugLn(FDebugId, 'Failed to setup live table', ditException); {$ENDIF}
+    Remove(FNextTableInternalId);
+  end;
+end;
+
+function TTableList.AddTournamentTable(const AGameId: TMongoId; const AShow: Boolean): Boolean;
+var
+  table: TTable;
+begin
+  result := FALSE;
+  if GetAndLockTable(AGameId, ttTournament, table) then
+  begin
+    if AShow then
+      table.BringToFront;
+    Unlock;
+    Exit(TRUE);
+  end;
+
+  table := TTable.Create(FNextTableInternalId);
+  Add(FNextTableInternalId, table);
+  if table.SetupTournamentTable(AGameId) then
+  begin
+    Inc(FNextTableInternalId);
+    if AShow then
+      table.BringToFront;
+    result := TRUE;
+  end
+  else
+  begin
+    {$IFDEF DEBUG} DebugLn(FDebugId, 'Failed to setup tournament table', ditException); {$ENDIF}
     Remove(FNextTableInternalId);
   end;
 end;
@@ -186,7 +216,7 @@ begin
   FLock.Enter;
   try
     for table in Values do
-      if (table.TableType = ttLiveGame) and
+      if (table.TableType = ttLive) and
          (table.Status.IsSitting) then
         Inc(result);
   finally
@@ -303,7 +333,7 @@ procedure TTableList.UpdateGameObject(const AGameId: TMongoId);
 var
   table: TTable;
 begin
-  if GetAndLockTable(AGameId, ttLiveGame, table) then
+  if GetAndLockTable(AGameId, ttLive, table) then
   try
     table.UpdateObjects;
   finally

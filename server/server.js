@@ -43,6 +43,7 @@ var Game = require('./game').Game;
 var Pot = require('./pot').Pot;
 var myutils = require('./myutils');
 var user = require('./user');
+var Tournament = require('./tournament');
 
 var Protoreader = require('./protoreader');
 Protoreader.init(pb,codes,[codes.seTableStatus,codes.seTableEvent,codes.srPong,codes.PerClientMsgEvent,codes.seChat,codes.scTableSit,codes.scTableJoin,codes.scLogin,codes.scStatus,codes.seGameChange,codes.PerGameMsgEvent]);
@@ -102,6 +103,7 @@ var internalHttpServer;
 	});*
 }*/
 function goOnline() {
+	Tournament.core.resetTimer();
 	internalHttpServer.goOnline();
 	secureServer.listen(12346);
 	server.listen(12345);

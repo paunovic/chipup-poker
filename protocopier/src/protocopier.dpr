@@ -10,7 +10,7 @@ uses
 
 const
   CPP_PROTO_PATH    = '..\..\..\..\cpp-protobuf-generator\output';
-  DELPHI_PROTO_PATH = '..\..\..\..\client\src\modules\protobuf\objects';
+  DELPHI_PROTO_PATH = '..\..\..\..\client\src\modules\protobufs\objects';
   REGEX_SEARCH      = '^.*\.(pas)$';
 
 var

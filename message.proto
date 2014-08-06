@@ -23,6 +23,7 @@ enum ServerCodes {
 	srOwnershipGiveAwayInvalidClubId = 18;
 	srOwnershipGiveAwayOk = 19;
 	srClubDisbandOk = 20;
+	srTournamentOpenTable = 21;
 	srChangePasswordOk = 23;
 	srCreateGameOk = 24;
 	srDeleteGameOk = 25;
@@ -44,6 +45,8 @@ enum ServerCodes {
 	srHandHistoryMsg = 42;
 	srQueryAssetsReply = 43;
 	srNotSitting = 44;
+	srTournamentReply = 45;
+	srTournamentDetails = 46;
 	
 	seChat = 50;
 	seSecondaryLoginDetected = 51;
@@ -59,6 +62,7 @@ enum ServerCodes {
 	
 	scHello = 70;
 	scLogin = 71;
+	scTournamentRegister = 72;
 	scRegister = 73;
 	scForgotPassword = 74;
 	scLogout = 75;
@@ -95,6 +99,8 @@ enum ServerCodes {
 	scSetPlayerLimit = 106;
 	scResetPlayerBalance = 107;
 	scQueryAssets = 108;
+	scTournamentUnregister = 109;
+	scGetTournamentDetails = 110;
 }
 
 message StringSizes {
@@ -166,9 +172,13 @@ message LoginReply {
 		lrInvalid = 1;
 	}
 	required LoginStatus login_status = 1;
-	optional StatusReply status = 2;
 	repeated TableStatus reconnect_tables = 3;
 	repeated TournamentInfo tournament_infos = 4;
+	repeated bytes registered_tournaments = 5 [(ObjectId)=true];
+	repeated Club clubs = 6;
+	repeated User users = 7;
+	optional User self = 8;
+	repeated Game games = 9;
 }
 
 message ClubMember {
@@ -205,7 +215,7 @@ message User {
 	
 	optional string email = 5;
 	optional bool authed = 6;
-	required PlayerSubscriptionPlan subscription_plan = 7;
+	optional PlayerSubscriptionPlan subscription_plan = 7;
 }
 
 message SubscriptionPlanChange {
@@ -255,13 +265,7 @@ message Game {
 	optional GameState state = 13;
 	optional uint32 closetime = 14;
 	optional uint32 lasthandid = 15;
-}
-
-message StatusReply {
-	repeated Club clubs = 1;
-	repeated User users = 2;
-	required User self = 3;
-	repeated Game games = 4;
+	optional bytes tournament = 16 [(ObjectId)=true];
 }
 
 message ListClubsReply {
@@ -350,6 +354,12 @@ message TableStatus {
 		tsWinning = 5;
 		tsWinning2 = 6;
 	}
+
+	enum TableType {
+		ttLive = 0;
+		ttTournament = 1;
+		ttHandReplay = 2;
+	}
 	
 	required bytes table_mongo_id = 1 [(ObjectId)=true];
 	repeated SeatInfo seats = 2;
@@ -372,6 +382,7 @@ message TableStatus {
 	optional uint32 rotation = 23;
 	optional Game.GameLimit game_limit = 25;
 	optional uint32 minimum_raise = 26;
+	required TableType table_type = 27;
 }
 
 message SeatInfo {
@@ -612,7 +623,20 @@ message AssetList {
 message TournamentList {
 	repeated TournamentInfo items = 1;
 }
+message TournamentDetails {
+	required bytes _id = 1 [(ObjectId)=true];
+}
+message TournamentMember {
+	required bytes _id = 1 [(ObjectId)=true];
+	required string displayname = 2;
+	required uint32 chips = 3;
+}
 message TournamentInfo {
+	enum TournamentState {
+		tnsOpen = 0;
+		tnsInProgress = 1;
+		tnsCancelled = 2;
+	}
 	required bytes _id = 1 [(ObjectId)=true];
 	required string name = 2;
 	required string description = 3;
@@ -625,7 +649,22 @@ message TournamentInfo {
 	required uint32 timeperlevel = 10;
 	required uint32 registered_players = 11;
 	required uint32 start_time = 12;
+	repeated TournamentMember players = 13;
+	required TournamentState state = 14;
 }
-message TournamentStatus {
-	repeated bytes registered_players = 11 [(ObjectId)=true];
+
+message TournamentCommandParams {
+	enum TournamentCommandEnum {
+		tceRegisterOk = 0;
+		tceAlreadyRegistered = 1;
+		tceRegisterLimitReached = 2;
+		tceRegisterFailed = 3;
+		tceUnregisterOk = 4;
+	}
+	required bytes _id = 1 [(ObjectId)=true];
+	optional TournamentCommandEnum reply_status = 2;
+}
+message TournamentTableStart {
+	required Game game = 1;
+	required TableStatus table_status = 2;
 }

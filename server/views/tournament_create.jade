@@ -11,6 +11,10 @@ block header2
       Calendar.setup({dateField:'dateField'});
       $('#timeField').timepicker();
     });
+    function updateTime() {
+      var date = new Date(document.getElementById('dateField').value+' '+document.getElementById('timeField').value);
+      document.getElementById('UTC_time').value = date.toUTCString();
+    }
 block content
   form(method="post")
     | name:
@@ -29,14 +33,9 @@ block content
     br
     | seats:
     select(name="seats_per_table")
-      option(value="2") 2
-      option(value="3") 3
-      option(value="4") 4
-      option(value="5") 5
       option(value="6") 6
-      option(value="7") 7
-      option(value="8") 8
       option(value="9") 9
+      option(value="10") 10
     br
     | Players min:
     input(type="text",name="minplayers")
@@ -52,8 +51,11 @@ block content
     | blind structure
     br
     | Start time:
-    input(type="text",id="dateField",class="dateField",value="Date",name="start_date")
-    input(type="text",id="timeField",name="start_time")
+    input(type="text",id="dateField",class="dateField",value="Date",onchange="updateTime();")
+    input(type="text",id="timeField",onchange="updateTime();")
+    br
+    | UTC start time
+    input(type="text",id="UTC_time",name="start_time",readonly=true)
     br
     input(type="submit",value="Create!")
     br

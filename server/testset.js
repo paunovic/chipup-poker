@@ -510,6 +510,50 @@ exports.user = {
 		});
 	}
 };
+exports.tournament = {
+	start: function (test) {
+		mdb.open('nodeunit');
+		var Tournament = require('./tournament');
+		var activeGames = {};
+		global.activeUsers = {};
+		var game = require('./game');
+		var profiler = require('profiler');
+		game.Game.init(activeGames);
+		profiler.setup(mdb.models.PokerProfile);
+		function setupUsers() {
+			var todo = [];
+			for (var x=0; x<12; x++) {
+				var user = {displayname:'test'+x,email:'test'+x+'@server.com'};
+				todo.push(user);
+			}
+			var users = [];
+			async.each(todo,function (x,cb) {
+				mdb.models.UserModel.remove({displayname:x.displayname},function (err,y) {
+					mdb.models.UserModel.create(x,function (err,doc) {
+						assert.ifError(err);
+						console.log('made',doc);
+						users.push({_id:doc._id, displayname:doc.displayname, chips:150000});
+						cb();
+					});
+				});
+			},function (err) {
+				assert.ifError(err);
+				console.log('done making users');
+				dotest(users);
+			});
+		}
+		function dotest(users) {
+		mdb.models.Tournament.create({ "description" : "notes", "gametype" : "gtHoldem", "limit" : "glNoLimit", "maxplayers" : 20, "minplayers" : 10, "name" : "name", "registered_players" : users.length, "seats_per_table" : 9, "start_time" : 1406628000, "startingchips" : 1500, "state" : "tnsOpen", "timeperlevel" : 15,players:users },function (err,doc) {
+			console.log('tournament made',arguments);
+			Tournament.core.startTournament(doc,function () {
+				test.done();
+				mdb.close();
+			});
+		});
+		}
+		setupUsers();
+	}
+};
 process.on('uncaughtException',function (err) {
 	console.log(err);
 	console.log(err.stack);

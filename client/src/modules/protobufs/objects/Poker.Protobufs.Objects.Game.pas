@@ -34,6 +34,7 @@ type
       kStateFieldNumber = 13;
       kClosetimeFieldNumber = 14;
       kLasthandidFieldNumber = 15;
+      kTournamentFieldNumber = 16;
 
     var
       FId: TMongoId;
@@ -50,6 +51,7 @@ type
       FState: TGameState;
       FClosetime: UInt32;
       FLasthandid: UInt32;
+      FTournament: TMongoId;
       _has_bits_: UINT32;
 
     procedure set_has_MongoId;
@@ -94,6 +96,9 @@ type
     procedure set_has_Lasthandid;
     procedure clear_has_Lasthandid;
     procedure SetLasthandid(const AValue: UInt32);
+    procedure set_has_Tournament;
+    procedure clear_has_Tournament;
+    procedure SetTournament(const AValue: TMongoId);
 
   public
     constructor Create(const AFrom: TPB_Game; const ALightweight: Boolean = FALSE); overload;
@@ -172,6 +177,11 @@ type
     function has_Lasthandid: Boolean;
     procedure clear_Lasthandid;
     property Lasthandid: UInt32 read FLasthandid write SetLasthandid;
+
+    // optional bytes Tournament = 16;
+    function has_Tournament: Boolean;
+    procedure clear_Tournament;
+    property Tournament: TMongoId read FTournament write SetTournament;
 
   end;
 
@@ -274,6 +284,11 @@ begin
         FLasthandid := AProtobufReader.readUInt32;
         set_has_Lasthandid;
       end;
+      kTournamentFieldNumber: begin
+        Assert(wire_type = WIRETYPE_LENGTH_DELIMITED);
+        FTournament := AProtobufReader.readMongoId;
+        set_has_Tournament;
+      end;
     else
       AProtobufReader.skipField(tag);
     end;
@@ -309,6 +324,8 @@ begin
     SetClosetime(AFrom.Closetime);
   if AFrom.has_Lasthandid then
     SetLasthandid(AFrom.Lasthandid);
+  if AFrom.has_Tournament then
+    SetTournament(AFrom.Tournament);
 end;
 
 function TPB_Game.IsInitialized: Boolean;
@@ -750,6 +767,40 @@ begin
   set_has_Lasthandid;
 end;
 
+procedure TPB_Game.clear_Tournament;
+begin
+  FTournament.Clear;
+  clear_has_Tournament;
+end;
+
+function TPB_Game.has_Tournament: Boolean;
+begin
+  result := (_has_bits_ and 32768) > 0;
+end;
+
+procedure TPB_Game.set_has_Tournament;
+begin
+  _has_bits_ := _has_bits_ or 32768;
+end;
+
+procedure TPB_Game.clear_has_Tournament;
+begin
+  _has_bits_ := _has_bits_ and not 32768;
+end;
+
+procedure TPB_Game.SetTournament(const AValue: TMongoId);
+begin
+  Assert(not has_Tournament);
+  FTournament := AValue;
+  if not Lightweight then
+  begin
+    ProtobufOutput.writeTag(kTournamentFieldNumber, WIRETYPE_LENGTH_DELIMITED);
+    ProtobufOutput.writeRawVarint32(12);
+    ProtobufOutput.writeRawData(AValue.Memory, 12);
+  end;
+  set_has_Tournament;
+end;
+
 procedure TPB_Game.Clear;
 begin
   if _has_bits_ = 0 then
@@ -769,6 +820,7 @@ begin
   clear_State;
   clear_Closetime;
   clear_Lasthandid;
+  clear_Tournament;
 end;
 
 procedure TPB_GameList.Assign(const APB_GameList: TList<TPB_Game>);

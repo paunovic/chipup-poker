@@ -1,7 +1,7 @@
 var net = require('net');
 var fs = require('fs');
 
-var p = require("node-protobuf").Protobuf;
+var p = require("node-protobuf");
 
 var Protoreader = require('./protoreader');
 

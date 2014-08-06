@@ -3,10 +3,11 @@ unit Poker.Tournaments;
 interface
 
 uses
-  Poker.Protobufs.Objects.TournamentList, System.SyncObjs, System.Generics.Collections, Poker.Types, Poker.Protobufs.Objects.TournamentInfo;
+  Poker.Protobufs.Objects.TournamentList, System.SyncObjs, System.Generics.Collections, Poker.Types, Poker.Tournaments.Info,
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Games.Game;
 
 type
-  TTournamentList = class(TObjectDictionary<TMongoId, TPB_TournamentInfo>)
+  TTournamentList = class(TObjectDictionary<TMongoId, TTournamentInfo>)
   private
     FLock: TCriticalSection;
   public
@@ -16,7 +17,9 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    function GetAndLock(const AId: TMongoId; out ATournament: TPB_TournamentInfo): Boolean;
+    function GetAndLock(const AId: TMongoId; out ATournament: TTournamentInfo): Boolean;
+    function GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TGameInfo): Boolean;
+    function AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
 
     procedure Assign(const ATournamentList: TList<TPB_TournamentInfo>); overload;
     procedure Assign(const ATournamentList: TPB_TournamentList); overload;
@@ -79,6 +82,26 @@ begin
   end;
 end;
 
+function TTournamentList.AdjustRegisteredPlayersCount(const AId: TMongoId; const AAdjustment: Integer): Boolean;
+var
+  tournament: TTournamentInfo;
+  reg_players: Integer;
+begin
+  result := FALSE;
+  if GetAndLock(AId, tournament) then
+  try
+    reg_players := tournament.RegisteredPlayers;
+    Inc(reg_players, AAdjustment);
+    if reg_players < 0 then
+      reg_players := 0;
+    tournament.clear_RegisteredPlayers;
+    tournament.RegisteredPlayers := reg_players;
+    result := TRUE;
+  finally
+    Unlock;
+  end;
+end;
+
 procedure TTournamentList.Assign(const ATournamentList: TPB_TournamentList);
 begin
   Assign(ATournamentList.Items);
@@ -102,13 +125,15 @@ procedure TTournamentList.Add(const ATournamentInfo: TPB_TournamentInfo);
 begin
   FLock.Enter;
   try
-    AddOrSetValue(ATournamentInfo.MongoId, TPB_TournamentInfo.Create(ATournamentInfo));
+    if ContainsKey(ATournamentInfo.MongoId) then
+      inherited Remove(ATournamentInfo.MongoId);
+    inherited Add(ATournamentInfo.MongoId, TTournamentInfo.Create(ATournamentInfo));
   finally
     FLock.Leave;
   end;
 end;
 
-function TTournamentList.GetAndLock(const AId: TMongoId; out ATournament: TPB_TournamentInfo): Boolean;
+function TTournamentList.GetAndLock(const AId: TMongoId; out ATournament: TTournamentInfo): Boolean;
 begin
   FLock.Enter;
   if TryGetValue(AId, ATournament) then
@@ -120,6 +145,21 @@ begin
   end;
 end;
 
-
+function TTournamentList.GetAndLockByGame(const AId: TMongoId; out ATournament: TTournamentInfo; out AGame: TGameInfo): Boolean;
+var
+  tournament: TTournamentInfo;
+  game: TGameInfo;
+begin
+  FLock.Enter;
+  for tournament in Values do
+    if tournament.Games.TryGetValue(AId, game) then
+    begin
+      ATournament := tournament;
+      AGame := game;
+      Exit(TRUE);
+    end;
+  FLock.Leave;
+  Exit(FALSE);
+end;
 
 end.

@@ -89,6 +89,11 @@ type
     gridTournamentsPlayers: TcxGridColumn;
     btTournamentRegister: TcxButton;
     acTournamentRegister: TAction;
+    acTournamentUnregister: TAction;
+    StyleRepository: TcxStyleRepository;
+    styleTournamentOpen: TcxStyle;
+    styleTournamentInProgress: TcxStyle;
+    styleTournamentCancelled: TcxStyle;
     procedure acLogoutExecute(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure acShowCreateClubFormExecute(Sender: TObject);
@@ -134,6 +139,10 @@ type
     procedure acTournamentRegisterExecute(Sender: TObject);
     procedure gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo;
       AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure acTournamentUnregisterExecute(Sender: TObject);
+    procedure gridTournamentsStatusStylesGetContentStyle(
+      Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+      AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
   private
     FSelectedClub: TMongoId;
     FSelectedGame: TMongoId;
@@ -149,6 +158,11 @@ type
     procedure UpdatePublicClublist;
     procedure UpdateGamelist;
     procedure UpdateTournamentList;
+    procedure UpdateTournamentActions;
+    procedure RefreshGrids;
+    procedure UpdateMenuActions;
+    procedure UpdateFormCaption;
+    procedure RefreshAll;
 
     procedure ShowTournamentLayout(const AShow: Boolean);
 
@@ -169,6 +183,9 @@ type
     procedure CSRTableStats(const AMethodId: Integer; const AObject: TObject);
     procedure CSRHandHistoryMsg(const AMethodId: Integer; const AObject: TObject);
     procedure CSETournamentList(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
+    procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -176,7 +193,6 @@ type
     function ConfirmToCloseTablesLogout: Boolean;
 
     procedure SocketStateChange(const AOldState, ANewState: TSocketState);
-    procedure ConfigureGUI;
 
     procedure DoLogout;
   protected
@@ -200,7 +216,7 @@ uses
   Poker.Server.Socket, Poker.Protobufs.Enum.ServerCodes, Poker.Common.Misc, Poker.DataModule,
   Poker.Forms.CreateClub, Poker.Forms.JoinClub, Poker.Server.MessageContainer, Poker.Players.PlayerList, Poker.Forms.ChangeEMail,
   Poker.Forms.ChangePassword, Poker.Forms.ChangeAvatar, Poker.Protobufs.Objects.ClubCommandReply, Poker.Protobufs.Objects.User,
-  Poker.Protobufs.Objects.StatusReply, Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table,
+  Poker.Server.MessageCallbacks, Poker.Protobufs.Objects.TableStatus, Poker.Tables.Table,
   Poker.DirectX.Timer, Poker.Protobufs.Objects.GetUserParams, Poker.Common.FormsContainer, Poker.Forms.Updater, Poker.Forms.ClubLobby,
   Poker.Protobufs.Objects.UserChangeParams, Poker.Settings, Poker.Protobufs.Objects.TableStatsReplies, Poker.Tables.StatsList,
   Poker.Protobufs.Objects.TableStatsReply, Poker.Forms.ContactUs, Poker.Forms.Reconnect, Poker.Avatars.Avatar, Poker.Forms.About,
@@ -208,7 +224,8 @@ uses
   Poker.Protobufs.Objects.ClubHandHistoryReply, Poker.HandHistory.Core, Poker.Forms.HandHistory, Poker.Forms.Settings,
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
-  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby;
+  Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
+  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info, Poker.Protobufs.Objects.TournamentTableStart;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -233,11 +250,14 @@ begin
                       TServerMessageCallback.Create(srTableStatsReply, CSRTableStats),
                       TServerMessageCallback.Create(srHandHistoryMsg, CSRHandHistoryMsg),
                       TServerMessageCallback.Create(seTournamentList, CSETournamentList),
+                      TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply),
+                      TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
+                      TServerMessageCallback.Create(srTournamentOpenTable, CSRTournamentOpenTable),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
                       TServerMessageCallback.Create(seSecondaryLoginDetected, CSESecondaryLoginDetected),
-                      TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk], CSRTableStatus)
+                      TServerMessageCallback.Create([seTableStatus, srTableStandUpOk, srTableSitOk, srTournamentOpenTable], CSRTableStatus)
                   ], TRUE);
 
   LoadImageFromResource(imgCashier, 'CashierNormal');
@@ -327,6 +347,7 @@ begin
   gridPublicClubsTable.DataController.SetRecordCount(0);
   gridPrivateClubsTable.DataController.SetRecordCount(0);
   gridGamesTable.DataController.SetRecordCount(0);
+  gridTournamentsTable.DataController.SetRecordCount(0);
   dmMain.SelfInfo.Flush;
   Players.Clear;
   TablesStats.Clear;
@@ -519,7 +540,7 @@ begin
          (member.Suspended) then
         err := 'You are currently suspended in this club, and cannot join any tables. Please contact club owner to resolve this issue.'
       else
-        if Tables.GetAndLockTable(game.MongoId, ttLiveGame, table) then
+        if Tables.GetAndLockTable(game.MongoId, ttLive, table) then
         begin
           table.BringToFront;
           Tables.Unlock;
@@ -543,7 +564,7 @@ begin
   FormsContainer.RunForm(TfrmJoinClub, self, [], FALSE);
 end;
 
-procedure TfrmChipUpMain.ConfigureGUI;
+procedure TfrmChipUpMain.UpdateFormCaption;
 var
   cpt: String;
 begin
@@ -552,7 +573,10 @@ begin
     cpt := cpt + ' (account verification pending)';
   if cpt <> Caption then
     Caption := cpt;
+end;
 
+procedure TfrmChipUpMain.UpdateMenuActions;
+begin
   acResendVerificationMail.Visible := not dmMain.SelfInfo.Authed;
 
   acSoundsOnOff.Checked := Settings.Sounds;
@@ -560,11 +584,76 @@ begin
   acAnimationsEnabled.Checked := Settings.Animations;
 
   ActionManager.ActionBars[0].Items[3].Visible := Settings.DeveloperMode;
+end;
 
+procedure TfrmChipUpMain.RefreshAll;
+begin
+  UpdateFormCaption;
+  RefreshGrids;
+  UpdateMenuActions;
+  UpdateTournamentActions;
+end;
+
+procedure TfrmChipUpMain.RefreshGrids;
+begin
   UpdateClublist;
   UpdateGamelist;
   UpdatePublicClublist;
   UpdateTournamentList;
+end;
+
+procedure TfrmChipUpMain.UpdateTournamentActions;
+var
+  registered: Boolean;
+  tournament: TTournamentInfo;
+begin
+  acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
+
+  if not FSelectedTournament.IsEmpty then
+  begin
+    registered := dmMain.SelfInfo.RegisteredTournaments.Contains(FSelectedTournament);
+    if not Tournaments.GetAndLock(FSelectedTournament, tournament) then
+    begin
+      acTournamentRegister.Enabled := FALSE;
+      acTournamentUnregister.Enabled := FALSE;
+    end
+    else
+      try
+        acTournamentRegister.Enabled := (not FSelectedTournament.IsEmpty) and (not registered) and (tournament.State = tnsOpen);
+        acTournamentUnregister.Enabled := (not FSelectedTournament.IsEmpty) and (registered) and (tournament.State = tnsOpen);
+      finally
+        Tournaments.Unlock;
+      end;
+  end
+  else
+  begin
+    acTournamentRegister.Enabled := FALSE;
+    acTournamentUnregister.Enabled := FALSE;
+  end;
+
+  if acTournamentUnregister.Enabled then
+  begin
+    btTournamentRegister.Action := acTournamentUnregister;
+    btTournamentRegister.Colors.HotText := $001111DF;
+    btTournamentRegister.Colors.NormalText := $001111BF;
+    btTournamentRegister.Colors.PressedText := $001111BF;
+  end
+  else
+  begin
+    btTournamentRegister.Action := acTournamentRegister;
+    btTournamentRegister.Colors.HotText := $0000E600;
+    btTournamentRegister.Colors.NormalText := $0000BF00;
+    btTournamentRegister.Colors.PressedText := $0000BF00;
+  end;
+
+  if Tournaments.TryGetValue(FSelectedTournament, tournament) then
+  try
+    rvTournamentInfo.Clear;
+    rvTournamentInfo.AddNL(tournament.Description, 0, 0);
+    rvTournamentInfo.Format;
+  finally
+    Tournaments.Unlock;
+  end;
 end;
 
 function TfrmChipUpMain.ConfirmToCloseTablesAppClose: Boolean;
@@ -706,6 +795,7 @@ var
   c: TcxGridDataController;
   rcount: Integer;
   tournament_info: TPB_TournamentInfo;
+  text: String;
 begin
   c := gridTournamentsTable.DataController;
   c.BeginFullUpdate;
@@ -720,10 +810,16 @@ begin
           c.SetRecordCount(rcount);
 
         c.SetValue(rcount - 1, gridTournamentsId.Index, tournament_info.MongoId.ToVariant);
-        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, UnixToDateTime(tournament_info.StartTime));
+        c.SetValue(rcount - 1, gridTournamentsStartTime.Index, TTimeZone.Local.ToLocalTime(UnixToDateTime(tournament_info.StartTime)));
         c.SetValue(rcount - 1, gridTournamentsName.Index, Format('%s', [tournament_info.Name]));
         c.SetValue(rcount - 1, gridTournamentsPlayers.Index, Format('%d/%d', [tournament_info.RegisteredPlayers, tournament_info.Maxplayers]));
-        c.SetValue(rcount - 1, gridTournamentsStatus.Index, 'Registering');
+
+        case tournament_info.State of
+          tnsOpen: text := 'Open';
+          tnsInProgress: text := 'In Progress';
+          tnsCancelled: text := 'Cancelled';
+        end;
+        c.SetValue(rcount - 1, gridTournamentsStatus.Index, text);
       end;
     finally
       Tournaments.Unlock;
@@ -820,6 +916,25 @@ begin
   UpdateGamelist;
 end;
 
+procedure TfrmChipUpMain.gridTournamentsStatusStylesGetContentStyle(Sender: TcxCustomGridTableView; ARecord: TcxCustomGridRecord;
+  AItem: TcxCustomGridTableItem; out AStyle: TcxStyle);
+var
+  mongoid: TMongoId;
+  tournament: TTournamentInfo;
+begin
+  mongoid := ARecord.Values[gridTournamentsId.Index];
+  if Tournaments.GetAndLock(mongoid, tournament) then
+  try
+    case tournament.State of
+      tnsOpen: AStyle := styleTournamentOpen;
+      tnsInProgress: AStyle := styleTournamentInProgress;
+      tnsCancelled: AStyle := styleTournamentCancelled;
+    end;
+  finally
+    Tournaments.Unlock;
+  end;
+end;
+
 procedure TfrmChipUpMain.gridTournamentsTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   acTournamentLobby.Execute;
@@ -828,7 +943,7 @@ end;
 procedure TfrmChipUpMain.gridTournamentsTableFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 var
   recIndex: Integer;
-  tournament: TPB_TournamentInfo;
+  tournament: TTournamentInfo;
   tournament_id: TMongoId;
 begin
   recIndex := Sender.DataController.GetFocusedRecordIndex;
@@ -845,8 +960,7 @@ begin
     end;
   end;
 
-  acTournamentLobby.Enabled := not FSelectedTournament.IsEmpty;
-  acTournamentRegister.Enabled := not FSelectedTournament.IsEmpty; // fixme
+  UpdateTournamentActions;
 end;
 
 procedure TfrmChipUpMain.gridGamesTableCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
@@ -908,7 +1022,7 @@ begin
       FSelectedClub.Clear;
       FSelectedGame.Clear;
       FSelectedTournament.Clear;
-      ConfigureGUI;
+      RefreshAll;
       Show;
       dmMain.ProcessReconnectedTables;
     end;
@@ -923,7 +1037,7 @@ procedure TfrmChipUpMain.ModalFormClose(ASender: TObject);
 begin
   if ASender is TfrmReconnect then
     case (ASender as TfrmReconnect).CurrentStatus of
-      rsLoggedIn: ConfigureGUI;
+      rsLoggedIn: RefreshAll;
     else
       FormsContainer.Items.Extract(ASender as TForm);
       DoLogout;
@@ -956,7 +1070,7 @@ begin
   case pbreply.Status of
     csSuccess: begin
       dmMain.ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
-      ConfigureGUI;
+      RefreshAll;
     end;
   end;
 end;
@@ -971,7 +1085,7 @@ begin
   case pbreply.Status of
     csSuccess: begin
       dmMain.ProcessClubObject(pbreply.Club, pbreply.Games, AMethodId);
-      ConfigureGUI;
+      RefreshAll;
     end;
   end;
 end;
@@ -984,7 +1098,7 @@ begin
     Exit;
 
   dmMain.ProcessClubObject(pbclub, nil, AMethodId);
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSRGetUsers(const AMethodId: Integer; const AObject: TObject);
@@ -1094,7 +1208,7 @@ begin
 
   dmMain.UpdateSelfInfoInPlayers;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSEChatEvent(const AMethodId: Integer; const AObject: TObject);
@@ -1130,7 +1244,7 @@ begin
     Tables.Unlock;
   end;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSREGameDelete(const AMethodId: Integer; const AObject: TObject);
@@ -1144,7 +1258,7 @@ begin
     Exit;
 
   iid := -1;
-  if Tables.GetAndLockTable(pbgame.MongoId, ttLiveGame, table) then
+  if Tables.GetAndLockTable(pbgame.MongoId, ttLive, table) then
   try
     iid := table.InternalId;
   finally
@@ -1160,7 +1274,7 @@ begin
     dmMain.SelfInfo.Clubs.Unlock;
   end;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
 
 procedure TfrmChipUpMain.CSREGameOperation(const AMethodId: Integer; const AObject: TObject);
@@ -1188,8 +1302,9 @@ begin
     Tables.Unlock;
   end;
 
-  ConfigureGUI;
+  RefreshAll;
 end;
+
 procedure TfrmChipUpMain.CSRTableStatus(const AMethodId: Integer; const AObject: TObject);
 var
   pbtstatus: TPB_TableStatus;
@@ -1207,7 +1322,8 @@ begin
     dmMain.SelfInfo.Clubs.Unlock;
   end;
 
-  if Tables.GetAndLockTable(pbtstatus.TableMongoId, ttLiveGame, table) then
+  if (Tables.GetAndLockTable(pbtstatus.TableMongoId, ttLive, table)) or
+     (Tables.GetAndLockTable(pbtstatus.TableMongoId, ttTournament, table)) then
   try
     if not table.Form.Visible then
       table.BringToFront;
@@ -1216,6 +1332,32 @@ begin
   end;
 
   UpdateGamelist;
+end;
+
+procedure TfrmChipUpMain.CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentCommandParams;
+begin
+  if not TTypes.TryCast<TPB_TournamentCommandParams>(AObject, proto) then
+    Exit;
+
+  case proto.ReplyStatus of
+    tceRegisterOk: begin
+      dmMain.SelfInfo.RegisteredTournaments.Add(proto.MongoId);
+      Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, 1);
+      UpdateTournamentList;
+      UpdateTournamentActions;
+    end;
+    tceAlreadyRegistered: ;
+    tceRegisterLimitReached: ShowWarningDialog('This tournament is already filled');
+    tceRegisterFailed: ShowWarningDialog('Tournament registration failed');
+    tceUnregisterOk: begin
+      dmMain.SelfInfo.RegisteredTournaments.Remove(proto.MongoId);
+      Tournaments.AdjustRegisteredPlayersCount(proto.MongoId, -1);
+      UpdateTournamentList;
+      UpdateTournamentActions;
+    end;
+  end;
 end;
 
 procedure TfrmChipUpMain.CSRTableStats(const AMethodId: Integer; const AObject: TObject);
@@ -1299,9 +1441,49 @@ begin
   FormsContainer.RunForm(TfrmTournamentLobby, self, [FSelectedTournament.Memory], TRUE);
 end;
 
+procedure TfrmChipUpMain.CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentInfo;
+begin
+  if not TTypes.TryCast<TPB_TournamentInfo>(AObject, proto) then
+    Exit;
+
+  Tournaments.Add(proto);
+end;
+
+procedure TfrmChipUpMain.CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentTableStart;
+  tournament: TTournamentInfo;
+  table: TTable;
+begin
+  if not TTypes.TryCast<TPB_TournamentTableStart>(AObject, proto) then
+    Exit;
+
+  if Tournaments.GetAndLock(proto.Game.Tournament, tournament) then
+  try
+    tournament.Games.AddGame(proto.Game);
+  finally
+    Tournaments.Unlock;
+  end;
+
+  Tables.AddTournamentTable(proto.Game.MongoId, TRUE);
+  if Tables.GetAndLockTable(proto.Game.MongoId, ttTournament, table) then
+  try
+    table.SetTableStatus(proto.TableStatus, TRUE);
+  finally
+    Tables.Unlock;
+  end;
+end;
+
 procedure TfrmChipUpMain.acTournamentRegisterExecute(Sender: TObject);
 begin
-//
+  ServerSocket.TournamentRegister(FSelectedTournament);
+end;
+
+procedure TfrmChipUpMain.acTournamentUnregisterExecute(Sender: TObject);
+begin
+  ServerSocket.TournamentUnregister(FSelectedTournament);
 end;
 
 end.
