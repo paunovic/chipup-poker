@@ -1018,7 +1018,8 @@ begin
        (member.Suspended) then
       Exit;
 
-    if (table.Status.IsSitting) and
+    if (table.TableType = ttLive) and
+       (table.Status.IsSitting) and
        (table.Status.GetSeatInfo(table.Status.SelfSeatIndex, seat)) and
        (seat.Chips = 0) then
     begin

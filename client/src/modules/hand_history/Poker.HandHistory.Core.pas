@@ -66,10 +66,10 @@ begin
   try
     if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then
     begin
-      if AHandHistoryInfo.Clubid.IsEmpty then
-        parentid := AHandHistoryInfo.TournamentId
+      if not AHandHistoryInfo.Clubid.IsEmpty then
+        parentid := AHandHistoryInfo.ClubId
       else
-        parentid := AHandHistoryInfo.ClubId;
+        parentid := AHandHistoryInfo.TournamentId;
 
       inherited Add(AHandHistoryInfo.Gameid, THandHistoryItems.Create(parentid, AHandHistoryInfo.Gameid));
       if not TryGetValue(AHandHistoryInfo.Gameid, hhis) then

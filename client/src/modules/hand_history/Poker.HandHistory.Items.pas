@@ -467,11 +467,10 @@ begin
 
   if not Assigned(club) then
   begin
-    if Tournaments.GetAndLock(FParentId, tournament) then
+    if Tournaments.GetAndLockByGame(FGameId, tournament, game) then
     try
       FTournament := TTournamentInfo.Create(tournament);
-      if tournament.Games.TryGetValue(FGameId, game) then
-        FGame.Assign(game);
+      FGame.Assign(game);
     finally
       Tournaments.Unlock;
     end;
