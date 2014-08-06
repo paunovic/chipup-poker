@@ -223,12 +223,11 @@ var
   C1: Integer;
   pbts: TPB_TableStatus;
 begin
-  FSelfInfo.LoadFromLoginReply(ALoginReply);
   Avatars.Add(FSelfInfo.AvatarId, nil);
   Players.LoadFromUsersProtobuf(ALoginReply.Users);
-  UpdateSelfInfoInPlayers;
-
   Tournaments.Assign(ALoginReply.TournamentInfos);
+  FSelfInfo.LoadFromLoginReply(ALoginReply);
+  UpdateSelfInfoInPlayers;
 
   FSelfInfo.RegisteredTournaments.Clear;
   FSelfInfo.RegisteredTournaments.AddRange(ALoginReply.RegisteredTournaments);
