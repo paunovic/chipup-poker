@@ -54,7 +54,7 @@ type
 
     procedure BringToFront;
     procedure SetTableStatus(const ATableStatus: TPB_TableStatus; const AClearAnimations: Boolean);
-    procedure PlaySound(const ASound: String);
+    procedure PlaySound(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
 
     function UpdateObjects: Boolean;
 
@@ -591,9 +591,9 @@ begin
   end;
 end;
 
-procedure TTable.PlaySound(const ASound: String);
+procedure TTable.PlaySound(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
 begin
-  if (GetForegroundWindow = FRenderer.RenderHandle) and
+  if ((AIgnoreFocus) or (GetForegroundWindow = FRenderer.RenderHandle)) and
      (Settings.Sounds) then
     Sounds.Play(ASound);
 end;

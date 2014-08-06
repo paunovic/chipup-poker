@@ -92,7 +92,7 @@ uses
   Poker.Protobufs.Objects.PlayerLimitParams, Poker.Protobufs.Objects.AssetList, Poker.Protobufs.Objects.HelloParams,
   Poker.Protobufs.Objects.TableStatus, Poker.Protobufs.Objects.Game, Poker.Protobufs.Objects.KickPlayerParams,
   Poker.Protobufs.Objects.SubscriptionPlanChange, Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentCommandParams,
-  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart;
+  Poker.Protobufs.Objects.TournamentInfo, Poker.Protobufs.Objects.TournamentTableStart, Poker.Protobufs.Objects.TournamentPlayerFinished;
 
 
 constructor TServerSocketCore.Create(const AServer: String; const APort: Integer);
@@ -518,6 +518,7 @@ begin
     srTournamentReply: ADataObject := TPB_TournamentCommandParams.Create(ADataPointer, ARpcMessage.DataSize);
     srTournamentDetails: ADataObject := TPB_TournamentInfo.Create(ADataPointer, ARpcMessage.DataSize);
     srTournamentOpenTable: ADataObject := TPB_TournamentTableStart.Create(ADataPointer, ARpcMessage.DataSize);
+    seTournamentPlayerFinished: ADataObject := TPB_TournamentPlayerFinished.Create(ADataPointer, ARpcMessage.DataSize);
   else
     {$IFDEF DEBUG} DebugLn(FDebugId, Format('Unhandled MethodId received: %d', [ARpcMessage.MethodId]), ditException); {$ENDIF}
     Exit(FALSE);

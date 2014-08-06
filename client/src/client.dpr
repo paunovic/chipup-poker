@@ -180,7 +180,8 @@ uses
   Poker.Tournaments.Info in 'modules\tournaments\Poker.Tournaments.Info.pas',
   Poker.Protobufs.Objects.TournamentMember in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentMember.pas',
   Poker.Protobufs.Objects.TournamentTableStart in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas',
-  Poker.Protobufs.Objects.HandHistoryReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas';
+  Poker.Protobufs.Objects.HandHistoryReply in 'modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas',
+  Poker.Protobufs.Objects.TournamentPlayerFinished in 'modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas';
 
 procedure FocusApp;
 var

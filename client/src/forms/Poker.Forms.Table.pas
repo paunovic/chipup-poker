@@ -110,7 +110,7 @@ type
     procedure ModalFormClose(Sender: TObject);
     procedure CheckChatScrollbackLimit;
     procedure RendererDealerChatMessage(const AMessage: String);
-    procedure RendererSoundPlay(const ASound: String);
+    procedure RendererSoundPlay(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
     procedure RendererTimebankStarted(Sender: TObject);
     procedure ConfigureActions;
     procedure AddChatMessage(const AUser: String; const AUserStyle, AUserParagraph: Integer; const AMessage: String; const AMessageStyle, AMessageParagraph: Integer);
@@ -359,7 +359,7 @@ begin
 
     if Tables.GetAndLockTable(FInternalId, table) then
     try
-      table.PlaySound(Sounds.SOUND_TIMEBAR);
+      table.PlaySound(Sounds.SOUND_TIMEBAR, TRUE);
     finally
       Tables.Unlock;
     end;
@@ -1265,13 +1265,13 @@ begin
   AddDealerChatMessage(AMessage);
 end;
 
-procedure TfrmTable.RendererSoundPlay(const ASound: String);
+procedure TfrmTable.RendererSoundPlay(const ASound: String; const AIgnoreFocus: Boolean = FALSE);
 var
   table: TTable;
 begin
   if Tables.GetAndLockTable(FInternalId, table) then
   try
-    table.PlaySound(ASound);
+    table.PlaySound(ASound, AIgnoreFocus);
   finally
     Tables.Unlock;
   end;
@@ -1285,7 +1285,7 @@ begin
   try
     FocusWindow;
     if table.Status.CurrentSeat = table.Status.SelfSeatIndex then
-      table.PlaySound(Sounds.SOUND_TIMEBANK);
+      table.PlaySound(Sounds.SOUND_TIMEBANK, TRUE);
   finally
     Tables.Unlock;
   end;

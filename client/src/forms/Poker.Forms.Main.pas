@@ -186,6 +186,7 @@ type
     procedure CSRTournamentReply(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentDetails(const AMethodId: Integer; const AObject: TObject);
     procedure CSRTournamentOpenTable(const AMethodId: Integer; const AObject: TObject);
+    procedure CSETournamentPlayerFinished(const AMethodId: Integer; const AObject: TObject);
 
     procedure AvatarChanged(Sender: TObject);
 
@@ -225,7 +226,8 @@ uses
   Poker.ActionMainMenuBarStyle, Poker.Protobufs.Objects.UpdateFileInfo, Poker.Clubs.Member, Poker.Players.Player, Poker.Avatars.AvatarList,
   Poker.Tables.TableList, Poker.Tables.Status, Poker.Forms.Subscriptions, Poker.Protobufs.Objects.Club, Poker.Protobufs.Objects.Game,
   Poker.Protobufs.Objects.TournamentList, Poker.Protobufs.Objects.TournamentInfo, Poker.Tournaments, Poker.Forms.TournamentLobby,
-  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info, Poker.Protobufs.Objects.TournamentTableStart;
+  Poker.Protobufs.Objects.TournamentCommandParams, System.DateUtils, Poker.Tournaments.Info, Poker.Protobufs.Objects.TournamentTableStart,
+  Poker.Protobufs.Objects.TournamentPlayerFinished;
 
 
 procedure TfrmChipUpMain.DoCreate;
@@ -253,6 +255,7 @@ begin
                       TServerMessageCallback.Create(srTournamentReply, CSRTournamentReply),
                       TServerMessageCallback.Create(srTournamentDetails, CSRTournamentDetails),
                       TServerMessageCallback.Create(srTournamentOpenTable, CSRTournamentOpenTable),
+                      TServerMessageCallback.Create(seTournamentPlayerFinished, CSETournamentPlayerFinished),
                       TServerMessageCallback.Create([srChangeClubDetailsReply, srCreateClubReply, srJoinClubReply, srKickPlayerReply], CSRClubCommand),
                       TServerMessageCallback.Create([srCreateGameOk, seGameChange, seGameCreate], CSREGameOperation),
                       TServerMessageCallback.Create([srClubDisbandOk, seClubChange, srSuspendPlayerOk, srReinstatePlayerOk, srOwnershipGiveAwayOk], CSREClubOperation),
@@ -1174,6 +1177,30 @@ begin
 
   Tournaments.Assign(proto);
   UpdateTournamentList;
+end;
+
+procedure TfrmChipUpMain.CSETournamentPlayerFinished(const AMethodId: Integer; const AObject: TObject);
+var
+  proto: TPB_TournamentPlayerFinished;
+  tournament: TTournamentInfo;
+  msg: String;
+begin
+  if not TTypes.TryCast<TPB_TournamentPlayerFinished>(AObject, proto) then
+    Exit;
+
+  if proto.PlayerId <> dmMain.SelfInfo.MongoId then
+    Exit;
+
+  msg := '';
+  if Tournaments.GetAndLock(proto.TournamentId, tournament) then
+  try
+    msg := Format('You finished tournament at %d/%d place', [proto.Place, tournament.Maxplayers]);
+  finally
+    Tournaments.Unlock;
+  end;
+
+  if msg <> '' then
+    MessageDlg(msg, mtInformation, [mbOk], 0);
 end;
 
 procedure TfrmChipUpMain.CSEUserChange(const AMethodId: Integer; const AObject: TObject);

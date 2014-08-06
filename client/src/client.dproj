@@ -362,6 +362,7 @@
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentMember.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentTableStart.pas"/>
 			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.HandHistoryReply.pas"/>
+			<DCCReference Include="modules\protobufs\objects\Poker.Protobufs.Objects.TournamentPlayerFinished.pas"/>
 			<RcItem Include="resources\cashier\Normal.png">
 				<ResourceType>RCDATA</ResourceType>
 				<ResourceId>CashierNormal</ResourceId>

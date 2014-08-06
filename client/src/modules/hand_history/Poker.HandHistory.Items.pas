@@ -470,7 +470,7 @@ begin
     if Tournaments.GetAndLock(FParentId, tournament) then
     try
       FTournament := TTournamentInfo.Create(tournament);
-      if FTournament.Games.TryGetValue(FGameId, game) then
+      if tournament.Games.TryGetValue(FGameId, game) then
         FGame.Assign(game);
     finally
       Tournaments.Unlock;
